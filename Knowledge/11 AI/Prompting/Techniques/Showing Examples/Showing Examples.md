@@ -51,7 +51,7 @@ Consider the graphic at the top of this article, in which we are attempting to c
 
 ## Structure
 
-![few_shot.svg](few_shot.svg)
+![11 AI-Showing Examples-20260210205142513.svg](11%20AI-Showing%20Examples-20260210205142513.svg)
 
 The way that we structure the examples is very important. Given that we have organised these three instances in an *input: classification* format, the model generates a single word following the final line, rather than outputting a complete sentence such as *this review is positive.*
 

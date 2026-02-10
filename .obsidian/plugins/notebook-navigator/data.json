@@ -132,7 +132,7 @@
   "openFolderNotesInNewTab": false,
   "hideFolderNoteInList": true,
   "pinCreatedFolderNote": false,
-  "showTags": true,
+  "showTags": false,
   "showTagIcons": true,
   "showAllTagsFolder": true,
   "showUntagged": true,
@@ -359,13 +359,38 @@
   "customVaultName": "",
   "pinnedNotes": {},
   "fileIcons": {},
-  "fileColors": {},
+  "fileColors": {
+    "Knowledge/01 Programming/01 Programming.md": "#d946ef"
+  },
   "folderIcons": {
     "Templates": "book-dashed",
-    "Knowledge": "book"
+    "Knowledge": "book",
+    "Assets": "images",
+    "Knowledge/01 Programming": "code-square",
+    "Knowledge/02 Computer Science": "flask-round",
+    "Knowledge/03 Data Persistance": "database",
+    "Knowledge/04 Networks": "network",
+    "Knowledge/05 Architecture": "building-2",
+    "Knowledge/06 Patterns & Practices": "layout-template",
+    "Knowledge/07 Security": "lock-keyhole",
+    "Knowledge/08 SDLC": "calendar-clock",
+    "Knowledge/09 DevOps": "skull",
+    "Knowledge/11 AI": "brain-circuit",
+    "Knowledge/10 Cloud": "cloud"
   },
   "folderColors": {
-    "Templates": "#6b7280"
+    "Templates": "#6b7280",
+    "Knowledge/02 Computer Science": "#ec4899",
+    "Knowledge/01 Programming": "#d946ef",
+    "Knowledge/03 Data Persistance": "#f43f5e",
+    "Knowledge/04 Networks": "#f97316",
+    "Knowledge/05 Architecture": "#eab308",
+    "Knowledge/06 Patterns & Practices": "#84cc16",
+    "Knowledge/07 Security": "#22c55e",
+    "Knowledge/08 SDLC": "#06b6d4",
+    "Knowledge/09 DevOps": "#0ea5e9",
+    "Knowledge/11 AI": "#6366f1",
+    "Knowledge/10 Cloud": "#3b82f6"
   },
   "folderBackgroundColors": {},
   "folderSortOverrides": {},

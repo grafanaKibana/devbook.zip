@@ -45,7 +45,7 @@ if (pages.length) {
 
 ## Deeper Explanation
 
-![instruction_prompt.svg](instruction_prompt.svg)
+![11 AI-Instruction Prompting-20260210205142433.svg](11%20AI-Instruction%20Prompting-20260210205142433.svg)
 
 ## Name Parsing Instructions Example
 
