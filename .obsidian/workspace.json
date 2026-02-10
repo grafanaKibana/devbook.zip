@@ -32,12 +32,12 @@
             "state": {
               "type": "split-diff-view",
               "state": {
-                "aFile": "Knowledge/Roadmap.canvas",
-                "bFile": "Knowledge/Roadmap.canvas",
+                "aFile": "AGENTS.md",
+                "bFile": "AGENTS.md",
                 "aRef": ""
               },
               "icon": "diff",
-              "title": "Diff: Roadmap.canvas  (Working Tree)"
+              "title": "Diff: AGENTS  (Working Tree)"
             }
           }
         ],
@@ -104,8 +104,7 @@
               "title": "Bookmarks"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -268,7 +267,7 @@
       }
     ]
   },
-  "active": "f6ca6887fe59ce39",
+  "active": "6cdf1810372ad7f9",
   "lastOpenFiles": [
     "Knowledge/Roadmap.canvas",
     "untitled folder/untitled folder.md",
