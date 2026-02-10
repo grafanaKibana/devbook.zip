@@ -1,5 +1,4 @@
-
-# Knowledge Hub
+# <Folder Name>
 
 ## All Topics (Database View)
 

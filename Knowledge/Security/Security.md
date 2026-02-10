@@ -1,7 +1,3 @@
----
-tags:
-  - FolderNote
----
 # <Folder Name>
 
 Up: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/index", regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
