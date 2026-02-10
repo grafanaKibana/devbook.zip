@@ -11,11 +11,14 @@ tags:
 :LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 ## Intro
 
+Quick introduction to the topic
+
 ## Deeper Explanation
+
 
 ## Questions
 
-> [!NOTE]- What is abc?
+> [!QUESTION]- What is abc?
 > Answer
 
 ## Further Reading
