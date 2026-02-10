@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
-  - Sorting Algorithms
-level:
-["1"]priority: medium
+topic: ["Computer Science"]
+subtopic: ["Algorithms", "Sorting Algorithms"]
+level: ["1"]
+priority: medium
 status: Not-Started
 ---
 :LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`

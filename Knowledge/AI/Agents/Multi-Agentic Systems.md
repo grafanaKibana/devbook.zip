@@ -16,12 +16,10 @@ status: Not-Started
 
 - Question
     
-    <aside>
-    💡
+    > [!TIP]
     
-    Answer
+    > Answer
     
-    </aside>
     
 
 ## References and Further Reading
@@ -30,4 +28,3 @@ status: Not-Started
 - https://github.com/Azure-Samples/semantic-kernel-workshop/tree/main
 
 ## Further Reading
-

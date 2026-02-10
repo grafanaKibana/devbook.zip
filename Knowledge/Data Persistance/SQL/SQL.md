@@ -42,21 +42,19 @@ SORT file.name ASC
 2. Что такое денормализация? Когда она будет полезна?
 3. Какой порядок исполнения SQL запросов?
     
-    <aside>
-    💡 →
+    > [!TIP]
     
-    1. FROM
-    2. ON
-    3. JOIN
-    4. WHERE
-    5. GROUP BY
-    6. WITH CUBE or WITH ROLLUP
-    7. HAVING
-    8. SELECT
-    9. DISTINCT
-    10. ORDER BY
-    11. TOP
-    </aside>
+    > 1. FROM
+    > 2. ON
+    > 3. JOIN
+    > 4. WHERE
+    > 5. GROUP BY
+    > 6. WITH CUBE or WITH ROLLUP
+    > 7. HAVING
+    > 8. SELECT
+    > 9. DISTINCT
+    > 10. ORDER BY
+    > 11. TOP
     
 4.
 

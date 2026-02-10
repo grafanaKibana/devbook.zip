@@ -18,12 +18,10 @@ status: Not-Started
 
 - Question
     
-    <aside>
-    💡
+    > [!TIP]
     
-    Answer
+    > Answer
     
-    </aside>
     
 
 ## References and Further Reading
@@ -31,4 +29,3 @@ status: Not-Started
 - https://devblogs.microsoft.com/semantic-kernel/building-a-model-context-protocol-server-with-semantic-kernel/
 
 ## Further Reading
-

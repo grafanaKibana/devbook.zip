@@ -65,10 +65,9 @@ In C#, types define the kind of data that variables can hold, how much memory th
 
 ## Value Types vs Reference Types
 
-<aside>
-⚠️ Common misconception: It's often stated that value types are stored on the stack while reference types are stored on the heap. However, this is a simplification. The actual storage location depends on context, not just the type.
+> [!TIP]
+> ⚠️ Common misconception: It's often stated that value types are stored on the stack while reference types are stored on the heap. However, this is a simplification. The actual storage location depends on context, not just the type.
 
-</aside>
 
 ### Value Types
 
@@ -239,188 +238,167 @@ if (obj is string str)  // Type check and declaration in one step
 - **Common**
     - What are generics in C#, and why are they useful?
         
-        <aside>
-        💡
-        
-        Generics allow the creation of type-safe classes, interfaces, and methods that operate on a type parameter. They enable code reuse with type safety, eliminate the need for boxing/unboxing when using collections, and improve performance. Generics also provide compile-time type checking and reduce casting errors.
-        
-        </aside>
+        > [!TIP]
+        >
+        > Generics allow the creation of type-safe classes, interfaces, and methods that operate on a type parameter. They enable code reuse with type safety, eliminate the need for boxing/unboxing when using collections, and improve performance. Generics also provide compile-time type checking and reduce casting errors.
+
         
     - How would you implement immutable value semantics for a complex domain object in C#?
         
-        <aside>
-        💡
-        
-        For C# 9 and newer, I'd use records which provide built-in immutability and value-based equality. For earlier versions, I'd create an immutable class with readonly fields, implement IEquatable<T>, override Equals(), GetHashCode(), and equality operators. I'd provide a "WithX" method pattern or a builder for creating modified instances. Finally, I'd implement proper structural equality by comparing all relevant fields and handling nulls correctly.
-        
-        </aside>
+        > [!TIP]
+        >
+        > For C# 9 and newer, I'd use records which provide built-in immutability and value-based equality. For earlier versions, I'd create an immutable class with readonly fields, implement IEquatable<T>, override Equals(), GetHashCode(), and equality operators. I'd provide a "WithX" method pattern or a builder for creating modified instances. Finally, I'd implement proper structural equality by comparing all relevant fields and handling nulls correctly.
+
         
 - **Class vs Structure**
     - Whats the difference between `class` and `structure`?
         
-        <aside>
-        💡 Differences:
-        
-        1. **Value:**
-            1. A class variable stores a reference to an object.
-            2. A structure variable stores the data itself.
-        2. **Transfer semantics:**
-            1. **Classes** are reference types. When an instance of a class is passed to a method, a reference to the object is passed to the method, and changes to the object will be visible wherever the reference is used.
-            2. **Structures** are meaningful types. When an instance of a structure is passed to a method, a copy of the value is passed to the method, and changes to the copy do not affect the original object.
-        3. **In-memory usage:**
-            1. **Classes**, more specifically class object variables are stored in the managed stack, a variable in turn stores not the object itself but a reference to the object in the managed heap.
-            2. **Structures** are stored in the stack by default, but can also be stored in the managed heap if necessary, for example, when the structure is a class field, or was explicitly packed into an object.
-        4. **Inheritance:**
-            1. **Classes** support inheritance, which means that one class can be inherited from another, providing the ability to create a hierarchy of classes.
-            2. **Structures** do not support inheritance. They cannot be inherited from other types and cannot be base classes. Therefore, all structures are `sealed` by default
-        5. **Default initialization:**
-            1. **Classes** are initialized by default with the value **`null`**.
-            2. **Structures** are initialized by default with a value corresponding to their data type (e.g. numbers are initialized with null).
-        6. **Differences in minor application details:**
-            1. Structures cannot have a default constructor(no parameters) or destructor in them
-            2. Structures can be initialized without using the `new` operator
-            3. Structures cannot have abstract or sealed modifiers, as well as members of structures cannot be `protected` or `protected internal`, which is logical because structures do not support inheritance.
-            4. Methods of structures cannot be abstract or virtual for the same reason of absence of inheritance in structures. Also, methods in structures cannot override any methods except those in `System.ValueType`.
-            5. Structures cannot contain fields whose size is not yet known (including those of their own type).
-        7. Examples:
-            1. `Struct`: **`System.String`, `System.IO.File`**
-            2. `Class`: **`System.Int32` (and other numeric data types), `System.DateTime`, `System.Drawing.Point`**
-        
-        [C# NET: Class vs Struct или в чём различия между Классом и Структурой - О сложном просто](https://www.calabonga.net/blog/post/c-net-4-0-class-vs-struct-ili-v-chem-razlichiya-mezhdu-klassom-i-strukturoi)
-        
-        </aside>
+        > [!TIP]
+        > Differences:
+        >
+        > 1. **Value:**
+        >     1. A class variable stores a reference to an object.
+        >     2. A structure variable stores the data itself.
+        > 2. **Transfer semantics:**
+        >     1. **Classes** are reference types. When an instance of a class is passed to a method, a reference to the object is passed to the method, and changes to the object will be visible wherever the reference is used.
+        >     2. **Structures** are meaningful types. When an instance of a structure is passed to a method, a copy of the value is passed to the method, and changes to the copy do not affect the original object.
+        > 3. **In-memory usage:**
+        >     1. **Classes**, more specifically class object variables are stored in the managed stack, a variable in turn stores not the object itself but a reference to the object in the managed heap.
+        >     2. **Structures** are stored in the stack by default, but can also be stored in the managed heap if necessary, for example, when the structure is a class field, or was explicitly packed into an object.
+        > 4. **Inheritance:**
+        >     1. **Classes** support inheritance, which means that one class can be inherited from another, providing the ability to create a hierarchy of classes.
+        >     2. **Structures** do not support inheritance. They cannot be inherited from other types and cannot be base classes. Therefore, all structures are `sealed` by default
+        > 5. **Default initialization:**
+        >     1. **Classes** are initialized by default with the value **`null`**.
+        >     2. **Structures** are initialized by default with a value corresponding to their data type (e.g. numbers are initialized with null).
+        > 6. **Differences in minor application details:**
+        >     1. Structures cannot have a default constructor(no parameters) or destructor in them
+        >     2. Structures can be initialized without using the `new` operator
+        >     3. Structures cannot have abstract or sealed modifiers, as well as members of structures cannot be `protected` or `protected internal`, which is logical because structures do not support inheritance.
+        >     4. Methods of structures cannot be abstract or virtual for the same reason of absence of inheritance in structures. Also, methods in structures cannot override any methods except those in `System.ValueType`.
+        >     5. Structures cannot contain fields whose size is not yet known (including those of their own type).
+        > 7. Examples:
+        >     1. `Struct`: **`System.String`, `System.IO.File`**
+        >     2. `Class`: **`System.Int32` (and other numeric data types), `System.DateTime`, `System.Drawing.Point`**
+        >
+        > [C# NET: Class vs Struct или в чём различия между Классом и Структурой - О сложном просто](https://www.calabonga.net/blog/post/c-net-4-0-class-vs-struct-ili-v-chem-razlichiya-mezhdu-klassom-i-strukturoi)
+
         
     - Explain how HashCode method works for object?
         
-        <aside>
-        💡 By default, the **`HashCode`** method uses an internal algorithm that is based on the address of the object in memory. This algorithm is based on hash code **combining**, which provides a more efficient and uniform distribution of hash codes.
-        
-        Briefly, the algorithm can be described as follows:
-        
-        1. Hash**initialization**: The hash code is initialized with some initial value (usually a prime number, such as 17 or 23).
-        2. **Combining** hashes: The hash code of an object is computed by combining the hashes of its constituent parts. For example, if an object contains multiple fields, the hashes of these fields are combined into one common hash code.
-        3. **Multiplication by a prime number**: The resulting hash code is multiplied by some prime number (e.g., 31 or 59). 
-        4. **Combining with new** data: When new data is added (e.g., when combining hashes of additional objects), their hashes are also combined with the existing hash code of the object.
-        5. **Return hash**: The resulting hash code is returned as the result of the **`HashCode`** method.
-        
-        However, this algorithm can be overridden in derived classes to better manage object hash codes based on their contents. Two objects that are equal should return identical hash codes. However, the reverse is not true: identical hash codes do not imply object equality, since different (unequal) objects can have identical hash codes.
-        
-        </aside>
+        > [!TIP]
+        > By default, the **`HashCode`** method uses an internal algorithm that is based on the address of the object in memory. This algorithm is based on hash code **combining**, which provides a more efficient and uniform distribution of hash codes.
+        >
+        > Briefly, the algorithm can be described as follows:
+        >
+        > 1. Hash**initialization**: The hash code is initialized with some initial value (usually a prime number, such as 17 or 23).
+        > 2. **Combining** hashes: The hash code of an object is computed by combining the hashes of its constituent parts. For example, if an object contains multiple fields, the hashes of these fields are combined into one common hash code.
+        > 3. **Multiplication by a prime number**: The resulting hash code is multiplied by some prime number (e.g., 31 or 59). 
+        > 4. **Combining with new** data: When new data is added (e.g., when combining hashes of additional objects), their hashes are also combined with the existing hash code of the object.
+        > 5. **Return hash**: The resulting hash code is returned as the result of the **`HashCode`** method.
+        >
+        > However, this algorithm can be overridden in derived classes to better manage object hash codes based on their contents. Two objects that are equal should return identical hash codes. However, the reverse is not true: identical hash codes do not imply object equality, since different (unequal) objects can have identical hash codes.
+
         
 - **Value vs Reference Types**
     - What is the difference between value types and reference types in C#?
         
-        <aside>
-        💡
-        
-        Value types contain the actual data and are typically stored on the stack, while reference types store a reference to data on the heap. Value types are copied when assigned, whereas reference types share the same object instance. Value types include primitives and structs, while reference types include classes, interfaces, and delegates.
-        
-        </aside>
+        > [!TIP]
+        >
+        > Value types contain the actual data and are typically stored on the stack, while reference types store a reference to data on the heap. Value types are copied when assigned, whereas reference types share the same object instance. Value types include primitives and structs, while reference types include classes, interfaces, and delegates.
+
         
     - What are the key differences between value types and reference types in C#?
         
-        <aside>
-        💡 Value types contain data directly, are typically allocated on the stack when local variables, cannot be null unless nullable, and assignment creates a copy. Reference types store a reference to data, are allocated on the heap, can be null, and assignment copies the reference but not the actual data.
-        
-        </aside>
+        > [!TIP]
+        > Value types contain data directly, are typically allocated on the stack when local variables, cannot be null unless nullable, and assignment creates a copy. Reference types store a reference to data, are allocated on the heap, can be null, and assignment copies the reference but not the actual data.
+
         
     - Explain the difference between passing by value and passing by reference, and how it affects value and reference types.
         
-        <aside>
-        💡 When passing a value type by value, a copy of the data is created. When passing a reference type by value, a copy of the reference is created, but both point to the same object. Using the ref keyword creates a reference to the original variable, allowing the method to modify the original value, whether it's a value or reference type.
-        
-        </aside>
+        > [!TIP]
+        > When passing a value type by value, a copy of the data is created. When passing a reference type by value, a copy of the reference is created, but both point to the same object. Using the ref keyword creates a reference to the original variable, allowing the method to modify the original value, whether it's a value or reference type.
+
         
     - What is boxing and unboxing in C#? When might it occur, and what are its performance implications?
         
-        <aside>
-        💡 Boxing is converting a value type to a reference type by wrapping it in an object, while unboxing is the reverse process. Boxing occurs when passing value types to methods expecting object parameters or when adding value types to collections of objects. It's expensive as it involves memory allocation, copying, and later garbage collection.
-        
-        </aside>
+        > [!TIP]
+        > Boxing is converting a value type to a reference type by wrapping it in an object, while unboxing is the reverse process. Boxing occurs when passing value types to methods expecting object parameters or when adding value types to collections of objects. It's expensive as it involves memory allocation, copying, and later garbage collection.
+
         
     - Why might you use ref with reference types even though they're already references? Provide a real-world example.
         
-        <aside>
-        💡 Using ref with reference types allows you to reassign the original reference, not just modify its properties. This is useful when you want to initialize or replace an object reference based on some logic. For example, in a factory method that might return different implementations, or when implementing the TryPattern where you want to output a new object only on success.
-        
-        </aside>
+        > [!TIP]
+        > Using ref with reference types allows you to reassign the original reference, not just modify its properties. This is useful when you want to initialize or replace an object reference based on some logic. For example, in a factory method that might return different implementations, or when implementing the TryPattern where you want to output a new object only on success.
+
         
     - Explain the performance implications of passing large structs by value versus by reference.
         
-        <aside>
-        💡
-        
-        Passing large structs by value results in copying the entire struct, which can be expensive for large structs (>16 bytes). This increases stack usage and CPU time for copying. Using `in`, `ref`, or `readonly ref` parameters avoids copying by passing a reference to the struct. For method returns, consider using `ref` returns or changing to a class if the struct is large and frequently returned.
-        
-        </aside>
+        > [!TIP]
+        >
+        > Passing large structs by value results in copying the entire struct, which can be expensive for large structs (>16 bytes). This increases stack usage and CPU time for copying. Using `in`, `ref`, or `readonly ref` parameters avoids copying by passing a reference to the struct. For method returns, consider using `ref` returns or changing to a class if the struct is large and frequently returned.
+
         
 - **Stack vs Heap**
     - Is it possible to store an object in a stack?
         
-        <aside>
-        💡 Yes, but you should not use it in real life, because the main advantage of stack is its speed, and the method described below will be 40-50 times slower.
-        
-        [Ломаем фундаментальные основы C#: выделение памяти под ссылочный тип на стеке](https://habr.com/ru/articles/428676/)
-        
-        </aside>
+        > [!TIP]
+        > Yes, but you should not use it in real life, because the main advantage of stack is its speed, and the method described below will be 40-50 times slower.
+        >
+        > [Ломаем фундаментальные основы C#: выделение памяти под ссылочный тип на стеке](https://habr.com/ru/articles/428676/)
+
         
     - Is it possible to make a structure stored in a heap?
         
-        <aside>
-        💡 In the .NET Framework and .NET Core, structures are usually stored on the stack, but there are several cases where they can be placed on the heap:
-        
-        1. **Storing a structure as a class field:**
-            - If a structure is a field in a class, and that class is stored in the heap, then the structure will also be stored in the heap. For example: Here `myStructField` will be stored in the heap as `myObject` is stored in the heap.
-                
-                ```csharp
-                public class MyClass
-                {
-                    public MyStruct MyStructField;
-                }
-                
-                MyClass myObject = new MyClass();
-                ```
-                
-        2. **Using a structure in an array that is stored in the heap:**
-            - If an array of structures is placed in the heap, then the structures themselves will also be in the heap. Example: Here every element of the `structArray` array will be stored in the heap.
-                
-                ```csharp
-                MyStruct[] structArray = new MyStruct[10];
-                
-                ```
-                
-        3. **Boxing:**
-            - Boxing is the process by which a meaningful type (struct) is converted into an object (reference type). When the structure is boxed, it is placed in the heap. Example:
-                
-                ```csharp
-                MyStruct myStruct = new MyStruct();
-                object boxedObject = myStruct; // Упаковка, myStruct теперь в куче
-                
-                ```
-                
-        
-        It is important to note that storing structures in the heap can have a negative impact on performance, as it can cause additional packing/unpacking overhead and increased memory usage. Structures are usually preferred on the stack where they can be more efficient.
-        
-        </aside>
+        > [!TIP]
+        > In the .NET Framework and .NET Core, structures are usually stored on the stack, but there are several cases where they can be placed on the heap:
+        >
+        > 1. **Storing a structure as a class field:**
+        >     - If a structure is a field in a class, and that class is stored in the heap, then the structure will also be stored in the heap. For example: Here `myStructField` will be stored in the heap as `myObject` is stored in the heap.
+        >
+        >         ```csharp
+        >         public class MyClass
+        >         {
+        >             public MyStruct MyStructField;
+        >         }
+        >
+        >         MyClass myObject = new MyClass();
+        >         ```
+        >
+        > 2. **Using a structure in an array that is stored in the heap:**
+        >     - If an array of structures is placed in the heap, then the structures themselves will also be in the heap. Example: Here every element of the `structArray` array will be stored in the heap.
+        >
+        >         ```csharp
+        >         MyStruct[] structArray = new MyStruct[10];
+        >
+        >         ```
+        >
+        > 3. **Boxing:**
+        >     - Boxing is the process by which a meaningful type (struct) is converted into an object (reference type). When the structure is boxed, it is placed in the heap. Example:
+        >
+        >         ```csharp
+        >         MyStruct myStruct = new MyStruct();
+        >         object boxedObject = myStruct; // Упаковка, myStruct теперь в куче
+        >
+        >         ```
+        >
+        > It is important to note that storing structures in the heap can have a negative impact on performance, as it can cause additional packing/unpacking overhead and increased memory usage. Structures are usually preferred on the stack where they can be more efficient.
+
         
 - **Boxing & Unboxing**
     - Explain what boxing and unboxing are in C#.
         
-        <aside>
-        💡
-        
-        Boxing is the process of converting a value type to a reference type by wrapping it in an object, which involves allocating memory on the heap. Unboxing is the reverse process of extracting the value type from the boxed object. Boxing occurs when assigning a value type to an object variable, and unboxing requires explicit casting.
-        
-        </aside>
+        > [!TIP]
+        >
+        > Boxing is the process of converting a value type to a reference type by wrapping it in an object, which involves allocating memory on the heap. Unboxing is the reverse process of extracting the value type from the boxed object. Boxing occurs when assigning a value type to an object variable, and unboxing requires explicit casting.
+
         
     - How would you design a custom collection that efficiently stores value types without boxing?
         
-        <aside>
-        💡
-        
-        I would use generics to create a strongly-typed collection like `List<T>` where T is the value type. For maximum performance, I'd consider using arrays or Span<T> internally, avoid LINQ in critical paths, and implement custom enumerators to prevent boxing. For large collections, I might also consider memory pooling or custom memory management to reduce GC pressure.
-        
-        </aside>
+        > [!TIP]
+        >
+        > I would use generics to create a strongly-typed collection like `List<T>` where T is the value type. For maximum performance, I'd consider using arrays or Span<T> internally, avoid LINQ in critical paths, and implement custom enumerators to prevent boxing. For large collections, I might also consider memory pooling or custom memory management to reduce GC pressure.
+
         
 
 ## References and Further Reading

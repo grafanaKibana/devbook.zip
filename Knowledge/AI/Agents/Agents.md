@@ -50,56 +50,37 @@ They provide a way to **delegate** specialized tasks to autonomous systems, pote
 
 In AI, “role playing” refers to assigning each agent (or sub-agent) a specific role or persona to better organize tasks. Rather than having a single, general agent, you can split tasks among different roles. Each role (like “planner,” “critic,” or “executor”) can focus on its part and work together more coherently.
 
-<aside>
-💡
+> [!TIP]
+> When designing a system with multiple agents or sub-agents, **name and define each role** explicitly to avoid overlap.
 
-When designing a system with multiple agents or sub-agents, **name and define each role** explicitly to avoid overlap.
 
-</aside>
 
 ### Focus
 
  “Focus” is the agent’s ability to stay on track, maintaining attention on a specific goal or sub-goal. Agents need to avoid distractions in complex environments. Focus helps them filter out irrelevant data and keep tasks aligned with the primary objectives.
 
-<aside>
-💡
-
-Align agent focus with well-defined objectives. The clearer the objective, the easier it is for the agent to stay on track.
-
-</aside>
+> [!TIP]
+> Align agent focus with well-defined objectives. The clearer the objective, the easier it is for the agent to stay on track.
 
 ### Tools
 
 Tools are external resources or APIs the agent can use—such as language models, databases, web services, or even specialized hardware. Effective tool usage can greatly expand an agent’s capabilities. However, more tools mean more complexity.
 
-<aside>
-💡
-
-Before adding tools, ask: **Do we really need them?** Overly complex toolkits might introduce confusion or errors.
-
-</aside>
-
+> [!TIP]
+> Before adding tools, ask: **Do we really need them?** Overly complex toolkits might introduce confusion or errors.
 ### Cooperation
 
 Cooperation is how different agents or sub-agents collaborate, share information, and work together toward a unified goal. Multi-agent systems often require coordination to avoid conflicting efforts or redundant work. This can involve protocols for communication, conflict resolution, and shared decision-making.
 
-<aside>
-💡
-
-Agents need a way to share relevant data—be it messages, events, or shared state. A simple, consistent protocol will often suffice.
-
-</aside>
+> [!TIP]
+> Agents need a way to share relevant data—be it messages, events, or shared state. A simple, consistent protocol will often suffice.
 
 ### Guardrails
 
 Guardrails are constraints or safety measures put in place to prevent harmful or unintended behavior. AI agents may encounter ambiguous or open-ended tasks. Guardrailsrails ensure they operate within ethical, legal, or functional boundaries.
 
-<aside>
-💡
-
-Always define guiderails (e.g., limiting access to certain system functions) so that even if an agent makes a poor decision, it can’t cause serious harm.
-
-</aside>
+> [!TIP]
+> Always define guiderails (e.g., limiting access to certain system functions) so that even if an agent makes a poor decision, it can’t cause serious harm.
 
 ### Memory
 
@@ -107,12 +88,8 @@ Memory allows an agent to store and recall information about past interactions, 
 
 This is crucial for context continuity, learning from mistakes, and adapting to new situations. Memory can be short-term (working memory for immediate tasks) or long-term (archives of past interactions, results, user preferences).
 
-<aside>
-💡
-
-Consider use structured storage (like a database or key-value store) and define **how long** different pieces of information remain in memory.
-
-</aside>
+> [!TIP]
+> Consider use structured storage (like a database or key-value store) and define **how long** different pieces of information remain in memory.
 
 ## Practical Tips
 

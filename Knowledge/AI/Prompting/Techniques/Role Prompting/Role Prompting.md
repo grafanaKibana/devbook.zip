@@ -60,27 +60,19 @@ When writing a review, tailoring your approach based on the platform and audienc
 
 ### Standard Prompt
 
-<aside>
-💬 Write a review of [pizza place].
+> [!EXAMPLE]
+> 💬 Write a review of [pizza place].
 
-</aside>
-
-<aside>
-📝 "I recently had the pleasure of trying [pizza place] and I must say that I was thoroughly impressed. The pizza was cooked to perfection and the toppings were fresh and flavorful. The crust was light and crispy, and the sauce was just the right amount of tangy. The service was also top-notch; the staff was friendly and attentive. Overall, I had a great experience and would definitely recommend [pizza place] to anyone looking for a delicious pizza."
-
-</aside>
+> [!EXAMPLE]
+> 📝 "I recently had the pleasure of trying [pizza place] and I must say that I was thoroughly impressed. The pizza was cooked to perfection and the toppings were fresh and flavorful. The crust was light and crispy, and the sauce was just the right amount of tangy. The service was also top-notch; the staff was friendly and attentive. Overall, I had a great experience and would definitely recommend [pizza place] to anyone looking for a delicious pizza."
 
 ### Role-Based Prompt
 
-<aside>
-💬 You are a food critic. Write a review of [pizza place].
+> [!EXAMPLE]
+> 💬 You are a food critic. Write a review of [pizza place].
 
-</aside>
-
-<aside>
-📝 "I recently had the pleasure of dining at [pizza place], a cozy pizzeria located in the heart of the city. Despite its small size, the restaurant packs a huge punch when it comes to flavor. The pizza was cooked to perfection. The crust was delightfully thin and crispy and the toppings were fresh and flavorful. The combination of flavors was simply delicious. The marinara sauce was rich and flavorful and complemented the toppings perfectly. The cheese was gooey and melted in my mouth. The service was also excellent. The staff was friendly and attentive. They were quick to answer questions and made sure that our food was served on time. Overall, my experience at [pizza place] was fantastic and I highly recommend it to anyone looking for a delicious pizza."
-
-</aside>
+> [!EXAMPLE]
+> 📝 "I recently had the pleasure of dining at [pizza place], a cozy pizzeria located in the heart of the city. Despite its small size, the restaurant packs a huge punch when it comes to flavor. The pizza was cooked to perfection. The crust was delightfully thin and crispy and the toppings were fresh and flavorful. The combination of flavors was simply delicious. The marinara sauce was rich and flavorful and complemented the toppings perfectly. The cheese was gooey and melted in my mouth. The service was also excellent. The staff was friendly and attentive. They were quick to answer questions and made sure that our food was served on time. Overall, my experience at [pizza place] was fantastic and I highly recommend it to anyone looking for a delicious pizza."
 
 ## Key Differences in Outputs
 

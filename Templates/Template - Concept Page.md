@@ -2,10 +2,7 @@
 topic: []
 subtopic: []
 level: ["1"]
-priority:
-  - low
-  - medium
-  - high
+priority: medium
 status: Not-Started
 tags:
   - Template

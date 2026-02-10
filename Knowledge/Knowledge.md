@@ -1,3 +1,12 @@
+---
+topic: []
+subtopic: []
+level: ["1"]
+priority: medium
+status: Not-Started
+tags:
+  - FolderNote
+---
 
 ## All Topics (Database View)
 

@@ -28,12 +28,10 @@ status: Not-Started
 
 - Question
     
-    <aside>
-    💡
+    > [!TIP]
     
-    Answer
+    > Answer
     
-    </aside>
     
 
 ## References and Further Reading
@@ -41,4 +39,3 @@ status: Not-Started
 - https://learn.deeplearning.ai/courses/multi-ai-agent-systems-with-crewai/lesson/fkfya/mental-framework-for-agent-creation
 
 ## Further Reading
-
