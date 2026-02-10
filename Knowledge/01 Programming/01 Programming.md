@@ -5,7 +5,7 @@ level:
   - "1"
 priority: medium
 status:
-  - Ready To Repeat
+  - Creation
 aliases:
   - Programming
 tags:
