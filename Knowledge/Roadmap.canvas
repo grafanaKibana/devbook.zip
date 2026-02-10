@@ -208,11 +208,47 @@
       "height": 80
     },
     {
+      "id": "n_7ed73a39da",
+      "type": "file",
+      "file": "Knowledge/05 Architecture/Application Architecture/Application Architecture.md",
+      "x": 420,
+      "y": 3040,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_1c7459d4ef",
+      "type": "file",
+      "file": "Knowledge/05 Architecture/Architecture Styles/Architecture Styles.md",
+      "x": 420,
+      "y": 3160,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_0677745c4a",
+      "type": "file",
+      "file": "Knowledge/05 Architecture/Distributed Systems/Distributed Systems.md",
+      "x": 420,
+      "y": 3280,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_836d7431d3",
+      "type": "file",
+      "file": "Knowledge/05 Architecture/Patterns/Patterns.md",
+      "x": 420,
+      "y": 3400,
+      "width": 340,
+      "height": 80
+    },
+    {
       "id": "n_8227afe735",
       "type": "file",
       "file": "Knowledge/06 Patterns & Practices/06 Patterns & Practices.md",
       "x": 0,
-      "y": 3340,
+      "y": 3740,
       "width": 340,
       "height": 80
     },
@@ -221,7 +257,7 @@
       "type": "file",
       "file": "Knowledge/07 Security/07 Security.md",
       "x": 0,
-      "y": 3640,
+      "y": 4040,
       "width": 340,
       "height": 80
     },
@@ -230,7 +266,7 @@
       "type": "file",
       "file": "Knowledge/08 SDLC/08 SDLC.md",
       "x": 0,
-      "y": 3940,
+      "y": 4340,
       "width": 340,
       "height": 80
     },
@@ -239,7 +275,7 @@
       "type": "file",
       "file": "Knowledge/09 DevOps/09 DevOps.md",
       "x": 0,
-      "y": 4240,
+      "y": 4640,
       "width": 340,
       "height": 80
     },
@@ -248,7 +284,7 @@
       "type": "file",
       "file": "Knowledge/09 DevOps/Deployment Stratagies/Deployment Stratagies.md",
       "x": 420,
-      "y": 4240,
+      "y": 4640,
       "width": 340,
       "height": 80
     },
@@ -257,7 +293,7 @@
       "type": "file",
       "file": "Knowledge/10 Cloud/10 Cloud.md",
       "x": 0,
-      "y": 4580,
+      "y": 4980,
       "width": 340,
       "height": 80
     },
@@ -266,7 +302,7 @@
       "type": "file",
       "file": "Knowledge/11 AI/11 AI.md",
       "x": 0,
-      "y": 4880,
+      "y": 5280,
       "width": 340,
       "height": 80
     },
@@ -275,7 +311,7 @@
       "type": "file",
       "file": "Knowledge/11 AI/Agents/Agents.md",
       "x": 420,
-      "y": 4880,
+      "y": 5280,
       "width": 340,
       "height": 80
     },
@@ -284,7 +320,7 @@
       "type": "file",
       "file": "Knowledge/11 AI/LLM/LLM.md",
       "x": 420,
-      "y": 5000,
+      "y": 5400,
       "width": 340,
       "height": 80
     },
@@ -293,7 +329,7 @@
       "type": "file",
       "file": "Knowledge/11 AI/Machine Learning/Machine Learning.md",
       "x": 420,
-      "y": 5120,
+      "y": 5520,
       "width": 340,
       "height": 80
     },
@@ -302,7 +338,7 @@
       "type": "file",
       "file": "Knowledge/11 AI/Prompting/Prompting.md",
       "x": 420,
-      "y": 5240,
+      "y": 5640,
       "width": 340,
       "height": 80
     },
@@ -311,7 +347,7 @@
       "type": "file",
       "file": "Knowledge/11 AI/Prompting/Techniques/Techniques.md",
       "x": 840,
-      "y": 5360,
+      "y": 5760,
       "width": 340,
       "height": 80
     },
@@ -320,7 +356,7 @@
       "type": "file",
       "file": "Knowledge/11 AI/Prompting/Techniques/Instruction Prompting/Instruction Prompting.md",
       "x": 1260,
-      "y": 5480,
+      "y": 5880,
       "width": 340,
       "height": 80
     },
@@ -329,7 +365,7 @@
       "type": "file",
       "file": "Knowledge/11 AI/Prompting/Techniques/Role Prompting/Role Prompting.md",
       "x": 1260,
-      "y": 5600,
+      "y": 6000,
       "width": 340,
       "height": 80
     },
@@ -338,7 +374,7 @@
       "type": "file",
       "file": "Knowledge/11 AI/Prompting/Techniques/Showing Examples/Showing Examples.md",
       "x": 1260,
-      "y": 5720,
+      "y": 6120,
       "width": 340,
       "height": 80
     }
@@ -497,6 +533,34 @@
       "fromSide": "bottom",
       "toNode": "n_2d902a721c",
       "toSide": "top"
+    },
+    {
+      "id": "e_d493c06da1",
+      "fromNode": "n_2d902a721c",
+      "fromSide": "right",
+      "toNode": "n_7ed73a39da",
+      "toSide": "left"
+    },
+    {
+      "id": "e_e71403a789",
+      "fromNode": "n_2d902a721c",
+      "fromSide": "right",
+      "toNode": "n_1c7459d4ef",
+      "toSide": "left"
+    },
+    {
+      "id": "e_44cfcaa01f",
+      "fromNode": "n_2d902a721c",
+      "fromSide": "right",
+      "toNode": "n_0677745c4a",
+      "toSide": "left"
+    },
+    {
+      "id": "e_544d3387e4",
+      "fromNode": "n_2d902a721c",
+      "fromSide": "right",
+      "toNode": "n_836d7431d3",
+      "toSide": "left"
     },
     {
       "id": "e_7d3ed695d4",

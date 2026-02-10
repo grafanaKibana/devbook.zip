@@ -1,9 +1,15 @@
 ---
+topic: ["Architecture"]
+subtopic: []
+level: ["1"]
+priority: medium
+status: Not-Started
 tags:
-  - Template
+  - FolderNote
 ---
 ## Parent
 :LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+
 ```dataviewjs
 const cur = dv.current();
 const curFolder = cur.file.folder;
@@ -34,6 +40,7 @@ if (pages.length) {
   dv.list(pages.map(p => p.file.link));
 }
 ```
+
 ---
 ## Intro
 
