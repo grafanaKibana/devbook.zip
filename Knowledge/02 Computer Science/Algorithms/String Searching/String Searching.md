@@ -45,6 +45,20 @@ if (pages.length) {
 
 ## Deeper Explanation
 
+## Diagram
+
+```mermaid
+graph TD
+  A[Need to find pattern P in text T] --> B{What do you need}
+  B -->|Exact matching linear time| C[KMP]
+  B -->|Fast average hashing OK| D[Rabin Karp]
+  B -->|Many queries or automata| E[Other Trie Aho Corasick]
+  C --> F[Compute pi array for P]
+  F --> G[Scan T with fallback using pi array]
+  D --> H[Compute rolling hash for windows]
+  H --> I[Verify when hashes match]
+```
+
 ## Questions
 
 > [!QUESTION]- What is abc?

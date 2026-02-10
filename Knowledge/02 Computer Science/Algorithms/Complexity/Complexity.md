@@ -45,6 +45,25 @@ if (pages.length) {
 
 ## Deeper Explanation
 
+## Diagram
+
+```mermaid
+graph TD
+  A[Algorithm] --> B[Choose input size n]
+  B --> C[Count primitive operations]
+  C --> D[Simplify expression]
+  D --> E[Keep dominant term]
+  E --> F[Drop constants]
+  F --> G[Asymptotic class]
+  G --> H[O 1]
+  G --> I[O log n]
+  G --> J[O n]
+  G --> K[O n log n]
+  G --> L[O n squared]
+  G --> M[O 2 to the n]
+  G --> N[O n factorial]
+```
+
 ## Questions
 
 > [!QUESTION]- What is abc?

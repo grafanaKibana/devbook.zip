@@ -45,6 +45,22 @@ if (pages.length) {
 
 ## Deeper Explanation
 
+## Diagram
+
+```mermaid
+graph TD
+  A[Need to sort] --> B{Constraints}
+  B -->|Need stable| C[Stable sort]
+  B -->|In-place priority| D[In-place sort]
+  B -->|Best for tiny arrays| E[Small n]
+  C --> F[Merge sort]
+  C --> G[Insertion sort for small or nearly sorted]
+  D --> H[Quick sort average fast]
+  D --> I[Selection sort few swaps]
+  D --> J[Bubble sort mostly educational]
+  E --> G
+```
+
 ## Questions
 
 > [!QUESTION]- What is abc?

@@ -21,6 +21,21 @@ Quick sort partitions the array around a pivot so smaller elements go left and l
 - Properties: in-place (typical), not stable.
 - How to make it robust: randomized pivot or median-of-three; switch to insertion sort on small partitions; consider introsort (fallback to heapsort) for worst-case bounds.
 
+## Diagram
+
+```mermaid
+graph TD
+  A[quickSort A from l to r] --> B{l at least r}
+  B -->|Yes| R[return]
+  B -->|No| C[Choose pivot]
+  C --> D[Partition A]
+  D --> E[Get pivot index p after partition]
+  E --> F[quickSort A from l to p minus 1]
+  E --> G[quickSort A from p plus 1 to r]
+  F --> R
+  G --> R
+```
+
 ## Questions
 
 > [!QUESTION]- What is abc?

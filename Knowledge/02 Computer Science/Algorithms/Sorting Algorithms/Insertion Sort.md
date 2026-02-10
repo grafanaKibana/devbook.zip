@@ -21,6 +21,22 @@ Insertion sort grows a sorted prefix by inserting each next element into its cor
 - Properties: stable, in-place (aside from the key temp), good constant factors.
 - Rule of thumb: use for n <= ~20-50 or as the base case inside merge/quick/introsort.
 
+## Diagram
+
+```mermaid
+graph TD
+  A[Start array A] --> B[Set j to 1]
+  B --> C{j less than n}
+  C -->|No| Z[Done]
+  C -->|Yes| D[Set key to A at j and set i]
+  D --> E{i nonnegative and A at i greater than key}
+  E -->|Yes| F[Shift right and decrement i]
+  F --> E
+  E -->|No| G[Insert key]
+  G --> H[Increment j]
+  H --> C
+```
+
 ## Questions
 
 > [!QUESTION]- What is abc?

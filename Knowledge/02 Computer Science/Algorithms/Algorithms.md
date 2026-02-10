@@ -75,6 +75,25 @@ if (pages.length) {
 - [Disjoint Set](Knowledge/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set.md)
 - [Disjoint Set / Union-Find](Knowledge/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set Union-Find.md)
 
+## Diagram
+
+```mermaid
+graph TD
+  A[Problem] --> B{What kind of task}
+  B -->|Analyze runtime| C[Complexity]
+  B -->|Order items| D[Sorting]
+  B -->|Nodes and edges| E[Graph algorithms]
+  B -->|Find pattern in text| F[String searching]
+  B -->|Dynamic connectivity| G[Disjoint set DSU]
+  C --> H[Choose asymptotic class]
+  D --> I[Pick stable and in place and worst case constraints]
+  E --> J[Traversal DFS or BFS]
+  E --> K[Shortest path Dijkstra]
+  F --> L[Exact KMP]
+  F --> M[Probabilistic Rabin Karp]
+  G --> N[Find or Union and path compression]
+```
+
 ## Questions
 
 > [!QUESTION]- What is abc?

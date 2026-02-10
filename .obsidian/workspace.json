@@ -4,7 +4,7 @@
     "type": "split",
     "children": [
       {
-        "id": "02b050563cda5f98",
+        "id": "7f852567eea4975c",
         "type": "tabs",
         "children": [
           {
@@ -16,9 +16,9 @@
               "state": {
                 "file": "Knowledge/Roadmap.canvas",
                 "viewState": {
-                  "x": 371.22091330873053,
-                  "y": 516.9442838152968,
-                  "zoom": -2.5012541114724365
+                  "x": 866.2491766994992,
+                  "y": 1389.169267064949,
+                  "zoom": -1.4661262712113055
                 }
               },
               "pinned": true,
@@ -27,17 +27,17 @@
             }
           },
           {
-            "id": "313cc04bb8867a35",
+            "id": "f6ca6887fe59ce39",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Knowledge/11 AI/11 AI.md",
+                "file": "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Quick Sort.md",
                 "mode": "preview",
                 "source": true
               },
               "icon": "lucide-file",
-              "title": "11 AI"
+              "title": "Quick Sort"
             }
           }
         ],
@@ -268,38 +268,38 @@
       }
     ]
   },
-  "active": "313cc04bb8867a35",
+  "active": "f6ca6887fe59ce39",
   "lastOpenFiles": [
+    "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Merge Sort.md",
+    "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms.md",
+    "Knowledge/02 Computer Science/Algorithms/Complexity/Complexity.md",
+    "Knowledge/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set.md",
+    "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Insertion Sort.md",
+    "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Selection Sort.md",
+    "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Quick Sort.md",
+    "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Bubble Sort.md",
+    "Knowledge/02 Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
+    "Knowledge/Roadmap.canvas",
+    "Knowledge/03 Data Persistance/ORMs/Entity Framework.md",
+    "Knowledge/03 Data Persistance/ORMs/ORMs.md",
+    "Knowledge/02 Computer Science/Algorithms/Complexity/Algorithms Complexity.md",
+    "Knowledge/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set Union-Find.md",
+    "Knowledge/02 Computer Science/Algorithms/String Searching/Rabit Karp Search.md",
+    "Knowledge/02 Computer Science/Algorithms/String Searching/KMP (Knuth-Morris-Pratt) Algorithm.md",
+    "Knowledge/02 Computer Science/Algorithms/String Searching/String Searching.md",
+    "Knowledge/05 Architecture/Application Architecture/Application Architecture.md",
+    "Knowledge/06 Patterns & Practices/Paradigms & Practices/Paradigms & Practices.md",
+    "Knowledge/11 AI/11 AI.md",
     "Knowledge/10 Cloud/10 Cloud.md",
     "Knowledge/09 DevOps/09 DevOps.md",
     "Knowledge/07 Security/07 Security.md",
     "Knowledge/07 Security/Basic Auth.md",
-    "Knowledge/Roadmap.canvas",
     "Knowledge/06 Patterns & Practices/Principles/Principles.md",
     "Knowledge/06 Patterns & Practices/Paradigms & Practices/Integration Testing.md",
     "Knowledge/06 Patterns & Practices/Paradigms & Practices/Unit Testing.md",
-    "Knowledge/06 Patterns & Practices/Paradigms & Practices/Event-Driven Development.md",
-    "Knowledge/06 Patterns & Practices/Paradigms & Practices/Functional Programming.md",
-    "Knowledge/06 Patterns & Practices/Paradigms & Practices/OOP.md",
-    "Knowledge/06 Patterns & Practices/Patterns/CQS.md",
-    "Knowledge/06 Patterns & Practices/Patterns/Dependency Injection.md",
-    "Knowledge/06 Patterns & Practices/Patterns/Repository & UoW.md",
-    "Knowledge/06 Patterns & Practices/Patterns/GRASP.md",
-    "Knowledge/06 Patterns & Practices/Patterns/Design Patterns.md",
-    "Knowledge/06 Patterns & Practices/Principles/IoC (Holywood Principle).md",
-    "Knowledge/06 Patterns & Practices/Principles/YAGNI.md",
-    "Knowledge/06 Patterns & Practices/Principles/SOLID.md",
-    "Knowledge/06 Patterns & Practices/Principles/KISS.md",
-    "Knowledge/06 Patterns & Practices/Principles/DRY.md",
-    "Knowledge/06 Patterns & Practices/06 Patterns & Practices.md",
-    "Knowledge/06 Patterns & Practices/Paradigms & Practices/Paradigms & Practices.md",
-    "Knowledge/06 Patterns & Practices/Patterns/Patterns.md",
     "Knowledge/06 Patterns & Practices/Paradigms & Practices",
     "Knowledge/06 Patterns & Practices/Patterns",
     "Knowledge/06 Patterns & Practices/Principles",
-    "Knowledge/05 Architecture/Application Architecture/Application Architecture.md",
-    "Knowledge/11 AI/Model Context Protocol.md",
-    "Templates/Template - Index.md",
     "Knowledge/05 Architecture/Distributed Systems",
     "Knowledge/05 Architecture/Patterns",
     "Knowledge/05 Architecture/Application Architecture",

@@ -45,6 +45,21 @@ if (pages.length) {
 
 ## Deeper Explanation
 
+## Diagram
+
+```mermaid
+graph TD
+  A[Graph G with V and E] --> B{Goal}
+  B -->|Visit all reachable nodes| C[Traversal]
+  B -->|Shortest path nonnegative weights| D[Dijkstra]
+  C --> E{Which frontier policy}
+  E -->|Queue| F[BFS]
+  E -->|Stack or recursion| G[DFS]
+  F --> H[Level-order distances in unweighted graphs]
+  G --> I[Topological and connected components patterns]
+  D --> J[Priority queue and relax edges]
+```
+
 ## Questions
 
 > [!QUESTION]- What is abc?

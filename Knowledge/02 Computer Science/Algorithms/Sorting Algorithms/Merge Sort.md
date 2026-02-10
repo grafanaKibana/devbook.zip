@@ -18,6 +18,20 @@ Merge sort is a divide-and-conquer algorithm: split the array, sort each half, t
 - Properties: stable (with careful merge), not in-place in typical array form.
 - Practical notes: great for linked lists and external sorting (sorting data that does not fit in memory).
 
+## Diagram
+
+```mermaid
+graph TD
+  A[mergeSort A from l to r] --> B{size at most 1}
+  B -->|Yes| R[return]
+  B -->|No| C[Compute mid]
+  C --> D[mergeSort A from l to mid]
+  C --> E[mergeSort A from mid plus 1 to r]
+  D --> F[merge two sorted halves]
+  E --> F
+  F --> R
+```
+
 ## Questions
 
 > [!QUESTION]- What is abc?
