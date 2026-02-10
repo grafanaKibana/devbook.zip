@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Knowledge/01 Programming/01 Programming.md",
+                "file": "Knowledge/09 DevOps/CI CD tools.md",
                 "mode": "preview",
                 "source": true
               },
               "icon": "lucide-file",
-              "title": "01 Programming"
+              "title": "CI CD tools"
             }
           }
         ]
@@ -36,9 +36,9 @@
               "state": {
                 "file": "Knowledge/Roadmap.canvas",
                 "viewState": {
-                  "x": 526.6470730228036,
-                  "y": 814.7536592894667,
-                  "zoom": -0.6387608791621517
+                  "x": 272.03441045958056,
+                  "y": 441.6268693068143,
+                  "zoom": -0.4387608791621518
                 }
               },
               "pinned": true,
@@ -234,11 +234,13 @@
       "notebook-navigator:Notebook Navigator": true
     }
   },
-  "active": "f6ca6887fe59ce39",
+  "active": "ce7a72e482374127",
   "lastOpenFiles": [
-    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md",
-    "Knowledge/Roadmap.canvas",
+    "Knowledge/09 DevOps/CI CD tools.md",
+    "Knowledge/09 DevOps/09 DevOps.md",
     "Knowledge/01 Programming/01 Programming.md",
+    "Knowledge/Roadmap.canvas",
+    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md",
     "Knowledge/11 AI & ML/LLM/Prompting/Showing Examples.md",
     "Knowledge/11 AI & ML/LLM/Prompting/Techniques/Techniques.md",
     "Knowledge/11 AI & ML/Machine Learning/Types.md",
@@ -263,8 +265,6 @@
     "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Insertion Sort.md",
     "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Selection Sort.md",
     "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Bubble Sort.md",
-    "Knowledge/03 Data Persistance/ORMs/Entity Framework.md",
-    "Knowledge/03 Data Persistance/ORMs/ORMs.md",
     "Knowledge/06 Patterns & Practices/Paradigms & Practices",
     "Knowledge/06 Patterns & Practices/Patterns",
     "Knowledge/06 Patterns & Practices/Principles",

@@ -27,7 +27,8 @@
       "x": 840,
       "y": 120,
       "width": 340,
-      "height": 80
+      "height": 80,
+      "color": "#9CA3AF"
     },
     {
       "id": "n_5b132671e7",
@@ -410,7 +411,7 @@
     {
       "id": "n_0ead8684fc",
       "type": "text",
-      "text": "Roadmap legend\nGenerated: 2026-02-11T01:36:22\n\nNot-Started: #9CA3AF\nCreation: 2\nRepetition: 5\nReady To Repeat: 6\nDone: 4\n\nHub status mode: rollup",
+      "text": "Roadmap legend\nGenerated: 2026-02-11T01:43:52\n\nNot-Started: #9CA3AF\nCreation: 2\nRepetition: 5\nReady To Repeat: 6\nDone: 4\n\nHub status mode: rollup",
       "x": -840,
       "y": -360,
       "width": 360,

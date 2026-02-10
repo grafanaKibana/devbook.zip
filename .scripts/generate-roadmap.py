@@ -252,41 +252,41 @@ def generate():
             total += subtree_node_count(tr, ch, depth + 1)
         return total
 
-    def build_rollup_status_by_dir(tr):
-        # Bottom-up aggregate of concept pages (non-hub notes) statuses.
-        own = {d: Counter() for d in tr.keys()}
-        for d in tr.keys():
-            try:
-                entries = os.listdir(d)
-            except FileNotFoundError:
-                continue
-            for e in entries:
-                if e.startswith(".") or not e.endswith(".md"):
+    def build_rollup_status_by_dir(tr, root_dir_abs):
+        # Aggregate statuses from ALL descendant concept pages (non-hub notes),
+        # regardless of MAX_DEPTH used for the canvas layout.
+        dirs = set(tr.keys())
+        counts_by_dir = {d: Counter() for d in dirs}
+
+        for dirpath, dirnames, filenames in os.walk(root_dir_abs):
+            dirnames[:] = [dn for dn in dirnames if not dn.startswith(".")]
+            for fn in filenames:
+                if fn.startswith(".") or not fn.endswith(".md"):
                     continue
-                p = os.path.join(d, e)
-                if not os.path.isfile(p):
-                    continue
+                p = os.path.join(dirpath, fn)
                 if is_hub_note_path(p):
                     continue
+
                 s = file_status(p)
-                if s:
-                    own[d][s] += 1
+                if not s:
+                    continue
 
-        memo_counts = {}
-
-        def agg_counts(d):
-            if d in memo_counts:
-                return memo_counts[d]
-            c = Counter()
-            c.update(own.get(d, {}))
-            for ch in tr.get(d, []):
-                c += agg_counts(ch)
-            memo_counts[d] = c
-            return c
+                cur = dirpath
+                while True:
+                    if cur in counts_by_dir:
+                        counts_by_dir[cur][s] += 1
+                    if cur == root_dir_abs:
+                        break
+                    parent = os.path.dirname(cur)
+                    if parent == cur:
+                        break
+                    if not cur.startswith(root_dir_abs):
+                        break
+                    cur = parent
 
         out = {}
-        for d in tr.keys():
-            out[d] = rollup_status_from_counts(agg_counts(d))
+        for d in dirs:
+            out[d] = rollup_status_from_counts(counts_by_dir.get(d, Counter()))
         return out
 
     for i, td in enumerate(topic_dirs):
@@ -295,7 +295,7 @@ def generate():
         topic_y = state["y"]
 
         tr = build_tree(td)
-        rollup_status_by_dir = build_rollup_status_by_dir(tr)
+        rollup_status_by_dir = build_rollup_status_by_dir(tr, td)
 
         n = {
             "id": tid,
