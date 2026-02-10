@@ -24,5 +24,7 @@ Quick introduction to the topic
 > Answer
 
 ## Further Reading
-- [Link 1](URL)
-- [Link 2](URL)
+Replace or delete these example links.
+
+- [Link 1](https://example.com)
+- [Link 2](https://example.com)

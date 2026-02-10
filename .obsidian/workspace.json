@@ -30,14 +30,14 @@
             "id": "f6ca6887fe59ce39",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "split-diff-view",
               "state": {
-                "file": "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Quick Sort.md",
-                "mode": "preview",
-                "source": true
+                "aFile": "Knowledge/Roadmap.canvas",
+                "bFile": "Knowledge/Roadmap.canvas",
+                "aRef": ""
               },
-              "icon": "lucide-file",
-              "title": "Quick Sort"
+              "icon": "diff",
+              "title": "Diff: Roadmap.canvas  (Working Tree)"
             }
           }
         ],
@@ -270,16 +270,18 @@
   },
   "active": "f6ca6887fe59ce39",
   "lastOpenFiles": [
+    "Knowledge/Roadmap.canvas",
+    "untitled folder/untitled folder.md",
+    "untitled folder",
+    "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Quick Sort.md",
     "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Merge Sort.md",
     "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms.md",
     "Knowledge/02 Computer Science/Algorithms/Complexity/Complexity.md",
     "Knowledge/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set.md",
     "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Insertion Sort.md",
     "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Selection Sort.md",
-    "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Quick Sort.md",
     "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Bubble Sort.md",
     "Knowledge/02 Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
-    "Knowledge/Roadmap.canvas",
     "Knowledge/03 Data Persistance/ORMs/Entity Framework.md",
     "Knowledge/03 Data Persistance/ORMs/ORMs.md",
     "Knowledge/02 Computer Science/Algorithms/Complexity/Algorithms Complexity.md",
@@ -295,8 +297,6 @@
     "Knowledge/07 Security/07 Security.md",
     "Knowledge/07 Security/Basic Auth.md",
     "Knowledge/06 Patterns & Practices/Principles/Principles.md",
-    "Knowledge/06 Patterns & Practices/Paradigms & Practices/Integration Testing.md",
-    "Knowledge/06 Patterns & Practices/Paradigms & Practices/Unit Testing.md",
     "Knowledge/06 Patterns & Practices/Paradigms & Practices",
     "Knowledge/06 Patterns & Practices/Patterns",
     "Knowledge/06 Patterns & Practices/Principles",
@@ -306,7 +306,6 @@
     "Knowledge/05 Architecture/Architecture Styles",
     "Knowledge/04 Networks/Architecture & Ops",
     "Knowledge/04 Networks/Protocols",
-    "Knowledge/04 Networks/Transport & Sockets",
     "Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205142069.png",
     "Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205141994.png",
     "Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205142050.png",
