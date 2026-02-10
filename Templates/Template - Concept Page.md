@@ -2,7 +2,10 @@
 topic: []
 subtopic: []
 level: 1
-priority: medium
+priority:
+  - medium
+  - low
+  - high
 status: Not-Started
 ---
 
