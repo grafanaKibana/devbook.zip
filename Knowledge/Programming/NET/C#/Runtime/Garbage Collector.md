@@ -5,7 +5,9 @@ level: ["1"]
 priority: medium
 status: Not-Started
 ---
+## Parent
 :LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+---
 ## Intro
 
 ## Deeper Explanation
@@ -120,4 +122,3 @@ status: Not-Started
 - https://habr.com/ru/articles/590475/
 
 ## Further Reading
-

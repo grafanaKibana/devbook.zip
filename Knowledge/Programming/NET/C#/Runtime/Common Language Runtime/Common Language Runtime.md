@@ -7,30 +7,41 @@ status: Not-Started
 tags:
   - FolderNote
 ---
+## Parent
 :LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
-## Children
-```dataview
-LIST WITHOUT ID link(file.path, regexreplace(file.folder, "^.*/", ""))
-WHERE regexmatch("^" + this.file.folder + "/[^/]+$", file.folder)
-  AND file.name = regexreplace(file.folder, "^.*/", "")
-  AND contains(file.tags, "#FolderNote")
-SORT file.folder ASC
-```
 
-## Pages
-```dataview
-LIST
-WHERE file.folder = this.file.folder
-  AND file.path != this.file.path
-  AND !contains(file.tags, "#FolderNote")
-SORT file.name ASC
-```
+```dataviewjs
+const cur = dv.current();
+const curFolder = cur.file.folder;
+const curPath = cur.file.path;
 
+const isFolderNote = (p) => (p.file.tags ?? []).includes("#FolderNote");
+
+const children = dv.pages()
+  .where(p => p.file.folder.startsWith(curFolder + "/"))
+  .where(p => p.file.folder.split("/").length === curFolder.split("/").length + 1)
+  .where(p => p.file.name === p.file.folder.split("/").slice(-1)[0])
+  .where(p => isFolderNote(p))
+  .sort(p => p.file.folder, "asc");
+
+if (children.length) {
+  dv.header(2, "Children");
+  dv.list(children.map(p => p.file.link));
+}
+
+const pages = dv.pages()
+  .where(p => p.file.folder === curFolder)
+  .where(p => p.file.path !== curPath)
+  .where(p => !isFolderNote(p))
+  .sort(p => p.file.name, "asc");
+
+if (pages.length) {
+  dv.header(2, "Pages");
+  dv.list(pages.map(p => p.file.link));
+}
+```
+---
 ## Intro
-
-## Deeper Explanation
-
-# Overview
 
 CLR (Common Language Runtime) - это часть .NET Framework (или .NET Core / .NET 5+), которая отвечает за выполнение кода, написанного на языках, совместимых с .NET. Она предоставляет среду выполнения, управление памятью, управление потоками, безопасность и другие службы для выполнения приложений.
 
@@ -80,12 +91,9 @@ CLR (Common Language Runtime) - это часть .NET Framework (или .NET Co
 
 ## Questions
 
-- 
 
-## References and Further Reading
-
-- https://en.wikipedia.org/wiki/Common_Language_Runtime
-- https://en.wikipedia.org/wiki/Just-in-time_compilation
-- https://docs.microsoft.com/en-us/dotnet/standard/clr
 
 ## Further Reading
+- [Common Language Runtime - Wikipedia](https://en.wikipedia.org/wiki/Common_Language_Runtime)
+- [Just-in-time compilation - Wikipedia](https://en.wikipedia.org/wiki/Just-in-time_compilation)
+- [Common Language Runtime (CLR) overview - .NET \| Microsoft Learn](https://docs.microsoft.com/en-us/dotnet/standard/clr)

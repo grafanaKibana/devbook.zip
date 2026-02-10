@@ -10,25 +10,40 @@ status: Not-Started
 tags:
   - FolderNote
 ---
+## Parent
 :LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
-## Children
-```dataview
-LIST WITHOUT ID link(file.path, regexreplace(file.folder, "^.*/", ""))
-WHERE regexmatch("^" + this.file.folder + "/[^/]+$", file.folder)
-  AND file.name = regexreplace(file.folder, "^.*/", "")
-  AND contains(file.tags, "#FolderNote")
-SORT file.folder ASC
-```
+```dataviewjs
+const cur = dv.current();
+const curFolder = cur.file.folder;
+const curPath = cur.file.path;
 
-## Pages
-```dataview
-LIST
-WHERE file.folder = this.file.folder
-  AND file.path != this.file.path
-  AND !contains(file.tags, "#FolderNote")
-SORT file.name ASC
-```
+const isFolderNote = (p) => (p.file.tags ?? []).includes("#FolderNote");
 
+const children = dv.pages()
+  .where(p => p.file.folder.startsWith(curFolder + "/"))
+  .where(p => p.file.folder.split("/").length === curFolder.split("/").length + 1)
+  .where(p => p.file.name === p.file.folder.split("/").slice(-1)[0])
+  .where(p => isFolderNote(p))
+  .sort(p => p.file.folder, "asc");
+
+if (children.length) {
+  dv.header(2, "Children");
+  dv.list(children.map(p => p.file.link));
+}
+
+const pages = dv.pages()
+  .where(p => p.file.folder === curFolder)
+  .where(p => p.file.path !== curPath)
+  .where(p => !isFolderNote(p))
+  .sort(p => p.file.name, "asc");
+
+if (pages.length) {
+  dv.header(2, "Pages");
+  dv.list(pages.map(p => p.file.link));
+}
+```
+---
+---
 ## Intro
 
 Prompts play a key role in the process of generating useful and accurate information from AI language models. Given below are some of the reasons why “Prompt Engineering” or learning how to write better prompts is important.
