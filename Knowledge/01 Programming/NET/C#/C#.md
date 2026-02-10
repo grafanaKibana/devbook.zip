@@ -41,19 +41,9 @@ if (pages.length) {
 }
 ```
 ---
-## Intro
-
-## Deeper Explanation
-
-## Topics
-
-[Fundamentals](Knowledge/01 Programming/NET/C#/Fundamentals/Fundamentals.md)
-
-[Runtime](Knowledge/01 Programming/NET/C#/Runtime/Runtime.md)
-
 ## References and Further Reading
 
-- https://dou.ua/forums/topic/33214/
+- 
 - https://habr.com/ru/articles/463213/
 - https://habr.com/ru/post/541786/
 
@@ -63,3 +53,7 @@ if (pages.length) {
 > Answer
 
 ## Further Reading
+
+- [Тонкости C# : то что вы всегда хотели знать, но боялись спросить \| DOU](https://dou.ua/forums/topic/33214/)
+- [Заблуждения начинающих C# разработчиков. Пытаемся ответить на стандартные вопросы / Хабр](https://habr.com/ru/articles/463213/)
+- [Популярные заблуждения о C# / Хабр](https://habr.com/ru/post/541786/)

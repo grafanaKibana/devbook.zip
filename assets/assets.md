@@ -35,16 +35,3 @@ if (pages.length) {
 }
 ```
 ---
----
-## Intro
-
-## Deeper Explanation
-
-## Questions
-
-> [!QUESTION]- What is abc?
-> Answer
-
-## Further Reading
-- [Link 1](URL)
-- [Link 2](URL)

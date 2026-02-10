@@ -11,14 +11,12 @@
             "id": "ce7a72e482374127",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
+              "type": "image",
               "state": {
-                "aFile": ".obsidian/plugins/obsidian-custom-attachment-location/data.json",
-                "bFile": ".obsidian/plugins/obsidian-custom-attachment-location/data.json",
-                "aRef": ""
+                "file": "Assets/11 AI/instruction_prompt.svg"
               },
-              "icon": "diff",
-              "title": "Diff: data.json  (Working Tree)"
+              "icon": "lucide-image",
+              "title": "instruction_prompt"
             }
           }
         ]
@@ -105,6 +103,7 @@
             "state": {
               "type": "backlink",
               "state": {
+                "file": "Assets/11 AI/instruction_prompt.svg",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -114,7 +113,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks"
+              "title": "Backlinks for instruction_prompt"
             }
           },
           {
@@ -123,11 +122,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
+                "file": "Assets/11 AI/instruction_prompt.svg",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links"
+              "title": "Outgoing links from instruction_prompt"
             }
           },
           {
@@ -165,12 +165,13 @@
             "state": {
               "type": "outline",
               "state": {
+                "file": "Assets/11 AI/instruction_prompt.svg",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline"
+              "title": "Outline of instruction_prompt"
             }
           },
           {
@@ -208,51 +209,52 @@
   },
   "active": "ce7a72e482374127",
   "lastOpenFiles": [
+    "Assets/01 Programming/01 Programming.md",
+    "Assets/03 Data Persistance/03 Data Persistance.md",
+    "Knowledge/03 Data Persistance/SQL/Indexes/Indexes.md",
+    "Knowledge/01 Programming/NET/C#/C#.md",
     "Assets/11 AI/11 AI.md",
-    "Assets/11 AI/role_prompt.svg",
-    "Assets/11 AI/instruction_prompt.svg",
-    "Assets/11 AI/few_shot.svg",
-    "Assets/11 AI/image.png",
+    "Assets/Assets.md",
+    "AGENTS.md",
+    "Knowledge/03 Data Persistance/ORMs/ORMs.md",
+    "Assets/01 Programming/Untitled.png",
     "Assets/01 Programming/image.png",
+    "Assets/03 Data Persistance/Untitled.png",
+    "Knowledge/03 Data Persistance/SQL/SQL.md",
+    "Knowledge/03 Data Persistance/03 Data Persistance.md",
+    "Assets/11 AI/instruction_prompt.svg",
+    "Knowledge/01 Programming/NET/C#/Fundamentals/Assets/01 Programming/01 Programming.md",
+    "Assets/11 AI/role_prompt.svg",
+    "Assets/11 AI/image.png",
+    "Assets/11 AI/few_shot.svg",
+    "Assets/03 Data Persistance/Untitled 4.png",
+    "Assets/03 Data Persistance/Untitled 3.png",
+    "Assets/03 Data Persistance/Untitled 2.png",
+    "Knowledge/11 AI/Prompting/Techniques/Showing Examples/Assets/Assets.md",
+    "Knowledge/11 AI/Prompting/Techniques/Role Prompting/Assets/Assets.md",
+    "Knowledge/11 AI/Prompting/Techniques/Showing Examples/Assets/11 AI/11 AI.md",
+    "Knowledge/11 AI/Prompting/Techniques/Showing Examples/Assets/11 AI",
+    "Knowledge/11 AI/Prompting/Techniques/Showing Examples/Assets",
+    "Knowledge/11 AI/Prompting/Techniques/Instruction Prompting/Assets/Assets.md",
+    "Knowledge/11 AI/Prompting/Techniques/Role Prompting/Assets/11 AI/11 AI.md",
+    "Knowledge/11 AI/Prompting/Techniques/Role Prompting/Assets/11 AI",
+    "Knowledge/11 AI/Prompting/Techniques/Role Prompting/Assets",
+    "Knowledge/11 AI/LLM/Assets/Assets.md",
+    "Knowledge/11 AI/Prompting/Techniques/Instruction Prompting/Assets/11 AI/11 AI.md",
+    "Knowledge/11 AI/Prompting/Techniques/Instruction Prompting/Assets/11 AI",
+    "Knowledge/11 AI/Prompting/Techniques/Instruction Prompting/Assets",
+    "Knowledge/03 Data Persistance/SQL/Indexes/Assets/Assets.md",
+    "Knowledge/11 AI/LLM/Assets/11 AI/11 AI.md",
+    "Knowledge/11 AI/LLM/Assets/11 AI",
+    "Knowledge/11 AI/LLM/Assets",
+    "Knowledge/01 Programming/NET/C#/Runtime/Common Language Runtime/Assets/Assets.md",
+    "Knowledge/03 Data Persistance/SQL/Indexes/Assets/03 Data Persistance/03 Data Persistance.md",
+    "Knowledge/03 Data Persistance/SQL/Indexes/Assets/03 Data Persistance",
+    "Knowledge/03 Data Persistance/SQL/Indexes/Assets",
+    "Knowledge/01 Programming/NET/C#/Runtime/Common Language Runtime/Assets/01 Programming/01 Programming.md",
     "Assets/11 AI/Prompting/Techniques/Role Prompting/Role Prompting.md",
     "Assets/11 AI/Prompting/Techniques/Showing Examples/Showing Examples.md",
     "Assets/11 AI/Prompting/Techniques/Instruction Prompting/Instruction Prompting.md",
-    "Assets/11 AI/Prompting/Techniques/Techniques.md",
-    "Assets/11 AI/Prompting/Techniques/Showing Examples",
-    "Assets/11 AI/Prompting/Techniques/Role Prompting",
-    "Assets/11 AI/Prompting/Techniques/Instruction Prompting",
-    "Assets/11 AI/LLM/LLM.md",
-    "Assets/11 AI/Prompting/Techniques",
-    "Assets/11 AI/Prompting/Prompting.md",
-    "Assets/11 AI/All Images/All Images.md",
-    "Assets/11 AI/LLM",
-    "Assets/11 AI/Prompting",
-    "Assets/11 AI/All Images",
-    "Assets/11 AI",
-    "Assets/03 Data Persistance/SQL/Indexes/Indexes.md",
-    "Assets/03 Data Persistance/SQL/SQL.md",
-    "Assets/03 Data Persistance/SQL/Indexes",
-    "Assets/03 Data Persistance/SQL",
-    "Assets/03 Data Persistance/All Images/All Images.md",
-    "Assets/01 Programming/Untitled.png",
-    "Assets/01 Programming/01 Programming.md",
-    "Assets/01 Programming/NET/C#/Fundamentals/Types/Types.md",
-    "Assets/03 Data Persistance/03 Data Persistance.md",
-    "Knowledge/03 Data Persistance/03 Data Persistance.md",
-    "Knowledge/02 Computer Science/02 Computer Science.md",
-    "Knowledge/01 Programming/01 Programming.md",
-    "Knowledge/Knowledge.md",
-    "Assets/01 Programming/NET/C#/Runtime/Common Language Runtime/Common Language Runtime.md",
-    "Assets/01 Programming/NET/C#/Runtime/Runtime.md",
-    "Assets/01 Programming/NET/C#/Fundamentals/Fundamentals.md",
-    "Assets/01 Programming/NET/C#/C#.md",
-    "Assets/01 Programming/All Images/All Images.md",
-    "Assets/01 Programming/NET/NET.md",
-    "Assets/03 Data Persistance/Untitled 4.png",
-    "Assets/03 Data Persistance/Untitled.png",
-    "Assets/03 Data Persistance/Untitled 1.png",
-    "Assets/03 Data Persistance/Untitled 3.png",
-    "Assets/assets.md",
     "Untitled.canvas"
   ]
 }
