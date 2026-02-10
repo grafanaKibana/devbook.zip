@@ -2,7 +2,7 @@
 topic: []
 subtopic: []
 level: ["1"]
-priority: medium
+priority: Medium
 status: Not-Started
 tags:
   - FolderNote
@@ -74,7 +74,7 @@ TABLE WITHOUT ID
   level as "Level",
   last_reviewed as "Last Reviewed"
 FROM "Knowledge"
-WHERE priority = "high"
+WHERE priority = "High"
   AND file.path != this.file.path
 SORT status ASC, last_reviewed DESC
 ```
@@ -104,7 +104,7 @@ TABLE WITHOUT ID
   level as "Level",
   last_reviewed as "Level"
 FROM "Knowledge"
-WHERE priority = "high"
+WHERE priority = "High"
   AND file.path != this.file.path
 SORT status ASC, last_reviewed DESC, last_reviewed ASC
 ```
@@ -194,7 +194,7 @@ TABLE WITHOUT ID
   level as "Level",
   last_reviewed as "Last Reviewed"
 FROM "Knowledge"
-WHERE priority = "high"
+WHERE priority = "High"
   AND file.path != this.file.path
 SORT status ASC, last_reviewed DESC, last_reviewed ASC
 ```
@@ -285,7 +285,7 @@ TABLE WITHOUT ID
   level as "Level",
   last_reviewed as "Level"
 FROM "Knowledge"
-WHERE priority = "high"
+WHERE priority = "High"
   AND file.path != this.file.path
 SORT status ASC, last_reviewed DESC, last_reviewed ASC
 ```

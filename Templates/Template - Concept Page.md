@@ -7,9 +7,9 @@ level:
   - "3"
   - "4"
 priority:
-  - low
-  - medium
-  - high
+  - Low
+  - Medium
+  - High
 status:
   - Not-Started
   - Repetition

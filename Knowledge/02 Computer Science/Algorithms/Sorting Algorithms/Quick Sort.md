@@ -5,7 +5,7 @@ subtopic:
   - Algorithms
   - Sorting Algorithms
 level: ["2"]
-priority: medium
+priority: Medium
 status: Not-Started
 ---
 ## Parent

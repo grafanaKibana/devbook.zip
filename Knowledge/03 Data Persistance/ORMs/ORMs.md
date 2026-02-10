@@ -2,7 +2,7 @@
 topic: ["Data Persistance"]
 subtopic: []
 level: ["1"]
-priority: medium
+priority: Medium
 status: Not-Started
 tags:
   - FolderNote

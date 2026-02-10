@@ -7,7 +7,12 @@ Usage:
 Called automatically by the git pre-commit hook.
 """
 
-import os, json, hashlib, sys
+import os
+import json
+import hashlib
+import sys
+import datetime
+from collections import Counter
 
 VAULT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 KNOWLEDGE = os.path.join(VAULT_ROOT, "Knowledge")
@@ -16,21 +21,33 @@ MAX_DEPTH = 3
 
 NODE_W = 340
 NODE_H = 80
-Y_TOPIC_SPACING = 220
 X_SUBTOPIC_OFFSET = 420
-Y_SUBTOPIC_SPACING = 120
 X_MAIN = 0
 
+# Vertical layout tuning.
+NODE_V_GAP = 40
+TOPIC_V_GAP = 160
+STEP_Y = NODE_H + NODE_V_GAP
 
+
+# Status values are defined by Templates/Template - Concept Page.md.
+# Colors follow JSON Canvas spec: either hex (#RRGGBB) or palette ids "1".."6".
+# Palette ids are theme-friendly; hex is used for a neutral gray Not-Started.
 STATUS_COLORS = {
-    # Using hex so we can get a neutral gray for Not-Started.
-    # Status values are defined by Templates/Template - Concept Page.md.
     "Not-Started": "#9CA3AF",
-    "Creation": "#F59E0B",
-    "Repetition": "#06B6D4",
-    "Ready To Repeat": "#A855F7",
-    "Done": "#10B981",
+    "Creation": "2",  # orange
+    "Repetition": "5",  # cyan
+    "Ready To Repeat": "6",  # purple
+    "Done": "4",  # green
 }
+
+# Folder hub nodes are colored based on the rollup of descendant concept pages.
+HUB_STATUS_MODE = "rollup"  # "rollup" | "frontmatter"
+
+# Child placement aims to reduce overall vertical height.
+CHILD_PLACEMENT = "masonry"  # "alternate" | "masonry"
+
+ADD_LEGEND = True
 
 
 def nid(path):
@@ -72,6 +89,12 @@ def build_tree(d):
 
     walk(d, 1)
     return t
+
+
+def is_hub_note_path(md_abs_path):
+    d = os.path.dirname(md_abs_path)
+    base = os.path.basename(d)
+    return os.path.basename(md_abs_path) == base + ".md"
 
 
 def read_frontmatter_status(abs_path):
@@ -138,6 +161,24 @@ def color_for_status(status):
     return STATUS_COLORS.get(status)
 
 
+def rollup_status_from_counts(counts):
+    total = sum(counts.values())
+    if total == 0:
+        return None
+    if counts.get("Done", 0) == total:
+        return "Done"
+    # Worst-first: if anything is not started, folder isn't done.
+    if counts.get("Not-Started", 0) > 0:
+        return "Not-Started"
+    if counts.get("Creation", 0) > 0:
+        return "Creation"
+    if counts.get("Repetition", 0) > 0:
+        return "Repetition"
+    if counts.get("Ready To Repeat", 0) > 0:
+        return "Ready To Repeat"
+    return "Not-Started"
+
+
 def generate():
     topic_dirs = [
         os.path.join(KNOWLEDGE, n)
@@ -148,19 +189,24 @@ def generate():
     nodes = []
     edges = []
     state = {"y": 0}
-    status_cache = {}
+    file_status_cache = {}
 
-    def node_color(rel_path):
-        c = status_cache.get(rel_path, "__MISSING__")
-        if c != "__MISSING__":
-            return c
-        abs_path = os.path.join(VAULT_ROOT, rel_path)
-        status = read_frontmatter_status(abs_path)
-        c = color_for_status(status)
-        status_cache[rel_path] = c
-        return c
+    def file_status(md_abs_path):
+        v = file_status_cache.get(md_abs_path, "__MISSING__")
+        if v != "__MISSING__":
+            return v
+        v = read_frontmatter_status(md_abs_path)
+        file_status_cache[md_abs_path] = v
+        return v
 
-    def place_subtree(tr, dir_abs, depth, parent_id, y, direction):
+    def hub_color_for_dir(dir_abs, rollup_status_by_dir):
+        if HUB_STATUS_MODE == "frontmatter":
+            s = file_status(hub(dir_abs))
+        else:
+            s = rollup_status_by_dir.get(dir_abs)
+        return color_for_status(s)
+
+    def place_subtree(tr, dir_abs, depth, parent_id, y, direction, rollup_status_by_dir):
         rel = os.path.relpath(hub(dir_abs), VAULT_ROOT)
         cid = nid(rel)
         cx = X_MAIN + (direction * depth * X_SUBTOPIC_OFFSET)
@@ -173,7 +219,7 @@ def generate():
             "width": NODE_W,
             "height": NODE_H,
         }
-        c = node_color(rel)
+        c = hub_color_for_dir(dir_abs, rollup_status_by_dir)
         if c:
             n["color"] = c
         nodes.append(n)
@@ -190,16 +236,67 @@ def generate():
                 "toSide": to_side,
             }
         )
-        y += Y_SUBTOPIC_SPACING
+        y += STEP_Y
         for gc in tr.get(dir_abs, []):
             if depth + 1 <= MAX_DEPTH:
-                y = place_subtree(tr, gc, depth + 1, cid, y, direction)
+                y = place_subtree(
+                    tr, gc, depth + 1, cid, y, direction, rollup_status_by_dir
+                )
         return y
+
+    def subtree_node_count(tr, dir_abs, depth):
+        if depth > MAX_DEPTH:
+            return 0
+        total = 1
+        for ch in tr.get(dir_abs, []):
+            total += subtree_node_count(tr, ch, depth + 1)
+        return total
+
+    def build_rollup_status_by_dir(tr):
+        # Bottom-up aggregate of concept pages (non-hub notes) statuses.
+        own = {d: Counter() for d in tr.keys()}
+        for d in tr.keys():
+            try:
+                entries = os.listdir(d)
+            except FileNotFoundError:
+                continue
+            for e in entries:
+                if e.startswith(".") or not e.endswith(".md"):
+                    continue
+                p = os.path.join(d, e)
+                if not os.path.isfile(p):
+                    continue
+                if is_hub_note_path(p):
+                    continue
+                s = file_status(p)
+                if s:
+                    own[d][s] += 1
+
+        memo_counts = {}
+
+        def agg_counts(d):
+            if d in memo_counts:
+                return memo_counts[d]
+            c = Counter()
+            c.update(own.get(d, {}))
+            for ch in tr.get(d, []):
+                c += agg_counts(ch)
+            memo_counts[d] = c
+            return c
+
+        out = {}
+        for d in tr.keys():
+            out[d] = rollup_status_from_counts(agg_counts(d))
+        return out
 
     for i, td in enumerate(topic_dirs):
         rel = os.path.relpath(hub(td), VAULT_ROOT)
         tid = nid(rel)
         topic_y = state["y"]
+
+        tr = build_tree(td)
+        rollup_status_by_dir = build_rollup_status_by_dir(tr)
+
         n = {
             "id": tid,
             "type": "file",
@@ -209,7 +306,7 @@ def generate():
             "width": NODE_W,
             "height": NODE_H,
         }
-        c = node_color(rel)
+        c = hub_color_for_dir(td, rollup_status_by_dir)
         if c:
             n["color"] = c
         nodes.append(n)
@@ -227,19 +324,61 @@ def generate():
                 }
             )
 
-        tr = build_tree(td)
         children = tr.get(td, [])
         if children:
             left_y = topic_y
             right_y = topic_y
-            for ci, c in enumerate(children):
-                if ci % 2 == 0:
-                    right_y = place_subtree(tr, c, 1, tid, right_y, +1)
+            for ci, cdir in enumerate(children):
+                if CHILD_PLACEMENT == "alternate":
+                    side = +1 if (ci % 2 == 0) else -1
                 else:
-                    left_y = place_subtree(tr, c, 1, tid, left_y, -1)
-            state["y"] = max(left_y, right_y, topic_y + NODE_H) + Y_TOPIC_SPACING
+                    h = subtree_node_count(tr, cdir, 1) * STEP_Y
+                    right_score = max(right_y + h, left_y)
+                    left_score = max(left_y + h, right_y)
+                    side = +1 if right_score <= left_score else -1
+
+                if side >= 0:
+                    right_y = place_subtree(
+                        tr, cdir, 1, tid, right_y, +1, rollup_status_by_dir
+                    )
+                else:
+                    left_y = place_subtree(
+                        tr, cdir, 1, tid, left_y, -1, rollup_status_by_dir
+                    )
+
+            state["y"] = max(left_y, right_y, topic_y + NODE_H) + TOPIC_V_GAP
         else:
-            state["y"] = topic_y + NODE_H + Y_TOPIC_SPACING
+            state["y"] = topic_y + NODE_H + TOPIC_V_GAP
+
+    if ADD_LEGEND and nodes:
+        min_x = min(n.get("x", 0) for n in nodes)
+        min_y = min(n.get("y", 0) for n in nodes)
+        ts = datetime.datetime.now().isoformat(timespec="seconds")
+
+        legend_lines = [
+            "Roadmap legend",
+            f"Generated: {ts}",
+            "",
+            f"Not-Started: {STATUS_COLORS['Not-Started']}",
+            f"Creation: {STATUS_COLORS['Creation']}",
+            f"Repetition: {STATUS_COLORS['Repetition']}",
+            f"Ready To Repeat: {STATUS_COLORS['Ready To Repeat']}",
+            f"Done: {STATUS_COLORS['Done']}",
+            "",
+            f"Hub status mode: {HUB_STATUS_MODE}",
+        ]
+
+        nodes.append(
+            {
+                "id": nid("__roadmap_legend__"),
+                "type": "text",
+                "text": "\n".join(legend_lines),
+                "x": min_x,
+                "y": min_y - (STEP_Y * 3),
+                "width": 360,
+                "height": 260,
+            }
+        )
 
     return {"nodes": nodes, "edges": edges}
 

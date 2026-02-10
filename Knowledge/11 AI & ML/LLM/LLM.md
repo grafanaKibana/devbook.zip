@@ -5,7 +5,7 @@ subtopic:
   - LLM
 level:
   - "1"
-priority: medium
+priority: Medium
 status: Not-Started
 tags:
   - FolderNote

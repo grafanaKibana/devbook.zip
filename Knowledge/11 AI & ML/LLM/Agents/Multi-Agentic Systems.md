@@ -2,7 +2,7 @@
 topic: ["AI"]
 subtopic: ["Agents"]
 level: ["1"]
-priority: medium
+priority: Medium
 status: Not-Started
 ---
 ## Parent

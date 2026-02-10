@@ -2,7 +2,7 @@
 topic: ["Programming"]
 subtopic: ["NET", "C#", "Runtime"]
 level: ["1"]
-priority: medium
+priority: Medium
 status: Not-Started
 tags:
   - FolderNote

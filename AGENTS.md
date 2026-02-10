@@ -46,7 +46,7 @@ Frontmatter keys and types are strict:
 - `topic`: array of strings (even if one value)
 - `subtopic`: array of strings (even if one value)
 - `level`: array of strings (default `["1"]`; keep as strings)
-- `priority`: enum string (vault currently uses `medium` everywhere)
+- `priority`: enum string (vault currently uses `Medium` everywhere)
 - `status`: enum string (ONLY these values are allowed): `Not-Started`, `Repetition`, `Creation`, `Ready To Repeat`, `Done`
 
 Example concept frontmatter:
@@ -56,7 +56,7 @@ Example concept frontmatter:
 topic: ["Programming"]
 subtopic: ["NET"]
 level: ["1"]
-priority: medium
+ priority: Medium
 status: Not-Started
 ---
 ```
@@ -168,4 +168,3 @@ sequenceDiagram
 
 ## Memory
 - 
-

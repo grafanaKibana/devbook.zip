@@ -2,7 +2,7 @@
 topic: ["Computer Science"]
 subtopic: ["Data Structures"]
 level: ["1"]
-priority: medium
+priority: Medium
 status: Not-Started
 ---
 ## Parent
