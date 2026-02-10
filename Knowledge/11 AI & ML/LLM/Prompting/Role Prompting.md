@@ -45,7 +45,7 @@ if (pages.length) {
 
 ## Deeper Explanation
 
-![11 AI-Role Prompting-20260210205142493.svg](11%20AI-Role%20Prompting-20260210205142493.svg)
+![11 AI & ML-Role Prompting-20260211012332438.svg](11%20AI%20&%20ML-Role%20Prompting-20260211012332438.svg)
 
 # What is Role Prompting?
 

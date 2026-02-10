@@ -1,9 +1,21 @@
 ---
 topic: []
 subtopic: []
-level: ["1"]
-priority: medium
-status: Not-Started
+level:
+  - "1"
+  - "2"
+  - "3"
+  - "4"
+priority:
+  - low
+  - medium
+  - high
+status:
+  - Not-Started
+  - Repetition
+  - Creation
+  - Ready To Repeat
+  - Done
 tags:
   - Template
 ---

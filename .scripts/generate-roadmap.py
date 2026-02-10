@@ -22,6 +22,17 @@ Y_SUBTOPIC_SPACING = 120
 X_MAIN = 0
 
 
+STATUS_COLORS = {
+    # Using hex so we can get a neutral gray for Not-Started.
+    # Status values are defined by Templates/Template - Concept Page.md.
+    "Not-Started": "#9CA3AF",
+    "Creation": "#F59E0B",
+    "Repetition": "#06B6D4",
+    "Ready To Repeat": "#A855F7",
+    "Done": "#10B981",
+}
+
+
 def nid(path):
     return "n_" + hashlib.sha1(path.encode()).hexdigest()[:10]
 
@@ -63,6 +74,35 @@ def build_tree(d):
     return t
 
 
+def read_frontmatter_status(abs_path):
+    try:
+        with open(abs_path, "r", encoding="utf-8") as f:
+            first = f.readline()
+            if first.strip() != "---":
+                return None
+            for line in f:
+                s = line.strip()
+                if s == "---":
+                    break
+                if not s.lower().startswith("status:"):
+                    continue
+                v = s.split(":", 1)[1].strip()
+                if (v.startswith('"') and v.endswith('"')) or (
+                    v.startswith("'") and v.endswith("'")
+                ):
+                    v = v[1:-1]
+                return v or None
+    except (FileNotFoundError, UnicodeDecodeError, OSError):
+        return None
+    return None
+
+
+def color_for_status(status):
+    if not status:
+        return None
+    return STATUS_COLORS.get(status)
+
+
 def generate():
     topic_dirs = [
         os.path.join(KNOWLEDGE, n)
@@ -73,51 +113,71 @@ def generate():
     nodes = []
     edges = []
     state = {"y": 0}
+    status_cache = {}
 
-    def place_subtree(tr, dir_abs, depth, parent_id):
+    def node_color(rel_path):
+        c = status_cache.get(rel_path, "__MISSING__")
+        if c != "__MISSING__":
+            return c
+        abs_path = os.path.join(VAULT_ROOT, rel_path)
+        status = read_frontmatter_status(abs_path)
+        c = color_for_status(status)
+        status_cache[rel_path] = c
+        return c
+
+    def place_subtree(tr, dir_abs, depth, parent_id, y, direction):
         rel = os.path.relpath(hub(dir_abs), VAULT_ROOT)
         cid = nid(rel)
-        cx = X_MAIN + depth * X_SUBTOPIC_OFFSET
-        nodes.append(
-            {
-                "id": cid,
-                "type": "file",
-                "file": rel,
-                "x": cx,
-                "y": state["y"],
-                "width": NODE_W,
-                "height": NODE_H,
-            }
-        )
+        cx = X_MAIN + (direction * depth * X_SUBTOPIC_OFFSET)
+        n = {
+            "id": cid,
+            "type": "file",
+            "file": rel,
+            "x": cx,
+            "y": y,
+            "width": NODE_W,
+            "height": NODE_H,
+        }
+        c = node_color(rel)
+        if c:
+            n["color"] = c
+        nodes.append(n)
+        if direction >= 0:
+            from_side, to_side = "right", "left"
+        else:
+            from_side, to_side = "left", "right"
         edges.append(
             {
                 "id": eid(parent_id, cid),
                 "fromNode": parent_id,
-                "fromSide": "right",
+                "fromSide": from_side,
                 "toNode": cid,
-                "toSide": "left",
+                "toSide": to_side,
             }
         )
-        state["y"] += Y_SUBTOPIC_SPACING
+        y += Y_SUBTOPIC_SPACING
         for gc in tr.get(dir_abs, []):
             if depth + 1 <= MAX_DEPTH:
-                place_subtree(tr, gc, depth + 1, cid)
+                y = place_subtree(tr, gc, depth + 1, cid, y, direction)
+        return y
 
     for i, td in enumerate(topic_dirs):
         rel = os.path.relpath(hub(td), VAULT_ROOT)
         tid = nid(rel)
         topic_y = state["y"]
-        nodes.append(
-            {
-                "id": tid,
-                "type": "file",
-                "file": rel,
-                "x": X_MAIN,
-                "y": topic_y,
-                "width": NODE_W,
-                "height": NODE_H,
-            }
-        )
+        n = {
+            "id": tid,
+            "type": "file",
+            "file": rel,
+            "x": X_MAIN,
+            "y": topic_y,
+            "width": NODE_W,
+            "height": NODE_H,
+        }
+        c = node_color(rel)
+        if c:
+            n["color"] = c
+        nodes.append(n)
 
         if i > 0:
             prev_rel = os.path.relpath(hub(topic_dirs[i - 1]), VAULT_ROOT)
@@ -135,10 +195,14 @@ def generate():
         tr = build_tree(td)
         children = tr.get(td, [])
         if children:
-            state["y"] = topic_y
-            for c in children:
-                place_subtree(tr, c, 1, tid)
-            state["y"] = max(state["y"], topic_y + NODE_H) + Y_TOPIC_SPACING
+            left_y = topic_y
+            right_y = topic_y
+            for ci, c in enumerate(children):
+                if ci % 2 == 0:
+                    right_y = place_subtree(tr, c, 1, tid, right_y, +1)
+                else:
+                    left_y = place_subtree(tr, c, 1, tid, left_y, -1)
+            state["y"] = max(left_y, right_y, topic_y + NODE_H) + Y_TOPIC_SPACING
         else:
             state["y"] = topic_y + NODE_H + Y_TOPIC_SPACING
 

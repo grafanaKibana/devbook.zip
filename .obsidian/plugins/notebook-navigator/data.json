@@ -378,8 +378,8 @@
     "Knowledge/07 Security": "lock-keyhole",
     "Knowledge/08 SDLC": "calendar-clock",
     "Knowledge/09 DevOps": "skull",
-    "Knowledge/11 AI": "brain-circuit",
-    "Knowledge/10 Cloud": "cloud"
+    "Knowledge/10 Cloud": "cloud",
+    "Knowledge/11 AI & ML": "brain-circuit"
   },
   "folderColors": {
     "Templates": "#6b7280",
@@ -392,8 +392,8 @@
     "Knowledge/07 Security": "#22c55e",
     "Knowledge/08 SDLC": "#06b6d4",
     "Knowledge/09 DevOps": "#0ea5e9",
-    "Knowledge/11 AI": "#6366f1",
-    "Knowledge/10 Cloud": "#3b82f6"
+    "Knowledge/10 Cloud": "#3b82f6",
+    "Knowledge/11 AI & ML": "#6366f1"
   },
   "folderBackgroundColors": {},
   "folderSortOverrides": {},

@@ -16,7 +16,8 @@
       "x": 420,
       "y": 0,
       "width": 340,
-      "height": 80
+      "height": 80,
+      "color": "#9CA3AF"
     },
     {
       "id": "n_1bfb35c3aa",
@@ -25,7 +26,8 @@
       "x": 840,
       "y": 120,
       "width": 340,
-      "height": 80
+      "height": 80,
+      "color": "#9CA3AF"
     },
     {
       "id": "n_5b132671e7",
@@ -34,7 +36,8 @@
       "x": 1260,
       "y": 240,
       "width": 340,
-      "height": 80
+      "height": 80,
+      "color": "#9CA3AF"
     },
     {
       "id": "n_4395a9e75e",
@@ -52,7 +55,8 @@
       "x": 840,
       "y": 480,
       "width": 340,
-      "height": 80
+      "height": 80,
+      "color": "#9CA3AF"
     },
     {
       "id": "n_ebcb435eb2",
@@ -61,7 +65,8 @@
       "x": 0,
       "y": 820,
       "width": 340,
-      "height": 80
+      "height": 80,
+      "color": "#9CA3AF"
     },
     {
       "id": "n_3a1362b179",
@@ -70,7 +75,8 @@
       "x": 420,
       "y": 820,
       "width": 340,
-      "height": 80
+      "height": 80,
+      "color": "#9CA3AF"
     },
     {
       "id": "n_7360aedba6",
@@ -79,7 +85,8 @@
       "x": 840,
       "y": 940,
       "width": 340,
-      "height": 80
+      "height": 80,
+      "color": "#9CA3AF"
     },
     {
       "id": "n_c54b6fadf2",
@@ -88,7 +95,8 @@
       "x": 840,
       "y": 1060,
       "width": 340,
-      "height": 80
+      "height": 80,
+      "color": "#9CA3AF"
     },
     {
       "id": "n_d0ca6038f7",
@@ -97,7 +105,8 @@
       "x": 840,
       "y": 1180,
       "width": 340,
-      "height": 80
+      "height": 80,
+      "color": "#9CA3AF"
     },
     {
       "id": "n_a6dc892c7f",
@@ -106,7 +115,8 @@
       "x": 840,
       "y": 1300,
       "width": 340,
-      "height": 80
+      "height": 80,
+      "color": "#9CA3AF"
     },
     {
       "id": "n_93b9ffc044",
@@ -115,295 +125,288 @@
       "x": 840,
       "y": 1420,
       "width": 340,
-      "height": 80
+      "height": 80,
+      "color": "#9CA3AF"
     },
     {
       "id": "n_ab2b58d449",
       "type": "file",
       "file": "Knowledge/02 Computer Science/Data Structures/Data Structures.md",
-      "x": 420,
-      "y": 1540,
+      "x": -420,
+      "y": 820,
       "width": 340,
-      "height": 80
+      "height": 80,
+      "color": "#9CA3AF"
     },
     {
       "id": "n_8fc82b07cf",
       "type": "file",
       "file": "Knowledge/03 Data Persistance/03 Data Persistance.md",
       "x": 0,
-      "y": 1880,
+      "y": 1760,
       "width": 340,
-      "height": 80
+      "height": 80,
+      "color": "#9CA3AF"
     },
     {
       "id": "n_a4212fc406",
       "type": "file",
       "file": "Knowledge/03 Data Persistance/ORMs/ORMs.md",
       "x": 420,
-      "y": 1880,
+      "y": 1760,
       "width": 340,
-      "height": 80
+      "height": 80,
+      "color": "#9CA3AF"
     },
     {
       "id": "n_d026450ac5",
       "type": "file",
       "file": "Knowledge/03 Data Persistance/SQL/SQL.md",
-      "x": 420,
-      "y": 2000,
+      "x": -420,
+      "y": 1760,
       "width": 340,
-      "height": 80
+      "height": 80,
+      "color": "#9CA3AF"
     },
     {
       "id": "n_a79b2e14f8",
       "type": "file",
       "file": "Knowledge/03 Data Persistance/SQL/Indexes/Indexes.md",
-      "x": 840,
-      "y": 2120,
+      "x": -840,
+      "y": 1880,
       "width": 340,
-      "height": 80
+      "height": 80,
+      "color": "#9CA3AF"
     },
     {
       "id": "n_ef51286781",
       "type": "file",
       "file": "Knowledge/04 Networks/04 Networks.md",
       "x": 0,
-      "y": 2460,
+      "y": 2220,
       "width": 340,
-      "height": 80
+      "height": 80,
+      "color": "#9CA3AF"
     },
     {
       "id": "n_bb7f64215e",
       "type": "file",
       "file": "Knowledge/04 Networks/Architecture & Ops/Architecture & Ops.md",
       "x": 420,
-      "y": 2460,
+      "y": 2220,
       "width": 340,
-      "height": 80
+      "height": 80,
+      "color": "#9CA3AF"
     },
     {
       "id": "n_36f0e496b1",
       "type": "file",
       "file": "Knowledge/04 Networks/Protocols/Protocols.md",
-      "x": 420,
-      "y": 2580,
+      "x": -420,
+      "y": 2220,
       "width": 340,
-      "height": 80
+      "height": 80,
+      "color": "#9CA3AF"
     },
     {
       "id": "n_b2648cb112",
       "type": "file",
       "file": "Knowledge/04 Networks/Transport & Sockets/Transport & Sockets.md",
       "x": 420,
-      "y": 2700,
+      "y": 2340,
       "width": 340,
-      "height": 80
+      "height": 80,
+      "color": "#9CA3AF"
     },
     {
       "id": "n_2d902a721c",
       "type": "file",
       "file": "Knowledge/05 Architecture/05 Architecture.md",
       "x": 0,
-      "y": 3040,
+      "y": 2680,
       "width": 340,
-      "height": 80
+      "height": 80,
+      "color": "#9CA3AF"
     },
     {
       "id": "n_7ed73a39da",
       "type": "file",
       "file": "Knowledge/05 Architecture/Application Architecture/Application Architecture.md",
       "x": 420,
-      "y": 3040,
+      "y": 2680,
       "width": 340,
-      "height": 80
+      "height": 80,
+      "color": "#9CA3AF"
     },
     {
       "id": "n_1c7459d4ef",
       "type": "file",
       "file": "Knowledge/05 Architecture/Architecture Styles/Architecture Styles.md",
-      "x": 420,
-      "y": 3160,
+      "x": -420,
+      "y": 2680,
       "width": 340,
-      "height": 80
+      "height": 80,
+      "color": "#9CA3AF"
     },
     {
       "id": "n_0677745c4a",
       "type": "file",
       "file": "Knowledge/05 Architecture/Distributed Systems/Distributed Systems.md",
       "x": 420,
-      "y": 3280,
+      "y": 2800,
       "width": 340,
-      "height": 80
+      "height": 80,
+      "color": "#9CA3AF"
     },
     {
       "id": "n_836d7431d3",
       "type": "file",
       "file": "Knowledge/05 Architecture/Patterns/Patterns.md",
-      "x": 420,
-      "y": 3400,
+      "x": -420,
+      "y": 2800,
       "width": 340,
-      "height": 80
+      "height": 80,
+      "color": "#9CA3AF"
     },
     {
       "id": "n_8227afe735",
       "type": "file",
       "file": "Knowledge/06 Patterns & Practices/06 Patterns & Practices.md",
       "x": 0,
-      "y": 3740,
+      "y": 3140,
       "width": 340,
-      "height": 80
+      "height": 80,
+      "color": "#9CA3AF"
     },
     {
       "id": "n_4c45901cbc",
       "type": "file",
       "file": "Knowledge/06 Patterns & Practices/Paradigms & Practices/Paradigms & Practices.md",
       "x": 420,
-      "y": 3740,
+      "y": 3140,
       "width": 340,
-      "height": 80
+      "height": 80,
+      "color": "#9CA3AF"
     },
     {
       "id": "n_337f780578",
       "type": "file",
       "file": "Knowledge/06 Patterns & Practices/Patterns/Patterns.md",
-      "x": 420,
-      "y": 3860,
+      "x": -420,
+      "y": 3140,
       "width": 340,
-      "height": 80
+      "height": 80,
+      "color": "#9CA3AF"
     },
     {
       "id": "n_08c964890a",
       "type": "file",
       "file": "Knowledge/06 Patterns & Practices/Principles/Principles.md",
       "x": 420,
-      "y": 3980,
+      "y": 3260,
       "width": 340,
-      "height": 80
+      "height": 80,
+      "color": "#9CA3AF"
     },
     {
       "id": "n_5c16a9eace",
       "type": "file",
       "file": "Knowledge/07 Security/07 Security.md",
       "x": 0,
-      "y": 4320,
+      "y": 3600,
       "width": 340,
-      "height": 80
+      "height": 80,
+      "color": "#9CA3AF"
     },
     {
       "id": "n_215ff47b7f",
       "type": "file",
       "file": "Knowledge/08 SDLC/08 SDLC.md",
       "x": 0,
-      "y": 4620,
+      "y": 3900,
       "width": 340,
-      "height": 80
+      "height": 80,
+      "color": "#9CA3AF"
     },
     {
       "id": "n_9a76cd745d",
       "type": "file",
       "file": "Knowledge/09 DevOps/09 DevOps.md",
       "x": 0,
-      "y": 4920,
+      "y": 4200,
       "width": 340,
-      "height": 80
+      "height": 80,
+      "color": "#9CA3AF"
     },
     {
       "id": "n_cf0ddb3d9c",
       "type": "file",
       "file": "Knowledge/09 DevOps/Deployment Stratagies/Deployment Stratagies.md",
       "x": 420,
-      "y": 4920,
+      "y": 4200,
       "width": 340,
-      "height": 80
+      "height": 80,
+      "color": "#9CA3AF"
     },
     {
       "id": "n_268761f2f7",
       "type": "file",
       "file": "Knowledge/10 Cloud/10 Cloud.md",
       "x": 0,
-      "y": 5260,
+      "y": 4540,
       "width": 340,
-      "height": 80
+      "height": 80,
+      "color": "#9CA3AF"
     },
     {
-      "id": "n_69083fd598",
+      "id": "n_e8bf2810e3",
       "type": "file",
-      "file": "Knowledge/11 AI/11 AI.md",
+      "file": "Knowledge/11 AI & ML/11 AI & ML.md",
       "x": 0,
-      "y": 5560,
+      "y": 4840,
       "width": 340,
-      "height": 80
+      "height": 80,
+      "color": "#9CA3AF"
     },
     {
-      "id": "n_53c391a283",
+      "id": "n_cff58d6dc6",
       "type": "file",
-      "file": "Knowledge/11 AI/Agents/Agents.md",
+      "file": "Knowledge/11 AI & ML/LLM/LLM.md",
       "x": 420,
-      "y": 5560,
+      "y": 4840,
       "width": 340,
-      "height": 80
+      "height": 80,
+      "color": "#9CA3AF"
     },
     {
-      "id": "n_ae8d4d47ca",
+      "id": "n_603797a9f1",
       "type": "file",
-      "file": "Knowledge/11 AI/LLM/LLM.md",
-      "x": 420,
-      "y": 5680,
-      "width": 340,
-      "height": 80
-    },
-    {
-      "id": "n_f7732ede08",
-      "type": "file",
-      "file": "Knowledge/11 AI/Machine Learning/Machine Learning.md",
-      "x": 420,
-      "y": 5800,
-      "width": 340,
-      "height": 80
-    },
-    {
-      "id": "n_d3e279620d",
-      "type": "file",
-      "file": "Knowledge/11 AI/Prompting/Prompting.md",
-      "x": 420,
-      "y": 5920,
-      "width": 340,
-      "height": 80
-    },
-    {
-      "id": "n_5c824ca31b",
-      "type": "file",
-      "file": "Knowledge/11 AI/Prompting/Techniques/Techniques.md",
+      "file": "Knowledge/11 AI & ML/LLM/Agents/Agents.md",
       "x": 840,
-      "y": 6040,
+      "y": 4960,
       "width": 340,
-      "height": 80
+      "height": 80,
+      "color": "#9CA3AF"
     },
     {
-      "id": "n_df7aabb02b",
+      "id": "n_5e107a36d8",
       "type": "file",
-      "file": "Knowledge/11 AI/Prompting/Techniques/Instruction Prompting/Instruction Prompting.md",
-      "x": 1260,
-      "y": 6160,
+      "file": "Knowledge/11 AI & ML/LLM/Prompting/Prompting.md",
+      "x": 840,
+      "y": 5080,
       "width": 340,
-      "height": 80
+      "height": 80,
+      "color": "#9CA3AF"
     },
     {
-      "id": "n_550a3ff8b8",
+      "id": "n_93bfc0ffdb",
       "type": "file",
-      "file": "Knowledge/11 AI/Prompting/Techniques/Role Prompting/Role Prompting.md",
-      "x": 1260,
-      "y": 6280,
+      "file": "Knowledge/11 AI & ML/Machine Learning/Machine Learning.md",
+      "x": -420,
+      "y": 4840,
       "width": 340,
-      "height": 80
-    },
-    {
-      "id": "n_981832293b",
-      "type": "file",
-      "file": "Knowledge/11 AI/Prompting/Techniques/Showing Examples/Showing Examples.md",
-      "x": 1260,
-      "y": 6400,
-      "width": 340,
-      "height": 80
+      "height": 80,
+      "color": "#9CA3AF"
     }
   ],
   "edges": [
@@ -494,9 +497,9 @@
     {
       "id": "e_1d8fc517e1",
       "fromNode": "n_ebcb435eb2",
-      "fromSide": "right",
+      "fromSide": "left",
       "toNode": "n_ab2b58d449",
-      "toSide": "left"
+      "toSide": "right"
     },
     {
       "id": "e_d1f0bfe9eb",
@@ -515,16 +518,16 @@
     {
       "id": "e_4e04193a95",
       "fromNode": "n_8fc82b07cf",
-      "fromSide": "right",
+      "fromSide": "left",
       "toNode": "n_d026450ac5",
-      "toSide": "left"
+      "toSide": "right"
     },
     {
       "id": "e_44776b59d8",
       "fromNode": "n_d026450ac5",
-      "fromSide": "right",
+      "fromSide": "left",
       "toNode": "n_a79b2e14f8",
-      "toSide": "left"
+      "toSide": "right"
     },
     {
       "id": "e_da1e1feec8",
@@ -543,9 +546,9 @@
     {
       "id": "e_c1d6b57a83",
       "fromNode": "n_ef51286781",
-      "fromSide": "right",
+      "fromSide": "left",
       "toNode": "n_36f0e496b1",
-      "toSide": "left"
+      "toSide": "right"
     },
     {
       "id": "e_025fab9476",
@@ -571,9 +574,9 @@
     {
       "id": "e_e71403a789",
       "fromNode": "n_2d902a721c",
-      "fromSide": "right",
+      "fromSide": "left",
       "toNode": "n_1c7459d4ef",
-      "toSide": "left"
+      "toSide": "right"
     },
     {
       "id": "e_44cfcaa01f",
@@ -585,9 +588,9 @@
     {
       "id": "e_544d3387e4",
       "fromNode": "n_2d902a721c",
-      "fromSide": "right",
+      "fromSide": "left",
       "toNode": "n_836d7431d3",
-      "toSide": "left"
+      "toSide": "right"
     },
     {
       "id": "e_7d3ed695d4",
@@ -606,9 +609,9 @@
     {
       "id": "e_d058d07de7",
       "fromNode": "n_8227afe735",
-      "fromSide": "right",
+      "fromSide": "left",
       "toNode": "n_337f780578",
-      "toSide": "left"
+      "toSide": "right"
     },
     {
       "id": "e_f77e517308",
@@ -653,67 +656,39 @@
       "toSide": "top"
     },
     {
-      "id": "e_a762e97677",
+      "id": "e_96e75c32f9",
       "fromNode": "n_268761f2f7",
       "fromSide": "bottom",
-      "toNode": "n_69083fd598",
+      "toNode": "n_e8bf2810e3",
       "toSide": "top"
     },
     {
-      "id": "e_c9c3acd573",
-      "fromNode": "n_69083fd598",
+      "id": "e_444083db75",
+      "fromNode": "n_e8bf2810e3",
       "fromSide": "right",
-      "toNode": "n_53c391a283",
+      "toNode": "n_cff58d6dc6",
       "toSide": "left"
     },
     {
-      "id": "e_a753cd0d8f",
-      "fromNode": "n_69083fd598",
+      "id": "e_14eeec1feb",
+      "fromNode": "n_cff58d6dc6",
       "fromSide": "right",
-      "toNode": "n_ae8d4d47ca",
+      "toNode": "n_603797a9f1",
       "toSide": "left"
     },
     {
-      "id": "e_85be650b8f",
-      "fromNode": "n_69083fd598",
+      "id": "e_6b35809246",
+      "fromNode": "n_cff58d6dc6",
       "fromSide": "right",
-      "toNode": "n_f7732ede08",
+      "toNode": "n_5e107a36d8",
       "toSide": "left"
     },
     {
-      "id": "e_51e5dacc71",
-      "fromNode": "n_69083fd598",
-      "fromSide": "right",
-      "toNode": "n_d3e279620d",
-      "toSide": "left"
-    },
-    {
-      "id": "e_90e47cb0c3",
-      "fromNode": "n_d3e279620d",
-      "fromSide": "right",
-      "toNode": "n_5c824ca31b",
-      "toSide": "left"
-    },
-    {
-      "id": "e_11d9e31723",
-      "fromNode": "n_5c824ca31b",
-      "fromSide": "right",
-      "toNode": "n_df7aabb02b",
-      "toSide": "left"
-    },
-    {
-      "id": "e_94345e4246",
-      "fromNode": "n_5c824ca31b",
-      "fromSide": "right",
-      "toNode": "n_550a3ff8b8",
-      "toSide": "left"
-    },
-    {
-      "id": "e_f3b7b9c722",
-      "fromNode": "n_5c824ca31b",
-      "fromSide": "right",
-      "toNode": "n_981832293b",
-      "toSide": "left"
+      "id": "e_e7b015e05a",
+      "fromNode": "n_e8bf2810e3",
+      "fromSide": "left",
+      "toNode": "n_93bfc0ffdb",
+      "toSide": "right"
     }
   ]
 }

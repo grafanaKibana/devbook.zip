@@ -51,7 +51,7 @@ Consider the graphic at the top of this article, in which we are attempting to c
 
 ## Structure
 
-![11 AI-Showing Examples-20260210205142513.svg](11%20AI-Showing%20Examples-20260210205142513.svg)
+![11 AI & ML-Showing Examples-20260211012332470.svg](11%20AI%20&%20ML-Showing%20Examples-20260211012332470.svg)
 
 The way that we structure the examples is very important. Given that we have organised these three instances in an *input: classification* format, the model generates a single word following the final line, rather than outputting a complete sentence such as *this review is positive.*
 
@@ -173,3 +173,7 @@ In conclusion, few-shot prompting is an effective strategy that can guide the mo
 > Answer
 
 ## Further Reading
+
+- [Instruction Prompting](Knowledge/11 AI/Prompting/Techniques/Instruction Prompting/Instruction Prompting.md)
+- [Showing Examples](Knowledge/11 AI/Prompting/Techniques/Showing Examples/Showing Examples.md)
+- [Role Prompting](Knowledge/11 AI/Prompting/Techniques/Role Prompting/Role Prompting.md)

@@ -47,7 +47,7 @@ TABLE WITHOUT ID
   priority as "Priority",
   level as "Level"
 FROM "Knowledge"
-WHERE (status = "Creation" OR status = "Repetition" OR status = "Ready-To-Repeat")
+WHERE (status = "Creation" OR status = "Repetition" OR status = "Ready To Repeat")
   AND file.path != this.file.path
 SORT status ASC, priority DESC, file.name ASC
 ```
@@ -169,7 +169,7 @@ SORT file.folder ASC
 LIST WITHOUT ID link(file.path, regexreplace(file.folder, "^.*/", ""))
 WHERE regexmatch("^" + this.file.folder + "/[^/]+$", file.folder)
   AND file.name = regexreplace(file.folder, "^.*/", "")
-  AND (file.status = "Creation" OR file.status = "Repetition" OR file.status = "Ready-To-Repeat")
+  AND (file.status = "Creation" OR file.status = "Repetition" OR file.status = "Ready To Repeat")
   AND contains(file.tags, "#FolderNote")
 SORT file.folder ASC
 ```
@@ -260,7 +260,7 @@ SORT file.folder ASC
 LIST WITHOUT ID link(file.path, regexreplace(file.folder, "^.*/", ""))
 WHERE regexmatch("^" + this.file.folder + "/[^/]+$", file.folder)
   AND file.name = regexreplace(file.folder, "^.*/", "")
-  AND (file.status = "Creation" OR file.status = "Repetition" OR file.status = "Ready-To-Repeat")
+  AND (file.status = "Creation" OR file.status = "Repetition" OR file.status = "Ready To Repeat")
   AND contains(file.tags, "#FolderNote")
 SORT file.folder ASC
 ```

@@ -8,6 +8,26 @@
         "type": "tabs",
         "children": [
           {
+            "id": "f6ca6887fe59ce39",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Knowledge/01 Programming/01 Programming.md",
+                "mode": "preview",
+                "source": true
+              },
+              "icon": "lucide-file",
+              "title": "01 Programming"
+            }
+          }
+        ]
+      },
+      {
+        "id": "571adfa34c1c7218",
+        "type": "tabs",
+        "children": [
+          {
             "id": "ce7a72e482374127",
             "type": "leaf",
             "pinned": true,
@@ -16,32 +36,17 @@
               "state": {
                 "file": "Knowledge/Roadmap.canvas",
                 "viewState": {
-                  "x": 866.2491766994992,
-                  "y": 1389.169267064949,
-                  "zoom": -1.4661262712113055
+                  "x": 475.2663602627862,
+                  "y": 4660.522159811982,
+                  "zoom": -1.6387608791621517
                 }
               },
               "pinned": true,
               "icon": "lucide-layout-dashboard",
               "title": "Roadmap"
             }
-          },
-          {
-            "id": "f6ca6887fe59ce39",
-            "type": "leaf",
-            "state": {
-              "type": "split-diff-view",
-              "state": {
-                "aFile": "AGENTS.md",
-                "bFile": "AGENTS.md",
-                "aRef": ""
-              },
-              "icon": "diff",
-              "title": "Diff: AGENTS  (Working Tree)"
-            }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -104,7 +109,8 @@
               "title": "Bookmarks"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -124,7 +130,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Assets/11 AI/instruction_prompt.svg",
+                "file": "Knowledge/11 AI/Prompting/Techniques/Instruction Prompting/Instruction Prompting.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -134,7 +140,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for instruction_prompt"
+              "title": "Backlinks for Instruction Prompting"
             }
           },
           {
@@ -143,12 +149,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Assets/11 AI/instruction_prompt.svg",
+                "file": "Knowledge/11 AI/Prompting/Techniques/Instruction Prompting/Instruction Prompting.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from instruction_prompt"
+              "title": "Outgoing links from Instruction Prompting"
             }
           },
           {
@@ -186,13 +192,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Assets/11 AI/instruction_prompt.svg",
+                "file": "Knowledge/11 AI/Prompting/Techniques/Instruction Prompting/Instruction Prompting.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of instruction_prompt"
+              "title": "Outline of Instruction Prompting"
             }
           },
           {
@@ -228,74 +234,37 @@
       "notebook-navigator:Notebook Navigator": true
     }
   },
-  "floating": {
-    "id": "ba27201698520335",
-    "type": "floating",
-    "children": [
-      {
-        "id": "a1c2fdf4d140686e",
-        "type": "window",
-        "children": [
-          {
-            "id": "abc64d66fffbe995",
-            "type": "tabs",
-            "children": [
-              {
-                "id": "2ffecf2e73e52cb4",
-                "type": "leaf",
-                "state": {
-                  "type": "webviewer",
-                  "state": {
-                    "url": "https://obsidian.md/account/billing",
-                    "title": "Account - Obsidian",
-                    "mode": "webview"
-                  },
-                  "icon": "globe-2",
-                  "title": "Account - Obsidian"
-                }
-              }
-            ]
-          }
-        ],
-        "direction": "vertical",
-        "x": 244,
-        "y": 35,
-        "width": 1024,
-        "height": 800,
-        "maximize": false,
-        "zoom": 0
-      }
-    ]
-  },
-  "active": "6cdf1810372ad7f9",
+  "active": "f6ca6887fe59ce39",
   "lastOpenFiles": [
+    "Knowledge/11 AI & ML/LLM/Prompting/Showing Examples.md",
+    "Knowledge/11 AI & ML/LLM/Prompting/Techniques/Techniques.md",
+    "Knowledge/11 AI & ML/Machine Learning/Types.md",
+    "Knowledge/11 AI & ML/LLM/Agents/Mental Framework.md",
+    "Knowledge/11 AI & ML/LLM/Agents/Agents.md",
+    "Assets/11 AI & ML/11 AI & ML.md",
+    "Knowledge/Knowledge.md",
+    "Assets/11 AI & ML",
+    "Knowledge/11 AI & ML/LLM/Prompting/Instruction Prompting.md",
+    "Knowledge/11 AI & ML/LLM/Prompting/Prompting.md",
+    "Knowledge/11 AI & ML/LLM/Prompting/Role Prompting.md",
+    "Templates/Template - Concept Page.md",
+    "Templates/Templates.md",
+    "Knowledge/01 Programming/01 Programming.md",
+    "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Quick Sort.md",
+    "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms.md",
     "Knowledge/Roadmap.canvas",
+    "Knowledge/02 Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
     "untitled folder/untitled folder.md",
     "untitled folder",
-    "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Quick Sort.md",
     "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Merge Sort.md",
-    "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms.md",
     "Knowledge/02 Computer Science/Algorithms/Complexity/Complexity.md",
     "Knowledge/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set.md",
     "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Insertion Sort.md",
     "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Selection Sort.md",
     "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Bubble Sort.md",
-    "Knowledge/02 Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
     "Knowledge/03 Data Persistance/ORMs/Entity Framework.md",
     "Knowledge/03 Data Persistance/ORMs/ORMs.md",
     "Knowledge/02 Computer Science/Algorithms/Complexity/Algorithms Complexity.md",
-    "Knowledge/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set Union-Find.md",
-    "Knowledge/02 Computer Science/Algorithms/String Searching/Rabit Karp Search.md",
-    "Knowledge/02 Computer Science/Algorithms/String Searching/KMP (Knuth-Morris-Pratt) Algorithm.md",
-    "Knowledge/02 Computer Science/Algorithms/String Searching/String Searching.md",
-    "Knowledge/05 Architecture/Application Architecture/Application Architecture.md",
-    "Knowledge/06 Patterns & Practices/Paradigms & Practices/Paradigms & Practices.md",
-    "Knowledge/11 AI/11 AI.md",
-    "Knowledge/10 Cloud/10 Cloud.md",
-    "Knowledge/09 DevOps/09 DevOps.md",
-    "Knowledge/07 Security/07 Security.md",
-    "Knowledge/07 Security/Basic Auth.md",
-    "Knowledge/06 Patterns & Practices/Principles/Principles.md",
     "Knowledge/06 Patterns & Practices/Paradigms & Practices",
     "Knowledge/06 Patterns & Practices/Patterns",
     "Knowledge/06 Patterns & Practices/Principles",
@@ -304,14 +273,13 @@
     "Knowledge/05 Architecture/Application Architecture",
     "Knowledge/05 Architecture/Architecture Styles",
     "Knowledge/04 Networks/Architecture & Ops",
-    "Knowledge/04 Networks/Protocols",
     "Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205142069.png",
     "Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205141994.png",
     "Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205142050.png",
-    "Assets/11 AI/11 AI-Instruction Prompting-20260210205142433.svg",
-    "Assets/11 AI/11 AI-Role Prompting-20260210205142493.svg",
-    "Assets/11 AI/11 AI-LLM-20260210205142384.png",
-    "Assets/11 AI/11 AI-Showing Examples-20260210205142513.svg",
+    "Assets/11 AI & ML/11 AI & ML-Instruction Prompting-20260211012332406.svg",
+    "Assets/11 AI & ML/11 AI & ML-Role Prompting-20260211012332438.svg",
+    "Assets/11 AI & ML/11 AI & ML-LLM-20260211012223477.png",
+    "Assets/11 AI & ML/11 AI & ML-Showing Examples-20260211012332470.svg",
     "Assets/01 Programming/01 Programming-Common Language Runtime-20260210212705669.png",
     "Assets/01 Programming/01 Programming-Types-20260210212705765.png",
     "Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205142027.png",

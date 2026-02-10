@@ -39,6 +39,6 @@ status: Not-Started
 
 ## References and Further Reading
 
-- https://learn.deeplearning.ai/courses/multi-ai-agent-systems-with-crewai/lesson/fkfya/mental-framework-for-agent-creation
+
 
 ## Further Reading
