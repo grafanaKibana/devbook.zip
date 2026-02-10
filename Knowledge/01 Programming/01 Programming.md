@@ -1,14 +1,15 @@
 ---
 topic: []
 subtopic: []
-level: ["1"]
+level:
+  - "1"
 priority: medium
 status: Not-Started
 aliases:
   - Programming
-
 tags:
   - FolderNote
+color: "#d946ef"
 ---
 ## Parent
 :LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`

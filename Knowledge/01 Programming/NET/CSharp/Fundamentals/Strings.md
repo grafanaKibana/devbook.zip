@@ -8,11 +8,6 @@ status: Not-Started
 ## Parent
 :LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 ---
-## Intro
-
-## Deeper Explanation
-
-# Overview
 
 > **9.2.5 The string type**
 > 

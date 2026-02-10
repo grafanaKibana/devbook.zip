@@ -164,8 +164,8 @@
   "frontmatterCreatedField": "",
   "frontmatterModifiedField": "",
   "frontmatterDateFormat": "",
-  "saveMetadataToFrontmatter": false,
-  "showFileIcons": true,
+  "saveMetadataToFrontmatter": true,
+  "showFileIcons": false,
   "showFilenameMatchIcons": false,
   "fileNameIconMap": {},
   "showCategoryIcons": false,
@@ -359,9 +359,7 @@
   "customVaultName": "",
   "pinnedNotes": {},
   "fileIcons": {},
-  "fileColors": {
-    "Knowledge/01 Programming/01 Programming.md": "#d946ef"
-  },
+  "fileColors": {},
   "folderIcons": {
     "Templates": "book-dashed",
     "Knowledge": "book",
