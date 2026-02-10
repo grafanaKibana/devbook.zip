@@ -68,7 +68,7 @@ CLR (Common Language Runtime) - это часть .NET Framework (или .NET Co
 
 Процесс запуска .NET-приложения и его выполнения под управлением CLR включает несколько ключевых шагов. Ниже представлен общий обзор этого процесса:
 
-![Untitled](Assets/01%20Programming/Untitled.png)
+![01 Programming-Common Language Runtime-20260210204916560](01%20Programming-Common%20Language%20Runtime-20260210204916560.png)
 
 1. **Компиляция исходного кода:**
     - После написания кода на языках, совместимых с .NET (например, C#), исходный код компилируется в промежуточный язык (IL - Intermediate Language, CIL - Common Intermediate Language, MSIL - Microsoft Intermediate Language). Это делается компилятором языка на котором написан код (например, C# компилятором - **`csc`**).

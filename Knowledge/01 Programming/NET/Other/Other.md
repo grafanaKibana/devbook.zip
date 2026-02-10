@@ -1,15 +1,9 @@
 ---
-topic: ["Programming"]
-subtopic: ["NET"]
-level: ["1"]
-priority: medium
-status: Not-Started
 tags:
-  - FolderNote
+  - Template
 ---
 ## Parent
 :LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
-
 ```dataviewjs
 const cur = dv.current();
 const curFolder = cur.file.folder;
@@ -41,9 +35,16 @@ if (pages.length) {
 }
 ```
 ---
+---
+## Intro
+
+## Deeper Explanation
+
+## Questions
+
+> [!QUESTION]- What is abc?
+> Answer
 
 ## Further Reading
-
-- [Тонкости C# : то что вы всегда хотели знать, но боялись спросить \| DOU](https://dou.ua/forums/topic/33214/)
-- [Заблуждения начинающих C# разработчиков. Пытаемся ответить на стандартные вопросы / Хабр](https://habr.com/ru/articles/463213/)
-- [Популярные заблуждения о C# / Хабр](https://habr.com/ru/post/541786/)
+- [Link 1](URL)
+- [Link 2](URL)
