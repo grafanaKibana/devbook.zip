@@ -2,12 +2,19 @@
 topic: []
 subtopic: []
 level:
-  - 1
-priority: medium
+  - "1"
+  - "2"
+  - "3"
+  - "4"
+priority:
+  - low
+  - medium
+  - high
 status: Not-Started
 tags:
   - Template
 ---
+# <% tp.file.title %>
 :LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 ## Intro
 
