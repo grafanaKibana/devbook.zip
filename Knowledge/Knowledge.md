@@ -7,7 +7,6 @@ status: Not-Started
 tags:
   - FolderNote
 ---
-
 ## All Topics (Database View)
 
 ```dataview
