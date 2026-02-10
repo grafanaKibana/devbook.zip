@@ -37,7 +37,7 @@
                 "file": "Knowledge/Roadmap.canvas",
                 "viewState": {
                   "x": 526.6470730228036,
-                  "y": 583.073354480661,
+                  "y": 814.7536592894667,
                   "zoom": -0.6387608791621517
                 }
               },
@@ -236,6 +236,7 @@
   },
   "active": "f6ca6887fe59ce39",
   "lastOpenFiles": [
+    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md",
     "Knowledge/Roadmap.canvas",
     "Knowledge/01 Programming/01 Programming.md",
     "Knowledge/11 AI & ML/LLM/Prompting/Showing Examples.md",

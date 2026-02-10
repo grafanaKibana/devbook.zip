@@ -80,18 +80,53 @@ def read_frontmatter_status(abs_path):
             first = f.readline()
             if first.strip() != "---":
                 return None
+            in_status_block = False
             for line in f:
-                s = line.strip()
-                if s == "---":
+                s = line.rstrip("\n")
+                stripped = s.strip()
+                if stripped == "---":
                     break
-                if not s.lower().startswith("status:"):
+
+                if in_status_block:
+                    st = stripped
+                    if not st:
+                        continue
+
+                    # Handle list-form status:
+                    # status:\n  - Done
+                    if st.startswith("-"):
+                        v = st[1:].strip()
+                        if (v.startswith('"') and v.endswith('"')) or (
+                            v.startswith("'") and v.endswith("'")
+                        ):
+                            v = v[1:-1]
+                        return v or None
+
+                    # Stop if we hit another key.
+                    if ":" in st:
+                        break
                     continue
-                v = s.split(":", 1)[1].strip()
-                if (v.startswith('"') and v.endswith('"')) or (
-                    v.startswith("'") and v.endswith("'")
-                ):
-                    v = v[1:-1]
-                return v or None
+
+                if not stripped.lower().startswith("status:"):
+                    continue
+
+                v = stripped.split(":", 1)[1].strip()
+
+                # status: Done
+                if v:
+                    if v.startswith("[") and v.endswith("]"):
+                        inner = v[1:-1].strip()
+                        if inner:
+                            first_item = inner.split(",", 1)[0].strip()
+                            v = first_item
+                    if (v.startswith('"') and v.endswith('"')) or (
+                        v.startswith("'") and v.endswith("'")
+                    ):
+                        v = v[1:-1]
+                    return v or None
+
+                # status: (with value on following lines)
+                in_status_block = True
     except (FileNotFoundError, UnicodeDecodeError, OSError):
         return None
     return None
