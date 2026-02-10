@@ -16,9 +16,9 @@
               "state": {
                 "file": "Knowledge/Roadmap.canvas",
                 "viewState": {
-                  "x": 563.9581691567846,
-                  "y": 2721.041639569566,
-                  "zoom": -1.7279780607856
+                  "x": 371.22091330873053,
+                  "y": 516.9442838152968,
+                  "zoom": -2.5012541114724365
                 }
               },
               "pinned": true,
@@ -30,14 +30,14 @@
             "id": "313cc04bb8867a35",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "split-diff-view",
               "state": {
-                "file": "Templates/Template - Index.md",
-                "mode": "source",
-                "source": false
+                "aFile": "Knowledge/01 Programming/NET/Other/Other.md",
+                "bFile": "Knowledge/01 Programming/NET/Other/Other.md",
+                "aRef": ""
               },
-              "icon": "lucide-file",
-              "title": "Template - Index"
+              "icon": "diff",
+              "title": "Diff: Other  (Working Tree)"
             }
           }
         ],
@@ -270,6 +270,9 @@
   },
   "active": "313cc04bb8867a35",
   "lastOpenFiles": [
+    "Knowledge/11 AI/Model Context Protocol.md",
+    "Templates/Template - Index.md",
+    "Knowledge/Roadmap.canvas",
     "Knowledge/05 Architecture/Distributed Systems/IaaS, PaaS, SaaS, CaaS.md",
     "Knowledge/05 Architecture/Distributed Systems/REST.md",
     "Knowledge/05 Architecture/Distributed Systems/Message Queues.md",
@@ -287,7 +290,6 @@
     "Knowledge/05 Architecture/Architecture Styles/Microservices.md",
     "Knowledge/05 Architecture/Architecture Styles/Monolith Architecture.md",
     "Templates/Template - Concept Page.md",
-    "Templates/Template - Index.md",
     "Knowledge/05 Architecture/Architecture Styles/Architecture Styles.md",
     "Knowledge/05 Architecture/Distributed Systems/Distributed Systems.md",
     "Knowledge/05 Architecture/Patterns/Patterns.md",
@@ -295,12 +297,10 @@
     "Knowledge/05 Architecture/Distributed Systems",
     "Knowledge/05 Architecture/Patterns",
     "Knowledge/05 Architecture/Application Architecture",
-    "Knowledge/Roadmap.canvas",
     "Knowledge/05 Architecture/Architecture Styles",
     "Knowledge/04 Networks/Architecture & Ops/Peer-2-Peer.md",
     "Knowledge/04 Networks/Architecture & Ops/VPN.md",
     "Knowledge/04 Networks/Protocols/gRPC.md",
-    "Knowledge/04 Networks/Protocols/RPC.md",
     "Knowledge/04 Networks/Architecture & Ops",
     "Knowledge/04 Networks/Protocols",
     "Knowledge/04 Networks/Transport & Sockets",

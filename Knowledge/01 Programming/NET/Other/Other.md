@@ -35,7 +35,6 @@ if (pages.length) {
 }
 ```
 ---
----
 ## Intro
 
 ## Deeper Explanation

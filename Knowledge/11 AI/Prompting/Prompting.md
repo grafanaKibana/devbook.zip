@@ -43,7 +43,6 @@ if (pages.length) {
 }
 ```
 ---
----
 ## Intro
 
 Prompts play a key role in the process of generating useful and accurate information from AI language models. Given below are some of the reasons why “Prompt Engineering” or learning how to write better prompts is important.
