@@ -36,9 +36,9 @@
               "state": {
                 "file": "Knowledge/Roadmap.canvas",
                 "viewState": {
-                  "x": 475.2663602627862,
-                  "y": 4660.522159811982,
-                  "zoom": -1.6387608791621517
+                  "x": 526.6470730228036,
+                  "y": 583.073354480661,
+                  "zoom": -0.6387608791621517
                 }
               },
               "pinned": true,
@@ -236,6 +236,8 @@
   },
   "active": "f6ca6887fe59ce39",
   "lastOpenFiles": [
+    "Knowledge/Roadmap.canvas",
+    "Knowledge/01 Programming/01 Programming.md",
     "Knowledge/11 AI & ML/LLM/Prompting/Showing Examples.md",
     "Knowledge/11 AI & ML/LLM/Prompting/Techniques/Techniques.md",
     "Knowledge/11 AI & ML/Machine Learning/Types.md",
@@ -249,10 +251,8 @@
     "Knowledge/11 AI & ML/LLM/Prompting/Role Prompting.md",
     "Templates/Template - Concept Page.md",
     "Templates/Templates.md",
-    "Knowledge/01 Programming/01 Programming.md",
     "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Quick Sort.md",
     "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms.md",
-    "Knowledge/Roadmap.canvas",
     "Knowledge/02 Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
     "untitled folder/untitled folder.md",
     "untitled folder",
@@ -264,7 +264,6 @@
     "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Bubble Sort.md",
     "Knowledge/03 Data Persistance/ORMs/Entity Framework.md",
     "Knowledge/03 Data Persistance/ORMs/ORMs.md",
-    "Knowledge/02 Computer Science/Algorithms/Complexity/Algorithms Complexity.md",
     "Knowledge/06 Patterns & Practices/Paradigms & Practices",
     "Knowledge/06 Patterns & Practices/Patterns",
     "Knowledge/06 Patterns & Practices/Principles",
