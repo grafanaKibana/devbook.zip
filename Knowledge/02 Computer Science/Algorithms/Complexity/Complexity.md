@@ -1,12 +1,9 @@
 ---
-topic: []
-subtopic: []
-level:
-  - "1"
+topic: ["Computer Science"]
+subtopic: ["Algorithms"]
+level: ["1"]
 priority: medium
 status: Not-Started
-aliases:
-  - Programming
 tags:
   - FolderNote
 ---
@@ -44,3 +41,13 @@ if (pages.length) {
 }
 ```
 ---
+## Intro
+
+## Deeper Explanation
+
+## Questions
+
+> [!QUESTION]- What is abc?
+> Answer
+
+## Further Reading

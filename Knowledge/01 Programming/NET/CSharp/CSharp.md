@@ -41,7 +41,6 @@ if (pages.length) {
 }
 ```
 ---
-
 ## Further Reading
 
 - [Тонкости C# : то что вы всегда хотели знать, но боялись спросить \| DOU](https://dou.ua/forums/topic/33214/)

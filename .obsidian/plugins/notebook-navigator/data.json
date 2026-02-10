@@ -11,7 +11,12 @@
       "hiddenFileProperties": [],
       "navigationBanner": null,
       "periodicNotesFolder": "",
-      "shortcuts": []
+      "shortcuts": [
+        {
+          "type": "note",
+          "path": "Knowledge/Roadmap.canvas"
+        }
+      ]
     }
   ],
   "vaultProfile": "default",
@@ -44,7 +49,7 @@
   "enterToOpenFiles": false,
   "shiftEnterOpenContext": "tab",
   "cmdCtrlEnterOpenContext": "split",
-  "startView": "files",
+  "startView": "navigation",
   "interfaceIcons": {},
   "homepage": "Knowledge/Knowledge.md",
   "mobileHomepage": null,
@@ -112,11 +117,11 @@
   "showNoteCount": true,
   "separateNoteCounts": true,
   "rootLevelSpacing": 0,
-  "navIndent": 16,
-  "navItemHeight": 28,
+  "navIndent": 12,
+  "navItemHeight": 24,
   "navItemHeightScaleText": true,
   "autoSelectFirstFileOnFocusChange": true,
-  "autoExpandFoldersTags": false,
+  "autoExpandFoldersTags": true,
   "springLoadedFolders": true,
   "springLoadedFoldersInitialDelay": 0.5,
   "springLoadedFoldersSubsequentDelay": 0.5,
@@ -149,7 +154,7 @@
   "showPinnedGroupHeader": true,
   "showPinnedIcon": true,
   "optimizeNoteHeight": true,
-  "compactItemHeight": 28,
+  "compactItemHeight": 24,
   "compactItemHeightScaleText": true,
   "showQuickActions": true,
   "quickActionRevealInFolder": false,
@@ -201,7 +206,7 @@
   "externalIconProviders": {
     "fontawesome-solid": false
   },
-  "searchProvider": "internal",
+  "searchProvider": "omnisearch",
   "keyboardShortcuts": {
     "pane:move-up": [
       {

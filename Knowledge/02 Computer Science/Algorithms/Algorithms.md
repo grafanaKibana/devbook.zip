@@ -49,19 +49,31 @@ if (pages.length) {
 
 [8 Common Data Structures every Programmer must know](https://towardsdatascience.com/8-common-data-structures-every-programmer-must-know-171acf6a1a42)
 
-[Algorithms Complexity](Knowledge/02 Computer Science/Algorithms/Algorithms Complexity.md)
+### Complexity
 
-[Sorting Algorithms](Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms.md)
+- [Complexity](Knowledge/02 Computer Science/Algorithms/Complexity/Complexity.md)
+- [Algorithms Complexity](Knowledge/02 Computer Science/Algorithms/Complexity/Algorithms Complexity.md)
 
-[Dijkstra](Knowledge/02 Computer Science/Algorithms/Dijkstra.md)
+### Sorting
 
-[DFS/BFS](Knowledge/02 Computer Science/Algorithms/DFS BFS.md)
+- [Sorting Algorithms](Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms.md)
 
-[Rabit Karp Search](Knowledge/02 Computer Science/Algorithms/Rabit Karp Search.md)
+### Graph
 
-[KMP (Knuth-Morris-Pratt) Algorithm](Knowledge/02 Computer Science/Algorithms/KMP (Knuth-Morris-Pratt) Algorithm.md)
+- [Graph Algorithms](Knowledge/02 Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md)
+- [DFS/BFS](Knowledge/02 Computer Science/Algorithms/Graph Algorithms/DFS BFS.md)
+- [Dijkstra](Knowledge/02 Computer Science/Algorithms/Graph Algorithms/Dijkstra.md)
 
-[Disjoint Set / Union-Find](Knowledge/02 Computer Science/Algorithms/Disjoint Set Union-Find.md)
+### String Searching
+
+- [String Searching](Knowledge/02 Computer Science/Algorithms/String Searching/String Searching.md)
+- [Rabit Karp Search](Knowledge/02 Computer Science/Algorithms/String Searching/Rabit Karp Search.md)
+- [KMP (Knuth-Morris-Pratt) Algorithm](Knowledge/02 Computer Science/Algorithms/String Searching/KMP (Knuth-Morris-Pratt) Algorithm.md)
+
+### Disjoint Set
+
+- [Disjoint Set](Knowledge/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set.md)
+- [Disjoint Set / Union-Find](Knowledge/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set Union-Find.md)
 
 ## Questions
 

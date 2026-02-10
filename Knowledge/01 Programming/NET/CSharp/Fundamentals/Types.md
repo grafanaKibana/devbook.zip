@@ -49,7 +49,7 @@ if (pages.length) {
 
 In C#, types define the kind of data that variables can hold, how much memory they occupy, and what operations can be performed on them. The C# type system is unified, meaning that all types, including primitives, share a common base type`(object`). This unified type system enables powerful features like polymorphism, type safety, and LINQ, while still allowing for high-performance code.
 
-![01 Programming-Types-20260210210600220.png](01%20Programming-Types-20260210210600220.png)
+![01 Programming-Types-20260210212705765.png](01%20Programming-Types-20260210212705765.png)
 
 ## Class vs Structure
 

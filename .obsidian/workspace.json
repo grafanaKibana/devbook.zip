@@ -11,14 +11,17 @@
             "id": "ce7a72e482374127",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
+              "type": "canvas",
               "state": {
-                "aFile": ".obsidian/plugins/notebook-navigator/data.json",
-                "bFile": ".obsidian/plugins/notebook-navigator/data.json",
-                "aRef": ""
+                "file": "Knowledge/Roadmap.canvas",
+                "viewState": {
+                  "x": 886.1455064977768,
+                  "y": 830.8583667781614,
+                  "zoom": -2.5750749458309703
+                }
               },
-              "icon": "diff",
-              "title": "Diff: data.json  (Working Tree)"
+              "icon": "lucide-layout-dashboard",
+              "title": "Roadmap"
             }
           }
         ]
@@ -89,7 +92,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 370.5
+    "width": 456.5
   },
   "right": {
     "id": "3a29a9e8dc8d7cc5",
@@ -209,54 +212,94 @@
       "notebook-navigator:Notebook Navigator": true
     }
   },
-  "active": "ce7a72e482374127",
+  "floating": {
+    "id": "ba27201698520335",
+    "type": "floating",
+    "children": [
+      {
+        "id": "a1c2fdf4d140686e",
+        "type": "window",
+        "children": [
+          {
+            "id": "abc64d66fffbe995",
+            "type": "tabs",
+            "children": [
+              {
+                "id": "2ffecf2e73e52cb4",
+                "type": "leaf",
+                "state": {
+                  "type": "webviewer",
+                  "state": {
+                    "url": "https://obsidian.md/account/billing",
+                    "title": "Account - Obsidian",
+                    "mode": "webview"
+                  },
+                  "icon": "globe-2",
+                  "title": "Account - Obsidian"
+                }
+              }
+            ]
+          }
+        ],
+        "direction": "vertical",
+        "x": 244,
+        "y": 35,
+        "width": 1024,
+        "height": 800,
+        "maximize": false,
+        "zoom": 0
+      }
+    ]
+  },
+  "active": "4ecbdb0726a22257",
   "lastOpenFiles": [
-    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Async Await.md",
-    "Knowledge/01 Programming/NET/NET.md",
-    "Knowledge/11 AI/Agents/Mental Framework.md",
-    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Strings.md",
-    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md",
-    "AGENTS.md",
-    "Строковый.md",
-    "Knowledge/01 Programming/NET/CSharp/CSharp.md",
-    "Knowledge/01 Programming/NET/ASP.NET Web API.md",
-    "Knowledge/01 Programming/NET/C.md",
-    "Knowledge/01 Programming/01 Programming.md",
-    "Knowledge/03 Data Persistance/ACID.md",
     "Knowledge/Knowledge.md",
-    "Assets/Assets.md",
+    "Knowledge/03 Data Persistance/ORMs/Entity Framework.md",
+    "Knowledge/03 Data Persistance/ORMs/ORMs.md",
+    "Knowledge/01 Programming/NET/Runtime/Runtime.md",
+    "Knowledge/01 Programming/NET/Other/Other.md",
+    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md",
+    "Knowledge/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set.md",
+    "Knowledge/02 Computer Science/Algorithms/Complexity/Complexity.md",
+    "Knowledge/02 Computer Science/Algorithms/String Searching/String Searching.md",
+    "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms.md",
+    "Knowledge/02 Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
+    "Knowledge/01 Programming/01 Programming.md",
+    "Knowledge/01 Programming/NET/NET.md",
+    "Knowledge/Roadmap.canvas",
+    "Knowledge/01 Programming/NET/ASP.NET Web API.md",
+    "Knowledge/02 Computer Science/Algorithms/Algorithms.md",
+    "Knowledge/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set Union-Find.md",
+    "Knowledge/02 Computer Science/Algorithms/Disjoint Set",
+    "Knowledge/02 Computer Science/Algorithms/String Searching/Rabit Karp Search.md",
+    "Knowledge/02 Computer Science/Algorithms/String Searching/KMP (Knuth-Morris-Pratt) Algorithm.md",
+    "Knowledge/02 Computer Science/Algorithms/String Searching",
+    "Knowledge/02 Computer Science/Algorithms/Graph Algorithms/Dijkstra.md",
+    "Knowledge/02 Computer Science/Algorithms/Graph Algorithms/DFS BFS.md",
+    "Knowledge/02 Computer Science/Algorithms/Graph Algorithms",
+    "Knowledge/02 Computer Science/Algorithms/Complexity/Algorithms Complexity.md",
+    "Knowledge/02 Computer Science/Algorithms/Complexity",
+    "Knowledge/02 Computer Science/Algorithms/Algorithms Complexity.md",
+    "Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205142069.png",
+    "Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205141994.png",
+    "Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205142050.png",
+    "Assets/03 Data Persistance/03 Data Persistance.md",
+    "Assets/11 AI/11 AI.md",
     "Assets/11 AI/11 AI-Instruction Prompting-20260210205142433.svg",
     "Assets/11 AI/11 AI-Role Prompting-20260210205142493.svg",
     "Assets/11 AI/11 AI-LLM-20260210205142384.png",
-    "Assets/11 AI/11 AI-Showing Examples-20260210205142513.svg",
-    "Knowledge/01 Programming/NET/Runtime/Runtime.md",
-    "Knowledge/01 Programming/NET/Runtime/Memory Leaks.md",
-    "Knowledge/01 Programming/NET/Runtime/Common Language Runtime.md",
-    "Knowledge/01 Programming/NET/Runtime/Garbage Collector.md",
-    "Knowledge/01 Programming/NET/Other/Other.md",
-    "Knowledge/01 Programming/NET/Other/OWIN.md",
-    "Knowledge/01 Programming/NET/Other",
-    "Knowledge/01 Programming/NET/NET Standart.md",
-    "Assets/11 AI/11 AI.md",
-    "Assets/03 Data Persistance/03 Data Persistance.md",
     "Assets/01 Programming/01 Programming.md",
-    "Knowledge/03 Data Persistance/SQL/Indexes/Indexes.md",
-    "Knowledge/03 Data Persistance/ORMs/ORMs.md",
-    "Assets/01 Programming/01 Programming-Common Language Runtime-20260210205141904.png",
-    "Assets/01 Programming/01 Programming-Types-20260210210600220.png",
-    "Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205141994.png",
-    "Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205142069.png",
-    "Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205142050.png",
+    "Knowledge/02 Computer Science/02 Computer Science.md",
+    "Assets/11 AI/11 AI-Showing Examples-20260210205142513.svg",
+    "Knowledge/01 Programming/NET/Other",
+    "Assets/01 Programming/01 Programming-Common Language Runtime-20260210212705669.png",
+    "Assets/01 Programming/01 Programming-Types-20260210212705765.png",
     "Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205142027.png",
     "Knowledge/11 AI/Prompting/Techniques/Showing Examples/Assets/11 AI",
     "Knowledge/11 AI/Prompting/Techniques/Showing Examples/Assets",
     "Knowledge/11 AI/Prompting/Techniques/Role Prompting/Assets/11 AI",
     "Knowledge/11 AI/Prompting/Techniques/Role Prompting/Assets",
     "Knowledge/11 AI/Prompting/Techniques/Instruction Prompting/Assets/11 AI",
-    "Knowledge/11 AI/Prompting/Techniques/Instruction Prompting/Assets",
-    "Knowledge/11 AI/LLM/Assets/11 AI",
-    "Knowledge/11 AI/LLM/Assets",
-    "Knowledge/03 Data Persistance/SQL/Indexes/Assets/03 Data Persistance",
     "Untitled.canvas"
   ]
 }

@@ -1,0 +1,559 @@
+{
+  "nodes": [
+    {
+      "id": "n_dd262f49bf",
+      "type": "file",
+      "file": "Knowledge/01 Programming/01 Programming.md",
+      "x": 0,
+      "y": 0,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_d4081e45fb",
+      "type": "file",
+      "file": "Knowledge/01 Programming/NET/NET.md",
+      "x": 420,
+      "y": 0,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_1bfb35c3aa",
+      "type": "file",
+      "file": "Knowledge/01 Programming/NET/CSharp/CSharp.md",
+      "x": 840,
+      "y": 120,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_5b132671e7",
+      "type": "file",
+      "file": "Knowledge/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md",
+      "x": 1260,
+      "y": 240,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_4395a9e75e",
+      "type": "file",
+      "file": "Knowledge/01 Programming/NET/Other/Other.md",
+      "x": 840,
+      "y": 360,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_eb0c42d3c0",
+      "type": "file",
+      "file": "Knowledge/01 Programming/NET/Runtime/Runtime.md",
+      "x": 840,
+      "y": 480,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_ebcb435eb2",
+      "type": "file",
+      "file": "Knowledge/02 Computer Science/02 Computer Science.md",
+      "x": 0,
+      "y": 820,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_3a1362b179",
+      "type": "file",
+      "file": "Knowledge/02 Computer Science/Algorithms/Algorithms.md",
+      "x": 420,
+      "y": 820,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_7360aedba6",
+      "type": "file",
+      "file": "Knowledge/02 Computer Science/Algorithms/Complexity/Complexity.md",
+      "x": 840,
+      "y": 940,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_c54b6fadf2",
+      "type": "file",
+      "file": "Knowledge/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set.md",
+      "x": 840,
+      "y": 1060,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_d0ca6038f7",
+      "type": "file",
+      "file": "Knowledge/02 Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
+      "x": 840,
+      "y": 1180,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_a6dc892c7f",
+      "type": "file",
+      "file": "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms.md",
+      "x": 840,
+      "y": 1300,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_93b9ffc044",
+      "type": "file",
+      "file": "Knowledge/02 Computer Science/Algorithms/String Searching/String Searching.md",
+      "x": 840,
+      "y": 1420,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_ab2b58d449",
+      "type": "file",
+      "file": "Knowledge/02 Computer Science/Data Structures/Data Structures.md",
+      "x": 420,
+      "y": 1540,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_8fc82b07cf",
+      "type": "file",
+      "file": "Knowledge/03 Data Persistance/03 Data Persistance.md",
+      "x": 0,
+      "y": 1880,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_a4212fc406",
+      "type": "file",
+      "file": "Knowledge/03 Data Persistance/ORMs/ORMs.md",
+      "x": 420,
+      "y": 1880,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_d026450ac5",
+      "type": "file",
+      "file": "Knowledge/03 Data Persistance/SQL/SQL.md",
+      "x": 420,
+      "y": 2000,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_a79b2e14f8",
+      "type": "file",
+      "file": "Knowledge/03 Data Persistance/SQL/Indexes/Indexes.md",
+      "x": 840,
+      "y": 2120,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_ef51286781",
+      "type": "file",
+      "file": "Knowledge/04 Networks/04 Networks.md",
+      "x": 0,
+      "y": 2460,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_2d902a721c",
+      "type": "file",
+      "file": "Knowledge/05 Architecture/05 Architecture.md",
+      "x": 0,
+      "y": 2760,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_8227afe735",
+      "type": "file",
+      "file": "Knowledge/06 Patterns & Practices/06 Patterns & Practices.md",
+      "x": 0,
+      "y": 3060,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_5c16a9eace",
+      "type": "file",
+      "file": "Knowledge/07 Security/07 Security.md",
+      "x": 0,
+      "y": 3360,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_215ff47b7f",
+      "type": "file",
+      "file": "Knowledge/08 SDLC/08 SDLC.md",
+      "x": 0,
+      "y": 3660,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_9a76cd745d",
+      "type": "file",
+      "file": "Knowledge/09 DevOps/09 DevOps.md",
+      "x": 0,
+      "y": 3960,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_cf0ddb3d9c",
+      "type": "file",
+      "file": "Knowledge/09 DevOps/Deployment Stratagies/Deployment Stratagies.md",
+      "x": 420,
+      "y": 3960,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_268761f2f7",
+      "type": "file",
+      "file": "Knowledge/10 Cloud/10 Cloud.md",
+      "x": 0,
+      "y": 4300,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_69083fd598",
+      "type": "file",
+      "file": "Knowledge/11 AI/11 AI.md",
+      "x": 0,
+      "y": 4600,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_53c391a283",
+      "type": "file",
+      "file": "Knowledge/11 AI/Agents/Agents.md",
+      "x": 420,
+      "y": 4600,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_ae8d4d47ca",
+      "type": "file",
+      "file": "Knowledge/11 AI/LLM/LLM.md",
+      "x": 420,
+      "y": 4720,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_f7732ede08",
+      "type": "file",
+      "file": "Knowledge/11 AI/Machine Learning/Machine Learning.md",
+      "x": 420,
+      "y": 4840,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_d3e279620d",
+      "type": "file",
+      "file": "Knowledge/11 AI/Prompting/Prompting.md",
+      "x": 420,
+      "y": 4960,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_5c824ca31b",
+      "type": "file",
+      "file": "Knowledge/11 AI/Prompting/Techniques/Techniques.md",
+      "x": 840,
+      "y": 5080,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_df7aabb02b",
+      "type": "file",
+      "file": "Knowledge/11 AI/Prompting/Techniques/Instruction Prompting/Instruction Prompting.md",
+      "x": 1260,
+      "y": 5200,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_550a3ff8b8",
+      "type": "file",
+      "file": "Knowledge/11 AI/Prompting/Techniques/Role Prompting/Role Prompting.md",
+      "x": 1260,
+      "y": 5320,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_981832293b",
+      "type": "file",
+      "file": "Knowledge/11 AI/Prompting/Techniques/Showing Examples/Showing Examples.md",
+      "x": 1260,
+      "y": 5440,
+      "width": 340,
+      "height": 80
+    }
+  ],
+  "edges": [
+    {
+      "id": "e_032b52e4bb",
+      "fromNode": "n_dd262f49bf",
+      "fromSide": "right",
+      "toNode": "n_d4081e45fb",
+      "toSide": "left"
+    },
+    {
+      "id": "e_420d63b589",
+      "fromNode": "n_d4081e45fb",
+      "fromSide": "right",
+      "toNode": "n_1bfb35c3aa",
+      "toSide": "left"
+    },
+    {
+      "id": "e_dc11d017fa",
+      "fromNode": "n_1bfb35c3aa",
+      "fromSide": "right",
+      "toNode": "n_5b132671e7",
+      "toSide": "left"
+    },
+    {
+      "id": "e_3ccd80672b",
+      "fromNode": "n_d4081e45fb",
+      "fromSide": "right",
+      "toNode": "n_4395a9e75e",
+      "toSide": "left"
+    },
+    {
+      "id": "e_1c931d8cc2",
+      "fromNode": "n_d4081e45fb",
+      "fromSide": "right",
+      "toNode": "n_eb0c42d3c0",
+      "toSide": "left"
+    },
+    {
+      "id": "e_d6edbfb3e0",
+      "fromNode": "n_dd262f49bf",
+      "fromSide": "bottom",
+      "toNode": "n_ebcb435eb2",
+      "toSide": "top"
+    },
+    {
+      "id": "e_6fa13350f3",
+      "fromNode": "n_ebcb435eb2",
+      "fromSide": "right",
+      "toNode": "n_3a1362b179",
+      "toSide": "left"
+    },
+    {
+      "id": "e_3a72107f6c",
+      "fromNode": "n_3a1362b179",
+      "fromSide": "right",
+      "toNode": "n_7360aedba6",
+      "toSide": "left"
+    },
+    {
+      "id": "e_62957e1d21",
+      "fromNode": "n_3a1362b179",
+      "fromSide": "right",
+      "toNode": "n_c54b6fadf2",
+      "toSide": "left"
+    },
+    {
+      "id": "e_91de2a43d3",
+      "fromNode": "n_3a1362b179",
+      "fromSide": "right",
+      "toNode": "n_d0ca6038f7",
+      "toSide": "left"
+    },
+    {
+      "id": "e_d1c74c900c",
+      "fromNode": "n_3a1362b179",
+      "fromSide": "right",
+      "toNode": "n_a6dc892c7f",
+      "toSide": "left"
+    },
+    {
+      "id": "e_01b6ad2c45",
+      "fromNode": "n_3a1362b179",
+      "fromSide": "right",
+      "toNode": "n_93b9ffc044",
+      "toSide": "left"
+    },
+    {
+      "id": "e_1d8fc517e1",
+      "fromNode": "n_ebcb435eb2",
+      "fromSide": "right",
+      "toNode": "n_ab2b58d449",
+      "toSide": "left"
+    },
+    {
+      "id": "e_d1f0bfe9eb",
+      "fromNode": "n_ebcb435eb2",
+      "fromSide": "bottom",
+      "toNode": "n_8fc82b07cf",
+      "toSide": "top"
+    },
+    {
+      "id": "e_77d4cff9a5",
+      "fromNode": "n_8fc82b07cf",
+      "fromSide": "right",
+      "toNode": "n_a4212fc406",
+      "toSide": "left"
+    },
+    {
+      "id": "e_4e04193a95",
+      "fromNode": "n_8fc82b07cf",
+      "fromSide": "right",
+      "toNode": "n_d026450ac5",
+      "toSide": "left"
+    },
+    {
+      "id": "e_44776b59d8",
+      "fromNode": "n_d026450ac5",
+      "fromSide": "right",
+      "toNode": "n_a79b2e14f8",
+      "toSide": "left"
+    },
+    {
+      "id": "e_da1e1feec8",
+      "fromNode": "n_8fc82b07cf",
+      "fromSide": "bottom",
+      "toNode": "n_ef51286781",
+      "toSide": "top"
+    },
+    {
+      "id": "e_fff42f096c",
+      "fromNode": "n_ef51286781",
+      "fromSide": "bottom",
+      "toNode": "n_2d902a721c",
+      "toSide": "top"
+    },
+    {
+      "id": "e_7d3ed695d4",
+      "fromNode": "n_2d902a721c",
+      "fromSide": "bottom",
+      "toNode": "n_8227afe735",
+      "toSide": "top"
+    },
+    {
+      "id": "e_69d9883b52",
+      "fromNode": "n_8227afe735",
+      "fromSide": "bottom",
+      "toNode": "n_5c16a9eace",
+      "toSide": "top"
+    },
+    {
+      "id": "e_d308908563",
+      "fromNode": "n_5c16a9eace",
+      "fromSide": "bottom",
+      "toNode": "n_215ff47b7f",
+      "toSide": "top"
+    },
+    {
+      "id": "e_b367dead72",
+      "fromNode": "n_215ff47b7f",
+      "fromSide": "bottom",
+      "toNode": "n_9a76cd745d",
+      "toSide": "top"
+    },
+    {
+      "id": "e_bf1e5a3fb5",
+      "fromNode": "n_9a76cd745d",
+      "fromSide": "right",
+      "toNode": "n_cf0ddb3d9c",
+      "toSide": "left"
+    },
+    {
+      "id": "e_6fcdaa3d0b",
+      "fromNode": "n_9a76cd745d",
+      "fromSide": "bottom",
+      "toNode": "n_268761f2f7",
+      "toSide": "top"
+    },
+    {
+      "id": "e_a762e97677",
+      "fromNode": "n_268761f2f7",
+      "fromSide": "bottom",
+      "toNode": "n_69083fd598",
+      "toSide": "top"
+    },
+    {
+      "id": "e_c9c3acd573",
+      "fromNode": "n_69083fd598",
+      "fromSide": "right",
+      "toNode": "n_53c391a283",
+      "toSide": "left"
+    },
+    {
+      "id": "e_a753cd0d8f",
+      "fromNode": "n_69083fd598",
+      "fromSide": "right",
+      "toNode": "n_ae8d4d47ca",
+      "toSide": "left"
+    },
+    {
+      "id": "e_85be650b8f",
+      "fromNode": "n_69083fd598",
+      "fromSide": "right",
+      "toNode": "n_f7732ede08",
+      "toSide": "left"
+    },
+    {
+      "id": "e_51e5dacc71",
+      "fromNode": "n_69083fd598",
+      "fromSide": "right",
+      "toNode": "n_d3e279620d",
+      "toSide": "left"
+    },
+    {
+      "id": "e_90e47cb0c3",
+      "fromNode": "n_d3e279620d",
+      "fromSide": "right",
+      "toNode": "n_5c824ca31b",
+      "toSide": "left"
+    },
+    {
+      "id": "e_11d9e31723",
+      "fromNode": "n_5c824ca31b",
+      "fromSide": "right",
+      "toNode": "n_df7aabb02b",
+      "toSide": "left"
+    },
+    {
+      "id": "e_94345e4246",
+      "fromNode": "n_5c824ca31b",
+      "fromSide": "right",
+      "toNode": "n_550a3ff8b8",
+      "toSide": "left"
+    },
+    {
+      "id": "e_f3b7b9c722",
+      "fromNode": "n_5c824ca31b",
+      "fromSide": "right",
+      "toNode": "n_981832293b",
+      "toSide": "left"
+    }
+  ]
+}
