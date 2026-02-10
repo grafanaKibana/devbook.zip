@@ -20,3 +20,16 @@ WHERE file.folder = this.file.folder
   AND !contains(file.tags, "#FolderNote")
 SORT file.name ASC
 ```
+
+## Intro
+
+## Deeper Explanation
+
+## Questions
+
+> [!QUESTION]- What is abc?
+> Answer
+
+## Further Reading
+- [Link 1](URL)
+- [Link 2](URL)

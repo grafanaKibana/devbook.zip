@@ -4,13 +4,11 @@ topic:
 subtopic:
   - Algorithms
   - Sorting Algorithms
-level: 1
+level: ["1"]
 priority: medium
 status: Not-Started
 ---
-
-# Bubble Sort
-
+:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 ## Intro
 Bubble sort repeatedly swaps adjacent out-of-order elements, pushing large values toward the end each pass. It is easy to understand but rarely used in production due to poor performance.
 
@@ -19,6 +17,11 @@ Bubble sort repeatedly swaps adjacent out-of-order elements, pushing large value
 - Early-exit optimization: if a pass makes zero swaps, the array is already sorted.
 - Complexity: average/worst O(n^2); best O(n) with early-exit on already-sorted input.
 - Properties: stable (with adjacent swaps), in-place, simple.
+
+## Questions
+
+> [!QUESTION]- What is abc?
+> Answer
 
 ## Further Reading
 - https://en.wikipedia.org/wiki/Bubble_sort - Overview and variants

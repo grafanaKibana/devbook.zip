@@ -1,12 +1,19 @@
-# <Folder Name>
-
-Up: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/index", regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
-
+---
+topic: ["Computer Science"]
+subtopic: []
+level: ["1"]
+priority: medium
+status: Not-Started
+tags:
+  - FolderNote
+---
+:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 ## Children
 ```dataview
 LIST WITHOUT ID link(file.path, regexreplace(file.folder, "^.*/", ""))
-WHERE file.name = "index"
-  AND regexmatch("^" + this.file.folder + "/[^/]+/index\\.md$", file.path)
+WHERE regexmatch("^" + this.file.folder + "/[^/]+$", file.folder)
+  AND file.name = regexreplace(file.folder, "^.*/", "")
+  AND contains(file.tags, "#FolderNote")
 SORT file.folder ASC
 ```
 
@@ -14,6 +21,22 @@ SORT file.folder ASC
 ```dataview
 LIST
 WHERE file.folder = this.file.folder
-  AND file.name != "index"
+  AND file.path != this.file.path
+  AND !contains(file.tags, "#FolderNote")
 SORT file.name ASC
 ```
+
+## Intro
+
+## Deeper Explanation
+
+[.NET Collections](Knowledge/Computer Science/Data Structures/NET Collections.md)
+
+[HashTable/HashSet](Knowledge/Computer Science/Data Structures/HashTable HashSet.md)
+
+## Questions
+
+> [!QUESTION]- What is abc?
+> Answer
+
+## Further Reading

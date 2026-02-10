@@ -1,0 +1,21 @@
+---
+topic: ["Data Persistance"]
+subtopic: []
+level: ["1"]
+priority: medium
+status: Not-Started
+---
+:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+## Intro
+
+## Deeper Explanation
+
+[ACID](https://ru.wikipedia.org/wiki/ACID)
+
+## Questions
+
+> [!QUESTION]- What is abc?
+> Answer
+
+## Further Reading
+
