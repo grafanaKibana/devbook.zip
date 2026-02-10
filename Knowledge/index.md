@@ -1,8 +1,3 @@
----
-status: Not-Started
-priority: medium
-level: 1
----
 
 # Knowledge Hub
 
