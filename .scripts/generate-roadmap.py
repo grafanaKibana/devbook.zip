@@ -34,11 +34,21 @@ STEP_Y = NODE_H + NODE_V_GAP
 # Colors follow JSON Canvas spec: either hex (#RRGGBB) or palette ids "1".."6".
 # Palette ids are theme-friendly; hex is used for a neutral gray Not-Started.
 STATUS_COLORS = {
-    "Not-Started": "#9CA3AF",
+    "Not-Started": "1",  # red
     "Creation": "2",  # orange
     "Repetition": "5",  # cyan
     "Ready To Repeat": "6",  # purple
     "Done": "4",  # green
+}
+
+
+PALETTE_NAMES = {
+    "1": "red",
+    "2": "orange",
+    "3": "yellow",
+    "4": "green",
+    "5": "cyan",
+    "6": "purple",
 }
 
 # Folder hub nodes are colored based on the rollup of descendant concept pages.
@@ -81,6 +91,8 @@ def build_tree(d):
 
     def walk(d2, depth):
         if depth > MAX_DEPTH:
+            # Still record the node so rollups/colors can apply to leaf folders.
+            t.setdefault(d2, [])
             return
         ch = subdirs(d2)
         t[d2] = ch
@@ -190,6 +202,7 @@ def generate():
     edges = []
     state = {"y": 0}
     file_status_cache = {}
+    node_status_counts = Counter()
 
     def file_status(md_abs_path):
         v = file_status_cache.get(md_abs_path, "__MISSING__")
@@ -199,12 +212,18 @@ def generate():
         file_status_cache[md_abs_path] = v
         return v
 
-    def hub_color_for_dir(dir_abs, rollup_status_by_dir):
+    def hub_status_for_dir(dir_abs, rollup_status_by_dir):
         if HUB_STATUS_MODE == "frontmatter":
-            s = file_status(hub(dir_abs))
+            return file_status(hub(dir_abs))
         else:
             s = rollup_status_by_dir.get(dir_abs)
-        return color_for_status(s)
+            # If there are no descendant concept pages, fall back to hub frontmatter.
+            if s is None:
+                return file_status(hub(dir_abs))
+            return s
+
+    def hub_color_for_dir(dir_abs, rollup_status_by_dir):
+        return color_for_status(hub_status_for_dir(dir_abs, rollup_status_by_dir))
 
     def place_subtree(tr, dir_abs, depth, parent_id, y, direction, rollup_status_by_dir):
         rel = os.path.relpath(hub(dir_abs), VAULT_ROOT)
@@ -219,7 +238,10 @@ def generate():
             "width": NODE_W,
             "height": NODE_H,
         }
-        c = hub_color_for_dir(dir_abs, rollup_status_by_dir)
+        st = hub_status_for_dir(dir_abs, rollup_status_by_dir)
+        if st:
+            node_status_counts[st] += 1
+        c = color_for_status(st)
         if c:
             n["color"] = c
         nodes.append(n)
@@ -306,7 +328,10 @@ def generate():
             "width": NODE_W,
             "height": NODE_H,
         }
-        c = hub_color_for_dir(td, rollup_status_by_dir)
+        st = hub_status_for_dir(td, rollup_status_by_dir)
+        if st:
+            node_status_counts[st] += 1
+        c = color_for_status(st)
         if c:
             n["color"] = c
         nodes.append(n)
@@ -353,32 +378,55 @@ def generate():
     if ADD_LEGEND and nodes:
         min_x = min(n.get("x", 0) for n in nodes)
         min_y = min(n.get("y", 0) for n in nodes)
-        ts = datetime.datetime.now().isoformat(timespec="seconds")
+        ts = datetime.datetime.now().astimezone().isoformat(timespec="seconds")
 
-        legend_lines = [
-            "Roadmap legend",
-            f"Generated: {ts}",
-            "",
-            f"Not-Started: {STATUS_COLORS['Not-Started']}",
-            f"Creation: {STATUS_COLORS['Creation']}",
-            f"Repetition: {STATUS_COLORS['Repetition']}",
-            f"Ready To Repeat: {STATUS_COLORS['Ready To Repeat']}",
-            f"Done: {STATUS_COLORS['Done']}",
-            "",
-            f"Hub status mode: {HUB_STATUS_MODE}",
-        ]
+        legend_x = min_x
+        legend_y = min_y - (STEP_Y * 4)
+
+        legend_w = 380
 
         nodes.append(
             {
-                "id": nid("__roadmap_legend__"),
+                "id": nid("__roadmap_legend_header__"),
                 "type": "text",
-                "text": "\n".join(legend_lines),
-                "x": min_x,
-                "y": min_y - (STEP_Y * 3),
-                "width": 360,
-                "height": 260,
+                "text": "\n".join(
+                    [
+                        "#### Roadmap legend",
+                        f"**Generated:** {ts}",
+                        f"**Hub status mode:** {HUB_STATUS_MODE}",
+                    ]
+                ),
+                "x": legend_x,
+                "y": legend_y,
+                "width": legend_w,
+                "height": 140,
             }
         )
+
+        status_order = [
+            "Not-Started",
+            "Creation",
+            "Ready To Repeat",
+            "Repetition",
+            "Done",
+        ]
+
+        row_y = legend_y + 160
+        for st in status_order:
+            c = STATUS_COLORS.get(st)
+            n = {
+                "id": nid(f"__roadmap_legend__{st}"),
+                "type": "text",
+                "text": f"{st}: {node_status_counts.get(st, 0)}",
+                "x": legend_x,
+                "y": row_y,
+                "width": legend_w,
+                "height": 60,
+            }
+            if c:
+                n["color"] = c
+            nodes.append(n)
+            row_y += 70
 
     return {"nodes": nodes, "edges": edges}
 

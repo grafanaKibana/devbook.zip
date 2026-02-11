@@ -11,14 +11,17 @@
             "id": "f6ca6887fe59ce39",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "canvas",
               "state": {
-                "file": "Knowledge/09 DevOps/CI CD tools.md",
-                "mode": "preview",
-                "source": true
+                "file": "Knowledge/Roadmap.canvas",
+                "viewState": {
+                  "x": -446.5,
+                  "y": 2100,
+                  "zoom": -2.137503523749935
+                }
               },
-              "icon": "lucide-file",
-              "title": "CI CD tools"
+              "icon": "lucide-layout-dashboard",
+              "title": "Roadmap"
             }
           }
         ]
@@ -36,9 +39,9 @@
               "state": {
                 "file": "Knowledge/Roadmap.canvas",
                 "viewState": {
-                  "x": 272.03441045958056,
-                  "y": 441.6268693068143,
-                  "zoom": -0.4387608791621518
+                  "x": -620.3355915863259,
+                  "y": 20.97713651990054,
+                  "zoom": -0.13876087916215185
                 }
               },
               "pinned": true,
@@ -88,7 +91,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "[\"aliases\"]",
+                "query": "",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -110,7 +113,7 @@
             }
           }
         ],
-        "currentTab": 1
+        "currentTab": 2
       }
     ],
     "direction": "horizontal",
