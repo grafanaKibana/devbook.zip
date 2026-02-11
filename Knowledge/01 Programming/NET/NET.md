@@ -41,27 +41,4 @@ if (pages.length) {
 }
 ```
 ---
-## Intro
 
-## Deeper Explanation
-
-## Sections
-
-[C#](Knowledge/01 Programming/NET/C#/C#.md)
-
-[.NET Standart](Knowledge/01 Programming/NET/NET Standart.md)
-
-[ASP.NET Web API](Knowledge/01 Programming/NET/ASP NET Web API.md)
-
-## Misc
-
-[OWIN](Knowledge/01 Programming/NET/OWIN.md)
-
-[SignalR](Knowledge/01 Programming/NET/SignalR.md)
-
-## Questions
-
-> [!QUESTION]- What is abc?
-> Answer
-
-## Further Reading

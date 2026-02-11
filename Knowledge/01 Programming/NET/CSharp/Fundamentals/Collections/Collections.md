@@ -114,9 +114,7 @@ status: Not-Started
 > A hash table uses the key's hash code to compute an index for where the value should be stored.
 > This lets it jump directly to the relevant bucket/slot instead of scanning all elements and comparing each key to the target key.
 
-## References and Further Reading
-
-- https://dunnhq.com/posts/2024/anatomy-of-the-dotnet-dictionary/
-- https://habr.com/ru/articles/198104/
-
 ## Further Reading
+
+- [Anatomy of the .NET dictionary](https://dunnhq.com/posts/2024/anatomy-of-the-dotnet-dictionary/)
+- [Fetching Title#x8il](https://habr.com/ru/articles/198104/)

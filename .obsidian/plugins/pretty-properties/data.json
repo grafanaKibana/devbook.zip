@@ -63,7 +63,7 @@
   "enableCustomDateFormat": false,
   "enableCustomDateFormatInBases": false,
   "enableRelativeDateColors": false,
-  "settingsTab": "OTHER",
+  "settingsTab": "PROPERTY_SETTINGS",
   "enableTaskNotesCount": false,
   "allTNTasksCount": "tn_tasks",
   "completedTNTasksCount": "tn_tasks_completed",
@@ -116,7 +116,7 @@
   "titleTextIconMatchTitleSize": true,
   "imageLinkFormat": "link",
   "hideMetadataContainerIfAllPropertiesHiddenEditing": false,
-  "hideMetadataContainerIfAllPropertiesHiddenReading": false,
+  "hideMetadataContainerIfAllPropertiesHiddenReading": true,
   "autoHidePropertiesWithBanner": false,
   "hideCoverCollapsed": false
 }

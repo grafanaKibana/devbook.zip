@@ -19,12 +19,6 @@ status: Not-Started
 
 **Асинхронность** позволяет вынести отдельные задачи из основного потока в специальные асинхронные методы и при этом более экономно использовать потоки. Асинхронные методы выполняются в отдельных потоках. Однако при выполнении продолжительной операции поток асинхронного метода возвратится в пул потоков и будет использоваться для других задач. А когда продолжительная операция завершит свое выполнение, для асинхронного метода опять выделяется поток из пула потоков, и асинхронный метод продолжает свою работу.
 
-## References and Further Reading
-
-- https://habr.com/ru/articles/727850/
-- https://habr.com/ru/articles/470830/
-- https://www.bytehide.com/blog/async-await-csharp
-
 ## Questions
 
 > [!QUESTION]- How is asynchrony different from multithreading?
@@ -41,3 +35,6 @@ status: Not-Started
 > `Task.Result` waits synchronously: it blocks the current thread, can cause deadlocks under a `SynchronizationContext` (UI / legacy ASP.NET), and wraps exceptions in `AggregateException`.
 
 ## Further Reading
+- [Fetching Title#3ra2](https://habr.com/ru/articles/727850/)
+- [Fetching Title#0gax](https://habr.com/ru/articles/470830/)
+- [Async and Await in C#: Complete Guide (2023)](https://www.bytehide.com/blog/async-await-csharp)
