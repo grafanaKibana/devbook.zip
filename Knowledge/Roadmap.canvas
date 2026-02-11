@@ -411,20 +411,29 @@
       "color": "1"
     },
     {
+      "id": "n_328ae87cd7",
+      "type": "group",
+      "label": "Legend",
+      "x": -864,
+      "y": -504,
+      "width": 428,
+      "height": 538
+    },
+    {
       "id": "n_b0ac2236f9",
       "type": "text",
-      "text": "#### Roadmap legend\n**Generated:** 2026-02-11T02:35:29+02:00\n**Hub status mode:** rollup",
+      "text": "#### Roadmap legend\n**Generated:** 2026-02-11T03:28:27+02:00\n**Hub status mode:** rollup",
       "x": -840,
       "y": -480,
       "width": 380,
-      "height": 140
+      "height": 110
     },
     {
       "id": "n_4a66490dd9",
       "type": "text",
       "text": "Not-Started: 41",
       "x": -840,
-      "y": -320,
+      "y": -354,
       "width": 380,
       "height": 60,
       "color": "1"
@@ -434,37 +443,37 @@
       "type": "text",
       "text": "Creation: 0",
       "x": -840,
-      "y": -250,
+      "y": -278,
       "width": 380,
       "height": 60,
       "color": "2"
-    },
-    {
-      "id": "n_6de0caeeec",
-      "type": "text",
-      "text": "Ready To Repeat: 0",
-      "x": -840,
-      "y": -180,
-      "width": 380,
-      "height": 60,
-      "color": "6"
     },
     {
       "id": "n_a434510472",
       "type": "text",
       "text": "Repetition: 0",
       "x": -840,
-      "y": -110,
+      "y": -202,
       "width": 380,
       "height": 60,
       "color": "5"
+    },
+    {
+      "id": "n_6de0caeeec",
+      "type": "text",
+      "text": "Ready To Repeat: 0",
+      "x": -840,
+      "y": -126,
+      "width": 380,
+      "height": 60,
+      "color": "6"
     },
     {
       "id": "n_0e6324d0db",
       "type": "text",
       "text": "Done: 0",
       "x": -840,
-      "y": -40,
+      "y": -50,
       "width": 380,
       "height": 60,
       "color": "4"
@@ -750,6 +759,38 @@
       "fromSide": "left",
       "toNode": "n_93bfc0ffdb",
       "toSide": "right"
+    },
+    {
+      "id": "e_0c4030c72b",
+      "fromNode": "n_4a66490dd9",
+      "fromSide": "right",
+      "toNode": "n_c1cf7bc196",
+      "toSide": "right",
+      "color": "1"
+    },
+    {
+      "id": "e_1ca3e47d87",
+      "fromNode": "n_c1cf7bc196",
+      "fromSide": "left",
+      "toNode": "n_a434510472",
+      "toSide": "left",
+      "color": "2"
+    },
+    {
+      "id": "e_cf423710c3",
+      "fromNode": "n_a434510472",
+      "fromSide": "right",
+      "toNode": "n_6de0caeeec",
+      "toSide": "right",
+      "color": "5"
+    },
+    {
+      "id": "e_32f0f6280f",
+      "fromNode": "n_6de0caeeec",
+      "fromSide": "left",
+      "toNode": "n_0e6324d0db",
+      "toSide": "left",
+      "color": "6"
     }
   ]
 }

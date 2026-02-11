@@ -4,29 +4,6 @@
     "type": "split",
     "children": [
       {
-        "id": "7f852567eea4975c",
-        "type": "tabs",
-        "children": [
-          {
-            "id": "f6ca6887fe59ce39",
-            "type": "leaf",
-            "state": {
-              "type": "canvas",
-              "state": {
-                "file": "Knowledge/Roadmap.canvas",
-                "viewState": {
-                  "x": -446.5,
-                  "y": 2100,
-                  "zoom": -2.137503523749935
-                }
-              },
-              "icon": "lucide-layout-dashboard",
-              "title": "Roadmap"
-            }
-          }
-        ]
-      },
-      {
         "id": "571adfa34c1c7218",
         "type": "tabs",
         "children": [
@@ -39,14 +16,28 @@
               "state": {
                 "file": "Knowledge/Roadmap.canvas",
                 "viewState": {
-                  "x": -620.3355915863259,
-                  "y": 20.97713651990054,
-                  "zoom": -0.13876087916215185
+                  "x": -101.97795948303192,
+                  "y": 609.2149432496744,
+                  "zoom": -1.7387608791621516
                 }
               },
               "pinned": true,
               "icon": "lucide-layout-dashboard",
               "title": "Roadmap"
+            }
+          },
+          {
+            "id": "52c3b4ab65874c31",
+            "type": "leaf",
+            "state": {
+              "type": "split-diff-view",
+              "state": {
+                "aFile": "Knowledge/Roadmap.canvas",
+                "bFile": "Knowledge/Roadmap.canvas",
+                "aRef": ""
+              },
+              "icon": "diff",
+              "title": "Diff: Roadmap.canvas  (Working Tree)"
             }
           }
         ]
@@ -113,7 +104,7 @@
             }
           }
         ],
-        "currentTab": 2
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -239,10 +230,11 @@
   },
   "active": "ce7a72e482374127",
   "lastOpenFiles": [
+    "Knowledge/01 Programming/NET/CSharp/CSharp.md",
+    "Knowledge/Roadmap.canvas",
     "Knowledge/09 DevOps/CI CD tools.md",
     "Knowledge/09 DevOps/09 DevOps.md",
     "Knowledge/01 Programming/01 Programming.md",
-    "Knowledge/Roadmap.canvas",
     "Knowledge/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md",
     "Knowledge/11 AI & ML/LLM/Prompting/Showing Examples.md",
     "Knowledge/11 AI & ML/LLM/Prompting/Techniques/Techniques.md",
@@ -267,7 +259,6 @@
     "Knowledge/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set.md",
     "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Insertion Sort.md",
     "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Selection Sort.md",
-    "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Bubble Sort.md",
     "Knowledge/06 Patterns & Practices/Paradigms & Practices",
     "Knowledge/06 Patterns & Practices/Patterns",
     "Knowledge/06 Patterns & Practices/Principles",

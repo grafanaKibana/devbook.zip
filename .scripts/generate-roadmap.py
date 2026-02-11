@@ -59,6 +59,11 @@ CHILD_PLACEMENT = "masonry"  # "alternate" | "masonry"
 
 ADD_LEGEND = True
 
+# Legend layout.
+LEGEND_CARD_H = 60
+LEGEND_CARD_GAP = 16
+LEGEND_COL_GAP = 40
+
 
 def nid(path):
     return "n_" + hashlib.sha1(path.encode()).hexdigest()[:10]
@@ -382,9 +387,45 @@ def generate():
 
         legend_x = min_x
         legend_y = min_y - (STEP_Y * 4)
-
         legend_w = 380
 
+        status_flow = [
+            "Not-Started",
+            "Creation",
+            "Repetition",
+            "Ready To Repeat",
+            "Done",
+        ]
+
+        # Legend group (visual wrapper).
+        col_w = legend_w
+        header_h = 110
+        pad = 24
+        rows = len(status_flow)
+        group_w = col_w + (pad * 2)
+        group_h = (
+            pad
+            + header_h
+            + LEGEND_CARD_GAP
+            + (rows * LEGEND_CARD_H)
+            + ((rows - 1) * LEGEND_CARD_GAP)
+            + pad
+        )
+
+        # Place group behind the legend nodes.
+        nodes.append(
+            {
+                "id": nid("__roadmap_legend_group__"),
+                "type": "group",
+                "label": "Legend",
+                "x": legend_x - pad,
+                "y": legend_y - pad,
+                "width": group_w,
+                "height": group_h,
+            }
+        )
+
+        # Header node inside the group.
         nodes.append(
             {
                 "id": nid("__roadmap_legend_header__"),
@@ -399,34 +440,52 @@ def generate():
                 "x": legend_x,
                 "y": legend_y,
                 "width": legend_w,
-                "height": 140,
+                "height": header_h,
             }
         )
 
-        status_order = [
-            "Not-Started",
-            "Creation",
-            "Ready To Repeat",
-            "Repetition",
-            "Done",
-        ]
+        # Status cards in a single column; arrows still alternate sides.
+        cards = []
+        base_y = legend_y + header_h + LEGEND_CARD_GAP
+        left_x = legend_x
 
-        row_y = legend_y + 160
-        for st in status_order:
+        for i, st in enumerate(status_flow):
+            cx = left_x
+            cy = base_y + i * (LEGEND_CARD_H + LEGEND_CARD_GAP)
             c = STATUS_COLORS.get(st)
+            card_id = nid(f"__roadmap_legend__{st}")
             n = {
-                "id": nid(f"__roadmap_legend__{st}"),
+                "id": card_id,
                 "type": "text",
                 "text": f"{st}: {node_status_counts.get(st, 0)}",
-                "x": legend_x,
-                "y": row_y,
-                "width": legend_w,
-                "height": 60,
+                "x": cx,
+                "y": cy,
+                "width": col_w,
+                "height": LEGEND_CARD_H,
             }
             if c:
                 n["color"] = c
             nodes.append(n)
-            row_y += 70
+            cards.append({"id": card_id, "x": cx, "y": cy, "status": st, "color": c})
+
+        # Connect status cards with arrows; edge color matches the source card.
+        # Side rules:
+        # - Edges alternate start side: right, left, right, left...
+        # - If an edge starts from left, it ends on left of the next card.
+        # - If an edge starts from right, it ends on right of the next card.
+        for idx, (a, b) in enumerate(zip(cards, cards[1:])):
+            from_side = "right" if (idx % 2 == 0) else "left"
+            to_side = from_side
+            e = {
+                "id": eid(a["id"], b["id"]),
+                "fromNode": a["id"],
+                "fromSide": from_side,
+                "toNode": b["id"],
+                "toSide": to_side,
+            }
+            if a.get("color"):
+                e["color"] = a["color"]
+            edges.append(e)
 
     return {"nodes": nodes, "edges": edges}
 
