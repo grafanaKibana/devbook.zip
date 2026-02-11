@@ -2,21 +2,10 @@
 tags: [FolderNote]
 ---
 
-# Knowledge Hub
-
 ## Start Here
 
 - [Roadmap](Roadmap.canvas)
 - [Browse Topics](Topics.base)
-
---- start-multi-column: kb_home
-```column-settings
-number of columns: 2
-column size: [62%, 38%]
-column spacing: 12px
-border: off
-shadow: off
-```
 
 ## Activity
 
@@ -52,33 +41,230 @@ renderHeatmapCalendar(this.container, {
 });
 ```
 
+--- start-multi-column: kb_metrics
+```column-settings
+number of columns: 2
+column size: [65%, 30%]
+column spacing: 12px
+border: off
+shadow: off
+```
+
+## Topic Coverage
+
+```dataviewjs
+const ROOT = "Knowledge";
+const isFolderNote = (p) => (p.file.tags ?? []).includes("#FolderNote");
+const notes = dv.pages(`"${ROOT}"`).where((p) => !isFolderNote(p));
+
+const asStringArray = (v) => {
+  if (Array.isArray(v)) return v.map((x) => String(x).trim()).filter(Boolean);
+  if (typeof v === "string") return [v.trim()].filter(Boolean);
+  return [];
+};
+
+const topicStats = new Map();
+let missingTopic = 0;
+
+for (const p of notes) {
+  const topics = asStringArray(p.topic);
+  if (topics.length === 0) {
+    missingTopic += 1;
+    continue;
+  }
+
+  const status = typeof p.status === "string" ? p.status.trim() : "";
+  const isDone = status === "Done";
+
+  for (const t of topics) {
+    const cur = topicStats.get(t) ?? { total: 0, done: 0 };
+    cur.total += 1;
+    if (isDone) cur.done += 1;
+    topicStats.set(t, cur);
+  }
+}
+
+const rows = [...topicStats.entries()].map(([topic, s]) => {
+  const pct = s.total > 0 ? Math.round((s.done / s.total) * 100) : 0;
+  return { topic, pct, done: s.done, total: s.total };
+});
+
+rows.sort((a, b) => a.pct - b.pct || b.total - a.total || a.topic.localeCompare(b.topic));
+
+const header = this.container.createDiv({
+  text: `Topics covered: ${rows.length}. Missing topic: ${missingTopic}.`,
+});
+header.style.opacity = "0.75";
+header.style.margin = "6px 0 10px";
+
+const table = this.container.createEl("table");
+table.style.width = "100%";
+table.style.borderCollapse = "collapse";
+
+const thead = table.createEl("thead");
+const hr = thead.createEl("tr");
+for (const h of ["Topic", "Completion", "Done"]) {
+  const th = hr.createEl("th", { text: h });
+  th.style.textAlign = h === "Topic" ? "left" : "right";
+  th.style.padding = "6px 8px";
+  th.style.borderBottom = "1px solid rgba(127,127,127,0.25)";
+  th.style.fontWeight = "600";
+}
+
+const tbody = table.createEl("tbody");
+for (const r of rows) {
+  const tr = tbody.createEl("tr");
+
+  const tdTopic = tr.createEl("td", { text: r.topic });
+  tdTopic.style.padding = "6px 8px";
+  tdTopic.style.borderBottom = "1px solid rgba(127,127,127,0.12)";
+
+  const tdProg = tr.createEl("td");
+  tdProg.style.padding = "6px 8px";
+  tdProg.style.borderBottom = "1px solid rgba(127,127,127,0.12)";
+  tdProg.style.textAlign = "right";
+
+  const wrap = tdProg.createDiv();
+  wrap.style.display = "grid";
+  wrap.style.gridTemplateColumns = "1fr 44px";
+  wrap.style.gap = "8px";
+  wrap.style.alignItems = "center";
+
+  const prog = document.createElement("progress");
+  prog.max = 100;
+  prog.value = r.pct;
+  prog.style.width = "100%";
+  prog.style.height = "12px";
+  wrap.appendChild(prog);
+
+  const pct = document.createElement("span");
+  pct.textContent = `${r.pct}%`;
+  pct.style.opacity = "0.8";
+  pct.style.fontVariantNumeric = "tabular-nums";
+  pct.style.textAlign = "right";
+  wrap.appendChild(pct);
+
+  const tdDone = tr.createEl("td", { text: `${r.done}/${r.total}` });
+  tdDone.style.padding = "6px 8px";
+  tdDone.style.borderBottom = "1px solid rgba(127,127,127,0.12)";
+  tdDone.style.textAlign = "right";
+  tdDone.style.fontVariantNumeric = "tabular-nums";
+}
+```
+
 --- column-break ---
 
-## Snapshot
+## Status Destribution
 
 ```dataviewjs
 const ROOT = "Knowledge";
 const isFolderNote = (p) => (p.file.tags ?? []).includes("#FolderNote");
 const since = (days) => dv.date("today").minus(dv.duration(`${days} days`));
 
-const notes = dv.pages(`"${ROOT}"`).where((p) => !isFolderNote(p));
+const cssVar = (name, fallback) => {
+  const v = getComputedStyle(document.body).getPropertyValue(name).trim();
+  return v.length ? v : fallback;
+};
 
-const inProgress = notes.where(
-  (p) => p.status === "Creation" || p.status === "Repetition" || p.status === "Ready To Repeat",
-);
-const notStarted = notes.where((p) => p.status === "Not-Started");
-const done = notes.where((p) => p.status === "Done");
-const unknown = notes.where((p) => typeof p.status !== "string" || p.status.length === 0);
+const STATUS_ORDER = [
+  { key: "Done", label: "Done", color: cssVar("--color-green", "#22C55E") },
+  { key: "Ready To Repeat", label: "Ready to repeat", color: cssVar("--color-cyan", "#14B8A6") },
+  { key: "Repetition", label: "Repetition", color: cssVar("--color-blue", "#3B82F6") },
+  { key: "Creation", label: "Creation", color: cssVar("--color-orange", "#F59E0B") },
+  { key: "Not-Started", label: "Not started", color: cssVar("--text-faint", "#9CA3AF") },
+  { key: "__OTHER__", label: "Other", color: cssVar("--color-purple", "#A78BFA") },
+  { key: "__MISSING__", label: "Missing", color: cssVar("--color-red", "#F87171") },
+];
+
+const notes = dv.pages(`"${ROOT}"`).where((p) => !isFolderNote(p));
+const counts = new Map(STATUS_ORDER.map((s) => [s.key, 0]));
+
+const known = new Set(STATUS_ORDER.map((s) => s.key));
+known.delete("__OTHER__");
+known.delete("__MISSING__");
+
+for (const p of notes) {
+  const raw = typeof p.status === "string" ? p.status.trim() : "";
+  const key = raw.length === 0 ? "__MISSING__" : known.has(raw) ? raw : "__OTHER__";
+  counts.set(key, (counts.get(key) ?? 0) + 1);
+}
+
+const total = notes.length;
+const segments = STATUS_ORDER
+  .map((s) => ({ ...s, count: counts.get(s.key) ?? 0 }))
+  .filter((s) => s.count > 0);
+
+let acc = 0;
+const stops = segments.map((s) => {
+  const pct = total > 0 ? (s.count / total) * 100 : 0;
+  const start = acc;
+  const end = acc + pct;
+  acc = end;
+  return { ...s, start, end };
+});
+
+const donutBg = stops.length
+  ? `conic-gradient(${stops.map((s) => `${s.color} ${s.start.toFixed(2)}% ${s.end.toFixed(2)}%`).join(", ")})`
+  : `conic-gradient(${cssVar("--background-modifier-border", "#E5E7EB")} 0% 100%)`;
+
+const wrapper = this.container.createDiv();
+wrapper.style.display = "grid";
+wrapper.style.gridTemplateColumns = "160px 1fr";
+wrapper.style.gap = "12px";
+wrapper.style.alignItems = "center";
+wrapper.style.marginBottom = "10px";
+
+const donut = wrapper.createDiv();
+donut.style.width = "160px";
+donut.style.height = "160px";
+donut.style.borderRadius = "999px";
+donut.style.background = donutBg;
+donut.style.position = "relative";
+donut.style.boxShadow = "inset 0 0 0 1px rgba(127,127,127,0.25)";
+
+const hole = donut.createDiv();
+hole.style.position = "absolute";
+hole.style.inset = "22px";
+hole.style.borderRadius = "999px";
+hole.style.background = cssVar("--background-primary", "transparent");
+hole.style.display = "grid";
+hole.style.placeItems = "center";
+hole.style.textAlign = "center";
+
+const center = hole.createDiv();
+center.createEl("div", { text: String(total) }).style.fontSize = "28px";
+const sub = center.createEl("div", { text: "notes" });
+sub.style.opacity = "0.7";
+sub.style.fontSize = "12px";
+
+const legend = wrapper.createDiv();
+legend.style.display = "grid";
+legend.style.gap = "6px";
+
+for (const s of STATUS_ORDER) {
+  const c = counts.get(s.key) ?? 0;
+  if (c <= 0) continue;
+
+  const row = legend.createDiv();
+  row.style.display = "flex";
+  row.style.alignItems = "center";
+  row.style.gap = "8px";
+
+  const swatch = row.createEl("span");
+  swatch.style.width = "10px";
+  swatch.style.height = "10px";
+  swatch.style.borderRadius = "2px";
+  swatch.style.background = s.color;
+  swatch.style.opacity = "0.9";
+
+  const pct = total > 0 ? Math.round((c / total) * 100) : 0;
+  row.createEl("span", { text: `${s.label}: ${c} (${pct}%)` });
+}
 
 const modified7 = notes.where((p) => p.file.mday && p.file.mday >= since(7));
 const modified30 = notes.where((p) => p.file.mday && p.file.mday >= since(30));
 
 dv.list([
-  `Notes: ${notes.length}`,
-  `In progress: ${inProgress.length}`,
-  `Not started: ${notStarted.length}`,
-  `Done: ${done.length}`,
-  `Missing status: ${unknown.length}`,
   `Updated last 7 days: ${modified7.length}`,
   `Updated last 30 days: ${modified30.length}`,
 ]);
@@ -86,209 +272,10 @@ dv.list([
 
 --- end-multi-column
 
-## Progress Over Time
-
-```dataviewjs
-const ROOT = "Knowledge";
-const isFolderNote = (p) => (p.file.tags ?? []).includes("#FolderNote");
-
-const STATUS_SERIES = [
-  { key: "Not-Started", label: "Not started", color: "#9CA3AF" },
-  { key: "Creation", label: "Creation", color: "#F59E0B" },
-  { key: "Repetition", label: "Repetition", color: "#3B82F6" },
-  { key: "Ready To Repeat", label: "Ready to repeat", color: "#14B8A6" },
-  { key: "Done", label: "Done", color: "#22C55E" },
-  { key: "__OTHER__", label: "Other", color: "#A78BFA" },
-  { key: "__MISSING__", label: "Missing", color: "#F87171" },
-];
-
-const notes = dv.pages(`"${ROOT}"`).where((p) => !isFolderNote(p));
-
-const today = dv.date("today");
-const endWeek = today.startOf("week");
-const weeks = 26;
-const startWeek = endWeek.minus(dv.duration(`${(weeks - 1) * 7} days`));
-
-const emptyCounts = () => new Map(STATUS_SERIES.map((s) => [s.key, 0]));
-
-const buckets = [];
-const bucketsByKey = new Map();
-for (let d = startWeek; d.toMillis() <= endWeek.toMillis(); d = d.plus(dv.duration("7 days"))) {
-  const key = d.toFormat("yyyy-MM-dd");
-  const bucket = { key, date: d, counts: emptyCounts() };
-  buckets.push(bucket);
-  bucketsByKey.set(key, bucket);
-}
-
-const knownStatuses = new Set(STATUS_SERIES.map((s) => s.key));
-knownStatuses.delete("__OTHER__");
-knownStatuses.delete("__MISSING__");
-
-for (const p of notes) {
-  const d = p.file.mday;
-  if (!d) continue;
-
-  const wk = d.startOf("week");
-  if (wk.toMillis() < startWeek.toMillis() || wk.toMillis() > endWeek.toMillis()) continue;
-
-  const bucket = bucketsByKey.get(wk.toFormat("yyyy-MM-dd"));
-  if (!bucket) continue;
-
-  const raw = typeof p.status === "string" ? p.status.trim() : "";
-  const statusKey = raw.length === 0 ? "__MISSING__" : knownStatuses.has(raw) ? raw : "__OTHER__";
-  bucket.counts.set(statusKey, (bucket.counts.get(statusKey) ?? 0) + 1);
-}
-
-const totals = buckets.map((b) => {
-  let t = 0;
-  for (const s of STATUS_SERIES) t += b.counts.get(s.key) ?? 0;
-  return t;
-});
-
-const maxTotal = Math.max(1, ...totals);
-
-const wrapper = this.container.createDiv();
-wrapper.style.width = "100%";
-
-const legend = wrapper.createDiv();
-legend.style.display = "flex";
-legend.style.flexWrap = "wrap";
-legend.style.gap = "10px";
-legend.style.alignItems = "center";
-legend.style.margin = "4px 0 10px";
-
-for (const s of STATUS_SERIES) {
-  const item = legend.createDiv();
-  item.style.display = "flex";
-  item.style.alignItems = "center";
-  item.style.gap = "6px";
-  item.style.whiteSpace = "nowrap";
-
-  const swatch = item.createEl("span");
-  swatch.style.display = "inline-block";
-  swatch.style.width = "10px";
-  swatch.style.height = "10px";
-  swatch.style.borderRadius = "2px";
-  swatch.style.background = s.color;
-  swatch.style.opacity = "0.9";
-
-  item.createEl("span", { text: s.label });
-}
-
-const caption = wrapper.createDiv({
-  text: "Weekly counts of notes updated (file.mday) by current status.",
-});
-caption.style.opacity = "0.75";
-caption.style.marginBottom = "8px";
-caption.style.fontSize = "0.9em";
-
-const svgNS = "http://www.w3.org/2000/svg";
-const svg = document.createElementNS(svgNS, "svg");
-svg.setAttribute("viewBox", "0 0 1000 260");
-svg.setAttribute("preserveAspectRatio", "none");
-svg.style.width = "100%";
-svg.style.height = "260px";
-
-const bg = document.createElementNS(svgNS, "rect");
-bg.setAttribute("x", "0");
-bg.setAttribute("y", "0");
-bg.setAttribute("width", "1000");
-bg.setAttribute("height", "260");
-bg.setAttribute("fill", "transparent");
-svg.appendChild(bg);
-
-const margin = { l: 46, r: 12, t: 10, b: 34 };
-const innerW = 1000 - margin.l - margin.r;
-const innerH = 260 - margin.t - margin.b;
-
-const yFor = (v) => margin.t + innerH - (v / maxTotal) * innerH;
-
-for (const frac of [0, 0.25, 0.5, 0.75, 1]) {
-  const v = Math.round(maxTotal * frac);
-  const y = yFor(v);
-
-  const line = document.createElementNS(svgNS, "line");
-  line.setAttribute("x1", String(margin.l));
-  line.setAttribute("x2", String(margin.l + innerW));
-  line.setAttribute("y1", String(y));
-  line.setAttribute("y2", String(y));
-  line.setAttribute("stroke", "currentColor");
-  line.setAttribute("stroke-opacity", "0.12");
-  svg.appendChild(line);
-
-  const label = document.createElementNS(svgNS, "text");
-  label.setAttribute("x", String(margin.l - 8));
-  label.setAttribute("y", String(y + 4));
-  label.setAttribute("text-anchor", "end");
-  label.setAttribute("font-size", "11");
-  label.setAttribute("fill", "currentColor");
-  label.setAttribute("fill-opacity", "0.7");
-  label.textContent = String(v);
-  svg.appendChild(label);
-}
-
-const n = buckets.length;
-const slotW = innerW / n;
-const barW = Math.max(1, slotW * 0.82);
-
-let prevMonth = null;
-for (let i = 0; i < n; i++) {
-  const b = buckets[i];
-  const x = margin.l + i * slotW + (slotW - barW) / 2;
-  let stack = 0;
-
-  const g = document.createElementNS(svgNS, "g");
-  const title = document.createElementNS(svgNS, "title");
-  title.textContent = `${b.date.toFormat("yyyy-LL-dd")}`;
-  g.appendChild(title);
-
-  for (const s of STATUS_SERIES) {
-    const c = b.counts.get(s.key) ?? 0;
-    if (c <= 0) continue;
-
-    const y0 = yFor(stack);
-    const y1 = yFor(stack + c);
-    const h = Math.max(0, y0 - y1);
-
-    const r = document.createElementNS(svgNS, "rect");
-    r.setAttribute("x", String(x));
-    r.setAttribute("y", String(y1));
-    r.setAttribute("width", String(barW));
-    r.setAttribute("height", String(h));
-    r.setAttribute("fill", s.color);
-    r.setAttribute("fill-opacity", "0.85");
-    g.appendChild(r);
-
-    stack += c;
-  }
-
-  svg.appendChild(g);
-
-  const month = b.date.toFormat("LLL");
-  if (month !== prevMonth) {
-    prevMonth = month;
-
-    const tx = x + barW / 2;
-    const ty = margin.t + innerH + 20;
-    const t = document.createElementNS(svgNS, "text");
-    t.setAttribute("x", String(tx));
-    t.setAttribute("y", String(ty));
-    t.setAttribute("text-anchor", "middle");
-    t.setAttribute("font-size", "11");
-    t.setAttribute("fill", "currentColor");
-    t.setAttribute("fill-opacity", "0.65");
-    t.textContent = month;
-    svg.appendChild(t);
-  }
-}
-
-wrapper.appendChild(svg);
-```
-
 --- start-multi-column: kb_work
 ```column-settings
 number of columns: 2
-column size: [62%, 38%]
+column size: [65%, 30%]
 column spacing: 12px
 border: off
 shadow: off
@@ -314,7 +301,7 @@ LIMIT 12
 ## Recently Updated
 
 ```dataview
-LIST WITHOUT ID file.link
+TABLE WITHOUT ID file.link
 FROM "Knowledge"
 WHERE !contains(file.tags, "#FolderNote")
 SORT file.mtime DESC
