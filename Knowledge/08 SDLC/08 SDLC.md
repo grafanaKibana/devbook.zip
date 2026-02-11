@@ -44,3 +44,11 @@ if (pages.length) {
 }
 ```
 ---
+
+## Questions
+
+> [!QUESTION]- Explain Agile, Scrum, Kanban, and Waterfall.
+> - Agile: an umbrella of values and principles (iterative delivery, feedback, adapting to change).
+> - Scrum: an Agile framework with defined roles (Product Owner, Scrum Master, Developers), events (sprint planning, daily scrum, review, retrospective), and artifacts (product backlog, sprint backlog, increment).
+> - Kanban: a flow-based method focused on visualizing work, limiting work in progress, and optimizing lead time/throughput.
+> - Waterfall: a sequential lifecycle (requirements -> design -> implementation -> testing -> release) that works best when requirements are stable and change is expensive.

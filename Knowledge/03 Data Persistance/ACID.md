@@ -17,7 +17,11 @@ status: Not-Started
 
 ## Questions
 
-> [!QUESTION]- What is abc?
-> Answer
+> [!QUESTION]- Explain ACID
+> ACID describes key transaction guarantees:
+> - Atomicity: all operations in a transaction succeed or none do.
+> - Consistency: committed transactions move the database between valid states (respecting constraints).
+> - Isolation: concurrent transactions do not observe each other's intermediate states (controlled by isolation levels).
+> - Durability: once committed, data survives crashes (via logging, checkpoints, replication, etc.).
 
 ## Further Reading

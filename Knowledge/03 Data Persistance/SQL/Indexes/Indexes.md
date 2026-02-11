@@ -145,37 +145,77 @@ if (pages.length) {
 
 ### Questions
 
-1. [Почему таблица не может иметь два кластеризованных индекса?](https://habr.com/ru/post/247373/#01)
-    
-    > [!TIP]
-    > Кластеризованный индекс – это и есть таблица. Когда вы создаете кластеризованный индекс у таблицы, подсистема хранения данных сортирует все строки в таблице в порядке возрастания или убывания, согласно определению индекса. Кластеризованный индекс это не отдельная сущность как другие индексы, а механизм сортировки данных в таблице и облегчения быстрого доступа к строкам с данными.
-    >
-    > Представим, что у вас есть таблица, содержащая историю операций по продажам. Таблица Sales включает в себя такую информация как идентификатор заказа, позицию товара в заказе, номер товара, количество товара, номер и дату заказа и т.д. Вы создаёте кластеризованный индекс по столбцам *OrderID* и *LineID*, с сортировкой в порядке возрастания, как показано в следующем *T-SQL* коде:
-    >
-    > ```sql
-    > CREATE UNIQUE CLUSTERED INDEX ix_oriderid_lineid
-    > ON dbo.Sales(OrderID, LineID);
-    > ```
-    >
-    > Когда вы запустите этот скрипт все строки в таблице будут физически отсортированы сначала по столбцу OrderID, а затем по LineID, но сами данные останутся в единственном логическом блоке, в таблице. По этой причине вы не можете создать два кластеризованных индекса. Может быть только одна таблица с одними данными и эта таблица может быть отсортирована только один раз в определенном порядке.
-    
-2. [Если кластеризованная таблица даёт множество преимуществ, то зачем использовать кучу?](https://habr.com/ru/post/247373/#02)
-3. [Как изменить установленное по умолчанию значение коэффициента заполнения индекса?](https://habr.com/ru/post/247373/#03)
-4. [Можно ли создать кластеризованный индекс на столбце, содержащем дубликаты?](https://habr.com/ru/post/247373/#04)
-5. [Как хранится таблица, если не был создан кластеризованный индекс?](https://habr.com/ru/post/247373/#05)
-6. [Какая взаимосвязь между ограничениями на уникальность значения и первичным ключом с индексами таблицы?](https://habr.com/ru/post/247373/#06)
-7. [Почему в SQL Server кластеризованные и некластеризованные индексы называются сбалансированным деревом?](https://habr.com/ru/post/247373/#07)
-8. [Как вообще индекс может улучшить производительность запросов, если приходится переходить по всем этим индексным узлам?](https://habr.com/ru/post/247373/#08)
-9. [Если индексы настолько замечательны, то почему бы просто не создать их на каждый столбец?](https://habr.com/ru/post/247373/#09)
-10. [Обязательно ли создавать кластеризованный индекс на столбце с первичным ключом?](https://habr.com/ru/post/247373/#10)
-11. [А что если проиндексировать представление, то это по-прежнему будет представление?](https://habr.com/ru/post/247373/#11)
-12. [Зачем использовать покрывающий индекс взамен составного индекса?](https://habr.com/ru/post/247373/#12)
-13. [Имеет ли значение количество дубликатов в ключевом столбце?](https://habr.com/ru/post/247373/#13)
-14. [Можно ли создать некластеризованный индекс только для определенного подмножества данных ключевого столбца?](https://habr.com/ru/post/247373/#14)
+> [!QUESTION]- Why can't a table have two clustered indexes?
+> Reference: [Article](https://habr.com/ru/post/247373/#01)
+> A clustered index is effectively the table. When you create a clustered index, the storage engine orders the table's rows according to the index key (ascending or descending). A clustered index is not a separate structure like other indexes; it is the way the table data itself is organized to enable efficient access to rows.
+>
+> Imagine you have a table that stores a sales history. The Sales table contains information such as order id, line id, product id, quantity, order number and date, and so on. You create a clustered index on the *OrderID* and *LineID* columns, sorted ascending, as shown in the following T-SQL:
+>
+> ```sql
+> CREATE UNIQUE CLUSTERED INDEX ix_oriderid_lineid
+> ON dbo.Sales(OrderID, LineID);
+> ```
+>
+> When you run this script, all rows in the table are physically ordered first by OrderID and then by LineID, but the data still remains a single logical structure: the table. For this reason, you cannot create two clustered indexes. There is only one table with one set of data, and that data can only be ordered one way at a time.
+
+> [!QUESTION]- If a clustered table has many benefits, why use a heap?
+> Reference: [Article](https://habr.com/ru/post/247373/#02)
+> Answer is not provided in the source interview list; see Further Reading.
+
+> [!QUESTION]- How do you change the default index fill factor?
+> Reference: [Article](https://habr.com/ru/post/247373/#03)
+> Answer is not provided in the source interview list; see Further Reading.
+
+> [!QUESTION]- Can you create a clustered index on a column with duplicates?
+> Reference: [Article](https://habr.com/ru/post/247373/#04)
+> Answer is not provided in the source interview list; see Further Reading.
+
+> [!QUESTION]- How is a table stored if no clustered index exists?
+> Reference: [Article](https://habr.com/ru/post/247373/#05)
+> Answer is not provided in the source interview list; see Further Reading.
+
+> [!QUESTION]- What is the relationship between unique constraints, primary keys, and table indexes?
+> Reference: [Article](https://habr.com/ru/post/247373/#06)
+> Answer is not provided in the source interview list; see Further Reading.
+
+> [!QUESTION]- Why are clustered and nonclustered indexes called balanced trees in SQL Server?
+> Reference: [Article](https://habr.com/ru/post/247373/#07)
+> Answer is not provided in the source interview list; see Further Reading.
+
+> [!QUESTION]- How can an index improve query performance if you have to traverse all those index nodes?
+> Reference: [Article](https://habr.com/ru/post/247373/#08)
+> Answer is not provided in the source interview list; see Further Reading.
+
+> [!QUESTION]- If indexes are so great, why not create them on every column?
+> Reference: [Article](https://habr.com/ru/post/247373/#09)
+> Answer is not provided in the source interview list; see Further Reading.
+
+> [!QUESTION]- Do you have to create a clustered index on the primary key column?
+> Reference: [Article](https://habr.com/ru/post/247373/#10)
+> Answer is not provided in the source interview list; see Further Reading.
+
+> [!QUESTION]- If you index a view, is it still a view?
+> Reference: [Article](https://habr.com/ru/post/247373/#11)
+> Answer is not provided in the source interview list; see Further Reading.
+
+> [!QUESTION]- Why use a covering index instead of a composite index?
+> Reference: [Article](https://habr.com/ru/post/247373/#12)
+> Answer is not provided in the source interview list; see Further Reading.
+
+> [!QUESTION]- Does the number of duplicates in the key column matter?
+> Reference: [Article](https://habr.com/ru/post/247373/#13)
+> Answer is not provided in the source interview list; see Further Reading.
+
+> [!QUESTION]- Can you create a nonclustered index for only a subset of key column values?
+> Reference: [Article](https://habr.com/ru/post/247373/#14)
+> Answer is not provided in the source interview list; see Further Reading.
 
 ## Questions
 
-> [!QUESTION]- What is abc?
-> Answer
+> [!QUESTION]- What is an index and what types exist?
+> An index is an additional on-disk/in-memory data structure (often a B-tree) that speeds up data access by allowing efficient seeks and ordered scans. Common types include clustered and nonclustered indexes; also unique, composite, filtered/partial, and full-text indexes (availability depends on the DB engine).
+
+> [!QUESTION]- How does ordering work for clustered vs nonclustered indexes?
+> With a clustered index, the leaf level is the table data itself, stored in the index key order, so range scans return rows already ordered by that key. With a nonclustered index, the leaf level stores index keys plus row locators; rows are ordered by the nonclustered key, but fetching non-index columns may require lookups into the clustered index (or heap).
 
 ## Further Reading

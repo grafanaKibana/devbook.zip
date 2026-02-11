@@ -91,6 +91,14 @@ CLR (Common Language Runtime) - это часть .NET Framework (или .NET Co
 
 ## Questions
 
+> [!QUESTION]- What is managed vs unmanaged code?
+> Managed code runs under the .NET runtime (CLR) and benefits from runtime services like type safety checks, exception handling, garbage collection, and JIT/AOT compilation.
+> Unmanaged code runs directly as native machine code under the OS (for example, C/C++ binaries). It does not run under the CLR and typically requires explicit resource and lifetime management.
+
+> [!QUESTION]- What is the CLR? What does it do? What is IL (CIL/MSIL)?
+> The CLR (Common Language Runtime) is the execution engine of .NET. It loads assemblies, verifies and executes IL, compiles IL to native code (JIT or AOT), manages memory (GC), handles exceptions, supports threading and interop, and provides other runtime services.
+> IL (also called CIL or MSIL) is the CPU-independent intermediate instruction set produced by .NET language compilers and stored in assemblies together with metadata. The CLR turns IL into native code for the current platform.
+
 
 
 ## Further Reading

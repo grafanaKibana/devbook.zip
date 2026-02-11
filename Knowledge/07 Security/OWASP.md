@@ -17,7 +17,10 @@ status: Not-Started
 
 ## Questions
 
-> [!QUESTION]- What is abc?
-> Answer
+> [!QUESTION]- Which OWASP Top 10 vulnerabilities do you know?
+> OWASP Top 10 is a regularly updated list of the most common and impactful web application security risks.
+> For example (2021): Broken Access Control, Cryptographic Failures, Injection, Insecure Design, Security Misconfiguration,
+> Vulnerable and Outdated Components, Identification and Authentication Failures, Software and Data Integrity Failures,
+> Security Logging and Monitoring Failures, Server-Side Request Forgery.
 
 ## Further Reading

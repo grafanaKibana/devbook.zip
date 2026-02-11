@@ -19,7 +19,10 @@ status: Not-Started
 
 ## Questions
 
-> [!QUESTION]- What is abc?
-> Answer
+> [!QUESTION]- How to choose Code First vs Database First?
+> Use Code First when you want the code model to be the source of truth (new projects, strong domain model, migrations as part of delivery). Use Database First when you already have a database schema you must integrate with (legacy DB, shared DB, strict DBA-controlled schema) and want to generate the model from it.
+
+> [!QUESTION]- What inheritance mapping strategies exist in Entity Framework?
+> The common strategies are: TPH (Table Per Hierarchy, single table with a discriminator), TPT (Table Per Type, separate table per type), and TPC (Table Per Concrete type, separate table per concrete type). They trade off query simplicity, normalization, and performance.
 
 ## Further Reading

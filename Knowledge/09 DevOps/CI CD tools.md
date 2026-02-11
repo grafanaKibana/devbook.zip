@@ -15,7 +15,9 @@ status: Not-Started
 
 ## Questions
 
-> [!QUESTION]- What is abc?
-> Answer
+> [!QUESTION]- What is CI/CD?
+> CI (Continuous Integration) is the practice of frequently integrating changes into a shared branch with automated builds and tests.
+> CD can mean Continuous Delivery (always in a releasable state) or Continuous Deployment (automatic release to production).
+> CI/CD is usually implemented as a pipeline that runs linting, tests, security checks, builds, and deployments.
 
 ## Further Reading

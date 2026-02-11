@@ -6,7 +6,6 @@
       {
         "id": "571adfa34c1c7218",
         "type": "tabs",
-        "dimension": 46.44308943089432,
         "children": [
           {
             "id": "5eac11414fcb0957",
@@ -28,44 +27,18 @@
             "id": "31bca3b8531db801",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "split-diff-view",
               "state": {
-                "file": "Assets/TEST INTERVIEW.md",
-                "mode": "preview",
-                "source": true
+                "aFile": "Knowledge/01 Programming/NET/CSharp/Fundamentals/Collections.md",
+                "bFile": "Knowledge/01 Programming/NET/CSharp/Fundamentals/Collections.md",
+                "aRef": ""
               },
-              "icon": "lucide-file",
-              "title": "TEST INTERVIEW"
+              "icon": "diff",
+              "title": "Diff: Collections  (Working Tree)"
             }
           }
         ],
         "currentTab": 1
-      },
-      {
-        "id": "2d688b6ffea0472e",
-        "type": "tabs",
-        "dimension": 53.55691056910568,
-        "children": [
-          {
-            "id": "ce7a72e482374127",
-            "type": "leaf",
-            "pinned": true,
-            "state": {
-              "type": "canvas",
-              "state": {
-                "file": "Knowledge/Roadmap.canvas",
-                "viewState": {
-                  "x": 376.96279561990366,
-                  "y": 426.2262871987958,
-                  "zoom": -0.7387608791621516
-                }
-              },
-              "pinned": true,
-              "icon": "lucide-layout-dashboard",
-              "title": "Roadmap"
-            }
-          }
-        ]
       }
     ],
     "direction": "vertical"
@@ -143,8 +116,7 @@
               "title": "Bookmarks"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -157,6 +129,7 @@
       {
         "id": "4258cb4b831c7f51",
         "type": "tabs",
+        "dimension": 64.57253886010362,
         "children": [
           {
             "id": "65fa44482ae23c99",
@@ -167,12 +140,44 @@
               "icon": "git-pull-request",
               "title": "Source Control"
             }
+          },
+          {
+            "id": "3ac884eb1bc73b82",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks"
+            }
+          },
+          {
+            "id": "226686c3d7d19514",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links"
+            }
           }
         ]
       },
       {
         "id": "1990516a765989dd",
         "type": "tabs",
+        "dimension": 35.42746113989637,
         "children": [
           {
             "id": "ece09f77d4f7a9ee",
@@ -180,13 +185,12 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Assets/TEST INTERVIEW.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of TEST INTERVIEW"
+              "title": "Outline"
             }
           },
           {
@@ -194,11 +198,9 @@
             "type": "leaf",
             "state": {
               "type": "file-properties",
-              "state": {
-                "file": "Assets/TEST INTERVIEW.md"
-              },
+              "state": {},
               "icon": "lucide-info",
-              "title": "File properties for TEST INTERVIEW"
+              "title": "File properties"
             }
           },
           {
@@ -239,43 +241,43 @@
   },
   "active": "31bca3b8531db801",
   "lastOpenFiles": [
-    "Assets/Assets.md",
-    "Templates/Template - Concept Page.md",
-    "Templates/Templates.md",
-    "Assets/TEST INTERVIEW.md",
-    "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Bubble Sort.md",
-    "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms.md",
-    "Knowledge/Knowledge.md",
+    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures.md",
+    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Types.md",
+    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md",
+    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures/Сontrol Structures.md",
+    "Knowledge/01 Programming/NET/CSharp/CSharp.md",
+    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures/Reflection.md",
+    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures/Namespace.md",
+    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures/try-catch-finnaly.md",
+    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures/Assembly.md",
+    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures/Methods.md",
+    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures/ForEach.md",
+    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Async Await.md",
+    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures",
     "Knowledge/Roadmap.canvas",
-    "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Quick Sort.md",
-    "Knowledge/01 Programming/NET/NET.md",
-    "Knowledge/01 Programming/01 Programming.md",
-    "untitled folder/untitled folder.md",
+    "Knowledge/Knowledge.md",
+    "Knowledge/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set Union-Find.md",
+    "Knowledge/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set.md",
+    "Knowledge/02 Computer Science/Algorithms/Algorithms.md",
+    "Knowledge/02 Computer Science/Algorithms/Complexity/Complexity.md",
+    "Knowledge/02 Computer Science/Algorithms/Algorithm Efficiency and Complexity.md",
+    "Knowledge/02 Computer Science/02 Computer Science.md",
+    "Knowledge/01 Programming/NET/Runtime/Common Language Runtime.md",
+    "Knowledge/01 Programming/NET/Runtime/Runtime.md",
+    "Knowledge/02 Computer Science/Data Structures/How Hash Tables Work.md",
+    "Knowledge/02 Computer Science/Data Structures/Data Structures.md",
+    "Knowledge/02 Computer Science/Algorithms/String Searching/String Searching.md",
+    "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms.md",
+    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Indexers.md",
     "untitled folder",
     "Untitled.base",
-    "AGENTS.md",
-    "Knowledge/01 Programming/NET/Other/Other.md",
-    "Knowledge/01 Programming/NET/CSharp/CSharp.md",
-    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md",
-    "Knowledge/05 Architecture/Distributed Systems/CAP theorem.md",
-    "Knowledge/09 DevOps/CI CD tools.md",
-    "Knowledge/09 DevOps/09 DevOps.md",
-    "Knowledge/11 AI & ML/LLM/Prompting/Showing Examples.md",
-    "Knowledge/11 AI & ML/LLM/Prompting/Techniques/Techniques.md",
-    "Knowledge/11 AI & ML/Machine Learning/Types.md",
-    "Knowledge/11 AI & ML/LLM/Agents/Mental Framework.md",
-    "Knowledge/11 AI & ML/LLM/Agents/Agents.md",
-    "Assets/11 AI & ML/11 AI & ML.md",
     "Assets/11 AI & ML",
-    "Knowledge/11 AI & ML/LLM/Prompting/Instruction Prompting.md",
-    "Knowledge/11 AI & ML/LLM/Prompting/Prompting.md",
     "Knowledge/06 Patterns & Practices/Paradigms & Practices",
     "Knowledge/06 Patterns & Practices/Patterns",
     "Knowledge/06 Patterns & Practices/Principles",
     "Knowledge/05 Architecture/Distributed Systems",
     "Knowledge/05 Architecture/Patterns",
     "Knowledge/05 Architecture/Application Architecture",
-    "Knowledge/05 Architecture/Architecture Styles",
     "Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205142069.png",
     "Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205141994.png",
     "Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205142050.png",

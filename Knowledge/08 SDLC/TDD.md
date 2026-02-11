@@ -15,7 +15,13 @@ status: Not-Started
 
 ## Questions
 
-> [!QUESTION]- What is abc?
-> Answer
+> [!QUESTION]- What is TDD?
+> TDD (Test-Driven Development) is a development practice where you write a test before the production code.
+> The typical loop is Red Green Refactor:
+> - Red: write a small test that fails
+> - Green: implement the simplest code to make it pass
+> - Refactor: improve the code while keeping tests green
+>
+> The goal is fast feedback, better design (smaller units with clear contracts), and protection against regressions.
 
 ## Further Reading

@@ -27,97 +27,92 @@ status: Not-Started
 
 ## Questions
 
-- **Common**
-    - What difference between IEnumerable & IQueryable?
-        
-        > [!TIP]
-        > **`Enumerable`** и **`IQueryable`** представляют два различных интерфейса в C# основное различие которых заключается в том  что **`IEnumerable`** предназначен для работы с коллекциями данных в памяти, тогда как **`IQueryable`** предназначен для формирования запросов к источникам данных (например, базам данных) с возможностью выполнения запросов на стороне источника данных.
-        >
-        > 1. **IEnumerable:**
-        >     - **`IEnumerable`** является основным интерфейсом для работы с коллекциями в LINQ (Language Integrated Query).
-        >     - Предоставляет возможность перечисления элементов коллекции один за другим с использованием foreach.
-        >     - Выполняет операции над данными на стороне клиента (в памяти).
-        >     - Применяется для работы с коллекциями, которые хранятся в памяти (например, массивы, списки).
-        >     - LINQ-запросы над **`IEnumerable`** выполняются в памяти, после чего LINQ операторы применяются к результирующей последовательности.Пример использования **`IEnumerable`**:
-        > 2. **IQueryable:**
-        >     - **`IQueryable`** является расширением **`IEnumerable`** и предназначен для работы с коллекциями данных, которые могут быть запросами к источнику данных (например, база данных).
-        >     - Позволяет строить запросы LINQ, которые будут выполнены на стороне источника данных (например, SQL-запросы к базе данных).
-        >     - Выполняет операции над данными на стороне сервера (в источнике данных) и поддерживает отложенную загрузку данных.
-        >     - Применяется для работы с запросами к базам данных, веб-сервисам и другим удаленным источникам данных.
-        >     - LINQ-запросы над **`IQueryable`** преобразуются в соответствующий запрос к источнику данных (например, SQL-запрос) для выполнения на сервере.
+> [!QUESTION]- What data structure is used behind `Dictionary<TKey, TValue>`?
+> A hash table: it uses hash codes to distribute keys into buckets for efficient average-case lookups.
+>
+> The primary data structure behind **`Dictionary`** is a hash table.
 
-        
-    - How does deferred execution differ in IEnumerable vs IQueryable?
-    - What happens when you call ToList() on an IQueryable?
-    - What should you watch out for when mixing client-side logic in IQueryable expressions?
-- **List**
-    - **Как List устроен под капотом?**
-        
-        > [!TIP]
-        > **`List<T>`** представляет собой удобную абстракцию над массивом, обеспечивая его динамическое расширение при добавлении элементов. Расширение массива происходит с увеличением его ёмкости для уменьшения частоты реаллокации памяти, что улучшает производительность. Устройство **`List<T>`** под капотом:
-        >
-        > 1. **Массив элементов `T[]`**:
-        >     - Основа **`List<T>`** - это обычный массив элементов типа **`T`**. При создании **`List<T>`** создается массив из начального размера (обычно 4 элемента), который будет расширяться по мере добавления элементов.
-        > 2. **`Capacity` и `Count`**:
-        >     - **`Capacity`** представляет собой текущую ёмкость (размер) массива, т.е., сколько элементов может вместить массив без необходимости его расширения.
-        >     - **`Count`** представляет количество фактически добавленных элементов.
-        > 3. **Динамическое расширение массива**:
-        >     - При добавлении нового элемента в **`List<T>`**, проверяется **`Count`** и **`Capacity`**. Если **`Count`** достигает **`Capacity`**, **`List<T>`** увеличивает размер массива, обычно удваивая его текущий **`Capacity`**.
-        >     - При удалении **`Capacity`** не уменьшается.
+> [!QUESTION]- How is `List<T>` implemented under the hood?
+> `List<T>` wraps an internal array. It tracks `Count` separately from `Capacity`, and when it runs out of capacity it allocates a larger array and copies the existing elements to the new array.
+>
+> **`List<T>`** is a convenient abstraction over an array, providing dynamic growth when adding elements.
+> The internal buffer grows by increasing its capacity to reduce how often memory needs to be reallocated, which improves performance.
+> How **`List<T>`** works under the hood:
+>
+> 1. **Element array `T[]`**:
+>     - The core of **`List<T>`** is a regular array of elements of type **`T`**. When you create a **`List<T>`**, it allocates an initial array (often 4 elements) that grows as you add items.
+> 2. **`Capacity` and `Count`**:
+>     - **`Capacity`** is the current size of the internal array, i.e., how many elements it can hold before it must grow.
+>     - **`Count`** is how many elements have actually been added.
+> 3. **Dynamic growth**:
+>     - When adding a new element, **`List<T>`** checks **`Count`** and **`Capacity`**. If **`Count`** reaches **`Capacity`**, **`List<T>`** grows the internal array, usually doubling the current **`Capacity`**.
+>     - When removing elements, **`Capacity`** does not shrink automatically.
 
-        
-    - **Count vs Capacity?**
-        
-        > [!TIP]
-        > **Count**:
-        >
-        > - **`Count`** представляет собой количество элементов, фактически находящихся в коллекции или контейнере. Это значение изменяется динамически при добавлении или удалении элементов из коллекции. Часто используется для выполнения итераций по коллекции или для проверки, не пуста ли коллекция.
-        >
-        > **Capacity**:
-        >
-        > - **`Capacity`** представляет собой текущую ёмкость (вместимость) коллекции, то есть количество элементов, которое коллекция может содержать до того, как ей потребуется увеличить свою ёмкость, выделив больше памяти. Это свойство изменяется реже, чем **`Count`**, и обычно увеличивается на фиксированный размер при необходимости. **`Capacity`** полезно для оптимизации производительности, так как увеличение ёмкости может быть дорогой операцией, и предварительное выделение памяти может уменьшить необходимость в частых реаллокациях.
+> [!QUESTION]- What is the difference between `Count` and `Capacity` in `List<T>`?
+> `Count` is how many items are stored. `Capacity` is how many items the internal buffer can hold before it needs to grow.
+>
+> **Count**:
+> - **`Count`** is the number of elements actually contained in the collection. It changes dynamically when you add or remove elements.
+> 
+> **Capacity**:
+> - **`Capacity`** is the current capacity of the internal buffer, i.e., how many elements the collection can hold before it needs to grow by allocating more memory. It changes less frequently than **`Count`** and typically grows in larger steps. **`Capacity`** matters for performance because growth can be an expensive reallocation + copy.
 
-        
-    - **Как работает Clear & Remove с Capacity?**
-        
-        > [!TIP]
-        > `Capacity` не изменяется при очищении или удалении элементов, для того чтобы сбросить `Capacity` можно вызвать `TrimExcess()` который установит `Capacity` значения текущей длины массива или установить `Capacity` напрямую. Изменение `Capacity` повлечет за собой перераспределение памяти и копирование всех элементов в новый массив
+> [!QUESTION]- How do `Clear` and `Remove` affect `Capacity` in `List<T>`?
+> They typically only change `Count`; `Capacity` remains unchanged. To reduce `Capacity`, call `TrimExcess()` or set `Capacity` explicitly, which reallocates and copies elements.
+>
+> `Capacity` does not change when clearing or removing elements. To reduce `Capacity`, you can call `TrimExcess()` (which sets `Capacity` close to the current size) or set `Capacity` directly. Changing `Capacity` reallocates and copies elements into a new array.
 
-        
-- **Dictionary**
-    - Какая структура даных стоит за Dictionary?
-        
-        > [!TIP]
-        > Основной структурой данных, лежащей в основе **`Dictionary`** , является хеш-таблица.
+> [!QUESTION]- What is the difference between `IEnumerable` and `IQueryable`?
+> **`IEnumerable`** and **`IQueryable`** are two different abstractions. The key difference is that **`IEnumerable`** is intended for in-memory data, while **`IQueryable`** represents a query that can be translated and executed by a remote provider (for example, a database).
+> 
+> 1. **IEnumerable:**
+>     - **`IEnumerable`** is the basic interface for iterating collections (and a common target for LINQ-to-Objects).
+>     - It enumerates items one by one using `foreach`.
+>     - Operations run on the client side (in memory).
+>     - Used for in-memory collections (arrays, lists, etc.).
+> 2. **IQueryable:**
+>     - **`IQueryable`** extends **`IEnumerable`** and is meant for queryable data sources.
+>     - It allows building LINQ queries that a provider can translate (for example into SQL).
+>     - Operations can run on the server/provider side and may support deferred loading.
+>     - Used for databases, web services, and other remote sources.
 
-        
-    - Why is Dictionary faster than List for lookups?
-    - How does hash collision affect performance?
-    - What’s the difference between Dictionary and ConcurrentDictionary?
-    - How would you customize hash code generation for a complex key?
-- **HashSet**
-    - Как работает механизм добавления значения в HashTable?
-        
-        > [!TIP]
-        > Алгоритм:
-        >
-        > 1. **Хеширование ключа**: Сначала система хеширует ключ, чтобы получить хеш-код. Хеш-код представляет собой числовое значение, которое будет использоваться для определения местоположения значения внутри хеш-таблицы.
-        > 2. **Определение позиции**: По полученному хеш-коду система определяет позицию внутри хеш-таблицы, где будет храниться значение.
-        > 3. **Добавление значения**: Если в указанной позиции нет других значений, то новое значение добавляется непосредственно на эту позицию. Если в этой позиции уже есть одно или несколько значений (это называется коллизией), то система решает коллизию, используя различные методы, например, метод цепочек (chaining) или открытое адресное хеширование.
-        >     - **Метод цепочек (chaining)**: В случае коллизии создается связанный список, в котором все значения с одним хеш-кодом хранятся последовательно.
-        >     - **Открытое адресное хеширование**: Если местоположение уже занято, система ищет следующую доступную ячейку в хеш-таблице, используя специальные алгоритмы, и добавляет значение туда.
-        >
-        > Этот механизм обеспечивает быстрое добавление элементов в **`Dictionary`**, в среднем за константное время (O(1)) в случае отсутствия коллизий.
+> [!QUESTION]- How does deferred execution differ in `IEnumerable` vs `IQueryable`?
+> Answer is not provided in the source interview list; see Further Reading.
 
-        
-    - За счет чего использование хеша вместо самого значение ключа ускоряется поиск?
-        
-        > [!TIP]
-        > Хеш-таблица использует хеш-код ключа для определения индекса, где должно храниться значение. Это позволяет сразу перейти к соответствующему индексу массива (или другой структуры данных), где находится элемент, вместо того чтобы перебирать все элементы по порядку, и сравнивать каждый с искомым ключём.
+> [!QUESTION]- What happens when you call `ToList()` on an `IQueryable`?
+> Answer is not provided in the source interview list; see Further Reading.
 
-        
-- **Trees**
-- **Graph**
+> [!QUESTION]- What should you watch out for when mixing client-side logic in `IQueryable` expressions?
+> Answer is not provided in the source interview list; see Further Reading.
+
+> [!QUESTION]- Why is `Dictionary` usually faster than `List` for lookups?
+> Answer is not provided in the source interview list; see Further Reading.
+
+> [!QUESTION]- How does hash collision affect performance?
+> Answer is not provided in the source interview list; see Further Reading.
+
+> [!QUESTION]- What's the difference between `Dictionary` and `ConcurrentDictionary`?
+> Answer is not provided in the source interview list; see Further Reading.
+
+> [!QUESTION]- How would you customize hash code generation for a complex key?
+> Answer is not provided in the source interview list; see Further Reading.
+
+> [!QUESTION]- How does inserting a value into a hashtable work?
+> Algorithm:
+> 
+> 1. **Hash the key**: the system hashes the key to get a hash code. The hash code is used to locate where the value should be stored.
+> 2. **Find the position**: based on the hash code, the system determines a position (bucket/slot) in the table.
+> 3. **Insert the value**:
+>     - If the position is empty, the value is stored there.
+>     - If the position already has a value (a collision), the system resolves the collision using a strategy such as chaining or open addressing.
+>         - **Chaining**: values with the same bucket are stored in a linked structure.
+>         - **Open addressing**: if a slot is occupied, the system searches for another available slot using a probing algorithm.
+> 
+> This provides fast average-case insertions (often constant time) when collisions are low.
+
+> [!QUESTION]- Why does using a hash code instead of comparing full keys speed up lookups?
+> A hash table uses the key's hash code to compute an index for where the value should be stored.
+> This lets it jump directly to the relevant bucket/slot instead of scanning all elements and comparing each key to the target key.
 
 ## References and Further Reading
 

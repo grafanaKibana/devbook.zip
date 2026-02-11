@@ -372,7 +372,27 @@ public class MyClass : IDisposable
 
 ## Questions
 
-- 
+> [!QUESTION]- What is a memory leak? Is it possible in .NET? How?
+> A memory leak is memory that is no longer needed but cannot be reclaimed, so the process keeps growing over time.
+> Yes, it is possible in .NET:
+> - Managed leaks: objects stay reachable (for example via static caches, event subscriptions, long-lived collections), so GC cannot collect them.
+> - Unmanaged leaks: native memory/handles are allocated (directly or indirectly) and not released (for example, missing `Dispose()` / `using`).
+
+> [!QUESTION]- What is the call stack? Can it overflow? What happens then?
+> The call stack is a per-thread LIFO memory region that stores stack frames for active method calls (return address, parameters, locals, etc.).
+> It can overflow (for example, due to deep or infinite recursion or very large stack allocations). In .NET this typically results in `StackOverflowException`, and the process is terminated (it cannot be reliably handled).
+
+> [!QUESTION]- Why do we need `using {}` if there is a GC?
+> `using` provides deterministic cleanup for resources that are not just managed memory (file handles, sockets, OS handles, unmanaged buffers). GC runs non-deterministically and does not guarantee timely release of such resources.
+> The `using` statement compiles to `try/finally` so `Dispose()` is called even when exceptions occur.
+
+> [!QUESTION]- What are `IDisposable` and `Finalize`?
+> `IDisposable` is an interface for explicit, deterministic cleanup via `Dispose()`.
+> `Finalize` (a finalizer, written as `~TypeName()` in C#) is called by the GC for objects that have a finalizer, but it is non-deterministic and adds overhead. Finalizers should only be used to release unmanaged resources, and `Dispose()` typically calls `GC.SuppressFinalize(this)`.
+
+> [!QUESTION]- What is the disposable (dispose) pattern?
+> A standard way to implement `IDisposable` so both explicit cleanup (`Dispose()`) and (optionally) finalization are supported.
+> Typical shape: `Dispose()` calls `Dispose(true)` and then `GC.SuppressFinalize(this)`; a finalizer (if needed) calls `Dispose(false)`; `Dispose(bool disposing)` releases unmanaged resources and, when `disposing` is true, also disposes managed fields.
 
 ## References and Further Reading
 

@@ -44,8 +44,24 @@ foreach имеет несколько интересных тонкостей:
 
 ## Questions
 
-1. Какие типы можно использовать в `foreach`?
-2. Как `foreach` выглядит под капотом?
+> [!QUESTION]- How do you handle potential errors in code?
+> By using `try`/`catch`/`finally` (and sometimes `using`/`await using`) to handle exceptions and guarantee cleanup.
+> Use `try`/`catch`/`finally` to handle exceptions and to guarantee cleanup.
+
+> [!QUESTION]- What is recursion?
+> It is a technique where a function calls itself, typically with a smaller input, until reaching a base case that terminates the process.
+> A technique where a function calls itself (usually with a smaller input) until it reaches a base case that stops further calls.
+
+> [!QUESTION]- When might `finally` not execute?
+> When execution is interrupted in a way that prevents normal unwinding: process termination/crash, indefinite blocking or non-terminating code paths, `Environment.FailFast()`, and in practice `StackOverflowException`.
+> Early process termination due to an OS failure or critical application error.
+> When execution does not unwind normally: abrupt process termination/crash/kill, `Environment.FailFast()`, a `StackOverflowException`, or code paths that never complete (infinite loop, non-terminating recursion, deadlock/permanent blocking).
+
+> [!QUESTION]- What types can you use in `foreach`?
+> Answer is not provided in the source interview list; see the `foreach` section above.
+
+> [!QUESTION]- How is `foreach` implemented under the hood?
+> Answer is not provided in the source interview list; see the `foreach` section above.
 
 # Methods()
 
@@ -111,8 +127,11 @@ foreach имеет несколько интересных тонкостей:
 
 ### Questions
 
-1. Зачем нужно понадобится использовать ref для ссылочных типов, если ссылочные типы и так передаются в метод по ссылке?
-2. Зачем нужен `in` параметр?
+> [!QUESTION]- Why might you need `ref` for reference types if reference types are already passed by reference?
+> See the `ref` section above.
+
+> [!QUESTION]- What is an `in` parameter used for?
+> See the `in` section above.
 
 ## Output
 
@@ -154,7 +173,8 @@ foreach (var number in CountNumbers(1, 5))
 
 ### Questions
 
-1. Что такое yield и как он работает?
+> [!QUESTION]- What is `yield` and how does it work?
+> See the `yield` section above.
 
 # Namespace
 
@@ -200,24 +220,10 @@ namespace MyProject
 
 ### Questions
 
-1. Что такое пространство имен? Зачем они нужны?
+> [!QUESTION]- What is a namespace? Why do we need it?
+> See the Namespace section above.
 
 # try/catch/finally
-
-## Questions
-
-1. В каком случае мы не попадём в finally?
-    
-    > [!TIP]
-    > Происходит преждевременное завершение процесса работы программы, например, из-за сбоя в работе операционной системы или критической ошибки в приложении.
-    >
-    > 1. Выполняется операция, которая блокирует поток выполнения и не может завершиться, например, ожидание завершения другого потока или получение сетевых данных, которые не приходят.
-    > 2. Вызывается метод Environment.FailFast(), который предназначен для немедленного завершения приложения без выполнения блока finally.
-    > 3. Выполняется бесконечный цикл или рекурсивная функция, которые не могут завершиться.
-    > 4. Происходит исключение `StackOverflowException`
-
-    
-
 # Assembly
 
 ## Refrection
@@ -239,6 +245,7 @@ namespace MyProject
 
 ### Questions
 
-1. Что такое рефлексия?
+> [!QUESTION]- What is reflection?
+> See the Reflection section above.
 
 ## Further Reading

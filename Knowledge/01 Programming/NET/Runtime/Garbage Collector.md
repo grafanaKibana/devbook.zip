@@ -108,11 +108,17 @@ status: Not-Started
 
 ## Questions
 
-- Что такое Garbage Collector? Зачем он нужен? Как он работает?
-- Что такое Small Object Heap & Large Object Heap?
-    
-    
-- Что такое утечка памяти?
+> [!QUESTION]- What is the Garbage Collector? Why do we need it? How does it work (high level)?
+> The GC is the .NET runtime's automatic memory manager for managed objects. It periodically finds objects that are no longer reachable from GC roots, reclaims their memory, and (on the SOH) typically compacts surviving objects to reduce fragmentation.
+> The GC is generational (Gen 0/1/2): most collections are small and fast, while full collections are less frequent.
+
+> [!QUESTION]- What are the Small Object Heap (SOH) and the Large Object Heap (LOH)?
+> The SOH stores most objects (typically smaller than ~85,000 bytes) and is compacted regularly.
+> The LOH stores large allocations (typically 85,000 bytes and above, often large arrays). It is collected with Gen 2 and can become fragmented; compaction behavior differs from the SOH and is more expensive.
+
+> [!QUESTION]- What is a memory leak?
+> Memory that is no longer needed but cannot be reclaimed. In .NET this can be caused by keeping objects reachable (managed leaks) or by not releasing unmanaged resources.
+> See: [Memory Leaks](Memory%20Leaks.md)
 
 ## References and Further Reading
 

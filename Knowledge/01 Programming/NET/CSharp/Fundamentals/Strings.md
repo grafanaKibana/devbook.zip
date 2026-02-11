@@ -144,28 +144,26 @@ Console.WriteLine("Strings are immutable");
 
 ## Questions
 
-- Что такое интернирование строк?
-- Какие отличия между `string` & `StringBuilder`?
-    
-    > [!TIP]
-    > **`string`** и **`StringBuilder`** - это два класса, которые используются для работы со строками в C#, но они имеют существенные отличия в том, как они хранят и обрабатывают строки, что делает их подходящими для разных сценариев.
-    >
-    > 1. **Неизменяемость vs. Изменяемость**:
-    >     - **`string`** является неизменяемым (immutable) типом данных. Это означает, что после создания строки ее содержимое нельзя изменить. Любое изменение строки создает новый экземпляр строки в памяти.
-    >     - **`StringBuilder`**, напротив, представляет собой изменяемый (mutable) класс, предназначенный для эффективного построения и изменения строк. Вы можете добавлять, изменять и удалять символы или подстроки внутри **`StringBuilder`** без создания новых экземпляров.
-    > 2. **Производительность**:
-    >     - Использование **`string`** для множественных операций изменения строки может привести к созданию большого количества временных объектов в памяти, что может сказаться на производительности и использовании памяти. **`StringBuilder`** спроектирован для минимизации таких временных объектов и обеспечения более высокой производительности при множественных изменениях строк.
-    > 3. **Использование**:
-    >     - **`string`** подходит для работы с небольшими строками или ситуациями, где строка не изменяется или делает это редко
-    >     - **`StringBuilder`** лучше подходит для сборки строк, когда вам нужно многократно добавлять или изменять их содержимое, например, при формировании длинных SQL-запросов, XML-документов, JSON-строк и т. д.
+> [!QUESTION]- What is string interning?
+> It's a mechanism where identical strings share a single instance in an intern pool (especially string literals), reducing duplication. You can explicitly intern strings via `string.Intern`.
 
-    
-- Когда стоит использовать StringBuilder а когда нет?
-    
-    > [!TIP]
-    > Когда нужно многократно изменять или создавать строки внутри циклов или в сценариях, где производительность и эффективность использования памяти имеют значение. Это особенно полезно при работе с большими объемами данных, такими как формирование длинных текстовых выводов, SQL-запросов или XML/JSON-структур.
-    >
-    > В случае, когда строки являются статическими и изменяются редко, **`StringBuilder`** может быть избыточным, и **`string`** подходит для обработки таких данных.
+> [!QUESTION]- What are the differences between `string` and `StringBuilder`? When should you use `StringBuilder`?
+> `string` is immutable, so repeated concatenation can allocate many intermediate strings. `StringBuilder` is mutable and is typically preferred when building strings in loops or when many appends are performed.
+>
+> **`string`** and **`StringBuilder`** are two types used for working with strings in C#, but they differ significantly in how they store and manipulate string data, which makes them suitable for different scenarios.
+>
+> 1. **Immutability vs mutability**:
+>     - **`string`** is immutable. This means that after a string is created, its content cannot be changed. Any modification creates a new string instance in memory.
+>     - **`StringBuilder`** is mutable and is designed for efficient string construction and modification. You can append, modify, and delete characters or substrings inside **`StringBuilder`** without creating new string instances.
+> 2. **Performance**:
+>     - Using **`string`** for many modifications can lead to creating many temporary objects in memory, which can hurt performance and memory usage. **`StringBuilder`** is designed to minimize these temporary allocations and provide better performance for repeated changes.
+> 3. **When to use**:
+>     - **`string`** is suitable for small strings or situations where the string does not change (or changes rarely).
+>     - **`StringBuilder`** is better when you need to build strings with many appends/changes, for example when generating long SQL queries, XML documents, JSON strings, and so on.
+>
+> Use it when you need to repeatedly modify or build strings inside loops or in scenarios where performance and memory efficiency matter. This is especially useful when working with large amounts of data, such as generating long text output, SQL queries, or XML/JSON structures.
+>
+> When strings are effectively static and change rarely, **`StringBuilder`** may be unnecessary, and **`string`** is usually the better choice.
 
 
 ## Further Reading

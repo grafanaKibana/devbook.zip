@@ -81,21 +81,11 @@
       "color": "1"
     },
     {
-      "id": "n_7360aedba6",
-      "type": "file",
-      "file": "Knowledge/02 Computer Science/Algorithms/Complexity/Complexity.md",
-      "x": 840,
-      "y": 880,
-      "width": 340,
-      "height": 80,
-      "color": "1"
-    },
-    {
       "id": "n_c54b6fadf2",
       "type": "file",
       "file": "Knowledge/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set.md",
       "x": 840,
-      "y": 1000,
+      "y": 880,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -105,7 +95,7 @@
       "type": "file",
       "file": "Knowledge/02 Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
       "x": 840,
-      "y": 1120,
+      "y": 1000,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -115,7 +105,7 @@
       "type": "file",
       "file": "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms.md",
       "x": 840,
-      "y": 1240,
+      "y": 1120,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -125,7 +115,7 @@
       "type": "file",
       "file": "Knowledge/02 Computer Science/Algorithms/String Searching/String Searching.md",
       "x": 840,
-      "y": 1360,
+      "y": 1240,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -145,7 +135,7 @@
       "type": "file",
       "file": "Knowledge/03 Data Persistance/03 Data Persistance.md",
       "x": 0,
-      "y": 1640,
+      "y": 1520,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -155,7 +145,7 @@
       "type": "file",
       "file": "Knowledge/03 Data Persistance/ORMs/ORMs.md",
       "x": 420,
-      "y": 1640,
+      "y": 1520,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -165,7 +155,7 @@
       "type": "file",
       "file": "Knowledge/03 Data Persistance/SQL/SQL.md",
       "x": -420,
-      "y": 1640,
+      "y": 1520,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -175,7 +165,7 @@
       "type": "file",
       "file": "Knowledge/03 Data Persistance/SQL/Indexes/Indexes.md",
       "x": -840,
-      "y": 1760,
+      "y": 1640,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -185,7 +175,7 @@
       "type": "file",
       "file": "Knowledge/04 Networks/04 Networks.md",
       "x": 0,
-      "y": 2040,
+      "y": 1920,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -195,7 +185,7 @@
       "type": "file",
       "file": "Knowledge/04 Networks/Architecture & Ops/Architecture & Ops.md",
       "x": 420,
-      "y": 2040,
+      "y": 1920,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -205,7 +195,7 @@
       "type": "file",
       "file": "Knowledge/04 Networks/Protocols/Protocols.md",
       "x": -420,
-      "y": 2040,
+      "y": 1920,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -215,7 +205,7 @@
       "type": "file",
       "file": "Knowledge/04 Networks/Transport & Sockets/Transport & Sockets.md",
       "x": 420,
-      "y": 2160,
+      "y": 2040,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -225,7 +215,7 @@
       "type": "file",
       "file": "Knowledge/05 Architecture/05 Architecture.md",
       "x": 0,
-      "y": 2440,
+      "y": 2320,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -235,7 +225,7 @@
       "type": "file",
       "file": "Knowledge/05 Architecture/Application Architecture/Application Architecture.md",
       "x": 420,
-      "y": 2440,
+      "y": 2320,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -245,7 +235,7 @@
       "type": "file",
       "file": "Knowledge/05 Architecture/Architecture Styles/Architecture Styles.md",
       "x": -420,
-      "y": 2440,
+      "y": 2320,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -255,7 +245,7 @@
       "type": "file",
       "file": "Knowledge/05 Architecture/Distributed Systems/Distributed Systems.md",
       "x": 420,
-      "y": 2560,
+      "y": 2440,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -265,7 +255,7 @@
       "type": "file",
       "file": "Knowledge/05 Architecture/Patterns/Patterns.md",
       "x": -420,
-      "y": 2560,
+      "y": 2440,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -275,7 +265,7 @@
       "type": "file",
       "file": "Knowledge/06 Patterns & Practices/06 Patterns & Practices.md",
       "x": 0,
-      "y": 2840,
+      "y": 2720,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -285,7 +275,7 @@
       "type": "file",
       "file": "Knowledge/06 Patterns & Practices/Paradigms & Practices/Paradigms & Practices.md",
       "x": 420,
-      "y": 2840,
+      "y": 2720,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -295,7 +285,7 @@
       "type": "file",
       "file": "Knowledge/06 Patterns & Practices/Patterns/Patterns.md",
       "x": -420,
-      "y": 2840,
+      "y": 2720,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -305,7 +295,7 @@
       "type": "file",
       "file": "Knowledge/06 Patterns & Practices/Principles/Principles.md",
       "x": 420,
-      "y": 2960,
+      "y": 2840,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -315,7 +305,7 @@
       "type": "file",
       "file": "Knowledge/07 Security/07 Security.md",
       "x": 0,
-      "y": 3240,
+      "y": 3120,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -325,7 +315,7 @@
       "type": "file",
       "file": "Knowledge/08 SDLC/08 SDLC.md",
       "x": 0,
-      "y": 3480,
+      "y": 3360,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -335,7 +325,7 @@
       "type": "file",
       "file": "Knowledge/09 DevOps/09 DevOps.md",
       "x": 0,
-      "y": 3720,
+      "y": 3600,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -345,7 +335,7 @@
       "type": "file",
       "file": "Knowledge/09 DevOps/Deployment Stratagies/Deployment Stratagies.md",
       "x": 420,
-      "y": 3720,
+      "y": 3600,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -355,7 +345,7 @@
       "type": "file",
       "file": "Knowledge/10 Cloud/10 Cloud.md",
       "x": 0,
-      "y": 4000,
+      "y": 3880,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -365,7 +355,7 @@
       "type": "file",
       "file": "Knowledge/11 AI & ML/11 AI & ML.md",
       "x": 0,
-      "y": 4240,
+      "y": 4120,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -375,7 +365,7 @@
       "type": "file",
       "file": "Knowledge/11 AI & ML/LLM/LLM.md",
       "x": 420,
-      "y": 4240,
+      "y": 4120,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -385,7 +375,7 @@
       "type": "file",
       "file": "Knowledge/11 AI & ML/LLM/Agents/Agents.md",
       "x": 840,
-      "y": 4360,
+      "y": 4240,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -395,7 +385,7 @@
       "type": "file",
       "file": "Knowledge/11 AI & ML/LLM/Prompting/Prompting.md",
       "x": 840,
-      "y": 4480,
+      "y": 4360,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -405,7 +395,7 @@
       "type": "file",
       "file": "Knowledge/11 AI & ML/Machine Learning/Machine Learning.md",
       "x": -420,
-      "y": 4240,
+      "y": 4120,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -422,7 +412,7 @@
     {
       "id": "n_b0ac2236f9",
       "type": "text",
-      "text": "#### Roadmap legend\n**Generated:** 2026-02-11T16:01:15+02:00\n**Hub status mode:** rollup",
+      "text": "#### Roadmap legend\n**Generated:** 2026-02-11T18:39:20+02:00\n**Hub status mode:** rollup",
       "x": -840,
       "y": -480,
       "width": 380,
@@ -431,7 +421,7 @@
     {
       "id": "n_4a66490dd9",
       "type": "text",
-      "text": "Not-Started: 41",
+      "text": "Not-Started: 40",
       "x": -840,
       "y": -354,
       "width": 380,
@@ -527,13 +517,6 @@
       "fromNode": "n_ebcb435eb2",
       "fromSide": "right",
       "toNode": "n_3a1362b179",
-      "toSide": "left"
-    },
-    {
-      "id": "e_3a72107f6c",
-      "fromNode": "n_3a1362b179",
-      "fromSide": "right",
-      "toNode": "n_7360aedba6",
       "toSide": "left"
     },
     {

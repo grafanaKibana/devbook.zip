@@ -246,7 +246,10 @@ status: Not-Started
 
 ## Questions
 
-> [!QUESTION]- What is abc?
-> Answer
+> [!QUESTION]- What is normalization?
+> Normalization is organizing relational data to reduce redundancy and avoid update anomalies by decomposing tables and defining keys/relationships (e.g., 1NF, 2NF, 3NF). The goal is consistency and maintainability, not always maximum read performance.
+
+> [!QUESTION]- What is denormalization?
+> Denormalization is intentionally introducing redundancy (e.g., duplicating fields, adding aggregates/materialized views) to speed up reads and simplify queries. It shifts complexity to writes and requires extra care to keep data consistent.
 
 ## Further Reading

@@ -301,7 +301,7 @@ LIMIT 12
 ## Recently Updated
 
 ```dataview
-TABLE WITHOUT ID file.link
+TABLE WITHOUT ID file.link as "Note"
 FROM "Knowledge"
 WHERE !contains(file.tags, "#FolderNote")
 SORT file.mtime DESC

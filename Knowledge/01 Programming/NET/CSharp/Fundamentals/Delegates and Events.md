@@ -164,33 +164,48 @@ TestAndPublish(UniversalTester);
 
 ## Questions
 
-- Delegates
-    - Что такое делегат? Наведи примеры использования
-    - Какие есть предустановленные делегаты в С#? Какая в них разница?
-        1. 
-        
-        > [!TIP]
-        > - `Func<T, ..>` - Предназначен для случая когда нужно вернуть значение после выполнения. Много примеров можно найти в LINQ, например:
-        >     - `list.Select(x => x.SomeProperty)`
-        >     - `list.Where(x => x.SomeValue == someOtherValue)`
-        >     - `list.Join(otherList, x => x.FirstKey, y => y.SecondKey, ...)`
-        > - `Action<T>` - Предназначен для случаев когда возвращение значения не требуется а требуется просто выполнить какое-то действие. Примером реализации можно назвать `List<T>.ForEach` - Выполнить действие для каждого объекта в списке.
-        > - `Predicate<T>` - Особый случай `Func<T, bool>` Предназначен для случаев когда нужно вернуть булевое значение. Примеры:
-        >     - `list.All(x => x >= 0)`
-        >     - `list.Exists(str => string.IsNullOrEmpty(str))`
-        
-    - Что такое Ковариаивность\Контрвариативность\Инвариативность
-        
-        > [!TIP]
-        > - Ковариативность - Параметр-тип может быть преобразован от класса, к классу производному от него.
-        >   В цепочке `IEnumerable → IList → List` при использовании `IList` можно будет использовать типы помеченные `зеленым`
-        > - Контрвариативность - Параметр-тип может быть преобразован от класса, являющимся для него.
-        >   В цепочке `IEnumerable → IList → List` при использовании `IList` можно будет использовать типы помеченные `зеленым`
-        > - Инвариативность- Параметр-тип должен быть только указанного типа.
-        >   В цепочке `IEnumerable → IList → List` при использовании `IList` можно будет использовать типы помеченные `зеленым`
-        
-    - Во что преобразуется делегат после компиляции?
-- Events
-    - Какие можно назвать примеры использования ивентов?
+> [!QUESTION]- What is the difference between Action, Func, and Predicate?
+> `Action` returns `void`, `Func` returns a value, and `Predicate<T>` returns `bool` (it is essentially `Func<T, bool>`).
+> `Action<...>` returns `void`, `Func<...>` returns a value (last type parameter is the return type), and `Predicate<T>` is a specialized `Func<T, bool>` used to test a condition.
+> 
+> - `Func<T, ...>` is used when you need to return a value. Many examples can be found in LINQ, for example:
+>     - `list.Select(x => x.SomeProperty)`
+>     - `list.Where(x => x.SomeValue == someOtherValue)`
+>     - `list.Join(otherList, x => x.FirstKey, y => y.SecondKey, ...)`
+> - `Action<T>` is used when you do not need to return a value and you just need to perform an action. An example is `List<T>.ForEach`.
+> - `Predicate<T>` is a special case of `Func<T, bool>` used when you need to return a boolean value. Examples:
+>     - `list.All(x => x >= 0)`
+>     - `list.Exists(str => string.IsNullOrEmpty(str))`
+
+> [!QUESTION]- What is an anonymous method?
+> An inline implementation of a delegate without a named method.
+> It can be written as `delegate (...) { ... }` or, more commonly, as a lambda `(...) => ...`.
+> It can capture variables from the outer scope (closure).
+
+> [!QUESTION]- Which built-in delegates do you know in .NET?
+> Common ones are `Action`, `Func`, `Predicate`, `EventHandler`, `EventHandler<TEventArgs>`, `Comparison<T>`, `Converter<TInput, TOutput>`.
+
+> [!QUESTION]- What is a delegate? Give examples of usage.
+> A delegate is a type-safe way to treat methods as values: you can store a method reference in a variable, pass it around, and invoke it.
+> Delegates can also be multicast (invocation lists).
+> Common uses: callbacks, LINQ selectors/predicates, and events.
+
+> [!QUESTION]- What does a delegate compile to?
+> A delegate type becomes a class derived from `System.MulticastDelegate`, with an `Invoke` method and runtime support for invocation lists.
+> The compiler generates a sealed class derived from `System.MulticastDelegate` (and ultimately `System.Delegate`) with an `Invoke` method matching the signature.
+> Delegate instances store a target object (or `null` for static methods), a method pointer, and (for multicast delegates) an invocation list.
+
+> [!QUESTION]- What is an event? How is it different from a delegate?
+> An event is a delegate with restricted invocation: only the declaring type can raise it, while external code can only subscribe/unsubscribe.
+> An event is a member (usually backed by a delegate) that restricts operations from outside the declaring type: external code can only subscribe/unsubscribe (`+=`/`-=`), but cannot invoke the event or overwrite the invocation list.
+> A delegate is a normal value that can be invoked and reassigned.
+
+> [!QUESTION]- What are covariance, contravariance, and invariance?
+> - Covariance: a type parameter can be substituted with a more derived type (commonly for output positions).
+> - Contravariance: a type parameter can be substituted with a less derived type (commonly for input positions).
+> - Invariance: the type parameter must match exactly.
+
+> [!QUESTION]- What are examples of using events?
+> Answer is not provided in the source interview list; see Further Reading.
 
 ## Further Reading

@@ -49,7 +49,7 @@ if (pages.length) {
 
 ## Questions
 
-> [!QUESTION]- What is abc?
-> Answer
+> [!QUESTION]- What is an ORM?
+> An ORM (Object-Relational Mapper) maps relational database tables/rows to objects and translates queries/changes in code into SQL. It helps with CRUD, tracking changes, relationships, and migrations, at the cost of an abstraction layer you must understand to avoid performance issues.
 
 ## Further Reading
