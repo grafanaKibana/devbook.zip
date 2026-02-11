@@ -6,6 +6,45 @@
       {
         "id": "571adfa34c1c7218",
         "type": "tabs",
+        "dimension": 46.44308943089432,
+        "children": [
+          {
+            "id": "5eac11414fcb0957",
+            "type": "leaf",
+            "pinned": true,
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Knowledge/Knowledge.md",
+                "mode": "preview",
+                "source": true
+              },
+              "pinned": true,
+              "icon": "lucide-file",
+              "title": "Knowledge"
+            }
+          },
+          {
+            "id": "31bca3b8531db801",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Assets/TEST INTERVIEW.md",
+                "mode": "preview",
+                "source": true
+              },
+              "icon": "lucide-file",
+              "title": "TEST INTERVIEW"
+            }
+          }
+        ],
+        "currentTab": 1
+      },
+      {
+        "id": "2d688b6ffea0472e",
+        "type": "tabs",
+        "dimension": 53.55691056910568,
         "children": [
           {
             "id": "ce7a72e482374127",
@@ -16,32 +55,17 @@
               "state": {
                 "file": "Knowledge/Roadmap.canvas",
                 "viewState": {
-                  "x": -101.97795948303192,
-                  "y": 609.2149432496744,
-                  "zoom": -1.7387608791621516
+                  "x": 376.96279561990366,
+                  "y": 426.2262871987958,
+                  "zoom": -0.7387608791621516
                 }
               },
               "pinned": true,
               "icon": "lucide-layout-dashboard",
               "title": "Roadmap"
             }
-          },
-          {
-            "id": "49224acde6932cd2",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Knowledge/Knowledge.md",
-                "mode": "source",
-                "source": true
-              },
-              "icon": "lucide-file",
-              "title": "Knowledge"
-            }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -95,6 +119,21 @@
             }
           },
           {
+            "id": "c61c20cdb67738c5",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
             "id": "2c177b2f9145d419",
             "type": "leaf",
             "state": {
@@ -120,51 +159,46 @@
         "type": "tabs",
         "children": [
           {
-            "id": "b93bd09a67a13e96",
+            "id": "65fa44482ae23c99",
             "type": "leaf",
             "state": {
-              "type": "backlink",
-              "state": {
-                "file": "Knowledge/11 AI/Prompting/Techniques/Instruction Prompting/Instruction Prompting.md",
-                "collapseAll": false,
-                "extraContext": false,
-                "sortOrder": "alphabetical",
-                "showSearch": false,
-                "searchQuery": "",
-                "backlinkCollapsed": false,
-                "unlinkedCollapsed": true
-              },
-              "icon": "links-coming-in",
-              "title": "Backlinks for Instruction Prompting"
+              "type": "git-view",
+              "state": {},
+              "icon": "git-pull-request",
+              "title": "Source Control"
             }
-          },
+          }
+        ]
+      },
+      {
+        "id": "1990516a765989dd",
+        "type": "tabs",
+        "children": [
           {
-            "id": "ef5dc8e83c292c68",
+            "id": "ece09f77d4f7a9ee",
             "type": "leaf",
             "state": {
-              "type": "outgoing-link",
+              "type": "outline",
               "state": {
-                "file": "Knowledge/11 AI/Prompting/Techniques/Instruction Prompting/Instruction Prompting.md",
-                "linksCollapsed": false,
-                "unlinkedCollapsed": true
-              },
-              "icon": "links-going-out",
-              "title": "Outgoing links from Instruction Prompting"
-            }
-          },
-          {
-            "id": "c61c20cdb67738c5",
-            "type": "leaf",
-            "state": {
-              "type": "tag",
-              "state": {
-                "sortOrder": "frequency",
-                "useHierarchy": true,
+                "file": "Assets/TEST INTERVIEW.md",
+                "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
-              "icon": "lucide-tags",
-              "title": "Tags"
+              "icon": "lucide-list",
+              "title": "Outline of TEST INTERVIEW"
+            }
+          },
+          {
+            "id": "4d5678bed75fd56d",
+            "type": "leaf",
+            "state": {
+              "type": "file-properties",
+              "state": {
+                "file": "Assets/TEST INTERVIEW.md"
+              },
+              "icon": "lucide-info",
+              "title": "File properties for TEST INTERVIEW"
             }
           },
           {
@@ -180,34 +214,8 @@
               "icon": "lucide-archive",
               "title": "All properties"
             }
-          },
-          {
-            "id": "ece09f77d4f7a9ee",
-            "type": "leaf",
-            "state": {
-              "type": "outline",
-              "state": {
-                "file": "Knowledge/11 AI/Prompting/Techniques/Instruction Prompting/Instruction Prompting.md",
-                "followCursor": false,
-                "showSearch": false,
-                "searchQuery": ""
-              },
-              "icon": "lucide-list",
-              "title": "Outline of Instruction Prompting"
-            }
-          },
-          {
-            "id": "65fa44482ae23c99",
-            "type": "leaf",
-            "state": {
-              "type": "git-view",
-              "state": {},
-              "icon": "git-pull-request",
-              "title": "Source Control"
-            }
           }
-        ],
-        "currentTab": 5
+        ]
       }
     ],
     "direction": "horizontal",
@@ -229,12 +237,19 @@
       "notebook-navigator:Notebook Navigator": true
     }
   },
-  "active": "49224acde6932cd2",
+  "active": "31bca3b8531db801",
   "lastOpenFiles": [
-    "Knowledge/Roadmap.canvas",
-    "Knowledge/Knowledge.md",
+    "Assets/Assets.md",
+    "Templates/Template - Concept Page.md",
+    "Templates/Templates.md",
+    "Assets/TEST INTERVIEW.md",
     "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Bubble Sort.md",
     "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms.md",
+    "Knowledge/Knowledge.md",
+    "Knowledge/Roadmap.canvas",
+    "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Quick Sort.md",
+    "Knowledge/01 Programming/NET/NET.md",
+    "Knowledge/01 Programming/01 Programming.md",
     "untitled folder/untitled folder.md",
     "untitled folder",
     "Untitled.base",
@@ -245,7 +260,6 @@
     "Knowledge/05 Architecture/Distributed Systems/CAP theorem.md",
     "Knowledge/09 DevOps/CI CD tools.md",
     "Knowledge/09 DevOps/09 DevOps.md",
-    "Knowledge/01 Programming/01 Programming.md",
     "Knowledge/11 AI & ML/LLM/Prompting/Showing Examples.md",
     "Knowledge/11 AI & ML/LLM/Prompting/Techniques/Techniques.md",
     "Knowledge/11 AI & ML/Machine Learning/Types.md",
@@ -255,11 +269,6 @@
     "Assets/11 AI & ML",
     "Knowledge/11 AI & ML/LLM/Prompting/Instruction Prompting.md",
     "Knowledge/11 AI & ML/LLM/Prompting/Prompting.md",
-    "Knowledge/11 AI & ML/LLM/Prompting/Role Prompting.md",
-    "Templates/Template - Concept Page.md",
-    "Templates/Templates.md",
-    "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Quick Sort.md",
-    "Knowledge/02 Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
     "Knowledge/06 Patterns & Practices/Paradigms & Practices",
     "Knowledge/06 Patterns & Practices/Patterns",
     "Knowledge/06 Patterns & Practices/Principles",
