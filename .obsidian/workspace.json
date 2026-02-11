@@ -27,20 +27,21 @@
             }
           },
           {
-            "id": "52c3b4ab65874c31",
+            "id": "fa59c1d02a74a7c0",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
+              "type": "markdown",
               "state": {
-                "aFile": "Knowledge/Roadmap.canvas",
-                "bFile": "Knowledge/Roadmap.canvas",
-                "aRef": ""
+                "file": "Knowledge/Knowledge.md",
+                "mode": "source",
+                "source": true
               },
-              "icon": "diff",
-              "title": "Diff: Roadmap.canvas  (Working Tree)"
+              "icon": "lucide-file",
+              "title": "Knowledge"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -228,21 +229,29 @@
       "notebook-navigator:Notebook Navigator": true
     }
   },
-  "active": "ce7a72e482374127",
+  "active": "fa59c1d02a74a7c0",
   "lastOpenFiles": [
-    "Knowledge/01 Programming/NET/CSharp/CSharp.md",
     "Knowledge/Roadmap.canvas",
+    "Knowledge/Knowledge.md",
+    "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Bubble Sort.md",
+    "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms.md",
+    "untitled folder/untitled folder.md",
+    "untitled folder",
+    "Untitled.base",
+    "AGENTS.md",
+    "Knowledge/01 Programming/NET/Other/Other.md",
+    "Knowledge/01 Programming/NET/CSharp/CSharp.md",
+    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md",
+    "Knowledge/05 Architecture/Distributed Systems/CAP theorem.md",
     "Knowledge/09 DevOps/CI CD tools.md",
     "Knowledge/09 DevOps/09 DevOps.md",
     "Knowledge/01 Programming/01 Programming.md",
-    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md",
     "Knowledge/11 AI & ML/LLM/Prompting/Showing Examples.md",
     "Knowledge/11 AI & ML/LLM/Prompting/Techniques/Techniques.md",
     "Knowledge/11 AI & ML/Machine Learning/Types.md",
     "Knowledge/11 AI & ML/LLM/Agents/Mental Framework.md",
     "Knowledge/11 AI & ML/LLM/Agents/Agents.md",
     "Assets/11 AI & ML/11 AI & ML.md",
-    "Knowledge/Knowledge.md",
     "Assets/11 AI & ML",
     "Knowledge/11 AI & ML/LLM/Prompting/Instruction Prompting.md",
     "Knowledge/11 AI & ML/LLM/Prompting/Prompting.md",
@@ -250,15 +259,7 @@
     "Templates/Template - Concept Page.md",
     "Templates/Templates.md",
     "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Quick Sort.md",
-    "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms.md",
     "Knowledge/02 Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
-    "untitled folder/untitled folder.md",
-    "untitled folder",
-    "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Merge Sort.md",
-    "Knowledge/02 Computer Science/Algorithms/Complexity/Complexity.md",
-    "Knowledge/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set.md",
-    "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Insertion Sort.md",
-    "Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Selection Sort.md",
     "Knowledge/06 Patterns & Practices/Paradigms & Practices",
     "Knowledge/06 Patterns & Practices/Patterns",
     "Knowledge/06 Patterns & Practices/Principles",
@@ -266,7 +267,6 @@
     "Knowledge/05 Architecture/Patterns",
     "Knowledge/05 Architecture/Application Architecture",
     "Knowledge/05 Architecture/Architecture Styles",
-    "Knowledge/04 Networks/Architecture & Ops",
     "Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205142069.png",
     "Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205141994.png",
     "Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205142050.png",
