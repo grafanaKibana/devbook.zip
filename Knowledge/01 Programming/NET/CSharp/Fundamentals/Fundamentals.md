@@ -46,18 +46,6 @@ if (pages.length) {
 
 ## Deeper Explanation
 
-# Topics
-
-[Types](Knowledge/01 Programming/NET/C)
-
-[Strings](Knowledge/01 Programming/NET/C)
-
-[Collections](Knowledge/01 Programming/NET/C)
-
-[Сontrol Structures](Knowledge/01 Programming/NET/C)
-
-[Delegates and Events](Knowledge/01 Programming/NET/C)
-
 ## Questions
 
 > [!QUESTION]- Which access modifiers do you know?
