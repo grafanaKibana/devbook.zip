@@ -386,7 +386,7 @@ def generate():
         ts = datetime.datetime.now().astimezone().strftime("%b %d %Y | %I:%M%p")
 
         legend_x = min_x
-        legend_y = min_y - (STEP_Y * 4)
+        legend_y = 0
         legend_w = 380
 
         status_flow = [
@@ -434,7 +434,6 @@ def generate():
                     [
                         "#### Roadmap legend",
                         f"**Generated:** {ts}",
-                        f"**Hub status mode:** {HUB_STATUS_MODE}",
                     ]
                 ),
                 "x": legend_x,

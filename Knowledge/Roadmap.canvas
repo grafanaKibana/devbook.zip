@@ -405,16 +405,16 @@
       "type": "group",
       "label": "Legend",
       "x": -864,
-      "y": -504,
+      "y": -24,
       "width": 428,
       "height": 538
     },
     {
       "id": "n_b0ac2236f9",
       "type": "text",
-      "text": "#### Roadmap legend\n**Generated:** Feb 13 2026 | 12:51AM\n**Hub status mode:** rollup",
+      "text": "#### Roadmap legend\n**Generated:** Feb 13 2026 | 12:54AM",
       "x": -840,
-      "y": -480,
+      "y": 0,
       "width": 380,
       "height": 110
     },
@@ -423,7 +423,7 @@
       "type": "text",
       "text": "Not-Started: 40",
       "x": -840,
-      "y": -354,
+      "y": 126,
       "width": 380,
       "height": 60,
       "color": "1"
@@ -433,7 +433,7 @@
       "type": "text",
       "text": "Creation: 0",
       "x": -840,
-      "y": -278,
+      "y": 202,
       "width": 380,
       "height": 60,
       "color": "2"
@@ -443,7 +443,7 @@
       "type": "text",
       "text": "Repetition: 0",
       "x": -840,
-      "y": -202,
+      "y": 278,
       "width": 380,
       "height": 60,
       "color": "5"
@@ -453,7 +453,7 @@
       "type": "text",
       "text": "Ready To Repeat: 0",
       "x": -840,
-      "y": -126,
+      "y": 354,
       "width": 380,
       "height": 60,
       "color": "6"
@@ -463,7 +463,7 @@
       "type": "text",
       "text": "Done: 0",
       "x": -840,
-      "y": -50,
+      "y": 430,
       "width": 380,
       "height": 60,
       "color": "4"

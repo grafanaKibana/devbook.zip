@@ -11,14 +11,15 @@
             "id": "49f66258c257767c",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "split-diff-view",
               "state": {
-                "file": "AGENTS.md",
-                "mode": "preview",
-                "source": true
+                "aFile": ".scripts/generate-roadmap.py",
+                "bFile": ".scripts/generate-roadmap.py",
+                "aRef": "HEAD",
+                "bRef": ""
               },
-              "icon": "lucide-file",
-              "title": "AGENTS"
+              "icon": "diff",
+              "title": "Diff: generate-roadmap.py  (Index)"
             }
           }
         ]
@@ -267,11 +268,9 @@
             "type": "leaf",
             "state": {
               "type": "file-properties",
-              "state": {
-                "file": "AGENTS.md"
-              },
+              "state": {},
               "icon": "lucide-info",
-              "title": "File properties for AGENTS"
+              "title": "File properties"
             }
           },
           {
@@ -313,6 +312,7 @@
   },
   "active": "49f66258c257767c",
   "lastOpenFiles": [
+    "AGENTS.md",
     "Untitled.base",
     "Assets/Assets.md",
     "Knowledge/Knowledge.md",
