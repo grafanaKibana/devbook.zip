@@ -11,14 +11,14 @@
             "id": "49f66258c257767c",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
+              "type": "markdown",
               "state": {
-                "aFile": ".obsidian/plugins/pretty-properties/data.json",
-                "bFile": ".obsidian/plugins/pretty-properties/data.json",
-                "aRef": ""
+                "file": "AGENTS.md",
+                "mode": "preview",
+                "source": true
               },
-              "icon": "diff",
-              "title": "Diff: data.json  (Working Tree)"
+              "icon": "lucide-file",
+              "title": "AGENTS"
             }
           }
         ]
@@ -182,8 +182,7 @@
               "title": "Bookmarks"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -268,9 +267,11 @@
             "type": "leaf",
             "state": {
               "type": "file-properties",
-              "state": {},
+              "state": {
+                "file": "AGENTS.md"
+              },
               "icon": "lucide-info",
-              "title": "File properties"
+              "title": "File properties for AGENTS"
             }
           },
           {
@@ -312,6 +313,9 @@
   },
   "active": "49f66258c257767c",
   "lastOpenFiles": [
+    "Untitled.base",
+    "Assets/Assets.md",
+    "Knowledge/Knowledge.md",
     "Knowledge/01 Programming/NET/NET.md",
     "Knowledge/01 Programming/01 Programming.md",
     "Knowledge/01 Programming/NET/CSharp/CSharp.md",
@@ -329,7 +333,6 @@
     "Knowledge/04 Networks/Architecture & Ops/Architecture & Ops.md",
     "Knowledge/01 Programming/NET/CSharp/Fundamentals/Types/Delegates and Events.md",
     "Knowledge/01 Programming/NET/CSharp/Fundamentals/Types/Strings.md",
-    "Knowledge/Knowledge.md",
     "Knowledge/Topics.base",
     "Knowledge/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures",
     "Knowledge/01 Programming/NET/CSharp/Fundamentals/Types",
@@ -341,10 +344,7 @@
     "Knowledge/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures/try-catch-finnaly.md",
     "Knowledge/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures/Assembly.md",
     "Knowledge/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures/Methods.md",
-    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures/ForEach.md",
-    "Knowledge/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set Union-Find.md",
     "untitled folder",
-    "Untitled.base",
     "Assets/11 AI & ML",
     "Knowledge/06 Patterns & Practices/Paradigms & Practices",
     "Knowledge/06 Patterns & Practices/Patterns",

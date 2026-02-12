@@ -383,7 +383,7 @@ def generate():
     if ADD_LEGEND and nodes:
         min_x = min(n.get("x", 0) for n in nodes)
         min_y = min(n.get("y", 0) for n in nodes)
-        ts = datetime.datetime.now().astimezone().isoformat(timespec="seconds")
+        ts = datetime.datetime.now().astimezone().strftime("%b %d %Y | %I:%M%p")
 
         legend_x = min_x
         legend_y = min_y - (STEP_Y * 4)
