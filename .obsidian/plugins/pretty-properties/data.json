@@ -1,8 +1,67 @@
 {
-  "hiddenProperties": [],
-  "propertyPillColors": {},
+  "hiddenProperties": [
+    "tags"
+  ],
+  "propertyPillColors": {
+    "1": {
+      "pillColor": "green",
+      "textColor": "default"
+    },
+    "2": {
+      "pillColor": "cyan",
+      "textColor": "default"
+    },
+    "3": {
+      "pillColor": "blue",
+      "textColor": "default"
+    },
+    "4": {
+      "pillColor": "purple",
+      "textColor": "default"
+    },
+    "Not-Started": {
+      "pillColor": "red",
+      "textColor": "default"
+    },
+    "Repetition": {
+      "pillColor": "blue",
+      "textColor": "default"
+    },
+    "Creation": {
+      "pillColor": "orange",
+      "textColor": "default"
+    },
+    "Ready To Repeat": {
+      "pillColor": "purple",
+      "textColor": "default"
+    },
+    "Done": {
+      "pillColor": "green",
+      "textColor": "default"
+    },
+    "Low": {
+      "pillColor": "green",
+      "textColor": "default"
+    },
+    "Medium": {
+      "pillColor": "yellow",
+      "textColor": "default"
+    },
+    "High": {
+      "pillColor": "red",
+      "textColor": "default"
+    },
+    "Programming": {
+      "textColor": "default"
+    }
+  },
   "propertyLongtextColors": {},
-  "tagColors": {},
+  "tagColors": {
+    "Template": {
+      "textColor": "default"
+    },
+    "FolderNote": {}
+  },
   "enableBanner": true,
   "enableIcon": true,
   "enableCover": true,

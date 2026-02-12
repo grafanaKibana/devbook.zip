@@ -11,14 +11,14 @@
             "id": "49f66258c257767c",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "split-diff-view",
               "state": {
-                "file": "Templates/Template - Concept Page.md",
-                "mode": "preview",
-                "source": true
+                "aFile": ".obsidian/plugins/pretty-properties/data.json",
+                "bFile": ".obsidian/plugins/pretty-properties/data.json",
+                "aRef": ""
               },
-              "icon": "lucide-file",
-              "title": "Template - Concept Page"
+              "icon": "diff",
+              "title": "Diff: data.json  (Working Tree)"
             }
           }
         ]
@@ -44,34 +44,36 @@
             }
           },
           {
+            "id": "31bca3b8531db801",
+            "type": "leaf",
+            "pinned": true,
+            "state": {
+              "type": "canvas",
+              "state": {
+                "file": "Knowledge/Roadmap.canvas",
+                "viewState": {
+                  "x": -383.09741667182476,
+                  "y": 127.47138315243751,
+                  "zoom": -0.17950819129066664
+                }
+              },
+              "pinned": true,
+              "icon": "lucide-layout-dashboard",
+              "title": "Roadmap"
+            }
+          },
+          {
             "id": "ec1d9b1d482adb23",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
                 "file": "Templates/Template - Index.md",
-                "mode": "source",
+                "mode": "preview",
                 "source": true
               },
               "icon": "lucide-file",
               "title": "Template - Index"
-            }
-          },
-          {
-            "id": "31bca3b8531db801",
-            "type": "leaf",
-            "state": {
-              "type": "canvas",
-              "state": {
-                "file": "Knowledge/Roadmap.canvas",
-                "viewState": {
-                  "x": 368,
-                  "y": 1034.8722835692174,
-                  "zoom": -1.9322203477148434
-                }
-              },
-              "icon": "lucide-layout-dashboard",
-              "title": "Roadmap"
             }
           },
           {
@@ -266,11 +268,9 @@
             "type": "leaf",
             "state": {
               "type": "file-properties",
-              "state": {
-                "file": "Templates/Template - Concept Page.md"
-              },
+              "state": {},
               "icon": "lucide-info",
-              "title": "File properties for Template - Concept Page"
+              "title": "File properties"
             }
           },
           {
@@ -312,29 +312,30 @@
   },
   "active": "49f66258c257767c",
   "lastOpenFiles": [
-    "Templates/Template - Index.md",
+    "Knowledge/01 Programming/NET/NET.md",
+    "Knowledge/01 Programming/01 Programming.md",
+    "Knowledge/01 Programming/NET/CSharp/CSharp.md",
+    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures/Сontrol Structures.md",
+    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Types/Types.md",
+    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Collections/Collections.md",
+    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md",
+    "Knowledge/05 Architecture/Architecture Styles/Architecture Styles.md",
     "Templates/Template - Concept Page.md",
+    "Knowledge/Roadmap.canvas",
+    "Templates/Template - Index.md",
     "Templates/Templates.md",
     "Assets/03 Data Persistance/03 Data Persistance.md",
     "Assets/01 Programming/01 Programming.md",
-    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md",
-    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures/Сontrol Structures.md",
-    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Collections/Collections.md",
-    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Types/Types.md",
     "Knowledge/04 Networks/Architecture & Ops/Architecture & Ops.md",
-    "Knowledge/01 Programming/NET/CSharp/CSharp.md",
     "Knowledge/01 Programming/NET/CSharp/Fundamentals/Types/Delegates and Events.md",
     "Knowledge/01 Programming/NET/CSharp/Fundamentals/Types/Strings.md",
     "Knowledge/Knowledge.md",
     "Knowledge/Topics.base",
-    "Knowledge/Roadmap.canvas",
     "Knowledge/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures",
     "Knowledge/01 Programming/NET/CSharp/Fundamentals/Types",
     "Knowledge/01 Programming/NET/CSharp/Fundamentals/Collections/Untitled.md",
     "Knowledge/01 Programming/NET/CSharp/Fundamentals/Collections",
     "Knowledge/01 Programming/NET/CSharp/Fundamentals/Async Await.md",
-    "Knowledge/01 Programming/NET/NET.md",
-    "Knowledge/01 Programming/01 Programming.md",
     "Knowledge/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures/Reflection.md",
     "Knowledge/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures/Namespace.md",
     "Knowledge/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures/try-catch-finnaly.md",
@@ -342,7 +343,6 @@
     "Knowledge/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures/Methods.md",
     "Knowledge/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures/ForEach.md",
     "Knowledge/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set Union-Find.md",
-    "Knowledge/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set.md",
     "untitled folder",
     "Untitled.base",
     "Assets/11 AI & ML",
