@@ -385,9 +385,9 @@ def generate():
         min_y = min(n.get("y", 0) for n in nodes)
         ts = datetime.datetime.now().astimezone().strftime("%b %d %Y | %I:%M%p")
 
-        legend_x = min_x
+        legend_x = min_x - 3
         legend_y = 0
-        legend_w = 380
+        legend_w = 386
 
         status_flow = [
             "Not-Started",
