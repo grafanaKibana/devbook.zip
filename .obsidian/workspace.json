@@ -53,8 +53,8 @@
               "state": {
                 "file": "Knowledge/Roadmap.canvas",
                 "viewState": {
-                  "x": -383.09741667182476,
-                  "y": 127.47138315243751,
+                  "x": -383.0974166718248,
+                  "y": 35.17155301519276,
                   "zoom": -0.17950819129066664
                 }
               },
@@ -310,7 +310,7 @@
       "notebook-navigator:Notebook Navigator": true
     }
   },
-  "active": "49f66258c257767c",
+  "active": "65fa44482ae23c99",
   "lastOpenFiles": [
     "AGENTS.md",
     "Untitled.base",
