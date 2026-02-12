@@ -404,18 +404,18 @@
       "id": "n_328ae87cd7",
       "type": "group",
       "label": "Legend",
-      "x": -864,
-      "y": -24,
-      "width": 428,
-      "height": 538
+      "x": -860,
+      "y": -20,
+      "width": 540,
+      "height": 530
     },
     {
       "id": "n_b0ac2236f9",
       "type": "text",
-      "text": "#### Roadmap legend\n**Generated:** Feb 13 2026 | 12:54AM",
+      "text": "#### Roadmap legend\n**Generated:** Feb 13 2026 | 12:57AM",
       "x": -840,
       "y": 0,
-      "width": 380,
+      "width": 500,
       "height": 110
     },
     {

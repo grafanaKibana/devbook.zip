@@ -53,9 +53,9 @@
               "state": {
                 "file": "Knowledge/Roadmap.canvas",
                 "viewState": {
-                  "x": -383.0974166718248,
-                  "y": 35.17155301519276,
-                  "zoom": -0.17950819129066664
+                  "x": -576.5436622117631,
+                  "y": 187.25109405000546,
+                  "zoom": -0.2690577093370057
                 }
               },
               "pinned": true,
@@ -268,9 +268,11 @@
             "type": "leaf",
             "state": {
               "type": "file-properties",
-              "state": {},
+              "state": {
+                "file": "Knowledge/Roadmap.canvas"
+              },
               "icon": "lucide-info",
-              "title": "File properties"
+              "title": "File properties for Roadmap"
             }
           },
           {
@@ -310,7 +312,7 @@
       "notebook-navigator:Notebook Navigator": true
     }
   },
-  "active": "65fa44482ae23c99",
+  "active": "31bca3b8531db801",
   "lastOpenFiles": [
     "AGENTS.md",
     "Untitled.base",

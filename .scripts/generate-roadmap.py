@@ -387,7 +387,7 @@ def generate():
 
         legend_x = min_x
         legend_y = 0
-        legend_w = 380
+        legend_w = 500
 
         status_flow = [
             "Not-Started",
@@ -398,11 +398,11 @@ def generate():
         ]
 
         # Legend group (visual wrapper).
-        col_w = legend_w
+        col_w = 380
         header_h = 110
-        pad = 24
+        pad = 20
         rows = len(status_flow)
-        group_w = col_w + (pad * 2)
+        group_w = legend_w + (pad * 2)
         group_h = (
             pad
             + header_h
