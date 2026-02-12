@@ -385,9 +385,9 @@ def generate():
         min_y = min(n.get("y", 0) for n in nodes)
         ts = datetime.datetime.now().astimezone().strftime("%b %d %Y | %I:%M%p")
 
-        legend_x = min_x - 3
+        legend_x = min_x - 60
         legend_y = 0
-        legend_w = 386
+        legend_w = 500
 
         status_flow = [
             "Not-Started",
@@ -398,11 +398,11 @@ def generate():
         ]
 
         # Legend group (visual wrapper).
-        col_w = legend_w
+        col_w = 380
         header_h = 110
-        pad = 24
+        pad = 20
         rows = len(status_flow)
-        group_w = col_w + (pad * 2)
+        group_w = legend_w + (pad * 2)
         group_h = (
             pad
             + header_h
@@ -446,7 +446,7 @@ def generate():
         # Status cards in a single column; arrows still alternate sides.
         cards = []
         base_y = legend_y + header_h + LEGEND_CARD_GAP
-        left_x = legend_x
+        left_x = legend_x + 60
 
         for i, st in enumerate(status_flow):
             cx = left_x
