@@ -65,11 +65,13 @@ const asStringArray = (v) => {
 
 const topicStats = new Map();
 let missingTopic = 0;
+const notesWithoutTopic = [];
 
 for (const p of notes) {
   const topics = asStringArray(p.topic);
   if (topics.length === 0) {
     missingTopic += 1;
+    notesWithoutTopic.push(p);
     continue;
   }
 
@@ -86,16 +88,40 @@ for (const p of notes) {
 
 const rows = [...topicStats.entries()].map(([topic, s]) => {
   const pct = s.total > 0 ? Math.round((s.done / s.total) * 100) : 0;
-  return { topic, pct, done: s.done, total: s.total };
+  return { topic, pct, done: s.done, total: s.total, isMissing: false };
 });
 
 rows.sort((a, b) => a.pct - b.pct || b.total - a.total || a.topic.localeCompare(b.topic));
 
-const header = this.container.createDiv({
-  text: `Topics covered: ${rows.length}. Missing topic: ${missingTopic}.`,
-});
-header.style.opacity = "0.75";
-header.style.margin = "6px 0 10px";
+// Display notes without topics
+if (notesWithoutTopic.length > 0) {
+  const missingSection = this.container.createDiv();
+  missingSection.style.marginTop = "20px";
+  missingSection.style.padding = "12px";
+  missingSection.style.backgroundColor = "rgba(234, 179, 8, 0.1)";
+  missingSection.style.borderRadius = "6px";
+  missingSection.style.border = "1px solid rgba(234, 179, 8, 0.3)";
+
+  const missingHeader = missingSection.createEl("div", {
+    text: ` Notes missing topic (${notesWithoutTopic.length}):`
+  });
+  missingHeader.style.fontWeight = "600";
+  missingHeader.style.color = "rgb(234, 179, 8)";
+  missingHeader.style.marginBottom = "8px";
+
+  const missingList = missingSection.createEl("ul");
+  missingList.style.margin = "0";
+  missingList.style.paddingLeft = "20px";
+
+  for (const note of notesWithoutTopic) {
+    const li = missingList.createEl("li");
+    const link = li.createEl("a", {
+      text: note.file.name,
+      href: note.file.path
+    });
+    link.className = "internal-link";
+  }
+}
 
 const table = this.container.createEl("table");
 table.style.width = "100%";
@@ -115,9 +141,18 @@ const tbody = table.createEl("tbody");
 for (const r of rows) {
   const tr = tbody.createEl("tr");
 
+  // Apply yellow background for missing topic row
+  if (r.isMissing) {
+    tr.style.backgroundColor = "rgba(234, 179, 8, 0.15)";
+  }
+
   const tdTopic = tr.createEl("td", { text: r.topic });
   tdTopic.style.padding = "6px 8px";
   tdTopic.style.borderBottom = "1px solid rgba(127,127,127,0.12)";
+  if (r.isMissing) {
+    tdTopic.style.color = "rgb(234, 179, 8)";
+    tdTopic.style.fontWeight = "600";
+  }
 
   const tdProg = tr.createEl("td");
   tdProg.style.padding = "6px 8px";
