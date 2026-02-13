@@ -50,7 +50,7 @@ border: off
 shadow: off
 ```
 
-## Topic Coverage
+# Topic Coverage
 
 ```dataviewjs
 const ROOT = "Knowledge";
@@ -92,36 +92,6 @@ const rows = [...topicStats.entries()].map(([topic, s]) => {
 });
 
 rows.sort((a, b) => a.pct - b.pct || b.total - a.total || a.topic.localeCompare(b.topic));
-
-// Display notes without topics
-if (notesWithoutTopic.length > 0) {
-  const missingSection = this.container.createDiv();
-  missingSection.style.marginTop = "20px";
-  missingSection.style.padding = "12px";
-  missingSection.style.backgroundColor = "rgba(234, 179, 8, 0.1)";
-  missingSection.style.borderRadius = "6px";
-  missingSection.style.border = "1px solid rgba(234, 179, 8, 0.3)";
-
-  const missingHeader = missingSection.createEl("div", {
-    text: ` Notes missing topic (${notesWithoutTopic.length}):`
-  });
-  missingHeader.style.fontWeight = "600";
-  missingHeader.style.color = "rgb(234, 179, 8)";
-  missingHeader.style.marginBottom = "8px";
-
-  const missingList = missingSection.createEl("ul");
-  missingList.style.margin = "0";
-  missingList.style.paddingLeft = "20px";
-
-  for (const note of notesWithoutTopic) {
-    const li = missingList.createEl("li");
-    const link = li.createEl("a", {
-      text: note.file.name,
-      href: note.file.path
-    });
-    link.className = "internal-link";
-  }
-}
 
 const table = this.container.createEl("table");
 table.style.width = "100%";
@@ -185,11 +155,24 @@ for (const r of rows) {
   tdDone.style.textAlign = "right";
   tdDone.style.fontVariantNumeric = "tabular-nums";
 }
+
+// Display notes without topics
+if (notesWithoutTopic.length > 0) {
+  const noteLinks = notesWithoutTopic
+    .map(note => `> - [[${note.file.path.replace('.md', '')}|${note.file.name}]]`)
+    .join('\n');
+
+  const count = notesWithoutTopic.length;
+  const label = count === 1 ? "Note" : "Notes";
+  const calloutMarkdown = `> [!warning] ${count} ${label} missing topic\n${noteLinks}`;
+
+  dv.paragraph(calloutMarkdown);
+}
 ```
 
 --- column-break ---
 
-## Status Destribution
+# Status Destribution
 
 ```dataviewjs
 const ROOT = "Knowledge";
@@ -316,7 +299,7 @@ border: off
 shadow: off
 ```
 
-## Focus
+# Focus
 
 ```dataview
 TABLE WITHOUT ID
@@ -333,7 +316,7 @@ LIMIT 12
 
 --- column-break ---
 
-## Recently Updated
+# Recently Updated
 
 ```dataview
 TABLE WITHOUT ID file.link as "Note"
