@@ -368,14 +368,27 @@
   "customVaultName": "",
   "pinnedNotes": {},
   "fileIcons": {},
-  "fileColors": {},
+  "fileColors": {
+    "Knowledge/01 Programming/01 Programming.md": "#f43f5e"
+  },
   "folderIcons": {
     "Templates": "book-dashed",
     "Assets": "images",
     "Knowledge": "book"
   },
   "folderColors": {
-    "Templates": "#6b7280"
+    "Templates": "#6b7280",
+    "Knowledge/01 Programming": "#ec4899",
+    "Knowledge/02 Computer Science": "#f43f5e",
+    "Knowledge/03 Data Persistance": "#ef4444",
+    "Knowledge/04 Networks": "#f97316",
+    "Knowledge/05 Architecture": "#eab308",
+    "Knowledge/06 Patterns & Practices": "#84cc16",
+    "Knowledge/07 Security": "#14b8a6",
+    "Knowledge/08 SDLC": "#0ea5e9",
+    "Knowledge/09 DevOps": "#3b82f6",
+    "Knowledge/10 Cloud": "#6366f1",
+    "Knowledge/11 AI & ML": "#8b5cf6"
   },
   "folderBackgroundColors": {},
   "folderSortOverrides": {},

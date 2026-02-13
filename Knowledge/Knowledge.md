@@ -1,5 +1,6 @@
 ---
-tags: [FolderNote]
+tags:
+  - FolderNote
 ---
 
 ## Start Here

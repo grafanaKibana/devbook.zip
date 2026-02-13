@@ -47,17 +47,16 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Knowledge/09 DevOps/Deployment Stratagies/Deployment Stratagies.md",
+                "file": "Knowledge/Knowledge.md",
                 "mode": "preview",
                 "source": true,
                 "backlinks": false
               },
               "icon": "lucide-file",
-              "title": "Deployment Stratagies"
+              "title": "Knowledge"
             }
           }
-        ],
-        "currentTab": 2
+        ]
       }
     ],
     "direction": "vertical"
@@ -183,13 +182,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Knowledge/09 DevOps/Deployment Stratagies/Deployment Stratagies.md",
+                "file": "Knowledge/Knowledge.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Deployment Stratagies"
+              "title": "Outline of Knowledge"
             }
           }
         ],
@@ -210,59 +209,22 @@
       "obsidian-git:Open Git source control": true,
       "templater-obsidian:Templater": false,
       "notebook-navigator:Notebook Navigator": true,
-      "publish:Publish changes...": false,
-      "quartz-syncer:Quartz Syncer publication center": false,
       "digitalgarden:Digital Garden Publication Center": false
     }
   },
-  "floating": {
-    "id": "874a1385746fe164",
-    "type": "floating",
-    "children": [
-      {
-        "id": "785cc0904069a6ec",
-        "type": "window",
-        "children": [
-          {
-            "id": "e2f7a51cb7fe5934",
-            "type": "tabs",
-            "children": [
-              {
-                "id": "64fc3447eb963d7b",
-                "type": "leaf",
-                "state": {
-                  "type": "webviewer",
-                  "state": {
-                    "url": "https://saberzero1.github.io/quartz-syncer-docs/Guides/Generating-an-access-token",
-                    "title": "Not Found",
-                    "mode": "webview"
-                  },
-                  "icon": "globe-2",
-                  "title": "Not Found"
-                }
-              }
-            ]
-          }
-        ],
-        "direction": "vertical",
-        "x": 1208,
-        "y": 264,
-        "width": 1024,
-        "height": 800,
-        "maximize": false,
-        "zoom": -0.5
-      }
-    ]
-  },
-  "active": "cffde94cae95054c",
+  "active": "5eac11414fcb0957",
   "lastOpenFiles": [
-    "Knowledge/09 DevOps/Deployment Stratagies/Blue Green Deployment.md",
-    "Knowledge/09 DevOps/Deployment Stratagies/Deployment Stratagies.md",
     "Knowledge/Knowledge.md",
+    "Knowledge/Roadmap.canvas",
+    "Knowledge/Questions.md",
+    "AGENTS.md",
+    "Knowledge/01 Programming/NET/CSharp/CSharp.md",
+    "Knowledge/01 Programming/NET/Other/Other.md",
     "Knowledge/01 Programming/01 Programming.md",
+    "Knowledge/09 DevOps/Deployment Stratagies/Deployment Stratagies.md",
+    "Knowledge/09 DevOps/Deployment Stratagies/Blue Green Deployment.md",
     "Knowledge/01 Programming/NET/NET.md",
     "Knowledge/Topics.base",
-    "Knowledge/Questions.md",
     "Knowledge/11 AI & ML/LLM/Prompting/Showing Examples.md",
     "Knowledge/11 AI & ML/LLM/Prompting/Role Prompting.md",
     "Knowledge/11 AI & ML/LLM/Prompting/Prompting.md",
@@ -284,11 +246,7 @@
     "Knowledge/11 AI & ML/11 AI & ML.md",
     "Knowledge/11 AI & ML",
     "Knowledge/10 Cloud/Azure.md",
-    "Knowledge/10 Cloud/AWS.md",
-    "Knowledge/10 Cloud/10 Cloud.md",
     "Knowledge/10 Cloud",
-    "Knowledge/09 DevOps/Deployment Stratagies/Linear Deployment.md",
-    "Knowledge/09 DevOps/Deployment Stratagies/In-place Deployment.md",
     "Knowledge/09 DevOps/Deployment Stratagies",
     "Knowledge/09 DevOps",
     "Knowledge/08 SDLC",
@@ -305,7 +263,6 @@
     "quartz/public/Roadmap.canvas",
     "quartz/content/Roadmap.canvas",
     "public/Roadmap.canvas",
-    "Knowledge/Roadmap.canvas",
     "Untitled.canvas"
   ]
 }
