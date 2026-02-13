@@ -22,11 +22,13 @@ const asStringArray = (v) => {
 };
 
 const topicStats = new Map();
+let missingTopic = 0;
 const notesWithoutTopic = [];
 
 for (const p of notes) {
   const topics = asStringArray(p.topic);
   if (topics.length === 0) {
+    missingTopic += 1;
     notesWithoutTopic.push(p);
     continue;
   }
@@ -44,27 +46,85 @@ for (const p of notes) {
 
 const rows = [...topicStats.entries()].map(([topic, s]) => {
   const pct = s.total > 0 ? Math.round((s.done / s.total) * 100) : 0;
-  const filled = Math.round(pct / 5);
-  const bar = "\u2588".repeat(filled) + "\u2591".repeat(20 - filled);
-  return [topic, `${bar} ${pct}%`, `${s.done}/${s.total}`];
+  return { topic, pct, done: s.done, total: s.total, isMissing: false };
 });
 
-rows.sort((a, b) => {
-  const pctA = parseInt(a[1].match(/\d+%/)[0]);
-  const pctB = parseInt(b[1].match(/\d+%/)[0]);
-  return pctA - pctB;
-});
+rows.sort((a, b) => a.pct - b.pct || b.total - a.total || a.topic.localeCompare(b.topic));
 
-dv.table(["Topic", "Completion", "Done"], rows);
+const table = this.container.createEl("table");
+table.style.width = "100%";
+table.style.borderCollapse = "collapse";
 
+const thead = table.createEl("thead");
+const hr = thead.createEl("tr");
+for (const h of ["Topic", "Completion", "Done"]) {
+  const th = hr.createEl("th", { text: h });
+  th.style.textAlign = h === "Topic" ? "left" : "right";
+  th.style.padding = "6px 8px";
+  th.style.borderBottom = "1px solid rgba(127,127,127,0.25)";
+  th.style.fontWeight = "600";
+}
+
+const tbody = table.createEl("tbody");
+for (const r of rows) {
+  const tr = tbody.createEl("tr");
+
+  // Apply yellow background for missing topic row
+  if (r.isMissing) {
+    tr.style.backgroundColor = "rgba(234, 179, 8, 0.15)";
+  }
+
+  const tdTopic = tr.createEl("td", { text: r.topic });
+  tdTopic.style.padding = "6px 8px";
+  tdTopic.style.borderBottom = "1px solid rgba(127,127,127,0.12)";
+  if (r.isMissing) {
+    tdTopic.style.color = "rgb(234, 179, 8)";
+    tdTopic.style.fontWeight = "600";
+  }
+
+  const tdProg = tr.createEl("td");
+  tdProg.style.padding = "6px 8px";
+  tdProg.style.borderBottom = "1px solid rgba(127,127,127,0.12)";
+  tdProg.style.textAlign = "right";
+
+  const wrap = tdProg.createDiv();
+  wrap.style.display = "grid";
+  wrap.style.gridTemplateColumns = "1fr 44px";
+  wrap.style.gap = "8px";
+  wrap.style.alignItems = "center";
+
+  const prog = document.createElement("progress");
+  prog.max = 100;
+  prog.value = r.pct;
+  prog.style.width = "100%";
+  prog.style.height = "12px";
+  wrap.appendChild(prog);
+
+  const pct = document.createElement("span");
+  pct.textContent = `${r.pct}%`;
+  pct.style.opacity = "0.8";
+  pct.style.fontVariantNumeric = "tabular-nums";
+  pct.style.textAlign = "right";
+  wrap.appendChild(pct);
+
+  const tdDone = tr.createEl("td", { text: `${r.done}/${r.total}` });
+  tdDone.style.padding = "6px 8px";
+  tdDone.style.borderBottom = "1px solid rgba(127,127,127,0.12)";
+  tdDone.style.textAlign = "right";
+  tdDone.style.fontVariantNumeric = "tabular-nums";
+}
+
+// Display notes without topics
 if (notesWithoutTopic.length > 0) {
   const noteLinks = notesWithoutTopic
-    .map(note => `> - ${note.file.link}`)
+    .map(note => `> - [[${note.file.path.replace('.md', '')}|${note.file.name}]]`)
     .join('\n');
 
   const count = notesWithoutTopic.length;
   const label = count === 1 ? "Note" : "Notes";
-  dv.paragraph(`> [!warning] ${count} ${label} missing topic\n${noteLinks}`);
+  const calloutMarkdown = `> [!warning] ${count} ${label} missing topic\n${noteLinks}`;
+
+  dv.paragraph(calloutMarkdown);
 }
 ```
 
