@@ -25,55 +25,39 @@
             }
           },
           {
-            "id": "31bca3b8531db801",
+            "id": "dfacbc313a0ac90a",
             "type": "leaf",
             "pinned": true,
             "state": {
-              "type": "canvas",
-              "state": {
-                "file": "Knowledge/Roadmap.canvas",
-                "viewState": {
-                  "x": 104.77068361083147,
-                  "y": 764.0677760456492,
-                  "zoom": -0.8532950948117315
-                }
-              },
-              "pinned": true,
-              "icon": "lucide-layout-dashboard",
-              "title": "Roadmap"
-            }
-          },
-          {
-            "id": "8dbb5cf0f5fbe8f6",
-            "type": "leaf",
-            "state": {
               "type": "markdown",
               "state": {
-                "file": "Templates/Mermaid/Template - Sequence Diagram.md",
-                "mode": "preview",
+                "file": "AGENTS.md",
+                "mode": "source",
                 "source": true,
                 "backlinks": false
               },
+              "pinned": true,
               "icon": "lucide-file",
-              "title": "Template - Sequence Diagram"
+              "title": "AGENTS"
             }
           },
           {
-            "id": "642bba1b9abe7ee2",
+            "id": "46be8968cb698557",
             "type": "leaf",
             "state": {
               "type": "split-diff-view",
               "state": {
-                "aFile": ".scripts/generate-roadmap.py",
-                "bFile": ".scripts/generate-roadmap.py",
-                "aRef": ""
+                "aFile": ".obsidian/core-plugins.json",
+                "bFile": ".obsidian/core-plugins.json",
+                "aRef": "HEAD",
+                "bRef": ""
               },
               "icon": "diff",
-              "title": "Diff: generate-roadmap.py  (Working Tree)"
+              "title": "Diff: core-plugins.json  (Index)"
             }
           }
         ],
-        "currentTab": 1
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -199,13 +183,12 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Knowledge/Roadmap.canvas",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Roadmap"
+              "title": "Outline"
             }
           }
         ],
@@ -225,7 +208,8 @@
       "command-palette:Open command palette": true,
       "obsidian-git:Open Git source control": true,
       "templater-obsidian:Templater": false,
-      "notebook-navigator:Notebook Navigator": true
+      "notebook-navigator:Notebook Navigator": true,
+      "publish:Publish changes...": false
     }
   },
   "floating": {
@@ -300,16 +284,19 @@
       }
     ]
   },
-  "active": "65fa44482ae23c99",
+  "active": "46be8968cb698557",
   "lastOpenFiles": [
-    "Knowledge/Roadmap.canvas",
     "Knowledge/Questions.md",
+    "AGENTS.md",
+    "Knowledge/Roadmap.canvas",
     "Knowledge/Knowledge.md",
-    "Knowledge/01 Programming/01 Programming.md",
-    "Templates/Mermaid/Template - Sequence Diagram.md",
-    "Templates/Mermaid/Template - Flowchart.md",
+    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Collections/Collections.md",
     "Templates/Mermaid/Template - Class Diagram.md",
+    "Templates/Mermaid/Template - Flowchart.md",
+    "Templates/Mermaid/Template - Sequence Diagram.md",
     "Templates/Mermaid/Template - Entity Relationship Diagram.md",
+    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md",
+    "Knowledge/01 Programming/01 Programming.md",
     "Knowledge/02 Computer Science/02 Computer Science.md",
     "Knowledge/01 Programming/NET/NET.md",
     "Templates/Templates.md",
@@ -329,9 +316,6 @@
     "Templates/Other",
     "Templates/Blocks/Template - Code Block.md",
     "Templates/Blocks/Untitled.md",
-    "Templates/Blocks/Template - Callout.md",
-    "Knowledge/02 Computer Science/Algorithms/Algorithms.md",
-    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Types/Strings.md",
     "Templates/Mermaid",
     "Templates/Blocks",
     "Templates/Pages",
