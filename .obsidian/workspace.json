@@ -45,15 +45,15 @@
             "id": "cffde94cae95054c",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
+              "type": "markdown",
               "state": {
-                "aFile": "vercel.json",
-                "bFile": "vercel.json",
-                "aRef": "HEAD",
-                "bRef": ""
+                "file": "Knowledge/09 DevOps/Deployment Stratagies/Deployment Stratagies.md",
+                "mode": "preview",
+                "source": true,
+                "backlinks": false
               },
-              "icon": "diff",
-              "title": "Diff: vercel.json  (Index)"
+              "icon": "lucide-file",
+              "title": "Deployment Stratagies"
             }
           }
         ],
@@ -183,12 +183,13 @@
             "state": {
               "type": "outline",
               "state": {
+                "file": "Knowledge/09 DevOps/Deployment Stratagies/Deployment Stratagies.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline"
+              "title": "Outline of Deployment Stratagies"
             }
           }
         ],
@@ -255,6 +256,11 @@
   },
   "active": "cffde94cae95054c",
   "lastOpenFiles": [
+    "Knowledge/09 DevOps/Deployment Stratagies/Blue Green Deployment.md",
+    "Knowledge/09 DevOps/Deployment Stratagies/Deployment Stratagies.md",
+    "Knowledge/Knowledge.md",
+    "Knowledge/01 Programming/01 Programming.md",
+    "Knowledge/01 Programming/NET/NET.md",
     "Knowledge/Topics.base",
     "Knowledge/Questions.md",
     "Knowledge/11 AI & ML/LLM/Prompting/Showing Examples.md",
@@ -283,14 +289,9 @@
     "Knowledge/10 Cloud",
     "Knowledge/09 DevOps/Deployment Stratagies/Linear Deployment.md",
     "Knowledge/09 DevOps/Deployment Stratagies/In-place Deployment.md",
-    "Knowledge/09 DevOps/Deployment Stratagies/Deployment Stratagies.md",
-    "Knowledge/09 DevOps/Deployment Stratagies/Canary Deployment.md",
-    "Knowledge/09 DevOps/Deployment Stratagies/Blue Green Deployment.md",
-    "Knowledge/09 DevOps/Deployment Stratagies/All-In-One Deployment.md",
     "Knowledge/09 DevOps/Deployment Stratagies",
     "Knowledge/09 DevOps",
     "Knowledge/08 SDLC",
-    "Knowledge/07 Security",
     "quartz/public/01-Programming/NET/CSharp/Fundamentals/Сontrol-Structures/Сontrol-Structures-og-image.webp",
     "quartz/public/01-Programming/NET/CSharp/Fundamentals/Types/Types-og-image.webp",
     "quartz/public/01-Programming/NET/CSharp/Fundamentals/Types/Strings-og-image.webp",
