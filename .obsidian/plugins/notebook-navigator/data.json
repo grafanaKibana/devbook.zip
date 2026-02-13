@@ -15,6 +15,10 @@
         {
           "type": "note",
           "path": "Knowledge/Roadmap.canvas"
+        },
+        {
+          "type": "note",
+          "path": "Knowledge/Questions.md"
         }
       ]
     }
