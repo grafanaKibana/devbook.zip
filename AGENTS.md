@@ -53,11 +53,16 @@ Example concept frontmatter:
 
 ```yaml
 ---
-topic: ["Programming"]
-subtopic: ["NET"]
-level: ["1"]
- priority: Medium
+topic:
+  - Programming
+subtopic:
+  - NET
+level:
+  - "1"
+priority: Medium
 status: Not-Started
+tags:
+  - FolderNote
 ---
 ```
 
