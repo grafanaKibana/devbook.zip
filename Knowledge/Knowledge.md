@@ -1,6 +1,8 @@
 ---
 tags:
   - FolderNote
+dg-home: true
+dg-publish: true
 ---
 
 ## Start Here
