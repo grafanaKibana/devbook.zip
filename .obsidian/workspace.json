@@ -42,18 +42,18 @@
             }
           },
           {
-            "id": "46be8968cb698557",
+            "id": "cffde94cae95054c",
             "type": "leaf",
             "state": {
               "type": "split-diff-view",
               "state": {
-                "aFile": ".obsidian/core-plugins.json",
-                "bFile": ".obsidian/core-plugins.json",
+                "aFile": "vercel.json",
+                "bFile": "vercel.json",
                 "aRef": "HEAD",
                 "bRef": ""
               },
               "icon": "diff",
-              "title": "Diff: core-plugins.json  (Index)"
+              "title": "Diff: vercel.json  (Index)"
             }
           }
         ],
@@ -209,7 +209,9 @@
       "obsidian-git:Open Git source control": true,
       "templater-obsidian:Templater": false,
       "notebook-navigator:Notebook Navigator": true,
-      "publish:Publish changes...": false
+      "publish:Publish changes...": false,
+      "quartz-syncer:Quartz Syncer publication center": false,
+      "digitalgarden:Digital Garden Publication Center": false
     }
   },
   "floating": {
@@ -217,58 +219,25 @@
     "type": "floating",
     "children": [
       {
-        "id": "d782690e6ab42528",
+        "id": "785cc0904069a6ec",
         "type": "window",
         "children": [
           {
-            "id": "5b675f8f61301800",
+            "id": "e2f7a51cb7fe5934",
             "type": "tabs",
             "children": [
               {
-                "id": "3195adcbe7a8f1af",
+                "id": "64fc3447eb963d7b",
                 "type": "leaf",
                 "state": {
                   "type": "webviewer",
                   "state": {
-                    "url": "https://obsidian.md/account/",
-                    "title": "Account - Obsidian",
+                    "url": "https://saberzero1.github.io/quartz-syncer-docs/Guides/Generating-an-access-token",
+                    "title": "Not Found",
                     "mode": "webview"
                   },
                   "icon": "globe-2",
-                  "title": "Account - Obsidian"
-                }
-              }
-            ]
-          }
-        ],
-        "direction": "vertical",
-        "x": 1208,
-        "y": 264,
-        "width": 1024,
-        "height": 800,
-        "maximize": false,
-        "zoom": -0.5
-      },
-      {
-        "id": "0ae768934bf15765",
-        "type": "window",
-        "children": [
-          {
-            "id": "2fc85872f8826221",
-            "type": "tabs",
-            "children": [
-              {
-                "id": "4e1b1d2a23fd450b",
-                "type": "leaf",
-                "state": {
-                  "type": "webviewer",
-                  "state": {
-                    "url": "https://github.com/mokkiebear/heatmap-tracker",
-                    "title": "GitHub - mokkiebear/heatmap-tracker: A customizable heatmap tracker plugin for Obsidian to visualize daily data trends with intuitive navigation and flexible settings.",
-                    "mode": "webview"
-                  },
-                  "icon": "globe-2",
-                  "title": "GitHub - mokkiebear/heatmap-tracker: A customizable heatmap tracker plugin for Obsidian to visualize daily data trends with intuitive navigation and flexible settings."
+                  "title": "Not Found"
                 }
               }
             ]
@@ -284,54 +253,58 @@
       }
     ]
   },
-  "active": "46be8968cb698557",
+  "active": "cffde94cae95054c",
   "lastOpenFiles": [
-    "Knowledge/Questions.md",
-    "AGENTS.md",
-    "Knowledge/Roadmap.canvas",
-    "Knowledge/Knowledge.md",
-    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Collections/Collections.md",
-    "Templates/Mermaid/Template - Class Diagram.md",
-    "Templates/Mermaid/Template - Flowchart.md",
-    "Templates/Mermaid/Template - Sequence Diagram.md",
-    "Templates/Mermaid/Template - Entity Relationship Diagram.md",
-    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md",
-    "Knowledge/01 Programming/01 Programming.md",
-    "Knowledge/02 Computer Science/02 Computer Science.md",
-    "Knowledge/01 Programming/NET/NET.md",
-    "Templates/Templates.md",
-    "Templates/Pages/Pages.md",
-    "Templates/Mermaid/Mermaid.md",
-    "Templates/Blocks/Blocks.md",
-    "Templates/Pages/Template - Index.md",
-    "Templates/Pages/Template - Concept Page.md",
-    "Templates/asdf/asdf.md",
-    "Templates/asdf",
-    "Knowledge/asdf/asdf.md",
-    "Knowledge/asdf",
-    "Knowledge/01 Programming/asd/asd.md",
-    "Knowledge/01 Programming/asd",
-    "Templates/Other/Untitled.md",
-    "Templates/Other/Other.md",
-    "Templates/Other",
-    "Templates/Blocks/Template - Code Block.md",
-    "Templates/Blocks/Untitled.md",
-    "Templates/Mermaid",
-    "Templates/Blocks",
-    "Templates/Pages",
     "Knowledge/Topics.base",
-    "Untitled.base",
-    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures",
-    "Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205142069.png",
-    "Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205141994.png",
-    "Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205142050.png",
-    "Assets/11 AI & ML/11 AI & ML-Instruction Prompting-20260211012332406.svg",
-    "Assets/11 AI & ML/11 AI & ML-Role Prompting-20260211012332438.svg",
-    "Assets/11 AI & ML/11 AI & ML-LLM-20260211012223477.png",
-    "Assets/11 AI & ML/11 AI & ML-Showing Examples-20260211012332470.svg",
-    "Assets/01 Programming/01 Programming-Common Language Runtime-20260210212705669.png",
-    "Assets/01 Programming/01 Programming-Types-20260211184602492.png",
-    "Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205142027.png",
+    "Knowledge/Questions.md",
+    "Knowledge/11 AI & ML/LLM/Prompting/Showing Examples.md",
+    "Knowledge/11 AI & ML/LLM/Prompting/Role Prompting.md",
+    "Knowledge/11 AI & ML/LLM/Prompting/Prompting.md",
+    "Knowledge/11 AI & ML/LLM/Prompting/Instruction Prompting.md",
+    "Knowledge/11 AI & ML/LLM/Agents/Tools.md",
+    "Knowledge/11 AI & ML/LLM/Agents/Model Context Protocol.md",
+    "Knowledge/11 AI & ML/LLM/Agents/Multi-Agentic Systems.md",
+    "Knowledge/11 AI & ML/LLM/Agents/Mental Framework.md",
+    "Knowledge/11 AI & ML/LLM/Agents/Agents.md",
+    "Knowledge/11 AI & ML/Machine Learning/Spectrum Of Automations.md",
+    "Knowledge/11 AI & ML/Machine Learning/Types.md",
+    "Knowledge/11 AI & ML/Machine Learning/Natural Language Processing.md",
+    "Knowledge/11 AI & ML/Machine Learning/Machine Learning.md",
+    "Knowledge/11 AI & ML/LLM/Prompting",
+    "Knowledge/11 AI & ML/LLM/LLM.md",
+    "Knowledge/11 AI & ML/LLM/Agents",
+    "Knowledge/11 AI & ML/Machine Learning",
+    "Knowledge/11 AI & ML/LLM",
+    "Knowledge/11 AI & ML/11 AI & ML.md",
+    "Knowledge/11 AI & ML",
+    "Knowledge/10 Cloud/Azure.md",
+    "Knowledge/10 Cloud/AWS.md",
+    "Knowledge/10 Cloud/10 Cloud.md",
+    "Knowledge/10 Cloud",
+    "Knowledge/09 DevOps/Deployment Stratagies/Linear Deployment.md",
+    "Knowledge/09 DevOps/Deployment Stratagies/In-place Deployment.md",
+    "Knowledge/09 DevOps/Deployment Stratagies/Deployment Stratagies.md",
+    "Knowledge/09 DevOps/Deployment Stratagies/Canary Deployment.md",
+    "Knowledge/09 DevOps/Deployment Stratagies/Blue Green Deployment.md",
+    "Knowledge/09 DevOps/Deployment Stratagies/All-In-One Deployment.md",
+    "Knowledge/09 DevOps/Deployment Stratagies",
+    "Knowledge/09 DevOps",
+    "Knowledge/08 SDLC",
+    "Knowledge/07 Security",
+    "quartz/public/01-Programming/NET/CSharp/Fundamentals/Сontrol-Structures/Сontrol-Structures-og-image.webp",
+    "quartz/public/01-Programming/NET/CSharp/Fundamentals/Types/Types-og-image.webp",
+    "quartz/public/01-Programming/NET/CSharp/Fundamentals/Types/Strings-og-image.webp",
+    "quartz/public/01-Programming/NET/CSharp/Fundamentals/Types/Delegates-and-Events-og-image.webp",
+    "quartz/public/01-Programming/NET/CSharp/Fundamentals/Collections/Collections-og-image.webp",
+    "quartz/public/01-Programming/NET/CSharp/Fundamentals/Fundamentals-og-image.webp",
+    "quartz/public/01-Programming/NET/CSharp/Fundamentals/Async-Await-og-image.webp",
+    "quartz/public/11-AI--and--ML/LLM/Prompting/Showing-Examples-og-image.webp",
+    "quartz/public/11-AI--and--ML/LLM/Prompting/Role-Prompting-og-image.webp",
+    "quartz/public/11-AI--and--ML/LLM/Prompting/Prompting-og-image.webp",
+    "quartz/public/Roadmap.canvas",
+    "quartz/content/Roadmap.canvas",
+    "public/Roadmap.canvas",
+    "Knowledge/Roadmap.canvas",
     "Untitled.canvas"
   ]
 }
