@@ -33,9 +33,9 @@
               "state": {
                 "file": "Knowledge/Roadmap.canvas",
                 "viewState": {
-                  "x": 211.35486619617018,
-                  "y": 833.1519658851388,
-                  "zoom": -1.437532480286457
+                  "x": 104.77068361083147,
+                  "y": 1205.7930259795296,
+                  "zoom": -0.8532950948117315
                 }
               },
               "pinned": true,
@@ -62,21 +62,18 @@
             "id": "642bba1b9abe7ee2",
             "type": "leaf",
             "state": {
-              "type": "canvas",
+              "type": "split-diff-view",
               "state": {
-                "file": "Knowledge/Roadmap.canvas",
-                "viewState": {
-                  "x": 340,
-                  "y": 2210,
-                  "zoom": -1.8520017777902107
-                }
+                "aFile": ".scripts/generate-roadmap.py",
+                "bFile": ".scripts/generate-roadmap.py",
+                "aRef": ""
               },
-              "icon": "lucide-layout-dashboard",
-              "title": "Roadmap"
+              "icon": "diff",
+              "title": "Diff: generate-roadmap.py  (Working Tree)"
             }
           }
         ],
-        "currentTab": 3
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -303,12 +300,12 @@
       }
     ]
   },
-  "active": "642bba1b9abe7ee2",
+  "active": "31bca3b8531db801",
   "lastOpenFiles": [
+    "Knowledge/Roadmap.canvas",
     "Knowledge/Questions.md",
     "Knowledge/Knowledge.md",
     "Knowledge/01 Programming/01 Programming.md",
-    "Knowledge/Roadmap.canvas",
     "Templates/Mermaid/Template - Sequence Diagram.md",
     "Templates/Mermaid/Template - Flowchart.md",
     "Templates/Mermaid/Template - Class Diagram.md",
