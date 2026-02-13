@@ -1,7 +1,10 @@
 ---
-topic: ["Programming"]
-subtopic: ["NET", "C#", "Fundamentals"]
-level: ["1"]
+topic:
+  - Programming
+subtopic:
+  - NET
+level:
+  - "1"
 priority: Medium
 status: Not-Started
 tags:

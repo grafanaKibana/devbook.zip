@@ -367,8 +367,8 @@
   "fileColors": {},
   "folderIcons": {
     "Templates": "book-dashed",
-    "Knowledge": "book",
     "Assets": "images",
+    "Knowledge": "book",
     "Knowledge/01 Programming": "code-square",
     "Knowledge/02 Computer Science": "flask-round",
     "Knowledge/03 Data Persistance": "database",
@@ -414,7 +414,8 @@
     }
   },
   "navigationSeparators": {
-    "folder:Templates": true
+    "folder:Templates": true,
+    "folder:Knowledge": true
   },
   "userColors": [
     "#ffffff",

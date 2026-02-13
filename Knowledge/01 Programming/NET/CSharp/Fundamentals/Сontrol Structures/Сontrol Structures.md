@@ -3,8 +3,6 @@ topic:
   - Programming
 subtopic:
   - NET
-  - C#
-  - Fundamentals
 level:
   - "1"
 priority: Medium

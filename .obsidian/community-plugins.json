@@ -1,6 +1,5 @@
 [
   "obsidian-git",
-  "terminal",
   "dataview",
   "templater-obsidian",
   "omnisearch",
@@ -12,7 +11,7 @@
   "obsidian-icon-folder",
   "pretty-properties",
   "obsidian-custom-attachment-location",
-  "heatmap-calendar",
   "multi-column-markdown",
-  "advanced-canvas"
+  "advanced-canvas",
+  "heatmap-calendar"
 ]

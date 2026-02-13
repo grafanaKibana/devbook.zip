@@ -1,26 +1,4 @@
----
-tags:
-  - FolderNote
----
 
-# Intro
-
-Quick introduction to the topic
-
-## Deeper Explanation
-
-Deeper Explanation of the topic
-
-## Questions
-
-> [!QUESTION]- What is abc?
-> Answer
-
-## Links
-Replace or delete these example links.
-
-- [Link 1](https://example.com)
-- [Link 2](https://example.com)
 
 # Whats next
 
