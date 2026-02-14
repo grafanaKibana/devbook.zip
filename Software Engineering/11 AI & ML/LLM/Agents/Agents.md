@@ -44,7 +44,7 @@ if (pages.length) {
 }
 ```
 ---
-## Intro
+# Intro
 
 An AI agent can be thought of as an autonomous program that **observes** (through sensors or data input), **decides** (using some form of reasoning or inference), and **acts** (outputs or executes changes in its environment).
 

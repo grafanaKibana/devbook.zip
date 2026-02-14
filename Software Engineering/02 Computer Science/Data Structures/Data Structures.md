@@ -43,7 +43,7 @@ if (pages.length) {
 }
 ```
 ---
-## Intro
+# Intro
 
 A data structure is a way to organize related data so it can be stored, accessed, and updated efficiently. Choosing the right data structure is often the biggest factor in making an algorithm fast and maintainable.
 

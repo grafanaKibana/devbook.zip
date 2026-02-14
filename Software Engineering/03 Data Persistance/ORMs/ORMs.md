@@ -43,11 +43,9 @@ if (pages.length) {
 }
 ```
 ---
-## Intro
+# Intro
 
 ## Deeper Explanation
-
-[[Entity Framework]]
 
 ## Questions
 

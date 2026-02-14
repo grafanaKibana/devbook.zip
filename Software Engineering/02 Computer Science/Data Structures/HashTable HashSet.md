@@ -11,7 +11,7 @@ status: Not-Started
 :LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ---
-## Intro
+# Intro
 
 Hash-based collections use a hash code to map a key to a bucket, aiming for near-constant-time lookup. In .NET this shows up in `Dictionary<TKey, TValue>` and `HashSet<T>`.
 

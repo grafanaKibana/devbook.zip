@@ -12,7 +12,7 @@ status: Not-Started
 :LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ---
-## Intro
+# Intro
 
 Domain-Driven Design (DDD) is an approach to software development that focuses on modeling the business domain and aligning code with a shared language and domain boundaries.
 

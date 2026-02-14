@@ -43,7 +43,7 @@ if (pages.length) {
 }
 ```
 ---
-## Intro
+# Intro
 
 ## Deeper Explanation
 

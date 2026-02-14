@@ -45,7 +45,7 @@ if (pages.length) {
 }
 ```
 ---
-## Intro
+# Intro
 
 ### Responsible AI Principles
 

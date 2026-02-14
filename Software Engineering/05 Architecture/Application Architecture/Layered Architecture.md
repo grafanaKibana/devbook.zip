@@ -12,7 +12,7 @@ status: Not-Started
 :LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ---
-## Intro
+# Intro
 
 Layered architecture (also called multi-layered or n-tier) structures an application into layers with clear responsibilities and dependency directions.
 

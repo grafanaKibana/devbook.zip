@@ -12,7 +12,7 @@ status: Not-Started
 :LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ---
-## Intro
+# Intro
 
 MVC and MVVM are UI/application architecture patterns that split responsibilities to improve maintainability, testability, and separation of concerns.
 

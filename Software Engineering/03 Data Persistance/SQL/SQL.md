@@ -43,24 +43,19 @@ if (pages.length) {
 }
 ```
 ---
-## Intro
+# Intro
 
 ## Deeper Explanation
 
-[[Indexes]]
-
-[[Normalization Denormalization|Normalization/Denormalization]]
-
 ## Logical SQL Query Execution Order
 
-**How you WRITE it:**
-
+- **How you WRITE it**
 ```mermaid
 graph LR
     W1["1 SELECT name, total"] --- W2["2 FROM orders"] --- W3["3 JOIN customers"] --- W4["4 WHERE year = 2025"] --- W5["5 GROUP BY name"] --- W6["6 HAVING total over 100"] --- W7["7 ORDER BY total"]
 ```
 
-**How the engine EXECUTES it:**
+- **How the engine EXECUTES it**
 
 ```mermaid
 graph LR

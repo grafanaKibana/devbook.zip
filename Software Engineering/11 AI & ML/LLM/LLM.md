@@ -44,7 +44,7 @@ if (pages.length) {
 }
 ```
 ---
-## Intro
+# Intro
 
 Large language models, also known as LLMs, are very large [deep learning](https://aws.amazon.com/what-is/deep-learning/) models that are pre-trained on vast amounts of data. The underlying transformer is a set of [neural networks](https://aws.amazon.com/what-is/neural-network/) that consist of an encoder and a decoder with self-attention capabilities. The encoder and decoder extract meanings from a sequence of text and understand the relationships between words and phrases in it.
 

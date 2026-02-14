@@ -12,7 +12,7 @@ status: Not-Started
 :LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ---
-## Intro
+# Intro
 
 Термин **утечка памяти** в средах со сборщиком мусора может вызывать некоторое недоумение. В конце концов, как может утекать память, если есть сборщик мусора, который следит за её своевременным освобождением?
 

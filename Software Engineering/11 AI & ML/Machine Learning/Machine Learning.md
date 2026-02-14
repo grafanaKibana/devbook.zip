@@ -44,13 +44,9 @@ if (pages.length) {
 }
 ```
 ---
-## Intro
+# Intro
 
 ## Deeper Explanation
-
-[[Types]]
-
-[[Spectrum Of Automations]]
 
 ## Links
 

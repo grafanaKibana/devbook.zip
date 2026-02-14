@@ -43,19 +43,9 @@ if (pages.length) {
 }
 ```
 ---
-## Intro
+# Intro
 
 ## Deeper Explanation
-
-[[In-place Deployment]]
-
-[[Blue Green Deployment|Blue/Green Deployment]]
-
-[[Canary Deployment]]
-
-[[Linear Deployment]]
-
-[[All-In-One Deployment]]
 
 ## Questions
 
