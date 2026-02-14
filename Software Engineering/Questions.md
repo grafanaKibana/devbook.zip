@@ -5,7 +5,7 @@ tags: [FolderNote]
 ```dataviewjs
 const { MarkdownRenderer } = require("obsidian");
 
-const pages = dv.pages('"Knowledge"')
+const pages = dv.pages('"Software Engineering"')
   .where(p => p.file.name !== "Questions");
 
 // Build a tree: each node has children (sub-folders) and items (callouts)
@@ -31,7 +31,7 @@ for (const page of pages) {
   }
   if (callouts.length === 0) continue;
 
-  const parts = page.file.folder.replace(/^Knowledge\/?/, "").split("/").filter(Boolean);
+  const parts = page.file.folder.replace(/^Software Engineering\/?/, "").split("/").filter(Boolean);
 
   let node = tree;
   for (let d = 0; d < parts.length && d < 6; d++) {

@@ -42,12 +42,12 @@
             "state": {
               "type": "split-diff-view",
               "state": {
-                "aFile": "AGENTS.md",
-                "bFile": "AGENTS.md",
+                "aFile": "Software Engineering/Questions.md",
+                "bFile": "Software Engineering/Questions.md",
                 "aRef": ""
               },
               "icon": "diff",
-              "title": "Diff: AGENTS  (Working Tree)"
+              "title": "Diff: Questions  (Working Tree)"
             }
           }
         ],
@@ -213,13 +213,19 @@
   },
   "active": "ce6bb2bb40a0a9de",
   "lastOpenFiles": [
-    "AGENTS.md",
+    "Software Engineering/06 Development Practices/Principles/YAGNI.md",
+    "Software Engineering/03 Data Persistance/ACID.md",
+    "Software Engineering/01 Programming/NET/NET Standart.md",
+    "Software Engineering/Questions.md",
     "Software Engineering/Topics.base",
+    "Software Engineering/Roadmap.canvas",
+    "Software Engineering/09 DevOps/Deployment Stratagies/All-In-One Deployment.md",
+    "AGENTS.md",
+    "Assets/Assets.md",
     "Software Engineering/Software Engineering.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Async Await.md",
     "Assets/01 Programming/01 Programming-Common Language Runtime-20260210212705669.png",
     "Software Engineering/01 Programming/NET/ASP.NET Web API.md",
-    "Software Engineering/Roadmap.canvas",
     "Software Engineering/08 SDLC/08 SDLC.md",
     "Software Engineering/01 Programming/NET/Other/Other.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md",
@@ -236,11 +242,6 @@
     "Software Engineering/02 Computer Science/02 Computer Science.md",
     "Software Engineering/05 Architecture/Architecture Styles/Microservices.md",
     "Software Engineering/05 Architecture/Patterns/Dependency Injection.md",
-    "Software Engineering/05 Architecture/Patterns/Design Patterns.md",
-    "Software Engineering/05 Architecture/Patterns/GRASP.md",
-    "Software Engineering/05 Architecture/Patterns/CQS.md",
-    "Software Engineering/05 Architecture/Patterns/Domain-Driven Development.md",
-    "Software Engineering/05 Architecture/Patterns/Repository & UoW.md",
     "Software Engineering/03 Data Persistance/NoSQL",
     "Software Engineering/09 DevOps/Version Control Systems",
     "Software Engineering/07 Security/Authentication",
