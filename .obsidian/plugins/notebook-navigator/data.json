@@ -175,7 +175,7 @@
   "quickActionAddToShortcuts": true,
   "quickActionPinNote": true,
   "quickActionOpenInNewTab": false,
-  "useFrontmatterMetadata": false,
+  "useFrontmatterMetadata": true,
   "frontmatterIconField": "",
   "frontmatterColorField": "",
   "frontmatterNameField": "",
@@ -381,7 +381,18 @@
   "folderIcons": {
     "Templates": "book-dashed",
     "Assets": "images",
-    "Knowledge": "book"
+    "Knowledge": "book",
+    "Knowledge/01 Programming": "code-square",
+    "Knowledge/02 Computer Science": "flask-round",
+    "Knowledge/03 Data Persistance": "database",
+    "Knowledge/04 Networks": "network",
+    "Knowledge/05 Architecture": "building-2",
+    "Knowledge/06 Development Practices": "tool-case",
+    "Knowledge/07 Security": "lock",
+    "Knowledge/08 SDLC": "gantt-chart",
+    "Knowledge/09 DevOps": "skull",
+    "Knowledge/10 Cloud": "cloud",
+    "Knowledge/11 AI & ML": "brain-circuit"
   },
   "folderColors": {
     "Templates": "#6b7280",
