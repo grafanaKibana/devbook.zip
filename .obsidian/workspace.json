@@ -4,40 +4,20 @@
     "type": "split",
     "children": [
       {
-        "id": "d4bef4fee3000006",
+        "id": "2a9162b21f832cf8",
         "type": "tabs",
         "children": [
           {
-            "id": "69ae2eaf499a433b",
-            "type": "leaf",
-            "pinned": true,
-            "state": {
-              "type": "bases",
-              "state": {
-                "file": "Software Engineering/Topics.base",
-                "viewName": "Table"
-              },
-              "pinned": true,
-              "icon": "lucide-table",
-              "title": "Topics"
-            }
-          },
-          {
-            "id": "af3a2ac6a41903fe",
+            "id": "1fedc7451582c06e",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
-              "state": {
-                "aFile": ".obsidian/workspace.json",
-                "bFile": ".obsidian/workspace.json",
-                "aRef": ""
-              },
-              "icon": "diff",
-              "title": "Diff: workspace.json  (Working Tree)"
+              "type": "empty",
+              "state": {},
+              "icon": "lucide-file",
+              "title": "New tab"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -114,7 +94,7 @@
         "type": "tabs",
         "children": [
           {
-            "id": "f9054415a792dd11",
+            "id": "af3a2ac6a41903fe",
             "type": "leaf",
             "state": {
               "type": "graph",
@@ -251,9 +231,12 @@
       "notebook-navigator:Notebook Navigator": true
     }
   },
-  "active": "b4a5f2c64c8491f4",
+  "active": "af3a2ac6a41903fe",
   "lastOpenFiles": [
     "Software Engineering/11 AI & ML/LLM/Agents/Agents.md",
+    "Software Engineering/01 Programming/01 Programming.md",
+    "Software Engineering/01 Programming/NET/NET.md",
+    "Software Engineering/01 Programming/NET/Runtime/Common Language Runtime.md",
     "Software Engineering/11 AI & ML/LLM/LLM.md",
     "Software Engineering/11 AI & ML/LLM/Prompting/Role Prompting.md",
     "Software Engineering/11 AI & ML/LLM/Prompting/Showing Examples.md",
@@ -276,9 +259,6 @@
     "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Bubble Sort.md",
     "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Quick Sort.md",
     "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Merge Sort.md",
-    "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms.md",
-    "Templates/Blocks/Template - Code Block.md",
-    "Templates/Blocks/Template - Callout.md",
     "Software Engineering/Roadmap.canvas",
     "Software Engineering/Topics.base",
     "Assets/01 Programming/01 Programming-Common Language Runtime-20260210212705669.png",

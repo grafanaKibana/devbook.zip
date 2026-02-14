@@ -6,7 +6,15 @@
   "hideUnresolved": false,
   "showOrphans": true,
   "collapse-color-groups": false,
-  "colorGroups": [],
+  "colorGroups": [
+    {
+      "query": "tag:#FolderNote  ",
+      "color": {
+        "a": 1,
+        "rgb": 5399264
+      }
+    }
+  ],
   "collapse-display": false,
   "showArrow": false,
   "textFadeMultiplier": 0,
@@ -17,6 +25,6 @@
   "repelStrength": 11.9731104651163,
   "linkStrength": 0.494004360465116,
   "linkDistance": 268,
-  "scale": 0.08589252029546206,
+  "scale": 0.08589252029546203,
   "close": true
 }
