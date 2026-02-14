@@ -1,5 +1,4 @@
 [
-  "obsidian-git",
   "templater-obsidian",
   "omnisearch",
   "folder-notes",
@@ -12,5 +11,6 @@
   "obsidian-custom-attachment-location",
   "multi-column-markdown",
   "advanced-canvas",
-  "dataview"
+  "dataview",
+  "obsidian-git"
 ]

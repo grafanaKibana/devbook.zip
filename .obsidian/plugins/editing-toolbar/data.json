@@ -1,6 +1,6 @@
 {
   "lastVersion": "3.2.7",
-  "aestheticStyle": "tiny",
+  "aestheticStyle": "default",
   "positionStyle": "top",
   "menuCommands": [
     {
@@ -428,7 +428,7 @@
       "toolbarBackgroundColor": "rgba(var(--background-secondary-rgb), 0.7)",
       "toolbarIconColor": "var(--text-normal)",
       "toolbarIconSize": 18,
-      "aestheticStyle": "tiny"
+      "aestheticStyle": "default"
     },
     "following": {
       "toolbarBackgroundColor": "rgba(var(--background-secondary-rgb), 0.7)",

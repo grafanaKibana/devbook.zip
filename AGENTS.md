@@ -5,7 +5,7 @@ This vault is an Obsidian knowledge base. These rules define how humans and agen
 ## Quickstart (daily navigation)
 
 - Open the Notebook Navigator homepage: [Knowledge](Knowledge/Knowledge.md)
-- Use the roadmap canvas for orientation and gaps: [Roadmap](Knowledge/Roadmap.canvas)
+- Use the roadmap canvas for orientation and gaps: [Roadmap](Roadmap.canvas)
 - Search with Omnisearch for any term across notes; prefer Omnisearch over folder browsing when you do not know where a note lives.
 
 ## Vault layout + scope boundaries

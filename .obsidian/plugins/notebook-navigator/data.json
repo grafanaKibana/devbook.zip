@@ -14,15 +14,15 @@
       "shortcuts": [
         {
           "type": "note",
-          "path": "Knowledge/Roadmap.canvas"
+          "path": "Software Engineering/Roadmap.canvas"
         },
         {
           "type": "note",
-          "path": "Knowledge/Questions.md"
+          "path": "Software Engineering/Questions.md"
         },
         {
           "type": "note",
-          "path": "Knowledge/Topics.base"
+          "path": "Software Engineering/Topics.base"
         }
       ]
     }
@@ -381,32 +381,32 @@
   "folderIcons": {
     "Templates": "book-dashed",
     "Assets": "images",
-    "Knowledge": "book",
-    "Knowledge/01 Programming": "code-square",
-    "Knowledge/02 Computer Science": "flask-round",
-    "Knowledge/03 Data Persistance": "database",
-    "Knowledge/04 Networks": "network",
-    "Knowledge/05 Architecture": "building-2",
-    "Knowledge/06 Development Practices": "tool-case",
-    "Knowledge/07 Security": "lock",
-    "Knowledge/08 SDLC": "gantt-chart",
-    "Knowledge/09 DevOps": "skull",
-    "Knowledge/10 Cloud": "cloud",
-    "Knowledge/11 AI & ML": "brain-circuit"
+    "Software Engineering": "book",
+    "Software Engineering/01 Programming": "code-square",
+    "Software Engineering/02 Computer Science": "flask-round",
+    "Software Engineering/03 Data Persistance": "database",
+    "Software Engineering/04 Networks": "network",
+    "Software Engineering/05 Architecture": "building-2",
+    "Software Engineering/06 Development Practices": "tool-case",
+    "Software Engineering/07 Security": "lock",
+    "Software Engineering/08 SDLC": "gantt-chart",
+    "Software Engineering/09 DevOps": "skull",
+    "Software Engineering/10 Cloud": "cloud",
+    "Software Engineering/11 AI & ML": "brain-circuit"
   },
   "folderColors": {
     "Templates": "#6b7280",
-    "Knowledge/01 Programming": "#ec4899",
-    "Knowledge/02 Computer Science": "#f43f5e",
-    "Knowledge/03 Data Persistance": "#ef4444",
-    "Knowledge/04 Networks": "#f97316",
-    "Knowledge/05 Architecture": "#eab308",
-    "Knowledge/07 Security": "#14b8a6",
-    "Knowledge/08 SDLC": "#0ea5e9",
-    "Knowledge/09 DevOps": "#3b82f6",
-    "Knowledge/10 Cloud": "#6366f1",
-    "Knowledge/11 AI & ML": "#8b5cf6",
-    "Knowledge/06 Development Practices": "#84cc16"
+    "Software Engineering/01 Programming": "#ec4899",
+    "Software Engineering/02 Computer Science": "#f43f5e",
+    "Software Engineering/03 Data Persistance": "#ef4444",
+    "Software Engineering/04 Networks": "#f97316",
+    "Software Engineering/05 Architecture": "#eab308",
+    "Software Engineering/07 Security": "#14b8a6",
+    "Software Engineering/08 SDLC": "#0ea5e9",
+    "Software Engineering/09 DevOps": "#3b82f6",
+    "Software Engineering/10 Cloud": "#6366f1",
+    "Software Engineering/11 AI & ML": "#8b5cf6",
+    "Software Engineering/06 Development Practices": "#84cc16"
   },
   "folderBackgroundColors": {},
   "folderSortOverrides": {},
@@ -428,7 +428,7 @@
   },
   "navigationSeparators": {
     "folder:Templates": true,
-    "folder:Knowledge": true
+    "folder:Software Engineering": true
   },
   "userColors": [
     "#ffffff",
