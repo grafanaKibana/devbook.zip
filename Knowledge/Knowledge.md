@@ -161,7 +161,8 @@ const rows = allKeys
     const c = counts.get(k) ?? 0;
     const pct = total > 0 ? Math.round((c / total) * 100) : 0;
     return { status: k, pct, count: c };
-  });
+  })
+  .filter((r) => r.status !== "Missing" || r.count > 0);
 
 const COL_WIDTHS = ["40%", "45%", "15%"];
 

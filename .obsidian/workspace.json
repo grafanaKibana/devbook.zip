@@ -57,14 +57,15 @@
             "id": "69ae2eaf499a433b",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
+              "type": "markdown",
               "state": {
-                "aFile": "src/src.md",
-                "bFile": "src/src.md",
-                "aRef": ""
+                "file": "Knowledge/Knowledge.md",
+                "mode": "preview",
+                "source": false,
+                "backlinks": false
               },
-              "icon": "diff",
-              "title": "Diff: src  (Working Tree)"
+              "icon": "lucide-file",
+              "title": "Knowledge"
             }
           }
         ],
@@ -129,7 +130,8 @@
               "title": "Bookmarks"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -164,9 +166,11 @@
             "type": "leaf",
             "state": {
               "type": "file-properties",
-              "state": {},
+              "state": {
+                "file": "Knowledge/Knowledge.md"
+              },
               "icon": "lucide-info",
-              "title": "File properties"
+              "title": "File properties for Knowledge"
             }
           },
           {
@@ -189,29 +193,13 @@
             "state": {
               "type": "outline",
               "state": {
+                "file": "Knowledge/Knowledge.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline"
-            }
-          }
-        ],
-        "currentTab": 2
-      },
-      {
-        "id": "40e2cafdb5dd21ef",
-        "type": "tabs",
-        "children": [
-          {
-            "id": "3beec744f1b0c1ff",
-            "type": "leaf",
-            "state": {
-              "type": "notebook-navigator-calendar",
-              "state": {},
-              "icon": "notebook-navigator",
-              "title": "Calendar"
+              "title": "Outline of Knowledge"
             }
           }
         ]
