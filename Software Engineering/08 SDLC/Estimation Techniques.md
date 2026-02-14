@@ -1,5 +1,6 @@
 ---
-topic: ["SDLC"]
+topic:
+  - SDLC
 subtopic: []
 level: ["1"]
 priority: Medium

@@ -1,6 +1,8 @@
 ---
-topic: ["Computer Science"]
-subtopic: []
+topic:
+  - Computer Science
+subtopic:
+  - Algorithms
 level: ["1"]
 priority: Medium
 status: Not-Started

@@ -1,6 +1,8 @@
 ---
-topic: ["Architecture"]
-subtopic: []
+topic:
+  - Architecture
+subtopic:
+  - Patterns
 level: ["1"]
 priority: Medium
 status: Not-Started

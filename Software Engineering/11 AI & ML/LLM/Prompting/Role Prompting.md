@@ -1,6 +1,8 @@
 ---
-topic: ["AI"]
-subtopic: ["Prompting", "Techniques"]
+topic:
+  - AI & ML
+subtopic:
+  - LLM
 level: ["1"]
 priority: Medium
 status: Not-Started

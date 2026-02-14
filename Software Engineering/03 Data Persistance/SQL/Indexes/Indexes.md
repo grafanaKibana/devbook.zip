@@ -1,6 +1,8 @@
 ---
-topic: ["Data Persistance"]
-subtopic: ["SQL"]
+topic:
+  - Data Persistance
+subtopic:
+  - SQL
 level: ["1"]
 priority: Medium
 status: Not-Started

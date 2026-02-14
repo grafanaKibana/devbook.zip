@@ -1,8 +1,7 @@
 ---
 topic:
   - Data Persistance
-subtopic:
-  - ACID
+subtopic: []
 level:
   - "2"
 priority:

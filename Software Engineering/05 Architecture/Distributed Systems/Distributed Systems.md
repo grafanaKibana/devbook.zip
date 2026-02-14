@@ -1,6 +1,8 @@
 ---
-topic: ["Architecture"]
-subtopic: []
+topic:
+  - Architecture
+subtopic:
+  - Distributed Systems
 level: ["1"]
 priority: Medium
 status: Not-Started

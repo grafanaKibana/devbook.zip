@@ -11,7 +11,7 @@ tags:
 # Topic Coverage
 
 ```dataviewjs
-const ROOT = "Knowledge";
+const ROOT = "Software Engineering";
 const isFolderNote = (p) => (p.file.tags ?? []).includes("#FolderNote");
 const notes = dv.pages(`"${ROOT}"`).where((p) => !isFolderNote(p));
 
@@ -140,7 +140,7 @@ if (notesWithoutTopic.length > 0) {
 # Status Distribution
 
 ```dataviewjs
-const ROOT = "Knowledge";
+const ROOT = "Software Engineering";
 const isFolderNote = (p) => (p.file.tags ?? []).includes("#FolderNote");
 
 const STATUS_ORDER = ["Done", "Ready To Repeat", "Repetition", "Creation", "Not-Started"];

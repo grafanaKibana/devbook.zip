@@ -1,6 +1,8 @@
 ---
-topic: ["Computer Science"]
-subtopic: ["Data Structures"]
+topic:
+  - Computer Science
+subtopic:
+  - Data Structures
 level: ["1"]
 priority: Medium
 status: Not-Started

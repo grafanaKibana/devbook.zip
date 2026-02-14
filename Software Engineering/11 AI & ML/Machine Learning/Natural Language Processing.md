@@ -1,6 +1,8 @@
 ---
-topic: ["AI"]
-subtopic: []
+topic:
+  - AI & ML
+subtopic:
+  - Machine Learning
 level: ["1"]
 priority: Medium
 status: Not-Started

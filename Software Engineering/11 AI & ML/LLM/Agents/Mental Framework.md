@@ -1,6 +1,8 @@
 ---
-topic: ["AI"]
-subtopic: ["Agents"]
+topic:
+  - AI & ML
+subtopic:
+  - LLM
 level: ["1"]
 priority: Medium
 status: Not-Started

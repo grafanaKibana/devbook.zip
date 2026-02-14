@@ -1,6 +1,6 @@
 ---
 topic:
-  - AI
+  - AI & ML
 subtopic: []
 level:
   - "1"

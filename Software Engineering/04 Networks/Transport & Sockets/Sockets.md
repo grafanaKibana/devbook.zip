@@ -1,6 +1,8 @@
 ---
-topic: ["Networks"]
-subtopic: []
+topic:
+  - Networks
+subtopic:
+  - Transport & Sockets
 level: ["1"]
 priority: Medium
 status: Not-Started

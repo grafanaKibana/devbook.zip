@@ -1,8 +1,7 @@
 ---
 topic:
   - Cloud
-subtopic:
-  - AWS
+subtopic: []
 level:
   - "2"
 priority:

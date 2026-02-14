@@ -1,8 +1,8 @@
 ---
 topic:
-  - Patterns & Practices
+  - Development Practices
 subtopic:
-  - Paradigms 
+  - Paradigms
 level:
   - "1"
 priority: Medium

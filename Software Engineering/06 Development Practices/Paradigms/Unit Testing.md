@@ -1,6 +1,8 @@
 ---
-topic: ["Patterns & Practices"]
-subtopic: []
+topic:
+  - Development Practices
+subtopic:
+  - Paradigms
 level: ["1"]
 priority: Medium
 status: Not-Started

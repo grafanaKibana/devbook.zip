@@ -1,8 +1,8 @@
 filters:
   and:
     - '!file.hasTag("FolderNote")'
-    - file.path.startsWith("Knowledge")
     - '!file.ext.containsAny("base", "canvas")'
+    - file.path.startsWith("Software Engineering")
 views:
   - type: table
     name: Table
@@ -13,7 +13,9 @@ views:
       - status
       - priority
       - level
-    sort: []
+    sort:
+      - property: topic
+        direction: DESC
     summaries: {}
   - type: cards
     name: Cards

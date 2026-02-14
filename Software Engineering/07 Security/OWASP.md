@@ -1,5 +1,6 @@
 ---
-topic: ["Security"]
+topic:
+  - Security
 subtopic: []
 level: ["1"]
 priority: Medium

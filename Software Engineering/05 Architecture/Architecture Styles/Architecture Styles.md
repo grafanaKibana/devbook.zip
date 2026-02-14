@@ -1,6 +1,8 @@
 ---
-topic: ["Architecture"]
-subtopic: []
+topic:
+  - Architecture
+subtopic:
+  - Architecture Styles
 level: ["1"]
 priority: Medium
 status: Not-Started

@@ -1,6 +1,8 @@
 ---
-topic: ["Networks"]
-subtopic: []
+topic:
+  - Networks
+subtopic:
+  - Protocols
 level: ["1"]
 priority: Medium
 status: Not-Started

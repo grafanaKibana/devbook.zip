@@ -1,8 +1,8 @@
 ---
 topic:
-  - AI
+  - AI & ML
 subtopic:
-  - Prompting
+  - LLM
 level:
   - "1"
 priority: Medium

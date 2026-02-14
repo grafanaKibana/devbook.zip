@@ -1,6 +1,8 @@
 ---
-topic: ["Programming"]
-subtopic: ["NET"]
+topic:
+  - Programming
+subtopic:
+  - NET
 level: ["1"]
 priority: Medium
 status: Not-Started

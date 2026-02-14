@@ -1,8 +1,7 @@
 ---
 topic:
   - Cloud
-subtopic:
-  - Azure
+subtopic: []
 level:
   - "2"
 priority:

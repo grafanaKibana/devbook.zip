@@ -1,5 +1,6 @@
 ---
-topic: ["DevOps"]
+topic:
+  - DevOps
 subtopic: []
 level: ["1"]
 priority: Medium
