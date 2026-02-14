@@ -2,7 +2,14 @@
   "attachmentFolderPath": "Assets",
   "alwaysUpdateLinks": true,
   "showInlineTitle": true,
-  "livePreview": false,
+  "livePreview": true,
   "defaultViewMode": "preview",
-  "readableLineLength": false
+  "readableLineLength": false,
+  "strictLineBreaks": false,
+  "propertiesInDocument": "hidden",
+  "showLineNumber": false,
+  "openBehavior": "file:Knowledge/Knowledge",
+  "userIgnoreFilters": [
+    "Assets/"
+  ]
 }

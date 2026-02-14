@@ -8,23 +8,6 @@
         "type": "tabs",
         "children": [
           {
-            "id": "5eac11414fcb0957",
-            "type": "leaf",
-            "pinned": true,
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Knowledge/Knowledge.md",
-                "mode": "preview",
-                "source": true,
-                "backlinks": false
-              },
-              "pinned": true,
-              "icon": "lucide-file",
-              "title": "Knowledge"
-            }
-          },
-          {
             "id": "dfacbc313a0ac90a",
             "type": "leaf",
             "pinned": true,
@@ -33,7 +16,7 @@
               "state": {
                 "file": "AGENTS.md",
                 "mode": "source",
-                "source": true,
+                "source": false,
                 "backlinks": false
               },
               "pinned": true,
@@ -47,16 +30,46 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Knowledge/Knowledge.md",
-                "mode": "preview",
-                "source": true,
+                "file": "AGENTS.md",
+                "mode": "source",
+                "source": false,
                 "backlinks": false
               },
               "icon": "lucide-file",
-              "title": "Knowledge"
+              "title": "AGENTS"
+            }
+          },
+          {
+            "id": "f11d9d49e6d5421a",
+            "type": "leaf",
+            "state": {
+              "type": "split-diff-view",
+              "state": {
+                "aFile": "Knowledge/Knowledge.md",
+                "bFile": "Knowledge/Knowledge.md",
+                "aRef": ""
+              },
+              "icon": "diff",
+              "title": "Diff: Knowledge  (Working Tree)"
+            }
+          },
+          {
+            "id": "69ae2eaf499a433b",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Knowledge/02 Computer Science/02 Computer Science.md",
+                "mode": "preview",
+                "source": false,
+                "backlinks": false
+              },
+              "icon": "lucide-file",
+              "title": "02 Computer Science"
             }
           }
-        ]
+        ],
+        "currentTab": 3
       }
     ],
     "direction": "vertical"
@@ -117,8 +130,7 @@
               "title": "Bookmarks"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -131,7 +143,6 @@
       {
         "id": "4258cb4b831c7f51",
         "type": "tabs",
-        "dimension": 64.57253886010362,
         "children": [
           {
             "id": "65fa44482ae23c99",
@@ -148,7 +159,6 @@
       {
         "id": "1990516a765989dd",
         "type": "tabs",
-        "dimension": 35.42746113989637,
         "children": [
           {
             "id": "4d5678bed75fd56d",
@@ -156,10 +166,10 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Templates/Mermaid/Template - Sequence Diagram.md"
+                "file": "Knowledge/02 Computer Science/02 Computer Science.md"
               },
               "icon": "lucide-info",
-              "title": "File properties for Template - Sequence Diagram"
+              "title": "File properties for 02 Computer Science"
             }
           },
           {
@@ -182,17 +192,33 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Knowledge/Knowledge.md",
+                "file": "Knowledge/02 Computer Science/02 Computer Science.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Knowledge"
+              "title": "Outline of 02 Computer Science"
             }
           }
         ],
         "currentTab": 2
+      },
+      {
+        "id": "40e2cafdb5dd21ef",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "3beec744f1b0c1ff",
+            "type": "leaf",
+            "state": {
+              "type": "notebook-navigator-calendar",
+              "state": {},
+              "icon": "notebook-navigator",
+              "title": "Calendar"
+            }
+          }
+        ]
       }
     ],
     "direction": "horizontal",
@@ -208,48 +234,48 @@
       "command-palette:Open command palette": true,
       "obsidian-git:Open Git source control": true,
       "templater-obsidian:Templater": false,
-      "notebook-navigator:Notebook Navigator": true,
-      "digitalgarden:Digital Garden Publication Center": false
+      "notebook-navigator:Notebook Navigator": true
     }
   },
-  "active": "5eac11414fcb0957",
+  "active": "6cdf1810372ad7f9",
   "lastOpenFiles": [
-    "Knowledge/Knowledge.md",
-    "Knowledge/Roadmap.canvas",
-    "Knowledge/Questions.md",
-    "AGENTS.md",
-    "Knowledge/01 Programming/NET/CSharp/CSharp.md",
-    "Knowledge/01 Programming/NET/Other/Other.md",
+    "Knowledge/02 Computer Science/02 Computer Science.md",
     "Knowledge/01 Programming/01 Programming.md",
-    "Knowledge/09 DevOps/Deployment Stratagies/Deployment Stratagies.md",
-    "Knowledge/09 DevOps/Deployment Stratagies/Blue Green Deployment.md",
     "Knowledge/01 Programming/NET/NET.md",
+    "Knowledge/01 Programming/NET/Other/SignalR.md",
+    "Knowledge/01 Programming/NET/CSharp/CSharp.md",
+    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md",
+    "Knowledge/Knowledge.md",
+    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Collections/Collections.md",
+    "AGENTS.md",
+    "Templates/Mermaid/Template - Entity Relationship Diagram.md",
+    "Templates/Blocks/Template - Callout.md",
+    "Templates/Blocks/Template - Code Block.md",
+    "Knowledge/Questions.md",
+    "Templates/Pages/Template - Concept Page.md",
+    "Templates/Pages/Template - Index.md",
+    "Knowledge/01 Programming/NET/NET Standart.md",
+    "Knowledge/01 Programming/NET/abc/abc.md",
+    "Knowledge/01 Programming/NET/abc",
+    "Knowledge/01 Programming/NET/ABC/ABC.md",
+    "Knowledge/01 Programming/NET/ABC",
+    "Knowledge/01 Programming/NET/Runtime/Garbage Collector.md",
+    "Knowledge/01 Programming/NET/Runtime/Memory Leaks.md",
+    "Knowledge/01 Programming/NET/Runtime/Common Language Runtime.md",
+    "Knowledge/01 Programming/NET/Runtime/Untitled.md",
+    "Knowledge/01 Programming/NET/Other/OWIN.md",
+    "Knowledge/01 Programming/NET/Other/Other.md",
+    "Knowledge/01 Programming/NET/Runtime/Runtime.md",
+    "Knowledge/Roadmap.canvas",
+    "Knowledge/09 DevOps/Deployment Stratagies/Deployment Stratagies.md",
     "Knowledge/Topics.base",
-    "Knowledge/11 AI & ML/LLM/Prompting/Showing Examples.md",
-    "Knowledge/11 AI & ML/LLM/Prompting/Role Prompting.md",
-    "Knowledge/11 AI & ML/LLM/Prompting/Prompting.md",
-    "Knowledge/11 AI & ML/LLM/Prompting/Instruction Prompting.md",
-    "Knowledge/11 AI & ML/LLM/Agents/Tools.md",
-    "Knowledge/11 AI & ML/LLM/Agents/Model Context Protocol.md",
-    "Knowledge/11 AI & ML/LLM/Agents/Multi-Agentic Systems.md",
-    "Knowledge/11 AI & ML/LLM/Agents/Mental Framework.md",
-    "Knowledge/11 AI & ML/LLM/Agents/Agents.md",
-    "Knowledge/11 AI & ML/Machine Learning/Spectrum Of Automations.md",
-    "Knowledge/11 AI & ML/Machine Learning/Types.md",
-    "Knowledge/11 AI & ML/Machine Learning/Natural Language Processing.md",
-    "Knowledge/11 AI & ML/Machine Learning/Machine Learning.md",
     "Knowledge/11 AI & ML/LLM/Prompting",
-    "Knowledge/11 AI & ML/LLM/LLM.md",
     "Knowledge/11 AI & ML/LLM/Agents",
     "Knowledge/11 AI & ML/Machine Learning",
     "Knowledge/11 AI & ML/LLM",
-    "Knowledge/11 AI & ML/11 AI & ML.md",
     "Knowledge/11 AI & ML",
-    "Knowledge/10 Cloud/Azure.md",
     "Knowledge/10 Cloud",
     "Knowledge/09 DevOps/Deployment Stratagies",
-    "Knowledge/09 DevOps",
-    "Knowledge/08 SDLC",
     "quartz/public/01-Programming/NET/CSharp/Fundamentals/Сontrol-Structures/Сontrol-Structures-og-image.webp",
     "quartz/public/01-Programming/NET/CSharp/Fundamentals/Types/Types-og-image.webp",
     "quartz/public/01-Programming/NET/CSharp/Fundamentals/Types/Strings-og-image.webp",

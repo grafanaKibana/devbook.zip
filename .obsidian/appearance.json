@@ -6,5 +6,6 @@
   "showRibbon": true,
   "showViewHeader": true,
   "interfaceFontFamily": "SF Pro",
-  "textFontFamily": "SF Pro Text"
+  "textFontFamily": "SF Pro Text",
+  "theme": "system"
 }

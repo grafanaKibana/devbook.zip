@@ -7,18 +7,12 @@ if (title.startsWith("Untitled")) {
   await tp.file.rename(`${title}`);
 }
 %>
+
 tags:
 - Template
 - FolderNote
 ---
-<%*
-// If File is untitled prompt the User to set a Title
-let title = tp.file.title
-if (title.startsWith("Untitled")) {
-  title = await tp.system.prompt("Title") ?? "Untitled";
-  await tp.file.rename(`${title}`);
-}
-%>
+
 # Intro
 
 Quick introduction to the topic

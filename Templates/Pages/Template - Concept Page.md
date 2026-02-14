@@ -7,6 +7,7 @@ if (title.startsWith("Untitled")) {
   await tp.file.rename(`${title}`);
 }
 %>
+
 topic: <% (() => { const parts = tp.file.folder(true).split("/"); const idx = parts.indexOf("Knowledge"); return (idx >= 0 && parts.length > idx + 1) ? `["${parts[idx + 1].replace(/^\d+\s+/, "")}"]` : "[]"; })() %>
 subtopic: <% (() => { const parts = tp.file.folder(true).split("/"); const idx = parts.indexOf("Knowledge"); return (idx >= 0 && parts.length > idx + 2) ? `["${parts[idx + 2].replace(/^\d+\s+/, "")}"]` : "[]"; })() %>
 level: <% tp.system.suggester(["1", "2", "3", "4"], ["1", "2", "3", "4"], false, "Select level") %>

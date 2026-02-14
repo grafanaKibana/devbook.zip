@@ -1,8 +1,6 @@
 ---
 tags:
   - FolderNote
-dg-home: true
-dg-publish: true
 ---
 
 ## Start Here
@@ -53,9 +51,18 @@ const rows = [...topicStats.entries()].map(([topic, s]) => {
 
 rows.sort((a, b) => a.pct - b.pct || b.total - a.total || a.topic.localeCompare(b.topic));
 
+const COL_WIDTHS = ["40%", "45%", "15%"];
+
 const table = this.container.createEl("table");
 table.style.width = "100%";
 table.style.borderCollapse = "collapse";
+table.style.tableLayout = "fixed";
+
+const colgroup = table.createEl("colgroup");
+for (const w of COL_WIDTHS) {
+  const col = colgroup.createEl("col");
+  col.style.width = w;
+}
 
 const thead = table.createEl("thead");
 const hr = thead.createEl("tr");
@@ -150,17 +157,82 @@ for (const p of notes) {
 const total = notes.length;
 const allKeys = [...STATUS_ORDER, "Other", "Missing"];
 const rows = allKeys
-  .filter((k) => (counts.get(k) ?? 0) > 0)
   .map((k) => {
     const c = counts.get(k) ?? 0;
     const pct = total > 0 ? Math.round((c / total) * 100) : 0;
-    const filled = Math.round(pct / 5);
-    const bar = "\u2588".repeat(filled) + "\u2591".repeat(20 - filled);
-    return [k, `${bar} ${pct}%`, `${c}`];
+    return { status: k, pct, count: c };
   });
 
-dv.table(["Status", "Distribution", "Count"], rows);
+const COL_WIDTHS = ["40%", "45%", "15%"];
 
+const table = this.container.createEl("table");
+table.style.width = "100%";
+table.style.borderCollapse = "collapse";
+table.style.tableLayout = "fixed";
+
+const colgroup = table.createEl("colgroup");
+for (const w of COL_WIDTHS) {
+  const col = colgroup.createEl("col");
+  col.style.width = w;
+}
+
+const thead = table.createEl("thead");
+const hr = thead.createEl("tr");
+for (const h of ["Status", "Distribution", "Count"]) {
+  const th = hr.createEl("th", { text: h });
+  th.style.textAlign = h === "Status" ? "left" : "right";
+  th.style.padding = "6px 8px";
+  th.style.borderBottom = "1px solid rgba(127,127,127,0.25)";
+  th.style.fontWeight = "600";
+}
+
+const tbody = table.createEl("tbody");
+for (const r of rows) {
+  const tr = tbody.createEl("tr");
+
+  if (r.status === "Missing") {
+    tr.style.backgroundColor = "rgba(234, 179, 8, 0.15)";
+  }
+
+  const tdStatus = tr.createEl("td", { text: r.status });
+  tdStatus.style.padding = "6px 8px";
+  tdStatus.style.borderBottom = "1px solid rgba(127,127,127,0.12)";
+  if (r.status === "Missing") {
+    tdStatus.style.color = "rgb(234, 179, 8)";
+    tdStatus.style.fontWeight = "600";
+  }
+
+  const tdProg = tr.createEl("td");
+  tdProg.style.padding = "6px 8px";
+  tdProg.style.borderBottom = "1px solid rgba(127,127,127,0.12)";
+  tdProg.style.textAlign = "right";
+
+  const wrap = tdProg.createDiv();
+  wrap.style.display = "grid";
+  wrap.style.gridTemplateColumns = "1fr 44px";
+  wrap.style.gap = "8px";
+  wrap.style.alignItems = "center";
+
+  const prog = document.createElement("progress");
+  prog.max = 100;
+  prog.value = r.pct;
+  prog.style.width = "100%";
+  prog.style.height = "12px";
+  wrap.appendChild(prog);
+
+  const pct = document.createElement("span");
+  pct.textContent = `${r.pct}%`;
+  pct.style.opacity = "0.8";
+  pct.style.fontVariantNumeric = "tabular-nums";
+  pct.style.textAlign = "right";
+  wrap.appendChild(pct);
+
+  const tdCount = tr.createEl("td", { text: `${r.count}` });
+  tdCount.style.padding = "6px 8px";
+  tdCount.style.borderBottom = "1px solid rgba(127,127,127,0.12)";
+  tdCount.style.textAlign = "right";
+  tdCount.style.fontVariantNumeric = "tabular-nums";
+}
 ```
 
 # Focus

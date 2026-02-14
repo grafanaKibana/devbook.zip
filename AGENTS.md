@@ -1,4 +1,4 @@
-t # AGENTS.md (Vault Operating Contract)
+# AGENTS.md (Vault Operating Contract)
 
 This vault is an Obsidian knowledge base. These rules define how humans and agents MUST operate inside it.
 
@@ -67,9 +67,6 @@ tags:
 ```
 
 ## Formatting + quality rules (STRICT MUST)
-
-- Links: author text MUST use Markdown links only: `[Title](path-or-url)`.
-- No wiki-links: do not write wiki-link syntax (double-bracket links) in author text. If you must discuss the syntax, write it spaced like `[ [ Note Name ] ]`.
 - No placeholders: real notes MUST NOT retain template placeholders (example questions, example links, "Replace or delete" lines, etc.). Placeholders are allowed only inside `Templates/`.
 - Templates are examples: delete irrelevant sections; do not force headers. Still enforce content invariants for real notes:
   - a short intro that answers "what is this" and "why do we care"

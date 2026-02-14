@@ -10,7 +10,27 @@
       "LiBookDashed"
     ],
     "recentlyUsedIconsSize": 5,
-    "rules": [],
+    "rules": [
+      {
+        "rule": "^ (?!\").md$):",
+        "icon": "LiPaperclip",
+        "for": "everything",
+        "order": 0
+      },
+      {
+        "rule": ".",
+        "icon": "LiFile",
+        "for": "everything",
+        "order": 1
+      },
+      {
+        "rule": ".",
+        "icon": "LiFolderClosed",
+        "for": "folders",
+        "order": 2,
+        "useFilePath": false
+      }
+    ],
     "extraMargin": {
       "top": 0,
       "right": 4,
