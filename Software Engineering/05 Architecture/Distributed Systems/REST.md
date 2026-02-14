@@ -19,7 +19,7 @@ status: Not-Started
 ## Questions
 
 > [!QUESTION]- What does REST mean?
-> REST (Representational State Transfer) is an architectural style for distributed systems.
+> REST (Representational State Transfer) is an architectural style for [[Distributed Systems|distributed systems]].
 > Key ideas: resources identified by URIs, stateless requests, cacheable responses, a uniform interface, layered system, and optional code-on-demand.
 > In practice, RESTful APIs model domain objects as resources and use HTTP methods with consistent semantics.
 

@@ -20,7 +20,7 @@ status: Not-Started
 
 > [!QUESTION]- What is Inversion of Control (IoC)?
 > IoC is a principle where the flow of control is inverted: instead of your code creating and managing its dependencies directly, an external mechanism (framework/container) coordinates object creation and composition.
-> A common IoC technique is Dependency Injection: dependencies are provided to a class (constructor/setter/parameter) rather than created inside it.
+> A common IoC technique is [[Dependency Injection]]: dependencies are provided to a class (constructor/setter/parameter) rather than created inside it.
 
 > [!QUESTION]- What is the Dependency Inversion Principle (DIP)?
 > DIP (the "D" in SOLID) says:

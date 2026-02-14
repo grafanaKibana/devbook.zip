@@ -158,7 +158,7 @@ By default, equality comparison behaves differently for value and reference type
 ## Stack vs Heap Allocation
 
 - Stack: Fast, limited size, automatic cleanup
-- Heap: Larger, managed by garbage collector
+- Heap: Larger, managed by [[Garbage Collector|garbage collector]]
 - Value types as local variables typically go on stack
 - Value types as class members go on heap with their containing object
 - Reference types (the objects themselves) always go on heap

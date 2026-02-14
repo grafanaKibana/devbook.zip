@@ -19,7 +19,7 @@ Quick sort partitions the array around a pivot so smaller elements go left and l
 - Mechanism: choose pivot, partition in-place (Lomuto/Hoare), then recurse on left/right partitions.
 - Complexity: average O(n log n); worst O(n^2) without protections.
 - Properties: in-place (typical), not stable.
-- How to make it robust: randomized pivot or median-of-three; switch to insertion sort on small partitions; consider introsort (fallback to heapsort) for worst-case bounds.
+- How to make it robust: randomized pivot or median-of-three; switch to [[Insertion Sort|insertion sort]] on small partitions; consider introsort (fallback to heapsort) for worst-case bounds.
 
 ## Diagram
 

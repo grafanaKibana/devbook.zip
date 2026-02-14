@@ -47,7 +47,10 @@ if (pages.length) {
 
 ## Deeper Explanation
 
-![11 AI & ML-Instruction Prompting-20260211012332406.svg](11%20AI%20&%20ML-Instruction%20Prompting-20260211012332406.svg)
+```mermaid
+graph LR
+    A["Write the word 'funny'<br>backwards"] --> B["ynnuf"]
+```
 
 ## Name Parsing Instructions Example
 

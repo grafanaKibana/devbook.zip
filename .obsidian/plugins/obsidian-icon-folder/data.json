@@ -10,27 +10,7 @@
       "LiBookDashed"
     ],
     "recentlyUsedIconsSize": 5,
-    "rules": [
-      {
-        "rule": "^ (?!\").md$):",
-        "icon": "LiPaperclip",
-        "for": "everything",
-        "order": 0
-      },
-      {
-        "rule": ".",
-        "icon": "LiFile",
-        "for": "everything",
-        "order": 1
-      },
-      {
-        "rule": ".",
-        "icon": "LiFolderClosed",
-        "for": "folders",
-        "order": 2,
-        "useFilePath": false
-      }
-    ],
+    "rules": [],
     "extraMargin": {
       "top": 0,
       "right": 4,
@@ -38,14 +18,14 @@
       "left": 0
     },
     "iconInTabsEnabled": true,
-    "iconInTitleEnabled": false,
+    "iconInTitleEnabled": true,
     "iconInTitlePosition": "inline",
     "iconInFrontmatterEnabled": false,
     "iconInFrontmatterFieldName": "icon",
     "iconColorInFrontmatterFieldName": "iconColor",
     "iconsBackgroundCheckEnabled": false,
     "iconsInNotesEnabled": true,
-    "iconsInLinksEnabled": true,
+    "iconsInLinksEnabled": false,
     "iconIdentifier": ":",
     "lucideIconPackType": "native",
     "debugMode": false,

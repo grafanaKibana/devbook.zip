@@ -46,12 +46,12 @@
                 "state": {
                   "type": "split-diff-view",
                   "state": {
-                    "aFile": "Software Engineering/01 Programming/NET/Runtime/Garbage Collector.md",
-                    "bFile": "Software Engineering/01 Programming/NET/Runtime/Garbage Collector.md",
+                    "aFile": "Software Engineering/11 AI & ML/LLM/Prompting/Instruction Prompting.md",
+                    "bFile": "Software Engineering/11 AI & ML/LLM/Prompting/Instruction Prompting.md",
                     "aRef": ""
                   },
                   "icon": "diff",
-                  "title": "Diff: Garbage Collector  (Working Tree)"
+                  "title": "Diff: Instruction Prompting  (Working Tree)"
                 },
                 "group": "ceab2e82d9d959a6"
               }
@@ -68,7 +68,7 @@
                 "state": {
                   "type": "backlink",
                   "state": {
-                    "file": "Software Engineering/04 Networks/04 Networks.md",
+                    "file": "Software Engineering/11 AI & ML/LLM/Prompting/Showing Examples.md",
                     "collapseAll": false,
                     "extraContext": false,
                     "sortOrder": "alphabetical",
@@ -78,7 +78,7 @@
                     "unlinkedCollapsed": true
                   },
                   "icon": "links-coming-in",
-                  "title": "Backlinks for 04 Networks"
+                  "title": "Backlinks for Showing Examples"
                 },
                 "group": "ceab2e82d9d959a6"
               }
@@ -105,7 +105,7 @@
               "type": "file-explorer",
               "state": {
                 "sortOrder": "alphabetical",
-                "autoReveal": true
+                "autoReveal": false
               },
               "icon": "lucide-folder-closed",
               "title": "Files"
@@ -146,8 +146,7 @@
               "title": "Bookmarks"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -177,12 +176,13 @@
             "state": {
               "type": "outline",
               "state": {
+                "file": "Software Engineering/11 AI & ML/LLM/Agents/Agents.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline"
+              "title": "Outline of Agents"
             }
           },
           {
@@ -215,6 +215,7 @@
             "state": {
               "type": "backlink",
               "state": {
+                "file": "Software Engineering/04 Networks/Transport & Sockets/Transport & Sockets.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -224,7 +225,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks"
+              "title": "Backlinks for Transport & Sockets"
             }
           }
         ]
@@ -274,7 +275,22 @@
   },
   "active": "ce6bb2bb40a0a9de",
   "lastOpenFiles": [
+    "Software Engineering/11 AI & ML/LLM/Prompting/Showing Examples.md",
+    "Software Engineering/11 AI & ML/LLM/Prompting/Role Prompting.md",
+    "Software Engineering/11 AI & ML/LLM/Prompting/Instruction Prompting.md",
+    "Software Engineering/11 AI & ML/LLM/Agents/Agents.md",
+    "Software Engineering/11 AI & ML/LLM/Prompting/Prompting.md",
+    "Software Engineering/06 Development Practices/06 Development Practices.md",
+    "Software Engineering/06 Development Practices/Principles/Principles.md",
+    "Software Engineering/06 Development Practices/Paradigms/Paradigms.md",
+    "Software Engineering/06 Development Practices/Paradigms/Functional Programming.md",
+    "Software Engineering/06 Development Practices/Principles/DRY.md",
+    "Software Engineering/04 Networks/Transport & Sockets/Transport & Sockets.md",
     "Software Engineering/04 Networks/04 Networks.md",
+    "Software Engineering/04 Networks/Architecture & Ops/Architecture & Ops.md",
+    "Software Engineering/04 Networks/Protocols/Protocols.md",
+    "Software Engineering/04 Networks/Transport & Sockets/Sockets.md",
+    "Software Engineering/04 Networks/Protocols/DNS.md",
     "Software Engineering/03 Data Persistance/03 Data Persistance.md",
     "Software Engineering/02 Computer Science/02 Computer Science.md",
     "Software Engineering/02 Computer Science/Algorithms/Algorithms.md",
@@ -284,23 +300,8 @@
     "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms.md",
     "Templates/Blocks/Template - Code Block.md",
     "Templates/Blocks/Template - Callout.md",
-    "Software Engineering/04 Networks/Architecture & Ops/Architecture & Ops.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Collections/Collections.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md",
-    "Software Engineering/02 Computer Science/Data Structures/Data Structures.md",
-    "Software Engineering/Software Engineering.md",
     "Software Engineering/Roadmap.canvas",
-    "Software Engineering/01 Programming/01 Programming.md",
-    "Software Engineering/10 Cloud/AWS.md",
-    "Software Engineering/01 Programming/NET/Other/SignalR.md",
-    "Software Engineering/01 Programming/NET/Other/OWIN.md",
-    "Software Engineering/01 Programming/NET/NET Standart.md",
-    "Software Engineering/01 Programming/NET/ASP.NET Web API.md",
-    "Untitled.md",
-    "Software Engineering/03 Data Persistance/ACID.md",
-    "Software Engineering/06 Development Practices/Principles/YAGNI.md",
-    "Software Engineering/Questions.md",
     "Software Engineering/Topics.base",
     "Assets/01 Programming/01 Programming-Common Language Runtime-20260210212705669.png",
     "Software Engineering/03 Data Persistance/NoSQL",

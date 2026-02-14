@@ -47,11 +47,14 @@ if (pages.length) {
 
 ## Deeper Explanation
 
-![11 AI & ML-Role Prompting-20260211012332438.svg](11%20AI%20&%20ML-Role%20Prompting-20260211012332438.svg)
+```mermaid
+graph LR
+    A["You are Shakespeare, an English writer. Write me a poem."] --> B["Of lovers hearts<br>and passions fire..."]
+```
 
 # What is Role Prompting?
 
-Role prompting is a technique that involves assigning specific roles to the LLM (Large Language Model) to control the style, tone, and quality of AI-generated text. By instructing the AI to adopt a particular role or perspective, you can influence how it approaches a task and the characteristics of its output.
+Role [[Prompting|prompting]] is a technique that involves assigning specific roles to the LLM (Large Language Model) to control the style, tone, and quality of AI-generated text. By instructing the AI to adopt a particular role or perspective, you can influence how it approaches a task and the characteristics of its output.
 
 The implementation of role prompting is straightforward: simply instruct the AI to "act as" or "embody" a specific character, profession, or perspective. For example, you might ask the AI to "act like a detective" or "embody a food critic."
 

@@ -6,11 +6,11 @@
   "url-into-selection",
   "obsidian-auto-link-title",
   "notebook-navigator",
-  "obsidian-icon-folder",
   "pretty-properties",
   "obsidian-custom-attachment-location",
   "multi-column-markdown",
   "advanced-canvas",
   "dataview",
-  "obsidian-git"
+  "obsidian-git",
+  "obsidian-icon-folder"
 ]

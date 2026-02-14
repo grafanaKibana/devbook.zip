@@ -47,13 +47,21 @@ if (pages.length) {
 
 ## Deeper Explanation
 
-Yet another prompting strategy is *few-shot prompting*, which is basically just **showing examples** (also called "shots") to the model of what you want it to do. Few-shot prompts allow the AI to learn from these examples.
+Yet another [[Prompting|prompting]] strategy is *few-shot prompting*, which is basically just **showing examples** (also called "shots") to the model of what you want it to do. Few-shot prompts allow the AI to learn from these examples.
 
 Consider the graphic at the top of this article, in which we are attempting to classify customer feedback as positive or negative. We show the model three examples of positive/negative feedback, then we show it a new piece of feedback that has not been classified yet (*It doesn't work!:*). The model sees that the first three examples were classified as either *positive* or *negative*, and uses this information to classify the new example as negative.
 
 ## Structure
 
-![11 AI & ML-Showing Examples-20260211012332470.svg](11%20AI%20&%20ML-Showing%20Examples-20260211012332470.svg)
+```mermaid
+graph LR
+    subgraph FewShot["A Few Shot Prompt"]
+        direction TB
+        E1["Example 1"] --> E2["Example 2"] --> E3["More examples..."] --> IN["Your input"]
+    end
+
+    FewShot --> P["Great product, 10/10: positive<br>Didnt work very well: negative<br>Super helpful, worth it: positive<br>It doesnt work!:"] --> O["negative"]
+```
 
 The way that we structure the examples is very important. Given that we have organised these three instances in an *input: classification* format, the model generates a single word following the final line, rather than outputting a complete sentence such as *this review is positive.*
 

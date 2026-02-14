@@ -3,6 +3,8 @@
     "aliases": "aliases",
     "cssclasses": "multitext",
     "tags": "tags",
+    "topic": "multitext",
+    "subtopic": "multitext",
     "priority": "multitext",
     "status": "multitext",
     "level": "multitext"
