@@ -11,17 +11,14 @@
             "id": "1fedc7451582c06e",
             "type": "leaf",
             "state": {
-              "type": "canvas",
+              "type": "split-diff-view",
               "state": {
-                "file": "Software Engineering/Roadmap.canvas",
-                "viewState": {
-                  "x": 490,
-                  "y": 1763.2643902439022,
-                  "zoom": -2.119801522016476
-                }
+                "aFile": "Templates/Pages/Template - Concept Page.md",
+                "bFile": "Templates/Pages/Template - Concept Page.md",
+                "aRef": ""
               },
-              "icon": "lucide-layout-dashboard",
-              "title": "Roadmap"
+              "icon": "diff",
+              "title": "Diff: Template - Concept Page  (Working Tree)"
             }
           }
         ]
@@ -135,11 +132,9 @@
             "type": "leaf",
             "state": {
               "type": "file-properties",
-              "state": {
-                "file": "Software Engineering/Roadmap.canvas"
-              },
+              "state": {},
               "icon": "lucide-info",
-              "title": "File properties for Roadmap"
+              "title": "File properties"
             }
           },
           {
@@ -148,13 +143,12 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Software Engineering/11 AI & ML/LLM/Agents/Agents.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Agents"
+              "title": "Outline"
             }
           },
           {
@@ -187,7 +181,6 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Software Engineering/Roadmap.canvas",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -197,7 +190,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Roadmap"
+              "title": "Backlinks"
             }
           }
         ]
@@ -247,7 +240,14 @@
   },
   "active": "1fedc7451582c06e",
   "lastOpenFiles": [
+    "Software Engineering/03 Data Persistance/ORMs/Entity Framework.md",
+    "Software Engineering/03 Data Persistance/ORMs/ORMs.md",
+    "Software Engineering/03 Data Persistance/NoSQL/NoSQL.md",
+    "Templates/Pages/Template - Index.md",
+    "Templates/Pages/Template - Concept Page.md",
     "Software Engineering/01 Programming/NET/Runtime/Garbage Collector.md",
+    "Templates/Blocks/Template - Callout.md",
+    "Templates/Mermaid/Template - Class Diagram.md",
     "Software Engineering/Roadmap.canvas",
     "Software Engineering/03 Data Persistance/SQL/SQL.md",
     "Software Engineering/05 Architecture/Patterns/CQRS.md",
@@ -263,7 +263,6 @@
     "Software Engineering/01 Programming/NET/Runtime/Common Language Runtime.md",
     "AGENTS.md",
     "Software Engineering/Software Engineering.md",
-    "Templates/Pages/Template - Concept Page.md",
     "Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
     "Software Engineering/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set.md",
     "Assets/11 AI & ML/11 AI & ML-LLM-20260211012223477.png",
@@ -272,11 +271,6 @@
     "Assets/11 AI & ML/11 AI & ML-Showing Examples-20260211012332470.svg",
     "Assets/11 AI & ML/11 AI & ML-Role Prompting-20260211012332438.svg",
     "Assets/Assets.md",
-    "Software Engineering/11 AI & ML/LLM/Agents/Agents.md",
-    "Software Engineering/01 Programming/01 Programming.md",
-    "Software Engineering/11 AI & ML/LLM/LLM.md",
-    "Software Engineering/11 AI & ML/LLM/Prompting/Role Prompting.md",
-    "Software Engineering/11 AI & ML/LLM/Prompting/Showing Examples.md",
     "Software Engineering/Topics.base",
     "Assets/01 Programming/01 Programming-Common Language Runtime-20260210212705669.png",
     "Software Engineering/03 Data Persistance/NoSQL",

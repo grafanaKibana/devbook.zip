@@ -16,7 +16,6 @@ status: Not-Started
 tags:
   - Template
 ---
-
 # Intro
 
 Quick introduction to the concept

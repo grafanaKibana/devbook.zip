@@ -1,7 +1,7 @@
 {
   "attachmentFolderPath": "Assets",
   "alwaysUpdateLinks": true,
-  "showInlineTitle": true,
+  "showInlineTitle": false,
   "livePreview": true,
   "defaultViewMode": "preview",
   "readableLineLength": false,
