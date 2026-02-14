@@ -1,8 +1,12 @@
 ---
-topic: ["Architecture"]
-subtopic: []
-level: ["1"]
-priority: Medium
+topic:
+  - Architecture
+subtopic:
+  - Patterns
+level:
+  - "1"
+priority:
+  - Low
 status: Not-Started
 ---
 ## Parent

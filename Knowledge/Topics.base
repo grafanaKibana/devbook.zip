@@ -1,22 +1,19 @@
+filters:
+  and:
+    - '!file.hasTag("FolderNote")'
+    - file.path.startsWith("Knowledge")
+    - '!file.ext.containsAny("base", "canvas")'
 views:
   - type: table
     name: Table
-    filters:
-      and:
-        - file.name != "index"
-        - file.name != "AGENTS"
-        - '!file.path.startsWith("Templates")'
-        - '!file.name.endsWith(".base")'
-        - '!file.ext.containsAny("png", "jpg")'
     order:
       - file.name
       - topic
       - subtopic
       - status
       - priority
-    sort:
-      - property: file.name
-        direction: DESC
+      - level
+    sort: []
   - type: cards
     name: Cards
     filters:

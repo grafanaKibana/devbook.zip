@@ -1,12 +1,13 @@
 ---
-topic: []
+topic:
+  - SDLC
 subtopic: []
-level: ["1"]
+level:
+  - "1"
 priority: Medium
 status: Not-Started
 aliases:
   - SDLC
-
 tags:
   - FolderNote
 ---

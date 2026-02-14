@@ -1,12 +1,13 @@
 ---
-topic: []
+topic:
+  - Security
 subtopic: []
-level: ["1"]
+level:
+  - "1"
 priority: Medium
 status: Not-Started
 aliases:
   - Security
-
 tags:
   - FolderNote
 ---

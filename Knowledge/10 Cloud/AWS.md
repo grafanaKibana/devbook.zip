@@ -1,8 +1,12 @@
 ---
-topic: ["Cloud"]
-subtopic: []
-level: ["1"]
-priority: Medium
+topic:
+  - Cloud
+subtopic:
+  - AWS
+level:
+  - "2"
+priority:
+  - Low
 status: Not-Started
 ---
 ## Parent

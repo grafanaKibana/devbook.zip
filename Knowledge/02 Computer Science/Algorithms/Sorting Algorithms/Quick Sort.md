@@ -3,8 +3,8 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
-  - Sorting Algorithms
-level: ["2"]
+level:
+  - "2"
 priority: Medium
 status: Not-Started
 ---

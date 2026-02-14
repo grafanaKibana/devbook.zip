@@ -1,8 +1,12 @@
 ---
-topic: ["Architecture"]
-subtopic: []
-level: ["1"]
-priority: Medium
+topic:
+  - Architecture
+subtopic:
+  - Distributed Systems
+level:
+  - "1"
+priority:
+  - Low
 status: Not-Started
 ---
 ## Parent

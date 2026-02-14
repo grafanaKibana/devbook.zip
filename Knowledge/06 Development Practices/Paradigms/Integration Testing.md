@@ -1,7 +1,10 @@
 ---
-topic: ["Patterns & Practices"]
-subtopic: []
-level: ["1"]
+topic:
+  - Patterns & Practices
+subtopic:
+  - Paradigms 
+level:
+  - "1"
 priority: Medium
 status: Not-Started
 ---

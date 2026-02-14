@@ -1,7 +1,9 @@
 ---
-topic: ["Data Persistance"]
+topic:
+  - Data Persistance
 subtopic: []
-level: ["1"]
+level:
+  - "3"
 priority: Medium
 status: Not-Started
 ---

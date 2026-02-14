@@ -1,8 +1,12 @@
 ---
-topic: ["Data Persistance"]
-subtopic: []
-level: ["1"]
-priority: Medium
+topic:
+  - Data Persistance
+subtopic:
+  - ACID
+level:
+  - "2"
+priority:
+  - High
 status: Not-Started
 ---
 ## Parent

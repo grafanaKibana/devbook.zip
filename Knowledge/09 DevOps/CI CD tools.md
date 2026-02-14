@@ -1,7 +1,9 @@
 ---
-topic: ["DevOps"]
+topic:
+  - DevOps
 subtopic: []
-level: ["1"]
+level:
+  - "2"
 priority: Medium
 status: Not-Started
 ---

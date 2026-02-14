@@ -1,9 +1,10 @@
 ---
-topic: ["DevOps"]
-subtopic: []
-level: ["1"]
-priority: Medium
-status: Not-Started
+topic:
+  - DevOps
+subtopic:
+  - Version Control Systems
+tags:
+  - FolderNote
 ---
 ## Parent
 :LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`

@@ -1,8 +1,12 @@
 ---
-topic: ["Security"]
-subtopic: []
-level: ["1"]
-priority: Medium
+topic:
+  - Security
+subtopic:
+  - Authentication
+level:
+  - "4"
+priority:
+  - High
 status: Not-Started
 ---
 ## Parent

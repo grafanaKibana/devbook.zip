@@ -1,7 +1,10 @@
 ---
-topic: ["Patterns & Practices"]
-subtopic: []
-level: ["1"]
+topic:
+  - Patterns & Practices
+subtopic:
+  - Paradigms 
+level:
+  - "1"
 priority: Medium
 status: Not-Started
 ---
@@ -12,6 +15,8 @@ status: Not-Started
 ## Intro
 
 ## Deeper Explanation
+
+[«Паттерны» функционального программирования](https://habr.com/ru/post/337880/)
 
 ## Questions
 

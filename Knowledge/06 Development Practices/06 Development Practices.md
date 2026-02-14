@@ -1,9 +1,13 @@
 ---
-topic: ["Patterns & Practices"]
+topic:
+  - Patterns & Practices
 subtopic: []
-level: ["1"]
+level:
+  - "1"
 priority: Medium
 status: Not-Started
+aliases:
+  - Patterns & Practices
 tags:
   - FolderNote
 ---
@@ -40,17 +44,4 @@ if (pages.length) {
   dv.list(pages.map(p => p.file.link));
 }
 ```
-
 ---
-## Intro
-
-## Deeper Explanation
-
-## Questions
-
-> [!QUESTION]- What is abc?
-> Answer
-
-## Further Reading
-- [Link 1](URL)
-- [Link 2](URL)

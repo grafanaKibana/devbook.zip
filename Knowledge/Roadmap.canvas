@@ -141,10 +141,20 @@
       "color": "1"
     },
     {
+      "id": "n_4cbe3c0d1b",
+      "type": "file",
+      "file": "Knowledge/03 Data Persistance/NoSQL/NoSQL.md",
+      "x": 420,
+      "y": 1520,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
       "id": "n_a4212fc406",
       "type": "file",
       "file": "Knowledge/03 Data Persistance/ORMs/ORMs.md",
-      "x": 420,
+      "x": -420,
       "y": 1520,
       "width": 340,
       "height": 80,
@@ -154,8 +164,8 @@
       "id": "n_d026450ac5",
       "type": "file",
       "file": "Knowledge/03 Data Persistance/SQL/SQL.md",
-      "x": -420,
-      "y": 1520,
+      "x": 420,
+      "y": 1640,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -164,8 +174,8 @@
       "id": "n_a79b2e14f8",
       "type": "file",
       "file": "Knowledge/03 Data Persistance/SQL/Indexes/Indexes.md",
-      "x": -840,
-      "y": 1640,
+      "x": 840,
+      "y": 1760,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -175,7 +185,7 @@
       "type": "file",
       "file": "Knowledge/04 Networks/04 Networks.md",
       "x": 0,
-      "y": 1920,
+      "y": 2040,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -185,7 +195,7 @@
       "type": "file",
       "file": "Knowledge/04 Networks/Architecture & Ops/Architecture & Ops.md",
       "x": 420,
-      "y": 1920,
+      "y": 2040,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -195,7 +205,7 @@
       "type": "file",
       "file": "Knowledge/04 Networks/Protocols/Protocols.md",
       "x": -420,
-      "y": 1920,
+      "y": 2040,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -205,7 +215,7 @@
       "type": "file",
       "file": "Knowledge/04 Networks/Transport & Sockets/Transport & Sockets.md",
       "x": 420,
-      "y": 2040,
+      "y": 2160,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -215,7 +225,7 @@
       "type": "file",
       "file": "Knowledge/05 Architecture/05 Architecture.md",
       "x": 0,
-      "y": 2320,
+      "y": 2440,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -225,7 +235,7 @@
       "type": "file",
       "file": "Knowledge/05 Architecture/Application Architecture/Application Architecture.md",
       "x": 420,
-      "y": 2320,
+      "y": 2440,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -235,7 +245,7 @@
       "type": "file",
       "file": "Knowledge/05 Architecture/Architecture Styles/Architecture Styles.md",
       "x": -420,
-      "y": 2320,
+      "y": 2440,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -245,7 +255,7 @@
       "type": "file",
       "file": "Knowledge/05 Architecture/Distributed Systems/Distributed Systems.md",
       "x": 420,
-      "y": 2440,
+      "y": 2560,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -255,46 +265,36 @@
       "type": "file",
       "file": "Knowledge/05 Architecture/Patterns/Patterns.md",
       "x": -420,
-      "y": 2440,
+      "y": 2560,
       "width": 340,
       "height": 80,
       "color": "1"
     },
     {
-      "id": "n_8227afe735",
+      "id": "n_4ccad1dbf4",
       "type": "file",
-      "file": "Knowledge/06 Patterns & Practices/06 Patterns & Practices.md",
+      "file": "Knowledge/06 Development Practices/06 Development Practices.md",
       "x": 0,
-      "y": 2720,
+      "y": 2840,
       "width": 340,
       "height": 80,
       "color": "1"
     },
     {
-      "id": "n_4c45901cbc",
+      "id": "n_14732f6187",
       "type": "file",
-      "file": "Knowledge/06 Patterns & Practices/Paradigms & Practices/Paradigms & Practices.md",
+      "file": "Knowledge/06 Development Practices/Paradigms/Paradigms.md",
       "x": 420,
-      "y": 2720,
+      "y": 2840,
       "width": 340,
       "height": 80,
       "color": "1"
     },
     {
-      "id": "n_337f780578",
+      "id": "n_28dba4dfb6",
       "type": "file",
-      "file": "Knowledge/06 Patterns & Practices/Patterns/Patterns.md",
+      "file": "Knowledge/06 Development Practices/Principles/Principles.md",
       "x": -420,
-      "y": 2720,
-      "width": 340,
-      "height": 80,
-      "color": "1"
-    },
-    {
-      "id": "n_08c964890a",
-      "type": "file",
-      "file": "Knowledge/06 Patterns & Practices/Principles/Principles.md",
-      "x": 420,
       "y": 2840,
       "width": 340,
       "height": 80,
@@ -311,11 +311,21 @@
       "color": "1"
     },
     {
+      "id": "n_8437d5edd8",
+      "type": "file",
+      "file": "Knowledge/07 Security/Authentication/Authentication.md",
+      "x": 420,
+      "y": 3120,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
       "id": "n_215ff47b7f",
       "type": "file",
       "file": "Knowledge/08 SDLC/08 SDLC.md",
       "x": 0,
-      "y": 3360,
+      "y": 3400,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -325,7 +335,7 @@
       "type": "file",
       "file": "Knowledge/09 DevOps/09 DevOps.md",
       "x": 0,
-      "y": 3600,
+      "y": 3640,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -335,7 +345,17 @@
       "type": "file",
       "file": "Knowledge/09 DevOps/Deployment Stratagies/Deployment Stratagies.md",
       "x": 420,
-      "y": 3600,
+      "y": 3640,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_e39b6cc0ad",
+      "type": "file",
+      "file": "Knowledge/09 DevOps/Version Control Systems/Version Control Systems.md",
+      "x": -420,
+      "y": 3640,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -345,7 +365,7 @@
       "type": "file",
       "file": "Knowledge/10 Cloud/10 Cloud.md",
       "x": 0,
-      "y": 3880,
+      "y": 3920,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -355,7 +375,7 @@
       "type": "file",
       "file": "Knowledge/11 AI & ML/11 AI & ML.md",
       "x": 0,
-      "y": 4120,
+      "y": 4160,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -365,7 +385,7 @@
       "type": "file",
       "file": "Knowledge/11 AI & ML/LLM/LLM.md",
       "x": 420,
-      "y": 4120,
+      "y": 4160,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -375,7 +395,7 @@
       "type": "file",
       "file": "Knowledge/11 AI & ML/LLM/Agents/Agents.md",
       "x": 840,
-      "y": 4240,
+      "y": 4280,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -385,7 +405,7 @@
       "type": "file",
       "file": "Knowledge/11 AI & ML/LLM/Prompting/Prompting.md",
       "x": 840,
-      "y": 4360,
+      "y": 4400,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -395,7 +415,7 @@
       "type": "file",
       "file": "Knowledge/11 AI & ML/Machine Learning/Machine Learning.md",
       "x": -420,
-      "y": 4120,
+      "y": 4160,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -404,7 +424,7 @@
       "id": "n_328ae87cd7",
       "type": "group",
       "label": "Legend",
-      "x": -920,
+      "x": -500,
       "y": -20,
       "width": 540,
       "height": 530
@@ -412,8 +432,8 @@
     {
       "id": "n_b0ac2236f9",
       "type": "text",
-      "text": "#### Roadmap legend\n**Generated:** Feb 14 2026 | 03:03AM",
-      "x": -900,
+      "text": "#### Roadmap legend\n**Generated:** Feb 14 2026 | 01:44PM",
+      "x": -480,
       "y": 0,
       "width": 500,
       "height": 110
@@ -421,8 +441,8 @@
     {
       "id": "n_4a66490dd9",
       "type": "text",
-      "text": "Not-Started: 40",
-      "x": -840,
+      "text": "Not-Started: 42",
+      "x": -420,
       "y": 126,
       "width": 380,
       "height": 60,
@@ -432,7 +452,7 @@
       "id": "n_c1cf7bc196",
       "type": "text",
       "text": "Creation: 0",
-      "x": -840,
+      "x": -420,
       "y": 202,
       "width": 380,
       "height": 60,
@@ -442,7 +462,7 @@
       "id": "n_a434510472",
       "type": "text",
       "text": "Repetition: 0",
-      "x": -840,
+      "x": -420,
       "y": 278,
       "width": 380,
       "height": 60,
@@ -452,7 +472,7 @@
       "id": "n_6de0caeeec",
       "type": "text",
       "text": "Ready To Repeat: 0",
-      "x": -840,
+      "x": -420,
       "y": 354,
       "width": 380,
       "height": 60,
@@ -462,7 +482,7 @@
       "id": "n_0e6324d0db",
       "type": "text",
       "text": "Done: 0",
-      "x": -840,
+      "x": -420,
       "y": 430,
       "width": 380,
       "height": 60,
@@ -562,25 +582,32 @@
       "toSide": "top"
     },
     {
-      "id": "e_77d4cff9a5",
+      "id": "e_7dd5562e8e",
       "fromNode": "n_8fc82b07cf",
       "fromSide": "right",
-      "toNode": "n_a4212fc406",
+      "toNode": "n_4cbe3c0d1b",
       "toSide": "left"
+    },
+    {
+      "id": "e_77d4cff9a5",
+      "fromNode": "n_8fc82b07cf",
+      "fromSide": "left",
+      "toNode": "n_a4212fc406",
+      "toSide": "right"
     },
     {
       "id": "e_4e04193a95",
       "fromNode": "n_8fc82b07cf",
-      "fromSide": "left",
+      "fromSide": "right",
       "toNode": "n_d026450ac5",
-      "toSide": "right"
+      "toSide": "left"
     },
     {
       "id": "e_44776b59d8",
       "fromNode": "n_d026450ac5",
-      "fromSide": "left",
+      "fromSide": "right",
       "toNode": "n_a79b2e14f8",
-      "toSide": "right"
+      "toSide": "left"
     },
     {
       "id": "e_da1e1feec8",
@@ -646,39 +673,39 @@
       "toSide": "right"
     },
     {
-      "id": "e_7d3ed695d4",
+      "id": "e_898777f538",
       "fromNode": "n_2d902a721c",
       "fromSide": "bottom",
-      "toNode": "n_8227afe735",
+      "toNode": "n_4ccad1dbf4",
       "toSide": "top"
     },
     {
-      "id": "e_2bafea9811",
-      "fromNode": "n_8227afe735",
+      "id": "e_531aac9fd6",
+      "fromNode": "n_4ccad1dbf4",
       "fromSide": "right",
-      "toNode": "n_4c45901cbc",
+      "toNode": "n_14732f6187",
       "toSide": "left"
     },
     {
-      "id": "e_d058d07de7",
-      "fromNode": "n_8227afe735",
+      "id": "e_60519a2c1e",
+      "fromNode": "n_4ccad1dbf4",
       "fromSide": "left",
-      "toNode": "n_337f780578",
+      "toNode": "n_28dba4dfb6",
       "toSide": "right"
     },
     {
-      "id": "e_f77e517308",
-      "fromNode": "n_8227afe735",
-      "fromSide": "right",
-      "toNode": "n_08c964890a",
-      "toSide": "left"
-    },
-    {
-      "id": "e_69d9883b52",
-      "fromNode": "n_8227afe735",
+      "id": "e_6949fa1b86",
+      "fromNode": "n_4ccad1dbf4",
       "fromSide": "bottom",
       "toNode": "n_5c16a9eace",
       "toSide": "top"
+    },
+    {
+      "id": "e_689c4b3e03",
+      "fromNode": "n_5c16a9eace",
+      "fromSide": "right",
+      "toNode": "n_8437d5edd8",
+      "toSide": "left"
     },
     {
       "id": "e_d308908563",
@@ -700,6 +727,13 @@
       "fromSide": "right",
       "toNode": "n_cf0ddb3d9c",
       "toSide": "left"
+    },
+    {
+      "id": "e_fa979e18d9",
+      "fromNode": "n_9a76cd745d",
+      "fromSide": "left",
+      "toNode": "n_e39b6cc0ad",
+      "toSide": "right"
     },
     {
       "id": "e_6fcdaa3d0b",

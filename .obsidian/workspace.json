@@ -6,6 +6,7 @@
       {
         "id": "571adfa34c1c7218",
         "type": "tabs",
+        "dimension": 28.772189349112427,
         "children": [
           {
             "id": "dfacbc313a0ac90a",
@@ -30,46 +31,39 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "AGENTS.md",
+                "file": "Knowledge/05 Architecture/Patterns/Dependency Injection.md",
                 "mode": "source",
                 "source": false,
                 "backlinks": false
               },
               "icon": "lucide-file",
-              "title": "AGENTS"
-            }
-          },
-          {
-            "id": "f11d9d49e6d5421a",
-            "type": "leaf",
-            "state": {
-              "type": "split-diff-view",
-              "state": {
-                "aFile": "Knowledge/Knowledge.md",
-                "bFile": "Knowledge/Knowledge.md",
-                "aRef": ""
-              },
-              "icon": "diff",
-              "title": "Diff: Knowledge  (Working Tree)"
-            }
-          },
-          {
-            "id": "69ae2eaf499a433b",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Knowledge/Knowledge.md",
-                "mode": "preview",
-                "source": false,
-                "backlinks": false
-              },
-              "icon": "lucide-file",
-              "title": "Knowledge"
+              "title": "Dependency Injection"
             }
           }
         ],
-        "currentTab": 3
+        "currentTab": 1
+      },
+      {
+        "id": "d4bef4fee3000006",
+        "type": "tabs",
+        "dimension": 71.22781065088756,
+        "children": [
+          {
+            "id": "69ae2eaf499a433b",
+            "type": "leaf",
+            "pinned": true,
+            "state": {
+              "type": "bases",
+              "state": {
+                "file": "Knowledge/Topics.base",
+                "viewName": "Table"
+              },
+              "pinned": true,
+              "icon": "lucide-table",
+              "title": "Topics"
+            }
+          }
+        ]
       }
     ],
     "direction": "vertical"
@@ -167,10 +161,10 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Knowledge/Knowledge.md"
+                "file": "Knowledge/05 Architecture/Patterns/Dependency Injection.md"
               },
               "icon": "lucide-info",
-              "title": "File properties for Knowledge"
+              "title": "File properties for Dependency Injection"
             }
           },
           {
@@ -193,13 +187,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Knowledge/Knowledge.md",
+                "file": "Knowledge/05 Architecture/Patterns/Dependency Injection.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Knowledge"
+              "title": "Outline of Dependency Injection"
             }
           }
         ]
@@ -221,45 +215,45 @@
       "notebook-navigator:Notebook Navigator": true
     }
   },
-  "active": "69ae2eaf499a433b",
+  "active": "cffde94cae95054c",
   "lastOpenFiles": [
-    "src/site/notes/Knowledge/Knowledge.md",
-    "src/src.md",
-    "Knowledge/02 Computer Science/02 Computer Science.md",
-    "src/site/notes/notes.md",
-    "src/site/site.md",
+    "Knowledge/05 Architecture/Patterns/Design Patterns.md",
+    "Knowledge/05 Architecture/Patterns/GRASP.md",
+    "Knowledge/05 Architecture/Patterns/CQS.md",
+    "Knowledge/05 Architecture/Patterns/Domain-Driven Development.md",
+    "Knowledge/05 Architecture/Patterns/Repository & UoW.md",
+    "Knowledge/05 Architecture/Patterns/Circut Breaker.md",
+    "Knowledge/05 Architecture/Patterns/Event Sourcing.md",
+    "Knowledge/05 Architecture/Patterns/CQRS.md",
+    "Knowledge/05 Architecture/Patterns/Event-Driven Development.md",
+    "Knowledge/05 Architecture/Patterns/Patterns.md",
+    "Knowledge/06 Development Practices/Paradigms/Integration Testing.md",
+    "Knowledge/06 Development Practices/Paradigms/Paradigms.md",
+    "Knowledge/06 Development Practices/Paradigms/Test-Driven Development.md",
+    "Knowledge/06 Development Practices/Principles/Principles.md",
+    "Knowledge/Topics.base",
+    "Knowledge/05 Architecture/Patterns/Dependency Injection.md",
+    "Knowledge/06 Development Practices/Principles/YAGNI.md",
+    "Knowledge/06 Development Practices/Patterns/Patterns.md",
+    "Knowledge/06 Development Practices/Principles/SOLID.md",
+    "Knowledge/06 Development Practices/Principles/KISS.md",
+    "Knowledge/06 Development Practices/Principles/IoC (Holywood Principle).md",
+    "Knowledge/06 Development Practices/Principles/DRY.md",
+    "Knowledge/07 Security/07 Security.md",
+    "Knowledge/05 Architecture/Distributed Systems/IaaS, PaaS, SaaS, CaaS.md",
+    "Knowledge/05 Architecture/Distributed Systems/Distributed Transactions.md",
+    "Knowledge/05 Architecture/Distributed Systems/Message Queues.md",
+    "Knowledge/05 Architecture/Distributed Systems/REST.md",
+    "Knowledge/03 Data Persistance/NoSQL",
+    "Knowledge/09 DevOps/Version Control Systems",
+    "Knowledge/07 Security/Authentication",
     "src/site/notes/Knowledge",
     "src/site/notes",
     "src/site",
     "src",
-    "Knowledge/01 Programming/01 Programming.md",
-    "Knowledge/01 Programming/NET/NET.md",
-    "Knowledge/01 Programming/NET/Other/SignalR.md",
-    "Knowledge/01 Programming/NET/CSharp/CSharp.md",
-    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md",
-    "Knowledge/Knowledge.md",
-    "Knowledge/01 Programming/NET/CSharp/Fundamentals/Collections/Collections.md",
-    "AGENTS.md",
-    "Templates/Mermaid/Template - Entity Relationship Diagram.md",
-    "Templates/Blocks/Template - Callout.md",
-    "Templates/Blocks/Template - Code Block.md",
-    "Knowledge/Questions.md",
-    "Templates/Pages/Template - Concept Page.md",
-    "Templates/Pages/Template - Index.md",
-    "Knowledge/01 Programming/NET/NET Standart.md",
-    "Knowledge/01 Programming/NET/abc/abc.md",
     "Knowledge/01 Programming/NET/abc",
-    "Knowledge/01 Programming/NET/ABC/ABC.md",
     "Knowledge/01 Programming/NET/ABC",
-    "Knowledge/01 Programming/NET/Runtime/Garbage Collector.md",
-    "Knowledge/01 Programming/NET/Runtime/Memory Leaks.md",
-    "Knowledge/01 Programming/NET/Runtime/Common Language Runtime.md",
-    "Knowledge/01 Programming/NET/Runtime/Untitled.md",
     "Knowledge/Roadmap.canvas",
-    "Knowledge/Topics.base",
-    "Knowledge/11 AI & ML/LLM/Prompting",
-    "Knowledge/11 AI & ML/LLM/Agents",
-    "Knowledge/11 AI & ML/Machine Learning",
     "quartz/public/01-Programming/NET/CSharp/Fundamentals/Сontrol-Structures/Сontrol-Structures-og-image.webp",
     "quartz/public/01-Programming/NET/CSharp/Fundamentals/Types/Types-og-image.webp",
     "quartz/public/01-Programming/NET/CSharp/Fundamentals/Types/Strings-og-image.webp",

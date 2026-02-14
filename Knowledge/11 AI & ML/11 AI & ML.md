@@ -1,12 +1,13 @@
 ---
-topic: []
+topic:
+  - AI
 subtopic: []
-level: ["1"]
+level:
+  - "1"
 priority: Medium
 status: Not-Started
 aliases:
   - AI
-
 tags:
   - FolderNote
 ---

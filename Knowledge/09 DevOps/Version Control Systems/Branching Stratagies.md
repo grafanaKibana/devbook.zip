@@ -1,8 +1,12 @@
 ---
-topic: ["DevOps"]
-subtopic: []
-level: ["1"]
-priority: Medium
+topic:
+  - DevOps
+subtopic:
+  - Version Control Systems
+level:
+  - "3"
+priority:
+  - High
 status: Not-Started
 ---
 ## Parent

@@ -1,7 +1,10 @@
 ---
-topic: ["Security"]
-subtopic: []
-level: ["1"]
+topic:
+  - Security
+subtopic:
+  - Authentication
+level:
+  - "1"
 priority: Medium
 status: Not-Started
 ---

@@ -1,7 +1,10 @@
 ---
-topic: ["DevOps"]
-subtopic: ["Deployment Stratagies"]
-level: ["1"]
+topic:
+  - DevOps
+subtopic:
+  - Deployment Stratagies
+level:
+  - "2"
 priority: Medium
 status: Not-Started
 ---

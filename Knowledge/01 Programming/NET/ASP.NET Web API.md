@@ -1,8 +1,12 @@
 ---
-topic: ["Programming"]
-subtopic: ["NET"]
-level: ["1"]
-priority: Medium
+topic:
+  - Programming
+subtopic:
+  - NET
+level:
+  - "3"
+priority:
+  - High
 status: Not-Started
 ---
 ## Parent
