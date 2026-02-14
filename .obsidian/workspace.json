@@ -11,14 +11,14 @@
             "id": "1fedc7451582c06e",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
+              "type": "markdown",
               "state": {
-                "aFile": "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Collections/Collections.md",
-                "bFile": "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Collections/Collections.md",
-                "aRef": ""
+                "file": "Templates/Pages/Template - Index.md",
+                "mode": "preview",
+                "source": false
               },
-              "icon": "diff",
-              "title": "Diff: Collections  (Working Tree)"
+              "icon": "lucide-file",
+              "title": "Template - Index"
             }
           }
         ]
@@ -132,9 +132,11 @@
             "type": "leaf",
             "state": {
               "type": "file-properties",
-              "state": {},
+              "state": {
+                "file": "Templates/Pages/Template - Index.md"
+              },
               "icon": "lucide-info",
-              "title": "File properties"
+              "title": "File properties for Template - Index"
             }
           },
           {
@@ -143,12 +145,13 @@
             "state": {
               "type": "outline",
               "state": {
+                "file": "Templates/Pages/Template - Index.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline"
+              "title": "Outline of Template - Index"
             }
           },
           {
@@ -181,6 +184,7 @@
             "state": {
               "type": "backlink",
               "state": {
+                "file": "Templates/Pages/Template - Index.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -190,7 +194,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks"
+              "title": "Backlinks for Template - Index"
             }
           }
         ]
@@ -241,6 +245,7 @@
   "active": "1fedc7451582c06e",
   "lastOpenFiles": [
     "Templates/Pages/Template - Concept Page.md",
+    "Templates/Pages/Template - Index.md",
     "Software Engineering/01 Programming/NET/ASP.NET Web API/Middlewares.md",
     "Software Engineering/01 Programming/NET/ASP.NET Web API/ASP.NET Web API.md",
     "Software Engineering/01 Programming/NET/NET.md",
@@ -251,7 +256,6 @@
     "Software Engineering/03 Data Persistance/ORMs/Entity Framework.md",
     "Software Engineering/03 Data Persistance/ORMs/ORMs.md",
     "Software Engineering/03 Data Persistance/NoSQL/NoSQL.md",
-    "Templates/Pages/Template - Index.md",
     "Software Engineering/01 Programming/NET/Runtime/Garbage Collector.md",
     "Templates/Blocks/Template - Callout.md",
     "Templates/Mermaid/Template - Class Diagram.md",

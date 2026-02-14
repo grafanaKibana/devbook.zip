@@ -6,7 +6,7 @@
   "defaultViewMode": "preview",
   "readableLineLength": false,
   "strictLineBreaks": false,
-  "propertiesInDocument": "hidden",
+  "propertiesInDocument": "source",
   "showLineNumber": false,
   "openBehavior": "file:Knowledge/Knowledge",
   "userIgnoreFilters": [

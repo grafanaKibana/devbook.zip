@@ -1,4 +1,14 @@
 ---
+topic: <% (() => { const parts = tp.file.folder(true).split("/"); const idx = parts.indexOf("Software Engineering"); return (idx >= 0 && parts.length > idx + 1) ? `["${parts[idx + 1].replace(/^\d+\s+/, "")}"]` : "[]"; })() %>
+subtopic: <% (() => { const parts = tp.file.folder(true).split("/"); const idx = parts.indexOf("Software Engineering"); return (idx >= 0 && parts.length > idx + 2) ? `["${parts[idx + 2].replace(/^\d+\s+/, "")}"]` : "[]"; })() %>
+level: <% tp.system.suggester(["1", "2", "3", "4"], ["1", "2", "3", "4"], false, "Select level") %>
+priority: <% tp.system.suggester(["Low", "Medium", "High"], ["Low", "Medium", "High"], false, "Select priority") %>
+status: Not-Started
+tags:
+- Template
+- FolderNote
+---
+
 <%*
 // If File is untitled prompt the User to set a Title
 let title = tp.file.title
@@ -7,12 +17,6 @@ if (title.startsWith("Untitled")) {
   await tp.file.rename(`${title}`);
 }
 %>
-
-tags:
-- Template
-- FolderNote
----
-
 # Intro
 
 Quick introduction to the topic
