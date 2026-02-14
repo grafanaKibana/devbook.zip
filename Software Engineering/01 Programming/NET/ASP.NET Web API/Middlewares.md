@@ -5,8 +5,7 @@ subtopic:
   - NET
 level:
   - "3"
-priority:
-  - High
+priority: Medium
 status: Not-Started
 ---
 ## Parent
@@ -15,7 +14,7 @@ status: Not-Started
 ---
 # Intro
 
-ASP.NET Web API runs requests through a configurable middleware pipeline, then dispatches to an endpoint (often an MVC controller action).
+ASP.NET Core middleware are components that form the HTTP request pipeline. Each middleware wraps the next like nested layers, processing requests on the way in and responses on the way out.
 
 ## Deeper Explanation
 
@@ -87,24 +86,6 @@ sequenceDiagram
 
 > [!QUESTION]- What is an action filter?
 > An MVC filter (for example, implementing `IActionFilter`/`IAsyncActionFilter`) that runs before and/or after a controller action executes. It can validate inputs, modify the action arguments, short-circuit by setting a result, or wrap execution to implement cross-cutting concerns such as logging, caching, and metrics.
-
-> [!QUESTION]- What is mapping, why is it needed, and how can it be implemented?
-> Mapping is the transformation of data from one shape/type to another (for example, Domain Entity -> DTO -> API response model).
-> It is used to decouple layers, hide internal details, enforce API contracts, prevent over-posting, and shape data for clients.
-> Typical implementation options:
-> - manual mapping (constructors, factory methods, extension methods)
-> - mapping libraries (AutoMapper, Mapster)
-> - code generation / source generators for mappings
-
-> [!QUESTION]- What are serialization and deserialization?
-> Serialization converts an in-memory object graph into a format that can be stored or transmitted (for example, JSON text or a binary payload).
-> Deserialization is the reverse process: converting that stored/transmitted representation back into objects.
-> Common uses: API payloads, persistence, caching, messaging.
-
-> [!QUESTION]- What is JSON and why is it used?
-> JSON (JavaScript Object Notation) is a lightweight text data format based on objects (name/value pairs) and arrays.
-> It is widely used for data interchange, especially in HTTP APIs, because it is human-readable, language-agnostic, and easy to parse.
-> In .NET, JSON is commonly handled with `System.Text.Json` (built-in) or Newtonsoft.Json.
 
 ## Further Reading
 

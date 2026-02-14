@@ -21,11 +21,21 @@
       "color": "1"
     },
     {
+      "id": "n_7391a699f9",
+      "type": "file",
+      "file": "Software Engineering/01 Programming/NET/ASP.NET Web API/ASP.NET Web API.md",
+      "x": 840,
+      "y": 120,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
       "id": "n_81e39394ae",
       "type": "file",
       "file": "Software Engineering/01 Programming/NET/CSharp/CSharp.md",
       "x": 840,
-      "y": 120,
+      "y": 240,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -35,7 +45,7 @@
       "type": "file",
       "file": "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md",
       "x": 1260,
-      "y": 240,
+      "y": 360,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -45,7 +55,7 @@
       "type": "file",
       "file": "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Collections/Collections.md",
       "x": 1680,
-      "y": 360,
+      "y": 480,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -55,7 +65,7 @@
       "type": "file",
       "file": "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types.md",
       "x": 1680,
-      "y": 480,
+      "y": 600,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -65,7 +75,7 @@
       "type": "file",
       "file": "Software Engineering/01 Programming/NET/CSharp/Fundamentals/\u0421ontrol Structures/\u0421ontrol Structures.md",
       "x": 1680,
-      "y": 600,
+      "y": 720,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -75,7 +85,7 @@
       "type": "file",
       "file": "Software Engineering/01 Programming/NET/Other/Other.md",
       "x": 840,
-      "y": 720,
+      "y": 840,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -85,7 +95,7 @@
       "type": "file",
       "file": "Software Engineering/01 Programming/NET/Runtime/Runtime.md",
       "x": 840,
-      "y": 840,
+      "y": 960,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -95,7 +105,7 @@
       "type": "file",
       "file": "Software Engineering/02 Computer Science/02 Computer Science.md",
       "x": 0,
-      "y": 1120,
+      "y": 1240,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -105,7 +115,7 @@
       "type": "file",
       "file": "Software Engineering/02 Computer Science/Algorithms/Algorithms.md",
       "x": 420,
-      "y": 1120,
+      "y": 1240,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -115,7 +125,7 @@
       "type": "file",
       "file": "Software Engineering/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set.md",
       "x": 840,
-      "y": 1240,
+      "y": 1360,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -125,7 +135,7 @@
       "type": "file",
       "file": "Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
       "x": 840,
-      "y": 1360,
+      "y": 1480,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -135,7 +145,7 @@
       "type": "file",
       "file": "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms.md",
       "x": 840,
-      "y": 1480,
+      "y": 1600,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -145,7 +155,7 @@
       "type": "file",
       "file": "Software Engineering/02 Computer Science/Algorithms/String Searching/String Searching.md",
       "x": 840,
-      "y": 1600,
+      "y": 1720,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -155,7 +165,7 @@
       "type": "file",
       "file": "Software Engineering/02 Computer Science/Data Structures/Data Structures.md",
       "x": -420,
-      "y": 1120,
+      "y": 1240,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -165,7 +175,7 @@
       "type": "file",
       "file": "Software Engineering/03 Data Persistance/03 Data Persistance.md",
       "x": 0,
-      "y": 1880,
+      "y": 2000,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -175,7 +185,7 @@
       "type": "file",
       "file": "Software Engineering/03 Data Persistance/NoSQL/NoSQL.md",
       "x": 420,
-      "y": 1880,
+      "y": 2000,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -185,7 +195,7 @@
       "type": "file",
       "file": "Software Engineering/03 Data Persistance/ORMs/ORMs.md",
       "x": -420,
-      "y": 1880,
+      "y": 2000,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -195,7 +205,7 @@
       "type": "file",
       "file": "Software Engineering/03 Data Persistance/SQL/SQL.md",
       "x": 420,
-      "y": 2000,
+      "y": 2120,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -205,7 +215,7 @@
       "type": "file",
       "file": "Software Engineering/03 Data Persistance/SQL/Indexes/Indexes.md",
       "x": 840,
-      "y": 2120,
+      "y": 2240,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -215,7 +225,7 @@
       "type": "file",
       "file": "Software Engineering/04 Networks/04 Networks.md",
       "x": 0,
-      "y": 2400,
+      "y": 2520,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -225,7 +235,7 @@
       "type": "file",
       "file": "Software Engineering/04 Networks/Architecture & Ops/Architecture & Ops.md",
       "x": 420,
-      "y": 2400,
+      "y": 2520,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -235,7 +245,7 @@
       "type": "file",
       "file": "Software Engineering/04 Networks/Protocols/Protocols.md",
       "x": -420,
-      "y": 2400,
+      "y": 2520,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -245,7 +255,7 @@
       "type": "file",
       "file": "Software Engineering/04 Networks/Transport & Sockets/Transport & Sockets.md",
       "x": 420,
-      "y": 2520,
+      "y": 2640,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -255,7 +265,7 @@
       "type": "file",
       "file": "Software Engineering/05 Architecture/05 Architecture.md",
       "x": 0,
-      "y": 2800,
+      "y": 2920,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -265,7 +275,7 @@
       "type": "file",
       "file": "Software Engineering/05 Architecture/Application Architecture/Application Architecture.md",
       "x": 420,
-      "y": 2800,
+      "y": 2920,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -275,7 +285,7 @@
       "type": "file",
       "file": "Software Engineering/05 Architecture/Architecture Styles/Architecture Styles.md",
       "x": -420,
-      "y": 2800,
+      "y": 2920,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -285,7 +295,7 @@
       "type": "file",
       "file": "Software Engineering/05 Architecture/Distributed Systems/Distributed Systems.md",
       "x": 420,
-      "y": 2920,
+      "y": 3040,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -295,7 +305,7 @@
       "type": "file",
       "file": "Software Engineering/05 Architecture/Patterns/Patterns.md",
       "x": -420,
-      "y": 2920,
+      "y": 3040,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -305,7 +315,7 @@
       "type": "file",
       "file": "Software Engineering/06 Development Practices/06 Development Practices.md",
       "x": 0,
-      "y": 3200,
+      "y": 3320,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -315,7 +325,7 @@
       "type": "file",
       "file": "Software Engineering/06 Development Practices/Paradigms/Paradigms.md",
       "x": 420,
-      "y": 3200,
+      "y": 3320,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -325,7 +335,7 @@
       "type": "file",
       "file": "Software Engineering/06 Development Practices/Principles/Principles.md",
       "x": -420,
-      "y": 3200,
+      "y": 3320,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -335,7 +345,7 @@
       "type": "file",
       "file": "Software Engineering/07 Security/07 Security.md",
       "x": 0,
-      "y": 3480,
+      "y": 3600,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -345,7 +355,7 @@
       "type": "file",
       "file": "Software Engineering/07 Security/Authentication/Authentication.md",
       "x": 420,
-      "y": 3480,
+      "y": 3600,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -355,7 +365,7 @@
       "type": "file",
       "file": "Software Engineering/08 SDLC/08 SDLC.md",
       "x": 0,
-      "y": 3760,
+      "y": 3880,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -365,7 +375,7 @@
       "type": "file",
       "file": "Software Engineering/09 DevOps/09 DevOps.md",
       "x": 0,
-      "y": 4000,
+      "y": 4120,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -375,7 +385,7 @@
       "type": "file",
       "file": "Software Engineering/09 DevOps/Deployment Stratagies/Deployment Stratagies.md",
       "x": 420,
-      "y": 4000,
+      "y": 4120,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -385,7 +395,7 @@
       "type": "file",
       "file": "Software Engineering/09 DevOps/Version Control Systems/Version Control Systems.md",
       "x": -420,
-      "y": 4000,
+      "y": 4120,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -395,7 +405,7 @@
       "type": "file",
       "file": "Software Engineering/10 Cloud/10 Cloud.md",
       "x": 0,
-      "y": 4280,
+      "y": 4400,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -405,7 +415,7 @@
       "type": "file",
       "file": "Software Engineering/11 AI & ML/11 AI & ML.md",
       "x": 0,
-      "y": 4520,
+      "y": 4640,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -415,7 +425,7 @@
       "type": "file",
       "file": "Software Engineering/11 AI & ML/LLM/LLM.md",
       "x": 420,
-      "y": 4520,
+      "y": 4640,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -425,7 +435,7 @@
       "type": "file",
       "file": "Software Engineering/11 AI & ML/LLM/Agents/Agents.md",
       "x": 840,
-      "y": 4640,
+      "y": 4760,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -435,7 +445,7 @@
       "type": "file",
       "file": "Software Engineering/11 AI & ML/LLM/Prompting/Prompting.md",
       "x": 840,
-      "y": 4760,
+      "y": 4880,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -445,7 +455,7 @@
       "type": "file",
       "file": "Software Engineering/11 AI & ML/Machine Learning/Machine Learning.md",
       "x": -420,
-      "y": 4520,
+      "y": 4640,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -462,7 +472,7 @@
     {
       "id": "n_b0ac2236f9",
       "type": "text",
-      "text": "#### Roadmap legend\n**Generated:** Feb 14 2026 | 11:54PM",
+      "text": "#### Roadmap legend\n**Generated:** Feb 14 2026 | 11:59PM",
       "x": -1020,
       "y": 0,
       "width": 500,
@@ -471,7 +481,7 @@
     {
       "id": "n_4a66490dd9",
       "type": "text",
-      "text": "Not-Started: 45",
+      "text": "Not-Started: 46",
       "x": -960,
       "y": 126,
       "width": 380,
@@ -525,6 +535,13 @@
       "fromNode": "n_21f0241782",
       "fromSide": "right",
       "toNode": "n_47b1436b4f",
+      "toSide": "left"
+    },
+    {
+      "id": "e_965d6003bf",
+      "fromNode": "n_47b1436b4f",
+      "fromSide": "right",
+      "toNode": "n_7391a699f9",
       "toSide": "left"
     },
     {
