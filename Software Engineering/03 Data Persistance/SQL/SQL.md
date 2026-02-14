@@ -47,9 +47,9 @@ if (pages.length) {
 
 ## Deeper Explanation
 
-[Indexes](Knowledge/03 Data Persistance/SQL/Indexes/Indexes.md)
+[[Indexes]]
 
-[Normalization/Denormalization](Knowledge/03 Data Persistance/SQL/Normalization Denormalization.md)
+[[Normalization Denormalization|Normalization/Denormalization]]
 
 ## CommonTableExpression - CTE
 

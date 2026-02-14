@@ -47,55 +47,6 @@ if (pages.length) {
 
 ## Deeper Explanation
 
-[](https://metanit.com/sharp/algoritm/)
-
-[8 Common Data Structures every Programmer must know](https://towardsdatascience.com/8-common-data-structures-every-programmer-must-know-171acf6a1a42)
-
-### Complexity
-
-- [Complexity](Knowledge/02 Computer Science/Algorithms/Complexity/Complexity.md)
-- [Algorithms Complexity](Knowledge/02 Computer Science/Algorithms/Complexity/Algorithms Complexity.md)
-
-### Sorting
-
-- [Sorting Algorithms](Knowledge/02 Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms.md)
-
-### Graph
-
-- [Graph Algorithms](Knowledge/02 Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md)
-- [DFS/BFS](Knowledge/02 Computer Science/Algorithms/Graph Algorithms/DFS BFS.md)
-- [Dijkstra](Knowledge/02 Computer Science/Algorithms/Graph Algorithms/Dijkstra.md)
-
-### String Searching
-
-- [String Searching](Knowledge/02 Computer Science/Algorithms/String Searching/String Searching.md)
-- [Rabit Karp Search](Knowledge/02 Computer Science/Algorithms/String Searching/Rabit Karp Search.md)
-- [KMP (Knuth-Morris-Pratt) Algorithm](Knowledge/02 Computer Science/Algorithms/String Searching/KMP (Knuth-Morris-Pratt) Algorithm.md)
-
-### Disjoint Set
-
-- [Disjoint Set](Knowledge/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set.md)
-- [Disjoint Set / Union-Find](Knowledge/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set Union-Find.md)
-
-## Diagram
-
-```mermaid
-graph TD
-  A[Problem] --> B{What kind of task}
-  B -->|Analyze runtime| C[Complexity]
-  B -->|Order items| D[Sorting]
-  B -->|Nodes and edges| E[Graph algorithms]
-  B -->|Find pattern in text| F[String searching]
-  B -->|Dynamic connectivity| G[Disjoint set DSU]
-  C --> H[Choose asymptotic class]
-  D --> I[Pick stable and in place and worst case constraints]
-  E --> J[Traversal DFS or BFS]
-  E --> K[Shortest path Dijkstra]
-  F --> L[Exact KMP]
-  F --> M[Probabilistic Rabin Karp]
-  G --> N[Find or Union and path compression]
-```
-
 ## Questions
 
 > [!QUESTION]- What is an algorithm? How is its efficiency measured?

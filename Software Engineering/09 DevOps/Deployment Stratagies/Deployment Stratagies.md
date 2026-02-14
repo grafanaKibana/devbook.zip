@@ -47,15 +47,15 @@ if (pages.length) {
 
 ## Deeper Explanation
 
-[In-place Deployment](Knowledge/09 DevOps/Deployment Stratagies/In-place Deployment.md)
+[[In-place Deployment]]
 
-[Blue/Green Deployment](Knowledge/09 DevOps/Deployment Stratagies/Blue Green Deployment.md)
+[[Blue Green Deployment|Blue/Green Deployment]]
 
-[Canary Deployment](Knowledge/09 DevOps/Deployment Stratagies/Canary Deployment.md)
+[[Canary Deployment]]
 
-[Linear Deployment](Knowledge/09 DevOps/Deployment Stratagies/Linear Deployment.md)
+[[Linear Deployment]]
 
-[All-In-One Deployment](Knowledge/09 DevOps/Deployment Stratagies/All-In-One Deployment.md)
+[[All-In-One Deployment]]
 
 ## Questions
 

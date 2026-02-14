@@ -176,6 +176,6 @@ In conclusion, few-shot prompting is an effective strategy that can guide the mo
 
 ## Further Reading
 
-- [Instruction Prompting](Knowledge/11 AI/Prompting/Techniques/Instruction Prompting/Instruction Prompting.md)
-- [Showing Examples](Knowledge/11 AI/Prompting/Techniques/Showing Examples/Showing Examples.md)
-- [Role Prompting](Knowledge/11 AI/Prompting/Techniques/Role Prompting/Role Prompting.md)
+- [[Instruction Prompting]]
+- [[Showing Examples]]
+- [[Role Prompting]]

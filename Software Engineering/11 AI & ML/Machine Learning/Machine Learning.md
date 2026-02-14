@@ -48,9 +48,9 @@ if (pages.length) {
 
 ## Deeper Explanation
 
-[Types](Knowledge/11 AI/Machine Learning/Types.md)
+[[Types]]
 
-[Spectrum Of Automations](Knowledge/11 AI/Machine Learning/Spectrum Of Automations.md)
+[[Spectrum Of Automations]]
 
 ## Links
 

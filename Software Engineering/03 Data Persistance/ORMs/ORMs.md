@@ -47,7 +47,7 @@ if (pages.length) {
 
 ## Deeper Explanation
 
-[Entity Framwork](Knowledge/03 Data Persistance/ORMs/Entity Framwork.md)
+[[Entity Framework]]
 
 ## Questions
 

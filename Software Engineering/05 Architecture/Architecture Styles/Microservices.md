@@ -35,4 +35,4 @@ Microservices are an architecture style where a system is split into small, inde
 
 ## Further Reading
 
-- [Monolith Architecture](Monolith%20Architecture.md)
+- [[Monolith Architecture]]

@@ -121,7 +121,7 @@ status: Not-Started
 
 > [!QUESTION]- What is a memory leak?
 > Memory that is no longer needed but cannot be reclaimed. In .NET this can be caused by keeping objects reachable (managed leaks) or by not releasing unmanaged resources.
-> See: [Memory Leaks](Memory%20Leaks.md)
+> See: [[Memory Leaks]]
 
 ## References and Further Reading
 

@@ -49,9 +49,6 @@ A data structure is a way to organize related data so it can be stored, accessed
 
 ## Deeper Explanation
 
-[.NET Collections](Knowledge/02 Computer Science/Data Structures/NET Collections.md)
-
-[HashTable/HashSet](Knowledge/02 Computer Science/Data Structures/HashTable HashSet.md)
 
 ## Questions
 
@@ -67,3 +64,4 @@ A data structure is a way to organize related data so it can be stored, accessed
 - [Popular types of linked list](https://www.simplilearn.com/tutorials/data-structure-tutorial/types-of-linked-list)
 - [Graphs in data structure](https://www.simplilearn.com/tutorials/data-structure-tutorial/graphs-in-data-structure)
 - [Types of trees in data structures](https://www.knowledgehut.com/blog/programming/types-of-trees-in-data-structure)
+- [8 Common Data Structures every Programmer must know](https://towardsdatascience.com/8-common-data-structures-every-programmer-must-know-171acf6a1a42)

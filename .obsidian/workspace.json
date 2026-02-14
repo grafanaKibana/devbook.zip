@@ -4,54 +4,88 @@
     "type": "split",
     "children": [
       {
-        "id": "d4bef4fee3000006",
-        "type": "tabs",
+        "id": "c71d6157ef4cd728",
+        "type": "split",
         "children": [
           {
-            "id": "69ae2eaf499a433b",
-            "type": "leaf",
-            "pinned": true,
-            "state": {
-              "type": "bases",
-              "state": {
-                "file": "Software Engineering/Topics.base",
-                "viewName": "Table"
+            "id": "d4bef4fee3000006",
+            "type": "tabs",
+            "children": [
+              {
+                "id": "69ae2eaf499a433b",
+                "type": "leaf",
+                "pinned": true,
+                "state": {
+                  "type": "bases",
+                  "state": {
+                    "file": "Software Engineering/Topics.base",
+                    "viewName": "Table"
+                  },
+                  "pinned": true,
+                  "icon": "lucide-table",
+                  "title": "Topics"
+                }
               },
-              "pinned": true,
-              "icon": "lucide-table",
-              "title": "Topics"
-            }
+              {
+                "id": "f9054415a792dd11",
+                "type": "leaf",
+                "state": {
+                  "type": "split-diff-view",
+                  "state": {
+                    "aFile": "AGENTS.md",
+                    "bFile": "AGENTS.md",
+                    "aRef": ""
+                  },
+                  "icon": "diff",
+                  "title": "Diff: AGENTS  (Working Tree)"
+                }
+              },
+              {
+                "id": "ce6bb2bb40a0a9de",
+                "type": "leaf",
+                "state": {
+                  "type": "split-diff-view",
+                  "state": {
+                    "aFile": "Software Engineering/01 Programming/NET/Runtime/Garbage Collector.md",
+                    "bFile": "Software Engineering/01 Programming/NET/Runtime/Garbage Collector.md",
+                    "aRef": ""
+                  },
+                  "icon": "diff",
+                  "title": "Diff: Garbage Collector  (Working Tree)"
+                },
+                "group": "ceab2e82d9d959a6"
+              }
+            ],
+            "currentTab": 2
           },
           {
-            "id": "f9054415a792dd11",
-            "type": "leaf",
-            "state": {
-              "type": "split-diff-view",
-              "state": {
-                "aFile": "AGENTS.md",
-                "bFile": "AGENTS.md",
-                "aRef": ""
-              },
-              "icon": "diff",
-              "title": "Diff: AGENTS  (Working Tree)"
-            }
-          },
-          {
-            "id": "ce6bb2bb40a0a9de",
-            "type": "leaf",
-            "state": {
-              "type": "split-diff-view",
-              "state": {
-                "aFile": ".obsidian/plugins/notebook-navigator/data.json",
-                "bFile": ".obsidian/plugins/notebook-navigator/data.json",
-                "aRef": ""
-              },
-              "icon": "diff",
-              "title": "Diff: data.json  (Working Tree)"
-            }
+            "id": "5f8994033078647c",
+            "type": "tabs",
+            "children": [
+              {
+                "id": "e4cec6fb1dd24063",
+                "type": "leaf",
+                "state": {
+                  "type": "backlink",
+                  "state": {
+                    "file": "Software Engineering/04 Networks/04 Networks.md",
+                    "collapseAll": false,
+                    "extraContext": false,
+                    "sortOrder": "alphabetical",
+                    "showSearch": false,
+                    "searchQuery": "",
+                    "backlinkCollapsed": false,
+                    "unlinkedCollapsed": true
+                  },
+                  "icon": "links-coming-in",
+                  "title": "Backlinks for 04 Networks"
+                },
+                "group": "ceab2e82d9d959a6"
+              }
+            ]
           }
         ],
-        "currentTab": 2
+        "direction": "horizontal"
       }
     ],
     "direction": "vertical"
@@ -112,7 +146,8 @@
               "title": "Bookmarks"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -142,13 +177,12 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Software Engineering/10 Cloud/AWS.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of AWS"
+              "title": "Outline"
             }
           },
           {
@@ -164,9 +198,36 @@
               "icon": "lucide-archive",
               "title": "All properties"
             }
+          },
+          {
+            "id": "4d32c5d183c8ef2c",
+            "type": "leaf",
+            "state": {
+              "type": "empty",
+              "state": {},
+              "icon": "lucide-file",
+              "title": "New tab"
+            }
+          },
+          {
+            "id": "61e426935bd16d93",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks"
+            }
           }
-        ],
-        "currentTab": 2
+        ]
       },
       {
         "id": "e96d0e13f56cecdc",
@@ -213,35 +274,35 @@
   },
   "active": "ce6bb2bb40a0a9de",
   "lastOpenFiles": [
+    "Software Engineering/04 Networks/04 Networks.md",
+    "Software Engineering/03 Data Persistance/03 Data Persistance.md",
+    "Software Engineering/02 Computer Science/02 Computer Science.md",
+    "Software Engineering/02 Computer Science/Algorithms/Algorithms.md",
+    "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Bubble Sort.md",
+    "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Quick Sort.md",
+    "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Merge Sort.md",
+    "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms.md",
+    "Templates/Blocks/Template - Code Block.md",
+    "Templates/Blocks/Template - Callout.md",
+    "Software Engineering/04 Networks/Architecture & Ops/Architecture & Ops.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Collections/Collections.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md",
+    "Software Engineering/02 Computer Science/Data Structures/Data Structures.md",
+    "Software Engineering/Software Engineering.md",
+    "Software Engineering/Roadmap.canvas",
+    "Software Engineering/01 Programming/01 Programming.md",
     "Software Engineering/10 Cloud/AWS.md",
+    "Software Engineering/01 Programming/NET/Other/SignalR.md",
+    "Software Engineering/01 Programming/NET/Other/OWIN.md",
+    "Software Engineering/01 Programming/NET/NET Standart.md",
+    "Software Engineering/01 Programming/NET/ASP.NET Web API.md",
     "Untitled.md",
     "Software Engineering/03 Data Persistance/ACID.md",
     "Software Engineering/06 Development Practices/Principles/YAGNI.md",
-    "Software Engineering/01 Programming/NET/NET Standart.md",
     "Software Engineering/Questions.md",
     "Software Engineering/Topics.base",
-    "Software Engineering/Roadmap.canvas",
-    "Software Engineering/09 DevOps/Deployment Stratagies/All-In-One Deployment.md",
-    "AGENTS.md",
-    "Assets/Assets.md",
-    "Software Engineering/Software Engineering.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Async Await.md",
     "Assets/01 Programming/01 Programming-Common Language Runtime-20260210212705669.png",
-    "Software Engineering/01 Programming/NET/ASP.NET Web API.md",
-    "Software Engineering/08 SDLC/08 SDLC.md",
-    "Software Engineering/01 Programming/NET/Other/Other.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md",
-    "Software Engineering/07 Security/Authentication/Oauth OIDC (OpenId Connect).md",
-    "Software Engineering/01 Programming/NET/Runtime/Memory Leaks.md",
-    "Software Engineering/01 Programming/NET/Other/SignalR.md",
-    "Software Engineering/01 Programming/01 Programming.md",
-    "Software Engineering/01 Programming/NET/NET.md",
-    "Software Engineering/01 Programming/NET/CSharp/CSharp.md",
-    "Software Engineering/03 Data Persistance/03 Data Persistance.md",
-    "Software Engineering/04 Networks/Architecture & Ops/Architecture & Ops.md",
-    "Assets/TEST INTERVIEW.md",
-    "Software Engineering/04 Networks/Protocols/HTTP & HTTPS.md",
-    "Software Engineering/02 Computer Science/02 Computer Science.md",
     "Software Engineering/03 Data Persistance/NoSQL",
     "Software Engineering/09 DevOps/Version Control Systems",
     "Software Engineering/07 Security/Authentication",
