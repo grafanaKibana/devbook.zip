@@ -51,6 +51,6 @@ if (pages.length) {
 > [!QUESTION]- What is abc?
 > Answer
 
-## Further Reading
+## Links
 - [Link 1](URL)
 - [Link 2](URL)

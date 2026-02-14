@@ -23,7 +23,7 @@ MVC and MVVM are UI/application architecture patterns that split responsibilitie
 > [!QUESTION]- What is MVC and why is it used?
 > MVC stands for Model-View-Controller. The Model represents the domain/data and business rules, the View is the UI (rendering), and the Controller handles incoming input/requests, coordinates work, and selects the response/view. The separation helps keep UI concerns out of business logic and makes the system easier to test and evolve.
 
-## Further Reading
+## Links
 
 - [Wikipedia - Model-view-controller](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller)
 - [Microsoft Learn - Overview of ASP.NET Core MVC](https://learn.microsoft.com/en-us/aspnet/core/mvc/overview)

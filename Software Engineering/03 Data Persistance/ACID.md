@@ -27,4 +27,4 @@ status: Not-Started
 > - Isolation: concurrent transactions do not observe each other's intermediate states (controlled by isolation levels).
 > - Durability: once committed, data survives crashes (via logging, checkpoints, replication, etc.).
 
-## Further Reading
+## Links

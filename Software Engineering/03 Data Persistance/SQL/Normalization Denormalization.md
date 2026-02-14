@@ -254,4 +254,4 @@ status: Not-Started
 > [!QUESTION]- What is denormalization?
 > Denormalization is intentionally introducing redundancy (e.g., duplicating fields, adding aggregates/materialized views) to speed up reads and simplify queries. It shifts complexity to writes and requires extra care to keep data consistent.
 
-## Further Reading
+## Links

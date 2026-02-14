@@ -32,6 +32,6 @@ Domain-Driven Design (DDD) is an approach to software development that focuses o
 >
 > The goal is to reduce the gap between the business and the code, especially in complex domains.
 
-## Further Reading
+## Links
 
 - [Martin Fowler - Domain Driven Design](https://martinfowler.com/tags/domain%20driven%20design.html)

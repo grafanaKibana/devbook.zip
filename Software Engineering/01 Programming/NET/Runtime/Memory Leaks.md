@@ -397,6 +397,6 @@ public class MyClass : IDisposable
 > A standard way to implement `IDisposable` so both explicit cleanup (`Dispose()`) and (optionally) finalization are supported.
 > Typical shape: `Dispose()` calls `Dispose(true)` and then `GC.SuppressFinalize(this)`; a finalizer (if needed) calls `Dispose(false)`; `Dispose(bool disposing)` releases unmanaged resources and, when `disposing` is true, also disposes managed fields.
 
-## References and Further Reading
+## Links
 
-## Further Reading
+## Links

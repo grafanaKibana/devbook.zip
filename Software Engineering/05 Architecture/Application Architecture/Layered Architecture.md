@@ -79,7 +79,7 @@ In traditional layered architecture, UI depends on Business Logic which depends 
 > [!QUESTION]- What is Onion Architecture?
 > Onion Architecture is a layered style where the Domain is at the center and dependencies point inward. Outer layers (infrastructure, UI, frameworks) depend on inner layers; inner layers do not depend on details. This is usually enforced by defining abstractions (interfaces) in the inner layers and implementing them in the outer layers.
 
-## Further Reading
+## Links
 
 - [Wikipedia - Multitier architecture](https://en.wikipedia.org/wiki/Multitier_architecture)
 - [The Clean Architecture (Robert C. Martin)](https://thecleanarchitecture.com/)

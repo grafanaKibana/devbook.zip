@@ -29,4 +29,4 @@ status: Not-Started
 >
 > Practically: depend on interfaces/contracts, keep implementation details behind them, and wire concrete implementations via DI.
 
-## Further Reading
+## Links

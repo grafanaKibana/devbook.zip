@@ -31,5 +31,5 @@ status: Not-Started
 > Authentication: proving that claim (password, MFA, certificate, etc.).
 > Authorization: checking permissions for a specific action on a specific resource.
 
-## Further Reading
+## Links
 - [Identification, authentication, authorization (RU)](http://security.mosmetod.ru/paroli/192-identifikatsiya-autentifikatsiya-i-avtorizatsiya-v-chem-raznitsa)

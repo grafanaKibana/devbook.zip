@@ -162,55 +162,55 @@ if (pages.length) {
 
 > [!QUESTION]- If a clustered table has many benefits, why use a heap?
 > Reference: [Article](https://habr.com/ru/post/247373/#02)
-> Answer is not provided in the source interview list; see Further Reading.
+> Answer is not provided in the source interview list; see Links.
 
 > [!QUESTION]- How do you change the default index fill factor?
 > Reference: [Article](https://habr.com/ru/post/247373/#03)
-> Answer is not provided in the source interview list; see Further Reading.
+> Answer is not provided in the source interview list; see Links.
 
 > [!QUESTION]- Can you create a clustered index on a column with duplicates?
 > Reference: [Article](https://habr.com/ru/post/247373/#04)
-> Answer is not provided in the source interview list; see Further Reading.
+> Answer is not provided in the source interview list; see Links.
 
 > [!QUESTION]- How is a table stored if no clustered index exists?
 > Reference: [Article](https://habr.com/ru/post/247373/#05)
-> Answer is not provided in the source interview list; see Further Reading.
+> Answer is not provided in the source interview list; see Links.
 
 > [!QUESTION]- What is the relationship between unique constraints, primary keys, and table indexes?
 > Reference: [Article](https://habr.com/ru/post/247373/#06)
-> Answer is not provided in the source interview list; see Further Reading.
+> Answer is not provided in the source interview list; see Links.
 
 > [!QUESTION]- Why are clustered and nonclustered indexes called balanced trees in SQL Server?
 > Reference: [Article](https://habr.com/ru/post/247373/#07)
-> Answer is not provided in the source interview list; see Further Reading.
+> Answer is not provided in the source interview list; see Links.
 
 > [!QUESTION]- How can an index improve query performance if you have to traverse all those index nodes?
 > Reference: [Article](https://habr.com/ru/post/247373/#08)
-> Answer is not provided in the source interview list; see Further Reading.
+> Answer is not provided in the source interview list; see Links.
 
 > [!QUESTION]- If indexes are so great, why not create them on every column?
 > Reference: [Article](https://habr.com/ru/post/247373/#09)
-> Answer is not provided in the source interview list; see Further Reading.
+> Answer is not provided in the source interview list; see Links.
 
 > [!QUESTION]- Do you have to create a clustered index on the primary key column?
 > Reference: [Article](https://habr.com/ru/post/247373/#10)
-> Answer is not provided in the source interview list; see Further Reading.
+> Answer is not provided in the source interview list; see Links.
 
 > [!QUESTION]- If you index a view, is it still a view?
 > Reference: [Article](https://habr.com/ru/post/247373/#11)
-> Answer is not provided in the source interview list; see Further Reading.
+> Answer is not provided in the source interview list; see Links.
 
 > [!QUESTION]- Why use a covering index instead of a composite index?
 > Reference: [Article](https://habr.com/ru/post/247373/#12)
-> Answer is not provided in the source interview list; see Further Reading.
+> Answer is not provided in the source interview list; see Links.
 
 > [!QUESTION]- Does the number of duplicates in the key column matter?
 > Reference: [Article](https://habr.com/ru/post/247373/#13)
-> Answer is not provided in the source interview list; see Further Reading.
+> Answer is not provided in the source interview list; see Links.
 
 > [!QUESTION]- Can you create a nonclustered index for only a subset of key column values?
 > Reference: [Article](https://habr.com/ru/post/247373/#14)
-> Answer is not provided in the source interview list; see Further Reading.
+> Answer is not provided in the source interview list; see Links.
 
 ## Questions
 
@@ -220,4 +220,4 @@ if (pages.length) {
 > [!QUESTION]- How does ordering work for clustered vs nonclustered indexes?
 > With a clustered index, the leaf level is the table data itself, stored in the index key order, so range scans return rows already ordered by that key. With a nonclustered index, the leaf level stores index keys plus row locators; rows are ordered by the nonclustered key, but fetching non-index columns may require lookups into the clustered index (or heap).
 
-## Further Reading
+## Links

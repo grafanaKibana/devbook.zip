@@ -171,7 +171,7 @@ Gen AI can evaluate essays against complex criteria like grammar, clarity, coher
 > [!QUESTION]- What is abc?
 > Answer
 
-## Further Reading
+## Links
 - [OpenAI Platform](https://platform.openai.com/docs/guides/prompt-engineering/strategy-write-clear-instructions)
 - [Learn Prompting: Your Guide to Communicating with AI](https://learnprompting.org/docs/basics/introduction)
 - [Prompt Engineering Guide – Nextra](https://www.promptingguide.ai/)

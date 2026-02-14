@@ -33,8 +33,8 @@ status: Not-Started
     
     
 
-## References and Further Reading
+## Links
 
 - https://learn.deeplearning.ai/courses/multi-ai-agent-systems-with-crewai/lesson/c4j19/key-elements-of-agent-tools
 
-## Further Reading
+## Links

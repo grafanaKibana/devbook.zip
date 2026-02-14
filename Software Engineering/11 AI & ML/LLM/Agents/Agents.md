@@ -115,6 +115,6 @@ This is crucial for context continuity, learning from mistakes, and adapting to 
 - **Testing & Validation**: Multi-agent systems can exhibit unexpected “emergent” behaviors. Test systematically to ensure agents aren’t working at cross-purposes.
 - **Iterate & Scale**: Start with a small system, learn from its interactions, then gradually add more agents or more complex behaviors.
 
-## Further Reading
+## Links
 - https://devblogs.microsoft.com/semantic-kernel/using-azure-ai-agents-with-semantic-kernel-in-net-and-python/
 - https://devblogs.microsoft.com/semantic-kernel/the-future-of-ai-customizing-ai-agents-with-the-semantic-kernel-agent-framework/

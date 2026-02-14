@@ -161,7 +161,7 @@ TestAndPublish(UniversalTester);
 
 События широко используются для составления собственных компонентов управления (кнопок, панелей, и т.д.).
 
-## References and Further Reading
+## Links
 
 - https://habr.com/ru/articles/329886/
 
@@ -209,6 +209,6 @@ TestAndPublish(UniversalTester);
 > - Invariance: the type parameter must match exactly.
 
 > [!QUESTION]- What are examples of using events?
-> Answer is not provided in the source interview list; see Further Reading.
+> Answer is not provided in the source interview list; see Links.
 
-## Further Reading
+## Links

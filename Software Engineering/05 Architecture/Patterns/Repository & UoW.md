@@ -27,7 +27,7 @@ Repository and Unit of Work are patterns for structuring data access and coordin
 >
 > Note: in EF Core, `DbContext` already acts as both a repository-like gateway and a unit of work (change tracking + `SaveChanges`).
 
-## Further Reading
+## Links
 
 - [Martin Fowler - Unit of Work](https://martinfowler.com/eaaCatalog/unitOfWork.html)
 - [Martin Fowler - Repository](https://martinfowler.com/eaaCatalog/repository.html)

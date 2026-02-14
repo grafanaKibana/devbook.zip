@@ -42,6 +42,6 @@ graph TD
 > [!QUESTION]- What is abc?
 > Answer
 
-## Further Reading
+## Links
 - https://en.wikipedia.org/wiki/Insertion_sort - Algorithm and complexity
 - https://cp-algorithms.com/sorting/insertion_sort.html - Competitive programming perspective

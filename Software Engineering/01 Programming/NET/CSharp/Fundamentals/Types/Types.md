@@ -270,7 +270,7 @@ if (obj is string str)  // Type check and declaration in one step
 
 > [!QUESTION]- What are checked and unchecked?
 > They define an overflow-checking context for integral arithmetic and conversions: `checked` throws on overflow, while `unchecked` allows wraparound.
-> Answer is not provided in the source interview list; see Further Reading.
+> Answer is not provided in the source interview list; see Links.
 
 > [!QUESTION]- What is a class? How does it differ from an object?
 > A class is a type definition (blueprint) describing members and behavior.
@@ -315,7 +315,7 @@ if (obj is string str)  // Type check and declaration in one step
 > [!QUESTION]- What is the difference between const and readonly?
 > `const` is evaluated at compile time and inlined into callers.
 > `readonly` is set at runtime (in an initializer or constructor) and cannot be reassigned afterward.
-> Answer is not provided in the source interview list; see Further Reading.
+> Answer is not provided in the source interview list; see Links.
 
 > [!QUESTION]- What is the difference between the equality operator and Equals for value and reference types?
 > `Equals` is a (virtual) method that can represent value equality; for value types it often compares field values.
@@ -542,12 +542,10 @@ if (obj is string str)  // Type check and declaration in one step
 
         
 
-## References and Further Reading
+## Links
 
 - https://docs.microsoft.com/en-us/dotnet/csharp/fundamentals/types/
 - https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/value-types
 - https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/reference-types
 - https://docs.microsoft.com/en-us/dotnet/framework/performance/performance-tips
 - https://csharpindepth.com/
-
-## Further Reading

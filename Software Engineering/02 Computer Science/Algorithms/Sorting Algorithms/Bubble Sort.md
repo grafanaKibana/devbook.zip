@@ -46,6 +46,6 @@ graph TD
 > [!QUESTION]- What is abc?
 > Answer
 
-## Further Reading
+## Links
 - https://en.wikipedia.org/wiki/Bubble_sort - Overview and variants
 - https://visualgo.net/en/sorting - Animation to build intuition

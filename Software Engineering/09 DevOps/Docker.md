@@ -21,6 +21,6 @@ status: Not-Started
 > A container is an isolated process that runs from an image and uses OS features (namespaces, cgroups) to limit what it can see and use.
 > Unlike virtual machines, containers share the host kernel, so they start faster and use fewer resources.
 
-## Further Reading
+## Links
 - [What is Docker? (IBM)](https://www.ibm.com/ru-ru/cloud/learn/docker)
 - [What are containers? (IBM)](https://www.ibm.com/ru-ru/cloud/learn/containers)

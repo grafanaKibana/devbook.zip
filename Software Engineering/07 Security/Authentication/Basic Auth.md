@@ -25,4 +25,4 @@ status: Not-Started
 > Resource-based authentication is often used to mean resource-scoped credentials (for example, an API key or token scoped to a specific service or audience);
 > in many systems, the "resource-based" part is really authorization (policy attached to a resource) rather than authentication.
 
-## Further Reading
+## Links

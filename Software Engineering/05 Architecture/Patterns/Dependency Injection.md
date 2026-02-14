@@ -34,6 +34,6 @@ Dependency Injection (DI) is a technique where objects receive their dependencie
 > services.AddSingleton<IClock, SystemClock>();
 > ```
 
-## Further Reading
+## Links
 
 - [Dependency injection in .NET](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection)

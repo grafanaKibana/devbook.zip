@@ -27,4 +27,4 @@ status: Not-Started
 >
 > The goal is fast feedback, better design (smaller units with clear contracts), and protection against regressions.
 
-## Further Reading
+## Links

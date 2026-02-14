@@ -37,6 +37,6 @@ status: Not-Started
 > Idempotent means repeating the same request has the same effect as doing it once (for example, GET, PUT, DELETE).
 > A method can be idempotent but not safe (for example, DELETE).
 
-## Further Reading
+## Links
 - [Idempotency in REST (RU)](https://restapitutorial.ru/lessons/idempotency.html)
 - [MDN: HTTP request methods](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods)

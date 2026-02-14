@@ -29,8 +29,8 @@ status: Not-Started
     
     
 
-## References and Further Reading
+## Links
 
 - https://devblogs.microsoft.com/semantic-kernel/building-a-model-context-protocol-server-with-semantic-kernel/
 
-## Further Reading
+## Links

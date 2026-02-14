@@ -108,5 +108,5 @@ When working with LLMs, you will come across a lot of new terms. This section wi
 > [!QUESTION]- What is LLM?
 > TODO
 
-## Further Reading
+## Links
 [What are Large Language Models? - LLM AI Explained - AWS](https://aws.amazon.com/what-is/large-language-model/?nc1=h_ls)

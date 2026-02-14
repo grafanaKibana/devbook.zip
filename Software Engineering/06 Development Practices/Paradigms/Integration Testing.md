@@ -24,4 +24,4 @@ status: Not-Started
 > - Speed and determinism: unit tests are typically fast and stable; integration tests are slower and can be more brittle due to environment and I/O.
 > - Purpose: unit tests validate logic and design boundaries; integration tests validate wiring, configuration, contracts, and real behavior across boundaries.
 
-## Further Reading
+## Links

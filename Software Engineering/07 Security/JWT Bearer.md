@@ -26,5 +26,5 @@ status: Not-Started
 > JWT is a token format: it can be stored and transported in cookies, or sent as `Authorization: Bearer <token>`.
 > Common tradeoffs: cookies require CSRF protections (for example, `SameSite`, anti-CSRF tokens); JWTs stored in JS-accessible storage increase XSS impact.
 
-## Further Reading
+## Links
 - [RFC 7519: JSON Web Token (JWT)](https://datatracker.ietf.org/doc/html/rfc7519)

@@ -26,4 +26,4 @@ tags:
 > - tag/release specific versions and roll back when needed
 > In practice, Git is the most common distributed VCS.
 
-## Further Reading
+## Links

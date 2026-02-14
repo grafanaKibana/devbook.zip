@@ -180,7 +180,7 @@ In conclusion, few-shot prompting is an effective strategy that can guide the mo
 > [!QUESTION]- What is abc?
 > Answer
 
-## Further Reading
+## Links
 
 - [[Prompting]]
 - [[Showing Examples]]

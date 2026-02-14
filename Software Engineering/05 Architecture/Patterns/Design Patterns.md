@@ -45,7 +45,7 @@ Design patterns are reusable, named solutions to recurring design problems. They
 > - Strategy: swap algorithms behind a common interface.
 > - Observer: publish/subscribe notifications to keep components loosely coupled.
 
-## Further Reading
+## Links
 
 - [Refactoring.Guru - Design Patterns](https://refactoring.guru/design-patterns)
 - [Wikipedia - Design pattern](https://en.wikipedia.org/wiki/Design_pattern)

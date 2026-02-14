@@ -22,4 +22,4 @@ status: Not-Started
 > CD can mean Continuous Delivery (always in a releasable state) or Continuous Deployment (automatic release to production).
 > CI/CD is usually implemented as a pipeline that runs linting, tests, security checks, builds, and deployments.
 
-## Further Reading
+## Links

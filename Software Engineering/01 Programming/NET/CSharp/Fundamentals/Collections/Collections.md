@@ -82,25 +82,25 @@ tags:
 >     - Used for databases, web services, and other remote sources.
 
 > [!QUESTION]- How does deferred execution differ in `IEnumerable` vs `IQueryable`?
-> Answer is not provided in the source interview list; see Further Reading.
+> Answer is not provided in the source interview list; see Links.
 
 > [!QUESTION]- What happens when you call `ToList()` on an `IQueryable`?
-> Answer is not provided in the source interview list; see Further Reading.
+> Answer is not provided in the source interview list; see Links.
 
 > [!QUESTION]- What should you watch out for when mixing client-side logic in `IQueryable` expressions?
-> Answer is not provided in the source interview list; see Further Reading.
+> Answer is not provided in the source interview list; see Links.
 
 > [!QUESTION]- Why is `Dictionary` usually faster than `List` for lookups?
-> Answer is not provided in the source interview list; see Further Reading.
+> Answer is not provided in the source interview list; see Links.
 
 > [!QUESTION]- How does hash collision affect performance?
-> Answer is not provided in the source interview list; see Further Reading.
+> Answer is not provided in the source interview list; see Links.
 
 > [!QUESTION]- What's the difference between `Dictionary` and `ConcurrentDictionary`?
-> Answer is not provided in the source interview list; see Further Reading.
+> Answer is not provided in the source interview list; see Links.
 
 > [!QUESTION]- How would you customize hash code generation for a complex key?
-> Answer is not provided in the source interview list; see Further Reading.
+> Answer is not provided in the source interview list; see Links.
 
 > [!QUESTION]- How does inserting a value into a hashtable work?
 > Algorithm:
@@ -119,7 +119,7 @@ tags:
 > A hash table uses the key's hash code to compute an index for where the value should be stored.
 > This lets it jump directly to the relevant bucket/slot instead of scanning all elements and comparing each key to the target key.
 
-## Further Reading
+## Links
 
 - [Anatomy of the .NET dictionary](https://dunnhq.com/posts/2024/anatomy-of-the-dotnet-dictionary/)
 - [Fetching Title#x8il](https://habr.com/ru/articles/198104/)

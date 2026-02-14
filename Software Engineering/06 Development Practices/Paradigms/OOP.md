@@ -37,6 +37,6 @@ OOP is typically used to:
 > - Inheritance: reuse/extend behavior by deriving from a base type (use carefully; composition is often safer).
 > - Polymorphism: treat different implementations through a common contract (interface/base type) and get behavior based on the runtime type.
 
-## Further Reading
+## Links
 
 - [Object-oriented programming (C# guide)](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/object-oriented/)

@@ -103,7 +103,7 @@ CLR (Common Language Runtime) - это часть .NET Framework (или .NET Co
 
 
 
-## Further Reading
+## Links
 - [Common Language Runtime - Wikipedia](https://en.wikipedia.org/wiki/Common_Language_Runtime)
 - [Just-in-time compilation - Wikipedia](https://en.wikipedia.org/wiki/Just-in-time_compilation)
 - [Common Language Runtime (CLR) overview - .NET \| Microsoft Learn](https://docs.microsoft.com/en-us/dotnet/standard/clr)

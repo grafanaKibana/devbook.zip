@@ -78,10 +78,10 @@ Think of it as: **"The engine builds a table first, then decorates it."**
 ### Questions
 
 > [!QUESTION]- What is normalization? What are its first three normal forms?
-> Answer is not provided in the source interview list; see Further Reading.
+> Answer is not provided in the source interview list; see Links.
 
 > [!QUESTION]- What is denormalization? When is it useful?
-> Answer is not provided in the source interview list; see Further Reading.
+> Answer is not provided in the source interview list; see Links.
 
 > [!QUESTION]- What is the logical SQL query execution order?
 > 1. FROM
@@ -141,4 +141,4 @@ Think of it as: **"The engine builds a table first, then decorates it."**
 > [!QUESTION]- What is a Common Table Expression?
 > A CTE (Common Table Expression) is a named, temporary result set defined with `WITH` and used within a single statement. It improves readability, enables query composition, and supports recursion for hierarchical data.
 
-## Further Reading
+## Links

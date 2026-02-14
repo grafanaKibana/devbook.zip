@@ -41,6 +41,6 @@ graph TD
 > [!QUESTION]- What is abc?
 > Answer
 
-## Further Reading
+## Links
 - https://en.wikipedia.org/wiki/Quicksort - Partition schemes and analysis
 - https://cp-algorithms.com/sorting/quick_sort.html - Practical implementation tips

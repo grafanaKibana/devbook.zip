@@ -38,7 +38,7 @@ status: Not-Started
 > `await` waits asynchronously: it does not block the current thread and it unwraps exceptions.
 > `Task.Result` waits synchronously: it blocks the current thread, can cause deadlocks under a `SynchronizationContext` (UI / legacy ASP.NET), and wraps exceptions in `AggregateException`.
 
-## Further Reading
+## Links
 - [Fetching Title#3ra2](https://habr.com/ru/articles/727850/)
 - [Fetching Title#0gax](https://habr.com/ru/articles/470830/)
 - [Async and Await in C#: Complete Guide (2023)](https://www.bytehide.com/blog/async-await-csharp)

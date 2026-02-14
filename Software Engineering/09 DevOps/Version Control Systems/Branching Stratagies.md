@@ -28,4 +28,4 @@ status: Not-Started
 > - `hotfix/*` branches off `main` for urgent production fixes
 > It fits scheduled releases and strict separation of "in development" vs "in production", but can feel heavy for trunk-based development or simple continuous delivery.
 
-## Further Reading
+## Links

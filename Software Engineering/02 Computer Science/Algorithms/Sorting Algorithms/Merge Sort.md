@@ -40,6 +40,6 @@ graph TD
 > [!QUESTION]- What is abc?
 > Answer
 
-## Further Reading
+## Links
 - https://en.wikipedia.org/wiki/Merge_sort - Core idea + variants
 - https://cp-algorithms.com/sorting/merge_sort.html - Implementation details

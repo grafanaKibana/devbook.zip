@@ -46,6 +46,6 @@ graph TD
 > [!QUESTION]- What is abc?
 > Answer
 
-## Further Reading
+## Links
 - https://en.wikipedia.org/wiki/Selection_sort - Details + stability discussion
 - https://visualgo.net/en/sorting - Step-by-step visualization

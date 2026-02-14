@@ -40,7 +40,7 @@ SOLID is a mnemonic for five object-oriented design principles that help keep co
 > 
 > A common alternative is to expose an interface and let a DI container manage a singleton lifetime.
 
-## Further Reading
+## Links
 
 - [SOLID (Habr)](https://habr.com/ru/articles/348286/)
 - [SOLID (Wikipedia)](https://en.wikipedia.org/wiki/SOLID)

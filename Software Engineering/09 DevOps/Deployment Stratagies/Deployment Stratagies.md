@@ -52,4 +52,4 @@ if (pages.length) {
 > [!QUESTION]- What is abc?
 > Answer
 
-## Further Reading
+## Links

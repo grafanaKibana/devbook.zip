@@ -58,7 +58,7 @@ A data structure is a way to organize related data so it can be stored, accessed
 > [!QUESTION]- What is a data structure? Which ones do you know? Which exist in .NET?
 > A data structure is an organization of data that enables efficient operations (access, insert, delete, search). Examples include arrays, lists, stacks, queues, linked lists, hash tables, sets, trees, and graphs. In .NET you commonly use `T[]`, `List<T>`, `Stack<T>`, `Queue<T>`, `LinkedList<T>`, `Dictionary<TKey, TValue>`, `Hashtable`, and `HashSet<T>`.
 
-## Further Reading
+## Links
 
 - [System.Collections.Generic namespace](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic)
 - [Popular types of linked list](https://www.simplilearn.com/tutorials/data-structure-tutorial/types-of-linked-list)

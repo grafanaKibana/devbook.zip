@@ -46,7 +46,7 @@ status: Not-Started
 > [!QUESTION]- What is `yield` and how does it work?
 > It enables iterator methods: the compiler generates a state machine that lazily produces values for `IEnumerable`. `yield return` emits one value and suspends execution; `yield break` ends the sequence.
 
-## Further Reading
+## Links
 
 - [List<T> class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1)
 - [List<T>.Capacity property](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1.capacity)

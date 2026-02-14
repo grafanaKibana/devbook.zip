@@ -27,7 +27,7 @@ GRASP is a set of principles for assigning responsibilities to objects/classes t
 > 
 > Common GRASP principles include: Information Expert, Creator, Controller, Low Coupling, High Cohesion, Polymorphism, Pure Fabrication, Indirection, and Protected Variations.
 
-## Further Reading
+## Links
 
 - [GRASP принципы](https://bool.dev/blog/detail/grasp-printsipy)
 - [GRASP (Wikipedia)](https://en.wikipedia.org/wiki/GRASP_(object-oriented_design))

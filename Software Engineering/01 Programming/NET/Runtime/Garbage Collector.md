@@ -186,8 +186,8 @@ Most objects die young in Gen 0 and never promote. Gen 2 collection is expensive
 > Memory that is no longer needed but cannot be reclaimed. In .NET this can be caused by keeping objects reachable (managed leaks) or by not releasing unmanaged resources.
 > See: [[Memory Leaks]]
 
-## References and Further Reading
+## Links
 
 - https://habr.com/ru/articles/590475/
 
-## Further Reading
+## Links
