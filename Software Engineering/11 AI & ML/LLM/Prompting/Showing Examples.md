@@ -43,9 +43,7 @@ if (pages.length) {
 }
 ```
 ---
-## Intro
-
-## Deeper Explanation
+# Intro
 
 Yet another [[Prompting|prompting]] strategy is *few-shot prompting*, which is basically just **showing examples** (also called "shots") to the model of what you want it to do. Few-shot prompts allow the AI to learn from these examples.
 
@@ -184,6 +182,6 @@ In conclusion, few-shot prompting is an effective strategy that can guide the mo
 
 ## Further Reading
 
-- [[Instruction Prompting]]
+- [[Prompting]]
 - [[Showing Examples]]
 - [[Role Prompting]]

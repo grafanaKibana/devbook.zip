@@ -43,22 +43,15 @@ if (pages.length) {
 }
 ```
 ---
-## Intro
-
-## Deeper Explanation
-
-```mermaid
-graph LR
-    A["You are Shakespeare, an English writer. Write me a poem."] --> B["Of lovers hearts<br>and passions fire..."]
-```
-
-# What is Role Prompting?
+# Intro
 
 Role [[Prompting|prompting]] is a technique that involves assigning specific roles to the LLM (Large Language Model) to control the style, tone, and quality of AI-generated text. By instructing the AI to adopt a particular role or perspective, you can influence how it approaches a task and the characteristics of its output.
 
 The implementation of role prompting is straightforward: simply instruct the AI to "act as" or "embody" a specific character, profession, or perspective. For example, you might ask the AI to "act like a detective" or "embody a food critic."
 
-## Benefits of Role Prompting
+## Deeper Explanation
+
+Benefits of Role Prompting
 
 - Control over writing style and tone
 - Enhanced depth and specificity of information
@@ -110,15 +103,16 @@ When comparing the standard review to the food critic review, several notable di
 3. Combine role prompting with other prompting techniques for enhanced results
 4. Experiment with different roles to find the most effective one for your specific task
 
- 
+## Structure
 
-**References:**
-
-1. [Learn Prompting: Role Prompting Guide](https://learnprompting.org/docs/basics/roles)
-
+```mermaid
+graph LR
+    A["You are Shakespeare, an English writer. Write me a poem."] --> B["Of lovers hearts<br>and passions fire..."]
+```
 ## Questions
 
 > [!QUESTION]- What is abc?
 > Answer
 
 ## Further Reading
+- [Learn Prompting: Role Prompting Guide](https://learnprompting.org/docs/basics/roles)
