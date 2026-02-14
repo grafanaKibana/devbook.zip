@@ -48,16 +48,6 @@ if (pages.length) {
 
 ## Deeper Explanation
 
-# Topics
-
-[Common Language Runtime](Knowledge/01 Programming/NET/C)
-
-[Async/Await](Knowledge/01 Programming/NET/C)
-
-[Garbage Collector](Knowledge/01 Programming/NET/C)
-
-[Memory Leaks](Knowledge/01 Programming/NET/C)
-
 ## Questions
 
 > [!QUESTION]- What is abc?

@@ -19,6 +19,35 @@ ASP.NET Web API runs requests through a configurable middleware pipeline, then d
 
 ## Deeper Explanation
 
+Each middleware wraps the next like nested layers. On the way **in**, a middleware can inspect or modify the request before calling `next`. On the way **out**, it can inspect or modify the response. Any middleware can **short-circuit** by returning a response without calling `next` — for example, `Authentication` can reject an unauthenticated request before it ever reaches `Routing`.
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant EH as ExceptionHandler
+    participant Auth as Authentication
+    participant R as Routing
+    participant AZ as Authorization
+    participant EP as Endpoint
+
+    C->>EH: Request
+    EH->>Auth: next
+    Auth->>R: next
+    R->>AZ: next
+    AZ->>EP: next
+    EP-->>AZ: Result
+    AZ-->>R: Response
+    R-->>Auth: Response
+    Auth-->>EH: Response
+    EH-->>C: Response
+
+    Note over C,EP: Short-circuit example
+    C->>EH: Request with bad token
+    EH->>Auth: next
+    Auth-->>EH: 401 Unauthorized
+    EH-->>C: 401 Unauthorized
+```
+
 ## Questions
 
 > [!QUESTION]- What is middleware in ASP.NET Core?

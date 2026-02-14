@@ -4,7 +4,7 @@ Obsidian knowledge base. These rules govern all human and agent operations.
 
 ## Vault layout
 
-- `Knowledge/`: all notes go here. No inbox. Homepage: `Knowledge/Software Engineering.md`.
+- `Software Engineering/`: all notes go here. No inbox. Homepage: `Software Engineering/Software Engineering.md`.
 - `Templates/`: note templates (examples, not mandatory headers). Start from template, delete irrelevant sections.
 - `Assets/`: all attachments. Never place images/files inside `Knowledge/`.
 - `Roadmap.canvas`: auto-generated vault map. Do not modify.

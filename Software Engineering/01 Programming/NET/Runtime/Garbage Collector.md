@@ -68,6 +68,69 @@ status: Not-Started
 
 ## Модель исполнения GC
 
+```mermaid
+graph TD
+    subgraph ROOTS[GC Roots]
+        R1[Static fields]
+        R2[Stack variables]
+        R3[CPU registers]
+    end
+
+    subgraph HEAP[Managed Heap before GC]
+        A[Object A]
+        B[Object B]
+        C[Object C - unreachable]
+        D[Object D]
+        E[Object E - unreachable]
+    end
+
+    R1 --> A
+    R2 --> B
+    A --> D
+    B --> D
+
+    subgraph MARK[1 - Mark Phase]
+        M1{Walk from roots}
+        M1 -->|reachable| M2[Mark A B D as live]
+        M1 -->|no references| M3[C and E stay unmarked]
+    end
+
+    subgraph COMPACT[2 - Compact Phase]
+        CP1[Move A B D together]
+        CP1 --> CP2[Update all pointers to new addresses]
+        CP2 --> CP3[Free space from C and E]
+    end
+
+    MARK --> COMPACT
+```
+
+### Generational Heap
+
+```mermaid
+graph LR
+    subgraph GEN0[Gen 0 - Nursery]
+        N1[New object X]
+        N2[New object Y]
+        N3[Temp variable Z]
+    end
+
+    subgraph GEN1[Gen 1 - Buffer]
+        S1[Survived 1 GC]
+    end
+
+    subgraph GEN2[Gen 2 - Long-lived]
+        L1[App-lifetime services]
+        L2[Static caches]
+    end
+
+    GEN0 -->|X survives GC 0| GEN1
+    GEN1 -->|Survives GC 1| GEN2
+    N3 -.->|Unreachable - collected| GONE([Freed])
+
+```
+
+Most objects die young in Gen 0 and never promote. Gen 2 collection is expensive and only runs under memory pressure.
+
 1. **Фаза маркировки “живых” объектов**
     1. **Начало сборки мусора:** Сборщик мусора начинает свою работу с набора ссылок, известных как **корни**. Это участки памяти, которые в силу определенных причин должны быть доступны всегда, и которые содержат ссылки на объекты, созданные приложением. Это могут быть регистры процессора, стек вызовов потоков, статические переменные и другие участки памяти, содержащие ссылки на объекты. Сборщик помечает эти объекты как "живые".
     2. **Поиск и маркировка:** Сборщик мусора просматривает все объекты, на которые ссылаются корни, помечая их как "живые". Затем он рекурсивно повторяет этот процесс для объектов, на которые ссылаются уже помеченные объекты, пока не обойдет все достижимые из корней объекты.

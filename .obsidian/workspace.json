@@ -11,10 +11,14 @@
             "id": "1fedc7451582c06e",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "Software Engineering/03 Data Persistance/SQL/SQL.md",
+                "mode": "preview",
+                "source": false
+              },
               "icon": "lucide-file",
-              "title": "New tab"
+              "title": "SQL"
             }
           }
         ]
@@ -124,9 +128,11 @@
             "type": "leaf",
             "state": {
               "type": "file-properties",
-              "state": {},
+              "state": {
+                "file": "Software Engineering/03 Data Persistance/SQL/SQL.md"
+              },
               "icon": "lucide-info",
-              "title": "File properties"
+              "title": "File properties for SQL"
             }
           },
           {
@@ -174,6 +180,7 @@
             "state": {
               "type": "backlink",
               "state": {
+                "file": "Software Engineering/03 Data Persistance/SQL/SQL.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -183,7 +190,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks"
+              "title": "Backlinks for SQL"
             }
           }
         ]
@@ -231,34 +238,38 @@
       "notebook-navigator:Notebook Navigator": true
     }
   },
-  "active": "af3a2ac6a41903fe",
+  "active": "1fedc7451582c06e",
   "lastOpenFiles": [
+    "Software Engineering/05 Architecture/Patterns/CQRS.md",
+    "Software Engineering/05 Architecture/Patterns/Patterns.md",
+    "Software Engineering/03 Data Persistance/SQL/SQL.md",
+    "Software Engineering/05 Architecture/Application Architecture/Layered Architecture.md",
+    "Software Engineering/05 Architecture/Application Architecture/Application Architecture.md",
+    "Software Engineering/01 Programming/NET/Runtime/Garbage Collector.md",
+    "Software Engineering/01 Programming/NET/Runtime/Runtime.md",
+    "Software Engineering/01 Programming/NET/ASP.NET Web API.md",
+    "Software Engineering/01 Programming/NET/NET.md",
+    "Software Engineering/05 Architecture/Patterns/CQS.md",
+    "Software Engineering/01 Programming/NET/Other/Other.md",
+    "Software Engineering/01 Programming/NET/Other/OWIN.md",
+    "Software Engineering/01 Programming/NET/Runtime/Common Language Runtime.md",
+    "AGENTS.md",
+    "Software Engineering/Software Engineering.md",
+    "Templates/Pages/Template - Concept Page.md",
+    "Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
+    "Software Engineering/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set.md",
+    "Assets/11 AI & ML/11 AI & ML-LLM-20260211012223477.png",
+    "Assets/11 AI & ML/11 AI & ML-Instruction Prompting-20260211012332406.svg",
+    "Assets/TEST INTERVIEW.md",
+    "Assets/11 AI & ML/11 AI & ML-Showing Examples-20260211012332470.svg",
+    "Assets/11 AI & ML/11 AI & ML-Role Prompting-20260211012332438.svg",
+    "Assets/Assets.md",
     "Software Engineering/11 AI & ML/LLM/Agents/Agents.md",
     "Software Engineering/01 Programming/01 Programming.md",
-    "Software Engineering/01 Programming/NET/NET.md",
-    "Software Engineering/01 Programming/NET/Runtime/Common Language Runtime.md",
     "Software Engineering/11 AI & ML/LLM/LLM.md",
     "Software Engineering/11 AI & ML/LLM/Prompting/Role Prompting.md",
     "Software Engineering/11 AI & ML/LLM/Prompting/Showing Examples.md",
     "Software Engineering/11 AI & ML/LLM/Prompting/Prompting.md",
-    "Software Engineering/11 AI & ML/LLM/Prompting/Instruction Prompting.md",
-    "Software Engineering/06 Development Practices/06 Development Practices.md",
-    "Software Engineering/06 Development Practices/Principles/Principles.md",
-    "Software Engineering/06 Development Practices/Paradigms/Paradigms.md",
-    "Software Engineering/06 Development Practices/Paradigms/Functional Programming.md",
-    "Software Engineering/06 Development Practices/Principles/DRY.md",
-    "Software Engineering/04 Networks/Transport & Sockets/Transport & Sockets.md",
-    "Software Engineering/04 Networks/04 Networks.md",
-    "Software Engineering/04 Networks/Architecture & Ops/Architecture & Ops.md",
-    "Software Engineering/04 Networks/Protocols/Protocols.md",
-    "Software Engineering/04 Networks/Transport & Sockets/Sockets.md",
-    "Software Engineering/04 Networks/Protocols/DNS.md",
-    "Software Engineering/03 Data Persistance/03 Data Persistance.md",
-    "Software Engineering/02 Computer Science/02 Computer Science.md",
-    "Software Engineering/02 Computer Science/Algorithms/Algorithms.md",
-    "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Bubble Sort.md",
-    "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Quick Sort.md",
-    "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Merge Sort.md",
     "Software Engineering/Roadmap.canvas",
     "Software Engineering/Topics.base",
     "Assets/01 Programming/01 Programming-Common Language Runtime-20260210212705669.png",
@@ -276,10 +287,6 @@
     "quartz/public/01-Programming/NET/CSharp/Fundamentals/Types/Strings-og-image.webp",
     "quartz/public/01-Programming/NET/CSharp/Fundamentals/Types/Delegates-and-Events-og-image.webp",
     "quartz/public/01-Programming/NET/CSharp/Fundamentals/Collections/Collections-og-image.webp",
-    "quartz/public/01-Programming/NET/CSharp/Fundamentals/Fundamentals-og-image.webp",
-    "quartz/public/01-Programming/NET/CSharp/Fundamentals/Async-Await-og-image.webp",
-    "quartz/public/11-AI--and--ML/LLM/Prompting/Showing-Examples-og-image.webp",
-    "quartz/public/11-AI--and--ML/LLM/Prompting/Role-Prompting-og-image.webp",
     "quartz/public/Roadmap.canvas",
     "quartz/content/Roadmap.canvas",
     "public/Roadmap.canvas",

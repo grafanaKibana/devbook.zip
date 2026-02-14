@@ -18,6 +18,59 @@ Layered architecture (also called multi-layered or n-tier) structures an applica
 
 ## Deeper Explanation
 
+```mermaid
+graph TD
+    subgraph OUTER[Infrastructure and Presentation - outermost]
+        UI[Controllers and Views]
+        DB[EF Core and SQL Server]
+        EXT[HTTP clients and Email and File system]
+    end
+
+    subgraph MIDDLE[Application Layer]
+        UC[Use Cases and Services]
+        IPORT[[IOrderRepository]]
+        OPORT[[IEmailSender]]
+    end
+
+    subgraph CORE[Domain Layer - innermost and zero dependencies]
+        ENT[Entities and Value Objects]
+        RULES[Business Rules]
+        DEVT[Domain Events]
+    end
+
+    UI --> UC
+    UC --> ENT
+    UC --> RULES
+
+    DB -.->|implements| IPORT
+    EXT -.->|implements| OPORT
+    IPORT --> ENT
+    OPORT --> UC
+
+```
+
+**Dependency Rule**: All arrows point **inward**. The Domain knows nothing about databases, frameworks, or UI. Infrastructure implements interfaces defined by inner layers — this is why it depends inward, not the other way around.
+
+```mermaid
+graph LR
+    subgraph TRADITIONAL[Traditional Layered - dependencies go down]
+        direction TB
+        T_UI[UI] --> T_BL[Business Logic]
+        T_BL --> T_DA[Data Access]
+        T_DA --> T_DB[(Database)]
+    end
+
+    subgraph ONION[Onion and Clean - dependencies go inward]
+        direction TB
+        O_INFRA[Infrastructure] --> O_APP[Application]
+        O_UI[Presentation] --> O_APP
+        O_APP --> O_DOM[Domain]
+    end
+
+```
+
+In traditional layered architecture, UI depends on Business Logic which depends on Data Access — a top-down chain where changing the DB affects everything above. In Onion Architecture, the dependency is **inverted**: Infrastructure depends on the Domain through interfaces, so you can swap databases without touching business rules.
+
 ## Questions
 
 > [!QUESTION]- What is multi-layered architecture?

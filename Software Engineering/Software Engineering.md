@@ -244,7 +244,7 @@ TABLE WITHOUT ID
   topic as "Topic",
   status as "Status",
   priority as "Priority"
-FROM "Knowledge"
+FROM "Software Engineering"
 WHERE !contains(file.tags, "#FolderNote")
   AND (status = "Creation" OR status = "Repetition" OR status = "Ready To Repeat")
 SORT priority DESC, file.mtime DESC
@@ -255,7 +255,7 @@ LIMIT 12
 
 ```dataview
 TABLE WITHOUT ID file.link as "Note"
-FROM "Knowledge"
+FROM "Software Engineering"
 WHERE !contains(file.tags, "#FolderNote")
 SORT file.mtime DESC
 LIMIT 12

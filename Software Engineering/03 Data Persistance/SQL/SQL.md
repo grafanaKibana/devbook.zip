@@ -51,6 +51,33 @@ if (pages.length) {
 
 [[Normalization Denormalization|Normalization/Denormalization]]
 
+## Logical SQL Query Execution Order
+
+**How you WRITE it:**
+
+```mermaid
+graph LR
+    W1["1 SELECT name, total"] --- W2["2 FROM orders"] --- W3["3 JOIN customers"] --- W4["4 WHERE year = 2025"] --- W5["5 GROUP BY name"] --- W6["6 HAVING total over 100"] --- W7["7 ORDER BY total"]
+```
+
+**How the engine EXECUTES it:**
+
+```mermaid
+graph LR
+    L1["1 FROM orders"] --> L2["2 JOIN customers ON id"] --> L3["3 WHERE year = 2025"] --> L4["4 GROUP BY name"] --> L5["5 HAVING total over 100"] --> L6["6 SELECT name, total"] --> L7["7 ORDER BY total"]
+```
+
+### Rules of Thumb
+
+Think of it as: **"The engine builds a table first, then decorates it."**
+
+1. **FROM/JOIN first, SELECT near last.** The engine needs to know *which tables* before it can do anything. You write `SELECT` first because you're describing *what you want* — the engine starts with *where to get it*.
+2. **WHERE before GROUP BY.** Filter individual rows *before* grouping — cheaper to throw away rows early than to group them and discard later.
+3. **HAVING is WHERE for groups.** If you need to filter *after* aggregation (e.g. "only groups with count over 5"), that's `HAVING`. If you can filter before grouping, use `WHERE` — it's faster.
+4. **SELECT runs late.** This is why column aliases from `SELECT` are invisible to `WHERE` and `GROUP BY` — they haven't been computed yet. But `ORDER BY` runs *after* `SELECT`, so aliases work there.
+5. **ORDER BY is almost last.** Sorting is expensive, so the engine does it only after everything else is settled.
+6. **LIMIT/TOP is the very last cut.** Take the final sorted result and slice off the top — no point limiting before you've filtered, grouped, and sorted.
+
 ## CommonTableExpression - CTE
 
 ### Questions
