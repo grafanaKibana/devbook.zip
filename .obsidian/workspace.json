@@ -42,12 +42,12 @@
             "state": {
               "type": "split-diff-view",
               "state": {
-                "aFile": "Software Engineering/Questions.md",
-                "bFile": "Software Engineering/Questions.md",
+                "aFile": ".obsidian/plugins/notebook-navigator/data.json",
+                "bFile": ".obsidian/plugins/notebook-navigator/data.json",
                 "aRef": ""
               },
               "icon": "diff",
-              "title": "Diff: Questions  (Working Tree)"
+              "title": "Diff: data.json  (Working Tree)"
             }
           }
         ],
@@ -112,8 +112,7 @@
               "title": "Bookmarks"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -143,13 +142,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Software Engineering/Roadmap.canvas",
+                "file": "Software Engineering/10 Cloud/AWS.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Roadmap"
+              "title": "Outline of AWS"
             }
           },
           {
@@ -166,7 +165,8 @@
               "title": "All properties"
             }
           }
-        ]
+        ],
+        "currentTab": 2
       },
       {
         "id": "e96d0e13f56cecdc",
@@ -213,8 +213,10 @@
   },
   "active": "ce6bb2bb40a0a9de",
   "lastOpenFiles": [
-    "Software Engineering/06 Development Practices/Principles/YAGNI.md",
+    "Software Engineering/10 Cloud/AWS.md",
+    "Untitled.md",
     "Software Engineering/03 Data Persistance/ACID.md",
+    "Software Engineering/06 Development Practices/Principles/YAGNI.md",
     "Software Engineering/01 Programming/NET/NET Standart.md",
     "Software Engineering/Questions.md",
     "Software Engineering/Topics.base",
@@ -240,8 +242,6 @@
     "Assets/TEST INTERVIEW.md",
     "Software Engineering/04 Networks/Protocols/HTTP & HTTPS.md",
     "Software Engineering/02 Computer Science/02 Computer Science.md",
-    "Software Engineering/05 Architecture/Architecture Styles/Microservices.md",
-    "Software Engineering/05 Architecture/Patterns/Dependency Injection.md",
     "Software Engineering/03 Data Persistance/NoSQL",
     "Software Engineering/09 DevOps/Version Control Systems",
     "Software Engineering/07 Security/Authentication",

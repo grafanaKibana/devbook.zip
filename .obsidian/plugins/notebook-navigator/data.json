@@ -120,7 +120,7 @@
       "search": true,
       "descendants": true,
       "sort": true,
-      "appearance": true,
+      "appearance": false,
       "newNote": true
     }
   },
