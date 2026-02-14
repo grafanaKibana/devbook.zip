@@ -15,9 +15,9 @@ import datetime
 from collections import Counter
 
 VAULT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-KNOWLEDGE = os.path.join(VAULT_ROOT, "Knowledge")
+KNOWLEDGE = os.path.join(VAULT_ROOT, "Software Engineering")
 CANVAS_PATH = os.path.join(KNOWLEDGE, "Roadmap.canvas")
-MAX_DEPTH = 3
+MAX_DEPTH = 5
 
 NODE_W = 340
 NODE_H = 80
@@ -385,7 +385,7 @@ def generate():
         min_y = min(n.get("y", 0) for n in nodes)
         ts = datetime.datetime.now().astimezone().strftime("%b %d %Y | %I:%M%p")
 
-        legend_x = min_x - 60
+        legend_x = min_x - 600
         legend_y = 0
         legend_w = 500
 

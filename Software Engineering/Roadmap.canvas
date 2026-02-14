@@ -1,104 +1,864 @@
 {
-	"nodes":[
-		{"id":"n_dd262f49bf","type":"file","file":"Software Engineering/01 Programming/01 Programming.md","x":0,"y":0,"width":340,"height":80,"color":"1"},
-		{"id":"n_d4081e45fb","type":"file","file":"Software Engineering/01 Programming/NET/NET.md","x":420,"y":0,"width":340,"height":80,"color":"1"},
-		{"id":"n_1bfb35c3aa","type":"file","file":"Software Engineering/01 Programming/NET/CSharp/CSharp.md","x":840,"y":120,"width":340,"height":80,"color":"1"},
-		{"id":"n_5b132671e7","type":"file","file":"Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md","x":1260,"y":240,"width":340,"height":80,"color":"1"},
-		{"id":"n_4395a9e75e","type":"file","file":"Software Engineering/01 Programming/NET/Other/Other.md","x":840,"y":360,"width":340,"height":80,"color":"1"},
-		{"id":"n_eb0c42d3c0","type":"file","file":"Software Engineering/01 Programming/NET/Runtime/Runtime.md","x":840,"y":480,"width":340,"height":80,"color":"1"},
-		{"id":"n_ebcb435eb2","type":"file","file":"Software Engineering/02 Computer Science/02 Computer Science.md","x":0,"y":760,"width":340,"height":80,"color":"1"},
-		{"id":"n_3a1362b179","type":"file","file":"Software Engineering/02 Computer Science/Algorithms/Algorithms.md","x":420,"y":760,"width":340,"height":80,"color":"1"},
-		{"id":"n_c54b6fadf2","type":"file","file":"Software Engineering/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set.md","x":840,"y":880,"width":340,"height":80,"color":"1"},
-		{"id":"n_d0ca6038f7","type":"file","file":"Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md","x":840,"y":1000,"width":340,"height":80,"color":"1"},
-		{"id":"n_a6dc892c7f","type":"file","file":"Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms.md","x":840,"y":1120,"width":340,"height":80,"color":"1"},
-		{"id":"n_93b9ffc044","type":"file","file":"Software Engineering/02 Computer Science/Algorithms/String Searching/String Searching.md","x":840,"y":1240,"width":340,"height":80,"color":"1"},
-		{"id":"n_ab2b58d449","type":"file","file":"Software Engineering/02 Computer Science/Data Structures/Data Structures.md","x":-420,"y":760,"width":340,"height":80,"color":"1"},
-		{"id":"n_8fc82b07cf","type":"file","file":"Software Engineering/03 Data Persistance/03 Data Persistance.md","x":0,"y":1520,"width":340,"height":80,"color":"1"},
-		{"id":"n_4cbe3c0d1b","type":"file","file":"Software Engineering/03 Data Persistance/NoSQL/NoSQL.md","x":420,"y":1520,"width":340,"height":80,"color":"1"},
-		{"id":"n_a4212fc406","type":"file","file":"Software Engineering/03 Data Persistance/ORMs/ORMs.md","x":-420,"y":1520,"width":340,"height":80,"color":"1"},
-		{"id":"n_d026450ac5","type":"file","file":"Software Engineering/03 Data Persistance/SQL/SQL.md","x":420,"y":1640,"width":340,"height":80,"color":"1"},
-		{"id":"n_a79b2e14f8","type":"file","file":"Software Engineering/03 Data Persistance/SQL/Indexes/Indexes.md","x":840,"y":1760,"width":340,"height":80,"color":"1"},
-		{"id":"n_ef51286781","type":"file","file":"Software Engineering/04 Networks/04 Networks.md","x":0,"y":2040,"width":340,"height":80,"color":"1"},
-		{"id":"n_bb7f64215e","type":"file","file":"Software Engineering/04 Networks/Architecture & Ops/Architecture & Ops.md","x":420,"y":2040,"width":340,"height":80,"color":"1"},
-		{"id":"n_36f0e496b1","type":"file","file":"Software Engineering/04 Networks/Protocols/Protocols.md","x":-420,"y":2040,"width":340,"height":80,"color":"1"},
-		{"id":"n_b2648cb112","type":"file","file":"Software Engineering/04 Networks/Transport & Sockets/Transport & Sockets.md","x":420,"y":2160,"width":340,"height":80,"color":"1"},
-		{"id":"n_2d902a721c","type":"file","file":"Software Engineering/05 Architecture/05 Architecture.md","x":0,"y":2440,"width":340,"height":80,"color":"1"},
-		{"id":"n_7ed73a39da","type":"file","file":"Software Engineering/05 Architecture/Application Architecture/Application Architecture.md","x":420,"y":2440,"width":340,"height":80,"color":"1"},
-		{"id":"n_1c7459d4ef","type":"file","file":"Software Engineering/05 Architecture/Architecture Styles/Architecture Styles.md","x":-420,"y":2440,"width":340,"height":80,"color":"1"},
-		{"id":"n_0677745c4a","type":"file","file":"Software Engineering/05 Architecture/Distributed Systems/Distributed Systems.md","x":420,"y":2560,"width":340,"height":80,"color":"1"},
-		{"id":"n_836d7431d3","type":"file","file":"Software Engineering/05 Architecture/Patterns/Patterns.md","x":-420,"y":2560,"width":340,"height":80,"color":"1"},
-		{"id":"n_4ccad1dbf4","type":"file","file":"Software Engineering/06 Development Practices/06 Development Practices.md","x":0,"y":2840,"width":340,"height":80,"color":"1"},
-		{"id":"n_14732f6187","type":"file","file":"Software Engineering/06 Development Practices/Paradigms/Paradigms.md","x":420,"y":2840,"width":340,"height":80,"color":"1"},
-		{"id":"n_28dba4dfb6","type":"file","file":"Software Engineering/06 Development Practices/Principles/Principles.md","x":-420,"y":2840,"width":340,"height":80,"color":"1"},
-		{"id":"n_5c16a9eace","type":"file","file":"Software Engineering/07 Security/07 Security.md","x":0,"y":3120,"width":340,"height":80,"color":"1"},
-		{"id":"n_8437d5edd8","type":"file","file":"Software Engineering/07 Security/Authentication/Authentication.md","x":420,"y":3120,"width":340,"height":80,"color":"1"},
-		{"id":"n_215ff47b7f","type":"file","file":"Software Engineering/08 SDLC/08 SDLC.md","x":0,"y":3400,"width":340,"height":80,"color":"1"},
-		{"id":"n_9a76cd745d","type":"file","file":"Software Engineering/09 DevOps/09 DevOps.md","x":0,"y":3640,"width":340,"height":80,"color":"1"},
-		{"id":"n_cf0ddb3d9c","type":"file","file":"Software Engineering/09 DevOps/Deployment Stratagies/Deployment Stratagies.md","x":420,"y":3640,"width":340,"height":80,"color":"1"},
-		{"id":"n_e39b6cc0ad","type":"file","file":"Software Engineering/09 DevOps/Version Control Systems/Version Control Systems.md","x":-420,"y":3640,"width":340,"height":80,"color":"1"},
-		{"id":"n_268761f2f7","type":"file","file":"Software Engineering/10 Cloud/10 Cloud.md","x":0,"y":3920,"width":340,"height":80,"color":"1"},
-		{"id":"n_e8bf2810e3","type":"file","file":"Software Engineering/11 AI & ML/11 AI & ML.md","x":0,"y":4160,"width":340,"height":80,"color":"1"},
-		{"id":"n_cff58d6dc6","type":"file","file":"Software Engineering/11 AI & ML/LLM/LLM.md","x":420,"y":4160,"width":340,"height":80,"color":"1"},
-		{"id":"n_603797a9f1","type":"file","file":"Software Engineering/11 AI & ML/LLM/Agents/Agents.md","x":840,"y":4280,"width":340,"height":80,"color":"1"},
-		{"id":"n_5e107a36d8","type":"file","file":"Software Engineering/11 AI & ML/LLM/Prompting/Prompting.md","x":840,"y":4400,"width":340,"height":80,"color":"1"},
-		{"id":"n_93bfc0ffdb","type":"file","file":"Software Engineering/11 AI & ML/Machine Learning/Machine Learning.md","x":-420,"y":4160,"width":340,"height":80,"color":"1"},
-		{"id":"n_328ae87cd7","type":"group","label":"Legend","x":-500,"y":-20,"width":540,"height":530},
-		{"id":"n_b0ac2236f9","type":"text","text":"#### Roadmap legend\n**Generated:** Feb 14 2026 | 01:52PM","x":-480,"y":0,"width":500,"height":110},
-		{"id":"n_4a66490dd9","type":"text","text":"Not-Started: 42","x":-420,"y":126,"width":380,"height":60,"color":"1"},
-		{"id":"n_c1cf7bc196","type":"text","text":"Creation: 0","x":-420,"y":202,"width":380,"height":60,"color":"2"},
-		{"id":"n_a434510472","type":"text","text":"Repetition: 0","x":-420,"y":278,"width":380,"height":60,"color":"5"},
-		{"id":"n_6de0caeeec","type":"text","text":"Ready To Repeat: 0","x":-420,"y":354,"width":380,"height":60,"color":"6"},
-		{"id":"n_0e6324d0db","type":"text","text":"Done: 0","x":-420,"y":430,"width":380,"height":60,"color":"4"}
-	],
-	"edges":[
-		{"id":"e_032b52e4bb","fromNode":"n_dd262f49bf","fromSide":"right","toNode":"n_d4081e45fb","toSide":"left"},
-		{"id":"e_420d63b589","fromNode":"n_d4081e45fb","fromSide":"right","toNode":"n_1bfb35c3aa","toSide":"left"},
-		{"id":"e_dc11d017fa","fromNode":"n_1bfb35c3aa","fromSide":"right","toNode":"n_5b132671e7","toSide":"left"},
-		{"id":"e_3ccd80672b","fromNode":"n_d4081e45fb","fromSide":"right","toNode":"n_4395a9e75e","toSide":"left"},
-		{"id":"e_1c931d8cc2","fromNode":"n_d4081e45fb","fromSide":"right","toNode":"n_eb0c42d3c0","toSide":"left"},
-		{"id":"e_d6edbfb3e0","fromNode":"n_dd262f49bf","fromSide":"bottom","toNode":"n_ebcb435eb2","toSide":"top"},
-		{"id":"e_6fa13350f3","fromNode":"n_ebcb435eb2","fromSide":"right","toNode":"n_3a1362b179","toSide":"left"},
-		{"id":"e_62957e1d21","fromNode":"n_3a1362b179","fromSide":"right","toNode":"n_c54b6fadf2","toSide":"left"},
-		{"id":"e_91de2a43d3","fromNode":"n_3a1362b179","fromSide":"right","toNode":"n_d0ca6038f7","toSide":"left"},
-		{"id":"e_d1c74c900c","fromNode":"n_3a1362b179","fromSide":"right","toNode":"n_a6dc892c7f","toSide":"left"},
-		{"id":"e_01b6ad2c45","fromNode":"n_3a1362b179","fromSide":"right","toNode":"n_93b9ffc044","toSide":"left"},
-		{"id":"e_1d8fc517e1","fromNode":"n_ebcb435eb2","fromSide":"left","toNode":"n_ab2b58d449","toSide":"right"},
-		{"id":"e_d1f0bfe9eb","fromNode":"n_ebcb435eb2","fromSide":"bottom","toNode":"n_8fc82b07cf","toSide":"top"},
-		{"id":"e_7dd5562e8e","fromNode":"n_8fc82b07cf","fromSide":"right","toNode":"n_4cbe3c0d1b","toSide":"left"},
-		{"id":"e_77d4cff9a5","fromNode":"n_8fc82b07cf","fromSide":"left","toNode":"n_a4212fc406","toSide":"right"},
-		{"id":"e_4e04193a95","fromNode":"n_8fc82b07cf","fromSide":"right","toNode":"n_d026450ac5","toSide":"left"},
-		{"id":"e_44776b59d8","fromNode":"n_d026450ac5","fromSide":"right","toNode":"n_a79b2e14f8","toSide":"left"},
-		{"id":"e_da1e1feec8","fromNode":"n_8fc82b07cf","fromSide":"bottom","toNode":"n_ef51286781","toSide":"top"},
-		{"id":"e_132a608547","fromNode":"n_ef51286781","fromSide":"right","toNode":"n_bb7f64215e","toSide":"left"},
-		{"id":"e_c1d6b57a83","fromNode":"n_ef51286781","fromSide":"left","toNode":"n_36f0e496b1","toSide":"right"},
-		{"id":"e_025fab9476","fromNode":"n_ef51286781","fromSide":"right","toNode":"n_b2648cb112","toSide":"left"},
-		{"id":"e_fff42f096c","fromNode":"n_ef51286781","fromSide":"bottom","toNode":"n_2d902a721c","toSide":"top"},
-		{"id":"e_d493c06da1","fromNode":"n_2d902a721c","fromSide":"right","toNode":"n_7ed73a39da","toSide":"left"},
-		{"id":"e_e71403a789","fromNode":"n_2d902a721c","fromSide":"left","toNode":"n_1c7459d4ef","toSide":"right"},
-		{"id":"e_44cfcaa01f","fromNode":"n_2d902a721c","fromSide":"right","toNode":"n_0677745c4a","toSide":"left"},
-		{"id":"e_544d3387e4","fromNode":"n_2d902a721c","fromSide":"left","toNode":"n_836d7431d3","toSide":"right"},
-		{"id":"e_898777f538","fromNode":"n_2d902a721c","fromSide":"bottom","toNode":"n_4ccad1dbf4","toSide":"top"},
-		{"id":"e_531aac9fd6","fromNode":"n_4ccad1dbf4","fromSide":"right","toNode":"n_14732f6187","toSide":"left"},
-		{"id":"e_60519a2c1e","fromNode":"n_4ccad1dbf4","fromSide":"left","toNode":"n_28dba4dfb6","toSide":"right"},
-		{"id":"e_6949fa1b86","fromNode":"n_4ccad1dbf4","fromSide":"bottom","toNode":"n_5c16a9eace","toSide":"top"},
-		{"id":"e_689c4b3e03","fromNode":"n_5c16a9eace","fromSide":"right","toNode":"n_8437d5edd8","toSide":"left"},
-		{"id":"e_d308908563","fromNode":"n_5c16a9eace","fromSide":"bottom","toNode":"n_215ff47b7f","toSide":"top"},
-		{"id":"e_b367dead72","fromNode":"n_215ff47b7f","fromSide":"bottom","toNode":"n_9a76cd745d","toSide":"top"},
-		{"id":"e_bf1e5a3fb5","fromNode":"n_9a76cd745d","fromSide":"right","toNode":"n_cf0ddb3d9c","toSide":"left"},
-		{"id":"e_fa979e18d9","fromNode":"n_9a76cd745d","fromSide":"left","toNode":"n_e39b6cc0ad","toSide":"right"},
-		{"id":"e_6fcdaa3d0b","fromNode":"n_9a76cd745d","fromSide":"bottom","toNode":"n_268761f2f7","toSide":"top"},
-		{"id":"e_96e75c32f9","fromNode":"n_268761f2f7","fromSide":"bottom","toNode":"n_e8bf2810e3","toSide":"top"},
-		{"id":"e_444083db75","fromNode":"n_e8bf2810e3","fromSide":"right","toNode":"n_cff58d6dc6","toSide":"left"},
-		{"id":"e_14eeec1feb","fromNode":"n_cff58d6dc6","fromSide":"right","toNode":"n_603797a9f1","toSide":"left"},
-		{"id":"e_6b35809246","fromNode":"n_cff58d6dc6","fromSide":"right","toNode":"n_5e107a36d8","toSide":"left"},
-		{"id":"e_e7b015e05a","fromNode":"n_e8bf2810e3","fromSide":"left","toNode":"n_93bfc0ffdb","toSide":"right"},
-		{"id":"e_0c4030c72b","fromNode":"n_4a66490dd9","fromSide":"right","toNode":"n_c1cf7bc196","toSide":"right","color":"1"},
-		{"id":"e_1ca3e47d87","fromNode":"n_c1cf7bc196","fromSide":"left","toNode":"n_a434510472","toSide":"left","color":"2"},
-		{"id":"e_cf423710c3","fromNode":"n_a434510472","fromSide":"right","toNode":"n_6de0caeeec","toSide":"right","color":"5"},
-		{"id":"e_32f0f6280f","fromNode":"n_6de0caeeec","fromSide":"left","toNode":"n_0e6324d0db","toSide":"left","color":"6"}
-	],
-	"metadata":{
-		"version":"1.0-1.0",
-		"frontmatter":{}
-	}
+  "nodes": [
+    {
+      "id": "n_21f0241782",
+      "type": "file",
+      "file": "Software Engineering/01 Programming/01 Programming.md",
+      "x": 0,
+      "y": 0,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_47b1436b4f",
+      "type": "file",
+      "file": "Software Engineering/01 Programming/NET/NET.md",
+      "x": 420,
+      "y": 0,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_81e39394ae",
+      "type": "file",
+      "file": "Software Engineering/01 Programming/NET/CSharp/CSharp.md",
+      "x": 840,
+      "y": 120,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_59da91ba7a",
+      "type": "file",
+      "file": "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md",
+      "x": 1260,
+      "y": 240,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_474eefedb5",
+      "type": "file",
+      "file": "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Collections/Collections.md",
+      "x": 1680,
+      "y": 360,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_8feb284bd4",
+      "type": "file",
+      "file": "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types.md",
+      "x": 1680,
+      "y": 480,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_24fac1251a",
+      "type": "file",
+      "file": "Software Engineering/01 Programming/NET/CSharp/Fundamentals/\u0421ontrol Structures/\u0421ontrol Structures.md",
+      "x": 1680,
+      "y": 600,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_7eb25ff61a",
+      "type": "file",
+      "file": "Software Engineering/01 Programming/NET/Other/Other.md",
+      "x": 840,
+      "y": 720,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_5838318922",
+      "type": "file",
+      "file": "Software Engineering/01 Programming/NET/Runtime/Runtime.md",
+      "x": 840,
+      "y": 840,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_de0e84ced0",
+      "type": "file",
+      "file": "Software Engineering/02 Computer Science/02 Computer Science.md",
+      "x": 0,
+      "y": 1120,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_84293cac94",
+      "type": "file",
+      "file": "Software Engineering/02 Computer Science/Algorithms/Algorithms.md",
+      "x": 420,
+      "y": 1120,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_cfd934171c",
+      "type": "file",
+      "file": "Software Engineering/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set.md",
+      "x": 840,
+      "y": 1240,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_8580dfc32b",
+      "type": "file",
+      "file": "Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
+      "x": 840,
+      "y": 1360,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_6f67c9766d",
+      "type": "file",
+      "file": "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms.md",
+      "x": 840,
+      "y": 1480,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_0832a50a3c",
+      "type": "file",
+      "file": "Software Engineering/02 Computer Science/Algorithms/String Searching/String Searching.md",
+      "x": 840,
+      "y": 1600,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_9a63ab08fe",
+      "type": "file",
+      "file": "Software Engineering/02 Computer Science/Data Structures/Data Structures.md",
+      "x": -420,
+      "y": 1120,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_0d3c5a9dde",
+      "type": "file",
+      "file": "Software Engineering/03 Data Persistance/03 Data Persistance.md",
+      "x": 0,
+      "y": 1880,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_c6ca73b0d4",
+      "type": "file",
+      "file": "Software Engineering/03 Data Persistance/NoSQL/NoSQL.md",
+      "x": 420,
+      "y": 1880,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_7f0cf4fe6e",
+      "type": "file",
+      "file": "Software Engineering/03 Data Persistance/ORMs/ORMs.md",
+      "x": -420,
+      "y": 1880,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_99bcec9fc7",
+      "type": "file",
+      "file": "Software Engineering/03 Data Persistance/SQL/SQL.md",
+      "x": 420,
+      "y": 2000,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_cfd0c4d718",
+      "type": "file",
+      "file": "Software Engineering/03 Data Persistance/SQL/Indexes/Indexes.md",
+      "x": 840,
+      "y": 2120,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_562477b458",
+      "type": "file",
+      "file": "Software Engineering/04 Networks/04 Networks.md",
+      "x": 0,
+      "y": 2400,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_0b0a05ce8f",
+      "type": "file",
+      "file": "Software Engineering/04 Networks/Architecture & Ops/Architecture & Ops.md",
+      "x": 420,
+      "y": 2400,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_7af3ba101b",
+      "type": "file",
+      "file": "Software Engineering/04 Networks/Protocols/Protocols.md",
+      "x": -420,
+      "y": 2400,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_7069b6749c",
+      "type": "file",
+      "file": "Software Engineering/04 Networks/Transport & Sockets/Transport & Sockets.md",
+      "x": 420,
+      "y": 2520,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_8e33116907",
+      "type": "file",
+      "file": "Software Engineering/05 Architecture/05 Architecture.md",
+      "x": 0,
+      "y": 2800,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_55d40f25c1",
+      "type": "file",
+      "file": "Software Engineering/05 Architecture/Application Architecture/Application Architecture.md",
+      "x": 420,
+      "y": 2800,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_c123561dff",
+      "type": "file",
+      "file": "Software Engineering/05 Architecture/Architecture Styles/Architecture Styles.md",
+      "x": -420,
+      "y": 2800,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_3f76eb09b7",
+      "type": "file",
+      "file": "Software Engineering/05 Architecture/Distributed Systems/Distributed Systems.md",
+      "x": 420,
+      "y": 2920,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_bf18b195af",
+      "type": "file",
+      "file": "Software Engineering/05 Architecture/Patterns/Patterns.md",
+      "x": -420,
+      "y": 2920,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_a493e627f8",
+      "type": "file",
+      "file": "Software Engineering/06 Development Practices/06 Development Practices.md",
+      "x": 0,
+      "y": 3200,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_1133a64372",
+      "type": "file",
+      "file": "Software Engineering/06 Development Practices/Paradigms/Paradigms.md",
+      "x": 420,
+      "y": 3200,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_8f4802edd0",
+      "type": "file",
+      "file": "Software Engineering/06 Development Practices/Principles/Principles.md",
+      "x": -420,
+      "y": 3200,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_98e6d345ab",
+      "type": "file",
+      "file": "Software Engineering/07 Security/07 Security.md",
+      "x": 0,
+      "y": 3480,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_d34646f1fd",
+      "type": "file",
+      "file": "Software Engineering/07 Security/Authentication/Authentication.md",
+      "x": 420,
+      "y": 3480,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_f00e1d8151",
+      "type": "file",
+      "file": "Software Engineering/08 SDLC/08 SDLC.md",
+      "x": 0,
+      "y": 3760,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_bb7c2d7018",
+      "type": "file",
+      "file": "Software Engineering/09 DevOps/09 DevOps.md",
+      "x": 0,
+      "y": 4000,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_48c141f3f9",
+      "type": "file",
+      "file": "Software Engineering/09 DevOps/Deployment Stratagies/Deployment Stratagies.md",
+      "x": 420,
+      "y": 4000,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_619c288a2f",
+      "type": "file",
+      "file": "Software Engineering/09 DevOps/Version Control Systems/Version Control Systems.md",
+      "x": -420,
+      "y": 4000,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_6fc77d3558",
+      "type": "file",
+      "file": "Software Engineering/10 Cloud/10 Cloud.md",
+      "x": 0,
+      "y": 4280,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_235841ecfa",
+      "type": "file",
+      "file": "Software Engineering/11 AI & ML/11 AI & ML.md",
+      "x": 0,
+      "y": 4520,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_c6ccce8189",
+      "type": "file",
+      "file": "Software Engineering/11 AI & ML/LLM/LLM.md",
+      "x": 420,
+      "y": 4520,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_8d7ef76fdd",
+      "type": "file",
+      "file": "Software Engineering/11 AI & ML/LLM/Agents/Agents.md",
+      "x": 840,
+      "y": 4640,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_7e80798d47",
+      "type": "file",
+      "file": "Software Engineering/11 AI & ML/LLM/Prompting/Prompting.md",
+      "x": 840,
+      "y": 4760,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_05ca101164",
+      "type": "file",
+      "file": "Software Engineering/11 AI & ML/Machine Learning/Machine Learning.md",
+      "x": -420,
+      "y": 4520,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_328ae87cd7",
+      "type": "group",
+      "label": "Legend",
+      "x": -1040,
+      "y": -20,
+      "width": 540,
+      "height": 530
+    },
+    {
+      "id": "n_b0ac2236f9",
+      "type": "text",
+      "text": "#### Roadmap legend\n**Generated:** Feb 14 2026 | 03:59PM",
+      "x": -1020,
+      "y": 0,
+      "width": 500,
+      "height": 110
+    },
+    {
+      "id": "n_4a66490dd9",
+      "type": "text",
+      "text": "Not-Started: 45",
+      "x": -960,
+      "y": 126,
+      "width": 380,
+      "height": 60,
+      "color": "1"
+    },
+    {
+      "id": "n_c1cf7bc196",
+      "type": "text",
+      "text": "Creation: 0",
+      "x": -960,
+      "y": 202,
+      "width": 380,
+      "height": 60,
+      "color": "2"
+    },
+    {
+      "id": "n_a434510472",
+      "type": "text",
+      "text": "Repetition: 0",
+      "x": -960,
+      "y": 278,
+      "width": 380,
+      "height": 60,
+      "color": "5"
+    },
+    {
+      "id": "n_6de0caeeec",
+      "type": "text",
+      "text": "Ready To Repeat: 0",
+      "x": -960,
+      "y": 354,
+      "width": 380,
+      "height": 60,
+      "color": "6"
+    },
+    {
+      "id": "n_0e6324d0db",
+      "type": "text",
+      "text": "Done: 0",
+      "x": -960,
+      "y": 430,
+      "width": 380,
+      "height": 60,
+      "color": "4"
+    }
+  ],
+  "edges": [
+    {
+      "id": "e_398af486c5",
+      "fromNode": "n_21f0241782",
+      "fromSide": "right",
+      "toNode": "n_47b1436b4f",
+      "toSide": "left"
+    },
+    {
+      "id": "e_b786689b8d",
+      "fromNode": "n_47b1436b4f",
+      "fromSide": "right",
+      "toNode": "n_81e39394ae",
+      "toSide": "left"
+    },
+    {
+      "id": "e_fb6eb328ec",
+      "fromNode": "n_81e39394ae",
+      "fromSide": "right",
+      "toNode": "n_59da91ba7a",
+      "toSide": "left"
+    },
+    {
+      "id": "e_eb1cca1236",
+      "fromNode": "n_59da91ba7a",
+      "fromSide": "right",
+      "toNode": "n_474eefedb5",
+      "toSide": "left"
+    },
+    {
+      "id": "e_de0ae9341d",
+      "fromNode": "n_59da91ba7a",
+      "fromSide": "right",
+      "toNode": "n_8feb284bd4",
+      "toSide": "left"
+    },
+    {
+      "id": "e_80f77ed6d6",
+      "fromNode": "n_59da91ba7a",
+      "fromSide": "right",
+      "toNode": "n_24fac1251a",
+      "toSide": "left"
+    },
+    {
+      "id": "e_5eaa319669",
+      "fromNode": "n_47b1436b4f",
+      "fromSide": "right",
+      "toNode": "n_7eb25ff61a",
+      "toSide": "left"
+    },
+    {
+      "id": "e_0d66cdcee9",
+      "fromNode": "n_47b1436b4f",
+      "fromSide": "right",
+      "toNode": "n_5838318922",
+      "toSide": "left"
+    },
+    {
+      "id": "e_0f3fa1cde7",
+      "fromNode": "n_21f0241782",
+      "fromSide": "bottom",
+      "toNode": "n_de0e84ced0",
+      "toSide": "top"
+    },
+    {
+      "id": "e_15dd435e23",
+      "fromNode": "n_de0e84ced0",
+      "fromSide": "right",
+      "toNode": "n_84293cac94",
+      "toSide": "left"
+    },
+    {
+      "id": "e_92f75dd80c",
+      "fromNode": "n_84293cac94",
+      "fromSide": "right",
+      "toNode": "n_cfd934171c",
+      "toSide": "left"
+    },
+    {
+      "id": "e_e71740aa5c",
+      "fromNode": "n_84293cac94",
+      "fromSide": "right",
+      "toNode": "n_8580dfc32b",
+      "toSide": "left"
+    },
+    {
+      "id": "e_0fd69a6f95",
+      "fromNode": "n_84293cac94",
+      "fromSide": "right",
+      "toNode": "n_6f67c9766d",
+      "toSide": "left"
+    },
+    {
+      "id": "e_fc53f61646",
+      "fromNode": "n_84293cac94",
+      "fromSide": "right",
+      "toNode": "n_0832a50a3c",
+      "toSide": "left"
+    },
+    {
+      "id": "e_c22e15fee3",
+      "fromNode": "n_de0e84ced0",
+      "fromSide": "left",
+      "toNode": "n_9a63ab08fe",
+      "toSide": "right"
+    },
+    {
+      "id": "e_c1ac2dd41c",
+      "fromNode": "n_de0e84ced0",
+      "fromSide": "bottom",
+      "toNode": "n_0d3c5a9dde",
+      "toSide": "top"
+    },
+    {
+      "id": "e_0921c7ac5d",
+      "fromNode": "n_0d3c5a9dde",
+      "fromSide": "right",
+      "toNode": "n_c6ca73b0d4",
+      "toSide": "left"
+    },
+    {
+      "id": "e_6da2845204",
+      "fromNode": "n_0d3c5a9dde",
+      "fromSide": "left",
+      "toNode": "n_7f0cf4fe6e",
+      "toSide": "right"
+    },
+    {
+      "id": "e_dd9e9a3caf",
+      "fromNode": "n_0d3c5a9dde",
+      "fromSide": "right",
+      "toNode": "n_99bcec9fc7",
+      "toSide": "left"
+    },
+    {
+      "id": "e_bc521610a8",
+      "fromNode": "n_99bcec9fc7",
+      "fromSide": "right",
+      "toNode": "n_cfd0c4d718",
+      "toSide": "left"
+    },
+    {
+      "id": "e_faa377a1f8",
+      "fromNode": "n_0d3c5a9dde",
+      "fromSide": "bottom",
+      "toNode": "n_562477b458",
+      "toSide": "top"
+    },
+    {
+      "id": "e_ec0ffc014e",
+      "fromNode": "n_562477b458",
+      "fromSide": "right",
+      "toNode": "n_0b0a05ce8f",
+      "toSide": "left"
+    },
+    {
+      "id": "e_58b22023a3",
+      "fromNode": "n_562477b458",
+      "fromSide": "left",
+      "toNode": "n_7af3ba101b",
+      "toSide": "right"
+    },
+    {
+      "id": "e_8a0bf9f59e",
+      "fromNode": "n_562477b458",
+      "fromSide": "right",
+      "toNode": "n_7069b6749c",
+      "toSide": "left"
+    },
+    {
+      "id": "e_2a9ff5bce8",
+      "fromNode": "n_562477b458",
+      "fromSide": "bottom",
+      "toNode": "n_8e33116907",
+      "toSide": "top"
+    },
+    {
+      "id": "e_103bed44dd",
+      "fromNode": "n_8e33116907",
+      "fromSide": "right",
+      "toNode": "n_55d40f25c1",
+      "toSide": "left"
+    },
+    {
+      "id": "e_a4d6efab4d",
+      "fromNode": "n_8e33116907",
+      "fromSide": "left",
+      "toNode": "n_c123561dff",
+      "toSide": "right"
+    },
+    {
+      "id": "e_445d8804b5",
+      "fromNode": "n_8e33116907",
+      "fromSide": "right",
+      "toNode": "n_3f76eb09b7",
+      "toSide": "left"
+    },
+    {
+      "id": "e_36778fb4b5",
+      "fromNode": "n_8e33116907",
+      "fromSide": "left",
+      "toNode": "n_bf18b195af",
+      "toSide": "right"
+    },
+    {
+      "id": "e_4cf7dc83df",
+      "fromNode": "n_8e33116907",
+      "fromSide": "bottom",
+      "toNode": "n_a493e627f8",
+      "toSide": "top"
+    },
+    {
+      "id": "e_ca034855e7",
+      "fromNode": "n_a493e627f8",
+      "fromSide": "right",
+      "toNode": "n_1133a64372",
+      "toSide": "left"
+    },
+    {
+      "id": "e_5de104fc10",
+      "fromNode": "n_a493e627f8",
+      "fromSide": "left",
+      "toNode": "n_8f4802edd0",
+      "toSide": "right"
+    },
+    {
+      "id": "e_c8692271c2",
+      "fromNode": "n_a493e627f8",
+      "fromSide": "bottom",
+      "toNode": "n_98e6d345ab",
+      "toSide": "top"
+    },
+    {
+      "id": "e_5c38c66cd9",
+      "fromNode": "n_98e6d345ab",
+      "fromSide": "right",
+      "toNode": "n_d34646f1fd",
+      "toSide": "left"
+    },
+    {
+      "id": "e_3b46a62b41",
+      "fromNode": "n_98e6d345ab",
+      "fromSide": "bottom",
+      "toNode": "n_f00e1d8151",
+      "toSide": "top"
+    },
+    {
+      "id": "e_f60451b345",
+      "fromNode": "n_f00e1d8151",
+      "fromSide": "bottom",
+      "toNode": "n_bb7c2d7018",
+      "toSide": "top"
+    },
+    {
+      "id": "e_4826e446b3",
+      "fromNode": "n_bb7c2d7018",
+      "fromSide": "right",
+      "toNode": "n_48c141f3f9",
+      "toSide": "left"
+    },
+    {
+      "id": "e_7068fce5b4",
+      "fromNode": "n_bb7c2d7018",
+      "fromSide": "left",
+      "toNode": "n_619c288a2f",
+      "toSide": "right"
+    },
+    {
+      "id": "e_f5fb992082",
+      "fromNode": "n_bb7c2d7018",
+      "fromSide": "bottom",
+      "toNode": "n_6fc77d3558",
+      "toSide": "top"
+    },
+    {
+      "id": "e_a99374aa98",
+      "fromNode": "n_6fc77d3558",
+      "fromSide": "bottom",
+      "toNode": "n_235841ecfa",
+      "toSide": "top"
+    },
+    {
+      "id": "e_478d5cd0b0",
+      "fromNode": "n_235841ecfa",
+      "fromSide": "right",
+      "toNode": "n_c6ccce8189",
+      "toSide": "left"
+    },
+    {
+      "id": "e_c523dc22ed",
+      "fromNode": "n_c6ccce8189",
+      "fromSide": "right",
+      "toNode": "n_8d7ef76fdd",
+      "toSide": "left"
+    },
+    {
+      "id": "e_98d487a0b7",
+      "fromNode": "n_c6ccce8189",
+      "fromSide": "right",
+      "toNode": "n_7e80798d47",
+      "toSide": "left"
+    },
+    {
+      "id": "e_826fcc0acd",
+      "fromNode": "n_235841ecfa",
+      "fromSide": "left",
+      "toNode": "n_05ca101164",
+      "toSide": "right"
+    },
+    {
+      "id": "e_0c4030c72b",
+      "fromNode": "n_4a66490dd9",
+      "fromSide": "right",
+      "toNode": "n_c1cf7bc196",
+      "toSide": "right",
+      "color": "1"
+    },
+    {
+      "id": "e_1ca3e47d87",
+      "fromNode": "n_c1cf7bc196",
+      "fromSide": "left",
+      "toNode": "n_a434510472",
+      "toSide": "left",
+      "color": "2"
+    },
+    {
+      "id": "e_cf423710c3",
+      "fromNode": "n_a434510472",
+      "fromSide": "right",
+      "toNode": "n_6de0caeeec",
+      "toSide": "right",
+      "color": "5"
+    },
+    {
+      "id": "e_32f0f6280f",
+      "fromNode": "n_6de0caeeec",
+      "fromSide": "left",
+      "toNode": "n_0e6324d0db",
+      "toSide": "left",
+      "color": "6"
+    }
+  ]
 }

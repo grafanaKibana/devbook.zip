@@ -375,7 +375,12 @@
   "checkForUpdatesOnStart": true,
   "confirmBeforeDelete": true,
   "customVaultName": "",
-  "pinnedNotes": {},
+  "pinnedNotes": {
+    "AGENTS.md": {
+      "folder": true,
+      "tag": false
+    }
+  },
   "fileIcons": {},
   "fileColors": {},
   "folderIcons": {

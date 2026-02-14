@@ -26,19 +26,32 @@
             "id": "f9054415a792dd11",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "split-diff-view",
               "state": {
-                "file": "Software Engineering/Software Engineering.md",
-                "mode": "preview",
-                "source": false,
-                "backlinks": false
+                "aFile": "AGENTS.md",
+                "bFile": "AGENTS.md",
+                "aRef": ""
               },
-              "icon": "lucide-file",
-              "title": "Software Engineering"
+              "icon": "diff",
+              "title": "Diff: AGENTS  (Working Tree)"
+            }
+          },
+          {
+            "id": "ce6bb2bb40a0a9de",
+            "type": "leaf",
+            "state": {
+              "type": "split-diff-view",
+              "state": {
+                "aFile": "AGENTS.md",
+                "bFile": "AGENTS.md",
+                "aRef": ""
+              },
+              "icon": "diff",
+              "title": "Diff: AGENTS  (Working Tree)"
             }
           }
         ],
-        "currentTab": 1
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -119,11 +132,9 @@
             "type": "leaf",
             "state": {
               "type": "file-properties",
-              "state": {
-                "file": "Software Engineering/Software Engineering.md"
-              },
+              "state": {},
               "icon": "lucide-info",
-              "title": "File properties for Software Engineering"
+              "title": "File properties"
             }
           },
           {
@@ -200,22 +211,25 @@
       "notebook-navigator:Notebook Navigator": true
     }
   },
-  "active": "f9054415a792dd11",
+  "active": "ce6bb2bb40a0a9de",
   "lastOpenFiles": [
+    "AGENTS.md",
+    "Software Engineering/Topics.base",
+    "Software Engineering/Software Engineering.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Async Await.md",
+    "Assets/01 Programming/01 Programming-Common Language Runtime-20260210212705669.png",
+    "Software Engineering/01 Programming/NET/ASP.NET Web API.md",
+    "Software Engineering/Roadmap.canvas",
     "Software Engineering/08 SDLC/08 SDLC.md",
     "Software Engineering/01 Programming/NET/Other/Other.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Async Await.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md",
     "Software Engineering/07 Security/Authentication/Oauth OIDC (OpenId Connect).md",
     "Software Engineering/01 Programming/NET/Runtime/Memory Leaks.md",
     "Software Engineering/01 Programming/NET/Other/SignalR.md",
-    "Software Engineering/Topics.base",
     "Software Engineering/01 Programming/01 Programming.md",
     "Software Engineering/01 Programming/NET/NET.md",
     "Software Engineering/01 Programming/NET/CSharp/CSharp.md",
-    "Software Engineering/Software Engineering.md",
     "Software Engineering/03 Data Persistance/03 Data Persistance.md",
-    "Software Engineering/Roadmap.canvas",
     "Software Engineering/04 Networks/Architecture & Ops/Architecture & Ops.md",
     "Assets/TEST INTERVIEW.md",
     "Software Engineering/04 Networks/Protocols/HTTP & HTTPS.md",
@@ -227,9 +241,6 @@
     "Software Engineering/05 Architecture/Patterns/CQS.md",
     "Software Engineering/05 Architecture/Patterns/Domain-Driven Development.md",
     "Software Engineering/05 Architecture/Patterns/Repository & UoW.md",
-    "Software Engineering/05 Architecture/Patterns/Circut Breaker.md",
-    "Software Engineering/05 Architecture/Patterns/Event Sourcing.md",
-    "Software Engineering/05 Architecture/Patterns/CQRS.md",
     "Software Engineering/03 Data Persistance/NoSQL",
     "Software Engineering/09 DevOps/Version Control Systems",
     "Software Engineering/07 Security/Authentication",
@@ -248,7 +259,6 @@
     "quartz/public/01-Programming/NET/CSharp/Fundamentals/Async-Await-og-image.webp",
     "quartz/public/11-AI--and--ML/LLM/Prompting/Showing-Examples-og-image.webp",
     "quartz/public/11-AI--and--ML/LLM/Prompting/Role-Prompting-og-image.webp",
-    "quartz/public/11-AI--and--ML/LLM/Prompting/Prompting-og-image.webp",
     "quartz/public/Roadmap.canvas",
     "quartz/content/Roadmap.canvas",
     "public/Roadmap.canvas",
