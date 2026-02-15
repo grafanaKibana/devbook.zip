@@ -1,21 +1,43 @@
 ---
-topic: <% (() => { const parts = tp.file.folder(true).split("/"); const idx = parts.indexOf("Software Engineering"); return (idx >= 0 && parts.length > idx + 1) ? `["${parts[idx + 1].replace(/^\d+\s+/, "")}"]` : "[]"; })() %>
-subtopic: <% (() => { const parts = tp.file.folder(true).split("/"); const idx = parts.indexOf("Software Engineering"); return (idx >= 0 && parts.length > idx + 2) ? `["${parts[idx + 2].replace(/^\d+\s+/, "")}"]` : "[]"; })() %>
-level: <% tp.system.suggester(["1", "2", "3", "4"], ["1", "2", "3", "4"], false, "Select level") %>
-priority: <% tp.system.suggester(["Low", "Medium", "High"], ["Low", "Medium", "High"], false, "Select priority") %>
+topic: []
+subtopic: []
+level:
+  - "1"
+priority: Medium
 status: Not-Started
 tags:
-- Template
-- FolderNote
+  - Template
+  - FolderNote
 ---
-
 <%*
-// If File is untitled prompt the User to set a Title
-let title = tp.file.title
+// Derive topic/subtopic from folder path
+const parts = tp.file.folder(true).split("/");
+const idx = parts.indexOf("Software Engineering");
+const topic = (idx >= 0 && parts.length > idx + 1) ? [parts[idx + 1].replace(/^\d+\s+/, "")] : [];
+const subtopic = (idx >= 0 && parts.length > idx + 2) ? [parts[idx + 2].replace(/^\d+\s+/, "")] : [];
+
+// If file is untitled, prompt for a title
+let title = tp.file.title;
 if (title.startsWith("Untitled")) {
   title = await tp.system.prompt("Title") ?? "Untitled";
-  await tp.file.rename(`${title}`);
+  await tp.file.rename(title);
 }
+
+// Prompt for level and priority
+const level = await tp.system.suggester(["1", "2", "3", "4"], ["1", "2", "3", "4"], false, "Select level");
+const priority = await tp.system.suggester(["Low", "Medium", "High"], ["Low", "Medium", "High"], false, "Select priority");
+
+// Write proper typed frontmatter after template finishes
+tp.hooks.on_all_templates_executed(async () => {
+  const file = tp.file.find_tfile(tp.file.path(true));
+  await app.fileManager.processFrontMatter(file, (fm) => {
+    fm.topic = topic;
+    fm.subtopic = subtopic;
+    if (level != null) fm.level = [level];
+    if (priority != null) fm.priority = priority;
+    fm.tags = ["FolderNote"];
+  });
+});
 %>
 # Intro
 

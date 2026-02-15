@@ -15,8 +15,8 @@
   "enable_folder_templates": true,
   "folder_templates": [
     {
-      "folder": "",
-      "template": "Templates/Pages/Template - Index.md"
+      "folder": "Software Engineering",
+      "template": "Templates/Pages/Template - Concept Page.md"
     }
   ],
   "enable_file_templates": false,

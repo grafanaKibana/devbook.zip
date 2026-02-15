@@ -4,14 +4,12 @@
   false,
   "Which programming language?"
 )%>
-
-<%_*
-  let code = await tp.system.prompt("Enter your code", "", false, true)
-%>
-
-<%-*
+<%*
 if (language != null) {
-  let content = '```' + language + '\n' + code + '\n```\n'
-  tR+=content
+  let selection = tp.file.selection();
+  let code = selection
+    ? selection
+    : (await tp.system.clipboard()).trim() || await tp.system.prompt("Enter your code", "", false, true);
+  tR += '```' + language + '\n' + code + '\n```';
 }
 %>
