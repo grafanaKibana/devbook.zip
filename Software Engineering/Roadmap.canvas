@@ -300,6 +300,16 @@
       "color": "1"
     },
     {
+      "id": "n_443c6b7acc",
+      "type": "file",
+      "file": "Software Engineering/05 Architecture/Distributed Systems/Message Queues/Message Queues.md",
+      "x": 840,
+      "y": 3160,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
       "id": "n_bf18b195af",
       "type": "file",
       "file": "Software Engineering/05 Architecture/Patterns/Patterns.md",
@@ -314,7 +324,7 @@
       "type": "file",
       "file": "Software Engineering/06 Development Practices/06 Development Practices.md",
       "x": 0,
-      "y": 3320,
+      "y": 3440,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -324,7 +334,7 @@
       "type": "file",
       "file": "Software Engineering/06 Development Practices/Paradigms/Paradigms.md",
       "x": 420,
-      "y": 3320,
+      "y": 3440,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -334,7 +344,7 @@
       "type": "file",
       "file": "Software Engineering/06 Development Practices/Principles/Principles.md",
       "x": -420,
-      "y": 3320,
+      "y": 3440,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -344,7 +354,7 @@
       "type": "file",
       "file": "Software Engineering/07 Security/07 Security.md",
       "x": 0,
-      "y": 3600,
+      "y": 3720,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -354,7 +364,7 @@
       "type": "file",
       "file": "Software Engineering/07 Security/Authentication/Authentication.md",
       "x": 420,
-      "y": 3600,
+      "y": 3720,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -364,7 +374,7 @@
       "type": "file",
       "file": "Software Engineering/08 SDLC/08 SDLC.md",
       "x": 0,
-      "y": 3880,
+      "y": 4000,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -374,7 +384,7 @@
       "type": "file",
       "file": "Software Engineering/09 DevOps/09 DevOps.md",
       "x": 0,
-      "y": 4120,
+      "y": 4240,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -384,7 +394,7 @@
       "type": "file",
       "file": "Software Engineering/09 DevOps/Deployment Stratagies/Deployment Stratagies.md",
       "x": 420,
-      "y": 4120,
+      "y": 4240,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -394,7 +404,7 @@
       "type": "file",
       "file": "Software Engineering/09 DevOps/Version Control Systems/Version Control Systems.md",
       "x": -420,
-      "y": 4120,
+      "y": 4240,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -404,7 +414,37 @@
       "type": "file",
       "file": "Software Engineering/10 Cloud/10 Cloud.md",
       "x": 0,
-      "y": 4400,
+      "y": 4520,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_ee1e334364",
+      "type": "file",
+      "file": "Software Engineering/10 Cloud/AWS/AWS.md",
+      "x": 420,
+      "y": 4520,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_d69756c8fd",
+      "type": "file",
+      "file": "Software Engineering/10 Cloud/Azure/Azure.md",
+      "x": -420,
+      "y": 4520,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_416c86c7a9",
+      "type": "file",
+      "file": "Software Engineering/10 Cloud/Google Cloud/Google Cloud.md",
+      "x": 420,
+      "y": 4640,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -414,7 +454,7 @@
       "type": "file",
       "file": "Software Engineering/11 AI & ML/11 AI & ML.md",
       "x": 0,
-      "y": 4640,
+      "y": 4920,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -424,7 +464,7 @@
       "type": "file",
       "file": "Software Engineering/11 AI & ML/LLM/LLM.md",
       "x": 420,
-      "y": 4640,
+      "y": 4920,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -434,7 +474,7 @@
       "type": "file",
       "file": "Software Engineering/11 AI & ML/LLM/Agents/Agents.md",
       "x": 840,
-      "y": 4760,
+      "y": 5040,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -444,7 +484,7 @@
       "type": "file",
       "file": "Software Engineering/11 AI & ML/LLM/Prompting/Prompting.md",
       "x": 840,
-      "y": 4880,
+      "y": 5160,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -454,7 +494,7 @@
       "type": "file",
       "file": "Software Engineering/11 AI & ML/Machine Learning/Machine Learning.md",
       "x": -420,
-      "y": 4640,
+      "y": 4920,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -471,7 +511,7 @@
     {
       "id": "n_b0ac2236f9",
       "type": "text",
-      "text": "#### Roadmap legend\n**Generated:** Feb 15 2026 | 03:34PM",
+      "text": "#### Roadmap legend\n**Generated:** Feb 15 2026 | 04:22PM",
       "x": -1020,
       "y": 0,
       "width": 500,
@@ -480,7 +520,7 @@
     {
       "id": "n_4a66490dd9",
       "type": "text",
-      "text": "Not-Started: 45",
+      "text": "Not-Started: 49",
       "x": -960,
       "y": 126,
       "width": 380,
@@ -733,6 +773,13 @@
       "toSide": "left"
     },
     {
+      "id": "e_a3a1735f11",
+      "fromNode": "n_3f76eb09b7",
+      "fromSide": "right",
+      "toNode": "n_443c6b7acc",
+      "toSide": "left"
+    },
+    {
       "id": "e_36778fb4b5",
       "fromNode": "n_8e33116907",
       "fromSide": "left",
@@ -808,6 +855,27 @@
       "fromSide": "bottom",
       "toNode": "n_6fc77d3558",
       "toSide": "top"
+    },
+    {
+      "id": "e_1e414fdaa4",
+      "fromNode": "n_6fc77d3558",
+      "fromSide": "right",
+      "toNode": "n_ee1e334364",
+      "toSide": "left"
+    },
+    {
+      "id": "e_74aa8e263c",
+      "fromNode": "n_6fc77d3558",
+      "fromSide": "left",
+      "toNode": "n_d69756c8fd",
+      "toSide": "right"
+    },
+    {
+      "id": "e_ad5ce909fb",
+      "fromNode": "n_6fc77d3558",
+      "fromSide": "right",
+      "toNode": "n_416c86c7a9",
+      "toSide": "left"
     },
     {
       "id": "e_a99374aa98",

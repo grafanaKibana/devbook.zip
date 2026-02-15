@@ -67,14 +67,14 @@
             "id": "1af06994487b60a6",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
+              "type": "markdown",
               "state": {
-                "aFile": "Software Engineering/01 Programming/NET/ASP.NET Web API/ASP.NET Web API.md",
-                "bFile": "Software Engineering/01 Programming/NET/ASP.NET Web API/ASP.NET Web API.md",
-                "aRef": ""
+                "file": "Software Engineering/05 Architecture/Patterns/Patterns.md",
+                "mode": "preview",
+                "source": false
               },
-              "icon": "diff",
-              "title": "Diff: ASP.NET Web API  (Working Tree)"
+              "icon": "lucide-file",
+              "title": "Patterns"
             }
           }
         ],
@@ -189,9 +189,11 @@
             "type": "leaf",
             "state": {
               "type": "file-properties",
-              "state": {},
+              "state": {
+                "file": "Software Engineering/05 Architecture/Patterns/Patterns.md"
+              },
               "icon": "lucide-info",
-              "title": "File properties"
+              "title": "File properties for Patterns"
             }
           },
           {
@@ -299,6 +301,8 @@
   },
   "active": "1af06994487b60a6",
   "lastOpenFiles": [
+    "Software Engineering/05 Architecture/Distributed Systems/Distributed Systems.md",
+    "Software Engineering/08 SDLC/08 SDLC.md",
     "Software Engineering/05 Architecture/Patterns/Design Patterns.md",
     "Software Engineering/05 Architecture/Patterns/Patterns.md",
     "Software Engineering/06 Development Practices/Principles/Principles.md",
@@ -325,8 +329,6 @@
     "Software Engineering/03 Data Persistance/ORMs/Entity Framework.md",
     "Assets/Assets.md",
     "Software Engineering/03 Data Persistance/ORMs/Untitled.md",
-    "Software Engineering/03 Data Persistance/ORMs/Abc.md",
-    "Software Engineering/03 Data Persistance/ORMs/ORMs.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures/asdf",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures/Some",
     "Software Engineering/01 Programming/NET/ASP.NET Web API",
