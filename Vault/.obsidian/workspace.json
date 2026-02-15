@@ -11,14 +11,17 @@
             "id": "70994c056d478933",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "canvas",
               "state": {
-                "file": "Software Engineering/Software Engineering.md",
-                "mode": "source",
-                "source": false
+                "file": "Software Engineering/Roadmap.canvas",
+                "viewState": {
+                  "x": 490,
+                  "y": 2550,
+                  "zoom": -2.2006135676045733
+                }
               },
-              "icon": "lucide-file",
-              "title": "Software Engineering"
+              "icon": "lucide-layout-dashboard",
+              "title": "Roadmap"
             }
           }
         ]
@@ -151,10 +154,10 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Software Engineering/Software Engineering.md"
+                "file": "Software Engineering/Roadmap.canvas"
               },
               "icon": "lucide-info",
-              "title": "File properties for Software Engineering"
+              "title": "File properties for Roadmap"
             }
           }
         ],
