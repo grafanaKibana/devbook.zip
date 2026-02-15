@@ -11,14 +11,14 @@
             "id": "70994c056d478933",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
+              "type": "markdown",
               "state": {
-                "aFile": "Vault/Software Engineering/Software Engineering.md",
-                "bFile": "Vault/Software Engineering/Software Engineering.md",
-                "aRef": ""
+                "file": "Software Engineering/Software Engineering.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "diff",
-              "title": "Diff: Software Engineering  (Working Tree)"
+              "icon": "lucide-file",
+              "title": "Software Engineering"
             }
           }
         ]
@@ -150,9 +150,11 @@
             "type": "leaf",
             "state": {
               "type": "file-properties",
-              "state": {},
+              "state": {
+                "file": "Software Engineering/Software Engineering.md"
+              },
               "icon": "lucide-info",
-              "title": "File properties"
+              "title": "File properties for Software Engineering"
             }
           }
         ],
