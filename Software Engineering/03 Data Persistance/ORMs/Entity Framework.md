@@ -1,19 +1,17 @@
 ---
 topic:
-  - Data Persistance
+  - "Data Persistance"
 subtopic:
-  - ORMs
-level: ["1"]
+  - "ORMs"
+level:
+  - "1"
 priority: Medium
 status: Not-Started
 ---
+
 # Intro
 
 ## Deeper Explanation
-
-## Links
-
-[Using lazy loading in Entity Framework Core 8](https://toreaurstad.blogspot.com/2024/09/using-lazy-loading-in-entity-framework.html?m=1&utm_source=newsletter.csharpdigest.net&utm_medium=newsletter&utm_campaign=on-over-engineering&_bhlid=efd39774a29b3493b98805aa251f5eb60eb7366e)
 
 ## Questions
 
@@ -25,9 +23,11 @@ status: Not-Started
 
 ## Links
 
+[Using lazy loading in Entity Framework Core 8](https://toreaurstad.blogspot.com/2024/09/using-lazy-loading-in-entity-framework.html?m=1&utm_source=newsletter.csharpdigest.net&utm_medium=newsletter&utm_campaign=on-over-engineering&_bhlid=efd39774a29b3493b98805aa251f5eb60eb7366e)
+
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -50,13 +50,12 @@ const pages = dv.pages()
   .sort(p => p.file.name, "asc");
   
   if (children.length) {
-	  dv.header(2, "Topics");
-	  dv.list(children.map(p => p.file.link));
+	dv.header(2, "Topics");
+	dv.list(children.map(p => p.file.link));
   }
   if (pages.length) {
-	  dv.header(2, "Pages");
-	  dv.list(pages.map(p => p.file.link));
+	dv.header(2, "Pages");
+	dv.list(pages.map(p => p.file.link));
   }
   
 ```
-

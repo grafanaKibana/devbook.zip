@@ -1,19 +1,17 @@
 ---
 topic:
-  - AI & ML
+  - "AI & ML"
 subtopic:
-  - Machine Learning
-level: ["1"]
+  - "Machine Learning"
+level:
+  - "1"
 priority: Medium
 status: Not-Started
 ---
+
 # Intro
 
 ## Deeper Explanation
-
-## Links
-
-[Introduction - Hugging Face NLP Course](https://huggingface.co/learn/nlp-course/chapter1/1)
 
 ## Questions
 
@@ -22,9 +20,11 @@ status: Not-Started
 
 ## Links
 
+[Introduction - Hugging Face NLP Course](https://huggingface.co/learn/nlp-course/chapter1/1)
+
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -56,4 +56,3 @@ const pages = dv.pages()
   }
   
 ```
-

@@ -1,18 +1,21 @@
 ---
 topic:
-  - Development Practices
+  - "Patterns & Practices"
 subtopic:
-  - Paradigms
+  - "Paradigms & Practices"
 level:
   - "1"
 priority: Medium
 status: Not-Started
 ---
+
 # Intro
+
+Functional programming is a paradigm that treats computation as the evaluation of pure functions, avoiding mutable state and side effects. Core concepts include immutability, first-class and higher-order functions, function composition, and declarative data transformations. It leads to code that is easier to reason about, test, and parallelize.
 
 ## Deeper Explanation
 
-[«Паттерны» функционального программирования](https://habr.com/ru/post/337880/)
+[Functional Programming "Patterns"](https://habr.com/ru/post/337880/)
 
 ## Questions
 
@@ -23,7 +26,7 @@ status: Not-Started
 
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -55,4 +58,3 @@ const pages = dv.pages()
   }
   
 ```
-

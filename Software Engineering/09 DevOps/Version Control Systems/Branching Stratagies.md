@@ -1,14 +1,13 @@
 ---
 topic:
-  - DevOps
-subtopic:
-  - Version Control Systems
+  - "DevOps"
+subtopic: []
 level:
   - "3"
-priority:
-  - High
+priority: High
 status: Not-Started
 ---
+
 # Intro
 
 ## Deeper Explanation
@@ -28,7 +27,7 @@ status: Not-Started
 
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -60,4 +59,3 @@ const pages = dv.pages()
   }
   
 ```
-

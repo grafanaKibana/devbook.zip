@@ -1,11 +1,13 @@
 ---
 topic:
-  - DevOps
+  - "DevOps"
 subtopic: []
-level: ["1"]
+level:
+  - "1"
 priority: Medium
 status: Not-Started
 ---
+
 # Intro
 
 ## Deeper Explanation
@@ -18,12 +20,13 @@ status: Not-Started
 > Unlike virtual machines, containers share the host kernel, so they start faster and use fewer resources.
 
 ## Links
+
 - [What is Docker? (IBM)](https://www.ibm.com/ru-ru/cloud/learn/docker)
 - [What are containers? (IBM)](https://www.ibm.com/ru-ru/cloud/learn/containers)
 
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -55,4 +58,3 @@ const pages = dv.pages()
   }
   
 ```
-

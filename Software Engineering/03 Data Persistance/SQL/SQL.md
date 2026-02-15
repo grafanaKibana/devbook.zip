@@ -1,14 +1,12 @@
 ---
 topic:
-  - Data Persistance
+  - "Data Persistance"
 subtopic:
-  - SQL
-level: ["1"]
-priority: Medium
-status: Not-Started
+  - "SQL"
 tags:
   - FolderNote
 ---
+
 # Intro
 
 ## Deeper Explanation
@@ -109,9 +107,18 @@ Think of it as: **"The engine builds a table first, then decorates it."**
 
 ## Links
 
+## Deeper Explanation
+
+
+## Questions
+
+
+## Links
+
+
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -143,4 +150,3 @@ const pages = dv.pages()
   }
   
 ```
-

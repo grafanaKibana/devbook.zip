@@ -1,15 +1,12 @@
 ---
 topic:
-  - Programming
+  - "Programming"
 subtopic:
-  - NET
-level:
-  - "1"
-priority: Medium
-status: Not-Started
+  - "NET"
 tags:
   - FolderNote
 ---
+
 # Intro
 
 ## Deeper Explanation
@@ -52,9 +49,18 @@ tags:
 
 ## Links
 
+## Deeper Explanation
+
+
+## Questions
+
+
+## Links
+
+
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -86,4 +92,3 @@ const pages = dv.pages()
   }
   
 ```
-

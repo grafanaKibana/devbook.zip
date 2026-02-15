@@ -1,14 +1,14 @@
 ---
 topic:
-  - AI & ML
+  - "AI & ML"
 subtopic:
-  - LLM
-level: ["1"]
+  - "LLM"
+level:
+  - "1"
 priority: Medium
 status: Not-Started
-tags:
-  - FolderNote
 ---
+
 # Intro
 
 Role [[Prompting|prompting]] is a technique that involves assigning specific roles to the LLM (Large Language Model) to control the style, tone, and quality of AI-generated text. By instructing the AI to adopt a particular role or perspective, you can influence how it approaches a task and the characteristics of its output.
@@ -75,17 +75,19 @@ When comparing the standard review to the food critic review, several notable di
 graph LR
     A["You are Shakespeare, an English writer. Write me a poem."] --> B["Of lovers hearts<br>and passions fire..."]
 ```
+
 ## Questions
 
 > [!QUESTION]- What is abc?
 > Answer
 
 ## Links
+
 - [Learn Prompting: Role Prompting Guide](https://learnprompting.org/docs/basics/roles)
 
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -117,4 +119,3 @@ const pages = dv.pages()
   }
   
 ```
-

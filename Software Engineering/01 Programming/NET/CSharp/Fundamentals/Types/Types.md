@@ -1,15 +1,12 @@
 ---
 topic:
-  - Programming
+  - "Programming"
 subtopic:
-  - NET
-level:
-  - "1"
-priority: Medium
-status: Not-Started
+  - "NET"
 tags:
   - FolderNote
 ---
+
 # Intro
 
 In C#, types define the kind of data that variables can hold, how much memory they occupy, and what operations can be performed on them. The C# type system is unified, meaning that all types, including primitives, share a common base type`(object`). This unified type system enables powerful features like polymorphism, type safety, and LINQ, while still allowing for high-performance code.
@@ -120,7 +117,7 @@ By default, equality comparison behaves differently for value and reference type
 ## Stack vs Heap Allocation
 
 - Stack: Fast, limited size, automatic cleanup
-- Heap: Larger, managed by [[Garbage Collector|garbage collector]]
+- Heap: Larger, managed by the garbage collector
 - Value types as local variables typically go on stack
 - Value types as class members go on heap with their containing object
 - Reference types (the objects themselves) always go on heap
@@ -512,9 +509,18 @@ if (obj is string str)  // Type check and declaration in one step
 - https://docs.microsoft.com/en-us/dotnet/framework/performance/performance-tips
 - https://csharpindepth.com/
 
+## Deeper Explanation
+
+
+## Questions
+
+
+## Links
+
+
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -546,4 +552,3 @@ const pages = dv.pages()
   }
   
 ```
-

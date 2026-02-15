@@ -1,13 +1,17 @@
 ---
 topic:
-  - AI & ML
+  - "AI & ML"
 subtopic:
-  - Machine Learning
-level: ["1"]
+  - "Machine Learning"
+level:
+  - "1"
 priority: Medium
 status: Not-Started
 ---
+
 # Intro
+
+The spectrum of automation describes five levels of AI involvement in a task, ranging from fully human-driven to fully autonomous. It helps frame where a given ML system sits: from Shadow Mode (AI observes but humans act) through AI Assistance and Partial Automation, up to Full Automation where the system operates independently.
 
 ## Deeper Explanation
 
@@ -26,7 +30,7 @@ status: Not-Started
 
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -58,4 +62,3 @@ const pages = dv.pages()
   }
   
 ```
-

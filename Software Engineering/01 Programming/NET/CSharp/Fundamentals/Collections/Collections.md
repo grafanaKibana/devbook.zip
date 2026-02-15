@@ -20,7 +20,7 @@ tags:
 
 ## HashTable
 
-Хеш-таблица — это структура данных, используемая для хранения пар ключ-значение, где каждому ключу соответствует уникальное хеш-значение. Это позволяет эффективно и быстро осуществлять операции поиска, добавления и удаления элементов, так как доступ к значению осуществляется через его хеш-код, что обеспечивает почти постоянное время доступа в среднем.
+A hash table is a data structure used to store key-value pairs, where each key corresponds to a unique hash value. This enables efficient and fast lookup, insertion, and deletion operations because access to a value goes through its hash code, providing near-constant average access time.
 
 ## Trees
 
@@ -118,11 +118,11 @@ tags:
 ## Links
 
 - [Anatomy of the .NET dictionary](https://dunnhq.com/posts/2024/anatomy-of-the-dotnet-dictionary/)
-- [Под капотом у Dictionary и ConcurrentDictionary](https://habr.com/ru/articles/198104/)
+- [Under the hood of Dictionary and ConcurrentDictionary](https://habr.com/ru/articles/198104/)
 
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -154,4 +154,3 @@ const pages = dv.pages()
   }
   
 ```
-

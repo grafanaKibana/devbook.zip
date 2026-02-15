@@ -1,30 +1,31 @@
 ---
 topic:
-  - Programming
+  - "Programming"
 subtopic:
-  - NET
+  - "NET"
 level:
   - "1"
 priority: Medium
 status: Not-Started
 ---
+
 # Intro
 
-Термин **утечка памяти** в средах со сборщиком мусора может вызывать некоторое недоумение. В конце концов, как может утекать память, если есть сборщик мусора, который следит за её своевременным освобождением?
+The term **memory leak** in garbage-collected environments can be confusing. After all, how can memory leak if there is a garbage collector that ensures timely reclamation?
 
-На это есть 2 основные причины. Первая — это объекты, которые не используются в программе, но на которые еще сохранились ссылки. Из-за того, что в других участках кода на объекты есть ссылки, сборщик мусора не освобождает занятую ими память, так что они сохраняются навсегда, удерживая выделенную под них память. Так происходит, например, когда вы регистрируете обработчик события, но не удаляете его. Назовем такие утечки **утечками управляемой памяти**.
+There are two main reasons. The first is objects that are no longer used by the program but are still referenced. Because some part of the code still holds references to them, the garbage collector does not reclaim their memory, so they remain forever and retain the memory allocated for them. This happens, for example, when you subscribe an event handler and never unsubscribe it. Let's call these **managed memory leaks**.
 
-Вторая причина — неаккуратная работа с неуправляемой памятью, когда вы каким-либо способом выделяете неуправляемую память, но не освобождаете ее. На самом деле, это не так уж и сложно сделать в управляемом, даже работая с управляемым кодом. Сам .NET имеет множество классов, которые выделяют неуправляемую память. Почти всё, что использует потоки, графику, файловую систему или сетевые вызовы, под капотом работает с неуправляемой памятью. Вы можете легко выделить неуправляемую память и самостоятельно, например при помощи специальных классов (таких как `Marshal`) или при помощи [P/Invoke](https://docs.microsoft.com/en-us/dotnet/standard/native-interop/pinvoke).
+The second reason is careless handling of unmanaged memory: you allocate unmanaged memory in some way, but never free it. In practice, this is not that hard to do even in managed code. .NET itself has many classes that allocate unmanaged memory. Almost anything that uses threads, graphics, the file system, or network calls works with unmanaged memory under the hood. You can also allocate unmanaged memory yourself, for example using special classes (such as `Marshal`) or via [P/Invoke](https://docs.microsoft.com/en-us/dotnet/standard/native-interop/pinvoke).
 
-*Многие разделяют мнение, что **утечки управляемой памяти*** — *это вовсе не утечки, ведь на них все еще есть ссылки и в теории, память все еще можно освободить. Это дискуссионный вопрос, но на мой взгляд, это все же утечки памяти. Они удерживают память, которая не может быть выделена другому экземпляру и в конечном итоге вызывают исключение Out of Memory. В этой статье я буду называть утечки и управляемой, и неуправляемой памяти просто утечками памяти.*
+*Many people argue that **managed memory leaks** are not really leaks, because the objects are still referenced and, in theory, the memory could still be reclaimed. This is debatable, but in my view these are still memory leaks. They retain memory that cannot be allocated to something else and can ultimately cause an Out of Memory exception. In this article, I will refer to both managed and unmanaged memory leaks simply as memory leaks.*
 
-Ниже приведено 8 наиболее часто встречающихся причин возникновения утечек. Первые 6 касаются утечек управляемой памяти, оставшиеся 2 — неуправляемой.
+Below are 8 of the most common causes of leaks. The first 6 are managed leaks; the remaining 2 are unmanaged.
 
-### Обработчики событий
+### Event handlers
 
-События в .NET печально известны утечками памяти. Причина проста: после подписки на событие какого-либо объекта, он будет удерживать ссылку на ваш класс, в котором вы определили обработчик (если, конечно, вы не использовали в качестве обработчика анонимный метод, не захватывающий членов класса). 
+Events in .NET are notorious for causing memory leaks. The reason is simple: after you subscribe to an event on some object, it will keep a reference to your class where the handler is defined (unless you used an anonymous method that does not capture any members of the class).
 
-Посмотрите на этот пример:
+Look at this example:
 
 ```csharp
 public class MyClass
@@ -36,26 +37,26 @@ public class MyClass
 
 	private void OnWiFiChanged(object sender, WifiEventArgs e)
 	{
-    // делаем что-нибудь полезное
+		// do something useful
   }
 }
 ```
 
-Так, если `wifiManager` определен за пределами `MyClass`, то мы получили утечку памяти. `wifiManager` ссылается на экземпляр `MyClass`, который теперь никогда не будет удален сборщиком мусора.
+So if `wifiManager` is defined outside of `MyClass`, you have a memory leak. `wifiManager` references the `MyClass` instance, which now will never be collected by the garbage collector.
 
-События действительно очень опасны, и про это есть отдельная статья: [5 Техник избежать утечек памяти при использовании событий в C# .NET, о которых вам нужно знать](https://michaelscodingspot.com/5-techniques-to-avoid-memory-leaks-by-events-in-c-net-you-should-know/).
+Events really can be dangerous, and there is a dedicated article about this: [5 Techniques to Avoid Memory Leaks When Using Events in C# .NET That You Should Know](https://michaelscodingspot.com/5-techniques-to-avoid-memory-leaks-by-events-in-c-net-you-should-know/).
 
-Что можно сделать в этой ситуации? В вышеуказанной [статье](https://michaelscodingspot.com/5-techniques-to-avoid-memory-leaks-by-events-in-c-net-you-should-know/) описано несколько хороших практик, позволяющих избежать утечек памяти. Не вдаваясь в подробности, вот некоторые из них:
+What can you do in this situation? The [article](https://michaelscodingspot.com/5-techniques-to-avoid-memory-leaks-by-events-in-c-net-you-should-know/) above describes several good practices to avoid memory leaks. Without going into details, here are some of them:
 
-1. Всегда отписывайтесь от событий.
-2. Используйте паттерны слабых событий ([Weak Event Pattern](https://docs.microsoft.com/en-us/dotnet/desktop/wpf/advanced/weak-event-patterns?view=netframeworkdesktop-4.8)).
-3. Если это возможно, подписывайтесь на события при помощи анонимных методов, не захватывающих других членов класса.
+1. Always unsubscribe from events.
+2. Use weak event patterns ([Weak Event Pattern](https://docs.microsoft.com/en-us/dotnet/desktop/wpf/advanced/weak-event-patterns?view=netframeworkdesktop-4.8)).
+3. If possible, subscribe using anonymous methods that do not capture other members of the class.
 
-### Захват членов класса в анонимных методах
+### Capturing class members in anonymous methods
 
-Довольно очевидно, что использование метода в качестве обработчика события приведет к созданию в обработчике ссылки на объект, содержащий этот метод. Но куда менее очевидно, что то же самое происходит, когда член класса захвачен в анонимном методе.
+It is fairly obvious that using an instance method as an event handler creates a reference from the handler to the object that owns the method. What is much less obvious is that the same thing happens when a class member is captured in an anonymous method.
 
-Вот пример:
+Here is an example:
 
 ```csharp
 public class MyClass
@@ -73,15 +74,15 @@ public class MyClass
 		_jobQueue.EnqueueJob(() =>
 		{
 			Logger.Log($"Executing job with ID {_id}");
-			// Выполняем полезную работу
+			// do useful work
 		});
 	}
 }
 ```
 
-В этом примере член класса `_id` **захвачен** в анонимном методе и, как результат, экземпляр класса хранит ссылку на себя. Это означает, что пока `_jobQueue` существует и ссылается на анонимный делегат, он [`_jobQueue`] ссылается также и на экземпляр `MyClass`.
+In this example, the class member `_id` is **captured** by the anonymous method and, as a result, the class instance ends up holding a reference to itself. This means that as long as `_jobQueue` exists and references the anonymous delegate, it [`_jobQueue`] also references the `MyClass` instance.
 
-Решение проблемы здесь простое — использовать локальную переменную:
+The fix here is simple: use a local variable instead:
 
 ```csharp
 public class MyClass
@@ -100,29 +101,29 @@ public class MyClass
 		_jobQueue.EnqueueJob(() =>
 		{
 			Logger.Log($"Executing job with ID {localId}");
-			// что-нибудь делаем
+			// do something
 		});
 	}
 }
 ```
 
-Если присвоить значение локальной переменной, член класса не будет захвачен и вы предотвратите утечку памяти.
+If you copy the value into a local variable, the class member will not be captured and you will prevent the leak.
 
-***Примечание:** если не совсем понятна природа возникновения утечки в данном случае, обратите внимание на [этот комментарий](https://habr.com/ru/post/589005/#comment_23709379).*
+***Note:** if the root cause of the leak in this case is not entirely clear, take a look at [this comment](https://habr.com/ru/post/589005/#comment_23709379).*
 
-### Статические переменные
+### Static variables
 
-Некоторые разработчики считают, что использование статических переменных являются плохой практикой. Тем не менее, говоря об утечках памяти, о них нельзя не упомянуть.
+Some developers consider static variables to be a bad practice. Nevertheless, when talking about memory leaks, they are important to mention.
 
-Прежде, чем подойти к сути этого раздела, давайте немного поговорим о работе сборщика мусора в .NET. Основная идея состоит в том, что сборщик мусора проходит по всем **корневым объектам** (**GC Roots**, **корни**) и помечает их, как объекты, которые **не** будут для очищены при сборке. Затем сборщик мусора проходит по всем объектам, на которые ссылаются корни, и точно также помечает их. И так далее. В конце концов, сборщик мусора собирает всё оставшееся ([отличная статья о сборщике мусора](https://habr.com/ru/post/590475/)).
+Before getting to the point of this section, let's briefly talk about how the .NET garbage collector works. The basic idea is that the GC walks all **root objects** (**GC Roots**, **roots**) and marks them as objects that will **not** be collected. Then it walks all objects referenced by those roots and marks them as well, and so on. Eventually, the GC collects everything that remains unmarked ([a great article about the garbage collector](https://habr.com/ru/post/590475/)).
 
-Что считается **корневыми** **объектами**?
+What is considered a **root object**?
 
-1. Cтек исполняющихся потоков.
-2. Статические переменные.
-3. Управляемые объекты, переданные COM-объектам через [Interop](https://docs.microsoft.com/en-us/dotnet/standard/native-interop/cominterop).
+1. The stacks of executing threads.
+2. Static variables.
+3. Managed objects passed to COM objects via [Interop](https://docs.microsoft.com/en-us/dotnet/standard/native-interop/cominterop).
 
-Это означает, что статические переменные и всё, на что они ссылаются, никогда не будет освобождено сборщиком мусора. Вот пример:
+This means that static variables, and everything they reference, will never be reclaimed by the garbage collector. Here is an example:
 
 ```csharp
 public class MyClass
@@ -135,13 +136,13 @@ public class MyClass
 }
 ```
 
-Если вы зачем-то напишете вышеприведенный код, любой экземпляр `MyClass` навсегда останется в памяти, тем самым вызвав утечку.
+If you write the code above for some reason, any `MyClass` instance will remain in memory forever, causing a leak.
 
-### Кэширование
+### Caching
 
-Разработчики любят кэширование. Действительно, зачем выполнять операцию дважды, если можно выполнить ее один раз и сохранить результат, не так ли?
+Developers love caching. After all, why perform an operation twice if you can do it once and store the result, right?
 
-Это правда, но если кэшировать бесконечно, то в конце концов вы исчерпаете всю доступную память. Посмотрите на этот пример:
+That is true, but if you cache without bounds, you will eventually exhaust all available memory. Look at this example:
 
 ```csharp
 public class ProfilePicExtractor
@@ -150,8 +151,8 @@ public class ProfilePicExtractor
 
 	public byte[] GetProfilePicByID(int id)
 	{
-		// По-хорошему, здесь нужно использовать механизм синхронизации,
-		// но для упрощения примера мы это опустим
+		// Ideally, you should use a synchronization mechanism here,
+		// but we omit it to keep the example simple
 		if (!PictureCache.ContainsKey(id))
 		{
 			var picture = GetPictureFromDatabase(id);
@@ -167,19 +168,19 @@ public class ProfilePicExtractor
 }
 ```
 
-Кэширование в этом примере помогает сократить дорогостоящие операции обращения к базе данных, но ценой является захламление памяти.
+Caching in this example helps reduce expensive database calls, but the cost is memory bloat.
 
-Для решения проблемы можно использовать следующие практики:
+To address this, you can use the following practices:
 
-1. Удалять из кэша данные, которые не используются какое-то время.
-2. Ограничить размер кэша.
-3. Использовать `WeakReference` для хранения кэшируемых объектов. `WeakReference` сборщику мусора самостоятельно очищать кэш, что в ряде случаев может оказаться не такой уж и плохой идеей. Сборщик мусора будет перемещать объекты, которые еще используются, в старшие поколения, чтобы держать их в памяти дольше. Это означает, что часто используемые объекты останутся в кэше дольше, тогда как неиспользуемые будут удалены сборщиком мусора без вашего явного участия.
+1. Remove items from the cache that have not been used for some time.
+2. Limit the cache size.
+3. Use `WeakReference` to store cached objects. `WeakReference` allows the garbage collector to clean up the cache on its own, which in some cases may not be a bad idea. The GC will promote objects that are still in use to older generations so they stay in memory longer. This means frequently used objects will remain in the cache longer, while unused ones will be collected without your explicit involvement.
 
-### Некорректная привязка данных в WPF
+### Incorrect data binding in WPF
 
-Привязка данных (Data Binding) в WPF тоже может стать причиной утечек памяти. Главное правило для предотвращения утечек — всегда использовать `DependencyObject` или `INotifyPropertyChanged`. Если вы этого не делаете, WPF создает т.н. сильную ссылку (strong reference) на объект, вызывая утечку памяти ([более подробное объяснение](https://stackoverflow.com/a/18543350/1229063)).
+Data binding in WPF can also cause memory leaks. The main rule to prevent leaks is to always use `DependencyObject` or `INotifyPropertyChanged`. If you do not, WPF creates a so-called strong reference to the object, causing a memory leak ([more detailed explanation](https://stackoverflow.com/a/18543350/1229063)).
 
-Пример:
+Example:
 
 ```xml
 <UserControl x:Class="WpfApp.MyControl"
@@ -189,7 +190,7 @@ public class ProfilePicExtractor
 </UserControl>
 ```
 
-Представленный ниже класс останется в памяти навсегда:
+The class below will remain in memory forever:
 
 ```csharp
 public class MyViewModel
@@ -204,7 +205,7 @@ public class MyViewModel
 }
 ```
 
-А вот этот класс уже не вызовет утечки:
+But this class will not cause a leak:
 
 ```csharp
 public class MyViewModel : INotifyPropertyChanged
@@ -223,17 +224,17 @@ public string SomeText
 }
 ```
 
-На самом деле даже не важно, вызываете вы `PropertyChanged` или нет, главное, что класс реализует интерфейс `INotifyPropertyChanged`. Это говорит инфраструктуре WPF не создавать сильную ссылку.
+In fact, it does not even matter whether you raise `PropertyChanged` or not; the key point is that the class implements `INotifyPropertyChanged`. This tells the WPF infrastructure not to create a strong reference.
 
-*Утечки памяти возникают только если используется режим привязки* `OneWay` *или* `TwoWay`*. Если привязка осуществляется в режиме* `OneTime` *или* `OneWayToSource`*, то проблемы не будет.*
+*Memory leaks occur only when the binding mode is* `OneWay` *or* `TwoWay`*. If the binding uses* `OneTime` *or* `OneWayToSource`*, there is no problem.*
 
-Утечки памяти в WPF также могут возникать, когда происходит привязка коллекций. Если коллекция не реализует `INotifyCollectionChanged`, вы получите утечку памяти. Вы можете избежать проблемы используя класс `ObservableCollection`, который этот интерфейс реализует.
+Memory leaks in WPF can also happen when binding collections. If the collection does not implement `INotifyCollectionChanged`, you will get a memory leak. You can avoid the problem by using `ObservableCollection`, which implements this interface.
 
-### Потоки, которые никогда не останавливаются
+### Threads that never stop
 
-Мы уже говорили о том, как работает сборщик мусора и о корневых объектах. Я упоминал, что стек потока считается корневым объектом. Стек потока включает все локальные переменные, а также члены стеков вызовов.
+We already discussed how the garbage collector works and what GC roots are. I mentioned that a thread stack is considered a root. A thread stack includes all local variables as well as call stack frames.
 
-Если вы зачем-то создали бесконечный поток, который ничего не делает и ссылается на объекты, то возникнет утечка памяти. Один из примеров того, как это может легко случиться — неправильное использование класса `Timer`. Посмотрите на этот код:
+If you create an infinite thread that does nothing but keeps references to objects, you will get a memory leak. One way this can happen easily is incorrect use of the `Timer` class. Look at this code:
 
 ```csharp
 public class MyClass
@@ -244,17 +245,17 @@ public class MyClass
 		timer.Change(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(5));
 	}
 
-	private void HandleTick(object state) => // Что-нибудь делаем
+	private void HandleTick(object state) => // do something
 }
 ```
 
-Если вы не остановите таймер, он будет бесконечно выполняться в отдельном потоке, удерживая ссылку на `MyClass` и предотвращая его удаление сборщиком мусора.
+If you do not stop the timer, it will keep running indefinitely on a separate thread, holding a reference to `MyClass` and preventing it from being collected.
 
-### Не освобожденная неуправляемая память
+### Unreleased unmanaged memory
 
-До сих пор мы говорили только об управляемой памяти, которая освобождается сборщиком мусора. Совсем другое дело — неуправляемая память. Вместо того, чтобы просто избегать ссылок на ненужные объекты, в этом случае вам необходимо явно освобождать память.
+So far, we have only talked about managed memory, which is reclaimed by the garbage collector. Unmanaged memory is a different story. Instead of just avoiding references to unneeded objects, you must explicitly free the memory.
 
-Вот простой пример:
+Here is a simple example:
 
 ```csharp
 public class SomeClass
@@ -266,13 +267,13 @@ public class SomeClass
 		_buffer = Marshal.AllocHGlobal(1000);
 	}
 
-	// Делаем что-нибудь, но не освобождаем память
+	// do something, but do not free the memory
 }
 ```
 
-В этом примере мы использовали `Marshal.AllocHGlobal`, чтобы выделить участок неуправляемой памяти ([см. документацию в MSDN](https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.marshal.allochglobal?view=net-5.0)). Если явно не освободить память при помощи `Marshal.FreeHGlobal`, она будет считаться выделенной в куче процесса, вызывая утечку памяти, даже после удаления `SomeClass` сборщиком мусора.
+In this example we used `Marshal.AllocHGlobal` to allocate a block of unmanaged memory ([see the MSDN documentation](https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.marshal.allochglobal?view=net-5.0)). If you do not explicitly free the memory via `Marshal.FreeHGlobal`, it will remain allocated in the process heap, causing a leak even after `SomeClass` is collected by the GC.
 
-Для предотвращения подобных проблем вы можете добавить в свой класс метод `Dispose`, в котором очищать неуправляемые ресурсы. Например:
+To prevent such issues, you can add a `Dispose` method to your class to clean up unmanaged resources. For example:
 
 ```csharp
 public class SomeClass : IDisposable
@@ -282,20 +283,20 @@ public class SomeClass : IDisposable
 	publicSomeClass()
 	{
 		_buffer = Marshal.AllocHGlobal(1000);
-		// Делаем что-нибудь, но не освобождаем память
+		// do something, but do not free the memory
 	}
 
 	public void Dispose() => Marshal.FreeHGlobal(_buffer);
 }
 ```
 
-*Утечки неуправляемой памяти даже хуже, чем утечки управляемой памяти в связи с [фрагментацией](https://stackoverflow.com/questions/3770457/what-is-memory-fragmentation). Сборщик мусора умеет дефрагментировать управляемую память, помещая неудаленные объекты рядом, чтобы освободить место для новых данных. В свою очередь, неуправляемая память навсегда привязывается к месту, в котором она выделена.*
+*Unmanaged memory leaks can be even worse than managed leaks due to [fragmentation](https://stackoverflow.com/questions/3770457/what-is-memory-fragmentation). The GC can defragment managed memory by moving surviving objects next to each other to free space for new allocations. Unmanaged memory, on the other hand, stays tied to the location where it was allocated.*
 
-### Не вызванный метод Dispose
+### Dispose not called
 
-В последнем примере мы добавили метод `Dispose` для освобождения неуправляемых ресурсов, когда они больше не нужны. Это прекрасно, но что случится, если кто-нибудь использует класс, но не вызовет метод `Dispose`?
+In the previous example we added a `Dispose` method to release unmanaged resources when they are no longer needed. That is great, but what happens if someone uses the class and never calls `Dispose`?
 
-Что вы можете сделать, так это использовать конструкцию `using` языка C#:
+What you can do is use the C# `using` construct:
 
 ```csharp
 using (var instance = new MyClass())
@@ -304,7 +305,7 @@ using (var instance = new MyClass())
 }
 ```
 
-Конструкция из примера работает на классах, реализующих интерфейс `IDisposable` и при компиляции автоматически преобразуется в следующий код:
+The construct from the example works for classes that implement `IDisposable` and is compiled into the following code:
 
 ```csharp
 MyClass instance = new MyClass();
@@ -321,9 +322,9 @@ if (instance != null)
 }
 ```
 
-Это довольно удобно, потому что если будет выброшено исключение, метод `Dispose` все равно будет вызван.
+This is convenient because even if an exception is thrown, `Dispose` will still be called.
 
-Для достижения наибольшей надежности MSDN предлагает [паттерн реализации Dispose](https://docs.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose). Вот пример его использования:
+For maximum reliability, MSDN suggests the [Dispose implementation pattern](https://docs.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose). Here is an example of how it can be used:
 
 ```csharp
 public class MyClass : IDisposable
@@ -344,10 +345,10 @@ public class MyClass : IDisposable
 		
 		if (disposing)
 		{
-			// Очищаем используемые управляемые объекты
+			// clean up managed objects being used
 		}
 
-		// Очищаем неуправляемые объекты
+		// clean up unmanaged objects
 		Marshal.FreeHGlobal(_bufferPtr);
 		_disposed = true;
 	}
@@ -365,9 +366,11 @@ public class MyClass : IDisposable
 }
 ```
 
-Использование этого паттерна позволяет гарантировать, что даже если метод `Dispose` не был вызван явно, то он все равно будет вызван финализатором, когда сборщик мусора решит удалить объект. Если же `Dispose` вызывался вручную, финализатор для объекта отключается и вызван не будет. Отмена финализатора очень важна, так как его вызов обходится [достаточно дорого](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/finalizers) и может вызывать проблемы с производительностью.
+Using this pattern helps ensure that even if `Dispose` is not called explicitly, it will still be called by the finalizer when the garbage collector decides to collect the object. If `Dispose` is called manually, the object's finalizer is suppressed and will not run. Suppressing finalization is important because running a finalizer is [relatively expensive](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/finalizers) and can cause performance issues.
 
-Но учтите, что серебряной пулей майкрософтовский паттерн `Dispose` не является. Если не вызвать `Dispose` вручную, и при этом объект не удален сборщиком мусора из-за утечки управляемой памяти, то и неуправляемые ресурсы освобождены не будут.
+But keep in mind that Microsoft's `Dispose` pattern is not a silver bullet. If you do not call `Dispose` manually and the object is not collected because of a managed leak, the unmanaged resources will not be released either.
+
+## Deeper Explanation
 
 ## Questions
 
@@ -395,11 +398,9 @@ public class MyClass : IDisposable
 
 ## Links
 
-## Links
-
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -422,13 +423,12 @@ const pages = dv.pages()
   .sort(p => p.file.name, "asc");
   
   if (children.length) {
-	  dv.header(2, "Topics");
-	  dv.list(children.map(p => p.file.link));
+	dv.header(2, "Topics");
+	dv.list(children.map(p => p.file.link));
   }
   if (pages.length) {
-	  dv.header(2, "Pages");
-	  dv.list(pages.map(p => p.file.link));
+	dv.header(2, "Pages");
+	dv.list(pages.map(p => p.file.link));
   }
   
 ```
-

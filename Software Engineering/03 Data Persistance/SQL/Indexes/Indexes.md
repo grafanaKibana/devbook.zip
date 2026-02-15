@@ -1,115 +1,115 @@
 ---
 topic:
-  - Data Persistance
+  - "Data Persistance"
 subtopic:
-  - SQL
-level: ["1"]
-priority: Medium
-status: Not-Started
+  - "SQL"
 tags:
   - FolderNote
 ---
+
 # Intro
+
+An index is a sorted auxiliary data structure that dramatically speeds up row retrieval in SQL databases by avoiding full table scans. Indexes use balanced-tree structures to reduce search complexity from `O(n)` to `O(log n)`, at the cost of additional disk space and slower write operations. The two main types are clustered indexes (which define the physical row order) and non-clustered indexes (which store pointers to the data).
 
 ## Deeper Explanation
 
-Индекс является структурой на диске, которая связана с таблицей или представлением и ускоряет получение строк из таблицы или представления. Индекс содержит ключи, построенные из одного или нескольких столбцов в таблице или представлении. Эти ключи хранятся в виде структуры сбалансированного дерева, которая поддерживает быстрый поиск строк по их ключевым значениям в SQL Server.
+An index is an on-disk structure associated with a table or view that speeds up retrieving rows from that table or view. An index contains keys built from one or more columns in the table or view. These keys are stored as a balanced-tree structure that supports fast lookup of rows by their key values in SQL Server.
 
-## Предназначение индексов
+## Purpose of indexes
 
-Простейший метод решения задачи поиска записей в базе данных, удовлетворяющих определенному критерию, — полный перебор. Но с ростом количества записей производительность такого подхода будет заметно падать. Для повышения производительности поиска создаются вспомогательные структуры — индексы. Используя индексы, можно существенно поднять скорость поиска, потому что данные в индексе хранятся в форме, позволяющей нам в процессе поиска не рассматривать области, которые заведомо не могут содержать искомые элементы.
+The simplest way to find records in a database that match a specific criterion is a full scan. But as the number of records grows, the performance of this approach drops noticeably. To improve lookup performance, auxiliary structures are created: indexes. With indexes, you can significantly increase search speed because the data in the index is stored in a form that lets you skip ranges that cannot possibly contain the desired elements.
 
-Важно, что использование индексов не только сокращает время поиска в абсолютном выражении, но и уменьшает алгоритмическую сложность процесса поиска. Это значит, что время, необходимое на поиск с помощью индексов, при росте объема базы данных будет расти существенно медленнее, чем при использовании полного перебора.
+Importantly, indexes not only reduce absolute lookup time, they also reduce the algorithmic complexity of the search process. This means that as the database grows, the time required to search using indexes increases much more slowly than with a full scan.
 
-Когда вы формируете запрос на индексированный столбец, подсистема запросов начинает идти сверху от корневого узла и постепенно двигается вниз через промежуточные узлы, при этом каждый слой промежуточного уровня содержит более детальную информацию о данных. Подсистема запросов продолжает двигаться по узлам индекса до тех пор, пока не достигнет нижнего уровня с листьями индекса. 
+When you query an indexed column, the query processor starts at the root node and gradually moves down through intermediate nodes, with each intermediate layer containing more detailed information about the data. The query processor continues traversing the index nodes until it reaches the bottom (leaf) level.
 
-Бинарный поиск имеет алгоритмическую сложность `O(log(n))`. Используя формулы алгоритмической сложности `O(n)` и `O(log(n))`, мы можем оценить, как будет меняться приблизительное количество операций при поиске разными способами с ростом объема данных
+Binary search has algorithmic complexity `O(log(n))`. Using the complexity formulas `O(n)` and `O(log(n))`, we can estimate how the approximate number of operations changes for different search approaches as the data volume grows.
 
 ![03 Data Persistance-Indexes-20260210205141994](03%20Data%20Persistance-Indexes-20260210205141994.png)
 
-### Куча
+### Heap
 
-**Кучи –** это данные, хранящиеся без какой-либо определенной сортировки, не имеющие индексов, доступ и поиск по таким данным происходит последовательно при сканировании страниц, и может занимать довольно долгое время влияя негативно на производительность.
+**A heap** is data stored without any defined ordering (i.e., a table without a clustered index). Access and searching over such data happens sequentially by scanning pages, which can take a long time and negatively impact performance.
 
-### Структура индексов
+### Index structure
 
-Индекс - древовидная отсортированная структура даных на диске, которая связана с таблицей или представлением и ускоряет получение строк из таблицы или представления. Индекс содержит ключи, построенные из одного или нескольких столбцов в таблице или представлении. Эти ключи хранятся в виде структуры сбалансированного дерева, которая поддерживает быстрый поиск строк по их ключевым значениям в SQL Server. 
+An index is a tree-like sorted on-disk data structure associated with a table or view that speeds up retrieving rows from that table or view. An index contains keys built from one or more columns in the table or view. These keys are stored as a balanced-tree structure that supports fast lookup of rows by their key values in SQL Server.
 
-Само сбалансированное дерево состоит из трёх уровней:
+The balanced tree itself consists of three levels:
 
-1. Корневой узел
-    1. Хранит ссылки на промежуточные узлы и диапазон их данных
-2. Промежуточный уровень
-    1. Хранит ссылки на листья и диапазон хранящихся в них данных
-3. Уровень листьев
-    1. Листок - страница с реальными данным в определенном диапазоне
+1. Root node
+    1. Stores pointers to intermediate nodes and the range of data they cover
+2. Intermediate level
+    1. Stores pointers to leaf nodes and the range of data stored in them
+3. Leaf level
+    1. A leaf is a page with the actual data for a given range
 
-### Кластерный индекс
+### Clustered index
 
-В кластеризованном индексе конечные узлы (листья) содержат страницы рельных данных базовой таблицы. 
+In a clustered index, the bottom nodes (leaves) contain the data pages of the base table.
 
-В корневых узлах находятся строки индекса, каждая строка содержит ключевое значения и указатель на страницу промежуточного уровня
+At the root level, index rows are stored; each row contains a key value and a pointer to an intermediate-level page.
 
-В промежуточных узлах находятся строки индекса, каждая строка содержит ключевое значение и указатель на строку данных в конечном листке
+At the intermediate level, index rows are stored; each row contains a key value and a pointer to a data row at the leaf level.
 
-Страницы на каждом уровне связаны в двунаправленный список.
+Pages at each level are linked in a doubly linked list.
 
-Важной характеристикой кластеризованного индекса является то, что все значения отсортированы в определенном порядке либо возрастания, либо убывания. Таким образом, таблица или представление может иметь только один кластеризованный индекс. В дополнение следует отметить, что данные в таблице хранятся в отсортированном виде только в случае если создан кластеризованный индекс у этой таблицы. Таблица не имеющая кластеризованного индекса называется кучей.
+An important property of a clustered index is that all values are ordered in a specific direction (ascending or descending). Therefore, a table or view can have only one clustered index. Also note that the table's data is stored in sorted order only when a clustered index exists on that table. A table without a clustered index is called a heap.
 
 ![Untitled](03%20Data%20Persistance-Indexes-20260210205142011.png)
 
 ![Untitled](03%20Data%20Persistance-Indexes-20260210205142027.png)
 
-### Упрощенный Пример
+### Simplified Example
 
-Наша база имеет таблицу с данными которая имеет кластерный индекс по ИД. Допустим ИД в таблице у нас в диапазоне от 1 до 5000, и мы хотим найти **1456** элемент. 
+Our database has a table with data that has a clustered index on ID. Suppose the IDs in the table are in the range from 1 to 5000, and we want to find element **1456**.
 
-1. Запрос приходит на корневой уровень, и смотрит на возможные варианты промежуточных узлов
-    1. Узел 1 имеет диапазон от 1 до 1250
-    2. **Узел 2 имеет диапазон от 1251 до 2500** - диапазон который нам нужен
-    3. Узел 3 имеет диапазон от 2501 до 3750
-    4. Узел 4 имеет диапазон от 3751 до 5000
-2. Сам промежуточный узел имеет ссылки на 5 страниц, 249 строк на каждой
-    1. **Страница 1 имеет диапазон от 1251 до 1500** - диапазон который нам нужен
-    2. Страница 2 имеет диапазон от 1501 до 1750
-    3. Страница 3 имеет диапазон от 1751 до 2000
-    4. Страница 4 имеет диапазон от 2001 до 2250
-    5. Страница 5 имеет диапазон от 2251 до 2500
-3. Далее мы проходим по этому диапазону линейным поиском и значительно ускоряем операцию получения значения уменьшая диапазон поиска с 5000 до 249 элементов. (Размеры узлов и страниц выбраны для примера)
+1. The query arrives at the root level and considers the possible intermediate nodes
+    1. Node 1 covers the range from 1 to 1250
+    2. **Node 2 covers the range from 1251 to 2500** - the range we need
+    3. Node 3 covers the range from 2501 to 3750
+    4. Node 4 covers the range from 3751 to 5000
+2. The intermediate node itself has pointers to 5 pages, 249 rows per page
+    1. **Page 1 covers the range from 1251 to 1500** - the range we need
+    2. Page 2 covers the range from 1501 to 1750
+    3. Page 3 covers the range from 1751 to 2000
+    4. Page 4 covers the range from 2001 to 2250
+    5. Page 5 covers the range from 2251 to 2500
+3. Next, we scan within that range linearly and significantly speed up retrieval by reducing the search space from 5000 to 249 elements. (Node and page sizes are chosen for illustration.)
 
-### Некластерный индекс
+### Nonclustered index
 
-В отличие от кластеризованного индекса, листья некластеризованного индекса содержат только те столбцы (*ключевые*), по которым определен данный индекс, а также содержит указатель на строки с реальными данными в таблице. Это означает, что системе подзапросов необходима дополнительная операция для обнаружения и получения требуемых данных. Содержание указателя на данные зависит от способа хранения данных: кластеризованная таблица или куча. Если указатель ссылается на кластеризованную таблицу, то он ведет к кластеризованному индексу, используя который можно найти реальные данные. Если указатель ссылается на кучу, то он ведет к конкретному идентификатору строки с данными.
+Unlike a clustered index, the leaf level of a nonclustered index contains only the columns (*key columns*) the index is defined on, and a pointer to the rows with the actual data in the table. This means the query processor needs an additional operation to locate and fetch the required data. What the data pointer contains depends on how the table is stored: as a clustered table or as a heap. If the pointer refers to a clustered table, it points to the clustered index, which can then be used to find the actual data. If the pointer refers to a heap, it points to a specific row identifier (RID).
 
-- **При наличии кластерного индекса**
-    - Если в таблице создан кластеризованный индекс, то некластеризованные индексы содержат в узле-листе значение ключа кластеризованного индекса для этих данных
+- **With a clustered index**
+    - If the table has a clustered index, then nonclustered indexes store the clustered index key value for the row in their leaf level
         
         ![Untitled](03%20Data%20Persistance-Indexes-20260210205142050.png)
         
-- **При отсутствии кластерного индекса**
-    - Если в таблице не создан кластеризованный индекс, то некластеризованные индексы по этой таблице хранят в своих узлах-листьях идентификаторы строк. Идентификатор строки указывает на реальную строку данных в таблице, по сути это - значение, включающее в себя номер файла данных, номер страницы и местоположение строки на этой странице.
+- **Without a clustered index**
+    - If the table does not have a clustered index, then nonclustered indexes on that table store row identifiers (RIDs) in their leaf level. A row identifier points to the actual data row in the table; in practice it includes the data file number, the page number, and the row's slot/location on that page.
         
         ![Untitled](03%20Data%20Persistance-Indexes-20260210205142069.png)
         
 
 ### Pros/Cons
 
-- Плюсы
-    - Улучшение скорости поиска записей
-    - При чтении данные приходят в отсортированном порядке что означает что не будет требоваться делать дополнительню сортировку
-- Минусы
-    - Индексы ухудшают производительность запросов связанных с добавлением, модификацией и удалением строк. Это связано с тем что при выполнении подобных операций СУБД должна ещё и динамически обновлять индекс.
-    - Для хранения индекса требуется дополнительное место на диске. Чем длиннее ключ, тем большего размера индекс и место для его хранения
-    - Не все данные подходят для индексации. Данные, которые не являются достаточно уникальными, (как например название штата в таблице с американскими городами) не дадут такого выигрыша от индексации, как данные, которые имеют больше возможных значений.
+- Pros
+    - Faster record lookups
+    - Reads can return data in sorted order, which means additional sorting may not be required
+- Cons
+    - Indexes can reduce performance for queries that insert, update, or delete rows, because the DBMS must also maintain the index as part of those operations
+    - Index storage requires additional disk space; the longer the key, the larger the index and its storage footprint
+    - Not all data is suitable for indexing. Data that is not sufficiently selective (for example, a state name in a table of US cities) will not yield the same indexing benefit as data with a wider range of values
 
-### Рекомендации к использованию
+### Usage recommendations
 
-- Для таблиц которые часто обновляются используйте как можно меньше индексов.
-- Если таблица содержит большое количество данных, но их изменения незначительны, тогда используйте столько индексов, сколько необходимо для улучшение производительности ваших запросов. Однако хорошо подумайте перед использованием индексов на небольших таблицах, т.к. возможно использование поиска по индексу может занять больше времени, нежели простое сканирование всех строк.
-- Для кластеризованных индексов старайтесь использовать настолько короткие поля насколько это возможно. Наилучшим образом будет применение кластеризованного индекса на столбцах с уникальными значениями и не позволяющими использовать NULL. Вот почему первичный ключ часто используется как кластеризованный индекс.
-- Уникальность значений в столбце влияет на производительность индекса. В общем случае, чем больше у вас дубликатов в столбце, тем хуже работает индекс. С другой стороны, чем больше уникальных значения, тем выше работоспособность индекса. Когда возможно используйте уникальный индекс.
-- Для составного индекса возьмите во внимание порядок столбцов в индексе. Столбцы, которые используются в выражениях *WHERE* (к примеру, *WHERE FirstName = 'Charlie'*) должны быть в индексе первыми. Последующие столбцы должны быть перечислены с учетом уникальности их значений (столбцы с самым высоким количеством уникальных значений идут первыми).
-- Также можно указать индекс на вычисляемых столбцах, если они соответствуют некоторым требованиям. К примеру, выражение которые используются для получения значения столбца, должны быть детерминистическими (всегда возвращать один и тот же результат для заданного набора входных параметров).
+- For tables that are updated frequently, use as few indexes as possible.
+- If a table contains a large amount of data but changes are minor, then use as many indexes as needed to improve query performance. However, think carefully before adding indexes to small tables, because an index seek can sometimes take longer than simply scanning all rows.
+- For clustered indexes, try to use the shortest possible key columns. Ideally, apply a clustered index to columns with unique values and that do not allow NULLs. This is why a primary key is often used as a clustered index.
+- Column value uniqueness affects index performance. In general, the more duplicates you have in a column, the worse the index performs. Conversely, the more unique the values, the better the index performs. When possible, use a unique index.
+- For a composite index, consider column order. Columns used in *WHERE* predicates (for example, *WHERE FirstName = 'Charlie'*) should come first. Subsequent columns should be ordered by selectivity (columns with the highest number of unique values first).
+- You can also index computed columns if they meet certain requirements. For example, expressions used to compute the column value must be deterministic (always returning the same result for the same set of input parameters).
 
 ### Questions
 
@@ -188,9 +188,18 @@ tags:
 
 ## Links
 
+## Deeper Explanation
+
+
+## Questions
+
+
+## Links
+
+
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -222,4 +231,3 @@ const pages = dv.pages()
   }
   
 ```
-

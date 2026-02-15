@@ -1,21 +1,24 @@
 ---
 topic:
-  - Computer Science
+  - "Computer Science"
 subtopic:
-  - Algorithms
+  - "Algorithms"
 level:
   - "2"
 priority: Medium
 status: Not-Started
 ---
+
 # Intro
+
 Quick sort partitions the array around a pivot so smaller elements go left and larger go right, then recursively sorts the partitions. It is often very fast in practice but has a worst-case O(n^2) if pivots are consistently bad.
 
 ## Deeper Explanation
+
 - Mechanism: choose pivot, partition in-place (Lomuto/Hoare), then recurse on left/right partitions.
 - Complexity: average O(n log n); worst O(n^2) without protections.
 - Properties: in-place (typical), not stable.
-- How to make it robust: randomized pivot or median-of-three; switch to [[Insertion Sort|insertion sort]] on small partitions; consider introsort (fallback to heapsort) for worst-case bounds.
+- How to make it robust: randomized pivot or median-of-three; switch to insertion sort on small partitions; consider introsort (fallback to heapsort) for worst-case bounds.
 
 ## Diagram
 
@@ -38,12 +41,13 @@ graph TD
 > Answer
 
 ## Links
+
 - https://en.wikipedia.org/wiki/Quicksort - Partition schemes and analysis
 - https://cp-algorithms.com/sorting/quick_sort.html - Practical implementation tips
 
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -66,13 +70,12 @@ const pages = dv.pages()
   .sort(p => p.file.name, "asc");
   
   if (children.length) {
-	  dv.header(2, "Topics");
-	  dv.list(children.map(p => p.file.link));
+	dv.header(2, "Topics");
+	dv.list(children.map(p => p.file.link));
   }
   if (pages.length) {
-	  dv.header(2, "Pages");
-	  dv.list(pages.map(p => p.file.link));
+	dv.header(2, "Pages");
+	dv.list(pages.map(p => p.file.link));
   }
   
 ```
-

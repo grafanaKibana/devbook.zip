@@ -1,19 +1,21 @@
 ---
 topic:
-  - AI & ML
+  - "AI & ML"
 subtopic:
-  - LLM
-level: ["1"]
+  - "LLM"
+level:
+  - "1"
 priority: Medium
 status: Not-Started
-tags:
-  - FolderNote
 ---
+
 # Intro
 
 Yet another [[Prompting|prompting]] strategy is *few-shot prompting*, which is basically just **showing examples** (also called "shots") to the model of what you want it to do. Few-shot prompts allow the AI to learn from these examples.
 
 Consider the graphic at the top of this article, in which we are attempting to classify customer feedback as positive or negative. We show the model three examples of positive/negative feedback, then we show it a new piece of feedback that has not been classified yet (*It doesn't work!:*). The model sees that the first three examples were classified as either *positive* or *negative*, and uses this information to classify the new example as negative.
+
+## Deeper Explanation
 
 ## Structure
 
@@ -154,7 +156,7 @@ In conclusion, few-shot prompting is an effective strategy that can guide the mo
 
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -186,4 +188,3 @@ const pages = dv.pages()
   }
   
 ```
-

@@ -1,16 +1,11 @@
 ---
 topic:
-  - AI & ML
+  - "AI & ML"
 subtopic: []
-level:
-  - "1"
-priority: Medium
-status: Not-Started
-aliases:
-  - AI
 tags:
   - FolderNote
 ---
+
 # Intro
 
 ### Responsible AI Principles
@@ -95,11 +90,15 @@ Transparency is essential to build trust, ensure accountability, promote fairnes
 The Accountability principle states that AI creators should be responsible for how their systems operate. They need to continuously monitor system performance and mitigate risks. Accountability in the AI industry is becoming a pressing issue as high-profile cases of algorithmic harm, bias, and abuse come to light. Critics increasingly argue that without accountability, AI creators hold too much power over opaque systems impacting lives.
 Microsoft emphasizes accountability in AI development and deployment through its Responsible AI Standard, which considers accountability a foundational principle. According to Microsoft, AI systems must be accountable to people, and companies deploying AI systems must take responsibility for their operation.
 
+## Deeper Explanation
+
+## Questions
+
 ## Links
 
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -131,4 +130,3 @@ const pages = dv.pages()
   }
   
 ```
-

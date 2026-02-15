@@ -1,14 +1,12 @@
 ---
 topic:
-  - Development Practices
+  - "Patterns & Practices"
 subtopic:
-  - Paradigms
-level: ["1"]
-priority: Medium
-status: Not-Started
+  - "Paradigms & Practices"
 tags:
   - FolderNote
 ---
+
 # Intro
 
 ## Deeper Explanation
@@ -19,12 +17,13 @@ tags:
 > Answer
 
 ## Links
+
 - [Link 1](URL)
 - [Link 2](URL)
 
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -56,4 +55,3 @@ const pages = dv.pages()
   }
   
 ```
-

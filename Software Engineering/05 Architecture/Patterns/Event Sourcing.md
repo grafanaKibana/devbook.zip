@@ -1,20 +1,17 @@
 ---
 topic:
-  - Architecture
+  - "Architecture"
 subtopic:
-  - Patterns
+  - "Patterns"
 level:
   - "1"
 priority: Medium
 status: Not-Started
 ---
+
 # Intro
 
 ## Deeper Explanation
-
-## Links
-
-[https://cqrs.nu/faq/Event Sourcing](https://cqrs.nu/faq/Event%20Sourcing)
 
 ## Questions
 
@@ -23,9 +20,11 @@ status: Not-Started
 
 ## Links
 
+[https://cqrs.nu/faq/Event Sourcing](https://cqrs.nu/faq/Event%20Sourcing)
+
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -57,4 +56,3 @@ const pages = dv.pages()
   }
   
 ```
-

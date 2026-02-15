@@ -1,13 +1,14 @@
 ---
 topic:
-  - Development Practices
+  - "Patterns & Practices"
 subtopic:
-  - Principles
+  - "Principles"
 level:
   - "1"
 priority: Medium
 status: Not-Started
 ---
+
 # Intro
 
 SOLID is a mnemonic for five object-oriented design principles that help keep code modular, testable, and easy to change.
@@ -43,7 +44,7 @@ SOLID is a mnemonic for five object-oriented design principles that help keep co
 
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -75,4 +76,3 @@ const pages = dv.pages()
   }
   
 ```
-

@@ -14,7 +14,7 @@ GRASP is a set of principles for assigning responsibilities to objects/classes t
 
 ## Deeper Explanation
 
-[GRASP принципы](https://bool.dev/blog/detail/grasp-printsipy)
+[GRASP principles](https://bool.dev/blog/detail/grasp-printsipy)
 
 ## Questions
 
@@ -25,12 +25,12 @@ GRASP is a set of principles for assigning responsibilities to objects/classes t
 
 ## Links
 
-- [GRASP принципы](https://bool.dev/blog/detail/grasp-printsipy)
+- [GRASP principles](https://bool.dev/blog/detail/grasp-printsipy)
 - [GRASP (Wikipedia)](https://en.wikipedia.org/wiki/GRASP_(object-oriented_design))
 
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -62,4 +62,3 @@ const pages = dv.pages()
   }
   
 ```
-

@@ -1,21 +1,22 @@
 ---
 topic:
-  - Development Practices
+  - "Patterns & Practices"
 subtopic: []
-level:
-  - "1"
-priority: Medium
-status: Not-Started
-aliases:
-  - Development Practices
 tags:
   - FolderNote
 ---
 
+# Intro
+
+## Deeper Explanation
+
+## Questions
+
+## Links
 
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -47,4 +48,3 @@ const pages = dv.pages()
   }
   
 ```
-

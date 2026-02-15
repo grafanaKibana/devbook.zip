@@ -1,17 +1,20 @@
 ---
 topic:
-  - Computer Science
+  - "Computer Science"
 subtopic:
-  - Algorithms
+  - "Algorithms"
 level:
   - "1"
 priority: Medium
 status: Not-Started
 ---
+
 # Intro
+
 Insertion sort grows a sorted prefix by inserting each next element into its correct position. It is fast for small inputs and nearly-sorted data, and it is a common building block inside hybrid sorts.
 
 ## Deeper Explanation
+
 - Mechanism: iterate left-to-right; for each key, shift larger elements right until the insertion spot is found.
 - Complexity: average/worst O(n^2); best O(n) when already sorted.
 - Properties: stable, in-place (aside from the key temp), good constant factors.
@@ -39,12 +42,13 @@ graph TD
 > Answer
 
 ## Links
+
 - https://en.wikipedia.org/wiki/Insertion_sort - Algorithm and complexity
 - https://cp-algorithms.com/sorting/insertion_sort.html - Competitive programming perspective
 
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -67,13 +71,12 @@ const pages = dv.pages()
   .sort(p => p.file.name, "asc");
   
   if (children.length) {
-	  dv.header(2, "Topics");
-	  dv.list(children.map(p => p.file.link));
+	dv.header(2, "Topics");
+	dv.list(children.map(p => p.file.link));
   }
   if (pages.length) {
-	  dv.header(2, "Pages");
-	  dv.list(pages.map(p => p.file.link));
+	dv.header(2, "Pages");
+	dv.list(pages.map(p => p.file.link));
   }
   
 ```
-

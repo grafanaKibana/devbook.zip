@@ -1,22 +1,19 @@
 ---
 topic:
-  - Architecture
+  - "Architecture"
 subtopic:
-  - Architecture Styles
+  - "Architecture Styles"
 level:
   - "1"
 priority: Medium
 status: Not-Started
 ---
+
 # Intro
 
 Microservices are an architecture style where a system is split into small, independently deployable services aligned around business capabilities.
 
 ## Deeper Explanation
-
-## Links
-
-[Microservices Pattern: Microservice Architecture pattern](https://microservices.io/patterns/microservices.html)
 
 ## Questions
 
@@ -31,11 +28,13 @@ Microservices are an architecture style where a system is split into small, inde
 
 ## Links
 
+[Microservices Pattern: Microservice Architecture pattern](https://microservices.io/patterns/microservices.html)
+
 - [[Monolith Architecture]]
 
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -67,4 +66,3 @@ const pages = dv.pages()
   }
   
 ```
-

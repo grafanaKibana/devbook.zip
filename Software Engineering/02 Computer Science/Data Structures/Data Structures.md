@@ -1,14 +1,12 @@
 ---
 topic:
-  - Computer Science
+  - "Computer Science"
 subtopic:
-  - Data Structures
-level: ["1"]
-priority: Medium
-status: Not-Started
+  - "Data Structures"
 tags:
   - FolderNote
 ---
+
 # Intro
 
 A data structure is a way to organize related data so it can be stored, accessed, and updated efficiently. Choosing the right data structure is often the biggest factor in making an algorithm fast and maintainable.
@@ -32,9 +30,18 @@ A data structure is a way to organize related data so it can be stored, accessed
 - [Types of trees in data structures](https://www.knowledgehut.com/blog/programming/types-of-trees-in-data-structure)
 - [8 Common Data Structures every Programmer must know](https://towardsdatascience.com/8-common-data-structures-every-programmer-must-know-171acf6a1a42)
 
+## Deeper Explanation
+
+
+## Questions
+
+
+## Links
+
+
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -66,4 +73,3 @@ const pages = dv.pages()
   }
   
 ```
-

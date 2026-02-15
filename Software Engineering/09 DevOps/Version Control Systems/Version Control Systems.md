@@ -1,16 +1,20 @@
 ---
 topic:
-  - DevOps
-subtopic:
-  - Version Control Systems
-tags:
-  - FolderNote
+  - "DevOps"
+subtopic: []
+level:
+  - ""
+priority: Medium
+status: Not-Started
 ---
+
 # Intro
+
+A version control system (VCS) tracks changes to files over time, enabling collaboration, branching, merging, and the ability to revert to any previous state. Git is the dominant distributed VCS, where every developer holds a full copy of the repository history, and workflows like git-flow or trunk-based development define how teams coordinate changes.
 
 ## Deeper Explanation
 
-[Шпаргалка по git-flow](https://danielkummer.github.io/git-flow-cheatsheet/index.ru_RU.html)
+[git-flow cheatsheet](https://danielkummer.github.io/git-flow-cheatsheet/index.ru_RU.html)
 
 ## Questions
 
@@ -26,7 +30,7 @@ tags:
 
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -58,4 +62,3 @@ const pages = dv.pages()
   }
   
 ```
-

@@ -1,61 +1,63 @@
 ---
 topic:
-  - Programming
+  - "Programming"
 subtopic:
-  - NET
-level: ["1"]
+  - "NET"
+level:
+  - "1"
 priority: Medium
 status: Not-Started
-tags:
-  - FolderNote
 ---
+
 # Intro
 
-CLR (Common Language Runtime) - это часть .NET Framework (или .NET Core / .NET 5+), которая отвечает за выполнение кода, написанного на языках, совместимых с .NET. Она предоставляет среду выполнения, управление памятью, управление потоками, безопасность и другие службы для выполнения приложений.
+CLR (Common Language Runtime) is part of the .NET Framework (or .NET Core / .NET 5+) responsible for executing code written in .NET-compatible languages. It provides the execution environment, memory management, thread management, security, and other services needed to run applications.
 
-Основные обязанности CLR:
+Core responsibilities of the CLR:
 
-1. **Компиляция в промежуточный язык (IL)**:
-    - Программы на .NET языках (C#, [VB.NET](http://vb.net/), F# и др.) компилируются в промежуточный язык (Intermediate Language, IL), который является независимым от платформы и сохраняется в сборке.
-2. **Just-In-Time (JIT) компиляция**:
-    - Когда приложение запускается, IL код JIT-компилируется в машинный код, который может выполняться на конкретной аппаратной платформе. Это происходит во время выполнения приложения, что улучшает портируемость кода.
-3. **Управление памятью**:
-    - CLR отслеживает выделение и освобождение памяти, автоматически управляя сборкой мусора. Она определяет, когда объекты больше не используются, и освобождает выделенную ими память.
-4. **Управление потоками**:
-    - CLR обеспечивает механизмы для создания и управления потоками выполнения. Это включает в себя синхронизацию доступа к данным между потоками и обработку исключений в многозадачных приложениях.
-5. **Безопасность кода**:
-    - CLR предоставляет механизмы безопасности, такие как проверка границ массива, проверка типов и другие, чтобы предотвратить выполнение небезопасного кода.
-6. **Метаданные и Reflection**:
-    - CLR хранит метаданные о типах и других элементах кода внутри сборки. Reflection API позволяет программам получать доступ и манипулировать этой метаинформацией во время выполнения.
-7. **Обработка исключений**:
-    - CLR предоставляет механизм обработки исключений, что позволяет программам легко обрабатывать исключительные ситуации.
-8. **Взаимодействие с нативным кодом**:
-    - CLR предоставляет механизмы для взаимодействия с нативным кодом, что позволяет использовать существующий код на C, C++ и других языках.
+1. **Compilation to an intermediate language (IL)**:
+    - Programs written in .NET languages (C#, [VB.NET](http://vb.net/), F#, etc.) are compiled into an intermediate language (Intermediate Language, IL) that is platform-independent and stored in an assembly.
+2. **Just-In-Time (JIT) compilation**:
+    - When an application starts, IL code is JIT-compiled into machine code that can run on the current hardware platform. This happens at runtime, improving the portability of the code.
+3. **Memory management**:
+    - The CLR tracks memory allocation and reclamation, automatically managing garbage collection. It determines when objects are no longer in use and frees the memory they occupy.
+4. **Thread management**:
+    - The CLR provides mechanisms for creating and managing threads of execution. This includes synchronizing access to data between threads and handling exceptions in multithreaded applications.
+5. **Code security**:
+    - The CLR provides security mechanisms such as array bounds checks, type verification, and others to prevent unsafe code execution.
+6. **Metadata and reflection**:
+    - The CLR stores metadata about types and other code elements inside assemblies. The Reflection API allows programs to access and manipulate this metadata at runtime.
+7. **Exception handling**:
+    - The CLR provides an exception-handling mechanism that makes it easier for programs to handle exceptional situations.
+8. **Interop with native code**:
+    - The CLR provides mechanisms for interoperating with native code, enabling reuse of existing code in C, C++, and other languages.
 
-Эти функциональности делают CLR ключевым компонентом .NET, обеспечивая среду выполнения и обеспечивая портируемость и безопасность кода. Важно отметить, что информация может меняться с выходом новых версий .NET, и для получения актуальной информации рекомендуется обращаться к официальной документации Microsoft.
+These capabilities make the CLR a key component of .NET by providing the runtime environment and ensuring portability and code safety. Note that details can evolve as new versions of .NET are released; for up-to-date information, refer to the official Microsoft documentation.
 
-Процесс запуска .NET-приложения и его выполнения под управлением CLR включает несколько ключевых шагов. Ниже представлен общий обзор этого процесса:
+The process of starting a .NET application and running it under the CLR involves several key steps. Below is a high-level overview:
 
 ![01 Programming-Common Language Runtime-20260210212705669](01%20Programming-Common%20Language%20Runtime-20260210212705669.png)
 
-1. **Компиляция исходного кода:**
-    - После написания кода на языках, совместимых с .NET (например, C#), исходный код компилируется в промежуточный язык (IL - Intermediate Language, CIL - Common Intermediate Language, MSIL - Microsoft Intermediate Language). Это делается компилятором языка на котором написан код (например, C# компилятором - **`csc`**).
-2. **Создание сборки:**
-    - Компилированный IL-код, вместе с метаданными о типах, упаковывается в сборку (.dll или .exe Assembly). Сборка содержит информацию о структуре кода, метаданные, ресурсы и другую необходимую информацию.
-3. **Запуск приложения:**
-    - Когда пользователь запускает .NET-приложение, операционная система загружает исполняемый файл (.exe) в память.
-4. **Just-In-Time (JIT) компиляция:**
-    - CLR, находящаяся внутри .NET Runtime, переводит IL-код в машинный код во время выполнения приложения. Этот процесс называется JIT-компиляцией. Это обеспечивает адаптацию кода к конкретной аппаратной платформе и повышает портируемость приложений.
-5. **Загрузка в память:**
-    - Загруженный машинный код и связанные сборки загружаются в память. CLR управляет этим процессом, устанавливая связи между разными сборками, если это необходимо.
-6. **Исполнение кода:**
-    - CLR начинает выполнение приложения, запуская метод **`Main()`** (или другой метод, указанный в конфигурации) из основного класса приложения.
-7. **Управление памятью и сборка мусора:**
-    - CLR автоматически управляет выделением и освобождением памяти, а также процессом сборки мусора. Это включает в себя отслеживание неиспользуемых объектов и их освобождение для повышения эффективности использования памяти.
-8. **Управление потоками и синхронизация:**
-    - CLR предоставляет механизмы для управления потоками выполнения приложения, обеспечивая безопасность и синхронизацию доступа к данным.
-9. **Обработка исключений:**
-    - В случае возникновения исключений, CLR обрабатывает их, предоставляя стек вызовов и другую информацию для отладки.
+1. **Source code compilation:**
+    - After writing code in .NET-compatible languages (for example, C#), the source code is compiled into an intermediate language (IL - Intermediate Language, CIL - Common Intermediate Language, MSIL - Microsoft Intermediate Language). This is done by the language compiler the code is written for (for example, the C# compiler **`csc`**).
+2. **Assembly creation:**
+    - The compiled IL code, along with type metadata, is packaged into an assembly (.dll or .exe assembly). The assembly contains information about the code structure, metadata, resources, and other required information.
+3. **Application startup:**
+    - When the user launches a .NET application, the operating system loads the executable (.exe) into memory.
+4. **Just-In-Time (JIT) compilation:**
+    - The CLR, which is part of the .NET runtime, translates IL code into machine code while the application is running. This process is called JIT compilation. It adapts the code to the specific hardware platform and improves application portability.
+5. **Loading into memory:**
+    - The generated machine code and referenced assemblies are loaded into memory. The CLR manages this process, establishing links between assemblies as needed.
+6. **Code execution:**
+    - The CLR begins executing the application by invoking the **`Main()`** method (or another entry point specified in configuration) from the application's main class.
+7. **Memory management and garbage collection:**
+    - The CLR automatically manages memory allocation and reclamation, including the garbage collection process. This includes tracking unused objects and reclaiming them to improve memory efficiency.
+8. **Threading and synchronization:**
+    - The CLR provides mechanisms for managing application threads, ensuring safety and synchronized access to data.
+9. **Exception handling:**
+    - When exceptions occur, the CLR handles them, providing the call stack and other information for debugging.
+
+## Deeper Explanation
 
 ## Questions
 
@@ -67,16 +69,15 @@ CLR (Common Language Runtime) - это часть .NET Framework (или .NET Co
 > The CLR (Common Language Runtime) is the execution engine of .NET. It loads assemblies, verifies and executes IL, compiles IL to native code (JIT or AOT), manages memory (GC), handles exceptions, supports threading and interop, and provides other runtime services.
 > IL (also called CIL or MSIL) is the CPU-independent intermediate instruction set produced by .NET language compilers and stored in assemblies together with metadata. The CLR turns IL into native code for the current platform.
 
-
-
 ## Links
+
 - [Common Language Runtime - Wikipedia](https://en.wikipedia.org/wiki/Common_Language_Runtime)
 - [Just-in-time compilation - Wikipedia](https://en.wikipedia.org/wiki/Just-in-time_compilation)
 - [Common Language Runtime (CLR) overview - .NET \| Microsoft Learn](https://docs.microsoft.com/en-us/dotnet/standard/clr)
 
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -99,13 +100,12 @@ const pages = dv.pages()
   .sort(p => p.file.name, "asc");
   
   if (children.length) {
-	  dv.header(2, "Topics");
-	  dv.list(children.map(p => p.file.link));
+	dv.header(2, "Topics");
+	dv.list(children.map(p => p.file.link));
   }
   if (pages.length) {
-	  dv.header(2, "Pages");
-	  dv.list(pages.map(p => p.file.link));
+	dv.header(2, "Pages");
+	dv.list(pages.map(p => p.file.link));
   }
   
 ```
-

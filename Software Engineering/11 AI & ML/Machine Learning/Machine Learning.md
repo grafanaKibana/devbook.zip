@@ -1,24 +1,15 @@
 ---
 topic:
-  - AI & ML
+  - "AI & ML"
 subtopic:
-  - Machine Learning
-level:
-  - "1"
-priority: Medium
-status: Not-Started
+  - "Machine Learning"
 tags:
   - FolderNote
 ---
+
 # Intro
 
 ## Deeper Explanation
-
-## Links
-
-[Machine Learning  |  Google for Developers](https://developers.google.com/machine-learning/crash-course)
-
-[Machine Learning for Beginners](https://microsoft.github.io/ML-For-Beginners/#/)
 
 ## Questions
 
@@ -27,9 +18,13 @@ tags:
 
 ## Links
 
+[Machine Learning  |  Google for Developers](https://developers.google.com/machine-learning/crash-course)
+
+[Machine Learning for Beginners](https://microsoft.github.io/ML-For-Beginners/#/)
+
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -61,4 +56,3 @@ const pages = dv.pages()
   }
   
 ```
-

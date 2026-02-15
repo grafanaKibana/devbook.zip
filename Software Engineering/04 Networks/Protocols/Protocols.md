@@ -1,14 +1,12 @@
 ---
 topic:
-  - Networks
+  - "Networks"
 subtopic:
-  - Protocols
-level: ["1"]
-priority: Medium
-status: Not-Started
+  - "Protocols"
 tags:
   - FolderNote
 ---
+
 # Intro
 
 ## Deeper Explanation
@@ -24,9 +22,18 @@ tags:
 - [RFC 3986: Uniform Resource Identifier (URI): Generic Syntax](https://datatracker.ietf.org/doc/html/rfc3986)
 - [MDN: URL](https://developer.mozilla.org/en-US/docs/Web/API/URL)
 
+## Deeper Explanation
+
+
+## Questions
+
+
+## Links
+
+
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -58,4 +65,3 @@ const pages = dv.pages()
   }
   
 ```
-

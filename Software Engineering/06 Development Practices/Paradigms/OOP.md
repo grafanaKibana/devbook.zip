@@ -1,13 +1,14 @@
 ---
 topic:
-  - Development Practices
+  - "Patterns & Practices"
 subtopic:
-  - Paradigms
+  - "Paradigms & Practices"
 level:
   - "1"
 priority: Medium
 status: Not-Started
 ---
+
 # Intro
 
 Object-oriented programming (OOP) is a paradigm where we model a domain as interacting objects that combine state (data) and behavior (methods).
@@ -39,7 +40,7 @@ OOP is typically used to:
 
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -71,4 +72,3 @@ const pages = dv.pages()
   }
   
 ```
-

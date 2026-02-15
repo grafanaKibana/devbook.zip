@@ -1,17 +1,20 @@
 ---
 topic:
-  - Computer Science
+  - "Computer Science"
 subtopic:
-  - Algorithms
+  - "Algorithms"
 level:
   - "1"
 priority: Medium
 status: Not-Started
 ---
+
 # Intro
+
 Selection sort builds a sorted prefix by repeatedly selecting the minimum remaining element and swapping it into place. It does a predictable number of comparisons but is still quadratic time.
 
 ## Deeper Explanation
+
 - Mechanism: for each position i, find the smallest element in a[i..n-1], then swap it with a[i].
 - Complexity: always O(n^2) comparisons; O(n) swaps.
 - Properties: in-place; typically not stable (a swap can reorder equal keys).
@@ -43,12 +46,13 @@ graph TD
 > Answer
 
 ## Links
+
 - https://en.wikipedia.org/wiki/Selection_sort - Details + stability discussion
 - https://visualgo.net/en/sorting - Step-by-step visualization
 
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -71,13 +75,12 @@ const pages = dv.pages()
   .sort(p => p.file.name, "asc");
   
   if (children.length) {
-	  dv.header(2, "Topics");
-	  dv.list(children.map(p => p.file.link));
+	dv.header(2, "Topics");
+	dv.list(children.map(p => p.file.link));
   }
   if (pages.length) {
-	  dv.header(2, "Pages");
-	  dv.list(pages.map(p => p.file.link));
+	dv.header(2, "Pages");
+	dv.list(pages.map(p => p.file.link));
   }
   
 ```
-

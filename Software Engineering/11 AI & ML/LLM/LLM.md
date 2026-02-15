@@ -1,20 +1,19 @@
 ---
 topic:
-  - AI & ML
+  - "AI & ML"
 subtopic:
-  - LLM
-level:
-  - "1"
-priority: Medium
-status: Not-Started
+  - "LLM"
 tags:
   - FolderNote
 ---
+
 # Intro
 
 Large language models, also known as LLMs, are very large [deep learning](https://aws.amazon.com/what-is/deep-learning/) models that are pre-trained on vast amounts of data. The underlying transformer is a set of [neural networks](https://aws.amazon.com/what-is/neural-network/) that consist of an encoder and a decoder with self-attention capabilities. The encoder and decoder extract meanings from a sequence of text and understand the relationships between words and phrases in it.
 
 ![11 AI & ML-LLM-20260211012223477.png](11%20AI%20&%20ML-LLM-20260211012223477.png)
+
+## Deeper Explanation
 
 ## How are LLMs built?
 
@@ -75,11 +74,12 @@ When working with LLMs, you will come across a lot of new terms. This section wi
 > TODO
 
 ## Links
+
 [What are Large Language Models? - LLM AI Explained - AWS](https://aws.amazon.com/what-is/large-language-model/?nc1=h_ls)
 
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -111,4 +111,3 @@ const pages = dv.pages()
   }
   
 ```
-

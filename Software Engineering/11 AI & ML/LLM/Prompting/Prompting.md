@@ -1,18 +1,19 @@
 ---
 topic:
-  - AI & ML
+  - "AI & ML"
 subtopic:
-  - LLM
+  - "LLM"
 level:
-  - "1"
+  - ""
 priority: Medium
 status: Not-Started
-tags:
-  - FolderNote
 ---
+
 # Intro
 
 Prompts play a key role in generating useful and accurate information from AI language models. Learning how to write better prompts — "Prompt Engineering" — unlocks the full potential of these models by guiding their behavior, improving output quality, and reducing inaccuracies.
+
+## Deeper Explanation
 
 ## Why Prompting Matters
 
@@ -139,13 +140,14 @@ Gen AI can evaluate essays against complex criteria like grammar, clarity, coher
 > Answer
 
 ## Links
+
 - [OpenAI Platform](https://platform.openai.com/docs/guides/prompt-engineering/strategy-write-clear-instructions)
 - [Learn Prompting: Your Guide to Communicating with AI](https://learnprompting.org/docs/basics/introduction)
 - [Prompt Engineering Guide – Nextra](https://www.promptingguide.ai/)
 
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -177,4 +179,3 @@ const pages = dv.pages()
   }
   
 ```
-

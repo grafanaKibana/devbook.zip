@@ -1,22 +1,19 @@
 ---
 topic:
-  - Architecture
+  - "Architecture"
 subtopic:
-  - Patterns
+  - "Patterns"
 level:
   - "3"
 priority: Medium
 status: Not-Started
 ---
+
 # Intro
 
 Domain-Driven Design (DDD) is an approach to software development that focuses on modeling the business domain and aligning code with a shared language and domain boundaries.
 
 ## Deeper Explanation
-
-## Links
-
-[CQRS.nu - Domain Driven Design FAQ](https://cqrs.nu/faq/Domain%20Driven%20Design)
 
 ## Questions
 
@@ -30,11 +27,13 @@ Domain-Driven Design (DDD) is an approach to software development that focuses o
 
 ## Links
 
+[CQRS.nu - Domain Driven Design FAQ](https://cqrs.nu/faq/Domain%20Driven%20Design)
+
 - [Martin Fowler - Domain Driven Design](https://martinfowler.com/tags/domain%20driven%20design.html)
 
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -66,4 +65,3 @@ const pages = dv.pages()
   }
   
 ```
-

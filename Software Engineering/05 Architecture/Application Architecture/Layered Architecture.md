@@ -1,13 +1,14 @@
 ---
 topic:
-  - Architecture
+  - "Architecture"
 subtopic:
-  - Application Architecture
+  - "Application Architecture"
 level:
   - "1"
 priority: Medium
 status: Not-Started
 ---
+
 # Intro
 
 Layered architecture (also called multi-layered or n-tier) structures an application into layers with clear responsibilities and dependency directions.
@@ -82,7 +83,7 @@ In traditional layered architecture, UI depends on Business Logic which depends 
 
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -114,4 +115,3 @@ const pages = dv.pages()
   }
   
 ```
-

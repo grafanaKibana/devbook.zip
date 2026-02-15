@@ -11,9 +11,9 @@ status: Not-Started
 ---
 # Intro
 
-Нередко программа выполняет такие операции, которые могут занять продолжительное время, например, обращение к сетевым ресурсам, чтение-запись файлов, обращение к базе данных и т.д. Такие операции могут серьезно нагрузить приложение. Особенно это актуально в графических (десктопных или мобильных) приложениях, где продолжительные операции могут блокировать интерфейс пользователя и негативно повлиять на желание пользователя работать с программой, или в веб-приложениях, которые должны быть готовы обслуживать тысячи запросов в секунду. В синхронном приложении при выполнении продолжительных операций в основном потоке этот поток просто бы блокировался на время выполнения операции. И чтобы продолжительные операции не блокировали общую работу приложения, в C# можно задействовать асинхронность.
+It is common for a program to perform operations that can take a long time, for example: accessing network resources, reading/writing files, querying a database, and so on. Such operations can heavily load an application. This is especially relevant in graphical (desktop or mobile) apps, where long-running operations can block the user interface and negatively affect the user's willingness to work with the program, or in web applications that must be ready to handle thousands of requests per second. In a synchronous application, when long operations are executed on the main thread, that thread would simply be blocked for the duration of the operation. To prevent long-running operations from blocking the overall work of the application, C# supports asynchrony.
 
-**Асинхронность** позволяет вынести отдельные задачи из основного потока в специальные асинхронные методы и при этом более экономно использовать потоки. Асинхронные методы выполняются в отдельных потоках. Однако при выполнении продолжительной операции поток асинхронного метода возвратится в пул потоков и будет использоваться для других задач. А когда продолжительная операция завершит свое выполнение, для асинхронного метода опять выделяется поток из пула потоков, и асинхронный метод продолжает свою работу.
+**Asynchrony** allows you to move certain tasks off the main thread into special async methods while using threads more efficiently. Async methods run on separate threads. However, while a long-running operation is in progress, the async method's thread is returned to the thread pool and can be used for other tasks. When the long-running operation completes, a thread from the pool is assigned again, and the async method continues its work.
 
 ## Questions
 
@@ -31,13 +31,14 @@ status: Not-Started
 > `Task.Result` waits synchronously: it blocks the current thread, can cause deadlocks under a `SynchronizationContext` (UI / legacy ASP.NET), and wraps exceptions in `AggregateException`.
 
 ## Links
-- [Как на самом деле работает Async/Await в C# (Часть 1)](https://habr.com/ru/articles/727850/)
-- [Async/await в C#: концепция, внутреннее устройство, полезные приемы](https://habr.com/ru/articles/470830/)
+
+- [How Async/Await in C# actually works (Part 1)](https://habr.com/ru/articles/727850/)
+- [Async/await in C#: concept, internals, useful techniques](https://habr.com/ru/articles/470830/)
 - [Async and Await in C#: Complete Guide (2023)](https://www.bytehide.com/blog/async-await-csharp)
 
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -60,13 +61,12 @@ const pages = dv.pages()
   .sort(p => p.file.name, "asc");
   
   if (children.length) {
-	  dv.header(2, "Topics");
-	  dv.list(children.map(p => p.file.link));
+	dv.header(2, "Topics");
+	dv.list(children.map(p => p.file.link));
   }
   if (pages.length) {
-	  dv.header(2, "Pages");
-	  dv.list(pages.map(p => p.file.link));
+	dv.header(2, "Pages");
+	dv.list(pages.map(p => p.file.link));
   }
   
 ```
-

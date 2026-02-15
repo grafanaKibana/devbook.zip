@@ -1,14 +1,14 @@
 ---
 topic:
-  - Architecture
+  - "Architecture"
 subtopic:
-  - Patterns
+  - "Patterns"
 level:
   - "1"
-priority:
-  - Low
+priority: Low
 status: Not-Started
 ---
+
 # Intro
 
 ## Deeper Explanation
@@ -22,7 +22,7 @@ status: Not-Started
 
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -54,4 +54,3 @@ const pages = dv.pages()
   }
   
 ```
-

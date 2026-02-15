@@ -1,24 +1,30 @@
 ---
 topic:
-  - Programming
+  - "Programming"
 subtopic:
-  - NET
-level:
-  - "1"
-priority: Medium
-status: Not-Started
+  - "NET"
 tags:
   - FolderNote
 ---
+
+# Intro
+
+
+## Deeper Explanation
+
+
+## Questions
+
+
 ## Links
 
-- [Тонкости C# : то что вы всегда хотели знать, но боялись спросить \| DOU](https://dou.ua/forums/topic/33214/)
-- [Заблуждения начинающих C# разработчиков. Пытаемся ответить на стандартные вопросы / Хабр](https://habr.com/ru/articles/463213/)
-- [Популярные заблуждения о C# / Хабр](https://habr.com/ru/post/541786/)
+- [C# Nuances: what you've always wanted to know but were afraid to ask | DOU](https://dou.ua/forums/topic/33214/)
+- [Misconceptions of beginner C# developers. Trying to answer common questions / Habr](https://habr.com/ru/articles/463213/)
+- [Common misconceptions about C# / Habr](https://habr.com/ru/post/541786/)
 
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -50,4 +56,3 @@ const pages = dv.pages()
   }
   
 ```
-

@@ -1,13 +1,14 @@
 ---
 topic:
-  - Architecture
+  - "Architecture"
 subtopic:
-  - Distributed Systems
+  - "Distributed Systems"
 level:
   - "1"
 priority: Medium
 status: Not-Started
 ---
+
 # Intro
 
 ## Deeper Explanation
@@ -20,12 +21,13 @@ status: Not-Started
 > In practice, RESTful APIs model domain objects as resources and use HTTP methods with consistent semantics.
 
 ## Links
+
 - [What is a REST API? (IBM)](https://www.ibm.com/ru-ru/cloud/learn/rest-apis)
 - [REST dissertation (Fielding)](https://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm)
 
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -57,4 +59,3 @@ const pages = dv.pages()
   }
   
 ```
-

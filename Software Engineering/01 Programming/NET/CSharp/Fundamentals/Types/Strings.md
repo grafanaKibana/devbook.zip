@@ -8,6 +8,8 @@ level:
 priority: Medium
 status: Not-Started
 ---
+# Intro
+
 > **9.2.5 The string type**
 > 
 > 
@@ -16,47 +18,47 @@ status: Not-Started
 
 ## String
 
-Основные особенности строк в .NET:
+Key characteristics of strings in .NET:
 
-1. Они являются ссылочными типами.
-2. Они неизменяемы. Однажды, создав строку, мы больше не можем ее изменить (честным способом). Каждый вызов метода этого класса возвращает новую строку, а предыдущая строка становится добычей для сборщика мусора.
-3. Они переопределяют метод Object.Equals, в результате чего он сравнивает не значения ссылок, а значения символов в строках.
+1. They are reference types.
+2. They are immutable. Once you create a string, you can no longer change it (in the normal/safe way). Each call to a method of this class returns a new string, and the previous string becomes garbage-collection eligible.
+3. They override `object.Equals`, so it compares the characters in the strings rather than the reference values.
 
-### Строки — ссылочные типы
+### Strings are reference types
 
-Строки являются настоящими ссылочными типами, являются запечатаным классом `System.String`  который наследуется напрямую от `object` , то есть они всегда располагаются в куче. Многие путают их со значимыми типами, потому что они ведут себя также, например, они неизменяемы и их сравнение происходит по значению, а не по ссылкам, но нужно помнить, что это ссылочный тип.
+Strings are real reference types: they are a sealed `System.String` class that inherits directly from `object`, so they always live on the heap. Many people confuse them with value types because they behave similarly (for example, they are immutable and are compared by value rather than by reference), but it is important to remember that `string` is a reference type.
 
-### Строки — неизменяемы
+### Strings are immutable
 
-Строки являются неизменяемыми. Это сделано не просто так. В неизменности строк есть немало преимуществ:
+Strings are immutable. This is not accidental. String immutability has many advantages:
 
-- Строковый тип является потокобезопасным, так как ни один поток не может изменить содержимое строки.
-- Использование неизменных строк ведет к снижению нагрузки на память, так как нет необходимости хранить 2 экземпляра одной строки. В таком случае и памяти меньше расходуется, и сравнение происходит быстрее, так как требует сравнение лишь ссылок. Механизм, который это реализует в .NET называется интернированием строк (пул строк), о нем поговорим чуть позже.
-- При передаче неизменяемого параметра в метод мы можем не беспокоиться, что он будет изменен (если, конечно, он не был передан как `ref` или `out`).
+- The string type is thread-safe, because no thread can change a string's contents.
+- Using immutable strings can reduce memory pressure because there is no need to store two identical instances. In such cases, less memory is used and comparisons can be faster because they may only need to compare references. The mechanism that enables this in .NET is string interning (the string pool), which we will discuss shortly.
+- When passing an immutable argument to a method, we do not need to worry that it will be changed (unless it is passed as `ref` or `out`).
 
-Структуры данных можно разделить на два вида — эфемерные и персистентные. Эфемерными называют структуры данных, хранящие только последнюю свою версию. Персистентными называют структуры, которые сохраняют все свои предыдущие версии при изменении. Последние фактически неизменяемы, так как их операции не изменяют структуру на месте, вместо этого они возвращают новую основанную на предыдущей структуру.
+Data structures can be divided into two types: ephemeral and persistent. Ephemeral data structures store only their latest version. Persistent data structures preserve all previous versions when modified. The latter are effectively immutable because their operations do not modify the structure in place; instead, they return a new structure based on the previous one.
 
-Учитывая, что строки неизменны, они могли бы быть и персистентными, однако таковыми не являются. В .NET строки являются эфемерными. Подробнее о том, почему это именно так можно прочитать у Эрика Липперта по [ссылке](http://blogs.msdn.com/b/ruericlippert/archive/2011/08/08/strings-immutability-and-persistence.aspx.)
+Given that strings are immutable, they could be persistent, but they are not. In .NET, strings are ephemeral. For more details on why this is the case, see Eric Lippert's explanation at this [link](http://blogs.msdn.com/b/ruericlippert/archive/2011/08/08/strings-immutability-and-persistence.aspx.)
 
-### Строки переопределяют Object.Equals
+### Strings override Object.Equals
 
-Класс String переопределяет метод Object.Equals, в результате чего сравнение происходит не по ссылке, а по значению. Я думаю, разработчики благодарны создателям класса String за то, что они переопределили оператор ==, так как код, использующий == для сравнения строк, выглядит более изящно, нежели вызов метода.
+The `String` class overrides `object.Equals`, so comparisons are performed by value rather than by reference. Many developers are grateful that `String` also overloads the `==` operator, because code that uses `==` to compare strings looks more elegant than calling a method.
 
 ```csharp
 if (s1 == s2)
 ```
 
-в сравнении
+compared to
 
 ```csharp
 if (s1.Equals(s2))
 ```
 
-Кстати, в Java оператор `==` сравнивает по ссылке, а для того чтобы сравнить строки посимвольно необходимо использовать метод `string.equals()`.
+By the way, in Java the `==` operator compares references, and to compare strings character-by-character you need to use `string.equals()`.
 
-### Интернирование строк
+### String interning
 
-Простой пример, код который переворачивает строку.
+A simple example: code that reverses a string.
 
 ```csharp
 var s = "Strings are immutuble";
@@ -69,9 +71,9 @@ var c = s[i];
 }
 ```
 
-Очевидно, данный код не скомпилируется. Компилятор будет ругаться на эти строки, потому что мы пытаемся изменить содержимое строки. Действительно, любой метод класса String возвращает новый экземпляр строки, вместо того чтобы изменять свое содержимое.
+Obviously, this code will not compile. The compiler will complain about these lines because we are trying to change the contents of a string. Indeed, any method of the `String` class returns a new string instance instead of modifying its contents.
 
-На самом деле строку можно изменить, но для этого придется прибегнуть к unsafe коду:
+In fact, you can modify a string, but you have to resort to unsafe code:
 
 ```csharp
 var s = "Strings are immutable";
@@ -90,19 +92,18 @@ var temp = c[i];
    }
 ```
 
-После выполнения этого кода, как и ожидалось, в строке будет записано
+After executing this code, as expected, the string will contain
 
 **elbatummi era sgnirtS**.
 
-Тот факт, что строки являются все-таки изменяемыми, приводит к одному очень интересному казусу. 
+The fact that strings are still mutable leads to a very interesting edge case.
 
-Связан он с интернированием строк.
+It is related to string interning.
 
 > [!TIP]
-> *Интернирование строк* — это механизм, при котором одинаковые литералы представляют собой один объект в памяти.
+> *String interning* is a mechanism where identical literals are represented by a single object in memory.
 
-
-Если не вникать глубоко в подробности, то смысл интернирования строк заключается в следующем: в рамках процесса (именно процесса, а не домена приложения) существует одна внутренняя хеш-таблица, ключами которой являются строки, а значениями – ссылки на них. Во время JIT-компиляции литеральные строки последовательно заносятся в таблицу (каждая строка в таблице встречается только один раз). На этапе выполнения ссылки на литеральные строки присваиваются из этой таблицы. Можно поместить строку во внутреннюю таблицу во время выполнения с помощью метода `String.Intern`. Также можно проверить, содержится ли строка во внутренней таблице с помощью метода `String.IsInterned`.
+Without going too deep into details, the idea of string interning is as follows: within a process (specifically a process, not an application domain) there is an internal hash table where keys are strings and values are references to them. During JIT compilation, literal strings are added to this table (each string appears only once). At runtime, references to literal strings are assigned from this table. You can add a string to the internal table at runtime using `string.Intern`, and you can check whether a string is in the internal table using `string.IsInterned`.
 
 ```csharp
 var s1 = "habrahabr";
@@ -113,7 +114,7 @@ Console.WriteLine(object.ReferenceEquals(s1, s2)); //true
 Console.WriteLine(object.ReferenceEquals(s1, s3)); //true
 ```
 
-Важно отметить, что интернируются по умолчанию только строковые литералы. Поскольку для реализации интернирования используется внутренняя хеш-таблица, то во время JIT компиляции происходит поиск по ней, что занимает время, поэтому если бы интернировались все строки, то это свело бы на нет всю оптимизацию. Во время компиляции в IL код, компилятор конкатенирует все литеральные строки, так как нет в необходимости содержать их по частям, поэтому 2 — ое равенство возвращает true. Так вот, в чем заключается казус. Рассмотрим следующий код:
+It is important to note that by default only string literals are interned. Since interning is implemented with an internal hash table, JIT compilation performs lookups in it, which takes time, so if all strings were interned it would negate the optimization. When compiling to IL, the compiler concatenates literal strings because there is no need to keep them in parts, so the second equality returns `true`. So what is the edge case? Consider the following code:
 
 ```csharp
 var s = "Strings are immutable";
@@ -133,11 +134,11 @@ var temp = c[i];
 Console.WriteLine("Strings are immutable");
 ```
 
-Кажется, что здесь все очевидно и, что такой код должен распечатать **Strings are immutable**. Однако, нет! Код напечатает **elbatummi era sgnirtS**. Дело именно в интернировании, изменяя строку `s`, мы меняем ее содержимое, а так как она является литералом, то интернируется и представляется одним экземпляром строки.
+It seems obvious that this code should print **Strings are immutable**. However, it does not. The code prints **elbatummi era sgnirtS**. The reason is string interning: by modifying the string `s`, we change its contents, and because it is a literal it is interned and represented by a single shared string instance.
 
-### Особенности производительности
+### Performance considerations
 
-У интернирования есть отрицательный побочный эффект. Дело в том, что ссылка на интернированный объект `String`, которую хранит CLR, может сохраняться и после завершения работы приложения и даже домена приложения. Поэтому большие литеральные строки использовать не стоит или же, если это необходимо стоит отключить интернирование, применив атрибут `CompilationRelaxations` к сборке.
+Interning has a negative side effect: the reference to an interned `String` object held by the CLR can persist after the application (and even the application domain) has finished. Therefore, large literal strings should be avoided, or if necessary interning should be disabled by applying the `CompilationRelaxations` attribute to the assembly.
 
 ## StringBuilder
 
@@ -164,12 +165,11 @@ Console.WriteLine("Strings are immutable");
 >
 > When strings are effectively static and change rarely, **`StringBuilder`** may be unnecessary, and **`string`** is usually the better choice.
 
-
 ## Links
 
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -192,13 +192,12 @@ const pages = dv.pages()
   .sort(p => p.file.name, "asc");
   
   if (children.length) {
-	  dv.header(2, "Topics");
-	  dv.list(children.map(p => p.file.link));
+	dv.header(2, "Topics");
+	dv.list(children.map(p => p.file.link));
   }
   if (pages.length) {
-	  dv.header(2, "Pages");
-	  dv.list(pages.map(p => p.file.link));
+	dv.header(2, "Pages");
+	dv.list(pages.map(p => p.file.link));
   }
   
 ```
-

@@ -1,33 +1,37 @@
 ---
 topic:
-  - Data Persistance
+  - "Data Persistance"
 subtopic:
-  - SQL
-level: ["1"]
+  - "SQL"
+level:
+  - "1"
 priority: Medium
 status: Not-Started
 ---
+
 # Intro
+
+Normalization is the process of structuring a relational database to eliminate data redundancy and ensure data integrity. It progresses through normal forms (1NF through 6NF), each imposing stricter rules on how attributes depend on keys. The goal is to store each fact exactly once, making updates safer and queries more predictable.
 
 ## Deeper Explanation
 
-Нормализация — это процесс организации данных в базе данных, Она включает в себя создание таблиц и установление связей между ними в соответствии с правилами, разработанными как для защиты данных, так и для повышения гибкости базы данных, устраняя избыточность и несогласованную зависимость.
-Избыточность данных приводит к непродуктивному расходованию свободного места на диске и затрудняет обслуживание баз данных. Например, если данные, хранящиеся в нескольких местах, потребуется изменить, в них придется внести одни и те же изменения во всех этих местах. Изменение адреса клиента проще реализовать, если эти данные хранятся только в таблице Customers и нигде в базе данных.
+Normalization is the process of organizing data in a database. It involves creating tables and establishing relationships between them according to rules designed both to protect data and to increase the database's flexibility by eliminating redundancy and inconsistent dependencies.
+Data redundancy leads to wasted disk space and makes database maintenance harder. For example, if data stored in multiple places needs to be changed, the same change must be applied everywhere. Changing a customer's address is easier when that data is stored only in the Customers table and nowhere else in the database.
 
-## Первая нормальная форма
+## First Normal Form
 
-Отношение находится в 1НФ, если все его атрибуты являются простыми, все используемые домены должны содержать только атомарные значения. Не должно быть повторений строк в таблице.
+A relation is in 1NF if all its attributes are simple and all domains used contain only atomic values. There must be no repeating rows in the table.
 
-Например, есть таблица «Автомобили»:
+For example, consider the "Cars" table:
 
-| Марка | Модели |
+| Make | Models |
 | --- | --- |
 | Audi | A4, S5, RS6, TT |
 | Infiniti | Q50 |
 
-Нарушение нормализации 1НФ происходит в моделях Audi, т.к. в одной ячейке содержится список из 3 элементов: M5, X5M, M1, т.е. он не является атомарным. Преобразуем таблицу к 1НФ:
+The 1NF violation occurs for the Audi models because a single cell contains a list of 3 elements: M5, X5M, M1, which is not atomic. Convert the table to 1NF:
 
-| Марка | Модели |
+| Make | Models |
 | --- | --- |
 | Audi | A4 |
 | Audi | S5 |
@@ -35,212 +39,209 @@ status: Not-Started
 | Audi | TT |
 | Infiniti | Q50 |
 
-## Вторая нормальная форма
+## Second Normal Form
 
-Отношение находится во 2НФ, если оно находится в 1НФ и каждый не ключевой атрибут неприводимо зависит от каждого атрибута Первичного Ключа (Primary Key - PK).
+A relation is in 2NF if it is in 1NF and every non-key attribute depends irreducibly on every attribute of the Primary Key (PK).
 
-Неприводимость означает, что нельзя убрать из потенциального ключа какую-то часть (атрибуты), чтобы все ещё можно было получить ту же связь между данными.
+Irreducibility means you cannot remove part of a candidate key (attributes) and still preserve the same relationship between the data.
 
-Например, дана таблица:
+For example, consider the table:
 
-| Фирма | Модель | Цена | Скидка |
+| Make | Model | Price | Discount |
 | --- | --- | --- | --- |
 | Audi | S5 | 5500000 | 5% |
 | Audi | RS6 | 6000000 | 5% |
 | Audi | TT | 2500000 | 5% |
 | Infiniti | Q50 | 5000000 | 10% |
 
-Таблица находится в первой нормальной форме, но не во второй. Цена машины зависит от модели и фирмы. Скидка зависят от **только от** фирмы, то есть зависимость от первичного ключа неполная. Исправляется это путем декомпозиции на два отношения, в которых не ключевые атрибуты зависят от ПК.
+The table is in 1NF but not in 2NF. The car price depends on both model and make. The discount depends **only on** the make, meaning the dependency on the primary key is partial. This is fixed by decomposing into two relations in which non-key attributes depend on the PK.
 
-| Фирма | Модель | Цена |
+| Make | Model | Price |
 | --- | --- | --- |
 | Audi | S5 | 5500000 |
 | Audi | RS6 | 6000000 |
 | Audi | TT | 2500000 |
 | Infiniti | Q50 | 5000000 |
 
-| Фирма | Скидка |
+| Make | Discount |
 | --- | --- |
 | Audi | 5% |
 | Infiniti | 10% |
 
-## Третья нормальная форма
+## Third Normal Form
 
-Отношение находится в 3НФ, когда находится во 2НФ и каждый не ключевой атрибут нетранзитивно зависит от первичного ключа. 
+A relation is in 3NF when it is in 2NF and every non-key attribute depends on the primary key non-transitively.
 
-### Что такое транзитивные функциональные зависимости?
+### What are transitive functional dependencies?
 
-Транзитивная функциональная зависимость – при изменении неключевого столбца может привести к изменению любого другого неключевого столбца.
+A transitive functional dependency means changing one non-key column can imply a change in another non-key column.
 
-Проще говоря, второе правило требует выносить все не ключевые поля, содержимое которых может относиться к нескольким записям таблицы в отдельные таблицы.
+Put simply, the rule requires moving all non-key fields whose contents can apply to multiple table rows into separate tables.
 
-Рассмотрим таблицу:
+Consider the table:
 
-| Модель | Магазин | Телефон |
+| Model | Store | Phone |
 | --- | --- | --- |
-| BMW | Риал-авто | 87-33-98 |
-| Audi | Риал-авто | 87-33-98 |
-| Nissan | Некст-Авто | 94-54-12 |
+| BMW | Real Auto | 87-33-98 |
+| Audi | Real Auto | 87-33-98 |
+| Nissan | Next Auto | 94-54-12 |
 
-Таблица находится во 2НФ, но не в 3НФ.
+The table is in 2NF but not in 3NF.
 
-В отношении атрибут «Модель» является первичным ключом. Личных телефонов у автомобилей нет, и телефон зависит исключительно от магазина.
+In this relation, the "Model" attribute is the primary key. Cars do not have personal phone numbers, and the phone depends only on the store.
 
-Таким образом, в отношении существуют следующие функциональные зависимости: Модель → Магазин, Магазин → Телефон, Модель → Телефон.
+Therefore, the following functional dependencies exist in the relation: Model → Store, Store → Phone, Model → Phone.
 
-Зависимость Модель → Телефон является транзитивной, следовательно, отношение не находится в 3НФ.
+The dependency Model → Phone is transitive; therefore, the relation is not in 3NF.
 
-В результате разделения исходного отношения получаются два отношения, находящиеся в 3НФ:
+As a result of decomposing the original relation, we get two relations that are in 3NF:
 
-| Магазин | Телефон |
+| Store | Phone |
 | --- | --- |
-| Риал-авто | 87-33-98 |
-| Некст-Авто | 94-54-12 |
+| Real Auto | 87-33-98 |
+| Next Auto | 94-54-12 |
 
-| Модель | Магазин |
+| Model | Store |
 | --- | --- |
-| BMW | Риал-авто |
-| Audi | Риал-авто |
-| Nissan | Некст-Авто |
+| BMW | Real Auto |
+| Audi | Real Auto |
+| Nissan | Next Auto |
 
-## Нормальная форма Бойса-Кодда (НФБК) 
-(частная форма третьей нормальной формы)**
+## Boyce-Codd Normal Form (BCNF)
 
-Определение 3НФ не совсем подходит для следующих отношений:
+(a special case of Third Normal Form)**
 
-1) отношение имеет два или более потенциальных ключа;
+The definition of 3NF is not fully suitable for the following relations:
 
-2) два и более потенциальных ключа являются составными;
+1) the relation has two or more candidate keys;
 
-3) они пересекаются, т.е. имеют хотя бы один общий атрибут.
+2) two or more candidate keys are composite;
 
-Для отношений, имеющих один потенциальный ключ (первичный), НФБК является 3НФ.
+3) they overlap, i.e., they share at least one common attribute.
 
-Отношение находится в НФБК, когда каждая нетривиальная и неприводимая слева функциональная зависимость обладает потенциальным ключом в качестве детерминанта.
+For relations that have one candidate key (primary), BCNF is equivalent to 3NF.
 
-Предположим, рассматривается отношение, представляющее данные о бронировании стоянки на день:
+A relation is in BCNF when every non-trivial functional dependency with an irreducible left-hand side has a candidate key as its determinant.
 
-| Номер стоянки | Время начала | Время окончания | Тариф |
+Suppose we consider a relation representing data about parking reservations for a day:
+
+| Parking spot number | Start time | End time | Rate |
 | --- | --- | --- | --- |
-| 1 | 09:30 | 10:30 | Бережливый |
-| 1 | 11:00 | 12:00 | Бережливый |
-| 1 | 14:00 | 15:30 | Стандарт |
-| 2 | 10:00 | 12:00 | Премиум-В |
-| 2 | 12:00 | 14:00 | Премиум-В |
-| 2 | 15:00 | 18:00 | Премиум-А |
+| 1 | 09:30 | 10:30 | Economy |
+| 1 | 11:00 | 12:00 | Economy |
+| 1 | 14:00 | 15:30 | Standard |
+| 2 | 10:00 | 12:00 | Premium B |
+| 2 | 12:00 | 14:00 | Premium B |
+| 2 | 15:00 | 18:00 | Premium A |
 
-Тариф имеет уникальное название и зависит от выбранной стоянки и наличии льгот, в частности:
+The rate has a unique name and depends on the chosen parking spot and whether discounts apply, specifically:
 
-- «Бережливый»: стоянка 1 для льготников
-- «Стандарт»: стоянка 1 для не льготников
-- «Премиум-А»: стоянка 2 для льготников
-- «Премиум-B»: стоянка 2 для не льготников.
+- "Economy": parking spot 1 for discount-eligible customers
+- "Standard": parking spot 1 for non-eligible customers
+- "Premium A": parking spot 2 for discount-eligible customers
+- "Premium B": parking spot 2 for non-eligible customers.
 
-Таким образом, возможны следующие составные первичные ключи: {Номер стоянки, Время начала}, {Номер стоянки, Время окончания}, {Тариф, Время начала}, {Тариф, Время окончания}.
+Thus, the following composite primary keys are possible: {Parking spot number, Start time}, {Parking spot number, End time}, {Rate, Start time}, {Rate, End time}.
 
-Отношение находится в 3НФ. Требования второй нормальной формы выполняются, так как все атрибуты входят в какой-то из потенциальных ключей, а неключевых атрибутов в отношении нет. Также нет и транзитивных зависимостей, что соответствует требованиям третьей нормальной формы. Тем не менее, существует функциональная зависимость Тариф → Номер стоянки, в которой левая часть (детерминант) не является потенциальным ключом отношения, то есть отношение не находится в нормальной форме Бойса — Кодда.
+The relation is in 3NF. The requirements of 2NF are satisfied because all attributes are part of some candidate key, and there are no non-key attributes in the relation. There are also no transitive dependencies, which meets the requirements of 3NF. Nevertheless, there is a functional dependency Rate → Parking spot number, where the left side (determinant) is not a candidate key of the relation, meaning the relation is not in Boyce-Codd Normal Form.
 
-Недостатком данной структуры является то, что, например, по ошибке можно приписать тариф «Бережливый» к бронированию второй стоянки, хотя он может относиться только к первой стоянки.
+A drawback of this structure is that, for example, by mistake you can assign the "Economy" rate to a reservation for parking spot 2, even though it can only apply to parking spot 1.
 
-Можно улучшить структуру с помощью декомпозиции отношения на два и добавления атрибута **Имеет льготы**, получив отношения, удовлетворяющие НФБК (подчёркнуты атрибуты, входящие в первичный ключ.):
+You can improve the structure by decomposing the relation into two and adding the **Has discounts** attribute, obtaining relations that satisfy BCNF (attributes that are part of the primary key are underlined):
 
-**Тарифы**
+**Rates**
 
-| Тариф | Номер стоянки | Имеет льготы |
+| Rate | Parking spot number | Has discounts |
 | --- | --- | --- |
-| Бережливый | 1 | true |
-| Стандарт | 1 | false |
-| Премиум-А | 2 | true |
-| Премиум-В | 2 | false |
+| Economy | 1 | true |
+| Standard | 1 | false |
+| Premium A | 2 | true |
+| Premium B | 2 | false |
 
-**Бронирование**
+**Reservations**
 
-| Тариф | Время начала | Время окончания |
+| Rate | Start time | End time |
 | --- | --- | --- |
-| Бережливый | 09:30 | 10:30 |
-| Бережливый | 11:00 | 12:00 |
-| Стандарт | 14:00 | 15:30 |
-| Премиум-В | 10:00 | 12:00 |
-| Премиум-В | 12:00 | 14:00 |
-| Премиум-А | 15:00 | 18:00 |
+| Economy | 09:30 | 10:30 |
+| Economy | 11:00 | 12:00 |
+| Standard | 14:00 | 15:30 |
+| Premium B | 10:00 | 12:00 |
+| Premium B | 12:00 | 14:00 |
+| Premium A | 15:00 | 18:00 |
 
-## Четвертая нормальная форма
+## Fourth Normal Form
 
-Отношение находится в 4НФ, если оно находится в НФБК и все нетривиальные многозначные зависимости фактически являются функциональными зависимостями от ее потенциальных ключей.
+A relation is in 4NF if it is in BCNF and all non-trivial multivalued dependencies are in fact functional dependencies on its candidate keys.
 
-В отношении R (A, B, C) существует **многозначная зависимость** R.A -> -> R.B в том и только в том случае, если множество значений B, соответствующее паре значений A и C, зависит только от A и не зависит от С.
+In a relation R (A, B, C), a **multivalued dependency** R.A -> -> R.B exists if and only if the set of B values corresponding to a pair of values A and C depends only on A and does not depend on C.
 
-Предположим, что рестораны производят разные виды пиццы, а службы доставки ресторанов работают только в определенных районах города. Составной первичный ключ соответствующей переменной отношения включает три атрибута: {Ресторан, Вид пиццы, Район доставки}.
+Suppose restaurants make different kinds of pizza, and each restaurant's delivery service operates only in certain areas of the city. The composite primary key of the corresponding relation variable includes three attributes: {Restaurant, Pizza type, Delivery area}.
 
-Такая переменная отношения не соответствует 4НФ, так как существует следующая многозначная зависимость:
+Such a relation variable is not in 4NF because the following multivalued dependencies exist:
 
-{Ресторан} → {Вид пиццы}
+{Restaurant} → {Pizza type}
 
-{Ресторан} → {Район доставки}
+{Restaurant} → {Delivery area}
 
-То есть, например, при добавлении нового вида пиццы придется внести по одному новому кортежу для каждого района доставки. Возможна логическая аномалия, при которой определенному виду пиццы будут соответствовать лишь некоторые районы доставки из обслуживаемых рестораном районов.
+That is, for example, when adding a new pizza type you would need to insert one new tuple for each delivery area. A logical anomaly is possible where a given pizza type is associated with only some of the delivery areas served by the restaurant.
 
-Для предотвращения аномалии нужно декомпозировать отношение, разместив независимые факты в разных отношениях. В данном примере следует выполнить декомпозицию на {Ресторан, Вид пиццы} и {Ресторан, Район доставки}.
+To prevent the anomaly, you need to decompose the relation by placing independent facts into different relations. In this example, you should decompose into {Restaurant, Pizza type} and {Restaurant, Delivery area}.
 
-Однако, если к исходной переменной отношения добавить атрибут, функционально зависящий от потенциального ключа, например цену с учётом стоимости доставки ({Ресторан, Вид пиццы, Район доставки} → Цена), то полученное отношение будет находиться в 4НФ и его уже нельзя подвергнуть декомпозиции без потерь.
+However, if you add to the original relation variable an attribute that functionally depends on the candidate key, for example a price including delivery cost ({Restaurant, Pizza type, Delivery area} → Price), then the resulting relation will be in 4NF and it can no longer be decomposed losslessly.
 
-## Пятая нормальная форма
+## Fifth Normal Form
 
-Отношения находятся в 5НФ, если оно находится в 4НФ и отсутствуют сложные зависимые соединения между атрибутами.
+Relations are in 5NF if they are in 4NF and there are no complex join dependencies between attributes.
 
-Если «Атрибут_1» зависит от «Атрибута_2», а «Атрибут_2» в свою очередь зависит от «Атрибута_3», а «Атрибут_3» зависит от «Атрибута_1», то все три атрибута обязательно входят в один кортеж.
+If "Attribute_1" depends on "Attribute_2", and "Attribute_2" in turn depends on "Attribute_3", and "Attribute_3" depends on "Attribute_1", then all three attributes must appear in a single tuple.
 
-Это очень жесткое требование, которое можно выполнить лишь при дополнительных условиях. На практике трудно найти пример реализации этого требования в чистом виде.
+This is a very strict requirement that can be satisfied only under additional conditions. In practice, it is difficult to find a clean real-world example of this requirement.
 
-Например, некоторая таблица содержит три атрибута «Поставщик», «Товар» и «Покупатель». Покупатель_1 приобретает несколько Товаров у Поставщика_1. Покупатель_1 приобрел новый Товар у Поставщика_2. Тогда в силу изложенного выше требования Поставщик_1 обязан поставлять Покупателю_1 тот же самый новый Товар, а Поставщик_2 должен поставлять Покупателю_1, кроме нового Товара, всю номенклатуру Товаров Поставщика_1. Этого на практике не бывает. Покупатель свободен в своем выборе товаров. Поэтому для устранения отмеченного затруднения все три атрибута разносят по разным отношениям (таблицам). После выделения трех новых отношений (Поставщик, Товар и Покупатель) необходимо помнить, что при извлечении информации (например, о покупателях и товарах) необходимо в запросе соединить все три отношения. Любая комбинация соединения двух отношений из трех неминуемо приведет к извлечению неверной (некорректной) информации. Некоторые СУБД снабжены специальными механизмами, устраняющими извлечение недостоверной информации. Тем не менее, следует придерживаться общей рекомендации: структуру базы данных строить таким образом, чтобы избежать применения 4НФ и 5НФ.
+For example, suppose a table has three attributes: "Supplier", "Product", and "Customer". Customer_1 buys several Products from Supplier_1. Customer_1 buys a new Product from Supplier_2. Then, under the requirement described above, Supplier_1 would be forced to supply that same new Product to Customer_1, and Supplier_2 would be forced to supply Customer_1 not only the new Product but also the entire product catalog of Supplier_1. This does not happen in practice. Customers are free to choose products. Therefore, to eliminate this difficulty, all three attributes are split into separate relations (tables). After creating the three new relations (Supplier, Product, and Customer), it is important to remember that when retrieving information (for example, about customers and products), the query must join all three relations. Any combination of joining only two of the three relations will inevitably lead to incorrect results. Some DBMSs provide special mechanisms to prevent retrieving inconsistent data. Nevertheless, the general recommendation is to design the database schema to avoid the need for 4NF and 5NF.
 
-Пятая нормальная форма ориентирована на работу с зависимыми соединениями. Указанные зависимые соединения между тремя атрибутами встречаются очень редко. Зависимые соединения между четырьмя, пятью и более атрибутами указать практически невозможно.
+Fifth Normal Form focuses on join dependencies. Such join dependencies among three attributes are very rare. Join dependencies among four, five, or more attributes are practically impossible to specify.
 
-## Доменно-ключевая нормальная форма
+## Domain-key normal form
 
-Переменная отношения находится в ДКНФ тогда и только тогда, когда каждое наложенное на неё ограничение является логическим следствием ограничений доменов и ограничений ключей, наложенных на данную переменную отношения.
+A relation variable is in DKNF if and only if every constraint on it is a logical consequence of domain constraints and key constraints imposed on that relation variable.
 
-Ограничение домена – ограничение, предписывающее использовать для определённого атрибута значения только из некоторого заданного домена. Ограничение по своей сути является заданием перечня (или логического эквивалента перечня) допустимых значений типа и объявлением о том, что указанный атрибут имеет данный тип.
+A domain constraint is a constraint that requires a particular attribute to take values only from a specified domain. In essence, it defines the set (or a logical equivalent of a set) of allowable values for a type and declares that the attribute has that type.
 
-Ограничение ключа – ограничение, утверждающее, что некоторый атрибут или комбинация атрибутов является потенциальным ключом.
+A key constraint is a constraint stating that some attribute or combination of attributes is a candidate key.
 
-Любая переменная отношения, находящаяся в ДКНФ, обязательно находится в 5НФ. Однако не любую переменную отношения можно привести к ДКНФ.
+Any relation variable in DKNF is necessarily in 5NF. However, not every relation variable can be transformed into DKNF.
 
-## Шестая нормальная форма
+## Sixth Normal Form
 
-Переменная отношения находится в шестой нормальной форме тогда и только тогда, когда она удовлетворяет всем нетривиальным зависимостям соединения. Из определения следует, что переменная находится в 6НФ тогда и только тогда, когда она неприводима, то есть не может быть подвергнута дальнейшей декомпозиции без потерь. Каждая переменная отношения, которая находится в 6НФ, также находится и в 5НФ.
+A relation variable is in Sixth Normal Form if and only if it satisfies all non-trivial join dependencies. From the definition it follows that a relation variable is in 6NF if and only if it is irreducible, i.e., it cannot be further decomposed losslessly. Every relation variable that is in 6NF is also in 5NF.
 
-Идея «декомпозиции до конца» выдвигалась до начала исследований в области хронологических данных, но не нашла поддержки. Однако для хронологических баз данных максимально возможная декомпозиция позволяет бороться с избыточностью и упрощает поддержание целостности базы данных.
+The idea of "decomposing all the way" was proposed before research into temporal data began, but it did not gain support. However, for temporal databases, maximal decomposition helps combat redundancy and simplifies maintaining database integrity.
 
-Для хронологических баз данных определены U_операторы, которые распаковывают отношения по указанным атрибутам, выполняют соответствующую операцию и упаковывают полученный результат. В данном примере соединение проекций отношения должно производится при помощи оператора U_JOIN.
+For temporal databases, U operators are defined that unpack relations on the specified attributes, perform the corresponding operation, and pack the result back. In this example, the join of relation projections should be performed using the U_JOIN operator.
 
-**Работники**
+**Employees**
 
-| Таб.№ | Время | Должность | Домашний адрес |
+| Emp No. | Time | Position | Home address |
 | --- | --- | --- | --- |
-| 6575 | 01-01-2000:10-02-2003 | слесарь | ул.Ленина,10 |
-| 6575 | 11-02-2003:15-06-2006 | слесарь | ул.Советская,22 |
-| 6575 | 16-06-2006:05-03-2009 | бригадир | ул.Советская,22 |
+| 6575 | 01-01-2000:10-02-2003 | mechanic | Lenin St, 10 |
+| 6575 | 11-02-2003:15-06-2006 | mechanic | Soviet St, 22 |
+| 6575 | 16-06-2006:05-03-2009 | foreman | Soviet St, 22 |
 
-Переменная отношения «Работники» не находится в 6НФ и может быть подвергнута декомпозиции на переменные отношения «Должности работников» и «Домашние адреса работников».
+The "Employees" relation variable is not in 6NF and can be decomposed into the relation variables "Employee positions" and "Home addresses".
 
-**Должности работников**
+**Employee positions**
 
-| Таб.№ | Время | Должность |
+| Emp No. | Time | Position |
 | --- | --- | --- |
-| 6575 | 01-01-2000:10-02-2003 | слесарь |
-| 6575 | 16-06-2006:05-03-2009 | бригадир |
+| 6575 | 01-01-2000:10-02-2003 | mechanic |
+| 6575 | 16-06-2006:05-03-2009 | foreman |
 
-**Домашние адреса работников**
+**Home addresses**
 
-| Таб.№ | Время | Домашний адрес |
+| Emp No. | Time | Home address |
 | --- | --- | --- |
-| 6575 | 01-01-2000:10-02-2003 | ул.Ленина,10 |
-| 6575 | 11-02-2003:15-06-2006 | ул.Советская,22 |
-
-## Литература
-
-Для более глубокого и основательного изучения рассмотренной темы, рекомендуется книга «Введение в системы баз данных» Криса Дж. Дейта, на основе материалов которой и была написана данная статья.
+| 6575 | 01-01-2000:10-02-2003 | Lenin St, 10 |
+| 6575 | 11-02-2003:15-06-2006 | Soviet St, 22 |
 
 ## Questions
 
@@ -252,9 +253,11 @@ status: Not-Started
 
 ## Links
 
+For a deeper and more thorough study of the topic, the book "Introduction to Database Systems" by Chris J. Date is recommended; the materials from that book were used as the basis for this article.
+
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -277,13 +280,12 @@ const pages = dv.pages()
   .sort(p => p.file.name, "asc");
   
   if (children.length) {
-	  dv.header(2, "Topics");
-	  dv.list(children.map(p => p.file.link));
+	dv.header(2, "Topics");
+	dv.list(children.map(p => p.file.link));
   }
   if (pages.length) {
-	  dv.header(2, "Pages");
-	  dv.list(pages.map(p => p.file.link));
+	dv.header(2, "Pages");
+	dv.list(pages.map(p => p.file.link));
   }
   
 ```
-

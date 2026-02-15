@@ -1,18 +1,20 @@
 ---
 topic:
-  - Computer Science
+  - "Computer Science"
 subtopic:
-  - Algorithms
+  - "Algorithms"
 level:
   - "4"
-priority:
-  - Low
+priority: Low
 status: Not-Started
 ---
+
 # Intro
+
 Bubble sort repeatedly swaps adjacent out-of-order elements, pushing large values toward the end each pass. It is easy to understand but rarely used in production due to poor performance.
 
 ## Deeper Explanation
+
 - Mechanism: scan left-to-right, swap (a[i], a[i+1]) when out of order; after one full pass, the max element is in its final place.
 - Early-exit optimization: if a pass makes zero swaps, the array is already sorted.
 - Complexity: average/worst O(n^2); best O(n) with early-exit on already-sorted input.
@@ -43,12 +45,13 @@ graph TD
 > Answer
 
 ## Links
+
 - https://en.wikipedia.org/wiki/Bubble_sort - Overview and variants
 - https://visualgo.net/en/sorting - Animation to build intuition
 
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -71,13 +74,12 @@ const pages = dv.pages()
   .sort(p => p.file.name, "asc");
   
   if (children.length) {
-	  dv.header(2, "Topics");
-	  dv.list(children.map(p => p.file.link));
+	dv.header(2, "Topics");
+	dv.list(children.map(p => p.file.link));
   }
   if (pages.length) {
-	  dv.header(2, "Pages");
-	  dv.list(pages.map(p => p.file.link));
+	dv.header(2, "Pages");
+	dv.list(pages.map(p => p.file.link));
   }
   
 ```
-

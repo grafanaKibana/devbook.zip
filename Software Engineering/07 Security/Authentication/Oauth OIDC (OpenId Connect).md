@@ -1,13 +1,13 @@
 ---
 topic:
-  - Security
-subtopic:
-  - Authentication
+  - "Security"
+subtopic: []
 level:
   - "1"
 priority: Medium
 status: Not-Started
 ---
+
 # Intro
 
 ## Deeper Explanation
@@ -28,11 +28,12 @@ status: Not-Started
 > Authorization: checking permissions for a specific action on a specific resource.
 
 ## Links
+
 - [Identification, authentication, authorization (RU)](http://security.mosmetod.ru/paroli/192-identifikatsiya-autentifikatsiya-i-avtorizatsiya-v-chem-raznitsa)
 
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -64,4 +65,3 @@ const pages = dv.pages()
   }
   
 ```
-

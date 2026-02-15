@@ -1,12 +1,16 @@
 ---
 topic:
-  - Security
+  - "Security"
 subtopic: []
-level: ["1"]
+level:
+  - "1"
 priority: Medium
 status: Not-Started
 ---
+
 # Intro
+
+OWASP (Open Worldwide Application Security Project) is a non-profit foundation that publishes freely available resources on web application security. Its most well-known output is the OWASP Top 10 — a regularly updated ranking of the most critical security risks facing web applications, covering threats like injection, broken access control, and cryptographic failures.
 
 ## Deeper Explanation
 
@@ -24,7 +28,7 @@ status: Not-Started
 
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -56,4 +60,3 @@ const pages = dv.pages()
   }
   
 ```
-

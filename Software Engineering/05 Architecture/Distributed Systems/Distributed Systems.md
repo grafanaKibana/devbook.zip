@@ -1,14 +1,12 @@
 ---
 topic:
-  - Architecture
+  - "Architecture"
 subtopic:
-  - Distributed Systems
-level: ["1"]
-priority: Medium
-status: Not-Started
+  - "Distributed Systems"
 tags:
   - FolderNote
 ---
+
 # Intro
 
 ## Deeper Explanation
@@ -22,9 +20,18 @@ tags:
 - [Link 1](URL)
 - [Link 2](URL)
 
+## Deeper Explanation
+
+
+## Questions
+
+
+## Links
+
+
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -56,4 +63,3 @@ const pages = dv.pages()
   }
   
 ```
-

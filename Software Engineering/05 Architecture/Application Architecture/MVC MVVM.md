@@ -1,13 +1,14 @@
 ---
 topic:
-  - Architecture
+  - "Architecture"
 subtopic:
-  - Application Architecture
+  - "Application Architecture"
 level:
   - "1"
 priority: Medium
 status: Not-Started
 ---
+
 # Intro
 
 MVC and MVVM are UI/application architecture patterns that split responsibilities to improve maintainability, testability, and separation of concerns.
@@ -26,7 +27,7 @@ MVC and MVVM are UI/application architecture patterns that split responsibilitie
 
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -58,4 +59,3 @@ const pages = dv.pages()
   }
   
 ```
-

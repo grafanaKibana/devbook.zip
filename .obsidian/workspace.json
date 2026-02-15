@@ -69,12 +69,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Async Await.md",
-                "mode": "preview",
+                "file": "Templates/Pages/Template - Index.md",
+                "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Async Await"
+              "title": "Template - Index"
             }
           }
         ],
@@ -190,10 +190,10 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Async Await.md"
+                "file": "Templates/Pages/Template - Index.md"
               },
               "icon": "lucide-info",
-              "title": "File properties for Async Await"
+              "title": "File properties for Template - Index"
             }
           },
           {
@@ -301,14 +301,21 @@
   },
   "active": "1af06994487b60a6",
   "lastOpenFiles": [
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Delegates and Events.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md",
+    "Templates/Pages/Template - Concept Page.md",
+    "Templates/Pages/Template - Index.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Strings.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Delegates and Events.md",
+    "Software Engineering/Questions.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Collections/Collections.md",
+    "Software Engineering/01 Programming/NET/ASP.NET Web API/ASP.NET Web API.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Async Await.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Control Structures.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures",
+    "Assets/TEST INTERVIEW.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md",
     "Software Engineering/01 Programming/NET/CSharp/CSharp.md",
     "Software Engineering/01 Programming/NET/ASP.NET Web API/Middlewares.md",
-    "Software Engineering/01 Programming/NET/ASP.NET Web API/ASP.NET Web API.md",
-    "Templates/Pages/Template - Index.md",
-    "Templates/Pages/Template - Concept Page.md",
     "Software Engineering/03 Data Persistance/ORMs/Entity Framework.md",
     "Assets/Assets.md",
     "Software Engineering/03 Data Persistance/ORMs/Untitled.md",
@@ -321,14 +328,8 @@
     "Software Engineering/01 Programming/NET/Other/SignalR.md",
     "Software Engineering/01 Programming/NET/Other/Other.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures/NEw notw.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures/sdf.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures/asdf/asdf.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures/asdf",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures/Сontrol Structures.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures/Some/Some.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures/Some",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures/Foreach.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types.md",
     "Software Engineering/01 Programming/NET/ASP.NET Web API",
     "Software Engineering/Roadmap.canvas",
     "Assets/11 AI & ML/11 AI & ML-LLM-20260211012223477.png",
@@ -342,7 +343,6 @@
     "Software Engineering/07 Security/Authentication",
     "src/site/notes/Knowledge",
     "src/site/notes",
-    "src/site",
     "quartz/public/01-Programming/NET/CSharp/Fundamentals/Сontrol-Structures/Сontrol-Structures-og-image.webp",
     "quartz/public/01-Programming/NET/CSharp/Fundamentals/Types/Types-og-image.webp",
     "quartz/public/01-Programming/NET/CSharp/Fundamentals/Types/Strings-og-image.webp",

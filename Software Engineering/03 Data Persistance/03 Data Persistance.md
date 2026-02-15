@@ -1,16 +1,17 @@
 ---
 topic:
-  - Data Persistance
+  - "Data Persistance"
 subtopic: []
-level:
-  - "1"
-priority: Medium
-status: Not-Started
-aliases:
-  - Data Persistance
 tags:
   - FolderNote
 ---
+
+# Intro
+
+
+## Deeper Explanation
+
+
 ## Questions
 
 > [!QUESTION]- What is a database?
@@ -19,9 +20,12 @@ tags:
 > [!QUESTION]- What are the main types of databases?
 > Common categories are: relational (SQL tables), key-value, document, wide-column, graph, time-series, and search engines. They differ in data model, query capabilities, consistency guarantees, and scaling approach.
 
+## Links
+
+
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -53,4 +57,3 @@ const pages = dv.pages()
   }
   
 ```
-

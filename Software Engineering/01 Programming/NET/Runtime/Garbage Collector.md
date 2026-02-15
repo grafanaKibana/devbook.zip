@@ -1,68 +1,69 @@
 ---
 topic:
-  - Programming
+  - "Programming"
 subtopic:
-  - NET
+  - "NET"
 level:
   - "1"
 priority: Medium
 status: Not-Started
 ---
+
 # Intro
 
-Сборщик мусора (GC) в общем языковом среде (CLR) служит автоматическим менеджером памяти которые управляет выделением и освобождением памяти для вашего приложения. Каждый раз, когда создаётся новый объект, среда выполнения выделяет память для объекта из управляемой кучи. Пока в управляемой куче доступно адресное пространство, среда выполнения продолжает выделять пространство для новых объектов.
+The Garbage Collector (GC) in the Common Language Runtime (CLR) is an automatic memory manager that controls memory allocation and reclamation for your application. Each time a new object is created, the runtime allocates memory for it from the managed heap. As long as address space is available in the managed heap, the runtime continues allocating space for new objects.
 
-Однако память не бесконечна. В конечном итоге сборщик мусора должен выполнить сборку, чтобы освободить некоторую память. Оптимизирующий движок сборщика мусора определяет наилучшее время для выполнения сборки, исходя из производимых выделений. Когда сборщик мусора выполняет сборку, он проверяет объекты в управляемой куче, которые больше не используются приложением, и выполняет необходимые операции для восстановления их памяти.
+However, memory is not infinite. Eventually, the garbage collector must perform a collection to free some memory. The GC's optimization engine determines the best time to run a collection based on allocation activity. When the GC runs, it examines objects on the managed heap that are no longer used by the application and performs the operations required to reclaim their memory.
 
-Сборщик мусора предоставляет следующие преимущества:
+The garbage collector provides the following benefits:
 
-- Освобождает разработчиков от необходимости вручную освобождать память.
-- Эффективно выделяет объекты на управляемой куче.
-- Восстанавливает объекты, которые больше не используются, очищает их память и сохраняет память доступной для будущих выделений.
-- Управляемые объекты автоматически получают чистое содержимое, поэтому их конструкторы не должны инициализировать каждое поле данных.
-- Обеспечивает безопасность памяти, убедившись, что объект не может использовать для себя память, выделенную для другого объекта.
+- Frees developers from having to manually free memory.
+- Efficiently allocates objects on the managed heap.
+- Reclaims objects that are no longer used, clears their memory, and keeps memory available for future allocations.
+- Managed objects automatically start with zeroed memory, so constructors do not have to initialize every data field.
+- Provides memory safety by ensuring that one object cannot use memory allocated for another object.
 
-Сборщик мусора .NET не выделяет или не освобождает неуправляемую память. Шаблон для уничтожения объекта, называемый шаблоном `dispose`. Шаблон `dispose` используется для объектов, которые реализуют интерфейс `IDisposable`.
+The .NET garbage collector does not allocate or free unmanaged memory. The pattern used to deterministically release resources is the `dispose` pattern. The `dispose` pattern is used for objects that implement the `IDisposable` interface.
 
-## Управляемая куча
+## Deeper Explanation
 
-После инициализации сборщика мусора среда CLR выделяет сегмент памяти для хранения объектов и управления ими. Эта память называется управляемой кучей в отличие от собственной кучи операционной системы.
+## Managed heap
 
-Для каждого управляемого процесса существует управляемая куча. Все потоки в процессе выделяют память для объектов в одной и той же куче.
+After the garbage collector is initialized, the CLR allocates a segment of memory for storing and managing objects. This memory is called the managed heap, as opposed to the operating system's native heap.
 
-Для резервирования памяти сборщик мусора вызывает функцию Windows [VirtualAlloc](https://learn.microsoft.com/ru-ru/windows/desktop/api/memoryapi/nf-memoryapi-virtualalloc) и резервирует для управляемых приложений по одному сегменту памяти за раз. Сборщик мусора также резервирует сегменты по мере необходимости и освобождает сегменты обратно в операционную систему (после очистки от любых объектов) путем вызова функции [Windows VirtualFree](https://learn.microsoft.com/ru-ru/windows/desktop/api/memoryapi/nf-memoryapi-virtualfree) .
+Each managed process has its own managed heap. All threads in the process allocate memory for objects from the same heap.
 
-> [!TIP]
-> 🚨 Размер сегментов, выделенных сборщиком мусора, зависит от реализации и может быть изменен в любое время, в том числе при периодических обновлениях. Приложение не должно делать никаких допущений относительно размера определенного сегмента, полагаться на него или пытаться настроить объем памяти, доступный для выделения сегментов.
-
-
-Чем меньше объектов распределено в куче, тем меньше придется работать сборщику мусора. При размещении объектов не используйте округленные значения, превышающие фактические потребности, например не выделяйте 32 байта, когда необходимо только 15 байтов.
-
-Активированный процесс сборки мусора освобождает память, занятую неиспользуемыми объектами. Процесс освобождения сжимает живые объекты, чтобы они перемещались вместе, и мертвое пространство удаляется, тем самым уменьшая кучу. Этот процесс гарантирует, что объекты, выделенные вместе, остаются вместе в управляемой куче, чтобы сохранить свое расположение.
-
-Степень вмешательства (частота и длительность) сборок мусора зависит от числа распределений и сохранившейся в управляемой куче памяти.
-
-Кучу можно рассматривать как совокупность двух куч: [куча больших объектов](https://learn.microsoft.com/ru-ru/dotnet/standard/garbage-collection/large-object-heap) - Large Object Heap, и куча маленьких объектов - Small Object Heap. Куча больших объектов содержит объекты размером от 85 000 байтов, обычно представленные массивами. Редко объект экземпляра может быть очень большим.
+To reserve memory, the garbage collector calls the Windows function [VirtualAlloc](https://learn.microsoft.com/ru-ru/windows/desktop/api/memoryapi/nf-memoryapi-virtualalloc) and reserves one memory segment at a time for managed applications. The GC also reserves additional segments as needed and releases segments back to the operating system (after clearing any objects) by calling [Windows VirtualFree](https://learn.microsoft.com/ru-ru/windows/desktop/api/memoryapi/nf-memoryapi-virtualfree).
 
 > [!TIP]
-> Вы можете [**настроить пороговый размер**](https://learn.microsoft.com/ru-ru/dotnet/core/runtime-config/garbage-collector#large-object-heap-threshold) для объектов, помещаемых в кучу больших объектов.
+> 🚨 The size of segments allocated by the garbage collector is implementation-dependent and can change at any time, including in periodic updates. An application should not make assumptions about the size of a particular segment, rely on it, or attempt to tune the amount of memory available for segment allocations.
 
+The fewer objects allocated on the heap, the less work the garbage collector has to do. When allocating objects, avoid rounded-up sizes that exceed actual needs; for example, do not allocate 32 bytes when you only need 15 bytes.
 
-## Освобождение памяти
+When a garbage collection is triggered, it reclaims memory occupied by unused objects. The reclamation process compacts live objects so they move together and dead space is removed, reducing the size of the heap. This process helps ensure that objects allocated together stay together on the managed heap, preserving locality.
 
-Механизм оптимизации сборщика мусора определяет наилучшее время для выполнения сбора, основываясь на произведенных выделениях памяти. Когда сборщик мусора выполняет очистку, он освобождает память, выделенную для объектов, которые больше не используются приложением. Он определяет, какие объекты больше не используются, анализируя *корни*приложения. Корни приложения содержат статические поля, локальные переменные в стеке потока, регистры процессора, дескрипторы сборки мусора и очередь завершения. Каждый корень либо ссылается на объект, находящийся в управляемой куче, либо имеет значение NULL. Сборщик мусора может запросить остальную часть среды выполнения для этих корней. Сборщик мусора использует этот список для создания графа, содержащего все объекты, доступные из корней.
+The level of GC activity (frequency and duration of collections) depends on the number of allocations and the amount of memory that remains on the managed heap.
 
-Объекты, которых нет в графе, недоступны из корней приложения. Сборщик мусора считает недостижимые объекты мусором и освобождает выделенную для них память. В процессе очистки сборщик мусора проверяет управляемую кучу, отыскивая блоки адресного пространства, занятые недостижимыми объектами. При обнаружении недостижимого объекта он использует функцию копирования памяти для уплотнения достижимых объектов в памяти, освобождая блоки адресного пространства, выделенные под недостижимые объекты. После уплотнения памяти, занимаемой достижимыми объектами, сборщик мусора вносит необходимые поправки в указатель, чтобы корни приложения указывали на новые расположения объектов. Он также устанавливает указатель управляемой кучи в положение после последнего достижимого объекта.
+You can think of the heap as consisting of two heaps: the [Large Object Heap](https://learn.microsoft.com/ru-ru/dotnet/standard/garbage-collection/large-object-heap) (LOH) and the Small Object Heap (SOH). The LOH contains objects of size 85,000 bytes and larger, typically arrays. In rare cases, an instance object can also be very large.
 
-### Условия для сборки мусора
+> [!TIP]
+> You can [**configure the threshold size**](https://learn.microsoft.com/ru-ru/dotnet/core/runtime-config/garbage-collector#large-object-heap-threshold) for objects placed on the Large Object Heap.
 
-Сборка мусора возникает при выполнении одного из следующих условий:
+## Reclaiming memory
 
-- Недостаточно физической памяти в системе. Размер памяти определяется уведомлением о нехватке памяти от операционной системы или нехватке памяти, как указано узлом.
-- Объем памяти, используемой объектами, выделенными в управляемой куче, превышает допустимый порог. Этот порог непрерывно корректируется во время выполнения процесса.
-- Вызывается метод [GC.Collect](https://learn.microsoft.com/ru-ru/dotnet/api/system.gc.collect) . Почти во всех случаях не нужно вызывать этот метод, так как сборщик мусора работает непрерывно. Этот метод в основном используется для уникальных ситуаций и тестирования.
+The GC optimization mechanism determines the best time to run a collection based on allocation activity. When the GC runs, it reclaims memory allocated for objects that are no longer used by the application. It determines which objects are no longer used by analyzing the application's *roots*. Application roots include static fields, local variables on thread stacks, CPU registers, GC handles, and the finalization queue. Each root either references an object on the managed heap or has a NULL value. The GC can ask the rest of the runtime for these roots. The GC uses this list to build a graph containing all objects reachable from the roots.
 
-## Модель исполнения GC
+Objects that are not in the graph are unreachable from the application's roots. The GC considers unreachable objects to be garbage and reclaims the memory allocated for them. During a collection, the GC inspects the managed heap, looking for blocks of address space occupied by unreachable objects. When it finds unreachable objects, it uses memory copying to compact reachable objects in memory, freeing the address space previously occupied by unreachable objects. After compaction, the GC updates references so that application roots point to the new locations of objects. It also sets the managed heap pointer to the position after the last reachable object.
+
+### Conditions that trigger garbage collection
+
+Garbage collection occurs when one of the following conditions is met:
+
+- There is not enough physical memory in the system. The available memory size is determined by a low-memory notification from the OS or by a low-memory condition as indicated by the host.
+- The amount of memory used by objects allocated on the managed heap exceeds an acceptable threshold. This threshold is continuously adjusted during process execution.
+- The [GC.Collect](https://learn.microsoft.com/ru-ru/dotnet/api/system.gc.collect) method is called. In almost all cases you should not call this method, because the GC runs automatically. It is primarily used for special scenarios and testing.
+
+## GC execution model
 
 ```mermaid
 graph TD
@@ -127,46 +128,46 @@ graph LR
 
 Most objects die young in Gen 0 and never promote. Gen 2 collection is expensive and only runs under memory pressure.
 
-1. **Фаза маркировки “живых” объектов**
-    1. **Начало сборки мусора:** Сборщик мусора начинает свою работу с набора ссылок, известных как **корни**. Это участки памяти, которые в силу определенных причин должны быть доступны всегда, и которые содержат ссылки на объекты, созданные приложением. Это могут быть регистры процессора, стек вызовов потоков, статические переменные и другие участки памяти, содержащие ссылки на объекты. Сборщик помечает эти объекты как "живые".
-    2. **Поиск и маркировка:** Сборщик мусора просматривает все объекты, на которые ссылаются корни, помечая их как "живые". Затем он рекурсивно повторяет этот процесс для объектов, на которые ссылаются уже помеченные объекты, пока не обойдет все достижимые из корней объекты.
-    3. **Критерии "живого" объекта:** Объект считается "живым", если на него есть ссылка из корневого набора или из других "живых" объектов. Сборщик определяет, что объект является ссылочным, если у него есть поле, содержащее ссылку на другой объект.
-2. **Фаза перемещения**
-    1. **Обновление ссылок на сжимаемые объекты:** После того как сборщик мусора определил, какие объекты считаются "живыми", начинается фаза перемещения. В этой фазе сборщик мусора перемещает "живые" объекты, чтобы они занимали непрерывный участок памяти. Во время этого процесса сборщик обновляет все ссылки на эти объекты, чтобы они указывали на новые адреса в памяти после перемещения.
-3. **Этап сжатия**
-    1. **Освобождение пространства и сжатие выживших объектов:** После перемещения "живых" объектов в непрерывный блок памяти, сборщик мусора освобождает память, занятую неиспользуемыми объектами. Это освобожденное пространство может быть использовано для новых объектов. Сборщик также сжимает выжившие объекты, чтобы уменьшить фрагментацию памяти.
+1. **Mark phase - marking live objects**
+    1. **Start of garbage collection:** The garbage collector starts from a set of references known as **roots**. These are memory locations that, for various reasons, must always be accessible and that contain references to objects created by the application. This can include CPU registers, thread call stacks, static variables, and other memory locations holding object references. The GC marks these objects as "live".
+    2. **Graph walk and marking:** The GC walks all objects referenced by roots, marking them as "live". It then recursively repeats this process for objects referenced by already-marked objects until it has visited all objects reachable from the roots.
+    3. **"Live" object criteria:** An object is considered "live" if it is referenced from the root set or from other "live" objects. The GC treats an object as a reference type if it has a field that contains a reference to another object.
+2. **Move phase**
+    1. **Updating references to compacted objects:** After the GC determines which objects are "live", the move phase begins. In this phase, the GC moves "live" objects so they occupy a contiguous region of memory. During this process, the GC updates all references to these objects so they point to the new memory addresses after the move.
+3. **Compact phase**
+    1. **Freeing space and compacting survivors:** After moving "live" objects into a contiguous memory block, the GC frees memory occupied by unused objects. The freed space can then be used for new objects. The GC also compacts surviving objects to reduce memory fragmentation.
 
-## Корневые объекты
+## Root objects
 
-Чтобы разобраться, каким образом сборщик мусора определяется, когда объект уже не нужен, необходимо знать, что собой представляют *корневые элементы приложения* (application roots). Попросту говоря, *корневым элементом* (root) называется ячейка в памяти, в которой содержится ссылка на размещающийся в куче объект. 
+To understand how the garbage collector decides when an object is no longer needed, you need to know what *application roots* are. Simply put, a *root* is a memory slot that contains a reference to an object located on the heap.
 
-Строго говоря, корневыми могут называться элементы:
+Strictly speaking, roots can include:
 
-- Ссылки на глобальные объекты (хотя в C# они не разрешены, CIL-код позволяет размещать глобальные объекты
-- Ссылки на любые статические объекты или статические поля.
-- Ссылки на локальные объекты в пределах кодовой базы приложения.
-- Ссылки на передаваемые методу параметры объекта.
-- Ссылки на объект, ожидающий *финализации*.
-- Любые регистры центрального процессора, которые ссылаются на объект.
+- References to global objects (although they are not allowed in C#, CIL code can place global objects
+- References to any static objects or static fields.
+- References to local objects within the application's codebase.
+- References to object parameters passed to methods.
+- References to an object awaiting *finalization*.
+- Any CPU registers that reference an object.
 
-## Поколения объектов
+## Object generations
 
-При попытке обнаружить недостижимый код объекты CLR-среды не проверяют буквально каждый находящийся в куче объект. Очевидно, что на это уходила бы масса времени, особенно в крупных проектах.
+When trying to find unreachable objects, the CLR does not literally inspect every object on the heap each time. Obviously, that would take a lot of time, especially in large projects.
 
-Для оптимизации процесса каждый объект в куче относится к определённому *«поколению»*
+To optimize the process, each object on the heap belongs to a specific *"generation"*.
 
-Смысл в применении поколений выглядит довольно просто:
+The idea behind generations is fairly simple:
 
-> Чем дольше объект находится в куче, тем выше вероятность того, что он там будет оставаться.
+> The longer an object stays on the heap, the more likely it is to remain there.
 > 
 
-Например, класс, определённый в главном окне настольного приложения, будет оставаться в памяти вплоть до завершения программы. С другой стороны, объект, попавший в кучу совсем недавно (например те, что находятся в области видимости методов), вероятнее всего будут становиться недостижимыми достаточно быстро. Изводя из этих предположений, каждый объект в куче относится к:
+For example, a class defined in the main window of a desktop application may remain in memory until the program exits. On the other hand, an object that was allocated very recently (for example, one that is only in method scope) is likely to become unreachable fairly quickly. Based on these assumptions, each object on the heap belongs to:
 
-- *Поколение 0.* Идентифицируется новый только что размещённый объект, который ещё никогда не помечался как надлежащий удалению в процессе сборки мусора
-- *Поколение 1.* Идентифицирует объект, который уже «пережил» один процесс сборки мусора (был помечен, как надлежащий удалению, но не был удалён из-за достаточного свободного места в куче).
-- *Поколение 2.* Идентифицирует объект, который пережил более одного прогона сбора мусора
+- *Generation 0.* Identifies a new object that has just been allocated and has not yet survived a garbage collection.
+- *Generation 1.* Identifies an object that has already survived one garbage collection.
+- *Generation 2.* Identifies an object that has survived more than one garbage collection.
 
-Сборщик мусора сначала анализирует все объекты, которые относятся к поколению 0. Если после их удаления остаётся достаточное количество памяти, статус всех уцелевших объектов повышается до поколения 1. Если все объекты поколения 0 были проверены, но всё равно требуется дополнительное пространство, то будет запцщени проверка объектов поколения 1. Объекты этого поколения, которым удалось уцелеть, станут объектами поколения 2. если же сборщику мусора **всё равно** понадобится память, что сборке мусора подвергнуться объекты поколения 2. Так как объектов выше 2 поколения не бывает, то статус объектов не изменится. Из всего вышесказанного можно сделать вывод, что более новые объекты будут удалятся быстрее, нежели более старые.
+The GC first analyzes all objects that belong to generation 0. If, after collecting Gen 0, there is enough memory, all surviving objects are promoted to Gen 1. If Gen 0 has been collected but additional space is still required, the GC will also collect Gen 1. Objects that survive Gen 1 become Gen 2 objects. If the GC still needs memory, it will perform a Gen 2 collection. Since there are no generations above Gen 2, the generation of surviving objects does not increase further. From this, you can conclude that newer objects tend to be collected faster than older ones.
 
 ## Questions
 
@@ -180,17 +181,15 @@ Most objects die young in Gen 0 and never promote. Gen 2 collection is expensive
 
 > [!QUESTION]- What is a memory leak?
 > Memory that is no longer needed but cannot be reclaimed. In .NET this can be caused by keeping objects reachable (managed leaks) or by not releasing unmanaged resources.
-> See: [[Memory Leaks]]
+> See also the Memory Leaks note in this runtime section.
 
 ## Links
 
 - https://habr.com/ru/articles/590475/
 
-## Links
-
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -213,13 +212,12 @@ const pages = dv.pages()
   .sort(p => p.file.name, "asc");
   
   if (children.length) {
-	  dv.header(2, "Topics");
-	  dv.list(children.map(p => p.file.link));
+	dv.header(2, "Topics");
+	dv.list(children.map(p => p.file.link));
   }
   if (pages.length) {
-	  dv.header(2, "Pages");
-	  dv.list(pages.map(p => p.file.link));
+	dv.header(2, "Pages");
+	dv.list(pages.map(p => p.file.link));
   }
   
 ```
-

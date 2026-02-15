@@ -1,15 +1,12 @@
 ---
 topic:
-  - AI & ML
+  - "AI & ML"
 subtopic:
-  - LLM
-level:
-  - "1"
-priority: Medium
-status: Not-Started
+  - "LLM"
 tags:
   - FolderNote
 ---
+
 # Intro
 
 An AI agent can be thought of as an autonomous program that **observes** (through sensors or data input), **decides** (using some form of reasoning or inference), and **acts** (outputs or executes changes in its environment).
@@ -25,6 +22,8 @@ They provide a way to **delegate** specialized tasks to autonomous systems, pote
 **Specialization**: In many areas of AI, specialized agents are often better at their narrower tasks (e.g., an agent that handles language translation vs. an agent optimized for image recognition).
 
 **Scalability**: If one agent is overloaded with all the possible tasks and tools, you might run into scalability issues. Multi-agent setups can spread out the workload.
+
+## Deeper Explanation
 
 ## Key elements
 
@@ -81,13 +80,16 @@ This is crucial for context continuity, learning from mistakes, and adapting to 
 - **Testing & Validation**: Multi-agent systems can exhibit unexpected “emergent” behaviors. Test systematically to ensure agents aren’t working at cross-purposes.
 - **Iterate & Scale**: Start with a small system, learn from its interactions, then gradually add more agents or more complex behaviors.
 
+## Questions
+
 ## Links
+
 - https://devblogs.microsoft.com/semantic-kernel/using-azure-ai-agents-with-semantic-kernel-in-net-and-python/
 - https://devblogs.microsoft.com/semantic-kernel/the-future-of-ai-customizing-ai-agents-with-the-semantic-kernel-agent-framework/
 
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -119,4 +121,3 @@ const pages = dv.pages()
   }
   
 ```
-

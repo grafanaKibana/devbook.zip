@@ -1,14 +1,12 @@
 ---
 topic:
-  - DevOps
+  - "DevOps"
 subtopic:
-  - Deployment Stratagies
-level: ["1"]
-priority: Medium
-status: Not-Started
+  - "Deployment Stratagies"
 tags:
   - FolderNote
 ---
+
 # Intro
 
 ## Deeper Explanation
@@ -22,7 +20,7 @@ tags:
 
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -54,4 +52,3 @@ const pages = dv.pages()
   }
   
 ```
-

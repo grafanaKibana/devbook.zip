@@ -14,94 +14,93 @@ status: Not-Started
 
 ## Delegates
 
-Делегат — тип который предоставляет объектно-ориентированный способ работы с методом как с переменной. Его более привычный аналог — указатель на функцию, функтор, или даже просто вектор прерывания.
+A delegate is a type that provides an object-oriented way to work with a method as a value (like a variable). A more familiar analogue is a function pointer, a functor, or even an interrupt vector.
 
-Делегат представляет собой тип, соответствующий определённой сигнатуре функции. Объявив переменную делегатного типа, вы можете записать в неё статический или нестатический метод, передать его как аргумент куда-либо, и вызвать.
+A delegate is a type that matches a specific function signature. By declaring a variable of a delegate type, you can store a reference to a static or instance method in it, pass it as an argument, and invoke it.
 
-Классический пример использования делегатов — сортировка списка объектов по значению какого-либо поля. Вы передаёте в сортирующий метод *делегат*, который по объекту вычисляет *ключ сортировки*, то есть, вытаскивает значение поля.
+A classic example of using delegates is sorting a list of objects by some field value. You pass a *delegate* to the sorting method that computes a *sort key* for an object (that is, extracts the field value).
 
-### Вариантность
+### Variance
 
-Каждый из параметров-типов обобщенного делегата или интерфейса должен быть помечен как ковариантный или контравариантный. Это не приводит ни к каким нежелательным последствиям, но позволит применять ваших делегатов в большем количестве сценариев и позволит вам осуществлять приведение типа переменной обобщенного делегата к тому же типу делегата с другим параметром-типом.
+Each type parameter of a generic delegate or interface can be marked as covariant or contravariant. This does not introduce undesirable consequences, but it allows your delegates to be used in more scenarios and lets you convert a generic delegate variable to the same delegate type with a different type parameter.
 
-Параметры-типы могут быть:
+Type parameters can be:
 
-- **Инвариантными**. Параметр-тип не может изменяться.
-- **Контравариантными**. Параметр-тип может быть преобразован от класса к классу, производному от него. В языке C# контравариантный тип обозначается ключевым словом **`in`**. Контравариантный параметр-тип может появляться только во входной позиции, например, в качестве аргументов метода. Например `in T` и `T` - `ICollection`, для этого типа мы можем использовать как `ICollection` так и `IList` (наследник `ICollection`) или `List` (наследник `IList`)
-- **Ковариантными**. Аргумент-тип может быть преобразован от класса к одному из его базовых классов. В языке С# ковариантный тип обозначается ключевым словом **`out`**. Ковариантный параметр обобщенного типа может появляться только в выходной позиции, например, в качестве возвращаемого значения метода. Например `in T` и `T` - `ICollection`, для этого типа мы можем использовать как `ICollection` так и `IEnumerable`(производный интерфейс `ICollection`)
+- **Invariant**. The type parameter cannot vary.
+- **Contravariant**. The type parameter can be substituted with a less derived (more general) type. In C#, a contravariant type parameter is marked with **`in`**. It can appear only in input positions (for example, method arguments). Example: `Action<object>` can be used where `Action<string>` is expected.
+- **Covariant**. The type parameter can be substituted with a more derived (more specific) type. In C#, a covariant type parameter is marked with **`out`**. It can appear only in output positions (for example, return values). Example: `IEnumerable<string>` can be used where `IEnumerable<object>` is expected.
 
 > [!TIP]
-> Вариантность действует только в том случае, если компилятор сможет установить возможность преобразования ссылок между типами. Другими словами, вариантность неприменима для значимых типов из-за необходимости упаковки (boxing).
+> Variance only works when the compiler can establish that reference conversions between types are valid. In other words, variance does not apply to value types because it would require boxing.
 
 ### Detailed Example
 
-Для начала, давайте глянем, что такое эта самая вариантность. Пусть у нас есть два класса, `Car` и `BMW`. Очевидно, что `BMW` есть подкласс `Car`: каждая бэха является машиной. Обычно при этом говорят так: «везде, где вы используете `Car`, можно использовать и `BMW`». Это на самом деле почти правда, но не совсем.
+First, let's look at what variance is. Suppose we have two classes, `Car` and `BMW`. Obviously, `BMW` is a subclass of `Car`: every BMW is a car. People often say: "everywhere you use `Car`, you can also use `BMW`." That is almost true, but not quite.
 
-**Пример:** если у вас есть список машин, вы не можете вместо него использовать список BMW. Почему? А вот почему. Пускай вас есть `List<BMW>`, и вы используете его как список машин. Тогда, раз это список *машин*, в него можно добавить и ~~Запорожец~~ Lanos, правильно? Вот тут-то и начинаются проблемы. Если у вас в коде написано:
+**Example:** if you have a list of cars, you cannot use a list of BMWs in its place. Why? Suppose you have `List<BMW>` and you try to use it as a list of cars. Then, since it is a list of *cars*, you could add a ~~Zaporozhets~~ Lanos to it, right? This is where the problems begin. If your code says:
 
 ```csharp
 List<BMW> bmws = new List<BMW>();
-List<Car> cars = bmws;   // поскольку список БМВ - это список машин
+List<Car> cars = bmws;   // because a list of BMWs is a list of cars
 cars.Add(new Lanos());
-BMW bmw = bmvs[0];       // ой.
+BMW bmw = bmvs[0];       // oops.
 
 ```
 
-Внимательно посмотрите на этот код и подумайте над ним: он иллюстрирует проблему. (И он не откомпилируется: язык C# спроектирован так, чтобы не приводить к проблемам.) Проблема с *записью* в список. Если мы в список добавим произвольную машину, будет очень плохо: мы сможем нарушить гарантии, которые даёт нам система типов!
+Look closely at this code and think about it: it illustrates the problem. (And it will not compile: C# is designed to prevent this kind of issue.) The problem is *writing* into the list. If we can add an arbitrary car to the list, we can break the guarantees provided by the type system.
 
-Если бы у нас был список, доступный *только на чтение*, то проблем бы как раз не было:
+If we had a list that was *read-only*, there would be no problem:
 
 ```csharp
 IEnumerable<BMW> bmws = new List<BMW>() { new BMW() };
-IEnumerable<Car> cars = bmws;   // а так можно
-//cars.Add(new Lanos());    // <-- не скомпилируется
+IEnumerable<Car> cars = bmws;   // this is allowed
+//cars.Add(new Lanos());    // <-- will not compile
 ```
 
-Итак, что у нас получается? Несмотря на то, что BMW — машина, *список* BMW уже не обязательно является списком машин. А вот список BMW, доступный лишь на чтение, таки является списком машин.
+So what do we get? Even though a BMW is a car, a *list* of BMWs is not necessarily a list of cars. But a read-only sequence of BMWs can be treated as a sequence of cars.
 
-Есть?
+OK?
 
-Теперь назад к вариантности. Мы говорим о ковариантности в общем смысле, если что-то меняется *аналогичным* образом. В случае наследования классов: мы можем вместо `Car` использовать `BMW`, и *точно так же* мы можем вместо `IEnumerable<Car>`использовать `IEnumerable<BMW>`.
+Now back to variance. We talk about covariance in the general sense when something changes in an *analogous* way. With class inheritance, we can use `BMW` instead of `Car`, and *in the same way* we can use `IEnumerable<BMW>` instead of `IEnumerable<Car>`.
 
----
-Окей, это было длинное вступление, теперь вернёмся к теме: ковариантность делегатов. Пусть у нас есть делегат, зависящий от типа `Car`. Поменяем в его определении `Car` на `BMW`, можно ли новый делегат использовать вместо старого?
+Okay, that was a long introduction. Now back to the topic: covariance of delegates. Suppose we have a delegate that depends on the `Car` type. If we replace `Car` with `BMW` in its definition, can we use the new delegate instead of the old one?
 
-Давайте рассуждать логически. Если у нас есть такой делегат:
+Let's reason logically. If we have this delegate:
 
 ```csharp
 public delegate Car Replace(Car original);
 ```
 
-(он принимает на вход `Car`, и выдаёт другой экземпляр `Car`), то можно ли вместо него подставить функцию, описывающуюся делегатом такого вида:
+(it takes a `Car` and returns another `Car` instance), can we substitute a function that matches a delegate of this form instead?
 
 ```csharp
 public BMW MyReplace(BMW original) { ... }
 ```
 
-? Разумеется, нет, потому что делегат может принимать на вход любую машину, а наша функция хочет только BMW. Так что здесь ковариантности нету: такую функцию нельзя использовать там, где требуется данный делегат.
+? Of course not, because the delegate can accept any car, while our function wants only a BMW. So there is no covariance here: you cannot use such a function where this delegate is required.
 
-А вот если наш вариантный тип данных (то есть, `Car`) находится лишь в позиции возвращаемого типа:
+But if the variant type (that is, `Car`) appears only in the return position:
 
 ```csharp
 public delegate Car Create();
 
 ```
 
-то на его месте можно использовать функцию такого вида:
+then we can use a function like this instead:
 
 ```csharp
 public BMW CreateBmw() { ... }
 
 ```
 
-(если подходила любая машина, то BMW тоже подойдёт).
+(if any car is acceptable, then a BMW is acceptable too).
 
-Это и есть ковариантность делегатов: там, где от вас в коде требуется делегат, вы можете вместо него предоставить ковариантный делегат.
+This is delegate covariance: where your code requires a delegate, you can provide a covariant delegate instead.
 
-Пример кода, использующий это:
+Example code that uses this:
 
 ```csharp
-// это функция, принимающая делегат:
+// a function that takes a delegate:
 Car PrepareCar(Create carCreator)
 {
     Car car = carCreator();
@@ -110,7 +109,7 @@ Car PrepareCar(Create carCreator)
     return car;
 }
 
-// это функция, которая ковариантна Create: она возвращает не Car, а BMW
+// a function that is covariant with Create: it returns BMW instead of Car
 BMW BmwFactory()
 {
     var bmw = new BMW();
@@ -118,13 +117,12 @@ BMW BmwFactory()
     return bmw;
 }
 
-// вы можете использовать эту функцию как аргумент PrepareCar
-// хотя её сигнатура другая:
+// you can use this function as an argument to PrepareCar
+// even though its signature is different:
 return PrepareCar(BmwFactory);
 ```
 
----
-Контравариантность работает в другую сторону: там вы можете использовать делегат, работающий с *базовым* типом там, где ожидается делегат с производным типом. Такое работает для аргументов функций:
+Contravariance works in the other direction: you can use a delegate that works with a *base* type where a delegate with a derived type is expected. This works for function arguments:
 
 ```csharp
 delegate double BmwTester(BMW bmw);
@@ -141,25 +139,21 @@ double UniversalTester(Car car)
     return 5.0;
 }
 
-// вы можете использовать UniversalTester, хотя у него и не совсем подходящая сигнатура
+// you can use UniversalTester even though its signature is not an exact match
 TestAndPublish(UniversalTester);
 ```
 
-Это работает по тем же причинам, что и ковариантность: если тестеру подходит любой тип машины, то он сможет работать и с BMW тоже.
+This works for the same reasons as covariance: if the tester can handle any car type, it can also handle a BMW.
 
 ## Events
 
-*Событие* — это именованный делегат, при вызове которого, будут запущены все подписавшиеся на момент вызова события методы заданной сигнатуры.
+An *event* is a named delegate that, when invoked, runs all methods with the given signature that are subscribed at the time the event is raised.
 
-Простыми словами, это не что иное, как ситуация, при возникновении которой, произойдут некоторые действия. 
+In simple terms, it is just a situation: when it happens, certain actions occur.
 
-Преимущество Событий очевидно: *классу-издателю, генерирующему событие* не нужно знать, сколько *классов-подписчиков подпишется* или отпишется. Он создал событие для определенных методов, ограничив их делегатом по определенной сигнатуре.
+The advantage of events is clear: the *publisher class that raises the event* does not need to know how many *subscriber classes* will subscribe or unsubscribe. It creates an event for a specific signature by constraining it with a delegate type.
 
-События широко используются для составления собственных компонентов управления (кнопок, панелей, и т.д.).
-
-## Links
-
-- https://habr.com/ru/articles/329886/
+Events are widely used when building custom UI components (buttons, panels, and so on).
 
 ## Questions
 
@@ -209,9 +203,11 @@ TestAndPublish(UniversalTester);
 
 ## Links
 
+- https://habr.com/ru/articles/329886/
+
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -234,13 +230,12 @@ const pages = dv.pages()
   .sort(p => p.file.name, "asc");
   
   if (children.length) {
-	  dv.header(2, "Topics");
-	  dv.list(children.map(p => p.file.link));
+	dv.header(2, "Topics");
+	dv.list(children.map(p => p.file.link));
   }
   if (pages.length) {
-	  dv.header(2, "Pages");
-	  dv.list(pages.map(p => p.file.link));
+	dv.header(2, "Pages");
+	dv.list(pages.map(p => p.file.link));
   }
   
 ```
-

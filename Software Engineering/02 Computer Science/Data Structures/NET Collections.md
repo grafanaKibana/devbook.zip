@@ -1,12 +1,14 @@
 ---
 topic:
-  - Computer Science
+  - "Computer Science"
 subtopic:
-  - Data Structures
-level: ["1"]
+  - "Data Structures"
+level:
+  - "1"
 priority: Medium
 status: Not-Started
 ---
+
 # Intro
 
 .NET provides a set of collection types (like `List<T>`, `Dictionary<TKey, TValue>`, `HashSet<T>`) plus common abstractions (`IEnumerable<T>`, `IQueryable<T>`) that affect performance, memory, and execution location.
@@ -60,7 +62,7 @@ status: Not-Started
 
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -83,13 +85,12 @@ const pages = dv.pages()
   .sort(p => p.file.name, "asc");
   
   if (children.length) {
-	  dv.header(2, "Topics");
-	  dv.list(children.map(p => p.file.link));
+	dv.header(2, "Topics");
+	dv.list(children.map(p => p.file.link));
   }
   if (pages.length) {
-	  dv.header(2, "Pages");
-	  dv.list(pages.map(p => p.file.link));
+	dv.header(2, "Pages");
+	dv.list(pages.map(p => p.file.link));
   }
   
 ```
-

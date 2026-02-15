@@ -1,16 +1,15 @@
 ---
 topic:
-  - SDLC
+  - "SDLC"
 subtopic: []
-level:
-  - "1"
-priority: Medium
-status: Not-Started
-aliases:
-  - SDLC
 tags:
   - FolderNote
 ---
+
+# Intro
+
+## Deeper Explanation
+
 ## Questions
 
 > [!QUESTION]- Explain Agile, Scrum, Kanban, and Waterfall.
@@ -19,9 +18,11 @@ tags:
 > - Kanban: a flow-based method focused on visualizing work, limiting work in progress, and optimizing lead time/throughput.
 > - Waterfall: a sequential lifecycle (requirements -> design -> implementation -> testing -> release) that works best when requirements are stable and change is expensive.
 
+## Links
+
 # Whats next
 
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
 const cur = dv.current();
@@ -53,4 +54,3 @@ const pages = dv.pages()
   }
   
 ```
-
