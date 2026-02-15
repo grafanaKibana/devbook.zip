@@ -11,14 +11,14 @@
             "id": "e7a7b303c61786dc",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
+              "type": "markdown",
               "state": {
-                "aFile": "Vault/URL.md",
-                "bFile": "Vault/URL.md",
-                "aRef": ""
+                "file": "Software Engineering/Software Engineering.md",
+                "mode": "preview",
+                "source": false
               },
-              "icon": "diff",
-              "title": "Diff: URL  (Working Tree)"
+              "icon": "lucide-file",
+              "title": "Software Engineering"
             }
           }
         ]
@@ -103,12 +103,13 @@
             "state": {
               "type": "outline",
               "state": {
+                "file": "Software Engineering/Software Engineering.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline"
+              "title": "Outline of Software Engineering"
             }
           },
           {
@@ -117,6 +118,7 @@
             "state": {
               "type": "backlink",
               "state": {
+                "file": "Software Engineering/Software Engineering.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -126,7 +128,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks"
+              "title": "Backlinks for Software Engineering"
             }
           },
           {
@@ -148,9 +150,11 @@
             "type": "leaf",
             "state": {
               "type": "file-properties",
-              "state": {},
+              "state": {
+                "file": "Software Engineering/Software Engineering.md"
+              },
               "icon": "lucide-info",
-              "title": "File properties"
+              "title": "File properties for Software Engineering"
             }
           }
         ],
@@ -201,12 +205,13 @@
       "digitalgarden:Digital Garden Publication Center": false
     }
   },
-  "active": "b4a5f2c64c8491f4",
+  "active": "e7a7b303c61786dc",
   "lastOpenFiles": [
+    "Software Engineering/Software Engineering.md",
+    "Software Engineering/01 Programming/01 Programming.md",
+    "Software Engineering/Roadmap.canvas",
     "Assets/library-big.svg",
     "URL.md",
-    "Software Engineering/Roadmap.canvas",
-    "Software Engineering/Software Engineering.md",
     "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Bubble Sort.md",
     "Software Engineering/04 Networks/Architecture & Ops/VPN.md",
     "Software Engineering/Untitled.canvas",
@@ -251,7 +256,6 @@
     "Vault/Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205141994.png",
     "Vault/Assets/11 AI & ML/11 AI & ML-LLM-20260211012223477.png",
     "Vault/Assets/01 Programming/01 Programming-Types-20260211184602492.png",
-    "Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205142069.png",
     "quartz/public/Roadmap.canvas",
     "quartz/content/Roadmap.canvas",
     "public/Roadmap.canvas",
