@@ -4,38 +4,25 @@
     "type": "split",
     "children": [
       {
-        "id": "54b9e0a3f0b7aaec",
+        "id": "4509724f8bf84da7",
         "type": "tabs",
         "children": [
           {
-            "id": "70994c056d478933",
-            "type": "leaf",
-            "pinned": true,
-            "state": {
-              "type": "bases",
-              "state": {
-                "file": "Software Engineering/Topics.base",
-                "viewName": "Table"
-              },
-              "pinned": true,
-              "icon": "lucide-table",
-              "title": "Topics"
-            }
-          },
-          {
-            "id": "9d170404770df8c8",
+            "id": "e7a7b303c61786dc",
             "type": "leaf",
             "state": {
-              "type": "image",
+              "type": "split-diff-view",
               "state": {
-                "file": "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205142069.png"
+                "aFile": "src/site/notes/Software Engineering/03 Data Persistance/SQL/Indexes.md",
+                "bFile": "src/site/notes/Software Engineering/03 Data Persistance/SQL/Indexes.md",
+                "aRef": "HEAD",
+                "bRef": ""
               },
-              "icon": "lucide-image",
-              "title": "03 Data Persistence-Indexes-20260210205142069"
+              "icon": "diff",
+              "title": "Diff: Indexes  (Index)"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -164,11 +151,9 @@
             "type": "leaf",
             "state": {
               "type": "file-properties",
-              "state": {
-                "file": "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205142069.png"
-              },
+              "state": {},
               "icon": "lucide-info",
-              "title": "File properties for 03 Data Persistence-Indexes-20260210205142069"
+              "title": "File properties"
             }
           }
         ],
@@ -219,22 +204,24 @@
       "digitalgarden:Digital Garden Publication Center": false
     }
   },
-  "active": "9d170404770df8c8",
+  "active": "e7a7b303c61786dc",
   "lastOpenFiles": [
+    "Software Engineering/03 Data Persistence/SQL/Indexes.md",
+    "Software Engineering/Topics.base",
+    "Software Engineering/03 Data Persistence/SQL/SQL.md",
+    "Software Engineering/03 Data Persistence/03 Data Persistence.md",
+    "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205142069.png",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205142050.png",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205142011.png",
+    "Assets/03 Data Persistence/03 Data Persistence.md",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205141994.png",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205142027.png",
-    "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205142069.png",
-    "Assets/03 Data Persistence/03 Data Persistence.md",
     "Assets/03 Data Persistence/03 Data Persistance-Indexes-20260210205142069.png",
     "Assets/03 Data Persistence/03 Data Persistance-Indexes-20260210205142050.png",
     "Assets/03 Data Persistence/03 Data Persistance-Indexes-20260210205142027.png",
     "Assets/03 Data Persistence/03 Data Persistance-Indexes-20260210205142011.png",
     "Assets/03 Data Persistence",
-    "Software Engineering/03 Data Persistence/SQL/SQL.md",
     "Software Engineering/03 Data Persistence/SQL/Normalization Denormalization.md",
-    "Software Engineering/03 Data Persistence/SQL/Indexes.md",
     "Software Engineering/03 Data Persistence/ORMs/ORMs.md",
     "Software Engineering/03 Data Persistence/ORMs/Entity Framework.md",
     "Software Engineering/03 Data Persistence/NoSQL/NoSQL.md",
@@ -243,10 +230,8 @@
     "Software Engineering/03 Data Persistence/ACID.md",
     "Software Engineering/03 Data Persistence/NoSQL",
     "Software Engineering/03 Data Persistence/Caching.md",
-    "Software Engineering/03 Data Persistence/03 Data Persistence.md",
     "Software Engineering/03 Data Persistence",
     "Software Engineering/Software Engineering.md",
-    "Software Engineering/Topics.base",
     "Software Engineering/01 Programming/01 Programming.md",
     "Software Engineering/03 Data Persistance/03 Data Persistance.md",
     "Software Engineering/03 Data Persistance/SQL/Indexes.md",
@@ -264,7 +249,6 @@
     "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Bubble Sort.md",
     "Software Engineering/04 Networks/Architecture & Ops/VPN.md",
     "Software Engineering/Untitled.canvas",
-    "Assets/favicon.png",
     "Vault/Templates/Mermaid",
     "Vault/Templates/Pages",
     "Vault/Templates/Blocks",
