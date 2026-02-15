@@ -96,7 +96,6 @@ if (notesWithoutTopic.length > 0) {
   dv.paragraph(calloutMarkdown);
 }
 ```
-
 # Status Distribution
 
 ```dataviewjs
@@ -173,7 +172,7 @@ LIMIT 12
 # Recently Updated
 
 ```dataview
-TABLE WITHOUT ID file.link as "Note"
+TABLE WITHOUT ID file.link as "Note", file.mtime as "Date"
 FROM "Software Engineering"
 WHERE !contains(file.tags, "#FolderNote")
 SORT file.mtime DESC
