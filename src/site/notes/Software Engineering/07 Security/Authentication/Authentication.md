@@ -2,17 +2,14 @@
 {"dg-publish":true,"permalink":"/software-engineering/07-security/authentication/authentication/","tags":["FolderNote"],"noteIcon":""}
 ---
 
+
 # Intro
 
-Quick introduction to the topic
-
-## Deeper Explanation
-
-Deeper Explanation of the topic
-
-## Questions
+Authentication is how a system proves who a user or service is, and it is a core control for production security. The details matter: password storage, MFA, session management, OAuth/OIDC, and secure failure handling. Example: a login flow is not done until you handle brute-force protection, account recovery, and session revocation.
 
 ## Links
+
+- [OWASP Authentication Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html)
 
 # Whats next
 

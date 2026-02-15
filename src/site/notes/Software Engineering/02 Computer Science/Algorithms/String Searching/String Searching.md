@@ -5,34 +5,11 @@
 
 # Intro
 
-## Deeper Explanation
-
-## Diagram
-
-```mermaid
-graph TD
-  A[Need to find pattern P in text T] --> B{What do you need}
-  B -->|Exact matching linear time| C[KMP]
-  B -->|Fast average hashing OK| D[Rabin Karp]
-  B -->|Many queries or automata| E[Other Trie Aho Corasick]
-  C --> F[Compute pi array for P]
-  F --> G[Scan T with fallback using pi array]
-  D --> H[Compute rolling hash for windows]
-  H --> I[Verify when hashes match]
-```
-
-## Questions
+String searching is about finding patterns in text efficiently, from small inputs to massive logs and documents. Good algorithms avoid re-checking work and keep performance predictable as input sizes grow. Example: KMP searches for a pattern in linear time by reusing prefix information instead of backtracking.
 
 ## Links
 
-## Deeper Explanation
-
-
-## Questions
-
-
-## Links
-
+- [String-searching algorithm (Wikipedia)](https://en.wikipedia.org/wiki/String-searching_algorithm)
 
 # Whats next
 

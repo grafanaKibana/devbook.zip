@@ -5,11 +5,11 @@
 
 # Intro
 
-## Deeper Explanation
-
-## Questions
+Deployment strategies reduce risk by controlling how changes reach users: gradual rollout, quick rollback, and safe validation. A strategy is only as good as your monitoring and your ability to stop or reverse. Example: canary deploys let you validate a new version on a small slice of traffic before scaling up.
 
 ## Links
+
+- [Deployment pipeline (Martin Fowler)](https://martinfowler.com/bliki/DeploymentPipeline.html)
 
 # Whats next
 
