@@ -11,17 +11,14 @@
             "id": "70994c056d478933",
             "type": "leaf",
             "state": {
-              "type": "canvas",
+              "type": "split-diff-view",
               "state": {
-                "file": "Software Engineering/Roadmap.canvas",
-                "viewState": {
-                  "x": 167.37461051239302,
-                  "y": 234.15228064744053,
-                  "zoom": -1.1339469009379068
-                }
+                "aFile": "Vault/Software Engineering/Software Engineering.md",
+                "bFile": "Vault/Software Engineering/Software Engineering.md",
+                "aRef": ""
               },
-              "icon": "lucide-layout-dashboard",
-              "title": "Roadmap"
+              "icon": "diff",
+              "title": "Diff: Software Engineering  (Working Tree)"
             }
           }
         ]
@@ -153,11 +150,9 @@
             "type": "leaf",
             "state": {
               "type": "file-properties",
-              "state": {
-                "file": "Software Engineering/Roadmap.canvas"
-              },
+              "state": {},
               "icon": "lucide-info",
-              "title": "File properties for Roadmap"
+              "title": "File properties"
             }
           }
         ],
@@ -208,11 +203,11 @@
       "digitalgarden:Digital Garden Publication Center": false
     }
   },
-  "active": "b85fcedbefcde250",
+  "active": "70994c056d478933",
   "lastOpenFiles": [
     "Software Engineering/Software Engineering.md",
-    "Software Engineering/01 Programming/01 Programming.md",
     "Software Engineering/Roadmap.canvas",
+    "Software Engineering/01 Programming/01 Programming.md",
     "Assets/library-big.svg",
     "URL.md",
     "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Bubble Sort.md",
@@ -244,7 +239,6 @@
     "Vault/Templates",
     "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types.md",
     "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Delegates and Events.md",
-    "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Strings.md",
     "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types",
     "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Collections",
     "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures",
