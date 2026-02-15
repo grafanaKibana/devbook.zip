@@ -35,7 +35,21 @@ function getAnchorLink(filePath, linkTitle) {
 }
 
 function getAnchorAttributes(filePath, linkTitle) {
-  let fileName = filePath.replaceAll("&amp;", "&");
+  const rawPath = (filePath ?? "").toString();
+  const trimmedPath = rawPath.trim();
+
+  if (trimmedPath.startsWith("#")) {
+    return {
+      attributes: {
+        "class": "internal-link",
+        "target": "",
+        "href": trimmedPath,
+      },
+      innerHTML: linkTitle ? linkTitle : trimmedPath,
+    };
+  }
+
+  let fileName = rawPath.replaceAll("&amp;", "&");
   let header = "";
   let headerLinkPath = "";
   if (filePath.includes("#")) {
@@ -62,7 +76,7 @@ function getAnchorAttributes(filePath, linkTitle) {
     }
     if (
       frontMatter.data.tags &&
-      frontMatter.data.tags.indexOf("gardenEntry") != -1
+      frontMatter.data.tags.indexOf("gardenEntry") !== -1
     ) {
       permalink = "/";
     }
@@ -179,7 +193,7 @@ module.exports = function(eleventyConfig) {
               } else if (line.startsWith("collapse:")) {
                 collapsible = true
                 collapse = line.substring(9);
-                if (collapse && collapse.trim().toLowerCase() == 'open') {
+                if (collapse && collapse.trim().toLowerCase() === 'open') {
                   collapsed = false
                 }
                 nbLinesToSkip++;
