@@ -1,73 +1,30 @@
 {
   "main": {
-    "id": "1525bb228e8a074d",
+    "id": "5324373015726ba8",
     "type": "split",
     "children": [
       {
-        "id": "2a9162b21f832cf8",
+        "id": "4509724f8bf84da7",
         "type": "tabs",
         "children": [
           {
-            "id": "1fedc7451582c06e",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Templates/Pages/Template - Concept Page.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Template - Concept Page"
-            }
-          },
-          {
-            "id": "3c02eb99209b7019",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Software Engineering/01 Programming/NET/Other/OWIN.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "OWIN"
-            }
-          },
-          {
-            "id": "779c4f17a56ae60f",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Software Engineering/03 Data Persistance/ORMs/ORMs.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "ORMs"
-            }
-          },
-          {
-            "id": "8e30b54bf7be122a",
+            "id": "e7a7b303c61786dc",
             "type": "leaf",
             "state": {
               "type": "canvas",
               "state": {
                 "file": "Software Engineering/Roadmap.canvas",
                 "viewState": {
-                  "x": 81.91378380256145,
-                  "y": 215.20802088280604,
-                  "zoom": -0.5578311618612442
+                  "x": 144.00065235430833,
+                  "y": 1625.4205606178925,
+                  "zoom": -1.6244978285279106
                 }
               },
               "icon": "lucide-layout-dashboard",
               "title": "Roadmap"
             }
           }
-        ],
-        "currentTab": 3
+        ]
       }
     ],
     "direction": "vertical"
@@ -179,10 +136,10 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Software Engineering/01 Programming/01 Programming.md"
+                "file": "Software Engineering/Roadmap.canvas"
               },
               "icon": "lucide-info",
-              "title": "File properties for 01 Programming"
+              "title": "File properties for Roadmap"
             }
           },
           {
@@ -277,6 +234,7 @@
   },
   "left-ribbon": {
     "hiddenItems": {
+      "homepage:Open homepage": false,
       "omnisearch:Omnisearch": false,
       "bases:Create new base": false,
       "canvas:Create new canvas": false,
@@ -285,53 +243,15 @@
       "command-palette:Open command palette": true,
       "obsidian-git:Open Git source control": true,
       "templater-obsidian:Templater": false,
-      "notebook-navigator:Notebook Navigator": true,
-      "homepage:Open homepage": false
+      "notebook-navigator:Notebook Navigator": true
     }
   },
-  "floating": {
-    "id": "7d88d0a220b12190",
-    "type": "floating",
-    "children": [
-      {
-        "id": "f02d71eaa2c8f727",
-        "type": "window",
-        "children": [
-          {
-            "id": "315e4d81f1f7db97",
-            "type": "tabs",
-            "children": [
-              {
-                "id": "a8300a75db95d0d8",
-                "type": "leaf",
-                "state": {
-                  "type": "webviewer",
-                  "state": {
-                    "url": "https://github.com/mgmeyers/obsidian-kanban/issues",
-                    "title": "Issues · mgmeyers/obsidian-kanban · GitHub",
-                    "mode": "webview"
-                  },
-                  "icon": "globe-2",
-                  "title": "Issues · mgmeyers/obsidian-kanban · GitHub"
-                }
-              }
-            ]
-          }
-        ],
-        "direction": "vertical",
-        "x": 1208,
-        "y": 256,
-        "width": 1024,
-        "height": 800,
-        "maximize": false,
-        "zoom": 0
-      }
-    ]
-  },
-  "active": "8e30b54bf7be122a",
+  "active": "4ecbdb0726a22257",
   "lastOpenFiles": [
-    "Software Engineering/Topics.base",
     "Software Engineering/Software Engineering.md",
+    "Software Engineering/01 Programming/01 Programming.md",
+    "Software Engineering/Roadmap.canvas",
+    "Software Engineering/Topics.base",
     "Software Engineering/10 Cloud/AWS/SQS.md",
     "Software Engineering/10 Cloud/AWS/S3.md",
     "Software Engineering/10 Cloud/AWS/EC2.md",
@@ -365,8 +285,6 @@
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures/asdf",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures/Some",
-    "Software Engineering/01 Programming/NET/ASP.NET Web API",
-    "Software Engineering/Roadmap.canvas",
     "Assets/11 AI & ML/11 AI & ML-LLM-20260211012223477.png",
     "Assets/11 AI & ML/11 AI & ML-Instruction Prompting-20260211012332406.svg",
     "Assets/11 AI & ML/11 AI & ML-Showing Examples-20260211012332470.svg",

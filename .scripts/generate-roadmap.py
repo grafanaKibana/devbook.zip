@@ -24,6 +24,9 @@ NODE_H = 80
 X_SUBTOPIC_OFFSET = 420
 X_MAIN = 0
 
+CARD_NODE_TYPE = "text"
+COLLAPSE_FILE_NODES = True
+
 # Vertical layout tuning.
 NODE_V_GAP = 40
 TOPIC_V_GAP = 160
@@ -75,6 +78,33 @@ def eid(a, b):
 
 def hub(d):
     return os.path.join(d, os.path.basename(d) + ".md")
+
+
+def canvas_title_for_path(rel_md_path):
+    return os.path.splitext(os.path.basename(rel_md_path))[0]
+
+
+def canvas_node_for_path(node_id, rel_md_path, x, y):
+    n = {
+        "id": node_id,
+        "x": x,
+        "y": y,
+        "width": NODE_W,
+        "height": NODE_H,
+    }
+
+    if CARD_NODE_TYPE == "file":
+        n["type"] = "file"
+        n["file"] = rel_md_path
+        if COLLAPSE_FILE_NODES:
+            n["collapsed"] = True
+        return n
+
+    title = canvas_title_for_path(rel_md_path)
+    link_target = os.path.splitext(rel_md_path)[0]
+    n["type"] = "text"
+    n["text"] = f"[[{link_target}|{title}]]"
+    return n
 
 
 def subdirs(d):
@@ -234,15 +264,7 @@ def generate():
         rel = os.path.relpath(hub(dir_abs), VAULT_ROOT)
         cid = nid(rel)
         cx = X_MAIN + (direction * depth * X_SUBTOPIC_OFFSET)
-        n = {
-            "id": cid,
-            "type": "file",
-            "file": rel,
-            "x": cx,
-            "y": y,
-            "width": NODE_W,
-            "height": NODE_H,
-        }
+        n = canvas_node_for_path(cid, rel, cx, y)
         st = hub_status_for_dir(dir_abs, rollup_status_by_dir)
         if st:
             node_status_counts[st] += 1
@@ -324,15 +346,7 @@ def generate():
         tr = build_tree(td)
         rollup_status_by_dir = build_rollup_status_by_dir(tr, td)
 
-        n = {
-            "id": tid,
-            "type": "file",
-            "file": rel,
-            "x": X_MAIN,
-            "y": topic_y,
-            "width": NODE_W,
-            "height": NODE_H,
-        }
+        n = canvas_node_for_path(tid, rel, X_MAIN, topic_y)
         st = hub_status_for_dir(td, rollup_status_by_dir)
         if st:
             node_status_counts[st] += 1
