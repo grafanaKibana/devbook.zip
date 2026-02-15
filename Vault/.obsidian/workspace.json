@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Software Engineering/Software Engineering.md",
-                "mode": "preview",
+                "file": "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Bubble Sort.md",
+                "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Software Engineering"
+              "title": "Bubble Sort"
             }
           }
         ]
@@ -103,10 +103,10 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Software Engineering/Software Engineering.md"
+                "file": "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Bubble Sort.md"
               },
               "icon": "lucide-info",
-              "title": "File properties for Software Engineering"
+              "title": "File properties for Bubble Sort"
             }
           },
           {
@@ -213,7 +213,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 407.5
+    "width": 407.5,
+    "collapsed": true
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -230,8 +231,51 @@
       "digitalgarden:Digital Garden Publication Center": false
     }
   },
-  "active": "e7a7b303c61786dc",
+  "floating": {
+    "id": "146a173a4d305f17",
+    "type": "floating",
+    "children": [
+      {
+        "id": "2dead4f440fc8763",
+        "type": "window",
+        "children": [
+          {
+            "id": "fddadfdf292e3a51",
+            "type": "tabs",
+            "children": [
+              {
+                "id": "3a076eace8cad93e",
+                "type": "leaf",
+                "state": {
+                  "type": "markdown",
+                  "state": {
+                    "file": "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Bubble Sort.md",
+                    "mode": "preview",
+                    "source": false
+                  },
+                  "icon": "lucide-file",
+                  "title": "Bubble Sort"
+                }
+              }
+            ]
+          }
+        ],
+        "direction": "vertical",
+        "x": 1208,
+        "y": 256,
+        "width": 1024,
+        "height": 800,
+        "maximize": false,
+        "zoom": 0
+      }
+    ]
+  },
+  "active": "3a076eace8cad93e",
   "lastOpenFiles": [
+    "Assets/favicon.png",
+    "Assets/brain-circuit.png",
+    "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Bubble Sort.md",
+    "Software Engineering/Roadmap.canvas",
     "Software Engineering/Software Engineering.md",
     "Vault/Templates/Mermaid/Mermaid.md",
     "Vault/Templates/Pages/Pages.md",
@@ -263,8 +307,6 @@
     "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Collections",
     "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md",
     "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures",
-    "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Async Await.md",
-    "Vault/Software Engineering/11 AI & ML/LLM/Prompting/Showing Examples.md",
     "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals",
     "Vault/Software Engineering/11 AI & ML/LLM/Prompting",
     "Vault/Software Engineering/11 AI & ML/LLM/Agents",
@@ -278,8 +320,6 @@
     "Vault/Assets/01 Programming/01 Programming-Types-20260211184602492.png",
     "Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205142069.png",
     "Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205142050.png",
-    "Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205142027.png",
-    "Software Engineering/Roadmap.canvas",
     "quartz/public/Roadmap.canvas",
     "quartz/content/Roadmap.canvas",
     "public/Roadmap.canvas",

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regenerate Software Engineering/Roadmap.canvas from folder structure.
+"""Regenerate Vault/Software Engineering/Roadmap.canvas from folder structure.
 
 Usage:
     python3 .scripts/generate-roadmap.py
@@ -14,10 +14,20 @@ import sys
 import datetime
 from collections import Counter
 
-VAULT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+VAULT_ROOT = os.path.join(REPO_ROOT, "Vault")
 KNOWLEDGE = os.path.join(VAULT_ROOT, "Software Engineering")
 CANVAS_PATH = os.path.join(KNOWLEDGE, "Roadmap.canvas")
 MAX_DEPTH = 5
+
+DG_ROADMAP_PERMALINK = "/software-engineering/roadmap/"
+DG_ROADMAP_FRONTMATTER = {
+    "dg-publish": True,
+    "permalink": DG_ROADMAP_PERMALINK,
+    "title": "Roadmap",
+}
+CANVAS_METADATA_VERSION = "1.0-1.0"
 
 NODE_W = 340
 NODE_H = 80
@@ -30,7 +40,6 @@ TOPIC_V_GAP = 160
 STEP_Y = NODE_H + NODE_V_GAP
 
 
-# Status values are defined by Templates/Template - Concept Page.md.
 # Colors follow JSON Canvas spec: either hex (#RRGGBB) or palette ids "1".."6".
 # Palette ids are theme-friendly; hex is used for a neutral gray Not-Started.
 STATUS_COLORS = {
@@ -494,7 +503,14 @@ def generate():
                 e["color"] = a["color"]
             edges.append(e)
 
-    return {"nodes": nodes, "edges": edges}
+    return {
+        "nodes": nodes,
+        "edges": edges,
+        "metadata": {
+            "version": CANVAS_METADATA_VERSION,
+            "frontmatter": DG_ROADMAP_FRONTMATTER,
+        },
+    }
 
 
 def main():

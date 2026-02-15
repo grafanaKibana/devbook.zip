@@ -502,7 +502,7 @@
     {
       "id": "n_b0ac2236f9",
       "type": "text",
-      "text": "#### Roadmap legend\n**Generated:** Feb 15 2026 | 07:37PM",
+      "text": "#### Roadmap legend\n**Generated:** Feb 15 2026 | 08:31PM",
       "x": -1020,
       "y": 0,
       "width": 500,
@@ -928,5 +928,13 @@
       "toSide": "left",
       "color": "6"
     }
-  ]
+  ],
+  "metadata": {
+    "version": "1.0-1.0",
+    "frontmatter": {
+      "dg-publish": true,
+      "permalink": "/software-engineering/roadmap/",
+      "title": "Roadmap"
+    }
+  }
 }
