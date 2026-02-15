@@ -13,12 +13,12 @@
             "state": {
               "type": "split-diff-view",
               "state": {
-                "aFile": "Vault/.obsidian/graph.json",
-                "bFile": "Vault/.obsidian/graph.json",
+                "aFile": "Vault/URL.md",
+                "bFile": "Vault/URL.md",
                 "aRef": ""
               },
               "icon": "diff",
-              "title": "Diff: graph.json  (Working Tree)"
+              "title": "Diff: URL  (Working Tree)"
             }
           }
         ]
@@ -201,8 +201,9 @@
       "digitalgarden:Digital Garden Publication Center": false
     }
   },
-  "active": "e7a7b303c61786dc",
+  "active": "b4a5f2c64c8491f4",
   "lastOpenFiles": [
+    "Assets/library-big.svg",
     "URL.md",
     "Software Engineering/Roadmap.canvas",
     "Software Engineering/Software Engineering.md",
@@ -236,7 +237,6 @@
     "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types.md",
     "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Delegates and Events.md",
     "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Strings.md",
-    "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Collections/Collections.md",
     "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types",
     "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Collections",
     "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures",
