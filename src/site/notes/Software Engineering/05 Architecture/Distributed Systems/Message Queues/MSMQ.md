@@ -1,0 +1,30 @@
+---
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/distributed-systems/message-queues/msmq/","noteIcon":""}
+---
+
+
+# Intro
+
+Microsoft Message Queuing (MSMQ) is a Windows message-queueing technology historically used for reliable, asynchronous messaging in on-premise environments.
+
+## Example
+
+In .NET Framework, MSMQ is commonly accessed via `System.Messaging`.
+
+```csharp
+using System.Messaging;
+
+MessageQueue.Create(@".\\Private$\\orders");
+using var q = new MessageQueue(@".\\Private$\\orders");
+q.Send("order-123");
+```
+
+
+## Questions
+
+> [!QUESTION]- When should MSMQ be used today?
+> Mostly in legacy/on-prem Windows environments where MSMQ is already part of the system. For new systems, prefer actively supported managed brokers/queues appropriate for your platform and operational model.
+
+## Links
+
+- [System.Messaging namespace](https://learn.microsoft.com/en-us/dotnet/api/system.messaging)

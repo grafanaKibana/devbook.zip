@@ -1,0 +1,13 @@
+---
+{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/c-sharp/fundamentals/control-structures/control-structures/","tags":["FolderNote"],"noteIcon":""}
+---
+
+# Intro
+
+This folder collects core C# control-flow topics plus a few adjacent fundamentals that were originally captured together.
+
+# Whats next
+
+:LiArrowUpLeft: [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals\|Fundamentals]]
+
+<h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Exception Handling.md" data-href="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Exception Handling.md" href="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Exception Handling.md" class="internal-link" target="_blank" rel="noopener nofollow">Exception Handling</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Foreach.md" data-href="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Foreach.md" href="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Foreach.md" class="internal-link" target="_blank" rel="noopener nofollow">Foreach</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Methods.md" data-href="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Methods.md" href="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Methods.md" class="internal-link" target="_blank" rel="noopener nofollow">Methods</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Namespaces.md" data-href="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Namespaces.md" href="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Namespaces.md" class="internal-link" target="_blank" rel="noopener nofollow">Namespaces</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Reflection.md" data-href="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Reflection.md" href="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Reflection.md" class="internal-link" target="_blank" rel="noopener nofollow">Reflection</a></span></li></ul></div>
