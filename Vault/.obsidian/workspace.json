@@ -11,15 +11,14 @@
             "id": "e7a7b303c61786dc",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
+              "type": "markdown",
               "state": {
-                "aFile": "Vault/.obsidian/workspace.json",
-                "bFile": "Vault/.obsidian/workspace.json",
-                "aRef": "HEAD",
-                "bRef": ""
+                "file": "Software Engineering/04 Networks/Architecture & Ops/VPN.md",
+                "mode": "preview",
+                "source": false
               },
-              "icon": "diff",
-              "title": "Diff: workspace.json  (Index)"
+              "icon": "lucide-file",
+              "title": "VPN"
             }
           }
         ]
@@ -103,9 +102,11 @@
             "type": "leaf",
             "state": {
               "type": "file-properties",
-              "state": {},
+              "state": {
+                "file": "Software Engineering/04 Networks/Architecture & Ops/VPN.md"
+              },
               "icon": "lucide-info",
-              "title": "File properties"
+              "title": "File properties for VPN"
             }
           },
           {
@@ -114,13 +115,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Templates/Pages/Template - Index.md",
+                "file": "Software Engineering/04 Networks/Architecture & Ops/VPN.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Template - Index"
+              "title": "Outline of VPN"
             }
           },
           {
@@ -252,13 +253,20 @@
       }
     ]
   },
-  "active": "4ecbdb0726a22257",
+  "active": "e7a7b303c61786dc",
   "lastOpenFiles": [
+    "Software Engineering/Untitled.canvas",
+    "Software Engineering/Roadmap.canvas",
+    "Templates/Pages/Template - Index.md",
+    "Templates/Pages/Template - Concept Page.md",
+    "Templates/Mermaid/Template - Class Diagram.md",
+    "Templates/Blocks/Template - Code Block.md",
+    "Templates/Blocks/Template - Callout.md",
+    "Templates/Templates.md",
+    "Software Engineering/Software Engineering.md",
     "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Bubble Sort.md",
     "Assets/favicon.png",
     "Assets/brain-circuit.png",
-    "Software Engineering/Roadmap.canvas",
-    "Software Engineering/Software Engineering.md",
     "Vault/Templates/Mermaid/Mermaid.md",
     "Vault/Templates/Pages/Pages.md",
     "Vault/Templates/Blocks/Blocks.md",
@@ -280,14 +288,8 @@
     "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Strings.md",
     "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Collections/Collections.md",
     "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Reflection.md",
-    "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Namespaces.md",
-    "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Foreach.md",
-    "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Methods.md",
-    "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Exception Handling.md",
-    "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Control Structures.md",
     "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types",
     "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Collections",
-    "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md",
     "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures",
     "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals",
     "Vault/Software Engineering/11 AI & ML/LLM/Prompting",
