@@ -63,7 +63,7 @@ const rows = [...topicStats.entries()].map(([topic, s]) => {
 rows.sort((a, b) => a.pct - b.pct || b.total - a.total || a.topic.localeCompare(b.topic));
 
 // Wrap the table so the published site can apply the same Dataview table normalization
-// it applies to ```dataview``` query blocks.
+// it applies to dataview query blocks.
 const wrapper = this.container.createEl("div");
 wrapper.classList.add("block-language-dataview");
 
@@ -103,6 +103,7 @@ if (notesWithoutTopic.length > 0) {
   dv.paragraph(calloutMarkdown);
 }
 ```
+
 # Status Distribution
 
 ```dataviewjs
@@ -140,7 +141,7 @@ const rows = allKeys
   .filter((r) => r.status !== "Missing" || r.count > 0);
 
 // Wrap the table so the published site can apply the same Dataview table normalization
-// it applies to ```dataview``` query blocks.
+// it applies to dataview query blocks.
 const wrapper = this.container.createEl("div");
 wrapper.classList.add("block-language-dataview");
 
