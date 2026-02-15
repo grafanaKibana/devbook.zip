@@ -1,0 +1,7 @@
+.markdown-preview-view progress.se-progress,
+.markdown-rendered progress.se-progress,
+.markdown-source-view.is-live-preview progress.se-progress {
+  width: 100%;
+  height: 12px;
+  vertical-align: middle;
+}
