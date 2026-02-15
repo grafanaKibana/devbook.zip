@@ -2,7 +2,6 @@
 topic: []
 subtopic: []
 level:
-  - "1"
 priority: Medium
 status: Not-Started
 tags:

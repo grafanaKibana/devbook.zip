@@ -67,14 +67,14 @@
             "id": "1af06994487b60a6",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "split-diff-view",
               "state": {
-                "file": "Software Engineering/03 Data Persistance/ORMs/Entity Framework.md",
-                "mode": "source",
-                "source": false
+                "aFile": "Templates/Pages/Template - Index.md",
+                "bFile": "Templates/Pages/Template - Index.md",
+                "aRef": ""
               },
-              "icon": "lucide-file",
-              "title": "Entity Framework"
+              "icon": "diff",
+              "title": "Diff: Template - Index  (Working Tree)"
             }
           }
         ],
@@ -189,11 +189,9 @@
             "type": "leaf",
             "state": {
               "type": "file-properties",
-              "state": {
-                "file": "Software Engineering/03 Data Persistance/ORMs/Entity Framework.md"
-              },
+              "state": {},
               "icon": "lucide-info",
-              "title": "File properties for Entity Framework"
+              "title": "File properties"
             }
           },
           {
@@ -299,49 +297,12 @@
       "notebook-navigator:Notebook Navigator": true
     }
   },
-  "floating": {
-    "id": "86734d631be51a37",
-    "type": "floating",
-    "children": [
-      {
-        "id": "779f86708b581e8b",
-        "type": "window",
-        "children": [
-          {
-            "id": "bc50c9e728da00d7",
-            "type": "tabs",
-            "children": [
-              {
-                "id": "47d25c3f762d7be6",
-                "type": "leaf",
-                "state": {
-                  "type": "webviewer",
-                  "state": {
-                    "url": "https://silentvoid13.github.io/Templater/user-functions/script-user-functions.html",
-                    "title": "User Scripts - Templater",
-                    "mode": "webview"
-                  },
-                  "icon": "globe-2",
-                  "title": "User Scripts - Templater"
-                }
-              }
-            ]
-          }
-        ],
-        "direction": "vertical",
-        "x": 1208,
-        "y": 256,
-        "width": 1024,
-        "height": 800,
-        "maximize": false,
-        "zoom": 0
-      }
-    ]
-  },
-  "active": "4ecbdb0726a22257",
+  "active": "1af06994487b60a6",
   "lastOpenFiles": [
-    "Assets/Assets.md",
+    "Templates/Pages/Template - Index.md",
+    "Templates/Pages/Template - Concept Page.md",
     "Software Engineering/03 Data Persistance/ORMs/Entity Framework.md",
+    "Assets/Assets.md",
     "Software Engineering/03 Data Persistance/ORMs/Untitled.md",
     "Software Engineering/03 Data Persistance/ORMs/Abc.md",
     "Software Engineering/03 Data Persistance/ORMs/ORMs.md",
@@ -349,10 +310,8 @@
     "Untitled.md",
     "Software Engineering/01 Programming/NET/Other/OWIN.md",
     "Software Engineering/01 Programming/NET/Other/asdf.md",
-    "Templates/Pages/Template - Concept Page.md",
     "Software Engineering/01 Programming/NET/Other/SignalR.md",
     "Software Engineering/01 Programming/NET/Other/Other.md",
-    "Templates/Pages/Template - Index.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures/NEw notw.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures/sdf.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures/asdf/asdf.md",
