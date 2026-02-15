@@ -15,9 +15,9 @@
               "state": {
                 "file": "Software Engineering/Roadmap.canvas",
                 "viewState": {
-                  "x": 144.00065235430833,
-                  "y": 1625.4205606178925,
-                  "zoom": -1.6244978285279106
+                  "x": 693.8325651047473,
+                  "y": 418.73959301842996,
+                  "zoom": -0.8232025445432203
                 }
               },
               "icon": "lucide-layout-dashboard",
@@ -246,12 +246,14 @@
       "notebook-navigator:Notebook Navigator": true
     }
   },
-  "active": "4ecbdb0726a22257",
+  "active": "e7a7b303c61786dc",
   "lastOpenFiles": [
+    "Software Engineering/Questions.md",
+    "Software Engineering/Roadmap.canvas",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Control Structures.md",
+    "Software Engineering/Topics.base",
     "Software Engineering/Software Engineering.md",
     "Software Engineering/01 Programming/01 Programming.md",
-    "Software Engineering/Roadmap.canvas",
-    "Software Engineering/Topics.base",
     "Software Engineering/10 Cloud/AWS/SQS.md",
     "Software Engineering/10 Cloud/AWS/S3.md",
     "Software Engineering/10 Cloud/AWS/EC2.md",
@@ -275,9 +277,6 @@
     "Software Engineering/10 Cloud/Azure Services/Azure Services.md",
     "Software Engineering/10 Cloud/AWS.md",
     "Software Engineering/08 SDLC/BDD.md",
-    "Software Engineering/07 Security/Block-chain.md",
-    "Software Engineering/06 Development Practices/Paradigms/Event-driven.md",
-    "Software Engineering/08 SDLC/08 SDLC.md",
     "Software Engineering/10 Cloud/Google Cloud",
     "Software Engineering/10 Cloud/Azure Services",
     "Software Engineering/05 Architecture/Distributed Systems/Message Queues",
