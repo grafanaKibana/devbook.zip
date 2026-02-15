@@ -5,14 +5,11 @@
 
 # Intro
 
-## Deeper Explanation
-
-## Questions
+Principles like SOLID, DRY, KISS, and YAGNI are guardrails for keeping systems understandable as they grow. They are not laws; they are heuristics to balance design purity against real constraints. Example: applying single responsibility usually means splitting modules at stable boundaries, not splitting every method.
 
 ## Links
 
-- [Link 1](URL)
-- [Link 2](URL)
+- [Software design principles (Wikipedia)](https://en.wikipedia.org/wiki/Software_design#Design_principles)
 
 # Whats next
 

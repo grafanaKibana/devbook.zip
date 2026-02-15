@@ -5,36 +5,11 @@
 
 # Intro
 
-## Deeper Explanation
-
-## Diagram
-
-```mermaid
-graph TD
-  A[Need to sort] --> B{Constraints}
-  B -->|Need stable| C[Stable sort]
-  B -->|In-place priority| D[In-place sort]
-  B -->|Best for tiny arrays| E[Small n]
-  C --> F[Merge sort]
-  C --> G[Insertion sort for small or nearly sorted]
-  D --> H[Quick sort average fast]
-  D --> I[Selection sort few swaps]
-  D --> J[Bubble sort mostly educational]
-  E --> G
-```
-
-## Questions
+Sorting is a foundational operation that impacts performance all over the stack: databases, UIs, pipelines, and in-memory processing. The important part is not memorizing algorithms, but understanding stability, memory tradeoffs, and typical runtime behavior. Example: mergesort is stable and predictable, while quicksort is often fast in practice but has worst-case pitfalls.
 
 ## Links
 
-## Deeper Explanation
-
-
-## Questions
-
-
-## Links
-
+- [Sorting algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Sorting_algorithm)
 
 # Whats next
 

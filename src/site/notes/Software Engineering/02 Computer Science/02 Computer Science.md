@@ -5,15 +5,11 @@
 
 # Intro
 
-
-## Deeper Explanation
-
-
-## Questions
-
+Computer science gives you the mental models behind software: algorithms, data structures, complexity, and how to reason about tradeoffs. Even when you use high-level frameworks, these fundamentals determine performance and correctness. Example: choosing the right data structure can turn an O(n^2) slowdown into an O(n log n) solution without changing the product.
 
 ## Links
 
+- [Computer science (Wikipedia)](https://en.wikipedia.org/wiki/Computer_science)
 
 # Whats next
 
