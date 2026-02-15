@@ -8,6 +8,7 @@ level:
 priority: Low
 status: Not-Started
 
+dg-publish: true
 ---
 
 # Intro

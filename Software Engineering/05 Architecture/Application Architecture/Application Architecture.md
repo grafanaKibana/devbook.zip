@@ -5,6 +5,7 @@ subtopic:
   - "Application Architecture"
 tags:
   - FolderNote
+dg-publish: true
 ---
 
 # Intro

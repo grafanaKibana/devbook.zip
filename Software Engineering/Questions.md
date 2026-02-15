@@ -1,5 +1,6 @@
 ---
 tags: [FolderNote]
+dg-publish: true
 ---
 
 ```dataviewjs

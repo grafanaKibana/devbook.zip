@@ -5,6 +5,7 @@ subtopic:
   - "Paradigms & Practices"
 tags:
   - FolderNote
+dg-publish: true
 ---
 
 # Intro

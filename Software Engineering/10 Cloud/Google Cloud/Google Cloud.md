@@ -9,6 +9,7 @@ priority: Medium
 status: Ready To Repeat
 tags:
   - FolderNote
+dg-publish: true
 ---
 
 # Intro

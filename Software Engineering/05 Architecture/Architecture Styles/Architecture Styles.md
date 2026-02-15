@@ -5,6 +5,7 @@ subtopic:
   - "Architecture Styles"
 tags:
   - FolderNote
+dg-publish: true
 ---
 
 # Intro

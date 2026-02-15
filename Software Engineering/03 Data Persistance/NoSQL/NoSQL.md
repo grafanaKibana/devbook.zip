@@ -7,6 +7,7 @@ level:
 priority: Medium
 status: Creation
 
+dg-publish: true
 ---
 
 # Intro

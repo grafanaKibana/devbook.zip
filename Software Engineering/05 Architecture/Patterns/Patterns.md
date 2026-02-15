@@ -5,6 +5,7 @@ subtopic:
   - "Patterns"
 tags:
   - FolderNote
+dg-publish: true
 ---
 
 # Intro

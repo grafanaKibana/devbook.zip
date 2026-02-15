@@ -5,6 +5,7 @@ subtopic:
   - "ORMs"
 tags:
   - FolderNote
+dg-publish: true
 ---
 
 # Intro

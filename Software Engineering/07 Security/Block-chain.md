@@ -7,6 +7,7 @@ level:
 priority: Medium
 status: Ready To Repeat
 
+dg-publish: true
 ---
 
 # Intro

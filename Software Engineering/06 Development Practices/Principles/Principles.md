@@ -5,6 +5,7 @@ subtopic:
   - "Principles"
 tags:
   - FolderNote
+dg-publish: true
 ---
 
 # Intro

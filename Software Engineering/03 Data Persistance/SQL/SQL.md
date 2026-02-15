@@ -5,6 +5,7 @@ subtopic:
   - "SQL"
 tags:
   - FolderNote
+dg-publish: true
 ---
 
 # Intro

@@ -5,6 +5,7 @@ subtopic:
   - "Deployment Stratagies"
 tags:
   - FolderNote
+dg-publish: true
 ---
 
 # Intro

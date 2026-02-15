@@ -8,6 +8,7 @@ level:
 priority: Medium
 status: Not-Started
 
+dg-publish: true
 ---
 # Intro
 

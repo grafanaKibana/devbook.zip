@@ -9,6 +9,7 @@ priority: Medium
 status: Creation
 tags:
   - FolderNote
+dg-publish: true
 ---
 
 # Intro

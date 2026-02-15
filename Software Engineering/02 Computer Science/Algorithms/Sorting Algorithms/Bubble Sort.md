@@ -8,6 +8,7 @@ level:
 priority: Low
 status: Ready To Repeat
 
+dg-publish: true
 ---
 
 # Intro

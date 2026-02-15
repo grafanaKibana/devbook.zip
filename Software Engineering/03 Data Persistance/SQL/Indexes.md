@@ -3,6 +3,7 @@ topic:
   - "Data Persistance"
 subtopic:
   - "SQL"
+dg-publish: true
 ---
 
 # Intro
@@ -91,40 +92,96 @@ Mermaid alternative:
 flowchart TB
   HDR["id, index_id = 1, root_page"]
 
-  subgraph Root[Root node]
+  subgraph RootPage["Root node"]
     direction TB
-    R["Name and data<br/>Index rows"]
+    R_hdr["Name and data"]
+    R_idx["Index rows"]
+    R_hdr --> R_idx
   end
 
-  subgraph Mid[Intermediate level]
+  subgraph IntermediateLevel["Intermediate level"]
     direction LR
-    I1["Name and data<br/>Index rows"]
-    I2["Name and data<br/>Index rows"]
-    I3["Name and data<br/>Index rows"]
+    subgraph I1p["Page"]
+      direction TB
+      I1_hdr["Name and data"]
+      I1_idx["Index rows"]
+      I1_hdr --> I1_idx
+    end
+    subgraph I2p["Page"]
+      direction TB
+      I2_hdr["Name and data"]
+      I2_idx["Index rows"]
+      I2_hdr --> I2_idx
+    end
+    subgraph I3p["Page"]
+      direction TB
+      I3_hdr["Name and data"]
+      I3_idx["Index rows"]
+      I3_hdr --> I3_idx
+    end
   end
 
-  subgraph Leaf[Leaf level or data pages]
+  subgraph LeafLevel["Leaf level or data pages"]
     direction LR
-    L1["Index rows<br/>Data rows"]
-    L2["Index rows<br/>Data rows"]
-    L3["Index rows<br/>Data rows"]
-    L4["Index rows<br/>Data rows"]
-    L5["Index rows<br/>Data rows"]
+    subgraph L1p["Page"]
+      direction TB
+      L1_idx["Index rows"]
+      L1_data["Data rows"]
+      L1_idx --> L1_data
+    end
+    subgraph L2p["Page"]
+      direction TB
+      L2_idx["Index rows"]
+      L2_data["Data rows"]
+      L2_idx --> L2_data
+    end
+    subgraph L3p["Page"]
+      direction TB
+      L3_idx["Index rows"]
+      L3_data["Data rows"]
+      L3_idx --> L3_data
+    end
+    subgraph L4p["Page"]
+      direction TB
+      L4_idx["Index rows"]
+      L4_data["Data rows"]
+      L4_idx --> L4_data
+    end
+    subgraph L5p["Page"]
+      direction TB
+      L5_idx["Index rows"]
+      L5_data["Data rows"]
+      L5_idx --> L5_data
+    end
   end
 
-  HDR --> R
-  R --> I1
-  R --> I2
-  R --> I3
+  HDR --> R_hdr
 
-  I1 --> L1
-  I1 --> L2
-  I2 --> L3
-  I3 --> L4
-  I3 --> L5
+  R_idx --> I1_hdr
+  R_idx --> I2_hdr
+  R_idx --> I3_hdr
 
-  %% leaf-level horizontal links
-  L1 --- L2 --- L3 --- L4 --- L5
+  %% Keep intermediate pages aligned left-to-right
+  I1_hdr --- I2_hdr --- I3_hdr
+
+  I1_idx --> L1_idx
+  I1_idx --> L2_idx
+  I2_idx --> L3_idx
+  I3_idx --> L4_idx
+  I3_idx --> L5_idx
+
+  %% Keep leaf pages aligned left-to-right
+  L1_idx --- L2_idx --- L3_idx --- L4_idx --- L5_idx
+
+  %% Doubly linked list at leaf level
+  L1_idx -- next --> L2_idx
+  L2_idx -- prev --> L1_idx
+  L2_idx -- next --> L3_idx
+  L3_idx -- prev --> L2_idx
+  L3_idx -- next --> L4_idx
+  L4_idx -- prev --> L3_idx
+  L4_idx -- next --> L5_idx
+  L5_idx -- prev --> L4_idx
 ```
 
 ![Untitled](../../../Assets/03%20Data%20Persistance/03%20Data%20Persistance-Indexes-20260210205142027.png)
@@ -133,38 +190,88 @@ Mermaid alternative:
 
 ```mermaid
 flowchart TB
-  subgraph Root[Root level]
+  subgraph RootLevel["Root level"]
     direction TB
-    R["A-B<br/>C-D<br/>E-F"]
+    R_ab["A-B"]
+    R_cd["C-D"]
+    R_ef["E-F"]
   end
 
-  subgraph Mid[Intermediate level]
+  subgraph IntermediateLevel["Intermediate level"]
     direction LR
-    Iab["A<br/>B"]
-    Icd["C<br/>D"]
-    Ief["E<br/>F"]
+    subgraph IabP["Page"]
+      direction TB
+      Iab_a["A"]
+      Iab_b["B"]
+    end
+    subgraph IcdP["Page"]
+      direction TB
+      Icd_c["C"]
+      Icd_d["D"]
+    end
+    subgraph IefP["Page"]
+      direction TB
+      Ief_e["E"]
+      Ief_f["F"]
+    end
   end
 
-  subgraph Leaf[Leaf level includes real data]
+  subgraph LeafLevel["Leaf level includes real data"]
     direction LR
-    LA["A<br/>Data"]
-    LB["B<br/>Data"]
-    LC["C<br/>Data"]
-    LD["D<br/>Data"]
-    LE["E<br/>Data"]
-    LF["F<br/>Data"]
+    subgraph LA_P["Leaf A"]
+      direction TB
+      LA_key["A"]
+      LA_data["Data"]
+      LA_key --> LA_data
+    end
+    subgraph LB_P["Leaf B"]
+      direction TB
+      LB_key["B"]
+      LB_data["Data"]
+      LB_key --> LB_data
+    end
+    subgraph LC_P["Leaf C"]
+      direction TB
+      LC_key["C"]
+      LC_data["Data"]
+      LC_key --> LC_data
+    end
+    subgraph LD_P["Leaf D"]
+      direction TB
+      LD_key["D"]
+      LD_data["Data"]
+      LD_key --> LD_data
+    end
+    subgraph LE_P["Leaf E"]
+      direction TB
+      LE_key["E"]
+      LE_data["Data"]
+      LE_key --> LE_data
+    end
+    subgraph LF_P["Leaf F"]
+      direction TB
+      LF_key["F"]
+      LF_data["Data"]
+      LF_key --> LF_data
+    end
   end
 
-  R --> Iab
-  R --> Icd
-  R --> Ief
+  R_ab --> Iab_a
+  R_cd --> Icd_c
+  R_ef --> Ief_e
 
-  Iab --> LA
-  Iab --> LB
-  Icd --> LC
-  Icd --> LD
-  Ief --> LE
-  Ief --> LF
+  %% Keep intermediate pages aligned left-to-right
+  Iab_a --- Icd_c --- Ief_e
+
+  Iab_a --> LA_key
+  Iab_b --> LB_key
+  Icd_c --> LC_key
+  Icd_d --> LD_key
+  Ief_e --> LE_key
+  Ief_f --> LF_key
+
+  %% Keep leaves aligned left-to-right
+  LA_key --- LB_key --- LC_key --- LD_key --- LE_key --- LF_key
 ```
 
 ### Simplified Example
@@ -197,41 +304,87 @@ Mermaid alternative:
 
 ```mermaid
 flowchart TB
-  subgraph Root[Root level]
+  subgraph RootLevel["Root level"]
     direction TB
-    R["A-B<br/>C-D<br/>E-F"]
+    R_ab["A-B"]
+    R_cd["C-D"]
+    R_ef["E-F"]
   end
 
-  subgraph Mid[Intermediate level]
+  subgraph IntermediateLevel["Intermediate level"]
     direction LR
-    Iab["A<br/>B"]
-    Icd["C<br/>D"]
-    Ief["E<br/>F"]
+    subgraph IabP["Page"]
+      direction TB
+      Iab_a["A"]
+      Iab_b["B"]
+    end
+    subgraph IcdP["Page"]
+      direction TB
+      Icd_c["C"]
+      Icd_d["D"]
+    end
+    subgraph IefP["Page"]
+      direction TB
+      Ief_e["E"]
+      Ief_f["F"]
+    end
   end
 
-  subgraph Leaf[Leaves]
+  subgraph LeafLevel["Leaves"]
     direction LR
-    LA["A<br/>Clustered key value"]
-    LB["B<br/>Clustered key value"]
-    LE["E<br/>Clustered key value"]
-    LF["F<br/>Clustered key value"]
+    subgraph LA_P["Leaf A"]
+      direction TB
+      LA_key["A"]
+      LA_ptr["Clustered key value"]
+      LA_key --> LA_ptr
+    end
+    subgraph LB_P["Leaf B"]
+      direction TB
+      LB_key["B"]
+      LB_ptr["Clustered key value"]
+      LB_key --> LB_ptr
+    end
+    subgraph LE_P["Leaf E"]
+      direction TB
+      LE_key["E"]
+      LE_ptr["Clustered key value"]
+      LE_key --> LE_ptr
+    end
+    subgraph LF_P["Leaf F"]
+      direction TB
+      LF_key["F"]
+      LF_ptr["Clustered key value"]
+      LF_key --> LF_ptr
+    end
   end
 
-  P["Pointers to clustered index"]
+  Ptr["Pointers to clustered index"]
+  CIX["Clustered index"]
 
-  R --> Iab
-  R --> Icd
-  R --> Ief
+  R_ab --> Iab_a
+  R_cd --> Icd_c
+  R_ef --> Ief_e
 
-  Iab --> LA
-  Iab --> LB
-  Ief --> LE
-  Ief --> LF
+  %% Keep intermediate pages aligned left-to-right
+  Iab_a --- Icd_c --- Ief_e
 
-  P --- LA
-  P --- LB
-  P --- LE
-  P --- LF
+  Iab_a --> LA_key
+  Iab_b --> LB_key
+  Ief_e --> LE_key
+  Ief_f --> LF_key
+
+  %% Keep leaves aligned left-to-right
+  LA_key --- LB_key --- LE_key --- LF_key
+
+  Ptr --- LA_ptr
+  Ptr --- LB_ptr
+  Ptr --- LE_ptr
+  Ptr --- LF_ptr
+
+  LA_ptr --> CIX
+  LB_ptr --> CIX
+  LE_ptr --> CIX
+  LF_ptr --> CIX
 ```
         
 - **Without a clustered index**
@@ -243,55 +396,106 @@ Mermaid alternative:
 
 ```mermaid
 flowchart TB
-  subgraph Root[Root level]
+  subgraph RootLevel["Root level"]
     direction TB
-    R["AB<br/>CD<br/>EF"]
+    R_ab["AB"]
+    R_cd["CD"]
+    R_ef["EF"]
   end
 
-  subgraph Mid[Intermediate level]
+  subgraph IntermediateLevel["Intermediate level"]
     direction LR
-    Iab["A<br/>B"]
-    Icd["C<br/>D"]
-    Ief["E<br/>F"]
+    subgraph IabP["Page"]
+      direction TB
+      Iab_a["A"]
+      Iab_b["B"]
+    end
+    subgraph IcdP["Page"]
+      direction TB
+      Icd_c["C"]
+      Icd_d["D"]
+    end
+    subgraph IefP["Page"]
+      direction TB
+      Ief_e["E"]
+      Ief_f["F"]
+    end
   end
 
-  subgraph Leaf[Leaves]
+  subgraph LeafLevel["Leaves"]
     direction LR
-    LA["A<br/>Row ID"]
-    LB["B<br/>Row ID"]
-    LC["C<br/>Row ID"]
-    LD["D<br/>Row ID"]
-    LE["E<br/>Row ID"]
-    LF["F<br/>Row ID"]
+    subgraph LA_P["Leaf A"]
+      direction TB
+      LA_key["A"]
+      LA_rid["Row ID"]
+      LA_key --> LA_rid
+    end
+    subgraph LB_P["Leaf B"]
+      direction TB
+      LB_key["B"]
+      LB_rid["Row ID"]
+      LB_key --> LB_rid
+    end
+    subgraph LC_P["Leaf C"]
+      direction TB
+      LC_key["C"]
+      LC_rid["Row ID"]
+      LC_key --> LC_rid
+    end
+    subgraph LD_P["Leaf D"]
+      direction TB
+      LD_key["D"]
+      LD_rid["Row ID"]
+      LD_key --> LD_rid
+    end
+    subgraph LE_P["Leaf E"]
+      direction TB
+      LE_key["E"]
+      LE_rid["Row ID"]
+      LE_key --> LE_rid
+    end
+    subgraph LF_P["Leaf F"]
+      direction TB
+      LF_key["F"]
+      LF_rid["Row ID"]
+      LF_key --> LF_rid
+    end
   end
 
-  subgraph Data[Data rows]
+  subgraph DataRows["Data rows"]
     direction LR
-    DA[Data row]
-    DB[Data row]
-    DC[Data row]
-    DD[Data row]
-    DE[Data row]
-    DF[Data row]
+    DA["Data row"]
+    DB["Data row"]
+    DC["Data row"]
+    DD["Data row"]
+    DE["Data row"]
+    DF["Data row"]
   end
 
-  R --- Iab
-  R --- Icd
-  R --- Ief
+  %% Keep data rows aligned left-to-right
+  DA --- DB --- DC --- DD --- DE --- DF
 
-  Iab --- LA
-  Iab --- LB
-  Icd --- LC
-  Icd --- LD
-  Ief --- LE
-  Ief --- LF
+  R_ab --- Iab_a
+  R_cd --- Icd_c
+  R_ef --- Ief_e
 
-  LA --- DA
-  LB --- DB
-  LC --- DC
-  LD --- DD
-  LE --- DE
-  LF --- DF
+  Iab_a --- LA_key
+  Iab_b --- LB_key
+  Icd_c --- LC_key
+  Icd_d --- LD_key
+  Ief_e --- LE_key
+  Ief_f --- LF_key
+
+  %% Keep leaves aligned left-to-right
+  LA_key --- LB_key --- LC_key --- LD_key --- LE_key --- LF_key
+
+  %% Row IDs point to heap rows
+  LA_rid --- DA
+  LB_rid --- DB
+  LC_rid --- DC
+  LD_rid --- DD
+  LE_rid --- DE
+  LF_rid --- DF
 ```
         
 
