@@ -82,7 +82,7 @@ def canvas_title_link(rel_md_path):
     if p.endswith(".md"):
         p = p[:-3]
     title = os.path.splitext(os.path.basename(rel_md_path))[0]
-    return f"## [[{p}|{title}]]"
+    return f"# [[{p}|{title}]]"
 
 
 def subdirs(d):

@@ -4,24 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "f86e561020a77b19",
+        "id": "4509724f8bf84da7",
         "type": "tabs",
         "children": [
           {
-            "id": "9cc12a18b15669f3",
+            "id": "e7a7b303c61786dc",
             "type": "leaf",
             "state": {
-              "type": "canvas",
+              "type": "split-diff-view",
               "state": {
-                "file": "Software Engineering/Roadmap.canvas",
-                "viewState": {
-                  "x": 137.18249097628495,
-                  "y": 308.9525161575948,
-                  "zoom": -0.6339080077029982
-                }
+                "aFile": ".scripts/generate-roadmap.py",
+                "bFile": ".scripts/generate-roadmap.py",
+                "aRef": ""
               },
-              "icon": "lucide-layout-dashboard",
-              "title": "Roadmap"
+              "icon": "diff",
+              "title": "Diff: generate-roadmap.py  (Working Tree)"
             }
           }
         ]
@@ -135,11 +132,9 @@
             "type": "leaf",
             "state": {
               "type": "file-properties",
-              "state": {
-                "file": "Software Engineering/Roadmap.canvas"
-              },
+              "state": {},
               "icon": "lucide-info",
-              "title": "File properties for Roadmap"
+              "title": "File properties"
             }
           },
           {
@@ -246,16 +241,22 @@
       "notebook-navigator:Notebook Navigator": true
     }
   },
-  "active": "9cc12a18b15669f3",
+  "active": "e7a7b303c61786dc",
   "lastOpenFiles": [
-    "Software Engineering/01 Programming/NET/NET Standart.md",
-    "Software Engineering/Roadmap.canvas",
-    "Software Engineering/02 Computer Science/02 Computer Science.md",
-    "Software Engineering/Questions.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Control Structures.md",
-    "Software Engineering/Topics.base",
-    "Software Engineering/Software Engineering.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md",
+    "Software Engineering/01 Programming/NET/NET Standart.md",
+    "Software Engineering/01 Programming/NET/NET.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Async Await.md",
     "Software Engineering/01 Programming/01 Programming.md",
+    "Software Engineering/Roadmap.canvas",
+    "Software Engineering/02 Computer Science/Data Structures/Data Structures.md",
+    "Software Engineering/Software Engineering.md",
+    "Software Engineering/03 Data Persistance/SQL/Indexes/Indexes.md",
+    "Software Engineering/Questions.md",
+    "Software Engineering/02 Computer Science/02 Computer Science.md",
+    "Software Engineering/Topics.base",
     "Software Engineering/10 Cloud/AWS/SQS.md",
     "Software Engineering/10 Cloud/AWS/S3.md",
     "Software Engineering/10 Cloud/AWS/EC2.md",
@@ -270,14 +271,8 @@
     "Software Engineering/10 Cloud/Google Cloud/Cloud Spanner.md",
     "Software Engineering/10 Cloud/Google Cloud/Cloud Functions.md",
     "Software Engineering/10 Cloud/Google Cloud/BigQuery.md",
-    "Software Engineering/10 Cloud/Google Cloud/Google Cloud.md",
-    "Software Engineering/10 Cloud/10 Cloud.md",
     "Software Engineering/10 Cloud/AWS",
-    "Software Engineering/10 Cloud/Google Cloud.md",
-    "Software Engineering/10 Cloud/Azure/Azure Services.md",
     "Software Engineering/10 Cloud/Azure",
-    "Software Engineering/10 Cloud/Azure Services/Azure Services.md",
-    "Software Engineering/10 Cloud/AWS.md",
     "Software Engineering/10 Cloud/Google Cloud",
     "Software Engineering/10 Cloud/Azure Services",
     "Software Engineering/05 Architecture/Distributed Systems/Message Queues",
