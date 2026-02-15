@@ -11,7 +11,16 @@ aliases:
 tags:
   - FolderNote
 ---
-## Parent
+## Questions
+
+> [!QUESTION]- Explain Agile, Scrum, Kanban, and Waterfall.
+> - Agile: an umbrella of values and principles (iterative delivery, feedback, adapting to change).
+> - Scrum: an Agile framework with defined roles (Product Owner, Scrum Master, Developers), events (sprint planning, daily scrum, review, retrospective), and artifacts (product backlog, sprint backlog, increment).
+> - Kanban: a flow-based method focused on visualizing work, limiting work in progress, and optimizing lead time/throughput.
+> - Waterfall: a sequential lifecycle (requirements -> design -> implementation -> testing -> release) that works best when requirements are stable and change is expensive.
+
+# Whats next
+
 :LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
 
 ```dataviewjs
@@ -28,28 +37,20 @@ const children = dv.pages()
   .where(p => isFolderNote(p))
   .sort(p => p.file.folder, "asc");
 
-if (children.length) {
-  dv.header(2, "Children");
-  dv.list(children.map(p => p.file.link));
-}
-
 const pages = dv.pages()
   .where(p => p.file.folder === curFolder)
   .where(p => p.file.path !== curPath)
   .where(p => !isFolderNote(p))
   .sort(p => p.file.name, "asc");
-
-if (pages.length) {
-  dv.header(2, "Pages");
-  dv.list(pages.map(p => p.file.link));
-}
+  
+  if (children.length) {
+	  dv.header(2, "Topics");
+	  dv.list(children.map(p => p.file.link));
+  }
+  if (pages.length) {
+	  dv.header(2, "Pages");
+	  dv.list(pages.map(p => p.file.link));
+  }
+  
 ```
----
 
-## Questions
-
-> [!QUESTION]- Explain Agile, Scrum, Kanban, and Waterfall.
-> - Agile: an umbrella of values and principles (iterative delivery, feedback, adapting to change).
-> - Scrum: an Agile framework with defined roles (Product Owner, Scrum Master, Developers), events (sprint planning, daily scrum, review, retrospective), and artifacts (product backlog, sprint backlog, increment).
-> - Kanban: a flow-based method focused on visualizing work, limiting work in progress, and optimizing lead time/throughput.
-> - Waterfall: a sequential lifecycle (requirements -> design -> implementation -> testing -> release) that works best when requirements are stable and change is expensive.

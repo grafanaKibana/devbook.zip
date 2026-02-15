@@ -9,15 +9,7 @@ priority:
   - High
 status: Not-Started
 ---
-## Parent
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
-
----
 # Intro
-
-## Deeper Explanation
-
-# Overview
 
 Нередко программа выполняет такие операции, которые могут занять продолжительное время, например, обращение к сетевым ресурсам, чтение-запись файлов, обращение к базе данных и т.д. Такие операции могут серьезно нагрузить приложение. Особенно это актуально в графических (десктопных или мобильных) приложениях, где продолжительные операции могут блокировать интерфейс пользователя и негативно повлиять на желание пользователя работать с программой, или в веб-приложениях, которые должны быть готовы обслуживать тысячи запросов в секунду. В синхронном приложении при выполнении продолжительных операций в основном потоке этот поток просто бы блокировался на время выполнения операции. И чтобы продолжительные операции не блокировали общую работу приложения, в C# можно задействовать асинхронность.
 
@@ -39,6 +31,42 @@ status: Not-Started
 > `Task.Result` waits synchronously: it blocks the current thread, can cause deadlocks under a `SynchronizationContext` (UI / legacy ASP.NET), and wraps exceptions in `AggregateException`.
 
 ## Links
-- [Fetching Title#3ra2](https://habr.com/ru/articles/727850/)
-- [Fetching Title#0gax](https://habr.com/ru/articles/470830/)
+- [Как на самом деле работает Async/Await в C# (Часть 1)](https://habr.com/ru/articles/727850/)
+- [Async/await в C#: концепция, внутреннее устройство, полезные приемы](https://habr.com/ru/articles/470830/)
 - [Async and Await in C#: Complete Guide (2023)](https://www.bytehide.com/blog/async-await-csharp)
+
+# Whats next
+
+:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+
+```dataviewjs
+const cur = dv.current();
+const curFolder = cur.file.folder;
+const curPath = cur.file.path;
+
+const isFolderNote = (p) => (p.file.tags ?? []).includes("#FolderNote");
+
+const children = dv.pages()
+  .where(p => p.file.folder.startsWith(curFolder + "/"))
+  .where(p => p.file.folder.split("/").length === curFolder.split("/").length + 1)
+  .where(p => p.file.name === p.file.folder.split("/").slice(-1)[0])
+  .where(p => isFolderNote(p))
+  .sort(p => p.file.folder, "asc");
+
+const pages = dv.pages()
+  .where(p => p.file.folder === curFolder)
+  .where(p => p.file.path !== curPath)
+  .where(p => !isFolderNote(p))
+  .sort(p => p.file.name, "asc");
+  
+  if (children.length) {
+	  dv.header(2, "Topics");
+	  dv.list(children.map(p => p.file.link));
+  }
+  if (pages.length) {
+	  dv.header(2, "Pages");
+	  dv.list(pages.map(p => p.file.link));
+  }
+  
+```
+

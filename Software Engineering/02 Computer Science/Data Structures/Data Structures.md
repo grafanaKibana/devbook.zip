@@ -9,40 +9,6 @@ status: Not-Started
 tags:
   - FolderNote
 ---
-## Parent
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
-
-```dataviewjs
-const cur = dv.current();
-const curFolder = cur.file.folder;
-const curPath = cur.file.path;
-
-const isFolderNote = (p) => (p.file.tags ?? []).includes("#FolderNote");
-
-const children = dv.pages()
-  .where(p => p.file.folder.startsWith(curFolder + "/"))
-  .where(p => p.file.folder.split("/").length === curFolder.split("/").length + 1)
-  .where(p => p.file.name === p.file.folder.split("/").slice(-1)[0])
-  .where(p => isFolderNote(p))
-  .sort(p => p.file.folder, "asc");
-
-if (children.length) {
-  dv.header(2, "Children");
-  dv.list(children.map(p => p.file.link));
-}
-
-const pages = dv.pages()
-  .where(p => p.file.folder === curFolder)
-  .where(p => p.file.path !== curPath)
-  .where(p => !isFolderNote(p))
-  .sort(p => p.file.name, "asc");
-
-if (pages.length) {
-  dv.header(2, "Pages");
-  dv.list(pages.map(p => p.file.link));
-}
-```
----
 # Intro
 
 A data structure is a way to organize related data so it can be stored, accessed, and updated efficiently. Choosing the right data structure is often the biggest factor in making an algorithm fast and maintainable.
@@ -65,3 +31,39 @@ A data structure is a way to organize related data so it can be stored, accessed
 - [Graphs in data structure](https://www.simplilearn.com/tutorials/data-structure-tutorial/graphs-in-data-structure)
 - [Types of trees in data structures](https://www.knowledgehut.com/blog/programming/types-of-trees-in-data-structure)
 - [8 Common Data Structures every Programmer must know](https://towardsdatascience.com/8-common-data-structures-every-programmer-must-know-171acf6a1a42)
+
+# Whats next
+
+:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+
+```dataviewjs
+const cur = dv.current();
+const curFolder = cur.file.folder;
+const curPath = cur.file.path;
+
+const isFolderNote = (p) => (p.file.tags ?? []).includes("#FolderNote");
+
+const children = dv.pages()
+  .where(p => p.file.folder.startsWith(curFolder + "/"))
+  .where(p => p.file.folder.split("/").length === curFolder.split("/").length + 1)
+  .where(p => p.file.name === p.file.folder.split("/").slice(-1)[0])
+  .where(p => isFolderNote(p))
+  .sort(p => p.file.folder, "asc");
+
+const pages = dv.pages()
+  .where(p => p.file.folder === curFolder)
+  .where(p => p.file.path !== curPath)
+  .where(p => !isFolderNote(p))
+  .sort(p => p.file.name, "asc");
+  
+  if (children.length) {
+	  dv.header(2, "Topics");
+	  dv.list(children.map(p => p.file.link));
+  }
+  if (pages.length) {
+	  dv.header(2, "Pages");
+	  dv.list(pages.map(p => p.file.link));
+  }
+  
+```
+

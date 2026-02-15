@@ -10,40 +10,6 @@ status: Not-Started
 tags:
   - FolderNote
 ---
-## Parent
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
-
-```dataviewjs
-const cur = dv.current();
-const curFolder = cur.file.folder;
-const curPath = cur.file.path;
-
-const isFolderNote = (p) => (p.file.tags ?? []).includes("#FolderNote");
-
-const children = dv.pages()
-  .where(p => p.file.folder.startsWith(curFolder + "/"))
-  .where(p => p.file.folder.split("/").length === curFolder.split("/").length + 1)
-  .where(p => p.file.name === p.file.folder.split("/").slice(-1)[0])
-  .where(p => isFolderNote(p))
-  .sort(p => p.file.folder, "asc");
-
-if (children.length) {
-  dv.header(2, "Children");
-  dv.list(children.map(p => p.file.link));
-}
-
-const pages = dv.pages()
-  .where(p => p.file.folder === curFolder)
-  .where(p => p.file.path !== curPath)
-  .where(p => !isFolderNote(p))
-  .sort(p => p.file.name, "asc");
-
-if (pages.length) {
-  dv.header(2, "Pages");
-  dv.list(pages.map(p => p.file.link));
-}
-```
----
 # Intro
 
 Large language models, also known as LLMs, are very large [deep learning](https://aws.amazon.com/what-is/deep-learning/) models that are pre-trained on vast amounts of data. The underlying transformer is a set of [neural networks](https://aws.amazon.com/what-is/neural-network/) that consist of an encoder and a decoder with self-attention capabilities. The encoder and decoder extract meanings from a sequence of text and understand the relationships between words and phrases in it.
@@ -110,3 +76,39 @@ When working with LLMs, you will come across a lot of new terms. This section wi
 
 ## Links
 [What are Large Language Models? - LLM AI Explained - AWS](https://aws.amazon.com/what-is/large-language-model/?nc1=h_ls)
+
+# Whats next
+
+:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+
+```dataviewjs
+const cur = dv.current();
+const curFolder = cur.file.folder;
+const curPath = cur.file.path;
+
+const isFolderNote = (p) => (p.file.tags ?? []).includes("#FolderNote");
+
+const children = dv.pages()
+  .where(p => p.file.folder.startsWith(curFolder + "/"))
+  .where(p => p.file.folder.split("/").length === curFolder.split("/").length + 1)
+  .where(p => p.file.name === p.file.folder.split("/").slice(-1)[0])
+  .where(p => isFolderNote(p))
+  .sort(p => p.file.folder, "asc");
+
+const pages = dv.pages()
+  .where(p => p.file.folder === curFolder)
+  .where(p => p.file.path !== curPath)
+  .where(p => !isFolderNote(p))
+  .sort(p => p.file.name, "asc");
+  
+  if (children.length) {
+	  dv.header(2, "Topics");
+	  dv.list(children.map(p => p.file.link));
+  }
+  if (pages.length) {
+	  dv.header(2, "Pages");
+	  dv.list(pages.map(p => p.file.link));
+  }
+  
+```
+

@@ -10,39 +10,6 @@ status: Not-Started
 tags:
   - FolderNote
 ---
-## Parent
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
-```dataviewjs
-const cur = dv.current();
-const curFolder = cur.file.folder;
-const curPath = cur.file.path;
-
-const isFolderNote = (p) => (p.file.tags ?? []).includes("#FolderNote");
-
-const children = dv.pages()
-  .where(p => p.file.folder.startsWith(curFolder + "/"))
-  .where(p => p.file.folder.split("/").length === curFolder.split("/").length + 1)
-  .where(p => p.file.name === p.file.folder.split("/").slice(-1)[0])
-  .where(p => isFolderNote(p))
-  .sort(p => p.file.folder, "asc");
-
-if (children.length) {
-  dv.header(2, "Children");
-  dv.list(children.map(p => p.file.link));
-}
-
-const pages = dv.pages()
-  .where(p => p.file.folder === curFolder)
-  .where(p => p.file.path !== curPath)
-  .where(p => !isFolderNote(p))
-  .sort(p => p.file.name, "asc");
-
-if (pages.length) {
-  dv.header(2, "Pages");
-  dv.list(pages.map(p => p.file.link));
-}
-```
----
 # Intro
 
 Prompts play a key role in generating useful and accurate information from AI language models. Learning how to write better prompts — "Prompt Engineering" — unlocks the full potential of these models by guiding their behavior, improving output quality, and reducing inaccuracies.
@@ -175,3 +142,39 @@ Gen AI can evaluate essays against complex criteria like grammar, clarity, coher
 - [OpenAI Platform](https://platform.openai.com/docs/guides/prompt-engineering/strategy-write-clear-instructions)
 - [Learn Prompting: Your Guide to Communicating with AI](https://learnprompting.org/docs/basics/introduction)
 - [Prompt Engineering Guide – Nextra](https://www.promptingguide.ai/)
+
+# Whats next
+
+:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+
+```dataviewjs
+const cur = dv.current();
+const curFolder = cur.file.folder;
+const curPath = cur.file.path;
+
+const isFolderNote = (p) => (p.file.tags ?? []).includes("#FolderNote");
+
+const children = dv.pages()
+  .where(p => p.file.folder.startsWith(curFolder + "/"))
+  .where(p => p.file.folder.split("/").length === curFolder.split("/").length + 1)
+  .where(p => p.file.name === p.file.folder.split("/").slice(-1)[0])
+  .where(p => isFolderNote(p))
+  .sort(p => p.file.folder, "asc");
+
+const pages = dv.pages()
+  .where(p => p.file.folder === curFolder)
+  .where(p => p.file.path !== curPath)
+  .where(p => !isFolderNote(p))
+  .sort(p => p.file.name, "asc");
+  
+  if (children.length) {
+	  dv.header(2, "Topics");
+	  dv.list(children.map(p => p.file.link));
+  }
+  if (pages.length) {
+	  dv.header(2, "Pages");
+	  dv.list(pages.map(p => p.file.link));
+  }
+  
+```
+

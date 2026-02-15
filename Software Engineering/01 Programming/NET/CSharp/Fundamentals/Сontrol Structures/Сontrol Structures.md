@@ -10,14 +10,6 @@ status: Not-Started
 tags:
   - FolderNote
 ---
-## Parent
-:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
-
----
-# Intro
-
-## Deeper Explanation
-
 # Foreach
 
 ### Usage
@@ -115,9 +107,8 @@ foreach имеет несколько интересных тонкостей:
     
     Пример использования **`in`** параметра:
     
-    ```csharp
-    csharpCopy code
-    public void ProcessData(in int value)
+```csharp
+public void ProcessData(in int value)
     {
         // value = 10; // Ошибка компиляции: нельзя изменить значение параметра in
         Console.WriteLine(value);
@@ -155,7 +146,6 @@ foreach имеет несколько интересных тонкостей:
 Пример использования **`yield`** для создания итератора:
 
 ```csharp
-csharpCopy code
 public IEnumerable<int> CountNumbers(int start, int end)
 {
     for (int i = start; i <= end; i++)
@@ -195,7 +185,6 @@ foreach (var number in CountNumbers(1, 5))
 Пример определения и использования пространства имен:
 
 ```csharp
-csharpCopy code
 namespace MyProject.Utilities
 {
     public class MathUtility
@@ -254,3 +243,39 @@ namespace MyProject
 > See the Reflection section above.
 
 ## Links
+
+# Whats next
+
+:LiArrowUpLeft: `= link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+
+```dataviewjs
+const cur = dv.current();
+const curFolder = cur.file.folder;
+const curPath = cur.file.path;
+
+const isFolderNote = (p) => (p.file.tags ?? []).includes("#FolderNote");
+
+const children = dv.pages()
+  .where(p => p.file.folder.startsWith(curFolder + "/"))
+  .where(p => p.file.folder.split("/").length === curFolder.split("/").length + 1)
+  .where(p => p.file.name === p.file.folder.split("/").slice(-1)[0])
+  .where(p => isFolderNote(p))
+  .sort(p => p.file.folder, "asc");
+
+const pages = dv.pages()
+  .where(p => p.file.folder === curFolder)
+  .where(p => p.file.path !== curPath)
+  .where(p => !isFolderNote(p))
+  .sort(p => p.file.name, "asc");
+  
+  if (children.length) {
+	  dv.header(2, "Topics");
+	  dv.list(children.map(p => p.file.link));
+  }
+  if (pages.length) {
+	  dv.header(2, "Pages");
+	  dv.list(pages.map(p => p.file.link));
+  }
+  
+```
+
