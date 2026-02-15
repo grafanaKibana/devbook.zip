@@ -5,11 +5,6 @@ dg-publish: true
 dg-home: true
 ---
 
-## Start Here
-
-- [Roadmap](Roadmap.canvas)
-- [Browse Topics](Topics.base)
-
 # Topic Coverage
 
 ```dataviewjs

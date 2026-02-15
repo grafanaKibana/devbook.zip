@@ -20,16 +20,33 @@
             }
         });
 
-        lucide.createIcons();
+        if (window.lucide && typeof window.lucide.createIcons === "function") {
+            window.lucide.createIcons();
+        }
 
         // Collapse callouts
         Array.from(document.querySelectorAll(".callout.is-collapsible")).forEach((elem) => {
-            elem.querySelector('.callout-title').addEventListener("click", (event) => {
+            const titleEl = elem.querySelector('.callout-title');
+            if (!titleEl) return;
+
+            const contentEl = elem.querySelector('.callout-content');
+            const syncContentVisibility = () => {
+                if (!contentEl) return;
+                // Some callouts (e.g. rendered by DataviewJS/Obsidian) may come with inline `style="display: none"`.
+                // Normalize visibility based on the `is-collapsed` class so toggling works everywhere.
+                contentEl.style.display = elem.classList.contains("is-collapsed") ? "none" : "";
+            };
+
+            syncContentVisibility();
+
+            titleEl.addEventListener("click", (event) => {
                 if (elem.classList.contains("is-collapsed")) {
                     elem.classList.remove("is-collapsed");
                 } else {
                     elem.classList.add("is-collapsed");
                 }
+
+                syncContentVisibility();
             });
         });
     });
