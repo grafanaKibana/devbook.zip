@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Regenerate Knowledge/Roadmap.canvas from the folder structure under Knowledge/.
+"""Regenerate Software Engineering/Roadmap.canvas from folder structure.
 
 Usage:
-    python3 .sisyphus/generate-roadmap.py
+    python3 .scripts/generate-roadmap.py
 
 Called automatically by the git pre-commit hook.
 """
@@ -75,6 +75,14 @@ def eid(a, b):
 
 def hub(d):
     return os.path.join(d, os.path.basename(d) + ".md")
+
+
+def canvas_title_link(rel_md_path):
+    p = rel_md_path
+    if p.endswith(".md"):
+        p = p[:-3]
+    title = os.path.splitext(os.path.basename(rel_md_path))[0]
+    return f"## [[{p}|{title}]]"
 
 
 def subdirs(d):
@@ -236,8 +244,8 @@ def generate():
         cx = X_MAIN + (direction * depth * X_SUBTOPIC_OFFSET)
         n = {
             "id": cid,
-            "type": "file",
-            "file": rel,
+            "type": "text",
+            "text": canvas_title_link(rel),
             "x": cx,
             "y": y,
             "width": NODE_W,
@@ -326,8 +334,8 @@ def generate():
 
         n = {
             "id": tid,
-            "type": "file",
-            "file": rel,
+            "type": "text",
+            "text": canvas_title_link(rel),
             "x": X_MAIN,
             "y": topic_y,
             "width": NODE_W,

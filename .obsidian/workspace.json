@@ -11,15 +11,17 @@
             "id": "9cc12a18b15669f3",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
+              "type": "canvas",
               "state": {
-                "aFile": ".scripts/generate-roadmap.py",
-                "bFile": ".scripts/generate-roadmap.py",
-                "aRef": "f3f4180edbc3ba7ce92ceb6bec2a431c8c89bff9^",
-                "bRef": "f3f4180edbc3ba7ce92ceb6bec2a431c8c89bff9"
+                "file": "Software Engineering/Roadmap.canvas",
+                "viewState": {
+                  "x": 137.18249097628495,
+                  "y": 308.9525161575948,
+                  "zoom": -0.6339080077029982
+                }
               },
-              "icon": "diff",
-              "title": "Diff: generate-roadmap.py (f3f4180)"
+              "icon": "lucide-layout-dashboard",
+              "title": "Roadmap"
             }
           }
         ]
@@ -133,9 +135,11 @@
             "type": "leaf",
             "state": {
               "type": "file-properties",
-              "state": {},
+              "state": {
+                "file": "Software Engineering/Roadmap.canvas"
+              },
               "icon": "lucide-info",
-              "title": "File properties"
+              "title": "File properties for Roadmap"
             }
           },
           {
@@ -242,8 +246,9 @@
       "notebook-navigator:Notebook Navigator": true
     }
   },
-  "active": "b4a5f2c64c8491f4",
+  "active": "9cc12a18b15669f3",
   "lastOpenFiles": [
+    "Software Engineering/01 Programming/NET/NET Standart.md",
     "Software Engineering/Roadmap.canvas",
     "Software Engineering/02 Computer Science/02 Computer Science.md",
     "Software Engineering/Questions.md",
