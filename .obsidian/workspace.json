@@ -53,13 +53,17 @@
             "id": "8e30b54bf7be122a",
             "type": "leaf",
             "state": {
-              "type": "bases",
+              "type": "canvas",
               "state": {
-                "file": "Software Engineering/Topics.base",
-                "viewName": "Table"
+                "file": "Software Engineering/Roadmap.canvas",
+                "viewState": {
+                  "x": 81.91378380256145,
+                  "y": 215.20802088280604,
+                  "zoom": -0.5578311618612442
+                }
               },
-              "icon": "lucide-table",
-              "title": "Topics"
+              "icon": "lucide-layout-dashboard",
+              "title": "Roadmap"
             }
           }
         ],
@@ -175,10 +179,10 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Software Engineering/Topics.base"
+                "file": "Software Engineering/01 Programming/01 Programming.md"
               },
               "icon": "lucide-info",
-              "title": "File properties for Topics"
+              "title": "File properties for 01 Programming"
             }
           },
           {
@@ -281,11 +285,52 @@
       "command-palette:Open command palette": true,
       "obsidian-git:Open Git source control": true,
       "templater-obsidian:Templater": false,
-      "notebook-navigator:Notebook Navigator": true
+      "notebook-navigator:Notebook Navigator": true,
+      "homepage:Open homepage": false
     }
+  },
+  "floating": {
+    "id": "7d88d0a220b12190",
+    "type": "floating",
+    "children": [
+      {
+        "id": "f02d71eaa2c8f727",
+        "type": "window",
+        "children": [
+          {
+            "id": "315e4d81f1f7db97",
+            "type": "tabs",
+            "children": [
+              {
+                "id": "a8300a75db95d0d8",
+                "type": "leaf",
+                "state": {
+                  "type": "webviewer",
+                  "state": {
+                    "url": "https://github.com/mgmeyers/obsidian-kanban/issues",
+                    "title": "Issues · mgmeyers/obsidian-kanban · GitHub",
+                    "mode": "webview"
+                  },
+                  "icon": "globe-2",
+                  "title": "Issues · mgmeyers/obsidian-kanban · GitHub"
+                }
+              }
+            ]
+          }
+        ],
+        "direction": "vertical",
+        "x": 1208,
+        "y": 256,
+        "width": 1024,
+        "height": 800,
+        "maximize": false,
+        "zoom": 0
+      }
+    ]
   },
   "active": "8e30b54bf7be122a",
   "lastOpenFiles": [
+    "Software Engineering/Topics.base",
     "Software Engineering/Software Engineering.md",
     "Software Engineering/10 Cloud/AWS/SQS.md",
     "Software Engineering/10 Cloud/AWS/S3.md",
@@ -314,7 +359,6 @@
     "Software Engineering/06 Development Practices/Paradigms/Event-driven.md",
     "Software Engineering/08 SDLC/08 SDLC.md",
     "Software Engineering/10 Cloud/Google Cloud",
-    "Software Engineering/11 AI & ML/AI basic concepts.md",
     "Software Engineering/10 Cloud/Azure Services",
     "Software Engineering/05 Architecture/Distributed Systems/Message Queues",
     "Assets/dotNET Matrix v4.xlsx",
