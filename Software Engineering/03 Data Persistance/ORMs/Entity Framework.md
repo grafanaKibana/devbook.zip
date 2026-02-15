@@ -28,3 +28,4 @@ status: Not-Started
 > The common strategies are: TPH (Table Per Hierarchy, single table with a discriminator), TPT (Table Per Type, separate table per type), and TPC (Table Per Concrete type, separate table per concrete type). They trade off query simplicity, normalization, and performance.
 
 ## Links
+

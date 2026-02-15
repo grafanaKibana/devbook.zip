@@ -299,10 +299,50 @@
       "notebook-navigator:Notebook Navigator": true
     }
   },
-  "active": "1af06994487b60a6",
+  "floating": {
+    "id": "86734d631be51a37",
+    "type": "floating",
+    "children": [
+      {
+        "id": "779f86708b581e8b",
+        "type": "window",
+        "children": [
+          {
+            "id": "bc50c9e728da00d7",
+            "type": "tabs",
+            "children": [
+              {
+                "id": "47d25c3f762d7be6",
+                "type": "leaf",
+                "state": {
+                  "type": "webviewer",
+                  "state": {
+                    "url": "https://silentvoid13.github.io/Templater/user-functions/script-user-functions.html",
+                    "title": "User Scripts - Templater",
+                    "mode": "webview"
+                  },
+                  "icon": "globe-2",
+                  "title": "User Scripts - Templater"
+                }
+              }
+            ]
+          }
+        ],
+        "direction": "vertical",
+        "x": 1208,
+        "y": 256,
+        "width": 1024,
+        "height": 800,
+        "maximize": false,
+        "zoom": 0
+      }
+    ]
+  },
+  "active": "4ecbdb0726a22257",
   "lastOpenFiles": [
-    "Software Engineering/03 Data Persistance/ORMs/Untitled.md",
+    "Assets/Assets.md",
     "Software Engineering/03 Data Persistance/ORMs/Entity Framework.md",
+    "Software Engineering/03 Data Persistance/ORMs/Untitled.md",
     "Software Engineering/03 Data Persistance/ORMs/Abc.md",
     "Software Engineering/03 Data Persistance/ORMs/ORMs.md",
     "Software Engineering/04 Networks/Architecture & Ops/VPN.md",
@@ -328,7 +368,6 @@
     "Software Engineering/01 Programming/NET/Other/any.md",
     "Software Engineering/01 Programming/NET/Other/Hi.md",
     "Templates/Pages/Untitled.md",
-    "Templates/Pages/.md",
     "Software Engineering/01 Programming/NET/ASP.NET Web API",
     "Software Engineering/Roadmap.canvas",
     "Assets/11 AI & ML/11 AI & ML-LLM-20260211012223477.png",
