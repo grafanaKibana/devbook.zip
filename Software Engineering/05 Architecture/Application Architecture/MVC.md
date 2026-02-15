@@ -38,9 +38,6 @@ public sealed class ProductsController : Controller
 
 ## Questions
 
-> [!QUESTION]- What is MVC?
-> Model-View-Controller (MVC) is a UI/application architecture pattern that splits responsibilities into:
-
 ## Links
 
 - [Overview of ASP.NET Core MVC](https://learn.microsoft.com/en-us/aspnet/core/mvc/overview)

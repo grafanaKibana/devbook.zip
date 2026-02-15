@@ -37,7 +37,44 @@ These capabilities make the CLR a key component of .NET by providing the runtime
 
 The process of starting a .NET application and running it under the CLR involves several key steps. Below is a high-level overview:
 
-![01 Programming-Common Language Runtime-20260210212705669](01%20Programming-Common%20Language%20Runtime-20260210212705669.png)
+```mermaid
+flowchart TB
+  subgraph SOURCE[Source code]
+    direction LR
+
+    subgraph VB[VB]
+      direction TB
+      VB_LANG[VB] --> VB_COMP[Compiler] --> VB_IL[Assembly IL Code]
+    end
+
+    subgraph CSHARP[C#]
+      direction TB
+      CS_LANG[C#] --> CS_COMP[Compiler] --> CS_IL[Assembly IL Code]
+    end
+
+    subgraph CPP[C++]
+      direction TB
+      CPP_LANG[C++] --> CPP_COMP[Compiler] --> CPP_IL[Assembly IL Code]
+    end
+  end
+
+  CPP_COMP --> UNMANAGED[Unmanaged Component]
+
+  subgraph MANAGED[Managed code]
+    direction TB
+    subgraph CLR[Common Language Runtime]
+      direction TB
+      JIT[JIT Compiler] --> NATIVE[Native Code]
+    end
+  end
+
+  VB_IL --> JIT
+  CS_IL --> JIT
+  CPP_IL --> JIT
+
+  NATIVE --> OS[Operating System Services]
+  UNMANAGED --> OS
+```
 
 1. **Source code compilation:**
     - After writing code in .NET-compatible languages (for example, C#), the source code is compiled into an intermediate language (IL - Intermediate Language, CIL - Common Intermediate Language, MSIL - Microsoft Intermediate Language). This is done by the language compiler the code is written for (for example, the C# compiler **`csc`**).

@@ -11,14 +11,14 @@
             "id": "e7a7b303c61786dc",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
+              "type": "markdown",
               "state": {
-                "aFile": "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Control Structures.md",
-                "bFile": "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Control Structures.md",
-                "aRef": ""
+                "file": "Software Engineering/03 Data Persistance/SQL/Indexes.md",
+                "mode": "preview",
+                "source": false
               },
-              "icon": "diff",
-              "title": "Diff: Control Structures  (Working Tree)"
+              "icon": "lucide-file",
+              "title": "Indexes"
             }
           }
         ]
@@ -87,7 +87,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 630.5
+    "width": 592.5
   },
   "right": {
     "id": "3a29a9e8dc8d7cc5",
@@ -132,9 +132,11 @@
             "type": "leaf",
             "state": {
               "type": "file-properties",
-              "state": {},
+              "state": {
+                "file": "Software Engineering/03 Data Persistance/SQL/Indexes.md"
+              },
               "icon": "lucide-info",
-              "title": "File properties"
+              "title": "File properties for Indexes"
             }
           },
           {
@@ -241,36 +243,43 @@
       "notebook-navigator:Notebook Navigator": true
     }
   },
-  "active": "e7a7b303c61786dc",
+  "active": "4ecbdb0726a22257",
   "lastOpenFiles": [
+    "Software Engineering/03 Data Persistance/SQL/SQL.md",
+    "Software Engineering/03 Data Persistance/SQL/Indexes/Indexes.md",
+    "Software Engineering/03 Data Persistance/SQL/Indexes.md",
+    "Software Engineering/03 Data Persistance/ACID.md",
+    "Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205142069.png",
+    "Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205142050.png",
+    "Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205142027.png",
+    "Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205142011.png",
+    "Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205141994.png",
+    "Assets/03 Data Persistance/03 Data Persistance.md",
+    "Software Engineering/Software Engineering.md",
+    "Assets/01 Programming/01 Programming-Types-20260211184602492.png",
+    "Software Engineering/Roadmap.canvas",
+    "Software Engineering/Questions.md",
+    "Software Engineering/01 Programming/NET/Runtime/Garbage Collector.md",
+    "Software Engineering/01 Programming/NET/Runtime/Common Language Runtime.md",
+    "Assets/01 Programming/01 Programming-Common Language Runtime-20260210212705669.png",
+    "Assets/01 Programming/01 Programming.md",
+    "Software Engineering/01 Programming/NET/Runtime/Runtime.md",
+    "Software Engineering/01 Programming/NET/Other/SignalR.md",
+    "Software Engineering/01 Programming/NET/Other/OWIN.md",
+    "Software Engineering/01 Programming/NET/Other/Other.md",
+    "Software Engineering/01 Programming/01 Programming.md",
+    "Software Engineering/01 Programming/NET/NET.md",
+    "Software Engineering/01 Programming/NET/ASP.NET Web API/ASP.NET Web API.md",
     "Software Engineering/02 Computer Science/02 Computer Science.md",
     "Software Engineering/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set.md",
     "Software Engineering/02 Computer Science/Algorithms/Algorithms.md",
-    "Software Engineering/01 Programming/NET/NET.md",
-    "Software Engineering/01 Programming/NET/ASP.NET Web API/ASP.NET Web API.md",
     "Software Engineering/01 Programming/NET/CSharp/CSharp.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Control Structures.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Exception Handling.md",
     "Software Engineering/07 Security/OWASP.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Collections/Collections.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Foreach.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Methods.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Recursion.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Reflection.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Yield.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Namespaces.md",
-    "Software Engineering/01 Programming/NET/NET Standart.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Async Await.md",
-    "Software Engineering/01 Programming/01 Programming.md",
-    "Software Engineering/Roadmap.canvas",
-    "Software Engineering/02 Computer Science/Data Structures/Data Structures.md",
-    "Software Engineering/Software Engineering.md",
-    "Software Engineering/03 Data Persistance/SQL/Indexes/Indexes.md",
-    "Software Engineering/Questions.md",
     "Software Engineering/Topics.base",
-    "Software Engineering/10 Cloud/AWS/SQS.md",
     "Software Engineering/10 Cloud/AWS",
     "Software Engineering/10 Cloud/Azure",
     "Software Engineering/10 Cloud/Google Cloud",
@@ -283,13 +292,6 @@
     "Assets/11 AI & ML/11 AI & ML-LLM-20260211012223477.png",
     "Assets/11 AI & ML/11 AI & ML-Instruction Prompting-20260211012332406.svg",
     "Assets/11 AI & ML/11 AI & ML-Showing Examples-20260211012332470.svg",
-    "Assets/11 AI & ML/11 AI & ML-Role Prompting-20260211012332438.svg",
-    "Assets/01 Programming/01 Programming-Common Language Runtime-20260210212705669.png",
-    "quartz/public/01-Programming/NET/CSharp/Fundamentals/Сontrol-Structures/Сontrol-Structures-og-image.webp",
-    "quartz/public/01-Programming/NET/CSharp/Fundamentals/Types/Types-og-image.webp",
-    "quartz/public/01-Programming/NET/CSharp/Fundamentals/Types/Strings-og-image.webp",
-    "quartz/public/01-Programming/NET/CSharp/Fundamentals/Types/Delegates-and-Events-og-image.webp",
-    "quartz/public/01-Programming/NET/CSharp/Fundamentals/Collections/Collections-og-image.webp",
     "quartz/public/Roadmap.canvas",
     "quartz/content/Roadmap.canvas",
     "public/Roadmap.canvas",

@@ -23,6 +23,10 @@
         {
           "type": "note",
           "path": "Software Engineering/Topics.base"
+        },
+        {
+          "type": "note",
+          "path": "Software Engineering/Software Engineering.md"
         }
       ]
     }

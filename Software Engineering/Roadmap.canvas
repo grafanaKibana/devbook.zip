@@ -211,20 +211,11 @@
       "color": "6"
     },
     {
-      "id": "n_cfd0c4d718",
-      "type": "text",
-      "text": "# [[Software Engineering/03 Data Persistance/SQL/Indexes/Indexes|Indexes]]",
-      "x": 840,
-      "y": 2240,
-      "width": 340,
-      "height": 80
-    },
-    {
       "id": "n_562477b458",
       "type": "text",
       "text": "# [[Software Engineering/04 Networks/04 Networks|04 Networks]]",
       "x": 0,
-      "y": 2520,
+      "y": 2400,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -234,7 +225,7 @@
       "type": "text",
       "text": "# [[Software Engineering/04 Networks/Architecture & Ops/Architecture & Ops|Architecture & Ops]]",
       "x": 420,
-      "y": 2520,
+      "y": 2400,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -244,7 +235,7 @@
       "type": "text",
       "text": "# [[Software Engineering/04 Networks/Protocols/Protocols|Protocols]]",
       "x": -420,
-      "y": 2520,
+      "y": 2400,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -254,7 +245,7 @@
       "type": "text",
       "text": "# [[Software Engineering/04 Networks/Transport & Sockets/Transport & Sockets|Transport & Sockets]]",
       "x": 420,
-      "y": 2640,
+      "y": 2520,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -264,7 +255,7 @@
       "type": "text",
       "text": "# [[Software Engineering/05 Architecture/05 Architecture|05 Architecture]]",
       "x": 0,
-      "y": 2920,
+      "y": 2800,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -274,7 +265,7 @@
       "type": "text",
       "text": "# [[Software Engineering/05 Architecture/Application Architecture/Application Architecture|Application Architecture]]",
       "x": 420,
-      "y": 2920,
+      "y": 2800,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -284,7 +275,7 @@
       "type": "text",
       "text": "# [[Software Engineering/05 Architecture/Architecture Styles/Architecture Styles|Architecture Styles]]",
       "x": -420,
-      "y": 2920,
+      "y": 2800,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -294,7 +285,7 @@
       "type": "text",
       "text": "# [[Software Engineering/05 Architecture/Distributed Systems/Distributed Systems|Distributed Systems]]",
       "x": 420,
-      "y": 3040,
+      "y": 2920,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -304,7 +295,7 @@
       "type": "text",
       "text": "# [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/Message Queues|Message Queues]]",
       "x": 840,
-      "y": 3160,
+      "y": 3040,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -314,7 +305,7 @@
       "type": "text",
       "text": "# [[Software Engineering/05 Architecture/Patterns/Patterns|Patterns]]",
       "x": -420,
-      "y": 3040,
+      "y": 2920,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -324,7 +315,7 @@
       "type": "text",
       "text": "# [[Software Engineering/06 Development Practices/06 Development Practices|06 Development Practices]]",
       "x": 0,
-      "y": 3440,
+      "y": 3320,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -334,7 +325,7 @@
       "type": "text",
       "text": "# [[Software Engineering/06 Development Practices/Paradigms/Paradigms|Paradigms]]",
       "x": 420,
-      "y": 3440,
+      "y": 3320,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -344,7 +335,7 @@
       "type": "text",
       "text": "# [[Software Engineering/06 Development Practices/Principles/Principles|Principles]]",
       "x": -420,
-      "y": 3440,
+      "y": 3320,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -354,7 +345,7 @@
       "type": "text",
       "text": "# [[Software Engineering/07 Security/07 Security|07 Security]]",
       "x": 0,
-      "y": 3720,
+      "y": 3600,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -364,7 +355,7 @@
       "type": "text",
       "text": "# [[Software Engineering/07 Security/Authentication/Authentication|Authentication]]",
       "x": 420,
-      "y": 3720,
+      "y": 3600,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -374,7 +365,7 @@
       "type": "text",
       "text": "# [[Software Engineering/08 SDLC/08 SDLC|08 SDLC]]",
       "x": 0,
-      "y": 4000,
+      "y": 3880,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -384,7 +375,7 @@
       "type": "text",
       "text": "# [[Software Engineering/09 DevOps/09 DevOps|09 DevOps]]",
       "x": 0,
-      "y": 4240,
+      "y": 4120,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -394,7 +385,7 @@
       "type": "text",
       "text": "# [[Software Engineering/09 DevOps/Deployment Stratagies/Deployment Stratagies|Deployment Stratagies]]",
       "x": 420,
-      "y": 4240,
+      "y": 4120,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -404,7 +395,7 @@
       "type": "text",
       "text": "# [[Software Engineering/09 DevOps/Version Control Systems/Version Control Systems|Version Control Systems]]",
       "x": -420,
-      "y": 4240,
+      "y": 4120,
       "width": 340,
       "height": 80,
       "color": "6"
@@ -414,7 +405,7 @@
       "type": "text",
       "text": "# [[Software Engineering/10 Cloud/10 Cloud|10 Cloud]]",
       "x": 0,
-      "y": 4520,
+      "y": 4400,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -424,7 +415,7 @@
       "type": "text",
       "text": "# [[Software Engineering/10 Cloud/AWS/AWS|AWS]]",
       "x": 420,
-      "y": 4520,
+      "y": 4400,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -434,7 +425,7 @@
       "type": "text",
       "text": "# [[Software Engineering/10 Cloud/Azure/Azure|Azure]]",
       "x": -420,
-      "y": 4520,
+      "y": 4400,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -444,7 +435,7 @@
       "type": "text",
       "text": "# [[Software Engineering/10 Cloud/Google Cloud/Google Cloud|Google Cloud]]",
       "x": 420,
-      "y": 4640,
+      "y": 4520,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -454,7 +445,7 @@
       "type": "text",
       "text": "# [[Software Engineering/11 AI & ML/11 AI & ML|11 AI & ML]]",
       "x": 0,
-      "y": 4920,
+      "y": 4800,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -464,7 +455,7 @@
       "type": "text",
       "text": "# [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]",
       "x": 420,
-      "y": 4920,
+      "y": 4800,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -474,7 +465,7 @@
       "type": "text",
       "text": "# [[Software Engineering/11 AI & ML/LLM/Agents/Agents|Agents]]",
       "x": 840,
-      "y": 5040,
+      "y": 4920,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -484,7 +475,7 @@
       "type": "text",
       "text": "# [[Software Engineering/11 AI & ML/LLM/Prompting/Prompting|Prompting]]",
       "x": 840,
-      "y": 5160,
+      "y": 5040,
       "width": 340,
       "height": 80,
       "color": "6"
@@ -494,7 +485,7 @@
       "type": "text",
       "text": "# [[Software Engineering/11 AI & ML/Machine Learning/Machine Learning|Machine Learning]]",
       "x": -420,
-      "y": 4920,
+      "y": 4800,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -511,7 +502,7 @@
     {
       "id": "n_b0ac2236f9",
       "type": "text",
-      "text": "#### Roadmap legend\n**Generated:** Feb 15 2026 | 06:27PM",
+      "text": "#### Roadmap legend\n**Generated:** Feb 15 2026 | 06:56PM",
       "x": -1020,
       "y": 0,
       "width": 500,
@@ -707,13 +698,6 @@
       "fromNode": "n_0d3c5a9dde",
       "fromSide": "right",
       "toNode": "n_99bcec9fc7",
-      "toSide": "left"
-    },
-    {
-      "id": "e_bc521610a8",
-      "fromNode": "n_99bcec9fc7",
-      "fromSide": "right",
-      "toNode": "n_cfd0c4d718",
       "toSide": "left"
     },
     {
