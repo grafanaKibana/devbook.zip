@@ -1,6 +1,6 @@
 ---
 topic:
-  - "Data Persistance"
+  - "Data Persistence"
 subtopic:
   - "SQL"
 dg-publish: true
@@ -24,7 +24,7 @@ When you query an indexed column, the query processor starts at the root node an
 
 Binary search has algorithmic complexity `O(log(n))`. Using the complexity formulas `O(n)` and `O(log(n))`, we can estimate how the approximate number of operations changes for different search approaches as the data volume grows.
 
-![03 Data Persistance-Indexes-20260210205141994](../../../Assets/03%20Data%20Persistance/03%20Data%20Persistance-Indexes-20260210205141994.png)
+![03 Data Persistence-Indexes-20260210205141994](../../../Assets/03%20Data%20Persistence/03%20Data%20Persistence-Indexes-20260210205141994.png)
 
 Mermaid alternative:
 
@@ -84,7 +84,7 @@ Pages at each level are linked in a doubly linked list.
 
 An important property of a clustered index is that all values are ordered in a specific direction (ascending or descending). Therefore, a table or view can have only one clustered index. Also note that the table's data is stored in sorted order only when a clustered index exists on that table. A table without a clustered index is called a heap.
 
-![Untitled](../../../Assets/03%20Data%20Persistance/03%20Data%20Persistance-Indexes-20260210205142011.png)
+![Untitled](../../../Assets/03%20Data%20Persistence/03%20Data%20Persistence-Indexes-20260210205142011.png)
 
 Mermaid alternative:
 
@@ -184,7 +184,7 @@ flowchart TB
   L5_idx -- prev --> L4_idx
 ```
 
-![Untitled](../../../Assets/03%20Data%20Persistance/03%20Data%20Persistance-Indexes-20260210205142027.png)
+![Untitled](../../../Assets/03%20Data%20Persistence/03%20Data%20Persistence-Indexes-20260210205142027.png)
 
 Mermaid alternative:
 
@@ -298,7 +298,7 @@ Unlike a clustered index, the leaf level of a nonclustered index contains only t
 - **With a clustered index**
     - If the table has a clustered index, then nonclustered indexes store the clustered index key value for the row in their leaf level
         
-![Untitled](../../../Assets/03%20Data%20Persistance/03%20Data%20Persistance-Indexes-20260210205142050.png)
+![Untitled](../../../Assets/03%20Data%20Persistence/03%20Data%20Persistence-Indexes-20260210205142050.png)
 
 Mermaid alternative:
 
@@ -390,7 +390,7 @@ flowchart TB
 - **Without a clustered index**
     - If the table does not have a clustered index, then nonclustered indexes on that table store row identifiers (RIDs) in their leaf level. A row identifier points to the actual data row in the table; in practice it includes the data file number, the page number, and the row's slot/location on that page.
         
-![Untitled](../../../Assets/03%20Data%20Persistance/03%20Data%20Persistance-Indexes-20260210205142069.png)
+![Untitled](../../../Assets/03%20Data%20Persistence/03%20Data%20Persistence-Indexes-20260210205142069.png)
 
 Mermaid alternative:
 

@@ -1,11 +1,15 @@
 ---
 topic:
-  - "Patterns & Practices"
+  - Patterns & Practices
 subtopic:
-  - "Paradigms & Practices"
+  - Paradigms & Practices
 tags:
   - FolderNote
 dg-publish: true
+status: Creation
+priority: Medium
+level:
+  - '4'
 ---
 
 # Intro

@@ -1,11 +1,15 @@
 ---
 topic:
-  - "Architecture"
+  - Architecture
 subtopic:
-  - "Application Architecture"
+  - Application Architecture
 tags:
   - FolderNote
 dg-publish: true
+status: Ready To Repeat
+priority: Medium
+level:
+  - '4'
 ---
 
 # Intro

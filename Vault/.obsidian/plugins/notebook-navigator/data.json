@@ -390,7 +390,7 @@
   "folderIcons": {
     "Software Engineering/01 Programming": "code-2",
     "Software Engineering/02 Computer Science": "flask-round",
-    "Software Engineering/03 Data Persistance": "database",
+    "Software Engineering/03 Data Persistence": "database",
     "Software Engineering/04 Networks": "network",
     "Software Engineering/05 Architecture": "building-2",
     "Software Engineering/06 Development Practices": "ruler-dimension-line",
@@ -405,7 +405,7 @@
   "folderColors": {
     "Software Engineering/01 Programming": "#f43f5e",
     "Software Engineering/02 Computer Science": "#ef4444",
-    "Software Engineering/03 Data Persistance": "#f97316",
+    "Software Engineering/03 Data Persistence": "#f97316",
     "Software Engineering/04 Networks": "#f59e0b",
     "Software Engineering/05 Architecture": "#eab308",
     "Software Engineering/06 Development Practices": "#84cc16",

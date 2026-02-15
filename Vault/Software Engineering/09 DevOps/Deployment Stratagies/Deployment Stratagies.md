@@ -1,11 +1,15 @@
 ---
 topic:
-  - "DevOps"
+  - DevOps
 subtopic:
-  - "Deployment Stratagies"
+  - Deployment Stratagies
 tags:
   - FolderNote
 dg-publish: true
+status: Not-Started
+priority: Medium
+level:
+  - '2'
 ---
 
 # Intro

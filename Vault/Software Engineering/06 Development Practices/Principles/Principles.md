@@ -1,11 +1,15 @@
 ---
 topic:
-  - "Patterns & Practices"
+  - Patterns & Practices
 subtopic:
-  - "Principles"
+  - Principles
 tags:
   - FolderNote
 dg-publish: true
+status: Ready To Repeat
+priority: Medium
+level:
+  - '4'
 ---
 
 # Intro

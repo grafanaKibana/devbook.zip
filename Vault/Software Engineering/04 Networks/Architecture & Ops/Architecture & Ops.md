@@ -1,11 +1,15 @@
 ---
 topic:
-  - "Networks"
+  - Networks
 subtopic:
-  - "Architecture & Ops"
+  - Architecture & Ops
 tags:
   - FolderNote
 dg-publish: true
+status: Not-Started
+priority: Medium
+level:
+  - '3'
 ---
 
 # Intro

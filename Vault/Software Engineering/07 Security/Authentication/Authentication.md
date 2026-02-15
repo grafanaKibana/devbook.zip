@@ -3,10 +3,13 @@ topic:
   - Security
 subtopic:
   - Authentication
-status: Not-Started
 tags:
   - FolderNote
 dg-publish: true
+priority: High
+level:
+  - '4'
+status: Ready To Repeat
 ---
 
 # Intro

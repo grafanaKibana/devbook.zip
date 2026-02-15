@@ -1,11 +1,15 @@
 ---
 topic:
-  - "Networks"
+  - Networks
 subtopic:
-  - "Protocols"
+  - Protocols
 tags:
   - FolderNote
 dg-publish: true
+status: Ready To Repeat
+priority: Medium
+level:
+  - '4'
 ---
 
 # Intro

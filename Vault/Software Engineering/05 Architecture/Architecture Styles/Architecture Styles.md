@@ -1,11 +1,15 @@
 ---
 topic:
-  - "Architecture"
+  - Architecture
 subtopic:
-  - "Architecture Styles"
+  - Architecture Styles
 tags:
   - FolderNote
 dg-publish: true
+status: Ready To Repeat
+priority: Medium
+level:
+  - '4'
 ---
 
 # Intro

@@ -1,10 +1,14 @@
 ---
 topic:
-  - "Cloud"
+  - Cloud
 subtopic: []
 tags:
   - FolderNote
 dg-publish: true
+status: Creation
+priority: Medium
+level:
+  - '3'
 ---
 
 # Intro

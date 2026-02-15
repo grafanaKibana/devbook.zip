@@ -1,13 +1,15 @@
 ---
 topic:
-  - "Data Persistance"
-subtopic: []
-level:
-  - "4"
-priority: Medium
-status: Not-Started
-
+  - Data Persistence
+subtopic:
+  - ORMs
+tags:
+  - FolderNote
 dg-publish: true
+status: Ready To Repeat
+priority: Medium
+level:
+  - '4'
 ---
 
 # Intro
@@ -16,7 +18,19 @@ dg-publish: true
 
 ## Questions
 
+> [!QUESTION]- What is an ORM?
+> An ORM (Object-Relational Mapper) maps relational database tables/rows to objects and translates queries/changes in code into SQL. It helps with CRUD, tracking changes, relationships, and migrations, at the cost of an abstraction layer you must understand to avoid performance issues.
+
 ## Links
+
+## Deeper Explanation
+
+
+## Questions
+
+
+## Links
+
 
 # Whats next
 
@@ -43,12 +57,12 @@ const pages = dv.pages()
   .sort(p => p.file.name, "asc");
   
   if (children.length) {
-	dv.header(2, "Topics");
-	dv.list(children.map(p => p.file.link));
+	  dv.header(2, "Topics");
+	  dv.list(children.map(p => p.file.link));
   }
   if (pages.length) {
-	dv.header(2, "Pages");
-	dv.list(pages.map(p => p.file.link));
+	  dv.header(2, "Pages");
+	  dv.list(pages.map(p => p.file.link));
   }
   
 ```
