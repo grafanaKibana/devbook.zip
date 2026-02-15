@@ -5,35 +5,11 @@
 
 # Intro
 
-## Deeper Explanation
-
-## Diagram
-
-```mermaid
-graph TD
-  A[Graph G with V and E] --> B{Goal}
-  B -->|Visit all reachable nodes| C[Traversal]
-  B -->|Shortest path nonnegative weights| D[Dijkstra]
-  C --> E{Which frontier policy}
-  E -->|Queue| F[BFS]
-  E -->|Stack or recursion| G[DFS]
-  F --> H[Level-order distances in unweighted graphs]
-  G --> I[Topological and connected components patterns]
-  D --> J[Priority queue and relax edges]
-```
-
-## Questions
+Graphs model relationships: networks, dependencies, routes, permissions, and many real-world system structures. Graph algorithms help you traverse, rank, and optimize those relationships efficiently. Example: shortest-path algorithms answer "what's the cheapest route" while BFS/DFS answer "what's reachable".
 
 ## Links
 
-## Deeper Explanation
-
-
-## Questions
-
-
-## Links
-
+- [Graph algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Graph_algorithm)
 
 # Whats next
 

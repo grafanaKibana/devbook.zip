@@ -10,11 +10,75 @@
 
 # Topic Coverage
 
-<table style="width: 100%; border-collapse: collapse; table-layout: fixed;"><colgroup><col style="width: 40%;"><col style="width: 45%;"><col style="width: 15%;"></colgroup><thead><tr><th style="text-align: left; padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.25); font-weight: 600;">Topic</th><th style="text-align: right; padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.25); font-weight: 600;">Completion</th><th style="text-align: right; padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.25); font-weight: 600;">Done</th></tr></thead><tbody><tr><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12);">Architecture</td><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12); text-align: right;"><div style="display: grid; grid-template-columns: 1fr 44px; gap: 8px; align-items: center;"><progress max="100" value="0" style="width: 100%; height: 12px;"></progress><span style="opacity: 0.8; font-variant-numeric: tabular-nums; text-align: right;">0%</span></div></td><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12); text-align: right; font-variant-numeric: tabular-nums;">0/26</td></tr><tr><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12);">Programming</td><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12); text-align: right;"><div style="display: grid; grid-template-columns: 1fr 44px; gap: 8px; align-items: center;"><progress max="100" value="0" style="width: 100%; height: 12px;"></progress><span style="opacity: 0.8; font-variant-numeric: tabular-nums; text-align: right;">0%</span></div></td><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12); text-align: right; font-variant-numeric: tabular-nums;">0/16</td></tr><tr><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12);">AI &amp; ML</td><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12); text-align: right;"><div style="display: grid; grid-template-columns: 1fr 44px; gap: 8px; align-items: center;"><progress max="100" value="0" style="width: 100%; height: 12px;"></progress><span style="opacity: 0.8; font-variant-numeric: tabular-nums; text-align: right;">0%</span></div></td><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12); text-align: right; font-variant-numeric: tabular-nums;">0/12</td></tr><tr><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12);">Computer Science</td><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12); text-align: right;"><div style="display: grid; grid-template-columns: 1fr 44px; gap: 8px; align-items: center;"><progress max="100" value="0" style="width: 100%; height: 12px;"></progress><span style="opacity: 0.8; font-variant-numeric: tabular-nums; text-align: right;">0%</span></div></td><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12); text-align: right; font-variant-numeric: tabular-nums;">0/12</td></tr><tr><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12);">Cloud</td><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12); text-align: right;"><div style="display: grid; grid-template-columns: 1fr 44px; gap: 8px; align-items: center;"><progress max="100" value="0" style="width: 100%; height: 12px;"></progress><span style="opacity: 0.8; font-variant-numeric: tabular-nums; text-align: right;">0%</span></div></td><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12); text-align: right; font-variant-numeric: tabular-nums;">0/11</td></tr><tr><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12);">Networks</td><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12); text-align: right;"><div style="display: grid; grid-template-columns: 1fr 44px; gap: 8px; align-items: center;"><progress max="100" value="0" style="width: 100%; height: 12px;"></progress><span style="opacity: 0.8; font-variant-numeric: tabular-nums; text-align: right;">0%</span></div></td><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12); text-align: right; font-variant-numeric: tabular-nums;">0/11</td></tr><tr><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12);">DevOps</td><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12); text-align: right;"><div style="display: grid; grid-template-columns: 1fr 44px; gap: 8px; align-items: center;"><progress max="100" value="0" style="width: 100%; height: 12px;"></progress><span style="opacity: 0.8; font-variant-numeric: tabular-nums; text-align: right;">0%</span></div></td><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12); text-align: right; font-variant-numeric: tabular-nums;">0/10</td></tr><tr><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12);">Security</td><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12); text-align: right;"><div style="display: grid; grid-template-columns: 1fr 44px; gap: 8px; align-items: center;"><progress max="100" value="0" style="width: 100%; height: 12px;"></progress><span style="opacity: 0.8; font-variant-numeric: tabular-nums; text-align: right;">0%</span></div></td><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12); text-align: right; font-variant-numeric: tabular-nums;">0/10</td></tr><tr><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12);">Patterns &amp; Practices</td><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12); text-align: right;"><div style="display: grid; grid-template-columns: 1fr 44px; gap: 8px; align-items: center;"><progress max="100" value="0" style="width: 100%; height: 12px;"></progress><span style="opacity: 0.8; font-variant-numeric: tabular-nums; text-align: right;">0%</span></div></td><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12); text-align: right; font-variant-numeric: tabular-nums;">0/9</td></tr><tr><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12);">Data Persistance</td><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12); text-align: right;"><div style="display: grid; grid-template-columns: 1fr 44px; gap: 8px; align-items: center;"><progress max="100" value="0" style="width: 100%; height: 12px;"></progress><span style="opacity: 0.8; font-variant-numeric: tabular-nums; text-align: right;">0%</span></div></td><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12); text-align: right; font-variant-numeric: tabular-nums;">0/6</td></tr><tr><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12);">SDLC</td><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12); text-align: right;"><div style="display: grid; grid-template-columns: 1fr 44px; gap: 8px; align-items: center;"><progress max="100" value="0" style="width: 100%; height: 12px;"></progress><span style="opacity: 0.8; font-variant-numeric: tabular-nums; text-align: right;">0%</span></div></td><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12); text-align: right; font-variant-numeric: tabular-nums;">0/3</td></tr><tr><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12);">Development Practices</td><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12); text-align: right;"><div style="display: grid; grid-template-columns: 1fr 44px; gap: 8px; align-items: center;"><progress max="100" value="0" style="width: 100%; height: 12px;"></progress><span style="opacity: 0.8; font-variant-numeric: tabular-nums; text-align: right;">0%</span></div></td><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12); text-align: right; font-variant-numeric: tabular-nums;">0/1</td></tr></tbody></table>
+dataview``` query blocks.
+const wrapper = this.container.createEl("div");
+wrapper.classList.add("block-language-dataview");
 
+const table = wrapper.createEl("table");
+table.classList.add("dataview", "table-view-table");
+
+const thead = table.createEl("thead");
+thead.classList.add("table-view-thead");
+const hr = thead.createEl("tr");
+for (const h of ["Topic", "Completion", "Done"]) {
+  const th = hr.createEl("th", { text: h });
+}
+
+const tbody = table.createEl("tbody");
+tbody.classList.add("table-view-tbody");
+for (const r of rows) {
+  const tr = tbody.createEl("tr");
+
+  const tdTopic = tr.createEl("td", { text: r.topic });
+
+  const tdProg = tr.createEl("td");
+  appendProgress(tdProg, r.pct);
+
+  const tdDone = tr.createEl("td", { text: `${r.done}/${r.total}` });
+}
+
+// Display notes without topics
+if (notesWithoutTopic.length > 0) {
+  const noteLinks = notesWithoutTopic
+    .map(note => `> - [[${note.file.path.replace('.md', '')}|${note.file.name}]]`)
+    .join('\n');
+
+  const count = notesWithoutTopic.length;
+  const label = count === 1 ? "Note" : "Notes";
+  const calloutMarkdown = `> [!warning] ${count} ${label} missing topic\n${noteLinks}`;
+
+  dv.paragraph(calloutMarkdown);
+}
+```
 # Status Distribution
 
-<table style="width: 100%; border-collapse: collapse; table-layout: fixed;"><colgroup><col style="width: 40%;"><col style="width: 45%;"><col style="width: 15%;"></colgroup><thead><tr><th style="text-align: left; padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.25); font-weight: 600;">Status</th><th style="text-align: right; padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.25); font-weight: 600;">Distribution</th><th style="text-align: right; padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.25); font-weight: 600;">Count</th></tr></thead><tbody><tr><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12);">Done</td><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12); text-align: right;"><div style="display: grid; grid-template-columns: 1fr 44px; gap: 8px; align-items: center;"><progress max="100" value="0" style="width: 100%; height: 12px;"></progress><span style="opacity: 0.8; font-variant-numeric: tabular-nums; text-align: right;">0%</span></div></td><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12); text-align: right; font-variant-numeric: tabular-nums;">0</td></tr><tr><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12);">Ready To Repeat</td><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12); text-align: right;"><div style="display: grid; grid-template-columns: 1fr 44px; gap: 8px; align-items: center;"><progress max="100" value="46" style="width: 100%; height: 12px;"></progress><span style="opacity: 0.8; font-variant-numeric: tabular-nums; text-align: right;">46%</span></div></td><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12); text-align: right; font-variant-numeric: tabular-nums;">59</td></tr><tr><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12);">Repetition</td><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12); text-align: right;"><div style="display: grid; grid-template-columns: 1fr 44px; gap: 8px; align-items: center;"><progress max="100" value="0" style="width: 100%; height: 12px;"></progress><span style="opacity: 0.8; font-variant-numeric: tabular-nums; text-align: right;">0%</span></div></td><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12); text-align: right; font-variant-numeric: tabular-nums;">0</td></tr><tr><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12);">Creation</td><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12); text-align: right;"><div style="display: grid; grid-template-columns: 1fr 44px; gap: 8px; align-items: center;"><progress max="100" value="23" style="width: 100%; height: 12px;"></progress><span style="opacity: 0.8; font-variant-numeric: tabular-nums; text-align: right;">23%</span></div></td><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12); text-align: right; font-variant-numeric: tabular-nums;">29</td></tr><tr><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12);">Not-Started</td><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12); text-align: right;"><div style="display: grid; grid-template-columns: 1fr 44px; gap: 8px; align-items: center;"><progress max="100" value="30" style="width: 100%; height: 12px;"></progress><span style="opacity: 0.8; font-variant-numeric: tabular-nums; text-align: right;">30%</span></div></td><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12); text-align: right; font-variant-numeric: tabular-nums;">38</td></tr><tr><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12);">Other</td><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12); text-align: right;"><div style="display: grid; grid-template-columns: 1fr 44px; gap: 8px; align-items: center;"><progress max="100" value="0" style="width: 100%; height: 12px;"></progress><span style="opacity: 0.8; font-variant-numeric: tabular-nums; text-align: right;">0%</span></div></td><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12); text-align: right; font-variant-numeric: tabular-nums;">0</td></tr><tr style="background-color: rgba(234, 179, 8, 0.15);"><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12); color: rgb(234, 179, 8); font-weight: 600;">Missing</td><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12); text-align: right;"><div style="display: grid; grid-template-columns: 1fr 44px; gap: 8px; align-items: center;"><progress max="100" value="1" style="width: 100%; height: 12px;"></progress><span style="opacity: 0.8; font-variant-numeric: tabular-nums; text-align: right;">1%</span></div></td><td style="padding: 6px 8px; border-bottom: 1px solid rgba(127, 127, 127, 0.12); text-align: right; font-variant-numeric: tabular-nums;">1</td></tr></tbody></table>
+dataview``` query blocks.
+const wrapper = this.container.createEl("div");
+wrapper.classList.add("block-language-dataview");
+
+const table = wrapper.createEl("table");
+table.classList.add("dataview", "table-view-table");
+
+const thead = table.createEl("thead");
+thead.classList.add("table-view-thead");
+const hr = thead.createEl("tr");
+for (const h of ["Status", "Distribution", "Count"]) {
+  const th = hr.createEl("th", { text: h });
+}
+
+const tbody = table.createEl("tbody");
+tbody.classList.add("table-view-tbody");
+for (const r of rows) {
+  const tr = tbody.createEl("tr");
+
+  const tdStatus = tr.createEl("td", { text: r.status });
+
+  const tdProg = tr.createEl("td");
+  appendProgress(tdProg, r.pct);
+
+  const tdCount = tr.createEl("td", { text: `${r.count}` });
+}
+```
 
 # Focus
 
@@ -37,19 +101,19 @@
 
 # Recently Updated
 
-| Note                                                                                                                         |
-| ---------------------------------------------------------------------------------------------------------------------------- |
-| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Delegates and Events\|Delegates and Events]]          |
-| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Strings\|Strings]]                                    |
-| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Reflection\|Reflection]]                 |
-| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Namespaces\|Namespaces]]                 |
-| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Foreach\|Foreach]]                       |
-| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Exception Handling\|Exception Handling]] |
-| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Methods\|Methods]]                       |
-| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Async Await\|Async Await]]                                  |
-| [[Software Engineering/11 AI & ML/LLM/Prompting/Showing Examples\|Showing Examples]]                                      |
-| [[Software Engineering/11 AI & ML/LLM/Prompting/Role Prompting\|Role Prompting]]                                          |
-| [[Software Engineering/11 AI & ML/LLM/Prompting/Prompting\|Prompting]]                                                    |
-| [[Software Engineering/11 AI & ML/LLM/Agents/Tools\|Tools]]                                                               |
+| Note                                                                                                                         | Date                        |
+| ---------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
+| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Delegates and Events\|Delegates and Events]]          | 7:38 PM - February 15, 2026 |
+| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Strings\|Strings]]                                    | 7:38 PM - February 15, 2026 |
+| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Reflection\|Reflection]]                 | 7:38 PM - February 15, 2026 |
+| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Namespaces\|Namespaces]]                 | 7:38 PM - February 15, 2026 |
+| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Foreach\|Foreach]]                       | 7:38 PM - February 15, 2026 |
+| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Exception Handling\|Exception Handling]] | 7:38 PM - February 15, 2026 |
+| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Methods\|Methods]]                       | 7:38 PM - February 15, 2026 |
+| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Async Await\|Async Await]]                                  | 7:38 PM - February 15, 2026 |
+| [[Software Engineering/11 AI & ML/LLM/Prompting/Showing Examples\|Showing Examples]]                                      | 7:38 PM - February 15, 2026 |
+| [[Software Engineering/11 AI & ML/LLM/Prompting/Role Prompting\|Role Prompting]]                                          | 7:38 PM - February 15, 2026 |
+| [[Software Engineering/11 AI & ML/LLM/Prompting/Prompting\|Prompting]]                                                    | 7:38 PM - February 15, 2026 |
+| [[Software Engineering/11 AI & ML/LLM/Agents/Tools\|Tools]]                                                               | 7:38 PM - February 15, 2026 |
 
 { .block-language-dataview}
