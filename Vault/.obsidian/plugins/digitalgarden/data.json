@@ -2,7 +2,7 @@
   "githubRepo": "KnowledgeHub",
   "githubToken": "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",
   "githubUserName": "grafanaKibana",
-  "gardenBaseUrl": "https://sde-knowledge-hub.vercel.app",
+  "gardenBaseUrl": "https://devsanctury.vercel.app",
   "prHistory": [],
   "baseTheme": "light",
   "theme": "{\"name\":\"Minimal\",\"author\":\"kepano\",\"repo\":\"kepano/obsidian-minimal\",\"screenshot\":\"dark-simple.png\",\"modes\":[\"dark\",\"light\"],\"cssUrl\":\"https://raw.githubusercontent.com/kepano/obsidian-minimal/HEAD/theme.css\"}",
