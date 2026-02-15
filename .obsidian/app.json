@@ -11,5 +11,6 @@
   "openBehavior": "file:Knowledge/Knowledge",
   "userIgnoreFilters": [
     "Assets/"
-  ]
+  ],
+  "newFileLocation": "current"
 }
