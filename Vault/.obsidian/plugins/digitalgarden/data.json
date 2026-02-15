@@ -5,7 +5,7 @@
   "gardenBaseUrl": "https://sde-knowledge-hub.vercel.app",
   "prHistory": [],
   "baseTheme": "light",
-  "theme": "{\"name\":\"Obsidianotion\",\"author\":\"Diego Eis\",\"repo\":\"diegoeis/obsidianotion\",\"screenshot\":\"cover.png\",\"modes\":[\"dark\",\"light\"],\"cssUrl\":\"https://raw.githubusercontent.com/diegoeis/obsidianotion/HEAD/theme.css\"}",
+  "theme": "{\"name\":\"Border\",\"author\":\"Akifyss\",\"repo\":\"Akifyss/obsidian-border\",\"screenshot\":\"cover.png\",\"modes\":[\"dark\",\"light\"],\"cssUrl\":\"https://raw.githubusercontent.com/Akifyss/obsidian-border/HEAD/theme.css\"}",
   "faviconPath": "Assets/favicon.png",
   "logoPath": "",
   "useFullResolutionImages": false,
