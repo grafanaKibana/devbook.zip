@@ -4,21 +4,22 @@
     "type": "split",
     "children": [
       {
-        "id": "dfcf268ba8302cbc",
+        "id": "f86e561020a77b19",
         "type": "tabs",
         "children": [
           {
-            "id": "024e85357ba9ffb8",
+            "id": "9cc12a18b15669f3",
             "type": "leaf",
             "state": {
               "type": "split-diff-view",
               "state": {
                 "aFile": ".scripts/generate-roadmap.py",
                 "bFile": ".scripts/generate-roadmap.py",
-                "aRef": ""
+                "aRef": "f3f4180edbc3ba7ce92ceb6bec2a431c8c89bff9^",
+                "bRef": "f3f4180edbc3ba7ce92ceb6bec2a431c8c89bff9"
               },
               "icon": "diff",
-              "title": "Diff: generate-roadmap.py  (Working Tree)"
+              "title": "Diff: generate-roadmap.py (f3f4180)"
             }
           }
         ]
@@ -241,9 +242,10 @@
       "notebook-navigator:Notebook Navigator": true
     }
   },
-  "active": "024e85357ba9ffb8",
+  "active": "b4a5f2c64c8491f4",
   "lastOpenFiles": [
     "Software Engineering/Roadmap.canvas",
+    "Software Engineering/02 Computer Science/02 Computer Science.md",
     "Software Engineering/Questions.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Control Structures.md",
     "Software Engineering/Topics.base",
@@ -271,7 +273,6 @@
     "Software Engineering/10 Cloud/Azure",
     "Software Engineering/10 Cloud/Azure Services/Azure Services.md",
     "Software Engineering/10 Cloud/AWS.md",
-    "Software Engineering/08 SDLC/BDD.md",
     "Software Engineering/10 Cloud/Google Cloud",
     "Software Engineering/10 Cloud/Azure Services",
     "Software Engineering/05 Architecture/Distributed Systems/Message Queues",

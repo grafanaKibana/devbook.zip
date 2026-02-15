@@ -15,14 +15,6 @@ views:
       - level
     sort:
       - property: topic
-        direction: ASC
-      - property: subtopic
-        direction: ASC
-      - property: status
-        direction: ASC
-      - property: priority
-        direction: ASC
-      - property: level
         direction: DESC
     summaries: {}
   - type: cards
