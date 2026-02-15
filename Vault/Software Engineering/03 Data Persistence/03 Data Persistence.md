@@ -1,10 +1,14 @@
 ---
 topic:
-  - "Data Persistance"
+  - Data Persistence
 subtopic: []
 tags:
   - FolderNote
 dg-publish: true
+status: Creation
+priority: High
+level:
+  - '4'
 ---
 
 # Intro

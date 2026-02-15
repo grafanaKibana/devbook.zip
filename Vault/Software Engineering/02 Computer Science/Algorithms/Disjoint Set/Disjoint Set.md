@@ -1,11 +1,15 @@
 ---
 topic:
-  - "Computer Science"
+  - Computer Science
 subtopic:
-  - "Algorithms"
+  - Algorithms
 tags:
   - FolderNote
 dg-publish: true
+status: Ready To Repeat
+priority: Medium
+level:
+  - '3'
 ---
 
 # Intro

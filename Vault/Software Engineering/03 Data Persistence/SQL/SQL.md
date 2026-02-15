@@ -1,11 +1,15 @@
 ---
 topic:
-  - "Data Persistance"
+  - Data Persistence
 subtopic:
-  - "SQL"
+  - SQL
 tags:
   - FolderNote
 dg-publish: true
+status: Ready To Repeat
+priority: Medium
+level:
+  - '4'
 ---
 
 # Intro

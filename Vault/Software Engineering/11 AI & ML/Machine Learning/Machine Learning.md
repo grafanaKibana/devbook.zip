@@ -1,11 +1,15 @@
 ---
 topic:
-  - "AI & ML"
+  - AI & ML
 subtopic:
-  - "Machine Learning"
+  - Machine Learning
 tags:
   - FolderNote
 dg-publish: true
+status: Creation
+priority: Medium
+level:
+  - '1'
 ---
 
 # Intro

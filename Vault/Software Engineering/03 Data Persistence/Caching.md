@@ -1,11 +1,11 @@
 ---
 topic:
-  - "Data Persistance"
+  - "Data Persistence"
 subtopic: []
 level:
-  - "3"
+  - "4"
 priority: Medium
-status: Creation
+status: Not-Started
 
 dg-publish: true
 ---
@@ -15,9 +15,6 @@ dg-publish: true
 ## Deeper Explanation
 
 ## Questions
-
-> [!QUESTION]- What are non-relational databases?
-> Non-relational databases (often grouped under the term NoSQL) store and query data without the classic relational model of normalized tables and joins. They typically favor flexible schemas and horizontal scaling, and come in several major families: key-value, document, wide-column, and graph databases.
 
 ## Links
 

@@ -1,11 +1,15 @@
 ---
 topic:
-  - "Architecture"
+  - Architecture
 subtopic:
-  - "Distributed Systems"
+  - Distributed Systems
 tags:
   - FolderNote
 dg-publish: true
+status: Creation
+priority: Medium
+level:
+  - '2'
 ---
 
 # Intro

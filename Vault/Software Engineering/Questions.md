@@ -1,5 +1,7 @@
 ---
-tags: [FolderNote]
+tags:
+  - FolderNote
+  - MetricsIgnore
 dg-publish: true
 ---
 

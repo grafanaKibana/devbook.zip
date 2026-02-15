@@ -1,11 +1,15 @@
 ---
 topic:
-  - "Architecture"
+  - Architecture
 subtopic:
-  - "Patterns"
+  - Patterns
 tags:
   - FolderNote
 dg-publish: true
+status: Creation
+priority: Medium
+level:
+  - '4'
 ---
 
 # Intro

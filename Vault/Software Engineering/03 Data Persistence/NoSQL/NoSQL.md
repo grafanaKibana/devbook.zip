@@ -1,10 +1,12 @@
 ---
 topic:
-  - "Data Persistance"
-subtopic:
-  - "ORMs"
-tags:
-  - FolderNote
+  - "Data Persistence"
+subtopic: []
+level:
+  - "3"
+priority: Medium
+status: Creation
+
 dg-publish: true
 ---
 
@@ -14,19 +16,10 @@ dg-publish: true
 
 ## Questions
 
-> [!QUESTION]- What is an ORM?
-> An ORM (Object-Relational Mapper) maps relational database tables/rows to objects and translates queries/changes in code into SQL. It helps with CRUD, tracking changes, relationships, and migrations, at the cost of an abstraction layer you must understand to avoid performance issues.
+> [!QUESTION]- What are non-relational databases?
+> Non-relational databases (often grouped under the term NoSQL) store and query data without the classic relational model of normalized tables and joins. They typically favor flexible schemas and horizontal scaling, and come in several major families: key-value, document, wide-column, and graph databases.
 
 ## Links
-
-## Deeper Explanation
-
-
-## Questions
-
-
-## Links
-
 
 # Whats next
 
@@ -53,12 +46,12 @@ const pages = dv.pages()
   .sort(p => p.file.name, "asc");
   
   if (children.length) {
-	  dv.header(2, "Topics");
-	  dv.list(children.map(p => p.file.link));
+	dv.header(2, "Topics");
+	dv.list(children.map(p => p.file.link));
   }
   if (pages.length) {
-	  dv.header(2, "Pages");
-	  dv.list(pages.map(p => p.file.link));
+	dv.header(2, "Pages");
+	dv.list(pages.map(p => p.file.link));
   }
   
 ```

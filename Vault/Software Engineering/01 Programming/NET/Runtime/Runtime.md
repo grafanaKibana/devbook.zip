@@ -1,11 +1,15 @@
 ---
 topic:
-  - "Programming"
+  - Programming
 subtopic:
-  - "NET"
+  - NET
 tags:
   - FolderNote
 dg-publish: true
+status: Ready To Repeat
+priority: Medium
+level:
+  - '4'
 ---
 
 # Intro

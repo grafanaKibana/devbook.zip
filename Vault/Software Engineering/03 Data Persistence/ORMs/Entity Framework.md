@@ -1,6 +1,6 @@
 ---
 topic:
-  - "Data Persistance"
+  - "Data Persistence"
 subtopic:
   - "ORMs"
 level:

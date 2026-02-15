@@ -1,6 +1,6 @@
 filters:
   and:
-    - '!file.hasTag("FolderNote")'
+    - file.hasTag("FolderNote")
     - '!file.ext.containsAny("base", "canvas")'
     - file.path.startsWith("Software Engineering")
 views:

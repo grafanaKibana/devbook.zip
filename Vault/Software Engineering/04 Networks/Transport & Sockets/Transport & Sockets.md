@@ -1,11 +1,15 @@
 ---
 topic:
-  - "Networks"
+  - Networks
 subtopic:
-  - "Transport & Sockets"
+  - Transport & Sockets
 tags:
   - FolderNote
 dg-publish: true
+status: Creation
+priority: Medium
+level:
+  - '3'
 ---
 
 # Intro

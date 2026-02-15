@@ -10,21 +10,32 @@
           {
             "id": "70994c056d478933",
             "type": "leaf",
+            "pinned": true,
             "state": {
-              "type": "canvas",
+              "type": "bases",
               "state": {
-                "file": "Software Engineering/Roadmap.canvas",
-                "viewState": {
-                  "x": 490,
-                  "y": 2550,
-                  "zoom": -2.2006135676045733
-                }
+                "file": "Software Engineering/Topics.base",
+                "viewName": "Table"
               },
-              "icon": "lucide-layout-dashboard",
-              "title": "Roadmap"
+              "pinned": true,
+              "icon": "lucide-table",
+              "title": "Topics"
+            }
+          },
+          {
+            "id": "9d170404770df8c8",
+            "type": "leaf",
+            "state": {
+              "type": "image",
+              "state": {
+                "file": "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205142069.png"
+              },
+              "icon": "lucide-image",
+              "title": "03 Data Persistence-Indexes-20260210205142069"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -154,10 +165,10 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Software Engineering/Roadmap.canvas"
+                "file": "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205142069.png"
               },
               "icon": "lucide-info",
-              "title": "File properties for Roadmap"
+              "title": "File properties for 03 Data Persistence-Indexes-20260210205142069"
             }
           }
         ],
@@ -208,56 +219,57 @@
       "digitalgarden:Digital Garden Publication Center": false
     }
   },
-  "active": "70994c056d478933",
+  "active": "9d170404770df8c8",
   "lastOpenFiles": [
-    "Software Engineering/Roadmap.canvas",
+    "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205142050.png",
+    "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205142011.png",
+    "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205141994.png",
+    "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205142027.png",
+    "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205142069.png",
+    "Assets/03 Data Persistence/03 Data Persistence.md",
+    "Assets/03 Data Persistence/03 Data Persistance-Indexes-20260210205142069.png",
+    "Assets/03 Data Persistence/03 Data Persistance-Indexes-20260210205142050.png",
+    "Assets/03 Data Persistence/03 Data Persistance-Indexes-20260210205142027.png",
+    "Assets/03 Data Persistence/03 Data Persistance-Indexes-20260210205142011.png",
+    "Assets/03 Data Persistence",
+    "Software Engineering/03 Data Persistence/SQL/SQL.md",
+    "Software Engineering/03 Data Persistence/SQL/Normalization Denormalization.md",
+    "Software Engineering/03 Data Persistence/SQL/Indexes.md",
+    "Software Engineering/03 Data Persistence/ORMs/ORMs.md",
+    "Software Engineering/03 Data Persistence/ORMs/Entity Framework.md",
+    "Software Engineering/03 Data Persistence/NoSQL/NoSQL.md",
+    "Software Engineering/03 Data Persistence/SQL",
+    "Software Engineering/03 Data Persistence/ORMs",
+    "Software Engineering/03 Data Persistence/ACID.md",
+    "Software Engineering/03 Data Persistence/NoSQL",
+    "Software Engineering/03 Data Persistence/Caching.md",
+    "Software Engineering/03 Data Persistence/03 Data Persistence.md",
+    "Software Engineering/03 Data Persistence",
     "Software Engineering/Software Engineering.md",
+    "Software Engineering/Topics.base",
     "Software Engineering/01 Programming/01 Programming.md",
+    "Software Engineering/03 Data Persistance/03 Data Persistance.md",
+    "Software Engineering/03 Data Persistance/SQL/Indexes.md",
+    "Software Engineering/06 Development Practices/Principles/SOLID.md",
+    "Software Engineering/06 Development Practices/Principles/KISS.md",
+    "Software Engineering/06 Development Practices/Principles/Principles.md",
+    "Software Engineering/06 Development Practices/Paradigms/Paradigms.md",
+    "Software Engineering/10 Cloud/Google Cloud/Google Cloud.md",
+    "Software Engineering/06 Development Practices/06 Development Practices.md",
+    "Software Engineering/10 Cloud/Azure/Azure.md",
+    "Software Engineering/10 Cloud/AWS/AWS.md",
+    "Software Engineering/Roadmap.canvas",
     "Assets/library-big.svg",
     "URL.md",
     "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Bubble Sort.md",
     "Software Engineering/04 Networks/Architecture & Ops/VPN.md",
     "Software Engineering/Untitled.canvas",
-    "Templates/Pages/Template - Index.md",
-    "Templates/Pages/Template - Concept Page.md",
-    "Templates/Mermaid/Template - Class Diagram.md",
-    "Templates/Blocks/Template - Code Block.md",
-    "Templates/Blocks/Template - Callout.md",
-    "Templates/Templates.md",
     "Assets/favicon.png",
-    "Assets/brain-circuit.png",
-    "Vault/Templates/Mermaid/Mermaid.md",
-    "Vault/Templates/Pages/Pages.md",
-    "Vault/Templates/Blocks/Blocks.md",
-    "Vault/Templates/Templates.md",
-    "Vault/Templates/Mermaid/Template - Sequence Diagram.md",
-    "Vault/Templates/Mermaid/Template - Flowchart.md",
-    "Vault/Templates/Mermaid/Template - Entity Relationship Diagram.md",
-    "Vault/Templates/Mermaid/Template - Class Diagram.md",
-    "Vault/Templates/Pages/Template - Index.md",
-    "Vault/Templates/Pages/Template - Concept Page.md",
-    "Vault/Templates/Blocks/Template - Code Block.md",
-    "Vault/Templates/Blocks/Template - Callout.md",
     "Vault/Templates/Mermaid",
     "Vault/Templates/Pages",
     "Vault/Templates/Blocks",
     "Vault/Templates",
-    "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types.md",
-    "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Delegates and Events.md",
-    "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types",
-    "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Collections",
-    "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures",
-    "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals",
-    "Vault/Software Engineering/11 AI & ML/LLM/Prompting",
-    "Vault/Software Engineering/11 AI & ML/LLM/Agents",
     "Vault/Software Engineering/Roadmap.canvas",
-    "Vault/Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205142069.png",
-    "Vault/Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205142050.png",
-    "Vault/Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205142027.png",
-    "Vault/Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205142011.png",
-    "Vault/Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205141994.png",
-    "Vault/Assets/11 AI & ML/11 AI & ML-LLM-20260211012223477.png",
-    "Vault/Assets/01 Programming/01 Programming-Types-20260211184602492.png",
     "quartz/public/Roadmap.canvas",
     "quartz/content/Roadmap.canvas",
     "public/Roadmap.canvas",

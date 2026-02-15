@@ -1,11 +1,15 @@
 ---
 topic:
-  - "AI & ML"
+  - AI & ML
 subtopic:
-  - "LLM"
+  - LLM
 tags:
   - FolderNote
 dg-publish: true
+status: Creation
+priority: Medium
+level:
+  - '3'
 ---
 
 # Intro

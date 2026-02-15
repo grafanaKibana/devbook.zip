@@ -1,10 +1,14 @@
 ---
 topic:
-  - "Computer Science"
+  - Computer Science
 subtopic: []
 tags:
   - FolderNote
 dg-publish: true
+status: Creation
+priority: Medium
+level:
+  - '4'
 ---
 
 # Intro
