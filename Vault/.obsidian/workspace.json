@@ -11,14 +11,17 @@
             "id": "70994c056d478933",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
+              "type": "canvas",
               "state": {
-                "aFile": "Vault/Software Engineering/Software Engineering.md",
-                "bFile": "Vault/Software Engineering/Software Engineering.md",
-                "aRef": ""
+                "file": "Software Engineering/Roadmap.canvas",
+                "viewState": {
+                  "x": 167.37461051239302,
+                  "y": 234.15228064744053,
+                  "zoom": -1.1339469009379068
+                }
               },
-              "icon": "diff",
-              "title": "Diff: Software Engineering  (Working Tree)"
+              "icon": "lucide-layout-dashboard",
+              "title": "Roadmap"
             }
           }
         ]
@@ -150,9 +153,11 @@
             "type": "leaf",
             "state": {
               "type": "file-properties",
-              "state": {},
+              "state": {
+                "file": "Software Engineering/Roadmap.canvas"
+              },
               "icon": "lucide-info",
-              "title": "File properties"
+              "title": "File properties for Roadmap"
             }
           }
         ],
@@ -203,7 +208,7 @@
       "digitalgarden:Digital Garden Publication Center": false
     }
   },
-  "active": "70994c056d478933",
+  "active": "b85fcedbefcde250",
   "lastOpenFiles": [
     "Software Engineering/Software Engineering.md",
     "Software Engineering/01 Programming/01 Programming.md",
