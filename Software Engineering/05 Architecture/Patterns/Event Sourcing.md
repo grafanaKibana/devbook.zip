@@ -4,7 +4,7 @@ topic:
 subtopic:
   - "Patterns"
 level:
-  - "1"
+  - "2"
 priority: Medium
 status: Not-Started
 ---

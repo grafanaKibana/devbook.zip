@@ -4,7 +4,7 @@ topic:
 subtopic:
   - Patterns
 level:
-  - "1"
+  - "4"
 priority: Medium
 status: Not-Started
 ---
@@ -45,6 +45,7 @@ Design patterns are reusable, named solutions to recurring design problems. They
 
 - [Refactoring.Guru - Design Patterns](https://refactoring.guru/design-patterns)
 - [Wikipedia - Design pattern](https://en.wikipedia.org/wiki/Design_pattern)
+- [C# Bridge Design Pattern](https://www.dofactory.com/net/bridge-design-pattern)
 
 # Whats next
 

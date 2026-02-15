@@ -67,14 +67,14 @@
             "id": "1af06994487b60a6",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "split-diff-view",
               "state": {
-                "file": "Templates/Pages/Template - Index.md",
-                "mode": "source",
-                "source": false
+                "aFile": "Software Engineering/01 Programming/NET/ASP.NET Web API/ASP.NET Web API.md",
+                "bFile": "Software Engineering/01 Programming/NET/ASP.NET Web API/ASP.NET Web API.md",
+                "aRef": ""
               },
-              "icon": "lucide-file",
-              "title": "Template - Index"
+              "icon": "diff",
+              "title": "Diff: ASP.NET Web API  (Working Tree)"
             }
           }
         ],
@@ -189,11 +189,9 @@
             "type": "leaf",
             "state": {
               "type": "file-properties",
-              "state": {
-                "file": "Templates/Pages/Template - Index.md"
-              },
+              "state": {},
               "icon": "lucide-info",
-              "title": "File properties for Template - Index"
+              "title": "File properties"
             }
           },
           {
@@ -301,8 +299,16 @@
   },
   "active": "1af06994487b60a6",
   "lastOpenFiles": [
-    "Templates/Pages/Template - Concept Page.md",
+    "Software Engineering/05 Architecture/Patterns/Design Patterns.md",
+    "Software Engineering/05 Architecture/Patterns/Patterns.md",
+    "Software Engineering/06 Development Practices/Principles/Principles.md",
+    "Software Engineering/06 Development Practices/Paradigms/Paradigms.md",
+    "Software Engineering/10 Cloud/Azure.md",
+    "Software Engineering/10 Cloud/AWS.md",
+    "Software Engineering/10 Cloud/10 Cloud.md",
     "Templates/Pages/Template - Index.md",
+    "Assets/dotNET Matrix v4.xlsx",
+    "Templates/Pages/Template - Concept Page.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Strings.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Delegates and Events.md",
@@ -321,13 +327,6 @@
     "Software Engineering/03 Data Persistance/ORMs/Untitled.md",
     "Software Engineering/03 Data Persistance/ORMs/Abc.md",
     "Software Engineering/03 Data Persistance/ORMs/ORMs.md",
-    "Software Engineering/04 Networks/Architecture & Ops/VPN.md",
-    "Untitled.md",
-    "Software Engineering/01 Programming/NET/Other/OWIN.md",
-    "Software Engineering/01 Programming/NET/Other/asdf.md",
-    "Software Engineering/01 Programming/NET/Other/SignalR.md",
-    "Software Engineering/01 Programming/NET/Other/Other.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures/NEw notw.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures/asdf",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures/Some",
     "Software Engineering/01 Programming/NET/ASP.NET Web API",
@@ -342,7 +341,6 @@
     "Software Engineering/09 DevOps/Version Control Systems",
     "Software Engineering/07 Security/Authentication",
     "src/site/notes/Knowledge",
-    "src/site/notes",
     "quartz/public/01-Programming/NET/CSharp/Fundamentals/Сontrol-Structures/Сontrol-Structures-og-image.webp",
     "quartz/public/01-Programming/NET/CSharp/Fundamentals/Types/Types-og-image.webp",
     "quartz/public/01-Programming/NET/CSharp/Fundamentals/Types/Strings-og-image.webp",
