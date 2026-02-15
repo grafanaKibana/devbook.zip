@@ -10,20 +10,11 @@ dg-publish: true
 
 # Intro
 
-## Deeper Explanation
-
-## Questions
+The .NET runtime (CLR) is what makes managed code fast and safe in practice: JIT compilation, garbage collection, and the execution model. Understanding the runtime pays off whenever you debug performance, memory, or weird production-only behavior. Example: if latency spikes under load, knowing how GC and allocations behave helps you find the real bottleneck.
 
 ## Links
 
-## Deeper Explanation
-
-
-## Questions
-
-
-## Links
-
+- [.NET documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/)
 
 # Whats next
 

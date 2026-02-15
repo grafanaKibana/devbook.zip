@@ -10,15 +10,11 @@ dg-publish: true
 
 # Intro
 
-
-## Deeper Explanation
-
-
-## Questions
-
+.NET is a general-purpose platform for building production software: web APIs, background workers, desktop apps, and cloud services. It is especially strong for long-lived services where tooling, performance, and maintainability matter. Example: a typical .NET service combines dependency injection, structured logging, and async I/O to handle real traffic safely.
 
 ## Links
 
+- [.NET documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/)
 
 # Whats next
 

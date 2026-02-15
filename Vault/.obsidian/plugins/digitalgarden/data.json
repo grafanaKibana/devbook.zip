@@ -5,7 +5,7 @@
   "gardenBaseUrl": "https://sde-knowledge-hub.vercel.app",
   "prHistory": [],
   "baseTheme": "light",
-  "theme": "{\"name\":\"Abecedarium\",\"author\":\"zalenza\",\"repo\":\"zalenza/Abecedarium-theme\",\"screenshot\":\"abecedarium_dark.png\",\"modes\":[\"dark\",\"light\"],\"cssUrl\":\"https://raw.githubusercontent.com/zalenza/Abecedarium-theme/HEAD/theme.css\"}",
+  "theme": "{\"name\":\"Minimal\",\"author\":\"kepano\",\"repo\":\"kepano/obsidian-minimal\",\"screenshot\":\"dark-simple.png\",\"modes\":[\"dark\",\"light\"],\"cssUrl\":\"https://raw.githubusercontent.com/kepano/obsidian-minimal/HEAD/theme.css\"}",
   "faviconPath": "Assets/library-big.svg",
   "logoPath": "",
   "useFullResolutionImages": false,

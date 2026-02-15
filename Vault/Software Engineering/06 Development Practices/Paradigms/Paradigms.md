@@ -10,14 +10,11 @@ dg-publish: true
 
 # Intro
 
-## Deeper Explanation
-
-## Questions
+Programming paradigms are different ways to model problems: object-oriented, functional, procedural, and event-driven styles. Knowing multiple paradigms helps you pick the simplest mental model for the job. Example: a functional approach often shines in data transformations where immutability reduces bugs.
 
 ## Links
 
-- [Link 1](URL)
-- [Link 2](URL)
+- [Programming paradigm (Wikipedia)](https://en.wikipedia.org/wiki/Programming_paradigm)
 
 # Whats next
 
