@@ -11,14 +11,15 @@
             "id": "e7a7b303c61786dc",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "split-diff-view",
               "state": {
-                "file": "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Bubble Sort.md",
-                "mode": "source",
-                "source": false
+                "aFile": "Vault/.obsidian/workspace.json",
+                "bFile": "Vault/.obsidian/workspace.json",
+                "aRef": "HEAD",
+                "bRef": ""
               },
-              "icon": "lucide-file",
-              "title": "Bubble Sort"
+              "icon": "diff",
+              "title": "Diff: workspace.json  (Index)"
             }
           }
         ]
@@ -102,11 +103,9 @@
             "type": "leaf",
             "state": {
               "type": "file-properties",
-              "state": {
-                "file": "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Bubble Sort.md"
-              },
+              "state": {},
               "icon": "lucide-info",
-              "title": "File properties for Bubble Sort"
+              "title": "File properties"
             }
           },
           {
@@ -194,27 +193,10 @@
             }
           }
         ]
-      },
-      {
-        "id": "13985ba4fb42a194",
-        "type": "tabs",
-        "children": [
-          {
-            "id": "64119d801a62589d",
-            "type": "leaf",
-            "state": {
-              "type": "notebook-navigator-calendar",
-              "state": {},
-              "icon": "notebook-navigator",
-              "title": "Calendar"
-            }
-          }
-        ]
       }
     ],
     "direction": "horizontal",
-    "width": 407.5,
-    "collapsed": true
+    "width": 407.5
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -270,11 +252,11 @@
       }
     ]
   },
-  "active": "3a076eace8cad93e",
+  "active": "e7a7b303c61786dc",
   "lastOpenFiles": [
+    "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Bubble Sort.md",
     "Assets/favicon.png",
     "Assets/brain-circuit.png",
-    "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Bubble Sort.md",
     "Software Engineering/Roadmap.canvas",
     "Software Engineering/Software Engineering.md",
     "Vault/Templates/Mermaid/Mermaid.md",
@@ -319,7 +301,6 @@
     "Vault/Assets/11 AI & ML/11 AI & ML-LLM-20260211012223477.png",
     "Vault/Assets/01 Programming/01 Programming-Types-20260211184602492.png",
     "Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205142069.png",
-    "Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205142050.png",
     "quartz/public/Roadmap.canvas",
     "quartz/content/Roadmap.canvas",
     "public/Roadmap.canvas",
