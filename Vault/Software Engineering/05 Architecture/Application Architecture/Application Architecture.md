@@ -10,22 +10,11 @@ dg-publish: true
 
 # Intro
 
-## Deeper Explanation
-
-## Questions
-
-## Links
-- [Link 1](URL)
-- [Link 2](URL)
-
-## Deeper Explanation
-
-
-## Questions
-
+Application architecture focuses on how a codebase is shaped: layers, modules, interaction patterns, and where responsibilities live. It affects testability, change speed, and how quickly new engineers can understand the system. Example: a layered design keeps domain logic independent from the database and web framework, which makes refactors safer.
 
 ## Links
 
+- [Software architecture guide (Martin Fowler)](https://martinfowler.com/architecture/)
 
 # Whats next
 

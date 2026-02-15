@@ -10,22 +10,11 @@ dg-publish: true
 
 # Intro
 
-## Deeper Explanation
-
-## Questions
-
-## Links
-- [Link 1](URL)
-- [Link 2](URL)
-
-## Deeper Explanation
-
-
-## Questions
-
+Not everything in .NET fits neatly into a single bucket: some tools and frameworks are best learned as "ecosystem building blocks". This folder collects those pieces and when to reach for them. Example: use SignalR when you need real-time updates to clients, and OWIN concepts when you need to understand middleware pipelines.
 
 ## Links
 
+- [.NET documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/)
 
 # Whats next
 

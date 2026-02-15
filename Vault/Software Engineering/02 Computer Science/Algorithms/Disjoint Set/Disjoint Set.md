@@ -10,35 +10,11 @@ dg-publish: true
 
 # Intro
 
-## Deeper Explanation
-
-## Diagram
-
-```mermaid
-graph TD
-  A[Elements 0 to n minus 1] --> B[Each element starts in its own set]
-  B --> C{Operation}
-  C -->|Union a b| D[Merge two sets]
-  C -->|Find x| E[Return representative of set]
-  C -->|Connected| F[Compare Find a and Find b]
-  D --> G[Union by size or rank]
-  E --> H[Path compression]
-  G --> I[Near O 1 amortized]
-  H --> I
-```
-
-## Questions
+Disjoint Set Union (Union-Find) is a classic structure for tracking connectivity as you merge groups over time. It shows up in graph problems, clustering, and any scenario where you repeatedly union sets and query whether two items are connected. Example: Kruskal's algorithm uses DSU to build a minimum spanning tree while avoiding cycles.
 
 ## Links
 
-## Deeper Explanation
-
-
-## Questions
-
-
-## Links
-
+- [Disjoint set union (CP-Algorithms)](https://cp-algorithms.com/data_structures/disjoint_set_union.html)
 
 # Whats next
 
