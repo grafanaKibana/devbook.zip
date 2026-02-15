@@ -4,24 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "4509724f8bf84da7",
+        "id": "dfcf268ba8302cbc",
         "type": "tabs",
         "children": [
           {
-            "id": "e7a7b303c61786dc",
+            "id": "024e85357ba9ffb8",
             "type": "leaf",
             "state": {
-              "type": "canvas",
+              "type": "split-diff-view",
               "state": {
-                "file": "Software Engineering/Roadmap.canvas",
-                "viewState": {
-                  "x": 693.8325651047473,
-                  "y": 418.73959301842996,
-                  "zoom": -0.8232025445432203
-                }
+                "aFile": ".scripts/generate-roadmap.py",
+                "bFile": ".scripts/generate-roadmap.py",
+                "aRef": ""
               },
-              "icon": "lucide-layout-dashboard",
-              "title": "Roadmap"
+              "icon": "diff",
+              "title": "Diff: generate-roadmap.py  (Working Tree)"
             }
           }
         ]
@@ -135,11 +132,9 @@
             "type": "leaf",
             "state": {
               "type": "file-properties",
-              "state": {
-                "file": "Software Engineering/Roadmap.canvas"
-              },
+              "state": {},
               "icon": "lucide-info",
-              "title": "File properties for Roadmap"
+              "title": "File properties"
             }
           },
           {
@@ -246,10 +241,10 @@
       "notebook-navigator:Notebook Navigator": true
     }
   },
-  "active": "e7a7b303c61786dc",
+  "active": "024e85357ba9ffb8",
   "lastOpenFiles": [
-    "Software Engineering/Questions.md",
     "Software Engineering/Roadmap.canvas",
+    "Software Engineering/Questions.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Control Structures.md",
     "Software Engineering/Topics.base",
     "Software Engineering/Software Engineering.md",
