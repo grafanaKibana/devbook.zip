@@ -62,16 +62,23 @@ const rows = [...topicStats.entries()].map(([topic, s]) => {
 
 rows.sort((a, b) => a.pct - b.pct || b.total - a.total || a.topic.localeCompare(b.topic));
 
-const table = this.container.createEl("table");
+// Wrap the table so the published site can apply the same Dataview table normalization
+// it applies to ```dataview``` query blocks.
+const wrapper = this.container.createEl("div");
+wrapper.classList.add("block-language-dataview");
+
+const table = wrapper.createEl("table");
 table.classList.add("dataview", "table-view-table");
 
 const thead = table.createEl("thead");
+thead.classList.add("table-view-thead");
 const hr = thead.createEl("tr");
 for (const h of ["Topic", "Completion", "Done"]) {
   const th = hr.createEl("th", { text: h });
 }
 
 const tbody = table.createEl("tbody");
+tbody.classList.add("table-view-tbody");
 for (const r of rows) {
   const tr = tbody.createEl("tr");
 
@@ -132,16 +139,23 @@ const rows = allKeys
   })
   .filter((r) => r.status !== "Missing" || r.count > 0);
 
-const table = this.container.createEl("table");
+// Wrap the table so the published site can apply the same Dataview table normalization
+// it applies to ```dataview``` query blocks.
+const wrapper = this.container.createEl("div");
+wrapper.classList.add("block-language-dataview");
+
+const table = wrapper.createEl("table");
 table.classList.add("dataview", "table-view-table");
 
 const thead = table.createEl("thead");
+thead.classList.add("table-view-thead");
 const hr = thead.createEl("tr");
 for (const h of ["Status", "Distribution", "Count"]) {
   const th = hr.createEl("th", { text: h });
 }
 
 const tbody = table.createEl("tbody");
+tbody.classList.add("table-view-tbody");
 for (const r of rows) {
   const tr = tbody.createEl("tr");
 
