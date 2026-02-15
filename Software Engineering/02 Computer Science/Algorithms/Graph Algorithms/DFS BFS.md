@@ -6,7 +6,8 @@ subtopic:
 level:
   - "4"
 priority: Medium
-status: Not-Started
+status: Ready To Repeat
+
 ---
 
 # Intro
@@ -43,10 +44,15 @@ graph LR
 
 ## Questions
 
-> [!QUESTION]- What is abc?
-> Answer
+> [!QUESTION]- When should I use BFS vs DFS?
+> Use BFS when you need shortest paths in an unweighted graph or level-order exploration. Use DFS for reachability, cycle detection, topological sorting, and when you want to explore one path deeply (often with recursion/stack).
 
 ## Links
+
+- [Depth-first search (Wikipedia)](https://en.wikipedia.org/wiki/Depth-first_search)
+- [Breadth-first search (Wikipedia)](https://en.wikipedia.org/wiki/Breadth-first_search)
+- [BFS (cp-algorithms)](https://cp-algorithms.com/graph/breadth-first-search.html)
+- [DFS (cp-algorithms)](https://cp-algorithms.com/graph/depth-first-search.html)
 
 # Whats next
 

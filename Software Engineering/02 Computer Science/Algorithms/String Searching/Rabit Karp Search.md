@@ -6,7 +6,8 @@ subtopic:
 level:
   - "4"
 priority: Medium
-status: Not-Started
+status: Ready To Repeat
+
 ---
 
 # Intro
@@ -36,10 +37,13 @@ graph TD
 
 ## Questions
 
-> [!QUESTION]- What is abc?
-> Answer
+> [!QUESTION]- What are hash collisions and how do we handle them?
+> A collision is when two different strings produce the same hash. Rabin-Karp handles this by verifying the actual substring when a hash match occurs, and collisions can be made very unlikely with good moduli/base choices (or double hashing).
 
 ## Links
+
+- [Rabin-Karp algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Rabin%E2%80%93Karp_algorithm)
+- [String hashing (cp-algorithms)](https://cp-algorithms.com/string/string-hashing.html)
 
 # Whats next
 

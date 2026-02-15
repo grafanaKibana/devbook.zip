@@ -7,7 +7,8 @@ level:
   - "4"
 priority:
   - High
-status: Not-Started
+status: Ready To Repeat
+
 ---
 # Intro
 

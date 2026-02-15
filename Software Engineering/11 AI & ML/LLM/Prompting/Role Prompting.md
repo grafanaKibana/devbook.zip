@@ -6,7 +6,8 @@ subtopic:
 level:
   - "3"
 priority: Medium
-status: Not-Started
+status: Ready To Repeat
+
 ---
 
 # Intro
@@ -78,8 +79,9 @@ graph LR
 
 ## Questions
 
-> [!QUESTION]- What is abc?
-> Answer
+> [!QUESTION]- What is Role Prompting?
+> Role [[Prompting|prompting]] is a technique that involves assigning specific roles to the LLM (Large Language Model) to control the style, tone, and quality of AI-generated text. By instructing the AI to adopt a particular role or perspective, you can influence how it approaches a task and the characteristics of its ou
+
 
 ## Links
 

@@ -28,7 +28,7 @@
       "y": 120,
       "width": 340,
       "height": 80,
-      "color": "1"
+      "color": "6"
     },
     {
       "id": "n_81e39394ae",
@@ -38,7 +38,7 @@
       "y": 240,
       "width": 340,
       "height": 80,
-      "color": "1"
+      "color": "6"
     },
     {
       "id": "n_59da91ba7a",
@@ -48,7 +48,7 @@
       "y": 360,
       "width": 340,
       "height": 80,
-      "color": "1"
+      "color": "6"
     },
     {
       "id": "n_474eefedb5",
@@ -58,7 +58,7 @@
       "y": 480,
       "width": 340,
       "height": 80,
-      "color": "1"
+      "color": "6"
     },
     {
       "id": "n_9e2180e4d2",
@@ -68,7 +68,7 @@
       "y": 600,
       "width": 340,
       "height": 80,
-      "color": "1"
+      "color": "2"
     },
     {
       "id": "n_8feb284bd4",
@@ -78,7 +78,7 @@
       "y": 720,
       "width": 340,
       "height": 80,
-      "color": "1"
+      "color": "6"
     },
     {
       "id": "n_7eb25ff61a",
@@ -98,7 +98,7 @@
       "y": 960,
       "width": 340,
       "height": 80,
-      "color": "1"
+      "color": "6"
     },
     {
       "id": "n_de0e84ced0",
@@ -108,7 +108,7 @@
       "y": 1240,
       "width": 340,
       "height": 80,
-      "color": "1"
+      "color": "2"
     },
     {
       "id": "n_84293cac94",
@@ -118,7 +118,7 @@
       "y": 1240,
       "width": 340,
       "height": 80,
-      "color": "1"
+      "color": "6"
     },
     {
       "id": "n_cfd934171c",
@@ -128,7 +128,7 @@
       "y": 1360,
       "width": 340,
       "height": 80,
-      "color": "1"
+      "color": "6"
     },
     {
       "id": "n_8580dfc32b",
@@ -138,7 +138,7 @@
       "y": 1480,
       "width": 340,
       "height": 80,
-      "color": "1"
+      "color": "6"
     },
     {
       "id": "n_6f67c9766d",
@@ -148,7 +148,7 @@
       "y": 1600,
       "width": 340,
       "height": 80,
-      "color": "1"
+      "color": "6"
     },
     {
       "id": "n_0832a50a3c",
@@ -158,7 +158,7 @@
       "y": 1720,
       "width": 340,
       "height": 80,
-      "color": "1"
+      "color": "6"
     },
     {
       "id": "n_9a63ab08fe",
@@ -168,7 +168,7 @@
       "y": 1240,
       "width": 340,
       "height": 80,
-      "color": "1"
+      "color": "2"
     },
     {
       "id": "n_0d3c5a9dde",
@@ -188,7 +188,7 @@
       "y": 2000,
       "width": 340,
       "height": 80,
-      "color": "1"
+      "color": "2"
     },
     {
       "id": "n_7f0cf4fe6e",
@@ -198,7 +198,7 @@
       "y": 2000,
       "width": 340,
       "height": 80,
-      "color": "1"
+      "color": "6"
     },
     {
       "id": "n_99bcec9fc7",
@@ -208,7 +208,7 @@
       "y": 2120,
       "width": 340,
       "height": 80,
-      "color": "1"
+      "color": "6"
     },
     {
       "id": "n_cfd0c4d718",
@@ -307,7 +307,7 @@
       "y": 3160,
       "width": 340,
       "height": 80,
-      "color": "1"
+      "color": "2"
     },
     {
       "id": "n_bf18b195af",
@@ -337,7 +337,7 @@
       "y": 3440,
       "width": 340,
       "height": 80,
-      "color": "1"
+      "color": "2"
     },
     {
       "id": "n_8f4802edd0",
@@ -407,7 +407,7 @@
       "y": 4240,
       "width": 340,
       "height": 80,
-      "color": "1"
+      "color": "6"
     },
     {
       "id": "n_6fc77d3558",
@@ -417,7 +417,7 @@
       "y": 4520,
       "width": 340,
       "height": 80,
-      "color": "1"
+      "color": "2"
     },
     {
       "id": "n_ee1e334364",
@@ -427,7 +427,7 @@
       "y": 4520,
       "width": 340,
       "height": 80,
-      "color": "1"
+      "color": "2"
     },
     {
       "id": "n_d69756c8fd",
@@ -437,7 +437,7 @@
       "y": 4520,
       "width": 340,
       "height": 80,
-      "color": "1"
+      "color": "2"
     },
     {
       "id": "n_416c86c7a9",
@@ -447,7 +447,7 @@
       "y": 4640,
       "width": 340,
       "height": 80,
-      "color": "1"
+      "color": "2"
     },
     {
       "id": "n_235841ecfa",
@@ -487,7 +487,7 @@
       "y": 5160,
       "width": 340,
       "height": 80,
-      "color": "1"
+      "color": "6"
     },
     {
       "id": "n_05ca101164",
@@ -511,7 +511,7 @@
     {
       "id": "n_b0ac2236f9",
       "type": "text",
-      "text": "#### Roadmap legend\n**Generated:** Feb 15 2026 | 04:22PM",
+      "text": "#### Roadmap legend\n**Generated:** Feb 15 2026 | 05:01PM",
       "x": -1020,
       "y": 0,
       "width": 500,
@@ -520,7 +520,7 @@
     {
       "id": "n_4a66490dd9",
       "type": "text",
-      "text": "Not-Started: 49",
+      "text": "Not-Started: 24",
       "x": -960,
       "y": 126,
       "width": 380,
@@ -530,7 +530,7 @@
     {
       "id": "n_c1cf7bc196",
       "type": "text",
-      "text": "Creation: 0",
+      "text": "Creation: 10",
       "x": -960,
       "y": 202,
       "width": 380,
@@ -550,7 +550,7 @@
     {
       "id": "n_6de0caeeec",
       "type": "text",
-      "text": "Ready To Repeat: 0",
+      "text": "Ready To Repeat: 15",
       "x": -960,
       "y": 354,
       "width": 380,

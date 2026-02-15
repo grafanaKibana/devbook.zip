@@ -6,7 +6,8 @@ subtopic:
 level:
   - "3"
 priority: Medium
-status: Not-Started
+status: Ready To Repeat
+
 ---
 
 # Intro
@@ -145,10 +146,15 @@ In conclusion, few-shot prompting is an effective strategy that can guide the mo
 
 ## Questions
 
-> [!QUESTION]- What is abc?
-> Answer
+> [!QUESTION]- Why does few-shot prompting help with structured outputs?
+> Because the examples demonstrate the exact input-to-output mapping and formatting. The model often follows the demonstrated pattern more reliably than a purely textual description of the desired format.
+
 
 ## Links
+
+- [Few-shot prompting (Prompting Guide)](https://www.promptingguide.ai/techniques/fewshot)
+- [Few-shot prompting (Learn Prompting)](https://learnprompting.org/docs/basics/few_shot)
+
 
 - [[Prompting]]
 - [[Showing Examples]]

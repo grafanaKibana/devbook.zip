@@ -6,7 +6,8 @@ subtopic:
 level:
   - "4"
 priority: Medium
-status: Not-Started
+status: Ready To Repeat
+
 ---
 
 # Intro
@@ -255,6 +256,8 @@ The "Employees" relation variable is not in 6NF and can be decomposed into the r
 
 For a deeper and more thorough study of the topic, the book "Introduction to Database Systems" by Chris J. Date is recommended; the materials from that book were used as the basis for this article.
 
+- [Database normalization (Wikipedia)](https://en.wikipedia.org/wiki/Database_normalization)
+- [Denormalization (Wikipedia)](https://en.wikipedia.org/wiki/Denormalization)
 # Whats next
 
 :LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`

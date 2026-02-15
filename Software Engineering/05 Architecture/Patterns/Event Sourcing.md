@@ -6,7 +6,8 @@ subtopic:
 level:
   - "2"
 priority: Medium
-status: Not-Started
+status: Creation
+
 ---
 
 # Intro
@@ -14,9 +15,6 @@ status: Not-Started
 ## Deeper Explanation
 
 ## Questions
-
-> [!QUESTION]- What is abc?
-> Answer
 
 ## Links
 

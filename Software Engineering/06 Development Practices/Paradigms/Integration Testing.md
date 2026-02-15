@@ -6,7 +6,8 @@ subtopic:
 level:
   - "3"
 priority: Medium
-status: Not-Started
+status: Ready To Repeat
+
 ---
 
 # Intro
@@ -22,6 +23,9 @@ status: Not-Started
 > - Purpose: unit tests validate logic and design boundaries; integration tests validate wiring, configuration, contracts, and real behavior across boundaries.
 
 ## Links
+
+- [Integration testing (Wikipedia)](https://en.wikipedia.org/wiki/Integration_testing)
+
 
 # Whats next
 

@@ -5,7 +5,8 @@ subtopic: []
 level:
   - "3"
 priority: Medium
-status: Not-Started
+status: Ready To Repeat
+
 ---
 
 # Intro
@@ -21,6 +22,9 @@ status: Not-Started
 > in many systems, the "resource-based" part is really authorization (policy attached to a resource) rather than authentication.
 
 ## Links
+
+- [Attribute-based access control (ABAC) (Wikipedia)](https://en.wikipedia.org/wiki/Attribute-based_access_control)
+
 
 # Whats next
 

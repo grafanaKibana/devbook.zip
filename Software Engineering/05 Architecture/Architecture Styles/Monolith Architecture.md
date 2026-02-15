@@ -7,6 +7,7 @@ level:
   - "4"
 priority: Medium
 status: Not-Started
+
 ---
 
 # Intro
@@ -14,9 +15,6 @@ status: Not-Started
 ## Deeper Explanation
 
 ## Questions
-
-> [!QUESTION]- What is abc?
-> Answer
 
 ## Links
 

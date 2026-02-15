@@ -3,8 +3,7 @@ topic:
   - Security
 subtopic:
   - Authentication
-status:
-  - Not-Started
+status: Not-Started
 tags:
   - FolderNote
 ---
@@ -18,15 +17,7 @@ Deeper Explanation of the topic
 
 ## Questions
 
-> [!QUESTION]- What is abc?
-> Answer
-
 ## Links
-
-Replace or delete these example links.
-
-- [Link 1](https://example.com)
-- [Link 2](https://example.com)
 
 # Whats next
 

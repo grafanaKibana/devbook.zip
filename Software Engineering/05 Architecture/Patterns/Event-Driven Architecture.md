@@ -1,22 +1,19 @@
 ---
 topic:
-  - "Architecture"
+  - Architecture
 subtopic:
-  - "Application Architecture"
+  - Patterns
 level:
-  - "3"
+  - "2"
 priority: Medium
 status: Not-Started
----
 
+---
 # Intro
 
 ## Deeper Explanation
 
 ## Questions
-
-> [!QUESTION]- What is abc?
-> Answer
 
 ## Links
 

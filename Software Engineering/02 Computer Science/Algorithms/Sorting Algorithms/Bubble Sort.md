@@ -6,7 +6,8 @@ subtopic:
 level:
   - "4"
 priority: Low
-status: Not-Started
+status: Ready To Repeat
+
 ---
 
 # Intro
@@ -41,8 +42,9 @@ graph TD
 
 ## Questions
 
-> [!QUESTION]- What is abc?
-> Answer
+> [!QUESTION]- What is Bubble Sort?
+> Bubble sort repeatedly swaps adjacent out-of-order elements, pushing large values toward the end each pass. It is easy to understand but rarely used in production due to poor performance.
+
 
 ## Links
 

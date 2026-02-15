@@ -5,7 +5,8 @@ subtopic: []
 level:
   - "4"
 priority: High
-status: Not-Started
+status: Ready To Repeat
+
 ---
 
 # Intro
@@ -21,6 +22,9 @@ status: Not-Started
 > in many systems, the "resource-based" part is really authorization (policy attached to a resource) rather than authentication.
 
 ## Links
+
+- [RFC 7617 HTTP Basic Authentication](https://datatracker.ietf.org/doc/html/rfc7617)
+
 
 # Whats next
 

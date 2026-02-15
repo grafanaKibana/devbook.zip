@@ -6,7 +6,8 @@ subtopic:
 level:
   - "4"
 priority: Medium
-status: Not-Started
+status: Ready To Repeat
+
 ---
 
 # Intro
@@ -35,10 +36,13 @@ graph TD
 
 ## Questions
 
-> [!QUESTION]- What is abc?
-> Answer
+> [!QUESTION]- Why does Dijkstra require non-negative weights?
+> The algorithm is greedy: once a vertex is extracted as the current minimum, its distance is assumed final. Negative edges can later produce a shorter path to an already-finalized vertex, so the greedy step becomes incorrect (use Bellman-Ford for graphs with negative edges).
 
 ## Links
+
+- [Dijkstra's algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm)
+- [Dijkstra (cp-algorithms)](https://cp-algorithms.com/graph/dijkstra.html)
 
 # Whats next
 

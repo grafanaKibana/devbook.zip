@@ -6,7 +6,8 @@ subtopic:
 level:
   - "3"
 priority: Medium
-status: Not-Started
+status: Creation
+
 ---
 
 # Intro
@@ -18,9 +19,6 @@ Functional programming is a paradigm that treats computation as the evaluation o
 [Functional Programming "Patterns"](https://habr.com/ru/post/337880/)
 
 ## Questions
-
-> [!QUESTION]- What is abc?
-> Answer
 
 ## Links
 

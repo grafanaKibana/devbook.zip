@@ -6,7 +6,8 @@ subtopic:
 level:
   - "4"
 priority: Medium
-status: Not-Started
+status: Ready To Repeat
+
 ---
 
 # Intro
@@ -27,6 +28,9 @@ status: Not-Started
 > Practically: depend on interfaces/contracts, keep implementation details behind them, and wire concrete implementations via DI.
 
 ## Links
+
+- [Inversion of Control and Dependency Injection (Fowler)](https://martinfowler.com/articles/injection.html)
+
 
 # Whats next
 

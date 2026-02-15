@@ -5,7 +5,8 @@ subtopic: []
 level:
   - "4"
 priority: Medium
-status: Not-Started
+status: Ready To Repeat
+
 ---
 
 # Intro
@@ -24,6 +25,10 @@ status: Not-Started
 > The goal is fast feedback, better design (smaller units with clear contracts), and protection against regressions.
 
 ## Links
+
+- [Test-driven development (Wikipedia)](https://en.wikipedia.org/wiki/Test-driven_development)
+- [TDD (Martin Fowler)](https://martinfowler.com/bliki/TestDrivenDevelopment.html)
+
 
 # Whats next
 

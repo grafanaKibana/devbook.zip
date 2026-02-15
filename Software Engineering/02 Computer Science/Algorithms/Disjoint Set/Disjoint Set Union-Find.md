@@ -6,7 +6,8 @@ subtopic:
 level:
   - "3"
 priority: Medium
-status: Not-Started
+status: Ready To Repeat
+
 ---
 
 # Intro
@@ -35,10 +36,13 @@ graph TD
 
 ## Questions
 
-> [!QUESTION]- What is abc?
-> Answer
+> [!QUESTION]- What is path compression?
+> During find(x), path compression rewires nodes on the path from x to the root to point directly to the root. This flattens the tree over time and makes future operations faster.
 
 ## Links
+
+- [Disjoint-set data structure (Wikipedia)](https://en.wikipedia.org/wiki/Disjoint-set_data_structure)
+- [DSU / Union-Find (cp-algorithms)](https://cp-algorithms.com/data_structures/disjoint_set_union.html)
 
 # Whats next
 

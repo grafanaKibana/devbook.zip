@@ -5,7 +5,8 @@ subtopic: []
 level:
   - "4"
 priority: High
-status: Not-Started
+status: Ready To Repeat
+
 ---
 
 # Intro
@@ -24,6 +25,10 @@ status: Not-Started
 > It fits scheduled releases and strict separation of "in development" vs "in production", but can feel heavy for trunk-based development or simple continuous delivery.
 
 ## Links
+
+- [A successful Git branching model (nvie)](https://nvie.com/posts/a-successful-git-branching-model/)
+- [Trunk-based development](https://trunkbaseddevelopment.com/)
+
 
 # Whats next
 

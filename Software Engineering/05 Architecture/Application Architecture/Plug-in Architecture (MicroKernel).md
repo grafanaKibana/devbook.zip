@@ -1,11 +1,13 @@
 ---
 topic:
-  - "Cloud"
-subtopic: []
+  - "Architecture"
+subtopic:
+  - "Application Architecture"
 level:
   - "3"
-priority: Low
+priority: Medium
 status: Not-Started
+
 ---
 
 # Intro
@@ -13,9 +15,6 @@ status: Not-Started
 ## Deeper Explanation
 
 ## Questions
-
-> [!QUESTION]- What is abc?
-> Answer
 
 ## Links
 

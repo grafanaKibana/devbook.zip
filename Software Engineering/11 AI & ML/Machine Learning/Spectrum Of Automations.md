@@ -6,7 +6,8 @@ subtopic:
 level:
   - "1"
 priority: Medium
-status: Not-Started
+status: Creation
+
 ---
 
 # Intro
@@ -22,9 +23,6 @@ The spectrum of automation describes five levels of AI involvement in a task, ra
 5. Full Automation
 
 ## Questions
-
-> [!QUESTION]- What is abc?
-> Answer
 
 ## Links
 

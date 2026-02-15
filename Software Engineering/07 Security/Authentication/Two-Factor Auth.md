@@ -5,7 +5,8 @@ subtopic: []
 level:
   - "3"
 priority: Medium
-status: Not-Started
+status: Ready To Repeat
+
 ---
 
 # Intro
@@ -21,6 +22,9 @@ status: Not-Started
 > in many systems, the "resource-based" part is really authorization (policy attached to a resource) rather than authentication.
 
 ## Links
+
+- [NIST SP 800-63B Digital Identity Guidelines](https://pages.nist.gov/800-63-3/sp800-63b.html)
+
 
 # Whats next
 

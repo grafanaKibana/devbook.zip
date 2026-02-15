@@ -6,7 +6,8 @@ subtopic:
 level:
   - "4"
 priority: Medium
-status: Not-Started
+status: Ready To Repeat
+
 ---
 
 # Intro
@@ -50,6 +51,10 @@ status: Not-Started
 > A mock is usually used for verification: it can record calls and assert expectations about interactions (which methods were called, with what arguments, and how many times).
 
 ## Links
+
+- [Unit testing (Wikipedia)](https://en.wikipedia.org/wiki/Unit_testing)
+- [xUnit.net docs](https://xunit.net/)
+
 
 # Whats next
 

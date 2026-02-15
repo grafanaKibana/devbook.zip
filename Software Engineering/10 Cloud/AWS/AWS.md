@@ -1,23 +1,34 @@
 ---
 topic:
-  - Architecture
+  - Cloud
 subtopic:
-  - Patterns
+  - AWS
 level:
-  - "2"
+  - "3"
 priority: Medium
-status: Not-Started
+status: Creation
+tags:
+  - FolderNote
 ---
+
 # Intro
 
-## Deeper Explanation
+AWS (Amazon Web Services) is a public cloud platform.
 
-## Questions
+This folder is the canonical place for AWS notes in this vault, including service pages (S3, DynamoDB, SQS, EC2).
 
-> [!QUESTION]- What is abc?
-> Answer
+## Example
+
+Verify the active identity and list buckets using AWS CLI:
+
+```bash
+aws sts get-caller-identity
+aws s3 ls
+```
 
 ## Links
+
+- [AWS Documentation](https://docs.aws.amazon.com/)
 
 # Whats next
 
@@ -53,4 +64,3 @@ const pages = dv.pages()
   }
   
 ```
-

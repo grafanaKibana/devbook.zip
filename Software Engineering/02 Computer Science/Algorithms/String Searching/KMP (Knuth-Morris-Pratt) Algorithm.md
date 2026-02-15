@@ -6,7 +6,8 @@ subtopic:
 level:
   - "4"
 priority: Medium
-status: Not-Started
+status: Ready To Repeat
+
 ---
 
 # Intro
@@ -36,10 +37,13 @@ graph TD
 
 ## Questions
 
-> [!QUESTION]- What is abc?
-> Answer
+> [!QUESTION]- What does the prefix function (LPS) represent?
+> For each position in the pattern, it stores the length of the longest proper prefix that is also a suffix ending at that position. This lets KMP shift the pattern without losing valid partial matches.
 
 ## Links
+
+- [Knuth-Morris-Pratt algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Knuth%E2%80%93Morris%E2%80%93Pratt_algorithm)
+- [Prefix function / KMP (cp-algorithms)](https://cp-algorithms.com/string/prefix-function.html)
 
 # Whats next
 
