@@ -11,14 +11,14 @@
             "id": "e7a7b303c61786dc",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "split-diff-view",
               "state": {
-                "file": "Software Engineering/04 Networks/Architecture & Ops/VPN.md",
-                "mode": "preview",
-                "source": false
+                "aFile": "Vault/.obsidian/graph.json",
+                "bFile": "Vault/.obsidian/graph.json",
+                "aRef": ""
               },
-              "icon": "lucide-file",
-              "title": "VPN"
+              "icon": "diff",
+              "title": "Diff: graph.json  (Working Tree)"
             }
           }
         ]
@@ -98,54 +98,17 @@
         "type": "tabs",
         "children": [
           {
-            "id": "4d5678bed75fd56d",
-            "type": "leaf",
-            "state": {
-              "type": "file-properties",
-              "state": {
-                "file": "Software Engineering/04 Networks/Architecture & Ops/VPN.md"
-              },
-              "icon": "lucide-info",
-              "title": "File properties for VPN"
-            }
-          },
-          {
             "id": "65dbb0aadaa22ecd",
             "type": "leaf",
             "state": {
               "type": "outline",
               "state": {
-                "file": "Software Engineering/04 Networks/Architecture & Ops/VPN.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of VPN"
-            }
-          },
-          {
-            "id": "f3d3f04eb83266dc",
-            "type": "leaf",
-            "state": {
-              "type": "all-properties",
-              "state": {
-                "sortOrder": "frequency",
-                "showSearch": true,
-                "searchQuery": ""
-              },
-              "icon": "lucide-archive",
-              "title": "All properties"
-            }
-          },
-          {
-            "id": "4d32c5d183c8ef2c",
-            "type": "leaf",
-            "state": {
-              "type": "empty",
-              "state": {},
-              "icon": "lucide-file",
-              "title": "New tab"
+              "title": "Outline"
             }
           },
           {
@@ -154,7 +117,6 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Templates/Pages/Template - Index.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -164,10 +126,35 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Template - Index"
+              "title": "Backlinks"
+            }
+          },
+          {
+            "id": "a25773e567e7e3e2",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "b85fcedbefcde250",
+            "type": "leaf",
+            "state": {
+              "type": "file-properties",
+              "state": {},
+              "icon": "lucide-info",
+              "title": "File properties"
             }
           }
-        ]
+        ],
+        "currentTab": 3
       },
       {
         "id": "e96d0e13f56cecdc",
@@ -201,6 +188,7 @@
   },
   "left-ribbon": {
     "hiddenItems": {
+      "homepage:Open homepage": false,
       "bases:Create new base": false,
       "canvas:Create new canvas": false,
       "switcher:Open quick switcher": false,
@@ -210,61 +198,23 @@
       "omnisearch:Omnisearch": false,
       "notebook-navigator:Notebook Navigator": false,
       "obsidian-git:Open Git source control": false,
-      "homepage:Open homepage": false,
       "digitalgarden:Digital Garden Publication Center": false
     }
   },
-  "floating": {
-    "id": "146a173a4d305f17",
-    "type": "floating",
-    "children": [
-      {
-        "id": "2dead4f440fc8763",
-        "type": "window",
-        "children": [
-          {
-            "id": "fddadfdf292e3a51",
-            "type": "tabs",
-            "children": [
-              {
-                "id": "3a076eace8cad93e",
-                "type": "leaf",
-                "state": {
-                  "type": "markdown",
-                  "state": {
-                    "file": "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Bubble Sort.md",
-                    "mode": "preview",
-                    "source": false
-                  },
-                  "icon": "lucide-file",
-                  "title": "Bubble Sort"
-                }
-              }
-            ]
-          }
-        ],
-        "direction": "vertical",
-        "x": 1208,
-        "y": 256,
-        "width": 1024,
-        "height": 800,
-        "maximize": false,
-        "zoom": 0
-      }
-    ]
-  },
   "active": "e7a7b303c61786dc",
   "lastOpenFiles": [
-    "Software Engineering/Untitled.canvas",
+    "URL.md",
     "Software Engineering/Roadmap.canvas",
+    "Software Engineering/Software Engineering.md",
+    "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Bubble Sort.md",
+    "Software Engineering/04 Networks/Architecture & Ops/VPN.md",
+    "Software Engineering/Untitled.canvas",
     "Templates/Pages/Template - Index.md",
     "Templates/Pages/Template - Concept Page.md",
     "Templates/Mermaid/Template - Class Diagram.md",
     "Templates/Blocks/Template - Code Block.md",
     "Templates/Blocks/Template - Callout.md",
     "Templates/Templates.md",
-    "Software Engineering/Software Engineering.md",
-    "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Bubble Sort.md",
     "Assets/favicon.png",
     "Assets/brain-circuit.png",
     "Vault/Templates/Mermaid/Mermaid.md",
@@ -287,7 +237,6 @@
     "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Delegates and Events.md",
     "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Strings.md",
     "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Collections/Collections.md",
-    "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Reflection.md",
     "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types",
     "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Collections",
     "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures",
