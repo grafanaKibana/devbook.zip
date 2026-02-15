@@ -1,0 +1,11 @@
+{
+  "accentColor": "",
+  "cssTheme": "Velocity",
+  "nativeMenus": true,
+  "translucency": true,
+  "showRibbon": true,
+  "showViewHeader": true,
+  "interfaceFontFamily": "SF Pro",
+  "textFontFamily": "SF Pro Text",
+  "theme": "system"
+}

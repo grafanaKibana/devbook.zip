@@ -11,24 +11,7 @@
       "hiddenFileProperties": [],
       "navigationBanner": null,
       "periodicNotesFolder": "",
-      "shortcuts": [
-        {
-          "type": "note",
-          "path": "Software Engineering/Roadmap.canvas"
-        },
-        {
-          "type": "note",
-          "path": "Software Engineering/Questions.md"
-        },
-        {
-          "type": "note",
-          "path": "Software Engineering/Topics.base"
-        },
-        {
-          "type": "note",
-          "path": "Software Engineering/Software Engineering.md"
-        }
-      ]
+      "shortcuts": []
     }
   ],
   "vaultProfile": "default",
@@ -387,44 +370,12 @@
   },
   "fileIcons": {},
   "fileColors": {},
-  "folderIcons": {
-    "Templates": "book-dashed",
-    "Assets": "images",
-    "Software Engineering": "book",
-    "Software Engineering/01 Programming": "code-square",
-    "Software Engineering/02 Computer Science": "flask-round",
-    "Software Engineering/03 Data Persistance": "database",
-    "Software Engineering/04 Networks": "network",
-    "Software Engineering/05 Architecture": "building-2",
-    "Software Engineering/06 Development Practices": "tool-case",
-    "Software Engineering/07 Security": "lock",
-    "Software Engineering/08 SDLC": "gantt-chart",
-    "Software Engineering/09 DevOps": "skull",
-    "Software Engineering/10 Cloud": "cloud",
-    "Software Engineering/11 AI & ML": "brain-circuit"
-  },
-  "folderColors": {
-    "Templates": "#6b7280",
-    "Software Engineering/01 Programming": "#ec4899",
-    "Software Engineering/02 Computer Science": "#f43f5e",
-    "Software Engineering/03 Data Persistance": "#ef4444",
-    "Software Engineering/04 Networks": "#f97316",
-    "Software Engineering/05 Architecture": "#eab308",
-    "Software Engineering/07 Security": "#14b8a6",
-    "Software Engineering/08 SDLC": "#0ea5e9",
-    "Software Engineering/09 DevOps": "#3b82f6",
-    "Software Engineering/10 Cloud": "#6366f1",
-    "Software Engineering/11 AI & ML": "#8b5cf6",
-    "Software Engineering/06 Development Practices": "#84cc16"
-  },
+  "folderIcons": {},
+  "folderColors": {},
   "folderBackgroundColors": {},
   "folderSortOverrides": {},
   "folderTreeSortOverrides": {},
-  "folderAppearances": {
-    "Templates": {
-      "mode": "compact"
-    }
-  },
+  "folderAppearances": {},
   "tagIcons": {},
   "tagColors": {},
   "tagBackgroundColors": {},
@@ -435,10 +386,7 @@
       "mode": "compact"
     }
   },
-  "navigationSeparators": {
-    "folder:Templates": true,
-    "folder:Software Engineering": true
-  },
+  "navigationSeparators": {},
   "userColors": [
     "#ffffff",
     "#d9d9d9",

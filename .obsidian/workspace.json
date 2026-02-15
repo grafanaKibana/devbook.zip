@@ -1,24 +1,20 @@
 {
   "main": {
-    "id": "5324373015726ba8",
+    "id": "51a9725d4daeebe5",
     "type": "split",
     "children": [
       {
-        "id": "4509724f8bf84da7",
+        "id": "f076a367c8cb06ef",
         "type": "tabs",
         "children": [
           {
-            "id": "e7a7b303c61786dc",
+            "id": "b0ad83a917586eb6",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
-              "state": {
-                "aFile": "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Collections/Collections.md",
-                "bFile": "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Collections/Collections.md",
-                "aRef": ""
-              },
-              "icon": "diff",
-              "title": "Diff: Collections  (Working Tree)"
+              "type": "empty",
+              "state": {},
+              "icon": "lucide-file",
+              "title": "New tab"
             }
           }
         ]
@@ -27,15 +23,15 @@
     "direction": "vertical"
   },
   "left": {
-    "id": "3cf1efa8ebb6d114",
+    "id": "a5e9bb13cd82eb67",
     "type": "split",
     "children": [
       {
-        "id": "df3b9ad8a1146664",
+        "id": "eb1539e767f303ad",
         "type": "tabs",
         "children": [
           {
-            "id": "6cdf1810372ad7f9",
+            "id": "39f6496b991eaf40",
             "type": "leaf",
             "state": {
               "type": "file-explorer",
@@ -48,17 +44,79 @@
             }
           },
           {
-            "id": "4ecbdb0726a22257",
+            "id": "8dee46b7865f4fa8",
             "type": "leaf",
             "state": {
-              "type": "notebook-navigator",
-              "state": {},
-              "icon": "notebook-navigator",
-              "title": "Notebook Navigator"
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
             }
           },
           {
-            "id": "c61c20cdb67738c5",
+            "id": "b1b8eca78efb24dc",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "47eee47405687c5a",
+    "type": "split",
+    "children": [
+      {
+        "id": "3f11cc151619b56a",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "5496ae6a6833bda8",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks"
+            }
+          },
+          {
+            "id": "3ddfc350a28af94f",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links"
+            }
+          },
+          {
+            "id": "27ef4c1b5c55b9ce",
             "type": "leaf",
             "state": {
               "type": "tag",
@@ -73,93 +131,13 @@
             }
           },
           {
-            "id": "2c177b2f9145d419",
-            "type": "leaf",
-            "state": {
-              "type": "bookmarks",
-              "state": {},
-              "icon": "lucide-bookmark",
-              "title": "Bookmarks"
-            }
-          }
-        ],
-        "currentTab": 1
-      }
-    ],
-    "direction": "horizontal",
-    "width": 592.5
-  },
-  "right": {
-    "id": "3a29a9e8dc8d7cc5",
-    "type": "split",
-    "children": [
-      {
-        "id": "c3c512d22d6b6711",
-        "type": "tabs",
-        "children": [
-          {
-            "id": "af3a2ac6a41903fe",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Software Engineering/01 Programming/NET/Runtime/Garbage Collector.md",
-                "mode": "preview",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Garbage Collector"
-            }
-          },
-          {
-            "id": "9ffdc88909c66d02",
-            "type": "leaf",
-            "state": {
-              "type": "notebook-navigator-calendar",
-              "state": {},
-              "icon": "notebook-navigator",
-              "title": "Calendar"
-            }
-          }
-        ]
-      },
-      {
-        "id": "1990516a765989dd",
-        "type": "tabs",
-        "children": [
-          {
-            "id": "4d5678bed75fd56d",
-            "type": "leaf",
-            "state": {
-              "type": "file-properties",
-              "state": {},
-              "icon": "lucide-info",
-              "title": "File properties"
-            }
-          },
-          {
-            "id": "65dbb0aadaa22ecd",
-            "type": "leaf",
-            "state": {
-              "type": "outline",
-              "state": {
-                "file": "Templates/Pages/Template - Index.md",
-                "followCursor": true,
-                "showSearch": false,
-                "searchQuery": ""
-              },
-              "icon": "lucide-list",
-              "title": "Outline of Template - Index"
-            }
-          },
-          {
-            "id": "f3d3f04eb83266dc",
+            "id": "1648f4bf718a2728",
             "type": "leaf",
             "state": {
               "type": "all-properties",
               "state": {
                 "sortOrder": "frequency",
-                "showSearch": true,
+                "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-archive",
@@ -167,132 +145,37 @@
             }
           },
           {
-            "id": "4d32c5d183c8ef2c",
+            "id": "0f3acdf2a13c1022",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
-              "icon": "lucide-file",
-              "title": "New tab"
-            }
-          },
-          {
-            "id": "61e426935bd16d93",
-            "type": "leaf",
-            "state": {
-              "type": "backlink",
+              "type": "outline",
               "state": {
-                "file": "Templates/Pages/Template - Index.md",
-                "collapseAll": false,
-                "extraContext": false,
-                "sortOrder": "alphabetical",
+                "followCursor": false,
                 "showSearch": false,
-                "searchQuery": "",
-                "backlinkCollapsed": false,
-                "unlinkedCollapsed": true
+                "searchQuery": ""
               },
-              "icon": "links-coming-in",
-              "title": "Backlinks for Template - Index"
-            }
-          }
-        ]
-      },
-      {
-        "id": "e96d0e13f56cecdc",
-        "type": "tabs",
-        "children": [
-          {
-            "id": "b4a5f2c64c8491f4",
-            "type": "leaf",
-            "state": {
-              "type": "git-view",
-              "state": {},
-              "icon": "git-pull-request",
-              "title": "Source Control"
-            }
-          },
-          {
-            "id": "6806a8e3ce6dd1cd",
-            "type": "leaf",
-            "state": {
-              "type": "git-history-view",
-              "state": {},
-              "icon": "history",
-              "title": "History"
+              "icon": "lucide-list",
+              "title": "Outline"
             }
           }
         ]
       }
     ],
     "direction": "horizontal",
-    "width": 407.5
+    "width": 300,
+    "collapsed": true
   },
   "left-ribbon": {
     "hiddenItems": {
-      "homepage:Open homepage": false,
-      "omnisearch:Omnisearch": false,
-      "bases:Create new base": false,
-      "canvas:Create new canvas": false,
       "switcher:Open quick switcher": false,
       "graph:Open graph view": false,
-      "command-palette:Open command palette": true,
-      "obsidian-git:Open Git source control": true,
-      "templater-obsidian:Templater": false,
-      "notebook-navigator:Notebook Navigator": true
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
     }
   },
-  "active": "e7a7b303c61786dc",
-  "lastOpenFiles": [
-    "Software Engineering/03 Data Persistance/SQL/Indexes.md",
-    "Software Engineering/03 Data Persistance/SQL/SQL.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md",
-    "Software Engineering/Questions.md",
-    "Software Engineering/03 Data Persistance/SQL/Indexes/Indexes.md",
-    "Software Engineering/03 Data Persistance/ACID.md",
-    "Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205142069.png",
-    "Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205142050.png",
-    "Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205142027.png",
-    "Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205142011.png",
-    "Assets/03 Data Persistance/03 Data Persistance-Indexes-20260210205141994.png",
-    "Assets/03 Data Persistance/03 Data Persistance.md",
-    "Software Engineering/Software Engineering.md",
-    "Assets/01 Programming/01 Programming-Types-20260211184602492.png",
-    "Software Engineering/Roadmap.canvas",
-    "Software Engineering/01 Programming/NET/Runtime/Garbage Collector.md",
-    "Software Engineering/01 Programming/NET/Runtime/Common Language Runtime.md",
-    "Assets/01 Programming/01 Programming-Common Language Runtime-20260210212705669.png",
-    "Assets/01 Programming/01 Programming.md",
-    "Software Engineering/01 Programming/NET/Runtime/Runtime.md",
-    "Software Engineering/01 Programming/NET/Other/SignalR.md",
-    "Software Engineering/01 Programming/NET/Other/OWIN.md",
-    "Software Engineering/01 Programming/NET/Other/Other.md",
-    "Software Engineering/01 Programming/01 Programming.md",
-    "Software Engineering/01 Programming/NET/NET.md",
-    "Software Engineering/01 Programming/NET/ASP.NET Web API/ASP.NET Web API.md",
-    "Software Engineering/02 Computer Science/02 Computer Science.md",
-    "Software Engineering/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set.md",
-    "Software Engineering/02 Computer Science/Algorithms/Algorithms.md",
-    "Software Engineering/01 Programming/NET/CSharp/CSharp.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Control Structures.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Exception Handling.md",
-    "Software Engineering/07 Security/OWASP.md",
-    "Software Engineering/Topics.base",
-    "Software Engineering/10 Cloud/AWS",
-    "Software Engineering/10 Cloud/Azure",
-    "Software Engineering/10 Cloud/Google Cloud",
-    "Software Engineering/10 Cloud/Azure Services",
-    "Software Engineering/05 Architecture/Distributed Systems/Message Queues",
-    "Assets/dotNET Matrix v4.xlsx",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures/asdf",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Сontrol Structures/Some",
-    "Assets/11 AI & ML/11 AI & ML-LLM-20260211012223477.png",
-    "Assets/11 AI & ML/11 AI & ML-Instruction Prompting-20260211012332406.svg",
-    "Assets/11 AI & ML/11 AI & ML-Showing Examples-20260211012332470.svg",
-    "quartz/public/Roadmap.canvas",
-    "quartz/content/Roadmap.canvas",
-    "public/Roadmap.canvas",
-    "Untitled.canvas"
-  ]
+  "active": "b0ad83a917586eb6",
+  "lastOpenFiles": []
 }
