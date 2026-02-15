@@ -14,7 +14,7 @@
               "type": "markdown",
               "state": {
                 "file": "Software Engineering/Software Engineering.md",
-                "mode": "source",
+                "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
@@ -226,16 +226,17 @@
       "omnisearch:Omnisearch": false,
       "notebook-navigator:Notebook Navigator": false,
       "obsidian-git:Open Git source control": false,
-      "homepage:Open homepage": false
+      "homepage:Open homepage": false,
+      "digitalgarden:Digital Garden Publication Center": false
     }
   },
-  "active": "b4a5f2c64c8491f4",
+  "active": "e7a7b303c61786dc",
   "lastOpenFiles": [
+    "Software Engineering/Software Engineering.md",
     "Vault/Templates/Mermaid/Mermaid.md",
     "Vault/Templates/Pages/Pages.md",
     "Vault/Templates/Blocks/Blocks.md",
     "Vault/Templates/Templates.md",
-    "Software Engineering/Software Engineering.md",
     "Vault/Templates/Mermaid/Template - Sequence Diagram.md",
     "Vault/Templates/Mermaid/Template - Flowchart.md",
     "Vault/Templates/Mermaid/Template - Entity Relationship Diagram.md",
