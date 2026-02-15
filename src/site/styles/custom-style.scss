@@ -6,4 +6,22 @@ body {
   --dg-content-max-width: 1000px;
   --dg-filetree-width: 300px;
   --dg-filetree-title-size: 28px;
+
+  .canvas-node-text-content {
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    ul,
+    ol {
+      margin: 0;
+    }
+
+    > * + * {
+      margin-top: 6px;
+    }
+  }
 }
