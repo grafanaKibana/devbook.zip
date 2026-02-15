@@ -10,75 +10,10 @@
 
 # Topic Coverage
 
-dataview``` query blocks.
-const wrapper = this.container.createEl("div");
-wrapper.classList.add("block-language-dataview");
-
-const table = wrapper.createEl("table");
-table.classList.add("dataview", "table-view-table");
-
-const thead = table.createEl("thead");
-thead.classList.add("table-view-thead");
-const hr = thead.createEl("tr");
-for (const h of ["Topic", "Completion", "Done"]) {
-  const th = hr.createEl("th", { text: h });
-}
-
-const tbody = table.createEl("tbody");
-tbody.classList.add("table-view-tbody");
-for (const r of rows) {
-  const tr = tbody.createEl("tr");
-
-  const tdTopic = tr.createEl("td", { text: r.topic });
-
-  const tdProg = tr.createEl("td");
-  appendProgress(tdProg, r.pct);
-
-  const tdDone = tr.createEl("td", { text: `${r.done}/${r.total}` });
-}
-
-// Display notes without topics
-if (notesWithoutTopic.length > 0) {
-  const noteLinks = notesWithoutTopic
-    .map(note => `> - [[${note.file.path.replace('.md', '')}|${note.file.name}]]`)
-    .join('\n');
-
-  const count = notesWithoutTopic.length;
-  const label = count === 1 ? "Note" : "Notes";
-  const calloutMarkdown = `> [!warning] ${count} ${label} missing topic\n${noteLinks}`;
-
-  dv.paragraph(calloutMarkdown);
-}
-```
+<div class="block-language-dataview"><table class="dataview table-view-table"><thead class="table-view-thead"><tr><th>Topic</th><th>Completion</th><th>Done</th></tr></thead><tbody class="table-view-tbody"><tr><td>Architecture</td><td><progress class="se-progress" max="100" value="0"></progress><span> 0%</span></td><td>0/26</td></tr><tr><td>Programming</td><td><progress class="se-progress" max="100" value="0"></progress><span> 0%</span></td><td>0/16</td></tr><tr><td>AI &amp; ML</td><td><progress class="se-progress" max="100" value="0"></progress><span> 0%</span></td><td>0/12</td></tr><tr><td>Computer Science</td><td><progress class="se-progress" max="100" value="0"></progress><span> 0%</span></td><td>0/12</td></tr><tr><td>Cloud</td><td><progress class="se-progress" max="100" value="0"></progress><span> 0%</span></td><td>0/11</td></tr><tr><td>Networks</td><td><progress class="se-progress" max="100" value="0"></progress><span> 0%</span></td><td>0/11</td></tr><tr><td>DevOps</td><td><progress class="se-progress" max="100" value="0"></progress><span> 0%</span></td><td>0/10</td></tr><tr><td>Security</td><td><progress class="se-progress" max="100" value="0"></progress><span> 0%</span></td><td>0/10</td></tr><tr><td>Patterns &amp; Practices</td><td><progress class="se-progress" max="100" value="0"></progress><span> 0%</span></td><td>0/9</td></tr><tr><td>Data Persistance</td><td><progress class="se-progress" max="100" value="0"></progress><span> 0%</span></td><td>0/6</td></tr><tr><td>SDLC</td><td><progress class="se-progress" max="100" value="0"></progress><span> 0%</span></td><td>0/3</td></tr><tr><td>Development Practices</td><td><progress class="se-progress" max="100" value="0"></progress><span> 0%</span></td><td>0/1</td></tr></tbody></table></div>
 # Status Distribution
 
-dataview``` query blocks.
-const wrapper = this.container.createEl("div");
-wrapper.classList.add("block-language-dataview");
-
-const table = wrapper.createEl("table");
-table.classList.add("dataview", "table-view-table");
-
-const thead = table.createEl("thead");
-thead.classList.add("table-view-thead");
-const hr = thead.createEl("tr");
-for (const h of ["Status", "Distribution", "Count"]) {
-  const th = hr.createEl("th", { text: h });
-}
-
-const tbody = table.createEl("tbody");
-tbody.classList.add("table-view-tbody");
-for (const r of rows) {
-  const tr = tbody.createEl("tr");
-
-  const tdStatus = tr.createEl("td", { text: r.status });
-
-  const tdProg = tr.createEl("td");
-  appendProgress(tdProg, r.pct);
-
-  const tdCount = tr.createEl("td", { text: `${r.count}` });
-}
-```
+<div class="block-language-dataview"><table class="dataview table-view-table"><thead class="table-view-thead"><tr><th>Status</th><th>Distribution</th><th>Count</th></tr></thead><tbody class="table-view-tbody"><tr><td>Done</td><td><progress class="se-progress" max="100" value="0"></progress><span> 0%</span></td><td>0</td></tr><tr><td>Ready To Repeat</td><td><progress class="se-progress" max="100" value="46"></progress><span> 46%</span></td><td>59</td></tr><tr><td>Repetition</td><td><progress class="se-progress" max="100" value="0"></progress><span> 0%</span></td><td>0</td></tr><tr><td>Creation</td><td><progress class="se-progress" max="100" value="23"></progress><span> 23%</span></td><td>29</td></tr><tr><td>Not-Started</td><td><progress class="se-progress" max="100" value="30"></progress><span> 30%</span></td><td>38</td></tr><tr><td>Other</td><td><progress class="se-progress" max="100" value="0"></progress><span> 0%</span></td><td>0</td></tr><tr><td>Missing</td><td><progress class="se-progress" max="100" value="1"></progress><span> 1%</span></td><td>1</td></tr></tbody></table></div>
 
 # Focus
 
