@@ -3,11 +3,6 @@
 ---
 
 
-## Start Here
-
-- [Roadmap](Roadmap.canvas)
-- [Browse Topics](Topics.base)
-
 # Topic Coverage
 
 <div class="block-language-dataview"><table class="dataview table-view-table"><thead class="table-view-thead"><tr><th>Topic</th><th>Completion</th><th>Done</th></tr></thead><tbody class="table-view-tbody"><tr><td>Architecture</td><td><progress class="se-progress" max="100" value="0"></progress><span> 0%</span></td><td>0/26</td></tr><tr><td>Programming</td><td><progress class="se-progress" max="100" value="0"></progress><span> 0%</span></td><td>0/16</td></tr><tr><td>AI &amp; ML</td><td><progress class="se-progress" max="100" value="0"></progress><span> 0%</span></td><td>0/12</td></tr><tr><td>Computer Science</td><td><progress class="se-progress" max="100" value="0"></progress><span> 0%</span></td><td>0/12</td></tr><tr><td>Cloud</td><td><progress class="se-progress" max="100" value="0"></progress><span> 0%</span></td><td>0/11</td></tr><tr><td>Networks</td><td><progress class="se-progress" max="100" value="0"></progress><span> 0%</span></td><td>0/11</td></tr><tr><td>DevOps</td><td><progress class="se-progress" max="100" value="0"></progress><span> 0%</span></td><td>0/10</td></tr><tr><td>Security</td><td><progress class="se-progress" max="100" value="0"></progress><span> 0%</span></td><td>0/10</td></tr><tr><td>Patterns &amp; Practices</td><td><progress class="se-progress" max="100" value="0"></progress><span> 0%</span></td><td>0/9</td></tr><tr><td>Data Persistance</td><td><progress class="se-progress" max="100" value="0"></progress><span> 0%</span></td><td>0/6</td></tr><tr><td>SDLC</td><td><progress class="se-progress" max="100" value="0"></progress><span> 0%</span></td><td>0/3</td></tr><tr><td>Development Practices</td><td><progress class="se-progress" max="100" value="0"></progress><span> 0%</span></td><td>0/1</td></tr></tbody></table></div>
