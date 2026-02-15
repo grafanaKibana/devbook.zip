@@ -19,10 +19,13 @@ status: Ready To Repeat
 ## Questions
 
 > [!QUESTION]- How is `List<T>` implemented under the hood?
-> It is a dynamic array backed by a contiguous `T[]` buffer plus a size counter. When adding past capacity it allocates a larger array and copies existing elements.
+> `List<T>` wraps an internal `T[]` buffer and tracks `Count` separately from `Capacity`.
+> When you add past `Capacity`, it allocates a larger array (typically grows by ~2x) and copies elements.
+> Removing items usually does not shrink the buffer automatically.
 
 > [!QUESTION]- What is the difference between `Count` and `Capacity` in `List<T>`?
-> `Count` is the number of stored elements. `Capacity` is the size of the internal buffer; it can be larger than `Count` to accommodate growth without reallocations.
+> `Count` is how many elements are logically in the list.
+> `Capacity` is the size of the internal array buffer; it can be larger than `Count` to avoid reallocations on growth.
 
 > [!QUESTION]- How do `Clear()` and `Remove()` affect `Capacity` in `List<T>`?
 > They typically do not change `Capacity`; they change `Count`. To shrink the buffer you can call `TrimExcess()` or set `Capacity` manually, which reallocates and copies elements.
@@ -33,17 +36,9 @@ status: Ready To Repeat
 > [!QUESTION]- How does `Object.GetHashCode()` work?
 > It returns an integer used by hash-based collections to bucket objects. The key contract is that objects considered equal by `Equals` must return the same hash code; collisions are permitted.
 
-> [!QUESTION]- How is `foreach` implemented "under the hood"?
-> The compiler rewrites it: for arrays it can become an indexed `for`, otherwise it becomes a loop over an enumerator calling `MoveNext()`/`Current`, usually with `try/finally` to dispose the enumerator.
-
-> [!QUESTION]- Which types can be used in `foreach`?
-> Any type that implements `IEnumerable`/`IEnumerable<T>`, or a type that provides a suitable `GetEnumerator()` returning an enumerator with `Current` and `MoveNext()`.
-
 > [!QUESTION]- What is the difference between `IEnumerable` and `IQueryable`?
-> `IEnumerable` is for in-memory iteration (LINQ uses delegates). `IQueryable` is for provider-backed queries (LINQ builds expression trees that can be translated and executed remotely).
-
-> [!QUESTION]- What is `yield` and how does it work?
-> It enables iterator methods: the compiler generates a state machine that lazily produces values for `IEnumerable`. `yield return` emits one value and suspends execution; `yield break` ends the sequence.
+> `IEnumerable` is for in-memory iteration (LINQ-to-Objects uses delegates and runs locally).
+> `IQueryable` represents a provider-backed query (LINQ builds an expression tree that can be translated and executed by a remote provider, for example SQL).
 
 ## Links
 

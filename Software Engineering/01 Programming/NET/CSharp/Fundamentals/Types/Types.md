@@ -305,9 +305,6 @@ if (obj is string str)  // Type check and declaration in one step
 > [!QUESTION]- What is a nullable type?
 > It's a type that can also represent `null`, meaning "no value" (for example `int?`).
 
-> [!QUESTION]- Name the OOP principles and explain each.
-> Encapsulation (hide state behind behavior), inheritance (derive from a base type), polymorphism (common interface with multiple implementations), and abstraction (expose essentials, hide details).
-
 > [!QUESTION]- What does object-oriented programming mean?
 > It's a programming paradigm where you model behavior and state as objects, using encapsulation, inheritance/interfaces, and polymorphism to manage complexity.
 
@@ -337,6 +334,9 @@ if (obj is string str)  // Type check and declaration in one step
 
 > [!QUESTION]- What is a record?
 > A C# type intended for value-like models, providing value-based equality and concise syntax, with features like `with` and deconstruction.
+
+> [!QUESTION]- What is an immutable type?
+> A type whose observable state cannot change after construction. Updates are modeled by creating a new instance (common patterns: readonly fields, no setters, and methods that return a modified copy).
 
 > [!QUESTION]- How can we return multiple values from a method without using collections?
 > Use tuples (ValueTuple), `out` parameters (often in Try methods), or return a dedicated type (record/class/struct) that groups the values.

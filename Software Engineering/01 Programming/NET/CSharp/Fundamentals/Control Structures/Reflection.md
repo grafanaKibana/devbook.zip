@@ -39,6 +39,9 @@ foreach (MethodInfo m in type.GetMethods())
 > [!QUESTION]- What is reflection?
 > Runtime inspection of assemblies, types, members, and attributes (via `System.Reflection`), sometimes also used to invoke members dynamically.
 
+> [!QUESTION]- What is an attribute and why do we need it?
+> An attribute is metadata attached to code. It can be discovered (often via reflection) and used by frameworks/tools to drive behavior (serialization, DI, validation, routing, tests, etc.).
+
 ## Links
 
 - [Reflection overview (.NET)](https://learn.microsoft.com/dotnet/fundamentals/reflection/overview)

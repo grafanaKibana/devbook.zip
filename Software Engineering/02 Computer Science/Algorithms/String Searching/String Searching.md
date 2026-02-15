@@ -27,9 +27,6 @@ graph TD
 
 ## Questions
 
-> [!QUESTION]- What is abc?
-> Answer
-
 ## Links
 
 ## Deeper Explanation

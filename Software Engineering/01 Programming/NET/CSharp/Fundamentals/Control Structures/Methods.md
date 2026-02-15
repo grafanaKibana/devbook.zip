@@ -71,6 +71,9 @@ static void ProcessData(in int value)
 > [!QUESTION]- What is an `in` parameter used for?
 > To pass an argument by readonly reference: avoid copies for large structs and communicate that the method should not modify the argument.
 
+> [!QUESTION]- What are optional parameters in methods?
+> Parameters with default values that callers can omit; the default is substituted at compile time at the call site.
+
 ## Links
 
 - [Method parameters and modifiers (ref/in/out)](https://learn.microsoft.com/dotnet/csharp/language-reference/keywords/method-parameters#reference-parameters)

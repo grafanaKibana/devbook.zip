@@ -13,9 +13,6 @@ tags:
 
 ## Questions
 
-> [!QUESTION]- What is abc?
-> Answer
-
 ## Links
 - [Link 1](URL)
 - [Link 2](URL)

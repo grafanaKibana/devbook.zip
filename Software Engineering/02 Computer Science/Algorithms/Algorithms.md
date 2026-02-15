@@ -16,8 +16,6 @@ tags:
 > [!QUESTION]- What is an algorithm? How is its efficiency measured?
 > An algorithm is a step-by-step procedure to solve a problem. Its efficiency is measured by time and space complexity, typically using Big-O to describe growth with input size.
 
-> [!QUESTION]- What is abc?
-> Answer
 
 ## Links
 

@@ -25,6 +25,35 @@ Binary search has algorithmic complexity `O(log(n))`. Using the complexity formu
 
 ![03 Data Persistance-Indexes-20260210205141994](../../../Assets/03%20Data%20Persistance/03%20Data%20Persistance-Indexes-20260210205141994.png)
 
+Mermaid alternative:
+
+```mermaid
+flowchart LR
+  %% Mermaid can't draw the colored regions/curves precisely, but this keeps the same structure.
+
+  subgraph Legend[Legend]
+    direction LR
+    Horrible[Horrible] --- Bad[Bad] --- Fair[Fair] --- Good[Good] --- Excellent[Excellent]
+  end
+
+  subgraph Plot[Plot]
+    direction LR
+    Origin((Origin))
+    X[Elements]
+    Y[Operations]
+
+    Origin --> Nf[O(n!)]
+    Origin --> P2[O(2^n)]
+    Origin --> N2[O(n^2)]
+    Origin --> Nnlogn[O(n log n)]
+    Origin --> Nn[O(n)]
+    Origin --> Nlog[O(log n)<br/>O(1)]
+
+    Nf --- Y
+    Nlog --- X
+  end
+```
+
 ### Heap
 
 **A heap** is data stored without any defined ordering (i.e., a table without a clustered index). Access and searching over such data happens sequentially by scanning pages, which can take a long time and negatively impact performance.
@@ -56,7 +85,87 @@ An important property of a clustered index is that all values are ordered in a s
 
 ![Untitled](../../../Assets/03%20Data%20Persistance/03%20Data%20Persistance-Indexes-20260210205142011.png)
 
+Mermaid alternative:
+
+```mermaid
+flowchart TB
+  HDR["id, index_id = 1, root_page"]
+
+  subgraph Root[Root node]
+    direction TB
+    R["Name and data<br/>Index rows"]
+  end
+
+  subgraph Mid[Intermediate level]
+    direction LR
+    I1["Name and data<br/>Index rows"]
+    I2["Name and data<br/>Index rows"]
+    I3["Name and data<br/>Index rows"]
+  end
+
+  subgraph Leaf[Leaf level or data pages]
+    direction LR
+    L1["Index rows<br/>Data rows"]
+    L2["Index rows<br/>Data rows"]
+    L3["Index rows<br/>Data rows"]
+    L4["Index rows<br/>Data rows"]
+    L5["Index rows<br/>Data rows"]
+  end
+
+  HDR --> R
+  R --> I1
+  R --> I2
+  R --> I3
+
+  I1 --> L1
+  I1 --> L2
+  I2 --> L3
+  I3 --> L4
+  I3 --> L5
+
+  %% leaf-level horizontal links
+  L1 --- L2 --- L3 --- L4 --- L5
+```
+
 ![Untitled](../../../Assets/03%20Data%20Persistance/03%20Data%20Persistance-Indexes-20260210205142027.png)
+
+Mermaid alternative:
+
+```mermaid
+flowchart TB
+  subgraph Root[Root level]
+    direction TB
+    R["A-B<br/>C-D<br/>E-F"]
+  end
+
+  subgraph Mid[Intermediate level]
+    direction LR
+    Iab["A<br/>B"]
+    Icd["C<br/>D"]
+    Ief["E<br/>F"]
+  end
+
+  subgraph Leaf[Leaf level includes real data]
+    direction LR
+    LA["A<br/>Data"]
+    LB["B<br/>Data"]
+    LC["C<br/>Data"]
+    LD["D<br/>Data"]
+    LE["E<br/>Data"]
+    LF["F<br/>Data"]
+  end
+
+  R --> Iab
+  R --> Icd
+  R --> Ief
+
+  Iab --> LA
+  Iab --> LB
+  Icd --> LC
+  Icd --> LD
+  Ief --> LE
+  Ief --> LF
+```
 
 ### Simplified Example
 
@@ -83,11 +192,107 @@ Unlike a clustered index, the leaf level of a nonclustered index contains only t
     - If the table has a clustered index, then nonclustered indexes store the clustered index key value for the row in their leaf level
         
 ![Untitled](../../../Assets/03%20Data%20Persistance/03%20Data%20Persistance-Indexes-20260210205142050.png)
+
+Mermaid alternative:
+
+```mermaid
+flowchart TB
+  subgraph Root[Root level]
+    direction TB
+    R["A-B<br/>C-D<br/>E-F"]
+  end
+
+  subgraph Mid[Intermediate level]
+    direction LR
+    Iab["A<br/>B"]
+    Icd["C<br/>D"]
+    Ief["E<br/>F"]
+  end
+
+  subgraph Leaf[Leaves]
+    direction LR
+    LA["A<br/>Clustered key value"]
+    LB["B<br/>Clustered key value"]
+    LE["E<br/>Clustered key value"]
+    LF["F<br/>Clustered key value"]
+  end
+
+  P["Pointers to clustered index"]
+
+  R --> Iab
+  R --> Icd
+  R --> Ief
+
+  Iab --> LA
+  Iab --> LB
+  Ief --> LE
+  Ief --> LF
+
+  P --- LA
+  P --- LB
+  P --- LE
+  P --- LF
+```
         
 - **Without a clustered index**
     - If the table does not have a clustered index, then nonclustered indexes on that table store row identifiers (RIDs) in their leaf level. A row identifier points to the actual data row in the table; in practice it includes the data file number, the page number, and the row's slot/location on that page.
         
 ![Untitled](../../../Assets/03%20Data%20Persistance/03%20Data%20Persistance-Indexes-20260210205142069.png)
+
+Mermaid alternative:
+
+```mermaid
+flowchart TB
+  subgraph Root[Root level]
+    direction TB
+    R["AB<br/>CD<br/>EF"]
+  end
+
+  subgraph Mid[Intermediate level]
+    direction LR
+    Iab["A<br/>B"]
+    Icd["C<br/>D"]
+    Ief["E<br/>F"]
+  end
+
+  subgraph Leaf[Leaves]
+    direction LR
+    LA["A<br/>Row ID"]
+    LB["B<br/>Row ID"]
+    LC["C<br/>Row ID"]
+    LD["D<br/>Row ID"]
+    LE["E<br/>Row ID"]
+    LF["F<br/>Row ID"]
+  end
+
+  subgraph Data[Data rows]
+    direction LR
+    DA[Data row]
+    DB[Data row]
+    DC[Data row]
+    DD[Data row]
+    DE[Data row]
+    DF[Data row]
+  end
+
+  R --- Iab
+  R --- Icd
+  R --- Ief
+
+  Iab --- LA
+  Iab --- LB
+  Icd --- LC
+  Icd --- LD
+  Ief --- LE
+  Ief --- LF
+
+  LA --- DA
+  LB --- DB
+  LC --- DC
+  LD --- DD
+  LE --- DE
+  LF --- DF
+```
         
 
 ### Pros/Cons

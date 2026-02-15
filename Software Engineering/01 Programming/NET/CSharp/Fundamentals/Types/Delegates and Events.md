@@ -194,11 +194,6 @@ Events are widely used when building custom UI components (buttons, panels, and 
 > An event is a member (usually backed by a delegate) that restricts operations from outside the declaring type: external code can only subscribe/unsubscribe (`+=`/`-=`), but cannot invoke the event or overwrite the invocation list.
 > A delegate is a normal value that can be invoked and reassigned.
 
-> [!QUESTION]- What are covariance, contravariance, and invariance?
-> - Covariance: a type parameter can be substituted with a more derived type (commonly for output positions).
-> - Contravariance: a type parameter can be substituted with a less derived type (commonly for input positions).
-> - Invariance: the type parameter must match exactly.
-
 > [!QUESTION]- What are examples of using events?
 > Answer is not provided in the source interview list; see Links.
 
