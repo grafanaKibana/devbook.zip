@@ -11,7 +11,24 @@
       "hiddenFileProperties": [],
       "navigationBanner": null,
       "periodicNotesFolder": "",
-      "shortcuts": []
+      "shortcuts": [
+        {
+          "type": "folder",
+          "path": "Software Engineering"
+        },
+        {
+          "type": "note",
+          "path": "Software Engineering/Questions.md"
+        },
+        {
+          "type": "note",
+          "path": "Software Engineering/Roadmap.canvas"
+        },
+        {
+          "type": "note",
+          "path": "Software Engineering/Topics.base"
+        }
+      ]
     }
   ],
   "vaultProfile": "default",
