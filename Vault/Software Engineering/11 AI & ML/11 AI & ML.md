@@ -112,7 +112,4 @@ Microsoft emphasizes accountability in AI development and deployment through its
 > **Topics**
 > - [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
 > - [[Software Engineering/11 AI & ML/Machine Learning/Machine Learning|Machine Learning]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/AI basic concepts|AI basic concepts]]
 <!-- whats-next:end -->

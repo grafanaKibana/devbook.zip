@@ -13,23 +13,12 @@ dg-publish: true
 
 # Intro
 
-Azure Cosmos DB is a globally distributed database service with multiple APIs (for example: NoSQL, MongoDB, Cassandra, Gremlin, Table).
-
-It is commonly used when you need low-latency reads/writes and multi-region replication.
-
-## Example
-
-Create a Cosmos DB account (NoSQL API) with Azure CLI:
-
-```bash
-az cosmosdb create \
-  --name my-cosmos-account \
-  --resource-group my-rg
-```
+Data labeling is how you produce high-quality ground truth for training and evaluation. In Azure, labeling workflows are typically managed through Azure Machine Learning labeling projects.
 
 ## Links
 
-- [Azure Cosmos DB documentation](https://learn.microsoft.com/en-us/azure/cosmos-db/)
+- [Labeling images and text documents (Azure ML)](https://learn.microsoft.com/azure/machine-learning/how-to-label-data?view=azureml-api-2)
+- [Set up an image labeling project (Azure ML)](https://learn.microsoft.com/azure/machine-learning/how-to-create-image-labeling-projects?view=azureml-api-2)
 
 <!-- whats-next:start -->
 
@@ -41,9 +30,9 @@ az cosmosdb create \
 >
 > **Pages**
 > - [[Software Engineering/10 Cloud/Azure/Azure AI Content Safety and Guardrails|Azure AI Content Safety and Guardrails]]
-> - [[Software Engineering/10 Cloud/Azure/Azure AI Data Labeling|Azure AI Data Labeling]]
 > - [[Software Engineering/10 Cloud/Azure/Azure AI Evaluation and Observability|Azure AI Evaluation and Observability]]
 > - [[Software Engineering/10 Cloud/Azure/Azure AI Foundry|Azure AI Foundry]]
+> - [[Software Engineering/10 Cloud/Azure/Azure Cosmos DB|Azure Cosmos DB]]
 > - [[Software Engineering/10 Cloud/Azure/Azure Functions|Azure Functions]]
 > - [[Software Engineering/10 Cloud/Azure/Azure Machine Learning|Azure Machine Learning]]
 > - [[Software Engineering/10 Cloud/Azure/Azure OpenAI|Azure OpenAI]]

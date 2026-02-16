@@ -60,6 +60,7 @@ Output JSON only: {"winner": "A"|"B"|"tie", "rationale": "..."}
 >  [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
 >
 > **Pages**
+> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Classification Evaluation|Classification Evaluation]]
 > - [[Software Engineering/11 AI & ML/LLM/Evaluation/Deterministic Checks|Deterministic Checks]]
 > - [[Software Engineering/11 AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs|Golden Test Set and Regression Runs]]
 > - [[Software Engineering/11 AI & ML/LLM/Evaluation/LLM-as-a-Judge|LLM-as-a-Judge]]

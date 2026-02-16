@@ -26,16 +26,6 @@ Good evaluation is multi-layered:
 - Online: production signals and controlled experiments
 - Human + automated: combine rubric-based review with scalable judges
 
-Common evaluation strategies for LLM apps (each one is a separate page in this folder):
-
-1. [[Software Engineering/11 AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs|Golden test set + regression runs]]
-2. [[Software Engineering/11 AI & ML/LLM/Evaluation/Rubric Scorecards|Rubric scorecards]]
-3. [[Software Engineering/11 AI & ML/LLM/Evaluation/Deterministic Checks|Deterministic checks]]
-4. [[Software Engineering/11 AI & ML/LLM/Evaluation/LLM-as-a-Judge|LLM-as-a-judge]]
-5. [[Software Engineering/11 AI & ML/LLM/Evaluation/Pairwise Comparisons|Pairwise comparisons (ranking)]]
-6. [[Software Engineering/11 AI & ML/LLM/Evaluation/Targeted Evals|Targeted evals for specific failure modes]]
-7. [[Software Engineering/11 AI & ML/LLM/Evaluation/Online Evaluation and AB Tests|Online evaluation + A/B tests]]
-
 ## Example
 
 Example scorecard for a customer support assistant (one test case):
@@ -78,6 +68,7 @@ Hard checks:
 >  [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
 >
 > **Pages**
+> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Classification Evaluation|Classification Evaluation]]
 > - [[Software Engineering/11 AI & ML/LLM/Evaluation/Deterministic Checks|Deterministic Checks]]
 > - [[Software Engineering/11 AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs|Golden Test Set and Regression Runs]]
 > - [[Software Engineering/11 AI & ML/LLM/Evaluation/LLM-as-a-Judge|LLM-as-a-Judge]]
