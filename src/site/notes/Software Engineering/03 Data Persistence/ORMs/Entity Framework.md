@@ -25,8 +25,12 @@
 
 [Using lazy loading in Entity Framework Core 8](https://toreaurstad.blogspot.com/2024/09/using-lazy-loading-in-entity-framework.html?m=1&utm_source=newsletter.csharpdigest.net&utm_medium=newsletter&utm_campaign=on-over-engineering&_bhlid=efd39774a29b3493b98805aa251f5eb60eb7366e)
 
-# Whats next
+<!-- whats-next:start -->
 
-:LiArrowUpLeft: [[Software Engineering/03 Data Persistence/03 Data Persistence\|03 Data Persistence]]
+---
 
-
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/03 Data Persistence/03 Data Persistence\|03 Data Persistence]]
+>
+<!-- whats-next:end -->

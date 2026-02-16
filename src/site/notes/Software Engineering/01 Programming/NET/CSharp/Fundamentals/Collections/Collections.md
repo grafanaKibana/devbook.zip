@@ -68,8 +68,12 @@ A hash table is a data structure used to store key-value pairs, where each key c
 - [Anatomy of the .NET dictionary](https://dunnhq.com/posts/2024/anatomy-of-the-dotnet-dictionary/)
 - [Under the hood of Dictionary and ConcurrentDictionary](https://habr.com/ru/articles/198104/)
 
-# Whats next
+<!-- whats-next:start -->
 
-:LiArrowUpLeft: [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals\|Fundamentals]]
+---
 
-
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals\|Fundamentals]]
+>
+<!-- whats-next:end -->

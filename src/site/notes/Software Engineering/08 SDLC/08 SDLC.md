@@ -17,8 +17,15 @@
 
 ## Links
 
-# Whats next
+<!-- whats-next:start -->
 
-:LiArrowUpLeft: [[Software Engineering/Software Engineering\|Software Engineering]]
+---
 
-<h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/08 SDLC/BDD.md" data-href="Software Engineering/08 SDLC/BDD.md" href="Software Engineering/08 SDLC/BDD.md" class="internal-link" target="_blank" rel="noopener nofollow">BDD</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/08 SDLC/Estimation Techniques.md" data-href="Software Engineering/08 SDLC/Estimation Techniques.md" href="Software Engineering/08 SDLC/Estimation Techniques.md" class="internal-link" target="_blank" rel="noopener nofollow">Estimation Techniques</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/Software Engineering\|Software Engineering]]
+>
+> **Pages**
+> - [[Software Engineering/08 SDLC/BDD\|BDD]]
+> - [[Software Engineering/08 SDLC/Estimation Techniques\|Estimation Techniques]]
+<!-- whats-next:end -->

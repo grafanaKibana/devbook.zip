@@ -21,8 +21,16 @@ az account list -o table
 
 - [Azure documentation](https://learn.microsoft.com/en-us/azure/)
 
-# Whats next
+<!-- whats-next:start -->
 
-:LiArrowUpLeft: [[Software Engineering/10 Cloud/10 Cloud\|10 Cloud]]
+---
 
-<h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/10 Cloud/Azure/Azure Cosmos DB.md" data-href="Software Engineering/10 Cloud/Azure/Azure Cosmos DB.md" href="Software Engineering/10 Cloud/Azure/Azure Cosmos DB.md" class="internal-link" target="_blank" rel="noopener nofollow">Azure Cosmos DB</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/10 Cloud/Azure/Azure Functions.md" data-href="Software Engineering/10 Cloud/Azure/Azure Functions.md" href="Software Engineering/10 Cloud/Azure/Azure Functions.md" class="internal-link" target="_blank" rel="noopener nofollow">Azure Functions</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/10 Cloud/10 Cloud\|10 Cloud]]
+>
+> **Pages**
+> - [[Software Engineering/10 Cloud/Azure/Azure Cosmos DB\|Azure Cosmos DB]]
+> - [[Software Engineering/10 Cloud/Azure/Azure Functions\|Azure Functions]]
+> - [[Software Engineering/10 Cloud/Azure/Azure Storage\|Azure Storage]]
+<!-- whats-next:end -->

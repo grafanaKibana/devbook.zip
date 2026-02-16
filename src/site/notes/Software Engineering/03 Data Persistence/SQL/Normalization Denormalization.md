@@ -251,8 +251,15 @@ For a deeper and more thorough study of the topic, the book "Introduction to Dat
 
 - [Database normalization (Wikipedia)](https://en.wikipedia.org/wiki/Database_normalization)
 - [Denormalization (Wikipedia)](https://en.wikipedia.org/wiki/Denormalization)
-# Whats next
 
-:LiArrowUpLeft: [[Software Engineering/03 Data Persistence/03 Data Persistence\|03 Data Persistence]]
+<!-- whats-next:start -->
 
-<h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/03 Data Persistence/SQL/Indexes.md" data-href="Software Engineering/03 Data Persistence/SQL/Indexes.md" href="Software Engineering/03 Data Persistence/SQL/Indexes.md" class="internal-link" target="_blank" rel="noopener nofollow">Indexes</a></span></li></ul></div>
+---
+
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/03 Data Persistence/03 Data Persistence\|03 Data Persistence]]
+>
+> **Pages**
+> - [[Software Engineering/03 Data Persistence/SQL/Indexes\|Indexes]]
+<!-- whats-next:end -->

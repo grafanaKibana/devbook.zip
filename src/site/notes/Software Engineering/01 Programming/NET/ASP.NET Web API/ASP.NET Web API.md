@@ -32,8 +32,15 @@ ASP.NET Web API runs requests through a configurable middleware pipeline, then d
 ## Links
 
 - [ASP.NET Core web API docs](https://learn.microsoft.com/en-us/aspnet/core/web-api/?view=aspnetcore-8.0)
-# Whats next
 
-:LiArrowUpLeft: [[Software Engineering/01 Programming/NET/NET\|NET]]
+<!-- whats-next:start -->
 
-<h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/01 Programming/NET/ASP.NET Web API/Middlewares.md" data-href="Software Engineering/01 Programming/NET/ASP.NET Web API/Middlewares.md" href="Software Engineering/01 Programming/NET/ASP.NET Web API/Middlewares.md" class="internal-link" target="_blank" rel="noopener nofollow">Middlewares</a></span></li></ul></div>
+---
+
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/01 Programming/NET/NET\|NET]]
+>
+> **Pages**
+> - [[Software Engineering/01 Programming/NET/ASP.NET Web API/Middlewares\|Middlewares]]
+<!-- whats-next:end -->

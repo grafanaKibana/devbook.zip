@@ -11,8 +11,14 @@ Programming turns ideas into working software by combining fundamentals (control
 
 - [Computer programming (Wikipedia)](https://en.wikipedia.org/wiki/Computer_programming)
 
-# Whats next
+<!-- whats-next:start -->
 
-:LiArrowUpLeft: [[Software Engineering/Software Engineering\|Software Engineering]]
+---
 
-<h2><span>Topics</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/01 Programming/NET/NET.md" data-href="Software Engineering/01 Programming/NET/NET.md" href="Software Engineering/01 Programming/NET/NET.md" class="internal-link" target="_blank" rel="noopener nofollow">NET</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/Software Engineering\|Software Engineering]]
+>
+> **Topics**
+> - [[Software Engineering/01 Programming/NET/NET\|NET]]
+<!-- whats-next:end -->

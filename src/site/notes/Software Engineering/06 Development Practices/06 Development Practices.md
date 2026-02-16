@@ -11,8 +11,15 @@ Development practices are the habits and processes that keep software shippable:
 
 - [Software development process (Wikipedia)](https://en.wikipedia.org/wiki/Software_development_process)
 
-# Whats next
+<!-- whats-next:start -->
 
-:LiArrowUpLeft: [[Software Engineering/Software Engineering\|Software Engineering]]
+---
 
-<h2><span>Topics</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/06 Development Practices/Paradigms/Paradigms.md" data-href="Software Engineering/06 Development Practices/Paradigms/Paradigms.md" href="Software Engineering/06 Development Practices/Paradigms/Paradigms.md" class="internal-link" target="_blank" rel="noopener nofollow">Paradigms</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/06 Development Practices/Principles/Principles.md" data-href="Software Engineering/06 Development Practices/Principles/Principles.md" href="Software Engineering/06 Development Practices/Principles/Principles.md" class="internal-link" target="_blank" rel="noopener nofollow">Principles</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/Software Engineering\|Software Engineering]]
+>
+> **Topics**
+> - [[Software Engineering/06 Development Practices/Paradigms/Paradigms\|Paradigms]]
+> - [[Software Engineering/06 Development Practices/Principles/Principles\|Principles]]
+<!-- whats-next:end -->

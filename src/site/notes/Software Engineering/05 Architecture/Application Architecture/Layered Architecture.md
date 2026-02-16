@@ -75,8 +75,16 @@ In traditional layered architecture, UI depends on Business Logic which depends 
 - [Wikipedia - Multitier architecture](https://en.wikipedia.org/wiki/Multitier_architecture)
 - [The Clean Architecture (Robert C. Martin)](https://thecleanarchitecture.com/)
 
-# Whats next
+<!-- whats-next:start -->
 
-:LiArrowUpLeft: [[Software Engineering/05 Architecture/05 Architecture\|05 Architecture]]
+---
 
-<h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/05 Architecture/Application Architecture/MVC.md" data-href="Software Engineering/05 Architecture/Application Architecture/MVC.md" href="Software Engineering/05 Architecture/Application Architecture/MVC.md" class="internal-link" target="_blank" rel="noopener nofollow">MVC</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/05 Architecture/Application Architecture/MVC MVVM.md" data-href="Software Engineering/05 Architecture/Application Architecture/MVC MVVM.md" href="Software Engineering/05 Architecture/Application Architecture/MVC MVVM.md" class="internal-link" target="_blank" rel="noopener nofollow">MVC MVVM</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/05 Architecture/Application Architecture/Plug-in Architecture (MicroKernel).md" data-href="Software Engineering/05 Architecture/Application Architecture/Plug-in Architecture (MicroKernel).md" href="Software Engineering/05 Architecture/Application Architecture/Plug-in Architecture (MicroKernel).md" class="internal-link" target="_blank" rel="noopener nofollow">Plug-in Architecture (MicroKernel)</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/05 Architecture/05 Architecture\|05 Architecture]]
+>
+> **Pages**
+> - [[Software Engineering/05 Architecture/Application Architecture/MVC\|MVC]]
+> - [[Software Engineering/05 Architecture/Application Architecture/MVC MVVM\|MVC MVVM]]
+> - [[Software Engineering/05 Architecture/Application Architecture/Plug-in Architecture (MicroKernel)\|Plug-in Architecture (MicroKernel)]]
+<!-- whats-next:end -->

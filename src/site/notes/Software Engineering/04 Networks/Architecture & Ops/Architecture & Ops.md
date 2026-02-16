@@ -11,8 +11,15 @@ Network architecture and operations cover how networks are designed, observed, a
 
 - [Network architecture (Wikipedia)](https://en.wikipedia.org/wiki/Network_architecture)
 
-# Whats next
+<!-- whats-next:start -->
 
-:LiArrowUpLeft: [[Software Engineering/04 Networks/04 Networks\|04 Networks]]
+---
 
-<h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/04 Networks/Architecture &amp; Ops/Peer-2-Peer.md" data-href="Software Engineering/04 Networks/Architecture &amp; Ops/Peer-2-Peer.md" href="Software Engineering/04 Networks/Architecture &amp; Ops/Peer-2-Peer.md" class="internal-link" target="_blank" rel="noopener nofollow">Peer-2-Peer</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/04 Networks/Architecture &amp; Ops/VPN.md" data-href="Software Engineering/04 Networks/Architecture &amp; Ops/VPN.md" href="Software Engineering/04 Networks/Architecture &amp; Ops/VPN.md" class="internal-link" target="_blank" rel="noopener nofollow">VPN</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/04 Networks/04 Networks\|04 Networks]]
+>
+> **Pages**
+> - [[Software Engineering/04 Networks/Architecture & Ops/Peer-2-Peer\|Peer-2-Peer]]
+> - [[Software Engineering/04 Networks/Architecture & Ops/VPN\|VPN]]
+<!-- whats-next:end -->

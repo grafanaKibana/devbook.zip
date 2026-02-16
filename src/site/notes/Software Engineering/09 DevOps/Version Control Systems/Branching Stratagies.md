@@ -23,9 +23,12 @@
 - [A successful Git branching model (nvie)](https://nvie.com/posts/a-successful-git-branching-model/)
 - [Trunk-based development](https://trunkbaseddevelopment.com/)
 
+<!-- whats-next:start -->
 
-# Whats next
+---
 
-:LiArrowUpLeft: [[Software Engineering/09 DevOps/09 DevOps\|09 DevOps]]
-
-<h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/09 DevOps/Version Control Systems/Version Control Systems.md" data-href="Software Engineering/09 DevOps/Version Control Systems/Version Control Systems.md" href="Software Engineering/09 DevOps/Version Control Systems/Version Control Systems.md" class="internal-link" target="_blank" rel="noopener nofollow">Version Control Systems</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/09 DevOps/09 DevOps\|09 DevOps]]
+>
+<!-- whats-next:end -->

@@ -22,8 +22,19 @@ ACID (Atomicity, Consistency, Isolation, Durability) is a set of properties that
 
 ## Links
 
-# Whats next
+<!-- whats-next:start -->
 
-:LiArrowUpLeft: [[Software Engineering/Software Engineering\|Software Engineering]]
+---
 
-<h2><span>Topics</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/03 Data Persistence/ORMs/ORMs.md" data-href="Software Engineering/03 Data Persistence/ORMs/ORMs.md" href="Software Engineering/03 Data Persistence/ORMs/ORMs.md" class="internal-link" target="_blank" rel="noopener nofollow">ORMs</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/03 Data Persistence/SQL/SQL.md" data-href="Software Engineering/03 Data Persistence/SQL/SQL.md" href="Software Engineering/03 Data Persistence/SQL/SQL.md" class="internal-link" target="_blank" rel="noopener nofollow">SQL</a></span></li></ul></div><h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/03 Data Persistence/Caching.md" data-href="Software Engineering/03 Data Persistence/Caching.md" href="Software Engineering/03 Data Persistence/Caching.md" class="internal-link" target="_blank" rel="noopener nofollow">Caching</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/Software Engineering\|Software Engineering]]
+>
+> **Topics**
+> - [[Software Engineering/03 Data Persistence/NoSQL/NoSQL\|NoSQL]]
+> - [[Software Engineering/03 Data Persistence/ORMs/ORMs\|ORMs]]
+> - [[Software Engineering/03 Data Persistence/SQL/SQL\|SQL]]
+>
+> **Pages**
+> - [[Software Engineering/03 Data Persistence/Caching\|Caching]]
+<!-- whats-next:end -->

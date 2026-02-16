@@ -14,8 +14,12 @@
 
 ## Links
 
-# Whats next
+<!-- whats-next:start -->
 
-:LiArrowUpLeft: [[Software Engineering/03 Data Persistence/03 Data Persistence\|03 Data Persistence]]
+---
 
-
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/03 Data Persistence/03 Data Persistence\|03 Data Persistence]]
+>
+<!-- whats-next:end -->

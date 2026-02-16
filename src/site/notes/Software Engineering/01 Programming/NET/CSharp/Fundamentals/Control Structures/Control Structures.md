@@ -6,8 +6,18 @@
 
 This folder collects core C# control-flow topics plus a few adjacent fundamentals that were originally captured together.
 
-# Whats next
+<!-- whats-next:start -->
 
-:LiArrowUpLeft: [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals\|Fundamentals]]
+---
 
-<h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Exception Handling.md" data-href="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Exception Handling.md" href="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Exception Handling.md" class="internal-link" target="_blank" rel="noopener nofollow">Exception Handling</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Foreach.md" data-href="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Foreach.md" href="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Foreach.md" class="internal-link" target="_blank" rel="noopener nofollow">Foreach</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Methods.md" data-href="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Methods.md" href="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Methods.md" class="internal-link" target="_blank" rel="noopener nofollow">Methods</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Namespaces.md" data-href="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Namespaces.md" href="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Namespaces.md" class="internal-link" target="_blank" rel="noopener nofollow">Namespaces</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Reflection.md" data-href="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Reflection.md" href="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Reflection.md" class="internal-link" target="_blank" rel="noopener nofollow">Reflection</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals\|Fundamentals]]
+>
+> **Pages**
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Exception Handling\|Exception Handling]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Foreach\|Foreach]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Methods\|Methods]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Namespaces\|Namespaces]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Reflection\|Reflection]]
+<!-- whats-next:end -->

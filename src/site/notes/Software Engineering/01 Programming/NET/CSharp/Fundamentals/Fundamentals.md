@@ -34,9 +34,19 @@
 
 ## Links
 
+<!-- whats-next:start -->
 
-# Whats next
+---
 
-:LiArrowUpLeft: [[Software Engineering/01 Programming/NET/CSharp/CSharp\|CSharp]]
-
-<h2><span>Topics</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Collections/Collections.md" data-href="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Collections/Collections.md" href="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Collections/Collections.md" class="internal-link" target="_blank" rel="noopener nofollow">Collections</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Control Structures.md" data-href="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Control Structures.md" href="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Control Structures.md" class="internal-link" target="_blank" rel="noopener nofollow">Control Structures</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types.md" data-href="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types.md" href="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types.md" class="internal-link" target="_blank" rel="noopener nofollow">Types</a></span></li></ul></div><h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Async Await.md" data-href="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Async Await.md" href="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Async Await.md" class="internal-link" target="_blank" rel="noopener nofollow">Async Await</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/01 Programming/NET/CSharp/CSharp\|CSharp]]
+>
+> **Topics**
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Collections/Collections\|Collections]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Control Structures\|Control Structures]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types\|Types]]
+>
+> **Pages**
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Async Await\|Async Await]]
+<!-- whats-next:end -->
