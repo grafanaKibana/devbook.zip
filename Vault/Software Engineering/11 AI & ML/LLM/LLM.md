@@ -93,6 +93,7 @@ When working with LLMs, you will come across a lot of new terms. This section wi
 > **Topics**
 > - [[Software Engineering/11 AI & ML/LLM/Agents/Agents|Agents]]
 > - [[Software Engineering/11 AI & ML/LLM/Prompting/Prompting|Prompting]]
+> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation|Evaluation]]
 >
 > **Pages**
 > - [[Software Engineering/11 AI & ML/LLM/OWASP vulnerabilities on AI LLM|OWASP vulnerabilities on AI LLM]]
