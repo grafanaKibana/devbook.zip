@@ -6,9 +6,9 @@ tags:
   - FolderNote
 dg-publish: true
 status: Creation
-priority: Low
 level:
   - '3'
+priority: Medium
 ---
 
 # Intro
