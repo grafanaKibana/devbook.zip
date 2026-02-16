@@ -1,13 +1,12 @@
 ---
 topic:
-  - "Patterns & Practices"
+  - Development Practices
 subtopic:
-  - "Principles"
+  - Principles
 level:
   - "4"
 priority: Medium
 status: Ready To Repeat
-
 dg-publish: true
 ---
 

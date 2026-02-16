@@ -1,12 +1,12 @@
 ---
 topic:
-  - "SDLC"
-subtopic: []
+  - Development Practices
+subtopic:
+  - Paradigms
 level:
   - "4"
 priority: Medium
 status: Ready To Repeat
-
 dg-publish: true
 ---
 
