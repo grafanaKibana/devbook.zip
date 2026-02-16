@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Software Engineering/11 AI & ML/Machine Learning/Data Drift.md",
+                "file": "Software Engineering/11 AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Data Drift"
+              "title": "Golden Test Set and Regression Runs"
             }
           }
         ]
@@ -103,13 +103,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Software Engineering/11 AI & ML/Machine Learning/Data Drift.md",
+                "file": "Software Engineering/11 AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Data Drift"
+              "title": "Outline of Golden Test Set and Regression Runs"
             }
           },
           {
@@ -118,7 +118,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Software Engineering/11 AI & ML/Machine Learning/Data Drift.md",
+                "file": "Software Engineering/11 AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -128,7 +128,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Data Drift"
+              "title": "Backlinks for Golden Test Set and Regression Runs"
             }
           },
           {
@@ -151,10 +151,10 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Software Engineering/11 AI & ML/Machine Learning/Data Drift.md"
+                "file": "Software Engineering/11 AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs.md"
               },
               "icon": "lucide-info",
-              "title": "File properties for Data Drift"
+              "title": "File properties for Golden Test Set and Regression Runs"
             }
           }
         ]
@@ -245,33 +245,33 @@
   },
   "active": "7400c06101d52411",
   "lastOpenFiles": [
-    "Software Engineering/11 AI & ML/Machine Learning/Machine Learning.md",
-    "Software Engineering/11 AI & ML/LLM/LLM.md",
+    "Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation Strategies.md",
+    "Software Engineering/11 AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs.md",
+    "Software Engineering/11 AI & ML/LLM/Evaluation/Deterministic Checks.md",
     "Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation.md",
     "Software Engineering/11 AI & ML/Machine Learning/Data Drift.md",
-    "Software Engineering/Software Engineering.md",
-    "Software Engineering/11 AI & ML/LLM/Prompting/Role Prompting.md",
+    "Software Engineering/11 AI & ML/LLM/Evaluation/Online Evaluation and AB Tests.md",
+    "Software Engineering/11 AI & ML/LLM/Evaluation/Targeted Evals.md",
+    "Software Engineering/11 AI & ML/LLM/Evaluation/Pairwise Comparisons.md",
+    "Software Engineering/11 AI & ML/LLM/Evaluation/Rubric Scorecards.md",
+    "Software Engineering/11 AI & ML/Machine Learning/Types.md",
+    "Software Engineering/11 AI & ML/Machine Learning/Machine Learning.md",
     "Software Engineering/11 AI & ML/LLM/Agents/Agents.md",
+    "Software Engineering/11 AI & ML/LLM/Prompting/Prompting.md",
+    "Software Engineering/11 AI & ML/LLM/Prompting/Role Prompting.md",
+    "Software Engineering/11 AI & ML/LLM/Generation Parameters.md",
+    "Software Engineering/11 AI & ML/LLM/Guardrails.md",
+    "Software Engineering/11 AI & ML/LLM/Hallucinations.md",
+    "Software Engineering/11 AI & ML/LLM/Evaluation/Overfitting.md",
+    "Software Engineering/11 AI & ML/LLM/LLM.md",
+    "Software Engineering/Software Engineering.md",
     "Software Engineering/11 AI & ML/LLM/Evaluation/LLM-as-a-Judge.md",
     "Software Engineering/01 Programming/NET/Runtime/Memory Leaks.md",
     "Software Engineering/01 Programming/NET/Runtime/Runtime.md",
     "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Bubble Sort.md",
     "Software Engineering/Questions.md",
-    "Software Engineering/11 AI & ML/LLM/Prompting/Prompting.md",
     "Software Engineering/04 Networks/Protocols/DNS.md",
     "Software Engineering/11 AI & ML/LLM/Evaluation",
-    "Software Engineering/03 Data Persistence/ACID.md",
-    "Software Engineering/10 Cloud/Google Cloud/Cloud Functions.md",
-    "Software Engineering/05 Architecture/Patterns/Dependency Injection.md",
-    "Software Engineering/10 Cloud/10 Cloud.md",
-    "Templates/Pages/Template - Concept Page.md",
-    "Templates/Pages/Template - Index.md",
-    "Templates/Mermaid/Template - Class Diagram.md",
-    "Templates/Blocks/Template - Callout.md",
-    "Software Engineering/10 Cloud/AWS/SQS.md",
-    "Software Engineering/10 Cloud/AWS/S3.md",
-    "Software Engineering/10 Cloud/AWS/EC2.md",
-    "Software Engineering/10 Cloud/AWS/AWS.md",
     "Software Engineering/Roadmap.canvas",
     "Software Engineering/Topics.base",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205142069.png",

@@ -49,4 +49,9 @@ Expected behavior: refuse, do not reveal hidden prompts/secrets, and only answer
 > - [[Software Engineering/11 AI & ML/LLM/Agents/Agents|Agents]]
 > - [[Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation|Evaluation]]
 > - [[Software Engineering/11 AI & ML/LLM/Prompting/Prompting|Prompting]]
+>
+> **Pages**
+> - [[Software Engineering/11 AI & ML/LLM/Generation Parameters|Generation Parameters]]
+> - [[Software Engineering/11 AI & ML/LLM/Guardrails|Guardrails]]
+> - [[Software Engineering/11 AI & ML/LLM/Hallucinations|Hallucinations]]
 <!-- whats-next:end -->

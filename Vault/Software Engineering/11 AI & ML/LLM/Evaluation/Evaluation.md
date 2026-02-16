@@ -18,6 +18,57 @@ Evaluation is how you measure whether an LLM application is doing the right thin
 
 This folder focuses on practical evaluation techniques you can apply in day-to-day engineering (offline test sets, automated judges, and scorecards).
 
+## Deeper Explanation
+
+Good evaluation is multi-layered:
+
+- Offline: fixed test sets to catch regressions
+- Online: production signals and controlled experiments
+- Human + automated: combine rubric-based review with scalable judges
+
+Common evaluation strategies for LLM apps (each one is a separate page in this folder):
+
+1. [[Software Engineering/11 AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs|Golden test set + regression runs]]
+2. [[Software Engineering/11 AI & ML/LLM/Evaluation/Rubric Scorecards|Rubric scorecards]]
+3. [[Software Engineering/11 AI & ML/LLM/Evaluation/Deterministic Checks|Deterministic checks]]
+4. [[Software Engineering/11 AI & ML/LLM/Evaluation/LLM-as-a-Judge|LLM-as-a-judge]]
+5. [[Software Engineering/11 AI & ML/LLM/Evaluation/Pairwise Comparisons|Pairwise comparisons (ranking)]]
+6. [[Software Engineering/11 AI & ML/LLM/Evaluation/Targeted Evals|Targeted evals for specific failure modes]]
+7. [[Software Engineering/11 AI & ML/LLM/Evaluation/Online Evaluation and AB Tests|Online evaluation + A/B tests]]
+
+## Example
+
+Example scorecard for a customer support assistant (one test case):
+
+```text
+Case: "Refund policy for damaged item after 45 days"
+
+Dimensions (0-2):
+- Correctness: 0 wrong / 1 partly / 2 correct
+- Groundedness: 0 invented / 1 unclear / 2 supported by policy
+- Safety: 0 unsafe / 1 questionable / 2 safe
+- Actionability: 0 vague / 1 partial / 2 clear steps
+
+Hard checks:
+- Must include a citation to the policy section
+- Must not request credit card numbers
+```
+
+## Questions
+
+> [!QUESTION]- What should I evaluate first?
+> Start with the dominant failure mode that breaks user trust (often correctness/groundedness) and add targeted suites for safety risks (prompt injection, PII, unsafe actions).
+
+> [!QUESTION]- When are classic metrics (BLEU/ROUGE) useful?
+> Mainly for narrow summarization/translation style tasks and as weak signals. For open-ended assistants, rubric-based scoring and pairwise ranking usually track real quality better.
+
+## Links
+
+- [Evaluation best practices (OpenAI API Docs)](https://developers.openai.com/api/docs/guides/evaluation-best-practices)
+- [Working with evals (OpenAI API Docs)](https://developers.openai.com/api/docs/guides/evals)
+- [Define your success criteria (Anthropic Docs)](https://docs.anthropic.com/en/docs/test-and-evaluate/define-success)
+- [AI Risk Management Framework (NIST)](https://www.nist.gov/itl/ai-risk-management-framework)
+
 <!-- whats-next:start -->
 
 ---
@@ -27,5 +78,12 @@ This folder focuses on practical evaluation techniques you can apply in day-to-d
 >  [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
 >
 > **Pages**
+> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Deterministic Checks|Deterministic Checks]]
+> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs|Golden Test Set and Regression Runs]]
 > - [[Software Engineering/11 AI & ML/LLM/Evaluation/LLM-as-a-Judge|LLM-as-a-Judge]]
+> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Online Evaluation and AB Tests|Online Evaluation and AB Tests]]
+> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Overfitting|Overfitting]]
+> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Pairwise Comparisons|Pairwise Comparisons]]
+> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Rubric Scorecards|Rubric Scorecards]]
+> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Targeted Evals|Targeted Evals]]
 <!-- whats-next:end -->
