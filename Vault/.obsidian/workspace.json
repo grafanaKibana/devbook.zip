@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Software Engineering/06 Development Practices/Principles/YAGNI.md",
-                "mode": "preview",
-                "source": false
+                "file": "Software Engineering/09 DevOps/Deployment Stratagies/Linear Deployment.md",
+                "mode": "source",
+                "source": true
               },
               "icon": "lucide-file",
-              "title": "YAGNI"
+              "title": "Linear Deployment"
             }
           }
         ]
@@ -103,13 +103,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Software Engineering/06 Development Practices/Principles/YAGNI.md",
+                "file": "Software Engineering/09 DevOps/Deployment Stratagies/Linear Deployment.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of YAGNI"
+              "title": "Outline of Linear Deployment"
             }
           },
           {
@@ -118,7 +118,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Software Engineering/06 Development Practices/Principles/YAGNI.md",
+                "file": "Software Engineering/09 DevOps/Deployment Stratagies/Linear Deployment.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -128,7 +128,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for YAGNI"
+              "title": "Backlinks for Linear Deployment"
             }
           },
           {
@@ -151,10 +151,10 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Software Engineering/06 Development Practices/Principles/YAGNI.md"
+                "file": "Software Engineering/09 DevOps/Deployment Stratagies/Linear Deployment.md"
               },
               "icon": "lucide-info",
-              "title": "File properties for YAGNI"
+              "title": "File properties for Linear Deployment"
             }
           }
         ],
@@ -205,8 +205,16 @@
       "digitalgarden:Digital Garden Publication Center": false
     }
   },
-  "active": "b85fcedbefcde250",
+  "active": "d0893c3b5aff8545",
   "lastOpenFiles": [
+    "Software Engineering/09 DevOps/Deployment Stratagies/In-place Deployment.md",
+    "Software Engineering/09 DevOps/Deployment Stratagies/Canary Deployment.md",
+    "Software Engineering/09 DevOps/Deployment Stratagies/Blue Green Deployment.md",
+    "Software Engineering/09 DevOps/Deployment Stratagies/All-In-One Deployment.md",
+    "Software Engineering/03 Data Persistence/SQL/Normalization Denormalization.md",
+    "Software Engineering/03 Data Persistence/SQL/Indexes.md",
+    "Software Engineering/03 Data Persistence/SQL/SQL.md",
+    "Software Engineering/06 Development Practices/Principles/YAGNI.md",
     "Software Engineering/06 Development Practices/Principles/SOLID.md",
     "Software Engineering/06 Development Practices/Principles/KISS.md",
     "Software Engineering/06 Development Practices/Principles/IoC (Holywood Principle).md",
@@ -221,8 +229,6 @@
     "Software Engineering/Software Engineering.md",
     "Software Engineering/06 Development Practices/Principles/Principles.md",
     "Software Engineering/06 Development Practices/Paradigms/Paradigms.md",
-    "Software Engineering/03 Data Persistence/SQL/Indexes.md",
-    "Software Engineering/03 Data Persistence/SQL/SQL.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Async Await.md",
     "Software Engineering/Topics.base",
     "Software Engineering/03 Data Persistence/03 Data Persistence.md",
@@ -237,17 +243,11 @@
     "Assets/03 Data Persistence/03 Data Persistance-Indexes-20260210205142027.png",
     "Assets/03 Data Persistence/03 Data Persistance-Indexes-20260210205142011.png",
     "Assets/03 Data Persistence",
-    "Software Engineering/03 Data Persistence/SQL/Normalization Denormalization.md",
     "Software Engineering/03 Data Persistence/ORMs/ORMs.md",
-    "Software Engineering/03 Data Persistence/ORMs/Entity Framework.md",
-    "Software Engineering/03 Data Persistence/NoSQL/NoSQL.md",
     "Software Engineering/03 Data Persistence/SQL",
     "Software Engineering/03 Data Persistence/ORMs",
-    "Software Engineering/03 Data Persistence/ACID.md",
     "Software Engineering/03 Data Persistence/NoSQL",
-    "Software Engineering/03 Data Persistence/Caching.md",
     "Software Engineering/03 Data Persistence",
-    "Software Engineering/01 Programming/01 Programming.md",
     "Software Engineering/Roadmap.canvas",
     "Assets/library-big.svg",
     "Software Engineering/Untitled.canvas",
