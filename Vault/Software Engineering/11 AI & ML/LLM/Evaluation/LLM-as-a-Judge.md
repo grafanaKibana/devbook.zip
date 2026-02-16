@@ -67,5 +67,5 @@ ANSWER:
 
 > [!note] Whats next
 > **Parent**
->  [[Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation|Evaluation]]
+> 
 <!-- whats-next:end -->
