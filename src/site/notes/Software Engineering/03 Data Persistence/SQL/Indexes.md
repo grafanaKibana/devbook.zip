@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/03-data-persistance/sql/indexes/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/sql/indexes/","noteIcon":""}
 ---
 
 
@@ -21,11 +21,40 @@ When you query an indexed column, the query processor starts at the root node an
 
 Binary search has algorithmic complexity `O(log(n))`. Using the complexity formulas `O(n)` and `O(log(n))`, we can estimate how the approximate number of operations changes for different search approaches as the data volume grows.
 
-![03 Data Persistance-Indexes-20260210205141994](/img/user/Assets/03%20Data%20Persistance/03%20Data%20Persistance-Indexes-20260210205141994.png)
+![03 Data Persistence-Indexes-20260210205141994](/img/user/Assets/03%20Data%20Persistence/03%20Data%20Persistence-Indexes-20260210205141994.png)
 
-![Untitled](/img/user/Assets/03%20Data%20Persistance/03%20Data%20Persistance-Indexes-20260210205142011.png)
+### Heap
 
-![Untitled](/img/user/Assets/03%20Data%20Persistance/03%20Data%20Persistance-Indexes-20260210205142027.png)
+**A heap** is data stored without any defined ordering (i.e., a table without a clustered index). Access and searching over such data happens sequentially by scanning pages, which can take a long time and negatively impact performance.
+
+### Index structure
+
+An index is a tree-like sorted on-disk data structure associated with a table or view that speeds up retrieving rows from that table or view. An index contains keys built from one or more columns in the table or view. These keys are stored as a balanced-tree structure that supports fast lookup of rows by their key values in SQL Server.
+
+The balanced tree itself consists of three levels:
+
+1. Root node
+    1. Stores pointers to intermediate nodes and the range of data they cover
+2. Intermediate level
+    1. Stores pointers to leaf nodes and the range of data stored in them
+3. Leaf level
+    1. A leaf is a page with the actual data for a given range
+
+### Clustered index
+
+In a clustered index, the bottom nodes (leaves) contain the data pages of the base table.
+
+At the root level, index rows are stored; each row contains a key value and a pointer to an intermediate-level page.
+
+At the intermediate level, index rows are stored; each row contains a key value and a pointer to a data row at the leaf level.
+
+Pages at each level are linked in a doubly linked list.
+
+An important property of a clustered index is that all values are ordered in a specific direction (ascending or descending). Therefore, a table or view can have only one clustered index. Also note that the table's data is stored in sorted order only when a clustered index exists on that table. A table without a clustered index is called a heap.
+
+![Untitled](/img/user/Assets/03%20Data%20Persistence/03%20Data%20Persistence-Indexes-20260210205142011.png)
+
+![Untitled](/img/user/Assets/03%20Data%20Persistence/03%20Data%20Persistence-Indexes-20260210205142027.png)
 
 ### Simplified Example
 
@@ -51,12 +80,12 @@ Unlike a clustered index, the leaf level of a nonclustered index contains only t
 - **With a clustered index**
     - If the table has a clustered index, then nonclustered indexes store the clustered index key value for the row in their leaf level
         
-![Untitled](/img/user/Assets/03%20Data%20Persistance/03%20Data%20Persistance-Indexes-20260210205142050.png)
+![Untitled](/img/user/Assets/03%20Data%20Persistence/03%20Data%20Persistence-Indexes-20260210205142050.png)
         
 - **Without a clustered index**
     - If the table does not have a clustered index, then nonclustered indexes on that table store row identifiers (RIDs) in their leaf level. A row identifier points to the actual data row in the table; in practice it includes the data file number, the page number, and the row's slot/location on that page.
         
-![Untitled](/img/user/Assets/03%20Data%20Persistance/03%20Data%20Persistance-Indexes-20260210205142069.png)
+![Untitled](/img/user/Assets/03%20Data%20Persistence/03%20Data%20Persistence-Indexes-20260210205142069.png)
         
 
 ### Pros/Cons
@@ -166,6 +195,6 @@ Unlike a clustered index, the leaf level of a nonclustered index contains only t
 
 # Whats next
 
-:LiArrowUpLeft: [[Software Engineering/03 Data Persistance/03 Data Persistance\|03 Data Persistance]]
+:LiArrowUpLeft: [[Software Engineering/03 Data Persistence/03 Data Persistence\|03 Data Persistence]]
 
-<h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/03 Data Persistance/SQL/Normalization Denormalization.md" data-href="Software Engineering/03 Data Persistance/SQL/Normalization Denormalization.md" href="Software Engineering/03 Data Persistance/SQL/Normalization Denormalization.md" class="internal-link" target="_blank" rel="noopener nofollow">Normalization Denormalization</a></span></li></ul></div>
+<h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/03 Data Persistence/SQL/Normalization Denormalization.md" data-href="Software Engineering/03 Data Persistence/SQL/Normalization Denormalization.md" href="Software Engineering/03 Data Persistence/SQL/Normalization Denormalization.md" class="internal-link" target="_blank" rel="noopener nofollow">Normalization Denormalization</a></span></li></ul></div>

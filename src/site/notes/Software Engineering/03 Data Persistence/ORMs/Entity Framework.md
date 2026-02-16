@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/03-data-persistance/or-ms/entity-framework/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/or-ms/entity-framework/","noteIcon":""}
 ---
 
 
@@ -27,6 +27,6 @@
 
 # Whats next
 
-:LiArrowUpLeft: [[Software Engineering/03 Data Persistance/03 Data Persistance\|03 Data Persistance]]
+:LiArrowUpLeft: [[Software Engineering/03 Data Persistence/03 Data Persistence\|03 Data Persistence]]
 
 
