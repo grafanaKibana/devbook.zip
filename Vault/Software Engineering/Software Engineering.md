@@ -8,8 +8,7 @@ status:
   - Creation
 level:
   - "4"
-priority:
-  - High
+priority: High
 ---
 
 # Topic Coverage
@@ -427,7 +426,7 @@ if (notesWithoutLevel.length > 0) {
 ```dataview
 TABLE WITHOUT ID
   file.link as "Note",
-  topic as "Topic",
+  join(topic, ", ") as "Topic",
   status as "Status",
   priority as "Priority"
 FROM "Software Engineering"
