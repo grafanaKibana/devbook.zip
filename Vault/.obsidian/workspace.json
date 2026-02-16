@@ -11,14 +11,14 @@
             "id": "0ffdcf48c2b03679",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
+              "type": "markdown",
               "state": {
-                "aFile": "Vault/Software Engineering/Questions.md",
-                "bFile": "Vault/Software Engineering/Questions.md",
-                "aRef": ""
+                "file": "Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "diff",
-              "title": "Diff: Questions  (Working Tree)"
+              "icon": "lucide-file",
+              "title": "Evaluation"
             }
           }
         ]
@@ -103,12 +103,13 @@
             "state": {
               "type": "outline",
               "state": {
+                "file": "Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline"
+              "title": "Outline of Evaluation"
             }
           },
           {
@@ -117,6 +118,7 @@
             "state": {
               "type": "backlink",
               "state": {
+                "file": "Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -126,7 +128,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks"
+              "title": "Backlinks for Evaluation"
             }
           },
           {
@@ -148,9 +150,11 @@
             "type": "leaf",
             "state": {
               "type": "file-properties",
-              "state": {},
+              "state": {
+                "file": "Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation.md"
+              },
               "icon": "lucide-info",
-              "title": "File properties"
+              "title": "File properties for Evaluation"
             }
           }
         ]
@@ -241,6 +245,9 @@
   },
   "active": "0ffdcf48c2b03679",
   "lastOpenFiles": [
+    "Software Engineering/01 Programming/NET/Runtime/Memory Leaks.md",
+    "Software Engineering/01 Programming/NET/Runtime/Runtime.md",
+    "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Bubble Sort.md",
     "Software Engineering/Questions.md",
     "Software Engineering/11 AI & ML/LLM/Evaluation/LLM-as-a-Judge.md",
     "Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation.md",
@@ -265,9 +272,6 @@
     "Software Engineering/10 Cloud/Google Cloud/Cloud Spanner.md",
     "Software Engineering/10 Cloud/Google Cloud/BigQuery.md",
     "Software Engineering/10 Cloud/Google Cloud/Cloud Storage.md",
-    "Software Engineering/10 Cloud/Google Cloud/Google Cloud.md",
-    "Software Engineering/10 Cloud/Azure/Azure.md",
-    "Software Engineering/01 Programming/NET/Other/OWIN.md",
     "Software Engineering/Roadmap.canvas",
     "Software Engineering/Topics.base",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205142069.png",
