@@ -28,7 +28,7 @@ Guardrails should be testable:
 
 - Build a red-team suite (prompt injection, jailbreaks, data exfiltration attempts).
 - Add regression tests and track drift over time.
-- Couple guardrails with evaluation: [[Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation|Evaluation]].
+- Couple guardrails with [[Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation|Evaluation]].
 
 ## Example
 
