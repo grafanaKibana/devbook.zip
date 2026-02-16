@@ -503,7 +503,12 @@ def main(argv: list[str]) -> int:
         for p in changed_rel_paths:
             print(p)
     else:
-        print(f"Would change {len(changed_rel_paths)} file(s)." if not args["write"] else f"Changed {len(changed_rel_paths)} file(s).")
+        if args["write"]:
+            print(f"Changed {len(changed_rel_paths)} file(s).")
+        else:
+            print(f"Would change {len(changed_rel_paths)} file(s).")
+            for p in changed_rel_paths:
+                print(p)
 
     return 0
 
