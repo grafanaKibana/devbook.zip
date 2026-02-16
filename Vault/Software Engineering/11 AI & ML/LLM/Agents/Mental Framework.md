@@ -5,7 +5,7 @@ subtopic:
   - "LLM"
 level:
   - "3"
-priority: Medium
+priority: Low
 status: Creation
 
 dg-publish: true

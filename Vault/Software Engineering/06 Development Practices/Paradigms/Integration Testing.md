@@ -5,7 +5,7 @@ subtopic:
   - Paradigms
 level:
   - "3"
-priority: Medium
+priority: High
 status: Ready To Repeat
 dg-publish: true
 ---

@@ -5,8 +5,7 @@ subtopic:
   - NET
 level:
   - "4"
-priority:
-  - High
+priority: High
 status: Ready To Repeat
 
 dg-publish: true

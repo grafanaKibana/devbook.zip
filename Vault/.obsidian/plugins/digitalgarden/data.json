@@ -4,7 +4,7 @@
   "githubUserName": "grafanaKibana",
   "gardenBaseUrl": "https://dev-sanctuary.vercel.app",
   "prHistory": [],
-  "baseTheme": "light",
+  "baseTheme": "dark",
   "theme": "{\"name\":\"Minimal\",\"author\":\"kepano\",\"repo\":\"kepano/obsidian-minimal\",\"screenshot\":\"dark-simple.png\",\"modes\":[\"dark\",\"light\"],\"cssUrl\":\"https://raw.githubusercontent.com/kepano/obsidian-minimal/HEAD/theme.css\"}",
   "faviconPath": "Assets/library-big.svg",
   "logoPath": "",

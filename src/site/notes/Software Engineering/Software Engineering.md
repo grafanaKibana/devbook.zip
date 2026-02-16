@@ -21,20 +21,20 @@
 
 # Focus
 
-| Note                                                                                                          | Topic                          | Status          | Priority |
-| ------------------------------------------------------------------------------------------------------------- | ------------------------------ | --------------- | -------- |
-| [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/MSMQ\|MSMQ]]                     | <ul><li>Architecture</li></ul> | Ready To Repeat | Medium   |
-| [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/Kafka\|Kafka]]                   | <ul><li>Architecture</li></ul> | Ready To Repeat | Medium   |
-| [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/Message Queues\|Message Queues]] | <ul><li>Architecture</li></ul> | Creation        | Medium   |
-| [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/RabbitMQ\|RabbitMQ]]             | <ul><li>Architecture</li></ul> | Creation        | Medium   |
-| [[Software Engineering/05 Architecture/Distributed Systems/REST\|REST]]                                    | <ul><li>Architecture</li></ul> | Ready To Repeat | Medium   |
-| [[Software Engineering/05 Architecture/Distributed Systems/Distributed Systems\|Distributed Systems]]      | <ul><li>Architecture</li></ul> | Creation        | Medium   |
-| [[Software Engineering/05 Architecture/Architecture Styles/Architecture Styles\|Architecture Styles]]      | <ul><li>Architecture</li></ul> | Ready To Repeat | Medium   |
-| [[Software Engineering/05 Architecture/Architecture Styles/Microservices\|Microservices]]                  | <ul><li>Architecture</li></ul> | Ready To Repeat | Medium   |
-| [[Software Engineering/05 Architecture/Patterns/Dependency Injection\|Dependency Injection]]               | <ul><li>Architecture</li></ul> | Ready To Repeat | Medium   |
-| [[Software Engineering/05 Architecture/Patterns/CQRS\|CQRS]]                                               | <ul><li>Architecture</li></ul> | Ready To Repeat | Medium   |
-| [[Software Engineering/05 Architecture/Patterns/GRASP\|GRASP]]                                             | <ul><li>Architecture</li></ul> | Ready To Repeat | Medium   |
-| [[Software Engineering/05 Architecture/Patterns/Domain-Driven Development\|Domain-Driven Development]]     | <ul><li>Architecture</li></ul> | Ready To Repeat | Medium   |
+| Note                                                                                                               | Topic                                   | Status          | Priority |
+| ------------------------------------------------------------------------------------------------------------------ | --------------------------------------- | --------------- | -------- |
+| [[Software Engineering/06 Development Practices/Principles/SOLID\|SOLID]]                                       | Development Practices | Ready To Repeat | Medium   |
+| [[Software Engineering/06 Development Practices/Principles/IoC (Holywood Principle)\|IoC (Holywood Principle)]] | Development Practices | Ready To Repeat | Medium   |
+| [[Software Engineering/06 Development Practices/Paradigms/Unit Testing\|Unit Testing]]                          | Development Practices | Ready To Repeat | Medium   |
+| [[Software Engineering/06 Development Practices/Paradigms/Test-Driven Development\|Test-Driven Development]]    | Development Practices | Ready To Repeat | Medium   |
+| [[Software Engineering/06 Development Practices/Paradigms/OOP\|OOP]]                                            | Development Practices | Ready To Repeat | Medium   |
+| [[Software Engineering/06 Development Practices/Paradigms/Integration Testing\|Integration Testing]]            | Development Practices | Ready To Repeat | Medium   |
+| [[Software Engineering/06 Development Practices/Paradigms/Functional Programming\|Functional Programming]]      | Development Practices | Creation        | Medium   |
+| [[Software Engineering/06 Development Practices/Paradigms/Event-driven\|Event-driven]]                          | Development Practices | Ready To Repeat | Medium   |
+| [[Software Engineering/03 Data Persistence/ORMs/Entity Framework\|Entity Framework]]                            | Data Persistence | Ready To Repeat | Medium   |
+| [[Software Engineering/03 Data Persistence/ORMs/ORMs\|ORMs]]                                                    | Data Persistence | Ready To Repeat | Medium   |
+| [[Software Engineering/03 Data Persistence/NoSQL/NoSQL\|NoSQL]]                                                 | Data Persistence | Creation        | Medium   |
+| [[Software Engineering/03 Data Persistence/SQL/Normalization Denormalization\|Normalization Denormalization]]   | Data Persistence | Ready To Repeat | Medium   |
 
 { .block-language-dataview}
 

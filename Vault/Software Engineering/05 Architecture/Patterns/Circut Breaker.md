@@ -5,7 +5,7 @@ subtopic:
   - "Patterns"
 level:
   - "3"
-priority: Low
+priority: High
 status: Not-Started
 
 dg-publish: true

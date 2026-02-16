@@ -5,7 +5,7 @@ subtopic:
   - "Distributed Systems"
 level:
   - "2"
-priority: Low
+priority: High
 status: Not-Started
 
 dg-publish: true

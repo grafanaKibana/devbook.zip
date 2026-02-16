@@ -5,7 +5,7 @@ subtopic:
   - "Algorithms"
 level:
   - "4"
-priority: Medium
+priority: Low
 status: Ready To Repeat
 
 dg-publish: true

@@ -7,7 +7,7 @@ tags:
   - FolderNote
 dg-publish: true
 status: Ready To Repeat
-priority: Medium
+priority: Low
 level:
   - '4'
 ---
