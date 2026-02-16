@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Software Engineering/Software Engineering.md",
+                "file": "Software Engineering/06 Development Practices/Principles/YAGNI.md",
                 "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Software Engineering"
+              "title": "YAGNI"
             }
           }
         ]
@@ -103,13 +103,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Software Engineering/Software Engineering.md",
+                "file": "Software Engineering/06 Development Practices/Principles/YAGNI.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Software Engineering"
+              "title": "Outline of YAGNI"
             }
           },
           {
@@ -118,7 +118,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Software Engineering/Software Engineering.md",
+                "file": "Software Engineering/06 Development Practices/Principles/YAGNI.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -128,7 +128,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Software Engineering"
+              "title": "Backlinks for YAGNI"
             }
           },
           {
@@ -151,10 +151,10 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Software Engineering/Software Engineering.md"
+                "file": "Software Engineering/06 Development Practices/Principles/YAGNI.md"
               },
               "icon": "lucide-info",
-              "title": "File properties for Software Engineering"
+              "title": "File properties for YAGNI"
             }
           }
         ],
@@ -205,12 +205,22 @@
       "digitalgarden:Digital Garden Publication Center": false
     }
   },
-  "active": "4ecbdb0726a22257",
+  "active": "b85fcedbefcde250",
   "lastOpenFiles": [
+    "Software Engineering/06 Development Practices/Principles/SOLID.md",
+    "Software Engineering/06 Development Practices/Principles/KISS.md",
+    "Software Engineering/06 Development Practices/Principles/IoC (Holywood Principle).md",
+    "Software Engineering/06 Development Practices/Principles/DRY.md",
+    "Software Engineering/06 Development Practices/Paradigms/Unit Testing.md",
+    "Software Engineering/06 Development Practices/Paradigms/Test-Driven Development.md",
+    "Software Engineering/06 Development Practices/Paradigms/OOP.md",
+    "Software Engineering/06 Development Practices/Paradigms/Integration Testing.md",
+    "Software Engineering/06 Development Practices/Paradigms/Functional Programming.md",
+    "Software Engineering/06 Development Practices/Paradigms/Event-driven.md",
     "Software Engineering/06 Development Practices/06 Development Practices.md",
+    "Software Engineering/Software Engineering.md",
     "Software Engineering/06 Development Practices/Principles/Principles.md",
     "Software Engineering/06 Development Practices/Paradigms/Paradigms.md",
-    "Software Engineering/Software Engineering.md",
     "Software Engineering/03 Data Persistence/SQL/Indexes.md",
     "Software Engineering/03 Data Persistence/SQL/SQL.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Async Await.md",
@@ -238,18 +248,8 @@
     "Software Engineering/03 Data Persistence/Caching.md",
     "Software Engineering/03 Data Persistence",
     "Software Engineering/01 Programming/01 Programming.md",
-    "Software Engineering/03 Data Persistance/03 Data Persistance.md",
-    "Software Engineering/03 Data Persistance/SQL/Indexes.md",
-    "Software Engineering/06 Development Practices/Principles/SOLID.md",
-    "Software Engineering/06 Development Practices/Principles/KISS.md",
-    "Software Engineering/10 Cloud/Google Cloud/Google Cloud.md",
-    "Software Engineering/10 Cloud/Azure/Azure.md",
-    "Software Engineering/10 Cloud/AWS/AWS.md",
     "Software Engineering/Roadmap.canvas",
     "Assets/library-big.svg",
-    "URL.md",
-    "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Bubble Sort.md",
-    "Software Engineering/04 Networks/Architecture & Ops/VPN.md",
     "Software Engineering/Untitled.canvas",
     "Vault/Templates/Mermaid",
     "Vault/Templates/Pages",

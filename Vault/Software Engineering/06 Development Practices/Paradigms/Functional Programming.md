@@ -1,13 +1,12 @@
 ---
 topic:
-  - "Patterns & Practices"
+  - Development Practices
 subtopic:
-  - "Paradigms & Practices"
+  - Paradigms
 level:
   - "3"
 priority: Medium
 status: Creation
-
 dg-publish: true
 ---
 

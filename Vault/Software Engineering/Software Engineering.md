@@ -19,7 +19,9 @@ const ROOT = "Software Engineering";
 const isFolderNote = (p) => (p.file.tags ?? []).includes("#FolderNote");
 const isMetricsIgnored = (p) => (p.file.tags ?? []).includes("#MetricsIgnore");
 const curPath = dv.current().file.path;
-const notes = dv.pages(`"${ROOT}"`).where((p) => p.file.path !== curPath && !isMetricsIgnored(p));
+const notes = dv.pages(`"${ROOT}"`).where(
+  (p) => p.file.path !== curPath && !isMetricsIgnored(p) && !isFolderNote(p)
+);
 
 const STATUS_PROGRESS = new Map([
   ["Not-Started", 0],
@@ -48,14 +50,25 @@ const topicStats = new Map();
 let notesWithTopicTotal = 0;
 let notesWithTopicPoints = 0;
 let notesWithTopicDone = 0;
-let missingTopic = 0;
-const notesWithoutTopic = [];
+
+const notesOutsideTopics = [];
+
+const folderToTopic = (folder) => {
+  if (typeof folder !== "string") return null;
+  if (folder === ROOT) return null;
+  if (!folder.startsWith(ROOT + "/")) return null;
+
+  const rel = folder.slice((ROOT + "/").length);
+  const seg = rel.split("/")[0] ?? "";
+  if (seg.length === 0) return null;
+
+  return seg.replace(/^\d+\s+/, "").trim();
+};
 
 for (const p of notes) {
-  const topics = asStringArray(p.topic);
-  if (topics.length === 0) {
-    missingTopic += 1;
-    notesWithoutTopic.push(p);
+  const topic = folderToTopic(p.file.folder);
+  if (!topic) {
+    notesOutsideTopics.push(p);
     continue;
   }
 
@@ -67,13 +80,11 @@ for (const p of notes) {
   notesWithTopicPoints += progress;
   if (isDone) notesWithTopicDone += 1;
 
-  for (const t of topics) {
-    const cur = topicStats.get(t) ?? { total: 0, points: 0, done: 0 };
-    cur.total += 1;
-    cur.points += progress;
-    if (isDone) cur.done += 1;
-    topicStats.set(t, cur);
-  }
+  const cur = topicStats.get(topic) ?? { total: 0, points: 0, done: 0 };
+  cur.total += 1;
+  cur.points += progress;
+  if (isDone) cur.done += 1;
+  topicStats.set(topic, cur);
 }
 
 const rows = [...topicStats.entries()].map(([topic, s]) => {
@@ -122,15 +133,15 @@ appendProgress(tdTotalProg, totalPct);
 
 trTotal.createEl("td", { text: `${notesWithTopicDone}/${notesWithTopicTotal}` });
 
-// Display notes without topics
-if (notesWithoutTopic.length > 0) {
-  const noteLinks = notesWithoutTopic
+// Display notes that aren't under a top-level topic folder
+if (notesOutsideTopics.length > 0) {
+  const noteLinks = notesOutsideTopics
     .map(note => `> - [[${note.file.path.replace('.md', '')}|${note.file.name}]]`)
     .join('\n');
 
-  const count = notesWithoutTopic.length;
+  const count = notesOutsideTopics.length;
   const label = count === 1 ? "Note" : "Notes";
-  const calloutMarkdown = `> [!warning] ${count} ${label} missing topic\n${noteLinks}`;
+  const calloutMarkdown = `> [!warning] ${count} ${label} outside topic folders\n${noteLinks}`;
 
   dv.paragraph(calloutMarkdown);
 }
