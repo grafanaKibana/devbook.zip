@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Software Engineering/10 Cloud/Google Cloud/Cloud Functions.md",
-                "mode": "source",
+                "file": "Software Engineering/04 Networks/Protocols/DNS.md",
+                "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Cloud Functions"
+              "title": "DNS"
             }
           }
         ]
@@ -103,13 +103,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Software Engineering/10 Cloud/Google Cloud/Cloud Functions.md",
+                "file": "Software Engineering/04 Networks/Protocols/DNS.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Cloud Functions"
+              "title": "Outline of DNS"
             }
           },
           {
@@ -118,7 +118,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Software Engineering/10 Cloud/Google Cloud/Cloud Functions.md",
+                "file": "Software Engineering/04 Networks/Protocols/DNS.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -128,7 +128,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Cloud Functions"
+              "title": "Backlinks for DNS"
             }
           },
           {
@@ -151,10 +151,10 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Software Engineering/10 Cloud/Google Cloud/Cloud Functions.md"
+                "file": "Software Engineering/04 Networks/Protocols/DNS.md"
               },
               "icon": "lucide-info",
-              "title": "File properties for Cloud Functions"
+              "title": "File properties for DNS"
             }
           }
         ],
@@ -208,8 +208,9 @@
   "active": "d0893c3b5aff8545",
   "lastOpenFiles": [
     "Software Engineering/Software Engineering.md",
-    "Software Engineering/05 Architecture/Patterns/Dependency Injection.md",
+    "Software Engineering/03 Data Persistence/ACID.md",
     "Software Engineering/10 Cloud/Google Cloud/Cloud Functions.md",
+    "Software Engineering/05 Architecture/Patterns/Dependency Injection.md",
     "Software Engineering/10 Cloud/10 Cloud.md",
     "Templates/Pages/Template - Concept Page.md",
     "Templates/Pages/Template - Index.md",
@@ -232,7 +233,6 @@
     "Software Engineering/10 Cloud/Azure/Azure Functions.md",
     "Templates/Blocks/Blocks.md",
     "Templates/Pages/Pages.md",
-    "Software Engineering/03 Data Persistence/SQL/SQL.md",
     "Software Engineering/Roadmap.canvas",
     "Software Engineering/Topics.base",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205142069.png",
