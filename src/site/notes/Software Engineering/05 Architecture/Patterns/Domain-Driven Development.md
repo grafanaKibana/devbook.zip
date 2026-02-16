@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/domain-driven-development/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/domain-driven-development/","noteIcon":"1"}
 ---
 
 

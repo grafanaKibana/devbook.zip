@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/runtime/garbage-collector/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/runtime/garbage-collector/","noteIcon":"1"}
 ---
 
 

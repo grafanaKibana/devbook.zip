@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/04-networks/transport-and-sockets/sockets/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/04-networks/transport-and-sockets/sockets/","noteIcon":"1"}
 ---
 
 

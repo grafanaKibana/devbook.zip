@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/algorithms/sorting-algorithms/quick-sort/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/algorithms/sorting-algorithms/quick-sort/","noteIcon":"1"}
 ---
 
 

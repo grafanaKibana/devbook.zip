@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/prompting/showing-examples/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/prompting/showing-examples/","noteIcon":"1"}
 ---
 
 

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/04-networks/protocols/g-rpc/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/04-networks/protocols/g-rpc/","noteIcon":"1"}
 ---
 
 

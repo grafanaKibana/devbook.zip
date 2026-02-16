@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/runtime/common-language-runtime/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/runtime/common-language-runtime/","noteIcon":"1"}
 ---
 
 

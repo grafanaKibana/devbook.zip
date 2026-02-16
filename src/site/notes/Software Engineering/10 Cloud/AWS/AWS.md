@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/10-cloud/aws/aws/","tags":["FolderNote"],"noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/10-cloud/aws/aws/","tags":["FolderNote"],"noteIcon":"1"}
 ---
 
 

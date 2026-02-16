@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/04-networks/protocols/smtp/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/04-networks/protocols/smtp/","noteIcon":"1"}
 ---
 
 

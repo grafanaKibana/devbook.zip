@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/data-structures/net-collections/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/data-structures/net-collections/","noteIcon":"1"}
 ---
 
 
