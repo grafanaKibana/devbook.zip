@@ -241,7 +241,7 @@
 		</div>
 	</div>
 </div>
-<div class="canvas-node canvas-node-text has-color" data-node-id="n_e96ba3df67" style="transform: translate(420px, 2120px); width: 340px; height: 80px; --canvas-color: #a882ff;">
+<div class="canvas-node canvas-node-text has-color" data-node-id="n_e96ba3df67" style="transform: translate(420px, 2120px); width: 340px; height: 80px; --canvas-color: #e9973f;">
 	<div class="canvas-node-container">
 		<div class="canvas-node-content markdown-rendered">
 			<div class="canvas-node-text-content" data-markdown="IyBbW1NvZnR3YXJlIEVuZ2luZWVyaW5nLzAzIERhdGEgUGVyc2lzdGVuY2UvU1FML1NRTFx8U1FMXV0="></div>
@@ -450,7 +450,7 @@
 <div class="canvas-node canvas-node-text " data-node-id="n_b0ac2236f9" style="transform: translate(-1020px, 0px); width: 500px; height: 110px; ">
 	<div class="canvas-node-container">
 		<div class="canvas-node-content markdown-rendered">
-			<div class="canvas-node-text-content" data-markdown="IyMjIyBSb2FkbWFwIGxlZ2VuZAoqKkdlbmVyYXRlZDoqKiBGZWIgMTYgMjAyNiB8IDAxOjU4QU0="></div>
+			<div class="canvas-node-text-content" data-markdown="IyMjIyBSb2FkbWFwIGxlZ2VuZAoqKkdlbmVyYXRlZDoqKiBGZWIgMTYgMjAyNiB8IDAyOjMyQU0="></div>
 		</div>
 	</div>
 </div>
@@ -464,7 +464,7 @@
 <div class="canvas-node canvas-node-text has-color" data-node-id="n_c1cf7bc196" style="transform: translate(-960px, 202px); width: 380px; height: 60px; --canvas-color: #e9973f;">
 	<div class="canvas-node-container">
 		<div class="canvas-node-content markdown-rendered">
-			<div class="canvas-node-text-content" data-markdown="Q3JlYXRpb246IDEy"></div>
+			<div class="canvas-node-text-content" data-markdown="Q3JlYXRpb246IDEz"></div>
 		</div>
 	</div>
 </div>
@@ -478,7 +478,7 @@
 <div class="canvas-node canvas-node-text has-color" data-node-id="n_6de0caeeec" style="transform: translate(-960px, 354px); width: 380px; height: 60px; --canvas-color: #a882ff;">
 	<div class="canvas-node-container">
 		<div class="canvas-node-content markdown-rendered">
-			<div class="canvas-node-text-content" data-markdown="UmVhZHkgVG8gUmVwZWF0OiAxMw=="></div>
+			<div class="canvas-node-text-content" data-markdown="UmVhZHkgVG8gUmVwZWF0OiAxMg=="></div>
 		</div>
 	</div>
 </div>
