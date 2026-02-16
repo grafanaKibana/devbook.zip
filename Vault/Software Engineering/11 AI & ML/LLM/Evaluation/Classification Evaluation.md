@@ -15,8 +15,6 @@ dg-publish: true
 
 Classification evaluation is how you measure whether a model assigns the right label (or set of labels) for an input. In software terms: you want to quantify the failure modes (false alarms vs misses), pick an operating point (threshold), and prevent regressions when data/model changes.
 
-This page focuses on practical metrics and how to choose them for engineering tradeoffs.
-
 ## Deeper Explanation
 
 ### Start with the decision you are actually shipping

@@ -60,6 +60,54 @@ Hub notes only need `tags: [FolderNote]`. Concept pages do NOT need FolderNote t
 - Code fences: always specify language (`bash`, `json`, `yaml`, `mermaid`, etc.).
 - Mermaid: only when it materially aids comprehension. Keep small. Avoid punctuation `()[]{},:;/|` in labels — write as words.
 
+### Note quality bar (Senior .NET + AI)
+
+These rules exist to make notes useful for the Senior .NET / AI engineering roles (learning + interview readiness). Apply them when creating or upgrading notes under `Vault/Software Engineering/`.
+
+- `dg-publish: true` notes MUST meet the quality bar below; otherwise keep `dg-publish: false` until ready.
+- Prefer short, high-signal writing: decision rules, pitfalls, and concrete examples over broad definitions.
+
+Required content (for any non-trivial concept page)
+
+- **Intro**: 2-5 sentences in your own words: what it is + why it matters + when you reach for it.
+- **Mental model**: a small explanation that makes the topic "click" (often a diagram or a 5-10 bullet cheatsheet).
+- **Example**: at least one representative example.
+  - .NET: prefer a `csharp` code snippet, and optionally a `json`/`yaml` config snippet.
+  - AI/LLM: prefer an end-to-end request/response shape, evaluation snippet, or a minimal pipeline pseudo-code.
+- **Pitfalls**: at least 3 "gotchas" when the topic is used in real systems (perf, correctness, security, operations).
+- **Tradeoffs**: when there are multiple plausible choices, include pros/cons and decision criteria.
+- **Questions**: include 1-3 tricky / interview-style questions (scenario-based, tradeoff-heavy) with expected answers with explanation why.
+- **References**: at least 2 external links.
+  - At least 1 should be an "anchor" reference (official docs/spec/RFC/vendor-neutral standard).
+  - At least 1 should be a "practice" reference (battle-tested blog/paper/tutorial that explains pitfalls).
+
+Mermaid diagram triggers
+
+Add a Mermaid diagram when it reduces cognitive load, especially for:
+
+- Request/response flows (ASP.NET Core middleware, auth, OAuth/OIDC) → `sequenceDiagram`
+- Lifecycle/state (GC, circuit breaker, retries, caching states) → `stateDiagram-v2`
+- Decision trees (when to use X vs Y) → `flowchart`
+- Architecture boundaries and dependencies → small `flowchart`/`graph` (C4-style simplified)
+- Data model relationships (EF Core, indexing, schemas) → `erDiagram` or `classDiagram`
+
+Tradeoffs and pros/cons triggers
+
+If the topic has multiple competing options, include a short comparison (table is fine):
+
+- .NET: `Task` vs `ValueTask`, `IEnumerable` vs `IAsyncEnumerable`, `Singleton` vs `Scoped`, `Include` vs projection, middleware vs filters.
+- AI: RAG vs fine-tuning, hybrid search vs vector-only, LLM-as-judge vs human eval, caching vs freshness, safety filters vs false positives.
+
+Question quality rules
+
+- Prefer scenario questions that force judgment (scale, latency, cost, failure modes) over trivia.
+- Each question should have a short "expected answer" (3-8 bullets) and mention key tradeoffs.
+
+Reference hygiene
+
+- Prefer stable/primary sources when available (Microsoft Learn/.NET API refs, RFCs, OWASP, NIST, Kubernetes docs).
+- Avoid link dumps; pick a few high-signal links and say what each is good for.
+
 ### Publishing frontmatter
 
 - `dg-publish: true` marks a note publishable.
