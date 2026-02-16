@@ -76,7 +76,7 @@ When working with LLMs, you will come across a lot of new terms. This section wi
 ## Questions
 
 > [!QUESTION]- What is LLM?
-> TODO
+> A large language model (LLM) is a neural network trained on large corpora of text to predict the next token. Once trained, it can be adapted to tasks like answering questions, summarizing, writing, and tool use by conditioning on instructions and context.
 
 ## Links
 
@@ -96,5 +96,8 @@ When working with LLMs, you will come across a lot of new terms. This section wi
 > - [[Software Engineering/11 AI & ML/LLM/Prompting/Prompting|Prompting]]
 >
 > **Pages**
+> - [[Software Engineering/11 AI & ML/LLM/Generation Parameters|Generation Parameters]]
+> - [[Software Engineering/11 AI & ML/LLM/Guardrails|Guardrails]]
+> - [[Software Engineering/11 AI & ML/LLM/Hallucinations|Hallucinations]]
 > - [[Software Engineering/11 AI & ML/LLM/OWASP vulnerabilities on AI LLM|OWASP vulnerabilities on AI LLM]]
 <!-- whats-next:end -->
