@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation.md",
+                "file": "Software Engineering/11 AI & ML/Machine Learning/Data Drift.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Evaluation"
+              "title": "Data Drift"
             }
           }
         ]
@@ -103,13 +103,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation.md",
+                "file": "Software Engineering/11 AI & ML/Machine Learning/Data Drift.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Evaluation"
+              "title": "Outline of Data Drift"
             }
           },
           {
@@ -118,7 +118,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation.md",
+                "file": "Software Engineering/11 AI & ML/Machine Learning/Data Drift.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -128,7 +128,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Evaluation"
+              "title": "Backlinks for Data Drift"
             }
           },
           {
@@ -151,10 +151,10 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation.md"
+                "file": "Software Engineering/11 AI & ML/Machine Learning/Data Drift.md"
               },
               "icon": "lucide-info",
-              "title": "File properties for Evaluation"
+              "title": "File properties for Data Drift"
             }
           }
         ]
@@ -245,10 +245,12 @@
   },
   "active": "7400c06101d52411",
   "lastOpenFiles": [
-    "Software Engineering/Software Engineering.md",
-    "Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation.md",
-    "Software Engineering/11 AI & ML/LLM/Prompting/Role Prompting.md",
+    "Software Engineering/11 AI & ML/Machine Learning/Machine Learning.md",
     "Software Engineering/11 AI & ML/LLM/LLM.md",
+    "Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation.md",
+    "Software Engineering/11 AI & ML/Machine Learning/Data Drift.md",
+    "Software Engineering/Software Engineering.md",
+    "Software Engineering/11 AI & ML/LLM/Prompting/Role Prompting.md",
     "Software Engineering/11 AI & ML/LLM/Agents/Agents.md",
     "Software Engineering/11 AI & ML/LLM/Evaluation/LLM-as-a-Judge.md",
     "Software Engineering/01 Programming/NET/Runtime/Memory Leaks.md",
@@ -270,8 +272,6 @@
     "Software Engineering/10 Cloud/AWS/S3.md",
     "Software Engineering/10 Cloud/AWS/EC2.md",
     "Software Engineering/10 Cloud/AWS/AWS.md",
-    "Software Engineering/10 Cloud/Google Cloud/Cloud Spanner.md",
-    "Software Engineering/10 Cloud/Google Cloud/BigQuery.md",
     "Software Engineering/Roadmap.canvas",
     "Software Engineering/Topics.base",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205142069.png",
