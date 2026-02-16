@@ -36,3 +36,16 @@ Expected behavior: refuse, do not reveal hidden prompts/secrets, and only answer
 ## Links
 
 - [OWASP Top 10 for LLM Applications](https://owasp.org/www-project-top-10-for-large-language-model-applications/)
+
+<!-- whats-next:start -->
+
+---
+
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/11 AI & ML/11 AI & ML|11 AI & ML]]
+>
+> **Topics**
+> - [[Software Engineering/11 AI & ML/LLM/Agents/Agents|Agents]]
+> - [[Software Engineering/11 AI & ML/LLM/Prompting/Prompting|Prompting]]
+<!-- whats-next:end -->

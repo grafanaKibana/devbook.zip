@@ -36,3 +36,16 @@ q.Send("order-123");
 ## Links
 
 - [System.Messaging namespace](https://learn.microsoft.com/en-us/dotnet/api/system.messaging)
+
+<!-- whats-next:start -->
+
+---
+
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/05 Architecture/Distributed Systems/Distributed Systems|Distributed Systems]]
+>
+> **Pages**
+> - [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/Kafka|Kafka]]
+> - [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/RabbitMQ|RabbitMQ]]
+<!-- whats-next:end -->

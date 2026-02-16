@@ -7,8 +7,6 @@ level:
   - "3"
 priority: Medium
 status: Creation
-tags:
-  - FolderNote
 dg-publish: true
 ---
 
@@ -31,3 +29,16 @@ az storage account create \
 ## Links
 
 - [Azure Storage documentation](https://learn.microsoft.com/en-us/azure/storage/)
+
+<!-- whats-next:start -->
+
+---
+
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/10 Cloud/10 Cloud|10 Cloud]]
+>
+> **Pages**
+> - [[Software Engineering/10 Cloud/Azure/Azure Cosmos DB|Azure Cosmos DB]]
+> - [[Software Engineering/10 Cloud/Azure/Azure Functions|Azure Functions]]
+<!-- whats-next:end -->

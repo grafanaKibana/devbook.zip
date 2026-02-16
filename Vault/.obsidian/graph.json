@@ -5,13 +5,27 @@
   "showAttachments": false,
   "hideUnresolved": false,
   "showOrphans": true,
-  "collapse-color-groups": false,
+  "collapse-color-groups": true,
   "colorGroups": [
     {
       "query": "tag:#FolderNote  ",
       "color": {
         "a": 1,
-        "rgb": 5399264
+        "rgb": 11424480
+      }
+    },
+    {
+      "query": "tag:#MetricsIgnore  ",
+      "color": {
+        "a": 1,
+        "rgb": 14701138
+      }
+    },
+    {
+      "query": "tag:#Template  ",
+      "color": {
+        "a": 1,
+        "rgb": 11657298
       }
     }
   ],
@@ -21,10 +35,10 @@
   "nodeSizeMultiplier": 1,
   "lineSizeMultiplier": 1,
   "collapse-forces": false,
-  "centerStrength": 0.44749273255814,
-  "repelStrength": 11.9731104651163,
-  "linkStrength": 0.494004360465116,
-  "linkDistance": 268,
-  "scale": 0.1474835869665247,
+  "centerStrength": 0.502906976744186,
+  "repelStrength": 10,
+  "linkStrength": 1,
+  "linkDistance": 250,
+  "scale": 1.2820267093141946,
   "close": true
 }

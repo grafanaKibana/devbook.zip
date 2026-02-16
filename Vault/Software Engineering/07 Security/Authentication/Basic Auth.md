@@ -26,38 +26,17 @@ dg-publish: true
 
 - [RFC 7617 HTTP Basic Authentication](https://datatracker.ietf.org/doc/html/rfc7617)
 
+<!-- whats-next:start -->
 
-# Whats next
+---
 
-:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
-
-```dataviewjs
-const cur = dv.current();
-const curFolder = cur.file.folder;
-const curPath = cur.file.path;
-
-const isFolderNote = (p) => (p.file.tags ?? []).includes("#FolderNote");
-
-const children = dv.pages()
-  .where(p => p.file.folder.startsWith(curFolder + "/"))
-  .where(p => p.file.folder.split("/").length === curFolder.split("/").length + 1)
-  .where(p => p.file.name === p.file.folder.split("/").slice(-1)[0])
-  .where(p => isFolderNote(p))
-  .sort(p => p.file.folder, "asc");
-
-const pages = dv.pages()
-  .where(p => p.file.folder === curFolder)
-  .where(p => p.file.path !== curPath)
-  .where(p => !isFolderNote(p))
-  .sort(p => p.file.name, "asc");
-  
-  if (children.length) {
-	  dv.header(2, "Topics");
-	  dv.list(children.map(p => p.file.link));
-  }
-  if (pages.length) {
-	  dv.header(2, "Pages");
-	  dv.list(pages.map(p => p.file.link));
-  }
-  
-```
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/07 Security/07 Security|07 Security]]
+>
+> **Pages**
+> - [[Software Engineering/07 Security/Authentication/Oauth OIDC (OpenId Connect)|Oauth OIDC (OpenId Connect)]]
+> - [[Software Engineering/07 Security/Authentication/Resource-based Auth|Resource-based Auth]]
+> - [[Software Engineering/07 Security/Authentication/SSO (Single Sign-On)|SSO (Single Sign-On)]]
+> - [[Software Engineering/07 Security/Authentication/Two-Factor Auth|Two-Factor Auth]]
+<!-- whats-next:end -->

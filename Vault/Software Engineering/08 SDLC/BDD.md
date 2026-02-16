@@ -39,3 +39,15 @@ Feature: Login
 
 - [Gherkin reference](https://cucumber.io/docs/gherkin/reference/)
 - [SpecFlow documentation](https://docs.specflow.org/)
+
+<!-- whats-next:start -->
+
+---
+
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/Software Engineering|Software Engineering]]
+>
+> **Pages**
+> - [[Software Engineering/08 SDLC/Estimation Techniques|Estimation Techniques]]
+<!-- whats-next:end -->
