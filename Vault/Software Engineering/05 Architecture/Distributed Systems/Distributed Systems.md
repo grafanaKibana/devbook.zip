@@ -20,37 +20,21 @@ Distributed systems are hard because the network is unreliable and time is messy
 
 - [Distributed computing (Wikipedia)](https://en.wikipedia.org/wiki/Distributed_computing)
 
-# Whats next
+<!-- whats-next:start -->
 
-:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+---
 
-```dataviewjs
-const cur = dv.current();
-const curFolder = cur.file.folder;
-const curPath = cur.file.path;
-
-const isFolderNote = (p) => (p.file.tags ?? []).includes("#FolderNote");
-
-const children = dv.pages()
-  .where(p => p.file.folder.startsWith(curFolder + "/"))
-  .where(p => p.file.folder.split("/").length === curFolder.split("/").length + 1)
-  .where(p => p.file.name === p.file.folder.split("/").slice(-1)[0])
-  .where(p => isFolderNote(p))
-  .sort(p => p.file.folder, "asc");
-
-const pages = dv.pages()
-  .where(p => p.file.folder === curFolder)
-  .where(p => p.file.path !== curPath)
-  .where(p => !isFolderNote(p))
-  .sort(p => p.file.name, "asc");
-  
-  if (children.length) {
-	  dv.header(2, "Topics");
-	  dv.list(children.map(p => p.file.link));
-  }
-  if (pages.length) {
-	  dv.header(2, "Pages");
-	  dv.list(pages.map(p => p.file.link));
-  }
-  
-```
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/05 Architecture/05 Architecture|05 Architecture]]
+>
+> **Topics**
+> - [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/Message Queues|Message Queues]]
+>
+> **Pages**
+> - [[Software Engineering/05 Architecture/Distributed Systems/CAP theorem|CAP theorem]]
+> - [[Software Engineering/05 Architecture/Distributed Systems/Distributed Transactions|Distributed Transactions]]
+> - [[Software Engineering/05 Architecture/Distributed Systems/IaaS, PaaS, SaaS, CaaS|IaaS, PaaS, SaaS, CaaS]]
+> - [[Software Engineering/05 Architecture/Distributed Systems/Message Queues|Message Queues]]
+> - [[Software Engineering/05 Architecture/Distributed Systems/REST|REST]]
+<!-- whats-next:end -->

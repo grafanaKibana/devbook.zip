@@ -47,3 +47,18 @@ foreach (MethodInfo m in type.GetMethods())
 
 - [Reflection overview (.NET)](https://learn.microsoft.com/dotnet/fundamentals/reflection/overview)
 - [Reflection and attributes (C#)](https://learn.microsoft.com/dotnet/csharp/advanced-topics/reflection-and-attributes/)
+
+<!-- whats-next:start -->
+
+---
+
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals|Fundamentals]]
+>
+> **Pages**
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Exception Handling|Exception Handling]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Foreach|Foreach]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Methods|Methods]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Namespaces|Namespaces]]
+<!-- whats-next:end -->

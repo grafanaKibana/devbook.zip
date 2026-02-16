@@ -55,3 +55,18 @@ public static class MathUtility
 
 - [Declare namespaces to organize types](https://learn.microsoft.com/dotnet/csharp/fundamentals/types/namespaces)
 - [namespace keyword](https://learn.microsoft.com/dotnet/csharp/language-reference/keywords/namespace)
+
+<!-- whats-next:start -->
+
+---
+
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals|Fundamentals]]
+>
+> **Pages**
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Exception Handling|Exception Handling]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Foreach|Foreach]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Methods|Methods]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Reflection|Reflection]]
+<!-- whats-next:end -->

@@ -63,3 +63,18 @@ catch (Exception ex) when (ex is not OperationCanceledException)
 ## Links
 
 - [Exception-handling statements (try/catch/finally/throw)](https://learn.microsoft.com/dotnet/csharp/language-reference/statements/exception-handling-statements)
+
+<!-- whats-next:start -->
+
+---
+
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals|Fundamentals]]
+>
+> **Pages**
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Foreach|Foreach]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Methods|Methods]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Namespaces|Namespaces]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Reflection|Reflection]]
+<!-- whats-next:end -->

@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Software Engineering/05 Architecture/05 Architecture.md",
+                "file": "Software Engineering/10 Cloud/Google Cloud/Cloud Functions.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "05 Architecture"
+              "title": "Cloud Functions"
             }
           }
         ]
@@ -103,13 +103,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Software Engineering/05 Architecture/05 Architecture.md",
+                "file": "Software Engineering/10 Cloud/Google Cloud/Cloud Functions.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of 05 Architecture"
+              "title": "Outline of Cloud Functions"
             }
           },
           {
@@ -118,7 +118,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Software Engineering/05 Architecture/05 Architecture.md",
+                "file": "Software Engineering/10 Cloud/Google Cloud/Cloud Functions.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -128,7 +128,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for 05 Architecture"
+              "title": "Backlinks for Cloud Functions"
             }
           },
           {
@@ -151,14 +151,14 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Software Engineering/05 Architecture/05 Architecture.md"
+                "file": "Software Engineering/10 Cloud/Google Cloud/Cloud Functions.md"
               },
               "icon": "lucide-info",
-              "title": "File properties for 05 Architecture"
+              "title": "File properties for Cloud Functions"
             }
           }
         ],
-        "currentTab": 3
+        "currentTab": 1
       },
       {
         "id": "e96d0e13f56cecdc",
@@ -207,32 +207,33 @@
   },
   "active": "d0893c3b5aff8545",
   "lastOpenFiles": [
-    "Software Engineering/03 Data Persistence/ORMs/Entity Framework.md",
-    "Software Engineering/03 Data Persistence/ORMs/ORMs.md",
-    "Software Engineering/09 DevOps/Deployment Stratagies/Linear Deployment.md",
-    "Software Engineering/09 DevOps/Deployment Stratagies/In-place Deployment.md",
-    "Software Engineering/09 DevOps/Deployment Stratagies/Canary Deployment.md",
-    "Software Engineering/09 DevOps/Deployment Stratagies/Blue Green Deployment.md",
-    "Software Engineering/09 DevOps/Deployment Stratagies/All-In-One Deployment.md",
-    "Software Engineering/03 Data Persistence/SQL/Normalization Denormalization.md",
-    "Software Engineering/03 Data Persistence/SQL/Indexes.md",
-    "Software Engineering/03 Data Persistence/SQL/SQL.md",
-    "Software Engineering/06 Development Practices/Principles/YAGNI.md",
-    "Software Engineering/06 Development Practices/Principles/SOLID.md",
-    "Software Engineering/06 Development Practices/Principles/KISS.md",
-    "Software Engineering/06 Development Practices/Principles/IoC (Holywood Principle).md",
-    "Software Engineering/06 Development Practices/Principles/DRY.md",
-    "Software Engineering/06 Development Practices/Paradigms/Unit Testing.md",
-    "Software Engineering/06 Development Practices/Paradigms/Test-Driven Development.md",
-    "Software Engineering/06 Development Practices/Paradigms/OOP.md",
-    "Software Engineering/06 Development Practices/Paradigms/Integration Testing.md",
-    "Software Engineering/06 Development Practices/Paradigms/Functional Programming.md",
-    "Software Engineering/06 Development Practices/Paradigms/Event-driven.md",
-    "Software Engineering/06 Development Practices/06 Development Practices.md",
-    "Software Engineering/Software Engineering.md",
-    "Software Engineering/06 Development Practices/Principles/Principles.md",
-    "Software Engineering/06 Development Practices/Paradigms/Paradigms.md",
+    "Software Engineering/10 Cloud/10 Cloud.md",
+    "Templates/Pages/Template - Concept Page.md",
+    "Templates/Pages/Template - Index.md",
+    "Templates/Mermaid/Template - Class Diagram.md",
+    "Templates/Blocks/Template - Callout.md",
+    "Software Engineering/10 Cloud/AWS/SQS.md",
+    "Software Engineering/10 Cloud/AWS/S3.md",
+    "Software Engineering/10 Cloud/AWS/EC2.md",
+    "Software Engineering/10 Cloud/AWS/AWS.md",
+    "Software Engineering/10 Cloud/Google Cloud/Cloud Spanner.md",
+    "Software Engineering/10 Cloud/Google Cloud/BigQuery.md",
+    "Software Engineering/10 Cloud/Google Cloud/Cloud Functions.md",
+    "Software Engineering/10 Cloud/Google Cloud/Cloud Storage.md",
+    "Software Engineering/10 Cloud/Google Cloud/Google Cloud.md",
+    "Software Engineering/10 Cloud/Azure/Azure.md",
+    "Software Engineering/01 Programming/NET/Other/OWIN.md",
+    "Software Engineering/01 Programming/NET/CSharp/CSharp.md",
+    "Software Engineering/01 Programming/NET/ASP.NET Web API/ASP.NET Web API.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Async Await.md",
+    "Software Engineering/03 Data Persistence/NoSQL/NoSQL.md",
+    "Software Engineering/10 Cloud/Azure/Azure Functions.md",
+    "Templates/Blocks/Blocks.md",
+    "Templates/Pages/Pages.md",
+    "Software Engineering/03 Data Persistence/SQL/SQL.md",
+    "Software Engineering/Roadmap.canvas",
+    "Software Engineering/10 Cloud/Google Cloud/Firebase.md",
+    "Software Engineering/10 Cloud/Azure/Azure Cosmos DB.md",
     "Software Engineering/Topics.base",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205142069.png",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205142050.png",
@@ -248,7 +249,6 @@
     "Software Engineering/03 Data Persistence/ORMs",
     "Software Engineering/03 Data Persistence/NoSQL",
     "Software Engineering/03 Data Persistence",
-    "Software Engineering/Roadmap.canvas",
     "Assets/library-big.svg",
     "Software Engineering/Untitled.canvas",
     "Vault/Templates/Mermaid",

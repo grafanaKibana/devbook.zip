@@ -28,3 +28,17 @@ aws dynamodb list-tables
 ## Links
 
 - [Amazon DynamoDB documentation](https://docs.aws.amazon.com/dynamodb/)
+
+<!-- whats-next:start -->
+
+---
+
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/10 Cloud/10 Cloud|10 Cloud]]
+>
+> **Pages**
+> - [[Software Engineering/10 Cloud/AWS/EC2|EC2]]
+> - [[Software Engineering/10 Cloud/AWS/S3|S3]]
+> - [[Software Engineering/10 Cloud/AWS/SQS|SQS]]
+<!-- whats-next:end -->

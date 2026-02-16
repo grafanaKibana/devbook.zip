@@ -19,37 +19,16 @@ Cloud computing is renting capabilities (compute, storage, networking) with mana
 
 - [NIST definition of cloud computing (SP 800-145)](https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-145.pdf)
 
-# Whats next
+<!-- whats-next:start -->
 
-:LiArrowUpLeft: `dv: link(regexreplace(this.file.folder, "/[^/]+$", "") + "/" + regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""), regexreplace(regexreplace(this.file.folder, "/[^/]+$", ""), "^.*/", ""))`
+---
 
-```dataviewjs
-const cur = dv.current();
-const curFolder = cur.file.folder;
-const curPath = cur.file.path;
-
-const isFolderNote = (p) => (p.file.tags ?? []).includes("#FolderNote");
-
-const children = dv.pages()
-  .where(p => p.file.folder.startsWith(curFolder + "/"))
-  .where(p => p.file.folder.split("/").length === curFolder.split("/").length + 1)
-  .where(p => p.file.name === p.file.folder.split("/").slice(-1)[0])
-  .where(p => isFolderNote(p))
-  .sort(p => p.file.folder, "asc");
-
-const pages = dv.pages()
-  .where(p => p.file.folder === curFolder)
-  .where(p => p.file.path !== curPath)
-  .where(p => !isFolderNote(p))
-  .sort(p => p.file.name, "asc");
-  
-  if (children.length) {
-	  dv.header(2, "Topics");
-	  dv.list(children.map(p => p.file.link));
-  }
-  if (pages.length) {
-	  dv.header(2, "Pages");
-	  dv.list(pages.map(p => p.file.link));
-  }
-  
-```
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/Software Engineering|Software Engineering]]
+>
+> **Topics**
+> - [[Software Engineering/10 Cloud/AWS/AWS|AWS]]
+> - [[Software Engineering/10 Cloud/Azure/Azure|Azure]]
+> - [[Software Engineering/10 Cloud/Google Cloud/Google Cloud|Google Cloud]]
+<!-- whats-next:end -->

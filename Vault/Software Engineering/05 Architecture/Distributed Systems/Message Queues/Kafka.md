@@ -35,3 +35,16 @@ kafka-topics.sh --describe --topic orders --bootstrap-server localhost:9092
 ## Links
 
 - [Apache Kafka Documentation](https://kafka.apache.org/documentation/)
+
+<!-- whats-next:start -->
+
+---
+
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/05 Architecture/Distributed Systems/Distributed Systems|Distributed Systems]]
+>
+> **Pages**
+> - [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/MSMQ|MSMQ]]
+> - [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/RabbitMQ|RabbitMQ]]
+<!-- whats-next:end -->

@@ -50,3 +50,21 @@ var block2Hash = Sha256Hex(block2Prev + block2Data);
 ## Links
 
 - [Blockchain](https://en.wikipedia.org/wiki/Blockchain)
+
+<!-- whats-next:start -->
+
+---
+
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/Software Engineering|Software Engineering]]
+>
+> **Topics**
+> - [[Software Engineering/07 Security/Authentication/Authentication|Authentication]]
+>
+> **Pages**
+> - [[Software Engineering/07 Security/Digital Signature|Digital Signature]]
+> - [[Software Engineering/07 Security/Encryption|Encryption]]
+> - [[Software Engineering/07 Security/JWT Bearer|JWT Bearer]]
+> - [[Software Engineering/07 Security/OWASP|OWASP]]
+<!-- whats-next:end -->
