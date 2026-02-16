@@ -11,8 +11,16 @@ The .NET runtime (CLR) is what makes managed code fast and safe in practice: JIT
 
 - [.NET documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/)
 
-# Whats next
+<!-- whats-next:start -->
 
-:LiArrowUpLeft: [[Software Engineering/01 Programming/NET/NET\|NET]]
+---
 
-<h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/01 Programming/NET/Runtime/Common Language Runtime.md" data-href="Software Engineering/01 Programming/NET/Runtime/Common Language Runtime.md" href="Software Engineering/01 Programming/NET/Runtime/Common Language Runtime.md" class="internal-link" target="_blank" rel="noopener nofollow">Common Language Runtime</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/01 Programming/NET/Runtime/Garbage Collector.md" data-href="Software Engineering/01 Programming/NET/Runtime/Garbage Collector.md" href="Software Engineering/01 Programming/NET/Runtime/Garbage Collector.md" class="internal-link" target="_blank" rel="noopener nofollow">Garbage Collector</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/01 Programming/NET/Runtime/Memory Leaks.md" data-href="Software Engineering/01 Programming/NET/Runtime/Memory Leaks.md" href="Software Engineering/01 Programming/NET/Runtime/Memory Leaks.md" class="internal-link" target="_blank" rel="noopener nofollow">Memory Leaks</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/01 Programming/NET/NET\|NET]]
+>
+> **Pages**
+> - [[Software Engineering/01 Programming/NET/Runtime/Common Language Runtime\|Common Language Runtime]]
+> - [[Software Engineering/01 Programming/NET/Runtime/Garbage Collector\|Garbage Collector]]
+> - [[Software Engineering/01 Programming/NET/Runtime/Memory Leaks\|Memory Leaks]]
+<!-- whats-next:end -->

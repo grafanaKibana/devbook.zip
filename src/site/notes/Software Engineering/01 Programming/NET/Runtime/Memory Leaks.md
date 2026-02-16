@@ -392,8 +392,15 @@ But keep in mind that Microsoft's `Dispose` pattern is not a silver bullet. If y
 
 ## Links
 
-# Whats next
+<!-- whats-next:start -->
 
-:LiArrowUpLeft: [[Software Engineering/01 Programming/NET/NET\|NET]]
+---
 
-<h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/01 Programming/NET/Runtime/Common Language Runtime.md" data-href="Software Engineering/01 Programming/NET/Runtime/Common Language Runtime.md" href="Software Engineering/01 Programming/NET/Runtime/Common Language Runtime.md" class="internal-link" target="_blank" rel="noopener nofollow">Common Language Runtime</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/01 Programming/NET/Runtime/Garbage Collector.md" data-href="Software Engineering/01 Programming/NET/Runtime/Garbage Collector.md" href="Software Engineering/01 Programming/NET/Runtime/Garbage Collector.md" class="internal-link" target="_blank" rel="noopener nofollow">Garbage Collector</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/01 Programming/NET/NET\|NET]]
+>
+> **Pages**
+> - [[Software Engineering/01 Programming/NET/Runtime/Common Language Runtime\|Common Language Runtime]]
+> - [[Software Engineering/01 Programming/NET/Runtime/Garbage Collector\|Garbage Collector]]
+<!-- whats-next:end -->

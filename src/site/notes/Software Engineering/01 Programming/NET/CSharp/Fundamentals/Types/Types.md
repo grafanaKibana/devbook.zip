@@ -513,9 +513,15 @@ if (obj is string str)  // Type check and declaration in one step
 
 ## Links
 
+<!-- whats-next:start -->
 
-# Whats next
+---
 
-:LiArrowUpLeft: [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals\|Fundamentals]]
-
-<h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Delegates and Events.md" data-href="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Delegates and Events.md" href="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Delegates and Events.md" class="internal-link" target="_blank" rel="noopener nofollow">Delegates and Events</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Strings.md" data-href="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Strings.md" href="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Strings.md" class="internal-link" target="_blank" rel="noopener nofollow">Strings</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals\|Fundamentals]]
+>
+> **Pages**
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Delegates and Events\|Delegates and Events]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Strings\|Strings]]
+<!-- whats-next:end -->

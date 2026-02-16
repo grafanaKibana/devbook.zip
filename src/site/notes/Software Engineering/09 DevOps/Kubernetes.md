@@ -11,8 +11,19 @@
 
 ## Links
 
-# Whats next
+<!-- whats-next:start -->
 
-:LiArrowUpLeft: [[Software Engineering/Software Engineering\|Software Engineering]]
+---
 
-<h2><span>Topics</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/09 DevOps/Deployment Stratagies/Deployment Stratagies.md" data-href="Software Engineering/09 DevOps/Deployment Stratagies/Deployment Stratagies.md" href="Software Engineering/09 DevOps/Deployment Stratagies/Deployment Stratagies.md" class="internal-link" target="_blank" rel="noopener nofollow">Deployment Stratagies</a></span></li></ul></div><h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/09 DevOps/CI CD tools.md" data-href="Software Engineering/09 DevOps/CI CD tools.md" href="Software Engineering/09 DevOps/CI CD tools.md" class="internal-link" target="_blank" rel="noopener nofollow">CI CD tools</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/09 DevOps/Docker.md" data-href="Software Engineering/09 DevOps/Docker.md" href="Software Engineering/09 DevOps/Docker.md" class="internal-link" target="_blank" rel="noopener nofollow">Docker</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/Software Engineering\|Software Engineering]]
+>
+> **Topics**
+> - [[Software Engineering/09 DevOps/Deployment Stratagies/Deployment Stratagies\|Deployment Stratagies]]
+> - [[Software Engineering/09 DevOps/Version Control Systems/Version Control Systems\|Version Control Systems]]
+>
+> **Pages**
+> - [[Software Engineering/09 DevOps/CI CD tools\|CI CD tools]]
+> - [[Software Engineering/09 DevOps/Docker\|Docker]]
+<!-- whats-next:end -->

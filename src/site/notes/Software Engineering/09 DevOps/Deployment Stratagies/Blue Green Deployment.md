@@ -11,8 +11,17 @@
 
 ## Links
 
-# Whats next
+<!-- whats-next:start -->
 
-:LiArrowUpLeft: [[Software Engineering/09 DevOps/09 DevOps\|09 DevOps]]
+---
 
-<h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/09 DevOps/Deployment Stratagies/All-In-One Deployment.md" data-href="Software Engineering/09 DevOps/Deployment Stratagies/All-In-One Deployment.md" href="Software Engineering/09 DevOps/Deployment Stratagies/All-In-One Deployment.md" class="internal-link" target="_blank" rel="noopener nofollow">All-In-One Deployment</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/09 DevOps/Deployment Stratagies/Canary Deployment.md" data-href="Software Engineering/09 DevOps/Deployment Stratagies/Canary Deployment.md" href="Software Engineering/09 DevOps/Deployment Stratagies/Canary Deployment.md" class="internal-link" target="_blank" rel="noopener nofollow">Canary Deployment</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/09 DevOps/Deployment Stratagies/In-place Deployment.md" data-href="Software Engineering/09 DevOps/Deployment Stratagies/In-place Deployment.md" href="Software Engineering/09 DevOps/Deployment Stratagies/In-place Deployment.md" class="internal-link" target="_blank" rel="noopener nofollow">In-place Deployment</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/09 DevOps/Deployment Stratagies/Linear Deployment.md" data-href="Software Engineering/09 DevOps/Deployment Stratagies/Linear Deployment.md" href="Software Engineering/09 DevOps/Deployment Stratagies/Linear Deployment.md" class="internal-link" target="_blank" rel="noopener nofollow">Linear Deployment</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/09 DevOps/09 DevOps\|09 DevOps]]
+>
+> **Pages**
+> - [[Software Engineering/09 DevOps/Deployment Stratagies/All-In-One Deployment\|All-In-One Deployment]]
+> - [[Software Engineering/09 DevOps/Deployment Stratagies/Canary Deployment\|Canary Deployment]]
+> - [[Software Engineering/09 DevOps/Deployment Stratagies/In-place Deployment\|In-place Deployment]]
+> - [[Software Engineering/09 DevOps/Deployment Stratagies/Linear Deployment\|Linear Deployment]]
+<!-- whats-next:end -->

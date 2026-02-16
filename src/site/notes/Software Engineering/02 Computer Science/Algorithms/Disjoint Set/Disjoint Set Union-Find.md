@@ -37,8 +37,12 @@ graph TD
 - [Disjoint-set data structure (Wikipedia)](https://en.wikipedia.org/wiki/Disjoint-set_data_structure)
 - [DSU / Union-Find (cp-algorithms)](https://cp-algorithms.com/data_structures/disjoint_set_union.html)
 
-# Whats next
+<!-- whats-next:start -->
 
-:LiArrowUpLeft: [[Software Engineering/02 Computer Science/Algorithms/Algorithms\|Algorithms]]
+---
 
-
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/02 Computer Science/Algorithms/Algorithms\|Algorithms]]
+>
+<!-- whats-next:end -->

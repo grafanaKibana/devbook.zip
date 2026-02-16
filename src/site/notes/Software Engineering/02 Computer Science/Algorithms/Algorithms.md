@@ -23,9 +23,17 @@
 
 ## Links
 
+<!-- whats-next:start -->
 
-# Whats next
+---
 
-:LiArrowUpLeft: [[Software Engineering/02 Computer Science/02 Computer Science\|02 Computer Science]]
-
-<h2><span>Topics</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set.md" data-href="Software Engineering/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set.md" href="Software Engineering/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set.md" class="internal-link" target="_blank" rel="noopener nofollow">Disjoint Set</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md" data-href="Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md" href="Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md" class="internal-link" target="_blank" rel="noopener nofollow">Graph Algorithms</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms.md" data-href="Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms.md" href="Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms.md" class="internal-link" target="_blank" rel="noopener nofollow">Sorting Algorithms</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/02 Computer Science/Algorithms/String Searching/String Searching.md" data-href="Software Engineering/02 Computer Science/Algorithms/String Searching/String Searching.md" href="Software Engineering/02 Computer Science/Algorithms/String Searching/String Searching.md" class="internal-link" target="_blank" rel="noopener nofollow">String Searching</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/02 Computer Science/02 Computer Science\|02 Computer Science]]
+>
+> **Topics**
+> - [[Software Engineering/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set\|Disjoint Set]]
+> - [[Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Graph Algorithms\|Graph Algorithms]]
+> - [[Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms\|Sorting Algorithms]]
+> - [[Software Engineering/02 Computer Science/Algorithms/String Searching/String Searching\|String Searching]]
+<!-- whats-next:end -->

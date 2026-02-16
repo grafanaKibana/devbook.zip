@@ -93,8 +93,18 @@ Microsoft emphasizes accountability in AI development and deployment through its
 
 ## Links
 
-# Whats next
+<!-- whats-next:start -->
 
-:LiArrowUpLeft: [[Software Engineering/Software Engineering\|Software Engineering]]
+---
 
-<h2><span>Topics</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/11 AI &amp; ML/LLM/LLM.md" data-href="Software Engineering/11 AI &amp; ML/LLM/LLM.md" href="Software Engineering/11 AI &amp; ML/LLM/LLM.md" class="internal-link" target="_blank" rel="noopener nofollow">LLM</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/11 AI &amp; ML/Machine Learning/Machine Learning.md" data-href="Software Engineering/11 AI &amp; ML/Machine Learning/Machine Learning.md" href="Software Engineering/11 AI &amp; ML/Machine Learning/Machine Learning.md" class="internal-link" target="_blank" rel="noopener nofollow">Machine Learning</a></span></li></ul></div><h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/11 AI &amp; ML/AI basic concepts.md" data-href="Software Engineering/11 AI &amp; ML/AI basic concepts.md" href="Software Engineering/11 AI &amp; ML/AI basic concepts.md" class="internal-link" target="_blank" rel="noopener nofollow">AI basic concepts</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/Software Engineering\|Software Engineering]]
+>
+> **Topics**
+> - [[Software Engineering/11 AI & ML/LLM/LLM\|LLM]]
+> - [[Software Engineering/11 AI & ML/Machine Learning/Machine Learning\|Machine Learning]]
+>
+> **Pages**
+> - [[Software Engineering/11 AI & ML/AI basic concepts\|AI basic concepts]]
+<!-- whats-next:end -->

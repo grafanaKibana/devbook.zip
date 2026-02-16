@@ -34,3 +34,17 @@ public sealed class ProductsController : Controller
 ## Links
 
 - [Overview of ASP.NET Core MVC](https://learn.microsoft.com/en-us/aspnet/core/mvc/overview)
+
+<!-- whats-next:start -->
+
+---
+
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/05 Architecture/05 Architecture\|05 Architecture]]
+>
+> **Pages**
+> - [[Software Engineering/05 Architecture/Application Architecture/Layered Architecture\|Layered Architecture]]
+> - [[Software Engineering/05 Architecture/Application Architecture/MVC MVVM\|MVC MVVM]]
+> - [[Software Engineering/05 Architecture/Application Architecture/Plug-in Architecture (MicroKernel)\|Plug-in Architecture (MicroKernel)]]
+<!-- whats-next:end -->

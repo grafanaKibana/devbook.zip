@@ -194,8 +194,14 @@ Events are widely used when building custom UI components (buttons, panels, and 
 
 - https://habr.com/ru/articles/329886/
 
-# Whats next
+<!-- whats-next:start -->
 
-:LiArrowUpLeft: [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals\|Fundamentals]]
+---
 
-<h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Strings.md" data-href="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Strings.md" href="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Strings.md" class="internal-link" target="_blank" rel="noopener nofollow">Strings</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals\|Fundamentals]]
+>
+> **Pages**
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Strings\|Strings]]
+<!-- whats-next:end -->

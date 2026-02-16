@@ -23,8 +23,14 @@ A version control system (VCS) tracks changes to files over time, enabling colla
 
 ## Links
 
-# Whats next
+<!-- whats-next:start -->
 
-:LiArrowUpLeft: [[Software Engineering/09 DevOps/09 DevOps\|09 DevOps]]
+---
 
-<h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/09 DevOps/Version Control Systems/Branching Stratagies.md" data-href="Software Engineering/09 DevOps/Version Control Systems/Branching Stratagies.md" href="Software Engineering/09 DevOps/Version Control Systems/Branching Stratagies.md" class="internal-link" target="_blank" rel="noopener nofollow">Branching Stratagies</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/09 DevOps/09 DevOps\|09 DevOps]]
+>
+> **Pages**
+> - [[Software Engineering/09 DevOps/Version Control Systems/Branching Stratagies\|Branching Stratagies]]
+<!-- whats-next:end -->
