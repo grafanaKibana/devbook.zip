@@ -111,9 +111,15 @@ Think of it as: **"The engine builds a table first, then decorates it."**
 
 ## Links
 
+<!-- whats-next:start -->
 
-# Whats next
+---
 
-:LiArrowUpLeft: [[Software Engineering/03 Data Persistence/03 Data Persistence\|03 Data Persistence]]
-
-<h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/03 Data Persistence/SQL/Indexes.md" data-href="Software Engineering/03 Data Persistence/SQL/Indexes.md" href="Software Engineering/03 Data Persistence/SQL/Indexes.md" class="internal-link" target="_blank" rel="noopener nofollow">Indexes</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/03 Data Persistence/SQL/Normalization Denormalization.md" data-href="Software Engineering/03 Data Persistence/SQL/Normalization Denormalization.md" href="Software Engineering/03 Data Persistence/SQL/Normalization Denormalization.md" class="internal-link" target="_blank" rel="noopener nofollow">Normalization Denormalization</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/03 Data Persistence/03 Data Persistence\|03 Data Persistence]]
+>
+> **Pages**
+> - [[Software Engineering/03 Data Persistence/SQL/Indexes\|Indexes]]
+> - [[Software Engineering/03 Data Persistence/SQL/Normalization Denormalization\|Normalization Denormalization]]
+<!-- whats-next:end -->

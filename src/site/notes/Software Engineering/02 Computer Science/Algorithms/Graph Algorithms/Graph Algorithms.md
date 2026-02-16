@@ -11,8 +11,15 @@ Graphs model relationships: networks, dependencies, routes, permissions, and man
 
 - [Graph algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Graph_algorithm)
 
-# Whats next
+<!-- whats-next:start -->
 
-:LiArrowUpLeft: [[Software Engineering/02 Computer Science/Algorithms/Algorithms\|Algorithms]]
+---
 
-<h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/DFS BFS.md" data-href="Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/DFS BFS.md" href="Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/DFS BFS.md" class="internal-link" target="_blank" rel="noopener nofollow">DFS BFS</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Dijkstra.md" data-href="Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Dijkstra.md" href="Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Dijkstra.md" class="internal-link" target="_blank" rel="noopener nofollow">Dijkstra</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/02 Computer Science/Algorithms/Algorithms\|Algorithms]]
+>
+> **Pages**
+> - [[Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/DFS BFS\|DFS BFS]]
+> - [[Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Dijkstra\|Dijkstra]]
+<!-- whats-next:end -->

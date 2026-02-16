@@ -28,3 +28,17 @@ aws sqs list-queues
 ## Links
 
 - [Amazon SQS documentation](https://docs.aws.amazon.com/sqs/)
+
+<!-- whats-next:start -->
+
+---
+
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/10 Cloud/10 Cloud\|10 Cloud]]
+>
+> **Pages**
+> - [[Software Engineering/10 Cloud/AWS/DynamoDB\|DynamoDB]]
+> - [[Software Engineering/10 Cloud/AWS/EC2\|EC2]]
+> - [[Software Engineering/10 Cloud/AWS/S3\|S3]]
+<!-- whats-next:end -->

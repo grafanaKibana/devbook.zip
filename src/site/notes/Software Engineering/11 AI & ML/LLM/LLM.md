@@ -73,8 +73,18 @@ When working with LLMs, you will come across a lot of new terms. This section wi
 
 [What are Large Language Models? - LLM AI Explained - AWS](https://aws.amazon.com/what-is/large-language-model/?nc1=h_ls)
 
-# Whats next
+<!-- whats-next:start -->
 
-:LiArrowUpLeft: [[Software Engineering/11 AI & ML/11 AI & ML\|11 AI & ML]]
+---
 
-<h2><span>Topics</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/11 AI &amp; ML/LLM/Agents/Agents.md" data-href="Software Engineering/11 AI &amp; ML/LLM/Agents/Agents.md" href="Software Engineering/11 AI &amp; ML/LLM/Agents/Agents.md" class="internal-link" target="_blank" rel="noopener nofollow">Agents</a></span></li></ul></div><h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/11 AI &amp; ML/LLM/OWASP vulnerabilities on AI LLM.md" data-href="Software Engineering/11 AI &amp; ML/LLM/OWASP vulnerabilities on AI LLM.md" href="Software Engineering/11 AI &amp; ML/LLM/OWASP vulnerabilities on AI LLM.md" class="internal-link" target="_blank" rel="noopener nofollow">OWASP vulnerabilities on AI LLM</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/11 AI & ML/11 AI & ML\|11 AI & ML]]
+>
+> **Topics**
+> - [[Software Engineering/11 AI & ML/LLM/Agents/Agents\|Agents]]
+> - [[Software Engineering/11 AI & ML/LLM/Prompting/Prompting\|Prompting]]
+>
+> **Pages**
+> - [[Software Engineering/11 AI & ML/LLM/OWASP vulnerabilities on AI LLM\|OWASP vulnerabilities on AI LLM]]
+<!-- whats-next:end -->

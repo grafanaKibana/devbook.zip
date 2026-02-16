@@ -11,8 +11,16 @@
 
 ## Links
 
-# Whats next
+<!-- whats-next:start -->
 
-:LiArrowUpLeft: [[Software Engineering/05 Architecture/05 Architecture\|05 Architecture]]
+---
 
-<h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/05 Architecture/Architecture Styles/Microservices.md" data-href="Software Engineering/05 Architecture/Architecture Styles/Microservices.md" href="Software Engineering/05 Architecture/Architecture Styles/Microservices.md" class="internal-link" target="_blank" rel="noopener nofollow">Microservices</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/05 Architecture/Architecture Styles/Monolith Architecture.md" data-href="Software Engineering/05 Architecture/Architecture Styles/Monolith Architecture.md" href="Software Engineering/05 Architecture/Architecture Styles/Monolith Architecture.md" class="internal-link" target="_blank" rel="noopener nofollow">Monolith Architecture</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/05 Architecture/Architecture Styles/Serverless Architecture.md" data-href="Software Engineering/05 Architecture/Architecture Styles/Serverless Architecture.md" href="Software Engineering/05 Architecture/Architecture Styles/Serverless Architecture.md" class="internal-link" target="_blank" rel="noopener nofollow">Serverless Architecture</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/05 Architecture/05 Architecture\|05 Architecture]]
+>
+> **Pages**
+> - [[Software Engineering/05 Architecture/Architecture Styles/Microservices\|Microservices]]
+> - [[Software Engineering/05 Architecture/Architecture Styles/Monolith Architecture\|Monolith Architecture]]
+> - [[Software Engineering/05 Architecture/Architecture Styles/Serverless Architecture\|Serverless Architecture]]
+<!-- whats-next:end -->

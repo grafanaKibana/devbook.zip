@@ -22,9 +22,14 @@
 
 ## Links
 
+<!-- whats-next:start -->
 
-# Whats next
+---
 
-:LiArrowUpLeft: [[Software Engineering/03 Data Persistence/03 Data Persistence\|03 Data Persistence]]
-
-<h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/03 Data Persistence/ORMs/Entity Framework.md" data-href="Software Engineering/03 Data Persistence/ORMs/Entity Framework.md" href="Software Engineering/03 Data Persistence/ORMs/Entity Framework.md" class="internal-link" target="_blank" rel="noopener nofollow">Entity Framework</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/03 Data Persistence/03 Data Persistence\|03 Data Persistence]]
+>
+> **Pages**
+> - [[Software Engineering/03 Data Persistence/ORMs/Entity Framework\|Entity Framework]]
+<!-- whats-next:end -->

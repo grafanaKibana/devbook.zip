@@ -22,8 +22,17 @@ aws s3 ls
 
 - [AWS Documentation](https://docs.aws.amazon.com/)
 
-# Whats next
+<!-- whats-next:start -->
 
-:LiArrowUpLeft: [[Software Engineering/10 Cloud/10 Cloud\|10 Cloud]]
+---
 
-<h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/10 Cloud/AWS/DynamoDB.md" data-href="Software Engineering/10 Cloud/AWS/DynamoDB.md" href="Software Engineering/10 Cloud/AWS/DynamoDB.md" class="internal-link" target="_blank" rel="noopener nofollow">DynamoDB</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/10 Cloud/AWS/EC2.md" data-href="Software Engineering/10 Cloud/AWS/EC2.md" href="Software Engineering/10 Cloud/AWS/EC2.md" class="internal-link" target="_blank" rel="noopener nofollow">EC2</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/10 Cloud/AWS/S3.md" data-href="Software Engineering/10 Cloud/AWS/S3.md" href="Software Engineering/10 Cloud/AWS/S3.md" class="internal-link" target="_blank" rel="noopener nofollow">S3</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/10 Cloud/AWS/SQS.md" data-href="Software Engineering/10 Cloud/AWS/SQS.md" href="Software Engineering/10 Cloud/AWS/SQS.md" class="internal-link" target="_blank" rel="noopener nofollow">SQS</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/10 Cloud/10 Cloud\|10 Cloud]]
+>
+> **Pages**
+> - [[Software Engineering/10 Cloud/AWS/DynamoDB\|DynamoDB]]
+> - [[Software Engineering/10 Cloud/AWS/EC2\|EC2]]
+> - [[Software Engineering/10 Cloud/AWS/S3\|S3]]
+> - [[Software Engineering/10 Cloud/AWS/SQS\|SQS]]
+<!-- whats-next:end -->

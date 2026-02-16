@@ -11,8 +11,18 @@ Principles like SOLID, DRY, KISS, and YAGNI are guardrails for keeping systems u
 
 - [Software design principles (Wikipedia)](https://en.wikipedia.org/wiki/Software_design#Design_principles)
 
-# Whats next
+<!-- whats-next:start -->
 
-:LiArrowUpLeft: [[Software Engineering/06 Development Practices/06 Development Practices\|06 Development Practices]]
+---
 
-<h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/06 Development Practices/Principles/DRY.md" data-href="Software Engineering/06 Development Practices/Principles/DRY.md" href="Software Engineering/06 Development Practices/Principles/DRY.md" class="internal-link" target="_blank" rel="noopener nofollow">DRY</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/06 Development Practices/Principles/IoC (Holywood Principle).md" data-href="Software Engineering/06 Development Practices/Principles/IoC (Holywood Principle).md" href="Software Engineering/06 Development Practices/Principles/IoC (Holywood Principle).md" class="internal-link" target="_blank" rel="noopener nofollow">IoC (Holywood Principle)</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/06 Development Practices/Principles/KISS.md" data-href="Software Engineering/06 Development Practices/Principles/KISS.md" href="Software Engineering/06 Development Practices/Principles/KISS.md" class="internal-link" target="_blank" rel="noopener nofollow">KISS</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/06 Development Practices/Principles/SOLID.md" data-href="Software Engineering/06 Development Practices/Principles/SOLID.md" href="Software Engineering/06 Development Practices/Principles/SOLID.md" class="internal-link" target="_blank" rel="noopener nofollow">SOLID</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/06 Development Practices/Principles/YAGNI.md" data-href="Software Engineering/06 Development Practices/Principles/YAGNI.md" href="Software Engineering/06 Development Practices/Principles/YAGNI.md" class="internal-link" target="_blank" rel="noopener nofollow">YAGNI</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/06 Development Practices/06 Development Practices\|06 Development Practices]]
+>
+> **Pages**
+> - [[Software Engineering/06 Development Practices/Principles/DRY\|DRY]]
+> - [[Software Engineering/06 Development Practices/Principles/IoC (Holywood Principle)\|IoC (Holywood Principle)]]
+> - [[Software Engineering/06 Development Practices/Principles/KISS\|KISS]]
+> - [[Software Engineering/06 Development Practices/Principles/SOLID\|SOLID]]
+> - [[Software Engineering/06 Development Practices/Principles/YAGNI\|YAGNI]]
+<!-- whats-next:end -->

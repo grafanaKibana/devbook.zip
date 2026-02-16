@@ -181,8 +181,15 @@ The GC first analyzes all objects that belong to generation 0. If, after collect
 
 - https://habr.com/ru/articles/590475/
 
-# Whats next
+<!-- whats-next:start -->
 
-:LiArrowUpLeft: [[Software Engineering/01 Programming/NET/NET\|NET]]
+---
 
-<h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/01 Programming/NET/Runtime/Common Language Runtime.md" data-href="Software Engineering/01 Programming/NET/Runtime/Common Language Runtime.md" href="Software Engineering/01 Programming/NET/Runtime/Common Language Runtime.md" class="internal-link" target="_blank" rel="noopener nofollow">Common Language Runtime</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/01 Programming/NET/Runtime/Memory Leaks.md" data-href="Software Engineering/01 Programming/NET/Runtime/Memory Leaks.md" href="Software Engineering/01 Programming/NET/Runtime/Memory Leaks.md" class="internal-link" target="_blank" rel="noopener nofollow">Memory Leaks</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/01 Programming/NET/NET\|NET]]
+>
+> **Pages**
+> - [[Software Engineering/01 Programming/NET/Runtime/Common Language Runtime\|Common Language Runtime]]
+> - [[Software Engineering/01 Programming/NET/Runtime/Memory Leaks\|Memory Leaks]]
+<!-- whats-next:end -->

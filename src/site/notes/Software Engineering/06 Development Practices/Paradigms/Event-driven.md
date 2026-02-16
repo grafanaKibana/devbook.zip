@@ -44,3 +44,19 @@ public sealed class Orders
 ## Links
 
 - [Event-driven architecture style](https://learn.microsoft.com/en-us/azure/architecture/guide/architecture-styles/event-driven)
+
+<!-- whats-next:start -->
+
+---
+
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/06 Development Practices/06 Development Practices\|06 Development Practices]]
+>
+> **Pages**
+> - [[Software Engineering/06 Development Practices/Paradigms/Functional Programming\|Functional Programming]]
+> - [[Software Engineering/06 Development Practices/Paradigms/Integration Testing\|Integration Testing]]
+> - [[Software Engineering/06 Development Practices/Paradigms/OOP\|OOP]]
+> - [[Software Engineering/06 Development Practices/Paradigms/Test-Driven Development\|Test-Driven Development]]
+> - [[Software Engineering/06 Development Practices/Paradigms/Unit Testing\|Unit Testing]]
+<!-- whats-next:end -->

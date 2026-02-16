@@ -140,8 +140,15 @@ Gen AI can evaluate essays against complex criteria like grammar, clarity, coher
 - [Learn Prompting: Your Guide to Communicating with AI](https://learnprompting.org/docs/basics/introduction)
 - [Prompt Engineering Guide – Nextra](https://www.promptingguide.ai/)
 
-# Whats next
+<!-- whats-next:start -->
 
-:LiArrowUpLeft: [[Software Engineering/11 AI & ML/LLM/LLM\|LLM]]
+---
 
-<h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/11 AI &amp; ML/LLM/Prompting/Role Prompting.md" data-href="Software Engineering/11 AI &amp; ML/LLM/Prompting/Role Prompting.md" href="Software Engineering/11 AI &amp; ML/LLM/Prompting/Role Prompting.md" class="internal-link" target="_blank" rel="noopener nofollow">Role Prompting</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/11 AI &amp; ML/LLM/Prompting/Showing Examples.md" data-href="Software Engineering/11 AI &amp; ML/LLM/Prompting/Showing Examples.md" href="Software Engineering/11 AI &amp; ML/LLM/Prompting/Showing Examples.md" class="internal-link" target="_blank" rel="noopener nofollow">Showing Examples</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/11 AI & ML/LLM/LLM\|LLM]]
+>
+> **Pages**
+> - [[Software Engineering/11 AI & ML/LLM/Prompting/Role Prompting\|Role Prompting]]
+> - [[Software Engineering/11 AI & ML/LLM/Prompting/Showing Examples\|Showing Examples]]
+<!-- whats-next:end -->

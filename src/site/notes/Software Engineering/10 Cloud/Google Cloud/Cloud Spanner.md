@@ -18,3 +18,18 @@ gcloud spanner instances list
 ## Links
 
 - [Cloud Spanner documentation](https://cloud.google.com/spanner/docs)
+
+<!-- whats-next:start -->
+
+---
+
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/10 Cloud/10 Cloud\|10 Cloud]]
+>
+> **Pages**
+> - [[Software Engineering/10 Cloud/Google Cloud/BigQuery\|BigQuery]]
+> - [[Software Engineering/10 Cloud/Google Cloud/Cloud Functions\|Cloud Functions]]
+> - [[Software Engineering/10 Cloud/Google Cloud/Cloud Storage\|Cloud Storage]]
+> - [[Software Engineering/10 Cloud/Google Cloud/Firebase\|Firebase]]
+<!-- whats-next:end -->

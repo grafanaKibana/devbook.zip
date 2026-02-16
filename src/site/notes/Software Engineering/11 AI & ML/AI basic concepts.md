@@ -37,3 +37,16 @@ recall    = TP / (TP + FN)
 ## Links
 
 - [What is artificial intelligence?](https://learn.microsoft.com/en-us/azure/ai-services/what-is-ai)
+
+<!-- whats-next:start -->
+
+---
+
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/Software Engineering\|Software Engineering]]
+>
+> **Topics**
+> - [[Software Engineering/11 AI & ML/LLM/LLM\|LLM]]
+> - [[Software Engineering/11 AI & ML/Machine Learning/Machine Learning\|Machine Learning]]
+<!-- whats-next:end -->

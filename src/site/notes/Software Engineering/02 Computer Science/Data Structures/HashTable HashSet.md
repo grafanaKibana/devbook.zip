@@ -18,8 +18,14 @@ Hash-based collections use a hash code to map a key to a bucket, aiming for near
 
 - [Dictionary<TKey, TValue> class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.dictionary-2)
 
-# Whats next
+<!-- whats-next:start -->
 
-:LiArrowUpLeft: [[Software Engineering/02 Computer Science/02 Computer Science\|02 Computer Science]]
+---
 
-<h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/02 Computer Science/Data Structures/NET Collections.md" data-href="Software Engineering/02 Computer Science/Data Structures/NET Collections.md" href="Software Engineering/02 Computer Science/Data Structures/NET Collections.md" class="internal-link" target="_blank" rel="noopener nofollow">NET Collections</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/02 Computer Science/02 Computer Science\|02 Computer Science]]
+>
+> **Pages**
+> - [[Software Engineering/02 Computer Science/Data Structures/NET Collections\|NET Collections]]
+<!-- whats-next:end -->

@@ -11,8 +11,14 @@ Disjoint Set Union (Union-Find) is a classic structure for tracking connectivity
 
 - [Disjoint set union (CP-Algorithms)](https://cp-algorithms.com/data_structures/disjoint_set_union.html)
 
-# Whats next
+<!-- whats-next:start -->
 
-:LiArrowUpLeft: [[Software Engineering/02 Computer Science/Algorithms/Algorithms\|Algorithms]]
+---
 
-<h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set Union-Find.md" data-href="Software Engineering/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set Union-Find.md" href="Software Engineering/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set Union-Find.md" class="internal-link" target="_blank" rel="noopener nofollow">Disjoint Set Union-Find</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/02 Computer Science/Algorithms/Algorithms\|Algorithms]]
+>
+> **Pages**
+> - [[Software Engineering/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set Union-Find\|Disjoint Set Union-Find]]
+<!-- whats-next:end -->

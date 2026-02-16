@@ -18,3 +18,18 @@ gcloud functions list
 ## Links
 
 - [Cloud Functions documentation](https://cloud.google.com/functions/docs)
+
+<!-- whats-next:start -->
+
+---
+
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/10 Cloud/10 Cloud\|10 Cloud]]
+>
+> **Pages**
+> - [[Software Engineering/10 Cloud/Google Cloud/BigQuery\|BigQuery]]
+> - [[Software Engineering/10 Cloud/Google Cloud/Cloud Spanner\|Cloud Spanner]]
+> - [[Software Engineering/10 Cloud/Google Cloud/Cloud Storage\|Cloud Storage]]
+> - [[Software Engineering/10 Cloud/Google Cloud/Firebase\|Firebase]]
+<!-- whats-next:end -->

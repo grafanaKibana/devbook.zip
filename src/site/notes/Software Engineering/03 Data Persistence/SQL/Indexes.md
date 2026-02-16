@@ -192,9 +192,14 @@ Unlike a clustered index, the leaf level of a nonclustered index contains only t
 
 ## Links
 
+<!-- whats-next:start -->
 
-# Whats next
+---
 
-:LiArrowUpLeft: [[Software Engineering/03 Data Persistence/03 Data Persistence\|03 Data Persistence]]
-
-<h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/03 Data Persistence/SQL/Normalization Denormalization.md" data-href="Software Engineering/03 Data Persistence/SQL/Normalization Denormalization.md" href="Software Engineering/03 Data Persistence/SQL/Normalization Denormalization.md" class="internal-link" target="_blank" rel="noopener nofollow">Normalization Denormalization</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/03 Data Persistence/03 Data Persistence\|03 Data Persistence]]
+>
+> **Pages**
+> - [[Software Engineering/03 Data Persistence/SQL/Normalization Denormalization\|Normalization Denormalization]]
+<!-- whats-next:end -->

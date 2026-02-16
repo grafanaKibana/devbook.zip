@@ -11,8 +11,15 @@ Not everything in .NET fits neatly into a single bucket: some tools and framewor
 
 - [.NET documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/)
 
-# Whats next
+<!-- whats-next:start -->
 
-:LiArrowUpLeft: [[Software Engineering/01 Programming/NET/NET\|NET]]
+---
 
-<h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/01 Programming/NET/Other/OWIN.md" data-href="Software Engineering/01 Programming/NET/Other/OWIN.md" href="Software Engineering/01 Programming/NET/Other/OWIN.md" class="internal-link" target="_blank" rel="noopener nofollow">OWIN</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/01 Programming/NET/Other/SignalR.md" data-href="Software Engineering/01 Programming/NET/Other/SignalR.md" href="Software Engineering/01 Programming/NET/Other/SignalR.md" class="internal-link" target="_blank" rel="noopener nofollow">SignalR</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/01 Programming/NET/NET\|NET]]
+>
+> **Pages**
+> - [[Software Engineering/01 Programming/NET/Other/OWIN\|OWIN]]
+> - [[Software Engineering/01 Programming/NET/Other/SignalR\|SignalR]]
+<!-- whats-next:end -->
