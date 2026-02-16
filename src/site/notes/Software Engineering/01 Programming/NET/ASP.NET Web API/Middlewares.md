@@ -83,9 +83,12 @@ sequenceDiagram
 - [Handle errors in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/error-handling)
 - [Filters in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/filters)
 
-# Whats next
+<!-- whats-next:start -->
 
-:LiArrowUpLeft: [[Software Engineering/01 Programming/NET/NET\|NET]]
+---
 
-<h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/01 Programming/NET/ASP.NET Web API/ASP.NET Web API.md" data-href="Software Engineering/01 Programming/NET/ASP.NET Web API/ASP.NET Web API.md" href="Software Engineering/01 Programming/NET/ASP.NET Web API/ASP.NET Web API.md" class="internal-link" target="_blank" rel="noopener nofollow">ASP.NET Web API</a></span></li></ul></div>
-
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/01 Programming/NET/NET\|NET]]
+>
+<!-- whats-next:end -->

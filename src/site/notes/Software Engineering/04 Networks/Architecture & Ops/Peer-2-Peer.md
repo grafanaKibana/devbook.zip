@@ -11,8 +11,14 @@
 
 ## Links
 
-# Whats next
+<!-- whats-next:start -->
 
-:LiArrowUpLeft: [[Software Engineering/04 Networks/04 Networks\|04 Networks]]
+---
 
-<h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/04 Networks/Architecture &amp; Ops/VPN.md" data-href="Software Engineering/04 Networks/Architecture &amp; Ops/VPN.md" href="Software Engineering/04 Networks/Architecture &amp; Ops/VPN.md" class="internal-link" target="_blank" rel="noopener nofollow">VPN</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/04 Networks/04 Networks\|04 Networks]]
+>
+> **Pages**
+> - [[Software Engineering/04 Networks/Architecture & Ops/VPN\|VPN]]
+<!-- whats-next:end -->

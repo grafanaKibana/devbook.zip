@@ -11,8 +11,15 @@ String searching is about finding patterns in text efficiently, from small input
 
 - [String-searching algorithm (Wikipedia)](https://en.wikipedia.org/wiki/String-searching_algorithm)
 
-# Whats next
+<!-- whats-next:start -->
 
-:LiArrowUpLeft: [[Software Engineering/02 Computer Science/Algorithms/Algorithms\|Algorithms]]
+---
 
-<h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/02 Computer Science/Algorithms/String Searching/KMP (Knuth-Morris-Pratt) Algorithm.md" data-href="Software Engineering/02 Computer Science/Algorithms/String Searching/KMP (Knuth-Morris-Pratt) Algorithm.md" href="Software Engineering/02 Computer Science/Algorithms/String Searching/KMP (Knuth-Morris-Pratt) Algorithm.md" class="internal-link" target="_blank" rel="noopener nofollow">KMP (Knuth-Morris-Pratt) Algorithm</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/02 Computer Science/Algorithms/String Searching/Rabit Karp Search.md" data-href="Software Engineering/02 Computer Science/Algorithms/String Searching/Rabit Karp Search.md" href="Software Engineering/02 Computer Science/Algorithms/String Searching/Rabit Karp Search.md" class="internal-link" target="_blank" rel="noopener nofollow">Rabit Karp Search</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/02 Computer Science/Algorithms/Algorithms\|Algorithms]]
+>
+> **Pages**
+> - [[Software Engineering/02 Computer Science/Algorithms/String Searching/KMP (Knuth-Morris-Pratt) Algorithm\|KMP (Knuth-Morris-Pratt) Algorithm]]
+> - [[Software Engineering/02 Computer Science/Algorithms/String Searching/Rabit Karp Search\|Rabit Karp Search]]
+<!-- whats-next:end -->

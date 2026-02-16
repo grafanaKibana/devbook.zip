@@ -71,3 +71,18 @@ static void ProcessData(in int value)
 ## Links
 
 - [Method parameters and modifiers (ref/in/out)](https://learn.microsoft.com/dotnet/csharp/language-reference/keywords/method-parameters#reference-parameters)
+
+<!-- whats-next:start -->
+
+---
+
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals\|Fundamentals]]
+>
+> **Pages**
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Exception Handling\|Exception Handling]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Foreach\|Foreach]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Namespaces\|Namespaces]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Reflection\|Reflection]]
+<!-- whats-next:end -->

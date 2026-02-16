@@ -11,8 +11,16 @@ Cloud computing is renting capabilities (compute, storage, networking) with mana
 
 - [NIST definition of cloud computing (SP 800-145)](https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-145.pdf)
 
-# Whats next
+<!-- whats-next:start -->
 
-:LiArrowUpLeft: [[Software Engineering/Software Engineering\|Software Engineering]]
+---
 
-<h2><span>Topics</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/10 Cloud/AWS/AWS.md" data-href="Software Engineering/10 Cloud/AWS/AWS.md" href="Software Engineering/10 Cloud/AWS/AWS.md" class="internal-link" target="_blank" rel="noopener nofollow">AWS</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/10 Cloud/Azure/Azure.md" data-href="Software Engineering/10 Cloud/Azure/Azure.md" href="Software Engineering/10 Cloud/Azure/Azure.md" class="internal-link" target="_blank" rel="noopener nofollow">Azure</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/10 Cloud/Google Cloud/Google Cloud.md" data-href="Software Engineering/10 Cloud/Google Cloud/Google Cloud.md" href="Software Engineering/10 Cloud/Google Cloud/Google Cloud.md" class="internal-link" target="_blank" rel="noopener nofollow">Google Cloud</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/Software Engineering\|Software Engineering]]
+>
+> **Topics**
+> - [[Software Engineering/10 Cloud/AWS/AWS\|AWS]]
+> - [[Software Engineering/10 Cloud/Azure/Azure\|Azure]]
+> - [[Software Engineering/10 Cloud/Google Cloud/Google Cloud\|Google Cloud]]
+<!-- whats-next:end -->

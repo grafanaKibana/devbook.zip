@@ -19,8 +19,16 @@ MVC and MVVM are UI/application architecture patterns that split responsibilitie
 - [Wikipedia - Model-view-controller](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller)
 - [Microsoft Learn - Overview of ASP.NET Core MVC](https://learn.microsoft.com/en-us/aspnet/core/mvc/overview)
 
-# Whats next
+<!-- whats-next:start -->
 
-:LiArrowUpLeft: [[Software Engineering/05 Architecture/05 Architecture\|05 Architecture]]
+---
 
-<h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/05 Architecture/Application Architecture/Layered Architecture.md" data-href="Software Engineering/05 Architecture/Application Architecture/Layered Architecture.md" href="Software Engineering/05 Architecture/Application Architecture/Layered Architecture.md" class="internal-link" target="_blank" rel="noopener nofollow">Layered Architecture</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/05 Architecture/Application Architecture/MVC.md" data-href="Software Engineering/05 Architecture/Application Architecture/MVC.md" href="Software Engineering/05 Architecture/Application Architecture/MVC.md" class="internal-link" target="_blank" rel="noopener nofollow">MVC</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/05 Architecture/Application Architecture/Plug-in Architecture (MicroKernel).md" data-href="Software Engineering/05 Architecture/Application Architecture/Plug-in Architecture (MicroKernel).md" href="Software Engineering/05 Architecture/Application Architecture/Plug-in Architecture (MicroKernel).md" class="internal-link" target="_blank" rel="noopener nofollow">Plug-in Architecture (MicroKernel)</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/05 Architecture/05 Architecture\|05 Architecture]]
+>
+> **Pages**
+> - [[Software Engineering/05 Architecture/Application Architecture/Layered Architecture\|Layered Architecture]]
+> - [[Software Engineering/05 Architecture/Application Architecture/MVC\|MVC]]
+> - [[Software Engineering/05 Architecture/Application Architecture/Plug-in Architecture (MicroKernel)\|Plug-in Architecture (MicroKernel)]]
+<!-- whats-next:end -->

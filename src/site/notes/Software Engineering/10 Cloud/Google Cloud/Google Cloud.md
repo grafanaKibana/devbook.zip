@@ -28,8 +28,18 @@ gcloud compute instances list
 
 - [Google Cloud documentation](https://cloud.google.com/docs)
 
-# Whats next
+<!-- whats-next:start -->
 
-:LiArrowUpLeft: [[Software Engineering/10 Cloud/10 Cloud\|10 Cloud]]
+---
 
-<h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/10 Cloud/Google Cloud/BigQuery.md" data-href="Software Engineering/10 Cloud/Google Cloud/BigQuery.md" href="Software Engineering/10 Cloud/Google Cloud/BigQuery.md" class="internal-link" target="_blank" rel="noopener nofollow">BigQuery</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/10 Cloud/Google Cloud/Cloud Functions.md" data-href="Software Engineering/10 Cloud/Google Cloud/Cloud Functions.md" href="Software Engineering/10 Cloud/Google Cloud/Cloud Functions.md" class="internal-link" target="_blank" rel="noopener nofollow">Cloud Functions</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/10 Cloud/Google Cloud/Cloud Spanner.md" data-href="Software Engineering/10 Cloud/Google Cloud/Cloud Spanner.md" href="Software Engineering/10 Cloud/Google Cloud/Cloud Spanner.md" class="internal-link" target="_blank" rel="noopener nofollow">Cloud Spanner</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/10 Cloud/Google Cloud/Cloud Storage.md" data-href="Software Engineering/10 Cloud/Google Cloud/Cloud Storage.md" href="Software Engineering/10 Cloud/Google Cloud/Cloud Storage.md" class="internal-link" target="_blank" rel="noopener nofollow">Cloud Storage</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/10 Cloud/Google Cloud/Firebase.md" data-href="Software Engineering/10 Cloud/Google Cloud/Firebase.md" href="Software Engineering/10 Cloud/Google Cloud/Firebase.md" class="internal-link" target="_blank" rel="noopener nofollow">Firebase</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/10 Cloud/10 Cloud\|10 Cloud]]
+>
+> **Pages**
+> - [[Software Engineering/10 Cloud/Google Cloud/BigQuery\|BigQuery]]
+> - [[Software Engineering/10 Cloud/Google Cloud/Cloud Functions\|Cloud Functions]]
+> - [[Software Engineering/10 Cloud/Google Cloud/Cloud Spanner\|Cloud Spanner]]
+> - [[Software Engineering/10 Cloud/Google Cloud/Cloud Storage\|Cloud Storage]]
+> - [[Software Engineering/10 Cloud/Google Cloud/Firebase\|Firebase]]
+<!-- whats-next:end -->

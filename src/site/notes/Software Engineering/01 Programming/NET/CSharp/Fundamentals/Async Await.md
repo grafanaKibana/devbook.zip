@@ -29,8 +29,16 @@ It is common for a program to perform operations that can take a long time, for 
 - [Async/await in C#: concept, internals, useful techniques](https://habr.com/ru/articles/470830/)
 - [Async and Await in C#: Complete Guide (2023)](https://www.bytehide.com/blog/async-await-csharp)
 
-# Whats next
+<!-- whats-next:start -->
 
-:LiArrowUpLeft: [[Software Engineering/01 Programming/NET/CSharp/CSharp\|CSharp]]
+---
 
-<h2><span>Topics</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Collections/Collections.md" data-href="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Collections/Collections.md" href="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Collections/Collections.md" class="internal-link" target="_blank" rel="noopener nofollow">Collections</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Control Structures.md" data-href="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Control Structures.md" href="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Control Structures.md" class="internal-link" target="_blank" rel="noopener nofollow">Control Structures</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types.md" data-href="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types.md" href="Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types.md" class="internal-link" target="_blank" rel="noopener nofollow">Types</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/01 Programming/NET/CSharp/CSharp\|CSharp]]
+>
+> **Topics**
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Collections/Collections\|Collections]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Control Structures\|Control Structures]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types\|Types]]
+<!-- whats-next:end -->

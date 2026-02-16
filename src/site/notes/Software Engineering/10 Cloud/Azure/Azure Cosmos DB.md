@@ -22,3 +22,16 @@ az cosmosdb create \
 ## Links
 
 - [Azure Cosmos DB documentation](https://learn.microsoft.com/en-us/azure/cosmos-db/)
+
+<!-- whats-next:start -->
+
+---
+
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/10 Cloud/10 Cloud\|10 Cloud]]
+>
+> **Pages**
+> - [[Software Engineering/10 Cloud/Azure/Azure Functions\|Azure Functions]]
+> - [[Software Engineering/10 Cloud/Azure/Azure Storage\|Azure Storage]]
+<!-- whats-next:end -->

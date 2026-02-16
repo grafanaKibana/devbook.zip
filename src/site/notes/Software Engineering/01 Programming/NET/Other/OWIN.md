@@ -11,8 +11,14 @@
 
 ## Links
 
-# Whats next
+<!-- whats-next:start -->
 
-:LiArrowUpLeft: [[Software Engineering/01 Programming/NET/NET\|NET]]
+---
 
-<h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/01 Programming/NET/Other/SignalR.md" data-href="Software Engineering/01 Programming/NET/Other/SignalR.md" href="Software Engineering/01 Programming/NET/Other/SignalR.md" class="internal-link" target="_blank" rel="noopener nofollow">SignalR</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/01 Programming/NET/NET\|NET]]
+>
+> **Pages**
+> - [[Software Engineering/01 Programming/NET/Other/SignalR\|SignalR]]
+<!-- whats-next:end -->

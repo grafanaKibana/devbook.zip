@@ -34,9 +34,15 @@ A data structure is a way to organize related data so it can be stored, accessed
 
 ## Links
 
+<!-- whats-next:start -->
 
-# Whats next
+---
 
-:LiArrowUpLeft: [[Software Engineering/02 Computer Science/02 Computer Science\|02 Computer Science]]
-
-<h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/02 Computer Science/Data Structures/HashTable HashSet.md" data-href="Software Engineering/02 Computer Science/Data Structures/HashTable HashSet.md" href="Software Engineering/02 Computer Science/Data Structures/HashTable HashSet.md" class="internal-link" target="_blank" rel="noopener nofollow">HashTable HashSet</a></span></li><li><span><a data-tooltip-position="top" aria-label="Software Engineering/02 Computer Science/Data Structures/NET Collections.md" data-href="Software Engineering/02 Computer Science/Data Structures/NET Collections.md" href="Software Engineering/02 Computer Science/Data Structures/NET Collections.md" class="internal-link" target="_blank" rel="noopener nofollow">NET Collections</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/02 Computer Science/02 Computer Science\|02 Computer Science]]
+>
+> **Pages**
+> - [[Software Engineering/02 Computer Science/Data Structures/HashTable HashSet\|HashTable HashSet]]
+> - [[Software Engineering/02 Computer Science/Data Structures/NET Collections\|NET Collections]]
+<!-- whats-next:end -->

@@ -37,8 +37,14 @@ graph TD
 - [Dijkstra's algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm)
 - [Dijkstra (cp-algorithms)](https://cp-algorithms.com/graph/dijkstra.html)
 
-# Whats next
+<!-- whats-next:start -->
 
-:LiArrowUpLeft: [[Software Engineering/02 Computer Science/Algorithms/Algorithms\|Algorithms]]
+---
 
-<h2><span>Pages</span></h2><div><ul class="dataview list-view-ul"><li><span><a data-tooltip-position="top" aria-label="Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/DFS BFS.md" data-href="Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/DFS BFS.md" href="Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/DFS BFS.md" class="internal-link" target="_blank" rel="noopener nofollow">DFS BFS</a></span></li></ul></div>
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/02 Computer Science/Algorithms/Algorithms\|Algorithms]]
+>
+> **Pages**
+> - [[Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/DFS BFS\|DFS BFS]]
+<!-- whats-next:end -->

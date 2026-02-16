@@ -22,3 +22,16 @@ Then open `http://localhost:15672` (default credentials: `guest`/`guest`).
 ## Links
 
 - [RabbitMQ Documentation](https://www.rabbitmq.com/docs)
+
+<!-- whats-next:start -->
+
+---
+
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/05 Architecture/Distributed Systems/Distributed Systems\|Distributed Systems]]
+>
+> **Pages**
+> - [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/Kafka\|Kafka]]
+> - [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/MSMQ\|MSMQ]]
+<!-- whats-next:end -->

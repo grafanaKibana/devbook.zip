@@ -22,3 +22,16 @@ func new --name Hello --template "HTTP trigger" --authlevel "Anonymous"
 ## Links
 
 - [Azure Functions documentation](https://learn.microsoft.com/en-us/azure/azure-functions/)
+
+<!-- whats-next:start -->
+
+---
+
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/10 Cloud/10 Cloud\|10 Cloud]]
+>
+> **Pages**
+> - [[Software Engineering/10 Cloud/Azure/Azure Cosmos DB\|Azure Cosmos DB]]
+> - [[Software Engineering/10 Cloud/Azure/Azure Storage\|Azure Storage]]
+<!-- whats-next:end -->
