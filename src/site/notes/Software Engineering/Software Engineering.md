@@ -9,11 +9,11 @@
 
 # Status Distribution
 
-<div class="block-language-dataview"><table class="dataview table-view-table"><thead class="table-view-thead"><tr><th>Status</th><th>Distribution</th><th>Count</th></tr></thead><tbody class="table-view-tbody"><tr><td>Done</td><td><progress class="se-progress" max="100" value="0"></progress><span> 0%</span></td><td>0</td></tr><tr><td>Ready To Repeat</td><td><progress class="se-progress" max="100" value="44"></progress><span> 44%</span></td><td>76</td></tr><tr><td>Repetition</td><td><progress class="se-progress" max="100" value="0"></progress><span> 0%</span></td><td>0</td></tr><tr><td>Creation</td><td><progress class="se-progress" max="100" value="32"></progress><span> 32%</span></td><td>56</td></tr><tr><td>Not-Started</td><td><progress class="se-progress" max="100" value="24"></progress><span> 24%</span></td><td>41</td></tr></tbody></table></div>
+<div class="block-language-dataview"><table class="dataview table-view-table"><thead class="table-view-thead"><tr><th>Status</th><th>Distribution</th><th>Count</th></tr></thead><tbody class="table-view-tbody"><tr><td>Done</td><td><progress class="se-progress" max="100" value="0"></progress><span> 0%</span></td><td>0</td></tr><tr><td>Ready To Repeat</td><td><progress class="se-progress" max="100" value="43"></progress><span> 43%</span></td><td>75</td></tr><tr><td>Repetition</td><td><progress class="se-progress" max="100" value="0"></progress><span> 0%</span></td><td>0</td></tr><tr><td>Creation</td><td><progress class="se-progress" max="100" value="33"></progress><span> 33%</span></td><td>57</td></tr><tr><td>Not-Started</td><td><progress class="se-progress" max="100" value="24"></progress><span> 24%</span></td><td>41</td></tr></tbody></table></div>
 
 # Priority Distribution
 
-<div class="block-language-dataview"><table class="dataview table-view-table"><thead class="table-view-thead"><tr><th>Priority</th><th>Distribution</th><th>Count</th></tr></thead><tbody class="table-view-tbody"><tr><td>High</td><td><progress class="se-progress" max="100" value="8"></progress><span> 8%</span></td><td>13</td></tr><tr><td>Medium</td><td><progress class="se-progress" max="100" value="91"></progress><span> 91%</span></td><td>157</td></tr><tr><td>Low</td><td><progress class="se-progress" max="100" value="2"></progress><span> 2%</span></td><td>3</td></tr></tbody></table></div>
+<div class="block-language-dataview"><table class="dataview table-view-table"><thead class="table-view-thead"><tr><th>Priority</th><th>Distribution</th><th>Count</th></tr></thead><tbody class="table-view-tbody"><tr><td>High</td><td><progress class="se-progress" max="100" value="45"></progress><span> 45%</span></td><td>77</td></tr><tr><td>Medium</td><td><progress class="se-progress" max="100" value="42"></progress><span> 42%</span></td><td>72</td></tr><tr><td>Low</td><td><progress class="se-progress" max="100" value="14"></progress><span> 14%</span></td><td>24</td></tr></tbody></table></div>
 
 # Level Distribution
 
@@ -21,39 +21,39 @@
 
 # Focus
 
-| Note                                                                                                               | Topic                                   | Status          | Priority |
-| ------------------------------------------------------------------------------------------------------------------ | --------------------------------------- | --------------- | -------- |
-| [[Software Engineering/06 Development Practices/Principles/SOLID\|SOLID]]                                       | Development Practices | Ready To Repeat | Medium   |
-| [[Software Engineering/06 Development Practices/Principles/IoC (Holywood Principle)\|IoC (Holywood Principle)]] | Development Practices | Ready To Repeat | Medium   |
-| [[Software Engineering/06 Development Practices/Paradigms/Unit Testing\|Unit Testing]]                          | Development Practices | Ready To Repeat | Medium   |
-| [[Software Engineering/06 Development Practices/Paradigms/Test-Driven Development\|Test-Driven Development]]    | Development Practices | Ready To Repeat | Medium   |
-| [[Software Engineering/06 Development Practices/Paradigms/OOP\|OOP]]                                            | Development Practices | Ready To Repeat | Medium   |
-| [[Software Engineering/06 Development Practices/Paradigms/Integration Testing\|Integration Testing]]            | Development Practices | Ready To Repeat | Medium   |
-| [[Software Engineering/06 Development Practices/Paradigms/Functional Programming\|Functional Programming]]      | Development Practices | Creation        | Medium   |
-| [[Software Engineering/06 Development Practices/Paradigms/Event-driven\|Event-driven]]                          | Development Practices | Ready To Repeat | Medium   |
-| [[Software Engineering/03 Data Persistence/ORMs/Entity Framework\|Entity Framework]]                            | Data Persistence | Ready To Repeat | Medium   |
-| [[Software Engineering/03 Data Persistence/ORMs/ORMs\|ORMs]]                                                    | Data Persistence | Ready To Repeat | Medium   |
-| [[Software Engineering/03 Data Persistence/NoSQL/NoSQL\|NoSQL]]                                                 | Data Persistence | Creation        | Medium   |
-| [[Software Engineering/03 Data Persistence/SQL/Normalization Denormalization\|Normalization Denormalization]]   | Data Persistence | Ready To Repeat | Medium   |
+| Note                                                                                                                                               | Topic                 | Status          | Priority |
+| -------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- | --------------- | -------- |
+| [[Software Engineering/05 Architecture/Architecture Styles/Architecture Styles\|Architecture Styles]]                                           | Architecture          | Ready To Repeat | Medium   |
+| [[Software Engineering/05 Architecture/Architecture Styles/Microservices\|Microservices]]                                                       | Architecture          | Ready To Repeat | Medium   |
+| [[Software Engineering/04 Networks/Transport & Sockets/TCP IP\|TCP IP]]                                                                         | Networks              | Creation        | Medium   |
+| [[Software Engineering/04 Networks/Transport & Sockets/Transport & Sockets\|Transport & Sockets]]                                               | Networks              | Creation        | Medium   |
+| [[Software Engineering/04 Networks/Transport & Sockets/UDP\|UDP]]                                                                               | Networks              | Creation        | Medium   |
+| [[Software Engineering/06 Development Practices/Paradigms/Functional Programming\|Functional Programming]]                                      | Development Practices | Creation        | Medium   |
+| [[Software Engineering/06 Development Practices/Paradigms/Event-driven\|Event-driven]]                                                          | Development Practices | Ready To Repeat | Medium   |
+| [[Software Engineering/06 Development Practices/Paradigms/OOP\|OOP]]                                                                            | Development Practices | Ready To Repeat | Medium   |
+| [[Software Engineering/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set Union-Find\|Disjoint Set Union-Find]]                           | Computer Science      | Ready To Repeat | Medium   |
+| [[Software Engineering/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set\|Disjoint Set]]                                                 | Computer Science      | Ready To Repeat | Medium   |
+| [[Software Engineering/02 Computer Science/Algorithms/String Searching/KMP (Knuth-Morris-Pratt) Algorithm\|KMP (Knuth-Morris-Pratt) Algorithm]] | Computer Science      | Ready To Repeat | Medium   |
+| [[Software Engineering/02 Computer Science/Algorithms/String Searching/Rabit Karp Search\|Rabit Karp Search]]                                   | Computer Science      | Ready To Repeat | Medium   |
 
 { .block-language-dataview}
 
 # Recently Updated
 
-| Note                                                                                                                         | Date                        |
-| ---------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
-| [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/MSMQ\|MSMQ]]                                    | 3:34 AM - February 16, 2026 |
-| [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/Kafka\|Kafka]]                                  | 3:34 AM - February 16, 2026 |
-| [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/Message Queues\|Message Queues]]                | 3:34 AM - February 16, 2026 |
-| [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/RabbitMQ\|RabbitMQ]]                            | 3:34 AM - February 16, 2026 |
-| [[Software Engineering/05 Architecture/Distributed Systems/REST\|REST]]                                                   | 3:34 AM - February 16, 2026 |
-| [[Software Engineering/05 Architecture/Architecture Styles/Service-Oriented Architecture\|Service-Oriented Architecture]] | 3:34 AM - February 16, 2026 |
-| [[Software Engineering/05 Architecture/Distributed Systems/CAP theorem\|CAP theorem]]                                     | 3:34 AM - February 16, 2026 |
-| [[Software Engineering/05 Architecture/Distributed Systems/Distributed Systems\|Distributed Systems]]                     | 3:34 AM - February 16, 2026 |
-| [[Software Engineering/05 Architecture/Distributed Systems/Distributed Transactions\|Distributed Transactions]]           | 3:34 AM - February 16, 2026 |
-| [[Software Engineering/05 Architecture/Distributed Systems/IaaS, PaaS, SaaS, CaaS\|IaaS, PaaS, SaaS, CaaS]]               | 3:34 AM - February 16, 2026 |
-| [[Software Engineering/05 Architecture/Distributed Systems/Message Queues\|Message Queues]]                               | 3:34 AM - February 16, 2026 |
-| [[Software Engineering/05 Architecture/Architecture Styles/Architecture Styles\|Architecture Styles]]                     | 3:34 AM - February 16, 2026 |
+| Note                                                                                                             | Date                        |
+| ---------------------------------------------------------------------------------------------------------------- | --------------------------- |
+| [[Software Engineering/11 AI & ML/Machine Learning/Types\|Types]]                                             | 3:53 AM - February 16, 2026 |
+| [[Software Engineering/03 Data Persistence/ORMs/Entity Framework\|Entity Framework]]                          | 3:53 AM - February 16, 2026 |
+| [[Software Engineering/11 AI & ML/Machine Learning/Natural Language Processing\|Natural Language Processing]] | 3:53 AM - February 16, 2026 |
+| [[Software Engineering/04 Networks/Protocols/SMTP\|SMTP]]                                                     | 3:53 AM - February 16, 2026 |
+| [[Software Engineering/07 Security/Encryption\|Encryption]]                                                   | 3:53 AM - February 16, 2026 |
+| [[Software Engineering/07 Security/Block-chain\|Block-chain]]                                                 | 3:53 AM - February 16, 2026 |
+| [[Software Engineering/11 AI & ML/Machine Learning/Machine Learning\|Machine Learning]]                       | 3:53 AM - February 16, 2026 |
+| [[Software Engineering/11 AI & ML/LLM/LLM\|LLM]]                                                              | 3:53 AM - February 16, 2026 |
+| [[Software Engineering/03 Data Persistence/SQL/Indexes\|Indexes]]                                             | 3:53 AM - February 16, 2026 |
+| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Async Await\|Async Await]]                      | 3:53 AM - February 16, 2026 |
+| [[Software Engineering/11 AI & ML/Machine Learning/Spectrum Of Automations\|Spectrum Of Automations]]         | 3:53 AM - February 16, 2026 |
+| [[Software Engineering/03 Data Persistence/ORMs/ORMs\|ORMs]]                                                  | 3:53 AM - February 16, 2026 |
 
 { .block-language-dataview}
 
