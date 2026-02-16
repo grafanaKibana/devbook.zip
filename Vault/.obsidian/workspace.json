@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "4913612e34c249b9",
+        "id": "d9b4651c8320cd4b",
         "type": "tabs",
         "children": [
           {
-            "id": "0ffdcf48c2b03679",
+            "id": "69ca9d18b7c1f65f",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -243,18 +243,19 @@
       }
     ]
   },
-  "active": "0ffdcf48c2b03679",
+  "active": "69ca9d18b7c1f65f",
   "lastOpenFiles": [
+    "Software Engineering/11 AI & ML/LLM/Prompting/Role Prompting.md",
+    "Software Engineering/11 AI & ML/LLM/LLM.md",
+    "Software Engineering/11 AI & ML/LLM/Agents/Agents.md",
+    "Software Engineering/11 AI & ML/LLM/Evaluation/LLM-as-a-Judge.md",
+    "Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation.md",
+    "Software Engineering/Software Engineering.md",
     "Software Engineering/01 Programming/NET/Runtime/Memory Leaks.md",
     "Software Engineering/01 Programming/NET/Runtime/Runtime.md",
     "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Bubble Sort.md",
     "Software Engineering/Questions.md",
-    "Software Engineering/11 AI & ML/LLM/Evaluation/LLM-as-a-Judge.md",
-    "Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation.md",
     "Software Engineering/11 AI & ML/LLM/Prompting/Prompting.md",
-    "Software Engineering/Software Engineering.md",
-    "Software Engineering/11 AI & ML/LLM/Agents/Agents.md",
-    "Software Engineering/11 AI & ML/LLM/LLM.md",
     "Software Engineering/04 Networks/Protocols/DNS.md",
     "Software Engineering/11 AI & ML/LLM/Evaluation",
     "Software Engineering/03 Data Persistence/ACID.md",
@@ -271,7 +272,6 @@
     "Software Engineering/10 Cloud/AWS/AWS.md",
     "Software Engineering/10 Cloud/Google Cloud/Cloud Spanner.md",
     "Software Engineering/10 Cloud/Google Cloud/BigQuery.md",
-    "Software Engineering/10 Cloud/Google Cloud/Cloud Storage.md",
     "Software Engineering/Roadmap.canvas",
     "Software Engineering/Topics.base",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205142069.png",
