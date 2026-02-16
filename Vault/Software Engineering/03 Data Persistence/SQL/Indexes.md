@@ -1,9 +1,15 @@
 ---
 topic:
-  - "Data Persistence"
+  - Data Persistence
 subtopic:
-  - "SQL"
+  - SQL
 dg-publish: true
+level:
+  - "4"
+priority:
+  - High
+status:
+  - Creation
 ---
 
 # Intro

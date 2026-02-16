@@ -4,6 +4,12 @@ tags:
   - MetricsIgnore
 dg-publish: true
 dg-home: true
+status:
+  - Creation
+level:
+  - "4"
+priority:
+  - High
 ---
 
 # Topic Coverage
@@ -39,6 +45,9 @@ const asStringArray = (v) => {
 };
 
 const topicStats = new Map();
+let notesWithTopicTotal = 0;
+let notesWithTopicPoints = 0;
+let notesWithTopicDone = 0;
 let missingTopic = 0;
 const notesWithoutTopic = [];
 
@@ -50,9 +59,13 @@ for (const p of notes) {
     continue;
   }
 
-  const status = typeof p.status === "string" ? p.status.trim() : "";
+  const status = asStringArray(p.status)[0] ?? "";
   const progress = STATUS_PROGRESS.get(status) ?? 0;
   const isDone = status === "Done";
+
+  notesWithTopicTotal += 1;
+  notesWithTopicPoints += progress;
+  if (isDone) notesWithTopicDone += 1;
 
   for (const t of topics) {
     const cur = topicStats.get(t) ?? { total: 0, points: 0, done: 0 };
@@ -98,6 +111,17 @@ for (const r of rows) {
   const tdDone = tr.createEl("td", { text: `${r.done}/${r.total}` });
 }
 
+const totalPct = notesWithTopicTotal > 0 ? Math.round(notesWithTopicPoints / notesWithTopicTotal) : 0;
+const trTotal = tbody.createEl("tr");
+trTotal.classList.add("se-total-row");
+
+trTotal.createEl("td", { text: "Total" });
+
+const tdTotalProg = trTotal.createEl("td");
+appendProgress(tdTotalProg, totalPct);
+
+trTotal.createEl("td", { text: `${notesWithTopicDone}/${notesWithTopicTotal}` });
+
 // Display notes without topics
 if (notesWithoutTopic.length > 0) {
   const noteLinks = notesWithoutTopic
@@ -135,8 +159,14 @@ const notes = dv.pages(`"${ROOT}"`).where((p) => p.file.path !== curPath && !isM
 const counts = new Map();
 const notesWithoutStatus = [];
 
+const asStringArray = (v) => {
+  if (Array.isArray(v)) return v.map((x) => String(x).trim()).filter(Boolean);
+  if (typeof v === "string") return [v.trim()].filter(Boolean);
+  return [];
+};
+
 for (const p of notes) {
-  const raw = typeof p.status === "string" ? p.status.trim() : "";
+  const raw = asStringArray(p.status)[0] ?? "";
   const isKnown = STATUS_ORDER.includes(raw);
   if (!isKnown) notesWithoutStatus.push(p);
   const key = isKnown ? raw : "Missing";
@@ -218,8 +248,14 @@ const notes = dv.pages(`"${ROOT}"`).where((p) => p.file.path !== curPath && !isM
 const counts = new Map();
 const notesWithoutPriority = [];
 
+const asStringArray = (v) => {
+  if (Array.isArray(v)) return v.map((x) => String(x).trim()).filter(Boolean);
+  if (typeof v === "string") return [v.trim()].filter(Boolean);
+  return [];
+};
+
 for (const p of notes) {
-  const raw = typeof p.priority === "string" ? p.priority.trim() : "";
+  const raw = asStringArray(p.priority)[0] ?? "";
   const isKnown = PRIORITY_ORDER.includes(raw);
   if (!isKnown) notesWithoutPriority.push(p);
   const key = isKnown ? raw : "Missing";
@@ -386,7 +422,11 @@ TABLE WITHOUT ID
 FROM "Software Engineering"
 WHERE file.path != this.file.path
   AND !contains(file.tags, "#MetricsIgnore")
-  AND (status = "Creation" OR status = "Repetition" OR status = "Ready To Repeat")
+  AND (
+    contains(status, "Creation")
+    OR contains(status, "Repetition")
+    OR contains(status, "Ready To Repeat")
+  )
 SORT priority DESC, file.mtime DESC
 LIMIT 12
 ```
