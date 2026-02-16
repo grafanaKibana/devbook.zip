@@ -11,14 +11,14 @@
             "id": "0ffdcf48c2b03679",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "split-diff-view",
               "state": {
-                "file": "Software Engineering/11 AI & ML/LLM/Evaluation/LLM-as-a-Judge.md",
-                "mode": "source",
-                "source": false
+                "aFile": "Vault/Software Engineering/Questions.md",
+                "bFile": "Vault/Software Engineering/Questions.md",
+                "aRef": ""
               },
-              "icon": "lucide-file",
-              "title": "LLM-as-a-Judge"
+              "icon": "diff",
+              "title": "Diff: Questions  (Working Tree)"
             }
           }
         ]
@@ -103,13 +103,12 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Software Engineering/11 AI & ML/LLM/Evaluation/LLM-as-a-Judge.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of LLM-as-a-Judge"
+              "title": "Outline"
             }
           },
           {
@@ -118,7 +117,6 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Software Engineering/11 AI & ML/LLM/Evaluation/LLM-as-a-Judge.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -128,7 +126,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for LLM-as-a-Judge"
+              "title": "Backlinks"
             }
           },
           {
@@ -150,15 +148,12 @@
             "type": "leaf",
             "state": {
               "type": "file-properties",
-              "state": {
-                "file": "Software Engineering/11 AI & ML/LLM/Evaluation/LLM-as-a-Judge.md"
-              },
+              "state": {},
               "icon": "lucide-info",
-              "title": "File properties for LLM-as-a-Judge"
+              "title": "File properties"
             }
           }
-        ],
-        "currentTab": 3
+        ]
       },
       {
         "id": "e96d0e13f56cecdc",
@@ -205,12 +200,52 @@
       "digitalgarden:Digital Garden Publication Center": false
     }
   },
+  "floating": {
+    "id": "98cf025b1e16300b",
+    "type": "floating",
+    "children": [
+      {
+        "id": "8eed5c023d0a44a2",
+        "type": "window",
+        "children": [
+          {
+            "id": "c04f0f189d644813",
+            "type": "tabs",
+            "children": [
+              {
+                "id": "e249953a9333cf66",
+                "type": "leaf",
+                "state": {
+                  "type": "webviewer",
+                  "state": {
+                    "url": "https://dg-docs.ole.dev/advanced/note-specific-settings/#note-icons",
+                    "title": "Note Specific Settings",
+                    "mode": "webview"
+                  },
+                  "icon": "globe-2",
+                  "title": "Note Specific Settings"
+                }
+              }
+            ]
+          }
+        ],
+        "direction": "vertical",
+        "x": 1208,
+        "y": 256,
+        "width": 1024,
+        "height": 800,
+        "maximize": false,
+        "zoom": 0
+      }
+    ]
+  },
   "active": "0ffdcf48c2b03679",
   "lastOpenFiles": [
+    "Software Engineering/Questions.md",
+    "Software Engineering/11 AI & ML/LLM/Evaluation/LLM-as-a-Judge.md",
     "Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation.md",
     "Software Engineering/11 AI & ML/LLM/Prompting/Prompting.md",
     "Software Engineering/Software Engineering.md",
-    "Software Engineering/11 AI & ML/LLM/Evaluation/LLM-as-a-Judge.md",
     "Software Engineering/11 AI & ML/LLM/Agents/Agents.md",
     "Software Engineering/11 AI & ML/LLM/LLM.md",
     "Software Engineering/04 Networks/Protocols/DNS.md",
@@ -233,7 +268,6 @@
     "Software Engineering/10 Cloud/Google Cloud/Google Cloud.md",
     "Software Engineering/10 Cloud/Azure/Azure.md",
     "Software Engineering/01 Programming/NET/Other/OWIN.md",
-    "Software Engineering/01 Programming/NET/CSharp/CSharp.md",
     "Software Engineering/Roadmap.canvas",
     "Software Engineering/Topics.base",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205142069.png",

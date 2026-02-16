@@ -80,8 +80,9 @@ for (const h1Key of sortedKeys(tree.children)) {
 }
 
 const total = countItems(tree);
-dv.paragraph(`**Total questions: ${total}**`);
-dv.header(2, "Table of Contents");
+
+dv.header(1, `Table of Contents`);
+dv.header(2, `Total questions: **${total}**`);
 dv.paragraph(tocLines.join("\n"));
 dv.el("hr", "");
 
