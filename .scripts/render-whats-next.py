@@ -10,6 +10,8 @@ Usage:
     python3 .scripts/render-whats-next.py --write --print-changed
 """
 
+from __future__ import annotations
+
 import os
 import subprocess
 import sys
