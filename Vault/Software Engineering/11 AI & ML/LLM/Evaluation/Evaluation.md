@@ -20,4 +20,12 @@ This folder focuses on practical evaluation techniques you can apply in day-to-d
 
 <!-- whats-next:start -->
 
+---
+
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
+>
+> **Pages**
+> - [[Software Engineering/11 AI & ML/LLM/Evaluation/LLM-as-a-Judge|LLM-as-a-Judge]]
 <!-- whats-next:end -->
