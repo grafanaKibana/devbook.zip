@@ -30,6 +30,7 @@ dg-publish: true
 >  [[Software Engineering/11 AI & ML/11 AI & ML|11 AI & ML]]
 >
 > **Pages**
+> - [[Software Engineering/11 AI & ML/Machine Learning/Data Drift|Data Drift]]
 > - [[Software Engineering/11 AI & ML/Machine Learning/Spectrum Of Automations|Spectrum Of Automations]]
 > - [[Software Engineering/11 AI & ML/Machine Learning/Types|Types]]
 <!-- whats-next:end -->
