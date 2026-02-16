@@ -5,7 +5,7 @@ subtopic:
   - Patterns
 level:
   - "1"
-priority: Medium
+priority: High
 status: Ready To Repeat
 
 dg-publish: true

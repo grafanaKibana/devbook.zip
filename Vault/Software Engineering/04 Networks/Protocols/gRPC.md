@@ -5,7 +5,7 @@ subtopic:
   - "Protocols"
 level:
   - "3"
-priority: Medium
+priority: High
 status: Not-Started
 
 dg-publish: true

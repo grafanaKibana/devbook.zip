@@ -6,8 +6,7 @@ subtopic:
 dg-publish: true
 level:
   - "4"
-priority:
-  - High
+priority: High
 status:
   - Creation
 ---

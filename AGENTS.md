@@ -46,7 +46,7 @@ status: Not-Started
 ```
 
 - `topic`, `subtopic`, `level`: arrays of strings (even single values)
-- `priority`: always `Medium`
+- `priority`: `Low`, `Medium`, or `High` (default: `Medium`)
 - `status`: one of `Not-Started`, `Repetition`, `Creation`, `Ready To Repeat`, `Done`
 
 Hub notes only need `tags: [FolderNote]`. Concept pages do NOT need FolderNote tag unless they are also hub notes.

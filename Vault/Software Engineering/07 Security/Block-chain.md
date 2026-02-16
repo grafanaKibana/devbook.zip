@@ -4,7 +4,7 @@ topic:
 subtopic: []
 level:
   - "1"
-priority: Medium
+priority: Low
 status: Ready To Repeat
 
 dg-publish: true

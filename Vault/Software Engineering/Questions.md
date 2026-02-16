@@ -3,6 +3,7 @@ tags:
   - FolderNote
   - MetricsIgnore
 dg-publish: true
+priority: Medium
 ---
 
 ```dataviewjs
