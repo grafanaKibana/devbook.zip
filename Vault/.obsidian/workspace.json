@@ -4,22 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "4509724f8bf84da7",
+        "id": "6617c8c633354ed9",
         "type": "tabs",
         "children": [
           {
-            "id": "e7a7b303c61786dc",
+            "id": "d0893c3b5aff8545",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
+              "type": "markdown",
               "state": {
-                "aFile": "src/site/notes/Software Engineering/03 Data Persistance/SQL/Indexes.md",
-                "bFile": "src/site/notes/Software Engineering/03 Data Persistance/SQL/Indexes.md",
-                "aRef": "HEAD",
-                "bRef": ""
+                "file": "Software Engineering/Software Engineering.md",
+                "mode": "preview",
+                "source": false
               },
-              "icon": "diff",
-              "title": "Diff: Indexes  (Index)"
+              "icon": "lucide-file",
+              "title": "Software Engineering"
             }
           }
         ]
@@ -88,7 +87,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 673.5
+    "width": 622.5
   },
   "right": {
     "id": "3a29a9e8dc8d7cc5",
@@ -151,9 +150,11 @@
             "type": "leaf",
             "state": {
               "type": "file-properties",
-              "state": {},
+              "state": {
+                "file": "Software Engineering/Software Engineering.md"
+              },
               "icon": "lucide-info",
-              "title": "File properties"
+              "title": "File properties for Software Engineering"
             }
           }
         ],
@@ -187,7 +188,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 407.5
+    "width": 369.5
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -204,11 +205,16 @@
       "digitalgarden:Digital Garden Publication Center": false
     }
   },
-  "active": "e7a7b303c61786dc",
+  "active": "4ecbdb0726a22257",
   "lastOpenFiles": [
+    "Software Engineering/06 Development Practices/06 Development Practices.md",
+    "Software Engineering/06 Development Practices/Principles/Principles.md",
+    "Software Engineering/06 Development Practices/Paradigms/Paradigms.md",
+    "Software Engineering/Software Engineering.md",
     "Software Engineering/03 Data Persistence/SQL/Indexes.md",
-    "Software Engineering/Topics.base",
     "Software Engineering/03 Data Persistence/SQL/SQL.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Async Await.md",
+    "Software Engineering/Topics.base",
     "Software Engineering/03 Data Persistence/03 Data Persistence.md",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205142069.png",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205142050.png",
@@ -231,16 +237,12 @@
     "Software Engineering/03 Data Persistence/NoSQL",
     "Software Engineering/03 Data Persistence/Caching.md",
     "Software Engineering/03 Data Persistence",
-    "Software Engineering/Software Engineering.md",
     "Software Engineering/01 Programming/01 Programming.md",
     "Software Engineering/03 Data Persistance/03 Data Persistance.md",
     "Software Engineering/03 Data Persistance/SQL/Indexes.md",
     "Software Engineering/06 Development Practices/Principles/SOLID.md",
     "Software Engineering/06 Development Practices/Principles/KISS.md",
-    "Software Engineering/06 Development Practices/Principles/Principles.md",
-    "Software Engineering/06 Development Practices/Paradigms/Paradigms.md",
     "Software Engineering/10 Cloud/Google Cloud/Google Cloud.md",
-    "Software Engineering/06 Development Practices/06 Development Practices.md",
     "Software Engineering/10 Cloud/Azure/Azure.md",
     "Software Engineering/10 Cloud/AWS/AWS.md",
     "Software Engineering/Roadmap.canvas",
