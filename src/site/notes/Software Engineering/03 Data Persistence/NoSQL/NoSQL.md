@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/03-data-persistance/no-sql/no-sql/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/no-sql/no-sql/","noteIcon":""}
 ---
 
 
@@ -16,6 +16,6 @@
 
 # Whats next
 
-:LiArrowUpLeft: [[Software Engineering/03 Data Persistance/03 Data Persistance\|03 Data Persistance]]
+:LiArrowUpLeft: [[Software Engineering/03 Data Persistence/03 Data Persistence\|03 Data Persistence]]
 
 
