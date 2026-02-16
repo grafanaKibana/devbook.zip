@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Software Engineering/09 DevOps/Deployment Stratagies/Linear Deployment.md",
+                "file": "Software Engineering/05 Architecture/05 Architecture.md",
                 "mode": "source",
-                "source": true
+                "source": false
               },
               "icon": "lucide-file",
-              "title": "Linear Deployment"
+              "title": "05 Architecture"
             }
           }
         ]
@@ -103,13 +103,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Software Engineering/09 DevOps/Deployment Stratagies/Linear Deployment.md",
+                "file": "Software Engineering/05 Architecture/05 Architecture.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Linear Deployment"
+              "title": "Outline of 05 Architecture"
             }
           },
           {
@@ -118,7 +118,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Software Engineering/09 DevOps/Deployment Stratagies/Linear Deployment.md",
+                "file": "Software Engineering/05 Architecture/05 Architecture.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -128,7 +128,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Linear Deployment"
+              "title": "Backlinks for 05 Architecture"
             }
           },
           {
@@ -151,10 +151,10 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Software Engineering/09 DevOps/Deployment Stratagies/Linear Deployment.md"
+                "file": "Software Engineering/05 Architecture/05 Architecture.md"
               },
               "icon": "lucide-info",
-              "title": "File properties for Linear Deployment"
+              "title": "File properties for 05 Architecture"
             }
           }
         ],
@@ -207,6 +207,9 @@
   },
   "active": "d0893c3b5aff8545",
   "lastOpenFiles": [
+    "Software Engineering/03 Data Persistence/ORMs/Entity Framework.md",
+    "Software Engineering/03 Data Persistence/ORMs/ORMs.md",
+    "Software Engineering/09 DevOps/Deployment Stratagies/Linear Deployment.md",
     "Software Engineering/09 DevOps/Deployment Stratagies/In-place Deployment.md",
     "Software Engineering/09 DevOps/Deployment Stratagies/Canary Deployment.md",
     "Software Engineering/09 DevOps/Deployment Stratagies/Blue Green Deployment.md",
@@ -231,11 +234,9 @@
     "Software Engineering/06 Development Practices/Paradigms/Paradigms.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Async Await.md",
     "Software Engineering/Topics.base",
-    "Software Engineering/03 Data Persistence/03 Data Persistence.md",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205142069.png",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205142050.png",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205142011.png",
-    "Assets/03 Data Persistence/03 Data Persistence.md",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205141994.png",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205142027.png",
     "Assets/03 Data Persistence/03 Data Persistance-Indexes-20260210205142069.png",
@@ -243,7 +244,6 @@
     "Assets/03 Data Persistence/03 Data Persistance-Indexes-20260210205142027.png",
     "Assets/03 Data Persistence/03 Data Persistance-Indexes-20260210205142011.png",
     "Assets/03 Data Persistence",
-    "Software Engineering/03 Data Persistence/ORMs/ORMs.md",
     "Software Engineering/03 Data Persistence/SQL",
     "Software Engineering/03 Data Persistence/ORMs",
     "Software Engineering/03 Data Persistence/NoSQL",
