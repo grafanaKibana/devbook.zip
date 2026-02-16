@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/04-networks/protocols/http-2/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/04-networks/protocols/http-2/","noteIcon":"1"}
 ---
 
 

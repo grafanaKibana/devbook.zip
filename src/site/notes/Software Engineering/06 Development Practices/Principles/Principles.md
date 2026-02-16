@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/06-development-practices/principles/principles/","tags":["FolderNote"],"noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/06-development-practices/principles/principles/","tags":["FolderNote"],"noteIcon":"1"}
 ---
 
 

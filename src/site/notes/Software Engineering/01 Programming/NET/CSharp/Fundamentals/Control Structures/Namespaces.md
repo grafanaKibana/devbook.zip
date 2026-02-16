@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/c-sharp/fundamentals/control-structures/namespaces/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/c-sharp/fundamentals/control-structures/namespaces/","noteIcon":"1"}
 ---
 
 # Namespaces

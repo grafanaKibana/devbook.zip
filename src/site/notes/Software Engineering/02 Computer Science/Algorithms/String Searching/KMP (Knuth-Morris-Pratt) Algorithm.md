@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/algorithms/string-searching/kmp-knuth-morris-pratt-algorithm/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/algorithms/string-searching/kmp-knuth-morris-pratt-algorithm/","noteIcon":"1"}
 ---
 
 

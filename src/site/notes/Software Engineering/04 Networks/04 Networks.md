@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/04-networks/04-networks/","tags":["FolderNote"],"noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/04-networks/04-networks/","tags":["FolderNote"],"noteIcon":"1"}
 ---
 
 

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/owasp-vulnerabilities-on-ai-llm/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/owasp-vulnerabilities-on-ai-llm/","noteIcon":"1"}
 ---
 
 
@@ -39,5 +39,11 @@ Expected behavior: refuse, do not reveal hidden prompts/secrets, and only answer
 >
 > **Topics**
 > - [[Software Engineering/11 AI & ML/LLM/Agents/Agents\|Agents]]
+> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation\|Evaluation]]
 > - [[Software Engineering/11 AI & ML/LLM/Prompting/Prompting\|Prompting]]
+>
+> **Pages**
+> - [[Software Engineering/11 AI & ML/LLM/Generation Parameters\|Generation Parameters]]
+> - [[Software Engineering/11 AI & ML/LLM/Guardrails\|Guardrails]]
+> - [[Software Engineering/11 AI & ML/LLM/Hallucinations\|Hallucinations]]
 <!-- whats-next:end -->

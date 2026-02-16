@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/distributed-systems/rest/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/distributed-systems/rest/","noteIcon":"1"}
 ---
 
 

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/07-security/authentication/authentication/","tags":["FolderNote"],"noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/07-security/authentication/authentication/","tags":["FolderNote"],"noteIcon":"1"}
 ---
 
 

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/04-networks/architecture-and-ops/vpn/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/04-networks/architecture-and-ops/vpn/","noteIcon":"1"}
 ---
 
 

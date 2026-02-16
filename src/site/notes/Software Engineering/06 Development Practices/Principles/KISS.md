@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/06-development-practices/principles/kiss/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/06-development-practices/principles/kiss/","noteIcon":"1"}
 ---
 
 

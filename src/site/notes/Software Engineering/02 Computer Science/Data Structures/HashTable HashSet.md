@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/data-structures/hash-table-hash-set/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/data-structures/hash-table-hash-set/","noteIcon":"1"}
 ---
 
 

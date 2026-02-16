@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/06-development-practices/principles/dry/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/06-development-practices/principles/dry/","noteIcon":"1"}
 ---
 
 # Intro

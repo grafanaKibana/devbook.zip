@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/06-development-practices/paradigms/paradigms/","tags":["FolderNote"],"noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/06-development-practices/paradigms/paradigms/","tags":["FolderNote"],"noteIcon":"1"}
 ---
 
 

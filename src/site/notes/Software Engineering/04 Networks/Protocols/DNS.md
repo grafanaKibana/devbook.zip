@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/04-networks/protocols/dns/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/04-networks/protocols/dns/","noteIcon":"1"}
 ---
 
 
