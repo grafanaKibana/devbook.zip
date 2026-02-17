@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/prompting/prompting/","noteIcon":"1"}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/prompting/prompting/","tags":["FolderNote"],"noteIcon":"1"}
 ---
 
 
@@ -8,6 +8,18 @@
 Prompts play a key role in generating useful and accurate information from AI language models. Learning how to write better prompts — "Prompt Engineering" — unlocks the full potential of these models by guiding their behavior, improving output quality, and reducing inaccuracies.
 
 ## Deeper Explanation
+
+### Mental Model
+
+Think of prompting as defining a small contract:
+
+- input: what context the model sees
+- task: what you want it to do
+- constraints: what it must not do
+- output schema: how the answer is shaped
+- evaluation: how you decide whether it is good
+
+For production use, prompts are part of an interface, so version them, test them, and monitor failures.
 
 ## Why Prompting Matters
 
@@ -133,12 +145,19 @@ Gen AI can evaluate essays against complex criteria like grammar, clarity, coher
 > [!QUESTION]- What is Prompting?
 > Prompts play a key role in generating useful and accurate information from AI language models. Learning how to write better prompts — "Prompt Engineering" — unlocks the full potential of these models by guiding their behavior, improving output quality, and reducing inaccuracies.
 
+> [!QUESTION]- You are building an internal assistant that can read company docs. What prompt level controls reduce prompt injection risk?
+> Separate system instructions from user content and never allow user text to override system rules.
+> Constrain outputs (schema or explicit format), avoid tool access unless necessary, and add deterministic checks.
+> Treat retrieval content as untrusted input and apply allowlists for tools.
+
 
 ## Links
 
 - [OpenAI Platform](https://platform.openai.com/docs/guides/prompt-engineering/strategy-write-clear-instructions)
 - [Learn Prompting: Your Guide to Communicating with AI](https://learnprompting.org/docs/basics/introduction)
 - [Prompt Engineering Guide – Nextra](https://www.promptingguide.ai/)
+- [OWASP Top 10 for LLM Applications](https://owasp.org/www-project-top-10-for-large-language-model-applications/)
+- [NIST AI Risk Management Framework](https://www.nist.gov/itl/ai-risk-management-framework)
 
 <!-- whats-next:start -->
 
