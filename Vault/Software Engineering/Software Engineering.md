@@ -451,6 +451,99 @@ WHERE file.path != this.file.path
 SORT file.mtime DESC
 LIMIT 12
 ```
+# Publish Distribution
+
+```dataviewjs
+const ROOT = "Software Engineering";
+const isMetricsIgnored = (p) => (p.file.tags ?? []).includes("#MetricsIgnore");
+
+const appendProgress = (td, pct) => {
+  const prog = td.createEl("progress");
+  prog.classList.add("se-progress");
+  prog.max = 100;
+  prog.value = pct;
+
+  td.createEl("span", { text: ` ${pct}%` });
+};
+
+const asBoolean = (v) => {
+  if (typeof v === "boolean") return v;
+  if (typeof v === "string") {
+    const s = v.trim().toLowerCase();
+    if (s === "true") return true;
+    if (s === "false") return false;
+  }
+  return false;
+};
+
+const curPath = dv.current().file.path;
+const notes = dv.pages(`"${ROOT}"`).where((p) => p.file.path !== curPath && !isMetricsIgnored(p));
+
+let publishedCount = 0;
+const unpublishedNotes = [];
+
+for (const p of notes) {
+  if (asBoolean(p["dg-publish"])) {
+    publishedCount += 1;
+  } else {
+    unpublishedNotes.push(p);
+  }
+}
+
+const unpublishedCount = unpublishedNotes.length;
+const total = notes.length;
+const rows = [
+  {
+    status: "Published",
+    count: publishedCount,
+    pct: total > 0 ? Math.round((publishedCount / total) * 100) : 0,
+  },
+  {
+    status: "Unpublished",
+    count: unpublishedCount,
+    pct: total > 0 ? Math.round((unpublishedCount / total) * 100) : 0,
+  },
+];
+
+const wrapper = this.container.createEl("div");
+wrapper.classList.add("block-language-dataview");
+
+const table = wrapper.createEl("table");
+table.classList.add("dataview", "table-view-table");
+
+const thead = table.createEl("thead");
+thead.classList.add("table-view-thead");
+const hr = thead.createEl("tr");
+for (const h of ["Publish Status", "Distribution", "Count"]) {
+  hr.createEl("th", { text: h });
+}
+
+const tbody = table.createEl("tbody");
+tbody.classList.add("table-view-tbody");
+for (const r of rows) {
+  const tr = tbody.createEl("tr");
+
+  tr.createEl("td", { text: r.status });
+
+  const tdProg = tr.createEl("td");
+  appendProgress(tdProg, r.pct);
+
+  tr.createEl("td", { text: `${r.count}` });
+}
+
+if (unpublishedNotes.length > 0) {
+  const noteLinks = unpublishedNotes
+    .sort((a, b) => a.file.path.localeCompare(b.file.path))
+    .map((note) => `> - [[${note.file.path.replace(".md", "")}|${note.file.name}]]`)
+    .join("\n");
+
+  const count = unpublishedNotes.length;
+  const label = count === 1 ? "page" : "pages";
+  const calloutMarkdown = `> [!info] ${count} unpublished ${label}\n${noteLinks}`;
+
+  dv.paragraph(calloutMarkdown);
+}
+```
 
 <!-- whats-next:start -->
 

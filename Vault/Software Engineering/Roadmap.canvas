@@ -501,10 +501,20 @@
       "color": "1"
     },
     {
+      "id": "n_f4abc89c6a",
+      "type": "text",
+      "text": "# [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/Evaluation|Evaluation]]",
+      "x": -840,
+      "y": 4920,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
       "id": "n_328ae87cd7",
       "type": "group",
       "label": "Legend",
-      "x": -1040,
+      "x": -1460,
       "y": -20,
       "width": 540,
       "height": 530
@@ -512,8 +522,8 @@
     {
       "id": "n_b0ac2236f9",
       "type": "text",
-      "text": "#### Roadmap legend\n**Generated:** Feb 17 2026 | 08:37PM",
-      "x": -1020,
+      "text": "#### Roadmap legend\n**Generated:** Feb 18 2026 | 01:27AM",
+      "x": -1440,
       "y": 0,
       "width": 500,
       "height": 110
@@ -521,8 +531,8 @@
     {
       "id": "n_4a66490dd9",
       "type": "text",
-      "text": "Not-Started: 24",
-      "x": -960,
+      "text": "Not-Started: 25",
+      "x": -1380,
       "y": 126,
       "width": 380,
       "height": 60,
@@ -532,7 +542,7 @@
       "id": "n_c1cf7bc196",
       "type": "text",
       "text": "Creation: 14",
-      "x": -960,
+      "x": -1380,
       "y": 202,
       "width": 380,
       "height": 60,
@@ -542,7 +552,7 @@
       "id": "n_a434510472",
       "type": "text",
       "text": "Repetition: 0",
-      "x": -960,
+      "x": -1380,
       "y": 278,
       "width": 380,
       "height": 60,
@@ -552,7 +562,7 @@
       "id": "n_6de0caeeec",
       "type": "text",
       "text": "Ready To Repeat: 12",
-      "x": -960,
+      "x": -1380,
       "y": 354,
       "width": 380,
       "height": 60,
@@ -562,7 +572,7 @@
       "id": "n_0e6324d0db",
       "type": "text",
       "text": "Done: 0",
-      "x": -960,
+      "x": -1380,
       "y": 430,
       "width": 380,
       "height": 60,
@@ -911,6 +921,13 @@
       "fromNode": "n_235841ecfa",
       "fromSide": "left",
       "toNode": "n_05ca101164",
+      "toSide": "right"
+    },
+    {
+      "id": "e_3189fdd78c",
+      "fromNode": "n_05ca101164",
+      "fromSide": "left",
+      "toNode": "n_f4abc89c6a",
       "toSide": "right"
     },
     {
