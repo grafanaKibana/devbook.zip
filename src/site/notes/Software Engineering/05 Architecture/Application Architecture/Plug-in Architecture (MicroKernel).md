@@ -5,11 +5,44 @@
 
 # Intro
 
+Microkernel (plug-in) architecture keeps a small, stable core and extends behavior via plug-ins.
+You reach for it when you need product variability, third party extensions, or a marketplace style system without forking the core.
+The key design work is defining the extension points and the safety boundaries between core and plug-ins.
+
 ## Deeper Explanation
 
-## Questions
+### Example
+
+Core defines an interface:
+
+```csharp
+public interface IPlugin
+{
+    string Name { get; }
+    void Register(IPluginRegistry registry);
+}
+```
+
+Core loads plug-ins (conceptual):
+
+```csharp
+var assemblies = Directory.EnumerateFiles("plugins", "*.dll");
+foreach (var path in assemblies)
+{
+    var asm = Assembly.LoadFrom(path);
+    foreach (var t in asm.GetTypes().Where(t => typeof(IPlugin).IsAssignableFrom(t) && !t.IsAbstract))
+    {
+        var plugin = (IPlugin)Activator.CreateInstance(t)!;
+        plugin.Register(registry);
+    }
+}
+```
 
 ## Links
+
+- [AssemblyLoadContext](https://learn.microsoft.com/dotnet/api/system.runtime.loader.assemblyloadcontext)
+- [Managed Extensibility Framework](https://learn.microsoft.com/dotnet/framework/mef/index)
+- [Microkernel architecture](https://martinfowler.com/articles/microservices.html#Microkernel)
 
 <!-- whats-next:start -->
 
