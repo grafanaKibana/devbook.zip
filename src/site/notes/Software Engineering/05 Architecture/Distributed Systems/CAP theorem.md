@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/distributed-systems/cap-theorem/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/distributed-systems/cap-theorem/","noteIcon":"1"}
 ---
 
 

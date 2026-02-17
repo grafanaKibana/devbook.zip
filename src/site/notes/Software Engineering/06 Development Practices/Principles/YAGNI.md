@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/06-development-practices/principles/yagni/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/06-development-practices/principles/yagni/","noteIcon":"1"}
 ---
 
 

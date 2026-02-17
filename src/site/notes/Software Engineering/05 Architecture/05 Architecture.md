@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/05-architecture/","tags":["FolderNote"],"noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/05-architecture/","tags":["FolderNote"],"noteIcon":"1"}
 ---
 
 

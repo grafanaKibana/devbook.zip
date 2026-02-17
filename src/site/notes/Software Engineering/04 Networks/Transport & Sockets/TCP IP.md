@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/04-networks/transport-and-sockets/tcp-ip/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/04-networks/transport-and-sockets/tcp-ip/","noteIcon":"1"}
 ---
 
 

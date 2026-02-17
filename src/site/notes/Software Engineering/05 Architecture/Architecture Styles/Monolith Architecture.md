@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/architecture-styles/monolith-architecture/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/architecture-styles/monolith-architecture/","noteIcon":"1"}
 ---
 
 

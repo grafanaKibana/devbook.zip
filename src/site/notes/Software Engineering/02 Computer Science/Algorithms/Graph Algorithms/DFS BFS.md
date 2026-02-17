@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/algorithms/graph-algorithms/dfs-bfs/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/algorithms/graph-algorithms/dfs-bfs/","noteIcon":"1"}
 ---
 
 

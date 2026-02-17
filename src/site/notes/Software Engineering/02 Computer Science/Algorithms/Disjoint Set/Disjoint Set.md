@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/algorithms/disjoint-set/disjoint-set/","tags":["FolderNote"],"noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/algorithms/disjoint-set/disjoint-set/","tags":["FolderNote"],"noteIcon":"1"}
 ---
 
 

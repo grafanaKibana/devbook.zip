@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/runtime/memory-leaks/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/runtime/memory-leaks/","noteIcon":"1"}
 ---
 
 

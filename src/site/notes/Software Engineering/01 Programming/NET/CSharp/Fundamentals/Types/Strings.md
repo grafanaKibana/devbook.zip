@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/c-sharp/fundamentals/types/strings/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/c-sharp/fundamentals/types/strings/","noteIcon":"1"}
 ---
 
 # Intro

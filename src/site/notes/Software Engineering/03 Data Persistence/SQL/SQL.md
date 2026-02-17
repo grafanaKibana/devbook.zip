@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/sql/sql/","tags":["FolderNote"],"noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/sql/sql/","tags":["FolderNote"],"noteIcon":"1"}
 ---
 
 

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/application-architecture/layered-architecture/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/application-architecture/layered-architecture/","noteIcon":"1"}
 ---
 
 

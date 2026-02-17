@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/10-cloud/google-cloud/google-cloud/","tags":["FolderNote"],"noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/10-cloud/google-cloud/google-cloud/","tags":["FolderNote"],"noteIcon":"1"}
 ---
 
 

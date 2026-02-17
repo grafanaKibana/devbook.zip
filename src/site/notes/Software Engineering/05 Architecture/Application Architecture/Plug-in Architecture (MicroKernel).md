@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/application-architecture/plug-in-architecture-micro-kernel/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/application-architecture/plug-in-architecture-micro-kernel/","noteIcon":"1"}
 ---
 
 

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/09-dev-ops/09-dev-ops/","tags":["FolderNote"],"noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/09-dev-ops/09-dev-ops/","tags":["FolderNote"],"noteIcon":"1"}
 ---
 
 

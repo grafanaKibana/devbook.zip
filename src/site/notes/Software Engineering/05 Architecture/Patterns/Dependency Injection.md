@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/dependency-injection/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/dependency-injection/","noteIcon":"1"}
 ---
 
 # Intro

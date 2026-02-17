@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/09-dev-ops/deployment-stratagies/blue-green-deployment/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/09-dev-ops/deployment-stratagies/blue-green-deployment/","noteIcon":"1"}
 ---
 
 

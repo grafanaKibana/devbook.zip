@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/07-security/authentication/sso-single-sign-on/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/07-security/authentication/sso-single-sign-on/","noteIcon":"1"}
 ---
 
 

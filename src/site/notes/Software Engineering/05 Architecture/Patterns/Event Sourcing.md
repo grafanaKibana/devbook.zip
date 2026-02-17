@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/event-sourcing/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/event-sourcing/","noteIcon":"1"}
 ---
 
 
