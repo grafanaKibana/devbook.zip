@@ -13,11 +13,27 @@ dg-publish: true
 
 # Intro
 
+RPC (remote procedure call) is a communication style where a client invokes a server operation as if it were a local function.
+You reach for it when you want a strongly defined service interface and predictable request and response shapes.
+The core difficulty is that network calls fail in more ways than local calls.
+
 ## Deeper Explanation
 
-## Questions
+### Mental Model
+
+```mermaid
+sequenceDiagram
+  participant Client
+  participant Service
+
+  Client->>Service: Call
+  Service->>Client: Result
+```
 
 ## Links
+
+- [Fallacies of distributed computing](https://en.wikipedia.org/wiki/Fallacies_of_distributed_computing)
+- [gRPC core concepts](https://grpc.io/docs/what-is-grpc/core-concepts/)
 
 <!-- whats-next:start -->
 
