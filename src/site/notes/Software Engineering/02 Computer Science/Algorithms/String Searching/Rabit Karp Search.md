@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/algorithms/string-searching/rabit-karp-search/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/algorithms/string-searching/rabit-karp-search/","noteIcon":"1"}
 ---
 
 

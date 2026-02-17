@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/04-networks/protocols/protocols/","tags":["FolderNote"],"noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/04-networks/protocols/protocols/","tags":["FolderNote"],"noteIcon":"1"}
 ---
 
 

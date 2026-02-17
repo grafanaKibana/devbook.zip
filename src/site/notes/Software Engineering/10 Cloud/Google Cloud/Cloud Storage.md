@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/10-cloud/google-cloud/cloud-storage/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/10-cloud/google-cloud/cloud-storage/","noteIcon":"1"}
 ---
 
 

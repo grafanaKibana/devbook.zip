@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/patterns/","tags":["FolderNote"],"noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/patterns/","tags":["FolderNote"],"noteIcon":"1"}
 ---
 
 

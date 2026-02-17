@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/net-standart/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/net-standart/","noteIcon":"1"}
 ---
 
 

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/roadmap.canvas/","title":"Roadmap","contentClasses":"canvas-page","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/roadmap.canvas/","title":"Roadmap","contentClasses":"canvas-page","noteIcon":"1"}
 ---
 
 <div id="Roadmapcanvas" class="canvas-wrapper hide">
@@ -94,7 +94,8 @@
 <path d="M 170 4480 C 170 4608, 170 4672, 170 4800" fill="none" stroke="var(--text-muted)" stroke-width="2" class="canvas-edge" data-edge-id="e_a99374aa98"  marker-end="url(#arrow-vartextmuted)" />
 <path d="M 340 4840 C 390 4840, 370 4840, 420 4840" fill="none" stroke="var(--text-muted)" stroke-width="2" class="canvas-edge" data-edge-id="e_478d5cd0b0"  marker-end="url(#arrow-vartextmuted)" />
 <path d="M 760 4840 C 817.6888204074238 4840, 782.3111795925762 4960, 840 4960" fill="none" stroke="var(--text-muted)" stroke-width="2" class="canvas-edge" data-edge-id="e_c523dc22ed"  marker-end="url(#arrow-vartextmuted)" />
-<path d="M 760 4840 C 861.1928851253881 4840, 738.8071148746119 5080, 840 5080" fill="none" stroke="var(--text-muted)" stroke-width="2" class="canvas-edge" data-edge-id="e_98d487a0b7"  marker-end="url(#arrow-vartextmuted)" />
+<path d="M 760 4840 C 861.1928851253881 4840, 738.8071148746119 5080, 840 5080" fill="none" stroke="var(--text-muted)" stroke-width="2" class="canvas-edge" data-edge-id="e_37c5e94d86"  marker-end="url(#arrow-vartextmuted)" />
+<path d="M 760 4840 C 907.5127113166863 4840, 692.4872886833137 5200, 840 5200" fill="none" stroke="var(--text-muted)" stroke-width="2" class="canvas-edge" data-edge-id="e_98d487a0b7"  marker-end="url(#arrow-vartextmuted)" />
 <path d="M 0 4840 C -50 4840, -30 4840, -80 4840" fill="none" stroke="var(--text-muted)" stroke-width="2" class="canvas-edge" data-edge-id="e_826fcc0acd"  marker-end="url(#arrow-vartextmuted)" />
 <path d="M -580 156 C -530 156, -530 232, -580 232" fill="none" stroke="#fb464c" stroke-width="2" class="canvas-edge" data-edge-id="e_0c4030c72b"  marker-end="url(#arrow-fb464c)" />
 <path d="M -960 232 C -1010 232, -1010 308, -960 308" fill="none" stroke="#e9973f" stroke-width="2" class="canvas-edge" data-edge-id="e_1ca3e47d87"  marker-end="url(#arrow-e9973f)" />
@@ -430,7 +431,14 @@
 		</div>
 	</div>
 </div>
-<div class="canvas-node canvas-node-text has-color" data-node-id="n_7e80798d47" style="transform: translate(840px, 5040px); width: 340px; height: 80px; --canvas-color: #a882ff;">
+<div class="canvas-node canvas-node-text has-color" data-node-id="n_c515e1fb46" style="transform: translate(840px, 5040px); width: 340px; height: 80px; --canvas-color: #e9973f;">
+	<div class="canvas-node-container">
+		<div class="canvas-node-content markdown-rendered">
+			<div class="canvas-node-text-content" data-markdown="IyBbW1NvZnR3YXJlIEVuZ2luZWVyaW5nLzExIEFJICYgTUwvTExNL0V2YWx1YXRpb24vRXZhbHVhdGlvblx8RXZhbHVhdGlvbl1d"></div>
+		</div>
+	</div>
+</div>
+<div class="canvas-node canvas-node-text has-color" data-node-id="n_7e80798d47" style="transform: translate(840px, 5160px); width: 340px; height: 80px; --canvas-color: #a882ff;">
 	<div class="canvas-node-container">
 		<div class="canvas-node-content markdown-rendered">
 			<div class="canvas-node-text-content" data-markdown="IyBbW1NvZnR3YXJlIEVuZ2luZWVyaW5nLzExIEFJICYgTUwvTExNL1Byb21wdGluZy9Qcm9tcHRpbmdcfFByb21wdGluZ11d"></div>
@@ -450,7 +458,7 @@
 <div class="canvas-node canvas-node-text " data-node-id="n_b0ac2236f9" style="transform: translate(-1020px, 0px); width: 500px; height: 110px; ">
 	<div class="canvas-node-container">
 		<div class="canvas-node-content markdown-rendered">
-			<div class="canvas-node-text-content" data-markdown="IyMjIyBSb2FkbWFwIGxlZ2VuZAoqKkdlbmVyYXRlZDoqKiBGZWIgMTYgMjAyNiB8IDA0OjA2UE0="></div>
+			<div class="canvas-node-text-content" data-markdown="IyMjIyBSb2FkbWFwIGxlZ2VuZAoqKkdlbmVyYXRlZDoqKiBGZWIgMTcgMjAyNiB8IDEyOjQ1QU0="></div>
 		</div>
 	</div>
 </div>
@@ -464,7 +472,7 @@
 <div class="canvas-node canvas-node-text has-color" data-node-id="n_c1cf7bc196" style="transform: translate(-960px, 202px); width: 380px; height: 60px; --canvas-color: #e9973f;">
 	<div class="canvas-node-container">
 		<div class="canvas-node-content markdown-rendered">
-			<div class="canvas-node-text-content" data-markdown="Q3JlYXRpb246IDEz"></div>
+			<div class="canvas-node-text-content" data-markdown="Q3JlYXRpb246IDE0"></div>
 		</div>
 	</div>
 </div>

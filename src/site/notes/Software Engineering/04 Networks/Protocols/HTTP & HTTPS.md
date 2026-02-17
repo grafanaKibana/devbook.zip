@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/04-networks/protocols/http-and-https/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/04-networks/protocols/http-and-https/","noteIcon":"1"}
 ---
 
 

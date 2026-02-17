@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/cqs/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/cqs/","noteIcon":"1"}
 ---
 
 # Intro

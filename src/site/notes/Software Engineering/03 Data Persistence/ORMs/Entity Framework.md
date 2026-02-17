@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/or-ms/entity-framework/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/or-ms/entity-framework/","noteIcon":"1"}
 ---
 
 

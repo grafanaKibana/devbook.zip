@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/07-security/07-security/","tags":["FolderNote"],"noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/07-security/07-security/","tags":["FolderNote"],"noteIcon":"1"}
 ---
 
 

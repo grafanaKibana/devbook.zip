@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/07-security/authentication/two-factor-auth/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/07-security/authentication/two-factor-auth/","noteIcon":"1"}
 ---
 
 

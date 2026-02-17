@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/cqrs/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/cqrs/","noteIcon":"1"}
 ---
 
 

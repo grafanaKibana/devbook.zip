@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/acid/","noteIcon":""}
+{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/acid/","noteIcon":"1"}
 ---
 
 
