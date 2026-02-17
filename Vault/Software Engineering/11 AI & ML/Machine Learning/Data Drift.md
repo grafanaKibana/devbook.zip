@@ -85,6 +85,9 @@ What to do when you detect drift:
 > **Parent**
 >  [[Software Engineering/11 AI & ML/11 AI & ML|11 AI & ML]]
 >
+> **Topics**
+> - [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/Evaluation|Evaluation]]
+>
 > **Pages**
 > - [[Software Engineering/11 AI & ML/Machine Learning/Natural Language Processing|Natural Language Processing]]
 > - [[Software Engineering/11 AI & ML/Machine Learning/Spectrum Of Automations|Spectrum Of Automations]]

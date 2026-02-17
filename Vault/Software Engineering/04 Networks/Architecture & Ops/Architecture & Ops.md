@@ -9,7 +9,7 @@ dg-publish: true
 status: Not-Started
 priority: Medium
 level:
-  - '3'
+  - "3"
 ---
 
 # Intro
