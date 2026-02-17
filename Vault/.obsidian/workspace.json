@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Software Engineering/11 AI & ML/LLM/LLM.md",
+                "file": "Software Engineering/11 AI & ML/LLM/Prompting/Prompting.md",
                 "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "LLM"
+              "title": "Prompting"
             }
           }
         ]
@@ -103,13 +103,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Software Engineering/11 AI & ML/LLM/LLM.md",
+                "file": "Software Engineering/11 AI & ML/LLM/Prompting/Prompting.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of LLM"
+              "title": "Outline of Prompting"
             }
           },
           {
@@ -118,7 +118,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Software Engineering/11 AI & ML/LLM/LLM.md",
+                "file": "Software Engineering/11 AI & ML/LLM/Prompting/Prompting.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -128,7 +128,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for LLM"
+              "title": "Backlinks for Prompting"
             }
           },
           {
@@ -151,10 +151,10 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Software Engineering/11 AI & ML/LLM/LLM.md"
+                "file": "Software Engineering/11 AI & ML/LLM/Prompting/Prompting.md"
               },
               "icon": "lucide-info",
-              "title": "File properties for LLM"
+              "title": "File properties for Prompting"
             }
           }
         ]
@@ -206,34 +206,36 @@
   },
   "active": "7400c06101d52411",
   "lastOpenFiles": [
-    "Software Engineering/11 AI & ML/Machine Learning/Infrastructure/Model serving stack.md",
-    "Software Engineering/11 AI & ML/LLM/LLM.md",
+    "Software Engineering/09 DevOps/Version Control Systems/Version Control Systems.md",
+    "Software Engineering/07 Security/Authentication/SSO (Single Sign-On).md",
+    "Software Engineering/07 Security/07 Security.md",
+    "Software Engineering/06 Development Practices/Principles/YAGNI.md",
+    "Software Engineering/06 Development Practices/Principles/KISS.md",
+    "Software Engineering/06 Development Practices/Principles/DRY.md",
+    "Software Engineering/06 Development Practices/Principles/Principles.md",
+    "Software Engineering/05 Architecture/Architecture Styles/Monolith Architecture.md",
+    "Software Engineering/05 Architecture/Architecture Styles/Architecture Styles.md",
+    "Software Engineering/05 Architecture/Application Architecture/Plug-in Architecture (MicroKernel).md",
+    "Software Engineering/05 Architecture/Application Architecture/Application Architecture.md",
+    "Software Engineering/04 Networks/Transport & Sockets/UDP.md",
+    "Software Engineering/04 Networks/Transport & Sockets/Sockets.md",
+    "Software Engineering/04 Networks/Transport & Sockets/Transport & Sockets.md",
+    "Software Engineering/04 Networks/Protocols/RPC.md",
+    "Software Engineering/04 Networks/Protocols/HTTP 2.md",
+    "Software Engineering/04 Networks/Protocols/gRPC.md",
+    "Software Engineering/04 Networks/Protocols/DNS.md",
+    "Software Engineering/04 Networks/Protocols/Protocols.md",
+    "Software Engineering/04 Networks/Architecture & Ops/VPN.md",
+    "Software Engineering/04 Networks/Architecture & Ops/Architecture & Ops.md",
+    "Software Engineering/03 Data Persistence/Caching.md",
+    "Software Engineering/03 Data Persistence/03 Data Persistence.md",
+    "Software Engineering/03 Data Persistence/NoSQL/NoSQL.md",
+    "Software Engineering/01 Programming/NET/NET Standart.md",
+    "Software Engineering/01 Programming/NET/NET.md",
+    "Assets/audits",
     "Assets/library-big.svg",
-    "Assets/11 AI & ML/11 AI & ML.md",
-    "Assets/03 Data Persistence/03 Data Persistence.md",
-    "Assets/01 Programming/01 Programming.md",
     "Assets/01 Programming/01 Programming-Types-20260211184602492.png",
     "Assets/11 AI & ML/11 AI & ML-LLM-20260211012223477.png",
-    "Assets/11 AI & ML/11 AI & ML-LLM-20260211012223477.md",
-    "Software Engineering/11 AI & ML/LLM/Evaluation/Overfitting.md",
-    "Software Engineering/11 AI & ML/LLM/Evaluation/Classification Evaluation.md",
-    "Software Engineering/11 AI & ML/Machine Learning/Infrastructure/Vector search and RAG serving.md",
-    "Software Engineering/11 AI & ML/Machine Learning/Infrastructure/Security and privacy for ML inference.md",
-    "Software Engineering/11 AI & ML/Machine Learning/Infrastructure/Capacity planning and autoscaling.md",
-    "Software Engineering/11 AI & ML/Machine Learning/Infrastructure/Observability for ML inference.md",
-    "Software Engineering/11 AI & ML/Machine Learning/Infrastructure/Online features and feature stores.md",
-    "Software Engineering/11 AI & ML/Machine Learning/Infrastructure/Deploying models and safe rollouts.md",
-    "Software Engineering/11 AI & ML/Machine Learning/Infrastructure/Latency and performance tuning for inference.md",
-    "Software Engineering/11 AI & ML/Machine Learning/Infrastructure/Online inference system design.md",
-    "Software Engineering/10 Cloud/Azure/Azure AI Security and Networking.md",
-    "Software Engineering/10 Cloud/Azure/Azure AI MLOps.md",
-    "Software Engineering/10 Cloud/Azure/Azure AI RAG and Search.md",
-    "Software Engineering/10 Cloud/Azure/Azure AI Content Safety and Guardrails.md",
-    "Software Engineering/10 Cloud/Azure/Azure AI Evaluation and Observability.md",
-    "Software Engineering/10 Cloud/Azure/Azure AI Data Labeling.md",
-    "Software Engineering/10 Cloud/Azure/Azure Machine Learning.md",
-    "Software Engineering/10 Cloud/Azure/Azure OpenAI.md",
-    "Software Engineering/10 Cloud/Azure/Azure AI Foundry.md",
     "Software Engineering/11 AI & ML/Machine Learning/Infrastructure",
     "Software Engineering/11 AI & ML/LLM/Evaluation",
     "Software Engineering/Roadmap.canvas",
@@ -252,7 +254,6 @@
     "Software Engineering/03 Data Persistence",
     "Software Engineering/Untitled.canvas",
     "Vault/Templates/Mermaid",
-    "Vault/Templates/Pages",
     "Vault/Software Engineering/Roadmap.canvas",
     "quartz/public/Roadmap.canvas",
     "quartz/content/Roadmap.canvas",
