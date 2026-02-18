@@ -7,7 +7,6 @@ status: Not-Started
 tags:
   - Template
   - FolderNote
-dg-publish:
 ---
 <%*
 // Derive topic/subtopic from folder path

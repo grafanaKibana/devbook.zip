@@ -1,3 +1,7 @@
+---
+tags:
+  - Template
+---
 
 ```mermaid
 flowchart TD

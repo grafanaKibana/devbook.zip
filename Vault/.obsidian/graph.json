@@ -5,20 +5,13 @@
   "showAttachments": false,
   "hideUnresolved": false,
   "showOrphans": true,
-  "collapse-color-groups": true,
+  "collapse-color-groups": false,
   "colorGroups": [
     {
-      "query": "tag:#FolderNote  ",
+      "query": "tag:#FolderNote",
       "color": {
         "a": 1,
-        "rgb": 11424480
-      }
-    },
-    {
-      "query": "tag:#MetricsIgnore  ",
-      "color": {
-        "a": 1,
-        "rgb": 14701138
+        "rgb": 3026478
       }
     },
     {
@@ -27,9 +20,37 @@
         "a": 1,
         "rgb": 11657298
       }
+    },
+    {
+      "query": "[\"status\":Not-Started]",
+      "color": {
+        "a": 1,
+        "rgb": 16743034
+      }
+    },
+    {
+      "query": "[\"status\":Creation]",
+      "color": {
+        "a": 1,
+        "rgb": 16502639
+      }
+    },
+    {
+      "query": "[\"status\":Repetition]",
+      "color": {
+        "a": 1,
+        "rgb": 7890141
+      }
+    },
+    {
+      "query": "[\"status\":Ready To Repeat]",
+      "color": {
+        "a": 1,
+        "rgb": 13663195
+      }
     }
   ],
-  "collapse-display": false,
+  "collapse-display": true,
   "showArrow": false,
   "textFadeMultiplier": 0,
   "nodeSizeMultiplier": 1,
@@ -39,6 +60,6 @@
   "repelStrength": 10,
   "linkStrength": 1,
   "linkDistance": 250,
-  "scale": 1.2820267093141946,
+  "scale": 0.315438575135057,
   "close": true
 }
