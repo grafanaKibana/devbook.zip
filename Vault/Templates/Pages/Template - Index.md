@@ -46,6 +46,10 @@ Quick introduction to the topic
 
 Deeper Explanation of the topic
 
+## Examples
+
+Examples if needed with their explanation
+
 ## Questions
 
 > [!QUESTION]- What is abc?

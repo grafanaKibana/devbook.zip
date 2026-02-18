@@ -70,13 +70,29 @@ These rules exist to make notes useful for the Senior .NET / AI engineering role
 Required content (for any non-trivial concept page)
 
 - **Intro**: 2-5 sentences in your own words: what it is + why it matters + when you reach for it.
-- **Mental model**: a small explanation that makes the topic "click" (often a diagram or a 5-10 bullet cheatsheet).
-- **Example**: at least one representative example.
+- **How It Works**: conditional section. Include when the mechanism/flow is non-trivial. Prefer one well-explained mechanism over many short bullets.
+  - **MUST include** `How It Works` when the concept has non-obvious mechanics, lifecycle/flow behavior, or decision logic that readers must understand to use it correctly.
+  - **MAY omit** `How It Works` for simple definition/reference notes where intro + example already gives full understanding.
+  - If `How It Works` exists, it must explain cause/effect clearly in plain language and include at least one concrete example or diagram walkthrough.
+  - Quality over quantity: no minimum bullet count; one concise, well-explained narrative is better than many short statements.
+  - Do not use disconnected one-liners that state facts without explaining why they matter.
+- **Examples**: at least one concrete example that shows real usage.
   - .NET: prefer a `csharp` code snippet, and optionally a `json`/`yaml` config snippet.
   - AI/LLM: prefer an end-to-end request/response shape, evaluation snippet, or a minimal pipeline pseudo-code.
-- **Pitfalls**: at least 3 "gotchas" when the topic is used in real systems (perf, correctness, security, operations).
-- **Tradeoffs**: when there are multiple plausible choices, include pros/cons and decision criteria.
-- **Questions**: include 1-3 tricky / interview-style questions (scenario-based, tradeoff-heavy) with expected answers with explanation why.
+- **Pitfalls**: conditional section. Include only when the topic has non-obvious real-world failure modes. If included, explain each pitfall with cause + impact + mitigation (not one-line warnings).
+  - **MUST include** a `Pitfalls` section when the topic has at least one non-obvious failure mode in production use (performance, correctness, security, reliability, or operations).
+  - **MAY omit** `Pitfalls` when the note is a simple definition/reference entry with no meaningful failure modes, or when it is a hub note.
+  - If `Pitfalls` exists, each item must include:
+    - what can go wrong (specific scenario)
+    - why it happens (cause/mechanism)
+    - how to avoid or detect it (mitigation/guardrail)
+- Do not add generic filler such as "handle errors" or "write tests" unless tied to a concrete topic-specific failure.
+- **Tradeoffs**: conditional section. Include only when there are multiple plausible choices that a senior engineer would realistically compare.
+  - **MUST include** a `Tradeoffs` section when there are 2+ viable options and the right choice depends on constraints.
+  - **MAY omit** `Tradeoffs` when one approach is clearly dominant for this scope, or alternatives are out of scope/deprecated.
+  - If `Tradeoffs` exists, compare concrete options with decision criteria (latency, memory, complexity, operability, cost, team constraints).
+  - Do not create strawman comparisons (real option vs obviously bad option).
+- **Questions**: include 1-3 tricky / interview-style questions with expected answers with explanation proper explanation why.
 - **References**: at least 2 external links.
   - At least 1 should be an "anchor" reference (official docs/spec/RFC/vendor-neutral standard).
   - At least 1 should be a "practice" reference (battle-tested blog/paper/tutorial that explains pitfalls).
