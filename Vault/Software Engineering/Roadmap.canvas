@@ -41,11 +41,21 @@
       "color": "1"
     },
     {
+      "id": "n_12ecdbd5c3",
+      "type": "text",
+      "text": "# [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Concurrency and Parallelism|Concurrency and Parallelism]]",
+      "x": 1260,
+      "y": 360,
+      "width": 340,
+      "height": 80,
+      "color": "2"
+    },
+    {
       "id": "n_59da91ba7a",
       "type": "text",
       "text": "# [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals|Fundamentals]]",
       "x": 1260,
-      "y": 360,
+      "y": 480,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -55,7 +65,7 @@
       "type": "text",
       "text": "# [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types|Types]]",
       "x": 1680,
-      "y": 480,
+      "y": 600,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -65,7 +75,7 @@
       "type": "text",
       "text": "# [[Software Engineering/01 Programming/NET/Other/Other|Other]]",
       "x": 840,
-      "y": 600,
+      "y": 720,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -75,7 +85,7 @@
       "type": "text",
       "text": "# [[Software Engineering/01 Programming/NET/Runtime/Runtime|Runtime]]",
       "x": 840,
-      "y": 720,
+      "y": 840,
       "width": 340,
       "height": 80,
       "color": "6"
@@ -85,7 +95,7 @@
       "type": "text",
       "text": "# [[Software Engineering/02 Computer Science/02 Computer Science|02 Computer Science]]",
       "x": 0,
-      "y": 1000,
+      "y": 1120,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -95,7 +105,7 @@
       "type": "text",
       "text": "# [[Software Engineering/02 Computer Science/Algorithms/Algorithms|Algorithms]]",
       "x": 420,
-      "y": 1000,
+      "y": 1120,
       "width": 340,
       "height": 80,
       "color": "6"
@@ -105,7 +115,7 @@
       "type": "text",
       "text": "# [[Software Engineering/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set|Disjoint Set]]",
       "x": 840,
-      "y": 1120,
+      "y": 1240,
       "width": 340,
       "height": 80,
       "color": "6"
@@ -115,7 +125,7 @@
       "type": "text",
       "text": "# [[Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Graph Algorithms|Graph Algorithms]]",
       "x": 840,
-      "y": 1240,
+      "y": 1360,
       "width": 340,
       "height": 80,
       "color": "6"
@@ -125,7 +135,7 @@
       "type": "text",
       "text": "# [[Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms|Sorting Algorithms]]",
       "x": 840,
-      "y": 1360,
+      "y": 1480,
       "width": 340,
       "height": 80,
       "color": "6"
@@ -135,7 +145,7 @@
       "type": "text",
       "text": "# [[Software Engineering/02 Computer Science/Algorithms/String Searching/String Searching|String Searching]]",
       "x": 840,
-      "y": 1480,
+      "y": 1600,
       "width": 340,
       "height": 80,
       "color": "6"
@@ -145,7 +155,7 @@
       "type": "text",
       "text": "# [[Software Engineering/02 Computer Science/Data Structures/Data Structures|Data Structures]]",
       "x": -420,
-      "y": 1000,
+      "y": 1120,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -155,7 +165,7 @@
       "type": "text",
       "text": "# [[Software Engineering/03 Data Persistence/03 Data Persistence|03 Data Persistence]]",
       "x": 0,
-      "y": 1760,
+      "y": 1880,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -165,7 +175,7 @@
       "type": "text",
       "text": "# [[Software Engineering/03 Data Persistence/NoSQL/NoSQL|NoSQL]]",
       "x": 420,
-      "y": 1760,
+      "y": 1880,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -175,7 +185,7 @@
       "type": "text",
       "text": "# [[Software Engineering/03 Data Persistence/ORMs/ORMs|ORMs]]",
       "x": -420,
-      "y": 1760,
+      "y": 1880,
       "width": 340,
       "height": 80,
       "color": "6"
@@ -185,7 +195,7 @@
       "type": "text",
       "text": "# [[Software Engineering/03 Data Persistence/SQL/SQL|SQL]]",
       "x": 420,
-      "y": 1880,
+      "y": 2000,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -195,7 +205,7 @@
       "type": "text",
       "text": "# [[Software Engineering/04 Networks/04 Networks|04 Networks]]",
       "x": 0,
-      "y": 2160,
+      "y": 2280,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -205,7 +215,7 @@
       "type": "text",
       "text": "# [[Software Engineering/04 Networks/Architecture & Ops/Architecture & Ops|Architecture & Ops]]",
       "x": 420,
-      "y": 2160,
+      "y": 2280,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -215,7 +225,7 @@
       "type": "text",
       "text": "# [[Software Engineering/04 Networks/Protocols/Protocols|Protocols]]",
       "x": -420,
-      "y": 2160,
+      "y": 2280,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -225,7 +235,7 @@
       "type": "text",
       "text": "# [[Software Engineering/04 Networks/Transport & Sockets/Transport & Sockets|Transport & Sockets]]",
       "x": 420,
-      "y": 2280,
+      "y": 2400,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -235,7 +245,7 @@
       "type": "text",
       "text": "# [[Software Engineering/05 Architecture/05 Architecture|05 Architecture]]",
       "x": 0,
-      "y": 2560,
+      "y": 2680,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -245,7 +255,7 @@
       "type": "text",
       "text": "# [[Software Engineering/05 Architecture/Application Architecture/Application Architecture|Application Architecture]]",
       "x": 420,
-      "y": 2560,
+      "y": 2680,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -255,7 +265,7 @@
       "type": "text",
       "text": "# [[Software Engineering/05 Architecture/Architecture Styles/Architecture Styles|Architecture Styles]]",
       "x": -420,
-      "y": 2560,
+      "y": 2680,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -265,7 +275,7 @@
       "type": "text",
       "text": "# [[Software Engineering/05 Architecture/Distributed Systems/Distributed Systems|Distributed Systems]]",
       "x": 420,
-      "y": 2680,
+      "y": 2800,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -275,7 +285,7 @@
       "type": "text",
       "text": "# [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/Message Queues|Message Queues]]",
       "x": 840,
-      "y": 2800,
+      "y": 2920,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -285,7 +295,7 @@
       "type": "text",
       "text": "# [[Software Engineering/05 Architecture/Patterns/Patterns|Patterns]]",
       "x": -420,
-      "y": 2680,
+      "y": 2800,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -295,7 +305,7 @@
       "type": "text",
       "text": "# [[Software Engineering/06 Development Practices/06 Development Practices|06 Development Practices]]",
       "x": 0,
-      "y": 3080,
+      "y": 3200,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -305,7 +315,7 @@
       "type": "text",
       "text": "# [[Software Engineering/06 Development Practices/Paradigms/Paradigms|Paradigms]]",
       "x": 420,
-      "y": 3080,
+      "y": 3200,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -315,7 +325,7 @@
       "type": "text",
       "text": "# [[Software Engineering/06 Development Practices/Principles/Principles|Principles]]",
       "x": -420,
-      "y": 3080,
+      "y": 3200,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -325,7 +335,7 @@
       "type": "text",
       "text": "# [[Software Engineering/07 Security/07 Security|07 Security]]",
       "x": 0,
-      "y": 3360,
+      "y": 3480,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -335,7 +345,7 @@
       "type": "text",
       "text": "# [[Software Engineering/07 Security/Authentication/Authentication|Authentication]]",
       "x": 420,
-      "y": 3360,
+      "y": 3480,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -345,7 +355,7 @@
       "type": "text",
       "text": "# [[Software Engineering/08 SDLC/08 SDLC|08 SDLC]]",
       "x": 0,
-      "y": 3640,
+      "y": 3760,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -355,7 +365,7 @@
       "type": "text",
       "text": "# [[Software Engineering/09 DevOps/09 DevOps|09 DevOps]]",
       "x": 0,
-      "y": 3880,
+      "y": 4000,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -365,7 +375,7 @@
       "type": "text",
       "text": "# [[Software Engineering/09 DevOps/Deployment Stratagies/Deployment Stratagies|Deployment Stratagies]]",
       "x": 420,
-      "y": 3880,
+      "y": 4000,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -375,7 +385,7 @@
       "type": "text",
       "text": "# [[Software Engineering/09 DevOps/Version Control Systems/Version Control Systems|Version Control Systems]]",
       "x": -420,
-      "y": 3880,
+      "y": 4000,
       "width": 340,
       "height": 80,
       "color": "6"
@@ -385,7 +395,7 @@
       "type": "text",
       "text": "# [[Software Engineering/10 Cloud/10 Cloud|10 Cloud]]",
       "x": 0,
-      "y": 4160,
+      "y": 4280,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -395,7 +405,7 @@
       "type": "text",
       "text": "# [[Software Engineering/10 Cloud/AWS/AWS|AWS]]",
       "x": 420,
-      "y": 4160,
+      "y": 4280,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -405,7 +415,7 @@
       "type": "text",
       "text": "# [[Software Engineering/10 Cloud/Azure/Azure|Azure]]",
       "x": -420,
-      "y": 4160,
+      "y": 4280,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -415,7 +425,7 @@
       "type": "text",
       "text": "# [[Software Engineering/10 Cloud/Google Cloud/Google Cloud|Google Cloud]]",
       "x": 420,
-      "y": 4280,
+      "y": 4400,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -425,7 +435,7 @@
       "type": "text",
       "text": "# [[Software Engineering/11 AI & ML/11 AI & ML|11 AI & ML]]",
       "x": 0,
-      "y": 4560,
+      "y": 4680,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -435,7 +445,7 @@
       "type": "text",
       "text": "# [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]",
       "x": 420,
-      "y": 4560,
+      "y": 4680,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -445,7 +455,7 @@
       "type": "text",
       "text": "# [[Software Engineering/11 AI & ML/LLM/Agents/Agents|Agents]]",
       "x": 840,
-      "y": 4680,
+      "y": 4800,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -455,7 +465,7 @@
       "type": "text",
       "text": "# [[Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation|Evaluation]]",
       "x": 840,
-      "y": 4800,
+      "y": 4920,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -465,7 +475,7 @@
       "type": "text",
       "text": "# [[Software Engineering/11 AI & ML/LLM/Prompting/Prompting|Prompting]]",
       "x": 840,
-      "y": 4920,
+      "y": 5040,
       "width": 340,
       "height": 80,
       "color": "6"
@@ -475,7 +485,7 @@
       "type": "text",
       "text": "# [[Software Engineering/11 AI & ML/Machine Learning/Machine Learning|Machine Learning]]",
       "x": -420,
-      "y": 4560,
+      "y": 4680,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -485,7 +495,7 @@
       "type": "text",
       "text": "# [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/Evaluation|Evaluation]]",
       "x": -840,
-      "y": 4680,
+      "y": 4800,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -502,7 +512,7 @@
     {
       "id": "n_b0ac2236f9",
       "type": "text",
-      "text": "#### Roadmap legend\n**Generated:** Feb 18 2026 | 09:19PM",
+      "text": "#### Roadmap legend\n**Generated:** Feb 18 2026 | 10:04PM",
       "x": -1440,
       "y": 0,
       "width": 500,
@@ -521,7 +531,7 @@
     {
       "id": "n_c1cf7bc196",
       "type": "text",
-      "text": "Creation: 11",
+      "text": "Creation: 12",
       "x": -1380,
       "y": 202,
       "width": 380,
@@ -579,6 +589,13 @@
       "fromNode": "n_47b1436b4f",
       "fromSide": "right",
       "toNode": "n_81e39394ae",
+      "toSide": "left"
+    },
+    {
+      "id": "e_b1bfe832d5",
+      "fromNode": "n_81e39394ae",
+      "fromSide": "right",
+      "toNode": "n_12ecdbd5c3",
       "toSide": "left"
     },
     {
