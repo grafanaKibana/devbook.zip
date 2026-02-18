@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/c-sharp/fundamentals/control-structures/foreach/","noteIcon":"1"}
+{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/c-sharp/fundamentals/foreach/","noteIcon":"1"}
 ---
 
 # Foreach
@@ -87,11 +87,15 @@ foreach (var number in CountNumbers(1, 5))
 
 > [!note] Whats next
 > **Parent**
->  [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals\|Fundamentals]]
+>  [[Software Engineering/01 Programming/NET/CSharp/CSharp\|CSharp]]
+>
+> **Topics**
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types\|Types]]
 >
 > **Pages**
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Exception Handling\|Exception Handling]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Methods\|Methods]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Namespaces\|Namespaces]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Reflection\|Reflection]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Exception Handling\|Exception Handling]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Generics\|Generics]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Methods\|Methods]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Namespaces\|Namespaces]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Reflection\|Reflection]]
 <!-- whats-next:end -->

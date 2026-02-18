@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/c-sharp/fundamentals/async-await/","noteIcon":"1"}
+{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/c-sharp/concurrency-and-parallelism/async-await/","noteIcon":"1"}
 ---
 
 # Intro
@@ -37,8 +37,10 @@ It is common for a program to perform operations that can take a long time, for 
 > **Parent**
 >  [[Software Engineering/01 Programming/NET/CSharp/CSharp\|CSharp]]
 >
-> **Topics**
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Collections/Collections\|Collections]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Control Structures\|Control Structures]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types\|Types]]
+> **Pages**
+> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/CancellationToken\|CancellationToken]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Deadlocks\|Deadlocks]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Parallelism\|Parallelism]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Tasks\|Tasks]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/ThreadPool\|ThreadPool]]
 <!-- whats-next:end -->

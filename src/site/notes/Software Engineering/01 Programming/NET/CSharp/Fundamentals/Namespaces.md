@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/c-sharp/fundamentals/control-structures/namespaces/","noteIcon":"1"}
+{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/c-sharp/fundamentals/namespaces/","noteIcon":"1"}
 ---
 
 # Namespaces
@@ -55,11 +55,15 @@ public static class MathUtility
 
 > [!note] Whats next
 > **Parent**
->  [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals\|Fundamentals]]
+>  [[Software Engineering/01 Programming/NET/CSharp/CSharp\|CSharp]]
+>
+> **Topics**
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types\|Types]]
 >
 > **Pages**
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Exception Handling\|Exception Handling]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Foreach\|Foreach]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Methods\|Methods]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Control Structures/Reflection\|Reflection]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Exception Handling\|Exception Handling]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Foreach\|Foreach]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Generics\|Generics]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Methods\|Methods]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Reflection\|Reflection]]
 <!-- whats-next:end -->
