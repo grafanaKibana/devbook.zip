@@ -2,13 +2,10 @@
 {"dg-publish":true,"permalink":"/software-engineering/01-programming/net/c-sharp/fundamentals/foreach/","noteIcon":"1"}
 ---
 
-# Foreach
 
 # Intro
 
 `foreach` is the most common way to iterate a sequence in C#. It works with types that provide an enumerator (typically via `IEnumerable` / `IEnumerable<T>`), and the compiler rewrites the loop into an enumerator-based pattern.
-
-## Deeper Explanation
 
 You can use `foreach` with:
 
