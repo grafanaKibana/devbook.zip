@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Update frontmatter topic/subtopic for all .md files under Software Engineering/.
+Sync topic/subtopic frontmatter for all .md files under Vault/Software Engineering/.
 
 Rules:
-- Folder structure: Software Engineering / <level1> / <level2> / <level3> / ...
+- Folder structure: Vault / Software Engineering / <level1> / <level2> / <level3> / ...
 - Strip leading number prefixes from folder names (e.g. "01 Programming" -> "Programming")
 - topic = level-1 folder name (cleaned)
 - subtopic = level-2 folder name (as-is), or empty if page is in level-1 folder
@@ -20,8 +20,8 @@ import os
 import re
 import sys
 
-VAULT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SE_DIR = os.path.join(VAULT_ROOT, "Software Engineering")
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SE_DIR = os.path.join(REPO_ROOT, "Vault", "Software Engineering")
 
 
 def strip_number_prefix(name: str) -> str:

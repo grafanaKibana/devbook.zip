@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "8b4704bccb886e37",
+        "id": "4509724f8bf84da7",
         "type": "tabs",
         "children": [
           {
-            "id": "7400c06101d52411",
+            "id": "e7a7b303c61786dc",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "split-diff-view",
               "state": {
-                "file": "Software Engineering/03 Data Persistence/SQL/Indexes.md",
-                "mode": "source",
-                "source": false
+                "aFile": ".scripts/find_broken_links.py",
+                "bFile": ".scripts/find_broken_links.py",
+                "aRef": ""
               },
-              "icon": "lucide-file",
-              "title": "Indexes"
+              "icon": "diff",
+              "title": "Diff: find_broken_links.py  (Working Tree)"
             }
           }
         ]
@@ -150,11 +150,9 @@
             "type": "leaf",
             "state": {
               "type": "file-properties",
-              "state": {
-                "file": "Software Engineering/03 Data Persistence/SQL/Indexes.md"
-              },
+              "state": {},
               "icon": "lucide-info",
-              "title": "File properties for Indexes"
+              "title": "File properties"
             }
           }
         ],
@@ -205,8 +203,9 @@
       "digitalgarden:Digital Garden Publication Center": false
     }
   },
-  "active": "7400c06101d52411",
+  "active": "e7a7b303c61786dc",
   "lastOpenFiles": [
+    "Software Engineering/03 Data Persistence/SQL/Indexes.md",
     "Software Engineering/03 Data Persistence/SQL/SQL.md",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260218023449265.png",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205142011.png",
@@ -214,7 +213,6 @@
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205142050.png",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205142027.png",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205141994.png",
-    "Software Engineering/03 Data Persistence/SQL/Indexes.md",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260218030128746.png",
     "Assets/11 AI & ML/11 AI & ML-LLM-20260211012223477.png",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260218024130357.png",

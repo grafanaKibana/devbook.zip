@@ -9,10 +9,10 @@ Derives folder note fields from descendant non-folder pages:
 Skips any note tagged MetricsIgnore.
 
 Usage:
-    python3 .scripts/sync-folder-frontmatter.py                 (dry-run)
-    python3 .scripts/sync-folder-frontmatter.py --write         (apply)
-    python3 .scripts/sync-folder-frontmatter.py --write --force (overwrite existing values)
-    python3 .scripts/sync-folder-frontmatter.py --print-changed (paths only)
+    python3 .scripts/sync-folder-rollup-frontmatter.py                 (dry-run)
+    python3 .scripts/sync-folder-rollup-frontmatter.py --write         (apply)
+    python3 .scripts/sync-folder-rollup-frontmatter.py --write --force (overwrite existing values)
+    python3 .scripts/sync-folder-rollup-frontmatter.py --print-changed (paths only)
 
 Called automatically by the git pre-commit hook.
 """

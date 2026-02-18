@@ -156,7 +156,7 @@ The published site (built with Eleventy) includes:
 
 Every commit triggers three automations in sequence:
 
-#### 1. Folder Frontmatter Sync (`sync-folder-frontmatter.py`)
+#### 1. Folder Frontmatter Sync (`sync-folder-rollup-frontmatter.py`)
 
 Derives metadata for hub (FolderNote) pages from their descendant concept pages:
 - **status** — worst-first rollup (if any child is `Creation`, the hub shows `Creation`)
@@ -189,7 +189,7 @@ Regenerates `Roadmap.canvas` from the folder structure:
 | Script | Purpose |
 |--------|---------|
 | `find_broken_links.py` | Scans for broken wikilinks, broken markdown links, and unlinked mentions (terms that appear in prose but aren't linked) |
-| `update_frontmatter.py` | Batch-updates `topic`/`subtopic` fields based on folder position |
+| `sync-topic-subtopic-frontmatter.py` | Batch-updates `topic`/`subtopic` fields based on folder position |
 | `migrate_pages.py` | One-time migration script that moved navigation blocks from top to bottom of notes |
 
 ### Dependency Management
