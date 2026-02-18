@@ -23,12 +23,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/ThreadPool.md",
-                "mode": "source",
+                "file": "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Exception Handling.md",
+                "mode": "preview",
                 "source": true
               },
               "icon": "lucide-file",
-              "title": "ThreadPool"
+              "title": "Exception Handling"
             }
           }
         ],
@@ -114,13 +114,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/ThreadPool.md",
+                "file": "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Exception Handling.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of ThreadPool"
+              "title": "Outline of Exception Handling"
             }
           },
           {
@@ -129,7 +129,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/ThreadPool.md",
+                "file": "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Exception Handling.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -139,7 +139,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for ThreadPool"
+              "title": "Backlinks for Exception Handling"
             }
           },
           {
@@ -162,10 +162,10 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/ThreadPool.md"
+                "file": "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Exception Handling.md"
               },
               "icon": "lucide-info",
-              "title": "File properties for ThreadPool"
+              "title": "File properties for Exception Handling"
             }
           }
         ],
@@ -218,35 +218,35 @@
   },
   "active": "430576b94cc94aa7",
   "lastOpenFiles": [
-    "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Concurrency and Parallelism.md",
-    "Software Engineering/01 Programming/NET/Other/Other.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md",
+    "Templates/Pages/Template - Index.md",
+    "Templates/Pages/Template - Concept Page.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Exception Handling.md",
+    "Software Engineering/01 Programming/NET/Runtime/Common Language Runtime.md",
+    "Software Engineering/01 Programming/NET/Other/OWIN.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Reflection.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Namespaces.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Methods.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Generics.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Foreach.md",
     "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/ThreadPool.md",
     "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Tasks.md",
     "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Parallelism.md",
     "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Deadlocks.md",
     "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/CancellationToken.md",
-    "Templates/Pages/Template - Index.md",
-    "Templates/Pages/Template - Concept Page.md",
-    "Software Engineering/Software Engineering.md",
     "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Async Await.md",
+    "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Concurrency and Parallelism.md",
+    "Software Engineering/Software Engineering.md",
+    "Software Engineering/01 Programming/NET/Other/Other.md",
     "Software Engineering/01 Programming/NET/ASP.NET Web API/ASP.NET Web API.md",
     "Software Engineering/01 Programming/NET/Runtime/Runtime.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Generics.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types.md",
     "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism",
     "Software Engineering/Roadmap.canvas",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Methods.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Classes.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Exception Handling.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Structs.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Strings.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Records.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Events.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types",
-    "Software Engineering/02 Computer Science/Data Structures/Graph.md",
-    "Software Engineering/02 Computer Science/Data Structures/Trees.md",
     "Assets/01 Programming/01 Programming-Types-20260211184602492.png",
     "Assets/11 AI & ML/11 AI & ML-LLM-20260211012223477.png",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205141994.png",

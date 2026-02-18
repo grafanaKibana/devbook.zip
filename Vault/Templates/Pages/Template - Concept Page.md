@@ -40,11 +40,8 @@ tp.hooks.on_all_templates_executed(async () => {
 # Intro
 
 Quick introduction to the concept
-
-## How It Works
-
 Explain the mechanism in plain language.
-Prefer one clear, complete explanation over many short bullets.
+Prefer clear, complete explanation over short bullets.
 Include at least one concrete example or a small diagram walkthrough when useful.
 
 ## Questions
