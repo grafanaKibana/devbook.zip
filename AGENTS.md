@@ -124,6 +124,64 @@ Reference hygiene
 - Prefer stable/primary sources when available (Microsoft Learn/.NET API refs, RFCs, OWASP, NIST, Kubernetes docs).
 - Avoid link dumps; pick a few high-signal links and say what each is good for.
 
+### Mandatory reviewer subagent gate
+
+This gate applies to all created or updated notes under `Vault/Software Engineering/`.
+
+- Main agent MUST spawn a dedicated reviewer subagent at the end of each edit batch, before marking work complete.
+- This gate is mandatory for all note changes.
+- Reviewer subagent is suggest-only: it MUST NOT edit files directly.
+- Completion is blocked until the reviewer reports zero findings.
+
+Reviewer objective
+
+- Validate technical correctness and remove unsupported claims.
+- Validate source legitimacy and reference quality.
+- Ensure explanation style is understandable for software engineers.
+- Ensure the note is a quick intro: what it is, why it matters, core mechanics, and interview readiness.
+- Ensure deeper study is delegated to curated references.
+
+Reviewer output contract (strict)
+
+- Treat every finding as a blocking error until fixed.
+- Provide a detailed summary with each finding explained using:
+  - what is wrong
+  - why it is wrong or risky
+  - exact change required to fix it
+  - which rule it violates
+- Do not return generic advice. Feedback must be file-specific and actionable.
+
+Minimum validation checklist (must all pass)
+
+- Frontmatter and section structure match this contract and the selected template.
+- Intro is clear, concise, and in own words.
+- The core explanation is accurate and understandable.
+- At least one concrete example exists.
+- Interview-style questions are meaningful and include expected answers.
+- References to include at least 2 external links, with at least:
+  - 1 anchor source (official docs/spec/RFC/vendor-neutral standard)
+  - 1 practice source (reputable real-world implementation guidance)
+- Any non-obvious production failure mode includes cause, impact, and mitigation.
+- Any real choice between viable options includes tradeoffs.
+
+Mandatory reviewer prompt format
+
+Use this structure when spawning the reviewer subagent:
+
+```text
+1. TASK: Review created/updated notes for technical correctness, source legitimacy, clarity, and interview readiness.
+2. EXPECTED OUTCOME: Return PASS only when zero issues remain; otherwise return a blocking error list with exact fixes.
+3. REQUIRED TOOLS: Repository read/search tools and trusted documentation lookup tools.
+4. MUST DO: Validate against AGENTS.md quality bar, templates, and source rules. Verify every claim is supported or remove it.
+5. MUST NOT DO: Do not edit files. Do not provide vague suggestions. Do not approve notes with unresolved issues.
+6. CONTEXT: Include changed file paths and relevant constraints for this batch.
+```
+
+Enforcement note
+
+- If the reviewer reports any issue, the main agent MUST fix all issues, then rerun the reviewer subagent.
+- Main agent MUST repeat this loop until the reviewer returns PASS with zero findings.
+
 ### Publishing frontmatter
 
 - `dg-publish: true` marks a note publishable.

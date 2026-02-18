@@ -41,10 +41,9 @@ tp.hooks.on_all_templates_executed(async () => {
 # Intro
 
 Quick introduction to the topic
-
-## Deeper Explanation
-
-Deeper Explanation of the topic
+Explain the topic in plain language.
+Prefer clear, complete explanation over short bullets.
+Include at least one concrete example or a small diagram walkthrough when useful.
 
 ## Examples
 
