@@ -23,12 +23,12 @@
 
 | Note                                                                                                      | Topic            | Status          | Priority |
 | --------------------------------------------------------------------------------------------------------- | ---------------- | --------------- | -------- |
+| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Exception Handling\|Exception Handling]] | Programming      | Creation        | Medium   |
 | [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Reflection\|Reflection]]                 | Programming      | Creation        | Medium   |
 | [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Namespaces\|Namespaces]]                 | Programming      | Creation        | Medium   |
 | [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Methods\|Methods]]                       | Programming      | Creation        | Medium   |
 | [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Generics\|Generics]]                     | Programming      | Creation        | Medium   |
 | [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Foreach\|Foreach]]                       | Programming      | Creation        | Medium   |
-| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Exception Handling\|Exception Handling]] | Programming      | Creation        | Medium   |
 | [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types\|Types]]                     | Programming      | Ready To Repeat | Medium   |
 | [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Strings\|Strings]]                 | Programming      | Ready To Repeat | Medium   |
 | [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals\|Fundamentals]]             | Programming      | Creation        | Medium   |
@@ -42,12 +42,12 @@
 
 | Note                                                                                                                   | Date                         |
 | ---------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
+| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Exception Handling\|Exception Handling]]              | 12:34 AM - February 19, 2026 |
 | [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Reflection\|Reflection]]                              | 11:36 PM - February 18, 2026 |
 | [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Namespaces\|Namespaces]]                              | 11:35 PM - February 18, 2026 |
 | [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Methods\|Methods]]                                    | 11:34 PM - February 18, 2026 |
 | [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Generics\|Generics]]                                  | 11:33 PM - February 18, 2026 |
 | [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Foreach\|Foreach]]                                    | 11:29 PM - February 18, 2026 |
-| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Exception Handling\|Exception Handling]]              | 11:28 PM - February 18, 2026 |
 | [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/ThreadPool\|ThreadPool]]               | 11:28 PM - February 18, 2026 |
 | [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Deadlocks\|Deadlocks]]                 | 11:25 PM - February 18, 2026 |
 | [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Parallelism\|Parallelism]]             | 11:25 PM - February 18, 2026 |
