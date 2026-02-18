@@ -11,17 +11,24 @@
             "id": "e7a7b303c61786dc",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
-              "state": {
-                "aFile": ".scripts/find_broken_links.py",
-                "bFile": ".scripts/find_broken_links.py",
-                "aRef": ""
-              },
-              "icon": "diff",
-              "title": "Diff: find_broken_links.py  (Working Tree)"
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Graph view"
+            }
+          },
+          {
+            "id": "430576b94cc94aa7",
+            "type": "leaf",
+            "state": {
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Graph view"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -203,10 +210,34 @@
       "digitalgarden:Digital Garden Publication Center": false
     }
   },
-  "active": "e7a7b303c61786dc",
+  "active": "430576b94cc94aa7",
   "lastOpenFiles": [
-    "Software Engineering/03 Data Persistence/SQL/Indexes.md",
-    "Software Engineering/03 Data Persistence/SQL/SQL.md",
+    "Templates/Blocks/Template - Code Block.md",
+    "Templates/Blocks/Template - Callout.md",
+    "Templates/Mermaid/Template - Sequence Diagram.md",
+    "Templates/Mermaid/Template - Flowchart.md",
+    "Templates/Mermaid/Template - Entity Relationship Diagram.md",
+    "Templates/Mermaid/Template - Class Diagram.md",
+    "Templates/Pages/Template - Index.md",
+    "Templates/Pages/Template - Concept Page.md",
+    "Templates/Templates.md",
+    "Software Engineering/01 Programming/01 Programming.md",
+    "Software Engineering/02 Computer Science/02 Computer Science.md",
+    "Software Engineering/Software Engineering.md",
+    "Software Engineering/03 Data Persistence/ACID.md",
+    "Software Engineering/01 Programming/NET/CSharp/CSharp.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Async Await.md",
+    "Software Engineering/07 Security/07 Security.md",
+    "Software Engineering/04 Networks/Protocols/HTTP 2.md",
+    "Software Engineering/09 DevOps/Deployment Stratagies/All-In-One Deployment.md",
+    "Software Engineering/05 Architecture/Distributed Systems/CAP theorem.md",
+    "Software Engineering/08 SDLC/BDD.md",
+    "Software Engineering/10 Cloud/10 Cloud.md",
+    "Software Engineering/04 Networks/Architecture & Ops/Peer-2-Peer.md",
+    "Software Engineering/04 Networks/Protocols/RPC.md",
+    "Software Engineering/04 Networks/Protocols/SMTP.md",
+    "Software Engineering/04 Networks/Protocols/HTTP & HTTPS.md",
+    "Software Engineering/04 Networks/Protocols/gRPC.md",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260218023449265.png",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205142011.png",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205142069.png",
@@ -217,32 +248,9 @@
     "Assets/11 AI & ML/11 AI & ML-LLM-20260211012223477.png",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260218024130357.png",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260218023920650.png",
-    "Software Engineering/03 Data Persistence/ORMs/ORMs.md",
-    "Software Engineering/03 Data Persistence/NoSQL/NoSQL.md",
-    "Software Engineering/03 Data Persistence/03 Data Persistence.md",
-    "Software Engineering/11 AI & ML/LLM/Evaluation/Classification Evaluation.md",
-    "Software Engineering/11 AI & ML/LLM/Agents/Agents.md",
     "Software Engineering/Topics.base",
-    "Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation.md",
-    "Software Engineering/03 Data Persistence/SQL/Normalization Denormalization.md",
     "Software Engineering/Roadmap.canvas",
-    "Software Engineering/Software Engineering.md",
-    "Software Engineering/04 Networks/Architecture & Ops/Architecture & Ops.md",
-    "Software Engineering/11 AI & ML/Machine Learning/Evaluation/ROC-AUC and PR-AUC.md",
-    "Software Engineering/11 AI & ML/Machine Learning/Machine Learning.md",
-    "Software Engineering/01 Programming/NET/ASP.NET Web API/ASP.NET Web API.md",
-    "Software Engineering/11 AI & ML/Machine Learning/Evaluation/Evaluation.md",
-    "Software Engineering/11 AI & ML/Machine Learning/ROC-AUC and PR-AUC.md",
     "Software Engineering/11 AI & ML/Machine Learning/Evaluation",
-    "Software Engineering/11 AI & ML/LLM/Prompting/Prompting.md",
-    "Software Engineering/09 DevOps/Version Control Systems/Version Control Systems.md",
-    "Software Engineering/07 Security/Authentication/SSO (Single Sign-On).md",
-    "Software Engineering/07 Security/07 Security.md",
-    "Software Engineering/06 Development Practices/Principles/YAGNI.md",
-    "Software Engineering/06 Development Practices/Principles/KISS.md",
-    "Software Engineering/06 Development Practices/Principles/DRY.md",
-    "Software Engineering/06 Development Practices/Principles/Principles.md",
-    "Software Engineering/05 Architecture/Architecture Styles/Monolith Architecture.md",
     "Assets/audits",
     "Software Engineering/11 AI & ML/Machine Learning/Infrastructure",
     "Software Engineering/11 AI & ML/LLM/Evaluation",

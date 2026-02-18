@@ -19502,6 +19502,18 @@ var GardenPageCompiler = class {
               linkedFileName = headerSplit[0];
               headerPath = headerSplit.length > 1 ? `#${headerSplit[1]}` : "";
             }
+            if (linkedFileName === "" && headerPath !== "") {
+              const currentFilePath = file.getPath();
+              const currentExtensionlessPath = currentFilePath.substring(
+                0,
+                currentFilePath.lastIndexOf(".")
+              );
+              convertedText = convertedText.replace(
+                linkMatch,
+                `[[${currentExtensionlessPath}${headerPath}\\|${linkDisplayName}]]`
+              );
+              continue;
+            }
             const fullLinkedFilePath = (0, import_obsidian5.getLinkpath)(linkedFileName);
             if (fullLinkedFilePath === "") {
               continue;
@@ -33209,6 +33221,8 @@ var DigitalGarden = class extends import_obsidian19.Plugin {
         const publishSuccessful = yield publisher.publish(publishFile);
         if (publishSuccessful) {
           new import_obsidian19.Notice(`Successfully published note to your garden.`);
+        } else {
+          new import_obsidian19.Notice("Unable to publish note, something went wrong.");
         }
         return publishSuccessful;
       } catch (e) {

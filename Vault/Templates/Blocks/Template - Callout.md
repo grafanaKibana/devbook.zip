@@ -1,3 +1,7 @@
+---
+tags:
+  - Template
+---
 <%_* let calloutType = await tp.system.suggester(
   ["Abstract", "Attention", "Bug", "Caution", "Check", "Cite", "Danger", "Done", "Error", "Example", "Fail", "Failure", "FAQ", "Help", "Hint", "Important", "Info", "Missing", "Note", "Question", "Quote", "Success", "Summary", "Tip", "TLDR", "Todo", "Warning"],
   ["abstract", "attention", "bug", "caution", "check", "cite", "danger", "done", "error", "example", "fail", "failure", "faq", "help", "hint", "important", "info", "missing", "note", "question", "quote", "success", "summary", "tip", "tldr", "todo", "warning"],
