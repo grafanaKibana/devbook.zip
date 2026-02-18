@@ -175,8 +175,21 @@ Interning has a negative side effect: the reference to an interned `String` obje
 
 > [!note] Whats next
 > **Parent**
->  [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals|Fundamentals]]
+>  [[Software Engineering/01 Programming/NET/CSharp/CSharp|CSharp]]
+>
+> **Topics**
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types|Types]]
 >
 > **Pages**
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Delegates and Events|Delegates and Events]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Async Await|Async Await]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Classes|Classes]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Delegates|Delegates]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Events|Events]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Exception Handling|Exception Handling]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Foreach|Foreach]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Methods|Methods]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Namespaces|Namespaces]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Records|Records]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Reflection|Reflection]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Structs|Structs]]
 <!-- whats-next:end -->
