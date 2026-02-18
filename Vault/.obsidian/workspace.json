@@ -21,15 +21,14 @@
             "id": "430576b94cc94aa7",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
+              "type": "markdown",
               "state": {
-                "aFile": "Vault/Software Engineering/Software Engineering.md",
-                "bFile": "Vault/Software Engineering/Software Engineering.md",
-                "aRef": "HEAD",
-                "bRef": ""
+                "file": "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Events.md",
+                "mode": "preview",
+                "source": true
               },
-              "icon": "diff",
-              "title": "Diff: Software Engineering  (Index)"
+              "icon": "lucide-file",
+              "title": "Events"
             }
           }
         ],
@@ -115,13 +114,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Software Engineering/03 Data Persistence/SQL/Indexes.md",
+                "file": "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Events.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Indexes"
+              "title": "Outline of Events"
             }
           },
           {
@@ -130,7 +129,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Software Engineering/03 Data Persistence/SQL/Indexes.md",
+                "file": "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Events.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -140,7 +139,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Indexes"
+              "title": "Backlinks for Events"
             }
           },
           {
@@ -162,13 +161,15 @@
             "type": "leaf",
             "state": {
               "type": "file-properties",
-              "state": {},
+              "state": {
+                "file": "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Events.md"
+              },
               "icon": "lucide-info",
-              "title": "File properties"
+              "title": "File properties for Events"
             }
           }
         ],
-        "currentTab": 3
+        "currentTab": 2
       },
       {
         "id": "e96d0e13f56cecdc",
@@ -217,37 +218,37 @@
   },
   "active": "430576b94cc94aa7",
   "lastOpenFiles": [
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types",
+    "Software Engineering/02 Computer Science/Data Structures/Graph.md",
+    "Software Engineering/02 Computer Science/Data Structures/Trees.md",
+    "Software Engineering/02 Computer Science/Data Structures/HashSet.md",
+    "Software Engineering/02 Computer Science/Data Structures/Hashtable.md",
+    "Software Engineering/02 Computer Science/Data Structures/Dictionary.md",
+    "Software Engineering/02 Computer Science/Data Structures/List.md",
+    "Assets/01 Programming/01 Programming-Types-20260211184602492.png",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Methods.md",
+    "Software Engineering/01 Programming/NET/CSharp/CSharp.md",
+    "Software Engineering/03 Data Persistence/NoSQL/NoSQL.md",
+    "Software Engineering/02 Computer Science/Data Structures/HashTable & HashSet.md",
+    "Software Engineering/02 Computer Science/Data Structures/Data Structures.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Collections/Collections.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Classes.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Async Await.md",
     "Software Engineering/Software Engineering.md",
-    "Software Engineering/01 Programming/01 Programming.md",
-    "Software Engineering/01 Programming/NET/Runtime/Memory Leaks.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Exception Handling.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Structs.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Records.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Delegates and Events.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Events.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Delegates.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Classes and Structs.md",
+    "Software Engineering/02 Computer Science/Data Structures/NET Collections.md",
     "Assets/11 AI & ML/11 AI & ML-LLM-20260211012223477.png",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205141994.png",
-    "Assets/01 Programming/01 Programming-Types-20260211184602492.png",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Async Await.md",
-    "Software Engineering/Questions.md",
     "Software Engineering/Roadmap.canvas",
     "Software Engineering/Topics.base",
-    "Templates/Blocks/Template - Code Block.md",
-    "Templates/Blocks/Template - Callout.md",
-    "Templates/Mermaid/Template - Sequence Diagram.md",
-    "Templates/Mermaid/Template - Flowchart.md",
-    "Templates/Mermaid/Template - Entity Relationship Diagram.md",
-    "Templates/Mermaid/Template - Class Diagram.md",
-    "Templates/Pages/Template - Index.md",
-    "Templates/Pages/Template - Concept Page.md",
-    "Templates/Templates.md",
-    "Software Engineering/02 Computer Science/02 Computer Science.md",
-    "Software Engineering/03 Data Persistence/ACID.md",
-    "Software Engineering/01 Programming/NET/CSharp/CSharp.md",
-    "Software Engineering/07 Security/07 Security.md",
-    "Software Engineering/04 Networks/Protocols/HTTP 2.md",
-    "Software Engineering/09 DevOps/Deployment Stratagies/All-In-One Deployment.md",
-    "Software Engineering/05 Architecture/Distributed Systems/CAP theorem.md",
-    "Software Engineering/08 SDLC/BDD.md",
-    "Software Engineering/10 Cloud/10 Cloud.md",
-    "Software Engineering/04 Networks/Architecture & Ops/Peer-2-Peer.md",
-    "Software Engineering/04 Networks/Protocols/RPC.md",
-    "Software Engineering/04 Networks/Protocols/SMTP.md",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260218023449265.png",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205142011.png",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205142069.png",
@@ -263,7 +264,6 @@
     "Software Engineering/03 Data Persistence/SQL",
     "Software Engineering/03 Data Persistence/ORMs",
     "Software Engineering/03 Data Persistence/NoSQL",
-    "Software Engineering/03 Data Persistence",
     "Software Engineering/Untitled.canvas",
     "Vault/Software Engineering/Roadmap.canvas",
     "quartz/public/Roadmap.canvas",
