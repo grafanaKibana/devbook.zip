@@ -31,9 +31,9 @@
 | [[Software Engineering/11 AI & ML/LLM/Evaluation/LLM-as-a-Judge\|LLM-as-a-Judge]]                                           | AI & ML          | Creation | Medium   |
 | [[Software Engineering/11 AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs\|Golden Test Set and Regression Runs]] | AI & ML          | Creation | Medium   |
 | [[Software Engineering/11 AI & ML/LLM/Evaluation/Overfitting\|Overfitting]]                                                 | AI & ML          | Creation | Medium   |
+| [[Software Engineering/11 AI & ML/LLM/Evaluation/Online Evaluation and AB Tests\|Online Evaluation and AB Tests]]           | AI & ML          | Creation | Medium   |
 | [[Software Engineering/11 AI & ML/LLM/Evaluation/Rubric Scorecards\|Rubric Scorecards]]                                     | AI & ML          | Creation | Medium   |
 | [[Software Engineering/11 AI & ML/LLM/Evaluation/Pairwise Comparisons\|Pairwise Comparisons]]                               | AI & ML          | Creation | Medium   |
-| [[Software Engineering/11 AI & ML/LLM/Evaluation/Online Evaluation and AB Tests\|Online Evaluation and AB Tests]]           | AI & ML          | Creation | Medium   |
 | [[Software Engineering/11 AI & ML/LLM/Evaluation/Deterministic Checks\|Deterministic Checks]]                               | AI & ML          | Creation | Medium   |
 
 { .block-language-dataview}
