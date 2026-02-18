@@ -9,13 +9,10 @@ priority: Medium
 status: Creation
 dg-publish: true
 ---
-# Reflection
 
 # Intro
 
 Reflection is the ability to inspect types, members, and assemblies at runtime using APIs in `System.Reflection`. It's commonly used by frameworks (DI, serializers, test runners), tools, and dynamic behaviors.
-
-## Deeper Explanation
 
 Reflection can be used for:
 

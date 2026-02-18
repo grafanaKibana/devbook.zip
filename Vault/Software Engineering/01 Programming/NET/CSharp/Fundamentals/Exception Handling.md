@@ -20,25 +20,7 @@ Exception handling in C# uses `try`, `catch`, and `finally` to handle failures a
 - `finally` runs when leaving the `try` block (success or failure) and is used for cleanup.
 - `throw;` rethrows the current exception and preserves the original stack trace.
 
-Example:
-
-```csharp
-try
-{
-    DoWork();
-}
-catch (ArgumentException ex)
-{
-    Console.WriteLine(ex.Message);
-    throw;
-}
-finally
-{
-    Cleanup();
-}
-```
-
-Example with exception filter:
+### Example:
 
 ```csharp
 try
@@ -49,6 +31,15 @@ catch (Exception ex) when (ex is not OperationCanceledException)
 {
     Log(ex);
     throw;
+}
+catch (ArgumentException ex)
+{
+    Console.WriteLine(ex.Message);
+    throw;
+}
+finally
+{
+    Cleanup();
 }
 ```
 

@@ -9,19 +9,14 @@ priority: Medium
 status: Creation
 dg-publish: true
 ---
-# Namespaces
 
 # Intro
 
 A namespace is a logical scope for organizing types (classes, structs, interfaces, enums, delegates). Namespaces help structure code and prevent naming collisions.
-
-## Deeper Explanation
-
-Namespaces:
-
-1. Provide uniqueness for type names (same simple name can exist in different namespaces)
-2. Organize large codebases into logical modules
-3. Improve readability and navigation
+It is providing:
+1. Uniqueness for type names (same simple name can exist in different namespaces)
+2. Organizing large codebases into logical modules
+3. Improving readability and navigation
 
 Example (block-scoped namespace):
 

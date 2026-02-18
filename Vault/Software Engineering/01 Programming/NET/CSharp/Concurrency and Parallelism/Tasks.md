@@ -14,6 +14,10 @@ dg-publish: true
 
 `Task` is the core .NET abstraction for asynchronous work. It models eventual completion, result/error propagation, and composition (`WhenAll`, `WhenAny`) without forcing you to manage raw threads. For production systems, understanding `Task` semantics is critical for avoiding deadlocks, thread starvation, and unbounded fan-out.
 
+## How It Works
+
+`Task` represents an operation, not a thread. A task might run on a pooled worker, or it might represent asynchronous I/O that completes later without occupying a worker while waiting. It is the preferred high-level entry point over older ThreadPool APIs for most application code.
+
 ## Example
 
 ```csharp
@@ -27,7 +31,32 @@ public async Task<IReadOnlyList<UserDto>> LoadUsersAsync(
 }
 ```
 
-This pattern gives structured concurrency: one parent operation owns all child tasks and observes all failures.
+
+### Failure aggregation example
+
+```csharp
+public async Task SyncAllAsync(CancellationToken cancellationToken)
+{
+    Task a = _catalog.SyncAsync(cancellationToken);
+    Task b = _pricing.SyncAsync(cancellationToken);
+    Task c = _inventory.SyncAsync(cancellationToken);
+
+    try
+    {
+        await Task.WhenAll(a, b, c);
+    }
+    catch
+    {
+        // Inspect all faults, not only the first observed one.
+        var failures = new[] { a, b, c }
+            .Where(t => t.IsFaulted)
+            .SelectMany(t => t.Exception!.Flatten().InnerExceptions)
+            .ToArray();
+
+        throw new AggregateException("Batch sync failed", failures);
+    }
+}
+```
 
 ### Task composition patterns
 
@@ -35,14 +64,7 @@ This pattern gives structured concurrency: one parent operation owns all child t
 - `Task.WhenAny`: race multiple operations (first-success / timeout fallback patterns).
 - `TaskCompletionSource<T>`: bridge callback/event APIs into task-based APIs.
 - `ValueTask`: use only when performance measurements justify it and consumption rules are respected.
-
-## Pitfalls
-
-- Using `.Result`/`.Wait()` inside async flows can deadlock and block pool threads.
-- Wrapping naturally async I/O in `Task.Run` adds scheduling overhead without benefit.
-- Fire-and-forget tasks hide failures unless explicitly observed/logged.
-- Starting thousands of tasks without throttling can saturate dependencies.
-
+- 
 
 ## Questions
 
@@ -60,6 +82,8 @@ This pattern gives structured concurrency: one parent operation owns all child t
 - [Task class (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task)
 - [Task.WhenAll documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task.whenall)
 - [Async guidance by Stephen Cleary](https://blog.stephencleary.com/2013/11/there-is-no-thread.html)
+- [Threading in C#: Task Parallelism (Joe Albahari)](https://www.albahari.com/threading/part5.aspx#_Task_Parallelism)
+- [Threading in C#: Working with AggregateException (Joe Albahari)](https://www.albahari.com/threading/part5.aspx#_Working_with_AggregateException)
 
 <!-- whats-next:start -->
 

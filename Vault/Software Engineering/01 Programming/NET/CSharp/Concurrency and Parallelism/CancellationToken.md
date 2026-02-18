@@ -21,6 +21,8 @@ dg-publish: true
 
 In service code, the main rule is propagation: if your method accepts a token, forward it to every downstream async call that supports cancellation.
 
+This model exists to avoid force-stop primitives. Albahari highlights why `Thread.Abort` and arbitrary `Thread.Interrupt` are unsafe in most real systems: they can interrupt code at unpredictable points and leave resources or invariants in bad state. Cooperative cancellation keeps control flow explicit and cleanup reliable.
+
 ## Example
 
 ```csharp
@@ -57,20 +59,19 @@ public async Task<OrderDto?> GetOrderAsync(
 
 ## Questions
 
-> [!QUESTION]- Why is cancellation in .NET called cooperative?
-> Because callee code chooses where to observe token state and terminate safely. Runtime does not forcibly kill the operation.
-
-> [!QUESTION]- Should canceled operations be logged as errors?
-> Usually no. They are expected control flow when initiated by caller timeout/user cancellation. Log at debug/info unless behavior is unexpected.
-
 > [!QUESTION]- When is it reasonable not to cancel immediately after token is signaled?
 > When a tiny critical section must complete to keep state consistent (for example finishing a single idempotent write or releasing resource ownership).
+
+> [!QUESTION]- Why is cooperative cancellation safer than `Thread.Abort`?
+> Cooperative cancellation stops at known safe points under your control. `Thread.Abort` can interrupt arbitrary code paths and violate cleanup assumptions.
 
 ## Links
 
 - [Cancellation in managed threads (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/threading/cancellation-in-managed-threads)
 - [CancellationToken API (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.threading.cancellationtoken)
 - [Cancellation in ASP.NET Core request pipelines](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/use-http-context#requestaborted)
+- [Threading in C#: Safe Cancellation (Joe Albahari)](https://www.albahari.com/threading/part3.aspx#_Safe_Cancellation)
+- [Threading in C#: Cancellation Tokens (Joe Albahari)](https://www.albahari.com/threading/part3.aspx#_Cancellation_Tokens)
 
 <!-- whats-next:start -->
 
