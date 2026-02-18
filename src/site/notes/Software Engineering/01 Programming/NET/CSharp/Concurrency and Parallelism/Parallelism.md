@@ -6,17 +6,21 @@
 # Intro
 
 Parallelism is about finishing CPU-bound work faster by using multiple cores at the same time. In .NET, the main tools are `Parallel.ForEachAsync`, PLINQ, and custom partitioned pipelines. Effective parallel code maximizes throughput while preserving determinism, bounded resource usage, and observability.
-
-## Deeper Explanation
-
-### Mental model
-
 - Async does not automatically mean parallel CPU execution.
 - Parallelism helps when each unit does meaningful CPU work.
 - Shared mutable state is the core risk; minimize or isolate it.
 - Throughput gains are bounded by Amdahl's law and memory bandwidth.
 
-### Representative example
+## How It Works
+
+The practical pipeline is: partition work, execute partitions concurrently, collate results safely.
+
+There is two patterns that are still useful decision anchors:
+
+- Data parallelism: same operation over many data elements. Usually scales better and is easier to reason about.
+- Task parallelism: different operations in parallel. Useful, but often less structured and harder to maintain.
+
+## Example
 
 ```csharp
 public async Task<IReadOnlyList<Result>> ComputeAsync(
@@ -43,27 +47,30 @@ public async Task<IReadOnlyList<Result>> ComputeAsync(
 }
 ```
 
-### Choosing the tool
+### PLINQ example for pure transforms
 
-- `Parallel.ForEachAsync`: straightforward bounded parallel loops.
-- PLINQ: declarative data transforms where ordering needs are explicit.
-- Manual task partitioning: when you need custom scheduling, affinity, or batching.
+```csharp
+public int[] ComputePrimes(int fromInclusive, int toExclusive)
+{
+    return Enumerable.Range(fromInclusive, toExclusive - fromInclusive)
+        .AsParallel()
+        .Where(n => n > 1 && Enumerable.Range(2, (int)Math.Sqrt(n) - 1)
+            .All(i => n % i != 0))
+        .ToArray();
+}
+```
+
+PLINQ works best when each element has enough CPU work to amortize partitioning and merge costs.
+
 
 ## Pitfalls
 
-- Over-parallelization can be slower due to scheduling/context-switch overhead.
-- Contended locks on shared state erase gains from extra workers.
-- Running CPU-heavy loops in request handlers can starve unrelated requests.
-- Ignoring ordering requirements can produce nondeterministic bugs.
+- TODO
 
 ## Tradeoffs
 
-| Choice | Pros | Cons | Use when |
-|---|---|---|---|
-| `Parallel.ForEachAsync` | Bounded, simple API | Less control than custom scheduler | Per-item CPU transforms |
-| PLINQ | Concise query style | Harder debugging, ordering caveats | Batch analytics style pipelines |
-| Manual partition + tasks | Maximum control | More complexity and failure modes | Specialized workload tuning |
-| Sequential | Deterministic and simple | Lower throughput for CPU-heavy sets | Small datasets or strict ordering |
+- TODO
+
 
 ## Questions
 
@@ -76,11 +83,17 @@ public async Task<IReadOnlyList<Result>> ComputeAsync(
 > [!QUESTION]- When should you avoid PLINQ?
 > When correctness depends on strict ordering, side-effect sequencing, or when query-level debugging clarity matters more than terse syntax.
 
+> [!QUESTION]- Why can a parallel query be slower than sequential for small inputs?
+> Partitioning, scheduling, and result merge overhead can dominate when per-element CPU work is too small.
+
+
 ## Links
 
 - [Parallel programming in .NET (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/)
 - [Parallel.ForEachAsync API (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.parallel.foreachasync)
 - [Potential pitfalls in data and task parallelism](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/potential-pitfalls-in-data-and-task-parallelism)
+- [Threading in C#: Why PFX and PFX concepts (Joe Albahari)](https://www.albahari.com/threading/part5.aspx#_Why_PFX)
+- [Threading in C#: PLINQ details and limitations (Joe Albahari)](https://www.albahari.com/threading/part5.aspx#_PLINQ)
 
 <!-- whats-next:start -->
 

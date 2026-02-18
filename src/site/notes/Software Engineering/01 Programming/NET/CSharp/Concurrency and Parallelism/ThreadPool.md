@@ -5,50 +5,38 @@
 
 # Intro
 
-The .NET ThreadPool is the shared execution engine for most `Task`-based work. It dynamically manages worker threads and I/O completion processing to balance throughput and latency. Understanding ThreadPool behavior is essential for diagnosing starvation, latency spikes, and "mysterious" timeout storms.
+The .NET ThreadPool is the shared execution engine for most `Task`-based work. It dynamically manages worker threads and I/O completion processing to balance throughput and latency. Understanding ThreadPool behavior is essential for diagnosing starvation, latency spikes, and "mysterious" timeout storms. Starting raw threads has real cost: setup time, stack allocation, and scheduler overhead. The ThreadPool amortizes this by reusing worker threads and limiting how many run concurrently.
 
-## Deeper Explanation
 
-### Mental model
-
-- Worker threads execute queued CPU-bound delegates.
-- I/O completion ports resume async operations when kernel I/O completes.
-- Thread injection is adaptive, not instant; blocking code can temporarily starve the pool.
-- The pool is process-wide and shared by unrelated workloads.
-
-### Representative example
+## Example
 
 ```csharp
-ThreadPool.GetAvailableThreads(out var availableWorkers, out var availableIo);
-ThreadPool.GetMaxThreads(out var maxWorkers, out var maxIo);
+public async Task<IReadOnlyList<Result>> ProcessBatchAsync(
+    IReadOnlyList<Item> items,
+    CancellationToken cancellationToken)
+{
+    // Bounded fan-out avoids queue explosions and ThreadPool contention.
+    using var gate = new SemaphoreSlim(initialCount: 32);
 
-Console.WriteLine($"Workers: {availableWorkers}/{maxWorkers}, IO: {availableIo}/{maxIo}");
+    var tasks = items.Select(async item =>
+    {
+        await gate.WaitAsync(cancellationToken);
+        try
+        {
+            return await _service.ProcessAsync(item, cancellationToken);
+        }
+        finally
+        {
+            gate.Release();
+        }
+    });
+
+    return await Task.WhenAll(tasks);
+}
 ```
 
-Use this signal with request latency and queue length metrics to detect starvation trends.
+The point is not `SemaphoreSlim` itself. The point is explicit concurrency control so the ThreadPool is not overwhelmed by accidental unbounded work.
 
-### Practical guidance
-
-- Avoid blocking waits (`.Result`, `.Wait`, long `Thread.Sleep`) on pool threads.
-- Keep request handlers async end-to-end for I/O.
-- Isolate long-running dedicated workers via hosted services/channels when appropriate.
-- Tune min threads only with evidence; it is not a universal performance fix.
-
-## Pitfalls
-
-- Sync-over-async causes blocked workers and cascading latency.
-- CPU-intensive background jobs on pool threads can degrade API latency.
-- Treating `Task.Run` as a scaling strategy increases pressure instead of solving root cause.
-- Raising min threads blindly can hide architectural issues and increase context switching.
-
-## Tradeoffs
-
-| Choice | Pros | Cons | Use when |
-|---|---|---|---|
-| ThreadPool default behavior | Good general balance | Can starve under heavy blocking | Typical web/service workloads |
-| Increase min threads | Faster reaction under bursts | Higher baseline overhead | Proven short-lived starvation |
-| Dedicated thread (`LongRunning`) | Isolation from pool | Extra resource cost | Truly long-lived CPU worker |
-| External queue + workers | Backpressure and control | More infra/complexity | High-throughput background processing |
 
 ## Questions
 
@@ -58,14 +46,14 @@ Use this signal with request latency and queue length metrics to detect starvati
 > [!QUESTION]- Why can an async app still suffer ThreadPool issues?
 > Because only part of the call graph is async; any blocking segment on pool workers can throttle the entire system.
 
-> [!QUESTION]- Is increasing `ThreadPool.SetMinThreads` a primary solution?
-> Usually no. It can mitigate symptoms but the primary fix is removing blocking and controlling workload concurrency.
 
 ## Links
 
 - [The managed thread pool (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/threading/the-managed-thread-pool)
 - [ThreadPool class API (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.threading.threadpool)
 - [Diagnosing .NET ThreadPool starvation](https://learn.microsoft.com/en-us/dotnet/core/diagnostics/debug-threadpool-starvation)
+- [Threading in C#: Thread Pooling (Joe Albahari)](https://www.albahari.com/threading/#_Thread_Pooling)
+- [Threading in C#: Optimizing the Thread Pool (Joe Albahari)](https://www.albahari.com/threading/#_Optimizing_the_Thread_Pool)
 
 <!-- whats-next:start -->
 
