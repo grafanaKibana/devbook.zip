@@ -172,7 +172,7 @@
   "quickActionAddToShortcuts": true,
   "quickActionPinNote": true,
   "quickActionOpenInNewTab": false,
-  "useFrontmatterMetadata": true,
+  "useFrontmatterMetadata": false,
   "frontmatterIconField": "icon",
   "frontmatterColorField": "color",
   "frontmatterBackgroundField": "background",
@@ -186,7 +186,7 @@
   "fileNameIconMap": {},
   "showCategoryIcons": true,
   "fileTypeIconMap": {
-    "md": "LiFile"
+    "png,jpg,jpeg": "LiImage"
   },
   "fileNameRows": 1,
   "showFilePreview": true,
@@ -413,8 +413,8 @@
     "Software Engineering/09 DevOps": "skull",
     "Software Engineering/10 Cloud": "cloud",
     "Software Engineering/11 AI & ML": "brain-circuit",
-    "Assets": "file-image",
-    "Templates": "templater-icon"
+    "Assets": "book-image",
+    "Templates": "book-dashed"
   },
   "folderColors": {
     "Software Engineering/01 Programming": "#f43f5e",

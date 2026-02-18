@@ -1,3 +1,7 @@
 {
-  "pinned": null
+  "pinned": [
+    "digitalgarden:publish-multiple-notes",
+    "templater-obsidian:insert-templater",
+    "obsidian-git:push"
+  ]
 }
