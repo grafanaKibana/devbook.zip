@@ -98,7 +98,6 @@ public static string NormalizeName(string? value)
 - [Best practices for exceptions](https://learn.microsoft.com/dotnet/standard/exceptions/best-practices-for-exceptions)
 - [Exception throwing (Framework Design Guidelines)](https://learn.microsoft.com/dotnet/standard/design-guidelines/exception-throwing)
 - [Using standard exception types](https://learn.microsoft.com/dotnet/standard/design-guidelines/using-standard-exception-types)
-- [CA2200: Rethrow to preserve stack details](https://learn.microsoft.com/visualstudio/code-quality/ca2200)
 
 <!-- whats-next:start -->
 
