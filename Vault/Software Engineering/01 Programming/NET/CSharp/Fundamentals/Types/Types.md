@@ -530,4 +530,11 @@ if (obj is string str)  // Type check and declaration in one step
 > **Parent**
 >  [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals|Fundamentals]]
 >
+> **Pages**
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Classes|Classes]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Delegates|Delegates]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Events|Events]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Records|Records]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Strings|Strings]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Structs|Structs]]
 <!-- whats-next:end -->
