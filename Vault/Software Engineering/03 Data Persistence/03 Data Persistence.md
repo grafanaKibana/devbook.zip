@@ -14,8 +14,6 @@ level:
 # Intro
 
 
-## Deeper Explanation
-
 
 ## Questions
 

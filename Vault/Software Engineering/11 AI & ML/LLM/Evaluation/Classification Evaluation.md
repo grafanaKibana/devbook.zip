@@ -15,193 +15,108 @@ dg-publish: true
 
 Classification evaluation is how you measure whether a model assigns the right label (or set of labels) for an input. In software terms: you want to quantify the failure modes (false alarms vs misses), pick an operating point (threshold), and prevent regressions when data/model changes.
 
-## Deeper Explanation
+## Precision Recall and F1 in one page
 
-### Start with the decision you are actually shipping
+### Confusion matrix first
 
-- Binary classification: yes/no (spam, fraud, safe/unsafe)
-- Multi-class: exactly one label among N (intent routing)
-- Multi-label: multiple labels can be true (topics, policy flags)
+Everything starts from four counts:
 
-Make sure your eval matches production behavior:
+| | Actual positive | Actual negative |
+|---|---:|---:|
+| Predicted positive | TP | FP |
+| Predicted negative | FN | TN |
 
-- If you ship a hard label: evaluate label metrics at the chosen threshold.
-- If you ship a probability/score: also evaluate probability quality (log loss, calibration).
-- If you route work: measure *downstream* impact too (cost of manual review, user harm, latency).
+- `TP`: you flagged positive and it really was positive.
+- `FP`: false alarm.
+- `FN`: miss.
+- `TN`: correctly ignored.
 
-### Confusion matrix (the basic building block)
-
-For binary classification, every prediction falls into one bucket:
-
-```text
-TP: predicted positive, actually positive
-FP: predicted positive, actually negative
-TN: predicted negative, actually negative
-FN: predicted negative, actually positive
-```
-
-Think of it like an alerting system:
-
-- FP = noisy alerts (wasted time, bad UX)
-- FN = missed incidents (risk)
-
-### Core metrics (binary)
-
-All metrics below come from TP/FP/TN/FN.
+### The three formulas to remember
 
 ```text
-accuracy   = (TP + TN) / (TP + FP + TN + FN)
-precision  = TP / (TP + FP)
-recall     = TP / (TP + FN)   # sensitivity, TPR
-specificity= TN / (TN + FP)   # TNR
-F1         = 2 * (precision * recall) / (precision + recall)
+precision = TP / (TP + FP)
+recall    = TP / (TP + FN)
+F1        = 2 * (precision * recall) / (precision + recall)
 ```
 
-- Accuracy = (TP + TN) / (TP + FP + TN + FN)
-  - Use when classes are balanced and FP/FN costs are similar.
-  - Pitfall: can look great on imbalanced data while missing most positives.
+- Precision: from predicted positives, how many are truly positive.
+- Recall: from real positives, how many you found.
+- F1: one score that is high only when both precision and recall are high.
 
-- Precision = TP / (TP + FP)
-  - "When we say positive, how often are we right?"
-  - High precision means low false-alarm rate *among predicted positives*.
-  - Useful when positives trigger expensive actions (blocking users, pagers).
+Memory hook:
 
-- Recall (Sensitivity, TPR) = TP / (TP + FN)
-  - "Of the real positives, how many did we catch?"
-  - High recall means few misses.
-  - Useful when misses are costly (fraud escaping, unsafe content).
+- Precision is hurt by `FP` false alarms.
+- Recall is hurt by `FN` misses.
 
-- Specificity (TNR) = TN / (TN + FP)
-  - "Of the real negatives, how many did we correctly ignore?"
-  - Useful when negatives dominate and you care about not bothering users.
+### Threshold tradeoff
 
-- F1 score = harmonic mean of precision and recall
-  - A single number when you care about both FP and FN.
-  - Pitfall: hides which side (precision vs recall) is failing.
+```mermaid
+flowchart LR
+  L[Low threshold] --> M[More predicted positives]
+  M --> R1[Recall usually up]
+  M --> P1[Precision usually down]
+  H[High threshold] --> F[Fewer predicted positives]
+  F --> R2[Recall usually down]
+  F --> P2[Precision usually up]
+```
 
-- F-beta score
-  - Like F1, but weights recall higher (beta > 1) or precision higher (beta < 1).
-  - Useful when you can explicitly encode the business cost tradeoff.
+### Real world examples
 
-- Balanced accuracy = (TPR + TNR) / 2
-  - Useful for imbalanced datasets where plain accuracy is misleading.
+Content moderation:
 
-### Less common but useful metrics
+- Low threshold catches more unsafe posts, but blocks more safe posts.
+- High threshold blocks fewer safe posts, but lets more unsafe posts pass.
 
-- Matthews Correlation Coefficient (MCC)
-  - A single score that stays informative under class imbalance.
-  - Useful when you want one number that accounts for all 4 confusion-matrix cells.
+Fraud detection:
 
-- Cohen's kappa
-  - Measures agreement beyond what you'd expect from base rates (chance).
-  - Useful when class frequencies are very skewed and you want to correct for that.
+- High recall means fewer fraud cases slip through.
+- High precision means fewer legit users get flagged.
 
-- Top-k accuracy (multi-class)
-  - "Was the correct label in the model's top k suggestions?"
-  - Useful for assistive UIs and routing systems that show multiple options.
+### Worked example
 
-### Thresholding and operating points
-
-Many classifiers output a score/probability. Turning that into a label requires a threshold.
-
-- Lower threshold: more positives predicted (recall up, precision often down)
-- Higher threshold: fewer positives predicted (precision up, recall often down)
-
-Engineering approach:
-
-- Pick a metric target that matches the constraint you must satisfy (e.g. recall >= 0.95) and then maximize the other side under that constraint.
-- Or define a cost function (FP_cost, FN_cost) and choose the threshold that minimizes expected cost.
-
-### ROC-AUC vs PR-AUC (ranking quality)
-
-These metrics evaluate how well the model *ranks* positives above negatives across all thresholds.
-
-- ROC curve: TPR vs FPR across thresholds; ROC-AUC is the area under it.
-  - Good when classes are reasonably balanced and you care about ranking.
-  - Can look deceptively good on highly imbalanced problems.
-
-- Precision-Recall (PR) curve: precision vs recall across thresholds; PR-AUC (often reported as Average Precision).
-  - Usually more informative when positives are rare.
-  - Better aligned with "find the needles" problems (fraud, abuse, incidents).
-
-### Probability metrics and calibration
-
-If your model outputs probabilities (or you treat scores like probabilities), you should measure whether those probabilities are meaningful.
-
-- Log loss (cross-entropy)
-  - Penalizes confident wrong predictions heavily.
-  - Useful when you want well-behaved probabilities, not just hard labels.
-
-- Brier score
-  - Mean squared error between predicted probability and outcome (0/1).
-  - Another probability-quality metric; often easier to reason about than log loss.
-
-- Calibration (reliability)
-  - "When the model says 0.8 confidence, does it end up correct about 80% of the time?"
-  - Evaluate with calibration curves / reliability diagrams; report an aggregate error (e.g. Expected Calibration Error) if you use it internally.
-  - Practical impact: better threshold selection, safer automation (route uncertain cases to humans).
-
-### Multi-class and multi-label metrics
-
-- Per-class precision/recall/F1 is the first thing to look at.
-- Averaging strategies:
-  - Macro average: treat each class equally (good when rare classes matter).
-  - Micro average: aggregate all decisions (good when overall throughput matters).
-  - Weighted average: macro weighted by class frequency (can hide rare-class failures).
-
-For multi-label tasks, metrics are usually computed per label and then averaged; also consider exact-match accuracy if you truly need all labels correct.
-
-### What to put in a PR or model card
-
-- Confusion matrix (or per-class breakdown)
-- Precision/recall/F1 at the shipped threshold
-- PR-AUC (or ROC-AUC) if you ship a tunable threshold
-- Calibration/log loss if you consume probabilities downstream
-- Segment breakdowns (key cohorts, languages, traffic sources)
-- A stable golden test set run (regression safety)
-
-## Example
-
-Binary classifier evaluated on 100 labeled examples at threshold 0.5:
+Binary classifier on 100 cases:
 
 ```text
 TP = 32
 FP = 8
 TN = 50
 FN = 10
+```
 
-accuracy  = (32 + 50) / 100 = 0.82
-precision = 32 / (32 + 8)   = 0.80
-recall    = 32 / (32 + 10)  = 0.76
+```text
+precision = 32 / (32 + 8)  = 0.80
+recall    = 32 / (32 + 10) = 0.76
 F1        = 2 * (0.80 * 0.76) / (0.80 + 0.76) = 0.78
 ```
 
-If this classifier blocks content:
+Same model family at two thresholds:
 
-- If you get too many false blocks (FP), raise the threshold or optimize for precision.
-- If unsafe content slips through (FN), lower the threshold or optimize for recall.
+| Threshold | TP | FP | FN | Precision | Recall |
+|---|---:|---:|---:|---:|---:|
+| 0.30 | 90 | 60 | 10 | 0.60 | 0.90 |
+| 0.80 | 55 | 10 | 45 | 0.85 | 0.55 |
+
+### Pitfalls
+
+- F1 can hide which side is weak, so always inspect precision and recall separately.
+- Comparing models at different thresholds is misleading unless threshold policy is fixed.
+- Optimizing only precision or only recall can create unacceptable product behavior.
 
 ## Questions
 
-> [!QUESTION]- Which metric should I optimize?
-> Optimize the metric that matches the *cost of being wrong* in production. If false positives are expensive (blocking, escalations), prioritize precision. If false negatives are risky (fraud, safety), prioritize recall. If you need one number, use F-beta with beta chosen from the business tradeoff.
+> [!QUESTION]- When should I optimize precision first?
+> Optimize precision first when false positives are expensive, for example blocking legit users or creating costly manual review load.
 
-> [!QUESTION]- When should I use ROC-AUC vs PR-AUC?
-> For rare positives, PR-AUC is usually the better signal. ROC-AUC can stay high even when the model produces many false positives in absolute terms.
+> [!QUESTION]- When should I optimize recall first?
+> Optimize recall first when misses are dangerous, for example fraud, abuse, or safety violations slipping through.
 
-> [!QUESTION]- How do I pick a threshold?
-> Pick it on a validation set using a constraint (e.g. recall >= 0.95) or a cost function (FP_cost/FN_cost). Then lock it and regression-test it on your golden set.
-
-> [!QUESTION]- What do I do if probabilities are not calibrated?
-> Consider calibration techniques (Platt scaling / isotonic regression) and re-check calibration by segment. Even if you only ship labels, calibration helps you route low-confidence cases to humans.
+> [!QUESTION]- How do I pick a threshold in practice?
+> Pick a business constraint first, such as recall >= 0.95, then choose the threshold that maximizes the other metric under that constraint. Freeze it and run regression checks on the same golden set.
 
 ## Links
 
 - [Scikit-learn: Classification metrics](https://scikit-learn.org/stable/modules/model_evaluation.html#classification-metrics)
 - [Scikit-learn API: precision_recall_fscore_support](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.precision_recall_fscore_support.html)
-- [Scikit-learn: ROC AUC and Average Precision](https://scikit-learn.org/stable/modules/model_evaluation.html#receiver-operating-characteristic-roc)
-- [Scikit-learn: Probability calibration](https://scikit-learn.org/stable/modules/calibration.html)
-- [Scikit-learn API: log_loss](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.log_loss.html)
 - [Google ML Glossary](https://developers.google.com/machine-learning/glossary)
 - [Google ML Crash Course: Accuracy, precision, recall](https://developers.google.com/machine-learning/crash-course/classification/accuracy-precision-recall)
 
