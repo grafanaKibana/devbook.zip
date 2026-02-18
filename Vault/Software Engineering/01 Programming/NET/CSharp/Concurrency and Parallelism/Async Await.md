@@ -12,9 +12,44 @@ dg-publish: true
 ---
 # Intro
 
-It is common for a program to perform operations that can take a long time, for example: accessing network resources, reading/writing files, querying a database, and so on. Such operations can heavily load an application. This is especially relevant in graphical (desktop or mobile) apps, where long-running operations can block the user interface and negatively affect the user's willingness to work with the program, or in web applications that must be ready to handle thousands of requests per second. In a synchronous application, when long operations are executed on the main thread, that thread would simply be blocked for the duration of the operation. To prevent long-running operations from blocking the overall work of the application, C# supports asynchrony.
+`async` and `await` are .NET's default model for non-blocking I/O. The goal is responsiveness and scalability: while code waits on network, disk, or database I/O, the thread is released so it can do other work. This is why async code keeps UIs responsive and helps servers handle more concurrent requests.
 
-**Asynchrony** allows you to move certain tasks off the main thread into special async methods while using threads more efficiently. Async methods run on separate threads. However, while a long-running operation is in progress, the async method's thread is returned to the thread pool and can be used for other tasks. When the long-running operation completes, a thread from the pool is assigned again, and the async method continues its work.
+The most important mental model is that async is not the same as "run on another thread". In many cases, no thread is actively executing your method while an awaited I/O operation is in flight.
+
+## How It Works
+
+An `async` method is compiled into a state machine. Each `await` can split execution into two phases:
+
+1. Run synchronously until the first incomplete awaitable.
+2. Register a continuation and return control to the caller.
+3. Resume later when the awaited operation completes.
+
+This is why `await` differs from `Task.Result` and `Task.Wait()`:
+
+- `await` is non-blocking for the current thread.
+- `Result`/`Wait()` block the current thread and can cause deadlocks under a synchronization context.
+- 
+
+## Example
+
+```csharp
+public async Task<OrderDto?> LoadOrderAsync(
+    int id,
+    CancellationToken cancellationToken)
+{
+    using var response = await _httpClient.GetAsync(
+        $"orders/{id}",
+        cancellationToken);
+
+    response.EnsureSuccessStatusCode();
+
+    return await response.Content.ReadFromJsonAsync<OrderDto>(
+        cancellationToken: cancellationToken);
+}
+```
+
+The method does not hold a thread while waiting on network I/O. The continuation runs only when the response is available.
+
 
 ## Questions
 
@@ -25,17 +60,23 @@ It is common for a program to perform operations that can take a long time, for 
 > [!QUESTION]- What is the difference between `Thread` and `Task`?
 > `Thread` is an OS thread you manage directly (heavier, dedicated execution).
 > `Task` is a higher-level abstraction representing an asynchronous operation or a unit of work, typically scheduled on the thread pool (and for I/O it may not require a dedicated thread while waiting).
-> References: [Difference between Task and Thread (ru StackOverflow)](https://ru.stackoverflow.com/questions/548876/%D0%92-%D1%87%D0%B5%D0%BC-%D1%80%D0%B0%D0%B7%D0%BD%D0%B8%D1%86%D0%B0-%D0%BC%D0%B5%D0%B6%D0%B4%D1%83-task-%D0%B8-thread-%D0%B8-%D0%BA%D0%BE%D0%B3%D0%B4%D0%B0-%D1%87%D1%82%D0%BE-%D0%BB%D1%83%D1%87%D1%88%D0%B5-%D0%B8%D1%81%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D1%82%D1%8C)
 
 > [!QUESTION]- What is the difference between `await` and `Task.Result`?
 > `await` waits asynchronously: it does not block the current thread and it unwraps exceptions.
 > `Task.Result` waits synchronously: it blocks the current thread, can cause deadlocks under a `SynchronizationContext` (UI / legacy ASP.NET), and wraps exceptions in `AggregateException`.
 
+> [!QUESTION]- If async does not always use extra threads, why does it improve scalability?
+> Because waiting time is no longer paid by tying up worker threads. Released threads can process other requests while I/O is pending.
+
+> [!QUESTION]- When should you use `Task.Run` with async code?
+> Mostly for CPU-bound work that you intentionally offload. Do not use it to wrap already-async I/O APIs.
+
 ## Links
 
-- [How Async/Await in C# actually works (Part 1)](https://habr.com/ru/articles/727850/)
-- [Async/await in C#: concept, internals, useful techniques](https://habr.com/ru/articles/470830/)
-- [Async and Await in C#: Complete Guide (2023)](https://www.bytehide.com/blog/async-await-csharp)
+- [Threading in C#: Thread Pooling and TPL context (Joe Albahari)](https://www.albahari.com/threading/)
+- [Threading in C#: Task Parallelism and task exceptions (Joe Albahari)](https://www.albahari.com/threading/part5.aspx#_Task_Parallelism)
+- [Async programming scenarios (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/async-scenarios)
+- [Await, UI, and deadlocks (Stephen Toub)](https://devblogs.microsoft.com/dotnet/await-and-ui-and-deadlocks-oh-my/)
 
 <!-- whats-next:start -->
 

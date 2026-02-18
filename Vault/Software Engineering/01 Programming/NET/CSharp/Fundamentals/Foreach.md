@@ -9,13 +9,10 @@ priority: Medium
 status: Creation
 dg-publish: true
 ---
-# Foreach
 
 # Intro
 
 `foreach` is the most common way to iterate a sequence in C#. It works with types that provide an enumerator (typically via `IEnumerable` / `IEnumerable<T>`), and the compiler rewrites the loop into an enumerator-based pattern.
-
-## Deeper Explanation
 
 You can use `foreach` with:
 
