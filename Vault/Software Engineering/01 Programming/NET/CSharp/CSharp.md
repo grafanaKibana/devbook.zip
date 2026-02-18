@@ -36,5 +36,6 @@ priority: High
 >  [[Software Engineering/01 Programming/NET/NET|NET]]
 >
 > **Topics**
+> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Concurrency and Parallelism|Concurrency and Parallelism]]
 > - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals|Fundamentals]]
 <!-- whats-next:end -->

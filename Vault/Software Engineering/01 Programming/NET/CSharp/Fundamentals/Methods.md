@@ -97,6 +97,81 @@ static int Sum(params ReadOnlySpan<int> numbers)
 }
 ```
 
+## Inheritance Method Keywords
+
+### virtual
+
+`virtual` marks a base-class method as overridable.
+
+- Enables runtime polymorphism.
+- Calls are resolved by the runtime type, not just the variable type.
+
+```csharp
+class Animal
+{
+    public virtual string Speak() => "...";
+}
+```
+
+### override
+
+`override` replaces a `virtual`/`abstract` member implementation in a derived class.
+
+- Signature must match the base member.
+- You can still call the base implementation with `base.MethodName()`.
+
+```csharp
+class Dog : Animal
+{
+    public override string Speak() => "Woof";
+}
+```
+
+### new
+
+`new` hides a member from the base class (it does not override it).
+
+- Behavior depends on the compile-time type of the variable.
+- Use intentionally when you want member hiding, not polymorphism.
+
+```csharp
+class Animal
+{
+    public string Category() => "Animal";
+}
+
+class Dog : Animal
+{
+    public new string Category() => "Dog";
+}
+```
+
+### virtual vs override vs new in one example
+
+```csharp
+class Animal
+{
+    public virtual string Speak() => "...";
+    public string Category() => "Animal";
+}
+
+class Dog : Animal
+{
+    public override string Speak() => "Woof";
+    public new string Category() => "Dog";
+}
+
+Animal asAnimal = new Dog();
+Dog asDog = new Dog();
+
+Console.WriteLine(asAnimal.Speak());    // Woof (runtime dispatch)
+Console.WriteLine(asDog.Speak());       // Woof
+Console.WriteLine(asAnimal.Category()); // Animal (member hiding)
+Console.WriteLine(asDog.Category());    // Dog
+```
+
+`override` participates in polymorphism; `new` does not.
+
 ## Questions
 
 > [!QUESTION]- Why might you need `ref` for reference types if reference types are already passed by reference?
@@ -107,6 +182,15 @@ static int Sum(params ReadOnlySpan<int> numbers)
 
 > [!QUESTION]- What are optional parameters in methods?
 > Parameters with default values that callers can omit; the default is substituted at compile time at the call site.
+
+> [!QUESTION]- In a hierarchy where `Animal a = new Dog();`, how can you make `a.Category()` return the derived value, and what does that imply for API design?
+> Mark the base member as `virtual` and the derived member as `override`. That enables polymorphic dispatch by runtime type. It also means the base API explicitly supports extensibility and behavioral substitution.
+
+> [!QUESTION]- When should you prefer `new` over `override`?
+> Prefer `new` only when polymorphism is not desired and you intentionally want different behavior based on the compile-time reference type (for compatibility or specialized APIs). In most extensible designs, `override` is the safer default.
+
+> [!QUESTION]- A base method is not marked `virtual`, but you need derived-specific behavior. What are your options?
+> Option 1: Change the base API to `virtual` (best if you own the base type and want polymorphism). Option 2: Hide with `new` (works, but no polymorphism and can confuse callers). Option 3: Redesign with composition/strategy if inheritance is not a good fit.
 
 ## Links
 
@@ -124,9 +208,9 @@ static int Sum(params ReadOnlySpan<int> numbers)
 > - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types|Types]]
 >
 > **Pages**
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Async Await|Async Await]]
 > - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Exception Handling|Exception Handling]]
 > - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Foreach|Foreach]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Generics|Generics]]
 > - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Namespaces|Namespaces]]
 > - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Reflection|Reflection]]
 <!-- whats-next:end -->
