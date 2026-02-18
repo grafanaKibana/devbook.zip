@@ -23,12 +23,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Events.md",
+                "file": "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Classes.md",
                 "mode": "preview",
                 "source": true
               },
               "icon": "lucide-file",
-              "title": "Events"
+              "title": "Classes"
             }
           }
         ],
@@ -114,13 +114,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Events.md",
+                "file": "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Classes.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Events"
+              "title": "Outline of Classes"
             }
           },
           {
@@ -129,7 +129,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Events.md",
+                "file": "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Classes.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -139,7 +139,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Events"
+              "title": "Backlinks for Classes"
             }
           },
           {
@@ -162,10 +162,10 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Events.md"
+                "file": "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Classes.md"
               },
               "icon": "lucide-info",
-              "title": "File properties for Events"
+              "title": "File properties for Classes"
             }
           }
         ],
@@ -218,6 +218,13 @@
   },
   "active": "430576b94cc94aa7",
   "lastOpenFiles": [
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Exception Handling.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Structs.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Strings.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Records.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Events.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Classes.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types",
@@ -234,15 +241,9 @@
     "Software Engineering/02 Computer Science/Data Structures/HashTable & HashSet.md",
     "Software Engineering/02 Computer Science/Data Structures/Data Structures.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Collections/Collections.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Classes.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Async Await.md",
     "Software Engineering/Software Engineering.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Exception Handling.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Structs.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Records.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Delegates and Events.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Events.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Delegates.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Classes and Structs.md",
     "Software Engineering/02 Computer Science/Data Structures/NET Collections.md",
     "Assets/11 AI & ML/11 AI & ML-LLM-20260211012223477.png",

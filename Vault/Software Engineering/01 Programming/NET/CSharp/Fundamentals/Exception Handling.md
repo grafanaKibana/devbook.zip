@@ -77,14 +77,8 @@ catch (Exception ex) when (ex is not OperationCanceledException)
 >
 > **Pages**
 > - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Async Await|Async Await]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Classes|Classes]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Delegates|Delegates]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Events|Events]]
 > - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Foreach|Foreach]]
 > - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Methods|Methods]]
 > - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Namespaces|Namespaces]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Records|Records]]
 > - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Reflection|Reflection]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Strings|Strings]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Structs|Structs]]
 <!-- whats-next:end -->
