@@ -11,17 +11,14 @@
             "id": "7400c06101d52411",
             "type": "leaf",
             "state": {
-              "type": "canvas",
+              "type": "markdown",
               "state": {
-                "file": "Software Engineering/Roadmap.canvas",
-                "viewState": {
-                  "x": 700.4693150800532,
-                  "y": 2128.4854653615666,
-                  "zoom": -1.9672413410363312
-                }
+                "file": "Software Engineering/03 Data Persistence/SQL/Indexes.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "lucide-layout-dashboard",
-              "title": "Roadmap"
+              "icon": "lucide-file",
+              "title": "Indexes"
             }
           }
         ]
@@ -106,13 +103,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Software Engineering/Roadmap.canvas",
+                "file": "Software Engineering/03 Data Persistence/SQL/Indexes.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Roadmap"
+              "title": "Outline of Indexes"
             }
           },
           {
@@ -121,7 +118,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Software Engineering/Roadmap.canvas",
+                "file": "Software Engineering/03 Data Persistence/SQL/Indexes.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -131,7 +128,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Roadmap"
+              "title": "Backlinks for Indexes"
             }
           },
           {
@@ -154,10 +151,10 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Software Engineering/Roadmap.canvas"
+                "file": "Software Engineering/03 Data Persistence/SQL/Indexes.md"
               },
               "icon": "lucide-info",
-              "title": "File properties for Roadmap"
+              "title": "File properties for Indexes"
             }
           }
         ],
@@ -191,7 +188,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 369.5
+    "width": 312.5
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -210,13 +207,24 @@
   },
   "active": "7400c06101d52411",
   "lastOpenFiles": [
+    "Software Engineering/03 Data Persistence/SQL/SQL.md",
+    "Software Engineering/03 Data Persistence/ORMs/ORMs.md",
+    "Software Engineering/03 Data Persistence/NoSQL/NoSQL.md",
+    "Software Engineering/03 Data Persistence/03 Data Persistence.md",
     "Software Engineering/03 Data Persistence/SQL/Indexes.md",
+    "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205142069.png",
+    "Assets/03 Data Persistence/03 Data Persistence-Indexes-en-01-big-o.png",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-en-05-nonclustered-rid.png",
+    "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205141994.png",
+    "Software Engineering/11 AI & ML/LLM/Evaluation/Classification Evaluation.md",
+    "Software Engineering/11 AI & ML/LLM/Agents/Agents.md",
+    "Software Engineering/Topics.base",
+    "Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation.md",
+    "Software Engineering/03 Data Persistence/SQL/Normalization Denormalization.md",
+    "Software Engineering/Roadmap.canvas",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-en-04-nonclustered-ci-pointer.png",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-en-03-clustered.png",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-en-02-structure.png",
-    "Assets/03 Data Persistence/03 Data Persistence-Indexes-en-01-big-o.png",
-    "Software Engineering/03 Data Persistence/SQL/SQL.md",
     "Software Engineering/Software Engineering.md",
     "Software Engineering/04 Networks/Architecture & Ops/Architecture & Ops.md",
     "Software Engineering/11 AI & ML/Machine Learning/Evaluation/ROC-AUC and PR-AUC.md",
@@ -235,22 +243,12 @@
     "Software Engineering/06 Development Practices/Principles/Principles.md",
     "Software Engineering/05 Architecture/Architecture Styles/Monolith Architecture.md",
     "Software Engineering/05 Architecture/Architecture Styles/Architecture Styles.md",
-    "Software Engineering/05 Architecture/Application Architecture/Plug-in Architecture (MicroKernel).md",
-    "Software Engineering/05 Architecture/Application Architecture/Application Architecture.md",
-    "Software Engineering/04 Networks/Transport & Sockets/UDP.md",
-    "Software Engineering/04 Networks/Transport & Sockets/Sockets.md",
-    "Software Engineering/04 Networks/Transport & Sockets/Transport & Sockets.md",
-    "Software Engineering/04 Networks/Protocols/RPC.md",
     "Assets/audits",
     "Assets/library-big.svg",
     "Assets/01 Programming/01 Programming-Types-20260211184602492.png",
     "Assets/11 AI & ML/11 AI & ML-LLM-20260211012223477.png",
     "Software Engineering/11 AI & ML/Machine Learning/Infrastructure",
     "Software Engineering/11 AI & ML/LLM/Evaluation",
-    "Software Engineering/Roadmap.canvas",
-    "Software Engineering/Topics.base",
-    "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205142069.png",
-    "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205142050.png",
     "Assets/03 Data Persistence",
     "Software Engineering/03 Data Persistence/SQL",
     "Software Engineering/03 Data Persistence/ORMs",

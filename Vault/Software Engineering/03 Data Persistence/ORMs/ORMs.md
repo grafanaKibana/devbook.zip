@@ -6,10 +6,10 @@ subtopic:
 tags:
   - FolderNote
 dg-publish: true
-status: Ready To Repeat
 priority: High
 level:
-  - '4'
+  - "4"
+status: Ready To Repeat
 ---
 
 # Intro
@@ -23,13 +23,6 @@ level:
 
 ## Links
 
-## Deeper Explanation
-
-
-## Questions
-
-
-## Links
 
 <!-- whats-next:start -->
 

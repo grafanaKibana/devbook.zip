@@ -190,16 +190,6 @@ Unlike a clustered index, the leaf level of a nonclustered index contains only t
 > [!QUESTION]- How does ordering work for clustered vs nonclustered indexes?
 > With a clustered index, the leaf level is the table data itself, stored in the index key order, so range scans return rows already ordered by that key. With a nonclustered index, the leaf level stores index keys plus row locators; rows are ordered by the nonclustered key, but fetching non-index columns may require lookups into the clustered index (or heap).
 
-## Links
-
-## Deeper Explanation
-
-
-## Questions
-
-
-## Links
-
 <!-- whats-next:start -->
 
 ---
