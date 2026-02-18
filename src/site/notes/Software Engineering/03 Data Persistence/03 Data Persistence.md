@@ -6,8 +6,6 @@
 # Intro
 
 
-## Deeper Explanation
-
 
 ## Questions
 

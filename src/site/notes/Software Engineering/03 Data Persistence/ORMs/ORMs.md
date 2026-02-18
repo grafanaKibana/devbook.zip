@@ -14,13 +14,6 @@
 
 ## Links
 
-## Deeper Explanation
-
-
-## Questions
-
-
-## Links
 
 <!-- whats-next:start -->
 
