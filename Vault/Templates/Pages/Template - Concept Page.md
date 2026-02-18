@@ -41,9 +41,11 @@ tp.hooks.on_all_templates_executed(async () => {
 
 Quick introduction to the concept
 
-## Deeper Explanation
+## How It Works
 
-Deeper Explanation of the concept
+Explain the mechanism in plain language.
+Prefer one clear, complete explanation over many short bullets.
+Include at least one concrete example or a small diagram walkthrough when useful.
 
 ## Questions
 
