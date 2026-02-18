@@ -13,17 +13,12 @@ dg-publish: true
 # Intro
 
 Parallelism is about finishing CPU-bound work faster by using multiple cores at the same time. In .NET, the main tools are `Parallel.ForEachAsync`, PLINQ, and custom partitioned pipelines. Effective parallel code maximizes throughput while preserving determinism, bounded resource usage, and observability.
-
-## Deeper Explanation
-
-### Mental model
-
 - Async does not automatically mean parallel CPU execution.
 - Parallelism helps when each unit does meaningful CPU work.
 - Shared mutable state is the core risk; minimize or isolate it.
 - Throughput gains are bounded by Amdahl's law and memory bandwidth.
 
-### Representative example
+## Example
 
 ```csharp
 public async Task<IReadOnlyList<Result>> ComputeAsync(
@@ -50,11 +45,6 @@ public async Task<IReadOnlyList<Result>> ComputeAsync(
 }
 ```
 
-### Choosing the tool
-
-- `Parallel.ForEachAsync`: straightforward bounded parallel loops.
-- PLINQ: declarative data transforms where ordering needs are explicit.
-- Manual task partitioning: when you need custom scheduling, affinity, or batching.
 
 ## Pitfalls
 
@@ -63,14 +53,6 @@ public async Task<IReadOnlyList<Result>> ComputeAsync(
 - Running CPU-heavy loops in request handlers can starve unrelated requests.
 - Ignoring ordering requirements can produce nondeterministic bugs.
 
-## Tradeoffs
-
-| Choice | Pros | Cons | Use when |
-|---|---|---|---|
-| `Parallel.ForEachAsync` | Bounded, simple API | Less control than custom scheduler | Per-item CPU transforms |
-| PLINQ | Concise query style | Harder debugging, ordering caveats | Batch analytics style pipelines |
-| Manual partition + tasks | Maximum control | More complexity and failure modes | Specialized workload tuning |
-| Sequential | Deterministic and simple | Lower throughput for CPU-heavy sets | Small datasets or strict ordering |
 
 ## Questions
 

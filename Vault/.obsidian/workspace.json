@@ -21,14 +21,14 @@
             "id": "430576b94cc94aa7",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
+              "type": "markdown",
               "state": {
-                "aFile": "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Classes.md",
-                "bFile": "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Classes.md",
-                "aRef": ""
+                "file": "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/ThreadPool.md",
+                "mode": "source",
+                "source": true
               },
-              "icon": "diff",
-              "title": "Diff: Classes  (Working Tree)"
+              "icon": "lucide-file",
+              "title": "ThreadPool"
             }
           }
         ],
@@ -114,12 +114,13 @@
             "state": {
               "type": "outline",
               "state": {
+                "file": "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/ThreadPool.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline"
+              "title": "Outline of ThreadPool"
             }
           },
           {
@@ -128,6 +129,7 @@
             "state": {
               "type": "backlink",
               "state": {
+                "file": "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/ThreadPool.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -137,7 +139,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks"
+              "title": "Backlinks for ThreadPool"
             }
           },
           {
@@ -159,9 +161,11 @@
             "type": "leaf",
             "state": {
               "type": "file-properties",
-              "state": {},
+              "state": {
+                "file": "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/ThreadPool.md"
+              },
               "icon": "lucide-info",
-              "title": "File properties"
+              "title": "File properties for ThreadPool"
             }
           }
         ],
@@ -212,11 +216,15 @@
       "digitalgarden:Digital Garden Publication Center": true
     }
   },
-  "active": "b4a5f2c64c8491f4",
+  "active": "430576b94cc94aa7",
   "lastOpenFiles": [
+    "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Concurrency and Parallelism.md",
+    "Software Engineering/01 Programming/NET/Other/Other.md",
+    "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/ThreadPool.md",
+    "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Tasks.md",
+    "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Parallelism.md",
     "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Deadlocks.md",
     "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/CancellationToken.md",
-    "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Concurrency and Parallelism.md",
     "Templates/Pages/Template - Index.md",
     "Templates/Pages/Template - Concept Page.md",
     "Software Engineering/Software Engineering.md",
@@ -225,11 +233,7 @@
     "Software Engineering/01 Programming/NET/Runtime/Runtime.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Generics.md",
-    "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/ThreadPool.md",
-    "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Parallelism.md",
-    "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Tasks.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types.md",
-    "Software Engineering/01 Programming/NET/Other/Other.md",
     "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism",
     "Software Engineering/Roadmap.canvas",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Methods.md",

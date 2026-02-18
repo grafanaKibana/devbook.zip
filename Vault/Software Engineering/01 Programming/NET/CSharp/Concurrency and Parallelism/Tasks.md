@@ -14,16 +14,7 @@ dg-publish: true
 
 `Task` is the core .NET abstraction for asynchronous work. It models eventual completion, result/error propagation, and composition (`WhenAll`, `WhenAny`) without forcing you to manage raw threads. For production systems, understanding `Task` semantics is critical for avoiding deadlocks, thread starvation, and unbounded fan-out.
 
-## Deeper Explanation
-
-### Mental model
-
-- A `Task` is a promise of completion, not necessarily a dedicated thread.
-- I/O-bound async operations often complete without occupying a worker thread while waiting.
-- CPU-bound work can be queued via `Task.Run` to the ThreadPool.
-- `await` composes tasks asynchronously; `.Result` and `.Wait()` block.
-
-### Representative example
+## Example
 
 ```csharp
 public async Task<IReadOnlyList<UserDto>> LoadUsersAsync(
@@ -52,14 +43,6 @@ This pattern gives structured concurrency: one parent operation owns all child t
 - Fire-and-forget tasks hide failures unless explicitly observed/logged.
 - Starting thousands of tasks without throttling can saturate dependencies.
 
-## Tradeoffs
-
-| Choice | Pros | Cons | Use when |
-|---|---|---|---|
-| `Task` | Simple, composable, broadly supported | Allocations in hot paths | Default async API type |
-| `ValueTask` | Lower allocation potential | More complex usage rules | Proven hot paths only |
-| `Task.Run` | Easy CPU offload | Misused for I/O, can increase contention | CPU-bound unit on request path |
-| `Thread` | Full control | Expensive and hard to scale | Long-lived dedicated worker |
 
 ## Questions
 
