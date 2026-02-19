@@ -21,14 +21,14 @@
             "id": "430576b94cc94aa7",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "split-diff-view",
               "state": {
-                "file": "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Methods.md",
-                "mode": "preview",
-                "source": true
+                "aFile": "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Strings.md",
+                "bFile": "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Strings.md",
+                "aRef": ""
               },
-              "icon": "lucide-file",
-              "title": "Methods"
+              "icon": "diff",
+              "title": "Diff: Strings  (Working Tree)"
             }
           }
         ],
@@ -134,13 +134,12 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Methods.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Methods"
+              "title": "Outline"
             }
           },
           {
@@ -149,7 +148,6 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Methods.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -159,7 +157,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Methods"
+              "title": "Backlinks"
             }
           },
           {
@@ -181,11 +179,9 @@
             "type": "leaf",
             "state": {
               "type": "file-properties",
-              "state": {
-                "file": "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Methods.md"
-              },
+              "state": {},
               "icon": "lucide-info",
-              "title": "File properties for Methods"
+              "title": "File properties"
             }
           }
         ],
@@ -238,15 +234,22 @@
   },
   "active": "430576b94cc94aa7",
   "lastOpenFiles": [
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Methods.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Generics.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Foreach.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Structs.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Strings.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Reflection.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Records.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Namespaces.md",
     "Software Engineering/01 Programming/NET/CSharp/CSharp.md",
     "Software Engineering/Software Engineering.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Exception Handling.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Methods.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Events.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Classes.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Generics.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Foreach.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Exception Handling.md",
     "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/ThreadPool.md",
     "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Tasks.md",
     "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Parallelism.md",
@@ -255,15 +258,8 @@
     "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/CancellationToken.md",
     "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Async Await.md",
     "Software Engineering/01 Programming/01 Programming.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md",
     "Templates/Pages/Template - Index.md",
     "Templates/Pages/Template - Concept Page.md",
-    "Software Engineering/01 Programming/NET/Runtime/Common Language Runtime.md",
-    "Software Engineering/01 Programming/NET/Other/OWIN.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Reflection.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Namespaces.md",
-    "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Concurrency and Parallelism.md",
-    "Software Engineering/01 Programming/NET/Other/Other.md",
     "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism",
     "Software Engineering/Roadmap.canvas",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types",

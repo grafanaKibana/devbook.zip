@@ -6,7 +6,7 @@ subtopic:
 level:
   - "4"
 priority: Medium
-status: Not-Started
+status: Ready To Repeat
 dg-publish: true
 ---
 # Intro
@@ -213,28 +213,8 @@ Console.WriteLine(a.Items.Count); // 3 — same list instance
 
 ## Questions
 
-> [!QUESTION]- A record class `Person` inherits from `record Entity`. Does `Person == Entity` use value-based or reference-based equality when both have the same property values but different runtime types?
-> Value-based equality in records includes a hidden `EqualityContract` property (returns `typeof(T)` for each record). Two records of different runtime types will **not** be equal even if all declared properties match:
-> ```csharp
-> public record Entity(int Id);
-> public record Person(int Id, string Name) : Entity(Id);
->
-> Entity e = new Entity(1);
-> Person p = new Person(1, "Alice");
-> Console.WriteLine(e == p);  // False — different EqualityContract
-> Console.WriteLine(p == e);  // False
-> ```
-> This prevents a sliced-equality bug where `Person(1, "Alice") == Person(1, "Bob")` could be `true` if compared through the `Entity` lens. The `EqualityContract` check runs first and short-circuits.
-
 > [!QUESTION]- You have a `record Wrapper(List<int> Items)`. You create `var b = a with { };` and then add an item to `b.Items`. Does `a` see the change? Why?
 > Yes — `a` sees the change. `with` performs a *shallow copy*: it copies references, not the underlying objects. Both `a.Items` and `b.Items` point to the same `List<int>` instance. Furthermore, `a == b` was `true` before the mutation (same reference in both), but the equality check still uses `List<T>.Equals` which is reference equality — so it remains `true` even after the content changes. To get proper deep value semantics, use immutable collections (`ImmutableList<T>`, `ImmutableArray<T>`) or override `Equals` to compare content.
-
-> [!QUESTION]- Can a plain class inherit from a record? Can a record inherit from a plain class?
-> Neither is allowed:
-> - A `class` cannot inherit from a `record` — the compiler rejects it because records have generated members (equality contract, clone method) that the class system does not expect.
-> - A `record` cannot inherit from a `class` — records can only derive from `object` or from another `record`.
-> - A `record struct` cannot inherit from anything (structs do not support inheritance).
-> This strict hierarchy ensures that record equality semantics are consistent throughout the inheritance chain.
 
 > [!QUESTION]- When would you choose `record class` over `readonly record struct`?
 > Choose `record class` when:
