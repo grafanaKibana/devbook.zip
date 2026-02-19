@@ -21,18 +21,17 @@
             "id": "430576b94cc94aa7",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
+              "type": "markdown",
               "state": {
-                "aFile": "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Structs.md",
-                "bFile": "Vault/Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Structs.md",
-                "aRef": ""
+                "file": "Software Engineering/01 Programming/NET/Other/OWIN.md",
+                "mode": "source",
+                "source": true
               },
-              "icon": "diff",
-              "title": "Diff: Structs  (Working Tree)"
+              "icon": "lucide-file",
+              "title": "OWIN"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       },
       {
         "id": "1809edfd84fd3307",
@@ -44,12 +43,26 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Software Engineering/Software Engineering.md",
-                "mode": "preview",
+                "file": "Software Engineering/01 Programming/NET/Other/SignalR.md",
+                "mode": "source",
                 "source": true
               },
               "icon": "lucide-file",
-              "title": "Software Engineering"
+              "title": "SignalR"
+            }
+          },
+          {
+            "id": "fa59b2617742a0aa",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Reflection.md",
+                "mode": "source",
+                "source": true
+              },
+              "icon": "lucide-file",
+              "title": "Reflection"
             }
           }
         ]
@@ -134,12 +147,13 @@
             "state": {
               "type": "outline",
               "state": {
+                "file": "Software Engineering/01 Programming/NET/Other/SignalR.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline"
+              "title": "Outline of SignalR"
             }
           },
           {
@@ -148,6 +162,7 @@
             "state": {
               "type": "backlink",
               "state": {
+                "file": "Software Engineering/01 Programming/NET/Other/SignalR.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -157,7 +172,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks"
+              "title": "Backlinks for SignalR"
             }
           },
           {
@@ -179,9 +194,11 @@
             "type": "leaf",
             "state": {
               "type": "file-properties",
-              "state": {},
+              "state": {
+                "file": "Software Engineering/01 Programming/NET/Other/SignalR.md"
+              },
               "icon": "lucide-info",
-              "title": "File properties"
+              "title": "File properties for SignalR"
             }
           }
         ],
@@ -232,8 +249,20 @@
       "digitalgarden:Digital Garden Publication Center": true
     }
   },
-  "active": "430576b94cc94aa7",
+  "active": "34db5e89adb1ce9f",
   "lastOpenFiles": [
+    "Software Engineering/01 Programming/NET/Other/OWIN.md",
+    "Software Engineering/01 Programming/NET/Other/SignalR.md",
+    "Software Engineering/01 Programming/NET/Other/Other.md",
+    "Software Engineering/Software Engineering.md",
+    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Reflection.md",
+    "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Selection Sort.md",
+    "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Quick Sort.md",
+    "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Merge Sort.md",
+    "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Bubble Sort.md",
+    "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms.md",
+    "Software Engineering/02 Computer Science/Data Structures/Data Structures.md",
+    "Software Engineering/Roadmap.canvas",
     "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/ThreadPool.md",
     "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Tasks.md",
     "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Parallelism.md",
@@ -246,22 +275,10 @@
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Generics.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Methods.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Namespaces.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Reflection.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Classes.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Events.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Records.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Strings.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Structs.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types.md",
-    "Software Engineering/Software Engineering.md",
-    "Software Engineering/01 Programming/NET/NET.md",
-    "Software Engineering/01 Programming/01 Programming.md",
-    "Templates/Pages/Template - Index.md",
-    "Templates/Pages/Template - Concept Page.md",
     "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism",
-    "Software Engineering/Roadmap.canvas",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types",
     "Assets/01 Programming/01 Programming-Types-20260211184602492.png",
     "Assets/11 AI & ML/11 AI & ML-LLM-20260211012223477.png",

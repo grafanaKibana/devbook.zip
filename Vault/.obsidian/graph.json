@@ -8,10 +8,17 @@
   "collapse-color-groups": false,
   "colorGroups": [
     {
-      "query": "tag:#FolderNote",
+      "query": "tag:#FolderNote  ",
       "color": {
         "a": 1,
-        "rgb": 3026478
+        "rgb": 11424480
+      }
+    },
+    {
+      "query": "tag:#MetricsIgnore  ",
+      "color": {
+        "a": 1,
+        "rgb": 14701138
       }
     },
     {
@@ -20,37 +27,9 @@
         "a": 1,
         "rgb": 11657298
       }
-    },
-    {
-      "query": "[\"status\":Not-Started]",
-      "color": {
-        "a": 1,
-        "rgb": 16743034
-      }
-    },
-    {
-      "query": "[\"status\":Creation]",
-      "color": {
-        "a": 1,
-        "rgb": 16502639
-      }
-    },
-    {
-      "query": "[\"status\":Repetition]",
-      "color": {
-        "a": 1,
-        "rgb": 7890141
-      }
-    },
-    {
-      "query": "[\"status\":Ready To Repeat]",
-      "color": {
-        "a": 1,
-        "rgb": 13663195
-      }
     }
   ],
-  "collapse-display": true,
+  "collapse-display": false,
   "showArrow": false,
   "textFadeMultiplier": 0,
   "nodeSizeMultiplier": 1,
@@ -60,6 +39,6 @@
   "repelStrength": 10,
   "linkStrength": 1,
   "linkDistance": 250,
-  "scale": 0.315438575135057,
-  "close": true
+  "scale": 0.12475092727183394,
+  "close": false
 }
