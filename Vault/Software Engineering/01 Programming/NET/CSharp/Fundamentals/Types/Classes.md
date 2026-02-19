@@ -6,7 +6,8 @@ subtopic:
 level:
   - "4"
 priority: Medium
-status: Not-Started
+status:
+  - Ready To Repeat
 dg-publish: true
 ---
 # Intro
@@ -30,13 +31,6 @@ var b = a;          // b points to the SAME object
 b.Total = 0m;
 Console.WriteLine(a.Total); // 0 — both references share the object
 ```
-
-Key properties:
-
-- Support single-class inheritance and multiple interface implementation.
-- Can have finalizers (`~ClassName()`), virtual/abstract members, and `protected` access.
-- Default value of a class variable is `null`.
-- Equality (`==`) compares references by default (unless overloaded, e.g. `string`).
 
 ## Class Modifiers
 
@@ -202,7 +196,7 @@ Key rules:
 > - **Inheritance**: a class can implement many interfaces but inherit from only one class.
 > - **Access modifiers**: abstract classes support `protected`/`internal` members; interface members are implicitly public (C# 8+ allows explicit modifiers but no `protected` instance state).
 > - **Performance**: virtual dispatch on abstract class methods is a single vtable lookup; default interface methods may involve additional dispatch overhead.
-> - Choose abstract class when you need shared mutable state, constructors, or `protected` implementation details. Choose interfaces for capability contracts and when multiple inheritance is needed.
+> - **Use Case**: The default implementation for interface methods have different goal compared to the abstract class implemented methods. While in class, semantically methods providing the basic shared functionality for the delivered classes, that don't have to be overriden. While default implementation exist for making extending the interfaces without breaking the inheritors. 
 
 > [!QUESTION]- Can a static class implement an interface? Why or why not?
 > No. A static class compiles to an `abstract sealed` class at IL level — it cannot be instantiated, so there is no object to dispatch interface calls through. Interfaces require an instance for virtual dispatch. If you need a "static implementation" of a contract, the patterns are:
@@ -245,7 +239,7 @@ Key rules:
 > 3. **Use `record class` instead** — the compiler generates value-based `Equals`, `GetHashCode`, `==`, and `!=` automatically. This is the recommended approach for data-carrier types.
 
 > [!QUESTION]- A static constructor throws an exception. What happens on subsequent accesses to that type?
-> The runtime marks the type as permanently broken. Every subsequent attempt to access any member of the type throws a `TypeInitializationException` wrapping the original exception — even if the condition that caused the failure has been resolved. The type cannot be re-initialized for the lifetime of the AppDomain (or AssemblyLoadContext in .NET Core). This is why static constructors should be kept minimal and defensive — failures are unrecoverable.
+> The runtime marks the type as permanently broken. Every subsequent attempt to access any member of the type throws a `TypeInitializationException` wrapping the original exception — even if the condition that caused the failure has been resolved. The type cannot be re-initialized for the lifetime of the AppDomain (or AssemblyLoadContext in .NET Core). This is why static constructors should be kept minimal and defensive because failures are unrecoverable.
 
 ## Links
 

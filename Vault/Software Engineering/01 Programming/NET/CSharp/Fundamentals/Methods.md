@@ -11,7 +11,7 @@ dg-publish: true
 ---
 # Intro
 
-TODO
+Methods are the core unit of behavior in C#: they define contracts, shape API boundaries, and express how data flows through a system. Parameter modifiers like `ref`, `in`, and `params` are not just syntax details - they directly affect mutability, copying/allocation behavior, and performance characteristics at call sites. Dispatch keywords like `virtual`, `override`, and `new` determine whether behavior is polymorphic at runtime or resolved by compile-time type. Use these features intentionally to design method APIs that stay clear, safe, and predictable as codebases grow.
 
 ## Input Parameters
 
@@ -66,11 +66,11 @@ static void ProcessData(in int value)
 
 ### params
 
-`params` lets a method accept a variable number of arguments as an array (or, since C# 13, any collection type).
+`params` lets a method accept a variable number of arguments as an array (or, since C# 13, recognized collection types).
 
 - Must be the last parameter in the method signature.
 - The caller can pass individual arguments, an array, or nothing at all.
-- The compiler allocates an array on each call — avoid in hot paths.
+- Expanded-form calls (for example, `Sum(1, 2, 3)`) construct the `params` collection at the call site; passing an existing collection can avoid extra construction.
 
 ```csharp
 static int Sum(params int[] numbers)
@@ -86,7 +86,7 @@ Sum();           // 0
 Sum(new[] { 4, 5 }); // 9 — explicit array also works
 ```
 
-C# 13 extends `params` beyond arrays to `Span<T>`, `ReadOnlySpan<T>`, `IEnumerable<T>`, and other collection types, which avoids the hidden heap allocation:
+C# 13 extends `params` beyond arrays to recognized collection types such as `Span<T>`, `ReadOnlySpan<T>`, and `IEnumerable<T>`. This can reduce allocations in some call patterns (especially span-based calls), but allocation behavior still depends on the target type and call form:
 
 ```csharp
 static int Sum(params ReadOnlySpan<int> numbers)
@@ -173,6 +173,17 @@ Console.WriteLine(asDog.Category());    // Dog
 
 `override` participates in polymorphism; `new` does not.
 
+## Pitfalls
+
+- Optional parameter defaults are substituted at the call site during compilation, so changing a default value in a shared library does not update already compiled consumers; this can create silent behavior drift across services. Prefer explicit overloads for public APIs and treat default-value changes as breaking behavior.
+- `in` parameters are readonly by reference, but the compiler can introduce temporaries for some argument forms or conversions, which means expected copy-avoidance may not happen. Benchmark hot paths, and if you must minimize temporaries, design APIs around stricter by-ref calling patterns (for example, `ref readonly` parameters) and avoid argument expressions that require conversions.
+- Member hiding with `new` is resolved by compile-time type, so callers can observe different results for the same runtime object depending on reference type. Prefer `virtual`/`override` when polymorphism is intended, and avoid `new` on public APIs unless the behavior split is deliberate and documented.
+
+## Tradeoffs
+
+- By-value vs `in` vs `ref`: by-value keeps APIs simplest and safest for small structs, `in` communicates read-only intent and can reduce copies for large structs, and `ref` enables mutation/rebinding but increases coupling and side-effect risk.
+- `override` vs `new`: `override` gives predictable runtime polymorphism and is usually the right choice for extensible designs, while `new` preserves separate behavior per compile-time type but can surprise callers and complicate versioning.
+
 ## Questions
 
 > [!QUESTION]- Why might you need `ref` for reference types if reference types are already passed by reference?
@@ -196,6 +207,8 @@ Console.WriteLine(asDog.Category());    // Dog
 ## Links
 
 - [Method parameters and modifiers (ref/in/out)](https://learn.microsoft.com/dotnet/csharp/language-reference/keywords/method-parameters#reference-parameters)
+- [C# 13: params collections](https://learn.microsoft.com/dotnet/csharp/whats-new/csharp-13#params-collections)
+- [C# 13: calling methods is easier and faster](https://devblogs.microsoft.com/dotnet/csharp13-calling-methods-is-easier-and-faster/)
 
 <!-- whats-next:start -->
 

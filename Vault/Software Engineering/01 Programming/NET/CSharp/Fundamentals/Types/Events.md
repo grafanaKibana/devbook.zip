@@ -6,14 +6,13 @@ subtopic:
 level:
   - "4"
 priority: Medium
-status: Not-Started
+status:
+  - Ready To Repeat
 dg-publish: true
 ---
 # Intro
 
 An event is a restricted delegate member that implements publisher-subscriber communication. Outside the declaring type, consumers can only subscribe (`+=`) and unsubscribe (`-=`); they cannot invoke or replace the delegate invocation list. This encapsulation is why events are preferred over raw public delegates in APIs.
-
-## Deeper Explanation
 
 The standard .NET event signature uses `EventHandler` or `EventHandler<TEventArgs>`.
 
@@ -52,15 +51,6 @@ With a public delegate field, any caller can do dangerous operations like:
 
 `event` blocks these operations for external code and exposes only subscription semantics.
 
-### Raising Events Safely
-
-Preferred pattern:
-
-- field-like event declaration
-- `protected virtual OnXxx(...)` raiser
-- `?.Invoke(this, args)` inside the raiser
-
-`?.Invoke` is thread-safe for the null-check/invocation window because it works on a copied delegate reference.
 
 ### Custom `add` and `remove`
 
@@ -89,9 +79,6 @@ public event EventHandler Tick
 
 1. **Memory leaks via long-lived publishers**: subscribers stay alive while subscribed.
 2. **Forgotten unsubscribe**: common in UI/view-model/service lifetimes.
-3. **Lambda unsubscribe bug**: cannot unsubscribe anonymous lambdas unless handler was stored.
-4. **Subscriber exceptions bubbling out**: one bad handler can fail the publisher call path.
-5. **Wrong sender/args conventions**: use `this` for instance events, `null` for static events, and `EventArgs.Empty` when no data exists.
 
 Example leak-safe subscription pattern:
 
@@ -114,14 +101,6 @@ public sealed class Listener : IDisposable
 }
 ```
 
-## Tradeoffs
-
-| Choice | Pros | Cons | Use when |
-|---|---|---|---|
-| `event EventHandler<T>` | Standard conventions, discoverable API | Boilerplate `EventArgs` type | Public framework/library surface |
-| Custom delegate event | Precise signature | Less familiar conventions | Domain needs special signature |
-| Event bus/message broker | Decoupled and scalable | More complexity and infra | Cross-bounded-context integration |
-| Raw delegate field | Very simple | No encapsulation, unsafe API | Private/internal implementation details only |
 
 ## Questions
 
