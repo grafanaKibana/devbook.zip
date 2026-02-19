@@ -91,4 +91,10 @@ sequenceDiagram
 > **Parent**
 >  [[Software Engineering/01 Programming/NET/NET\|NET]]
 >
+> **Pages**
+> - [[Software Engineering/01 Programming/NET/ASP.NET Web API/Authentication\|Authentication]]
+> - [[Software Engineering/01 Programming/NET/ASP.NET Web API/Authorization\|Authorization]]
+> - [[Software Engineering/01 Programming/NET/ASP.NET Web API/CORS\|CORS]]
+> - [[Software Engineering/01 Programming/NET/ASP.NET Web API/Dependency Injection\|Dependency Injection]]
+> - [[Software Engineering/01 Programming/NET/ASP.NET Web API/Filters\|Filters]]
 <!-- whats-next:end -->

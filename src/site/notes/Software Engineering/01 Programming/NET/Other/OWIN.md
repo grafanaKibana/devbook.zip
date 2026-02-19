@@ -5,13 +5,11 @@
 
 # Intro
 
-OWIN (Open Web Interface for .NET) defines a standard boundary between .NET web servers and web applications. It became popular through Katana and is most relevant today when you maintain legacy ASP.NET applications or migrate them to ASP.NET Core. The key value is understanding middleware pipeline composition and host decoupling, because those ideas carry directly into modern .NET web stacks.
-
-## How It Works
-
-### Mental Model
-
-An OWIN app is middleware chained around an environment dictionary (`IDictionary<string, object>`). Each middleware can inspect/modify request state, call the next component, then inspect/modify the response on the way back.
+OWIN (Open Web Interface for .NET) defines a standard boundary between .NET web servers and web applications. 
+It became popular through Katana and is most relevant today when you maintain legacy ASP.NET applications or migrate them to ASP.NET Core.
+The key value is understanding middleware pipeline composition and host decoupling, because those ideas carry directly into modern .NET web stacks.
+An OWIN app is middleware chained around an environment dictionary (`IDictionary<string, object>`).
+Each middleware can inspect/modify request state, call the next component, then inspect/modify the response on the way back.
 
 ```mermaid
 flowchart LR
@@ -71,7 +69,7 @@ This pattern is conceptually similar to ASP.NET Core middleware, but the abstrac
 > - ASP.NET Core uses different abstractions (`HttpContext`, endpoint routing, hosting model) and has first-class integration with modern .NET runtime/tooling.
 > - Migration should be treated as conceptual reuse plus API rewrite, not a drop-in protocol swap.
 
-> [!QUESTION]- You are modernizing an OWIN app with strict uptime requirements. How do you choose incremental migration vs rewrite?
+> [!QUESTION]- How should incremental migration vs full rewrite be chosen when modernizing an OWIN app under strict uptime requirements?
 > - Prefer incremental migration when downtime risk and release pressure are high; isolate seams (auth, API endpoints, cross-cutting middleware) and move components in slices.
 > - Prefer rewrite when current architecture blocks critical goals (performance, security posture, operability) and business can fund a transition window.
 > - Decide with hard constraints: SLA tolerance, test coverage quality, team expertise, and ability to run parallel environments safely.

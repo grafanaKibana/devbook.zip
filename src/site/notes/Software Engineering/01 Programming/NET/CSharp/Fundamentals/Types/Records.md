@@ -206,7 +206,7 @@ Console.WriteLine(a.Items.Count); // 3 — same list instance
 
 ## Questions
 
-> [!QUESTION]- You have a `record Wrapper(List<int> Items)`. You create `var b = a with { };` and then add an item to `b.Items`. Does `a` see the change? Why?
+> [!QUESTION]- In `record Wrapper(List<int> Items)`, if `var b = a with { };` and an item is added to `b.Items`, does `a` observe the change, and why?
 > Yes — `a` sees the change. `with` performs a *shallow copy*: it copies references, not the underlying objects. Both `a.Items` and `b.Items` point to the same `List<int>` instance. Furthermore, `a == b` was `true` before the mutation (same reference in both), but the equality check still uses `List<T>.Equals` which is reference equality — so it remains `true` even after the content changes. To get proper deep value semantics, use immutable collections (`ImmutableList<T>`, `ImmutableArray<T>`) or override `Equals` to compare content.
 
 > [!QUESTION]- When would you choose `record class` over `readonly record struct`?
@@ -221,7 +221,7 @@ Console.WriteLine(a.Items.Count); // 3 — same list instance
 > - You are on a hot path where GC pressure matters (e.g. tight loops, high-throughput pipelines).
 > - No inheritance is needed.
 
-> [!QUESTION]- You override `Equals` on a positional record to ignore one property. Does `GetHashCode` still include that property? What happens?
+> [!QUESTION]- If `Equals` on a positional record is overridden to ignore one property, does `GetHashCode` still include that property, and what breaks?
 > Yes — the compiler-generated `GetHashCode` includes all positional properties regardless of your `Equals` override. This breaks the contract: two objects that are "equal" (by your custom `Equals`) may have different hash codes, causing them to land in different buckets in `Dictionary`, `HashSet`, or any hash-based collection. Lookups silently fail. **Rule**: whenever you override `Equals`, always override `GetHashCode` to match. The compiler emits a warning (CS8851) if you override one without the other, but it is only a warning — not an error.
 
 > [!QUESTION]- Can a record struct be used as a `Dictionary` key safely? What do you need to watch out for?
