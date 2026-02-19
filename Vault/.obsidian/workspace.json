@@ -31,17 +31,14 @@
             "id": "e7a7b303c61786dc",
             "type": "leaf",
             "state": {
-              "type": "canvas",
+              "type": "markdown",
               "state": {
-                "file": "Software Engineering/Roadmap.canvas",
-                "viewState": {
-                  "x": 186.02833429698973,
-                  "y": 1754.1436047352263,
-                  "zoom": -1.6510261869362723
-                }
+                "file": "Software Engineering/Software Engineering.md",
+                "mode": "preview",
+                "source": true
               },
-              "icon": "lucide-layout-dashboard",
-              "title": "Roadmap"
+              "icon": "lucide-file",
+              "title": "Software Engineering"
             }
           }
         ]
@@ -126,13 +123,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Software Engineering/01 Programming/NET/Other/OWIN.md",
+                "file": "Software Engineering/Software Engineering.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of OWIN"
+              "title": "Outline of Software Engineering"
             }
           },
           {
@@ -141,7 +138,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Software Engineering/01 Programming/NET/Other/OWIN.md",
+                "file": "Software Engineering/Software Engineering.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -151,7 +148,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for OWIN"
+              "title": "Backlinks for Software Engineering"
             }
           },
           {
@@ -174,10 +171,10 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Software Engineering/01 Programming/NET/Other/OWIN.md"
+                "file": "Software Engineering/Software Engineering.md"
               },
               "icon": "lucide-info",
-              "title": "File properties for OWIN"
+              "title": "File properties for Software Engineering"
             }
           }
         ],
@@ -228,15 +225,20 @@
       "digitalgarden:Digital Garden Publication Center": true
     }
   },
-  "active": "430576b94cc94aa7",
+  "active": "e7a7b303c61786dc",
   "lastOpenFiles": [
+    "Software Engineering/01 Programming/NET/ASP.NET Web API/Filters.md",
+    "Software Engineering/Software Engineering.md",
+    "Software Engineering/Questions.md",
+    "Software Engineering/Topics.base",
+    "Software Engineering/03 Data Persistence/ACID.md",
+    "Assets/01 Programming/01 Programming-Types-20260211184602492.png",
+    "Software Engineering/Roadmap.canvas",
+    "Software Engineering/01 Programming/NET/Other/OWIN.md",
     "Software Engineering/01 Programming/NET/ASP.NET Web API/Authorization.md",
     "Software Engineering/01 Programming/NET/ASP.NET Web API/Authentication.md",
     "Software Engineering/01 Programming/NET/ASP.NET Web API/CORS.md",
     "Software Engineering/01 Programming/NET/ASP.NET Web API/Dependency Injection.md",
-    "Software Engineering/01 Programming/NET/ASP.NET Web API/Filters.md",
-    "Software Engineering/Roadmap.canvas",
-    "Software Engineering/Software Engineering.md",
     "Software Engineering/11 AI & ML/Machine Learning/Types/Reinforcement Learning.md",
     "Software Engineering/11 AI & ML/Machine Learning/Types/Semi-Supervised Learning.md",
     "Software Engineering/11 AI & ML/Machine Learning/Types/Self-Supervised Learning.md",
@@ -254,14 +256,8 @@
     "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Semaphore.md",
     "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Mutex.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Classes.md",
-    "Software Engineering/02 Computer Science/Data Structures/Data Structures.md",
-    "Software Engineering/02 Computer Science/Data Structures/LinkedList.md",
-    "Software Engineering/02 Computer Science/Data Structures/Queue.md",
-    "Software Engineering/02 Computer Science/Data Structures/Stack.md",
-    "Software Engineering/Topics.base",
     "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types",
-    "Assets/01 Programming/01 Programming-Types-20260211184602492.png",
     "Assets/11 AI & ML/11 AI & ML-LLM-20260211012223477.png",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205141994.png",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260218023449265.png",
