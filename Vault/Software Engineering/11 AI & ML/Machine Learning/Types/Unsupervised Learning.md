@@ -13,19 +13,8 @@ dg-publish: true
 # Intro
 
 Unsupervised learning finds structure in data without target labels. Use it when you have large unlabeled datasets and need segmentation, anomaly detection, or compact representations before a supervised task exists.
-
-## How It Works
-
-The model optimizes an objective that captures structure, such as grouping similar points, reconstructing inputs with fewer dimensions, or identifying observations that do not fit the baseline distribution.
-
-## Examples
-
-A payments team clusters merchants by transaction behavior to discover hidden risk segments. The clusters become inputs for policy decisions and later labeling strategy.
-
-## Pitfalls
-
-- Teams often over-interpret clusters as stable business entities. This happens because clustering objectives optimize geometry, not domain meaning. Mitigate with repeated runs, stability checks, and domain validation before operational use.
-- Optimization on proxy metrics can hide downstream failure. This happens when silhouette score improves but task outcomes do not. Mitigate by evaluating whether unsupervised outputs improve a real decision workflow.
+At a high level, the model optimizes an objective that captures structure in the input space, such as grouping similar points, reconstructing inputs with fewer dimensions, or flagging observations that do not match baseline behavior.
+For Example, a payments team clusters merchants by transaction behavior to discover hidden risk segments, then uses those segments to guide policy review and prioritize future labeling.
 
 ## Questions
 
@@ -48,7 +37,9 @@ A payments team clusters merchants by transaction behavior to discover hidden ri
 
 - [Clustering (Google Developers)](https://developers.google.com/machine-learning/clustering)
 - [scikit-learn clustering guide](https://scikit-learn.org/stable/modules/clustering.html)
-- [Practical Guide to Cluster Analysis in Python](https://realpython.com/k-means-clustering-python/)
+- [scikit-learn anomaly detection](https://scikit-learn.org/stable/modules/outlier_detection.html)
+- [scikit-learn dimensionality reduction](https://scikit-learn.org/stable/modules/decomposition.html)
+- [Rules of ML engineering](https://developers.google.com/machine-learning/guides/rules-of-ml)
 
 <!-- whats-next:start -->
 

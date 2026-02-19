@@ -40,9 +40,11 @@ tp.hooks.on_all_templates_executed(async () => {
 # Intro
 
 Quick introduction to the concept
-Explain the mechanism in plain language.
-Prefer clear, complete explanation over short bullets.
-Include at least one concrete example or a small diagram walkthrough when useful.
+For simple topics, keep mechanism + example inline in this section.
+Add standalone sections only when they improve clarity:
+- `## How It Works` for non-obvious mechanisms/flows
+- `## Example` when an inline example is not enough
+- `## Pitfalls` only for non-obvious real-world failure modes
 
 ## Questions
 

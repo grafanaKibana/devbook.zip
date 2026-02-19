@@ -12,20 +12,12 @@ dg-publish: true
 
 # Intro
 
-Supervised learning trains a model on labeled input-output pairs so the model can predict a known target for new examples. It is usually the first choice when reliable labels exist and the business objective is explicit, such as classification or regression. The practical value is straightforward evaluation: you can measure performance directly against ground truth.
-
-## How It Works
-
-Training repeatedly compares model predictions with known labels, computes a loss, and updates parameters to reduce that loss. Good supervised systems depend as much on label quality, feature quality, and split strategy as on model choice.
-
-## Examples
-
-Support tickets are labeled with owning team (`Billing`, `Security`, `Platform`). Train a text classifier on historical labeled tickets, then route new tickets automatically and keep human override for low-confidence cases.
-
-## Pitfalls
-
-- Label leakage can create inflated offline metrics when training features include post-outcome information. This happens when feature pipelines do not enforce time boundaries. Mitigate with time-aware feature audits and strict train/serve parity checks.
-- Label noise can cap model quality even with stronger architectures. This happens when annotation rules are inconsistent across reviewers. Mitigate with sampled label audits, disagreement tracking, and relabeling of high-impact slices.
+Supervised learning trains a model on labeled input-output pairs so the model can predict a known target for new examples.
+It is usually the first choice when reliable labels exist and the business objective is explicit, such as classification or regression.
+The practical value is straightforward evaluation: you can measure performance directly against ground truth.
+Training repeatedly compares model predictions with known labels, computes a loss, and updates parameters to reduce that loss.
+In practice, model quality depends as much on label quality, feature quality, and split strategy as on architecture choice.
+For Example, label support tickets with owning team (`Billing`, `Security`, `Platform`), train a text classifier on historical labeled tickets, and route new tickets automatically with human override for low-confidence cases.
 
 ## Questions
 

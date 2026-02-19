@@ -14,18 +14,9 @@ dg-publish: true
 
 Self-supervised learning builds supervision from raw data itself by creating proxy prediction tasks. It is useful when labels are scarce but unlabeled corpora are large, especially in language, vision, and multimodal systems.
 
-## How It Works
-
-You pretrain a model on a proxy objective such as masked-token prediction, then adapt the learned representation to downstream tasks with limited labels. The transfer quality depends on how well the pretraining objective captures structure needed by the target task.
-
-## Examples
-
-An enterprise search system pretrains embeddings on millions of internal documents using contrastive objectives, then fine-tunes on a small relevance-labeled dataset for ranking.
-
-## Pitfalls
-
-- Pretraining gains can fail to transfer to business tasks. This happens when proxy objectives learn shortcuts unrelated to downstream outcomes. Mitigate with task-level validation and ablation against supervised-only baselines.
-- Representation collapse can reduce embedding usefulness in contrastive setups. This happens when data augmentations or negative sampling are poorly designed. Mitigate with monitoring on embedding diversity and retrieval quality metrics.
+You pretrain a model on a proxy objective such as masked-token prediction, then adapt the learned representation to downstream tasks with limited labels.
+Transfer quality depends on whether the pretraining objective captures structure that matters for the target task.
+For Example, an enterprise search system pretrains embeddings on a large internal document corpus with a contrastive objective, then fine-tunes on a small relevance-labeled dataset for ranking.
 
 ## Questions
 
@@ -50,6 +41,8 @@ An enterprise search system pretrains embeddings on millions of internal documen
 - [BERT: Pre-training of Deep Bidirectional Transformers](https://arxiv.org/abs/1810.04805)
 - [Learning Transferable Visual Models From Natural Language Supervision (CLIP)](https://arxiv.org/abs/2103.00020)
 - [OpenAI CLIP research write-up](https://openai.com/research/clip)
+- [Bootstrap Your Own Latent A New Approach to Self-Supervised Learning](https://arxiv.org/abs/2006.07733)
+- [SEER self-supervised computer vision at scale (Meta Engineering)](https://ai.meta.com/blog/seer-the-start-of-a-more-powerful-flexible-and-accessible-era-for-computer-vision/)
 
 <!-- whats-next:start -->
 
