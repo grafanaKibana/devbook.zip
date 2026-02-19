@@ -5,11 +5,23 @@
 
 # Intro
 
-Not everything in .NET fits neatly into a single bucket: some tools and frameworks are best learned as "ecosystem building blocks". This folder collects those pieces and when to reach for them. Example: use SignalR when you need real-time updates to clients, and OWIN concepts when you need to understand middleware pipelines.
+Not everything in .NET fits cleanly into language/runtime buckets. This folder captures ecosystem topics that are important in practice but often context-dependent, such as legacy web hosting abstractions and real-time communication stacks. Example: use SignalR for server-push real-time updates, and study OWIN mainly for legacy ASP.NET maintenance or migration work.
+
+## What Is In This Folder
+
+- `OWIN`: host-application boundary and middleware pipeline model used in classic ASP.NET/Katana.
+- `SignalR`: real-time, bidirectional client/server messaging with hubs, groups, and scale-out concerns.
+
+## How To Use This Folder
+
+- Start with `SignalR` if you are building or operating modern real-time .NET systems.
+- Study `OWIN` when you work with ASP.NET Framework-era services or migration projects.
+- Focus on decision rules, pitfalls, and migration tradeoffs rather than memorizing APIs.
 
 ## Links
 
-- [.NET documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/)
+- [.NET documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/) - Platform overview and official references.
+- [ASP.NET Core documentation](https://learn.microsoft.com/en-us/aspnet/core/) - Modern web stack guidance for middleware and real-time features.
 
 <!-- whats-next:start -->
 
