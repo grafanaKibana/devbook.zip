@@ -6,7 +6,8 @@ subtopic:
 level:
   - "4"
 priority: Medium
-status: Creation
+status:
+  - Done
 dg-publish: true
 ---
 # Intro
@@ -37,6 +38,26 @@ Constraints define what operations are legal on `T` and protect APIs from invali
 - `where T : BaseType` - `T` must inherit from a specific base type.
 - `where T : ISomeInterface` - `T` must implement a specific interface.
 
+## Variance
+
+Variance controls assignment compatibility between constructed generic types.
+
+- Invariance (default): `List<string>` is not assignable to `List<object>`.
+- Covariance (`out T`): lets you use a more derived type where a base type is expected for producer-only APIs (for example, `IEnumerable<string>` to `IEnumerable<object>`).
+- Contravariance (`in T`): lets you use a less derived type where a more derived type is expected for consumer-only APIs (for example, `IComparer<object>` as `IComparer<string>`).
+- Variance is supported on interfaces and delegates marked with `in`/`out`, and only for reference-type substitutions.
+
+```csharp
+IEnumerable<string> names = new List<string> { "Ada", "Linus" };
+IEnumerable<object> objects = names; // covariance
+
+Action<object> printAny = o => Console.WriteLine(o);
+Action<string> printString = printAny; // contravariance
+
+List<string> list = new();
+// List<object> invalid = list; // does not compile (invariance)
+```
+
 ## Example
 
 ```csharp
@@ -51,19 +72,33 @@ public static T CreateAndValidate<T>()
 
 ## Pitfalls
 
-- Unconstrained `T` is very limited: you cannot call members or use operators unless you add constraints.
-- `default(T)` can be surprising (`null` for refs, zeroed value for structs); be explicit about nullability and defaults.
-- Over-constraining (`where T : class, SomeConcreteType`) reduces reuse and can force awkward workarounds.
+- Unconstrained `T` blocks member/operator usage because the compiler cannot prove capabilities, which pushes unsafe casts and weakens API clarity; add the smallest constraint set (`where T : IFoo`, `where T : struct`, etc.) that encodes what the algorithm really needs.
+- `default(T)` can hide correctness bugs because reference and nullable types become `null` while value types become zeroed data, which may be interpreted as valid business values; model absence explicitly (for example, `Try` pattern, `Option`, or nullable annotations) and validate before use.
+- Over-constraining (`where T : class, SomeConcreteType`) couples generic APIs to one hierarchy, which prevents reuse and forces duplicate implementations later; prefer interface-based constraints that describe behavior instead of concrete inheritance chains.
 
 ## Questions
 
-TODO
+> [!QUESTION]- Why does `IEnumerable<string>` assign to `IEnumerable<object>`, but `List<string>` does not assign to `List<object>`?
+> `IEnumerable<out T>` is covariant, so it is safe to upcast because it only produces `T` values.
+> `List<T>` is invariant because it both reads and writes `T`; if `List<string>` were assignable to `List<object>`, code could add a non-string object and break type safety.
+> In practice, expose covariant interfaces (`IEnumerable<T>`, `IReadOnlyList<T>`) at API boundaries and keep mutable concrete collections internal.
+
+> [!QUESTION]- When should you mark a generic interface type parameter as `out` or `in`?
+> Use `out` when the type parameter is output-only (returned values), and `in` when it is input-only (method arguments).
+> If a parameter must be both consumed and produced, keep it invariant because variance would allow unsafe assignments.
+> This design choice improves API flexibility without sacrificing compile-time safety.
+
+> [!QUESTION]- A generic method uses `default(T)` as a fallback value. Why can this be dangerous in production code?
+> `default(T)` can silently map to meaningful domain values (`0`, `DateTime.MinValue`, `null`), so failures look like valid data instead of explicit errors.
+> Repeated fallback usage can spread bad state across caches, persistence, or downstream services before detection.
+> Prefer explicit failure paths (`TryXxx`, exceptions, discriminated result types) and validate invariants at boundaries.
 
 ## Links
 
 - [Generics in C#](https://learn.microsoft.com/dotnet/csharp/programming-guide/generics/)
 - [Constraints on type parameters](https://learn.microsoft.com/dotnet/csharp/programming-guide/generics/constraints-on-type-parameters)
 - [Covariance and contravariance in generics](https://learn.microsoft.com/dotnet/standard/generics/covariance-and-contravariance)
+- [Covariance and Contravariance in C# (Eric Lippert)](https://ericlippert.com/2007/10/16/covariance-and-contravariance-in-c-part-1/)
 
 <!-- whats-next:start -->
 

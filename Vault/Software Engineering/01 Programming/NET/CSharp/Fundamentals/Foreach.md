@@ -5,8 +5,8 @@ subtopic:
   - NET
 level:
   - "4"
-priority: Medium
-status: Creation
+priority: High
+status: Done
 dg-publish: true
 ---
 
@@ -26,7 +26,7 @@ Internals (compiler lowering):
 - For many built-in collections, the compiler emits code that calls `GetEnumerator()`, then loops while `MoveNext()` returns `true` and reads `Current`.
 - For some cases (for example, arrays), the compiler can optimize into an index-based loop.
 
-Example equivalent shape:
+Under the hood, foreach compiles into:
 
 ```csharp
 var enumerator = collection.GetEnumerator();
@@ -75,6 +75,9 @@ foreach (var number in CountNumbers(1, 5))
 
 > [!QUESTION]- What is `yield` and how does it work?
 > It creates an iterator: each `yield return` produces a value and pauses the method; the method resumes on the next iteration request.
+
+> [!QUESTION]- Why and when should you use `yield return` instead of returning a materialized collection like `List<T>`?
+> Use `yield return` for deferred execution and streaming when consumers may stop early or the sequence is large, because it lowers peak memory usage. Materialize (`ToList()` / `ToArray()`) when you need a snapshot, random access or `Count`, or repeated enumeration without rerunning expensive or side-effectful generation logic.
 
 ## Links
 
