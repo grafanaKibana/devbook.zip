@@ -16,6 +16,7 @@ Use this folder as a map:
 - `Parallelism` for CPU-bound work distribution.
 - `ThreadPool` for runtime scheduling behavior and starvation diagnostics.
 - `Deadlocks` for correctness and failure prevention under contention.
+- `Mutex` and `Semaphore` for synchronization limits and access control strategies.
 
 ### Mental model
 
@@ -93,7 +94,7 @@ public async Task<IReadOnlyList<UserDto>> LoadUsersBoundedAsync(
 > [!QUESTION]- What is the first decision before choosing a primitive (`Task`, `lock`, `Parallel`, `Channel`)?
 > Classify the workload as I/O-bound vs CPU-bound and define cancellation/error boundaries. Primitive choice follows that classification.
 
-> [!QUESTION]- You need to call 300 external APIs in one request and cut latency. Why is unbounded `Task.WhenAll` often a bad first choice?
+> [!QUESTION]- Why is unbounded `Task.WhenAll` often a bad first choice when calling around 300 external APIs in one request?
 > Because it can overload downstream dependencies, saturate connection pools, and create timeout storms. Bounded fan-out keeps latency gains while preserving system stability.
 
 > [!QUESTION]- For one requirement ("update shared state safely"), when do you choose `lock` vs `SemaphoreSlim` vs `Channel<T>`?
@@ -120,7 +121,9 @@ public async Task<IReadOnlyList<UserDto>> LoadUsersBoundedAsync(
 > - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Async Await\|Async Await]]
 > - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/CancellationToken\|CancellationToken]]
 > - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Deadlocks\|Deadlocks]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Mutex\|Mutex]]
 > - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Parallelism\|Parallelism]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Semaphore\|Semaphore]]
 > - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Tasks\|Tasks]]
 > - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/ThreadPool\|ThreadPool]]
 <!-- whats-next:end -->

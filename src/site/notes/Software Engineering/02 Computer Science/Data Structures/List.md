@@ -65,5 +65,9 @@ Console.WriteLine(users[0]);
 > - [[Software Engineering/02 Computer Science/Data Structures/Graph\|Graph]]
 > - [[Software Engineering/02 Computer Science/Data Structures/HashSet\|HashSet]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Hashtable\|Hashtable]]
+> - [[Software Engineering/02 Computer Science/Data Structures/LinkedList\|LinkedList]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Queue\|Queue]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Span\|Span]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Stack\|Stack]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Trees\|Trees]]
 <!-- whats-next:end -->

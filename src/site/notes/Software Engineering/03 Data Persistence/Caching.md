@@ -276,19 +276,6 @@ sequenceDiagram
   - Missing locale, permissions, feature flags, or query parameters leads to serving wrong content
   - Mitigation: deterministic key builder, include all correctness dimensions
 
-### Tradeoffs
-
-- Longer TTL reduces load but increases staleness risk
-- Distributed cache adds infra and consistency complexity but scales across app instances
-
-In practice, you pick an invalidation model first, then tune TTLs, stampede protection, and payload shape.
-
-| Approach | Pros | Cons | When it fits |
-|---|---|---|---|
-| TTL only | Simple, no extra dependencies, predictable failure modes | Stale reads by design, hard to meet tight correctness, stampede risk on hot keys | Analytics, catalogs, slow changing reference data with known staleness budget |
-| Event driven invalidation | Low staleness, adapts to actual change rate, avoids waiting for TTL | Needs reliable events, ordering and retries, more moving parts | User facing data where freshness matters and writes are observable |
-| Hybrid event driven plus TTL | Best effort near real time plus safety net, resilient to missed events | Most complex, still eventual, requires monitoring | Most production systems with mixed workloads and hot keys |
-
 ## Questions
 
 > [!QUESTION]- What makes caching hard?
@@ -298,7 +285,7 @@ In practice, you pick an invalidation model first, then tune TTLs, stampede prot
 > [!QUESTION]- How do you reduce cache stampede?
 > Add jitter to expirations, use request coalescing, and consider background refresh.
 
-> [!QUESTION]- You cache user profiles in Redis and a user updates their display name then immediately refreshes the page and still sees the old value sometimes. How do you fix it without turning off caching?
+> [!QUESTION]- How do you fix stale read-after-write behavior in Redis user-profile caching without turning off caching?
 > - Define the correctness target first: read your writes for the updating user, plus a staleness budget for everyone else
 > - On the write path, either update the cached value or delete it after the database commit succeeds
 > - If there are multiple writers or async pipelines, publish an invalidation event and consume it in all app instances
@@ -306,14 +293,14 @@ In practice, you pick an invalidation model first, then tune TTLs, stampede prot
 > - Keep a TTL as a safety net for missed invalidations
 > - Add monitoring: rate of stale reads, invalidation lag, and cache hit ratio per key type
 
-> [!QUESTION]- Your API uses TTL only caching with a five minute TTL. At every five minute boundary, p99 latency spikes and the database CPU pegs. What changes do you make?
+> [!QUESTION]- What changes reduce p99 spikes and database CPU saturation in TTL-only caching with synchronized five-minute expirations?
 > - Add jitter to TTL so expirations spread over time
 > - Add request coalescing so only one request recomputes a key and others await the same result
 > - Consider stale while revalidate so you never block on recomputation for hot keys
 > - Add a short circuit to protect the database: rate limit recomputes, timeouts, and fallback behavior
 > - Identify and treat hot keys separately: shorter payloads, proactive refresh, dedicated cache region
 
-> [!QUESTION]- You run multi tenant SaaS and cache search results. A customer reports seeing another tenant data once. What do you look for and how do you prevent it?
+> [!QUESTION]- What should be checked first when a multi-tenant cache leaks one tenant's data to another, and how is it prevented?
 > - Assume a cache key correctness bug until proven otherwise: ensure tenant id and auth scope are part of every key
 > - Verify there is no shared key for different query parameters, locale, feature flags, or permissions
 > - Ensure you do not cache error pages or partial failures that can later be served as valid results

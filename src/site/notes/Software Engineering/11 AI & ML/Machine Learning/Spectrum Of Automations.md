@@ -29,9 +29,9 @@ The spectrum of automation describes five levels of AI involvement in a task, ra
 >
 > **Topics**
 > - [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/Evaluation\|Evaluation]]
+> - [[Software Engineering/11 AI & ML/Machine Learning/Types/Types\|Types]]
 >
 > **Pages**
 > - [[Software Engineering/11 AI & ML/Machine Learning/Data Drift\|Data Drift]]
 > - [[Software Engineering/11 AI & ML/Machine Learning/Natural Language Processing\|Natural Language Processing]]
-> - [[Software Engineering/11 AI & ML/Machine Learning/Types\|Types]]
 <!-- whats-next:end -->
