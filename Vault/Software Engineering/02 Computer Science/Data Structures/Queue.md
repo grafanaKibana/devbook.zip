@@ -6,15 +6,13 @@ subtopic:
 level:
   - "4"
 priority: Medium
-status: Creation
+status: Ready To Repeat
 dg-publish: true
 ---
 
 # Intro
 
 `Queue<T>` is a FIFO (first in, first out) collection. The earliest enqueued item is processed first. Use it for buffering, breadth-first traversal, and producer-consumer style pipelines.
-
-## Deeper Explanation
 
 `Queue<T>` is implemented as a circular buffer in .NET:
 

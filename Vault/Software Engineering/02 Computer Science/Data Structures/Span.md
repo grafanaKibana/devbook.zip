@@ -6,15 +6,13 @@ subtopic:
 level:
   - "4"
 priority: Medium
-status: Creation
+status: Ready To Repeat
 dg-publish: true
 ---
 
 # Intro
 
 `Span<T>` is a stack-only view over contiguous memory. It does not own data, it only points to existing memory (array, stackalloc buffer, or unmanaged memory). Use it when you need high-performance slicing/parsing with minimal allocations.
-
-## Deeper Explanation
 
 `Span<T>` gives bounds-checked access to a contiguous region with very low overhead:
 
