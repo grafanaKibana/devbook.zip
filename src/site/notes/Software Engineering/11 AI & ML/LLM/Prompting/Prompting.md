@@ -145,7 +145,7 @@ Gen AI can evaluate essays against complex criteria like grammar, clarity, coher
 > [!QUESTION]- What is Prompting?
 > Prompts play a key role in generating useful and accurate information from AI language models. Learning how to write better prompts — "Prompt Engineering" — unlocks the full potential of these models by guiding their behavior, improving output quality, and reducing inaccuracies.
 
-> [!QUESTION]- You are building an internal assistant that can read company docs. What prompt level controls reduce prompt injection risk?
+> [!QUESTION]- Which prompt-level controls reduce prompt-injection risk for an internal assistant that reads company documents?
 > Separate system instructions from user content and never allow user text to override system rules.
 > Constrain outputs (schema or explicit format), avoid tool access unless necessary, and add deterministic checks.
 > Treat retrieval content as untrusted input and apply allowlists for tools.

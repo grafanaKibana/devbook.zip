@@ -7,11 +7,6 @@
 
 A data structure is a way to organize data for efficient access and updates. In .NET, choosing the right collection usually has a bigger impact than micro-optimizing syntax.
 
-## Deeper Explanation
-
-This hub groups practical notes for common .NET data structures and collection families.
-Use it as a quick navigation index when comparing tradeoffs.
-
 ## Questions
 
 > [!QUESTION]- What is a data structure? Which ones do you know? Which of them exist in .NET?
@@ -21,6 +16,7 @@ Use it as a quick navigation index when comparing tradeoffs.
 
 - [System.Collections.Generic namespace](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic)
 - [Collections and data structures](https://learn.microsoft.com/en-us/dotnet/standard/collections/)
+- [Anatomy of the .NET dictionary](https://dunnhq.com/posts/2024/anatomy-of-the-dotnet-dictionary/)
 
 <!-- whats-next:start -->
 
@@ -35,6 +31,10 @@ Use it as a quick navigation index when comparing tradeoffs.
 > - [[Software Engineering/02 Computer Science/Data Structures/Graph\|Graph]]
 > - [[Software Engineering/02 Computer Science/Data Structures/HashSet\|HashSet]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Hashtable\|Hashtable]]
+> - [[Software Engineering/02 Computer Science/Data Structures/LinkedList\|LinkedList]]
 > - [[Software Engineering/02 Computer Science/Data Structures/List\|List]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Queue\|Queue]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Span\|Span]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Stack\|Stack]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Trees\|Trees]]
 <!-- whats-next:end -->

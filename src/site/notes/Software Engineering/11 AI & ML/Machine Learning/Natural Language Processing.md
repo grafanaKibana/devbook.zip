@@ -23,9 +23,9 @@
 >
 > **Topics**
 > - [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/Evaluation\|Evaluation]]
+> - [[Software Engineering/11 AI & ML/Machine Learning/Types/Types\|Types]]
 >
 > **Pages**
 > - [[Software Engineering/11 AI & ML/Machine Learning/Data Drift\|Data Drift]]
 > - [[Software Engineering/11 AI & ML/Machine Learning/Spectrum Of Automations\|Spectrum Of Automations]]
-> - [[Software Engineering/11 AI & ML/Machine Learning/Types\|Types]]
 <!-- whats-next:end -->
