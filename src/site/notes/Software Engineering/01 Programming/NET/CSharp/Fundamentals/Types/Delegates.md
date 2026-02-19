@@ -6,8 +6,6 @@
 
 A delegate is a type-safe function pointer in C#. It lets you treat methods as values: store them in variables, pass them to other methods, compose invocation lists, and invoke them later. Delegates are foundational for callbacks, LINQ, strategy-style APIs, and events.
 
-## Deeper Explanation
-
 A delegate type defines a method signature. Any method with a compatible signature (static or instance) can be assigned to that delegate variable.
 
 ```csharp
@@ -19,7 +17,7 @@ PriceCalculator calc = StandardPrice;
 var total = calc(3, 19.99m); // 59.97
 ```
 
-Built-in generic delegates:
+### Built-in generic delegates
 
 - `Action<T...>`: returns `void`
 - `Func<T..., TResult>`: returns a value
@@ -77,41 +75,6 @@ Func<int, bool> greaterThanThreshold = x => x > threshold;
 ```
 
 Captured variables are references to closure state, not a one-time value copy.
-
-## Pitfalls
-
-1. **Multicast return value trap**: calling `Func<T>` multicast returns only the last subscriber result.
-2. **Exception short-circuiting**: one failing subscriber stops invocation.
-3. **Hidden allocations**: closures allocate heap objects in hot paths.
-4. **Delegate type mismatch**: same signature does not mean same delegate type.
-5. **Variance combine trap**: variant delegate conversions can compile, but combining differently typed delegates can throw at runtime.
-
-If you need isolation or aggregate results, use `GetInvocationList()` and invoke handlers one-by-one.
-
-```csharp
-var handlers = calc.GetInvocationList();
-foreach (var d in handlers)
-{
-    try
-    {
-        var result = ((PriceCalculator)d)(2, 5m);
-        Console.WriteLine(result);
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine(ex.Message);
-    }
-}
-```
-
-## Tradeoffs
-
-| Choice | Pros | Cons | Use when |
-|---|---|---|---|
-| Custom `delegate` type | Self-documenting domain intent | More types to maintain | Public API needs semantic meaning |
-| `Func`/`Action` | Minimal boilerplate | Less expressive names | Internal logic and short callbacks |
-| Multicast delegate | Simple fan-out | Exception/return-value semantics are subtle | Fire-and-forget notification chains |
-| Delegate callback | Fast, lightweight | Tighter coupling than message bus | In-process synchronous extensibility |
 
 ## Questions
 
