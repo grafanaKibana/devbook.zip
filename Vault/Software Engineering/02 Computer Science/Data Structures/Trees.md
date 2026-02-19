@@ -64,5 +64,9 @@ var ids = new SortedSet<int> { 5, 1, 3, 3 };
 > - [[Software Engineering/02 Computer Science/Data Structures/Graph|Graph]]
 > - [[Software Engineering/02 Computer Science/Data Structures/HashSet|HashSet]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Hashtable|Hashtable]]
+> - [[Software Engineering/02 Computer Science/Data Structures/LinkedList|LinkedList]]
 > - [[Software Engineering/02 Computer Science/Data Structures/List|List]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Queue|Queue]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Span|Span]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Stack|Stack]]
 <!-- whats-next:end -->

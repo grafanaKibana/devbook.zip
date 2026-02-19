@@ -70,75 +70,24 @@ An endpoint is a production service with an SLO: define a latency budget, throug
 #### Monitoring and Retraining
 Monitor both system health and model health: latency, error rate, and saturation, plus data quality, drift, and performance over time. Plan for feedback loops and delayed labels, and set retraining triggers that are measurable and cost aware; see [[Software Engineering/11 AI & ML/Machine Learning/Data Drift|Data Drift]] for drift concepts. A good pipeline makes retraining boring: automated, repeatable, and gated by evaluation.
 
-### Example
-
-```python
-import pandas as pd
-import joblib
-
-from sklearn.model_selection import train_test_split
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import classification_report, roc_auc_score
-
-df = pd.read_csv("train.csv")
-X = df.drop(columns=["label"])
-y = df["label"]
-
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42, stratify=y
-)
-
-model = Pipeline([
-    ("scale", StandardScaler(with_mean=False)),
-    ("clf", LogisticRegression(max_iter=200)),
-])
-
-model.fit(X_train, y_train)
-pred = model.predict(X_test)
-proba = model.predict_proba(X_test)[:, 1]
-
-print(classification_report(y_test, pred))
-print("auc", roc_auc_score(y_test, proba))
-
-joblib.dump(model, "model.joblib")
-```
-
-### Pitfalls
-
-- Data leakage from time, joins, target derived features, or label lookahead that inflates offline metrics and fails in prod.
-- Training serving skew when preprocessing differs between notebooks and the endpoint; fix by packaging transforms with the model.
-- Overfitting the validation set by iterating on it too long; keep a true holdout test and time box tuning.
-- Neglecting monitoring and drift detection, so the model silently degrades and no one notices until customers complain.
-- Class imbalance leading to misleading accuracy; use stratified splits, appropriate metrics, reweighting, or resampling.
-- Ignoring feature importance and slice analysis, which hides brittle shortcuts and fairness issues.
-
-### Tradeoffs
-
-| Mode | Latency | Cost | Complexity | Best fit use cases |
-|---|---|---|---|---|
-| Batch inference | Minutes to hours | Low per prediction | Low to medium | Nightly scoring, backfills, offline ranking, reporting |
-| Real time inference | Milliseconds to seconds | Higher always on compute | Medium to high | Fraud checks, personalization, search reranking, interactive decisions |
-| Streaming inference | Seconds to minutes | Medium to high depends on volume | High | Event driven scoring, near real time alerts, feature updates on streams |
 
 ## Questions
 
-> [!QUESTION]- You own a churn model. Product wants a weekly batch score today, but may need real time scoring in six months. How do you design the pipeline so you do not paint yourself into a corner
+> [!QUESTION]- How should an ML pipeline be designed to ship weekly batch churn scoring now while preserving a path to real-time scoring later?
 > - Start with batch to ship value, but define a stable feature contract and a single preprocessing implementation shared by batch and online
 > - Store features and predictions with versioned schema so you can backtest and replay later
 > - Use a model registry with stage promotion and rollback, and keep training code runnable in CI
 > - Plan the online boundary now: which features are available at request time and which require async enrichment
 > - Add monitoring from day one so you have drift and label delay visibility before moving to real time
 
-> [!QUESTION]- Your binary classifier shows 98 percent accuracy in evaluation, but support tickets are rising. What do you check and which metric do you optimize next
+> [!QUESTION]- What should be checked first when a binary classifier shows 98 percent accuracy but support tickets rise, and which metric should be optimized next?
 > - Check class balance and the confusion matrix; high accuracy can hide poor recall on the minority class
 > - Inspect label quality and leakage sources, especially time based joins and post event signals
 > - Pick metrics based on cost: optimize precision if false positives are expensive, recall if misses are expensive, or use PR AUC for heavy imbalance
 > - Tune the decision threshold using a cost curve or expected value, not the default 0.5
 > - Run slice based evaluation to find the segments where the model fails and decide whether to collect more data or add features
 
-> [!QUESTION]- You need to deploy a model behind an API with a strict latency budget, but the best model is slower. What tradeoffs and rollout plan do you propose
+> [!QUESTION]- What tradeoffs and rollout plan are appropriate when the best model exceeds a strict API latency budget?
 > - Measure end to end latency budget including preprocessing, network, and tail latencies, then decide if you can meet SLO with scaling or caching
 > - Consider a smaller model, distillation, quantization, or a two stage setup where a cheap model gates the expensive one
 > - Use canary or A B rollout with guardrails on latency and key business metrics, plus automated rollback
@@ -148,13 +97,9 @@ joblib.dump(model, "model.joblib")
 ## Links
 
 [Machine Learning  |  Google for Developers](https://developers.google.com/machine-learning/crash-course)
-
 [Machine Learning for Beginners](https://microsoft.github.io/ML-For-Beginners/#/)
-
 [Rules of Machine Learning  |  Google for Developers](https://developers.google.com/machine-learning/guides/rules-of-ml)
-
 [scikit learn user guide](https://scikit-learn.org/stable/user_guide.html)
-
 [Hidden Technical Debt in Machine Learning Systems](https://papers.nips.cc/paper_files/paper/2015/hash/86df7dcfd896fcaf2674f757a2463eba-Abstract.html)
 
 <!-- whats-next:start -->
@@ -167,10 +112,10 @@ joblib.dump(model, "model.joblib")
 >
 > **Topics**
 > - [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/Evaluation|Evaluation]]
+> - [[Software Engineering/11 AI & ML/Machine Learning/Types/Types|Types]]
 >
 > **Pages**
 > - [[Software Engineering/11 AI & ML/Machine Learning/Data Drift|Data Drift]]
 > - [[Software Engineering/11 AI & ML/Machine Learning/Natural Language Processing|Natural Language Processing]]
 > - [[Software Engineering/11 AI & ML/Machine Learning/Spectrum Of Automations|Spectrum Of Automations]]
-> - [[Software Engineering/11 AI & ML/Machine Learning/Types|Types]]
 <!-- whats-next:end -->
