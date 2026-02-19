@@ -6,15 +6,13 @@ subtopic:
 level:
   - "4"
 priority: Medium
-status: Creation
+status: Ready To Repeat
 dg-publish: true
 ---
 
 # Intro
 
 `LinkedList<T>` is a doubly linked list where each node points to previous and next nodes. It is useful when you already keep node references and need frequent O(1) inserts/removes around those nodes.
-
-## Deeper Explanation
 
 Unlike array-backed collections, linked lists do not store elements contiguously:
 

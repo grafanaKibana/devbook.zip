@@ -165,7 +165,7 @@ Mark structs `readonly` to make this class of bug impossible.
 
 ## Questions
 
-> [!QUESTION]- You have a high-throughput service processing 100k messages per second. Each message has an Id (Guid), a Timestamp (DateTime), and a small Status enum. Would you model this as a class or struct? Why?
+> [!QUESTION]- For a high-throughput service processing 100k messages per second (Id, Timestamp, Status), would class or struct be the better model, and why?
 > A `readonly struct` (or `readonly record struct`) is the best fit:
 > - Total payload is roughly 28 bytes before alignment (Guid 16 + DateTime 8 + enum ~4), so it is above the strict 16-byte heuristic and should be benchmarked in your workload.
 > - Value semantics avoid a separate object allocation per message when values stay inline and are not boxed/captured, reducing GC pressure at 100k/s.

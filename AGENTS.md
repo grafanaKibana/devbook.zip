@@ -92,10 +92,10 @@ Required content (for any non-trivial concept page)
   - **MAY omit** `Tradeoffs` when one approach is clearly dominant for this scope, or alternatives are out of scope/deprecated.
   - If `Tradeoffs` exists, compare concrete options with decision criteria (latency, memory, complexity, operability, cost, team constraints).
   - Do not create strawman comparisons (real option vs obviously bad option).
-- **Questions**: include 1-3 tricky / interview-style questions with expected answers with explanation proper explanation why.
-- **References**: at least 2 external links.
+- **Questions**: include 1-3 direct interview-style questions with expected answers and a clear explanation of why.
+- **References**: 2-10 external links.
   - At least 1 should be an "anchor" reference (official docs/spec/RFC/vendor-neutral standard).
-  - At least 1 should be a "practice" reference (battle-tested blog/paper/tutorial that explains pitfalls).
+  - At least 1 should be a "practice" reference from real-world engineering experience (postmortem, production deep-dive, senior practitioner blog/talk) with concrete lessons.
 
 Mermaid diagram triggers
 
@@ -116,13 +116,19 @@ If the topic has multiple competing options, include a short comparison (table i
 
 Question quality rules
 
-- Prefer scenario questions that force judgment (scale, latency, cost, failure modes) over trivia.
+- Prefer direct interview questions that force judgment (scale, latency, cost, failure modes) over trivia.
+- Avoid second-person scenario stems in questions such as "You have", "Your team", or "You need".
+- Use precise action verbs in stems when helpful: explain, compare, evaluate, choose, justify.
 - Each question should have a short "expected answer" (3-8 bullets) and mention key tradeoffs.
 
 Reference hygiene
 
 - Prefer stable/primary sources when available (Microsoft Learn/.NET API refs, RFCs, OWASP, NIST, Kubernetes docs).
-- Avoid link dumps; pick a few high-signal links and say what each is good for.
+- Avoid link dumps; keep references focused and capped at 10 links.
+- Do not add documentation index/hub pages that mostly link to other pages; link the specific page with the actual guidance.
+- Do not add links that are not directly useful for learning the current topic.
+- When updating an existing note, de-duplicate references first; replace weaker/older links instead of only appending new ones.
+- Prefer at least one practitioner source with first-hand implementation insight, not only vendor documentation.
 
 ### Mandatory reviewer subagent gate
 
@@ -200,7 +206,4 @@ Enforcement note
 ## Workflow notes
 
 - If request changes vault structure/formatting rules, ask user whether to update AGENTS.md Memory.
-
-## Memory
-
-- 
+- If page structure is unclear (target folder, page type, note naming, or template), ask the user one clarifying question before changing pages or creating new ones.

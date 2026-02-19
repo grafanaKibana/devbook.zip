@@ -6,8 +6,7 @@ subtopic:
 level:
   - "4"
 priority: Medium
-status:
-  - Done
+status: Done
 dg-publish: true
 ---
 # Intro
@@ -15,8 +14,9 @@ dg-publish: true
 Exception handling in C# uses `try`, `catch`, and `finally` to handle failures and guarantee cleanup. In modern C#, `using` / `await using` is the preferred way to ensure `Dispose` / `DisposeAsync` runs.
 - `try` contains code that may throw.
 - `catch` handles exceptions you know how to handle.
-- `finally` runs when leaving the `try` block (success or failure) and is used for cleanup.
+- `finally` normally runs when leaving the `try` block (success or failure) and is used for cleanup.
 - `throw;` rethrows the current exception and preserves the original stack trace.
+- If no matching `catch` exists in the current method, the runtime searches up caller frames for a compatible handler (including `when` filters). After a handler is selected, the stack is unwound and `finally` blocks run on the path to that handler.
 
 ## Example:
 
@@ -99,6 +99,7 @@ public static string NormalizeName(string? value)
 - [Best practices for exceptions](https://learn.microsoft.com/dotnet/standard/exceptions/best-practices-for-exceptions)
 - [Exception throwing (Framework Design Guidelines)](https://learn.microsoft.com/dotnet/standard/design-guidelines/exception-throwing)
 - [Using standard exception types](https://learn.microsoft.com/dotnet/standard/design-guidelines/using-standard-exception-types)
+- [Catch handler search in call stack (Metanit)](https://metanit.com/sharp/tutorial/2.30.php)
 
 <!-- whats-next:start -->
 

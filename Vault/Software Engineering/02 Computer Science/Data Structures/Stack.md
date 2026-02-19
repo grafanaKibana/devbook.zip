@@ -6,15 +6,13 @@ subtopic:
 level:
   - "4"
 priority: Medium
-status: Creation
+status: Ready To Repeat
 dg-publish: true
 ---
 
 # Intro
 
 `Stack<T>` is a LIFO (last in, first out) collection. The most recently pushed element is the first popped. Use it for backtracking, undo flows, and depth-first traversals.
-
-## Deeper Explanation
 
 `Stack<T>` in .NET is array-backed and optimized for top-of-stack operations:
 
