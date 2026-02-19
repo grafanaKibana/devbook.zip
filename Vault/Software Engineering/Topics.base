@@ -15,7 +15,7 @@ views:
       - level
     sort:
       - property: topic
-        direction: DESC
+        direction: ASC
     summaries: {}
   - type: cards
     name: Cards

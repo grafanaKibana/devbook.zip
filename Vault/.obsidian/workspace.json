@@ -11,10 +11,14 @@
             "id": "e7a7b303c61786dc",
             "type": "leaf",
             "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "Graph view"
+              "type": "markdown",
+              "state": {
+                "file": "Software Engineering/01 Programming/NET/NET Standart.md",
+                "mode": "source",
+                "source": true
+              },
+              "icon": "lucide-file",
+              "title": "NET Standart"
             }
           },
           {
@@ -29,40 +33,6 @@
               },
               "icon": "lucide-file",
               "title": "OWIN"
-            }
-          }
-        ]
-      },
-      {
-        "id": "1809edfd84fd3307",
-        "type": "tabs",
-        "children": [
-          {
-            "id": "34db5e89adb1ce9f",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Software Engineering/01 Programming/NET/Other/SignalR.md",
-                "mode": "source",
-                "source": true
-              },
-              "icon": "lucide-file",
-              "title": "SignalR"
-            }
-          },
-          {
-            "id": "fa59b2617742a0aa",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Reflection.md",
-                "mode": "source",
-                "source": true
-              },
-              "icon": "lucide-file",
-              "title": "Reflection"
             }
           }
         ]
@@ -131,7 +101,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 622.5
+    "width": 594.5039253234863
   },
   "right": {
     "id": "3a29a9e8dc8d7cc5",
@@ -147,13 +117,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Software Engineering/01 Programming/NET/Other/SignalR.md",
+                "file": "Software Engineering/01 Programming/NET/NET Standart.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of SignalR"
+              "title": "Outline of NET Standart"
             }
           },
           {
@@ -162,7 +132,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Software Engineering/01 Programming/NET/Other/SignalR.md",
+                "file": "Software Engineering/01 Programming/NET/NET Standart.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -172,7 +142,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for SignalR"
+              "title": "Backlinks for NET Standart"
             }
           },
           {
@@ -195,10 +165,10 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Software Engineering/01 Programming/NET/Other/SignalR.md"
+                "file": "Software Engineering/01 Programming/NET/NET Standart.md"
               },
               "icon": "lucide-info",
-              "title": "File properties for SignalR"
+              "title": "File properties for NET Standart"
             }
           }
         ],
@@ -249,12 +219,14 @@
       "digitalgarden:Digital Garden Publication Center": true
     }
   },
-  "active": "34db5e89adb1ce9f",
+  "active": "e7a7b303c61786dc",
   "lastOpenFiles": [
-    "Software Engineering/01 Programming/NET/Other/OWIN.md",
-    "Software Engineering/01 Programming/NET/Other/SignalR.md",
-    "Software Engineering/01 Programming/NET/Other/Other.md",
+    "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Async Await.md",
+    "Software Engineering/Topics.base",
     "Software Engineering/Software Engineering.md",
+    "Software Engineering/01 Programming/NET/Other/SignalR.md",
+    "Software Engineering/01 Programming/NET/Other/OWIN.md",
+    "Software Engineering/01 Programming/NET/Other/Other.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Reflection.md",
     "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Selection Sort.md",
     "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Quick Sort.md",
@@ -268,7 +240,6 @@
     "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Parallelism.md",
     "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Deadlocks.md",
     "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/CancellationToken.md",
-    "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Async Await.md",
     "Software Engineering/01 Programming/NET/CSharp/CSharp.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Exception Handling.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Foreach.md",
@@ -277,13 +248,11 @@
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Namespaces.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals.md",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Classes.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
     "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types",
     "Assets/01 Programming/01 Programming-Types-20260211184602492.png",
     "Assets/11 AI & ML/11 AI & ML-LLM-20260211012223477.png",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205141994.png",
-    "Software Engineering/Topics.base",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260218023449265.png",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205142011.png",
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260210205142069.png",
