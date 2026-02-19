@@ -6,17 +6,18 @@ subtopic:
 level:
   - "4"
 priority: Medium
-status: Creation
+status: Done
 dg-publish: true
 ---
 
 # Intro
 
-A namespace is a logical scope for organizing types (classes, structs, interfaces, enums, delegates). Namespaces help structure code and prevent naming collisions.
-It is providing:
-1. Uniqueness for type names (same simple name can exist in different namespaces)
-2. Organizing large codebases into logical modules
-3. Improving readability and navigation
+A namespace is a logical scope for organizing types (classes, structs, interfaces, enums, delegates) in C#. It prevents naming collisions and makes large solutions easier to navigate by grouping related code into a clear, discoverable API surface. Encapsulation and versioning boundaries come from assemblies and access modifiers, not namespaces.
+
+Namespaces provide:
+1. Disambiguation for type names (`User` can exist in multiple namespaces)
+2. Logical modularization of large codebases
+3. Better readability and discoverability in tooling
 
 Example (block-scoped namespace):
 
@@ -41,15 +42,23 @@ public static class MathUtility
 }
 ```
 
+## Tradeoffs
+
+- File-scoped namespaces reduce indentation and noise for one-namespace-per-file layouts, which improves readability in modern codebases.
+- Block-scoped namespaces are still useful when a file intentionally contains multiple namespace blocks or mixed declarations.
+
 ## Questions
 
 > [!QUESTION]- What is a namespace? Why do we need it?
-> A namespace groups related types and avoids name collisions; it also helps organize large projects.
+> A namespace groups related types and prevents naming conflicts by enabling fully qualified names when simple names collide. In daily development, `using` directives keep call sites readable while preserving unambiguous resolution during compilation. It also improves project structure by mapping code to logical domains.
+
+> [!QUESTION]- When should you prefer file-scoped namespaces over block-scoped namespaces?
+> Prefer file-scoped namespaces when a file contains one namespace and regular type declarations, because it reduces indentation and visual noise. Use block-scoped form when a file needs multiple namespace blocks or unusual nesting patterns.
 
 ## Links
 
-- [Declare namespaces to organize types](https://learn.microsoft.com/dotnet/csharp/fundamentals/types/namespaces)
-- [namespace keyword](https://learn.microsoft.com/dotnet/csharp/language-reference/keywords/namespace)
+- [Declare namespaces to organize types](https://learn.microsoft.com/dotnet/csharp/fundamentals/types/namespaces) - Official overview and best-practice guidance.
+- [namespace keyword](https://learn.microsoft.com/dotnet/csharp/language-reference/keywords/namespace) - Exact language rules and syntax variants.
 
 <!-- whats-next:start -->
 
