@@ -69,19 +69,20 @@ These rules exist to make notes useful for the Senior .NET / AI engineering role
 
 Required content (for any non-trivial concept page)
 
+- These are content requirements, not mandatory section headings. For simple topics, keep content compact under `Intro`.
+
 - **Intro**: 2-5 sentences in your own words: what it is + why it matters + when you reach for it.
-- **How It Works**: conditional section. Include when the mechanism/flow is non-trivial. Prefer one well-explained mechanism over many short bullets.
-  - **MUST include** `How It Works` when the concept has non-obvious mechanics, lifecycle/flow behavior, or decision logic that readers must understand to use it correctly.
-  - **MAY omit** `How It Works` for simple definition/reference notes where intro + example already gives full understanding.
-  - If `How It Works` exists, it must explain cause/effect clearly in plain language and include at least one concrete example or diagram walkthrough.
+  - **MUST include** mechanism explanation in `Intro` when the concept has non-obvious mechanics, lifecycle/flow behavior, or decision logic readers must understand to use it correctly.
+  - Explain cause/effect in plain language and include at least one concrete example or small diagram walkthrough when useful.
   - Quality over quantity: no minimum bullet count; one concise, well-explained narrative is better than many short statements.
   - Do not use disconnected one-liners that state facts without explaining why they matter.
-- **Examples**: at least one concrete example that shows real usage.
+- **Example content**: at least one concrete example that shows real usage.
+  - For simple topics, the example can be inline under `Intro`; a standalone `Example`/`Examples` heading is optional.
   - .NET: prefer a `csharp` code snippet, and optionally a `json`/`yaml` config snippet.
   - AI/LLM: prefer an end-to-end request/response shape, evaluation snippet, or a minimal pipeline pseudo-code.
-- **Pitfalls**: conditional section. Include only when the topic has non-obvious real-world failure modes. If included, explain each pitfall with cause + impact + mitigation (not one-line warnings).
-  - **MUST include** a `Pitfalls` section when the topic has at least one non-obvious failure mode in production use (performance, correctness, security, reliability, or operations).
-  - **MAY omit** `Pitfalls` when the note is a simple definition/reference entry with no meaningful failure modes, or when it is a hub note.
+- **Pitfalls**: conditional content. Include only when the topic has non-obvious real-world failure modes.
+  - **MUST include** pitfall coverage when the topic has at least one non-obvious production failure mode (performance, correctness, security, reliability, or operations).
+  - **MAY omit** a standalone `Pitfalls` heading when there are no meaningful pitfalls, or when one short caution can be covered inline in `Intro`.
   - If `Pitfalls` exists, each item must include:
     - what can go wrong (specific scenario)
     - why it happens (cause/mechanism)
@@ -96,6 +97,13 @@ Required content (for any non-trivial concept page)
 - **References**: 2-10 external links.
   - At least 1 should be an "anchor" reference (official docs/spec/RFC/vendor-neutral standard).
   - At least 1 should be a "practice" reference from real-world engineering experience (postmortem, production deep-dive, senior practitioner blog/talk) with concrete lessons.
+
+Section minimalism rule
+
+- For simple topics, prefer a compact note: `Intro` + inline example + `References`.
+- Add standalone `Examples` and `Pitfalls` headings only when they add unique value beyond Intro.
+- If a section would be only 1-2 short sentences with no extra clarity, merge it into `Intro`.
+- Avoid creating multiple tiny sections that fragment one idea.
 
 Mermaid diagram triggers
 

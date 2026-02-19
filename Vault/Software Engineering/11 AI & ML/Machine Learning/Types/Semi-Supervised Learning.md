@@ -12,20 +12,11 @@ dg-publish: true
 
 # Intro
 
-Semi-supervised learning combines a small labeled dataset with a larger unlabeled dataset. It matters when labeling is expensive but you still need supervised-level performance on a clear target variable.
-
-## How It Works
-
-The model first learns from labeled data, then extends training signal with unlabeled examples through pseudo-labeling, consistency regularization, or graph-based propagation. The key risk is reinforcing incorrect pseudo-labels.
-
-## Examples
-
-A moderation team has 8,000 labeled toxic comments and 2 million unlabeled comments. They train an initial classifier, pseudo-label only high-confidence predictions, and retrain with confidence thresholds and validation guards.
-
-## Pitfalls
-
-- Pseudo-label confirmation bias can amplify early mistakes. This happens when low-confidence predictions are fed back as ground truth. Mitigate with conservative confidence thresholds and periodic reset to trusted labels.
-- Class imbalance can worsen during pseudo-labeling. This happens when majority-class predictions dominate unlabeled data. Mitigate with class-aware sampling, per-class thresholds, and monitored recall on minority classes.
+Semi-supervised learning combines a small labeled dataset with a larger unlabeled dataset.
+It matters when labeling is expensive but you still need supervised-level performance on a clear target variable.
+The model first learns from labeled data, then extends training signal with unlabeled examples through pseudo-labeling, consistency regularization, or graph-based propagation.
+The main risk is reinforcing incorrect pseudo-labels.
+For Example, a moderation team with 8,000 labeled toxic comments and 2 million unlabeled comments trains an initial classifier, accepts only high-confidence pseudo-labels, and retrains with validation guards.
 
 ## Questions
 
@@ -50,6 +41,7 @@ A moderation team has 8,000 labeled toxic comments and 2 million unlabeled comme
 - [FixMatch: Simplifying Semi-Supervised Learning](https://arxiv.org/abs/2001.07685)
 - [scikit-learn semi-supervised learning](https://scikit-learn.org/stable/modules/semi_supervised.html)
 - [FixMatch reference implementation (Google Research)](https://github.com/google-research/fixmatch)
+- [Rules of ML engineering](https://developers.google.com/machine-learning/guides/rules-of-ml)
 
 <!-- whats-next:start -->
 
