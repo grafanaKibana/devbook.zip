@@ -16,6 +16,33 @@ status: Creation
 
 A data structure is a way to organize data for efficient access and updates. In .NET, choosing the right collection usually has a bigger impact than micro-optimizing syntax.
 
+## Structure
+
+```mermaid
+graph TD
+    DS[data structures]
+    DS --> ARR[array and list]
+    DS --> KV[key value hash]
+    DS --> FIFO[queue]
+    DS --> LIFO[stack]
+    DS --> TREE[tree and heap]
+    DS --> G[graph]
+```
+
+## Example
+
+```csharp
+var byId = new Dictionary<int, string>
+{
+    [42] = "Ann"
+};
+
+var ordered = new List<string> { "Ann", "Bob" };
+
+Console.WriteLine(byId[42]); // Fast lookup by key
+Console.WriteLine(ordered[0]); // Fast lookup by index
+```
+
 ## Questions
 
 > [!QUESTION]- What is a data structure? Which ones do you know? Which of them exist in .NET?
@@ -38,8 +65,10 @@ A data structure is a way to organize data for efficient access and updates. In 
 > **Pages**
 > - [[Software Engineering/02 Computer Science/Data Structures/Dictionary|Dictionary]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Graph|Graph]]
+> - [[Software Engineering/02 Computer Science/Data Structures/HashMap|HashMap]]
 > - [[Software Engineering/02 Computer Science/Data Structures/HashSet|HashSet]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Hashtable|Hashtable]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Heap|Heap]]
 > - [[Software Engineering/02 Computer Science/Data Structures/LinkedList|LinkedList]]
 > - [[Software Engineering/02 Computer Science/Data Structures/List|List]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Queue|Queue]]

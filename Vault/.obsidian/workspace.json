@@ -8,37 +8,17 @@
         "type": "tabs",
         "children": [
           {
-            "id": "430576b94cc94aa7",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Software Engineering/01 Programming/NET/Other/OWIN.md",
-                "mode": "source",
-                "source": true
-              },
-              "icon": "lucide-file",
-              "title": "OWIN"
-            }
-          }
-        ]
-      },
-      {
-        "id": "417dbbda960cd744",
-        "type": "tabs",
-        "children": [
-          {
             "id": "e7a7b303c61786dc",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Software Engineering/Software Engineering.md",
+                "file": "Software Engineering/02 Computer Science/Algorithms/Search Algorithms/Binary Search.md",
                 "mode": "preview",
                 "source": true
               },
               "icon": "lucide-file",
-              "title": "Software Engineering"
+              "title": "Binary Search"
             }
           }
         ]
@@ -123,13 +103,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Software Engineering/Software Engineering.md",
+                "file": "Software Engineering/01 Programming/NET/Other/OWIN.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Software Engineering"
+              "title": "Outline of OWIN"
             }
           },
           {
@@ -138,7 +118,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Software Engineering/Software Engineering.md",
+                "file": "Software Engineering/01 Programming/NET/Other/OWIN.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -148,7 +128,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Software Engineering"
+              "title": "Backlinks for OWIN"
             }
           },
           {
@@ -171,10 +151,10 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Software Engineering/Software Engineering.md"
+                "file": "Software Engineering/02 Computer Science/Algorithms/Search Algorithms/Binary Search.md"
               },
               "icon": "lucide-info",
-              "title": "File properties for Software Engineering"
+              "title": "File properties for Binary Search"
             }
           }
         ],
@@ -227,35 +207,38 @@
   },
   "active": "e7a7b303c61786dc",
   "lastOpenFiles": [
-    "Software Engineering/01 Programming/NET/ASP.NET Web API/Filters.md",
+    "Software Engineering/02 Computer Science/Algorithms/Search Algorithms/Rabin Karp Search.md",
+    "Software Engineering/02 Computer Science/Algorithms/Search Algorithms/KMP (Knuth-Morris-Pratt) Algorithm.md",
+    "Software Engineering/02 Computer Science/Algorithms/Search Algorithms/String Searching/String Searching.md",
+    "Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
+    "Software Engineering/02 Computer Science/Algorithms/Search Algorithms/DFS BFS.md",
+    "Software Engineering/02 Computer Science/Algorithms/Search Algorithms/String Searching/Rabit Karp Search.md",
+    "Software Engineering/02 Computer Science/Algorithms/Search Algorithms/String Searching",
+    "Software Engineering/02 Computer Science/Algorithms/Search Algorithms/String Searching.md",
+    "Software Engineering/02 Computer Science/Algorithms/Search Algorithms/Rabit Karp Search.md",
+    "Software Engineering/02 Computer Science/Algorithms/Search Algorithms/KMP (Knuth-Morris-Pratt) Algorithm.md",
+    "Software Engineering/02 Computer Science/Data Structures/HashMap.md",
+    "Software Engineering/02 Computer Science/Algorithms/String Searching/String Searching.md",
+    "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms.md",
+    "Software Engineering/02 Computer Science/Algorithms/Search Algorithms/Search Algorithms.md",
+    "Software Engineering/02 Computer Science/Data Structures/HashSet.md",
+    "Software Engineering/02 Computer Science/Data Structures/Graph.md",
+    "Software Engineering/02 Computer Science/Data Structures/Dictionary.md",
+    "Software Engineering/02 Computer Science/Data Structures/Heap.md",
+    "Software Engineering/02 Computer Science/Data Structures/Data Structures.md",
+    "Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/DFS BFS.md",
+    "Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Dijkstra.md",
+    "Software Engineering/02 Computer Science/Algorithms/Search Algorithms/Binary Search.md",
+    "Software Engineering/02 Computer Science/Algorithms/Search Algorithms",
+    "Software Engineering/01 Programming/NET/Other/OWIN.md",
     "Software Engineering/Software Engineering.md",
+    "Software Engineering/01 Programming/NET/ASP.NET Web API/Filters.md",
     "Software Engineering/Questions.md",
     "Software Engineering/Topics.base",
     "Software Engineering/03 Data Persistence/ACID.md",
     "Assets/01 Programming/01 Programming-Types-20260211184602492.png",
     "Software Engineering/Roadmap.canvas",
-    "Software Engineering/01 Programming/NET/Other/OWIN.md",
-    "Software Engineering/01 Programming/NET/ASP.NET Web API/Authorization.md",
-    "Software Engineering/01 Programming/NET/ASP.NET Web API/Authentication.md",
-    "Software Engineering/01 Programming/NET/ASP.NET Web API/CORS.md",
-    "Software Engineering/01 Programming/NET/ASP.NET Web API/Dependency Injection.md",
-    "Software Engineering/11 AI & ML/Machine Learning/Types/Reinforcement Learning.md",
-    "Software Engineering/11 AI & ML/Machine Learning/Types/Semi-Supervised Learning.md",
-    "Software Engineering/11 AI & ML/Machine Learning/Types/Self-Supervised Learning.md",
-    "Software Engineering/11 AI & ML/Machine Learning/Types/Unsupervised Learning.md",
-    "Software Engineering/11 AI & ML/Machine Learning/Types/Supervised Learning.md",
-    "Software Engineering/11 AI & ML/Machine Learning/Types/Types.md",
     "Software Engineering/11 AI & ML/Machine Learning/Types",
-    "Software Engineering/11 AI & ML/Machine Learning/Types.md",
-    "Software Engineering/11 AI & ML/Machine Learning/Evaluation/ROC-AUC and PR-AUC.md",
-    "Software Engineering/11 AI & ML/Machine Learning/Data Drift.md",
-    "Software Engineering/11 AI & ML/Machine Learning/Spectrum Of Automations.md",
-    "Software Engineering/11 AI & ML/Machine Learning/Natural Language Processing.md",
-    "Software Engineering/11 AI & ML/Machine Learning/Machine Learning.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Strings.md",
-    "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Semaphore.md",
-    "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Mutex.md",
-    "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Classes.md",
     "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types",
     "Assets/11 AI & ML/11 AI & ML-LLM-20260211012223477.png",
@@ -271,8 +254,6 @@
     "Assets/audits",
     "Software Engineering/11 AI & ML/Machine Learning/Infrastructure",
     "Software Engineering/11 AI & ML/LLM/Evaluation",
-    "Assets/03 Data Persistence",
-    "Software Engineering/03 Data Persistence/SQL",
     "Software Engineering/Untitled.canvas",
     "Vault/Software Engineering/Roadmap.canvas",
     "quartz/public/Roadmap.canvas",

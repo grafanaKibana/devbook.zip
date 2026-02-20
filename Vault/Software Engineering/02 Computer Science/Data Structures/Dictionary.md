@@ -19,6 +19,16 @@ dg-publish: true
 `Dictionary` is hash-table based: keys are mapped to buckets by hash code, then equality checks resolve collisions.
 Average lookup/add/remove is O(1), but bad hash distribution can degrade performance.
 
+## Structure
+
+```mermaid
+graph TD
+    K1[key one hash] --> B0[bucket zero]
+    K2[key two hash] --> B1[bucket one]
+    B0 --> E1[key one value ann]
+    B1 --> E2[key two value bob]
+```
+
 ### Example
 
 ```csharp
@@ -73,8 +83,10 @@ if (byId.TryGetValue(2, out var user))
 >
 > **Pages**
 > - [[Software Engineering/02 Computer Science/Data Structures/Graph|Graph]]
+> - [[Software Engineering/02 Computer Science/Data Structures/HashMap|HashMap]]
 > - [[Software Engineering/02 Computer Science/Data Structures/HashSet|HashSet]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Hashtable|Hashtable]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Heap|Heap]]
 > - [[Software Engineering/02 Computer Science/Data Structures/LinkedList|LinkedList]]
 > - [[Software Engineering/02 Computer Science/Data Structures/List|List]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Queue|Queue]]

@@ -20,6 +20,16 @@ dg-publish: true
 - Capacity grows when needed, similar to `List<T>`.
 - Enumeration is from top to bottom.
 
+## Structure
+
+```mermaid
+graph TD
+    T[top] --> N3[item c]
+    N3 --> N2[item b]
+    N2 --> N1[item a]
+    N1 --> B[bottom]
+```
+
 ### Example
 
 ```csharp
@@ -59,7 +69,7 @@ Console.WriteLine(stack.Pop());  // A
 - [Stack<T> class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.stack-1)
 - [Selecting a collection class](https://learn.microsoft.com/en-us/dotnet/standard/collections/selecting-a-collection-class)
 - [Generic collections in .NET](https://learn.microsoft.com/en-us/dotnet/standard/collections/)
-- [Why are Stack<T> and Queue<T> array-backed?](https://stackoverflow.com/questions/3000410/why-are-stackt-and-queuet-implemented-with-an-array)
+- [Stack implementation in dotnet runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/Stack.cs)
 
 <!-- whats-next:start -->
 
@@ -72,8 +82,10 @@ Console.WriteLine(stack.Pop());  // A
 > **Pages**
 > - [[Software Engineering/02 Computer Science/Data Structures/Dictionary|Dictionary]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Graph|Graph]]
+> - [[Software Engineering/02 Computer Science/Data Structures/HashMap|HashMap]]
 > - [[Software Engineering/02 Computer Science/Data Structures/HashSet|HashSet]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Hashtable|Hashtable]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Heap|Heap]]
 > - [[Software Engineering/02 Computer Science/Data Structures/LinkedList|LinkedList]]
 > - [[Software Engineering/02 Computer Science/Data Structures/List|List]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Queue|Queue]]

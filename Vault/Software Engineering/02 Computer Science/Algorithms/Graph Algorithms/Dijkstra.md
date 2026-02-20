@@ -8,12 +8,27 @@ level:
 priority: Medium
 status: Ready To Repeat
 
-dg-publish: true
+dg-publish: false
 ---
 
 # Intro
 
+Dijkstra computes shortest paths from one source in graphs with non-negative edge weights. It repeatedly finalizes the currently cheapest reachable node and relaxes outgoing edges using a priority queue. Use it for routing, cost minimization, and path planning where edge costs are never negative.
+
 ## Deeper Explanation
+
+- Maintain `dist[v]` as best known distance from source.
+- Pop the smallest tentative distance from the priority queue.
+- Relax each outgoing edge and push improved distances back to the queue.
+- Complexity is typically `O((V + E) log V)` with adjacency list plus heap.
+
+## Example
+
+```text
+Edges: A-B(2), A-C(5), B-C(1), B-D(4), C-D(1)
+From A: dist(B)=2, dist(C)=3 via B, dist(D)=4 via C
+Shortest A->D path is A->B->C->D with total cost 4
+```
 
 ## Diagram
 
@@ -38,7 +53,17 @@ graph TD
 ## Questions
 
 > [!QUESTION]- Why does Dijkstra require non-negative weights?
-> The algorithm is greedy: once a vertex is extracted as the current minimum, its distance is assumed final. Negative edges can later produce a shorter path to an already-finalized vertex, so the greedy step becomes incorrect (use Bellman-Ford for graphs with negative edges).
+> - Dijkstra is greedy and treats extracted minimum-distance nodes as finalized.
+> - Negative edges can create a later path that is cheaper than a finalized one.
+> - This breaks the core correctness invariant of the algorithm.
+> - Use Bellman Ford when negative edges are possible.
+> - Why it matters: this constraint is essential for correctness, not an optimization detail.
+
+> [!QUESTION]- What data structures make Dijkstra practical at scale?
+> - Adjacency list keeps memory proportional to edges for sparse graphs.
+> - Min-heap priority queue gives efficient next-node selection.
+> - Distance array plus optional parent array supports path reconstruction.
+> - Why it matters: complexity targets depend on these choices, especially on large graphs.
 
 ## Links
 
@@ -53,6 +78,4 @@ graph TD
 > **Parent**
 >  [[Software Engineering/02 Computer Science/Algorithms/Algorithms|Algorithms]]
 >
-> **Pages**
-> - [[Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/DFS BFS|DFS BFS]]
 <!-- whats-next:end -->
