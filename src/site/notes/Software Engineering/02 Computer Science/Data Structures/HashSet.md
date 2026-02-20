@@ -12,6 +12,16 @@
 `HashSet<T>` is hash-based and uses `GetHashCode` plus `Equals` to enforce uniqueness.
 Its core operations (`Add`, `Contains`, `Remove`) are O(1) on average.
 
+## Structure
+
+```mermaid
+graph TD
+    H1[value dotnet hash] --> B0[bucket zero]
+    H2[value csharp hash] --> B1[bucket one]
+    B0 --> V1[dotnet]
+    B1 --> V2[csharp]
+```
+
 ### Example
 
 ```csharp
@@ -48,6 +58,7 @@ var added = tags.Add("DOTNET"); // false, already exists by comparer
 - [HashSet<T> class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.hashset-1)
 - [ISet<T> interface](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.iset-1)
 - [Collections overview and complexity](https://learn.microsoft.com/en-us/dotnet/standard/collections/)
+- [HashSet implementation in dotnet runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/HashSet.cs)
 
 <!-- whats-next:start -->
 
@@ -60,7 +71,9 @@ var added = tags.Add("DOTNET"); // false, already exists by comparer
 > **Pages**
 > - [[Software Engineering/02 Computer Science/Data Structures/Dictionary\|Dictionary]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Graph\|Graph]]
+> - [[Software Engineering/02 Computer Science/Data Structures/HashMap\|HashMap]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Hashtable\|Hashtable]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Heap\|Heap]]
 > - [[Software Engineering/02 Computer Science/Data Structures/LinkedList\|LinkedList]]
 > - [[Software Engineering/02 Computer Science/Data Structures/List\|List]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Queue\|Queue]]
