@@ -12,6 +12,19 @@ Trees represent hierarchical data with parent-child relationships. In .NET, tree
 A tree organizes nodes so each node can have children and (except root) one parent.
 Balanced tree structures keep operations near O(log n), while unbalanced trees can degrade toward O(n).
 
+## Structure
+
+```mermaid
+graph TD
+    R[root]
+    R --> L[left child]
+    R --> M[right child]
+    L --> LL[left left]
+    L --> LR[left right]
+    M --> RL[right left]
+    M --> RR[right right]
+```
+
 ### Example
 
 ```csharp
@@ -43,6 +56,7 @@ var ids = new SortedSet<int> { 5, 1, 3, 3 };
 - [SortedSet<T> class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.sortedset-1)
 - [Sorted collection types](https://learn.microsoft.com/en-us/dotnet/standard/collections/sorted-collection-types)
 - [Traverse a binary tree with parallel tasks](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/how-to-traverse-a-binary-tree-with-parallel-tasks)
+- [SortedSet implementation in dotnet runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Collections/src/System/Collections/Generic/SortedSet.cs)
 
 <!-- whats-next:start -->
 
@@ -55,8 +69,10 @@ var ids = new SortedSet<int> { 5, 1, 3, 3 };
 > **Pages**
 > - [[Software Engineering/02 Computer Science/Data Structures/Dictionary\|Dictionary]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Graph\|Graph]]
+> - [[Software Engineering/02 Computer Science/Data Structures/HashMap\|HashMap]]
 > - [[Software Engineering/02 Computer Science/Data Structures/HashSet\|HashSet]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Hashtable\|Hashtable]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Heap\|Heap]]
 > - [[Software Engineering/02 Computer Science/Data Structures/LinkedList\|LinkedList]]
 > - [[Software Engineering/02 Computer Science/Data Structures/List\|List]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Queue\|Queue]]
