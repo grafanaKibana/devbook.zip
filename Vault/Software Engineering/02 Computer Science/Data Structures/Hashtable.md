@@ -19,6 +19,16 @@ dg-publish: true
 `Hashtable` stores keys and values as `object`, so value types are boxed/unboxed.
 It still uses hash buckets and collision resolution similar to modern hash-based collections.
 
+## Structure
+
+```mermaid
+graph TD
+    K1[object key one hash] --> B0[bucket zero]
+    K2[object key two hash] --> B1[bucket one]
+    B0 --> E1[object key one value ann]
+    B1 --> E2[object key two value bob]
+```
+
 ### Example
 
 ```csharp
@@ -54,6 +64,7 @@ var value = table["user:1"]; // object
 - [Hashtable class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.hashtable)
 - [When to use generic collections](https://learn.microsoft.com/en-us/dotnet/standard/collections/when-to-use-generic-collections)
 - [Selecting a collection class](https://learn.microsoft.com/en-us/dotnet/standard/collections/selecting-a-collection-class)
+- [Hashtable implementation in dotnet runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Collections/Hashtable.cs)
 
 <!-- whats-next:start -->
 
@@ -66,7 +77,9 @@ var value = table["user:1"]; // object
 > **Pages**
 > - [[Software Engineering/02 Computer Science/Data Structures/Dictionary|Dictionary]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Graph|Graph]]
+> - [[Software Engineering/02 Computer Science/Data Structures/HashMap|HashMap]]
 > - [[Software Engineering/02 Computer Science/Data Structures/HashSet|HashSet]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Heap|Heap]]
 > - [[Software Engineering/02 Computer Science/Data Structures/LinkedList|LinkedList]]
 > - [[Software Engineering/02 Computer Science/Data Structures/List|List]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Queue|Queue]]

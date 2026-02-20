@@ -20,6 +20,15 @@ dg-publish: true
 - It can wrap array segments and stack-allocated buffers.
 - Because it is a `ref struct`, it cannot escape to the managed heap.
 
+## Structure
+
+```mermaid
+graph LR
+    A[array zero ten] --> B[array one twenty] --> C[array two thirty] --> D[array three forty]
+    S[span start two length two] --> C
+    S --> D
+```
+
 ### Example
 
 ```csharp
@@ -69,8 +78,10 @@ Console.WriteLine(values[2]); // 300
 > **Pages**
 > - [[Software Engineering/02 Computer Science/Data Structures/Dictionary|Dictionary]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Graph|Graph]]
+> - [[Software Engineering/02 Computer Science/Data Structures/HashMap|HashMap]]
 > - [[Software Engineering/02 Computer Science/Data Structures/HashSet|HashSet]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Hashtable|Hashtable]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Heap|Heap]]
 > - [[Software Engineering/02 Computer Science/Data Structures/LinkedList|LinkedList]]
 > - [[Software Engineering/02 Computer Science/Data Structures/List|List]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Queue|Queue]]

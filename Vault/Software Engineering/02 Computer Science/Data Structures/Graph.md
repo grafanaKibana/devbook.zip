@@ -19,6 +19,16 @@ Graphs model relationships between entities using vertices and edges. In .NET, g
 The most common representation is an adjacency list: each node maps to neighbors.
 This is space efficient for sparse graphs and works well with BFS/DFS traversals.
 
+## Structure
+
+```mermaid
+graph TD
+    A[node a] --> B[node b]
+    A --> C[node c]
+    B --> D[node d]
+    C --> D
+```
+
 ### Example
 
 ```csharp
@@ -56,6 +66,7 @@ var graph = new Dictionary<string, List<string>>
 - [Collections and data structures overview](https://learn.microsoft.com/en-us/dotnet/standard/collections/)
 - [PriorityQueue<TElement, TPriority> class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.priorityqueue-2)
 - [.NET libraries update with Dijkstra example](https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-9/libraries#collections)
+- [Dijkstra test implementation in dotnet runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Collections/tests/Generic/PriorityQueue/PriorityQueue.Tests.Dijkstra.cs)
 
 <!-- whats-next:start -->
 
@@ -67,8 +78,10 @@ var graph = new Dictionary<string, List<string>>
 >
 > **Pages**
 > - [[Software Engineering/02 Computer Science/Data Structures/Dictionary|Dictionary]]
+> - [[Software Engineering/02 Computer Science/Data Structures/HashMap|HashMap]]
 > - [[Software Engineering/02 Computer Science/Data Structures/HashSet|HashSet]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Hashtable|Hashtable]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Heap|Heap]]
 > - [[Software Engineering/02 Computer Science/Data Structures/LinkedList|LinkedList]]
 > - [[Software Engineering/02 Computer Science/Data Structures/List|List]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Queue|Queue]]
