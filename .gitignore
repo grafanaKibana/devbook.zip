@@ -14,4 +14,4 @@ _site/
 
 .git/
 .sisyphus/
-.obsidian/workspace.json
+**/.obsidian/workspace.json
