@@ -13,6 +13,16 @@ Unlike array-backed collections, linked lists do not store elements contiguously
 - Inserting/removing at a known node is O(1).
 - Each element carries node-pointer overhead, so memory locality is worse than `List<T>`.
 
+## Structure
+
+```mermaid
+graph LR
+    H[head] --> N1[node a]
+    N1 <--> N2[node b]
+    N2 <--> N3[node c]
+    N3 --> T[tail]
+```
+
 ### Example
 
 ```csharp
@@ -64,8 +74,10 @@ list.Remove("C");
 > **Pages**
 > - [[Software Engineering/02 Computer Science/Data Structures/Dictionary\|Dictionary]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Graph\|Graph]]
+> - [[Software Engineering/02 Computer Science/Data Structures/HashMap\|HashMap]]
 > - [[Software Engineering/02 Computer Science/Data Structures/HashSet\|HashSet]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Hashtable\|Hashtable]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Heap\|Heap]]
 > - [[Software Engineering/02 Computer Science/Data Structures/List\|List]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Queue\|Queue]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Span\|Span]]
