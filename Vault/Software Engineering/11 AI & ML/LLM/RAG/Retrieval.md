@@ -49,6 +49,8 @@ Main risk:
 
 ### Sparse Retrieval — Keyword Search (BM25)
 
+If you have used full-text search in PostgreSQL (`to_tsvector`/`to_tsquery`) or Elasticsearch, BM25 is the same core idea — it is the algorithm behind those search indexes. Think of it as `grep` with ranking: it finds documents containing your exact words, then sorts them by how distinctive those words are in the corpus. A query for `NullReferenceException` in a .NET codebase hits exactly the files that contain that string, and files where it appears in a focused context (short file, rare term) rank above a 10,000-line log dump that happens to mention it once.
+
 How it works:
 
 - BM25 scores documents by how well their words match the query words, giving higher weight to rare terms. If a query contains `E4392` and only 3 documents in the corpus mention that code, those documents score high. Common words like "the" or "error" contribute almost nothing because they appear everywhere.
@@ -65,6 +67,8 @@ Main risk:
 - **Weak on paraphrases.** BM25 cannot match "authentication failure" to a chunk about "credential validation errors" because the words do not overlap. Synonym expansion and stemming help marginally but do not close the gap with vector search on semantically varied queries.
 
 ### Hybrid Retrieval — Vector + Keyword
+
+Hybrid retrieval is like running both a full-text search (`WHERE body @@ to_tsquery('error & 429')`) and a vector similarity search against the same query, then merging the two result sets. RRF merges by rank position — like taking two independently sorted result lists and boosting any item that appears near the top of both. If document A is #2 in vector search and #5 in keyword search, while document B is #1 in keyword search but #200 in vector search, RRF ranks A higher because both retrievers agree it is relevant. Linear combination is the same idea but lets you explicitly set how much you trust each retriever — like a weighted `UNION ALL` with a tunable ratio.
 
 How it works:
 

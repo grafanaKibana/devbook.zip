@@ -1,5 +1,58 @@
 # Senior AI Engineer — Technical Deep Dive Prep (DraftKings AIP DevEx)
 
+## Preparation Checklist
+
+### Day 1 (Thursday) — RAG Technical Deep Dive
+
+- [x] Read [[#Quick Reference Card]] out loud (10 min)
+- [x] Understand the [[RAG]] pipeline end-to-end — walk through all 8 stages from [[#RAG Pipeline End-to-End]]
+- [x] Study [[Chunking]] strategies, [[#Embedding Models]], and [[#Vector Databases]] tables — know trade-offs for each
+- [x] Understand [[Retrieval]] approaches — explain when hybrid beats dense, and how [[Re-ranking]] improves precision
+- [x] Study [[#RAG Pain Points]] — practice detection + mitigation per stage
+- [x] Understand [[Evaluation]] metrics ([[#RAG Evaluation (RAGAS)]]) — explain faithfulness, relevancy, precision, recall
+- [x] Practice [[#Day 1 Practice Q&A]] — all 3 questions out loud
+- [x] Read: [Anthropic RAG Cookbook](https://github.com/anthropics/anthropic-cookbook/tree/main/misc/retrieval_augmented_generation) · [Twelve RAG Pain Points](https://arxiv.org/abs/2401.05856)
+
+### Day 2 (Friday) — Agents & MCP
+
+- [x] Read [[#Quick Reference Card]] out loud (10 min)
+- [x] Understand [[Agents|agent patterns]] — complexity ladder, ReAct vs Plan-and-Execute vs Reflexion ([[#Agent Patterns and Complexity Ladder]])
+- [x] Study [[Tools|tool use]] and function calling — 5-step flow + error handling patterns ([[#Tool Use & Function Calling]])
+- [ ] Deep dive [[Model Context Protocol]] — 3 primitives, transport, DraftKings N×M narrative ([[#MCP Deep Dive (Critical — Core to DraftKings Stack)]])
+- [ ] Understand [[Multi-Agentic Systems|multi-agent orchestration]] — Supervisor vs Hierarchical vs Peer-to-peer ([[#Multi-Agent Orchestration]])
+- [ ] Study n8n workflow pattern and agentic coding tools status at DK ([[#n8n Workflows]], [[#Agentic Coding Tools]])
+- [x] Practice [[#Day 2 Practice Q&A]] — all 3 questions out loud
+- [x] Read: [Building Effective Agents](https://www.anthropic.com/engineering/building-effective-agents) (MUST READ) · [MCP docs](https://modelcontextprotocol.io/)
+
+### Day 3 (Saturday) — System Design + Class Design
+
+- [ ] Read [[#Quick Reference Card]] out loud (10 min)
+- [ ] Internalize the [[#System Design Framework]] — 5/10/15/5 time-box
+- [ ] Study [[#Building Blocks Quick Reference]] and [[#.NET-Specific Patterns]] — know each component's purpose
+- [ ] Understand all 4 [[#AI System Design Patterns]] — Webhook→Queue→Worker, Rate Limiting, Vector DB, Async Validation
+- [ ] Study [[#Project Deep Dive Framework (How to Present ANY Past Project)|5-Layer Presentation Framework]] with cheat sheets: [[#Communication Patterns Cheat Sheet|communication]], [[#Database Selection Cheat Sheet|databases]], [[#Scalability Patterns Quick Reference|scalability]], [[#Consistency Models|consistency]]
+- [ ] Walk through [[#Class Design Round — Robot-Managed Restaurant (HackerRank Style)|Robot Restaurant class design]] end-to-end — diagram, patterns ([[Design Patterns]]), A* pathfinding, extension question
+- [ ] Practice [[#Day 3 Practice Q&A]] + [[#Class Design Questions (HackerRank Round)|additional class design questions]]
+
+### Day 4 (Sunday) — Projects & AI Ownership
+
+- [ ] Read [[#Quick Reference Card]] out loud (10 min)
+- [ ] Practice 2-minute pitches for each project (timed): [[#Dexter (Jira → PR Automation)|Dexter]], [[#Doculus (Auto-Documentation)|Doculus]], [[#SlackJack (Support Bot)|SlackJack]], [[#AmendA (PR Comment Updater)|AmendA]]
+- [ ] Study [[#AI Ownership Framework]] — scoping, [[#Metrics Framework|metrics]], [[#Adoption Challenges + Responses|adoption]], iteration loops, risk
+- [ ] Memorize [[#DraftKings Numbers to Anchor|DK numbers]]: 20% tickets via AI · 15% throughput · 100% 101 completion
+- [ ] Review [[#DraftKings Intelligence Brief]] — vision, 2026 goals, priority timeline
+- [ ] Study [[#Interview Traps & Ownership Signals]] — internalize traps + practice [[#Ownership Phrases to Practice Verbatim|ownership phrases]] out loud
+- [ ] Practice [[#Day 4 Practice Q&A]] — all 3 questions out loud
+
+### Day 5 (Monday) — Final Review
+
+- [ ] [[#Morning Cheat Sheet (30 minutes)|Morning Cheat Sheet]] review (30 min)
+- [ ] [[#Timed Practice Drill (3 rounds)|Timed practice]]: 3 rounds × 30 min (RAG assistant, MCP platform, Dexter roadmap)
+- [ ] Review [[#Additional Practice Questions]] — past projects + [[#API Design Quick Reference|API design]]
+- [ ] Practice [[#2-Minute Closing Script]] out loud — 3 times minimum
+- [ ] Final pass: re-read [[#Interview Traps & Ownership Signals]] + [[#Top 3 Ownership Signals]]
+
+
 ## Quick Reference Card
 
 > [!tip] How to use this card
@@ -216,6 +269,9 @@ Prompted LLM → Chain → Router → Orchestrator → Autonomous Agent
 **What I would say:** "I avoid jumping to fully autonomous agents. I start with deterministic workflows and introduce agency only where uncertainty and branching justify it."
 
 ### Tool Use & Function Calling
+
+For detailed coverage of tool design principles — naming, parameters, versatility, fault tolerance, and caching — see [[Tools]].
+
 
 How it works:
 
