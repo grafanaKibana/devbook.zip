@@ -238,12 +238,9 @@ The table compares steady-state characteristics. In practice, most teams start w
 >
 > **Pages**
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Caching\|Caching]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Embeddings\|Embeddings]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation\|Evaluation]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Generation\|Generation]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Grounding\|Grounding]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring\|Monitoring]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Query Translation\|Query Translation]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/RAG vs Fine-Tuning\|RAG vs Fine-Tuning]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/Re-ranking\|Re-ranking]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Retrieval\|Retrieval]]
 <!-- whats-next:end -->

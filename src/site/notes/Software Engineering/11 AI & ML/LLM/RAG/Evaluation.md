@@ -139,8 +139,8 @@ Decision rule: combine deterministic checks (format, citation presence, length) 
 
 ## Questions
 
-> [!QUESTION]- A team's aggregate Recall@5 improves after a pipeline change, but a specific customer reports worse answers. What is the most likely evaluation failure?
-> The evaluation is not sliced by meaningful segments. Aggregate metrics average across all query types and tenants, masking localized regressions. The fix is to evaluate per segment (tenant, language, query cluster, document type) and flag any segment that degrades beyond the threshold, even when the aggregate improves. This is the most common RAG evaluation failure in production.
+> [!QUESTION]- Why can aggregate retrieval metrics improve while individual user segments degrade?
+> Aggregate metrics average across all query types and tenants, masking localized regressions. A pipeline change that improves average Recall@5 can simultaneously degrade recall by double digits on a specific tenant's query cluster. The fix is to evaluate per segment (tenant, language, query cluster, document type) and flag any segment that degrades beyond the threshold, even when the aggregate improves. This is the most common RAG evaluation failure in production.
 
 > [!QUESTION]- Why are relative regression thresholds preferable to absolute quality targets for RAG release gates?
 > Absolute thresholds are brittle across corpus changes, model updates, and workload shifts. A threshold set during initial launch becomes meaningless after the corpus doubles or the query distribution shifts. Relative thresholds (no more than N% regression from baseline) adapt automatically because the baseline tracks the current system state. They also prevent the failure mode where a team sets an ambitious absolute target, cannot reach it, and disables the gate entirely.
@@ -172,11 +172,8 @@ Decision rule: combine deterministic checks (format, citation presence, length) 
 > **Pages**
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Caching\|Caching]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Chunking\|Chunking]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Embeddings\|Embeddings]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Generation\|Generation]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Grounding\|Grounding]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring\|Monitoring]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Query Translation\|Query Translation]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/RAG vs Fine-Tuning\|RAG vs Fine-Tuning]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/Re-ranking\|Re-ranking]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Retrieval\|Retrieval]]
 <!-- whats-next:end -->
