@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Software Engineering/02 Computer Science/Algorithms/Search Algorithms/Binary Search.md",
-                "mode": "preview",
+                "file": "Software Engineering/11 AI & ML/LLM/RAG/Strategy and Advanced Patterns.md",
+                "mode": "source",
                 "source": true
               },
               "icon": "lucide-file",
-              "title": "Binary Search"
+              "title": "Strategy and Advanced Patterns"
             }
           }
         ]
@@ -103,13 +103,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Software Engineering/01 Programming/NET/Other/OWIN.md",
+                "file": "Software Engineering/11 AI & ML/LLM/RAG/Strategy and Advanced Patterns.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of OWIN"
+              "title": "Outline of Strategy and Advanced Patterns"
             }
           },
           {
@@ -151,14 +151,13 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Software Engineering/02 Computer Science/Algorithms/Search Algorithms/Binary Search.md"
+                "file": "Software Engineering/11 AI & ML/LLM/RAG/Strategy and Advanced Patterns.md"
               },
               "icon": "lucide-info",
-              "title": "File properties for Binary Search"
+              "title": "File properties for Strategy and Advanced Patterns"
             }
           }
-        ],
-        "currentTab": 3
+        ]
       },
       {
         "id": "e96d0e13f56cecdc",
@@ -207,35 +206,36 @@
   },
   "active": "e7a7b303c61786dc",
   "lastOpenFiles": [
+    "Software Engineering/11 AI & ML/LLM/RAG/Retrieval and Query Translation.md",
+    "Software Engineering/11 AI & ML/LLM/RAG/Production Operations.md",
+    "Software Engineering/11 AI & ML/LLM/RAG/Grounding and Generation.md",
+    "Software Engineering/11 AI & ML/LLM/RAG/Evaluation.md",
+    "Software Engineering/11 AI & ML/LLM/RAG/Chunking and Embeddings.md",
+    "Software Engineering/11 AI & ML/LLM/RAG/RAG.md",
+    "Software Engineering/11 AI & ML/LLM/LLM.md",
+    "Software Engineering/11 AI & ML/LLM/RAG/Strategy and Advanced Patterns.md",
+    "Software Engineering/11 AI & ML/LLM/RAG/RAG Strategy and Advanced Patterns.md",
+    "Software Engineering/11 AI & ML/LLM/RAG/RAG Production Operations.md",
+    "Software Engineering/11 AI & ML/LLM/RAG/RAG Evaluation.md",
+    "Software Engineering/11 AI & ML/LLM/RAG/RAG Grounding and Generation.md",
+    "Software Engineering/11 AI & ML/LLM/RAG/RAG Retrieval and Query Translation.md",
+    "Software Engineering/11 AI & ML/LLM/RAG/RAG Chunking and Embeddings.md",
+    "Software Engineering/11 AI & ML/LLM/RAG",
+    "Software Engineering/11 AI & ML/LLM/RAG.md",
+    "Software Engineering/Software Engineering.md",
+    "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Selection Sort.md",
+    "Software Engineering/02 Computer Science/Algorithms/README.md",
+    "Software Engineering/02 Computer Science/Algorithms/Algorithms.md",
+    "Software Engineering/03 Data Persistence/ACID.md",
+    "Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
+    "Software Engineering/02 Computer Science/Algorithms/Search Algorithms/Binary Search.md",
     "Software Engineering/02 Computer Science/Algorithms/Search Algorithms/Rabin Karp Search.md",
     "Software Engineering/02 Computer Science/Algorithms/Search Algorithms/KMP (Knuth-Morris-Pratt) Algorithm.md",
     "Software Engineering/02 Computer Science/Algorithms/Search Algorithms/String Searching/String Searching.md",
-    "Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
     "Software Engineering/02 Computer Science/Algorithms/Search Algorithms/DFS BFS.md",
-    "Software Engineering/02 Computer Science/Algorithms/Search Algorithms/String Searching/Rabit Karp Search.md",
     "Software Engineering/02 Computer Science/Algorithms/Search Algorithms/String Searching",
-    "Software Engineering/02 Computer Science/Algorithms/Search Algorithms/String Searching.md",
-    "Software Engineering/02 Computer Science/Algorithms/Search Algorithms/Rabit Karp Search.md",
-    "Software Engineering/02 Computer Science/Algorithms/Search Algorithms/KMP (Knuth-Morris-Pratt) Algorithm.md",
-    "Software Engineering/02 Computer Science/Data Structures/HashMap.md",
-    "Software Engineering/02 Computer Science/Algorithms/String Searching/String Searching.md",
-    "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms.md",
-    "Software Engineering/02 Computer Science/Algorithms/Search Algorithms/Search Algorithms.md",
-    "Software Engineering/02 Computer Science/Data Structures/HashSet.md",
-    "Software Engineering/02 Computer Science/Data Structures/Graph.md",
-    "Software Engineering/02 Computer Science/Data Structures/Dictionary.md",
-    "Software Engineering/02 Computer Science/Data Structures/Heap.md",
-    "Software Engineering/02 Computer Science/Data Structures/Data Structures.md",
-    "Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/DFS BFS.md",
-    "Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Dijkstra.md",
-    "Software Engineering/02 Computer Science/Algorithms/Search Algorithms/Binary Search.md",
     "Software Engineering/02 Computer Science/Algorithms/Search Algorithms",
-    "Software Engineering/01 Programming/NET/Other/OWIN.md",
-    "Software Engineering/Software Engineering.md",
-    "Software Engineering/01 Programming/NET/ASP.NET Web API/Filters.md",
-    "Software Engineering/Questions.md",
     "Software Engineering/Topics.base",
-    "Software Engineering/03 Data Persistence/ACID.md",
     "Assets/01 Programming/01 Programming-Types-20260211184602492.png",
     "Software Engineering/Roadmap.canvas",
     "Software Engineering/11 AI & ML/Machine Learning/Types",
@@ -253,7 +253,6 @@
     "Software Engineering/11 AI & ML/Machine Learning/Evaluation",
     "Assets/audits",
     "Software Engineering/11 AI & ML/Machine Learning/Infrastructure",
-    "Software Engineering/11 AI & ML/LLM/Evaluation",
     "Software Engineering/Untitled.canvas",
     "Vault/Software Engineering/Roadmap.canvas",
     "quartz/public/Roadmap.canvas",
