@@ -183,7 +183,7 @@ If the topic has multiple competing options, include a short comparison (table i
 Question quality rules
 
 - Prefer direct interview questions that force judgment (scale, latency, cost, failure modes) over trivia.
-- Avoid second-person scenario stems in questions such as "You have", "Your team", or "You need".
+- Avoid scenario-based stems that set up a specific situation before the question ("A team does X and Y happens", "A system uses X with Y configuration"). Prefer direct questions that ask about the concept ("Why can X cause Y?", "When is X justified over Y?", "How does X reduce Y?").
 - Use precise action verbs in stems when helpful: explain, compare, evaluate, choose, justify.
 - Each question should have a short "expected answer" (3-8 bullets) and mention key tradeoffs.
 

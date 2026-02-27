@@ -257,16 +257,19 @@ How it works:
 - A larger generalist model scores each draft by computing the conditional probability P(answer | rationale).
 - Select the draft with the highest verification score.
 
-```text
-Retrieved docs --> Partition into subsets
-                    |         |         |
-                 Subset 1  Subset 2  Subset 3
-                    |         |         |
-             Draft + rationale in parallel with small model
-                    |         |         |
-             Verify each draft with large model
-                    |
-             Return highest-confidence draft
+```mermaid
+flowchart TD
+    D[Retrieved Docs] --> P[Partition into Subsets]
+    P --> S1[Subset 1]
+    P --> S2[Subset 2]
+    P --> S3[Subset 3]
+    S1 --> D1[Draft plus Rationale from Small Model]
+    S2 --> D2[Draft plus Rationale from Small Model]
+    S3 --> D3[Draft plus Rationale from Small Model]
+    D1 --> V[Verify Each Draft with Large Model]
+    D2 --> V
+    D3 --> V
+    V --> B[Return Highest-Confidence Draft]
 ```
 
 - The speedup comes from three sources: the smaller model is substantially faster per draft, drafts execute in parallel, and the verifier only scores (does not generate from scratch).
@@ -339,6 +342,28 @@ Main risk:
 - Cache aggressively: community summaries (Graph RAG), web search results (CRAG), reasoning chains (Iterative), and tool outputs (Agentic).
 - Route simple queries to the cheapest path. Most production traffic is simple — do not pay multi-hop costs for single-hop questions.
 
+## RAG vs Fine-Tuning
+
+RAG and fine-tuning optimize different parts of the system. RAG externalizes knowledge into retrievable sources, while fine-tuning changes model behavior in weights. Choosing correctly prevents expensive retraining for problems that retrieval can solve more safely.
+
+Example: if product policy changes weekly, RAG can update by reindexing documents. Fine-tuning would require repeated retraining cycles and still provide weak source traceability.
+
+| Axis | RAG | Fine-tuning |
+|---|---|---|
+| Knowledge freshness | High | Low |
+| Source traceability | High | Low |
+| Behavioral consistency | Medium | High |
+| Time to first value | Faster | Slower |
+| Operational complexity | Retrieval and index ops | Training and eval and release ops |
+
+**Decision rules:**
+
+1. Start with RAG when facts change often or citation is required.
+2. Add fine-tuning when output style or policy behavior remains unstable after prompt and retrieval tuning.
+3. Keep mutable facts in retrieval; keep behavior patterns in fine-tuned weights.
+
+The combined pattern — fine-tune the model for behavior (format, tone, refusal policy) and use RAG for current factual knowledge — keeps updates fast while preserving behavioral control.
+
 ## Questions
 
 > [!QUESTION]- Why should advanced RAG patterns be introduced incrementally instead of all at once?
@@ -361,6 +386,7 @@ Main risk:
 - [Speculative RAG: Enhancing Retrieval Augmented Generation through Drafting](https://arxiv.org/abs/2407.08223)
 - [Agentic RAG with LangGraph (LangChain engineering)](https://blog.langchain.com/agentic-rag-with-langgraph/)
 - [Deconstructing RAG (LangChain engineering)](https://blog.langchain.com/deconstructing-rag/)
+- [Fine-tuning guide (OpenAI)](https://platform.openai.com/docs/guides/fine-tuning)
 - [RAGOps: Operating and Managing RAG Pipelines](https://arxiv.org/abs/2506.03401)
 
 <!-- whats-next:start -->

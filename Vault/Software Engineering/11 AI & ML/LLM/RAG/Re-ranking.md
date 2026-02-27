@@ -95,7 +95,7 @@ Mitigation: evaluate the reranker on your own query-document pairs before commit
 
 ### Over-Reliance on Reranking to Fix Retrieval
 
-Reranking can only reorder what retrieval found. If the relevant document is not in the candidate set at all (recall failure), no amount of reranking will surface it. Teams sometimes add rerankers expecting them to fix retrieval coverage problems, when the actual fix is better [[Software Engineering/11 AI & ML/LLM/RAG/Chunking|chunking]], [[Software Engineering/11 AI & ML/LLM/RAG/Embeddings|embedding model selection]], or query expansion.
+Reranking can only reorder what retrieval found. If the relevant document is not in the candidate set at all (recall failure), no amount of reranking will surface it. Teams sometimes add rerankers expecting them to fix retrieval coverage problems, when the actual fix is better [[Software Engineering/11 AI & ML/LLM/RAG/Chunking|chunking]], [[Software Engineering/11 AI & ML/LLM/Embeddings|embedding model selection]], or query expansion.
 
 Diagnostic: if reranking improves precision but not recall, the pipeline has a first-stage recall problem, not a ranking problem.
 
@@ -114,8 +114,8 @@ Decision rule: start without reranking and measure retrieval quality. Add score 
 
 ## Questions
 
-> [!QUESTION]- A team adds a cross-encoder reranker and nDCG@5 improves on the eval set, but production users report no quality change. What is the most likely cause?
-> The improvement is in ranking positions that the generator does not use. If the generator only reads the top-3 chunks, improvements at positions 4–5 are invisible to users. Check whether the reranker changes the top-3 composition, not just overall nDCG. Also verify that the eval set reflects production query distribution — gains on eval-set query types may not represent the queries users actually send.
+> [!QUESTION]- Why can reranking improve offline nDCG without visible quality improvement for end users?
+> The improvement may be in ranking positions that the generator does not use. If the generator only reads the top-3 chunks, improvements at positions 4–5 are invisible to users. Evaluate whether the reranker changes the top-k composition that actually enters the prompt, not just overall nDCG. Also verify that the eval set reflects production query distribution — gains on eval-set query types may not represent the queries users actually send.
 
 > [!QUESTION]- When does reranking hurt retrieval quality instead of helping?
 > When the reranker is out-of-distribution for your domain. A reranker trained on short web passages may misjudge relevance on long technical documents, internal terminology, or multilingual content — demoting actually relevant documents. Also when the candidate count is too small: if first-stage recall@N is already low, the reranker only reorders noise. Always compare recall and precision before and after reranking on domain-specific queries.
