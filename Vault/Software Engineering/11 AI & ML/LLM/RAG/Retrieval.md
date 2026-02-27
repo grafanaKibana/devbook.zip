@@ -83,10 +83,10 @@ Failure pattern:
 ## Questions
 
 > [!QUESTION]- Why can dense-only retrieval underperform on technical support workloads?
-> **Expected answer:** Support workloads often include exact lexical constraints such as error codes, version strings, and SKU IDs. Dense retrieval captures semantic similarity but can miss those exact tokens, reducing retrieval precision.
+> Support workloads often include exact lexical constraints such as error codes, version strings, and SKU IDs. Dense retrieval captures semantic similarity but can miss those exact tokens, reducing retrieval precision.
 
 > [!QUESTION]- Why does retrieval require metadata filters even when semantic matching is strong?
-> **Expected answer:** Semantic relevance does not enforce authorization boundaries. Without tenant and ACL filters, retrieval can return context that is relevant but unauthorized.
+> Semantic relevance does not enforce authorization boundaries. Without tenant and ACL filters, retrieval can return context that is relevant but unauthorized.
 
 ## References
 

@@ -103,10 +103,10 @@ Main risk:
 ## Questions
 
 > [!QUESTION]- Why does query translation often improve recall but sometimes hurt precision?
-> **Expected answer:** Additional query variants increase coverage, but weak variants can pull related yet irrelevant documents. Precision drops unless fusion and reranking suppress noisy candidates.
+> Additional query variants increase coverage, but weak variants can pull related yet irrelevant documents. Precision drops unless fusion and reranking suppress noisy candidates.
 
 > [!QUESTION]- When is decomposition a better choice than plain multi-query?
-> **Expected answer:** Decomposition is better when the original query contains distinct sub-problems that need separate evidence retrieval and structured synthesis.
+> Decomposition is better when the original query contains distinct sub-problems that need separate evidence retrieval and structured synthesis.
 
 ## References
 

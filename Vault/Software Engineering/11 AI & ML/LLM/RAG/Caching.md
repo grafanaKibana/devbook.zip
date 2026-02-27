@@ -57,10 +57,10 @@ retrieval_cache_key = hash(
 ## Questions
 
 > [!QUESTION]- Why should retrieval cache keys be based on processed query text instead of raw embeddings?
-> **Expected answer:** Processed query text and transformation version are easier to audit, deterministic across model upgrades, and align with query translation behavior. Raw embedding bytes are opaque and brittle for versioned cache invalidation.
+> Processed query text and transformation version are easier to audit, deterministic across model upgrades, and align with query translation behavior. Raw embedding bytes are opaque and brittle for versioned cache invalidation.
 
 > [!QUESTION]- Why is response caching riskier than embedding caching?
-> **Expected answer:** Response outputs depend on prompt policy, retrieved evidence, and permissions, which change frequently. Embedding caches are usually content-addressed and less coupled to mutable policy state.
+> Response outputs depend on prompt policy, retrieved evidence, and permissions, which change frequently. Embedding caches are usually content-addressed and less coupled to mutable policy state.
 
 ## References
 

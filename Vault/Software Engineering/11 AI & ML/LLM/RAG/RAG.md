@@ -338,29 +338,16 @@ Main risk:
 - Cache aggressively: community summaries (Graph RAG), web search results (CRAG), reasoning chains (Iterative), and tool outputs (Agentic).
 - Route simple queries to the cheapest path. Most production traffic is simple — do not pay multi-hop costs for single-hop questions.
 
-## Detailed Pages
-
-- [[11 AI & ML/LLM/RAG/Chunking|Chunking]] - strategy-by-strategy chunk design and when to use each pattern.
-- [[11 AI & ML/LLM/RAG/Embeddings|Embeddings]] - model choice, dimensions, and semantic-vs-keyword tradeoffs.
-- [[11 AI & ML/LLM/RAG/Retrieval|Retrieval]] - dense/sparse/hybrid retrieval and fusion fundamentals.
-- [[11 AI & ML/LLM/RAG/Query Translation|Query Translation]] - Multi-Query, RAG-Fusion, Decomposition, Step-Back, HyDE.
-- [[11 AI & ML/LLM/RAG/Grounding|Grounding]] - citation contracts, evidence checks, and abstention logic.
-- [[11 AI & ML/LLM/RAG/Generation|Generation]] - context assembly, prompt construction, and model behavior.
-- [[11 AI & ML/LLM/RAG/Evaluation|Evaluation]] - retrieval and generation metrics plus regression gating.
-- [[11 AI & ML/LLM/RAG/Caching|Caching]] - cache layers, key design, and invalidation safety.
-- [[11 AI & ML/LLM/RAG/Monitoring|Monitoring]] - production metrics, alerting, and drift detection.
-- [[11 AI & ML/LLM/RAG/RAG vs Fine-Tuning|RAG vs Fine-Tuning]] - decision criteria and combined architectures.
-
 ## Questions
 
 > [!QUESTION]- Why should advanced RAG patterns be introduced incrementally instead of all at once?
-> **Expected answer:** Each pattern adds independent failure modes and observability needs. Incremental rollout isolates impact, allows A/B measurement against baseline, and prevents compounding complexity from masking root causes. Start with the pattern that addresses your highest-frequency failure mode.
+> Each pattern adds independent failure modes and observability needs. Incremental rollout isolates impact, allows A/B measurement against baseline, and prevents compounding complexity from masking root causes. Start with the pattern that addresses your highest-frequency failure mode.
 
 > [!QUESTION]- When is Graph RAG a better fit than plain vector retrieval?
-> **Expected answer:** When answers require explicit entity relations, dependency paths, or multi-hop joins that are hard to recover from independent text chunks. Examples: compliance tracing across policy documents, architecture dependency analysis, supply chain impact assessment. Skip Graph RAG for simple fact lookups where vector similarity suffices.
+> When answers require explicit entity relations, dependency paths, or multi-hop joins that are hard to recover from independent text chunks. Examples: compliance tracing across policy documents, architecture dependency analysis, supply chain impact assessment. Skip Graph RAG for simple fact lookups where vector similarity suffices.
 
 > [!QUESTION]- How does Adaptive RAG reduce cost without sacrificing accuracy on complex queries?
-> **Expected answer:** A query complexity classifier routes simple queries to no-retrieval or single-pass RAG (cheap and fast) and reserves iterative multi-hop retrieval for the complex tail. Since most production queries are simple, the average cost drops significantly while complex queries still get full retrieval. Misclassification cost is asymmetric — err toward the more capable strategy when uncertain.
+> A query complexity classifier routes simple queries to no-retrieval or single-pass RAG (cheap and fast) and reserves iterative multi-hop retrieval for the complex tail. Since most production queries are simple, the average cost drops significantly while complex queries still get full retrieval. Misclassification cost is asymmetric — err toward the more capable strategy when uncertain.
 
 ## References
 

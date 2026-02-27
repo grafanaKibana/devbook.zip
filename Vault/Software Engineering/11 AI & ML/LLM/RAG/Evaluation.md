@@ -40,10 +40,10 @@ Release gate example:
 ## Questions
 
 > [!QUESTION]- Why can aggregate quality stay flat while users still report failures?
-> **Expected answer:** Aggregate metrics can hide segment-specific regressions. Query-cluster or tenant-level slicing may reveal low-recall or low-faithfulness pockets masked by overall averages.
+> Aggregate metrics can hide segment-specific regressions. Query-cluster or tenant-level slicing may reveal low-recall or low-faithfulness pockets masked by overall averages.
 
 > [!QUESTION]- What is the practical difference between faithfulness and answer correctness?
-> **Expected answer:** Faithfulness checks whether claims are supported by provided context. Correctness checks whether the final answer solves the user problem. A response can be faithful but incomplete or unhelpful.
+> Faithfulness checks whether claims are supported by provided context. Correctness checks whether the final answer solves the user problem. A response can be faithful but incomplete or unhelpful.
 
 ## References
 

@@ -51,10 +51,10 @@ Thresholds should be calibrated to your workload and error budget.
 ## Questions
 
 > [!QUESTION]- Why should monitoring dashboards be segmented, not only global?
-> **Expected answer:** Global aggregates hide localized regressions. Segmenting by tenant, domain, or query cluster reveals failures that impact real users but disappear in overall averages.
+> Global aggregates hide localized regressions. Segmenting by tenant, domain, or query cluster reveals failures that impact real users but disappear in overall averages.
 
 > [!QUESTION]- Why can latency-only SLO tracking be misleading for RAG?
-> **Expected answer:** A system can meet latency targets while serving lower-quality or ungrounded answers. Monitoring must pair speed with quality and grounding metrics.
+> A system can meet latency targets while serving lower-quality or ungrounded answers. Monitoring must pair speed with quality and grounding metrics.
 
 ## References
 
