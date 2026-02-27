@@ -55,11 +55,7 @@ How it works:
 - Run dense and sparse retrieval in parallel.
 - Fuse ranked lists into one candidate set.
 
-Fusion baseline:
-
-```text
-RRF_score(doc) = sum(1 / (rank_i + k))
-```
+Fusion baseline: [[Software Engineering/11 AI & ML/LLM/RAG/Re-ranking|Reciprocal Rank Fusion (RRF)]] — sum the reciprocal of each document's rank across retrievers. Rank-based, so no score normalization needed.
 
 Best fit:
 
@@ -67,7 +63,7 @@ Best fit:
 
 Failure pattern:
 
-- Over-retrieval noise if top-k is high and reranking/deduplication is weak.
+- Over-retrieval noise if top-k is high and [[Software Engineering/11 AI & ML/LLM/RAG/Re-ranking|reranking]]/deduplication is weak.
 
 ## Indexing and Filtering
 
@@ -78,7 +74,7 @@ Failure pattern:
 ## Practical Baselines
 
 - Start with hybrid retrieval and conservative top-k (for many systems, 5-20 is a practical baseline).
-- Add reranking only after baseline retrieval is stable.
+- Add [[Software Engineering/11 AI & ML/LLM/RAG/Re-ranking|reranking]] only after baseline retrieval is stable.
 - Track retrieval metrics per segment (tenant, locale, domain) to avoid aggregate blind spots.
 
 ## Questions

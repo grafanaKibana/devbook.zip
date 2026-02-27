@@ -87,7 +87,7 @@
   "mobileHomepage": null,
   "useMobileHomepage": false,
   "dualPane": true,
-  "dualPaneOrientation": "horizontal",
+  "dualPaneOrientation": "vertical",
   "showTooltips": false,
   "showTooltipPath": true,
   "desktopBackground": "separate",
