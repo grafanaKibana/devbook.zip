@@ -1671,7 +1671,6 @@ var DEFAULT_SETTINGS_VALUES = {
   maxNodeWidth: -1,
   disableFontSizeRelativeToZoom: false,
   canvasMetadataCompatibilityEnabled: true,
-  treatFileNodeEdgesAsLinks: true,
   enableSingleNodeLinks: true,
   combineCustomStylesInDropdown: false,
   nodeStylingFeatureEnabled: true,
@@ -1824,11 +1823,6 @@ var SETTINGS = {
     description: "Make .canvas files compatible with the backlinks and outgoing links feature and show the connections in the graph view.",
     infoSection: "full-metadata-cache-support",
     children: {
-      treatFileNodeEdgesAsLinks: {
-        label: "Treat edges between file nodes as links",
-        description: "When enabled, edges between file nodes will be treated as links. This means that if file node A.md has an edge to file node B.md in the canvas, file A.md will have a link to file B.md in the outgoing links section and show a connection in the graph view.",
-        type: "boolean"
-      },
       enableSingleNodeLinks: {
         label: "Enable support for linking to a node using a [[wikilink]]",
         description: "When enabled, you can link and embed a node using [[canvas-file#node-id]].",
@@ -2450,9 +2444,9 @@ var Patcher = class _Patcher {
     this.plugin = plugin;
     this.patch();
   }
-  static async waitForViewRequest(plugin, viewType, patch) {
+  static async waitForMapValueLookup(map, viewType, patch) {
     return new Promise((resolve) => {
-      const uninstaller = around(plugin.app.viewRegistry.viewByType, {
+      const uninstaller = around(map, {
         [viewType]: (next) => function(...args) {
           const view = next.call(this, ...args);
           patch(view);
@@ -2463,6 +2457,9 @@ var Patcher = class _Patcher {
         }
       });
     });
+  }
+  static async waitForViewRequest(plugin, viewType, patch) {
+    return this.waitForMapValueLookup(plugin.app.viewRegistry.viewByType, viewType, patch);
   }
   static OverrideExisting(fn) {
     return Object.assign(fn, { __overrideExisting: true });
@@ -2488,6 +2485,14 @@ var Patcher = class _Patcher {
     if (uninstallers) uninstallers.push(uninstaller);
     plugin.register(uninstaller);
     return object;
+  }
+  static async patchOnce(plugin, object, patches) {
+    const uninstallers = [];
+    const value = await new Promise(
+      (resolve) => this.patch(plugin, object, patches(resolve), false, uninstallers)
+    );
+    for (const uninstall of uninstallers) uninstall();
+    return value;
   }
   static tryPatchWorkspacePrototype(plugin, getTarget, patches, uninstallers) {
     return new Promise((resolve) => {
@@ -3014,7 +3019,8 @@ var LinkSuggestionsPatcher = class extends Patcher {
         const currentFilePath = this.getSourcePath();
         const targetFile = this.app.metadataCache.getFirstLinkpathDest(path, currentFilePath);
         if (!targetFile) return result;
-        if (!(targetFile instanceof import_obsidian6.TFile) || targetFile.extension !== "canvas") return result;
+        if (!(targetFile instanceof import_obsidian6.TFile) || targetFile.extension !== "canvas")
+          return result;
         const fileCache = this.app.metadataCache.getFileCache(targetFile);
         if (!fileCache) return result;
         const canvasNodeCaches = fileCache.nodes;
@@ -3097,10 +3103,17 @@ var EmbedPatcher = class extends Patcher {
 // src/patchers/metadata-cache-patcher.ts
 var import_obsidian8 = require("obsidian");
 
+// src/utils/filepath-helper.ts
+var FilepathHelper = class {
+  static extension(path) {
+    var _a;
+    return (path == null ? void 0 : path.includes(".")) ? (_a = path == null ? void 0 : path.split(".")) == null ? void 0 : _a.pop() : void 0;
+  }
+};
+
 // src/utils/hash-helper.ts
 var HashHelper = class _HashHelper {
-  static async getFileHash(plugin, file) {
-    const bytes = await plugin.app.vault.readBinary(file);
+  static async getBytesHash(bytes) {
     const cryptoBytes = await crypto.subtle.digest("SHA-256", new Uint8Array(bytes));
     return _HashHelper.arrayBufferToHexString(cryptoBytes);
   }
@@ -3115,11 +3128,33 @@ var HashHelper = class _HashHelper {
   }
 };
 
-// src/utils/filepath-helper.ts
-var FilepathHelper = class {
-  static extension(path) {
+// src/utils/task-queue.ts
+var TaskQueue = class {
+  constructor() {
+    this.running = false;
+    this.queue = [];
+    this.onFinished = () => {
+    };
+  }
+  async add(task) {
+    return new Promise((resolve) => {
+      this.queue.push([resolve, task]);
+      if (!this.running) this.run();
+    });
+  }
+  setOnFinished(callback) {
+    this.onFinished = callback;
+  }
+  async run() {
     var _a;
-    return (path == null ? void 0 : path.includes(".")) ? (_a = path == null ? void 0 : path.split(".")) == null ? void 0 : _a.pop() : void 0;
+    this.running = true;
+    while (this.queue.length > 0) {
+      const [resolver, task] = (_a = this.queue.shift()) != null ? _a : [void 0, void 0];
+      await (task == null ? void 0 : task());
+      resolver == null ? void 0 : resolver();
+    }
+    this.running = false;
+    this.onFinished();
   }
 };
 
@@ -3127,7 +3162,6 @@ var FilepathHelper = class {
 var MetadataCachePatcher = class extends Patcher {
   async patch() {
     if (!this.plugin.settings.getSetting("canvasMetadataCompatibilityEnabled")) return;
-    const that = this;
     Patcher.patchPrototype(this.plugin, this.plugin.app.metadataCache, {
       getCache: Patcher.OverrideExisting((next) => function(filepath, ...args) {
         if (FilepathHelper.extension(filepath) === "canvas") {
@@ -3138,180 +3172,181 @@ var MetadataCachePatcher = class extends Patcher {
         return next.call(this, filepath, ...args);
       }),
       computeFileMetadataAsync: Patcher.OverrideExisting((next) => async function(file, ...args) {
-        var _a, _b, _c, _d, _e, _f, _g;
-        if (FilepathHelper.extension(file.path) !== "canvas")
-          return next.call(this, file, ...args);
-        this.uniqueFileLookup.add(file.name.toLowerCase(), file);
-        const fileHash = await HashHelper.getFileHash(that.plugin, file);
-        this.saveFileCache(file.path, {
-          hash: fileHash,
-          // Hash wouldn't get set in the original function
-          mtime: file.stat.mtime,
-          size: file.stat.size
-        });
-        const content = JSON.parse(await this.vault.cachedRead(file) || "{}");
-        const frontmatter = (_a = content.metadata) == null ? void 0 : _a.frontmatter;
-        const frontmatterData = {};
-        if (frontmatter) {
-          frontmatterData.frontmatterPosition = {
-            start: { line: 0, col: 0, offset: 0 },
-            end: { line: 0, col: 0, offset: 0 }
-          };
-          frontmatterData.frontmatter = frontmatter;
-          frontmatterData.frontmatterLinks = Object.entries(frontmatter).flatMap(([key, value]) => {
-            const getLinks = (value2) => value2.map((v) => {
-              if (!v.startsWith("[[") || !v.endsWith("]]")) return null;
-              const [link, ...aliases] = v.slice(2, -2).split("|");
-              return {
-                key,
-                displayText: aliases.length > 0 ? aliases.join("|") : link,
-                link,
-                original: v
-              };
-            }).filter((v) => v !== null);
-            if (typeof value === "string") return getLinks([value]);
-            else if (Array.isArray(value)) return getLinks(value);
-            return [];
-          }).filter((v) => v !== null);
-        }
-        const fileNodesEmbeds = (_d = (_c = (_b = content.nodes) == null ? void 0 : _b.map((nodeData, index) => nodeData.type === "file" && nodeData.file ? {
-          link: nodeData.file,
-          original: nodeData.file,
-          displayText: nodeData.file,
-          position: {
-            start: { line: 0, col: 1, offset: 0 },
-            // 0 for nodes
-            end: { line: 0, col: 1, offset: index }
-            // index of node
-          }
-        } : null)) == null ? void 0 : _c.filter((entry) => entry !== null)) != null ? _d : [];
-        const textEncoder = new TextEncoder();
-        const nodesMetadataPromises = (_g = (_f = (_e = content.nodes) == null ? void 0 : _e.map((node) => node.type === "text" ? textEncoder.encode(node.text).buffer : null)) == null ? void 0 : _f.map((buffer) => buffer ? this.computeMetadataAsync(buffer) : Promise.resolve(null))) != null ? _g : [];
-        const nodesMetadata = await Promise.all(nodesMetadataPromises);
-        const textNodesEmbeds = nodesMetadata.map((metadata, index) => {
-          var _a2;
-          return ((_a2 = metadata == null ? void 0 : metadata.embeds) != null ? _a2 : []).map((embed2) => {
-            var _a3, _b2;
-            return {
-              ...embed2,
-              position: {
-                nodeId: (_b2 = (_a3 = content.nodes) == null ? void 0 : _a3[index]) == null ? void 0 : _b2.id,
-                start: { line: 0, col: 1, offset: 0 },
-                // 0 for node
-                end: { line: 0, col: 1, offset: index }
-                // index of node
-              }
-            };
-          });
-        }).flat();
-        const textNodesLinks = nodesMetadata.map((metadata, index) => {
-          var _a2;
-          return ((_a2 = metadata == null ? void 0 : metadata.links) != null ? _a2 : []).map((link) => {
-            var _a3, _b2;
-            return {
-              ...link,
-              position: {
-                nodeId: (_b2 = (_a3 = content.nodes) == null ? void 0 : _a3[index]) == null ? void 0 : _b2.id,
-                start: { line: 0, col: 1, offset: 0 },
-                // 0 for node
-                end: { line: 0, col: 1, offset: index }
-                // index of node
-              }
-            };
-          });
-        }).flat();
-        this.metadataCache[fileHash] = {
-          v: 1,
-          ...frontmatterData,
-          embeds: [
-            ...fileNodesEmbeds,
-            ...textNodesEmbeds
-          ],
-          links: [
-            ...textNodesLinks
-          ],
-          nodes: {
-            ...nodesMetadata.reduce((acc, metadata, index) => {
-              var _a2, _b2;
-              const nodeId = (_b2 = (_a2 = content.nodes) == null ? void 0 : _a2[index]) == null ? void 0 : _b2.id;
-              if (nodeId && metadata)
-                acc[nodeId] = metadata;
-              return acc;
-            }, {})
-          }
-        };
-        this.trigger("changed", file, "", this.metadataCache[fileHash]);
-        if (await Promise.race([this.workQueue.promise.then(() => false), new Promise((resolve) => setTimeout(() => resolve(true), 0))]))
-          this.trigger("finished", file, "", this.metadataCache[fileHash], true);
-        this.resolveLinks(file.path, content);
+        if (file instanceof import_obsidian8.TFile && (file == null ? void 0 : file.extension) === "canvas")
+          return CanvasMetadataHandler.computeCanvasFileMetadataAsync.call(this, file);
+        return next.call(this, file, ...args);
       }),
-      resolveLinks: Patcher.OverrideExisting((next) => async function(filepath, cachedContent) {
-        var _a, _b;
-        if (FilepathHelper.extension(filepath) !== "canvas")
-          return next.call(this, filepath);
-        const file = this.vault.getAbstractFileByPath(filepath);
-        if (!file) return;
-        const metadataCache = this.metadataCache[(_a = this.fileCache[filepath]) == null ? void 0 : _a.hash];
-        if (!metadataCache) return;
-        const metadataReferences = [...metadataCache.links || [], ...metadataCache.embeds || []];
-        this.resolvedLinks[filepath] = metadataReferences.reduce((acc, metadataReference) => {
-          const resolvedLinkpath = this.getFirstLinkpathDest(metadataReference.link, filepath);
-          if (!resolvedLinkpath) return acc;
-          acc[resolvedLinkpath.path] = (acc[resolvedLinkpath.path] || 0) + 1;
-          return acc;
-        }, {});
-        if (that.plugin.settings.getSetting("treatFileNodeEdgesAsLinks")) {
-          ((_b = cachedContent.edges) != null ? _b : []).forEach((edge) => {
-            var _a2, _b2;
-            const from = (_a2 = cachedContent.nodes) == null ? void 0 : _a2.find((node) => node.id === edge.fromNode);
-            const to = (_b2 = cachedContent.nodes) == null ? void 0 : _b2.find((node) => node.id === edge.toNode);
-            if (!from || !to) return;
-            if (from.type !== "file" || to.type !== "file" || !from.file || !from.file) return;
-            const fromFile = from.file;
-            const toFile = to.file;
-            this.registerInternalLinkAC(file.name, fromFile, toFile);
-            if (!(edge.toEnd !== "none" || edge.fromEnd === "arrow"))
-              this.registerInternalLinkAC(file.name, toFile, fromFile);
-          });
-        }
-        this.trigger("resolve", file);
-        this.trigger("resolved");
-      }),
-      registerInternalLinkAC: (_next) => async function(canvasName, from, to) {
-        var _a, _b, _c, _d;
-        if (from === to) return;
-        const fromFile = this.vault.getAbstractFileByPath(from);
-        if (!fromFile || !(fromFile instanceof import_obsidian8.TFile)) return;
-        if (!["md", "canvas"].includes(fromFile.extension)) return;
-        const fromFileHash = (_b = (_a = this.fileCache[from]) == null ? void 0 : _a.hash) != null ? _b : await HashHelper.getFileHash(that.plugin, fromFile);
-        const fromFileMetadataCache = (_c = this.metadataCache[fromFileHash]) != null ? _c : { v: 1 };
-        this.metadataCache[fromFileHash] = {
-          ...fromFileMetadataCache,
-          links: [
-            ...fromFileMetadataCache.links || [],
-            {
-              link: to,
-              original: to,
-              displayText: `${canvasName} \u2192 ${to}`,
-              position: {
-                start: { line: 0, col: 0, offset: 0 },
-                end: { line: 0, col: 0, offset: 0 }
-              }
-            }
-          ]
-        };
-        this.resolvedLinks[from] = {
-          ...this.resolvedLinks[from],
-          [to]: (((_d = this.resolvedLinks[from]) == null ? void 0 : _d[to]) || 0) + 1
-        };
-      }
+      resolveLinks: Patcher.OverrideExisting((next) => async function(filepath) {
+        const result = next.call(this, filepath);
+        if (FilepathHelper.extension(filepath) === "canvas")
+          CanvasMetadataHandler.resolveCanvasLinks.call(this, filepath);
+        return result;
+      })
     });
-    this.plugin.registerEvent(this.plugin.app.vault.on("modify", (file) => {
-      if (FilepathHelper.extension(file.path) !== "canvas") return;
-      this.plugin.app.metadataCache.computeFileMetadataAsync(file);
-    }));
   }
 };
+var _CanvasMetadataHandler = class _CanvasMetadataHandler {
+  static async computeCanvasFileMetadataAsync(file) {
+    this.uniqueFileLookup.add(file.name.toLowerCase(), file);
+    let isStale = true;
+    if (!this.fileCache.hasOwnProperty(file.path))
+      this.saveFileCache(file.path, { mtime: 0, size: 0, hash: "" });
+    else {
+      const cache2 = this.fileCache[file.path];
+      const unchanged = cache2.mtime === file.stat.mtime && cache2.size === file.stat.size;
+      const hasMetadataCache = cache2.hash && this.metadataCache.hasOwnProperty(cache2.hash);
+      if (unchanged && hasMetadataCache)
+        isStale = false;
+    }
+    if (isStale) {
+      _CanvasMetadataHandler.linkResolveQueue.setOnFinished(() => this.trigger("finished"));
+      await _CanvasMetadataHandler.metadataQueue.add(
+        () => _CanvasMetadataHandler.updateMetadataCache.call(this, file)
+      );
+    }
+    _CanvasMetadataHandler.linkResolveQueue.setOnFinished(() => this.trigger("resolved"));
+    await _CanvasMetadataHandler.linkResolveQueue.add(
+      () => _CanvasMetadataHandler.resolveCanvasLinks.call(this, file.path)
+    );
+  }
+  static async updateMetadataCache(file) {
+    const bytes = await this.vault.readBinary(file);
+    const data = new TextDecoder().decode(new Uint8Array(bytes));
+    const hash = await HashHelper.getBytesHash(bytes);
+    const cache2 = {
+      mtime: file.stat.mtime,
+      size: file.stat.size,
+      hash
+    };
+    this.saveFileCache(file.path, cache2);
+    let metadata = this.metadataCache[cache2.hash];
+    if (metadata) return this.trigger(
+      "changed",
+      file,
+      data,
+      metadata
+    );
+    const slowIndexingTimeout = setTimeout(() => {
+      new import_obsidian8.Notice(`Canvas indexing taking a long time for file ${file.path}`);
+    }, 1e4);
+    try {
+      metadata = await _CanvasMetadataHandler.computeCanvasMetadataAsync.call(this, data);
+    } finally {
+      clearTimeout(slowIndexingTimeout);
+    }
+    if (metadata) {
+      this.saveMetaCache(hash, metadata);
+      this.trigger("changed", file, data, metadata);
+    } else {
+      console.log("Canvas metadata failed to parse", file);
+    }
+  }
+  static async computeCanvasMetadataAsync(data) {
+    var _a, _b, _c, _d, _e;
+    const content = JSON.parse(data || "{}");
+    const metadata = {
+      v: 1
+    };
+    const frontmatter = (_a = content.metadata) == null ? void 0 : _a.frontmatter;
+    metadata.frontmatterPosition = {
+      start: { line: 0, col: 0, offset: 0 },
+      end: { line: 0, col: 0, offset: 0 }
+    };
+    metadata.frontmatter = frontmatter;
+    metadata.frontmatterLinks = [];
+    for (const [key, value] of Object.entries(frontmatter != null ? frontmatter : {})) {
+      const getLinks = (value2) => value2.map((v) => {
+        if (!v.startsWith("[[") || !v.endsWith("]]")) return null;
+        const [link, ...aliases] = v.slice(2, -2).split("|");
+        return {
+          key,
+          displayText: aliases.length > 0 ? aliases.join("|") : link,
+          link,
+          original: v
+        };
+      }).filter((v) => v !== null);
+      if (typeof value === "string") (_b = metadata.frontmatterLinks) == null ? void 0 : _b.push(...getLinks([value]));
+      else if (Array.isArray(value)) (_c = metadata.frontmatterLinks) == null ? void 0 : _c.push(...getLinks(value));
+    }
+    metadata.nodes = {};
+    metadata.links = [];
+    metadata.embeds = [];
+    await Promise.all(((_d = content.nodes) != null ? _d : []).map(async (node, index) => {
+      var _a2, _b2;
+      if (node.type !== "text") return;
+      const text = node.text;
+      const buffer = new TextEncoder().encode(text).buffer;
+      const nodeMetadata = await this.computeMetadataAsync(buffer);
+      if (!nodeMetadata) return;
+      metadata.nodes[node.id] = nodeMetadata;
+      metadata.links.push(...((_a2 = nodeMetadata.links) != null ? _a2 : []).map((link) => ({
+        ...link,
+        position: {
+          nodeId: node.id,
+          start: { line: 0, col: 1, offset: 0 },
+          // 0 for node
+          end: { line: 0, col: 1, offset: index }
+          // index of node
+        }
+      })));
+      metadata.embeds.push(...((_b2 = nodeMetadata.embeds) != null ? _b2 : []).map((embed2) => ({
+        ...embed2,
+        position: {
+          nodeId: node.id,
+          start: { line: 0, col: 1, offset: 0 },
+          // 0 for node
+          end: { line: 0, col: 1, offset: index }
+          // index of node
+        }
+      })));
+    }));
+    for (const [index, node] of ((_e = content.nodes) != null ? _e : []).entries()) {
+      if (node.type !== "file") continue;
+      const file = node.file;
+      if (!file) continue;
+      metadata.embeds.push({
+        link: file,
+        original: file,
+        displayText: file,
+        position: {
+          start: { line: 0, col: 1, offset: 0 },
+          // 0 for nodes
+          end: { line: 0, col: 1, offset: index }
+          // index of node
+        }
+      });
+    }
+    return metadata;
+  }
+  static async resolveCanvasLinks(filepath) {
+    var _a, _b, _c, _d, _e;
+    const file = this.vault.getAbstractFileByPath(filepath);
+    if (!(file instanceof import_obsidian8.TFile)) return;
+    const metadata = this.getFileCache(file);
+    const references = [...(_a = metadata == null ? void 0 : metadata.links) != null ? _a : [], ...(_b = metadata == null ? void 0 : metadata.embeds) != null ? _b : []];
+    const referenceLinks = references.map((ref) => ref.link).sort();
+    const resolvedLinks = {};
+    const unresolvedLinks = {};
+    for (const link of referenceLinks) {
+      const resolved = this.getFirstLinkpathDest(link, filepath);
+      if (resolved) {
+        (_d = resolvedLinks[_c = resolved.path]) != null ? _d : resolvedLinks[_c] = 0;
+        resolvedLinks[resolved.path]++;
+      } else {
+        const strippedLink = link.endsWith(".md") ? link.slice(0, -3) : link;
+        (_e = unresolvedLinks[strippedLink]) != null ? _e : unresolvedLinks[strippedLink] = 0;
+        unresolvedLinks[strippedLink]++;
+      }
+    }
+    this.resolvedLinks[filepath] = resolvedLinks;
+    this.unresolvedLinks[filepath] = unresolvedLinks;
+    await sleep(1);
+    this.trigger("resolve", file);
+  }
+};
+_CanvasMetadataHandler.metadataQueue = new TaskQueue();
+_CanvasMetadataHandler.linkResolveQueue = new TaskQueue();
+var CanvasMetadataHandler = _CanvasMetadataHandler;
 
 // src/patchers/backlinks-patcher.ts
 var import_obsidian9 = require("obsidian");
@@ -3381,6 +3416,27 @@ var OutgoingLinksPatcher = class extends Patcher {
           return result;
         })
       });
+    });
+  }
+};
+
+// src/patchers/file-manager-patcher.ts
+var FileManagerPatcher = class extends Patcher {
+  async patch() {
+    if (!this.plugin.settings.getSetting("canvasMetadataCompatibilityEnabled")) return;
+    const that = this;
+    Patcher.patch(this.plugin, this.plugin.app.fileManager, {
+      processFrontMatter: Patcher.OverrideExisting((next) => async function(file, fn, options) {
+        if ((file == null ? void 0 : file.extension) === "canvas") {
+          that.plugin.app.vault.process(file, (data) => {
+            const content = JSON.parse(data);
+            fn(content.metadata.frontmatter);
+            return JSON.stringify(content, null, 2);
+          });
+          return;
+        }
+        return next.call(this, file, fn, options);
+      })
     });
   }
 };
@@ -3820,11 +3876,21 @@ var NodeRatioCanvasExtension = class extends CanvasExtension {
 
 // src/canvas-extensions/group-canvas-extension.ts
 var GROUP_NODE_SIZE = { width: 300, height: 300 };
+var GROUP_NODE_PADDING = 20;
 var GroupCanvasExtension = class extends CanvasExtension {
   isEnabled() {
     return true;
   }
   init() {
+    this.plugin.addCommand({
+      id: "create-group-around-selection",
+      name: "Group selected nodes",
+      checkCallback: CanvasHelper.canvasCommand(
+        this.plugin,
+        (canvas) => canvas.selection.size > 0,
+        (canvas) => this.createGroupAroundSelection(canvas)
+      )
+    });
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       "advanced-canvas:canvas-changed",
       (canvas) => {
@@ -3848,6 +3914,19 @@ var GroupCanvasExtension = class extends CanvasExtension {
         );
       }
     ));
+  }
+  createGroupAroundSelection(canvas) {
+    const bbox = BBoxHelper.combineBBoxes(
+      Array.from(canvas.selection.values()).map((e) => e.getBBox())
+    );
+    const paddedBBox = BBoxHelper.enlargeBBox(bbox, GROUP_NODE_PADDING);
+    canvas.createGroupNode({
+      pos: { x: paddedBBox.minX, y: paddedBBox.minY },
+      size: {
+        width: paddedBBox.maxX - paddedBBox.minX,
+        height: paddedBBox.maxY - paddedBBox.minY
+      }
+    });
   }
 };
 
@@ -5580,6 +5659,20 @@ var CollapsibleGroupsCanvasExtension = class extends CanvasExtension {
       "advanced-canvas:data-loaded:before",
       (_canvas, data, _setData) => this.collapseNodes(data)
     ));
+    this.plugin.addCommand({
+      id: "toggle-collapse-group",
+      name: "Toggle collapse group",
+      checkCallback: CanvasHelper.canvasCommand(
+        this.plugin,
+        (canvas) => canvas.selection.size === 1 && canvas.selection.values().next().value.getData().type === "group",
+        (canvas) => this.toggleCollapseGroup(canvas, canvas.selection.values().next().value)
+      )
+    });
+  }
+  toggleCollapseGroup(canvas, node) {
+    const data = node.getData();
+    this.setCollapsed(node.canvas, node, data.collapsed ? void 0 : true);
+    canvas.markMoved(node);
   }
   onNodeChanged(canvas, groupNode) {
     var _a, _b;
@@ -5589,11 +5682,7 @@ var CollapsibleGroupsCanvasExtension = class extends CanvasExtension {
     const collapseEl = document.createElement("span");
     collapseEl.className = "collapse-button";
     (0, import_obsidian17.setIcon)(collapseEl, groupNodeData.collapsed ? "plus-circle" : "minus-circle");
-    collapseEl.onclick = () => {
-      const groupNodeData2 = groupNode.getData();
-      this.setCollapsed(canvas, groupNode, groupNodeData2.collapsed ? void 0 : true);
-      canvas.markMoved(groupNode);
-    };
+    collapseEl.onclick = () => this.toggleCollapseGroup(canvas, groupNode);
     groupNode.collapseEl = collapseEl;
     (_b = groupNode.labelEl) == null ? void 0 : _b.insertAdjacentElement("afterend", collapseEl);
   }
@@ -7290,17 +7379,85 @@ var CanvasWrapperExposerExtension = class extends CanvasExtension {
   }
 };
 
+// src/patchers/bases-table-view-patcher.ts
+var BasesTableViewPatcher = class extends Patcher {
+  async patch() {
+    if (!this.plugin.settings.getSetting("canvasMetadataCompatibilityEnabled")) return;
+    const bases = this.plugin.app.internalPlugins.getEnabledPluginById("bases");
+    if (!bases) return;
+    this.patchViewFactory(bases);
+  }
+  async patchViewFactory(bases) {
+    const that = this;
+    await Patcher.patchOnce(this.plugin, bases.registrations.table, (resolve) => ({
+      factory: Patcher.OverrideExisting((next) => function(...args) {
+        const view = next.call(this, ...args);
+        that.patchTableView(view);
+        resolve(view);
+        return view;
+      })
+    }));
+  }
+  async patchTableView(basesView) {
+    const that = this;
+    await Patcher.patchOnce(this.plugin, basesView, (resolve) => ({
+      updateVirtualDisplay: Patcher.OverrideExisting((next) => function(...args) {
+        const result = next.call(this, ...args);
+        if (this.rows.length > 0) {
+          const row = this.rows.first();
+          that.patchTableRow(row);
+          resolve(row);
+        }
+        return result;
+      })
+    }));
+  }
+  async patchTableRow(row) {
+    const that = this;
+    await Patcher.patchOnce(this.plugin, row, (resolve) => ({
+      render: Patcher.OverrideExisting((next) => function(...args) {
+        let result = next.call(this, ...args);
+        if (this.cells.length > 0) {
+          const cell = this.cells.first();
+          that.patchTableCell(cell);
+          resolve(cell);
+          result = next.call(this, ...args);
+        }
+        return result;
+      })
+    }));
+  }
+  async patchTableCell(cell) {
+    Patcher.patchPrototype(this.plugin, cell, {
+      render: Patcher.OverrideExisting((next) => function(ctx) {
+        var _a;
+        const isCanvas = ((_a = ctx.file) == null ? void 0 : _a.extension) === "canvas";
+        if (isCanvas) ctx.file.extension = "md";
+        const result = next.call(this, ctx);
+        if (isCanvas) ctx.file.extension = "canvas";
+        return result;
+      })
+    });
+  }
+};
+
 // src/main.ts
 var PATCHERS = [
+  // Core canvas patchers
   CanvasPatcher,
+  SearchCommandPatcher,
+  // Core metadata patchers
+  MetadataCachePatcher,
+  FileManagerPatcher,
+  // Direct metadata dependant patchers
+  PropertiesPatcher,
+  !(0, import_obsidian19.requireApiVersion)("1.12.0") && BacklinksPatcher,
+  OutgoingLinksPatcher,
+  // Metadata dependant patchers
+  (0, import_obsidian19.requireApiVersion)("1.9.0") && BasesTableViewPatcher,
   LinkSuggestionsPatcher,
   EmbedPatcher,
-  MetadataCachePatcher,
-  BacklinksPatcher,
-  OutgoingLinksPatcher,
-  PropertiesPatcher,
-  SearchPatcher,
-  SearchCommandPatcher
+  SearchPatcher
 ];
 var CANVAS_EXTENSIONS = [
   // Advanced JSON Canvas Extensions
@@ -7343,6 +7500,7 @@ var AdvancedCanvasPlugin = class extends import_obsidian19.Plugin {
     this.settings.addSettingsTab();
     this.windowsManager = new WindowsManager(this);
     this.patchers = PATCHERS.map((Patcher2) => {
+      if (!Patcher2) return;
       try {
         return new Patcher2(this);
       } catch (e) {
