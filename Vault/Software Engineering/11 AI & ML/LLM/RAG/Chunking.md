@@ -7,6 +7,7 @@ level:
   - "2"
 priority: High
 status: Creation
+dg-publish: true
 ---
 
 # Intro
@@ -37,11 +38,12 @@ How it works:
 - The overlap parameter controls how much context is shared between neighboring chunks. Typical values are 10-20% of chunk size. Zero overlap is fastest but maximizes the chance of splitting a sentence mid-thought.
 - This is the fastest strategy to implement and the most predictable operationally — ingestion throughput is constant per document size, and chunk sizes are uniform, which simplifies vector DB capacity planning.
 
-```text
-Source: "Keep logs for 90 days. Exception: security investigations -> 365 days."
-Chunk 1 (200 tokens): "Keep logs for 90 days."
-Chunk 2 (200 tokens): "Exception: security investigations -> 365 days."
-# Rule and exception land in separate chunks -> retrieval misses the exception.
+```mermaid
+flowchart TD
+  S[Source -- Keep logs 90 days -- Exception 365 days for security] --> SP[Fixed-size split at 200 tokens]
+  SP --> C1[Chunk 1 -- Keep logs 90 days]
+  SP --> C2[Chunk 2 -- Exception 365 days for security]
+  C1 -. retrieval finds only chunk 1 .-> W[Answer misses exception clause]
 ```
 
 Where it fits:
@@ -62,11 +64,14 @@ How it works:
 - This preserves the largest coherent units possible. A short section stays as one chunk. A long section gets split at paragraph boundaries, not arbitrary offsets.
 - Most general-purpose RAG frameworks (LangChain, LlamaIndex) use recursive character splitting as their default. The separator hierarchy is configurable per document format.
 
-```text
-Separators tried in order: "\n# " -> "\n\n" -> ". "
-Source: "Data retention policy\n\nKeep logs 90 days. Exception: 365 days for security."
-Result: one chunk (fits target) -> rule + exception stay together.
-Long source: splits at paragraph boundaries first, sentence boundaries only if needed.
+```mermaid
+flowchart TD
+  D[Document] --> S1{Split by section breaks}
+  S1 -->|Fits target| Done[Keep as one chunk]
+  S1 -->|Too large| S2{Split by paragraph breaks}
+  S2 -->|Fits target| Done
+  S2 -->|Too large| S3{Split by sentence breaks}
+  S3 --> Done
 ```
 
 Where it fits:
@@ -87,13 +92,12 @@ How it works:
 - Different source formats need different parsers: markdown heading hierarchy, HTML DOM tree, PDF layout analysis (Unstructured, PyMuPDF), DOCX paragraph styles. The parser output is a sequence of typed blocks (heading + prose, table, code block, list).
 - Each chunk inherits metadata from its structural ancestors: section title, heading path, document ID. This enables section-level filtering at retrieval time and improves citation traceability.
 
-```text
-Source: markdown doc with heading + table + code block
-Parser output:
-  Chunk 1: heading + prose (atomic, section path: "Data Retention > Policy Rules")
-  Chunk 2: full table (atomic, section path: "Data Retention > Retention Periods")
-  Chunk 3: code block + docstring (atomic, section path: "Data Retention > Implementation")
-# Each structural unit stays intact for retrieval.
+```mermaid
+flowchart TD
+  D[Markdown document] --> P[Structure parser]
+  P --> C1[Heading + prose -- Data Retention then Policy Rules]
+  P --> C2[Full table -- Data Retention then Retention Periods]
+  P --> C3[Code block + docstring -- Data Retention then Implementation]
 ```
 
 Where it fits:
@@ -115,10 +119,13 @@ How it works:
 - The core assumption: spans that are semantically similar belong together, and a drop in similarity signals a topic shift. The boundary is placed where the content actually changes, not where a fixed window happens to end.
 - Threshold selection is critical. Too aggressive (high threshold) fragments the document into single-sentence chunks. Too conservative (low threshold) produces oversized chunks that span multiple topics. Calibrate on a held-out evaluation set per corpus.
 
-```text
-Span similarities: [0.92, 0.89, 0.91, 0.43, 0.88, 0.90]
-                                        ^^ topic shift detected (below threshold 0.6)
-Split at position 4 -> two chunks aligned to actual topic change.
+```mermaid
+flowchart LR
+  A[Span 1 -- sim 0.92] --> B[Span 2 -- sim 0.89]
+  B --> C[Span 3 -- sim 0.91]
+  C -->|sim drops to 0.43| D[Topic shift -- split here]
+  D --> E[Span 5 -- sim 0.88]
+  E --> F[Span 6 -- sim 0.90]
 ```
 
 Where it fits:
@@ -140,11 +147,14 @@ How it works:
 - At retrieval time, search against child chunks for precision — small chunks match specific queries better. When a child matches, expand to its parent chunk before passing context to the generator. The parent provides the surrounding context that the child alone may lack.
 - The parent-child mapping is stored as metadata. Each child stores its parent ID. Expansion is a metadata lookup, not a second retrieval call.
 
-```text
-Parent chunk: full "Data Retention" section (800 tokens)
-Child chunks: [clause 1, 120 tokens] [clause 2, 90 tokens] [clause 3, 110 tokens]
-Retrieval: child 2 matches query -> expand to parent for generation context.
-# Retrieval precision from small children + generation context from parent.
+```mermaid
+flowchart TD
+  P[Parent -- full Data Retention section -- 800 tokens] --> C1[Child -- clause 1 -- 120 tokens]
+  P --> C2[Child -- clause 2 -- 90 tokens]
+  P --> C3[Child -- clause 3 -- 110 tokens]
+  Q[Query] --> C2
+  C2 -. expand to parent .-> P
+  P --> G[Generator gets full context]
 ```
 
 Where it fits:
@@ -166,13 +176,12 @@ How it works:
 - This can be fully agentic (LLM decides everything) or hybrid (rules propose candidates, LLM refines). The hybrid approach is more practical — use recursive splitting to generate candidate chunks, then have the LLM merge or split candidates based on semantic coherence.
 - Boundary decisions are non-deterministic. The same document can produce different chunks on re-processing unless you cache the LLM's boundary decisions and version them alongside the prompts and model used.
 
-```text
-LLM prompt: "Split this document into self-contained chunks by intent."
-LLM output:
-  Chunk 1: eligibility rules (tagged: policy, access-control)
-  Chunk 2: exception handling (tagged: policy, escalation)
-  Chunk 3: audit requirements (tagged: compliance, logging)
-# Boundaries follow document intent, not token counts.
+```mermaid
+flowchart TD
+  D[Document] --> LLM[LLM reasons about semantic intent]
+  LLM --> C1[Chunk 1 -- eligibility rules]
+  LLM --> C2[Chunk 2 -- exception handling]
+  LLM --> C3[Chunk 3 -- audit requirements]
 ```
 
 Where it fits:
