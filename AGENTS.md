@@ -278,3 +278,4 @@ Enforcement note
 - If request changes vault structure/formatting rules, ask user whether to update AGENTS.md Memory.
 - If page structure is unclear (target folder, page type, note naming, or template), ask the user one clarifying question before changing pages or creating new ones.
 - **AGENTS.md evolution rule.** When updating this contract, prefer extending the writing paradigm or strengthening existing principles over adding prescriptive format rules. If a proposed rule can be derived from the three writing principles (concrete over abstract, show the machine, depth matches complexity), strengthen the principle instead of adding a new rule. Rules should guide judgment, not prescribe specific section templates or bullet formats for each case.
+- **No automatic commits.** Never create git commits unless the user explicitly asks. Leave changes unstaged/uncommitted so the user controls when and what to commit.
