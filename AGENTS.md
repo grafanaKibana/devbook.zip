@@ -57,7 +57,20 @@ Hub notes only need `tags: [FolderNote]`. Concept pages do NOT need FolderNote t
 - Every real note must have: intro ("what + why"), at least one concrete example, at least one real reference link.
 - Internal links: Obsidian wikilinks are allowed and common (prefer `[[path/to/note|Title]]` for internal references).
 - External links: Markdown links (`[Title](https://...)`).
-- Code fences: always specify language (`bash`, `json`, `yaml`, `mermaid`, etc.).
+- **Code fences (enforced)**
+  - Every fenced code block MUST specify a language. This is enforced automatically via `markdownlint-cli2` (rule MD040) on staged files before commit.
+  - Accepted Obsidian-specific block languages: `mermaid`, `dataview`, `dataviewjs`.
+  - When no specific language applies, use `text` as the fallback (never leave the language blank).
+  - To embed a fenced code block example inside a note (e.g., in documentation), use a quadruple fence to wrap it:
+
+    ````markdown
+    ```text
+    example content
+    ```
+    ````
+
+  - To find existing notes with unlabeled fences, run `npm run lint:md:all`; add a language or change to `text` for generic output blocks.
+  - **MD040 migration path**: enforcement is staged-only. The pre-commit hook blocks new unlabeled fences but does NOT require fixing the existing backlog immediately. Fix existing fences gradually as you touch files. When fixing: use `text` for generic or unknown blocks; use the real language where the content is clearly identifiable (`bash`, `csharp`, `json`, `yaml`, `mermaid`, `dataview`, `dataviewjs`).
 - Mermaid: only when it materially aids comprehension. Keep small. Avoid punctuation `()[]{},:;/|` in labels — write as words.
 
 ### Note quality bar (Senior .NET + AI)
@@ -104,6 +117,38 @@ Section minimalism rule
 - Add standalone `Examples` and `Pitfalls` headings only when they add unique value beyond Intro.
 - If a section would be only 1-2 short sentences with no extra clarity, merge it into `Intro`.
 - Avoid creating multiple tiny sections that fragment one idea.
+
+Scope-to-depth fit
+
+A note's depth must match its topic's actual complexity. More content is not always better.
+
+- **Small/definitional topics** (e.g., a single enum, a short principle like YAGNI, a trivial command): keep it compact. `Intro` + inline example + `References` is often sufficient. Do NOT force `Pitfalls`/`Tradeoffs`/`Questions` sections when they would be filler or padding.
+- **Topics with non-obvious mechanics** (e.g., GC, Async/Await, OAuth flow, caching eviction): the intro MUST include or reference a mechanism explanation (cause/effect in plain language). Include `Pitfalls` when real failure modes exist. Include `Tradeoffs` when 2+ realistic options exist.
+- **Topics with multiple competing approaches** (e.g., Task vs ValueTask, RAG vs fine-tuning): include a `Tradeoffs` section with concrete decision criteria, not a strawman comparison.
+
+Reviewer check: Does the note have the right depth for its topic? Flag overstuffed small notes and underwritten complex notes equally.
+
+**Publish gate for `dg-publish: true`**: A published note MUST have non-empty, substantive content — not a template skeleton or a heading with no body. This is content-based, not status-based. A note can be `status: Creation` and still be published if it already has meaningful content.
+
+Note size and splitting
+
+When a note grows large, the reviewer MUST include a **Split Suggestion** section in their output — either recommending a split or explicitly justifying why it's not needed.
+
+**Heuristic trigger**: suggest a split when a note is **>1200 words OR >12 headings**, AND it covers **2+ distinct concepts** (separate definitions, concerns, or decision contexts that could each stand alone).
+
+Reviewer commands to measure size quickly:
+
+```bash
+wc -w "<note>.md"           # word count
+rg -c "^#+\s" "<note>.md"   # heading count
+```
+
+**Decision tree**:
+
+- The note is a **grab-bag / category overview** (e.g., covering DNS, HTTP, and Sockets in one file) → Convert to a **hub note (FolderNote)** + individual sub-notes per concept.
+- The note covers **2-3 separable concepts** that can each stand without the original (e.g., combining CQRS and Event Sourcing in one file) → **Split into peer concept notes** in the same folder; add cross-links between them.
+
+**This rule is a suggestion, not a mandate.** The reviewer must justify their recommendation; the author decides whether to split.
 
 Mermaid diagram triggers
 
@@ -164,6 +209,7 @@ Reviewer output contract (strict)
   - exact change required to fix it
   - which rule it violates
 - Do not return generic advice. Feedback must be file-specific and actionable.
+- Every review MUST include a **Split Suggestion** section. When the note exceeds the size heuristic (>1200 words OR >12 headings AND 2+ distinct concepts), include a specific split recommendation. Otherwise, include "Split Suggestion: No split needed — [brief justification]".
 
 Minimum validation checklist (must all pass)
 
@@ -177,6 +223,9 @@ Minimum validation checklist (must all pass)
   - 1 practice source (reputable real-world implementation guidance)
 - Any non-obvious production failure mode includes cause, impact, and mitigation.
 - Any real choice between viable options includes tradeoffs.
+- All fenced code blocks have a language specified (MD040). Use `text` for generic blocks.
+- Scope-to-depth fit: note depth matches topic complexity (not overstuffed for small topics; not thin for complex ones).
+- Split heuristic checked: if >1200 words OR >12 headings AND 2+ distinct concepts, Split Suggestion is included.
 
 Mandatory reviewer prompt format
 
@@ -184,7 +233,7 @@ Use this structure when spawning the reviewer subagent:
 
 ```text
 1. TASK: Review created/updated notes for technical correctness, source legitimacy, clarity, and interview readiness.
-2. EXPECTED OUTCOME: Return PASS only when zero issues remain; otherwise return a blocking error list with exact fixes.
+2. EXPECTED OUTCOME: Return PASS only when zero findings remain (including code fence language, scope-to-depth fit, and split heuristic); otherwise return a blocking error list with exact fixes and which rule each issue violates.
 3. REQUIRED TOOLS: Repository read/search tools and trusted documentation lookup tools.
 4. MUST DO: Validate against AGENTS.md quality bar, templates, and source rules. Verify every claim is supported or remove it.
 5. MUST NOT DO: Do not edit files. Do not provide vague suggestions. Do not approve notes with unresolved issues.
