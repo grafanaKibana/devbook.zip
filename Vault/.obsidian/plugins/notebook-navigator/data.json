@@ -28,6 +28,23 @@
           "type": "note",
           "path": "Software Engineering/Topics.base"
         }
+      ],
+      "propertyKeys": [
+        {
+          "key": "level",
+          "showInNavigation": true,
+          "showInList": true
+        },
+        {
+          "key": "priority",
+          "showInNavigation": true,
+          "showInList": true
+        },
+        {
+          "key": "status",
+          "showInNavigation": true,
+          "showInList": true
+        }
       ]
     }
   ],
@@ -55,6 +72,7 @@
     "compactItemHeightScaleText": "synced",
     "uiScale": "synced"
   },
+  "createNewNotesInNewTab": false,
   "autoRevealActiveFile": true,
   "autoRevealShortestPath": true,
   "autoRevealIgnoreRightSidebar": true,
@@ -99,11 +117,13 @@
   "dateFormat": "MMM D, YYYY",
   "timeFormat": "h:mm a",
   "calendarTemplateFolder": "Templates",
+  "confirmBeforeDelete": true,
+  "deleteAttachments": "ask",
+  "moveFileConflicts": "ask",
   "externalIconProviders": {
     "fontawesome-solid": false
   },
   "checkForUpdatesOnStart": true,
-  "confirmBeforeDelete": true,
   "pinNavigationBanner": true,
   "showNoteCount": true,
   "separateNoteCounts": true,
@@ -151,7 +171,6 @@
   "inheritPropertyColors": true,
   "propertySortOrder": "alpha-asc",
   "showAllPropertiesFolder": true,
-  "propertyFields": "level, priority, status",
   "defaultListMode": "compact",
   "includeDescendantNotes": true,
   "defaultFolderSort": "title-asc",
@@ -488,8 +507,7 @@
     "#404040",
     "#404040"
   ],
-  "lastShownVersion": "2.4.0",
-  "lastAnnouncedRelease": "2.4.1",
+  "lastShownVersion": "2.4.2",
   "rootFolderOrder": [],
   "rootTagOrder": [],
   "rootPropertyOrder": []

@@ -481,6 +481,16 @@
       "color": "6"
     },
     {
+      "id": "n_b94b6593b3",
+      "type": "text",
+      "text": "# [[Software Engineering/11 AI & ML/LLM/RAG/RAG|RAG]]",
+      "x": 840,
+      "y": 5160,
+      "width": 340,
+      "height": 80,
+      "color": "2"
+    },
+    {
       "id": "n_05ca101164",
       "type": "text",
       "text": "# [[Software Engineering/11 AI & ML/Machine Learning/Machine Learning|Machine Learning]]",
@@ -522,7 +532,7 @@
     {
       "id": "n_b0ac2236f9",
       "type": "text",
-      "text": "#### Roadmap legend\n**Generated:** Feb 21 2026 | 01:50AM",
+      "text": "#### Roadmap legend\n**Generated:** Feb 27 2026 | 03:19AM",
       "x": -1440,
       "y": 0,
       "width": 500,
@@ -541,7 +551,7 @@
     {
       "id": "n_c1cf7bc196",
       "type": "text",
-      "text": "Creation: 13",
+      "text": "Creation: 14",
       "x": -1380,
       "y": 202,
       "width": 380,
@@ -907,6 +917,13 @@
       "fromNode": "n_c6ccce8189",
       "fromSide": "right",
       "toNode": "n_7e80798d47",
+      "toSide": "left"
+    },
+    {
+      "id": "e_324bac136d",
+      "fromNode": "n_c6ccce8189",
+      "fromSide": "right",
+      "toNode": "n_b94b6593b3",
       "toSide": "left"
     },
     {
