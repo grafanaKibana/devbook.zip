@@ -14,83 +14,97 @@ level:
 
 # Intro
 
-An AI agent can be thought of as an autonomous program that **observes** (through sensors or data input), **decides** (using some form of reasoning or inference), and **acts** (outputs or executes changes in its environment).
+An agentic system is any system where an LLM controls part of the workflow — calling tools, making decisions, or directing other LLMs. The term "agent" gets used loosely, but there is a practical distinction that matters for system design:
 
-AI agents are essential when **complex** or **dynamic tasks** arise—situations where the environment may change, or the goal might shift over time.
+- **Workflows** are systems where LLMs and tools are orchestrated through predefined code paths. The developer controls the sequence; the LLM handles individual steps.
+- **Agents** are systems where the LLM dynamically directs its own process and tool usage, deciding what to do next based on results so far.
 
-They provide a way to **delegate** specialized tasks to autonomous systems, potentially saving human effort and ensuring faster or more efficient operations.
+Most production systems that people call "agents" are actually workflows — and that is the right choice. The most effective agentic systems use the simplest pattern that solves the problem. Start with a single LLM call with good prompting and retrieval. Add workflow orchestration when that falls short. Reach for autonomous agents only when the task is genuinely open-ended and unpredictable.
 
-### Why Don’t We Use a Single Agent With All Possible Tools?
+## The Augmented LLM
 
-**Scope and Complexity**: One massive, monolithic agent with every tool tends to become too complex to maintain, or less specialized in each tool.
+The building block of every agentic system is an LLM enhanced with retrieval, [[Software Engineering/11 AI & ML/LLM/Agents/Tools|tools]], and memory. The model generates its own search queries, selects appropriate tools, and decides what information to retain. Before building multi-step systems, invest in making this single building block work well — choose the right model, tune the prompts, and ensure tools have clear, well-documented interfaces.
 
-**Specialization**: In many areas of AI, specialized agents are often better at their narrower tasks (e.g., an agent that handles language translation vs. an agent optimized for image recognition).
+[[Software Engineering/11 AI & ML/LLM/Agents/Model Context Protocol|Model Context Protocol (MCP)]] standardizes how an augmented LLM connects to external tools and data sources.
 
-**Scalability**: If one agent is overloaded with all the possible tasks and tools, you might run into scalability issues. Multi-agent setups can spread out the workload.
+## Workflow Patterns
 
-## Deeper Explanation
+Five patterns cover most production agentic systems. Each trades latency and cost for better task performance in a specific way.
 
-## Key elements
+### Prompt Chaining
 
-### Role playing
+Break a task into sequential steps where each LLM call processes the output of the previous one. Add programmatic checks between steps to verify the process stays on track.
 
-In AI, “role playing” refers to assigning each agent (or sub-agent) a specific role or persona to better organize tasks. Rather than having a single, general agent, you can split tasks among different roles. Each role (like “planner,” “critic,” or “executor”) can focus on its part and work together more coherently.
+When to use: tasks that decompose cleanly into fixed subtasks. Example: generate marketing copy, then translate it. Write an outline, validate it meets criteria, then write the document.
 
-> [!TIP]
-> When designing a system with multiple agents or sub-agents, **name and define each role** explicitly to avoid overlap.
+### Routing
 
+Classify the input and direct it to a specialized prompt or model. This lets you optimize each downstream path independently — a change to handle refund requests will not degrade general question answering.
 
+When to use: distinct input categories that need different handling. Example: route customer queries — general questions to a small fast model, complex technical issues to a larger model, refund requests to a constrained workflow with tool access.
 
-### Focus
+### Parallelization
 
- “Focus” is the agent’s ability to stay on track, maintaining attention on a specific goal or sub-goal. Agents need to avoid distractions in complex environments. Focus helps them filter out irrelevant data and keep tasks aligned with the primary objectives.
+Run LLM calls simultaneously and aggregate results. Two variants: **sectioning** splits independent subtasks across parallel calls; **voting** runs the same task multiple times for higher confidence.
 
-> [!TIP]
-> Align agent focus with well-defined objectives. The clearer the objective, the easier it is for the agent to stay on track.
+When to use: independent subtasks that benefit from speed, or tasks where multiple perspectives improve reliability. Example: one LLM processes the user query while another screens for policy violations in parallel. Or multiple prompts review code for vulnerabilities and flag issues independently.
 
-### Tools
+### Orchestrator-Workers
 
-Tools are external resources or APIs the agent can use—such as language models, databases, web services, or even specialized hardware. Effective tool usage can greatly expand an agent’s capabilities. However, more tools mean more complexity.
+A central LLM dynamically breaks the task into subtasks, delegates each to a worker LLM, and synthesizes results. Unlike parallelization, the subtasks are not predefined — the orchestrator determines them based on the input.
 
-> [!TIP]
-> Before adding tools, ask: **Do we really need them?** Overly complex toolkits might introduce confusion or errors.
-### Cooperation
+When to use: complex tasks where you cannot predict the subtasks in advance. Example: a coding agent that determines which files need changes and what each change should be.
 
-Cooperation is how different agents or sub-agents collaborate, share information, and work together toward a unified goal. Multi-agent systems often require coordination to avoid conflicting efforts or redundant work. This can involve protocols for communication, conflict resolution, and shared decision-making.
+### Evaluator-Optimizer
 
-> [!TIP]
-> Agents need a way to share relevant data—be it messages, events, or shared state. A simple, consistent protocol will often suffice.
+One LLM generates a response; another evaluates it and provides feedback. The loop continues until the evaluator is satisfied. This is the LLM equivalent of an iterative editing process.
 
-### Guardrails
+When to use: tasks with clear evaluation criteria where iterative refinement adds measurable value. Example: literary translation where an evaluator catches nuance the translator missed.
 
-Guardrails are constraints or safety measures put in place to prevent harmful or unintended behavior. AI agents may encounter ambiguous or open-ended tasks. Guardrailsrails ensure they operate within ethical, legal, or functional boundaries.
+## Autonomous Agents
 
-> [!TIP]
-> Always define guiderails (e.g., limiting access to certain system functions) so that even if an agent makes a poor decision, it can’t cause serious harm.
+When the task is genuinely open-ended — you cannot predict the number of steps, and no fixed workflow covers the problem — use an autonomous agent. An agent is an LLM using tools in a loop: observe results, decide next action, execute, repeat.
 
-### Memory
+```mermaid
+flowchart TD
+    H[Human task] --> A[Agent plans next step]
+    A --> T[Execute tool or action]
+    T --> E[Observe result]
+    E --> C{Task complete?}
+    C -->|No| A
+    C -->|Yes| R[Return result to human]
+    E -->|Blocked| HI[Ask human for input]
+    HI --> A
+```
 
-Memory allows an agent to store and recall information about past interactions, decisions, or states.
+Agents are powerful but come with higher costs and compounding error risk. Each step that goes slightly wrong can push the agent further off track. Three principles from production experience:
 
-This is crucial for context continuity, learning from mistakes, and adapting to new situations. Memory can be short-term (working memory for immediate tasks) or long-term (archives of past interactions, results, user preferences).
+1. **Simplicity** — keep the design minimal. Complex agents are harder to debug and more prone to cascading failures.
+2. **Transparency** — show the agent's planning and reasoning steps explicitly. When something fails, you need to see where and why.
+3. **Tool quality** — invest as much effort in tool interfaces (documentation, error messages, parameter design) as in prompts. Think of it as designing an API for a junior developer — if the tool is ambiguous to use, the agent will misuse it.
 
-> [!TIP]
-> Consider use structured storage (like a database or key-value store) and define **how long** different pieces of information remain in memory.
+Where agents work well today: coding tasks (verifiable via tests), customer support (measurable via resolution), and research tasks (structured by sources). The common thread is clear success criteria and feedback loops that let the agent assess its own progress.
 
-## Practical Tips
-
-- **Start Small**: If you are experimenting with AI agents, try building a single task-specific agent first. Once comfortable, you can expand to multiple agents.
-- **Define Clear Roles**: For a multi-agent system, clarify each agent’s capabilities and boundaries. Overlapping tasks can cause confusion if not handled carefully.
-- **Communication Protocols**: Ensure that agents can **communicate** effectively. In multi-agent systems, shared language or messaging formats are crucial for coordination.
-- **Testing & Validation**: Multi-agent systems can exhibit unexpected “emergent” behaviors. Test systematically to ensure agents aren’t working at cross-purposes.
-- **Iterate & Scale**: Start with a small system, learn from its interactions, then gradually add more agents or more complex behaviors.
+For patterns on coordinating multiple agents, see [[Software Engineering/11 AI & ML/LLM/Agents/Multi-Agentic Systems|Multi-Agentic Systems]].
 
 ## Questions
 
-## Links
+> [!QUESTION]- When should you use a workflow instead of an autonomous agent?
+> Use a workflow when the task decomposes into predictable steps — you know the sequence in advance and each step has clear inputs and outputs. Workflows are cheaper, faster, and more debuggable. Use an autonomous agent only when you cannot predict the steps needed, the task is open-ended, and you have a feedback mechanism (tests, evaluation criteria) to catch errors. Most production "agents" are actually workflows, and that is the right choice for most use cases.
 
-- https://devblogs.microsoft.com/semantic-kernel/using-azure-ai-agents-with-semantic-kernel-in-net-and-python/
-- https://devblogs.microsoft.com/semantic-kernel/the-future-of-ai-customizing-ai-agents-with-the-semantic-kernel-agent-framework/
+> [!QUESTION]- Why does Anthropic recommend starting with the simplest possible solution?
+> Each layer of agentic complexity — chaining, routing, parallelization, autonomy — adds latency, cost, and failure surface. A single well-prompted LLM call with good retrieval solves many tasks. Adding orchestration only makes sense when you can demonstrate measurably better outcomes that justify the added complexity. Teams that start with complex multi-agent systems often spend more time debugging coordination than solving the actual problem.
+
+> [!QUESTION]- Why is tool design often more important than prompt design in agentic systems?
+> In a single LLM call, the prompt is the entire interface. In an agentic system, the LLM interacts with tools repeatedly — each tool call is a decision point where the agent can succeed or fail. Poorly documented tools, ambiguous parameters, or inconsistent error messages cause wrong tool calls that compound across steps. Anthropic's SWE-bench agent team spent more time optimizing tools (e.g., switching from relative to absolute file paths to eliminate a class of errors) than optimizing prompts, because tool quality directly determined task success rate.
+
+## References
+
+- [Building Effective Agents (Anthropic Engineering)](https://www.anthropic.com/engineering/building-effective-agents)
+- [Patterns for Basic Agent Workflows — cookbook (Anthropic)](https://platform.claude.com/cookbook/patterns-agents-basic-workflows)
+- [Claude Agent SDK — overview and patterns (Anthropic)](https://platform.claude.com/docs/en/agent-sdk/overview)
+- [Using Azure AI Agents with Semantic Kernel in .NET and Python (Microsoft)](https://devblogs.microsoft.com/semantic-kernel/using-azure-ai-agents-with-semantic-kernel-in-net-and-python/)
+- [The Future of AI — Customizing AI Agents with Semantic Kernel (Microsoft)](https://devblogs.microsoft.com/semantic-kernel/the-future-of-ai-customizing-ai-agents-with-the-semantic-kernel-agent-framework/)
 
 <!-- whats-next:start -->
 
