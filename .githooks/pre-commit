@@ -7,7 +7,11 @@ set -e
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 
 # Collect staged Markdown files (handles spaces in paths)
-mapfile -t STAGED_MD < <(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(md|MD)$' || true)
+STAGED_MD=()
+while IFS= read -r file; do
+    [[ "$file" =~ \.(md|MD)$ ]] || continue
+    STAGED_MD+=("$file")
+done < <(git diff --cached --name-only --diff-filter=ACMR)
 
 # If no staged Markdown files, skip automations
 if [[ ${#STAGED_MD[@]} -eq 0 ]]; then

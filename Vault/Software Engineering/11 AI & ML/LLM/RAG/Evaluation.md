@@ -61,9 +61,14 @@ Release gate example:
 >  [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
 >
 > **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Chunking and Embeddings|Chunking and Embeddings]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Grounding and Generation|Grounding and Generation]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Production Operations|Production Operations]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Retrieval and Query Translation|Retrieval and Query Translation]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Strategy and Advanced Patterns|Strategy and Advanced Patterns]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/Advanced RAG Patterns|Advanced RAG Patterns]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/Caching|Caching]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/Chunking|Chunking]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/Embeddings|Embeddings]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/Generation|Generation]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/Grounding|Grounding]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring|Monitoring]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/Query Translation|Query Translation]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/RAG vs Fine-Tuning|RAG vs Fine-Tuning]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/Retrieval|Retrieval]]
 <!-- whats-next:end -->

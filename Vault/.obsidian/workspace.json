@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Software Engineering/11 AI & ML/LLM/RAG/Strategy and Advanced Patterns.md",
-                "mode": "source",
+                "file": "Software Engineering/11 AI & ML/LLM/RAG/Chunking.md",
+                "mode": "preview",
                 "source": true
               },
               "icon": "lucide-file",
-              "title": "Strategy and Advanced Patterns"
+              "title": "Chunking"
             }
           }
         ]
@@ -103,13 +103,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Software Engineering/11 AI & ML/LLM/RAG/Strategy and Advanced Patterns.md",
+                "file": "Software Engineering/11 AI & ML/LLM/RAG/Chunking.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Strategy and Advanced Patterns"
+              "title": "Outline of Chunking"
             }
           },
           {
@@ -151,10 +151,10 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Software Engineering/11 AI & ML/LLM/RAG/Strategy and Advanced Patterns.md"
+                "file": "Software Engineering/11 AI & ML/LLM/RAG/Chunking.md"
               },
               "icon": "lucide-info",
-              "title": "File properties for Strategy and Advanced Patterns"
+              "title": "File properties for Chunking"
             }
           }
         ]
@@ -206,38 +206,39 @@
   },
   "active": "e7a7b303c61786dc",
   "lastOpenFiles": [
+    "Software Engineering/_test-md040.md",
+    "Software Engineering/01 Programming/TEST-TEMP/TEST-TEMP.md",
+    "Software Engineering/01 Programming/TEST-TEMP/test-md040.md",
+    "Software Engineering/11 AI & ML/LLM/RAG/Chunking.md",
+    "Software Engineering/01 Programming/TEST-TEMP",
+    "Software Engineering/TEST-MD040-DO-NOT-COMMIT.md",
+    "Software Engineering/11 AI & ML/LLM/RAG/Advanced RAG Patterns.md",
+    "Software Engineering/11 AI & ML/LLM/RAG/Caching.md",
+    "Software Engineering/11 AI & ML/LLM/RAG/RAG.md",
+    "Software Engineering/11 AI & ML/LLM/RAG/Monitoring.md",
+    "Software Engineering/11 AI & ML/LLM/RAG/Generation.md",
+    "Software Engineering/11 AI & ML/LLM/RAG/Query Translation.md",
+    "Software Engineering/11 AI & ML/LLM/RAG/Embeddings.md",
+    "Software Engineering/11 AI & ML/LLM/RAG/RAG vs Fine-Tuning.md",
+    "Software Engineering/11 AI & ML/LLM/RAG/Grounding.md",
+    "Software Engineering/11 AI & ML/LLM/RAG/Retrieval.md",
+    "Software Engineering/11 AI & ML/LLM/RAG/Chunking and Embeddings.md",
+    "Software Engineering/02 Computer Science/Algorithms/Algorithms.md",
+    "Software Engineering/Roadmap.canvas",
+    "Software Engineering/Topics.base",
+    "Software Engineering/Software Engineering.md",
+    "Software Engineering/11 AI & ML/LLM/RAG/Strategy and Advanced Patterns.md",
     "Software Engineering/11 AI & ML/LLM/RAG/Retrieval and Query Translation.md",
     "Software Engineering/11 AI & ML/LLM/RAG/Production Operations.md",
     "Software Engineering/11 AI & ML/LLM/RAG/Grounding and Generation.md",
     "Software Engineering/11 AI & ML/LLM/RAG/Evaluation.md",
-    "Software Engineering/11 AI & ML/LLM/RAG/Chunking and Embeddings.md",
-    "Software Engineering/11 AI & ML/LLM/RAG/RAG.md",
     "Software Engineering/11 AI & ML/LLM/LLM.md",
-    "Software Engineering/11 AI & ML/LLM/RAG/Strategy and Advanced Patterns.md",
     "Software Engineering/11 AI & ML/LLM/RAG/RAG Strategy and Advanced Patterns.md",
     "Software Engineering/11 AI & ML/LLM/RAG/RAG Production Operations.md",
-    "Software Engineering/11 AI & ML/LLM/RAG/RAG Evaluation.md",
-    "Software Engineering/11 AI & ML/LLM/RAG/RAG Grounding and Generation.md",
-    "Software Engineering/11 AI & ML/LLM/RAG/RAG Retrieval and Query Translation.md",
-    "Software Engineering/11 AI & ML/LLM/RAG/RAG Chunking and Embeddings.md",
     "Software Engineering/11 AI & ML/LLM/RAG",
-    "Software Engineering/11 AI & ML/LLM/RAG.md",
-    "Software Engineering/Software Engineering.md",
-    "Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Selection Sort.md",
-    "Software Engineering/02 Computer Science/Algorithms/README.md",
-    "Software Engineering/02 Computer Science/Algorithms/Algorithms.md",
-    "Software Engineering/03 Data Persistence/ACID.md",
-    "Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
-    "Software Engineering/02 Computer Science/Algorithms/Search Algorithms/Binary Search.md",
-    "Software Engineering/02 Computer Science/Algorithms/Search Algorithms/Rabin Karp Search.md",
-    "Software Engineering/02 Computer Science/Algorithms/Search Algorithms/KMP (Knuth-Morris-Pratt) Algorithm.md",
-    "Software Engineering/02 Computer Science/Algorithms/Search Algorithms/String Searching/String Searching.md",
-    "Software Engineering/02 Computer Science/Algorithms/Search Algorithms/DFS BFS.md",
     "Software Engineering/02 Computer Science/Algorithms/Search Algorithms/String Searching",
     "Software Engineering/02 Computer Science/Algorithms/Search Algorithms",
-    "Software Engineering/Topics.base",
     "Assets/01 Programming/01 Programming-Types-20260211184602492.png",
-    "Software Engineering/Roadmap.canvas",
     "Software Engineering/11 AI & ML/Machine Learning/Types",
     "Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism",
     "Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types",
@@ -252,7 +253,6 @@
     "Assets/03 Data Persistence/03 Data Persistence-Indexes-20260218024130357.png",
     "Software Engineering/11 AI & ML/Machine Learning/Evaluation",
     "Assets/audits",
-    "Software Engineering/11 AI & ML/Machine Learning/Infrastructure",
     "Software Engineering/Untitled.canvas",
     "Vault/Software Engineering/Roadmap.canvas",
     "quartz/public/Roadmap.canvas",
