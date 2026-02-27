@@ -216,7 +216,7 @@
 		</div>
 	</div>
 </div>
-<div class="canvas-node canvas-node-text has-color" data-node-id="n_4588f305ea" style="transform: translate(0px, 1880px); width: 340px; height: 80px; --canvas-color: #fb464c;">
+<div class="canvas-node canvas-node-text has-color" data-node-id="n_4588f305ea" style="transform: translate(0px, 1880px); width: 340px; height: 80px; --canvas-color: #e9973f;">
 	<div class="canvas-node-container">
 		<div class="canvas-node-content markdown-rendered">
 			<div class="canvas-node-text-content" data-markdown="IyBbW1NvZnR3YXJlIEVuZ2luZWVyaW5nLzAzIERhdGEgUGVyc2lzdGVuY2UvMDMgRGF0YSBQZXJzaXN0ZW5jZVx8MDMgRGF0YSBQZXJzaXN0ZW5jZV1d"></div>
@@ -474,21 +474,21 @@
 <div class="canvas-node canvas-node-text " data-node-id="n_b0ac2236f9" style="transform: translate(-1440px, 0px); width: 500px; height: 110px; ">
 	<div class="canvas-node-container">
 		<div class="canvas-node-content markdown-rendered">
-			<div class="canvas-node-text-content" data-markdown="IyMjIyBSb2FkbWFwIGxlZ2VuZAoqKkdlbmVyYXRlZDoqKiBGZWIgMjcgMjAyNiB8IDAzOjE5QU0="></div>
+			<div class="canvas-node-text-content" data-markdown="IyMjIyBSb2FkbWFwIGxlZ2VuZAoqKkdlbmVyYXRlZDoqKiBGZWIgMjcgMjAyNiB8IDA1OjM3UE0="></div>
 		</div>
 	</div>
 </div>
 <div class="canvas-node canvas-node-text has-color" data-node-id="n_4a66490dd9" style="transform: translate(-1380px, 126px); width: 380px; height: 60px; --canvas-color: #fb464c;">
 	<div class="canvas-node-container">
 		<div class="canvas-node-content markdown-rendered">
-			<div class="canvas-node-text-content" data-markdown="Tm90LVN0YXJ0ZWQ6IDI1"></div>
+			<div class="canvas-node-text-content" data-markdown="Tm90LVN0YXJ0ZWQ6IDI0"></div>
 		</div>
 	</div>
 </div>
 <div class="canvas-node canvas-node-text has-color" data-node-id="n_c1cf7bc196" style="transform: translate(-1380px, 202px); width: 380px; height: 60px; --canvas-color: #e9973f;">
 	<div class="canvas-node-container">
 		<div class="canvas-node-content markdown-rendered">
-			<div class="canvas-node-text-content" data-markdown="Q3JlYXRpb246IDE0"></div>
+			<div class="canvas-node-text-content" data-markdown="Q3JlYXRpb246IDE1"></div>
 		</div>
 	</div>
 </div>
