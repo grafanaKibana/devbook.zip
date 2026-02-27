@@ -77,7 +77,6 @@ retrieval_cache_key = hash(
 >  [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
 >
 > **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Advanced RAG Patterns|Advanced RAG Patterns]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Chunking|Chunking]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Embeddings|Embeddings]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation|Evaluation]]
