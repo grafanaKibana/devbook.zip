@@ -35,7 +35,7 @@ Instruction Tuned LLMs, instead of trying to autocomplete your text, try to foll
 
 Instruction Tuned LLMs are built on top of Base LLMs:
 
-```
+```text
 Instruction Tuned LLMs = Base LLMs + Further Tuning + RLHF
 ```
 
@@ -56,7 +56,7 @@ When working with LLMs, you will come across a lot of new terms. This section wi
 - **Sentiment Analysis** — Sentiment analysis is the process of determining the emotional tone behind a series of words, used to gain an understanding of the attitudes, opinions and emotions expressed within an online mention. Sentiment analysis is also known as opinion mining, deriving the opinion or attitude of a speaker.
 - **Verbalizer** — In the classification setting, verbalizers are mappings from labels to words in a language model’s vocabulary. For example, consider performing sentiment classification with the following prompt:
     
-    ```
+    ```text
     Tweet: "I love hotpockets"What is the sentiment of this tweet? Say 'pos' or 'neg'.
     ```
     
@@ -88,7 +88,8 @@ When working with LLMs, you will come across a lot of new terms. This section wi
 > - [[Software Engineering/11 AI & ML/LLM/RAG/RAG\|RAG]]
 >
 > **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/Generation Parameters\|Generation Parameters]]
+> - [[Software Engineering/11 AI & ML/LLM/Embeddings\|Embeddings]]
+> - [[Software Engineering/11 AI & ML/LLM/Generation\|Generation]]
 > - [[Software Engineering/11 AI & ML/LLM/Guardrails\|Guardrails]]
 > - [[Software Engineering/11 AI & ML/LLM/Hallucinations\|Hallucinations]]
 > - [[Software Engineering/11 AI & ML/LLM/OWASP vulnerabilities on AI LLM\|OWASP vulnerabilities on AI LLM]]
