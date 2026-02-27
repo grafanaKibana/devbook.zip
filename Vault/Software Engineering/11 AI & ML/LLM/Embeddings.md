@@ -133,17 +133,17 @@ Decision rule: start with a proprietary API model to establish baseline recall. 
 
 > [!note] Whats next
 > **Parent**
->  [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
+>  [[Software Engineering/11 AI & ML/11 AI & ML|11 AI & ML]]
+>
+> **Topics**
+> - [[Software Engineering/11 AI & ML/LLM/Agents/Agents|Agents]]
+> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation|Evaluation]]
+> - [[Software Engineering/11 AI & ML/LLM/Prompting/Prompting|Prompting]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/RAG|RAG]]
 >
 > **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Caching|Caching]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Chunking|Chunking]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation|Evaluation]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Generation|Generation]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Grounding|Grounding]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring|Monitoring]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Query Translation|Query Translation]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/RAG vs Fine-Tuning|RAG vs Fine-Tuning]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Re-ranking|Re-ranking]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Retrieval|Retrieval]]
+> - [[Software Engineering/11 AI & ML/LLM/Generation|Generation]]
+> - [[Software Engineering/11 AI & ML/LLM/Guardrails|Guardrails]]
+> - [[Software Engineering/11 AI & ML/LLM/Hallucinations|Hallucinations]]
+> - [[Software Engineering/11 AI & ML/LLM/OWASP vulnerabilities on AI LLM|OWASP vulnerabilities on AI LLM]]
 <!-- whats-next:end -->

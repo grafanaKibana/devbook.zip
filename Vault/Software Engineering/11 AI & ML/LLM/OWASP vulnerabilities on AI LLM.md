@@ -52,7 +52,8 @@ Expected behavior: refuse, do not reveal hidden prompts/secrets, and only answer
 > - [[Software Engineering/11 AI & ML/LLM/RAG/RAG|RAG]]
 >
 > **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/Generation Parameters|Generation Parameters]]
+> - [[Software Engineering/11 AI & ML/LLM/Embeddings|Embeddings]]
+> - [[Software Engineering/11 AI & ML/LLM/Generation|Generation]]
 > - [[Software Engineering/11 AI & ML/LLM/Guardrails|Guardrails]]
 > - [[Software Engineering/11 AI & ML/LLM/Hallucinations|Hallucinations]]
 <!-- whats-next:end -->
