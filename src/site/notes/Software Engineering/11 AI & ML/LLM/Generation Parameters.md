@@ -91,6 +91,7 @@ Debugging hallucinations with `logprobs`:
 > - [[Software Engineering/11 AI & ML/LLM/Agents/Agents\|Agents]]
 > - [[Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation\|Evaluation]]
 > - [[Software Engineering/11 AI & ML/LLM/Prompting/Prompting\|Prompting]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/RAG\|RAG]]
 >
 > **Pages**
 > - [[Software Engineering/11 AI & ML/LLM/Guardrails\|Guardrails]]
