@@ -6,6 +6,12 @@ set -e
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 
+# Obsidian Git plugin can run hooks with a minimal PATH.
+# Add common Node binary locations so markdownlint-cli2 is discoverable.
+for bin_dir in /opt/homebrew/bin /opt/homebrew/opt/node@22/bin /usr/local/bin; do
+    [[ -d "$bin_dir" ]] && PATH="$bin_dir:$PATH"
+done
+
 # Collect staged Markdown files (handles spaces in paths)
 STAGED_MD=()
 while IFS= read -r file; do
@@ -34,7 +40,20 @@ python3 "$REPO_ROOT/.scripts/generate-roadmap.py"
 if [[ ${#STAGED_MD[@]} -gt 0 ]]; then
     echo "[pre-commit] Checking fenced code block languages (MD040)..."
     # Run only on staged files; pass each file as a positional argument
-    if ! npx --no-install markdownlint-cli2 --config "$REPO_ROOT/.markdownlint.json" "${STAGED_MD[@]}"; then
+    LINT_CMD=()
+    if [[ -x "$REPO_ROOT/node_modules/.bin/markdownlint-cli2" ]]; then
+        LINT_CMD=("$REPO_ROOT/node_modules/.bin/markdownlint-cli2")
+    elif command -v npx >/dev/null 2>&1; then
+        LINT_CMD=(npx --no-install markdownlint-cli2)
+    else
+        echo ""
+        echo "[pre-commit] ✗ markdownlint-cli2 runtime not found."
+        echo "  Install dependencies: npm install"
+        echo "  Or ensure Node tools are on PATH for GUI apps (Obsidian)."
+        exit 1
+    fi
+
+    if ! "${LINT_CMD[@]}" --config "$REPO_ROOT/.markdownlint.json" "${STAGED_MD[@]}"; then
         echo ""
         echo "[pre-commit] ✗ MD040: Add a language to every fenced code block."
         echo "  Fallback: use 'text' when no specific language applies."
