@@ -110,4 +110,5 @@ Failure pattern:
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring|Monitoring]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Query Translation|Query Translation]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/RAG vs Fine-Tuning|RAG vs Fine-Tuning]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/Re-ranking|Re-ranking]]
 <!-- whats-next:end -->
