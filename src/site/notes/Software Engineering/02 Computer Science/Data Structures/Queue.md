@@ -13,6 +13,13 @@
 - Head/tail indices wrap around instead of shifting elements.
 - Operations are O(1) on average, with occasional O(n) resize copies.
 
+## Structure
+
+```mermaid
+graph LR
+    F[front] --> A[item one] --> B[item two] --> C[item three] --> T[back]
+```
+
 ### Example
 
 ```csharp
@@ -52,7 +59,7 @@ Console.WriteLine(jobs.Peek());    // job-2
 - [PriorityQueue<TElement, TPriority> class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.priorityqueue-2)
 - [Collections in .NET](https://learn.microsoft.com/en-us/dotnet/standard/collections/)
 - [System.Threading.Channels library](https://learn.microsoft.com/en-us/dotnet/core/extensions/channels)
-- [Why are Stack<T> and Queue<T> array-backed?](https://stackoverflow.com/questions/3000410/why-are-stackt-and-queuet-implemented-with-an-array)
+- [Queue implementation in dotnet runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/Queue.cs)
 
 <!-- whats-next:start -->
 
@@ -65,8 +72,10 @@ Console.WriteLine(jobs.Peek());    // job-2
 > **Pages**
 > - [[Software Engineering/02 Computer Science/Data Structures/Dictionary\|Dictionary]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Graph\|Graph]]
+> - [[Software Engineering/02 Computer Science/Data Structures/HashMap\|HashMap]]
 > - [[Software Engineering/02 Computer Science/Data Structures/HashSet\|HashSet]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Hashtable\|Hashtable]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Heap\|Heap]]
 > - [[Software Engineering/02 Computer Science/Data Structures/LinkedList\|LinkedList]]
 > - [[Software Engineering/02 Computer Science/Data Structures/List\|List]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Span\|Span]]

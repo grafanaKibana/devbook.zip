@@ -12,6 +12,13 @@
 `List<T>` stores items in a contiguous array, so indexing by position is O(1) and iterating is cache friendly.
 When `Count` grows past `Capacity`, the internal array is reallocated and copied to a larger buffer.
 
+## Structure
+
+```mermaid
+graph LR
+    I0[index zero ann] --> I1[index one bob] --> I2[index two chris]
+```
+
 ### Example
 
 ```csharp
@@ -51,6 +58,7 @@ Console.WriteLine(users[0]);
 - [List<T> class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1)
 - [Supplemental API remarks for List<T>](https://learn.microsoft.com/en-us/dotnet/fundamentals/runtime-libraries/system-collections-generic-list%7Bt%7D)
 - [When to use generic collections](https://learn.microsoft.com/en-us/dotnet/standard/collections/when-to-use-generic-collections)
+- [List implementation in dotnet runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/List.cs)
 
 <!-- whats-next:start -->
 
@@ -63,8 +71,10 @@ Console.WriteLine(users[0]);
 > **Pages**
 > - [[Software Engineering/02 Computer Science/Data Structures/Dictionary\|Dictionary]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Graph\|Graph]]
+> - [[Software Engineering/02 Computer Science/Data Structures/HashMap\|HashMap]]
 > - [[Software Engineering/02 Computer Science/Data Structures/HashSet\|HashSet]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Hashtable\|Hashtable]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Heap\|Heap]]
 > - [[Software Engineering/02 Computer Science/Data Structures/LinkedList\|LinkedList]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Queue\|Queue]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Span\|Span]]
