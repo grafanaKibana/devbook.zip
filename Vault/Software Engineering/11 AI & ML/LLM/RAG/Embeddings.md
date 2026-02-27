@@ -60,10 +60,10 @@ embedding:
 ## Questions
 
 > [!QUESTION]- Why can a high-dimensional model still fail retrieval quality goals?
-> **Expected answer:** Embedding quality is only one part of retrieval. Poor chunking, weak metadata filters, or bad query translation can dominate failure modes even with a strong model.
+> Embedding quality is only one part of retrieval. Poor chunking, weak metadata filters, or bad query translation can dominate failure modes even with a strong model.
 
 > [!QUESTION]- When should keyword signals be retained even after deploying strong embeddings?
-> **Expected answer:** Keep keyword signals for exact constraints such as IDs, codes, and function names, where semantic proximity alone can return plausible but wrong documents.
+> Keep keyword signals for exact constraints such as IDs, codes, and function names, where semantic proximity alone can return plausible but wrong documents.
 
 ## References
 

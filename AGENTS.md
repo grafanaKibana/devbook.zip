@@ -57,6 +57,7 @@ Hub notes only need `tags: [FolderNote]`. Concept pages do NOT need FolderNote t
 - Every real note must have: intro ("what + why"), at least one concrete example, at least one real reference link.
 - Internal links: Obsidian wikilinks are allowed and common (prefer `[[path/to/note|Title]]` for internal references).
 - External links: Markdown links (`[Title](https://...)`).
+- **No manual folder navigation.** Do not add "Detailed Pages", "See also", or link lists enumerating sibling/child pages in the same folder. The pre-commit hook auto-generates a "Whats next" callout with parent, topic, and sibling links. Targeted cross-links between specific related concepts are fine (e.g., "see [[Task vs ValueTask]]" inside a discussion) — just do not duplicate the auto-generated navigation.
 - **Code fences (enforced)**
   - Every fenced code block MUST specify a language. This is enforced automatically via `markdownlint-cli2` (rule MD040) on staged files before commit.
   - Accepted Obsidian-specific block languages: `mermaid`, `dataview`, `dataviewjs`.
@@ -79,6 +80,18 @@ These rules exist to make notes useful for the Senior .NET / AI engineering role
 
 - `dg-publish: true` notes MUST meet the quality bar below; otherwise keep `dg-publish: false` until ready.
 - Prefer short, high-signal writing: decision rules, pitfalls, and concrete examples over broad definitions.
+
+Writing paradigm
+
+Three principles govern note content. Apply them as judgment calls, not checklists.
+
+1. **Concrete over abstract** — Ground every claim in a specific example, mechanism, or scenario. Never write "it depends" without showing on what. Never describe a technique without showing what it does to real input.
+2. **Show the machine** — Explain how things actually work: what goes in, what comes out, what breaks if you get it wrong. The reader should understand the mechanism, not just the label.
+3. **Depth matches complexity** — A note's size must be proportional to the topic's actual complexity. Simple topics get compact notes. Complex topics earn detailed explanations. (See "Scope-to-depth fit" below for specifics.)
+
+These principles override specific section rules. If following a section template produces abstract filler, cut the section.
+
+These principles apply recursively. In a note covering multiple approaches, patterns, or strategies, apply them to each sub-concept — not just to the note as a whole.
 
 Required content (for any non-trivial concept page)
 
@@ -264,3 +277,4 @@ Enforcement note
 
 - If request changes vault structure/formatting rules, ask user whether to update AGENTS.md Memory.
 - If page structure is unclear (target folder, page type, note naming, or template), ask the user one clarifying question before changing pages or creating new ones.
+- **AGENTS.md evolution rule.** When updating this contract, prefer extending the writing paradigm or strengthening existing principles over adding prescriptive format rules. If a proposed rule can be derived from the three writing principles (concrete over abstract, show the machine, depth matches complexity), strengthen the principle instead of adding a new rule. Rules should guide judgment, not prescribe specific section templates or bullet formats for each case.

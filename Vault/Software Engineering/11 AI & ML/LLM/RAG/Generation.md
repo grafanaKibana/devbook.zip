@@ -47,10 +47,10 @@ System contract:
 ## Questions
 
 > [!QUESTION]- Why can generation quality regress even if retrieval metrics improve?
-> **Expected answer:** Better retrieval recall can increase context volume and noise. Without tighter context assembly and prompt constraints, the model may attend to weaker evidence and produce less precise answers.
+> Better retrieval recall can increase context volume and noise. Without tighter context assembly and prompt constraints, the model may attend to weaker evidence and produce less precise answers.
 
 > [!QUESTION]- When should abstention be part of generation logic?
-> **Expected answer:** Include abstention when wrong answers are costly and evidence can be missing or conflicting. Abstention is a controlled failure mode that preserves trust.
+> Include abstention when wrong answers are costly and evidence can be missing or conflicting. Abstention is a controlled failure mode that preserves trust.
 
 ## References
 

@@ -44,10 +44,10 @@ This split keeps updates fast while preserving behavioral control.
 ## Questions
 
 > [!QUESTION]- Why is fine-tuning a weak first move for a fast-changing knowledge base?
-> **Expected answer:** Weight updates are slower and less transparent than retrieval updates. Frequent factual changes fit retrieval pipelines better because documents and indexes can be updated without retraining.
+> Weight updates are slower and less transparent than retrieval updates. Frequent factual changes fit retrieval pipelines better because documents and indexes can be updated without retraining.
 
 > [!QUESTION]- When is a combined RAG + fine-tuning stack justified?
-> **Expected answer:** Use combined architecture when retrieval already provides correct evidence but output behavior still fails requirements such as structure, policy adherence, or domain-specific response style.
+> Use combined architecture when retrieval already provides correct evidence but output behavior still fails requirements such as structure, policy adherence, or domain-specific response style.
 
 ## References
 

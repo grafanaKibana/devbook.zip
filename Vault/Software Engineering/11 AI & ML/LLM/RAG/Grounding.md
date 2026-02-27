@@ -57,10 +57,10 @@ Pitfall:
 ## Questions
 
 > [!QUESTION]- Why is citation forcing a necessary but insufficient control?
-> **Expected answer:** Citation tags create traceability, but models can still attach weak or irrelevant citations. A separate verification pass must confirm claim-to-evidence support.
+> Citation tags create traceability, but models can still attach weak or irrelevant citations. A separate verification pass must confirm claim-to-evidence support.
 
 > [!QUESTION]- When should grounding checks block the final answer?
-> **Expected answer:** Block when any material claim lacks supporting evidence, when citations are unresolved, or when sources conflict without clear resolution.
+> Block when any material claim lacks supporting evidence, when citations are unresolved, or when sources conflict without clear resolution.
 
 ## References
 
