@@ -135,3 +135,24 @@ Decision rule: start without reranking and measure retrieval quality. Add score 
 - [Late interaction overview — ColBERT, ColPali, and production context (Weaviate)](https://weaviate.io/blog/late-interaction-overview)
 - [Voyage Rerank-2 benchmarks — 93-dataset comparison across reranker models (Voyage AI)](https://blog.voyageai.com/2024/09/30/rerank-2/)
 - [MTEB leaderboard — reranking task results (Hugging Face)](https://huggingface.co/spaces/mteb/leaderboard)
+
+<!-- whats-next:start -->
+
+---
+
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
+>
+> **Pages**
+> - [[Software Engineering/11 AI & ML/LLM/RAG/Caching|Caching]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/Chunking|Chunking]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/Embeddings|Embeddings]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation|Evaluation]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/Generation|Generation]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/Grounding|Grounding]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring|Monitoring]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/Query Translation|Query Translation]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/RAG vs Fine-Tuning|RAG vs Fine-Tuning]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/Retrieval|Retrieval]]
+<!-- whats-next:end -->
