@@ -32,5 +32,6 @@ dg-publish: true
 > - [[Software Engineering/04 Networks/Protocols/gRPC|gRPC]]
 > - [[Software Engineering/04 Networks/Protocols/HTTP|HTTP]]
 > - [[Software Engineering/04 Networks/Protocols/HTTP 2|HTTP 2]]
+> - [[Software Engineering/04 Networks/Protocols/REST|REST]]
 > - [[Software Engineering/04 Networks/Protocols/RPC|RPC]]
 <!-- whats-next:end -->

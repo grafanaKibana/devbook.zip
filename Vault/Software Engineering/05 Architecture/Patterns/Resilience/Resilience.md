@@ -21,6 +21,15 @@ Resilience patterns protect systems from cascading failures and traffic overload
 - [Release It! (Michael Nygard)](https://pragprog.com/titles/mnee2/release-it-second-edition/) — foundational patterns for production resilience.
 
 <!-- whats-next:start -->
+
+---
+
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/05 Architecture/Patterns/Patterns|Patterns]]
+>
+> **Pages**
+> - [[Software Engineering/05 Architecture/Patterns/Resilience/Circuit Breaker|Circuit Breaker]]
 <!-- whats-next:end -->
 # Intro
 

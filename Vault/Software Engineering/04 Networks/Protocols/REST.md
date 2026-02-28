@@ -253,18 +253,13 @@ Decision heuristic:
 
 > [!note] Whats next
 > **Parent**
->  [[Software Engineering/05 Architecture/05 Architecture|05 Architecture]]
->
-> **Topics**
-> - [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/Message Queues|Message Queues]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Scalability Patterns/Scalability Patterns|Scalability Patterns]]
+>  [[Software Engineering/04 Networks/04 Networks|04 Networks]]
 >
 > **Pages**
-> - [[Software Engineering/05 Architecture/Distributed Systems/API Gateway|API Gateway]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/CAP theorem|CAP theorem]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Consistency Models|Consistency Models]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Distributed Transactions|Distributed Transactions]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Load Balancing|Load Balancing]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Observability|Observability]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Webhooks|Webhooks]]
+> - [[Software Engineering/04 Networks/Protocols/DNS|DNS]]
+> - [[Software Engineering/04 Networks/Protocols/gRPC|gRPC]]
+> - [[Software Engineering/04 Networks/Protocols/HTTP|HTTP]]
+> - [[Software Engineering/04 Networks/Protocols/HTTP 2|HTTP 2]]
+> - [[Software Engineering/04 Networks/Protocols/RPC|RPC]]
+> - [[Software Engineering/04 Networks/Protocols/SMTP|SMTP]]
 <!-- whats-next:end -->
