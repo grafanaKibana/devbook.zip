@@ -119,3 +119,15 @@ Same model family at two thresholds:
 - [Scikit-learn API: precision_recall_fscore_support](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.precision_recall_fscore_support.html)
 - [Google ML Glossary](https://developers.google.com/machine-learning/glossary)
 - [Google ML Crash Course: Accuracy, precision, recall](https://developers.google.com/machine-learning/crash-course/classification/accuracy-precision-recall)
+
+<!-- whats-next:start -->
+
+---
+
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/11 AI & ML/Machine Learning/Machine Learning|Machine Learning]]
+>
+> **Pages**
+> - [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/ROC-AUC and PR-AUC|ROC-AUC and PR-AUC]]
+<!-- whats-next:end -->

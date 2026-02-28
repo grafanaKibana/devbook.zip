@@ -245,7 +245,6 @@ The "bitter lesson" of multi-agent: elaborate coordination architectures built t
 >
 > **Pages**
 > - [[Software Engineering/11 AI & ML/LLM/Agents/Agent Loop|Agent Loop]]
-> - [[Software Engineering/11 AI & ML/LLM/Agents/Mental Framework|Mental Framework]]
 > - [[Software Engineering/11 AI & ML/LLM/Agents/Model Context Protocol|Model Context Protocol]]
 > - [[Software Engineering/11 AI & ML/LLM/Agents/Tools|Tools]]
 <!-- whats-next:end -->

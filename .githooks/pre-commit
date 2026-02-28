@@ -12,10 +12,11 @@ for bin_dir in /opt/homebrew/bin /opt/homebrew/opt/node@22/bin /usr/local/bin; d
     [[ -d "$bin_dir" ]] && PATH="$bin_dir:$PATH"
 done
 
-# Collect staged Markdown files (handles spaces in paths)
+# Collect staged Markdown files under Vault/ only (skip .opencode/, root AGENTS.md, etc.)
 STAGED_MD=()
 while IFS= read -r file; do
     [[ "$file" =~ \.(md|MD)$ ]] || continue
+    [[ "$file" == Vault/* ]] || continue
     STAGED_MD+=("$file")
 done < <(git diff --cached --name-only --diff-filter=ACMR)
 

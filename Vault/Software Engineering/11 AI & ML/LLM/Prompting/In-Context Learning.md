@@ -145,4 +145,15 @@ When this pattern is not enough for reasoning-heavy tasks, continue with [[Softw
 - [Prompt Engineering for Large Language Models (Eugene Yan)](https://eugeneyan.com/writing/prompting/)
 
 <!-- whats-next:start -->
+
+---
+
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
+>
+> **Pages**
+> - [[Software Engineering/11 AI & ML/LLM/Prompting/Automated Prompt Optimization|Automated Prompt Optimization]]
+> - [[Software Engineering/11 AI & ML/LLM/Prompting/Prompt Composition|Prompt Composition]]
+> - [[Software Engineering/11 AI & ML/LLM/Prompting/Reasoning Techniques|Reasoning Techniques]]
 <!-- whats-next:end -->

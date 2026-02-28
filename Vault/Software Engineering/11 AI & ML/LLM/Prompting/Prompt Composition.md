@@ -144,4 +144,15 @@ This page covers the human-guided version. For fully automated loops, see [[Soft
 - [Prompt Injection Attacks Against GPT 3 - Simon Willison](https://simonwillison.net/2022/Sep/12/prompt-injection/)
 
 <!-- whats-next:start -->
+
+---
+
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
+>
+> **Pages**
+> - [[Software Engineering/11 AI & ML/LLM/Prompting/Automated Prompt Optimization|Automated Prompt Optimization]]
+> - [[Software Engineering/11 AI & ML/LLM/Prompting/In-Context Learning|In-Context Learning]]
+> - [[Software Engineering/11 AI & ML/LLM/Prompting/Reasoning Techniques|Reasoning Techniques]]
 <!-- whats-next:end -->

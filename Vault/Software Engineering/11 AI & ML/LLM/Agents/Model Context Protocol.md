@@ -142,7 +142,6 @@ MCP adds the most value when you have multiple AI clients (IDE, chatbot, agent f
 >
 > **Pages**
 > - [[Software Engineering/11 AI & ML/LLM/Agents/Agent Loop|Agent Loop]]
-> - [[Software Engineering/11 AI & ML/LLM/Agents/Mental Framework|Mental Framework]]
 > - [[Software Engineering/11 AI & ML/LLM/Agents/Multi-Agentic Systems|Multi-Agentic Systems]]
 > - [[Software Engineering/11 AI & ML/LLM/Agents/Tools|Tools]]
 <!-- whats-next:end -->

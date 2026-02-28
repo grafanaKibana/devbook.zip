@@ -120,4 +120,12 @@ Amazon Q Developer provides AI coding assistance in IDE and CLI experiences with
 ---
 
 > [!note] Whats next
+> **Parent**
+>  [[Software Engineering/11 AI & ML/11 AI & ML|11 AI & ML]]
+>
+> **Pages**
+> - [[Software Engineering/11 AI & ML/Tooling/Agent Instructions|Agent Instructions]]
+> - [[Software Engineering/11 AI & ML/Tooling/Hooks|Hooks]]
+> - [[Software Engineering/11 AI & ML/Tooling/Plugins|Plugins]]
+> - [[Software Engineering/11 AI & ML/Tooling/Skills|Skills]]
 <!-- whats-next:end -->

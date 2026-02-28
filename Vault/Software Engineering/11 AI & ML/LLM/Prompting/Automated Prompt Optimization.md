@@ -100,4 +100,15 @@ For most practitioners, strong manual prompting plus meta-prompting covers most 
 - [Prompt Engineering Guide - Program-Aided Language Models (PAL)](https://www.promptingguide.ai/techniques/pal)
 
 <!-- whats-next:start -->
+
+---
+
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
+>
+> **Pages**
+> - [[Software Engineering/11 AI & ML/LLM/Prompting/In-Context Learning|In-Context Learning]]
+> - [[Software Engineering/11 AI & ML/LLM/Prompting/Prompt Composition|Prompt Composition]]
+> - [[Software Engineering/11 AI & ML/LLM/Prompting/Reasoning Techniques|Reasoning Techniques]]
 <!-- whats-next:end -->

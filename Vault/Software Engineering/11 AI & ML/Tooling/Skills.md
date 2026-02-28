@@ -89,4 +89,12 @@ Assume your team has strict API error contracts and logging conventions. Without
 ---
 
 > [!note] Whats next
+> **Parent**
+>  [[Software Engineering/11 AI & ML/11 AI & ML|11 AI & ML]]
+>
+> **Pages**
+> - [[Software Engineering/11 AI & ML/Tooling/Agent Instructions|Agent Instructions]]
+> - [[Software Engineering/11 AI & ML/Tooling/Coding Agents|Coding Agents]]
+> - [[Software Engineering/11 AI & ML/Tooling/Hooks|Hooks]]
+> - [[Software Engineering/11 AI & ML/Tooling/Plugins|Plugins]]
 <!-- whats-next:end -->
