@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/architecture-styles/architecture-styles/","tags":["FolderNote"],"noteIcon":"1"}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/system-architecture/system-architecture/","tags":["FolderNote"],"noteIcon":"1"}
 ---
 
 
@@ -20,8 +20,8 @@ Architecture styles are high-level ways to organize systems: monoliths, microser
 >  [[Software Engineering/05 Architecture/05 Architecture\|05 Architecture]]
 >
 > **Pages**
-> - [[Software Engineering/05 Architecture/Architecture Styles/Microservices\|Microservices]]
-> - [[Software Engineering/05 Architecture/Architecture Styles/Monolith Architecture\|Monolith Architecture]]
-> - [[Software Engineering/05 Architecture/Architecture Styles/Serverless Architecture\|Serverless Architecture]]
-> - [[Software Engineering/05 Architecture/Architecture Styles/Service-Oriented Architecture\|Service-Oriented Architecture]]
+> - [[Software Engineering/05 Architecture/System Architecture/Microservices\|Microservices]]
+> - [[Software Engineering/05 Architecture/System Architecture/Monolith Architecture\|Monolith Architecture]]
+> - [[Software Engineering/05 Architecture/System Architecture/Serverless Architecture\|Serverless Architecture]]
+> - [[Software Engineering/05 Architecture/System Architecture/Service-Oriented Architecture\|Service-Oriented Architecture]]
 <!-- whats-next:end -->

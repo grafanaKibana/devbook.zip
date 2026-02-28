@@ -2,7 +2,7 @@
 topic:
   - "Architecture"
 subtopic:
-  - "Architecture Styles"
+  - "System Architecture"
 level:
   - "3"
 priority: Medium
@@ -28,7 +28,7 @@ dg-publish: true
 >  [[Software Engineering/05 Architecture/05 Architecture|05 Architecture]]
 >
 > **Pages**
-> - [[Software Engineering/05 Architecture/Architecture Styles/Microservices|Microservices]]
-> - [[Software Engineering/05 Architecture/Architecture Styles/Monolith Architecture|Monolith Architecture]]
-> - [[Software Engineering/05 Architecture/Architecture Styles/Serverless Architecture|Serverless Architecture]]
+> - [[Software Engineering/05 Architecture/System Architecture/Microservices|Microservices]]
+> - [[Software Engineering/05 Architecture/System Architecture/Monolith Architecture|Monolith Architecture]]
+> - [[Software Engineering/05 Architecture/System Architecture/Serverless Architecture|Serverless Architecture]]
 <!-- whats-next:end -->

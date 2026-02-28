@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/architecture-styles/microservices/","noteIcon":"1"}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/system-architecture/microservices/","noteIcon":"1"}
 ---
 
 
@@ -24,7 +24,7 @@ Microservices are an architecture style where a system is split into small, inde
 
 [Microservices Pattern: Microservice Architecture pattern](https://microservices.io/patterns/microservices.html)
 
-- [[Software Engineering/05 Architecture/Architecture Styles/Monolith Architecture\|Monolith Architecture]]
+- [[Software Engineering/05 Architecture/System Architecture/Monolith Architecture\|Monolith Architecture]]
 
 <!-- whats-next:start -->
 
@@ -35,7 +35,7 @@ Microservices are an architecture style where a system is split into small, inde
 >  [[Software Engineering/05 Architecture/05 Architecture\|05 Architecture]]
 >
 > **Pages**
-> - [[Software Engineering/05 Architecture/Architecture Styles/Monolith Architecture\|Monolith Architecture]]
-> - [[Software Engineering/05 Architecture/Architecture Styles/Serverless Architecture\|Serverless Architecture]]
-> - [[Software Engineering/05 Architecture/Architecture Styles/Service-Oriented Architecture\|Service-Oriented Architecture]]
+> - [[Software Engineering/05 Architecture/System Architecture/Monolith Architecture\|Monolith Architecture]]
+> - [[Software Engineering/05 Architecture/System Architecture/Serverless Architecture\|Serverless Architecture]]
+> - [[Software Engineering/05 Architecture/System Architecture/Service-Oriented Architecture\|Service-Oriented Architecture]]
 <!-- whats-next:end -->

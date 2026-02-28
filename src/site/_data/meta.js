@@ -1,4 +1,5 @@
 require("dotenv").config();
+require("dotenv").config({ path: ".env.local", override: true });
 const { globSync } = require("glob");
 
 module.exports = async (data) => {
