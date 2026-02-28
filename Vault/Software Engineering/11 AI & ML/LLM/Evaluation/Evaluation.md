@@ -8,7 +8,8 @@ tags:
 dg-publish: true
 level:
   - "3"
-status: Creation
+status:
+  - Done
 priority: Medium
 ---
 
@@ -44,7 +45,22 @@ Hard checks:
 - Must not request credit card numbers
 ```
 
+## Evaluation Overfitting
+
+When you iterate on prompts or rubrics against a fixed evaluation set, you can overfit to that benchmark—improvements on your dev set don't transfer to real users. This happens because you're optimizing for the specific distribution and phrasing of your test cases, not for genuine quality.
+
+**Practical signals of evaluation overfitting:**
+
+- You keep iterating on a prompt until it maximizes a single judge score on your dev set.
+- It becomes overly verbose and "judge-friendly" while real users complain about slow, indirect answers.
+- Improvements only show up on your dev set but not on a holdout set (or online metrics).
+
+**Fix:** Introduce multiple eval dimensions, add human spot checks, and keep a frozen holdout set that you never tune against.
+
 ## Questions
+
+> [!QUESTION]- How do I know if I'm overfitting my prompt?
+> If improvements only show up on your dev set but not on a holdout set (or online metrics), you are likely tuning to that benchmark. Add paraphrased variants, segment tests, and an untouched holdout.
 
 > [!QUESTION]- What should I evaluate first?
 > Start with the dominant failure mode that breaks user trust (often correctness/groundedness) and add targeted suites for safety risks (prompt injection, PII, unsafe actions).

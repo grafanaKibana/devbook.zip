@@ -6,7 +6,7 @@ subtopic:
 tags:
   - FolderNote
 dg-publish: true
-status: Creation
+status: Done
 priority: Low
 level:
   - '3'
@@ -29,37 +29,7 @@ The building block of every agentic system is an LLM enhanced with retrieval, [[
 
 ## Workflow Patterns
 
-Five patterns cover most production agentic systems. Each trades latency and cost for better task performance in a specific way.
-
-### Prompt Chaining
-
-Break a task into sequential steps where each LLM call processes the output of the previous one. Add programmatic checks between steps to verify the process stays on track.
-
-When to use: tasks that decompose cleanly into fixed subtasks. Example: generate marketing copy, then translate it. Write an outline, validate it meets criteria, then write the document.
-
-### Routing
-
-Classify the input and direct it to a specialized prompt or model. This lets you optimize each downstream path independently — a change to handle refund requests will not degrade general question answering.
-
-When to use: distinct input categories that need different handling. Example: route customer queries — general questions to a small fast model, complex technical issues to a larger model, refund requests to a constrained workflow with tool access.
-
-### Parallelization
-
-Run LLM calls simultaneously and aggregate results. Two variants: **sectioning** splits independent subtasks across parallel calls; **voting** runs the same task multiple times for higher confidence.
-
-When to use: independent subtasks that benefit from speed, or tasks where multiple perspectives improve reliability. Example: one LLM processes the user query while another screens for policy violations in parallel. Or multiple prompts review code for vulnerabilities and flag issues independently.
-
-### Orchestrator-Workers
-
-A central LLM dynamically breaks the task into subtasks, delegates each to a worker LLM, and synthesizes results. Unlike parallelization, the subtasks are not predefined — the orchestrator determines them based on the input.
-
-When to use: complex tasks where you cannot predict the subtasks in advance. Example: a coding agent that determines which files need changes and what each change should be.
-
-### Evaluator-Optimizer
-
-One LLM generates a response; another evaluates it and provides feedback. The loop continues until the evaluator is satisfied. This is the LLM equivalent of an iterative editing process.
-
-When to use: tasks with clear evaluation criteria where iterative refinement adds measurable value. Example: literary translation where an evaluator catches nuance the translator missed.
+Five agentic workflow patterns — prompt chaining, routing, parallelization, orchestrator-workers, and evaluator-optimizer — form a progression of increasing complexity. See [[Software Engineering/11 AI & ML/LLM/Agents/Multi-Agentic Systems|Multi-Agentic Systems]] for all workflow pattern details, diagrams, and code examples.
 
 ## Autonomous Agents
 
@@ -90,21 +60,33 @@ For patterns on coordinating multiple agents, see [[Software Engineering/11 AI &
 ## Questions
 
 > [!QUESTION]- When should you use a workflow instead of an autonomous agent?
-> Use a workflow when the task decomposes into predictable steps — you know the sequence in advance and each step has clear inputs and outputs. Workflows are cheaper, faster, and more debuggable. Use an autonomous agent only when you cannot predict the steps needed, the task is open-ended, and you have a feedback mechanism (tests, evaluation criteria) to catch errors. Most production "agents" are actually workflows, and that is the right choice for most use cases.
+> - Use a workflow when the task decomposes into predictable steps with clear inputs and outputs at each stage
+> - Workflows are cheaper, faster, and more debuggable than autonomous agents
+> - Use an autonomous agent only when steps are unpredictable, the task is open-ended, and you have feedback mechanisms (tests, eval criteria) to catch errors
+> - Most production "agents" are actually workflows — and that is the right choice for the majority of use cases
+> - Key tradeoff: workflows trade flexibility for reliability; agents trade reliability for adaptability
 
 > [!QUESTION]- Why does Anthropic recommend starting with the simplest possible solution?
-> Each layer of agentic complexity — chaining, routing, parallelization, autonomy — adds latency, cost, and failure surface. A single well-prompted LLM call with good retrieval solves many tasks. Adding orchestration only makes sense when you can demonstrate measurably better outcomes that justify the added complexity. Teams that start with complex multi-agent systems often spend more time debugging coordination than solving the actual problem.
+> - Each layer of complexity — chaining, routing, parallelization, autonomy — adds latency, cost, and failure surface
+> - A single well-prompted LLM call with good retrieval solves many tasks without orchestration
+> - Adding orchestration only makes sense when you can demonstrate measurably better outcomes
+> - Teams that start with complex multi-agent systems often spend more time debugging coordination than solving the actual problem
+> - Key tradeoff: simpler systems are easier to debug and cheaper to run, but cannot handle tasks requiring dynamic decision-making
 
 > [!QUESTION]- Why is tool design often more important than prompt design in agentic systems?
-> In a single LLM call, the prompt is the entire interface. In an agentic system, the LLM interacts with tools repeatedly — each tool call is a decision point where the agent can succeed or fail. Poorly documented tools, ambiguous parameters, or inconsistent error messages cause wrong tool calls that compound across steps. Anthropic's SWE-bench agent team spent more time optimizing tools (e.g., switching from relative to absolute file paths to eliminate a class of errors) than optimizing prompts, because tool quality directly determined task success rate.
+> - In a single LLM call, the prompt is the entire interface; in an agentic system, the LLM interacts with tools repeatedly
+> - Each tool call is a decision point where the agent can succeed or fail — errors compound across steps
+> - Poorly documented tools, ambiguous parameters, or inconsistent error messages cause wrong tool calls
+> - Anthropic's SWE-bench team spent more time optimizing tools (e.g., absolute vs relative file paths) than prompts, because tool quality directly determined success rate
+> - Key tradeoff: investing in tool interface quality yields compounding returns across all agent interactions, while prompt improvements affect only the initial call
 
 ## References
 
 - [Building Effective Agents (Anthropic Engineering)](https://www.anthropic.com/engineering/building-effective-agents)
 - [Patterns for Basic Agent Workflows — cookbook (Anthropic)](https://platform.claude.com/cookbook/patterns-agents-basic-workflows)
 - [Claude Agent SDK — overview and patterns (Anthropic)](https://platform.claude.com/docs/en/agent-sdk/overview)
-- [Using Azure AI Agents with Semantic Kernel in .NET and Python (Microsoft)](https://devblogs.microsoft.com/semantic-kernel/using-azure-ai-agents-with-semantic-kernel-in-net-and-python/)
-- [The Future of AI — Customizing AI Agents with Semantic Kernel (Microsoft)](https://devblogs.microsoft.com/semantic-kernel/the-future-of-ai-customizing-ai-agents-with-the-semantic-kernel-agent-framework/)
+- [Microsoft Agent Framework — Overview (Microsoft Learn)](https://learn.microsoft.com/en-us/agent-framework/overview/)
+- [Semantic Kernel to Agent Framework Migration Guide (Microsoft)](https://learn.microsoft.com/en-us/agent-framework/migration-guide/from-semantic-kernel/)
 
 <!-- whats-next:start -->
 

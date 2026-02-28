@@ -106,6 +106,7 @@ Required content (for any non-trivial concept page)
   - For simple topics, the example can be inline under `Intro`; a standalone `Example`/`Examples` heading is optional.
   - .NET: prefer a `csharp` code snippet, and optionally a `json`/`yaml` config snippet.
   - AI/LLM: prefer an end-to-end request/response shape, evaluation snippet, or a minimal pipeline pseudo-code.
+  - Agentic AI / agent orchestration: prefer C# with Microsoft Agent Framework (`Microsoft.Agents.AI.*` packages) over Python or Semantic Kernel. MAF is the direct successor to SK and AutoGen; use MAF APIs (`AIAgent`, `ChatClientAgent`, `AgentWorkflowBuilder`) for all agent code examples.
 - **Pitfalls**: conditional content. Include only when the topic has non-obvious real-world failure modes.
   - **MUST include** pitfall coverage when the topic has at least one non-obvious production failure mode (performance, correctness, security, reliability, or operations).
   - **MAY omit** a standalone `Pitfalls` heading when there are no meaningful pitfalls, or when one short caution can be covered inline in `Intro`.
@@ -272,6 +273,77 @@ Enforcement note
 - **Digital Garden**: uses `dg-*` frontmatter and drives the publish/export flow.
 - **Obsidian Git**: manual sync only. Remind user to sync after work.
 - **Omnisearch**: vault-wide full-text search. No HTTP API.
+
+## Agent tooling (Obsidian skills & CLI)
+
+Agents have four Obsidian-specific skills available. Load them via `load_skills=["obsidian-markdown", ...]` when delegating tasks that touch vault content.
+
+### Skills overview
+
+| Skill | When to load | What it provides |
+|-------|-------------|-----------------|
+| `obsidian-markdown` | Any note creation/editing | Obsidian Flavored Markdown reference: wikilinks (`[[note\|display]]`), embeds (`![[note]]`), callouts (`> [!type]`), properties/frontmatter YAML, tags, block IDs, Mermaid syntax, LaTeX math, footnotes, comments (`%%hidden%%`) |
+| `obsidian-cli` | Vault queries, bulk operations, property updates (requires Obsidian running) | CLI commands to read, create, search, append notes, manage properties, list tags/backlinks, and run tasks — all without opening files manually |
+| `obsidian-bases` | Creating/editing `.base` files | Bases YAML schema: views (table/cards/list/map), filters, formulas, properties config, summaries, file/date/string/list functions |
+| `json-canvas` | Creating/editing `.canvas` files | JSON Canvas spec: node types (text/file/link/group), edges, colors, layout guidelines, ID generation |
+
+### Obsidian CLI quick reference
+
+The `obsidian` CLI interacts with a **running Obsidian instance**. It will not work if Obsidian is closed. Install via [Obsidian CLI docs](https://help.obsidian.md/cli).
+
+**Syntax**: parameters use `=`, flags are bare booleans. Quote values with spaces.
+
+```bash
+# Target this vault explicitly
+obsidian vault="Knowledge Hub" <command>
+
+# File targeting: file= resolves like a wikilink, path= is exact from vault root
+obsidian read file="Task vs ValueTask"
+obsidian read path="Software Engineering/01 Programming/.NET/Task vs ValueTask.md"
+```
+
+**Common operations for note workflows**:
+
+```bash
+# Read a note
+obsidian read file="My Note"
+
+# Create a note (silent = don't open in UI, overwrite = replace if exists)
+obsidian create name="New Note" content="# Hello" template="Template" silent
+
+# Append content to a note
+obsidian append file="My Note" content="\n## New Section\nContent here"
+
+# Set/get frontmatter properties
+obsidian property:set name="status" value="Creation" file="My Note"
+obsidian property:set name="dg-publish" value="true" file="My Note"
+
+# Search vault content
+obsidian search query="async await" limit=10
+
+# List tags with counts
+obsidian tags sort=count counts
+
+# Get backlinks for a note
+obsidian backlinks file="My Note"
+
+# List tasks
+obsidian tasks daily todo
+```
+
+### When to use CLI vs file tools
+
+| Operation | Use | Reason |
+|-----------|-----|--------|
+| Read note content | File tools (`Read`) | Always available, no Obsidian dependency |
+| Edit/create notes | File tools (`Edit`/`Write`) | Precise line-level control, always available |
+| Search vault content | File tools (`Grep`/`Glob`) | Always available; CLI search is supplementary |
+| Set frontmatter properties | CLI `property:set` | Cleaner than parsing YAML manually, handles edge cases |
+| Get backlinks/tags | CLI `backlinks`/`tags` | Only way to query Obsidian's link index |
+| Bulk property updates | CLI `property:set` in loop | Faster than editing YAML in each file |
+| Verify note exists by wikilink name | CLI `read file=` | Resolves wikilinks the same way Obsidian does |
+
+**Default**: Use standard file tools for all read/write operations. Use CLI as a supplement when Obsidian is running and you need vault-index features (backlinks, wikilink resolution, property management).
 
 ## Workflow notes
 
