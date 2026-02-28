@@ -8,6 +8,8 @@ status: Not-Started
 tags:
   - FolderNote
 dg-publish: false
+level:
+  - "3"
 ---
 
 # Intro
@@ -38,6 +40,13 @@ Replace or delete these example links.
 ---
 
 > [!note] Whats next
+> **Parent**
+>  [[Software Engineering/05 Architecture/Patterns/Patterns|Patterns]]
+>
+> **Pages**
+> - [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/CQRS|CQRS]]
+> - [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/Domain-Driven Design|Domain-Driven Design]]
+> - [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/Event Sourcing|Event Sourcing]]
 <!-- whats-next:end -->
 
 ---

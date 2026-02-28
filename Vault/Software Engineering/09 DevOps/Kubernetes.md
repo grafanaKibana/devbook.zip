@@ -33,4 +33,5 @@ dg-publish: true
 > **Pages**
 > - [[Software Engineering/09 DevOps/CI CD tools|CI CD tools]]
 > - [[Software Engineering/09 DevOps/Docker|Docker]]
+> - [[Software Engineering/09 DevOps/Observability|Observability]]
 <!-- whats-next:end -->
