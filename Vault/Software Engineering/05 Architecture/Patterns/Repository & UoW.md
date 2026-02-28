@@ -48,4 +48,5 @@ Repository and Unit of Work are patterns for structuring data access and coordin
 > - [[Software Engineering/05 Architecture/Patterns/Event Sourcing|Event Sourcing]]
 > - [[Software Engineering/05 Architecture/Patterns/Event-Driven Architecture|Event-Driven Architecture]]
 > - [[Software Engineering/05 Architecture/Patterns/GRASP|GRASP]]
+> - [[Software Engineering/05 Architecture/Patterns/Rate Limiting|Rate Limiting]]
 <!-- whats-next:end -->

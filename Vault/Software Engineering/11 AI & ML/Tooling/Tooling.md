@@ -5,10 +5,10 @@ subtopic:
   - Tooling
 tags:
   - FolderNote
-dg-publish: false
+dg-publish: true
 status: Creation
 level:
-  - '2'
+  - "2"
 priority: Medium
 ---
 

@@ -29,7 +29,7 @@
 - [x] Read [[#Quick Reference Card]] out loud (10 min)
 - [x] Internalize the [[#System Design Framework]] — 5/10/15/5 time-box
 - [x] Study [[#Building Blocks Quick Reference]] and [[#.NET-Specific Patterns]] — know each component's purpose
-- [ ] Understand all 4 [[#AI System Design Patterns]] — Webhook→Queue→Worker, Rate Limiting, Vector DB, Async Validation
+- [x] Understand all 4 [[#AI System Design Patterns]] — Webhook→Queue→Worker, Rate Limiting, Vector DB, Async Validation
 - [ ] Study [[#Project Deep Dive Framework (How to Present ANY Past Project)|5-Layer Presentation Framework]] with cheat sheets: [[#Communication Patterns Cheat Sheet|communication]], [[#Database Selection Cheat Sheet|databases]], [[#Scalability Patterns Quick Reference|scalability]], [[#Consistency Models|consistency]]
 - [ ] Walk through [[#Class Design Round — Robot-Managed Restaurant (HackerRank Style)|Robot Restaurant class design]] end-to-end — diagram, patterns ([[Design Patterns]]), A* pathfinding, extension question
 - [ ] Practice [[#Day 3 Practice Q&A]] + [[#Class Design Questions (HackerRank Round)|additional class design questions]]
@@ -254,10 +254,12 @@ From "Twelve RAG Pain Points" (Barnett et al.) + production experience:
 
 ### Agent Patterns and Complexity Ladder
 
-```text
-Prompted LLM → Chain → Router → Orchestrator → Autonomous Agent
-← simpler, predictable                    capable, less predictable →
+```mermaid
+flowchart LR
+    A[Prompted LLM] --> B[Chain] --> C[Router] --> D[Orchestrator] --> E[Autonomous Agent]
 ```
+
+*← simpler and predictable · · · capable and less predictable →*
 
 - **ReAct** (Think → Act → Observe): strong baseline for tool-using assistants
 - **Plan-and-Execute**: better for multi-step tasks where explicit decomposition helps
@@ -405,9 +407,9 @@ Use this for EVERY design question:
 
 This is the architecture of **ALL DraftKings AI tools**.
 
-```text
-[External Event] → Webhook → Queue → AI Worker → [Result Action]
- (Jira/PR/Slack)   (HTTP)   (RabbitMQ)  (LLM+tools)  (PR/Doc/Reply)
+```mermaid
+flowchart LR
+    A["External Event<br>Jira - PR - Slack"] --> B["Webhook<br>HTTP"] --> C["Queue<br>RabbitMQ"] --> D["AI Worker<br>LLM + tools"] --> E["Result Action<br>PR - Doc - Reply"]
 ```
 
 Why this is strong: isolates bursty traffic from model latency, supports retries/idempotency, enables horizontal worker scaling.
@@ -427,8 +429,9 @@ Why this is strong: isolates bursty traffic from model latency, supports retries
 
 #### Pattern 4: Async Validation Pipeline
 
-```text
-webhook → validate input → enqueue → worker → LLM → validate output → action
+```mermaid
+flowchart LR
+    A[Webhook] --> B[Validate Input] --> C[Enqueue] --> D[Worker] --> E[LLM] --> F[Validate Output] --> G[Action]
 ```
 
 - Input: schema + auth + idempotency key
@@ -474,19 +477,16 @@ For each project, present: Architecture → MVP scope → Edge cases → Metrics
 
 **Architecture:**
 
-```text
-[Jira Webhook/CRON]
-        │
-        ▼
-[Ticket Parser] → [Repo/Component Mapper] → [Clone + Context Builder]
-        │                                              │
-        └──────────────────────────────► [AI Codegen Worker]
-                                                │
-                                   [Pre-commit + Build Validation]
-                                                │
-                                            [Open PR]
-                                                │
-                                         [Update Jira Status]
+```mermaid
+flowchart TD
+    A["Jira Webhook - CRON"] --> B[Ticket Parser]
+    B --> C["Repo + Component Mapper"]
+    C --> D["Clone + Context Builder"]
+    D --> E[AI Codegen Worker]
+    B --> E
+    E --> F["Pre-commit + Build Validation"]
+    F --> G[Open PR]
+    G --> H[Update Jira Status]
 ```
 
 **MVP scope:** Single-repo, low-risk services. Generate branch + PR draft first, then expand to code changes. Strict confidence threshold before auto-PR.
@@ -512,15 +512,13 @@ For each project, present: Architecture → MVP scope → Edge cases → Metrics
 
 **Architecture:**
 
-```text
-[PR Merge Event] → [Diff Analyzer] → [Doc Scope Resolver]
-                         │
-                         ▼
-                [AI Doc Regeneration Engine]
-                         │
-               [AIDOC Marker-Safe Merge Layer]
-                         │
-                    [Open Docs PR]
+```mermaid
+flowchart TD
+    A[PR Merge Event] --> B[Diff Analyzer]
+    B --> C[Doc Scope Resolver]
+    C --> D[AI Doc Regeneration Engine]
+    D --> E[AIDOC Marker-Safe Merge Layer]
+    E --> F[Open Docs PR]
 ```
 
 **MVP scope:** One doc type first (runbooks or API docs). Only update sections with explicit markers. Human review required initially. ~22 story points.
@@ -538,13 +536,14 @@ For each project, present: Architecture → MVP scope → Edge cases → Metrics
 
 **Architecture:**
 
-```text
-[Slack Event] → [n8n Workflow] → [Intent Router] → [AI Agent]
-                                                         │
-                                                  [Postgres Memory]
-                                                  [Confluence Retrieval]
-                                                         ▼
-                                                   [Threaded Reply]
+```mermaid
+flowchart TD
+    A[Slack Event] --> B[n8n Workflow]
+    B --> C[Intent Router]
+    C --> D[AI Agent]
+    D <--> E[Postgres Memory]
+    D <--> F[Confluence Retrieval]
+    D --> G[Threaded Reply]
 ```
 
 **MVP scope:** One team channel, FAQ + runbook questions, escalation path for low-confidence. ~12 story points.
@@ -564,15 +563,13 @@ For each project, present: Architecture → MVP scope → Edge cases → Metrics
 
 **Architecture:**
 
-```text
-[PR Comment Webhook] → [@amenda Parser] → [Change Planner]
-                                                │
-                                                ▼
-                                      [AI Code Update Worker]
-                                                │
-                                   [Pre-commit/Tests/Static Checks]
-                                                │
-                                     [Commit + PR Reply Summary]
+```mermaid
+flowchart TD
+    A[PR Comment Webhook] --> B["@amenda Parser"]
+    B --> C[Change Planner]
+    C --> D[AI Code Update Worker]
+    D --> E["Pre-commit + Tests + Static Checks"]
+    E --> F[Commit + PR Reply Summary]
 ```
 
 **Modes:** Single comment (immediate localized change) · Batch (`@amenda Apply All` for grouped updates)
@@ -746,7 +743,7 @@ Dexter · Doculus · SlackJack · AmendA · Ops Support Bot · Curio · Tech Pla
 ## Class Design Round — Robot-Managed Restaurant (HackerRank Style)
 
 > [!warning] This section prepares you for the OOP class design round
-> The interviewer expects clean OOP with clear interfaces, extensibility, and attention to real-world movement mechanics. Think "close to UML but in code" — classes, interfaces, relationships, key methods.
+> The interviewer expects clean OOP with clear interfaces, extensibility, and attention to real-world movement mechanics. Think diagrams plus patterns plus key method signatures — not full implementations.
 
 ### Problem Statement
 
@@ -768,368 +765,338 @@ Design a robot-managed restaurant system where:
 └──────────┴──────────┴──────────┴──────────┴─────────────┘
 ```
 
-### Step 2: Core Interfaces ([[Design Patterns]], [[Dependency Injection]])
+### Step 2: Class Hierarchy
 
 > [!tip] Key Design Principle
 > **Program to interfaces, not implementations.** This is what enables the Cleaner Robot extension later without modifying existing code (Open/Closed Principle).
 
-#### Location & The Restaurant Floor
+#### Robot Hierarchy and Movement Strategy
 
-```csharp
-public class Position
-{
-    public int X { get; }
-    public int Y { get; }
-    public int ManhattanDistanceTo(Position other)
-        => Math.Abs(X - other.X) + Math.Abs(Y - other.Y);
-}
+```mermaid
+classDiagram
+    direction TB
 
-public interface ILocation
-{
-    string Name { get; }
-    Position Position { get; }
-}
+    class Position {
+        +int X
+        +int Y
+        +ManhattanDistanceTo(other) int
+    }
 
-public class Table : ILocation { /* tableId, seats, Position */ }
-public class KitchenStation : ILocation { /* stationId, Position */ }
-public class ChargingDock : ILocation { /* Position */ }
+    class ILocation {
+        <<interface>>
+        +Name string
+        +Position Position
+    }
+    class Table
+    class KitchenStation
+    class ChargingDock
 
-// Restaurant floor as a navigable grid
-public class RestaurantFloor
-{
-    private Cell[,] grid;  // WALKABLE, TABLE, WALL, KITCHEN, CHARGING
-    public List<ILocation> Locations { get; }
-    public bool IsWalkable(Position pos);
-    public List<Position> GetNeighbors(Position pos);
-}
+    class RestaurantFloor {
+        -Cell grid
+        +IsWalkable(pos) bool
+        +GetNeighbors(pos) List~Position~
+    }
+
+    class IMovementStrategy {
+        <<interface>>
+        +FindPath(from, to, floor) List~Position~
+    }
+    class AStarMovement
+    class WaypointMovement
+    class DirectMovement
+
+    class RobotState {
+        <<enumeration>>
+        Idle
+        Moving
+        TakingOrder
+        Delivering
+        Cleaning
+        Charging
+    }
+
+    class IMovable {
+        <<interface>>
+        +CurrentPosition Position
+        +MoveTo(destination)
+    }
+
+    class Robot {
+        <<abstract>>
+        +Id string
+        +CurrentPosition Position
+        +State RobotState
+        #MovementStrategy IMovementStrategy
+        +MoveTo(destination)
+        +PerformTask(task)*
+    }
+
+    class IOrderTaker {
+        <<interface>>
+        +TakeOrder(table) Order
+    }
+    class IDeliverer {
+        <<interface>>
+        +PickUp(order, station)
+        +Deliver(order, table)
+    }
+    class ICleaner {
+        <<interface>>
+        +Clean(location)
+    }
+
+    class WaiterRobot
+    class CleanerRobot
+
+    ILocation <|.. Table
+    ILocation <|.. KitchenStation
+    ILocation <|.. ChargingDock
+    IMovementStrategy <|.. AStarMovement
+    IMovementStrategy <|.. WaypointMovement
+    IMovementStrategy <|.. DirectMovement
+    Robot ..|> IMovable
+    Robot --> IMovementStrategy : strategy injection
+    Robot --> RestaurantFloor : navigates
+    Robot <|-- WaiterRobot
+    Robot <|-- CleanerRobot
+    WaiterRobot ..|> IOrderTaker
+    WaiterRobot ..|> IDeliverer
+    CleanerRobot ..|> ICleaner
 ```
 
-#### Movement Strategy (Strategy Pattern — THE critical answer to "how does robot move?")
+**Why this hierarchy wins in interviews:**
+
+- **Open/Closed**: Adding `CleanerRobot` required **zero changes** to `WaiterRobot`, `Robot`, or `Kitchen`
+- **Interface Segregation**: `ICleaner` is separate from `IOrderTaker` — no robot implements methods it doesn't need
+- **Strategy**: Movement algorithm is injectable per robot instance — A* for waiters, waypoint-based for cleaners
+- **Liskov Substitution**: Any `Robot` subclass can be used wherever `Robot` is expected
+
+**Key pattern — Strategy injection in Robot constructor:**
 
 ```csharp
-// Strategy interface for pathfinding
-public interface IMovementStrategy
+protected Robot(string id, Position startPos, IMovementStrategy movement)
 {
-    List<Position> FindPath(Position from, Position to, RestaurantFloor floor);
+    Id = id;
+    CurrentPosition = startPos;
+    MovementStrategy = movement;  // Injected — swap A* for waypoint without changing Robot
+    State = RobotState.Idle;
 }
-
-// A* — optimal for grid-based restaurant layouts
-public class AStarMovement : IMovementStrategy
-{
-    public List<Position> FindPath(Position from, Position to, RestaurantFloor floor)
-    {
-        // A* uses f(n) = g(n) + h(n)
-        // g = actual cost from start, h = Manhattan distance heuristic
-        // Expand lowest-f node, backtrack parent pointers for path
-        // Avoids obstacles (walls, furniture, other robots)
-    }
-}
-
-// Waypoint-based — follow predefined restaurant lanes
-public class WaypointMovement : IMovementStrategy
-{
-    private List<Position> waypoints;  // predefined safe corridors
-    public List<Position> FindPath(Position from, Position to, RestaurantFloor floor)
-    {
-        // Navigate via closest waypoints — like restaurant "traffic lanes"
-        // Real robots (BellaBot, Servi) use this: SLAM builds map once,
-        // then navigation runs on pre-computed corridors
-    }
-}
-
-// Simple direct movement — for open spaces or testing
-public class DirectMovement : IMovementStrategy { /* straight line */ }
 ```
 
 > [!question] "How would the robot physically move from A to B?"
 > **Model answer:**
 > "I model the restaurant floor as a 2D grid where each cell is walkable or blocked. The robot uses a **pathfinding strategy** — I'd inject `IMovementStrategy` via constructor. For a fixed restaurant layout, I'd use A* on a pre-computed waypoint graph: optimal paths without re-running full grid search on every move. Real service robots like BellaBot and Bear Robotics' Servi do exactly this: SLAM builds the map once, then navigation runs on it. A collision avoidance layer checks if the next position is occupied by another robot — if so, wait or re-route."
 
-#### Robot Base and Types (Interface Segregation + Template Method)
+#### Kitchen and Orchestration — Observer Pattern
+
+```mermaid
+classDiagram
+    direction LR
+
+    class Order {
+        +OrderId string
+        +SourceTable Table
+        +Items List~MenuItem~
+        +Status OrderStatus
+        +CreatedAt DateTime
+    }
+
+    class OrderStatus {
+        <<enumeration>>
+        Pending
+        Preparing
+        Ready
+        Delivered
+    }
+
+    class IKitchenObserver {
+        <<interface>>
+        +OnOrderReady(order)
+    }
+
+    class Kitchen {
+        -orderQueue Queue~Order~
+        -observers List~IKitchenObserver~
+        +ReceiveOrder(order)
+        +CompleteOrder(order)
+        +Subscribe(observer)
+    }
+
+    class RobotDispatcher {
+        -robots List~Robot~
+        -taskQueue PriorityQueue~RobotTask~
+        +RegisterRobot(robot)
+        +OnOrderReady(order)
+        +RequestCleaning(location)
+        +AssignNextTask()
+    }
+
+    class RobotFactory {
+        +Create(type, id, position) Robot
+    }
+
+    Kitchen --> IKitchenObserver : notifies
+    RobotDispatcher ..|> IKitchenObserver
+    RobotDispatcher --> Robot : manages
+    RobotDispatcher --> RobotFactory : uses
+    Order --> OrderStatus
+```
+
+**Key pattern — Observer decouples Kitchen from Dispatcher:**
 
 ```csharp
-// Capability interfaces — a robot implements ONLY what it CAN do (ISP)
-public interface IMovable
+// Kitchen does NOT know about robots — it just notifies observers
+public void CompleteOrder(Order order)
 {
-    Position CurrentPosition { get; }
-    void MoveTo(ILocation destination);
-}
-
-public interface IOrderTaker
-{
-    Order TakeOrder(Table table);
-}
-
-public interface IDeliverer
-{
-    void PickUp(Order order, KitchenStation station);
-    void Deliver(Order order, Table table);
-}
-
-public interface ICleaner
-{
-    void Clean(ILocation location);
-}
-
-public enum RobotState { Idle, Moving, TakingOrder, Delivering, Cleaning, Charging }
-
-// Base robot — ALL robots can move
-public abstract class Robot : IMovable
-{
-    public string Id { get; }
-    public Position CurrentPosition { get; protected set; }
-    public RobotState State { get; protected set; }
-    protected IMovementStrategy MovementStrategy { get; }
-
-    protected Robot(string id, Position startPos, IMovementStrategy movement)
-    {
-        Id = id;
-        CurrentPosition = startPos;
-        MovementStrategy = movement;
-        State = RobotState.Idle;
-    }
-
-    public void MoveTo(ILocation destination)
-    {
-        State = RobotState.Moving;
-        var path = MovementStrategy.FindPath(
-            CurrentPosition, destination.Position, RestaurantFloor.Instance);
-        foreach (var step in path)
-        {
-            CurrentPosition = step;  // Move step by step
-        }
-        State = RobotState.Idle;
-    }
-
-    public abstract void PerformTask(RobotTask task);
-}
-
-// Waiter Robot — takes orders + delivers food
-public class WaiterRobot : Robot, IOrderTaker, IDeliverer
-{
-    public WaiterRobot(string id, Position start, IMovementStrategy movement)
-        : base(id, start, movement) { }
-
-    public Order TakeOrder(Table table)
-    {
-        MoveTo(table);
-        State = RobotState.TakingOrder;
-        var order = new Order(table);
-        State = RobotState.Idle;
-        return order;
-    }
-
-    public void PickUp(Order order, KitchenStation station) => MoveTo(station);
-
-    public void Deliver(Order order, Table table)
-    {
-        State = RobotState.Delivering;
-        MoveTo(table);
-        order.Status = OrderStatus.Delivered;
-        State = RobotState.Idle;
-    }
-}
-
-// ✅ Cleaner Robot — THE EXTENSION (zero changes to existing code!)
-public class CleanerRobot : Robot, ICleaner
-{
-    public CleanerRobot(string id, Position start, IMovementStrategy movement)
-        : base(id, start, movement) { }
-
-    public void Clean(ILocation location)
-    {
-        State = RobotState.Cleaning;
-        MoveTo(location);
-        // perform cleaning logic
-        State = RobotState.Idle;
-    }
+    order.Status = OrderStatus.Ready;
+    foreach (var obs in observers)
+        obs.OnOrderReady(order);  // Dispatcher reacts by assigning delivery
 }
 ```
 
-> [!tip] Why this design wins in interviews
-> - **Open/Closed**: Adding `CleanerRobot` required **ZERO changes** to `WaiterRobot`, `Robot`, or `Kitchen`
-> - **Interface Segregation**: `ICleaner` is separate from `IOrderTaker` — no robot implements methods it doesn't need
-> - **Strategy**: Movement algorithm is injectable per robot instance
-> - **Single Responsibility**: Each class has one reason to change
-> - **Liskov Substitution**: Any `Robot` subclass can be used wherever `Robot` is expected
+### Step 3: Async Concurrency — Multiple Customers Simultaneously
 
-#### Orders and Kitchen (Command + Observer Patterns)
+This is the critical part interviewers probe: how does the system handle **concurrent operations** when multiple customers are at different stages?
+
+#### Robot State Machine
+
+```mermaid
+stateDiagram-v2
+    [*] --> Idle
+    Idle --> Moving : Task assigned
+    Moving --> TakingOrder : Arrived at table
+    Moving --> PickingUp : Arrived at kitchen
+    Moving --> Cleaning : Arrived at dirty table
+    TakingOrder --> Moving : Order taken heading to kitchen
+    PickingUp --> Moving : Food picked up heading to table
+    Moving --> Idle : Delivered or task complete
+    Cleaning --> Idle : Cleaning done
+    Idle --> Charging : Battery low
+    Charging --> Idle : Charged
+```
+
+#### Concurrent Scenario — Three Customers at Different Stages
+
+```mermaid
+sequenceDiagram
+    participant D as Dispatcher
+    participant W1 as WaiterBot 1
+    participant W2 as WaiterBot 2
+    participant K as Kitchen
+
+    Note over D,K: Customer B at Table 3 already ordered - food preparing
+
+    rect rgb(230, 245, 255)
+        Note right of D: Customer A arrives at Table 5
+        D->>D: Find idle waiter nearest Table 5
+        D->>W1: Assign take-order at Table 5
+        W1->>W1: MoveTo Table 5 via A*
+        W1->>K: TakeOrder and send to Kitchen
+    end
+
+    rect rgb(255, 245, 230)
+        Note right of K: Kitchen finishes Customer B food
+        K-->>D: OnOrderReady for Table 3
+        D->>D: W1 busy - W2 idle - assign W2
+        D->>W2: Assign delivery for Table 3
+        W2->>K: PickUp order
+        W2->>W2: Deliver to Table 3
+    end
+
+    rect rgb(255, 230, 230)
+        Note right of D: Customer C arrives at Table 7
+        D->>D: All waiters busy - queue task
+        Note over D: Priority queue - delivery over new orders
+    end
+
+    W1-->>D: State changed to Idle
+    D->>D: Dequeue next task for Customer C
+    D->>W1: Assign take-order at Table 7
+```
+
+#### How the Dispatcher Handles Concurrency
+
+**Task Priority Queue** — When all robots are busy, tasks are queued by priority:
+
+| Priority | Task Type | Rationale |
+|----------|-----------|-----------|
+| 1 Highest | Food delivery | Food gets cold — direct customer impact |
+| 2 | Order taking | Customer is waiting but not losing quality |
+| 3 | Table cleaning | No active customer affected |
+| 4 Lowest | Restocking or charging | Background maintenance |
+
+**Dispatcher assignment logic:**
 
 ```csharp
-// Order as a command-like data object
-public class Order
+public void AssignNextTask()
 {
-    public string OrderId { get; }
-    public Table SourceTable { get; }
-    public List<MenuItem> Items { get; }
-    public OrderStatus Status { get; set; }
-    public DateTime CreatedAt { get; }
-}
+    if (!taskQueue.TryDequeue(out var task)) return;
 
-public enum OrderStatus { Pending, Preparing, Ready, Delivered }
+    var candidate = robots
+        .Where(r => r.State == RobotState.Idle && r.CanHandle(task))
+        .OrderBy(r => r.CurrentPosition.ManhattanDistanceTo(task.Location))
+        .FirstOrDefault();
 
-// Observer — kitchen notifies when order is ready
-public interface IKitchenObserver
-{
-    void OnOrderReady(Order order);
-}
-
-public class Kitchen
-{
-    private Queue<Order> orderQueue = new();
-    private List<IKitchenObserver> observers = new();
-
-    public void Subscribe(IKitchenObserver observer) => observers.Add(observer);
-
-    public void ReceiveOrder(Order order)
-    {
-        order.Status = OrderStatus.Preparing;
-        orderQueue.Enqueue(order);
-    }
-
-    public void CompleteOrder(Order order)
-    {
-        order.Status = OrderStatus.Ready;
-        foreach (var obs in observers)
-            obs.OnOrderReady(order);  // Notify all subscribers
-    }
+    if (candidate != null)
+        candidate.PerformTask(task);
+    else
+        taskQueue.Enqueue(task);  // Re-queue if no idle robot available
 }
 ```
 
-#### Robot Dispatcher (Orchestrator + Observer)
+**Key concurrency behaviors:**
 
-```csharp
-public class RobotDispatcher : IKitchenObserver
-{
-    private List<Robot> robots = new();
+1. **Observer notifications are non-blocking** — Kitchen fires `OnOrderReady`, Dispatcher evaluates immediately but only assigns if a robot is idle. Otherwise the delivery task enters the priority queue.
 
-    public void RegisterRobot(Robot robot) => robots.Add(robot);
+2. **State-checked dispatch** — The Dispatcher only assigns work to `Idle` robots. A robot moving to Table 5 for an order cannot be reassigned mid-path. The new task goes to another idle robot or the queue.
 
-    // Kitchen notifies → dispatcher assigns delivery to idle waiter
-    public void OnOrderReady(Order order)
-    {
-        var waiter = robots.OfType<WaiterRobot>()
-            .FirstOrDefault(r => r.State == RobotState.Idle);
-        if (waiter != null)
-        {
-            waiter.PickUp(order, kitchen.GetStation());
-            waiter.Deliver(order, order.SourceTable);
-        }
-        // else: queue for next available
-    }
+3. **Proximity-based selection** — Among idle robots that can handle the task, the nearest one is chosen via Manhattan distance. This minimizes wait time and avoids two robots crossing paths.
 
-    public void RequestCleaning(ILocation location)
-    {
-        var cleaner = robots.OfType<CleanerRobot>()
-            .FirstOrDefault(r => r.State == RobotState.Idle);
-        cleaner?.Clean(location);
-    }
-}
+4. **Completion callback** — When a robot finishes any task, it sets `State = Idle` and calls `Dispatcher.AssignNextTask()`, which checks the queue and immediately assigns the next highest-priority task.
 
-// Factory — create robots by type
-public class RobotFactory
-{
-    public Robot Create(string type, string id, Position start) => type switch
-    {
-        "waiter"  => new WaiterRobot(id, start, new AStarMovement()),
-        "cleaner" => new CleanerRobot(id, start, new WaypointMovement()),
-        _ => throw new ArgumentException($"Unknown robot type: {type}")
-    };
-}
-```
+> [!tip] Interview line
+> "The Dispatcher is event-driven: Kitchen events and robot-idle events both trigger task assignment. The system self-balances without polling — as soon as capacity frees up, queued work starts immediately."
 
-### Full System Flow (Draw This!)
+### Full System Flow
 
-```text
-Customer sits at Table 5
-        │
-        ▼
-[RobotDispatcher] assigns idle WaiterRobot
-        │
-        ▼
-WaiterRobot.MoveTo(Table5)          ← A* pathfinding on floor grid
-        │
-        ▼
-WaiterRobot.TakeOrder(Table5)       ← returns Order object
-        │
-        ▼
-Kitchen.ReceiveOrder(order)          ← order enters kitchen queue
-        │
-        ▼
-Kitchen.CompleteOrder(order)         ← Observer notifies dispatcher
-        │
-        ▼
-[RobotDispatcher.OnOrderReady]       ← finds idle waiter
-        │
-        ▼
-WaiterRobot.PickUp(order, station)   ← robot moves to kitchen
-        │
-        ▼
-WaiterRobot.Deliver(order, Table5)   ← robot moves to table
-        │
-        ▼
-[Customer leaves]
-        │
-        ▼
-[RobotDispatcher.RequestCleaning]     ← assigns cleaner
-        │
-        ▼
-CleanerRobot.MoveTo(Table5)          ← reuses SAME pathfinding!
-CleanerRobot.Clean(Table5)
-```
+```mermaid
+sequenceDiagram
+    actor CA as Customer
+    participant D as Dispatcher
+    participant W as WaiterBot
+    participant K as Kitchen
+    participant Cl as CleanerBot
 
-### Class Diagram (Whiteboard Version)
+    CA->>D: Sits at Table 5
+    D->>W: Assign nearest idle waiter
+    W->>CA: MoveTo Table 5 via A*
+    W->>CA: TakeOrder
+    W->>K: ReceiveOrder
 
-```text
-«interface»              «interface»           «interface»
-IMovable                 IOrderTaker           ICleaner
-+ MoveTo(ILocation)      + TakeOrder(Table)    + Clean(ILocation)
-+ CurrentPosition
+    Note over K: Preparing food...
 
-«interface»                        «interface»
-IMovementStrategy                  IKitchenObserver
-+ FindPath(from, to, floor)        + OnOrderReady(Order)
-       ▲            ▲
-       │            │
-AStarMovement  WaypointMovement
+    K-->>D: OnOrderReady via Observer
+    D->>W: Assign delivery to idle waiter
+    W->>K: PickUp order
+    W->>CA: Deliver to Table 5
 
-
-«abstract» Robot ──────────────────── implements IMovable
-- id, currentPosition, state
-- movementStrategy: IMovementStrategy    ← Strategy injection
-+ MoveTo(ILocation)
-       ▲                    ▲
-       │                    │
-WaiterRobot              CleanerRobot
-(+IOrderTaker            (+ICleaner)
- +IDeliverer
- +IKitchenObserver)
-
-
-Kitchen ─────── notifies ─────► IKitchenObserver
-- orderQueue                         ▲
-+ ReceiveOrder(Order)                │
-+ CompleteOrder(Order)        RobotDispatcher
-                              - robots: List<Robot>
-                              + RegisterRobot(Robot)
-                              + OnOrderReady(Order)
-                              + RequestCleaning(ILocation)
-
-
-RobotFactory
-+ Create(type, id, position): Robot
+    CA->>D: Leaves table
+    D->>Cl: RequestCleaning Table 5
+    Cl->>Cl: MoveTo Table 5 via same pathfinding
+    Cl->>Cl: Clean Table 5
 ```
 
 ### Patterns Summary Table
 
 | Pattern | Where Used | Why |
 |---|---|---|
-| **Strategy** | `IMovementStrategy` | Swap pathfinding per robot/context without changing robot code |
-| **Observer** | `Kitchen` → `IKitchenObserver` | Decouple kitchen from robot assignment logic |
-| **Command-like** | `Order` object | Order flows through system as data, can be queued/logged |
-| **Factory** | `RobotFactory` | Encapsulate robot creation, easy to add new types |
-| **Template Method** | `Robot` base class | Shared movement logic, specialized task behavior in subclasses |
-| **ISP** | `IOrderTaker`, `ICleaner`, `IDeliverer` | Robots only implement capabilities they actually have |
+| **Strategy** | `IMovementStrategy` | Swap pathfinding per robot or context without changing robot code |
+| **Observer** | `Kitchen` to `IKitchenObserver` | Decouple kitchen from robot assignment logic |
+| **Command-like** | `Order` object | Order flows through system as data — can be queued or logged |
+| **Factory** | `RobotFactory` | Encapsulate robot creation — easy to add new types |
+| **Template Method** | `Robot` base class | Shared movement logic with specialized task behavior in subclasses |
+| **ISP** | `IOrderTaker` and `ICleaner` and `IDeliverer` | Robots only implement capabilities they actually have |
+| **Priority Queue** | `RobotDispatcher.taskQueue` | Handle concurrent demand when robots are busy |
 
 ### Follow-Up: "Add another robot type?"
 
@@ -1190,14 +1157,15 @@ Restaurant Floor (10x8 grid):
 - What were the constraints? (team size, timeline, existing infra)
 
 #### Layer 2: High-Level Architecture (2 minutes)
-```text
-[Client/Trigger] → [API Layer] → [Business Logic] → [Data Store]
-                         ↕               ↕
-                    [Auth/Gateway]   [External Services]
-                                         ↕
-                                    [Async Workers]
-                                         ↕
-                                    [Message Queue]
+```mermaid
+flowchart LR
+    A["Client + Trigger"] --> B[API Layer]
+    B <--> C["Auth + Gateway"]
+    B --> D[Business Logic]
+    D <--> E[External Services]
+    D --> F[Data Store]
+    E <--> G[Async Workers]
+    G <--> H[Message Queue]
 ```
 For each box: **technology choice** + **WHY** + **communication pattern** (sync vs async)
 

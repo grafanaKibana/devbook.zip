@@ -1,3 +1,4 @@
+/* ── Sidebar quicklink buttons ── */
 .dg-sidebar-quicklinks {
   display: flex;
   gap: 8px;
@@ -22,8 +23,16 @@
   border: 1px solid transparent;
 }
 
+.dg-sidebar-quicklink:link,
+.dg-sidebar-quicklink:visited,
+.dg-sidebar-quicklink:hover,
+.dg-sidebar-quicklink:active {
+  color: var(--text-on-accent);
+  text-decoration: none;
+}
+
 .dg-sidebar-quicklink:hover {
-  background: var(--interactive-accent-hover);
+  filter: brightness(1.15);
 }
 
 .dg-sidebar-quicklink:focus-visible {
