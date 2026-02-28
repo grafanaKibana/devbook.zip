@@ -7,8 +7,7 @@ dg-publish: true
 level:
   - "4"
 priority: High
-status:
-  - Creation
+status: Creation
 ---
 
 # Intro
@@ -89,6 +88,66 @@ Assume a clustered index on `ID` with values from `1` to `5000`. We need `ID = 1
 
 The search space drops from 5000 rows to one small page range (illustrative page sizing).
 
+## Covering Indexes and Included Columns
+
+A covering index satisfies a query entirely from the index without touching the base table. When a nonclustered index seek finds a matching row but the query needs columns not in the index, SQL Server performs a **Key Lookup** back to the clustered index for each row. On large result sets this becomes expensive fast.
+
+The `INCLUDE` clause adds columns to the leaf level only, not to the B-tree navigation nodes. This means they don't participate in seeks or ordering, but they're available at the leaf so the engine never needs to follow the key lookup path.
+
+```sql
+-- Without covering: index seek + key lookup per row for Email and LastLogin
+CREATE INDEX IX_Users_Status ON Users (Status);
+
+-- Covering: leaf stores Status (key) + Email + LastLogin (included)
+CREATE INDEX IX_Users_Status_Covering
+    ON Users (Status)
+    INCLUDE (Email, LastLogin);
+```
+
+**Key rules:**
+- SARGable columns (used in `WHERE`, `JOIN`, `GROUP BY`, `ORDER BY`) go in the key.
+- SELECT-only columns go in `INCLUDE`. They bypass the 1700-byte nonclustered key size limit (900-byte for clustered) and the 32-column key limit (SQL Server 2016+).
+- Eliminating Key Lookups is the primary index tuning lever. Check execution plans for "Key Lookup" operators; each one is a candidate for an INCLUDE column.
+
+## Columnstore Indexes
+
+Columnstore indexes store data column-by-column rather than row-by-row, compressed into **row groups** of up to ~1 million rows each. The engine reads only the columns a query touches, skipping the rest entirely.
+
+Batch execution mode processes rows in groups of up to ~900 at a time rather than one row at a time, which is why columnstore queries on large aggregations are significantly faster than equivalent rowstore queries on the same data.
+
+Two variants:
+- **Clustered columnstore**: the entire table is stored as columnstore. Ideal for data warehouse fact tables where you always aggregate large ranges.
+- **Nonclustered columnstore**: a secondary index on a rowstore table, enabling HTAP (hybrid transactional/analytical) workloads without a separate DW.
+
+Columnstore is not a replacement for B+ tree indexes. OLTP point lookups, small range seeks, and frequent single-row updates still belong on rowstore. Use columnstore when queries scan millions of rows and aggregate.
+
+## Filtered Indexes
+
+A filtered index is a nonclustered index with a `WHERE` predicate. It indexes only the rows matching that predicate.
+
+```sql
+-- Only index active users; 95% of rows are inactive and irrelevant
+CREATE INDEX IX_Users_Active
+    ON Users (LastLogin, Email)
+    WHERE IsActive = 1;
+```
+
+Best for: columns with many NULLs (add `WHERE Col IS NOT NULL` to exclude them from the index), sparse active subsets, or status columns where one value dominates. The index is smaller, cheaper to maintain, and often fits entirely in the buffer pool. The query's `WHERE` clause must be compatible with the filter predicate for the optimizer to use it.
+
+## Index Maintenance
+
+**Fragmentation** happens when page splits leave pages partially empty or out of logical order. Two metrics matter: logical fragmentation (out-of-order pages) and page density (how full each page is).
+
+On modern SSD and cloud storage, random I/O is cheap, so logical fragmentation has less impact than it did on spinning disks, especially for point lookups. For large range scans, page density still matters: sparse pages mean more I/O to read the same data.
+
+Two maintenance operations:
+- **REORGANIZE**: online, leaf-level only, compacts pages in place. Does not update statistics.
+- **REBUILD**: recreates the index from scratch, updates statistics with a full scan. Can be offline or online (online rebuild availability depends on SQL Server edition and index type; it's supported in Azure SQL Database and SQL Server Enterprise).
+
+**The statistics trap:** performance often improves after a rebuild not because fragmentation was the problem, but because the implicit `FULLSCAN` statistics update gave the optimizer accurate cardinality estimates. Before scheduling a rebuild, try `UPDATE STATISTICS ... WITH FULLSCAN` first. If that fixes the query plan, fragmentation was never the issue.
+
+**Fill factor** controls how full pages are when an index is built or rebuilt. Only lower it for indexes that suffer frequent page splits, typically GUID or random keys. For sequential keys (identity, date), the default (0 = 100%) is fine.
+
 ## Tradeoffs
 
 - **Benefits**: faster lookups, faster ordered reads, better range filtering.
@@ -106,44 +165,32 @@ The search space drops from 5000 rows to one small page range (illustrative page
 ## Questions
 
 > [!QUESTION]- What is an index and what types exist?
-> An index is an additional on-disk/in-memory structure (often a B-tree/B+ tree) that speeds up access via seeks and ordered scans. Common types are clustered and nonclustered indexes, plus unique, composite, filtered/partial, and full-text indexes depending on DB engine.
+> - An index is an auxiliary on-disk structure (usually a B+ tree) that lets the engine seek to rows without scanning the whole table.
+> - Common types: clustered, nonclustered, unique, composite, filtered, covering (nonclustered with INCLUDE), and columnstore.
+> - Clustered defines physical row order; nonclustered is a separate structure with a pointer back to the row.
+> - Columnstore stores data column-by-column for analytics; rowstore B+ tree is for OLTP.
 
-> [!QUESTION]- How does ordering work for clustered vs nonclustered indexes?
-> In a clustered index, the leaf level is the table data itself, physically ordered by the clustered key. In a nonclustered index, the leaf level is ordered by nonclustered key and stores locators to data rows.
+> [!QUESTION]- When should a column go in INCLUDE rather than the index key?
+> - Key columns participate in B-tree navigation and are subject to the 1700-byte nonclustered key size limit (900-byte for clustered) and the 32-column key limit (SQL Server 2016+).
+> - INCLUDE columns live only at the leaf level. They bypass both limits and don't affect seek/sort behavior.
+> - Rule: SARGable columns (used in `WHERE`, `JOIN`, `GROUP BY`, `ORDER BY`) go in the key; SELECT-only columns go in INCLUDE.
+> - The goal is eliminating Key Lookup operators in execution plans. Each lookup is a round-trip to the clustered index per row.
 
-> [!QUESTION]- Why cannot a table have two clustered indexes?
-> A clustered index defines physical row order. One table can be physically ordered only one way at a time.
-
-> [!QUESTION]- If clustered tables are often faster for reads, why would you still use a heap?
-> Use this for bulk-load/staging scenarios and append-heavy transient data where ordered access is not required.
-
-> [!QUESTION]- How do fill factor and page splits affect write performance?
-> Lower fill factor leaves room on pages and can reduce splits, but increases storage and read IO.
-
-> [!QUESTION]- Can a clustered index key contain duplicates?
-> Yes. SQL Server makes keys unique internally by adding a hidden uniquifier when needed.
-
-> [!QUESTION]- How are rows located from a nonclustered index when the base table is a heap?
-> The nonclustered leaf stores a RID pointing to file/page/slot.
-
-> [!QUESTION]- Why not index every column?
-> Extra indexes increase write cost, memory pressure, and maintenance; some low-selectivity indexes are not useful.
-
-> [!QUESTION]- Do you always make the primary key clustered?
-> No. It is common, but choose clustered key by access patterns, size, and update behavior.
-
-> [!QUESTION]- What is the difference between composite and covering indexes?
-> Composite defines key columns used for seek/order. Covering also includes non-key columns to avoid lookups.
-
-> [!QUESTION]- Can you index only a subset of rows?
-> Yes, with filtered indexes (where supported by engine).
+> [!QUESTION]- Why can an index rebuild appear to fix a slow query, and how do you verify whether statistics were the real cause?
+> - Rebuilding implicitly runs a FULLSCAN statistics update, giving the optimizer accurate cardinality estimates.
+> - Stale statistics causing a bad plan is a far more common culprit than fragmentation on SSD/cloud storage.
+> - Test first: run `UPDATE STATISTICS ... WITH FULLSCAN` without rebuilding. If that fixes the plan, fragmentation was never the issue.
+> - Rebuilding indexes purely for fragmentation on modern storage is often wasted maintenance work and causes unnecessary blocking.
 
 ## Links
 
 - [SQL Server and Azure SQL index architecture and design guide](https://learn.microsoft.com/sql/relational-databases/sql-server-index-design-guide?view=sql-server-ver17)
 - [Clustered and nonclustered indexes described](https://learn.microsoft.com/sql/relational-databases/indexes/clustered-and-nonclustered-indexes-described?view=sql-server-ver17)
-- [Clustered Index Structures](https://learn.microsoft.com/en-us/previous-versions/sql/sql-server-2008-r2/ms177443(v=sql.105))
-- [Interview question list on indexes](https://habr.com/ru/post/247373/)
+- [Optimize index maintenance to improve query performance](https://learn.microsoft.com/sql/relational-databases/indexes/reorganize-and-rebuild-indexes?view=sql-server-ver17)
+- [Columnstore indexes overview](https://learn.microsoft.com/sql/relational-databases/indexes/columnstore-indexes-overview?view=sql-server-ver17)
+- [Use The Index, Luke — The B-Tree](https://use-the-index-luke.com/sql/anatomy/the-tree)
+- [The Clustered Index Debate (Kimberly Tripp / SQLskills)](https://www.sqlskills.com/blogs/kimberly/the-clustered-index-debate-continues/)
+- [Erin Stellato — Index Maintenance Myths (SQLskills)](https://www.sqlskills.com/blogs/erin/index-maintenance-myths-misconceptions-and-realities/)
 
 <!-- whats-next:start -->
 

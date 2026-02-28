@@ -29,7 +29,7 @@ Architecture is about structuring software so it can evolve: clear boundaries, e
 >
 > **Topics**
 > - [[Software Engineering/05 Architecture/Application Architecture/Application Architecture|Application Architecture]]
-> - [[Software Engineering/05 Architecture/Architecture Styles/Architecture Styles|Architecture Styles]]
+> - [[Software Engineering/05 Architecture/System Architecture/System Architecture|System Architecture]]
 > - [[Software Engineering/05 Architecture/Distributed Systems/Distributed Systems|Distributed Systems]]
 > - [[Software Engineering/05 Architecture/Patterns/Patterns|Patterns]]
 <!-- whats-next:end -->

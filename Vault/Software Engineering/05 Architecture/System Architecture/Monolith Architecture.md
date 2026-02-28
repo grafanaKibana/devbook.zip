@@ -2,7 +2,7 @@
 topic:
   - "Architecture"
 subtopic:
-  - "Architecture Styles"
+  - "System Architecture"
 level:
   - "4"
 priority: Medium
@@ -48,7 +48,7 @@ And it can be a bad thing because of: Slow build, hidden coupling points, worse 
 >  [[Software Engineering/05 Architecture/05 Architecture|05 Architecture]]
 >
 > **Pages**
-> - [[Software Engineering/05 Architecture/Architecture Styles/Microservices|Microservices]]
-> - [[Software Engineering/05 Architecture/Architecture Styles/Serverless Architecture|Serverless Architecture]]
-> - [[Software Engineering/05 Architecture/Architecture Styles/Service-Oriented Architecture|Service-Oriented Architecture]]
+> - [[Software Engineering/05 Architecture/System Architecture/Microservices|Microservices]]
+> - [[Software Engineering/05 Architecture/System Architecture/Serverless Architecture|Serverless Architecture]]
+> - [[Software Engineering/05 Architecture/System Architecture/Service-Oriented Architecture|Service-Oriented Architecture]]
 <!-- whats-next:end -->
