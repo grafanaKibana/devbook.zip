@@ -164,4 +164,9 @@ Vertical scaling is the right first move for a stateful service you can't refact
 ---
 
 > [!note] Whats next
+> **Parent**
+>  [[Software Engineering/05 Architecture/Distributed Systems/Distributed Systems|Distributed Systems]]
+>
+> **Pages**
+> - [[Software Engineering/05 Architecture/Distributed Systems/Scalability Patterns/Vertical Scaling|Vertical Scaling]]
 <!-- whats-next:end -->

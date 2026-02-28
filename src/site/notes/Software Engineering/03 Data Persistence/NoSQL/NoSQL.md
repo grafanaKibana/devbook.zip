@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/no-sql/no-sql/","tags":["FolderNote"],"noteIcon":"1"}
+{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/no-sql/no-sql/","tags":["FolderNote"],"noteIcon":"3"}
 ---
 
 

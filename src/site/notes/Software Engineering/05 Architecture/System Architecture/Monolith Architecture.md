@@ -1,5 +1,9 @@
 ---
+<<<<<<< HEAD:src/site/notes/Software Engineering/05 Architecture/System Architecture/Monolith Architecture.md
 {"dg-publish":true,"permalink":"/software-engineering/05-architecture/system-architecture/monolith-architecture/","noteIcon":"1"}
+=======
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/architecture-styles/monolith-architecture/","noteIcon":"3"}
+>>>>>>> origin/main:src/site/notes/Software Engineering/05 Architecture/Architecture Styles/Monolith Architecture.md
 ---
 
 

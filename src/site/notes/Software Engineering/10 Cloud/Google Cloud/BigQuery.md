@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/10-cloud/google-cloud/big-query/","noteIcon":"1"}
+{"dg-publish":true,"permalink":"/software-engineering/10-cloud/google-cloud/big-query/","noteIcon":"3"}
 ---
 
 

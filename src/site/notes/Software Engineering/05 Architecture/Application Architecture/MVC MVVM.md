@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/application-architecture/mvc-mvvm/","noteIcon":"1"}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/application-architecture/mvc-mvvm/","noteIcon":"3"}
 ---
 
 

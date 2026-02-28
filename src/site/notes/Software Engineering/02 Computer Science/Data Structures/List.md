@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/data-structures/list/","noteIcon":"1"}
+{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/data-structures/list/","noteIcon":"3"}
 ---
 
 

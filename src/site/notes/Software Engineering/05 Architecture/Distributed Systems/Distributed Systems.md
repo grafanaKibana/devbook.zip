@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/distributed-systems/distributed-systems/","tags":["FolderNote"],"noteIcon":"1"}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/distributed-systems/distributed-systems/","tags":["FolderNote"],"noteIcon":"3"}
 ---
 
 
@@ -23,9 +23,14 @@ Distributed systems are hard because the network is unreliable and time is messy
 > - [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/Message Queues\|Message Queues]]
 >
 > **Pages**
+> - [[Software Engineering/05 Architecture/Distributed Systems/API Gateway\|API Gateway]]
 > - [[Software Engineering/05 Architecture/Distributed Systems/CAP theorem\|CAP theorem]]
+> - [[Software Engineering/05 Architecture/Distributed Systems/Consistency Models\|Consistency Models]]
 > - [[Software Engineering/05 Architecture/Distributed Systems/Distributed Transactions\|Distributed Transactions]]
 > - [[Software Engineering/05 Architecture/Distributed Systems/IaaS, PaaS, SaaS, CaaS\|IaaS, PaaS, SaaS, CaaS]]
+> - [[Software Engineering/05 Architecture/Distributed Systems/Load Balancing\|Load Balancing]]
 > - [[Software Engineering/05 Architecture/Distributed Systems/Message Queues\|Message Queues]]
+> - [[Software Engineering/05 Architecture/Distributed Systems/Observability\|Observability]]
 > - [[Software Engineering/05 Architecture/Distributed Systems/REST\|REST]]
+> - [[Software Engineering/05 Architecture/Distributed Systems/Scalability Patterns\|Scalability Patterns]]
 <!-- whats-next:end -->

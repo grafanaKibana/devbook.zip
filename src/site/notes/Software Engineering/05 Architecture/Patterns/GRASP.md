@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/grasp/","noteIcon":"1"}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/grasp/","noteIcon":"3"}
 ---
 
 # Intro
@@ -39,5 +39,6 @@ GRASP is a set of principles for assigning responsibilities to objects/classes t
 > - [[Software Engineering/05 Architecture/Patterns/Domain-Driven Development\|Domain-Driven Development]]
 > - [[Software Engineering/05 Architecture/Patterns/Event Sourcing\|Event Sourcing]]
 > - [[Software Engineering/05 Architecture/Patterns/Event-Driven Architecture\|Event-Driven Architecture]]
+> - [[Software Engineering/05 Architecture/Patterns/Rate Limiting\|Rate Limiting]]
 > - [[Software Engineering/05 Architecture/Patterns/Repository & UoW\|Repository & UoW]]
 <!-- whats-next:end -->

@@ -306,4 +306,6 @@ For a deeper study of the topic, the book ["Introduction to Database Systems" by
 >
 > **Pages**
 > - [[Software Engineering/03 Data Persistence/SQL/Indexes|Indexes]]
+> - [[Software Engineering/03 Data Persistence/SQL/Replication|Replication]]
+> - [[Software Engineering/03 Data Persistence/SQL/Sharding|Sharding]]
 <!-- whats-next:end -->
