@@ -2,7 +2,7 @@
 topic:
   - "AI & ML"
 subtopic:
-  - "LLM"
+  - "Machine Learning"
 level:
   - "3"
 priority: Medium
@@ -119,22 +119,3 @@ Same model family at two thresholds:
 - [Scikit-learn API: precision_recall_fscore_support](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.precision_recall_fscore_support.html)
 - [Google ML Glossary](https://developers.google.com/machine-learning/glossary)
 - [Google ML Crash Course: Accuracy, precision, recall](https://developers.google.com/machine-learning/crash-course/classification/accuracy-precision-recall)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Deterministic Checks|Deterministic Checks]]
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs|Golden Test Set and Regression Runs]]
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/LLM-as-a-Judge|LLM-as-a-Judge]]
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Online Evaluation and AB Tests|Online Evaluation and AB Tests]]
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Overfitting|Overfitting]]
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Pairwise Comparisons|Pairwise Comparisons]]
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Rubric Scorecards|Rubric Scorecards]]
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Targeted Evals|Targeted Evals]]
-<!-- whats-next:end -->

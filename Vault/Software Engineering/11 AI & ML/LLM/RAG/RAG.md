@@ -1,7 +1,7 @@
 ---
 tags:
   - FolderNote
-status: Creation
+status: Done
 priority: High
 level:
   - "2"

@@ -1,13 +1,13 @@
 ---
 topic:
-  - "AI & ML"
+  - AI & ML
 subtopic:
-  - "LLM"
+  - LLM
 level:
   - "2"
 priority: High
-status: Creation
-dg-publish: false
+status: Done
+dg-publish: true
 ---
 
 # Intro
@@ -66,6 +66,22 @@ Where it fits: broad questions where a single phrasing captures only part of the
 
 Main risk: latency and cost. N query variants means N retrieval calls plus the LLM call that generates the variants. For 4 variants against a retriever with 100ms latency, query translation adds ~400ms sequentially (parallelizable to ~100ms with concurrent retrieval) plus the LLM generation time for variant creation.
 
+### Step-Back Prompting
+
+Step-back prompting generates a more abstract, higher-level version of the question. The system retrieves context for both the step-back question (background/principles) and the original question (specifics), then provides both to the generator.
+
+The intuition: some questions require first-principles context before the specific answer is useful. Asking "Why does EF Core throw timeout on batch insert of 10K rows?" benefits from background on EF Core's batch execution model and connection management before the specific timeout cause.
+
+Example — original query: "Why is my HNSW recall dropping after adding 5M vectors?"
+
+Step-back question: "How does HNSW index recall scale with corpus size and what parameters affect it?"
+
+The step-back retrieval surfaces foundational content about HNSW graph structure, `ef_search` tuning, and recall-versus-scale behavior. The original query retrieval surfaces specific troubleshooting content. Together, the generator has both the conceptual framework and the specific guidance to produce a grounded answer.
+
+Where it fits: questions that implicitly assume background knowledge. Common in technical domains where users ask about symptoms without understanding the underlying mechanism.
+
+Main risk: overly abstract retrieval. If the step-back question is too general ("What are vector database best practices?"), the retrieved context is too broad to be actionable and wastes prompt tokens on background the generator does not need.
+
 ### Decomposition
 
 Decomposition splits a complex multi-part question into focused sub-questions, retrieves evidence for each independently, and synthesizes the final answer from the combined context. Unlike multi-query, the sub-questions are *different questions* — each targets a distinct piece of evidence needed for the answer.
@@ -82,23 +98,7 @@ Each sub-question retrieves different documents. The synthesis step combines the
 
 Where it fits: multi-hop questions that span multiple concepts, entities, or constraints. Comparison questions, timeline questions ("What changed between v1 and v2?"), and questions requiring evidence from different document sections.
 
-Main risk: context fragmentation. Sub-questions lose the constraints that connect them. "What is the allocation behavior of Task?" retrieves general information, not specifically the allocation behavior relevant to high-throughput scenarios. The synthesis step must reconstruct context that the decomposition discarded. For questions that are not genuinely multi-hop, decomposition adds complexity without improving retrieval.
-
-### Step-Back Prompting
-
-Step-back prompting generates a more abstract, higher-level version of the question. The system retrieves context for both the step-back question (background/principles) and the original question (specifics), then provides both to the generator.
-
-The intuition: some questions require first-principles context before the specific answer is useful. Asking "Why does EF Core throw timeout on batch insert of 10K rows?" benefits from background on EF Core's batch execution model and connection management before the specific timeout cause.
-
-Example — original query: "Why is my HNSW recall dropping after adding 5M vectors?"
-
-Step-back question: "How does HNSW index recall scale with corpus size and what parameters affect it?"
-
-The step-back retrieval surfaces foundational content about HNSW graph structure, `ef_search` tuning, and recall-versus-scale behavior. The original query retrieval surfaces specific troubleshooting content. Together, the generator has both the conceptual framework and the specific guidance to produce a grounded answer.
-
-Where it fits: questions that implicitly assume background knowledge. Common in technical domains where users ask about symptoms without understanding the underlying mechanism.
-
-Main risk: overly abstract retrieval. If the step-back question is too general ("What are vector database best practices?"), the retrieved context is too broad to be actionable and wastes prompt tokens on background the generator does not need.
+Main risk: context fragmentation. Sub-questions lose the constraints that connect them. "Compare Task vs ValueTask for high-throughput endpoints" becomes three independent questions — none of which carries the "high-throughput" constraint that makes the comparison relevant. Sub-question retrieval returns general-purpose content, and the synthesis step cannot reconstruct specificity that was discarded during decomposition. For questions that are not genuinely multi-hop, decomposition adds complexity without improving retrieval.
 
 ### HyDE — Hypothetical Document Embeddings
 
