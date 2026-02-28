@@ -37,7 +37,7 @@
 > **Pages**
 > - [[Software Engineering/04 Networks/Protocols/DNS\|DNS]]
 > - [[Software Engineering/04 Networks/Protocols/gRPC\|gRPC]]
-> - [[Software Engineering/04 Networks/Protocols/HTTP & HTTPS\|HTTP & HTTPS]]
+> - [[Software Engineering/04 Networks/Protocols/HTTP\|HTTP]]
 > - [[Software Engineering/04 Networks/Protocols/HTTP 2\|HTTP 2]]
 > - [[Software Engineering/04 Networks/Protocols/RPC\|RPC]]
 > - [[Software Engineering/04 Networks/Protocols/SMTP\|SMTP]]
