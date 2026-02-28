@@ -52,6 +52,5 @@ public sealed class ProductsController : Controller
 >
 > **Pages**
 > - [[Software Engineering/05 Architecture/Application Architecture/Layered Architecture|Layered Architecture]]
-> - [[Software Engineering/05 Architecture/Application Architecture/MVC|MVC]]
 > - [[Software Engineering/05 Architecture/Application Architecture/Plug-in Architecture (MicroKernel)|Plug-in Architecture (MicroKernel)]]
 <!-- whats-next:end -->

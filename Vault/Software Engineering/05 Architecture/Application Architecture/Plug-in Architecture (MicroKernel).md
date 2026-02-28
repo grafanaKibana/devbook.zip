@@ -62,6 +62,5 @@ foreach (var path in assemblies)
 >
 > **Pages**
 > - [[Software Engineering/05 Architecture/Application Architecture/Layered Architecture|Layered Architecture]]
-> - [[Software Engineering/05 Architecture/Application Architecture/MVC|MVC]]
 > - [[Software Engineering/05 Architecture/Application Architecture/MVC MVVM|MVC MVVM]]
 <!-- whats-next:end -->
