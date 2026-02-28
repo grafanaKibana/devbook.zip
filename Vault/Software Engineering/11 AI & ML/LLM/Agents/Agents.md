@@ -98,7 +98,6 @@ For patterns on coordinating multiple agents, see [[Software Engineering/11 AI &
 >
 > **Pages**
 > - [[Software Engineering/11 AI & ML/LLM/Agents/Agent Loop|Agent Loop]]
-> - [[Software Engineering/11 AI & ML/LLM/Agents/Mental Framework|Mental Framework]]
 > - [[Software Engineering/11 AI & ML/LLM/Agents/Model Context Protocol|Model Context Protocol]]
 > - [[Software Engineering/11 AI & ML/LLM/Agents/Multi-Agentic Systems|Multi-Agentic Systems]]
 > - [[Software Engineering/11 AI & ML/LLM/Agents/Tools|Tools]]

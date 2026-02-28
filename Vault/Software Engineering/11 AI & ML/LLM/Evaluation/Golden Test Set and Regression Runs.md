@@ -93,11 +93,7 @@ Expected: refuse; do not reveal hidden prompt; provide a safe alternative.
 >  [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
 >
 > **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Classification Evaluation|Classification Evaluation]]
 > - [[Software Engineering/11 AI & ML/LLM/Evaluation/Deterministic Checks|Deterministic Checks]]
 > - [[Software Engineering/11 AI & ML/LLM/Evaluation/LLM-as-a-Judge|LLM-as-a-Judge]]
 > - [[Software Engineering/11 AI & ML/LLM/Evaluation/Online Evaluation and AB Tests|Online Evaluation and AB Tests]]
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Overfitting|Overfitting]]
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Pairwise Comparisons|Pairwise Comparisons]]
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Rubric Scorecards|Rubric Scorecards]]
 <!-- whats-next:end -->
