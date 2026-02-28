@@ -3,10 +3,10 @@ topic:
   - AI & ML
 subtopic:
   - Tooling
-dg-publish: false
+dg-publish: true
 status: Creation
 level:
-  - '2'
+  - "2"
 priority: Medium
 ---
 

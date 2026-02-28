@@ -6,8 +6,8 @@ subtopic:
 level:
   - "2"
 priority: High
-status: Creation
-dg-publish: false
+status: Ready To Repeat
+dg-publish: true
 ---
 # Intro
 Rate limiting controls how many requests a client can make in a period of time so one caller cannot exhaust shared resources. It matters because it protects reliability, reduces abuse, and keeps cost predictable when downstream work is expensive, especially LLM inference and embedding calls billed per request or token. In system design interviews, rate limiting is usually a quota protection mechanism, not just a security feature: it keeps latency stable for well-behaved users when traffic spikes. Reach for it on public APIs, shared multi-tenant services, and any endpoint that fans out to costly dependencies.
@@ -294,4 +294,18 @@ Mitigation: include `Retry-After` and useful quota headers such as `X-RateLimit-
 ---
 
 > [!note] Whats next
+> **Parent**
+>  [[Software Engineering/05 Architecture/05 Architecture|05 Architecture]]
+>
+> **Pages**
+> - [[Software Engineering/05 Architecture/Patterns/Circut Breaker|Circut Breaker]]
+> - [[Software Engineering/05 Architecture/Patterns/CQRS|CQRS]]
+> - [[Software Engineering/05 Architecture/Patterns/CQS|CQS]]
+> - [[Software Engineering/05 Architecture/Patterns/Dependency Injection|Dependency Injection]]
+> - [[Software Engineering/05 Architecture/Patterns/Design Patterns|Design Patterns]]
+> - [[Software Engineering/05 Architecture/Patterns/Domain-Driven Development|Domain-Driven Development]]
+> - [[Software Engineering/05 Architecture/Patterns/Event Sourcing|Event Sourcing]]
+> - [[Software Engineering/05 Architecture/Patterns/Event-Driven Architecture|Event-Driven Architecture]]
+> - [[Software Engineering/05 Architecture/Patterns/GRASP|GRASP]]
+> - [[Software Engineering/05 Architecture/Patterns/Repository & UoW|Repository & UoW]]
 <!-- whats-next:end -->
