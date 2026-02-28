@@ -18,15 +18,12 @@
 > **Parent**
 >  [[Software Engineering/05 Architecture/05 Architecture\|05 Architecture]]
 >
+> **Topics**
+> - [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/Architectural Patterns\|Architectural Patterns]]
+> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Design Patterns\|Design Patterns]]
+> - [[Software Engineering/05 Architecture/Patterns/Resilience/Resilience\|Resilience]]
+>
 > **Pages**
-> - [[Software Engineering/05 Architecture/Patterns/Circut Breaker\|Circut Breaker]]
-> - [[Software Engineering/05 Architecture/Patterns/CQRS\|CQRS]]
 > - [[Software Engineering/05 Architecture/Patterns/Dependency Injection\|Dependency Injection]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns\|Design Patterns]]
-> - [[Software Engineering/05 Architecture/Patterns/Domain-Driven Development\|Domain-Driven Development]]
-> - [[Software Engineering/05 Architecture/Patterns/Event Sourcing\|Event Sourcing]]
-> - [[Software Engineering/05 Architecture/Patterns/Event-Driven Architecture\|Event-Driven Architecture]]
-> - [[Software Engineering/05 Architecture/Patterns/GRASP\|GRASP]]
-> - [[Software Engineering/05 Architecture/Patterns/Rate Limiting\|Rate Limiting]]
 > - [[Software Engineering/05 Architecture/Patterns/Repository & UoW\|Repository & UoW]]
 <!-- whats-next:end -->

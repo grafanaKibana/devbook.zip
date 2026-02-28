@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/distributed-systems/observability/","noteIcon":"3"}
+{"dg-publish":true,"permalink":"/software-engineering/09-dev-ops/observability/","noteIcon":"3"}
 ---
 
 # Intro
@@ -289,20 +289,14 @@ If thresholds are too sensitive or static, teams get constant false positives an
 
 > [!note] Whats next
 > **Parent**
->  [[Software Engineering/05 Architecture/05 Architecture\|05 Architecture]]
+>  [[Software Engineering/Software Engineering\|Software Engineering]]
 >
 > **Topics**
-> - [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/Message Queues\|Message Queues]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Scalability Patterns/Scalability Patterns\|Scalability Patterns]]
+> - [[Software Engineering/09 DevOps/Deployment Stratagies/Deployment Stratagies\|Deployment Stratagies]]
+> - [[Software Engineering/09 DevOps/Version Control Systems/Version Control Systems\|Version Control Systems]]
 >
 > **Pages**
-> - [[Software Engineering/05 Architecture/Distributed Systems/API Gateway\|API Gateway]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/CAP theorem\|CAP theorem]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Consistency Models\|Consistency Models]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Distributed Transactions\|Distributed Transactions]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/IaaS, PaaS, SaaS, CaaS\|IaaS, PaaS, SaaS, CaaS]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Load Balancing\|Load Balancing]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Message Queues\|Message Queues]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/REST\|REST]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Webhooks\|Webhooks]]
+> - [[Software Engineering/09 DevOps/CI CD tools\|CI CD tools]]
+> - [[Software Engineering/09 DevOps/Docker\|Docker]]
+> - [[Software Engineering/09 DevOps/Kubernetes\|Kubernetes]]
 <!-- whats-next:end -->

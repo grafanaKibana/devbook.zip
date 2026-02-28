@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/cqrs/","noteIcon":"3"}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/architectural-patterns/cqrs/","noteIcon":"3"}
 ---
 
 # Intro
@@ -182,7 +182,7 @@ public sealed class OrderSummaryProjection : INotificationHandler<OrderPlaced>
 ```
 
 ## CQRS and Event Sourcing
-CQRS pairs naturally with [[Software Engineering/05 Architecture/Patterns/Event Sourcing\|Event Sourcing]] because events are already the canonical change stream that can project into one or many read models. This makes rebuilding read views and supporting new query shapes easier.
+CQRS pairs naturally with [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/Event Sourcing\|Event Sourcing]] because events are already the canonical change stream that can project into one or many read models. This makes rebuilding read views and supporting new query shapes easier.
 Important distinction for interviews: **CQRS does not require Event Sourcing**.
 
 - CQRS without Event Sourcing: write model persists current state (for example, relational tables), and emits events only as integration/projection signals.
@@ -227,17 +227,9 @@ Warm-up refresher: What is CQRS? CQRS separates commands (state changes) from qu
 
 > [!note] Whats next
 > **Parent**
->  [[Software Engineering/05 Architecture/05 Architecture\|05 Architecture]]
+>  [[Software Engineering/05 Architecture/Patterns/Patterns\|Patterns]]
 >
 > **Pages**
-> - [[Software Engineering/05 Architecture/Patterns/Circut Breaker\|Circut Breaker]]
-> - [[Software Engineering/05 Architecture/Patterns/CQS\|CQS]]
-> - [[Software Engineering/05 Architecture/Patterns/Dependency Injection\|Dependency Injection]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns\|Design Patterns]]
-> - [[Software Engineering/05 Architecture/Patterns/Domain-Driven Development\|Domain-Driven Development]]
-> - [[Software Engineering/05 Architecture/Patterns/Event Sourcing\|Event Sourcing]]
-> - [[Software Engineering/05 Architecture/Patterns/Event-Driven Architecture\|Event-Driven Architecture]]
-> - [[Software Engineering/05 Architecture/Patterns/GRASP\|GRASP]]
-> - [[Software Engineering/05 Architecture/Patterns/Rate Limiting\|Rate Limiting]]
-> - [[Software Engineering/05 Architecture/Patterns/Repository & UoW\|Repository & UoW]]
+> - [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/Domain-Driven Design\|Domain-Driven Design]]
+> - [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/Event Sourcing\|Event Sourcing]]
 <!-- whats-next:end -->

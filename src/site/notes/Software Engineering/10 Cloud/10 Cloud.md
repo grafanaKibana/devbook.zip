@@ -23,4 +23,7 @@ Cloud computing is renting capabilities (compute, storage, networking) with mana
 > - [[Software Engineering/10 Cloud/AWS/AWS\|AWS]]
 > - [[Software Engineering/10 Cloud/Azure/Azure\|Azure]]
 > - [[Software Engineering/10 Cloud/Google Cloud/Google Cloud\|Google Cloud]]
+>
+> **Pages**
+> - [[Software Engineering/10 Cloud/IaaS, PaaS, SaaS, CaaS\|IaaS, PaaS, SaaS, CaaS]]
 <!-- whats-next:end -->

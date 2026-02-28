@@ -214,10 +214,6 @@ Why this question matters: senior candidates must translate AP choice into concr
 > - [[Software Engineering/05 Architecture/Distributed Systems/API Gateway\|API Gateway]]
 > - [[Software Engineering/05 Architecture/Distributed Systems/Consistency Models\|Consistency Models]]
 > - [[Software Engineering/05 Architecture/Distributed Systems/Distributed Transactions\|Distributed Transactions]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/IaaS, PaaS, SaaS, CaaS\|IaaS, PaaS, SaaS, CaaS]]
 > - [[Software Engineering/05 Architecture/Distributed Systems/Load Balancing\|Load Balancing]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Message Queues\|Message Queues]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Observability\|Observability]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/REST\|REST]]
 > - [[Software Engineering/05 Architecture/Distributed Systems/Webhooks\|Webhooks]]
 <!-- whats-next:end -->
