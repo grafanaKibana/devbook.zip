@@ -33,12 +33,12 @@ flowchart LR
 ## Communication patterns
 **Synchronous calls**
 - Use synchronous communication when the caller needs an immediate answer.
-- Common options are [[Software Engineering/05 Architecture/Distributed Systems/REST\|REST]] and [[Software Engineering/04 Networks/Protocols/gRPC\|gRPC]].
+- Common options are [[Software Engineering/04 Networks/Protocols/REST\|REST]] and [[Software Engineering/04 Networks/Protocols/gRPC\|gRPC]].
 - Best for short request-response interactions on the critical path.
 - Risk: long synchronous chains amplify latency and failure propagation.
 
 **Asynchronous messaging**
-- Use [[Software Engineering/05 Architecture/Distributed Systems/Message Queues\|Message Queues]] and [[Software Engineering/05 Architecture/Patterns/Event-Driven Architecture\|Event-Driven Architecture]] when temporal decoupling matters.
+- Use [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/Message Queues\|Message Queues]] and [[Software Engineering/05 Architecture/System Architecture/Event-Driven Architecture\|Event-Driven Architecture]] when temporal decoupling matters.
 - Best for workflows, retries, burst smoothing, and eventual consistency.
 - Publish immutable events like `OrderPlaced` or `InventoryReserved`.
 - Make handlers idempotent to survive retries and duplicate delivery.
@@ -234,6 +234,7 @@ spec:
 >  [[Software Engineering/05 Architecture/05 Architecture\|05 Architecture]]
 >
 > **Pages**
+> - [[Software Engineering/05 Architecture/System Architecture/Event-Driven Architecture\|Event-Driven Architecture]]
 > - [[Software Engineering/05 Architecture/System Architecture/Monolith Architecture\|Monolith Architecture]]
 > - [[Software Engineering/05 Architecture/System Architecture/Serverless Architecture\|Serverless Architecture]]
 > - [[Software Engineering/05 Architecture/System Architecture/Service-Oriented Architecture\|Service-Oriented Architecture]]
