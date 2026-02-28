@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/08-sdlc/08-sdlc/","tags":["FolderNote"],"noteIcon":"1"}
+{"dg-publish":true,"permalink":"/software-engineering/08-sdlc/08-sdlc/","tags":["FolderNote"],"noteIcon":"3"}
 ---
 
 

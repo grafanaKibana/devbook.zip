@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/09-dev-ops/kubernetes/","noteIcon":"1"}
+{"dg-publish":true,"permalink":"/software-engineering/09-dev-ops/kubernetes/","noteIcon":"3"}
 ---
 
 

@@ -98,4 +98,6 @@ ORDER BY headcount DESC;
 > **Pages**
 > - [[Software Engineering/03 Data Persistence/SQL/Indexes|Indexes]]
 > - [[Software Engineering/03 Data Persistence/SQL/Normalization Denormalization|Normalization Denormalization]]
+> - [[Software Engineering/03 Data Persistence/SQL/Replication|Replication]]
+> - [[Software Engineering/03 Data Persistence/SQL/Sharding|Sharding]]
 <!-- whats-next:end -->

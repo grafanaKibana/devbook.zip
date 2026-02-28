@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/10-cloud/google-cloud/cloud-spanner/","noteIcon":"1"}
+{"dg-publish":true,"permalink":"/software-engineering/10-cloud/google-cloud/cloud-spanner/","noteIcon":"3"}
 ---
 
 

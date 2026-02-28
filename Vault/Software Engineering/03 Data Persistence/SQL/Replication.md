@@ -121,4 +121,11 @@ Typical scaling progression: vertical scale → read replicas → caching layer 
 ---
 
 > [!note] Whats next
+> **Parent**
+>  [[Software Engineering/03 Data Persistence/03 Data Persistence|03 Data Persistence]]
+>
+> **Pages**
+> - [[Software Engineering/03 Data Persistence/SQL/Indexes|Indexes]]
+> - [[Software Engineering/03 Data Persistence/SQL/Normalization Denormalization|Normalization Denormalization]]
+> - [[Software Engineering/03 Data Persistence/SQL/Sharding|Sharding]]
 <!-- whats-next:end -->

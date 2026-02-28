@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/07-security/jwt-bearer/","noteIcon":"1"}
+{"dg-publish":true,"permalink":"/software-engineering/07-security/jwt-bearer/","noteIcon":"3"}
 ---
 
 

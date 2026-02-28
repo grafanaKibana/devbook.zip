@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/roadmap.canvas/","title":"Roadmap","contentClasses":"canvas-page","noteIcon":"1"}
+{"dg-publish":true,"permalink":"/software-engineering/roadmap.canvas/","title":"Roadmap","contentClasses":"canvas-page","noteIcon":"3"}
 ---
 
 <div id="Roadmapcanvas" class="canvas-wrapper hide">
@@ -301,7 +301,7 @@
 		</div>
 	</div>
 </div>
-<div class="canvas-node canvas-node-text has-color" data-node-id="n_443c6b7acc" style="transform: translate(840px, 2920px); width: 340px; height: 80px; --canvas-color: #e9973f;">
+<div class="canvas-node canvas-node-text has-color" data-node-id="n_443c6b7acc" style="transform: translate(840px, 2920px); width: 340px; height: 80px; --canvas-color: #a882ff;">
 	<div class="canvas-node-container">
 		<div class="canvas-node-content markdown-rendered">
 			<div class="canvas-node-text-content" data-markdown="IyBbW1NvZnR3YXJlIEVuZ2luZWVyaW5nLzA1IEFyY2hpdGVjdHVyZS9EaXN0cmlidXRlZCBTeXN0ZW1zL01lc3NhZ2UgUXVldWVzL01lc3NhZ2UgUXVldWVzXHxNZXNzYWdlIFF1ZXVlc11d"></div>
@@ -482,7 +482,7 @@
 <div class="canvas-node canvas-node-text " data-node-id="n_b0ac2236f9" style="transform: translate(-1440px, 0px); width: 500px; height: 110px; ">
 	<div class="canvas-node-container">
 		<div class="canvas-node-content markdown-rendered">
-			<div class="canvas-node-text-content" data-markdown="IyMjIyBSb2FkbWFwIGxlZ2VuZAoqKkdlbmVyYXRlZDoqKiBGZWIgMjggMjAyNiB8IDAzOjM1UE0="></div>
+			<div class="canvas-node-text-content" data-markdown="IyMjIyBSb2FkbWFwIGxlZ2VuZAoqKkdlbmVyYXRlZDoqKiBGZWIgMjggMjAyNiB8IDA2OjI1UE0="></div>
 		</div>
 	</div>
 </div>
@@ -496,7 +496,7 @@
 <div class="canvas-node canvas-node-text has-color" data-node-id="n_c1cf7bc196" style="transform: translate(-1380px, 202px); width: 380px; height: 60px; --canvas-color: #e9973f;">
 	<div class="canvas-node-container">
 		<div class="canvas-node-content markdown-rendered">
-			<div class="canvas-node-text-content" data-markdown="Q3JlYXRpb246IDE1"></div>
+			<div class="canvas-node-text-content" data-markdown="Q3JlYXRpb246IDE0"></div>
 		</div>
 	</div>
 </div>
@@ -510,7 +510,7 @@
 <div class="canvas-node canvas-node-text has-color" data-node-id="n_6de0caeeec" style="transform: translate(-1380px, 354px); width: 380px; height: 60px; --canvas-color: #a882ff;">
 	<div class="canvas-node-container">
 		<div class="canvas-node-content markdown-rendered">
-			<div class="canvas-node-text-content" data-markdown="UmVhZHkgVG8gUmVwZWF0OiAxMg=="></div>
+			<div class="canvas-node-text-content" data-markdown="UmVhZHkgVG8gUmVwZWF0OiAxMw=="></div>
 		</div>
 	</div>
 </div>

@@ -132,4 +132,9 @@ The practical decision rule: start vertical, switch to horizontal when you hit t
 ---
 
 > [!note] Whats next
+> **Parent**
+>  [[Software Engineering/05 Architecture/Distributed Systems/Distributed Systems|Distributed Systems]]
+>
+> **Pages**
+> - [[Software Engineering/05 Architecture/Distributed Systems/Scalability Patterns/Horizontal Scaling|Horizontal Scaling]]
 <!-- whats-next:end -->
