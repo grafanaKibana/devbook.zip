@@ -42,6 +42,7 @@
 
 | Note                                                                                                                           | Date                        |
 | ------------------------------------------------------------------------------------------------------------------------------ | --------------------------- |
+| [[Software Engineering/11 AI & ML/LLM/LLM\|LLM]]                                                                            | 3:41 PM - February 28, 2026 |
 | [[Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation\|Evaluation]]                                                   | 3:35 PM - February 28, 2026 |
 | [[Software Engineering/11 AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs\|Golden Test Set and Regression Runs]] | 3:35 PM - February 28, 2026 |
 | [[Software Engineering/11 AI & ML/LLM/Evaluation/LLM-as-a-Judge\|LLM-as-a-Judge]]                                           | 3:35 PM - February 28, 2026 |
@@ -53,7 +54,6 @@
 | [[Software Engineering/11 AI & ML/LLM/Agents/Agent Loop\|Agent Loop]]                                                       | 3:35 PM - February 28, 2026 |
 | [[Software Engineering/11 AI & ML/LLM/Agents/Multi-Agentic Systems\|Multi-Agentic Systems]]                                 | 3:35 PM - February 28, 2026 |
 | [[Software Engineering/11 AI & ML/LLM/Prompting/Prompting\|Prompting]]                                                      | 3:35 PM - February 28, 2026 |
-| [[Software Engineering/11 AI & ML/LLM/Prompting/Reasoning Techniques\|Reasoning Techniques]]                                | 3:35 PM - February 28, 2026 |
 
 { .block-language-dataview}
 # Publish Distribution
