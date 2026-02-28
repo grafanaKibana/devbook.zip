@@ -200,4 +200,6 @@ Practical threshold tuning pattern:
 > **Parent**
 >  [[Software Engineering/11 AI & ML/Machine Learning/Machine Learning\|Machine Learning]]
 >
+> **Pages**
+> - [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/Classification Evaluation\|Classification Evaluation]]
 <!-- whats-next:end -->
