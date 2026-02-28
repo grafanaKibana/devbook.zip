@@ -29,7 +29,7 @@ Resilience patterns protect systems from cascading failures and traffic overload
 >  [[Software Engineering/05 Architecture/Patterns/Patterns|Patterns]]
 >
 > **Pages**
-> - [[Software Engineering/05 Architecture/Patterns/Resilience/Circuit Breaker|Circuit Breaker]]
+> - [[Software Engineering/05 Architecture/Patterns/Resilience Patterns/Circuit Breaker|Circuit Breaker]]
 <!-- whats-next:end -->
 # Intro
 
