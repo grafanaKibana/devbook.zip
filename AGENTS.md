@@ -51,6 +51,31 @@ status: Not-Started
 
 Hub notes only need `tags: [FolderNote]`. Concept pages do NOT need FolderNote tag unless they are also hub notes.
 
+### Placement and scope check (before creating pages)
+
+Before creating a new page, the agent MUST evaluate whether the user's request is the best approach for the vault structure. This check runs even when the request seems unambiguous.
+
+**Evaluate:**
+
+1. **Folder placement** — Is the requested folder the most appropriate home? Does a more specific subfolder exist, or would a different topic area be a better fit?
+2. **Naming** — Does the proposed name match vault conventions and existing naming patterns? Would a different name be clearer or more discoverable?
+3. **Scope** — Should this be a standalone page, or would the content fit better as a new section in an existing page that already covers related material?
+4. **Duplication** — Does a page covering this topic (or a near-synonym) already exist?
+
+If any check suggests a better approach, present the alternative concisely and let the user decide:
+
+```text
+I'd suggest a different approach:
+
+You asked: [what the user requested]
+I'd recommend: [alternative — different folder / name / merge into existing page]
+Why: [brief reason]
+
+Should I go with my recommendation, or proceed with your original request?
+```
+
+If all checks pass, proceed without asking.
+
 ## Formatting rules (STRICT)
 
 - No placeholders in real notes (allowed only in `Vault/Templates/`).
@@ -348,6 +373,6 @@ obsidian tasks daily todo
 ## Workflow notes
 
 - If request changes vault structure/formatting rules, ask user whether to update AGENTS.md Memory.
-- If page structure is unclear (target folder, page type, note naming, or template), ask the user one clarifying question before changing pages or creating new ones.
+- **Placement and scope check.** Before creating or moving pages, the agent MUST run the placement and scope check defined in "Creating structure" — even when the user's instruction seems clear. See [Placement and scope check](#placement-and-scope-check-before-creating-pages).
 - **AGENTS.md evolution rule.** When updating this contract, prefer extending the writing paradigm or strengthening existing principles over adding prescriptive format rules. If a proposed rule can be derived from the three writing principles (concrete over abstract, show the machine, depth matches complexity), strengthen the principle instead of adding a new rule. Rules should guide judgment, not prescribe specific section templates or bullet formats for each case.
 - **No automatic commits.** Never create git commits unless the user explicitly asks. Leave changes unstaged/uncommitted so the user controls when and what to commit.

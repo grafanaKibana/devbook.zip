@@ -2,7 +2,7 @@
 topic:
   - "Architecture"
 subtopic:
-  - "Patterns"
+  - "Resilience"
 level:
   - "3"
 priority: High

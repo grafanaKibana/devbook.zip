@@ -1,8 +1,8 @@
 ---
 topic:
-  - "Architecture"
+  - "Networks"
 subtopic:
-  - "Distributed Systems"
+  - "Protocols"
 level:
   - "3"
 priority: High

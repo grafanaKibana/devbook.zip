@@ -3,6 +3,8 @@ topic:
   - Architecture
 subtopic:
   - Patterns
+tags:
+  - FolderNote
 level:
   - "4"
 priority: High
