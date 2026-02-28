@@ -33,7 +33,7 @@ Repository and Unit of Work are patterns for structuring data access and coordin
 > **Topics**
 > - [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/Architectural Patterns\|Architectural Patterns]]
 > - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Design Patterns\|Design Patterns]]
-> - [[Software Engineering/05 Architecture/Patterns/Resilience/Resilience\|Resilience]]
+> - [[Software Engineering/05 Architecture/Patterns/Resilience Patterns/Resilience Patterns\|Resilience Patterns]]
 >
 > **Pages**
 > - [[Software Engineering/05 Architecture/Patterns/CQS\|CQS]]
