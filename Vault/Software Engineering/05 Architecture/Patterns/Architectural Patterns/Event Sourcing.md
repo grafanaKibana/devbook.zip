@@ -2,7 +2,7 @@
 topic:
   - "Architecture"
 subtopic:
-  - "Patterns"
+  - "Architectural Patterns"
 level:
   - "2"
 priority: High
