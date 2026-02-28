@@ -9,8 +9,9 @@
                 <img class="site-logo" src="{{meta.siteLogoPath}}" alt="{{meta.siteName}}">
         </a>
         {% else %}
-        <a href="/" style="text-decoration: none; text-align: center;">
-                <h1 style="margin: 15px !important;">{{meta.siteName}}</h1>
+        <a href="/" class="dg-branding dg-branding-mobile" aria-label="{{meta.siteName}} home">
+                <span class="dg-branding-title">{{meta.siteName}}</span>
+                {% if meta.siteSubtitle %}<span class="dg-branding-subtitle">{{meta.siteSubtitle}}</span>{% endif %}
         </a>
         {% endif %}
         {% for imp in dynamics.filetree.afterTitle %}
