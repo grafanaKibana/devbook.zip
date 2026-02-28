@@ -1,9 +1,5 @@
 ---
-<<<<<<< HEAD:src/site/notes/Software Engineering/05 Architecture/System Architecture/Microservices.md
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/system-architecture/microservices/","noteIcon":"1"}
-=======
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/architecture-styles/microservices/","noteIcon":"3"}
->>>>>>> origin/main:src/site/notes/Software Engineering/05 Architecture/Architecture Styles/Microservices.md
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/system-architecture/microservices/","noteIcon":"3"}
 ---
 
 
@@ -170,7 +166,7 @@ spec:
 | Operational complexity | Low | Low to medium | High |
 | Best fit | Small team, early product | Growing product, clear domains, limited ops capacity | Large org, high release velocity, independent scaling needs |
 
-[[Software Engineering/05 Architecture/Architecture Styles/Monolith Architecture\|Monolith Architecture]] is usually the best starting point when boundaries are still evolving and operational maturity is limited.
+[[Software Engineering/05 Architecture/System Architecture/Monolith Architecture\|Monolith Architecture]] is usually the best starting point when boundaries are still evolving and operational maturity is limited.
 
 **Migration path: start monolith, then extract**
 1. Start with a modular monolith and enforce boundaries internally.
@@ -222,18 +218,12 @@ spec:
 > - Choose microservices when independent deploy/scale constraints are proven.
 > - Re-evaluate architecture periodically as constraints change.
 
-<<<<<<< HEAD:src/site/notes/Software Engineering/05 Architecture/System Architecture/Microservices.md
-[Microservices Pattern: Microservice Architecture pattern](https://microservices.io/patterns/microservices.html)
-
-- [[Software Engineering/05 Architecture/System Architecture/Monolith Architecture\|Monolith Architecture]]
-=======
 ## References
 - [Microservices Pattern: Microservice Architecture](https://microservices.io/patterns/microservices.html) — core microservices patterns and decomposition guidance.
 - [Microservices — Martin Fowler](https://martinfowler.com/articles/microservices.html) — original definition and key characteristics.
 - [.NET Microservices: Architecture for Containerized .NET Applications](https://learn.microsoft.com/en-us/dotnet/architecture/microservices/) — official Microsoft .NET guidance.
 - [Default ASP.NET Core port changed from 80 to 8080](https://learn.microsoft.com/en-us/dotnet/core/compatibility/containers/8.0/aspnet-port) — container port behavior in modern ASP.NET Core images.
 - [Building Microservices (2nd Edition) — Sam Newman](https://samnewman.io/books/building_microservices_2nd_edition/) — practical production lessons on boundaries and migration.
->>>>>>> origin/main:src/site/notes/Software Engineering/05 Architecture/Architecture Styles/Microservices.md
 
 <!-- whats-next:start -->
 
