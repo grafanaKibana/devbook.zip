@@ -31,4 +31,5 @@
 > **Pages**
 > - [[Software Engineering/09 DevOps/Docker\|Docker]]
 > - [[Software Engineering/09 DevOps/Kubernetes\|Kubernetes]]
+> - [[Software Engineering/09 DevOps/Observability\|Observability]]
 <!-- whats-next:end -->
