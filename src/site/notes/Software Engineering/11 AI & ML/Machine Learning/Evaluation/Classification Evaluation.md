@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/evaluation/classification-evaluation/","noteIcon":"1"}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/machine-learning/evaluation/classification-evaluation/","noteIcon":"1"}
 ---
 
 
@@ -118,15 +118,8 @@ Same model family at two thresholds:
 
 > [!note] Whats next
 > **Parent**
->  [[Software Engineering/11 AI & ML/LLM/LLM\|LLM]]
+>  [[Software Engineering/11 AI & ML/Machine Learning/Machine Learning\|Machine Learning]]
 >
 > **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Deterministic Checks\|Deterministic Checks]]
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs\|Golden Test Set and Regression Runs]]
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/LLM-as-a-Judge\|LLM-as-a-Judge]]
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Online Evaluation and AB Tests\|Online Evaluation and AB Tests]]
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Overfitting\|Overfitting]]
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Pairwise Comparisons\|Pairwise Comparisons]]
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Rubric Scorecards\|Rubric Scorecards]]
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Targeted Evals\|Targeted Evals]]
+> - [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/ROC-AUC and PR-AUC\|ROC-AUC and PR-AUC]]
 <!-- whats-next:end -->
