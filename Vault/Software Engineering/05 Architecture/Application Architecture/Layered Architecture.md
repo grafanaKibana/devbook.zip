@@ -92,7 +92,6 @@ In traditional layered architecture, UI depends on Business Logic which depends 
 >  [[Software Engineering/05 Architecture/05 Architecture|05 Architecture]]
 >
 > **Pages**
-> - [[Software Engineering/05 Architecture/Application Architecture/MVC|MVC]]
 > - [[Software Engineering/05 Architecture/Application Architecture/MVC MVVM|MVC MVVM]]
 > - [[Software Engineering/05 Architecture/Application Architecture/Plug-in Architecture (MicroKernel)|Plug-in Architecture (MicroKernel)]]
 <!-- whats-next:end -->

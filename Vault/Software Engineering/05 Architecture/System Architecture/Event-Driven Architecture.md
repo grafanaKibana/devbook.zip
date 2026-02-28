@@ -282,14 +282,8 @@ Production note: pair publish with the transactional outbox pattern to avoid "DB
 >  [[Software Engineering/05 Architecture/05 Architecture|05 Architecture]]
 >
 > **Pages**
-> - [[Software Engineering/05 Architecture/Patterns/Circut Breaker|Circut Breaker]]
-> - [[Software Engineering/05 Architecture/Patterns/CQRS|CQRS]]
-> - [[Software Engineering/05 Architecture/Patterns/CQS|CQS]]
-> - [[Software Engineering/05 Architecture/Patterns/Dependency Injection|Dependency Injection]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns|Design Patterns]]
-> - [[Software Engineering/05 Architecture/Patterns/Domain-Driven Development|Domain-Driven Development]]
-> - [[Software Engineering/05 Architecture/Patterns/Event Sourcing|Event Sourcing]]
-> - [[Software Engineering/05 Architecture/Patterns/GRASP|GRASP]]
-> - [[Software Engineering/05 Architecture/Patterns/Rate Limiting|Rate Limiting]]
-> - [[Software Engineering/05 Architecture/Patterns/Repository & UoW|Repository & UoW]]
+> - [[Software Engineering/05 Architecture/System Architecture/Microservices|Microservices]]
+> - [[Software Engineering/05 Architecture/System Architecture/Monolith Architecture|Monolith Architecture]]
+> - [[Software Engineering/05 Architecture/System Architecture/Serverless Architecture|Serverless Architecture]]
+> - [[Software Engineering/05 Architecture/System Architecture/Service-Oriented Architecture|Service-Oriented Architecture]]
 <!-- whats-next:end -->
