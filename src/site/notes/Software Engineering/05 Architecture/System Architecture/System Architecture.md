@@ -1,9 +1,5 @@
 ---
-<<<<<<< HEAD:src/site/notes/Software Engineering/05 Architecture/System Architecture/System Architecture.md
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/system-architecture/system-architecture/","tags":["FolderNote"],"noteIcon":"1"}
-=======
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/architecture-styles/architecture-styles/","tags":["FolderNote"],"noteIcon":"3"}
->>>>>>> origin/main:src/site/notes/Software Engineering/05 Architecture/Architecture Styles/Architecture Styles.md
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/system-architecture/system-architecture/","tags":["FolderNote"],"noteIcon":"3"}
 ---
 
 

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/distributed-systems/scalability-patterns/","noteIcon":"3"}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/distributed-systems/scalability-patterns/scalability-patterns/","tags":["FolderNote"],"noteIcon":"3"}
 ---
 
 
@@ -11,32 +11,7 @@ Concrete interview lens: if checkout traffic grows from 1,000 RPS to 10,000 RPS,
 
 ## Vertical vs Horizontal Scaling
 
-Vertical scaling means making one node bigger (more CPU, RAM, IOPS). Horizontal scaling means adding more nodes and spreading load.
-
-- Vertical scaling is often the fastest first move for monoliths and databases because architecture change is minimal.
-- Horizontal scaling is usually the long-term strategy for stateless services because capacity grows incrementally and failures are isolated.
-- Vertical scaling has hard ceilings (max machine size, rising cost per unit, maintenance windows, single-node blast radius).
-- Horizontal scaling has distributed-systems costs (coordination, consistency, retries, observability, deployment complexity).
-
-```mermaid
-flowchart LR
-    A[Client traffic] --> B[Service]
-
-    subgraph Vertical scaling
-        B --> C[Bigger single instance]
-        C --> C1[More CPU and RAM]
-        C --> C2[Single node limit]
-    end
-
-    subgraph Horizontal scaling
-        B --> D[Load balancer]
-        D --> E1[Instance 1]
-        D --> E2[Instance 2]
-        D --> E3[Instance N]
-    end
-```
-
-Rule of thumb: vertical first for speed, horizontal next for sustained growth.
+Two fundamental approaches to adding capacity: [[Software Engineering/05 Architecture/Distributed Systems/Scalability Patterns/Vertical Scaling\|Vertical Scaling]] (bigger node) and [[Software Engineering/05 Architecture/Distributed Systems/Scalability Patterns/Horizontal Scaling\|Horizontal Scaling]] (more nodes). Vertical is the fastest first move; horizontal is the long-term strategy for stateless services. See the dedicated pages for mechanisms, tradeoffs, and pitfalls.
 
 ## Core Patterns
 
@@ -190,19 +165,9 @@ Simple production pattern:
 
 > [!note] Whats next
 > **Parent**
->  [[Software Engineering/05 Architecture/05 Architecture\|05 Architecture]]
->
-> **Topics**
-> - [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/Message Queues\|Message Queues]]
+>  [[Software Engineering/05 Architecture/Distributed Systems/Distributed Systems\|Distributed Systems]]
 >
 > **Pages**
-> - [[Software Engineering/05 Architecture/Distributed Systems/API Gateway\|API Gateway]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/CAP theorem\|CAP theorem]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Consistency Models\|Consistency Models]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Distributed Transactions\|Distributed Transactions]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/IaaS, PaaS, SaaS, CaaS\|IaaS, PaaS, SaaS, CaaS]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Load Balancing\|Load Balancing]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Message Queues\|Message Queues]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Observability\|Observability]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/REST\|REST]]
+> - [[Software Engineering/05 Architecture/Distributed Systems/Scalability Patterns/Horizontal Scaling\|Horizontal Scaling]]
+> - [[Software Engineering/05 Architecture/Distributed Systems/Scalability Patterns/Vertical Scaling\|Vertical Scaling]]
 <!-- whats-next:end -->

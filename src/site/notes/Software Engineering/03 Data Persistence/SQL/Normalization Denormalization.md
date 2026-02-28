@@ -5,16 +5,11 @@
 
 # Intro
 
-Normalization is the process of structuring a relational database to eliminate data redundancy and ensure data integrity. It progresses through normal forms (1NF through 6NF), each imposing stricter rules on how attributes depend on keys. The goal is to store each fact exactly once, making updates safer and queries more predictable.
-
-## Deeper Explanation
-
-Normalization is the process of organizing data in a database. It involves creating tables and establishing relationships between them according to rules designed both to protect data and to increase the database's flexibility by eliminating redundancy and inconsistent dependencies.
-Data redundancy leads to wasted disk space and makes database maintenance harder. For example, if data stored in multiple places needs to be changed, the same change must be applied everywhere. Changing a customer's address is easier when that data is stored only in the Customers table and nowhere else in the database.
+Normalization is the process of structuring a relational database to eliminate redundancy and ensure data integrity. It works by decomposing tables so each fact is stored exactly once, which prevents update anomalies: if a customer's address lives in one place, you can't accidentally update it in three rows and miss a fourth. The tradeoff is read performance: fully normalized schemas require joins, and joins cost CPU and I/O. That's why most production OLTP systems stop at 3NF or BCNF. Higher normal forms (4NF, 5NF, 6NF) address increasingly rare anomalies involving multivalued or join dependencies, and the decomposition overhead rarely pays off outside temporal or analytical databases.
 
 ## First Normal Form
 
-A relation is in 1NF if all its attributes are simple and all domains used contain only atomic values. There must be no repeating rows in the table.
+A relation is in 1NF if all its attributes are simple and all domains used contain only atomic values. Each cell must hold a single value, not a list or set (no repeating groups).
 
 For example, consider the "Cars" table:
 
@@ -23,7 +18,7 @@ For example, consider the "Cars" table:
 | Audi | A4, S5, RS6, TT |
 | Infiniti | Q50 |
 
-The 1NF violation occurs for the Audi models because a single cell contains a list of 3 elements: M5, X5M, M1, which is not atomic. Convert the table to 1NF:
+The 1NF violation occurs for the Audi row because a single cell contains a comma-separated list of 4 values: A4, S5, RS6, TT (not atomic). Convert the table to 1NF:
 
 | Make | Models |
 | --- | --- |
@@ -103,7 +98,7 @@ As a result of decomposing the original relation, we get two relations that are 
 
 ## Boyce-Codd Normal Form (BCNF)
 
-(a special case of Third Normal Form)**
+*(A stricter variant of 3NF.)*
 
 The definition of 3NF is not fully suitable for the following relations:
 
@@ -181,17 +176,17 @@ That is, for example, when adding a new pizza type you would need to insert one 
 
 To prevent the anomaly, you need to decompose the relation by placing independent facts into different relations. In this example, you should decompose into {Restaurant, Pizza type} and {Restaurant, Delivery area}.
 
-However, if you add to the original relation variable an attribute that functionally depends on the candidate key, for example a price including delivery cost ({Restaurant, Pizza type, Delivery area} → Price), then the resulting relation will be in 4NF and it can no longer be decomposed losslessly.
+However, if you add an attribute that functionally depends on the full candidate key, for example a delivery-inclusive price ({Restaurant, Pizza type, Delivery area} -> Price), the new attribute does not remove the independent multivalued dependencies. Whether the resulting relation satisfies 4NF depends on whether those MVDs are still non-trivial. In practice, the safe approach is to decompose first (eliminating the MVDs) and add the price-dependent attribute to the appropriate decomposed relation.
 
 ## Fifth Normal Form
 
-Relations are in 5NF if they are in 4NF and there are no complex join dependencies between attributes.
+A relation is in 5NF (also called PJ/NF, Projection-Join Normal Form) if it is in 4NF and every join dependency is implied by its candidate keys. In other words, the relation cannot be losslessly decomposed into smaller projections unless those projections are defined by candidate keys.
 
-If "Attribute_1" depends on "Attribute_2", and "Attribute_2" in turn depends on "Attribute_3", and "Attribute_3" depends on "Attribute_1", then all three attributes must appear in a single tuple.
+The classic example involves three entities: Supplier, Product, and Customer, where the business rule is "a supplier supplies a product to a customer only if the supplier supplies that product AND the supplier serves that customer AND the customer buys that product." This creates a join dependency across three binary relations: {Supplier, Product}, {Supplier, Customer}, and {Product, Customer}. Joining any two of the three produces spurious tuples; only joining all three reconstructs the original valid data. Because this join dependency is not implied by any candidate key, the original three-attribute relation is not in 5NF and must be decomposed into those three binary relations.
 
 This is a very strict requirement that can be satisfied only under additional conditions. In practice, it is difficult to find a clean real-world example of this requirement.
 
-For example, suppose a table has three attributes: "Supplier", "Product", and "Customer". Customer_1 buys several Products from Supplier_1. Customer_1 buys a new Product from Supplier_2. Then, under the requirement described above, Supplier_1 would be forced to supply that same new Product to Customer_1, and Supplier_2 would be forced to supply Customer_1 not only the new Product but also the entire product catalog of Supplier_1. This does not happen in practice. Customers are free to choose products. Therefore, to eliminate this difficulty, all three attributes are split into separate relations (tables). After creating the three new relations (Supplier, Product, and Customer), it is important to remember that when retrieving information (for example, about customers and products), the query must join all three relations. Any combination of joining only two of the three relations will inevitably lead to incorrect results. Some DBMSs provide special mechanisms to prevent retrieving inconsistent data. Nevertheless, the general recommendation is to design the database schema to avoid the need for 4NF and 5NF.
+The decomposition produces three binary relations: `SupplierProduct(Supplier, Product)`, `SupplierCustomer(Supplier, Customer)`, and `ProductCustomer(Product, Customer)`. Joining any two of these produces spurious tuples; only joining all three reconstructs the original valid data. The general recommendation is to design schemas to avoid the need for 4NF and 5NF, as these anomalies are rare in practice.
 
 Fifth Normal Form focuses on join dependencies. Such join dependencies among three attributes are very rare. Join dependencies among four, five, or more attributes are practically impossible to specify.
 
@@ -237,20 +232,61 @@ The "Employees" relation variable is not in 6NF and can be decomposed into the r
 | 6575 | 01-01-2000:10-02-2003 | Lenin St, 10 |
 | 6575 | 11-02-2003:15-06-2006 | Soviet St, 22 |
 
+## Denormalization
+
+Denormalization is the deliberate introduction of redundancy to speed up reads. Where normalization splits data across tables to eliminate duplication, denormalization collapses it back together to avoid expensive joins at query time.
+
+**When to denormalize:** read-heavy workloads where joins dominate query cost, reporting and analytics queries that aggregate large datasets, and cases where latency requirements can't be met by indexes alone.
+
+**Common techniques:**
+- Duplicate a column from a related table to avoid a join (e.g., storing `CustomerName` on the `Orders` table)
+- Pre-compute aggregates and store them as columns
+- Materialized views that cache the result of a complex query
+- Flatten a hierarchy into a single wide table for analytics
+
+**Concrete example:** instead of computing total order value on every request with a JOIN + SUM, store it directly:
+
+```sql
+-- Normalized: computed at read time
+SELECT c.Name, SUM(o.Amount)
+FROM Customers c
+JOIN Orders o ON o.CustomerId = c.Id
+GROUP BY c.Id, c.Name;
+
+-- Denormalized: pre-stored on the Customers table
+SELECT Name, TotalOrderAmount FROM Customers;
+```
+
+The tradeoff is real: reads get faster, but every write to `Orders` must also update `TotalOrderAmount` on `Customers`. Miss one update and the data is inconsistent. Denormalization shifts complexity from reads to writes and requires explicit consistency management.
+
+## Pitfalls
+
+**Over-normalizing** splits data into too many tables, forcing multi-way joins for simple queries. A schema in 5NF or 6NF is theoretically clean but practically painful for OLTP workloads. Most production systems stop at 3NF or BCNF because the anomalies addressed by higher forms are rare enough that the join overhead isn't worth it.
+
+**Under-normalizing** stores the same fact in multiple places. When that fact changes, every copy must be updated atomically. Miss one and you have a data corruption bug. This is the classic update anomaly normalization was designed to prevent.
+
+**Premature denormalization** adds write complexity before you've measured whether reads are actually slow. Profile first. Denormalize only when a specific query is a proven bottleneck and indexes can't fix it. Denormalizing speculatively creates maintenance burden with no guaranteed payoff.
+
 ## Questions
 
-> [!QUESTION]- What is normalization?
-> Normalization is organizing relational data to reduce redundancy and avoid update anomalies by decomposing tables and defining keys/relationships (e.g., 1NF, 2NF, 3NF). The goal is consistency and maintainability, not always maximum read performance.
+> [!QUESTION]- What is normalization and why do most systems stop at 3NF/BCNF?
+> Normalization eliminates redundancy by decomposing tables so each fact is stored once, preventing update anomalies. Most production OLTP systems stop at 3NF or BCNF because higher forms (4NF, 5NF) address rare anomalies (multivalued and join dependencies) at the cost of more tables and more joins. The decomposition overhead rarely pays off outside temporal or analytical databases.
 
-> [!QUESTION]- What is denormalization?
-> Denormalization is intentionally introducing redundancy (e.g., duplicating fields, adding aggregates/materialized views) to speed up reads and simplify queries. It shifts complexity to writes and requires extra care to keep data consistent.
+> [!QUESTION]- When would you denormalize a table, and what risks does it introduce?
+> Denormalize when a read-heavy workload has expensive joins that indexes can't fix: common in reporting, analytics, or high-throughput APIs. Risks: update anomalies (copies get out of sync), data inconsistency if writes don't update all copies atomically, and increased write complexity. Always measure before denormalizing; premature denormalization adds maintenance cost for no proven benefit.
+
+> [!QUESTION]- What is the difference between 2NF and 3NF, and how would you recognize a violation of each?
+> 2NF eliminates partial dependencies: every non-key attribute must depend on the entire composite primary key, not just part of it. A violation looks like a column that depends on only one column of a multi-column PK. 3NF eliminates transitive dependencies: non-key attributes must depend directly on the PK, not through another non-key attribute. A violation looks like column A depending on the PK, column B depending on A (not on the PK directly). Fixing both involves decomposing the offending columns into separate tables.
 
 ## Links
 
-For a deeper and more thorough study of the topic, the book "Introduction to Database Systems" by Chris J. Date is recommended; the materials from that book were used as the basis for this article.
+For a deeper study of the topic, the book ["Introduction to Database Systems" by Chris J. Date](https://www.oreilly.com/library/view/an-introduction-to/9780132874281/) is recommended.
 
 - [Database normalization (Wikipedia)](https://en.wikipedia.org/wiki/Database_normalization)
 - [Denormalization (Wikipedia)](https://en.wikipedia.org/wiki/Denormalization)
+- [Data partitioning strategies - Microsoft Azure Architecture](https://learn.microsoft.com/azure/architecture/best-practices/data-partitioning-strategies)
+- [Designing Data-Intensive Applications - Martin Kleppmann (O'Reilly)](https://www.oreilly.com/library/view/designing-data-intensive-applications/9781491903063/) - covers denormalization, replication, and consistency tradeoffs in production systems
+- [Description of the database normalization basics (Microsoft Learn)](https://learn.microsoft.com/troubleshoot/microsoft-365-apps/access/database-normalization-description)
 
 <!-- whats-next:start -->
 
@@ -262,4 +298,6 @@ For a deeper and more thorough study of the topic, the book "Introduction to Dat
 >
 > **Pages**
 > - [[Software Engineering/03 Data Persistence/SQL/Indexes\|Indexes]]
+> - [[Software Engineering/03 Data Persistence/SQL/Replication\|Replication]]
+> - [[Software Engineering/03 Data Persistence/SQL/Sharding\|Sharding]]
 <!-- whats-next:end -->
