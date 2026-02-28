@@ -388,7 +388,7 @@ Use this for EVERY design question:
 | Message Queue | Async decoupling | [[RabbitMQ]] / [[Kafka]] / Azure Service Bus | Core for webhook pipelines |
 | Cache | Reduce latency + API cost | Redis + `IDistributedCache` | Fast repeat answers, metadata cache |
 | Database | State, config, audit | Postgres/SQL Server | Durable workflow state |
-| Circuit Breaker | Prevent cascading failures | Polly ([[Circut Breaker]]) | Protect LLM/API dependencies |
+| Circuit Breaker | Prevent cascading failures | Polly ([[Circuit Breaker]]) | Protect LLM/API dependencies |
 | Rate Limiter | Quota protection | ASP.NET Core middleware | Cost and reliability control |
 
 ### .NET-Specific Patterns
@@ -1321,4 +1321,4 @@ Present 2-3 decisions as trade-offs:
 ## Vault Cross-Reference Map
 
 > [!note] Quick links to existing vault notes for deeper study
-> [[RAG]] · [[Chunking]] · [[Retrieval]] · [[Re-ranking]] · [[Evaluation]] · [[Query Translation]] · [[Caching]] · [[Monitoring]] · [[Agents]] · [[Tools]] · [[Multi-Agentic Systems]] · [[Mental Framework]] · [[Model Context Protocol]] · [[Hallucinations]] · [[Generation]] · [[LLM]] · [[LLM-as-a-Judge]] · [[CQRS]] · [[Event Sourcing]] · [[Event-Driven Architecture]] · [[Microservices]] · [[Message Queues]] · [[Kafka]] · [[RabbitMQ]] · [[CAP theorem]] · [[Circut Breaker]] · [[REST]] · [[gRPC]]
+> [[RAG]] · [[Chunking]] · [[Retrieval]] · [[Re-ranking]] · [[Evaluation]] · [[Query Translation]] · [[Caching]] · [[Monitoring]] · [[Agents]] · [[Tools]] · [[Multi-Agentic Systems]] · [[Mental Framework]] · [[Model Context Protocol]] · [[Hallucinations]] · [[Generation]] · [[LLM]] · [[LLM-as-a-Judge]] · [[CQRS]] · [[Event Sourcing]] · [[Event-Driven Architecture]] · [[Microservices]] · [[Message Queues]] · [[Kafka]] · [[RabbitMQ]] · [[CAP theorem]] · [[Circuit Breaker]] · [[REST]] · [[gRPC]]

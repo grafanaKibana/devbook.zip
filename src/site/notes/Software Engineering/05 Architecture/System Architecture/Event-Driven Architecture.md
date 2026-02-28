@@ -1,22 +1,14 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Patterns
-level:
-  - "2"
-priority: High
-status: Ready To Repeat
-
-dg-publish: true
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/system-architecture/event-driven-architecture/","noteIcon":"3"}
 ---
+
 # Intro
 
 Event-Driven Architecture (EDA) is a style where services communicate by publishing and consuming events instead of calling each other directly through synchronous APIs. The core idea is that a producer emits a fact (`OrderPlaced`, `PaymentFailed`, `InventoryReserved`) and does not need to know who reacts to it. This matters because it reduces runtime coupling, allows services to scale independently, and improves resilience when one downstream component is temporarily unavailable. You reach for EDA when workflows cross service boundaries, when processing can be asynchronous, and when you specifically need durable retained events for audit or replay.
 
 In interview terms: EDA is not "just using a queue". It is a contract-driven communication model where events represent state changes, subscribers own their reaction logic, and consistency is typically eventual rather than immediate.
 
-For related foundations, connect this page with [[Software Engineering/05 Architecture/Distributed Systems/Message Queues|Message Queues]], [[RabbitMQ]], and [[Kafka]].
+For related foundations, connect this page with [[Software Engineering/05 Architecture/Distributed Systems/Message Queues\|Message Queues]], [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/RabbitMQ\|RabbitMQ]], and [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/Kafka\|Kafka]].
 
 ## Core Concepts
 
@@ -279,17 +271,17 @@ Production note: pair publish with the transactional outbox pattern to avoid "DB
 
 > [!note] Whats next
 > **Parent**
->  [[Software Engineering/05 Architecture/05 Architecture|05 Architecture]]
+>  [[Software Engineering/05 Architecture/05 Architecture\|05 Architecture]]
 >
 > **Pages**
-> - [[Software Engineering/05 Architecture/Patterns/Circut Breaker|Circut Breaker]]
-> - [[Software Engineering/05 Architecture/Patterns/CQRS|CQRS]]
-> - [[Software Engineering/05 Architecture/Patterns/CQS|CQS]]
-> - [[Software Engineering/05 Architecture/Patterns/Dependency Injection|Dependency Injection]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns|Design Patterns]]
-> - [[Software Engineering/05 Architecture/Patterns/Domain-Driven Development|Domain-Driven Development]]
-> - [[Software Engineering/05 Architecture/Patterns/Event Sourcing|Event Sourcing]]
-> - [[Software Engineering/05 Architecture/Patterns/GRASP|GRASP]]
-> - [[Software Engineering/05 Architecture/Patterns/Rate Limiting|Rate Limiting]]
-> - [[Software Engineering/05 Architecture/Patterns/Repository & UoW|Repository & UoW]]
+> - [[Software Engineering/05 Architecture/Patterns/Circut Breaker\|Circut Breaker]]
+> - [[Software Engineering/05 Architecture/Patterns/CQRS\|CQRS]]
+> - [[Software Engineering/05 Architecture/Patterns/CQS\|CQS]]
+> - [[Software Engineering/05 Architecture/Patterns/Dependency Injection\|Dependency Injection]]
+> - [[Software Engineering/05 Architecture/Patterns/Design Patterns\|Design Patterns]]
+> - [[Software Engineering/05 Architecture/Patterns/Domain-Driven Development\|Domain-Driven Development]]
+> - [[Software Engineering/05 Architecture/Patterns/Event Sourcing\|Event Sourcing]]
+> - [[Software Engineering/05 Architecture/Patterns/GRASP\|GRASP]]
+> - [[Software Engineering/05 Architecture/Patterns/Rate Limiting\|Rate Limiting]]
+> - [[Software Engineering/05 Architecture/Patterns/Repository & UoW\|Repository & UoW]]
 <!-- whats-next:end -->
