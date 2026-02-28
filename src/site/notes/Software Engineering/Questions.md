@@ -1,9 +1,9 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/questions/","tags":["FolderNote","MetricsIgnore"],"noteIcon":"1"}
+{"dg-publish":true,"permalink":"/software-engineering/questions/","tags":["FolderNote","MetricsIgnore"],"noteIcon":"3"}
 ---
 
 
-<h1><span>Table of Contents</span></h1><h2><span>Total questions: <strong>391</strong></span></h2><p><span><ul>
+<h1><span>Table of Contents</span></h1><h2><span>Total questions: <strong>416</strong></span></h2><p><span><ul>
 <li dir="auto"><strong><a class="internal-link" data-href="#01-programming" href="#01-programming" target="_blank" rel="noopener nofollow">01 Programming</a></strong> (114)
 <ul>
 <li dir="auto"><a class="internal-link" data-href="#01-programming-net" href="#01-programming-net" target="_blank" rel="noopener nofollow">NET</a> (114)</li>
@@ -29,12 +29,12 @@
 <li dir="auto"><a class="internal-link" data-href="#04-networks-transport-sockets" href="#04-networks-transport-sockets" target="_blank" rel="noopener nofollow">Transport &amp; Sockets</a> (3)</li>
 </ul>
 </li>
-<li dir="auto"><strong><a class="internal-link" data-href="#05-architecture" href="#05-architecture" target="_blank" rel="noopener nofollow">05 Architecture</a></strong> (18)
+<li dir="auto"><strong><a class="internal-link" data-href="#05-architecture" href="#05-architecture" target="_blank" rel="noopener nofollow">05 Architecture</a></strong> (43)
 <ul>
 <li dir="auto"><a class="internal-link" data-href="#05-architecture-application-architecture" href="#05-architecture-application-architecture" target="_blank" rel="noopener nofollow">Application Architecture</a> (3)</li>
-<li dir="auto"><a class="internal-link" data-href="#05-architecture-architecture-styles" href="#05-architecture-architecture-styles" target="_blank" rel="noopener nofollow">Architecture Styles</a> (3)</li>
-<li dir="auto"><a class="internal-link" data-href="#05-architecture-distributed-systems" href="#05-architecture-distributed-systems" target="_blank" rel="noopener nofollow">Distributed Systems</a> (3)</li>
-<li dir="auto"><a class="internal-link" data-href="#05-architecture-patterns" href="#05-architecture-patterns" target="_blank" rel="noopener nofollow">Patterns</a> (9)</li>
+<li dir="auto"><a class="internal-link" data-href="#05-architecture-architecture-styles" href="#05-architecture-architecture-styles" target="_blank" rel="noopener nofollow">Architecture Styles</a> (5)</li>
+<li dir="auto"><a class="internal-link" data-href="#05-architecture-distributed-systems" href="#05-architecture-distributed-systems" target="_blank" rel="noopener nofollow">Distributed Systems</a> (21)</li>
+<li dir="auto"><a class="internal-link" data-href="#05-architecture-patterns" href="#05-architecture-patterns" target="_blank" rel="noopener nofollow">Patterns</a> (14)</li>
 </ul>
 </li>
 <li dir="auto"><strong><a class="internal-link" data-href="#06-development-practices" href="#06-development-practices" target="_blank" rel="noopener nofollow">06 Development Practices</a></strong> (19)
@@ -1136,15 +1136,33 @@ The application can decide what to do on loss.<br>
 </div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">What is MVC and why is it used?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
 <p dir="auto">MVC stands for Model-View-Controller. The Model represents the domain/data and business rules, the View is the UI (rendering), and the Controller handles incoming input/requests, coordinates work, and selects the response/view. The separation helps keep UI concerns out of business logic and makes the system easier to test and evolve.<br>
 <em><a class="internal-link" data-href="Software Engineering/05 Architecture/Application Architecture/MVC MVVM.md" href="Software Engineering/05 Architecture/Application Architecture/MVC MVVM.md" target="_blank" rel="noopener nofollow">MVC MVVM</a></em></p>
-</div></div></div><h2 id="05-architecture-architecture-styles">Architecture Styles</h2><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">Microservices vs monolith: what is the difference and when should you choose which?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
-<p dir="auto">A monolith is a single deployable unit (often with one codebase and one process). Microservices split the system into multiple deployable services with their own boundaries and often their own data.</p>
-<p dir="auto">Typical trade-offs:</p>
+</div></div></div><h2 id="05-architecture-architecture-styles">Architecture Styles</h2><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">Why can microservices lead to distributed data consistency problems, and how do you address them?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
 <ul>
-<li dir="auto">Microservices: independent deployments and scaling, but higher operational complexity (service discovery, observability, <a data-tooltip-position="top" aria-label="Distributed Transactions" data-href="Distributed Transactions" href="Distributed Transactions" class="internal-link" target="_blank" rel="noopener nofollow">distributed transactions</a>, versioning, testing).</li>
-<li dir="auto">Monolith: simpler operations and consistency, but can become hard to evolve if it is not modular.</li>
+<li dir="auto">Each service owns its data, so cross-service business actions cannot rely on one ACID transaction.</li>
+<li dir="auto">A later step can fail after an earlier local commit, producing partial state.</li>
+<li dir="auto">Use sagas with compensating actions across local transactions.</li>
+<li dir="auto">Use outbox/inbox and idempotent handlers to survive retries and duplicates.</li>
+<li dir="auto">Accept eventual consistency and make process state observable.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Architecture Styles/Microservices.md" href="Software Engineering/05 Architecture/Architecture Styles/Microservices.md" target="_blank" rel="noopener nofollow">Microservices</a></em></li>
 </ul>
-<p dir="auto">A common path is to start with a modular monolith and extract services when there is a clear boundary and a real need.<br>
-<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Architecture Styles/Microservices.md" href="Software Engineering/05 Architecture/Architecture Styles/Microservices.md" target="_blank" rel="noopener nofollow">Microservices</a></em></p>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">Order and Inventory are separate microservices. A customer places an order. How do you ensure inventory is reserved without a distributed transaction?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<ul>
+<li dir="auto">Persist order as <code>Pending</code> and publish <code>OrderPlaced</code> via outbox in the same local transaction.</li>
+<li dir="auto">Inventory consumes <code>OrderPlaced</code> and emits <code>InventoryReserved</code> or <code>InventoryRejected</code>.</li>
+<li dir="auto">Order transitions to <code>Confirmed</code> or <code>Rejected</code> based on the inventory event.</li>
+<li dir="auto">Keep consumers idempotent by tracking processed message IDs.</li>
+<li dir="auto">Add timeout compensation if inventory does not respond within SLA.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Architecture Styles/Microservices.md" href="Software Engineering/05 Architecture/Architecture Styles/Microservices.md" target="_blank" rel="noopener nofollow">Microservices</a></em></li>
+</ul>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">How do you decide between monolith, modular monolith, and microservices for a new product?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<ul>
+<li dir="auto">Decide from team size, release pressure, domain volatility, and ops maturity.</li>
+<li dir="auto">One team in discovery phase usually benefits most from monolith speed.</li>
+<li dir="auto">Clear domains with limited platform capacity often fit modular monolith.</li>
+<li dir="auto">Choose microservices when independent deploy/scale constraints are proven.</li>
+<li dir="auto">Re-evaluate architecture periodically as constraints change.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Architecture Styles/Microservices.md" href="Software Engineering/05 Architecture/Architecture Styles/Microservices.md" target="_blank" rel="noopener nofollow">Microservices</a></em></li>
+</ul>
 </div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">What is a modular monolith?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
 <p dir="auto">A monolith with explicit module boundaries, clear dependencies, and internal APIs.<br>
 It preserves operational simplicity while controlling coupling.<br>
@@ -1152,64 +1170,227 @@ It preserves operational simplicity while controlling coupling.<br>
 </div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">When do microservices become justified?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
 <p dir="auto">When independent deployment is a hard requirement and the team can support the operational complexity.<br>
 <em><a class="internal-link" data-href="Software Engineering/05 Architecture/Architecture Styles/Monolith Architecture.md" href="Software Engineering/05 Architecture/Architecture Styles/Monolith Architecture.md" target="_blank" rel="noopener nofollow">Monolith Architecture</a></em></p>
-</div></div></div><h2 id="05-architecture-distributed-systems">Distributed Systems</h2><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">What does REST mean?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
-<p dir="auto">REST (Representational State Transfer) is an architectural style for <a data-tooltip-position="top" aria-label="Distributed Systems" data-href="Distributed Systems" href="Distributed Systems" class="internal-link" target="_blank" rel="noopener nofollow">distributed systems</a>.<br>
-Key ideas: resources identified by URIs, stateless requests, cacheable responses, a uniform interface, layered system, and optional code-on-demand.<br>
-In practice, RESTful APIs model domain objects as resources and use HTTP methods with consistent semantics.<br>
-<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Distributed Systems/REST.md" href="Software Engineering/05 Architecture/Distributed Systems/REST.md" target="_blank" rel="noopener nofollow">REST</a></em></p>
-</div></div></div><h3>Message Queues</h3><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">What is Kafka?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
-<p dir="auto">Apache Kafka is a distributed event streaming platform built around an append-only log (topics/partitions) and consumer groups.<br>
-<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Distributed Systems/Message Queues/Kafka.md" href="Software Engineering/05 Architecture/Distributed Systems/Message Queues/Kafka.md" target="_blank" rel="noopener nofollow">Kafka</a></em></p>
-</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">When should MSMQ be used today?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+</div></div></div><h2 id="05-architecture-distributed-systems">Distributed Systems</h2><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">A client sends <code>POST /api/orders</code>, times out, and retries. How do you prevent duplicate orders?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<p dir="auto"><strong>Expected answer:</strong></p>
+<ul>
+<li dir="auto">Require an <code>Idempotency-Key</code> header for create operations.</li>
+<li dir="auto">Persist key + request hash + resulting order ID with TTL.</li>
+<li dir="auto">On retry with same key and same payload, return the original result (<code>201</code> or <code>200</code>) instead of creating a new order.</li>
+<li dir="auto">On same key with different payload, reject with <code>409 Conflict</code>.<br>
+<strong>Why this matters:</strong> demonstrates reliability under partial failure and correct non-idempotent write handling.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Distributed Systems/REST.md" href="Software Engineering/05 Architecture/Distributed Systems/REST.md" target="_blank" rel="noopener nofollow">REST</a></em></li>
+</ul>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">Explain <code>PUT</code> vs <code>PATCH</code> semantics and retry behavior.</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<p dir="auto"><strong>Expected answer:</strong></p>
+<ul>
+<li dir="auto"><code>PUT</code> replaces the target resource representation; repeated identical calls are idempotent.</li>
+<li dir="auto"><code>PATCH</code> applies partial updates; idempotency depends on patch format and operation semantics.</li>
+<li dir="auto">Clients can safely auto-retry idempotent requests when network failures are ambiguous.</li>
+<li dir="auto">Servers should document patch media type and conflict rules (<code>409</code>/<code>422</code>).<br>
+<strong>Why this matters:</strong> tests precise HTTP semantics and failure-mode reasoning.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Distributed Systems/REST.md" href="Software Engineering/05 Architecture/Distributed Systems/REST.md" target="_blank" rel="noopener nofollow">REST</a></em></li>
+</ul>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">Why do many teams stop at Richardson Level 2 instead of Level 3 HATEOAS?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<p dir="auto"><strong>Expected answer:</strong></p>
+<ul>
+<li dir="auto">Level 2 already provides major REST benefits: resource URIs, verb semantics, status codes, cacheability.</li>
+<li dir="auto">Level 3 requires hypermedia-aware clients, link relation design discipline, and tooling investment.</li>
+<li dir="auto">In closed ecosystems, clients often already know workflows, reducing HATEOAS payoff.</li>
+<li dir="auto">Level 3 is valuable when runtime discoverability and loose client coupling are strategic requirements.<br>
+<strong>Why this matters:</strong> shows tradeoff thinking rather than dogmatic purity.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Distributed Systems/REST.md" href="Software Engineering/05 Architecture/Distributed Systems/REST.md" target="_blank" rel="noopener nofollow">REST</a></em></li>
+</ul>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">How do you design gateway aggregation endpoints for client efficiency, and what do you explicitly keep out of the gateway?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<p dir="auto"><strong>Expected answer:</strong></p>
+<ul>
+<li dir="auto">Use gateway routing plus targeted aggregation endpoints for mobile-specific read models.</li>
+<li dir="auto">Keep gateway concerns to auth, throttling, routing, transformation, and observability.</li>
+<li dir="auto">Keep business rules, transactions, and domain invariants inside backend services.</li>
+<li dir="auto">Add correlation IDs and tracing across fan-out calls.<br>
+<strong>Why this matters:</strong> This tests whether you can design for client efficiency without turning the gateway into a distributed monolith.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Distributed Systems/API Gateway.md" href="Software Engineering/05 Architecture/Distributed Systems/API Gateway.md" target="_blank" rel="noopener nofollow">API Gateway</a></em></li>
+</ul>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">When would you choose a single API gateway versus a BFF approach?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<p dir="auto"><strong>Expected answer:</strong></p>
+<ul>
+<li dir="auto">Choose a single gateway for simpler systems with similar client needs and shared release cadence.</li>
+<li dir="auto">Choose BFF when web/mobile/partner clients have materially different payload, auth, or latency profiles.</li>
+<li dir="auto">Consider team ownership boundaries and deployment autonomy.</li>
+<li dir="auto">Evaluate operational cost versus client performance and change isolation.<br>
+<strong>Why this matters:</strong> This reveals whether you can apply tradeoffs, not just name patterns.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Distributed Systems/API Gateway.md" href="Software Engineering/05 Architecture/Distributed Systems/API Gateway.md" target="_blank" rel="noopener nofollow">API Gateway</a></em></li>
+</ul>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">Explain API Gateway vs Service Mesh in one architecture and where each policy belongs.</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<p dir="auto"><strong>Expected answer:</strong></p>
+<ul>
+<li dir="auto">Gateway owns north-south concerns: edge auth, TLS termination, external rate limits, API surface control.</li>
+<li dir="auto">Mesh owns east-west concerns: mTLS, retries, traffic policy, and internal telemetry.</li>
+<li dir="auto">They complement each other rather than compete.<br>
+<strong>Why this matters:</strong> Interviewers want clear boundary thinking for platform design decisions.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Distributed Systems/API Gateway.md" href="Software Engineering/05 Architecture/Distributed Systems/API Gateway.md" target="_blank" rel="noopener nofollow">API Gateway</a></em></li>
+</ul>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">How do you guarantee read-your-writes when writes go to a strongly consistent store but reads come from an eventually consistent cache?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<p dir="auto"><strong>Expected answer</strong></p>
+<ul>
+<li dir="auto">Route post-write reads to strong/session-consistent paths for that user.</li>
+<li dir="auto">Invalidate or write-through cache on update.</li>
+<li dir="auto">Include version/timestamp and reject stale follow-up writes.</li>
+<li dir="auto">Keep write operations idempotent.<br>
+<strong>Why this matters:</strong> tests whether you can combine storage and cache guarantees without breaking read-after-write UX.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Distributed Systems/Consistency Models.md" href="Software Engineering/05 Architecture/Distributed Systems/Consistency Models.md" target="_blank" rel="noopener nofollow">Consistency Models</a></em></li>
+</ul>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">Which chat features should use linearizable, causal, and eventual consistency, and why?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<p dir="auto"><strong>Expected answer</strong></p>
+<ul>
+<li dir="auto">Message ordering/reply chains usually need at least causal consistency.</li>
+<li dir="auto">Typing indicators can be eventual.</li>
+<li dir="auto">Compliance-sensitive receipt semantics may justify stronger guarantees.</li>
+<li dir="auto">Pick by user-visible correctness risk vs latency cost.<br>
+<strong>Why this matters:</strong> tests whether you can map business semantics to the minimum safe consistency level.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Distributed Systems/Consistency Models.md" href="Software Engineering/05 Architecture/Distributed Systems/Consistency Models.md" target="_blank" rel="noopener nofollow">Consistency Models</a></em></li>
+</ul>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">Why can linearizability reduce availability during a network partition, and how do you reduce blast radius in design?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<p dir="auto"><strong>Expected answer</strong></p>
+<ul>
+<li dir="auto">Linearizable paths need coordination/quorum that partitions can block.</li>
+<li dir="auto">System must reject or delay some operations to avoid conflicting truths.</li>
+<li dir="auto">Scope strong consistency to critical writes only.</li>
+<li dir="auto">Serve non-critical reads with weaker models and explicit degraded-mode behavior.<br>
+<strong>Why this matters:</strong> tests CAP tradeoff reasoning and your ability to design graceful degradation boundaries.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Distributed Systems/Consistency Models.md" href="Software Engineering/05 Architecture/Distributed Systems/Consistency Models.md" target="_blank" rel="noopener nofollow">Consistency Models</a></em></li>
+</ul>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">How do you diagnose an intermittent p95 or p99 latency bottleneck in a multi-service system?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<ul>
+<li dir="auto">Start from traces to find which span dominates p95/p99 latency on slow requests.</li>
+<li dir="auto">Correlate with RED metrics per service to confirm whether latency is isolated or systemic.</li>
+<li dir="auto">Check dependency spans (DB, cache, external API) to identify downstream propagation.</li>
+<li dir="auto">Use structured logs with the same trace ID to validate edge-case payloads or retries.</li>
+<li dir="auto">Why this answer is strong: it uses all three pillars together instead of guessing from one dashboard.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Distributed Systems/Observability.md" href="Software Engineering/05 Architecture/Distributed Systems/Observability.md" target="_blank" rel="noopener nofollow">Observability</a></em></li>
+</ul>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">When should you use RED vs USE in a distributed system interview design?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<ul>
+<li dir="auto">Use RED for customer-facing service endpoints and request pipelines.</li>
+<li dir="auto">Use USE for underlying resources such as CPU, thread pools, queue depth, and DB connections.</li>
+<li dir="auto">Combine both: RED shows symptom at service boundary; USE explains pressure source beneath it.</li>
+<li dir="auto">Why this answer is strong: it separates service health from resource health and links them causally.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Distributed Systems/Observability.md" href="Software Engineering/05 Architecture/Distributed Systems/Observability.md" target="_blank" rel="noopener nofollow">Observability</a></em></li>
+</ul>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">Why instrument with OpenTelemetry from day one instead of adding observability later?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<ul>
+<li dir="auto">Early instrumentation bakes telemetry into contracts and code paths before scale complexity appears.</li>
+<li dir="auto">Retrofitting often misses historical baselines and requires invasive code changes across many services.</li>
+<li dir="auto">Vendor-neutral instrumentation preserves backend flexibility as platform needs evolve.</li>
+<li dir="auto">Why this answer is strong: it explains operational risk, engineering cost, and architecture flexibility.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Distributed Systems/Observability.md" href="Software Engineering/05 Architecture/Distributed Systems/Observability.md" target="_blank" rel="noopener nofollow">Observability</a></em></li>
+</ul>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">Your AI service has four instances behind an L7 gateway with passive outlier detection enabled. One instance returns HTTP 500 on about 30 percent of requests. How does the LB detect and handle this?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<p dir="auto"><strong>Expected answer</strong></p>
+<ul>
+<li dir="auto">Use active probes with failure thresholds and passive error observation from live traffic.</li>
+<li dir="auto">Mark the instance unhealthy after threshold breach and remove it from new routing.</li>
+<li dir="auto">Keep it out until it meets consecutive-success recovery checks.</li>
+<li dir="auto">If ingress is L4 or passive outlier detection is unavailable, rely on active checks plus retry and circuit-breaker policies in clients or gateways.</li>
+<li dir="auto">Add retries and circuit breakers at the caller or gateway for graceful degradation.<br>
+<strong>Why this question matters</strong></li>
+<li dir="auto">It tests production failure handling, not just basic definition knowledge.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Distributed Systems/Load Balancing.md" href="Software Engineering/05 Architecture/Distributed Systems/Load Balancing.md" target="_blank" rel="noopener nofollow">Load Balancing</a></em></li>
+</ul>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">When is Azure Load Balancer the better choice than Azure Application Gateway for an ASP.NET Core workload?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<p dir="auto"><strong>Expected answer</strong></p>
+<ul>
+<li dir="auto">Azure Load Balancer when L4 TCP or UDP distribution is enough and minimal overhead is preferred.</li>
+<li dir="auto">Azure Application Gateway when L7 HTTP capabilities are needed, such as path routing, WAF, and rich TLS controls.</li>
+<li dir="auto">Mention that Kestrel typically sits behind one of these ingress layers.<br>
+<strong>Why this question matters</strong></li>
+<li dir="auto">It validates whether the candidate can map requirements to concrete cloud services.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Distributed Systems/Load Balancing.md" href="Software Engineering/05 Architecture/Distributed Systems/Load Balancing.md" target="_blank" rel="noopener nofollow">Load Balancing</a></em></li>
+</ul>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">Why can sticky sessions hurt autoscaling outcomes, and what architecture is safer?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<p dir="auto"><strong>Expected answer</strong></p>
+<ul>
+<li dir="auto">Sticky sessions create uneven distribution and reduce failover quality.</li>
+<li dir="auto">Scale-out does not fully rebalance existing pinned clients.</li>
+<li dir="auto">Safer architecture is stateless service instances plus shared session state in Redis or a database.<br>
+<strong>Why this question matters</strong></li>
+<li dir="auto">It checks practical judgment about reliability and elasticity tradeoffs.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Distributed Systems/Load Balancing.md" href="Software Engineering/05 Architecture/Distributed Systems/Load Balancing.md" target="_blank" rel="noopener nofollow">Load Balancing</a></em></li>
+</ul>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">Your system handles 1,000 RPS today. Product wants 10x. How do you decide what to scale first?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<p dir="auto"><strong>Expected answer:</strong></p>
+<ul>
+<li dir="auto">Start with bottleneck identification using telemetry (CPU, DB waits, p95 latency, queue depth, external dependency latency).</li>
+<li dir="auto">Separate read path and write path capacity constraints.</li>
+<li dir="auto">Apply highest-ROI pattern first (cache or read replicas for reads, queue for bursty async work, horizontal app scale for compute).</li>
+<li dir="auto">Re-measure after each change to avoid solving a bottleneck that moved.</li>
+<li dir="auto">Explicitly discuss reliability and cost impact, not just throughput.<br>
+<strong>Why this is strong:</strong> It shows methodical scaling based on evidence, not guesswork.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Distributed Systems/Scalability Patterns.md" href="Software Engineering/05 Architecture/Distributed Systems/Scalability Patterns.md" target="_blank" rel="noopener nofollow">Scalability Patterns</a></em></li>
+</ul>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">When would you choose read replicas instead of CQRS for a scaling problem?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<p dir="auto"><strong>Expected answer:</strong></p>
+<ul>
+<li dir="auto">Choose read replicas when main pressure is read throughput on an existing relational model.</li>
+<li dir="auto">Choose CQRS when read/write models diverge and read projections need different shape or storage.</li>
+<li dir="auto">Mention consistency behavior: replicas have lag; CQRS read models are eventually consistent by design.</li>
+<li dir="auto">Mention complexity: replicas are simpler operationally than full CQRS/event projection pipelines.<br>
+<strong>Why this is strong:</strong> It balances architecture fit, consistency, and operational cost.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Distributed Systems/Scalability Patterns.md" href="Software Engineering/05 Architecture/Distributed Systems/Scalability Patterns.md" target="_blank" rel="noopener nofollow">Scalability Patterns</a></em></li>
+</ul>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">Why can horizontal scaling fail even when you add many app instances?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<p dir="auto"><strong>Expected answer:</strong></p>
+<ul>
+<li dir="auto">Service may still hold state locally (sessions, in-memory cache).</li>
+<li dir="auto">Shared dependencies can become the new choke point (database, third-party API, message broker).</li>
+<li dir="auto">Connection pools or thread pools can saturate before CPU does.</li>
+<li dir="auto">Load balancer distribution may be uneven because of sticky sessions or slow instances.</li>
+<li dir="auto">Without idempotent retries and backpressure, failures amplify under load.<br>
+<strong>Why this is strong:</strong> It demonstrates distributed-systems failure awareness beyond compute scaling.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Distributed Systems/Scalability Patterns.md" href="Software Engineering/05 Architecture/Distributed Systems/Scalability Patterns.md" target="_blank" rel="noopener nofollow">Scalability Patterns</a></em></li>
+</ul>
+</div></div></div><h3>Message Queues</h3><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">When should MSMQ be used today?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
 <p dir="auto">Mostly in legacy/on-prem Windows environments where MSMQ is already part of the system. For new systems, prefer actively supported managed brokers/queues appropriate for your platform and operational model.<br>
 <em><a class="internal-link" data-href="Software Engineering/05 Architecture/Distributed Systems/Message Queues/MSMQ.md" href="Software Engineering/05 Architecture/Distributed Systems/Message Queues/MSMQ.md" target="_blank" rel="noopener nofollow">MSMQ</a></em></p>
-</div></div></div><h2 id="05-architecture-patterns">Patterns</h2><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">What is CQRS?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
-<p dir="auto">CQRS (Command Query Responsibility Segregation) separates the model used for writes (commands that change state) from the model used for reads (queries that return data). This can simplify complex domains and enable different scaling/optimization strategies for reads vs writes. It adds complexity (more moving parts, eventual consistency when using separate read stores), so it is usually applied where the benefits justify the cost.<br>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">You need to process order events in order per customer but handle 50K events per second. How do you design the Kafka topic?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<p dir="auto"><strong>Expected answer:</strong></p>
+<ul>
+<li dir="auto">Use <code>customer_id</code> as partition key so each customer stream stays ordered.</li>
+<li dir="auto">Provision enough partitions for parallelism based on measured per-partition consumer throughput and latency targets.</li>
+<li dir="auto">Scale consumer group instances up to partition count.</li>
+<li dir="auto">Monitor hot partitions and lag; if one customer dominates, consider composite key strategy.</li>
+<li dir="auto">Keep consumers idempotent because retries and reprocessing can still happen.</li>
+</ul>
+<p dir="auto"><strong>Why this question matters:</strong> it checks whether the candidate can balance ordering guarantees and horizontal scalability.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Distributed Systems/Message Queues/Kafka.md" href="Software Engineering/05 Architecture/Distributed Systems/Message Queues/Kafka.md" target="_blank" rel="noopener nofollow">Kafka</a></em></p>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">Compare at-most-once, at-least-once, and exactly-once in Kafka. Which do you choose for payment events and why?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<p dir="auto"><strong>Expected answer:</strong></p>
+<ul>
+<li dir="auto">At-most-once risks loss and is rarely valid for payments.</li>
+<li dir="auto">At-least-once is common if handlers are idempotent and duplicates are acceptable.</li>
+<li dir="auto">Exactly-once requires transactions and idempotent producer flow, with added latency and complexity.</li>
+<li dir="auto">For payment events, choose at-least-once plus strict idempotency or exactly-once when duplicate side effects are too costly.</li>
+</ul>
+<p dir="auto"><strong>Why this question matters:</strong> it tests tradeoff judgment under reliability constraints.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Distributed Systems/Message Queues/Kafka.md" href="Software Engineering/05 Architecture/Distributed Systems/Message Queues/Kafka.md" target="_blank" rel="noopener nofollow">Kafka</a></em></p>
+</div></div></div><h2 id="05-architecture-patterns">Patterns</h2><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">When is CQRS worth the operational complexity, and when is it an anti-pattern?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<p dir="auto"><strong>Expected answer:</strong> CQRS is justified when read/write workloads differ materially (high read ratio, complex query shapes, independent scaling needs) and the domain has meaningful invariants. It is usually an anti-pattern for simple CRUD with low scale pressure, because projection pipelines, eventual consistency handling, and dual-model maintenance add avoidable complexity.<br>
+[!QUESTION]- Your dashboard queries are slow because the normalized write model needs 5 JOINs. How does CQRS help, and what is the cost?<br>
+<strong>Expected answer:</strong> CQRS allows a denormalized read model built for that dashboard (for example, a pre-joined projection table), which removes expensive runtime joins and improves latency. The cost is projection infrastructure, eventual consistency, duplicate data, and extra operational work (retries, idempotency, lag monitoring). The key interview point is to justify CQRS only if latency/scaling gains outweigh this complexity.<br>
+[!QUESTION]- Does adopting CQRS mean you must adopt Event Sourcing?<br>
+<strong>Expected answer:</strong> No. CQRS is a responsibility split between command and query paths; Event Sourcing is a persistence strategy where events are the source of truth. They fit well together because events project naturally to read models, but CQRS can run on regular state-based persistence (for example, EF Core tables) with or without event publication.<br>
 <em><a class="internal-link" data-href="Software Engineering/05 Architecture/Patterns/CQRS.md" href="Software Engineering/05 Architecture/Patterns/CQRS.md" target="_blank" rel="noopener nofollow">CQRS</a></em></p>
-</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">What is the difference between <code>services.AddTransient</code>, <code>services.AddScoped</code>, and <code>services.AddSingleton</code> in ASP.NET Core DI?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
-<p dir="auto">These methods define the service lifetime:</p>
-<ul>
-<li dir="auto"><code>Transient</code>: a new instance is created every time the service is requested.</li>
-<li dir="auto"><code>Scoped</code>: one instance is created per scope (in web apps, typically per HTTP request).</li>
-<li dir="auto"><code>Singleton</code>: one instance is created for the entire application lifetime (the root container).</li>
-</ul>
-<p dir="auto">Common pitfalls: singletons must be thread-safe; do not inject scoped services into singletons (it effectively becomes a captive dependency); <code>DbContext</code> is typically registered as scoped.</p>
-<pre class="language-csharp"><code class="language-csharp is-loaded">services<span class="token punctuation">.</span><span class="token generic-method"><span class="token function">AddTransient</span><span class="token generic class-name"><span class="token punctuation">&lt;</span>IMailer<span class="token punctuation">,</span> SmtpMailer<span class="token punctuation">&gt;</span></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-services<span class="token punctuation">.</span><span class="token generic-method"><span class="token function">AddScoped</span><span class="token generic class-name"><span class="token punctuation">&lt;</span>AppDbContext<span class="token punctuation">&gt;</span></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-services<span class="token punctuation">.</span><span class="token generic-method"><span class="token function">AddSingleton</span><span class="token generic class-name"><span class="token punctuation">&lt;</span>IClock<span class="token punctuation">,</span> SystemClock<span class="token punctuation">&gt;</span></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-</code><button class="copy-code-button"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-copy"><rect x="8" y="8" width="14" height="14" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg></button></pre>
-<p dir="auto"><em><a class="internal-link" data-href="Software Engineering/05 Architecture/Patterns/Dependency Injection.md" href="Software Engineering/05 Architecture/Patterns/Dependency Injection.md" target="_blank" rel="noopener nofollow">Dependency Injection</a></em></p>
-</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">What are design patterns and why do we need them?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
-<p dir="auto">Design patterns are proven, repeatable approaches to common design problems (not copy-paste code). They help you communicate intent, reduce accidental complexity, and improve maintainability by encouraging good separation of concerns and loose coupling.<br>
-<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Patterns/Design Patterns.md" href="Software Engineering/05 Architecture/Patterns/Design Patterns.md" target="_blank" rel="noopener nofollow">Design Patterns</a></em></p>
-</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">What categories of patterns exist?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
-<p dir="auto">For GoF design patterns, the classic categories are:</p>
-<ul>
-<li dir="auto">Creational: object creation (how instances are constructed)</li>
-<li dir="auto">Structural: object composition (how classes/objects are arranged)</li>
-<li dir="auto">Behavioral: object interaction (how responsibilities and communication are organized)<br>
-<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Patterns/Design Patterns.md" href="Software Engineering/05 Architecture/Patterns/Design Patterns.md" target="_blank" rel="noopener nofollow">Design Patterns</a></em></li>
-</ul>
-</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">What is an anti-pattern?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
-<p dir="auto">An anti-pattern is a common, recurring solution to a problem that looks reasonable at first but leads to negative consequences (for example, high coupling, poor testability, or performance issues).<br>
-<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Patterns/Design Patterns.md" href="Software Engineering/05 Architecture/Patterns/Design Patterns.md" target="_blank" rel="noopener nofollow">Design Patterns</a></em></p>
-</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">Name a few patterns from each category and the basic idea behind them.</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
-<p dir="auto">Creational:</p>
-<ul>
-<li dir="auto">Factory Method: delegate creation to subclasses / factories to decouple callers from concrete types.</li>
-<li dir="auto">Builder: construct complex objects step-by-step, separating construction from representation.</li>
-</ul>
-<p dir="auto">Structural:</p>
-<ul>
-<li dir="auto">Adapter: make incompatible interfaces work together.</li>
-<li dir="auto">Decorator: add behavior by wrapping objects instead of subclassing.</li>
-</ul>
-<p dir="auto">Behavioral:</p>
-<ul>
-<li dir="auto">Strategy: swap algorithms behind a common interface.</li>
-<li dir="auto">Observer: publish/subscribe notifications to keep components loosely coupled.<br>
-<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Patterns/Design Patterns.md" href="Software Engineering/05 Architecture/Patterns/Design Patterns.md" target="_blank" rel="noopener nofollow">Design Patterns</a></em></li>
-</ul>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">Your singleton cache service must use a scoped <code>DbContext</code> to warm data on startup. How do you solve this without captive dependency?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<p dir="auto"><strong>Expected answer:</strong> inject <code>IServiceScopeFactory</code>, create a scope inside startup logic, resolve <code>DbContext</code> from that scope, perform work, dispose scope.<br>
+<strong>Why:</strong> validates practical lifetime-boundary reasoning, not just memorized definitions.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Patterns/Dependency Injection.md" href="Software Engineering/05 Architecture/Patterns/Dependency Injection.md" target="_blank" rel="noopener nofollow">Dependency Injection</a></em></p>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">Explain <code>Transient</code>, <code>Scoped</code>, and <code>Singleton</code> lifetimes with one safe production example each.</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<p dir="auto"><strong>Expected answer:</strong> transient for lightweight stateless services, scoped for request-bound consistency (<code>DbContext</code>), singleton for thread-safe shared services (cache/config/factory).<br>
+<strong>Why:</strong> checks whether candidate maps lifetime to runtime behavior.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Patterns/Dependency Injection.md" href="Software Engineering/05 Architecture/Patterns/Dependency Injection.md" target="_blank" rel="noopener nofollow">Dependency Injection</a></em></p>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">Why is Service Locator an anti-pattern in business logic, and when is it acceptable?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<p dir="auto"><strong>Expected answer:</strong> it hides dependencies and hurts testability; acceptable in factories, middleware activation, and explicit scope-managed infrastructure.<br>
+<strong>Why:</strong> tests architecture judgment and boundary discipline.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Patterns/Dependency Injection.md" href="Software Engineering/05 Architecture/Patterns/Dependency Injection.md" target="_blank" rel="noopener nofollow">Dependency Injection</a></em></p>
 </div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">What is DDD (Domain-Driven Design)?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
 <p dir="auto">DDD is a set of principles and patterns for building software around a rich domain model. It emphasizes:</p>
 <ul>
@@ -1219,6 +1400,40 @@ services<span class="token punctuation">.</span><span class="token generic-metho
 </ul>
 <p dir="auto">The goal is to reduce the gap between the business and the code, especially in complex domains.<br>
 <em><a class="internal-link" data-href="Software Engineering/05 Architecture/Patterns/Domain-Driven Development.md" href="Software Engineering/05 Architecture/Patterns/Domain-Driven Development.md" target="_blank" rel="noopener nofollow">Domain-Driven Development</a></em></p>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">Order service publishes <code>OrderPlaced</code>. Payment and Inventory both consume it. Payment fails. How do you handle compensation without tight coupling?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<p dir="auto"><strong>Expected answer</strong></p>
+<ul>
+<li dir="auto">Prefer saga/process manager or choreography with explicit failure events (<code>PaymentFailed</code>).</li>
+<li dir="auto">Avoid direct service-to-service rollback calls as the primary mechanism.</li>
+<li dir="auto">Emit compensating commands/events (<code>ReleaseInventory</code>, <code>CancelOrder</code>) based on workflow state.</li>
+<li dir="auto">Keep operations idempotent because retries and duplicates are expected.</li>
+<li dir="auto">Track workflow with correlation ID for observability and replay.<br>
+<strong>Why this is asked</strong></li>
+<li dir="auto">It tests whether the candidate understands eventual consistency and compensation in distributed systems.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Patterns/Event-Driven Architecture.md" href="Software Engineering/05 Architecture/Patterns/Event-Driven Architecture.md" target="_blank" rel="noopener nofollow">Event-Driven Architecture</a></em></li>
+</ul>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">When would you choose orchestration over choreography in an event-driven workflow?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<p dir="auto"><strong>Expected answer</strong></p>
+<ul>
+<li dir="auto">Choose orchestration when the process is long-running, has strict step ordering, and requires explicit compensation/state visibility.</li>
+<li dir="auto">Choreography is better when services can react independently and team autonomy is a top priority.</li>
+<li dir="auto">Orchestration centralizes control (easier reasoning) but adds coordinator complexity and potential bottleneck risk.</li>
+<li dir="auto">Choreography reduces central coupling but raises tracing and governance complexity as fan-out grows.<br>
+<strong>Why this is asked</strong></li>
+<li dir="auto">It tests architectural judgment under operational constraints, not just pattern definitions.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Patterns/Event-Driven Architecture.md" href="Software Engineering/05 Architecture/Patterns/Event-Driven Architecture.md" target="_blank" rel="noopener nofollow">Event-Driven Architecture</a></em></li>
+</ul>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">How do you evolve integration event contracts without breaking consumers?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<p dir="auto"><strong>Expected answer</strong></p>
+<ul>
+<li dir="auto">Use additive changes first; avoid removing/renaming fields abruptly.</li>
+<li dir="auto">Version contracts (<code>v1</code>, <code>v2</code>) and support dual publishing during migrations.</li>
+<li dir="auto">Add consumer-driven contract tests in CI.</li>
+<li dir="auto">Monitor deserialization failures and rollout with staged deployments.<br>
+<strong>Why this is asked</strong></li>
+<li dir="auto">It tests real-world ownership of compatibility, release safety, and producer-consumer decoupling.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Patterns/Event-Driven Architecture.md" href="Software Engineering/05 Architecture/Patterns/Event-Driven Architecture.md" target="_blank" rel="noopener nofollow">Event-Driven Architecture</a></em></li>
+</ul>
 </div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">What is GRASP?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
 <p dir="auto">GRASP (General Responsibility Assignment Software Patterns) is a set of guidelines for assigning responsibilities to classes/objects.</p>
 <p dir="auto">Common GRASP principles include: Information Expert, Creator, Controller, Low Coupling, High Cohesion, Polymorphism, Pure Fabrication, Indirection, and Protected Variations.<br>
@@ -1228,6 +1443,98 @@ services<span class="token punctuation">.</span><span class="token generic-metho
 <p dir="auto">They are most useful when you need to coordinate multiple changes that must succeed or fail together, or when you want to decouple the domain/application layers from a specific data access technology.</p>
 <p dir="auto">Note: in EF Core, <code>DbContext</code> already acts as both a repository-like gateway and a unit of work (change tracking + <code>SaveChanges</code>).<br>
 <em><a class="internal-link" data-href="Software Engineering/05 Architecture/Patterns/Repository &amp; UoW.md" href="Software Engineering/05 Architecture/Patterns/Repository &amp; UoW.md" target="_blank" rel="noopener nofollow">Repository &amp; UoW</a></em></p>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="" data-callout="question" class="callout node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">Your AI service wraps OpenAI APIs with per-tenant limits and runs on 4 instances. How do you enforce limits accurately, and which algorithm do you choose?</div></div><div class="callout-content">
+<p dir="auto"><strong>Expected answer</strong></p>
+<ul>
+<li dir="auto">Use distributed shared state, usually Redis, because per-instance memory breaks global accuracy.</li>
+<li dir="auto">Partition by tenant ID so quotas align with billing and fairness.</li>
+<li dir="auto">Choose token bucket when tenants need controlled burst capacity with stable average throughput.</li>
+<li dir="auto">Use atomic operations (Lua or transaction pattern) for refill and consume to avoid race conditions.</li>
+<li dir="auto">Return <code>429</code> with <code>Retry-After</code> and remaining quota headers to support client backoff.<br>
+<strong>Why this question matters</strong></li>
+<li dir="auto">It tests algorithm choice plus distributed systems correctness, not just definition recall.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Patterns/Rate Limiting.md" href="Software Engineering/05 Architecture/Patterns/Rate Limiting.md" target="_blank" rel="noopener nofollow">Rate Limiting</a></em></li>
+</ul>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="" data-callout="question" class="callout node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">When would you prefer sliding window counter over fixed window in a public API?</div></div><div class="callout-content">
+<p dir="auto"><strong>Expected answer</strong></p>
+<ul>
+<li dir="auto">Prefer sliding window counter when edge fairness matters and fixed window boundary bursts are unacceptable.</li>
+<li dir="auto">It gives near-rolling behavior with lower memory than sliding log.</li>
+<li dir="auto">Accept approximation error in exchange for better operational cost.</li>
+<li dir="auto">Keep fixed window only where simplicity dominates and traffic patterns are predictable.<br>
+<strong>Why this question matters</strong></li>
+<li dir="auto">It checks whether the candidate can justify tradeoffs under realistic constraints.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Patterns/Rate Limiting.md" href="Software Engineering/05 Architecture/Patterns/Rate Limiting.md" target="_blank" rel="noopener nofollow">Rate Limiting</a></em></li>
+</ul>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="" data-callout="question" class="callout node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">What failure mode should you choose if Redis-based rate limiting is unavailable: fail-open or fail-closed?</div></div><div class="callout-content">
+<p dir="auto"><strong>Expected answer</strong></p>
+<ul>
+<li dir="auto">Decide by endpoint risk profile, not globally.</li>
+<li dir="auto">Fail-open for low-risk endpoints when availability is the top priority.</li>
+<li dir="auto">Fail-closed for sensitive operations where abuse or cost explosion is unacceptable.</li>
+<li dir="auto">Document and test the behavior with chaos drills.<br>
+<strong>Why this question matters</strong></li>
+<li dir="auto">It tests operational judgment and explicit risk tradeoff reasoning.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Patterns/Rate Limiting.md" href="Software Engineering/05 Architecture/Patterns/Rate Limiting.md" target="_blank" rel="noopener nofollow">Rate Limiting</a></em></li>
+</ul>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">What are design patterns and why do we need them?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<p dir="auto">Design patterns are proven, repeatable approaches to common design problems (not copy-paste code). They communicate intent, reduce accidental complexity, and improve maintainability through loose coupling.<br>
+Expected answer:</p>
+<ul>
+<li dir="auto">Named reusable design templates.</li>
+<li dir="auto">Shared team vocabulary.</li>
+<li dir="auto">Better extensibility and testability.<br>
+Why this matters: interviewers check whether you think in reusable design decisions instead of ad-hoc classes.<br>
+[!QUESTION]- What categories of patterns exist?<br>
+For GoF patterns, the classic categories are:</li>
+<li dir="auto">Creational: object creation (how instances are constructed)</li>
+<li dir="auto">Structural: object composition (how classes/objects are arranged)</li>
+<li dir="auto">Behavioral: object interaction (how responsibilities and communication are organized)<br>
+Expected answer:</li>
+<li dir="auto">Creational, Structural, Behavioral.</li>
+<li dir="auto">Classify by where change pressure appears.<br>
+Why this matters: category mapping shows fast architectural reasoning and helps justify pattern choice under time pressure.<br>
+[!QUESTION]- What is an anti-pattern?<br>
+An anti-pattern is a recurring solution that appears useful but repeatedly causes high coupling, low testability, or operational problems.<br>
+Expected answer:</li>
+<li dir="auto">Recognize recurring harmful design choices.</li>
+<li dir="auto">Explain why they fail over time.</li>
+<li dir="auto">Propose a safer alternative.<br>
+Why this matters: strong candidates avoid cargo-cult patterns and can explain failure mechanisms, not only definitions.<br>
+[!QUESTION]- Name a few patterns from each category and the basic idea behind them.<br>
+Creational:</li>
+<li dir="auto">Factory Method: delegate creation to creators/factories to decouple callers from concrete types.</li>
+<li dir="auto">Builder: construct complex objects step-by-step.</li>
+</ul>
+<p dir="auto">Structural:</p>
+<ul>
+<li dir="auto">Adapter: make incompatible interfaces work together.</li>
+<li dir="auto">Decorator: add behavior by wrapping instead of subclassing.</li>
+</ul>
+<p dir="auto">Behavioral:</p>
+<ul>
+<li dir="auto">Strategy: swap algorithms behind a common interface.</li>
+<li dir="auto">Observer: publish/subscribe notifications.<br>
+Expected answer:</li>
+<li dir="auto">Give one concrete use-case per chosen pattern.<br>
+Why this matters: interviewers score practical mapping from pattern names to real design problems.<br>
+[!QUESTION]- You need to add a new robot type to an existing system without modifying existing code. Which patterns enable this?<br>
+Combine Factory Method (instantiate new robot implementation), Strategy (inject new movement/task behavior), and Template Method (reuse stable execution skeleton).<br>
+Expected answer:</li>
+<li dir="auto">Factory Method for creation extension.</li>
+<li dir="auto">Strategy for algorithm variation.</li>
+<li dir="auto">Template Method for stable lifecycle.</li>
+<li dir="auto">Tradeoff: extra classes and abstraction overhead.<br>
+Why this matters: this question tests OCP-driven design and whether you can combine patterns coherently.<br>
+[!QUESTION]- How do you choose between Strategy and Template Method in robot behavior design?<br>
+Prefer Strategy when behavior slices vary independently and should be swapped by composition. Prefer Template Method when algorithm order is fixed and only selected steps should vary.<br>
+Expected answer:</li>
+<li dir="auto">Strategy: composition and runtime swap, with more object wiring.</li>
+<li dir="auto">Template Method: inheritance with a fixed skeleton and tighter base-class coupling.</li>
+<li dir="auto">Tradeoff: flexibility vs orchestration simplicity.<br>
+Why this matters: this is a common class-design tradeoff where poor choice leads to either rigid inheritance or excessive object churn.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Patterns/Design Patterns.md" href="Software Engineering/05 Architecture/Patterns/Design Patterns.md" target="_blank" rel="noopener nofollow">Design Patterns</a></em></li>
+</ul>
 </div></div></div><h1 id="06-development-practices">06 Development Practices</h1><h2 id="06-development-practices-paradigms">Paradigms</h2><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">What is Event-driven?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
 <p dir="auto">Event-driven development builds systems around events (facts that something happened) and reactions to those events.<br>
 <em><a class="internal-link" data-href="Software Engineering/06 Development Practices/Paradigms/Event-driven.md" href="Software Engineering/06 Development Practices/Paradigms/Event-driven.md" target="_blank" rel="noopener nofollow">Event-driven</a></em></p>

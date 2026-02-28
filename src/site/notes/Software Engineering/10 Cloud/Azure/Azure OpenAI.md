@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/10-cloud/azure/azure-open-ai/","noteIcon":"1"}
+{"dg-publish":true,"permalink":"/software-engineering/10-cloud/azure/azure-open-ai/","noteIcon":"3"}
 ---
 
 

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/algorithms/search-algorithms/search-algorithms/","tags":["FolderNote"],"noteIcon":"1"}
+{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/algorithms/search-algorithms/search-algorithms/","tags":["FolderNote"],"noteIcon":"3"}
 ---
 
 

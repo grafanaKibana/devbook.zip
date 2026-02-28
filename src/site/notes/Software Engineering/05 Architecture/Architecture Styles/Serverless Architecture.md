@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/architecture-styles/serverless-architecture/","noteIcon":"1"}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/architecture-styles/serverless-architecture/","noteIcon":"3"}
 ---
 
 

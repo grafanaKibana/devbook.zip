@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/10-cloud/google-cloud/cloud-functions/","noteIcon":"1"}
+{"dg-publish":true,"permalink":"/software-engineering/10-cloud/google-cloud/cloud-functions/","noteIcon":"3"}
 ---
 
 

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/sql/indexes/","noteIcon":"1"}
+{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/sql/indexes/","noteIcon":"3"}
 ---
 
 
