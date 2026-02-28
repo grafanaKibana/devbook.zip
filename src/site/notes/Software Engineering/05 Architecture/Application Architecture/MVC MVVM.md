@@ -7,8 +7,23 @@
 
 MVC and MVVM are UI/application architecture patterns that split responsibilities to improve maintainability, testability, and separation of concerns.
 
-## Deeper Explanation
+- **MVC** (Model-View-Controller): the Model holds domain/data and business rules, the View renders the UI, and the Controller handles incoming requests, coordinates work, and selects the response/view.
+- **MVVM** (Model-View-ViewModel): the Model holds domain data, the View is the UI binding target, and the ViewModel exposes observable state and commands that the View binds to — eliminating direct view manipulation.
 
+## Example
+
+In ASP.NET Core MVC, an HTTP request is routed to a controller action, which returns a view with a view-model.
+
+```csharp
+public sealed class ProductsController : Controller
+{
+    public IActionResult Details(int id)
+    {
+        var vm = new ProductDetailsVm(id, name: "Keyboard", price: 49.99m);
+        return View(vm);
+    }
+}
+```
 ## Questions
 
 > [!QUESTION]- What is MVC and why is it used?
@@ -29,6 +44,5 @@ MVC and MVVM are UI/application architecture patterns that split responsibilitie
 >
 > **Pages**
 > - [[Software Engineering/05 Architecture/Application Architecture/Layered Architecture\|Layered Architecture]]
-> - [[Software Engineering/05 Architecture/Application Architecture/MVC\|MVC]]
 > - [[Software Engineering/05 Architecture/Application Architecture/Plug-in Architecture (MicroKernel)\|Plug-in Architecture (MicroKernel)]]
 <!-- whats-next:end -->

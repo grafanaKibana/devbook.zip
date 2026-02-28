@@ -1,11 +1,11 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/event-sourcing/","noteIcon":"3"}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/architectural-patterns/event-sourcing/","noteIcon":"3"}
 ---
 
 
 # Intro
 
-Event Sourcing stores each aggregate's state as an ordered stream of domain events instead of saving only the latest row snapshot. That event history gives you a built-in audit trail, enables temporal queries like "what did we believe at 10:15 yesterday", and allows replay when you need to rebuild read models or recover from projection bugs. You usually reach for it when business value depends on immutable history, traceability, and intent-level debugging, not just current state reads. In .NET systems, it often appears together with [[Software Engineering/05 Architecture/Patterns/CQRS\|CQRS]] so writes persist events and reads consume projections optimized for query use cases.
+Event Sourcing stores each aggregate's state as an ordered stream of domain events instead of saving only the latest row snapshot. That event history gives you a built-in audit trail, enables temporal queries like "what did we believe at 10:15 yesterday", and allows replay when you need to rebuild read models or recover from projection bugs. You usually reach for it when business value depends on immutable history, traceability, and intent-level debugging, not just current state reads. In .NET systems, it often appears together with [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/CQRS\|CQRS]] so writes persist events and reads consume projections optimized for query use cases.
 
 ## Mechanism
 ### Core flow
@@ -204,7 +204,7 @@ public static async Task AddItemToOrderAsync(IEventStore eventStore, Guid orderI
 `expectedRevision` semantics are store-specific (for example, some stores use `-1` for an empty stream), so use your event store's concurrency API exactly.
 
 ## Event Sourcing + CQRS
-Event Sourcing and [[Software Engineering/05 Architecture/Patterns/CQRS\|CQRS]] solve different concerns and complement each other well.
+Event Sourcing and [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/CQRS\|CQRS]] solve different concerns and complement each other well.
 - **Write side**: command handlers persist validated domain events to the event store.
 - **Bridge**: those events become the integration boundary between write and read models.
 - **Read side**: projectors consume events and maintain query-optimized denormalized views.
@@ -272,17 +272,9 @@ Schema evolution is a common production failure mode in event-sourced systems, e
 
 > [!note] Whats next
 > **Parent**
->  [[Software Engineering/05 Architecture/05 Architecture\|05 Architecture]]
+>  [[Software Engineering/05 Architecture/Patterns/Patterns\|Patterns]]
 >
 > **Pages**
-> - [[Software Engineering/05 Architecture/Patterns/Circut Breaker\|Circut Breaker]]
-> - [[Software Engineering/05 Architecture/Patterns/CQRS\|CQRS]]
-> - [[Software Engineering/05 Architecture/Patterns/CQS\|CQS]]
-> - [[Software Engineering/05 Architecture/Patterns/Dependency Injection\|Dependency Injection]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns\|Design Patterns]]
-> - [[Software Engineering/05 Architecture/Patterns/Domain-Driven Development\|Domain-Driven Development]]
-> - [[Software Engineering/05 Architecture/Patterns/Event-Driven Architecture\|Event-Driven Architecture]]
-> - [[Software Engineering/05 Architecture/Patterns/GRASP\|GRASP]]
-> - [[Software Engineering/05 Architecture/Patterns/Rate Limiting\|Rate Limiting]]
-> - [[Software Engineering/05 Architecture/Patterns/Repository & UoW\|Repository & UoW]]
+> - [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/CQRS\|CQRS]]
+> - [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/Domain-Driven Design\|Domain-Driven Design]]
 <!-- whats-next:end -->
