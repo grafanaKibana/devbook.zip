@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/06-development-practices/principles/solid/","noteIcon":"1"}
+{"dg-publish":true,"permalink":"/software-engineering/06-development-practices/principles/solid/","noteIcon":"3"}
 ---
 
 

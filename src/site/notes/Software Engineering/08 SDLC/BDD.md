@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/08-sdlc/bdd/","noteIcon":"1"}
+{"dg-publish":true,"permalink":"/software-engineering/08-sdlc/bdd/","noteIcon":"3"}
 ---
 
 

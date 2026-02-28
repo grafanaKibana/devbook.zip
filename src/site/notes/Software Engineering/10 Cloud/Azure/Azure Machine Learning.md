@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/10-cloud/azure/azure-machine-learning/","noteIcon":"1"}
+{"dg-publish":true,"permalink":"/software-engineering/10-cloud/azure/azure-machine-learning/","noteIcon":"3"}
 ---
 
 

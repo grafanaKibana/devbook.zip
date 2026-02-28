@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/machine-learning/types/self-supervised-learning/","noteIcon":"1"}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/machine-learning/types/self-supervised-learning/","noteIcon":"3"}
 ---
 
 
