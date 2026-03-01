@@ -40,20 +40,20 @@
 
 # Recently Updated
 
-| Note                                                                                                                       | Date                         |
-| -------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
-| [[Software Engineering/05 Architecture/Distributed Systems/CAP theorem\|CAP theorem]]                                   | 11:14 PM - February 28, 2026 |
-| [[Software Engineering/05 Architecture/Distributed Systems/Consistency Models\|Consistency Models]]                     | 11:14 PM - February 28, 2026 |
-| [[Software Engineering/05 Architecture/Distributed Systems/API Gateway\|API Gateway]]                                   | 11:14 PM - February 28, 2026 |
-| [[Software Engineering/05 Architecture/Distributed Systems/Distributed Systems\|Distributed Systems]]                   | 11:14 PM - February 28, 2026 |
-| [[Software Engineering/05 Architecture/Distributed Systems/Distributed Transactions\|Distributed Transactions]]         | 11:14 PM - February 28, 2026 |
-| [[Software Engineering/05 Architecture/Distributed Systems/Load Balancing\|Load Balancing]]                             | 11:14 PM - February 28, 2026 |
-| [[Software Engineering/05 Architecture/Distributed Systems/Webhooks\|Webhooks]]                                         | 11:14 PM - February 28, 2026 |
-| [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/Architectural Patterns\|Architectural Patterns]] | 11:14 PM - February 28, 2026 |
-| [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/CQRS\|CQRS]]                                     | 11:14 PM - February 28, 2026 |
-| [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/Domain-Driven Design\|Domain-Driven Design]]     | 11:14 PM - February 28, 2026 |
-| [[Software Engineering/05 Architecture/Patterns/Design Patterns/Design Patterns\|Design Patterns]]                      | 11:14 PM - February 28, 2026 |
-| [[Software Engineering/05 Architecture/Patterns/Design Patterns/GRASP\|GRASP]]                                          | 11:14 PM - February 28, 2026 |
+| Note                                                                                                               | Date                         |
+| ------------------------------------------------------------------------------------------------------------------ | ---------------------------- |
+| [[Software Engineering/05 Architecture/Patterns/Resilience Patterns/Rate Limiting\|Rate Limiting]]              | 11:16 PM - February 28, 2026 |
+| [[Software Engineering/05 Architecture/Patterns/Resilience Patterns/Resilience Patterns\|Resilience Patterns]]  | 11:16 PM - February 28, 2026 |
+| [[Software Engineering/05 Architecture/Patterns/Dependency Injection\|Dependency Injection]]                    | 11:16 PM - February 28, 2026 |
+| [[Software Engineering/05 Architecture/Patterns/Patterns\|Patterns]]                                            | 11:16 PM - February 28, 2026 |
+| [[Software Engineering/05 Architecture/Patterns/Repository & UoW\|Repository & UoW]]                            | 11:16 PM - February 28, 2026 |
+| [[Software Engineering/05 Architecture/Patterns/CQS\|CQS]]                                                      | 11:16 PM - February 28, 2026 |
+| [[Software Engineering/05 Architecture/Patterns/Resilience Patterns/Circuit Breaker\|Circuit Breaker]]          | 11:15 PM - February 28, 2026 |
+| [[Software Engineering/05 Architecture/Distributed Systems/CAP theorem\|CAP theorem]]                           | 11:14 PM - February 28, 2026 |
+| [[Software Engineering/05 Architecture/Distributed Systems/Consistency Models\|Consistency Models]]             | 11:14 PM - February 28, 2026 |
+| [[Software Engineering/05 Architecture/Distributed Systems/API Gateway\|API Gateway]]                           | 11:14 PM - February 28, 2026 |
+| [[Software Engineering/05 Architecture/Distributed Systems/Distributed Systems\|Distributed Systems]]           | 11:14 PM - February 28, 2026 |
+| [[Software Engineering/05 Architecture/Distributed Systems/Distributed Transactions\|Distributed Transactions]] | 11:14 PM - February 28, 2026 |
 
 { .block-language-dataview}
 # Publish Distribution
@@ -72,7 +72,7 @@
 <li dir="auto"><a data-tooltip-position="top" aria-label="Software Engineering/05 Architecture/Distributed Systems/Scalability Patterns/Vertical Scaling" data-href="Software Engineering/05 Architecture/Distributed Systems/Scalability Patterns/Vertical Scaling" href="Software Engineering/05 Architecture/Distributed Systems/Scalability Patterns/Vertical Scaling" class="internal-link" target="_blank" rel="noopener nofollow">Vertical Scaling</a></li>
 <li dir="auto"><a data-tooltip-position="top" aria-label="Software Engineering/05 Architecture/Distributed Systems/Webhooks" data-href="Software Engineering/05 Architecture/Distributed Systems/Webhooks" href="Software Engineering/05 Architecture/Distributed Systems/Webhooks" class="internal-link" target="_blank" rel="noopener nofollow">Webhooks</a></li>
 <li dir="auto"><a data-tooltip-position="top" aria-label="Software Engineering/05 Architecture/Patterns/Architectural Patterns/Architectural Patterns" data-href="Software Engineering/05 Architecture/Patterns/Architectural Patterns/Architectural Patterns" href="Software Engineering/05 Architecture/Patterns/Architectural Patterns/Architectural Patterns" class="internal-link" target="_blank" rel="noopener nofollow">Architectural Patterns</a></li>
-<li dir="auto"><a data-tooltip-position="top" aria-label="Software Engineering/05 Architecture/Patterns/Resilience/Resilience" data-href="Software Engineering/05 Architecture/Patterns/Resilience/Resilience" href="Software Engineering/05 Architecture/Patterns/Resilience/Resilience" class="internal-link" target="_blank" rel="noopener nofollow">Resilience</a></li>
+<li dir="auto"><a data-tooltip-position="top" aria-label="Software Engineering/05 Architecture/Patterns/Resilience Patterns/Resilience Patterns" data-href="Software Engineering/05 Architecture/Patterns/Resilience Patterns/Resilience Patterns" href="Software Engineering/05 Architecture/Patterns/Resilience Patterns/Resilience Patterns" class="internal-link" target="_blank" rel="noopener nofollow">Resilience Patterns</a></li>
 </ul>
 </div></div></span></p>
 
