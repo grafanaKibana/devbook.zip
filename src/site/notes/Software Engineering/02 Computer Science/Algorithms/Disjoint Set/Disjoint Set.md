@@ -41,6 +41,7 @@ flowchart TD
 
 - [Disjoint set data structure Wikipedia](https://en.wikipedia.org/wiki/Disjoint-set_data_structure)
 - [Disjoint set union CP Algorithms](https://cp-algorithms.com/data_structures/disjoint_set_union.html)
+- [Union-Find (Princeton Algorithms)](https://algs4.cs.princeton.edu/15uf/) — Sedgewick's implementation walkthrough with complexity analysis and practical variants.
 
 <!-- whats-next:start -->
 
