@@ -44,3 +44,15 @@ body {
 #graph-controls {
   display: none;
 }
+
+/* ── Mobile sidebar: full width ── */
+@media (max-width: 1000px) {
+  .filetree-wrapper {
+    width: 100% !important;
+    min-width: 100% !important;
+  }
+
+  .filetree-sidebar {
+    width: 100% !important;
+  }
+}
