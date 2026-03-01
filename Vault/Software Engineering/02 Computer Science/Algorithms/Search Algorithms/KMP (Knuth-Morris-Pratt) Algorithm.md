@@ -117,4 +117,11 @@ Text: ABABABC
 ---
 
 > [!note] Whats next
+> **Parent**
+>  [[Software Engineering/02 Computer Science/Algorithms/Algorithms|Algorithms]]
+>
+> **Pages**
+> - [[Software Engineering/02 Computer Science/Algorithms/Search Algorithms/Binary Search|Binary Search]]
+> - [[Software Engineering/02 Computer Science/Algorithms/Search Algorithms/DFS BFS|DFS BFS]]
+> - [[Software Engineering/02 Computer Science/Algorithms/Search Algorithms/Rabin Karp Search|Rabin Karp Search]]
 <!-- whats-next:end -->

@@ -119,4 +119,11 @@ Roll to "aba": (312 - 3·100)·10 + 1 = 121 → verify → match at 4
 ---
 
 > [!note] Whats next
+> **Parent**
+>  [[Software Engineering/02 Computer Science/Algorithms/Algorithms|Algorithms]]
+>
+> **Pages**
+> - [[Software Engineering/02 Computer Science/Algorithms/Search Algorithms/Binary Search|Binary Search]]
+> - [[Software Engineering/02 Computer Science/Algorithms/Search Algorithms/DFS BFS|DFS BFS]]
+> - [[Software Engineering/02 Computer Science/Algorithms/Search Algorithms/KMP (Knuth-Morris-Pratt) Algorithm|KMP (Knuth-Morris-Pratt) Algorithm]]
 <!-- whats-next:end -->
