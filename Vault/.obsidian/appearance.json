@@ -1,5 +1,5 @@
 {
-  "accentColor": "",
+  "accentColor": "#276844",
   "cssTheme": "Velocity",
   "nativeMenus": true,
   "translucency": true,
@@ -7,5 +7,6 @@
   "showViewHeader": true,
   "interfaceFontFamily": "SF Pro",
   "textFontFamily": "SF Pro Text",
-  "theme": "system"
+  "theme": "system",
+  "baseFontSize": 16
 }

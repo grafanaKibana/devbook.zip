@@ -37,17 +37,20 @@
         {
           "key": "level",
           "showInNavigation": true,
-          "showInList": true
+          "showInList": true,
+          "showInFileMenu": false
         },
         {
           "key": "priority",
           "showInNavigation": true,
-          "showInList": true
+          "showInList": true,
+          "showInFileMenu": false
         },
         {
           "key": "status",
           "showInNavigation": true,
-          "showInList": true
+          "showInList": true,
+          "showInFileMenu": false
         }
       ]
     }
@@ -160,9 +163,10 @@
   "folderNoteName": "",
   "folderNoteNamePattern": "",
   "folderNoteTemplate": "Templates/Pages/Template - Index.md",
-  "openFolderNotesInNewTab": false,
+  "enableFolderNoteLinks": true,
   "hideFolderNoteInList": true,
   "pinCreatedFolderNote": false,
+  "openFolderNotesInNewTab": false,
   "showTags": false,
   "showTagIcons": true,
   "showAllTagsFolder": true,
@@ -216,6 +220,7 @@
   "skipHeadingsInPreview": true,
   "skipCodeBlocksInPreview": true,
   "stripHtmlInPreview": true,
+  "stripLatexInPreview": true,
   "previewRows": 2,
   "previewProperties": [],
   "showFeatureImage": true,
@@ -516,7 +521,7 @@
     "#404040",
     "#404040"
   ],
-  "lastShownVersion": "2.4.2",
+  "lastShownVersion": "2.4.3",
   "rootFolderOrder": [],
   "rootTagOrder": [],
   "rootPropertyOrder": []

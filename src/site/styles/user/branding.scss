@@ -33,6 +33,11 @@
   margin: 8px 0;
 }
 
+/* Navbar (mobile/tablet): stretch inner row so branding centers between hamburger & search */
+.navbar .navbar-inner {
+  flex: 1;
+}
+
 .dg-branding-mobile .dg-branding-title {
   font-size: 1.25rem;
 }
