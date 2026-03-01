@@ -28,4 +28,9 @@ The two foundational patterns here are [[Software Engineering/05 Architecture/Pa
 ---
 
 > [!note] Whats next
+> **Parent**
+>  [[Software Engineering/05 Architecture/Patterns/Patterns|Patterns]]
+>
+> **Pages**
+> - [[Software Engineering/05 Architecture/Patterns/Resilience Patterns/Circuit Breaker|Circuit Breaker]]
 <!-- whats-next:end -->

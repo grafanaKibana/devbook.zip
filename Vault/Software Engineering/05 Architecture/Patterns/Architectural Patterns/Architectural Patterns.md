@@ -28,4 +28,11 @@ The three patterns here compose naturally: [[Software Engineering/05 Architectur
 ---
 
 > [!note] Whats next
+> **Parent**
+>  [[Software Engineering/05 Architecture/Patterns/Patterns|Patterns]]
+>
+> **Pages**
+> - [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/CQRS|CQRS]]
+> - [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/Domain-Driven Design|Domain-Driven Design]]
+> - [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/Event Sourcing|Event Sourcing]]
 <!-- whats-next:end -->
