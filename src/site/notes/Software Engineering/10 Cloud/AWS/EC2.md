@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/10-cloud/aws/ec-2/","noteIcon":"3"}
+{"dg-publish":true,"permalink":"/software-engineering/10-cloud/aws/ec-2/"}
 ---
 
 

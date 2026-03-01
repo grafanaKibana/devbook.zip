@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/or-ms/or-ms/","tags":["FolderNote"],"noteIcon":"3"}
+{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/or-ms/or-ms/","tags":["FolderNote"]}
 ---
 
 

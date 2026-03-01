@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/06-development-practices/principles/io-c-holywood-principle/","noteIcon":"3"}
+{"dg-publish":true,"permalink":"/software-engineering/06-development-practices/principles/io-c-holywood-principle/"}
 ---
 
 

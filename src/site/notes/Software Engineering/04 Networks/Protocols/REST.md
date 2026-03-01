@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/04-networks/protocols/rest/","noteIcon":"3"}
+{"dg-publish":true,"permalink":"/software-engineering/04-networks/protocols/rest/"}
 ---
 
 

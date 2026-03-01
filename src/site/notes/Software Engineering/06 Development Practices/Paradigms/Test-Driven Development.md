@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/06-development-practices/paradigms/test-driven-development/","noteIcon":"3"}
+{"dg-publish":true,"permalink":"/software-engineering/06-development-practices/paradigms/test-driven-development/"}
 ---
 
 

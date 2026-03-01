@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/10-cloud/iaa-s-paa-s-saa-s-caa-s/","noteIcon":"3"}
+{"dg-publish":true,"permalink":"/software-engineering/10-cloud/iaa-s-paa-s-saa-s-caa-s/"}
 ---
 
 

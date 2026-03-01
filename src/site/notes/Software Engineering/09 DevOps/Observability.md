@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/09-dev-ops/observability/","noteIcon":"3"}
+{"dg-publish":true,"permalink":"/software-engineering/09-dev-ops/observability/"}
 ---
 
 # Intro

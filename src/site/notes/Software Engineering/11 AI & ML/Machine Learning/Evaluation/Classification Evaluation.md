@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/machine-learning/evaluation/classification-evaluation/","noteIcon":"3"}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/machine-learning/evaluation/classification-evaluation/"}
 ---
 
 

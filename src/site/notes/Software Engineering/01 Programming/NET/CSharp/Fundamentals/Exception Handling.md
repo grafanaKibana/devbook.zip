@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/c-sharp/fundamentals/exception-handling/","noteIcon":"3"}
+{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/c-sharp/fundamentals/exception-handling/"}
 ---
 
 # Intro

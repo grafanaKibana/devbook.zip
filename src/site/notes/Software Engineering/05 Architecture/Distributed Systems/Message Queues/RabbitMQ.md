@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/distributed-systems/message-queues/rabbit-mq/","noteIcon":"3"}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/distributed-systems/message-queues/rabbit-mq/"}
 ---
 
 

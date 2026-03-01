@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/09-dev-ops/deployment-stratagies/deployment-stratagies/","tags":["FolderNote"],"noteIcon":"3"}
+{"dg-publish":true,"permalink":"/software-engineering/09-dev-ops/deployment-stratagies/deployment-stratagies/","tags":["FolderNote"]}
 ---
 
 

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/agents/agents/","tags":["FolderNote"],"noteIcon":"3"}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/agents/agents/","tags":["FolderNote"]}
 ---
 
 

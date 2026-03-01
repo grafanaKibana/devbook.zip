@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/machine-learning/types/reinforcement-learning/","noteIcon":"3"}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/machine-learning/types/reinforcement-learning/"}
 ---
 
 

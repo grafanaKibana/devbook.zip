@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/repository-and-uo-w/","noteIcon":"3"}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/repository-and-uo-w/"}
 ---
 
 # Intro
