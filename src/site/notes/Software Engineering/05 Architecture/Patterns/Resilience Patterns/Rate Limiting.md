@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/resilience/rate-limiting/","tags":["FolderNote"],"noteIcon":"3"}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/resilience-patterns/rate-limiting/","tags":["FolderNote"],"noteIcon":"3"}
 ---
 
 # Intro
@@ -291,5 +291,5 @@ Mitigation: include `Retry-After` and useful quota headers such as `X-RateLimit-
 >  [[Software Engineering/05 Architecture/Patterns/Patterns\|Patterns]]
 >
 > **Pages**
-> - [[Software Engineering/05 Architecture/Patterns/Resilience/Circuit Breaker\|Circuit Breaker]]
+> - [[Software Engineering/05 Architecture/Patterns/Resilience Patterns/Circuit Breaker\|Circuit Breaker]]
 <!-- whats-next:end -->
