@@ -118,4 +118,7 @@ Shortest A→D path: A→B→C→D (cost 4)
 ---
 
 > [!note] Whats next
+> **Parent**
+>  [[Software Engineering/02 Computer Science/Algorithms/Algorithms|Algorithms]]
+>
 <!-- whats-next:end -->
