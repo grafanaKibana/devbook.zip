@@ -268,8 +268,8 @@ Minimum validation checklist (must all pass)
 - Intro is clear, concise, and in own words.
 - The core explanation is accurate and understandable.
 - At least one concrete example exists.
-- Interview-style questions are meaningful and include expected answers.
-- References to include at least 2 external links, with at least:
+- Interview-style questions are meaningful and include expected answers. Questions MAY be omitted when the topic is definitional and the intro already covers everything worth knowing.
+- References include at least 1 external link (official docs or primary source). For non-trivial topics, at least:
   - 1 anchor source (official docs/spec/RFC/vendor-neutral standard)
   - 1 practice source (reputable real-world implementation guidance)
 - Any non-obvious production failure mode includes cause, impact, and mitigation.
