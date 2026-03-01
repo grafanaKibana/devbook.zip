@@ -22,13 +22,6 @@ flowchart TD
   F -->|No| H[Use linear scan or indexing structure]
 ```
 
-## Examples
-
-- [[Software Engineering/02 Computer Science/Algorithms/Search Algorithms/Binary Search\|Binary Search]]
-- [[Software Engineering/02 Computer Science/Algorithms/Search Algorithms/DFS BFS\|DFS BFS]]
-- [[Software Engineering/02 Computer Science/Algorithms/Search Algorithms/KMP (Knuth-Morris-Pratt) Algorithm\|KMP (Knuth-Morris-Pratt) Algorithm]]
-- [[Software Engineering/02 Computer Science/Algorithms/Search Algorithms/Rabin Karp Search\|Rabin Karp Search]]
-
 ## Questions
 
 > [!QUESTION]- What is the first decision before picking a search algorithm?
@@ -45,9 +38,10 @@ flowchart TD
 
 ## Links
 
-- [Search algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Search_algorithm)
-- [Binary search (cp algorithms)](https://cp-algorithms.com/num_methods/binary_search.html)
-- [Hyperscan high performance multiple regex matching](https://www.hyperscan.io/)
+- [Search algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Search_algorithm) — Overview of search algorithm categories.
+- [BinarySearch method (.NET API)](https://learn.microsoft.com/en-us/dotnet/api/system.array.binarysearch) — Official .NET binary search reference with usage examples.
+- [Binary search (CP Algorithms)](https://cp-algorithms.com/num_methods/binary_search.html) — Implementation patterns and edge-case analysis.
+- [Nearly all binary searches and mergesorts are broken (Google Research)](https://research.google/blog/extra-extra-read-all-about-it-nearly-all-binary-searches-and-mergesorts-are-broken/) — Practitioner post-mortem on a subtle overflow bug present in most binary search implementations for decades.
 
 <!-- whats-next:start -->
 

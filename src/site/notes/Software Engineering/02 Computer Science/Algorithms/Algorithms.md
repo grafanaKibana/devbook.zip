@@ -7,17 +7,9 @@
 
 Algorithms are step-by-step procedures for solving problems with predictable behavior as input grows. In practice, algorithm choice is a tradeoff between runtime, memory usage, implementation complexity, and failure modes under real workloads.
 
+Complexity analysis (Big O) is the primary tool for comparing algorithms without benchmarking. It captures growth rate: O(n log n) sorting scales to millions of items where O(n²) does not. But Big O ignores constant factors, cache behavior, and real-world input distributions — so production decisions combine theoretical analysis with profiling on representative data.
+
 Concrete example: for repeated membership checks in a large list of ids, sorting once and using binary search gives fast lookups with low memory overhead. For one-off checks on unsorted data, a linear scan is usually simpler and can be faster overall because there is no preprocessing cost.
-
-## Diagram
-
-```mermaid
-flowchart TD
-  A[Algorithms] --> B[Sorting Algorithms]
-  A --> C[Search Algorithms]
-  A --> D[Graph Algorithms]
-  A --> E[Disjoint Set]
-```
 
 ## Questions
 
@@ -27,6 +19,14 @@ flowchart TD
 > - Space complexity describes extra memory needed as input grows.
 > - Big O notation is used to compare growth classes independent of hardware details.
 > - Why it matters: complexity awareness helps avoid implementations that fail under production scale.
+
+> [!QUESTION]- Why is Big O not enough to choose the fastest algorithm in practice?
+> Big O describes asymptotic growth and ignores constant factors, cache locality, branch prediction, and real input distributions. Quick Sort is O(n log n) average like Merge Sort but often faster on arrays due to cache-friendly in-place partitioning.
+> Measure on representative data after narrowing candidates by complexity class.
+
+> [!QUESTION]- What is the difference between worst-case, average-case, and amortized complexity?
+> Worst-case guarantees behavior under adversarial or degenerate inputs (important for security and SLAs). Average-case describes typical behavior under random inputs. Amortized complexity describes cost spread over a sequence of operations (e.g., dynamic array resizing is O(1) amortized even though individual resizes are O(n)).
+> Choose based on whether you control the input distribution and whether tail latency matters.
 
 ## Links
 

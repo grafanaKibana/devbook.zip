@@ -5,12 +5,14 @@
 
 # Intro
 
-Programming turns ideas into working software by combining fundamentals (control flow, data structures, APIs) with good engineering judgment. You will find language- and platform-specific notes here, with an emphasis on building reliable, maintainable systems. Example: when a feature seems simple, programming skill is knowing where to add tests, where to add validation, and where to keep things boring.
+Programming is the discipline of translating problems into working software. At the level covered here, that means choosing the right abstractions, managing complexity, and writing code that other engineers can maintain and extend. The focus in this section is on the .NET ecosystem — C# language features, runtime behavior, web API development, and concurrency patterns — because that is where most production backend work happens for .NET-focused teams.
+
+What separates senior programming skill from junior: knowing when *not* to use a pattern, understanding the runtime implications of language features (allocations, GC pressure, thread safety), and making boring, correct choices under time pressure instead of clever ones.
 
 ## Links
 
-- [Computer programming (Wikipedia)](https://en.wikipedia.org/wiki/Computer_programming)
-
+- [.NET documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/) — Entry point for the .NET platform covered in this section.
+- [The Pragmatic Programmer (Hunt & Thomas)](https://pragprog.com/titles/tpp20/the-pragmatic-programmer-20th-anniversary-edition/) — Practitioner guide to programming craft and engineering judgment.
 <!-- whats-next:start -->
 
 ---
