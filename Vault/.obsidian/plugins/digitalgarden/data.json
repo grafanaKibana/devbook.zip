@@ -15,7 +15,7 @@
   "slugifyEnabled": true,
   "noteIconKey": "dg-note-icon",
   "defaultNoteIcon": "3",
-  "showNoteIconOnTitle": true,
+  "showNoteIconOnTitle": false,
   "showNoteIconInFileTree": false,
   "showNoteIconOnInternalLink": false,
   "showNoteIconOnBackLink": false,
