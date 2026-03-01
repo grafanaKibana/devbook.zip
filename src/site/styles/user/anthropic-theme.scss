@@ -21,6 +21,15 @@ body {
   --accent-h: 160;
   --accent-s: 30%;
   --accent-l: 25%;
+
+  /* ── Headings in sans-serif, like Anthropic ── */
+  --h1-font: var(--font-interface-theme);
+  --h2-font: var(--font-interface-theme);
+  --h3-font: var(--font-interface-theme);
+  --h4-font: var(--font-interface-theme);
+  --h5-font: var(--font-interface-theme);
+  --h6-font: var(--font-interface-theme);
+  --inline-title-font: var(--font-interface-theme);
 }
 
 /* ── Dramatic page titles ── */
