@@ -56,3 +56,16 @@ body {
     width: 100% !important;
   }
 }
+
+/* ── Prevent tables from causing horizontal page scroll on mobile ── */
+@media (max-width: 800px) {
+  .content {
+    overflow-x: hidden;
+  }
+
+  .content table {
+    display: block;
+    overflow-x: auto;
+    max-width: 100%;
+  }
+}
