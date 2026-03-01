@@ -1,3 +1,4 @@
+{% if not (contentClasses and "canvas-page" in contentClasses) %}
 <footer class="dg-contact-footer">
   <nav class="dg-contact-footer-links" aria-label="Contact links">
     {% if meta.contact.email %}
@@ -20,3 +21,4 @@
     {% endif %}
   </nav>
 </footer>
+{% endif %}
