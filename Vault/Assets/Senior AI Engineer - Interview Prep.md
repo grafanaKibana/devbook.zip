@@ -31,16 +31,16 @@
 - [x] Study [[#Building Blocks Quick Reference]] and [[#.NET-Specific Patterns]] — know each component's purpose
 - [x] Understand all 4 [[#AI System Design Patterns]] — Webhook→Queue→Worker, Rate Limiting, Vector DB, Async Validation
 - [x] Study [[#Project Deep Dive Framework (How to Present ANY Past Project)|5-Layer Presentation Framework]] with cheat sheets: [[#Communication Patterns Cheat Sheet|communication]], [[#Database Selection Cheat Sheet|databases]], [[#Scalability Patterns Quick Reference|scalability]], [[#Consistency Models|consistency]]
-- [ ] Walk through [[#Class Design Round — Robot-Managed Restaurant (HackerRank Style)|Robot Restaurant class design]] end-to-end — diagram, patterns ([[Design Patterns]]), A* pathfinding, extension question
+- [x] Walk through [[#Class Design Round — Robot-Managed Restaurant (HackerRank Style)|Robot Restaurant class design]] end-to-end — diagram, patterns ([[Design Patterns]]), A* pathfinding, extension question
 - [ ] Practice [[#Day 3 Practice Q&A]] + [[#Class Design Questions (HackerRank Round)|additional class design questions]]
 
 ### Day 4 (Sunday) — Projects & AI Ownership
 
-- [ ] Read [[#Quick Reference Card]] out loud (10 min)
-- [ ] Practice 2-minute pitches for each project (timed): [[#Dexter (Jira → PR Automation)|Dexter]], [[#Doculus (Auto-Documentation)|Doculus]], [[#SlackJack (Support Bot)|SlackJack]], [[#AmendA (PR Comment Updater)|AmendA]]
-- [ ] Study [[#AI Ownership Framework]] — scoping, [[#Metrics Framework|metrics]], [[#Adoption Challenges + Responses|adoption]], iteration loops, risk
-- [ ] Memorize [[#DraftKings Numbers to Anchor|DK numbers]]: 20% tickets via AI · 15% throughput · 100% 101 completion
-- [ ] Review [[#DraftKings Intelligence Brief]] — vision, 2026 goals, priority timeline
+- [x] Read [[#Quick Reference Card]] out loud (10 min)
+- [x] Practice 2-minute pitches for each project (timed): [[#Dexter (Jira → PR Automation)|Dexter]], [[#Doculus (Auto-Documentation)|Doculus]], [[#SlackJack (Support Bot)|SlackJack]], [[#AmendA (PR Comment Updater)|AmendA]]
+- [x] Study [[#AI Ownership Framework]] — scoping, [[#Metrics Framework|metrics]], [[#Adoption Challenges + Responses|adoption]], iteration loops, risk
+- [x] Memorize [[#DraftKings Numbers to Anchor|DK numbers]]: 20% tickets via AI · 15% throughput · 100% 101 completion
+- [x] Review [[#DraftKings Intelligence Brief]] — vision, 2026 goals, priority timeline
 - [ ] Study [[#Interview Traps & Ownership Signals]] — internalize traps + practice [[#Ownership Phrases to Practice Verbatim|ownership phrases]] out loud
 - [ ] Practice [[#Day 4 Practice Q&A]] — all 3 questions out loud
 
@@ -711,17 +711,55 @@ Dexter · Doculus · SlackJack · AmendA · Ops Support Bot · Curio · Tech Pla
 
 ### Common Mistakes to Avoid
 
-> [!warning] Trap 1: "I know RAG" but no production scars
-> Fix: Talk about failure modes by stage and how you detected/mitigated each.
+> [!warning]- Trap 1: "I know RAG" but no production scars
+> Saying "I built a RAG system" without describing what broke is a red flag. Interviewers assume you followed a tutorial.
+> **What they want to hear**: Failure modes by pipeline stage — stale ingestion, bad chunk boundaries, embedding domain mismatch, retrieval missing acronyms, hallucinated citations — and how you detected and mitigated each.
+> **Fix**: "We saw faithfulness drop when legal jargon entered the corpus. Dense retrieval missed exact statute IDs, so we added BM25 hybrid retrieval and saw context precision recover from 0.61 to 0.78."
 
-> [!warning] Trap 2: Handwavy "agent" language
-> Fix: Name exact pattern (ReAct vs workflow), tool boundaries, and failure handling.
+> [!warning]- Trap 2: Handwavy "agent" language
+> Saying "we used agents" without naming the exact pattern, tool boundaries, or control flow signals shallow understanding. "Agent" has become a buzzword.
+> **What they want to hear**: Is it ReAct, Plan-and-Execute, or a deterministic workflow with one LLM step? What tools does the agent have access to? What happens when a tool call fails? What is the termination condition?
+> **Fix**: "SlackJack uses a ReAct loop with a constrained toolset — Confluence search, Postgres memory read, and Slack reply. If tool confidence is below threshold, it escalates to a human rather than hallucinating an answer. Max 5 iterations before forced response."
 
-> [!warning] Trap 3: No failure-mode analysis in system design
-> Fix: Always include retries, idempotency, dead-letter queue, fallback, and monitoring.
+> [!warning]- Trap 3: No failure-mode analysis in system design
+> Drawing boxes and arrows without discussing what breaks is a junior move. Every interviewer will ask "what happens when X goes down?"
+> **What they want to hear**: For each dependency — what fails, how you detect it, how you recover, and how you prevent cascading. Retries with backoff, circuit breakers, dead-letter queues, idempotency keys, health checks, graceful degradation.
+> **Fix**: "If the LLM provider returns 503s, Polly circuit breaker trips after 5 failures in 30 seconds. While tripped, we return a degraded response and route the task to a fallback queue. Half-open probes every 60 seconds. DLQ alert fires if depth exceeds 10 in 5 minutes."
 
-> [!warning] Trap 4: Project talk without metrics
-> Fix: Tie every project to adoption, throughput, quality, and satisfaction metrics.
+> [!warning]- Trap 4: Project talk without metrics
+> Describing what you built without quantifying impact sounds like you shipped and forgot. Ownership means measuring outcomes, not just deploying code.
+> **What they want to hear**: Adoption, throughput, quality, and satisfaction metrics — with actual numbers or targets. What did you measure? What did the numbers tell you? What did you change because of the data?
+> **Fix**: "Dexter's success metric is PR acceptance rate — currently 73% for low-risk tickets. Build pass rate is 91%. We track cycle time from ticket creation to first PR: median dropped from 4 hours to 22 minutes for eligible tickets."
+
+> [!warning]- Trap 5: Treating the model as a black box
+> "We send the prompt and get an answer" suggests you have no debugging strategy when outputs are wrong. Senior engineers understand why models fail, not just that they fail.
+> **What they want to hear**: Prompt engineering with structured constraints, output validation, confidence estimation, systematic debugging (is it a retrieval failure or a generation failure?), and when to use cheaper models vs frontier models.
+> **Fix**: "When Dexter generated wrong import statements, I traced it to a retrieval problem — the context window had the right file but the wrong version. Fixing the freshness TTL on the code index resolved it. The model was fine; the context was stale."
+
+> [!warning]- Trap 6: No cost awareness in architecture
+> Designing an AI system without discussing token costs, API pricing tiers, or cost-per-query signals that you have never operated AI at real scale. Cost is a first-class architectural constraint.
+> **What they want to hear**: Cost-per-query estimates, caching strategies to avoid redundant LLM calls, model tiering (cheap model for classification, frontier model for generation), token budget allocation across retrieval/reranking/generation, and how you monitor cost drift.
+> **Fix**: "We route simple ticket classification through a smaller model at ~$0.001/call and reserve GPT-4 for code generation at ~$0.05/call. Caching repeated Confluence queries in Redis saves ~30% of embedding API calls. We track cost-per-PR in our dashboard and alert if it exceeds $0.50."
+
+> [!warning]- Trap 7: "We will just use a better model"
+> Using model upgrades as the answer to quality problems is not an engineering strategy. Models improve, but your pipeline, retrieval, and validation are what you control. This trap is explicitly called out in DraftKings ownership thinking.
+> **What they want to hear**: That you diagnose *where* in the pipeline the quality problem originates (ingestion? chunking? retrieval? prompt? output validation?) before reaching for a model swap. Model choice is one lever among many.
+> **Fix**: "Before considering a model upgrade, I check retrieval metrics first — context precision and recall. In 80% of cases, the issue is that the right evidence never reached the model. Fixing retrieval is cheaper and more durable than chasing the next model release."
+
+> [!warning]- Trap 8: No security or governance thinking
+> Building AI features without mentioning access control, PII handling, prompt injection, or audit trails suggests you have never shipped to an enterprise environment. DraftKings is a regulated company — this matters.
+> **What they want to hear**: Scoped credentials with least-privilege access, PII stripping before AI context, prompt injection defenses (input sanitization, system prompt isolation), audit logging of all AI decisions traceable to source event + model version, and InfoSec review gates for new tool integrations.
+> **Fix**: "Every MCP server integration goes through InfoSec review — Kiro is approved, Junie is under review. Slack messages are stripped of email addresses before entering the AI context. All AI actions are logged with correlation ID, model version, and source event for audit."
+
+> [!warning]- Trap 9: Jumping to multi-agent when a workflow suffices
+> Proposing a multi-agent architecture for a problem that a deterministic workflow solves is over-engineering. It signals you are chasing hype rather than solving the problem. Anthropic's own guidance says most "agent" use cases are better served by workflows.
+> **What they want to hear**: A clear decision framework for when to add agency. Deterministic path known → workflow. Uncertain exploration with branching → agent. You should start simple and add complexity only when metrics prove necessity.
+> **Fix**: "Doculus uses a purely deterministic pipeline: PR merge → diff analysis → doc scope resolution → regeneration → PR. No agent loop needed — the path is fully predictable. SlackJack uses a ReAct agent because user questions are open-ended and require iterative tool use. The architecture matches the uncertainty of each problem."
+
+> [!warning]- Trap 10: No rollout or adoption strategy
+> Building a tool without a plan for how engineers will actually use it is shipping into a vacuum. Adoption is behavior change, not deployment.
+> **What they want to hear**: Phased rollout (pilot one team → measure → expand), friction reduction (single command, sensible defaults, templates), trust-building (transparent failures, quality dashboards), feedback loops (telemetry + user input → iteration), and enablement (office hours, documentation, champions).
+> **Fix**: "We piloted SlackJack in one team channel for 4 weeks, measured resolution-without-escalation rate and CSAT, iterated on the intent router based on misclassification logs, then expanded to three more channels. Adoption grew from 12% to 68% weekly active usage once we added team-specific MCP integrations for Snowflake and LaunchDarkly."
 
 ### Ownership Phrases to Practice Verbatim
 
@@ -1278,30 +1316,244 @@ Present 2-3 decisions as trade-offs:
 ### Class Design Questions (HackerRank Round)
 
 > [!question] "Design a parking lot system"
-> **Framework**: Vehicle hierarchy (Car/Truck/Motorcycle) → ParkingSpot types → ParkingLot with floors → Strategy for spot assignment → Observer for availability. Key: different vehicle sizes need different spots.
+> **Core entities**: `Vehicle` (Car, Truck, Motorcycle) → `ParkingSpot` (Compact, Regular, Large, Handicapped) → `ParkingFloor` → `ParkingLot` → `Ticket`
+>
+> **Key patterns**:
+> - **Strategy** — `ISpotAssignmentStrategy` injected into `ParkingLot`: `NearestEntranceStrategy`, `EvenDistributionStrategy`, `CompactFirstStrategy`. Swap assignment logic without changing lot code.
+> - **Observer** — `IAvailabilityObserver` notified when spots free up. Display boards and waitlist system subscribe.
+> - **Factory** — `ParkingSpotFactory.Create(SpotType)` encapsulates spot creation.
+> - **ISP** — `IElectricChargeable` only on spots with chargers, not all spots.
+>
+> **Model answer**:
+> 1. Vehicle arrives → `ParkingLot.AssignSpot(vehicle)` uses strategy to find best available spot that fits vehicle size
+> 2. Vehicle size → spot size mapping: Motorcycle fits Compact+; Car fits Regular+; Truck requires Large only
+> 3. `Ticket` records vehicle, spot, entry time — used for fee calculation
+> 4. On exit: `ParkingLot.FreeSpot(ticket)` → calculates fee by duration → notifies observers (display boards update)
+> 5. Fee calculation: Strategy pattern again — `IFeeStrategy` (hourly, daily cap, weekend rates)
+>
+> **Key code — Assignment with Observer notification**:
+> ```csharp
+> public class ParkingLot
+> {
+>     private readonly List<ParkingFloor> _floors;
+>     private readonly ISpotAssignmentStrategy _strategy;
+>     private readonly List<IAvailabilityObserver> _observers;
+>     
+>     public Ticket? AssignSpot(Vehicle vehicle)
+>     {
+>         var spot = _strategy.FindSpot(vehicle, _floors);
+>         if (spot == null) return null; // Full
+>         spot.Occupy(vehicle);
+>         return new Ticket(vehicle, spot, DateTime.UtcNow);
+>     }
+>     
+>     public decimal FreeSpot(Ticket ticket)
+>     {
+>         ticket.Spot.Vacate();
+>         var fee = _feeStrategy.Calculate(ticket);
+>         foreach (var obs in _observers)
+>             obs.OnSpotAvailable(ticket.Spot); // Display boards update
+>         return fee;
+>     }
+> }
+> ```
+>
+> **Interviewer probes to expect**:
+> - **Concurrency**: Two vehicles arrive simultaneously for the last spot — use optimistic locking or transaction on `spot.Occupy()` to prevent double-assignment. Alternatively, `ConcurrentDictionary<SpotId, Vehicle>` with atomic `TryAdd`.
+> - **Persistence**: Tickets and occupancy must survive service restart — persist to Postgres. Display boards read from cache (Redis) populated by Observer on each state change.
+> - **Entrance/exit gates**: Gate opens only after payment confirmed. Payment flow: scan ticket → calculate fee → pay → raise gate → vacate spot → notify observers.
+>
+> **Extension question: "Add EV charging spots"**
+> 1. Create `IElectricChargeable` interface with `StartCharging()` / `StopCharging()` / `ChargeLevel`
+> 2. `ElectricParkingSpot : ParkingSpot, IElectricChargeable`
+> 3. Update assignment strategy to prefer EV spots for electric vehicles — zero changes to `ParkingLot`, `Ticket`, or existing spot types
+> 4. Observer notifies when charging complete — same pattern as availability
 
 > [!question] "Design an elevator system"
-> **Framework**: Elevator (state: idle/moving, direction, floor) → ElevatorController → Strategy for scheduling (SCAN, LOOK, nearest-first) → Observer for floor arrival. Key: scheduling algorithm.
+> **Core entities**: `Elevator` (id, current floor, direction, state, max capacity) → `ElevatorController` → `Request` (floor, direction) → `Building`
+>
+> **Key patterns**:
+> - **Strategy** — `IDispatchStrategy` injected into `ElevatorController`: `NearestIdleStrategy` (minimize wait), `SameDirectionStrategy` (LOOK-like: prefer elevator already heading toward request), `RoundRobinStrategy` (even load). Dispatch picks *which elevator* handles a request. Each elevator internally services its stop queue in SCAN order (sweep up, then down).
+> - **Observer** — `IFloorArrivalObserver` notified when elevator reaches a floor. Floor display panels and telemetry/logging subscribe. The controller does NOT subscribe — it owns the request queue directly and mutates it on dispatch.
+> - **State** — `ElevatorState` enum (Idle, MovingUp, MovingDown, DoorsOpen, Maintenance). Clean state machine governs transitions.
+> - **Command** — Each `Request` is a command object queued and processed by the controller. Two types: `HallCall` (floor + direction, from outside) and `CarCall` (floor, from inside elevator).
+>
+> **State machine**:
+> ```mermaid
+> stateDiagram-v2
+>     [*] --> Idle
+>     Idle --> MovingUp : Request above
+>     Idle --> MovingDown : Request below
+>     Idle --> DoorsOpen : Request at current floor
+>     MovingUp --> DoorsOpen : Arrived at target
+>     MovingDown --> DoorsOpen : Arrived at target
+>     DoorsOpen --> Idle : No more requests
+>     DoorsOpen --> MovingUp : Next request above
+>     DoorsOpen --> MovingDown : Next request below
+>     Idle --> Maintenance : Manual trigger
+>     Maintenance --> Idle : Cleared
+> ```
+>
+> **Model answer**:
+> 1. User presses UP button on floor 3 → `HallCall(floor=3, direction=Up)` created
+> 2. `ElevatorController.Dispatch(request)` → dispatch strategy picks the best elevator: prefer one already moving up and below floor 3, then idle nearest, then any
+> 3. Elevator adds floor 3 to its internal stop queue. Internally, each elevator uses SCAN order: service all stops in current direction before reversing — prevents starvation
+> 4. Elevator moves floor-by-floor, checking at each: are there pickups or dropoffs here? If yes → `DoorsOpen` → load/unload → resume
+> 5. Capacity check before boarding: `if (elevator.CurrentLoad >= elevator.MaxCapacity)` skip pickup, leave hall call active for next elevator
+>
+> **Key code — Dispatch strategy (picks which elevator)**:
+> ```csharp
+> public class SameDirectionStrategy : IDispatchStrategy
+> {
+>     public Elevator? SelectElevator(Request request, List<Elevator> elevators)
+>     {
+>         return elevators
+>             .Where(e => e.State != ElevatorState.Maintenance)
+>             .Where(e => e.CurrentLoad < e.MaxCapacity)
+>             .OrderBy(e => IsMovingToward(e, request) ? 0 : 1)  // Prefer same-direction
+>             .ThenBy(e => e.State == ElevatorState.Idle ? 0 : 1) // Then idle
+>             .ThenBy(e => Math.Abs(e.CurrentFloor - request.Floor)) // Then nearest
+>             .FirstOrDefault();
+>     }
+> }
+> ```
+>
+> **Interviewer probes to expect**:
+> - **Hall calls vs car calls**: Hall call ("I want to go up from floor 3") is dispatched to an elevator. Car call ("Take me to floor 7") goes directly to that elevator's stop queue. These are separate request types — don't conflate them.
+> - **Starvation/fairness**: Pure nearest-first can starve distant floors. SCAN ordering prevents this by guaranteeing every floor in the sweep direction gets served before reversal.
+> - **Full elevator**: If the selected elevator is full when it arrives, the hall call must remain active and be reassigned to the next available elevator — not silently dropped.
+>
+> **Extension question: "Add VIP priority and emergency mode"**
+> 1. `Request` gets a `Priority` enum (Normal, VIP, Emergency)
+> 2. Controller uses `PriorityQueue<Request>` — emergency preempts everything
+> 3. Emergency mode: all elevators go to ground floor, doors open, ignore normal requests
+> 4. Zero changes to `Elevator` internals — only controller dispatch logic changes
 
 > [!question] "Design a chess game"
-> **Framework**: Board (8x8 grid) → Piece hierarchy → Each piece has movement strategy → Game manages turns → Move validation. Key: extensibility for new pieces.
-
+> **Core entities**: `Board` (8x8 grid of `Square`) → `Piece` hierarchy (King, Queen, Rook, Bishop, Knight, Pawn) → `Game` (manages turns, win conditions) → `Move` (from, to, captured piece)
+>
+> **Key patterns**:
+> - **Polymorphism** — Each `Piece` subclass implements `GetLegalMoves(board)`. Shared sliding logic lives in base class `SlideMoves()` helper (used by Rook, Bishop, Queen). Knight and Pawn override completely.
+> - **Template Method** — `Piece` base has `ExecuteMove(from, to, board)` that calls: `PreMoveValidation()` (shared: bounds + turn check) → `ApplyMove()` (shared: update board) → `PostMoveAction()` (override per piece: pawn promotion, castling flag update, en passant state). Subclasses customize `PostMoveAction` without rewriting the move flow.
+> - **Command** — `Move` object stores from, to, captured piece, and any special state (was it castling? en passant?) — making it undoable.
+> - **Observer** — `IGameObserver` notified on check, checkmate, stalemate. UI and game logger subscribe.
+>
+> **Model answer**:
+> 1. `Board` is 8x8 array of `Square` objects. Each square holds optional `Piece` reference and knows its position
+> 2. Each `Piece` subclass implements `GetLegalMoves(board)` returning `List<Move>` — this is where piece-specific logic lives (rook: rank/file lines until blocked; bishop: diagonals; knight: L-shapes ignoring blocks; pawn: forward + capture + en passant)
+> 3. `Game.TryMove(from, to)` flow: validate it is current player's piece → call `piece.GetLegalMoves(board)` → check if target is in legal moves → call `piece.ExecuteMove()` (Template Method) → check if own king is now in check (illegal, undo) → switch turns → check opponent for checkmate/stalemate
+> 4. Check detection: after every move, compute *attack squares* (pseudo-legal moves, ignoring self-check constraint) for all opponent pieces. If any attack square targets the king's position → king is in check. This avoids circular dependency between legality and check.
+> 5. Checkmate: king is in check AND no legal move by any piece removes the check (try every possible move, undo, see if king is still attacked)
+>
+> **Key code — Piece hierarchy with Template Method**:
+> ```csharp
+> public abstract class Piece
+> {
+>     public Color Color { get; }
+>     public Position Position { get; set; }
+>     public abstract List<Move> GetLegalMoves(Board board);
+>     
+>     // Template Method: shared flow, customizable post-action
+>     public Move ExecuteMove(Position to, Board board)
+>     {
+>         var captured = board.GetPiece(to);
+>         var move = new Move(Position, to, captured);
+>         board.MovePiece(this, to);         // Shared: update board state
+>         PostMoveAction(move, board);        // Override: pawn promotion, castling flags
+>         return move;
+>     }
+>     
+>     protected virtual void PostMoveAction(Move move, Board board) { } // Default: no-op
+>     
+>     protected List<Move> SlideMoves(Board board, (int dr, int dc)[] directions)
+>     {
+>         var moves = new List<Move>();
+>         foreach (var (dr, dc) in directions)
+>         {
+>             var pos = Position;
+>             while (true)
+>             {
+>                 pos = new Position(pos.Row + dr, pos.Col + dc);
+>                 if (!board.IsInBounds(pos)) break;
+>                 if (board.IsOccupiedByAlly(pos, Color)) break;
+>                 moves.Add(new Move(Position, pos, board.GetPiece(pos)));
+>                 if (board.IsOccupiedByEnemy(pos, Color)) break; // Capture then stop
+>             }
+>         }
+>         return moves;
+>     }
+> }
+> 
+> public class Pawn : Piece
+> {
+>     public override List<Move> GetLegalMoves(Board board) { /* forward, capture, en passant */ }
+>     protected override void PostMoveAction(Move move, Board board)
+>     {
+>         if (move.To.Row == PromotionRank)
+>             board.PromotePawn(this); // Replace pawn with chosen piece
+>     }
+> }
+> ```
+>
+> **Interviewer probes to expect**:
+> - **Special moves**: Castling (king + rook move together, requires neither has moved, no check through), en passant (capture pawn that just double-moved), promotion (pawn reaches back rank). Each needs state tracking — `HasMoved` flag on King/Rook, `lastDoublePawnMove` on Game.
+> - **Draw conditions**: Stalemate, threefold repetition (need board state hashing via Zobrist), fifty-move rule, insufficient material. Move history from Command pattern enables all of these.
+>
+> **Extension question: "Add undo/redo and move history"**
+> 1. `Move` already stores captured piece — `Undo()` restores piece to original square, puts captured piece back
+> 2. `Game` maintains `Stack<Move> history` and `Stack<Move> redoStack`
+> 3. Undo pops from history, pushes to redo. Any new move clears redo stack
+> 4. Move history enables PGN export, game replay, and draw-by-repetition detection
+> 5. Zero changes to `Piece` subclasses or `Board` — only `Game` orchestration changes
 ### Past Project Deep Dive Questions
 
 > [!question] "How did services communicate in your system?"
-> Name the pattern → Why you chose it → Trade-offs → Failure handling → What changes at 10x.
+> **Model answer (anchor to Dexter/Doculus — queue-based; SlackJack uses n8n workflows)**:
+> - "For **Dexter and Doculus**, we use **webhook-driven async pipelines**. External events (Jira webhooks, PR merge events) hit an HTTP endpoint, validate + normalize, then enqueue to RabbitMQ. Workers consume from the queue and run the AI pipeline."
+> - "**SlackJack is different** — it uses **n8n workflow orchestration** instead of a raw queue. Slack events trigger an n8n webhook, which routes by intent through a deterministic workflow before reaching the AI agent. n8n gives us visual workflow editing, easy human-in-the-loop insertion, and per-team workflow duplication without code changes."
+> - "We chose **async over sync** for all tools because LLM processing takes 5-30 seconds — holding an HTTP connection open that long causes timeout cascading and blocks the caller. With a queue (or n8n's async steps), the trigger returns 202 immediately, and processing happens at its own pace."
+> - "Internal service-to-service calls (e.g., worker calling the repo mapper or ticket parser) use **REST over HTTP** because the call graph is simple and tooling is mature. If we had high-frequency internal calls, I would switch to **gRPC** for typed contracts and lower latency."
+> - **Trade-offs**: Async adds complexity — you need idempotency keys (we derive from the stable webhook delivery ID — Jira's `webhookEvent` ID, GitHub's `X-GitHub-Delivery` header, Slack's `event_id`), dead-letter queues for poison messages, and correlation IDs threaded through the entire pipeline for tracing.
+> - **Failure handling**: Transient failures (LLM API 429/503) → exponential backoff with jitter via Polly. Permanent failures (invalid ticket, missing repo) → route to DLQ, alert on-call, create incident ticket. Circuit breaker on the LLM provider — trips after 5 consecutive failures in a 30-second window, half-open probes every 60 seconds. While tripped, return a degraded response and route to fallback queue.
+> - **At 10x scale**: The webhook endpoint becomes the bottleneck. I would add a load balancer in front, scale worker instances horizontally (queue-based autoscaling on queue depth), and partition queues by team/org to prevent noisy-neighbor issues.
 
 > [!question] "What database did you use and why?"
-> State DB → Data model fit → Query patterns → Indexing → Caching layer → Consistency requirements.
+> **Model answer (anchor to Dexter + SlackJack)**:
+> - "**PostgreSQL** for all structured state: ticket-to-repo mappings, run history, audit logs, workflow configuration. Postgres was the natural choice because the team already operates it, EF Core integration is mature, and the data is inherently relational (tickets reference repos, runs reference tickets)."
+> - "For SlackJack's conversation memory, Postgres with JSONB columns gives us flexible message storage with relational query power for threading and retrieval. No need for a separate document store."
+> - **Query patterns**: Most reads are by ticket ID or repo ID (indexed). Audit log queries are time-range scans (B-tree on `created_at`). We considered time-series DBs for telemetry but kept it in Postgres with partitioning — simpler ops for the team size.
+> - **Caching**: Redis for hot data — repo metadata that rarely changes (TTL: 1 hour), recent ticket context during active processing (TTL: 10 minutes). Cache-aside pattern: check Redis first, miss falls through to Postgres, populate cache on read.
+> - **Consistency**: Strong consistency for workflow state (a ticket must not be processed twice). Eventual consistency is fine for analytics dashboards and display metrics.
+> - **If I needed vector search** (e.g., embedding historical PRs for retrieval-grounded codegen): pgvector extension on the same Postgres instance. Keeps operational surface small. I would only move to a dedicated vector DB (Qdrant/Pinecone) if ANN query latency or index size exceeds what pgvector handles.
 
 > [!question] "How did you handle failures?"
-> Categorize (transient vs permanent) → Retry with backoff → Circuit breaker → DLQ → Alerting → Recovery.
+> **Model answer (anchor to production AI pipelines)**:
+> - "I categorize failures into three tiers with different handling strategies."
+> - **Tier 1 — Transient** (LLM API rate limits, network blips, DB connection timeout): Retry with exponential backoff + jitter. Polly policy: 3 retries, starting at 500ms, max 8s. Jitter prevents thundering herd when multiple workers retry simultaneously.
+> - **Tier 2 — Degraded dependency** (LLM provider consistently slow or erroring): Circuit breaker trips after 5 consecutive failures in a 30-second window. Half-open state probes every 60 seconds. While tripped: return a degraded response (“I was unable to generate code for this ticket, manual handling required”) and route the task to a fallback queue for later retry.
+> - **Tier 3 — Permanent** (invalid input, missing repo, unsupported ticket type): No retry. Route to DLQ immediately. Structured log with correlation ID, ticket ID, failure reason. Alert fires if DLQ depth exceeds threshold (>10 messages in 5 minutes → Slack alert to on-call).
+> - **Idempotency**: Every webhook handler derives an idempotency key from the stable delivery ID provided by the source system (Jira webhook ID, GitHub `X-GitHub-Delivery` header, Slack `event_id`). Before processing, check if key exists in Postgres. If yes, return cached result. This prevents duplicate PRs from webhook retries.
+> - **Observability**: Every pipeline stage emits structured logs with correlation ID. Metrics: failure rate by stage (ingestion/codegen/validation/PR creation), p95 latency per stage, DLQ depth, circuit breaker state. Dashboards in Grafana, alerts in PagerDuty.
+> - **Recovery**: For DLQ items, on-call reviews the failure reason. If it is a data issue (bad ticket format), fix and replay. If it is a code bug, fix, deploy, replay. Replay is safe because idempotency prevents duplicates.
 
 > [!question] "How would you scale to 100x?"
-> Identify bottleneck → Horizontal scaling → DB read replicas/sharding/CQRS → Caching → Async paths → CDN.
+> **Model answer (anchor to Dexter at 100x ticket volume)**:
+> - "First step: identify the actual bottleneck, not assume. At current scale, the LLM API is the bottleneck — it is the slowest stage by 10x (5-30s per call vs. <100ms for everything else)."
+> - **LLM layer**: Multiple provider accounts with load balancing (round-robin with health checks). Negotiate higher rate limits. Consider self-hosted models for high-volume, lower-complexity tasks (small codegen) while keeping frontier models for complex tickets.
+> - **Worker layer**: Horizontal scaling — spin up more workers. Queue-based autoscaling: when queue depth exceeds threshold for >2 minutes, add workers. Scale down when idle. Workers are stateless — all state lives in Postgres and Redis.
+> - **Database**: At 100x, read load grows fastest (dashboards, audit queries, status checks). Add read replicas. For write-heavy scenarios (audit logs at 100x), partition the audit table by month. If query patterns diverge significantly, consider CQRS: separate write model (normalized Postgres) from read model (denormalized views or Elasticsearch for search).
+> - **Queue**: Partition by team or org to prevent noisy neighbors. Add priority lanes — P1 tickets get dedicated queue with reserved worker capacity.
+> - **Caching**: More aggressive caching of repo metadata, ticket templates, prompt templates. Warm cache on deployment instead of lazy population.
+> - **What does NOT need to change**: The webhook → queue → worker architecture. It scales horizontally by design. The core pattern is sound; scaling is about tuning capacity at each stage.
 
 > [!question] "What would you do differently?"
-> Pick 1-2 concrete things → What you learned → Why original made sense → What changed → Better approach.
+> **Model answer (anchor to lessons from Dexter/Doculus)**:
+> - "**Evaluation infrastructure from day one.** We built Dexter's codegen pipeline before building systematic quality measurement. We relied on manual PR review to assess quality, which does not scale and gives inconsistent signal. If I started over, I would build a golden test set of 20-30 representative tickets with expected outputs before writing the first line of pipeline code. Every pipeline change would run against this set with automated scoring (code compiles, tests pass, diff similarity to expected)."
+> - "**Better component mapping.** Dexter's initial repo-to-ticket mapping was simple keyword matching. It worked for 60% of tickets but failed on ambiguous ownership (shared libraries, cross-team services). What I would do now: build the mapping from Git history — who changed what files for similar tickets — rather than static configuration. Historical ownership signals are more accurate than manual mappings."
+> - "The original decisions made sense at the time. We optimized for speed-to-MVP: get the pipeline working, prove value, then improve quality. That was correct — we proved the 20% ticket target was achievable. But I would timebox the 'no eval' phase to 2 weeks max, not let it stretch to a month."
+> - **Why the original made sense**: Small team, tight deadline, needed to prove concept before investing in infrastructure. The fast approach gave us data to justify the investment.
+> - **What changed**: Scale — manual review of AI outputs does not work past ~50 tickets/week. And trust — without automated quality gates, engineers did not trust Dexter's PRs enough to merge without heavy review, defeating the throughput goal.
+> - **Security note**: Scoped tokens with least-privilege access for each integration (read-only Jira token for ticket fetch, write-scoped Git token limited to PR creation). Slack PII handled by stripping user emails from AI context. Audit log retention for compliance — all AI decisions traceable to source event + model version.
 
 ### API Design Quick Reference
 
