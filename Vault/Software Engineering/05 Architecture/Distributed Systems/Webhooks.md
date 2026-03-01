@@ -6,8 +6,9 @@ subtopic:
 level:
   - "2"
 priority: Medium
-status: Not-Started
-dg-publish: false
+status:
+  - Ready To Repeat
+dg-publish: true
 ---
 
 # Intro
