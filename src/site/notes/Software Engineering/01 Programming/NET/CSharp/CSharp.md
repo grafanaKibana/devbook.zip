@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/c-sharp/c-sharp/","tags":["FolderNote"],"noteIcon":"3"}
+{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/c-sharp/c-sharp/","tags":["FolderNote"]}
 ---
 
 

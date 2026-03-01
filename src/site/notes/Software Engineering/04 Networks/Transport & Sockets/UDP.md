@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/04-networks/transport-and-sockets/udp/","noteIcon":"3"}
+{"dg-publish":true,"permalink":"/software-engineering/04-networks/transport-and-sockets/udp/"}
 ---
 
 

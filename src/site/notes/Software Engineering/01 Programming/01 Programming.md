@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/01-programming/01-programming/","tags":["FolderNote"],"noteIcon":"3"}
+{"dg-publish":true,"permalink":"/software-engineering/01-programming/01-programming/","tags":["FolderNote"]}
 ---
 
 

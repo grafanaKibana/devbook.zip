@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/09-dev-ops/docker/","noteIcon":"3"}
+{"dg-publish":true,"permalink":"/software-engineering/09-dev-ops/docker/"}
 ---
 
 

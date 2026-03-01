@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/sql/replication/","noteIcon":"3"}
+{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/sql/replication/"}
 ---
 
 

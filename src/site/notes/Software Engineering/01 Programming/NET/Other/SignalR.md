@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/other/signal-r/","noteIcon":"3"}
+{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/other/signal-r/"}
 ---
 
 

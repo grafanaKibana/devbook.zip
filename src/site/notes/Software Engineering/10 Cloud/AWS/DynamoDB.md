@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/10-cloud/aws/dynamo-db/","noteIcon":"3"}
+{"dg-publish":true,"permalink":"/software-engineering/10-cloud/aws/dynamo-db/"}
 ---
 
 

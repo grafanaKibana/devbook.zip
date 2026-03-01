@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/prompting/in-context-learning/","noteIcon":"3"}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/prompting/in-context-learning/"}
 ---
 
 

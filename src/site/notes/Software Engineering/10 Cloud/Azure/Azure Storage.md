@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/10-cloud/azure/azure-storage/","noteIcon":"3"}
+{"dg-publish":true,"permalink":"/software-engineering/10-cloud/azure/azure-storage/"}
 ---
 
 

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/07-security/authentication/oauth-oidc-open-id-connect/","noteIcon":"3"}
+{"dg-publish":true,"permalink":"/software-engineering/07-security/authentication/oauth-oidc-open-id-connect/"}
 ---
 
 

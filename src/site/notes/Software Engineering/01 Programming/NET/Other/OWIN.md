@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/other/owin/","noteIcon":"3"}
+{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/other/owin/"}
 ---
 
 

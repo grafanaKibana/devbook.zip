@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/distributed-systems/distributed-systems/","tags":["FolderNote"],"noteIcon":"3"}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/distributed-systems/distributed-systems/","tags":["FolderNote"]}
 ---
 
 

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/02-computer-science/","tags":["FolderNote"],"noteIcon":"3"}
+{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/02-computer-science/","tags":["FolderNote"]}
 ---
 
 

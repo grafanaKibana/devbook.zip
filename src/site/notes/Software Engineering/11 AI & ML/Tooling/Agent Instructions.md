@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/tooling/agent-instructions/","noteIcon":"3"}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/tooling/agent-instructions/"}
 ---
 
 

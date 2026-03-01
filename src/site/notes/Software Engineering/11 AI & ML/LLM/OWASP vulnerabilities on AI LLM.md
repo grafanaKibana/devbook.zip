@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/owasp-vulnerabilities-on-ai-llm/","noteIcon":"3"}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/owasp-vulnerabilities-on-ai-llm/"}
 ---
 
 

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/software-engineering/","tags":["FolderNote","MetricsIgnore","gardenEntry"],"noteIcon":"3"}
+{"dg-publish":true,"permalink":"/software-engineering/software-engineering/","tags":["FolderNote","MetricsIgnore","gardenEntry"]}
 ---
 
 

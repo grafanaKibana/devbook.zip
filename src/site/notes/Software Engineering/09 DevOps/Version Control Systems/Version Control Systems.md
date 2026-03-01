@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/09-dev-ops/version-control-systems/version-control-systems/","tags":["FolderNote"],"noteIcon":"3"}
+{"dg-publish":true,"permalink":"/software-engineering/09-dev-ops/version-control-systems/version-control-systems/","tags":["FolderNote"]}
 ---
 
 
