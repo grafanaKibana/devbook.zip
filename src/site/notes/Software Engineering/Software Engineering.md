@@ -5,11 +5,11 @@
 
 # Topic Coverage
 
-<div class="block-language-dataview"><table class="dataview table-view-table"><thead class="table-view-thead"><tr><th>Topic</th><th>Progress</th><th>Done</th></tr></thead><tbody class="table-view-tbody"><tr><td>AI &amp; ML</td><td><progress class="se-progress" max="100" value="62"></progress><span> 62%</span></td><td>19/39</td></tr><tr><td>Computer Science</td><td><progress class="se-progress" max="100" value="62"></progress><span> 62%</span></td><td>0/23</td></tr><tr><td>Programming</td><td><progress class="se-progress" max="100" value="59"></progress><span> 59%</span></td><td>6/32</td></tr><tr><td>Security</td><td><progress class="se-progress" max="100" value="53"></progress><span> 53%</span></td><td>0/10</td></tr><tr><td>Architecture</td><td><progress class="se-progress" max="100" value="50"></progress><span> 50%</span></td><td>0/27</td></tr><tr><td>Development Practices</td><td><progress class="se-progress" max="100" value="50"></progress><span> 50%</span></td><td>0/11</td></tr><tr><td>Data Persistence</td><td><progress class="se-progress" max="100" value="46"></progress><span> 46%</span></td><td>0/7</td></tr><tr><td>SDLC</td><td><progress class="se-progress" max="100" value="38"></progress><span> 38%</span></td><td>0/2</td></tr><tr><td>DevOps</td><td><progress class="se-progress" max="100" value="25"></progress><span> 25%</span></td><td>0/10</td></tr><tr><td>Cloud</td><td><progress class="se-progress" max="100" value="24"></progress><span> 24%</span></td><td>0/19</td></tr><tr><td>Networks</td><td><progress class="se-progress" max="100" value="15"></progress><span> 15%</span></td><td>0/12</td></tr><tr class="se-total-row"><td>Total</td><td><progress class="se-progress" max="100" value="49"></progress><span> 49%</span></td><td>25/192</td></tr></tbody></table></div>
+<div class="block-language-dataview"><table class="dataview table-view-table"><thead class="table-view-thead"><tr><th>Topic</th><th>Progress</th><th>Done</th></tr></thead><tbody class="table-view-tbody"><tr><td>AI &amp; ML</td><td><progress class="se-progress" max="100" value="62"></progress><span> 62%</span></td><td>19/39</td></tr><tr><td>Computer Science</td><td><progress class="se-progress" max="100" value="62"></progress><span> 62%</span></td><td>0/23</td></tr><tr><td>Security</td><td><progress class="se-progress" max="100" value="53"></progress><span> 53%</span></td><td>0/10</td></tr><tr><td>Architecture</td><td><progress class="se-progress" max="100" value="50"></progress><span> 50%</span></td><td>0/27</td></tr><tr><td>Development Practices</td><td><progress class="se-progress" max="100" value="50"></progress><span> 50%</span></td><td>0/11</td></tr><tr><td>Data Persistence</td><td><progress class="se-progress" max="100" value="46"></progress><span> 46%</span></td><td>0/7</td></tr><tr><td>SDLC</td><td><progress class="se-progress" max="100" value="38"></progress><span> 38%</span></td><td>0/2</td></tr><tr><td>Programming</td><td><progress class="se-progress" max="100" value="25"></progress><span> 25%</span></td><td>0/32</td></tr><tr><td>DevOps</td><td><progress class="se-progress" max="100" value="25"></progress><span> 25%</span></td><td>0/10</td></tr><tr><td>Cloud</td><td><progress class="se-progress" max="100" value="24"></progress><span> 24%</span></td><td>0/19</td></tr><tr><td>Networks</td><td><progress class="se-progress" max="100" value="15"></progress><span> 15%</span></td><td>0/12</td></tr><tr class="se-total-row"><td>Total</td><td><progress class="se-progress" max="100" value="43"></progress><span> 43%</span></td><td>19/192</td></tr></tbody></table></div>
 
 # Status Distribution
 
-<div class="block-language-dataview"><table class="dataview table-view-table"><thead class="table-view-thead"><tr><th>Status</th><th>Distribution</th><th>Count</th></tr></thead><tbody class="table-view-tbody"><tr><td>Done</td><td><progress class="se-progress" max="100" value="12"></progress><span> 12%</span></td><td>29</td></tr><tr><td>Ready To Repeat</td><td><progress class="se-progress" max="100" value="38"></progress><span> 38%</span></td><td>96</td></tr><tr><td>Repetition</td><td><progress class="se-progress" max="100" value="0"></progress><span> 0%</span></td><td>0</td></tr><tr><td>Creation</td><td><progress class="se-progress" max="100" value="34"></progress><span> 34%</span></td><td>85</td></tr><tr><td>Not-Started</td><td><progress class="se-progress" max="100" value="16"></progress><span> 16%</span></td><td>40</td></tr></tbody></table></div>
+<div class="block-language-dataview"><table class="dataview table-view-table"><thead class="table-view-thead"><tr><th>Status</th><th>Distribution</th><th>Count</th></tr></thead><tbody class="table-view-tbody"><tr><td>Done</td><td><progress class="se-progress" max="100" value="9"></progress><span> 9%</span></td><td>23</td></tr><tr><td>Ready To Repeat</td><td><progress class="se-progress" max="100" value="31"></progress><span> 31%</span></td><td>77</td></tr><tr><td>Repetition</td><td><progress class="se-progress" max="100" value="0"></progress><span> 0%</span></td><td>0</td></tr><tr><td>Creation</td><td><progress class="se-progress" max="100" value="46"></progress><span> 46%</span></td><td>114</td></tr><tr><td>Not-Started</td><td><progress class="se-progress" max="100" value="14"></progress><span> 14%</span></td><td>36</td></tr></tbody></table></div>
 
 # Priority Distribution
 
@@ -21,39 +21,39 @@
 
 # Focus
 
-| Note                                                                                                                    | Topic        | Status          | Priority |
-| ----------------------------------------------------------------------------------------------------------------------- | ------------ | --------------- | -------- |
-| [[Software Engineering/05 Architecture/System Architecture/Microservices\|Microservices]]                            | Architecture | Ready To Repeat | Medium   |
-| [[Software Engineering/05 Architecture/System Architecture/System Architecture\|System Architecture]]                | Architecture | Ready To Repeat | Medium   |
-| [[Software Engineering/10 Cloud/10 Cloud\|10 Cloud]]                                                                 | Cloud        | Creation        | Medium   |
-| [[Software Engineering/11 AI & ML/Tooling/Hooks\|Hooks]]                                                             | AI & ML      | Creation        | Medium   |
-| [[Software Engineering/11 AI & ML/Tooling/Plugins\|Plugins]]                                                         | AI & ML      | Creation        | Medium   |
-| [[Software Engineering/11 AI & ML/Tooling/Skills\|Skills]]                                                           | AI & ML      | Creation        | Medium   |
-| [[Software Engineering/11 AI & ML/Tooling/Tooling\|Tooling]]                                                         | AI & ML      | Creation        | Medium   |
-| [[Software Engineering/11 AI & ML/Tooling/Coding Agents\|Coding Agents]]                                             | AI & ML      | Creation        | Medium   |
-| [[Software Engineering/11 AI & ML/Tooling/Agent Instructions\|Agent Instructions]]                                   | AI & ML      | Creation        | Medium   |
-| [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/Classification Evaluation\|Classification Evaluation]] | AI & ML      | Creation        | Medium   |
-| [[Software Engineering/11 AI & ML/LLM/Guardrails\|Guardrails]]                                                       | AI & ML      | Creation        | Medium   |
-| [[Software Engineering/11 AI & ML/LLM/Hallucinations\|Hallucinations]]                                               | AI & ML      | Creation        | Medium   |
+| Note                                                                                                                   | Topic       | Status   | Priority |
+| ---------------------------------------------------------------------------------------------------------------------- | ----------- | -------- | -------- |
+| [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/CancellationToken\|CancellationToken]] | Programming | Creation | Medium   |
+| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Generics\|Generics]]                                  | Programming | Creation | Medium   |
+| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Reflection\|Reflection]]                              | Programming | Creation | Medium   |
+| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Methods\|Methods]]                                    | Programming | Creation | Medium   |
+| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Namespaces\|Namespaces]]                              | Programming | Creation | Medium   |
+| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Exception Handling\|Exception Handling]]              | Programming | Creation | Medium   |
+| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Records\|Records]]                              | Programming | Creation | Medium   |
+| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Events\|Events]]                                | Programming | Creation | Medium   |
+| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types\|Types]]                                  | Programming | Creation | Medium   |
+| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Classes\|Classes]]                              | Programming | Creation | Medium   |
+| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Strings\|Strings]]                              | Programming | Creation | Medium   |
+| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Structs\|Structs]]                              | Programming | Creation | Medium   |
 
 { .block-language-dataview}
 
 # Recently Updated
 
-| Note                                                                                                               | Date                         |
-| ------------------------------------------------------------------------------------------------------------------ | ---------------------------- |
-| [[Software Engineering/05 Architecture/Patterns/Resilience Patterns/Rate Limiting\|Rate Limiting]]              | 11:16 PM - February 28, 2026 |
-| [[Software Engineering/05 Architecture/Patterns/Resilience Patterns/Resilience Patterns\|Resilience Patterns]]  | 11:16 PM - February 28, 2026 |
-| [[Software Engineering/05 Architecture/Patterns/Dependency Injection\|Dependency Injection]]                    | 11:16 PM - February 28, 2026 |
-| [[Software Engineering/05 Architecture/Patterns/Patterns\|Patterns]]                                            | 11:16 PM - February 28, 2026 |
-| [[Software Engineering/05 Architecture/Patterns/Repository & UoW\|Repository & UoW]]                            | 11:16 PM - February 28, 2026 |
-| [[Software Engineering/05 Architecture/Patterns/CQS\|CQS]]                                                      | 11:16 PM - February 28, 2026 |
-| [[Software Engineering/05 Architecture/Patterns/Resilience Patterns/Circuit Breaker\|Circuit Breaker]]          | 11:15 PM - February 28, 2026 |
-| [[Software Engineering/05 Architecture/Distributed Systems/CAP theorem\|CAP theorem]]                           | 11:14 PM - February 28, 2026 |
-| [[Software Engineering/05 Architecture/Distributed Systems/Consistency Models\|Consistency Models]]             | 11:14 PM - February 28, 2026 |
-| [[Software Engineering/05 Architecture/Distributed Systems/API Gateway\|API Gateway]]                           | 11:14 PM - February 28, 2026 |
-| [[Software Engineering/05 Architecture/Distributed Systems/Distributed Systems\|Distributed Systems]]           | 11:14 PM - February 28, 2026 |
-| [[Software Engineering/05 Architecture/Distributed Systems/Distributed Transactions\|Distributed Transactions]] | 11:14 PM - February 28, 2026 |
+| Note                                                                                                                   | Date                     |
+| ---------------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| [[Software Engineering/01 Programming/01 Programming\|01 Programming]]                                              | 3:46 AM - March 01, 2026 |
+| [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/CancellationToken\|CancellationToken]] | 3:33 AM - March 01, 2026 |
+| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Generics\|Generics]]                                  | 3:33 AM - March 01, 2026 |
+| [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Deadlocks\|Deadlocks]]                 | 3:33 AM - March 01, 2026 |
+| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Reflection\|Reflection]]                              | 3:31 AM - March 01, 2026 |
+| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Methods\|Methods]]                                    | 3:31 AM - March 01, 2026 |
+| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals\|Fundamentals]]                          | 3:31 AM - March 01, 2026 |
+| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Namespaces\|Namespaces]]                              | 3:31 AM - March 01, 2026 |
+| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Exception Handling\|Exception Handling]]              | 3:31 AM - March 01, 2026 |
+| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Foreach\|Foreach]]                                    | 3:31 AM - March 01, 2026 |
+| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Records\|Records]]                              | 3:31 AM - March 01, 2026 |
+| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Events\|Events]]                                | 3:31 AM - March 01, 2026 |
 
 { .block-language-dataview}
 # Publish Distribution
