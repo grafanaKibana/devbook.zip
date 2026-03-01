@@ -163,12 +163,6 @@ public sealed class LlmGateway
 }
 ```
 
-## Why this configuration is interview-strong
-
-- It names the exact thresholds and ties them to traffic (`MinimumThroughput`) and error budget (`FailureRatio`).
-- It encodes failure semantics (`429` and `5xx` yes, non-retriable `4xx` no) via `ShouldHandle`.
-- It exposes lifecycle hooks (`OnOpened`, `OnHalfOpened`, `OnClosed`) for alerting and dashboards.
-- It demonstrates operational behavior, not just syntax.
 
 # Integration with Other Resilience Patterns
 

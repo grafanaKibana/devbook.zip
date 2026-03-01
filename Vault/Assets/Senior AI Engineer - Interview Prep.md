@@ -32,7 +32,7 @@
 - [x] Understand all 4 [[#AI System Design Patterns]] — Webhook→Queue→Worker, Rate Limiting, Vector DB, Async Validation
 - [x] Study [[#Project Deep Dive Framework (How to Present ANY Past Project)|5-Layer Presentation Framework]] with cheat sheets: [[#Communication Patterns Cheat Sheet|communication]], [[#Database Selection Cheat Sheet|databases]], [[#Scalability Patterns Quick Reference|scalability]], [[#Consistency Models|consistency]]
 - [x] Walk through [[#Class Design Round — Robot-Managed Restaurant (HackerRank Style)|Robot Restaurant class design]] end-to-end — diagram, patterns ([[Design Patterns]]), A* pathfinding, extension question
-- [ ] Practice [[#Day 3 Practice Q&A]] + [[#Class Design Questions (HackerRank Round)|additional class design questions]]
+- [x] Practice [[#Day 3 Practice Q&A]] + [[#Class Design Questions (HackerRank Round)|additional class design questions]]
 
 ### Day 4 (Sunday) — Projects & AI Ownership
 
@@ -42,7 +42,7 @@
 - [x] Memorize [[#DraftKings Numbers to Anchor|DK numbers]]: 20% tickets via AI · 15% throughput · 100% 101 completion
 - [x] Review [[#DraftKings Intelligence Brief]] — vision, 2026 goals, priority timeline
 - [ ] Study [[#Interview Traps & Ownership Signals]] — internalize traps + practice [[#Ownership Phrases to Practice Verbatim|ownership phrases]] out loud
-- [ ] Practice [[#Day 4 Practice Q&A]] — all 3 questions out loud
+- [x] Practice [[#Day 4 Practice Q&A]] — all 3 questions out loud
 
 ### Day 5 (Monday) — Final Review
 
