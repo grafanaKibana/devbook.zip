@@ -1,12 +1,13 @@
 ---
 topic:
-  - "Computer Science"
+  - Computer Science
 subtopic:
-  - "Algorithms"
+  - Algorithms
 level:
   - "4"
 priority: Medium
-status: Done
+status:
+  - Done
 dg-publish: true
 ---
 
