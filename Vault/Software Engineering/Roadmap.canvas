@@ -1069,7 +1069,7 @@
     "version": "1.0-1.0",
     "frontmatter": {
       "dg-publish": true,
-      "permalink": "/software-engineering/roadmap/",
+      "permalink": "/roadmap/",
       "title": "Roadmap"
     }
   }

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/questions/","tags":["FolderNote","MetricsIgnore"],"noteIcon":"3"}
+{"dg-publish":true,"permalink":"/questions/","tags":["FolderNote","MetricsIgnore"],"noteIcon":"3"}
 ---
 
 
