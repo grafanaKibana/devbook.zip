@@ -108,11 +108,15 @@ These rules exist to make notes useful for the Senior .NET / AI engineering role
 
 Writing paradigm
 
-Three principles govern note content. Apply them as judgment calls, not checklists.
+Seven principles govern note content. Apply them as judgment calls, not checklists.
 
 1. **Concrete over abstract** — Ground every claim in a specific example, mechanism, or scenario. Never write "it depends" without showing on what. Never describe a technique without showing what it does to real input.
 2. **Show the machine** — Explain how things actually work: what goes in, what comes out, what breaks if you get it wrong. The reader should understand the mechanism, not just the label.
 3. **Depth matches complexity** — A note's size must be proportional to the topic's actual complexity. Simple topics get compact notes. Complex topics earn detailed explanations. (See "Scope-to-depth fit" below for specifics.)
+4. **Scannable by design** — A note is a reference the reader returns to, not a one-time tutorial. Someone searching for a specific pitfall or comparing two approaches should orient immediately without reading from the top. Consistent internal structure and labeled transitions (bold phrases that signal what follows — mechanism, use case, risk, mitigation) serve as landmarks the way API documentation lets you jump to the method you need.
+5. **Opinionated over neutral** — Comparisons exist to help the reader decide, not to present a balanced menu. Every table, every list of alternatives should leave the reader with a concrete recommendation and the conditions under which it changes. Neutral enumeration without a decision rule forces the reader to do the synthesis work the note should have done.
+6. **Symmetric treatment** — When a note presents multiple alternatives, each one deserves the same questions answered at the same depth. If one approach gets a mechanism explanation, failure modes, and use cases, every other approach should too. Asymmetry signals incomplete understanding and undermines trust in the comparison.
+7. **Tradeoff-anchored** — Engineering is choosing under constraints, not following best practices. Every recommendation, every pitfall mitigation, every question answer should make the cost explicit. "Use X" is incomplete; "Use X — it costs Y, which is acceptable when Z" is engineering advice.
 
 These principles override specific section rules. If following a section template produces abstract filler, cut the section.
 
@@ -132,6 +136,7 @@ Required content (for any non-trivial concept page)
   - .NET: prefer a `csharp` code snippet, and optionally a `json`/`yaml` config snippet.
   - AI/LLM: prefer an end-to-end request/response shape, evaluation snippet, or a minimal pipeline pseudo-code.
   - Agentic AI / agent orchestration: prefer C# with Microsoft Agent Framework (`Microsoft.Agents.AI.*` packages) over Python or Semantic Kernel. MAF is the direct successor to SK and AutoGen; use MAF APIs (`AIAgent`, `ChatClientAgent`, `AgentWorkflowBuilder`) for all agent code examples.
+  - Examples should read like they come from a real system — specific metrics, error codes, dollar amounts, tenant names — so the reader trusts the advice and can map it to their own production context. Abstract "imagine a scenario" setups signal theoretical reasoning rather than experience.
 - **Pitfalls**: conditional content. Include only when the topic has non-obvious real-world failure modes.
   - **MUST include** pitfall coverage when the topic has at least one non-obvious production failure mode (performance, correctness, security, reliability, or operations).
   - **MAY omit** a standalone `Pitfalls` heading when there are no meaningful pitfalls, or when one short caution can be covered inline in `Intro`.
@@ -139,16 +144,21 @@ Required content (for any non-trivial concept page)
     - what can go wrong (specific scenario)
     - why it happens (cause/mechanism)
     - how to avoid or detect it (mitigation/guardrail)
+  - Name each pitfall heading after the specific failure mode so a reader scanning can identify relevant risks without reading the body.
 - Do not add generic filler such as "handle errors" or "write tests" unless tied to a concrete topic-specific failure.
 - **Tradeoffs**: conditional section. Include only when there are multiple plausible choices that a senior engineer would realistically compare.
   - **MUST include** a `Tradeoffs` section when there are 2+ viable options and the right choice depends on constraints.
   - **MAY omit** `Tradeoffs` when one approach is clearly dominant for this scope, or alternatives are out of scope/deprecated.
   - If `Tradeoffs` exists, compare concrete options with decision criteria (latency, memory, complexity, operability, cost, team constraints).
   - Do not create strawman comparisons (real option vs obviously bad option).
-- **Questions**: include 1-3 direct interview-style questions with expected answers and a clear explanation of why.
-- **References**: 2-10 external links.
-  - At least 1 should be an "anchor" reference (official docs/spec/RFC/vendor-neutral standard).
-  - At least 1 should be a "practice" reference from real-world engineering experience (postmortem, production deep-dive, senior practitioner blog/talk) with concrete lessons.
+  - Close every comparison with a concrete decision rule — what to start with, when to switch, what signals indicate the current choice is wrong. The reader should leave with a decision, not a menu.
+- **Questions**: conditional content. Include when the topic has non-obvious interview value — judgment calls, tradeoffs, or failure modes that test engineering reasoning beyond what the intro already explains.
+  - **MUST include** questions when the topic involves decisions a senior engineer should be able to articulate under pressure (architecture choices, failure analysis, performance tradeoffs).
+  - **MAY omit** questions when the topic is definitional or mechanical — where the intro already teaches everything worth knowing and a question would just ask the reader to repeat it.
+  - If `Questions` exists, each should have a short expected answer (3-8 bullets) that demonstrates judgment, not recall.
+- **References**: conditional depth. At least 1 external link (official docs or primary source) for any published page.
+  - For non-trivial topics, include 2-10 links with at least 1 anchor source (official docs/spec/RFC) and 1 practice source (practitioner blog/postmortem/production deep-dive).
+  - For simple/definitional topics, a single official docs link is sufficient — do not pad with marginally relevant links to hit a count.
 
 Section minimalism rule
 
@@ -212,6 +222,7 @@ Question quality rules
 - Avoid scenario-based stems that set up a specific situation before the question ("A team does X and Y happens", "A system uses X with Y configuration"). Prefer direct questions that ask about the concept ("Why can X cause Y?", "When is X justified over Y?", "How does X reduce Y?").
 - Use precise action verbs in stems when helpful: explain, compare, evaluate, choose, justify.
 - Each question should have a short "expected answer" (3-8 bullets) and mention key tradeoffs.
+- Answers should close with an explicit tradeoff statement. The goal is to train engineering judgment — thinking in constraints and costs — not factual recall.
 
 Reference hygiene
 
@@ -221,6 +232,7 @@ Reference hygiene
 - Do not add links that are not directly useful for learning the current topic.
 - When updating an existing note, de-duplicate references first; replace weaker/older links instead of only appending new ones.
 - Prefer at least one practitioner source with first-hand implementation insight, not only vendor documentation.
+- Annotate each reference so the reader can assess its relevance without clicking — briefly describe what the page covers and who wrote it. The reader should know what they will find before they leave the note.
 
 ### Mandatory reviewer subagent gate
 
@@ -265,6 +277,8 @@ Minimum validation checklist (must all pass)
 - All fenced code blocks have a language specified (MD040). Use `text` for generic blocks.
 - Scope-to-depth fit: note depth matches topic complexity (not overstuffed for small topics; not thin for complex ones).
 - Split heuristic checked: if >1200 words OR >12 headings AND 2+ distinct concepts, Split Suggestion is included.
+- Writing paradigm: note feels scannable (reader orients without reading from the top), opinionated (comparisons end with recommendations), symmetric (alternatives get equal treatment), and tradeoff-anchored (costs are explicit).
+- References are annotated so the reader can assess relevance without clicking.
 
 Mandatory reviewer prompt format
 
@@ -374,5 +388,5 @@ obsidian tasks daily todo
 
 - If request changes vault structure/formatting rules, ask user whether to update AGENTS.md Memory.
 - **Placement and scope check.** Before creating or moving pages, the agent MUST run the placement and scope check defined in "Creating structure" — even when the user's instruction seems clear. See [Placement and scope check](#placement-and-scope-check-before-creating-pages).
-- **AGENTS.md evolution rule.** When updating this contract, prefer extending the writing paradigm or strengthening existing principles over adding prescriptive format rules. If a proposed rule can be derived from the three writing principles (concrete over abstract, show the machine, depth matches complexity), strengthen the principle instead of adding a new rule. Rules should guide judgment, not prescribe specific section templates or bullet formats for each case.
+- **AGENTS.md evolution rule.** When updating this contract, prefer extending the writing paradigm or strengthening existing principles over adding prescriptive format rules. If a proposed rule can be derived from the seven writing principles (concrete over abstract, show the machine, depth matches complexity, scannable by design, opinionated over neutral, symmetric treatment, tradeoff-anchored), strengthen the principle instead of adding a new rule. Rules should guide judgment, not prescribe specific section templates or bullet formats for each case.
 - **No automatic commits.** Never create git commits unless the user explicitly asks. Leave changes unstaged/uncommitted so the user controls when and what to commit.

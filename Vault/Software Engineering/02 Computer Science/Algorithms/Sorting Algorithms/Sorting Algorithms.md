@@ -43,6 +43,10 @@ flowchart TD
 > - It is commonly used as a base case inside hybrid production sort implementations.
 > - Why it matters: knowing this avoids overengineering and explains hybrid sort internals in interviews.
 
+> [!QUESTION]- What does .NET's built-in Array.Sort use, and why?
+> .NET uses an introspective sort (IntroSort): it starts with Quick Sort for fast average performance, switches to Heap Sort when recursion depth exceeds a threshold (to guarantee O(n log n) worst case), and uses Insertion Sort for small partitions (to exploit its low overhead on nearly-sorted data).
+> This hybrid approach demonstrates why production sort implementations combine multiple algorithms rather than using a single one.
+
 ## Links
 
 - [Sorting algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Sorting_algorithm)

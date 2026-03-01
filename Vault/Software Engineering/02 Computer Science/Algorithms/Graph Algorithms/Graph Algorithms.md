@@ -42,11 +42,16 @@ flowchart TD
 > - Bellman Ford handles negative edges by repeated relaxation.
 > - Why it matters: this is a common correctness trap in interviews and real systems.
 
+> [!QUESTION]- What representation should you use for a graph: adjacency list or adjacency matrix?
+> Adjacency list is the default for sparse graphs (most real-world graphs): O(V+E) space, efficient neighbor iteration. Adjacency matrix uses O(V²) space but gives O(1) edge existence checks.
+> Use adjacency matrix only for dense graphs or when you need fast "is there an edge between A and B?" queries. In .NET, `Dictionary<T, List<T>>` is a common adjacency list implementation.
+
 ## Links
 
 - [Graph algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Graph_algorithm)
 - [Introduction to algorithms graph lectures MIT](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/pages/lecture-notes/)
 - [Graph algorithms cp algorithms](https://cp-algorithms.com/graph/)
+- [Graph algorithms (Sedgewick and Wayne, Algorithms 4th ed.)](https://algs4.cs.princeton.edu/40graphs/) — Practitioner-oriented chapter covering graph representations, traversal implementations, and shortest-path algorithms with Java code and performance analysis.
 
 <!-- whats-next:start -->
 
