@@ -5,10 +5,8 @@ subtopic:
   - NET
 level:
   - "4"
-priority:
-  - Medium
-status:
-  - Done
+priority: Medium
+status: Creation
 dg-publish: true
 ---
 
