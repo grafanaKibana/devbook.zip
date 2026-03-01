@@ -49,6 +49,18 @@ status: Not-Started
 - `priority`: `Low`, `Medium`, or `High` (default: `Medium`)
 - `status`: one of `Not-Started`, `Repetition`, `Creation`, `Ready To Repeat`, `Done`
 
+Status tracks both note completeness and personal learning progress (spaced repetition). Lifecycle: `Not-Started` → `Creation` → `Ready To Repeat` → `Repetition` → `Ready To Repeat` (another cycle) or `Done`.
+
+| Status | Meaning |
+|--------|---------|
+| `Not-Started` | Stub/placeholder — no content written, topic not yet studied. |
+| `Creation` | Work in progress — note is being written and/or topic is being studied for the first time. |
+| `Ready To Repeat` | Note content is complete and queued for spaced repetition. |
+| `Repetition` | Currently in active review — re-reading and reinforcing knowledge. **User-only.** |
+| `Done` | Mastered and note complete. **User-only.** |
+
+Agent rule: agents may set `Not-Started`, `Creation`, or `Ready To Repeat`. Agents must never set `Repetition` or `Done`.
+
 Hub notes only need `tags: [FolderNote]`. Concept pages do NOT need FolderNote tag unless they are also hub notes.
 
 ### Placement and scope check (before creating pages)
