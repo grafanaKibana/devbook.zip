@@ -5,82 +5,23 @@ subtopic:
   - Patterns
 tags:
   - FolderNote
-dg-publish: false
-status: Not-Started
-priority: Medium
+dg-publish: true
+status: Ready To Repeat
+priority: High
 level:
   - "3"
 ---
 
 # Intro
 
-Resilience patterns protect systems from cascading failures and traffic overload. Circuit breakers stop calling failing dependencies, and rate limiters cap request volume to prevent resource exhaustion. Both are essential in distributed systems where partial failures are normal.
+Resilience patterns protect distributed systems from cascading failures by controlling how services behave when dependencies degrade. The core insight is that partial failure is the normal state — something is always slow, overloaded, or down — and uncontrolled failure propagation turns a single slow dependency into a system-wide outage. Without explicit resilience boundaries, threads, sockets, and retries pile up until healthy parts of the system also degrade.
 
-## Links
+The two foundational patterns here are [[Software Engineering/05 Architecture/Patterns/Resilience Patterns/Circuit Breaker|Circuit Breaker]] (stop calling a failing dependency and fail fast instead of waiting) and [[Software Engineering/05 Architecture/Patterns/Resilience Patterns/Rate Limiting|Rate Limiting]] (cap request volume so one caller cannot exhaust shared resources). In production .NET systems, these compose into a resilience stack together with timeouts, retries with exponential backoff, and fallbacks — each layer handling a different failure mode. Polly and `Microsoft.Extensions.Resilience` wire these layers into a single `HttpClient` pipeline.
 
-- [Release It! (Michael Nygard)](https://pragprog.com/titles/mnee2/release-it-second-edition/) — foundational patterns for production resilience.
+## References
 
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/Patterns/Patterns|Patterns]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Patterns/Resilience Patterns/Circuit Breaker|Circuit Breaker]]
-<!-- whats-next:end -->
-# Intro
-
-Quick introduction to the concept
-For simple topics, keep mechanism + example inline in this section.
-Add standalone sections only when they improve clarity:
-- `## How It Works` for non-obvious mechanisms/flows
-- `## Example` when an inline example is not enough
-- `## Pitfalls` only for non-obvious real-world failure modes
-
-## Questions
-
-> [!QUESTION]- What is abc?
-> Answer
-
-## Links
-
-Replace or delete these example links.
-
-- [Link 1](https://example.com)
-- [Link 2](https://example.com)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-<!-- whats-next:end -->
-
-# Intro
-
-Quick introduction to the topic
-Explain the topic in plain language.
-Prefer clear, complete explanation over short bullets.
-Include at least one concrete example or a small diagram walkthrough when useful.
-
-## Examples
-
-Examples if needed with their explanation
-
-## Questions
-
-> [!QUESTION]- What is abc?
-> Answer
-
-## Links
-
-Replace or delete these example links.
-
-- [Link 1](https://example.com)
-- [Link 2](https://example.com)
+- [Release It! Second Edition -- foundational patterns for production resilience covering circuit breakers, bulkheads, timeouts, and steady-state design (Michael Nygard, Pragmatic Bookshelf)](https://pragprog.com/titles/mnee2/release-it-second-edition/)
+- [Resiliency patterns -- cloud design patterns for retry, circuit breaker, bulkhead, and health endpoint monitoring (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/architecture/patterns/category/resiliency)
 
 <!-- whats-next:start -->
 

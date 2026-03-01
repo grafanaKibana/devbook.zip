@@ -7,7 +7,7 @@ level:
   - "2"
 priority: High
 status: Not-Started
-dg-publish: false
+dg-publish: true
 ---
 
 # Vertical Scaling
