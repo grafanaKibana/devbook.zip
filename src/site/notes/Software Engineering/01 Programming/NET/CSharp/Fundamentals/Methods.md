@@ -199,9 +199,9 @@ Console.WriteLine(asDog.Category());    // Dog
 
 ## Links
 
-- [Method parameters and modifiers (ref/in/out)](https://learn.microsoft.com/dotnet/csharp/language-reference/keywords/method-parameters#reference-parameters)
-- [C# 13: params collections](https://learn.microsoft.com/dotnet/csharp/whats-new/csharp-13#params-collections)
-- [C# 13: calling methods is easier and faster](https://devblogs.microsoft.com/dotnet/csharp13-calling-methods-is-easier-and-faster/)
+- [Method parameters and modifiers (ref/in/out)](https://learn.microsoft.com/dotnet/csharp/language-reference/keywords/method-parameters#reference-parameters) — official reference for all parameter modifiers with semantics and examples.
+- [C# 13: params collections](https://learn.microsoft.com/dotnet/csharp/whats-new/csharp-13#params-collections) — explains the C# 13 extension of `params` to any collection type, not just arrays.
+- [C# 13: calling methods is easier and faster](https://devblogs.microsoft.com/dotnet/csharp13-calling-methods-is-easier-and-faster/) — .NET team blog post on the performance and ergonomics improvements to method calls in C# 13.
 
 <!-- whats-next:start -->
 

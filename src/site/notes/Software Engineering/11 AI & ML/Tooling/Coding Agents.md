@@ -99,14 +99,14 @@ Amazon Q Developer provides AI coding assistance in IDE and CLI experiences with
 
 ## References
 
-- [Claude Code overview (Anthropic Docs)](https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview)
-- [Cursor Documentation](https://docs.cursor.com/)
-- [GitHub Copilot documentation](https://docs.github.com/en/copilot)
-- [Cline Documentation](https://docs.cline.bot/)
-- [Aider Documentation](https://aider.chat/docs/)
-- [Windsurf Documentation (Codeium)](https://docs.windsurf.com/)
-- [Amazon Q Developer documentation](https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/what-is.html)
-- [Building Effective Agents (Anthropic Engineering)](https://www.anthropic.com/engineering/building-effective-agents)
+- [Claude Code overview (Anthropic Docs)](https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview) — official overview of Claude Code's agentic capabilities, memory system, and tool use.
+- [Cursor Documentation](https://docs.cursor.com/) — official docs for Cursor IDE covering AI chat, Composer, and codebase indexing features.
+- [GitHub Copilot documentation](https://docs.github.com/en/copilot) — official GitHub Copilot docs covering code completion, chat, and workspace agents.
+- [Cline Documentation](https://docs.cline.bot/) — open-source VS Code extension docs for autonomous coding agent with tool use and browser control.
+- [Aider Documentation](https://aider.chat/docs/) — CLI-based coding agent docs covering git integration, model selection, and multi-file editing.
+- [Windsurf Documentation (Codeium)](https://docs.windsurf.com/) — Windsurf IDE docs covering Cascade agent, flows, and context management.
+- [Amazon Q Developer documentation](https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/what-is.html) — AWS coding assistant docs covering inline suggestions, chat, and code transformation.
+- [Building Effective Agents (Anthropic Engineering)](https://www.anthropic.com/engineering/building-effective-agents) — Anthropic's engineering guide on agentic system design principles applicable to coding agent workflows.
 
 <!-- whats-next:start -->
 

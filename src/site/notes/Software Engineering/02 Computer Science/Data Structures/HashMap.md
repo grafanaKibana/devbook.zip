@@ -62,11 +62,22 @@ if (usersById.TryGetValue(1002, out var name))
 > [!QUESTION]- Which .NET type is the standard hash map in modern code?
 > `Dictionary<TKey, TValue>` is the default hash map in modern .NET.
 
+## Hash-Based Collections Comparison
+
+| Type | Key type | Thread-safe | When to use |
+|---|---|---|---|
+| `Dictionary<TKey,TValue>` | Generic | No | Default hash map in modern .NET |
+| `Hashtable` | `object` | No | Legacy interop only |
+| `HashSet<T>` | N/A (values only) | No | Unique value membership |
+| `ConcurrentDictionary<TKey,TValue>` | Generic | Yes | Concurrent read/write |
+
+**Decision rule**: use `Dictionary<TKey,TValue>` by default. `Hashtable` only for legacy API compatibility.
+
 ## Links
 
-- [Dictionary TKey TValue class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.dictionary-2)
-- [Selecting a collection class](https://learn.microsoft.com/en-us/dotnet/standard/collections/selecting-a-collection-class)
-- [Anatomy of the .NET dictionary](https://dunnhq.com/posts/2024/anatomy-of-the-dotnet-dictionary/)
+- [Dictionary TKey TValue class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.dictionary-2) — API reference; the primary hash map in modern .NET.
+- [Selecting a collection class](https://learn.microsoft.com/en-us/dotnet/standard/collections/selecting-a-collection-class) — Microsoft decision guide for choosing between hash-based and sorted collections.
+- [Anatomy of the .NET dictionary](https://dunnhq.com/posts/2024/anatomy-of-the-dotnet-dictionary/) — practitioner deep-dive into bucket layout, collision handling, and resize behavior.
 
 <!-- whats-next:start -->
 

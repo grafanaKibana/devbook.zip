@@ -4,11 +4,9 @@
 
 # Intro
 
-ASP.NET Core middleware are components that form the HTTP request pipeline. Each middleware wraps the next like nested layers, processing requests on the way in and responses on the way out.
+ASP.NET Core middleware are components that form the HTTP request pipeline. Each middleware wraps the next like nested layers, processing requests on the way in and responses on the way out. You reach for middleware when a concern must apply to all (or most) requests regardless of which controller or endpoint handles them — logging, authentication, CORS, compression, and exception handling are canonical examples.
 
-## Deeper Explanation
-
-Each middleware wraps the next like nested layers. On the way **in**, a middleware can inspect or modify the request before calling `next`. On the way **out**, it can inspect or modify the response. Any middleware can **short-circuit** by returning a response without calling `next` — for example, `Authentication` can reject an unauthenticated request before it ever reaches `Routing`.
+Each middleware receives an `HttpContext` and a `RequestDelegate` (`next`). On the way **in**, it can inspect or modify the request before calling `next`. On the way **out**, it can inspect or modify the response. Any middleware can **short-circuit** by returning a response without calling `next` — for example, `UseAuthentication` can reject an unauthenticated request before it ever reaches routing.
 
 ```mermaid
 sequenceDiagram
@@ -37,36 +35,105 @@ sequenceDiagram
     EH-->>C: 401 Unauthorized
 ```
 
+Order matters: middleware registered first runs first on the way in and last on the way out. The recommended order in `Program.cs` is:
+
+```csharp
+app.UseExceptionHandler("/error");
+app.UseHsts();
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
+app.UseCors();
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
+```
+
+## Writing Custom Middleware
+
+The simplest form is an inline lambda:
+
+```csharp
+app.Use(async (ctx, next) =>
+{
+    var sw = System.Diagnostics.Stopwatch.StartNew();
+    try
+    {
+        await next(ctx);
+    }
+    finally
+    {
+        sw.Stop();
+        app.Logger.LogInformation("{Method} {Path} -> {StatusCode} in {ElapsedMs} ms",
+            ctx.Request.Method,
+            ctx.Request.Path,
+            ctx.Response.StatusCode,
+            sw.ElapsedMilliseconds);
+    }
+});
+```
+
+For reusable middleware, use a class with the conventional pattern:
+
+```csharp
+public sealed class CorrelationIdMiddleware
+{
+    private readonly RequestDelegate _next;
+    private readonly ILogger<CorrelationIdMiddleware> _logger;
+
+    public CorrelationIdMiddleware(RequestDelegate next, ILogger<CorrelationIdMiddleware> logger)
+    {
+        _next = next;
+        _logger = logger;
+    }
+
+    public async Task InvokeAsync(HttpContext context)
+    {
+        var correlationId = context.Request.Headers["X-Correlation-Id"].FirstOrDefault()
+            ?? Guid.NewGuid().ToString("N");
+
+        context.Response.Headers["X-Correlation-Id"] = correlationId;
+        using (_logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
+        {
+            await _next(context);
+        }
+    }
+}
+
+// Registration
+app.UseMiddleware<CorrelationIdMiddleware>();
+```
+
+## Pitfalls
+
+**Wrong registration order** — placing `UseAuthorization` before `UseAuthentication` means the identity is never populated, so all requests appear anonymous. The canonical order (exception handler → HSTS → static files → routing → CORS → auth → authorization → endpoints) exists for a reason.
+
+**Modifying the response after it has started** — once `Response.HasStarted` is `true`, headers and status code are already sent. Writing to them throws. Check `context.Response.HasStarted` before any post-`next` response modification.
+
+**Blocking I/O in synchronous middleware** — calling `Thread.Sleep` or synchronous file/DB operations blocks a thread-pool thread for the duration. Use `async/await` throughout.
+
+**Swallowing exceptions silently** — a `try/catch` in middleware that logs and returns 200 hides failures from callers and monitoring. Either rethrow or return an appropriate error status.
+
+## Tradeoffs
+
+| Option | Best for | Weakness |
+|---|---|---|
+| Middleware | App-wide cross-cutting concerns (logging, auth, exception handling, CORS) | No direct MVC action context; runs for all requests including static files |
+| MVC action filters | Concerns tied to controllers/actions and model/action context | Only applies to MVC pipeline; not available for Minimal APIs |
+| Endpoint filters | Minimal API endpoint-scoped behavior | Not used by MVC controllers |
+
+**Decision rule**: use middleware when the concern must apply before routing or to all request types. Use filters when you need `ActionExecutingContext`, action arguments, or action result wrapping.
+
 ## Questions
 
 > [!QUESTION]- What is middleware in ASP.NET Core?
-> Middleware is a component in the HTTP request pipeline. It can inspect/modify the request and response, call the next component, or short-circuit the pipeline (for example, return a cached response without calling the next middleware). Order matters.
+> Middleware is a component in the HTTP request pipeline. It can inspect/modify the request and response, call the next component, or short-circuit the pipeline (for example, return a cached response without calling the next middleware). Order matters — middleware registered first runs first on the way in and last on the way out.
 
 > [!QUESTION]- Action filter vs middleware: what is the difference?
 > Middleware is pipeline-level and can apply to all requests (before routing/MVC, around endpoint execution). Action filters are MVC-level and run only for MVC actions, with access to action context, model binding, and results; they are a better fit for cross-cutting concerns that are specific to controller actions.
 
 > [!QUESTION]- How can you log execution time for all requests?
-> Use a middleware that measures elapsed time around `next()` and logs it (or an action filter if you only care about MVC actions).
->
-> ```csharp
-> app.Use(async (ctx, next) =>
-> {
->     var sw = System.Diagnostics.Stopwatch.StartNew();
->     try
->     {
->         await next();
->     }
->     finally
->     {
->         sw.Stop();
->         app.Logger.LogInformation("{Method} {Path} -> {StatusCode} in {ElapsedMs} ms",
->             ctx.Request.Method,
->             ctx.Request.Path,
->             ctx.Response.StatusCode,
->             sw.ElapsedMilliseconds);
->     }
-> });
-> ```
+> Use a middleware that measures elapsed time around `next()` and logs it. An action filter works too, but only for MVC actions.
 
 > [!QUESTION]- How can you centrally catch errors for all requests?
 > Add a global exception-handling middleware. In ASP.NET Core this is commonly done with `app.UseExceptionHandler(...)` (and `app.UseDeveloperExceptionPage()` in development). The handler can log the exception and return a consistent error response (for example, RFC 7807 Problem Details).
@@ -74,14 +141,12 @@ sequenceDiagram
 > [!QUESTION]- What is the ASP.NET request processing pipeline?
 > A request is received by the host (for example, Kestrel) and then flows through an ordered chain of middleware. Middleware can add features (routing, authN/authZ, CORS, compression, etc.), select an endpoint, and finally execute the endpoint (MVC action, Minimal API handler, etc.). On the way back out, the middleware chain unwinds, allowing post-processing of the response.
 
-> [!QUESTION]- What is an action filter?
-> An MVC filter (for example, implementing `IActionFilter`/`IAsyncActionFilter`) that runs before and/or after a controller action executes. It can validate inputs, modify the action arguments, short-circuit by setting a result, or wrap execution to implement cross-cutting concerns such as logging, caching, and metrics.
-
 ## Links
 
-- [Middleware in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/middleware/)
-- [Handle errors in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/error-handling)
-- [Filters in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/filters)
+- [Middleware in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/middleware/) — official guide covering pipeline order, built-in middleware, and writing custom components.
+- [Handle errors in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/error-handling) — covers `UseExceptionHandler`, `UseDeveloperExceptionPage`, and Problem Details.
+- [Filters in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/filters) — MVC filter pipeline; use alongside this page to understand middleware vs filter tradeoffs.
+- [Write custom ASP.NET Core middleware](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/middleware/write) — step-by-step guide with DI, factory-based middleware, and testing patterns.
 
 <!-- whats-next:start -->
 

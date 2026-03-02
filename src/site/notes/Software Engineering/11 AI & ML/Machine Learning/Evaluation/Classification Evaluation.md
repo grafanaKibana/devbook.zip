@@ -107,10 +107,10 @@ Same model family at two thresholds:
 
 ## Links
 
-- [Scikit-learn: Classification metrics](https://scikit-learn.org/stable/modules/model_evaluation.html#classification-metrics)
-- [Scikit-learn API: precision_recall_fscore_support](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.precision_recall_fscore_support.html)
-- [Google ML Glossary](https://developers.google.com/machine-learning/glossary)
-- [Google ML Crash Course: Accuracy, precision, recall](https://developers.google.com/machine-learning/crash-course/classification/accuracy-precision-recall)
+- [Scikit-learn: Classification metrics](https://scikit-learn.org/stable/modules/model_evaluation.html#classification-metrics) — comprehensive reference for precision, recall, F1, confusion matrix, and multi-class variants with code examples.
+- [Scikit-learn API: precision_recall_fscore_support](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.precision_recall_fscore_support.html) — API reference for computing per-class and averaged precision, recall, and F-score.
+- [Google ML Glossary](https://developers.google.com/machine-learning/glossary) — concise definitions of ML terms including precision, recall, F1, and confusion matrix.
+- [Google ML Crash Course: Accuracy, precision, recall](https://developers.google.com/machine-learning/crash-course/classification/accuracy-precision-recall) — interactive tutorial explaining classification metrics with worked examples and visualizations.
 
 <!-- whats-next:start -->
 

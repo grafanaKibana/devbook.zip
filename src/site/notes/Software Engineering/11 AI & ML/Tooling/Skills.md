@@ -71,11 +71,11 @@ Assume your team has strict API error contracts and logging conventions. Without
 
 ## References
 
-- [Extend Claude with skills (Claude Code Docs)](https://code.claude.com/docs/en/skills)
-- [Agent Skills (OpenCode Docs)](https://opencode.ai/docs/skills/)
-- [Adding custom instructions for GitHub Copilot CLI (GitHub Docs)](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-custom-instructions)
-- [.clinerules: Version-Controlled, Shareable, and AI-Editable Instructions (Cline)](https://cline.ghost.io/clinerules-version-controlled-shareable-and-ai-editable-instructions/)
-- [What are Cursor Rules? (WorkOS)](https://workos.com/blog/what-are-cursor-rules)
+- [Extend Claude with skills (Claude Code Docs)](https://code.claude.com/docs/en/skills) — official Claude Code documentation on skill file format, frontmatter fields, and allowed-tools configuration.
+- [Agent Skills (OpenCode Docs)](https://opencode.ai/docs/skills/) — OpenCode's skill system documentation covering discovery paths, frontmatter schema, and loading behavior.
+- [Adding custom instructions for GitHub Copilot CLI (GitHub Docs)](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-custom-instructions) — GitHub Copilot's equivalent of skills via `.github/copilot-instructions.md`.
+- [.clinerules: Version-Controlled, Shareable, and AI-Editable Instructions (Cline)](https://cline.ghost.io/clinerules-version-controlled-shareable-and-ai-editable-instructions/) — Cline's approach to version-controlled instruction files.
+- [What are Cursor Rules? (WorkOS)](https://workos.com/blog/what-are-cursor-rules) — overview of Cursor's `.cursorrules` and `.cursor/rules/` modular rule system.
 
 <!-- whats-next:start -->
 

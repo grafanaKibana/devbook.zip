@@ -85,12 +85,12 @@ flowchart TD
 > Consistent hashing maps keys and shards onto a circular ring. Adding a shard displaces only the keys between the new shard and its predecessor, roughly 1/N of all keys. Virtual nodes (multiple ring positions per physical shard) prevent any shard from owning a disproportionately large arc.
 ## Links
 
-- [Horizontal, vertical, and functional data partitioning (Azure Architecture Center)](https://learn.microsoft.com/azure/architecture/best-practices/data-partitioning)
-- [Sharding pattern (Azure Architecture Center)](https://learn.microsoft.com/azure/architecture/patterns/sharding)
-- [Sharding Pinterest — How We Scaled Our MySQL Fleet](https://medium.com/pinterest-engineering/sharding-pinterest-how-we-scaled-our-mysql-fleet-3f341e96ca6f)
-- [Scaling Etsy Payments with Vitess — Part 1](https://www.etsy.com/codeascraft/scaling-etsy-payments-with-vitess-part-1--the-data-model)
-- [Designing Data-Intensive Applications, Ch. 6 (Martin Kleppmann)](https://www.oreilly.com/library/view/designing-data-intensive-applications/9781098119058/)
-- [Don't shard yet — 8 strategies to try first](https://www.lazertechnologies.com/insights/dont-shard-yet-8-database-performance-strategies-to-try-before-sharding)
+- [Horizontal, vertical, and functional data partitioning (Azure Architecture Center)](https://learn.microsoft.com/azure/architecture/best-practices/data-partitioning) — practical guidance on partitioning strategies with tradeoffs for each approach.
+- [Sharding pattern (Azure Architecture Center)](https://learn.microsoft.com/azure/architecture/patterns/sharding) — pattern description covering shard key selection, routing, and rebalancing considerations.
+- [Sharding Pinterest — How We Scaled Our MySQL Fleet](https://medium.com/pinterest-engineering/sharding-pinterest-how-we-scaled-our-mysql-fleet-3f341e96ca6f) — production case study on range-based sharding at scale with lessons on shard key design and migration.
+- [Scaling Etsy Payments with Vitess — Part 1](https://www.etsy.com/codeascraft/scaling-etsy-payments-with-vitess-part-1--the-data-model) — real-world account of migrating a payments system to Vitess (MySQL sharding layer) with data model decisions.
+- [Designing Data-Intensive Applications, Ch. 6 (Martin Kleppmann)](https://www.oreilly.com/library/view/designing-data-intensive-applications/9781098119058/) — covers partitioning strategies, secondary indexes on sharded data, and rebalancing algorithms.
+- [Don't shard yet — 8 strategies to try first](https://www.lazertechnologies.com/insights/dont-shard-yet-8-database-performance-strategies-to-try-before-sharding) — practitioner post on exhausting simpler scaling options before committing to sharding complexity.
 
 <!-- whats-next:start -->
 

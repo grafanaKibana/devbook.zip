@@ -71,10 +71,10 @@ Expected: refuse; do not reveal hidden prompt; provide a safe alternative.
 
 ## References
 
-- [Evaluation best practices (OpenAI API Docs)](https://developers.openai.com/api/docs/guides/evaluation-best-practices)
-- [Define your success criteria (Anthropic Docs)](https://docs.anthropic.com/en/docs/test-and-evaluate/define-success)
-- [OWASP LLM Prompt Injection Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/LLM_Prompt_Injection_Prevention_Cheat_Sheet.html)
-- [Groundedness in Azure AI Content Safety](https://learn.microsoft.com/azure/ai-services/content-safety/concepts/groundedness)
+- [Evaluation best practices (OpenAI API Docs)](https://developers.openai.com/api/docs/guides/evaluation-best-practices) — OpenAI's guide to building eval pipelines, scoring rubrics, and regression workflows.
+- [Define your success criteria (Anthropic Docs)](https://docs.anthropic.com/en/docs/test-and-evaluate/define-success) — Anthropic's framework for specifying what good looks like before building evals.
+- [OWASP LLM Prompt Injection Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/LLM_Prompt_Injection_Prevention_Cheat_Sheet.html) — OWASP guidance on prompt injection; useful for designing adversarial test cases.
+- [Groundedness in Azure AI Content Safety](https://learn.microsoft.com/azure/ai-services/content-safety/concepts/groundedness) — Microsoft's definition and detection approach for groundedness; relevant for targeted hallucination eval suites.
 
 <!-- whats-next:start -->
 

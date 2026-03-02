@@ -53,12 +53,22 @@ var added = tags.Add("DOTNET"); // false, already exists by comparer
 > [!QUESTION]- Why can `HashSet<T>.Contains` fail for logically equal objects?
 > Because hash/equality contracts are broken (for example, mismatched `GetHashCode`).
 
+## Hash-Based Collections Comparison
+
+| Type | Stores | Thread-safe | When to use |
+|---|---|---|---|
+| `HashSet<T>` | Values only | No | Unique membership checks, set operations |
+| `Dictionary<TKey,TValue>` | Key-value pairs | No | Key-based lookup |
+| `SortedSet<T>` | Values only | No | Sorted uniqueness, O(log n) ops |
+
+**Decision rule**: use `HashSet<T>` when you only need to track membership or perform set operations (union, intersect, except). Use `Dictionary` when you need to associate a value with each key.
+
 ## Links
 
-- [HashSet<T> class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.hashset-1)
-- [ISet<T> interface](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.iset-1)
-- [Collections overview and complexity](https://learn.microsoft.com/en-us/dotnet/standard/collections/)
-- [HashSet implementation in dotnet runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/HashSet.cs)
+- [HashSet<T> class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.hashset-1) — API reference with set operation methods (UnionWith, IntersectWith, ExceptWith).
+- [ISet<T> interface](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.iset-1) — interface contract for set semantics; useful for abstracting over HashSet and SortedSet.
+- [Collections overview and complexity](https://learn.microsoft.com/en-us/dotnet/standard/collections/) — Microsoft overview of all collection types with complexity guidance.
+- [HashSet implementation in dotnet runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/HashSet.cs) — source code for internal bucket and slot layout.
 
 <!-- whats-next:start -->
 

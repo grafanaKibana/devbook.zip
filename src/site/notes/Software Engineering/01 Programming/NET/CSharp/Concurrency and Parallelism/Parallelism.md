@@ -65,12 +65,22 @@ PLINQ works best when each element has enough CPU work to amortize partitioning 
 
 ## Pitfalls
 
-- TODO
+- **Shared mutable state causes data races**: `ConcurrentBag<T>` and similar collections add synchronization overhead. Prefer partition-local accumulators and merge at the end — the PLINQ `Aggregate` overload or a `ConcurrentDictionary` keyed by partition ID are common patterns.
+- **Over-parallelizing I/O-bound work wastes threads**: `Parallel.ForEach` on I/O operations blocks thread-pool threads while waiting on I/O. Use `async/await` with `SemaphoreSlim` to cap concurrency without blocking threads.
+- **Ignoring Amdahl's Law**: the serial fraction of your workload caps the maximum speedup regardless of core count. Profile first — if 20% of work is serial, you can never exceed 5× speedup no matter how many cores you add.
+- **PLINQ ordering overhead**: `.AsParallel().AsOrdered()` forces a merge step that can negate parallelism gains. Only add `AsOrdered()` when the consumer actually requires ordered output.
+- **Unhandled exceptions in parallel bodies**: exceptions from parallel workers are wrapped in `AggregateException`. Callers that only catch `Exception` will miss them. Always unwrap with `.Flatten().Handle(...)` or inspect `InnerExceptions`.
 
 ## Tradeoffs
 
-- TODO
+| Approach | Best for | Cost |
+|---|---|---|
+| `Parallel.ForEachAsync` | CPU-bound work with async-compatible bodies | Overhead per partition; requires `CancellationToken` threading |
+| PLINQ | Pure transforms on in-memory sequences | Merge cost; ordering adds extra overhead; harder to debug |
+| `Task.WhenAll` fan-out | I/O-bound work (HTTP, DB) | Thread-pool friendly; no CPU parallelism benefit |
+| Manual partitioning + channels | Streaming pipelines with backpressure | Most complex; best throughput for producer/consumer patterns |
 
+**Decision rule**: start with `Parallel.ForEachAsync` for CPU-bound batch work. Switch to PLINQ when the operation is a pure transform and you want terse syntax. Use `Task.WhenAll` for I/O. Reach for channels only when you need backpressure or streaming.
 
 ## Questions
 
@@ -89,11 +99,11 @@ PLINQ works best when each element has enough CPU work to amortize partitioning 
 
 ## Links
 
-- [Parallel programming in .NET (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/)
-- [Parallel.ForEachAsync API (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.parallel.foreachasync)
-- [Potential pitfalls in data and task parallelism](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/potential-pitfalls-in-data-and-task-parallelism)
-- [Threading in C#: Why PFX and PFX concepts (Joe Albahari)](https://www.albahari.com/threading/part5.aspx#_Why_PFX)
-- [Threading in C#: PLINQ details and limitations (Joe Albahari)](https://www.albahari.com/threading/part5.aspx#_PLINQ)
+- [Parallel programming in .NET (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/) — overview of the Task Parallel Library, PLINQ, and data/task parallelism patterns.
+- [Parallel.ForEachAsync API (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.parallel.foreachasync) — API reference with signature, parameters, and cancellation behavior.
+- [Potential pitfalls in data and task parallelism](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/potential-pitfalls-in-data-and-task-parallelism) — Microsoft's own list of common mistakes: ordering, side effects, shared state, and exception handling.
+- [Threading in C#: Why PFX and PFX concepts (Joe Albahari)](https://www.albahari.com/threading/part5.aspx#_Why_PFX) — deep-dive into the Parallel Framework Extras design rationale and work-stealing scheduler.
+- [Threading in C#: PLINQ details and limitations (Joe Albahari)](https://www.albahari.com/threading/part5.aspx#_PLINQ) — covers PLINQ internals, ordering, cancellation, and when PLINQ is slower than sequential LINQ.
 
 <!-- whats-next:start -->
 

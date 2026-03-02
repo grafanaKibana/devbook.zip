@@ -55,6 +55,41 @@ Generation metrics evaluate the quality of the model's output given the retrieve
 
 **Response completeness** — does the answer cover all aspects of the query? A query asking "compare A and B" expects coverage of both. Partial answers score lower. Azure AI Foundry includes completeness as a separate evaluator for this reason.
 
+## RAGAS Framework
+
+[RAGAS](https://docs.ragas.io/) (Retrieval-Augmented Generation Assessment) implements the retrieval and generation concepts above as four named, runnable scores. Each uses [[Software Engineering/11 AI & ML/LLM/Evaluation/LLM-as-a-Judge\|LLM-as-judge]] evaluation and isolates a specific failure mode in the pipeline.
+
+| Metric | Layer | What it measures | Reference needed |
+| --- | --- | --- | --- |
+| **Faithfulness** | Generation | Are all claims in the response supported by retrieved context? Score = `supported_claims / total_claims` | No |
+| **Response Relevancy** | Generation | Does the response address the user's question? Reverse-engineers questions from response, measures embedding similarity to original query | No |
+| **Context Precision** | Retrieval | Are relevant chunks ranked higher than irrelevant ones? Signal-to-noise in the retrieved set | Yes -- or use reference-free `ContextUtilization` variant |
+| **Context Recall** | Retrieval | Did retrieval capture all evidence needed to answer? Score = `reference_claims_in_context / total_reference_claims` | Always |
+
+Faithfulness and Response Relevancy are fully reference-free — they run without labeled ground truth. Context Recall always requires a reference answer. Context Precision has both a reference-required variant and a reference-free variant (`ContextUtilization`) that uses the generated response as a relevance proxy. Bootstrapping evaluation without a labeled set is possible with Faithfulness + Response Relevancy + ContextUtilization, but Context Recall — the retrieval ceiling metric — requires investing in a golden set.
+
+### Diagnostic Combinations
+
+Individual scores identify symptoms. Reading two scores together identifies root causes — this is the primary diagnostic value of the framework.
+
+| Faithfulness | Context Recall | Diagnosis | Fix |
+| --- | --- | --- | --- |
+| High | Low | Retrieval ceiling — model uses what it gets correctly, but evidence is missing | Hybrid retrieval, expand k, fix metadata filters, improve embeddings |
+| Low | High | Generation problem — right evidence arrives but model confabulates | Prompt constraints, grounding instructions, output validation |
+| Low | Low | Systemic — retrieval broken and generation unreliable | Fix retrieval first as the upstream bottleneck, then generation |
+
+| Context Precision | Context Recall | Diagnosis | Fix |
+| --- | --- | --- | --- |
+| Low | High | Noise — retrieval finds relevant docs but drowns them in irrelevant chunks | Re-ranking, tighter metadata filters, reduce k |
+| High | Low | Incomplete — retrieved set is clean but missing relevant evidence | Expand k, add hybrid search, improve chunk boundaries |
+
+### Additional RAGAS Metrics
+
+RAGAS v0.4+ adds two metrics beyond the original four:
+
+- **Noise Sensitivity** — measures incorrect claims introduced when retrieved context contains irrelevant chunks. Catches a gap the original four miss: the model hallucinating claims consistent with noisy context rather than ground truth. Requires reference. Lower is better.
+- **Context Entities Recall** — compares named entities in the reference answer against entities in retrieved context. Useful for entity-heavy domains (legal, medical, financial) where missing a specific name, date, or identifier is a hard failure even when general topic recall is adequate.
+
 ## Component-Level Evaluation
 
 The retrieval and generation metrics above measure end-to-end layer quality — whether the right chunks arrived and whether the answer is faithful. They do not isolate which upstream component caused the failure. A drop in Recall@5 could come from bad chunking (evidence split across boundaries), weak embeddings (model misrepresents domain vocabulary), or poor ANN approximation (index too lossy). Component-level evaluation isolates each layer so fixes target the actual bottleneck.
@@ -203,6 +238,15 @@ Decision rule: combine deterministic checks (format, citation presence, length) 
 > - Golden sets also serve as regression gates — known past failures are captured permanently, preventing recurrence
 > - In practice, combine both: synthetic for broad coverage, golden for regression gating on known failure modes
 > - Tradeoff: golden sets cost annotator time (typically 2-4 hours per 100 examples) and require ongoing maintenance as the corpus evolves — invest proportionally to the cost of an undetected evaluation failure in your domain
+
+> [!QUESTION]- Given high Faithfulness (0.91) and low Context Recall (0.54), which pipeline layer do you fix first and why?
+> - High faithfulness means the model correctly uses the context it receives — generation is not the problem
+> - Low context recall means retrieval misses roughly half the necessary evidence — the retrieval layer is the bottleneck
+> - Retrieval quality is a hard ceiling on answer quality: the generator cannot use evidence it never sees
+> - Fix retrieval first: add hybrid search (BM25 + dense), expand k, review metadata filters, check embedding domain fit
+> - Do not touch prompts or generation settings until recall improves — optimizing generation against incomplete evidence is wasted effort
+> - After retrieval fix, re-measure both: if faithfulness drops as recall improves, the additional context is confusing the model — add re-ranking or improve prompt grounding
+> - Tradeoff: improving recall often decreases precision (more chunks = more noise) — pair recall improvements with re-ranking to maintain context quality
 
 ## References
 

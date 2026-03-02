@@ -100,10 +100,10 @@ If this rule should apply only to one endpoint, apply it with `[ServiceFilter(ty
 
 ## Links
 
-- [Filters in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/filters?view=aspnetcore-8.0)
-- [Middleware in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/middleware?view=aspnetcore-8.0)
-- [Minimal API endpoint filters](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis/min-api-filters?view=aspnetcore-8.0)
-- [Filter pipeline in ASP.NET Core (practitioner write-up)](https://abp.today/blog/2021/06/08/filter-pipeline-aspnet-core)
+- [Filters in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/filters?view=aspnetcore-8.0) — official reference covering all filter types, execution order, DI registration, and cancellation.
+- [Middleware in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/middleware?view=aspnetcore-8.0) — use alongside this page to understand when middleware is the better choice.
+- [Minimal API endpoint filters](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis/min-api-filters?view=aspnetcore-8.0) — endpoint-scoped filter equivalent for Minimal APIs.
+- [Filter pipeline in ASP.NET Core (ABP blog)](https://abp.today/blog/2021/06/08/filter-pipeline-aspnet-core) — practitioner walkthrough of filter ordering and real-world usage patterns.
 
 <!-- whats-next:start -->
 

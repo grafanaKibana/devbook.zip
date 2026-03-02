@@ -19,8 +19,6 @@ The garbage collector provides the following benefits:
 
 The .NET garbage collector does not allocate or free unmanaged memory. The pattern used to deterministically release resources is the `dispose` pattern. The `dispose` pattern is used for objects that implement the `IDisposable` interface.
 
-## Deeper Explanation
-
 ## Managed heap
 
 After the garbage collector is initialized, the CLR allocates a segment of memory for storing and managing objects. This memory is called the managed heap, as opposed to the operating system's native heap.
@@ -179,7 +177,9 @@ The GC first analyzes all objects that belong to generation 0. If, after collect
 
 ## Links
 
-- https://habr.com/ru/articles/590475/
+- [Fundamentals of garbage collection (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/fundamentals) — official reference covering managed heap, generations, LOH, and collection triggers.
+- [Garbage collection and performance (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/performance) — guidance on reducing GC pressure: allocation patterns, LOH fragmentation, and server vs workstation GC modes.
+- [.NET GC internals deep-dive (Maoni Stephens, habr.com)](https://habr.com/ru/articles/590475/) — practitioner deep-dive into GC internals, generation promotion, and tuning strategies from a .NET runtime engineer.
 
 <!-- whats-next:start -->
 

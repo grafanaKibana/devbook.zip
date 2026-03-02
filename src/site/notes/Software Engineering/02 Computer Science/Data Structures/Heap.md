@@ -7,7 +7,7 @@
 
 A heap is an implicit complete d ary tree that keeps a priority rule between parent and child nodes. In a min heap, the smallest value is always at the root, so extracting the next priority item stays fast. In .NET, `PriorityQueue<TElement, TPriority>` is implemented as an array backed quaternary heap that gives fast enqueue and dequeue for scheduler and path finding workloads.
 
-## Deeper Explanation
+## How It Works
 
 Heaps are not globally sorted like a list. They only guarantee local ordering between parent and children, which is enough to keep the best candidate at the top.
 
@@ -28,7 +28,7 @@ graph TD
     C --> G[seven child value seven]
 ```
 
-### Example
+## Example
 
 ```csharp
 var pq = new PriorityQueue<string, int>();
@@ -41,17 +41,18 @@ Console.WriteLine(pq.Dequeue()); // critical
 Console.WriteLine(pq.Peek());    // high
 ```
 
-### Pitfalls
+## Pitfalls
 
-- Assuming full sort order is incorrect. Only root priority is guaranteed, so iterating a heap does not return sorted output.
-- Mixing priority direction causes silent logic bugs. In .NET lower `TPriority` values are dequeued first, so invert priority intentionally if you need max first behavior.
-- Mutable priority data can make queue semantics confusing. If priority changes after enqueue, remove and reinsert instead of mutating external state and expecting reheapify.
+- **Assuming full sort order**: only root priority is guaranteed, so iterating a heap does not return sorted output. Use a sorted set or sort explicitly when ordered iteration is required.
+- **Mixing priority direction**: in .NET, lower `TPriority` values are dequeued first. Invert priority intentionally (e.g., negate integers) if you need max-first behavior.
+- **Mutating priority after enqueue**: if priority changes after insertion, the heap does not reorder automatically. Remove and reinsert instead of mutating external state.
 
-### Tradeoffs
+## Tradeoffs
 
-- Heap vs sorted set: heaps are better for repeated best item extraction, sorted sets are better when you need ordered iteration.
-- Heap vs list sort per batch: heaps are better for incremental arrivals, sorting a list can be simpler when all data is already known.
-
+| Choice | Heap | Alternative | Decision criteria |
+|---|---|---|---|
+| Repeated best-item extraction | `PriorityQueue` O(log n) per op | Sorted list O(n) insert | Heap wins for incremental arrivals. Sorted list is simpler when all data is known upfront and you need ordered iteration. |
+| Ordered iteration | Not suitable | `SortedSet<T>` | Use `SortedSet` when you need both priority extraction and in-order traversal. |
 ## Questions
 
 > [!QUESTION]- Why is `Dequeue` on a heap O(log n) instead of O(1)?
@@ -65,9 +66,9 @@ Console.WriteLine(pq.Peek());    // high
 
 ## Links
 
-- [PriorityQueue TElement TPriority class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.priorityqueue-2)
-- [Collections and data structures](https://learn.microsoft.com/en-us/dotnet/standard/collections/)
-- [PriorityQueue source in dotnet runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Collections/src/System/Collections/Generic/PriorityQueue.cs)
+- [PriorityQueue\<TElement, TPriority\> class (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.priorityqueue-2) — API reference covering enqueue, dequeue, peek, and update priority semantics.
+- [Collections and data structures (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/collections/) — overview of .NET collection types with guidance on choosing the right structure for your use case.
+- [PriorityQueue source in dotnet/runtime (GitHub)](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Collections/src/System/Collections/Generic/PriorityQueue.cs) — quaternary heap implementation showing the actual sift-up and sift-down logic.
 
 <!-- whats-next:start -->
 

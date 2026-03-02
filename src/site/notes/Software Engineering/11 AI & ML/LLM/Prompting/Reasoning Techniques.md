@@ -112,14 +112,14 @@ Decision rule:
 
 ## References
 
-- [Chain-of-Thought Prompting Elicits Reasoning in Large Language Models (Wei et al., 2022)](https://arxiv.org/abs/2201.11903)
-- [Large Language Models are Zero-Shot Reasoners (Kojima et al., 2022)](https://arxiv.org/abs/2205.11916)
-- [Self-Consistency Improves Chain of Thought Reasoning in Language Models (Wang et al., 2022)](https://arxiv.org/abs/2203.11171)
-- [Tree of Thoughts: Deliberate Problem Solving with Large Language Models (Yao et al., 2023)](https://arxiv.org/abs/2305.10601)
-- [Prompting Guide: Chain-of-Thought](https://www.promptingguide.ai/techniques/cot)
-- [Prompting Guide: Self-Consistency](https://www.promptingguide.ai/techniques/consistency)
-- [Prompting Guide: Tree of Thoughts](https://www.promptingguide.ai/techniques/tot)
-- [Engineering Blog: Tree of Thoughts Prompting](https://github.com/dave1010/tree-of-thought-prompting)
+- [Chain-of-Thought Prompting Elicits Reasoning in Large Language Models (Wei et al., 2022)](https://arxiv.org/abs/2201.11903) — original CoT paper showing that few-shot examples with reasoning steps dramatically improve performance on arithmetic and symbolic tasks.
+- [Large Language Models are Zero-Shot Reasoners (Kojima et al., 2022)](https://arxiv.org/abs/2205.11916) — introduces zero-shot CoT via the "Let's think step by step" prompt, enabling reasoning without few-shot examples.
+- [Self-Consistency Improves Chain of Thought Reasoning in Language Models (Wang et al., 2022)](https://arxiv.org/abs/2203.11171) — shows that sampling multiple reasoning paths and taking the majority answer improves accuracy over single-path CoT.
+- [Tree of Thoughts: Deliberate Problem Solving with Large Language Models (Yao et al., 2023)](https://arxiv.org/abs/2305.10601) — introduces ToT, enabling LLMs to explore multiple reasoning branches and backtrack, outperforming CoT on planning tasks.
+- [Prompting Guide: Chain-of-Thought](https://www.promptingguide.ai/techniques/cot) — practitioner overview of CoT variants with prompt examples and when to apply each.
+- [Prompting Guide: Self-Consistency](https://www.promptingguide.ai/techniques/consistency) — explains the self-consistency sampling approach with implementation guidance.
+- [Prompting Guide: Tree of Thoughts](https://www.promptingguide.ai/techniques/tot) — practical guide to ToT with prompt templates and use-case recommendations.
+- [Engineering Blog: Tree of Thoughts Prompting](https://github.com/dave1010/tree-of-thought-prompting) — community implementation of ToT prompting with examples and prompt templates.
 
 <!-- whats-next:start -->
 

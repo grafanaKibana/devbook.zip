@@ -127,14 +127,14 @@ Use this pattern when the captured variable would otherwise be shared and mutate
 
 ## Links
 
-- [Delegates - C# Programming Guide](https://learn.microsoft.com/dotnet/csharp/programming-guide/delegates/)
-- [Using delegates - C# Programming Guide](https://learn.microsoft.com/dotnet/csharp/programming-guide/delegates/using-delegates)
-- [Variance in delegates](https://learn.microsoft.com/dotnet/csharp/programming-guide/concepts/covariance-contravariance/variance-in-delegates)
-- [C# language spec - delegates](https://learn.microsoft.com/dotnet/csharp/language-reference/language-specification/delegates)
-- [C# language spec - anonymous function expressions and captured outer variables](https://learn.microsoft.com/dotnet/csharp/language-reference/language-specification/expressions#1221-anonymous-function-expressions)
-- [Remoting APIs unavailable on .NET and delegate BeginInvoke/EndInvoke behavior](https://learn.microsoft.com/dotnet/core/porting/net-framework-tech-unavailable#remoting)
-- [Migrating delegate BeginInvoke calls for .NET Core](https://devblogs.microsoft.com/dotnet/migrating-delegate-begininvoke-calls-for-net-core/)
-- [Closing over the loop variable considered harmful](https://ericlippert.com/2009/11/12/closing-over-the-loop-variable-considered-harmful-part-one/)
+- [Delegates - C# Programming Guide](https://learn.microsoft.com/dotnet/csharp/programming-guide/delegates/) — official overview of delegate declaration, instantiation, and multicast behavior.
+- [Using delegates - C# Programming Guide](https://learn.microsoft.com/dotnet/csharp/programming-guide/delegates/using-delegates) — practical examples of passing methods as arguments and combining delegates.
+- [Variance in delegates](https://learn.microsoft.com/dotnet/csharp/programming-guide/concepts/covariance-contravariance/variance-in-delegates) — explains covariance and contravariance rules for delegate parameter and return types.
+- [C# language spec - delegates](https://learn.microsoft.com/dotnet/csharp/language-reference/language-specification/delegates) — normative spec for delegate types, invocation, and compatibility rules.
+- [C# language spec - anonymous function expressions and captured outer variables](https://learn.microsoft.com/dotnet/csharp/language-reference/language-specification/expressions#1221-anonymous-function-expressions) — spec-level explanation of closure capture semantics and variable lifetime.
+- [Remoting APIs unavailable on .NET and delegate BeginInvoke/EndInvoke behavior](https://learn.microsoft.com/dotnet/core/porting/net-framework-tech-unavailable#remoting) — explains why `BeginInvoke`/`EndInvoke` throw on modern .NET and what to use instead.
+- [Migrating delegate BeginInvoke calls for .NET Core](https://devblogs.microsoft.com/dotnet/migrating-delegate-begininvoke-calls-for-net-core/) — .NET team migration guide with `Task`-based replacements for async delegate patterns.
+- [Closing over the loop variable considered harmful (Eric Lippert)](https://ericlippert.com/2009/11/12/closing-over-the-loop-variable-considered-harmful-part-one/) — canonical explanation of the loop-variable capture pitfall with C# examples.
 
 <!-- whats-next:start -->
 
