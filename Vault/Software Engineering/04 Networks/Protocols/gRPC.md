@@ -1,8 +1,8 @@
 ---
 topic:
-  - "Networks"
+  - Networks
 subtopic:
-  - "Protocols"
+  - Protocols
 level:
   - "3"
 priority: High

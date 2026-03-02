@@ -1,8 +1,8 @@
 ---
 topic:
-  - "Data Persistence"
+  - Data Persistence
 subtopic:
-  - "ORMs"
+  - ORMs
 level:
   - "4"
 priority: High

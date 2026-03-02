@@ -1,8 +1,8 @@
 ---
 topic:
-  - "Data Persistence"
+  - Data Persistence
 subtopic:
-  - "SQL"
+  - SQL
 level:
   - "4"
 priority: High

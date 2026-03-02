@@ -1,6 +1,6 @@
 ---
 topic:
-  - "Security"
+  - Security
 subtopic: []
 level:
   - "2"

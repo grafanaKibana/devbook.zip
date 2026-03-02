@@ -1,8 +1,8 @@
 ---
 topic:
-  - "Computer Science"
+  - Computer Science
 subtopic:
-  - "Algorithms"
+  - Algorithms
 level:
   - "3"
 priority: Medium

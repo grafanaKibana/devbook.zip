@@ -1,6 +1,6 @@
 ---
 topic:
-  - "Data Persistence"
+  - Data Persistence
 subtopic: []
 level:
   - "3"

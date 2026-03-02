@@ -1,8 +1,8 @@
 ---
 topic:
-  - "DevOps"
+  - DevOps
 subtopic:
-  - "Deployment Stratagies"
+  - Deployment Stratagies
 level:
   - "2"
 priority: Medium

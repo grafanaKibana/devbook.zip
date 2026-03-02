@@ -1,8 +1,8 @@
 ---
 topic:
-  - "AI & ML"
+  - AI & ML
 subtopic:
-  - "LLM"
+  - LLM
 level:
   - "3"
 priority: Medium

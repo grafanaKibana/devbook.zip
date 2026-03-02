@@ -1,6 +1,6 @@
 ---
 topic:
-  - "DevOps"
+  - DevOps
 subtopic: []
 level:
   - "2"

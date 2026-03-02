@@ -1,8 +1,8 @@
 ---
 topic:
-  - "Architecture"
+  - Architecture
 subtopic:
-  - "Architectural Patterns"
+  - Patterns
 level:
   - "2"
 priority: High

@@ -1,7 +1,8 @@
 ---
 topic:
-  - "DevOps"
-subtopic: []
+  - DevOps
+subtopic:
+  - Version Control Systems
 level:
   - "4"
 priority: High

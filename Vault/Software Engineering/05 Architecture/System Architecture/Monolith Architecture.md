@@ -1,8 +1,8 @@
 ---
 topic:
-  - "Architecture"
+  - Architecture
 subtopic:
-  - "System Architecture"
+  - System Architecture
 level:
   - "4"
 priority: Medium

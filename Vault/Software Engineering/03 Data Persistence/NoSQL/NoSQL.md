@@ -1,7 +1,8 @@
 ---
 topic:
-  - "Data Persistence"
-subtopic: []
+  - Data Persistence
+subtopic:
+  - NoSQL
 level:
   - "3"
 priority: Medium

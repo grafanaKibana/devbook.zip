@@ -1,8 +1,8 @@
 ---
 topic:
-  - "Architecture"
+  - Architecture
 subtopic:
-  - "Application Architecture"
+  - Application Architecture
 level:
   - "3"
 priority: High

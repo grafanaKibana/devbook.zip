@@ -1,8 +1,7 @@
 ---
 topic:
   - DevOps
-subtopic:
-  - []
+subtopic: []
 level:
   - "2"
 priority: High

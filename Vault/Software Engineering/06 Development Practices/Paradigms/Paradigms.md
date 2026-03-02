@@ -1,8 +1,8 @@
 ---
 topic:
-  - Patterns & Practices
+  - Development Practices
 subtopic:
-  - Paradigms & Practices
+  - Paradigms
 tags:
   - FolderNote
 dg-publish: true
