@@ -2,40 +2,73 @@
 {"dg-publish":true,"permalink":"/software-engineering/04-networks/architecture-and-ops/vpn/"}
 ---
 
-
 # Intro
 
-A VPN (virtual private network) creates an encrypted tunnel so a device or network can communicate as if it were on a private network.
-You reach for it to access private resources, connect offices, or secure traffic over untrusted networks.
-The key engineering work is routing, DNS, identity, and safe split tunnel policy.
+A VPN (Virtual Private Network) creates an encrypted tunnel between two endpoints so traffic flows as if both are on the same private network, even over the public internet. You reach for it to access private resources remotely, connect geographically separated offices, or secure traffic over untrusted networks (public Wi-Fi, cloud provider links).
 
-## Deeper Explanation
+The key engineering work is not just encryption — it is routing, DNS, identity, and split-tunnel policy: deciding which traffic goes through the tunnel and which goes directly to the internet.
 
-### Mental Model
+## How It Works
+
+A VPN wraps (encapsulates) packets inside an encrypted outer packet. The outer packet travels over the public internet to the VPN gateway, which decrypts it and forwards the inner packet to the private network.
 
 ```mermaid
 flowchart LR
-  D[Device] --> T[Tunnel]
-  T --> G[Gateway]
-  G --> P[Private network]
+  D[Device] -->|Encrypted tunnel| G[VPN Gateway]
+  G --> P[Private Network]
+  D -->|Direct| I[Internet]
 ```
 
-Common types:
+**Split tunneling:** only traffic destined for private resources goes through the tunnel; internet traffic goes directly. This reduces gateway load and latency for non-private traffic.
 
-- Client VPN: individual device to gateway
-- Site to site VPN: network to network
+**Full tunneling:** all traffic goes through the gateway. Useful when you need to enforce corporate security policies on all outbound traffic.
 
-## Questions
+## VPN Types
 
-> [!QUESTION]- What is the difference between client VPN and site to site VPN?
-> Client VPN connects a single device.
-> Site to site connects two networks.
+**Client VPN (remote access)**
+A single device connects to a gateway. Common for remote workers accessing corporate resources. The device gets a virtual IP on the private network.
 
-## Links
+**Site-to-site VPN**
+Two networks connect via gateways. Traffic between the networks flows through the tunnel transparently. Used to connect branch offices or cloud VPCs to on-premises networks.
 
-- [WireGuard](https://www.wireguard.com/)
-- [IPsec architecture RFC 4301](https://www.rfc-editor.org/rfc/rfc4301)
-- [VPN](https://en.wikipedia.org/wiki/Virtual_private_network)
+## Protocols
+
+**IPsec**
+The traditional standard. Operates at the network layer (Layer 3). Supports two modes:
+- *Transport mode*: encrypts only the payload, used for host-to-host.
+- *Tunnel mode*: encrypts the entire packet, used for site-to-site and client VPN.
+
+IPsec is complex to configure (IKE negotiation, SA management) but is widely supported by hardware appliances and cloud providers (AWS VPN, Azure VPN Gateway).
+
+**WireGuard**
+A modern, minimal protocol (~4,000 lines of code vs IPsec's ~400,000). Uses state-of-the-art cryptography (ChaCha20, Curve25519, BLAKE2). Faster handshake, simpler configuration, and better performance than IPsec in most benchmarks. Supported natively in Linux kernel since 5.6. Used by Tailscale, Cloudflare WARP, and many cloud providers.
+
+**OpenVPN**
+TLS-based, runs over UDP or TCP. Highly portable and widely supported. Slower than WireGuard due to TLS overhead and userspace implementation.
+
+| Protocol | Layer | Complexity | Performance | Use case |
+|----------|-------|------------|-------------|----------|
+| IPsec | 3 | High | Good | Enterprise, hardware appliances |
+| WireGuard | 3 | Low | Excellent | Modern deployments, cloud |
+| OpenVPN | App | Medium | Moderate | Legacy, cross-platform |
+
+## Pitfalls
+
+**DNS leaks**
+If DNS queries bypass the tunnel, they reveal browsing activity to the ISP even when traffic is encrypted. Fix: route DNS through the tunnel or use a DNS server inside the private network.
+
+**Split-tunnel misconfiguration**
+Overly broad split-tunnel rules can expose private resources to the internet. Overly narrow rules force unnecessary traffic through the gateway, increasing latency and cost.
+
+**MTU issues**
+VPN encapsulation adds overhead (20–60 bytes per packet). If the MTU is not adjusted, large packets get fragmented, degrading performance. Fix: set the VPN interface MTU to account for encapsulation overhead (e.g., 1420 for WireGuard over a 1500-byte Ethernet link).
+
+## References
+
+- [WireGuard official site](https://www.wireguard.com/) — protocol design, performance benchmarks, and implementation guide for the modern VPN standard.
+- [IPsec architecture (RFC 4301)](https://www.rfc-editor.org/rfc/rfc4301) — the authoritative specification for IPsec tunnel and transport modes.
+- [Virtual private network (Wikipedia)](https://en.wikipedia.org/wiki/Virtual_private_network) — overview of VPN types, protocols, and use cases.
+- [WireGuard vs OpenVPN vs IPsec (Tailscale blog)](https://tailscale.com/blog/how-tailscale-works) — practitioner comparison of VPN protocols with real-world performance data.
 
 <!-- whats-next:start -->
 

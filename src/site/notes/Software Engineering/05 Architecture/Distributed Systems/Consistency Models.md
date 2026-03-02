@@ -132,11 +132,11 @@ During a partition, preserving stronger consistency typically means reduced avai
 
 ## References
 
-- [Jepsen - Consistency Models](https://jepsen.io/consistency)
-- [Azure Cosmos DB Consistency Levels](https://learn.microsoft.com/azure/cosmos-db/consistency-levels)
-- [Manage consistency levels in Azure Cosmos DB](https://learn.microsoft.com/azure/cosmos-db/nosql/how-to-manage-consistency)
-- [ZooKeeper Internals](https://zookeeper.apache.org/doc/current/zookeeperInternals.html)
-- [Meta Engineering - Cache made consistent](https://engineering.fb.com/2022/06/08/core-infra/cache-made-consistent/)
+- [Jepsen - Consistency Models](https://jepsen.io/consistency) — the definitive practitioner reference for consistency model taxonomy, with formal definitions and real-world database analysis.
+- [Azure Cosmos DB Consistency Levels](https://learn.microsoft.com/azure/cosmos-db/consistency-levels) — Microsoft's tunable consistency spectrum (Strong, Bounded Staleness, Session, Consistent Prefix, Eventual) with latency and availability tradeoffs.
+- [Manage consistency levels in Azure Cosmos DB](https://learn.microsoft.com/azure/cosmos-db/nosql/how-to-manage-consistency) — how to configure and override consistency per request in Cosmos DB.
+- [ZooKeeper Internals](https://zookeeper.apache.org/doc/current/zookeeperInternals.html) — explains ZooKeeper's linearizable writes + sequentially consistent reads model.
+- [Meta Engineering - Cache made consistent](https://engineering.fb.com/2022/06/08/core-infra/cache-made-consistent/) — Meta's production experience with cache consistency at scale; real-world example of read-your-writes and invalidation challenges.
 
 <!-- whats-next:start -->
 

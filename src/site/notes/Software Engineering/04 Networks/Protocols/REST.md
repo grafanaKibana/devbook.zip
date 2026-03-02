@@ -233,11 +233,11 @@ Decision heuristic:
 
 ## References
 
-- [What is a REST API? (IBM)](https://www.ibm.com/ru-ru/cloud/learn/rest-apis)
-- [REST dissertation (Fielding)](https://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm)
-- [Create web APIs with ASP.NET Core](https://learn.microsoft.com/aspnet/core/web-api/)
-- [Microsoft REST API Guidelines](https://github.com/microsoft/api-guidelines)
-- [Best Practices for Designing a Pragmatic RESTful API (Vinay Sahni)](https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api)
+- [What is a REST API? (IBM)](https://www.ibm.com/ru-ru/cloud/learn/rest-apis) — accessible overview of REST concepts, constraints, and HTTP method semantics.
+- [REST dissertation (Fielding)](https://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm) — the original 2000 dissertation defining REST architectural constraints; chapter 5 is the canonical source.
+- [Create web APIs with ASP.NET Core](https://learn.microsoft.com/aspnet/core/web-api/) — official guide to building REST APIs with ASP.NET Core, covering controllers, routing, and content negotiation.
+- [Microsoft REST API Guidelines](https://github.com/microsoft/api-guidelines) — Microsoft's internal API design standards covering versioning, error responses, pagination, and naming conventions.
+- [Best Practices for Designing a Pragmatic RESTful API (Vinay Sahni)](https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api) — practitioner guide covering URL design, HTTP status codes, versioning, and filtering with real-world examples.
 
 <!-- whats-next:start -->
 

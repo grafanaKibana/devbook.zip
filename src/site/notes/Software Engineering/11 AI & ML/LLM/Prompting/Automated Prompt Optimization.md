@@ -82,14 +82,14 @@ For most practitioners, strong manual prompting plus meta-prompting covers most 
 
 ## References
 
-- [Zhou et al. 2022 - Large Language Models Are Human-Level Prompt Engineers (APE)](https://arxiv.org/abs/2211.01910)
-- [Diao et al. 2023 - Active Prompting with Chain-of-Thought for Large Language Models](https://arxiv.org/abs/2302.12246)
-- [Li et al. 2023 - Directional Stimulus Prompting](https://arxiv.org/abs/2302.11520)
-- [Gao et al. 2022 - PAL: Program-Aided Language Models](https://arxiv.org/abs/2211.10435)
-- [Prompt Engineering Guide - Automatic Prompt Engineer](https://www.promptingguide.ai/techniques/ape)
-- [Prompt Engineering Guide - Active-Prompt](https://www.promptingguide.ai/techniques/activeprompt)
-- [Prompt Engineering Guide - Directional Stimulus Prompting](https://www.promptingguide.ai/techniques/dsp)
-- [Prompt Engineering Guide - Program-Aided Language Models (PAL)](https://www.promptingguide.ai/techniques/pal)
+- [Zhou et al. 2022 - Large Language Models Are Human-Level Prompt Engineers (APE)](https://arxiv.org/abs/2211.01910) — original APE paper; frames instruction discovery as a search problem and shows LLM-generated prompts can match or beat human-written ones.
+- [Diao et al. 2023 - Active Prompting with Chain-of-Thought for Large Language Models](https://arxiv.org/abs/2302.12246) — Active-Prompt paper; introduces uncertainty-based example selection to improve annotation efficiency.
+- [Li et al. 2023 - Directional Stimulus Prompting](https://arxiv.org/abs/2302.11520) — DSP paper; proposes a trainable policy model that generates steering hints for a frozen LLM.
+- [Gao et al. 2022 - PAL: Program-Aided Language Models](https://arxiv.org/abs/2211.10435) — PAL paper; shows that offloading computation to code execution reduces arithmetic and symbolic errors.
+- [Prompt Engineering Guide - Automatic Prompt Engineer](https://www.promptingguide.ai/techniques/ape) — practitioner summary of APE with usage guidance.
+- [Prompt Engineering Guide - Active-Prompt](https://www.promptingguide.ai/techniques/activeprompt) — practitioner summary of Active-Prompt.
+- [Prompt Engineering Guide - Directional Stimulus Prompting](https://www.promptingguide.ai/techniques/dsp) — practitioner summary of DSP.
+- [Prompt Engineering Guide - Program-Aided Language Models (PAL)](https://www.promptingguide.ai/techniques/pal) — practitioner summary of PAL with examples.
 
 <!-- whats-next:start -->
 

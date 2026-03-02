@@ -2,46 +2,31 @@
 {"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/machine-learning/data-drift/"}
 ---
 
-
 # Intro
 
-Data drift is when the statistical properties of your input data change over time compared to the data your model was trained on. It matters because models usually assume training and serving data come from the same distribution; when that stops being true, predictions can become less reliable.
+Data drift is when the statistical properties of your input data change over time compared to the data your model was trained on. It matters because ML models assume training and serving data come from the same distribution — when that stops being true, predictions can become less reliable without any obvious error. A fraud model trained on last year's purchase behavior silently degrades when new payment methods emerge; a vision model deployed to a new camera produces worse results due to different lighting.
 
-Concrete examples include:
+## Types of Drift
 
-- A fraud model trained on last year's purchase behavior sees a spike in new payment methods and merchant categories.
-- A vision model deployed to a new camera has different brightness/contrast due to sensor and lighting changes.
+| Type | What changes | Example |
+|------|-------------|---------|
+| **Data drift** (feature drift) | P(X) — input distribution | Users start asking questions in a new language |
+| **Label drift** (prior probability shift) | P(Y) — label distribution | Fraud rate increases from 1% to 5% |
+| **Concept drift** | P(Y\|X) — the relationship between inputs and labels | "Spam" patterns change as spammers adapt |
+| **Covariate shift** | P(X) changes but P(Y\|X) stays the same | New user segment with different demographics |
 
-## Deeper Explanation
+**Concept drift is the most dangerous** — the model's learned relationship is no longer valid, so retraining on new data is the only fix. Data drift may be benign if the model generalizes well to the new distribution.
 
-What typically drifts:
+## Detection Methods
 
-- Feature distributions (means, ranges, category frequencies)
-- Missingness patterns (null rate changes)
-- Correlations between features
-
-How it relates to other drift terms:
-
-- Data drift (often used for feature drift): P(X) changes
-- Label drift (prior probability shift): P(Y) changes
-- Concept drift: P(Y|X) changes (the relationship changes)
-
-How to detect it in practice:
-
-- Define a baseline window (e.g., training data or last 30 days of stable serving)
-- Compare baseline vs current window per feature
-- Use simple, interpretable tests/metrics (e.g., PSI, KS test for numeric; chi-square for categorical)
-- Segment monitoring (region, device, customer tier) to avoid averages hiding drift
-
-Example: compute PSI (Population Stability Index) for one numeric feature using binned proportions:
+**Population Stability Index (PSI)** — measures how much a feature's distribution has shifted. Commonly used in credit scoring and finance.
 
 ```python
 import numpy as np
 
 def psi(expected, actual, bins=10, eps=1e-6):
-    # expected: baseline values, actual: current values
+    """Compute PSI between baseline and current feature distributions."""
     quantiles = np.quantile(expected, np.linspace(0, 1, bins + 1))
-    # ensure unique bin edges
     edges = np.unique(quantiles)
     if len(edges) < 3:
         return 0.0
@@ -51,23 +36,76 @@ def psi(expected, actual, bins=10, eps=1e-6):
     exp_p = np.maximum(exp_counts / max(exp_counts.sum(), 1), eps)
     act_p = np.maximum(act_counts / max(act_counts.sum(), 1), eps)
     return float(np.sum((act_p - exp_p) * np.log(act_p / exp_p)))
+
+# PSI < 0.1: no significant drift
+# PSI 0.1–0.2: moderate drift, investigate
+# PSI > 0.2: significant drift, action required
 ```
 
-What to do when you detect drift:
+**Kolmogorov-Smirnov (KS) test** — non-parametric test for numeric features. Tests whether two samples come from the same distribution.
 
-- First rule out pipeline issues (schema changes, unit changes, broken ETL, encoding bugs)
-- Check performance if labels are available (drift without performance drop can be benign)
-- Decide on response: retrain, update features, adjust thresholds, add guardrails, or route to manual review
+**Chi-square test** — for categorical features. Tests whether observed frequencies match expected frequencies.
+
+**Jensen-Shannon divergence** — symmetric measure of distribution distance. Bounded [0, 1], easier to interpret than KL divergence.
+
+## Monitoring Workflow
+
+```text
+1. Define baseline
+   └── Training data distribution OR last 30 days of stable serving
+
+2. Compute drift metrics per feature
+   └── PSI for numeric, chi-square for categorical
+   └── Run daily or per batch
+
+3. Segment monitoring
+   └── Break down by region, device, user tier
+   └── Averages hide drift in subpopulations
+
+4. Alert on threshold breach
+   └── PSI > 0.2, KS p-value < 0.05
+
+5. Investigate
+   └── Rule out pipeline issues first (schema changes, ETL bugs, encoding changes)
+   └── Check model performance if labels are available
+
+6. Respond
+   └── Retrain on recent data
+   └── Update feature engineering
+   └── Adjust decision thresholds
+   └── Route to manual review for high-risk cases
+```
+
+## Pitfalls
+
+**Drift without performance drop**
+Drift in a feature the model does not rely on heavily may not affect predictions. Always check model performance metrics (if labels are available) before triggering a retrain. Unnecessary retraining wastes resources and can introduce instability.
+
+**Averages hiding drift**
+A global PSI of 0.05 (no drift) can coexist with PSI of 0.4 for a specific user segment. Always monitor drift per segment.
+
+**Delayed labels**
+For many production systems, ground truth labels arrive days or weeks after prediction (e.g., fraud confirmed after investigation). Use proxy metrics (escalation rate, user complaints) for early drift detection while waiting for labels.
+
+**Treating all drift as concept drift**
+Data drift (P(X) changes) does not always require retraining — the model may generalize. Concept drift (P(Y|X) changes) always requires retraining. Distinguish between them before deciding on a response.
 
 ## Questions
 
-- Which features are the most drift-sensitive for this model, and what are their alert thresholds?
-- Can we measure model performance quickly (delayed labels, proxy metrics), or only drift?
-- Do we need separate baselines per segment (market, device, seasonality)?
+> [!QUESTION]- What is the difference between data drift and concept drift?
+> Data drift: the input distribution P(X) changes (users ask different questions, new product categories appear). The model's learned relationship P(Y|X) may still be valid.
+> Concept drift: the relationship P(Y|X) changes (what constitutes spam evolves, fraud patterns shift). The model's learned relationship is no longer valid — retraining is required.
+> Cost of confusing them: retraining on new data for concept drift is necessary; retraining for benign data drift wastes resources and may reduce performance on the original distribution.
 
-## Links
+> [!QUESTION]- How do you detect drift when labels are delayed?
+> Use proxy metrics: escalation rate, user complaints, re-contact rate, or model confidence distributions. Monitor input feature distributions (PSI, KS test) as an early warning signal. When labels arrive, compute actual performance metrics and compare to baseline.
 
-[Data drift in machine learning models - Evidently AI](https://www.evidentlyai.com/ml-in-production/data-drift)
+## References
+
+- [Data drift in machine learning models (Evidently AI)](https://www.evidentlyai.com/ml-in-production/data-drift) — practitioner guide to drift types, detection methods, and monitoring workflows with Python examples.
+- [Population Stability Index (PSI) explained](https://www.listendata.com/2015/05/population-stability-index.html) — detailed explanation of PSI calculation, interpretation thresholds, and use in credit scoring.
+- [Monitoring ML models in production (Google MLOps)](https://cloud.google.com/architecture/mlops-continuous-delivery-and-automation-pipelines-in-machine-learning) — Google's MLOps guide covering data validation, model monitoring, and retraining triggers.
+- [Failing Loudly: An Empirical Study of Methods for Detecting Dataset Shift (Rabanser et al., 2019)](https://arxiv.org/abs/1810.11953) — empirical comparison of drift detection methods across different shift types and dataset sizes.
 
 <!-- whats-next:start -->
 

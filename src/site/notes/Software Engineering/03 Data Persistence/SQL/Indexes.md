@@ -177,13 +177,13 @@ Two maintenance operations:
 
 ## Links
 
-- [SQL Server and Azure SQL index architecture and design guide](https://learn.microsoft.com/sql/relational-databases/sql-server-index-design-guide?view=sql-server-ver17)
-- [Clustered and nonclustered indexes described](https://learn.microsoft.com/sql/relational-databases/indexes/clustered-and-nonclustered-indexes-described?view=sql-server-ver17)
-- [Optimize index maintenance to improve query performance](https://learn.microsoft.com/sql/relational-databases/indexes/reorganize-and-rebuild-indexes?view=sql-server-ver17)
-- [Columnstore indexes overview](https://learn.microsoft.com/sql/relational-databases/indexes/columnstore-indexes-overview?view=sql-server-ver17)
-- [Use The Index, Luke — The B-Tree](https://use-the-index-luke.com/sql/anatomy/the-tree)
-- [The Clustered Index Debate (Kimberly Tripp / SQLskills)](https://www.sqlskills.com/blogs/kimberly/the-clustered-index-debate-continues/)
-- [Erin Stellato — Index Maintenance Myths (SQLskills)](https://www.sqlskills.com/blogs/erin/index-maintenance-myths-misconceptions-and-realities/)
+- [SQL Server and Azure SQL index architecture and design guide](https://learn.microsoft.com/sql/relational-databases/sql-server-index-design-guide?view=sql-server-ver17) — comprehensive reference covering B-tree internals, fill factor, included columns, and index design principles.
+- [Clustered and nonclustered indexes described](https://learn.microsoft.com/sql/relational-databases/indexes/clustered-and-nonclustered-indexes-described?view=sql-server-ver17) — official explanation of the structural difference between clustered and nonclustered indexes with diagrams.
+- [Optimize index maintenance to improve query performance](https://learn.microsoft.com/sql/relational-databases/indexes/reorganize-and-rebuild-indexes?view=sql-server-ver17) — guidance on when to reorganize vs rebuild, fragmentation thresholds, and online vs offline operations.
+- [Columnstore indexes overview](https://learn.microsoft.com/sql/relational-databases/indexes/columnstore-indexes-overview?view=sql-server-ver17) — covers columnar storage, batch mode execution, and when columnstore outperforms rowstore for analytics.
+- [Use The Index, Luke — The B-Tree](https://use-the-index-luke.com/sql/anatomy/the-tree) — practitioner deep-dive into B-tree structure, leaf nodes, and how the optimizer uses indexes; vendor-neutral.
+- [The Clustered Index Debate (Kimberly Tripp / SQLskills)](https://www.sqlskills.com/blogs/kimberly/the-clustered-index-debate-continues/) — expert analysis of clustered index key selection, GUIDs vs integers, and fragmentation implications.
+- [Erin Stellato — Index Maintenance Myths (SQLskills)](https://www.sqlskills.com/blogs/erin/index-maintenance-myths-misconceptions-and-realities/) — debunks common misconceptions about fragmentation thresholds and maintenance schedules with real benchmark data.
 
 <!-- whats-next:start -->
 

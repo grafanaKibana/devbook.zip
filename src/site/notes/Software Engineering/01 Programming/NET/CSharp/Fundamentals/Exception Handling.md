@@ -88,11 +88,11 @@ public static string NormalizeName(string? value)
 
 ## Links
 
-- [Exception-handling statements (try/catch/finally/throw)](https://learn.microsoft.com/dotnet/csharp/language-reference/statements/exception-handling-statements)
-- [Best practices for exceptions](https://learn.microsoft.com/dotnet/standard/exceptions/best-practices-for-exceptions)
-- [Exception throwing (Framework Design Guidelines)](https://learn.microsoft.com/dotnet/standard/design-guidelines/exception-throwing)
-- [Using standard exception types](https://learn.microsoft.com/dotnet/standard/design-guidelines/using-standard-exception-types)
-- [Catch handler search in call stack (Metanit)](https://metanit.com/sharp/tutorial/2.30.php)
+- [Exception-handling statements (try/catch/finally/throw)](https://learn.microsoft.com/dotnet/csharp/language-reference/statements/exception-handling-statements) — language reference for all exception-handling syntax including `when` filters and throw expressions.
+- [Best practices for exceptions](https://learn.microsoft.com/dotnet/standard/exceptions/best-practices-for-exceptions) — Microsoft guidance on when to throw, when to catch, and how to design exception hierarchies.
+- [Exception throwing (Framework Design Guidelines)](https://learn.microsoft.com/dotnet/standard/design-guidelines/exception-throwing) — API design rules for exception usage in library code.
+- [Using standard exception types](https://learn.microsoft.com/dotnet/standard/design-guidelines/using-standard-exception-types) — which built-in exception types to use for which scenarios.
+- [Catch handler search in call stack (Metanit)](https://metanit.com/sharp/tutorial/2.30.php) — Russian-language practitioner walkthrough of how the runtime searches for matching handlers up the call stack.
 
 <!-- whats-next:start -->
 

@@ -282,11 +282,11 @@ The tradeoff is real: reads get faster, but every write to `Orders` must also up
 
 For a deeper study of the topic, the book ["Introduction to Database Systems" by Chris J. Date](https://www.oreilly.com/library/view/an-introduction-to/9780132874281/) is recommended.
 
-- [Database normalization (Wikipedia)](https://en.wikipedia.org/wiki/Database_normalization)
-- [Denormalization (Wikipedia)](https://en.wikipedia.org/wiki/Denormalization)
-- [Data partitioning strategies - Microsoft Azure Architecture](https://learn.microsoft.com/azure/architecture/best-practices/data-partitioning-strategies)
-- [Designing Data-Intensive Applications - Martin Kleppmann (O'Reilly)](https://www.oreilly.com/library/view/designing-data-intensive-applications/9781491903063/) - covers denormalization, replication, and consistency tradeoffs in production systems
-- [Description of the database normalization basics (Microsoft Learn)](https://learn.microsoft.com/troubleshoot/microsoft-365-apps/access/database-normalization-description)
+- [Database normalization (Wikipedia)](https://en.wikipedia.org/wiki/Database_normalization) — encyclopedic overview of normal forms 1NF through 6NF with formal definitions and examples.
+- [Denormalization (Wikipedia)](https://en.wikipedia.org/wiki/Denormalization) — covers denormalization techniques, use cases, and the tradeoffs against normalization.
+- [Data partitioning strategies (Azure Architecture Center)](https://learn.microsoft.com/azure/architecture/best-practices/data-partitioning-strategies) — practical guidance on horizontal, vertical, and functional partitioning for scalable systems.
+- [Designing Data-Intensive Applications (Martin Kleppmann, O'Reilly)](https://www.oreilly.com/library/view/designing-data-intensive-applications/9781491903063/) — covers denormalization, replication, and consistency tradeoffs in production systems; chapters 2-3 are directly relevant.
+- [Description of the database normalization basics (Microsoft Learn)](https://learn.microsoft.com/troubleshoot/microsoft-365-apps/access/database-normalization-description) — accessible walkthrough of 1NF through 3NF with concrete table examples.
 
 <!-- whats-next:start -->
 

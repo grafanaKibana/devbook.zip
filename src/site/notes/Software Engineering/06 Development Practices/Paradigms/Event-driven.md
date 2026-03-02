@@ -3,47 +3,93 @@
 ---
 
 
-# Intro
+# Event-Driven Development
 
-Event-driven development builds systems around events (facts that something happened) and reactions to those events.
+Event-driven development builds systems around *events* — immutable facts that something happened — and reactions to those events. Producers publish events without knowing who will consume them; consumers subscribe and handle events independently. This decouples components: the order service doesn't call the inventory service directly, it publishes `OrderPlaced` and the inventory service reacts on its own schedule.
 
-In practice, it means producers publish events (often asynchronously) and consumers subscribe and handle them, which helps decouple components and enables scalable, resilient workflows.
+The pattern appears at two scales: **in-process** (domain events within a single application, dispatched via MediatR or a simple in-memory bus) and **distributed** (events published to a message broker like RabbitMQ, Azure Service Bus, or Kafka, consumed by separate services).
 
-## Example
-
-An order service publishes `OrderPlaced`. Other services react without the order service calling them directly.
+## In-Process Domain Events
 
 ```csharp
-public sealed record OrderPlaced(string OrderId, DateTimeOffset OccurredAt);
+// Event: an immutable fact
+public sealed record OrderPlaced(string OrderId, decimal Total, DateTimeOffset OccurredAt);
 
-public interface IEventBus
+// Publisher: raises the event after persisting state
+public sealed class OrderService(IEventBus bus, IOrderRepository repo)
 {
-    Task PublishAsync<T>(T evt, CancellationToken ct);
+    public async Task PlaceAsync(string orderId, decimal total, CancellationToken ct)
+    {
+        await repo.SaveAsync(new Order(orderId, total), ct);
+        // Publish AFTER save — event reflects committed state
+        await bus.PublishAsync(new OrderPlaced(orderId, total, DateTimeOffset.UtcNow), ct);
+    }
 }
 
-public sealed class Orders
+// Consumer: reacts without being called directly
+public sealed class InventoryHandler : IEventHandler<OrderPlaced>
 {
-    private readonly IEventBus _bus;
-
-    public Orders(IEventBus bus) => _bus = bus;
-
-    public async Task PlaceAsync(string orderId, CancellationToken ct)
+    public Task HandleAsync(OrderPlaced evt, CancellationToken ct)
     {
-        // Persist order state first (often with an Outbox for reliability)
-        await _bus.PublishAsync(new OrderPlaced(orderId, DateTimeOffset.UtcNow), ct);
+        // Reserve stock for the placed order
+        return Task.CompletedTask;
     }
 }
 ```
 
+## Distributed Events and the Outbox Pattern
 
-## Questions
+Publishing to a message broker after a database write introduces a reliability gap: the DB write succeeds but the broker publish fails, leaving the event lost.
 
-> [!QUESTION]- What is Event-driven?
-> Event-driven development builds systems around events (facts that something happened) and reactions to those events.
+The **Outbox pattern** solves this by writing the event to an `OutboxMessages` table in the same database transaction as the domain change. A background worker then reads the outbox and publishes to the broker, retrying until acknowledged:
 
-## Links
+```csharp
+// In the same transaction: save order + write outbox entry
+await using var tx = await db.Database.BeginTransactionAsync(ct);
+await repo.SaveAsync(order, ct);
+await db.OutboxMessages.AddAsync(new OutboxMessage
+{
+    Type    = nameof(OrderPlaced),
+    Payload = JsonSerializer.Serialize(new OrderPlaced(order.Id, order.Total, DateTimeOffset.UtcNow))
+}, ct);
+await db.SaveChangesAsync(ct);
+await tx.CommitAsync(ct);
+// Background worker publishes OutboxMessages to the broker
+```
 
-- [Event-driven architecture style](https://learn.microsoft.com/en-us/azure/architecture/guide/architecture-styles/event-driven)
+## Pitfalls
+
+### Publishing Before Persisting
+
+**What goes wrong**: the event is published to the broker before the database transaction commits. If the commit fails, consumers react to an event that never happened.
+
+**Why it happens**: publishing feels like a natural "last step" after business logic, but it happens before the DB confirms success.
+
+**Mitigation**: always publish events *after* a successful commit, or use the Outbox pattern for guaranteed delivery.
+
+### Ignoring Consumer Idempotency
+
+**What goes wrong**: the broker delivers the same event twice (at-least-once delivery is the default for most brokers). The consumer processes it twice, double-charging a customer or double-reserving stock.
+
+**Why it happens**: most message brokers guarantee at-least-once delivery, not exactly-once.
+
+**Mitigation**: make consumers idempotent. Track processed event IDs in a `ProcessedEvents` table and skip duplicates. Design operations to be naturally idempotent where possible (e.g., `SET stock = X` instead of `stock -= Y`).
+
+## Tradeoffs
+
+| Approach | Strengths | Weaknesses | When to use |
+|---|---|---|---|
+| In-process events (MediatR) | Simple, no infrastructure, synchronous option | Lost on process crash, no cross-service delivery | Domain events within one bounded context |
+| Distributed broker (Service Bus, Kafka) | Durable, cross-service, scalable | Operational complexity, at-least-once delivery, ordering challenges | Cross-service workflows, audit trails, high-throughput pipelines |
+
+**Decision rule**: start with in-process events for domain logic within a single service. Move to a distributed broker when you need cross-service communication, durability across restarts, or fan-out to multiple consumers. Always pair distributed events with the Outbox pattern for reliability.
+
+## References
+
+- [Event-driven architecture style (Azure Architecture Center)](https://learn.microsoft.com/en-us/azure/architecture/guide/architecture-styles/event-driven) — Microsoft's overview of event-driven patterns, broker topologies, and when to apply them in distributed systems.
+- [Outbox pattern (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/architecture/best-practices/transactional-outbox-cosmos) — detailed explanation of the Outbox pattern for reliable event publishing with transactional guarantees.
+- [MediatR (GitHub)](https://github.com/jbogard/MediatR) — the standard .NET in-process mediator library used for domain events, commands, and queries; supports both synchronous and asynchronous handlers.
+- [Event-Driven Architecture (Martin Fowler)](https://martinfowler.com/articles/201701-event-driven.html) — practitioner article distinguishing event notification, event-carried state transfer, event sourcing, and CQRS — four patterns often confused under the "event-driven" label.
 
 <!-- whats-next:start -->
 

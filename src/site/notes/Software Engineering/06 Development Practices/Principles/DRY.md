@@ -45,9 +45,9 @@ public static class EmailRules
 
 ## Links
 
-- [The Pragmatic Programmer](https://pragprog.com/titles/tpp20/the-pragmatic-programmer-20th-anniversary-edition/)
-- [DRY principle](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself)
-- [Be careful with abstractions](https://www.joelonsoftware.com/2002/11/11/the-law-of-leaky-abstractions/)
+- [The Pragmatic Programmer](https://pragprog.com/titles/tpp20/the-pragmatic-programmer-20th-anniversary-edition/) — the book that coined DRY; Chapter 7 explains the principle with examples of knowledge duplication vs code duplication.
+- [DRY principle (Wikipedia)](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself) — concise definition and common misapplications.
+- [The Law of Leaky Abstractions (Joel Spolsky)](https://www.joelonsoftware.com/2002/11/11/the-law-of-leaky-abstractions/) — practitioner essay on why premature abstraction (the DRY failure mode) creates more problems than it solves.
 
 <!-- whats-next:start -->
 

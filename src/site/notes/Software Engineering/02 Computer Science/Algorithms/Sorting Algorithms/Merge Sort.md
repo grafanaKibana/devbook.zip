@@ -2,19 +2,13 @@
 {"dg-publish":true,"permalink":"/software-engineering/02-computer-science/algorithms/sorting-algorithms/merge-sort/"}
 ---
 
-
 # Intro
 
-Merge sort is a divide-and-conquer algorithm: split the array, sort each half, then merge the two sorted halves. It has reliable O(n log n) time and is stable, at the cost of extra memory.
+Merge sort is a divide-and-conquer algorithm: split the array in half, recursively sort each half, then merge the two sorted halves into one. It guarantees O(n log n) time in all cases and is stable, at the cost of O(n) extra memory. It is the algorithm of choice when stability matters or when sorting linked lists and external data.
 
-## Deeper Explanation
+## Mechanism
 
-- Mechanism: recursively split until size 1, then merge by repeatedly taking the smaller front element from the two halves.
-- Complexity: O(n log n) time in all cases; O(n) extra space for the merge buffer (array implementation).
-- Properties: stable (with careful merge), not in-place in typical array form.
-- Practical notes: great for linked lists and external sorting (sorting data that does not fit in memory).
-
-## Diagram
+Recursively split until each partition has size 1 (trivially sorted). Then merge pairs of sorted partitions by repeatedly taking the smaller front element from the two halves.
 
 ```mermaid
 graph TD
@@ -28,16 +22,66 @@ graph TD
   F --> R
 ```
 
+## Complexity
+
+| Case | Time | Space |
+|------|------|-------|
+| Best | O(n log n) | O(n) |
+| Average | O(n log n) | O(n) |
+| Worst | O(n log n) | O(n) |
+
+**Properties:** stable, not in-place (requires O(n) merge buffer for arrays), O(1) extra space for linked lists.
+
+## C# Implementation
+
+```csharp
+public static void MergeSort(int[] a, int left, int right)
+{
+    if (left >= right) return;
+
+    int mid = left + (right - left) / 2;
+    MergeSort(a, left, mid);
+    MergeSort(a, mid + 1, right);
+    Merge(a, left, mid, right);
+}
+
+private static void Merge(int[] a, int left, int mid, int right)
+{
+    int[] temp = new int[right - left + 1];
+    int i = left, j = mid + 1, k = 0;
+
+    while (i <= mid && j <= right)
+        temp[k++] = a[i] <= a[j] ? a[i++] : a[j++];
+
+    while (i <= mid)  temp[k++] = a[i++];
+    while (j <= right) temp[k++] = a[j++];
+
+    Array.Copy(temp, 0, a, left, temp.Length);
+}
+```
+
+## When to Use
+
+- **Stability required:** merge sort preserves the relative order of equal elements. Use when sorting objects by a secondary key after a primary sort.
+- **Linked lists:** merge sort is O(1) extra space on linked lists (no random access needed for merging).
+- **External sorting:** sorting data that does not fit in memory — merge sort's sequential access pattern maps well to disk I/O.
+- **Predictable worst case:** unlike quick sort, merge sort never degrades to O(n²).
+
+For in-memory array sorting where stability is not required, `Array.Sort` (introsort) is typically faster due to better cache behavior.
+
 ## Questions
 
-> [!QUESTION]- What is Merge Sort?
-> Merge sort is a divide-and-conquer algorithm: split the array, sort each half, then merge the two sorted halves. It has reliable O(n log n) time and is stable, at the cost of extra memory.
+> [!QUESTION]- Why is merge sort preferred over quick sort for linked lists?
+> Merge sort requires no random access — it only needs to traverse lists sequentially and re-link nodes. The merge step is O(1) extra space on linked lists (just pointer manipulation, no copy buffer). Quick sort's partitioning requires random access to swap elements by index, which is O(n) on a linked list. For linked list sorting, merge sort is O(n log n) time and O(1) extra space; quick sort degrades to O(n²) or requires O(n) extra space.
+
+> [!QUESTION]- When does merge sort's O(n) space cost become a real problem?
+> When sorting large datasets in memory-constrained environments: sorting 1 GB of data requires another 1 GB merge buffer. For external sorting (data larger than RAM), merge sort's sequential access pattern is actually an advantage — it maps well to disk I/O. For in-memory sorting where stability is not required and memory is constrained, quick sort (in-place, O(log n) stack) is the better choice.
 
 
-## Links
+## References
 
-- https://en.wikipedia.org/wiki/Merge_sort - Core idea + variants
-- https://cp-algorithms.com/sorting/merge_sort.html - Implementation details
+- [Merge sort (Wikipedia)](https://en.wikipedia.org/wiki/Merge_sort) — algorithm description, stability proof, and external sort variant.
+- [Merge sort (cp-algorithms)](https://cp-algorithms.com/sorting/merge_sort.html) — implementation details and inversion count application.
 
 <!-- whats-next:start -->
 
