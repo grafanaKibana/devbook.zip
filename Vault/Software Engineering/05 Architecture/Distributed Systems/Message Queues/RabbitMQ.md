@@ -270,10 +270,10 @@ Why: shows understanding of guarantees and their costs.
 
 ## References
 
-- [RabbitMQ Documentation](https://www.rabbitmq.com/docs)
-- [RabbitMQ Tutorials](https://www.rabbitmq.com/tutorials)
-- [CloudAMQP: RabbitMQ Best Practice for High Performance](https://www.cloudamqp.com/blog/part1-rabbitmq-best-practice.html)
-- [RabbitMQ .NET API Guide](https://www.rabbitmq.com/client-libraries/dotnet-api-guide)
+- [RabbitMQ Documentation](https://www.rabbitmq.com/docs) — official reference covering exchanges, queues, bindings, durability, and clustering.
+- [RabbitMQ Tutorials](https://www.rabbitmq.com/tutorials) — step-by-step tutorials for common messaging patterns: work queues, pub/sub, routing, topics, and RPC.
+- [CloudAMQP: RabbitMQ Best Practice for High Performance](https://www.cloudamqp.com/blog/part1-rabbitmq-best-practice.html) — practitioner guide on connection pooling, prefetch count, persistent messages, and avoiding common performance pitfalls.
+- [RabbitMQ .NET API Guide](https://www.rabbitmq.com/client-libraries/dotnet-api-guide) — official .NET client library reference covering connection management, channel lifecycle, and consumer patterns.
 
 <!-- whats-next:start -->
 
