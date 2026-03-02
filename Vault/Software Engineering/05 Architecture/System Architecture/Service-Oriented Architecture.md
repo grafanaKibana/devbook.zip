@@ -47,6 +47,15 @@ SOA remains relevant in enterprise contexts where:
 
 **Mitigation**: keep the ESB as a dumb transport. Business logic belongs in the services. If the ESB is doing domain decisions, refactor them into the services.
 
+## Questions
+
+> [!QUESTION]- What is the key architectural difference between SOA and microservices?
+> SOA uses an Enterprise Service Bus (ESB) as a central integration hub — services communicate through the bus, which handles routing, transformation, and orchestration. Microservices use 'smart endpoints, dumb pipes': services contain the logic and communicate directly via HTTP/REST, gRPC, or lightweight message brokers. The ESB becomes a bottleneck and single point of failure in SOA; microservices distribute that responsibility into the services themselves.
+
+> [!QUESTION]- When is SOA still the right choice over microservices?
+> SOA remains appropriate for enterprise integration scenarios: connecting heterogeneous legacy systems (SAP, Salesforce, custom ERP) via a shared integration layer, shared services used by multiple business units where microservice decomposition overhead isn't justified, and regulated industries requiring centralized governance and audit trails. Microservices are better for greenfield cloud-native systems where teams can own independent services end-to-end.
+
+
 ## References
 
 - [Service-oriented architecture (Wikipedia)](https://en.wikipedia.org/wiki/Service-oriented_architecture) — historical context, ESB patterns, and the evolution from SOA to microservices.

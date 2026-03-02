@@ -67,6 +67,15 @@ public static void InsertionSort(int[] a)
 - **Base case in hybrid sorts:** Timsort and introsort switch to insertion sort for small partitions.
 - **Online sorting:** can sort a stream of elements as they arrive, one at a time.
 
+## Questions
+
+> [!QUESTION]- When is insertion sort faster than O(n log n) algorithms?
+> For small arrays (n ≤ 20–50), insertion sort outperforms merge sort and quick sort because it has no recursion overhead, no auxiliary memory allocation, and excellent cache locality. This is why Timsort and introsort switch to insertion sort for small partitions — the constant factor advantage outweighs the asymptotic disadvantage.
+
+> [!QUESTION]- Why is insertion sort used as the base case in Timsort?
+> Timsort (Python's and Java's default sort) uses insertion sort for runs shorter than ~64 elements. At that size, insertion sort's O(n²) worst case is bounded (64² = 4096 operations), its cache-friendly sequential access beats merge sort's random access pattern, and it requires no extra memory. The combination of O(n) best case on nearly-sorted data and low constant factors makes it ideal for the small-partition base case.
+
+
 ## References
 
 - [Insertion sort (Wikipedia)](https://en.wikipedia.org/wiki/Insertion_sort) — algorithm description, binary insertion sort variant, and complexity analysis.

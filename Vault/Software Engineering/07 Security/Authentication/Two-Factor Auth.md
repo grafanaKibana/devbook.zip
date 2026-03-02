@@ -47,6 +47,21 @@ FIDO2 (Fast Identity Online) uses public-key cryptography with hardware security
 
 **When to use**: High-security applications (banking, enterprise admin access). More secure than TOTP but requires hardware or platform support.
 
+## Pitfalls
+
+- **TOTP clock skew**: TOTP codes are time-based. If the server and client clocks differ by more than 30 seconds, valid codes are rejected. Mitigation: accept codes from the previous and next 30-second window (±1 window tolerance).
+- **SMS 2FA is phishable**: SMS codes can be intercepted via SIM swapping or SS7 attacks. For high-security applications, use TOTP or FIDO2 instead of SMS.
+- **Backup codes stored insecurely**: Backup codes are one-time recovery codes. If stored in plaintext or emailed, they become a single point of failure. Hash them like passwords.
+
+## Questions
+
+> [!QUESTION]- Why is FIDO2/WebAuthn more secure than TOTP?
+> TOTP codes can be phished — an attacker can trick a user into entering their code on a fake site. FIDO2 keys are bound to the origin domain: the browser only uses the key for the exact domain it was registered on, making phishing impossible. The private key also never leaves the device.
+
+> [!QUESTION]- When should you use TOTP vs FIDO2?
+> TOTP is simpler to implement and works on any device with an authenticator app — use it for most applications. FIDO2 is phishing-resistant and required for high-assurance scenarios (banking, admin access, NIST AAL3). The cost is hardware dependency and more complex enrollment flow.
+
+
 ## References
 
 - [NIST SP 800-63B — Digital Identity Guidelines](https://pages.nist.gov/800-63-3/sp800-63b.html) — NIST's authoritative guide on authentication assurance levels and MFA requirements

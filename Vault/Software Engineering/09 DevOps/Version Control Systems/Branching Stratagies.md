@@ -67,6 +67,15 @@ A branching strategy defines how a team uses Git branches to manage parallel dev
 
 **Use GitFlow** only when: you ship versioned releases on a fixed schedule (e.g., a mobile app or packaged software) and need to maintain multiple release branches simultaneously.
 
+## Questions
+
+> [!QUESTION]- Why does GitFlow create integration problems for teams practicing continuous deployment?
+> GitFlow's long-lived `develop` branch accumulates divergence from `main` over days or weeks. Feature branches branch off `develop`, so they also diverge. When multiple features merge back, conflicts compound. The `release/*` stabilization phase adds a manual gate that prevents continuous deployment. For web services that deploy multiple times per day, GitFlow's overhead is pure cost with no benefit. Use trunk-based development or GitHub Flow instead.
+
+> [!QUESTION]- What does trunk-based development require that makes it unsuitable for all teams?
+> Trunk-based development requires: (1) feature flags to hide incomplete features from users, (2) fast CI (< 10 minutes) so broken commits are caught quickly, (3) team discipline to keep commits small and the trunk green. Without feature flags, incomplete features must be fully hidden behind code-level conditions or held back entirely. Without fast CI, a broken commit blocks the whole team. Teams without these practices should start with GitHub Flow (short-lived PRs) and evolve toward trunk-based as their CI matures.
+
+
 ## References
 
 - [Trunk Based Development](https://trunkbaseddevelopment.com/) — practitioner site for trunk-based development; covers feature flags, branch by abstraction, and team scaling

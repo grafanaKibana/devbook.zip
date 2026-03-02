@@ -76,6 +76,15 @@ private static void Merge(int[] a, int left, int mid, int right)
 
 For in-memory array sorting where stability is not required, `Array.Sort` (introsort) is typically faster due to better cache behavior.
 
+## Questions
+
+> [!QUESTION]- Why is merge sort preferred over quick sort for linked lists?
+> Merge sort requires no random access — it only needs to traverse lists sequentially and re-link nodes. The merge step is O(1) extra space on linked lists (just pointer manipulation, no copy buffer). Quick sort's partitioning requires random access to swap elements by index, which is O(n) on a linked list. For linked list sorting, merge sort is O(n log n) time and O(1) extra space; quick sort degrades to O(n²) or requires O(n) extra space.
+
+> [!QUESTION]- When does merge sort's O(n) space cost become a real problem?
+> When sorting large datasets in memory-constrained environments: sorting 1 GB of data requires another 1 GB merge buffer. For external sorting (data larger than RAM), merge sort's sequential access pattern is actually an advantage — it maps well to disk I/O. For in-memory sorting where stability is not required and memory is constrained, quick sort (in-place, O(log n) stack) is the better choice.
+
+
 ## References
 
 - [Merge sort (Wikipedia)](https://en.wikipedia.org/wiki/Merge_sort) — algorithm description, stability proof, and external sort variant.

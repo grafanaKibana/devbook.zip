@@ -43,11 +43,26 @@ var block2Hash = Sha256Hex(block2Prev + block2Data);
 ```
 
 
+## Pitfalls
+
+### Using Blockchain When a Database Suffices
+
+**What goes wrong**: teams adopt blockchain for internal systems where all parties trust a central authority, gaining none of the decentralization benefits while paying the full cost in throughput, complexity, and compliance risk.
+
+**Why it happens**: blockchain is associated with innovation and security, making it attractive even when the problem doesn't require it.
+
+**Mitigation**: blockchain is justified only when you need a shared ledger across mutually distrusting parties with no central authority. If you control all the nodes, a traditional database with audit logging is simpler, faster, and easier to comply with GDPR.
+
+### GDPR Conflict with Immutability
+
+**What goes wrong**: storing personal data on a blockchain makes it impossible to fulfill GDPR's right to erasure (Article 17). Once written, the data cannot be deleted without breaking the chain.
+
+**Mitigation**: never store personal data directly on a blockchain. Store a hash or reference; keep the actual data in a mutable off-chain store that can be deleted.
+
 ## Questions
 
 > [!QUESTION]- What is Block-chain?
-> A blockchain is an append-only ledger where records are grouped into blocks and linked together using cryptographic hashes.
-
+> A blockchain is an append-only ledger where records are grouped into blocks and linked together using cryptographic hashes. Changing a past block changes its hash, which breaks the chain unless all subsequent blocks are recomputed and the network's consensus rules are satisfied.
 ## Limitations for Enterprise Use
 
 - **Throughput**: Public blockchains (Bitcoin: ~7 TPS, Ethereum: ~15 TPS) are orders of magnitude slower than traditional databases (thousands of TPS). Private blockchains are faster but lose decentralization benefits.

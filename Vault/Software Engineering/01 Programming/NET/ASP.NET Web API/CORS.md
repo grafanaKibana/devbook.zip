@@ -86,6 +86,15 @@ public IActionResult InternalEndpoint() => Ok();
 
 **Mitigation**: place `app.UseCors()` immediately after `app.UseRouting()` and before any authentication/authorization middleware.
 
+## Questions
+
+> [!QUESTION]- Does CORS protect your API from unauthorized access?
+> No. CORS is a browser enforcement mechanism — it only affects browser-initiated JavaScript requests. Non-browser clients (curl, Postman, server-to-server calls) ignore CORS headers entirely. CORS prevents malicious websites from making cross-origin requests on behalf of a logged-in user (CSRF-style attacks), but it does not replace authentication or authorization. Always secure your API with proper auth regardless of CORS configuration.
+
+> [!QUESTION]- Why must app.UseCors() come before authentication middleware?
+> Preflight OPTIONS requests do not carry authentication credentials. If authentication middleware runs first, it rejects the preflight with 401 before CORS headers are added to the response. The browser then sees a failed preflight and blocks the actual request. Placing UseCors() before UseAuthentication() ensures preflight responses include the correct CORS headers and return 200, allowing the browser to proceed with the actual authenticated request.
+
+
 ## References
 
 - [Enable CORS in ASP.NET Core (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/security/cors) — official guide covering named policies, default policies, endpoint-specific CORS, and preflight handling.

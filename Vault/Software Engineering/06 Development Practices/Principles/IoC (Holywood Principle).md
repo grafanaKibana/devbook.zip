@@ -54,6 +54,15 @@ These are related but distinct:
 
 DIP is the *why* (depend on interfaces); IoC/DI is the *how* (let the container wire the concrete implementations). You can follow DIP without a DI container (manual wiring in `Main`), but a container makes it practical at scale.
 
+## Questions
+
+> [!QUESTION]- What is the difference between IoC and Dependency Injection?
+> IoC is the principle: the framework controls object creation and wiring instead of your code. Dependency Injection is the most common technique for implementing IoC: dependencies are passed in (injected) rather than created internally. You can implement IoC without DI (e.g., using a service locator or factory), but constructor injection via a DI container is the idiomatic .NET approach. IoC is the what; DI is the how.
+
+> [!QUESTION]- What is the difference between IoC and the Dependency Inversion Principle (DIP)?
+> DIP (SOLID 'D') is a design rule: high-level modules should depend on abstractions, not concrete implementations. IoC is a runtime mechanism: the framework wires concrete implementations to those abstractions. DIP is the why (depend on interfaces); IoC/DI is the how (let the container provide the concrete class). You can follow DIP without a DI container by manually wiring dependencies in Main, but a container makes it practical at scale.
+
+
 ## References
 
 - [Inversion of Control Containers and the Dependency Injection pattern (Martin Fowler)](https://martinfowler.com/articles/injection.html) — the canonical article that named and defined IoC containers and DI; explains the Hollywood Principle and compares constructor, setter, and interface injection.

@@ -56,6 +56,41 @@ app.Use(async (context, next) =>
 
 **Avoid** for user-facing authentication. Use OAuth 2.0 / JWT Bearer for APIs and ASP.NET Core Identity for user login.
 
+## Pitfalls
+
+### Credentials on Every Request
+
+**What goes wrong**: Basic Auth sends credentials with every HTTP request. If any request is intercepted (misconfigured proxy, logging middleware that logs headers), credentials are exposed.
+
+**Mitigation**: always use HTTPS. Never log the `Authorization` header. Rotate service account credentials regularly.
+
+### No Token Revocation
+
+**What goes wrong**: Basic Auth has no concept of token expiry or revocation. If credentials are compromised, the only remediation is changing the password, which requires updating all clients.
+
+**Mitigation**: for user-facing authentication, use OAuth 2.0 / JWT Bearer with short-lived tokens and refresh token rotation. For service-to-service, use client credentials flow or API keys with rotation support.
+
+## Tradeoffs
+
+| Scheme | Complexity | Revocation | User-facing | Use when |
+|---|---|---|---|---|
+| Basic Auth | Minimal | Password change only | No | Internal M2M over HTTPS, legacy integration |
+| API Key | Low | Key rotation | No | Public APIs, third-party integrations |
+| JWT Bearer | Medium | Token expiry + refresh | Yes | User-facing APIs, stateless auth |
+| OAuth 2.0 | High | Token revocation, refresh | Yes | Delegated access, third-party clients |
+
+**Decision rule**: use Basic Auth only for internal service-to-service calls over HTTPS where simplicity is the priority. For user-facing authentication or any external-facing API, use JWT Bearer or OAuth 2.0.
+
+
+## Questions
+
+> [!QUESTION]- Why is Basic Auth unsafe over HTTP?
+> Base64 is encoding, not encryption — it is trivially reversible. Over HTTP, the `Authorization` header is sent in plaintext and visible to any network observer. Over HTTPS, the header is encrypted by TLS, making Basic Auth safe to use.
+
+> [!QUESTION]- When is Basic Auth acceptable in production?
+> For machine-to-machine calls between trusted services on an internal network over HTTPS, Basic Auth is acceptable when simplicity matters and the credential is a service account (not a user password). For user-facing authentication, use OAuth 2.0 / JWT Bearer — Basic Auth requires sending credentials on every request, which increases exposure.
+
+
 ## References
 
 - [RFC 7617 — HTTP Basic Authentication](https://datatracker.ietf.org/doc/html/rfc7617) — the authoritative specification for Basic Auth

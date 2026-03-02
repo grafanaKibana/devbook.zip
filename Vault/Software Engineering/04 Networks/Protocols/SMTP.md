@@ -74,6 +74,42 @@ Modern email delivery requires authentication records to avoid spam filters:
 
 Without these, emails from your domain will be marked as spam or rejected.
 
+## Pitfalls
+
+### Missing SPF/DKIM/DMARC
+
+**What goes wrong**: emails from your domain land in spam or are rejected outright by major providers (Gmail, Outlook).
+
+**Why it happens**: SMTP has no built-in sender authentication. Without SPF, DKIM, and DMARC, receiving servers cannot verify that your server is authorized to send for your domain.
+
+**Mitigation**: configure all three DNS records before sending any production email. Use a managed email service (SendGrid, Mailgun, Azure Communication Services) — they handle authentication setup and maintain sender reputation.
+
+### Using System.Net.Mail.SmtpClient
+
+**What goes wrong**: `SmtpClient` does not support OAuth2, has poor async support, and is marked obsolete in .NET.
+
+**Mitigation**: use MailKit for all new .NET email code. It supports SMTP, IMAP, POP3, OAuth2, and modern TLS.
+
+## Tradeoffs
+
+| Approach | Pros | Cons | Use when |
+|---|---|---|---|
+| Direct SMTP (MailKit) | Full control, no third-party dependency | You manage deliverability, bounce handling, spam reputation | Internal systems, low volume |
+| Managed service (SendGrid, Mailgun) | Deliverability handled, analytics, bounce/unsubscribe management | Cost, vendor dependency | Production transactional email |
+| Azure Communication Services | Azure-native, integrates with Azure Monitor | Azure lock-in | Azure-hosted systems |
+
+**Decision rule**: use a managed email service for any production transactional email. Direct SMTP is only appropriate for internal notifications where deliverability to external inboxes is not required.
+
+
+## Questions
+
+> [!QUESTION]- Why does SMTP require SPF, DKIM, and DMARC for deliverability?
+> SMTP has no built-in sender authentication — anyone can claim any From address. SPF restricts which IPs can send for a domain. DKIM adds a cryptographic signature that proves the message was not tampered with. DMARC tells receiving servers what to do when SPF/DKIM fail. Without all three, email from your domain will be marked as spam or rejected by major providers.
+
+> [!QUESTION]- Why is `System.Net.Mail.SmtpClient` deprecated in .NET?
+> `SmtpClient` does not support modern authentication (OAuth2), has poor async support, and lacks IMAP/POP3. Microsoft marked it obsolete and recommends MailKit, which supports all modern protocols and authentication methods.
+
+
 ## References
 
 - [SMTP (RFC 5321)](https://www.rfc-editor.org/rfc/rfc5321) — the current SMTP specification; defines the protocol commands, response codes, and message format.
