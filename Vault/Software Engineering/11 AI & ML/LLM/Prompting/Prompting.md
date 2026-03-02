@@ -6,8 +6,7 @@ subtopic:
 level:
   - "3"
 priority: Low
-status:
-  - Done
+status: Done
 tags:
   - FolderNote
 dg-publish: true
