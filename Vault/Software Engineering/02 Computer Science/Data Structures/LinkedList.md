@@ -65,10 +65,10 @@ list.Remove("C");
 
 ## Links
 
-- [LinkedList<T> class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.linkedlist-1)
-- [Selecting a collection class](https://learn.microsoft.com/en-us/dotnet/standard/collections/selecting-a-collection-class)
-- [Performance tips for collections](https://learn.microsoft.com/en-us/dotnet/standard/collections/)
-- [Exploring C# LinkedLists via LRU Caches](https://blog.softwx.net/2012/07/exploring-c-linkedlists-via-lru-caches.html)
+- [LinkedList<T> class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.linkedlist-1) — API reference covering node operations, AddBefore/AddAfter, and enumeration.
+- [Selecting a collection class](https://learn.microsoft.com/en-us/dotnet/standard/collections/selecting-a-collection-class) — Microsoft decision guide; explains when linked list is appropriate vs array-backed collections.
+- [Performance tips for collections](https://learn.microsoft.com/en-us/dotnet/standard/collections/) — overview of .NET collection types with complexity and memory characteristics.
+- [Exploring C# LinkedLists via LRU Caches](https://blog.softwx.net/2012/07/exploring-c-linkedlists-via-lru-caches.html) — practitioner example of a real use case (LRU cache) where O(1) node-local edits justify linked list overhead.
 
 <!-- whats-next:start -->
 

@@ -63,9 +63,9 @@ Console.WriteLine(values[2]); // 300
 
 ## Links
 
-- [Span<T> struct](https://learn.microsoft.com/en-us/dotnet/api/system.span-1)
-- [Memory<T> and Span<T> usage guidelines](https://learn.microsoft.com/en-us/dotnet/standard/memory-and-spans/)
-- [Welcome to C# 7.2 and Span](https://devblogs.microsoft.com/dotnet/welcome-to-c-7-2-and-span/)
+- [Span<T> struct](https://learn.microsoft.com/en-us/dotnet/api/system.span-1) — API reference covering constructors, Slice, and ref struct constraints.
+- [Memory<T> and Span<T> usage guidelines](https://learn.microsoft.com/en-us/dotnet/standard/memory-and-spans/) — Microsoft guidance on when to use Span vs Memory, ownership rules, and async boundaries.
+- [Welcome to C# 7.2 and Span](https://devblogs.microsoft.com/dotnet/welcome-to-c-7-2-and-span/) — .NET blog post introducing Span<T> with motivation, design rationale, and early usage examples.
 
 <!-- whats-next:start -->
 

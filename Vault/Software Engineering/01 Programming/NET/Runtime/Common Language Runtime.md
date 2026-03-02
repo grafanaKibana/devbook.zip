@@ -13,90 +13,89 @@ dg-publish: true
 
 # Intro
 
-CLR (Common Language Runtime) is part of the .NET Framework (or .NET Core / .NET 5+) responsible for executing code written in .NET-compatible languages. It provides the execution environment, memory management, thread management, security, and other services needed to run applications.
+The CLR (Common Language Runtime) is the execution engine of .NET. It takes the CPU-independent bytecode (IL) produced by language compilers and turns it into native machine code at runtime, while also providing memory management, type safety, exception handling, threading, and interoperability services. Every C#, F#, and VB.NET program runs inside the CLR — it is the reason .NET code is portable across platforms and why you do not manage memory manually.
 
-Core responsibilities of the CLR:
+The key insight: .NET compilers do not produce native binaries. They produce **assemblies** containing **IL (Intermediate Language)** plus metadata. The CLR loads those assemblies and compiles IL to native code on the target machine using **JIT (Just-In-Time) compilation** or, for ahead-of-time scenarios, **AOT (Ahead-of-Time) compilation** (ReadyToRun, NativeAOT).
 
-1. **Compilation to an intermediate language (IL)**:
-    - Programs written in .NET languages (C#, [VB.NET](http://vb.net/), F#, etc.) are compiled into an intermediate language (Intermediate Language, IL) that is platform-independent and stored in an assembly.
-2. **Just-In-Time (JIT) compilation**:
-    - When an application starts, IL code is JIT-compiled into machine code that can run on the current hardware platform. This happens at runtime, improving the portability of the code.
-3. **Memory management**:
-    - The CLR tracks memory allocation and reclamation, automatically managing garbage collection. It determines when objects are no longer in use and frees the memory they occupy.
-4. **Thread management**:
-    - The CLR provides mechanisms for creating and managing threads of execution. This includes synchronizing access to data between threads and handling exceptions in multithreaded applications.
-5. **Code security**:
-    - The CLR provides security mechanisms such as array bounds checks, type verification, and others to prevent unsafe code execution.
-6. **Metadata and reflection**:
-    - The CLR stores metadata about types and other code elements inside assemblies. The Reflection API allows programs to access and manipulate this metadata at runtime.
-7. **Exception handling**:
-    - The CLR provides an exception-handling mechanism that makes it easier for programs to handle exceptional situations.
-8. **Interop with native code**:
-    - The CLR provides mechanisms for interoperating with native code, enabling reuse of existing code in C, C++, and other languages.
-
-These capabilities make the CLR a key component of .NET by providing the runtime environment and ensuring portability and code safety. Note that details can evolve as new versions of .NET are released; for up-to-date information, refer to the official Microsoft documentation.
-
-The process of starting a .NET application and running it under the CLR involves several key steps. Below is a high-level overview:
+## How It Works
 
 ```mermaid
 flowchart TB
   subgraph SOURCE[Source code]
     direction LR
-
-    subgraph VB[VB]
-      direction TB
-      VB_LANG[VB] --> VB_COMP[Compiler] --> VB_IL[Assembly IL Code]
-    end
-
-    subgraph CSHARP[C#]
-      direction TB
-      CS_LANG[C#] --> CS_COMP[Compiler] --> CS_IL[Assembly IL Code]
-    end
-
-    subgraph CPP[C++]
-      direction TB
-      CPP_LANG[C++] --> CPP_COMP[Compiler] --> CPP_IL[Assembly IL Code]
-    end
+    CS[C# source] --> CSC[Roslyn compiler] --> IL[Assembly with IL and metadata]
+    FS[F# source] --> FSC[F# compiler] --> IL
   end
 
-  CPP_COMP --> UNMANAGED[Unmanaged Component]
-
-  subgraph MANAGED[Managed code]
+  subgraph CLR[Common Language Runtime]
     direction TB
-    subgraph CLR[Common Language Runtime]
-      direction TB
-      JIT[JIT Compiler] --> NATIVE[Native Code]
-    end
+    LOAD[Assembly loader] --> VERIFY[Type verifier]
+    VERIFY --> JIT[JIT compiler]
+    JIT --> NATIVE[Native machine code]
+    NATIVE --> GC[Garbage Collector]
+    NATIVE --> EH[Exception handling]
+    NATIVE --> THREAD[Thread management]
   end
 
-  VB_IL --> JIT
-  CS_IL --> JIT
-  CPP_IL --> JIT
-
-  NATIVE --> OS[Operating System Services]
-  UNMANAGED --> OS
+  IL --> LOAD
+  NATIVE --> OS[Operating System]
 ```
 
-1. **Source code compilation:**
-    - After writing code in .NET-compatible languages (for example, C#), the source code is compiled into an intermediate language (IL - Intermediate Language, CIL - Common Intermediate Language, MSIL - Microsoft Intermediate Language). This is done by the language compiler the code is written for (for example, the C# compiler **`csc`**).
-2. **Assembly creation:**
-    - The compiled IL code, along with type metadata, is packaged into an assembly (.dll or .exe assembly). The assembly contains information about the code structure, metadata, resources, and other required information.
-3. **Application startup:**
-    - When the user launches a .NET application, the operating system loads the executable (.exe) into memory.
-4. **Just-In-Time (JIT) compilation:**
-    - The CLR, which is part of the .NET runtime, translates IL code into machine code while the application is running. This process is called JIT compilation. It adapts the code to the specific hardware platform and improves application portability.
-5. **Loading into memory:**
-    - The generated machine code and referenced assemblies are loaded into memory. The CLR manages this process, establishing links between assemblies as needed.
-6. **Code execution:**
-    - The CLR begins executing the application by invoking the **`Main()`** method (or another entry point specified in configuration) from the application's main class.
-7. **Memory management and garbage collection:**
-    - The CLR automatically manages memory allocation and reclamation, including the garbage collection process. This includes tracking unused objects and reclaiming them to improve memory efficiency.
-8. **Threading and synchronization:**
-    - The CLR provides mechanisms for managing application threads, ensuring safety and synchronized access to data.
-9. **Exception handling:**
-    - When exceptions occur, the CLR handles them, providing the call stack and other information for debugging.
+**Startup sequence:**
 
-## Deeper Explanation
+1. OS loads the executable; the CLR host (`dotnet.exe` or embedded host) initializes.
+2. The assembly loader reads the `.dll`/`.exe`, validates the PE header, and loads IL + metadata into memory.
+3. The type verifier checks that IL is type-safe before execution (skipped for trusted/AOT code).
+4. The JIT compiler translates each method's IL to native code on first call and caches the result. Subsequent calls go directly to native code.
+5. The GC manages heap allocations; the thread pool manages worker threads.
+
+**Key CLR subsystems:**
+
+| Subsystem | What it does |
+|---|---|
+| JIT compiler | Translates IL → native code per method on first call |
+| Garbage Collector | Tracks heap objects, reclaims unreachable memory in generations |
+| Type system | Enforces type safety, loads metadata, supports reflection |
+| Exception handling | Structured exception handling (SEH) with stack unwinding |
+| Thread pool | Manages worker and I/O completion threads |
+| Interop | P/Invoke and COM interop for calling native code |
+
+## Managed vs Unmanaged Code
+
+**Managed code** runs under the CLR. The runtime provides:
+- Automatic memory management (GC)
+- Type safety and bounds checking
+- Structured exception handling
+- JIT/AOT compilation
+
+**Unmanaged code** runs directly as native machine code (C/C++ binaries, OS APIs). It does not benefit from CLR services and requires explicit memory management. .NET can call unmanaged code via P/Invoke:
+
+```csharp
+using System.Runtime.InteropServices;
+
+[DllImport("kernel32.dll", SetLastError = true)]
+static extern bool Beep(uint dwFreq, uint dwDuration);
+
+Beep(440, 500); // A4 note for 500ms
+```
+
+## JIT vs AOT
+
+| Mode | When compiled | Startup | Peak throughput | Binary size |
+|---|---|---|---|---|
+| JIT (default) | At runtime, per method | Slower (first call) | High (tiered compilation) | Small IL assembly |
+| ReadyToRun | At publish time, partial | Faster | Similar to JIT | Larger |
+| NativeAOT | At publish time, full | Fastest | No JIT overhead | Largest |
+
+**Decision rule**: use JIT for most server workloads (tiered compilation optimizes hot paths). Use NativeAOT for CLI tools, serverless cold-start-sensitive functions, or embedded scenarios where startup time and binary size matter.
+
+## Pitfalls
+
+**Assuming JIT is free** — the first call to a method triggers JIT compilation. In latency-sensitive scenarios (serverless cold starts, first request after deploy), this adds measurable overhead. Mitigate with ReadyToRun or NativeAOT publishing, or warm-up requests.
+
+**Blocking the thread pool** — the CLR thread pool uses hill-climbing to tune thread count. Blocking threads with synchronous I/O or `Thread.Sleep` starves the pool and degrades throughput. Use `async/await` to release threads during I/O waits.
+
+**Finalizer abuse** — objects with finalizers are promoted to the next GC generation before collection, increasing memory pressure. Prefer `IDisposable` + `using` for deterministic cleanup; use finalizers only as a safety net for unmanaged resources.
 
 ## Questions
 
@@ -108,11 +107,19 @@ flowchart TB
 > The CLR (Common Language Runtime) is the execution engine of .NET. It loads assemblies, verifies and executes IL, compiles IL to native code (JIT or AOT), manages memory (GC), handles exceptions, supports threading and interop, and provides other runtime services.
 > IL (also called CIL or MSIL) is the CPU-independent intermediate instruction set produced by .NET language compilers and stored in assemblies together with metadata. The CLR turns IL into native code for the current platform.
 
+> [!QUESTION]- When would you choose NativeAOT over JIT compilation?
+> NativeAOT eliminates JIT startup cost and produces a self-contained native binary — ideal for CLI tools, serverless functions with cold-start SLAs, or embedded scenarios. The cost is longer publish time, larger binary, and loss of runtime reflection-heavy features (dynamic code generation, some serialization patterns). For long-running server workloads, JIT with tiered compilation typically wins on peak throughput.
+
+> [!QUESTION]- Why does the GC use generations?
+> Most objects die young (short-lived allocations like request-scoped objects). Generational GC exploits this by collecting Gen 0 (newest, smallest) most frequently and cheaply. Long-lived objects are promoted to Gen 1 and Gen 2, which are collected less often. This reduces the cost of GC for the common case while still reclaiming long-lived garbage.
+
 ## Links
 
-- [Common Language Runtime - Wikipedia](https://en.wikipedia.org/wiki/Common_Language_Runtime)
-- [Just-in-time compilation - Wikipedia](https://en.wikipedia.org/wiki/Just-in-time_compilation)
-- [Common Language Runtime (CLR) overview - .NET \| Microsoft Learn](https://docs.microsoft.com/en-us/dotnet/standard/clr)
+- [Common Language Runtime (CLR) overview — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/standard/clr) — official overview of CLR responsibilities, managed execution, and assembly loading.
+- [.NET Runtime architecture — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/core/introduction) — covers the relationship between CLR, BCL, and the SDK.
+- [Managed execution process — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/standard/managed-execution-process) — step-by-step walkthrough from source code to running application.
+- [NativeAOT deployment — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/) — when and how to use ahead-of-time compilation.
+- [Fundamentals of garbage collection — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/fundamentals) — generational GC, LOH, and GC modes explained.
 
 <!-- whats-next:start -->
 
