@@ -104,6 +104,42 @@ Internal and external DNS return different answers for the same name (e.g., inte
 > [!QUESTION]- How does DNSSEC protect against cache poisoning?
 > DNSSEC signs records with a private key. Resolvers verify signatures using the public key from the DNS hierarchy. A forged response without a valid signature is rejected. Cost: key rotation complexity, signing overhead, and larger DNS responses (signatures add bytes).
 
+## Tradeoffs
+
+**TTL length: short vs long**
+
+| Dimension | Short TTL (60–300s) | Long TTL (3600–86400s) |
+|-----------|--------------------|-----------------------|
+| Failover speed | Fast (minutes) | Slow (hours) |
+| Cache hit rate | Low (more resolver queries) | High (fewer queries) |
+| DNS query load | Higher | Lower |
+| Migration risk | Low | High (stale records persist) |
+
+Decision rule: use short TTLs for records that may change (load balancer IPs, CDN origins, failover targets). Use long TTLs for stable records (MX, NS, static content). Always lower TTL 24h before a planned migration, then restore it after.
+
+**Recursive vs iterative resolution**
+Recursive: client delegates all work to the resolver. Simpler for clients, but the resolver is a single point of failure and cache poisoning target. Iterative: client walks the hierarchy itself. Rare in practice — most clients use recursive resolvers. Useful for DNS debugging tools (`dig +trace`).
+
+## DNS Debugging Commands
+
+```bash
+# Full resolution trace (shows each step)
+dig +trace api.example.com
+
+# Query specific record type
+dig api.example.com A
+dig example.com MX
+
+# Check TTL remaining in resolver cache
+dig @8.8.8.8 api.example.com A
+
+# Reverse lookup
+dig -x 203.0.113.42
+
+# Check DNSSEC validation
+dig +dnssec api.example.com
+```
+
 ## References
 
 - [DNS concepts (RFC 1034)](https://www.rfc-editor.org/rfc/rfc1034) — the original DNS specification covering the hierarchical namespace, zones, and resolution algorithm.

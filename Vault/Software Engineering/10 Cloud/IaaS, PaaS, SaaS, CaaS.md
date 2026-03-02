@@ -66,6 +66,48 @@ The provider manages the container orchestration layer (Kubernetes control plane
 
 **Use SaaS** for any business function where the software is a commodity (email, CRM, source control, CI/CD).
 
+## Examples
+
+**IaaS — Azure VM via Bicep (Infrastructure as Code)**
+
+```bicep
+resource vm 'Microsoft.Compute/virtualMachines@2023-03-01' = {
+  name: 'my-vm'
+  location: resourceGroup().location
+  properties: {
+    hardwareProfile: { vmSize: 'Standard_D2s_v3' }
+    storageProfile: {
+      imageReference: {
+        publisher: 'Canonical'
+        offer: 'UbuntuServer'
+        sku: '22_04-lts'
+        version: 'latest'
+      }
+    }
+    osProfile: {
+      computerName: 'my-vm'
+      adminUsername: 'azureuser'
+      // You manage: OS patches, security groups, scaling
+    }
+  }
+}
+```
+
+**PaaS — Azure App Service deployment config**
+
+```yaml
+# azure-pipelines.yml — deploy to Azure App Service (PaaS)
+# Provider manages: OS, runtime, scaling, TLS certificates
+- task: AzureWebApp@1
+  inputs:
+    azureSubscription: 'my-subscription'
+    appType: 'webApp'
+    appName: 'my-app-service'
+    package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
+    # No OS config, no runtime version pinning — provider handles it
+```
+
+
 ## Pitfalls
 
 ### Starting with IaaS When PaaS Suffices
@@ -94,6 +136,8 @@ The provider manages the container orchestration layer (Kubernetes control plane
 
 - [NIST Cloud Computing Definition (SP 800-145)](https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-145.pdf) — the authoritative NIST definition of cloud service models (IaaS, PaaS, SaaS) and deployment models
 - [Azure — What are IaaS, PaaS, SaaS?](https://azure.microsoft.com/en-us/resources/cloud-computing-dictionary/what-is-iaas/) — Microsoft's explanation with Azure service examples for each model
+- [Azure App Service overview](https://learn.microsoft.com/en-us/azure/app-service/overview) — PaaS reference: what the platform manages, supported runtimes, scaling options, and deployment slots
+- [Azure Kubernetes Service (AKS) overview](https://learn.microsoft.com/en-us/azure/aks/intro-kubernetes) — CaaS reference: what AKS manages vs what you manage, and when to choose AKS over App Service
 <!-- whats-next:start -->
 
 ---

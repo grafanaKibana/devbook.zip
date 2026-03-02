@@ -74,6 +74,27 @@ Run deterministic checks first. A malformed JSON or a disallowed action does not
 
 **Use both.** Deterministic checks enforce hard constraints; LLM judges evaluate soft quality. Neither replaces the other.
 
+## Pitfalls
+
+### Over-Relying on Schema Validation Alone
+
+**What goes wrong**: the team adds JSON schema validation and considers deterministic checks done. The output is structurally valid but semantically wrong — the `action` field is `"search"` when it should be `"escalate"`, and the schema allows both.
+
+**Mitigation**: schema validation is necessary but not sufficient. Add allowlist checks (only permitted action values), citation rules (factual answers must cite sources), and PII scanning. Schema catches structure; business rules catch semantic violations.
+
+### Treating Deterministic Failures as Soft Warnings
+
+**What goes wrong**: a deterministic check fails (PII detected in output, disallowed action invoked) but the team logs it as a warning and continues. The LLM judge then evaluates the output and may pass it.
+
+**Mitigation**: deterministic check failures are hard failures. Reject the output immediately. Do not pass it to the LLM judge. The pipeline order matters: deterministic checks first, LLM judge only on outputs that pass all hard rules.
+
+### Forgetting to Check Tool Inputs, Not Just Outputs
+
+**What goes wrong**: the team validates the final LLM response but not the tool calls the agent makes. The agent calls a `delete_record` tool that is not on the allowlist, and the check never fires because it only runs on the text response.
+
+**Mitigation**: apply allowlist checks to every tool invocation, not just the final response. For agentic systems, each tool call is an action that needs validation.
+
+
 ## Questions
 
 > [!QUESTION]- Can deterministic checks replace LLM judges?

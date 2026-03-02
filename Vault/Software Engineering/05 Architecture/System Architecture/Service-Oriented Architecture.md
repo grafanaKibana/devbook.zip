@@ -37,6 +37,38 @@ SOA remains relevant in enterprise contexts where:
 - **Shared services**: a single "Customer Service" used by multiple business units, where the overhead of microservice decomposition isn't justified.
 - **Regulated industries**: where centralized governance, audit trails, and schema contracts are required.
 
+## Example: SOA Service Contract
+
+In classic SOA, services expose contracts via WSDL (SOAP) or OpenAPI (REST). A service consumer depends only on the contract, not the implementation:
+
+```xml
+<!-- WSDL-style service contract (simplified) -->
+<definitions name="OrderService">
+  <portType name="OrderServicePort">
+    <operation name="PlaceOrder">
+      <input message="PlaceOrderRequest"/>
+      <output message="PlaceOrderResponse"/>
+    </operation>
+  </portType>
+</definitions>
+```
+
+In modern SOA using REST, the equivalent is an OpenAPI contract. The consumer generates a typed client from the contract and never imports the service's internal assemblies:
+
+```csharp
+// Consumer: generated client from OpenAPI spec
+// dotnet-openapi add https://orders-service/swagger/v1/swagger.json
+var client = new OrderServiceClient(httpClient);
+var response = await client.PlaceOrderAsync(new PlaceOrderRequest
+{
+    CustomerId = customerId,
+    Items = items
+});
+```
+
+The contract boundary is the key SOA discipline: services communicate through published interfaces, not shared code or shared databases.
+
+
 ## Pitfalls
 
 ### ESB as a God Object
@@ -61,6 +93,8 @@ SOA remains relevant in enterprise contexts where:
 - [Service-oriented architecture (Wikipedia)](https://en.wikipedia.org/wiki/Service-oriented_architecture) — historical context, ESB patterns, and the evolution from SOA to microservices.
 - [Microservices vs SOA (Martin Fowler)](https://martinfowler.com/articles/microservices.html#MicroservicesAndSOA) — Fowler's comparison of the two approaches, explaining why microservices emerged as a reaction to SOA's centralized governance model.
 - [[Software Engineering/05 Architecture/System Architecture/Microservices|Microservices]] — the modern evolution of SOA: fine-grained services, decentralized data, independent deployment, and "smart endpoints, dumb pipes."
+- [Azure Integration Services overview (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/architecture/reference-architectures/enterprise-integration/basic-enterprise-integration) — Microsoft's modern SOA integration reference architecture using API Management, Logic Apps, and Service Bus as the integration layer.
+- [SOA Manifesto](http://www.soa-manifesto.org/) — the original SOA design principles: service contracts, loose coupling, abstraction, reusability, autonomy, statelessness, discoverability, and composability.
 
 <!-- whats-next:start -->
 

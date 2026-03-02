@@ -19,6 +19,7 @@ dg-publish: true
 `Hashtable` stores keys and values as `object`, so value types are boxed/unboxed.
 It still uses hash buckets and collision resolution similar to modern hash-based collections.
 
+Internally, `Hashtable` uses separate chaining: when two keys hash to the same bucket, they form a linked list at that slot. Lookup traverses the chain until the matching key is found, making worst-case performance O(n) when all keys collide. `Dictionary<TKey, TValue>` uses open addressing with prime-based probing, which is more cache-friendly and avoids per-collision heap allocations. This is the primary performance reason to prefer `Dictionary` in new code.
 ## Structure
 
 ```mermaid

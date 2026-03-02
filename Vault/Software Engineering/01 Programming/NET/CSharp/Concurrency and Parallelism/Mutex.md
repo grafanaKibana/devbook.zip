@@ -43,6 +43,28 @@ finally
 }
 ```
 
+Single-instance application guard using a global mutex:
+
+```csharp
+// Global\ prefix makes the mutex visible across all Terminal Services sessions on Windows
+const string MutexName = @"Global\MyApp.SingleInstance";
+using var mutex = new Mutex(initiallyOwned: false, name: MutexName, createdNew: out bool created);
+
+if (!mutex.WaitOne(0)) // non-blocking check
+{
+    Console.Error.WriteLine("Another instance is already running.");
+    return;
+}
+try
+{
+    RunApplication();
+}
+finally
+{
+    mutex.ReleaseMutex();
+}
+```
+
 ## Pitfalls
 
 - Using `Mutex` for simple in-process locks adds kernel transition overhead and can degrade throughput. Prefer `lock` for short synchronous in-process sections.

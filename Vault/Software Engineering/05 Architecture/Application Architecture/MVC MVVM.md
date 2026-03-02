@@ -103,6 +103,25 @@ The View (XAML) binds to `Name` and `LoadCommand` — no code-behind. The ViewMo
 
 **When to switch:** if you find yourself writing significant code-behind in a WPF/MAUI app to update UI elements manually, switch to MVVM. If your ASP.NET Core controllers are growing large with UI logic, consider Razor Pages (a simplified MVC variant) or move logic to services.
 
+## Pitfalls
+
+### Massive Controllers (MVC)
+
+**What goes wrong**: the Controller accumulates business logic — validation, orchestration, data transformation — instead of delegating to services. A 500-line controller is a sign that the Controller is doing the Model's job.
+
+**Why it happens**: it is the path of least resistance. The controller already has access to the request, the response, and the DI container.
+
+**Mitigation**: keep controllers thin. A controller action should: validate input, call one service method, map the result to a view model, and return a response. All business logic belongs in the service or domain layer.
+
+### Fat ViewModels (MVVM)
+
+**What goes wrong**: the ViewModel accumulates business logic, data access, and navigation logic. It becomes a second controller.
+
+**Why it happens**: the ViewModel is the natural place to put 'everything the View needs,' and that scope creeps.
+
+**Mitigation**: ViewModels should expose observable state and commands. Business logic belongs in services injected into the ViewModel. Navigation belongs in a navigation service, not the ViewModel itself.
+
+
 ## Questions
 
 > [!QUESTION]- What is the key difference between MVC and MVVM?

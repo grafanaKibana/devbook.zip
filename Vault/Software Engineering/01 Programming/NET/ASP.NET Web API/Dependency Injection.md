@@ -105,12 +105,32 @@ public sealed class BackgroundWorker(IServiceScopeFactory scopeFactory) : Backgr
 
 **Mitigation**: always use `AddDbContext<T>()` without overriding the lifetime. If you need a `DbContext` in a Singleton, use `IDbContextFactory<T>` (registered with `AddDbContextFactory<T>()`).
 
+## Tradeoffs
+
+- **Constructor vs property injection**: constructor injection is the standard in ASP.NET Core — all dependencies are explicit, required, and available at construction time. Property injection (not natively supported by the built-in container) is appropriate only for optional dependencies or legacy frameworks. Constructor injection fails loudly at startup if a registration is missing; property injection fails silently at call time.
+- **Scoped vs Transient for stateful services**: Scoped creates one instance per request and shares it across the full request graph — appropriate for DbContext (unit-of-work). Transient creates a new instance on every injection — appropriate for lightweight, stateless services. Choosing Scoped when you mean Transient causes unintended state sharing within a request.
+- **Built-in container vs Autofac/others**: ASP.NET Core's built-in container covers constructor injection, lifetimes, and open-generic registration with zero extra dependencies. Autofac, StructureMap, and Lamar add named registrations, decorators, and convention-based scanning. Prefer the built-in container unless you specifically need a missing feature.
+
+## Questions
+
+> [!QUESTION]- What is a captive dependency and why is it dangerous?
+> A captive dependency occurs when a long-lived service (Singleton) captures a shorter-lived service (Scoped or Transient) at construction time. The shorter-lived service then lives as long as the Singleton, violating its intended lifetime. For DbContext, this causes a single database context to be shared across all requests, leading to data corruption and race conditions.
+
+> [!QUESTION]- How do you use a Scoped service inside a Singleton without a captive dependency?
+> Inject `IServiceScopeFactory` into the Singleton and call `scopeFactory.CreateScope()` at the point of use. Resolve the Scoped service from the new scope and dispose the scope when done. This ensures the Scoped service lives within a controlled scope, not captured inside the Singleton.
+
+> [!QUESTION]- What is the difference between `GetService<T>` and `GetRequiredService<T>`?
+> `GetService<T>` returns null if the service is not registered; `GetRequiredService<T>` throws `InvalidOperationException`. Use `GetRequiredService<T>` in production code where a missing registration is a programming error that should fail loudly at startup rather than silently return null at call time.
+
+
 ## References
 
 - [Dependency injection in ASP.NET Core (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/dependency-injection) — official guide covering service registration, lifetimes, constructor injection, and scope validation.
 - [Service lifetimes (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection#service-lifetimes) — detailed explanation of Singleton, Scoped, and Transient with examples of when each is appropriate.
+- [Dependency injection guidelines](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection-guidelines) — best practices including captive dependency avoidance, scope validation, and testing patterns.
+- [IServiceScopeFactory (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.dependencyinjection.iservicescopefactory) — API reference for creating manual service scopes; the correct pattern for Singletons that need Scoped dependencies.
 - [[Software Engineering/05 Architecture/Patterns/Dependency Injection|Dependency Injection]] — the general DI pattern: why it improves testability and decoupling, independent of ASP.NET Core.
-- [[Software Engineering/06 Development Practices/Principles/IoC (Holywood Principle)|IoC (Hollywood Principle)]] — the underlying principle: "don't call us, we'll call you" — the framework provides dependencies rather than your code creating them.
+- [[Software Engineering/06 Development Practices/Principles/IoC (Holywood Principle)|IoC (Hollywood Principle)]] — the underlying principle: the framework provides dependencies rather than your code creating them.
 
 <!-- whats-next:start -->
 

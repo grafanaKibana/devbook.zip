@@ -20,6 +20,7 @@ dg-publish: true
 - Head/tail indices wrap around instead of shifting elements.
 - Operations are O(1) on average, with occasional O(n) resize copies.
 
+Because head and tail indices advance modulo the array length, neither `Enqueue` nor `Dequeue` shifts elements — only index arithmetic occurs. When the buffer fills completely, the queue copies all elements to a larger array with the head reset to index 0, then resumes the circular layout. This one-time O(n) resize is amortized over many operations so steady-state throughput stays O(1).
 ## Structure
 
 ```mermaid

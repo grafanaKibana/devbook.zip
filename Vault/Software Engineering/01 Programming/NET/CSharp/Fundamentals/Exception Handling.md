@@ -79,6 +79,13 @@ public static string NormalizeName(string? value)
 - **Throwing in `finally`**: a new exception from `finally` can mask the original failure from `try`/`catch`. Keep `finally` focused on cleanup and avoid new throws there.
 - **Overly generic exception types**: throwing `Exception` makes handling and telemetry less actionable. Prefer specific built-in types (`ArgumentException`, `InvalidOperationException`, and related types) that communicate intent.
 
+## Tradeoffs
+
+- **Exceptions vs Result types**: Exceptions are idiomatic for truly unexpected failures and integrate with .NET infrastructure (stack traces, logging middleware, global handlers). Result types (`Result<T, TError>`, `OneOf`) make failure paths explicit at the call site with zero allocation overhead — meaningful in high-throughput hot paths. Use exceptions for infrastructure failures (I/O, network, invariant violation) and result types for expected domain failures (validation, business rule rejections, not-found).
+- **Catch width**: catching broad types (`catch (Exception)`) is convenient but hides root causes and encourages accidental error swallowing. Narrow catches force awareness of specific failure modes. As a rule: only catch exceptions you know how to handle; let the rest propagate to a global handler.
+- **Exception filters (`when`)**: filters evaluate before stack unwinding, preserving the full original call stack in logging tools (Application Insights, Serilog). They enable observe-and-rethrow without cloning the exception type. Prefer `catch (Exception ex) when (ShouldLog(ex))` over `catch/log/throw` patterns when your goal is observation, not handling.
+
+
 ## Questions
 
 > [!QUESTION]- What is the difference between `throw;` and `throw ex;` inside a `catch` block?

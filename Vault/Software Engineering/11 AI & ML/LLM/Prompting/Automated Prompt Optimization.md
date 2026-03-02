@@ -58,6 +58,48 @@ print(answer)  # 447
 
 A text-only reasoning path might slip on multiplication or addition, while the executed program returns the exact value. This is also a direct precursor to modern agentic tool use patterns, where LLMs delegate deterministic work to external tools.
 
+**APE-style candidate scoring loop** (simplified):
+
+```python
+# Generate candidate prompts, score each on a validation set, keep the best
+candidates = llm.generate(
+    f"Generate 5 instruction variants for this task: {task_description}",
+    n=5
+)
+
+scores = []
+for candidate in candidates:
+    correct = 0
+    for example in validation_set:
+        output = llm.complete(candidate + "\n" + example["input"])
+        correct += (output.strip() == example["expected"])
+    scores.append(correct / len(validation_set))
+
+best_prompt = candidates[scores.index(max(scores))]
+```
+
+
+## Pitfalls
+
+### Optimizing Without a Stable Evaluation Set
+
+**What goes wrong**: the team runs APE-style search but uses a small or inconsistent validation set. The winning prompt scores well on that set by chance, not because it generalizes. In production, quality is no better than the original.
+
+**Mitigation**: treat the evaluation set as the most important artifact. It must be large enough to distinguish signal from noise (typically 50+ cases), representative of the real task distribution, and held fixed throughout the optimization run. Without a stable eval set, automated optimization is just random search.
+
+### Mistaking Benchmark Improvement for Production Improvement
+
+**What goes wrong**: APE finds a prompt that improves accuracy on MultiArith by 3%. The team ships it. Production quality does not change because the benchmark distribution does not match real user queries.
+
+**Mitigation**: always validate optimized prompts on your own task distribution, not just public benchmarks. Public benchmarks are useful for comparing methods; they are not a substitute for domain-specific evaluation.
+
+### Using PAL When the Task Cannot Be Formalized
+
+**What goes wrong**: the team applies PAL to a summarization or tone-adjustment task. The model generates Python code that tries to manipulate strings, but the task requires judgment, not computation. The code runs but produces worse output than plain CoT.
+
+**Mitigation**: PAL is effective for tasks with deterministic, computable answers (arithmetic, symbolic manipulation, unit conversion). For tasks requiring judgment, tone, or creativity, plain prompting or CoT is more appropriate.
+
+
 ## Tradeoffs
 
 | Approach | Core benefit | Main requirement | Practical limitation |

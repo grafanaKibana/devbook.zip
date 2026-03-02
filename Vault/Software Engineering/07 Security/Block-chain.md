@@ -59,10 +59,39 @@ var block2Hash = Sha256Hex(block2Prev + block2Data);
 
 **Mitigation**: never store personal data directly on a blockchain. Store a hash or reference; keep the actual data in a mutable off-chain store that can be deleted.
 
+## Tradeoffs
+
+### Consensus Mechanisms
+
+| Mechanism | Throughput | Energy | Decentralization | Use when |
+|-----------|-----------|--------|-----------------|----------|
+| Proof-of-Work (PoW) | ~7 TPS (Bitcoin) | Very high (ASIC mining) | High | Maximum censorship resistance; energy cost is acceptable |
+| Proof-of-Stake (PoS) | ~15–30 TPS (Ethereum) | Low | High | Energy efficiency matters; validators stake tokens as collateral |
+| Proof-of-Authority (PoA) | Thousands TPS | Minimal | Low (known validators) | Private/consortium chains where validators are trusted entities |
+
+**Decision rule**: PoW for maximum trustlessness (public cryptocurrency). PoS for public chains where energy matters. PoA for enterprise/private chains where you know and trust all validators — but at that point, ask whether a traditional database with audit logging is simpler.
+
+### Public vs Private Chains
+
+| Type | Participants | Throughput | Immutability | Use when |
+|------|------------|-----------|-------------|----------|
+| Public (Bitcoin, Ethereum) | Anyone | Low (7–30 TPS) | Absolute | Trustless, permissionless ledger across unknown parties |
+| Private/Consortium (Hyperledger) | Known entities | High (thousands TPS) | Configurable | Enterprise use with known participants; still need shared ledger |
+| Traditional DB + audit log | Internal | Very high | Soft (admin can edit) | All parties trust a central authority |
+
+**Decision rule**: if all parties trust a central authority, use a traditional database with append-only audit logging. Blockchain adds value only when you need a shared ledger across mutually distrusting parties with no central authority.
+
 ## Questions
 
 > [!QUESTION]- What is Block-chain?
 > A blockchain is an append-only ledger where records are grouped into blocks and linked together using cryptographic hashes. Changing a past block changes its hash, which breaks the chain unless all subsequent blocks are recomputed and the network's consensus rules are satisfied.
+
+> [!QUESTION]- When is blockchain justified over a traditional database?
+> Blockchain is justified when you need a shared ledger across mutually distrusting parties with no central authority and no single party can be trusted to maintain the record. If all parties trust a central authority, a traditional database with append-only audit logging is simpler, faster, and GDPR-compliant. The cost of blockchain — low throughput, immutability conflicts with erasure rights, consensus overhead — is only worth paying when decentralization is a hard requirement.
+
+> [!QUESTION]- Why does PoW waste energy and what is the alternative?
+> Proof-of-Work requires miners to perform computationally expensive hash searches to earn the right to add a block. This energy expenditure is the security mechanism — attacking the chain requires outspending honest miners. Proof-of-Stake replaces energy expenditure with economic stake: validators lock up tokens as collateral and lose them if they act dishonestly. PoS achieves similar security guarantees at a fraction of the energy cost, which is why Ethereum migrated from PoW to PoS in 2022.
+
 ## Limitations for Enterprise Use
 
 - **Throughput**: Public blockchains (Bitcoin: ~7 TPS, Ethereum: ~15 TPS) are orders of magnitude slower than traditional databases (thousands of TPS). Private blockchains are faster but lose decentralization benefits.
@@ -74,6 +103,8 @@ var block2Hash = Sha256Hex(block2Prev + block2Data);
 
 - [Blockchain (Wikipedia)](https://en.wikipedia.org/wiki/Blockchain) — comprehensive overview of blockchain concepts, consensus mechanisms, and applications
 - [Bitcoin whitepaper (Satoshi Nakamoto)](https://bitcoin.org/bitcoin.pdf) — the original blockchain paper; explains the proof-of-work consensus mechanism
+- [Ethereum — Proof-of-Stake](https://ethereum.org/en/developers/docs/consensus-mechanisms/pos/) — Ethereum's official explanation of PoS, how validators are selected, and how slashing deters dishonest behavior
+- [Hyperledger Fabric — Introduction](https://hyperledger-fabric.readthedocs.io/en/latest/whatis.html) — enterprise permissioned blockchain; explains PoA-style consensus and where private chains fit
 <!-- whats-next:start -->
 
 ---

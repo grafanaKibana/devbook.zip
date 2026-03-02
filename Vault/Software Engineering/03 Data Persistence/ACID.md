@@ -76,6 +76,47 @@ Once a transaction commits, its changes survive crashes. The database achieves t
 
 **Mitigation**: keep transactions short. Do all I/O outside the transaction. Only open the transaction for the database operations themselves.
 
+## Tradeoffs
+
+**ACID vs BASE**
+
+| Dimension | ACID | BASE |
+|-----------|------|------|
+| Consistency | Strong (every commit is valid) | Eventual (replicas converge over time) |
+| Availability | Lower under partition (must reject or delay) | Higher (accept writes, reconcile later) |
+| Latency | Higher (coordination, locking) | Lower (no global coordination) |
+| Use case | Financial transactions, inventory, bookings | Caches, DNS, social feeds, analytics |
+
+**Decision rule**: use ACID for any data where partial updates are unacceptable (money, inventory, reservations). Use BASE (eventual consistency) for data where temporary divergence is tolerable and throughput matters more than strict correctness.
+
+**Isolation level cost**
+
+| Level | Anomalies prevented | Lock contention | When to use |
+|-------|---------------------|-----------------|-------------|
+| Read Committed | Dirty reads | Low | Default; safe for most reads |
+| Repeatable Read | Dirty + non-repeatable | Medium | Read-modify-write patterns |
+| Serializable | All anomalies | High | Financial calculations, inventory decrement |
+| Snapshot (SQL Server) | All anomalies | Low (optimistic) | High-read, low-conflict workloads |
+
+**Decision rule**: start with Read Committed (the default). Upgrade to Repeatable Read or Serializable only for transactions that read and then write based on what they read. Use Snapshot isolation when you need Serializable semantics without the lock contention.
+
+```csharp
+// Optimistic concurrency as a lighter alternative to Serializable
+// EF Core: rowversion column prevents lost updates without table locks
+public sealed class Account
+{
+    public int Id { get; set; }
+    public decimal Balance { get; set; }
+    [Timestamp]
+    public byte[] RowVersion { get; set; } = [];  // EF Core concurrency token
+}
+
+// If another transaction committed between our read and write,
+// EF throws DbUpdateConcurrencyException — retry or surface conflict to user
+await db.SaveChangesAsync();
+```
+
+
 ## Questions
 
 > [!QUESTION]- What isolation level should you use for a read-modify-write transaction, and why?

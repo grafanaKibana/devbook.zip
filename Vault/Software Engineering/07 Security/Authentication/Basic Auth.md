@@ -48,6 +48,18 @@ app.Use(async (context, next) =>
 });
 ```
 
+For service-to-service calls, Basic Auth is typically sent via `HttpClient`:
+
+```csharp
+// Sending Basic Auth from a client
+var credentials = Convert.ToBase64String(
+    System.Text.Encoding.UTF8.GetBytes("service-account:secret-password"));
+httpClient.DefaultRequestHeaders.Authorization =
+    new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", credentials);
+
+var response = await httpClient.GetAsync("/api/internal/data");
+```
+
 ## When to Use
 
 - Internal APIs between trusted services where simplicity matters more than security sophistication
@@ -93,8 +105,10 @@ app.Use(async (context, next) =>
 
 ## References
 
-- [RFC 7617 — HTTP Basic Authentication](https://datatracker.ietf.org/doc/html/rfc7617) — the authoritative specification for Basic Auth
-- [Microsoft — ASP.NET Core Authentication](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/) — overview of ASP.NET Core authentication schemes
+- [RFC 7617 — HTTP Basic Authentication](https://datatracker.ietf.org/doc/html/rfc7617) — the authoritative specification for Basic Auth, including the `charset` parameter and interaction with TLS
+- [Microsoft — ASP.NET Core Authentication](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/) — overview of ASP.NET Core authentication schemes and middleware pipeline
+- [OWASP — Authentication Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html) — OWASP guidance on secure credential handling, transport requirements, and when to avoid Basic Auth
+- [RFC 9110 §11.7 — HTTP Semantics: Authorization](https://www.rfc-editor.org/rfc/rfc9110#section-11.7) — the HTTP/1.1 semantics spec defining the `Authorization` header and `WWW-Authenticate` challenge/response flow
 <!-- whats-next:start -->
 
 ---

@@ -91,6 +91,18 @@ await tx.CommitAsync(ct);
 
 **Decision rule**: start with in-process events for domain logic within a single service. Move to a distributed broker when you need cross-service communication, durability across restarts, or fan-out to multiple consumers. Always pair distributed events with the Outbox pattern for reliability.
 
+## Questions
+
+> [!QUESTION]- How does event-driven architecture differ from event sourcing?
+> Event-driven architecture is a communication style: components publish events and others react asynchronously. Event sourcing is a persistence pattern: the state of an entity is derived by replaying its event history rather than storing current state. You can use event-driven communication without event sourcing (most systems do). Event sourcing requires event-driven communication but adds the constraint that events are the source of truth for state.
+
+> [!QUESTION]- How do you guarantee ordering of events in a distributed event-driven system?
+> Most message brokers guarantee ordering only within a partition or queue. Kafka guarantees ordering within a partition (use a consistent partition key, e.g., order ID). Azure Service Bus sessions guarantee ordering within a session. Cross-partition ordering is not guaranteed — design consumers to be idempotent and handle out-of-order delivery. If strict global ordering is required, use a single partition (which limits throughput) or a sequencer service.
+
+> [!QUESTION]- Why must event consumers be idempotent in an at-least-once delivery system?
+> Most message brokers guarantee at-least-once delivery: a message may be delivered more than once if the consumer crashes after processing but before acknowledging. Without idempotency, duplicate delivery causes double-charging, double-reserving, or duplicate records. Mitigation: track processed event IDs in a `ProcessedEvents` table and skip duplicates, or design operations to be naturally idempotent (SET stock = X instead of stock -= Y).
+
+
 ## References
 
 - [Event-driven architecture style (Azure Architecture Center)](https://learn.microsoft.com/en-us/azure/architecture/guide/architecture-styles/event-driven) — Microsoft's overview of event-driven patterns, broker topologies, and when to apply them in distributed systems.
