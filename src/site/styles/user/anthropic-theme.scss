@@ -17,11 +17,6 @@ body {
   /* Code — JetBrains Mono, same as Anthropic docs */
   --font-monospace-theme: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, 'Cascadia Code', monospace;
 
-  /* ── British Racing Green accent ── */
-  --accent-h: 160;
-  --accent-s: 30%;
-  --accent-l: 25%;
-
   /* ── Headings in sans-serif, like Anthropic ── */
   --h1-font: var(--font-interface-theme);
   --h2-font: var(--font-interface-theme);
@@ -30,6 +25,18 @@ body {
   --h5-font: var(--font-interface-theme);
   --h6-font: var(--font-interface-theme);
   --inline-title-font: var(--font-interface-theme);
+}
+
+body.theme-light {
+  --accent-h: 158;
+  --accent-s: 45%;
+  --accent-l: 23%;
+}
+
+body.theme-dark {
+  --accent-h: 158;
+  --accent-s: 25%;
+  --accent-l: 38%;
 }
 
 /* ── Dramatic page titles ── */

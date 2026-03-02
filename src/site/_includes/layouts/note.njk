@@ -14,6 +14,7 @@ permalink: "notes/{{ page.fileSlug | slugify }}/"
     {% endfor %}
   </head>
   <body class="theme-{{meta.baseTheme}} markdown-preview-view markdown-rendered markdown-preview-section {% if settings.dgShowFileTree !== true %}no-filetree{% endif %} {% if settings.dgHomeLink === true and settings.dgShowFileTree !== true %}has-navbar{% endif %} {{meta.bodyClasses}}">
+    <script>!function(){var m=matchMedia("(prefers-color-scheme:dark)"),c=document.body.classList;function t(d){c.remove("theme-dark","theme-light");c.add(d?"theme-dark":"theme-light")}t(m.matches);m.addEventListener("change",function(e){t(e.matches)})}()</script>
     {%include "components/notegrowthhistory.njk"%}
     
     {% if settings.dgShowFileTree !== true %}
