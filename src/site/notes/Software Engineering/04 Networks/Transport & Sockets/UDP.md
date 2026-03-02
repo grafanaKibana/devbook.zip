@@ -70,6 +70,17 @@ UDP datagrams are limited to 65,507 bytes (65,535 minus headers). Larger payload
 **No built-in security**
 UDP has no authentication or encryption. Use DTLS (Datagram TLS) for encrypted UDP, or build on QUIC which includes TLS 1.3.
 
+## Questions
+
+> [!QUESTION]- When is UDP preferable to TCP, and what reliability mechanisms do applications add on top?
+> UDP when latency matters more than reliability: real-time audio/video, gaming, DNS. A retransmitted old packet is worse than no packet. Applications add their own reliability: sequence numbers for ordering, FEC (Forward Error Correction) for loss recovery, selective retransmission for critical events. QUIC is the canonical example — it builds reliable ordered streams on UDP while avoiding TCP's head-of-line blocking.
+
+> [!QUESTION]- Why does UDP have no congestion control, and what are the consequences?
+> UDP sends at whatever rate the application dictates. Under congestion, UDP traffic doesn't back off — it can starve TCP connections sharing the same link. Applications using UDP for bulk transfer must implement their own congestion control (QUIC does this). For small datagrams (DNS, game state), the impact is minimal because the volume is low.
+
+> [!QUESTION]- What is QUIC and why is it built on UDP rather than TCP?
+> QUIC (HTTP/3) implements reliable, ordered, multiplexed streams on top of UDP. It's built on UDP to avoid TCP's head-of-line blocking (a lost TCP segment blocks all streams; QUIC streams are independent), to enable faster connection establishment (0-RTT resumption), and to allow protocol evolution without OS kernel changes. TLS 1.3 is built into QUIC — there's no separate TLS handshake.
+
 ## References
 
 - [UDP specification (RFC 768)](https://www.rfc-editor.org/rfc/rfc768) — the original 3-page UDP specification; notable for its brevity.

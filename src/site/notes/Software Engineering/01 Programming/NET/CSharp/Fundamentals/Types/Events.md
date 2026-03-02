@@ -94,6 +94,13 @@ public sealed class Listener : IDisposable
 ```
 
 
+## Tradeoffs
+
+- **Events vs public delegate fields**: A public delegate field lets any external caller replace, null out, or directly invoke the handler. The `event` keyword restricts external callers to `+=`/`-=` only, preserving publisher control. Always use `event` in public APIs.
+- **Events vs `IObservable<T>` (Rx)**: Events are synchronous, single-publisher, multicast notifications with no composition support. `IObservable<T>` from Reactive Extensions supports filtering, merging, debouncing, retrying, and async continuations — at the cost of a dependency and a steeper learning curve. Use `IObservable<T>` when you need stream operators; events for simple point-to-point notifications.
+- **Custom `add`/`remove` overhead**: The default event implementation stores handlers in a multicast delegate (immutable; every `+=`/`-=` allocates a new list). In high-frequency subscribe/unsubscribe scenarios, custom accessors backed by a `ConcurrentDictionary` or locked collection reduce per-operation allocation.
+
+
 ## Questions
 
 > [!QUESTION]- How is an event different from a delegate field in terms of access control?

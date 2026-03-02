@@ -68,6 +68,13 @@ public static T CreateAndValidate<T>()
 - `default(T)` can hide correctness bugs because reference and nullable types become `null` while value types become zeroed data, which may be interpreted as valid business values; model absence explicitly (for example, `Try` pattern, `Option`, or nullable annotations) and validate before use.
 - Over-constraining (`where T : class, SomeConcreteType`) couples generic APIs to one hierarchy, which prevents reuse and forces duplicate implementations later; prefer interface-based constraints that describe behavior instead of concrete inheritance chains.
 
+## Tradeoffs
+
+- **Generics vs `object` (boxing)**: Non-generic collections (`ArrayList`, `Hashtable`) store value types as `object`, boxing them on every add and unboxing on every read. `List<int>` avoids boxing entirely — the JIT generates a specialized implementation per value type. The performance difference is measurable in allocation-heavy loops on value types like `int`, `Guid`, or `DateTime`.
+- **Generics vs inheritance for polymorphism**: Generics express static (compile-time) polymorphism — the type argument is resolved at JIT time. Inheritance expresses dynamic (runtime) polymorphism via virtual dispatch. Use generics when the concrete type is always known at the call site (algorithm or container); use inheritance when the concrete type is determined at runtime (strategy, plugin, handler).
+- **CLR generic specialization**: The CLR generates separate JIT-compiled bodies for each value-type argument (`List<int>`, `List<double>` each get their own code) but shares one compiled body for all reference-type arguments (`List<string>` and `List<object>` share JIT output). This means value-type generics are as fast as hand-typed code, while reference-type generics share an efficient single body with a small type-pointer indirection.
+
+
 ## Questions
 
 > [!QUESTION]- Why does `IEnumerable<string>` assign to `IEnumerable<object>`, but `List<string>` does not assign to `List<object>`?

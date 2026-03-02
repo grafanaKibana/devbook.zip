@@ -48,6 +48,27 @@ This format keeps selection metadata in frontmatter and keeps behavioral constra
 
 Assume your team has strict API error contracts and logging conventions. Without a skill, the agent may generate mixed error shapes (`{ error: "..." }` in one file, RFC 7807 in another), omit correlation IDs, and forget retry-safe patterns. With a `company-api-conventions` skill loaded, the model consistently applies your contract, calls your API schema tools first, and produces code that passes internal review with fewer manual corrections.
 
+## Pitfalls
+
+### Skills That Are Too Broad
+
+**What goes wrong**: a skill named `coding-conventions` tries to cover error handling, logging, API design, testing, and naming conventions in one file. The model loads it for every task, consuming context budget even when only one convention is relevant.
+
+**Mitigation**: split broad skills into focused, single-concern files. A `api-error-contracts` skill and a `logging-conventions` skill are each loaded only when relevant, reducing token cost and improving precision.
+
+### Stale Skills Not Reviewed Like Code
+
+**What goes wrong**: a skill was written six months ago for an older API version. The team has since migrated to a new SDK, but the skill still references deprecated methods. The agent follows the skill and generates code that fails to compile.
+
+**Mitigation**: treat skills as code artifacts. Version-control them, review changes in pull requests, and include them in the same update cycle as the code they govern. Add a `last-reviewed` date in the frontmatter as a lightweight staleness signal.
+
+### Conflicting Project and Global Skills
+
+**What goes wrong**: a user-global skill sets a personal preference (e.g., always use `var` in C#) that conflicts with a project skill requiring explicit types. The agent receives both and produces inconsistent output.
+
+**Mitigation**: project-scoped skills take precedence over user-global skills for repository-specific conventions. Document the precedence rule in the project skill's frontmatter. Avoid encoding team conventions in user-global skills.
+
+
 ## Tradeoffs
 
 | Choice | Option A | Option B | Decision criteria |

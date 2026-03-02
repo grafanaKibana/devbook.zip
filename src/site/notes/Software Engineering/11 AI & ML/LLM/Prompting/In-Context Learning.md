@@ -102,6 +102,39 @@ Possible output:
 
 When this pattern is not enough for reasoning-heavy tasks, continue with [[Software Engineering/11 AI & ML/LLM/Prompting/Reasoning Techniques\|Reasoning Techniques]].
 
+## Pitfalls
+
+### Recency Bias in Example Ordering
+
+**What goes wrong**: the last example in a few-shot prompt has disproportionate influence on the output. If the last example is a rare edge case, the model over-applies that pattern to normal inputs.
+
+**Mitigation**: test multiple orderings of your demonstration set. Place the most representative examples last, or randomize order across requests to average out the bias.
+
+### Adding More Shots Instead of Fixing the Root Cause
+
+**What goes wrong**: the model produces inconsistent output, so the team adds more examples. The real problem is ambiguous instructions or inconsistent example formatting. More shots amplify the inconsistency rather than fixing it.
+
+**Mitigation**: before increasing shot count, audit example consistency (same separators, same field order, same casing). Fix formatting first. Add shots only when the schema is clean and failures are about coverage, not consistency.
+
+### Context Window Pressure
+
+**What goes wrong**: a few-shot prompt with 10 long examples consumes 3,000 tokens, leaving little room for the actual user input. For long documents or multi-turn conversations, the demonstrations crowd out the content.
+
+**Mitigation**: keep examples short and representative. For long-context tasks, use one-shot or zero-shot with precise instructions. Measure token cost of the demonstration block and set a budget.
+
+## Tradeoffs
+
+| Approach | Token cost | Format control | Knowledge injection | Use when |
+|----------|-----------|---------------|-------------------|----------|
+| Zero-shot | Minimal | Low | None | Simple, well-specified tasks; instruction-tuned models |
+| One-shot | Low | Medium | None | Format is inconsistent; one example clarifies the schema |
+| Few-shot (3-5) | Medium | High | None | Ambiguous class boundaries; complex output structure |
+| Fine-tuning | High (training) | Very high | Yes (new knowledge) | Consistent task at scale; examples cannot fit in context |
+| RAG + zero-shot | Medium (retrieval) | Low | Yes (external docs) | Task requires external knowledge not in model weights |
+
+**Decision rule**: start zero-shot. Move to one-shot when output format is inconsistent. Move to few-shot when class boundaries are ambiguous. Move to fine-tuning only when few-shot is too expensive at scale or the task requires knowledge injection. Use RAG when the task requires external facts.
+
+
 ## Questions
 
 > [!QUESTION]- When should you start with zero-shot versus few-shot?

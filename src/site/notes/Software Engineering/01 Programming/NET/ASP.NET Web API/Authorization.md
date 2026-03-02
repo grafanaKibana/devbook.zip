@@ -119,6 +119,24 @@ The `"CanEditDocument"` policy handler receives the `document` as the resource a
 
 **Mitigation**: move all authorization logic into policies and handlers. Controllers should only call `authz.AuthorizeAsync()` or use `[Authorize(Policy = "...")]` — never contain authorization logic directly.
 
+## Tradeoffs
+
+- **Role-based vs policy-based**: Role-based is simple and appropriate for coarse-grained access (admin vs user). Policy-based is more flexible — requirements are composable, testable, and decouple permission logic from controllers. Prefer policy-based for any production system beyond the simplest use case.
+- **Policy-based vs resource-based**: Use policy-based (attribute) when the decision is independent of the specific resource instance. Use resource-based (`IAuthorizationService.AuthorizeAsync`) when the decision depends on the resource's data (owner, state, team membership). Start with policy-based; add resource-based only where instance context is needed.
+- **Declarative (`[Authorize]`) vs imperative (`authz.AuthorizeAsync`)**: Declarative is cleaner and evaluated at routing level. Imperative is necessary when the resource is only available after a database query — you cannot load the resource before the action method runs.
+
+## Questions
+
+> [!QUESTION]- When should you return 403 Forbidden vs 404 Not Found for an unauthorized resource access?
+> Return 403 when the resource exists but the user lacks permission, and the resource's existence is not sensitive. Return 404 consistently when leaking the resource's existence is a security risk (e.g., private financial or health records).
+
+> [!QUESTION]- What is the difference between `context.Succeed()` and `context.Fail()` in an authorization handler?
+> `context.Succeed(requirement)` marks that requirement as satisfied. `context.Fail()` explicitly forces authorization failure regardless of other handlers' decisions — it cannot be overridden by a subsequent `Succeed`. Use `Fail` only when you have a definitive security reason to block access.
+
+> [!QUESTION]- How do you implement OR logic across two authorization policies on a single endpoint?
+> Multiple `[Authorize]` attributes stack with AND semantics — all policies must pass. For OR logic, implement a single custom `IAuthorizationRequirement` that internally checks whether any of the conditions is met, then apply that single requirement via one policy.
+
+
 ## References
 
 - [Authorization in ASP.NET Core (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/introduction) — official overview of role-based, claims-based, and policy-based authorization.

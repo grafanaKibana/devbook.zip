@@ -50,6 +50,54 @@ public async Task<IActionResult> Edit(int id)
 }
 ```
 
+## Testing Authorization Handlers
+
+Authorization handlers are plain classes and easy to unit test without spinning up ASP.NET Core:
+
+```csharp
+// Unit test for DocumentOwnerHandler
+public class DocumentOwnerHandlerTests
+{
+    [Fact]
+    public async Task Succeeds_WhenUserIsOwner()
+    {
+        var handler = new DocumentOwnerHandler();
+        var userId = "user-123";
+        var document = new Document { OwnerId = userId };
+
+        var claims = new[] { new Claim(ClaimTypes.NameIdentifier, userId) };
+        var user = new ClaimsPrincipal(new ClaimsIdentity(claims));
+        var requirement = new DocumentOwnerRequirement();
+
+        var context = new AuthorizationHandlerContext(
+            new[] { requirement }, user, document);
+
+        await handler.HandleAsync(context);
+
+        Assert.True(context.HasSucceeded);
+    }
+
+    [Fact]
+    public async Task Fails_WhenUserIsNotOwner()
+    {
+        var handler = new DocumentOwnerHandler();
+        var document = new Document { OwnerId = "other-user" };
+
+        var claims = new[] { new Claim(ClaimTypes.NameIdentifier, "user-123") };
+        var user = new ClaimsPrincipal(new ClaimsIdentity(claims));
+        var requirement = new DocumentOwnerRequirement();
+
+        var context = new AuthorizationHandlerContext(
+            new[] { requirement }, user, document);
+
+        await handler.HandleAsync(context);
+
+        Assert.False(context.HasSucceeded);
+    }
+}
+```
+
+
 ## Pitfalls
 
 ### Missing Authorization Check After Fetching Resource
@@ -78,8 +126,10 @@ public async Task<IActionResult> Edit(int id)
 
 ## References
 
-- [Microsoft — Resource-based authorization in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/resourcebased) — official guide with full implementation example
-- [Microsoft — Policy-based authorization](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/policies) — how to define and use authorization policies
+- [Microsoft — Resource-based authorization in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/resourcebased) — official guide with full implementation example including handler registration and controller usage
+- [Microsoft — Policy-based authorization](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/policies) — how to define and use authorization policies; covers requirement composition and handler ordering
+- [OWASP — Broken Access Control (A01:2021)](https://owasp.org/Top10/A01_2021-Broken_Access_Control/) — OWASP's top vulnerability category; Insecure Direct Object Reference (IDOR) is the canonical resource-based auth failure mode
+- [Microsoft — Authorization in ASP.NET Core (overview)](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/introduction) — covers the full authorization model: simple, role-based, claims-based, and resource-based
 <!-- whats-next:start -->
 
 ---

@@ -12,6 +12,8 @@
 `List<T>` stores items in a contiguous array, so indexing by position is O(1) and iterating is cache friendly.
 When `Count` grows past `Capacity`, the internal array is reallocated and copied to a larger buffer.
 
+When `Count` exceeds `Capacity`, `List<T>` allocates a new internal array with double the current capacity (power-of-two growth), copies all elements, and releases the old buffer. The doubling strategy ensures any sequence of n appends costs O(n) total — amortized O(1) per append — even though individual resize events are O(n). The pre-sizing constructor `new List<T>(capacity)` eliminates resizes for known-size collections, which matters in hot paths where repeated allocation and GC pressure are measurable. Prefer `Capacity` pre-sizing over post-construction `TrimExcess` when the final size is known upfront.
+
 ## Structure
 
 ```mermaid

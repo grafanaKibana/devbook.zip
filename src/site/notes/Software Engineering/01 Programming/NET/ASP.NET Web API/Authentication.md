@@ -124,6 +124,24 @@ public IActionResult ApiEndpoint() => Ok();
 
 **Mitigation**: always set `ValidateLifetime = true` in production. Use short-lived access tokens (15–60 minutes) with refresh tokens for long-lived sessions.
 
+## Tradeoffs
+
+- **JWT Bearer vs Cookie auth**: JWT is stateless — the server stores nothing per session, making it ideal for horizontally scaled APIs and mobile/SPA clients. Cookie auth is simpler for browser-based web apps (browsers handle transmission automatically) and easier to revoke. Downside of JWT: tokens cannot be revoked before expiry without a server-side blacklist or short-lived access tokens with refresh token rotation.
+- **JWT vs API keys**: API keys are simpler (no signing algorithm, no expiry rotation) and appropriate for server-to-server authentication where the caller is not an end user. JWT carries identity claims and integrates with ASP.NET Core's claims pipeline. Use API keys for machine clients; JWT for user-facing authentication.
+- **Stateless vs stateful sessions**: stateless (JWT) scales without shared session storage but requires refresh token infrastructure. Stateful (session/cookie) is easier to revoke and simpler to implement, but requires sticky sessions or a distributed session store (Redis) in multi-instance deployments.
+
+## Questions
+
+> [!QUESTION]- Why can't you revoke a JWT before its expiry?
+> JWTs are self-contained and the server stores no record of issued tokens. Revocation requires a server-side blacklist (typically Redis) or very short expiry (15–60 min) combined with long-lived refresh tokens stored server-side and revocable on logout.
+
+> [!QUESTION]- When would you choose cookie authentication over JWT Bearer in an ASP.NET Core API?
+> For browser-based web applications (Razor Pages/MVC) where the browser manages cookie transmission automatically, where session revocation (logout everywhere) is a hard requirement, and where CSRF risk is manageable via ASP.NET Core's built-in anti-forgery tokens.
+
+> [!QUESTION]- What does `ValidateIssuerSigningKey = true` actually enforce?
+> It forces the JWT middleware to verify the token's signature against your known signing key. Without it, a token signed by a different (attacker-controlled) key could be accepted — breaking the entire authentication model.
+
+
 ## References
 
 - [Authentication in ASP.NET Core (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/) — official overview of the authentication middleware, scheme registration, and `ClaimsPrincipal` population.

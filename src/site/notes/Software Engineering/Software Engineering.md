@@ -21,39 +21,39 @@
 
 # Focus
 
-| Note                                                                                                                         | Topic            | Status   | Priority |
-| ---------------------------------------------------------------------------------------------------------------------------- | ---------------- | -------- | -------- |
-| [[Software Engineering/07 Security/Digital Signature\|Digital Signature]]                                                 | Security         | Creation | Medium   |
-| [[Software Engineering/08 SDLC/Estimation Techniques\|Estimation Techniques]]                                             | SDLC             | Creation | Medium   |
-| [[Software Engineering/05 Architecture/System Architecture/Service-Oriented Architecture\|Service-Oriented Architecture]] | Architecture     | Creation | Medium   |
-| [[Software Engineering/04 Networks/Protocols/RPC\|RPC]]                                                                   | Networks         | Creation | Medium   |
-| [[Software Engineering/04 Networks/Architecture & Ops/Peer-2-Peer\|Peer-2-Peer]]                                          | Networks         | Creation | Medium   |
-| [[Software Engineering/01 Programming/NET/ASP.NET Web API/CORS\|CORS]]                                                    | Programming      | Creation | Medium   |
-| [[Software Engineering/11 AI & ML/Tooling/Coding Agents\|Coding Agents]]                                                  | AI & ML          | Creation | Medium   |
-| [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/Classification Evaluation\|Classification Evaluation]]      | AI & ML          | Creation | Medium   |
-| [[Software Engineering/02 Computer Science/Data Structures/Heap\|Heap]]                                                   | Computer Science | Creation | Medium   |
-| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Delegates\|Delegates]]                                | Programming      | Creation | Medium   |
-| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Methods\|Methods]]                                          | Programming      | Creation | Medium   |
-| [[Software Engineering/11 AI & ML/Tooling/Skills\|Skills]]                                                                | AI & ML          | Creation | Medium   |
+| Note                                                                                                                         | Topic                 | Status   | Priority |
+| ---------------------------------------------------------------------------------------------------------------------------- | --------------------- | -------- | -------- |
+| [[Software Engineering/11 AI & ML/Tooling/Skills\|Skills]]                                                                | AI & ML               | Creation | Medium   |
+| [[Software Engineering/07 Security/Digital Signature\|Digital Signature]]                                                 | Security              | Creation | Medium   |
+| [[Software Engineering/08 SDLC/Estimation Techniques\|Estimation Techniques]]                                             | SDLC                  | Creation | Medium   |
+| [[Software Engineering/08 SDLC/BDD\|BDD]]                                                                                 | SDLC                  | Creation | Medium   |
+| [[Software Engineering/06 Development Practices/Paradigms/OOP\|OOP]]                                                      | Development Practices | Creation | Medium   |
+| [[Software Engineering/06 Development Practices/Paradigms/Event-driven\|Event-driven]]                                    | Development Practices | Creation | Medium   |
+| [[Software Engineering/05 Architecture/System Architecture/Serverless Architecture\|Serverless Architecture]]             | Architecture          | Creation | Medium   |
+| [[Software Engineering/05 Architecture/System Architecture/Service-Oriented Architecture\|Service-Oriented Architecture]] | Architecture          | Creation | Medium   |
+| [[Software Engineering/05 Architecture/System Architecture/Monolith Architecture\|Monolith Architecture]]                 | Architecture          | Creation | Medium   |
+| [[Software Engineering/04 Networks/Transport & Sockets/UDP\|UDP]]                                                         | Networks              | Creation | Medium   |
+| [[Software Engineering/04 Networks/Protocols/DNS\|DNS]]                                                                   | Networks              | Creation | Medium   |
+| [[Software Engineering/04 Networks/Protocols/RPC\|RPC]]                                                                   | Networks              | Creation | Medium   |
 
 { .block-language-dataview}
 
 # Recently Updated
 
-| Note                                                                                                     | Date                     |
-| -------------------------------------------------------------------------------------------------------- | ------------------------ |
-| [[Software Engineering/11 AI & ML/Machine Learning/Spectrum Of Automations\|Spectrum Of Automations]] | 4:31 AM - March 02, 2026 |
-| [[Software Engineering/05 Architecture/Patterns/CQS\|CQS]]                                            | 4:31 AM - March 02, 2026 |
-| [[Software Engineering/10 Cloud/IaaS, PaaS, SaaS, CaaS\|IaaS, PaaS, SaaS, CaaS]]                      | 4:30 AM - March 02, 2026 |
-| [[Software Engineering/07 Security/Digital Signature\|Digital Signature]]                             | 4:30 AM - March 02, 2026 |
-| [[Software Engineering/07 Security/Authentication/Resource-based Auth\|Resource-based Auth]]          | 4:30 AM - March 02, 2026 |
-| [[Software Engineering/07 Security/Authentication/Basic Auth\|Basic Auth]]                            | 4:30 AM - March 02, 2026 |
-| [[Software Engineering/06 Development Practices/Principles/YAGNI\|YAGNI]]                             | 4:29 AM - March 02, 2026 |
-| [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/MSMQ\|MSMQ]]                | 4:29 AM - March 02, 2026 |
-| [[Software Engineering/05 Architecture/Patterns/Design Patterns/GRASP\|GRASP]]                        | 4:29 AM - March 02, 2026 |
-| [[Software Engineering/04 Networks/Protocols/SMTP\|SMTP]]                                             | 4:29 AM - March 02, 2026 |
-| [[Software Engineering/08 SDLC/Estimation Techniques\|Estimation Techniques]]                         | 4:28 AM - March 02, 2026 |
-| [[Software Engineering/03 Data Persistence/ACID\|ACID]]                                               | 4:28 AM - March 02, 2026 |
+| Note                                                                                                              | Date                      |
+| ----------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| [[Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Merge Sort\|Merge Sort]]              | 11:33 PM - March 02, 2026 |
+| [[Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Quick Sort\|Quick Sort]]              | 11:33 PM - March 02, 2026 |
+| [[Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Selection Sort\|Selection Sort]]      | 11:32 PM - March 02, 2026 |
+| [[Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Bubble Sort\|Bubble Sort]]            | 11:31 PM - March 02, 2026 |
+| [[Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Insertion Sort\|Insertion Sort]]      | 11:31 PM - March 02, 2026 |
+| [[Software Engineering/11 AI & ML/Machine Learning/Natural Language Processing\|Natural Language Processing]]  | 11:30 PM - March 02, 2026 |
+| [[Software Engineering/11 AI & ML/LLM/Prompting/In-Context Learning\|In-Context Learning]]                     | 11:30 PM - March 02, 2026 |
+| [[Software Engineering/11 AI & ML/Machine Learning/Data Drift\|Data Drift]]                                    | 11:29 PM - March 02, 2026 |
+| [[Software Engineering/11 AI & ML/LLM/Prompting/Automated Prompt Optimization\|Automated Prompt Optimization]] | 11:29 PM - March 02, 2026 |
+| [[Software Engineering/11 AI & ML/Machine Learning/Spectrum Of Automations\|Spectrum Of Automations]]          | 11:29 PM - March 02, 2026 |
+| [[Software Engineering/11 AI & ML/Tooling/Skills\|Skills]]                                                     | 11:28 PM - March 02, 2026 |
+| [[Software Engineering/11 AI & ML/LLM/Evaluation/Deterministic Checks\|Deterministic Checks]]                  | 11:28 PM - March 02, 2026 |
 
 { .block-language-dataview}
 # Publish Distribution

@@ -117,6 +117,27 @@ public static List<(int u, int v, int w)> KruskalMST(
 > [!QUESTION]- How does DSU detect cycles in a graph?
 > Before adding an edge (u, v), call `find(u)` and `find(v)`. If they return the same root, u and v are already in the same connected component — adding the edge would create a cycle. If different, call `union(u, v)` to merge the components.
 
+## Pitfalls
+
+**Path compression invalidates parent-array snapshots**: Path compression rewires `_parent` entries on every `Find` call. If you copy the `_parent` array to implement undo or rollback, those snapshots become stale after any `Find`. For rollback-capable DSU (used in offline algorithms), use union by rank only — no path compression — and maintain an explicit undo stack of `(node, oldParent, oldRank)` tuples.
+
+**Rank vs size confusion**: `_rank` approximates tree height; a `_size` field tracks element count. Both achieve O(log n) height when used alone, but they serve different purposes. Mixing them — for example, using a size field but calling it rank — silently degrades efficiency (size can grow faster than rank would, producing taller trees). Choose one consistently and document the invariant.
+
+**Integer index assumption**: The standard implementation maps elements to integers 0…n-1. Using non-integer keys requires a separate `Dictionary<T, int>` to assign indices before construction. Forgetting this indirection causes index-out-of-range errors at runtime, not compile time.
+
+## Tradeoffs
+
+**Union by rank vs union by size**: Both bound tree height at O(log n) without path compression and achieve O(α(n)) together with it. Union by size is often preferred because element count is a natural quantity and enables O(1) set-size queries via `_size[Find(x)]`. Union by rank is marginally simpler when size queries are not needed. Choose based on whether downstream code needs to know partition sizes.
+
+**Path compression variants**: Three strategies achieve the same O(α(n)) amortized bound but differ in write volume:
+- *Full compression* (point every node directly to root): most aggressive, maximum pointer rewrites per call.
+- *Path halving* (skip every other node): half the writes, nearly identical empirical speed.
+- *Path splitting* (each node points to its grandparent): similar to halving, easier to implement iteratively.
+Path halving is often preferred in cache-sensitive code because fewer writes reduce cache-line dirtying. The standard implementation above uses full compression for clarity.
+
+**DSU vs adjacency-list union-find**: DSU only answers connectivity queries, not path or degree queries. If you need to know the actual path between two nodes, maintain an adjacency list alongside DSU. DSU is the right tool when you only need "are a and b connected?" in O(α(n)) — not when you need to reconstruct how.
+
+
 ## References
 
 - [Disjoint-set data structure (Wikipedia)](https://en.wikipedia.org/wiki/Disjoint-set_data_structure) — formal description, proof of O(α(n)) amortized complexity, and history.
