@@ -79,6 +79,13 @@ public IActionResult InternalEndpoint() => Ok();
 
 **Mitigation**: place `app.UseCors()` immediately after `app.UseRouting()` and before any authentication/authorization middleware.
 
+## Tradeoffs
+
+- **Wildcard origin vs specific origins**: `AllowAnyOrigin()` is simple for public read APIs serving any client but cannot be combined with `AllowCredentials()`. Specifying origins with `WithOrigins()` is required for credentialed requests and reduces attack surface for sensitive endpoints.
+- **Global policy vs endpoint-specific**: a single global policy is easier to maintain but may be too permissive for write endpoints. Per-endpoint CORS via `[EnableCors("PolicyName")]` allows tighter control — a public read API can allow any origin while write endpoints restrict to trusted origins.
+- **Preflight caching**: browsers cache preflight responses to avoid redundant OPTIONS requests. Setting `SetPreflightMaxAge(TimeSpan.FromMinutes(10))` in the policy reduces round-trip latency in production. Set it to zero during development to always test current configuration.
+
+
 ## Questions
 
 > [!QUESTION]- Does CORS protect your API from unauthorized access?
@@ -92,6 +99,8 @@ public IActionResult InternalEndpoint() => Ok();
 
 - [Enable CORS in ASP.NET Core (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/security/cors) — official guide covering named policies, default policies, endpoint-specific CORS, and preflight handling.
 - [Cross-Origin Resource Sharing (MDN)](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) — browser-side explanation of CORS: simple requests, preflight, credentials, and the headers involved.
+- [CORS security considerations (OWASP)](https://cheatsheetseries.owasp.org/cheatsheets/CORS_Security_Cheat_Sheet.html) — OWASP cheat sheet covering common CORS misconfigurations and how to avoid them.
+- [Fetch standard CORS protocol](https://fetch.spec.whatwg.org/#cors-protocol) — WHATWG fetch specification defining the exact CORS protocol browsers must follow.
 
 <!-- whats-next:start -->
 

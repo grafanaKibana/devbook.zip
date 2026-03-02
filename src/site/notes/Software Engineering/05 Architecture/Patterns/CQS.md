@@ -56,6 +56,31 @@ The principle is a guideline, not a law. Apply it where it improves clarity; rel
 
 CQS is a prerequisite mindset for CQRS. If you're applying CQRS, you're already following CQS at the method level. See [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/CQRS\|CQRS]] for the architectural pattern.
 
+## CQS in a Repository
+
+A CQS-compliant repository separates read and write methods with explicit contracts:
+
+```csharp
+public interface IOrderRepository
+{
+    // Queries: return data, no side effects
+    Task<Order?> GetByIdAsync(OrderId id);
+    Task<IReadOnlyList<Order>> GetByCustomerAsync(CustomerId customerId);
+
+    // Commands: change state, return void (or Task)
+    Task AddAsync(Order order);
+    Task UpdateAsync(Order order);
+    Task DeleteAsync(OrderId id);
+}
+
+// The generated ID exception: returning the ID from Add is a pragmatic CQS violation.
+// Document it explicitly:
+// Task<OrderId> AddAsync(Order order);  // returns generated ID only, not the full entity
+```
+
+The query methods can be called freely in any order without side effects. The command methods are the only paths that change state — making it easy to audit what can mutate the system.
+
+
 ## Pitfalls
 
 ### Violating CQS in Repository Methods
@@ -80,6 +105,7 @@ CQS is a prerequisite mindset for CQRS. If you're applying CQRS, you're already 
 
 - [CommandQuerySeparation (Martin Fowler)](https://martinfowler.com/bliki/CommandQuerySeparation.html) — concise explanation of CQS with the Stack.Pop() exception and the relationship to CQRS.
 - [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/CQRS\|CQRS]] — the architectural extension of CQS: separate read and write models, often with separate data stores and optimized query paths.
+- [Object-Oriented Software Construction (Bertrand Meyer)](https://www.eiffel.com/values/design-by-contract/introduction/) — the original source of CQS; Meyer coined the principle in the context of Design by Contract and the Eiffel language.
 
 <!-- whats-next:start -->
 

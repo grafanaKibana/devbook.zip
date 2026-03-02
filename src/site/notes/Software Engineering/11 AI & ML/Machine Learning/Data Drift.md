@@ -90,6 +90,32 @@ For many production systems, ground truth labels arrive days or weeks after pred
 **Treating all drift as concept drift**
 Data drift (P(X) changes) does not always require retraining — the model may generalize. Concept drift (P(Y|X) changes) always requires retraining. Distinguish between them before deciding on a response.
 
+## Tradeoffs
+
+### Detection Method Selection
+
+| Method | Feature type | Sensitivity | Interpretability | Use when |
+|--------|------------|------------|-----------------|----------|
+| PSI | Numeric | Medium | High (thresholds: 0.1, 0.2) | Credit scoring, finance; well-understood thresholds |
+| KS test | Numeric | High | Medium (p-value) | General numeric features; sensitive to small shifts |
+| Chi-square | Categorical | Medium | Medium | Categorical features with stable cardinality |
+| Jensen-Shannon divergence | Any | High | Low (0–1 scale) | Comparing distributions symmetrically; bounded output |
+| Model performance metrics | Any | Highest | High | When labels are available; most direct signal |
+
+**Decision rule**: use PSI for numeric features in regulated domains (finance, healthcare) where thresholds are well-established. Use KS test for general numeric monitoring. Use model performance metrics when labels are available — they are the most direct signal. Use proxy metrics (escalation rate, confidence distributions) when labels are delayed.
+
+### Retraining Strategy
+
+| Strategy | Trigger | Cost | Risk | Use when |
+|----------|---------|------|------|----------|
+| Scheduled retraining | Time-based (weekly, monthly) | Predictable | May retrain unnecessarily | Stable domains with predictable drift cycles |
+| Drift-triggered retraining | PSI/KS threshold breach | Variable | May miss slow drift | Domains with irregular drift patterns |
+| Continuous learning | Every new batch | High | Catastrophic forgetting | High-velocity data streams with fast-changing patterns |
+| Manual review + retrain | Human decision | Low (infrequent) | Slow response | Low-volume, high-stakes models where retraining is expensive |
+
+**Decision rule**: start with scheduled retraining (weekly or monthly) for most models. Add drift-triggered alerts as a safety net. Move to drift-triggered retraining only when scheduled retraining is too slow to respond to real-world changes.
+
+
 ## Questions
 
 > [!QUESTION]- What is the difference between data drift and concept drift?

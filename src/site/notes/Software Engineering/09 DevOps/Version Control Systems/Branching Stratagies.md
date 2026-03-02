@@ -59,6 +59,47 @@ A branching strategy defines how a team uses Git branches to manage parallel dev
 
 **Use GitFlow** only when: you ship versioned releases on a fixed schedule (e.g., a mobile app or packaged software) and need to maintain multiple release branches simultaneously.
 
+## Pitfalls
+
+### Long-Lived Feature Branches
+
+**What goes wrong**: a feature branch lives for 2+ weeks. By the time it merges, `main` has diverged significantly. The merge conflict is large, the review is hard, and integration bugs appear that weren't visible in isolation.
+
+**Why it happens**: features are scoped too large, or the team lacks feature flags to ship incomplete work.
+
+**Mitigation**: keep branches short-lived (1-2 days max for trunk-based, 3-5 days for GitHub Flow). Break large features into smaller vertical slices that can be merged independently. Use feature flags to hide incomplete features from users.
+
+### Inconsistent Branch Naming
+
+**What goes wrong**: branches named `fix`, `johns-branch`, `temp`, `wip`. No one can tell what a branch is for, who owns it, or whether it is safe to delete.
+
+**Mitigation**: enforce a naming convention: `feature/TICKET-123-short-description`, `fix/TICKET-456-bug-name`, `hotfix/TICKET-789-critical-fix`. Automate enforcement with a pre-push hook or CI check.
+
+## Example: Trunk-Based Development with Feature Flag
+
+```bash
+# Short-lived branch: created, merged, deleted within 1-2 days
+git checkout -b feature/PROJ-123-add-payment-method
+
+# Small, focused commit
+git commit -m 'feat: add PayPal payment method behind feature flag'
+
+# Merge to main via PR (CI must pass)
+git push origin feature/PROJ-123-add-payment-method
+# Open PR, get review, merge, delete branch
+```
+
+```csharp
+// Feature flag hides incomplete work from users
+if (_featureFlags.IsEnabled("PayPalPayment", userId))
+{
+    // New PayPal integration — only visible to opted-in users
+    return await _payPalGateway.ChargeAsync(amount);
+}
+return await _stripeGateway.ChargeAsync(amount);  // existing path
+```
+
+
 ## Questions
 
 > [!QUESTION]- Why does GitFlow create integration problems for teams practicing continuous deployment?

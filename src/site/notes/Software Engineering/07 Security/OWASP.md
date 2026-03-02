@@ -85,6 +85,36 @@ else
 **Example**: An image upload feature that fetches images by URL — attacker provides `http://169.254.169.254/latest/meta-data/` (AWS metadata endpoint).
 **Mitigation**: Validate and allowlist URLs before making server-side requests. Block requests to private IP ranges. Use network-level controls (VPC security groups).
 
+## Pitfalls
+
+### Checklist Security (False Sense of Compliance)
+
+**What goes wrong**: a team works through the OWASP Top 10 as a checklist, marks each item 'done,' and considers the application secure. The Top 10 is a minimum baseline, not a comprehensive security program.
+
+**Why it matters**: the Top 10 covers the most common vulnerabilities, not all vulnerabilities. Application-specific logic flaws, business logic bypasses, and supply chain attacks are not covered.
+
+**Mitigation**: use the Top 10 as a starting point. Add threat modeling, penetration testing, and security code review. Treat security as a continuous process, not a one-time audit.
+
+### Stale Dependency Scanning
+
+**What goes wrong**: `dotnet list package --vulnerable` is run once during setup and never again. New CVEs are published daily; a package that was safe last month may be vulnerable today.
+
+**Mitigation**: automate dependency scanning in CI (GitHub Dependabot, OWASP Dependency-Check). Set up alerts for new CVEs in your dependency tree. Pin dependency versions and review updates regularly.
+
+## Tradeoffs
+
+**Security scanning depth vs CI speed**
+
+| Approach | Coverage | CI Impact | When to use |
+|----------|----------|-----------|-------------|
+| SAST (static analysis) | Code patterns, known vulnerabilities | Low (seconds) | Every PR |
+| DAST (dynamic analysis) | Runtime vulnerabilities, auth bypasses | High (minutes) | Nightly or pre-release |
+| Penetration testing | Business logic, chained vulnerabilities | Very high (days) | Quarterly or pre-launch |
+| Dependency scanning | Known CVEs in dependencies | Low (seconds) | Every PR |
+
+**Decision rule**: run SAST and dependency scanning on every PR (fast, automated). Run DAST nightly against a staging environment. Schedule penetration testing quarterly or before major releases. Do not skip DAST because it is slow — it catches vulnerabilities that static analysis cannot.
+
+
 ## Questions
 
 > [!QUESTION]- Which OWASP Top 10 item is most commonly found in production .NET apps?

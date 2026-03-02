@@ -82,11 +82,33 @@ For all new systems, prefer Azure Service Bus (cloud), RabbitMQ (self-hosted cro
 > MSMQ is a Windows-only component tied to the .NET Framework. .NET 5+ is cross-platform and does not include Windows-specific legacy APIs. The community `MSMQ.Messaging` NuGet package provides compatibility, but the recommended path is migrating to a supported broker.
 
 
+## Receive with Transaction Example
+
+```csharp
+// Transactional receive — message is only removed if the transaction commits
+using var queue = new MessageQueue(@".\Private$\orders");
+using var tx = new MessageQueueTransaction();
+tx.Begin();
+try
+{
+    var msg = queue.Receive(timeout: TimeSpan.FromSeconds(5), transaction: tx);
+    ProcessOrder(msg.Body as string);
+    tx.Commit(); // message removed from queue only on commit
+}
+catch
+{
+    tx.Abort(); // message returned to queue for retry
+    throw;
+}
+```
+
 ## References
 
 - [System.Messaging namespace (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.messaging) — API reference for the .NET Framework MSMQ client; note this is not available in .NET 5+.
 - [Message Queuing (MSMQ) overview (Microsoft Learn)](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/msmq/ms711472(v=vs.85)) — Windows MSMQ architecture, queue types, and transactional messaging.
 - [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/RabbitMQ\|RabbitMQ]] — the standard modern alternative for on-premise or self-hosted message brokering; cross-platform, actively maintained.
+- [Outbox pattern (Microsoft Azure Architecture Center)](https://learn.microsoft.com/en-us/azure/architecture/best-practices/transactional-outbox-cosmos) — the modern replacement for MSDTC-based distributed transactions: write message to DB in the same transaction as the domain change, then relay to the broker.
+- [Azure Service Bus overview (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-messaging-overview) — the cloud-managed successor to MSMQ for Azure-hosted systems; supports sessions, dead-lettering, and scheduled delivery.
 
 <!-- whats-next:start -->
 

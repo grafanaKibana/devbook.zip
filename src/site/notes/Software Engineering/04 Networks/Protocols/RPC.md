@@ -50,6 +50,43 @@ RPC's "local call" abstraction is leaky. The eight fallacies of distributed comp
 
 **Practical implication**: always handle RPC failures explicitly. Implement retries with idempotency keys, timeouts, and circuit breakers. Never assume a failed RPC means the server didn't execute the operation — it may have executed and the response was lost.
 
+## Pitfalls
+
+**Versioning hell**
+Changing a Protobuf message (removing a field, reusing a field number) breaks existing clients. Mitigation: never remove or reuse field numbers; use the `reserved` keyword for deprecated fields; version service names (`OrderServiceV2`) for breaking changes.
+
+**Tight coupling through generated stubs**
+Client and server must share the same `.proto` file. A server-side change requires regenerating and redeploying all clients. Treat `.proto` files as a public API contract with the same backward-compatibility rules as a REST API.
+
+**Serialization overhead masking latency**
+Protobuf is fast, but large messages (nested objects, repeated fields) still add serialization cost. A 10KB Protobuf message serialized 10,000 times/sec adds measurable CPU. Profile serialization in hot paths; use streaming for large payloads instead of single large messages.
+
+## gRPC C# Example
+
+```csharp
+// Server implementation
+public class OrderServiceImpl : OrderService.OrderServiceBase
+{
+    public override Task<OrderResponse> PlaceOrder(
+        OrderRequest request, ServerCallContext context)
+    {
+        // context.CancellationToken respects client-side deadlines
+        return Task.FromResult(new OrderResponse
+        {
+            OrderId = Guid.NewGuid().ToString(),
+            Status = "Accepted"
+        });
+    }
+}
+
+// Client call with deadline
+var channel = GrpcChannel.ForAddress("https://localhost:5001");
+var client = new OrderService.OrderServiceClient(channel);
+var response = await client.PlaceOrderAsync(
+    new OrderRequest { ProductId = "sku-123", Quantity = 2 },
+    deadline: DateTime.UtcNow.AddSeconds(5)); // client-side timeout
+```
+
 ## Questions
 
 > [!QUESTION]- Why is RPC's 'local call' abstraction considered leaky?
@@ -65,6 +102,8 @@ RPC's "local call" abstraction is leaky. The eight fallacies of distributed comp
 - [[Software Engineering/04 Networks/Protocols/REST\|REST]] — the alternative communication style: resource-oriented, HTTP verbs, JSON, browser-native.
 - [Fallacies of distributed computing (Wikipedia)](https://en.wikipedia.org/wiki/Fallacies_of_distributed_computing) — the eight assumptions that make distributed systems harder than they appear; essential context for any RPC-based system.
 - [gRPC core concepts](https://grpc.io/docs/what-is-grpc/core-concepts/) — official gRPC documentation covering service definitions, stub generation, and the four service types (unary, server streaming, client streaming, bidirectional).
+- [Protocol Buffers language guide (Google)](https://protobuf.dev/programming-guides/proto3/) — field numbering rules, reserved fields, and backward compatibility; essential for safe schema evolution.
+- [gRPC .NET documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/grpc/) — ASP.NET Core gRPC server setup, client factory, interceptors, and health checks.
 
 <!-- whats-next:start -->
 

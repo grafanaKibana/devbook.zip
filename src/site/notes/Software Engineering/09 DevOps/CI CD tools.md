@@ -114,6 +114,39 @@ pipeline {
 
 **Use Jenkins** only when: you have an air-gapped or on-premises environment where cloud CI/CD is not an option, or you have an existing Jenkins investment that is too costly to migrate.
 
+## Pitfalls
+
+### Secret Leakage in Logs
+
+**What goes wrong**: a pipeline step prints environment variables or request bodies to the log, exposing API keys, connection strings, or tokens. CI logs are often accessible to all team members and sometimes public.
+
+**Why it happens**: debugging steps (`env`, `printenv`, verbose HTTP logging) are added during troubleshooting and not removed.
+
+**Mitigation**: use the CI platform's secret masking (GitHub Actions masks secrets automatically; Azure DevOps masks pipeline variables marked as secret). Never print environment variables in pipeline steps. Audit pipeline logs before making a repo public.
+
+### Flaky Tests Blocking Deploys
+
+**What goes wrong**: a test that passes 90% of the time fails randomly in CI, blocking the deployment pipeline. The team learns to re-run the pipeline instead of fixing the test, eroding trust in CI.
+
+**Why it happens**: tests depend on timing, external services, or shared state that is not properly isolated.
+
+**Mitigation**: quarantine flaky tests immediately (mark as skipped with a tracking issue). Fix the root cause: use test containers for external dependencies, mock time-dependent behavior, and isolate shared state between tests.
+
+### Config Drift Between Environments
+
+**What goes wrong**: the pipeline deploys successfully to staging but fails in production because of a configuration difference (different connection string format, missing environment variable, different secret name).
+
+**Mitigation**: use infrastructure-as-code (Bicep, Terraform) to define environment configuration. Promote the same artifact through environments — never rebuild for production. Use environment-specific variable groups in Azure DevOps or environment secrets in GitHub Actions.
+
+## Questions
+
+> [!QUESTION]- When should you use GitHub Actions vs Azure DevOps Pipelines?
+> Use GitHub Actions when your code is on GitHub and you want zero infrastructure overhead — it integrates natively with PRs, branch protection, and OIDC for cloud auth. Use Azure DevOps Pipelines when deploying to Azure services (AKS, App Service, Azure Functions) and needing enterprise features: approval gates, deployment environments, audit trails, and integration with Azure Boards. Both support .NET equally well; the decision is about ecosystem fit and operational requirements.
+
+> [!QUESTION]- What makes a CI pipeline 'good' vs 'fast but unreliable'?
+> A good CI pipeline: (1) runs in < 10 minutes (fast enough to not block the developer), (2) has zero flaky tests (every failure is a real failure), (3) masks secrets and never logs sensitive data, (4) promotes the same artifact through environments (no rebuilds), (5) has clear failure messages that point to the root cause. A fast but unreliable pipeline trains developers to ignore failures and re-run instead of fix — which defeats the purpose of CI.
+
+
 ## References
 
 - [GitHub Actions documentation](https://docs.github.com/en/actions) — official GitHub Actions docs; covers workflow syntax, runners, secrets, and OIDC authentication

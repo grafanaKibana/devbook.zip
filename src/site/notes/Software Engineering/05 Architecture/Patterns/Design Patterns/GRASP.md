@@ -59,6 +59,53 @@ The `Order` class has the information (line items, prices, quantities) — it sh
 **Mitigation**: ask 'which class has the information needed to fulfill this responsibility?' If `Order` has the line items and prices, `Order.CalculateTotal()` belongs on `Order`, not on `OrderService`.
 
 
+## Tradeoffs
+
+**GRASP vs GoF Design Patterns**
+
+| Dimension | GRASP | GoF Patterns |
+|-----------|-------|-------------|
+| Level | Responsibility assignment heuristics | Structural/behavioral solutions to recurring problems |
+| When to apply | During initial design: who should own this behavior? | During refinement: how should this collaboration be structured? |
+| Prescriptiveness | Principles (judgment required) | Patterns (concrete structure) |
+| Risk | Over-applying Information Expert creates anemic services | Over-applying patterns adds unnecessary abstraction |
+
+**Decision rule**: use GRASP principles to make initial responsibility assignments. Use GoF patterns when a specific structural problem (e.g., object creation, algorithm variation) needs a concrete solution. GRASP answers 'who'; GoF answers 'how'.
+
+**When GRASP over-specifies**
+Pure Fabrication (creating service classes for responsibilities that don't fit domain objects) can lead to an anemic domain model if applied too aggressively. If every behavior ends up in a service class, domain objects become data bags. Balance Pure Fabrication with Information Expert: prefer putting behavior on the class that has the data, and only fabricate a service when no domain class is a natural fit.
+
+## Example: Polymorphism Replacing Conditionals
+
+```csharp
+// BAD: type-switch violates Polymorphism principle
+public string GenerateReport(string type, ReportData data) => type switch
+{
+    "pdf" => GeneratePdf(data),
+    "csv" => GenerateCsv(data),
+    _ => throw new ArgumentException($"Unknown type: {type}")
+};
+
+// GOOD: Polymorphism — each type owns its generation logic
+public interface IReportGenerator
+{
+    string Generate(ReportData data);
+}
+
+public sealed class PdfReportGenerator : IReportGenerator
+{
+    public string Generate(ReportData data) => /* PDF logic */ string.Empty;
+}
+
+public sealed class CsvReportGenerator : IReportGenerator
+{
+    public string Generate(ReportData data) => /* CSV logic */ string.Empty;
+}
+
+// Adding a new format = new class, no changes to existing code (Open/Closed)
+```
+
+
 ## Questions
 
 > [!QUESTION]- What is the Information Expert principle and why does it reduce coupling?
@@ -73,6 +120,7 @@ The `Order` class has the information (line items, prices, quantities) — it sh
 - [GRASP (Wikipedia)](https://en.wikipedia.org/wiki/GRASP_(object-oriented_design)) — overview of all nine principles with definitions and examples.
 - [Applying UML and Patterns (Craig Larman)](https://www.oreilly.com/library/view/applying-uml-and/0131489062/) — the book that introduced GRASP; covers all nine principles with detailed worked examples in the context of iterative OO design.
 - [[Software Engineering/06 Development Practices/Paradigms/OOP\|OOP]] — object-oriented programming fundamentals that GRASP principles build on: encapsulation, polymorphism, and responsibility assignment.
+- [GRASP Patterns Explained (Baeldung)](https://www.baeldung.com/java-grasp-patterns) — practical walkthrough of all nine GRASP principles with code examples; Java-based but the responsibility assignment concepts apply directly to C#.
 
 <!-- whats-next:start -->
 

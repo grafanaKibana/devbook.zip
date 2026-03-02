@@ -89,6 +89,23 @@ public class OrderService
 }
 ```
 
+## Tradeoffs
+
+**SOLID purity vs pragmatism**
+Strict SOLID application creates more files, more interfaces, and more indirection. For a 50-line script or a prototype, this overhead exceeds the benefit. Apply SOLID where complexity is real: large codebases, multiple developers, long-lived systems. The cost of over-engineering (unnecessary abstractions, premature interfaces) is as real as the cost of under-engineering (tight coupling, untestable code).
+
+**Per-principle cost**
+
+| Principle | Benefit | Cost | When to relax |
+|-----------|---------|------|---------------|
+| SRP | Focused classes, easier testing | More files, more navigation | Small utilities with one actor |
+| OCP | Add features without modifying existing code | Requires upfront abstraction | When the extension point is not yet clear |
+| LSP | Substitutable types, no runtime type checks | Constrains inheritance hierarchy | Rarely — LSP violations are usually design errors |
+| ISP | Clients depend only on what they use | More interfaces to maintain | When one client uses all methods |
+| DIP | Testable, swappable implementations | DI container overhead, more indirection | Performance-critical paths with measurable overhead |
+
+Decision rule: apply SOLID where you have evidence of coupling pain (hard to test, hard to change, hard to understand). Don't apply it speculatively to code that hasn't caused problems.
+
 ## Pitfalls
 
 **Over-engineering**: Applying SOLID to every class in a small codebase creates unnecessary abstractions. A 50-line script does not need interfaces and dependency injection. Apply SOLID where complexity is real, not anticipated.
@@ -114,6 +131,8 @@ public class OrderService
 
 - [SOLID (Wikipedia)](https://en.wikipedia.org/wiki/SOLID) — overview of all five principles with history and examples
 - [Microsoft — Design principles](https://learn.microsoft.com/en-us/dotnet/architecture/modern-web-apps-azure/architectural-principles) — SOLID and related principles in the context of .NET architecture
+- [SOLID principles in C# (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/architecture/modern-web-apps-azure/architectural-principles#solid) — SOLID applied to ASP.NET Core architecture with .NET-specific examples.
+- [Clean Architecture (Robert C. Martin)](https://www.oreilly.com/library/view/clean-architecture-a/9780134494272/) — the book that extends SOLID into architectural principles; covers component cohesion, coupling, and the dependency rule.
 <!-- whats-next:start -->
 
 ---
