@@ -107,6 +107,18 @@ public sealed class PdfPlugin : IPlugin
 
 **Decision rule**: use plug-in architecture when you need runtime extensibility by third parties or when different customers need different feature sets from the same core product. For internal applications where all features are known upfront, a monolith with feature flags is simpler.
 
+## Questions
+
+> [!QUESTION]- How do you prevent version conflicts between plug-ins that depend on different versions of the same library?
+> Use `AssemblyLoadContext` to isolate each plug-in's dependencies. Each context has its own assembly resolution scope, so plug-in A's dependency on `Newtonsoft.Json` 12.x does not conflict with plug-in B's dependency on 13.x. Cost: each context adds memory overhead and prevents type sharing across contexts — objects from one context cannot be cast to types from another.
+
+> [!QUESTION]- How do you version extension point interfaces without breaking existing plug-ins?
+> Treat the extension point interface as a public API with semantic versioning. For breaking changes, introduce a new interface version (`IPlugin`, `IPlugin2`) and support both simultaneously via an adapter. Existing plug-ins implement the old interface; new plug-ins implement the new one. The core adapts old plug-ins to the new contract. Cost: adapter proliferation over time — set a deprecation timeline and remove old interfaces after a migration window.
+
+> [!QUESTION]- When is plug-in architecture the wrong choice?
+> When all features are known upfront and no third-party extensibility is needed. The loading complexity, versioning challenges, and security surface (untrusted code running in-process) are not justified for internal applications. A monolith with feature flags is simpler and safer. Plug-in architecture earns its complexity when customers or third parties need to extend the product without modifying the core.
+
+
 ## References
 
 - [AssemblyLoadContext (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.loader.assemblyloadcontext) — the .NET API for isolated plug-in loading; prevents version conflicts between plug-ins by giving each its own assembly resolution context.

@@ -87,10 +87,24 @@ foreach (var gateway in gateways)
 
 **Use OOP** for domain modeling with complex invariants and state transitions. **Use functional patterns** (LINQ, records, pure functions) for data transformation pipelines.
 
+## Questions
+
+> [!QUESTION]- When should you prefer composition over inheritance?
+> Prefer composition when the relationship is 'has-a' rather than 'is-a', when you need to combine behaviors from multiple sources (C# has no multiple inheritance), or when the base class is not designed for extension (sealed or has complex invariants). Inheritance creates tight coupling: a change to the base class can break all derived classes. Composition lets you swap implementations at runtime and test components in isolation. Rule of thumb: if you find yourself overriding methods to change or suppress base behavior, composition is the better fit.
+
+> [!QUESTION]- What is the Anemic Domain Model and why is it considered an anti-pattern?
+> An Anemic Domain Model has objects with only getters/setters and no behavior — all logic lives in service classes. It violates encapsulation: the service must reach into the object to get data, then compute and set results back. This is procedural programming with OOP syntax. The cost: invariants are enforced in service code (scattered, easy to miss), objects can be put into invalid states, and the domain model provides no design guidance. Fix: move behavior that depends on an object's data into the object itself (Information Expert principle).
+
+> [!QUESTION]- How does polymorphism reduce conditional complexity?
+> Without polymorphism, behavior that varies by type requires if/switch chains: 'if type == PDF, do X; if type == CSV, do Y.' Each new type requires modifying existing code (Open/Closed violation). With polymorphism, each type implements a shared interface and handles its own behavior. Adding a new type means adding a new class, not modifying existing code. The caller iterates over `IEnumerable<IReportGenerator>` and calls `Generate()` — the runtime dispatches to the correct implementation.
+
+
 ## References
 
 - [Microsoft — Object-oriented programming in C#](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/tutorials/oop) — official C# OOP guide with examples
 - [Microsoft — Composition over inheritance](https://learn.microsoft.com/en-us/dotnet/architecture/modern-web-apps-azure/architectural-principles#prefer-composition-over-inheritance) — .NET architecture guidance on when to prefer composition
+- [Composition over inheritance (Wikipedia)](https://en.wikipedia.org/wiki/Composition_over_inheritance) — the principle with examples of when inheritance creates fragile hierarchies and how composition avoids them.
+- [Anemic Domain Model (Martin Fowler)](https://martinfowler.com/bliki/AnemicDomainModel.html) — Fowler's critique of the anti-pattern: why separating data from behavior loses the benefits of OOP.
 <!-- whats-next:start -->
 
 ---

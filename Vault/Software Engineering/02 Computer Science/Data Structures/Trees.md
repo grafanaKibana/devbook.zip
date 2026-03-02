@@ -12,12 +12,20 @@ dg-publish: true
 
 # Intro
 
-Trees represent hierarchical data with parent-child relationships. In .NET, tree-like behavior often appears through `SortedSet<T>` and custom node models.
+Trees represent hierarchical data with parent-child relationships. In .NET, tree-like behavior commonly appears through `SortedSet<T>`, custom recursive node models, and expression trees in the compiler pipeline.
 
 ## Deeper Explanation
 
-A tree organizes nodes so each node can have children and (except root) one parent.
-Balanced tree structures keep operations near O(log n), while unbalanced trees can degrade toward O(n).
+A tree organizes nodes so each node has at most one parent (except the root) and any number of children. Balanced trees keep height at O(log n), making insert, delete, and search O(log n). Unbalanced trees degrade toward O(n) — inserting already-sorted values into a naïve BST produces a linked list.
+
+**Traversal orders** define processing sequence:
+
+- *Pre-order* (root → left → right): used to serialize or copy a tree.
+- *In-order* (left → root → right): visits nodes in sorted order for a BST — the basis for `SortedSet<T>` enumeration.
+- *Post-order* (left → right → root): used when children must be processed before parents, such as deleting a subtree or evaluating an expression tree.
+- *BFS (level-order)*: uses a `Queue<T>` to visit nodes level by level, natural for shortest-path in unweighted trees.
+
+`SortedSet<T>` in .NET uses a red-black tree internally, guaranteeing O(log n) insert and lookup regardless of insertion order.
 
 ## Structure
 

@@ -16,8 +16,13 @@ Graphs model relationships between entities using vertices and edges. In .NET, g
 
 ## Deeper Explanation
 
-The most common representation is an adjacency list: each node maps to neighbors.
-This is space efficient for sparse graphs and works well with BFS/DFS traversals.
+The most common representation is an adjacency list: each node maps to its neighbors. Adjacency lists cost O(V + E) space and are efficient for sparse graphs where E ≪ V².
+
+**Adjacency matrix** costs O(V²) space and offers O(1) edge-existence checks, but wastes memory on sparse graphs. In .NET, a `bool[,]` or `int[,]` can serve as a matrix.
+
+**Weighted graphs** extend either representation: an adjacency list becomes `Dictionary<int, List<(int neighbor, int weight)>>`, while a matrix stores `int[,]` with a sentinel (0 or `int.MaxValue`) for absent edges. Dijkstra's algorithm requires weights and pairs naturally with `PriorityQueue<TElement, int>` in .NET for O((V + E) log V) performance.
+
+**Directed vs undirected**: Directed graphs (digraphs) model one-way relationships — `A → B` does not imply `B → A` — and require asymmetric adjacency structures. Undirected graphs store each edge in both directions. Most shortest-path algorithms (Dijkstra, Bellman-Ford) operate on directed graphs; connectivity checks work on either.
 
 ## Structure
 

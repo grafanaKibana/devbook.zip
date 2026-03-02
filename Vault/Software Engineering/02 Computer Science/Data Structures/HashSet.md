@@ -16,8 +16,16 @@ dg-publish: true
 
 ## Deeper Explanation
 
-`HashSet<T>` is hash-based and uses `GetHashCode` plus `Equals` to enforce uniqueness.
-Its core operations (`Add`, `Contains`, `Remove`) are O(1) on average.
+`HashSet<T>` is hash-based: `GetHashCode` determines the bucket; `Equals` resolves collisions within a bucket. Core operations (`Add`, `Contains`, `Remove`) are O(1) average.
+
+`HashSet<T>` also exposes the full set algebra in O(n) time:
+
+- `UnionWith` — adds all elements from another collection (set A ∪ B).
+- `IntersectWith` — keeps only elements present in both (A ∩ B).
+- `ExceptWith` — removes elements found in another collection (A − B).
+- `SymmetricExceptWith` — keeps elements present in exactly one set (A △ B).
+
+These are in-place mutations. `IsSubsetOf`, `IsSupersetOf`, and `SetEquals` test structural relationships without modifying the set. A common production pattern: accumulate processed IDs in a `HashSet<int>`, then call `ExceptWith` against the full batch to find unprocessed items in O(n) instead of O(n²).
 
 ## Structure
 

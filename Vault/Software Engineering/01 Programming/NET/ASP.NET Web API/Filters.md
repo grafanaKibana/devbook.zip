@@ -66,6 +66,27 @@ builder.Services.AddControllers(options =>
 
 If this rule should apply only to one endpoint, apply it with `[ServiceFilter(typeof(RequireCorrelationIdFilter))]` instead of registering globally.
 
+Exception filter to catch and shape unhandled action exceptions:
+
+```csharp
+public sealed class ApiExceptionFilter(ILogger<ApiExceptionFilter> logger) : IAsyncExceptionFilter
+{
+    public Task OnExceptionAsync(ExceptionContext context)
+    {
+        logger.LogError(context.Exception, "Unhandled exception in {Action}",
+            context.ActionDescriptor.DisplayName);
+
+        context.Result = context.Exception is NotFoundException
+            ? new NotFoundObjectResult(new { error = context.Exception.Message })
+            : new ObjectResult(new { error = "An unexpected error occurred." }) { StatusCode = 500 };
+
+        context.ExceptionHandled = true;
+        return Task.CompletedTask;
+    }
+}
+```
+
+Register globally: `builder.Services.AddControllers(opts => opts.Filters.Add<ApiExceptionFilter>());`
 ## Pitfalls
 
 - Running blocking I/O inside sync filters can hurt throughput because request threads are blocked; use async filters for I/O work.

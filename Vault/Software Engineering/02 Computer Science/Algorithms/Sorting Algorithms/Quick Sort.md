@@ -83,6 +83,32 @@ private static int Partition(int[] a, int left, int right)
 
 Avoid naive quick sort (fixed pivot) on inputs that may be sorted or reverse-sorted — it degrades to O(n²).
 
+## Pitfalls
+
+### Fixed Pivot on Sorted Input
+
+**What goes wrong**: using the first or last element as the pivot on already-sorted or reverse-sorted input causes every partition to be maximally unbalanced (one side has n-1 elements, the other has 0). This degrades to O(n²) time and O(n) stack depth, causing a stack overflow for large n.
+
+**Mitigation**: use a randomized pivot (pick a random index and swap it to the end before partitioning) or median-of-three (pick the median of first, middle, last elements). .NET's `Array.Sort` uses introsort, which switches to heapsort when recursion depth exceeds 2×log(n).
+
+### Not Handling Duplicate Keys
+
+**What goes wrong**: standard Lomuto/Hoare partition degrades to O(n²) on arrays with many duplicate keys (e.g., sorting 10,000 elements where 90% are the same value). All duplicates end up on one side of every partition.
+
+**Mitigation**: use three-way partitioning (Dutch National Flag algorithm) for inputs with many duplicates. It partitions into three regions: less than, equal to, and greater than the pivot, so all equal elements are placed in their final positions in one pass.
+
+## Tradeoffs
+
+| Algorithm | Time (avg) | Time (worst) | Space | Stable | Use when |
+|-----------|-----------|-------------|-------|--------|----------|
+| Quick sort (randomized) | O(n log n) | O(n²) rare | O(log n) | No | General-purpose in-memory; best cache behavior |
+| Introsort (Array.Sort) | O(n log n) | O(n log n) | O(log n) | No | Production default; guaranteed O(n log n) |
+| Merge sort | O(n log n) | O(n log n) | O(n) | Yes | Stability required; linked lists; external sort |
+| Heap sort | O(n log n) | O(n log n) | O(1) | No | Guaranteed O(n log n) in-place; used as introsort fallback |
+
+**Decision rule**: use `Array.Sort` (introsort) for general-purpose in-memory sorting. Implement quick sort directly only when you need fine-grained control (e.g., three-way partition for duplicate-heavy data). Use merge sort when stability is required.
+
+
 ## Questions
 
 > [!QUESTION]- What causes quick sort's O(n²) worst case and how does introsort prevent it?
@@ -96,6 +122,9 @@ Avoid naive quick sort (fixed pivot) on inputs that may be sorted or reverse-sor
 
 - [Quicksort (Wikipedia)](https://en.wikipedia.org/wiki/Quicksort) — Lomuto and Hoare partition schemes, randomization, and introsort.
 - [Quick sort (cp-algorithms)](https://cp-algorithms.com/sorting/quick_sort.html) — practical implementation tips including three-way partition for duplicate keys.
+
+- [Introsort (Wikipedia)](https://en.wikipedia.org/wiki/Introsort) — the hybrid algorithm used by .NET's Array.Sort; combines quick sort, heapsort, and insertion sort to guarantee O(n log n) worst case while keeping quick sort's cache efficiency.
+- [Sorting algorithms comparison (Big-O Cheat Sheet)](https://www.bigocheatsheet.com/) — quick reference for time and space complexity of all common sorting algorithms.
 
 <!-- whats-next:start -->
 

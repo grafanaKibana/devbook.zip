@@ -20,6 +20,7 @@ dg-publish: true
 - Capacity grows when needed, similar to `List<T>`.
 - Enumeration is from top to bottom.
 
+The runtime uses a call stack with the same LIFO discipline: each function invocation pushes a stack frame containing its local variables and return address; when the function returns, the frame is popped. An explicit `Stack<T>` mirrors this behavior in application code — useful for undo/redo chains, expression evaluation, and depth-first backtracking without the recursion limit risk. Unlike the implicit call stack, `Stack<T>` capacity is bounded only by heap memory.
 ## Structure
 
 ```mermaid

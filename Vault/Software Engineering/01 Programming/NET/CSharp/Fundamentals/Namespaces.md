@@ -42,6 +42,15 @@ public static class MathUtility
 }
 ```
 
+## Pitfalls
+
+**Namespace collision between libraries**: When two packages define the same fully qualified type name, the compiler reports ambiguity. Fix with `extern alias` in the project file or by using fully qualified names at the call site.
+
+**Global using overreach**: C# 10 `global using` directives apply to every file in the project. Overusing them pollutes the implicit import context and makes it hard to trace where a name comes from. Limit global usings to universally unambiguous imports (`System`, `System.Collections.Generic`); keep domain-specific namespaces in per-file `using` directives.
+
+**Namespace/assembly mismatch**: The compiler does not enforce alignment between namespace name and assembly name. A type in `MyApp.Utilities` can live in `MyApp.Core.dll`. Misaligned namespaces cause autocompletion to mislead developers about which assembly to reference.
+
+
 ## Tradeoffs
 
 - File-scoped namespaces reduce indentation and noise for one-namespace-per-file layouts, which improves readability in modern codebases.
@@ -57,9 +66,10 @@ public static class MathUtility
 
 ## Links
 
-- [Declare namespaces to organize types](https://learn.microsoft.com/dotnet/csharp/fundamentals/types/namespaces) - Official overview and best-practice guidance.
-- [namespace keyword](https://learn.microsoft.com/dotnet/csharp/language-reference/keywords/namespace) - Exact language rules and syntax variants.
-
+- [Declare namespaces to organize types](https://learn.microsoft.com/dotnet/csharp/fundamentals/types/namespaces) — official overview and best-practice guidance for namespace declaration and usage.
+- [namespace keyword](https://learn.microsoft.com/dotnet/csharp/language-reference/keywords/namespace) — exact language rules and syntax variants including file-scoped form.
+- [Global using directives (C# 10)](https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-10#global-using-directives) — covers the new `global using` syntax, when to use it, and common pitfalls.
+- [Namespace naming guidelines](https://learn.microsoft.com/en-us/dotnet/standard/design-guidelines/names-of-namespaces) — Framework Design Guidelines naming conventions for public APIs.
 <!-- whats-next:start -->
 
 ---

@@ -67,6 +67,33 @@ public static void InsertionSort(int[] a)
 - **Base case in hybrid sorts:** Timsort and introsort switch to insertion sort for small partitions.
 - **Online sorting:** can sort a stream of elements as they arrive, one at a time.
 
+## Pitfalls
+
+### Using Insertion Sort on Large Unsorted Arrays
+
+**What goes wrong**: insertion sort is applied to an array of 10,000 elements. At O(n²) average case, this is ~100 million comparisons. A merge sort or introsort would complete in ~130,000 comparisons.
+
+**Mitigation**: use insertion sort only for small arrays (n ≤ 20–50) or nearly-sorted data. For general-purpose sorting, use `Array.Sort` (introsort in .NET), which switches to insertion sort internally for small partitions.
+
+### Forgetting That Insertion Sort Is Stable
+
+**What goes wrong**: a developer replaces insertion sort with selection sort for a small-array case, not realizing selection sort is not stable. Equal elements that were in a specific order are now reordered.
+
+**Mitigation**: when stability matters (sorting objects by a secondary key), use insertion sort or merge sort. Selection sort and quick sort are not stable by default.
+
+## Tradeoffs
+
+| Algorithm | Time (avg) | Space | Stable | Best case | Use when |
+|-----------|-----------|-------|--------|-----------|----------|
+| Insertion sort | O(n²) | O(1) | Yes | O(n) | n ≤ 50; nearly-sorted; base case in hybrid sorts |
+| Selection sort | O(n²) | O(1) | No | O(n²) | Writes are expensive; n is small |
+| Bubble sort | O(n²) | O(1) | Yes | O(n) | Teaching only; never in production |
+| Merge sort | O(n log n) | O(n) | Yes | O(n log n) | Stability required; linked lists; external sort |
+| Quick sort (introsort) | O(n log n) | O(log n) | No | O(n log n) | General-purpose in-memory sorting |
+
+**Decision rule**: use insertion sort for small arrays (n ≤ 50) or nearly-sorted data. For general-purpose sorting, use `Array.Sort` (introsort). For stable sorting of large arrays, use `Array.Sort` with a stable comparer or LINQ `OrderBy` (which uses merge sort).
+
+
 ## Questions
 
 > [!QUESTION]- When is insertion sort faster than O(n log n) algorithms?
@@ -80,6 +107,9 @@ public static void InsertionSort(int[] a)
 
 - [Insertion sort (Wikipedia)](https://en.wikipedia.org/wiki/Insertion_sort) — algorithm description, binary insertion sort variant, and complexity analysis.
 - [Insertion sort (cp-algorithms)](https://cp-algorithms.com/sorting/insertion_sort.html) — competitive programming perspective with implementation notes.
+
+- [Timsort (Wikipedia)](https://en.wikipedia.org/wiki/Timsort) — Python's and Java's default sort; uses insertion sort for small runs (< 64 elements), explaining why insertion sort matters in practice despite its O(n²) complexity.
+- [Sorting algorithms comparison (Big-O Cheat Sheet)](https://www.bigocheatsheet.com/) — quick reference for time and space complexity of all common sorting algorithms.
 
 <!-- whats-next:start -->
 

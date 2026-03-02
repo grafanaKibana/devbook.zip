@@ -50,6 +50,24 @@ public class ReportService
 // When a second format is needed, introduce the abstraction then — with a real use case to guide the design.
 ```
 
+A second common YAGNI violation is building a generic configuration system for a feature that has exactly one configuration today:
+
+```csharp
+// YAGNI violation: generic config system for one setting
+public class FeatureConfig
+{
+    public Dictionary<string, object> Settings { get; set; } = new();
+    public T Get<T>(string key) => (T)Settings[key];
+}
+
+// YAGNI-compliant: direct property until a second setting is needed
+public class FeatureConfig
+{
+    public bool IsEnabled { get; set; }
+}
+// When a second setting arrives, refactor then — with a real use case to guide the design.
+```
+
 ## Pitfalls
 
 ### Speculative Generality
@@ -59,6 +77,20 @@ public class ReportService
 **Why it happens**: developers anticipate future needs and add flexibility 'for free' while they're in the code. The cost is paid in complexity, not in time.
 
 **Mitigation**: apply the Rule of Three — introduce an abstraction when you have two concrete use cases, not one. One use case is speculation; two give you enough information to design the abstraction correctly.
+
+
+## Tradeoffs
+
+**YAGNI vs forward-thinking design**
+
+| Dimension | YAGNI (build now) | Speculative design (build ahead) |
+|-----------|-------------------|----------------------------------|
+| Cost if needed | Refactor later (usually cheap) | Paid upfront (certain) |
+| Cost if not needed | Zero | Maintenance burden forever |
+| Design quality | May need refactoring when need arrives | May be wrong when need arrives |
+| Reversibility | High (add abstraction when needed) | Low (removing abstraction is hard) |
+
+**Decision rule**: apply YAGNI by default. The exception is when the cost of adding the abstraction later is genuinely high — public API contracts, database schemas, wire protocols, or security boundaries. For these, upfront design is justified because changing them later is expensive or breaking. For internal code, add the abstraction when you have two concrete use cases, not one.
 
 
 ## Questions
@@ -75,6 +107,8 @@ public class ReportService
 - [YAGNI (Martin Fowler)](https://martinfowler.com/bliki/Yagni.html) — concise explanation of YAGNI with the important nuance: it applies to *features*, not to good engineering practices like testing and refactoring.
 - [You aren't gonna need it (Wikipedia)](https://en.wikipedia.org/wiki/You_aren%27t_gonna_need_it) — origin in Extreme Programming and the relationship to the broader XP principle of doing the simplest thing that could possibly work.
 - [[Software Engineering/06 Development Practices/Principles/KISS|KISS]] — related principle: keep implementations simple; complexity should be justified by current requirements.
+- [Extreme Programming Explained (Kent Beck)](https://www.oreilly.com/library/view/extreme-programming-explained/0321278658/) — the XP book that established YAGNI as a core practice; explains the economic argument for deferring features until they are needed.
+- [Speculative Generality (Refactoring Guru)](https://refactoring.guru/smells/speculative-generality) — the code smell that YAGNI prevents: hooks, abstract classes, and parameters added for hypothetical future use that never arrives.
 
 <!-- whats-next:start -->
 

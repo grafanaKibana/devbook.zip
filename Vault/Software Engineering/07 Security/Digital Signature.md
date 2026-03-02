@@ -43,6 +43,19 @@ verifier.ImportRSAPublicKey(publicKey, out _);
 bool isValid = verifier.VerifyData(message, signature, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
 ```
 
+ECDSA (the modern alternative) produces smaller signatures and is faster:
+
+```csharp
+// ECDSA signing (preferred for new systems)
+using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+var message = System.Text.Encoding.UTF8.GetBytes("Transfer $1000 to account 12345");
+var signature = ecdsa.SignData(message, HashAlgorithmName.SHA256);
+
+// Verify
+bool isValid = ecdsa.VerifyData(message, signature, HashAlgorithmName.SHA256);
+// ECDSA P-256 signature: 64 bytes vs RSA-2048: 256 bytes
+```
+
 ## Use Cases
 
 - **JWT signing**: The identity provider signs the JWT with its private key; APIs verify with the public key (JWKS endpoint). See [[Software Engineering/07 Security/JWT Bearer|JWT Bearer]].
@@ -91,6 +104,7 @@ bool isValid = verifier.VerifyData(message, signature, HashAlgorithmName.SHA256,
 
 - [Microsoft — Cryptographic Signatures](https://learn.microsoft.com/en-us/dotnet/standard/security/cryptographic-signatures) — .NET guide to RSA and ECDSA signing
 - [RFC 7515 — JSON Web Signature (JWS)](https://datatracker.ietf.org/doc/html/rfc7515) — the standard for signing JWTs
+- [NIST FIPS 186-5 — Digital Signature Standard](https://csrc.nist.gov/publications/detail/fips/186/5/final) — the authoritative NIST standard for digital signatures; covers RSA, ECDSA, and EdDSA with key size requirements and algorithm selection guidance.
 <!-- whats-next:start -->
 
 ---

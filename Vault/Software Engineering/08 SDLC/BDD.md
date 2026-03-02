@@ -121,6 +121,18 @@ Each unique Gherkin step requires a step definition. Without careful reuse, you 
 **BDD without collaboration**
 Writing Gherkin scenarios alone (without business stakeholders) defeats the purpose. The value is in the conversation that produces the scenarios, not the scenarios themselves.
 
+## Questions
+
+> [!QUESTION]- When does BDD overhead outweigh its benefits?
+> BDD adds overhead: Gherkin scenarios must be written and maintained, step definitions must be kept in sync, and the collaboration process takes time. The overhead is not worth it for: pure technical components with no business language (algorithms, infrastructure), small teams where developers and stakeholders communicate directly without formal scenarios, and rapidly changing requirements where maintaining `.feature` files becomes a burden. BDD earns its cost when: business rules are complex and misunderstanding them is expensive, cross-functional alignment is genuinely needed, and scenarios serve as living documentation.
+
+> [!QUESTION]- How does BDD differ from TDD, and are they complementary?
+> TDD focuses on unit behavior: does the code work correctly? Tests are written by developers in code. BDD focuses on system behavior: does the system meet requirements from the user's perspective? Scenarios are written in business language (Gherkin) collaboratively with stakeholders. They are complementary: use TDD for unit-level design and fast feedback loops; use BDD for acceptance criteria and cross-functional alignment. A well-tested system uses both — TDD for the inner loop, BDD for the outer loop.
+
+> [!QUESTION]- What is 'specification by example' and how does it reduce requirement ambiguity?
+> Specification by example replaces abstract requirement statements ('the system should handle invalid input') with concrete examples ('given a blank email field, when I submit the form, then I see the error message X'). Concrete examples are unambiguous: they can be automated as tests and verified against the running system. Abstract requirements are interpreted differently by developers, testers, and business stakeholders. The Three Amigos practice (developer + tester + business) produces examples collaboratively, surfacing misunderstandings before implementation begins.
+
+
 ## References
 
 - [Gherkin reference (Cucumber)](https://cucumber.io/docs/gherkin/reference/) — complete Gherkin syntax reference including Scenario Outline, Background, and data tables.
