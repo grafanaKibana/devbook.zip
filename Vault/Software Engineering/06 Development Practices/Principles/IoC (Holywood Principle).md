@@ -6,30 +6,59 @@ subtopic:
 level:
   - "4"
 priority: High
-status: Ready To Repeat
-dg-publish: false
+status: Creation
+dg-publish: true
 ---
 
-# Intro
+# Inversion of Control (Hollywood Principle)
 
-## Deeper Explanation
+Inversion of Control (IoC) is a design principle where the flow of control is inverted: instead of your code creating and managing its dependencies, an external mechanism (a framework or container) coordinates object creation and composition. The name "Hollywood Principle" comes from the phrase *"Don't call us, we'll call you"* — your code defines what it needs, and the framework provides it.
 
-## Questions
+IoC is the principle; **Dependency Injection (DI)** is the most common technique for implementing it. See [[Software Engineering/05 Architecture/Patterns/Dependency Injection|Dependency Injection]] for the full treatment of DI patterns, service lifetimes, and ASP.NET Core's DI container.
 
-> [!QUESTION]- What is Inversion of Control (IoC)?
-> IoC is a principle where the flow of control is inverted: instead of your code creating and managing its dependencies directly, an external mechanism (framework/container) coordinates object creation and composition.
-> A common IoC technique is [[Dependency Injection]]: dependencies are provided to a class (constructor/setter/parameter) rather than created inside it.
+## How It Works
 
-> [!QUESTION]- What is the Dependency Inversion Principle (DIP)?
-> DIP (the "D" in SOLID) says:
-> - High-level modules should not depend on low-level modules. Both should depend on abstractions.
-> - Abstractions should not depend on details. Details should depend on abstractions.
->
-> Practically: depend on interfaces/contracts, keep implementation details behind them, and wire concrete implementations via DI.
+Without IoC, a class creates its own dependencies:
 
-## Links
+```csharp
+// Tightly coupled — OrderService controls its own dependencies
+public class OrderService
+{
+    private readonly SqlOrderRepository _repo = new SqlOrderRepository("conn-string");
+    private readonly SmtpEmailSender _email   = new SmtpEmailSender("smtp.example.com");
+}
+```
 
-- [Inversion of Control and Dependency Injection (Fowler)](https://martinfowler.com/articles/injection.html)
+With IoC (via constructor injection), the container provides dependencies:
+
+```csharp
+// Loosely coupled — dependencies are injected, not created
+public class OrderService(IOrderRepository repo, IEmailSender email)
+{
+    // repo and email are provided by the DI container
+}
+
+// Registration in Program.cs
+builder.Services.AddScoped<IOrderRepository, SqlOrderRepository>();
+builder.Services.AddSingleton<IEmailSender, SmtpEmailSender>();
+```
+
+The container calls `OrderService` with the right implementations — "don't call us, we'll call you."
+
+## IoC vs Dependency Inversion Principle (DIP)
+
+These are related but distinct:
+
+- **IoC** (Hollywood Principle): a runtime mechanism — the framework controls object creation and wiring.
+- **DIP** (SOLID "D"): a design rule — high-level modules should depend on abstractions, not concrete implementations.
+
+DIP is the *why* (depend on interfaces); IoC/DI is the *how* (let the container wire the concrete implementations). You can follow DIP without a DI container (manual wiring in `Main`), but a container makes it practical at scale.
+
+## References
+
+- [Inversion of Control Containers and the Dependency Injection pattern (Martin Fowler)](https://martinfowler.com/articles/injection.html) — the canonical article that named and defined IoC containers and DI; explains the Hollywood Principle and compares constructor, setter, and interface injection.
+- [[Software Engineering/05 Architecture/Patterns/Dependency Injection|Dependency Injection]] — full treatment of DI patterns, ASP.NET Core service lifetimes (Singleton/Scoped/Transient), and common pitfalls like captive dependencies.
+- [[Software Engineering/06 Development Practices/Principles/SOLID|SOLID]] — covers the Dependency Inversion Principle (DIP) in context with the other SOLID principles.
 
 <!-- whats-next:start -->
 

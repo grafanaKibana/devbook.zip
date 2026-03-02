@@ -1,13 +1,14 @@
 ---
 topic:
   - Security
-subtopic: []
+subtopic:
+  - Security
 level:
   - "1"
 priority: Low
-status: Ready To Repeat
+status: Creation
 
-dg-publish: false
+dg-publish: true
 ---
 
 # Intro
@@ -47,10 +48,17 @@ var block2Hash = Sha256Hex(block2Prev + block2Data);
 > [!QUESTION]- What is Block-chain?
 > A blockchain is an append-only ledger where records are grouped into blocks and linked together using cryptographic hashes.
 
-## Links
+## Limitations for Enterprise Use
 
-- [Blockchain](https://en.wikipedia.org/wiki/Blockchain)
+- **Throughput**: Public blockchains (Bitcoin: ~7 TPS, Ethereum: ~15 TPS) are orders of magnitude slower than traditional databases (thousands of TPS). Private blockchains are faster but lose decentralization benefits.
+- **Immutability is a liability**: GDPR's right to erasure conflicts with blockchain's append-only nature. Storing personal data on a blockchain creates compliance problems.
+- **Consensus overhead**: Proof-of-Work wastes energy. Proof-of-Stake is more efficient but adds validator complexity.
+- **When to use**: Blockchain is justified when you need a shared ledger across mutually distrusting parties with no central authority. For most enterprise use cases, a traditional database with audit logging is simpler and faster.
 
+## References
+
+- [Blockchain (Wikipedia)](https://en.wikipedia.org/wiki/Blockchain) — comprehensive overview of blockchain concepts, consensus mechanisms, and applications
+- [Bitcoin whitepaper (Satoshi Nakamoto)](https://bitcoin.org/bitcoin.pdf) — the original blockchain paper; explains the proof-of-work consensus mechanism
 <!-- whats-next:start -->
 
 ---

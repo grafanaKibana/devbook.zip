@@ -298,7 +298,7 @@ If thresholds are too sensitive or static, teams get constant false positives an
 >  [[Software Engineering/Software Engineering|Software Engineering]]
 >
 > **Topics**
-> - [[Software Engineering/09 DevOps/Deployment Stratagies/Deployment Stratagies|Deployment Stratagies]]
+> - [[Software Engineering/09 DevOps/Deployment Strategies/Deployment Strategies|Deployment Strategies]]
 > - [[Software Engineering/09 DevOps/Version Control Systems/Version Control Systems|Version Control Systems]]
 >
 > **Pages**
