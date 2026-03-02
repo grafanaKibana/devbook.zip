@@ -123,10 +123,4 @@ Train an agent to choose actions that maximize long-term reward through interact
 > **Parent**
 >  [[Software Engineering/11 AI & ML/Machine Learning/Machine Learning|Machine Learning]]
 >
-> **Pages**
-> - [[Software Engineering/11 AI & ML/Machine Learning/Types/Reinforcement Learning|Reinforcement Learning]]
-> - [[Software Engineering/11 AI & ML/Machine Learning/Types/Self-Supervised Learning|Self-Supervised Learning]]
-> - [[Software Engineering/11 AI & ML/Machine Learning/Types/Semi-Supervised Learning|Semi-Supervised Learning]]
-> - [[Software Engineering/11 AI & ML/Machine Learning/Types/Supervised Learning|Supervised Learning]]
-> - [[Software Engineering/11 AI & ML/Machine Learning/Types/Unsupervised Learning|Unsupervised Learning]]
 <!-- whats-next:end -->

@@ -155,12 +155,6 @@ Increase traffic to the new version in fixed increments on a fixed schedule (e.g
 > **Parent**
 >  [[Software Engineering/09 DevOps/09 DevOps|09 DevOps]]
 >
-> **Pages**
-> - [[Software Engineering/09 DevOps/Deployment Strategies/All-In-One Deployment|All-In-One Deployment]]
-> - [[Software Engineering/09 DevOps/Deployment Strategies/Blue Green Deployment|Blue Green Deployment]]
-> - [[Software Engineering/09 DevOps/Deployment Strategies/Canary Deployment|Canary Deployment]]
-> - [[Software Engineering/09 DevOps/Deployment Strategies/In-place Deployment|In-place Deployment]]
-> - [[Software Engineering/09 DevOps/Deployment Strategies/Linear Deployment|Linear Deployment]]
 <!-- whats-next:end -->
 
 # Intro
