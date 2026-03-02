@@ -55,6 +55,21 @@ Expected = (2 + 4×5 + 14) / 6 = 36 / 6 = 6 days
 
 **Decision rule**: use T-Shirt sizing for roadmap planning and early backlog grooming. Use Planning Poker with story points for sprint planning. Use PERT when you need to communicate uncertainty to stakeholders or when a task has a wide range of possible outcomes.
 
+## Pitfalls
+
+**Anchoring bias**
+The first estimate heard influences all subsequent estimates. In Planning Poker, if one person reveals their card early, others anchor to it. Mitigation: simultaneous reveal is mandatory — all cards shown at the same time.
+
+**Planning fallacy**
+Teams consistently underestimate because they focus on the best-case scenario and ignore past overruns. Mitigation: use PERT's three-point estimate to force explicit consideration of the pessimistic case. Track actual vs estimated velocity over 3-5 sprints and use historical data for capacity planning.
+
+**Story point inflation**
+Teams gradually inflate story points to make velocity look better or to avoid pressure. A 5-point story this quarter is estimated as 8 points next quarter for the same complexity. Mitigation: periodically re-calibrate against reference stories. Velocity is a planning tool, not a performance metric — never use it to compare teams.
+
+**Velocity gaming**
+When velocity is used as a performance metric, teams optimize for points rather than value: splitting stories artificially, marking stories done before they are truly complete, or avoiding complex work. Mitigation: measure outcomes (features shipped, bugs fixed, customer satisfaction) not velocity.
+
+
 ## Questions
 
 > [!QUESTION]- Why are story points measured in relative complexity rather than hours?

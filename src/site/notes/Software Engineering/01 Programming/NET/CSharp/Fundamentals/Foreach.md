@@ -58,6 +58,19 @@ foreach (var number in CountNumbers(1, 5))
 }
 ```
 
+## Pitfalls
+
+**Modifying the collection during iteration**: Mutating a `List<T>` or `Dictionary<TKey,TValue>` inside a `foreach` over it throws `InvalidOperationException`. The enumerator tracks an internal version counter and detects the change. Fix by iterating a snapshot (`collection.ToList()`) or collecting mutations in a separate list and applying them after the loop.
+
+**Closure variable capture**: Lambdas created inside `foreach` capture the loop variable by reference unless you shadow it into a local. Before C# 5, all lambdas in a `foreach` could close over the same `item` variable and see only the last value. Best practice: always copy to a local inside the lambda body if lifetimes extend beyond the iteration: `var current = item; tasks.Add(() => Process(current));`.
+
+## Tradeoffs
+
+- **`foreach` vs `for`**: `foreach` is idiomatic and works on any enumerable. `for` is faster on arrays and `List<T>` because the JIT can eliminate bounds checks when iterating from 0 to `Count`. Use `for` in tight inner loops over known-length collections; `foreach` everywhere else.
+- **`foreach` vs LINQ**: LINQ chains are composable and readable but allocate per-operator. `foreach` over the source directly allocates less. Use LINQ for readability on non-hot paths; `foreach` (or `Span<T>`) for hot paths where allocation matters.
+- **`foreach` vs `Span<T>` iteration**: for CPU-bound loops over memory you own, iterating a `Span<T>` or `ReadOnlySpan<T>` eliminates enumerator overhead and enables bounds-check elimination. Typical microbenchmark improvement is 20–30% on large arrays.
+
+
 ## Questions
 
 > [!QUESTION]- What types can you use in `foreach`?

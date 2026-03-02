@@ -39,11 +39,47 @@ FIDO2 (Fast Identity Online) uses public-key cryptography with hardware security
 
 **When to use**: High-security applications (banking, enterprise admin access). More secure than TOTP but requires hardware or platform support.
 
+```csharp
+// FIDO2 / WebAuthn with Fido2NetLib (server-side assertion verification)
+// 1. During registration: store the credential public key per user
+// 2. During login: verify the signed assertion
+
+var fido2 = new Fido2(new Fido2Configuration
+{
+    ServerDomain = "example.com",
+    ServerName = "My App",
+    Origins = new HashSet<string> { "https://example.com" }
+});
+
+// Verify assertion (login step)
+var result = await fido2.MakeAssertionAsync(
+    clientResponse,          // JSON from navigator.credentials.get()
+    options,                  // stored assertion options from session
+    storedPublicKey,          // credential public key from registration
+    storedSignCount,          // replay attack counter
+    isUserHandleOwnerOfCredential);
+
+// result.Status == "ok" means authentication succeeded
+// result.Counter must be > storedSignCount (replay protection)
+```
+
 ## Pitfalls
 
 - **TOTP clock skew**: TOTP codes are time-based. If the server and client clocks differ by more than 30 seconds, valid codes are rejected. Mitigation: accept codes from the previous and next 30-second window (±1 window tolerance).
 - **SMS 2FA is phishable**: SMS codes can be intercepted via SIM swapping or SS7 attacks. For high-security applications, use TOTP or FIDO2 instead of SMS.
 - **Backup codes stored insecurely**: Backup codes are one-time recovery codes. If stored in plaintext or emailed, they become a single point of failure. Hash them like passwords.
+
+## Tradeoffs
+
+| Method | Phishing Resistance | Hardware Required | Implementation Complexity | Use when |
+|--------|-------------------|-----------------|--------------------------|----------|
+| SMS OTP | None (SIM swap, SS7) | No | Minimal | Legacy systems; low-security consumer apps where UX matters most |
+| TOTP (Google Authenticator) | Low (code can be phished) | Authenticator app | Low | Most applications; good balance of security and UX |
+| Push notification (Duo, Okta) | Low (MFA fatigue attacks) | Smartphone | Medium | Enterprise SSO; users are trained to verify context before approving |
+| FIDO2 / WebAuthn | High (origin-bound) | Security key or platform authenticator | High | High-assurance scenarios: banking, admin access, NIST AAL3 |
+
+**Decision rule**: default to TOTP for most applications — it is widely supported, requires no hardware, and is significantly more secure than SMS. Use FIDO2 when phishing resistance is a hard requirement (financial services, privileged access). Avoid SMS OTP for new systems; it is the weakest 2FA method and vulnerable to SIM swapping.
+
 
 ## Questions
 

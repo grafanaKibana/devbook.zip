@@ -68,6 +68,32 @@ Almost never in production. Prefer:
 
 Bubble sort is useful as a teaching example and for understanding stability and in-place constraints.
 
+## Pitfalls
+
+### Using Bubble Sort in Production
+
+**What goes wrong**: bubble sort is used for a small utility sort because it is easy to write. Even for n=100, it performs ~5,000 comparisons versus ~700 for insertion sort. For n=1,000, it is ~500,000 versus ~250,000.
+
+**Mitigation**: use insertion sort instead of bubble sort for small arrays. Insertion sort has the same O(n²) worst case but fewer comparisons, fewer swaps, and better cache behavior. For n > 50, use `Array.Sort` (introsort).
+
+### Omitting the Early-Exit Optimization
+
+**What goes wrong**: the basic bubble sort without the `swapped` flag always runs n²/2 comparisons, even on already-sorted input. The O(n) best case only applies with the early-exit optimization.
+
+**Mitigation**: always include the `swapped` flag. If a full pass makes zero swaps, the array is sorted and the algorithm can stop. This is the only scenario where bubble sort has any advantage over selection sort.
+
+## Tradeoffs
+
+| Algorithm | Time (avg) | Stable | Best case | Practical use |
+|-----------|-----------|--------|-----------|--------------|
+| Bubble sort | O(n²) | Yes | O(n) with early-exit | Teaching only |
+| Insertion sort | O(n²) | Yes | O(n) | Small arrays, nearly-sorted data, hybrid sort base case |
+| Selection sort | O(n²) | No | O(n²) | When writes are expensive |
+| Array.Sort (introsort) | O(n log n) | No | O(n log n) | General-purpose production sorting |
+
+**Decision rule**: never use bubble sort in production. Insertion sort is strictly better for small arrays (same stability, better constant factors). For general-purpose sorting, use `Array.Sort`.
+
+
 ## Questions
 
 > [!QUESTION]- Why is bubble sort never used in production?
@@ -81,6 +107,9 @@ Bubble sort is useful as a teaching example and for understanding stability and 
 
 - [Bubble sort (Wikipedia)](https://en.wikipedia.org/wiki/Bubble_sort) — algorithm description, variants (cocktail shaker sort), and stability proof.
 - [Sorting visualizations (VisuAlgo)](https://visualgo.net/en/sorting) — step-by-step animation to build intuition for all comparison sorts.
+
+- [Timsort (Wikipedia)](https://en.wikipedia.org/wiki/Timsort) — Python's and Java's default sort; replaced bubble sort and insertion sort for general use; shows why O(n²) algorithms are only kept as base cases for small partitions.
+- [Sorting algorithms comparison (Big-O Cheat Sheet)](https://www.bigocheatsheet.com/) — quick reference for time and space complexity of all common sorting algorithms.
 
 <!-- whats-next:start -->
 
