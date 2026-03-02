@@ -59,12 +59,22 @@ var value = table["user:1"]; // object
 > [!QUESTION]- Why does using a hash code instead of comparing full keys speed up lookups?
 > Hashing narrows search to one bucket instead of scanning all entries.
 
+## Hash-Based Collections Comparison
+
+| Type | Key type | Type-safe | When to use |
+|---|---|---|---|
+| `Hashtable` | `object` | No | Legacy interop only |
+| `Dictionary<TKey,TValue>` | Generic | Yes | Default key-value map in modern .NET |
+| `ConcurrentDictionary<TKey,TValue>` | Generic | Yes | Concurrent read/write |
+
+**Decision rule**: do not use `Hashtable` in new code. Migrate to `Dictionary<TKey,TValue>` for type safety and better performance.
+
 ## Links
 
-- [Hashtable class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.hashtable)
-- [When to use generic collections](https://learn.microsoft.com/en-us/dotnet/standard/collections/when-to-use-generic-collections)
-- [Selecting a collection class](https://learn.microsoft.com/en-us/dotnet/standard/collections/selecting-a-collection-class)
-- [Hashtable implementation in dotnet runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Collections/Hashtable.cs)
+- [Hashtable class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.hashtable) — API reference; documents the legacy non-generic hash table.
+- [When to use generic collections](https://learn.microsoft.com/en-us/dotnet/standard/collections/when-to-use-generic-collections) — explains why generic collections replace non-generic ones for type safety and performance.
+- [Selecting a collection class](https://learn.microsoft.com/en-us/dotnet/standard/collections/selecting-a-collection-class) — decision guide for choosing the right collection type.
+- [Hashtable implementation in dotnet runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Collections/Hashtable.cs) — source code showing the legacy bucket and collision design.
 
 <!-- whats-next:start -->
 

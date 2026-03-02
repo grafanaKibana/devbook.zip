@@ -94,10 +94,10 @@ public static T CreateAndValidate<T>()
 
 ## Links
 
-- [Generics in C#](https://learn.microsoft.com/dotnet/csharp/programming-guide/generics/)
-- [Constraints on type parameters](https://learn.microsoft.com/dotnet/csharp/programming-guide/generics/constraints-on-type-parameters)
-- [Covariance and contravariance in generics](https://learn.microsoft.com/dotnet/standard/generics/covariance-and-contravariance)
-- [Covariance and Contravariance in C# (Eric Lippert)](https://ericlippert.com/2007/10/16/covariance-and-contravariance-in-c-part-1/)
+- [Generics in C#](https://learn.microsoft.com/dotnet/csharp/programming-guide/generics/) — official guide covering generic classes, methods, interfaces, and delegates with examples.
+- [Constraints on type parameters](https://learn.microsoft.com/dotnet/csharp/programming-guide/generics/constraints-on-type-parameters) — full list of constraint keywords and their semantics.
+- [Covariance and contravariance in generics](https://learn.microsoft.com/dotnet/standard/generics/covariance-and-contravariance) — Microsoft reference on `in`/`out` variance with interface and delegate examples.
+- [Covariance and Contravariance in C# (Eric Lippert)](https://ericlippert.com/2007/10/16/covariance-and-contravariance-in-c-part-1/) — 10-part series by a former C# compiler team member; the definitive practitioner explanation of variance semantics.
 
 <!-- whats-next:start -->
 

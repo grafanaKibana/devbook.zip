@@ -81,12 +81,12 @@ foreach (var number in CountNumbers(1, 5))
 
 ## Links
 
-- [Iteration statements (foreach)](https://learn.microsoft.com/dotnet/csharp/language-reference/statements/iteration-statements#the-foreach-statement)
-- [C# language specification: iteration statements](https://learn.microsoft.com/dotnet/csharp/language-reference/language-specification/statements#139-iteration-statements)
-- [yield statement (yield return / yield break)](https://learn.microsoft.com/dotnet/csharp/language-reference/statements/yield)
-- [Iterators (overview)](https://learn.microsoft.com/dotnet/csharp/iterators)
-- [How is foreach implemented in C#? (StackOverflow)](https://stackoverflow.com/questions/11179156/how-is-foreach-implemented-in-c)
-- [Yield: what, where, and why](https://habr.com/ru/post/311094/)
+- [Iteration statements (foreach)](https://learn.microsoft.com/dotnet/csharp/language-reference/statements/iteration-statements#the-foreach-statement) — language reference for `foreach` syntax, duck-typing pattern, and async enumeration.
+- [C# language specification: iteration statements](https://learn.microsoft.com/dotnet/csharp/language-reference/language-specification/statements#139-iteration-statements) — formal spec defining the enumerator pattern the compiler targets.
+- [yield statement (yield return / yield break)](https://learn.microsoft.com/dotnet/csharp/language-reference/statements/yield) — reference for iterator methods, state machine semantics, and async iterators.
+- [Iterators (overview)](https://learn.microsoft.com/dotnet/csharp/iterators) — conceptual guide covering lazy evaluation, deferred execution, and `IAsyncEnumerable<T>`.
+- [How is foreach implemented in C#? (StackOverflow)](https://stackoverflow.com/questions/11179156/how-is-foreach-implemented-in-c) — community explanation of compiler lowering with IL examples.
+- [Yield: what, where, and why (Habr)](https://habr.com/ru/post/311094/) — Russian-language practitioner deep-dive into iterator state machines.
 
 <!-- whats-next:start -->
 

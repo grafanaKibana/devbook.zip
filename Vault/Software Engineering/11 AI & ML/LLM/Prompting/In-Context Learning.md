@@ -136,12 +136,12 @@ When this pattern is not enough for reasoning-heavy tasks, continue with [[Softw
 
 ## References
 
-- [Prompt Engineering Guide - Zero-Shot Prompting](https://www.promptingguide.ai/techniques/zeroshot)
-- [Prompt Engineering Guide - Few-Shot Prompting](https://www.promptingguide.ai/techniques/fewshot)
-- [Brown et al. 2020 - Language Models are Few-Shot Learners](https://arxiv.org/abs/2005.14165)
-- [Min et al. 2022 - Rethinking the Role of Demonstrations](https://arxiv.org/abs/2202.12837)
-- [Anthropic Prompt Engineering Overview](https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview)
-- [Prompt Engineering for Large Language Models (Eugene Yan)](https://eugeneyan.com/writing/prompting/)
+- [Prompt Engineering Guide - Zero-Shot Prompting](https://www.promptingguide.ai/techniques/zeroshot) — practitioner guide to zero-shot patterns and when they work.
+- [Prompt Engineering Guide - Few-Shot Prompting](https://www.promptingguide.ai/techniques/fewshot) — practitioner guide to few-shot design, example selection, and common failure modes.
+- [Brown et al. 2020 - Language Models are Few-Shot Learners](https://arxiv.org/abs/2005.14165) — GPT-3 paper that introduced few-shot prompting as a capability; foundational reading.
+- [Min et al. 2022 - Rethinking the Role of Demonstrations](https://arxiv.org/abs/2202.12837) — shows that demonstration format and label space matter more than per-example label correctness.
+- [Anthropic Prompt Engineering Overview](https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview) — Anthropic's practical guide to prompt design including zero-shot and few-shot patterns for Claude.
+- [Prompt Engineering for Large Language Models (Eugene Yan)](https://eugeneyan.com/writing/prompting/) — practitioner deep-dive covering shot selection, formatting, and evaluation of prompting strategies.
 
 <!-- whats-next:start -->
 

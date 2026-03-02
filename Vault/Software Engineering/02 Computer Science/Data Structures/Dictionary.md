@@ -67,11 +67,22 @@ if (byId.TryGetValue(2, out var user))
 > [!QUESTION]- How does hash collision affect performance?
 > More collisions increase comparisons in a bucket chain and can push operations toward O(n).
 
+## Hash-Based Collections Comparison
+
+| Type | Key type | Thread-safe | Ordering | When to use |
+|---|---|---|---|---|
+| `Dictionary<TKey,TValue>` | Generic | No | Insertion (not guaranteed) | Default key-value map in modern .NET |
+| `Hashtable` | `object` | No (Synchronized wrapper only) | None | Legacy interop only |
+| `HashSet<T>` | N/A (values only) | No | None | Unique value membership checks |
+| `ConcurrentDictionary<TKey,TValue>` | Generic | Yes | None | Concurrent read/write without external locks |
+
+**Decision rule**: start with `Dictionary<TKey,TValue>`. Switch to `ConcurrentDictionary` for concurrent writes, `FrozenDictionary` for read-only hot paths, `SortedDictionary` for ordered iteration.
+
 ## Links
 
-- [Dictionary<TKey, TValue> class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.dictionary-2)
-- [Selecting a collection class](https://learn.microsoft.com/en-us/dotnet/standard/collections/selecting-a-collection-class)
-- [Anatomy of the .NET dictionary](https://dunnhq.com/posts/2024/anatomy-of-the-dotnet-dictionary/)
+- [Dictionary<TKey, TValue> class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.dictionary-2) — API reference with remarks on hash contract requirements and capacity.
+- [Selecting a collection class](https://learn.microsoft.com/en-us/dotnet/standard/collections/selecting-a-collection-class) — Microsoft decision guide for choosing between Dictionary, Hashtable, SortedDictionary, and concurrent variants.
+- [Anatomy of the .NET dictionary](https://dunnhq.com/posts/2024/anatomy-of-the-dotnet-dictionary/) — practitioner deep-dive into internal bucket layout, collision handling, and resize behavior.
 
 <!-- whats-next:start -->
 
