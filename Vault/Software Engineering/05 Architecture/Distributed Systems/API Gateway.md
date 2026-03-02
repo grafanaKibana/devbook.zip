@@ -206,11 +206,11 @@ Rule of thumb:
 
 ## References
 
-- [API Gateway pattern - Azure Architecture Center](https://learn.microsoft.com/azure/architecture/patterns/gateway-routing)
-- [YARP documentation](https://learn.microsoft.com/aspnet/core/fundamentals/servers/yarp/getting-started)
-- [YARP GitHub repository](https://github.com/dotnet/yarp)
-- [Ocelot documentation](https://ocelot.readthedocs.io/en/latest/)
-- [Microservices.io - API Gateway pattern (Chris Richardson)](https://microservices.io/patterns/apigateway.html)
+- [API Gateway pattern (Azure Architecture Center)](https://learn.microsoft.com/azure/architecture/patterns/gateway-routing) — pattern description covering routing, aggregation, and offloading cross-cutting concerns.
+- [YARP documentation](https://learn.microsoft.com/aspnet/core/fundamentals/servers/yarp/getting-started) — official getting-started guide for Microsoft's YARP reverse proxy library for .NET.
+- [YARP GitHub repository](https://github.com/dotnet/yarp) — source code, samples, and issue tracker for the YARP project.
+- [Ocelot documentation](https://ocelot.readthedocs.io/en/latest/) — configuration reference for the Ocelot .NET API gateway including routing, authentication, and rate limiting.
+- [Microservices.io — API Gateway pattern (Chris Richardson)](https://microservices.io/patterns/apigateway.html) — pattern catalog entry covering API gateway vs BFF, forces, and consequences in microservices architectures.
 
 <!-- whats-next:start -->
 

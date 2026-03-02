@@ -193,11 +193,11 @@ Practical threshold tuning pattern:
 
 ## Links
 
-- [ML.NET BinaryClassificationMetrics](https://learn.microsoft.com/dotnet/api/microsoft.ml.data.binaryclassificationmetrics)
-- [ML.NET evaluate binary classification model](https://learn.microsoft.com/dotnet/machine-learning/resources/metrics#evaluation-metrics-for-binary-classification)
-- [ML.NET tutorial binary classification](https://learn.microsoft.com/dotnet/machine-learning/tutorials/sentiment-analysis)
-- [The Relationship Between Precision Recall and ROC Curves](https://dl.acm.org/doi/10.1145/1143844.1143874)
-- [Precision Recall Plot is More Informative than the ROC Plot when Evaluating Binary Classifiers on Imbalanced Datasets](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4349800/)
+- [ML.NET BinaryClassificationMetrics](https://learn.microsoft.com/dotnet/api/microsoft.ml.data.binaryclassificationmetrics) — API reference for .NET binary classification evaluation metrics including AUC, accuracy, and F1.
+- [ML.NET evaluate binary classification model](https://learn.microsoft.com/dotnet/machine-learning/resources/metrics#evaluation-metrics-for-binary-classification) — guide to interpreting binary classification metrics in ML.NET with threshold selection guidance.
+- [ML.NET tutorial binary classification](https://learn.microsoft.com/dotnet/machine-learning/tutorials/sentiment-analysis) — end-to-end sentiment analysis tutorial showing model training, evaluation, and metric interpretation.
+- [The Relationship Between Precision Recall and ROC Curves](https://dl.acm.org/doi/10.1145/1143844.1143874) — foundational paper proving that PR curves are more informative than ROC curves for imbalanced datasets.
+- [Precision Recall Plot is More Informative than the ROC Plot when Evaluating Binary Classifiers on Imbalanced Datasets](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4349800/) — empirical study demonstrating PR-AUC superiority for rare-event classification tasks.
 
 <!-- whats-next:start -->
 

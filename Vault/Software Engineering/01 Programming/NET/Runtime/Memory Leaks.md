@@ -372,8 +372,6 @@ Using this pattern helps ensure that even if `Dispose` is not called explicitly,
 
 But keep in mind that Microsoft's `Dispose` pattern is not a silver bullet. If you do not call `Dispose` manually and the object is not collected because of a managed leak, the unmanaged resources will not be released either.
 
-## Deeper Explanation
-
 ## Questions
 
 > [!QUESTION]- What is a memory leak? Is it possible in .NET? How?
@@ -400,6 +398,11 @@ But keep in mind that Microsoft's `Dispose` pattern is not a silver bullet. If y
 
 ## Links
 
+- [Garbage collection fundamentals (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/fundamentals) — explains GC roots, reachability, and why managed leaks are possible despite automatic memory management.
+- [Implementing a Dispose method (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose) — official pattern for deterministic cleanup of managed and unmanaged resources.
+- [Weak event patterns in WPF (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/advanced/weak-event-patterns) — how to subscribe to events without creating strong references that prevent GC.
+- [8 Ways You Can Cause Memory Leaks in .NET (Michael's Coding Spot)](https://michaelscodingspot.com/memory-leaks-dotnet/) — practitioner walkthrough of the 8 most common .NET leak patterns with code examples and fixes.
+- [5 Techniques to Avoid Memory Leaks by Events in C# .NET (Michael's Coding Spot)](https://michaelscodingspot.com/5-techniques-to-avoid-memory-leaks-by-events-in-c-net-you-should-know/) — event-specific leak patterns and mitigation strategies including weak event and anonymous handler approaches.
 <!-- whats-next:start -->
 
 ---

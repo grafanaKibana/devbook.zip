@@ -137,13 +137,13 @@ Main risk:
 
 ## References
 
-- [Prompt caching (OpenAI API docs)](https://developers.openai.com/docs/guides/prompt-caching)
-- [Prompt caching (Anthropic docs)](https://platform.claude.com/docs/en/build-with-claude/prompt-caching)
-- [SemanticCache with RedisVL](https://redis.io/docs/latest/develop/ai/redisvl/0.7.0/user_guide/llmcache/)
-- [Caching embeddings (LangChain CacheBackedEmbeddings)](https://python.langchain.com/docs/how_to/caching_embeddings)
-- [Semantic cache with Azure Cosmos DB](https://learn.microsoft.com/en-us/azure/cosmos-db/gen-ai/semantic-cache)
-- [Reducing false positives in RAG semantic caching (InfoQ)](https://www.infoq.com/articles/reducing-false-positives-retrieval-augmented-generation/)
-- [RAGOps: Operating and Managing RAG Pipelines](https://arxiv.org/abs/2506.03401)
+- [Prompt caching (OpenAI API docs)](https://developers.openai.com/docs/guides/prompt-caching) — official guide to OpenAI's prefix caching feature, covering eligible content, pricing, and cache hit rates.
+- [Prompt caching (Anthropic docs)](https://platform.claude.com/docs/en/build-with-claude/prompt-caching) — Anthropic's prompt caching documentation covering cache breakpoints, TTL, and cost reduction patterns.
+- [SemanticCache with RedisVL](https://redis.io/docs/latest/develop/ai/redisvl/0.7.0/user_guide/llmcache/) — implementation guide for Redis-backed semantic caching with similarity threshold configuration.
+- [Caching embeddings (LangChain CacheBackedEmbeddings)](https://python.langchain.com/docs/how_to/caching_embeddings) — how to cache embedding computations to avoid redundant API calls during document ingestion.
+- [Semantic cache with Azure Cosmos DB](https://learn.microsoft.com/en-us/azure/cosmos-db/gen-ai/semantic-cache) — Azure-specific implementation of semantic caching using Cosmos DB vector search.
+- [Reducing false positives in RAG semantic caching (InfoQ)](https://www.infoq.com/articles/reducing-false-positives-retrieval-augmented-generation/) — practitioner analysis of threshold calibration and false-positive mitigation strategies.
+- [RAGOps: Operating and Managing RAG Pipelines](https://arxiv.org/abs/2506.03401) — survey paper covering caching, monitoring, and operational patterns for production RAG systems.
 
 <!-- whats-next:start -->
 
