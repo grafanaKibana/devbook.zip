@@ -6,16 +6,27 @@ subtopic:
 level:
   - "4"
 priority: High
-status: Ready To Repeat
-
+status: Creation
 dg-publish: true
 ---
-
 # Intro
 
-Layered architecture (also called multi-layered or n-tier) structures an application into layers with clear responsibilities and dependency directions.
+Layered architecture structures an application into layers with clear responsibilities and strict dependency directions. Each layer only depends on the layer directly below it (traditional) or on inner layers (onion/clean). The goal is to isolate business rules from infrastructure details — so you can swap databases, frameworks, or delivery mechanisms without touching domain logic.
 
-## Deeper Explanation
+## Layer Responsibilities
+
+A typical four-layer structure:
+
+| Layer | Responsibility | Examples |
+|-------|---------------|---------|
+| **Presentation** | Handle input, render output | ASP.NET Core controllers, Razor views, Blazor components |
+| **Application** | Orchestrate use cases, coordinate domain + infrastructure | Service classes, CQRS handlers, DTOs |
+| **Domain** | Business rules, entities, invariants | Entities, value objects, domain events, domain services |
+| **Infrastructure** | Technical details: persistence, messaging, external APIs | EF Core `DbContext`, HTTP clients, email senders |
+
+## Dependency Rule
+
+**All dependencies point inward.** The Domain knows nothing about databases, frameworks, or UI. Infrastructure implements interfaces defined by inner layers.
 
 ```mermaid
 graph TD
@@ -45,10 +56,9 @@ graph TD
     EXT -.->|implements| OPORT
     IPORT --> ENT
     OPORT --> UC
-
 ```
 
-**Dependency Rule**: All arrows point **inward**. The Domain knows nothing about databases, frameworks, or UI. Infrastructure implements interfaces defined by inner layers — this is why it depends inward, not the other way around.
+## Traditional vs Onion/Clean
 
 ```mermaid
 graph LR
@@ -65,23 +75,82 @@ graph LR
         O_UI[Presentation] --> O_APP
         O_APP --> O_DOM[Domain]
     end
-
 ```
 
-In traditional layered architecture, UI depends on Business Logic which depends on Data Access — a top-down chain where changing the DB affects everything above. In Onion Architecture, the dependency is **inverted**: Infrastructure depends on the Domain through interfaces, so you can swap databases without touching business rules.
+In traditional layered architecture, changing the database affects everything above it. In Onion/Clean Architecture, the dependency is **inverted**: Infrastructure depends on the Domain through interfaces, so you can swap databases without touching business rules.
+
+## .NET Example
+
+```csharp
+// Domain layer — no dependencies on EF Core or ASP.NET
+public class Order
+{
+    public int Id { get; private set; }
+    public Money Total { get; private set; }
+
+    public void AddItem(Product product, int quantity)
+    {
+        // Business rule: enforce invariants here
+        if (quantity <= 0) throw new DomainException("Quantity must be positive");
+        Total = Total.Add(product.Price.Multiply(quantity));
+    }
+}
+
+// Application layer — depends on domain + abstractions
+public class PlaceOrderHandler
+{
+    private readonly IOrderRepository _orders;
+    private readonly IEmailSender _email;
+
+    public async Task HandleAsync(PlaceOrderCommand cmd, CancellationToken ct)
+    {
+        var order = new Order();
+        foreach (var item in cmd.Items)
+            order.AddItem(item.Product, item.Quantity);
+
+        await _orders.SaveAsync(order, ct);
+        await _email.SendConfirmationAsync(cmd.CustomerEmail, order, ct);
+    }
+}
+
+// Infrastructure layer — implements domain abstractions
+public class EfOrderRepository : IOrderRepository
+{
+    private readonly AppDbContext _db;
+    public async Task SaveAsync(Order order, CancellationToken ct)
+        => await _db.Orders.AddAsync(order, ct);
+}
+```
+
+## Pitfalls
+
+**Anemic domain model**
+Business logic leaks into the Application layer (service classes do everything) while the Domain layer contains only data bags. The layers exist but the dependency rule is violated in spirit — the Domain has no behavior to protect.
+
+**Layer bypass**
+Controllers calling repositories directly, skipping the Application layer. Breaks the single-responsibility of each layer and makes the codebase harder to test.
+
+**Over-engineering small apps**
+Four layers with interfaces and DI for a 3-endpoint CRUD API adds ceremony without benefit. Apply layered architecture when the domain has real complexity worth protecting.
 
 ## Questions
 
-> [!QUESTION]- What is multi-layered architecture?
-> Multi-layered architecture splits the system into layers such as Presentation, Application (use cases), Domain (business rules), and Infrastructure/Data access. Each layer has a focused responsibility and communicates through well-defined interfaces, which improves maintainability and testability.
+> [!QUESTION]- What is the Dependency Rule and why does it matter?
+> All source code dependencies must point inward — toward higher-level policies (domain). Outer layers (infrastructure, UI) depend on inner layers; inner layers never depend on outer layers. This means you can change databases, frameworks, or delivery mechanisms without touching business rules.
+> Cost: requires defining interfaces in inner layers and wiring implementations in outer layers — more upfront structure.
 
-> [!QUESTION]- What is Onion Architecture?
-> Onion Architecture is a layered style where the Domain is at the center and dependencies point inward. Outer layers (infrastructure, UI, frameworks) depend on inner layers; inner layers do not depend on details. This is usually enforced by defining abstractions (interfaces) in the inner layers and implementing them in the outer layers.
+> [!QUESTION]- What is the difference between traditional layered and Onion/Clean Architecture?
+> Traditional layered: UI → Business Logic → Data Access → Database. Changing the DB affects everything above. Onion/Clean: Infrastructure → Application → Domain. The Domain has zero dependencies; Infrastructure implements Domain interfaces. The key difference is dependency inversion at the data access boundary.
 
-## Links
+> [!QUESTION]- When would you choose a modular monolith over microservices?
+> When independent deployment is not yet a hard requirement. A modular monolith with clear layer boundaries and internal APIs gives you most of the maintainability benefits of microservices without the operational complexity (distributed tracing, network failures, eventual consistency). Start here; extract services when a specific module needs independent scaling or deployment.
 
-- [Wikipedia - Multitier architecture](https://en.wikipedia.org/wiki/Multitier_architecture)
-- [The Clean Architecture (Robert C. Martin)](https://thecleanarchitecture.com/)
+## References
+
+- [Multitier architecture (Wikipedia)](https://en.wikipedia.org/wiki/Multitier_architecture) — overview of n-tier patterns, layer responsibilities, and historical context.
+- [The Clean Architecture (Robert C. Martin)](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html) — the canonical article defining the dependency rule and how Clean Architecture relates to Onion and Hexagonal.
+- [Onion Architecture (Jeffrey Palermo)](https://jeffreypalermo.com/2008/07/the-onion-architecture-part-1/) — original blog post introducing Onion Architecture with the inward-dependency model.
+- [ASP.NET Core architecture guidance (Microsoft)](https://learn.microsoft.com/en-us/dotnet/architecture/modern-web-apps-azure/common-web-application-architectures) — Microsoft's guidance on layered, clean, and modular architectures for ASP.NET Core applications.
 
 <!-- whats-next:start -->
 

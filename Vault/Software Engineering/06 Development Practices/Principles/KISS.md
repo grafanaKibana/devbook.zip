@@ -6,50 +6,71 @@ subtopic:
 level:
   - "4"
 priority: High
-status: Not-Started
+status: Creation
 dg-publish: true
 ---
-
 # Intro
 
-KISS means prefer the simplest solution that meets the actual requirements, so the system stays easy to change and operate.
-Simple is different from "quick hack." Simple means fewer moving parts, fewer hidden assumptions, and clear failure modes.
-You reach for KISS when complexity is added "just in case" or when abstractions obscure the real behavior.
+KISS (Keep It Simple, Stupid) means prefer the simplest solution that meets the actual requirements. Simple is not the same as "quick hack" — simple means fewer moving parts, fewer hidden assumptions, and clear failure modes. You reach for KISS when complexity is added "just in case" or when abstractions obscure the real behavior.
 
-## Deeper Explanation
+Complexity has ongoing cost: bugs, onboarding time, testing, and operations. Every abstraction layer you add must earn its keep by solving a proven problem.
 
-### Mental Model
+## Violation vs Fix
 
-- Complexity has ongoing cost: bugs, onboarding time, testing, operations
-- Prefer boring, well understood building blocks
-- Add complexity only to solve a proven problem (measured pain)
+**Over-engineered:**
 
-### Pitfalls
+```csharp
+// A generic event-sourced, CQRS-based, plugin-extensible system
+// for storing a user's display name preference
+public class UserPreferenceCommandHandler<TCommand, TResult>
+    where TCommand : ICommand<TResult>
+{
+    // 200 lines of infrastructure for: user.DisplayName = name
+}
+```
 
-- Oversimplifying and ignoring requirements like security, scaling, or compliance
-- "Simple" might become code with no structure, no tests, and no boundaries
-- Avoiding necessary abstractions and then duplicating work everywhere
+**KISS:**
 
-### Tradeoffs
+```csharp
+public class UserService
+{
+    public async Task SetDisplayNameAsync(int userId, string name, CancellationToken ct)
+    {
+        var user = await _db.Users.FindAsync(userId, ct);
+        user!.DisplayName = name;
+        await _db.SaveChangesAsync(ct);
+    }
+}
+```
 
-- A simpler design may push complexity to operations (manual runbooks) unless you automate
-- Too much abstraction hides details; too little abstraction creates duplication
+The second version is boring, obvious, and correct. Add the event sourcing when you have a proven need for audit history or temporal queries — not before.
 
-## Questions
+## When KISS Is the Wrong Choice
 
-> [!QUESTION]- How do you decide whether a design is too complex?
-> If it adds moving parts without a proven need, or if the team cannot explain the failure modes.
-> Prefer a measured approach: build the simple thing, then evolve when you hit real constraints.
+KISS does not mean "ignore requirements." Some complexity is mandatory:
 
-> [!QUESTION]- Give an example where KISS is the wrong choice.
-> When a naive solution fails important non-functional requirements like security or correctness.
-> Example: skipping input validation or rate limiting in a public API.
+- **Security:** skipping input validation, rate limiting, or authentication in a public API is not "simple" — it is negligent.
+- **Correctness:** a naive implementation that ignores edge cases (integer overflow, null handling, race conditions) is not simple — it is broken.
+- **Compliance:** regulatory requirements (GDPR, PCI-DSS) add complexity that cannot be avoided.
 
-## Links
+The principle is: add complexity only to solve a proven problem, not a hypothetical one.
 
-- [KISS principle](https://en.wikipedia.org/wiki/KISS_principle)
-- [The Pragmatic Programmer](https://pragprog.com/titles/tpp20/the-pragmatic-programmer-20th-anniversary-edition/)
-- [The law of leaky abstractions](https://www.joelonsoftware.com/2002/11/11/the-law-of-leaky-abstractions/)
+## Pitfalls
+
+**Confusing simple with no structure**
+A 2,000-line `Program.cs` with no separation of concerns is not simple — it is unstructured. KISS means simple design, not absence of design.
+
+**Avoiding necessary abstractions**
+Refusing to extract a shared abstraction to "keep it simple" leads to duplication everywhere. When the same logic appears in three places, the simple solution is to extract it.
+
+**Premature simplification**
+Removing a safety mechanism (retry logic, circuit breaker, idempotency key) because it "adds complexity" creates a system that fails in production in non-obvious ways.
+
+## References
+
+- [KISS principle (Wikipedia)](https://en.wikipedia.org/wiki/KISS_principle) — origin of the term, examples from engineering and software design.
+- [The Pragmatic Programmer (Hunt & Thomas)](https://pragprog.com/titles/tpp20/the-pragmatic-programmer-20th-anniversary-edition/) — Chapter on "Good Enough Software" and avoiding over-engineering.
+- [The law of leaky abstractions (Joel Spolsky)](https://www.joelonsoftware.com/2002/11/11/the-law-of-leaky-abstractions/) — why abstractions always leak and why understanding the underlying mechanism matters.
 
 <!-- whats-next:start -->
 

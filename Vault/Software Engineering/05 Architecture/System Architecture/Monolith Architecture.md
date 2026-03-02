@@ -6,38 +6,106 @@ subtopic:
 level:
   - "4"
 priority: Medium
-status: Not-Started
-
+status: Creation
 dg-publish: true
 ---
-
 # Intro
 
-A monolith is an application deployed as a single unit.
-This can be a good thing: fewer moving parts, simpler operations, and easy local development.
-And it can be a bad thing because of: Slow build, hidden coupling points, worse encapsulation of the components.
+A monolith is an application deployed as a single unit — one process, one codebase, one deployment artifact. All components (UI, business logic, data access) run in the same process and share the same database. This is not inherently bad: fewer moving parts, simpler operations, easy local development, and no distributed systems complexity. The problems emerge when the monolith grows large and teams start coupling components in ways that make independent change difficult.
 
-## Deeper Explanation
+## What a Monolith Looks Like
 
-### Tradeoffs
+A typical ASP.NET Core monolith:
 
-- Monolith vs microservices: monolith is simpler to operate; microservices enable independent deployment at higher operational cost
-- Modular monolith is often a better first step than jumping to microservices
+```text
+MyApp/
+├── Controllers/        # HTTP entry points
+├── Services/           # Business logic
+├── Repositories/       # Data access (EF Core)
+├── Models/             # Domain entities
+└── Program.cs          # Single startup, single deployment
+```
+
+One `dotnet publish`, one Docker image, one deployment. All requests go to the same process. The database is shared by all components.
+
+## Benefits
+
+**Operational simplicity:** one service to deploy, monitor, and debug. No distributed tracing, no network partitions between components, no eventual consistency to reason about.
+
+**Easy local development:** `dotnet run` starts everything. No service mesh, no container orchestration needed for development.
+
+**Simple transactions:** all operations share a database connection. ACID transactions across components are trivial — no distributed transaction protocols needed.
+
+**Low latency for internal calls:** component-to-component calls are in-process function calls, not network hops.
+
+## When Monoliths Break Down
+
+| Signal | What it means |
+|--------|--------------|
+| Build takes 10+ minutes | Too much code in one compilation unit |
+| Deploying one feature requires testing everything | Hidden coupling between components |
+| One team's change breaks another team's feature | Shared mutable state, no module boundaries |
+| One component's load spikes affect all others | No independent scaling |
+| Database schema changes require coordinating all teams | Shared schema ownership |
+
+These signals indicate the monolith has become a **big ball of mud** — not because monoliths are bad, but because module boundaries were not enforced.
+
+## Modular Monolith — The Middle Ground
+
+A modular monolith enforces explicit module boundaries within a single deployment:
+
+```text
+MyApp/
+├── Ordering/           # Module: owns its own models, services, DB tables
+│   ├── OrderService.cs
+│   └── IOrderRepository.cs
+├── Catalog/            # Module: no direct dependency on Ordering internals
+│   ├── ProductService.cs
+│   └── ICatalogRepository.cs
+├── Shared/             # Shared kernel: only stable abstractions
+└── Program.cs
+```
+
+Modules communicate through public interfaces, not by reaching into each other's internals. This gives you most of the maintainability benefits of microservices while keeping operational simplicity.
+
+## Monolith vs Microservices
+
+| Aspect | Monolith | Microservices |
+|--------|----------|---------------|
+| Deployment | Single unit | Independent per service |
+| Transactions | ACID (trivial) | Distributed (Saga, 2PC) |
+| Scaling | Scale everything together | Scale individual services |
+| Operational complexity | Low | High (service mesh, tracing, retries) |
+| Team autonomy | Low (shared codebase) | High (independent deployments) |
+| Development speed (early) | Fast | Slow (infrastructure overhead) |
+| Development speed (at scale) | Slow (coupling) | Fast (independent teams) |
+
+See [[Software Engineering/05 Architecture/System Architecture/Microservices|Microservices]] for the full microservices pattern.
+
+## Decision Rule
+
+**Start with a monolith** (ideally modular). The operational simplicity and development speed advantages are significant in the early stages of a product. Microservices are justified when:
+- Independent deployment is a hard requirement (different release cadences per team).
+- A specific component needs independent scaling (e.g., a video processing service).
+- Teams are large enough that shared codebase coordination becomes the bottleneck.
+
+The cost of premature microservices is high: distributed systems complexity, eventual consistency, and operational overhead before the product has proven its architecture.
 
 ## Questions
 
-> [!QUESTION]- What is a modular monolith?
-> A monolith with explicit module boundaries, clear dependencies, and internal APIs.
-> It preserves operational simplicity while controlling coupling.
+> [!QUESTION]- What is a modular monolith and when is it better than microservices?
+> A modular monolith enforces explicit module boundaries (clear interfaces, no internal coupling) within a single deployment. It gives you maintainability and team autonomy without distributed systems complexity. It is better than microservices when independent deployment is not yet a hard requirement — which is most early-stage products.
+> Cost: requires discipline to maintain module boundaries; without enforcement, it degrades into a big ball of mud.
 
-> [!QUESTION]- When do microservices become justified?
-> When independent deployment is a hard requirement and the team can support the operational complexity.
+> [!QUESTION]- When do microservices become justified over a monolith?
+> When independent deployment is a hard requirement and the team can support the operational complexity (distributed tracing, network failures, eventual consistency, service mesh). The signal is usually: teams are blocked by each other's deployments, or a specific component needs independent scaling that the monolith cannot provide.
 
-## Links
+## References
 
-- [Monolith first](https://martinfowler.com/bliki/MonolithFirst.html)
-- [Microservices](https://martinfowler.com/articles/microservices.html)
-- [Building Microservices](https://samnewman.io/books/building_microservices/)
+- [Monolith First (Martin Fowler)](https://martinfowler.com/bliki/MonolithFirst.html) — the case for starting with a monolith and extracting services only when justified by specific needs.
+- [Microservices (Martin Fowler)](https://martinfowler.com/articles/microservices.html) — the canonical microservices article; useful for understanding what you are trading away when you leave the monolith.
+- [Modular Monolith: A Primer (Kamil Grzybek)](https://www.kamilgrzybek.com/blog/posts/modular-monolith-primer) — practitioner guide to enforcing module boundaries in a .NET monolith.
+- [Building Microservices (Sam Newman)](https://samnewman.io/books/building_microservices/) — the definitive book on microservices; Chapter 1 covers when NOT to use them.
 
 <!-- whats-next:start -->
 
