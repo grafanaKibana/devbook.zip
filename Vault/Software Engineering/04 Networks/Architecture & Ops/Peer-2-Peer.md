@@ -50,6 +50,15 @@ Each peer knows a subset of other peers (its "routing table"). Lookups route thr
 
 **Decision rule**: use P2P when you need to distribute large files at scale (BitTorrent), build censorship-resistant systems (IPFS, blockchain), or reduce server costs for direct communication (WebRTC). Use client-server when you need strong consistency, predictable latency, or centralized access control.
 
+## Questions
+
+> [!QUESTION]- Why is consistency hard in P2P systems?
+> P2P systems have no central authority to act as the source of truth. When peers hold different versions of data and there is no coordinator to resolve conflicts, the system must rely on eventual consistency — peers eventually converge to the same state through gossip or reconciliation protocols. This is acceptable for file distribution (BitTorrent) or content-addressed storage (IPFS) where data is immutable, but it makes P2P unsuitable for systems requiring strong consistency (financial transactions, inventory).
+
+> [!QUESTION]- How does WebRTC use P2P, and what is the role of STUN/TURN servers?
+> WebRTC establishes direct peer connections between browsers for audio, video, and data. The challenge is NAT traversal: most browsers are behind NAT and don't have public IP addresses. STUN servers help peers discover their public IP/port. When direct connection fails (symmetric NAT), TURN servers relay traffic. The goal is to minimize relay usage — direct P2P connections reduce latency and server cost; TURN relay is the fallback.
+
+
 ## References
 
 - [Kademlia: A Peer-to-peer Information System (Maymounkov & Mazières)](https://pdos.csail.mit.edu/~petar/papers/maymounkov-kademlia-lncs.pdf) — the original Kademlia DHT paper; the algorithm used by BitTorrent and IPFS for peer discovery.

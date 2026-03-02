@@ -54,6 +54,41 @@ MSMQ is appropriate only when:
 
 For all new systems, prefer Azure Service Bus (cloud), RabbitMQ (self-hosted cross-platform), or Kafka (high-throughput streaming). See [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/RabbitMQ|RabbitMQ]] and [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/Kafka|Kafka]] for modern alternatives.
 
+## Pitfalls
+
+### Windows-Only Lock-In
+
+**What goes wrong**: MSMQ cannot run on Linux or in containers. Teams that build on MSMQ cannot containerize their services or move to cloud-native infrastructure without replacing the messaging layer.
+
+**Mitigation**: for any new system, use RabbitMQ (cross-platform, containerizable) or Azure Service Bus (cloud-managed). Reserve MSMQ for existing systems where migration cost is not justified.
+
+### MSDTC Distributed Transactions
+
+**What goes wrong**: MSMQ's distributed transaction support relies on MSDTC (Microsoft Distributed Transaction Coordinator), which is complex to configure, fragile in network partitions, and unavailable in containers.
+
+**Mitigation**: replace MSDTC-based distributed transactions with the Outbox pattern (write message to DB in the same transaction as the domain change, then relay to the broker) or Saga pattern for multi-step workflows.
+
+## Tradeoffs
+
+| Broker | Platform | Managed | Throughput | Use when |
+|---|---|---|---|---|
+| MSMQ | Windows only | Self-hosted | Low | Existing on-prem Windows systems |
+| RabbitMQ | Cross-platform | Self-hosted | Medium | On-prem or containerized, modern protocols |
+| Azure Service Bus | Cloud | Fully managed | Medium-high | Azure-hosted systems, managed operations |
+| Kafka | Cross-platform | Self-hosted or managed | Very high | High-throughput event streaming |
+
+**Decision rule**: for new systems, default to Azure Service Bus (Azure) or RabbitMQ (self-hosted). Use Kafka only when you need high-throughput event streaming or event sourcing. MSMQ is a maintenance choice, not a new-system choice.
+
+
+## Questions
+
+> [!QUESTION]- When is MSMQ still the right choice over RabbitMQ or Azure Service Bus?
+> MSMQ is appropriate only when: (1) the system already uses MSMQ and migration cost is not justified, (2) the environment is on-premise Windows with no cloud connectivity, or (3) MSDTC-based distributed transactions are required. For all new systems, prefer RabbitMQ (self-hosted, cross-platform) or Azure Service Bus (cloud-managed).
+
+> [!QUESTION]- Why is MSMQ not available in .NET 5+?
+> MSMQ is a Windows-only component tied to the .NET Framework. .NET 5+ is cross-platform and does not include Windows-specific legacy APIs. The community `MSMQ.Messaging` NuGet package provides compatibility, but the recommended path is migrating to a supported broker.
+
+
 ## References
 
 - [System.Messaging namespace (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.messaging) — API reference for the .NET Framework MSMQ client; note this is not available in .NET 5+.

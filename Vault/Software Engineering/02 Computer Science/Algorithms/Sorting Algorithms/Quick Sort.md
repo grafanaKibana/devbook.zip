@@ -83,6 +83,15 @@ private static int Partition(int[] a, int left, int right)
 
 Avoid naive quick sort (fixed pivot) on inputs that may be sorted or reverse-sorted — it degrades to O(n²).
 
+## Questions
+
+> [!QUESTION]- What causes quick sort's O(n²) worst case and how does introsort prevent it?
+> O(n²) occurs when every pivot is the minimum or maximum of its partition — each partition step reduces the array by only one element. This happens on already-sorted or reverse-sorted input with a fixed pivot (first or last element). Introsort (.NET's Array.Sort) prevents it by switching to heapsort when recursion depth exceeds 2×log(n), guaranteeing O(n log n) worst case while keeping quick sort's cache-friendly average case.
+
+> [!QUESTION]- Why is quick sort faster than merge sort in practice despite the same O(n log n) average?
+> Quick sort is in-place — it requires only O(log n) stack space versus merge sort's O(n) auxiliary array. The in-place partitioning accesses memory sequentially, giving better CPU cache utilization. Merge sort's merge step requires copying between arrays, causing more cache misses. For in-memory sorting where stability is not required, quick sort's constant factor advantage typically makes it 20–40% faster than merge sort.
+
+
 ## References
 
 - [Quicksort (Wikipedia)](https://en.wikipedia.org/wiki/Quicksort) — Lomuto and Hoare partition schemes, randomization, and introsort.

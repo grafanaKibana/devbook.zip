@@ -58,6 +58,32 @@ public async Task<IActionResult> Edit(int id)
 }
 ```
 
+## Pitfalls
+
+### Missing Authorization Check After Fetching Resource
+
+**What goes wrong**: the controller fetches the resource and returns it without checking ownership. Any authenticated user can access any resource by guessing the ID (Insecure Direct Object Reference, OWASP A01).
+
+**Why it happens**: authorization is added as an afterthought, or developers assume role-based checks are sufficient.
+
+**Mitigation**: always call `IAuthorizationService.AuthorizeAsync(User, resource, policy)` after fetching the resource and before returning it. Return `403 Forbidden` (not `404 Not Found`) when the resource exists but the user lacks permission — unless you want to hide resource existence.
+
+### Returning 404 vs 403
+
+**What goes wrong**: returning `404 Not Found` for unauthorized access hides resource existence but can confuse legitimate users who have the wrong ID.
+
+**Decision rule**: return `403 Forbidden` when the resource exists and the user is authenticated but lacks permission. Return `404 Not Found` only when you intentionally want to hide resource existence from unauthorized users (e.g., private content).
+
+
+## Questions
+
+> [!QUESTION]- What is the difference between role-based and resource-based authorization?
+> Role-based authorization checks what type of user you are (e.g., Admin, Editor). Resource-based authorization checks your relationship to a specific resource instance (e.g., are you the owner of this document?). Use role-based for coarse-grained access control; use resource-based when the decision depends on data.
+
+> [!QUESTION]- Why inject `IAuthorizationService` instead of checking ownership in the controller directly?
+> `IAuthorizationService` centralizes authorization logic in handlers, making it testable and reusable across controllers. Direct ownership checks in controllers scatter authorization logic, making it easy to miss a check or apply it inconsistently. The handler pattern also supports multiple requirements composing into a single policy.
+
+
 ## References
 
 - [Microsoft — Resource-based authorization in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/resourcebased) — official guide with full implementation example

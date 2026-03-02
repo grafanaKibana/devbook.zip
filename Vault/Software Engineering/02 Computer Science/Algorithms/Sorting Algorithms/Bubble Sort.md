@@ -75,6 +75,15 @@ Almost never in production. Prefer:
 
 Bubble sort is useful as a teaching example and for understanding stability and in-place constraints.
 
+## Questions
+
+> [!QUESTION]- Why is bubble sort never used in production?
+> Bubble sort has O(n²) average and worst-case time with poor cache behavior — each swap touches two adjacent elements, causing many cache misses on large arrays. Insertion sort is strictly better for small arrays (same O(n²) but fewer comparisons and better cache access). For large arrays, introsort (Array.Sort in .NET) is O(n log n). Bubble sort has no scenario where it is the best choice.
+
+> [!QUESTION]- What is bubble sort's one practical advantage?
+> The early-exit optimization gives O(n) best case on already-sorted input — the same as insertion sort. However, insertion sort achieves this with fewer comparisons and better cache behavior, so even in this case insertion sort is preferred. Bubble sort's main value is pedagogical: it is easy to explain and visualize.
+
+
 ## References
 
 - [Bubble sort (Wikipedia)](https://en.wikipedia.org/wiki/Bubble_sort) — algorithm description, variants (cocktail shaker sort), and stability proof.

@@ -62,6 +62,15 @@ Expected = (2 + 4×5 + 14) / 6 = 36 / 6 = 6 days
 
 **Decision rule**: use T-Shirt sizing for roadmap planning and early backlog grooming. Use Planning Poker with story points for sprint planning. Use PERT when you need to communicate uncertainty to stakeholders or when a task has a wide range of possible outcomes.
 
+## Questions
+
+> [!QUESTION]- Why are story points measured in relative complexity rather than hours?
+> Hours are absolute and vary by person, day, and context. A senior engineer estimates 2 hours; a junior estimates 8 hours for the same task. Story points measure relative complexity: a 5-point story is roughly twice as complex as a 2-point story, regardless of who does it. A team's velocity (points per sprint) emerges from historical data and automatically accounts for team-specific factors like skill level, interruptions, and tech debt. Treating story points as hours destroys this abstraction and makes velocity meaningless.
+
+> [!QUESTION]- What is the most common estimation mistake and how do you avoid it?
+> Treating story points as hours ('8 points = 8 hours'). This forces estimators to think in absolute time, reintroduces the person-dependency problem, and makes velocity comparisons between teams meaningless. The fix: calibrate story points against reference stories ('this is a 2-point story because it's similar to the login feature we built last sprint'), track velocity over 3-5 sprints to establish a baseline, and use that baseline for capacity planning — never convert points to hours.
+
+
 ## References
 
 - [Planning Poker (Mountain Goat Software)](https://www.mountaingoatsoftware.com/agile/planning-poker) — the original Planning Poker description by Mike Cohn; explains the technique, card values, and why simultaneous reveal prevents anchoring.

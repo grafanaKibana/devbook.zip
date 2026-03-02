@@ -76,6 +76,15 @@ Once a transaction commits, its changes survive crashes. The database achieves t
 
 **Mitigation**: keep transactions short. Do all I/O outside the transaction. Only open the transaction for the database operations themselves.
 
+## Questions
+
+> [!QUESTION]- What isolation level should you use for a read-modify-write transaction, and why?
+> Use Serializable or Repeatable Read. Read Committed (the default in SQL Server and PostgreSQL) allows non-repeatable reads: a balance check and a debit in the same transaction can see different values if another transaction commits between them. For financial calculations or inventory updates, this causes incorrect results. Serializable prevents all anomalies but has the highest lock contention. Repeatable Read prevents non-repeatable reads with lower overhead. Optimistic concurrency (row version/timestamp) is a lighter alternative to Serializable for low-conflict workloads.
+
+> [!QUESTION]- How does write-ahead logging (WAL) implement durability?
+> Before applying any change to data pages, the database writes the change to a sequential log file (WAL). The log write is synchronous — the transaction does not commit until the log entry is flushed to durable storage. On crash recovery, the database replays the log to restore all committed transactions and undo any uncommitted ones. WAL makes durability cheap: sequential log writes are fast; the actual data page updates can be deferred (write-behind). This is why databases can commit thousands of transactions per second despite disk I/O.
+
+
 ## References
 
 - [ACID (Wikipedia)](https://en.wikipedia.org/wiki/ACID) — comprehensive overview of all four properties with historical context and database implementation details.

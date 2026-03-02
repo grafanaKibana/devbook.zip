@@ -66,6 +66,30 @@ The provider manages the container orchestration layer (Kubernetes control plane
 
 **Use SaaS** for any business function where the software is a commodity (email, CRM, source control, CI/CD).
 
+## Pitfalls
+
+### Starting with IaaS When PaaS Suffices
+
+**What goes wrong**: teams choose IaaS (raw VMs) for new web applications because it feels more familiar or 'more control.' They end up managing OS patches, security groups, and scaling policies — operational work that adds no business value.
+
+**Mitigation**: default to PaaS (Azure App Service, AWS Elastic Beanstalk) for new web applications. Move to CaaS or IaaS only when you have a specific requirement that PaaS cannot meet (custom OS, GPU, container portability).
+
+### Vendor Lock-In with PaaS
+
+**What goes wrong**: PaaS services use provider-specific APIs and configuration. Migrating from Azure App Service to AWS Elastic Beanstalk requires significant rework.
+
+**Mitigation**: containerize applications (Docker) before deploying to PaaS where possible. Containers are portable across CaaS providers (AKS, EKS, GKE) and reduce lock-in. Accept PaaS lock-in only when the operational savings justify it.
+
+
+## Questions
+
+> [!QUESTION]- What is the key operational difference between IaaS and PaaS?
+> With IaaS you manage the OS, runtime, and middleware — you patch the OS, configure security groups, and handle scaling policies. With PaaS the provider manages all of that; you only deploy application code and data. The tradeoff: IaaS gives full control (custom OS, GPU, specific runtime versions); PaaS eliminates operational overhead at the cost of flexibility. Start with PaaS for new web applications; move to IaaS only when PaaS cannot meet your requirements.
+
+> [!QUESTION]- Where does CaaS fit between IaaS and PaaS?
+> CaaS (e.g., AKS, EKS) sits between them: you manage container images and deployments, but the provider manages the Kubernetes control plane and underlying OS. It gives more control than PaaS (you define your own container images, resource limits, and networking) while eliminating the Kubernetes control plane management burden of IaaS. Use CaaS when you need container portability or multi-service orchestration that PaaS cannot provide.
+
+
 ## References
 
 - [NIST Cloud Computing Definition (SP 800-145)](https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-145.pdf) — the authoritative NIST definition of cloud service models (IaaS, PaaS, SaaS) and deployment models

@@ -57,6 +57,15 @@ RPC's "local call" abstraction is leaky. The eight fallacies of distributed comp
 
 **Practical implication**: always handle RPC failures explicitly. Implement retries with idempotency keys, timeouts, and circuit breakers. Never assume a failed RPC means the server didn't execute the operation — it may have executed and the response was lost.
 
+## Questions
+
+> [!QUESTION]- Why is RPC's 'local call' abstraction considered leaky?
+> RPC hides the network boundary, but the network introduces failures that local calls never have: calls can time out, be delivered twice (at-least-once delivery), or fail with the server having already executed the operation. A failed RPC does not mean the server didn't execute — the response may have been lost. This forces callers to implement idempotency keys, retries with backoff, and circuit breakers — concerns that don't exist for local calls. The abstraction is useful but must not be trusted blindly.
+
+> [!QUESTION]- When should you choose gRPC over REST?
+> Choose gRPC for internal service-to-service communication where: (1) you need high throughput or low latency (binary Protobuf is 3-10x smaller than JSON), (2) you need bidirectional streaming, or (3) you want strongly typed contracts enforced at compile time. Choose REST for public APIs, browser clients (gRPC requires a proxy for browsers), or when human-readable payloads matter for debugging. The key constraint: gRPC requires HTTP/2 and a Protobuf toolchain; REST works with any HTTP client.
+
+
 ## References
 
 - [[Software Engineering/04 Networks/Protocols/gRPC|gRPC]] — the modern RPC framework: Protobuf contracts, HTTP/2 transport, streaming, and .NET implementation.

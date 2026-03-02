@@ -50,6 +50,26 @@ public class ReportService
 // When a second format is needed, introduce the abstraction then — with a real use case to guide the design.
 ```
 
+## Pitfalls
+
+### Speculative Generality
+
+**What goes wrong**: a class or method is made generic to handle cases that don't exist yet. The abstraction is harder to understand, harder to test, and often wrong when the hypothetical case finally arrives — because the real requirements differ from what was imagined.
+
+**Why it happens**: developers anticipate future needs and add flexibility 'for free' while they're in the code. The cost is paid in complexity, not in time.
+
+**Mitigation**: apply the Rule of Three — introduce an abstraction when you have two concrete use cases, not one. One use case is speculation; two give you enough information to design the abstraction correctly.
+
+
+## Questions
+
+> [!QUESTION]- Does YAGNI mean you should skip tests and refactoring?
+> No. YAGNI applies to features and abstractions, not to engineering practices. Martin Fowler explicitly distinguishes: YAGNI says don't build features you don't need yet. It does not say skip tests, skip refactoring, or write messy code. Good engineering practices are always justified because they reduce the cost of future changes.
+
+> [!QUESTION]- When does YAGNI conflict with good design, and how do you resolve it?
+> YAGNI conflicts with design when adding an abstraction now would make future changes cheaper. The resolution: add the abstraction when you have two concrete use cases, not one. One use case is speculation; two use cases give you enough information to design the abstraction correctly. This is the Rule of Three from refactoring.
+
+
 ## References
 
 - [YAGNI (Martin Fowler)](https://martinfowler.com/bliki/Yagni.html) — concise explanation of YAGNI with the important nuance: it applies to *features*, not to good engineering practices like testing and refactoring.

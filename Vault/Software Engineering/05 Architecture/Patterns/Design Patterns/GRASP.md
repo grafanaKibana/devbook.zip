@@ -55,6 +55,26 @@ public sealed class Order
 
 The `Order` class has the information (line items, prices, quantities) — it should own the calculation.
 
+## Pitfalls
+
+### Misapplying Information Expert (Anemic Domain Model)
+
+**What goes wrong**: domain classes hold only data (properties) while all behavior lives in service classes. This is the Anemic Domain Model anti-pattern — it violates Information Expert by separating data from the behavior that operates on it.
+
+**Why it happens**: developers default to putting logic in service classes because it feels more 'service-oriented.' The result is service classes that reach into domain objects to get data, creating tight coupling.
+
+**Mitigation**: ask 'which class has the information needed to fulfill this responsibility?' If `Order` has the line items and prices, `Order.CalculateTotal()` belongs on `Order`, not on `OrderService`.
+
+
+## Questions
+
+> [!QUESTION]- What is the Information Expert principle and why does it reduce coupling?
+> Information Expert assigns responsibility to the class that has the information needed to fulfill it. This keeps related data and behavior together, reducing the need for one class to reach into another to get data. The result is lower coupling and higher cohesion — each class does what it knows.
+
+> [!QUESTION]- How does GRASP differ from SOLID?
+> GRASP focuses on responsibility assignment — which class should own a behavior or data. SOLID focuses on design principles for maintainability (single responsibility, open/closed, etc.). They are complementary: GRASP guides initial design decisions; SOLID guides refactoring and long-term maintainability.
+
+
 ## References
 
 - [GRASP (Wikipedia)](https://en.wikipedia.org/wiki/GRASP_(object-oriented_design)) — overview of all nine principles with definitions and examples.

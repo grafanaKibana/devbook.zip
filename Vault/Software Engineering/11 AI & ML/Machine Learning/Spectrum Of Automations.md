@@ -61,10 +61,50 @@ The AI acts autonomously on all cases without human review. Humans monitor aggre
 
 **Decision rule**: start every new AI feature in Shadow Mode. Move to AI Assistance after validating accuracy on production data. Move to Partial Automation when precision on high-confidence cases is consistently above your acceptable error threshold. Move to Full Automation only when the cost of errors is low or the monitoring is robust enough to catch degradation quickly.
 
+## Pitfalls
+
+### Skipping Shadow Mode
+
+**What goes wrong**: teams deploy a new AI feature directly to AI Assistance or Partial Automation without validating on production data first. The model performs well on the test set but fails on production distribution — different user behavior, edge cases, or data drift.
+
+**Why it happens**: Shadow Mode feels like wasted time when the model looks good in evaluation. The cost of errors seems low until they happen at scale.
+
+**Mitigation**: always start in Shadow Mode. Run for at least 2–4 weeks to capture weekly patterns and edge cases. Compare AI predictions to human decisions to measure real-world accuracy before giving the model any authority.
+
+### Moving to Full Automation Too Early
+
+**What goes wrong**: the team moves to Full Automation before establishing monitoring baselines. When the model degrades (data drift, distribution shift), there is no alert — errors propagate silently until a human notices.
+
+**Mitigation**: before moving to Full Automation, define and instrument the metrics that indicate model health (precision, recall, false positive rate). Set alert thresholds. Establish a rollback procedure. Full Automation without monitoring is not automation — it is uncontrolled risk.
+
+
+## Tradeoffs
+
+| Approach | Human effort | Error risk | When to use |
+|---|---|---|---|
+| Human Only | High | Lowest | Baseline; no model yet |
+| Shadow Mode | High (humans still decide) | Zero (no automated actions) | New model, validating accuracy |
+| AI Assistance | Medium (human reviews AI suggestions) | Low | High-stakes decisions, model validated |
+| Partial Automation | Low (humans review edge cases only) | Medium | Model has high precision on confident cases |
+| Full Automation | Minimal (monitoring only) | High | Mature model, low-stakes errors, robust monitoring |
+
+**Key tradeoff**: moving up the spectrum reduces human effort but increases the blast radius of model errors. The right level depends on error cost, model maturity, and monitoring capability — not on how confident the team feels about the model.
+
+
+## Questions
+
+> [!QUESTION]- Why start every new AI feature in Shadow Mode?
+> Shadow Mode lets you validate accuracy on real production data without any risk of automated errors. You measure false positive rate, edge cases, and distribution shift before giving the model any authority. Skipping Shadow Mode means discovering failures in production where they have real consequences.
+
+> [!QUESTION]- What signals indicate it is safe to move from Partial to Full Automation?
+> Precision on automated cases is consistently above your acceptable error threshold across multiple weeks. Monitoring dashboards show stable metrics with no degradation. The cost of errors is low enough that automated mistakes are recoverable. You have alerting in place to detect metric drift quickly.
+
+
 ## References
 
 - [ML deployment strategies (Chip Huyen, Designing Machine Learning Systems)](https://www.oreilly.com/library/view/designing-machine-learning/9781098107956/) — Chapter 9 covers deployment patterns including shadow mode, canary deployment, and A/B testing for ML systems.
 - [Human-in-the-loop ML (Hugging Face)](https://huggingface.co/blog/human-in-the-loop) — practical discussion of when and how to keep humans in the loop for AI-assisted workflows.
+- [Shadow mode deployment (Martin Fowler)](https://martinfowler.com/bliki/ShadowDeployment.html) — explanation of shadow mode as a deployment technique for validating new system behavior against production traffic without user impact.
 
 <!-- whats-next:start -->
 
