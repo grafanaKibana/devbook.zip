@@ -1,8 +1,8 @@
 ---
 topic:
-  - "Networks"
+  - Networks
 subtopic:
-  - "Architecture & Ops"
+  - Architecture & Ops
 level:
   - "1"
 priority: Medium

@@ -1,6 +1,6 @@
 ---
 topic:
-  - Patterns & Practices
+  - Development Practices
 subtopic: []
 tags:
   - FolderNote

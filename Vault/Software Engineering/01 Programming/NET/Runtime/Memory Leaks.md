@@ -1,8 +1,8 @@
 ---
 topic:
-  - "Programming"
+  - Programming
 subtopic:
-  - "NET"
+  - NET
 level:
   - "4"
 priority: High

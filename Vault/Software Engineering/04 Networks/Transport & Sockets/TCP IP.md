@@ -1,8 +1,8 @@
 ---
 topic:
-  - "Networks"
+  - Networks
 subtopic:
-  - "Transport & Sockets"
+  - Transport & Sockets
 level:
   - "3"
 priority: Medium

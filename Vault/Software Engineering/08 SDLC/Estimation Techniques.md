@@ -1,6 +1,6 @@
 ---
 topic:
-  - "SDLC"
+  - SDLC
 subtopic: []
 level:
   - "4"

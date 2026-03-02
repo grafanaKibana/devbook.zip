@@ -1,7 +1,8 @@
 ---
 topic:
-  - "Security"
-subtopic: []
+  - Security
+subtopic:
+  - Authentication
 level:
   - "4"
 priority: High

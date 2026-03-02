@@ -1,8 +1,8 @@
 ---
 topic:
-  - "Architecture"
+  - Architecture
 subtopic:
-  - "Distributed Systems"
+  - Distributed Systems
 level:
   - "2"
 priority: High

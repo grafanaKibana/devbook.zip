@@ -1,8 +1,7 @@
 ---
 topic:
-  - "Cloud"
-subtopic:
-  - []
+  - Cloud
+subtopic: []
 level:
   - "2"
 priority: High

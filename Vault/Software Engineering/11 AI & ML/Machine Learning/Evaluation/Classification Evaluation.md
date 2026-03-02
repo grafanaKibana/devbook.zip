@@ -1,8 +1,8 @@
 ---
 topic:
-  - "AI & ML"
+  - AI & ML
 subtopic:
-  - "Machine Learning"
+  - Machine Learning
 level:
   - "3"
 priority: Medium
