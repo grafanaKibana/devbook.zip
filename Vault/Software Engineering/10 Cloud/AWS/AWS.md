@@ -97,9 +97,4 @@ aws sqs receive-message --queue-url https://sqs.us-east-1.amazonaws.com/12345678
 > **Parent**
 >  [[Software Engineering/10 Cloud/10 Cloud|10 Cloud]]
 >
-> **Pages**
-> - [[Software Engineering/10 Cloud/AWS/DynamoDB|DynamoDB]]
-> - [[Software Engineering/10 Cloud/AWS/EC2|EC2]]
-> - [[Software Engineering/10 Cloud/AWS/S3|S3]]
-> - [[Software Engineering/10 Cloud/AWS/SQS|SQS]]
 <!-- whats-next:end -->
