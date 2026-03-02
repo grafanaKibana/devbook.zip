@@ -6,23 +6,16 @@ subtopic:
 level:
   - "4"
 priority: Low
-status: Ready To Repeat
-
+status: Creation
 dg-publish: true
 ---
-
 # Intro
 
-Bubble sort repeatedly swaps adjacent out-of-order elements, pushing large values toward the end each pass. It is easy to understand but rarely used in production due to poor performance.
+Bubble sort repeatedly swaps adjacent out-of-order elements, pushing large values toward the end each pass. It is easy to understand but rarely used in production due to poor performance. Its main value is as a teaching tool and as a baseline to understand why better algorithms exist.
 
-## Deeper Explanation
+## Mechanism
 
-- Mechanism: scan left-to-right, swap (a[i], a[i+1]) when out of order; after one full pass, the max element is in its final place.
-- Early-exit optimization: if a pass makes zero swaps, the array is already sorted.
-- Complexity: average/worst O(n^2); best O(n) with early-exit on already-sorted input.
-- Properties: stable (with adjacent swaps), in-place, simple.
-
-## Diagram
+Each pass scans left-to-right and swaps `a[i]` with `a[i+1]` when they are out of order. After one full pass, the largest element is in its final position. With an early-exit flag, the algorithm stops as soon as a pass makes zero swaps — giving O(n) best case on already-sorted input.
 
 ```mermaid
 graph TD
@@ -41,16 +34,51 @@ graph TD
   J --> F
 ```
 
-## Questions
+## Complexity
 
-> [!QUESTION]- What is Bubble Sort?
-> Bubble sort repeatedly swaps adjacent out-of-order elements, pushing large values toward the end each pass. It is easy to understand but rarely used in production due to poor performance.
+| Case | Time | Space |
+|------|------|-------|
+| Best (sorted input, early-exit) | O(n) | O(1) |
+| Average | O(n²) | O(1) |
+| Worst (reverse-sorted) | O(n²) | O(1) |
 
+**Properties:** stable (adjacent swaps preserve equal-element order), in-place.
 
-## Links
+## C# Implementation
 
-- https://en.wikipedia.org/wiki/Bubble_sort - Overview and variants
-- https://visualgo.net/en/sorting - Animation to build intuition
+```csharp
+public static void BubbleSort(int[] a)
+{
+    int n = a.Length;
+    bool swapped;
+    do
+    {
+        swapped = false;
+        for (int i = 0; i < n - 1; i++)
+        {
+            if (a[i] > a[i + 1])
+            {
+                (a[i], a[i + 1]) = (a[i + 1], a[i]);
+                swapped = true;
+            }
+        }
+        n--; // last element is already in place
+    } while (swapped);
+}
+```
+
+## When to Use
+
+Almost never in production. Prefer:
+- **Insertion sort** for small arrays (n ≤ 20) or nearly-sorted data — better constant factors.
+- **Array.Sort** (introsort) for general-purpose sorting in .NET.
+
+Bubble sort is useful as a teaching example and for understanding stability and in-place constraints.
+
+## References
+
+- [Bubble sort (Wikipedia)](https://en.wikipedia.org/wiki/Bubble_sort) — algorithm description, variants (cocktail shaker sort), and stability proof.
+- [Sorting visualizations (VisuAlgo)](https://visualgo.net/en/sorting) — step-by-step animation to build intuition for all comparison sorts.
 
 <!-- whats-next:start -->
 
