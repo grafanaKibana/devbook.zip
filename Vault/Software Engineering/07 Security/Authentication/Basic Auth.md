@@ -6,27 +6,60 @@ subtopic:
 level:
   - "4"
 priority: High
-status: Ready To Repeat
+status: Creation
 
-dg-publish: false
+dg-publish: true
 ---
 
-# Intro
+# Basic Authentication
 
-## Deeper Explanation
+Basic Authentication is the simplest HTTP authentication scheme. The client sends credentials (username:password) encoded as Base64 in the `Authorization` header on every request. It is defined in RFC 7617.
 
-## Questions
+## Mechanism
 
-> [!QUESTION]- Basic authentication vs two-factor authentication vs resource-based authentication
-> Basic authentication: single-factor credentials (username and password) sent on every request (often as base64). It must be used only over HTTPS.
-> Two-factor authentication: authentication that requires a second factor in addition to a password (for example, TOTP, push approval, hardware key).
-> Resource-based authentication is often used to mean resource-scoped credentials (for example, an API key or token scoped to a specific service or audience);
-> in many systems, the "resource-based" part is really authorization (policy attached to a resource) rather than authentication.
+1. Client sends: `Authorization: Basic base64(username:password)`
+2. Server decodes the Base64 string, splits on `:`, and validates the credentials
+3. If valid, the request proceeds; if not, the server returns `401 Unauthorized` with `WWW-Authenticate: Basic realm="My API"`
 
-## Links
+**Important**: Base64 is encoding, not encryption. The credentials are trivially decodable. Basic Auth MUST be used over HTTPS only — over HTTP, credentials are sent in plaintext.
 
-- [RFC 7617 HTTP Basic Authentication](https://datatracker.ietf.org/doc/html/rfc7617)
+## ASP.NET Core Example
 
+```csharp
+// Middleware to validate Basic Auth credentials
+app.Use(async (context, next) =>
+{
+    var authHeader = context.Request.Headers.Authorization.ToString();
+    if (!authHeader.StartsWith("Basic "))
+    {
+        context.Response.StatusCode = 401;
+        context.Response.Headers.WWWAuthenticate = "Basic realm=\"My API\"";
+        return;
+    }
+    var credentials = System.Text.Encoding.UTF8.GetString(
+        Convert.FromBase64String(authHeader["Basic ".Length..]));
+    var parts = credentials.Split(':', 2);
+    if (parts[0] != "admin" || parts[1] != "secret")
+    {
+        context.Response.StatusCode = 401;
+        return;
+    }
+    await next();
+});
+```
+
+## When to Use
+
+- Internal APIs between trusted services where simplicity matters more than security sophistication
+- Development and testing environments
+- Legacy system integration where the client cannot support OAuth/JWT
+
+**Avoid** for user-facing authentication. Use OAuth 2.0 / JWT Bearer for APIs and ASP.NET Core Identity for user login.
+
+## References
+
+- [RFC 7617 — HTTP Basic Authentication](https://datatracker.ietf.org/doc/html/rfc7617) — the authoritative specification for Basic Auth
+- [Microsoft — ASP.NET Core Authentication](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/) — overview of ASP.NET Core authentication schemes
 <!-- whats-next:start -->
 
 ---
