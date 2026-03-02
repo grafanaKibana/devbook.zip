@@ -8,8 +8,7 @@ tags:
 dg-publish: true
 level:
   - "3"
-status:
-  - Done
+status: Done
 priority: Medium
 ---
 
