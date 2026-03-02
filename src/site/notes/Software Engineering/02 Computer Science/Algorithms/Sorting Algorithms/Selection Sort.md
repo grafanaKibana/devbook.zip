@@ -66,6 +66,32 @@ Rarely in production. The O(n) swap count is its only advantage over bubble sort
 
 For general use, prefer insertion sort (better on nearly-sorted data) or `Array.Sort` (introsort).
 
+## Pitfalls
+
+### Using Selection Sort When Stability Is Required
+
+**What goes wrong**: selection sort swaps the minimum element into position, which can move an equal element past another equal element, breaking stability. A developer uses it for a secondary sort (e.g., sort by name after sorting by age) and the primary sort order is corrupted.
+
+**Mitigation**: use insertion sort or merge sort when stability is required. Selection sort is only appropriate when writes are significantly more expensive than reads (e.g., flash memory) and stability is not needed.
+
+### Choosing Selection Sort Over Insertion Sort for Small Arrays
+
+**What goes wrong**: selection sort is chosen for small arrays because it has O(n) swaps. But for small n, the swap count advantage is negligible, and insertion sort is faster in practice due to better cache behavior and O(n) best case on nearly-sorted data.
+
+**Mitigation**: prefer insertion sort for small arrays. Use selection sort only when writes are measurably more expensive than reads in your specific hardware context.
+
+## Tradeoffs
+
+| Algorithm | Time (avg) | Stable | Swaps | Best case | Use when |
+|-----------|-----------|--------|-------|-----------|----------|
+| Selection sort | O(n²) | No | O(n) | O(n²) | Writes are expensive (flash memory); stability not needed |
+| Insertion sort | O(n²) | Yes | O(n²) shifts | O(n) | Small arrays; nearly-sorted data; stability needed |
+| Merge sort | O(n log n) | Yes | O(n log n) | O(n log n) | Stability required; large arrays; linked lists |
+| Array.Sort (introsort) | O(n log n) | No | O(n log n) | O(n log n) | General-purpose in-memory sorting |
+
+**Decision rule**: selection sort's only advantage is O(n) swaps. Use it only when writes are significantly more expensive than reads (flash memory, EEPROM). For all other cases, use insertion sort (small arrays) or `Array.Sort` (large arrays).
+
+
 ## Questions
 
 > [!QUESTION]- Why does selection sort make exactly O(n) swaps, and when does that matter?
@@ -79,6 +105,9 @@ For general use, prefer insertion sort (better on nearly-sorted data) or `Array.
 
 - [Selection sort (Wikipedia)](https://en.wikipedia.org/wiki/Selection_sort) — algorithm description, stability discussion, and comparison with insertion sort.
 - [Sorting visualizations (VisuAlgo)](https://visualgo.net/en/sorting) — step-by-step animation comparing all basic sorting algorithms.
+
+- [Timsort (Wikipedia)](https://en.wikipedia.org/wiki/Timsort) — Python's and Java's default sort; uses insertion sort (not selection sort) for small runs, illustrating why insertion sort is preferred over selection sort in practice.
+- [Sorting algorithms comparison (Big-O Cheat Sheet)](https://www.bigocheatsheet.com/) — quick reference for time and space complexity of all common sorting algorithms.
 
 <!-- whats-next:start -->
 

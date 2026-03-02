@@ -52,11 +52,35 @@ Each peer knows a subset of other peers (its "routing table"). Lookups route thr
 > WebRTC establishes direct peer connections between browsers for audio, video, and data. The challenge is NAT traversal: most browsers are behind NAT and don't have public IP addresses. STUN servers help peers discover their public IP/port. When direct connection fails (symmetric NAT), TURN servers relay traffic. The goal is to minimize relay usage — direct P2P connections reduce latency and server cost; TURN relay is the fallback.
 
 
+## Pitfalls
+
+**NAT traversal failure**
+Most peers are behind NAT and lack public IP addresses. STUN discovers the public IP/port; when symmetric NAT blocks direct connection, TURN relay is required. TURN adds latency and server cost. Mitigation: implement ICE (Interactive Connectivity Establishment) — try direct connection first, fall back to TURN relay only when necessary.
+
+**DHT poisoning**
+A malicious peer can inject false routing table entries, redirecting lookups to attacker-controlled nodes. Mitigations: Sybil resistance (proof-of-work for node IDs), content addressing (IPFS uses the hash as the content ID — poisoned data is detectable because the hash won't match).
+
+**Churn instability**
+Peers join and leave constantly. High churn degrades DHT routing — routing tables become stale, lookups fail. Kademlia's bucket refresh keeps routing tables current; replication factor (k=20 in BitTorrent) ensures data survives peer loss.
+
+## WebRTC Connection Setup
+
+```text
+// ICE candidate exchange (simplified)
+1. Peer A creates RTCPeerConnection
+2. Peer A gathers ICE candidates (STUN → public IP/port)
+3. Peer A sends offer + candidates to Peer B via signaling server
+4. Peer B responds with answer + its own candidates
+5. Both peers try all candidate pairs → select lowest-latency direct path
+6. If no direct path: fall back to TURN relay
+```
+
 ## References
 
 - [Kademlia: A Peer-to-peer Information System (Maymounkov & Mazières)](https://pdos.csail.mit.edu/~petar/papers/maymounkov-kademlia-lncs.pdf) — the original Kademlia DHT paper; the algorithm used by BitTorrent and IPFS for peer discovery.
 - [WebRTC (MDN)](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API) — browser P2P API for real-time audio, video, and data channels; includes ICE/STUN/TURN for NAT traversal.
 - [IPFS documentation](https://docs.ipfs.tech/concepts/how-ipfs-works/) — content-addressed P2P storage: how content IDs, DHT routing, and Bitswap work together.
+- [WebRTC for the Curious](https://webrtcforthecurious.com/) — deep dive into ICE, STUN, TURN, DTLS, and SRTP written by WebRTC implementers; explains why NAT traversal is hard and how TURN relay works.
 
 <!-- whats-next:start -->
 

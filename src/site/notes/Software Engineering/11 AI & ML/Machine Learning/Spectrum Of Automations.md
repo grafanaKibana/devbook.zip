@@ -54,6 +54,34 @@ The AI acts autonomously on all cases without human review. Humans monitor aggre
 
 **Decision rule**: start every new AI feature in Shadow Mode. Move to AI Assistance after validating accuracy on production data. Move to Partial Automation when precision on high-confidence cases is consistently above your acceptable error threshold. Move to Full Automation only when the cost of errors is low or the monitoring is robust enough to catch degradation quickly.
 
+## Implementation Pattern
+
+The spectrum maps directly to code structure. Here is a fraud detection example at each level:
+
+**Shadow Mode** — run model, log prediction, take no action:
+
+```python
+def process_transaction_shadow(tx: Transaction) -> None:
+    prediction = fraud_model.predict(tx)  # model runs
+    logger.info("shadow_prediction", tx_id=tx.id, score=prediction.score,
+                predicted_fraud=prediction.is_fraud)  # logged only
+    # No action taken — human team reviews logs to measure accuracy
+```
+
+**Partial Automation** — act on high-confidence cases, escalate the rest:
+
+```python
+def process_transaction_partial(tx: Transaction) -> Action:
+    prediction = fraud_model.predict(tx)
+    if prediction.score >= 0.95:          # high confidence: automate
+        return Action.BLOCK
+    elif prediction.score >= 0.70:        # medium confidence: human review
+        return Action.QUEUE_FOR_REVIEW
+    else:                                 # low confidence: allow
+        return Action.ALLOW
+```
+
+
 ## Pitfalls
 
 ### Skipping Shadow Mode

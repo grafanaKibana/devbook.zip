@@ -84,6 +84,25 @@ See [[Software Engineering/05 Architecture/System Architecture/Microservices\|Mi
 
 The cost of premature microservices is high: distributed systems complexity, eventual consistency, and operational overhead before the product has proven its architecture.
 
+## Pitfalls
+
+### Deployment Coupling
+
+**What goes wrong**: a bug fix in one module requires deploying the entire application. A failed deployment of an unrelated module blocks the fix from reaching production.
+
+**Why it happens**: the monolith is a single deployment unit. Any change to any module triggers a full deployment.
+
+**Mitigation**: enforce strict module boundaries so that changes in one module do not require touching others. Use feature flags to decouple deployment from release. A modular monolith with clear interfaces reduces the blast radius of any single change.
+
+### Database Monolith
+
+**What goes wrong**: all modules share the same database schema and tables. A schema change for one module requires coordinating with all teams and risks breaking other modules.
+
+**Why it happens**: a shared database is the default in a monolith. It is convenient early on but becomes a coordination bottleneck as the team grows.
+
+**Mitigation**: partition the database by module even within a monolith. Each module owns its tables and accesses other modules' data only through service interfaces, not direct SQL joins. This is the modular monolith approach and is a prerequisite for eventual microservice extraction.
+
+
 ## Questions
 
 > [!QUESTION]- What is a modular monolith and when is it better than microservices?

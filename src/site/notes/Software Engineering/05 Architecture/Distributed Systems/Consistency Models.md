@@ -104,6 +104,37 @@ During a partition, preserving stronger consistency typically means reduced avai
 - Keep consistency decisions visible in architecture docs and API contracts.
 
 
+## Example: Optimistic Concurrency for Read-Your-Writes
+
+ETag-based optimistic concurrency enforces that a write only succeeds if the client's version matches the server's current version — a practical implementation of session consistency for HTTP APIs:
+
+```csharp
+// GET /orders/42 returns ETag: "v3"
+// Client stores the ETag and sends it on the next write
+
+// PUT /orders/42 with If-Match: "v3"
+// If another writer committed between the GET and PUT, the server returns 412 Precondition Failed
+app.MapPut("/orders/{id}", async (int id, OrderUpdate update,
+    HttpContext ctx, OrderRepository repo) =>
+{
+    var etag = ctx.Request.Headers.IfMatch.FirstOrDefault();
+    var order = await repo.GetAsync(id);
+    if (order is null) return Results.NotFound();
+
+    // Reject if the client's version is stale (another writer committed first)
+    if (etag is not null && etag != order.ETag)
+        return Results.StatusCode(412);  // Precondition Failed
+
+    order.Apply(update);
+    order.ETag = Guid.NewGuid().ToString("N");
+    await repo.SaveAsync(order);
+    return Results.Ok(order);
+});
+```
+
+This pattern implements read-your-writes at the API layer: the client reads the current ETag, includes it on the write, and the server rejects stale writes. The client retries with a fresh GET if it receives 412.
+
+
 ## Questions
 
 > [!QUESTION]- How do you guarantee read-your-writes when writes go to a strongly consistent store but reads come from an eventually consistent cache?

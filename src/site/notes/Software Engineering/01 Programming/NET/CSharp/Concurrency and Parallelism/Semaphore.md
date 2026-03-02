@@ -33,6 +33,25 @@ finally
 }
 ```
 
+Named `Semaphore` for cross-process bounded access:
+
+```csharp
+// Limit 3 concurrent processes accessing a shared resource
+const string SemName = "MyApp.ResourceGate";
+using var sem = new Semaphore(initialCount: 3, maximumCount: 3, name: SemName);
+
+if (!sem.WaitOne(TimeSpan.FromSeconds(5)))
+    throw new TimeoutException("Could not acquire semaphore slot.");
+try
+{
+    AccessSharedResource();
+}
+finally
+{
+    sem.Release();
+}
+```
+
 ## Pitfalls
 
 - Forgetting `Release` leaks permits and eventually stalls all waiters. Always release in `finally`.

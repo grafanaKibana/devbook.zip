@@ -47,6 +47,33 @@ These are related but distinct:
 
 DIP is the *why* (depend on interfaces); IoC/DI is the *how* (let the container wire the concrete implementations). You can follow DIP without a DI container (manual wiring in `Main`), but a container makes it practical at scale.
 
+## Pitfalls
+
+### Service Locator Anti-Pattern
+
+**What goes wrong**: instead of injecting dependencies, a class calls a global `ServiceLocator.Get<IOrderRepository>()` to resolve them. This is IoC in name only — the class still controls its own dependency resolution.
+
+**Why it matters**: dependencies are hidden (not visible in the constructor), making the class hard to test (you must configure the global locator in tests) and hard to reason about (you can't tell what a class needs without reading its implementation).
+
+**Mitigation**: always use constructor injection. The constructor signature is the contract — it makes dependencies explicit and testable.
+
+### Over-Injection (Constructor Bloat)
+
+**What goes wrong**: a class has 8+ constructor parameters. Every new feature adds another dependency. The constructor becomes a sign that the class has too many responsibilities.
+
+**Why it happens**: DI makes adding dependencies easy — too easy. Each dependency feels justified in isolation.
+
+**Mitigation**: treat a constructor with more than 4-5 parameters as a design smell. Extract a new service or aggregate related dependencies into a parameter object. The root cause is usually an SRP violation.
+
+### Circular Dependencies
+
+**What goes wrong**: `ServiceA` depends on `ServiceB`, which depends on `ServiceA`. The DI container throws at startup.
+
+**Why it happens**: two services that should be decoupled have grown to depend on each other.
+
+**Mitigation**: introduce an interface or event to break the cycle. If `A` needs to notify `B`, have `A` publish an event that `B` subscribes to — no direct dependency.
+
+
 ## Questions
 
 > [!QUESTION]- What is the difference between IoC and Dependency Injection?
@@ -61,6 +88,8 @@ DIP is the *why* (depend on interfaces); IoC/DI is the *how* (let the container 
 - [Inversion of Control Containers and the Dependency Injection pattern (Martin Fowler)](https://martinfowler.com/articles/injection.html) — the canonical article that named and defined IoC containers and DI; explains the Hollywood Principle and compares constructor, setter, and interface injection.
 - [[Software Engineering/05 Architecture/Patterns/Dependency Injection\|Dependency Injection]] — full treatment of DI patterns, ASP.NET Core service lifetimes (Singleton/Scoped/Transient), and common pitfalls like captive dependencies.
 - [[Software Engineering/06 Development Practices/Principles/SOLID\|SOLID]] — covers the Dependency Inversion Principle (DIP) in context with the other SOLID principles.
+- [Dependency injection in ASP.NET Core (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/dependency-injection) — official guide to ASP.NET Core's built-in DI container: service registration, lifetimes, and constructor injection patterns.
+- [Service Locator is an Anti-Pattern (Mark Seemann)](https://blog.ploeh.dk/2010/02/03/ServiceLocatorisanAnti-Pattern/) — practitioner post explaining why Service Locator violates the explicit dependency principle and how to replace it with constructor injection.
 
 <!-- whats-next:start -->
 

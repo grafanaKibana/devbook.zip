@@ -77,6 +77,18 @@ In .NET, TLS is handled automatically by `HttpClient` and ASP.NET Core. Enforce 
 
 **Hybrid encryption** (used in TLS, PGP): Use asymmetric crypto to exchange a symmetric key, then use the symmetric key for bulk data. Best of both worlds.
 
+## Questions
+
+> [!QUESTION]- When should you use symmetric vs asymmetric encryption?
+> Use symmetric (AES-256-GCM) for bulk data encryption — it is 10-100x faster than asymmetric. Use asymmetric (RSA, ECDH) for key exchange and digital signatures, not for encrypting data directly. In practice, use hybrid encryption: asymmetric to exchange a symmetric key, then symmetric for the data. This is exactly what TLS does.
+
+> [!QUESTION]- What is envelope encryption and when is it used?
+> Envelope encryption uses two keys: a Data Encryption Key (DEK) encrypts the data; a Key Encryption Key (KEK) encrypts the DEK. The encrypted DEK is stored alongside the ciphertext. The KEK lives in a key management service (Azure Key Vault, AWS KMS) and never leaves it. This pattern is used in cloud storage (Azure Blob Storage, S3 server-side encryption) and allows key rotation without re-encrypting all data — you only re-encrypt the DEK.
+
+> [!QUESTION]- Why is key management harder than choosing the right algorithm?
+> The algorithm (AES-256-GCM) is well-understood and rarely the weak point. Key management is where systems fail: hardcoded keys in source code, keys stored in plaintext config files, no key rotation policy, no audit trail for key access. Use Azure Key Vault or AWS KMS to store keys, rotate them automatically, and audit every access. Never derive keys from passwords without a proper KDF (PBKDF2, Argon2).
+
+
 ## References
 
 - [NIST Cryptographic Standards](https://csrc.nist.gov/projects/cryptographic-standards-and-guidelines) — authoritative cryptographic standards; covers AES, RSA, ECDSA, and key management guidelines

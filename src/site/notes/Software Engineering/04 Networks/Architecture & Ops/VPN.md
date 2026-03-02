@@ -52,6 +52,39 @@ TLS-based, runs over UDP or TCP. Highly portable and widely supported. Slower th
 | WireGuard | 3 | Low | Excellent | Modern deployments, cloud |
 | OpenVPN | App | Medium | Moderate | Legacy, cross-platform |
 
+## Tradeoffs
+
+**IPsec vs WireGuard vs OpenVPN**: see the protocol comparison table in the Protocols section. Decision rule: default to WireGuard for new deployments (simpler, faster, smaller attack surface — ~4,000 lines vs ~400,000 for IPsec). Use IPsec when you need hardware appliance compatibility or regulatory mandate. Use OpenVPN only as a fallback for environments where WireGuard is not yet supported.
+
+**Full tunnel vs split tunnel**: full tunnel routes all traffic through the VPN gateway, enforcing corporate security policies (content filtering, DLP) on all outbound traffic at the cost of increased gateway load and latency for internet traffic. Split tunnel routes only private-destined traffic through the VPN, reducing gateway bandwidth cost, but requires precise ACLs — overly broad rules can expose private resources to the internet.
+
+WireGuard peer configuration (client side):
+
+```text
+[Interface]
+PrivateKey = <client-private-key>
+Address = 10.0.0.2/24
+DNS = 10.0.0.1
+
+[Peer]
+PublicKey = <server-public-key>
+Endpoint = vpn.example.com:51820
+AllowedIPs = 10.0.0.0/24   # split tunnel: only private subnet
+PersistentKeepalive = 25
+```
+
+## Questions
+
+> [!QUESTION]- What is split tunneling and when would you use it?
+> Split tunneling routes only traffic destined for private resources through the VPN; internet traffic goes directly. Use it to reduce gateway bandwidth cost and latency for internet-bound traffic. Avoid it when corporate policy requires all traffic to pass through security inspection (content filtering, DLP).
+
+> [!QUESTION]- Why does WireGuard have a smaller attack surface than IPsec?
+> WireGuard is ~4,000 lines of code (auditable by a small team) vs IPsec's ~400,000 lines. Fewer lines means fewer potential vulnerabilities. WireGuard also uses a fixed, modern cryptographic suite (ChaCha20, Curve25519, BLAKE2) with no negotiation — removing cipher selection as an attack vector.
+
+> [!QUESTION]- What causes DNS leaks in a VPN setup, and how do you fix them?
+> DNS queries bypass the encrypted tunnel — typically because the OS sends DNS requests to the default interface rather than the VPN interface. Fix: route DNS through the tunnel by setting DNS to an internal server and ensuring DNS requests use the VPN's routing table, or by running a local DNS resolver that forces all queries through the tunnel.
+
+
 ## Pitfalls
 
 **DNS leaks**
