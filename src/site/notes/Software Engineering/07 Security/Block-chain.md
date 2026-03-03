@@ -75,9 +75,6 @@ var block2Hash = Sha256Hex(block2Prev + block2Data);
 
 ## Questions
 
-> [!QUESTION]- What is Block-chain?
-> A blockchain is an append-only ledger where records are grouped into blocks and linked together using cryptographic hashes. Changing a past block changes its hash, which breaks the chain unless all subsequent blocks are recomputed and the network's consensus rules are satisfied.
-
 > [!QUESTION]- When is blockchain justified over a traditional database?
 > Blockchain is justified when you need a shared ledger across mutually distrusting parties with no central authority and no single party can be trusted to maintain the record. If all parties trust a central authority, a traditional database with append-only audit logging is simpler, faster, and GDPR-compliant. The cost of blockchain — low throughput, immutability conflicts with erasure rights, consensus overhead — is only worth paying when decentralization is a hard requirement.
 

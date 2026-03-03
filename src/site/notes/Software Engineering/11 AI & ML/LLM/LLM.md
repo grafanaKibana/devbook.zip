@@ -66,9 +66,6 @@ When working with LLMs, you will come across a lot of new terms. This section wi
 
 ## Questions
 
-> [!QUESTION]- What is LLM?
-> A large language model (LLM) is a neural network trained on large corpora of text to predict the next token. Once trained, it can be adapted to tasks like answering questions, summarizing, writing, and tool use by conditioning on instructions and context.
-
 ## Links
 
 [What are Large Language Models? - LLM AI Explained - AWS](https://aws.amazon.com/what-is/large-language-model/?nc1=h_ls)

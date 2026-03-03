@@ -5,18 +5,11 @@
 
 # Intro
 
-
-
-## Questions
-
-> [!QUESTION]- What is a database?
-> A database is an organized collection of data stored in a structured way so it can be efficiently created, read, updated, and deleted. In practice you interact with it through a DBMS (Database Management System), which provides storage, indexing, querying, transactions, security, backups, etc.
-
-> [!QUESTION]- What are the main types of databases?
-> Common categories are: relational (SQL tables), key-value, document, wide-column, graph, time-series, and search engines. They differ in data model, query capabilities, consistency guarantees, and scaling approach.
+Data persistence is how software survives a restart: storing, retrieving, and protecting state across processes and machines. The choice between SQL, NoSQL, and caching layers shapes every system's consistency guarantees, latency profile, and operational cost. Example: picking the wrong isolation level can silently corrupt data under concurrency, while an unnecessary cache adds a stale-read failure mode that did not exist before.
 
 ## Links
 
+- [Database (Wikipedia)](https://en.wikipedia.org/wiki/Database)
 <!-- whats-next:start -->
 
 ---

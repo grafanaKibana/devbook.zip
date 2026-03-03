@@ -135,9 +135,6 @@ Four layers with interfaces and DI for a 3-endpoint CRUD API adds ceremony witho
 > [!QUESTION]- What is the difference between traditional layered and Onion/Clean Architecture?
 > Traditional layered: UI → Business Logic → Data Access → Database. Changing the DB affects everything above. Onion/Clean: Infrastructure → Application → Domain. The Domain has zero dependencies; Infrastructure implements Domain interfaces. The key difference is dependency inversion at the data access boundary.
 
-> [!QUESTION]- When would you choose a modular monolith over microservices?
-> When independent deployment is not yet a hard requirement. A modular monolith with clear layer boundaries and internal APIs gives you most of the maintainability benefits of microservices without the operational complexity (distributed tracing, network failures, eventual consistency). Start here; extract services when a specific module needs independent scaling or deployment.
-
 ## References
 
 - [Multitier architecture (Wikipedia)](https://en.wikipedia.org/wiki/Multitier_architecture) — overview of n-tier patterns, layer responsibilities, and historical context.

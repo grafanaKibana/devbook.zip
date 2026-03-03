@@ -91,13 +91,19 @@ Beep(440, 500); // A4 note for 500ms
 
 ## Questions
 
-> [!QUESTION]- What is managed vs unmanaged code?
+> [!QUESTION]- What is managed vs unmanaged code? Why does unmanaged interop require careful lifetime management?
 > Managed code runs under the .NET runtime (CLR) and benefits from runtime services like type safety checks, exception handling, garbage collection, and JIT/AOT compilation.
 > Unmanaged code runs directly as native machine code under the OS (for example, C/C++ binaries). It does not run under the CLR and typically requires explicit resource and lifetime management.
+> P/Invoke calls into native libraries require marshaling data across the managed/unmanaged boundary, which adds overhead and risks memory corruption if signatures are wrong.
+> Use `SafeHandle` (not raw `IntPtr`) to wrap unmanaged handles — it ensures deterministic release even if exceptions occur and prevents handle recycling attacks.
+> **Tradeoff**: interop enables reuse of native libraries and OS APIs, but every boundary crossing costs marshaling overhead and introduces bugs (dangling pointers, double-free) that the GC cannot prevent.
 
-> [!QUESTION]- What is the CLR? What does it do? What is IL (CIL/MSIL)?
+> [!QUESTION]- What is the CLR and IL? How does JIT compilation affect startup vs steady-state performance, and when is NativeAOT a better choice?
 > The CLR (Common Language Runtime) is the execution engine of .NET. It loads assemblies, verifies and executes IL, compiles IL to native code (JIT or AOT), manages memory (GC), handles exceptions, supports threading and interop, and provides other runtime services.
 > IL (also called CIL or MSIL) is the CPU-independent intermediate instruction set produced by .NET language compilers and stored in assemblies together with metadata. The CLR turns IL into native code for the current platform.
+> JIT compilation adds latency on first method call. Tiered compilation mitigates this: Tier 0 compiles quickly with minimal optimization, then hot methods are recompiled at Tier 1 with full optimization — giving fast startup and high steady-state throughput.
+> NativeAOT eliminates JIT entirely by compiling to native code at publish time — fastest startup, smallest working set, but no runtime code generation (limits reflection, dynamic assembly loading, and some serialization patterns).
+> **Tradeoff**: JIT with tiered compilation is the right default for long-running server workloads; NativeAOT wins for CLI tools, serverless cold-start SLAs, and embedded scenarios where startup and binary size matter more than runtime flexibility.
 
 > [!QUESTION]- When would you choose NativeAOT over JIT compilation?
 > NativeAOT eliminates JIT startup cost and produces a self-contained native binary — ideal for CLI tools, serverless functions with cold-start SLAs, or embedded scenarios. The cost is longer publish time, larger binary, and loss of runtime reflection-heavy features (dynamic code generation, some serialization patterns). For long-running server workloads, JIT with tiered compilation typically wins on peak throughput.

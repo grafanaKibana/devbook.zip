@@ -21,39 +21,39 @@
 
 # Focus
 
-| Note                                                                                                                         | Topic                 | Status   | Priority |
-| ---------------------------------------------------------------------------------------------------------------------------- | --------------------- | -------- | -------- |
-| [[Software Engineering/11 AI & ML/Tooling/Skills\|Skills]]                                                                | AI & ML               | Creation | Medium   |
-| [[Software Engineering/07 Security/Digital Signature\|Digital Signature]]                                                 | Security              | Creation | Medium   |
-| [[Software Engineering/08 SDLC/Estimation Techniques\|Estimation Techniques]]                                             | SDLC                  | Creation | Medium   |
-| [[Software Engineering/08 SDLC/BDD\|BDD]]                                                                                 | SDLC                  | Creation | Medium   |
-| [[Software Engineering/06 Development Practices/Paradigms/OOP\|OOP]]                                                      | Development Practices | Creation | Medium   |
-| [[Software Engineering/06 Development Practices/Paradigms/Event-driven\|Event-driven]]                                    | Development Practices | Creation | Medium   |
-| [[Software Engineering/05 Architecture/System Architecture/Serverless Architecture\|Serverless Architecture]]             | Architecture          | Creation | Medium   |
-| [[Software Engineering/05 Architecture/System Architecture/Service-Oriented Architecture\|Service-Oriented Architecture]] | Architecture          | Creation | Medium   |
-| [[Software Engineering/05 Architecture/System Architecture/Monolith Architecture\|Monolith Architecture]]                 | Architecture          | Creation | Medium   |
-| [[Software Engineering/04 Networks/Transport & Sockets/UDP\|UDP]]                                                         | Networks              | Creation | Medium   |
-| [[Software Engineering/04 Networks/Protocols/DNS\|DNS]]                                                                   | Networks              | Creation | Medium   |
-| [[Software Engineering/04 Networks/Protocols/RPC\|RPC]]                                                                   | Networks              | Creation | Medium   |
+| Note                                                                                                                                                | Topic                 | Status          | Priority |
+| --------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- | --------------- | -------- |
+| [[Software Engineering/08 SDLC/08 SDLC\|08 SDLC]]                                                                                                | SDLC                  | Ready To Repeat | Medium   |
+| [[Software Engineering/04 Networks/Transport & Sockets/TCP IP\|TCP IP]]                                                                          | Networks              | Creation        | Medium   |
+| [[Software Engineering/02 Computer Science/Algorithms/Search Algorithms/Rabin Karp Search\|Rabin Karp Search]]                                   | Computer Science      | Ready To Repeat | Medium   |
+| [[Software Engineering/02 Computer Science/Algorithms/Search Algorithms/KMP (Knuth-Morris-Pratt) Algorithm\|KMP (Knuth-Morris-Pratt) Algorithm]] | Computer Science      | Ready To Repeat | Medium   |
+| [[Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Dijkstra\|Dijkstra]]                                                      | Computer Science      | Ready To Repeat | Medium   |
+| [[Software Engineering/03 Data Persistence/NoSQL/NoSQL\|NoSQL]]                                                                                  | Data Persistence      | Ready To Repeat | Medium   |
+| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Namespaces\|Namespaces]]                                                           | Programming           | Creation        | Medium   |
+| [[Software Engineering/11 AI & ML/Tooling/Skills\|Skills]]                                                                                       | AI & ML               | Creation        | Medium   |
+| [[Software Engineering/07 Security/Digital Signature\|Digital Signature]]                                                                        | Security              | Creation        | Medium   |
+| [[Software Engineering/08 SDLC/Estimation Techniques\|Estimation Techniques]]                                                                    | SDLC                  | Creation        | Medium   |
+| [[Software Engineering/08 SDLC/BDD\|BDD]]                                                                                                        | SDLC                  | Creation        | Medium   |
+| [[Software Engineering/06 Development Practices/Paradigms/OOP\|OOP]]                                                                             | Development Practices | Creation        | Medium   |
 
 { .block-language-dataview}
 
 # Recently Updated
 
-| Note                                                                                                              | Date                      |
-| ----------------------------------------------------------------------------------------------------------------- | ------------------------- |
-| [[Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Merge Sort\|Merge Sort]]              | 11:33 PM - March 02, 2026 |
-| [[Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Quick Sort\|Quick Sort]]              | 11:33 PM - March 02, 2026 |
-| [[Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Selection Sort\|Selection Sort]]      | 11:32 PM - March 02, 2026 |
-| [[Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Bubble Sort\|Bubble Sort]]            | 11:31 PM - March 02, 2026 |
-| [[Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Insertion Sort\|Insertion Sort]]      | 11:31 PM - March 02, 2026 |
-| [[Software Engineering/11 AI & ML/Machine Learning/Natural Language Processing\|Natural Language Processing]]  | 11:30 PM - March 02, 2026 |
-| [[Software Engineering/11 AI & ML/LLM/Prompting/In-Context Learning\|In-Context Learning]]                     | 11:30 PM - March 02, 2026 |
-| [[Software Engineering/11 AI & ML/Machine Learning/Data Drift\|Data Drift]]                                    | 11:29 PM - March 02, 2026 |
-| [[Software Engineering/11 AI & ML/LLM/Prompting/Automated Prompt Optimization\|Automated Prompt Optimization]] | 11:29 PM - March 02, 2026 |
-| [[Software Engineering/11 AI & ML/Machine Learning/Spectrum Of Automations\|Spectrum Of Automations]]          | 11:29 PM - March 02, 2026 |
-| [[Software Engineering/11 AI & ML/Tooling/Skills\|Skills]]                                                     | 11:28 PM - March 02, 2026 |
-| [[Software Engineering/11 AI & ML/LLM/Evaluation/Deterministic Checks\|Deterministic Checks]]                  | 11:28 PM - March 02, 2026 |
+| Note                                                                                                              | Date                     |
+| ----------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| [[Software Engineering/03 Data Persistence/ORMs/ORMs\|ORMs]]                                                   | 9:46 PM - March 03, 2026 |
+| [[Software Engineering/04 Networks/Protocols/Protocols\|Protocols]]                                            | 9:43 PM - March 03, 2026 |
+| [[Software Engineering/08 SDLC/08 SDLC\|08 SDLC]]                                                              | 9:43 PM - March 03, 2026 |
+| [[Software Engineering/03 Data Persistence/03 Data Persistence\|03 Data Persistence]]                          | 9:43 PM - March 03, 2026 |
+| [[Software Engineering/11 AI & ML/Machine Learning/Natural Language Processing\|Natural Language Processing]]  | 9:27 PM - March 03, 2026 |
+| [[Software Engineering/04 Networks/Transport & Sockets/TCP IP\|TCP IP]]                                        | 9:27 PM - March 03, 2026 |
+| [[Software Engineering/11 AI & ML/LLM/Prompting/Prompting\|Prompting]]                                         | 9:26 PM - March 03, 2026 |
+| [[Software Engineering/11 AI & ML/LLM/Prompting/Prompt Composition\|Prompt Composition]]                       | 9:26 PM - March 03, 2026 |
+| [[Software Engineering/11 AI & ML/Tooling/Hooks\|Hooks]]                                                       | 9:25 PM - March 03, 2026 |
+| [[Software Engineering/11 AI & ML/LLM/OWASP vulnerabilities on AI LLM\|OWASP vulnerabilities on AI LLM]]       | 9:25 PM - March 03, 2026 |
+| [[Software Engineering/11 AI & ML/LLM/Hallucinations\|Hallucinations]]                                         | 9:25 PM - March 03, 2026 |
+| [[Software Engineering/02 Computer Science/Algorithms/Search Algorithms/Rabin Karp Search\|Rabin Karp Search]] | 9:24 PM - March 03, 2026 |
 
 { .block-language-dataview}
 # Publish Distribution

@@ -163,17 +163,16 @@ The GC first analyzes all objects that belong to generation 0. If, after collect
 
 ## Questions
 
-> [!QUESTION]- What is the Garbage Collector? Why do we need it? How does it work (high level)?
+> [!QUESTION]- How does .NET's generational GC work? Why does it use generations, and what are the main tuning tradeoffs?
 > The GC is the .NET runtime's automatic memory manager for managed objects. It periodically finds objects that are no longer reachable from GC roots, reclaims their memory, and (on the SOH) typically compacts surviving objects to reduce fragmentation.
-> The GC is generational (Gen 0/1/2): most collections are small and fast, while full collections are less frequent.
+> The GC is generational (Gen 0/1/2): most collections are small and fast, while full collections are less frequent. Generations exploit the generational hypothesis — most objects die young — so collecting Gen 0 frequently and cheaply avoids scanning the entire heap.
+> Workstation GC (default) runs collections on the allocating thread; Server GC uses dedicated threads per logical processor for higher throughput but more memory overhead.
+> Background GC (default for Gen 2) allows Gen 0/1 collections to proceed during a long Gen 2 collection, reducing pause times for latency-sensitive workloads.
+> **Tradeoff**: Server GC maximizes throughput for multi-core services but uses more memory per heap; Workstation GC minimizes memory footprint for client apps and small containers. Tune based on workload sensitivity to pause duration vs throughput.
 
 > [!QUESTION]- What are the Small Object Heap (SOH) and the Large Object Heap (LOH)?
 > The SOH stores most objects (typically smaller than ~85,000 bytes) and is compacted regularly.
 > The LOH stores large allocations (typically 85,000 bytes and above, often large arrays). It is collected with Gen 2 and can become fragmented; compaction behavior differs from the SOH and is more expensive.
-
-> [!QUESTION]- What is a memory leak?
-> Memory that is no longer needed but cannot be reclaimed. In .NET this can be caused by keeping objects reachable (managed leaks) or by not releasing unmanaged resources.
-> See also the Memory Leaks note in this runtime section.
 
 ## Links
 
