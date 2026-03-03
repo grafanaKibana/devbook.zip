@@ -5,15 +5,11 @@
 
 # Intro
 
-## Deeper Explanation
-
-## Questions
-
-> [!QUESTION]- What is an ORM?
-> An ORM (Object-Relational Mapper) maps relational database tables/rows to objects and translates queries/changes in code into SQL. It helps with CRUD, tracking changes, relationships, and migrations, at the cost of an abstraction layer you must understand to avoid performance issues.
+Object-Relational Mappers bridge the gap between in-memory objects and relational tables, translating LINQ or method calls into SQL so developers work with domain models instead of raw queries. The convenience is real, but the abstraction leaks: understanding what SQL your ORM generates is the difference between a fast query and a full table scan. Example: chaining multiple `Include()` calls on separate collection navigations in Entity Framework produces a Cartesian explosion — the SQL JOIN cross-multiplies both collections, returning thousands of duplicate rows from what looks like a simple eager-load.
 
 ## Links
 
+- [Object-relational mapping (Wikipedia)](https://en.wikipedia.org/wiki/Object%E2%80%93relational_mapping)
 
 <!-- whats-next:start -->
 

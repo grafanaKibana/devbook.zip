@@ -175,10 +175,6 @@ Third-party libraries may acquire internal locks. Calling library methods while 
 > Capture a process dump with `dotnet-dump collect` or `procdump`. Analyze with `dotnet-dump analyze` and `clrthreads`/`syncblk` commands to find threads blocked on monitors. For async deadlocks, look for threads blocked in `.Result` or `.Wait()` while holding a `SynchronizationContext`.
 > Cost: dump capture briefly pauses the process; plan for a maintenance window or use a non-blocking snapshot tool.
 
-> [!QUESTION]- What is `SemaphoreSlim` and when do you use it instead of `lock`?
-> `SemaphoreSlim` is an async-compatible synchronization primitive that supports `await`-able acquisition. Use it when you need mutual exclusion across `await` points — `lock` cannot span an `await`.
-> Cost: slightly more verbose than `lock`; must manually call `Release()` in a `finally` block.
-
 ## References
 
 - [Managed threading best practices (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/threading/managed-threading-best-practices) — official guidance on avoiding deadlocks, race conditions, and starvation in .NET.

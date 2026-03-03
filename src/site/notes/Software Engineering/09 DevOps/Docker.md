@@ -115,13 +115,6 @@ volumes:
 
 ## Questions
 
-> [!QUESTION]- What is the difference between a Docker image and a container?
-> - An image is a read-only layered filesystem built from a Dockerfile. It is immutable.
-> - A container is a running instance of an image with a writable layer on top.
-> - Multiple containers can run from the same image simultaneously.
-> - Deleting a container does not delete the image.
-> - Tradeoff: images are shared and cached; containers are ephemeral and isolated.
-
 > [!QUESTION]- Why use multi-stage builds for .NET applications?
 > - The .NET SDK image (~800MB) includes compilers and build tools not needed at runtime.
 > - The ASP.NET runtime image (~200MB) is sufficient for running the published app.
