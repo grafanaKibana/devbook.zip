@@ -151,15 +151,6 @@ Simple production pattern:
 > - Mention complexity: replicas are simpler operationally than full CQRS/event projection pipelines.
 > **Why this is strong:** It balances architecture fit, consistency, and operational cost.
 
-> [!QUESTION]- Why can horizontal scaling fail even when you add many app instances?
-> **Expected answer:**
-> - Service may still hold state locally (sessions, in-memory cache).
-> - Shared dependencies can become the new choke point (database, third-party API, message broker).
-> - Connection pools or thread pools can saturate before CPU does.
-> - Load balancer distribution may be uneven because of sticky sessions or slow instances.
-> - Without idempotent retries and backpressure, failures amplify under load.
-> **Why this is strong:** It demonstrates distributed-systems failure awareness beyond compute scaling.
-
 ## References
 
 - [System Design Primer - Scalability](https://github.com/donnemartin/system-design-primer#scalability)

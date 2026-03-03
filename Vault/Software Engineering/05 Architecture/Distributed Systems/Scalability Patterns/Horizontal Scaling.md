@@ -143,15 +143,6 @@ Vertical scaling is the right first move for a stateful service you can't refact
 > - Connection pool or thread pool saturation before CPU becomes the bottleneck.
 > **Why this is strong:** It demonstrates awareness that scaling one tier shifts the bottleneck downstream — a classic distributed-systems trap.
 
-> [!QUESTION]- When is [[Vertical Scaling]] the better choice over horizontal?
-> **Expected answer:**
-> - Service is stateful and can't be refactored quickly (legacy apps, databases).
-> - Operational cost of distributed state management outweighs the capacity benefit.
-> - Need a fast fix with low risk — vertical scaling has zero architectural prerequisites.
-> - For databases, scaling up (bigger instance) is often right before introducing read replicas or sharding.
-> - No added network overhead or coordination complexity.
-> **Why this is strong:** It shows the candidate doesn't treat horizontal scaling as universally superior — they reason about tradeoffs based on constraints.
-
 ## References
 
 - [Kubernetes Horizontal Pod Autoscaler](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) — official HPA docs covering metrics, behavior tuning, and scaling algorithms

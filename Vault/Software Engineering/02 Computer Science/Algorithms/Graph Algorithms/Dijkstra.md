@@ -88,25 +88,25 @@ Shortest A→D path: A→B→C→D (cost 4)
 
 ## Questions
 
-- **Why does Dijkstra require non-negative edge weights?**
-  - Dijkstra is greedy: it treats the extracted minimum-distance node as finalized.
-  - Non-negative weights guarantee no future path through unfinalized nodes can undercut a finalized distance.
-  - A negative-weight edge can create a later, cheaper path to an already-finalized node, producing wrong results.
-  - Bellman-Ford relaxes all edges V-1 times without the finalization assumption, handling negative weights at `O(VE)` cost.
-  - **Tradeoff**: Bellman-Ford handles negative weights but is slower — accept the non-negative constraint when graph structure allows it.
+> [!QUESTION]- Why does Dijkstra require non-negative edge weights?
+  > - Dijkstra is greedy: it treats the extracted minimum-distance node as finalized.
+  > - Non-negative weights guarantee no future path through unfinalized nodes can undercut a finalized distance.
+  > - A negative-weight edge can create a later, cheaper path to an already-finalized node, producing wrong results.
+  > - Bellman-Ford relaxes all edges V-1 times without the finalization assumption, handling negative weights at `O(VE)` cost.
+  > - **Tradeoff**: Bellman-Ford handles negative weights but is slower — accept the non-negative constraint when graph structure allows it.
 
-- **What data structures make Dijkstra practical at scale?**
-  - Adjacency list keeps memory proportional to edges for sparse graphs vs `O(V²)` for adjacency matrix.
-  - Min-heap priority queue gives `O(log V)` extraction vs `O(V)` linear scan.
-  - Lazy deletion avoids the need for decrease-key, which most standard library heaps lack.
-  - Distance array plus parent array supports `O(V)` path reconstruction by walking parent pointers backward.
-  - **Tradeoff**: Fibonacci heap improves asymptotic complexity to `O(V log V + E)` but has worse constant factors — binary heap wins in practice for most graph sizes.
+> [!QUESTION]- What data structures make Dijkstra practical at scale?
+  > - Adjacency list keeps memory proportional to edges for sparse graphs vs `O(V²)` for adjacency matrix.
+  > - Min-heap priority queue gives `O(log V)` extraction vs `O(V)` linear scan.
+  > - Lazy deletion avoids the need for decrease-key, which most standard library heaps lack.
+  > - Distance array plus parent array supports `O(V)` path reconstruction by walking parent pointers backward.
+  > - **Tradeoff**: Fibonacci heap improves asymptotic complexity to `O(V log V + E)` but has worse constant factors — binary heap wins in practice for most graph sizes.
 
-- **When should you prefer A* over Dijkstra?**
-  - A* adds a heuristic estimating remaining cost to the target, prioritizing nodes that appear closer to the goal.
-  - With an admissible heuristic (never overestimates), A* finds optimal paths while exploring fewer nodes.
-  - Without a good heuristic (e.g., abstract cost graphs, all-pairs queries), A* degrades to Dijkstra with extra overhead.
-  - **Tradeoff**: A* trades generality for speed — it needs domain-specific knowledge (the heuristic) but can explore orders of magnitude fewer nodes on spatial graphs.
+> [!QUESTION]- When should you prefer A* over Dijkstra?
+  > - A* adds a heuristic estimating remaining cost to the target, prioritizing nodes that appear closer to the goal.
+  > - With an admissible heuristic (never overestimates), A* finds optimal paths while exploring fewer nodes.
+  > - Without a good heuristic (e.g., abstract cost graphs, all-pairs queries), A* degrades to Dijkstra with extra overhead.
+  > - **Tradeoff**: A* trades generality for speed — it needs domain-specific knowledge (the heuristic) but can explore orders of magnitude fewer nodes on spatial graphs.
 
 ## References
 

@@ -20,14 +20,6 @@ Git is the dominant distributed VCS, where every developer holds a full copy of 
 
 ## Questions
 
-> [!QUESTION]- What is a version control system (VCS)?
-> A VCS is a tool that tracks changes to files over time and lets you:
-> - keep a history of commits (who changed what, when, and why)
-> - collaborate safely (pull, push, resolve conflicts)
-> - work in parallel via branches and merge changes back
-> - tag/release specific versions and roll back when needed
-> In practice, Git is the most common distributed VCS.
-
 ## Links
 
 - [Pro Git book](https://git-scm.com/book/en/v2)

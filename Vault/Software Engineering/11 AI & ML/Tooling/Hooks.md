@@ -126,26 +126,26 @@ Cursor uses a similar structure in `.cursor/hooks.json` with event names like `a
 
 ## Questions
 
-- **Why should destructive-operation controls live in PreToolUse rather than PostToolUse?**
-  - PreToolUse is the last decision point before side effects execute.
-  - PostToolUse runs after execution and cannot reliably undo external side effects like file writes, shell commands, or API calls.
-  - Preventive controls produce cleaner failure modes than post-hoc remediation.
-  - The complementary pattern: deny in pre-hooks, then lint, format, and log in post-hooks.
-  - **Tradeoff**: pre-hooks add latency to every tool call in scope, so apply them only to operations where the cost of an unblocked violation exceeds the cost of the delay.
+> [!QUESTION]- Why should destructive-operation controls live in PreToolUse rather than PostToolUse?
+  > - PreToolUse is the last decision point before side effects execute.
+  > - PostToolUse runs after execution and cannot reliably undo external side effects like file writes, shell commands, or API calls.
+  > - Preventive controls produce cleaner failure modes than post-hoc remediation.
+  > - The complementary pattern: deny in pre-hooks, then lint, format, and log in post-hooks.
+  > - **Tradeoff**: pre-hooks add latency to every tool call in scope, so apply them only to operations where the cost of an unblocked violation exceeds the cost of the delay.
 
-- **How do you design hook pipelines that improve quality without making the agent unusably slow?**
-  - Gate only high-risk actions synchronously — destructive shell commands, writes to protected paths.
-  - Keep post-hooks deterministic and incremental — format changed files, not the whole repo.
-  - Move expensive validation (full test suites, security scans) to commit and CI boundaries or async hook paths.
-  - Track hook execution time and failure rate; split or prune hooks that dominate loop latency.
-  - **Tradeoff**: more hooks mean more safety but more friction — achieve maximum coverage at minimum loop cost by matching hooks narrowly and running the cheapest effective check.
+> [!QUESTION]- How do you design hook pipelines that improve quality without making the agent unusably slow?
+  > - Gate only high-risk actions synchronously — destructive shell commands, writes to protected paths.
+  > - Keep post-hooks deterministic and incremental — format changed files, not the whole repo.
+  > - Move expensive validation (full test suites, security scans) to commit and CI boundaries or async hook paths.
+  > - Track hook execution time and failure rate; split or prune hooks that dominate loop latency.
+  > - **Tradeoff**: more hooks mean more safety but more friction — achieve maximum coverage at minimum loop cost by matching hooks narrowly and running the cheapest effective check.
 
-- **When should you use an LLM-based hook instead of a deterministic script?**
-  - Use deterministic scripts when the policy can be expressed as a clear rule — regex match, file path check, exit code.
-  - Use LLM-based hooks when the decision requires judgment that rules cannot capture, such as whether a code change introduces a security risk.
-  - LLM hooks add 1-5 seconds of inference latency and introduce non-determinism where the same input may produce different decisions.
-  - Reserve LLM hooks for high-stakes, ambiguous decisions where a false negative is expensive.
-  - **Tradeoff**: deterministic hooks are fast and predictable but rigid — LLM hooks handle nuance but add cost and unpredictability, so use them where the cost of a missed violation exceeds the cost of occasional false positives and extra latency.
+> [!QUESTION]- When should you use an LLM-based hook instead of a deterministic script?
+  > - Use deterministic scripts when the policy can be expressed as a clear rule — regex match, file path check, exit code.
+  > - Use LLM-based hooks when the decision requires judgment that rules cannot capture, such as whether a code change introduces a security risk.
+  > - LLM hooks add 1-5 seconds of inference latency and introduce non-determinism where the same input may produce different decisions.
+  > - Reserve LLM hooks for high-stakes, ambiguous decisions where a false negative is expensive.
+  > - **Tradeoff**: deterministic hooks are fast and predictable but rigid — LLM hooks handle nuance but add cost and unpredictability, so use them where the cost of a missed violation exceeds the cost of occasional false positives and extra latency.
 
 ## References
 

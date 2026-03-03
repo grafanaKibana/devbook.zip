@@ -20,18 +20,6 @@ These are not beginner topics with a ceiling. A senior developer's edge comes fr
 
 ## Questions
 
-> [!QUESTION]- Which access modifiers exist in C# and what are the defaults?
-> `public`, `private`, `protected`, `internal`, `protected internal`, `private protected`.
-> Fields and methods default to `private`. Top-level classes and structs default to `internal`.
-> This matters because incorrect access assumptions are a common source of "it compiles locally but fails from another assembly" issues.
-
-> [!QUESTION]- What is implicit typing (`var`) and when should you use it?
-> `var` tells the compiler to infer the variable's static type from the initializer expression. The variable is still strongly typed at compile time — only the declaration is shorter.
-> Use `var` when the type is obvious from context (e.g., `var list = new List<string>()`). Avoid `var` when the right-hand side does not make the type immediately clear, because it hurts readability for other developers.
-
-> [!QUESTION]- What is a variable in terms of the C# type system?
-> A variable is a named, typed storage location that holds either a value (for value types) or a reference to an object (for reference types). The declared type determines what operations are valid and how assignment and parameter passing behave.
-
 ## Links
 
 - [C# fundamentals (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/) — Official guide to types, classes, and core language features.

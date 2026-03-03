@@ -91,23 +91,23 @@ Roll to "aba": (312 - 3·100)·10 + 1 = 121 → verify → match at 4
 
 ## Questions
 
-- **How does the rolling hash achieve O(1) window updates?**
-  - The hash treats the window as a polynomial in a chosen base. Sliding right means subtracting the leftmost character's weighted contribution, multiplying by the base, and adding the new rightmost character.
-  - All three operations are constant-time arithmetic modulo the prime.
-  - Without rolling, each window hash would require `O(m)` computation, making the scan `O(nm)` — no better than naive search.
-  - **Tradeoff**: rolling hash requires careful modular arithmetic and a good choice of base and prime — the `O(1)` update comes at the cost of implementation care to avoid overflow and collision.
+> [!QUESTION]- How does the rolling hash achieve O(1) window updates?
+  > - The hash treats the window as a polynomial in a chosen base. Sliding right means subtracting the leftmost character's weighted contribution, multiplying by the base, and adding the new rightmost character.
+  > - All three operations are constant-time arithmetic modulo the prime.
+  > - Without rolling, each window hash would require `O(m)` computation, making the scan `O(nm)` — no better than naive search.
+  > - **Tradeoff**: rolling hash requires careful modular arithmetic and a good choice of base and prime — the `O(1)` update comes at the cost of implementation care to avoid overflow and collision.
 
-- **Why is character-by-character verification necessary on hash match?**
-  - Hash functions map a large input space to a smaller output space, so collisions are mathematically inevitable.
-  - A hash match means the pattern and window might be equal; only character comparison confirms it.
-  - Skipping verification turns the algorithm into a probabilistic filter that can report false positives.
-  - **Tradeoff**: verification costs `O(m)` per match, but the expected number of false matches is small with a good hash — the correctness guarantee is worth the marginal cost.
+> [!QUESTION]- Why is character-by-character verification necessary on hash match?
+  > - Hash functions map a large input space to a smaller output space, so collisions are mathematically inevitable.
+  > - A hash match means the pattern and window might be equal; only character comparison confirms it.
+  > - Skipping verification turns the algorithm into a probabilistic filter that can report false positives.
+  > - **Tradeoff**: verification costs `O(m)` per match, but the expected number of false matches is small with a good hash — the correctness guarantee is worth the marginal cost.
 
-- **When should you choose Rabin-Karp over KMP?**
-  - When multi-pattern matching is needed — Rabin-Karp's hash-set extension is simpler than implementing Aho-Corasick.
-  - When implementation simplicity matters and expected-case `O(n+m)` is acceptable.
-  - When the search is probabilistic by nature (e.g., plagiarism detection scanning many documents against many patterns).
-  - **Tradeoff**: Rabin-Karp sacrifices worst-case determinism for implementation simplicity and natural multi-pattern support — accept this when collision risk is low and the use case favors hash-based filtering.
+> [!QUESTION]- When should you choose Rabin-Karp over KMP?
+  > - When multi-pattern matching is needed — Rabin-Karp's hash-set extension is simpler than implementing Aho-Corasick.
+  > - When implementation simplicity matters and expected-case `O(n+m)` is acceptable.
+  > - When the search is probabilistic by nature (e.g., plagiarism detection scanning many documents against many patterns).
+  > - **Tradeoff**: Rabin-Karp sacrifices worst-case determinism for implementation simplicity and natural multi-pattern support — accept this when collision risk is low and the use case favors hash-based filtering.
 
 ## References
 

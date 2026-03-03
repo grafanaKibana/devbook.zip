@@ -134,9 +134,6 @@ app.UseMiddleware<CorrelationIdMiddleware>();
 
 ## Questions
 
-> [!QUESTION]- What is middleware in ASP.NET Core?
-> Middleware is a component in the HTTP request pipeline. It can inspect/modify the request and response, call the next component, or short-circuit the pipeline (for example, return a cached response without calling the next middleware). Order matters — middleware registered first runs first on the way in and last on the way out.
-
 > [!QUESTION]- Action filter vs middleware: what is the difference?
 > Middleware is pipeline-level and can apply to all requests (before routing/MVC, around endpoint execution). Action filters are MVC-level and run only for MVC actions, with access to action context, model binding, and results; they are a better fit for cross-cutting concerns that are specific to controller actions.
 

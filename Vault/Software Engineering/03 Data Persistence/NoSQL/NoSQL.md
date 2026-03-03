@@ -60,9 +60,6 @@ Document store example: a product page is an aggregate, so store it as one docum
 
 ## Questions
 
-> [!QUESTION]- What are non-relational databases?
-> Non-relational databases (often grouped under the term NoSQL) store and query data without the classic relational model of normalized tables and joins. They typically favor flexible schemas and horizontal scaling, and come in several major families: key-value, document, wide-column, and graph databases.
-
 > [!QUESTION]- Which NoSQL family fits a user profile API with very frequent reads by user id, and why?
 > Key value or document store.
 > Use key value if the access pattern is almost entirely by id and you do not need rich querying.
