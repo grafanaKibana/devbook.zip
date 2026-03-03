@@ -5,18 +5,11 @@
 
 # Intro
 
-## Deeper Explanation
-
-## Questions
-
-> [!QUESTION]- Explain Agile, Scrum, Kanban, and Waterfall.
-> - Agile: an umbrella of values and principles (iterative delivery, feedback, adapting to change).
-> - Scrum: an Agile framework with defined roles (Product Owner, Scrum Master, Developers), events (sprint planning, daily scrum, review, retrospective), and artifacts (product backlog, sprint backlog, increment).
-> - Kanban: a flow-based method focused on visualizing work, limiting work in progress, and optimizing lead time/throughput.
-> - Waterfall: a sequential lifecycle (requirements -> design -> implementation -> testing -> release) that works best when requirements are stable and change is expensive.
+The Software Development Lifecycle is the sequence of phases a feature travels from idea to production and beyond: requirements, design, implementation, testing, deployment, and maintenance. Choosing the right process model (waterfall, iterative, agile) determines how quickly a team gets feedback and how expensive a wrong assumption becomes. Example: skipping a spike before committing to a sprint estimate is how two-week tasks become two-month projects.
 
 ## Links
 
+- [Software development process (Wikipedia)](https://en.wikipedia.org/wiki/Software_development_process)
 <!-- whats-next:start -->
 
 ---

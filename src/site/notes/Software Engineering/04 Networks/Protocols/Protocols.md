@@ -5,27 +5,12 @@
 
 # Intro
 
-## Deeper Explanation
-
-## Questions
-
-> [!QUESTION]- URI vs URL: what is the difference?
-> URI (Uniform Resource Identifier) identifies a resource.
-> URL (Uniform Resource Locator) is a type of URI that also tells you how and where to access the resource (scheme plus location).
-> Example: `https://example.com/a/b?x=1#top` is a URL (and therefore a URI).
+Protocols are the agreed-upon rules that let machines communicate: what to send, in what order, and what to do when things go wrong. Every layer of the stack (link, network, transport, application) has its own protocol set, and production debugging often means knowing which layer broke the contract. Example: an HTTP 502 can mean the upstream is down, or it can mean a TLS version mismatch between proxy and origin that never shows up in application logs.
 
 ## Links
+
 - [RFC 3986: Uniform Resource Identifier (URI): Generic Syntax](https://datatracker.ietf.org/doc/html/rfc3986)
 - [MDN: URL](https://developer.mozilla.org/en-US/docs/Web/API/URL)
-
-## Deeper Explanation
-
-
-## Questions
-
-
-## Links
-
 <!-- whats-next:start -->
 
 ---

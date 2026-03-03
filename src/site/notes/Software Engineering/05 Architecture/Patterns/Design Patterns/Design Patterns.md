@@ -256,44 +256,7 @@ Why interviewers like it:
 4. Observer with long-lived publishers can leak memory because event subscriptions keep subscribers alive. Always define unsubscribe paths (or weak subscriptions) and verify with memory profiling and heap snapshots that transient listeners are collectible.
 
 ## Questions
-> [!QUESTION]- What are design patterns and why do we need them?
-> Design patterns are proven, repeatable approaches to common design problems (not copy-paste code). They communicate intent, reduce accidental complexity, and improve maintainability through loose coupling.
-> Expected answer:
-> - Named reusable design templates.
-> - Shared team vocabulary.
-> - Better extensibility and testability.
-> Why this matters: interviewers check whether you think in reusable design decisions instead of ad-hoc classes.
-> [!QUESTION]- What categories of patterns exist?
-> For GoF patterns, the classic categories are:
-> - Creational: object creation (how instances are constructed)
-> - Structural: object composition (how classes/objects are arranged)
-> - Behavioral: object interaction (how responsibilities and communication are organized)
-> Expected answer:
-> - Creational, Structural, Behavioral.
-> - Classify by where change pressure appears.
-> Why this matters: category mapping shows fast architectural reasoning and helps justify pattern choice under time pressure.
-> [!QUESTION]- What is an anti-pattern?
-> An anti-pattern is a recurring solution that appears useful but repeatedly causes high coupling, low testability, or operational problems.
-> Expected answer:
-> - Recognize recurring harmful design choices.
-> - Explain why they fail over time.
-> - Propose a safer alternative.
-> Why this matters: strong candidates avoid cargo-cult patterns and can explain failure mechanisms, not only definitions.
-> [!QUESTION]- Name a few patterns from each category and the basic idea behind them.
-> Creational:
-> - Factory Method: delegate creation to creators/factories to decouple callers from concrete types.
-> - Builder: construct complex objects step-by-step.
->
-> Structural:
-> - Adapter: make incompatible interfaces work together.
-> - Decorator: add behavior by wrapping instead of subclassing.
->
-> Behavioral:
-> - Strategy: swap algorithms behind a common interface.
-> - Observer: publish/subscribe notifications.
-> Expected answer:
-> - Give one concrete use-case per chosen pattern.
-> Why this matters: interviewers score practical mapping from pattern names to real design problems.
+
 > [!QUESTION]- You need to add a new robot type to an existing system without modifying existing code. Which patterns enable this?
 > Combine Factory Method (instantiate new robot implementation), Strategy (inject new movement/task behavior), and Template Method (reuse stable execution skeleton).
 > Expected answer:

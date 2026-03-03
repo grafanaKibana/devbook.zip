@@ -100,6 +100,23 @@ socket.NoDelay = true;  // disables Nagle's algorithm
 
 **Decision rule**: use TCP for anything where data loss is unacceptable (web APIs, databases, file transfer). Use UDP when you control reliability at the application layer or when low latency matters more than guaranteed delivery (real-time video, DNS, QUIC/HTTP/3).
 
+## Questions
+
+> [!QUESTION]- Why does TCP's three-way handshake exist, and when does its latency cost become a real problem?
+> - The handshake synchronizes sequence numbers and confirms both sides are reachable before sending data.
+> - It adds one full round-trip of latency before the first byte of application data can be sent.
+> - For short-lived connections (single HTTP request, DNS-over-TCP), handshake latency dominates total request time.
+> - HTTP/2 multiplexing amortizes the handshake across many requests on one connection. QUIC (HTTP/3) eliminates it entirely by combining transport and TLS handshakes.
+> - **Tradeoff**: the handshake guarantees reliable connection setup but costs latency — use connection pooling or QUIC when handshake overhead is unacceptable.
+
+> [!QUESTION]- How do flow control and congestion control differ, and what happens when you confuse them?
+> - Flow control protects the receiver: the receive window limits how much unacknowledged data the sender can push.
+> - Congestion control protects the network: the congestion window limits send rate based on detected packet loss.
+> - The effective send rate is the minimum of both windows.
+> - Tuning only one side causes problems: a large receive window with aggressive congestion control still causes network drops; a small receive window with conservative congestion control wastes available bandwidth.
+> - **Tradeoff**: flow control is endpoint-local and deterministic; congestion control is network-wide and heuristic — both must be tuned together for optimal throughput.
+
+
 ## References
 
 - [Transmission Control Protocol (RFC 793)](https://www.rfc-editor.org/rfc/rfc793) — the original TCP specification; defines the three-way handshake, sequence numbers, flow control, and state machine.

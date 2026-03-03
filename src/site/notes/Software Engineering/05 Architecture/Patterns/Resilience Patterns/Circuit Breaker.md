@@ -206,38 +206,26 @@ Interview nuance: teams often say "retry inside breaker" to mean retries must co
 
 # Questions
 
-## 1) Your AI service calls an LLM API and sees intermittent 429 plus occasional 500. How do you configure the breaker and what do you do when it opens?
+> [!QUESTION]- Your AI service calls an LLM API and sees intermittent 429 plus occasional 500. How do you configure the breaker and what do you do when it opens?
+> - Count `429`, `5xx`, network, and timeout faults in `ShouldHandle`.
+> - Set `FailureRatio`, `SamplingDuration`, and `MinimumThroughput` to match real traffic volume.
+> - Configure moderate retry with jitter before breaker evaluation.
+> - On open: fast-fail and switch to fallback (cache, smaller local model, queued async processing).
+> - Emit breaker state transitions to logs/metrics and page only on sustained open state.
+> - **Tradeoff**: it tests whether you can convert noisy provider behavior into explicit resilience policy and graceful degradation.
 
-Expected answer:
+> [!QUESTION]- Why is retry placement relative to circuit breaker important?
+> - Retry should execute inside the same resilience pipeline before breaker decisions.
+> - Outer retries around an already open breaker create extra pressure and useless attempts.
+> - Proper ordering gives cleaner failure accounting and earlier protection.
+> - **Tradeoff**: it checks if you understand composition semantics, not just individual patterns.
 
-- Count `429`, `5xx`, network, and timeout faults in `ShouldHandle`.
-- Set `FailureRatio`, `SamplingDuration`, and `MinimumThroughput` to match real traffic volume.
-- Configure moderate retry with jitter before breaker evaluation.
-- On open: fast-fail and switch to fallback (cache, smaller local model, queued async processing).
-- Emit breaker state transitions to logs/metrics and page only on sustained open state.
-
-Why this is asked: it tests whether you can convert noisy provider behavior into explicit resilience policy and graceful degradation.
-
-## 2) Why is retry placement relative to circuit breaker important?
-
-Expected answer:
-
-- Retry should execute inside the same resilience pipeline before breaker decisions.
-- Outer retries around an already open breaker create extra pressure and useless attempts.
-- Proper ordering gives cleaner failure accounting and earlier protection.
-
-Why this is asked: it checks if you understand composition semantics, not just individual patterns.
-
-## 3) How do you avoid a half-open thundering herd in Kubernetes-scale deployments?
-
-Expected answer:
-
-- Limit probe concurrency and keep half-open trial volume small.
-- Add jitter to retry and recovery timing.
-- Use global controls (rate limits, queueing, bulkheads) so per-pod recovery does not synchronize spikes.
-- Watch fleet-wide metrics, not only single-instance breaker events.
-
-Why this is asked: it tests distributed-systems thinking beyond single-process code.
+> [!QUESTION]- How do you avoid a half-open thundering herd in Kubernetes-scale deployments?
+> - Limit probe concurrency and keep half-open trial volume small.
+> - Add jitter to retry and recovery timing.
+> - Use global controls (rate limits, queueing, bulkheads) so per-pod recovery does not synchronize spikes.
+> - Watch fleet-wide metrics, not only single-instance breaker events.
+> - **Tradeoff**: it tests distributed-systems thinking beyond single-process code.
 
 # References
 
