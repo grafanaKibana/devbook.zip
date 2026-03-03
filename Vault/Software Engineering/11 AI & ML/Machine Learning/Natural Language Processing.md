@@ -127,6 +127,23 @@ Console.WriteLine($"Confidence: {result.Value.ConfidenceScores.Positive:P}");
 **Decision rule**: use monolingual models when your product serves one language and accuracy is critical. Use multilingual models when you need coverage across many languages and per-language accuracy can be slightly lower. Use LLMs when the task complexity outweighs the cost of per-call API pricing.
 
 
+## Questions
+
+> [!QUESTION]- When should you fine-tune a small model instead of prompting an LLM for an NLP task?
+> - Fine-tune when you have labeled training data and the task is well-defined (classification, NER, sentiment).
+> - Fine-tuned small models (BERT, DistilBERT) run at millisecond latency on-device vs seconds for LLM API calls.
+> - Per-request cost is near zero for on-device inference vs $0.01–$0.10+ per LLM call at scale.
+> - LLMs win when the task is complex (multi-step reasoning, summarization), training data is scarce, or rapid iteration matters more than unit cost.
+> - **Tradeoff**: fine-tuning trades upfront training effort and data collection for dramatically lower latency and cost at scale — use LLMs for prototyping, then evaluate whether fine-tuning is worth the investment for production.
+
+> [!QUESTION]- Why do multilingual NLP models underperform monolingual ones, and when is that acceptable?
+> - Multilingual models split their capacity across 100+ languages, so per-language representation quality is lower.
+> - Monolingual models concentrate all parameters on one language, achieving higher accuracy on that language's benchmarks.
+> - Multilingual models are acceptable when you need coverage across many languages and per-language accuracy can be slightly lower.
+> - For high-stakes tasks (medical NER, legal classification), the accuracy gap may be unacceptable — use language-specific models.
+> - **Tradeoff**: multilingual models trade per-language accuracy for language coverage — accept the tradeoff when serving many languages with limited ML infrastructure, but validate on your target languages explicitly.
+
+
 ## References
 
 - [Hugging Face NLP Course](https://huggingface.co/learn/nlp-course/chapter1/1) — free, comprehensive course covering tokenization, transformers, fine-tuning, and all major NLP tasks with code examples.

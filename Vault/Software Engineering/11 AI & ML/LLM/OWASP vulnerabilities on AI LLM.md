@@ -141,26 +141,26 @@ Adversaries can trigger denial-of-wallet by forcing high token usage, oversized 
 
 ## Questions
 
-- **Why is prompt injection fundamentally harder to prevent than SQL injection?**
-  - SQL injection is mainly a syntax boundary problem, and parameterized queries create a deterministic code-data split.
-  - Prompt injection is a semantic boundary problem where instructions and data coexist in natural language.
-  - There is no universally reliable delimiter the model can always respect across direct, indirect, and multimodal inputs.
-  - The practical defense model is layered and probabilistic: filtering, monitoring, privilege separation, and output sanitization.
-  - **Tradeoff**: stronger defense adds latency and engineering complexity, so depth of controls should match expected blast radius.
+> [!QUESTION]- Why is prompt injection fundamentally harder to prevent than SQL injection?
+  > - SQL injection is mainly a syntax boundary problem, and parameterized queries create a deterministic code-data split.
+  > - Prompt injection is a semantic boundary problem where instructions and data coexist in natural language.
+  > - There is no universally reliable delimiter the model can always respect across direct, indirect, and multimodal inputs.
+  > - The practical defense model is layered and probabilistic: filtering, monitoring, privilege separation, and output sanitization.
+  > - **Tradeoff**: stronger defense adds latency and engineering complexity, so depth of controls should match expected blast radius.
 
-- **How does Excessive Agency (LLM06) compound with Prompt Injection (LLM01)?**
-  - Prompt injection gives an attacker influence over model decisions.
-  - Excessive agency converts that influence into real actions through tools and permissions.
-  - Combined, the attacker effectively operates with the model's authority boundary.
-  - Mitigation must address both sides: reduce injection success rate and reduce available authority after compromise.
-  - **Tradeoff**: tighter permissions reduce automation convenience and user experience, but align capabilities with trust boundaries.
+> [!QUESTION]- How does Excessive Agency (LLM06) compound with Prompt Injection (LLM01)?
+  > - Prompt injection gives an attacker influence over model decisions.
+  > - Excessive agency converts that influence into real actions through tools and permissions.
+  > - Combined, the attacker effectively operates with the model's authority boundary.
+  > - Mitigation must address both sides: reduce injection success rate and reduce available authority after compromise.
+  > - **Tradeoff**: tighter permissions reduce automation convenience and user experience, but align capabilities with trust boundaries.
 
-- **Why should system prompts be treated as public rather than secret?**
-  - Adversarial prompting and jailbreak techniques can extract hidden instructions in real systems.
-  - Security that depends on prompt secrecy is obscurity, not enforceable control.
-  - System prompts should be written as if attackers can read them.
-  - Deterministic enforcement belongs in RBAC, output filtering, and tool permission architecture.
-  - **Tradeoff**: this shifts effort from prompt design to code controls, but produces more auditable and durable security.
+> [!QUESTION]- Why should system prompts be treated as public rather than secret?
+  > - Adversarial prompting and jailbreak techniques can extract hidden instructions in real systems.
+  > - Security that depends on prompt secrecy is obscurity, not enforceable control.
+  > - System prompts should be written as if attackers can read them.
+  > - Deterministic enforcement belongs in RBAC, output filtering, and tool permission architecture.
+  > - **Tradeoff**: this shifts effort from prompt design to code controls, but produces more auditable and durable security.
 
 ## References
 

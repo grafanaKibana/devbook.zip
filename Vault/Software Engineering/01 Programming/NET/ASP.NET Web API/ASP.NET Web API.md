@@ -61,31 +61,9 @@ public sealed class OrdersController : ControllerBase
  
 ## Questions
 
-> [!QUESTION]- What is mapping, why is it needed, and how can it be implemented?
-> Mapping is the transformation of data from one shape/type to another (for example, Domain Entity -> DTO -> API response model).
-> It is used to decouple layers, hide internal details, enforce API contracts, prevent over-posting, and shape data for clients.
-> Typical implementation options:
-> - manual mapping (constructors, factory methods, extension methods)
-> - mapping libraries (AutoMapper, Mapster)
-> - code generation / source generators for mappings
-
-> [!QUESTION]- What are serialization and deserialization?
-> Serialization converts an in-memory object graph into a format that can be stored or transmitted (for example, JSON text or a binary payload).
-> Deserialization is the reverse process: converting that stored/transmitted representation back into objects.
-> Common uses: API payloads, persistence, caching, messaging.
-
-> [!QUESTION]- What is JSON and why is it used?
-> JSON (JavaScript Object Notation) is a lightweight text data format based on objects (name/value pairs) and arrays.
-> It is widely used for data interchange, especially in HTTP APIs, because it is human-readable, language-agnostic, and easy to parse.
-> In .NET, JSON is commonly handled with `System.Text.Json` (built-in) or Newtonsoft.Json.
-
 > [!QUESTION]- Where should authentication and authorization live in an ASP.NET Core API?
 > Put authentication and authorization in the pipeline so endpoints can assume an authenticated principal.
 > Use middleware for auth and use endpoint metadata and policies to decide access per endpoint.
-
-> [!QUESTION]- When do you choose middleware over an endpoint filter?
-> Choose middleware for cross-cutting concerns that apply broadly (logging, auth, exception handling).
-> Choose endpoint filters for endpoint scoped behavior and validation around Minimal APIs.
 
 ## Links
 

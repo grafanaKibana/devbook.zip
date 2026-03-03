@@ -58,9 +58,6 @@ public static class MathUtility
 
 ## Questions
 
-> [!QUESTION]- What is a namespace? Why do we need it?
-> A namespace groups related types and prevents naming conflicts by enabling fully qualified names when simple names collide. In daily development, `using` directives keep call sites readable while preserving unambiguous resolution during compilation. It also improves project structure by mapping code to logical domains.
-
 > [!QUESTION]- When should you prefer file-scoped namespaces over block-scoped namespaces?
 > Prefer file-scoped namespaces when a file contains one namespace and regular type declarations, because it reduces indentation and visual noise. Use block-scoped form when a file needs multiple namespace blocks or unusual nesting patterns.
 

@@ -73,13 +73,6 @@ For patterns on coordinating multiple agents, see [[Software Engineering/11 AI &
 > - Teams that start with complex multi-agent systems often spend more time debugging coordination than solving the actual problem
 > - Key tradeoff: simpler systems are easier to debug and cheaper to run, but cannot handle tasks requiring dynamic decision-making
 
-> [!QUESTION]- Why is tool design often more important than prompt design in agentic systems?
-> - In a single LLM call, the prompt is the entire interface; in an agentic system, the LLM interacts with tools repeatedly
-> - Each tool call is a decision point where the agent can succeed or fail — errors compound across steps
-> - Poorly documented tools, ambiguous parameters, or inconsistent error messages cause wrong tool calls
-> - Anthropic's SWE-bench team spent more time optimizing tools (e.g., absolute vs relative file paths) than prompts, because tool quality directly determined success rate
-> - Key tradeoff: investing in tool interface quality yields compounding returns across all agent interactions, while prompt improvements affect only the initial call
-
 ## References
 
 - [Building Effective Agents (Anthropic Engineering)](https://www.anthropic.com/engineering/building-effective-agents)

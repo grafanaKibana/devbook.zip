@@ -165,38 +165,26 @@ That per-operation selection is usually what interviewers want to hear.
 
 ## Interview Questions
 
-### 1) Your service uses Postgres for orders and Redis for session cache. During a partition, how do they behave differently and why is that acceptable?
+> [!QUESTION]- Your service uses Postgres for orders and Redis for session cache. During a partition, how do they behave differently and why is that acceptable?
+> - Orders are correctness-critical, so write path should favor consistency (reject/timeout if quorum or primary connectivity is not safe).
+> - Session cache can favor availability; stale/missing session values are tolerable and recoverable.
+> - This is an operation-level CAP decision, not contradiction.
+> - The database remains source of truth; cache is disposable acceleration.
+> - **Tradeoff**: it tests whether you can map CAP to business impact instead of reciting definitions.
 
-Expected answer:
+> [!QUESTION]- If CAP is only about partitions, why do we still tune consistency levels on healthy clusters?
+> - Because PACELC: without partition, there is still latency vs consistency tradeoff.
+> - Waiting for more replicas/quorum improves freshness/ordering confidence but increases latency.
+> - Reading locally reduces latency but may return older data.
+> - Practical tuning depends on endpoint SLO and correctness requirements.
+> - **Tradeoff**: it separates textbook CAP knowledge from real operational design judgment.
 
-- Orders are correctness-critical, so write path should favor consistency (reject/timeout if quorum or primary connectivity is not safe).
-- Session cache can favor availability; stale/missing session values are tolerable and recoverable.
-- This is an operation-level CAP decision, not contradiction.
-- The database remains source of truth; cache is disposable acceleration.
-
-Why this question matters: it tests whether you can map CAP to business impact instead of reciting definitions.
-
-### 2) If CAP is only about partitions, why do we still tune consistency levels on healthy clusters?
-
-Expected answer:
-
-- Because PACELC: without partition, there is still latency vs consistency tradeoff.
-- Waiting for more replicas/quorum improves freshness/ordering confidence but increases latency.
-- Reading locally reduces latency but may return older data.
-- Practical tuning depends on endpoint SLO and correctness requirements.
-
-Why this question matters: it separates textbook CAP knowledge from real operational design judgment.
-
-### 3) A team says "our database is AP, so conflicts are fine." What follow-up would you ask?
-
-Expected answer:
-
-- Ask for exact conflict resolution policy (last-write-wins, merge function, user-assisted resolution).
-- Ask how causality/version metadata is stored and how retries stay idempotent.
-- Ask how reconciliation failures are detected (metrics, dead-letter, repair jobs, audits).
-- Ask which entities are forbidden from AP behavior (money movement, inventory decrements, security state).
-
-Why this question matters: senior candidates must translate AP choice into concrete safety controls.
+> [!QUESTION]- A team says "our database is AP, so conflicts are fine." What follow-up would you ask?
+> - Ask for exact conflict resolution policy (last-write-wins, merge function, user-assisted resolution).
+> - Ask how causality/version metadata is stored and how retries stay idempotent.
+> - Ask how reconciliation failures are detected (metrics, dead-letter, repair jobs, audits).
+> - Ask which entities are forbidden from AP behavior (money movement, inventory decrements, security state).
+> - **Tradeoff**: senior candidates must translate AP choice into concrete safety controls.
 
 ## References
 

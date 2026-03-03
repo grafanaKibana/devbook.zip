@@ -134,29 +134,26 @@ For deeper implementation patterns, use targeted follow-ups such as [[Software E
 
 ## Questions
 
-1. **Why do prompt anatomy and model settings have to be designed together?**
-   - Expected answer:
-     - Prompt text defines intent and constraints, settings define sampling behavior.
-     - A precise prompt can still fail with overly random settings.
-     - Conservative settings can still produce poor output if instructions are ambiguous.
-     - Reliable systems tune both and evaluate with task-specific metrics.
-   - Why: tests whether the candidate understands mechanism, not just terminology.
+> [!QUESTION]- Why do prompt anatomy and model settings have to be designed together?
+> - Prompt text defines intent and constraints, settings define sampling behavior.
+> - A precise prompt can still fail with overly random settings.
+> - Conservative settings can still produce poor output if instructions are ambiguous.
+> - Reliable systems tune both and evaluate with task-specific metrics.
+> - **Tradeoff**: tests whether the candidate understands mechanism, not just terminology.
 
-2. **When should you prefer few-shot prompting over pure instruction prompting?**
-   - Expected answer:
-     - When output format is strict or hard to describe in words.
-     - When label boundaries are subtle and examples clarify decision edges.
-     - When consistency matters more than novelty.
-     - Start with minimal examples, then add edge cases.
-   - Why: checks practical decision-making under real product constraints.
+> [!QUESTION]- When should you prefer few-shot prompting over pure instruction prompting?
+> - When output format is strict or hard to describe in words.
+> - When label boundaries are subtle and examples clarify decision edges.
+> - When consistency matters more than novelty.
+> - Start with minimal examples, then add edge cases.
+> - **Tradeoff**: checks practical decision-making under real product constraints.
 
-3. **How would you debug a prompt that is accurate but too verbose and expensive?**
-   - Expected answer:
-     - Tighten output indicator with length limits and schema.
-     - Lower `max tokens` and add stop sequences.
-     - Keep `temperature` low for deterministic concise tasks.
-     - Evaluate token usage and failure rate after each change.
-   - Why: validates operational thinking about latency and cost.
+> [!QUESTION]- How would you debug a prompt that is accurate but too verbose and expensive?
+> - Tighten output indicator with length limits and schema.
+> - Lower `max tokens` and add stop sequences.
+> - Keep `temperature` low for deterministic concise tasks.
+> - Evaluate token usage and failure rate after each change.
+> - **Tradeoff**: validates operational thinking about latency and cost.
 
 ## References
 

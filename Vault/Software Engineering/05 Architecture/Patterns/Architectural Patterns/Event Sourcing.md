@@ -248,24 +248,21 @@ You can do CQRS without Event Sourcing, and Event Sourcing without strict CQRS s
 Decision rule: prefer CRUD by default; choose Event Sourcing only when immutable audit history, temporal reconstruction, or replay-based recovery are explicit and valuable requirements.
 
 ## Questions
-### 1) You need a full audit trail for financial transactions. Compare Event Sourcing with a CRUD model plus audit-log table. When does Event Sourcing justify its complexity?
-**Expected answer**
-- CRUD + audit table can satisfy compliance for many systems with lower operational overhead.
-- Event Sourcing is justified when domain behavior depends on historical intent and replay, not only final values.
-- If you need deterministic rebuild of multiple read models, Event Sourcing is stronger.
-- If temporal queries are frequent and core to product value, Event Sourcing can pay off.
-- If team maturity for schema evolution and projection operations is low, choose CRUD first.
-**Why this matters**
-It tests whether you can choose architecture by constraints instead of defaulting to the most sophisticated pattern.
-### 2) How do you evolve event schemas safely without breaking old streams?
-**Expected answer**
-- Use explicit event versioning strategy.
-- Prefer backward-compatible additive changes.
-- Introduce upcasters/adapters for old payloads.
-- Keep integration tests that replay production-like historical streams.
-- Treat event contracts as long-lived public interfaces.
-**Why this matters**
-Schema evolution is a common production failure mode in event-sourced systems, especially when teams skip compatibility testing across historical streams.
+> [!QUESTION]- You need a full audit trail for financial transactions. Compare Event Sourcing with a CRUD model plus audit-log table. When does Event Sourcing justify its complexity?
+> - CRUD + audit table can satisfy compliance for many systems with lower operational overhead.
+> - Event Sourcing is justified when domain behavior depends on historical intent and replay, not only final values.
+> - If you need deterministic rebuild of multiple read models, Event Sourcing is stronger.
+> - If temporal queries are frequent and core to product value, Event Sourcing can pay off.
+> - If team maturity for schema evolution and projection operations is low, choose CRUD first.
+> - **Tradeoff**: it tests whether you can choose architecture by constraints instead of defaulting to the most sophisticated pattern.
+
+> [!QUESTION]- How do you evolve event schemas safely without breaking old streams?
+> - Use explicit event versioning strategy.
+> - Prefer backward-compatible additive changes.
+> - Introduce upcasters/adapters for old payloads.
+> - Keep integration tests that replay production-like historical streams.
+> - Treat event contracts as long-lived public interfaces.
+> - **Tradeoff**: schema evolution is a common production failure mode in event-sourced systems, especially when teams skip compatibility testing across historical streams.
 ## References
 - [Event Sourcing - Greg Young FAQ](https://cqrs.nu/faq/event-sourcing)
 - [SimpleCQRS - Greg Young sample repository](https://github.com/gregoryyoung/m-r)
