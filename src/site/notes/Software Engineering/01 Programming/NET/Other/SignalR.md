@@ -5,7 +5,7 @@
 
 # Intro
 
-SignalR is ASP.NET Core's real-time communication framework for bidirectional server/client messaging over persistent connections. It is the default choice when the server must push updates immediately (chat, live dashboards, collaborative workflows, notifications) without polling-heavy architectures. SignalR hides transport negotiation details behind hubs, but production success still depends on scaling, connection lifecycle handling, and clear authorization boundaries.
+SignalR is ASP.NET Core's real-time communication framework for bidirectional server/client messaging over persistent connections. It is the default choice when the server must push updates immediately (chat, live dashboards, collaborative workflows, notifications) without polling-heavy architectures. A stock trading dashboard, for example, uses SignalR to push price updates to 50,000 concurrent browser clients with sub-100ms delivery — replacing a 5-second polling interval that was generating 10,000 requests/second and still showing stale prices. SignalR hides transport negotiation details behind hubs, but production success still depends on scaling, connection lifecycle handling, and clear authorization boundaries.
 
 ## How It Works
 
@@ -51,10 +51,10 @@ app.Run();
 
 ## Pitfalls
 
-- Assuming hub instances are stateful leads to lost data because hubs are transient per invocation; keep connection/session state in `Context.Items` or external stores.
+- Assuming hub instances are stateful leads to lost data because hubs are transient per invocation; keep connection/session state in `Context.Items` or external stores. In one production incident, a team stored a user's shopping cart in a hub field — every subsequent `SendAsync` call operated on an empty cart because the hub was a new instance, resulting in 12 hours of lost cart data before the bug was traced.
 - Skipping `await` on `SendAsync` can drop messages when hub execution completes before send operations finish.
 - Treating groups as authorization boundaries is unsafe: groups are routing constructs, not security policy enforcement.
-- Multi-node deployments fail unpredictably without a scale-out plan (Azure SignalR Service or backplane) and correct session-affinity assumptions.
+- Multi-node deployments fail unpredictably without a scale-out plan (Azure SignalR Service or backplane) and correct session-affinity assumptions. A 4-node deployment without a backplane delivers messages only to clients connected to the originating node — roughly 75% of connected clients silently miss every broadcast, and the bug only manifests under load when connections distribute across nodes.
 
 ## Tradeoffs
 

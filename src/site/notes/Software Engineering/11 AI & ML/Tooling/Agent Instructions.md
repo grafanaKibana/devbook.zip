@@ -33,19 +33,23 @@ For modular, reusable behavior packs that complement instruction files, see [[So
 
 ## Example
 
-Minimal but useful `AGENTS.md` snippet:
+Minimal but effective `AGENTS.md` for a .NET API project:
 
-```markdown
+````markdown
 # Project Instructions
 
 - Stack: .NET 9, ASP.NET Core, PostgreSQL 16, xUnit
-- Use `dotnet test` before proposing completion
-- Prefer explicit DTO mapping; do not return EF entities from API handlers
-- Keep feature code under `src/Features/<FeatureName>/`
+- Run `dotnet test` before proposing any change as complete
+- Prefer explicit DTO mapping; never return EF entities from API handlers
+- Feature code lives under `src/Features/<FeatureName>/`
 - Do not introduce new top-level folders without explicit rationale
-```
+- Error responses use ProblemDetails (RFC 9457) with `type` URI
+- All new endpoints require at least one integration test
+````
 
-This is effective because it sets execution defaults (stack, verification command), coding style (DTO boundary), and one architecture constraint (feature folder policy) in a compact form.
+This works because it sets: execution defaults (stack, verification command), data boundaries (DTO mapping), structural constraints (feature folders), error format (ProblemDetails), and quality gates (integration tests). Each rule is actionable — the agent can verify compliance mechanically.
+
+**Anti-pattern** — a 500-line instruction file that describes ideal architecture, coding philosophy, and team values. This consumes prompt budget, dilutes critical rules, and creates contradictions when the codebase does not match the aspirational description. Keep the core under 30 rules; link to deeper docs for reference.
 
 ## Pitfalls
 

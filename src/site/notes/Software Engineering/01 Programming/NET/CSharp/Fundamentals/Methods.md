@@ -4,7 +4,7 @@
 
 # Intro
 
-Methods are the core unit of behavior in C#: they define contracts, shape API boundaries, and express how data flows through a system. Parameter modifiers like `ref`, `in`, and `params` are not just syntax details - they directly affect mutability, copying/allocation behavior, and performance characteristics at call sites. Dispatch keywords like `virtual`, `override`, and `new` determine whether behavior is polymorphic at runtime or resolved by compile-time type. Use these features intentionally to design method APIs that stay clear, safe, and predictable as codebases grow.
+Methods are the core unit of behavior in C#: they define contracts, shape API boundaries, and express how data flows through a system. Parameter modifiers like `ref`, `in`, and `params` are not just syntax details — they directly affect mutability, copying/allocation behavior, and performance characteristics at call sites. A misplaced `in` on a 4-byte `int` adds overhead instead of saving it (the runtime passes a pointer plus a defensive copy), while a missing `ref` on a 128-byte `Matrix4x4` silently copies 128 bytes per call in a hot rendering loop. Dispatch keywords like `virtual`, `override`, and `new` determine whether behavior is polymorphic at runtime or resolved by compile-time type — getting this wrong creates bugs where the "right" method runs for the wrong variable type, invisible until you upcast.
 
 ## Input Parameters
 
@@ -174,9 +174,14 @@ Console.WriteLine(asDog.Category());    // Dog
 
 ## Tradeoffs
 
-- By-value vs `in` vs `ref`: by-value keeps APIs simplest and safest for small structs, `in` communicates read-only intent and can reduce copies for large structs, and `ref` enables mutation/rebinding but increases coupling and side-effect risk.
-- `override` vs `new`: `override` gives predictable runtime polymorphism and is usually the right choice for extensible designs, while `new` preserves separate behavior per compile-time type but can surprise callers and complicate versioning.
+| Decision | Option A | Option B | When A | When B |
+| --- | --- | --- | --- | --- |
+| **By-value vs `in`** | By-value (copies the argument) | `in` (readonly reference) | Small types (≤16 bytes: `int`, `Guid`, small structs) — copy is cheaper than indirection | Large structs (>16 bytes: `Matrix4x4`, `decimal`-heavy DTOs) — avoids 128+ byte copies on hot paths |
+| **`in` vs `ref`** | `in` (readonly reference) | `ref` (mutable reference) | Callee only reads — communicates intent, compiler enforces immutability | Callee must mutate or rebind — e.g., `TryParse` patterns, swap utilities |
+| **`override` vs `new`** | `override` (runtime polymorphism) | `new` (compile-time hiding) | Almost always — predictable dispatch, works through base-type references | Rare: deliberate compile-time-only behavior split, documented API hiding for compatibility |
+| **`params T[]` vs `params ReadOnlySpan<T>`** | `params T[]` (heap array per call) | `params ReadOnlySpan<T>` (stack or inline buffer) | Pre-C# 13 code, or when caller needs to store the array | C# 13+, hot paths where allocation pressure matters — span-based avoids the heap allocation |
 
+**Decision rule**: default to by-value for types ≤16 bytes and `override` for all polymorphic methods. Introduce `in` only when profiling shows copy cost matters (typically structs >16 bytes called >10K/sec). Use `new` only when you own both types and the behavior split is documented in XML comments.
 ## Questions
 
 > [!QUESTION]- Why might you need `ref` for reference types if reference types are already passed by reference?

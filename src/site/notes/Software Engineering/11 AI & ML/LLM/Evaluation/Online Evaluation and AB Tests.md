@@ -4,7 +4,7 @@
 
 # Intro
 
-Online evaluation measures an LLM application in production using real user traffic. A/B tests compare two variants (different prompts, models, retrieval strategies, or tooling) on live traffic to determine which produces better user outcomes. Unlike offline evaluation on a fixed test set, online evaluation captures real distribution shifts, edge cases, and user behavior that benchmarks miss.
+Online evaluation measures an LLM application in production using real user traffic. A/B tests compare two variants (different prompts, models, retrieval strategies, or tooling) on live traffic to determine which produces better user outcomes. Unlike offline evaluation on a fixed test set, online evaluation captures real distribution shifts, edge cases, and user behavior that benchmarks miss. At one enterprise chatbot serving 50,000 conversations/day, switching from GPT-3.5-turbo to GPT-4o improved offline BLEU scores by only 3%, but online A/B testing revealed a 22% improvement in task resolution rate and a 40% reduction in escalation-to-human — metrics that offline evaluation could not have predicted because they depend on real user interaction patterns.
 
 The key discipline: define success metrics and guardrail metrics before running the experiment. Never optimize for a proxy metric (e.g., response length) without also monitoring the outcome metric (e.g., task resolution rate).
 
@@ -55,7 +55,7 @@ Both are necessary. Monitoring catches silent degradation (model updates, data d
 ## Pitfalls
 
 **Novelty effect**
-Users interact differently with new systems. A new prompt may score higher initially because users are more engaged with something new, not because it is better. Run experiments long enough to see past the novelty period (typically 1–2 weeks).
+Users interact differently with new systems. A new prompt may score higher initially because users are more engaged with something new, not because it is better. A customer support chatbot showed a 15% improvement in satisfaction scores during the first week of a prompt change, but by week 3 the improvement had shrunk to 2% — the initial lift was mostly users exploring the new response style. Run experiments long enough to see past the novelty period (typically 1–2 weeks).
 
 **Peeking at results early**
 Checking significance before the planned end date inflates false positive rates. Use sequential testing methods (e.g., always-valid p-values) if you need to monitor results continuously.

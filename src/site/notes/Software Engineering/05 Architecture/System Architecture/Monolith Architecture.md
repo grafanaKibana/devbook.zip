@@ -4,7 +4,7 @@
 
 # Intro
 
-A monolith is an application deployed as a single unit — one process, one codebase, one deployment artifact. All components (UI, business logic, data access) run in the same process and share the same database. This is not inherently bad: fewer moving parts, simpler operations, easy local development, and no distributed systems complexity. The problems emerge when the monolith grows large and teams start coupling components in ways that make independent change difficult.
+A monolith is an application deployed as a single unit — one process, one codebase, one deployment artifact. All components (UI, business logic, data access) run in the same process and share the same database. This is not inherently bad: fewer moving parts, simpler operations, easy local development, and no distributed systems complexity. Shopify, for example, runs one of the world's largest e-commerce platforms on a modular Rails monolith handling over 80,000 requests/second — proving that monoliths scale further than most teams assume before microservices become necessary. The problems emerge when the monolith grows large and teams start coupling components in ways that make independent change difficult.
 
 ## What a Monolith Looks Like
 
@@ -88,7 +88,7 @@ The cost of premature microservices is high: distributed systems complexity, eve
 
 ### Deployment Coupling
 
-**What goes wrong**: a bug fix in one module requires deploying the entire application. A failed deployment of an unrelated module blocks the fix from reaching production.
+**What goes wrong**: a bug fix in one module requires deploying the entire application. In a 15-team organization with a single monolith deployed via a 45-minute CI/CD pipeline, a one-line CSS fix in the storefront module sat blocked for 3 days because the checkout team's unrelated database migration kept failing — both changes were in the same deployment artifact.
 
 **Why it happens**: the monolith is a single deployment unit. Any change to any module triggers a full deployment.
 
