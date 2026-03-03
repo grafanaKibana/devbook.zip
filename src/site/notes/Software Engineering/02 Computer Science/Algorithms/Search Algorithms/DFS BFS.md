@@ -93,23 +93,23 @@ DFS from A (recursive, left neighbor first):
 
 ## Questions
 
-- **When should you choose BFS over DFS?**
-  - Use BFS when you need shortest path by hop count in an unweighted graph — BFS visits nodes in order of increasing distance from the source.
-  - Use BFS when you need level-order properties (e.g., minimum moves in a puzzle, shortest transformation sequence).
-  - DFS cannot guarantee shortest path because it may reach a node through a longer branch first.
-  - **Tradeoff**: BFS guarantees shortest paths but can use more memory on wide graphs — accept the memory cost when correctness requires distance ordering.
+> [!QUESTION]- When should you choose BFS over DFS?
+  > - Use BFS when you need shortest path by hop count in an unweighted graph — BFS visits nodes in order of increasing distance from the source.
+  > - Use BFS when you need level-order properties (e.g., minimum moves in a puzzle, shortest transformation sequence).
+  > - DFS cannot guarantee shortest path because it may reach a node through a longer branch first.
+  > - **Tradeoff**: BFS guarantees shortest paths but can use more memory on wide graphs — accept the memory cost when correctness requires distance ordering.
 
-- **Why can recursive DFS cause stack overflow and how do you fix it?**
-  - Recursive DFS adds one stack frame per depth level. Graphs shaped like chains with 10k+ depth exceed typical stack limits.
-  - Iterative DFS with an explicit stack has identical traversal logic but uses heap memory instead of call stack, avoiding overflow.
-  - The conversion is mechanical: replace function calls with stack pushes, returns with stack pops.
-  - **Tradeoff**: iterative DFS is slightly more verbose but safe for arbitrary graph sizes — always prefer it in production code where graph depth is unbounded.
+> [!QUESTION]- Why can recursive DFS cause stack overflow and how do you fix it?
+  > - Recursive DFS adds one stack frame per depth level. Graphs shaped like chains with 10k+ depth exceed typical stack limits.
+  > - Iterative DFS with an explicit stack has identical traversal logic but uses heap memory instead of call stack, avoiding overflow.
+  > - The conversion is mechanical: replace function calls with stack pushes, returns with stack pops.
+  > - **Tradeoff**: iterative DFS is slightly more verbose but safe for arbitrary graph sizes — always prefer it in production code where graph depth is unbounded.
 
-- **How do you detect cycles using DFS in a directed graph?**
-  - Maintain three states for each node: unvisited, in-progress (on recursion stack), and completed.
-  - A cycle exists if DFS reaches a node that is currently in-progress — this means a back edge closes a cycle.
-  - This is more precise than checking "visited" alone because a cross edge to a completed node is not a cycle.
-  - **Tradeoff**: three-state tracking adds slight implementation complexity over basic visited-set DFS, but correctly distinguishes back edges from cross edges — necessary for correctness in directed graphs.
+> [!QUESTION]- How do you detect cycles using DFS in a directed graph?
+  > - Maintain three states for each node: unvisited, in-progress (on recursion stack), and completed.
+  > - A cycle exists if DFS reaches a node that is currently in-progress — this means a back edge closes a cycle.
+  > - This is more precise than checking "visited" alone because a cross edge to a completed node is not a cycle.
+  > - **Tradeoff**: three-state tracking adds slight implementation complexity over basic visited-set DFS, but correctly distinguishes back edges from cross edges — necessary for correctness in directed graphs.
 
 ## References
 

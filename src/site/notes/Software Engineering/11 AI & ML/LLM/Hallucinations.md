@@ -79,26 +79,26 @@ In practice, combine these with [[Software Engineering/11 AI & ML/LLM/Guardrails
 
 ## Questions
 
-- **Why can RAG-grounded systems still hallucinate significantly?**
-  - RAG changes the task to summarizing retrieved evidence, but generation can still add unsupported claims beyond context.
-  - The model can misread or incorrectly compose facts from valid passages.
-  - Retrieval failures silently cap answer quality before generation starts.
-  - Legal RAG tools reporting >17% hallucination shows the gap between grounding and guaranteed correctness.
-  - **Tradeoff**: RAG adds retrieval and embedding cost but reduces rather than eliminates hallucination; invest according to the cost of undetected fabrication.
+> [!QUESTION]- Why can RAG-grounded systems still hallucinate significantly?
+  > - RAG changes the task to summarizing retrieved evidence, but generation can still add unsupported claims beyond context.
+  > - The model can misread or incorrectly compose facts from valid passages.
+  > - Retrieval failures silently cap answer quality before generation starts.
+  > - Legal RAG tools reporting >17% hallucination shows the gap between grounding and guaranteed correctness.
+  > - **Tradeoff**: RAG adds retrieval and embedding cost but reduces rather than eliminates hallucination; invest according to the cost of undetected fabrication.
 
-- **Why does RLHF increase hallucination risk while perceived quality improves?**
-  - Human raters generally reward confidence, verbosity, and polished style.
-  - RLHF optimizes approval signals, so "sounds good" can outrank "is true."
-  - The model becomes more overconfident on wrong answers, which worsens calibration.
-  - Factuality-aware optimization (for example FActScore-informed preference training) counterbalances this failure mode.
-  - **Tradeoff**: RLHF improves engagement and instruction-following but can hurt factual reliability unless factual rewards are part of training.
+> [!QUESTION]- Why does RLHF increase hallucination risk while perceived quality improves?
+  > - Human raters generally reward confidence, verbosity, and polished style.
+  > - RLHF optimizes approval signals, so "sounds good" can outrank "is true."
+  > - The model becomes more overconfident on wrong answers, which worsens calibration.
+  > - Factuality-aware optimization (for example FActScore-informed preference training) counterbalances this failure mode.
+  > - **Tradeoff**: RLHF improves engagement and instruction-following but can hurt factual reliability unless factual rewards are part of training.
 
-- **How do you separate retrieval failure from generation hallucination in a RAG pipeline?**
-  - Check corpus coverage first: does the needed document exist at all.
-  - Check retrieval recall next: if present, was it retrieved for this query.
-  - Check claim traceability: can each answer claim be grounded to retrieved passages.
-  - Not retrieved implies retrieval failure (fix chunking, embeddings, ranking); retrieved but unsupported claims imply generation hallucination (fix grounding prompt and verification).
-  - **Tradeoff**: attribution pipelines add NLI-per-claim cost and latency, but they prevent wasted effort by isolating the true bottleneck.
+> [!QUESTION]- How do you separate retrieval failure from generation hallucination in a RAG pipeline?
+  > - Check corpus coverage first: does the needed document exist at all.
+  > - Check retrieval recall next: if present, was it retrieved for this query.
+  > - Check claim traceability: can each answer claim be grounded to retrieved passages.
+  > - Not retrieved implies retrieval failure (fix chunking, embeddings, ranking); retrieved but unsupported claims imply generation hallucination (fix grounding prompt and verification).
+  > - **Tradeoff**: attribution pipelines add NLI-per-claim cost and latency, but they prevent wasted effort by isolating the true bottleneck.
 
 ## References
 
