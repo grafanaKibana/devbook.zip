@@ -13,7 +13,7 @@ dg-publish: true
 # Intro
 
 Filters in ASP.NET Core let you run logic before and after specific stages of controller action execution.
-They are useful for cross-cutting concerns that are tightly coupled to MVC actions, such as action-level validation, response shaping, and controller-scoped auditing.
+They are useful for cross-cutting concerns that are tightly coupled to MVC actions, such as action-level validation, response shaping, and controller-scoped auditing — for example, an action filter that validates an `X-Correlation-Id` header on every inbound request and returns a 400 if missing, saving you from duplicating that check across 80+ controller actions.
 This matters because putting all of that logic inside actions quickly creates duplication and inconsistent behavior.
 Reach for filters when middleware is too broad and endpoint code is too local.
 
@@ -89,9 +89,9 @@ public sealed class ApiExceptionFilter(ILogger<ApiExceptionFilter> logger) : IAs
 Register globally: `builder.Services.AddControllers(opts => opts.Filters.Add<ApiExceptionFilter>());`
 ## Pitfalls
 
-- Running blocking I/O inside sync filters can hurt throughput because request threads are blocked; use async filters for I/O work.
+- Running blocking I/O inside sync filters can hurt throughput because request threads are blocked; use async filters for I/O work. A sync `IActionFilter` that calls a remote validation API with `.Result` instead of using `IAsyncActionFilter` with `await` blocked thread-pool threads under load — at 200 concurrent requests, thread starvation caused p99 latency to spike from 50ms to 12 seconds and triggered 503 responses.
 - Putting authentication or authorization checks into custom action filters often duplicates policy logic and causes drift; prefer built-in `AddAuthentication`, `AddAuthorization`, and `[Authorize]` policies.
-- Expecting exception filters to handle everything is risky; they do not replace global exception middleware for non-MVC failures.
+- Expecting exception filters to handle everything is risky; they only catch exceptions thrown during action execution (action method, action filters, and result execution). Exceptions in middleware, model binding before action selection, or authorization filters bypass exception filters entirely — a `JsonException` during `[FromBody]` deserialization returned a raw 500 instead of the structured error the team expected because the exception filter never fired.
 
 ## Tradeoffs
 

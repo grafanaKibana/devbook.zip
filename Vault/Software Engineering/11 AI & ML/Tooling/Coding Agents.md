@@ -12,7 +12,7 @@ priority: Medium
 
 # Intro
 
-Coding agents are software tools that run an LLM inside an action loop to complete engineering tasks end to end: read code, propose a plan, edit files, run commands, inspect failures, and iterate until a stopping condition is met. They matter because they shift AI from "suggestion mode" to "execution mode". In practice, that changes team throughput only when the agent can follow repository conventions, verify changes, and expose enough execution detail for humans to trust the result.
+Coding agents are software tools that run an LLM inside an action loop to complete engineering tasks end to end: read code, propose a plan, edit files, run commands, inspect failures, and iterate until a stopping condition is met. They shift AI from suggestion mode (autocomplete predicts the next line) to execution mode (the agent ships a tested change across multiple files). In practice, this changes team throughput only when three conditions hold: the agent follows repository conventions via instruction files, verifies its own changes via build/test/lint, and exposes enough execution detail for humans to trust and correct the result. A concrete example: an agent tasked with adding pagination to the /orders endpoint might read the existing controller, add query parameters, update the repository layer, write an integration test, run `dotnet test`, fix a failing assertion, and re-run until green — all without human intervention.
 
 A useful distinction in daily engineering:
 
@@ -33,7 +33,7 @@ flowchart TD
     D -->|Yes| O[Return result and rationale]
 ```
 
-The key mechanism is iterative tool use, not one-shot generation. The model decides what to do next from observed outputs (test failures, lint errors, command logs), then re-plans. Better agents expose this loop clearly so developers can intervene before incorrect edits spread.
+The key mechanism is iterative tool use, not one-shot generation. The model decides what to do next from observed outputs (test failures, lint errors, command logs), then re-plans. This is what separates agents from chat: a chat assistant suggests code you paste; an agent edits the file, runs the test, sees it fail, reads the error, fixes the code, and re-runs. Better agents expose this loop clearly (step-by-step logs, approval gates) so developers can intervene before incorrect edits cascade. The failure mode is an agent that loops 20+ times without converging — burning tokens and potentially making the codebase worse with each iteration.
 
 ## Major Tools
 
@@ -71,11 +71,10 @@ Amazon Q Developer provides AI coding assistance in IDE and CLI experiences with
 
 ## Pitfalls
 
-- **Over-reliance without review:** teams accept large agent-generated diffs without understanding side effects; this happens because fast output can feel authoritative; mitigate with small-scoped tasks, mandatory human review, and test gates.
-- **Context window limits:** very large repos or long sessions can push relevant files out of active context; this causes stale assumptions and partial refactors; mitigate by constraining task scope, refreshing context, and requiring explicit file lists.
-- **Cost drift:** autonomous loops can trigger repeated model/tool calls during retries; this inflates spend and latency in CI or shared environments; mitigate with token budgets, loop limits, and model tier routing.
-- **Hallucinated code or APIs:** agents can invent methods, config keys, or package names when context is weak; mitigate by running builds/tests, checking official docs, and preferring tool-assisted code search before implementation.
-
+- **Over-reliance without review** — teams accept large agent-generated diffs without understanding side effects. A 400-line diff that passes tests can still introduce architectural violations, security holes, or maintenance debt. Mitigation: limit task scope to single-concern changes, require human review on all PRs, and use instruction files to encode architecture constraints.
+- **Context window limits** — very large repos or long sessions push relevant files out of active context. The agent operates on stale assumptions: it edits a file it read 20 messages ago, not knowing another edit changed the interface. Mitigation: constrain task scope, break large changes into sequential smaller tasks, and use agents that re-read files before editing.
+- **Cost drift** — autonomous retry loops can trigger 50+ model calls during a debugging spiral. At $0.015/1K output tokens, a 30-minute debugging session can cost $5-15. In CI pipelines running agents on every PR, this adds up. Mitigation: set token budgets, loop limits (max 10 iterations), and route simple tasks to cheaper models.
+- **Hallucinated APIs** — agents invent methods, config keys, or package names when context is weak. Example: an agent called `HttpContext.GetBearerToken()` (does not exist) instead of parsing the `Authorization` header. The code compiled but threw `NullReferenceException` at runtime. Mitigation: run builds and tests, use tool-assisted code search before implementation, and include SDK version constraints in instruction files.
 ## Tradeoffs
 
 | Decision | Option A | Option B | Practical tradeoff |

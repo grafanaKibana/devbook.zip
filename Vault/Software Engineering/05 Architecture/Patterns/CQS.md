@@ -12,7 +12,7 @@ dg-publish: true
 
 # CQS — Command-Query Separation
 
-Command-Query Separation (CQS) is a design principle that says every method should be either a **command** (changes state, returns void) or a **query** (returns data, has no side effects) — never both. Coined by Bertrand Meyer, it makes code easier to reason about: if a method returns a value, you can call it freely without worrying about side effects; if it changes state, you know it won't return data you depend on.
+Command-Query Separation (CQS) is a design principle that says every method should be either a **command** (changes state, returns void) or a **query** (returns data, has no side effects) — never both. Coined by Bertrand Meyer, it makes code easier to reason about: if a method returns a value, you can call it freely without worrying about side effects; if it changes state, you know it won't return data you depend on. In a 200-endpoint e-commerce API, applying CQS to the repository layer made it immediately clear which methods could be safely retried, cached, or called in parallel (queries) and which required idempotency guards and transaction boundaries (commands) — cutting the time to diagnose a double-charge bug from hours of tracing to minutes of checking command call sites.
 
 CQS is a method-level principle. [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/CQRS|CQRS]] (Command-Query Responsibility Segregation) applies the same idea at the architectural level — separate read and write models, separate data stores, separate code paths.
 
@@ -92,7 +92,7 @@ The query methods can be called freely in any order without side effects. The co
 
 ### Violating CQS in Repository Methods
 
-**What goes wrong**: `repository.Add(entity)` returns the saved entity with its generated ID. This is a command (changes state) that also returns data — a CQS violation. The pattern is common and tempting because it avoids an extra round-trip.
+**What goes wrong**: `repository.Add(entity)` returns the saved entity with its generated ID. This is a command (changes state) that also returns data — a CQS violation. In one codebase, a `CreateOrderAsync` method that returned the full `Order` entity was called by two API consumers: one retried on timeout, creating duplicate orders because the caller treated the returned entity as idempotent confirmation. Separating into a void command + separate query would have made the retry-safety question obvious.
 
 **Why it matters**: the violation is pragmatic and widely accepted (see 'When CQS Is Pragmatically Relaxed' above), but it should be a conscious decision. Undisciplined mixing of commands and queries makes code harder to reason about and test.
 

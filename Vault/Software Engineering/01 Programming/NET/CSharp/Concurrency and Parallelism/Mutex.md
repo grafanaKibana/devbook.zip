@@ -12,7 +12,7 @@ dg-publish: true
 
 # Intro
 
-`Mutex` is an OS-backed synchronization primitive that enforces single-owner access to a critical section. In .NET it is most useful when synchronization must work across process boundaries (named mutex). For purely in-process code, `lock` or `SemaphoreSlim` is usually a better default.
+`Mutex` is an OS-backed synchronization primitive that enforces single-owner access to a critical section. In .NET it is most useful for **cross-process coordination** via named mutexes — for example, ensuring only one instance of a Windows service writes to a shared log file, or preventing concurrent database migrations from two deployment slots. For purely in-process code, `lock` or `SemaphoreSlim` is a better default because they avoid the kernel transition overhead that makes `Mutex` 10-50x slower than `Monitor.Enter` for uncontended acquisitions.
 
 ## How It Works
 
@@ -67,10 +67,10 @@ finally
 
 ## Pitfalls
 
-- Using `Mutex` for simple in-process locks adds kernel transition overhead and can degrade throughput. Prefer `lock` for short synchronous in-process sections.
-- Calling `ReleaseMutex` from a thread that does not own it throws and can destabilize control flow. Keep ownership scope explicit (`WaitOne`/`ReleaseMutex` in same method block).
-- Abandoned mutexes (owner thread exits unexpectedly) can surface as `AbandonedMutexException`. Treat it as a consistency warning and validate shared state before continuing.
-- Named mutexes are not automatically restricted to your process/user context, which can become a security or interference risk on shared machines. Use appropriate access-control settings on Windows (`MutexSecurity`/`MutexAcl`); on Unix-like systems there is currently no way to restrict access to a named mutex, so avoid named mutexes on machines with untrusted users.
+- **Kernel transition overhead on hot paths** — `Mutex.WaitOne` is a kernel call that costs 1-5 µs per uncontended acquisition, versus 20-50 ns for `lock` (which uses `Monitor.Enter` with a user-mode spin before escalating). An API endpoint using `Mutex` for in-process synchronization at 10K req/s adds 10-50 ms of cumulative wait time per second. Use `lock` for in-process, `Mutex` only when cross-process is required.
+- **Release from wrong thread throws** — calling `ReleaseMutex` from a thread that does not own it throws `ApplicationException`. In async code where continuations can run on different threads, this is a landmine. Keep `WaitOne`/`ReleaseMutex` in the same synchronous method scope; for async patterns, use `SemaphoreSlim.WaitAsync` instead.
+- **Abandoned mutex corruption risk** — if the owner thread exits without releasing (crash, `Thread.Abort`, unhandled exception), the next waiter gets `AbandonedMutexException`. This means the protected resource may be in an inconsistent state. Always validate shared state after acquiring an abandoned mutex.
+- **Security on shared machines** — named mutexes are not automatically restricted to your process or user context. On Windows, another process can open your named mutex and interfere with coordination. Use `MutexAccessRule`/`MutexSecurity` to restrict access. On Linux, named mutexes use shared memory files with no ACL support — avoid named mutexes on multi-tenant machines.
 
 ## Tradeoffs
 

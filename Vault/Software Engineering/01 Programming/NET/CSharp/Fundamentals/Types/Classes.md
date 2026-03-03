@@ -11,7 +11,7 @@ dg-publish: true
 ---
 # Intro
 
-A class is a reference type that defines a blueprint for objects allocated on the managed heap. Multiple variables can reference the same object, so mutations through one reference are visible through all others. Classes support single-class inheritance, virtual dispatch, finalizers, and the full range of access modifiers — making them the default choice for most domain models, services, and infrastructure types in C#.
+A class is a reference type that defines a blueprint for objects allocated on the managed heap. Multiple variables can reference the same object, so mutations through one reference are visible through all others — a property that enables shared state but also creates aliasing bugs when callers don't expect it. Classes support single-class inheritance, virtual dispatch, finalizers, and the full range of access modifiers, making them the default choice for services, domain entities, and infrastructure types in C#. The key design decision is knowing when NOT to use a class: value-typed data carriers should be `record struct` or `readonly struct` (stack-allocated, no GC pressure), and pure data objects with value equality should be `record class` (auto-generated `Equals`/`GetHashCode`/`==`).
 
 ## Deeper Explanation
 
@@ -187,6 +187,16 @@ Key rules:
 
 5. **Partial class hidden members** — Source generators can add fields, methods, and interface implementations to your partial class that you do not see in your source file. Name collisions produce confusing compiler errors pointing at generated code.
 
+## Tradeoffs
+
+| Decision | Option A | Option B | When A | When B |
+| --- | --- | --- | --- | --- |
+| **`class` vs `record class`** | Regular class (manual equality, mutable by default) | Record class (value equality, `with` expressions, immutable by convention) | Entities with identity semantics (two `Order` objects with same data are different if IDs differ), mutable state machines, services | DTOs, events, messages, API responses — anywhere value equality is natural and immutability is preferred |
+| **`abstract class` vs `interface`** | Abstract class (shared state + implementation, single inheritance) | Interface (multiple implementation, no instance state, default methods since C# 8) | Need shared fields/constructors, template method pattern, protected state | Need multiple implementations per type, or only defining a contract without shared state |
+| **`sealed` vs open** | Sealed (no inheritance, enables devirtualization) | Open (extensible) | Leaf types, DTOs, types not designed for extension — `sealed` is safer default | Explicitly designed for inheritance with documented extension points |
+| **`static class` vs singleton** | Static class (no instance, no DI, no interface) | Singleton via DI (`services.AddSingleton<T>()`) | Pure utility functions with no state and no need for testing isolation | Needs DI injection, interface-based testing, or configuration-dependent behavior |
+
+**Decision rule**: default to `sealed class` for new types (prevents accidental inheritance, enables compiler optimizations). Use `record class` for immutable data carriers. Use `abstract class` only when you need shared instance state across a type hierarchy — otherwise prefer interfaces.
 ## Questions
 
 > [!QUESTION]- What is the difference between `abstract class` and `interface` with default interface methods (C# 8+)? When would you still choose an abstract class?

@@ -12,7 +12,7 @@ dg-publish: true
 
 # Intro
 
-`Dictionary<TKey, TValue>` is the primary key-value collection in .NET. Use it for fast lookups by key in single-threaded or externally synchronized code.
+`Dictionary<TKey, TValue>` is the primary key-value collection in .NET and the default choice for fast lookups by key in single-threaded or externally synchronized code. Internally it is a hash table: keys are mapped to buckets by hash code, then equality checks resolve collisions within each bucket. Average lookup/add/remove is O(1); worst case (all keys in one bucket) degrades to O(n). A production example: an ASP.NET Core middleware that resolves tenant configuration by hostname uses `FrozenDictionary<string, TenantConfig>` (a read-optimized variant introduced in .NET 8) to serve 200K req/s with sub-microsecond lookup per request.
 
 ## Deeper Explanation
 
@@ -46,9 +46,9 @@ if (byId.TryGetValue(2, out var user))
 
 ### Pitfalls
 
-- If `Equals` says two keys are equal, `GetHashCode` must match too.
-- Mutable keys can become unfindable after mutation.
-- `Dictionary` is not safe for concurrent writes; use `ConcurrentDictionary` when needed.
+- **`GetHashCode`/`Equals` contract violation** — if `Equals` says two keys are equal but `GetHashCode` returns different values, the dictionary stores both as separate entries. Later lookups find one but not the other, causing silent data duplication. Always ensure: if `a.Equals(b)` then `a.GetHashCode() == b.GetHashCode()`.
+- **Mutable keys become unfindable** — mutating a field that participates in `GetHashCode` after insertion orphans the entry in the wrong bucket. The key still exists but `TryGetValue` returns `false`. Use immutable keys (`string`, `int`, `record` types).
+- **Concurrent writes corrupt state** — `Dictionary` is not thread-safe. Two threads calling `Add` simultaneously can corrupt the internal bucket array, causing infinite loops in `FindValue` (a real production incident pattern). Use `ConcurrentDictionary` for concurrent writes, or externally synchronize with `lock`.
 
 ### Tradeoffs
 

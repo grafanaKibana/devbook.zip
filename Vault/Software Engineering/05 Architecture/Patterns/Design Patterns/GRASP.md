@@ -68,19 +68,13 @@ The `Order` class has the information (line items, prices, quantities) — it sh
 
 ## Tradeoffs
 
-**GRASP vs GoF Design Patterns**
+| Decision | Option A | Option B | When A | When B |
+| --- | --- | --- | --- | --- |
+| **Information Expert vs Pure Fabrication** | Put behavior on the class that has the data | Create a service class for the behavior | Always try first — keeps data and behavior together, reduces coupling | When behavior requires cross-aggregate coordination, external I/O, or infrastructure concerns that do not belong in domain objects |
+| **Low Coupling vs Information Expert** | Minimize dependencies via indirection | Assign to the class with the data even if it adds a dependency | When the dependency would cross module or layer boundaries | When the dependency is within the same aggregate and adding indirection adds complexity without benefit |
+| **GRASP vs GoF Patterns** | GRASP heuristics for who should own this | GoF patterns for how this collaboration should work | During initial design: responsibility assignment | During refinement: when a specific structural problem like factory, strategy, or observer needs a concrete solution |
 
-| Dimension | GRASP | GoF Patterns |
-|-----------|-------|-------------|
-| Level | Responsibility assignment heuristics | Structural/behavioral solutions to recurring problems |
-| When to apply | During initial design: who should own this behavior? | During refinement: how should this collaboration be structured? |
-| Prescriptiveness | Principles (judgment required) | Patterns (concrete structure) |
-| Risk | Over-applying Information Expert creates anemic services | Over-applying patterns adds unnecessary abstraction |
-
-**Decision rule**: use GRASP principles to make initial responsibility assignments. Use GoF patterns when a specific structural problem (e.g., object creation, algorithm variation) needs a concrete solution. GRASP answers 'who'; GoF answers 'how'.
-
-**When GRASP over-specifies**
-Pure Fabrication (creating service classes for responsibilities that don't fit domain objects) can lead to an anemic domain model if applied too aggressively. If every behavior ends up in a service class, domain objects become data bags. Balance Pure Fabrication with Information Expert: prefer putting behavior on the class that has the data, and only fabricate a service when no domain class is a natural fit.
+**Decision rule**: use GRASP principles to make initial responsibility assignments. When two principles conflict (Information Expert says class A, Low Coupling says class B), prefer the assignment that keeps the most change-prone behavior behind the fewest interfaces. GRASP answers who; GoF answers how.
 
 ## Example: Polymorphism Replacing Conditionals
 

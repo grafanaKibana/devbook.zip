@@ -12,7 +12,7 @@ dg-publish: true
 
 # YAGNI
 
-YAGNI — *You Aren't Gonna Need It* — means: do not build a feature until you have a real, current need for it. It protects against speculative complexity: abstractions, extension points, and configuration options added for hypothetical future requirements that never arrive. Every line of code you write has a maintenance cost; YAGNI says don't pay that cost for features you don't need yet.
+YAGNI — *You Aren't Gonna Need It* — means: do not build a feature until you have a real, current need for it. It protects against speculative complexity: abstractions, extension points, and configuration options added for hypothetical future requirements that never arrive. Every line of code you write has a maintenance cost; YAGNI says don't pay that cost for features you don't need yet. A team spent 3 sprints building a plugin architecture for their notification system "in case we need to support SMS, push, and Slack" — 18 months later, only email was used, and the plugin abstraction layer had accumulated 40+ unit tests, a factory, a registry, and a configuration schema that all needed maintenance for a single implementation.
 
 YAGNI is most useful when design discussions drift toward "what if we need to support X later?" — the answer is: build it when X is a real requirement with a real user, not before.
 
@@ -72,7 +72,7 @@ public class FeatureConfig
 
 ### Speculative Generality
 
-**What goes wrong**: a class or method is made generic to handle cases that don't exist yet. The abstraction is harder to understand, harder to test, and often wrong when the hypothetical case finally arrives — because the real requirements differ from what was imagined.
+**What goes wrong**: a class or method is made generic to handle cases that don't exist yet. The abstraction is harder to understand, harder to test, and often wrong when the hypothetical case finally arrives — because the real requirements differ from what was imagined. A team built a generic `IDocumentProcessor<TDoc, TResult>` pipeline for PDF generation; when CSV export was finally needed 14 months later, the PDF-oriented interface assumptions (page breaks, fonts, margins) were so baked into the abstraction that the team had to bypass it entirely and write CSV export from scratch, leaving the generic pipeline as dead code that only PDFs used.
 
 **Why it happens**: developers anticipate future needs and add flexibility 'for free' while they're in the code. The cost is paid in complexity, not in time.
 
