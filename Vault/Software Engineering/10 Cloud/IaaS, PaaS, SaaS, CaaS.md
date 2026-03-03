@@ -13,7 +13,7 @@ dg-publish: true
 
 # IaaS, PaaS, SaaS, CaaS
 
-Cloud service models define how much of the infrastructure stack the cloud provider manages versus how much you manage. Choosing the wrong model adds unnecessary operational burden (too much IaaS) or loses necessary control (too much SaaS).
+Cloud service models define how much of the infrastructure stack the cloud provider manages versus how much you manage. Choosing the wrong model adds unnecessary operational burden (too much IaaS) or loses necessary control (too much SaaS). A startup running a CRUD web API on IaaS (Azure VMs) spent 20 hours/month on OS patching, security group updates, and scaling policies; migrating to PaaS (Azure App Service) eliminated that operational overhead entirely and reduced their monthly infrastructure cost from $1,200 to $400 because the auto-scaling was more efficient than their manually provisioned VMs.
 
 ## IaaS — Infrastructure as a Service
 
@@ -112,7 +112,7 @@ resource vm 'Microsoft.Compute/virtualMachines@2023-03-01' = {
 
 ### Starting with IaaS When PaaS Suffices
 
-**What goes wrong**: teams choose IaaS (raw VMs) for new web applications because it feels more familiar or 'more control.' They end up managing OS patches, security groups, and scaling policies — operational work that adds no business value.
+**What goes wrong**: teams choose IaaS (raw VMs) for new web applications because it feels more familiar or 'more control.' They end up managing OS patches, security groups, and scaling policies — operational work that adds no business value. A 5-developer team running 12 VMs for a web application spent an average of 30 engineer-hours/month on infrastructure maintenance (security patches, disk space alerts, certificate renewals, failed health checks) — work that PaaS handles automatically.
 
 **Mitigation**: default to PaaS (Azure App Service, AWS Elastic Beanstalk) for new web applications. Move to CaaS or IaaS only when you have a specific requirement that PaaS cannot meet (custom OS, GPU, container portability).
 

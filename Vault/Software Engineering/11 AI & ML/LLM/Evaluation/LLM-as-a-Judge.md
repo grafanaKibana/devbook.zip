@@ -111,15 +111,15 @@ Calibration tips:
 
 ## Pitfalls
 
-**Verbosity bias.** Judge models tend to prefer longer, more detailed answers even when a shorter answer is correct. Mitigate by adding a conciseness dimension to the rubric, capping acceptable length, and including counterexamples where short answers score full marks.
+**Verbosity bias** — judge models prefer longer, more detailed answers even when a shorter answer is correct and sufficient. In one production eval, a 3-sentence correct answer scored 3/5 while a 12-sentence answer with minor inaccuracies scored 4/5. Mitigation: add a conciseness dimension to the rubric, include calibration examples where short answers score full marks, and cap acceptable length in the judge prompt.
 
-**Position bias in pairwise.** When the same answer appears as A in one run and B in another, judges often prefer whichever position they saw first. Always randomize A/B order and check that win-rates are symmetric.
+**Position bias in pairwise** — when the same answer appears as A in one run and B in another, judges prefer whichever position they see first. In a 100-pair experiment, answer A won 62% of the time regardless of content. Mitigation: always randomize A/B order and verify that win-rates are symmetric (within 5% tolerance). If bias persists, run each pair twice (swapped) and take the consistent verdict.
 
-**Prompt sensitivity.** Small wording changes in the judge prompt can shift scores significantly. Lock the prompt in version control, run regression checks when you change it, and treat prompt changes like code changes.
+**Prompt sensitivity** — small wording changes in the judge prompt can shift scores by 0.5-1.0 points on a 5-point scale. Changing "evaluate correctness" to "grade factual accuracy" produced a 0.7-point average shift in one eval pipeline. Mitigation: lock the judge prompt in version control, run regression checks when you change it, and treat prompt changes like code changes with tests and review.
 
-**Hidden coupling.** If the judge model is the same model (or a close relative) as the one generating answers, it may reward its own style and penalize outputs from other models. Use a different judge model, or at minimum validate with human labels on a diverse sample.
+**Hidden coupling (self-preference)** — if the judge model is the same model or fine-tune as the candidate, it rewards its own style and penalizes outputs from other models. A Claude judge gave Claude answers 0.8 points higher on average than GPT-4 answers of equivalent human-rated quality. Mitigation: use a different model family for judging, or validate judge scores against human labels on a diverse multi-model sample.
 
-**Calibration drift.** Judge behavior shifts as the underlying model is updated. Maintain a fixed gold dataset with known human labels and re-run calibration periodically to catch drift early.
+**Calibration drift** — judge behavior shifts when the underlying model receives updates. A model update that improved reasoning also made the judge stricter on formatting, causing 15% more failures on an unchanged golden set. Mitigation: maintain a fixed gold dataset with known human labels and re-run calibration after every model update. Alert if agreement with human labels drops below 80% on binary pass/fail.
 
 ## Questions
 

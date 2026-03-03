@@ -13,15 +13,13 @@ dg-publish: true
 
 # Intro
 
-The term **memory leak** in garbage-collected environments can be confusing. After all, how can memory leak if there is a garbage collector that ensures timely reclamation?
+In garbage-collected environments, "memory leak" means objects that are no longer useful but remain reachable from GC roots — so the collector never reclaims them. The process RSS grows monotonically until an `OutOfMemoryException` crashes the service or the container hits its memory limit and gets OOM-killed. In production, this typically manifests as a slow climb in memory usage over days, with periodic restarts masking the underlying issue until traffic increases and the leak accelerates.
 
-There are two main reasons. The first is objects that are no longer used by the program but are still referenced. Because some part of the code still holds references to them, the garbage collector does not reclaim their memory, so they remain forever and retain the memory allocated for them. This happens, for example, when you subscribe an event handler and never unsubscribe it. Let's call these **managed memory leaks**.
+There are two categories. **Managed leaks**: objects held alive by forgotten references (event subscriptions, static caches, closures capturing `this`). The GC works correctly — it just can't collect objects that are technically still reachable. **Unmanaged leaks**: native memory allocated via `Marshal.AllocHGlobal`, P/Invoke, or wrapped OS handles that are never freed, because the GC doesn't manage memory outside the managed heap.
 
-The second reason is careless handling of unmanaged memory: you allocate unmanaged memory in some way, but never free it. In practice, this is not that hard to do even in managed code. .NET itself has many classes that allocate unmanaged memory. Almost anything that uses threads, graphics, the file system, or network calls works with unmanaged memory under the hood. You can also allocate unmanaged memory yourself, for example using special classes (such as `Marshal`) or via [P/Invoke](https://docs.microsoft.com/en-us/dotnet/standard/native-interop/pinvoke).
+The diagnostic workflow: capture a memory dump (`dotnet-dump collect`), load it in Visual Studio or `dotnet-dump analyze`, and run `dumpheap -stat` to find the largest retained types. For event-related leaks, `gcroot <address>` traces the reference chain from a leaked object back to its GC root — the root is where the fix goes.
 
-*Many people argue that **managed memory leaks** are not really leaks, because the objects are still referenced and, in theory, the memory could still be reclaimed. This is debatable, but in my view these are still memory leaks. They retain memory that cannot be allocated to something else and can ultimately cause an Out of Memory exception. In this article, I will refer to both managed and unmanaged memory leaks simply as memory leaks.*
-
-Below are 8 of the most common causes of leaks. The first 6 are managed leaks; the remaining 2 are unmanaged.
+Below are 8 of the most common causes. The first 6 are managed leaks; the remaining 2 are unmanaged.
 
 ### Event handlers
 
@@ -371,6 +369,17 @@ public class MyClass : IDisposable
 Using this pattern helps ensure that even if `Dispose` is not called explicitly, it will still be called by the finalizer when the garbage collector decides to collect the object. If `Dispose` is called manually, the object's finalizer is suppressed and will not run. Suppressing finalization is important because running a finalizer is [relatively expensive](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/finalizers) and can cause performance issues.
 
 But keep in mind that Microsoft's `Dispose` pattern is not a silver bullet. If you do not call `Dispose` manually and the object is not collected because of a managed leak, the unmanaged resources will not be released either.
+
+## Tradeoffs
+
+| Decision | Option A | Option B | When A | When B |
+| --- | --- | --- | --- | --- |
+| **Event subscription model** | Strong events (standard C# events) | Weak events (`WeakEventManager`, `ConditionalWeakTable`) | Short-lived subscribers with deterministic unsubscription (e.g., `using` scope) | Long-lived publishers with many transient subscribers (UI frameworks, plugin systems) |
+| **Caching strategy** | Unbounded `Dictionary` cache | `MemoryCache` with size limits and eviction | Never — unbounded caches always leak eventually | Always for any cache that grows proportionally with input; set `SizeLimit` and `AbsoluteExpirationRelativeToNow` |
+| **Unmanaged resource cleanup** | `IDisposable` only (deterministic, no finalizer) | `IDisposable` plus finalizer safety net | When all callers reliably use `using`/`await using` (internal code, DI-managed lifetimes) | When the type is exposed to external consumers who may forget `Dispose()` — the finalizer catches the leak at the cost of one extra GC cycle |
+| **Leak detection approach** | Periodic memory dumps plus manual analysis | Continuous monitoring with `dotnet-counters` / `EventPipe` | Post-incident investigation, deep root-cause analysis | Production monitoring — alert on Gen 2 heap size or GC handle count crossing thresholds before OOM |
+
+**Decision rule**: treat every `IDisposable` as a potential leak. Use `using` statements for all disposable objects. For caches, always set size limits and TTLs — unbounded caches are the number one managed leak pattern in production .NET services.
 
 ## Questions
 

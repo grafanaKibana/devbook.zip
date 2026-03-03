@@ -12,7 +12,7 @@ dg-publish: true
 
 # Intro
 
-A hash map stores key value pairs and uses hashing to find a bucket quickly. The goal is fast insert, lookup, and delete by key, usually O(1) on average. In .NET, the primary hash map implementation is `Dictionary<TKey, TValue>`, while `Hashtable` is the older non generic version.
+A hash map stores key-value pairs and uses hashing to find a bucket quickly. The goal is fast insert, lookup, and delete by key — O(1) average, O(n) worst case when all keys collide into one bucket. In .NET, the primary hash map implementation is `Dictionary<TKey, TValue>`, while `Hashtable` is the older non-generic version. A concrete example: a user session cache storing 50K active sessions by session ID achieves sub-microsecond lookups with `Dictionary<string, Session>`, where the same lookup in a `List<Session>` would scan 25K entries on average.
 
 ## Deeper Explanation
 
@@ -49,9 +49,9 @@ if (usersById.TryGetValue(1002, out var name))
 
 ### Pitfalls
 
-- Mutable key fields can break lookups after insertion because the hash or equality result changes. Use immutable key types or avoid mutating key fields.
-- Poor `GetHashCode` implementations create heavy collisions and degrade toward O(n). Keep hash code logic stable and well distributed.
-- Using a hash map when sorted iteration is required adds extra sorting work later. Use a sorted collection if order is part of the requirement.
+- **Mutable key fields break lookups** — if you insert a key, then mutate a field that participates in `GetHashCode`, the entry becomes orphaned in the wrong bucket. Lookups return `false` even though the entry exists. Use immutable key types (`string`, `int`, records with `init` properties) or never mutate key fields after insertion.
+- **Poor `GetHashCode` creates O(n) degradation** — a `GetHashCode` that returns the same value for all instances (e.g., `return 0;`) puts every entry in one bucket, turning the hash map into a linked list. In .NET, the default `GetHashCode` for value types uses reflection-based field hashing which is slow; always override it for custom struct keys.
+- **Hash map when sorted iteration is needed** — `Dictionary` does not guarantee enumeration order. If you insert keys 3, 1, 2 and iterate, you might get 3, 1, 2 or any permutation. Use `SortedDictionary` for ordered keys, or sort after retrieval.
 
 ### Tradeoffs
 

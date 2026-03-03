@@ -13,7 +13,9 @@ dg-publish: true
 
 # Intro
 
-Normalization is the process of structuring a relational database to eliminate redundancy and ensure data integrity. It works by decomposing tables so each fact is stored exactly once, which prevents update anomalies: if a customer's address lives in one place, you can't accidentally update it in three rows and miss a fourth. The tradeoff is read performance: fully normalized schemas require joins, and joins cost CPU and I/O. That's why most production OLTP systems stop at 3NF or BCNF. Higher normal forms (4NF, 5NF, 6NF) address increasingly rare anomalies involving multivalued or join dependencies, and the decomposition overhead rarely pays off outside temporal or analytical databases.
+Normalization is the process of structuring a relational database to eliminate redundancy and ensure data integrity. It works by decomposing tables so each fact is stored exactly once, which prevents update anomalies: if a customer's address lives in one place, you can't accidentally update it in three rows and miss a fourth. The tradeoff is read performance: fully normalized schemas require joins, and joins cost CPU and I/O.
+
+Most production OLTP systems stop at 3NF or BCNF. Higher normal forms (4NF, 5NF, 6NF) address increasingly rare anomalies involving multivalued or join dependencies, and the decomposition overhead rarely pays off outside temporal or analytical databases. The decision of where to stop is driven by write-to-read ratio: the more writes dominate, the more normalization pays off (fewer places to update); the more reads dominate, the more joins hurt and denormalization becomes attractive.
 
 ## First Normal Form
 
@@ -269,11 +271,24 @@ The tradeoff is real: reads get faster, but every write to `Orders` must also up
 
 ## Pitfalls
 
-**Over-normalizing** splits data into too many tables, forcing multi-way joins for simple queries. A schema in 5NF or 6NF is theoretically clean but practically painful for OLTP workloads. Most production systems stop at 3NF or BCNF because the anomalies addressed by higher forms are rare enough that the join overhead isn't worth it.
+**Over-normalizing into join hell** — a schema in 5NF or 6NF is theoretically clean but forces multi-way joins for simple queries. A real example: a SaaS app normalized `Users`, `Addresses`, `PhoneNumbers`, `Emails`, and `Preferences` into separate tables. Loading a user profile required a 5-table JOIN that took 12 ms at 100K rows. After the table grew to 10M rows, the same query took 340 ms even with proper indexes, because each join multiplied the working set. They denormalized `Addresses` and `Preferences` back onto `Users`, dropping the query to 8 ms. Rule of thumb: if a query joins 4+ tables and runs on every request, measure it under production load before committing to that schema.
 
-**Under-normalizing** stores the same fact in multiple places. When that fact changes, every copy must be updated atomically. Miss one and you have a data corruption bug. This is the classic update anomaly normalization was designed to prevent.
+**Under-normalizing and silent data corruption** — storing the same fact in multiple places creates update anomalies that are invisible until they cause business impact. A concrete scenario: an e-commerce system stored `product_price` on both `Products` and `OrderLineItems` (for historical pricing). A bug in the price-update API updated `Products` but not `OrderLineItems` for pending carts. 2,300 orders shipped at stale prices over a weekend — $47K revenue discrepancy discovered during Monday reconciliation. Fix: use a `PriceHistory` table with effective dates, and join to it at order-finalization time. The join costs 1-2 ms; the data integrity is worth it.
 
-**Premature denormalization** adds write complexity before you've measured whether reads are actually slow. Profile first. Denormalize only when a specific query is a proven bottleneck and indexes can't fix it. Denormalizing speculatively creates maintenance burden with no guaranteed payoff.
+**Premature denormalization** — adding redundant columns or materialized aggregates before measuring whether reads are actually slow. A team pre-stored `TotalOrderAmount` on `Customers` from day one, requiring triggers on every `INSERT`, `UPDATE`, and `DELETE` to `Orders`. The triggers added 3 ms per write and caused deadlocks under concurrent order processing (trigger locks `Customers` row while another transaction tries to insert an `Order` for the same customer). The read query they were "optimizing" ran twice per day for a dashboard. Profile first: `EXPLAIN ANALYZE` the query, check if an index or a covering index solves it. Denormalize only when a specific query is a proven bottleneck and indexes can't fix it.
+
+**Schema migration pain from over-normalization** — highly decomposed schemas make `ALTER TABLE` migrations harder because foreign key chains cascade through many tables. Adding a column to a core entity might require updating 8 JOINs in application code, modifying 4 stored procedures, and rebuilding indexes on related tables. In PostgreSQL, `ALTER TABLE ADD COLUMN` with a default value rewrites the entire table (pre-v11), and with FK constraints this can lock dependent tables. Plan schema changes with `pg_repack` or online DDL tools, and keep normalization pragmatic — theoretical purity that creates operational risk isn't worth it.
+
+## Tradeoffs
+
+| Decision | Option A | Option B | When to Choose A | When to Choose B |
+| --- | --- | --- | --- | --- |
+| **Stop at 3NF vs BCNF** | 3NF (simpler, allows some redundancy in overlapping candidate keys) | BCNF (stricter, eliminates all FD-based anomalies) | Single candidate key per table (3NF = BCNF), or overlapping keys are rare and anomaly risk is low | Multiple overlapping composite candidate keys exist and data integrity is critical (e.g., scheduling, reservation systems) |
+| **Normalize vs Denormalize reads** | Full normalization (single source of truth, no update anomalies) | Denormalized columns / materialized views (faster reads, redundant data) | Write-heavy OLTP with strong consistency requirements (banking, inventory) | Read-heavy reporting / API responses where joins are measured bottlenecks |
+| **Pre-compute aggregates vs compute at read time** | Store aggregates (e.g., `TotalOrders` on `Customers`) | Compute via `JOIN + SUM` at query time | Aggregate queried on >50% of reads AND write frequency to source table is low | Aggregate queried rarely, or source table has high write concurrency (triggers cause contention) |
+| **Higher NFs (4NF/5NF) vs pragmatic 3NF** | Decompose to 4NF/5NF to eliminate multivalued/join dependencies | Stay at 3NF and accept rare anomaly risk | Temporal databases, audit-critical domains where any anomaly is unacceptable | Standard OLTP where MVDs are rare and the extra joins aren't justified |
+
+**Decision rule**: start at 3NF for new OLTP schemas. Promote to BCNF only when you identify overlapping composite candidate keys. Denormalize only after `EXPLAIN ANALYZE` proves a specific query is bottlenecked on joins and indexes can't help. For every denormalized column, document which write paths must maintain it and add a reconciliation check (scheduled query comparing the denormalized value against the computed value).
 
 ## Questions
 

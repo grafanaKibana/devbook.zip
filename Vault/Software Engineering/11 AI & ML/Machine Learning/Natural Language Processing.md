@@ -12,7 +12,7 @@ dg-publish: true
 
 # Natural Language Processing
 
-Natural Language Processing (NLP) is the field of AI concerned with enabling computers to understand, interpret, and generate human language. NLP powers search engines, chatbots, translation, sentiment analysis, document classification, and the large language models (LLMs) that underpin modern AI assistants. The transformer architecture (2017) fundamentally changed NLP — most modern NLP tasks are now solved by fine-tuning or prompting pre-trained transformer models rather than building task-specific pipelines from scratch.
+Natural Language Processing (NLP) is the field of AI concerned with enabling computers to understand, interpret, and generate human language. NLP powers search engines, chatbots, translation, sentiment analysis, document classification, and the large language models (LLMs) that underpin modern AI assistants. The transformer architecture (2017) fundamentally changed NLP — most modern NLP tasks are now solved by fine-tuning or prompting pre-trained transformer models rather than building task-specific pipelines from scratch. A production document classification system at a legal firm, for example, replaced a hand-tuned regex + TF-IDF pipeline (73% accuracy, 6 months of engineering) with a fine-tuned DistilBERT model (94% accuracy, 2 weeks of labeling + training) — and the model generalized to new document types without additional rules.
 
 ## Core NLP Tasks
 
@@ -89,11 +89,11 @@ Console.WriteLine($"Confidence: {result.Value.ConfidenceScores.Positive:P}");
 
 ### Treating Token Count as Word Count
 
-**What goes wrong**: estimating LLM costs or context window usage based on word count. A 1,000-word document may be 1,200–1,500 tokens depending on vocabulary and language.
+**What goes wrong**: estimating LLM costs or context window usage based on word count. A 1,000-word English document may be 1,200–1,500 tokens depending on vocabulary, but a 1,000-word Japanese document can be 3,000+ tokens because CJK characters require more subword units. A team budgeted $5,000/month for their multilingual summarization pipeline based on English token estimates — actual costs hit $14,000/month because Japanese and Korean inputs consumed 2-3x more tokens than projected.
 
 **Why it happens**: "token" and "word" are used interchangeably in casual conversation.
 
-**Mitigation**: use the model's tokenizer to count tokens before sending to the API. OpenAI's `tiktoken` library and Azure's token counting APIs provide exact counts.
+**Mitigation**: use the model's tokenizer to count tokens before sending to the API. OpenAI's `tiktoken` library and Azure's token counting APIs provide exact counts. For multilingual applications, benchmark token counts per language during cost estimation.
 
 ### Language Bias in Pre-Trained Models
 

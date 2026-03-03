@@ -12,7 +12,7 @@ dg-publish: true
 
 # Intro
 
-`Semaphore` controls concurrent access by allowing up to N holders at once. It is useful when you need bounded parallelism instead of full serialization. In modern .NET, `SemaphoreSlim` is typically preferred for in-process async workflows because it supports `WaitAsync` with lower overhead.
+`Semaphore` controls concurrent access by allowing up to N holders at once, unlike `Mutex` and `lock` which allow exactly one. This is the right primitive when you need **bounded parallelism** — for example, limiting an HTTP client to 10 concurrent outbound requests to avoid overwhelming a downstream API (which returns 429 at 15 concurrent connections), or capping database connection usage below the pool maximum during batch processing. In modern .NET, `SemaphoreSlim` is preferred for in-process async workflows because it supports `WaitAsync` and avoids kernel transitions.
 
 ## How It Works
 
@@ -61,10 +61,10 @@ finally
 
 ## Pitfalls
 
-- Forgetting `Release` leaks permits and eventually stalls all waiters. Always release in `finally`.
-- For `Semaphore` and `SemaphoreSlim` with an explicit `maxCount`, over-release can throw `SemaphoreFullException`; for `SemaphoreSlim` created without `maxCount`, over-release can silently increase concurrency beyond your intended limit. Keep acquire/release symmetry explicit in one scope.
-- Using `Semaphore`/`SemaphoreSlim` as a fairness guarantee is risky under load because scheduling order is not strict FIFO. If ordering matters, use queue-based coordination (`Channel<T>`).
-- Semaphores do not provide ownership identity checks for correctness of release pairing in async flows. If one code path releases without a matching acquire, throttling math drifts and bugs become hard to detect.
+- **Leaked permits stall all waiters** — forgetting `Release` in an exception path permanently reduces available permits. With a maxCount of 4, one leaked permit drops throughput by 25%; four leaked permits deadlock the system. Always release in `finally`.
+- **Over-release inflates concurrency** — for `SemaphoreSlim` without an explicit `maxCount`, calling `Release` without a matching `Wait` silently increases the permit count beyond your intended limit. Your "max 10 concurrent" throttle quietly becomes 11, then 12. With explicit `maxCount`, over-release throws `SemaphoreFullException` — which is noisy but at least detectable. Always set `maxCount` and keep acquire/release symmetry in one scope.
+- **No fairness guarantee** — `SemaphoreSlim` does not guarantee FIFO ordering under contention. A request that arrives later can acquire the permit before an earlier waiter, causing starvation in pathological cases. If ordering matters, use `Channel<T>` as a bounded queue.
+- **No ownership tracking** — unlike `Mutex`, semaphores do not track which thread/task acquired a permit. Any code path can call `Release`, even without a matching `Wait`. This makes debugging permit leaks harder — instrument with logging around `Wait`/`Release` in production throttling code.
 
 ## Tradeoffs
 

@@ -12,7 +12,7 @@ dg-publish: true
 
 # Service-Oriented Architecture
 
-Service-Oriented Architecture (SOA) structures a system as a collection of loosely coupled services that communicate over a network, typically via standardized protocols (SOAP/WSDL historically, REST or messaging today). Each service exposes a well-defined interface and can be developed, deployed, and scaled independently. SOA emerged in the 2000s as a way to integrate heterogeneous enterprise systems without tight coupling.
+Service-Oriented Architecture (SOA) structures a system as a collection of loosely coupled services that communicate over a network, typically via standardized protocols (SOAP/WSDL historically, REST or messaging today). Each service exposes a well-defined interface and can be developed, deployed, and scaled independently. SOA emerged in the 2000s as a way to integrate heterogeneous enterprise systems — SAP, Salesforce, custom ERP, mainframe CICS — without rewriting them. The Enterprise Service Bus (ESB) acted as the central nervous system: routing messages, transforming schemas, and orchestrating workflows between services that knew nothing about each other.
 
 SOA and microservices share the same decomposition philosophy but differ in scope, governance, and communication style. Understanding the distinction matters for interviews and architecture decisions.
 
@@ -71,13 +71,22 @@ The contract boundary is the key SOA discipline: services communicate through pu
 
 ## Pitfalls
 
-### ESB as a God Object
+**ESB as a God Object** — the Enterprise Service Bus accumulates business logic: routing rules, data transformations, orchestration, error handling. A real example: a logistics company's ESB grew to 2,400 routing rules and 180 XSLT transformations over 5 years. A single schema change in the "Shipment" service required updating 47 ESB transformations, a 3-week effort. The ESB became the most complex and fragile component in the system — every change required the ESB team's involvement. Mitigation: keep the ESB as a dumb transport. Business logic belongs in the services. If the ESB is doing domain decisions, refactor them into the services.
 
-**What goes wrong**: the Enterprise Service Bus accumulates business logic — routing rules, data transformations, orchestration. The ESB becomes the most complex and fragile component in the system.
+**Shared database coupling** — classic SOA allows services to share a database, unlike microservices which mandate per-service data stores. In practice, shared databases create hidden coupling: the Order Service and Inventory Service both read/write the same `Products` table, and a schema migration by one team breaks the other. Mitigation: establish clear table ownership per service, use views or stored procedures as the service contract, and plan migration toward per-service databases when coupling pain exceeds migration cost.
 
-**Why it happens**: ESBs are designed to be configurable integration hubs, and it's tempting to put "just one more transformation" in the bus.
+**Contract versioning hell** — WSDL/SOAP contracts are rigid: adding an optional field can break consumers that validate strictly against the schema. After 3 years, a financial services SOA had 6 concurrent versions of the "Account" service contract, each with a different subset of consumers. Mitigation: design contracts for backward compatibility (additive-only changes), use versioned endpoints (`/v1/`, `/v2/`), and set sunset dates with deprecation warnings.
 
-**Mitigation**: keep the ESB as a dumb transport. Business logic belongs in the services. If the ESB is doing domain decisions, refactor them into the services.
+## Tradeoffs
+
+| Decision | SOA | Microservices | When SOA | When Microservices |
+| --- | --- | --- | --- | --- |
+| **Service granularity** | Coarse-grained ("Order Management") | Fine-grained ("Order Placement", "Order Status") | Fewer teams, shared business domains, integration-heavy | Many teams with clear bounded contexts and independent deployment needs |
+| **Communication** | ESB / centralized broker | Direct HTTP/gRPC / lightweight broker | Heterogeneous protocol translation needed (SOAP, CICS, MQ) | Homogeneous stack, latency-sensitive, team autonomy valued |
+| **Data ownership** | Shared databases acceptable | Per-service data stores required | Legacy databases that can't be split without major re-architecture | Greenfield or after domain boundaries are well-understood |
+| **Governance** | Centralized (shared schemas, ESB team) | Decentralized (team-owned contracts) | Regulated industries requiring audit trails and central schema control | Fast-moving product teams with strong DevOps culture |
+
+**Decision rule**: start with SOA when integrating existing enterprise systems that can't be rewritten. Move to microservices when team autonomy and independent deployment velocity matter more than centralized governance. Many organizations run both — SOA for legacy integration, microservices for new product development.
 
 ## Questions
 
