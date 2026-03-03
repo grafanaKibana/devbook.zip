@@ -6,7 +6,7 @@
 
 DRY means one place should own a single piece of knowledge, so you do not have to change the same rule in multiple places.
 It is not "never repeat code." It is "avoid duplicated business rules and duplicated decision logic."
-You reach for DRY when duplication causes bugs, inconsistent behavior, or high change cost.
+You reach for DRY when duplication causes bugs, inconsistent behavior, or high change cost. In a payments codebase, the tax calculation formula was duplicated in the checkout API and the invoicing batch job — when tax rates changed, only the API was updated, causing a $43,000 discrepancy over two months before the invoicing path was discovered.
 
 ## Deeper Explanation
 
@@ -45,7 +45,7 @@ public static class EmailRules
 
 ### Pitfalls
 
-- **Premature abstraction**: you unify code that looks similar but has different intent. When one side needs to change, you must either break the abstraction or add a parameter to handle the divergence — making the shared code more complex than the duplication it replaced.
+- **Premature abstraction**: you unify code that looks similar but has different intent. When one side needs to change, you must either break the abstraction or add a parameter to handle the divergence — making the shared code more complex than the duplication it replaced. A team extracted a shared `ValidateName()` helper for both user and product name validation; six months later, the function had 4 boolean parameters (`allowUnicode`, `maxLength`, `allowSpaces`, `requireCapitalization`) and 12 call sites passing different flag combinations — a textbook case of premature abstraction costing more than the original duplication.
 - **Shared helper that becomes a dumping ground**: a `StringUtils` or `Helpers` class that accumulates unrelated methods. High coupling, low cohesion.
 - **Over-reuse across bounded contexts**: sharing a domain model between two bounded contexts (e.g., `Order` used by both the billing and shipping contexts) causes cascading changes when one context's requirements evolve.
 

@@ -5,7 +5,7 @@
 
 # Inversion of Control (Hollywood Principle)
 
-Inversion of Control (IoC) is a design principle where the flow of control is inverted: instead of your code creating and managing its dependencies, an external mechanism (a framework or container) coordinates object creation and composition. The name "Hollywood Principle" comes from the phrase *"Don't call us, we'll call you"* — your code defines what it needs, and the framework provides it.
+Inversion of Control (IoC) is a design principle where the flow of control is inverted: instead of your code creating and managing its dependencies, an external mechanism (a framework or container) coordinates object creation and composition. The name comes from the phrase *Don't call us, we'll call you* — your code defines what it needs, and the framework provides it. In practice, IoC is what makes ASP.NET Core's `builder.Services.AddScoped<IOrderRepository, SqlOrderRepository>()` work: the framework reads the registrations, inspects constructor signatures, and wires everything together at request time. Without IoC, every class would `new` its own dependencies, creating a tightly coupled object graph that cannot be tested or reconfigured without editing source code.
 
 IoC is the principle; **Dependency Injection (DI)** is the most common technique for implementing it. See [[Software Engineering/05 Architecture/Patterns/Dependency Injection\|Dependency Injection]] for the full treatment of DI patterns, service lifetimes, and ASP.NET Core's DI container.
 
@@ -72,6 +72,16 @@ DIP is the *why* (depend on interfaces); IoC/DI is the *how* (let the container 
 **Why it happens**: two services that should be decoupled have grown to depend on each other.
 
 **Mitigation**: introduce an interface or event to break the cycle. If `A` needs to notify `B`, have `A` publish an event that `B` subscribes to — no direct dependency.
+
+## Tradeoffs
+
+| Decision | Option A | Option B | When A | When B |
+| --- | --- | --- | --- | --- |
+| **Constructor injection vs property injection** | Constructor injection: dependencies required at creation | Property injection: dependencies set after creation | Almost always — makes dependencies explicit, enforced at compile time, immutable | Legacy code where constructors cannot be changed, or optional cross-cutting concerns like logging that have safe defaults |
+| **DI container vs manual wiring** | Framework DI container (`IServiceCollection`) | Manual `new` in `Main` or composition root | Any non-trivial application — container handles lifetime, scoping, and graph resolution | Small CLI tools, scripts, or when the dependency graph is 3-5 objects and a container adds ceremony |
+| **Single container vs multiple containers** | One root `IServiceProvider` for the app | Multiple containers or child scopes for modules | Standard ASP.NET Core apps — one DI root with request scopes | Plugin architectures, multi-tenant isolation, or test scenarios needing independent service graphs |
+
+**Decision rule**: use constructor injection via the built-in ASP.NET Core DI container as the default. Question the pattern only when constructors have more than 5 parameters (SRP violation signal) or when you are writing infrastructure that genuinely needs property injection.
 
 
 ## Questions

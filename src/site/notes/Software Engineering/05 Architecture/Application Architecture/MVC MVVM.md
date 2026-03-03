@@ -4,7 +4,7 @@
 
 # Intro
 
-MVC and MVVM are UI architecture patterns that separate data, presentation, and interaction logic to improve testability and maintainability. Both solve the same problem — keeping UI code from tangling with business logic — but they differ in how the View and the logic layer communicate. MVC uses a Controller that handles requests and selects views; MVVM uses a ViewModel that exposes observable state the View binds to directly.
+MVC and MVVM are UI architecture patterns that separate data, presentation, and interaction logic to improve testability and maintainability. Both solve the same problem — keeping UI code from tangling with business logic — but they differ in how the View and the logic layer communicate. MVC uses a Controller that handles requests and selects views; MVVM uses a ViewModel that exposes observable state the View binds to directly. In a 120-controller ASP.NET Core API, enforcing thin MVC controllers (under 20 lines per action) that delegate to domain services reduced the average time to add a new endpoint from 2 hours to 30 minutes because developers no longer had to untangle business logic embedded in controller actions.
 
 ## MVC — Model-View-Controller
 
@@ -100,7 +100,7 @@ The View (XAML) binds to `Name` and `LoadCommand` — no code-behind. The ViewMo
 
 ### Massive Controllers (MVC)
 
-**What goes wrong**: the Controller accumulates business logic — validation, orchestration, data transformation — instead of delegating to services. A 500-line controller is a sign that the Controller is doing the Model's job.
+**What goes wrong**: the Controller accumulates business logic — validation, orchestration, data transformation — instead of delegating to services. A 500-line controller is a sign that the Controller is doing the Model's job. In one production codebase, a `PaymentsController` grew to 1,200 lines with inline Stripe API calls, retry logic, and email sending — a bug in the retry logic caused double charges for 340 customers over a weekend, and it took 3 developers 2 days to trace the issue because the payment flow was spread across 8 controller actions instead of a single `PaymentService`.
 
 **Why it happens**: it is the path of least resistance. The controller already has access to the request, the response, and the DI container.
 

@@ -5,7 +5,7 @@
 
 # Domain-Driven Design
 
-Domain-Driven Design (DDD) is an approach to software development that centers the design on the business domain — its language, rules, and boundaries — rather than on technical infrastructure. The core idea: complex software fails not because of bad technology but because the code doesn't reflect how the business actually works. DDD provides a set of tactical patterns (Entities, Value Objects, Aggregates, Domain Events, Repositories) and strategic patterns (Bounded Contexts, Ubiquitous Language) to close that gap.
+Domain-Driven Design (DDD) is an approach to software development that centers the design on the business domain — its language, rules, and boundaries — rather than on technical infrastructure. The core idea: complex software fails not because of bad technology but because the code doesn't reflect how the business actually works. DDD provides a set of tactical patterns (Entities, Value Objects, Aggregates, Domain Events, Repositories) and strategic patterns (Bounded Contexts, Ubiquitous Language) to close that gap. In an insurance claims platform, introducing Bounded Contexts between Underwriting and Claims Processing eliminated a class of bugs where claim status updates silently overwrote underwriting decisions — the two contexts had different definitions of "approved" that a shared `Policy` model conflated.
 
 DDD is most valuable in complex domains with rich business rules. For CRUD-heavy systems with little domain logic, the overhead is not justified.
 
@@ -138,7 +138,7 @@ See [[Software Engineering/05 Architecture/Patterns/Repository & UoW\|Repository
 
 ### Aggregate Boundaries Too Large
 
-**What goes wrong**: one Aggregate contains dozens of Entities. Every operation loads the entire graph, causing performance problems and contention.
+**What goes wrong**: one Aggregate contains dozens of Entities. Every operation loads the entire graph, causing performance problems and contention. A `Customer` Aggregate that included `Orders`, `Addresses`, `PaymentMethods`, and `ActivityLog` loaded 15MB of data on every update — a simple address change took 4 seconds and held a database lock that blocked concurrent writes to the same customer.
 
 **Why it happens**: developers model "what belongs together conceptually" rather than "what must change together transactionally."
 
