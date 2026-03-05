@@ -11,7 +11,22 @@ dg-publish: true
 ---
 # Template Method
 
-The Template Method pattern defines the skeleton of an algorithm in a base class, deferring some steps to subclasses. The base class calls abstract or virtual methods in a fixed sequence; subclasses override the steps without changing the overall structure. The mechanism: the template method is `sealed` (or non-overridable) in the base class; the steps it calls are `abstract` or `virtual`. Reach for it when multiple classes share the same algorithm structure but differ in specific steps.
+Making tea and making coffee follow the same recipe: boil water, brew the drink, pour into a cup, add condiments. The steps are identical; only the brewing and condiment details differ — tea steeps leaves and adds lemon, coffee uses grounds and adds sugar. The recipe template is fixed; specific steps are customized.
+
+The Template Method pattern defines the skeleton of an algorithm in a base class, letting subclasses override specific steps without changing the overall structure. The base class declares a template method that calls a fixed sequence of steps — some concrete (shared by all subclasses), some abstract or virtual (customized by each subclass). In an e-commerce system, `ReportGenerator.Generate()` always follows fetch data → validate → format → write. The PDF, CSV, and Excel subclasses override only `FormatReport()` and `WriteOutput()` while sharing the orchestration logic.
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Base as ReportGenerator
+    participant Sub as PdfReportGenerator
+    Client->>Base: Generate
+    Base->>Base: FetchData - shared
+    Base->>Base: ValidateData - shared
+    Base->>Sub: FormatReport - overridden
+    Base->>Sub: WriteOutput - overridden
+    Sub-->>Client: Report complete
+```
 
 ## Problem
 

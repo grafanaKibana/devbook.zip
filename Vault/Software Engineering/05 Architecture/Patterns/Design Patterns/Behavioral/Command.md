@@ -11,7 +11,23 @@ dg-publish: true
 ---
 # Command
 
-The Command pattern encapsulates a request as an object, letting you parameterize clients with different requests, queue or log requests, and support undoable operations. The mechanism: a command object bundles the action, its parameters, and the receiver into one unit. The invoker calls `Execute()` without knowing what the command does; the command knows how to do it and how to undo it. Reach for it when you need undo/redo, operation queuing, retry logic, or an audit trail of operations.
+A restaurant order ticket is a Command. The waiter writes down what you want (the request), walks it to the kitchen (the invoker), and the chef prepares it (the receiver). The ticket can be queued behind other orders, prioritized for VIPs, cancelled before cooking starts, or saved in a log for the end-of-night audit. The waiter doesn’t cook; the chef doesn’t take orders. The ticket decouples who requests from who executes.
+
+The Command pattern encapsulates a request as an object, bundling the action, its parameters, and the receiver into one unit. An invoker calls `Execute()` without knowing what the command does; the command knows how to do it and — critically — how to `Undo()` it. Because commands are objects, they can be serialized, queued, logged, retried, and replayed. In an e-commerce system, `PlaceOrderCommand`, `CancelOrderCommand`, and `RefundOrderCommand` each carry their context and can be pushed onto a command history for full undo support.
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Invoker as Command Queue
+    participant Command as PlaceOrderCommand
+    participant Receiver as OrderService
+    Client->>Command: Create with order data
+    Client->>Invoker: Submit command
+    Invoker->>Command: Execute
+    Command->>Receiver: Process order
+    Receiver-->>Command: Result
+    Note over Invoker: Can also Undo or Retry
+```
 
 > [!NOTE] Command vs Strategy
 > **Command** encapsulates a **request** with all its data — what to do, when, and with what context. [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Strategy|Strategy]] encapsulates an **algorithm** — how to do something. Command is about WHAT and WHEN; Strategy is about HOW. A `PlaceOrderCommand` carries the order data and knows how to place it. A `ShippingCostStrategy` knows how to calculate cost but doesn't carry the order.

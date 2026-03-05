@@ -11,7 +11,30 @@ dg-publish: true
 ---
 # Adapter
 
-The Adapter pattern converts the interface of a class into another interface that clients expect. It wraps an incompatible object and translates calls between the two interfaces — like a power adapter that lets a US plug work in a European socket. The mechanism: the adapter implements the target interface and holds a reference to the adaptee; every method on the target interface delegates to the adaptee with any necessary translation. Reach for it when integrating third-party libraries, legacy systems, or external APIs whose interfaces you can't change.
+Traveling abroad with a US laptop charger, you discover your plug doesn’t fit the European outlet. You buy a power adapter at the airport. The adapter doesn’t change your charger or rewire the outlet — it sits between them and translates one shape into another. Both sides keep working exactly as before.
+
+The Adapter pattern does the same thing in code: it converts the interface of an existing class into a different interface that clients expect. The adapter implements the target interface your code already works with and holds a reference to the incompatible object (the adaptee). Every method call on the target interface delegates to the adaptee with any necessary translation — converting data formats, mapping method names, or adapting return types. The key insight: the adapter preserves the original capability without modifying either side.
+
+```mermaid
+classDiagram
+    class IInventoryService {
+        <<interface>>
+        +CheckStockAsync() InventoryResult
+    }
+    class LegacyInventoryAdapter {
+        -legacySystem LegacySoapInventory
+        +CheckStockAsync() InventoryResult
+    }
+    class LegacySoapInventory {
+        +QueryStockXml() string
+    }
+    class OrderService {
+        -inventory IInventoryService
+    }
+    IInventoryService <|.. LegacyInventoryAdapter
+    LegacyInventoryAdapter --> LegacySoapInventory : wraps and translates
+    OrderService --> IInventoryService : depends on
+```
 
 > [!NOTE] Adapter vs Facade vs Bridge
 > **Adapter** makes an existing incompatible interface work — it's a retrofit. [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Facade|Facade]] creates a new simplified interface over a complex subsystem — it's about convenience. [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Bridge|Bridge]] is designed upfront to separate abstraction from implementation — it's not a retrofit at all.

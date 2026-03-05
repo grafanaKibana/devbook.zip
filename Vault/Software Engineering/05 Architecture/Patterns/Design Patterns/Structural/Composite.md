@@ -11,7 +11,30 @@ dg-publish: true
 ---
 # Composite
 
-The Composite pattern composes objects into tree structures and lets clients treat individual objects and compositions uniformly. The mechanism: a common interface is implemented by both leaf nodes (single items) and composite nodes (containers that hold other nodes). Clients call the same method on both — the composite recursively delegates to its children. Reach for it when you have a part-whole hierarchy where clients shouldn't need to distinguish between individual items and groups of items.
+A military command structure is a natural Composite. A general gives an order to a division, which passes it to brigades, which pass it to battalions, down to individual soldiers. Whether you command one soldier or an entire army, the interface is the same: "execute this order." The hierarchy handles the recursion — the general doesn’t need to know whether a unit is a single person or ten thousand.
+
+The Composite pattern composes objects into tree structures and lets clients treat individual objects and compositions uniformly through a shared interface. Leaf nodes (single items) implement the interface directly. Composite nodes (containers) implement the same interface but delegate to their children recursively. In an e-commerce system, a `SingleProduct` has a price. A `ProductBundle` also has a price — calculated by summing its children, which can themselves be products or nested bundles. The client calls `GetPrice()` on either without knowing or caring which type it holds.
+
+```mermaid
+classDiagram
+    class IOrderComponent {
+        <<interface>>
+        +GetPrice() decimal
+        +GetDescription() string
+    }
+    class SingleProduct {
+        -price decimal
+        +GetPrice() decimal
+    }
+    class ProductBundle {
+        -children List of IOrderComponent
+        +GetPrice() decimal
+        +Add(component)
+    }
+    IOrderComponent <|.. SingleProduct
+    IOrderComponent <|.. ProductBundle
+    ProductBundle o--> IOrderComponent : contains children
+```
 
 ## Problem
 

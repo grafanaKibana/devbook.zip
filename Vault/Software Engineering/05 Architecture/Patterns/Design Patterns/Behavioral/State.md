@@ -11,7 +11,21 @@ dg-publish: true
 ---
 # State
 
-The State pattern allows an object to alter its behavior when its internal state changes. The object appears to change its class. The mechanism: state-specific behavior is extracted into separate state classes; the context delegates behavior to the current state object; state transitions are driven by the context itself (not the caller). In C#, **`async`/`await` generates an `IAsyncStateMachine`** — the compiler implements the State pattern for every async method. Reach for it when an object's behavior depends heavily on its state and must change at runtime, and when state-specific logic would otherwise produce large switch statements.
+Think of a vending machine. Press the same button and you get different results depending on what state the machine is in — idle shows a prompt, has-money dispenses a drink, out-of-stock shows an error. The button doesn’t change. The machine’s response changes because its internal state changed. That’s the State pattern.
+
+The State pattern extracts state-specific behavior into separate state classes. The context object — your `Order` — holds a reference to its current state object and delegates all behavior to it. When the order transitions from Pending to Paid, the context swaps its state object, and suddenly `Ship()` does something different without any switch statement. The state objects themselves drive transitions: `PaidState.Ship()` changes the context’s state to `ShippedState`. This is key — the **object decides** its next state, not the caller. In C#, the compiler implements exactly this pattern for every `async` method: **`async`/`await` generates an `IAsyncStateMachine`** where each `await` point is a state transition.
+
+```mermaid
+stateDiagram-v2
+    [*] --> Pending
+    Pending --> Paid : Payment confirmed
+    Pending --> Cancelled : Customer cancels
+    Paid --> Shipped : Warehouse dispatches
+    Paid --> Cancelled : Refund before shipping
+    Shipped --> Delivered : Carrier confirms
+    Shipped --> Returned : Customer returns
+    Delivered --> Returned : Return window open
+```
 
 > [!NOTE] State vs Strategy
 > Identical class structure, different intent. **State** transitions are **driven by the object** — the order changes its own state from Pending to Paid. **Strategy** selection is **driven by the client** — the caller chooses which shipping algorithm to inject. If the object decides which "algorithm" to use next, it's State. If the caller decides, it's Strategy. See [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Strategy|Strategy]].

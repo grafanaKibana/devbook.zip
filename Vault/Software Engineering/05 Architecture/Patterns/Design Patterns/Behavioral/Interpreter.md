@@ -11,7 +11,21 @@ dg-publish: true
 ---
 # Interpreter
 
-The Interpreter pattern defines a grammar for a language and provides an interpreter to evaluate sentences in that language. The mechanism: each grammar rule becomes a class implementing an `IExpression` interface with an `Interpret(context)` method; complex expressions are composed from simpler ones (Composite pattern applied to a grammar). In .NET, **LINQ Expression Trees + EF Core `IQueryable<T>` are the canonical production Interpreter** — EF Core interprets a LINQ expression tree (an AST) into SQL at runtime. Reach for it when you need to evaluate rules or queries defined at runtime, without redeployment.
+A calculator is an Interpreter. You type `2 + 3 * 4` and the calculator parses it into a tree — multiply first, then add — and evaluates the result by walking the tree. Each operator node knows how to compute itself. LINQ Expression Trees work the same way: your C# lambda `o => o.Total > 100` becomes an abstract syntax tree that EF Core interprets into SQL at runtime, without you writing any SQL.
+
+The Interpreter pattern defines a grammar for a language and provides an interpreter that evaluates sentences in that grammar. Each grammar rule becomes a class implementing an `IExpression` interface with an `Interpret(context)` method. Complex expressions are composed from simpler ones — `AndExpression` holds two child expressions, `ComparisonExpression` evaluates a single condition. This is the Composite pattern applied to a grammar. In .NET, **LINQ Expression Trees + EF Core `IQueryable<T>` are the canonical production Interpreter**: the LINQ provider traverses the expression tree and translates each node into the target language (SQL, MongoDB queries, Elasticsearch DSL).
+
+```mermaid
+flowchart TD
+    Rule["order.total > 100 AND customer.tier == Gold"]
+    Rule --> AndExpr["AndExpression"]
+    AndExpr --> Left["ComparisonExpression: total > 100"]
+    AndExpr --> Right["ComparisonExpression: tier == Gold"]
+    Left --> LVal["ValueExpression: order.total"]
+    Left --> LConst["ConstantExpression: 100"]
+    Right --> RVal["ValueExpression: customer.tier"]
+    Right --> RConst["ConstantExpression: Gold"]
+```
 
 ## Problem
 

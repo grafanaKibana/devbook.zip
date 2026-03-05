@@ -11,7 +11,19 @@ dg-publish: true
 ---
 # Mediator
 
-The Mediator pattern defines an object that encapsulates how a set of objects interact. Instead of objects referring to each other directly, they communicate through the mediator. The mechanism: components send requests to the mediator; the mediator routes them to the appropriate handler. This reduces the many-to-many dependencies between components to a one-to-many dependency on the mediator. In .NET, MediatR is the canonical implementation — `IMediator.Send(command)` routes to the registered handler without the sender knowing the handler.
+Air traffic control is a Mediator. Planes don’t talk to each other directly — a pilot about to land doesn’t radio every other plane in the area. All communication goes through the control tower, which knows the positions, altitudes, and intentions of every aircraft. Adding a new plane to the airspace doesn’t require every existing plane to know about it — only the tower needs updating.
+
+The Mediator pattern defines an object that encapsulates how a set of components interact. Instead of components referring to each other directly (creating a many-to-many dependency web), they communicate through the mediator, reducing dependencies to one-to-many. In .NET, **MediatR is the canonical implementation** — `IMediator.Send(command)` routes a request to its registered handler without the sender knowing the handler. The checkout controller sends `CheckoutCommand`; the mediator finds and invokes `CheckoutHandler`. Adding a new operation means adding a new command and handler pair, not editing the controller.
+
+```mermaid
+flowchart TD
+    Controller -->|sends| Mediator
+    Mediator -->|routes to| InventoryHandler
+    Mediator -->|routes to| PaymentHandler
+    Mediator -->|routes to| ShippingHandler
+    Mediator -->|routes to| NotificationHandler
+    InventoryHandler -.->|no direct coupling| PaymentHandler
+```
 
 ## Problem
 

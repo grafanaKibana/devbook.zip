@@ -11,7 +11,38 @@ dg-publish: true
 ---
 # Bridge
 
-The Bridge pattern decouples an abstraction from its implementation so the two can vary independently. The mechanism: the abstraction holds a reference to an implementation interface (the "bridge") rather than inheriting from it. Changes to the implementation don't affect the abstraction, and vice versa. Reach for it when you have two orthogonal dimensions of variation — for example, payment types (single charge, subscription, refund) × payment providers (Stripe, PayPal, BankTransfer) — and you want to avoid a combinatorial class explosion.
+Think of remote controls and TVs. Any remote — basic, smart, universal — can operate any TV — Samsung, LG, Sony. The remote is the abstraction (what you want to do: power, volume, channel), the TV is the implementation (how it actually gets done). Adding a new TV brand doesn’t require redesigning any remote. Adding a new remote type doesn’t require changing any TV. The two hierarchies vary independently because they’re connected by a bridge, not welded together by inheritance.
+
+The Bridge pattern decouples an abstraction from its implementation so they can evolve independently. The abstraction holds a reference to an implementation interface (the "bridge") rather than inheriting from a concrete class. In an e-commerce system, payment types (single charge, subscription, refund) are the abstraction dimension, and payment providers (Stripe, PayPal, BankTransfer) are the implementation dimension. Without Bridge, you’d need `StripeCharge`, `StripeSubscription`, `StripeRefund`, `PayPalCharge`, `PayPalSubscription`... — a combinatorial explosion. With Bridge, each abstraction delegates to whichever provider implementation it received.
+
+```mermaid
+classDiagram
+    class PaymentAbstraction {
+        <<abstract>>
+        #implementor IPaymentImplementor
+        +Execute()
+    }
+    class SingleCharge {
+        +Execute()
+    }
+    class SubscriptionPayment {
+        +Execute()
+    }
+    class IPaymentImplementor {
+        <<interface>>
+        +ProcessAmount()
+        +Refund()
+    }
+    class StripeImplementor
+    class PayPalImplementor
+    class BankTransferImplementor
+    PaymentAbstraction <|-- SingleCharge
+    PaymentAbstraction <|-- SubscriptionPayment
+    PaymentAbstraction o--> IPaymentImplementor : bridge
+    IPaymentImplementor <|.. StripeImplementor
+    IPaymentImplementor <|.. PayPalImplementor
+    IPaymentImplementor <|.. BankTransferImplementor
+```
 
 > [!NOTE] Bridge vs Adapter
 > [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Adapter|Adapter]] is a **retrofit** — you adapt an existing interface you can't change. Bridge is **designed upfront** — you plan the abstraction/implementation split from the start. If you're integrating a legacy system, use Adapter. If you're designing a new system with multiple dimensions of variation, use Bridge.

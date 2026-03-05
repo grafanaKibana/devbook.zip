@@ -4,53 +4,53 @@
 
 ### Day 1 (Thursday) — RAG Technical Deep Dive
 
-- [x] Read [[#Quick Reference Card]] out loud (10 min)
-- [x] Understand the [[RAG]] pipeline end-to-end — walk through all 8 stages from [[#RAG Pipeline End-to-End]]
-- [x] Study [[Chunking]] strategies, [[#Embedding Models]], and [[#Vector Databases]] tables — know trade-offs for each
+- [x] Read [[Sr. AI Engineer - System Design Interview Prep#Quick Reference Card]] out loud (10 min)
+- [x] Understand the [[RAG]] pipeline end-to-end — walk through all 8 stages from [[Sr. AI Engineer - System Design Interview Prep#RAG Pipeline End-to-End]]
+- [x] Study [[Chunking]] strategies, [[Sr. AI Engineer - System Design Interview Prep#Embedding Models]], and [[Sr. AI Engineer - System Design Interview Prep#Vector Databases]] tables — know trade-offs for each
 - [x] Understand [[Retrieval]] approaches — explain when hybrid beats dense, and how [[Re-ranking]] improves precision
-- [x] Study [[#RAG Pain Points]] — practice detection + mitigation per stage
-- [x] Understand [[Evaluation]] metrics ([[#RAG Evaluation (RAGAS)]]) — explain faithfulness, relevancy, precision, recall
-- [x] Practice [[#Day 1 Practice Q&A]] — all 3 questions out loud
+- [x] Study [[Sr. AI Engineer - System Design Interview Prep#RAG Pain Points]] — practice detection + mitigation per stage
+- [x] Understand [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation]] metrics ([[Sr. AI Engineer - System Design Interview Prep#RAG Evaluation (RAGAS)]]) — explain faithfulness, relevancy, precision, recall
+- [x] Practice [[Sr. AI Engineer - System Design Interview Prep#Day 1 Practice Q&A]] — all 3 questions out loud
 - [x] Read: [Anthropic RAG Cookbook](https://github.com/anthropics/anthropic-cookbook/tree/main/misc/retrieval_augmented_generation) · [Twelve RAG Pain Points](https://arxiv.org/abs/2401.05856)
 
 ### Day 2 (Friday) — Agents & MCP
 
-- [x] Read [[#Quick Reference Card]] out loud (10 min)
-- [x] Understand [[Agents|agent patterns]] — complexity ladder, ReAct vs Plan-and-Execute vs Reflexion ([[#Agent Patterns and Complexity Ladder]])
-- [x] Study [[Tools|tool use]] and function calling — 5-step flow + error handling patterns ([[#Tool Use & Function Calling]])
-- [x] Deep dive [[Model Context Protocol]] — 3 primitives, transport, DraftKings N×M narrative ([[#MCP Deep Dive (Critical — Core to DraftKings Stack)]])
-- [x] Understand [[Multi-Agentic Systems|multi-agent orchestration]] — Supervisor vs Hierarchical vs Peer-to-peer ([[#Multi-Agent Orchestration]])
-- [x] Study n8n workflow pattern and agentic coding tools status at DK ([[#n8n Workflows]], [[#Agentic Coding Tools]])
-- [x] Practice [[#Day 2 Practice Q&A]] — all 3 questions out loud
+- [x] Read [[Sr. AI Engineer - System Design Interview Prep#Quick Reference Card]] out loud (10 min)
+- [x] Understand [[Agents|agent patterns]] — complexity ladder, ReAct vs Plan-and-Execute vs Reflexion ([[Sr. AI Engineer - System Design Interview Prep#Agent Patterns and Complexity Ladder]])
+- [x] Study [[Tools|tool use]] and function calling — 5-step flow + error handling patterns ([[Sr. AI Engineer - System Design Interview Prep#Tool Use & Function Calling]])
+- [x] Deep dive [[Model Context Protocol]] — 3 primitives, transport, DraftKings N×M narrative ([[Sr. AI Engineer - System Design Interview Prep#MCP Deep Dive (Critical — Core to DraftKings Stack)]])
+- [x] Understand [[Multi-Agentic Systems|multi-agent orchestration]] — Supervisor vs Hierarchical vs Peer-to-peer ([[Sr. AI Engineer - System Design Interview Prep#Multi-Agent Orchestration]])
+- [x] Study n8n workflow pattern and agentic coding tools status at DK ([[Sr. AI Engineer - System Design Interview Prep#n8n Workflows]], [[Sr. AI Engineer - System Design Interview Prep#Agentic Coding Tools]])
+- [x] Practice [[Sr. AI Engineer - System Design Interview Prep#Day 2 Practice Q&A]] — all 3 questions out loud
 - [x] Read: [Building Effective Agents](https://www.anthropic.com/engineering/building-effective-agents) (MUST READ) · [MCP docs](https://modelcontextprotocol.io/)
 
 ### Day 3 (Saturday) — System Design + Class Design
 
-- [x] Read [[#Quick Reference Card]] out loud (10 min)
-- [x] Internalize the [[#System Design Framework]] — 5/10/15/5 time-box
-- [x] Study [[#Building Blocks Quick Reference]] and [[#.NET-Specific Patterns]] — know each component's purpose
-- [x] Understand all 4 [[#AI System Design Patterns]] — Webhook→Queue→Worker, Rate Limiting, Vector DB, Async Validation
-- [x] Study [[#Project Deep Dive Framework (How to Present ANY Past Project)|5-Layer Presentation Framework]] with cheat sheets: [[#Communication Patterns Cheat Sheet|communication]], [[#Database Selection Cheat Sheet|databases]], [[#Scalability Patterns Quick Reference|scalability]], [[#Consistency Models|consistency]]
-- [x] Walk through [[#Class Design Round — Robot-Managed Restaurant (HackerRank Style)|Robot Restaurant class design]] end-to-end — diagram, patterns ([[Design Patterns]]), A* pathfinding, extension question
-- [x] Practice [[#Day 3 Practice Q&A]] + [[#Class Design Questions (HackerRank Round)|additional class design questions]]
+- [x] Read [[Sr. AI Engineer - System Design Interview Prep#Quick Reference Card]] out loud (10 min)
+- [x] Internalize the [[Sr. AI Engineer - System Design Interview Prep#System Design Framework]] — 5/10/15/5 time-box
+- [x] Study [[Sr. AI Engineer - System Design Interview Prep#Building Blocks Quick Reference]] and [[Sr. AI Engineer - System Design Interview Prep#.NET-Specific Patterns]] — know each component's purpose
+- [x] Understand all 4 [[Sr. AI Engineer - System Design Interview Prep#AI System Design Patterns]] — Webhook→Queue→Worker, Rate Limiting, Vector DB, Async Validation
+- [x] Study [[Sr. AI Engineer - System Design Interview Prep#Project Deep Dive Framework (How to Present ANY Past Project)|5-Layer Presentation Framework]] with cheat sheets: [[Sr. AI Engineer - System Design Interview Prep#Communication Patterns Cheat Sheet|communication]], [[Sr. AI Engineer - System Design Interview Prep#Database Selection Cheat Sheet|databases]], [[Sr. AI Engineer - System Design Interview Prep#Scalability Patterns Quick Reference|scalability]], [[Sr. AI Engineer - System Design Interview Prep#Consistency Models|consistency]]
+- [x] Walk through [[Sr. AI Engineer - System Design Interview Prep#Class Design Round — Robot-Managed Restaurant (HackerRank Style)|Robot Restaurant class design]] end-to-end — diagram, patterns ([[Design Patterns]]), A* pathfinding, extension question
+- [x] Practice [[Sr. AI Engineer - System Design Interview Prep#Day 3 Practice Q&A]] + [[Sr. AI Engineer - System Design Interview Prep#Class Design Questions (HackerRank Round)|additional class design questions]]
 
 ### Day 4 (Sunday) — Projects & AI Ownership
 
-- [x] Read [[#Quick Reference Card]] out loud (10 min)
-- [x] Practice 2-minute pitches for each project (timed): [[#Dexter (Jira → PR Automation)|Dexter]], [[#Doculus (Auto-Documentation)|Doculus]], [[#SlackJack (Support Bot)|SlackJack]], [[#AmendA (PR Comment Updater)|AmendA]]
-- [x] Study [[#AI Ownership Framework]] — scoping, [[#Metrics Framework|metrics]], [[#Adoption Challenges + Responses|adoption]], iteration loops, risk
-- [x] Memorize [[#DraftKings Numbers to Anchor|DK numbers]]: 20% tickets via AI · 15% throughput · 100% 101 completion
-- [x] Review [[#DraftKings Intelligence Brief]] — vision, 2026 goals, priority timeline
-- [ ] Study [[#Interview Traps & Ownership Signals]] — internalize traps + practice [[#Ownership Phrases to Practice Verbatim|ownership phrases]] out loud
-- [x] Practice [[#Day 4 Practice Q&A]] — all 3 questions out loud
+- [x] Read [[Sr. AI Engineer - System Design Interview Prep#Quick Reference Card]] out loud (10 min)
+- [x] Practice 2-minute pitches for each project (timed): [[Sr. AI Engineer - System Design Interview Prep#Dexter (Jira → PR Automation)|Dexter]], [[Sr. AI Engineer - System Design Interview Prep#Doculus (Auto-Documentation)|Doculus]], [[Sr. AI Engineer - System Design Interview Prep#SlackJack (Support Bot)|SlackJack]], [[Sr. AI Engineer - System Design Interview Prep#AmendA (PR Comment Updater)|AmendA]]
+- [x] Study [[Sr. AI Engineer - System Design Interview Prep#AI Ownership Framework]] — scoping, [[Sr. AI Engineer - System Design Interview Prep#Metrics Framework|metrics]], [[Sr. AI Engineer - System Design Interview Prep#Adoption Challenges + Responses|adoption]], iteration loops, risk
+- [x] Memorize [[Sr. AI Engineer - System Design Interview Prep#DraftKings Numbers to Anchor|DK numbers]]: 20% tickets via AI · 15% throughput · 100% 101 completion
+- [x] Review [[Sr. AI Engineer - System Design Interview Prep#DraftKings Intelligence Brief]] — vision, 2026 goals, priority timeline
+- [ ] Study [[Sr. AI Engineer - System Design Interview Prep#Interview Traps & Ownership Signals]] — internalize traps + practice [[Sr. AI Engineer - System Design Interview Prep#Ownership Phrases to Practice Verbatim|ownership phrases]] out loud
+- [x] Practice [[Sr. AI Engineer - System Design Interview Prep#Day 4 Practice Q&A]] — all 3 questions out loud
 
 ### Day 5 (Monday) — Final Review
 
-- [ ] [[#Morning Cheat Sheet (30 minutes)|Morning Cheat Sheet]] review (30 min)
-- [ ] [[#Timed Practice Drill (3 rounds)|Timed practice]]: 3 rounds × 30 min (RAG assistant, MCP platform, Dexter roadmap)
-- [ ] Review [[#Additional Practice Questions]] — past projects + [[#API Design Quick Reference|API design]]
-- [ ] Practice [[#2-Minute Closing Script]] out loud — 3 times minimum
-- [ ] Final pass: re-read [[#Interview Traps & Ownership Signals]] + [[#Top 3 Ownership Signals]]
+- [ ] [[Sr. AI Engineer - System Design Interview Prep#Morning Cheat Sheet (30 minutes)|Morning Cheat Sheet]] review (30 min)
+- [ ] [[Sr. AI Engineer - System Design Interview Prep#Timed Practice Drill (3 rounds)|Timed practice]]: 3 rounds × 30 min (RAG assistant, MCP platform, Dexter roadmap)
+- [ ] Review [[Sr. AI Engineer - System Design Interview Prep#Additional Practice Questions]] — past projects + [[Sr. AI Engineer - System Design Interview Prep#API Design Quick Reference|API design]]
+- [ ] Practice [[Sr. AI Engineer - System Design Interview Prep#2-Minute Closing Script]] out loud — 3 times minimum
+- [ ] Final pass: re-read [[Sr. AI Engineer - System Design Interview Prep#Interview Traps & Ownership Signals]] + [[Sr. AI Engineer - System Design Interview Prep#Top 3 Ownership Signals]]
 
 
 ## Quick Reference Card
@@ -208,7 +208,7 @@ From "Twelve RAG Pain Points" (Barnett et al.) + production experience:
 **Eval pipeline I would describe:**
 
 1. Build **golden set** of representative queries + expected evidence
-2. Run offline eval nightly with RAGAS metrics ([[Evaluation]], [[LLM-as-a-Judge]])
+2. Run offline eval nightly with RAGAS metrics ([[Software Engineering/11 AI & ML/LLM/RAG/Evaluation]], [[LLM-as-a-Judge]])
 3. Add scenario tags: acronym-heavy, stale-doc risk, multi-hop questions
 4. Track regressions per pipeline stage after each change
 5. Run online A/B for high-impact changes
@@ -225,7 +225,7 @@ From "Twelve RAG Pain Points" (Barnett et al.) + production experience:
 > 2. **Pipeline**: "Ingestion with source metadata → recursive/document-aware chunking → embedding → hybrid retrieval → rerank → grounded generation with citations"
 > 3. **Data model**: "Each chunk stores source ID, owner team, last updated, permission tags"
 > 4. **Quality**: "RAGAS offline + golden set + citation verifier online"
-> 5. **Ops**: "Latency budget split across retrieval/rerank/generation; caching for repeated queries ([[Caching]])"
+> 5. **Ops**: "Latency budget split across retrieval/rerank/generation; caching for repeated queries ([[Software Engineering/11 AI & ML/LLM/RAG/Caching]])"
 > 6. **Rollout**: "Pilot one org → measure resolution rate and unsupported claim rate → expand"
 
 > [!question] "What are the biggest challenges with RAG in production?"
@@ -1573,4 +1573,4 @@ Present 2-3 decisions as trade-offs:
 ## Vault Cross-Reference Map
 
 > [!note] Quick links to existing vault notes for deeper study
-> [[RAG]] · [[Chunking]] · [[Retrieval]] · [[Re-ranking]] · [[Evaluation]] · [[Query Translation]] · [[Caching]] · [[Monitoring]] · [[Agents]] · [[Tools]] · [[Multi-Agentic Systems]] · [[Mental Framework]] · [[Model Context Protocol]] · [[Hallucinations]] · [[Generation]] · [[LLM]] · [[LLM-as-a-Judge]] · [[CQRS]] · [[Event Sourcing]] · [[Event-Driven Architecture]] · [[Microservices]] · [[Message Queues]] · [[Kafka]] · [[RabbitMQ]] · [[CAP theorem]] · [[Circuit Breaker]] · [[REST]] · [[gRPC]]
+> [[RAG]] · [[Chunking]] · [[Retrieval]] · [[Re-ranking]] · [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation]] · [[Query Translation]] · [[Software Engineering/11 AI & ML/LLM/RAG/Caching]] · [[Monitoring]] · [[Agents]] · [[Tools]] · [[Multi-Agentic Systems]] · [[Mental Framework]] · [[Model Context Protocol]] · [[Hallucinations]] · [[Generation]] · [[LLM]] · [[LLM-as-a-Judge]] · [[CQRS]] · [[Event Sourcing]] · [[Event-Driven Architecture]] · [[Microservices]] · [[Message Queues]] · [[Kafka]] · [[RabbitMQ]] · [[CAP theorem]] · [[Circuit Breaker]] · [[REST]] · [[gRPC]]
