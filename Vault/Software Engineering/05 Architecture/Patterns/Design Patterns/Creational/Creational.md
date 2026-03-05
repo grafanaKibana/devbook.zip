@@ -20,4 +20,13 @@ Creational patterns abstract the instantiation process, making a system independ
 ---
 
 > [!note] Whats next
+> **Parent**
+>  [[Software Engineering/05 Architecture/Patterns/Design Patterns/Design Patterns|Design Patterns]]
+>
+> **Pages**
+> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Creational/Abstract Factory|Abstract Factory]]
+> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Creational/Builder|Builder]]
+> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Creational/Factory Method|Factory Method]]
+> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Creational/Prototype|Prototype]]
+> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Creational/Singleton|Singleton]]
 <!-- whats-next:end -->
