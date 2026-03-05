@@ -37,11 +37,11 @@ public static class MathUtility
 
 ## Pitfalls
 
-**Namespace collision between libraries**: When two packages define the same fully qualified type name, the compiler reports ambiguity. Fix with `extern alias` in the project file or by using fully qualified names at the call site.
+**Namespace collision between libraries** — when two NuGet packages define the same fully qualified type name, the compiler reports ambiguity. A real case: migrating from `System.Data.SqlClient` to `Microsoft.Data.SqlClient` while both packages are referenced causes every `SqlConnection` usage to error. Fix with `extern alias` in the project file, or complete the migration before removing the old package.
 
-**Global using overreach**: C# 10 `global using` directives apply to every file in the project. Overusing them pollutes the implicit import context and makes it hard to trace where a name comes from. Limit global usings to universally unambiguous imports (`System`, `System.Collections.Generic`); keep domain-specific namespaces in per-file `using` directives.
+**Global using overreach** — C# 10 `global using` directives apply to every file in the project. A team added `global using Newtonsoft.Json;` and `global using System.Text.Json;` simultaneously, causing ambiguity errors on `JsonSerializer` across 200+ files. Limit global usings to universally unambiguous imports (`System`, `System.Collections.Generic`); keep domain-specific namespaces in per-file `using` directives.
 
-**Namespace/assembly mismatch**: The compiler does not enforce alignment between namespace name and assembly name. A type in `MyApp.Utilities` can live in `MyApp.Core.dll`. Misaligned namespaces cause autocompletion to mislead developers about which assembly to reference.
+**Namespace/assembly mismatch** — the compiler does not enforce alignment between namespace name and assembly name. A type in `MyApp.Utilities` can live in `MyApp.Core.dll`. Misaligned namespaces cause autocompletion to mislead developers about which assembly to reference and make `dotnet add package` discovery harder.
 
 
 ## Tradeoffs

@@ -5,7 +5,7 @@
 
 # Digital Signature
 
-A digital signature proves that a message or document was created by a specific party (authenticity) and has not been modified since signing (integrity). Unlike encryption, signing does not hide the content — it proves who created it and that it is unchanged.
+A digital signature proves that a message or document was created by a specific party (authenticity) and has not been modified since signing (integrity). Unlike encryption, signing does not hide the content — it proves who created it and that it is unchanged. Every JWT your ASP.NET Core API validates uses a digital signature: the identity provider signs the token with its private key (RS256 or ES256), and the API verifies the signature using the public key from the JWKS endpoint — a failed signature check means the token was forged or tampered with and the request is rejected with a 401.
 
 ## How It Works
 
@@ -59,7 +59,7 @@ bool isValid = ecdsa.VerifyData(message, signature, HashAlgorithmName.SHA256);
 
 ### Using RSA with PKCS#1 Padding (Vulnerable to Bleichenbacher Attack)
 
-**What goes wrong**: RSA with PKCS#1 v1.5 padding is vulnerable to padding oracle attacks. An attacker can exploit timing differences in error responses to decrypt ciphertexts or forge signatures.
+**What goes wrong**: RSA with PKCS#1 v1.5 padding is vulnerable to padding oracle attacks (Bleichenbacher's attack, CVE-1999-1230 and variants). An attacker can exploit timing differences in error responses to decrypt ciphertexts or forge signatures. In 2018, the ROBOT attack (Return Of Bleichenbacher's Oracle Threat) demonstrated that PKCS#1 v1.5 vulnerabilities persisted in major TLS implementations including Facebook, Citrix, and Cisco — affecting an estimated 2.8% of the Alexa Top Million sites.
 
 **Mitigation**: use RSA-PSS padding for signatures (`RSASignaturePadding.Pss` in .NET) or switch to ECDSA. Never use PKCS#1 v1.5 for new systems.
 

@@ -5,19 +5,13 @@
 
 # Intro
 
-The Garbage Collector (GC) in the Common Language Runtime (CLR) is an automatic memory manager that controls memory allocation and reclamation for your application. Each time a new object is created, the runtime allocates memory for it from the managed heap. As long as address space is available in the managed heap, the runtime continues allocating space for new objects.
+The Garbage Collector (GC) is the CLR's automatic memory manager. Every `new` allocates on the managed heap; the GC periodically identifies objects no longer reachable from GC roots (static fields, stack variables, CPU registers, GC handles, finalization queue), reclaims their memory, and compacts survivors to reduce fragmentation. You never call `free` — but you pay for that convenience in pause time and throughput overhead, so understanding the GC's internals is essential for writing latency-sensitive .NET services.
 
-However, memory is not infinite. Eventually, the garbage collector must perform a collection to free some memory. The GC's optimization engine determines the best time to run a collection based on allocation activity. When the GC runs, it examines objects on the managed heap that are no longer used by the application and performs the operations required to reclaim their memory.
+The GC uses a **generational model** based on the empirical observation that most objects die young. Gen 0 holds newly allocated objects and collects in under 1 ms on modern hardware. Objects that survive promote to Gen 1 (a buffer between short- and long-lived), then to Gen 2 (application-lifetime objects like singletons and static caches). The Large Object Heap (LOH, ≥85 KB by default) is collected alongside Gen 2 but is **not compacted by default** — allocations leave gaps that fragment the address space over time.
 
-The garbage collector provides the following benefits:
+The GC runs in three phases: **mark** (walk from roots, flag reachable objects), **sweep/compact** (reclaim dead memory, slide survivors together, update pointers), and **promote** (move survivors to the next generation). Background GC (enabled by default since .NET 4.5) runs the expensive Gen 2 mark phase on a dedicated thread, allowing Gen 0/1 collections to proceed concurrently — this is what keeps p99 latencies under control in ASP.NET Core services.
 
-- Frees developers from having to manually free memory.
-- Efficiently allocates objects on the managed heap.
-- Reclaims objects that are no longer used, clears their memory, and keeps memory available for future allocations.
-- Managed objects automatically start with zeroed memory, so constructors do not have to initialize every data field.
-- Provides memory safety by ensuring that one object cannot use memory allocated for another object.
-
-The .NET garbage collector does not allocate or free unmanaged memory. The pattern used to deterministically release resources is the `dispose` pattern. The `dispose` pattern is used for objects that implement the `IDisposable` interface.
+For unmanaged resources (file handles, database connections, native memory), the GC provides no help — you must implement `IDisposable` and use `using` statements. Objects with finalizers get queued on the finalization thread, which delays their collection by at least one GC cycle and serializes all finalizer execution on a single thread.
 
 ## Managed heap
 
@@ -118,7 +112,7 @@ graph LR
 
 ```
 
-Most objects die young in Gen 0 and never promote. Gen 2 collection is expensive and only runs under memory pressure.
+Most objects die young in Gen 0 and never promote. A Gen 0 collection typically takes <1 ms. Gen 1 runs less frequently and takes 1-10 ms. Gen 2 is the expensive one: a full blocking Gen 2 can pause all managed threads for 100-500 ms on heaps larger than 2 GB. Background GC mitigates this by running the Gen 2 mark concurrently, reducing application-visible pauses to 1-10 ms in most workloads — but the sweep phase still requires a brief suspension.
 
 1. **Mark phase - marking live objects**
     1. **Start of garbage collection:** The garbage collector starts from a set of references known as **roots**. These are memory locations that, for various reasons, must always be accessible and that contain references to objects created by the application. This can include CPU registers, thread call stacks, static variables, and other memory locations holding object references. The GC marks these objects as "live".
@@ -174,11 +168,34 @@ The GC first analyzes all objects that belong to generation 0. If, after collect
 > The SOH stores most objects (typically smaller than ~85,000 bytes) and is compacted regularly.
 > The LOH stores large allocations (typically 85,000 bytes and above, often large arrays). It is collected with Gen 2 and can become fragmented; compaction behavior differs from the SOH and is more expensive.
 
+## Pitfalls
+
+**LOH fragmentation causing OutOfMemoryException** — the LOH is not compacted by default, so repeated allocation and deallocation of large byte arrays (common in image processing, file upload buffers, serialization) creates gaps. Over hours of steady traffic, free space fragments until no contiguous block can satisfy a new allocation, even though total free memory is sufficient. Mitigation: enable `GCSettings.LargeObjectHeapCompactionMode = CompactOnce` before a forced GC during low-traffic windows, or use `ArrayPool<byte>.Shared` to reuse buffers instead of allocating.
+
+**Finalizer queue blocking collection** — objects with finalizers (`~ClassName()`) survive their first GC cycle because the runtime must run the finalizer before reclaiming memory. The finalizer thread is single-threaded and sequential: if one finalizer blocks (waiting on I/O, throwing an exception it swallows, or doing expensive work), every other finalizable object backs up behind it. A queue of 50,000+ pending finalizers is a memory leak in disguise. Mitigation: implement `IDisposable` with the dispose pattern, call `GC.SuppressFinalize(this)` in `Dispose()`, and treat finalizers as safety nets — never as the primary cleanup path.
+
+**Gen 2 pauses in latency-sensitive services** — a full blocking Gen 2 collection can pause all managed threads for 100-500 ms on heaps >2 GB. For gRPC or real-time services with p99 SLOs under 50 ms, this is a production incident. Mitigation: keep the Gen 2 heap small by avoiding long-lived allocations (prefer `Span<T>`, stack allocation, object pooling), enable Server GC with `<ServerGarbageCollection>true</ServerGarbageCollection>`, and for extreme cases use `GCLatencyMode.SustainedLowLatency` to suppress Gen 2 collections during critical windows (at the cost of higher memory usage).
+
+**Pinned objects preventing compaction** — `fixed` blocks and `GCHandle.Alloc(obj, GCHandleType.Pinned)` prevent the GC from moving objects during compaction, creating fragmentation holes identical to the LOH problem but on the SOH. Heavy P/Invoke interop or native buffer passing can pin thousands of objects. Mitigation: minimize pin duration, use `Memory<T>` / `MemoryPool<T>` with pinnable buffers, and in .NET 5+ consider `POH` (Pinned Object Heap) which isolates pinned allocations from the compactable SOH.
+
+## Tradeoffs
+
+| GC Mode | Throughput | Pause Time | Memory | Best For |
+| --- | --- | --- | --- | --- |
+| **Workstation** | Lower (single GC thread) | Shorter pauses per collection | Lower footprint (~1 heap) | Client apps, small containers (<2 cores) |
+| **Server** | Higher (1 GC thread per core) | Longer individual pauses, but less frequent | Higher (1 heap per core, 2-4× Workstation) | Multi-core services, ASP.NET Core APIs |
+| **Background** (default) | Slight overhead for concurrent mark | Gen 2 pauses reduced to 1-10 ms | Slightly higher (concurrent mark needs working space) | Any workload sensitive to tail latency |
+| **SustainedLowLatency** | Same as base mode | Suppresses Gen 2 during critical windows | Grows unbounded until mode is reset | Real-time trading, game servers, during batch processing windows |
+
+**Decision rule**: start with Server GC + Background (the ASP.NET Core default). If p99 latency spikes correlate with GC pauses (`dotnet-counters` shows Gen 2 count increasing), reduce allocation rate first (pooling, `Span<T>`, fewer LINQ allocations). Switch to `SustainedLowLatency` only during known critical windows and always reset afterward — running it permanently leads to OOM.
+
 ## Links
 
 - [Fundamentals of garbage collection (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/fundamentals) — official reference covering managed heap, generations, LOH, and collection triggers.
 - [Garbage collection and performance (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/performance) — guidance on reducing GC pressure: allocation patterns, LOH fragmentation, and server vs workstation GC modes.
-- [.NET GC internals deep-dive (Maoni Stephens, habr.com)](https://habr.com/ru/articles/590475/) — practitioner deep-dive into GC internals, generation promotion, and tuning strategies from a .NET runtime engineer.
+- [Runtime configuration options for GC (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/core/runtime-config/garbage-collector) — reference for all GC-related MSBuild properties and environment variables (ServerGC, ConcurrentGC, HeapCount, LOH threshold).
+- [Pro .NET Memory Management (Konrad Kokosa)](https://prodotnetmemory.com/) — practitioner deep-dive into GC internals, heap segments, pinning, finalization, and performance tuning with real profiling sessions.
+- [Maoni Stephens' blog](https://maoni0.medium.com/) — GC design insights from the principal engineer who built the .NET GC; covers heap tuning, region-based GC in .NET 7+, and production debugging.
 
 <!-- whats-next:start -->
 

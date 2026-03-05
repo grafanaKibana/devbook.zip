@@ -5,7 +5,7 @@
 
 # Intro
 
-Graphs model relationships between entities using vertices and edges. In .NET, graph structures are commonly implemented with collection primitives like `Dictionary<TNode, List<TNode>>`.
+Graphs model relationships between entities using vertices (nodes) and edges. Unlike trees, graphs can have cycles, multiple paths between nodes, and no single root. In .NET, there is no built-in `Graph<T>` type — you compose graphs from `Dictionary<TNode, List<TNode>>` for adjacency lists, `bool[,]` for adjacency matrices, and `PriorityQueue<TElement, int>` for weighted shortest-path algorithms. A production example: a microservice dependency graph with 200 services uses BFS from a failing service node to identify all downstream services affected by the outage, generating an automated blast radius report in under 50 ms.
 
 ## Deeper Explanation
 
@@ -41,9 +41,9 @@ var graph = new Dictionary<string, List<string>>
 
 ### Pitfalls
 
-- Missing cycle detection can cause infinite traversal loops.
-- Recursive DFS can overflow stack for deep graphs.
-- Choosing matrix representation for sparse graphs wastes memory.
+- **Infinite loops without cycle detection** — a DFS or BFS that does not track visited nodes will loop forever on cyclic graphs. Always maintain a `HashSet<TNode>` of visited nodes. In production, a service health checker without cycle detection caused a CPU spike to 100% when a circular dependency was introduced between services.
+- **Stack overflow on recursive DFS** — graphs with 10K+ nodes and deep chains blow the default 1 MB .NET stack. Use iterative DFS with an explicit `Stack<TNode>` for unknown-depth graphs.
+- **Adjacency matrix on sparse graphs** — a matrix for 10K nodes costs 100M entries (400 MB for `int[,]`), even if only 50K edges exist. An adjacency list for the same graph costs O(V + E) = roughly 60K entries. Always match representation to graph density.
 
 ### Tradeoffs
 

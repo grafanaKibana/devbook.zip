@@ -5,7 +5,7 @@
 
 # Intro
 
-A blockchain is an append-only ledger where records are grouped into blocks and linked together using cryptographic hashes.
+A blockchain is an append-only ledger where records are grouped into blocks and linked together using cryptographic hashes. Bitcoin processes roughly 7 transactions per second across its entire network — compared to Visa's 65,000 TPS capacity — which illustrates the fundamental throughput cost of decentralized consensus and why blockchain is only justified when mutual distrust between parties makes a central authority impossible.
 
 The hash link makes tampering detectable: changing a past block changes its hash, which breaks the chain unless all subsequent blocks are recomputed (and the network's consensus rules are satisfied).
 
@@ -39,7 +39,7 @@ var block2Hash = Sha256Hex(block2Prev + block2Data);
 
 ### Using Blockchain When a Database Suffices
 
-**What goes wrong**: teams adopt blockchain for internal systems where all parties trust a central authority, gaining none of the decentralization benefits while paying the full cost in throughput, complexity, and compliance risk.
+**What goes wrong**: teams adopt blockchain for internal systems where all parties trust a central authority, gaining none of the decentralization benefits while paying the full cost in throughput, complexity, and compliance risk. An Australian government agency spent AUD $8.5M on a blockchain-based supply chain system that was eventually replaced by a PostgreSQL database with audit logging — all participants were government departments that already trusted a central authority, so the consensus mechanism added latency and complexity with zero benefit.
 
 **Why it happens**: blockchain is associated with innovation and security, making it attractive even when the problem doesn't require it.
 

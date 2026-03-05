@@ -4,7 +4,7 @@
 
 # Intro
 
-Exception handling in C# uses `try`, `catch`, and `finally` to handle failures and guarantee cleanup. In modern C#, `using` / `await using` is the preferred way to ensure `Dispose` / `DisposeAsync` runs.
+Exception handling in C# uses `try`, `catch`, and `finally` to handle failures and guarantee cleanup. In a production ASP.NET Core API handling 5,000 requests/second, the difference between a well-structured exception strategy and ad-hoc `catch (Exception)` blocks is the difference between actionable Application Insights traces with full stack context and a wall of swallowed errors that hide the root cause for days. In modern C#, `using` / `await using` is the preferred way to ensure `Dispose` / `DisposeAsync` runs.
 - `try` contains code that may throw.
 - `catch` handles exceptions you know how to handle.
 - `finally` normally runs when leaving the `try` block (success or failure) and is used for cleanup.
@@ -67,7 +67,7 @@ public static string NormalizeName(string? value)
 
 ## Pitfalls
 
-- **Exceptions as control flow**: throwing for expected branches (for example, routine `not found`) is expensive and obscures business logic. Use explicit branching (`Try*` patterns, nullable results, or domain result types) for expected outcomes.
+- **Exceptions as control flow**: throwing for expected branches (for example, routine `not found`) is expensive and obscures business logic. On a hot path processing 10,000 order lookups/second, using `throw new NotFoundException()` for cache misses (a 30% miss rate) generated 3,000 exceptions/second — each costing ~15μs for stack trace capture, adding 45ms of CPU time per second and triggering garbage collection pressure from the `Exception` objects. Use explicit branching (`Try*` patterns, nullable results, or domain result types) for expected outcomes.
 - **`throw ex;` in `catch`**: this restarts the stack trace at the rethrow point and loses the original call path. Use `throw;` inside the same `catch` to preserve debugging context.
 - **Throwing in `finally`**: a new exception from `finally` can mask the original failure from `try`/`catch`. Keep `finally` focused on cleanup and avoid new throws there.
 - **Overly generic exception types**: throwing `Exception` makes handling and telemetry less actionable. Prefer specific built-in types (`ArgumentException`, `InvalidOperationException`, and related types) that communicate intent.

@@ -39,7 +39,7 @@ public interface IPaymentGateway
 ```
 
 ### Inheritance
-Reuse and extend behavior by deriving from a base type. Use carefully — deep inheritance hierarchies create tight coupling. Prefer composition over inheritance when the relationship is "has-a" rather than "is-a".
+Reuse and extend behavior by deriving from a base type. The mechanism: the CLR's virtual method table (vtable) maps method slots to implementations, and derived classes can replace entries via `override`. The risk: deep hierarchies create tight coupling — a change to a base class method signature or default behavior can silently break all derived classes (fragile base class problem). Rule: use inheritance for genuine "is-a" relationships with shared invariants (e.g., `HttpMessageHandler` pipeline), use composition for everything else.
 
 ```csharp
 // Prefer composition:
@@ -63,22 +63,21 @@ foreach (var gateway in gateways)
 
 ## Pitfalls
 
-**Deep inheritance hierarchies**: Each level of inheritance adds coupling. A change to a base class can break all derived classes. Prefer interfaces and composition.
+**Deep inheritance hierarchies** — each level of inheritance adds coupling. A production example: a payment processing system had `PaymentBase` → `CardPayment` → `AuthorizedCardPayment` → `RefundableAuthorizedCardPayment`. Adding retry logic to `PaymentBase.Process()` broke `RefundableAuthorizedCardPayment` because it overrode `Process()` and assumed a specific call order. Flattening to `IPayment` interface + composition cut the bug rate in that module by 60% over two quarters. Prefer interfaces and composition; limit inheritance to 2 levels maximum.
 
-**Anemic domain model**: Objects with only getters/setters and no behavior. All logic lives in service classes. This is procedural programming with OOP syntax — it loses encapsulation benefits.
+**Anemic domain model** — objects with only getters/setters and no behavior. All logic lives in service classes. This is procedural programming with OOP syntax — invariants are enforced in service code (scattered, easy to miss), and objects can be put into invalid states. A real example: an `Order` class with public `Status` setter allowed any service to set `Status = Shipped` without checking whether payment was confirmed. Moving the transition to `Order.Ship()` with a guard (`if (Status != PaymentConfirmed) throw`) eliminated an entire category of invalid-state bugs.
 
-**Overusing inheritance for code reuse**: Inheriting from a class just to reuse a method creates an "is-a" relationship that may not be semantically correct. Use composition or extension methods instead.
+**Overusing inheritance for code reuse** — inheriting from a class just to reuse a method creates an "is-a" relationship that may not be semantically correct. Example: `EmailNotifier : SmtpClient` just to get `Send()` — now `EmailNotifier` IS an SMTP client and exposes 40+ public methods from `SmtpClient` that callers shouldn't use. Use composition (`EmailNotifier` has an `ISmtpClient` field) or extension methods instead.
+## Tradeoffs
 
-## Tradeoffs vs Functional Programming
+| Decision | OOP Approach | Alternative | When OOP Wins | When Alternative Wins |
+| --- | --- | --- | --- | --- |
+| **State management** | Mutable state encapsulated in objects | Immutable data + pure functions (FP) | Complex domain invariants that must be enforced at every mutation (banking, inventory, workflow engines) | Data transformation pipelines, ETL, event processing where immutability prevents race conditions |
+| **Code reuse** | Inheritance (shared base implementation) | Composition + interfaces | Genuine type hierarchies with shared invariants (ASP.NET `Controller` → `ControllerBase`) — limit to 2 levels | Everything else — composition is more flexible, testable, and doesn't create fragile base class coupling |
+| **Extensibility** | Virtual methods + override | Strategy/delegate injection | Stable extension points with well-defined contracts (middleware pipelines, template method) | High-variance behavior that changes at runtime or per-request (feature flags, A/B routing) |
+| **Testability** | Interface-based DI + mocking | Pure functions (no mocking needed) | Services with external dependencies (DB, HTTP, queues) where mocking isolates the unit under test | Pure computation where input → output is deterministic and mocking adds ceremony for no benefit |
 
-| | OOP | Functional |
-|---|---|---|
-| State | Mutable (encapsulated) | Immutable (preferred) |
-| Reuse | Inheritance + composition | Higher-order functions |
-| Testing | Requires mocking | Pure functions are trivially testable |
-| .NET fit | C# classes, interfaces | LINQ, records, F# |
-
-**Use OOP** for domain modeling with complex invariants and state transitions. **Use functional patterns** (LINQ, records, pure functions) for data transformation pipelines.
+**Decision rule**: use OOP for domain modeling with complex invariants and state transitions (DDD aggregates, workflow engines). Use functional patterns (LINQ, records, pure functions) for data transformation and stateless computation. Most production C# codebases use both — OOP for the domain layer, functional style for the application/infrastructure layers.
 
 ## Questions
 

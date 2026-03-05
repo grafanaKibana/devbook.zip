@@ -5,7 +5,7 @@
 
 # Intro
 
-`HashSet<T>` stores unique values with fast membership checks. Use it when uniqueness and lookup speed matter more than ordering.
+`HashSet<T>` stores unique values with O(1) average membership checks. Use it when uniqueness and lookup speed matter more than ordering. A concrete use case: deduplicating 500K event IDs in a message processing pipeline — `HashSet<string>.Contains` checks each ID in sub-microsecond time, while `List<string>.Contains` would scan up to 500K entries per check, turning a 200 ms job into a 40-minute one.
 
 ## Deeper Explanation
 
@@ -44,9 +44,9 @@ var added = tags.Add("DOTNET"); // false, already exists by comparer
 
 ### Pitfalls
 
-- Overriding `Equals` without matching `GetHashCode` breaks set behavior.
-- Mutating fields that participate in hash/equality after insertion can make entries unreachable.
-- Enumeration order is not a stable contract.
+- **Broken `GetHashCode`/`Equals` contract** — overriding `Equals` without matching `GetHashCode` causes `Add` to accept duplicates and `Contains` to miss existing entries. Two objects that are `Equals` must produce the same `GetHashCode`.
+- **Mutable fields in hash computation** — mutating a field that participates in `GetHashCode` after insertion makes the entry unreachable in its bucket. `Contains` returns `false` even though the entry exists. Use immutable types or never mutate hash-participating fields after adding to the set.
+- **Assuming stable enumeration order** — `HashSet<T>` enumeration order depends on internal bucket layout and can change after `Add`/`Remove` operations or across .NET versions. If you serialize a `HashSet` and compare output strings, tests will be flaky. Use `SortedSet<T>` or `.OrderBy()` when order matters.
 
 ### Tradeoffs
 

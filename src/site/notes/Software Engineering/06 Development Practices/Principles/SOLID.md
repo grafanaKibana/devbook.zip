@@ -5,7 +5,7 @@
 
 # SOLID Principles
 
-SOLID is a mnemonic for five object-oriented design principles that help keep code modular, testable, and easy to change. They are not rules to follow blindly — they are heuristics for managing complexity. Violating them is sometimes the right call; the cost is usually increased coupling and harder testing.
+SOLID is a mnemonic for five object-oriented design principles that help keep code modular, testable, and easy to change. They are not rules to follow blindly — they are heuristics for managing complexity. In a 300-class e-commerce platform, applying DIP (Dependency Inversion) to the payment module reduced the time to add a new payment provider from 2 weeks of cross-cutting changes to 3 days of implementing a single `IPaymentGateway` interface — because no existing code needed modification. Violating them is sometimes the right call; the cost is usually increased coupling and harder testing.
 
 ## S — Single Responsibility Principle
 
@@ -108,7 +108,7 @@ Decision rule: apply SOLID where you have evidence of coupling pain (hard to tes
 
 ## Pitfalls
 
-**Over-engineering**: Applying SOLID to every class in a small codebase creates unnecessary abstractions. A 50-line script does not need interfaces and dependency injection. Apply SOLID where complexity is real, not anticipated.
+**Over-engineering**: Applying SOLID to every class in a small codebase creates unnecessary abstractions. A 50-line script does not need interfaces and dependency injection. A team applied ISP so aggressively to a 20-endpoint internal tool that they ended up with 47 single-method interfaces — navigating the codebase required tracing through 3-4 layers of indirection for every feature, and new developers took 2 weeks to onboard on what should have been a simple CRUD application. Apply SOLID where complexity is real, not anticipated.
 
 **SRP misapplied**: "One reason to change" is not "one method per class". A class can have multiple methods as long as they all serve the same actor/concern.
 

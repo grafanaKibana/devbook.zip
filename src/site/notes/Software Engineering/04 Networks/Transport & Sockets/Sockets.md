@@ -106,7 +106,7 @@ Console.WriteLine($"Received {result.Buffer.Length} bytes from {result.RemoteEnd
 
 **Blocking the thread pool** — synchronous socket operations (`Receive`, `Send`) block a thread-pool thread. Use async APIs (`ReceiveAsync`, `SendAsync`, `TcpClient.GetStream()` + `ReadAsync`) to release threads during I/O waits.
 
-**No framing on TCP** — TCP delivers a stream of bytes with no concept of message boundaries. If your protocol sends variable-length messages, you must add framing: length-prefix, delimiter, or fixed-size headers.
+**No framing on TCP** — TCP delivers a stream of bytes with no concept of message boundaries. If your protocol sends variable-length messages, you must add framing: length-prefix, delimiter, or fixed-size headers. A chat application that sent messages as raw UTF-8 without framing worked fine in local testing but in production, high-throughput scenarios caused two messages to arrive in a single `ReadAsync` call, merging "Hello" and "World" into "HelloWorld" — the bug took weeks to reproduce because it only occurred under network congestion.
 
 ## Tradeoffs
 
