@@ -124,4 +124,8 @@ public sealed class CsvReportGenerator : IReportGenerator
 > **Parent**
 >  [[Software Engineering/05 Architecture/Patterns/Patterns\|Patterns]]
 >
+> **Topics**
+> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Behavioral\|Behavioral]]
+> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Creational/Creational\|Creational]]
+> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Structural\|Structural]]
 <!-- whats-next:end -->
