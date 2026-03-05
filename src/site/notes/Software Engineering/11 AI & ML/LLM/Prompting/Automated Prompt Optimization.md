@@ -5,7 +5,7 @@
 
 # Intro
 
-Manual prompt engineering is effective for small projects, but it becomes slow and brittle when you need to tune many tasks, models, or domains. Research on automated prompt optimization tries to move part of that work into repeatable loops: generate candidates, evaluate them, and keep the best signals. These methods are still mostly research-stage for typical product teams, but they show how prompting can evolve from craft to optimization workflow. This page surveys four representative approaches.
+Manual prompt engineering is effective for small projects, but it becomes slow and brittle when you need to tune many tasks, models, or domains. A team maintaining 15 classification prompts across 3 models spends days on each model migration, manually adjusting wording that worked for GPT-4 but fails on Claude. Automated prompt optimization moves part of that work into repeatable loops: generate candidates, evaluate them against a validation set, and keep the best-performing variant. These methods are still mostly research-stage for typical product teams, but they show where prompting is heading — from craft to engineering workflow with measurable iteration cycles. This page surveys four representative approaches and when each is worth the setup cost.
 
 ## Automatic Prompt Engineer (APE)
 
@@ -74,23 +74,13 @@ best_prompt = candidates[scores.index(max(scores))]
 
 ## Pitfalls
 
-### Optimizing Without a Stable Evaluation Set
+**Optimizing without a stable evaluation set** — a team runs APE-style search but uses a 15-example validation set. The winning prompt scores 93% on that set by chance (variance on 15 samples is plus or minus 12%), not because it generalizes. In production, quality is no better than the original. Mitigation: use at least 50 validation examples, representative of real task distribution, held fixed throughout the optimization run. Statistical significance matters — a 3% improvement on 50 examples might not be real; on 200 examples, it probably is.
 
-**What goes wrong**: the team runs APE-style search but uses a small or inconsistent validation set. The winning prompt scores well on that set by chance, not because it generalizes. In production, quality is no better than the original.
+**Mistaking benchmark improvement for production improvement** — APE finds a prompt that improves accuracy on MultiArith by 3%. The team ships it. Production quality does not change because MultiArith is synthetic math problems and the production task is customer intent classification. Mitigation: always validate on your own task distribution. Public benchmarks are useful for comparing methods; they are not a substitute for domain-specific evaluation.
 
-**Mitigation**: treat the evaluation set as the most important artifact. It must be large enough to distinguish signal from noise (typically 50+ cases), representative of the real task distribution, and held fixed throughout the optimization run. Without a stable eval set, automated optimization is just random search.
+**Using PAL when the task cannot be formalized** — a team applies PAL to summarization. The model generates Python code that splits strings and counts sentences, but summarization requires judgment about salience, not string manipulation. The code runs but produces worse output than plain CoT. Mitigation: PAL is for tasks with deterministic, computable answers (arithmetic, unit conversion, symbolic manipulation). For tasks requiring judgment, tone, or creativity, stick with text-based reasoning.
 
-### Mistaking Benchmark Improvement for Production Improvement
-
-**What goes wrong**: APE finds a prompt that improves accuracy on MultiArith by 3%. The team ships it. Production quality does not change because the benchmark distribution does not match real user queries.
-
-**Mitigation**: always validate optimized prompts on your own task distribution, not just public benchmarks. Public benchmarks are useful for comparing methods; they are not a substitute for domain-specific evaluation.
-
-### Using PAL When the Task Cannot Be Formalized
-
-**What goes wrong**: the team applies PAL to a summarization or tone-adjustment task. The model generates Python code that tries to manipulate strings, but the task requires judgment, not computation. The code runs but produces worse output than plain CoT.
-
-**Mitigation**: PAL is effective for tasks with deterministic, computable answers (arithmetic, symbolic manipulation, unit conversion). For tasks requiring judgment, tone, or creativity, plain prompting or CoT is more appropriate.
+**Overfitting the meta-loop to failure examples** — meta-prompting that refines prompts against 5 specific failure cases can regress on the other 95% of inputs. The refined prompt adds so many constraints to handle edge cases that it confuses the model on straightforward inputs. Mitigation: always evaluate refined prompts against a held-out set that includes both the failure cases and a representative sample of normal cases. Version prompts in source control with rollback criteria.
 
 
 ## Tradeoffs

@@ -5,7 +5,7 @@
 
 # OAuth 2.0 and OpenID Connect
 
-OAuth 2.0 is an authorization framework that lets users grant third-party applications limited access to their resources without sharing credentials. OpenID Connect (OIDC) is an identity layer on top of OAuth 2.0 that adds authentication — it tells you who the user is, not just what they can access.
+OAuth 2.0 is an authorization framework that lets users grant third-party applications limited access to their resources without sharing credentials. OpenID Connect (OIDC) is an identity layer on top of OAuth 2.0 that adds authentication — it tells you who the user is, not just what they can access. Most modern web applications use the Authorization Code flow with PKCE: a user clicking "Sign in with Microsoft" on a SaaS dashboard triggers a redirect to Microsoft Entra ID, which returns an authorization code exchanged for an access token (API calls) and an ID token (user identity) — all without the application ever seeing the user's password.
 
 ## OAuth 2.0 Flows
 
@@ -65,7 +65,7 @@ builder.Services.AddAuthentication(options =>
 
 ## Pitfalls
 
-**Missing PKCE**: Without PKCE, authorization codes can be intercepted and exchanged by an attacker. Always use PKCE for public clients (SPAs, mobile apps).
+**Missing PKCE**: Without PKCE, authorization codes can be intercepted and exchanged by an attacker. A mobile app that used the Authorization Code flow without PKCE was vulnerable to a redirect URI interception attack — a malicious app registered the same custom URI scheme, intercepted the authorization code from the redirect, and exchanged it for tokens, gaining full access to 1,200 user accounts before the issue was detected. Always use PKCE for public clients (SPAs, mobile apps).
 
 **Token leakage in logs**: Access tokens and ID tokens in URL fragments or query parameters get logged by web servers and proxies. Always use the Authorization Code flow (tokens in the response body), never the Implicit flow (tokens in URL fragments).
 

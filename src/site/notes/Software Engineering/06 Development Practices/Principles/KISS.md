@@ -4,7 +4,7 @@
 
 # Intro
 
-KISS (Keep It Simple, Stupid) means prefer the simplest solution that meets the actual requirements. Simple is not the same as "quick hack" — simple means fewer moving parts, fewer hidden assumptions, and clear failure modes. You reach for KISS when complexity is added "just in case" or when abstractions obscure the real behavior.
+KISS (Keep It Simple, Stupid) means prefer the simplest solution that meets the actual requirements. Simple is not the same as "quick hack" — simple means fewer moving parts, fewer hidden assumptions, and clear failure modes. You reach for KISS when complexity is added "just in case" or when abstractions obscure the real behavior. A startup built a full event-sourced CQRS system with a Kafka message bus for what was a 3-table CRUD application serving 50 users — the team spent 60% of engineering time maintaining infrastructure instead of shipping features, and eventually rewrote it as a simple ASP.NET Core API with EF Core in two weeks.
 
 Complexity has ongoing cost: bugs, onboarding time, testing, and operations. Every abstraction layer you add must earn its keep by solving a proven problem.
 
@@ -65,7 +65,7 @@ The simplest distributed system that meets current requirements is almost always
 ## Pitfalls
 
 **Confusing simple with no structure**
-A 2,000-line `Program.cs` with no separation of concerns is not simple — it is unstructured. KISS means simple design, not absence of design.
+A 2,000-line `Program.cs` with no separation of concerns is not simple — it is unstructured. A production outage at a fintech company was traced to a 3,400-line `Startup.cs` where middleware ordering, DI registration, and configuration validation were interleaved — a developer reordered two middleware registrations during a refactor and broke authentication for all endpoints, and the bug passed code review because no one could reason about the file's structure. KISS means simple design, not absence of design.
 
 **Avoiding necessary abstractions**
 Refusing to extract a shared abstraction to "keep it simple" leads to duplication everywhere. When the same logic appears in three places, the simple solution is to extract it.

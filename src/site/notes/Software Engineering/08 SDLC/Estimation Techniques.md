@@ -5,7 +5,7 @@
 
 # Estimation Techniques
 
-Software estimation techniques provide structured ways to forecast the effort, time, or complexity of development work. No technique is perfectly accurate — estimation is inherently uncertain. The goal is to reduce uncertainty enough to make planning decisions, not to predict the future precisely.
+Software estimation techniques provide structured ways to forecast the effort, time, or complexity of development work. No technique is perfectly accurate — estimation is inherently uncertain. Studies consistently show that software projects overrun initial estimates by 30-100%, with the Standish Group's CHAOS report finding that only 29% of projects are delivered on time and on budget. The goal is to reduce uncertainty enough to make planning decisions, not to predict the future precisely.
 
 ## Common Techniques
 
@@ -58,7 +58,7 @@ Expected = (2 + 4×5 + 14) / 6 = 36 / 6 = 6 days
 ## Pitfalls
 
 **Anchoring bias**
-The first estimate heard influences all subsequent estimates. In Planning Poker, if one person reveals their card early, others anchor to it. Mitigation: simultaneous reveal is mandatory — all cards shown at the same time.
+The first estimate heard influences all subsequent estimates. In one team's retrospective analysis, stories estimated after hearing the tech lead's number first clustered within ±1 point of the lead's estimate 78% of the time — compared to 35% when simultaneous reveal was enforced. Mitigation: simultaneous reveal is mandatory — all cards shown at the same time.
 
 **Planning fallacy**
 Teams consistently underestimate because they focus on the best-case scenario and ignore past overruns. Mitigation: use PERT's three-point estimate to force explicit consideration of the pessimistic case. Track actual vs estimated velocity over 3-5 sprints and use historical data for capacity planning.
