@@ -30,7 +30,11 @@
         },
         {
           "type": "note",
-          "path": "Assets/Senior AI Engineer - Interview Prep.md"
+          "path": "Assets/Sr. AI Engineer - System Design Interview Prep.md"
+        },
+        {
+          "type": "note",
+          "path": "Assets/Sr. AI Engineer - OOD Interview Prep.md"
         }
       ],
       "propertyKeys": [
@@ -426,7 +430,12 @@
       "tag": false,
       "property": false
     },
-    "Assets/Senior AI Engineer - Interview Prep.md": {
+    "Assets/Sr. AI Engineer - System Design Interview Prep.md": {
+      "folder": true,
+      "tag": false,
+      "property": false
+    },
+    "Assets/Sr. AI Engineer - OOD Interview Prep.md": {
       "folder": true,
       "tag": false,
       "property": false

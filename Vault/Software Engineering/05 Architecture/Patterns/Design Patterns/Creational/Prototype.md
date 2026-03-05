@@ -11,7 +11,20 @@ dg-publish: true
 ---
 # Prototype
 
-The Prototype pattern creates new objects by copying an existing instance (the prototype) rather than constructing from scratch. The mechanism: the prototype object knows how to copy itself — either shallow (copy references) or deep (copy the full object graph). In modern C#, `record with {}` expressions are the idiomatic Prototype for value-semantic objects. The classical `ICloneable` interface is considered problematic (it doesn't specify shallow vs deep semantics) — prefer explicit copy constructors or `record with {}` for new code. Reach for Prototype when object construction is expensive or complex, and you need many similar objects that differ only in a few fields.
+Photocopying a filled-out form is a Prototype in everyday life. Instead of filling out a new form from scratch, you copy the existing one and change just the name or address. The copy carries all the original structure and most of the original data — you only modify what differs.
+
+The Prototype pattern creates new objects by copying an existing instance rather than constructing from scratch. The prototype object knows how to copy itself, producing either a shallow copy (references shared) or a deep copy (full object graph duplicated). The client asks the prototype to clone itself, then tweaks the variant-specific fields. In modern C#, **`record with {}` expressions are the idiomatic Prototype** for value-semantic objects — the compiler generates the copy logic for you. The classical `ICloneable` interface is considered problematic because it doesn’t specify shallow vs deep semantics. Prefer `record with {}` for new code, or explicit copy constructors when you need deep-copy control over reference types.
+
+```mermaid
+flowchart LR
+    TemplateProduct["Template Product"]
+    TemplateProduct -->|Clone| Copy1["Variant - Red Large"]
+    TemplateProduct -->|Clone| Copy2["Variant - Blue Small"]
+    TemplateProduct -->|Clone| Copy3["Variant - Green Medium"]
+    Copy1 -.->|modify size and color| Copy1
+    Copy2 -.->|modify size and color| Copy2
+    Copy3 -.->|modify size and color| Copy3
+```
 
 ## Problem
 

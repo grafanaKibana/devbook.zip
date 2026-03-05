@@ -11,7 +11,23 @@ dg-publish: true
 ---
 # Singleton
 
-The Singleton pattern ensures a class has only one instance and provides a global access point to it. In modern .NET, **`services.AddSingleton<T>()`** is the correct implementation — it's testable, injectable, and lifetime-controlled by the DI container. The classical form (static instance + private constructor) is largely obsolete in DI-based applications: it creates hidden global state, makes testing difficult, and introduces captive dependency bugs. Understand the classical form to recognize it in legacy code; use DI-managed singletons for new code.
+A country has exactly one president at a time. Everyone refers to "the president" — there’s a single instance that serves the entire nation. You don’t create a new president when you need one; you access the existing one through a well-known entry point. If two departments tried to independently elect their own president, you’d have chaos.
+
+The Singleton pattern ensures a class has only one instance and provides a global access point to it. In modern .NET, **`services.AddSingleton<T>()`** is the correct implementation — it’s testable, injectable, and lifetime-controlled by the DI container. The classical form (static instance, private constructor, double-checked locking) is largely obsolete in DI-based applications: it creates hidden global state, makes testing difficult, and introduces captive dependency bugs when a singleton captures a scoped service. Understand the classical form to recognize it in legacy code; use DI-managed singletons for all new work.
+
+```mermaid
+flowchart TD
+    subgraph Classical Singleton
+        PrivateCtor["private constructor"] --> StaticInstance["static instance field"]
+        StaticInstance --> GlobalAccess["global access point"]
+    end
+    subgraph Modern DI Singleton
+        Registration["AddSingleton of T"] --> Container["DI Container"]
+        Container -->|manages lifetime| SingleInstance["single instance"]
+        Container -->|injects into| ServiceA["Service A"]
+        Container -->|injects into| ServiceB["Service B"]
+    end
+```
 
 ## Problem
 

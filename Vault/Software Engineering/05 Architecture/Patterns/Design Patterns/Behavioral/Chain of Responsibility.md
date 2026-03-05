@@ -11,7 +11,23 @@ dg-publish: true
 ---
 # Chain of Responsibility
 
-The Chain of Responsibility pattern passes a request along a chain of handlers. Each handler decides whether to process the request or pass it to the next handler. The mechanism: handlers implement a common interface with a `Handle()` method and hold a reference to the next handler; a handler either processes the request and stops the chain, or calls `next.Handle()` to continue. Reach for it when multiple objects may handle a request, the handler isn't known upfront, and you want to decouple senders from receivers.
+Airport security is a Chain of Responsibility. Your bag passes through ID verification, then X-ray scanning, then manual inspection, then customs. Each checkpoint either clears you or pulls you aside. Adding a new check — say, a bomb-sniffing dog — means inserting a new station in the line. No existing checkpoint changes. The passenger doesn’t decide which checks to go through; the chain decides.
+
+The Chain of Responsibility pattern passes a request along a chain of handlers, where each handler decides whether to process the request or forward it to the next one. Handlers implement a common interface with a `Handle()` method and hold a reference to their successor. A handler either processes the request and stops the chain, or calls `next.Handle()` to continue. The sender doesn’t know which handler will process the request — or even how many handlers exist. In ASP.NET Core, **the middleware pipeline is this exact pattern**: `app.UseAuthentication()` → `app.UseAuthorization()` → `app.UseRateLimiting()` → your endpoint.
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant StockCheck
+    participant FraudCheck
+    participant CreditCheck
+    participant AddressCheck
+    Client->>StockCheck: Validate order
+    StockCheck->>FraudCheck: Pass to next
+    FraudCheck->>CreditCheck: Pass to next
+    CreditCheck->>AddressCheck: Pass to next
+    AddressCheck-->>Client: Approved
+```
 
 ## Problem
 

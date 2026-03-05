@@ -11,7 +11,42 @@ dg-publish: true
 ---
 # Visitor
 
-The Visitor pattern lets you add new operations to an object hierarchy without modifying the classes in that hierarchy. The mechanism: each element class implements `Accept(IVisitor visitor)` which calls `visitor.Visit(this)` — this double dispatch ensures the correct `Visit` overload is called for the concrete type. Reach for it when you have a stable element hierarchy and frequently add new operations across all elements.
+A museum audio guide is a Visitor. The exhibits (element hierarchy) stay the same, but you can load different tours — art history, architecture, kids’ tour. Each tour visits the same exhibits but tells different stories. Adding a new tour doesn’t require changing any exhibit; adding a new exhibit requires updating every tour. That trade-off — easy to add operations, hard to add elements — is the Visitor’s defining characteristic.
+
+The Visitor pattern lets you add new operations to an object hierarchy without modifying the classes in that hierarchy. Each element implements `Accept(IVisitor visitor)`, which calls `visitor.Visit(this)` — this **double dispatch** ensures the correct `Visit` overload runs for the concrete element type. The visitor carries the operation and any accumulated state. In an e-commerce cart, `PhysicalProduct`, `DigitalProduct`, and `SubscriptionProduct` each accept visitors like `TaxVisitor`, `ShippingVisitor`, or `DiscountVisitor` — adding a new calculation means adding a new visitor class, not editing the product hierarchy.
+
+```mermaid
+classDiagram
+    class ICartItem {
+        <<interface>>
+        +Accept(visitor ICartItemVisitor)
+    }
+    class PhysicalProduct {
+        +Accept(visitor)
+    }
+    class DigitalProduct {
+        +Accept(visitor)
+    }
+    class SubscriptionProduct {
+        +Accept(visitor)
+    }
+    class ICartItemVisitor {
+        <<interface>>
+        +Visit(PhysicalProduct)
+        +Visit(DigitalProduct)
+        +Visit(SubscriptionProduct)
+    }
+    class TaxVisitor
+    class ShippingVisitor
+    class DiscountVisitor
+    ICartItem <|.. PhysicalProduct
+    ICartItem <|.. DigitalProduct
+    ICartItem <|.. SubscriptionProduct
+    ICartItemVisitor <|.. TaxVisitor
+    ICartItemVisitor <|.. ShippingVisitor
+    ICartItemVisitor <|.. DiscountVisitor
+    ICartItem ..> ICartItemVisitor : accepts
+```
 
 **Modern C# note**: For simple type-dispatch scenarios, C# pattern matching (`switch` expressions with type patterns) can replace Visitor with less ceremony. Visitor earns its complexity when: the element hierarchy is stable and large, new operations are frequent, or you need the visitor to carry state across elements. For 2-3 element types with 1-2 operations, use pattern matching.
 

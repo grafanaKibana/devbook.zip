@@ -11,7 +11,26 @@ dg-publish: true
 ---
 # Factory Method
 
-The Factory Method pattern defines an interface for creating an object but lets subclasses decide which class to instantiate. Instead of calling `new NotificationService()` directly, you call a factory method that returns the right implementation. The key mechanism: the creator class declares the factory method as abstract or virtual; each subclass overrides it to produce a specific product. Reach for it when a class can't anticipate the type of objects it must create, or when you want subclasses to control what gets created.
+A restaurant kitchen has one menu, but different stations prepare the same dish their own way — the Italian station makes pasta, the French station makes a soufflé. The customer orders "the special" without knowing which station handles it. The ordering process is the same; the creation varies by station.
+
+The Factory Method pattern works the same way: it defines an interface for creating an object but lets subclasses decide which class to instantiate. A creator class declares an abstract or virtual factory method that returns a product interface. Each concrete creator overrides this method to produce its specific product. The client code calls the factory method through the creator interface, never touching `new` directly — so adding a new product type means adding a new creator subclass, not editing existing code.
+
+```mermaid
+flowchart LR
+    Client -->|calls| Creator
+    Creator -->|declares| FactoryMethod["factory method"]
+    subgraph Concrete Creators
+        EmailCreator["EmailNotificationCreator"]
+        SmsCreator["SmsNotificationCreator"]
+        PushCreator["PushNotificationCreator"]
+    end
+    FactoryMethod -.->|overridden by| EmailCreator
+    FactoryMethod -.->|overridden by| SmsCreator
+    FactoryMethod -.->|overridden by| PushCreator
+    EmailCreator -->|creates| EmailNotification
+    SmsCreator -->|creates| SmsNotification
+    PushCreator -->|creates| PushNotification
+```
 
 > [!NOTE] Factory Method vs Abstract Factory
 > Factory Method creates **one product** via inheritance — the subclass decides. [[Software Engineering/05 Architecture/Patterns/Design Patterns/Creational/Abstract Factory|Abstract Factory]] creates a **family of related products** via composition. If you only need one object type, Factory Method is simpler.

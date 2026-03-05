@@ -11,7 +11,39 @@ dg-publish: true
 ---
 # Decorator
 
-The Decorator pattern attaches additional responsibilities to an object dynamically by wrapping it in decorator objects that implement the same interface. The mechanism: each decorator holds a reference to the next handler in the chain, calls it, and adds behavior before or after. Decorators compose — you can stack them in any order. Reach for it when you need to add cross-cutting concerns (logging, validation, caching, metrics) to an object without modifying its class, and when the concerns should be composable and independently testable.
+Stacking toppings on a pizza is a Decorator in everyday life. Start with plain dough, add sauce, add cheese, add pepperoni, add mushrooms. Each topping wraps the previous pizza without changing what’s underneath, and you can add or remove any topping independently. A pepperoni pizza and a mushroom pizza share the same base — the toppings are layered on, not baked in.
+
+The Decorator pattern works the same way: it attaches additional responsibilities to an object dynamically by wrapping it in decorator objects that implement the same interface. Each decorator holds a reference to the wrapped object, calls it, and adds behavior before or after the call. Decorators compose freely — you can stack `LoggingHandler(ValidationHandler(MetricsHandler(CoreHandler)))` in any order. Each decorator is independently testable and deployable. The client sees a single `IOrderHandler` and doesn’t know (or care) how many decorators are wrapping the core.
+
+```mermaid
+classDiagram
+    class IOrderHandler {
+        <<interface>>
+        +HandleAsync(order) OrderResult
+    }
+    class CoreOrderHandler {
+        +HandleAsync(order) OrderResult
+    }
+    class LoggingDecorator {
+        -inner IOrderHandler
+        +HandleAsync(order) OrderResult
+    }
+    class ValidationDecorator {
+        -inner IOrderHandler
+        +HandleAsync(order) OrderResult
+    }
+    class MetricsDecorator {
+        -inner IOrderHandler
+        +HandleAsync(order) OrderResult
+    }
+    IOrderHandler <|.. CoreOrderHandler
+    IOrderHandler <|.. LoggingDecorator
+    IOrderHandler <|.. ValidationDecorator
+    IOrderHandler <|.. MetricsDecorator
+    LoggingDecorator --> IOrderHandler : wraps
+    ValidationDecorator --> IOrderHandler : wraps
+    MetricsDecorator --> IOrderHandler : wraps
+```
 
 > [!NOTE] Decorator vs Proxy
 > Both wrap the same interface. **Decorator ADDS new behavior** — logging, caching, validation. [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Proxy|Proxy]] **CONTROLS ACCESS** to the real object — lazy loading, auth checks, remote calls. The structural difference is intent: Decorator enriches; Proxy restricts or defers.

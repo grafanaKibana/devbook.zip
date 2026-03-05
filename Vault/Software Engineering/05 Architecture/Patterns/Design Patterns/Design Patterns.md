@@ -56,6 +56,11 @@ Each pattern page shows the same e-commerce scenario coded **without** the patte
 > **Parent**
 >  [[Software Engineering/05 Architecture/Patterns/Patterns|Patterns]]
 >
+> **Topics**
+> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Behavioral|Behavioral]]
+> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Creational/Creational|Creational]]
+> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Structural|Structural]]
+>
 > **Pages**
 > - [[Software Engineering/05 Architecture/Patterns/Design Patterns/GRASP|GRASP]]
 <!-- whats-next:end -->

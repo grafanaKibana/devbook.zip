@@ -11,7 +11,26 @@ dg-publish: true
 ---
 # Flyweight
 
-The Flyweight pattern reduces memory usage by sharing common state across many fine-grained objects. The mechanism: split an object's state into **intrinsic** (shared, immutable — stored in the flyweight) and **extrinsic** (unique per instance — passed in by the caller). A factory returns the same flyweight instance for objects with identical intrinsic state. Reach for it when you have thousands of objects that share most of their data, and memory is a measurable constraint.
+A printing press uses shared letter stamps instead of casting a unique metal letter for every character in a book. The "A" stamp is reused thousands of times across every page — only its position (extrinsic state) changes. The shape of the letter (intrinsic state) is shared. Without this, printing a book would require millions of unique metal pieces instead of a few dozen reusable stamps.
+
+The Flyweight pattern reduces memory usage by sharing common state across many fine-grained objects. It splits an object’s data into **intrinsic state** (shared, immutable — stored in the flyweight) and **extrinsic state** (unique per use — passed in by the caller). A flyweight factory returns the same instance for objects with identical intrinsic state. In an e-commerce catalog, 100,000 products might share only 50 category definitions — each product stores a category ID, not a full copy of tax rates, display rules, and shipping constraints.
+
+```mermaid
+flowchart TD
+    subgraph Shared Flyweights
+        Electronics["CategoryData: Electronics"]
+        Clothing["CategoryData: Clothing"]
+        Food["CategoryData: Food"]
+    end
+    P1["Product SKU-001"] -->|categoryId| Electronics
+    P2["Product SKU-002"] -->|categoryId| Electronics
+    P3["Product SKU-003"] -->|categoryId| Clothing
+    P4["Product SKU-004"] -->|categoryId| Food
+    P5["Product SKU-005"] -->|categoryId| Electronics
+    FlyweightFactory -->|returns shared instance| Electronics
+    FlyweightFactory -->|returns shared instance| Clothing
+    FlyweightFactory -->|returns shared instance| Food
+```
 
 ## Problem
 

@@ -11,7 +11,34 @@ dg-publish: true
 ---
 # Strategy
 
-The Strategy pattern defines a family of algorithms, encapsulates each one, and makes them interchangeable. The mechanism: a context holds a reference to a strategy interface; the client injects the desired strategy; the context delegates the algorithm to the strategy. Reach for it when you have multiple variants of an algorithm that need to be swappable at runtime, or when you want to eliminate conditional logic that selects between algorithms.
+A navigation app uses the Strategy pattern every time you pick a route. Same destination, different algorithms — fastest, shortest, avoid tolls, scenic. You choose the strategy before you start driving; the app uses it to calculate the route. Swap the strategy mid-trip and the app recalculates without changing the navigation engine itself.
+
+The Strategy pattern defines a family of algorithms, encapsulates each one behind a common interface, and makes them interchangeable at runtime. A **context** holds a reference to a strategy interface and delegates the algorithm to it. The **client** injects the desired strategy — `FlatRateStrategy`, `WeightBasedStrategy`, or `ZoneBasedStrategy` — and the context executes it without knowing which variant it received. Adding a new algorithm means adding a new strategy class, not editing a growing switch statement.
+
+```mermaid
+classDiagram
+    class ShippingContext {
+        -strategy IShippingCostStrategy
+        +CalculateCost(order) decimal
+    }
+    class IShippingCostStrategy {
+        <<interface>>
+        +Calculate(order) decimal
+    }
+    class FlatRateStrategy {
+        +Calculate(order) decimal
+    }
+    class WeightBasedStrategy {
+        +Calculate(order) decimal
+    }
+    class ZoneBasedStrategy {
+        +Calculate(order) decimal
+    }
+    ShippingContext o--> IShippingCostStrategy
+    IShippingCostStrategy <|.. FlatRateStrategy
+    IShippingCostStrategy <|.. WeightBasedStrategy
+    IShippingCostStrategy <|.. ZoneBasedStrategy
+```
 
 > [!NOTE] Strategy vs State vs Command
 > **Strategy** selection is **driven by the client** — the caller injects which algorithm to use. [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/State|State]] transitions are **driven by the object** — the object changes its own behavior. [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Command|Command]] encapsulates a **request** with context — what to do and when. If the caller decides the algorithm, it's Strategy. If the object decides, it's State.

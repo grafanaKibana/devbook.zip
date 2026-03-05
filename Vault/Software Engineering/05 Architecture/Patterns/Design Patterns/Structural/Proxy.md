@@ -11,7 +11,30 @@ dg-publish: true
 ---
 # Proxy
 
-The Proxy pattern provides a surrogate or placeholder for another object to control access to it. The mechanism: the proxy implements the same interface as the real subject and holds a reference to it; the proxy intercepts calls and decides whether, when, and how to forward them. Three common variants: **virtual proxy** (lazy initialization — defer expensive creation), **caching proxy** (memoize results), **protection proxy** (auth check before access). Reach for it when you need to control access to an object without changing the object itself or its callers.
+A security guard at a building entrance is a Proxy. The guard has the same "enter" interface as an open door, but checks your badge before letting you through. Some proxies are lazy — like an automatic door that only powers on when someone approaches. Some are protective — checking credentials before granting access. Some are virtual — an intercom that represents someone who isn’t physically present. In every case, the proxy stands in front of the real thing and controls access to it.
+
+The Proxy pattern provides a surrogate for another object to control access to it. The proxy implements the same interface as the real subject and holds a reference to it, intercepting calls and deciding whether, when, and how to forward them. Three common variants: a **virtual proxy** defers expensive creation until first use (lazy-loading product images), a **caching proxy** stores results to avoid repeated work, and a **protection proxy** checks authorization before forwarding. The client interacts with the proxy transparently — it looks identical to the real object.
+
+```mermaid
+classDiagram
+    class IProductService {
+        <<interface>>
+        +GetProductAsync(id) Product
+    }
+    class RealProductService {
+        +GetProductAsync(id) Product
+    }
+    class ProductProxy {
+        -realService RealProductService
+        -cache Dictionary
+        +GetProductAsync(id) Product
+    }
+    class Client
+    IProductService <|.. RealProductService
+    IProductService <|.. ProductProxy
+    ProductProxy --> RealProductService : delegates after check
+    Client --> IProductService : uses transparently
+```
 
 > [!NOTE] Proxy vs Decorator
 > Both wrap the same interface. **Proxy CONTROLS ACCESS** — lazy loading, caching, auth. [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Decorator|Decorator]] **ADDS BEHAVIOR** — logging, metrics, validation. The structural difference is intent: Proxy restricts or defers; Decorator enriches. A caching proxy that also logs is a Proxy with a Decorator concern mixed in — keep them separate.

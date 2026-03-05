@@ -11,7 +11,19 @@ dg-publish: true
 ---
 # Builder
 
-The Builder pattern separates the construction of a complex object from its representation, letting the same construction process create different representations. The mechanism: a `Builder` class accumulates configuration through a fluent API; a `Build()` call validates and assembles the final object. Reach for it when an object requires many optional parameters, multi-step assembly with validation between steps, or when the same construction process must produce different variants. For **simple objects**, modern C# `required` properties and `init` setters with object initializers are often sufficient — Builder earns its complexity when construction involves validation, computed fields, or a director-driven assembly sequence.
+Ordering a custom sandwich at a sub shop is a Builder in action. You start with bread, add meat, choose veggies, pick a sauce, decide on a size — step by step, in any order, skipping what you don’t want. At the end, the sandwich artist assembles everything into a finished product. You never see a constructor that takes twelve arguments for bread-type, meat-type, lettuce-yes-no, tomato-yes-no.
+
+The Builder pattern separates the construction of a complex object from its representation. A `Builder` class accumulates configuration through a fluent API — `.WithShipping(address)`, `.WithDiscount(code)`, `.WithGiftWrap()` — and a final `Build()` call validates constraints and assembles the finished object. Each step is optional, order-independent, and self-documenting. For **simple objects**, modern C# `required` properties and `init` setters with object initializers are often sufficient — Builder earns its complexity when construction involves cross-field validation, computed values, or a director-driven assembly sequence where the same process produces different representations.
+
+```mermaid
+flowchart LR
+    Client -->|configures| Builder
+    Builder -->|WithShipping| Builder
+    Builder -->|WithDiscount| Builder
+    Builder -->|WithGiftWrap| Builder
+    Builder -->|Build and validate| Order["Order"]
+    Director -->|drives build steps| Builder
+```
 
 ## Problem
 

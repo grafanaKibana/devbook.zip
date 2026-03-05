@@ -11,7 +11,22 @@ dg-publish: true
 ---
 # Memento
 
-The Memento pattern captures and externalizes an object's internal state so it can be restored later, without violating encapsulation. The mechanism: the originator creates a memento (a snapshot of its state); a caretaker stores the memento without inspecting it; the originator can restore its state from a memento. Reach for it when you need undo/redo, abandoned cart recovery, or any scenario where you must restore a previous state.
+Save points in a video game are Mementos. Before a boss fight, the game captures your exact state — health, inventory, position, quest progress — into a save file. If you die, you restore from the save point and try again. The save file captures everything needed to recreate the moment without exposing the game’s internal data structures to the save system.
+
+The Memento pattern captures and externalizes an object’s internal state so it can be restored later, without violating encapsulation. Three participants: the **originator** (your shopping cart) creates a memento containing a snapshot of its state. The **caretaker** (the history manager) stores mementos without inspecting their contents. When undo is needed, the originator restores itself from a memento. The caretaker never accesses or modifies the saved state — it just holds the opaque snapshots.
+
+```mermaid
+sequenceDiagram
+    participant Cart as ShoppingCart
+    participant Memento as CartMemento
+    participant History as CartHistory
+    Cart->>Memento: CreateMemento with current state
+    Memento->>History: Store snapshot
+    Note over Cart: User modifies cart
+    Cart->>History: Request undo
+    History->>Memento: Get last snapshot
+    Memento->>Cart: Restore previous state
+```
 
 ## Problem
 

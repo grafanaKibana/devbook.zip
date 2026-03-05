@@ -11,7 +11,19 @@ dg-publish: true
 ---
 # Facade
 
-The Facade pattern provides a simplified interface to a complex subsystem. It doesn't add new functionality — it orchestrates existing subsystems behind a single entry point, hiding their complexity from callers. The mechanism: the facade class holds references to subsystem components and exposes high-level methods that coordinate them. Reach for it when a controller, service, or client needs to orchestrate multiple subsystems and the orchestration logic is the same every time.
+A hotel concierge is a Facade. You walk up and say "I need a restaurant reservation, a taxi, and theater tickets." Behind the scenes, the concierge calls the restaurant, the taxi company, and the box office. You interact with one person instead of three separate services, each with its own phone number, hold music, and booking protocol. The concierge doesn’t add new capabilities — they simplify access to existing ones.
+
+The Facade pattern provides a simplified interface to a complex subsystem. The facade class holds references to subsystem components (inventory, payment, shipping, notification) and exposes high-level methods that coordinate them. The client calls `OrderFacade.PlaceOrderAsync(order)` instead of manually orchestrating five services in the right sequence with the right error handling. The subsystems remain fully accessible for clients that need fine-grained control — the facade is a convenience, not a prison.
+
+```mermaid
+flowchart LR
+    Client -->|PlaceOrder| OrderFacade
+    OrderFacade --> InventoryService
+    OrderFacade --> PaymentService
+    OrderFacade --> ShippingService
+    OrderFacade --> NotificationService
+    OrderFacade --> AnalyticsService
+```
 
 > [!NOTE] Facade vs Adapter
 > **Facade** creates a **new simplified interface** for your convenience — it's about reducing complexity. [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Adapter|Adapter]] makes an **existing incompatible interface** fit a target interface — it's about compatibility. Facade is optional (you could call the subsystems directly); Adapter is required (the interfaces are incompatible without it).

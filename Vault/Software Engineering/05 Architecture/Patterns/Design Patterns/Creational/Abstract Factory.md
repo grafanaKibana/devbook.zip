@@ -11,7 +11,37 @@ dg-publish: true
 ---
 # Abstract Factory
 
-The Abstract Factory pattern provides an interface for creating **families of related objects** without specifying their concrete classes. The key mechanism: a factory interface declares creation methods for each product in the family; concrete factories implement the interface and ensure all products they create are compatible with each other. Reach for it when your system must work with multiple product families (Stripe vs PayPal), and products within a family must stay consistent — you can't mix a Stripe payment processor with a PayPal receipt generator.
+Walk into an IKEA showroom and pick the "Modern" living room set — you get a modern chair, a modern table, and a modern lamp, all designed to look right together. You can’t accidentally mix a Victorian chair with a Modern table because the set is curated as a family. Pick a different style and every piece changes together.
+
+The Abstract Factory pattern works the same way: it provides an interface for creating **families of related objects** without specifying their concrete classes. A factory interface declares creation methods for each product in the family (payment processor, receipt generator, refund handler). Each concrete factory (Stripe, PayPal, BankTransfer) implements the full interface, guaranteeing that all products it creates are compatible with each other. The client receives a factory and uses it — swapping `StripePaymentFactory` for `PayPalPaymentFactory` changes the entire product family in one place, and the compiler prevents mixing a Stripe processor with a PayPal receipt generator.
+
+```mermaid
+classDiagram
+    class IPaymentProviderFactory {
+        <<interface>>
+        +CreateProcessor() IPaymentProcessor
+        +CreateReceiptGenerator() IReceiptGenerator
+        +CreateRefundHandler() IRefundHandler
+    }
+    class StripeFactory {
+        +CreateProcessor() StripeProcessor
+        +CreateReceiptGenerator() StripeReceiptGen
+        +CreateRefundHandler() StripeRefundHandler
+    }
+    class PayPalFactory {
+        +CreateProcessor() PayPalProcessor
+        +CreateReceiptGenerator() PayPalReceiptGen
+        +CreateRefundHandler() PayPalRefundHandler
+    }
+    IPaymentProviderFactory <|.. StripeFactory
+    IPaymentProviderFactory <|.. PayPalFactory
+    StripeFactory ..> StripeProcessor
+    StripeFactory ..> StripeReceiptGen
+    StripeFactory ..> StripeRefundHandler
+    PayPalFactory ..> PayPalProcessor
+    PayPalFactory ..> PayPalReceiptGen
+    PayPalFactory ..> PayPalRefundHandler
+```
 
 > [!NOTE] Abstract Factory vs Factory Method
 > [[Software Engineering/05 Architecture/Patterns/Design Patterns/Creational/Factory Method|Factory Method]] creates **one product** via inheritance. Abstract Factory creates a **family of related products** via composition. If your products need to work together (Stripe payment + Stripe receipt + Stripe refund handler), use Abstract Factory to enforce that constraint.
