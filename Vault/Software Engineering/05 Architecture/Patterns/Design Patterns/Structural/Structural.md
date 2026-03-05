@@ -20,4 +20,15 @@ Structural patterns deal with how classes and objects are composed to form large
 ---
 
 > [!note] Whats next
+> **Parent**
+>  [[Software Engineering/05 Architecture/Patterns/Design Patterns/Design Patterns|Design Patterns]]
+>
+> **Pages**
+> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Adapter|Adapter]]
+> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Bridge|Bridge]]
+> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Composite|Composite]]
+> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Decorator|Decorator]]
+> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Facade|Facade]]
+> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Flyweight|Flyweight]]
+> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Proxy|Proxy]]
 <!-- whats-next:end -->
