@@ -26,14 +26,6 @@ The platform has three layers worth understanding separately: the **runtime** (C
 > Runtime (CLR), language (C#/F#), and framework libraries (ASP.NET Core, EF Core, extensions).
 > It matters because most production issues cross layers: a performance problem might involve language-level allocations (C#), runtime GC behavior (CLR), and framework middleware configuration (ASP.NET Core). Understanding the boundaries helps you diagnose root causes instead of applying surface-level fixes.
 
-> [!QUESTION]- What is the difference between .NET Framework and modern .NET?
-> .NET Framework is Windows-only, ships with the OS, and is in maintenance mode (4.8.x patches only). Modern .NET (.NET 5+) is cross-platform, open-source, and receives active feature development.
-> Migration matters because new capabilities (Minimal APIs, native AOT, significant performance improvements) only ship in modern .NET. Framework-era patterns (OWIN, System.Web) still appear in legacy codebases that need migration.
-
-> [!QUESTION]- Why does .NET consistently rank high in web framework benchmarks, and does that translate to application performance?
-> The runtime uses tiered JIT compilation (quick startup, then optimized hot paths), the Kestrel web server is built on efficient async I/O (System.IO.Pipelines), and the framework minimizes allocations on the request path.
-> However, benchmark performance does not automatically transfer to application code — you still need correct async patterns, minimal middleware, and efficient data access to realize it in production.
-
 ## Links
 
 - [.NET documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/) — Platform overview, guides, and API reference.

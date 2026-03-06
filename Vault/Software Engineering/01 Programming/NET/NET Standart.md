@@ -82,16 +82,6 @@ var buffer = new byte[256];
 > - Prefer adding it as part of multi-targeting (`net8.0;netstandard2.0`) instead of making it your only target for new libraries.
 > - If all known consumers are modern .NET, target modern `netX` directly.
 
-> [!QUESTION]- What is the pragmatic default for new libraries today?
-> - Start with the modern runtime you deploy and support in production (for example `net8.0`).
-> - Add `netstandard2.0` only when compatibility requirements are explicit and validated.
-> - Reassess target frameworks periodically because old compatibility constraints often disappear over time.
-
-> [!QUESTION]- Why are there no new .NET Standard versions after 2.1, and what does that mean for design decisions?
-> - .NET 5+ unified the platform, so new API evolution happens directly in modern .NET TFMs rather than via new .NET Standard contracts.
-> - .NET Standard remains a compatibility tool, not the primary innovation target.
-> - Design choice: optimize for modern .NET first, then add compatibility targets only where business requirements demand them.
-
 ## Links
 
 - [.NET Standard](https://learn.microsoft.com/dotnet/standard/net-standard) - Official contract model, version support matrix, and current guidance.

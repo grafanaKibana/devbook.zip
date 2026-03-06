@@ -66,13 +66,6 @@ For patterns on coordinating multiple agents, see [[Software Engineering/11 AI &
 > - Most production "agents" are actually workflows — and that is the right choice for the majority of use cases
 > - Key tradeoff: workflows trade flexibility for reliability; agents trade reliability for adaptability
 
-> [!QUESTION]- Why does Anthropic recommend starting with the simplest possible solution?
-> - Each layer of complexity — chaining, routing, parallelization, autonomy — adds latency, cost, and failure surface
-> - A single well-prompted LLM call with good retrieval solves many tasks without orchestration
-> - Adding orchestration only makes sense when you can demonstrate measurably better outcomes
-> - Teams that start with complex multi-agent systems often spend more time debugging coordination than solving the actual problem
-> - Key tradeoff: simpler systems are easier to debug and cheaper to run, but cannot handle tasks requiring dynamic decision-making
-
 ## References
 
 - [Building Effective Agents (Anthropic Engineering)](https://www.anthropic.com/engineering/building-effective-agents)

@@ -235,16 +235,6 @@ Production note: pair publish with the transactional outbox pattern to avoid "DB
 
 ## Questions
 
-> [!QUESTION]- Order service publishes `OrderPlaced`. Payment and Inventory both consume it. Payment fails. How do you handle compensation without tight coupling?
-> **Expected answer**
-> - Prefer saga/process manager or choreography with explicit failure events (`PaymentFailed`).
-> - Avoid direct service-to-service rollback calls as the primary mechanism.
-> - Emit compensating commands/events (`ReleaseInventory`, `CancelOrder`) based on workflow state.
-> - Keep operations idempotent because retries and duplicates are expected.
-> - Track workflow with correlation ID for observability and replay.
-> **Why this is asked**
-> - It tests whether the candidate understands eventual consistency and compensation in distributed systems.
-
 > [!QUESTION]- When would you choose orchestration over choreography in an event-driven workflow?
 > **Expected answer**
 > - Choose orchestration when the process is long-running, has strict step ordering, and requires explicit compensation/state visibility.

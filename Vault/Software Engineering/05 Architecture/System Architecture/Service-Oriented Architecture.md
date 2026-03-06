@@ -90,9 +90,6 @@ The contract boundary is the key SOA discipline: services communicate through pu
 
 ## Questions
 
-> [!QUESTION]- What is the key architectural difference between SOA and microservices?
-> SOA uses an Enterprise Service Bus (ESB) as a central integration hub — services communicate through the bus, which handles routing, transformation, and orchestration. Microservices use 'smart endpoints, dumb pipes': services contain the logic and communicate directly via HTTP/REST, gRPC, or lightweight message brokers. The ESB becomes a bottleneck and single point of failure in SOA; microservices distribute that responsibility into the services themselves.
-
 > [!QUESTION]- When is SOA still the right choice over microservices?
 > SOA remains appropriate for enterprise integration scenarios: connecting heterogeneous legacy systems (SAP, Salesforce, custom ERP) via a shared integration layer, shared services used by multiple business units where microservice decomposition overhead isn't justified, and regulated industries requiring centralized governance and audit trails. Microservices are better for greenfield cloud-native systems where teams can own independent services end-to-end.
 

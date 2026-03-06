@@ -163,32 +163,6 @@ Health model | Active only | Active plus passive | Simplicity versus better dete
 
 ## Questions
 
-> [!QUESTION]- Your AI service has four instances behind an L7 gateway with passive outlier detection enabled. One instance returns HTTP 500 on about 30 percent of requests. How does the LB detect and handle this?
-> **Expected answer**
-> - Use active probes with failure thresholds and passive error observation from live traffic.
-> - Mark the instance unhealthy after threshold breach and remove it from new routing.
-> - Keep it out until it meets consecutive-success recovery checks.
-> - If ingress is L4 or passive outlier detection is unavailable, rely on active checks plus retry and circuit-breaker policies in clients or gateways.
-> - Add retries and circuit breakers at the caller or gateway for graceful degradation.
-> **Why this question matters**
-> - It tests production failure handling, not just basic definition knowledge.
-
-> [!QUESTION]- When is Azure Load Balancer the better choice than Azure Application Gateway for an ASP.NET Core workload?
-> **Expected answer**
-> - Azure Load Balancer when L4 TCP or UDP distribution is enough and minimal overhead is preferred.
-> - Azure Application Gateway when L7 HTTP capabilities are needed, such as path routing, WAF, and rich TLS controls.
-> - Mention that Kestrel typically sits behind one of these ingress layers.
-> **Why this question matters**
-> - It validates whether the candidate can map requirements to concrete cloud services.
-
-> [!QUESTION]- Why can sticky sessions hurt autoscaling outcomes, and what architecture is safer?
-> **Expected answer**
-> - Sticky sessions create uneven distribution and reduce failover quality.
-> - Scale-out does not fully rebalance existing pinned clients.
-> - Safer architecture is stateless service instances plus shared session state in Redis or a database.
-> **Why this question matters**
-> - It checks practical judgment about reliability and elasticity tradeoffs.
-
 ## References
 
 - [Azure Load Balancer overview](https://learn.microsoft.com/azure/load-balancer/load-balancer-overview) — official docs covering L4 vs L7 load balancing, health probes, and SKU differences in Azure.
