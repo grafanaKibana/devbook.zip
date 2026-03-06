@@ -12,15 +12,15 @@
 
 - [x] Read [[Sr. AI Engineer - OOD Interview Prep#Quick Reference Card]] out loud (10 min)
 - [x] Internalize the [[Sr. AI Engineer - OOD Interview Prep#OOD Interview Framework]] — 3/3/5/10/10/5 time-box for any class design problem
-- [ ] Study [[Sr. AI Engineer - OOD Interview Prep#SOLID Principles — Interview-Ready Explanations]] — practice explaining each with C# code, not textbook definitions
+- [x] Study [[Sr. AI Engineer - OOD Interview Prep#SOLID Principles — Interview-Ready Explanations]] — practice explaining each with C# code, not textbook definitions
 - [ ] Study all 8 patterns in [[Sr. AI Engineer - OOD Interview Prep#Design Patterns Reference]] — know when to use each and the interview signal for each
-- [ ] Memorize [[Sr. AI Engineer - OOD Interview Prep#Pattern Decision Framework]] table — given a requirement signal, name the pattern in < 3 seconds
+- [x] Memorize [[Sr. AI Engineer - OOD Interview Prep#Pattern Decision Framework]] table — given a requirement signal, name the pattern in < 3 seconds
 - [x] Study [[Sr. AI Engineer - OOD Interview Prep#Common OOD Interview Mistakes]] — internalize the 7 traps
 - [x] Practice [[Sr. AI Engineer - OOD Interview Prep#Day 1 Practice Q&A]] — all questions out loud
 
 ### Day 2 (Friday, March 6) — The Actual DK Problem + Classic Set 1
 
-- [ ] Read [[Sr. AI Engineer - OOD Interview Prep#Quick Reference Card]] out loud (10 min)
+- [x] Read [[Sr. AI Engineer - OOD Interview Prep#Quick Reference Card]] out loud (10 min)
 - [ ] Walk through [[Sr. AI Engineer - OOD Interview Prep#Design a Robot-Managed Restaurant PRIORITY — Actual DK Problem|Robot Restaurant]] FIRST — this is the most likely problem (30 min timed)
 - [ ] Walk through [[Sr. AI Engineer - OOD Interview Prep#Design a Library Management System]] end-to-end — diagram, patterns, code, extensions
 - [ ] Walk through [[Sr. AI Engineer - OOD Interview Prep#Design a Vending Machine]] — State pattern focus, state diagram, transitions
@@ -95,7 +95,7 @@
 |---|---|---|
 | "Multiple algorithms/strategies" | **[[Strategy]]** | Swap behavior at runtime via injection |
 | "Notify when something happens" | **[[Observer]]** | Decouple event producer from consumers |
-| "Object creation varies" | **[[Factory Method|Factory]]** | Encapsulate construction, hide concrete types |
+| "Object creation varies" | **[[Factory Method]]** | Encapsulate construction, hide concrete types |
 | "Steps are same, details differ" | **[[Template Method]]** | Reuse skeleton, customize hooks |
 | "Undo, queue, log actions" | **[[Command]]** | Reify operations as objects |
 | "Object changes behavior by state" | **[[State]]** | Replace conditionals with polymorphism |
@@ -949,29 +949,21 @@ classDiagram
     class KitchenStation
     class ChargingDock
 
-    class RestaurantFloor {
-        -Cell grid
+    class Restaurant {
+        -locations List~ILocation~
+        -grid bool[][]
         +IsWalkable(pos) bool
         +GetNeighbors(pos) List~Position~
     }
 
     class IMovementStrategy {
         <<interface>>
-        +FindPath(from, to, floor) List~Position~
+        +FindPath(from, to, restaurant) List~Position~
     }
     class AStarMovement
     class WaypointMovement
     class DirectMovement
 
-    class RobotState {
-        <<enumeration>>
-        Idle
-        Moving
-        TakingOrder
-        Delivering
-        Cleaning
-        Charging
-    }
 
     class IMovable {
         <<interface>>
@@ -983,7 +975,7 @@ classDiagram
         <<abstract>>
         +Id string
         +CurrentPosition Position
-        +State RobotState
+        +State RobotState~Idle Moving TakingOrder Delivering Cleaning Charging~
         #MovementStrategy IMovementStrategy
         +MoveTo(destination)
         +PerformTask(task)*
@@ -1009,17 +1001,58 @@ classDiagram
     ILocation <|.. Table
     ILocation <|.. KitchenStation
     ILocation <|.. ChargingDock
+    Restaurant o-- ILocation : contains
     IMovementStrategy <|.. AStarMovement
     IMovementStrategy <|.. WaypointMovement
     IMovementStrategy <|.. DirectMovement
     Robot ..|> IMovable
     Robot --> IMovementStrategy : strategy injection
-    Robot --> RestaurantFloor : navigates
+    Robot --> Restaurant : navigates
     Robot <|-- WaiterRobot
     Robot <|-- CleanerRobot
     WaiterRobot ..|> IOrderTaker
     WaiterRobot ..|> IDeliverer
     CleanerRobot ..|> ICleaner
+
+    class Order {
+        +OrderId string
+        +SourceTable Table
+        +Items List~MenuItem~
+        +Status OrderStatus~Pending Preparing Ready Delivered~
+    }
+
+    class EventBus {
+        +Subscribe~T~(handler)
+        +Publish~T~(event)
+    }
+
+    class Kitchen {
+        -orderQueue Queue~Order~
+        -EventBus eventBus
+        +ReceiveOrder(order)
+        +CompleteOrder(order)
+    }
+
+    class RestaurantHost {
+        -EventBus eventBus
+        +SeatCustomer(table)
+        +RequestBill(table)
+    }
+
+    class RobotDispatcher {
+        -robots List~Robot~
+        -taskQueue PriorityQueue~RobotTask~
+        +RegisterRobot(robot)
+        +AssignNextTask()
+    }
+
+
+    Kitchen --> EventBus : publishes OrderReadyEvent
+    RestaurantHost --> EventBus : publishes CustomerSeatedEvent
+    Robot --> EventBus : publishes RobotIdleEvent
+    RobotDispatcher --> EventBus : subscribes
+    RobotDispatcher --> Robot : manages
+    Kitchen --> Order : processes
 ```
 
 **Why this hierarchy wins in interviews:**
@@ -1031,216 +1064,138 @@ classDiagram
 
 #### Step 3: Apply Patterns — Key Code (10 min)
 
-**Strategy injection in Robot constructor:**
+**Robot hierarchy — Strategy + ISP:**
 
 ```csharp
+// Robot base — movement via injected Strategy
 public abstract class Robot : IMovable
 {
-    public string Id { get; }
-    public Position CurrentPosition { get; protected set; }
     public RobotState State { get; protected set; }
-    protected IMovementStrategy MovementStrategy { get; }
-    protected RestaurantFloor Floor { get; }
-
-    protected Robot(string id, Position startPos, IMovementStrategy movement, RestaurantFloor floor)
-    {
-        Id = id;
-        CurrentPosition = startPos;
-        MovementStrategy = movement;  // Injected — swap A* for waypoint without changing Robot
-        Floor = floor;
-        State = RobotState.Idle;
-    }
+    protected IMovementStrategy MovementStrategy { get; } // Injected in constructor
 
     public void MoveTo(Position destination)
     {
         State = RobotState.Moving;
         var path = MovementStrategy.FindPath(CurrentPosition, destination, Floor);
-        foreach (var step in path)
-            CurrentPosition = step; // Simplified — real system would animate/tick
+        // Follow path step by step, then set State = Idle
     }
 
     public abstract void PerformTask(RobotTask task);
 }
 
+// Waiter implements ONLY order-related interfaces (ISP)
 public class WaiterRobot : Robot, IOrderTaker, IDeliverer
 {
-    public WaiterRobot(string id, Position startPos, IMovementStrategy movement, RestaurantFloor floor)
-        : base(id, startPos, movement, floor) { }
+    public Order TakeOrder(Table table) { MoveTo(table.Position); /* take order */ }
+    public void Deliver(Order order, Table table) { MoveTo(table.Position); /* deliver */ }
 
-    public Order TakeOrder(Table table)
+    public override void PerformTask(RobotTask task) => _ = task.Type switch
     {
-        MoveTo(table.Position);
-        State = RobotState.TakingOrder;
-        var order = new Order(table);
-        State = RobotState.Idle;
-        return order;
-    }
-
-    public void PickUp(Order order, KitchenStation station)
-    {
-        MoveTo(station.Position);
-        // Pick up the order
-    }
-
-    public void Deliver(Order order, Table table)
-    {
-        MoveTo(table.Position);
-        State = RobotState.Delivering;
-        order.Status = OrderStatus.Delivered;
-        State = RobotState.Idle;
-    }
-
-    public override void PerformTask(RobotTask task)
-    {
-        switch (task.Type)
-        {
-            case TaskType.TakeOrder: TakeOrder(task.TargetTable); break;
-            case TaskType.Deliver: Deliver(task.Order, task.TargetTable); break;
-        }
-    }
+        TaskType.TakeOrder => TakeOrder(task.TargetTable),
+        TaskType.Deliver => Deliver(task.Order, task.TargetTable),
+    };
 }
 
+// Cleaner implements ONLY ICleaner — zero overlap with Waiter (ISP)
 public class CleanerRobot : Robot, ICleaner
 {
-    public CleanerRobot(string id, Position startPos, IMovementStrategy movement, RestaurantFloor floor)
-        : base(id, startPos, movement, floor) { }
+    public void Clean(ILocation loc) { MoveTo(loc.Position); /* clean */ }
 
-    public void Clean(ILocation location)
-    {
-        MoveTo(location.Position);
-        State = RobotState.Cleaning;
-        // Cleaning logic
-        State = RobotState.Idle;
-    }
-
-    public override void PerformTask(RobotTask task)
-    {
-        if (task.Type == TaskType.Clean) Clean(task.TargetLocation);
-    }
+    public override void PerformTask(RobotTask task) => Clean(task.TargetLocation);
 }
 ```
 
 > [!tip] Interview line
-> "Notice: WaiterRobot implements IOrderTaker and IDeliverer. CleanerRobot implements ICleaner. Neither implements the other's interface — that's Interface Segregation. And both share movement via the base Robot class with an injected Strategy."
+> "WaiterRobot implements IOrderTaker + IDeliverer. CleanerRobot implements ICleaner. No overlap — that's ISP. Both share movement via Strategy injection in the base class. Adding a new robot type = new class, zero changes to existing ones — that's OCP."
 
-**Kitchen and Orchestration — Observer Pattern:**
+**EventBus orchestration — all events flow through one channel:**
 
 ```mermaid
-classDiagram
-    direction LR
+sequenceDiagram
+    participant R as RestaurantHost
+    participant B as EventBus
+    participant D as RobotDispatcher
+    participant W as WaiterBot
+    participant K as Kitchen
 
-    class Order {
-        +OrderId string
-        +SourceTable Table
-        +Items List~MenuItem~
-        +Status OrderStatus
-        +CreatedAt DateTime
-    }
+    Note over R,K: All events flow through single EventBus
 
-    class OrderStatus {
-        <<enumeration>>
-        Pending
-        Preparing
-        Ready
-        Delivered
-    }
+    R->>B: Publish CustomerSeatedEvent
+    B->>D: handler fires
+    D->>D: Find nearest idle WaiterBot
+    D->>W: Assign TakeOrder task
+    W->>W: MoveTo table via A* then TakeOrder
+    W->>K: SubmitOrder
+    W->>B: Publish RobotIdleEvent
+    B->>D: handler fires
+    D->>D: Check queue - empty
 
-    class IKitchenObserver {
-        <<interface>>
-        +OnOrderReady(order)
-    }
-
-    class Kitchen {
-        -orderQueue Queue~Order~
-        -observers List~IKitchenObserver~
-        +ReceiveOrder(order)
-        +CompleteOrder(order)
-        +Subscribe(observer)
-    }
-
-    class RobotDispatcher {
-        -robots List~Robot~
-        -taskQueue PriorityQueue~RobotTask~
-        +RegisterRobot(robot)
-        +OnOrderReady(order)
-        +RequestCleaning(location)
-        +AssignNextTask()
-    }
-
-    class RobotFactory {
-        +Create(type, id, position) Robot
-    }
-
-    Kitchen --> IKitchenObserver : notifies
-    RobotDispatcher ..|> IKitchenObserver
-    RobotDispatcher --> Robot : manages
-    RobotDispatcher --> RobotFactory : uses
-    Order --> OrderStatus
+    K->>K: Prepare food...
+    K->>B: Publish OrderReadyEvent
+    B->>D: handler fires
+    D->>W: Assign Delivery task
+    W->>K: MoveTo kitchen then PickUp
+    W->>W: MoveTo table then Deliver
+    W->>B: Publish RobotIdleEvent
 ```
 
-**Key pattern — Observer decouples Kitchen from Dispatcher:**
+**Key pattern — single EventBus, typed events, one decision point:**
 
 ```csharp
-public class Kitchen
+// Single EventBus — all events flow through one channel
+public class EventBus
 {
-    private readonly Queue<Order> _orderQueue = new();
-    private readonly List<IKitchenObserver> _observers = new();
-
-    public void Subscribe(IKitchenObserver observer) => _observers.Add(observer);
-
-    public void ReceiveOrder(Order order)
-    {
-        order.Status = OrderStatus.Preparing;
-        _orderQueue.Enqueue(order);
-    }
-
-    // Kitchen does NOT know about robots — it just notifies observers
-    public void CompleteOrder(Order order)
-    {
-        order.Status = OrderStatus.Ready;
-        foreach (var obs in _observers)
-            obs.OnOrderReady(order);  // Dispatcher reacts by assigning delivery
-    }
+    public void Subscribe<T>(Action<T> handler) { /* store by typeof(T) */ }
+    public void Publish<T>(T evt) { /* invoke matching handlers */ }
 }
 
-public class RobotDispatcher : IKitchenObserver
+// Event records — one per event type, easy to add new ones
+public record CustomerSeatedEvent(Table Table);
+public record OrderReadyEvent(Order Order);
+public record RobotIdleEvent(Robot Robot);
+
+// Publishers just call bus.Publish — don't know who listens
+public class Kitchen
 {
-    private readonly List<Robot> _robots = new();
-    private readonly PriorityQueue<RobotTask, int> _taskQueue = new();
+    private readonly EventBus _bus;
+    public void CompleteOrder(Order order) => _bus.Publish(new OrderReadyEvent(order));
+}
 
-    public void OnOrderReady(Order order)
+// Dispatcher subscribes to all event types through one bus
+public class RobotDispatcher
+{
+    public RobotDispatcher(EventBus bus)
     {
-        var task = new RobotTask(TaskType.Deliver, order, order.SourceTable);
-        _taskQueue.Enqueue(task, priority: 1); // Delivery is highest priority
-        AssignNextTask();
+        bus.Subscribe<CustomerSeatedEvent>(e =>
+        {
+            _taskQueue.Enqueue(new RobotTask(TaskType.TakeOrder, e.Table), priority: 2);
+            AssignNextTask();
+        });
+        bus.Subscribe<OrderReadyEvent>(e =>
+        {
+            _taskQueue.Enqueue(new RobotTask(TaskType.Deliver, e.Order), priority: 1);
+            AssignNextTask();
+        });
+        bus.Subscribe<RobotIdleEvent>(_ => AssignNextTask());
     }
 
-    public void RequestCleaning(ILocation location)
-    {
-        var task = new RobotTask(TaskType.Clean, location);
-        _taskQueue.Enqueue(task, priority: 3); // Cleaning is lower priority
-        AssignNextTask();
-    }
-
-    public void AssignNextTask()
+    // Core: nearest capable idle robot gets the task, or re-queue
+    private void AssignNextTask()
     {
         if (!_taskQueue.TryDequeue(out var task, out _)) return;
 
-        var candidate = _robots
+        var best = _robots
             .Where(r => r.State == RobotState.Idle && r.CanHandle(task))
-            .OrderBy(r => r.CurrentPosition.ManhattanDistanceTo(task.Location))
-            .FirstOrDefault();
+            .MinBy(r => r.DistanceTo(task.Location));
 
-        if (candidate != null)
-            candidate.PerformTask(task);
-        else
-            _taskQueue.Enqueue(task, task.Priority); // Re-queue if no idle robot
+        if (best != null) best.PerformTask(task);
+        else _taskQueue.Enqueue(task, task.Priority); // No idle robot — re-queue
     }
 }
 ```
 
 > [!tip] Interview line
-> "The Dispatcher is event-driven: Kitchen events and robot-idle events both trigger task assignment. The system self-balances without polling — as soon as capacity frees up, queued work starts immediately."
+> "One EventBus, typed events, one Dispatcher. Kitchen publishes OrderReadyEvent, RestaurantHost publishes CustomerSeatedEvent, Robot publishes RobotIdleEvent — all flow through the same bus. Adding a new event type is one record class and one Subscribe call. No new interfaces, no changes to existing publishers."
 
 #### Step 4: Concurrency — Multiple Customers Simultaneously (10 min)
 
