@@ -462,4 +462,16 @@ The practical implication: when debugging a SOLID violation, look one level deep
 - [Dependency Injection in .NET — Mark Seemann](https://www.manning.com/books/dependency-injection-principles-practices-patterns) — deep practitioner treatment of DIP in .NET: composition roots, lifetime management, decorator patterns, and the pitfalls of service locator anti-patterns
 
 <!-- whats-next:start -->
+
+---
+
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/06 Development Practices/06 Development Practices|06 Development Practices]]
+>
+> **Pages**
+> - [[Software Engineering/06 Development Practices/Principles/DRY|DRY]]
+> - [[Software Engineering/06 Development Practices/Principles/IoC (Holywood Principle)|IoC (Holywood Principle)]]
+> - [[Software Engineering/06 Development Practices/Principles/KISS|KISS]]
+> - [[Software Engineering/06 Development Practices/Principles/YAGNI|YAGNI]]
 <!-- whats-next:end -->
