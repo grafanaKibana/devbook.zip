@@ -113,14 +113,8 @@ public sealed class Listener : IDisposable
 > [!QUESTION]- How is an event different from a delegate field in terms of access control?
 > An event exposes only `add`/`remove` from outside the declaring type. A delegate field can be invoked, replaced, or nulled by external callers. Events preserve publisher ownership of invocation.
 
-> [!QUESTION]- Why is `PriceChanged?.Invoke(this, e)` preferred over `if (PriceChanged != null) PriceChanged(this, e)`?
-> The null-conditional form avoids the race where another thread unsubscribes between check and call. It uses a copied delegate reference for the invocation expression.
-
 > [!QUESTION]- Why do event leaks happen, and how do you prevent them?
 > The publisher keeps strong references to subscriber handlers. If the publisher outlives subscribers, those subscribers cannot be garbage-collected. Prevent with explicit unsubscribe (`Dispose`), weak-event pattern, or scoped subscription helpers.
-
-> [!QUESTION]- Is `EventArgs` inheritance mandatory in modern .NET?
-> No. In modern .NET, `EventHandler<T>` no longer requires `T : EventArgs`. You can use any payload type, but `EventArgs`-based design remains the most idiomatic and interoperable style.
 
 > [!QUESTION]- How do you handle exceptions in event subscribers without losing later handlers?
 > Copy the invocation list using `GetInvocationList()` and invoke handlers individually in `try/catch`. Direct event invocation stops at first exception.

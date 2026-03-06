@@ -97,9 +97,6 @@ Run deterministic checks first. A malformed JSON or a disallowed action does not
 
 ## Questions
 
-> [!QUESTION]- Can deterministic checks replace LLM judges?
-> No. They enforce format and hard rules, but they do not measure semantic correctness, relevance, or tone. A response can pass all schema checks and still be factually wrong or unhelpful. Use deterministic checks as a fast pre-filter; use LLM judges for semantic quality.
-
 > [!QUESTION]- What is the minimum useful set of deterministic checks for a tool-using agent?
 > (1) Allowlisted tools/actions only, (2) strict output schema validation, (3) PII scanning on outputs, (4) injection-resistant formatting, (5) length constraints. These catch the most common failure modes cheaply before any expensive evaluation.
 

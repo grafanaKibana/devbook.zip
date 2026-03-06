@@ -215,14 +215,6 @@ Decision heuristic:
 
 ## Questions
 
-> [!QUESTION]- A client sends `POST /api/orders`, times out, and retries. How do you prevent duplicate orders?
-> **Expected answer:**
-> - Require an `Idempotency-Key` header for create operations.
-> - Persist key + request hash + resulting order ID with TTL.
-> - On retry with same key and same payload, return the original result (`201` or `200`) instead of creating a new order.
-> - On same key with different payload, reject with `409 Conflict`.
-> **Why this matters:** demonstrates reliability under partial failure and correct non-idempotent write handling.
-
 > [!QUESTION]- Explain `PUT` vs `PATCH` semantics and retry behavior.
 > **Expected answer:**
 > - `PUT` replaces the target resource representation; repeated identical calls are idempotent.

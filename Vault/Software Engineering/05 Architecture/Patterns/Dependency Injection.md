@@ -260,10 +260,6 @@ Use this when selection is explicit and stable; avoid turning keys into hidden r
 
 ## Interview Questions
 
-> [!QUESTION]- Your singleton cache service must use a scoped `DbContext` to warm data on startup. How do you solve this without captive dependency?
-> **Expected answer:** inject `IServiceScopeFactory`, create a scope inside startup logic, resolve `DbContext` from that scope, perform work, dispose scope.
-> **Why:** validates practical lifetime-boundary reasoning, not just memorized definitions.
-
 > [!QUESTION]- Explain `Transient`, `Scoped`, and `Singleton` lifetimes with one safe production example each.
 > **Expected answer:** transient for lightweight stateless services, scoped for request-bound consistency (`DbContext`), singleton for thread-safe shared services (cache/config/factory).
 > **Why:** checks whether candidate maps lifetime to runtime behavior.

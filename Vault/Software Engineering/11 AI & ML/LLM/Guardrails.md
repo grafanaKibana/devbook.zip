@@ -152,9 +152,6 @@ Guardrails that are not tested degrade silently. Build a red-team suite (injecti
 > [!QUESTION]- What is the minimum useful guardrail set for a production LLM application?
 > (1) Allowlisted tools/actions only, (2) strict output schema validation, (3) PII scanning on outputs, (4) prompt injection detection on inputs, (5) an abstention/escalation path for uncertainty. These five controls catch the most common failure modes at low cost. Add content safety classifiers and human-in-the-loop for high-risk domains.
 
-> [!QUESTION]- Can you rely on a safety filter alone?
-> No. Filters help with known bad patterns but miss novel attacks, indirect injections, and context-dependent harms. You still need least-privilege tool access, structured outputs, and tests for injection and data exfiltration. Defense in depth is the only reliable approach.
-
 > [!QUESTION]- How do you test guardrails?
 > Build a red-team test suite: injection attempts ("ignore all previous instructions"), jailbreaks ("you are DAN"), data exfiltration attempts, and out-of-scope requests. Run the suite on every model or prompt change. Track pass rates over time — a regression in the red-team suite is a deployment blocker.
 

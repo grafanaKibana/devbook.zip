@@ -212,13 +212,6 @@ spec:
 > - Use outbox/inbox and idempotent handlers to survive retries and duplicates.
 > - Accept eventual consistency and make process state observable.
 
-> [!QUESTION]- Order and Inventory are separate microservices. A customer places an order. How do you ensure inventory is reserved without a distributed transaction?
-> - Persist order as `Pending` and publish `OrderPlaced` via outbox in the same local transaction.
-> - Inventory consumes `OrderPlaced` and emits `InventoryReserved` or `InventoryRejected`.
-> - Order transitions to `Confirmed` or `Rejected` based on the inventory event.
-> - Keep consumers idempotent by tracking processed message IDs.
-> - Add timeout compensation if inventory does not respond within SLA.
-
 > [!QUESTION]- How do you decide between monolith, modular monolith, and microservices for a new product?
 > - Decide from team size, release pressure, domain volatility, and ops maturity.
 > - One team in discovery phase usually benefits most from monolith speed.

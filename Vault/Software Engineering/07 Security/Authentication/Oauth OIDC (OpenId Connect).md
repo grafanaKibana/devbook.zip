@@ -92,12 +92,6 @@ builder.Services.AddAuthentication(options =>
 
 ## Questions
 
-> [!QUESTION]- What is the difference between OAuth 2.0 and OpenID Connect?
-> - OAuth 2.0 is an authorization framework: it grants access to resources (what you can do).
-> - OIDC is an authentication layer on top of OAuth 2.0: it proves who the user is.
-> - OAuth 2.0 issues access tokens; OIDC additionally issues ID tokens (JWTs with user claims).
-> - Tradeoff: OIDC adds the ID token and UserInfo endpoint; OAuth 2.0 alone cannot tell you who the user is.
-
 ## References
 
 - [RFC 6749 — OAuth 2.0](https://datatracker.ietf.org/doc/html/rfc6749) — the authoritative OAuth 2.0 specification
