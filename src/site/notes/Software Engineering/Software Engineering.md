@@ -21,39 +21,39 @@
 
 # Focus
 
-| Note                                                                                                         | Topic            | Status          | Priority |
-| ------------------------------------------------------------------------------------------------------------ | ---------------- | --------------- | -------- |
-| [[Software Engineering/08 SDLC/Estimation Techniques\|Estimation Techniques]]                             | SDLC             | Creation        | Medium   |
-| [[Software Engineering/07 Security/Digital Signature\|Digital Signature]]                                 | Security         | Creation        | Medium   |
-| [[Software Engineering/04 Networks/Transport & Sockets/Sockets\|Sockets]]                                 | Networks         | Creation        | Medium   |
-| [[Software Engineering/05 Architecture/System Architecture/Monolith Architecture\|Monolith Architecture]] | Architecture     | Creation        | Medium   |
-| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Exception Handling\|Exception Handling]]    | Programming      | Creation        | Medium   |
-| [[Software Engineering/01 Programming/NET/ASP.NET Web API/Filters\|Filters]]                              | Programming      | Creation        | Medium   |
-| [[Software Engineering/01 Programming/NET/Other/SignalR\|SignalR]]                                        | Programming      | Creation        | Medium   |
-| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Namespaces\|Namespaces]]                    | Programming      | Creation        | Medium   |
-| [[Software Engineering/02 Computer Science/Data Structures/HashSet\|HashSet]]                             | Computer Science | Creation        | Medium   |
-| [[Software Engineering/02 Computer Science/Data Structures/Graph\|Graph]]                                 | Computer Science | Creation        | Medium   |
-| [[Software Engineering/02 Computer Science/Data Structures/Dictionary\|Dictionary]]                       | Computer Science | Ready To Repeat | Medium   |
-| [[Software Engineering/02 Computer Science/Data Structures/HashMap\|HashMap]]                             | Computer Science | Creation        | Medium   |
+| Note                                                                                                                         | Topic            | Status          | Priority |
+| ---------------------------------------------------------------------------------------------------------------------------- | ---------------- | --------------- | -------- |
+| [[Software Engineering/11 AI & ML/LLM/Guardrails\|Guardrails]]                                                            | AI & ML          | Creation        | Medium   |
+| [[Software Engineering/01 Programming/NET/ASP.NET Web API/CORS\|CORS]]                                                    | Programming      | Creation        | Medium   |
+| [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/Classification Evaluation\|Classification Evaluation]]      | AI & ML          | Creation        | Medium   |
+| [[Software Engineering/05 Architecture/System Architecture/Service-Oriented Architecture\|Service-Oriented Architecture]] | Architecture     | Creation        | Medium   |
+| [[Software Engineering/05 Architecture/System Architecture/Microservices\|Microservices]]                                 | Architecture     | Ready To Repeat | Medium   |
+| [[Software Engineering/02 Computer Science/Data Structures/Graph\|Graph]]                                                 | Computer Science | Creation        | Medium   |
+| [[Software Engineering/02 Computer Science/Algorithms/Search Algorithms/Binary Search\|Binary Search]]                    | Computer Science | Ready To Repeat | Medium   |
+| [[Software Engineering/02 Computer Science/02 Computer Science\|02 Computer Science]]                                     | Computer Science | Creation        | Medium   |
+| [[Software Engineering/01 Programming/NET/NET Standart\|NET Standart]]                                                    | Programming      | Creation        | Medium   |
+| [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Events\|Events]]                                      | Programming      | Creation        | Medium   |
+| [[Software Engineering/02 Computer Science/Data Structures/Span\|Span]]                                                   | Computer Science | Ready To Repeat | Medium   |
+| [[Software Engineering/08 SDLC/Estimation Techniques\|Estimation Techniques]]                                             | SDLC             | Creation        | Medium   |
 
 { .block-language-dataview}
 
 # Recently Updated
 
-| Note                                                                                                                             | Date                      |
-| -------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
-| [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Interpreter\|Interpreter]]                         | 12:56 AM - March 06, 2026 |
-| [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Visitor\|Visitor]]                                 | 12:56 AM - March 06, 2026 |
-| [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Template Method\|Template Method]]                 | 12:56 AM - March 06, 2026 |
-| [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Strategy\|Strategy]]                               | 12:55 AM - March 06, 2026 |
-| [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/State\|State]]                                     | 12:55 AM - March 06, 2026 |
-| [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Observer\|Observer]]                               | 12:55 AM - March 06, 2026 |
-| [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Memento\|Memento]]                                 | 12:55 AM - March 06, 2026 |
-| [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Mediator\|Mediator]]                               | 12:55 AM - March 06, 2026 |
-| [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Iterator\|Iterator]]                               | 12:54 AM - March 06, 2026 |
-| [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Command\|Command]]                                 | 12:54 AM - March 06, 2026 |
-| [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Chain of Responsibility\|Chain of Responsibility]] | 12:54 AM - March 06, 2026 |
-| [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Proxy\|Proxy]]                                     | 12:54 AM - March 06, 2026 |
+| Note                                                                                                                           | Date                     |
+| ------------------------------------------------------------------------------------------------------------------------------ | ------------------------ |
+| [[Software Engineering/06 Development Practices/Principles/SOLID\|SOLID]]                                                   | 7:30 PM - March 06, 2026 |
+| [[Software Engineering/11 AI & ML/LLM/Guardrails\|Guardrails]]                                                              | 7:29 PM - March 06, 2026 |
+| [[Software Engineering/01 Programming/NET/ASP.NET Web API/CORS\|CORS]]                                                      | 7:29 PM - March 06, 2026 |
+| [[Software Engineering/03 Data Persistence/Caching\|Caching]]                                                               | 7:29 PM - March 06, 2026 |
+| [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/CQRS\|CQRS]]                                         | 2:50 AM - March 06, 2026 |
+| [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/Classification Evaluation\|Classification Evaluation]]        | 2:10 AM - March 06, 2026 |
+| [[Software Engineering/11 AI & ML/LLM/Evaluation/Online Evaluation and AB Tests\|Online Evaluation and AB Tests]]           | 2:10 AM - March 06, 2026 |
+| [[Software Engineering/11 AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs\|Golden Test Set and Regression Runs]] | 2:10 AM - March 06, 2026 |
+| [[Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation\|Evaluation]]                                                   | 2:09 AM - March 06, 2026 |
+| [[Software Engineering/11 AI & ML/LLM/Evaluation/Deterministic Checks\|Deterministic Checks]]                               | 2:09 AM - March 06, 2026 |
+| [[Software Engineering/11 AI & ML/LLM/Agents/Agents\|Agents]]                                                               | 2:09 AM - March 06, 2026 |
+| [[Software Engineering/09 DevOps/CI CD tools\|CI CD tools]]                                                                 | 2:09 AM - March 06, 2026 |
 
 { .block-language-dataview}
 # Publish Distribution

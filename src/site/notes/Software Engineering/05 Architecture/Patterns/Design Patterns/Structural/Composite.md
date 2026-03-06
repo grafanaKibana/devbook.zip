@@ -190,9 +190,6 @@ Adding a `SubscriptionProduct` now means one new class implementing `IOrderCompo
 
 ## Questions
 
-> [!QUESTION]- Should `Add()` and `Remove()` be on the `IOrderComponent` interface or only on `ProductBundle`?
-> Only on `ProductBundle`. Putting them on the interface forces leaves to implement them (throwing `NotSupportedException`), which violates LSP — callers can't safely call `Add()` on any `IOrderComponent`. The tradeoff: if `Add()`/`Remove()` are only on `ProductBundle`, callers that need to build trees must know the concrete type. This is acceptable — tree construction is a separate concern from tree traversal. Keep the component interface to read operations; expose mutation only on the composite class.
-
 > [!QUESTION]- How does Composite relate to the Visitor pattern?
 > They're complementary. Composite defines the tree structure and uniform traversal. Visitor adds new operations to the tree without modifying the node classes. Example: `TaxVisitor`, `ShippingVisitor`, and `DiscountVisitor` can each traverse the same `IOrderComponent` tree without adding methods to `SingleProduct` or `ProductBundle`. Use Composite when the structure varies; use Visitor when the operations vary. Together, they handle both dimensions of variation.
 

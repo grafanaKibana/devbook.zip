@@ -88,12 +88,6 @@ flowchart TD
 > - Return the stored candidate after the loop ends.
 > - Why it matters: this lower-bound variant is a common interview and production requirement.
 
-> [!QUESTION]- Why is `left + (right - left) / 2` preferred over `(left + right) / 2`?
-> - In fixed-width integer languages, `left + right` can overflow for large index values.
-> - `left + (right - left) / 2` computes the same midpoint without overflow risk.
-> - The same safety principle applies across many divide-and-conquer algorithms.
-> - Why it matters: this prevents rare but high-impact correctness bugs at scale.
-
 ## Links
 
 - [Binary search (cp algorithms)](https://cp-algorithms.com/num_methods/binary_search.html)

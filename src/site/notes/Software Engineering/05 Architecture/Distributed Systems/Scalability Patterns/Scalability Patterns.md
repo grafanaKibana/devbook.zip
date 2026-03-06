@@ -125,15 +125,6 @@ Simple production pattern:
 
 ## Questions
 
-> [!QUESTION]- Your system handles 1,000 RPS today. Product wants 10x. How do you decide what to scale first?
-> **Expected answer:**
-> - Start with bottleneck identification using telemetry (CPU, DB waits, p95 latency, queue depth, external dependency latency).
-> - Separate read path and write path capacity constraints.
-> - Apply highest-ROI pattern first (cache or read replicas for reads, queue for bursty async work, horizontal app scale for compute).
-> - Re-measure after each change to avoid solving a bottleneck that moved.
-> - Explicitly discuss reliability and cost impact, not just throughput.
-> **Why this is strong:** It shows methodical scaling based on evidence, not guesswork.
-
 > [!QUESTION]- When would you choose read replicas instead of CQRS for a scaling problem?
 > **Expected answer:**
 > - Choose read replicas when main pressure is read throughput on an existing relational model.

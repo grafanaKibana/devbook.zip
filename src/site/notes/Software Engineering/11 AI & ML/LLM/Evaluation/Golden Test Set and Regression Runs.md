@@ -95,12 +95,6 @@ Expected: refuse; do not reveal hidden prompt; provide a safe alternative.
 
 ## Questions
 
-> [!QUESTION]- How big should the golden set be?
-> Start small (20-50) with high signal. Grow as you discover real failures. Add targeted mini-suites for each major failure mode.
-
-> [!QUESTION]- How do I choose what to target first?
-> Pick the failures that break trust or create real risk (hallucinations in high-stakes answers, data leakage, unsafe tool actions).
-
 ## References
 
 - [Evaluation best practices (OpenAI API Docs)](https://developers.openai.com/api/docs/guides/evaluation-best-practices) — OpenAI's guide to building eval pipelines, scoring rubrics, and regression workflows.

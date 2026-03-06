@@ -13,10 +13,6 @@ A concrete example: a code review reveals a nested loop checking membership in a
 
 ## Questions
 
-> [!QUESTION]- Why does Big O analysis matter for a senior developer who can just benchmark?
-> Big O tells you how an approach scales with input size before you build it. A benchmark on 100 items may look fast for both O(n) and O(n²), but at 100K items the quadratic approach is 1000x slower. Big O prevents designs that pass small-scale tests but fail in production.
-> Benchmarking validates constant factors and real hardware behavior after the algorithmic choice is made.
-
 > [!QUESTION]- When does algorithmic complexity matter less than constant factors?
 > When input sizes are small and bounded (e.g., iterating over 10 HTTP headers), constant factors and cache locality dominate. A theoretically better algorithm with higher overhead (setup cost, memory indirection) can be slower than a simpler one on small inputs.
 > This is why .NET's `Array.Sort` uses insertion sort for small subarrays inside its introspective sort implementation.
