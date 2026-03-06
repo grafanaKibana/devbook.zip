@@ -915,15 +915,15 @@ Design a robot-managed restaurant system where:
 │                    Restaurant System                     │
 ├──────────┬──────────┬──────────┬──────────┬─────────────┤
 │  Robot   │  Table   │ Kitchen  │  Order   │ Restaurant  │
-│ (types)  │ (seats)  │ (queues) │ (items)  │   Floor     │
+│ (types)  │(location)│ (events) │ (items)  │  (layout)   │
 └──────────┴──────────┴──────────┴──────────┴─────────────┘
 ```
 
 **Relationships:**
 - Robot *has-a* position, *has-a* movement strategy, *is-a* type (Waiter, Cleaner)
-- Table and KitchenStation *are* locations on the floor
-- Kitchen *produces* orders, *notifies* when ready
-- Dispatcher *assigns* tasks to robots, *observes* kitchen events
+- Table and KitchenStation *are* locations inside Restaurant
+- All events flow through a single `EventBus` — Kitchen, RestaurantHost, and Robot publish; Dispatcher subscribes
+- Dispatcher *assigns* tasks to idle robots via a priority queue
 
 #### Step 2: Class Hierarchy and Movement Strategy (5 min)
 
@@ -975,7 +975,7 @@ classDiagram
         <<abstract>>
         +Id string
         +CurrentPosition Position
-        +State RobotState~Idle Moving TakingOrder Delivering Cleaning Charging~
+        +State RobotState~Idle Moving TakingOrder Delivering Cleaning~
         #MovementStrategy IMovementStrategy
         +MoveTo(destination)
         +PerformTask(task)*
@@ -1049,7 +1049,7 @@ classDiagram
 
     Kitchen --> EventBus : publishes OrderReadyEvent
     RestaurantHost --> EventBus : publishes CustomerSeatedEvent
-    Robot --> EventBus : publishes RobotIdleEvent
+    Robot --> EventBus : publishes events
     RobotDispatcher --> EventBus : subscribes
     RobotDispatcher --> Robot : manages
     Kitchen --> Order : processes
@@ -1057,10 +1057,12 @@ classDiagram
 
 **Why this hierarchy wins in interviews:**
 
-- **Open/Closed**: Adding `CleanerRobot` required **zero changes** to `WaiterRobot`, `Robot`, or `Kitchen`
-- **Interface Segregation**: `ICleaner` is separate from `IOrderTaker` — no robot implements methods it doesn't need
-- **[[Strategy]]**: Movement algorithm is injectable per robot instance — A* for waiters, waypoint-based for cleaners
-- **Liskov Substitution**: Any `Robot` subclass can be used wherever `Robot` is expected
+- **Open/Closed**: Adding `CleanerRobot` required **zero changes** to `WaiterRobot`, `Robot`, or `Kitchen`. New event type = one record class + one `Subscribe` call — no changes to existing publishers or Dispatcher logic
+- **Interface Segregation**: `ICleaner` is separate from `IOrderTaker`/`IDeliverer` — no robot implements methods it doesn't need
+- **[[Strategy]]**: Movement algorithm is injectable per robot — A* for waiters, waypoint-based for cleaners. Swap without touching Robot or any consumer
+- **[[Observer]] via EventBus**: Kitchen, RestaurantHost, and Robot all publish typed events through a single `EventBus`. Dispatcher subscribes to all three — one decision point, zero coupling between publishers
+- **Dependency Inversion**: Robot depends on `IMovementStrategy` abstraction, Dispatcher depends on `EventBus` abstraction — high-level policy never touches low-level details
+- **Liskov Substitution**: Any `Robot` subclass works wherever `Robot` is expected — `WaiterRobot` and `CleanerRobot` both honor the base contract
 
 #### Step 3: Apply Patterns — Key Code (10 min)
 
@@ -1076,7 +1078,7 @@ public abstract class Robot : IMovable
     public void MoveTo(Position destination)
     {
         State = RobotState.Moving;
-        var path = MovementStrategy.FindPath(CurrentPosition, destination, Floor);
+        var path = MovementStrategy.FindPath(CurrentPosition, destination, _restaurant);
         // Follow path step by step, then set State = Idle
     }
 
@@ -1125,7 +1127,9 @@ sequenceDiagram
     D->>D: Find nearest idle WaiterBot
     D->>W: Assign TakeOrder task
     W->>W: MoveTo table via A* then TakeOrder
-    W->>K: SubmitOrder
+    W->>B: Publish OrderPlacedEvent
+    B->>K: handler fires
+    K->>K: ReceiveOrder and start preparing
     W->>B: Publish RobotIdleEvent
     B->>D: handler fires
     D->>D: Check queue - empty
@@ -1145,19 +1149,42 @@ sequenceDiagram
 // Single EventBus — all events flow through one channel
 public class EventBus
 {
-    public void Subscribe<T>(Action<T> handler) { /* store by typeof(T) */ }
-    public void Publish<T>(T evt) { /* invoke matching handlers */ }
+    // { OrderReadyEvent: [Dispatcher.handler], OrderPlacedEvent: [Kitchen.handler], RobotIdleEvent: [Dispatcher.handler] }
+    private readonly Dictionary<Type, List<Delegate>> _handlers = new();
+
+    public void Subscribe<T>(Action<T> handler)
+    {
+        var key = typeof(T);
+        if (!_handlers.ContainsKey(key)) _handlers[key] = new();
+        _handlers[key].Add(handler);
+    }
+
+    public void Publish<T>(T evt)
+    {
+        if (!_handlers.TryGetValue(typeof(T), out var handlers)) return;
+        foreach (Action<T> handler in handlers)
+            handler(evt);
+    }
 }
 
 // Event records — one per event type, easy to add new ones
 public record CustomerSeatedEvent(Table Table);
+public record OrderPlacedEvent(Order Order);
 public record OrderReadyEvent(Order Order);
 public record RobotIdleEvent(Robot Robot);
 
-// Publishers just call bus.Publish — don't know who listens
+// Kitchen subscribes to OrderPlacedEvent, publishes OrderReadyEvent
 public class Kitchen
 {
     private readonly EventBus _bus;
+
+    public Kitchen(EventBus bus)
+    {
+        _bus = bus;
+        bus.Subscribe<OrderPlacedEvent>(e => ReceiveOrder(e.Order));
+    }
+
+    private void ReceiveOrder(Order order) { /* prepare food... */ }
     public void CompleteOrder(Order order) => _bus.Publish(new OrderReadyEvent(order));
 }
 
@@ -1214,8 +1241,6 @@ stateDiagram-v2
     PickingUp --> Moving : Food picked up heading to table
     Moving --> Idle : Delivered or task complete
     Cleaning --> Idle : Cleaning done
-    Idle --> Charging : Battery low
-    Charging --> Idle : Charged
 ```
 
 **Concurrent Scenario — Three Customers at Different Stages:**
@@ -1234,12 +1259,12 @@ sequenceDiagram
         D->>D: Find idle waiter nearest Table 5
         D->>W1: Assign take-order at Table 5
         W1->>W1: MoveTo Table 5 via A*
-        W1->>K: TakeOrder and send to Kitchen
+        W1->>W1: TakeOrder then publish OrderPlacedEvent
     end
 
     rect rgb(255, 245, 230)
         Note right of K: Kitchen finishes Customer B food
-        K-->>D: OnOrderReady for Table 3
+        K-->>D: Publish OrderReadyEvent via EventBus
         D->>D: W1 busy - W2 idle - assign W2
         D->>W2: Assign delivery for Table 3
         W2->>K: PickUp order
@@ -1252,7 +1277,7 @@ sequenceDiagram
         Note over D: Priority queue - delivery over new orders
     end
 
-    W1-->>D: State changed to Idle
+    W1-->>D: Publish RobotIdleEvent via EventBus
     D->>D: Dequeue next task for Customer C
     D->>W1: Assign take-order at Table 7
 ```
@@ -1263,15 +1288,16 @@ sequenceDiagram
 |---|---|---|
 | 1 Highest | Food delivery | Food gets cold — direct customer impact |
 | 2 | Order taking | Customer is waiting but not losing quality |
-| 3 | Table cleaning | No active customer affected |
-| 4 Lowest | Restocking or charging | Background maintenance |
+| 3 Lowest | Table cleaning | No active customer affected |
+
+Robots auto-charge when idle — no charging tasks in the queue. If interviewer probes battery management, mention it as an extension.
 
 **Key concurrency behaviors:**
 
-1. **Observer notifications are non-blocking** — Kitchen fires `OnOrderReady`, Dispatcher evaluates immediately but only assigns if a robot is idle. Otherwise the delivery task enters the priority queue.
+1. **Event-driven dispatch** — Kitchen publishes `OrderReadyEvent`, Dispatcher's handler evaluates immediately but only assigns if a robot is idle. Otherwise the task enters the priority queue.
 2. **State-checked dispatch** — The Dispatcher only assigns work to `Idle` robots. A robot moving to Table 5 for an order cannot be reassigned mid-path. The new task goes to another idle robot or the queue.
 3. **Proximity-based selection** — Among idle robots that can handle the task, the nearest one is chosen via Manhattan distance. This minimizes wait time and avoids two robots crossing paths.
-4. **Completion callback** — When a robot finishes any task, it sets `State = Idle` and calls `Dispatcher.AssignNextTask()`, which checks the queue and immediately assigns the next highest-priority task.
+4. **Completion callback** — When a robot finishes any task, it publishes `RobotIdleEvent`. Dispatcher's handler fires `AssignNextTask()`, which dequeues the next highest-priority task immediately.
 
 #### Step 5: The Movement Question — "How does the robot physically move from A to B?" (CRITICAL)
 
@@ -1319,37 +1345,44 @@ Restaurant Floor (10x8 grid):
 > "To add a Cleaner Robot, I need exactly three things:"
 > 1. Create `ICleaner` interface with `Clean(ILocation location)` method
 > 2. Create `CleanerRobot : Robot, ICleaner` — inherits movement from base, implements cleaning
-> 3. Register `CleanerRobot` in `RobotFactory` and `RobotDispatcher`
+> 3. Register `CleanerRobot` in `RobotDispatcher` and subscribe to relevant events (e.g., `TableVacatedEvent`)
 >
-> "Notice what I did NOT change: `WaiterRobot`, `Robot` base class, `Kitchen`, `Order`, or any existing interface. This is Open/Closed in practice — open for extension, closed for modification."
+> "Notice what I did NOT change: `WaiterRobot`, `Robot` base class, `Kitchen`, `EventBus`, or any existing event type. This is Open/Closed in practice — open for extension, closed for modification."
 
 #### Full System Flow
 
 ```mermaid
 sequenceDiagram
     actor CA as Customer
+    participant R as RestaurantHost
+    participant B as EventBus
     participant D as Dispatcher
     participant W as WaiterBot
     participant K as Kitchen
     participant Cl as CleanerBot
 
-    CA->>D: Sits at Table 5
+    CA->>R: Sits at Table 5
+    R->>B: Publish CustomerSeatedEvent
+    B->>D: handler fires
     D->>W: Assign nearest idle waiter
-    W->>CA: MoveTo Table 5 via A*
-    W->>CA: TakeOrder
-    W->>K: ReceiveOrder
+    W->>W: MoveTo Table 5 via A*
+    W->>W: TakeOrder
+    W->>B: Publish OrderPlacedEvent
+    B->>K: handler fires
 
     Note over K: Preparing food...
 
-    K-->>D: OnOrderReady via Observer
-    D->>W: Assign delivery to idle waiter
-    W->>K: PickUp order
-    W->>CA: Deliver to Table 5
+    K->>B: Publish OrderReadyEvent
+    B->>D: handler fires
+    D->>W: Assign delivery
+    W->>K: MoveTo kitchen then PickUp
+    W->>W: Deliver to Table 5
 
-    CA->>D: Leaves table
-    D->>Cl: RequestCleaning Table 5
-    Cl->>Cl: MoveTo Table 5 via same pathfinding
-    Cl->>Cl: Clean Table 5
+    CA->>R: Leaves table
+    R->>B: Publish TableVacatedEvent
+    B->>D: handler fires
+    D->>Cl: Assign cleaning
+    Cl->>Cl: MoveTo Table 5 then Clean
 ```
 
 #### Patterns Summary for This Problem
@@ -1357,9 +1390,8 @@ sequenceDiagram
 | Pattern | Where Used | Why |
 |---|---|---|
 | **[[Strategy]]** | `IMovementStrategy` | Swap pathfinding per robot or context without changing robot code |
-| **[[Observer]]** | `Kitchen` → `IKitchenObserver` | Decouple kitchen from robot assignment logic |
-| **Command-like** | `Order` object | Order flows through system as data — can be queued or logged |
-| **[[Factory Method|Factory]]** | `RobotFactory` | Encapsulate robot creation — easy to add new types |
+| **[[Observer]] via EventBus** | `EventBus` with typed events | Decouple all publishers (Kitchen, RestaurantHost, Robot) from Dispatcher — one channel, zero coupling |
+| **Command-like** | `Order` / `RobotTask` objects | Tasks flow through system as data — can be queued, prioritized, or logged |
 | **[[Template Method]]** | `Robot` base class | Shared movement logic with specialized task behavior in subclasses |
 | **ISP** | `IOrderTaker`, `ICleaner`, `IDeliverer` | Robots only implement capabilities they actually have |
 | **Priority Queue** | `RobotDispatcher.taskQueue` | Handle concurrent demand when robots are busy |
@@ -1370,9 +1402,9 @@ sequenceDiagram
 > **Model answer:**
 > 1. Create `IGreeter` interface with `GreetAndSeat(Customer, Table)` method
 > 2. Create `HostRobot : Robot, IGreeter` — inherits movement, implements greeting
-> 3. Add `"host"` case to `RobotFactory`
-> 4. Add seating logic to `RobotDispatcher` (on customer arrival event)
-> 5. **Zero changes** to `WaiterRobot`, `CleanerRobot`, `Kitchen`, or `Order`
+> 3. Add `CustomerArrivedEvent` and subscribe in Dispatcher
+> 4. Register `HostRobot` in `RobotDispatcher`
+> 5. **Zero changes** to `WaiterRobot`, `CleanerRobot`, `Kitchen`, or `EventBus`
 >
 > "This is OCP in practice — open for extension, closed for modification."
 
@@ -1385,7 +1417,7 @@ sequenceDiagram
 > [!question] "How would you make this thread-safe with async operations?"
 > - Dispatcher uses `ConcurrentQueue<RobotTask>` and `lock` on assignment logic
 > - Robot state changes are atomic — `Interlocked.CompareExchange` on state enum
-> - Kitchen observer notifications queue tasks rather than directly dispatching — avoids race conditions
+> - EventBus handlers are synchronous by default — use `Channel<RobotTask>` to decouple event publishing from task processing and avoid race conditions
 > - "In a real .NET system, I would use `Channel<RobotTask>` for the producer-consumer pattern between Kitchen events and Dispatcher processing."
 
 ---
