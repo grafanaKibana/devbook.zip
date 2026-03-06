@@ -33,4 +33,5 @@ The two foundational patterns here are [[Software Engineering/05 Architecture/Pa
 >
 > **Pages**
 > - [[Software Engineering/05 Architecture/Patterns/Resilience Patterns/Circuit Breaker|Circuit Breaker]]
+> - [[Software Engineering/05 Architecture/Patterns/Resilience Patterns/Retry and Timeout Patterns|Retry and Timeout Patterns]]
 <!-- whats-next:end -->

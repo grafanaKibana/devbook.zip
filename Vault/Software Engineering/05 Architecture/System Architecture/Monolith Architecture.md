@@ -137,6 +137,7 @@ The cost of premature microservices is high: distributed systems complexity, eve
 > **Pages**
 > - [[Software Engineering/05 Architecture/System Architecture/Event-Driven Architecture|Event-Driven Architecture]]
 > - [[Software Engineering/05 Architecture/System Architecture/Microservices|Microservices]]
+> - [[Software Engineering/05 Architecture/System Architecture/Modular Monolith|Modular Monolith]]
 > - [[Software Engineering/05 Architecture/System Architecture/Serverless Architecture|Serverless Architecture]]
 > - [[Software Engineering/05 Architecture/System Architecture/Service-Oriented Architecture|Service-Oriented Architecture]]
 <!-- whats-next:end -->

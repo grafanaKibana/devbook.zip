@@ -113,6 +113,7 @@ The contract boundary is the key SOA discipline: services communicate through pu
 > **Pages**
 > - [[Software Engineering/05 Architecture/System Architecture/Event-Driven Architecture|Event-Driven Architecture]]
 > - [[Software Engineering/05 Architecture/System Architecture/Microservices|Microservices]]
+> - [[Software Engineering/05 Architecture/System Architecture/Modular Monolith|Modular Monolith]]
 > - [[Software Engineering/05 Architecture/System Architecture/Monolith Architecture|Monolith Architecture]]
 > - [[Software Engineering/05 Architecture/System Architecture/Serverless Architecture|Serverless Architecture]]
 <!-- whats-next:end -->

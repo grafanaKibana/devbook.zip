@@ -225,4 +225,9 @@ Decision rule: start with exponential backoff plus jitter and dual timeout bound
 ---
 
 > [!note] Whats next
+> **Parent**
+>  [[Software Engineering/05 Architecture/Patterns/Patterns|Patterns]]
+>
+> **Pages**
+> - [[Software Engineering/05 Architecture/Patterns/Resilience Patterns/Circuit Breaker|Circuit Breaker]]
 <!-- whats-next:end -->

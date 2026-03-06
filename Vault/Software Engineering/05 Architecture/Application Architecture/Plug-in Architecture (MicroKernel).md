@@ -134,6 +134,7 @@ public sealed class PdfPlugin : IPlugin
 >  [[Software Engineering/05 Architecture/05 Architecture|05 Architecture]]
 >
 > **Pages**
+> - [[Software Engineering/05 Architecture/Application Architecture/Clean Architecture|Clean Architecture]]
 > - [[Software Engineering/05 Architecture/Application Architecture/Layered Architecture|Layered Architecture]]
 > - [[Software Engineering/05 Architecture/Application Architecture/MVC MVVM|MVC MVVM]]
 <!-- whats-next:end -->

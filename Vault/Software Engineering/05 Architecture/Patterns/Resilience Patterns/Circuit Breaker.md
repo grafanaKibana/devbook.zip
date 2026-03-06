@@ -245,4 +245,6 @@ Interview nuance: teams often say "retry inside breaker" to mean retries must co
 > **Parent**
 >  [[Software Engineering/05 Architecture/Patterns/Patterns|Patterns]]
 >
+> **Pages**
+> - [[Software Engineering/05 Architecture/Patterns/Resilience Patterns/Retry and Timeout Patterns|Retry and Timeout Patterns]]
 <!-- whats-next:end -->
