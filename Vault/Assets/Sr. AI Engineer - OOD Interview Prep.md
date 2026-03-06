@@ -21,13 +21,11 @@
 ### Day 2 (Friday, March 6) — The Actual DK Problem + Classic Set 1
 
 - [x] Read [[Sr. AI Engineer - OOD Interview Prep#Quick Reference Card]] out loud (10 min)
-- [ ] Walk through [[Sr. AI Engineer - OOD Interview Prep#Design a Robot-Managed Restaurant PRIORITY — Actual DK Problem|Robot Restaurant]] FIRST — this is the most likely problem (30 min timed)
-- [ ] Walk through [[Sr. AI Engineer - OOD Interview Prep#Design a Library Management System]] end-to-end — diagram, patterns, code, extensions
-- [ ] Walk through [[Sr. AI Engineer - OOD Interview Prep#Design a Vending Machine]] — State pattern focus, state diagram, transitions
-- [ ] Walk through [[Sr. AI Engineer - OOD Interview Prep#Design a File System]] — Composite pattern focus, recursive operations
-- [ ] For each problem: practice the entities → hierarchy → patterns → code → extension flow out loud
+- [x] Walk through [[Sr. AI Engineer - OOD Interview Prep#Design a Robot-Managed Restaurant PRIORITY — Actual DK Problem|Robot Restaurant]] FIRST — this is the most likely problem (30 min timed)
+- [ ] Walk through [[Sr. AI Engineer - OOD Interview Prep#Design a Document Editor]] — Composite, Command, State, Decorator, Strategy in one problem (30 min timed)
+- [x] For each problem: practice the entities → hierarchy → patterns → code → extension flow out loud
 - [ ] Practice [[Sr. AI Engineer - OOD Interview Prep#Day 2 Practice Q&A]] — model answers out loud
-- [ ] Time yourself: each problem should take 30-35 minutes whiteboard-style
+- [x] Time yourself: each problem should take 30-35 minutes whiteboard-style
 
 ### Day 3 (Saturday, March 7) — Classic OOD Problems (Set 2) + DraftKings-Relevant
 
@@ -1422,681 +1420,954 @@ sequenceDiagram
 
 ---
 
-### Design a Library Management System
+### Design a Document Editor
 
 > [!note] Problem statement
-> Design a library management system where members can search for books, borrow books, return books, and receive overdue notifications. The system should handle different member types with different borrowing limits.
+> Design a document editor that supports:
+> 1. A hierarchical document structure document to sections to paragraphs to text elements
+> 2. Formatting bold italic underline that can be layered
+> 3. Undo redo for all editing operations
+> 4. Editor modes Editing Selecting ReadOnly with different behaviors per mode
+> 5. Export to multiple formats HTML Markdown PlainText
+> 6. Extension add image support without breaking existing code
 
-#### Step 1: Clarify & Identify Entities
+> [!warning] Key design insight
+> The recursive Composite tree is the star of this problem. `GetWordCount` and `Render` walk `Document` to `Section` to `Paragraph` to leaf nodes with the same recursion pattern. Interviewers will probe this traversal deeply just like movement strategy depth in the Robot problem.
 
-**Clarifying questions to ask:**
-- "How many books and members are we designing for?" (scope)
-- "Do we need to handle reservations for checked-out books?"
-- "Are there different member tiers with different privileges?"
-- "Do we need a fine/penalty system?"
+#### Step 1: Clarify and Identify Core Entities 3 min
+
+**Say this first:**
+
+> Before I start coding let me confirm scope. Is this a single user editor for now with local undo redo. Should formatting be character range based or element based. Do we need cursor and selection modeling in this round. I will assume a tree based document model with element level editing and single process concurrency unless you want collaborative editing now.
 
 **Core entities:**
 
 ```text
-Book — BookCopy — Member (types) — Loan — Reservation — Catalog — Library — Notification
+┌────────────────────────────────────────────────────────────────────────┐
+│                          Document Editor System                        │
+├──────────────┬──────────────┬──────────────┬──────────────┬───────────┤
+│ DocumentTree │ EditorMode   │ EditCommand  │ ExportPolicy │ Formatter  │
+│ composite    │ state        │ undo redo    │ strategy     │ decorator  │
+└──────────────┴──────────────┴──────────────┴──────────────┴───────────┘
 ```
 
-#### Step 2: Class Hierarchy
+**Relationships:**
+- `Document` contains `Section` nodes and each `Section` contains `Paragraph` nodes and each `Paragraph` contains `IDocumentElement` children
+- `TextElement` is a leaf and `Paragraph` `Section` `Document` are composites that recurse through children for `GetWordCount` and `Render`
+- Formatting uses decorators that wrap any `IDocumentElement` without changing leaf or composite classes
+- Editing actions are commands and `CommandHistory` manages undo and redo stacks
+- `DocumentEditor` holds current `IEditorState` and delegates behavior changes by state
+- Export is pluggable via `IExportStrategy` and selected at runtime by `DocumentEditor`
+
+#### Step 2: Class Hierarchy 5 min
+
+> [!tip] Key Design Principle
+> Keep the document tree stable and push variation to interfaces. Composite handles structure. Command handles history. State handles mode behavior. Decorator handles layered formatting. Strategy handles export policy.
 
 ```mermaid
 classDiagram
     direction TB
 
-    class BookStatus {
-        <<enumeration>>
-        Available
-        CheckedOut
-        Reserved
-        Lost
-    }
-
-    class Book {
-        +string ISBN
-        +string Title
-        +string Author
-        +string Category
-        +List~BookCopy~ Copies
-    }
-
-    class BookCopy {
-        +string CopyId
-        +Book Book
-        +BookStatus Status
-        +CheckOut(member) Loan
-        +Return()
-    }
-
-    class MemberType {
-        <<enumeration>>
-        Standard
-        Premium
-        Student
-    }
-
-    class IMember {
+    class IDocumentElement {
         <<interface>>
-        +string MemberId
-        +string Name
-        +MemberType Type
-        +int MaxBooks
-        +int LoanDurationDays
-        +List~Loan~ ActiveLoans
-        +CanBorrow() bool
+        +GetWordCount int
+        +Render string
     }
 
-    class Member {
+    class TextElement {
+        +Text string
+        +GetWordCount int
+        +Render string
+    }
+
+    class DocumentContainer {
         <<abstract>>
-        +string MemberId
-        +string Name
-        +List~Loan~ ActiveLoans
-        +CanBorrow() bool
+        +Children IReadOnlyList~IDocumentElement~
+        +AddChild
+        +RemoveChild
+        +GetWordCount int
+        +Render string
+        #RenderOpen string
+        #RenderClose string
     }
 
-    class StandardMember {
-        +int MaxBooks = 3
-        +int LoanDurationDays = 14
+    class Paragraph {
+        +RenderOpen string
+        +RenderClose string
     }
 
-    class PremiumMember {
-        +int MaxBooks = 10
-        +int LoanDurationDays = 30
+    class Section {
+        +Title string
+        +RenderOpen string
+        +RenderClose string
     }
 
-    class ISearchStrategy {
+    class Document {
+        +Name string
+        +RenderOpen string
+        +RenderClose string
+    }
+
+    class ITextDecorator {
         <<interface>>
-        +Search(catalog, query) List~Book~
-    }
-    class TitleSearchStrategy
-    class AuthorSearchStrategy
-    class CategorySearchStrategy
-
-    class Loan {
-        +string LoanId
-        +BookCopy Copy
-        +IMember Member
-        +DateTime BorrowDate
-        +DateTime DueDate
-        +DateTime? ReturnDate
-        +bool IsOverdue
+        +Inner IDocumentElement
     }
 
-    class Reservation {
-        +IMember Member
-        +Book Book
-        +DateTime ReservedAt
+    class BoldDecorator {
+        +GetWordCount int
+        +Render string
     }
 
-    class Catalog {
-        -Dictionary~string ISBN - Book~ books
-        -ISearchStrategy searchStrategy
-        +Search(query) List~Book~
-        +AddBook(book)
-        +FindAvailableCopy(isbn) BookCopy?
+    class ItalicDecorator {
+        +GetWordCount int
+        +Render string
     }
 
-    class INotificationObserver {
+    class UnderlineDecorator {
+        +GetWordCount int
+        +Render string
+    }
+
+    class IEditorState {
         <<interface>>
-        +OnBookAvailable(member, book)
-        +OnLoanOverdue(member, loan)
+        +InsertText
+        +DeleteText
+        +SelectRange
     }
 
-    class Library {
-        -Catalog catalog
-        -List~INotificationObserver~ observers
-        +BorrowBook(member, isbn) Loan
-        +ReturnBook(loanId)
-        +SearchBooks(query) List~Book~
-        +ReserveBook(member, isbn) Reservation
+    class EditingState
+    class SelectingState
+    class ReadOnlyState
+
+    class ICommand {
+        <<interface>>
+        +Execute
+        +Undo
     }
 
-    Book "1" --> "*" BookCopy : has copies
-    IMember <|.. Member
-    Member <|-- StandardMember
-    Member <|-- PremiumMember
-    ISearchStrategy <|.. TitleSearchStrategy
-    ISearchStrategy <|.. AuthorSearchStrategy
-    ISearchStrategy <|.. CategorySearchStrategy
-    Catalog --> ISearchStrategy : uses
-    Loan --> BookCopy
-    Loan --> IMember
-    Library --> Catalog
-    Library --> INotificationObserver : notifies
+    class InsertTextCommand {
+        +Execute
+        +Undo
+    }
+
+    class DeleteTextCommand {
+        +Execute
+        +Undo
+    }
+
+    class FormatCommand {
+        +Execute
+        +Undo
+    }
+
+    class CommandHistory {
+        +ExecuteCommand
+        +Undo
+        +Redo
+    }
+
+    class IExportStrategy {
+        <<interface>>
+        +Export string
+    }
+
+    class HtmlExporter {
+        +Export string
+    }
+
+    class MarkdownExporter {
+        +Export string
+    }
+
+    class PlainTextExporter {
+        +Export string
+    }
+
+    class DocumentEditor {
+        +CurrentState IEditorState
+        +Document Document
+        +History CommandHistory
+        +InsertText
+        +DeleteText
+        +ApplyFormat
+        +Undo
+        +Redo
+        +Export string
+        +SetState
+    }
+
+    IDocumentElement <|.. TextElement
+    IDocumentElement <|.. DocumentContainer
+    DocumentContainer <|-- Paragraph
+    DocumentContainer <|-- Section
+    DocumentContainer <|-- Document
+
+    ITextDecorator <|.. BoldDecorator
+    ITextDecorator <|.. ItalicDecorator
+    ITextDecorator <|.. UnderlineDecorator
+    IDocumentElement <|.. BoldDecorator
+    IDocumentElement <|.. ItalicDecorator
+    IDocumentElement <|.. UnderlineDecorator
+
+    IEditorState <|.. EditingState
+    IEditorState <|.. SelectingState
+    IEditorState <|.. ReadOnlyState
+
+    ICommand <|.. InsertTextCommand
+    ICommand <|.. DeleteTextCommand
+    ICommand <|.. FormatCommand
+
+    IExportStrategy <|.. HtmlExporter
+    IExportStrategy <|.. MarkdownExporter
+    IExportStrategy <|.. PlainTextExporter
+
+    DocumentEditor o-- Document
+    DocumentEditor o-- CommandHistory
+    DocumentEditor o-- IEditorState
 ```
 
-#### Step 3: Key Patterns Applied
+**Why this hierarchy wins in interviews:**
+- **Open Closed Principle** new exporters decorators or element types are added as new classes with no edits to stable editor flow
+- **Interface Segregation Principle** `ICommand` `IEditorState` `IExportStrategy` each model one reason to change
+- **Composite** tree recursion makes structural operations uniform for leaf and container nodes
+- **Command** all edits become reversible units and undo redo is deterministic
+- **State** mode specific behavior is explicit and testable not hidden in large conditionals
+- **Decorator** layered formatting composes like `BoldDecorator` over `ItalicDecorator` over `TextElement`
+- **Strategy** exporting varies by policy without changing document model
+- **Dependency Inversion Principle** `DocumentEditor` depends on abstractions not concrete exporters or states
+- **Liskov Substitution Principle** any `IDocumentElement` including decorated elements works wherever a document element is needed
 
-| Pattern | Where | Why |
+#### Step 3: Apply Patterns Key Code 10 min
+
+| Pattern | Where used | Why it matters |
 |---|---|---|
-| **[[Strategy]]** | `ISearchStrategy` in Catalog | Search algorithm varies — title, author, category, full-text. Swap without changing Catalog. |
-| **[[Observer]]** | `INotificationObserver` in Library | Notify members when reserved book becomes available or loan is overdue. Decouple notification from borrowing logic. |
-| **[[Template Method]]** | `Member` base class | `CanBorrow()` uses shared logic (check active loans) with type-specific limits in subclasses. |
-| **[[Factory Method|Factory]]** | `MemberFactory` | Create correct member type from registration data without exposing concrete types. |
+| Composite | `IDocumentElement` and container hierarchy | Uniform recursion for `GetWordCount` and `Render` |
+| Command | `ICommand` and `CommandHistory` | Reliable undo redo across all edits |
+| State | `IEditorState` family | Mode specific behavior without branching explosion |
+| Decorator | `BoldDecorator` `ItalicDecorator` `UnderlineDecorator` | Layer formatting dynamically |
+| Strategy | `IExportStrategy` family | Export behavior is runtime swappable |
+| Template Method | `DocumentContainer.Render` and `GetWordCount` | Shared recursion algorithm with specialized wrappers |
 
-#### Step 4: Key Code
+**Composite hierarchy with recursive GetWordCount and Render:**
 
 ```csharp
-public abstract class Member : IMember
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace Ood.Editor.Composite;
+
+public interface IDocumentElement
 {
-    public string MemberId { get; }
-    public string Name { get; }
-    public List<Loan> ActiveLoans { get; } = new();
+    int GetWordCount();
+    string Render();
+}
 
-    public abstract int MaxBooks { get; }
-    public abstract int LoanDurationDays { get; }
-    public abstract MemberType Type { get; }
-
-    public bool CanBorrow() => ActiveLoans.Count < MaxBooks &&
-                                ActiveLoans.All(l => !l.IsOverdue);
-
-    protected Member(string id, string name)
+public sealed class TextElement : IDocumentElement
+{
+    public TextElement(string text)
     {
-        MemberId = id;
+        Text = text ?? string.Empty;
+    }
+
+    public string Text { get; private set; }
+
+    public void ReplaceText(string text) => Text = text ?? string.Empty;
+
+    public int GetWordCount()
+    {
+        return Text
+            .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Length;
+    }
+
+    public string Render() => Text;
+}
+
+public abstract class DocumentContainer : IDocumentElement
+{
+    private readonly List<IDocumentElement> _children = new();
+
+    public IReadOnlyList<IDocumentElement> Children => _children;
+
+    public void AddChild(IDocumentElement child)
+    {
+        ArgumentNullException.ThrowIfNull(child);
+        _children.Add(child);
+    }
+
+    public void InsertChild(int index, IDocumentElement child)
+    {
+        ArgumentNullException.ThrowIfNull(child);
+        _children.Insert(index, child);
+    }
+
+    public void RemoveChild(IDocumentElement child)
+    {
+        ArgumentNullException.ThrowIfNull(child);
+        _children.Remove(child);
+    }
+
+    public int GetWordCount()
+    {
+        return _children.Sum(child => child.GetWordCount());
+    }
+
+    public string Render()
+    {
+        var sb = new StringBuilder();
+        sb.Append(RenderOpen());
+        for (var i = 0; i < _children.Count; i++)
+        {
+            if (i > 0)
+            {
+                sb.Append(RenderSeparator());
+            }
+
+            sb.Append(_children[i].Render());
+        }
+
+        sb.Append(RenderClose());
+        return sb.ToString();
+    }
+
+    protected virtual string RenderSeparator() => Environment.NewLine;
+    protected abstract string RenderOpen();
+    protected abstract string RenderClose();
+}
+
+public sealed class Paragraph : DocumentContainer
+{
+    protected override string RenderOpen() => string.Empty;
+    protected override string RenderClose() => string.Empty;
+    protected override string RenderSeparator() => " ";
+}
+
+public sealed class Section : DocumentContainer
+{
+    public Section(string title)
+    {
+        Title = title;
+    }
+
+    public string Title { get; }
+
+    protected override string RenderOpen() => $"## {Title}{Environment.NewLine}";
+    protected override string RenderClose() => Environment.NewLine;
+}
+
+public sealed class Document : DocumentContainer
+{
+    public Document(string name)
+    {
         Name = name;
     }
-}
 
-public class PremiumMember : Member
-{
-    public override int MaxBooks => 10;
-    public override int LoanDurationDays => 30;
-    public override MemberType Type => MemberType.Premium;
+    public string Name { get; }
 
-    public PremiumMember(string id, string name) : base(id, name) { }
+    protected override string RenderOpen() => $"# {Name}{Environment.NewLine}{Environment.NewLine}";
+    protected override string RenderClose() => string.Empty;
 }
 ```
+
+> [!tip] Interview line
+> My recursive algorithm lives once in `DocumentContainer`. Every container delegates the same operation to children. That is why `GetWordCount` and `Render` scale from one paragraph to ten thousand nodes without changing control flow.
+
+**Command pattern with undo redo:**
 
 ```csharp
-public class Library
+using System;
+using System.Collections.Generic;
+
+namespace Ood.Editor.Commands;
+
+public interface ICommand
 {
-    private readonly Catalog _catalog;
-    private readonly List<INotificationObserver> _observers = new();
-    private readonly Dictionary<string, Reservation> _reservations = new();
+    void Execute();
+    void Undo();
+}
 
-    public Loan BorrowBook(IMember member, string isbn)
+public sealed class InsertTextCommand : ICommand
+{
+    private readonly List<string> _buffer;
+    private readonly int _index;
+    private readonly string _value;
+
+    public InsertTextCommand(List<string> buffer, int index, string value)
     {
-        if (!member.CanBorrow())
-            throw new InvalidOperationException("Member cannot borrow — limit reached or has overdue books.");
-
-        var copy = _catalog.FindAvailableCopy(isbn)
-            ?? throw new InvalidOperationException("No available copies.");
-
-        var loan = copy.CheckOut(member);
-        member.ActiveLoans.Add(loan);
-        return loan;
+        _buffer = buffer;
+        _index = index;
+        _value = value;
     }
 
-    public void ReturnBook(string loanId, Loan loan)
+    public void Execute()
     {
-        loan.ReturnDate = DateTime.UtcNow;
-        loan.Copy.Return();
-        loan.Member.ActiveLoans.Remove(loan);
+        _buffer.Insert(_index, _value);
+    }
 
-        // Check if anyone has a reservation for this book
-        if (_reservations.TryGetValue(loan.Copy.Book.ISBN, out var reservation))
+    public void Undo()
+    {
+        _buffer.RemoveAt(_index);
+    }
+}
+
+public sealed class DeleteTextCommand : ICommand
+{
+    private readonly List<string> _buffer;
+    private readonly int _index;
+    private string? _deleted;
+
+    public DeleteTextCommand(List<string> buffer, int index)
+    {
+        _buffer = buffer;
+        _index = index;
+    }
+
+    public void Execute()
+    {
+        _deleted = _buffer[_index];
+        _buffer.RemoveAt(_index);
+    }
+
+    public void Undo()
+    {
+        if (_deleted is null)
         {
-            _reservations.Remove(loan.Copy.Book.ISBN);
-            foreach (var observer in _observers)
-                observer.OnBookAvailable(reservation.Member, loan.Copy.Book);
+            throw new InvalidOperationException("Delete command was not executed");
         }
+
+        _buffer.Insert(_index, _deleted);
+    }
+}
+
+public sealed class FormatCommand : ICommand
+{
+    private readonly List<string> _buffer;
+    private readonly int _index;
+    private readonly Func<string, string> _formatter;
+    private string? _previous;
+
+    public FormatCommand(List<string> buffer, int index, Func<string, string> formatter)
+    {
+        _buffer = buffer;
+        _index = index;
+        _formatter = formatter;
+    }
+
+    public void Execute()
+    {
+        _previous = _buffer[_index];
+        _buffer[_index] = _formatter(_previous);
+    }
+
+    public void Undo()
+    {
+        if (_previous is null)
+        {
+            throw new InvalidOperationException("Format command was not executed");
+        }
+
+        _buffer[_index] = _previous;
+    }
+}
+
+public sealed class CommandHistory
+{
+    private readonly Stack<ICommand> _undoStack = new();
+    private readonly Stack<ICommand> _redoStack = new();
+
+    public void ExecuteCommand(ICommand command)
+    {
+        command.Execute();
+        _undoStack.Push(command);
+        _redoStack.Clear();
+    }
+
+    public void Undo()
+    {
+        if (_undoStack.Count == 0)
+        {
+            return;
+        }
+
+        var command = _undoStack.Pop();
+        command.Undo();
+        _redoStack.Push(command);
+    }
+
+    public void Redo()
+    {
+        if (_redoStack.Count == 0)
+        {
+            return;
+        }
+
+        var command = _redoStack.Pop();
+        command.Execute();
+        _undoStack.Push(command);
     }
 }
 ```
 
-#### Step 5: Interviewer Probes to Expect
+> [!tip] Interview line
+> Undo is not magic state rewind. It is deterministic reverse execution of immutable command intent and command local snapshot data.
 
-> [!question] "How would you add a fine system for overdue books?"
-> **Model answer:**
-> 1. Create `IFineCalculator` interface with `Calculate(Loan loan) : decimal`
-> 2. Implement `PerDayFineCalculator`, `FlatRateFineCalculator`
-> 3. Inject into `Library` — calculate fine on `ReturnBook()` if overdue
-> 4. Zero changes to `Member`, `BookCopy`, or `Catalog`
-> 5. "Strategy pattern again — fine policy varies by library policy, and I want to swap it without touching return logic."
+**State pattern with mode specific behavior:**
 
-> [!question] "How do you handle concurrent borrows of the last copy?"
-> **Model answer:**
-> - "This is a classic race condition. Two members try to borrow the last copy simultaneously."
-> - "Solution: `FindAvailableCopy` + `CheckOut` must be atomic. In a database-backed system, use optimistic concurrency — version column on BookCopy, retry on conflict. In-memory, use `lock` or `ConcurrentDictionary.TryUpdate`."
-> - "I would also add a reservation queue so the second member gets priority when the book returns."
+```csharp
+using System;
+using System.Collections.Generic;
+using Ood.Editor.Commands;
 
-> [!question] "Extension: add a book recommendation feature"
-> - New `IRecommendationStrategy` — by category, by borrowing history, collaborative filtering
-> - Inject into Library or a separate `RecommendationService`
-> - Zero changes to existing classes
+namespace Ood.Editor.State;
 
----
+public interface IEditorState
+{
+    void InsertText(DocumentEditorContext context, string value);
+    void DeleteText(DocumentEditorContext context, int index);
+    void SelectRange(DocumentEditorContext context, int start, int length);
+}
 
-### Design a Vending Machine
+public sealed class EditingState : IEditorState
+{
+    public void InsertText(DocumentEditorContext context, string value)
+    {
+        var command = new InsertTextCommand(context.Buffer, context.CursorIndex, value);
+        context.History.ExecuteCommand(command);
+        context.CursorIndex++;
+    }
 
-> [!note] Problem statement
-> Design a vending machine that accepts coins, allows product selection, dispenses products, and returns change. Focus on the state transitions.
+    public void DeleteText(DocumentEditorContext context, int index)
+    {
+        var command = new DeleteTextCommand(context.Buffer, index);
+        context.History.ExecuteCommand(command);
+        context.CursorIndex = Math.Max(0, context.CursorIndex - 1);
+    }
 
-#### Step 1: State Machine Design
+    public void SelectRange(DocumentEditorContext context, int start, int length)
+    {
+        context.SelectionStart = start;
+        context.SelectionLength = length;
+        context.SetState(new SelectingState());
+    }
+}
+
+public sealed class SelectingState : IEditorState
+{
+    public void InsertText(DocumentEditorContext context, string value)
+    {
+        var command = new InsertTextCommand(context.Buffer, context.SelectionStart, value);
+        context.History.ExecuteCommand(command);
+        context.CursorIndex = context.SelectionStart + 1;
+        context.ClearSelection();
+        context.SetState(new EditingState());
+    }
+
+    public void DeleteText(DocumentEditorContext context, int index)
+    {
+        var command = new DeleteTextCommand(context.Buffer, index);
+        context.History.ExecuteCommand(command);
+        context.ClearSelection();
+        context.SetState(new EditingState());
+    }
+
+    public void SelectRange(DocumentEditorContext context, int start, int length)
+    {
+        context.SelectionStart = start;
+        context.SelectionLength = length;
+    }
+}
+
+public sealed class ReadOnlyState : IEditorState
+{
+    public void InsertText(DocumentEditorContext context, string value)
+    {
+        throw new InvalidOperationException("Read only mode does not allow insert");
+    }
+
+    public void DeleteText(DocumentEditorContext context, int index)
+    {
+        throw new InvalidOperationException("Read only mode does not allow delete");
+    }
+
+    public void SelectRange(DocumentEditorContext context, int start, int length)
+    {
+        context.SelectionStart = start;
+        context.SelectionLength = length;
+    }
+}
+
+public sealed class DocumentEditorContext
+{
+    public DocumentEditorContext(CommandHistory history)
+    {
+        History = history;
+        CurrentState = new EditingState();
+    }
+
+    public CommandHistory History { get; }
+    public IEditorState CurrentState { get; private set; }
+    public int CursorIndex { get; set; }
+    public int SelectionStart { get; set; }
+    public int SelectionLength { get; set; }
+    public List<string> Buffer { get; } = new();
+
+    public void SetState(IEditorState next) => CurrentState = next;
+
+    public void ClearSelection()
+    {
+        SelectionStart = 0;
+        SelectionLength = 0;
+    }
+}
+```
+
+> [!tip] Interview line
+> In `ReadOnlyState` typing throws immediately. In `EditingState` selecting text transitions to `SelectingState`. That transition logic is encapsulated in state objects not scattered across if else checks.
+
+**Decorator pattern for layered formatting:**
+
+```csharp
+using Ood.Editor.Composite;
+
+namespace Ood.Editor.Decorators;
+
+public interface ITextDecorator
+{
+    IDocumentElement Inner { get; }
+}
+
+public abstract class TextDecoratorBase : IDocumentElement, ITextDecorator
+{
+    protected TextDecoratorBase(IDocumentElement inner)
+    {
+        Inner = inner;
+    }
+
+    public IDocumentElement Inner { get; }
+
+    public virtual int GetWordCount() => Inner.GetWordCount();
+    public abstract string Render();
+}
+
+public sealed class BoldDecorator : TextDecoratorBase
+{
+    public BoldDecorator(IDocumentElement inner) : base(inner)
+    {
+    }
+
+    public override string Render() => $"<strong>{Inner.Render()}</strong>";
+}
+
+public sealed class ItalicDecorator : TextDecoratorBase
+{
+    public ItalicDecorator(IDocumentElement inner) : base(inner)
+    {
+    }
+
+    public override string Render() => $"<em>{Inner.Render()}</em>";
+}
+
+public sealed class UnderlineDecorator : TextDecoratorBase
+{
+    public UnderlineDecorator(IDocumentElement inner) : base(inner)
+    {
+    }
+
+    public override string Render() => $"<u>{Inner.Render()}</u>";
+}
+```
+
+> [!tip] Interview line
+> Stacking is natural because decorators implement the same interface. `new BoldDecorator(new ItalicDecorator(text))` is still one `IDocumentElement` to the rest of the tree.
+
+**Strategy pattern for export:**
+
+```csharp
+using System;
+using Ood.Editor.Composite;
+
+namespace Ood.Editor.Export;
+
+public interface IExportStrategy
+{
+    string Export(Document document);
+}
+
+public sealed class HtmlExporter : IExportStrategy
+{
+    public string Export(Document document)
+    {
+        var body = document.Render()
+            .Replace(Environment.NewLine, "<br/>", StringComparison.Ordinal);
+        return $"<html><body>{body}</body></html>";
+    }
+}
+
+public sealed class MarkdownExporter : IExportStrategy
+{
+    public string Export(Document document)
+    {
+        return document.Render();
+    }
+}
+
+public sealed class PlainTextExporter : IExportStrategy
+{
+    public string Export(Document document)
+    {
+        var rendered = document.Render();
+        return rendered
+            .Replace("# ", string.Empty, StringComparison.Ordinal)
+            .Replace("## ", string.Empty, StringComparison.Ordinal)
+            .Replace("<strong>", string.Empty, StringComparison.Ordinal)
+            .Replace("</strong>", string.Empty, StringComparison.Ordinal)
+            .Replace("<em>", string.Empty, StringComparison.Ordinal)
+            .Replace("</em>", string.Empty, StringComparison.Ordinal)
+            .Replace("<u>", string.Empty, StringComparison.Ordinal)
+            .Replace("</u>", string.Empty, StringComparison.Ordinal);
+    }
+}
+```
+
+> [!tip] Interview line
+> Export is pure strategy. The editor never branches on format. It asks the selected strategy to export the same document tree.
+
+```mermaid
+sequenceDiagram
+    actor U as User
+    participant E as DocumentEditor
+    participant S as EditorState
+    participant H as CommandHistory
+    participant C as InsertTextCommand
+    participant T as DocumentTree
+
+    U->>E: Type text hello
+    E->>S: InsertText request
+    S->>C: Create insert command
+    S->>H: Execute command
+    H->>C: Execute
+    C->>T: Insert text element
+    T-->>C: Tree updated
+    U->>E: Undo
+    E->>H: Undo
+    H->>C: Undo
+    C->>T: Remove inserted element
+```
+
+#### Step 4: Concurrency 5 min
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Idle
-    Idle --> HasMoney : Insert coin
-    HasMoney --> HasMoney : Insert more coins
-    HasMoney --> Dispensing : Select product and sufficient funds
-    HasMoney --> Idle : Cancel and return money
-    Dispensing --> Idle : Product dispensed and change returned
-    Dispensing --> HasMoney : Product out of stock try another
-    Idle --> OutOfService : Maintenance needed
-    OutOfService --> Idle : Restocked and serviced
+    [*] --> Editing
+    Editing --> Selecting : user selects range
+    Selecting --> Editing : selection applied
+    Editing --> ReadOnly : lock document
+    Selecting --> ReadOnly : lock document
+    ReadOnly --> Editing : unlock document
 ```
-
-#### Step 2: Class Hierarchy
 
 ```mermaid
-classDiagram
-    direction TB
+sequenceDiagram
+    participant A as UserA Editor
+    participant B as UserB Export
+    participant E as DocumentEditor
+    participant L as ReadWriteLock
+    participant H as CommandHistory
+    participant X as HtmlExporter
 
-    class Product {
-        +string Id
-        +string Name
-        +decimal Price
-    }
+    A->>E: Insert paragraph
+    E->>L: Acquire write lock
+    E->>H: Execute command
+    H-->>E: done
+    E->>L: Release write lock
 
-    class Slot {
-        +string SlotCode
-        +Product Product
-        +int Quantity
-        +bool IsAvailable
-        +Dispense() Product
-    }
+    B->>E: Export html
+    E->>L: Acquire read lock
+    E->>X: Export snapshot
+    X-->>E: html output
+    E->>L: Release read lock
 
-    class IVendingState {
-        <<interface>>
-        +InsertMoney(machine, amount)
-        +SelectProduct(machine, slotCode)
-        +Dispense(machine)
-        +Cancel(machine)
-    }
-
-    class IdleState {
-        +InsertMoney(machine, amount)
-        +SelectProduct(machine, slotCode)
-        +Dispense(machine)
-        +Cancel(machine)
-    }
-
-    class HasMoneyState {
-        +InsertMoney(machine, amount)
-        +SelectProduct(machine, slotCode)
-        +Dispense(machine)
-        +Cancel(machine)
-    }
-
-    class DispensingState {
-        +InsertMoney(machine, amount)
-        +SelectProduct(machine, slotCode)
-        +Dispense(machine)
-        +Cancel(machine)
-    }
-
-    class VendingMachine {
-        -IVendingState currentState
-        -Dictionary~string - Slot~ slots
-        -decimal balance
-        -Slot? selectedSlot
-        +SetState(state)
-        +InsertMoney(amount)
-        +SelectProduct(slotCode)
-        +Dispense()
-        +Cancel()
-        +ReturnChange() decimal
-    }
-
-    IVendingState <|.. IdleState
-    IVendingState <|.. HasMoneyState
-    IVendingState <|.. DispensingState
-    VendingMachine --> IVendingState : delegates to
-    VendingMachine --> "*" Slot : contains
-    Slot --> Product : holds
+    A->>E: Undo
+    E->>L: Acquire write lock
+    E->>H: Undo
+    H-->>E: done
+    E->>L: Release write lock
 ```
 
-#### Step 3: Key Patterns Applied
+**Key concurrency behaviors:**
+1. Every command mutation takes write lock so tree and history stay consistent
+2. Export reads from a stable snapshot under read lock so long exports do not block every read path
+3. Undo redo are serialized with other writes to prevent stack corruption
+4. ReadOnly mode can be used as a soft gate for maintenance or review windows
 
-| Pattern | Where | Why |
-|---|---|---|
-| **[[State]]** | `IVendingState` implementations | Each state encapsulates its own behavior — no giant switch on state. |
-| **[[Factory Method|Factory]]** | Product/Slot initialization | Construct machine configuration from inventory data. |
+#### Step 5: The Composite Recursion Question CRITICAL
 
-#### Step 4: Key Code — State Implementations
+> [!question] How exactly does GetWordCount recurse through the tree and how do decorators affect it
+> **Model answer:**
+> - `Document.GetWordCount` starts at root and sums child counts
+> - Each `Section` does the same over its `Paragraph` children
+> - Each `Paragraph` does the same over its `IDocumentElement` children
+> - `TextElement` returns a concrete local count from its own text
+> - A decorator like `BoldDecorator` does not break recursion because it still implements `IDocumentElement` and delegates `GetWordCount` to `Inner`
+> - So recursion shape is unchanged even when formatting layers are added
+
+**Concrete tree and trace:**
+
+```text
+Document Quarterly Report
+  Section Overview
+    Paragraph 1
+      TextElement Revenue grew fast
+      BoldDecorator
+        TextElement Net margin improved
+  Section Risks
+    Paragraph 1
+      ItalicDecorator
+        TextElement Supply risk increased
+```
+
+Step by step trace for `GetWordCount`:
+1. `Document` asks `Section Overview` and `Section Risks`
+2. `Section Overview` asks `Paragraph 1`
+3. `Paragraph 1` asks child one `TextElement Revenue grew fast` returns 3
+4. `Paragraph 1` asks child two `BoldDecorator` which delegates to inner `TextElement Net margin improved` returns 3
+5. `Paragraph 1` returns 6 then `Section Overview` returns 6
+6. `Section Risks` asks its paragraph then `ItalicDecorator` delegates to `TextElement Supply risk increased` returns 3
+7. `Section Risks` returns 3 then `Document` returns total 9
+
+The same traversal pattern is used by `Render`. That symmetry is the interview winning point.
+
+#### Step 6: Extension Add Image Support 5 min
+
+**Four step extension framework:**
+1. Add `ImageElement : IDocumentElement` as a new leaf with `GetWordCount` returning `0`
+2. Implement `Render` for each output target friendly representation
+3. Reuse existing insertion commands because commands already accept `IDocumentElement`
+4. Add optional exporter enhancements later without touching tree contracts
 
 ```csharp
-public class VendingMachine
+using Ood.Editor.Composite;
+
+namespace Ood.Editor.Extensions;
+
+public sealed class ImageElement : IDocumentElement
 {
-    private IVendingState _currentState;
-    private readonly Dictionary<string, Slot> _slots;
-
-    public decimal Balance { get; set; }
-    public Slot? SelectedSlot { get; set; }
-
-    public VendingMachine(Dictionary<string, Slot> slots)
+    public ImageElement(string source, string alt)
     {
-        _slots = slots;
-        _currentState = new IdleState(); // Start idle
+        Source = source;
+        Alt = alt;
     }
 
-    public void SetState(IVendingState state) => _currentState = state;
-    public void InsertMoney(decimal amount) => _currentState.InsertMoney(this, amount);
-    public void SelectProduct(string slotCode) => _currentState.SelectProduct(this, slotCode);
-    public void Dispense() => _currentState.Dispense(this);
-    public void Cancel() => _currentState.Cancel(this);
+    public string Source { get; }
+    public string Alt { get; }
 
-    public Slot? GetSlot(string code) => _slots.GetValueOrDefault(code);
+    public int GetWordCount() => 0;
 
-    public decimal ReturnChange()
-    {
-        var change = Balance;
-        Balance = 0;
-        return change;
-    }
+    public string Render() => $"<img src=\"{Source}\" alt=\"{Alt}\"/>";
 }
 ```
 
-```csharp
-public class IdleState : IVendingState
-{
-    public void InsertMoney(VendingMachine machine, decimal amount)
-    {
-        machine.Balance += amount;
-        machine.SetState(new HasMoneyState());
-    }
+**Why this is zero break change:**
+- Existing composites already store `IDocumentElement` so image insertion needs no hierarchy change
+- Existing recursion already works because image is just another leaf
+- Undo for image insert uses the same insert command because command target type is interface based not text specific
 
-    public void SelectProduct(VendingMachine machine, string slotCode)
-        => throw new InvalidOperationException("Insert money first.");
-
-    public void Dispense(VendingMachine machine)
-        => throw new InvalidOperationException("Insert money and select a product first.");
-
-    public void Cancel(VendingMachine machine) { } // No-op — nothing to cancel
-}
-
-public class HasMoneyState : IVendingState
-{
-    public void InsertMoney(VendingMachine machine, decimal amount)
-    {
-        machine.Balance += amount;
-        // Stay in HasMoney state — accumulate funds
-    }
-
-    public void SelectProduct(VendingMachine machine, string slotCode)
-    {
-        var slot = machine.GetSlot(slotCode)
-            ?? throw new InvalidOperationException($"Invalid slot: {slotCode}");
-
-        if (!slot.IsAvailable)
-            throw new InvalidOperationException("Product out of stock.");
-
-        if (machine.Balance < slot.Product.Price)
-            throw new InvalidOperationException(
-                $"Insufficient funds. Need {slot.Product.Price - machine.Balance:C} more.");
-
-        machine.SelectedSlot = slot;
-        machine.SetState(new DispensingState());
-        machine.Dispense(); // Auto-trigger dispensing
-    }
-
-    public void Dispense(VendingMachine machine)
-        => throw new InvalidOperationException("Select a product first.");
-
-    public void Cancel(VendingMachine machine)
-    {
-        machine.ReturnChange();
-        machine.SetState(new IdleState());
-    }
-}
-
-public class DispensingState : IVendingState
-{
-    public void InsertMoney(VendingMachine machine, decimal amount)
-        => throw new InvalidOperationException("Currently dispensing. Please wait.");
-
-    public void SelectProduct(VendingMachine machine, string slotCode)
-        => throw new InvalidOperationException("Currently dispensing. Please wait.");
-
-    public void Dispense(VendingMachine machine)
-    {
-        var product = machine.SelectedSlot!.Dispense();
-        machine.Balance -= product.Price;
-        machine.ReturnChange(); // Return any excess
-        machine.SelectedSlot = null;
-        machine.SetState(new IdleState());
-    }
-
-    public void Cancel(VendingMachine machine)
-        => throw new InvalidOperationException("Cannot cancel during dispensing.");
-}
-```
-
-#### Step 5: Interviewer Probes to Expect
-
-> [!question] "What if we need to add a new payment method (card, NFC)?"
-> - Create `IPaymentMethod` interface with `ProcessPayment(decimal amount) : bool`
-> - `CoinPayment`, `CardPayment`, `NfcPayment` implementations
-> - Inject into VendingMachine — State pattern stays the same, payment processing is swapped via Strategy
-> - "OCP: new payment method = new class, zero changes to state logic."
-
-> [!question] "How would you handle the machine running out of change?"
-> - Add `IChangeDispenser` with `CanMakeChange(decimal amount) : bool` and `DispenseChange(decimal amount) : List<Coin>`
-> - Check before entering DispensingState — if can't make change, reject the transaction
-> - Track coin inventory alongside product inventory
-
----
-
-### Design a File System
-
-> [!note] Problem statement
-> Design an in-memory file system that supports files, directories, nested directories, and operations like search, size calculation, and display.
-
-#### Step 1: Composite Pattern Focus
-
-The file system is the classic Composite pattern use case: files and directories share the same interface, and directories contain other files/directories recursively.
+#### Full System Flow
 
 ```mermaid
-classDiagram
-    direction TB
+sequenceDiagram
+    actor U as User
+    participant E as DocumentEditor
+    participant S as EditingState
+    participant H as CommandHistory
+    participant T as DocumentTree
+    participant F as FormatCommand
+    participant X as HtmlExporter
 
-    class IFileSystemItem {
-        <<interface>>
-        +string Name
-        +string Path
-        +long GetSize()
-        +void Display(indent)
-        +DateTime CreatedAt
-        +DateTime ModifiedAt
-    }
+    U->>E: Open document
+    E-->>U: Document loaded in editing mode
+    U->>E: Type text draft ready
+    E->>S: InsertText
+    S->>H: Execute InsertTextCommand
+    H->>T: Add text element
 
-    class File {
-        +string Name
-        +string Path
-        +string Content
-        +long Size
-        +long GetSize()
-        +void Display(indent)
-    }
+    U->>E: Apply bold on selection
+    E->>H: Execute FormatCommand
+    H->>F: Execute
+    F->>T: Wrap target with BoldDecorator
 
-    class Directory {
-        +string Name
-        +string Path
-        +List~IFileSystemItem~ Children
-        +Add(item)
-        +Remove(name)
-        +Find(name) IFileSystemItem?
-        +long GetSize()
-        +void Display(indent)
-    }
+    U->>E: Undo
+    E->>H: Undo
+    H->>F: Undo
+    F->>T: Restore previous element state
 
-    class ISearchStrategy {
-        <<interface>>
-        +Search(root, criteria) List~IFileSystemItem~
-    }
-
-    class NameSearchStrategy {
-        +Search(root, criteria) List~IFileSystemItem~
-    }
-
-    class ExtensionSearchStrategy {
-        +Search(root, criteria) List~IFileSystemItem~
-    }
-
-    class SizeSearchStrategy {
-        +Search(root, criteria) List~IFileSystemItem~
-    }
-
-    class FileSystem {
-        -Directory root
-        -ISearchStrategy searchStrategy
-        +CreateFile(path, name, content) File
-        +CreateDirectory(path, name) Directory
-        +Delete(path, name)
-        +Search(criteria) List~IFileSystemItem~
-        +GetSize(path) long
-    }
-
-    IFileSystemItem <|.. File
-    IFileSystemItem <|.. Directory
-    Directory --> "*" IFileSystemItem : contains
-    ISearchStrategy <|.. NameSearchStrategy
-    ISearchStrategy <|.. ExtensionSearchStrategy
-    ISearchStrategy <|.. SizeSearchStrategy
-    FileSystem --> Directory : root
-    FileSystem --> ISearchStrategy : uses
+    U->>E: Export html
+    E->>X: Export document
+    X-->>U: html result
 ```
 
-#### Step 2: Key Patterns Applied
+#### Patterns Summary for This Problem
 
-| Pattern | Where | Why |
+| Pattern | Where Used | Why |
 |---|---|---|
-| **[[Composite]]** | `IFileSystemItem` → `File`, `Directory` | Uniform treatment of files and directories — `GetSize()` works the same way whether called on a file or a directory tree. |
-| **[[Strategy]]** | `ISearchStrategy` | Search by name, extension, size, date — swap without changing FileSystem. |
-| **Visitor** (if extensions requested) | `IFileSystemVisitor` | Add operations (compress, encrypt, count) without modifying File/Directory classes. |
+| Composite | `Document` `Section` `Paragraph` `TextElement` | Uniform tree operations and recursive traversal |
+| Command | `InsertTextCommand` `DeleteTextCommand` `FormatCommand` `CommandHistory` | Consistent undo redo and operation auditability |
+| State | `EditingState` `SelectingState` `ReadOnlyState` | Different behavior by mode without giant conditional blocks |
+| Decorator | `BoldDecorator` `ItalicDecorator` `UnderlineDecorator` | Dynamic stacked formatting on any element |
+| Strategy | `IExportStrategy` with html markdown plain text exporters | Add export formats with no editor rewrite |
+| Template Method | `DocumentContainer.Render` and `GetWordCount` skeleton | Shared algorithm with container specific wrappers |
 
-#### Step 3: Key Code
+#### Interviewer Probes to Expect
 
-```csharp
-public interface IFileSystemItem
-{
-    string Name { get; }
-    string Path { get; }
-    DateTime CreatedAt { get; }
-    long GetSize();
-    void Display(int indent = 0);
-}
+> [!question] How does undo work when you undo a format operation
+> **Model answer:**
+> - `FormatCommand` captures target parent reference target index and previous element snapshot before execute
+> - Execute replaces target element with decorated element
+> - Undo puts the captured previous element back at the same index
+> - Because this operation is one command entry undo preserves user intent as one reversible step
 
-public class File : IFileSystemItem
-{
-    public string Name { get; }
-    public string Path { get; }
-    public string Content { get; set; }
-    public DateTime CreatedAt { get; } = DateTime.UtcNow;
+> [!question] Can you stack bold and italic on same text
+> **Model answer:**
+> - Yes by decorator composition `new BoldDecorator(new ItalicDecorator(textElement))`
+> - Order is explicit and deterministic
+> - Word count stays accurate because each decorator delegates to inner for counting
+> - Render output nests correctly for target format
 
-    public File(string name, string path, string content = "")
-    {
-        Name = name;
-        Path = path;
-        Content = content;
-    }
+> [!question] How would you add collaborative editing
+> **Model answer:**
+> - Keep existing command model but add operation metadata user id version vector timestamp
+> - Introduce operational transform or CRDT merge layer before command execution
+> - Publish applied operations to peers via observer style event stream
+> - Keep local undo as user scoped command stacks to avoid reversing remote intent accidentally
 
-    public long GetSize() => Content.Length; // Simplified — real system tracks bytes
-    public void Display(int indent = 0) => Console.WriteLine($"{new string(' ', indent)}{Name} ({GetSize()} bytes)");
-}
-
-public class Directory : IFileSystemItem
-{
-    public string Name { get; }
-    public string Path { get; }
-    public DateTime CreatedAt { get; } = DateTime.UtcNow;
-    private readonly List<IFileSystemItem> _children = new();
-    public IReadOnlyList<IFileSystemItem> Children => _children;
-
-    public Directory(string name, string path)
-    {
-        Name = name;
-        Path = path;
-    }
-
-    public void Add(IFileSystemItem item) => _children.Add(item);
-
-    public void Remove(string name) =>
-        _children.RemoveAll(c => c.Name == name);
-
-    public IFileSystemItem? Find(string name) =>
-        _children.FirstOrDefault(c => c.Name == name);
-
-    // Composite: recursively sum all children
-    public long GetSize() => _children.Sum(c => c.GetSize());
-
-    // Composite: recursively display tree
-    public void Display(int indent = 0)
-    {
-        Console.WriteLine($"{new string(' ', indent)}/{Name}/");
-        foreach (var child in _children)
-            child.Display(indent + 2);
-    }
-}
-```
-
-**Visitor pattern for extensibility (if interviewer asks "add compression/encryption"):**
-
-```csharp
-public interface IFileSystemVisitor
-{
-    void VisitFile(File file);
-    void VisitDirectory(Directory directory);
-}
-
-public class SizeCalculatorVisitor : IFileSystemVisitor
-{
-    public long TotalSize { get; private set; }
-
-    public void VisitFile(File file) => TotalSize += file.GetSize();
-    public void VisitDirectory(Directory directory)
-    {
-        foreach (var child in directory.Children)
-        {
-            if (child is File f) VisitFile(f);
-            else if (child is Directory d) VisitDirectory(d);
-        }
-    }
-}
-```
-
-#### Step 4: Interviewer Probes to Expect
-
-> [!question] "How would you add symbolic links?"
-> - Create `SymbolicLink : IFileSystemItem` that holds a reference to another `IFileSystemItem`
-> - `GetSize()` delegates to the target. `Display()` shows the link with an indicator
-> - Must handle circular references — track visited nodes during traversal
-> - "Composite handles this naturally because SymbolicLink implements the same interface."
-
-> [!question] "How would you add permissions?"
-> - Create `IPermissionChecker` interface. Decorator pattern: `PermissionCheckedDirectory : IFileSystemItem` wraps a Directory
-> - Or simpler: add `Permissions` property to `IFileSystemItem` and check before operations
-> - "I prefer the decorator approach because it separates permission logic from file system structure."
+> [!question] What if document has ten thousand elements how does GetWordCount perform
+> **Model answer:**
+> - Baseline recursion is linear in number of nodes per call
+> - Add cached counts on container nodes and invalidate lazily on subtree mutation
+> - Mutation commands can bubble dirty flags to ancestors for precise invalidation
+> - Read heavy workloads then become near constant for unchanged subtrees while preserving correctness
 
 ### Day 2 Practice Q&A
 
-> [!question] "Design a Library Management System — 30 minutes"
+> [!question] "Design a Document Editor — 30 minutes"
 > Follow the framework: Clarify → Entities → Hierarchy → Patterns → Code → Extend
 > **Key phrases to say:**
-> - "I'll use Strategy for search because the search algorithm varies — title, author, category"
-> - "Observer for notifications — when a reserved book becomes available, the member is notified without the return logic knowing about notifications"
-> - "Template Method for member types — same borrowing flow, different limits"
-> - Extension: "Adding a fine system is a new Strategy — zero changes to existing code"
+> - "Composite for the document tree — Document, Section, Paragraph, TextElement share one interface so GetWordCount and Render recurse uniformly"
+> - "Command for undo/redo — every edit is an object with Execute and Undo, CommandHistory manages the stacks"
+> - "State for editor modes — Editing, Selecting, ReadOnly each define valid actions without conditionals"
+> - "Decorator for formatting — Bold(Italic(text)) stacks transparently because decorators implement IDocumentElement"
+> - "Strategy for export — HtmlExporter, MarkdownExporter swap without touching the document model"
+> - Extension: "Adding ImageElement is a new IDocumentElement leaf — zero changes to composites, commands, or exporters"
 
-> [!question] "What pattern would you use for a vending machine? Why?"
+> [!question] "What patterns complement each other in the Document Editor and why?"
 > **Model answer:**
-> - "State pattern. The vending machine's behavior changes entirely based on its current state — idle, has money, dispensing. Each state defines what actions are valid."
-> - "The alternative — a giant switch on state — would be an SRP and OCP violation. Every new state would modify the switch in multiple methods."
-> - "State pattern gives me: clear transitions, self-documenting behavior per state, and easy addition of new states like OutOfService."
+> - "Composite provides the tree structure, Decorator layers on top of tree nodes without modifying them"
+> - "Command wraps mutations to the Composite tree so they become reversible"
+> - "State guards which commands are allowed based on editor mode"
+> - "Strategy is orthogonal — export reads the tree but never modifies it, so it works regardless of state or formatting"
+> - "Together they give me: structural extensibility via Composite plus Decorator, behavioral safety via State plus Command, and output flexibility via Strategy"
 
 ---
 
