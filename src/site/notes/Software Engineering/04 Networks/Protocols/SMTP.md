@@ -99,10 +99,6 @@ Without these, emails from your domain will be marked as spam or rejected.
 > [!QUESTION]- Why does SMTP require SPF, DKIM, and DMARC for deliverability?
 > SMTP has no built-in sender authentication — anyone can claim any From address. SPF restricts which IPs can send for a domain. DKIM adds a cryptographic signature that proves the message was not tampered with. DMARC tells receiving servers what to do when SPF/DKIM fail. Without all three, email from your domain will be marked as spam or rejected by major providers.
 
-> [!QUESTION]- Why is `System.Net.Mail.SmtpClient` deprecated in .NET?
-> `SmtpClient` does not support modern authentication (OAuth2), has poor async support, and lacks IMAP/POP3. Microsoft marked it obsolete and recommends MailKit, which supports all modern protocols and authentication methods.
-
-
 ## References
 
 - [SMTP (RFC 5321)](https://www.rfc-editor.org/rfc/rfc5321) — the current SMTP specification; defines the protocol commands, response codes, and message format.

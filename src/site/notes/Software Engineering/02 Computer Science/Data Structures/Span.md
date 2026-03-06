@@ -51,9 +51,6 @@ Console.WriteLine(values[2]); // 300
 > [!QUESTION]- When should you choose `Memory<T>` instead of `Span<T>`?
 > Use `Memory<T>` when the buffer must cross async boundaries, be stored in fields, or live longer than a single synchronous scope.
 
-> [!QUESTION]- Does slicing a span allocate?
-> No. `Slice` creates another view over the same memory region. This is why spans are useful for allocation-sensitive parsing and protocol handling.
-
 ## Links
 
 - [Span<T> struct](https://learn.microsoft.com/en-us/dotnet/api/system.span-1) — API reference covering constructors, Slice, and ref struct constraints.

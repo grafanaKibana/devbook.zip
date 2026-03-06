@@ -209,10 +209,6 @@ Decision rule: CQRS is usually worth it when at least two are true at once: high
 ## Questions
 > [!QUESTION]- When is CQRS worth the operational complexity, and when is it an anti-pattern?
 > **Expected answer:** CQRS is justified when read/write workloads differ materially (high read ratio, complex query shapes, independent scaling needs) and the domain has meaningful invariants. It is usually an anti-pattern for simple CRUD with low scale pressure, because projection pipelines, eventual consistency handling, and dual-model maintenance add avoidable complexity.
-> [!QUESTION]- Your dashboard queries are slow because the normalized write model needs 5 JOINs. How does CQRS help, and what is the cost?
-> **Expected answer:** CQRS allows a denormalized read model built for that dashboard (for example, a pre-joined projection table), which removes expensive runtime joins and improves latency. The cost is projection infrastructure, eventual consistency, duplicate data, and extra operational work (retries, idempotency, lag monitoring). The key interview point is to justify CQRS only if latency/scaling gains outweigh this complexity.
-> [!QUESTION]- Does adopting CQRS mean you must adopt Event Sourcing?
-> **Expected answer:** No. CQRS is a responsibility split between command and query paths; Event Sourcing is a persistence strategy where events are the source of truth. They fit well together because events project naturally to read models, but CQRS can run on regular state-based persistence (for example, EF Core tables) with or without event publication.
 Warm-up refresher: What is CQRS? CQRS separates commands (state changes) from queries (read-only data retrieval) so each side can be modeled and optimized independently.
 ## References
 - [Microsoft Learn - CQRS pattern](https://learn.microsoft.com/azure/architecture/patterns/cqrs)
