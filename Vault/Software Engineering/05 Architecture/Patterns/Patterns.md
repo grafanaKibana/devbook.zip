@@ -36,5 +36,6 @@ Patterns are reusable solutions to recurring design problems, especially around 
 > **Pages**
 > - [[Software Engineering/05 Architecture/Patterns/CQS|CQS]]
 > - [[Software Engineering/05 Architecture/Patterns/Dependency Injection|Dependency Injection]]
+> - [[Software Engineering/05 Architecture/Patterns/Event Bus|Event Bus]]
 > - [[Software Engineering/05 Architecture/Patterns/Repository & UoW|Repository & UoW]]
 <!-- whats-next:end -->

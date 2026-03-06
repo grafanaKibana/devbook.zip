@@ -190,4 +190,16 @@ The tradeoff is explicit: you own the execution strategy but you own the registr
 ---
 
 > [!note] Whats next
+> **Parent**
+>  [[Software Engineering/05 Architecture/05 Architecture|05 Architecture]]
+>
+> **Topics**
+> - [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/Architectural Patterns|Architectural Patterns]]
+> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Design Patterns|Design Patterns]]
+> - [[Software Engineering/05 Architecture/Patterns/Resilience Patterns/Resilience Patterns|Resilience Patterns]]
+>
+> **Pages**
+> - [[Software Engineering/05 Architecture/Patterns/CQS|CQS]]
+> - [[Software Engineering/05 Architecture/Patterns/Dependency Injection|Dependency Injection]]
+> - [[Software Engineering/05 Architecture/Patterns/Repository & UoW|Repository & UoW]]
 <!-- whats-next:end -->
