@@ -118,9 +118,6 @@ When extending precision/recall to multi-class problems, the averaging method ch
 > [!QUESTION]- How do you pick a classification threshold in practice?
 > 1. Define the business constraint: "recall must be ≥ 0.95" or "FP rate must be ≤ 0.02." 2. Plot the precision-recall curve on a held-out validation set. 3. Find the threshold that satisfies your constraint while maximizing the complementary metric. 4. Validate on a separate golden test set (not the validation set used for selection). 5. Freeze the threshold in production config (not hardcoded). 6. Set up monitoring: if the metric drops ≥5% on weekly golden-set runs, trigger re-evaluation. **Tradeoff**: a static threshold degrades as data distribution shifts — schedule quarterly threshold reviews or implement dynamic thresholding with confidence calibration.
 
-> [!QUESTION]- Your model has F1 = 0.78. The PM says it's "good enough." What questions do you ask?
-> 1. What are precision and recall separately? F1 0.78 could be 0.95/0.66 or 0.66/0.95 — radically different operational impact. 2. What's the class balance? On imbalanced data, F1 can be misleadingly high for the majority class. 3. What's the business cost of each error type? If FP costs $5 and FN costs $500, optimizing F1 (which weights them equally) is wrong — you need a cost-weighted metric. 4. At what threshold? If threshold isn't fixed, the number is meaningless. 5. On what data split? If measured on training data, it's overfit. Must be held-out or cross-validated.
-
 ## Links
 
 - [Scikit-learn: Classification metrics](https://scikit-learn.org/stable/modules/model_evaluation.html#classification-metrics) — comprehensive reference for precision, recall, F1, confusion matrix, ROC, and multi-class variants with code examples.

@@ -190,20 +190,8 @@ Decision rule: start with `HybridCache` for new .NET 9+ projects — it handles 
 
 ## Questions
 
-> [!QUESTION]- What makes caching hard?
-> Invalidation and correctness. Serving data fast is easy — knowing when that data is no longer valid is the core challenge. You need a clear staleness contract per data type and safe fallbacks for when the cache is unavailable or poisoned.
-
 > [!QUESTION]- How do you reduce cache stampede?
 > Add jitter to expirations so hot keys do not all expire simultaneously. Use request coalescing (singleflight pattern) so only one caller recomputes while others await the result. Consider stale-while-revalidate or background refresh to avoid blocking on recomputation entirely. `HybridCache` in .NET 9+ handles coalescing automatically.
-
-> [!QUESTION]- How do you fix stale read-after-write behavior in Redis user-profile caching without turning off caching?
-> Define the correctness target first: read-your-writes for the updating user, plus a staleness budget for everyone else. On the write path, either update the cached value or delete it after the database commit succeeds. If there are multiple writers or async pipelines, publish an invalidation event and consume it in all app instances. For per-user read-your-writes, use a version token in the cache key (row version or updated_at) so the writer reads the new version immediately. Keep a TTL as a safety net for missed invalidations. Add monitoring: rate of stale reads, invalidation lag, and cache hit ratio per key type.
-
-> [!QUESTION]- What changes reduce p99 spikes and database CPU saturation in TTL-only caching with synchronized five-minute expirations?
-> Add jitter to TTL so expirations spread over time. Add request coalescing so only one request recomputes a key and others await the same result. Consider stale-while-revalidate so you never block on recomputation for hot keys. Add a short circuit to protect the database: rate-limit recomputes, timeouts, and fallback behavior. Identify and treat hot keys separately: shorter payloads, proactive refresh, dedicated cache region.
-
-> [!QUESTION]- What should be checked first when a multi-tenant cache leaks one tenant's data to another, and how is it prevented?
-> Assume a cache key correctness bug until proven otherwise: ensure tenant ID and auth scope are part of every key. Verify there is no shared key for different query parameters, locale, feature flags, or permissions. Ensure you do not cache error pages or partial failures that can later be served as valid results. Use strongly typed key builders and centralized key composition to prevent ad-hoc string keys. Add defense in depth: validate tenant on deserialized payload before returning and log violations.
 
 ## References
 

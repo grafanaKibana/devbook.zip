@@ -53,9 +53,6 @@ var graph = new Dictionary<string, List<string>>
 
 ## Questions
 
-> [!QUESTION]- Does .NET provide a built-in `Graph<T>` type?
-> No. You usually build graphs using `Dictionary`, `List`, `HashSet`, and `Queue`/`Stack`.
-
 > [!QUESTION]- Which collections are typically used for BFS?
 > `Queue<T>` for frontier and `HashSet<T>` for visited tracking.
 
