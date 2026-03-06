@@ -29,6 +29,7 @@ Application architecture focuses on how a codebase is shaped: layers, modules, i
 >  [[Software Engineering/05 Architecture/05 Architecture|05 Architecture]]
 >
 > **Pages**
+> - [[Software Engineering/05 Architecture/Application Architecture/Clean Architecture|Clean Architecture]]
 > - [[Software Engineering/05 Architecture/Application Architecture/Layered Architecture|Layered Architecture]]
 > - [[Software Engineering/05 Architecture/Application Architecture/MVC MVVM|MVC MVVM]]
 > - [[Software Engineering/05 Architecture/Application Architecture/Plug-in Architecture (MicroKernel)|Plug-in Architecture (MicroKernel)]]

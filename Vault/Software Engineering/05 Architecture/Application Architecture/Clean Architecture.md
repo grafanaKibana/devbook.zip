@@ -275,4 +275,11 @@ Decision rule: start with Layered or Vertical Slice for simple domains, and move
 ---
 
 > [!note] Whats next
+> **Parent**
+>  [[Software Engineering/05 Architecture/05 Architecture|05 Architecture]]
+>
+> **Pages**
+> - [[Software Engineering/05 Architecture/Application Architecture/Layered Architecture|Layered Architecture]]
+> - [[Software Engineering/05 Architecture/Application Architecture/MVC MVVM|MVC MVVM]]
+> - [[Software Engineering/05 Architecture/Application Architecture/Plug-in Architecture (MicroKernel)|Plug-in Architecture (MicroKernel)]]
 <!-- whats-next:end -->

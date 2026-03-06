@@ -196,6 +196,7 @@ That per-operation selection is usually what interviewers want to hear.
 > - [[Software Engineering/05 Architecture/Distributed Systems/API Gateway|API Gateway]]
 > - [[Software Engineering/05 Architecture/Distributed Systems/Consistency Models|Consistency Models]]
 > - [[Software Engineering/05 Architecture/Distributed Systems/Distributed Transactions|Distributed Transactions]]
+> - [[Software Engineering/05 Architecture/Distributed Systems/Idempotency|Idempotency]]
 > - [[Software Engineering/05 Architecture/Distributed Systems/Load Balancing|Load Balancing]]
 > - [[Software Engineering/05 Architecture/Distributed Systems/Webhooks|Webhooks]]
 <!-- whats-next:end -->

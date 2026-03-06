@@ -301,4 +301,5 @@ Mitigation: include `Retry-After` and useful quota headers such as `X-RateLimit-
 >
 > **Pages**
 > - [[Software Engineering/05 Architecture/Patterns/Resilience Patterns/Circuit Breaker|Circuit Breaker]]
+> - [[Software Engineering/05 Architecture/Patterns/Resilience Patterns/Retry and Timeout Patterns|Retry and Timeout Patterns]]
 <!-- whats-next:end -->

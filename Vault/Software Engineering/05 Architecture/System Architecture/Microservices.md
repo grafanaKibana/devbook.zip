@@ -236,6 +236,7 @@ spec:
 >
 > **Pages**
 > - [[Software Engineering/05 Architecture/System Architecture/Event-Driven Architecture|Event-Driven Architecture]]
+> - [[Software Engineering/05 Architecture/System Architecture/Modular Monolith|Modular Monolith]]
 > - [[Software Engineering/05 Architecture/System Architecture/Monolith Architecture|Monolith Architecture]]
 > - [[Software Engineering/05 Architecture/System Architecture/Serverless Architecture|Serverless Architecture]]
 > - [[Software Engineering/05 Architecture/System Architecture/Service-Oriented Architecture|Service-Oriented Architecture]]
