@@ -68,9 +68,6 @@ If safety metrics are included in the optimization objective, the system may lea
 
 ## Questions
 
-> [!QUESTION]- Should I rely on online metrics only?
-> No. Use offline evaluation (golden test sets, LLM judges) to prevent obvious regressions before deployment, and online evaluation to validate real-world impact. Offline evaluation is fast and cheap; online evaluation captures real distribution and user behavior. Neither replaces the other.
-
 > [!QUESTION]- How do you determine the minimum sample size for an A/B test?
 > Use a power analysis: specify the minimum detectable effect (e.g., 2% improvement in resolution rate), desired statistical power (80%), and significance level (p < 0.05). Tools like statsmodels or online calculators give the required sample size. Underpowered tests produce false positives that waste engineering effort.
 

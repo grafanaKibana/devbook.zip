@@ -140,9 +140,6 @@ pipeline {
 
 ## Questions
 
-> [!QUESTION]- When should you use GitHub Actions vs Azure DevOps Pipelines?
-> Use GitHub Actions when your code is on GitHub and you want zero infrastructure overhead — it integrates natively with PRs, branch protection, and OIDC for cloud auth. Use Azure DevOps Pipelines when deploying to Azure services (AKS, App Service, Azure Functions) and needing enterprise features: approval gates, deployment environments, audit trails, and integration with Azure Boards. Both support .NET equally well; the decision is about ecosystem fit and operational requirements.
-
 > [!QUESTION]- What makes a CI pipeline 'good' vs 'fast but unreliable'?
 > A good CI pipeline: (1) runs in < 10 minutes (fast enough to not block the developer), (2) has zero flaky tests (every failure is a real failure), (3) masks secrets and never logs sensitive data, (4) promotes the same artifact through environments (no rebuilds), (5) has clear failure messages that point to the root cause. A fast but unreliable pipeline trains developers to ignore failures and re-run instead of fix — which defeats the purpose of CI.
 

@@ -49,12 +49,6 @@ When you iterate on prompts or rubrics against a fixed evaluation set, you can o
 
 ## Questions
 
-> [!QUESTION]- How do I know if I'm overfitting my prompt?
-> If improvements only show up on your dev set but not on a holdout set (or online metrics), you are likely tuning to that benchmark. Add paraphrased variants, segment tests, and an untouched holdout.
-
-> [!QUESTION]- What should I evaluate first?
-> Start with the dominant failure mode that breaks user trust (often correctness/groundedness) and add targeted suites for safety risks (prompt injection, PII, unsafe actions).
-
 > [!QUESTION]- When are classic metrics (BLEU/ROUGE) useful?
 > Mainly for narrow summarization/translation style tasks and as weak signals. For open-ended assistants, rubric-based scoring and pairwise ranking usually track real quality better.
 
