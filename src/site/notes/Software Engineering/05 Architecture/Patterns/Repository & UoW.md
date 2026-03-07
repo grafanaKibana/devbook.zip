@@ -147,4 +147,5 @@ When NOT to add the abstraction: if you're building a simple CRUD service and th
 > **Pages**
 > - [[Software Engineering/05 Architecture/Patterns/CQS\|CQS]]
 > - [[Software Engineering/05 Architecture/Patterns/Dependency Injection\|Dependency Injection]]
+> - [[Software Engineering/05 Architecture/Patterns/Event Bus\|Event Bus]]
 <!-- whats-next:end -->
