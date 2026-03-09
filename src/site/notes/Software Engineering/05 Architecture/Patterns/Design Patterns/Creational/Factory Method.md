@@ -162,6 +162,7 @@ Adding a Slack channel now means a new `SlackNotificationCreator` class — zero
 
 ## References
 
+- [Factory Method Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=EcFVTgRHJLM&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=4) — video walkthrough of the Factory Method pattern with OOP examples
 - [Factory Method — refactoring.guru](https://refactoring.guru/design-patterns/factory-method) — canonical pattern description with structure diagram and C# example
 - [ILoggerFactory interface — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.logging.iloggerfactory) — .NET logging factory method in production use
 - [DbProviderFactory — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.data.common.dbproviderfactory) — ADO.NET abstract factory method for database providers
