@@ -151,6 +151,7 @@ Four layers with interfaces and DI for a 3-endpoint CRUD API adds ceremony witho
 >  [[Software Engineering/05 Architecture/05 Architecture\|05 Architecture]]
 >
 > **Pages**
+> - [[Software Engineering/05 Architecture/Application Architecture/Clean Architecture\|Clean Architecture]]
 > - [[Software Engineering/05 Architecture/Application Architecture/MVC MVVM\|MVC MVVM]]
 > - [[Software Engineering/05 Architecture/Application Architecture/Plug-in Architecture (MicroKernel)\|Plug-in Architecture (MicroKernel)]]
 <!-- whats-next:end -->

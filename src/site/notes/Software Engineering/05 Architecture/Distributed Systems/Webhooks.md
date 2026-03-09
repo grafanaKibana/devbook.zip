@@ -191,5 +191,6 @@ Decision heuristic:
 > - [[Software Engineering/05 Architecture/Distributed Systems/CAP theorem\|CAP theorem]]
 > - [[Software Engineering/05 Architecture/Distributed Systems/Consistency Models\|Consistency Models]]
 > - [[Software Engineering/05 Architecture/Distributed Systems/Distributed Transactions\|Distributed Transactions]]
+> - [[Software Engineering/05 Architecture/Distributed Systems/Idempotency\|Idempotency]]
 > - [[Software Engineering/05 Architecture/Distributed Systems/Load Balancing\|Load Balancing]]
 <!-- whats-next:end -->

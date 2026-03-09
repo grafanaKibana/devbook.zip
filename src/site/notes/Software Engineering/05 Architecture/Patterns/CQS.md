@@ -122,5 +122,6 @@ The query methods can be called freely in any order without side effects. The co
 >
 > **Pages**
 > - [[Software Engineering/05 Architecture/Patterns/Dependency Injection\|Dependency Injection]]
+> - [[Software Engineering/05 Architecture/Patterns/Event Bus\|Event Bus]]
 > - [[Software Engineering/05 Architecture/Patterns/Repository & UoW\|Repository & UoW]]
 <!-- whats-next:end -->

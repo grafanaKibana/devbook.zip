@@ -185,6 +185,7 @@ This pattern implements read-your-writes at the API layer: the client reads the 
 > - [[Software Engineering/05 Architecture/Distributed Systems/API Gateway\|API Gateway]]
 > - [[Software Engineering/05 Architecture/Distributed Systems/CAP theorem\|CAP theorem]]
 > - [[Software Engineering/05 Architecture/Distributed Systems/Distributed Transactions\|Distributed Transactions]]
+> - [[Software Engineering/05 Architecture/Distributed Systems/Idempotency\|Idempotency]]
 > - [[Software Engineering/05 Architecture/Distributed Systems/Load Balancing\|Load Balancing]]
 > - [[Software Engineering/05 Architecture/Distributed Systems/Webhooks\|Webhooks]]
 <!-- whats-next:end -->
