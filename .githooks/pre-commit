@@ -29,13 +29,30 @@ fi
 echo "[pre-commit] Running vault automations..."
 
 # 1. Sync folder frontmatter (derives status/priority/level from children)
-python3 "$REPO_ROOT/.scripts/sync-folder-rollup-frontmatter.py" --write
+ROLLUP_CHANGED=$(python3 "$REPO_ROOT/.scripts/sync-folder-rollup-frontmatter.py" --write --force --print-changed)
+if [[ -n "$ROLLUP_CHANGED" ]]; then
+    while IFS= read -r file; do
+        git add "$REPO_ROOT/$file"
+    done <<< "$ROLLUP_CHANGED"
+    echo "[pre-commit] ✓ Folder frontmatter synced ($(echo "$ROLLUP_CHANGED" | wc -l | tr -d ' ') notes)"
+fi
 
 # 2. Render whats-next navigation callouts
-python3 "$REPO_ROOT/.scripts/render-whats-next.py" --staged --write
+WHATSNEXT_CHANGED=$(python3 "$REPO_ROOT/.scripts/render-whats-next.py" --staged --write --print-changed)
+if [[ -n "$WHATSNEXT_CHANGED" ]]; then
+    while IFS= read -r file; do
+        git add "$REPO_ROOT/$file"
+    done <<< "$WHATSNEXT_CHANGED"
+    echo "[pre-commit] ✓ Whats-next callouts updated ($(echo "$WHATSNEXT_CHANGED" | wc -l | tr -d ' ') notes)"
+fi
 
 # 3. Generate roadmap canvas from folder structure
 python3 "$REPO_ROOT/.scripts/generate-roadmap.py"
+ROADMAP_FILE="Vault/Software Engineering/Roadmap.canvas"
+if ! git diff --quiet -- "$REPO_ROOT/$ROADMAP_FILE" 2>/dev/null; then
+    git add "$REPO_ROOT/$ROADMAP_FILE"
+    echo "[pre-commit] ✓ Roadmap canvas regenerated"
+fi
 
 ### MD040 LINT — markdownlint-cli2 (staged-only) ###
 if [[ ${#STAGED_MD[@]} -gt 0 ]]; then

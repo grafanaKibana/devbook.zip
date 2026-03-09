@@ -5,11 +5,11 @@ subtopic:
   - LLM
 level:
   - "3"
-priority: Low
 status: Done
 tags:
   - FolderNote
 dg-publish: true
+priority: Medium
 ---
 
 # Intro
