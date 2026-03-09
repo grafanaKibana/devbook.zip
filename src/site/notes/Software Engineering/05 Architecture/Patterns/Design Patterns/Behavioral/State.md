@@ -208,6 +208,7 @@ Adding `OnHoldState` now means one new class — existing states never change.
 
 ## References
 
+- [State Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=N12L5D78MAA&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=17) — video walkthrough of the State pattern with OOP examples
 - [State — refactoring.guru](https://refactoring.guru/design-patterns/state) — canonical pattern description with context/state diagram and C# example
 - [Async/await state machine — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/task-asynchronous-programming-model) — how the compiler generates IAsyncStateMachine
 - [Stateless — GitHub](https://github.com/dotnet-state-machine/stateless) — declarative state machine library for .NET
