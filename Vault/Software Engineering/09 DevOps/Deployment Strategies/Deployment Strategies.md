@@ -3,8 +3,9 @@ topic:
   - DevOps
 subtopic:
   - Deployment Strategies
-dg-publish: false
-status: Not-Started
+dg-publish: true
+status:
+  - Creation
 priority: Medium
 level:
   - "2"
