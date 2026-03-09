@@ -6,10 +6,10 @@ subtopic:
 level:
   - "2"
 priority: High
-status: Ready To Repeat
 dg-publish: true
 tags:
   - FolderNote
+status: Not-Started
 ---
 
 # Intro

@@ -6,10 +6,10 @@ subtopic:
 tags:
   - FolderNote
 dg-publish: true
-status: Ready To Repeat
 priority: Medium
 level:
   - '3'
+status: Creation
 ---
 
 # Intro
