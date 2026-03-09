@@ -283,5 +283,6 @@ Use this when selection is explicit and stable; avoid turning keys into hidden r
 >
 > **Pages**
 > - [[Software Engineering/05 Architecture/Patterns/CQS\|CQS]]
+> - [[Software Engineering/05 Architecture/Patterns/Event Bus\|Event Bus]]
 > - [[Software Engineering/05 Architecture/Patterns/Repository & UoW\|Repository & UoW]]
 <!-- whats-next:end -->

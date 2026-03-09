@@ -3,7 +3,7 @@
 ---
 
 
-<h1><span>Table of Contents</span></h1><h2><span>Total questions: <strong>540</strong></span></h2><p><span><ul>
+<h1><span>Table of Contents</span></h1><h2><span>Total questions: <strong>552</strong></span></h2><p><span><ul>
 <li dir="auto"><strong><a class="internal-link" data-href="#01-programming" href="#01-programming" target="_blank" rel="noopener nofollow">01 Programming</a></strong> (124)
 <ul>
 <li dir="auto"><a class="internal-link" data-href="#01-programming-net" href="#01-programming-net" target="_blank" rel="noopener nofollow">NET</a> (124)</li>
@@ -29,17 +29,17 @@
 <li dir="auto"><a class="internal-link" data-href="#04-networks-transport-sockets" href="#04-networks-transport-sockets" target="_blank" rel="noopener nofollow">Transport &amp; Sockets</a> (8)</li>
 </ul>
 </li>
-<li dir="auto"><strong><a class="internal-link" data-href="#05-architecture" href="#05-architecture" target="_blank" rel="noopener nofollow">05 Architecture</a></strong> (114)
+<li dir="auto"><strong><a class="internal-link" data-href="#05-architecture" href="#05-architecture" target="_blank" rel="noopener nofollow">05 Architecture</a></strong> (125)
 <ul>
-<li dir="auto"><a class="internal-link" data-href="#05-architecture-application-architecture" href="#05-architecture-application-architecture" target="_blank" rel="noopener nofollow">Application Architecture</a> (7)</li>
-<li dir="auto"><a class="internal-link" data-href="#05-architecture-distributed-systems" href="#05-architecture-distributed-systems" target="_blank" rel="noopener nofollow">Distributed Systems</a> (20)</li>
-<li dir="auto"><a class="internal-link" data-href="#05-architecture-patterns" href="#05-architecture-patterns" target="_blank" rel="noopener nofollow">Patterns</a> (77)</li>
-<li dir="auto"><a class="internal-link" data-href="#05-architecture-system-architecture" href="#05-architecture-system-architecture" target="_blank" rel="noopener nofollow">System Architecture</a> (10)</li>
+<li dir="auto"><a class="internal-link" data-href="#05-architecture-application-architecture" href="#05-architecture-application-architecture" target="_blank" rel="noopener nofollow">Application Architecture</a> (9)</li>
+<li dir="auto"><a class="internal-link" data-href="#05-architecture-distributed-systems" href="#05-architecture-distributed-systems" target="_blank" rel="noopener nofollow">Distributed Systems</a> (22)</li>
+<li dir="auto"><a class="internal-link" data-href="#05-architecture-patterns" href="#05-architecture-patterns" target="_blank" rel="noopener nofollow">Patterns</a> (82)</li>
+<li dir="auto"><a class="internal-link" data-href="#05-architecture-system-architecture" href="#05-architecture-system-architecture" target="_blank" rel="noopener nofollow">System Architecture</a> (12)</li>
 </ul>
 </li>
-<li dir="auto"><strong><a class="internal-link" data-href="#06-development-practices" href="#06-development-practices" target="_blank" rel="noopener nofollow">06 Development Practices</a></strong> (29)
+<li dir="auto"><strong><a class="internal-link" data-href="#06-development-practices" href="#06-development-practices" target="_blank" rel="noopener nofollow">06 Development Practices</a></strong> (30)
 <ul>
-<li dir="auto"><a class="internal-link" data-href="#06-development-practices-paradigms" href="#06-development-practices-paradigms" target="_blank" rel="noopener nofollow">Paradigms</a> (17)</li>
+<li dir="auto"><a class="internal-link" data-href="#06-development-practices-paradigms" href="#06-development-practices-paradigms" target="_blank" rel="noopener nofollow">Paradigms</a> (18)</li>
 <li dir="auto"><a class="internal-link" data-href="#06-development-practices-principles" href="#06-development-practices-principles" target="_blank" rel="noopener nofollow">Principles</a> (12)</li>
 </ul>
 </li>
@@ -1225,6 +1225,24 @@ Cost: MVVM requires binding infrastructure (<code>INotifyPropertyChanged</code>,
 </div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">When is plug-in architecture the wrong choice?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
 <p dir="auto">When all features are known upfront and no third-party extensibility is needed. The loading complexity, versioning challenges, and security surface (untrusted code running in-process) are not justified for internal applications. A monolith with feature flags is simpler and safer. Plug-in architecture earns its complexity when customers or third parties need to extend the product without modifying the core.<br>
 <em><a class="internal-link" data-href="Software Engineering/05 Architecture/Application Architecture/Plug-in Architecture (MicroKernel).md" href="Software Engineering/05 Architecture/Application Architecture/Plug-in Architecture (MicroKernel).md" target="_blank" rel="noopener nofollow">Plug-in Architecture (MicroKernel)</a></em></p>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">How does Clean Architecture differ from traditional N Layer, and when does the extra indirection pay off</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<ul>
+<li dir="auto">N Layer often keeps downward dependencies from UI to business to data, while Clean Architecture enforces inward dependencies toward policy.</li>
+<li dir="auto">In Clean Architecture, inner layers define contracts and outer layers implement them, so domain logic survives framework changes.</li>
+<li dir="auto">The indirection pays off when business rules are complex, testing speed matters, and infrastructure churn is expected over multiple years.</li>
+<li dir="auto">For short lived services with shallow rules, the same indirection can slow delivery with little resilience gain.</li>
+<li dir="auto">Tradeoff statement: Clean Architecture buys adaptability and testability by paying upfront complexity and wiring overhead.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Application Architecture/Clean Architecture.md" href="Software Engineering/05 Architecture/Application Architecture/Clean Architecture.md" target="_blank" rel="noopener nofollow">Clean Architecture</a></em></li>
+</ul>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">What happens when you apply Clean Architecture to a simple CRUD service</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<ul>
+<li dir="auto">You often create command handlers ports and adapters that do little more than pass data through, so cycle time drops without stronger correctness.</li>
+<li dir="auto">Teams spend effort maintaining abstractions instead of shipping user value because domain complexity never materializes.</li>
+<li dir="auto">Operationally it can still work, but the architecture tax shows up in onboarding and debugging cost.</li>
+<li dir="auto">A pragmatic approach is to keep boundaries light and evolve toward stricter clean boundaries only where invariants and integration volatility appear.</li>
+<li dir="auto">Tradeoff statement: using full Clean Architecture too early protects against hypothetical future change while charging real present complexity.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Application Architecture/Clean Architecture.md" href="Software Engineering/05 Architecture/Application Architecture/Clean Architecture.md" target="_blank" rel="noopener nofollow">Clean Architecture</a></em></li>
+</ul>
 </div></div></div><h2 id="05-architecture-distributed-systems">Distributed Systems</h2><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">How do you design gateway aggregation endpoints for client efficiency, and what do you explicitly keep out of the gateway?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
 <p dir="auto"><strong>Expected answer:</strong></p>
 <ul>
@@ -1342,6 +1360,25 @@ Cost: MVVM requires binding infrastructure (<code>INotifyPropertyChanged</code>,
 <strong>Why this matters:</strong> Tests depth of security thinking beyond basic signature verification.<br>
 <em><a class="internal-link" data-href="Software Engineering/05 Architecture/Distributed Systems/Webhooks.md" href="Software Engineering/05 Architecture/Distributed Systems/Webhooks.md" target="_blank" rel="noopener nofollow">Webhooks</a></em></li>
 </ul>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">Why is idempotency essential for reliable retry strategies, and what happens without it?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<ul>
+<li dir="auto">Retries are a certainty in distributed systems because clients cannot always distinguish failure from delayed success.</li>
+<li dir="auto">Idempotency converts ambiguous outcomes into deterministic behavior, so retries do not amplify side effects.</li>
+<li dir="auto">Without it, transient faults become correctness bugs such as duplicate charges or duplicate shipment commands.</li>
+<li dir="auto">Idempotency also improves operational recovery because replay jobs and dead letter reprocessing become safe.</li>
+<li dir="auto"><strong>Tradeoff</strong>: stronger idempotency guarantees require extra storage, key lifecycle management, and stricter request validation.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Distributed Systems/Idempotency.md" href="Software Engineering/05 Architecture/Distributed Systems/Idempotency.md" target="_blank" rel="noopener nofollow">Idempotency</a></em></li>
+</ul>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">How do you implement idempotency for a payment endpoint that processes charges through a third party provider?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<ul>
+<li dir="auto">Require <code>Idempotency-Key</code> for <code>POST /payments</code> and hash a canonical request payload.</li>
+<li dir="auto">Use an atomic insert into an idempotency table keyed by that header to gate concurrent duplicates.</li>
+<li dir="auto">If key exists with matching hash and completed state, return cached response with same status code.</li>
+<li dir="auto">Pass the same key to the provider when supported so upstream retries are also deduplicated.</li>
+<li dir="auto">If key exists but hash differs, reject with conflict to prevent accidental key reuse.</li>
+<li dir="auto"><strong>Tradeoff</strong>: caching and replaying responses gives predictable retries but adds storage overhead and response schema coupling.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Distributed Systems/Idempotency.md" href="Software Engineering/05 Architecture/Distributed Systems/Idempotency.md" target="_blank" rel="noopener nofollow">Idempotency</a></em></li>
+</ul>
 </div></div></div><h3>Message Queues</h3><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">You need to process order events in order per customer but handle 50K events per second. How do you design the Kafka topic?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
 <p dir="auto"><strong>Expected answer:</strong></p>
 <ul>
@@ -1458,6 +1495,37 @@ Cost: MVVM requires binding infrastructure (<code>INotifyPropertyChanged</code>,
 <p dir="auto"><strong>Expected answer:</strong> it hides dependencies and hurts testability; acceptable in factories, middleware activation, and explicit scope-managed infrastructure.<br>
 <strong>Why:</strong> tests architecture judgment and boundary discipline.<br>
 <em><a class="internal-link" data-href="Software Engineering/05 Architecture/Patterns/Dependency Injection.md" href="Software Engineering/05 Architecture/Patterns/Dependency Injection.md" target="_blank" rel="noopener nofollow">Dependency Injection</a></em></p>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">How does an event bus differ from a message broker?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<ul>
+<li dir="auto">Event bus is a <strong>dispatch mechanism</strong> — resolves handlers and invokes them, typically in-process</li>
+<li dir="auto">Message broker is <strong>infrastructure</strong> — durable middleware (RabbitMQ, Kafka, Service Bus) that persists and delivers messages across processes</li>
+<li dir="auto">In-process bus loses unprocessed events on crash; broker persists them</li>
+<li dir="auto">Bus abstraction can sit on top of a broker (MassTransit does this) — bus adds handler resolution and retry semantics, broker provides transport and durability</li>
+<li dir="auto">Cost of broker: operational complexity, network latency, serialization overhead</li>
+<li dir="auto">Cost of in-process bus: no durability, no cross-service delivery</li>
+<li dir="auto"><strong>Tradeoff</strong>: broker guarantees delivery at the cost of infrastructure complexity; in-process bus is simple but ephemeral<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Patterns/Event Bus.md" href="Software Engineering/05 Architecture/Patterns/Event Bus.md" target="_blank" rel="noopener nofollow">Event Bus</a></em></li>
+</ul>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">Why should event handlers be independent rather than ordered?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<ul>
+<li dir="auto">Event bus contract is fan-out — "these N things happen when X occurs" — not a sequential pipeline</li>
+<li dir="auto">If handler B depends on handler A's side effect, you have a hidden workflow disguised as fan-out</li>
+<li dir="auto">Execution order depends on DI registration order, which is fragile and undocumented</li>
+<li dir="auto">Breaks when: order changes (new handler inserted), parallelism enabled, or handler moved to another service</li>
+<li dir="auto">Fix: model the dependency as a saga or command chain where A publishes a new event that triggers B</li>
+<li dir="auto">This makes the dependency visible, testable, and deployable independently</li>
+<li dir="auto"><strong>Tradeoff</strong>: more events and handlers, but each is self-contained and the workflow is explicit in the codebase<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Patterns/Event Bus.md" href="Software Engineering/05 Architecture/Patterns/Event Bus.md" target="_blank" rel="noopener nofollow">Event Bus</a></em></li>
+</ul>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">When is MediatR INotification insufficient as an event bus?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<ul>
+<li dir="auto"><strong>Exception isolation</strong>: default MediatR stops at the first handler failure — unacceptable when independent side effects (email, analytics, inventory) must not block each other</li>
+<li dir="auto"><strong>Scope isolation</strong>: all handlers share the same DI scope, so DbContext mutations in handler A leak into handler B</li>
+<li dir="auto"><strong>Execution strategy</strong>: default is sequential; parallel execution requires custom <code>INotificationPublisher</code></li>
+<li dir="auto">Each fix requires either replacing MediatR's publisher or building a custom bus</li>
+<li dir="auto"><strong>Tradeoff</strong>: custom bus gives you control over all three concerns, but you lose MediatR's pipeline behavior ecosystem (validation, logging, caching behaviors) and auto-discovery<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Patterns/Event Bus.md" href="Software Engineering/05 Architecture/Patterns/Event Bus.md" target="_blank" rel="noopener nofollow">Event Bus</a></em></li>
+</ul>
 </div></div></div><h3>Architectural Patterns</h3><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">When is CQRS worth the operational complexity, and when is it an anti-pattern?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
 <p dir="auto"><strong>Expected answer:</strong> CQRS is justified when read/write workloads differ materially (high read ratio, complex query shapes, independent scaling needs) and the domain has meaningful invariants. It is usually an anti-pattern for simple CRUD with low scale pressure, because projection pipelines, eventual consistency handling, and dual-model maintenance add avoidable complexity.<br>
 <em><a class="internal-link" data-href="Software Engineering/05 Architecture/Patterns/Architectural Patterns/CQRS.md" href="Software Engineering/05 Architecture/Patterns/Architectural Patterns/CQRS.md" target="_blank" rel="noopener nofollow">CQRS</a></em></p>
@@ -1741,6 +1809,24 @@ Cost: MVVM requires binding infrastructure (<code>INotifyPropertyChanged</code>,
 <li dir="auto">It tests operational judgment and explicit risk tradeoff reasoning.<br>
 <em><a class="internal-link" data-href="Software Engineering/05 Architecture/Patterns/Resilience Patterns/Rate Limiting.md" href="Software Engineering/05 Architecture/Patterns/Resilience Patterns/Rate Limiting.md" target="_blank" rel="noopener nofollow">Rate Limiting</a></em></li>
 </ul>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">Why does retry without jitter make outages worse and how does jitter fix it</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<ul>
+<li dir="auto">Without jitter each client computes nearly identical retry times so failures synchronize into periodic traffic spikes.</li>
+<li dir="auto">Those spikes hit while the dependency is already degraded which increases queue depth and recovery time.</li>
+<li dir="auto">Jitter randomizes each delay so retries spread over time and reduce synchronized pressure.</li>
+<li dir="auto">This improves recovery odds and stabilizes shared infrastructure such as load balancers and connection pools.</li>
+<li dir="auto"><strong>Tradeoff</strong> jitter reduces herd effects but increases per request timing variance and makes behavior slightly harder to predict.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Patterns/Resilience Patterns/Retry and Timeout Patterns.md" href="Software Engineering/05 Architecture/Patterns/Resilience Patterns/Retry and Timeout Patterns.md" target="_blank" rel="noopener nofollow">Retry and Timeout Patterns</a></em></li>
+</ul>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">How do you prevent retry amplification in a multi layer microservices system</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<ul>
+<li dir="auto">Assign retry ownership to one layer per call path usually the edge caller or the service nearest the user boundary.</li>
+<li dir="auto">Propagate cancellation tokens and deadlines so downstream services respect the remaining time budget.</li>
+<li dir="auto">Keep low retry counts and combine with circuit breaker and rate limits to avoid multiplicative pressure.</li>
+<li dir="auto">Measure effective attempts per request in telemetry and alert when fan out exceeds budget.</li>
+<li dir="auto"><strong>Tradeoff</strong> centralizing retries improves control and cost but can reduce local autonomy for service teams.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/Patterns/Resilience Patterns/Retry and Timeout Patterns.md" href="Software Engineering/05 Architecture/Patterns/Resilience Patterns/Retry and Timeout Patterns.md" target="_blank" rel="noopener nofollow">Retry and Timeout Patterns</a></em></li>
+</ul>
 </div></div></div><h2 id="05-architecture-system-architecture">System Architecture</h2><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">When would you choose orchestration over choreography in an event-driven workflow?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
 <p dir="auto"><strong>Expected answer</strong></p>
 <ul>
@@ -1800,6 +1886,26 @@ Cost: requires discipline to maintain module boundaries; without enforcement, it
 <li dir="auto">Re-evaluate architecture periodically as constraints change.<br>
 <em><a class="internal-link" data-href="Software Engineering/05 Architecture/System Architecture/Microservices.md" href="Software Engineering/05 Architecture/System Architecture/Microservices.md" target="_blank" rel="noopener nofollow">Microservices</a></em></li>
 </ul>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">How do you enforce module boundaries in a modular monolith to prevent it from degrading into a traditional monolith?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<ul>
+<li dir="auto">Split each module into contracts core and infrastructure assemblies and allow cross module references only to contracts.</li>
+<li dir="auto">Enforce table ownership and block cross module joins from application code.</li>
+<li dir="auto">Add architecture tests that fail CI on forbidden project references and namespace dependencies.</li>
+<li dir="auto">Keep integration through explicit APIs events or mediator requests rather than direct class calls.</li>
+<li dir="auto">Track boundary drift with code review checklists and dependency graph checks.</li>
+<li dir="auto">Tradeoff: stronger enforcement raises short term friction but prevents long term structural decay.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/System Architecture/Modular Monolith.md" href="Software Engineering/05 Architecture/System Architecture/Modular Monolith.md" target="_blank" rel="noopener nofollow">Modular Monolith</a></em></li>
+</ul>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">When would you choose a modular monolith over microservices, and what signals tell you it is time to extract?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<ul>
+<li dir="auto">Choose modular monolith when domains are clear enough for module ownership but not enough operational pressure exists to justify distributed systems overhead.</li>
+<li dir="auto">Prefer it when one platform team can run a single deployment reliably and release cadence is still mostly coordinated.</li>
+<li dir="auto">Extract when one module needs independent scaling, independent release frequency, or different reliability posture that the shared deployment cannot satisfy.</li>
+<li dir="auto">Extract when change coupling metrics show one module repeatedly blocked by unrelated regression risk in the shared deploy.</li>
+<li dir="auto">Keep contract stable first then swap transport from in process implementation to HTTP or gRPC.</li>
+<li dir="auto">Tradeoff: delaying extraction avoids premature complexity but waiting too long can slow teams once scaling pressure is persistent.<br>
+<em><a class="internal-link" data-href="Software Engineering/05 Architecture/System Architecture/Modular Monolith.md" href="Software Engineering/05 Architecture/System Architecture/Modular Monolith.md" target="_blank" rel="noopener nofollow">Modular Monolith</a></em></li>
+</ul>
 </div></div></div><h1 id="06-development-practices">06 Development Practices</h1><h2 id="06-development-practices-paradigms">Paradigms</h2><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">How does event-driven architecture differ from event sourcing?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
 <p dir="auto">Event-driven architecture is a communication style: components publish events and others react asynchronously. Event sourcing is a persistence pattern: the state of an entity is derived by replaying its event history rather than storing current state. You can use event-driven communication without event sourcing (most systems do). Event sourcing requires event-driven communication but adds the constraint that events are the source of truth for state.<br>
 <em><a class="internal-link" data-href="Software Engineering/06 Development Practices/Paradigms/Event-driven.md" href="Software Engineering/06 Development Practices/Paradigms/Event-driven.md" target="_blank" rel="noopener nofollow">Event-driven</a></em></p>
@@ -1836,14 +1942,46 @@ Cost: requires discipline to maintain module boundaries; without enforcement, it
 <em><a class="internal-link" data-href="Software Engineering/06 Development Practices/Paradigms/Functional Programming.md" href="Software Engineering/06 Development Practices/Paradigms/Functional Programming.md" target="_blank" rel="noopener nofollow">Functional Programming</a></em></li>
 </ul>
 </div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">When should you prefer composition over inheritance?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
-<p dir="auto">Prefer composition when the relationship is 'has-a' rather than 'is-a', when you need to combine behaviors from multiple sources (C# has no multiple inheritance), or when the base class is not designed for extension (sealed or has complex invariants). Inheritance creates tight coupling: a change to the base class can break all derived classes. Composition lets you swap implementations at runtime and test components in isolation. Rule of thumb: if you find yourself overriding methods to change or suppress base behavior, composition is the better fit.<br>
-<em><a class="internal-link" data-href="Software Engineering/06 Development Practices/Paradigms/OOP.md" href="Software Engineering/06 Development Practices/Paradigms/OOP.md" target="_blank" rel="noopener nofollow">OOP</a></em></p>
+<ul>
+<li dir="auto">Prefer composition when the relationship is "has-a" rather than "is-a"</li>
+<li dir="auto">Use composition when you need to combine behaviors from multiple sources (C# has no multiple class inheritance)</li>
+<li dir="auto">Use composition when the base class is not designed for extension (<code>sealed</code> or has complex internal invariants)</li>
+<li dir="auto">Inheritance creates tight coupling: a change to the base class can break all derived classes</li>
+<li dir="auto">Composition lets you swap implementations at runtime and test components in isolation via interfaces</li>
+<li dir="auto">Heuristic: if you override methods to suppress or fundamentally change base behavior, composition fits better</li>
+<li dir="auto">Tradeoff: composition requires more explicit wiring (constructor injection, delegation) but buys flexibility and testability; inheritance is less boilerplate but creates coupling that compounds with depth<br>
+<em><a class="internal-link" data-href="Software Engineering/06 Development Practices/Paradigms/OOP.md" href="Software Engineering/06 Development Practices/Paradigms/OOP.md" target="_blank" rel="noopener nofollow">OOP</a></em></li>
+</ul>
 </div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">What is the Anemic Domain Model and why is it considered an anti-pattern?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
-<p dir="auto">An Anemic Domain Model has objects with only getters/setters and no behavior — all logic lives in service classes. It violates encapsulation: the service must reach into the object to get data, then compute and set results back. This is procedural programming with OOP syntax. The cost: invariants are enforced in service code (scattered, easy to miss), objects can be put into invalid states, and the domain model provides no design guidance. Fix: move behavior that depends on an object's data into the object itself (Information Expert principle).<br>
-<em><a class="internal-link" data-href="Software Engineering/06 Development Practices/Paradigms/OOP.md" href="Software Engineering/06 Development Practices/Paradigms/OOP.md" target="_blank" rel="noopener nofollow">OOP</a></em></p>
+<ul>
+<li dir="auto">Objects have only getters/setters with no behavior — all logic lives in service classes</li>
+<li dir="auto">Violates encapsulation: services reach into objects to get data, compute, and set results back</li>
+<li dir="auto">This is procedural programming with OOP syntax — invariants are enforced in scattered service code</li>
+<li dir="auto">Objects can be put into invalid states because there is no guard at the mutation point</li>
+<li dir="auto">Fix: move behavior that depends on an object's data into the object itself (Information Expert principle from GRASP)</li>
+<li dir="auto">Tradeoff: rich domain models enforce invariants at the source but require more upfront design investment; anemic models are simpler to write initially but accumulate inconsistency bugs as the system grows<br>
+<em><a class="internal-link" data-href="Software Engineering/06 Development Practices/Paradigms/OOP.md" href="Software Engineering/06 Development Practices/Paradigms/OOP.md" target="_blank" rel="noopener nofollow">OOP</a></em></li>
+</ul>
 </div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">How does polymorphism reduce conditional complexity?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
-<p dir="auto">Without polymorphism, behavior that varies by type requires if/switch chains: 'if type == PDF, do X; if type == CSV, do Y.' Each new type requires modifying existing code (Open/Closed violation). With polymorphism, each type implements a shared interface and handles its own behavior. Adding a new type means adding a new class, not modifying existing code. The caller iterates over <code>IEnumerable&lt;IReportGenerator&gt;</code> and calls <code>Generate()</code> — the runtime dispatches to the correct implementation.<br>
-<em><a class="internal-link" data-href="Software Engineering/06 Development Practices/Paradigms/OOP.md" href="Software Engineering/06 Development Practices/Paradigms/OOP.md" target="_blank" rel="noopener nofollow">OOP</a></em></p>
+<ul>
+<li dir="auto">Without polymorphism, varying behavior by type requires if/switch chains that grow with every new type</li>
+<li dir="auto">Each new type forces editing existing code — a direct Open/Closed violation</li>
+<li dir="auto">With polymorphism, each type implements a shared interface and handles its own behavior</li>
+<li dir="auto">Adding a new type means adding a new class, not modifying existing code</li>
+<li dir="auto">The caller iterates over <code>IEnumerable&lt;IReportGenerator&gt;</code> and calls <code>Generate()</code> — the runtime dispatches to the correct implementation</li>
+<li dir="auto">Tradeoff: polymorphism adds indirection — debugging requires knowing which concrete type is active, and navigating call hierarchies takes extra IDE steps. Worth paying when you have 3+ variant types or expect new types over time<br>
+<em><a class="internal-link" data-href="Software Engineering/06 Development Practices/Paradigms/OOP.md" href="Software Engineering/06 Development Practices/Paradigms/OOP.md" target="_blank" rel="noopener nofollow">OOP</a></em></li>
+</ul>
+</div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">What is the difference between an interface and an abstract class in C#?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<ul>
+<li dir="auto">Interface: defines a contract without instance state; can include default method implementations (C# 8+); a class can implement many interfaces</li>
+<li dir="auto">Abstract class: defines a contract plus shared implementation and instance state; a class can inherit from only one abstract class</li>
+<li dir="auto">Use interfaces when unrelated types share a capability (<code>IDisposable</code>, <code>IComparable</code>)</li>
+<li dir="auto">Use abstract classes when related types form a genuine hierarchy with shared invariants</li>
+<li dir="auto">In practice, most OOD designs use both: interface for external consumers, abstract class for the internal hierarchy (<code>Robot : IMovable</code>)</li>
+<li dir="auto">Tradeoff: interfaces are more flexible (no coupling to shared state, multiple implementation) but force every implementer to write the full implementation; abstract classes reduce duplication but create a single coupling point that all derived classes depend on<br>
+<em><a class="internal-link" data-href="Software Engineering/06 Development Practices/Paradigms/OOP.md" href="Software Engineering/06 Development Practices/Paradigms/OOP.md" target="_blank" rel="noopener nofollow">OOP</a></em></li>
+</ul>
 </div></div></div><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">What does <code>WebApplicationFactory</code> test that unit tests cannot?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
 <ul>
 <li dir="auto">DI registration: if a service is missing from the container, the integration test fails at startup.</li>
