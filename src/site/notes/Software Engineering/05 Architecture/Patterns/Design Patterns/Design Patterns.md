@@ -34,7 +34,8 @@ Each pattern page shows the same e-commerce scenario coded **without** the patte
 
 ## References
 
-- [Refactoring.Guru — Design Patterns](https://refactoring.guru/design-patterns) — comprehensive pattern catalog with intent, problem, solution, and C# examples for all 22 GoF patterns (excludes Interpreter).
+- [Design Patterns playlist by Christopher Okharavi](https://www.youtube.com/playlist?list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc) — must watch playlist for the design patterns.
+- [Refactoring.Guru — Design Patterns](https://refactoring.guru/design-patterns) — comprehensive pattern catalog with intent, problem, solution, and C# examples for 22 GoF patterns (excludes Interpreter).
 - [Design Patterns: Elements of Reusable Object-Oriented Software (GoF)](https://www.pearson.com/en-us/subject-catalog/p/design-patterns-elements-of-reusable-object-oriented-software/P200000009480/9780321700698) — the original 1994 book defining all 23 patterns; the authoritative primary source.
 - [Martin Fowler — Patterns of Enterprise Application Architecture](https://martinfowler.com/eaaCatalog/) — enterprise-level pattern catalog extending GoF into application architecture concerns; complements GoF for service and data layer design.
 - [Wikipedia — Software design pattern](https://en.wikipedia.org/wiki/Design_pattern) — overview of all 23 GoF patterns with intent summaries, the original categorization table, and historical context.

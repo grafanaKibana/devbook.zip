@@ -186,6 +186,7 @@ Adding a `PartialRefundCommand` now means one new class — the invoker and audi
 
 ## References
 
+- [Command Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=9qA5kw8dcSU&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=7) — video walkthrough of the Command pattern with OOP examples
 - [Command — refactoring.guru](https://refactoring.guru/design-patterns/command) — canonical pattern description with invoker/command/receiver diagram and C# example
 - [ICommand interface (WPF) — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.windows.input.icommand) — Command pattern in WPF/MAUI UI frameworks
 - [MediatR — GitHub](https://github.com/jbogard/MediatR) — Command pattern implementation for .NET with pipeline behaviors
