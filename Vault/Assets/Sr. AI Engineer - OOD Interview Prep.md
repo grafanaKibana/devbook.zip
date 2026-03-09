@@ -13,7 +13,7 @@
 - [x] Read [[Sr. AI Engineer - OOD Interview Prep#Quick Reference Card]] out loud (10 min)
 - [x] Internalize the [[Sr. AI Engineer - OOD Interview Prep#OOD Interview Framework]] — 3/3/5/10/10/5 time-box for any class design problem
 - [x] Study [[Sr. AI Engineer - OOD Interview Prep#SOLID Principles — Interview-Ready Explanations]] — practice explaining each with C# code, not textbook definitions
-- [ ] Study all 8 patterns in [[Sr. AI Engineer - OOD Interview Prep#Design Patterns Reference]] — know when to use each and the interview signal for each
+- [x] Study all 8 patterns in [[Sr. AI Engineer - OOD Interview Prep#Design Patterns Reference]] — know when to use each and the interview signal for each
 - [x] Memorize [[Sr. AI Engineer - OOD Interview Prep#Pattern Decision Framework]] table — given a requirement signal, name the pattern in < 3 seconds
 - [x] Study [[Sr. AI Engineer - OOD Interview Prep#Common OOD Interview Mistakes]] — internalize the 7 traps
 - [x] Practice [[Sr. AI Engineer - OOD Interview Prep#Day 1 Practice Q&A]] — all questions out loud
@@ -24,37 +24,80 @@
 - [x] Walk through [[Sr. AI Engineer - OOD Interview Prep#Design a Robot-Managed Restaurant PRIORITY — Actual DK Problem|Robot Restaurant]] FIRST — this is the most likely problem (30 min timed)
 - [ ] Walk through [[Sr. AI Engineer - OOD Interview Prep#Design a Document Editor]] — Composite, Command, State, Decorator, Strategy in one problem (30 min timed)
 - [x] For each problem: practice the entities → hierarchy → patterns → code → extension flow out loud
-- [ ] Practice [[Sr. AI Engineer - OOD Interview Prep#Day 2 Practice Q&A]] — model answers out loud
+- [x] Practice [[Sr. AI Engineer - OOD Interview Prep#Day 2 Practice Q&A]] — model answers out loud
 - [x] Time yourself: each problem should take 30-35 minutes whiteboard-style
 
 ### Day 3 (Saturday, March 7) — Classic OOD Problems (Set 2) + DraftKings-Relevant
 
-- [ ] Read [[Sr. AI Engineer - OOD Interview Prep#Quick Reference Card]] out loud (10 min)
-- [ ] Walk through [[Sr. AI Engineer - OOD Interview Prep#Design a Task Ticket Management System]] — relevant to Jira/Dexter
-- [ ] Walk through [[Sr. AI Engineer - OOD Interview Prep#Design a Notification System]] — relevant to SlackJack/AmendA
-- [ ] Walk through [[Sr. AI Engineer - OOD Interview Prep#Design a Plugin Extension System]] — relevant to MCP architecture
-- [ ] For each: practice the DraftKings connection narrative
-- [ ] Practice [[Sr. AI Engineer - OOD Interview Prep#Day 3 Practice Q&A]] — all questions out loud
-- [ ] Cross-reference: connect each design to DraftKings projects (Dexter, SlackJack, AmendA, Doculus)
+- [x] Read [[Sr. AI Engineer - OOD Interview Prep#Quick Reference Card]] out loud (10 min)
+- [x] Walk through [[Sr. AI Engineer - OOD Interview Prep#Design a Task Ticket Management System]] — relevant to Jira/Dexter
+- [x] Walk through [[Sr. AI Engineer - OOD Interview Prep#Design a Notification System]] — relevant to SlackJack/AmendA
+- [x] Walk through [[Sr. AI Engineer - OOD Interview Prep#Design a Plugin Extension System]] — relevant to MCP architecture
+- [x] For each: practice the DraftKings connection narrative
+- [x] Practice [[Sr. AI Engineer - OOD Interview Prep#Day 3 Practice Q&A]] — all questions out loud
+- [x] Cross-reference: connect each design to DraftKings projects (Dexter, SlackJack, AmendA, Doculus)
 
-### Day 4 (Sunday, March 8) — Mock Practice & Edge Cases
+#### Evening Session (~1h) — Cross-Problem Pattern Integration
 
-- [ ] Read [[Sr. AI Engineer - OOD Interview Prep#Quick Reference Card]] out loud (10 min)
-- [ ] Study [[Sr. AI Engineer - OOD Interview Prep#Concurrency Patterns in OOD]] — thread safety, async patterns in C#
-- [ ] Practice [[Sr. AI Engineer - OOD Interview Prep#Handling Extension Questions Gracefully]] — the 4-step extension framework
-- [ ] Do all 5 [[Sr. AI Engineer - OOD Interview Prep#Rapid-Fire Mini OOD Problems]] timed (15 min each) — entities + pattern + key code
-- [ ] Study [[Sr. AI Engineer - OOD Interview Prep#Common Interviewer Follow-ups]] — know the 8 probes and model responses
-- [ ] Study [[Sr. AI Engineer - OOD Interview Prep#Anti-Patterns in Class Design]] — know each one and the fix
-- [ ] Practice [[Sr. AI Engineer - OOD Interview Prep#Day 4 Practice Q&A]] — all questions out loud
+- [x] **Pattern frequency drill** (15 min): Go through [[Sr. AI Engineer - OOD Interview Prep#OOD Pattern Summary]] — for each pattern in each problem, verbally explain WHY it appears there (not just where). If you can't explain the WHY in one sentence, revisit that problem's section
+- [x] **DraftKings narrative rehearsal** (15 min): For each Day 2-3 problem, practice saying the DraftKings connection in under 30 seconds — Robot Restaurant → real robotics, Ticket System → Dexter, Notification → SlackJack/AmendA, Plugin → MCP. The interviewer should feel these map to systems you'd actually build
+- [x] **Weak spot identification** (15 min): Scan all Day 2-3 problems — which ones felt shaky on pattern selection? Where was your code weakest? Write down your top 2 weakest problems — these are your Day 5 redo targets
+- [x] **Pattern Quick-Match speed test** (15 min): Cover the "One-line why" column in [[Sr. AI Engineer - OOD Interview Prep#Pattern Quick-Match]], read only the requirement signal, and name the pattern + reason in under 5 seconds per row. Repeat until you hit <5 sec consistently
 
-### Day 5 (Monday, March 9) — Full Mock & Weak Spots
+### Day 4 (Sunday, March 8) — Deep Topic Coverage: Concurrency, Extensions & Design Thinking
 
-- [ ] Read [[Sr. AI Engineer - OOD Interview Prep#Quick Reference Card]] out loud (10 min)
-- [ ] Walk through [[Sr. AI Engineer - OOD Interview Prep#Design a Robot-Managed Restaurant PRIORITY — Actual DK Problem|Robot Restaurant]] again — full 35 min timed, simulate interview conditions
-- [ ] Pick your 2 weakest problems from Days 2-3 and redo them timed
-- [ ] Practice all extension questions from every problem — use the [[Sr. AI Engineer - OOD Interview Prep#Handling Extension Questions Gracefully|4-step extension framework]]
-- [ ] Review [[Sr. AI Engineer - OOD Interview Prep#Concurrency Patterns in OOD]] — make sure you can answer concurrency probes for any design
-- [ ] Practice [[Sr. AI Engineer - OOD Interview Prep#2-Minute Closing Script for OOD Round]] out loud — 3 times minimum
+> 2-3 hours across 2-3 sessions. Each session is self-contained — take breaks between.
+
+#### Session 1 (~50-60 min) — Concurrency as a Design Concern
+
+- [x] Read [[Sr. AI Engineer - OOD Interview Prep#Quick Reference Card]] out loud (5 min)
+- [x] Study [[Sr. AI Engineer - OOD Interview Prep#Concurrency Patterns in OOD]] thoroughly (20 min) — don't just read, trace each code sample mentally: what happens if two threads hit this code at the same time?
+- [x] Study [[Sr. AI Engineer - OOD Interview Prep#Concurrency Cheat Sheet for OOD Interviews]] — for each row, think of which Day 2-3 problems use that pattern (10 min)
+- [x] **Concurrency overlay exercise** (15 min): Pick Robot Restaurant and Document Editor — for each, answer out loud: "What shared state breaks under concurrent access? What .NET primitive fixes it? Where exactly is the critical section?" Practice until answers are under 30 seconds each
+- [x] Study the concurrency/testing/scale probes from [[Sr. AI Engineer - OOD Interview Prep#Common Interviewer Follow-ups]] (10 min) — practice model responses out loud
+
+#### Session 2 (~50-60 min) — Extension Mastery & Anti-Pattern Recognition
+
+- [x] Study [[Sr. AI Engineer - OOD Interview Prep#Handling Extension Questions Gracefully]] — internalize the 4-step framework until it's automatic (10 min)
+- [x] **Extension drill across ALL problems** (20 min): Use the extension table in [[Sr. AI Engineer - OOD Interview Prep#Handling Extension Questions Gracefully]] — for each row, verbally walk through all 4 steps showing zero changes to existing code. Focus on naming what you did NOT change
+- [x] Study [[Sr. AI Engineer - OOD Interview Prep#Anti-Patterns in Class Design]] — for each anti-pattern, recall a specific moment from your Day 2-3 designs where you avoided it or could have fallen into it (15 min)
+- [x] **State vs Strategy discrimination** (10 min): These two are the most confused patterns in interviews. Practice explaining the difference using Vending Machine (State — the machine transitions itself) vs Robot Movement (Strategy — the caller injects the algorithm). Key question: "Who controls the switch?"
+
+#### Session 3 (if time remains, ~30-40 min) — Rapid-Fire Under Pressure
+
+- [x] Do 3 of the 5 [[Sr. AI Engineer - OOD Interview Prep#Rapid-Fire Mini OOD Problems]] timed at 10 min each — pick Logger, Rate Limiter, and Payment Processor. For each: entities → primary pattern → 10 lines of key code → name one extension point
+- [x] Practice [[Sr. AI Engineer - OOD Interview Prep#Day 4 Practice Q&A]] — answer each question out loud in under 60 seconds. If you ramble, restart and tighten
+
+### Day 5 (Monday, March 9) — Full Mock, Weak Spots & Final Integration
+
+> 4 hours across 3-4 sessions scattered through the day. Take real breaks — walk, rest. Cramming kills retrieval under pressure.
+
+#### Session 1 (~60-75 min) — Full Mock Interview Simulation
+
+- [x] Read [[Sr. AI Engineer - OOD Interview Prep#Quick Reference Card]] out loud (5 min)
+- [x] Walk through [[Sr. AI Engineer - OOD Interview Prep#Design a Robot-Managed Restaurant PRIORITY — Actual DK Problem|Robot Restaurant]] — full 35 min timed, interview conditions (no notes, speak out loud, draw diagrams on paper)
+- [x] **Self-evaluate** (10 min): Score yourself on the 5 criteria in [[Sr. AI Engineer - OOD Interview Prep#Full Mock Robot Restaurant 35 min interview conditions]] — write down specific gaps, not just pass/fail
+- [x] **Movement deep-dive** (10 min): Practice the movement question specifically — "How does the robot physically move from A to B?" Say: grid, A*, collision avoidance, real-world references (BellaBot, Nav2). This is the one they specifically probe
+- [x] Practice [[Sr. AI Engineer - OOD Interview Prep#2-Minute Closing Script for OOD Round]] out loud — 2 times
+
+#### Session 2 (~60 min) — Targeted Weak Spot Repair
+
+- [x] Redo your 2 weakest problems from Days 2-3 timed (25 min each) — focus on the specific gaps you identified on Day 3 evening and Day 5 Session 1
+- [x] For each redone problem: explain pattern choices as if justifying to the interviewer — "I chose Strategy here because the requirement says [X] which means the algorithm varies" — not just "I'll use Strategy"
+- [x] Practice extension questions for both redone problems using the [[Sr. AI Engineer - OOD Interview Prep#Handling Extension Questions Gracefully|4-step extension framework]] — show zero changes, name the principle
+
+#### Session 3 (~50-60 min) — Cross-Problem Pattern Fluency
+
+- [x] **Pattern Decision Tree speed drill** (10 min): Walk through [[Sr. AI Engineer - OOD Interview Prep#Pattern Decision Tree]] flowchart — for each decision node, name a concrete example from your Day 2-3 problems in under 3 seconds
+- [x] **Interviewer Follow-up gauntlet** (20 min): Go through ALL 8 probes in [[Sr. AI Engineer - OOD Interview Prep#Common Interviewer Follow-ups]] — answer each out loud in under 45 seconds, using specific examples from your designs (not generic answers)
+- [x] **SOLID violation speed check** (10 min): For each SOLID principle, name one violation AND one fix from the problems you designed — aim for 10 seconds per principle
+- [x] Review [[Sr. AI Engineer - OOD Interview Prep#Concurrency Patterns in OOD]] — make sure you can answer the concurrency probe for Robot Restaurant, Document Editor, and Ticket System without hesitation
+
+#### Session 4 (~30-40 min) — Closing & Confidence Building
+
+- [x] Practice [[Sr. AI Engineer - OOD Interview Prep#2-Minute Closing Script for OOD Round]] out loud — 3 more times (should feel conversational now, not rehearsed)
+- [x] **DraftKings narrative final pass** (15 min): For every problem, practice the 15-second DraftKings connection — Dexter, SlackJack, AmendA, MCP. If any connection feels forced, drop it — authenticity beats coverage
+- [x] **Final confidence check** (10 min): For each problem ask yourself: "If the interviewer gave me this cold, could I produce a clean design in 30 minutes?" If any answer is no, spend remaining time revisiting that problem's pattern choices and key code
 
 ### Day 6 (Tuesday, March 10 morning) — Final Review Before 4 PM Interview
 
@@ -139,9 +182,9 @@ The **Robot-Managed Restaurant** was the exact problem asked in a previous Draft
 | **0** | Wed Mar 4 | Orientation — skim structure, know the priority problem | 15 min |
 | **1** | Thu Mar 5 | SOLID principles + 8 design patterns + OOD interview framework | 2-3 hours |
 | **2** | Fri Mar 6 | Robot Restaurant (priority) + Library + Vending Machine + File System | 3-4 hours |
-| **3** | Sat Mar 7 | DK-relevant problems: Ticket System, Notifications, Plugin System | 2-3 hours |
-| **4** | Sun Mar 8 | Concurrency, extension questions, 5 rapid-fire problems, anti-patterns | 2-3 hours |
-| **5** | Mon Mar 9 | Full mock: Robot Restaurant timed + redo 2 weakest problems + closing script | 2-3 hours |
+| **3** | Sat Mar 7 | DK-relevant problems: Ticket System, Notifications, Plugin System + evening pattern integration | 2-3 hrs + 1 hr evening |
+| **4** | Sun Mar 8 | Concurrency deep-dive, extension mastery, anti-patterns, State vs Strategy, rapid-fire (2-3 sessions) | 2-3 hours |
+| **5** | Mon Mar 9 | Full Robot Restaurant mock, weak spot repair, cross-problem pattern fluency, closing script (3-4 sessions) | 4 hours |
 | **6** | Tue Mar 10 | Morning review: cheat sheet, pattern decision tree, SOLID quick-check, final Robot Restaurant pass | 1 hour (before 4 PM interview) |
 
 ### What to skim right now (10 min)
@@ -3046,7 +3089,10 @@ public class PluginManager
 
 ---
 
-## Day 4 (Sunday, March 8) — Mock Practice & Edge Cases
+## Day 4 (Sunday, March 8) — Deep Topic Coverage: Concurrency, Extensions & Design Thinking
+
+> [!tip] Goal
+> Three focused sessions, each covering a distinct topic. Session 1: understand how concurrency changes your designs. Session 2: master the extension framework and learn to spot anti-patterns instantly. Session 3 (if time): pressure-test under time constraints. Take real breaks between sessions.
 
 ### Concurrency Patterns in OOD
 
@@ -3437,10 +3483,10 @@ public class PaymentProcessor
 
 ---
 
-## Day 5 (Monday, March 9) — Full Mock & Weak Spots
+## Day 5 (Monday, March 9) — Full Mock, Weak Spots & Final Integration
 
 > [!tip] Goal
-> Today is about simulation and gap-filling. Treat Robot Restaurant as a real interview. Redo your weakest problems. Rehearse the closing script until it's natural.
+> Four scattered sessions with breaks between. Session 1: full interview simulation with self-evaluation. Session 2: targeted repair of your weakest areas. Session 3: build cross-problem pattern fluency so you can match patterns to requirements instantly. Session 4: polish the closing narrative and build confidence. Don't cram — rest between sessions helps retrieval under pressure.
 
 ### Full Mock: Robot Restaurant (35 min, interview conditions)
 
@@ -3582,7 +3628,7 @@ One last walkthrough — focus only on the three things the interviewer specific
 | **[[Strategy]]** | `IMovementStrategy` | `ISearchStrategy` | `IPaymentMethod` | `ISearchStrategy` | `IAssignmentStrategy` | `INotificationChannel` | `IPluginDiscovery` |
 | **[[Observer]]** | `IKitchenObserver` | `INotificationObserver` | — | — | `INotificationObserver` | User preferences | `IPluginObserver` |
 | **[[State]]** | `RobotState` enum | — | `IVendingState` | — | `ITicketState` | — | `PluginStatus` |
-| **[[Factory Method|Factory]]** | `RobotFactory` | `MemberFactory` | — | — | — | Channel factory | `IPluginLoader` |
+| **[[Factory Method]]** | `RobotFactory` | `MemberFactory` | — | — | — | Channel factory | `IPluginLoader` |
 | **[[Template Method]]** | `Robot.PerformTask` | `Member.CanBorrow` | — | — | — | `IMessageTemplate` | Plugin lifecycle |
 | **[[Composite]]** | — | — | — | `IFileSystemItem` | — | — | — |
 | **[[Decorator]]** | — | — | — | Permission wrapper | — | `RetryDecorator` | Sandbox wrapper |

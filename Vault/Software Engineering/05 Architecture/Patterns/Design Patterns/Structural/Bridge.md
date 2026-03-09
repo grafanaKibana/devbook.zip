@@ -210,6 +210,7 @@ Adding a new payment type now means one new `PaymentOperation` subclass that wor
 
 ## References
 
+- [Bridge Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=F1YQ7YRjttI&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=11) — video walkthrough of the Bridge pattern with OOP examples
 - [Bridge — refactoring.guru](https://refactoring.guru/design-patterns/bridge) — canonical pattern description with structure diagram and C# example
 - [DbConnection — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.data.common.dbconnection) — ADO.NET's Bridge abstraction for database connections
 - [IDistributedCache — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.caching.distributed.idistributedcache) — .NET caching Bridge with multiple provider implementations

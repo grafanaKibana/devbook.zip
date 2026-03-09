@@ -171,6 +171,7 @@ Adding fraud detection now means editing `OrderFacade.PlaceOrderAsync` in one pl
 
 ## References
 
+- [Facade Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=K4FkHVO5iac&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=9) — video walkthrough of the Facade pattern with OOP examples
 - [Facade — refactoring.guru](https://refactoring.guru/design-patterns/facade) — canonical pattern description with subsystem diagram and C# example
 - [File class — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.io.file) — .NET's built-in Facade for file I/O operations
 - [HttpClient — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.net.http.httpclient) — Facade over the HTTP message handler pipeline
