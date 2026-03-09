@@ -188,6 +188,7 @@ Replacing the legacy system now means writing a new adapter class — `OrderServ
 
 ## References
 
+- [Adapter Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=2PKQtcJjYvc&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=8) — video walkthrough of the Adapter pattern with OOP examples
 - [Adapter — refactoring.guru](https://refactoring.guru/design-patterns/adapter) — canonical pattern description with object and class adapter variants, C# example
 - [StreamReader — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.io.streamreader) — .NET's built-in Adapter for byte-to-text stream translation
 - [DelegatingHandler — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.net.http.delegatinghandler) — HTTP pipeline adapter pattern in .NET

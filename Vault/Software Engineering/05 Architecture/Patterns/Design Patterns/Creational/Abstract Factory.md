@@ -205,6 +205,7 @@ Adding BankTransfer now means one new `BankTransferFactory` class. `CheckoutServ
 
 ## References
 
+- [Abstract Factory Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=v-GiuMmsXj4&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=5) — video walkthrough of the Abstract Factory pattern with OOP examples
 - [Abstract Factory — refactoring.guru](https://refactoring.guru/design-patterns/abstract-factory) — canonical pattern description with structure diagram and C# example
 - [DbProviderFactory — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.data.common.dbproviderfactory) — ADO.NET's built-in Abstract Factory for database provider families
 - [Dependency injection in .NET — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection) — how the DI container acts as a runtime Abstract Factory

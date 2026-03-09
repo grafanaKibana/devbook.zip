@@ -177,6 +177,7 @@ public class ExpensiveConnectionPool
 
 ## References
 
+- [Singleton Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=hUE_j6q0LTQ&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=6) — video walkthrough of the Singleton pattern with OOP examples
 - [Singleton — refactoring.guru](https://refactoring.guru/design-patterns/singleton) — canonical pattern description with thread-safety discussion and C# examples
 - [Dependency injection in .NET — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection) — `AddSingleton<T>()` and service lifetime management
 - [Dependency injection guidelines — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection-guidelines) — captive dependency detection and `ValidateScopes`

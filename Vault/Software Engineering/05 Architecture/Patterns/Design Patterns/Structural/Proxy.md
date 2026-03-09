@@ -214,6 +214,7 @@ Adding a rate-limiting proxy now means one new class implementing `IProductServi
 
 ## References
 
+- [Proxy Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=NwaabHqPHeM&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=10) — video walkthrough of the Proxy pattern with OOP examples
 - [Proxy — refactoring.guru](https://refactoring.guru/design-patterns/proxy) — canonical pattern description with virtual/caching/protection variants and C# example
 - [Lazy loading related data — EF Core — Microsoft Learn](https://learn.microsoft.com/en-us/ef/core/querying/related-data/lazy) — EF Core lazy-loading proxy in production use
 - [DispatchProxy — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.reflection.dispatchproxy) — .NET's runtime proxy generation mechanism
