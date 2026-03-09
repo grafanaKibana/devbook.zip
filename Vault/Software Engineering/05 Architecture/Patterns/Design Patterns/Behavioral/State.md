@@ -6,7 +6,8 @@ subtopic:
 level:
   - "3"
 priority: High
-status: Creation
+status:
+  - Done
 dg-publish: true
 ---
 # State

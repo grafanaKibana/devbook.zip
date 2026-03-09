@@ -6,7 +6,8 @@ subtopic:
 level:
   - "1"
 priority: High
-status: Creation
+status:
+  - Done
 dg-publish: true
 ---
 # Factory Method
