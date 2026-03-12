@@ -125,7 +125,7 @@ When NOT to add the abstraction: if you're building a simple CRUD service and th
 > - This means multiple repository operations within one request share the same `DbContext` instance and commit atomically — exactly what Unit of Work provides.
 > - Tradeoff: this only works if all repositories share the same `DbContext` instance (Scoped lifetime in ASP.NET Core DI). If you accidentally register `DbContext` as Singleton or Transient, the Unit of Work semantics break.
 
-> [!QUESTION]- When is a generic IRepository<T> an anti-pattern?
+> [!QUESTION]- When is a generic `IRepository<T>` an anti-pattern?
 > - A generic repository exposes the same interface for every entity, including operations that don't make sense for some aggregates (e.g., `GetAll()` on an `Order` aggregate with millions of rows).
 > - It encourages callers to treat all entities the same, bypassing aggregate-specific access patterns and invariants.
 > - It often leaks `IQueryable<T>`, coupling callers to EF Core.
