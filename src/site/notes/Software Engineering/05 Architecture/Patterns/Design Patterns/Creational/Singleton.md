@@ -174,7 +174,7 @@ public class ExpensiveConnectionPool
 - [Singleton — refactoring.guru](https://refactoring.guru/design-patterns/singleton) — canonical pattern description with thread-safety discussion and C# examples
 - [Dependency injection in .NET — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection) — `AddSingleton<T>()` and service lifetime management
 - [Dependency injection guidelines — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection-guidelines) — captive dependency detection and `ValidateScopes`
-- [Lazy<T> — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.lazy-1) — thread-safe lazy initialization without manual locking
+- [`Lazy<T>` — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.lazy-1) — thread-safe lazy initialization without manual locking
 
 <!-- whats-next:start -->
 
