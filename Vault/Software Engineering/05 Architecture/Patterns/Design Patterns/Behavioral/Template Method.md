@@ -184,7 +184,7 @@ Adding an Excel generator now means one new subclass — the fetch, validate, an
 - [Template Method — refactoring.guru](https://refactoring.guru/design-patterns/template-method) — canonical pattern description with base/subclass diagram and C# example
 - [BackgroundService — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.hosting.backgroundservice) — Template Method for hosted background services
 - [Stream abstract class — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.io.stream) — Template Method in the .NET I/O hierarchy
-- [AuthenticationHandler<T> — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.authentication.authenticationhandler-1) — Template Method for ASP.NET Core authentication schemes
+- [`AuthenticationHandler<T>` — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.authentication.authenticationhandler-1) — Template Method for ASP.NET Core authentication schemes
 
 <!-- whats-next:start -->
 
