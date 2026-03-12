@@ -63,7 +63,7 @@ Console.WriteLine(jobs.Peek());    // job-2
 
 ## Links
 
-- [Queue<T> class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.queue-1) — API reference covering Enqueue, Dequeue, Peek, and circular buffer internals.
+- [`Queue<T>` class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.queue-1) — API reference covering Enqueue, Dequeue, Peek, and circular buffer internals.
 - [PriorityQueue<TElement, TPriority> class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.priorityqueue-2) — use when ordering by priority rather than arrival time is required.
 - [Collections in .NET](https://learn.microsoft.com/en-us/dotnet/standard/collections/) — overview of all collection types with complexity and usage guidance.
 - [System.Threading.Channels library](https://learn.microsoft.com/en-us/dotnet/core/extensions/channels) — async producer-consumer channels; the right upgrade path when Queue<T> needs concurrent access.

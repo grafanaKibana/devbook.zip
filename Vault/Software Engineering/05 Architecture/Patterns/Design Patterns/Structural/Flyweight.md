@@ -139,8 +139,8 @@ Updating the Electronics tax rate now means updating one `CategoryFlyweight` ins
 ## References
 
 - [Flyweight — refactoring.guru](https://refactoring.guru/design-patterns/flyweight) — canonical pattern description with intrinsic/extrinsic state diagram and C# example
-- [ArrayPool<T> — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.buffers.arraypool-1) — .NET's built-in Flyweight for buffer reuse
-- [ObjectPool<T> — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.objectpool.objectpool-1) — ASP.NET Core object pooling (Flyweight for expensive objects)
+- [`ArrayPool<T>` — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.buffers.arraypool-1) — .NET's built-in Flyweight for buffer reuse
+- [`ObjectPool<T>` — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.objectpool.objectpool-1) — ASP.NET Core object pooling (Flyweight for expensive objects)
 - [string.Intern — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.string.intern) — CLR string intern pool as a Flyweight factory
 
 <!-- whats-next:start -->

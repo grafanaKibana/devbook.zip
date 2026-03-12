@@ -35,6 +35,10 @@
         {
           "type": "note",
           "path": "Assets/Sr. AI Engineer - OOD Interview Prep.md"
+        },
+        {
+          "type": "note",
+          "path": "Assets/Sr. AI Engineer - Hiring Manager Final Round Prep.md"
         }
       ],
       "propertyKeys": [
@@ -56,7 +60,43 @@
           "showInList": true,
           "showInFileMenu": false
         }
-      ]
+      ],
+      "navRainbow": {
+        "mode": "none",
+        "shortcuts": {
+          "enabled": false,
+          "firstColor": "#ef4444",
+          "lastColor": "#8b5cf6",
+          "transitionStyle": "rgb"
+        },
+        "recent": {
+          "enabled": false,
+          "firstColor": "#ef4444",
+          "lastColor": "#8b5cf6",
+          "transitionStyle": "rgb"
+        },
+        "folders": {
+          "enabled": true,
+          "firstColor": "#ef4444",
+          "lastColor": "#8b5cf6",
+          "transitionStyle": "hue",
+          "scope": "root"
+        },
+        "tags": {
+          "enabled": false,
+          "firstColor": "#ef4444",
+          "lastColor": "#8b5cf6",
+          "transitionStyle": "hue",
+          "scope": "root"
+        },
+        "properties": {
+          "enabled": false,
+          "firstColor": "#ef4444",
+          "lastColor": "#8b5cf6",
+          "transitionStyle": "hue",
+          "scope": "root"
+        }
+      }
     }
   ],
   "vaultProfile": "default",
@@ -81,6 +121,8 @@
     "calendarWeeksToShow": "synced",
     "compactItemHeight": "synced",
     "compactItemHeightScaleText": "synced",
+    "featureImageSize": "synced",
+    "featureImagePixelSize": "synced",
     "uiScale": "synced"
   },
   "createNewNotesInNewTab": false,
@@ -211,8 +253,10 @@
   "frontmatterCreatedField": "",
   "frontmatterModifiedField": "",
   "frontmatterDateFormat": "",
-  "showFileIcons": true,
   "showFileIconUnfinishedTask": false,
+  "showFileBackgroundUnfinishedTask": false,
+  "unfinishedTaskBackgroundColor": "#ef000050",
+  "showFileIcons": true,
   "showFilenameMatchIcons": false,
   "fileNameIconMap": {},
   "showCategoryIcons": true,
@@ -230,6 +274,8 @@
   "showFeatureImage": true,
   "featureImageProperties": [],
   "featureImageExcludeProperties": [],
+  "featureImageSize": "64",
+  "featureImagePixelSize": "256",
   "forceSquareFeatureImage": true,
   "downloadExternalFeatureImages": true,
   "showFileTags": true,
@@ -240,9 +286,11 @@
   "showFileProperties": true,
   "colorFileProperties": true,
   "prioritizeColoredFileProperties": true,
-  "notePropertyType": "none",
   "showFilePropertiesInCompactMode": false,
   "showPropertiesOnSeparateRows": true,
+  "enablePropertyInternalLinks": true,
+  "enablePropertyExternalLinks": true,
+  "notePropertyType": "none",
   "showFileDate": true,
   "alphabeticalDateMode": "modified",
   "showParentFolder": true,
@@ -439,10 +487,16 @@
       "folder": true,
       "tag": false,
       "property": false
+    },
+    "Assets/Sr. AI Engineer - Hiring Manager Final Round Prep.md": {
+      "folder": true,
+      "tag": false,
+      "property": false
     }
   },
   "fileIcons": {},
   "fileColors": {},
+  "fileBackgroundColors": {},
   "folderIcons": {
     "Software Engineering/01 Programming": "code-2",
     "Software Engineering/02 Computer Science": "flask-round",
@@ -503,7 +557,11 @@
     "key:status=ready to repeat": "#a855f7"
   },
   "propertyBackgroundColors": {},
+  "propertySortOverrides": {},
   "propertyTreeSortOverrides": {},
+  "propertyAppearances": {},
+  "virtualFolderColors": {},
+  "virtualFolderBackgroundColors": {},
   "navigationSeparators": {
     "folder:Templates": true,
     "folder:Software Engineering": true
@@ -530,7 +588,7 @@
     "#404040",
     "#404040"
   ],
-  "lastShownVersion": "2.4.3",
+  "lastShownVersion": "2.5.0",
   "rootFolderOrder": [],
   "rootTagOrder": [],
   "rootPropertyOrder": []
