@@ -181,9 +181,9 @@ Adding same-day delivery now means one new class and one DI registration — `Sh
 
 - [Strategy Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=v9ejT8FO-7I&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=1) — video walkthrough of the Strategy pattern with OOP examples
 - [Strategy — refactoring.guru](https://refactoring.guru/design-patterns/strategy) — canonical pattern description with context/strategy diagram and C# example
-- [IComparer<T> — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.icomparer-1) — .NET's built-in Strategy for comparison algorithms
-- [JsonConverter<T> — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.text.json.serialization.jsonconverter-1) — Strategy pattern for JSON serialization
-- [IPasswordHasher<T> — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.identity.ipasswordhasher-1) — Strategy pattern for password hashing in ASP.NET Core Identity
+- [`IComparer<T>` — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.icomparer-1) — .NET's built-in Strategy for comparison algorithms
+- [`JsonConverter<T>` — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.text.json.serialization.jsonconverter-1) — Strategy pattern for JSON serialization
+- [`IPasswordHasher<T>` — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.identity.ipasswordhasher-1) — Strategy pattern for password hashing in ASP.NET Core Identity
 
 <!-- whats-next:start -->
 

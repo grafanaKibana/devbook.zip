@@ -132,9 +132,9 @@ The caller uses `await foreach` without knowing whether the source is a database
 
 - [Iterator Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=uNTNEfwYXhI&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=16) — video walkthrough of the Iterator pattern with OOP examples
 - [Iterator — refactoring.guru](https://refactoring.guru/design-patterns/iterator) — canonical pattern description with C# example
-- [IEnumerable<T> — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.ienumerable-1) — the .NET Iterator interface
+- [`IEnumerable<T>` — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.ienumerable-1) — the .NET Iterator interface
 - [yield statement — C# reference — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/yield) — how `yield return` implements the Iterator pattern
-- [IAsyncEnumerable<T> — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.iasyncenumerable-1) — async Iterator for streaming data sources
+- [`IAsyncEnumerable<T>` — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.iasyncenumerable-1) — async Iterator for streaming data sources
 
 <!-- whats-next:start -->
 
