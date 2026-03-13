@@ -23,7 +23,7 @@ classDiagram
         +CalculateCost(order) decimal
     }
     class IShippingCostStrategy {
-        <<interface>>
+
         +Calculate(order) decimal
     }
     class FlatRateStrategy {

@@ -11,7 +11,6 @@ The Abstract Factory pattern works the same way: it provides an interface for cr
 ```mermaid
 classDiagram
     class IPaymentProviderFactory {
-        <<interface>>
         +CreateProcessor() IPaymentProcessor
         +CreateReceiptGenerator() IReceiptGenerator
         +CreateRefundHandler() IRefundHandler

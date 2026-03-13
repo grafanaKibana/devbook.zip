@@ -11,7 +11,6 @@ The Composite pattern composes objects into tree structures and lets clients tre
 ```mermaid
 classDiagram
     class IOrderComponent {
-        <<interface>>
         +GetPrice() decimal
         +GetDescription() string
     }
