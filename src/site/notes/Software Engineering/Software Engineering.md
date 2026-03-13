@@ -17,20 +17,20 @@ Organized into 11 topic areas with spaced repetition tracking. The dashboards be
 
 # Recently Updated
 
-| Note                                                                                                 | Date                     |
-| ---------------------------------------------------------------------------------------------------- | ------------------------ |
-| [[Software Engineering/02 Computer Science/Data Structures/Queue\|Queue]]                         | 1:53 AM - March 13, 2026 |
-| [[Software Engineering/02 Computer Science/Data Structures/Data Structures\|Data Structures]]     | 1:53 AM - March 13, 2026 |
-| [[Software Engineering/02 Computer Science/Data Structures/Span\|Span]]                           | 1:53 AM - March 13, 2026 |
-| [[Software Engineering/02 Computer Science/Data Structures/Trees\|Trees]]                         | 1:53 AM - March 13, 2026 |
-| [[Software Engineering/05 Architecture/Patterns/CQS\|CQS]]                                        | 1:53 AM - March 13, 2026 |
-| [[Software Engineering/05 Architecture/Patterns/Repository & UoW\|Repository & UoW]]              | 1:53 AM - March 13, 2026 |
-| [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Observer\|Observer]]   | 1:48 AM - March 13, 2026 |
-| [[Software Engineering/02 Computer Science/Data Structures/Stack\|Stack]]                         | 1:48 AM - March 13, 2026 |
-| [[Software Engineering/02 Computer Science/Data Structures/HashSet\|HashSet]]                     | 1:48 AM - March 13, 2026 |
-| [[Software Engineering/02 Computer Science/Data Structures/List\|List]]                           | 1:48 AM - March 13, 2026 |
-| [[Software Engineering/05 Architecture/Patterns/Design Patterns/Creational/Singleton\|Singleton]] | 1:48 AM - March 13, 2026 |
-| [[Software Engineering/02 Computer Science/Data Structures/LinkedList\|LinkedList]]               | 1:48 AM - March 13, 2026 |
+| Note                                                                                                               | Date                      |
+| ------------------------------------------------------------------------------------------------------------------ | ------------------------- |
+| [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Bridge\|Bridge]]                     | 12:13 PM - March 13, 2026 |
+| [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Visitor\|Visitor]]                   | 12:13 PM - March 13, 2026 |
+| [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Adapter\|Adapter]]                   | 12:13 PM - March 13, 2026 |
+| [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Decorator\|Decorator]]               | 12:13 PM - March 13, 2026 |
+| [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Composite\|Composite]]               | 12:13 PM - March 13, 2026 |
+| [[Software Engineering/05 Architecture/Patterns/Design Patterns/Creational/Abstract Factory\|Abstract Factory]] | 12:13 PM - March 13, 2026 |
+| [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Proxy\|Proxy]]                       | 12:12 PM - March 13, 2026 |
+| [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Strategy\|Strategy]]                 | 12:12 PM - March 13, 2026 |
+| [[Software Engineering/02 Computer Science/Data Structures/Queue\|Queue]]                                       | 1:53 AM - March 13, 2026  |
+| [[Software Engineering/02 Computer Science/Data Structures/Data Structures\|Data Structures]]                   | 1:53 AM - March 13, 2026  |
+| [[Software Engineering/02 Computer Science/Data Structures/Span\|Span]]                                         | 1:53 AM - March 13, 2026  |
+| [[Software Engineering/02 Computer Science/Data Structures/Trees\|Trees]]                                       | 1:53 AM - March 13, 2026  |
 
 { .block-language-dataview}
 # Publish Distribution
