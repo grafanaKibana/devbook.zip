@@ -28,7 +28,7 @@ Console.WriteLine(ordered[0]); // Fast lookup by index
 > [!QUESTION]- What is a data structure? Which ones do you know? Which of them exist in .NET?
 > A data structure is a way to organize related data into a collection-like object. Examples include arrays, lists, queues, stacks, linked lists, dictionaries/hash tables, hash sets, graphs, and trees. .NET provides built-in implementations for many of these (for example `Array`, `List<T>`, `Queue<T>`, `Stack<T>`, `LinkedList<T>`, `Dictionary<TKey, TValue>`, `HashSet<T>`).
 
-> [!QUESTION]- How do you choose between List<T>, Dictionary<TKey, TValue>, and HashSet<T>?
+> [!QUESTION]- How do you choose between `List<T>`, `Dictionary<TKey, TValue>`, and `HashSet<T>`?
 > Use `List<T>` when you need ordered, index-based access and the primary operations are iteration or positional lookup. Use `Dictionary<TKey, TValue>` when you need fast lookup, insertion, and deletion by a unique key. Use `HashSet<T>` when you only need membership testing and set operations (union, intersection, difference) without associated values.
 > The wrong choice shows up as O(n) scans that should be O(1) lookups.
 
@@ -36,7 +36,7 @@ Console.WriteLine(ordered[0]); // Fast lookup by index
 > Switching from O(n) linear search to O(1) hash lookup reduces work by orders of magnitude at scale. No amount of loop unrolling or SIMD on the O(n) path matches that.
 > Focus on algorithmic complexity first, then optimize constant factors within the chosen structure if profiling shows it matters.
 
-> [!QUESTION]- When would you use LinkedList<T> over List<T> in .NET?
+> [!QUESTION]- When would you use `LinkedList<T>` over `List<T>` in .NET?
 > Almost never in practice. `List<T>` (backed by a contiguous array) has better cache locality, lower memory overhead per element, and faster iteration. `LinkedList<T>` only wins when you need frequent insertions/deletions in the middle of a very large collection and already hold a reference to the node.
 > In most .NET code, `List<T>` is the correct default.
 
