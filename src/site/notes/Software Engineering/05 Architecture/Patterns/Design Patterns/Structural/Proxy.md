@@ -11,7 +11,6 @@ The Proxy pattern provides a surrogate for another object to control access to i
 ```mermaid
 classDiagram
     class IProductService {
-        <<interface>>
         +GetProductAsync(id) Product
     }
     class RealProductService {

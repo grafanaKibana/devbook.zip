@@ -11,7 +11,6 @@ The Adapter pattern does the same thing in code: it converts the interface of an
 ```mermaid
 classDiagram
     class IInventoryService {
-        <<interface>>
         +CheckStockAsync() InventoryResult
     }
     class LegacyInventoryAdapter {

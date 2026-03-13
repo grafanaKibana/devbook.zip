@@ -11,7 +11,6 @@ The Visitor pattern lets you add new operations to an object hierarchy without m
 ```mermaid
 classDiagram
     class ICartItem {
-        <<interface>>
         +Accept(visitor ICartItemVisitor)
     }
     class PhysicalProduct {
@@ -24,7 +23,6 @@ classDiagram
         +Accept(visitor)
     }
     class ICartItemVisitor {
-        <<interface>>
         +Visit(PhysicalProduct)
         +Visit(DigitalProduct)
         +Visit(SubscriptionProduct)
