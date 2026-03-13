@@ -11,6 +11,7 @@ The Bridge pattern decouples an abstraction from its implementation so they can 
 ```mermaid
 classDiagram
     class PaymentAbstraction {
+
         #implementor IPaymentImplementor
         +Execute()
     }
@@ -21,6 +22,7 @@ classDiagram
         +Execute()
     }
     class IPaymentImplementor {
+
         +ProcessAmount()
         +Refund()
     }

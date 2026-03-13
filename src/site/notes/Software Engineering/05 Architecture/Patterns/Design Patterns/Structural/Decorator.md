@@ -11,6 +11,7 @@ The Decorator pattern works the same way: it attaches additional responsibilitie
 ```mermaid
 classDiagram
     class IOrderHandler {
+
         +HandleAsync(order) OrderResult
     }
     class CoreOrderHandler {
