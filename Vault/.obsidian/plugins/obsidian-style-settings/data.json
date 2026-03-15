@@ -1,0 +1,22 @@
+{
+  "obsidian-velocity@@theme-paint-dark": "gray",
+  "obsidian-velocity@@color-highlight-rgb": "var(--highlight-green-rgb)",
+  "obsidian-velocity@@enable-special-text": false,
+  "obsidian-velocity@@enable-special-code": false,
+  "obsidian-velocity@@line-height-normal": "1.6",
+  "obsidian-velocity@@vl-layout-padding": "8px",
+  "obsidian-velocity-config@@disable-list-styling": false,
+  "obsidian-velocity-config@@disable-callout-styling": false,
+  "obsidian-velocity-config@@disable-custom-icons": false,
+  "obsidian-velocity-config@@restore-table-scroll": false,
+  "obsidian-velocity-config@@restore-indent-guide": false,
+  "obsidian-velocity-config@@disable-hover-header": true,
+  "obsidian-velocity-config@@disable-naked-embeds": false,
+  "obsidian-velocity-config@@disable-autohide": false,
+  "obsidian-velocity-config@@disable-status-fade": false,
+  "obsidian-velocity-config@@disable-title-h1": false,
+  "obsidian-velocity-config@@active-line-highlight": false,
+  "obsidian-velocity-config@@hide-bases-header": false,
+  "obsidian-velocity-config@@enable-dim-img": false,
+  "obsidian-velocity-config@@improve-pinned-tabs": false
+}

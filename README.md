@@ -29,7 +29,7 @@ A structured collection of software engineering notes covering 11 topic areas, d
 ```
 Vault/Software Engineering/   ──(Obsidian Git)──>   GitHub repo
         │                                                │
-        │  Obsidian plugins:                             │  Vercel/Netlify/Anything else auto-deploys
+        │  Obsidian plugins:                             │  Vercel auto-deploys
         │  Templater, Dataview,                          │  on push to main
         │  Folder Notes, Digital Garden                  │
         │                                                ▼
@@ -43,12 +43,12 @@ Vault/Software Engineering/   ──(Obsidian Git)──>   GitHub repo
 1. **Author** notes in Obsidian using templates (Concept Page or Index templates)
 2. **Mark** notes for publishing with `dg-publish: true` in frontmatter
 3. **Publish** via the Digital Garden plugin, which exports notes to `src/site/notes/`
-4. **Commit & push** — Deployment provider picks up the change and runs the Eleventy build
+4. **Commit & push** — Vercel picks up the change and runs the Eleventy build
 5. **Live** — static site with full-text search, graph view, backlinks, and table of contents
 
-### Two Obsidian Configs
+### Obsidian Config
 
-- **`Vault/.obsidian/`** — the vault config with all plugins, themes, and settings. Open `Vault/` as your Obsidian vault.
+**`Vault/.obsidian/`** — the vault config with all plugins, themes, and settings. Open `Vault/` as your Obsidian vault.
 
 ## Repository Structure
 
@@ -68,13 +68,17 @@ Knowledge Hub/
 ├── src/site/                       # Eleventy site source (Digital Garden output)
 │   ├── notes/                      # Exported notes for the website
 │   ├── styles/                     # SCSS styles (custom + Digital Garden base)
+│   │   └── user/                   # Custom style overrides (survives template updates)
 │   ├── _includes/                  # Nunjucks layouts and components
+│   │   └── components/user/        # Custom injected components
 │   └── _data/                      # Site metadata and computed data
+├── src/helpers/                    # Eleventy helper functions (graph, filetree, utils)
 ├── .scripts/                       # Vault maintenance automation (Python)
-├── .git/hooks/pre-commit           # Git hook that runs automations
+├── .githooks/pre-commit            # Git hook that runs automations
 ├── .eleventy.js                    # Eleventy config (markdown pipeline)
-├── netlify.toml                    # Netlify deployment config
-├── vercel.json                     # Vercel deployment config (alternative)
+├── .markdownlint.json              # MD040 lint rule (fenced code block languages)
+├── vercel.json                     # Vercel deployment config (primary)
+├── netlify.toml                    # Netlify deployment config (alternative)
 └── AGENTS.md                       # AI agent operating contract
 ```
 
@@ -148,13 +152,86 @@ The published site (built with Eleventy) includes:
 - **RSS feed** — at `/feed.xml`
 - **Sitemap** — at `/sitemap.xml`
 - **Responsive layout** — adapts to mobile, desktop, and ultrawide displays
-- **Dark theme** — matches the Obsidian vault theme
+- **Dark/light theme** — auto-switches based on system preference
+
+## Website Customizations
+
+The site extends the stock [Digital Garden](https://github.com/oleeskild/Obsidian-Digital-Garden) template through its official extension system. Custom styles live in `src/site/styles/user/` and custom components in `src/site/_includes/components/user/` — both directories survive template updates.
+
+### Theme & Typography
+
+**Anthropic-inspired design** (`styles/user/anthropic-theme.scss`):
+
+- **Body text**: [Source Serif 4](https://fonts.google.com/specimen/Source+Serif+4) (serif) — like Anthropic's docs
+- **UI / headings**: [Inter](https://fonts.google.com/specimen/Inter) (sans-serif) — clean navigation and titles
+- **Code**: [Source Code Pro](https://fonts.google.com/specimen/Source+Code+Pro) (monospace) — VS Code-style code blocks
+- **Accent color**: British Racing Green (HSL 158°, 25–45% saturation) — replaces the default blue
+- **Page titles**: 2.4em with tight letter-spacing (-0.03em)
+- **Mermaid diagrams**: transparent background (vs. white default)
+- **Base Obsidian theme**: [Minimal](https://github.com/kepano/obsidian-minimal) by @kepano — fetched at build time
+
+### Responsive Layout
+
+**Adaptive widths** (`styles/user/layout.scss`):
+
+| Breakpoint | Filetree | Content Max | Sidebar |
+|------------|----------|-------------|---------|
+| Base | 300px | default | 300px |
+| ≥ 1980px | 400px | 900px | 400px |
+| ≥ 2560px | 500px | 1000px | 500px |
+
+- **Mobile** (≤ 1000px): full-width sidebar overlay, table horizontal scroll
+- **Graph**: 300 × 300px, depth controls hidden
+- **Canvas nodes**: compact spacing (6px between elements)
+
+### Sidebar Branding
+
+**Site title block** (`styles/user/branding.scss`, modified `filetree.njk` / `filetreeNavbar.njk`):
+
+- Centered title + subtitle layout (or logo image if `src/site/logo.*` exists)
+- Title: uppercase, 28px (`--dg-filetree-title-size`)
+- Subtitle: 0.82rem, 85% opacity (driven by `SITE_NAME_SUBTITLE` in `.env.local`)
+- Mobile navbar: compact variant at 1.25rem
+
+### Quicklink Navigation
+
+**Sidebar buttons** (`styles/user/quicklinks.scss`, `components/user/filetree/afterTitle/quicklinks.njk`):
+
+- Three buttons below the site title: **Home**, **Questions**, **Roadmap**
+- Accent-colored background with brightness hover effect
+- Hidden on mobile navbar (visible only in the filetree sidebar)
+
+### Footer Contact Links
+
+**Contact info** (`styles/user/branding.scss`, `components/user/common/footer/contact-links.njk`):
+
+- Email, LinkedIn, and GitHub links with Lucide icons
+- Driven by `.env.local` variables: `SITE_CONTACT_EMAIL`, `SITE_CONTACT_LINKEDIN`, `SITE_CONTACT_GITHUB`
+- Hidden on canvas pages
+
+### Vercel Analytics
+
+**Web analytics** (`components/user/common/head/001-vercel-analytics.njk`):
+
+- Vercel Web Analytics script injected into `<head>` on every page
+
+### Modified Stock Files
+
+Some customizations required changes to stock Digital Garden files. These may need re-applying after template updates from the Obsidian plugin:
+
+| File | Modification |
+|------|-------------|
+| `filetree.njk` | Branding block with title + subtitle (replaces plain `<h1>`) |
+| `filetreeNavbar.njk` | Mobile branding block matching the desktop sidebar |
+| `meta.js` | Contact info fields, `siteSubtitle`, `siteLogoPath` detection, canvas UI strings |
+| `.eleventy.js` | `xmlSafe` filter, `canvas-markdown` transform, external link `target="_blank"` |
+| `feed.njk` | `xmlSafe` filter for valid Atom XML output |
 
 ## Automations
 
 ### Git Pre-Commit Hook
 
-Every commit triggers three automations in sequence:
+Every commit triggers three Python automations followed by markdown linting (`.githooks/pre-commit`):
 
 #### 1. Folder Frontmatter Sync (`sync-folder-rollup-frontmatter.py`)
 
@@ -184,13 +261,16 @@ Regenerates `Roadmap.canvas` from the folder structure:
 - Adds a legend with per-status counts and generation timestamp
 - Publishes the canvas to the website via `dg-publish` frontmatter
 
+#### 4. Markdown Lint (`markdownlint-cli2`)
+
+Enforces MD040 (fenced code block language) on staged Markdown files. Every fenced code block must specify a language — use `text` as a fallback when no specific language applies. Blocks the commit on violations.
+
 ### Other Scripts
 
 | Script | Purpose |
 |--------|---------|
-| `find_broken_links.py` | Scans for broken wikilinks, broken markdown links, and unlinked mentions (terms that appear in prose but aren't linked) |
+| `audit_all_pages.py` | Full vault quality audit — scores every page against the AGENTS.md quality bar and outputs JSON for reporting |
 | `sync-topic-subtopic-frontmatter.py` | Batch-updates `topic`/`subtopic` fields based on folder position |
-| `migrate_pages.py` | One-time migration script that moved navigation blocks from top to bottom of notes |
 
 ### Dependency Management
 
@@ -200,7 +280,7 @@ Regenerates `Roadmap.canvas` from the folder structure:
 
 ```
 npm run build
-  ├── get-theme        # Fetches Obsidian theme CSS
+  ├── get-theme        # Fetches Obsidian theme CSS from GitHub
   ├── build:sass       # Compiles SCSS → CSS (compressed)
   └── build:eleventy   # Processes markdown → HTML via Eleventy
 ```
@@ -209,7 +289,7 @@ The Eleventy pipeline handles:
 - Markdown rendering with 8 markdown-it plugins (anchors, footnotes, math, attrs, tasks, PlantUML, mark, mermaid)
 - Obsidian wikilink → HTML anchor resolution
 - Callout blockquote → styled div transformation
-- Canvas file rendering (pre-compiled HTML pass-through)
+- Canvas file rendering (pre-compiled HTML pass-through with build-time markdown rendering)
 - Image optimization (WebP + JPEG at multiple breakpoints)
 - Table wrapping for horizontal scroll
 - DataviewJS link resolution
@@ -226,10 +306,10 @@ The Eleventy pipeline handles:
 | Templating | Nunjucks + Liquid |
 | Styling | SCSS (Obsidian theme + custom overrides) |
 | Markdown | markdown-it + 8 plugins |
-| Hosting | Netlify (primary) / Vercel (alternative) |
+| Hosting | Vercel (primary) / Netlify (alternative) |
 | Automation | Python scripts + Git hooks |
 | Dependencies | Dependabot (weekly) |
-| Runtime | Node.js 22.x |
+| Runtime | Node.js 24.x |
 
 ## Local Development
 
@@ -248,11 +328,7 @@ npm start
 npm run build
 ```
 
-Open `Vault/` as an Obsidian vault for note editing. The `.env` file configures site metadata (theme, site name, base URL, feature flags).
-
-## Customization
-
-Override the site's appearance in `src/site/styles/custom-style.scss`. The Digital Garden base provides 100+ CSS custom properties covering layout, typography, sidebar, graph, search, navigation, and component styling. See the [Digital Garden docs](https://dg-docs.ole.dev/) for the full variable reference.
+Open `Vault/` as an Obsidian vault for note editing. The `.env` file configures site metadata (theme, site name, base URL, feature flags). Personal data (contact info, subtitle) goes in `.env.local` which is gitignored.
 
 ## License
 
