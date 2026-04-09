@@ -5303,8 +5303,12 @@ var PortalsCanvasExtension = class _PortalsCanvasExtension extends CanvasExtensi
       let newEdgeId = `${portalNodeData.id}${PORTAL_ID_DELIMITER}${edgeDataFromPortal.id}`;
       if (!newEdgeId.startsWith(PORTAL_ID_PREFIX))
         newEdgeId = PORTAL_ID_PREFIX + newEdgeId;
-      const fromNodeId = `${portalNodeData.id}${PORTAL_ID_DELIMITER}${edgeDataFromPortal.fromNode}`;
-      const toNodeId = `${portalNodeData.id}${PORTAL_ID_DELIMITER}${edgeDataFromPortal.toNode}`;
+      let fromNodeId = `${portalNodeData.id}${PORTAL_ID_DELIMITER}${edgeDataFromPortal.fromNode}`;
+      if (!fromNodeId.startsWith(PORTAL_ID_PREFIX))
+        fromNodeId = PORTAL_ID_PREFIX + fromNodeId;
+      let toNodeId = `${portalNodeData.id}${PORTAL_ID_DELIMITER}${edgeDataFromPortal.toNode}`;
+      if (!toNodeId.startsWith(PORTAL_ID_PREFIX))
+        toNodeId = PORTAL_ID_PREFIX + toNodeId;
       addedData.edges.push({
         ...edgeDataFromPortal,
         id: newEdgeId,
