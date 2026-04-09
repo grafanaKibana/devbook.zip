@@ -27,18 +27,6 @@
         {
           "type": "note",
           "path": "Software Engineering/Topics.base"
-        },
-        {
-          "type": "note",
-          "path": "Assets/Sr. AI Engineer - System Design Interview Prep.md"
-        },
-        {
-          "type": "note",
-          "path": "Assets/Sr. AI Engineer - OOD Interview Prep.md"
-        },
-        {
-          "type": "note",
-          "path": "Assets/Sr. AI Engineer - Hiring Manager Final Round Prep.md"
         }
       ],
       "propertyKeys": [
@@ -499,17 +487,17 @@
       "tag": false,
       "property": false
     },
-    "Assets/Sr. AI Engineer - System Design Interview Prep.md": {
+    "Assets/Docs/Sr. AI Engineer - Hiring Manager Final Round Prep.md": {
       "folder": true,
       "tag": false,
       "property": false
     },
-    "Assets/Sr. AI Engineer - OOD Interview Prep.md": {
+    "Assets/Docs/Sr. AI Engineer - OOD Interview Prep.md": {
       "folder": true,
       "tag": false,
       "property": false
     },
-    "Assets/Sr. AI Engineer - Hiring Manager Final Round Prep.md": {
+    "Assets/Docs/Sr. AI Engineer - System Design Interview Prep.md": {
       "folder": true,
       "tag": false,
       "property": false
