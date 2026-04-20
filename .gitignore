@@ -4,6 +4,7 @@ netlify/functions/search/data.json
 netlify/functions/search/index.json
 src/site/styles/theme.*.css
 src/site/styles/_theme.*.css
+
 # Local Netlify folder
 .netlify
 .idea/
@@ -15,3 +16,7 @@ _site/
 .git/
 .sisyphus/
 **/.obsidian/workspace.json
+
+# Dotnet
+**/obj/
+**/bin/
