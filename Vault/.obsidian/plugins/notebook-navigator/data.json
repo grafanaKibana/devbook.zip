@@ -103,6 +103,7 @@
   "vaultTitle": "navigation",
   "syncModes": {
     "vaultProfile": "synced",
+    "homepage": "synced",
     "folderSortOrder": "synced",
     "tagSortOrder": "synced",
     "propertySortOrder": "synced",
@@ -138,9 +139,10 @@
   "mouseBackForwardAction": "history",
   "startView": "navigation",
   "showInfoButtons": true,
-  "homepage": "Knowledge/Knowledge.md",
-  "mobileHomepage": null,
-  "useMobileHomepage": false,
+  "homepage": {
+    "source": "file",
+    "file": "Knowledge/Knowledge.md"
+  },
   "dualPane": true,
   "dualPaneOrientation": "vertical",
   "showTooltips": false,
@@ -266,7 +268,7 @@
   "fileNameIconMap": {},
   "showCategoryIcons": true,
   "fileTypeIconMap": {
-    "png,jpg,jpeg": "LiImage"
+    "png,jpg,jpeg": "image"
   },
   "fileNameRows": 1,
   "showFilePreview": true,
@@ -486,21 +488,6 @@
       "folder": true,
       "tag": false,
       "property": false
-    },
-    "Assets/Docs/Sr. AI Engineer - Hiring Manager Final Round Prep.md": {
-      "folder": true,
-      "tag": false,
-      "property": false
-    },
-    "Assets/Docs/Sr. AI Engineer - OOD Interview Prep.md": {
-      "folder": true,
-      "tag": false,
-      "property": false
-    },
-    "Assets/Docs/Sr. AI Engineer - System Design Interview Prep.md": {
-      "folder": true,
-      "tag": false,
-      "property": false
     }
   },
   "fileIcons": {},
@@ -597,7 +584,7 @@
     "#404040",
     "#404040"
   ],
-  "lastShownVersion": "2.5.6",
+  "lastShownVersion": "2.5.8",
   "rootFolderOrder": [],
   "rootTagOrder": [],
   "rootPropertyOrder": []

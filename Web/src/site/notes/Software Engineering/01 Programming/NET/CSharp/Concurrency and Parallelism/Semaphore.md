@@ -1,0 +1,102 @@
+---
+{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/c-sharp/concurrency-and-parallelism/semaphore/"}
+---
+
+
+# Intro
+
+`Semaphore` controls concurrent access by allowing up to N holders at once, unlike `Mutex` and `lock` which allow exactly one. This is the right primitive when you need **bounded parallelism** — for example, limiting an HTTP client to 10 concurrent outbound requests to avoid overwhelming a downstream API (which returns 429 at 15 concurrent connections), or capping database connection usage below the pool maximum during batch processing. In modern .NET, `SemaphoreSlim` is preferred for in-process async workflows because it supports `WaitAsync` and avoids kernel transitions.
+
+## How It Works
+
+A semaphore tracks a permit count:
+
+- `Semaphore`: `WaitOne` consumes one permit.
+- `SemaphoreSlim`: `Wait`/`WaitAsync` consumes one permit.
+- If no permits are available, callers wait.
+- `Release` returns a permit and wakes a waiter.
+- `System.Threading.Semaphore` can be named for cross-process coordination; `SemaphoreSlim` is in-process only.
+
+## Example
+
+```csharp
+using var gate = new SemaphoreSlim(initialCount: 4, maxCount: 4);
+
+await gate.WaitAsync(cancellationToken);
+try
+{
+    await ProcessAsync(cancellationToken);
+}
+finally
+{
+    gate.Release();
+}
+```
+
+Named `Semaphore` for cross-process bounded access:
+
+```csharp
+// Limit 3 concurrent processes accessing a shared resource
+const string SemName = "MyApp.ResourceGate";
+using var sem = new Semaphore(initialCount: 3, maximumCount: 3, name: SemName);
+
+if (!sem.WaitOne(TimeSpan.FromSeconds(5)))
+    throw new TimeoutException("Could not acquire semaphore slot.");
+try
+{
+    AccessSharedResource();
+}
+finally
+{
+    sem.Release();
+}
+```
+
+## Pitfalls
+
+- **Leaked permits stall all waiters** — forgetting `Release` in an exception path permanently reduces available permits. With a maxCount of 4, one leaked permit drops throughput by 25%; four leaked permits deadlock the system. Always release in `finally`.
+- **Over-release inflates concurrency** — for `SemaphoreSlim` without an explicit `maxCount`, calling `Release` without a matching `Wait` silently increases the permit count beyond your intended limit. Your "max 10 concurrent" throttle quietly becomes 11, then 12. With explicit `maxCount`, over-release throws `SemaphoreFullException` — which is noisy but at least detectable. Always set `maxCount` and keep acquire/release symmetry in one scope.
+- **No fairness guarantee** — `SemaphoreSlim` does not guarantee FIFO ordering under contention. A request that arrives later can acquire the permit before an earlier waiter, causing starvation in pathological cases. If ordering matters, use `Channel<T>` as a bounded queue.
+- **No ownership tracking** — unlike `Mutex`, semaphores do not track which thread/task acquired a permit. Any code path can call `Release`, even without a matching `Wait`. This makes debugging permit leaks harder — instrument with logging around `Wait`/`Release` in production throttling code.
+
+## Tradeoffs
+
+- `SemaphoreSlim` vs `Semaphore`: `SemaphoreSlim` is lighter and async-friendly in-process; `Semaphore` supports named cross-process coordination.
+- Semaphore vs mutex/lock: semaphore allows bounded parallelism; mutex/lock allows only one owner at a time.
+- Semaphore vs unbounded `Task.WhenAll`: semaphore caps pressure on dependencies and connection pools at the cost of a little orchestration complexity.
+
+## Questions
+
+> [!QUESTION]- When should you choose `SemaphoreSlim` over `lock`?
+> Choose `SemaphoreSlim` when critical sections include `await` and you need asynchronous waiting. `lock` cannot contain `await` safely.
+
+> [!QUESTION]- Why is a semaphore useful for fan-out HTTP calls?
+> It limits in-flight requests, protecting downstream dependencies and your own resources from overload while preserving concurrency.
+
+> [!QUESTION]- What bug pattern most often breaks semaphore-based code?
+> Missing or unbalanced `Release` calls. The safe pattern is acquire then `try/finally` release in the same method scope.
+
+## Links
+
+- [Semaphore class (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.threading.semaphore)
+- [SemaphoreSlim class (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.threading.semaphoreslim)
+- [Overview of synchronization primitives (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/threading/overview-of-synchronization-primitives)
+- [Threading in C#: Event wait handles, mutexes, and semaphores (Joe Albahari)](https://www.albahari.com/threading/part2.aspx)
+
+<!-- whats-next:start -->
+
+---
+
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/01 Programming/NET/CSharp/CSharp\|CSharp]]
+>
+> **Pages**
+> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Async Await\|Async Await]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/CancellationToken\|CancellationToken]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Deadlocks\|Deadlocks]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Mutex\|Mutex]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Parallelism\|Parallelism]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Tasks\|Tasks]]
+> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/ThreadPool\|ThreadPool]]
+<!-- whats-next:end -->

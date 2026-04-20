@@ -12,9 +12,9 @@ Obsidian knowledge base. These rules govern all human and agent operations.
 
 ## Repository layout (publishing)
 
-- `src/site/notes/`: exported notes for the website build (Digital Garden / Eleventy input). Prefer editing in `Vault/` and treating this as generated output unless you are explicitly fixing the publish/export layer.
+- `Web/src/site/notes/`: exported notes for the website build (Digital Garden / Eleventy input). Prefer editing in `Vault/` and treating this as generated output unless you are explicitly fixing the publish/export layer.
 
-MUST NOT introduce new root folders or page types.
+Do not introduce additional root application folders beyond the current `Platform/`, `Vault/`, and `Web/` layout unless the user explicitly asks for a repository restructure.
 
 ## Creating structure
 
@@ -107,7 +107,7 @@ If all checks pass, proceed without asking.
     ```
     ````
 
-  - To find existing notes with unlabeled fences, run `npm run lint:md:all`; add a language or change to `text` for generic output blocks.
+- To find existing notes with unlabeled fences, run `cd Web && npm run lint:md:all`; add a language or change to `text` for generic output blocks.
   - **MD040 migration path**: enforcement is staged-only. The pre-commit hook blocks new unlabeled fences but does NOT require fixing the existing backlog immediately. Fix existing fences gradually as you touch files. When fixing: use `text` for generic or unknown blocks; use the real language where the content is clearly identifiable (`bash`, `csharp`, `json`, `yaml`, `mermaid`, `dataview`, `dataviewjs`).
 - Mermaid: only when it materially aids comprehension. Keep small. Avoid punctuation `()[]{},:;/|` in labels — write as words.
 

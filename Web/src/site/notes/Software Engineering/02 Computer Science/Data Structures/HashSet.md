@@ -1,0 +1,101 @@
+---
+{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/data-structures/hash-set/"}
+---
+
+
+# Intro
+
+`HashSet<T>` stores unique values with O(1) average membership checks. Use it when uniqueness and lookup speed matter more than ordering. A concrete use case: deduplicating 500K event IDs in a message processing pipeline — `HashSet<string>.Contains` checks each ID in sub-microsecond time, while `List<string>.Contains` would scan up to 500K entries per check, turning a 200 ms job into a 40-minute one.
+
+## Deeper Explanation
+
+`HashSet<T>` is hash-based: `GetHashCode` determines the bucket; `Equals` resolves collisions within a bucket. Core operations (`Add`, `Contains`, `Remove`) are O(1) average.
+
+`HashSet<T>` also exposes the full set algebra in O(n) time:
+
+- `UnionWith` — adds all elements from another collection (set A ∪ B).
+- `IntersectWith` — keeps only elements present in both (A ∩ B).
+- `ExceptWith` — removes elements found in another collection (A − B).
+- `SymmetricExceptWith` — keeps elements present in exactly one set (A △ B).
+
+These are in-place mutations. `IsSubsetOf`, `IsSupersetOf`, and `SetEquals` test structural relationships without modifying the set. A common production pattern: accumulate processed IDs in a `HashSet<int>`, then call `ExceptWith` against the full batch to find unprocessed items in O(n) instead of O(n²).
+
+## Structure
+
+```mermaid
+graph TD
+    H1[value dotnet hash] --> B0[bucket zero]
+    H2[value csharp hash] --> B1[bucket one]
+    B0 --> V1[dotnet]
+    B1 --> V2[csharp]
+```
+
+### Example
+
+```csharp
+var tags = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+{
+    "dotnet",
+    "csharp"
+};
+
+var added = tags.Add("DOTNET"); // false, already exists by comparer
+```
+
+### Pitfalls
+
+- **Broken `GetHashCode`/`Equals` contract** — overriding `Equals` without matching `GetHashCode` causes `Add` to accept duplicates and `Contains` to miss existing entries. Two objects that are `Equals` must produce the same `GetHashCode`.
+- **Mutable fields in hash computation** — mutating a field that participates in `GetHashCode` after insertion makes the entry unreachable in its bucket. `Contains` returns `false` even though the entry exists. Use immutable types or never mutate hash-participating fields after adding to the set.
+- **Assuming stable enumeration order** — `HashSet<T>` enumeration order depends on internal bucket layout and can change after `Add`/`Remove` operations or across .NET versions. If you serialize a `HashSet` and compare output strings, tests will be flaky. Use `SortedSet<T>` or `.OrderBy()` when order matters.
+
+### Tradeoffs
+
+- Use `HashSet<T>` for fast uniqueness checks.
+- Use `SortedSet<T>` if you need sorted uniqueness and accept O(log n) operations.
+
+## Questions
+
+> [!QUESTION]- What is the difference between `HashSet<T>` and `List<T>` for membership checks?
+> `HashSet<T>.Contains` is O(1) average; `List<T>.Contains` is O(n).
+
+> [!QUESTION]- Why can `HashSet<T>.Contains` fail for logically equal objects?
+> Because hash/equality contracts are broken (for example, mismatched `GetHashCode`).
+
+## Hash-Based Collections Comparison
+
+| Type | Stores | Thread-safe | When to use |
+|---|---|---|---|
+| `HashSet<T>` | Values only | No | Unique membership checks, set operations |
+| `Dictionary<TKey,TValue>` | Key-value pairs | No | Key-based lookup |
+| `SortedSet<T>` | Values only | No | Sorted uniqueness, O(log n) ops |
+
+**Decision rule**: use `HashSet<T>` when you only need to track membership or perform set operations (union, intersect, except). Use `Dictionary` when you need to associate a value with each key.
+
+## Links
+
+- [`HashSet<T>` class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.hashset-1) — API reference with set operation methods (UnionWith, IntersectWith, ExceptWith).
+- [`ISet<T>` interface](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.iset-1) — interface contract for set semantics; useful for abstracting over HashSet and SortedSet.
+- [Collections overview and complexity](https://learn.microsoft.com/en-us/dotnet/standard/collections/) — Microsoft overview of all collection types with complexity guidance.
+- [HashSet implementation in dotnet runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/HashSet.cs) — source code for internal bucket and slot layout.
+
+<!-- whats-next:start -->
+
+---
+
+> [!note] Whats next
+> **Parent**
+>  [[Software Engineering/02 Computer Science/02 Computer Science\|02 Computer Science]]
+>
+> **Pages**
+> - [[Software Engineering/02 Computer Science/Data Structures/Dictionary\|Dictionary]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Graph\|Graph]]
+> - [[Software Engineering/02 Computer Science/Data Structures/HashMap\|HashMap]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Hashtable\|Hashtable]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Heap\|Heap]]
+> - [[Software Engineering/02 Computer Science/Data Structures/LinkedList\|LinkedList]]
+> - [[Software Engineering/02 Computer Science/Data Structures/List\|List]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Queue\|Queue]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Span\|Span]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Stack\|Stack]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Trees\|Trees]]
+<!-- whats-next:end -->

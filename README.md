@@ -42,7 +42,7 @@ Vault/Software Engineering/   ──(Obsidian Git)──>   GitHub repo
 
 1. **Author** notes in Obsidian using templates (Concept Page or Index templates)
 2. **Mark** notes for publishing with `dg-publish: true` in frontmatter
-3. **Publish** via the Digital Garden plugin, which exports notes to `src/site/notes/`
+3. **Publish** via the Digital Garden plugin, which exports notes to `Web/src/site/notes/`
 4. **Commit & push** — Vercel picks up the change and runs the Eleventy build
 5. **Live** — static site with full-text search, graph view, backlinks, and table of contents
 
@@ -65,20 +65,21 @@ Knowledge Hub/
 │   │   └── Software Engineering.md # Homepage with live dashboards
 │   ├── Templates/                  # Note templates (Concept Page, Index, Mermaid, etc.)
 │   └── Assets/                     # All attachments (images, files)
-├── src/site/                       # Eleventy site source (Digital Garden output)
-│   ├── notes/                      # Exported notes for the website
-│   ├── styles/                     # SCSS styles (custom + Digital Garden base)
-│   │   └── user/                   # Custom style overrides (survives template updates)
-│   ├── _includes/                  # Nunjucks layouts and components
-│   │   └── components/user/        # Custom injected components
-│   └── _data/                      # Site metadata and computed data
-├── src/helpers/                    # Eleventy helper functions (graph, filetree, utils)
+├── Platform/                       # .NET solution(s) and backend projects
+├── Web/                            # Eleventy website project
+│   ├── src/site/                   # Eleventy site source (Digital Garden output)
+│   │   ├── notes/                  # Exported notes for the website
+│   │   ├── styles/                 # SCSS styles (custom + Digital Garden base)
+│   │   │   └── user/               # Custom style overrides (survives template updates)
+│   │   ├── _includes/              # Nunjucks layouts and components
+│   │   │   └── components/user/    # Custom injected components
+│   │   └── _data/                  # Site metadata and computed data
+│   ├── src/helpers/                # Eleventy helper functions (graph, filetree, utils)
+│   ├── .eleventy.js                # Eleventy config (markdown pipeline)
+│   ├── vercel.json                 # Vercel deployment config (primary)
+│   └── netlify.toml                # Netlify deployment config (alternative)
 ├── .scripts/                       # Vault maintenance automation (Python)
 ├── .githooks/pre-commit            # Git hook that runs automations
-├── .eleventy.js                    # Eleventy config (markdown pipeline)
-├── .markdownlint.json              # MD040 lint rule (fenced code block languages)
-├── vercel.json                     # Vercel deployment config (primary)
-├── netlify.toml                    # Netlify deployment config (alternative)
 └── AGENTS.md                       # AI agent operating contract
 ```
 
@@ -156,7 +157,7 @@ The published site (built with Eleventy) includes:
 
 ## Website Customizations
 
-The site extends the stock [Digital Garden](https://github.com/oleeskild/Obsidian-Digital-Garden) template through its official extension system. Custom styles live in `src/site/styles/user/` and custom components in `src/site/_includes/components/user/` — both directories survive template updates.
+The site extends the stock [Digital Garden](https://github.com/oleeskild/Obsidian-Digital-Garden) template through its official extension system. Custom styles live in `Web/src/site/styles/user/` and custom components in `Web/src/site/_includes/components/user/` — both directories survive template updates.
 
 ### Theme & Typography
 
@@ -188,7 +189,7 @@ The site extends the stock [Digital Garden](https://github.com/oleeskild/Obsidia
 
 **Site title block** (`styles/user/branding.scss`, modified `filetree.njk` / `filetreeNavbar.njk`):
 
-- Centered title + subtitle layout (or logo image if `src/site/logo.*` exists)
+- Centered title + subtitle layout (or logo image if `Web/src/site/logo.*` exists)
 - Title: uppercase, 28px (`--dg-filetree-title-size`)
 - Subtitle: 0.82rem, 85% opacity (driven by `SITE_NAME_SUBTITLE` in `.env.local`)
 - Mobile navbar: compact variant at 1.25rem
@@ -224,7 +225,7 @@ Some customizations required changes to stock Digital Garden files. These may ne
 | `filetree.njk` | Branding block with title + subtitle (replaces plain `<h1>`) |
 | `filetreeNavbar.njk` | Mobile branding block matching the desktop sidebar |
 | `meta.js` | Contact info fields, `siteSubtitle`, `siteLogoPath` detection, canvas UI strings |
-| `.eleventy.js` | `xmlSafe` filter, `canvas-markdown` transform, external link `target="_blank"` |
+| `Web/.eleventy.js` | `xmlSafe` filter, `canvas-markdown` transform, external link `target="_blank"` |
 | `feed.njk` | `xmlSafe` filter for valid Atom XML output |
 
 ## Automations
@@ -319,6 +320,7 @@ git clone https://github.com/grafanaKibana/KnowledgeHub.git
 cd KnowledgeHub
 
 # Install dependencies
+cd Web
 npm install
 
 # Development server (live reload)
@@ -328,7 +330,7 @@ npm start
 npm run build
 ```
 
-Open `Vault/` as an Obsidian vault for note editing. The `.env` file configures site metadata (theme, site name, base URL, feature flags). Personal data (contact info, subtitle) goes in `.env.local` which is gitignored.
+Open `Vault/` as an Obsidian vault for note editing. The website app lives in `Web/`; its `.env` file configures site metadata (theme, site name, base URL, feature flags). Personal data (contact info, subtitle) goes in `Web/.env.local` which is gitignored.
 
 ## License
 

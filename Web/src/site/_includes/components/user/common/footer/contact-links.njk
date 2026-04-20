@@ -1,0 +1,24 @@
+{% if not (contentClasses and "canvas-page" in contentClasses) %}
+<footer class="dg-contact-footer">
+  <nav class="dg-contact-footer-links" aria-label="Contact links">
+    {% if meta.contact.email %}
+      <a href="mailto:{{meta.contact.email}}" class="dg-contact-link">
+        <i data-lucide="mail"></i>
+        <span>{{meta.contact.email}}</span>
+      </a>
+    {% endif %}
+    {% if meta.contact.linkedin %}
+      <a href="{{meta.contact.linkedin}}" target="_blank" rel="noopener noreferrer" class="dg-contact-link">
+        <i data-lucide="linkedin"></i>
+        <span>{{meta.contact.name or "LinkedIn"}}</span>
+      </a>
+    {% endif %}
+    {% if meta.contact.github %}
+      <a href="{{meta.contact.github}}" target="_blank" rel="noopener noreferrer" class="dg-contact-link">
+        <i data-lucide="github"></i>
+        <span>GitHub</span>
+      </a>
+    {% endif %}
+  </nav>
+</footer>
+{% endif %}

@@ -1,0 +1,46 @@
+/* ── Sidebar quicklink buttons ── */
+.dg-sidebar-quicklinks {
+  display: flex;
+  gap: 8px;
+  margin: 10px 0;
+  width: 100%;
+}
+
+.dg-sidebar-quicklink {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 0.85rem;
+  line-height: 1;
+  font-weight: 600;
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border: 1px solid transparent;
+}
+
+.dg-sidebar-quicklink:link,
+.dg-sidebar-quicklink:visited,
+.dg-sidebar-quicklink:hover,
+.dg-sidebar-quicklink:active {
+  color: var(--text-on-accent);
+  text-decoration: none;
+}
+
+.dg-sidebar-quicklink:hover {
+  filter: brightness(1.15);
+}
+
+.dg-sidebar-quicklink:focus-visible {
+  outline: 2px solid var(--text-accent);
+  outline-offset: 2px;
+}
+
+/* Hide these in the mobile top navbar; keep them in the filetree sidebar. */
+.navbar .dg-sidebar-quicklinks {
+  display: none;
+}
