@@ -1,3 +1,4 @@
 <Solution>
   <Project Path="KnowledgeHub.API/KnowledgeHub.API.csproj" />
+  <Project Path="KnowledgeHub.Data/KnowledgeHub.Data.csproj" />
 </Solution>
