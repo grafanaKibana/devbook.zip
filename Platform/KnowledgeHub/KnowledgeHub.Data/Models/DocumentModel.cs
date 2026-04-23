@@ -30,12 +30,6 @@ public record Document
     public required string RawMarkdown { get; init; }
 
     /// <summary>
-    /// Plain text version derived from the markdown content.
-    /// Example: <c>RAG combines retrieval with generation...</c>
-    /// </summary>
-    public required string PlainText { get; init; }
-
-    /// <summary>
     /// Content hash used to detect changes and re-ingestion.
     /// Example: <c>sha256:4d7f8a1b2c3d</c>
     /// </summary>
@@ -51,5 +45,5 @@ public record Document
     /// Child chunks derived from this document.
     /// Example: <c>[chunk_rag_md_0001, chunk_rag_md_0002, chunk_rag_md_0003]</c>
     /// </summary>
-    public List<Chunk> Chunks { get; init; } = [];
+    public List<ChunkModel> Chunks { get; init; } = [];
 }

@@ -2,7 +2,7 @@ namespace KnowledgeHub.Data;
 
 using System.ComponentModel.DataAnnotations;
 
-public record Chunk
+public record ChunkModel
 {
     /// <summary>
     /// Unique chunk identifier.
