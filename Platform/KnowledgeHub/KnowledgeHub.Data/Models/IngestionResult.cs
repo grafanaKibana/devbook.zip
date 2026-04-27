@@ -1,4 +1,4 @@
-namespace KnowledgeHub.Data.Ingestion;
+namespace KnowledgeHub.Data.Models;
 
 public sealed record IngestionResult(
     bool Success,

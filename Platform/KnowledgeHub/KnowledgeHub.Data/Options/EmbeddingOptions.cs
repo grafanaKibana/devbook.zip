@@ -1,4 +1,4 @@
-namespace KnowledgeHub.Data.Embeddings;
+namespace KnowledgeHub.Data.Options;
 
 public sealed class EmbeddingOptions
 {
@@ -9,8 +9,6 @@ public sealed class EmbeddingOptions
     public string? ApiKey { get; init; }
 
     public string? Endpoint { get; init; }
-
     public int BatchSize { get; init; } = 16;
-
     public int VectorDimensions { get; init; } = 384;
 }

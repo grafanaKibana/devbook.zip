@@ -1,13 +1,14 @@
 namespace KnowledgeHub.Data.Jobs;
 
-using KnowledgeHub.Data.Chunking;
+using KnowledgeHub.Data.Options;
+using KnowledgeHub.Data.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 public sealed class DocumentChunkIngestionJob(
     KnowledgeHubDbContext dbContext,
-    IChunkingService chunkingService,
-    IOptions<ChunkingOptions> options) : IDocumentChunkIngestionJob
+    ChunkingService chunkingService,
+    IOptions<ChunkingOptions> options)
 {
     private readonly ChunkingOptions options = options.Value;
 

@@ -1,9 +1,8 @@
 namespace KnowledgeHub.Data;
 
-using KnowledgeHub.Data.Chunking;
-using KnowledgeHub.Data.Embeddings;
-using KnowledgeHub.Data.Ingestion;
 using KnowledgeHub.Data.Jobs;
+using KnowledgeHub.Data.Options;
+using KnowledgeHub.Data.Services;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -16,14 +15,12 @@ public static class ServiceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(services);
 
-        services.AddScoped<IIngestionService, IngestionService>();
-        services.AddScoped<FixedSizeChunkingStrategy>();
-        services.AddScoped<RecursiveChunkingStrategy>();
-        services.AddScoped<IChunkingService, ChunkingService<RecursiveChunkingStrategy>>();
-        services.AddScoped<IDocumentChunkIngestionJob, DocumentChunkIngestionJob>();
+        services.AddScoped<IngestionService>();
+        services.AddScoped<ChunkingService>();
+        services.AddScoped<DocumentChunkIngestionJob>();
 
         services.AddEmbeddingGenerator(CreateEmbeddingGenerator);
-        services.AddSingleton<IEmbeddingService, EmbeddingService>();
+        services.AddSingleton<EmbeddingService>();
 
         return services;
     }

@@ -1,4 +1,4 @@
-namespace KnowledgeHub.Data;
+namespace KnowledgeHub.Data.Models;
 
 using System.ComponentModel.DataAnnotations;
 

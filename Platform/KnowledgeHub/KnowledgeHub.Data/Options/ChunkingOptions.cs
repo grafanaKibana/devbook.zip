@@ -1,4 +1,4 @@
-namespace KnowledgeHub.Data.Chunking;
+namespace KnowledgeHub.Data.Options;
 
 public sealed class ChunkingOptions
 {

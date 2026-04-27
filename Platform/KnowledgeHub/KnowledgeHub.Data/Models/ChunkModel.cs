@@ -1,4 +1,4 @@
-namespace KnowledgeHub.Data;
+namespace KnowledgeHub.Data.Models;
 
 using System.ComponentModel.DataAnnotations;
 
@@ -49,7 +49,7 @@ public record ChunkModel
 
     /// <summary>
     /// Navigation property to the parent document.
-    /// Example: a <see cref="KnowledgeHub.Data.Document"/> instance for <c>doc_rag_md</c>
+    /// Example: a <see cref="Document"/> instance for <c>doc_rag_md</c>
     /// </summary>
     public Document? Document { get; init; }
 }

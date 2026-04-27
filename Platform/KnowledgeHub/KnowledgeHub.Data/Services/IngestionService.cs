@@ -1,4 +1,4 @@
-namespace KnowledgeHub.Data.Ingestion;
+namespace KnowledgeHub.Data.Services;
 
 using System.Buffers.Binary;
 using System.Globalization;
@@ -6,6 +6,8 @@ using System.IO.Hashing;
 using System.Text;
 using Hangfire;
 using KnowledgeHub.Data.Jobs;
+using KnowledgeHub.Data.Models;
+using KnowledgeHub.Data.Options;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
@@ -14,7 +16,7 @@ public sealed class IngestionService(
     KnowledgeHubDbContext dbContext,
     IBackgroundJobClient backgroundJobClient,
     IHostEnvironment hostEnvironment,
-    IOptions<IngestionOptions> options) : IIngestionService
+    IOptions<IngestionOptions> options)
 {
     private readonly IngestionOptions options = options.Value;
 
@@ -101,7 +103,7 @@ public sealed class IngestionService(
 
         if (changedDocumentIds.Count > 0)
         {
-            backgroundJobClient.Enqueue<IDocumentChunkIngestionJob>(
+            backgroundJobClient.Enqueue<DocumentChunkIngestionJob>(
                 job => job.ProcessDocumentsAsync(changedDocumentIds.ToArray()));
         }
 

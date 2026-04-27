@@ -1,9 +1,9 @@
 using Hangfire;
 using Hangfire.Mongo;
 using KnowledgeHub.Data;
-using KnowledgeHub.Data.Chunking;
-using KnowledgeHub.Data.Embeddings;
-using KnowledgeHub.Data.Ingestion;
+using KnowledgeHub.Data.Models;
+using KnowledgeHub.Data.Options;
+using KnowledgeHub.Data.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -51,7 +51,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.MapPost("/ingestion/documents",
-        async (IngestionRequest request, IIngestionService ingestionService, CancellationToken cancellationToken) =>
+        async (IngestionRequest request, IngestionService ingestionService, CancellationToken cancellationToken) =>
         {
             try
             {

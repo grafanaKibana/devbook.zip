@@ -1,11 +1,12 @@
-namespace KnowledgeHub.Data.Embeddings;
+namespace KnowledgeHub.Data.Services;
 
+using KnowledgeHub.Data.Options;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Options;
 
 public sealed class EmbeddingService(
     IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator,
-    IOptions<EmbeddingOptions> options) : IEmbeddingService
+    IOptions<EmbeddingOptions> options)
 {
     private readonly EmbeddingOptions options = options.Value;
 
