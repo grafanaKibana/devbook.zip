@@ -1,16 +1,23 @@
 namespace KnowledgeHub.Data.Ingestion;
 
 using System.Buffers.Binary;
+using System.Globalization;
 using System.IO.Hashing;
 using System.Text;
 using Hangfire;
 using KnowledgeHub.Data.Jobs;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 
 public sealed class IngestionService(
     KnowledgeHubDbContext dbContext,
-    IBackgroundJobClient backgroundJobClient) : IIngestionService
+    IBackgroundJobClient backgroundJobClient,
+    IHostEnvironment hostEnvironment,
+    IOptions<IngestionOptions> options) : IIngestionService
 {
+    private readonly IngestionOptions options = options.Value;
+
     public async Task<IngestionResult> IngestDocumentsAsync(
         IngestionRequest request,
         CancellationToken cancellationToken = default)
@@ -22,14 +29,15 @@ public sealed class IngestionService(
             throw new ArgumentException("Source path is required.", nameof(request));
         }
 
-        var sourceDirectory = ResolveSourceDirectory(request.SourcePath);
+        var ingestionRootDirectory = ResolveIngestionRootDirectory(hostEnvironment.ContentRootPath, options.ContentRootPath);
+        var sourceDirectory = ResolveSourceDirectory(ingestionRootDirectory, request.SourcePath);
 
         if (!Directory.Exists(sourceDirectory))
         {
             throw new DirectoryNotFoundException($"Source directory was not found: '{sourceDirectory}'.");
         }
 
-        var markdownFiles = GetMarkdownFiles(sourceDirectory, request.FileName);
+        var markdownFiles = GetMarkdownFiles(ingestionRootDirectory, sourceDirectory, request.FileName, options.MaxFilesPerRequest);
         var createdCount = 0;
         var updatedCount = 0;
         var changedDocumentIds = new List<string>();
@@ -38,11 +46,13 @@ public sealed class IngestionService(
         {
             cancellationToken.ThrowIfCancellationRequested();
 
+            ValidateFileSize(markdownFile, options.MaxFileSizeBytes);
+
             var rawMarkdown = await File.ReadAllTextAsync(markdownFile, cancellationToken);
             var sourceHash = ComputeXxHash3(rawMarkdown);
             var title = Path.GetFileNameWithoutExtension(markdownFile);
             var updatedAt = DateTimeOffset.UtcNow;
-            var normalizedSourcePath = NormalizePath(markdownFile);
+            var normalizedSourcePath = NormalizePath(Path.GetRelativePath(ingestionRootDirectory, markdownFile));
 
             var existingDocument = await dbContext.Documents
                 .FirstOrDefaultAsync(document => document.SourcePath == normalizedSourcePath, cancellationToken);
@@ -51,7 +61,7 @@ public sealed class IngestionService(
             {
                 var newDocument = new Document
                 {
-                    DocumentId = GenerateDocumentId(),
+                    DocumentId = GenerateDocumentId(normalizedSourcePath),
                     SourcePath = normalizedSourcePath,
                     Title = title,
                     RawMarkdown = rawMarkdown,
@@ -103,41 +113,85 @@ public sealed class IngestionService(
             changedDocumentIds);
     }
 
-    private static string ResolveSourceDirectory(string sourcePath)
+    private static string ResolveIngestionRootDirectory(string hostContentRootPath, string configuredContentRootPath)
     {
-        return Path.IsPathRooted(sourcePath)
-            ? sourcePath
-            : Path.GetFullPath(sourcePath, Directory.GetCurrentDirectory());
-    }
-
-    private static IReadOnlyList<string> GetMarkdownFiles(string sourceDirectory, string? fileName)
-    {
-        if (!string.IsNullOrWhiteSpace(fileName))
+        if (string.IsNullOrWhiteSpace(configuredContentRootPath))
         {
-            var filePath = Path.Combine(sourceDirectory, fileName);
-
-            if (!File.Exists(filePath))
-            {
-                throw new FileNotFoundException($"Markdown file was not found: '{filePath}'.", filePath);
-            }
-
-            if (!string.Equals(Path.GetExtension(filePath), ".md", StringComparison.OrdinalIgnoreCase))
-            {
-                throw new ArgumentException("Only markdown files with the .md extension are supported.", nameof(fileName));
-            }
-
-            return [filePath];
+            throw new InvalidOperationException("Ingestion content root path is required.");
         }
 
-        return Directory
+        return Path.IsPathRooted(configuredContentRootPath)
+            ? Path.GetFullPath(configuredContentRootPath)
+            : Path.GetFullPath(configuredContentRootPath, hostContentRootPath);
+    }
+
+    private static string ResolveSourceDirectory(string ingestionRootDirectory, string sourcePath)
+    {
+        if (Path.IsPathRooted(sourcePath))
+        {
+            throw new ArgumentException("SourcePath must be relative to the configured ingestion root.", nameof(sourcePath));
+        }
+
+        if (ContainsTraversal(sourcePath))
+        {
+            throw new ArgumentException("SourcePath must stay within the configured ingestion root.", nameof(sourcePath));
+        }
+
+        var sourceDirectory = Path.GetFullPath(Path.Combine(ingestionRootDirectory, sourcePath));
+        EnsurePathIsUnderRoot(ingestionRootDirectory, sourceDirectory, nameof(sourcePath));
+
+        return sourceDirectory;
+    }
+
+    private static IReadOnlyList<string> GetMarkdownFiles(
+        string ingestionRootDirectory,
+        string sourceDirectory,
+        string? fileName,
+        int maxFilesPerRequest)
+    {
+        var normalizedMaxFilesPerRequest = Math.Max(1, maxFilesPerRequest);
+
+        if (!string.IsNullOrWhiteSpace(fileName))
+        {
+            ValidateFileName(fileName);
+
+            var filePath = Path.Combine(sourceDirectory, fileName);
+            var normalizedFilePath = Path.GetFullPath(filePath);
+
+            EnsurePathIsUnderRoot(ingestionRootDirectory, normalizedFilePath, nameof(fileName));
+
+            if (!File.Exists(normalizedFilePath))
+            {
+                throw new FileNotFoundException($"Markdown file was not found: '{normalizedFilePath}'.", normalizedFilePath);
+            }
+
+            return [normalizedFilePath];
+        }
+
+        var markdownFiles = Directory
             .EnumerateFiles(sourceDirectory, "*.md", SearchOption.AllDirectories)
             .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
             .ToArray();
+
+        if (markdownFiles.Length > normalizedMaxFilesPerRequest)
+        {
+            throw new ArgumentException(
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    "The request matches {0} markdown files, which exceeds the configured limit of {1}.",
+                    markdownFiles.Length,
+                    normalizedMaxFilesPerRequest),
+                nameof(sourceDirectory));
+        }
+
+        return markdownFiles;
     }
 
-    private static string GenerateDocumentId()
+    private static string GenerateDocumentId(string normalizedSourcePath)
     {
-        return $"doc_{Guid.CreateVersion7():N}";
+        var hash = ComputeXxHash3(normalizedSourcePath).Split(':', 2)[0];
+
+        return $"doc_{hash}";
     }
 
     private static string ComputeXxHash3(string value)
@@ -146,6 +200,70 @@ public sealed class IngestionService(
         var hashValue = BinaryPrimitives.ReadUInt64BigEndian(hashBytes);
 
         return Convert.ToHexStringLower(hashBytes) + $":{hashValue}";
+    }
+
+    private static void ValidateFileName(string fileName)
+    {
+        if (Path.IsPathRooted(fileName))
+        {
+            throw new ArgumentException("FileName must be relative to the selected source directory.", nameof(fileName));
+        }
+
+        if (!string.Equals(fileName, Path.GetFileName(fileName), StringComparison.Ordinal)
+            || fileName.Contains(Path.DirectorySeparatorChar)
+            || fileName.Contains(Path.AltDirectorySeparatorChar)
+            || ContainsTraversal(fileName))
+        {
+            throw new ArgumentException("FileName must be a single markdown file name without path segments.", nameof(fileName));
+        }
+
+        if (!string.Equals(Path.GetExtension(fileName), ".md", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException("Only markdown files with the .md extension are supported.", nameof(fileName));
+        }
+    }
+
+    private static void EnsurePathIsUnderRoot(string ingestionRootDirectory, string candidatePath, string parameterName)
+    {
+        var normalizedRoot = AppendDirectorySeparator(Path.GetFullPath(ingestionRootDirectory));
+        var normalizedCandidate = Path.GetFullPath(candidatePath);
+
+        if (!normalizedCandidate.StartsWith(normalizedRoot, StringComparison.Ordinal))
+        {
+            throw new ArgumentException("The requested path must stay within the configured ingestion root.", parameterName);
+        }
+    }
+
+    private static bool ContainsTraversal(string path)
+    {
+        var pathSegments = path.Split(['/', '\\'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+        return pathSegments.Any(segment => string.Equals(segment, "..", StringComparison.Ordinal));
+    }
+
+    private static string AppendDirectorySeparator(string path)
+    {
+        return path.EndsWith(Path.DirectorySeparatorChar)
+            ? path
+            : path + Path.DirectorySeparatorChar;
+    }
+
+    private static void ValidateFileSize(string filePath, long maxFileSizeBytes)
+    {
+        var normalizedMaxFileSizeBytes = Math.Max(1L, maxFileSizeBytes);
+        var fileInfo = new FileInfo(filePath);
+
+        if (fileInfo.Length > normalizedMaxFileSizeBytes)
+        {
+            throw new ArgumentException(
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    "Markdown file '{0}' is {1} bytes, which exceeds the configured limit of {2} bytes.",
+                    fileInfo.Name,
+                    fileInfo.Length,
+                    normalizedMaxFileSizeBytes),
+                nameof(filePath));
+        }
     }
 
     private static string NormalizePath(string path) => path.Replace('\\', '/');

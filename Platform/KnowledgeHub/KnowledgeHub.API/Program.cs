@@ -5,6 +5,7 @@ using KnowledgeHub.Data.Chunking;
 using KnowledgeHub.Data.Embeddings;
 using KnowledgeHub.Data.Ingestion;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 var mongoConnectionString = builder.Configuration.GetConnectionString("MongoDb") ?? throw new ArgumentNullException();
@@ -14,6 +15,10 @@ var mongoConnectionString = builder.Configuration.GetConnectionString("MongoDb")
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<KnowledgeHubDbContext>(options =>
     options.UseMongoDB(mongoConnectionString));
+
+builder.Services
+    .AddOptions<IngestionOptions>()
+    .Bind(builder.Configuration.GetSection(IngestionOptions.SectionName));
 
 builder.Services
     .AddOptions<ChunkingOptions>()
@@ -48,13 +53,25 @@ app.UseHttpsRedirection();
 app.MapPost("/ingestion/documents",
         async (IngestionRequest request, IIngestionService ingestionService, CancellationToken cancellationToken) =>
         {
-            var result = await ingestionService.IngestDocumentsAsync(request, cancellationToken);
+            try
+            {
+                var result = await ingestionService.IngestDocumentsAsync(request, cancellationToken);
 
-            return Results.Ok(result);
+                return Results.Ok(result);
+            }
+            catch (ArgumentException exception)
+            {
+                return Results.BadRequest(new { error = exception.Message });
+            }
+            catch (DirectoryNotFoundException exception)
+            {
+                return Results.BadRequest(new { error = exception.Message });
+            }
+            catch (FileNotFoundException exception)
+            {
+                return Results.BadRequest(new { error = exception.Message });
+            }
         })
     .WithName("IngestDocument");
-
-app.MapGet("/weatherforecast", null!)
-    .WithName("GetWeatherForecast");
 
 app.Run();
