@@ -2,8 +2,6 @@ namespace KnowledgeHub.Data.Options;
 
 public sealed class EmbeddingOptions
 {
-    public const string SectionName = "Embeddings";
-
     public string ModelId { get; init; } = "text-embedding-3-small";
 
     public string? ApiKey { get; init; }
