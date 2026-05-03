@@ -41,6 +41,7 @@ public sealed class ChunkingService(
             if (existingChunks.Count > 0)
             {
                 dbContext.Chunks.RemoveRange(existingChunks);
+                await dbContext.SaveChangesAsync(cancellationToken);
             }
 
             if (chunkDrafts.Count == 0)
@@ -77,12 +78,9 @@ public sealed class ChunkingService(
 
         var chunks = new List<Chunk>();
 
-        foreach (var section in ExtractSections(document.RawMarkdown))
+        foreach (var section in ExtractSections(document.PageContent))
         {
-            foreach (var text in SplitRecursively(section.Content, 0))
-            {
-                chunks.Add(new Chunk(text, section.Heading));
-            }
+            chunks.AddRange(SplitRecursively(section.Content, 0).Select(text => new Chunk(text, section.Heading)));
         }
 
         return chunks;

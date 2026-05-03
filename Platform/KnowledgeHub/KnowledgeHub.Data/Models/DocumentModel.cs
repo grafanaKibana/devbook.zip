@@ -30,6 +30,18 @@ public record Document
     public required string RawMarkdown { get; init; }
 
     /// <summary>
+    /// YAML frontmatter without the surrounding delimiter lines.
+    /// Example: <c>topic: [AI]\nstatus: Creation</c>
+    /// </summary>
+    public required string Frontmatter { get; init; }
+
+    /// <summary>
+    /// Markdown content without YAML frontmatter.
+    /// Example: <c># RAG\n\nRAG combines retrieval with generation...</c>
+    /// </summary>
+    public required string PageContent { get; init; }
+
+    /// <summary>
     /// Content hash used to detect changes and re-ingestion.
     /// Example: <c>sha256:4d7f8a1b2c3d</c>
     /// </summary>

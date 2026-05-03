@@ -75,8 +75,40 @@ Example full-folder request:
 - Default ingestion root: `Vault/Software Engineering`.
 - `fileName` is optional, but when present it must be a single `.md` file name with no path segments.
 - Requests are rejected if they try to escape the configured ingestion root.
-- Requests are also rejected when they match more than the configured file-count limit or a file exceeds the configured file-size limit.
+- Folder ingestion reads all matching markdown files; individual markdown file size is not checked.
 - Ingestion is currently **upsert-only**. It creates or updates scanned files, but it does not purge documents for files that were deleted or moved outside the scanned request.
+
+## Mock RAG API
+
+These endpoints are intentionally simple placeholders. They return hard-coded dummy chunks so the API shape can be tested before real vector search and LLM answer generation are added.
+
+Search chunks:
+
+```text
+POST /rag/search
+```
+
+```json
+{
+  "query": "when should I use RAG",
+  "topK": 5
+}
+```
+
+Ask a question:
+
+```text
+POST /rag/ask
+```
+
+```json
+{
+  "question": "When should I use RAG instead of fine tuning?",
+  "topK": 5
+}
+```
+
+The mock answer returns dummy source chunks and citation labels without calling MongoDB or an LLM. Later, `/rag/search` should become query embedding plus vector retrieval, and `/rag/ask` should pass retrieved chunks to a chat model.
 
 ## Runtime flow
 

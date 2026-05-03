@@ -1,7 +1,6 @@
 namespace KnowledgeHub.Data.Services;
 
 using System.Buffers.Binary;
-using System.Globalization;
 using System.IO.Hashing;
 using System.Text;
 using Hangfire;
@@ -39,7 +38,7 @@ public sealed class IngestionService(
             throw new DirectoryNotFoundException($"Source directory was not found: '{sourceDirectory}'.");
         }
 
-        var markdownFiles = GetMarkdownFiles(ingestionRootDirectory, sourceDirectory, request.FileName, options.MaxFilesPerRequest);
+        var markdownFiles = GetMarkdownFiles(ingestionRootDirectory, sourceDirectory, request.FileName);
         var createdCount = 0;
         var updatedCount = 0;
         var changedDocumentIds = new List<string>();
@@ -48,9 +47,8 @@ public sealed class IngestionService(
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            ValidateFileSize(markdownFile, options.MaxFileSizeBytes);
-
             var rawMarkdown = await File.ReadAllTextAsync(markdownFile, cancellationToken);
+            var markdownParts = SplitFrontmatter(rawMarkdown);
             var sourceHash = ComputeXxHash3(rawMarkdown);
             var title = Path.GetFileNameWithoutExtension(markdownFile);
             var updatedAt = DateTimeOffset.UtcNow;
@@ -67,6 +65,8 @@ public sealed class IngestionService(
                     SourcePath = normalizedSourcePath,
                     Title = title,
                     RawMarkdown = rawMarkdown,
+                    Frontmatter = markdownParts.Frontmatter,
+                    PageContent = markdownParts.PageContent,
                     SourceHash = sourceHash,
                     UpdatedAt = updatedAt,
                 };
@@ -80,7 +80,9 @@ public sealed class IngestionService(
 
             if (string.Equals(existingDocument.SourceHash, sourceHash, StringComparison.Ordinal)
                 && string.Equals(existingDocument.Title, title, StringComparison.Ordinal)
-                && string.Equals(existingDocument.RawMarkdown, rawMarkdown, StringComparison.Ordinal))
+                && string.Equals(existingDocument.RawMarkdown, rawMarkdown, StringComparison.Ordinal)
+                && string.Equals(existingDocument.Frontmatter, markdownParts.Frontmatter, StringComparison.Ordinal)
+                && string.Equals(existingDocument.PageContent, markdownParts.PageContent, StringComparison.Ordinal))
             {
                 continue;
             }
@@ -91,6 +93,8 @@ public sealed class IngestionService(
                 SourcePath = normalizedSourcePath,
                 Title = title,
                 RawMarkdown = rawMarkdown,
+                Frontmatter = markdownParts.Frontmatter,
+                PageContent = markdownParts.PageContent,
                 SourceHash = sourceHash,
                 UpdatedAt = updatedAt,
             });
@@ -148,11 +152,8 @@ public sealed class IngestionService(
     private static IReadOnlyList<string> GetMarkdownFiles(
         string ingestionRootDirectory,
         string sourceDirectory,
-        string? fileName,
-        int maxFilesPerRequest)
+        string? fileName)
     {
-        var normalizedMaxFilesPerRequest = Math.Max(1, maxFilesPerRequest);
-
         if (!string.IsNullOrWhiteSpace(fileName))
         {
             ValidateFileName(fileName);
@@ -175,17 +176,6 @@ public sealed class IngestionService(
             .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
             .ToArray();
 
-        if (markdownFiles.Length > normalizedMaxFilesPerRequest)
-        {
-            throw new ArgumentException(
-                string.Format(
-                    CultureInfo.InvariantCulture,
-                    "The request matches {0} markdown files, which exceeds the configured limit of {1}.",
-                    markdownFiles.Length,
-                    normalizedMaxFilesPerRequest),
-                nameof(sourceDirectory));
-        }
-
         return markdownFiles;
     }
 
@@ -202,6 +192,34 @@ public sealed class IngestionService(
         var hashValue = BinaryPrimitives.ReadUInt64BigEndian(hashBytes);
 
         return Convert.ToHexStringLower(hashBytes) + $":{hashValue}";
+    }
+
+    private static MarkdownParts SplitFrontmatter(string rawMarkdown)
+    {
+        if (!rawMarkdown.StartsWith("---", StringComparison.Ordinal))
+        {
+            return new MarkdownParts(string.Empty, rawMarkdown);
+        }
+
+        using var reader = new StringReader(rawMarkdown);
+        var firstLine = reader.ReadLine();
+        if (!string.Equals(firstLine, "---", StringComparison.Ordinal))
+        {
+            return new MarkdownParts(string.Empty, rawMarkdown);
+        }
+
+        var frontmatterBuilder = new StringBuilder();
+        while (reader.ReadLine() is { } line)
+        {
+            if (string.Equals(line, "---", StringComparison.Ordinal))
+            {
+                return new MarkdownParts(frontmatterBuilder.ToString().TrimEnd(), reader.ReadToEnd().TrimStart());
+            }
+
+            frontmatterBuilder.AppendLine(line);
+        }
+
+        return new MarkdownParts(string.Empty, rawMarkdown);
     }
 
     private static void ValidateFileName(string fileName)
@@ -250,23 +268,7 @@ public sealed class IngestionService(
             : path + Path.DirectorySeparatorChar;
     }
 
-    private static void ValidateFileSize(string filePath, long maxFileSizeBytes)
-    {
-        var normalizedMaxFileSizeBytes = Math.Max(1L, maxFileSizeBytes);
-        var fileInfo = new FileInfo(filePath);
-
-        if (fileInfo.Length > normalizedMaxFileSizeBytes)
-        {
-            throw new ArgumentException(
-                string.Format(
-                    CultureInfo.InvariantCulture,
-                    "Markdown file '{0}' is {1} bytes, which exceeds the configured limit of {2} bytes.",
-                    fileInfo.Name,
-                    fileInfo.Length,
-                    normalizedMaxFileSizeBytes),
-                nameof(filePath));
-        }
-    }
-
     private static string NormalizePath(string path) => path.Replace('\\', '/');
+
+    private sealed record MarkdownParts(string Frontmatter, string PageContent);
 }

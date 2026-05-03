@@ -11,7 +11,7 @@ using System.ClientModel;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddKnowledgeHubDataServices(this IServiceCollection services)
+    public static IServiceCollection AddServices(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
 
@@ -24,6 +24,7 @@ public static class ServiceCollectionExtensions
 
         return services;
     }
+
 
     private static IEmbeddingGenerator<string, Embedding<float>> CreateEmbeddingGenerator(IServiceProvider serviceProvider)
     {
@@ -50,8 +51,6 @@ public static class ServiceCollectionExtensions
                     Endpoint = new Uri(options.Endpoint, UriKind.Absolute),
                 });
 
-        return client
-            .GetEmbeddingClient(options.ModelId)
-            .AsIEmbeddingGenerator(options.VectorDimensions);
+        return client.GetEmbeddingClient(options.ModelId).AsIEmbeddingGenerator(options.VectorDimensions);
     }
 }
