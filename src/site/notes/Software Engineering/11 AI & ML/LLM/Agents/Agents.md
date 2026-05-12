@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/agents/agents/","tags":["FolderNote"]}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/agents/agents/","tags":["FolderNote"],"dg-note-properties":{"topic":["AI & ML"],"subtopic":["LLM"],"tags":["FolderNote"],"status":"Done","level":["3"],"priority":"Medium"}}
 ---
 
 

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/c-sharp/fundamentals/generics/"}
+{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/c-sharp/fundamentals/generics/","dg-note-properties":{"topic":["Programming"],"subtopic":["NET"],"level":["4"],"priority":"Medium","status":"Creation"}}
 ---
 
 # Intro

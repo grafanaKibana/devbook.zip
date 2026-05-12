@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/algorithms/sorting-algorithms/sorting-algorithms/","tags":["FolderNote"]}
+{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/algorithms/sorting-algorithms/sorting-algorithms/","tags":["FolderNote"],"dg-note-properties":{"topic":["Computer Science"],"subtopic":["Algorithms"],"tags":["FolderNote"],"priority":"Low","level":["4"],"status":"Creation"}}
 ---
 
 

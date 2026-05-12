@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/prompting/prompting/","tags":["FolderNote"]}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/prompting/prompting/","tags":["FolderNote"],"dg-note-properties":{"topic":["AI & ML"],"subtopic":["LLM"],"level":["3"],"status":"Done","tags":["FolderNote"],"priority":"Medium"}}
 ---
 
 

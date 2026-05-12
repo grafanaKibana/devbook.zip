@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/design-patterns/behavioral/chain-of-responsibility/"}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/design-patterns/behavioral/chain-of-responsibility/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Patterns"],"level":["3"],"priority":"High","status":"Creation"}}
 ---
 
 # Chain of Responsibility

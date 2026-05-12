@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/10-cloud/aws/aws/","tags":["FolderNote"]}
+{"dg-publish":true,"permalink":"/software-engineering/10-cloud/aws/aws/","tags":["FolderNote"],"dg-note-properties":{"topic":["Cloud"],"subtopic":["AWS"],"level":["3"],"priority":"Medium","status":"Creation","tags":["FolderNote"]}}
 ---
 
 

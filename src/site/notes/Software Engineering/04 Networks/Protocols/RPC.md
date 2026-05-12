@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/04-networks/protocols/rpc/"}
+{"dg-publish":true,"permalink":"/software-engineering/04-networks/protocols/rpc/","dg-note-properties":{"topic":["Networks"],"subtopic":["Protocols"],"level":["3"],"priority":"Medium","status":"Creation"}}
 ---
 
 

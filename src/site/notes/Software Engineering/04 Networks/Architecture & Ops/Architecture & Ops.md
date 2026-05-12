@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/04-networks/architecture-and-ops/architecture-and-ops/","tags":["FolderNote"]}
+{"dg-publish":true,"permalink":"/software-engineering/04-networks/architecture-and-ops/architecture-and-ops/","tags":["FolderNote"],"dg-note-properties":{"topic":["Networks"],"subtopic":["Architecture & Ops"],"tags":["FolderNote"],"priority":"Medium","level":["3"],"status":"Creation"}}
 ---
 
 

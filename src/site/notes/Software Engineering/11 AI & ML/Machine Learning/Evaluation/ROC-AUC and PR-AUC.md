@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/machine-learning/evaluation/roc-auc-and-pr-auc/"}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/machine-learning/evaluation/roc-auc-and-pr-auc/","dg-note-properties":{"topic":["AI & ML"],"subtopic":["Machine Learning"],"level":["2"],"priority":"Medium","status":"Not-Started"}}
 ---
 
 

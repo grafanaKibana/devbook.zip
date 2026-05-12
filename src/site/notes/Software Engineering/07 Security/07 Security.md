@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/07-security/07-security/","tags":["FolderNote"]}
+{"dg-publish":true,"permalink":"/software-engineering/07-security/07-security/","tags":["FolderNote"],"dg-note-properties":{"topic":["Security"],"subtopic":[],"tags":["FolderNote"],"priority":"High","level":["4"],"status":"Creation"}}
 ---
 
 

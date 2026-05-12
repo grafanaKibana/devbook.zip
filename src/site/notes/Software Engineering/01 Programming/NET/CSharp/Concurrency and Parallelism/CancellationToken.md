@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/c-sharp/concurrency-and-parallelism/cancellation-token/"}
+{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/c-sharp/concurrency-and-parallelism/cancellation-token/","dg-note-properties":{"topic":["Programming"],"subtopic":["NET"],"level":["4"],"priority":"Medium","status":"Creation"}}
 ---
 
 # Intro

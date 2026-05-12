@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/10-cloud/google-cloud/google-cloud/","tags":["FolderNote"]}
+{"dg-publish":true,"permalink":"/software-engineering/10-cloud/google-cloud/google-cloud/","tags":["FolderNote"],"dg-note-properties":{"topic":["Cloud"],"subtopic":["Google Cloud"],"level":["3"],"priority":"Medium","tags":["FolderNote"],"status":"Creation"}}
 ---
 
 

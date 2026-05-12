@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/c-sharp/concurrency-and-parallelism/thread-pool/"}
+{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/c-sharp/concurrency-and-parallelism/thread-pool/","dg-note-properties":{"topic":["Programming"],"subtopic":["NET"],"level":["4"],"priority":"High","status":"Creation"}}
 ---
 
 # Intro

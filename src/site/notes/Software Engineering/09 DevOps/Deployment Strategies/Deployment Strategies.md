@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/09-dev-ops/deployment-strategies/deployment-strategies/"}
+{"dg-publish":true,"permalink":"/software-engineering/09-dev-ops/deployment-strategies/deployment-strategies/","dg-note-properties":{"topic":["DevOps"],"subtopic":["Deployment Strategies"],"status":["Creation"],"priority":"Medium","level":["2"]}}
 ---
 
 

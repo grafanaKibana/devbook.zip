@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/04-networks/protocols/http-2/"}
+{"dg-publish":true,"permalink":"/software-engineering/04-networks/protocols/http-2/","dg-note-properties":{"topic":["Networks"],"subtopic":["Protocols"],"level":["3"],"priority":"Medium","status":"Creation"}}
 ---
 
 # Intro

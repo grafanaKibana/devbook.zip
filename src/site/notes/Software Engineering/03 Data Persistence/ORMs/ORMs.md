@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/or-ms/or-ms/","tags":["FolderNote"]}
+{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/or-ms/or-ms/","tags":["FolderNote"],"dg-note-properties":{"topic":["Data Persistence"],"subtopic":["ORMs"],"tags":["FolderNote"],"priority":"High","level":["4"],"status":"Creation"}}
 ---
 
 

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/09-dev-ops/version-control-systems/branching-stratagies/"}
+{"dg-publish":true,"permalink":"/software-engineering/09-dev-ops/version-control-systems/branching-stratagies/","dg-note-properties":{"topic":["DevOps"],"subtopic":["Version Control Systems"],"level":["4"],"priority":"High","status":"Creation"}}
 ---
 
 

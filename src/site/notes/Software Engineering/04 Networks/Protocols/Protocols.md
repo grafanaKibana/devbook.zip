@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/04-networks/protocols/protocols/","tags":["FolderNote"]}
+{"dg-publish":true,"permalink":"/software-engineering/04-networks/protocols/protocols/","tags":["FolderNote"],"dg-note-properties":{"topic":["Networks"],"subtopic":["Protocols"],"tags":["FolderNote"],"priority":"High","status":"Creation","level":["3"]}}
 ---
 
 

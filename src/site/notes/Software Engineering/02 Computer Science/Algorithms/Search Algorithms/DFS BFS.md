@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/algorithms/search-algorithms/dfs-bfs/"}
+{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/algorithms/search-algorithms/dfs-bfs/","dg-note-properties":{"topic":["Computer Science"],"subtopic":["Algorithms"],"level":["4"],"priority":"Medium","status":"Done"}}
 ---
 
 

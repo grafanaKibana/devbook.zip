@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/08-sdlc/bdd/"}
+{"dg-publish":true,"permalink":"/software-engineering/08-sdlc/bdd/","dg-note-properties":{"topic":["SDLC"],"subtopic":["SDLC"],"level":["1"],"priority":"Medium","status":"Creation"}}
 ---
 
 # Intro

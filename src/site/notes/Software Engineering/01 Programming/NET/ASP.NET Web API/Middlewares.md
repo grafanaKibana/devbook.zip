@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/asp-net-web-api/middlewares/"}
+{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/asp-net-web-api/middlewares/","dg-note-properties":{"topic":["Programming"],"subtopic":["NET"],"level":["4"],"priority":"High","status":"Creation"}}
 ---
 
 # Intro

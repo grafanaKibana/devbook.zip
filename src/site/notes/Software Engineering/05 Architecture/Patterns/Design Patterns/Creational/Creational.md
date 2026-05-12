@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/design-patterns/creational/creational/","tags":["FolderNote"]}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/design-patterns/creational/creational/","tags":["FolderNote"],"dg-note-properties":{"topic":["Architecture"],"subtopic":["Patterns"],"tags":["FolderNote"],"level":["3"],"priority":"High","status":"Done"}}
 ---
 
 # Creational Patterns

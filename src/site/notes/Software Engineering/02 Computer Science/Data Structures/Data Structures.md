@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/data-structures/data-structures/","tags":["FolderNote"]}
+{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/data-structures/data-structures/","tags":["FolderNote"],"dg-note-properties":{"topic":["Computer Science"],"subtopic":["Data Structures"],"tags":["FolderNote"],"priority":"Medium","level":["4"],"status":"Creation"}}
 ---
 
 

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/machine-learning/spectrum-of-automations/"}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/machine-learning/spectrum-of-automations/","dg-note-properties":{"topic":["AI & ML"],"subtopic":["Machine Learning"],"level":["1"],"priority":"Low","status":"Creation"}}
 ---
 
 

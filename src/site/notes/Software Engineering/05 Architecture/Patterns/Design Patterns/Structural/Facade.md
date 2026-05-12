@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/design-patterns/structural/facade/"}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/design-patterns/structural/facade/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Patterns"],"level":["2"],"priority":"High","status":"Creation"}}
 ---
 
 # Facade

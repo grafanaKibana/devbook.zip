@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/04-networks/architecture-and-ops/peer-2-peer/"}
+{"dg-publish":true,"permalink":"/software-engineering/04-networks/architecture-and-ops/peer-2-peer/","dg-note-properties":{"topic":["Networks"],"subtopic":["Architecture & Ops"],"level":["1"],"priority":"Medium","status":"Creation"}}
 ---
 
 

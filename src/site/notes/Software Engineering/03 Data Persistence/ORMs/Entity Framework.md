@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/or-ms/entity-framework/"}
+{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/or-ms/entity-framework/","dg-note-properties":{"topic":["Data Persistence"],"subtopic":["ORMs"],"level":["4"],"priority":"High","status":"Creation"}}
 ---
 
 

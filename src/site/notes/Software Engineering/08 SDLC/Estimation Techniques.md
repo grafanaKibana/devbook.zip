@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/08-sdlc/estimation-techniques/"}
+{"dg-publish":true,"permalink":"/software-engineering/08-sdlc/estimation-techniques/","dg-note-properties":{"topic":["SDLC"],"subtopic":["SDLC"],"level":["4"],"priority":"Medium","status":"Creation"}}
 ---
 
 

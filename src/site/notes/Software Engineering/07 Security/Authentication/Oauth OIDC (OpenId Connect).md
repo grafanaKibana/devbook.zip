@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/07-security/authentication/oauth-oidc-open-id-connect/"}
+{"dg-publish":true,"permalink":"/software-engineering/07-security/authentication/oauth-oidc-open-id-connect/","dg-note-properties":{"topic":["Security"],"subtopic":["Authentication"],"level":["3"],"priority":"High","status":"Creation"}}
 ---
 
 

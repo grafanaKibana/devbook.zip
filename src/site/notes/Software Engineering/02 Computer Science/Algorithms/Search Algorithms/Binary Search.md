@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/algorithms/search-algorithms/binary-search/"}
+{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/algorithms/search-algorithms/binary-search/","dg-note-properties":{"topic":["Computer Science"],"subtopic":["Algorithms"],"level":["4"],"priority":"Medium","status":"Ready To Repeat"}}
 ---
 
 

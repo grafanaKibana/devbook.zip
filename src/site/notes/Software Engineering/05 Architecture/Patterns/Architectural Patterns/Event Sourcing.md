@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/architectural-patterns/event-sourcing/"}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/architectural-patterns/event-sourcing/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Patterns"],"level":["2"],"priority":"High","status":"Ready To Repeat"}}
 ---
 
 

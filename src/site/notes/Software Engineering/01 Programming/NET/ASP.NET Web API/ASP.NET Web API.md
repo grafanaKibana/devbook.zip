@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/asp-net-web-api/asp-net-web-api/","tags":["FolderNote"]}
+{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/asp-net-web-api/asp-net-web-api/","tags":["FolderNote"],"dg-note-properties":{"topic":["Programming"],"subtopic":["NET"],"level":["4"],"priority":"High","tags":["FolderNote"],"status":"Creation"}}
 ---
 
 

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/design-patterns/behavioral/template-method/"}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/design-patterns/behavioral/template-method/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Patterns"],"level":["2"],"priority":"High","status":"Creation"}}
 ---
 
 # Template Method

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/algorithms/disjoint-set/disjoint-set-union-find/"}
+{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/algorithms/disjoint-set/disjoint-set-union-find/","dg-note-properties":{"topic":["Computer Science"],"subtopic":["Algorithms"],"level":["3"],"priority":"Medium","status":"Creation"}}
 ---
 
 # Intro

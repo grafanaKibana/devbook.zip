@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/distributed-systems/scalability-patterns/vertical-scaling/"}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/distributed-systems/scalability-patterns/vertical-scaling/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Distributed Systems"],"level":["2"],"priority":"High","status":"Not-Started"}}
 ---
 
 

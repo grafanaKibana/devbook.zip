@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/evaluation/online-evaluation-and-ab-tests/"}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/evaluation/online-evaluation-and-ab-tests/","dg-note-properties":{"topic":["AI & ML"],"subtopic":["LLM"],"level":["3"],"priority":"Medium","status":"Done"}}
 ---
 
 # Intro

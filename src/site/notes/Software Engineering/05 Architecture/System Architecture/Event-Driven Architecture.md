@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/system-architecture/event-driven-architecture/"}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/system-architecture/event-driven-architecture/","dg-note-properties":{"topic":["Architecture"],"subtopic":["System Architecture"],"level":["2"],"priority":"High","status":"Ready To Repeat"}}
 ---
 
 # Intro

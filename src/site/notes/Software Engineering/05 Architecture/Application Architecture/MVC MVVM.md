@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/application-architecture/mvc-mvvm/"}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/application-architecture/mvc-mvvm/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Application Architecture"],"level":["4"],"priority":"High","status":"Creation"}}
 ---
 
 # Intro

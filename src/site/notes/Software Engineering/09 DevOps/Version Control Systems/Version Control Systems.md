@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/09-dev-ops/version-control-systems/version-control-systems/","tags":["FolderNote"]}
+{"dg-publish":true,"permalink":"/software-engineering/09-dev-ops/version-control-systems/version-control-systems/","tags":["FolderNote"],"dg-note-properties":{"topic":["DevOps"],"subtopic":["Version Control Systems"],"level":["4"],"priority":"High","tags":["FolderNote"],"status":"Creation"}}
 ---
 
 

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/architectural-patterns/architectural-patterns/","tags":["FolderNote"]}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/architectural-patterns/architectural-patterns/","tags":["FolderNote"],"dg-note-properties":{"topic":["Architecture"],"subtopic":["Patterns"],"tags":["FolderNote"],"priority":"High","level":["3"],"status":"Creation"}}
 ---
 
 

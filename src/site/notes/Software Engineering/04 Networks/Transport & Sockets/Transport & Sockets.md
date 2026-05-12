@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/04-networks/transport-and-sockets/transport-and-sockets/","tags":["FolderNote"]}
+{"dg-publish":true,"permalink":"/software-engineering/04-networks/transport-and-sockets/transport-and-sockets/","tags":["FolderNote"],"dg-note-properties":{"topic":["Networks"],"subtopic":["Transport & Sockets"],"tags":["FolderNote"],"status":"Creation","priority":"Medium","level":["3"]}}
 ---
 
 
