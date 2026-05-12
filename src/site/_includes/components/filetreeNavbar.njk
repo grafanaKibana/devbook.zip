@@ -11,6 +11,7 @@
         {% else %}
         <a href="/" style="text-decoration: none; text-align: center;">
                 <h1 style="margin: 15px !important;">{{meta.siteName}}</h1>
+                {% if meta.siteSubtitle %}<span class="dg-branding-subtitle">{{meta.siteSubtitle}}</span>{% endif %}
         </a>
         {% endif %}
         {% for imp in dynamics.filetree.afterTitle %}
