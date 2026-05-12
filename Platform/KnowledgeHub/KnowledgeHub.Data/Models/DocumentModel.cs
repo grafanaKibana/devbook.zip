@@ -1,6 +1,6 @@
 namespace KnowledgeHub.Data.Models;
 
-using System.ComponentModel.DataAnnotations;
+using MongoDB.Bson.Serialization.Attributes;
 
 public record Document
 {
@@ -8,7 +8,7 @@ public record Document
     /// Unique document identifier.
     /// Example: <c>doc_rag_md</c>
     /// </summary>
-    [Key]
+    [BsonId]
     public required string DocumentId { get; init; }
 
     /// <summary>
@@ -57,5 +57,6 @@ public record Document
     /// Child chunks derived from this document.
     /// Example: <c>[chunk_rag_md_0001, chunk_rag_md_0002, chunk_rag_md_0003]</c>
     /// </summary>
+    [BsonIgnore]
     public List<ChunkModel> Chunks { get; init; } = [];
 }

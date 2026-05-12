@@ -3,17 +3,15 @@ namespace KnowledgeHub.Data.Services;
 using System.Buffers.Binary;
 using System.IO.Hashing;
 using System.Text;
-using Hangfire;
-using KnowledgeHub.Data.Jobs;
 using KnowledgeHub.Data.Models;
 using KnowledgeHub.Data.Options;
-using Microsoft.EntityFrameworkCore;
+using KnowledgeHub.Data.Repositories;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
 public sealed class IngestionService(
-    KnowledgeHubDbContext dbContext,
-    IBackgroundJobClient backgroundJobClient,
+    IDocumentRepository documentRepository,
+    ChunkingService chunkingService,
     IHostEnvironment hostEnvironment,
     IOptions<IngestionOptions> options)
 {
@@ -41,6 +39,7 @@ public sealed class IngestionService(
         var markdownFiles = GetMarkdownFiles(ingestionRootDirectory, sourceDirectory, request.FileName);
         var createdCount = 0;
         var updatedCount = 0;
+        var changedDocuments = new List<Document>();
         var changedDocumentIds = new List<string>();
 
         foreach (var markdownFile in markdownFiles)
@@ -54,8 +53,7 @@ public sealed class IngestionService(
             var updatedAt = DateTimeOffset.UtcNow;
             var normalizedSourcePath = NormalizePath(Path.GetRelativePath(ingestionRootDirectory, markdownFile));
 
-            var existingDocument = await dbContext.Documents
-                .FirstOrDefaultAsync(document => document.SourcePath == normalizedSourcePath, cancellationToken);
+            var existingDocument = await documentRepository.GetBySourcePathAsync(normalizedSourcePath, cancellationToken);
 
             if (existingDocument is null)
             {
@@ -71,9 +69,10 @@ public sealed class IngestionService(
                     UpdatedAt = updatedAt,
                 };
 
-                dbContext.Documents.Add(newDocument);
+                await documentRepository.UpsertAsync(newDocument, cancellationToken);
 
                 createdCount++;
+                changedDocuments.Add(newDocument);
                 changedDocumentIds.Add(newDocument.DocumentId);
                 continue;
             }
@@ -87,7 +86,7 @@ public sealed class IngestionService(
                 continue;
             }
 
-            dbContext.Entry(existingDocument).CurrentValues.SetValues(new Document
+            var updatedDocument = new Document
             {
                 DocumentId = existingDocument.DocumentId,
                 SourcePath = normalizedSourcePath,
@@ -97,19 +96,16 @@ public sealed class IngestionService(
                 PageContent = markdownParts.PageContent,
                 SourceHash = sourceHash,
                 UpdatedAt = updatedAt,
-            });
+            };
+
+            await documentRepository.UpsertAsync(updatedDocument, cancellationToken);
 
             updatedCount++;
+            changedDocuments.Add(updatedDocument);
             changedDocumentIds.Add(existingDocument.DocumentId);
         }
 
-        await dbContext.SaveChangesAsync(cancellationToken);
-
-        if (changedDocumentIds.Count > 0)
-        {
-            backgroundJobClient.Enqueue<DocumentChunkIngestionJob>(
-                job => job.ProcessDocumentsAsync(changedDocumentIds.ToArray()));
-        }
+        await chunkingService.ReplaceDocumentChunksAsync(changedDocuments, cancellationToken);
 
         return new IngestionResult(
             true,

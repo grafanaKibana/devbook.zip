@@ -1,7 +1,7 @@
 namespace KnowledgeHub.Data;
 
-using KnowledgeHub.Data.Jobs;
 using KnowledgeHub.Data.Options;
+using KnowledgeHub.Data.Repositories;
 using KnowledgeHub.Data.Services;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,7 +17,9 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IngestionService>();
         services.AddScoped<ChunkingService>();
-        services.AddScoped<DocumentChunkIngestionJob>();
+        services.AddScoped<IDocumentRepository, DocumentRepository>();
+        services.AddScoped<IChunkRepository, ChunkRepository>();
+        services.AddScoped<RagSearchService>();
 
         services.AddEmbeddingGenerator(CreateEmbeddingGenerator);
         services.AddSingleton<EmbeddingService>();
@@ -34,12 +36,12 @@ public static class ServiceCollectionExtensions
 
         if (string.IsNullOrWhiteSpace(options.ApiKey))
         {
-            throw new InvalidOperationException("Embeddings API key is required. Configure Embeddings:ApiKey or OPENAI_API_KEY.");
+            throw new InvalidOperationException("EmbeddingOptions API key is required. Configure EmbeddingOptions:ApiKey or OPENAI_API_KEY.");
         }
 
         if (string.IsNullOrWhiteSpace(options.ModelId))
         {
-            throw new InvalidOperationException("Embeddings model ID is required. Configure Embeddings:ModelId.");
+            throw new InvalidOperationException("EmbeddingOptions model ID is required. Configure EmbeddingOptions:ModelId.");
         }
 
         var client = string.IsNullOrWhiteSpace(options.Endpoint)

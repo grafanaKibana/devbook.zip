@@ -5,13 +5,13 @@ using System.IO.Hashing;
 using System.Text;
 using KnowledgeHub.Data.Models;
 using KnowledgeHub.Data.Options;
+using KnowledgeHub.Data.Repositories;
 using Markdig;
 using Markdig.Syntax;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 public sealed class ChunkingService(
-    KnowledgeHubDbContext dbContext,
+    IChunkRepository chunkRepository,
     IOptions<ChunkingOptions> options,
     EmbeddingService embeddingService)
 {
@@ -34,18 +34,10 @@ public sealed class ChunkingService(
             cancellationToken.ThrowIfCancellationRequested();
 
             var chunkDrafts = Chunk(document);
-            var existingChunks = await dbContext.Chunks
-                .Where(chunk => chunk.DocumentId == document.DocumentId)
-                .ToListAsync(cancellationToken);
-
-            if (existingChunks.Count > 0)
-            {
-                dbContext.Chunks.RemoveRange(existingChunks);
-                await dbContext.SaveChangesAsync(cancellationToken);
-            }
 
             if (chunkDrafts.Count == 0)
             {
+                await chunkRepository.ReplaceDocumentChunksAsync(document.DocumentId, [], cancellationToken);
                 continue;
             }
 
@@ -66,10 +58,8 @@ public sealed class ChunkingService(
                 })
                 .ToArray();
 
-            dbContext.Chunks.AddRange(newChunks);
+            await chunkRepository.ReplaceDocumentChunksAsync(document.DocumentId, newChunks, cancellationToken);
         }
-
-        await dbContext.SaveChangesAsync(cancellationToken);
     }
 
     private IReadOnlyList<Chunk> Chunk(Document document)

@@ -1,6 +1,6 @@
 namespace KnowledgeHub.Data.Models;
 
-using System.ComponentModel.DataAnnotations;
+using MongoDB.Bson.Serialization.Attributes;
 
 public record ChunkModel
 {
@@ -8,7 +8,7 @@ public record ChunkModel
     /// Unique chunk identifier.
     /// Example: <c>chunk_rag_md_0003</c>
     /// </summary>
-    [Key]
+    [BsonId]
     public required string ChunkId { get; init; }
 
     /// <summary>
@@ -51,5 +51,6 @@ public record ChunkModel
     /// Navigation property to the parent document.
     /// Example: a <see cref="Document"/> instance for <c>doc_rag_md</c>
     /// </summary>
+    [BsonIgnore]
     public Document? Document { get; init; }
 }

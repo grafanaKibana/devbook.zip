@@ -1,19 +1,37 @@
 # KnowledgeHub API
 
-Small local API for ingesting markdown notes, storing documents/chunks in MongoDB, and generating embeddings through `Microsoft.Extensions.AI` with an OpenAI-backed embedding client.
+Small local API for ingesting markdown notes, storing documents/chunks in MongoDB through `MongoDB.Driver`, and generating embeddings through `Microsoft.Extensions.AI` with an OpenAI-backed embedding client.
+
+This is a personal R&D proof of concept for learning RAG mechanics, not a production enterprise service. The code intentionally favors a small number of classes and visible constants over extra configuration layers, extension points, and defensive edge-case handling.
 
 ## Projects
 
-- `KnowledgeHub.API` — minimal ASP.NET Core host.
-- `KnowledgeHub.Data` — ingestion, chunking, Hangfire job orchestration, and embedding integration.
+- `KnowledgeHub.API`, minimal ASP.NET Core host.
+- `KnowledgeHub.Data`, ingestion, chunking, small MongoDB.Driver repositories, Hangfire boilerplate for future jobs, and embedding integration.
 
 ## Prerequisites
 
 - MongoDB connection string in `ConnectionStrings:MongoDb`.
-- The MongoDB connection string must include a database name because Hangfire Mongo storage uses it at startup.
-- A reachable MongoDB instance for local runtime testing.
-- `OPENAI_API_KEY` environment variable.
+- Atlas MongoDB for real `/rag/search` vector retrieval. Local or non-Atlas MongoDB is enough for basic storage experiments, but it does not support the `$vectorSearch` stage used by the search endpoint.
+- OpenAI API key in `EmbeddingOptions:ApiKey` or `OPENAI_API_KEY`.
 - Optional `OPENAI_ENDPOINT` environment variable if you are not using the default OpenAI endpoint.
+
+Required runtime configuration:
+
+```json
+{
+  "ConnectionStrings": {
+    "MongoDb": "<mongo-connection-string>"
+  },
+  "EmbeddingOptions": {
+    "ApiKey": "<openai-api-key>",
+    "ModelId": "text-embedding-3-small",
+    "VectorDimensions": 384
+  }
+}
+```
+
+Keep secret values in user-secrets or environment variables, not in committed `appsettings*.json` files.
 
 ## Run
 
@@ -41,7 +59,11 @@ Build:
 dotnet build Platform/KnowledgeHub/KnowledgeHub.API/KnowledgeHub.API.csproj
 ```
 
-There is currently no dedicated test project under `Platform/KnowledgeHub`, so `dotnet test` is not yet a meaningful verification step here.
+Test:
+
+```bash
+dotnet test Platform/KnowledgeHub/KnowledgeHub.Tests/KnowledgeHub.Tests.csproj
+```
 
 ## Ingestion API
 
@@ -77,10 +99,15 @@ Example full-folder request:
 - Requests are rejected if they try to escape the configured ingestion root.
 - Folder ingestion reads all matching markdown files; individual markdown file size is not checked.
 - Ingestion is currently **upsert-only**. It creates or updates scanned files, but it does not purge documents for files that were deleted or moved outside the scanned request.
+- Hangfire server/storage is wired for future background work, but ingestion chunking currently runs inline from the API request; no ingestion job is registered.
 
-## Mock RAG API
+Persistence is intentionally driver-only. The app uses two tiny repositories over `MongoDB.Driver`: one for document lookup/upsert and one for chunk replacement/vector search. There is no EF Core DbContext, migration layer, generic repository, or unit-of-work abstraction.
 
-These endpoints are intentionally simple placeholders. They return hard-coded dummy chunks so the API shape can be tested before real vector search and LLM answer generation are added.
+## RAG API
+
+`/rag/search` performs real vector retrieval against the `chunks` collection. It embeds the query with the configured embedding model, runs Atlas `$vectorSearch`, and returns `mode: "vector"` with matching chunk results.
+
+`/rag/ask` remains a mock endpoint for now. It still returns dummy source chunks and does not call MongoDB or an LLM.
 
 Search chunks:
 
@@ -92,6 +119,49 @@ POST /rag/search
 {
   "query": "when should I use RAG",
   "topK": 5
+}
+```
+
+Example QA request for a blank query:
+
+```bash
+curl -i http://localhost:5288/rag/search \
+  -H "Content-Type: application/json" \
+  -d '{"query":"   ","topK":5}'
+```
+
+Expected response shape:
+
+```json
+{
+  "error": "Query is required."
+}
+```
+
+Example QA request for vector retrieval:
+
+```bash
+curl -s http://localhost:5288/rag/search \
+  -H "Content-Type: application/json" \
+  -d '{"query":"when should I use RAG","topK":5}'
+```
+
+Expected response shape:
+
+```json
+{
+  "query": "when should I use RAG",
+  "mode": "vector",
+  "results": [
+    {
+      "chunkId": "<chunk-id>",
+      "documentId": "<document-id>",
+      "chunkText": "<matched chunk text>",
+      "heading": "<document heading>",
+      "citationLabel": "<citation>",
+      "score": 0.82
+    }
+  ]
 }
 ```
 
@@ -108,11 +178,41 @@ POST /rag/ask
 }
 ```
 
-The mock answer returns dummy source chunks and citation labels without calling MongoDB or an LLM. Later, `/rag/search` should become query embedding plus vector retrieval, and `/rag/ask` should pass retrieved chunks to a chat model.
+The mock answer returns dummy source chunks and citation labels without calling MongoDB or an LLM. Real answer generation for `/rag/ask` is intentionally outside this PoC step.
+
+## Atlas Vector Search index
+
+Create this Atlas Vector Search index on the `chunks` collection before calling `/rag/search` against real data:
+
+```json
+{
+  "name": "chunks_embedding_vector_idx",
+  "type": "vectorSearch",
+  "definition": {
+    "fields": [
+      {
+        "type": "vector",
+        "path": "Embedding",
+        "numDimensions": 384,
+        "similarity": "cosine"
+      }
+    ]
+  }
+}
+```
+
+The index dimensions must match `EmbeddingOptions:VectorDimensions`. The path is currently a PoC constant in `RagSearchService` and must stay `Embedding` unless the chunk model and index are changed together.
+
+## RAG troubleshooting
+
+- Missing index or non-Atlas MongoDB: `/rag/search` depends on Atlas `$vectorSearch`. If the index `chunks_embedding_vector_idx` is missing, or the database is local/non-Atlas MongoDB, vector search fails before returning results.
+- Dimension mismatch: the Atlas index uses `384` dimensions, so `EmbeddingOptions:ModelId` must stay `text-embedding-3-small` with `EmbeddingOptions:VectorDimensions = 384` unless you rebuild stored chunk embeddings and recreate the index with matching dimensions.
+- Empty results: if `/rag/search` returns `mode: "vector"` with an empty `results` array, first ingest markdown documents so the API can create chunks and embeddings. A valid index cannot return matches when the `chunks` collection has no embedded chunks.
+- Secret handling: keep `ConnectionStrings:MongoDb`, `EmbeddingOptions:ApiKey`, and `OPENAI_API_KEY` in user-secrets or environment variables only. Committed configuration should contain placeholders or non-secret defaults.
 
 ## Runtime flow
 
 1. The API validates the request and scans markdown files under the configured ingestion root.
 2. Matching documents are created or updated in MongoDB.
-3. Changed document IDs are enqueued into Hangfire.
-4. The background job chunks the document text and generates embeddings.
+3. Changed documents are chunked and embedded before the ingestion response returns.
+4. Chunk replacement deletes the document's previous chunks and inserts the new embedded chunks.

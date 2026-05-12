@@ -6,7 +6,7 @@ using KnowledgeHub.Data;
 using KnowledgeHub.Data.Models;
 using KnowledgeHub.Data.Options;
 using KnowledgeHub.Data.Services;
-using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
 var mongoConnectionString = builder.Configuration.GetConnectionString("MongoDb") ?? throw new ArgumentNullException();
@@ -17,8 +17,13 @@ const string mongoDatabaseName = nameof(KnowledgeHub);
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddDbContext<KnowledgeHubDbContext>(options =>
-    options.UseMongoDB(mongoConnectionString, mongoDatabaseName));
+builder.Services.AddSingleton<IMongoClient>(_ => new MongoClient(mongoConnectionString));
+builder.Services.AddSingleton(serviceProvider =>
+    serviceProvider.GetRequiredService<IMongoClient>().GetDatabase(mongoDatabaseName));
+builder.Services.AddSingleton(serviceProvider =>
+    serviceProvider.GetRequiredService<IMongoDatabase>().GetCollection<Document>("documents"));
+builder.Services.AddSingleton(serviceProvider =>
+    serviceProvider.GetRequiredService<IMongoDatabase>().GetCollection<ChunkModel>("chunks"));
 
 builder.Services
     .AddOptions<IngestionOptions>()
@@ -88,22 +93,20 @@ app.MapPost("/ingestion/documents",
     .WithName("IngestDocument");
 
 app.MapPost("/rag/search",
-        (RagSearchRequest request) =>
+        async (RagSearchRequest request, RagSearchService ragSearchService, CancellationToken cancellationToken) =>
         {
-            if (string.IsNullOrWhiteSpace(request.Query))
+            try
             {
-                return Results.BadRequest(new { error = "Query is required." });
+                var result = await ragSearchService.SearchAsync(request, cancellationToken);
+
+                return Results.Ok(result);
             }
-
-            var topK = Math.Clamp(request.TopK, 1, 10);
-            var query = request.Query.Trim();
-            var results = CreateMockChunks()
-                .Take(topK)
-                .ToArray();
-
-            return Results.Ok(new RagSearchResponse(query, "mock", results));
+            catch (ArgumentException exception)
+            {
+                return Results.BadRequest(new { error = exception.Message });
+            }
         })
-    .WithName("MockRagSearch");
+    .WithName("RagSearch");
 
 app.MapPost("/rag/ask",
         (RagAskRequest request) =>
@@ -129,23 +132,23 @@ app.MapPost("/rag/ask",
 
 app.Run();
 
-static IReadOnlyList<RagChunkResult> CreateMockChunks() =>
+static IReadOnlyList<RagChunkResponse> CreateMockChunks() =>
 [
-    new RagChunkResult(
+    new RagChunkResponse(
         "chunk_mock_rag_0001",
         "doc_mock_rag",
         "RAG retrieves relevant knowledge base chunks before asking the model to answer, which keeps answers grounded in your own notes.",
         "RAG Flow",
         "[[RAG#RAG Flow]]",
         0.92),
-    new RagChunkResult(
+    new RagChunkResponse(
         "chunk_mock_chunking_0001",
         "doc_mock_chunking",
         "Chunking splits long pages into smaller passages so retrieval can return the specific section that answers the question.",
         "Chunking",
         "[[Chunking#Chunking]]",
         0.84),
-    new RagChunkResult(
+    new RagChunkResponse(
         "chunk_mock_embeddings_0001",
         "doc_mock_embeddings",
         "Embeddings turn text into vectors. Query vectors and chunk vectors must use the same model and dimensions.",
@@ -153,3 +156,5 @@ static IReadOnlyList<RagChunkResult> CreateMockChunks() =>
         "[[Embeddings#Embeddings]]",
         0.76),
 ];
+
+public partial class Program;
