@@ -20,7 +20,13 @@
   text-transform: uppercase;
 }
 
+h1.dg-branding-title {
+  margin: 0;
+}
+
 .dg-branding-subtitle {
+  display: block;
+  margin-top: 4px;
   font-size: 0.82rem;
   line-height: 1.2;
   opacity: 0.85;
