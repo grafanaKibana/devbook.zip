@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/other/signal-r/"}
+{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/other/signal-r/","dg-note-properties":{"topic":["Programming"],"subtopic":["NET"],"level":["3"],"priority":"Medium","status":"Creation"}}
 ---
 
 

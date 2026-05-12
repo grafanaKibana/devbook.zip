@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/system-architecture/service-oriented-architecture/"}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/system-architecture/service-oriented-architecture/","dg-note-properties":{"topic":["Architecture"],"subtopic":["System Architecture"],"level":["3"],"priority":"Medium","status":"Creation"}}
 ---
 
 

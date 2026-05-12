@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/rag/rag/","tags":["FolderNote"]}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/rag/rag/","tags":["FolderNote"],"dg-note-properties":{"tags":["FolderNote"],"status":"Done","priority":"High","level":["2"]}}
 ---
 
 
@@ -21,320 +21,372 @@ flowchart LR
     G --> V[Groundedness and Citation Checks]
 ```
 
-## Advanced RAG Patterns
+## RAG Patterns Ranked by Commonness
 
-Basic retrieve-then-generate works for straightforward factual lookups, but production systems hit failure modes that need more sophisticated patterns: multi-hop reasoning, uncertain retrieval quality, cross-modal evidence, and dynamic tool selection. Each pattern below solves a specific class of failures. Adopt incrementally after baseline RAG metrics plateau — every pattern adds latency, cost, and operational complexity.
+This ranking is a practical adoption heuristic, not market-share data. It orders patterns by how often they appear as default production guidance in current vendor docs, open-source frameworks, and enterprise RAG architectures. Start at the top and move down only when [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation\|evaluation]] shows a specific failure that cheaper patterns do not fix.
+
+### 1. Baseline Single-Pass RAG
+
+#### Work principle
+
+The system embeds the user query, retrieves the most similar chunks, places those chunks into the prompt, and asks the model to answer from that context. It is the simplest useful RAG loop: one query in, one retrieval pass, one generated answer out.
 
 ```mermaid
-flowchart TD
-    Q[Query] --> CL[Classify Complexity]
-    CL -->|Simple fact| SR[Single-Pass RAG]
-    CL -->|Multi-hop or ambiguous| IR[Iterative Retrieval]
-    CL -->|Low retrieval confidence| CR[CRAG]
-    CL -->|Relational or connected facts| GR[Graph RAG]
-    CL -->|Multiple data sources| AR[Agentic RAG]
-    CL -->|Mixed modalities| MR[Multimodal RAG]
-```
-
-### Iterative Retrieval
-
-How it works:
-
-- Run a retrieve-reason-retrieve loop instead of a single retrieval pass.
-- After each retrieval, the LLM reasons over current evidence and generates a follow-up retrieval query targeting information gaps.
-- The loop continues until a stop condition fires. Common strategies:
-  - **Fixed iteration cap** (2-4 hops) — predictable latency and cost but may stop early or waste iterations.
-  - **Information gain threshold** — stop when newly retrieved documents add little novel content. Requires a novelty metric (embedding similarity or entity overlap against existing context).
-  - **Explicit stop signal** — the LLM emits a stop token when it determines evidence is sufficient. Risk: the model may stop prematurely or never stop.
-- In practice, most multi-hop questions are answered within a few iterations. Adding more hops yields diminishing returns and increasing noise.
-
-```python
-context = []
-for step in range(max_steps):
-    thought = llm.reason(query, context)
-    if has_sufficient_info(thought):
-        break
-    follow_up = extract_retrieval_query(thought)
-    new_docs = retrieve(follow_up, top_k=3)
-    context.extend(new_docs)
-answer = llm.generate(query, context)
+flowchart LR
+    Q[User query] --> E[Embed query]
+    E --> R[Retrieve chunks]
+    R --> C[Assemble context]
+    C --> G[Generate answer]
 ```
 
 Where it fits:
 
-- Multi-hop questions where second-hop evidence depends on first-hop findings — "Who is the spouse of the director of Inception?" needs hop 1 to find the director, hop 2 to find the spouse.
+- First production version of a documentation assistant or support bot.
+- Small curated corpora where [[Software Engineering/11 AI & ML/LLM/RAG/Chunking\|chunking]] is clean and the answer usually lives in one document.
+- Baseline measurement before adding expensive retrieval logic.
+
+Main risk:
+
+- **Low precision or recall ceiling** — a single dense top-k search often misses exact identifiers, product codes, and policy names. Treat this as the baseline, not the final architecture.
+
+### 2. Hybrid Search plus Reranking
+
+#### Work principle
+
+Run lexical search and vector search together, merge their candidates, then rerank the merged set so the generator sees the best few passages. Lexical search catches exact terms; vector search catches semantic matches; [[Software Engineering/11 AI & ML/LLM/RAG/Re-ranking\|reranking]] removes noise before context assembly.
+
+```mermaid
+flowchart LR
+    Q[User query] --> L[Keyword search]
+    Q --> V[Vector search]
+    L --> CC[Candidate chunks]
+    V --> CC
+    CC --> F[Fuse candidates]
+    F --> RR[Rerank evidence]
+    RR --> C[Assemble context]
+    C --> G[Generate answer]
+```
+
+Where it fits:
+
+- Most production text RAG over enterprise documents, tickets, policies, and API docs.
+- Corpora with exact names, acronyms, error codes, or version numbers.
+- Systems where dense retrieval has acceptable recall but too much irrelevant context reaches the model.
+
+Main risk:
+
+- **Ranking stack complexity** — BM25 weights, vector similarity, reciprocal rank fusion, semantic rankers, and cross-encoder rerankers all affect final order. Tune with a golden query set instead of eyeballing examples.
+
+### 3. Query Rewriting and Routing
+
+#### Work principle
+
+Before retrieval, a small model or rules engine rewrites the user request into a better search query and routes it to the cheapest capable path. The rewrite makes implicit intent explicit; the router decides whether to use normal RAG, web search, SQL, multi-hop retrieval, or no retrieval.
+
+```mermaid
+flowchart LR
+    Q[User query] --> A[Analyze intent]
+    A --> W[Rewrite query]
+    A --> RT[Choose route]
+    W --> R[Retrieve chunks]
+    RT --> R
+    R --> CC[Candidate chunks]
+    CC --> C[Assemble context]
+    C --> G[Generate answer]
+```
+
+Where it fits:
+
+- Users ask vague questions like "does the new limit apply to partners" while the corpus uses terms like "external reseller quota".
+- High-volume systems where simple queries should not pay for agentic or multi-hop execution.
+- Multilingual or synonym-heavy corpora where the user vocabulary differs from the document vocabulary.
+
+Main risk:
+
+- **Semantic drift** — the rewritten query can silently change the user's intent. Log original and rewritten queries together, and measure whether rewrites improve retrieval recall.
+
+### 4. Parent-Document and Recursive Retrieval
+
+#### Work principle
+
+Index small chunks for precise matching, but return a larger parent section or document window for generation. Retrieval stays sharp, while the model receives enough surrounding context to interpret tables, definitions, and dependencies.
+
+```mermaid
+flowchart LR
+    D[Document] --> P[Parent sections]
+    P --> S[Small chunks]
+    S --> I[Chunk index]
+    Q[User query] --> R[Retrieve small chunks]
+    I --> R
+    R --> M[Matched chunks]
+    M --> X[Expand to parents]
+    P --> X
+    X --> C[Assemble context]
+    C --> G[Generate answer]
+```
+
+Where it fits:
+
+- Long manuals, design docs, RFCs, and legal policies where a 300-token chunk is not enough to answer correctly.
+- Tables and lists where a matching row needs its header, caption, or section preamble.
+- Questions that need local context but not full multi-hop reasoning.
+
+Main risk:
+
+- **Context bloat** — returning parent sections can drown the prompt in irrelevant text. Use token budgets and rerank parent windows before generation.
+
+### 5. Multi-Query Fusion
+
+#### Work principle
+
+Generate several search variants for the same user question, retrieve for each variant, deduplicate results, then fuse the rankings. This raises recall when no single query wording captures all relevant evidence.
+
+```mermaid
+flowchart LR
+    Q[User query] --> M[Generate variants]
+    M --> R1[Retrieve variant one]
+    M --> R2[Retrieve variant two]
+    M --> R3[Retrieve variant three]
+    R1 --> CC[Candidate chunks]
+    R2 --> CC
+    R3 --> CC
+    CC --> F[Fuse and dedupe]
+    F --> C[Assemble context]
+    C --> G[Generate answer]
+```
+
+Where it fits:
+
+- Compound questions such as "compare retention, deletion, and export rules".
+- Domains with many aliases for the same concept.
+- Recall-sensitive assistants where missing evidence is worse than retrieving a few extra candidates.
+
+Main risk:
+
+- **Duplicate cost** — every variant runs another retrieval path. Cap variants, deduplicate aggressively, and skip this pattern for simple fact lookups.
+
+### 6. Contextual Retrieval
+
+#### Work principle
+
+Add a short document-aware explanation to each chunk before indexing it. The retriever no longer sees a bare fragment; it sees the fragment plus enough context to know what the fragment means inside the original document.
+
+```mermaid
+flowchart LR
+    D[Source document] --> CH[Raw chunk]
+    D --> CT[Chunk context]
+    CH --> EN[Enriched chunk]
+    CT --> EN
+    EN --> IDX[Index]
+    Q[User query] --> R[Retrieve enriched chunks]
+    IDX --> R
+    R --> C[Assemble context]
+    C --> G[Generate answer]
+```
+
+Where it fits:
+
+- Chunks that contain pronouns, shorthand, table rows, or local definitions that make sense only inside the source document.
+- Static or slowly changing corpora where extra indexing-time LLM calls are acceptable.
+- Systems already using hybrid search and reranking but still losing meaning at chunk boundaries.
+
+Main risk:
+
+- **Indexing cost and stale enrichment** — every chunk may need an LLM-generated description. When source documents change, regenerate enriched chunks or the index will preserve old context.
+
+### 7. Multimodal RAG
+
+#### Work principle
+
+Retrieve and pass evidence across text, tables, images, charts, and scanned pages. The system either converts non-text content into text-like representations or uses vision-capable embeddings and models so the answer can cite visual evidence.
+
+```mermaid
+flowchart LR
+    Q[User query] --> RT[Modality router]
+    RT --> T[Text retrieval]
+    RT --> I[Image retrieval]
+    RT --> B[Table retrieval]
+    T --> E[Mixed evidence]
+    I --> E
+    B --> E
+    E --> C[Assemble context]
+    C --> G[Generate answer]
+```
+
+Where it fits:
+
+- Financial reports, research papers, technical manuals, medical forms, and scanned PDFs.
+- Questions where the evidence is in a chart, layout, or table rather than prose.
+- Document AI systems where OCR-only pipelines lose structure.
+
+Main risk:
+
+- **Modality mismatch** — retrieving an image is useless if the final model only receives text. Pass visual evidence to a model that can inspect it, or extract reliable text and table structure first.
+
+### 8. HyDE
+
+#### Work principle
+
+The model writes a hypothetical answer first, embeds that synthetic answer, and searches with the answer embedding instead of the raw query. The fake answer acts like a semantic bridge when the user query is too short or uses different vocabulary than the corpus.
+
+```mermaid
+flowchart LR
+    Q[User query] --> H[Draft hypothetical answer]
+    H --> E[Embed draft]
+    E --> R[Retrieve chunks]
+    Q --> C[Assemble context]
+    R --> C
+    C --> G[Generate answer]
+```
+
+Where it fits:
+
+- Sparse or vague user queries where direct embedding search underperforms.
+- Domains with vocabulary mismatch between layperson questions and expert documents.
+- Offline research assistants where extra model calls are acceptable.
+
+Main risk:
+
+- **Hallucinated retrieval anchor** — the hypothetical answer can invent details and retrieve evidence for the wrong premise. Use HyDE selectively and compare it against direct retrieval in evals.
+
+### 9. Iterative Multi-Hop Retrieval
+
+#### Work principle
+
+The system retrieves evidence, reasons about what is missing, creates a follow-up query, and retrieves again. It repeats for a small number of hops until the evidence covers the question.
+
+```mermaid
+flowchart LR
+    Q[User query] --> R1[Retrieve chunks]
+    R1 --> EC[Evidence context]
+    EC --> RE[Reason gaps]
+    RE --> F[Follow up query]
+    F --> R2[Retrieve more chunks]
+    R2 --> EC
+    EC --> C[Assemble context]
+    C --> G[Generate answer]
+```
+
+Where it fits:
+
+- Multi-hop questions where second-hop evidence depends on first-hop findings.
 - Bridge entity problems where the connecting document is not in the initial top-k results.
 - Complex analytical queries that decompose into sub-questions, each needing separate evidence.
 
 Main risk:
 
-- **Query drift** — each iteration's retrieval query can wander from the original intent. Mitigate by including the original query in every reasoning prompt.
-- **Noise accumulation** — irrelevant documents pile up, confusing later reasoning steps. Rerank and prune before adding to context.
-- **Latency multiplier** — each hop adds another embedding + retrieval + reasoning round-trip. With multiple hops, total response time grows multiplicatively.
+- **Query drift and noise accumulation** — each hop can move away from the original intent. Include the original query in every step, cap hops, rerank before adding new evidence, and trace each hop for debugging.
 
-### Self-RAG
+### 10. Agentic RAG
 
-How it works:
+#### Work principle
 
-- A single language model is trained with four special reflection tokens that control retrieval and self-critique:
-
-| Token | Purpose | Values |
-|-------|---------|--------|
-| **Retrieve** | Decide whether to call the retriever | yes, no, continue |
-| **IsRel** | Grade if retrieved document is relevant to the query | relevant, irrelevant |
-| **IsSup** | Check if the generation is supported by the document | fully supported, partially supported, no support |
-| **IsUse** | Rate if the generation actually answers the query | 1 through 5 |
-
-- At inference, the model generates text and reflection tokens together. When `Retrieve` fires "yes", documents are fetched and scored. Multiple candidate segments are generated in parallel (one per retrieved passage), scored by the reflection tokens, and the best segment is selected via beam search.
-- Training is two-stage: first train a critic model to label reflection tokens on a dataset, then insert those labels into the training corpus and train the generator with standard next-token prediction. No RLHF needed — reflection tokens are vocabulary expansion.
-
-```python
-retrieve_token = model.predict_token(input_x, preceding_y)
-if retrieve_token == "yes":
-    passages = retriever.get_top_k(input_x)
-    candidates = []
-    for passage in passages:
-        segment = model.generate(input_x, passage)
-        is_rel = model.predict_token("IsRel", input_x, passage)
-        is_sup = model.predict_token("IsSup", input_x, passage, segment)
-        is_use = model.predict_token("IsUse", input_x, segment)
-        candidates.append((segment, score(is_rel, is_sup, is_use)))
-    best = max(candidates, key=lambda x: x[1])
-```
-
-Where it fits:
-
-- Workloads with mixed knowledge needs — some queries need retrieval, others do not, and the model learns when to retrieve.
-- Long-form generation where retrieval mid-generation (not just at the start) improves grounding.
-- High hallucination risk scenarios where `IsSup` filtering catches unsupported claims before they reach the user.
-
-Main risk:
-
-- **Requires custom model training.** You cannot add Self-RAG to an off-the-shelf LLM without fine-tuning. This is not a plug-and-play pattern.
-- **Beam search complexity** over reflection token scores adds inference overhead. Weights for each token type (relevance, support, utility) are dataset-specific and need tuning.
-- **Critic quality ceiling** — if the critic model mislabels during training, the generator learns wrong retrieval and grounding behavior. Garbage labels in, garbage behavior out.
-
-### CRAG — Corrective Retrieval-Augmented Generation
-
-How it works:
-
-- Add a lightweight retrieval evaluator (the paper uses fine-tuned T5-large, 770M params) that scores retrieved documents before they reach the generator.
-- Based on the evaluator's confidence score, the system triggers one of three corrective actions:
-
-| Confidence | Action | Behavior |
-|------------|--------|----------|
-| High — above upper threshold | Correct | Refine documents with decompose-then-recompose |
-| Low — below lower threshold | Incorrect | Discard retrieved docs and fall back to web search |
-| Middle — between thresholds | Ambiguous | Combine refined documents with web search results |
-
-- **Knowledge refinement** (decompose-then-recompose): split each document into sentence-level strips, score each strip individually with the evaluator, discard irrelevant strips, and concatenate surviving strips in original order. This removes "partially relevant" noise that hurts generation quality.
-- **Web search fallback**: rewrite the query for web search optimization, fetch results, and optionally apply knowledge refinement to web results too.
-
-```python
-scores = [evaluator.score(query, doc) for doc in retrieved_docs]
-confidence = max(scores)
-if confidence >= upper_threshold:
-    knowledge = refine_strips(query, retrieved_docs)
-elif confidence < lower_threshold:
-    knowledge = web_search(rewrite_query(query))
-else:
-    knowledge = refine_strips(query, retrieved_docs) + web_search(rewrite_query(query))
-answer = llm.generate(query, knowledge)
-```
-
-Where it fits:
-
-- Noisy retriever environments where precision is inconsistent across query types.
-- Domains where the static corpus has gaps and web search can fill them (time-sensitive content, emerging topics).
-- Systems that need graceful degradation — CRAG provides a structured fallback chain instead of silently hallucinating from bad evidence.
-
-Main risk:
-
-- **Threshold tuning** — upper and lower confidence thresholds are dataset-specific with no universal values. Requires a validation set to calibrate.
-- **Web search overhead** — adds noticeable latency, API cost, and rate limit exposure per query that routes through the Incorrect or Ambiguous path. Cache web results and implement backoff.
-- **Evaluator drift** — the relevance evaluator's accuracy degrades as the domain evolves. Monitor false-positive and false-negative rates and retrain periodically.
-- **Strip granularity tradeoff** — too fine (word-level) loses context, too coarse (paragraph-level) keeps noise. Sentence-level is the paper's default heuristic, not a universal optimum.
-
-### Graph RAG
-
-How it works:
-
-- Instead of flat vector similarity over chunks, Graph RAG builds a knowledge graph from the corpus and retrieves over entity relationships. The pipeline has three stages:
-
-**1. Entity and relationship extraction.** An LLM reads each chunk and extracts typed entities (Person, Organization, Concept, Event) and typed directed edges with properties. The main challenge is entity linking — disambiguating the same name across documents.
-
-**2. Community detection.** The Leiden algorithm (successor to Louvain) partitions the graph into hierarchical communities. The number of levels depends on the graph and resolution parameters. As an illustrative example: fine-grained communities might represent individual subsystems, while coarser levels group those into broader domains. This precomputes semantic clusters so query-time retrieval does not need to traverse the full graph.
-
-**3. Community summarization.** Each community gets an LLM-generated summary. Summaries are expensive to generate (multiple LLM calls across the hierarchy) but cheap to query.
-
-At query time, the paper describes a map-reduce approach: community summaries are ranked for relevance, the LLM generates partial answers from each relevant summary (map), and a final synthesis step combines partial answers into a coherent response (reduce). The open-source [GraphRAG library](https://github.com/microsoft/graphrag) extends this with two query modes:
-
-- **Local search** — retrieves entities, relationships, and associated text chunks relevant to the query. Best for specific fact retrieval that requires relational context.
-- **Global search** — operates over community summaries at a chosen hierarchy level using the map-reduce pattern. Best for synthesis questions like "what are the main themes across all documents?" that flat retrieval cannot answer.
-
-Where it fits:
-
-- Multi-hop reasoning where answers require connecting entities across documents — "what breaks if we remove component X?".
-- Dependency-heavy domains: legal contracts, technical architecture, supply chains, compliance tracing.
-- Global synthesis queries that need a dataset-wide perspective, not just top-k chunks.
-
-Main risk:
-
-- **Entity linking errors propagate.** A wrong entity merge creates broken multi-hop paths and nonsensical query results. Fine-tune extraction on domain data and validate extraction quality before building the graph.
-- **Schema drift** — open-domain extraction creates 100+ relationship types that are logically equivalent but stored as distinct edge types. Define a constrained ontology of 10-20 relation types upfront and normalize during extraction.
-- **Expensive indexing** — entity extraction + relation extraction + community summarization costs significantly more than embedding-based indexing (multiple LLM calls per chunk at each stage). Budget accordingly and benchmark on a representative sample before full-corpus indexing.
-- **Incremental updates are hard.** Adding new documents requires re-running community detection and re-summarizing affected communities, or accepting stale graph structure.
-
-### Agentic RAG
-
-How it works:
-
-- The LLM acts as a reasoning engine that dynamically decides which tools to call, rather than following a fixed retrieve-then-generate pipeline.
-- The agent maintains a scratchpad of Thought/Action/Observation traces (ReAct pattern) and loops until it has enough information to answer.
-- Available tools typically include: vector search, SQL query, web search, API calls, and calculators. The LLM sees tool descriptions and picks based on query type — no hardcoded if/else routing.
-
-```python
-while iteration < max_iterations:
-    thought = llm.reason(query, scratchpad)
-    if thought.is_final_answer:
-        return thought.answer
-    tool, args = llm.select_tool(thought, available_tools)
-    observation = execute_tool(tool, args)
-    scratchpad.append(thought, tool, observation)
-    iteration += 1
-```
-
-Where it fits:
-
-- Queries requiring multiple data sources — "why did sales drop in Q3?" needs SQL for revenue data, vector search for market reports, and web search for competitor news.
-- Ambiguous queries where the first retrieval attempt may miss and the agent needs to retry with a refined query.
-- Research-style tasks where the user expects multi-step investigation with intermediate results.
-
-Main risk:
-
-- **Infinite loops** — the agent never converges and keeps calling the same tool. Set a strict `max_iterations` cap (5-7) and detect repeated tool calls.
-- **Tool hallucination** — the LLM invents tool names that do not exist. Use structured output (function calling) instead of free-text tool selection.
-- **Cost explosion** — often several times more LLM calls than single-pass RAG per query. Use a cheaper model for routing decisions and the expensive model only for final generation.
-- **Latency accumulation** — multi-turn reasoning often pushes response time into seconds. Stream intermediate results to the user and parallelize independent tool calls where possible.
-- **Debugging complexity** — tracing which step failed across a multi-turn agent graph is significantly harder than debugging single-pass RAG. Production deployments need trace logging (LangSmith, Langfuse).
-
-### Adaptive RAG
-
-How it works:
-
-- A lightweight classifier (fine-tuned smaller LM or heuristic rules) scores query complexity and routes to the cheapest strategy that can handle it:
-
-| Complexity | Strategy | Example |
-|------------|----------|---------|
-| Simple | No retrieval — LLM answers from parametric memory | "What is 2+2?" |
-| Moderate | Single-pass RAG | "What is the return policy?" |
-| Complex | Iterative multi-hop RAG | "Compare implications across three papers" |
-
-- The classifier is trained on automatically collected labels: run all three strategies on a dataset, and label each query with the simplest strategy that produced a correct answer.
-- Heuristic fast-path signals work as a bootstrap before the classifier is trained: short definitional queries ("what is X") skip retrieval, queries with comparison words or multiple entities route to multi-hop, queries mentioning recent events route to web-augmented retrieval.
-
-Where it fits:
-
-- High-volume production systems where most queries are simple but a tail of complex queries needs multi-hop reasoning.
-- Cost-sensitive deployments where routing simple queries to the no-retrieval path saves retrieval and generation cost for those queries.
-
-Main risk:
-
-- **Asymmetric misclassification cost.** Routing a complex query to the simple strategy produces a wrong answer (high cost to user). Routing a simple query to the complex strategy wastes money but still works (low cost). Err toward the more capable strategy when uncertain.
-- **Classifier drift** — query distribution changes over time. Retrain on production traffic periodically.
-- **Cold start** — needs labeled data. Bootstrap with heuristics first, collect production labels, then fine-tune.
-
-### Speculative RAG
-
-How it works:
-
-- Partition retrieved documents into subsets and generate candidate answers in parallel using a small specialist model (e.g., Mistral-7B fine-tuned on RAG tasks).
-- A larger generalist model scores each draft by computing the conditional probability P(answer | rationale).
-- Select the draft with the highest verification score.
+An [[Software Engineering/11 AI & ML/LLM/Agents/Agents\|agent]] decides which retrieval or data tools to call, observes the result, and chooses the next action. Unlike a fixed pipeline, the path can change per query.
 
 ```mermaid
-flowchart TD
-    D[Retrieved Docs] --> P[Partition into Subsets]
-    P --> S1[Subset 1]
-    P --> S2[Subset 2]
-    P --> S3[Subset 3]
-    S1 --> D1[Draft plus Rationale from Small Model]
-    S2 --> D2[Draft plus Rationale from Small Model]
-    S3 --> D3[Draft plus Rationale from Small Model]
-    D1 --> V[Verify Each Draft with Large Model]
-    D2 --> V
-    D3 --> V
-    V --> B[Return Highest-Confidence Draft]
+flowchart LR
+    Q[User query] --> A[Agent reasoning]
+    A --> T[Choose tool]
+    T --> O[Observe evidence]
+    O --> S[Update scratchpad]
+    S --> A
+    S --> C[Assemble context]
+    C --> G[Generate answer]
 ```
 
-- The speedup comes from three sources: the smaller model is substantially faster per draft, drafts execute in parallel, and the verifier only scores (does not generate from scratch).
-
 Where it fits:
 
-- Latency-sensitive applications where standard RAG is too slow and you can trade parallel compute for wall-clock time.
-- Workloads where documents may contain conflicting information — parallel drafting from different subsets surfaces disagreements that the verifier can adjudicate.
+- Queries requiring multiple data sources: vector search, SQL, web search, APIs, and calculators.
+- Research-style tasks where the user expects multi-step investigation.
+- Ambiguous questions where the system must try one route, inspect the result, then retry differently.
 
 Main risk:
 
-- **Draft quality depends on fine-tuning.** The small model must be fine-tuned specifically for RAG tasks, not just general instruction following. A generic small model produces low-quality drafts that waste the verifier's time.
-- **Document partitioning strategy matters.** The paper clusters retrieved documents by similarity and samples one from each cluster per subset to maximize diversity. Poor partitioning (e.g., random splitting) leads to redundant or incomplete drafts.
-- **Verification overhead can negate speedup** if too many drafts are generated. Keep the draft count low enough that verification cost stays below the generation savings.
+- **Unbounded execution** — agents can loop, call expensive tools, or choose the wrong tool confidently. Use structured tool calls, iteration caps, trace logging, and cost budgets.
 
-### Multimodal RAG
+### 11. GraphRAG
 
-How it works:
+#### Work principle
 
-- Extend the RAG pipeline to retrieve across text, tables, images, and structured data using modality-aware processing at each stage.
+Build a knowledge graph from documents, connect entities and relationships, summarize communities, then retrieve from graph neighborhoods or community summaries. The graph gives the retriever explicit relationship structure that flat chunks do not contain.
 
-**Embedding strategies by modality:**
-
-| Modality | Approach | Tradeoff |
-|----------|----------|----------|
-| Text | Standard text embeddings | Mature and fast. Works with any vector DB |
-| Tables | Whole-table as markdown or HTML with text embedding, or vision model reads table image directly | Vision avoids OCR errors but costs significantly more per table |
-| Images | ColPali for page-level retrieval preserving layout, or CLIP for image-text alignment | ColPali uses multi-vector per page and needs custom indexing. CLIP uses single vector and works with standard DBs |
-| Mixed pages | Semantic chunking with modality markers grouping related text and image and table into one unit | Keeps cross-modal context together but increases chunk size |
-
-**Chunking rules by modality:**
-
-- Text — recursive character split, 400-512 tokens with 10-20% overlap.
-- Tables — always chunk as whole table with caption/title as metadata. Never split a table across chunks — rows lose column headers and the data becomes meaningless.
-- Images — page-level (ColPali) or image-level (CLIP). Splitting images destroys visual coherence.
-
-**Cross-modal alignment:** generate potential queries from each chunk regardless of modality. A table and a chart can both answer "revenue growth" even though their raw formats differ. At retrieval time, match the user query against these generated queries rather than raw chunk content.
+```mermaid
+flowchart LR
+    D[Documents] --> ER[Extract entities]
+    ER --> KG[Knowledge graph]
+    KG --> CS[Community summaries]
+    Q[User query] --> GS[Graph search]
+    KG --> GS
+    CS --> GS
+    GS --> E[Graph evidence]
+    E --> C[Assemble context]
+    C --> G[Generate answer]
+```
 
 Where it fits:
 
-- Document corpora with significant table and figure content: financial reports, research papers, technical manuals.
-- Scanned documents where OCR quality is poor — vision-first approaches (ColPali) bypass OCR entirely.
+- Dependency-heavy domains: architecture, compliance, contracts, supply chains, investigations.
+- Questions that ask about relationships, impact, ownership, or themes across a corpus.
+- Global synthesis queries where top-k chunks miss the dataset-level picture.
 
 Main risk:
 
-- **OCR cascade errors** — a table with merged cells becomes gibberish text. Vision models read tables better but add meaningful inference latency per table.
-- **Embedding dimension mismatch** — ColPali multi-vector embeddings do not fit standard single-vector stores. Use stores with multi-vector support or flatten with dimensionality reduction (at some accuracy cost).
-- **Cross-modal retrieval drift** — a text query retrieves an image, but the LLM cannot interpret image content. Always pass retrieved images to a vision-capable model (GPT-4o, Gemini, Qwen-VL).
+- **Expensive and brittle indexing** — entity extraction, entity linking, graph construction, and community summaries all introduce errors. GraphRAG is powerful when relationships matter, but overkill for ordinary support Q&A.
+
+### 12. Corrective and Self-Reflective RAG
+
+#### Work principle
+
+Add an evaluator or specially trained model that decides whether retrieved evidence is relevant and whether the generated answer is supported. If evidence looks weak, the system retries retrieval, falls back to web search, or rejects unsupported output.
+
+```mermaid
+flowchart LR
+    Q[User query] --> R[Retrieve]
+    R --> E[Evaluate evidence]
+    E --> P[Evidence passes]
+    E --> W[Evidence weak]
+    W --> X[Correct retrieval]
+    X --> R
+    P --> C[Assemble context]
+    C --> G[Generate answer]
+    G --> S[Check support]
+```
+
+Where it fits:
+
+- High-risk domains where unsupported answers are unacceptable.
+- Research or custom-model environments that can train reflection tokens, relevance evaluators, or domain-specific critics.
+- Systems with mature observability where the team can calibrate evaluator thresholds.
+
+Main risk:
+
+- **Rare as a plug-and-play production pattern** — Self-RAG requires custom model training, and CRAG-style correction needs calibrated evaluators. For most teams, start with reranking, evals, and guardrails before adopting this family.
 
 ## Pattern Selection Guide
 
-| Pattern | Best For | Runtime Latency | Setup Effort | Runtime Cost | When to Skip |
-|---------|----------|-----------------|--------------|--------------|--------------|
-| Iterative Retrieval | Multi-hop questions | High — multiple retrieval round-trips | Low — works with existing retriever | High — multiple LLM calls per query | Simple single-hop lookups |
-| Self-RAG | Adaptive retrieval and hallucination control | Medium — parallel passage scoring | High — requires custom model training | Medium — single model with reflection tokens | Cannot fine-tune models |
-| CRAG | Noisy retrievers and web fallback | Medium — evaluator plus optional web search | Medium — train or configure evaluator | Medium — evaluator inference plus occasional web API | Retriever already has high precision |
-| Graph RAG | Relational and connected-fact queries | Medium — community lookup plus generation | High — entity extraction and graph construction | High — many community summaries and partial answers in map-reduce | Simple fact lookups or frequently changing data |
-| Agentic RAG | Multi-source orchestration | High — multi-turn reasoning loop | Medium — define tools and routing | High — many LLM calls per query | Single data source is sufficient |
-| Adaptive RAG | Mixed-complexity query traffic | Low to High — depends on routed strategy | Medium — train or configure classifier | Low to High — saves on simple queries | Uniform query complexity |
-| Speculative RAG | Latency-sensitive with conflict detection | Low — parallel drafting reduces wall-clock time | High — fine-tune specialist drafter | Medium — parallel small-model calls plus verifier | Low query volume |
-| Multimodal RAG | Tables and images and mixed-format docs | Medium to High — vision model inference | Medium — modality-aware chunking pipeline | Medium to High — vision embeddings and models | Text-only corpus |
+| Pattern | Commonness | Best For | Runtime Cost | When to Skip |
+|---------|------------|----------|--------------|--------------|
+| Baseline Single-Pass RAG | Mainstream baseline | First version and simple factual lookup | Low | Retrieval metrics already show exact-term or precision failures |
+| Hybrid Search plus Reranking | Mainstream production default | Enterprise text with exact terms and semantic matches | Medium | Tiny curated corpus where dense retrieval is already excellent |
+| Query Rewriting and Routing | Common | Vague queries and mixed complexity traffic | Low to medium | Users already write precise search queries |
+| Parent-Document and Recursive Retrieval | Common | Long documents and structure-sensitive answers | Medium | Short standalone snippets answer most questions |
+| Multi-Query Fusion | Emerging | Compound or synonym-heavy questions | Medium | Simple single-intent lookup traffic |
+| Contextual Retrieval | Emerging | Chunks that lose meaning outside the source document | Indexing cost high and runtime cost low | Fast-changing corpora where enrichment goes stale quickly |
+| Multimodal RAG | Emerging | PDFs, tables, figures, scans, diagrams | Medium to high | Text-only corpus |
+| HyDE | Niche | Vocabulary mismatch and sparse queries | Medium | Queries are already specific and direct retrieval works |
+| Iterative Multi-Hop Retrieval | Rare to emerging | Multi-hop evidence chains | High | Single-hop answers dominate traffic |
+| Agentic RAG | Rare to emerging | Multiple tools and dynamic investigation | High | One data source and one retrieval path are enough |
+| GraphRAG | Rare and specialized | Entity relationships and global synthesis | High | Simple fact lookup or frequently changing data |
+| Corrective and Self-Reflective RAG | Research and very rare | High-risk answers needing custom critique | High | You cannot train evaluators or calibrate thresholds |
 
-**Adoption order**: start with baseline single-pass RAG. Add CRAG or Adaptive RAG first (lowest integration effort). Move to Iterative or Graph RAG when metrics plateau on multi-hop queries. Add Agentic RAG only when multiple data sources are required.
+**Adoption order**: ship baseline RAG first, then add hybrid search and reranking. Add query rewriting, parent-document retrieval, or multi-query fusion when evals show recall gaps. Use contextual, multimodal, iterative, agentic, or GraphRAG only for the specific failure modes they solve. Treat Self-RAG, CRAG, and Speculative RAG as research patterns unless your team can justify the training, evaluator, or specialist-model overhead.
 
 ## Operational Baselines
 
 - Gate every pattern behind a feature flag. Measure retrieval precision, generation faithfulness, latency p95, and cost per query before and after.
-- Set hard iteration caps on looping patterns (Iterative, Agentic) to bound latency and cost. For Self-RAG, cap the number of retrieval calls per answer rather than loop iterations.
+- Set hard iteration caps on looping patterns (Iterative, Agentic) to bound latency and cost. For corrective/self-reflective patterns, cap retry count and reject unsupported output instead of looping until the answer looks good.
 - Monitor query drift and noise accumulation in iterative patterns. Track semantic similarity between the original query and each iteration's retrieval query.
-- Cache aggressively: community summaries (Graph RAG), web search results (CRAG), reasoning chains (Iterative), and tool outputs (Agentic).
+- Cache aggressively: community summaries (GraphRAG), query rewrites, multi-query result sets, contextual chunk enrichments, reasoning chains, and agent tool outputs. See [[Software Engineering/11 AI & ML/LLM/RAG/Caching\|Caching]] for cache-key risks.
 - Route simple queries to the cheapest path. Most production traffic is simple — do not pay multi-hop costs for single-hop questions.
 
 ## RAG vs Fine-Tuning
@@ -367,22 +419,21 @@ The combined pattern — fine-tune the model for behavior (format, tone, refusal
 > [!QUESTION]- When is Graph RAG a better fit than plain vector retrieval?
 > When answers require explicit entity relations, dependency paths, or multi-hop joins that are hard to recover from independent text chunks. Examples: compliance tracing across policy documents, architecture dependency analysis, supply chain impact assessment. Skip Graph RAG for simple fact lookups where vector similarity suffices.
 
-> [!QUESTION]- How does Adaptive RAG reduce cost without sacrificing accuracy on complex queries?
-> A query complexity classifier routes simple queries to no-retrieval or single-pass RAG (cheap and fast) and reserves iterative multi-hop retrieval for the complex tail. Since most production queries are simple, the average cost drops significantly while complex queries still get full retrieval. Misclassification cost is asymmetric — err toward the more capable strategy when uncertain.
+> [!QUESTION]- Why is hybrid search plus reranking usually added before GraphRAG or agentic RAG?
+> Hybrid search and reranking fix the most common production failure first: the right evidence is missing or buried under noisy chunks. They reuse the same corpus and retrieval pipeline, so the integration cost is lower than building agents or knowledge graphs. GraphRAG and agentic RAG are justified only when evals show relationship reasoning or multi-tool orchestration is the actual bottleneck. The tradeoff is that hybrid search improves retrieval quality cheaply, while graph and agentic systems buy extra capability at a large indexing, latency, and observability cost.
 
 ## References
 
-- [Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks](https://arxiv.org/abs/2005.11401)
-- [RAG techniques (Azure AI Search)](https://learn.microsoft.com/en-us/azure/search/retrieval-augmented-generation-overview)
-- [Self-RAG: Learning to Retrieve, Generate, and Critique Through Self-Reflection](https://arxiv.org/abs/2310.11511)
-- [Corrective Retrieval Augmented Generation (CRAG)](https://arxiv.org/abs/2401.15884)
-- [From Local to Global: A Graph RAG Approach to Query-Focused Summarization](https://arxiv.org/abs/2404.16130)
-- [Adaptive-RAG: Learning to Adapt Retrieval-Augmented Large Language Models through Question Complexity](https://arxiv.org/abs/2403.14403)
-- [Speculative RAG: Enhancing Retrieval Augmented Generation through Drafting](https://arxiv.org/abs/2407.08223)
-- [Agentic RAG with LangGraph (LangChain engineering)](https://blog.langchain.com/agentic-rag-with-langgraph/)
-- [Deconstructing RAG (LangChain engineering)](https://blog.langchain.com/deconstructing-rag/)
-- [Fine-tuning guide (OpenAI)](https://platform.openai.com/docs/guides/fine-tuning)
-- [RAGOps: Operating and Managing RAG Pipelines](https://arxiv.org/abs/2506.03401)
+- [Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks](https://arxiv.org/abs/2005.11401) — the original RAG paper; useful for understanding the baseline retrieve-then-generate formulation before modern production extensions.
+- [RAG techniques in Azure AI Search](https://learn.microsoft.com/en-us/azure/search/retrieval-augmented-generation-overview) — Microsoft’s current production-oriented overview of classic RAG, chunking, indexing, retrieval, and answer generation.
+- [Hybrid search in Azure AI Search](https://learn.microsoft.com/en-us/azure/search/hybrid-search-overview) — explains why modern search stacks combine keyword and vector retrieval rather than relying on dense vectors alone.
+- [Semantic ranking in Azure AI Search](https://learn.microsoft.com/en-us/azure/search/semantic-search-overview) — documents reranking as a second-stage relevance step after the initial candidate set is retrieved.
+- [Contextual Retrieval](https://www.anthropic.com/news/contextual-retrieval) — Anthropic’s 2024 write-up on enriching chunks with document-aware context before indexing.
+- [Advanced retrieval strategies in LlamaIndex](https://developers.llamaindex.ai/python/framework/module_guides/querying/retriever/retrievers/) — framework documentation covering practical retriever variants such as hybrid, recursive, and auto-retrieval patterns.
+- [Multimodal search in Azure AI Search](https://learn.microsoft.com/en-us/azure/search/multimodal-search-overview) — production guidance for retrieving over mixed text and image content.
+- [From Local to Global: A Graph RAG Approach to Query-Focused Summarization](https://arxiv.org/abs/2404.16130) — Microsoft Research paper behind GraphRAG; use it for relationship-heavy and global-synthesis workloads, not as a default RAG baseline.
+- [Self-RAG: Learning to Retrieve, Generate, and Critique Through Self-Reflection](https://arxiv.org/abs/2310.11511) — research source for reflection-token-based retrieval and critique; included to explain why Self-RAG is powerful but rarely plug-and-play.
+- [Corrective Retrieval Augmented Generation](https://arxiv.org/abs/2401.15884) — research source for evaluator-driven correction and web-search fallback; useful when studying corrective RAG but not a first production pattern.
 
 <!-- whats-next:start -->
 

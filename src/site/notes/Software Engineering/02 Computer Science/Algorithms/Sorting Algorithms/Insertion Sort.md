@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/algorithms/sorting-algorithms/insertion-sort/"}
+{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/algorithms/sorting-algorithms/insertion-sort/","dg-note-properties":{"topic":["Computer Science"],"subtopic":["Algorithms"],"level":["4"],"priority":"Low","status":"Creation"}}
 ---
 
 # Intro

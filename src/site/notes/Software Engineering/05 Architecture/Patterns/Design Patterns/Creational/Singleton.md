@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/design-patterns/creational/singleton/"}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/design-patterns/creational/singleton/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Patterns"],"level":["2"],"priority":"High","status":["Done"]}}
 ---
 
 # Singleton

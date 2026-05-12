@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/tooling/coding-agents/"}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/tooling/coding-agents/","dg-note-properties":{"topic":["AI & ML"],"subtopic":["Tooling"],"status":"Creation","level":["2"],"priority":"Medium"}}
 ---
 
 

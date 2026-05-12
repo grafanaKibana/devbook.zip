@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/07-security/authentication/authentication/","tags":["FolderNote"]}
+{"dg-publish":true,"permalink":"/software-engineering/07-security/authentication/authentication/","tags":["FolderNote"],"dg-note-properties":{"topic":["Security"],"subtopic":["Authentication"],"tags":["FolderNote"],"priority":"High","level":["4"],"status":"Creation"}}
 ---
 
 

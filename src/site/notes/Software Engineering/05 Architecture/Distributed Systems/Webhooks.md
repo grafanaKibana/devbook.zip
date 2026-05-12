@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/distributed-systems/webhooks/"}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/distributed-systems/webhooks/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Distributed Systems"],"level":["2"],"priority":"Medium","status":"Ready To Repeat"}}
 ---
 
 

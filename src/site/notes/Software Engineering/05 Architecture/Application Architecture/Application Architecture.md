@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/application-architecture/application-architecture/","tags":["FolderNote"]}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/application-architecture/application-architecture/","tags":["FolderNote"],"dg-note-properties":{"topic":["Architecture"],"subtopic":["Application Architecture"],"tags":["FolderNote"],"priority":"High","level":["4"],"status":"Creation"}}
 ---
 
 

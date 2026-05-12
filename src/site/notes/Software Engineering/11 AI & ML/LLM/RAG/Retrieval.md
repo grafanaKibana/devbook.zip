@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/rag/retrieval/"}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/rag/retrieval/","dg-note-properties":{"topic":["AI & ML"],"subtopic":["LLM"],"level":["2"],"priority":"High","status":"Done"}}
 ---
 
 

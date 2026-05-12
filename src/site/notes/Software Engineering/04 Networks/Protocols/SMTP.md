@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/04-networks/protocols/smtp/"}
+{"dg-publish":true,"permalink":"/software-engineering/04-networks/protocols/smtp/","dg-note-properties":{"topic":["Networks"],"subtopic":["Protocols"],"level":["3"],"priority":"Low","status":"Creation"}}
 ---
 
 

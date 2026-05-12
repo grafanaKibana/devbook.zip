@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/09-dev-ops/09-dev-ops/","tags":["FolderNote"]}
+{"dg-publish":true,"permalink":"/software-engineering/09-dev-ops/09-dev-ops/","tags":["FolderNote"],"dg-note-properties":{"topic":["DevOps"],"subtopic":[],"tags":["FolderNote"],"status":"Creation","priority":"High","level":["4"]}}
 ---
 
 

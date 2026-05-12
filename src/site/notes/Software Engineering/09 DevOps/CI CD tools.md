@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/09-dev-ops/ci-cd-tools/"}
+{"dg-publish":true,"permalink":"/software-engineering/09-dev-ops/ci-cd-tools/","dg-note-properties":{"topic":["DevOps"],"subtopic":[],"level":["3"],"priority":"High","status":"Creation"}}
 ---
 
 

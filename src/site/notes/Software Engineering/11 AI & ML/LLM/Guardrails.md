@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/guardrails/"}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/guardrails/","dg-note-properties":{"topic":["AI & ML"],"subtopic":["LLM"],"level":["3"],"priority":"Medium","status":"Creation"}}
 ---
 
 # Intro

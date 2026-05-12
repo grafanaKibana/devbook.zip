@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/08-sdlc/08-sdlc/","tags":["FolderNote"]}
+{"dg-publish":true,"permalink":"/software-engineering/08-sdlc/08-sdlc/","tags":["FolderNote"],"dg-note-properties":{"topic":["SDLC"],"subtopic":[],"tags":["FolderNote"],"priority":"Medium","level":["4"],"status":"Creation"}}
 ---
 
 

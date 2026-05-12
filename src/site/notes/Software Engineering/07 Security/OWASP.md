@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/07-security/owasp/"}
+{"dg-publish":true,"permalink":"/software-engineering/07-security/owasp/","dg-note-properties":{"topic":["Security"],"subtopic":["Security"],"level":["4"],"priority":"High","status":"Creation"}}
 ---
 
 

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/other/owin/"}
+{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/other/owin/","dg-note-properties":{"topic":["Programming"],"subtopic":["NET"],"level":["3"],"priority":"Low","status":"Creation"}}
 ---
 
 

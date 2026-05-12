@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/runtime/garbage-collector/"}
+{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/runtime/garbage-collector/","dg-note-properties":{"topic":["Programming"],"subtopic":["NET"],"level":["4"],"priority":"High","status":"Creation"}}
 ---
 
 

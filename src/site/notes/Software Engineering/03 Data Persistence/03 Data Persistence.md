@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/03-data-persistence/","tags":["FolderNote"]}
+{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/03-data-persistence/","tags":["FolderNote"],"dg-note-properties":{"topic":["Data Persistence"],"subtopic":[],"tags":["FolderNote"],"status":"Creation","priority":"High","level":["4"]}}
 ---
 
 

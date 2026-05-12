@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/distributed-systems/scalability-patterns/scalability-patterns/","tags":["FolderNote"]}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/distributed-systems/scalability-patterns/scalability-patterns/","tags":["FolderNote"],"dg-note-properties":{"topic":["Architecture"],"subtopic":["Distributed Systems"],"level":["2"],"priority":"High","tags":["FolderNote"],"status":"Not-Started"}}
 ---
 
 

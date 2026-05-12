@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/repository-and-uo-w/"}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/repository-and-uo-w/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Patterns"],"level":["4"],"priority":"High","status":"Creation"}}
 ---
 
 

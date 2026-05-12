@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/04-networks/transport-and-sockets/sockets/"}
+{"dg-publish":true,"permalink":"/software-engineering/04-networks/transport-and-sockets/sockets/","dg-note-properties":{"topic":["Networks"],"subtopic":["Transport & Sockets"],"level":["3"],"priority":"Medium","status":"Creation"}}
 ---
 
 

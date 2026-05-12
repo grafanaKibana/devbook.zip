@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/09-dev-ops/observability/"}
+{"dg-publish":true,"permalink":"/software-engineering/09-dev-ops/observability/","dg-note-properties":{"topic":["DevOps"],"subtopic":[],"level":["2"],"priority":"High","status":"Ready To Repeat"}}
 ---
 
 # Intro
