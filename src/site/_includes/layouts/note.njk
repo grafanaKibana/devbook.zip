@@ -14,7 +14,6 @@ permalink: "notes/{{ page.fileSlug | slugify }}/"
     {% endfor %}
   </head>
   <body class="theme-{{meta.baseTheme}} markdown-preview-view markdown-rendered markdown-preview-section {% if settings.dgShowFileTree !== true %}no-filetree{% endif %} {% if settings.dgHomeLink === true and settings.dgShowFileTree !== true %}has-navbar{% endif %} {{meta.bodyClasses}}">
-    <script>!function(){var m=matchMedia("(prefers-color-scheme:dark)"),c=document.body.classList;function t(d){c.remove("theme-dark","theme-light");c.add(d?"theme-dark":"theme-light")}t(m.matches);m.addEventListener("change",function(e){t(e.matches)})}()</script>
     {%include "components/notegrowthhistory.njk"%}
     
     {% if settings.dgShowFileTree !== true %}
@@ -27,7 +26,7 @@ permalink: "notes/{{ page.fileSlug | slugify }}/"
       {%include "components/searchContainer.njk"%}
     {% endif %}
 
-    <main class="content cm-s-obsidian {{contentClasses}}">
+    <main class="content cm-s-obsidian print {{contentClasses}}">
       <header>
         {% if settings.dgShowInlineTitle === true %}
           <h1 data-note-icon="{% if noteIcon %}{{noteIcon}}{% else %}{{meta.noteIconsSettings.default}}{% endif %}">{% if title %}{{ title }}{% else %}{{ page.fileSlug }}{% endif %}</h1>
@@ -77,7 +76,7 @@ permalink: "notes/{{ page.fileSlug | slugify }}/"
       {% endfor %}
     </main>
 
-    {% if settings.dgShowBacklinks === true or settings.dgShowLocalGraph === true or settings.dgShowToc === true%}
+    {% if settings.dgShowBacklinks === true or settings.dgShowLocalGraph === true or settings.dgShowToc === true or dynamics.sidebar.top.length > 0 or dynamics.sidebar.bottom.length > 0%}
       {%include "components/sidebar.njk"%}
     {% endif %}
 
@@ -96,5 +95,6 @@ permalink: "notes/{{ page.fileSlug | slugify }}/"
     {% if contentClasses and "canvas-page" in contentClasses %}
       {%include "components/canvasScript.njk"%}
     {% endif %}
+    {% include "components/basesScript.njk" %}
   </body>
 </html>
