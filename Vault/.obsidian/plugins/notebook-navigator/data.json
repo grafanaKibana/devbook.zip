@@ -308,7 +308,7 @@
   "parentFolderClickRevealsFile": true,
   "showParentFolderColor": true,
   "showParentFolderIcon": true,
-  "calendarEnabled": true,
+  "calendarEnabled": false,
   "calendarPlacement": "right-sidebar",
   "calendarConfirmBeforeCreate": true,
   "calendarLocale": "system-default",

@@ -1,4 +1,5 @@
 require("dotenv").config();
+require("dotenv").config({ path: ".env.local", override: true });
 const { globSync } = require("glob");
 
 module.exports = async (data) => {
@@ -95,7 +96,14 @@ module.exports = async (data) => {
     timestampSettings,
     baseTheme: process.env.BASE_THEME || "dark",
     siteName: process.env.SITE_NAME_HEADER || "Digital Garden",
+    siteSubtitle: process.env.SITE_NAME_SUBTITLE || "",
     siteLogoPath: logoPath,
+    contact: {
+      email: process.env.SITE_CONTACT_EMAIL || "",
+      name: process.env.SITE_CONTACT_NAME || "",
+      linkedin: process.env.SITE_CONTACT_LINKEDIN || "",
+      github: process.env.SITE_CONTACT_GITHUB || "",
+    },
     mainLanguage: process.env.SITE_MAIN_LANGUAGE || "en",
     siteBaseUrl: baseUrl,
     styleSettingsCss,
