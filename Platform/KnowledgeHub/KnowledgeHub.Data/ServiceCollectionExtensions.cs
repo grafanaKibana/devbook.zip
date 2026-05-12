@@ -11,20 +11,23 @@ using System.ClientModel;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddServices(this IServiceCollection services)
+    extension(IServiceCollection services)
     {
-        ArgumentNullException.ThrowIfNull(services);
+        public IServiceCollection AddServices()
+        {
+            ArgumentNullException.ThrowIfNull(services);
 
-        services.AddScoped<IngestionService>();
-        services.AddScoped<ChunkingService>();
-        services.AddScoped<IDocumentRepository, DocumentRepository>();
-        services.AddScoped<IChunkRepository, ChunkRepository>();
-        services.AddScoped<RagSearchService>();
+            services.AddScoped<IngestionService>();
+            services.AddScoped<ChunkingService>();
+            services.AddScoped<IDocumentRepository, DocumentRepository>();
+            services.AddScoped<IChunkRepository, ChunkRepository>();
+            services.AddScoped<RagSearchService>();
 
-        services.AddEmbeddingGenerator(CreateEmbeddingGenerator);
-        services.AddSingleton<EmbeddingService>();
+            services.AddEmbeddingGenerator(CreateEmbeddingGenerator);
+            services.AddSingleton<EmbeddingService>();
 
-        return services;
+            return services;
+        }
     }
 
 
