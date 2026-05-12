@@ -1,335 +1,209 @@
-# Knowledge Hub
+# Digital Obsidian Garden
+This is the template to be used together with the [Digital Garden Obsidian Plugin](https://github.com/oleeskild/Obsidian-Digital-Garden).
+See the README in the plugin repo for information on how to set it up.
 
-A personal software engineering knowledge base built with [Obsidian](https://obsidian.md) and published as a static website via the [Digital Garden](https://github.com/oleeskild/Obsidian-Digital-Garden) plugin + [Eleventy](https://www.11ty.dev/).
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/oleeskild/digitalgarden)
 
-Write notes locally in Obsidian. Commit. The site rebuilds automatically.
+---
+## Docs
+Docs are available at [docs.forestry.md](https://docs.forestry.md/)
 
-## What It Is
+---
+## CSS Variables
 
-A structured collection of software engineering notes covering 11 topic areas, designed for learning and interview preparation at a Senior .NET / AI engineering level. Every note follows a strict quality bar: intro in your own words, concrete examples, pitfalls, tradeoffs, interview-style questions, and curated references.
+The digital garden is fully customizable through CSS variables. Override these in `src/site/styles/custom-style.scss` to customize your garden's appearance.
 
-### Topic Areas
+### How to Customize
 
-| # | Topic | Scope |
-|---|-------|-------|
-| 01 | Programming | Languages, paradigms, .NET ecosystem |
-| 02 | Computer Science | Data structures, algorithms, fundamentals |
-| 03 | Data Persistence | Databases, EF Core, caching, indexing |
-| 04 | Networks | Protocols, HTTP, sockets, DNS |
-| 05 | Architecture | Design patterns, system design, DDD |
-| 06 | Development Practices | Testing, code quality, CI/CD practices |
-| 07 | Security | Auth, encryption, OWASP, identity |
-| 08 | SDLC | Software development lifecycle |
-| 09 | DevOps | Containers, orchestration, IaC |
-| 10 | Cloud | Azure, cloud-native patterns |
-| 11 | AI & ML | LLMs, RAG, embeddings, evaluation |
+Add your overrides to `custom-style.scss`:
 
-## How It Works
-
-```
-Vault/Software Engineering/   ──(Obsidian Git)──>   GitHub repo
-        │                                                │
-        │  Obsidian plugins:                             │  Vercel auto-deploys
-        │  Templater, Dataview,                          │  on push to main
-        │  Folder Notes, Digital Garden                  │
-        │                                                ▼
-        ▼                                          Eleventy (SSG)
-   Write & organize                                builds to dist/
-   notes locally                                   and publishes site
+```scss
+body {
+    --dg-content-max-width: 800px;
+    --dg-content-font-size: 16px;
+    --dg-sidebar-max-width: 400px;
+}
 ```
 
-### Vault → Website Pipeline
-
-1. **Author** notes in Obsidian using templates (Concept Page or Index templates)
-2. **Mark** notes for publishing with `dg-publish: true` in frontmatter
-3. **Publish** via the Digital Garden plugin, which exports notes to `src/site/notes/`
-4. **Commit & push** — Vercel picks up the change and runs the Eleventy build
-5. **Live** — static site with full-text search, graph view, backlinks, and table of contents
-
-### Obsidian Config
-
-**`Vault/.obsidian/`** — the vault config with all plugins, themes, and settings. Open `Vault/` as your Obsidian vault.
-
-## Repository Structure
-
-```
-Knowledge Hub/
-├── Vault/                          # The Obsidian vault (open this in Obsidian)
-│   ├── Software Engineering/       # All notes live here
-│   │   ├── 01 Programming/        # Topic folders (numbered for ordering)
-│   │   ├── 02 Computer Science/
-│   │   ├── ...
-│   │   ├── 11 AI & ML/
-│   │   ├── Roadmap.canvas          # Auto-generated visual roadmap
-│   │   ├── Topics.base             # Obsidian Bases dashboard
-│   │   └── Software Engineering.md # Homepage with live dashboards
-│   ├── Templates/                  # Note templates (Concept Page, Index, Mermaid, etc.)
-│   └── Assets/                     # All attachments (images, files)
-├── src/site/                       # Eleventy site source (Digital Garden output)
-│   ├── notes/                      # Exported notes for the website
-│   ├── styles/                     # SCSS styles (custom + Digital Garden base)
-│   │   └── user/                   # Custom style overrides (survives template updates)
-│   ├── _includes/                  # Nunjucks layouts and components
-│   │   └── components/user/        # Custom injected components
-│   └── _data/                      # Site metadata and computed data
-├── src/helpers/                    # Eleventy helper functions (graph, filetree, utils)
-├── .scripts/                       # Vault maintenance automation (Python)
-├── .githooks/pre-commit            # Git hook that runs automations
-├── .eleventy.js                    # Eleventy config (markdown pipeline)
-├── .markdownlint.json              # MD040 lint rule (fenced code block languages)
-├── vercel.json                     # Vercel deployment config (primary)
-├── netlify.toml                    # Netlify deployment config (alternative)
-└── AGENTS.md                       # AI agent operating contract
-```
-
-## Features
-
-### Obsidian-Side
-
-**Structured Note Templates** — Two Templater-powered templates that auto-derive `topic`/`subtopic` from folder path, prompt for `level` and `priority`, and scaffold the note structure:
-
-- **Concept Page** — for individual topics (intro, explanation, questions, links)
-- **Index Page** — for folder hub notes (auto-tagged `FolderNote`)
-
-**Frontmatter System** — Every note carries structured metadata:
-
-```yaml
-topic: [Programming]        # Derived from folder path
-subtopic: [.NET]            # Derived from folder path
-level: ["2"]                # Depth/difficulty (1-4)
-priority: High              # Low | Medium | High
-status: Creation            # Not-Started | Creation | Repetition | Ready To Repeat | Done
-dg-publish: true            # Controls website publishing
-```
-
-**Homepage Dashboard** — `Software Engineering.md` renders live DataviewJS tables showing:
-- Topic coverage with progress bars and done/total counts
-- Status distribution across all notes
-- Priority distribution
-- Level distribution
-- Focus list (notes currently in progress)
-- Recently updated notes
-
-**Obsidian Bases** — `Topics.base` provides a filterable table/card view of all folder notes, queryable by topic, subtopic, status, priority, and level.
-
-**Visual Roadmap** — `Roadmap.canvas` is an auto-generated JSON Canvas that maps the entire knowledge structure as a node graph, color-coded by learning status (red → orange → cyan → purple → green), with a legend showing counts per status.
-
-### Obsidian Plugins
-
-| Plugin | Purpose |
-|--------|---------|
-| **Digital Garden** | Publishes selected notes to the website |
-| **Templater** | Powers note templates with JavaScript logic |
-| **Dataview / DataviewJS** | Drives dashboard tables and queries |
-| **Folder Notes** | Auto-creates hub notes for folders |
-| **Obsidian Git** | Manual git sync from within Obsidian |
-| **Omnisearch** | Vault-wide full-text search |
-| **Advanced Canvas** | Extended canvas features |
-| **Auto Link Title** | Auto-fetches titles for pasted URLs |
-| **URL into Selection** | Wraps selected text with pasted URL |
-| **Custom Attachment Location** | Routes attachments to `Assets/` |
-| **Icon Folder** | Custom folder icons in the file explorer |
-| **Pretty Properties** | Better frontmatter property display |
-| **Multi-Column Markdown** | Multi-column layouts in notes |
-| **Homepage** | Sets the startup note |
-
-### Website Features
-
-The published site (built with Eleventy) includes:
-
-- **Full-text search** with keyboard navigation
-- **Interactive graph view** showing note connections
-- **Backlinks** — pages that reference the current page
-- **Table of contents** — auto-generated from headings
-- **File tree navigation** — mirrors the vault folder structure
-- **Wikilink resolution** — Obsidian `[[wikilinks]]` become working HTML links
-- **Mermaid diagrams** — rendered inline
-- **MathJax** — LaTeX math rendering
-- **Callouts** — Obsidian callout syntax rendered as styled blocks
-- **Canvas rendering** — `.canvas` files render as interactive pannable/zoomable maps
-- **Image optimization** — automatic WebP conversion with responsive srcsets
-- **HTML minification** — in production builds
-- **RSS feed** — at `/feed.xml`
-- **Sitemap** — at `/sitemap.xml`
-- **Responsive layout** — adapts to mobile, desktop, and ultrawide displays
-- **Dark/light theme** — auto-switches based on system preference
-
-## Website Customizations
-
-The site extends the stock [Digital Garden](https://github.com/oleeskild/Obsidian-Digital-Garden) template through its official extension system. Custom styles live in `src/site/styles/user/` and custom components in `src/site/_includes/components/user/` — both directories survive template updates.
-
-### Theme & Typography
-
-**Anthropic-inspired design** (`styles/user/anthropic-theme.scss`):
-
-- **Body text**: [Source Serif 4](https://fonts.google.com/specimen/Source+Serif+4) (serif) — like Anthropic's docs
-- **UI / headings**: [Inter](https://fonts.google.com/specimen/Inter) (sans-serif) — clean navigation and titles
-- **Code**: [Source Code Pro](https://fonts.google.com/specimen/Source+Code+Pro) (monospace) — VS Code-style code blocks
-- **Accent color**: British Racing Green (HSL 158°, 25–45% saturation) — replaces the default blue
-- **Page titles**: 2.4em with tight letter-spacing (-0.03em)
-- **Mermaid diagrams**: transparent background (vs. white default)
-- **Base Obsidian theme**: [Minimal](https://github.com/kepano/obsidian-minimal) by @kepano — fetched at build time
-
-### Responsive Layout
-
-**Adaptive widths** (`styles/user/layout.scss`):
-
-| Breakpoint | Filetree | Content Max | Sidebar |
-|------------|----------|-------------|---------|
-| Base | 300px | default | 300px |
-| ≥ 1980px | 400px | 900px | 400px |
-| ≥ 2560px | 500px | 1000px | 500px |
-
-- **Mobile** (≤ 1000px): full-width sidebar overlay, table horizontal scroll
-- **Graph**: 300 × 300px, depth controls hidden
-- **Canvas nodes**: compact spacing (6px between elements)
-
-### Sidebar Branding
-
-**Site title block** (`styles/user/branding.scss`, modified `filetree.njk` / `filetreeNavbar.njk`):
-
-- Centered title + subtitle layout (or logo image if `src/site/logo.*` exists)
-- Title: uppercase, 28px (`--dg-filetree-title-size`)
-- Subtitle: 0.82rem, 85% opacity (driven by `SITE_NAME_SUBTITLE` in `.env.local`)
-- Mobile navbar: compact variant at 1.25rem
-
-### Quicklink Navigation
-
-**Sidebar buttons** (`styles/user/quicklinks.scss`, `components/user/filetree/afterTitle/quicklinks.njk`):
-
-- Three buttons below the site title: **Home**, **Questions**, **Roadmap**
-- Accent-colored background with brightness hover effect
-- Hidden on mobile navbar (visible only in the filetree sidebar)
-
-### Footer Contact Links
-
-**Contact info** (`styles/user/branding.scss`, `components/user/common/footer/contact-links.njk`):
-
-- Email, LinkedIn, and GitHub links with Lucide icons
-- Driven by `.env.local` variables: `SITE_CONTACT_EMAIL`, `SITE_CONTACT_LINKEDIN`, `SITE_CONTACT_GITHUB`
-- Hidden on canvas pages
-
-### Vercel Analytics
-
-**Web analytics** (`components/user/common/head/001-vercel-analytics.njk`):
-
-- Vercel Web Analytics script injected into `<head>` on every page
-
-### Modified Stock Files
-
-Some customizations required changes to stock Digital Garden files. These may need re-applying after template updates from the Obsidian plugin:
-
-| File | Modification |
-|------|-------------|
-| `filetree.njk` | Branding block with title + subtitle (replaces plain `<h1>`) |
-| `filetreeNavbar.njk` | Mobile branding block matching the desktop sidebar |
-| `meta.js` | Contact info fields, `siteSubtitle`, `siteLogoPath` detection, canvas UI strings |
-| `.eleventy.js` | `xmlSafe` filter, `canvas-markdown` transform, external link `target="_blank"` |
-| `feed.njk` | `xmlSafe` filter for valid Atom XML output |
-
-## Automations
-
-### Git Pre-Commit Hook
-
-Every commit triggers three Python automations followed by markdown linting (`.githooks/pre-commit`):
-
-#### 1. Folder Frontmatter Sync (`sync-folder-rollup-frontmatter.py`)
-
-Derives metadata for hub (FolderNote) pages from their descendant concept pages:
-- **status** — worst-first rollup (if any child is `Creation`, the hub shows `Creation`)
-- **priority** — highest-first (if any child is `High`, the hub shows `High`)
-- **level** — max numeric level from children
-
-This means hub notes always reflect the aggregate state of their subtopics without manual updates.
-
-#### 2. Whats Next Renderer (`render-whats-next.py`)
-
-Generates navigation callouts at the bottom of every note with:
-- **Parent** link — navigates up to the parent hub note
-- **Topics** — links to child hub notes (sub-folders)
-- **Pages** — links to sibling concept pages in the same folder
-
-Uses HTML markers (`<!-- whats-next:start -->` / `<!-- whats-next:end -->`) so the block is idempotently replaced on each commit. Only processes staged files for performance.
-
-#### 3. Roadmap Generator (`generate-roadmap.py`)
-
-Regenerates `Roadmap.canvas` from the folder structure:
-- Walks the `Vault/Software Engineering/` directory tree (up to 5 levels deep)
-- Creates a node for each folder hub, linked to its parent
-- Colors nodes by learning status using the JSON Canvas color palette
-- Uses masonry layout to minimize vertical height
-- Adds a legend with per-status counts and generation timestamp
-- Publishes the canvas to the website via `dg-publish` frontmatter
-
-#### 4. Markdown Lint (`markdownlint-cli2`)
-
-Enforces MD040 (fenced code block language) on staged Markdown files. Every fenced code block must specify a language — use `text` as a fallback when no specific language applies. Blocks the commit on violations.
-
-### Other Scripts
-
-| Script | Purpose |
-|--------|---------|
-| `audit_all_pages.py` | Full vault quality audit — scores every page against the AGENTS.md quality bar and outputs JSON for reporting |
-| `sync-topic-subtopic-frontmatter.py` | Batch-updates `topic`/`subtopic` fields based on folder position |
-
-### Dependency Management
-
-**Dependabot** runs weekly npm dependency checks, with pinned exceptions for `@sindresorhus/slugify` (ESM-only) and `@11ty/eleventy-plugin-rss` (breaking changes).
-
-### Build Pipeline
-
-```
-npm run build
-  ├── get-theme        # Fetches Obsidian theme CSS from GitHub
-  ├── build:sass       # Compiles SCSS → CSS (compressed)
-  └── build:eleventy   # Processes markdown → HTML via Eleventy
-```
-
-The Eleventy pipeline handles:
-- Markdown rendering with 8 markdown-it plugins (anchors, footnotes, math, attrs, tasks, PlantUML, mark, mermaid)
-- Obsidian wikilink → HTML anchor resolution
-- Callout blockquote → styled div transformation
-- Canvas file rendering (pre-compiled HTML pass-through with build-time markdown rendering)
-- Image optimization (WebP + JPEG at multiple breakpoints)
-- Table wrapping for horizontal scroll
-- DataviewJS link resolution
-- HTML minification (production only)
-- Favicon generation
-- RSS feed generation
-
-### Tech Stack
-
-| Layer | Technology |
-|-------|------------|
-| Note editor | Obsidian |
-| Static site generator | Eleventy 3.x |
-| Templating | Nunjucks + Liquid |
-| Styling | SCSS (Obsidian theme + custom overrides) |
-| Markdown | markdown-it + 8 plugins |
-| Hosting | Vercel (primary) / Netlify (alternative) |
-| Automation | Python scripts + Git hooks |
-| Dependencies | Dependabot (weekly) |
-| Runtime | Node.js 24.x |
-
-## Local Development
-
-```bash
-# Clone
-git clone https://github.com/grafanaKibana/KnowledgeHub.git
-cd KnowledgeHub
-
-# Install dependencies
-npm install
-
-# Development server (live reload)
-npm start
-
-# Production build
-npm run build
-```
-
-Open `Vault/` as an Obsidian vault for note editing. The `.env` file configures site metadata (theme, site name, base URL, feature flags). Personal data (contact info, subtitle) goes in `.env.local` which is gitignored.
-
-## License
-
-ISC
+### Responsive Layout Notes
+
+- Content will never overlap the filetree, regardless of `--dg-content-max-width` value
+- The right sidebar (TOC/graph/backlinks) automatically hides when there isn't enough viewport space
+- To make the sidebar appear at smaller viewports, reduce `--dg-sidebar-max-width`
+
+### Available Variables
+
+#### Color Variables
+You can override the base Obsidian theme color variables directly:
+
+| Variable | Description |
+|----------|-------------|
+| `--text-normal` | Normal text color |
+| `--text-muted` | Muted/secondary text |
+| `--text-faint` | Faint text |
+| `--text-accent` | Accent color |
+| `--text-accent-hover` | Accent hover color |
+| `--link-color` | Link color |
+| `--link-color-hover` | Link color hover |
+| `--link-unresolved-color` | Link color unresolved |
+| `--link-unresolved-opacity` | Link color unresolved opacity |
+| `--background-primary` | Primary background |
+| `--background-primary-alt` | Alt primary background |
+| `--background-secondary` | Secondary background |
+| `--background-secondary-alt` | Alt secondary background |
+| `--interactive-normal` | Interactive element color |
+| `--interactive-hover` | Interactive hover color |
+| `--interactive-accent` | Interactive accent |
+| `--interactive-accent-hover` | Interactive accent hover |
+
+#### Layout Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `--dg-content-max-width` | `700px` | Maximum width of content area |
+| `--dg-content-margin-top` | `90px` | Top margin for content |
+| `--dg-content-margin-top-mobile` | `75px` | Top margin on mobile |
+| `--dg-content-font-size` | `18px` | Base font size for content |
+| `--dg-content-line-height` | `1.5` | Line height for content |
+
+#### Sidebar (Right) Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `--dg-sidebar-top` | `75px` | Sidebar top offset |
+| `--dg-sidebar-gap` | `80px` | Gap between content and sidebar |
+| `--dg-sidebar-min-width` | `25px` | Minimum sidebar width |
+| `--dg-sidebar-max-width` | `350px` | Maximum sidebar width |
+| `--dg-sidebar-container-padding` | `20px` | Sidebar container padding |
+| `--dg-sidebar-container-height` | `87%` | Sidebar container height |
+
+#### Graph Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `--dg-graph-width` | `250px` | Local graph width |
+| `--dg-graph-height` | `250px` | Local graph height |
+| `--dg-graph-border-radius` | `10px` | Graph border radius |
+| `--dg-graph-margin-bottom` | `20px` | Graph bottom margin |
+| `--dg-graph-fullscreen-width` | `90vw` | Expanded/global graph width |
+| `--dg-graph-fullscreen-height` | `85vh` | Expanded/global graph height |
+| `--dg-graph-node-color` | `var(--text-accent)` | Active/current node color |
+| `--dg-graph-node-color-muted` | `var(--text-faint)` | Neighbor node color |
+| `--dg-graph-label-color` | `var(--text-normal)` | Node label text color |
+| `--dg-graph-bg` | `var(--background-primary)` | Graph background color |
+| `--dg-graph-border-color` | `var(--background-secondary)` | Graph border color |
+
+#### Filetree (Left Sidebar) Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `--dg-filetree-width` | `250px` | Filetree sidebar width |
+| `--dg-filetree-min-width` | `250px` | Minimum filetree width |
+| `--dg-filetree-padding` | `10px 20px` | Filetree padding |
+| `--dg-filetree-gap` | `80px` | Gap from content |
+| `--dg-filetree-title-size` | `32px` | Filetree title font size |
+
+#### TOC (Table of Contents) Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `--dg-toc-padding` | `5px` | TOC container padding |
+| `--dg-toc-font-size` | `0.9rem` | TOC font size |
+| `--dg-toc-max-height` | `220px` | TOC max height |
+| `--dg-toc-title-size` | `1.2rem` | TOC title font size |
+| `--dg-toc-item-padding` | `2px 0 2px 8px` | TOC item padding |
+| `--dg-toc-indent` | `1em` | TOC nested list indent |
+
+#### Backlinks Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `--dg-backlinks-margin-top` | `10px` | Backlinks section top margin |
+| `--dg-backlinks-max-height` | `250px` | Backlinks list max height |
+| `--dg-backlinks-title-size` | `0.9rem` | Backlinks title font size |
+| `--dg-backlinks-card-size` | `0.85rem` | Backlink card font size |
+| `--dg-backlinks-card-padding` | `6px 0` | Backlink card padding |
+| `--dg-backlinks-icon-size` | `14px` | Backlink icon size |
+
+#### Search Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `--dg-search-box-width` | `900px` | Search box width |
+| `--dg-search-box-max-width` | `80%` | Search box max width |
+| `--dg-search-box-radius` | `15px` | Search box border radius |
+| `--dg-search-box-padding` | `10px` | Search box padding |
+| `--dg-search-input-size` | `2rem` | Search input font size |
+| `--dg-search-input-padding` | `10px` | Search input padding |
+| `--dg-search-input-radius` | `5px` | Search input border radius |
+| `--dg-search-results-max-height` | `50vh` | Search results max height |
+| `--dg-search-result-size` | `1.2rem` | Search result font size |
+| `--dg-search-result-radius` | `10px` | Search result border radius |
+| `--dg-search-link-size` | `1.4rem` | Search link font size |
+
+#### Search Button Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `--dg-search-btn-radius` | `8px` | Search button border radius |
+| `--dg-search-btn-height` | `32px` | Search button height |
+| `--dg-search-btn-padding` | `0 10px` | Search button padding |
+| `--dg-search-btn-gap` | `8px` | Search button icon/text gap |
+| `--dg-search-btn-font-size` | `0.85rem` | Search button font size |
+| `--dg-search-btn-icon-size` | `14px` | Search button icon size |
+
+#### Navbar Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `--dg-navbar-title-size-mobile` | `18px` | Navbar title size on mobile |
+| `--dg-navbar-search-margin` | `20px` | Navbar search button margin |
+| `--dg-navbar-search-min-width` | `36px` | Navbar search min width |
+| `--dg-logo-height` | `40px` | Site logo height on desktop |
+| `--dg-logo-height-mobile` | `32px` | Site logo height on mobile |
+| `--dg-logo-margin` | `10px 15px` | Site logo margin |
+| `--dg-filetree-logo-height` | `70px` | Site logo height in filetree sidebar |
+
+#### Note Link / Filetree Item Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `--dg-notelink-padding` | `4px 8px 4px 12px` | Note link padding |
+| `--dg-notelink-size` | `0.85rem` | Note link font size |
+| `--dg-notelink-border-width` | `2px` | Note link left border width |
+| `--dg-notelink-hover-bg` | `rgba(255, 255, 255, 0.05)` | Note link hover background |
+| `--dg-folder-margin` | `4px 0 4px 2px` | Folder name margin |
+| `--dg-folder-icon-size` | `14px` | Folder icon size |
+| `--dg-inner-folder-padding` | `3px 0 3px 0` | Inner folder padding |
+| `--dg-inner-folder-margin` | `12px` | Inner folder left margin |
+| `--dg-filelist-margin` | `8px` | File list left margin |
+
+#### Graph Controls Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `--dg-graph-ctrl-padding` | `6px 10px` | Graph controls padding |
+| `--dg-graph-ctrl-radius` | `6px` | Graph controls border radius |
+| `--dg-graph-ctrl-margin` | `10px` | Graph controls margin |
+| `--dg-graph-ctrl-size` | `0.7rem` | Graph controls font size |
+| `--dg-graph-ctrl-icon-size` | `14px` | Graph control icon size |
+| `--dg-graph-ctrl-gap` | `10px` | Graph controls gap |
+
+#### Timestamps Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `--dg-timestamps-size` | `0.8em` | Timestamps font size |
+| `--dg-timestamps-gap` | `10px` | Timestamps gap |
+| `--dg-timestamps-margin-top` | `20px` | Timestamps top margin |
+
+#### Misc Component Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `--dg-overlay-bg` | `rgba(0, 0, 0, 0.5)` | Overlay background color |
+| `--dg-mermaid-radius` | `25px` | Mermaid diagram border radius |
+| `--dg-mermaid-padding` | `10px` | Mermaid diagram padding |
+| `--dg-transclusion-padding` | `8px` | Transclusion container padding |
+| `--dg-external-link-icon-size` | `13px` | External link icon size |
+| `--dg-external-link-padding` | `16px` | External link right padding |
