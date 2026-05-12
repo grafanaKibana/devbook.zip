@@ -103,6 +103,7 @@
   "vaultTitle": "navigation",
   "syncModes": {
     "vaultProfile": "synced",
+    "homepage": "synced",
     "folderSortOrder": "synced",
     "tagSortOrder": "synced",
     "propertySortOrder": "synced",
@@ -138,13 +139,16 @@
   "mouseBackForwardAction": "history",
   "startView": "navigation",
   "showInfoButtons": true,
-  "homepage": "Knowledge/Knowledge.md",
-  "mobileHomepage": null,
-  "useMobileHomepage": false,
+  "homepage": {
+    "source": "file",
+    "file": "Knowledge/Knowledge.md",
+    "createMissingPeriodicNote": true
+  },
   "dualPane": true,
   "dualPaneOrientation": "vertical",
   "showTooltips": false,
   "showTooltipPath": true,
+  "showTooltipWordCount": false,
   "desktopBackground": "separate",
   "desktopScale": 1,
   "mobileScale": 1,
@@ -238,10 +242,8 @@
   "listPaneTitle": "header",
   "noteGrouping": "folder",
   "showSelectedNavigationPills": false,
+  "stickyGroupHeaders": true,
   "filterPinnedByFolder": false,
-  "showPinnedGroupHeader": true,
-  "showPinnedIcon": true,
-  "optimizeNoteHeight": true,
   "compactItemHeight": 24,
   "compactItemHeightScaleText": true,
   "showQuickActions": true,
@@ -262,13 +264,15 @@
   "showFileBackgroundUnfinishedTask": false,
   "unfinishedTaskBackgroundColor": "#ef000050",
   "showFileIcons": true,
+  "useFolderIconForFiles": false,
   "showFilenameMatchIcons": false,
   "fileNameIconMap": {},
   "showCategoryIcons": true,
   "fileTypeIconMap": {
-    "png,jpg,jpeg": "LiImage"
+    "png,jpg,jpeg": "image"
   },
   "fileNameRows": 1,
+  "useFolderColorForTitles": false,
   "showFilePreview": true,
   "skipHeadingsInPreview": true,
   "skipCodeBlocksInPreview": true,
@@ -300,6 +304,7 @@
   "showFileDate": true,
   "alphabeticalDateMode": "modified",
   "showParentFolder": true,
+  "showParentFolderFullPath": false,
   "parentFolderClickRevealsFile": true,
   "showParentFolderColor": true,
   "showParentFolderIcon": true,
@@ -503,6 +508,7 @@
       "property": false
     }
   },
+  "collapsedPinnedContexts": {},
   "fileIcons": {},
   "fileColors": {},
   "fileBackgroundColors": {},
@@ -597,7 +603,7 @@
     "#404040",
     "#404040"
   ],
-  "lastShownVersion": "2.5.6",
+  "lastShownVersion": "2.6.5",
   "rootFolderOrder": [],
   "rootTagOrder": [],
   "rootPropertyOrder": []
