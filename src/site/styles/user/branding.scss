@@ -14,10 +14,11 @@
 }
 
 .dg-branding-title {
-  font-size: var(--dg-filetree-title-size);
-  line-height: 1.15;
-  font-weight: 700;
-  text-transform: uppercase;
+  font-family: var(--font-text-theme), Georgia, 'Times New Roman', serif !important;
+  font-size: var(--dg-filetree-title-size)  !important;
+  line-height: 1.15  !important;
+  font-weight: 700  !important;
+  text-transform: uppercase  !important;
 }
 
 h1.dg-branding-title {
