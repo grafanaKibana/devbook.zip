@@ -11,7 +11,6 @@
     {% endfor %}
   </head>
   <body class="theme-{{meta.baseTheme}} markdown-preview-view markdown-rendered markdown-preview-section {% if settings.dgShowFileTree !== true %}no-filetree{% endif %} {% if settings.dgHomeLink === true and settings.dgShowFileTree !== true %}has-navbar{% endif %} {{meta.bodyClasses}}">
-    <script>!function(){var m=matchMedia("(prefers-color-scheme:dark)"),c=document.body.classList;function t(d){c.remove("theme-dark","theme-light");c.add(d?"theme-dark":"theme-light")}t(m.matches);m.addEventListener("change",function(e){t(e.matches)})}()</script>
     {%include "components/notegrowthhistory.njk"%}
     {% if settings.dgShowFileTree !== true %}
       {%include "components/navbar.njk"%}
@@ -21,10 +20,10 @@
     {% if settings.dgEnableSearch === true %}
       {%include "components/searchContainer.njk"%}
     {% endif %}
-    <main class="content cm-s-obsidian {{contentClasses}}">
+    <main class="content cm-s-obsidian print {{contentClasses}}">
       <header>
       {% if settings.dgShowInlineTitle === true %}
-        <h1>{{ noteTitle  }}</h1>
+        <h1>{% if title %}{{ title }}{% else %}{{ page.fileSlug }}{% endif %}</h1>
       {% endif %}
 
       <div class="header-meta">
@@ -62,7 +61,7 @@
       {% endfor %}
     </main>
 
-    {% if settings.dgShowBacklinks === true or settings.dgShowLocalGraph === true or settings.dgShowToc === true%}
+    {% if settings.dgShowBacklinks === true or settings.dgShowLocalGraph === true or settings.dgShowToc === true or dynamics.sidebar.top.length > 0 or dynamics.sidebar.bottom.length > 0%}
       {%include "components/sidebar.njk" %}
     {%endif%}
 
@@ -76,5 +75,6 @@
       {% include imp %}
     {% endfor %}
     {%include "components/lucideIcons.njk"%}
+    {%include "components/basesScript.njk"%}
     </body>
   </html>
