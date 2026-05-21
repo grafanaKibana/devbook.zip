@@ -14,4 +14,10 @@ _site/
 
 .git/
 .sisyphus/
+.omo/
+.opencode
+
 **/.obsidian/workspace.json
+**/bin/
+**/obj/
+**.sln.DotSettings.user
