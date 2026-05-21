@@ -11,6 +11,7 @@ using Microsoft.Extensions.Options;
 
 public sealed class IngestionService(
     IDocumentRepository documentRepository,
+    IChunkRepository chunkRepository,
     ChunkingService chunkingService,
     IHostEnvironment hostEnvironment,
     IOptions<IngestionOptions> options)
@@ -39,8 +40,22 @@ public sealed class IngestionService(
         var markdownFiles = GetMarkdownFiles(ingestionRootDirectory, sourceDirectory, request.FileName);
         var createdCount = 0;
         var updatedCount = 0;
+        var deletedCount = 0;
         var changedDocuments = new List<Document>();
         var changedDocumentIds = new List<string>();
+        var isFolderIngestion = string.IsNullOrWhiteSpace(request.FileName);
+
+        if (isFolderIngestion)
+        {
+            var sourcePathPrefix = GetSourcePathPrefix(ingestionRootDirectory, sourceDirectory);
+            var existingDocuments = await documentRepository.GetBySourcePathPrefixAsync(sourcePathPrefix, cancellationToken);
+            var existingDocumentIds = existingDocuments.Select(document => document.DocumentId).ToArray();
+
+            await chunkRepository.DeleteByDocumentIdsAsync(existingDocumentIds, cancellationToken);
+            await documentRepository.DeleteByIdsAsync(existingDocumentIds, cancellationToken);
+
+            deletedCount = existingDocumentIds.Length;
+        }
 
         foreach (var markdownFile in markdownFiles)
         {
@@ -77,7 +92,8 @@ public sealed class IngestionService(
                 continue;
             }
 
-            if (string.Equals(existingDocument.SourceHash, sourceHash, StringComparison.Ordinal)
+            if (!isFolderIngestion
+                && string.Equals(existingDocument.SourceHash, sourceHash, StringComparison.Ordinal)
                 && string.Equals(existingDocument.Title, title, StringComparison.Ordinal)
                 && string.Equals(existingDocument.RawMarkdown, rawMarkdown, StringComparison.Ordinal)
                 && string.Equals(existingDocument.Frontmatter, markdownParts.Frontmatter, StringComparison.Ordinal)
@@ -112,7 +128,15 @@ public sealed class IngestionService(
             markdownFiles.Count,
             createdCount,
             updatedCount,
+            deletedCount,
             changedDocumentIds);
+    }
+
+    private static string GetSourcePathPrefix(string ingestionRootDirectory, string sourceDirectory)
+    {
+        var relativePath = NormalizePath(Path.GetRelativePath(ingestionRootDirectory, sourceDirectory));
+
+        return string.Equals(relativePath, ".", StringComparison.Ordinal) ? string.Empty : relativePath.TrimEnd('/');
     }
 
     private static string ResolveIngestionRootDirectory(string hostContentRootPath, string configuredContentRootPath)
@@ -241,10 +265,12 @@ public sealed class IngestionService(
 
     private static void EnsurePathIsUnderRoot(string ingestionRootDirectory, string candidatePath, string parameterName)
     {
-        var normalizedRoot = AppendDirectorySeparator(Path.GetFullPath(ingestionRootDirectory));
+        var normalizedRoot = TrimDirectorySeparator(Path.GetFullPath(ingestionRootDirectory));
+        var normalizedRootWithSeparator = AppendDirectorySeparator(normalizedRoot);
         var normalizedCandidate = Path.GetFullPath(candidatePath);
 
-        if (!normalizedCandidate.StartsWith(normalizedRoot, StringComparison.Ordinal))
+        if (!string.Equals(normalizedCandidate, normalizedRoot, StringComparison.Ordinal)
+            && !normalizedCandidate.StartsWith(normalizedRootWithSeparator, StringComparison.Ordinal))
         {
             throw new ArgumentException("The requested path must stay within the configured ingestion root.", parameterName);
         }
@@ -262,6 +288,11 @@ public sealed class IngestionService(
         return path.EndsWith(Path.DirectorySeparatorChar)
             ? path
             : path + Path.DirectorySeparatorChar;
+    }
+
+    private static string TrimDirectorySeparator(string path)
+    {
+        return path.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
     }
 
     private static string NormalizePath(string path) => path.Replace('\\', '/');

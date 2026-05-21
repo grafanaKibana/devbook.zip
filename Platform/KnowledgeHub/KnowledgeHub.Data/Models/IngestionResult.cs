@@ -5,4 +5,5 @@ public sealed record IngestionResult(
     int ProcessedCount,
     int CreatedCount,
     int UpdatedCount,
+    int DeletedCount,
     IReadOnlyList<string> DocumentIds);

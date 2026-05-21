@@ -1,6 +1,8 @@
 namespace KnowledgeHub.Data.Repositories;
 
+using System.Text.RegularExpressions;
 using KnowledgeHub.Data.Models;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 public sealed class DocumentRepository(IMongoCollection<Document> documents) : IDocumentRepository
@@ -9,6 +11,22 @@ public sealed class DocumentRepository(IMongoCollection<Document> documents) : I
         await documents
             .Find(document => document.SourcePath == sourcePath)
             .FirstOrDefaultAsync(cancellationToken);
+
+    public async Task<IReadOnlyList<Document>> GetBySourcePathPrefixAsync(
+        string sourcePathPrefix,
+        CancellationToken cancellationToken = default)
+    {
+        var filter = string.IsNullOrWhiteSpace(sourcePathPrefix)
+            ? Builders<Document>.Filter.Empty
+            : Builders<Document>.Filter.Regex(
+                document => document.SourcePath,
+                new BsonRegularExpression($"^{Regex.Escape(sourcePathPrefix.TrimEnd('/'))}(/|$)"));
+
+        return await documents
+            .Find(filter)
+            .SortBy(document => document.SourcePath)
+            .ToListAsync(cancellationToken);
+    }
 
     public async Task<IReadOnlyList<Document>> GetByIdsAsync(
         IReadOnlyCollection<string> documentIds,
@@ -24,4 +42,16 @@ public sealed class DocumentRepository(IMongoCollection<Document> documents) : I
             document,
             new ReplaceOptions { IsUpsert = true },
             cancellationToken);
+
+    public async Task DeleteByIdsAsync(
+        IReadOnlyCollection<string> documentIds,
+        CancellationToken cancellationToken = default)
+    {
+        if (documentIds.Count == 0)
+        {
+            return;
+        }
+
+        await documents.DeleteManyAsync(document => documentIds.Contains(document.DocumentId), cancellationToken);
+    }
 }

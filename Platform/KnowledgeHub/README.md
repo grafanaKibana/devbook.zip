@@ -98,7 +98,7 @@ Example full-folder request:
 - `fileName` is optional, but when present it must be a single `.md` file name with no path segments.
 - Requests are rejected if they try to escape the configured ingestion root.
 - Folder ingestion reads all matching markdown files; individual markdown file size is not checked.
-- Ingestion is currently **upsert-only**. It creates or updates scanned files, but it does not purge documents for files that were deleted or moved outside the scanned request.
+- Folder ingestion rebuilds the selected folder from scratch: it deletes stored documents/chunks under that folder, then recreates documents/chunks for the markdown files currently on disk. Single-file ingestion stays scoped to that file and does not delete sibling documents.
 - Hangfire server/storage is wired for future background work, but ingestion chunking currently runs inline from the API request; no ingestion job is registered.
 
 Persistence is intentionally driver-only. The app uses two tiny repositories over `MongoDB.Driver`: one for document lookup/upsert and one for chunk replacement/vector search. There is no EF Core DbContext, migration layer, generic repository, or unit-of-work abstraction.
@@ -216,6 +216,7 @@ The index dimensions must match `EmbeddingOptions:VectorDimensions`. The path is
 ## Runtime flow
 
 1. The API validates the request and scans markdown files under the configured ingestion root.
-2. Matching documents are created or updated in MongoDB.
-3. Changed documents are chunked and embedded before the ingestion response returns.
-4. Chunk replacement deletes the document's previous chunks and inserts the new embedded chunks.
+2. Folder ingestion deletes existing documents and chunks under the selected folder scope.
+3. Current markdown documents are created or updated in MongoDB.
+4. Changed or rebuilt documents are chunked and embedded before the ingestion response returns.
+5. Chunk replacement deletes the document's previous chunks and inserts the new embedded chunks.

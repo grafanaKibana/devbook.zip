@@ -23,6 +23,18 @@ public sealed class ChunkRepository(IMongoCollection<ChunkModel> chunks) : IChun
         }
     }
 
+    public async Task DeleteByDocumentIdsAsync(
+        IReadOnlyCollection<string> documentIds,
+        CancellationToken cancellationToken = default)
+    {
+        if (documentIds.Count == 0)
+        {
+            return;
+        }
+
+        await chunks.DeleteManyAsync(chunk => documentIds.Contains(chunk.DocumentId), cancellationToken);
+    }
+
     public async Task<IReadOnlyList<RagChunkResponse>> VectorSearchAsync(
         float[] queryVector,
         int topK,
@@ -50,7 +62,7 @@ public sealed class ChunkRepository(IMongoCollection<ChunkModel> chunks) : IChun
         };
 
         var documents = await chunks
-            .Aggregate<BsonDocument>(pipeline)
+            .Aggregate<BsonDocument>(pipeline, cancellationToken: cancellationToken)
             .ToListAsync(cancellationToken);
 
         return documents
