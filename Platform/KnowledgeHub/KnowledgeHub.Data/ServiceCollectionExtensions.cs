@@ -39,7 +39,7 @@ public static class ServiceCollectionExtensions
 
         if (string.IsNullOrWhiteSpace(options.ApiKey))
         {
-            throw new InvalidOperationException("EmbeddingOptions API key is required. Configure EmbeddingOptions:ApiKey or OPENAI_API_KEY.");
+            throw new InvalidOperationException("EmbeddingOptions API key is required. Configure EmbeddingOptions:ApiKey.");
         }
 
         if (string.IsNullOrWhiteSpace(options.ModelId))

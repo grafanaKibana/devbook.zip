@@ -13,8 +13,8 @@ This is a personal R&D proof of concept for learning RAG mechanics, not a produc
 
 - MongoDB connection string in `ConnectionStrings:MongoDb`.
 - Atlas MongoDB for real `/rag/search` vector retrieval. Local or non-Atlas MongoDB is enough for basic storage experiments, but it does not support the `$vectorSearch` stage used by the search endpoint.
-- OpenAI API key in `EmbeddingOptions:ApiKey` or `OPENAI_API_KEY`.
-- Optional `OPENAI_ENDPOINT` environment variable if you are not using the default OpenAI endpoint.
+- OpenAI API key in `EmbeddingOptions:ApiKey` or the `EmbeddingOptions__ApiKey` environment variable.
+- Optional `EmbeddingOptions:Endpoint` or `EmbeddingOptions__Endpoint` if you are not using the default OpenAI endpoint.
 
 Required runtime configuration:
 
@@ -134,7 +134,10 @@ Expected response shape:
 
 ```json
 {
-  "error": "Query is required."
+  "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+  "title": "Bad Request",
+  "status": 400,
+  "detail": "Query is required."
 }
 ```
 
@@ -208,7 +211,7 @@ The index dimensions must match `EmbeddingOptions:VectorDimensions`. The path is
 - Missing index or non-Atlas MongoDB: `/rag/search` depends on Atlas `$vectorSearch`. If the index `chunks_embedding_vector_idx` is missing, or the database is local/non-Atlas MongoDB, vector search fails before returning results.
 - Dimension mismatch: the Atlas index uses `384` dimensions, so `EmbeddingOptions:ModelId` must stay `text-embedding-3-small` with `EmbeddingOptions:VectorDimensions = 384` unless you rebuild stored chunk embeddings and recreate the index with matching dimensions.
 - Empty results: if `/rag/search` returns `mode: "vector"` with an empty `results` array, first ingest markdown documents so the API can create chunks and embeddings. A valid index cannot return matches when the `chunks` collection has no embedded chunks.
-- Secret handling: keep `ConnectionStrings:MongoDb`, `EmbeddingOptions:ApiKey`, and `OPENAI_API_KEY` in user-secrets or environment variables only. Committed configuration should contain placeholders or non-secret defaults.
+- Secret handling: keep `ConnectionStrings:MongoDb` and `EmbeddingOptions:ApiKey` in user-secrets or environment variables only. Use double underscores for environment variables, for example `ConnectionStrings__MongoDb` and `EmbeddingOptions__ApiKey`. Committed configuration should contain placeholders or non-secret defaults.
 
 ## Runtime flow
 

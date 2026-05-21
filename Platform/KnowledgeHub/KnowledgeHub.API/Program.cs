@@ -2,13 +2,15 @@ using Hangfire;
 using Hangfire.Mongo;
 using Hangfire.Mongo.Migration.Strategies;
 using Hangfire.Mongo.Migration.Strategies.Backup;
+using KnowledgeHub.API.ExceptionHandling;
 using KnowledgeHub.API.Extensions;
 using KnowledgeHub.Data;
-using KnowledgeHub.Data.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApiWithSwagger();
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<ClientRequestExceptionHandler>();
 
 builder.Services.BindOptions(builder.Configuration);
 builder.Services.AddMongoDb(builder.Configuration, out var mongoConnectionString, out var mongoDatabaseName);
@@ -35,6 +37,8 @@ builder.Services.AddHangfireServer();
 
 var app = builder.Build();
 
+app.UseExceptionHandler();
+app.UseStatusCodePages();
 app.UseOpenApiWithSwagger();
 app.UseHttpsRedirection();
 app.AddEndpoints();

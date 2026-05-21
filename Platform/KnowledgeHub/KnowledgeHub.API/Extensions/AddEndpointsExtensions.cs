@@ -12,40 +12,18 @@ public static class AddEndpointsExtensions
             app.MapPost("/ingestion/documents",
                     async (IngestionRequest request, IngestionService ingestionService, CancellationToken cancellationToken) =>
                     {
-                        try
-                        {
-                            var result = await ingestionService.IngestDocumentsAsync(request, cancellationToken);
+                        var result = await ingestionService.IngestDocumentsAsync(request, cancellationToken);
 
-                            return Results.Ok(result);
-                        }
-                        catch (ArgumentException exception)
-                        {
-                            return Results.BadRequest(new {error = exception.Message});
-                        }
-                        catch (DirectoryNotFoundException exception)
-                        {
-                            return Results.BadRequest(new {error = exception.Message});
-                        }
-                        catch (FileNotFoundException exception)
-                        {
-                            return Results.BadRequest(new {error = exception.Message});
-                        }
+                        return Results.Ok(result);
                     })
                 .WithName("IngestDocument");
 
             app.MapPost("/rag/search",
                     async (RagSearchRequest request, RagSearchService ragSearchService, CancellationToken cancellationToken) =>
                     {
-                        try
-                        {
-                            var result = await ragSearchService.SearchAsync(request, cancellationToken);
+                        var result = await ragSearchService.SearchAsync(request, cancellationToken);
 
-                            return Results.Ok(result);
-                        }
-                        catch (ArgumentException exception)
-                        {
-                            return Results.BadRequest(new {error = exception.Message});
-                        }
+                        return Results.Ok(result);
                     })
                 .WithName("RagSearch");
 
@@ -54,7 +32,7 @@ public static class AddEndpointsExtensions
                     {
                         if (string.IsNullOrWhiteSpace(request.Question))
                         {
-                            return Results.BadRequest(new {error = "Question is required."});
+                            throw new ArgumentException("Question is required.");
                         }
 
                         var topK = Math.Clamp(request.TopK, 1, 5);

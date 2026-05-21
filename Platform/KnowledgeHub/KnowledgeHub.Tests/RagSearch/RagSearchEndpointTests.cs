@@ -19,7 +19,7 @@ namespace KnowledgeHub.Tests.RagSearch;
 public sealed class RagSearchEndpointTests
 {
     [Fact]
-    public async Task PostRagSearchBlankQueryReturnsHttp400WithQueryIsRequiredJsonError()
+    public async Task PostRagSearchBlankQueryReturnsHttp400WithProblemDetails()
     {
         await using var factory = new OfflineRagSearchApplicationFactory();
         using var client = factory.CreateClient();
@@ -27,8 +27,11 @@ public sealed class RagSearchEndpointTests
         var response = await client.PostAsJsonAsync("/rag/search", new { query = "   ", topK = 5 });
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
         using var document = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
-        Assert.Equal("Query is required.", document.RootElement.GetProperty("error").GetString());
+        Assert.Equal(400, document.RootElement.GetProperty("status").GetInt32());
+        Assert.Equal("Bad Request", document.RootElement.GetProperty("title").GetString());
+        Assert.Equal("Query is required.", document.RootElement.GetProperty("detail").GetString());
     }
 
     [Fact]
