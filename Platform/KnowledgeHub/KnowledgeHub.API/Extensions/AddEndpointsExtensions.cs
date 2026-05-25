@@ -10,7 +10,7 @@ public static class AddEndpointsExtensions
         public WebApplication AddEndpoints()
         {
             app.MapPost("/ingestion/documents",
-                    async (IngestionRequest request, IngestionService ingestionService, CancellationToken cancellationToken) =>
+                    async (IngestionRequest request, IIngestionService ingestionService, CancellationToken cancellationToken) =>
                     {
                         var result = await ingestionService.IngestDocumentsAsync(request, cancellationToken);
 
@@ -19,7 +19,7 @@ public static class AddEndpointsExtensions
                 .WithName("IngestDocument");
 
             app.MapPost("/rag/search",
-                    async (RagSearchRequest request, RagSearchService ragSearchService, CancellationToken cancellationToken) =>
+                    async (RagSearchRequest request, IRagSearchService ragSearchService, CancellationToken cancellationToken) =>
                     {
                         var result = await ragSearchService.SearchAsync(request, cancellationToken);
 

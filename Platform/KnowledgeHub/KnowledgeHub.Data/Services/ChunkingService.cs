@@ -100,7 +100,7 @@ public sealed class ChunkingService(
         for (var index = 0; index < headings.Length; index++)
         {
             var heading = headings[index];
-            var headingText = heading.Inline?.ToString()?.Trim();
+            var headingText = ExtractHeadingText(markdown, heading);
             var contentStart = FindNextLineStart(markdown, heading.Span.Start);
             var contentEnd = index + 1 < headings.Length ? headings[index + 1].Span.Start : markdown.Length;
 
@@ -239,6 +239,13 @@ public sealed class ChunkingService(
         var nextNewline = markdown.IndexOf('\n', start);
 
         return nextNewline < 0 ? markdown.Length : nextNewline + 1;
+    }
+
+    private static string ExtractHeadingText(string markdown, HeadingBlock heading)
+    {
+        var headingMarkdown = markdown[heading.Span.Start..(heading.Span.End + 1)];
+
+        return headingMarkdown.Trim().TrimStart('#').Trim();
     }
 
     private static int FindWhitespaceBoundary(string content, int start, int endExclusive)

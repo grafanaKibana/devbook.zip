@@ -3,14 +3,21 @@ namespace KnowledgeHub.Data.Services;
 using KnowledgeHub.Data.Models;
 using KnowledgeHub.Data.Repositories;
 
+public interface IRagSearchService
+{
+    Task<RagSearchResponse> SearchAsync(
+        RagSearchRequest request,
+        CancellationToken cancellationToken = default);
+}
+
 public class RagSearchService(
     EmbeddingService embeddingService,
-    IChunkRepository chunkRepository)
+    IChunkRepository chunkRepository) : IRagSearchService
 {
     private const int DefaultTopK = 5;
     private const int MaxTopK = 10;
 
-    public virtual async Task<RagSearchResponse> SearchAsync(
+    public async Task<RagSearchResponse> SearchAsync(
         RagSearchRequest request,
         CancellationToken cancellationToken = default)
     {

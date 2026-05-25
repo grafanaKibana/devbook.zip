@@ -9,12 +9,19 @@ using KnowledgeHub.Data.Repositories;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
+public interface IIngestionService
+{
+    Task<IngestionResult> IngestDocumentsAsync(
+        IngestionRequest request,
+        CancellationToken cancellationToken = default);
+}
+
 public sealed class IngestionService(
     IDocumentRepository documentRepository,
     IChunkRepository chunkRepository,
     ChunkingService chunkingService,
     IHostEnvironment hostEnvironment,
-    IOptions<IngestionOptions> options)
+    IOptions<IngestionOptions> options) : IIngestionService
 {
     private readonly IngestionOptions options = options.Value;
 

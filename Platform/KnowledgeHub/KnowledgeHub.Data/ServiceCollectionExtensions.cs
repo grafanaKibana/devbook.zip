@@ -18,10 +18,12 @@ public static class ServiceCollectionExtensions
             ArgumentNullException.ThrowIfNull(services);
 
             services.AddScoped<IngestionService>();
+            services.AddScoped<IIngestionService>(serviceProvider => serviceProvider.GetRequiredService<IngestionService>());
             services.AddScoped<ChunkingService>();
             services.AddScoped<IDocumentRepository, DocumentRepository>();
             services.AddScoped<IChunkRepository, ChunkRepository>();
             services.AddScoped<RagSearchService>();
+            services.AddScoped<IRagSearchService>(serviceProvider => serviceProvider.GetRequiredService<RagSearchService>());
 
             services.AddEmbeddingGenerator(CreateEmbeddingGenerator);
             services.AddSingleton<EmbeddingService>();
