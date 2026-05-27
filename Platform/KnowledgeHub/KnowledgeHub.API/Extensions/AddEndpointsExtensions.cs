@@ -28,52 +28,25 @@ public static class AddEndpointsExtensions
                 .WithName("RagSearch");
 
             app.MapPost("/rag/ask",
-                    (RagAskRequest request) =>
+                    async (RagAskRequest request, IRagSearchService ragSearchService, CancellationToken cancellationToken) =>
                     {
                         if (string.IsNullOrWhiteSpace(request.Question))
                         {
                             throw new ArgumentException("Question is required.");
                         }
 
-                        var topK = Math.Clamp(request.TopK, 1, 5);
                         var question = request.Question.Trim();
-                        var sources = CreateMockChunks()
-                            .Take(topK)
-                            .ToArray();
+                        var searchResult = await ragSearchService.SearchAsync(
+                            new RagSearchRequest(question, request.TopK),
+                            cancellationToken);
 
-                        var answer = "Mock answer: a real RAG endpoint will embed the question, retrieve relevant chunks, "
-                                     + "and ask an LLM to answer from those chunks. Dummy sources: "
-                                     + string.Join(", ", sources.Select(source => source.CitationLabel));
+                        var answer = "Answer generation is not implemented yet. Retrieved source chunks: "
+                                     + string.Join(", ", searchResult.Results.Select(source => source.CitationLabel));
 
-                        return Results.Ok(new RagAskResponse(question, answer, "mock", sources));
+                        return Results.Ok(new RagAskResponse(question, answer, searchResult.Mode, searchResult.Results));
                     })
-                .WithName("MockRagAsk");
+                .WithName("RagAsk");
             return app;
         }
     }
-
-    static IReadOnlyList<RagChunkResponse> CreateMockChunks() =>
-    [
-        new RagChunkResponse(
-            "chunk_mock_rag_0001",
-            "doc_mock_rag",
-            "RAG retrieves relevant knowledge base chunks before asking the model to answer, which keeps answers grounded in your own notes.",
-            "RAG Flow",
-            "[[RAG#RAG Flow]]",
-            0.92),
-        new RagChunkResponse(
-            "chunk_mock_chunking_0001",
-            "doc_mock_chunking",
-            "Chunking splits long pages into smaller passages so retrieval can return the specific section that answers the question.",
-            "Chunking",
-            "[[Chunking#Chunking]]",
-            0.84),
-        new RagChunkResponse(
-            "chunk_mock_embeddings_0001",
-            "doc_mock_embeddings",
-            "Embeddings turn text into vectors. Query vectors and chunk vectors must use the same model and dimensions.",
-            "Embeddings",
-            "[[Embeddings#Embeddings]]",
-            0.76),
-    ];
 }

@@ -82,9 +82,18 @@ public sealed class KnowledgeHubEndpointTests
     }
 
     [Fact]
-    public async Task PostRagAsk_TrimsQuestionClampsTopKAndReturnsMockSources()
+    public async Task PostRagAsk_TrimsQuestionDelegatesToSearchServiceAndReturnsSources()
     {
-        await using var factory = new OfflineApplicationFactory(_ => { });
+        var expectedSources = new[]
+        {
+            new RagChunkResponse("chunk-1", "doc-1", "Chunk text", "Heading", "[[Doc#Heading]]", 0.91),
+        };
+        var search = new Mock<IRagSearchService>(MockBehavior.Strict);
+        search.Setup(mock => mock.SearchAsync(
+                It.Is<RagSearchRequest>(request => request.Query == "When use RAG?" && request.TopK == 99),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new RagSearchResponse("When use RAG?", "vector", expectedSources));
+        await using var factory = new OfflineApplicationFactory(services => services.AddScoped(_ => search.Object));
         using var client = factory.CreateClient();
 
         var response = await client.PostAsJsonAsync("/rag/ask", new RagAskRequest("  When use RAG?  ", 99));
@@ -93,9 +102,10 @@ public sealed class KnowledgeHubEndpointTests
         var body = await response.Content.ReadFromJsonAsync<RagAskResponse>();
         body.Should().NotBeNull();
         body!.Question.Should().Be("When use RAG?");
-        body.Mode.Should().Be("mock");
-        body.Sources.Should().HaveCount(3);
-        body.Answer.Should().Contain("Dummy sources");
+        body.Mode.Should().Be("vector");
+        body.Sources.Should().BeEquivalentTo(expectedSources);
+        body.Answer.Should().Contain("Answer generation is not implemented yet");
+        search.VerifyAll();
     }
 
     [Fact]

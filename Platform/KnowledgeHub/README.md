@@ -107,7 +107,7 @@ Persistence is intentionally driver-only. The app uses two tiny repositories ove
 
 `/rag/search` performs real vector retrieval against the `chunks` collection. It embeds the query with the configured embedding model, runs Atlas `$vectorSearch`, and returns `mode: "vector"` with matching chunk results.
 
-`/rag/ask` remains a mock endpoint for now. It still returns dummy source chunks and does not call MongoDB or an LLM.
+`/rag/ask` performs the same real vector chunk retrieval as `/rag/search`, returns the retrieved chunks as sources, and keeps answer generation as a placeholder for now. It does not call an LLM yet.
 
 Search chunks:
 
@@ -181,7 +181,7 @@ POST /rag/ask
 }
 ```
 
-The mock answer returns dummy source chunks and citation labels without calling MongoDB or an LLM. Real answer generation for `/rag/ask` is intentionally outside this PoC step.
+The answer field is a placeholder that lists retrieved citation labels. The `sources` array comes from real vector retrieval against MongoDB chunks; real LLM answer generation for `/rag/ask` is intentionally outside this PoC step.
 
 ## Atlas Vector Search index
 
