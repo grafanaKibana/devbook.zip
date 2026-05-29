@@ -104,7 +104,7 @@ public sealed class KnowledgeHubEndpointTests
         body!.Question.Should().Be("When use RAG?");
         body.Mode.Should().Be("vector");
         body.Sources.Should().BeEquivalentTo(expectedSources);
-        body.Answer.Should().Contain("Answer generation is not implemented yet");
+        body.Answer.Should().Be("Answer generation is not implemented yet. Retrieved source chunks: [[Doc#Heading]]");
         search.VerifyAll();
     }
 

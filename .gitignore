@@ -22,4 +22,5 @@ _site/
 # Dotnet
 **/obj/
 **/bin/
+**/EvaluationReports/
 *.DotSettings.user

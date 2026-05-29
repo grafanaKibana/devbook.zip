@@ -21,6 +21,7 @@
   <ItemGroup>
     <ProjectReference Include="..\KnowledgeHub.API\KnowledgeHub.API.csproj" />
     <ProjectReference Include="..\KnowledgeHub.Data\KnowledgeHub.Data.csproj" />
+    <ProjectReference Include="..\KnowledgeHub.Evaluations\KnowledgeHub.Evaluations.csproj" />
   </ItemGroup>
 
 </Project>

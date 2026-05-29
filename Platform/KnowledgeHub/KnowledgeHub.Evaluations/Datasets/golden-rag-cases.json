@@ -1,0 +1,142 @@
+{
+  "cases": [
+    {
+      "id": "rag-eval-intro-layers",
+      "query": "Why should RAG evaluation be split into layers?",
+      "expectedSources": [
+        {
+          "path": "Software Engineering/11 AI & ML/LLM/RAG/Evaluation.md",
+          "heading": "Intro",
+          "snippet": "RAG evaluation decomposes into three layers: retrieval quality, generation quality, and end-to-end usefulness."
+        }
+      ],
+      "expectedAnswerSummary": "Evaluation should separate retrieval, generation, and end-to-end behavior so regressions are attributable."
+    },
+    {
+      "id": "rag-eval-recall-primary",
+      "query": "What retrieval metric should I track first for RAG?",
+      "expectedSources": [
+        {
+          "path": "Software Engineering/11 AI & ML/LLM/RAG/Evaluation.md",
+          "heading": "Retrieval Metrics",
+          "snippet": "**Recall@k** — of all relevant documents in the corpus, what fraction appears in the top-k results. Recall@5 = 0.8 means 80% of relevant documents land in the top 5. This is the primary retrieval metric for RAG because the generator cannot use evidence it never sees. A recall failure is a hard ceiling on answer quality."
+        }
+      ],
+      "expectedAnswerSummary": "Track Recall@k first because missing evidence is a hard ceiling on answer quality."
+    },
+    {
+      "id": "rag-eval-mrr",
+      "query": "When is MRR useful in RAG evaluation?",
+      "expectedSources": [
+        {
+          "path": "Software Engineering/11 AI & ML/LLM/RAG/Evaluation.md",
+          "heading": "Retrieval Metrics",
+          "snippet": "**MRR (Mean Reciprocal Rank)** — the average of 1/rank for the first relevant document across queries. If the first relevant result is at position 3, the reciprocal rank is 1/3. MRR rewards pushing the best result higher. Useful when the generator primarily uses the top-ranked chunk."
+        }
+      ]
+    },
+    {
+      "id": "rag-eval-diagnostic-ceiling",
+      "query": "What does high faithfulness with low context recall mean?",
+      "expectedSources": [
+        {
+          "path": "Software Engineering/11 AI & ML/LLM/RAG/Evaluation.md",
+          "heading": "Diagnostic Combinations",
+          "snippet": "| High | Low | Retrieval ceiling — model uses what it gets correctly, but evidence is missing | Hybrid retrieval, expand k, fix metadata filters, improve embeddings |"
+        }
+      ],
+      "expectedAnswerSummary": "This points to a retrieval ceiling, not a generation problem."
+    },
+    {
+      "id": "rag-chunking-fixed-size-boundary-cuts",
+      "query": "What is the main risk of fixed-size chunking?",
+      "expectedSources": [
+        {
+          "path": "Software Engineering/11 AI & ML/LLM/RAG/Chunking.md",
+          "heading": "Fixed-Size Chunking",
+          "snippet": "- **Boundary cuts through logical units.** A policy clause, code block, or table row gets split at an arbitrary token offset. The retriever returns a fragment that looks relevant but is incomplete, and the model generates a confidently wrong answer. Mitigate by increasing overlap and auditing retrieval on structured documents."
+        }
+      ]
+    },
+    {
+      "id": "rag-chunking-parent-child-context",
+      "query": "How does parent-child chunking improve answer completeness?",
+      "expectedSources": [
+        {
+          "path": "Software Engineering/11 AI & ML/LLM/RAG/Chunking.md",
+          "heading": "Parent-Child Chunking",
+          "snippet": "- At retrieval time, search against child chunks for precision — small chunks match specific queries better. When a child matches, expand to its parent chunk before passing context to the generator. The parent provides the surrounding context that the child alone may lack."
+        }
+      ],
+      "expectedAnswerSummary": "Retrieve small chunks for precision, then expand to parent context for synthesis."
+    },
+    {
+      "id": "rag-retrieval-dense-identifiers",
+      "query": "Why can vector search miss technical identifiers?",
+      "expectedSources": [
+        {
+          "path": "Software Engineering/11 AI & ML/LLM/RAG/Retrieval.md",
+          "heading": "Dense Retrieval -- Vector Search",
+          "snippet": "- **Misses exact identifiers.** Embedding models learn to capture meaning, not specific tokens. Error codes, API paths, and version strings get lost in the vector representation. The retriever returns topically related but operationally wrong chunks — and unlike keyword search misses (which return obviously unrelated content), vector search misses look plausible, making them harder to catch."
+        }
+      ]
+    },
+    {
+      "id": "rag-query-translation-original-query",
+      "query": "Should translated queries replace the original query?",
+      "expectedSources": [
+        {
+          "path": "Software Engineering/11 AI & ML/LLM/RAG/Query Translation.md",
+          "heading": "Pitfalls",
+          "snippet": "Mitigation: include the original query as one of the retrieval variants — never translate only, always include the original. Set explicit constraints in the translation prompt (\"preserve all specific entities, identifiers, and version numbers\"). Evaluate translated queries against the original: if cosine similarity between a variant and the original drops below a threshold, discard the variant before retrieval."
+        }
+      ],
+      "expectedAnswerSummary": "Keep the original query in the candidate set so translations do not drift away from intent."
+    },
+    {
+      "id": "rag-reranking-cannot-fix-recall",
+      "query": "Can reranking recover documents that retrieval missed?",
+      "expectedSources": [
+        {
+          "path": "Software Engineering/11 AI & ML/LLM/RAG/Re-ranking.md",
+          "heading": "Pitfalls",
+          "snippet": "Reranking can only reorder what retrieval found. If the relevant document is not in the candidate set at all (recall failure), no amount of reranking will surface it. Teams sometimes add rerankers expecting them to fix retrieval coverage problems, when the actual fix is better [[Software Engineering/11 AI & ML/LLM/RAG/Chunking|chunking]], [[Software Engineering/11 AI & ML/LLM/Embeddings|embedding model selection]], or query expansion."
+        }
+      ]
+    },
+    {
+      "id": "rag-embeddings-swap-invalidates-vectors",
+      "query": "What happens when you swap embedding models?",
+      "expectedSources": [
+        {
+          "path": "Software Engineering/11 AI & ML/LLM/Embeddings.md",
+          "heading": "Pitfalls",
+          "snippet": "Changing the embedding model — even a minor version — invalidates every stored vector. The new model produces vectors in a different geometric space. Cosine similarity between old and new vectors is meaningless."
+        }
+      ]
+    },
+    {
+      "id": "rag-golden-set-staleness",
+      "query": "Why can a golden evaluation set go stale?",
+      "expectedSources": [
+        {
+          "path": "Software Engineering/11 AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs.md",
+          "heading": "Pitfalls",
+          "snippet": "**What goes wrong**: the golden set was built from early user queries. Six months later, user behavior has shifted — new question types, new product features, new failure modes."
+        }
+      ]
+    },
+    {
+      "id": "rag-monitoring-global-aggregates",
+      "query": "Why do global monitoring metrics hide tenant regressions?",
+      "expectedSources": [
+        {
+          "path": "Software Engineering/11 AI & ML/LLM/RAG/Monitoring.md",
+          "heading": "Pitfalls",
+          "snippet": "Global aggregate metrics hide localized regressions. A pipeline change that improves average faithfulness by 2% can simultaneously degrade faithfulness by 20% for a specific tenant whose documents use a different format."
+        }
+      ],
+      "expectedAnswerSummary": "Segment monitoring by tenant or query cluster so localized regressions are not averaged away."
+    }
+  ]
+}

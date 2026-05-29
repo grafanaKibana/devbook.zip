@@ -8,6 +8,7 @@ This is a personal R&D proof of concept for learning RAG mechanics, not a produc
 
 - `KnowledgeHub.API`, minimal ASP.NET Core host.
 - `KnowledgeHub.Data`, ingestion, chunking, small MongoDB.Driver repositories, Hangfire boilerplate for future jobs, and embedding integration.
+- `KnowledgeHub.Evaluations`, test-style RAG search evaluation over the golden dataset and local HTML report generation.
 
 ## Prerequisites
 
@@ -63,6 +64,34 @@ Test:
 
 ```bash
 dotnet test Platform/KnowledgeHub/KnowledgeHub.Tests/KnowledgeHub.Tests.csproj
+```
+
+Build the evaluation project:
+
+```bash
+dotnet build Platform/KnowledgeHub/KnowledgeHub.Evaluations/KnowledgeHub.Evaluations.csproj
+```
+
+## RAG evaluation commands
+
+The golden dataset is `Platform/KnowledgeHub/KnowledgeHub.Evaluations/Datasets/golden-rag-cases.json`. Restore the local report tool from the repo root before generating HTML reports:
+
+```bash
+dotnet tool restore
+```
+
+The tool manifest tracks `Microsoft.Extensions.AI.Evaluation.Console`, which provides `dotnet aieval report`.
+
+Generate the AI evaluation HTML report from the scenario test run by running the evaluation project:
+
+```bash
+dotnet run --project Platform/KnowledgeHub/KnowledgeHub.Evaluations/KnowledgeHub.Evaluations.csproj -- --name RAGSearch
+```
+
+Selecting and running the `KnowledgeHub.Evaluations` project in the IDE executes the same `RunEvaluation.cs` report-generation flow. `RunEvaluation.cs` invokes the report command for the latest run folder:
+
+```bash
+dotnet aieval report --path EvaluationReports --output <latest-run>/report.html
 ```
 
 ## Ingestion API
