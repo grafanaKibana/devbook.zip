@@ -82,6 +82,21 @@ dotnet tool restore
 
 The tool manifest tracks `Microsoft.Extensions.AI.Evaluation.Console`, which provides `dotnet aieval report`.
 
+Evaluation runs load configuration from `KnowledgeHub.Evaluations/appsettings.json`, `KnowledgeHub.Evaluations/appsettings.Evaluations.json`, and environment variables. The committed `appsettings.Evaluations.json` contains only non-secret defaults and placeholders. Before running live evaluations, provide:
+
+- `ConnectionStrings:MongoDb` with an Atlas connection string that has the vector-search index.
+- `EmbeddingOptions:ApiKey` with an OpenAI API key.
+
+Use environment variables when you do not want to edit the local settings file:
+
+```bash
+ConnectionStrings__MongoDb="<mongo-connection-string>" \
+EmbeddingOptions__ApiKey="<openai-api-key>" \
+dotnet run --project Platform/KnowledgeHub/KnowledgeHub.Evaluations/KnowledgeHub.Evaluations.csproj -- --name RAGSearch
+```
+
+If either value is missing, the scenario tests are skipped and no new evaluation report folder is created.
+
 Generate the AI evaluation HTML report from the scenario test run by running the evaluation project:
 
 ```bash
