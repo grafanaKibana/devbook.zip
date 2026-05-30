@@ -72,7 +72,7 @@ public sealed class RAGSearchMetricCalculatorTests
     }
 
     [Fact]
-    public void ScoreQuery_MatchesBySourceDocumentWithoutRequiringSnippetOrHeadingMatch()
+    public void ScoreQuery_DoesNotMatchExpectedEvidenceBySourceDocumentOnly()
     {
         var result = RAGSearchMetricCalculator.ScoreQuery(
             new RAGSearchPrediction(
@@ -82,12 +82,29 @@ public sealed class RAGSearchMetricCalculatorTests
                 [new RAGSearchDocument("Software Engineering/11 AI & ML/LLM/RAG/Evaluation.md", "Other heading", "different snippet")]
             ));
 
+        result.RecallAtK.Should().Be(0);
+        result.PrecisionAtK.Should().Be(0);
+        result.ReciprocalRank.Should().Be(0);
+        result.Diagnostics.Matches.Should().ContainSingle().Which.IsRelevant.Should().BeFalse();
+        result.Diagnostics.Matches[0].HeadingMatched.Should().BeFalse();
+        result.Diagnostics.Matches[0].SnippetMatched.Should().BeFalse();
+    }
+
+    [Fact]
+    public void ScoreQuery_MatchesExpectedEvidenceWhenHeadingOrSnippetMatches()
+    {
+        var result = RAGSearchMetricCalculator.ScoreQuery(
+            new RAGSearchPrediction(
+                string.Empty,
+                "evidence hit",
+                [new RAGSearchDocument("Software Engineering/11 AI & ML/LLM/RAG/Evaluation.md", "Retrieval Metrics", "MRR rewards pushing the first relevant result higher")],
+                [new RAGSearchDocument("Software Engineering/11 AI & ML/LLM/RAG/Evaluation.md", "Retrieval Metrics", "different chunk text")]
+            ));
+
         result.RecallAtK.Should().Be(1);
         result.PrecisionAtK.Should().Be(1);
         result.ReciprocalRank.Should().Be(1);
-        result.Diagnostics.Matches.Should().ContainSingle().Which.IsRelevant.Should().BeTrue();
-        result.Diagnostics.Matches[0].HeadingMatched.Should().BeFalse();
-        result.Diagnostics.Matches[0].SnippetMatched.Should().BeFalse();
+        result.Diagnostics.Matches.Should().ContainSingle().Which.HeadingMatched.Should().BeTrue();
     }
 
     [Fact]

@@ -12,7 +12,7 @@ public sealed class GoldenRagDatasetTests
     {
         var dataset = LoadDataset();
 
-        dataset.Cases.Should().HaveCount(12);
+        dataset.Cases.Should().HaveCount(15);
         dataset.Cases.SelectMany(testCase => testCase.ExpectedSources)
             .Should()
             .OnlyContain(source => source.Path.StartsWith("Software Engineering/", StringComparison.Ordinal));

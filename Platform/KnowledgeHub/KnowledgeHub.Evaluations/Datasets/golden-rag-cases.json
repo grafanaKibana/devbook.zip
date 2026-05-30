@@ -137,6 +137,57 @@
         }
       ],
       "expectedAnswerSummary": "Segment monitoring by tenant or query cluster so localized regressions are not averaged away."
+    },
+    {
+      "id": "rag-eval-chunking-token-iou",
+      "query": "How can I evaluate whether a chunking strategy retrieves the exact evidence span instead of noisy context?",
+      "expectedSources": [
+        {
+          "path": "Software Engineering/11 AI & ML/LLM/RAG/Evaluation.md",
+          "heading": "Chunking Evaluation",
+          "snippet": "Token IoU is more informative than end-to-end Recall@k because it captures chunk efficiency. A chunking strategy can achieve high retrieval recall by retrieving large, noisy chunks while wasting context window tokens on irrelevant content."
+        },
+        {
+          "path": "Software Engineering/11 AI & ML/LLM/RAG/Chunking.md",
+          "heading": "Practical Baselines",
+          "snippet": "Track per-source retrieval failure modes before switching strategy. Aggregate metrics hide format-specific problems — a retriever can perform well on prose while consistently breaking on table-heavy docs."
+        }
+      ],
+      "expectedAnswerSummary": "Use span-level/token-overlap metrics plus per-source failure analysis, not just document-level recall."
+    },
+    {
+      "id": "rag-retrieval-identifier-hybrid",
+      "query": "A query contains an exact error code or API path; why might vector retrieval look plausible but still fail, and what retrieval mode helps?",
+      "expectedSources": [
+        {
+          "path": "Software Engineering/11 AI & ML/LLM/RAG/Retrieval.md",
+          "heading": "Dense Retrieval — Vector Search",
+          "snippet": "Embedding models learn to capture meaning, not specific tokens. Error codes, API paths, and version strings get lost in the vector representation."
+        },
+        {
+          "path": "Software Engineering/11 AI & ML/LLM/RAG/Retrieval.md",
+          "heading": "Hybrid Retrieval — Vector + Keyword",
+          "snippet": "Identifier-heavy corpora benefit from higher keyword weight (alpha around 0.4); conversational queries benefit from higher vector weight (alpha around 0.7)."
+        }
+      ],
+      "expectedAnswerSummary": "Vector search can miss exact identifiers; hybrid retrieval or stronger keyword weighting should cover those lexical constraints."
+    },
+    {
+      "id": "rag-embedding-finetune-vs-chunking",
+      "query": "When should I finetune embeddings instead of changing chunking or retrieval logic?",
+      "expectedSources": [
+        {
+          "path": "Software Engineering/11 AI & ML/LLM/Embeddings.md",
+          "heading": "Questions",
+          "snippet": "Finetuning is justified when retrieval failures are specifically caused by semantic mismatches on domain terminology — queries and relevant documents contain the same domain concepts but land far apart in vector space."
+        },
+        {
+          "path": "Software Engineering/11 AI & ML/LLM/RAG/Chunking.md",
+          "heading": "How to Choose a Strategy",
+          "snippet": "Use retrieval failures, not preference, to pick a strategy."
+        }
+      ],
+      "expectedAnswerSummary": "Finetune only when failures are semantic/domain-term mismatches; fix chunking when evidence is split or noisy."
     }
   ]
 }

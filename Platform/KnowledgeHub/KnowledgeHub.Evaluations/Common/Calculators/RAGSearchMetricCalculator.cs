@@ -127,10 +127,21 @@ public static class RAGSearchMetricCalculator
             var headingMatched = MatchesContains(expectedDocument.Heading, retrievedDocument.Heading);
             var snippetMatched = MatchesContains(expectedDocument.Snippet, retrievedDocument.Snippet);
 
+            if (RequiresEvidenceMatch(expectedDocument) && !headingMatched && !snippetMatched)
+            {
+                continue;
+            }
+
             return (index, expectedDocument, headingMatched, snippetMatched);
         }
 
         return null;
+    }
+
+    private static bool RequiresEvidenceMatch(RAGSearchDocument expectedDocument)
+    {
+        return !string.IsNullOrWhiteSpace(expectedDocument.Heading)
+            || !string.IsNullOrWhiteSpace(expectedDocument.Snippet);
     }
 
     private static bool MatchesSourcePath(string expectedSourcePath, string retrievedSourcePath)
