@@ -26,6 +26,9 @@ public sealed class FixedSizeChunkingService(
             return;
         }
 
+        var emptyDocumentIds = new List<string>();
+        var chunkDrafts = new List<ChunkDraft>();
+
         foreach (var document in documents)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -34,25 +37,47 @@ public sealed class FixedSizeChunkingService(
 
             if (chunkTexts.Count == 0)
             {
-                await chunkRepository.ReplaceDocumentChunksAsync(document.DocumentId, [], cancellationToken);
+                emptyDocumentIds.Add(document.DocumentId);
                 continue;
             }
 
-            var embeddings = await embeddingService.GenerateEmbeddingsAsync(chunkTexts, cancellationToken);
-            var chunks = chunkTexts
-                .Select((text, index) => new ChunkModel
-                {
-                    ChunkId = GenerateChunkId(document.DocumentId, document.SourceHash, index, text),
-                    DocumentId = document.DocumentId,
-                    ChunkText = text,
-                    Heading = null,
-                    ChunkOrder = index,
-                    Embedding = embeddings[index],
-                    CitationLabel = $"[[{document.Title}]]",
-                })
-                .ToArray();
+            chunkDrafts.AddRange(chunkTexts.Select((text, index) => new ChunkDraft(document, text, index)));
+        }
 
-            await chunkRepository.ReplaceDocumentChunksAsync(document.DocumentId, chunks, cancellationToken);
+        foreach (var documentId in emptyDocumentIds)
+        {
+            await chunkRepository.ReplaceDocumentChunksAsync(documentId, [], cancellationToken);
+        }
+
+        if (chunkDrafts.Count == 0)
+        {
+            return;
+        }
+
+        var embeddings = await embeddingService.GenerateEmbeddingsAsync(
+            chunkDrafts.Select(draft => draft.ChunkText).ToArray(),
+            cancellationToken);
+
+        var newChunks = chunkDrafts
+            .Select((draft, index) => new ChunkModel
+            {
+                ChunkId = GenerateChunkId(draft.Document.DocumentId, draft.Document.SourceHash, draft.ChunkOrder, draft.ChunkText),
+                DocumentId = draft.Document.DocumentId,
+                ChunkText = draft.ChunkText,
+                Heading = null,
+                ChunkOrder = draft.ChunkOrder,
+                Embedding = embeddings[index],
+                CitationLabel = $"[[{draft.Document.Title}]]",
+            })
+            .GroupBy(chunk => chunk.DocumentId)
+            .ToDictionary(group => group.Key, group => (IReadOnlyCollection<ChunkModel>)group.ToArray());
+
+        foreach (var document in documents)
+        {
+            if (newChunks.TryGetValue(document.DocumentId, out var documentChunks))
+            {
+                await chunkRepository.ReplaceDocumentChunksAsync(document.DocumentId, documentChunks, cancellationToken);
+            }
         }
     }
 
@@ -121,4 +146,6 @@ public sealed class FixedSizeChunkingService(
 
         return $"chunk_{documentId}_{chunkOrder:D4}_{Convert.ToHexStringLower(hashBytes)}:{hashValue}";
     }
+
+    private sealed record ChunkDraft(Document Document, string ChunkText, int ChunkOrder);
 }

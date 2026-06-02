@@ -6,6 +6,7 @@ using KnowledgeHub.Data.Options;
 using KnowledgeHub.Data.Repositories;
 using KnowledgeHub.Data.Services;
 using KnowledgeHub.Tests.TestSupport;
+using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Options;
 using Moq;
 
@@ -76,6 +77,41 @@ public sealed class MarkdownSectionChunkingServiceTests
         capturedChunks.Should().HaveCountGreaterThan(1);
         capturedChunks!.Select(chunk => chunk.ChunkText).Should().OnlyContain(text => text.Length <= 24);
         capturedChunks.Select(chunk => chunk.CitationLabel).Should().OnlyContain(label => label == "[[Long]]");
+        repository.VerifyAll();
+    }
+
+    [Fact]
+    public async Task ReplaceDocumentChunksAsync_EmbedsChunksAcrossDocumentsInSingleBatch()
+    {
+        var repository = new Mock<IChunkRepository>(MockBehavior.Strict);
+        repository.Setup(mock => mock.ReplaceDocumentChunksAsync(
+                "doc-first",
+                It.IsAny<IReadOnlyCollection<ChunkModel>>(),
+                It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        repository.Setup(mock => mock.ReplaceDocumentChunksAsync(
+                "doc-second",
+                It.IsAny<IReadOnlyCollection<ChunkModel>>(),
+                It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        var generator = EmbeddingGeneratorMockFactory.CreateByInputLength();
+        var embeddingService = new EmbeddingService(generator.Object, Options.Create(new EmbeddingOptions { BatchSize = 10 }));
+        var service = new MarkdownSectionChunkingService(
+            repository.Object,
+            Options.Create(new ChunkingOptions { MaxChunkLength = 100, OverlapLength = 0 }),
+            embeddingService);
+
+        await service.ReplaceDocumentChunksAsync([
+            Document("doc-first", "First", "# One\n\nFirst body."),
+            Document("doc-second", "Second", "# Two\n\nSecond body.")
+        ]);
+
+        generator.Verify(mock => mock.GenerateAsync(
+                It.Is<IEnumerable<string>>(values => values.SequenceEqual(new[] { "First body.", "Second body." })),
+                It.IsAny<EmbeddingGenerationOptions?>(),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
         repository.VerifyAll();
     }
 
