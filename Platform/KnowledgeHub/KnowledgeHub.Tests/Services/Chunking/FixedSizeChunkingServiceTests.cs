@@ -85,7 +85,7 @@ public sealed class FixedSizeChunkingServiceTests
             .Returns(Task.CompletedTask);
 
         var generator = EmbeddingGeneratorMockFactory.CreateByInputLength();
-        var embeddingService = new EmbeddingService(generator.Object, Options.Create(new EmbeddingOptions { BatchSize = 10 }));
+        var embeddingService = new EmbeddingService(generator.Object, Options.Create(new EmbeddingOptions()));
         var service = new FixedSizeChunkingService(
             repository.Object,
             Options.Create(new ChunkingOptions { MaxChunkLength = 100, OverlapLength = 0 }),
@@ -110,7 +110,7 @@ public sealed class FixedSizeChunkingServiceTests
         int overlapLength)
     {
         var generator = EmbeddingGeneratorMockFactory.CreateByInputLength();
-        var embeddingService = new EmbeddingService(generator.Object, Options.Create(new EmbeddingOptions { BatchSize = 10 }));
+        var embeddingService = new EmbeddingService(generator.Object, Options.Create(new EmbeddingOptions()));
 
         return new FixedSizeChunkingService(
             repository.Object,

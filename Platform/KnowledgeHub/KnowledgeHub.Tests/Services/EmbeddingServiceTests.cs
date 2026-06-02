@@ -14,7 +14,7 @@ public sealed class EmbeddingServiceTests
     public async Task GenerateEmbeddingsAsync_ReturnsEmptyListForEmptyInput()
     {
         var generator = new Mock<IEmbeddingGenerator<string, Embedding<float>>>(MockBehavior.Strict);
-        var service = new EmbeddingService(generator.Object, Options.Create(new EmbeddingOptions { BatchSize = 2 }));
+        var service = new EmbeddingService(generator.Object, Options.Create(new EmbeddingOptions()));
 
         var result = await service.GenerateEmbeddingsAsync([]);
 
@@ -23,7 +23,7 @@ public sealed class EmbeddingServiceTests
     }
 
     [Fact]
-    public async Task GenerateEmbeddingsAsync_BatchesInputByConfiguredBatchSize()
+    public async Task GenerateEmbeddingsAsync_BatchesInputByEstimatedTokenBudget()
     {
         var calls = new List<IReadOnlyList<string>>();
         var generator = EmbeddingGeneratorMockFactory.Create(values =>
@@ -31,16 +31,40 @@ public sealed class EmbeddingServiceTests
             calls.Add(values);
             return values.Select(value => new[] { (float)value.Length }).ToArray();
         });
-        var service = new EmbeddingService(generator.Object, Options.Create(new EmbeddingOptions { BatchSize = 2 }));
+        var service = new EmbeddingService(
+            generator.Object,
+            Options.Create(new EmbeddingOptions { MaxConcurrentBatches = 1 }));
+        var nearBudgetText = new string('a', (EmbeddingOptions.MaxBatchTokens * 4) - 4);
 
-        await service.GenerateEmbeddingsAsync(["one", "two", "three", "four", "five"]);
+        await service.GenerateEmbeddingsAsync([nearBudgetText, "second", "third"]);
 
-        calls.Should().BeEquivalentTo(new[]
+        calls.Should().HaveCount(2);
+        calls[0].Should().Equal([nearBudgetText]);
+        calls[1].Should().Equal("second", "third");
+    }
+
+    [Fact]
+    public async Task GenerateEmbeddingsAsync_BatchesInputByMaxBatchItems()
+    {
+        var calls = new List<IReadOnlyList<string>>();
+        var generator = EmbeddingGeneratorMockFactory.Create(values =>
         {
-            new[] { "one", "two" },
-            new[] { "three", "four" },
-            new[] { "five" },
-        }, options => options.WithStrictOrdering());
+            calls.Add(values);
+            return values.Select(value => new[] { (float)value.Length }).ToArray();
+        });
+        var service = new EmbeddingService(
+            generator.Object,
+            Options.Create(new EmbeddingOptions { MaxConcurrentBatches = 1 }));
+        var values = Enumerable
+            .Range(0, EmbeddingOptions.MaxBatchItems + 1)
+            .Select(index => $"chunk-{index}")
+            .ToArray();
+
+        await service.GenerateEmbeddingsAsync(values);
+
+        calls.Should().HaveCount(2);
+        calls[0].Should().HaveCount(EmbeddingOptions.MaxBatchItems);
+        calls[1].Should().Equal($"chunk-{EmbeddingOptions.MaxBatchItems}");
     }
 
     [Fact]
@@ -55,7 +79,7 @@ public sealed class EmbeddingServiceTests
                 _ => throw new InvalidOperationException("Unexpected value."),
             })
             .ToArray());
-        var service = new EmbeddingService(generator.Object, Options.Create(new EmbeddingOptions { BatchSize = 2 }));
+        var service = new EmbeddingService(generator.Object, Options.Create(new EmbeddingOptions()));
 
         var result = await service.GenerateEmbeddingsAsync(["alpha", "beta", "gamma"]);
 
@@ -77,11 +101,65 @@ public sealed class EmbeddingServiceTests
                 It.IsAny<EmbeddingGenerationOptions?>(),
                 It.IsAny<CancellationToken>()))
             .ThrowsAsync(expected);
-        var service = new EmbeddingService(generator.Object, Options.Create(new EmbeddingOptions { BatchSize = 2 }));
+        var service = new EmbeddingService(generator.Object, Options.Create(new EmbeddingOptions()));
 
         var action = async () => await service.GenerateEmbeddingsAsync(["query"]);
 
         await action.Should().ThrowAsync<InvalidOperationException>()
             .Where(exception => ReferenceEquals(exception, expected));
+    }
+
+    [Fact]
+    public async Task GenerateEmbeddingsAsync_LimitsConcurrentBatches()
+    {
+        var activeCalls = 0;
+        var maxActiveCalls = 0;
+        var twoCallsStarted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var generator = new Mock<IEmbeddingGenerator<string, Embedding<float>>>(MockBehavior.Strict);
+        generator.Setup(mock => mock.GenerateAsync(
+                It.IsAny<IEnumerable<string>>(),
+                It.IsAny<EmbeddingGenerationOptions?>(),
+                It.IsAny<CancellationToken>()))
+            .Returns(async (IEnumerable<string> values, EmbeddingGenerationOptions? _, CancellationToken token) =>
+            {
+                var capturedValues = values.ToArray();
+                var active = Interlocked.Increment(ref activeCalls);
+
+                while (true)
+                {
+                    var observed = maxActiveCalls;
+                    if (active <= observed || Interlocked.CompareExchange(ref maxActiveCalls, active, observed) == observed)
+                    {
+                        break;
+                    }
+                }
+
+                if (active == 2)
+                {
+                    twoCallsStarted.TrySetResult();
+                }
+
+                await twoCallsStarted.Task.WaitAsync(TimeSpan.FromSeconds(1), token);
+                await Task.Delay(20, token);
+                Interlocked.Decrement(ref activeCalls);
+
+                var embeddings = capturedValues
+                    .Select(value => new Embedding<float>(new[] { (float)value[0] }))
+                    .ToArray();
+
+                return new GeneratedEmbeddings<Embedding<float>>(embeddings);
+            });
+        var service = new EmbeddingService(
+            generator.Object,
+            Options.Create(new EmbeddingOptions { MaxConcurrentBatches = 2 }));
+
+        var values = Enumerable
+            .Range(0, EmbeddingOptions.MaxBatchItems + 1)
+            .Select(index => $"chunk-{index}")
+            .ToArray();
+
+        await service.GenerateEmbeddingsAsync(values);
+
+        maxActiveCalls.Should().Be(2);
     }
 }

@@ -96,7 +96,7 @@ public sealed class MarkdownSectionChunkingServiceTests
             .Returns(Task.CompletedTask);
 
         var generator = EmbeddingGeneratorMockFactory.CreateByInputLength();
-        var embeddingService = new EmbeddingService(generator.Object, Options.Create(new EmbeddingOptions { BatchSize = 10 }));
+        var embeddingService = new EmbeddingService(generator.Object, Options.Create(new EmbeddingOptions()));
         var service = new MarkdownSectionChunkingService(
             repository.Object,
             Options.Create(new ChunkingOptions { MaxChunkLength = 100, OverlapLength = 0 }),
@@ -118,7 +118,7 @@ public sealed class MarkdownSectionChunkingServiceTests
     private static MarkdownSectionChunkingService CreateService(Mock<IChunkRepository> repository, int maxChunkLength)
     {
         var generator = EmbeddingGeneratorMockFactory.CreateByInputLength();
-        var embeddingService = new EmbeddingService(generator.Object, Options.Create(new EmbeddingOptions { BatchSize = 10 }));
+        var embeddingService = new EmbeddingService(generator.Object, Options.Create(new EmbeddingOptions()));
 
         return new MarkdownSectionChunkingService(
             repository.Object,

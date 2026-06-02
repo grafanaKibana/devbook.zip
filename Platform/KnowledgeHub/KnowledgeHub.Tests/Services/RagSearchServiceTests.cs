@@ -55,7 +55,7 @@ public sealed class RagSearchServiceTests
     private static RagSearchService CreateService(Mock<IChunkRepository> repository)
     {
         var generator = EmbeddingGeneratorMockFactory.CreateByInputLength();
-        var embeddingService = new EmbeddingService(generator.Object, Options.Create(new EmbeddingOptions { BatchSize = 10 }));
+        var embeddingService = new EmbeddingService(generator.Object, Options.Create(new EmbeddingOptions()));
 
         return new RagSearchService(embeddingService, repository.Object);
     }

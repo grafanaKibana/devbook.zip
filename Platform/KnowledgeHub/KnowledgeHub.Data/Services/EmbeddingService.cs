@@ -8,6 +8,7 @@ public sealed class EmbeddingService(
     IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator,
     IOptions<EmbeddingOptions> options) : IEmbeddingService
 {
+    private const int EstimatedCharactersPerToken = 4;
     private readonly EmbeddingOptions options = options.Value;
 
     public async Task<IReadOnlyList<float[]>> GenerateEmbeddingsAsync(
@@ -21,17 +22,66 @@ public sealed class EmbeddingService(
             return [];
         }
 
-        var batchSize = Math.Max(1, options.BatchSize);
-        var vectors = new List<float[]>(values.Count);
+        var batches = CreateBatches(values);
+        var results = new float[values.Count][];
 
-        foreach (var batch in values.Chunk(batchSize))
+        await Parallel.ForEachAsync(
+            batches,
+            new ParallelOptions
+            {
+                MaxDegreeOfParallelism = Math.Max(1, options.MaxConcurrentBatches),
+                CancellationToken = cancellationToken,
+            },
+            async (batch, token) =>
+            {
+                var embeddings = await embeddingGenerator.GenerateAsync(
+                    batch.Select(item => item.Value),
+                    cancellationToken: token);
+
+                foreach (var pair in batch.Zip(embeddings))
+                {
+                    results[pair.First.Index] = pair.Second.Vector.ToArray();
+                }
+            });
+
+        return results;
+    }
+
+    private static IReadOnlyList<EmbeddingBatchItem[]> CreateBatches(IReadOnlyList<string> values)
+    {
+        var batches = new List<EmbeddingBatchItem[]>();
+        var currentBatch = new List<EmbeddingBatchItem>();
+        var currentTokenCount = 0;
+
+        for (var index = 0; index < values.Count; index++)
         {
-            var embeddings = await embeddingGenerator.GenerateAsync(batch, cancellationToken: cancellationToken);
-            vectors.AddRange(embeddings.Select(embedding => embedding.Vector.ToArray()));
+            var value = values[index];
+            var tokenCount = EstimateTokenCount(value);
+            var wouldExceedTokenBudget = currentBatch.Count > 0
+                                         && currentTokenCount + tokenCount > EmbeddingOptions.MaxBatchTokens;
+            var wouldExceedItemBudget = currentBatch.Count >= EmbeddingOptions.MaxBatchItems;
+
+            if (wouldExceedTokenBudget || wouldExceedItemBudget)
+            {
+                batches.Add(currentBatch.ToArray());
+                currentBatch.Clear();
+                currentTokenCount = 0;
+            }
+
+            currentBatch.Add(new EmbeddingBatchItem(value, index));
+            currentTokenCount += tokenCount;
         }
 
-        return vectors;
+        if (currentBatch.Count > 0)
+        {
+            batches.Add(currentBatch.ToArray());
+        }
+
+        return batches;
     }
+
+    private static int EstimateTokenCount(string value) =>
+        Math.Max(1, (value.Length + EstimatedCharactersPerToken - 1) / EstimatedCharactersPerToken);
 
     public async Task<float[]> GenerateEmbeddingAsync(
         string value,
@@ -48,4 +98,6 @@ public sealed class EmbeddingService(
         
         return embedding.ToArray();
     }
+
+    private sealed record EmbeddingBatchItem(string Value, int Index);
 }

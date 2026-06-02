@@ -140,10 +140,9 @@ public sealed class KnowledgeHubEndpointTests
                 configurationBuilder.AddInMemoryCollection(new Dictionary<string, string?>
                 {
                     ["ConnectionStrings:MongoDb"] = "mongodb://localhost:27017",
-                    ["EmbeddingOptions:ApiKey"] = "test-key",
                     ["EmbeddingOptions:ModelId"] = "text-embedding-3-small",
-                    ["EmbeddingOptions:BatchSize"] = "16",
                     ["EmbeddingOptions:VectorDimensions"] = "384",
+                    ["EmbeddingOptions:ApiKey"] = "test-key",
                 });
             });
 
