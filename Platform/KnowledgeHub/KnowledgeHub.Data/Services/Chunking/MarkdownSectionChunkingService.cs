@@ -29,36 +29,45 @@ public sealed class MarkdownSectionChunkingService(
             return;
         }
 
-        foreach (var document in documents)
+        var documentDrafts = documents
+            .Select(document => new DocumentChunkDraft(document, Chunk(document)))
+            .ToArray();
+
+        var chunkDrafts = documentDrafts
+            .SelectMany(documentDraft => documentDraft.Chunks.Select((chunk, index) =>
+                new ChunkDraft(documentDraft.Document, chunk, index)))
+            .ToArray();
+
+        var embeddedDrafts = await embeddingService.GenerateAndZipAsync(
+            chunkDrafts,
+            draft => draft.Chunk.Text,
+            cancellationToken);
+
+        var chunksByDocumentId = embeddedDrafts
+            .Select(draft => new ChunkModel
+            {
+                ChunkId = GenerateChunkId(
+                    draft.Value.Document.DocumentId,
+                    draft.Value.Document.SourceHash,
+                    draft.Value.ChunkOrder,
+                    draft.Value.Chunk.Text),
+                DocumentId = draft.Value.Document.DocumentId,
+                ChunkText = draft.Value.Chunk.Text,
+                Heading = draft.Value.Chunk.Heading,
+                ChunkOrder = draft.Value.ChunkOrder,
+                Embedding = draft.Embedding,
+                CitationLabel = BuildCitationLabel(draft.Value.Document.Title, draft.Value.Chunk.Heading),
+            })
+            .GroupBy(chunk => chunk.DocumentId)
+            .ToDictionary(group => group.Key, group => group.ToArray());
+
+        foreach (var documentDraft in documentDrafts)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var chunkDrafts = Chunk(document);
+            var newChunks = chunksByDocumentId.GetValueOrDefault(documentDraft.Document.DocumentId) ?? [];
 
-            if (chunkDrafts.Count == 0)
-            {
-                await chunkRepository.ReplaceDocumentChunksAsync(document.DocumentId, [], cancellationToken);
-                continue;
-            }
-
-            var embeddings = await embeddingService.GenerateEmbeddingsAsync(
-                chunkDrafts.Select(chunk => chunk.Text).ToArray(),
-                cancellationToken);
-
-            var newChunks = chunkDrafts
-                .Select((chunk, index) => new ChunkModel
-                {
-                    ChunkId = GenerateChunkId(document.DocumentId, document.SourceHash, index, chunk.Text),
-                    DocumentId = document.DocumentId,
-                    ChunkText = chunk.Text,
-                    Heading = chunk.Heading,
-                    ChunkOrder = index,
-                    Embedding = embeddings[index],
-                    CitationLabel = BuildCitationLabel(document.Title, chunk.Heading),
-                })
-                .ToArray();
-
-            await chunkRepository.ReplaceDocumentChunksAsync(document.DocumentId, newChunks, cancellationToken);
+            await chunkRepository.ReplaceDocumentChunksAsync(documentDraft.Document.DocumentId, newChunks, cancellationToken);
         }
     }
 
@@ -70,7 +79,7 @@ public sealed class MarkdownSectionChunkingService(
 
         foreach (var section in ExtractSections(document.PageContent))
         {
-            chunks.AddRange(SplitRecursively(section.Content, 0).Select(text => new Chunk(text, section.Heading)));
+            chunks.AddRange(SplitRecursively(section.Content, 0).Select(text => new Chunk(section.Heading, text)));
         }
 
         return chunks;
@@ -277,4 +286,8 @@ public sealed class MarkdownSectionChunkingService(
     }
 
     private sealed record Section(string? Heading, string Content);
+
+    private sealed record DocumentChunkDraft(Document Document, IReadOnlyList<Chunk> Chunks);
+
+    private sealed record ChunkDraft(Document Document, Chunk Chunk, int ChunkOrder);
 }

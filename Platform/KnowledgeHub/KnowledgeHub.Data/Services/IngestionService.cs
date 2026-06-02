@@ -24,13 +24,9 @@ public sealed class IngestionService(
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        if (string.IsNullOrWhiteSpace(request.SourcePath))
-        {
-            throw new ArgumentException("Source path is required.", nameof(request));
-        }
-
         var ingestionRootDirectory = ResolveIngestionRootDirectory(hostEnvironment.ContentRootPath, options.ContentRootPath);
-        var sourceDirectory = ResolveSourceDirectory(ingestionRootDirectory, request.SourcePath);
+        var sourcePath = string.IsNullOrWhiteSpace(request.SourcePath) ? string.Empty : request.SourcePath;
+        var sourceDirectory = ResolveSourceDirectory(ingestionRootDirectory, sourcePath);
 
         if (!Directory.Exists(sourceDirectory))
         {

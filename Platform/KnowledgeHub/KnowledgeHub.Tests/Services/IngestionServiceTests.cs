@@ -12,17 +12,40 @@ using Moq;
 public sealed class IngestionServiceTests
 {
     [Theory]
+    [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public async Task IngestDocumentsAsync_RejectsBlankSourcePath(string sourcePath)
+    public async Task IngestDocumentsAsync_BlankSourcePathIngestsEverythingUnderRoot(string? sourcePath)
     {
         using var workspace = TestWorkspace.Create();
-        var service = CreateService(workspace.RootDirectory, new Mock<IDocumentRepository>(), new Mock<IChunkRepository>());
+        workspace.WriteMarkdown("Root.md", "# Root\n\nRoot content.");
+        workspace.WriteMarkdown("Scope/Nested.md", "# Nested\n\nNested content.");
+        var upsertedDocuments = new List<Document>();
+        var documents = new Mock<IDocumentRepository>(MockBehavior.Strict);
+        documents.Setup(mock => mock.GetBySourcePathPrefixAsync("", It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+        documents.Setup(mock => mock.DeleteByIdsAsync(It.IsAny<IReadOnlyCollection<string>>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        documents.Setup(mock => mock.GetBySourcePathAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Document?)null);
+        documents.Setup(mock => mock.UpsertAsync(It.IsAny<Document>(), It.IsAny<CancellationToken>()))
+            .Callback<Document, CancellationToken>((document, _) => upsertedDocuments.Add(document))
+            .Returns(Task.CompletedTask);
+        var chunks = new Mock<IChunkRepository>(MockBehavior.Strict);
+        chunks.Setup(mock => mock.DeleteByDocumentIdsAsync(It.IsAny<IReadOnlyCollection<string>>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        chunks.Setup(mock => mock.ReplaceDocumentChunksAsync(It.IsAny<string>(), It.IsAny<IReadOnlyCollection<ChunkModel>>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        var service = CreateService(workspace.RootDirectory, documents, chunks);
 
-        var action = async () => await service.IngestDocumentsAsync(new IngestionRequest(sourcePath, null));
+        var result = await service.IngestDocumentsAsync(new IngestionRequest(sourcePath, null));
 
-        await action.Should().ThrowAsync<ArgumentException>()
-            .WithMessage("Source path is required. (Parameter 'request')");
+        result.ProcessedCount.Should().Be(2);
+        result.CreatedCount.Should().Be(2);
+        result.DeletedCount.Should().Be(0);
+        upsertedDocuments.Select(document => document.SourcePath).Should().Equal("Root.md", "Scope/Nested.md");
+        documents.VerifyAll();
+        chunks.VerifyAll();
     }
 
     [Theory]

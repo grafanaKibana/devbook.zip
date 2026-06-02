@@ -135,9 +135,18 @@ Example full-folder request:
 }
 ```
 
+Example full-root request:
+
+```json
+{
+  "sourcePath": null,
+  "fileName": null
+}
+```
+
 ## Ingestion rules
 
-- `sourcePath` is **relative to** the configured ingestion root.
+- `sourcePath` is **relative to** the configured ingestion root; null or blank ingests the full root.
 - Default ingestion root: `Vault/Software Engineering`.
 - `fileName` is optional, but when present it must be a single `.md` file name with no path segments.
 - Requests are rejected if they try to escape the configured ingestion root.

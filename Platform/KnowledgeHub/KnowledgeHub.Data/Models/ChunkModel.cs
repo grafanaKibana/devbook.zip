@@ -18,16 +18,16 @@ public record ChunkModel
     public required string DocumentId { get; init; }
 
     /// <summary>
-    /// Retrievable chunk text sent to embedding and search.
-    /// Example: <c>RAG improves factual grounding by retrieving relevant notes before generation.</c>
-    /// </summary>
-    public required string ChunkText { get; init; }
-
-    /// <summary>
     /// Optional section heading the chunk was extracted from.
     /// Example: <c>Tradeoffs</c>
     /// </summary>
     public string? Heading { get; init; }
+
+    /// <summary>
+    /// Retrievable chunk text sent to embedding and search.
+    /// Example: <c>RAG improves factual grounding by retrieving relevant notes before generation.</c>
+    /// </summary>
+    public required string ChunkText { get; init; }
 
     /// <summary>
     /// Chunk position within the parent document.
