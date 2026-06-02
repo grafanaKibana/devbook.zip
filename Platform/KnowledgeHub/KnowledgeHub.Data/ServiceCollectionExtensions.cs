@@ -17,16 +17,17 @@ public static class ServiceCollectionExtensions
         {
             ArgumentNullException.ThrowIfNull(services);
 
-            services.AddScoped<IngestionService>();
-            services.AddScoped<IIngestionService>(serviceProvider => serviceProvider.GetRequiredService<IngestionService>());
-            services.AddScoped<ChunkingService>();
+            services.AddScoped<IIngestionService, IngestionService>();
+            services.AddScoped<IChunkingService, MarkdownSectionChunkingService>();
+            // services.AddScoped<IChunkingService, FixedSizeChunkingService>();
+
             services.AddScoped<IDocumentRepository, DocumentRepository>();
             services.AddScoped<IChunkRepository, ChunkRepository>();
-            services.AddScoped<RagSearchService>();
-            services.AddScoped<IRagSearchService>(serviceProvider => serviceProvider.GetRequiredService<RagSearchService>());
+
+            services.AddScoped<IRagSearchService, RagSearchService>();
 
             services.AddEmbeddingGenerator(CreateEmbeddingGenerator);
-            services.AddSingleton<EmbeddingService>();
+            services.AddSingleton<IEmbeddingService, EmbeddingService>();
 
             return services;
         }

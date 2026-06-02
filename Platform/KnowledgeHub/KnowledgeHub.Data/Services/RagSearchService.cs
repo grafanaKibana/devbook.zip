@@ -3,15 +3,8 @@ namespace KnowledgeHub.Data.Services;
 using KnowledgeHub.Data.Models;
 using KnowledgeHub.Data.Repositories;
 
-public interface IRagSearchService
-{
-    Task<RagSearchResponse> SearchAsync(
-        RagSearchRequest request,
-        CancellationToken cancellationToken = default);
-}
-
 public class RagSearchService(
-    EmbeddingService embeddingService,
+    IEmbeddingService embeddingService,
     IChunkRepository chunkRepository) : IRagSearchService
 {
     private const int DefaultTopK = 5;
@@ -33,9 +26,8 @@ public class RagSearchService(
             ? DefaultTopK
             : Math.Min(request.TopK, MaxTopK);
 
-        var embeddings = await embeddingService.GenerateEmbeddingsAsync([query], cancellationToken);
-        var queryVector = embeddings[0];
-        var results = await chunkRepository.VectorSearchAsync(queryVector, topK, cancellationToken);
+        var embedding = await embeddingService.GenerateEmbeddingAsync(query, cancellationToken);
+        var results = await chunkRepository.VectorSearchAsync(embedding, topK, cancellationToken);
 
         return new RagSearchResponse(query, "vector", results);
     }

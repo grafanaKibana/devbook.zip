@@ -206,7 +206,7 @@ public sealed class IngestionServiceTests
     {
         var embeddingGenerator = EmbeddingGeneratorMockFactory.CreateByInputLength();
         var embeddingService = new EmbeddingService(embeddingGenerator.Object, Options.Create(new EmbeddingOptions { BatchSize = 10 }));
-        var chunkingService = new ChunkingService(
+        var chunkingService = new MarkdownSectionChunkingService(
             chunks.Object,
             Options.Create(new ChunkingOptions { MaxChunkLength = 500, OverlapLength = 0 }),
             embeddingService);

@@ -9,13 +9,13 @@ using KnowledgeHub.Tests.TestSupport;
 using Microsoft.Extensions.Options;
 using Moq;
 
-public sealed class ChunkingServiceTests
+public sealed class FixedSizeChunkingServiceTests
 {
     [Fact]
     public async Task ReplaceDocumentChunksAsync_DoesNothingForEmptyDocumentList()
     {
         var repository = new Mock<IChunkRepository>(MockBehavior.Strict);
-        var service = CreateService(repository, maxChunkLength: 100);
+        var service = CreateService(repository, maxChunkLength: 100, overlapLength: 0);
 
         await service.ReplaceDocumentChunksAsync([]);
 
@@ -26,14 +26,8 @@ public sealed class ChunkingServiceTests
     public async Task ReplaceDocumentChunksAsync_ReplacesWhitespaceDocumentWithEmptyChunks()
     {
         IReadOnlyCollection<ChunkModel>? capturedChunks = null;
-        var repository = new Mock<IChunkRepository>(MockBehavior.Strict);
-        repository.Setup(mock => mock.ReplaceDocumentChunksAsync(
-                "doc-empty",
-                It.IsAny<IReadOnlyCollection<ChunkModel>>(),
-                It.IsAny<CancellationToken>()))
-            .Callback<string, IReadOnlyCollection<ChunkModel>, CancellationToken>((_, chunks, _) => capturedChunks = chunks)
-            .Returns(Task.CompletedTask);
-        var service = CreateService(repository, maxChunkLength: 100);
+        var repository = CaptureReplace("doc-empty", chunks => capturedChunks = chunks);
+        var service = CreateService(repository, maxChunkLength: 100, overlapLength: 0);
 
         await service.ReplaceDocumentChunksAsync([Document("doc-empty", "Empty", "   \n\t  ")]);
 
@@ -42,51 +36,49 @@ public sealed class ChunkingServiceTests
     }
 
     [Fact]
-    public async Task ReplaceDocumentChunksAsync_UsesHeadingMetadataAndCitationLabels()
+    public async Task ReplaceDocumentChunksAsync_UsesFixedSizeChunksWithoutHeadingMetadata()
     {
         IReadOnlyCollection<ChunkModel>? capturedChunks = null;
-        var repository = CaptureReplace("doc-rag", chunks => capturedChunks = chunks);
-        var service = CreateService(repository, maxChunkLength: 200);
+        var repository = CaptureReplace("doc-fixed", chunks => capturedChunks = chunks);
+        var service = CreateService(repository, maxChunkLength: 12, overlapLength: 0);
 
-        await service.ReplaceDocumentChunksAsync([
-            Document("doc-rag", "RAG", "# Overview\n\nGround answers in notes.\n\n## Tradeoffs\n\nRetrieval adds latency.")
-        ]);
+        await service.ReplaceDocumentChunksAsync([Document("doc-fixed", "Fixed", "Alpha beta gamma delta")]);
 
         capturedChunks.Should().NotBeNull();
-        capturedChunks.Should().HaveCount(2);
-        capturedChunks!.Select(chunk => chunk.Heading).Should().Equal("Overview", "Tradeoffs");
-        capturedChunks.Select(chunk => chunk.CitationLabel).Should().Equal("[[RAG#Overview]]", "[[RAG#Tradeoffs]]");
+        capturedChunks.Should().HaveCountGreaterThan(1);
+        capturedChunks!.Select(chunk => chunk.Heading).Should().OnlyContain(heading => heading == null);
+        capturedChunks.Select(chunk => chunk.CitationLabel).Should().OnlyContain(label => label == "[[Fixed]]");
+        capturedChunks.Select(chunk => chunk.ChunkText).Should().OnlyContain(text => text.Length <= 12);
         capturedChunks.Select(chunk => chunk.ChunkOrder).Should().Equal(0, 1);
-        capturedChunks.Select(chunk => chunk.DocumentId).Should().OnlyContain(documentId => documentId == "doc-rag");
         capturedChunks.Select(chunk => chunk.Embedding).Should().OnlyContain(vector => vector.Length == 2);
         repository.VerifyAll();
     }
 
     [Fact]
-    public async Task ReplaceDocumentChunksAsync_SplitsLongSectionsAndReplacesRepositoryChunks()
+    public async Task ReplaceDocumentChunksAsync_AppliesConfiguredOverlap()
     {
         IReadOnlyCollection<ChunkModel>? capturedChunks = null;
-        var repository = CaptureReplace("doc-long", chunks => capturedChunks = chunks);
-        var service = CreateService(repository, maxChunkLength: 24);
-        var content = "First sentence. Second sentence. Third sentence.";
+        var repository = CaptureReplace("doc-overlap", chunks => capturedChunks = chunks);
+        var service = CreateService(repository, maxChunkLength: 10, overlapLength: 3);
 
-        await service.ReplaceDocumentChunksAsync([Document("doc-long", "Long", content)]);
+        await service.ReplaceDocumentChunksAsync([Document("doc-overlap", "Overlap", "abcdefghij12345")]);
 
         capturedChunks.Should().NotBeNull();
-        capturedChunks.Should().HaveCountGreaterThan(1);
-        capturedChunks!.Select(chunk => chunk.ChunkText).Should().OnlyContain(text => text.Length <= 24);
-        capturedChunks.Select(chunk => chunk.CitationLabel).Should().OnlyContain(label => label == "[[Long]]");
+        capturedChunks!.Select(chunk => chunk.ChunkText).Should().Equal("abcdefghij", "hij12345");
         repository.VerifyAll();
     }
 
-    private static ChunkingService CreateService(Mock<IChunkRepository> repository, int maxChunkLength)
+    private static FixedSizeChunkingService CreateService(
+        Mock<IChunkRepository> repository,
+        int maxChunkLength,
+        int overlapLength)
     {
         var generator = EmbeddingGeneratorMockFactory.CreateByInputLength();
         var embeddingService = new EmbeddingService(generator.Object, Options.Create(new EmbeddingOptions { BatchSize = 10 }));
 
-        return new ChunkingService(
+        return new FixedSizeChunkingService(
             repository.Object,
-            Options.Create(new ChunkingOptions { MaxChunkLength = maxChunkLength, OverlapLength = 0 }),
+            Options.Create(new ChunkingOptions { MaxChunkLength = maxChunkLength, OverlapLength = overlapLength }),
             embeddingService);
     }
 

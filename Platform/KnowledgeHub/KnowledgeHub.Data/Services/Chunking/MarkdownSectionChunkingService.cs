@@ -10,10 +10,10 @@ using Markdig;
 using Markdig.Syntax;
 using Microsoft.Extensions.Options;
 
-public sealed class ChunkingService(
+public sealed class MarkdownSectionChunkingService(
     IChunkRepository chunkRepository,
     IOptions<ChunkingOptions> options,
-    EmbeddingService embeddingService)
+    IEmbeddingService embeddingService) : IChunkingService
 {
     private static readonly string[] Separators = ["\n\n", "\n", ". ", " "];
     private readonly ChunkingOptions options = options.Value;

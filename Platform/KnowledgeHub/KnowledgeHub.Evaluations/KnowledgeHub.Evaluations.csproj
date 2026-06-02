@@ -38,4 +38,8 @@
     <ProjectReference Include="..\KnowledgeHub.Data\KnowledgeHub.Data.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="EvaluationReports\results\" />
+  </ItemGroup>
+
 </Project>

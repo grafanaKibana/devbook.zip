@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 
 public sealed class EmbeddingService(
     IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator,
-    IOptions<EmbeddingOptions> options)
+    IOptions<EmbeddingOptions> options) : IEmbeddingService
 {
     private readonly EmbeddingOptions options = options.Value;
 
@@ -31,5 +31,21 @@ public sealed class EmbeddingService(
         }
 
         return vectors;
+    }
+
+    public async Task<float[]> GenerateEmbeddingAsync(
+        string value,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+
+        if (string.IsNullOrEmpty(value))
+        {
+            return [];
+        }
+
+        var embedding = await embeddingGenerator.GenerateVectorAsync(value, cancellationToken: cancellationToken);
+        
+        return embedding.ToArray();
     }
 }
