@@ -1,10 +1,10 @@
-namespace KnowledgeHub.Tests.TestSupport;
+namespace KnowledgeHub.Tests.Common;
 
 internal sealed class TestWorkspace : IDisposable
 {
     private TestWorkspace(string rootDirectory)
     {
-        RootDirectory = rootDirectory;
+        this.RootDirectory = rootDirectory;
         Directory.CreateDirectory(rootDirectory);
     }
 
@@ -14,16 +14,16 @@ internal sealed class TestWorkspace : IDisposable
 
     public void WriteMarkdown(string relativePath, string markdown)
     {
-        var path = Path.Combine(RootDirectory, relativePath);
+        var path = Path.Combine(this.RootDirectory, relativePath);
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         File.WriteAllText(path, markdown);
     }
 
     public void Dispose()
     {
-        if (Directory.Exists(RootDirectory))
+        if (Directory.Exists(this.RootDirectory))
         {
-            Directory.Delete(RootDirectory, recursive: true);
+            Directory.Delete(this.RootDirectory, recursive: true);
         }
     }
 }

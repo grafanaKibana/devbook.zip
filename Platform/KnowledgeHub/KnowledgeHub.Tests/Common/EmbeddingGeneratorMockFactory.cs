@@ -1,4 +1,4 @@
-namespace KnowledgeHub.Tests.TestSupport;
+namespace KnowledgeHub.Tests.Common;
 
 using Microsoft.Extensions.AI;
 using Moq;

@@ -1,4 +1,4 @@
-namespace KnowledgeHub.Data.Services;
+namespace KnowledgeHub.Data.Services.Chunking;
 
 using KnowledgeHub.Data.Models;
 

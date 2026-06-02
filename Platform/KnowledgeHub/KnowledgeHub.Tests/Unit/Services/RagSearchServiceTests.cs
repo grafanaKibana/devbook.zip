@@ -1,27 +1,40 @@
-namespace KnowledgeHub.Tests.Services;
+namespace KnowledgeHub.Tests.Unit.Services;
 
 using FluentAssertions;
 using KnowledgeHub.Data.Models;
 using KnowledgeHub.Data.Options;
 using KnowledgeHub.Data.Repositories;
 using KnowledgeHub.Data.Services;
-using KnowledgeHub.Tests.TestSupport;
+using KnowledgeHub.Tests.Common;
 using Microsoft.Extensions.Options;
 using Moq;
 
 public sealed class RagSearchServiceTests
 {
+    private const string QueryWithWhitespace = "  vector search  ";
+    private const string NormalizedQuery = "vector search";
+    private const string SearchMode = "vector";
+
+    /// <summary>
+    /// Protects the API boundary from running paid embeddings and vector search for an empty user query.
+    /// </summary>
     [Fact]
     public async Task SearchAsync_RejectsBlankQuery()
     {
+        // Arrange
         var service = CreateService(new Mock<IChunkRepository>(MockBehavior.Strict));
 
+        // Act
         var action = async () => await service.SearchAsync(new RagSearchRequest("   ", 5));
 
+        // Assert
         await action.Should().ThrowAsync<ArgumentException>()
             .WithMessage("Query is required.");
     }
 
+    /// <summary>
+    /// Protects the retrieval contract by trimming the query, clamping TopK, and sending the generated query vector to the repository.
+    /// </summary>
     [Theory]
     [InlineData(0, 5)]
     [InlineData(-1, 5)]
@@ -29,6 +42,7 @@ public sealed class RagSearchServiceTests
     [InlineData(50, 10)]
     public async Task SearchAsync_TrimsQueryAndNormalizesTopK(int requestedTopK, int expectedTopK)
     {
+        // Arrange
         var expectedResults = new[]
         {
             new RagChunkResponse("chunk-1", "doc-1", "Chunk text", "Heading", "[[Doc#Heading]]", 0.93),
@@ -43,13 +57,17 @@ public sealed class RagSearchServiceTests
             .ReturnsAsync(expectedResults);
         var service = CreateService(repository);
 
-        var response = await service.SearchAsync(new RagSearchRequest("  vector search  ", requestedTopK));
+        // Act
+        var response = await service.SearchAsync(new RagSearchRequest(QueryWithWhitespace, requestedTopK));
 
-        response.Query.Should().Be("vector search");
-        response.Mode.Should().Be("vector");
-        response.Results.Should().BeSameAs(expectedResults);
+        // Assert
+        response.Should().BeEquivalentTo(new
+        {
+            Query = NormalizedQuery,
+            Mode = SearchMode,
+            Results = expectedResults,
+        });
         capturedVector.Should().Equal([13f, 0f]);
-        repository.VerifyAll();
     }
 
     private static RagSearchService CreateService(Mock<IChunkRepository> repository)

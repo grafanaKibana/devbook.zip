@@ -1,4 +1,4 @@
-namespace KnowledgeHub.Tests.TestSupport;
+namespace KnowledgeHub.Tests.Common;
 
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;

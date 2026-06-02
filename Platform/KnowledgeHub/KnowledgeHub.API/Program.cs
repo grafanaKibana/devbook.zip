@@ -44,4 +44,7 @@ app.UseHttpsRedirection();
 app.AddEndpoints();
 app.Run();
 
-public partial class Program;
+namespace KnowledgeHub.API
+{
+    public partial class Program;
+}

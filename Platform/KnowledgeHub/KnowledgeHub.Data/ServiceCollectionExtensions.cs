@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using OpenAI;
 using System.ClientModel;
+using KnowledgeHub.Data.Services.Chunking;
 
 public static class ServiceCollectionExtensions
 {

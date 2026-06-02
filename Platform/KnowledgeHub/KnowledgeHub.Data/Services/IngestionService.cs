@@ -6,6 +6,7 @@ using System.Text;
 using KnowledgeHub.Data.Models;
 using KnowledgeHub.Data.Options;
 using KnowledgeHub.Data.Repositories;
+using KnowledgeHub.Data.Services.Chunking;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
