@@ -20,10 +20,10 @@ public sealed class MarkdownSectionChunkingServiceTests
     private const string SecondDocumentId = "doc-second";
 
     /// <summary>
-    /// Protects stale-vector cleanup for notes that become whitespace-only by replacing existing chunks with an empty set.
+    /// Tests that markdown section chunking replaces chunks with an empty collection when a document has only whitespace content.
     /// </summary>
     [Fact]
-    public async Task ReplaceDocumentChunksAsync_ReplacesWhitespaceDocumentWithEmptyChunks()
+    public async Task ReplaceDocumentChunksAsync_WhitespaceDocument_ReplacesChunksWithEmptyCollection()
     {
         // Arrange
         IReadOnlyCollection<ChunkModel>? capturedChunks = null;
@@ -38,10 +38,10 @@ public sealed class MarkdownSectionChunkingServiceTests
     }
 
     /// <summary>
-    /// Protects citation quality by binding each markdown heading section to its heading metadata and Obsidian-style citation label.
+    /// Tests that markdown section chunking binds each heading section to heading metadata and an Obsidian-style citation label.
     /// </summary>
     [Fact]
-    public async Task ReplaceDocumentChunksAsync_UsesHeadingMetadataAndCitationLabels()
+    public async Task ReplaceDocumentChunksAsync_DocumentHasMarkdownHeadings_CreatesChunksWithHeadingMetadataAndCitationLabels()
     {
         // Arrange
         IReadOnlyCollection<ChunkModel>? capturedChunks = null;
@@ -64,10 +64,10 @@ public sealed class MarkdownSectionChunkingServiceTests
     }
 
     /// <summary>
-    /// Protects long-section handling so a single oversized markdown section is still split into embeddable chunks with document citations.
+    /// Tests that markdown section chunking splits an oversized section into embeddable chunks with document citations.
     /// </summary>
     [Fact]
-    public async Task ReplaceDocumentChunksAsync_SplitsLongSectionsAndReplacesRepositoryChunks()
+    public async Task ReplaceDocumentChunksAsync_SectionExceedsMaxChunkLength_SplitsSectionAndReplacesRepositoryChunks()
     {
         // Arrange
         IReadOnlyCollection<ChunkModel>? capturedChunks = null;
@@ -86,10 +86,10 @@ public sealed class MarkdownSectionChunkingServiceTests
     }
 
     /// <summary>
-    /// Protects ingestion throughput by ensuring multiple changed documents are embedded in one provider call instead of one call per document.
+    /// Tests that markdown section chunking embeds chunks across multiple documents in one provider batch.
     /// </summary>
     [Fact]
-    public async Task ReplaceDocumentChunksAsync_EmbedsChunksAcrossDocumentsInSingleBatch()
+    public async Task ReplaceDocumentChunksAsync_MultipleDocuments_EmbedsChunksInSingleBatch()
     {
         // Arrange
         IReadOnlyList<string>? embeddedValues = null;

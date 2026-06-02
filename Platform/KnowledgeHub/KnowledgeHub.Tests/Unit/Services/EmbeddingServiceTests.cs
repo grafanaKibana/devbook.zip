@@ -15,10 +15,10 @@ public sealed class EmbeddingServiceTests
     private const string ThirdValue = "gamma";
 
     /// <summary>
-    /// Keeps empty ingestion and chunking paths from accidentally calling the embedding provider with no work, which would waste paid API calls.
+    /// Tests that embedding generation returns no vectors for empty input, avoiding unnecessary computing resources and API call quota usage.
     /// </summary>
     [Fact]
-    public async Task GenerateEmbeddingsAsync_ReturnsEmptyListForEmptyInput()
+    public async Task GenerateEmbeddingsAsync_EmptyInput_ReturnsEmptyList()
     {
         // Arrange
         var generator = new Mock<IEmbeddingGenerator<string, Embedding<float>>>(MockBehavior.Strict);
@@ -32,10 +32,10 @@ public sealed class EmbeddingServiceTests
     }
 
     /// <summary>
-    /// Protects the provider token-budget split so a large note chunk does not force the next chunk into an oversized embedding request.
+    /// Tests that embedding generation splits batches by estimated token budget so provider requests stay within token limits.
     /// </summary>
     [Fact]
-    public async Task GenerateEmbeddingsAsync_BatchesInputByEstimatedTokenBudget()
+    public async Task GenerateEmbeddingsAsync_InputExceedsTokenBudget_SplitsIntoSeparateBatches()
     {
         // Arrange
         var calls = new List<IReadOnlyList<string>>();
@@ -60,10 +60,10 @@ public sealed class EmbeddingServiceTests
     }
 
     /// <summary>
-    /// Protects the provider item-limit split so the service never sends more chunks than the embedding API accepts per request.
+    /// Tests that embedding generation splits batches by item count so provider requests stay within item limits.
     /// </summary>
     [Fact]
-    public async Task GenerateEmbeddingsAsync_BatchesInputByMaxBatchItems()
+    public async Task GenerateEmbeddingsAsync_InputExceedsMaxBatchItems_SplitsIntoSeparateBatches()
     {
         // Arrange
         var calls = new List<IReadOnlyList<string>>();
@@ -88,10 +88,10 @@ public sealed class EmbeddingServiceTests
     }
 
     /// <summary>
-    /// Protects retrieval quality by guaranteeing embeddings stay aligned with their source chunks after batching and parallel completion.
+    /// Tests that generated vectors keep the same order as their source texts after batching and parallel execution.
     /// </summary>
     [Fact]
-    public async Task GenerateEmbeddingsAsync_PreservesVectorOrderAcrossBatches()
+    public async Task GenerateEmbeddingsAsync_MultipleBatches_ReturnsVectorsInInputOrder()
     {
         // Arrange
         var generator = EmbeddingGeneratorMockFactory.Create(values => values
@@ -117,10 +117,10 @@ public sealed class EmbeddingServiceTests
     }
 
     /// <summary>
-    /// Protects the concurrency throttle that prevents local ingestion from overwhelming the external embedding provider.
+    /// Tests that concurrent batch execution respects the configured limit to avoid overwhelming the embedding provider.
     /// </summary>
     [Fact]
-    public async Task GenerateEmbeddingsAsync_LimitsConcurrentBatches()
+    public async Task GenerateEmbeddingsAsync_MaxConcurrentBatchesConfigured_LimitsConcurrentProviderCalls()
     {
         // Arrange
         var activeCalls = 0;

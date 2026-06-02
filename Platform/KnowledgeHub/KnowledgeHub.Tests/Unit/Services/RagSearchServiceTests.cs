@@ -16,10 +16,10 @@ public sealed class RagSearchServiceTests
     private const string SearchMode = "vector";
 
     /// <summary>
-    /// Protects the API boundary from running paid embeddings and vector search for an empty user query.
+    /// Tests that search rejects an empty query before generating embeddings or executing vector search.
     /// </summary>
     [Fact]
-    public async Task SearchAsync_RejectsBlankQuery()
+    public async Task SearchAsync_EmptyQuery_ThrowsArgumentException()
     {
         // Arrange
         var service = CreateService(new Mock<IChunkRepository>(MockBehavior.Strict));
@@ -33,14 +33,14 @@ public sealed class RagSearchServiceTests
     }
 
     /// <summary>
-    /// Protects the retrieval contract by trimming the query, clamping TopK, and sending the generated query vector to the repository.
+    /// Tests that search normalizes query text and TopK before passing the generated query vector to the repository.
     /// </summary>
     [Theory]
     [InlineData(0, 5)]
     [InlineData(-1, 5)]
     [InlineData(3, 3)]
     [InlineData(50, 10)]
-    public async Task SearchAsync_TrimsQueryAndNormalizesTopK(int requestedTopK, int expectedTopK)
+    public async Task SearchAsync_QueryWithWhitespaceAndUnnormalizedTopK_CallsVectorSearchWithNormalizedRequest(int requestedTopK, int expectedTopK)
     {
         // Arrange
         var expectedResults = new[]

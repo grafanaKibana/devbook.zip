@@ -11,14 +11,33 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Moq;
 
-public abstract class IntegrationTestBase
+public abstract class IntegrationTestBase : IAsyncLifetime
 {
     protected const string ProblemJsonMediaType = "application/problem+json";
+    private OfflineApplicationFactory? factory;
+    private HttpClient? client;
 
-    protected static OfflineApplicationFactory CreateApplicationFactory(Action<IServiceCollection> configureTestServices) =>
-        new(configureTestServices);
+    protected HttpClient Client => client ??= Factory.CreateClient();
 
-    protected sealed class OfflineApplicationFactory(Action<IServiceCollection> configureTestServices) : WebApplicationFactory<Program>
+    private OfflineApplicationFactory Factory => factory ??= new(ConfigureTestServices);
+
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
+    {
+        client?.Dispose();
+
+        if (factory is not null)
+        {
+            await factory.DisposeAsync();
+        }
+    }
+
+    protected virtual void ConfigureTestServices(IServiceCollection services)
+    {
+    }
+
+    private sealed class OfflineApplicationFactory(Action<IServiceCollection> configureTestServices) : WebApplicationFactory<Program>
     {
         private const string LocalMongoConnectionString = "mongodb://localhost:27017";
         private readonly string? previousMongoConnectionString = Environment.GetEnvironmentVariable("ConnectionStrings__MongoDb");

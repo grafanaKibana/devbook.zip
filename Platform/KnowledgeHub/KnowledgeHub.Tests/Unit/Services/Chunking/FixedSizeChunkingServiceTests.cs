@@ -20,10 +20,10 @@ public sealed class FixedSizeChunkingServiceTests
     private const string SecondDocumentId = "doc-second";
 
     /// <summary>
-    /// Protects stale-vector cleanup for notes that become whitespace-only by replacing existing chunks with an empty set.
+    /// Tests that fixed-size chunking replaces chunks with an empty collection when a document has only whitespace content.
     /// </summary>
     [Fact]
-    public async Task ReplaceDocumentChunksAsync_ReplacesWhitespaceDocumentWithEmptyChunks()
+    public async Task ReplaceDocumentChunksAsync_WhitespaceDocument_ReplacesChunksWithEmptyCollection()
     {
         // Arrange
         IReadOnlyCollection<ChunkModel>? capturedChunks = null;
@@ -38,10 +38,10 @@ public sealed class FixedSizeChunkingServiceTests
     }
 
     /// <summary>
-    /// Documents the fallback chunker contract: fixed-size chunks deliberately have no heading metadata but still produce citations and embeddings.
+    /// Tests that fixed-size chunking creates chunks without heading metadata while still assigning citation labels and embeddings.
     /// </summary>
     [Fact]
-    public async Task ReplaceDocumentChunksAsync_UsesFixedSizeChunksWithoutHeadingMetadata()
+    public async Task ReplaceDocumentChunksAsync_TextExceedsMaxChunkLength_CreatesFixedSizeChunksWithoutHeadingMetadata()
     {
         // Arrange
         IReadOnlyCollection<ChunkModel>? capturedChunks = null;
@@ -62,10 +62,10 @@ public sealed class FixedSizeChunkingServiceTests
     }
 
     /// <summary>
-    /// Protects configured overlap, which preserves context across hard chunk boundaries for later vector retrieval.
+    /// Tests that fixed-size chunking applies configured overlap so adjacent chunks preserve boundary context.
     /// </summary>
     [Fact]
-    public async Task ReplaceDocumentChunksAsync_AppliesConfiguredOverlap()
+    public async Task ReplaceDocumentChunksAsync_OverlapConfigured_CreatesOverlappingChunks()
     {
         // Arrange
         IReadOnlyCollection<ChunkModel>? capturedChunks = null;
@@ -81,10 +81,10 @@ public sealed class FixedSizeChunkingServiceTests
     }
 
     /// <summary>
-    /// Protects ingestion throughput by ensuring multiple changed documents are embedded in one provider call instead of one call per document.
+    /// Tests that fixed-size chunking embeds chunks across multiple documents in one provider batch.
     /// </summary>
     [Fact]
-    public async Task ReplaceDocumentChunksAsync_EmbedsChunksAcrossDocumentsInSingleBatch()
+    public async Task ReplaceDocumentChunksAsync_MultipleDocuments_EmbedsChunksInSingleBatch()
     {
         // Arrange
         IReadOnlyList<string>? embeddedValues = null;

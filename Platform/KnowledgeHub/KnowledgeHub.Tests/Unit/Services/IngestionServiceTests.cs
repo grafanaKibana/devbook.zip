@@ -20,13 +20,13 @@ public sealed class IngestionServiceTests
     private const string NestedMarkdownPath = "Scope/Nested.md";
 
     /// <summary>
-    /// Protects the documented full-root ingestion behavior for null, empty, and whitespace source paths.
+    /// Tests that ingestion treats null, empty, and whitespace source paths as full-root ingestion requests.
     /// </summary>
     [Theory]
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public async Task IngestDocumentsAsync_BlankSourcePathIngestsEverythingUnderRoot(string? sourcePath)
+    public async Task IngestDocumentsAsync_BlankSourcePath_IngestsEverythingUnderRoot(string? sourcePath)
     {
         // Arrange
         using var workspace = TestWorkspace.Create();
@@ -53,12 +53,12 @@ public sealed class IngestionServiceTests
     }
 
     /// <summary>
-    /// Protects the filesystem boundary so ingestion cannot read folders outside the configured vault root.
+    /// Tests that ingestion rejects source paths escaping the configured root to avoid reading files outside the vault.
     /// </summary>
     [Theory]
     [InlineData("../Outside")]
     [InlineData("/tmp")]
-    public async Task IngestDocumentsAsync_RejectsSourcePathEscapingRoot(string sourcePath)
+    public async Task IngestDocumentsAsync_SourcePathEscapesRoot_ThrowsArgumentException(string sourcePath)
     {
         // Arrange
         using var workspace = TestWorkspace.Create();
@@ -72,13 +72,13 @@ public sealed class IngestionServiceTests
     }
 
     /// <summary>
-    /// Protects single-file ingestion from path traversal, nested paths, and non-markdown files masquerading as selected notes.
+    /// Tests that single-file ingestion rejects invalid file names to avoid path traversal and non-markdown ingestion.
     /// </summary>
     [Theory]
     [InlineData("../Note.md")]
     [InlineData("Nested/Note.md")]
     [InlineData("Note.txt")]
-    public async Task IngestDocumentsAsync_RejectsBadFileName(string fileName)
+    public async Task IngestDocumentsAsync_InvalidFileName_ThrowsArgumentException(string fileName)
     {
         // Arrange
         using var workspace = TestWorkspace.Create();
@@ -93,10 +93,10 @@ public sealed class IngestionServiceTests
     }
 
     /// <summary>
-    /// Protects the primary single-note ingestion path: create document metadata, split frontmatter, and replace chunks for the new document.
+    /// Tests that single-file ingestion creates a document, parses frontmatter, and replaces chunks for a new markdown file.
     /// </summary>
     [Fact]
-    public async Task IngestDocumentsAsync_CreatesSingleFileAndChunksIt()
+    public async Task IngestDocumentsAsync_NewSingleFile_CreatesDocumentAndReplacesChunks()
     {
         // Arrange
         using var workspace = TestWorkspace.Create();
@@ -136,10 +136,10 @@ public sealed class IngestionServiceTests
     }
 
     /// <summary>
-    /// Protects single-file update scoping so changing one note updates its document and chunks without deleting sibling documents.
+    /// Tests that single-file ingestion updates a changed document without deleting other documents in the same folder.
     /// </summary>
     [Fact]
-    public async Task IngestDocumentsAsync_UpdatesChangedSingleFileWithoutDeletingSiblings()
+    public async Task IngestDocumentsAsync_ChangedSingleFile_UpdatesDocumentWithoutDeletingSiblings()
     {
         // Arrange
         using var workspace = TestWorkspace.Create();
@@ -178,10 +178,10 @@ public sealed class IngestionServiceTests
     }
 
     /// <summary>
-    /// Protects idempotent single-file ingestion so unchanged notes do not rewrite documents or regenerate embeddings.
+    /// Tests that single-file ingestion skips unchanged content to avoid unnecessary document writes and embedding regeneration.
     /// </summary>
     [Fact]
-    public async Task IngestDocumentsAsync_SkipsUnchangedSingleFile()
+    public async Task IngestDocumentsAsync_UnchangedSingleFile_SkipsDocumentUpdateAndChunking()
     {
         // Arrange
         using var workspace = TestWorkspace.Create();
@@ -216,10 +216,10 @@ public sealed class IngestionServiceTests
     }
 
     /// <summary>
-    /// Protects folder rebuild semantics: scoped documents are deleted before the current markdown files are recreated and chunked.
+    /// Tests that folder ingestion deletes scoped stored documents before recreating chunks for current markdown files.
     /// </summary>
     [Fact]
-    public async Task IngestDocumentsAsync_FolderIngestionDeletesScopedDocumentsAndIngestsMarkdownFiles()
+    public async Task IngestDocumentsAsync_FolderSource_DeletesScopedDocumentsAndIngestsMarkdownFiles()
     {
         // Arrange
         using var workspace = TestWorkspace.Create();

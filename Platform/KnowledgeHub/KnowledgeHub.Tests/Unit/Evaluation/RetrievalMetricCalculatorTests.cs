@@ -13,10 +13,10 @@ public sealed class RAGSearchMetricCalculatorTests
     private const string RetrievalSnippet = "Recall@k is primary";
 
     /// <summary>
-    /// Protects the happy-path baseline for all retrieval metrics when the first retrieved document is exactly relevant.
+    /// Tests that scoring returns perfect retrieval metrics when the first retrieved document exactly matches expected evidence.
     /// </summary>
     [Fact]
-    public void ScoreQuery_ReturnsPerfectMetricsForPerfectHit()
+    public void ScoreQuery_PerfectHit_ReturnsPerfectMetrics()
     {
         // Arrange
         var prediction = Prediction("perfect hit", [Document(EvaluationPath, RetrievalHeading, RetrievalSnippet)], [Document(EvaluationPath, "Retrieval Metrics and more", "Recall@k is primary because the generator cannot use evidence it never sees.")]);
@@ -41,10 +41,10 @@ public sealed class RAGSearchMetricCalculatorTests
     }
 
     /// <summary>
-    /// Protects partial-hit math so missing one expected source lowers recall without hiding the matched source.
+    /// Tests that scoring returns partial retrieval metrics when only one of multiple expected sources is retrieved.
     /// </summary>
     [Fact]
-    public void ScoreQuery_ReturnsPartialMetricsForPartialHit()
+    public void ScoreQuery_PartialHit_ReturnsPartialMetrics()
     {
         // Arrange
         var prediction = Prediction(
@@ -63,10 +63,10 @@ public sealed class RAGSearchMetricCalculatorTests
     }
 
     /// <summary>
-    /// Protects failure reporting for a complete miss, which is the main signal future evaluation reports need to diagnose bad retrieval.
+    /// Tests that scoring returns zero metrics and a failure reason when no retrieved document matches expected evidence.
     /// </summary>
     [Fact]
-    public void ScoreQuery_ReturnsZeroMetricsForNoHit()
+    public void ScoreQuery_NoHit_ReturnsZeroMetricsAndFailureReason()
     {
         // Arrange
         var prediction = Prediction(
@@ -89,10 +89,10 @@ public sealed class RAGSearchMetricCalculatorTests
     }
 
     /// <summary>
-    /// Protects evidence-sensitive matching so the evaluator does not count the right file as relevant when heading and snippet evidence differ.
+    /// Tests that scoring does not count a source-path match as relevant when required heading and snippet evidence differ.
     /// </summary>
     [Fact]
-    public void ScoreQuery_DoesNotMatchExpectedEvidenceBySourceDocumentOnly()
+    public void ScoreQuery_SourcePathMatchesButEvidenceDiffers_ReturnsNoRelevantMatch()
     {
         // Arrange
         var prediction = Prediction(
@@ -116,10 +116,10 @@ public sealed class RAGSearchMetricCalculatorTests
     }
 
     /// <summary>
-    /// Protects evidence-sensitive matching when the retrieved heading proves relevance even if the chunk text is different.
+    /// Tests that scoring counts a retrieved document as relevant when the heading matches expected evidence.
     /// </summary>
     [Fact]
-    public void ScoreQuery_MatchesExpectedEvidenceWhenHeadingOrSnippetMatches()
+    public void ScoreQuery_HeadingMatchesExpectedEvidence_ReturnsRelevantMatch()
     {
         // Arrange
         var prediction = Prediction(
@@ -138,10 +138,10 @@ public sealed class RAGSearchMetricCalculatorTests
     }
 
     /// <summary>
-    /// Protects precision and diagnostics when vector search returns duplicate chunks from the same source document.
+    /// Tests that scoring records duplicate retrieved source paths while counting precision against all retrieved results.
     /// </summary>
     [Fact]
-    public void ScoreQuery_DoesNotCountDuplicateRetrievedSourcesTwice()
+    public void ScoreQuery_DuplicateRetrievedSources_ReturnsDuplicateDiagnostics()
     {
         // Arrange
         var prediction = Prediction(
@@ -164,10 +164,10 @@ public sealed class RAGSearchMetricCalculatorTests
     }
 
     /// <summary>
-    /// Protects mean reciprocal rank input by proving the first relevant result rank, not just presence, controls the query score.
+    /// Tests that scoring uses the first relevant result rank to calculate reciprocal rank.
     /// </summary>
     [Fact]
-    public void ScoreQuery_ReturnsMrrForFirstRelevantSourceRank()
+    public void ScoreQuery_FirstRelevantSourceAtSecondRank_ReturnsReciprocalRankForSecondRank()
     {
         // Arrange
         var prediction = Prediction("rank two hit", [Document(EvaluationPath)], [Document(ChunkingPath), Document(EvaluationPath)]);
@@ -182,10 +182,10 @@ public sealed class RAGSearchMetricCalculatorTests
     }
 
     /// <summary>
-    /// Protects report-level aggregation: averages, empty-result rate, per-query order, and per-source summaries drive the HTML evaluation report.
+    /// Tests that evaluation aggregates query metrics, empty-result rate, query order, and per-source summaries for reports.
     /// </summary>
     [Fact]
-    public void Evaluate_ReturnsEmptyResultRateAndPerSourceDocumentSummaries()
+    public void Evaluate_MixedQueryResults_ReturnsAggregateMetricsAndSourceSummaries()
     {
         // Arrange
         var predictions = new[]

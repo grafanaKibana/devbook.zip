@@ -15,27 +15,25 @@ public sealed class RagEndpointTests : IntegrationTestBase
     private const string AskPath = "/rag/ask";
     private const string SearchQuery = " vector search ";
     private const string Question = "When use RAG?";
+    private readonly Mock<IRagSearchService> search = new(MockBehavior.Strict);
 
     /// <summary>
-    /// Protects the search HTTP contract by verifying the endpoint passes user input to the retrieval service and serializes vector results.
+    /// Tests that the RAG search endpoint passes user input to the search service and returns vector search results.
     /// </summary>
     [Fact]
-    public async Task PostRagSearch_DelegatesToSearchServiceAndReturnsResponse()
+    public async Task PostRagSearch_ValidRequest_ReturnsSearchServiceResponse()
     {
         // Arrange
         var expected = new RagSearchResponse("vector search", "vector", [
             new RagChunkResponse("chunk-1", "doc-1", "Chunk text", "Heading", "[[Doc#Heading]]", 0.91)
         ]);
         RagSearchRequest? capturedRequest = null;
-        var search = new Mock<IRagSearchService>(MockBehavior.Strict);
         search.Setup(mock => mock.SearchAsync(It.IsAny<RagSearchRequest>(), It.IsAny<CancellationToken>()))
             .Callback<RagSearchRequest, CancellationToken>((request, _) => capturedRequest = request)
             .ReturnsAsync(expected);
-        await using var factory = CreateApplicationFactory(services => services.AddScoped(_ => search.Object));
-        using var client = factory.CreateClient();
 
         // Act
-        var response = await client.PostAsJsonAsync(SearchPath, new RagSearchRequest(SearchQuery, 7));
+        var response = await Client.PostAsJsonAsync(SearchPath, new RagSearchRequest(SearchQuery, 7));
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -45,20 +43,17 @@ public sealed class RagEndpointTests : IntegrationTestBase
     }
 
     /// <summary>
-    /// Protects client-facing validation errors by keeping service ArgumentException responses as HTTP 400 ProblemDetails.
+    /// Tests that the RAG search endpoint converts service validation exceptions into HTTP 400 ProblemDetails responses.
     /// </summary>
     [Fact]
-    public async Task PostRagSearch_ReturnsProblemDetailsForServiceValidationException()
+    public async Task PostRagSearch_ServiceValidationException_ReturnsBadRequestProblemDetails()
     {
         // Arrange
-        var search = new Mock<IRagSearchService>(MockBehavior.Strict);
         search.Setup(mock => mock.SearchAsync(It.IsAny<RagSearchRequest>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new ArgumentException("Query is required."));
-        await using var factory = CreateApplicationFactory(services => services.AddScoped(_ => search.Object));
-        using var client = factory.CreateClient();
 
         // Act
-        var response = await client.PostAsJsonAsync(SearchPath, new RagSearchRequest("   ", 5));
+        var response = await Client.PostAsJsonAsync(SearchPath, new RagSearchRequest("   ", 5));
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -73,10 +68,10 @@ public sealed class RagEndpointTests : IntegrationTestBase
     }
 
     /// <summary>
-    /// Protects the temporary ask endpoint contract: trim the question, reuse vector search, and expose retrieved chunks as answer sources.
+    /// Tests that the RAG ask endpoint trims the question, delegates to search, and returns retrieved chunks as sources.
     /// </summary>
     [Fact]
-    public async Task PostRagAsk_TrimsQuestionDelegatesToSearchServiceAndReturnsSources()
+    public async Task PostRagAsk_QuestionWithWhitespace_ReturnsTrimmedQuestionAndRetrievedSources()
     {
         // Arrange
         var expectedSources = new[]
@@ -84,15 +79,12 @@ public sealed class RagEndpointTests : IntegrationTestBase
             new RagChunkResponse("chunk-1", "doc-1", "Chunk text", "Heading", "[[Doc#Heading]]", 0.91),
         };
         RagSearchRequest? capturedRequest = null;
-        var search = new Mock<IRagSearchService>(MockBehavior.Strict);
         search.Setup(mock => mock.SearchAsync(It.IsAny<RagSearchRequest>(), It.IsAny<CancellationToken>()))
             .Callback<RagSearchRequest, CancellationToken>((request, _) => capturedRequest = request)
             .ReturnsAsync(new RagSearchResponse(Question, "vector", expectedSources));
-        await using var factory = CreateApplicationFactory(services => services.AddScoped(_ => search.Object));
-        using var client = factory.CreateClient();
 
         // Act
-        var response = await client.PostAsJsonAsync(AskPath, new RagAskRequest($"  {Question}  ", 99));
+        var response = await Client.PostAsJsonAsync(AskPath, new RagAskRequest($"  {Question}  ", 99));
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -108,21 +100,24 @@ public sealed class RagEndpointTests : IntegrationTestBase
     }
 
     /// <summary>
-    /// Protects the ask endpoint from sending empty questions into retrieval, where they would become meaningless embeddings.
+    /// Tests that the RAG ask endpoint rejects empty questions before sending them to retrieval.
     /// </summary>
     [Fact]
-    public async Task PostRagAsk_RejectsBlankQuestion()
+    public async Task PostRagAsk_EmptyQuestion_ReturnsBadRequestProblemDetails()
     {
         // Arrange
-        await using var factory = CreateApplicationFactory(_ => { });
-        using var client = factory.CreateClient();
 
         // Act
-        var response = await client.PostAsJsonAsync(AskPath, new RagAskRequest("   ", 5));
+        var response = await Client.PostAsJsonAsync(AskPath, new RagAskRequest("   ", 5));
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>();
         problem.Should().BeEquivalentTo(new { Detail = "Question is required." });
+    }
+
+    protected override void ConfigureTestServices(IServiceCollection services)
+    {
+        services.AddScoped(_ => search.Object);
     }
 }

@@ -13,30 +13,33 @@ public sealed class IngestionEndpointTests : IntegrationTestBase
     private const string IngestionPath = "/ingestion/documents";
     private const string SourcePath = "Scope";
     private const string FileName = "Note.md";
+    private readonly Mock<IIngestionService> ingestion = new(MockBehavior.Strict);
 
     /// <summary>
-    /// Protects the ingestion HTTP contract by verifying the endpoint accepts the request DTO and returns the service result unchanged.
+    /// Tests that the ingestion endpoint passes the request body to the ingestion service and returns the service result.
     /// </summary>
     [Fact]
-    public async Task PostIngestionDocuments_DelegatesToIngestionServiceAndReturnsResult()
+    public async Task PostIngestionDocuments_ValidRequest_ReturnsIngestionServiceResult()
     {
         // Arrange
         var expected = new IngestionResult(true, 1, 1, 0, 0, ["doc-1"]);
         IngestionRequest? capturedRequest = null;
-        var ingestion = new Mock<IIngestionService>(MockBehavior.Strict);
         ingestion.Setup(mock => mock.IngestDocumentsAsync(It.IsAny<IngestionRequest>(), It.IsAny<CancellationToken>()))
             .Callback<IngestionRequest, CancellationToken>((request, _) => capturedRequest = request)
             .ReturnsAsync(expected);
-        await using var factory = CreateApplicationFactory(services => services.AddScoped(_ => ingestion.Object));
-        using var client = factory.CreateClient();
 
         // Act
-        var response = await client.PostAsJsonAsync(IngestionPath, new IngestionRequest(SourcePath, FileName));
+        var response = await Client.PostAsJsonAsync(IngestionPath, new IngestionRequest(SourcePath, FileName));
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         capturedRequest.Should().BeEquivalentTo(new IngestionRequest(SourcePath, FileName));
         var body = await response.Content.ReadFromJsonAsync<IngestionResult>();
         body.Should().BeEquivalentTo(expected);
+    }
+
+    protected override void ConfigureTestServices(IServiceCollection services)
+    {
+        services.AddScoped(_ => ingestion.Object);
     }
 }
