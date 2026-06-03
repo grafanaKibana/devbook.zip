@@ -1,14 +1,12 @@
 namespace KnowledgeHub.Tests.Unit.Evaluation;
 
 using FluentAssertions;
-using KnowledgeHub.Evaluations.Common.Calculators;
-using KnowledgeHub.Evaluations.Common.Evaluators.RAGSearch;
 using KnowledgeHub.Evaluations.Common.Evaluators.SummaryGeneration;
-using KnowledgeHub.Evaluations.Scenarios.RAGSearch;
+using KnowledgeHub.Evaluations.Scenarios.RAG.Search;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.AI.Evaluation;
 
-public sealed class RAGSearchMetricCalculatorTests
+public sealed class SearchMetricCalculatorTests
 {
     private const string EvaluationPath = "Software Engineering/11 AI & ML/LLM/RAG/Evaluation.md";
     private const string ChunkingPath = "Software Engineering/11 AI & ML/LLM/RAG/Chunking.md";
@@ -26,19 +24,14 @@ public sealed class RAGSearchMetricCalculatorTests
         var prediction = Prediction("perfect hit", [Document(EvaluationPath, RetrievalHeading, RetrievalSnippet)], [Document(EvaluationPath, "Retrieval Metrics and more", "Recall@k is primary because the generator cannot use evidence it never sees.")]);
 
         // Act
-        var result = RAGSearchMetricCalculator.ScoreQuery(prediction);
+        var result = SearchMetricCalculator.ScoreQuery(prediction);
 
         // Assert
         result.Should().BeEquivalentTo(new
         {
-            CaseId = string.Empty,
-            Query = "perfect hit",
-            ExpectedSourceDocuments = new[] { EvaluationPath },
-            RetrievedSourceDocuments = new[] { EvaluationPath },
             RecallAtK = 1d,
             PrecisionAtK = 1d,
             ReciprocalRank = 1d,
-            FailureReason = (string?)null,
         });
         result.Diagnostics.MissingExpectedSourcePaths.Should().BeEmpty();
         result.Diagnostics.DuplicateRetrievedSourcePaths.Should().BeEmpty();
@@ -57,7 +50,7 @@ public sealed class RAGSearchMetricCalculatorTests
             [Document(EvaluationPath, RetrievalHeading, "Recall@k is primary because the generator cannot use evidence it never sees."), Document(IrrelevantPath, "Composite", "irrelevant")]);
 
         // Act
-        var result = RAGSearchMetricCalculator.ScoreQuery(prediction);
+        var result = SearchMetricCalculator.ScoreQuery(prediction);
 
         // Assert
         result.RecallAtK.Should().Be(0.5);
@@ -67,10 +60,10 @@ public sealed class RAGSearchMetricCalculatorTests
     }
 
     /// <summary>
-    /// Tests that scoring returns zero metrics and a failure reason when no retrieved document matches expected evidence.
+    /// Tests that scoring returns zero metrics when no retrieved document matches expected evidence.
     /// </summary>
     [Fact]
-    public void ScoreQuery_NoHit_ReturnsZeroMetricsAndFailureReason()
+    public void ScoreQuery_NoHit_ReturnsZeroMetrics()
     {
         // Arrange
         var prediction = Prediction(
@@ -79,7 +72,7 @@ public sealed class RAGSearchMetricCalculatorTests
             [Document(ChunkingPath, "Parent-Child Chunking", "different source")]);
 
         // Act
-        var result = RAGSearchMetricCalculator.ScoreQuery(prediction);
+        var result = SearchMetricCalculator.ScoreQuery(prediction);
 
         // Assert
         result.Should().BeEquivalentTo(new
@@ -87,7 +80,6 @@ public sealed class RAGSearchMetricCalculatorTests
             RecallAtK = 0d,
             PrecisionAtK = 0d,
             ReciprocalRank = 0d,
-            FailureReason = "No relevant source document appeared in the retrieved results.",
         });
         result.Diagnostics.MissingExpectedSourcePaths.Should().ContainSingle();
     }
@@ -105,7 +97,7 @@ public sealed class RAGSearchMetricCalculatorTests
             [Document(EvaluationPath, "Other heading", "different snippet")]);
 
         // Act
-        var result = RAGSearchMetricCalculator.ScoreQuery(prediction);
+        var result = SearchMetricCalculator.ScoreQuery(prediction);
 
         // Assert
         result.RecallAtK.Should().Be(0);
@@ -134,7 +126,7 @@ public sealed class RAGSearchMetricCalculatorTests
                 Document(ChunkingPath, "Parent-Child Chunking", "different chunk")
             ]);
 
-        var result = RAGSearchMetricCalculator.ScoreQuery(prediction);
+        var result = SearchMetricCalculator.ScoreQuery(prediction);
 
         result.Diagnostics.ExpectedDocuments.Should().BeEquivalentTo([
             new { Index = 1, SourcePath = EvaluationPath, Heading = RetrievalHeading, SnippetPreview = RetrievalSnippet, Matched = false },
@@ -181,18 +173,18 @@ public sealed class RAGSearchMetricCalculatorTests
     }
 
     [Fact]
-    public async Task RAGSearchEvaluator_EvaluateAsync_AddsReportFacingDiagnostics()
+    public async Task SearchEvaluator_EvaluateAsync_AddsReportFacingDiagnostics()
     {
         var prediction = Prediction(
             "report diagnostic query",
             [Document(EvaluationPath, RetrievalHeading, "MRR rewards pushing the first relevant result higher")],
             [Document(EvaluationPath, "Questions", "different chunk")]);
-        var evaluator = new RAGSearchEvaluator();
+        var evaluator = new SearchEvaluator();
 
         var result = await evaluator.EvaluateAsync(
             [new ChatMessage(ChatRole.User, prediction.Query)],
             new ChatResponse(new ChatMessage(ChatRole.Assistant, "[[Evaluation#Questions]]")),
-            additionalContext: [new RAGSearchEvaluationContext(prediction, topK: 5)]);
+            additionalContext: [new SearchEvaluationContext(prediction, topK: 5)]);
 
         var recallMetric = result.Metrics["RecallAtK"];
         var diagnosticMessages = recallMetric.Diagnostics.Should().NotBeNull().And.Subject!.Select(diagnostic => diagnostic.Message);
@@ -217,18 +209,18 @@ public sealed class RAGSearchMetricCalculatorTests
     }
 
     [Fact]
-    public async Task RAGSearchEvaluator_EvaluateAsync_FormatsFractionalScoresWithInvariantCulture()
+    public async Task SearchEvaluator_EvaluateAsync_FormatsFractionalScoresWithInvariantCulture()
     {
         var prediction = Prediction(
             "fractional score query",
             [Document(EvaluationPath)],
             [Document(IrrelevantPath), Document(EvaluationPath)]);
-        var evaluator = new RAGSearchEvaluator();
+        var evaluator = new SearchEvaluator();
 
         var result = await evaluator.EvaluateAsync(
             [new ChatMessage(ChatRole.User, prediction.Query)],
             new ChatResponse(new ChatMessage(ChatRole.Assistant, "[[Composite]]\n[[Evaluation]]")),
-            additionalContext: [new RAGSearchEvaluationContext(prediction, topK: 5)]);
+            additionalContext: [new SearchEvaluationContext(prediction, topK: 5)]);
 
         result.Metrics["PrecisionAtK"].Interpretation!.Reason.Should().Contain("Score 0.5 (Good)");
         result.Metrics["ReciprocalRank"].Interpretation!.Reason.Should().Contain("Score 0.5 (Good)");
@@ -239,12 +231,12 @@ public sealed class RAGSearchMetricCalculatorTests
     {
         var predictions = new[]
         {
-            new RAGSearchPrediction("case-1", "first query", [Document(EvaluationPath)], [Document(EvaluationPath)]),
-            new RAGSearchPrediction("case-2", "second query", [Document(EvaluationPath)], []),
-            new RAGSearchPrediction("case-3", "third query", [Document(ChunkingPath)], [Document(IrrelevantPath), Document(ChunkingPath)]),
+            new SearchPrediction("first query", [Document(EvaluationPath)], [Document(EvaluationPath)]),
+            new SearchPrediction("second query", [Document(EvaluationPath)], []),
+            new SearchPrediction("third query", [Document(ChunkingPath)], [Document(IrrelevantPath), Document(ChunkingPath)]),
         };
 
-        var metrics = RAGSearchEvaluator.ComputeSummaryMetrics(predictions, topK: 5)["Overall"].ToDictionary(metric => metric.Name);
+        var metrics = SearchEvaluator.ComputeSummaryMetrics(predictions, topK: 5)["Overall"].ToDictionary(metric => metric.Name);
 
         metrics["RecallAtK"].Rating.Should().Be(EvaluationRating.Average);
         metrics["PrecisionAtK"].Rating.Should().Be(EvaluationRating.Good);
@@ -279,7 +271,7 @@ public sealed class RAGSearchMetricCalculatorTests
             [Document(EvaluationPath, RetrievalHeading, "different chunk text")]);
 
         // Act
-        var result = RAGSearchMetricCalculator.ScoreQuery(prediction);
+        var result = SearchMetricCalculator.ScoreQuery(prediction);
 
         // Assert
         result.RecallAtK.Should().Be(1);
@@ -305,7 +297,7 @@ public sealed class RAGSearchMetricCalculatorTests
             ]);
 
         // Act
-        var result = RAGSearchMetricCalculator.ScoreQuery(prediction);
+        var result = SearchMetricCalculator.ScoreQuery(prediction);
 
         // Assert
         result.RecallAtK.Should().Be(1);
@@ -324,7 +316,7 @@ public sealed class RAGSearchMetricCalculatorTests
         var prediction = Prediction("rank two hit", [Document(EvaluationPath)], [Document(ChunkingPath), Document(EvaluationPath)]);
 
         // Act
-        var result = RAGSearchMetricCalculator.ScoreQuery(prediction);
+        var result = SearchMetricCalculator.ScoreQuery(prediction);
 
         // Assert
         result.RecallAtK.Should().Be(1);
@@ -333,54 +325,36 @@ public sealed class RAGSearchMetricCalculatorTests
     }
 
     /// <summary>
-    /// Tests that evaluation aggregates query metrics, empty-result rate, query order, and per-source summaries for reports.
+    /// Tests that evaluation aggregates query count, retrieval metrics, and empty-result rate for reports.
     /// </summary>
     [Fact]
-    public void Evaluate_MixedQueryResults_ReturnsAggregateMetricsAndSourceSummaries()
+    public void Evaluate_MixedQueryResults_ReturnsAggregateMetrics()
     {
         // Arrange
         var predictions = new[]
         {
-            new RAGSearchPrediction("case-1", "first query", [Document(EvaluationPath)], [Document(EvaluationPath)]),
-            new RAGSearchPrediction("case-2", "second query", [Document(EvaluationPath)], []),
-            new RAGSearchPrediction("case-3", "third query", [Document(ChunkingPath)], [Document(IrrelevantPath), Document(ChunkingPath)]),
+            new SearchPrediction("first query", [Document(EvaluationPath)], [Document(EvaluationPath)]),
+            new SearchPrediction("second query", [Document(EvaluationPath)], []),
+            new SearchPrediction("third query", [Document(ChunkingPath)], [Document(IrrelevantPath), Document(ChunkingPath)]),
         };
 
         // Act
-        var report = RAGSearchMetricCalculator.Evaluate(predictions, topK: 5);
+        var report = SearchMetricCalculator.Evaluate(predictions, topK: 5);
 
         // Assert
+        report.QueryCount.Should().Be(3);
         report.RecallAtK.Should().BeApproximately(2d / 3d, 0.000001);
         report.PrecisionAtK.Should().BeApproximately(0.5, 0.000001);
         report.MeanReciprocalRank.Should().BeApproximately(0.5, 0.000001);
         report.EmptyResultRate.Should().BeApproximately(1d / 3d, 0.000001);
-        report.Queries.Select(query => query.CaseId).Should().Equal("case-1", "case-2", "case-3");
-        report.SourceDocuments.Should().ContainEquivalentOf(new
-        {
-            SourceDocument = EvaluationPath,
-            CaseCount = 2,
-            AverageRecallAtK = 0.5,
-            AveragePrecisionAtK = 0.5,
-            AverageReciprocalRank = 0.5,
-            EmptyResultCount = 1
-        });
-        report.SourceDocuments.Should().ContainEquivalentOf(new
-        {
-            SourceDocument = ChunkingPath,
-            CaseCount = 1,
-            AverageRecallAtK = 1,
-            AveragePrecisionAtK = 0.5,
-            AverageReciprocalRank = 0.5,
-            EmptyResultCount = 0
-        });
     }
 
-    private static RAGSearchPrediction Prediction(
+    private static SearchPrediction Prediction(
         string query,
-        IReadOnlyList<RAGSearchDocument> expectedDocuments,
-        IReadOnlyList<RAGSearchDocument> retrievedDocuments) =>
-        new(string.Empty, query, expectedDocuments, retrievedDocuments);
+        IReadOnlyList<SearchDocument> expectedDocuments,
+        IReadOnlyList<SearchDocument> retrievedDocuments) =>
+        new(query, expectedDocuments, retrievedDocuments);
 
-    private static RAGSearchDocument Document(string sourcePath, string? heading = null, string? snippet = null) =>
+    private static SearchDocument Document(string sourcePath, string? heading = null, string? snippet = null) =>
         new(sourcePath, heading, snippet);
 }

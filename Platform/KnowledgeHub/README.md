@@ -92,7 +92,7 @@ Use environment variables when you do not want to edit the local settings file:
 ```bash
 ConnectionStrings__MongoDb="<mongo-connection-string>" \
 EmbeddingOptions__ApiKey="<openai-api-key>" \
-dotnet run --project Platform/KnowledgeHub/KnowledgeHub.Evaluations/KnowledgeHub.Evaluations.csproj -- --name RAGSearch
+dotnet run --project Platform/KnowledgeHub/KnowledgeHub.Evaluations/KnowledgeHub.Evaluations.csproj -- --name RAG.Search
 ```
 
 If either value is missing, the scenario tests are skipped and no new evaluation report folder is created.
@@ -100,7 +100,7 @@ If either value is missing, the scenario tests are skipped and no new evaluation
 Generate the AI evaluation HTML report from the scenario test run by running the evaluation project:
 
 ```bash
-dotnet run --project Platform/KnowledgeHub/KnowledgeHub.Evaluations/KnowledgeHub.Evaluations.csproj -- --name RAGSearch
+dotnet run --project Platform/KnowledgeHub/KnowledgeHub.Evaluations/KnowledgeHub.Evaluations.csproj -- --name RAG.Search
 ```
 
 Selecting and running the `KnowledgeHub.Evaluations` project in the IDE executes the same `RunEvaluation.cs` report-generation flow. `RunEvaluation.cs` invokes the report command for the latest run folder:

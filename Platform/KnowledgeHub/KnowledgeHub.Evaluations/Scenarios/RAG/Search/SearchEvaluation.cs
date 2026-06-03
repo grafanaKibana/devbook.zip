@@ -1,39 +1,39 @@
-namespace KnowledgeHub.Evaluations.Scenarios.RAGSearch;
+namespace KnowledgeHub.Evaluations.Scenarios.RAG.Search;
 
 using KnowledgeHub.Data.Models;
 using KnowledgeHub.Evaluations.Common;
-using KnowledgeHub.Evaluations.Common.Evaluators.RAGSearch;
 using KnowledgeHub.Evaluations.Common.Evaluators.SummaryGeneration;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.AI.Evaluation;
 
-public sealed class RAGSearchEvaluation : MongoEvaluationTestBase<RAGSearchPrediction>
+public sealed class SearchEvaluation : MongoEvaluationTestBase<SearchPrediction>
 {
     private const string DatasetFile = "golden-rag-cases.json";
     private const int TopK = 5;
 
-    protected override IEvaluator[] GetPerIterationEvaluators() => [new RAGSearchEvaluator()];
+    protected override string ScenarioDisplayName => "RAG.Search";
+
+    protected override IEvaluator[] GetPerIterationEvaluators() => [new SearchEvaluator()];
 
     protected override Dictionary<string, IEnumerable<SummaryMetric>> ComputeSummaryMetrics(
-        IReadOnlyList<RAGSearchPrediction> predictions)
-        => RAGSearchEvaluator.ComputeSummaryMetrics(predictions, TopK);
+        IReadOnlyList<SearchPrediction> predictions)
+        => SearchEvaluator.ComputeSummaryMetrics(predictions, TopK);
 
-    private static IEnumerable<TestCaseData> TestCases() => LoadTestCases<RAGSearchDataset, RAGSearchEvaluationCase>(
+    private static IEnumerable<TestCaseData> TestCases() => LoadTestCases<SearchDataset, SearchEvaluationCase>(
         DatasetFile, dataset => dataset.Cases, testCase => testCase.Id);
 
     [Test]
     [TestCaseSource(nameof(TestCases))]
-    public async Task SearchFindsExpectedSources(RAGSearchEvaluationCase testCase)
+    public async Task SearchFindsExpectedSources(SearchEvaluationCase testCase)
     {
         await using var scenarioRun = await ReportingConfig.CreateScenarioRunAsync(
             scenarioName: GetScenarioName(),
             iterationName: testCase.Id);
 
         var response = await RagSearchService.SearchAsync(new RagSearchRequest(testCase.Query, TopK));
-        var prediction = new RAGSearchPrediction(
-            testCase.Id,
+        var prediction = new SearchPrediction(
             testCase.Query,
-            testCase.ExpectedSources.Select(source => new RAGSearchDocument(source.Path, source.Heading, source.Snippet)).ToArray(),
+            testCase.ExpectedSources.Select(source => new SearchDocument(source.Path, source.Heading, source.Snippet)).ToArray(),
             await MapRetrievedDocumentsAsync(response.Results));
 
         Predictions.Add(prediction);
@@ -41,10 +41,10 @@ public sealed class RAGSearchEvaluation : MongoEvaluationTestBase<RAGSearchPredi
         await scenarioRun.EvaluateAsync(
             [new ChatMessage(ChatRole.User, testCase.Query)],
             new ChatResponse(new ChatMessage(ChatRole.Assistant, string.Join(Environment.NewLine, response.Results.Select(result => result.CitationLabel)))),
-            additionalContext: [new RAGSearchEvaluationContext(prediction, TopK)]);
+            additionalContext: [new SearchEvaluationContext(prediction, TopK)]);
     }
 
-    private async Task<IReadOnlyList<RAGSearchDocument>> MapRetrievedDocumentsAsync(IReadOnlyList<RagChunkResponse> results)
+    private async Task<IReadOnlyList<SearchDocument>> MapRetrievedDocumentsAsync(IReadOnlyList<RagChunkResponse> results)
     {
         var documentIds = results
             .Select(result => result.DocumentId)
@@ -58,19 +58,19 @@ public sealed class RAGSearchEvaluation : MongoEvaluationTestBase<RAGSearchPredi
         var sourcePathsByDocumentId = documents.ToDictionary(document => document.DocumentId, document => document.SourcePath, StringComparer.Ordinal);
 
         return results
-            .Select(result => new RAGSearchDocument(
+            .Select(result => new SearchDocument(
                 sourcePathsByDocumentId.TryGetValue(result.DocumentId, out var sourcePath) ? sourcePath : result.CitationLabel,
                 result.Heading,
                 result.ChunkText))
             .ToArray();
     }
 
-    public sealed record RAGSearchDataset
+    public sealed record SearchDataset
     {
-        public IReadOnlyList<RAGSearchEvaluationCase> Cases { get; init; } = [];
+        public IReadOnlyList<SearchEvaluationCase> Cases { get; init; } = [];
     }
 
-    public sealed record RAGSearchEvaluationCase
+    public sealed record SearchEvaluationCase
     {
         public string Id { get; init; } = string.Empty;
         public string Query { get; init; } = string.Empty;

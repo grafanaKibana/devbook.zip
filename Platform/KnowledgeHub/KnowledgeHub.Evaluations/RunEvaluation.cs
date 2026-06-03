@@ -8,7 +8,7 @@ const string ReportsFolderName = "EvaluationReports";
 const string ReportFileName = "report.html";
 
 var openBrowser = ParseOpenBrowserFlag(args);
-var evaluationName = ParseEvaluationName(args) ?? "RAGSearch";
+var evaluationName = ParseEvaluationName(args) ?? "RAG.Search";
 var projectDirectory = ResolveProjectDirectory();
 
 #endregion
@@ -52,6 +52,14 @@ string? ParseEvaluationName(string[] arguments)
     }
 
     return null;
+}
+
+
+string ResolveEvaluationTestFilter(string evaluationName)
+{
+    return evaluationName.Equals("RAG.Search", StringComparison.OrdinalIgnoreCase)
+        ? "SearchFindsExpectedSources"
+        : evaluationName;
 }
 
 string ResolveProjectDirectory([CallerFilePath] string scriptPath = "")
@@ -124,11 +132,12 @@ Console.WriteLine($"Working directory: {projectDirectory}");
 #region Step 1: Run evaluation tests
 
 Console.WriteLine("\n=== Running Evaluation Tests ===\n");
-Console.WriteLine($"Filtering evaluations by Name: {evaluationName}");
+var testFilterName = ResolveEvaluationTestFilter(evaluationName);
+Console.WriteLine($"Filtering evaluations by Name: {evaluationName} (test filter: {testFilterName})");
 
 var testStopwatch = Stopwatch.StartNew();
 var runStartedAtUtc = DateTime.UtcNow;
-var escapedEvaluationName = evaluationName.Replace("\"", "\\\"");
+var escapedEvaluationName = testFilterName.Replace("\"", "\\\"");
 var testFilterArgs = $" --filter \"Name~{escapedEvaluationName}\"";
 
 var testProcess = Process.Start(new ProcessStartInfo

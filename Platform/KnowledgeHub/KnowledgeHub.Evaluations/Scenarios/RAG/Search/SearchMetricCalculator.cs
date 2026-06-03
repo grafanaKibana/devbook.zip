@@ -1,38 +1,34 @@
-namespace KnowledgeHub.Evaluations.Common.Calculators;
+namespace KnowledgeHub.Evaluations.Scenarios.RAG.Search;
 
-using KnowledgeHub.Evaluations.Scenarios.RAGSearch;
-
-public static class RAGSearchMetricCalculator
+public static class SearchMetricCalculator
 {
-    public static RAGSearchReport Evaluate(
-        IReadOnlyList<RAGSearchPrediction> cases,
+    public static SearchReport Evaluate(
+        IReadOnlyList<SearchPrediction> cases,
         int topK = 5)
     {
         var queryMetrics = cases.Select(queryCase => ScoreQuery(queryCase, topK)).ToArray();
 
         if (queryMetrics.Length == 0)
         {
-            return new RAGSearchReport(topK, 0, 0, 0, 0, [], queryMetrics);
+            return new SearchReport(0, 0, 0, 0, 0);
         }
 
-        return new RAGSearchReport(
-            topK,
+        return new SearchReport(
+            queryMetrics.Length,
             queryMetrics.Average(metric => metric.RecallAtK),
             queryMetrics.Average(metric => metric.PrecisionAtK),
             queryMetrics.Average(metric => metric.ReciprocalRank),
-            queryMetrics.Count(metric => metric.IsEmptyResult) / (double)queryMetrics.Length,
-            SummarizeSourceDocuments(cases, queryMetrics),
-            queryMetrics);
+            queryMetrics.Count(metric => metric.IsEmptyResult) / (double)queryMetrics.Length);
     }
 
-    public static RAGSearchQueryMetrics ScoreQuery(RAGSearchPrediction queryCase, int topK = 5)
+    public static SearchQueryMetrics ScoreQuery(SearchPrediction queryCase, int topK = 5)
     {
         var expectedDocuments = queryCase.ExpectedDocuments;
         var retrievedDocuments = queryCase.RetrievedDocuments.Take(topK).ToArray();
         var matchedExpected = new bool[expectedDocuments.Count];
         var duplicateRetrievedSourcePaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var seenRetrievedSourcePaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        var matchDiagnostics = new List<RAGSearchMatchDiagnostic>(retrievedDocuments.Length);
+        var matchDiagnostics = new List<SearchMatchDiagnostic>(retrievedDocuments.Length);
         var relevantRetrievedCount = 0;
         var reciprocalRank = 0d;
 
@@ -49,14 +45,12 @@ public static class RAGSearchMetricCalculator
             var analysis = AnalyzeRetrievedDocument(expectedDocuments, matchedExpected, retrievedDocument);
             if (!analysis.IsRelevant)
             {
-                matchDiagnostics.Add(new RAGSearchMatchDiagnostic(
+                matchDiagnostics.Add(new SearchMatchDiagnostic(
                     rank,
                     retrievedDocument.SourcePath,
                     retrievedDocument.Heading,
-                    Preview(retrievedDocument.Snippet),
                     analysis.Expected?.SourcePath,
                     analysis.Expected?.Heading,
-                    Preview(analysis.Expected?.Snippet),
                     analysis.SourcePathMatched,
                     analysis.HeadingMatched,
                     analysis.SnippetMatched,
@@ -69,14 +63,12 @@ public static class RAGSearchMetricCalculator
             relevantRetrievedCount++;
             reciprocalRank = reciprocalRank == 0 ? 1d / rank : reciprocalRank;
 
-            matchDiagnostics.Add(new RAGSearchMatchDiagnostic(
+            matchDiagnostics.Add(new SearchMatchDiagnostic(
                 rank,
                 retrievedDocument.SourcePath,
                 retrievedDocument.Heading,
-                Preview(retrievedDocument.Snippet),
                 analysis.Expected!.SourcePath,
                 analysis.Expected.Heading,
-                Preview(analysis.Expected.Snippet),
                 analysis.SourcePathMatched,
                 analysis.HeadingMatched,
                 analysis.SnippetMatched,
@@ -91,10 +83,9 @@ public static class RAGSearchMetricCalculator
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToArray();
 
-        var uniqueRetrievedCount = seenRetrievedSourcePaths.Count;
         var expectedCount = expectedDocuments.Count;
         var expectedDiagnostics = expectedDocuments
-            .Select((expectedDocument, index) => new RAGSearchExpectedDiagnostic(
+            .Select((expectedDocument, index) => new SearchExpectedDiagnostic(
                 index + 1,
                 expectedDocument.SourcePath,
                 expectedDocument.Heading,
@@ -103,23 +94,14 @@ public static class RAGSearchMetricCalculator
             .ToArray();
         var recallAtK = expectedCount == 0 ? 0 : matchedExpected.Count(matched => matched) / (double)expectedCount;
         var precisionAtK = retrievedDocuments.Length == 0 ? 0 : relevantRetrievedCount / (double)retrievedDocuments.Length;
-        var failureReason = reciprocalRank == 0
-            ? "No relevant source document appeared in the retrieved results."
-            : null;
 
-        return new RAGSearchQueryMetrics(
-            queryCase.CaseId,
-            queryCase.Query,
-            expectedDocuments.Select(document => document.SourcePath).ToArray(),
-            retrievedDocuments.Select(document => document.SourcePath).ToArray(),
+        return new SearchQueryMetrics(
             recallAtK,
             precisionAtK,
             reciprocalRank,
             retrievedDocuments.Length == 0,
-            failureReason,
-            new RAGSearchQueryDiagnostics(
+            new SearchQueryDiagnostics(
                 retrievedDocuments.Length,
-                uniqueRetrievedCount,
                 expectedCount,
                 expectedDiagnostics,
                 missingExpectedSourcePaths,
@@ -128,9 +110,9 @@ public static class RAGSearchMetricCalculator
     }
 
     private static RetrievedDocumentAnalysis AnalyzeRetrievedDocument(
-        IReadOnlyList<RAGSearchDocument> expectedDocuments,
+        IReadOnlyList<SearchDocument> expectedDocuments,
         bool[] matchedExpected,
-        RAGSearchDocument retrievedDocument)
+        SearchDocument retrievedDocument)
     {
         RetrievedDocumentAnalysis? evidenceMismatch = null;
 
@@ -205,7 +187,7 @@ public static class RAGSearchMetricCalculator
             "Retrieved source path did not match any expected source path.");
     }
 
-    private static bool RequiresEvidenceMatch(RAGSearchDocument expectedDocument)
+    private static bool RequiresEvidenceMatch(SearchDocument expectedDocument)
     {
         return !string.IsNullOrWhiteSpace(expectedDocument.Heading)
             || !string.IsNullOrWhiteSpace(expectedDocument.Snippet);
@@ -246,7 +228,7 @@ public static class RAGSearchMetricCalculator
 
     private sealed record RetrievedDocumentAnalysis(
         int? ExpectedIndex,
-        RAGSearchDocument? Expected,
+        SearchDocument? Expected,
         bool SourcePathMatched,
         bool HeadingMatched,
         bool SnippetMatched,
@@ -254,24 +236,45 @@ public static class RAGSearchMetricCalculator
     {
         public bool IsRelevant => ExpectedIndex is not null;
     }
-
-    private static IReadOnlyList<RAGSearchSourceDocumentSummary> SummarizeSourceDocuments(
-        IReadOnlyList<RAGSearchPrediction> cases,
-        IReadOnlyList<RAGSearchQueryMetrics> queryMetrics)
-    {
-        return cases
-            .Zip(queryMetrics)
-            .SelectMany(pair => pair.First.ExpectedDocuments
-                .Select(expectedDocument => new { expectedDocument.SourcePath, Metrics = pair.Second }))
-            .GroupBy(item => NormalizePath(item.SourcePath), StringComparer.OrdinalIgnoreCase)
-            .OrderBy(group => group.Key, StringComparer.OrdinalIgnoreCase)
-            .Select(group => new RAGSearchSourceDocumentSummary(
-                group.First().SourcePath,
-                group.Count(),
-                group.Average(item => item.Metrics.RecallAtK),
-                group.Average(item => item.Metrics.PrecisionAtK),
-                group.Average(item => item.Metrics.ReciprocalRank),
-                group.Count(item => item.Metrics.IsEmptyResult)))
-            .ToArray();
-    }
 }
+
+public sealed record SearchReport(
+    int QueryCount,
+    double RecallAtK,
+    double PrecisionAtK,
+    double MeanReciprocalRank,
+    double EmptyResultRate);
+
+public sealed record SearchQueryMetrics(
+    double RecallAtK,
+    double PrecisionAtK,
+    double ReciprocalRank,
+    bool IsEmptyResult,
+    SearchQueryDiagnostics Diagnostics);
+
+public sealed record SearchQueryDiagnostics(
+    int RetrievedCount,
+    int ExpectedCount,
+    IReadOnlyList<SearchExpectedDiagnostic> ExpectedDocuments,
+    IReadOnlyList<string> MissingExpectedSourcePaths,
+    IReadOnlyList<string> DuplicateRetrievedSourcePaths,
+    IReadOnlyList<SearchMatchDiagnostic> Matches);
+
+public sealed record SearchExpectedDiagnostic(
+    int Index,
+    string SourcePath,
+    string? Heading,
+    string? SnippetPreview,
+    bool Matched);
+
+public sealed record SearchMatchDiagnostic(
+    int Rank,
+    string SourcePath,
+    string? Heading,
+    string? MatchedExpectedSourcePath,
+    string? MatchedExpectedHeading,
+    bool SourcePathMatched,
+    bool HeadingMatched,
+    bool SnippetMatched,
+    bool IsRelevant,
+    string Reason);

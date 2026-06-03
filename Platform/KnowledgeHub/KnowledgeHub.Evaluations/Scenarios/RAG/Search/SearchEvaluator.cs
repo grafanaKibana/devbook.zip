@@ -1,13 +1,11 @@
-namespace KnowledgeHub.Evaluations.Common.Evaluators.RAGSearch;
+namespace KnowledgeHub.Evaluations.Scenarios.RAG.Search;
 
 using System.Globalization;
-using KnowledgeHub.Evaluations.Common.Calculators;
 using KnowledgeHub.Evaluations.Common.Evaluators.SummaryGeneration;
-using KnowledgeHub.Evaluations.Scenarios.RAGSearch;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.AI.Evaluation;
 
-public sealed class RAGSearchEvaluator : IEvaluator
+public sealed class SearchEvaluator : IEvaluator
 {
     private const string RecallAtKMetricName = "RecallAtK";
     private const string PrecisionAtKMetricName = "PrecisionAtK";
@@ -27,13 +25,13 @@ public sealed class RAGSearchEvaluator : IEvaluator
         IEnumerable<EvaluationContext>? additionalContext = null,
         CancellationToken cancellationToken = default)
     {
-        var context = additionalContext?.OfType<RAGSearchEvaluationContext>().FirstOrDefault();
+        var context = additionalContext?.OfType<SearchEvaluationContext>().FirstOrDefault();
         if (context is null)
         {
-            return ValueTask.FromResult(new EvaluationResult(CreateFailedMetric(RecallAtKMetricName, "RAGSearchEvaluationContext not provided.")));
+            return ValueTask.FromResult(new EvaluationResult(CreateFailedMetric(RecallAtKMetricName, "SearchEvaluationContext not provided.")));
         }
 
-        var metrics = RAGSearchMetricCalculator.ScoreQuery(context.Prediction, context.TopK);
+        var metrics = SearchMetricCalculator.ScoreQuery(context.Prediction, context.TopK);
 
         return ValueTask.FromResult(new EvaluationResult([
             CreateMetric(RecallAtKMetricName, metrics.RecallAtK, metrics),
@@ -43,16 +41,16 @@ public sealed class RAGSearchEvaluator : IEvaluator
     }
 
     public static Dictionary<string, IEnumerable<SummaryMetric>> ComputeSummaryMetrics(
-        IReadOnlyList<RAGSearchPrediction> predictions,
+        IReadOnlyList<SearchPrediction> predictions,
         int topK)
     {
-        var report = RAGSearchMetricCalculator.Evaluate(predictions, topK);
+        var report = SearchMetricCalculator.Evaluate(predictions, topK);
 
         return new Dictionary<string, IEnumerable<SummaryMetric>>
         {
             ["Overall"] =
             [
-                new SummaryMetric("SampleCount", report.Queries.Count, "Total RAG search cases evaluated.", SummaryMetricKind.Count),
+                new SummaryMetric("SampleCount", report.QueryCount, "Total RAG search cases evaluated.", SummaryMetricKind.Count),
                 new SummaryMetric(RecallAtKMetricName, report.RecallAtK, "Average Recall@k across all RAG search cases.", SummaryMetricKind.Percentage, GetRating(RecallAtKMetricName, report.RecallAtK)),
                 new SummaryMetric(PrecisionAtKMetricName, report.PrecisionAtK, "Average Precision@k across all RAG search cases.", SummaryMetricKind.Percentage, GetRating(PrecisionAtKMetricName, report.PrecisionAtK)),
                 new SummaryMetric(ReciprocalRankMetricName, report.MeanReciprocalRank, "Mean reciprocal rank across all RAG search cases.", SummaryMetricKind.PlainNumber, GetRating(ReciprocalRankMetricName, report.MeanReciprocalRank)),
@@ -61,7 +59,7 @@ public sealed class RAGSearchEvaluator : IEvaluator
         };
     }
 
-    private static NumericMetric CreateMetric(string name, double value, RAGSearchQueryMetrics metrics)
+    private static NumericMetric CreateMetric(string name, double value, SearchQueryMetrics metrics)
     {
         var failed = name == RecallAtKMetricName && value < 1;
         var metric = new NumericMetric(name, value, CreateMetricReason(name))
@@ -77,7 +75,7 @@ public sealed class RAGSearchEvaluator : IEvaluator
         return metric;
     }
 
-    private static void AddDiagnostics(NumericMetric metric, string name, RAGSearchQueryMetrics metrics)
+    private static void AddDiagnostics(NumericMetric metric, string name, SearchQueryMetrics metrics)
     {
         var diagnostics = metrics.Diagnostics;
         var relevantRetrievedCount = diagnostics.Matches.Count(match => match.IsRelevant);
@@ -132,7 +130,7 @@ public sealed class RAGSearchEvaluator : IEvaluator
             _ => name,
         };
 
-    private static string CreateInterpretationReason(string name, double value, RAGSearchQueryMetrics metrics)
+    private static string CreateInterpretationReason(string name, double value, SearchQueryMetrics metrics)
     {
         var diagnostics = metrics.Diagnostics;
         var matchedExpectedCount = MatchedExpectedCount(diagnostics);
@@ -193,13 +191,13 @@ public sealed class RAGSearchEvaluator : IEvaluator
             _ => EvaluationRating.Unacceptable,
         };
 
-    private static string FormatExpectedDocument(RAGSearchExpectedDiagnostic expectedDocument)
+    private static string FormatExpectedDocument(SearchExpectedDiagnostic expectedDocument)
         => $"#{expectedDocument.Index} {expectedDocument.SourcePath} heading={FormatValue(expectedDocument.Heading)} snippet={FormatValue(expectedDocument.SnippetPreview)}";
 
-    private static string FormatRetrievedMiss(RAGSearchMatchDiagnostic match)
+    private static string FormatRetrievedMiss(SearchMatchDiagnostic match)
         => $"rank {match.Rank} heading={FormatValue(match.Heading)} expectedHeading={FormatValue(match.MatchedExpectedHeading)} reason={match.Reason}";
 
-    private static int MatchedExpectedCount(RAGSearchQueryDiagnostics diagnostics)
+    private static int MatchedExpectedCount(SearchQueryDiagnostics diagnostics)
         => diagnostics.ExpectedDocuments.Count(expectedDocument => expectedDocument.Matched);
 
     private static string FormatValue(string? value)
