@@ -28,22 +28,11 @@ public static class AddEndpointsExtensions
                 .WithName("RagSearch");
 
             app.MapPost("/rag/ask",
-                    async (RagAskRequest request, IRagSearchService ragSearchService, CancellationToken cancellationToken) =>
+                    async (RagAskRequest request, IRagAskService ragAskService, CancellationToken cancellationToken) =>
                     {
-                        if (string.IsNullOrWhiteSpace(request.Question))
-                        {
-                            throw new ArgumentException("Question is required.");
-                        }
+                        var result = await ragAskService.AskAsync(request, cancellationToken);
 
-                        var question = request.Question.Trim();
-                        var searchResult = await ragSearchService.SearchAsync(
-                            new RagSearchRequest(question, request.TopK),
-                            cancellationToken);
-
-                        var answer = "Answer generation is not implemented yet. Retrieved source chunks: "
-                                     + string.Join(", ", searchResult.Results.Select(source => source.CitationLabel));
-
-                        return Results.Ok(new RagAskResponse(question, answer, searchResult.Mode, searchResult.Results));
+                        return Results.Ok(result);
                     })
                 .WithName("RagAsk");
             return app;

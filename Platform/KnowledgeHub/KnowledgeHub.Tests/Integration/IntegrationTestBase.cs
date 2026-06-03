@@ -64,8 +64,10 @@ public abstract class IntegrationTestBase : IAsyncLifetime
                 services.RemoveAll<IRecurringJobManager>();
                 services.RemoveAll<IIngestionService>();
                 services.RemoveAll<IRagSearchService>();
+                services.RemoveAll<IRagAskService>();
                 services.AddScoped(_ => Mock.Of<IIngestionService>());
                 services.AddScoped(_ => Mock.Of<IRagSearchService>());
+                services.AddScoped(_ => Mock.Of<IRagAskService>());
                 configureTestServices(services);
             });
         }

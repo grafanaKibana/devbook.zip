@@ -20,6 +20,10 @@ public static class AddOptionsExtensions
                 .AddOptions<EmbeddingOptions>()
                 .Bind(configuration.GetSection(nameof(EmbeddingOptions)));
 
+            services
+                .AddOptions<AnswerAgentOptions>()
+                .Bind(configuration.GetSection(nameof(AnswerAgentOptions)));
+
             return services;
         }
     }
