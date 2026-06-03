@@ -122,7 +122,8 @@ Example request:
 ```json
 {
   "sourcePath": "11 AI & ML/LLM/RAG",
-  "fileName": "Chunking.md"
+  "fileName": "Chunking.md",
+  "forceReingest": false
 }
 ```
 
@@ -131,7 +132,8 @@ Example full-folder request:
 ```json
 {
   "sourcePath": "11 AI & ML/LLM/RAG",
-  "fileName": null
+  "fileName": null,
+  "forceReingest": true
 }
 ```
 
@@ -140,7 +142,8 @@ Example full-root request:
 ```json
 {
   "sourcePath": null,
-  "fileName": null
+  "fileName": null,
+  "forceReingest": true
 }
 ```
 
@@ -149,6 +152,7 @@ Example full-root request:
 - `sourcePath` is **relative to** the configured ingestion root; null or blank ingests the full root.
 - Default ingestion root: `Vault/Software Engineering`.
 - `fileName` is optional, but when present it must be a single `.md` file name with no path segments.
+- `forceReingest` is optional and defaults to `false`; set it to `true` to refresh stored documents/chunks even when the source content is unchanged.
 - Requests are rejected if they try to escape the configured ingestion root.
 - Folder ingestion reads all matching markdown files; individual markdown file size is not checked.
 - Folder ingestion rebuilds the selected folder from scratch: it deletes stored documents/chunks under that folder, then recreates documents/chunks for the markdown files currently on disk. Single-file ingestion stays scoped to that file and does not delete sibling documents.

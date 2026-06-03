@@ -29,11 +29,11 @@ public sealed class IngestionEndpointTests : IntegrationTestBase
             .ReturnsAsync(expected);
 
         // Act
-        var response = await Client.PostAsJsonAsync(IngestionPath, new IngestionRequest(SourcePath, FileName));
+        var response = await Client.PostAsJsonAsync(IngestionPath, new IngestionRequest(SourcePath, FileName, true));
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        capturedRequest.Should().BeEquivalentTo(new IngestionRequest(SourcePath, FileName));
+        capturedRequest.Should().BeEquivalentTo(new IngestionRequest(SourcePath, FileName, true));
         var body = await response.Content.ReadFromJsonAsync<IngestionResult>();
         body.Should().BeEquivalentTo(expected);
     }

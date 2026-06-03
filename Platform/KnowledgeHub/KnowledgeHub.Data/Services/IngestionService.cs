@@ -89,7 +89,8 @@ public sealed class IngestionService(
                 continue;
             }
 
-            if (!isFolderIngestion
+            if (!request.ForceReingest
+                && !isFolderIngestion
                 && string.Equals(existingDocument.SourceHash, sourceHash, StringComparison.Ordinal)
                 && string.Equals(existingDocument.Title, title, StringComparison.Ordinal)
                 && string.Equals(existingDocument.RawMarkdown, rawMarkdown, StringComparison.Ordinal)

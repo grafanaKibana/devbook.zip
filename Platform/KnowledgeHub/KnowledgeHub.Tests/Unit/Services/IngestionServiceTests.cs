@@ -215,6 +215,41 @@ public sealed class IngestionServiceTests
         upsertedDocument.Should().BeNull();
     }
 
+    [Fact]
+    public async Task IngestDocumentsAsync_ForceReingestUnchangedSingleFile_UpdatesDocumentAndReplacesChunks()
+    {
+        using var workspace = TestWorkspace.Create();
+        const string rawMarkdown = "# Note\n\nStable content.";
+        workspace.WriteMarkdown(ScopedNotePath, rawMarkdown);
+        var existing = Document(ExistingDocumentId, ScopedNotePath, rawMarkdown, "placeholder") with
+        {
+            SourceHash = ComputeSourceHash(rawMarkdown),
+        };
+        Document? upsertedDocument = null;
+        var replacedDocumentIds = new List<string>();
+        var documents = new Mock<IDocumentRepository>(MockBehavior.Strict);
+        documents.Setup(mock => mock.GetBySourcePathAsync(ScopedNotePath, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(existing);
+        documents.Setup(mock => mock.UpsertAsync(It.IsAny<Document>(), It.IsAny<CancellationToken>()))
+            .Callback<Document, CancellationToken>((document, _) => upsertedDocument = document)
+            .Returns(Task.CompletedTask);
+        var chunks = CaptureReplaceChunks((documentId, _) => replacedDocumentIds.Add(documentId));
+        var service = CreateService(workspace.RootDirectory, documents, chunks);
+
+        var result = await service.IngestDocumentsAsync(new IngestionRequest(ScopePath, NoteFileName, ForceReingest: true));
+
+        result.Should().BeEquivalentTo(new
+        {
+            ProcessedCount = 1,
+            CreatedCount = 0,
+            UpdatedCount = 1,
+            DeletedCount = 0,
+            DocumentIds = new[] { ExistingDocumentId },
+        });
+        upsertedDocument.Should().BeEquivalentTo(new { DocumentId = ExistingDocumentId, SourcePath = ScopedNotePath });
+        replacedDocumentIds.Should().Equal(ExistingDocumentId);
+    }
+
     /// <summary>
     /// Tests that folder ingestion deletes scoped stored documents before recreating chunks for current markdown files.
     /// </summary>
