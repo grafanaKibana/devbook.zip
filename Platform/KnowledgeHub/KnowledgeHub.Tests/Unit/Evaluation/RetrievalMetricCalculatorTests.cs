@@ -2,7 +2,11 @@ namespace KnowledgeHub.Tests.Unit.Evaluation;
 
 using FluentAssertions;
 using KnowledgeHub.Evaluations.Common.Calculators;
+using KnowledgeHub.Evaluations.Common.Evaluators.RAGSearch;
+using KnowledgeHub.Evaluations.Common.Evaluators.SummaryGeneration;
 using KnowledgeHub.Evaluations.Scenarios.RAGSearch;
+using Microsoft.Extensions.AI;
+using Microsoft.Extensions.AI.Evaluation;
 
 public sealed class RAGSearchMetricCalculatorTests
 {
@@ -112,7 +116,154 @@ public sealed class RAGSearchMetricCalculatorTests
             IsRelevant = false,
             HeadingMatched = false,
             SnippetMatched = false,
+            SourcePathMatched = true,
+            MatchedExpectedHeading = RetrievalHeading,
+            Reason = "Source path matched an expected document, but neither the expected heading nor expected snippet appeared in the retrieved chunk.",
         });
+    }
+
+    [Fact]
+    public void ScoreQuery_MixedEvidence_ReturnsReadableDiagnostics()
+    {
+        var prediction = Prediction(
+            "diagnostic query",
+            [Document(EvaluationPath, RetrievalHeading, RetrievalSnippet), Document(ChunkingPath, "Parent-Child Chunking", "search child chunks")],
+            [
+                Document(EvaluationPath, "Questions", "different chunk"),
+                Document(ChunkingPath, "Parent-Child Chunking", "different chunk"),
+                Document(ChunkingPath, "Parent-Child Chunking", "different chunk")
+            ]);
+
+        var result = RAGSearchMetricCalculator.ScoreQuery(prediction);
+
+        result.Diagnostics.ExpectedDocuments.Should().BeEquivalentTo([
+            new { Index = 1, SourcePath = EvaluationPath, Heading = RetrievalHeading, SnippetPreview = RetrievalSnippet, Matched = false },
+            new { Index = 2, SourcePath = ChunkingPath, Heading = "Parent-Child Chunking", SnippetPreview = "search child chunks", Matched = true }
+        ]);
+        result.Diagnostics.Matches.Should().BeEquivalentTo([
+            new
+            {
+                Rank = 1,
+                SourcePath = EvaluationPath,
+                Heading = "Questions",
+                MatchedExpectedSourcePath = EvaluationPath,
+                SourcePathMatched = true,
+                HeadingMatched = false,
+                SnippetMatched = false,
+                IsRelevant = false,
+                Reason = "Source path matched an expected document, but neither the expected heading nor expected snippet appeared in the retrieved chunk."
+            },
+            new
+            {
+                Rank = 2,
+                SourcePath = ChunkingPath,
+                Heading = "Parent-Child Chunking",
+                MatchedExpectedSourcePath = ChunkingPath,
+                SourcePathMatched = true,
+                HeadingMatched = true,
+                SnippetMatched = false,
+                IsRelevant = true,
+                Reason = "Matched expected source path and heading."
+            },
+            new
+            {
+                Rank = 3,
+                SourcePath = ChunkingPath,
+                Heading = "Parent-Child Chunking",
+                MatchedExpectedSourcePath = ChunkingPath,
+                SourcePathMatched = true,
+                HeadingMatched = true,
+                SnippetMatched = false,
+                IsRelevant = false,
+                Reason = "Source path matched an expected document that was already credited by an earlier retrieved result; duplicate retrieval does not add recall credit."
+            }
+        ]);
+    }
+
+    [Fact]
+    public async Task RAGSearchEvaluator_EvaluateAsync_AddsReportFacingDiagnostics()
+    {
+        var prediction = Prediction(
+            "report diagnostic query",
+            [Document(EvaluationPath, RetrievalHeading, "MRR rewards pushing the first relevant result higher")],
+            [Document(EvaluationPath, "Questions", "different chunk")]);
+        var evaluator = new RAGSearchEvaluator();
+
+        var result = await evaluator.EvaluateAsync(
+            [new ChatMessage(ChatRole.User, prediction.Query)],
+            new ChatResponse(new ChatMessage(ChatRole.Assistant, "[[Evaluation#Questions]]")),
+            additionalContext: [new RAGSearchEvaluationContext(prediction, topK: 5)]);
+
+        var recallMetric = result.Metrics["RecallAtK"];
+        var diagnosticMessages = recallMetric.Diagnostics.Should().NotBeNull().And.Subject!.Select(diagnostic => diagnostic.Message);
+
+        recallMetric.Reason.Should().Be("Recall@k measures evidence coverage: matched expected evidence divided by expected evidence. High means required evidence was present in top-k; low means generation is capped by missing context.");
+        recallMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Unacceptable);
+        recallMetric.Interpretation.Reason.Should().Be("Score 0 (Unacceptable): matched 0/1 expected evidence items.");
+        diagnosticMessages.Should().Contain(message => message.Contains("Recall affected: missing #1 Software Engineering/11 AI & ML/LLM/RAG/Evaluation.md heading=\"Retrieval Metrics\""));
+        diagnosticMessages.Should().Contain(message => message.Contains("Closest same-source misses: rank 1 heading=\"Questions\" expectedHeading=\"Retrieval Metrics\"")
+            && message.Contains("neither the expected heading nor expected snippet appeared"));
+        diagnosticMessages.Should().HaveCount(2);
+
+        var precisionMetric = result.Metrics["PrecisionAtK"];
+        precisionMetric.Reason.Should().Be("Precision@k measures context purity: relevant retrieved chunks divided by retrieved chunks. High means top-k is mostly useful evidence; low means context contains noise or duplicate/non-credit chunks.");
+        precisionMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Unacceptable);
+        precisionMetric.Interpretation.Reason.Should().Be("Score 0 (Unacceptable): 0/1 retrieved chunks counted as relevant evidence.");
+
+        var reciprocalRankMetric = result.Metrics["ReciprocalRank"];
+        reciprocalRankMetric.Reason.Should().Be("ReciprocalRank measures ranking quality: 1 divided by the rank of the first relevant evidence chunk. High means useful evidence appears early; 0 means no relevant evidence appeared in top-k.");
+        reciprocalRankMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Unacceptable);
+        reciprocalRankMetric.Interpretation.Reason.Should().Be("Score 0 (Unacceptable): no retrieved chunk matched the expected evidence.");
+    }
+
+    [Fact]
+    public async Task RAGSearchEvaluator_EvaluateAsync_FormatsFractionalScoresWithInvariantCulture()
+    {
+        var prediction = Prediction(
+            "fractional score query",
+            [Document(EvaluationPath)],
+            [Document(IrrelevantPath), Document(EvaluationPath)]);
+        var evaluator = new RAGSearchEvaluator();
+
+        var result = await evaluator.EvaluateAsync(
+            [new ChatMessage(ChatRole.User, prediction.Query)],
+            new ChatResponse(new ChatMessage(ChatRole.Assistant, "[[Composite]]\n[[Evaluation]]")),
+            additionalContext: [new RAGSearchEvaluationContext(prediction, topK: 5)]);
+
+        result.Metrics["PrecisionAtK"].Interpretation!.Reason.Should().Contain("Score 0.5 (Good)");
+        result.Metrics["ReciprocalRank"].Interpretation!.Reason.Should().Contain("Score 0.5 (Good)");
+    }
+
+    [Fact]
+    public void ComputeSummaryMetrics_RatesAggregateMetrics()
+    {
+        var predictions = new[]
+        {
+            new RAGSearchPrediction("case-1", "first query", [Document(EvaluationPath)], [Document(EvaluationPath)]),
+            new RAGSearchPrediction("case-2", "second query", [Document(EvaluationPath)], []),
+            new RAGSearchPrediction("case-3", "third query", [Document(ChunkingPath)], [Document(IrrelevantPath), Document(ChunkingPath)]),
+        };
+
+        var metrics = RAGSearchEvaluator.ComputeSummaryMetrics(predictions, topK: 5)["Overall"].ToDictionary(metric => metric.Name);
+
+        metrics["RecallAtK"].Rating.Should().Be(EvaluationRating.Average);
+        metrics["PrecisionAtK"].Rating.Should().Be(EvaluationRating.Good);
+        metrics["ReciprocalRank"].Rating.Should().Be(EvaluationRating.Good);
+        metrics["EmptyResultRate"].Rating.Should().Be(EvaluationRating.Poor);
+    }
+
+    [Fact]
+    public async Task SummaryEvaluator_EvaluateAsync_FormatsFractionalScoresWithInvariantCulture()
+    {
+        var evaluator = new SummaryEvaluator([
+            new SummaryMetric("Fractional", 2d / 3d, "Fractional summary", SummaryMetricKind.PlainNumber, EvaluationRating.Average)
+        ]);
+
+        var result = await evaluator.EvaluateAsync(
+            [new ChatMessage(ChatRole.System, "summary")],
+            new ChatResponse(new ChatMessage(ChatRole.Assistant, "summary")));
+
+        result.Metrics["Fractional"].Interpretation!.Reason.Should().Be("Summary score 0.667 rated Average.");
     }
 
     /// <summary>

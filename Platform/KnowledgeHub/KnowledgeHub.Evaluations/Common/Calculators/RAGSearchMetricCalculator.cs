@@ -46,30 +46,42 @@ public static class RAGSearchMetricCalculator
                 duplicateRetrievedSourcePaths.Add(retrievedDocument.SourcePath);
             }
 
-            var match = FindMatch(expectedDocuments, matchedExpected, retrievedDocument);
-            if (match is null)
+            var analysis = AnalyzeRetrievedDocument(expectedDocuments, matchedExpected, retrievedDocument);
+            if (!analysis.IsRelevant)
             {
                 matchDiagnostics.Add(new RAGSearchMatchDiagnostic(
                     rank,
                     retrievedDocument.SourcePath,
-                    null,
+                    retrievedDocument.Heading,
+                    Preview(retrievedDocument.Snippet),
+                    analysis.Expected?.SourcePath,
+                    analysis.Expected?.Heading,
+                    Preview(analysis.Expected?.Snippet),
+                    analysis.SourcePathMatched,
+                    analysis.HeadingMatched,
+                    analysis.SnippetMatched,
                     false,
-                    false,
-                    false));
+                    analysis.Reason));
                 continue;
             }
 
-            matchedExpected[match.Value.ExpectedIndex] = true;
+            matchedExpected[analysis.ExpectedIndex!.Value] = true;
             relevantRetrievedCount++;
             reciprocalRank = reciprocalRank == 0 ? 1d / rank : reciprocalRank;
 
             matchDiagnostics.Add(new RAGSearchMatchDiagnostic(
                 rank,
                 retrievedDocument.SourcePath,
-                match.Value.Expected.SourcePath,
-                match.Value.HeadingMatched,
-                match.Value.SnippetMatched,
-                true));
+                retrievedDocument.Heading,
+                Preview(retrievedDocument.Snippet),
+                analysis.Expected!.SourcePath,
+                analysis.Expected.Heading,
+                Preview(analysis.Expected.Snippet),
+                analysis.SourcePathMatched,
+                analysis.HeadingMatched,
+                analysis.SnippetMatched,
+                true,
+                analysis.Reason));
         }
 
         var missingExpectedSourcePaths = expectedDocuments
@@ -81,6 +93,14 @@ public static class RAGSearchMetricCalculator
 
         var uniqueRetrievedCount = seenRetrievedSourcePaths.Count;
         var expectedCount = expectedDocuments.Count;
+        var expectedDiagnostics = expectedDocuments
+            .Select((expectedDocument, index) => new RAGSearchExpectedDiagnostic(
+                index + 1,
+                expectedDocument.SourcePath,
+                expectedDocument.Heading,
+                Preview(expectedDocument.Snippet),
+                matchedExpected[index]))
+            .ToArray();
         var recallAtK = expectedCount == 0 ? 0 : matchedExpected.Count(matched => matched) / (double)expectedCount;
         var precisionAtK = retrievedDocuments.Length == 0 ? 0 : relevantRetrievedCount / (double)retrievedDocuments.Length;
         var failureReason = reciprocalRank == 0
@@ -101,16 +121,19 @@ public static class RAGSearchMetricCalculator
                 retrievedDocuments.Length,
                 uniqueRetrievedCount,
                 expectedCount,
+                expectedDiagnostics,
                 missingExpectedSourcePaths,
                 duplicateRetrievedSourcePaths.OrderBy(path => path, StringComparer.OrdinalIgnoreCase).ToArray(),
                 matchDiagnostics));
     }
 
-    private static (int ExpectedIndex, RAGSearchDocument Expected, bool HeadingMatched, bool SnippetMatched)? FindMatch(
+    private static RetrievedDocumentAnalysis AnalyzeRetrievedDocument(
         IReadOnlyList<RAGSearchDocument> expectedDocuments,
         bool[] matchedExpected,
         RAGSearchDocument retrievedDocument)
     {
+        RetrievedDocumentAnalysis? evidenceMismatch = null;
+
         for (var index = 0; index < expectedDocuments.Count; index++)
         {
             if (matchedExpected[index])
@@ -129,13 +152,57 @@ public static class RAGSearchMetricCalculator
 
             if (RequiresEvidenceMatch(expectedDocument) && !headingMatched && !snippetMatched)
             {
+                evidenceMismatch ??= new RetrievedDocumentAnalysis(
+                    null,
+                    expectedDocument,
+                    true,
+                    headingMatched,
+                    snippetMatched,
+                    "Source path matched an expected document, but neither the expected heading nor expected snippet appeared in the retrieved chunk.");
                 continue;
             }
 
-            return (index, expectedDocument, headingMatched, snippetMatched);
+            return new RetrievedDocumentAnalysis(
+                index,
+                expectedDocument,
+                true,
+                headingMatched,
+                snippetMatched,
+                headingMatched && snippetMatched
+                    ? "Matched expected source path, heading, and snippet."
+                    : headingMatched
+                        ? "Matched expected source path and heading."
+                        : snippetMatched
+                            ? "Matched expected source path and snippet."
+                            : "Matched expected source path; no heading or snippet was required.");
         }
 
-        return null;
+        if (evidenceMismatch is not null)
+        {
+            return evidenceMismatch;
+        }
+
+        var alreadyMatchedExpected = expectedDocuments
+            .Select((expectedDocument, index) => new { ExpectedDocument = expectedDocument, Matched = matchedExpected[index] })
+            .FirstOrDefault(item => item.Matched && MatchesSourcePath(item.ExpectedDocument.SourcePath, retrievedDocument.SourcePath));
+        if (alreadyMatchedExpected is not null)
+        {
+            return new RetrievedDocumentAnalysis(
+                null,
+                alreadyMatchedExpected.ExpectedDocument,
+                true,
+                MatchesContains(alreadyMatchedExpected.ExpectedDocument.Heading, retrievedDocument.Heading),
+                MatchesContains(alreadyMatchedExpected.ExpectedDocument.Snippet, retrievedDocument.Snippet),
+                "Source path matched an expected document that was already credited by an earlier retrieved result; duplicate retrieval does not add recall credit.");
+        }
+
+        return new RetrievedDocumentAnalysis(
+            null,
+            null,
+            false,
+            false,
+            false,
+            "Retrieved source path did not match any expected source path.");
     }
 
     private static bool RequiresEvidenceMatch(RAGSearchDocument expectedDocument)
@@ -162,6 +229,30 @@ public static class RAGSearchMetricCalculator
     private static string NormalizePath(string value)
     {
         return value.Replace('\\', '/').Trim();
+    }
+
+    private static string? Preview(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        var normalized = string.Join(' ', value.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
+        const int maxLength = 180;
+
+        return normalized.Length <= maxLength ? normalized : normalized[..maxLength] + "…";
+    }
+
+    private sealed record RetrievedDocumentAnalysis(
+        int? ExpectedIndex,
+        RAGSearchDocument? Expected,
+        bool SourcePathMatched,
+        bool HeadingMatched,
+        bool SnippetMatched,
+        string Reason)
+    {
+        public bool IsRelevant => ExpectedIndex is not null;
     }
 
     private static IReadOnlyList<RAGSearchSourceDocumentSummary> SummarizeSourceDocuments(

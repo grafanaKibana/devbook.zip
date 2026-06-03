@@ -1,11 +1,11 @@
 {
   "cases": [
     {
-      "id": "rag-eval-intro-layers",
+      "id": "RAG evaluation layers",
       "query": "Why should RAG evaluation be split into layers?",
       "expectedSources": [
         {
-          "path": "Software Engineering/11 AI & ML/LLM/RAG/Evaluation.md",
+          "path": "11 AI & ML/LLM/RAG/Evaluation.md",
           "heading": "Intro",
           "snippet": "RAG evaluation decomposes into three layers: retrieval quality, generation quality, and end-to-end usefulness."
         }
@@ -13,11 +13,11 @@
       "expectedAnswerSummary": "Evaluation should separate retrieval, generation, and end-to-end behavior so regressions are attributable."
     },
     {
-      "id": "rag-eval-recall-primary",
+      "id": "Recall as the primary RAG retrieval metric",
       "query": "What retrieval metric should I track first for RAG?",
       "expectedSources": [
         {
-          "path": "Software Engineering/11 AI & ML/LLM/RAG/Evaluation.md",
+          "path": "11 AI & ML/LLM/RAG/Evaluation.md",
           "heading": "Retrieval Metrics",
           "snippet": "**Recall@k** — of all relevant documents in the corpus, what fraction appears in the top-k results. Recall@5 = 0.8 means 80% of relevant documents land in the top 5. This is the primary retrieval metric for RAG because the generator cannot use evidence it never sees. A recall failure is a hard ceiling on answer quality."
         }
@@ -25,169 +25,210 @@
       "expectedAnswerSummary": "Track Recall@k first because missing evidence is a hard ceiling on answer quality."
     },
     {
-      "id": "rag-eval-mrr",
-      "query": "When is MRR useful in RAG evaluation?",
-      "expectedSources": [
-        {
-          "path": "Software Engineering/11 AI & ML/LLM/RAG/Evaluation.md",
-          "heading": "Retrieval Metrics",
-          "snippet": "**MRR (Mean Reciprocal Rank)** — the average of 1/rank for the first relevant document across queries. If the first relevant result is at position 3, the reciprocal rank is 1/3. MRR rewards pushing the best result higher. Useful when the generator primarily uses the top-ranked chunk."
-        }
-      ]
-    },
-    {
-      "id": "rag-eval-diagnostic-ceiling",
-      "query": "What does high faithfulness with low context recall mean?",
-      "expectedSources": [
-        {
-          "path": "Software Engineering/11 AI & ML/LLM/RAG/Evaluation.md",
-          "heading": "Diagnostic Combinations",
-          "snippet": "| High | Low | Retrieval ceiling — model uses what it gets correctly, but evidence is missing | Hybrid retrieval, expand k, fix metadata filters, improve embeddings |"
-        }
-      ],
-      "expectedAnswerSummary": "This points to a retrieval ceiling, not a generation problem."
-    },
-    {
-      "id": "rag-chunking-fixed-size-boundary-cuts",
+      "id": "Fixed size chunking cuts logical boundaries",
       "query": "What is the main risk of fixed-size chunking?",
       "expectedSources": [
         {
-          "path": "Software Engineering/11 AI & ML/LLM/RAG/Chunking.md",
+          "path": "11 AI & ML/LLM/RAG/Chunking.md",
           "heading": "Fixed-Size Chunking",
           "snippet": "- **Boundary cuts through logical units.** A policy clause, code block, or table row gets split at an arbitrary token offset. The retriever returns a fragment that looks relevant but is incomplete, and the model generates a confidently wrong answer. Mitigate by increasing overlap and auditing retrieval on structured documents."
         }
-      ]
-    },
-    {
-      "id": "rag-chunking-parent-child-context",
-      "query": "How does parent-child chunking improve answer completeness?",
-      "expectedSources": [
-        {
-          "path": "Software Engineering/11 AI & ML/LLM/RAG/Chunking.md",
-          "heading": "Parent-Child Chunking",
-          "snippet": "- At retrieval time, search against child chunks for precision — small chunks match specific queries better. When a child matches, expand to its parent chunk before passing context to the generator. The parent provides the surrounding context that the child alone may lack."
-        }
       ],
-      "expectedAnswerSummary": "Retrieve small chunks for precision, then expand to parent context for synthesis."
+      "expectedAnswerSummary": "Fixed-size chunking can split logical units, so retrieved fragments may look relevant while missing required context."
     },
     {
-      "id": "rag-retrieval-dense-identifiers",
+      "id": "Vector search misses exact technical identifiers",
       "query": "Why can vector search miss technical identifiers?",
       "expectedSources": [
         {
-          "path": "Software Engineering/11 AI & ML/LLM/RAG/Retrieval.md",
+          "path": "11 AI & ML/LLM/RAG/Retrieval.md",
           "heading": "Dense Retrieval -- Vector Search",
           "snippet": "- **Misses exact identifiers.** Embedding models learn to capture meaning, not specific tokens. Error codes, API paths, and version strings get lost in the vector representation. The retriever returns topically related but operationally wrong chunks — and unlike keyword search misses (which return obviously unrelated content), vector search misses look plausible, making them harder to catch."
         }
-      ]
+      ],
+      "expectedAnswerSummary": "Embeddings capture meaning better than exact tokens, so identifier-heavy queries often need keyword or hybrid retrieval."
     },
     {
-      "id": "rag-query-translation-original-query",
-      "query": "Should translated queries replace the original query?",
+      "id": "BFS and DFS solve different graph problems",
+      "query": "When should I choose BFS instead of DFS for graph traversal?",
       "expectedSources": [
         {
-          "path": "Software Engineering/11 AI & ML/LLM/RAG/Query Translation.md",
-          "heading": "Pitfalls",
-          "snippet": "Mitigation: include the original query as one of the retrieval variants — never translate only, always include the original. Set explicit constraints in the translation prompt (\"preserve all specific entities, identifiers, and version numbers\"). Evaluate translated queries against the original: if cosine similarity between a variant and the original drops below a threshold, discard the variant before retrieval."
+          "path": "02 Computer Science/Algorithms/Search Algorithms/DFS BFS.md",
+          "heading": "Intro",
+          "snippet": "Both run in `O(V + E)` time, but they solve different problems: BFS finds shortest paths by edge count in unweighted graphs, while DFS is the natural fit for cycle detection, topological sorting, and connected component discovery."
         }
       ],
-      "expectedAnswerSummary": "Keep the original query in the candidate set so translations do not drift away from intent."
+      "expectedAnswerSummary": "Use BFS for unweighted shortest paths or level ordering; use DFS for cycle detection, topological sort, or connected components."
     },
     {
-      "id": "rag-reranking-cannot-fix-recall",
-      "query": "Can reranking recover documents that retrieval missed?",
+      "id": "Dijkstra requires non negative edge weights",
+      "query": "Why does Dijkstra fail when a graph has negative edge weights?",
       "expectedSources": [
         {
-          "path": "Software Engineering/11 AI & ML/LLM/RAG/Re-ranking.md",
+          "path": "02 Computer Science/Algorithms/Graph Algorithms/Dijkstra.md",
           "heading": "Pitfalls",
-          "snippet": "Reranking can only reorder what retrieval found. If the relevant document is not in the candidate set at all (recall failure), no amount of reranking will surface it. Teams sometimes add rerankers expecting them to fix retrieval coverage problems, when the actual fix is better [[Software Engineering/11 AI & ML/LLM/RAG/Chunking|chunking]], [[Software Engineering/11 AI & ML/LLM/Embeddings|embedding model selection]], or query expansion."
-        }
-      ]
-    },
-    {
-      "id": "rag-embeddings-swap-invalidates-vectors",
-      "query": "What happens when you swap embedding models?",
-      "expectedSources": [
-        {
-          "path": "Software Engineering/11 AI & ML/LLM/Embeddings.md",
-          "heading": "Pitfalls",
-          "snippet": "Changing the embedding model — even a minor version — invalidates every stored vector. The new model produces vectors in a different geometric space. Cosine similarity between old and new vectors is meaningless."
-        }
-      ]
-    },
-    {
-      "id": "rag-golden-set-staleness",
-      "query": "Why can a golden evaluation set go stale?",
-      "expectedSources": [
-        {
-          "path": "Software Engineering/11 AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs.md",
-          "heading": "Pitfalls",
-          "snippet": "**What goes wrong**: the golden set was built from early user queries. Six months later, user behavior has shifted — new question types, new product features, new failure modes."
-        }
-      ]
-    },
-    {
-      "id": "rag-monitoring-global-aggregates",
-      "query": "Why do global monitoring metrics hide tenant regressions?",
-      "expectedSources": [
-        {
-          "path": "Software Engineering/11 AI & ML/LLM/RAG/Monitoring.md",
-          "heading": "Pitfalls",
-          "snippet": "Global aggregate metrics hide localized regressions. A pipeline change that improves average faithfulness by 2% can simultaneously degrade faithfulness by 20% for a specific tenant whose documents use a different format."
+          "snippet": "- **What goes wrong**: Dijkstra finalizes a node's distance on extraction, but a later path through a negative-weight edge can produce a shorter distance to an already-finalized node, giving wrong results."
         }
       ],
-      "expectedAnswerSummary": "Segment monitoring by tenant or query cluster so localized regressions are not averaged away."
+      "expectedAnswerSummary": "Dijkstra assumes extracted distances are final; negative edges can later undercut a finalized distance, so use Bellman-Ford instead."
     },
     {
-      "id": "rag-eval-chunking-token-iou",
-      "query": "How can I evaluate whether a chunking strategy retrieves the exact evidence span instead of noisy context?",
+      "id": "REST statelessness supports horizontal scaling",
+      "query": "Why does REST require each request to contain all processing context?",
       "expectedSources": [
         {
-          "path": "Software Engineering/11 AI & ML/LLM/RAG/Evaluation.md",
-          "heading": "Chunking Evaluation",
-          "snippet": "Token IoU is more informative than end-to-end Recall@k because it captures chunk efficiency. A chunking strategy can achieve high retrieval recall by retrieving large, noisy chunks while wasting context window tokens on irrelevant content."
+          "path": "04 Networks/Protocols/REST.md",
+          "heading": "REST Constraints",
+          "snippet": "- Benefit: easier horizontal scaling and simpler failover."
+        }
+      ],
+      "expectedAnswerSummary": "REST statelessness avoids sticky server sessions, making scaling and failover simpler because any server can process the request."
+    },
+    {
+      "id": "REST retries depend on idempotency",
+      "query": "Why can retrying a POST request create duplicate orders?",
+      "expectedSources": [
+        {
+          "path": "04 Networks/Protocols/REST.md",
+          "heading": "Pitfalls",
+          "snippet": "- **What goes wrong**: client timeout on `POST /orders` triggers retry and creates duplicate orders."
+        }
+      ],
+      "expectedAnswerSummary": "POST is not idempotent by default, so retries after uncertain timeouts need idempotency keys or duplicate detection."
+    },
+    {
+      "id": "Normalization trades write integrity for read join cost",
+      "query": "What is the main tradeoff between normalization and denormalization?",
+      "expectedSources": [
+        {
+          "path": "03 Data Persistence/SQL/Normalization Denormalization.md",
+          "heading": "Intro",
+          "snippet": "The tradeoff is read performance: fully normalized schemas require joins, and joins cost CPU and I/O."
+        }
+      ],
+      "expectedAnswerSummary": "Normalization reduces redundancy and update anomalies, but highly normalized reads often pay more join CPU and I/O."
+    },
+    {
+      "id": "CAP partition time forces consistency or availability",
+      "query": "What does CAP theorem actually force you to choose during a partition?",
+      "expectedSources": [
+        {
+          "path": "05 Architecture/Distributed Systems/CAP theorem.md",
+          "heading": "What CAP Actually Means",
+          "snippet": "The real forced choice is:"
         },
         {
-          "path": "Software Engineering/11 AI & ML/LLM/RAG/Chunking.md",
-          "heading": "Practical Baselines",
-          "snippet": "Track per-source retrieval failure modes before switching strategy. Aggregate metrics hide format-specific problems — a retriever can perform well on prose while consistently breaking on table-heavy docs."
-        }
-      ],
-      "expectedAnswerSummary": "Use span-level/token-overlap metrics plus per-source failure analysis, not just document-level recall."
-    },
-    {
-      "id": "rag-retrieval-identifier-hybrid",
-      "query": "A query contains an exact error code or API path; why might vector retrieval look plausible but still fail, and what retrieval mode helps?",
-      "expectedSources": [
-        {
-          "path": "Software Engineering/11 AI & ML/LLM/RAG/Retrieval.md",
-          "heading": "Dense Retrieval — Vector Search",
-          "snippet": "Embedding models learn to capture meaning, not specific tokens. Error codes, API paths, and version strings get lost in the vector representation."
+          "path": "05 Architecture/Distributed Systems/CAP theorem.md",
+          "heading": "What CAP Actually Means",
+          "snippet": "- during a partition, choose **C** (reject/timeout some operations)"
         },
         {
-          "path": "Software Engineering/11 AI & ML/LLM/RAG/Retrieval.md",
-          "heading": "Hybrid Retrieval — Vector + Keyword",
-          "snippet": "Identifier-heavy corpora benefit from higher keyword weight (alpha around 0.4); conversational queries benefit from higher vector weight (alpha around 0.7)."
+          "path": "05 Architecture/Distributed Systems/CAP theorem.md",
+          "heading": "What CAP Actually Means",
+          "snippet": "- or choose **A** (continue serving operations with possible staleness/conflicts)"
         }
       ],
-      "expectedAnswerSummary": "Vector search can miss exact identifiers; hybrid retrieval or stronger keyword weighting should cover those lexical constraints."
+      "expectedAnswerSummary": "Once a partition exists, a replicated system must either reject or block some operations for consistency, or keep serving with possible stale/conflicting data."
     },
     {
-      "id": "rag-embedding-finetune-vs-chunking",
-      "query": "When should I finetune embeddings instead of changing chunking or retrieval logic?",
+      "id": "Microservices should start from proven pressure",
+      "query": "How should a team migrate from a monolith to microservices safely?",
       "expectedSources": [
         {
-          "path": "Software Engineering/11 AI & ML/LLM/Embeddings.md",
-          "heading": "Questions",
-          "snippet": "Finetuning is justified when retrieval failures are specifically caused by semantic mismatches on domain terminology — queries and relevant documents contain the same domain concepts but land far apart in vector space."
+          "path": "05 Architecture/System Architecture/Microservices.md",
+          "heading": "Microservices vs monolith vs modular monolith",
+          "snippet": "Measure release bottlenecks, scale asymmetry, and team contention."
         },
         {
-          "path": "Software Engineering/11 AI & ML/LLM/RAG/Chunking.md",
-          "heading": "How to Choose a Strategy",
-          "snippet": "Use retrieval failures, not preference, to pick a strategy."
+          "path": "05 Architecture/System Architecture/Microservices.md",
+          "heading": "Microservices vs monolith vs modular monolith",
+          "snippet": "Extract one bounded context with clear API contracts and isolated data ownership."
         }
       ],
-      "expectedAnswerSummary": "Finetune only when failures are semantic/domain-term mismatches; fix chunking when evidence is split or noisy."
+      "expectedAnswerSummary": "Start with modular boundaries, measure real pressure, then extract one bounded context at a time with clear contracts and isolated data."
+    },
+    {
+      "id": "CQRS separates write invariants from read models",
+      "query": "What is CQRS really separating?",
+      "expectedSources": [
+        {
+          "path": "05 Architecture/Patterns/Architectural Patterns/CQRS.md",
+          "heading": "Mechanism",
+          "snippet": "- Commands validate intent and mutate state."
+        },
+        {
+          "path": "05 Architecture/Patterns/Architectural Patterns/CQRS.md",
+          "heading": "Mechanism",
+          "snippet": "- Queries return data and must have no side effects."
+        },
+        {
+          "path": "05 Architecture/Patterns/Architectural Patterns/CQRS.md",
+          "heading": "Mechanism",
+          "snippet": "- The write model protects business invariants."
+        },
+        {
+          "path": "05 Architecture/Patterns/Architectural Patterns/CQRS.md",
+          "heading": "Mechanism",
+          "snippet": "- The read model is shaped for fast, task-focused queries."
+        }
+      ],
+      "expectedAnswerSummary": "CQRS separates state-changing commands and invariant-focused write models from side-effect-free queries and optimized read models."
+    },
+    {
+      "id": "Circuit breaker opens on sustained dependency instability",
+      "query": "How does a circuit breaker decide to stop calls to a failing dependency?",
+      "expectedSources": [
+        {
+          "path": "05 Architecture/Patterns/Resilience Patterns/Circuit Breaker.md",
+          "heading": "How transitions are decided",
+          "snippet": "- It opens only after `MinimumThroughput` is met, which avoids opening on tiny traffic samples."
+        },
+        {
+          "path": "05 Architecture/Patterns/Resilience Patterns/Circuit Breaker.md",
+          "heading": "How transitions are decided",
+          "snippet": "- It compares observed failures against `FailureRatio` (for example `0.25` means 25 percent failures)."
+        }
+      ],
+      "expectedAnswerSummary": "A breaker samples enough traffic, compares failures to a threshold, opens for a break duration, then probes recovery in half-open state."
+    },
+    {
+      "id": "Circuit breaker failure predicates should exclude caller mistakes",
+      "query": "Should a circuit breaker count HTTP 400 and 404 responses as dependency failures?",
+      "expectedSources": [
+        {
+          "path": "05 Architecture/Patterns/Resilience Patterns/Circuit Breaker.md",
+          "heading": "What should count as a failure",
+          "snippet": "- Usually do not count: business/validation `4xx` like `400` or `404`, because these are often caller mistakes, not provider instability."
+        }
+      ],
+      "expectedAnswerSummary": "Do not usually count validation or business 4xx responses; count transient infrastructure failures such as timeouts, network errors, 5xx, and unsafe throttling."
+    },
+    {
+      "id": "Observability combines metrics logs and traces",
+      "query": "What are the three pillars of observability and what does each answer?",
+      "expectedSources": [
+        {
+          "path": "09 DevOps/Observability.md",
+          "heading": "The Three Pillars",
+          "snippet": "The three pillars are complementary signals, not competing tools."
+        },
+        {
+          "path": "09 DevOps/Observability.md",
+          "heading": "Metrics",
+          "snippet": "Metrics are numeric measurements over time that answer \"how much\" and \"how often\"."
+        },
+        {
+          "path": "09 DevOps/Observability.md",
+          "heading": "Logs",
+          "snippet": "Logs are structured event records that answer \"what exactly happened\" at a point in time."
+        },
+        {
+          "path": "09 DevOps/Observability.md",
+          "heading": "Traces",
+          "snippet": "Traces represent a single request journey across services and dependencies."
+        }
+      ],
+      "expectedAnswerSummary": "Metrics quantify rates and distributions, logs explain discrete events, and traces show request flow across services and dependencies."
     }
   ]
 }

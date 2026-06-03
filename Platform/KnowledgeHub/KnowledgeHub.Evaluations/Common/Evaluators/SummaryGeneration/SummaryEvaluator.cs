@@ -1,5 +1,6 @@
 namespace KnowledgeHub.Evaluations.Common.Evaluators.SummaryGeneration;
 
+using System.Globalization;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.AI.Evaluation;
 
@@ -28,18 +29,22 @@ public sealed class SummaryEvaluator(IEnumerable<SummaryMetric> metrics) : IEval
         return new NumericMetric(metric.Name, roundedValue, metric.Description)
         {
             Interpretation = new EvaluationMetricInterpretation(
-                EvaluationRating.Unknown,
+                metric.Rating,
                 failed: false,
-                reason: metric.Description),
+                reason: $"Summary score {FormatNumber(roundedValue)} rated {metric.Rating}."),
         };
     }
+
+    private static string FormatNumber(double value)
+        => value.ToString("0.###", CultureInfo.InvariantCulture);
 }
 
 public sealed record SummaryMetric(
     string Name,
     double Value,
     string Description,
-    SummaryMetricKind Kind = SummaryMetricKind.PlainNumber);
+    SummaryMetricKind Kind = SummaryMetricKind.PlainNumber,
+    EvaluationRating Rating = EvaluationRating.Unknown);
 
 public enum SummaryMetricKind
 {
