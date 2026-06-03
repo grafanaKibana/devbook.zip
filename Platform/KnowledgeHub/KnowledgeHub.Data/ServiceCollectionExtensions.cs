@@ -22,8 +22,9 @@ public static class ServiceCollectionExtensions
             ArgumentNullException.ThrowIfNull(services);
 
             services.AddScoped<IIngestionService, IngestionService>();
-            services.AddScoped<IChunkingService, MarkdownSectionChunkingService>();
-            // services.AddScoped<IChunkingService, FixedSizeChunkingService>();
+            services.AddScoped<IChunkingService, ChunkingService>();
+            // services.AddScoped<IChunkingStrategy, FixedSizeChunkingStrategy>();
+            services.AddScoped<IChunkingStrategy, MarkdownSectionChunkingStrategy>();
 
             services.AddScoped<IDocumentRepository, DocumentRepository>();
             services.AddScoped<IChunkRepository, ChunkRepository>();

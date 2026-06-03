@@ -13,10 +13,6 @@ public static class AddOptionsExtensions
                 .Bind(configuration.GetSection(nameof(IngestionOptions)));
 
             services
-                .AddOptions<ChunkingOptions>()
-                .Bind(configuration.GetSection(nameof(ChunkingOptions)));
-
-            services
                 .AddOptions<EmbeddingOptions>()
                 .Bind(configuration.GetSection(nameof(EmbeddingOptions)));
 

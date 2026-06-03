@@ -11,16 +11,16 @@ using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Options;
 using Moq;
 
-public sealed class FixedSizeChunkingServiceTests
+public sealed class MarkdownSectionChunkingStrategyTests
 {
     private const string EmptyDocumentId = "doc-empty";
-    private const string FixedDocumentId = "doc-fixed";
-    private const string OverlapDocumentId = "doc-overlap";
+    private const string RagDocumentId = "doc-rag";
+    private const string LongDocumentId = "doc-long";
     private const string FirstDocumentId = "doc-first";
     private const string SecondDocumentId = "doc-second";
 
     /// <summary>
-    /// Tests that fixed-size chunking replaces chunks with an empty collection when a document has only whitespace content.
+    /// Tests that markdown section chunking replaces chunks with an empty collection when a document has only whitespace content.
     /// </summary>
     [Fact]
     public async Task ReplaceDocumentChunksAsync_WhitespaceDocument_ReplacesChunksWithEmptyCollection()
@@ -28,7 +28,7 @@ public sealed class FixedSizeChunkingServiceTests
         // Arrange
         IReadOnlyCollection<ChunkModel>? capturedChunks = null;
         var repository = CaptureReplace(EmptyDocumentId, chunks => capturedChunks = chunks);
-        var service = CreateService(repository, maxChunkLength: 100, overlapLength: 0);
+        var service = CreateService(repository);
 
         // Act
         await service.ReplaceDocumentChunksAsync([Document(EmptyDocumentId, "Empty", "   \n\t  ")]);
@@ -38,50 +38,55 @@ public sealed class FixedSizeChunkingServiceTests
     }
 
     /// <summary>
-    /// Tests that fixed-size chunking creates chunks without heading metadata while still assigning citation labels and embeddings.
+    /// Tests that markdown section chunking binds each heading section to heading metadata and an Obsidian-style citation label.
     /// </summary>
     [Fact]
-    public async Task ReplaceDocumentChunksAsync_TextExceedsMaxChunkLength_CreatesFixedSizeChunksWithoutHeadingMetadata()
+    public async Task ReplaceDocumentChunksAsync_DocumentHasMarkdownHeadings_CreatesChunksWithHeadingMetadataAndCitationLabels()
     {
         // Arrange
         IReadOnlyCollection<ChunkModel>? capturedChunks = null;
-        var repository = CaptureReplace(FixedDocumentId, chunks => capturedChunks = chunks);
-        var service = CreateService(repository, maxChunkLength: 12, overlapLength: 0);
+        var repository = CaptureReplace(RagDocumentId, chunks => capturedChunks = chunks);
+        var service = CreateService(repository);
 
         // Act
-        await service.ReplaceDocumentChunksAsync([Document(FixedDocumentId, "Fixed", "Alpha beta gamma delta")]);
+        await service.ReplaceDocumentChunksAsync([
+            Document(RagDocumentId, "RAG", "# Overview\n\nGround answers in notes.\n\n## Tradeoffs\n\nRetrieval adds latency.")
+        ]);
 
         // Assert
         capturedChunks.Should().NotBeNull();
         capturedChunks!.Should().HaveCount(2);
-        capturedChunks.Select(chunk => chunk.Heading).Should().OnlyContain(heading => heading == null);
-        capturedChunks.Select(chunk => chunk.CitationLabel).Should().OnlyContain(label => label == "[[Fixed]]");
-        capturedChunks.Select(chunk => chunk.ChunkText).Should().OnlyContain(text => text.Length <= 12);
+        capturedChunks.Select(chunk => chunk.Heading).Should().Equal("Overview", "Tradeoffs");
+        capturedChunks.Select(chunk => chunk.CitationLabel).Should().Equal("[[RAG#Overview]]", "[[RAG#Tradeoffs]]");
         capturedChunks.Select(chunk => chunk.ChunkOrder).Should().Equal(0, 1);
+        capturedChunks.Select(chunk => chunk.DocumentId).Should().OnlyContain(documentId => documentId == RagDocumentId);
         capturedChunks.Select(chunk => chunk.Embedding).Should().OnlyContain(vector => vector.Length == 2);
     }
 
     /// <summary>
-    /// Tests that fixed-size chunking applies configured overlap so adjacent chunks preserve boundary context.
+    /// Tests that markdown section chunking splits an oversized section into embeddable chunks with document citations.
     /// </summary>
     [Fact]
-    public async Task ReplaceDocumentChunksAsync_OverlapConfigured_CreatesOverlappingChunks()
+    public async Task ReplaceDocumentChunksAsync_SectionExceedsMaxChunkLength_SplitsSectionAndReplacesRepositoryChunks()
     {
         // Arrange
         IReadOnlyCollection<ChunkModel>? capturedChunks = null;
-        var repository = CaptureReplace(OverlapDocumentId, chunks => capturedChunks = chunks);
-        var service = CreateService(repository, maxChunkLength: 10, overlapLength: 3);
+        var repository = CaptureReplace(LongDocumentId, chunks => capturedChunks = chunks);
+        var service = CreateService(repository);
+        var content = string.Join(". ", Enumerable.Range(0, 80).Select(index => $"Sentence {index:D2} explains markdown chunking behavior"));
 
         // Act
-        await service.ReplaceDocumentChunksAsync([Document(OverlapDocumentId, "Overlap", "abcdefghij12345")]);
+        await service.ReplaceDocumentChunksAsync([Document(LongDocumentId, "Long", content)]);
 
         // Assert
         capturedChunks.Should().NotBeNull();
-        capturedChunks!.Select(chunk => chunk.ChunkText).Should().Equal("abcdefghij", "hij12345");
+        capturedChunks!.Should().HaveCountGreaterThan(1);
+        capturedChunks.Select(chunk => chunk.ChunkText).Should().OnlyContain(text => text.Length <= 1200);
+        capturedChunks.Select(chunk => chunk.CitationLabel).Should().OnlyContain(label => label == "[[Long]]");
     }
 
     /// <summary>
-    /// Tests that fixed-size chunking embeds chunks across multiple documents in one provider batch.
+    /// Tests that markdown section chunking embeds chunks across multiple documents in one provider batch.
     /// </summary>
     [Fact]
     public async Task ReplaceDocumentChunksAsync_MultipleDocuments_EmbedsChunksInSingleBatch()
@@ -94,40 +99,35 @@ public sealed class FixedSizeChunkingServiceTests
             embeddedValues = values;
             return values.Select(value => new[] { (float)value.Length }).ToArray();
         });
-        var service = CreateService(repository, generator.Object, maxChunkLength: 100, overlapLength: 0);
+        var service = CreateService(repository, generator.Object);
 
         // Act
         await service.ReplaceDocumentChunksAsync([
-            Document(FirstDocumentId, "First", "First body."),
-            Document(SecondDocumentId, "Second", "Second body.")
+            Document(FirstDocumentId, "First", "# One\n\nFirst body."),
+            Document(SecondDocumentId, "Second", "# Two\n\nSecond body.")
         ]);
 
         // Assert
         embeddedValues.Should().Equal("First body.", "Second body.");
     }
 
-    private static FixedSizeChunkingService CreateService(
-        Mock<IChunkRepository> repository,
-        int maxChunkLength,
-        int overlapLength)
+    private static ChunkingService CreateService(Mock<IChunkRepository> repository)
     {
         var generator = EmbeddingGeneratorMockFactory.CreateByInputLength();
 
-        return CreateService(repository, generator.Object, maxChunkLength, overlapLength);
+        return CreateService(repository, generator.Object);
     }
 
-    private static FixedSizeChunkingService CreateService(
+    private static ChunkingService CreateService(
         Mock<IChunkRepository> repository,
-        IEmbeddingGenerator<string, Embedding<float>> generator,
-        int maxChunkLength,
-        int overlapLength)
+        IEmbeddingGenerator<string, Embedding<float>> generator)
     {
         var embeddingService = new EmbeddingService(generator, Options.Create(new EmbeddingOptions()));
 
-        return new FixedSizeChunkingService(
+        return new ChunkingService(
             repository.Object,
-            Options.Create(new ChunkingOptions { MaxChunkLength = maxChunkLength, OverlapLength = overlapLength }),
-            embeddingService);
+            embeddingService,
+            new MarkdownSectionChunkingStrategy());
     }
 
     private static Mock<IChunkRepository> CaptureReplace(

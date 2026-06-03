@@ -301,10 +301,10 @@ public sealed class IngestionServiceTests
     {
         var embeddingGenerator = EmbeddingGeneratorMockFactory.CreateByInputLength();
         var embeddingService = new EmbeddingService(embeddingGenerator.Object, Options.Create(new EmbeddingOptions()));
-        var chunkingService = new MarkdownSectionChunkingService(
+        var chunkingService = new ChunkingService(
             chunks.Object,
-            Options.Create(new ChunkingOptions { MaxChunkLength = 500, OverlapLength = 0 }),
-            embeddingService);
+            embeddingService,
+            new MarkdownSectionChunkingStrategy());
 
         return new IngestionService(
             documents.Object,
