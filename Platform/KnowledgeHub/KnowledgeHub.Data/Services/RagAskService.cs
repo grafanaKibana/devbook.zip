@@ -1,6 +1,5 @@
 namespace KnowledgeHub.Data.Services;
 
-using System.Text;
 using KnowledgeHub.Data.Agents;
 using KnowledgeHub.Data.Models;
 using Microsoft.Agents.AI;
@@ -26,24 +25,30 @@ public sealed class RagAskService(
             new RagSearchRequest(question, request.TopK),
             cancellationToken);
 
-        var response = await answerAgent.RunAsync(BuildAgentInput(question, searchResult.Results), cancellationToken: cancellationToken);
+        var query = BuildAgentInput(question, searchResult.Results);
+        var response = await answerAgent.RunAsync(query, cancellationToken: cancellationToken);
 
         return new RagAskResponse(question, response.Text, searchResult.Mode, searchResult.Results);
     }
 
     private static string BuildAgentInput(string question, IReadOnlyList<RagChunkResponse> sources)
     {
-        var builder = new StringBuilder();
-        builder.AppendLine("Question:").AppendLine(question).AppendLine();
-        builder.AppendLine("Sources:");
+        return $"""
+            Question:
+            {question}
 
-        for (var index = 0; index < sources.Count; index++)
-        {
-            var source = sources[index];
-            builder.Append('[').Append(index + 1).Append("] ").AppendLine(source.CitationLabel);
-            builder.AppendLine(source.ChunkText.Trim()).AppendLine();
-        }
+            Sources:
+            {BuildSourceBlocks(sources)}
+            """;
+    }
 
-        return builder.ToString();
+    private static string BuildSourceBlocks(IReadOnlyList<RagChunkResponse> sources)
+    {
+        return string.Join(Environment.NewLine, sources.Select((source, index) =>
+            $"""
+            [{index + 1}] {source.CitationLabel}
+            {source.ChunkText.Trim()}
+
+            """));
     }
 }
