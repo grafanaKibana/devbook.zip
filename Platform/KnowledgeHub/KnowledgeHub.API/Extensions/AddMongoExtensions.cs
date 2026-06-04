@@ -20,8 +20,6 @@ public static class AddMongoExtensions
                 serviceProvider.GetRequiredService<IMongoClient>().GetDatabase(MongoDatabaseName));
             services.AddSingleton(serviceProvider =>
                 serviceProvider.GetRequiredService<IMongoDatabase>().GetCollection<Document>("documents"));
-            services.AddSingleton(serviceProvider =>
-                serviceProvider.GetRequiredService<IMongoDatabase>().GetCollection<ChunkModel>("chunks"));
 
             return services;
         }

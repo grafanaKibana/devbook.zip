@@ -236,7 +236,7 @@ public sealed class SearchMetricCalculatorTests
             new SearchPrediction("third query", [Document(ChunkingPath)], [Document(IrrelevantPath), Document(ChunkingPath)]),
         };
 
-        var metrics = SearchEvaluator.ComputeSummaryMetrics(predictions, topK: 5)["Overall"].ToDictionary(metric => metric.Name);
+        var metrics = SearchEvaluator.ComputeSummaryMetrics(predictions, topK: 5)["MarkdownSection"].ToDictionary(metric => metric.Name);
 
         metrics["RecallAtK"].Rating.Should().Be(EvaluationRating.Average);
         metrics["PrecisionAtK"].Rating.Should().Be(EvaluationRating.Good);

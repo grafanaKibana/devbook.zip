@@ -24,17 +24,30 @@ public sealed class SearchEvaluation : MongoEvaluationTestBase<SearchPrediction>
 
     [Test]
     [TestCaseSource(nameof(TestCases))]
-    public async Task SearchFindsExpectedSources(SearchEvaluationCase testCase)
+    public async Task SearchOverFixedSizeChunks(SearchEvaluationCase testCase)
+    {
+        await SearchFindsExpectedSources(testCase, ChunkingStrategyKind.FixedSize);
+    }
+
+    [Test]
+    [TestCaseSource(nameof(TestCases))]
+    public async Task SearchOverMarkdownSectionChunks(SearchEvaluationCase testCase)
+    {
+        await SearchFindsExpectedSources(testCase, ChunkingStrategyKind.MarkdownSection);
+    }
+
+    private async Task SearchFindsExpectedSources(SearchEvaluationCase testCase, ChunkingStrategyKind chunkingStrategy)
     {
         await using var scenarioRun = await ReportingConfig.CreateScenarioRunAsync(
             scenarioName: GetScenarioName(),
-            iterationName: testCase.Id);
+            iterationName: $"{chunkingStrategy}.{testCase.Id}");
 
-        var response = await RagSearchService.SearchAsync(new RagSearchRequest(testCase.Query, TopK));
+        var response = await RagSearchService.SearchAsync(new RagSearchRequest(testCase.Query, TopK, chunkingStrategy));
         var prediction = new SearchPrediction(
             testCase.Query,
             testCase.ExpectedSources.Select(source => new SearchDocument(source.Path, source.Heading, source.Snippet)).ToArray(),
-            await MapRetrievedDocumentsAsync(response.Results));
+            await MapRetrievedDocumentsAsync(response.Results),
+            chunkingStrategy);
 
         Predictions.Add(prediction);
 
@@ -52,7 +65,7 @@ public sealed class SearchEvaluation : MongoEvaluationTestBase<SearchPrediction>
             .Distinct(StringComparer.Ordinal)
             .ToArray();
 
-        IReadOnlyList<Document> documents = documentIds.Length == 0
+        var documents = documentIds.Length == 0
             ? []
             : await DocumentRepository.GetByIdsAsync(documentIds);
         var sourcePathsByDocumentId = documents.ToDictionary(document => document.DocumentId, document => document.SourcePath, StringComparer.Ordinal);

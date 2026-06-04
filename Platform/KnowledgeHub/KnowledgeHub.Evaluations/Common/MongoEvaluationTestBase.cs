@@ -33,7 +33,6 @@ public abstract class MongoEvaluationTestBase<TPrediction> : EvaluationTestBase<
         services.AddSingleton<IMongoClient>(_ => new MongoClient(connectionString));
         services.AddSingleton(serviceProvider => serviceProvider.GetRequiredService<IMongoClient>().GetDatabase("KnowledgeHub"));
         services.AddSingleton(serviceProvider => serviceProvider.GetRequiredService<IMongoDatabase>().GetCollection<Document>("documents"));
-        services.AddSingleton(serviceProvider => serviceProvider.GetRequiredService<IMongoDatabase>().GetCollection<ChunkModel>("chunks"));
         services.AddServices();
 
         serviceProvider = services.BuildServiceProvider();

@@ -1,6 +1,7 @@
 namespace KnowledgeHub.Evaluations.Scenarios.RAG.Search;
 
 using System.Globalization;
+using KnowledgeHub.Data.Models;
 using KnowledgeHub.Evaluations.Common.Evaluators.SummaryGeneration;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.AI.Evaluation;
@@ -44,20 +45,21 @@ public sealed class SearchEvaluator : IEvaluator
         IReadOnlyList<SearchPrediction> predictions,
         int topK)
     {
-        var report = SearchMetricCalculator.Evaluate(predictions, topK);
-
-        return new Dictionary<string, IEnumerable<SummaryMetric>>
-        {
-            ["Overall"] =
-            [
-                new SummaryMetric("SampleCount", report.QueryCount, "Total RAG search cases evaluated.", SummaryMetricKind.Count),
-                new SummaryMetric(RecallAtKMetricName, report.RecallAtK, "Average Recall@k across all RAG search cases.", SummaryMetricKind.Percentage, GetRating(RecallAtKMetricName, report.RecallAtK)),
-                new SummaryMetric(PrecisionAtKMetricName, report.PrecisionAtK, "Average Precision@k across all RAG search cases.", SummaryMetricKind.Percentage, GetRating(PrecisionAtKMetricName, report.PrecisionAtK)),
-                new SummaryMetric(ReciprocalRankMetricName, report.MeanReciprocalRank, "Mean reciprocal rank across all RAG search cases.", SummaryMetricKind.PlainNumber, GetRating(ReciprocalRankMetricName, report.MeanReciprocalRank)),
-                new SummaryMetric("EmptyResultRate", report.EmptyResultRate, "Share of RAG search cases with no retrieved chunks.", SummaryMetricKind.Percentage, GetEmptyResultRateRating(report.EmptyResultRate)),
-            ]
-        };
+        return predictions
+            .GroupBy(prediction => prediction.ChunkingStrategy)
+            .ToDictionary(
+                group => group.Key.ToString(),
+                group => CreateSummaryMetrics(SearchMetricCalculator.Evaluate(group.ToArray(), topK), group.Key));
     }
+
+    private static IEnumerable<SummaryMetric> CreateSummaryMetrics(SearchReport report, ChunkingStrategyKind strategy) =>
+    [
+        new SummaryMetric("SampleCount", report.QueryCount, $"Total RAG search cases evaluated over {strategy} chunks.", SummaryMetricKind.Count),
+        new SummaryMetric(RecallAtKMetricName, report.RecallAtK, $"Average Recall@k across RAG search cases over {strategy} chunks.", SummaryMetricKind.Percentage, GetRating(RecallAtKMetricName, report.RecallAtK)),
+        new SummaryMetric(PrecisionAtKMetricName, report.PrecisionAtK, $"Average Precision@k across RAG search cases over {strategy} chunks.", SummaryMetricKind.Percentage, GetRating(PrecisionAtKMetricName, report.PrecisionAtK)),
+        new SummaryMetric(ReciprocalRankMetricName, report.MeanReciprocalRank, $"Mean reciprocal rank across RAG search cases over {strategy} chunks.", SummaryMetricKind.PlainNumber, GetRating(ReciprocalRankMetricName, report.MeanReciprocalRank)),
+        new SummaryMetric("EmptyResultRate", report.EmptyResultRate, $"Share of RAG search cases with no retrieved {strategy} chunks.", SummaryMetricKind.Percentage, GetEmptyResultRateRating(report.EmptyResultRate)),
+    ];
 
     private static NumericMetric CreateMetric(string name, double value, SearchQueryMetrics metrics)
     {

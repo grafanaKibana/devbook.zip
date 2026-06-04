@@ -70,11 +70,42 @@ public sealed class RagSearchServiceTests
         capturedVector.Should().Equal([13f, 0f]);
     }
 
+    [Fact]
+    public async Task SearchAsync_FixedSizeStrategy_CreatesFixedSizeRepository()
+    {
+        // Arrange
+        var repository = new Mock<IChunkRepository>(MockBehavior.Strict);
+        repository.Setup(mock => mock.VectorSearchAsync(
+                It.IsAny<float[]>(),
+                5,
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+        var generator = EmbeddingGeneratorMockFactory.CreateByInputLength();
+        var embeddingService = new EmbeddingService(generator.Object, Options.Create(new EmbeddingOptions()));
+        var repositoryFactory = new Mock<IChunkRepositoryFactory>(MockBehavior.Strict);
+        repositoryFactory.Setup(factory => factory.Create(ChunkingStrategyKind.FixedSize))
+            .Returns(repository.Object);
+        var service = new RagSearchService(embeddingService, repositoryFactory.Object);
+
+        // Act
+        await service.SearchAsync(new RagSearchRequest(QueryWithWhitespace, 5, ChunkingStrategyKind.FixedSize));
+
+        // Assert
+        repositoryFactory.Verify(factory => factory.Create(ChunkingStrategyKind.FixedSize), Times.Once);
+        repository.Verify(mock => mock.VectorSearchAsync(
+            It.IsAny<float[]>(),
+            5,
+            It.IsAny<CancellationToken>()), Times.Once);
+    }
+
     private static RagSearchService CreateService(Mock<IChunkRepository> repository)
     {
         var generator = EmbeddingGeneratorMockFactory.CreateByInputLength();
         var embeddingService = new EmbeddingService(generator.Object, Options.Create(new EmbeddingOptions()));
+        var repositoryFactory = new Mock<IChunkRepositoryFactory>(MockBehavior.Strict);
+        repositoryFactory.Setup(factory => factory.Create(ChunkingStrategyKind.MarkdownSection))
+            .Returns(repository.Object);
 
-        return new RagSearchService(embeddingService, repository.Object);
+        return new RagSearchService(embeddingService, repositoryFactory.Object);
     }
 }

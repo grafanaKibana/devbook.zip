@@ -10,6 +10,8 @@ public sealed class MarkdownSectionChunkingStrategy : IChunkingStrategy
     private const int OverlapLength = 200;
     private static readonly string[] Separators = ["\n\n", "\n", ". ", " "];
 
+    public ChunkingStrategyKind Strategy => ChunkingStrategyKind.MarkdownSection;
+
     public IReadOnlyList<ChunkContent> Chunk(Document document)
     {
         ArgumentNullException.ThrowIfNull(document);

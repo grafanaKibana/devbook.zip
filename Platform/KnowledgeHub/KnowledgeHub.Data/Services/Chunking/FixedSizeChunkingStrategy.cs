@@ -7,6 +7,8 @@ public sealed class FixedSizeChunkingStrategy : IChunkingStrategy
     private const int MaxChunkLength = 1200;
     private const int OverlapLength = 200;
 
+    public ChunkingStrategyKind Strategy => ChunkingStrategyKind.FixedSize;
+
     public IReadOnlyList<ChunkContent> Chunk(Document document)
     {
         ArgumentNullException.ThrowIfNull(document);

@@ -3,6 +3,7 @@ namespace KnowledgeHub.Data;
 using System.ClientModel;
 using KnowledgeHub.Data.Agents;
 using KnowledgeHub.Data.Agents.Abstractions;
+using KnowledgeHub.Data.Models;
 using KnowledgeHub.Data.Options;
 using KnowledgeHub.Data.Repositories;
 using KnowledgeHub.Data.Services;
@@ -22,12 +23,18 @@ public static class ServiceCollectionExtensions
             ArgumentNullException.ThrowIfNull(services);
 
             services.AddScoped<IIngestionService, IngestionService>();
-            services.AddScoped<IChunkingService, ChunkingService>();
-            // services.AddScoped<IChunkingStrategy, FixedSizeChunkingStrategy>();
-            services.AddScoped<IChunkingStrategy, MarkdownSectionChunkingStrategy>();
+
+            services.AddScoped<FixedSizeChunkingStrategy>();
+            services.AddScoped<MarkdownSectionChunkingStrategy>();
+
+            services.AddScoped<IChunkingStrategy>(serviceProvider => serviceProvider.GetRequiredService<FixedSizeChunkingStrategy>());
+            services.AddScoped<IChunkingStrategy>(serviceProvider => serviceProvider.GetRequiredService<MarkdownSectionChunkingStrategy>());
+
+            services.AddScoped<IChunkingService>(serviceProvider => CreateChunkingService(serviceProvider, ChunkingStrategyKind.FixedSize));
+            services.AddScoped<IChunkingService>(serviceProvider => CreateChunkingService(serviceProvider, ChunkingStrategyKind.MarkdownSection));
 
             services.AddScoped<IDocumentRepository, DocumentRepository>();
-            services.AddScoped<IChunkRepository, ChunkRepository>();
+            services.AddScoped<IChunkRepositoryFactory, ChunkRepositoryFactory>();
 
             services.AddScoped<IRagSearchService, RagSearchService>();
             services.AddScoped<IRagAskService, RagAskService>();
@@ -39,6 +46,16 @@ public static class ServiceCollectionExtensions
 
             return services;
         }
+    }
+
+
+    private static IChunkingService CreateChunkingService(IServiceProvider serviceProvider, ChunkingStrategyKind strategy)
+    {
+        var chunkingStrategy = serviceProvider.GetServices<IChunkingStrategy>().Single(item => item.Strategy == strategy);
+        var chunkRepository = serviceProvider.GetRequiredService<IChunkRepositoryFactory>().Create(strategy);
+        var embeddingService = serviceProvider.GetRequiredService<IEmbeddingService>();
+
+        return new ChunkingService(chunkRepository, embeddingService, chunkingStrategy);
     }
 
 

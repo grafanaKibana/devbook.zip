@@ -11,6 +11,8 @@ public sealed class ChunkingService(
     IEmbeddingService embeddingService,
     IChunkingStrategy chunkingStrategy) : IChunkingService
 {
+    public ChunkingStrategyKind Strategy => chunkingStrategy.Strategy;
+
     public async Task ReplaceDocumentChunksAsync(
         IReadOnlyList<Document> documents,
         CancellationToken cancellationToken = default)

@@ -5,7 +5,7 @@ using KnowledgeHub.Data.Repositories;
 
 public class RagSearchService(
     IEmbeddingService embeddingService,
-    IChunkRepository chunkRepository) : IRagSearchService
+    IChunkRepositoryFactory chunkRepositoryFactory) : IRagSearchService
 {
     private const int DefaultTopK = 5;
     private const int MaxTopK = 10;
@@ -27,6 +27,7 @@ public class RagSearchService(
             : Math.Min(request.TopK, MaxTopK);
 
         var embedding = await embeddingService.GenerateEmbeddingAsync(query, cancellationToken);
+        var chunkRepository = chunkRepositoryFactory.Create(request.ChunkingStrategy);
         var results = await chunkRepository.VectorSearchAsync(embedding, topK, cancellationToken);
 
         return new RagSearchResponse(query, "vector", results);

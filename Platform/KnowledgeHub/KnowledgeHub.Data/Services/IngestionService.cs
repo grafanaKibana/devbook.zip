@@ -12,8 +12,8 @@ using Microsoft.Extensions.Options;
 
 public sealed class IngestionService(
     IDocumentRepository documentRepository,
-    IChunkRepository chunkRepository,
-    IChunkingService chunkingService,
+    IChunkRepositoryFactory chunkRepositoryFactory,
+    IEnumerable<IChunkingService> chunkingServices,
     IHostEnvironment hostEnvironment,
     IOptions<IngestionOptions> options) : IIngestionService
 {
@@ -41,6 +41,7 @@ public sealed class IngestionService(
         var changedDocuments = new List<Document>();
         var changedDocumentIds = new List<string>();
         var isFolderIngestion = string.IsNullOrWhiteSpace(request.FileName);
+        var selectedChunkingServices = GetSelectedChunkingServices(request.ChunkingStrategy);
 
         if (isFolderIngestion)
         {
@@ -48,7 +49,12 @@ public sealed class IngestionService(
             var existingDocuments = await documentRepository.GetBySourcePathPrefixAsync(sourcePathPrefix, cancellationToken);
             var existingDocumentIds = existingDocuments.Select(document => document.DocumentId).ToArray();
 
-            await chunkRepository.DeleteByDocumentIdsAsync(existingDocumentIds, cancellationToken);
+            foreach (var chunkingService in selectedChunkingServices)
+            {
+                await chunkRepositoryFactory.Create(chunkingService.Strategy)
+                    .DeleteByDocumentIdsAsync(existingDocumentIds, cancellationToken);
+            }
+
             await documentRepository.DeleteByIdsAsync(existingDocumentIds, cancellationToken);
 
             deletedCount = existingDocumentIds.Length;
@@ -119,7 +125,10 @@ public sealed class IngestionService(
             changedDocumentIds.Add(existingDocument.DocumentId);
         }
 
-        await chunkingService.ReplaceDocumentChunksAsync(changedDocuments, cancellationToken);
+        foreach (var chunkingService in selectedChunkingServices)
+        {
+            await chunkingService.ReplaceDocumentChunksAsync(changedDocuments, cancellationToken);
+        }
 
         return new IngestionResult(
             true,
@@ -128,6 +137,27 @@ public sealed class IngestionService(
             updatedCount,
             deletedCount,
             changedDocumentIds);
+    }
+
+    private IReadOnlyList<IChunkingService> GetSelectedChunkingServices(ChunkingStrategyKind? requestedStrategy)
+    {
+        var services = chunkingServices.ToArray();
+
+        if (requestedStrategy is null)
+        {
+            return services;
+        }
+
+        var selected = services
+            .Where(service => service.Strategy == requestedStrategy.Value)
+            .ToArray();
+
+        if (selected.Length == 0)
+        {
+            throw new InvalidOperationException($"Chunking strategy '{requestedStrategy}' is not registered.");
+        }
+
+        return selected;
     }
 
     private static string GetSourcePathPrefix(string ingestionRootDirectory, string sourceDirectory)
