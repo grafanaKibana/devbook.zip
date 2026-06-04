@@ -31,6 +31,7 @@ public sealed class SearchMetricCalculatorTests
         {
             RecallAtK = 1d,
             PrecisionAtK = 1d,
+            HitRateAtK = 1d,
             ReciprocalRank = 1d,
         });
         result.Diagnostics.MissingExpectedSourcePaths.Should().BeEmpty();
@@ -55,6 +56,7 @@ public sealed class SearchMetricCalculatorTests
         // Assert
         result.RecallAtK.Should().Be(0.5);
         result.PrecisionAtK.Should().Be(0.5);
+        result.HitRateAtK.Should().Be(1);
         result.ReciprocalRank.Should().Be(1);
         result.Diagnostics.MissingExpectedSourcePaths.Should().ContainSingle().Which.Should().Be(ChunkingPath);
     }
@@ -79,6 +81,7 @@ public sealed class SearchMetricCalculatorTests
         {
             RecallAtK = 0d,
             PrecisionAtK = 0d,
+            HitRateAtK = 0d,
             ReciprocalRank = 0d,
         });
         result.Diagnostics.MissingExpectedSourcePaths.Should().ContainSingle();
@@ -192,15 +195,19 @@ public sealed class SearchMetricCalculatorTests
         recallMetric.Reason.Should().Be("Recall@k measures evidence coverage: matched expected evidence divided by expected evidence. High means required evidence was present in top-k; low means generation is capped by missing context.");
         recallMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Unacceptable);
         recallMetric.Interpretation.Reason.Should().Be("Score 0 (Unacceptable): matched 0/1 expected evidence items.");
-        diagnosticMessages.Should().Contain(message => message.Contains("Recall affected: missing #1 Software Engineering/11 AI & ML/LLM/RAG/Evaluation.md heading=\"Retrieval Metrics\""));
-        diagnosticMessages.Should().Contain(message => message.Contains("Closest same-source misses: rank 1 heading=\"Questions\" expectedHeading=\"Retrieval Metrics\"")
-            && message.Contains("neither the expected heading nor expected snippet appeared"));
+        diagnosticMessages.Should().Contain(message => message.Contains("Recall affected: missing 1/1 expected evidence: #1 Software Engineering/11 AI & ML/LLM/RAG/Evaluation.md heading=\"Retrieval Metrics\"."));
+        diagnosticMessages.Should().Contain(message => message.Contains("Closest same-source misses: rank 1 heading=\"Questions\" expectedHeading=\"Retrieval Metrics\" reason=expected heading/snippet absent."));
         diagnosticMessages.Should().HaveCount(2);
 
         var precisionMetric = result.Metrics["PrecisionAtK"];
-        precisionMetric.Reason.Should().Be("Precision@k measures context purity: relevant retrieved chunks divided by retrieved chunks. High means top-k is mostly useful evidence; low means context contains noise or duplicate/non-credit chunks.");
+        precisionMetric.Reason.Should().Be("Precision@k measures annotated context purity: relevant retrieved chunks divided by retrieved chunks. With sparse expected evidence, a case with one credited chunk in top-5 scores 0.2 even when that chunk is sufficient.");
         precisionMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Unacceptable);
         precisionMetric.Interpretation.Reason.Should().Be("Score 0 (Unacceptable): 0/1 retrieved chunks counted as relevant evidence.");
+
+        var hitRateMetric = result.Metrics["HitRateAtK"];
+        hitRateMetric.Reason.Should().Be("HitRate@k measures whether at least one expected evidence item appeared in top-k.");
+        hitRateMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Unacceptable);
+        hitRateMetric.Interpretation.Reason.Should().Be("Score 0 (Unacceptable): no expected evidence item appeared in top-k.");
 
         var reciprocalRankMetric = result.Metrics["ReciprocalRank"];
         reciprocalRankMetric.Reason.Should().Be("ReciprocalRank measures ranking quality: 1 divided by the rank of the first relevant evidence chunk. High means useful evidence appears early; 0 means no relevant evidence appeared in top-k.");
@@ -240,6 +247,7 @@ public sealed class SearchMetricCalculatorTests
 
         metrics["RecallAtK"].Rating.Should().Be(EvaluationRating.Average);
         metrics["PrecisionAtK"].Rating.Should().Be(EvaluationRating.Good);
+        metrics["HitRateAtK"].Rating.Should().Be(EvaluationRating.Average);
         metrics["ReciprocalRank"].Rating.Should().Be(EvaluationRating.Good);
         metrics["EmptyResultRate"].Rating.Should().Be(EvaluationRating.Poor);
     }
@@ -276,6 +284,7 @@ public sealed class SearchMetricCalculatorTests
         // Assert
         result.RecallAtK.Should().Be(1);
         result.PrecisionAtK.Should().Be(1);
+        result.HitRateAtK.Should().Be(1);
         result.ReciprocalRank.Should().Be(1);
         result.Diagnostics.Matches.Should().ContainSingle().Which.HeadingMatched.Should().BeTrue();
     }
@@ -302,6 +311,7 @@ public sealed class SearchMetricCalculatorTests
         // Assert
         result.RecallAtK.Should().Be(1);
         result.PrecisionAtK.Should().Be(1d / 3d);
+        result.HitRateAtK.Should().Be(1);
         result.ReciprocalRank.Should().Be(1);
         result.Diagnostics.DuplicateRetrievedSourcePaths.Should().ContainSingle().Which.Should().Be(EvaluationPath);
     }
@@ -321,6 +331,7 @@ public sealed class SearchMetricCalculatorTests
         // Assert
         result.RecallAtK.Should().Be(1);
         result.PrecisionAtK.Should().Be(0.5);
+        result.HitRateAtK.Should().Be(1);
         result.ReciprocalRank.Should().Be(0.5);
     }
 
@@ -345,6 +356,7 @@ public sealed class SearchMetricCalculatorTests
         report.QueryCount.Should().Be(3);
         report.RecallAtK.Should().BeApproximately(2d / 3d, 0.000001);
         report.PrecisionAtK.Should().BeApproximately(0.5, 0.000001);
+        report.HitRateAtK.Should().BeApproximately(2d / 3d, 0.000001);
         report.MeanReciprocalRank.Should().BeApproximately(0.5, 0.000001);
         report.EmptyResultRate.Should().BeApproximately(1d / 3d, 0.000001);
     }

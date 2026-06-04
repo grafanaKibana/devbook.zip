@@ -10,12 +10,15 @@ public sealed class SearchEvaluator : IEvaluator
 {
     private const string RecallAtKMetricName = "RecallAtK";
     private const string PrecisionAtKMetricName = "PrecisionAtK";
+    private const string HitRateAtKMetricName = "HitRateAtK";
     private const string ReciprocalRankMetricName = "ReciprocalRank";
+    private const int DiagnosticItemLimit = 2;
 
     public IReadOnlyCollection<string> EvaluationMetricNames { get; } =
     [
         RecallAtKMetricName,
         PrecisionAtKMetricName,
+        HitRateAtKMetricName,
         ReciprocalRankMetricName,
     ];
 
@@ -37,6 +40,7 @@ public sealed class SearchEvaluator : IEvaluator
         return ValueTask.FromResult(new EvaluationResult([
             CreateMetric(RecallAtKMetricName, metrics.RecallAtK, metrics),
             CreateMetric(PrecisionAtKMetricName, metrics.PrecisionAtK, metrics),
+            CreateMetric(HitRateAtKMetricName, metrics.HitRateAtK, metrics),
             CreateMetric(ReciprocalRankMetricName, metrics.ReciprocalRank, metrics),
         ]));
     }
@@ -56,7 +60,8 @@ public sealed class SearchEvaluator : IEvaluator
     [
         new SummaryMetric("SampleCount", report.QueryCount, $"Total RAG search cases evaluated over {strategy} chunks.", SummaryMetricKind.Count),
         new SummaryMetric(RecallAtKMetricName, report.RecallAtK, $"Average Recall@k across RAG search cases over {strategy} chunks.", SummaryMetricKind.Percentage, GetRating(RecallAtKMetricName, report.RecallAtK)),
-        new SummaryMetric(PrecisionAtKMetricName, report.PrecisionAtK, $"Average Precision@k across RAG search cases over {strategy} chunks.", SummaryMetricKind.Percentage, GetRating(PrecisionAtKMetricName, report.PrecisionAtK)),
+        new SummaryMetric(PrecisionAtKMetricName, report.PrecisionAtK, $"Average annotated Precision@k across RAG search cases over {strategy} chunks; sparse expected evidence can cap this below 1 even when the needed evidence is found.", SummaryMetricKind.Percentage, GetRating(PrecisionAtKMetricName, report.PrecisionAtK)),
+        new SummaryMetric(HitRateAtKMetricName, report.HitRateAtK, $"Average HitRate@k across RAG search cases over {strategy} chunks; shows how often retrieval found at least one expected evidence item.", SummaryMetricKind.Percentage, GetRating(HitRateAtKMetricName, report.HitRateAtK)),
         new SummaryMetric(ReciprocalRankMetricName, report.MeanReciprocalRank, $"Mean reciprocal rank across RAG search cases over {strategy} chunks.", SummaryMetricKind.PlainNumber, GetRating(ReciprocalRankMetricName, report.MeanReciprocalRank)),
         new SummaryMetric("EmptyResultRate", report.EmptyResultRate, $"Share of RAG search cases with no retrieved {strategy} chunks.", SummaryMetricKind.Percentage, GetEmptyResultRateRating(report.EmptyResultRate)),
     ];
@@ -88,13 +93,13 @@ public sealed class SearchEvaluator : IEvaluator
 
         if (name == RecallAtKMetricName && diagnostics.MissingExpectedSourcePaths.Count > 0)
         {
-            var missingExpected = diagnostics.ExpectedDocuments.Where(expectedDocument => !expectedDocument.Matched);
+            var missingExpected = diagnostics.ExpectedDocuments.Where(expectedDocument => !expectedDocument.Matched).ToArray();
             metric.AddDiagnostics(EvaluationDiagnostic.Warning(
-                $"Recall affected: missing {string.Join(" | ", missingExpected.Select(FormatExpectedDocument))}"));
+                $"Recall affected: missing {missingExpected.Length}/{diagnostics.ExpectedCount} expected evidence: {FormatLimitedItems(missingExpected, FormatExpectedDocument)}."));
             if (sameSourceMisses.Length > 0)
             {
                 metric.AddDiagnostics(EvaluationDiagnostic.Informational(
-                    $"Closest same-source misses: {string.Join(" | ", sameSourceMisses.Select(FormatRetrievedMiss))}"));
+                    $"Closest same-source misses: {FormatLimitedItems(sameSourceMisses, FormatRetrievedMiss)}."));
             }
         }
 
@@ -127,7 +132,8 @@ public sealed class SearchEvaluator : IEvaluator
         => name switch
         {
             RecallAtKMetricName => "Recall@k measures evidence coverage: matched expected evidence divided by expected evidence. High means required evidence was present in top-k; low means generation is capped by missing context.",
-            PrecisionAtKMetricName => "Precision@k measures context purity: relevant retrieved chunks divided by retrieved chunks. High means top-k is mostly useful evidence; low means context contains noise or duplicate/non-credit chunks.",
+            PrecisionAtKMetricName => "Precision@k measures annotated context purity: relevant retrieved chunks divided by retrieved chunks. With sparse expected evidence, a case with one credited chunk in top-5 scores 0.2 even when that chunk is sufficient.",
+            HitRateAtKMetricName => "HitRate@k measures whether at least one expected evidence item appeared in top-k.",
             ReciprocalRankMetricName => "ReciprocalRank measures ranking quality: 1 divided by the rank of the first relevant evidence chunk. High means useful evidence appears early; 0 means no relevant evidence appeared in top-k.",
             _ => name,
         };
@@ -146,6 +152,9 @@ public sealed class SearchEvaluator : IEvaluator
                 $"Score {FormatNumber(value)} ({rating}): matched {matchedExpectedCount}/{diagnostics.ExpectedCount} expected evidence items.",
             PrecisionAtKMetricName =>
                 $"Score {FormatNumber(value)} ({rating}): {relevantRetrievedCount}/{diagnostics.RetrievedCount} retrieved chunks counted as relevant evidence.",
+            HitRateAtKMetricName => value > 0
+                ? $"Score 1 ({rating}): at least one expected evidence item appeared in top-k."
+                : $"Score 0 ({rating}): no expected evidence item appeared in top-k.",
             ReciprocalRankMetricName => firstRelevantRank is null
                 ? $"Score 0 ({rating}): no retrieved chunk matched the expected evidence."
                 : $"Score {FormatNumber(value)} ({rating}): first relevant evidence was at rank {firstRelevantRank}.",
@@ -172,6 +181,14 @@ public sealed class SearchEvaluator : IEvaluator
                 > 0 => EvaluationRating.Poor,
                 _ => EvaluationRating.Unacceptable,
             },
+            HitRateAtKMetricName => value switch
+            {
+                >= 1 => EvaluationRating.Exceptional,
+                >= 0.8 => EvaluationRating.Good,
+                >= 0.5 => EvaluationRating.Average,
+                > 0 => EvaluationRating.Poor,
+                _ => EvaluationRating.Unacceptable,
+            },
             ReciprocalRankMetricName => value switch
             {
                 >= 1 => EvaluationRating.Exceptional,
@@ -194,10 +211,28 @@ public sealed class SearchEvaluator : IEvaluator
         };
 
     private static string FormatExpectedDocument(SearchExpectedDiagnostic expectedDocument)
-        => $"#{expectedDocument.Index} {expectedDocument.SourcePath} heading={FormatValue(expectedDocument.Heading)} snippet={FormatValue(expectedDocument.SnippetPreview)}";
+        => $"#{expectedDocument.Index} {expectedDocument.SourcePath} heading={FormatValue(expectedDocument.Heading)}";
 
     private static string FormatRetrievedMiss(SearchMatchDiagnostic match)
-        => $"rank {match.Rank} heading={FormatValue(match.Heading)} expectedHeading={FormatValue(match.MatchedExpectedHeading)} reason={match.Reason}";
+        => $"rank {match.Rank} heading={FormatValue(match.Heading)} expectedHeading={FormatValue(match.MatchedExpectedHeading)} reason={ShortReason(match)}";
+
+    private static string FormatLimitedItems<T>(IReadOnlyCollection<T> items, Func<T, string> formatter)
+    {
+        var formatted = string.Join(" | ", items.Take(DiagnosticItemLimit).Select(formatter));
+        var remainingCount = items.Count - DiagnosticItemLimit;
+
+        return remainingCount > 0 ? $"{formatted} (+{remainingCount} more)" : formatted;
+    }
+
+    private static string ShortReason(SearchMatchDiagnostic match)
+    {
+        if (match.SourcePathMatched && !match.HeadingMatched && !match.SnippetMatched)
+        {
+            return "expected heading/snippet absent";
+        }
+
+        return match.Reason;
+    }
 
     private static int MatchedExpectedCount(SearchQueryDiagnostics diagnostics)
         => diagnostics.ExpectedDocuments.Count(expectedDocument => expectedDocument.Matched);

@@ -10,13 +10,14 @@ public static class SearchMetricCalculator
 
         if (queryMetrics.Length == 0)
         {
-            return new SearchReport(0, 0, 0, 0, 0);
+            return new SearchReport(0, 0, 0, 0, 0, 0);
         }
 
         return new SearchReport(
             queryMetrics.Length,
             queryMetrics.Average(metric => metric.RecallAtK),
             queryMetrics.Average(metric => metric.PrecisionAtK),
+            queryMetrics.Average(metric => metric.HitRateAtK),
             queryMetrics.Average(metric => metric.ReciprocalRank),
             queryMetrics.Count(metric => metric.IsEmptyResult) / (double)queryMetrics.Length);
     }
@@ -94,10 +95,12 @@ public static class SearchMetricCalculator
             .ToArray();
         var recallAtK = expectedCount == 0 ? 0 : matchedExpected.Count(matched => matched) / (double)expectedCount;
         var precisionAtK = retrievedDocuments.Length == 0 ? 0 : relevantRetrievedCount / (double)retrievedDocuments.Length;
+        var hitRateAtK = relevantRetrievedCount > 0 ? 1d : 0d;
 
         return new SearchQueryMetrics(
             recallAtK,
             precisionAtK,
+            hitRateAtK,
             reciprocalRank,
             retrievedDocuments.Length == 0,
             new SearchQueryDiagnostics(
@@ -242,12 +245,14 @@ public sealed record SearchReport(
     int QueryCount,
     double RecallAtK,
     double PrecisionAtK,
+    double HitRateAtK,
     double MeanReciprocalRank,
     double EmptyResultRate);
 
 public sealed record SearchQueryMetrics(
     double RecallAtK,
     double PrecisionAtK,
+    double HitRateAtK,
     double ReciprocalRank,
     bool IsEmptyResult,
     SearchQueryDiagnostics Diagnostics);
