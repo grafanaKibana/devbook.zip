@@ -97,8 +97,6 @@ public sealed class IngestionService(
                     UpdatedAt = updatedAt,
                 };
 
-                await documentRepository.UpsertAsync(newDocument, cancellationToken);
-
                 createdCount++;
                 changedDocuments.Add(newDocument);
                 changedDocumentIds.Add(newDocument.DocumentId);
@@ -127,11 +125,14 @@ public sealed class IngestionService(
                 UpdatedAt = updatedAt,
             };
 
-            await documentRepository.UpsertAsync(updatedDocument, cancellationToken);
-
             updatedCount++;
             changedDocuments.Add(updatedDocument);
             changedDocumentIds.Add(existingDocument.DocumentId);
+        }
+
+        if (changedDocuments.Count > 0)
+        {
+            await documentRepository.BulkUpsertAsync(changedDocuments, cancellationToken);
         }
 
         foreach (var chunkingService in selectedChunkingServices)

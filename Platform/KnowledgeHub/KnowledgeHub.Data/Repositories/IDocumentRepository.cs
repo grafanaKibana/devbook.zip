@@ -12,5 +12,7 @@ public interface IDocumentRepository
 
     Task UpsertAsync(Document document, CancellationToken cancellationToken = default);
 
+    Task BulkUpsertAsync(IReadOnlyCollection<Document> documents, CancellationToken cancellationToken = default);
+
     Task DeleteByIdsAsync(IReadOnlyCollection<string> documentIds, CancellationToken cancellationToken = default);
 }

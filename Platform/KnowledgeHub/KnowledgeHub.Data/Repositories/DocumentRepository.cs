@@ -43,6 +43,27 @@ public sealed class DocumentRepository(IMongoCollection<Document> documents) : I
             new ReplaceOptions { IsUpsert = true },
             cancellationToken);
 
+    public async Task BulkUpsertAsync(
+        IReadOnlyCollection<Document> changedDocuments,
+        CancellationToken cancellationToken = default)
+    {
+        if (changedDocuments.Count == 0)
+        {
+            return;
+        }
+
+        var writes = changedDocuments
+            .Select(document => new ReplaceOneModel<Document>(
+                Builders<Document>.Filter.Eq(existing => existing.DocumentId, document.DocumentId),
+                document)
+            {
+                IsUpsert = true,
+            })
+            .ToArray();
+
+        await documents.BulkWriteAsync(writes, cancellationToken: cancellationToken);
+    }
+
     public async Task DeleteByIdsAsync(
         IReadOnlyCollection<string> documentIds,
         CancellationToken cancellationToken = default)

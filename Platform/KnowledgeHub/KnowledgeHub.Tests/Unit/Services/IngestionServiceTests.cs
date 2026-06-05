@@ -107,8 +107,8 @@ public sealed class IngestionServiceTests
         var documents = new Mock<IDocumentRepository>(MockBehavior.Strict);
         documents.Setup(mock => mock.GetBySourcePathAsync(ScopedNotePath, It.IsAny<CancellationToken>()))
             .ReturnsAsync((Document?)null);
-        documents.Setup(mock => mock.UpsertAsync(It.IsAny<Document>(), It.IsAny<CancellationToken>()))
-            .Callback<Document, CancellationToken>((document, _) => upsertedDocument = document)
+        documents.Setup(mock => mock.BulkUpsertAsync(It.IsAny<IReadOnlyCollection<Document>>(), It.IsAny<CancellationToken>()))
+            .Callback<IReadOnlyCollection<Document>, CancellationToken>((batch, _) => upsertedDocument = batch.Single())
             .Returns(Task.CompletedTask);
         var chunks = CaptureReplaceChunks((_, newChunks) => replacedChunks = newChunks);
         var service = CreateService(workspace.RootDirectory, documents, chunks);
@@ -145,7 +145,7 @@ public sealed class IngestionServiceTests
         var documents = new Mock<IDocumentRepository>(MockBehavior.Strict);
         documents.Setup(mock => mock.GetBySourcePathAsync(ScopedNotePath, It.IsAny<CancellationToken>()))
             .ReturnsAsync((Document?)null);
-        documents.Setup(mock => mock.UpsertAsync(It.IsAny<Document>(), It.IsAny<CancellationToken>()))
+        documents.Setup(mock => mock.BulkUpsertAsync(It.IsAny<IReadOnlyCollection<Document>>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
         var fixedChunking = CreateChunkingService(ChunkingStrategyKind.FixedSize);
         var markdownChunking = CreateChunkingService(ChunkingStrategyKind.MarkdownSection);
@@ -177,7 +177,7 @@ public sealed class IngestionServiceTests
         var documents = new Mock<IDocumentRepository>(MockBehavior.Strict);
         documents.Setup(mock => mock.GetBySourcePathAsync(ScopedNotePath, It.IsAny<CancellationToken>()))
             .ReturnsAsync((Document?)null);
-        documents.Setup(mock => mock.UpsertAsync(It.IsAny<Document>(), It.IsAny<CancellationToken>()))
+        documents.Setup(mock => mock.BulkUpsertAsync(It.IsAny<IReadOnlyCollection<Document>>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
         var fixedChunking = CreateChunkingService(ChunkingStrategyKind.FixedSize);
         var markdownChunking = CreateChunkingService(ChunkingStrategyKind.MarkdownSection);
@@ -215,8 +215,8 @@ public sealed class IngestionServiceTests
         var documents = new Mock<IDocumentRepository>(MockBehavior.Strict);
         documents.Setup(mock => mock.GetBySourcePathAsync(ScopedNotePath, It.IsAny<CancellationToken>()))
             .ReturnsAsync(existing);
-        documents.Setup(mock => mock.UpsertAsync(It.IsAny<Document>(), It.IsAny<CancellationToken>()))
-            .Callback<Document, CancellationToken>((document, _) => upsertedDocument = document)
+        documents.Setup(mock => mock.BulkUpsertAsync(It.IsAny<IReadOnlyCollection<Document>>(), It.IsAny<CancellationToken>()))
+            .Callback<IReadOnlyCollection<Document>, CancellationToken>((batch, _) => upsertedDocument = batch.Single())
             .Returns(Task.CompletedTask);
         documents.Setup(mock => mock.DeleteByIdsAsync(It.IsAny<IReadOnlyCollection<string>>(), It.IsAny<CancellationToken>()))
             .Callback<IReadOnlyCollection<string>, CancellationToken>((ids, _) => deletedDocumentIds = ids)
@@ -260,9 +260,6 @@ public sealed class IngestionServiceTests
         var documents = new Mock<IDocumentRepository>(MockBehavior.Strict);
         documents.Setup(mock => mock.GetBySourcePathAsync(ScopedNotePath, It.IsAny<CancellationToken>()))
             .ReturnsAsync(existing);
-        documents.Setup(mock => mock.UpsertAsync(It.IsAny<Document>(), It.IsAny<CancellationToken>()))
-            .Callback<Document, CancellationToken>((document, _) => upsertedDocument = document)
-            .Returns(Task.CompletedTask);
         var chunks = new Mock<IChunkRepository>(MockBehavior.Strict);
         var service = CreateService(workspace.RootDirectory, documents, chunks);
 
@@ -295,8 +292,8 @@ public sealed class IngestionServiceTests
         var documents = new Mock<IDocumentRepository>(MockBehavior.Strict);
         documents.Setup(mock => mock.GetBySourcePathAsync(ScopedNotePath, It.IsAny<CancellationToken>()))
             .ReturnsAsync(existing);
-        documents.Setup(mock => mock.UpsertAsync(It.IsAny<Document>(), It.IsAny<CancellationToken>()))
-            .Callback<Document, CancellationToken>((document, _) => upsertedDocument = document)
+        documents.Setup(mock => mock.BulkUpsertAsync(It.IsAny<IReadOnlyCollection<Document>>(), It.IsAny<CancellationToken>()))
+            .Callback<IReadOnlyCollection<Document>, CancellationToken>((batch, _) => upsertedDocument = batch.Single())
             .Returns(Task.CompletedTask);
         var chunks = CaptureReplaceChunks((documentId, _) => replacedDocumentIds.Add(documentId));
         var service = CreateService(workspace.RootDirectory, documents, chunks);
@@ -425,8 +422,8 @@ public sealed class IngestionServiceTests
             .ReturnsAsync(existingDocuments);
         documents.Setup(mock => mock.DeleteByIdsAsync(It.IsAny<IReadOnlyCollection<string>>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
-        documents.Setup(mock => mock.UpsertAsync(It.IsAny<Document>(), It.IsAny<CancellationToken>()))
-            .Callback<Document, CancellationToken>((document, _) => upsertedDocuments.Add(document))
+        documents.Setup(mock => mock.BulkUpsertAsync(It.IsAny<IReadOnlyCollection<Document>>(), It.IsAny<CancellationToken>()))
+            .Callback<IReadOnlyCollection<Document>, CancellationToken>((batch, _) => upsertedDocuments.AddRange(batch))
             .Returns(Task.CompletedTask);
 
         return documents;
