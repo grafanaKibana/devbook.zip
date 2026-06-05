@@ -13,13 +13,24 @@ public sealed class ChunkRepository(IMongoCollection<ChunkModel> chunks) : IChun
     public async Task ReplaceDocumentChunksAsync(
         string documentId,
         IReadOnlyCollection<ChunkModel> newChunks,
+        CancellationToken cancellationToken = default) =>
+        await ReplaceDocumentsChunksAsync([documentId], newChunks, cancellationToken);
+
+    public async Task ReplaceDocumentsChunksAsync(
+        IReadOnlyCollection<string> documentIds,
+        IReadOnlyCollection<ChunkModel> newChunks,
         CancellationToken cancellationToken = default)
     {
-        await chunks.DeleteManyAsync(chunk => chunk.DocumentId == documentId, cancellationToken);
+        if (documentIds.Count == 0)
+        {
+            return;
+        }
+
+        await chunks.DeleteManyAsync(chunk => documentIds.Contains(chunk.DocumentId), cancellationToken);
 
         if (newChunks.Count > 0)
         {
-            await chunks.InsertManyAsync(newChunks, cancellationToken: cancellationToken);
+            await chunks.InsertManyAsync(newChunks, new InsertManyOptions { IsOrdered = false }, cancellationToken);
         }
     }
 

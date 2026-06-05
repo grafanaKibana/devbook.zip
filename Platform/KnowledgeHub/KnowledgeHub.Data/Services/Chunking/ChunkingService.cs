@@ -24,7 +24,6 @@ public sealed class ChunkingService(
             return;
         }
 
-        var emptyDocumentIds = new List<string>();
         var chunkDrafts = new List<ChunkDraft>();
 
         foreach (var document in documents)
@@ -35,20 +34,17 @@ public sealed class ChunkingService(
 
             if (documentChunks.Count == 0)
             {
-                emptyDocumentIds.Add(document.DocumentId);
                 continue;
             }
 
             chunkDrafts.AddRange(documentChunks.Select((chunk, index) => new ChunkDraft(document, chunk, index)));
         }
 
-        foreach (var documentId in emptyDocumentIds)
-        {
-            await chunkRepository.ReplaceDocumentChunksAsync(documentId, [], cancellationToken);
-        }
+        var documentIds = documents.Select(document => document.DocumentId).ToArray();
 
         if (chunkDrafts.Count == 0)
         {
+            await chunkRepository.ReplaceDocumentsChunksAsync(documentIds, [], cancellationToken);
             return;
         }
 
@@ -67,16 +63,9 @@ public sealed class ChunkingService(
                 Embedding = embeddings[index],
                 CitationLabel = BuildCitationLabel(draft.Document.Title, draft.Chunk.Heading),
             })
-            .GroupBy(chunk => chunk.DocumentId)
-            .ToDictionary(group => group.Key, group => (IReadOnlyCollection<ChunkModel>)group.ToArray());
+            .ToArray();
 
-        foreach (var document in documents)
-        {
-            if (newChunks.TryGetValue(document.DocumentId, out var documentChunks))
-            {
-                await chunkRepository.ReplaceDocumentChunksAsync(document.DocumentId, documentChunks, cancellationToken);
-            }
-        }
+        await chunkRepository.ReplaceDocumentsChunksAsync(documentIds, newChunks, cancellationToken);
     }
 
     private static string GenerateChunkId(string documentId, string sourceHash, int chunkOrder, string chunkText)

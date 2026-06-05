@@ -35,6 +35,7 @@ public sealed class IngestionService(
         }
 
         var markdownFiles = GetMarkdownFiles(ingestionRootDirectory, sourceDirectory, request.FileName);
+        var markdownSnapshots = await ReadMarkdownFileSnapshotsAsync(markdownFiles, ingestionRootDirectory, cancellationToken);
         var createdCount = 0;
         var updatedCount = 0;
         var deletedCount = 0;
@@ -49,8 +50,8 @@ public sealed class IngestionService(
             var sourcePathPrefix = GetSourcePathPrefix(ingestionRootDirectory, sourceDirectory);
             var existingDocuments = await documentRepository.GetBySourcePathPrefixAsync(sourcePathPrefix, cancellationToken);
             existingDocumentsBySourcePath = existingDocuments.ToDictionary(document => document.SourcePath, StringComparer.Ordinal);
-            var currentSourcePaths = markdownFiles
-                .Select(markdownFile => NormalizePath(Path.GetRelativePath(ingestionRootDirectory, markdownFile)))
+            var currentSourcePaths = markdownSnapshots
+                .Select(snapshot => snapshot.SourcePath)
                 .ToHashSet(StringComparer.Ordinal);
             var deletedDocumentIds = existingDocuments
                 .Where(document => !currentSourcePaths.Contains(document.SourcePath))
@@ -68,33 +69,26 @@ public sealed class IngestionService(
             deletedCount = deletedDocumentIds.Length;
         }
 
-        foreach (var markdownFile in markdownFiles)
+        foreach (var snapshot in markdownSnapshots)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var rawMarkdown = await File.ReadAllTextAsync(markdownFile, cancellationToken);
-            var markdownParts = SplitFrontmatter(rawMarkdown);
-            var sourceHash = ComputeXxHash3(rawMarkdown);
-            var title = Path.GetFileNameWithoutExtension(markdownFile);
-            var updatedAt = DateTimeOffset.UtcNow;
-            var normalizedSourcePath = NormalizePath(Path.GetRelativePath(ingestionRootDirectory, markdownFile));
-
             var existingDocument = isFolderIngestion
-                ? existingDocumentsBySourcePath.GetValueOrDefault(normalizedSourcePath)
-                : await documentRepository.GetBySourcePathAsync(normalizedSourcePath, cancellationToken);
+                ? existingDocumentsBySourcePath.GetValueOrDefault(snapshot.SourcePath)
+                : await documentRepository.GetBySourcePathAsync(snapshot.SourcePath, cancellationToken);
 
             if (existingDocument is null)
             {
                 var newDocument = new Document
                 {
-                    DocumentId = GenerateDocumentId(normalizedSourcePath),
-                    SourcePath = normalizedSourcePath,
-                    Title = title,
-                    RawMarkdown = rawMarkdown,
-                    Frontmatter = markdownParts.Frontmatter,
-                    PageContent = markdownParts.PageContent,
-                    SourceHash = sourceHash,
-                    UpdatedAt = updatedAt,
+                    DocumentId = GenerateDocumentId(snapshot.SourcePath),
+                    SourcePath = snapshot.SourcePath,
+                    Title = snapshot.Title,
+                    RawMarkdown = snapshot.RawMarkdown,
+                    Frontmatter = snapshot.Frontmatter,
+                    PageContent = snapshot.PageContent,
+                    SourceHash = snapshot.SourceHash,
+                    UpdatedAt = snapshot.UpdatedAt,
                 };
 
                 createdCount++;
@@ -104,11 +98,11 @@ public sealed class IngestionService(
             }
 
             if (!request.ForceReingest
-                && string.Equals(existingDocument.SourceHash, sourceHash, StringComparison.Ordinal)
-                && string.Equals(existingDocument.Title, title, StringComparison.Ordinal)
-                && string.Equals(existingDocument.RawMarkdown, rawMarkdown, StringComparison.Ordinal)
-                && string.Equals(existingDocument.Frontmatter, markdownParts.Frontmatter, StringComparison.Ordinal)
-                && string.Equals(existingDocument.PageContent, markdownParts.PageContent, StringComparison.Ordinal))
+                && string.Equals(existingDocument.SourceHash, snapshot.SourceHash, StringComparison.Ordinal)
+                && string.Equals(existingDocument.Title, snapshot.Title, StringComparison.Ordinal)
+                && string.Equals(existingDocument.RawMarkdown, snapshot.RawMarkdown, StringComparison.Ordinal)
+                && string.Equals(existingDocument.Frontmatter, snapshot.Frontmatter, StringComparison.Ordinal)
+                && string.Equals(existingDocument.PageContent, snapshot.PageContent, StringComparison.Ordinal))
             {
                 continue;
             }
@@ -116,13 +110,13 @@ public sealed class IngestionService(
             var updatedDocument = new Document
             {
                 DocumentId = existingDocument.DocumentId,
-                SourcePath = normalizedSourcePath,
-                Title = title,
-                RawMarkdown = rawMarkdown,
-                Frontmatter = markdownParts.Frontmatter,
-                PageContent = markdownParts.PageContent,
-                SourceHash = sourceHash,
-                UpdatedAt = updatedAt,
+                SourcePath = snapshot.SourcePath,
+                Title = snapshot.Title,
+                RawMarkdown = snapshot.RawMarkdown,
+                Frontmatter = snapshot.Frontmatter,
+                PageContent = snapshot.PageContent,
+                SourceHash = snapshot.SourceHash,
+                UpdatedAt = snapshot.UpdatedAt,
             };
 
             updatedCount++;
@@ -142,7 +136,7 @@ public sealed class IngestionService(
 
         return new IngestionResult(
             true,
-            markdownFiles.Count,
+            markdownSnapshots.Count,
             createdCount,
             updatedCount,
             deletedCount,
@@ -169,6 +163,63 @@ public sealed class IngestionService(
 
         return selected;
     }
+
+    private async Task<IReadOnlyList<MarkdownFileSnapshot>> ReadMarkdownFileSnapshotsAsync(
+        IReadOnlyList<string> markdownFiles,
+        string ingestionRootDirectory,
+        CancellationToken cancellationToken)
+    {
+        var snapshots = new MarkdownFileSnapshot?[markdownFiles.Count];
+
+        await Parallel.ForEachAsync(
+            markdownFiles.Select((path, index) => new { path, index }),
+            new ParallelOptions
+            {
+                MaxDegreeOfParallelism = Math.Max(1, options.MaxFileReadConcurrency),
+                CancellationToken = cancellationToken,
+            },
+            async (item, token) =>
+            {
+                var rawMarkdown = await File.ReadAllTextAsync(item.path, token);
+                var markdownParts = SplitFrontmatter(rawMarkdown);
+                var normalizedSourcePath = NormalizePath(Path.GetRelativePath(ingestionRootDirectory, item.path));
+
+                if (!ShouldIngest(normalizedSourcePath, markdownParts.Frontmatter))
+                {
+                    return;
+                }
+
+                snapshots[item.index] = new MarkdownFileSnapshot(
+                    normalizedSourcePath,
+                    Path.GetFileNameWithoutExtension(item.path),
+                    rawMarkdown,
+                    markdownParts.Frontmatter,
+                    markdownParts.PageContent,
+                    ComputeXxHash3(rawMarkdown),
+                    DateTimeOffset.UtcNow);
+            });
+
+        return snapshots.OfType<MarkdownFileSnapshot>().ToArray();
+    }
+
+    private static bool ShouldIngest(string normalizedSourcePath, string frontmatter) =>
+        !IsTemplatePath(normalizedSourcePath) && HasPublishFlag(frontmatter);
+
+    private static bool IsTemplatePath(string normalizedSourcePath) =>
+        normalizedSourcePath
+            .Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Any(segment => string.Equals(segment, "Templates", StringComparison.OrdinalIgnoreCase));
+
+    private static bool HasPublishFlag(string frontmatter) =>
+        frontmatter
+            .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Any(line =>
+            {
+                var parts = line.Split(':', 2, StringSplitOptions.TrimEntries);
+                return parts.Length == 2
+                       && string.Equals(parts[0], "dg-publish", StringComparison.OrdinalIgnoreCase)
+                       && string.Equals(parts[1].Trim('\'', '"'), "true", StringComparison.OrdinalIgnoreCase);
+            });
 
     private static string GetSourcePathPrefix(string ingestionRootDirectory, string sourceDirectory)
     {
@@ -336,4 +387,13 @@ public sealed class IngestionService(
     private static string NormalizePath(string path) => path.Replace('\\', '/');
 
     private sealed record MarkdownParts(string Frontmatter, string PageContent);
+
+    private sealed record MarkdownFileSnapshot(
+        string SourcePath,
+        string Title,
+        string RawMarkdown,
+        string Frontmatter,
+        string PageContent,
+        string SourceHash,
+        DateTimeOffset UpdatedAt);
 }

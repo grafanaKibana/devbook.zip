@@ -30,8 +30,8 @@ public sealed class IngestionServiceTests
     {
         // Arrange
         using var workspace = TestWorkspace.Create();
-        workspace.WriteMarkdown(RootMarkdownPath, "# Root\n\nRoot content.");
-        workspace.WriteMarkdown(NestedMarkdownPath, "# Nested\n\nNested content.");
+        workspace.WriteMarkdown(RootMarkdownPath, Published("# Root\n\nRoot content."));
+        workspace.WriteMarkdown(NestedMarkdownPath, Published("# Nested\n\nNested content."));
         var upsertedDocuments = new List<Document>();
         var documents = CreateFolderDocumentRepository(string.Empty, [], upsertedDocuments);
         var chunks = CreateReplacingChunkRepository();
@@ -101,7 +101,7 @@ public sealed class IngestionServiceTests
     {
         // Arrange
         using var workspace = TestWorkspace.Create();
-        workspace.WriteMarkdown(ScopedNotePath, "---\nstatus: Creation\n---\n# Note\n\nFresh content.");
+        workspace.WriteMarkdown(ScopedNotePath, Published("# Note\n\nFresh content.", "status: Creation"));
         Document? upsertedDocument = null;
         IReadOnlyCollection<ChunkModel>? replacedChunks = null;
         var documents = new Mock<IDocumentRepository>(MockBehavior.Strict);
@@ -130,7 +130,7 @@ public sealed class IngestionServiceTests
         {
             SourcePath = ScopedNotePath,
             Title = "Note",
-            Frontmatter = "status: Creation",
+            Frontmatter = "dg-publish: true\nstatus: Creation",
             PageContent = "# Note\n\nFresh content.",
         });
         replacedChunks.Should().NotBeEmpty();
@@ -141,7 +141,7 @@ public sealed class IngestionServiceTests
     {
         // Arrange
         using var workspace = TestWorkspace.Create();
-        workspace.WriteMarkdown(ScopedNotePath, "# Note\n\nFresh content.");
+        workspace.WriteMarkdown(ScopedNotePath, Published("# Note\n\nFresh content."));
         var documents = new Mock<IDocumentRepository>(MockBehavior.Strict);
         documents.Setup(mock => mock.GetBySourcePathAsync(ScopedNotePath, It.IsAny<CancellationToken>()))
             .ReturnsAsync((Document?)null);
@@ -173,7 +173,7 @@ public sealed class IngestionServiceTests
     {
         // Arrange
         using var workspace = TestWorkspace.Create();
-        workspace.WriteMarkdown(ScopedNotePath, "# Note\n\nFresh content.");
+        workspace.WriteMarkdown(ScopedNotePath, Published("# Note\n\nFresh content."));
         var documents = new Mock<IDocumentRepository>(MockBehavior.Strict);
         documents.Setup(mock => mock.GetBySourcePathAsync(ScopedNotePath, It.IsAny<CancellationToken>()))
             .ReturnsAsync((Document?)null);
@@ -208,7 +208,7 @@ public sealed class IngestionServiceTests
     {
         // Arrange
         using var workspace = TestWorkspace.Create();
-        workspace.WriteMarkdown(ScopedNotePath, "# Note\n\nChanged content.");
+        workspace.WriteMarkdown(ScopedNotePath, Published("# Note\n\nChanged content."));
         var existing = Document(ExistingDocumentId, ScopedNotePath, "# Note\n\nOld content.", "old-hash");
         Document? upsertedDocument = null;
         IReadOnlyCollection<string>? deletedDocumentIds = null;
@@ -250,7 +250,7 @@ public sealed class IngestionServiceTests
     {
         // Arrange
         using var workspace = TestWorkspace.Create();
-        const string rawMarkdown = "# Note\n\nStable content.";
+        var rawMarkdown = Published("# Note\n\nStable content.");
         workspace.WriteMarkdown(ScopedNotePath, rawMarkdown);
         var existing = Document(ExistingDocumentId, ScopedNotePath, rawMarkdown, "placeholder") with
         {
@@ -281,7 +281,7 @@ public sealed class IngestionServiceTests
     public async Task IngestDocumentsAsync_ForceReingestUnchangedSingleFile_UpdatesDocumentAndReplacesChunks()
     {
         using var workspace = TestWorkspace.Create();
-        const string rawMarkdown = "# Note\n\nStable content.";
+        var rawMarkdown = Published("# Note\n\nStable content.");
         workspace.WriteMarkdown(ScopedNotePath, rawMarkdown);
         var existing = Document(ExistingDocumentId, ScopedNotePath, rawMarkdown, "placeholder") with
         {
@@ -317,15 +317,15 @@ public sealed class IngestionServiceTests
     {
         // Arrange
         using var workspace = TestWorkspace.Create();
-        const string unchangedMarkdown = "# A\n\nAlpha.";
+        var unchangedMarkdown = Published("# A\n\nAlpha.");
         workspace.WriteMarkdown("Scope/A.md", unchangedMarkdown);
-        workspace.WriteMarkdown(NestedMarkdownPath, "# B\n\nChanged beta.");
-        workspace.WriteMarkdown("Scope/New.md", "# New\n\nFresh.");
+        workspace.WriteMarkdown(NestedMarkdownPath, Published("# B\n\nChanged beta."));
+        workspace.WriteMarkdown("Scope/New.md", Published("# New\n\nFresh."));
         File.WriteAllText(Path.Combine(workspace.RootDirectory, ScopePath, "Ignored.txt"), "not markdown");
         var existingScoped = new[]
         {
             Document("old-a", "Scope/A.md", unchangedMarkdown, ComputeSourceHash(unchangedMarkdown)),
-            Document("old-b", NestedMarkdownPath, "# B\n\nOld beta.", "old-hash"),
+            Document("old-b", NestedMarkdownPath, Published("# B\n\nOld beta."), "old-hash"),
             Document("deleted", "Scope/Deleted.md", "old", "old"),
         };
         var upsertedDocuments = new List<Document>();
@@ -363,7 +363,7 @@ public sealed class IngestionServiceTests
     {
         // Arrange
         using var workspace = TestWorkspace.Create();
-        const string rawMarkdown = "# Note\n\nStable content.";
+        var rawMarkdown = Published("# Note\n\nStable content.");
         workspace.WriteMarkdown(ScopedNotePath, rawMarkdown);
         var existing = Document(ExistingDocumentId, ScopedNotePath, rawMarkdown, ComputeSourceHash(rawMarkdown));
         var upsertedDocuments = new List<Document>();
@@ -387,6 +387,30 @@ public sealed class IngestionServiceTests
         });
         upsertedDocuments.Should().BeEmpty();
         VerifyFolderRepositoryUsedOnce(documents, ScopePath);
+    }
+
+    [Fact]
+    public async Task IngestDocumentsAsync_FolderSource_SkipsNonRagMarkdownFiles()
+    {
+        using var workspace = TestWorkspace.Create();
+        workspace.WriteMarkdown("Scope/Published.md", Published("# Published\n\nUseful RAG content."));
+        workspace.WriteMarkdown("Scope/Draft.md", "# Draft\n\nNot published yet.");
+        workspace.WriteMarkdown("Scope/Templates/Template.md", Published("# Template\n\nScaffold."));
+        var upsertedDocuments = new List<Document>();
+        var documents = CreateFolderDocumentRepository(ScopePath, [], upsertedDocuments);
+        var chunks = CreateReplacingChunkRepository();
+        var service = CreateService(workspace.RootDirectory, documents, chunks);
+
+        var result = await service.IngestDocumentsAsync(new IngestionRequest(ScopePath, null));
+
+        result.Should().BeEquivalentTo(new
+        {
+            ProcessedCount = 1,
+            CreatedCount = 1,
+            UpdatedCount = 0,
+            DeletedCount = 0,
+        });
+        upsertedDocuments.Select(document => document.SourcePath).Should().Equal("Scope/Published.md");
     }
 
     private static IngestionService CreateService(
@@ -451,11 +475,17 @@ public sealed class IngestionServiceTests
     private static Mock<IChunkRepository> CaptureReplaceChunks(Action<string, IReadOnlyCollection<ChunkModel>> capture)
     {
         var chunks = new Mock<IChunkRepository>(MockBehavior.Strict);
-        chunks.Setup(mock => mock.ReplaceDocumentChunksAsync(
-                It.IsAny<string>(),
+        chunks.Setup(mock => mock.ReplaceDocumentsChunksAsync(
+                It.IsAny<IReadOnlyCollection<string>>(),
                 It.IsAny<IReadOnlyCollection<ChunkModel>>(),
                 It.IsAny<CancellationToken>()))
-            .Callback<string, IReadOnlyCollection<ChunkModel>, CancellationToken>((documentId, newChunks, _) => capture(documentId, newChunks))
+            .Callback<IReadOnlyCollection<string>, IReadOnlyCollection<ChunkModel>, CancellationToken>((documentIds, newChunks, _) =>
+            {
+                foreach (var documentId in documentIds)
+                {
+                    capture(documentId, newChunks.Where(chunk => chunk.DocumentId == documentId).ToArray());
+                }
+            })
             .Returns(Task.CompletedTask);
 
         return chunks;
@@ -473,17 +503,58 @@ public sealed class IngestionServiceTests
         return chunkingService;
     }
 
-    private static Document Document(string documentId, string sourcePath, string rawMarkdown, string sourceHash) => new()
+    private static Document Document(string documentId, string sourcePath, string rawMarkdown, string sourceHash)
     {
-        DocumentId = documentId,
-        SourcePath = sourcePath,
-        Title = Path.GetFileNameWithoutExtension(sourcePath),
-        RawMarkdown = rawMarkdown,
-        Frontmatter = string.Empty,
-        PageContent = rawMarkdown,
-        SourceHash = sourceHash,
-        UpdatedAt = DateTimeOffset.UnixEpoch,
-    };
+        var parts = SplitFrontmatter(rawMarkdown);
+
+        return new Document
+        {
+            DocumentId = documentId,
+            SourcePath = sourcePath,
+            Title = Path.GetFileNameWithoutExtension(sourcePath),
+            RawMarkdown = rawMarkdown,
+            Frontmatter = parts.Frontmatter,
+            PageContent = parts.PageContent,
+            SourceHash = sourceHash,
+            UpdatedAt = DateTimeOffset.UnixEpoch,
+        };
+    }
+
+    private static string Published(string pageContent, string? extraFrontmatter = null)
+    {
+        var frontmatter = string.IsNullOrWhiteSpace(extraFrontmatter)
+            ? "dg-publish: true"
+            : $"dg-publish: true\n{extraFrontmatter}";
+
+        return $"---\n{frontmatter}\n---\n{pageContent}";
+    }
+
+    private static (string Frontmatter, string PageContent) SplitFrontmatter(string rawMarkdown)
+    {
+        if (!rawMarkdown.StartsWith("---", StringComparison.Ordinal))
+        {
+            return (string.Empty, rawMarkdown);
+        }
+
+        using var reader = new StringReader(rawMarkdown);
+        if (!string.Equals(reader.ReadLine(), "---", StringComparison.Ordinal))
+        {
+            return (string.Empty, rawMarkdown);
+        }
+
+        var frontmatter = new System.Text.StringBuilder();
+        while (reader.ReadLine() is { } line)
+        {
+            if (string.Equals(line, "---", StringComparison.Ordinal))
+            {
+                return (frontmatter.ToString().TrimEnd(), reader.ReadToEnd().TrimStart());
+            }
+
+            frontmatter.AppendLine(line);
+        }
+
+        return (string.Empty, rawMarkdown);
+    }
 
     private static string ComputeSourceHash(string value)
     {

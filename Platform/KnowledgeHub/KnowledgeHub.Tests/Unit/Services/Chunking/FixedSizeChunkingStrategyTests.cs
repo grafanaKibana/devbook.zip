@@ -132,11 +132,11 @@ public sealed class FixedSizeChunkingStrategyTests
         Action<IReadOnlyCollection<ChunkModel>> capture)
     {
         var repository = new Mock<IChunkRepository>(MockBehavior.Strict);
-        repository.Setup(mock => mock.ReplaceDocumentChunksAsync(
-                expectedDocumentId,
+        repository.Setup(mock => mock.ReplaceDocumentsChunksAsync(
+                It.Is<IReadOnlyCollection<string>>(documentIds => documentIds.Count == 1 && documentIds.Contains(expectedDocumentId)),
                 It.IsAny<IReadOnlyCollection<ChunkModel>>(),
                 It.IsAny<CancellationToken>()))
-            .Callback<string, IReadOnlyCollection<ChunkModel>, CancellationToken>((_, chunks, _) => capture(chunks))
+            .Callback<IReadOnlyCollection<string>, IReadOnlyCollection<ChunkModel>, CancellationToken>((_, chunks, _) => capture(chunks))
             .Returns(Task.CompletedTask);
 
         return repository;
@@ -145,14 +145,11 @@ public sealed class FixedSizeChunkingStrategyTests
     private static Mock<IChunkRepository> CaptureReplaceForDocuments(params string[] documentIds)
     {
         var repository = new Mock<IChunkRepository>(MockBehavior.Strict);
-        foreach (var documentId in documentIds)
-        {
-            repository.Setup(mock => mock.ReplaceDocumentChunksAsync(
-                    documentId,
-                    It.IsAny<IReadOnlyCollection<ChunkModel>>(),
-                    It.IsAny<CancellationToken>()))
-                .Returns(Task.CompletedTask);
-        }
+        repository.Setup(mock => mock.ReplaceDocumentsChunksAsync(
+                It.Is<IReadOnlyCollection<string>>(actual => actual.Order().SequenceEqual(documentIds.Order())),
+                It.IsAny<IReadOnlyCollection<ChunkModel>>(),
+                It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
 
         return repository;
     }
