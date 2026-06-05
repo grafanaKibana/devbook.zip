@@ -50,6 +50,7 @@ public sealed class IngestionServiceTests
             DeletedCount = 0,
         });
         upsertedDocuments.Select(document => document.SourcePath).Should().Equal(RootMarkdownPath, NestedMarkdownPath);
+        VerifyFolderRepositoryUsedOnce(documents, string.Empty);
     }
 
     /// <summary>
@@ -357,6 +358,7 @@ public sealed class IngestionServiceTests
         upsertedDocuments.Select(document => document.SourcePath).Should().Equal(NestedMarkdownPath, "Scope/New.md");
         replacedDocumentIds.Should().BeEquivalentTo(result.DocumentIds);
         replacedDocumentIds.Should().NotContain("old-a");
+        VerifyFolderRepositoryUsedOnce(documents, ScopePath);
     }
 
     [Fact]
@@ -387,6 +389,7 @@ public sealed class IngestionServiceTests
             DocumentIds = Array.Empty<string>(),
         });
         upsertedDocuments.Should().BeEmpty();
+        VerifyFolderRepositoryUsedOnce(documents, ScopePath);
     }
 
     private static IngestionService CreateService(
@@ -422,13 +425,21 @@ public sealed class IngestionServiceTests
             .ReturnsAsync(existingDocuments);
         documents.Setup(mock => mock.DeleteByIdsAsync(It.IsAny<IReadOnlyCollection<string>>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
-        documents.Setup(mock => mock.GetBySourcePathAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((Document?)null);
         documents.Setup(mock => mock.UpsertAsync(It.IsAny<Document>(), It.IsAny<CancellationToken>()))
             .Callback<Document, CancellationToken>((document, _) => upsertedDocuments.Add(document))
             .Returns(Task.CompletedTask);
 
         return documents;
+    }
+
+    private static void VerifyFolderRepositoryUsedOnce(Mock<IDocumentRepository> documents, string expectedSourcePathPrefix)
+    {
+        documents.Verify(
+            mock => mock.GetBySourcePathPrefixAsync(expectedSourcePathPrefix, It.IsAny<CancellationToken>()),
+            Times.Once);
+        documents.Verify(
+            mock => mock.GetBySourcePathAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
     private static Mock<IChunkRepository> CreateReplacingChunkRepository()
