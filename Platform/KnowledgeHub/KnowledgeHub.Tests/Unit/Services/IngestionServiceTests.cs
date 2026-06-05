@@ -314,20 +314,20 @@ public sealed class IngestionServiceTests
         replacedDocumentIds.Should().Equal(ExistingDocumentId);
     }
 
-    /// <summary>
-    /// Tests that folder ingestion deletes scoped stored documents before recreating chunks for current markdown files.
-    /// </summary>
     [Fact]
-    public async Task IngestDocumentsAsync_FolderSource_DeletesScopedDocumentsAndIngestsMarkdownFiles()
+    public async Task IngestDocumentsAsync_FolderSource_DeletesMissingDocumentsAndIngestsChangedMarkdownFiles()
     {
         // Arrange
         using var workspace = TestWorkspace.Create();
-        workspace.WriteMarkdown("Scope/A.md", "# A\n\nAlpha.");
-        workspace.WriteMarkdown(NestedMarkdownPath, "# B\n\nBeta.");
+        const string unchangedMarkdown = "# A\n\nAlpha.";
+        workspace.WriteMarkdown("Scope/A.md", unchangedMarkdown);
+        workspace.WriteMarkdown(NestedMarkdownPath, "# B\n\nChanged beta.");
+        workspace.WriteMarkdown("Scope/New.md", "# New\n\nFresh.");
         File.WriteAllText(Path.Combine(workspace.RootDirectory, ScopePath, "Ignored.txt"), "not markdown");
         var existingScoped = new[]
         {
-            Document("old-a", "Scope/A.md", "old", "old"),
+            Document("old-a", "Scope/A.md", unchangedMarkdown, ComputeSourceHash(unchangedMarkdown)),
+            Document("old-b", NestedMarkdownPath, "# B\n\nOld beta.", "old-hash"),
             Document("deleted", "Scope/Deleted.md", "old", "old"),
         };
         var upsertedDocuments = new List<Document>();
@@ -348,14 +348,45 @@ public sealed class IngestionServiceTests
         // Assert
         result.Should().BeEquivalentTo(new
         {
-            ProcessedCount = 2,
-            CreatedCount = 2,
-            UpdatedCount = 0,
-            DeletedCount = 2,
+            ProcessedCount = 3,
+            CreatedCount = 1,
+            UpdatedCount = 1,
+            DeletedCount = 1,
         });
-        deletedDocumentIds.Should().BeEquivalentTo(["old-a", "deleted"]);
-        upsertedDocuments.Select(document => document.SourcePath).Should().Equal("Scope/A.md", NestedMarkdownPath);
+        deletedDocumentIds.Should().BeEquivalentTo(["deleted"]);
+        upsertedDocuments.Select(document => document.SourcePath).Should().Equal(NestedMarkdownPath, "Scope/New.md");
         replacedDocumentIds.Should().BeEquivalentTo(result.DocumentIds);
+        replacedDocumentIds.Should().NotContain("old-a");
+    }
+
+    [Fact]
+    public async Task IngestDocumentsAsync_UnchangedFolder_SkipsDocumentUpdatesAndChunking()
+    {
+        // Arrange
+        using var workspace = TestWorkspace.Create();
+        const string rawMarkdown = "# Note\n\nStable content.";
+        workspace.WriteMarkdown(ScopedNotePath, rawMarkdown);
+        var existing = Document(ExistingDocumentId, ScopedNotePath, rawMarkdown, ComputeSourceHash(rawMarkdown));
+        var upsertedDocuments = new List<Document>();
+        var documents = CreateFolderDocumentRepository(ScopePath, [existing], upsertedDocuments);
+        var chunks = new Mock<IChunkRepository>(MockBehavior.Strict);
+        chunks.Setup(mock => mock.DeleteByDocumentIdsAsync(It.Is<IReadOnlyCollection<string>>(ids => ids.Count == 0), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        var service = CreateService(workspace.RootDirectory, documents, chunks);
+
+        // Act
+        var result = await service.IngestDocumentsAsync(new IngestionRequest(ScopePath, null));
+
+        // Assert
+        result.Should().BeEquivalentTo(new
+        {
+            ProcessedCount = 1,
+            CreatedCount = 0,
+            UpdatedCount = 0,
+            DeletedCount = 0,
+            DocumentIds = Array.Empty<string>(),
+        });
+        upsertedDocuments.Should().BeEmpty();
     }
 
     private static IngestionService CreateService(

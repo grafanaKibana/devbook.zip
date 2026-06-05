@@ -42,22 +42,30 @@ public sealed class IngestionService(
         var changedDocumentIds = new List<string>();
         var isFolderIngestion = string.IsNullOrWhiteSpace(request.FileName);
         var selectedChunkingServices = GetSelectedChunkingServices(request.ChunkingStrategy);
+        var existingDocumentsBySourcePath = new Dictionary<string, Document>(StringComparer.Ordinal);
 
         if (isFolderIngestion)
         {
             var sourcePathPrefix = GetSourcePathPrefix(ingestionRootDirectory, sourceDirectory);
             var existingDocuments = await documentRepository.GetBySourcePathPrefixAsync(sourcePathPrefix, cancellationToken);
-            var existingDocumentIds = existingDocuments.Select(document => document.DocumentId).ToArray();
+            existingDocumentsBySourcePath = existingDocuments.ToDictionary(document => document.SourcePath, StringComparer.Ordinal);
+            var currentSourcePaths = markdownFiles
+                .Select(markdownFile => NormalizePath(Path.GetRelativePath(ingestionRootDirectory, markdownFile)))
+                .ToHashSet(StringComparer.Ordinal);
+            var deletedDocumentIds = existingDocuments
+                .Where(document => !currentSourcePaths.Contains(document.SourcePath))
+                .Select(document => document.DocumentId)
+                .ToArray();
 
             foreach (var chunkingService in selectedChunkingServices)
             {
                 await chunkRepositoryFactory.Create(chunkingService.Strategy)
-                    .DeleteByDocumentIdsAsync(existingDocumentIds, cancellationToken);
+                    .DeleteByDocumentIdsAsync(deletedDocumentIds, cancellationToken);
             }
 
-            await documentRepository.DeleteByIdsAsync(existingDocumentIds, cancellationToken);
+            await documentRepository.DeleteByIdsAsync(deletedDocumentIds, cancellationToken);
 
-            deletedCount = existingDocumentIds.Length;
+            deletedCount = deletedDocumentIds.Length;
         }
 
         foreach (var markdownFile in markdownFiles)
@@ -71,7 +79,9 @@ public sealed class IngestionService(
             var updatedAt = DateTimeOffset.UtcNow;
             var normalizedSourcePath = NormalizePath(Path.GetRelativePath(ingestionRootDirectory, markdownFile));
 
-            var existingDocument = await documentRepository.GetBySourcePathAsync(normalizedSourcePath, cancellationToken);
+            var existingDocument = isFolderIngestion
+                ? existingDocumentsBySourcePath.GetValueOrDefault(normalizedSourcePath)
+                : await documentRepository.GetBySourcePathAsync(normalizedSourcePath, cancellationToken);
 
             if (existingDocument is null)
             {
@@ -96,7 +106,6 @@ public sealed class IngestionService(
             }
 
             if (!request.ForceReingest
-                && !isFolderIngestion
                 && string.Equals(existingDocument.SourceHash, sourceHash, StringComparison.Ordinal)
                 && string.Equals(existingDocument.Title, title, StringComparison.Ordinal)
                 && string.Equals(existingDocument.RawMarkdown, rawMarkdown, StringComparison.Ordinal)
