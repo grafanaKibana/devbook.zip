@@ -10,7 +10,7 @@ public static class SearchMetricCalculator
 
         if (queryMetrics.Length == 0)
         {
-            return new SearchReport(0, 0, 0, 0, 0, 0);
+            return new SearchReport(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         }
 
         return new SearchReport(
@@ -19,7 +19,11 @@ public static class SearchMetricCalculator
             queryMetrics.Average(metric => metric.PrecisionAtK),
             queryMetrics.Average(metric => metric.HitRateAtK),
             queryMetrics.Average(metric => metric.ReciprocalRank),
-            queryMetrics.Count(metric => metric.IsEmptyResult) / (double)queryMetrics.Length);
+            queryMetrics.Count(metric => metric.IsEmptyResult) / (double)queryMetrics.Length,
+            AverageAvailable(queryMetrics, metric => metric.ScoreAverage),
+            AverageAvailable(queryMetrics, metric => metric.CreditedScoreAverage),
+            AverageAvailable(queryMetrics, metric => metric.UncreditedScoreAverage),
+            AverageAvailable(queryMetrics, metric => metric.CreditedToUncreditedSameSourceScoreGap));
     }
 
     public static SearchQueryMetrics ScoreQuery(SearchPrediction queryCase, int topK = 5)
@@ -50,6 +54,7 @@ public static class SearchMetricCalculator
                     rank,
                     retrievedDocument.SourcePath,
                     retrievedDocument.Heading,
+                    retrievedDocument.Score,
                     analysis.Expected?.SourcePath,
                     analysis.Expected?.Heading,
                     analysis.SourcePathMatched,
@@ -68,6 +73,7 @@ public static class SearchMetricCalculator
                 rank,
                 retrievedDocument.SourcePath,
                 retrievedDocument.Heading,
+                retrievedDocument.Score,
                 analysis.Expected!.SourcePath,
                 analysis.Expected.Heading,
                 analysis.SourcePathMatched,
@@ -96,6 +102,7 @@ public static class SearchMetricCalculator
         var recallAtK = expectedCount == 0 ? 0 : matchedExpected.Count(matched => matched) / (double)expectedCount;
         var precisionAtK = retrievedDocuments.Length == 0 ? 0 : relevantRetrievedCount / (double)retrievedDocuments.Length;
         var hitRateAtK = relevantRetrievedCount > 0 ? 1d : 0d;
+        var scoreMetrics = CreateScoreMetrics(matchDiagnostics);
 
         return new SearchQueryMetrics(
             recallAtK,
@@ -103,6 +110,10 @@ public static class SearchMetricCalculator
             hitRateAtK,
             reciprocalRank,
             retrievedDocuments.Length == 0,
+            scoreMetrics.ScoreAverage,
+            scoreMetrics.CreditedScoreAverage,
+            scoreMetrics.UncreditedScoreAverage,
+            scoreMetrics.CreditedToUncreditedSameSourceScoreGap,
             new SearchQueryDiagnostics(
                 retrievedDocuments.Length,
                 expectedCount,
@@ -111,6 +122,38 @@ public static class SearchMetricCalculator
                 duplicateRetrievedSourcePaths.OrderBy(path => path, StringComparer.OrdinalIgnoreCase).ToArray(),
                 matchDiagnostics));
     }
+
+    private static double AverageAvailable(IReadOnlyList<SearchQueryMetrics> metrics, Func<SearchQueryMetrics, double?> selector)
+    {
+        var values = metrics.Select(selector).OfType<double>().ToArray();
+
+        return values.Length == 0 ? 0 : values.Average();
+    }
+
+    private static SearchScoreMetrics CreateScoreMetrics(IReadOnlyList<SearchMatchDiagnostic> matches)
+    {
+        var scoredMatches = matches.Where(match => match.Score.HasValue).ToArray();
+        var creditedScores = scoredMatches.Where(match => match.IsRelevant).Select(match => match.Score!.Value).ToArray();
+        var uncreditedScores = scoredMatches.Where(match => !match.IsRelevant).Select(match => match.Score!.Value).ToArray();
+        var firstCredited = scoredMatches.FirstOrDefault(match => match.IsRelevant);
+        var highestUncreditedSameSource = firstCredited is null
+            ? null
+            : scoredMatches
+                .Where(match => !match.IsRelevant && match.SourcePathMatched)
+                .OrderByDescending(match => match.Score)
+                .FirstOrDefault();
+
+        return new SearchScoreMetrics(
+            AverageOrNull(scoredMatches.Select(match => match.Score!.Value).ToArray()),
+            AverageOrNull(creditedScores),
+            AverageOrNull(uncreditedScores),
+            firstCredited?.Score is not null && highestUncreditedSameSource?.Score is not null
+                ? firstCredited.Score - highestUncreditedSameSource.Score
+                : null);
+    }
+
+    private static double? AverageOrNull(IReadOnlyList<double> values)
+        => values.Count == 0 ? null : values.Average();
 
     private static RetrievedDocumentAnalysis AnalyzeRetrievedDocument(
         IReadOnlyList<SearchDocument> expectedDocuments,
@@ -247,7 +290,11 @@ public sealed record SearchReport(
     double PrecisionAtK,
     double HitRateAtK,
     double MeanReciprocalRank,
-    double EmptyResultRate);
+    double EmptyResultRate,
+    double ScoreAverage,
+    double CreditedScoreAverage,
+    double UncreditedScoreAverage,
+    double CreditedToUncreditedSameSourceScoreGap);
 
 public sealed record SearchQueryMetrics(
     double RecallAtK,
@@ -255,7 +302,17 @@ public sealed record SearchQueryMetrics(
     double HitRateAtK,
     double ReciprocalRank,
     bool IsEmptyResult,
+    double? ScoreAverage,
+    double? CreditedScoreAverage,
+    double? UncreditedScoreAverage,
+    double? CreditedToUncreditedSameSourceScoreGap,
     SearchQueryDiagnostics Diagnostics);
+
+public sealed record SearchScoreMetrics(
+    double? ScoreAverage,
+    double? CreditedScoreAverage,
+    double? UncreditedScoreAverage,
+    double? CreditedToUncreditedSameSourceScoreGap);
 
 public sealed record SearchQueryDiagnostics(
     int RetrievedCount,
@@ -276,6 +333,7 @@ public sealed record SearchMatchDiagnostic(
     int Rank,
     string SourcePath,
     string? Heading,
+    double? Score,
     string? MatchedExpectedSourcePath,
     string? MatchedExpectedHeading,
     bool SourcePathMatched,

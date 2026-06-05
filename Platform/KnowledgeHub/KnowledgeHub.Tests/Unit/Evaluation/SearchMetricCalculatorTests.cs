@@ -105,10 +105,12 @@ public sealed class SearchMetricCalculatorTests
         // Assert
         result.RecallAtK.Should().Be(0);
         result.PrecisionAtK.Should().Be(0);
+        result.HitRateAtK.Should().Be(0);
         result.ReciprocalRank.Should().Be(0);
         result.Diagnostics.Matches.Should().ContainSingle().Which.Should().BeEquivalentTo(new
         {
             IsRelevant = false,
+            Score = (double?)null,
             HeadingMatched = false,
             SnippetMatched = false,
             SourcePathMatched = true,
@@ -141,6 +143,7 @@ public sealed class SearchMetricCalculatorTests
                 Rank = 1,
                 SourcePath = EvaluationPath,
                 Heading = "Questions",
+                Score = (double?)null,
                 MatchedExpectedSourcePath = EvaluationPath,
                 SourcePathMatched = true,
                 HeadingMatched = false,
@@ -153,6 +156,7 @@ public sealed class SearchMetricCalculatorTests
                 Rank = 2,
                 SourcePath = ChunkingPath,
                 Heading = "Parent-Child Chunking",
+                Score = (double?)null,
                 MatchedExpectedSourcePath = ChunkingPath,
                 SourcePathMatched = true,
                 HeadingMatched = true,
@@ -165,6 +169,7 @@ public sealed class SearchMetricCalculatorTests
                 Rank = 3,
                 SourcePath = ChunkingPath,
                 Heading = "Parent-Child Chunking",
+                Score = (double?)null,
                 MatchedExpectedSourcePath = ChunkingPath,
                 SourcePathMatched = true,
                 HeadingMatched = true,
@@ -176,12 +181,32 @@ public sealed class SearchMetricCalculatorTests
     }
 
     [Fact]
-    public async Task SearchEvaluator_EvaluateAsync_AddsReportFacingDiagnostics()
+    public void ScoreQuery_ScoredResults_ReturnsScoreAnalysisMetrics()
+    {
+        var prediction = Prediction(
+            "score analysis query",
+            [Document(EvaluationPath, RetrievalHeading, RetrievalSnippet)],
+            [
+                Document(EvaluationPath, RetrievalHeading, "Recall@k is primary because the generator cannot use evidence it never sees.", score: 0.8),
+                Document(EvaluationPath, RetrievalHeading, "Recall@k is primary because the generator cannot use evidence it never sees.", score: 0.75),
+                Document(IrrelevantPath, "Composite", "irrelevant", score: 0.7)
+            ]);
+
+        var result = SearchMetricCalculator.ScoreQuery(prediction);
+
+        result.ScoreAverage.Should().BeApproximately(0.75, 0.000001);
+        result.CreditedScoreAverage.Should().BeApproximately(0.8, 0.000001);
+        result.UncreditedScoreAverage.Should().BeApproximately(0.725, 0.000001);
+        result.CreditedToUncreditedSameSourceScoreGap.Should().BeApproximately(0.05, 0.000001);
+    }
+
+    [Fact]
+    public async Task SearchEvaluator_EvaluateAsync_AddsReportFacingInterpretations()
     {
         var prediction = Prediction(
             "report diagnostic query",
             [Document(EvaluationPath, RetrievalHeading, "MRR rewards pushing the first relevant result higher")],
-            [Document(EvaluationPath, "Questions", "different chunk")]);
+            [Document(EvaluationPath, "Questions", "different chunk", score: 0.87)]);
         var evaluator = new SearchEvaluator();
 
         var result = await evaluator.EvaluateAsync(
@@ -190,19 +215,18 @@ public sealed class SearchMetricCalculatorTests
             additionalContext: [new SearchEvaluationContext(prediction, topK: 5)]);
 
         var recallMetric = result.Metrics["RecallAtK"];
-        var diagnosticMessages = recallMetric.Diagnostics.Should().NotBeNull().And.Subject!.Select(diagnostic => diagnostic.Message);
 
         recallMetric.Reason.Should().Be("Recall@k measures evidence coverage: matched expected evidence divided by expected evidence. High means required evidence was present in top-k; low means generation is capped by missing context.");
         recallMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Unacceptable);
         recallMetric.Interpretation.Reason.Should().Be("Score 0 (Unacceptable): matched 0/1 expected evidence items.");
-        diagnosticMessages.Should().Contain(message => message.Contains("Recall affected: missing 1/1 expected evidence: #1 Software Engineering/11 AI & ML/LLM/RAG/Evaluation.md heading=\"Retrieval Metrics\"."));
-        diagnosticMessages.Should().Contain(message => message.Contains("Closest same-source misses: rank 1 heading=\"Questions\" expectedHeading=\"Retrieval Metrics\" reason=expected heading/snippet absent."));
-        diagnosticMessages.Should().HaveCount(2);
+        recallMetric.Diagnostics.Should().BeNullOrEmpty();
 
         var precisionMetric = result.Metrics["PrecisionAtK"];
+
         precisionMetric.Reason.Should().Be("Precision@k measures annotated context purity: relevant retrieved chunks divided by retrieved chunks. With sparse expected evidence, a case with one credited chunk in top-5 scores 0.2 even when that chunk is sufficient.");
         precisionMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Unacceptable);
         precisionMetric.Interpretation.Reason.Should().Be("Score 0 (Unacceptable): 0/1 retrieved chunks counted as relevant evidence.");
+        precisionMetric.Diagnostics.Should().BeNullOrEmpty();
 
         var hitRateMetric = result.Metrics["HitRateAtK"];
         hitRateMetric.Reason.Should().Be("HitRate@k measures whether at least one expected evidence item appeared in top-k.");
@@ -213,6 +237,91 @@ public sealed class SearchMetricCalculatorTests
         reciprocalRankMetric.Reason.Should().Be("ReciprocalRank measures ranking quality: 1 divided by the rank of the first relevant evidence chunk. High means useful evidence appears early; 0 means no relevant evidence appeared in top-k.");
         reciprocalRankMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Unacceptable);
         reciprocalRankMetric.Interpretation.Reason.Should().Be("Score 0 (Unacceptable): no retrieved chunk matched the expected evidence.");
+        reciprocalRankMetric.Diagnostics.Should().BeNullOrEmpty();
+
+        var scoreAverageMetric = result.Metrics["ScoreAverage"];
+        ((NumericMetric)scoreAverageMetric).Value.Should().Be(0.87);
+        scoreAverageMetric.Reason.Should().Be("ScoreAverage measures the average vector score across all scored retrieved chunks in top-k.");
+        scoreAverageMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Exceptional);
+        scoreAverageMetric.Interpretation.Reason.Should().Be("Score 0.87 (Exceptional): average score across scored retrieved chunks.");
+        scoreAverageMetric.Diagnostics.Should().BeNullOrEmpty();
+
+        var creditedScoreMetric = result.Metrics["CreditedScoreAverage"];
+        ((NumericMetric)creditedScoreMetric).Value.Should().Be(0);
+        creditedScoreMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Inconclusive);
+        creditedScoreMetric.Interpretation.Reason.Should().Be("Score 0 (Inconclusive): no credited retrieved chunks included vector scores.");
+
+        var uncreditedScoreMetric = result.Metrics["UncreditedScoreAverage"];
+        ((NumericMetric)uncreditedScoreMetric).Value.Should().Be(0.87);
+        uncreditedScoreMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Exceptional);
+        uncreditedScoreMetric.Interpretation.Reason.Should().Be("Score 0.87 (Exceptional): average score across scored uncredited retrieved chunks; uncredited means absent from the sparse expected-evidence set, not necessarily irrelevant.");
+
+        var gapMetric = result.Metrics["CreditedToUncreditedSameSourceScoreGap"];
+        ((NumericMetric)gapMetric).Value.Should().Be(0);
+        gapMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Inconclusive);
+        gapMetric.Interpretation.Reason.Should().Be("Score 0 (Inconclusive): no scored credited and uncredited same-source pair was available.");
+    }
+
+    [Fact]
+    public async Task SearchEvaluator_EvaluateAsync_RoundsScoreMetricsAndRatesThresholds()
+    {
+        var prediction = Prediction(
+            "rounded score query",
+            [Document(EvaluationPath, RetrievalHeading, RetrievalSnippet)],
+            [
+                Document(EvaluationPath, RetrievalHeading, "Recall@k is primary because the generator cannot use evidence it never sees.", score: 0.87654),
+                Document(EvaluationPath, RetrievalHeading, "Recall@k is primary because the generator cannot use evidence it never sees.", score: 0.84321),
+                Document(IrrelevantPath, "Composite", "irrelevant", score: 0.18765)
+            ]);
+        var evaluator = new SearchEvaluator();
+
+        var result = await evaluator.EvaluateAsync(
+            [new ChatMessage(ChatRole.User, prediction.Query)],
+            new ChatResponse(new ChatMessage(ChatRole.Assistant, "[[Evaluation#Retrieval Metrics]]")),
+            additionalContext: [new SearchEvaluationContext(prediction, topK: 5)]);
+
+        var scoreAverageMetric = result.Metrics["ScoreAverage"];
+        ((NumericMetric)scoreAverageMetric).Value.Should().Be(0.636);
+        scoreAverageMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Good);
+        scoreAverageMetric.Interpretation.Reason.Should().Be("Score 0.636 (Good): average score across scored retrieved chunks.");
+
+        var creditedScoreMetric = result.Metrics["CreditedScoreAverage"];
+        ((NumericMetric)creditedScoreMetric).Value.Should().Be(0.877);
+        creditedScoreMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Exceptional);
+
+        var uncreditedScoreMetric = result.Metrics["UncreditedScoreAverage"];
+        ((NumericMetric)uncreditedScoreMetric).Value.Should().Be(0.515);
+        uncreditedScoreMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Average);
+        uncreditedScoreMetric.Interpretation.Reason.Should().Be("Score 0.515 (Average): average score across scored uncredited retrieved chunks; uncredited means absent from the sparse expected-evidence set, not necessarily irrelevant.");
+
+        var gapMetric = result.Metrics["CreditedToUncreditedSameSourceScoreGap"];
+        ((NumericMetric)gapMetric).Value.Should().Be(0.033);
+        gapMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Unknown);
+        gapMetric.Interpretation.Reason.Should().Be("Score 0.033 (Unknown): credited score minus highest uncredited same-source score; descriptive only.");
+    }
+
+    [Fact]
+    public async Task SearchEvaluator_EvaluateAsync_RatesLowScoreAverageAsUnacceptable()
+    {
+        var prediction = Prediction(
+            "low score query",
+            [Document(EvaluationPath, RetrievalHeading, RetrievalSnippet)],
+            [Document(EvaluationPath, RetrievalHeading, "Recall@k is primary because the generator cannot use evidence it never sees.", score: 0.2)]);
+        var evaluator = new SearchEvaluator();
+
+        var result = await evaluator.EvaluateAsync(
+            [new ChatMessage(ChatRole.User, prediction.Query)],
+            new ChatResponse(new ChatMessage(ChatRole.Assistant, "[[Evaluation#Retrieval Metrics]]")),
+            additionalContext: [new SearchEvaluationContext(prediction, topK: 5)]);
+
+        var scoreAverageMetric = result.Metrics["ScoreAverage"];
+
+        ((NumericMetric)scoreAverageMetric).Value.Should().Be(0.2);
+        scoreAverageMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Unacceptable);
+        scoreAverageMetric.Interpretation.Reason.Should().Be("Score 0.2 (Unacceptable): average score across scored retrieved chunks.");
+
+        var creditedScoreMetric = result.Metrics["CreditedScoreAverage"];
+        creditedScoreMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Unacceptable);
     }
 
     [Fact]
@@ -250,6 +359,11 @@ public sealed class SearchMetricCalculatorTests
         metrics["HitRateAtK"].Rating.Should().Be(EvaluationRating.Average);
         metrics["ReciprocalRank"].Rating.Should().Be(EvaluationRating.Good);
         metrics["EmptyResultRate"].Rating.Should().Be(EvaluationRating.Poor);
+        metrics.Should().ContainKeys("ScoreAverage", "CreditedScoreAverage", "UncreditedScoreAverage", "CreditedToUncreditedSameSourceScoreGap");
+        metrics["ScoreAverage"].Rating.Should().Be(EvaluationRating.Unacceptable);
+        metrics["CreditedScoreAverage"].Rating.Should().Be(EvaluationRating.Unacceptable);
+        metrics["UncreditedScoreAverage"].Rating.Should().Be(EvaluationRating.Unacceptable);
+        metrics["CreditedToUncreditedSameSourceScoreGap"].Rating.Should().Be(EvaluationRating.Unknown);
     }
 
     [Fact]
@@ -344,9 +458,9 @@ public sealed class SearchMetricCalculatorTests
         // Arrange
         var predictions = new[]
         {
-            new SearchPrediction("first query", [Document(EvaluationPath)], [Document(EvaluationPath)]),
+            new SearchPrediction("first query", [Document(EvaluationPath)], [Document(EvaluationPath, score: 0.9)]),
             new SearchPrediction("second query", [Document(EvaluationPath)], []),
-            new SearchPrediction("third query", [Document(ChunkingPath)], [Document(IrrelevantPath), Document(ChunkingPath)]),
+            new SearchPrediction("third query", [Document(ChunkingPath)], [Document(IrrelevantPath, score: 0.7), Document(ChunkingPath, score: 0.8)]),
         };
 
         // Act
@@ -359,6 +473,10 @@ public sealed class SearchMetricCalculatorTests
         report.HitRateAtK.Should().BeApproximately(2d / 3d, 0.000001);
         report.MeanReciprocalRank.Should().BeApproximately(0.5, 0.000001);
         report.EmptyResultRate.Should().BeApproximately(1d / 3d, 0.000001);
+        report.ScoreAverage.Should().BeApproximately(0.825, 0.000001);
+        report.CreditedScoreAverage.Should().BeApproximately(0.85, 0.000001);
+        report.UncreditedScoreAverage.Should().BeApproximately(0.7, 0.000001);
+        report.CreditedToUncreditedSameSourceScoreGap.Should().Be(0);
     }
 
     private static SearchPrediction Prediction(
@@ -367,6 +485,6 @@ public sealed class SearchMetricCalculatorTests
         IReadOnlyList<SearchDocument> retrievedDocuments) =>
         new(query, expectedDocuments, retrievedDocuments);
 
-    private static SearchDocument Document(string sourcePath, string? heading = null, string? snippet = null) =>
-        new(sourcePath, heading, snippet);
+    private static SearchDocument Document(string sourcePath, string? heading = null, string? snippet = null, double? score = null) =>
+        new(sourcePath, heading, snippet, Score: score);
 }

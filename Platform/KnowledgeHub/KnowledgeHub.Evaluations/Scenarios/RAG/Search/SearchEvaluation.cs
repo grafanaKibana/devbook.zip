@@ -71,10 +71,12 @@ public sealed class SearchEvaluation : MongoEvaluationTestBase<SearchPrediction>
         var sourcePathsByDocumentId = documents.ToDictionary(document => document.DocumentId, document => document.SourcePath, StringComparer.Ordinal);
 
         return results
-            .Select(result => new SearchDocument(
+            .Select((result, index) => new SearchDocument(
                 sourcePathsByDocumentId.TryGetValue(result.DocumentId, out var sourcePath) ? sourcePath : result.CitationLabel,
                 result.Heading,
-                result.ChunkText))
+                result.ChunkText,
+                index + 1,
+                result.Score))
             .ToArray();
     }
 

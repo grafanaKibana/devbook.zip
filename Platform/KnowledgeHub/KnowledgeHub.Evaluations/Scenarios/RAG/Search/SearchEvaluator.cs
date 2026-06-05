@@ -12,7 +12,10 @@ public sealed class SearchEvaluator : IEvaluator
     private const string PrecisionAtKMetricName = "PrecisionAtK";
     private const string HitRateAtKMetricName = "HitRateAtK";
     private const string ReciprocalRankMetricName = "ReciprocalRank";
-    private const int DiagnosticItemLimit = 2;
+    private const string ScoreAverageMetricName = "ScoreAverage";
+    private const string CreditedScoreAverageMetricName = "CreditedScoreAverage";
+    private const string UncreditedScoreAverageMetricName = "UncreditedScoreAverage";
+    private const string CreditedToUncreditedSameSourceScoreGapMetricName = "CreditedToUncreditedSameSourceScoreGap";
 
     public IReadOnlyCollection<string> EvaluationMetricNames { get; } =
     [
@@ -20,6 +23,10 @@ public sealed class SearchEvaluator : IEvaluator
         PrecisionAtKMetricName,
         HitRateAtKMetricName,
         ReciprocalRankMetricName,
+        ScoreAverageMetricName,
+        CreditedScoreAverageMetricName,
+        UncreditedScoreAverageMetricName,
+        CreditedToUncreditedSameSourceScoreGapMetricName,
     ];
 
     public ValueTask<EvaluationResult> EvaluateAsync(
@@ -42,6 +49,10 @@ public sealed class SearchEvaluator : IEvaluator
             CreateMetric(PrecisionAtKMetricName, metrics.PrecisionAtK, metrics),
             CreateMetric(HitRateAtKMetricName, metrics.HitRateAtK, metrics),
             CreateMetric(ReciprocalRankMetricName, metrics.ReciprocalRank, metrics),
+            CreateScoreMetric(ScoreAverageMetricName, metrics.ScoreAverage, metrics),
+            CreateScoreMetric(CreditedScoreAverageMetricName, metrics.CreditedScoreAverage, metrics),
+            CreateScoreMetric(UncreditedScoreAverageMetricName, metrics.UncreditedScoreAverage, metrics),
+            CreateScoreMetric(CreditedToUncreditedSameSourceScoreGapMetricName, metrics.CreditedToUncreditedSameSourceScoreGap, metrics),
         ]));
     }
 
@@ -64,6 +75,10 @@ public sealed class SearchEvaluator : IEvaluator
         new SummaryMetric(HitRateAtKMetricName, report.HitRateAtK, $"Average HitRate@k across RAG search cases over {strategy} chunks; shows how often retrieval found at least one expected evidence item.", SummaryMetricKind.Percentage, GetRating(HitRateAtKMetricName, report.HitRateAtK)),
         new SummaryMetric(ReciprocalRankMetricName, report.MeanReciprocalRank, $"Mean reciprocal rank across RAG search cases over {strategy} chunks.", SummaryMetricKind.PlainNumber, GetRating(ReciprocalRankMetricName, report.MeanReciprocalRank)),
         new SummaryMetric("EmptyResultRate", report.EmptyResultRate, $"Share of RAG search cases with no retrieved {strategy} chunks.", SummaryMetricKind.Percentage, GetEmptyResultRateRating(report.EmptyResultRate)),
+        new SummaryMetric(ScoreAverageMetricName, report.ScoreAverage, $"Average vector score across all scored retrieved {strategy} chunks.", SummaryMetricKind.PlainNumber, GetRating(ScoreAverageMetricName, report.ScoreAverage)),
+        new SummaryMetric(CreditedScoreAverageMetricName, report.CreditedScoreAverage, $"Average vector score across retrieved {strategy} chunks credited against expected evidence.", SummaryMetricKind.PlainNumber, GetRating(CreditedScoreAverageMetricName, report.CreditedScoreAverage)),
+        new SummaryMetric(UncreditedScoreAverageMetricName, report.UncreditedScoreAverage, $"Average vector score across retrieved {strategy} chunks not credited by the sparse golden dataset; high values can still indicate useful query-similar context.", SummaryMetricKind.PlainNumber, GetRating(UncreditedScoreAverageMetricName, report.UncreditedScoreAverage)),
+        new SummaryMetric(CreditedToUncreditedSameSourceScoreGapMetricName, report.CreditedToUncreditedSameSourceScoreGap, $"Average score difference between the first credited result and the highest-scored uncredited same-source {strategy} chunk; descriptive only because uncredited chunks may still be useful.", SummaryMetricKind.PlainNumber, GetRating(CreditedToUncreditedSameSourceScoreGapMetricName, report.CreditedToUncreditedSameSourceScoreGap)),
     ];
 
     private static NumericMetric CreateMetric(string name, double value, SearchQueryMetrics metrics)
@@ -77,55 +92,21 @@ public sealed class SearchEvaluator : IEvaluator
                 reason: CreateInterpretationReason(name, value, metrics)),
         };
 
-        AddDiagnostics(metric, name, metrics);
-
         return metric;
     }
 
-    private static void AddDiagnostics(NumericMetric metric, string name, SearchQueryMetrics metrics)
+    private static NumericMetric CreateScoreMetric(string name, double? value, SearchQueryMetrics metrics)
     {
-        var diagnostics = metrics.Diagnostics;
-        var relevantRetrievedCount = diagnostics.Matches.Count(match => match.IsRelevant);
-        var firstRelevantRank = diagnostics.Matches.FirstOrDefault(match => match.IsRelevant)?.Rank;
-        var sameSourceMisses = diagnostics.Matches
-            .Where(match => match.SourcePathMatched && !match.IsRelevant)
-            .ToArray();
+        var metricValue = value is null ? 0 : RoundScore(value.Value);
+        var rating = value is null ? EvaluationRating.Inconclusive : GetRating(name, metricValue);
 
-        if (name == RecallAtKMetricName && diagnostics.MissingExpectedSourcePaths.Count > 0)
+        return new NumericMetric(name, metricValue, CreateMetricReason(name))
         {
-            var missingExpected = diagnostics.ExpectedDocuments.Where(expectedDocument => !expectedDocument.Matched).ToArray();
-            metric.AddDiagnostics(EvaluationDiagnostic.Warning(
-                $"Recall affected: missing {missingExpected.Length}/{diagnostics.ExpectedCount} expected evidence: {FormatLimitedItems(missingExpected, FormatExpectedDocument)}."));
-            if (sameSourceMisses.Length > 0)
-            {
-                metric.AddDiagnostics(EvaluationDiagnostic.Informational(
-                    $"Closest same-source misses: {FormatLimitedItems(sameSourceMisses, FormatRetrievedMiss)}."));
-            }
-        }
-
-        if (name == PrecisionAtKMetricName && relevantRetrievedCount < diagnostics.RetrievedCount)
-        {
-            metric.AddDiagnostics(EvaluationDiagnostic.Informational(
-                $"Precision affected: {diagnostics.RetrievedCount - relevantRetrievedCount}/{diagnostics.RetrievedCount} retrieved chunks were not relevant; ranks {string.Join(", ", diagnostics.Matches.Where(match => !match.IsRelevant).Select(match => match.Rank))}."));
-            if (diagnostics.DuplicateRetrievedSourcePaths.Count > 0)
-            {
-                metric.AddDiagnostics(EvaluationDiagnostic.Informational(
-                    $"Duplicate sources affected precision: {string.Join(", ", diagnostics.DuplicateRetrievedSourcePaths)}."));
-            }
-        }
-
-        if (name == ReciprocalRankMetricName)
-        {
-            if (firstRelevantRank is null)
-            {
-                metric.AddDiagnostics(EvaluationDiagnostic.Warning("MRR affected: no relevant evidence was found in top-k."));
-            }
-            else if (firstRelevantRank > 1)
-            {
-                metric.AddDiagnostics(EvaluationDiagnostic.Informational(
-                    $"MRR affected: first relevant evidence was at rank {firstRelevantRank} after {firstRelevantRank - 1} non-relevant chunks."));
-            }
-        }
+            Interpretation = new EvaluationMetricInterpretation(
+                rating,
+                failed: false,
+                reason: CreateInterpretationReason(name, metricValue, metrics)),
+        };
     }
 
     private static string CreateMetricReason(string name)
@@ -135,6 +116,10 @@ public sealed class SearchEvaluator : IEvaluator
             PrecisionAtKMetricName => "Precision@k measures annotated context purity: relevant retrieved chunks divided by retrieved chunks. With sparse expected evidence, a case with one credited chunk in top-5 scores 0.2 even when that chunk is sufficient.",
             HitRateAtKMetricName => "HitRate@k measures whether at least one expected evidence item appeared in top-k.",
             ReciprocalRankMetricName => "ReciprocalRank measures ranking quality: 1 divided by the rank of the first relevant evidence chunk. High means useful evidence appears early; 0 means no relevant evidence appeared in top-k.",
+            ScoreAverageMetricName => "ScoreAverage measures the average vector score across all scored retrieved chunks in top-k.",
+            CreditedScoreAverageMetricName => "CreditedScoreAverage measures the average vector score across retrieved chunks credited against expected evidence.",
+            UncreditedScoreAverageMetricName => "UncreditedScoreAverage measures the average vector score across retrieved chunks not credited by the sparse golden dataset; uncredited does not mean irrelevant.",
+            CreditedToUncreditedSameSourceScoreGapMetricName => "CreditedToUncreditedSameSourceScoreGap measures the first credited result score minus the highest-scored uncredited result from the same expected source path; it is descriptive, not a quality target.",
             _ => name,
         };
 
@@ -158,6 +143,18 @@ public sealed class SearchEvaluator : IEvaluator
             ReciprocalRankMetricName => firstRelevantRank is null
                 ? $"Score 0 ({rating}): no retrieved chunk matched the expected evidence."
                 : $"Score {FormatNumber(value)} ({rating}): first relevant evidence was at rank {firstRelevantRank}.",
+            ScoreAverageMetricName => metrics.ScoreAverage is null
+                ? "Score 0 (Inconclusive): no retrieved chunks included vector scores."
+                : $"Score {FormatNumber(value)} ({rating}): average score across scored retrieved chunks.",
+            CreditedScoreAverageMetricName => metrics.CreditedScoreAverage is null
+                ? "Score 0 (Inconclusive): no credited retrieved chunks included vector scores."
+                : $"Score {FormatNumber(value)} ({rating}): average score across scored credited retrieved chunks.",
+            UncreditedScoreAverageMetricName => metrics.UncreditedScoreAverage is null
+                ? "Score 0 (Inconclusive): no uncredited retrieved chunks included vector scores."
+                : $"Score {FormatNumber(value)} ({rating}): average score across scored uncredited retrieved chunks; uncredited means absent from the sparse expected-evidence set, not necessarily irrelevant.",
+            CreditedToUncreditedSameSourceScoreGapMetricName => metrics.CreditedToUncreditedSameSourceScoreGap is null
+                ? "Score 0 (Inconclusive): no scored credited and uncredited same-source pair was available."
+                : $"Score {FormatNumber(value)} ({rating}): credited score minus highest uncredited same-source score; descriptive only.",
             _ => $"{name}: {FormatNumber(value)}",
         };
     }
@@ -197,6 +194,15 @@ public sealed class SearchEvaluator : IEvaluator
                 > 0 => EvaluationRating.Poor,
                 _ => EvaluationRating.Unacceptable,
             },
+            ScoreAverageMetricName or CreditedScoreAverageMetricName or UncreditedScoreAverageMetricName => value switch
+            {
+                > 0.8 => EvaluationRating.Exceptional,
+                > 0.6 => EvaluationRating.Good,
+                > 0.4 => EvaluationRating.Average,
+                > 0.2 => EvaluationRating.Poor,
+                _ => EvaluationRating.Unacceptable,
+            },
+            CreditedToUncreditedSameSourceScoreGapMetricName => EvaluationRating.Unknown,
             _ => EvaluationRating.Unknown,
         };
 
@@ -210,38 +216,14 @@ public sealed class SearchEvaluator : IEvaluator
             _ => EvaluationRating.Unacceptable,
         };
 
-    private static string FormatExpectedDocument(SearchExpectedDiagnostic expectedDocument)
-        => $"#{expectedDocument.Index} {expectedDocument.SourcePath} heading={FormatValue(expectedDocument.Heading)}";
-
-    private static string FormatRetrievedMiss(SearchMatchDiagnostic match)
-        => $"rank {match.Rank} heading={FormatValue(match.Heading)} expectedHeading={FormatValue(match.MatchedExpectedHeading)} reason={ShortReason(match)}";
-
-    private static string FormatLimitedItems<T>(IReadOnlyCollection<T> items, Func<T, string> formatter)
-    {
-        var formatted = string.Join(" | ", items.Take(DiagnosticItemLimit).Select(formatter));
-        var remainingCount = items.Count - DiagnosticItemLimit;
-
-        return remainingCount > 0 ? $"{formatted} (+{remainingCount} more)" : formatted;
-    }
-
-    private static string ShortReason(SearchMatchDiagnostic match)
-    {
-        if (match.SourcePathMatched && !match.HeadingMatched && !match.SnippetMatched)
-        {
-            return "expected heading/snippet absent";
-        }
-
-        return match.Reason;
-    }
-
     private static int MatchedExpectedCount(SearchQueryDiagnostics diagnostics)
         => diagnostics.ExpectedDocuments.Count(expectedDocument => expectedDocument.Matched);
 
-    private static string FormatValue(string? value)
-        => string.IsNullOrWhiteSpace(value) ? "<none>" : $"\"{value}\"";
-
     private static string FormatNumber(double value)
         => value.ToString("0.###", CultureInfo.InvariantCulture);
+
+    private static double RoundScore(double value)
+        => Math.Round(value, 3);
 
     private static NumericMetric CreateFailedMetric(string name, string reason)
         => new(name, 0, reason)
