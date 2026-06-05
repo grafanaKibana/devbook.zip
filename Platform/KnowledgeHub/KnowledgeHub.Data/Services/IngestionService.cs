@@ -99,10 +99,7 @@ public sealed class IngestionService(
 
             if (!request.ForceReingest
                 && string.Equals(existingDocument.SourceHash, snapshot.SourceHash, StringComparison.Ordinal)
-                && string.Equals(existingDocument.Title, snapshot.Title, StringComparison.Ordinal)
-                && string.Equals(existingDocument.RawMarkdown, snapshot.RawMarkdown, StringComparison.Ordinal)
-                && string.Equals(existingDocument.Frontmatter, snapshot.Frontmatter, StringComparison.Ordinal)
-                && string.Equals(existingDocument.PageContent, snapshot.PageContent, StringComparison.Ordinal))
+                && string.Equals(existingDocument.Title, snapshot.Title, StringComparison.Ordinal))
             {
                 continue;
             }
