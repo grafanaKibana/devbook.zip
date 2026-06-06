@@ -6,8 +6,11 @@ using Markdig.Syntax;
 
 public sealed class MarkdownSectionChunkingStrategy : IChunkingStrategy
 {
+    /// <summary>
+    /// Maximum character length for a section chunk before recursive separator-based splitting is applied.
+    /// </summary>
     private const int MaxChunkLength = 1200;
-    private const int OverlapLength = 200;
+
     private static readonly string[] Separators = ["\n\n", "\n", ". ", " "];
 
     public ChunkingStrategyKind Strategy => ChunkingStrategyKind.MarkdownSection;
@@ -149,7 +152,7 @@ public sealed class MarkdownSectionChunkingStrategy : IChunkingStrategy
                 break;
             }
 
-            start = Math.Max(endExclusive - OverlapLength, start + 1);
+            start = endExclusive;
         }
 
         return chunks;

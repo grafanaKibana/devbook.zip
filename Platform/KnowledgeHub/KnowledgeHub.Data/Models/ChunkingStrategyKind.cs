@@ -4,4 +4,5 @@ public enum ChunkingStrategyKind
 {
     FixedSize,
     MarkdownSection,
+    Semantic,
 }

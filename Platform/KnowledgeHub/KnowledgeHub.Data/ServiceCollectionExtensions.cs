@@ -26,12 +26,15 @@ public static class ServiceCollectionExtensions
 
             services.AddScoped<FixedSizeChunkingStrategy>();
             services.AddScoped<MarkdownSectionChunkingStrategy>();
+            services.AddScoped<SemanticChunkingStrategy>();
 
             services.AddScoped<IChunkingStrategy>(serviceProvider => serviceProvider.GetRequiredService<FixedSizeChunkingStrategy>());
             services.AddScoped<IChunkingStrategy>(serviceProvider => serviceProvider.GetRequiredService<MarkdownSectionChunkingStrategy>());
+            services.AddScoped<IChunkingStrategy>(serviceProvider => serviceProvider.GetRequiredService<SemanticChunkingStrategy>());
 
             services.AddScoped<IChunkingService>(serviceProvider => CreateChunkingService(serviceProvider, ChunkingStrategyKind.FixedSize));
             services.AddScoped<IChunkingService>(serviceProvider => CreateChunkingService(serviceProvider, ChunkingStrategyKind.MarkdownSection));
+            services.AddScoped<IChunkingService>(serviceProvider => CreateChunkingService(serviceProvider, ChunkingStrategyKind.Semantic));
 
             services.AddScoped<IDocumentRepository, DocumentRepository>();
             services.AddScoped<IChunkRepositoryFactory, ChunkRepositoryFactory>();

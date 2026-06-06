@@ -36,6 +36,13 @@ public sealed class SearchEvaluation : MongoEvaluationTestBase<SearchPrediction>
         await SearchFindsExpectedSources(testCase, ChunkingStrategyKind.MarkdownSection);
     }
 
+    [Test]
+    [TestCaseSource(nameof(TestCases))]
+    public async Task SearchOverSemanticChunks(SearchEvaluationCase testCase)
+    {
+        await SearchFindsExpectedSources(testCase, ChunkingStrategyKind.Semantic);
+    }
+
     private async Task SearchFindsExpectedSources(SearchEvaluationCase testCase, ChunkingStrategyKind chunkingStrategy)
     {
         await using var scenarioRun = await ReportingConfig.CreateScenarioRunAsync(

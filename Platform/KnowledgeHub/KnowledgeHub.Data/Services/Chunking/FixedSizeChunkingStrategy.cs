@@ -4,7 +4,14 @@ using KnowledgeHub.Data.Models;
 
 public sealed class FixedSizeChunkingStrategy : IChunkingStrategy
 {
+    /// <summary>
+    /// Maximum character length for each fixed-size chunk before the splitter starts a new chunk.
+    /// </summary>
     private const int MaxChunkLength = 1200;
+
+    /// <summary>
+    /// Number of trailing characters repeated in the next chunk to preserve boundary context.
+    /// </summary>
     private const int OverlapLength = 200;
 
     public ChunkingStrategyKind Strategy => ChunkingStrategyKind.FixedSize;

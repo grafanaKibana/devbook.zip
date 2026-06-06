@@ -169,6 +169,42 @@ public sealed class IngestionServiceTests
     }
 
     [Fact]
+    public async Task IngestDocumentsAsync_SemanticStrategy_RunsOnlySemanticChunkingService()
+    {
+        // Arrange
+        using var workspace = TestWorkspace.Create();
+        workspace.WriteMarkdown(ScopedNotePath, Published("# Note\n\nFresh content."));
+        var documents = new Mock<IDocumentRepository>(MockBehavior.Strict);
+        documents.Setup(mock => mock.GetBySourcePathAsync(ScopedNotePath, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Document?)null);
+        documents.Setup(mock => mock.BulkUpsertAsync(It.IsAny<IReadOnlyCollection<Document>>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        var fixedChunking = CreateChunkingService(ChunkingStrategyKind.FixedSize);
+        var markdownChunking = CreateChunkingService(ChunkingStrategyKind.MarkdownSection);
+        var semanticChunking = CreateChunkingService(ChunkingStrategyKind.Semantic);
+        var service = new IngestionService(
+            documents.Object,
+            new Mock<IChunkRepositoryFactory>(MockBehavior.Strict).Object,
+            [fixedChunking.Object, markdownChunking.Object, semanticChunking.Object],
+            new TestHostEnvironment(workspace.RootDirectory),
+            Options.Create(new IngestionOptions { ContentRootPath = "." }));
+
+        // Act
+        await service.IngestDocumentsAsync(new IngestionRequest(ScopePath, NoteFileName, ChunkingStrategy: ChunkingStrategyKind.Semantic));
+
+        // Assert
+        fixedChunking.Verify(mock => mock.ReplaceDocumentChunksAsync(
+            It.IsAny<IReadOnlyList<Document>>(),
+            It.IsAny<CancellationToken>()), Times.Never);
+        markdownChunking.Verify(mock => mock.ReplaceDocumentChunksAsync(
+            It.IsAny<IReadOnlyList<Document>>(),
+            It.IsAny<CancellationToken>()), Times.Never);
+        semanticChunking.Verify(mock => mock.ReplaceDocumentChunksAsync(
+            It.Is<IReadOnlyList<Document>>(documents => documents.Count == 1 && documents[0].SourcePath == ScopedNotePath),
+            It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
     public async Task IngestDocumentsAsync_NullChunkingStrategy_RunsAllChunkingServices()
     {
         // Arrange
@@ -181,10 +217,11 @@ public sealed class IngestionServiceTests
             .Returns(Task.CompletedTask);
         var fixedChunking = CreateChunkingService(ChunkingStrategyKind.FixedSize);
         var markdownChunking = CreateChunkingService(ChunkingStrategyKind.MarkdownSection);
+        var semanticChunking = CreateChunkingService(ChunkingStrategyKind.Semantic);
         var service = new IngestionService(
             documents.Object,
             new Mock<IChunkRepositoryFactory>(MockBehavior.Strict).Object,
-            [fixedChunking.Object, markdownChunking.Object],
+            [fixedChunking.Object, markdownChunking.Object, semanticChunking.Object],
             new TestHostEnvironment(workspace.RootDirectory),
             Options.Create(new IngestionOptions { ContentRootPath = "." }));
 
@@ -196,6 +233,9 @@ public sealed class IngestionServiceTests
             It.Is<IReadOnlyList<Document>>(documents => documents.Count == 1 && documents[0].SourcePath == ScopedNotePath),
             It.IsAny<CancellationToken>()), Times.Once);
         markdownChunking.Verify(mock => mock.ReplaceDocumentChunksAsync(
+            It.Is<IReadOnlyList<Document>>(documents => documents.Count == 1 && documents[0].SourcePath == ScopedNotePath),
+            It.IsAny<CancellationToken>()), Times.Once);
+        semanticChunking.Verify(mock => mock.ReplaceDocumentChunksAsync(
             It.Is<IReadOnlyList<Document>>(documents => documents.Count == 1 && documents[0].SourcePath == ScopedNotePath),
             It.IsAny<CancellationToken>()), Times.Once);
     }
