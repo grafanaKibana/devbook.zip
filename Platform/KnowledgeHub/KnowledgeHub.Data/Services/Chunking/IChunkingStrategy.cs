@@ -1,10 +1,14 @@
 namespace KnowledgeHub.Data.Services.Chunking;
 
 using KnowledgeHub.Data.Models;
+using KnowledgeHub.Data.Services;
 
 public interface IChunkingStrategy
 {
     ChunkingStrategyKind Strategy { get; }
 
-    IReadOnlyList<ChunkContent> Chunk(Document document);
+    Task<IReadOnlyList<ChunkContent>> ChunkAsync(
+        Document document,
+        IEmbeddingService embeddingService,
+        CancellationToken cancellationToken = default);
 }

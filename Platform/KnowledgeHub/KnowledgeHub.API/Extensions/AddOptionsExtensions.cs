@@ -20,6 +20,10 @@ public static class AddOptionsExtensions
                 .AddOptions<AnswerAgentOptions>()
                 .Bind(configuration.GetSection(nameof(AnswerAgentOptions)));
 
+            services
+                .AddOptions<RagSearchOptions>()
+                .Bind(configuration.GetSection(nameof(RagSearchOptions)));
+
             return services;
         }
     }

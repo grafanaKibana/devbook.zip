@@ -8,6 +8,7 @@ using KnowledgeHub.Data.Options;
 using KnowledgeHub.Data.Repositories;
 using KnowledgeHub.Data.Services;
 using KnowledgeHub.Data.Services.Chunking;
+using KnowledgeHub.Data.Services.Reranking;
 using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
@@ -35,6 +36,15 @@ public static class ServiceCollectionExtensions
             services.AddScoped<IChunkingService>(serviceProvider => CreateChunkingService(serviceProvider, ChunkingStrategyKind.FixedSize));
             services.AddScoped<IChunkingService>(serviceProvider => CreateChunkingService(serviceProvider, ChunkingStrategyKind.MarkdownSection));
             services.AddScoped<IChunkingService>(serviceProvider => CreateChunkingService(serviceProvider, ChunkingStrategyKind.Semantic));
+
+            services.AddScoped<CrossEncoderLexicalRerankingStrategy>();
+            services.AddScoped<LateInteractionRerankingStrategy>();
+            services.AddScoped<ReciprocalRankFusionRerankingStrategy>();
+
+            services.AddScoped<IRerankingStrategy>(serviceProvider => serviceProvider.GetRequiredService<CrossEncoderLexicalRerankingStrategy>());
+            services.AddScoped<IRerankingStrategy>(serviceProvider => serviceProvider.GetRequiredService<LateInteractionRerankingStrategy>());
+            services.AddScoped<IRerankingStrategy>(serviceProvider => serviceProvider.GetRequiredService<ReciprocalRankFusionRerankingStrategy>());
+            services.AddScoped<IRerankingStrategyFactory, RerankingStrategyFactory>();
 
             services.AddScoped<IDocumentRepository, DocumentRepository>();
             services.AddScoped<IChunkRepositoryFactory, ChunkRepositoryFactory>();

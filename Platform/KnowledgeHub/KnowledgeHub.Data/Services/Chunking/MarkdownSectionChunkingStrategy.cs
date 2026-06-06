@@ -1,6 +1,7 @@
 namespace KnowledgeHub.Data.Services.Chunking;
 
 using KnowledgeHub.Data.Models;
+using KnowledgeHub.Data.Services;
 using Markdig;
 using Markdig.Syntax;
 
@@ -15,9 +16,13 @@ public sealed class MarkdownSectionChunkingStrategy : IChunkingStrategy
 
     public ChunkingStrategyKind Strategy => ChunkingStrategyKind.MarkdownSection;
 
-    public IReadOnlyList<ChunkContent> Chunk(Document document)
+    public Task<IReadOnlyList<ChunkContent>> ChunkAsync(
+        Document document,
+        IEmbeddingService embeddingService,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(document);
+        ArgumentNullException.ThrowIfNull(embeddingService);
 
         var chunks = new List<ChunkContent>();
 
@@ -26,7 +31,7 @@ public sealed class MarkdownSectionChunkingStrategy : IChunkingStrategy
             chunks.AddRange(SplitRecursively(section.Content, 0).Select(text => new ChunkContent(text, section.Heading)));
         }
 
-        return chunks;
+        return Task.FromResult<IReadOnlyList<ChunkContent>>(chunks);
     }
 
     private static IReadOnlyList<Section> ExtractSections(string markdown)

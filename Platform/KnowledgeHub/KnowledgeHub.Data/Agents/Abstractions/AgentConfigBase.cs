@@ -29,24 +29,24 @@ public abstract record AgentConfigBase : IAgentConfig
     {
         var chatOptions = new ChatOptions
         {
-            Instructions = Prompt,
-            ModelId = ModelId,
+            Instructions = this.Prompt,
+            ModelId = this.ModelId,
         };
 
-        if (ChatResponseFormat is { } responseFormat)
+        if (this.ChatResponseFormat is { } responseFormat)
         {
             chatOptions.ResponseFormat = responseFormat;
         }
 
-        if (Tools is { Count: > 0 } tools)
+        if (this.Tools is { Count: > 0 } tools)
         {
             chatOptions.Tools = tools;
         }
 
         return new ChatClientAgentOptions
         {
-            Name = Name,
-            Description = Description,
+            Name = this.Name,
+            Description = this.Description,
             ChatOptions = chatOptions,
         };
     }
@@ -57,14 +57,14 @@ public abstract record AgentConfigBase : IAgentConfig
 
     protected string RenderExamples()
     {
-        if (PromptExamples.Count == 0)
+        if (this.PromptExamples.Count == 0)
         {
             return string.Empty;
         }
 
         var builder = new StringBuilder();
 
-        foreach (var example in PromptExamples)
+        foreach (var example in this.PromptExamples)
         {
             if (builder.Length > 0)
             {

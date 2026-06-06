@@ -1,15 +1,32 @@
 namespace KnowledgeHub.Evaluations.Scenarios.RAG.Search;
 
 using KnowledgeHub.Data.Models;
+using KnowledgeHub.Data.Options;
+using KnowledgeHub.Data.Services;
 using KnowledgeHub.Evaluations.Common;
 using KnowledgeHub.Evaluations.Common.Evaluators.SummaryGeneration;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.AI.Evaluation;
+using Microsoft.Extensions.Options;
 
 public sealed class SearchEvaluation : MongoEvaluationTestBase<SearchPrediction>
 {
     private const string DatasetFile = "golden-rag-cases.json";
     private const int TopK = 5;
+
+    private static readonly ChunkingStrategyKind[] ChunkingStrategies =
+    [
+        ChunkingStrategyKind.FixedSize,
+        ChunkingStrategyKind.MarkdownSection,
+        ChunkingStrategyKind.Semantic,
+    ];
+
+    private static readonly RerankingStrategyKind[] RerankingStrategies =
+    [
+        RerankingStrategyKind.CrossEncoderLexical,
+        RerankingStrategyKind.LateInteraction,
+        RerankingStrategyKind.ReciprocalRankFusion,
+    ];
 
     protected override string ScenarioDisplayName => "RAG.Search";
 
@@ -19,49 +36,67 @@ public sealed class SearchEvaluation : MongoEvaluationTestBase<SearchPrediction>
         IReadOnlyList<SearchPrediction> predictions)
         => SearchEvaluator.ComputeSummaryMetrics(predictions, TopK);
 
-    private static IEnumerable<TestCaseData> TestCases() => LoadTestCases<SearchDataset, SearchEvaluationCase>(
-        DatasetFile, dataset => dataset.Cases, testCase => testCase.Id);
-
-    [Test]
-    [TestCaseSource(nameof(TestCases))]
-    public async Task SearchOverFixedSizeChunks(SearchEvaluationCase testCase)
+    private static IEnumerable<TestCaseData> TestCases()
     {
-        await SearchFindsExpectedSources(testCase, ChunkingStrategyKind.FixedSize);
+        var datasetCases = LoadTestCases<SearchDataset, SearchEvaluationCase>(
+                DatasetFile, dataset => dataset.Cases, testCase => testCase.Id)
+            .Select(testCaseData => (SearchEvaluationCase)testCaseData.Arguments[0]!);
+
+        foreach (var testCase in datasetCases)
+        foreach (var chunkingStrategy in ChunkingStrategies)
+        foreach (var rerankingStrategy in RerankingStrategies)
+        {
+            yield return new TestCaseData(testCase, chunkingStrategy, rerankingStrategy)
+                .SetName($"SearchOverRerankedChunks({chunkingStrategy},{rerankingStrategy},{testCase.Id})");
+        }
     }
 
     [Test]
     [TestCaseSource(nameof(TestCases))]
-    public async Task SearchOverMarkdownSectionChunks(SearchEvaluationCase testCase)
+    public async Task SearchOverRerankedChunks(
+        SearchEvaluationCase testCase,
+        ChunkingStrategyKind chunkingStrategy,
+        RerankingStrategyKind rerankingStrategy)
     {
-        await SearchFindsExpectedSources(testCase, ChunkingStrategyKind.MarkdownSection);
+        await SearchFindsExpectedSources(testCase, chunkingStrategy, rerankingStrategy);
     }
 
-    [Test]
-    [TestCaseSource(nameof(TestCases))]
-    public async Task SearchOverSemanticChunks(SearchEvaluationCase testCase)
+    private async Task SearchFindsExpectedSources(
+        SearchEvaluationCase testCase,
+        ChunkingStrategyKind chunkingStrategy,
+        RerankingStrategyKind rerankingStrategy)
     {
-        await SearchFindsExpectedSources(testCase, ChunkingStrategyKind.Semantic);
-    }
-
-    private async Task SearchFindsExpectedSources(SearchEvaluationCase testCase, ChunkingStrategyKind chunkingStrategy)
-    {
-        await using var scenarioRun = await ReportingConfig.CreateScenarioRunAsync(
+        await using var scenarioRun = await this.ReportingConfig.CreateScenarioRunAsync(
             scenarioName: GetScenarioName(),
-            iterationName: $"{chunkingStrategy}.{testCase.Id}");
+            iterationName: $"{chunkingStrategy}.{rerankingStrategy}.{testCase.Id}");
 
-        var response = await RagSearchService.SearchAsync(new RagSearchRequest(testCase.Query, TopK, chunkingStrategy));
+        var searchService = CreateSearchService(chunkingStrategy, rerankingStrategy);
+        var response = await searchService.SearchAsync(new RagSearchRequest(testCase.Query, TopK));
         var prediction = new SearchPrediction(
             testCase.Query,
             testCase.ExpectedSources.Select(source => new SearchDocument(source.Path, source.Heading, source.Snippet)).ToArray(),
             await MapRetrievedDocumentsAsync(response.Results),
-            chunkingStrategy);
+            chunkingStrategy,
+            rerankingStrategy);
 
-        Predictions.Add(prediction);
+        this.Predictions.Add(prediction);
 
         await scenarioRun.EvaluateAsync(
             [new ChatMessage(ChatRole.User, testCase.Query)],
             new ChatResponse(new ChatMessage(ChatRole.Assistant, string.Join(Environment.NewLine, response.Results.Select(result => result.CitationLabel)))),
             additionalContext: [new SearchEvaluationContext(prediction, TopK)]);
+    }
+
+    private RagSearchService CreateSearchService(
+        ChunkingStrategyKind chunkingStrategy,
+        RerankingStrategyKind rerankingStrategy)
+    {
+        return new RagSearchService(this.EmbeddingService, this.ChunkRepositoryFactory, this.RerankingStrategyFactory,
+            Options.Create(new RagSearchOptions
+            {
+                ChunkingStrategy = chunkingStrategy,
+                RerankingStrategy = rerankingStrategy,
+            }));
     }
 
     private async Task<IReadOnlyList<SearchDocument>> MapRetrievedDocumentsAsync(IReadOnlyList<RagChunkResponse> results)
@@ -74,7 +109,7 @@ public sealed class SearchEvaluation : MongoEvaluationTestBase<SearchPrediction>
 
         var documents = documentIds.Length == 0
             ? []
-            : await DocumentRepository.GetByIdsAsync(documentIds);
+            : await this.DocumentRepository.GetByIdsAsync(documentIds);
         var sourcePathsByDocumentId = documents.ToDictionary(document => document.DocumentId, document => document.SourcePath, StringComparer.Ordinal);
 
         return results

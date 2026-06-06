@@ -5,6 +5,7 @@ using KnowledgeHub.Data.Models;
 using KnowledgeHub.Data.Options;
 using KnowledgeHub.Data.Repositories;
 using KnowledgeHub.Data.Services;
+using KnowledgeHub.Data.Services.Reranking;
 using KnowledgeHub.Tests.Common;
 using Microsoft.Extensions.Options;
 using Moq;
@@ -13,7 +14,7 @@ public sealed class RagSearchServiceTests
 {
     private const string QueryWithWhitespace = "  vector search  ";
     private const string NormalizedQuery = "vector search";
-    private const string SearchMode = "vector";
+    private const string SearchMode = "vector+CrossEncoderLexical";
 
     /// <summary>
     /// Tests that search rejects an empty query before generating embeddings or executing vector search.
@@ -40,18 +41,19 @@ public sealed class RagSearchServiceTests
     [InlineData(-1, 5)]
     [InlineData(3, 3)]
     [InlineData(50, 10)]
-    public async Task SearchAsync_QueryWithWhitespaceAndUnnormalizedTopK_CallsVectorSearchWithNormalizedRequest(int requestedTopK, int expectedTopK)
+    public async Task SearchAsync_QueryWithWhitespaceAndUnnormalizedTopK_CallsVectorSearchWithExpandedCandidateCount(int requestedTopK, int expectedTopK)
     {
         // Arrange
+        var expectedCandidateCount = expectedTopK * 4;
         var expectedResults = new[]
         {
-            new RagChunkResponse("chunk-1", "doc-1", "Chunk text", "Heading", "[[Doc#Heading]]", 0.93),
+            new RagChunkResponse("chunk-1", "doc-1", "vector search exact match", "Heading", "[[Doc#Heading]]", 0.93),
         };
         float[]? capturedVector = null;
         var repository = new Mock<IChunkRepository>(MockBehavior.Strict);
         repository.Setup(mock => mock.VectorSearchAsync(
                 It.IsAny<float[]>(),
-                expectedTopK,
+                expectedCandidateCount,
                 It.IsAny<CancellationToken>()))
             .Callback<float[], int, CancellationToken>((vector, _, _) => capturedVector = vector)
             .ReturnsAsync(expectedResults);
@@ -61,12 +63,11 @@ public sealed class RagSearchServiceTests
         var response = await service.SearchAsync(new RagSearchRequest(QueryWithWhitespace, requestedTopK));
 
         // Assert
-        response.Should().BeEquivalentTo(new
-        {
-            Query = NormalizedQuery,
-            Mode = SearchMode,
-            Results = expectedResults,
-        });
+        response.Query.Should().Be(NormalizedQuery);
+        response.Mode.Should().Be(SearchMode);
+        response.Results.Should().ContainSingle();
+        response.Results[0].Should().BeEquivalentTo(expectedResults[0], options => options.Excluding(result => result.Score));
+        response.Results[0].Score.Should().BeGreaterThan(0);
         capturedVector.Should().Equal([13f, 0f]);
     }
 
@@ -77,7 +78,7 @@ public sealed class RagSearchServiceTests
         var repository = new Mock<IChunkRepository>(MockBehavior.Strict);
         repository.Setup(mock => mock.VectorSearchAsync(
                 It.IsAny<float[]>(),
-                5,
+                20,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
         var generator = EmbeddingGeneratorMockFactory.CreateByInputLength();
@@ -85,20 +86,52 @@ public sealed class RagSearchServiceTests
         var repositoryFactory = new Mock<IChunkRepositoryFactory>(MockBehavior.Strict);
         repositoryFactory.Setup(factory => factory.Create(ChunkingStrategyKind.FixedSize))
             .Returns(repository.Object);
-        var service = new RagSearchService(embeddingService, repositoryFactory.Object);
+        var service = new RagSearchService(
+            embeddingService,
+            repositoryFactory.Object,
+            CreateRerankingStrategyFactory(),
+            Options.Create(new RagSearchOptions { ChunkingStrategy = ChunkingStrategyKind.FixedSize }));
 
         // Act
-        await service.SearchAsync(new RagSearchRequest(QueryWithWhitespace, 5, ChunkingStrategyKind.FixedSize));
+        await service.SearchAsync(new RagSearchRequest(QueryWithWhitespace, 5));
 
         // Assert
         repositoryFactory.Verify(factory => factory.Create(ChunkingStrategyKind.FixedSize), Times.Once);
         repository.Verify(mock => mock.VectorSearchAsync(
             It.IsAny<float[]>(),
-            5,
+            20,
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
-    private static RagSearchService CreateService(Mock<IChunkRepository> repository)
+    [Fact]
+    public async Task SearchAsync_RerankingStrategy_ReordersCandidatesAndReturnsRequestedTopK()
+    {
+        // Arrange
+        var candidates = new[]
+        {
+            new RagChunkResponse("chunk-1", "doc-1", "unrelated text", null, "[[Other]]", 0.99),
+            new RagChunkResponse("chunk-2", "doc-2", "vector search should use reranking after retrieval", null, "[[Vector]]", 0.80),
+            new RagChunkResponse("chunk-3", "doc-3", "another unrelated text", null, "[[Another]]", 0.70),
+        };
+        var repository = new Mock<IChunkRepository>(MockBehavior.Strict);
+        repository.Setup(mock => mock.VectorSearchAsync(
+                It.IsAny<float[]>(),
+                8,
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(candidates);
+        var service = CreateService(repository, RerankingStrategyKind.ReciprocalRankFusion);
+
+        // Act
+        var response = await service.SearchAsync(new RagSearchRequest(QueryWithWhitespace, 2));
+
+        // Assert
+        response.Results.Should().HaveCount(2);
+        response.Results[0].ChunkId.Should().Be("chunk-2");
+    }
+
+    private static RagSearchService CreateService(
+        Mock<IChunkRepository> repository,
+        RerankingStrategyKind rerankingStrategy = RerankingStrategyKind.CrossEncoderLexical)
     {
         var generator = EmbeddingGeneratorMockFactory.CreateByInputLength();
         var embeddingService = new EmbeddingService(generator.Object, Options.Create(new EmbeddingOptions()));
@@ -106,6 +139,17 @@ public sealed class RagSearchServiceTests
         repositoryFactory.Setup(factory => factory.Create(ChunkingStrategyKind.MarkdownSection))
             .Returns(repository.Object);
 
-        return new RagSearchService(embeddingService, repositoryFactory.Object);
+        return new RagSearchService(
+            embeddingService,
+            repositoryFactory.Object,
+            CreateRerankingStrategyFactory(),
+            Options.Create(new RagSearchOptions { RerankingStrategy = rerankingStrategy }));
     }
+
+    private static IRerankingStrategyFactory CreateRerankingStrategyFactory() => new RerankingStrategyFactory(
+    [
+        new CrossEncoderLexicalRerankingStrategy(),
+        new LateInteractionRerankingStrategy(),
+        new ReciprocalRankFusionRerankingStrategy(),
+    ]);
 }

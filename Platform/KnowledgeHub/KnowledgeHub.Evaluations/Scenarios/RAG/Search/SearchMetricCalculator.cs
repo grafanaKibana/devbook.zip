@@ -1,5 +1,7 @@
 namespace KnowledgeHub.Evaluations.Scenarios.RAG.Search;
 
+using KnowledgeHub.Data.Models;
+
 public static class SearchMetricCalculator
 {
     public static SearchReport Evaluate(
@@ -47,7 +49,7 @@ public static class SearchMetricCalculator
                 duplicateRetrievedSourcePaths.Add(retrievedDocument.SourcePath);
             }
 
-            var analysis = AnalyzeRetrievedDocument(expectedDocuments, matchedExpected, retrievedDocument);
+            var analysis = AnalyzeRetrievedDocument(queryCase.ChunkingStrategy, expectedDocuments, matchedExpected, retrievedDocument);
             if (!analysis.IsRelevant)
             {
                 matchDiagnostics.Add(new SearchMatchDiagnostic(
@@ -156,6 +158,7 @@ public static class SearchMetricCalculator
         => values.Count == 0 ? null : values.Average();
 
     private static RetrievedDocumentAnalysis AnalyzeRetrievedDocument(
+        ChunkingStrategyKind chunkingStrategy,
         IReadOnlyList<SearchDocument> expectedDocuments,
         bool[] matchedExpected,
         SearchDocument retrievedDocument)
@@ -178,7 +181,7 @@ public static class SearchMetricCalculator
             var headingMatched = MatchesContains(expectedDocument.Heading, retrievedDocument.Heading);
             var snippetMatched = MatchesContains(expectedDocument.Snippet, retrievedDocument.Snippet);
 
-            if (RequiresEvidenceMatch(expectedDocument) && !headingMatched && !snippetMatched)
+            if (RequiresEvidenceMatch(chunkingStrategy, expectedDocument) && !headingMatched && !snippetMatched)
             {
                 evidenceMismatch ??= new RetrievedDocumentAnalysis(
                     null,
@@ -233,8 +236,13 @@ public static class SearchMetricCalculator
             "Retrieved source path did not match any expected source path.");
     }
 
-    private static bool RequiresEvidenceMatch(SearchDocument expectedDocument)
+    private static bool RequiresEvidenceMatch(ChunkingStrategyKind chunkingStrategy, SearchDocument expectedDocument)
     {
+        if (chunkingStrategy == ChunkingStrategyKind.Semantic)
+        {
+            return !string.IsNullOrWhiteSpace(expectedDocument.Snippet);
+        }
+
         return !string.IsNullOrWhiteSpace(expectedDocument.Heading)
             || !string.IsNullOrWhiteSpace(expectedDocument.Snippet);
     }
@@ -280,7 +288,7 @@ public static class SearchMetricCalculator
         bool SnippetMatched,
         string Reason)
     {
-        public bool IsRelevant => ExpectedIndex is not null;
+        public bool IsRelevant => this.ExpectedIndex is not null;
     }
 }
 

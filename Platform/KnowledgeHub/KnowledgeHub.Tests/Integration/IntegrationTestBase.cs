@@ -17,7 +17,7 @@ public abstract class IntegrationTestBase : IAsyncLifetime
     private OfflineApplicationFactory? factory;
     private HttpClient? client;
 
-    protected HttpClient Client => client ??= Factory.CreateClient();
+    protected HttpClient Client => client ??= this.Factory.CreateClient();
 
     private OfflineApplicationFactory Factory => factory ??= new(ConfigureTestServices);
 

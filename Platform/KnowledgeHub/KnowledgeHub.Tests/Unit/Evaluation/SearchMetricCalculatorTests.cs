@@ -1,6 +1,7 @@
 namespace KnowledgeHub.Tests.Unit.Evaluation;
 
 using FluentAssertions;
+using KnowledgeHub.Data.Models;
 using KnowledgeHub.Evaluations.Common.Evaluators.SummaryGeneration;
 using KnowledgeHub.Evaluations.Scenarios.RAG.Search;
 using Microsoft.Extensions.AI;
@@ -352,7 +353,7 @@ public sealed class SearchMetricCalculatorTests
             new SearchPrediction("third query", [Document(ChunkingPath)], [Document(IrrelevantPath), Document(ChunkingPath)]),
         };
 
-        var metrics = SearchEvaluator.ComputeSummaryMetrics(predictions, topK: 5)["MarkdownSection"].ToDictionary(metric => metric.Name);
+        var metrics = SearchEvaluator.ComputeSummaryMetrics(predictions, topK: 5)["MarkdownSection.CrossEncoderLexical"].ToDictionary(metric => metric.Name);
 
         metrics["RecallAtK"].Rating.Should().Be(EvaluationRating.Average);
         metrics["PrecisionAtK"].Rating.Should().Be(EvaluationRating.Good);
@@ -401,6 +402,29 @@ public sealed class SearchMetricCalculatorTests
         result.HitRateAtK.Should().Be(1);
         result.ReciprocalRank.Should().Be(1);
         result.Diagnostics.Matches.Should().ContainSingle().Which.HeadingMatched.Should().BeTrue();
+    }
+
+    [Fact]
+    public void ScoreQuery_SemanticStrategyDoesNotRequireHeadingEvidence_ReturnsRelevantSourceMatch()
+    {
+        var prediction = Prediction(
+            "semantic evidence hit",
+            [Document(EvaluationPath, RetrievalHeading)],
+            [Document(EvaluationPath, heading: null, snippet: "semantic chunk crosses source sections")],
+            ChunkingStrategyKind.Semantic);
+
+        var result = SearchMetricCalculator.ScoreQuery(prediction);
+
+        result.RecallAtK.Should().Be(1);
+        result.PrecisionAtK.Should().Be(1);
+        result.Diagnostics.Matches.Should().ContainSingle().Which.Should().BeEquivalentTo(new
+        {
+            IsRelevant = true,
+            SourcePathMatched = true,
+            HeadingMatched = false,
+            SnippetMatched = false,
+            Reason = "Matched expected source path; no heading or snippet was required.",
+        });
     }
 
     /// <summary>
@@ -482,8 +506,9 @@ public sealed class SearchMetricCalculatorTests
     private static SearchPrediction Prediction(
         string query,
         IReadOnlyList<SearchDocument> expectedDocuments,
-        IReadOnlyList<SearchDocument> retrievedDocuments) =>
-        new(query, expectedDocuments, retrievedDocuments);
+        IReadOnlyList<SearchDocument> retrievedDocuments,
+        ChunkingStrategyKind chunkingStrategy = ChunkingStrategyKind.MarkdownSection) =>
+        new(query, expectedDocuments, retrievedDocuments, chunkingStrategy);
 
     private static SearchDocument Document(string sourcePath, string? heading = null, string? snippet = null, double? score = null) =>
         new(sourcePath, heading, snippet, Score: score);

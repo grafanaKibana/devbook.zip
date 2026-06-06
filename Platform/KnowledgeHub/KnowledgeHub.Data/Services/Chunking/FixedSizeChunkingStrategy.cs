@@ -1,6 +1,7 @@
 namespace KnowledgeHub.Data.Services.Chunking;
 
 using KnowledgeHub.Data.Models;
+using KnowledgeHub.Data.Services;
 
 public sealed class FixedSizeChunkingStrategy : IChunkingStrategy
 {
@@ -16,13 +17,19 @@ public sealed class FixedSizeChunkingStrategy : IChunkingStrategy
 
     public ChunkingStrategyKind Strategy => ChunkingStrategyKind.FixedSize;
 
-    public IReadOnlyList<ChunkContent> Chunk(Document document)
+    public Task<IReadOnlyList<ChunkContent>> ChunkAsync(
+        Document document,
+        IEmbeddingService embeddingService,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(document);
+        ArgumentNullException.ThrowIfNull(embeddingService);
 
-        return SplitFixedSize(document.PageContent)
+        var chunks = SplitFixedSize(document.PageContent)
             .Select(text => new ChunkContent(text, null))
             .ToArray();
+
+        return Task.FromResult<IReadOnlyList<ChunkContent>>(chunks);
     }
 
     private IReadOnlyList<string> SplitFixedSize(string content)

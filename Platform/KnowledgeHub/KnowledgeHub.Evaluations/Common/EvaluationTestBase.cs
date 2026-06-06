@@ -26,7 +26,7 @@ public abstract class EvaluationTestBase<TPrediction>
     [OneTimeSetUp]
     public async Task BaseSetupAsync()
     {
-        ReportingConfig = DiskBasedReportingConfiguration.Create(
+        this.ReportingConfig = DiskBasedReportingConfiguration.Create(
             storageRootPath: EvaluationExecutionContext.ReportsPath,
             evaluators: GetPerIterationEvaluators(),
             chatConfiguration: null,
@@ -49,7 +49,7 @@ public abstract class EvaluationTestBase<TPrediction>
 
     protected abstract IEvaluator[] GetPerIterationEvaluators();
 
-    protected string GetScenarioName() => $"{ScenarioDisplayName}.{TestContext.CurrentContext.Test.MethodName}";
+    protected string GetScenarioName() => $"{this.ScenarioDisplayName}.{TestContext.CurrentContext.Test.MethodName}";
 
     protected abstract Dictionary<string, IEnumerable<SummaryMetric>> ComputeSummaryMetrics(
         IReadOnlyList<TPrediction> predictions);
@@ -92,9 +92,9 @@ public abstract class EvaluationTestBase<TPrediction>
             enableResponseCaching: false,
             executionName: EvaluationExecutionContext.ExecutionName);
 
-        var scenarioName = string.IsNullOrWhiteSpace(SummaryGroupName)
-            ? $"Summary.{ScenarioDisplayName}"
-            : $"Summary.{SummaryGroupName}.{ScenarioDisplayName}";
+        var scenarioName = string.IsNullOrWhiteSpace(this.SummaryGroupName)
+            ? $"Summary.{this.ScenarioDisplayName}"
+            : $"Summary.{this.SummaryGroupName}.{this.ScenarioDisplayName}";
 
         await using var scenarioRun = await summaryConfig.CreateScenarioRunAsync(
             scenarioName: scenarioName,
@@ -109,12 +109,12 @@ public abstract class EvaluationTestBase<TPrediction>
 
     private async Task GenerateSummaryReportAsync()
     {
-        if (Predictions.IsEmpty)
+        if (this.Predictions.IsEmpty)
         {
             return;
         }
 
-        var summaryMetrics = ComputeSummaryMetrics(Predictions.ToList());
+        var summaryMetrics = ComputeSummaryMetrics(this.Predictions.ToList());
         foreach (var (iterationName, metrics) in summaryMetrics)
         {
             await CreateSummaryScenarioAsync(iterationName, metrics);

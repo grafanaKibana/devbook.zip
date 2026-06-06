@@ -1,14 +1,23 @@
 namespace KnowledgeHub.Data.Services;
 
 using KnowledgeHub.Data.Models;
+using KnowledgeHub.Data.Options;
 using KnowledgeHub.Data.Repositories;
+using KnowledgeHub.Data.Services.Reranking;
+using Microsoft.Extensions.Options;
 
 public class RagSearchService(
     IEmbeddingService embeddingService,
-    IChunkRepositoryFactory chunkRepositoryFactory) : IRagSearchService
+    IChunkRepositoryFactory chunkRepositoryFactory,
+    IRerankingStrategyFactory rerankingStrategyFactory,
+    IOptions<RagSearchOptions> options) : IRagSearchService
 {
+    private readonly RagSearchOptions options = options.Value;
+
     private const int DefaultTopK = 5;
     private const int MaxTopK = 10;
+    private const int RerankingCandidateMultiplier = 4;
+    private const int MaxRerankingCandidateCount = 50;
 
     public async Task<RagSearchResponse> SearchAsync(
         RagSearchRequest request,
@@ -25,11 +34,14 @@ public class RagSearchService(
         var topK = request.TopK <= 0
             ? DefaultTopK
             : Math.Min(request.TopK, MaxTopK);
+        var rerankingStrategy = rerankingStrategyFactory.Create(options.RerankingStrategy);
+        var candidateCount = Math.Min(topK * RerankingCandidateMultiplier, MaxRerankingCandidateCount);
 
         var embedding = await embeddingService.GenerateEmbeddingAsync(query, cancellationToken);
-        var chunkRepository = chunkRepositoryFactory.Create(request.ChunkingStrategy);
-        var results = await chunkRepository.VectorSearchAsync(embedding, topK, cancellationToken);
+        var chunkRepository = chunkRepositoryFactory.Create(options.ChunkingStrategy);
+        var candidates = await chunkRepository.VectorSearchAsync(embedding, candidateCount, cancellationToken);
+        var results = rerankingStrategy.Rerank(query, candidates, topK);
 
-        return new RagSearchResponse(query, "vector", results);
+        return new RagSearchResponse(query, $"vector+{options.RerankingStrategy}", results);
     }
 }

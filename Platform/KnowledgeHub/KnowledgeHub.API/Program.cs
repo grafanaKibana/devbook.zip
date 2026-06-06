@@ -37,6 +37,8 @@ builder.Services.AddHangfireServer();
 
 var app = builder.Build();
 
+await app.EnsureChunkVectorSearchIndexesAsync();
+
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 app.UseOpenApiWithSwagger();

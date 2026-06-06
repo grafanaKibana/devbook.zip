@@ -29,7 +29,7 @@ public sealed class IngestionEndpointTests : IntegrationTestBase
             .ReturnsAsync(expected);
 
         // Act
-        var response = await Client.PostAsJsonAsync(IngestionPath, new IngestionRequest(SourcePath, FileName, true));
+        var response = await this.Client.PostAsJsonAsync(IngestionPath, new IngestionRequest(SourcePath, FileName, true));
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);

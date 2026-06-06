@@ -30,7 +30,7 @@ public sealed class ChunkingService(
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var documentChunks = chunkingStrategy.Chunk(document);
+            var documentChunks = await chunkingStrategy.ChunkAsync(document, embeddingService, cancellationToken);
 
             if (documentChunks.Count == 0)
             {

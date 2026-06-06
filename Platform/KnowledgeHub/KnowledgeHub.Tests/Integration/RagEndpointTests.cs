@@ -34,7 +34,7 @@ public sealed class RagEndpointTests : IntegrationTestBase
             .ReturnsAsync(expected);
 
         // Act
-        var response = await Client.PostAsJsonAsync(SearchPath, new RagSearchRequest(SearchQuery, 7));
+        var response = await this.Client.PostAsJsonAsync(SearchPath, new RagSearchRequest(SearchQuery, 7));
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -54,7 +54,7 @@ public sealed class RagEndpointTests : IntegrationTestBase
             .ThrowsAsync(new ArgumentException("Query is required."));
 
         // Act
-        var response = await Client.PostAsJsonAsync(SearchPath, new RagSearchRequest("   ", 5));
+        var response = await this.Client.PostAsJsonAsync(SearchPath, new RagSearchRequest("   ", 5));
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -83,7 +83,7 @@ public sealed class RagEndpointTests : IntegrationTestBase
             .ReturnsAsync(expected);
 
         // Act
-        var response = await Client.PostAsJsonAsync(AskPath, new RagAskRequest($"  {Question}  ", 99));
+        var response = await this.Client.PostAsJsonAsync(AskPath, new RagAskRequest($"  {Question}  ", 99));
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -103,7 +103,7 @@ public sealed class RagEndpointTests : IntegrationTestBase
             .ThrowsAsync(new ArgumentException("Question is required."));
 
         // Act
-        var response = await Client.PostAsJsonAsync(AskPath, new RagAskRequest("   ", 5));
+        var response = await this.Client.PostAsJsonAsync(AskPath, new RagAskRequest("   ", 5));
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);

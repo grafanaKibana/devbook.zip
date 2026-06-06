@@ -61,24 +61,24 @@ public sealed class SearchEvaluator : IEvaluator
         int topK)
     {
         return predictions
-            .GroupBy(prediction => prediction.ChunkingStrategy)
+            .GroupBy(prediction => new { prediction.ChunkingStrategy, prediction.RerankingStrategy })
             .ToDictionary(
-                group => group.Key.ToString(),
-                group => CreateSummaryMetrics(SearchMetricCalculator.Evaluate(group.ToArray(), topK), group.Key));
+                group => $"{group.Key.ChunkingStrategy}.{group.Key.RerankingStrategy}",
+                group => CreateSummaryMetrics(SearchMetricCalculator.Evaluate(group.ToArray(), topK), group.Key.ChunkingStrategy, group.Key.RerankingStrategy));
     }
 
-    private static IEnumerable<SummaryMetric> CreateSummaryMetrics(SearchReport report, ChunkingStrategyKind strategy) =>
+    private static IEnumerable<SummaryMetric> CreateSummaryMetrics(SearchReport report, ChunkingStrategyKind chunkingStrategy, RerankingStrategyKind rerankingStrategy) =>
     [
-        new SummaryMetric("SampleCount", report.QueryCount, $"Total RAG search cases evaluated over {strategy} chunks.", SummaryMetricKind.Count),
-        new SummaryMetric(RecallAtKMetricName, report.RecallAtK, $"Average Recall@k across RAG search cases over {strategy} chunks.", SummaryMetricKind.Percentage, GetRating(RecallAtKMetricName, report.RecallAtK)),
-        new SummaryMetric(PrecisionAtKMetricName, report.PrecisionAtK, $"Average annotated Precision@k across RAG search cases over {strategy} chunks; sparse expected evidence can cap this below 1 even when the needed evidence is found.", SummaryMetricKind.Percentage, GetRating(PrecisionAtKMetricName, report.PrecisionAtK)),
-        new SummaryMetric(HitRateAtKMetricName, report.HitRateAtK, $"Average HitRate@k across RAG search cases over {strategy} chunks; shows how often retrieval found at least one expected evidence item.", SummaryMetricKind.Percentage, GetRating(HitRateAtKMetricName, report.HitRateAtK)),
-        new SummaryMetric(ReciprocalRankMetricName, report.MeanReciprocalRank, $"Mean reciprocal rank across RAG search cases over {strategy} chunks.", SummaryMetricKind.PlainNumber, GetRating(ReciprocalRankMetricName, report.MeanReciprocalRank)),
-        new SummaryMetric("EmptyResultRate", report.EmptyResultRate, $"Share of RAG search cases with no retrieved {strategy} chunks.", SummaryMetricKind.Percentage, GetEmptyResultRateRating(report.EmptyResultRate)),
-        new SummaryMetric(ScoreAverageMetricName, report.ScoreAverage, $"Average vector score across all scored retrieved {strategy} chunks.", SummaryMetricKind.PlainNumber, GetRating(ScoreAverageMetricName, report.ScoreAverage)),
-        new SummaryMetric(CreditedScoreAverageMetricName, report.CreditedScoreAverage, $"Average vector score across retrieved {strategy} chunks credited against expected evidence.", SummaryMetricKind.PlainNumber, GetRating(CreditedScoreAverageMetricName, report.CreditedScoreAverage)),
-        new SummaryMetric(UncreditedScoreAverageMetricName, report.UncreditedScoreAverage, $"Average vector score across retrieved {strategy} chunks not credited by the sparse golden dataset; high values can still indicate useful query-similar context.", SummaryMetricKind.PlainNumber, GetRating(UncreditedScoreAverageMetricName, report.UncreditedScoreAverage)),
-        new SummaryMetric(CreditedToUncreditedSameSourceScoreGapMetricName, report.CreditedToUncreditedSameSourceScoreGap, $"Average score difference between the first credited result and the highest-scored uncredited same-source {strategy} chunk; descriptive only because uncredited chunks may still be useful.", SummaryMetricKind.PlainNumber, GetRating(CreditedToUncreditedSameSourceScoreGapMetricName, report.CreditedToUncreditedSameSourceScoreGap)),
+        new SummaryMetric("SampleCount", report.QueryCount, $"Total RAG search cases evaluated over {chunkingStrategy} chunks with {rerankingStrategy} reranking.", SummaryMetricKind.Count),
+        new SummaryMetric(RecallAtKMetricName, report.RecallAtK, $"Average Recall@k across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking.", SummaryMetricKind.Percentage, GetRating(RecallAtKMetricName, report.RecallAtK)),
+        new SummaryMetric(PrecisionAtKMetricName, report.PrecisionAtK, $"Average annotated Precision@k across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking; sparse expected evidence can cap this below 1 even when the needed evidence is found.", SummaryMetricKind.Percentage, GetRating(PrecisionAtKMetricName, report.PrecisionAtK)),
+        new SummaryMetric(HitRateAtKMetricName, report.HitRateAtK, $"Average HitRate@k across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking; shows how often retrieval found at least one expected evidence item.", SummaryMetricKind.Percentage, GetRating(HitRateAtKMetricName, report.HitRateAtK)),
+        new SummaryMetric(ReciprocalRankMetricName, report.MeanReciprocalRank, $"Mean reciprocal rank across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking.", SummaryMetricKind.PlainNumber, GetRating(ReciprocalRankMetricName, report.MeanReciprocalRank)),
+        new SummaryMetric("EmptyResultRate", report.EmptyResultRate, $"Share of RAG search cases with no retrieved {chunkingStrategy} chunks after {rerankingStrategy} reranking.", SummaryMetricKind.Percentage, GetEmptyResultRateRating(report.EmptyResultRate)),
+        new SummaryMetric(ScoreAverageMetricName, report.ScoreAverage, $"Average returned score across all scored retrieved {chunkingStrategy} chunks with {rerankingStrategy} reranking.", SummaryMetricKind.PlainNumber, GetRating(ScoreAverageMetricName, report.ScoreAverage)),
+        new SummaryMetric(CreditedScoreAverageMetricName, report.CreditedScoreAverage, $"Average returned score across retrieved {chunkingStrategy} chunks credited against expected evidence with {rerankingStrategy} reranking.", SummaryMetricKind.PlainNumber, GetRating(CreditedScoreAverageMetricName, report.CreditedScoreAverage)),
+        new SummaryMetric(UncreditedScoreAverageMetricName, report.UncreditedScoreAverage, $"Average returned score across retrieved {chunkingStrategy} chunks not credited by the sparse golden dataset with {rerankingStrategy} reranking; high values can still indicate useful query-similar context.", SummaryMetricKind.PlainNumber, GetRating(UncreditedScoreAverageMetricName, report.UncreditedScoreAverage)),
+        new SummaryMetric(CreditedToUncreditedSameSourceScoreGapMetricName, report.CreditedToUncreditedSameSourceScoreGap, $"Average score difference between the first credited result and the highest-scored uncredited same-source {chunkingStrategy} chunk with {rerankingStrategy} reranking; descriptive only because uncredited chunks may still be useful.", SummaryMetricKind.PlainNumber, GetRating(CreditedToUncreditedSameSourceScoreGapMetricName, report.CreditedToUncreditedSameSourceScoreGap)),
     ];
 
     private static NumericMetric CreateMetric(string name, double value, SearchQueryMetrics metrics)
