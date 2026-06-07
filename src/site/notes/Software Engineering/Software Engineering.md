@@ -19,6 +19,7 @@ Organized into 11 topic areas with spaced repetition tracking. The dashboards be
 
 | Note                                                                                                               | Date                      |
 | ------------------------------------------------------------------------------------------------------------------ | ------------------------- |
+| [[Software Engineering/11 AI & ML/LLM/RAG/Re-ranking\|Re-ranking]]                                              | 9:56 AM - June 07, 2026   |
 | [[Software Engineering/11 AI & ML/LLM/RAG/RAG\|RAG]]                                                            | 3:00 PM - May 12, 2026    |
 | [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Bridge\|Bridge]]                     | 12:13 PM - March 13, 2026 |
 | [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Visitor\|Visitor]]                   | 12:13 PM - March 13, 2026 |
@@ -30,7 +31,6 @@ Organized into 11 topic areas with spaced repetition tracking. The dashboards be
 | [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Strategy\|Strategy]]                 | 12:12 PM - March 13, 2026 |
 | [[Software Engineering/02 Computer Science/Data Structures/Queue\|Queue]]                                       | 1:53 AM - March 13, 2026  |
 | [[Software Engineering/02 Computer Science/Data Structures/Data Structures\|Data Structures]]                   | 1:53 AM - March 13, 2026  |
-| [[Software Engineering/02 Computer Science/Data Structures/Span\|Span]]                                         | 1:53 AM - March 13, 2026  |
 
 { .block-language-dataview}
 # Publish Distribution
