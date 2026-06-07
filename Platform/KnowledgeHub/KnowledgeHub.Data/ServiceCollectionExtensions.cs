@@ -38,13 +38,15 @@ public static class ServiceCollectionExtensions
             services.AddScoped<IChunkingService>(serviceProvider => CreateChunkingService(serviceProvider, ChunkingStrategyKind.Semantic));
 
             services.AddScoped<NoRerankingStrategy>();
-            services.AddScoped<CrossEncoderLexicalRerankingStrategy>();
-            services.AddScoped<LateInteractionRerankingStrategy>();
+            services.AddScoped<Bm25RerankingStrategy>();
+            services.AddScoped<MaximalMarginalRelevanceRerankingStrategy>();
+            services.AddScoped<LlmRerankingStrategy>();
             services.AddScoped<ReciprocalRankFusionRerankingStrategy>();
 
             services.AddScoped<IRerankingStrategy>(serviceProvider => serviceProvider.GetRequiredService<NoRerankingStrategy>());
-            services.AddScoped<IRerankingStrategy>(serviceProvider => serviceProvider.GetRequiredService<CrossEncoderLexicalRerankingStrategy>());
-            services.AddScoped<IRerankingStrategy>(serviceProvider => serviceProvider.GetRequiredService<LateInteractionRerankingStrategy>());
+            services.AddScoped<IRerankingStrategy>(serviceProvider => serviceProvider.GetRequiredService<Bm25RerankingStrategy>());
+            services.AddScoped<IRerankingStrategy>(serviceProvider => serviceProvider.GetRequiredService<MaximalMarginalRelevanceRerankingStrategy>());
+            services.AddScoped<IRerankingStrategy>(serviceProvider => serviceProvider.GetRequiredService<LlmRerankingStrategy>());
             services.AddScoped<IRerankingStrategy>(serviceProvider => serviceProvider.GetRequiredService<ReciprocalRankFusionRerankingStrategy>());
             services.AddScoped<IRerankingStrategyFactory, RerankingStrategyFactory>();
 
@@ -55,6 +57,7 @@ public static class ServiceCollectionExtensions
             services.AddScoped<IRagAskService, RagAskService>();
 
             services.AddAgent<AnswerAgent>();
+            services.AddAgent<RerankingAgent>();
 
             services.AddEmbeddingGenerator(CreateEmbeddingGenerator);
             services.AddSingleton<IEmbeddingService, EmbeddingService>();

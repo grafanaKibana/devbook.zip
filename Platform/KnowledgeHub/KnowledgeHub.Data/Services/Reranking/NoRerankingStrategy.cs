@@ -6,10 +6,14 @@ public sealed class NoRerankingStrategy : IRerankingStrategy
 {
     public RerankingStrategyKind Strategy => RerankingStrategyKind.NoReranking;
 
-    public IReadOnlyList<RagChunkResponse> Rerank(string query, IReadOnlyList<RagChunkResponse> candidates, int topK)
+    public Task<IReadOnlyList<RagChunkResponse>> RerankAsync(
+        string query,
+        IReadOnlyList<RagChunkResponse> candidates,
+        int topK,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(candidates);
 
-        return candidates.Take(topK).ToArray();
+        return Task.FromResult<IReadOnlyList<RagChunkResponse>>(candidates.Take(topK).ToArray());
     }
 }

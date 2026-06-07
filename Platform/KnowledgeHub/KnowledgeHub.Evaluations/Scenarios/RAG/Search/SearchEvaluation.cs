@@ -17,8 +17,9 @@ public sealed class SearchEvaluation : MongoEvaluationTestBase<SearchPrediction>
     private static readonly RerankingStrategyKind[] RerankingStrategies =
     [
         RerankingStrategyKind.NoReranking,
-        RerankingStrategyKind.CrossEncoderLexical,
-        RerankingStrategyKind.LateInteraction,
+        RerankingStrategyKind.Bm25,
+        RerankingStrategyKind.MaximalMarginalRelevance,
+        RerankingStrategyKind.Llm,
         RerankingStrategyKind.ReciprocalRankFusion,
     ];
 

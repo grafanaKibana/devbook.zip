@@ -6,5 +6,9 @@ public interface IRerankingStrategy
 {
     RerankingStrategyKind Strategy { get; }
 
-    IReadOnlyList<RagChunkResponse> Rerank(string query, IReadOnlyList<RagChunkResponse> candidates, int topK);
+    Task<IReadOnlyList<RagChunkResponse>> RerankAsync(
+        string query,
+        IReadOnlyList<RagChunkResponse> candidates,
+        int topK,
+        CancellationToken cancellationToken = default);
 }

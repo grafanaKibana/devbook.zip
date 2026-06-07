@@ -40,7 +40,7 @@ public class RagSearchService(
         var embedding = await embeddingService.GenerateEmbeddingAsync(query, cancellationToken);
         var chunkRepository = chunkRepositoryFactory.Create(options.ChunkingStrategy);
         var candidates = await chunkRepository.VectorSearchAsync(embedding, candidateCount, cancellationToken);
-        var results = rerankingStrategy.Rerank(query, candidates, topK);
+        var results = await rerankingStrategy.RerankAsync(query, candidates, topK, cancellationToken);
 
         return new RagSearchResponse(query, $"vector+{options.RerankingStrategy}", results);
     }

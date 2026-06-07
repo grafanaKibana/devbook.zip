@@ -7,4 +7,4 @@ public sealed record SearchPrediction(
     IReadOnlyList<SearchDocument> ExpectedDocuments,
     IReadOnlyList<SearchDocument> RetrievedDocuments,
     ChunkingStrategyKind ChunkingStrategy = ChunkingStrategyKind.MarkdownSection,
-    RerankingStrategyKind RerankingStrategy = RerankingStrategyKind.CrossEncoderLexical);
+    RerankingStrategyKind RerankingStrategy = RerankingStrategyKind.Bm25);

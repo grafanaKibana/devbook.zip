@@ -6,5 +6,5 @@ public sealed class RagSearchOptions
 {
     public ChunkingStrategyKind ChunkingStrategy { get; init; } = ChunkingStrategyKind.MarkdownSection;
 
-    public RerankingStrategyKind RerankingStrategy { get; init; } = RerankingStrategyKind.CrossEncoderLexical;
+    public RerankingStrategyKind RerankingStrategy { get; init; } = RerankingStrategyKind.Bm25;
 }

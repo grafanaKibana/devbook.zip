@@ -3,7 +3,8 @@ namespace KnowledgeHub.Data.Models;
 public enum RerankingStrategyKind
 {
     NoReranking,
-    CrossEncoderLexical,
-    LateInteraction,
+    Bm25,
+    MaximalMarginalRelevance,
+    Llm,
     ReciprocalRankFusion,
 }

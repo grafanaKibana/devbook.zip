@@ -11,19 +11,24 @@ public sealed class ReciprocalRankFusionRerankingStrategy : IRerankingStrategy
 
     public RerankingStrategyKind Strategy => RerankingStrategyKind.ReciprocalRankFusion;
 
-    public IReadOnlyList<RagChunkResponse> Rerank(string query, IReadOnlyList<RagChunkResponse> candidates, int topK)
+    public Task<IReadOnlyList<RagChunkResponse>> RerankAsync(
+        string query,
+        IReadOnlyList<RagChunkResponse> candidates,
+        int topK,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(candidates);
 
         var vectorRanks = candidates
             .Select((candidate, index) => new { candidate.ChunkId, Rank = index + 1 })
             .ToDictionary(item => item.ChunkId, item => item.Rank, StringComparer.Ordinal);
+        var bm25Scores = RerankingText.Bm25Scores(query, candidates);
         var lexicalRanks = candidates
             .Select((candidate, index) => new
             {
                 candidate.ChunkId,
                 OriginalRank = index + 1,
-                Score = RerankingText.LexicalScore(query, candidate),
+                Score = bm25Scores[index],
             })
             .OrderByDescending(item => item.Score)
             .ThenBy(item => item.OriginalRank)
@@ -37,12 +42,14 @@ public sealed class ReciprocalRankFusionRerankingStrategy : IRerankingStrategy
                 ((VectorWeight * RelativeReciprocal(vectorRanks[candidate.ChunkId])) + (LexicalWeight * RelativeReciprocal(lexicalRanks[candidate.ChunkId]))) / MaximumScore))
             .ToArray();
 
-        return scoredCandidates
+        var results = scoredCandidates
             .OrderByDescending(item => item.Score)
             .ThenBy(item => item.OriginalRank)
             .Take(topK)
             .Select(item => item.Candidate with { Score = item.Score })
             .ToArray();
+
+        return Task.FromResult<IReadOnlyList<RagChunkResponse>>(results);
     }
 
     private static double RelativeReciprocal(int rank) => (RankConstant + 1D) / (RankConstant + rank);

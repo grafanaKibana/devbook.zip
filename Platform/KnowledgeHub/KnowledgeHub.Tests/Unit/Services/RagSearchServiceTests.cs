@@ -14,7 +14,7 @@ public sealed class RagSearchServiceTests
 {
     private const string QueryWithWhitespace = "  vector search  ";
     private const string NormalizedQuery = "vector search";
-    private const string SearchMode = "vector+CrossEncoderLexical";
+    private const string SearchMode = "vector+Bm25";
 
     /// <summary>
     /// Tests that search rejects an empty query before generating embeddings or executing vector search.
@@ -131,7 +131,7 @@ public sealed class RagSearchServiceTests
 
     private static RagSearchService CreateService(
         Mock<IChunkRepository> repository,
-        RerankingStrategyKind rerankingStrategy = RerankingStrategyKind.CrossEncoderLexical)
+        RerankingStrategyKind rerankingStrategy = RerankingStrategyKind.Bm25)
     {
         var generator = EmbeddingGeneratorMockFactory.CreateByInputLength();
         var embeddingService = new EmbeddingService(generator.Object, Options.Create(new EmbeddingOptions()));
@@ -148,8 +148,8 @@ public sealed class RagSearchServiceTests
 
     private static IRerankingStrategyFactory CreateRerankingStrategyFactory() => new RerankingStrategyFactory(
     [
-        new CrossEncoderLexicalRerankingStrategy(),
-        new LateInteractionRerankingStrategy(),
+        new Bm25RerankingStrategy(),
+        new MaximalMarginalRelevanceRerankingStrategy(),
         new ReciprocalRankFusionRerankingStrategy(),
         new NoRerankingStrategy(),
     ]);
