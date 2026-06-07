@@ -14,7 +14,7 @@ public sealed class Bm25RerankingStrategy : IRerankingStrategy
     {
         ArgumentNullException.ThrowIfNull(candidates);
 
-        var scores = RerankingText.Bm25Scores(query, candidates);
+        var scores = RerankingText.BoundedBm25Scores(query, candidates);
         var results = candidates
             .Select((candidate, index) => new RerankingText.ScoredCandidate(candidate, index + 1, scores[index]))
             .OrderByDescending(item => item.Score)

@@ -51,25 +51,18 @@ internal static partial class RerankingText
             .ToArray();
     }
 
-    public static IReadOnlyList<double> Normalize(IReadOnlyList<double> scores)
+    public static IReadOnlyList<double> BoundedBm25Scores(string query, IReadOnlyList<RagChunkResponse> candidates)
     {
-        if (scores.Count == 0)
+        var queryTermCount = Tokenize(query).Distinct(StringComparer.Ordinal).Count();
+        if (queryTermCount == 0)
         {
-            return [];
+            return candidates.Select(_ => 0d).ToArray();
         }
 
-        var min = scores.Min();
-        var max = scores.Max();
-
-        if (Math.Abs(max - min) < double.Epsilon)
-        {
-            return scores.Select(_ => 0d).ToArray();
-        }
-
-        return scores.Select(score => (score - min) / (max - min)).ToArray();
+        return Bm25Scores(query, candidates)
+            .Select(score => 1 - Math.Exp(-score / queryTermCount))
+            .ToArray();
     }
-
-    public static double LexicalScore(string query, RagChunkResponse candidate) => Bm25Scores(query, [candidate])[0];
 
     public static string CreateSearchText(RagChunkResponse candidate) => string.Join(' ', candidate.Heading, candidate.CitationLabel, candidate.ChunkText);
 

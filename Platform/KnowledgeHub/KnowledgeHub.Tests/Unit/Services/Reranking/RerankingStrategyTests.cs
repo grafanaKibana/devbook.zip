@@ -27,6 +27,7 @@ public sealed class RerankingStrategyTests
 
         results.Should().HaveCount(2);
         results[0].ChunkId.Should().Be("rrf");
+        results[0].Score.Should().BeInRange(0, 1);
         results[0].Score.Should().BeGreaterThan(0);
     }
 
@@ -74,7 +75,7 @@ public sealed class RerankingStrategyTests
         (await new Bm25RerankingStrategy()
             .RerankAsync("reciprocal rank fusion", candidates, topK: 2))
             .Select(result => result.Score)
-            .Should().OnlyContain(score => score >= 0);
+            .Should().OnlyContain(score => score >= 0 && score <= 1);
 
         (await new MaximalMarginalRelevanceRerankingStrategy()
             .RerankAsync("reciprocal rank fusion", candidates, topK: 2))

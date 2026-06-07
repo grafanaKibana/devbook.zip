@@ -16,7 +16,7 @@ public sealed class MaximalMarginalRelevanceRerankingStrategy : IRerankingStrate
     {
         ArgumentNullException.ThrowIfNull(candidates);
 
-        var relevanceScores = RerankingText.Normalize(RerankingText.Bm25Scores(query, candidates));
+        var relevanceScores = RerankingText.BoundedBm25Scores(query, candidates);
         var tokenSets = candidates
             .Select(candidate => RerankingText.Tokenize(RerankingText.CreateSearchText(candidate)).ToHashSet(StringComparer.Ordinal))
             .ToArray();
