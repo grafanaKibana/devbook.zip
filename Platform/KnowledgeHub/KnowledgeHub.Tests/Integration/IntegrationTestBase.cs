@@ -39,18 +39,18 @@ public abstract class IntegrationTestBase : IAsyncLifetime
 
     private sealed class OfflineApplicationFactory(Action<IServiceCollection> configureTestServices) : WebApplicationFactory<Program>
     {
-        private const string LocalMongoConnectionString = "mongodb://localhost:27017";
         private readonly string? previousMongoConnectionString = Environment.GetEnvironmentVariable("ConnectionStrings__MongoDb");
+        private readonly string mongoConnectionString = ResolveMongoConnectionString();
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
-            Environment.SetEnvironmentVariable("ConnectionStrings__MongoDb", LocalMongoConnectionString);
+            Environment.SetEnvironmentVariable("ConnectionStrings__MongoDb", mongoConnectionString);
             builder.UseEnvironment("Testing");
             builder.ConfigureAppConfiguration((_, configurationBuilder) =>
             {
                 configurationBuilder.AddInMemoryCollection(new Dictionary<string, string?>
                 {
-                    ["ConnectionStrings:MongoDb"] = LocalMongoConnectionString,
+                    ["ConnectionStrings:MongoDb"] = mongoConnectionString,
                     ["EmbeddingOptions:ModelId"] = "text-embedding-3-small",
                     ["EmbeddingOptions:VectorDimensions"] = "384",
                     ["EmbeddingOptions:ApiKey"] = "test-key",
@@ -77,6 +77,42 @@ public abstract class IntegrationTestBase : IAsyncLifetime
             Environment.SetEnvironmentVariable("ConnectionStrings__MongoDb", previousMongoConnectionString);
 
             await base.DisposeAsync();
+        }
+
+        private static string ResolveMongoConnectionString()
+        {
+            var environmentConnectionString = Environment.GetEnvironmentVariable("ConnectionStrings__MongoDb");
+            if (!string.IsNullOrWhiteSpace(environmentConnectionString))
+            {
+                return environmentConnectionString;
+            }
+
+            var configuration = new ConfigurationBuilder()
+                .AddJsonFile(ResolveRepositoryPath("Platform", "KnowledgeHub", "KnowledgeHub.API", "appsettings.Development.json"), optional: true)
+                .AddJsonFile(ResolveRepositoryPath("Platform", "KnowledgeHub", "KnowledgeHub.Evaluations", "appsettings.Evaluations.json"), optional: true)
+                .AddEnvironmentVariables()
+                .Build();
+
+            return configuration.GetConnectionString("MongoDb")
+                ?? throw new InvalidOperationException("Integration tests require ConnectionStrings:MongoDb or ConnectionStrings__MongoDb.");
+        }
+
+        private static string ResolveRepositoryPath(params string[] segments)
+        {
+            var current = new DirectoryInfo(AppContext.BaseDirectory);
+
+            while (current is not null)
+            {
+                var candidate = Path.Combine(new[] { current.FullName }.Concat(segments).ToArray());
+                if (File.Exists(candidate))
+                {
+                    return candidate;
+                }
+
+                current = current.Parent;
+            }
+
+            return Path.Combine(segments);
         }
     }
 }

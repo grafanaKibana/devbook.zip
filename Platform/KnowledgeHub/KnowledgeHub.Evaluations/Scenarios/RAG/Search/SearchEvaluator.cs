@@ -116,9 +116,9 @@ public sealed class SearchEvaluator : IEvaluator
             PrecisionAtKMetricName => "Precision@k measures annotated context purity: relevant retrieved chunks divided by retrieved chunks. With sparse expected evidence, a case with one credited chunk in top-5 scores 0.2 even when that chunk is sufficient.",
             HitRateAtKMetricName => "HitRate@k measures whether at least one expected evidence item appeared in top-k.",
             ReciprocalRankMetricName => "ReciprocalRank measures ranking quality: 1 divided by the rank of the first relevant evidence chunk. High means useful evidence appears early; 0 means no relevant evidence appeared in top-k.",
-            ScoreAverageMetricName => "ScoreAverage measures the average vector score across all scored retrieved chunks in top-k.",
-            CreditedScoreAverageMetricName => "CreditedScoreAverage measures the average vector score across retrieved chunks credited against expected evidence.",
-            UncreditedScoreAverageMetricName => "UncreditedScoreAverage measures the average vector score across retrieved chunks not credited by the sparse golden dataset; uncredited does not mean irrelevant.",
+            ScoreAverageMetricName => "ScoreAverage measures the average returned score across all scored retrieved chunks in top-k. For NoReranking this is the vector score; for rerankers this is the reranker score.",
+            CreditedScoreAverageMetricName => "CreditedScoreAverage measures the average returned score across retrieved chunks credited against expected evidence.",
+            UncreditedScoreAverageMetricName => "UncreditedScoreAverage measures the average returned score across retrieved chunks not credited by the sparse golden dataset; uncredited does not mean irrelevant.",
             CreditedToUncreditedSameSourceScoreGapMetricName => "CreditedToUncreditedSameSourceScoreGap measures the first credited result score minus the highest-scored uncredited result from the same expected source path; it is descriptive, not a quality target.",
             _ => name,
         };
@@ -144,13 +144,13 @@ public sealed class SearchEvaluator : IEvaluator
                 ? $"Score 0 ({rating}): no retrieved chunk matched the expected evidence."
                 : $"Score {FormatNumber(value)} ({rating}): first relevant evidence was at rank {firstRelevantRank}.",
             ScoreAverageMetricName => metrics.ScoreAverage is null
-                ? "Score 0 (Inconclusive): no retrieved chunks included vector scores."
+                ? "Score 0 (Inconclusive): no retrieved chunks included returned scores."
                 : $"Score {FormatNumber(value)} ({rating}): average score across scored retrieved chunks.",
             CreditedScoreAverageMetricName => metrics.CreditedScoreAverage is null
-                ? "Score 0 (Inconclusive): no credited retrieved chunks included vector scores."
+                ? "Score 0 (Inconclusive): no credited retrieved chunks included returned scores."
                 : $"Score {FormatNumber(value)} ({rating}): average score across scored credited retrieved chunks.",
             UncreditedScoreAverageMetricName => metrics.UncreditedScoreAverage is null
-                ? "Score 0 (Inconclusive): no uncredited retrieved chunks included vector scores."
+                ? "Score 0 (Inconclusive): no uncredited retrieved chunks included returned scores."
                 : $"Score {FormatNumber(value)} ({rating}): average score across scored uncredited retrieved chunks; uncredited means absent from the sparse expected-evidence set, not necessarily irrelevant.",
             CreditedToUncreditedSameSourceScoreGapMetricName => metrics.CreditedToUncreditedSameSourceScoreGap is null
                 ? "Score 0 (Inconclusive): no scored credited and uncredited same-source pair was available."

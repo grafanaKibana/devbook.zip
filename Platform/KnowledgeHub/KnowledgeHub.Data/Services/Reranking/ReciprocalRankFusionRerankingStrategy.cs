@@ -7,6 +7,7 @@ public sealed class ReciprocalRankFusionRerankingStrategy : IRerankingStrategy
     private const int RankConstant = 60;
     private const double VectorWeight = 1;
     private const double LexicalWeight = 2;
+    private const double MaximumScore = VectorWeight + LexicalWeight;
 
     public RerankingStrategyKind Strategy => RerankingStrategyKind.ReciprocalRankFusion;
 
@@ -29,19 +30,20 @@ public sealed class ReciprocalRankFusionRerankingStrategy : IRerankingStrategy
             .Select((item, index) => new { item.ChunkId, Rank = index + 1 })
             .ToDictionary(item => item.ChunkId, item => item.Rank, StringComparer.Ordinal);
 
-        return candidates
-            .Select(candidate => new
-            {
-                Candidate = candidate,
-                Score = (VectorWeight * Reciprocal(vectorRanks[candidate.ChunkId])) + (LexicalWeight * Reciprocal(lexicalRanks[candidate.ChunkId])),
-                VectorRank = vectorRanks[candidate.ChunkId],
-            })
+        var scoredCandidates = candidates
+            .Select(candidate => new RerankingText.ScoredCandidate(
+                candidate,
+                vectorRanks[candidate.ChunkId],
+                ((VectorWeight * RelativeReciprocal(vectorRanks[candidate.ChunkId])) + (LexicalWeight * RelativeReciprocal(lexicalRanks[candidate.ChunkId]))) / MaximumScore))
+            .ToArray();
+
+        return scoredCandidates
             .OrderByDescending(item => item.Score)
-            .ThenBy(item => item.VectorRank)
+            .ThenBy(item => item.OriginalRank)
             .Take(topK)
             .Select(item => item.Candidate with { Score = item.Score })
             .ToArray();
     }
 
-    private static double Reciprocal(int rank) => 1D / (RankConstant + rank);
+    private static double RelativeReciprocal(int rank) => (RankConstant + 1D) / (RankConstant + rank);
 }

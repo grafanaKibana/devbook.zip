@@ -242,7 +242,7 @@ public sealed class SearchMetricCalculatorTests
 
         var scoreAverageMetric = result.Metrics["ScoreAverage"];
         ((NumericMetric)scoreAverageMetric).Value.Should().Be(0.87);
-        scoreAverageMetric.Reason.Should().Be("ScoreAverage measures the average vector score across all scored retrieved chunks in top-k.");
+        scoreAverageMetric.Reason.Should().Be("ScoreAverage measures the average returned score across all scored retrieved chunks in top-k. For NoReranking this is the vector score; for rerankers this is the reranker score.");
         scoreAverageMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Exceptional);
         scoreAverageMetric.Interpretation.Reason.Should().Be("Score 0.87 (Exceptional): average score across scored retrieved chunks.");
         scoreAverageMetric.Diagnostics.Should().BeNullOrEmpty();
@@ -250,7 +250,7 @@ public sealed class SearchMetricCalculatorTests
         var creditedScoreMetric = result.Metrics["CreditedScoreAverage"];
         ((NumericMetric)creditedScoreMetric).Value.Should().Be(0);
         creditedScoreMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Inconclusive);
-        creditedScoreMetric.Interpretation.Reason.Should().Be("Score 0 (Inconclusive): no credited retrieved chunks included vector scores.");
+        creditedScoreMetric.Interpretation.Reason.Should().Be("Score 0 (Inconclusive): no credited retrieved chunks included returned scores.");
 
         var uncreditedScoreMetric = result.Metrics["UncreditedScoreAverage"];
         ((NumericMetric)uncreditedScoreMetric).Value.Should().Be(0.87);

@@ -10,13 +10,14 @@ public sealed class CrossEncoderLexicalRerankingStrategy : IRerankingStrategy
     {
         ArgumentNullException.ThrowIfNull(candidates);
 
-        return candidates
-            .Select((candidate, index) => new
-            {
-                Candidate = candidate,
-                OriginalRank = index + 1,
-                Score = RerankingText.LexicalScore(query, candidate),
-            })
+        var scoredCandidates = candidates
+            .Select((candidate, index) => new RerankingText.ScoredCandidate(
+                candidate,
+                index + 1,
+                RerankingText.LexicalScore(query, candidate)))
+            .ToArray();
+
+        return scoredCandidates
             .OrderByDescending(item => item.Score)
             .ThenByDescending(item => item.Candidate.Score)
             .ThenBy(item => item.OriginalRank)

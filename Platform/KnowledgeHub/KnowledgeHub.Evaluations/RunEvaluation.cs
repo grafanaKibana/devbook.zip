@@ -58,7 +58,7 @@ string? ParseEvaluationName(string[] arguments)
 string ResolveEvaluationTestFilter(string evaluationName)
 {
     return evaluationName.Equals("RAG.Search", StringComparison.OrdinalIgnoreCase)
-        ? "SearchOverRerankedChunks"
+        ? "SearchOver"
         : evaluationName;
 }
 

@@ -43,17 +43,17 @@ internal static partial class RerankingText
             .ToDictionary(group => group.Key, group => group.Count(), StringComparer.Ordinal);
         var uniqueQueryTokens = queryTokens.Distinct(StringComparer.Ordinal).ToArray();
         var matchedTokens = uniqueQueryTokens.Count(token => candidateCounts.ContainsKey(token));
-        var termFrequency = uniqueQueryTokens.Sum(token => candidateCounts.TryGetValue(token, out var count) ? Math.Log(1 + count) : 0);
         var coverage = matchedTokens / (double)uniqueQueryTokens.Length;
-        var density = termFrequency / Math.Sqrt(candidateTokens.Count);
-        var phraseBonus = CreateSearchText(candidate).Contains(query.Trim(), StringComparison.OrdinalIgnoreCase) ? 0.25 : 0;
+        var density = uniqueQueryTokens
+            .Average(token => candidateCounts.TryGetValue(token, out var count) ? count / (double)(count + 1) : 0);
+        var phraseMatch = CreateSearchText(candidate).Contains(query.Trim(), StringComparison.OrdinalIgnoreCase) ? 1 : 0;
 
-        return coverage + density + phraseBonus;
+        return (coverage * 0.7) + (density * 0.2) + (phraseMatch * 0.1);
     }
 
     public static string CreateSearchText(RagChunkResponse candidate) => string.Join(' ', candidate.Heading, candidate.CitationLabel, candidate.ChunkText);
 
-    public static double Normalize(double value, double min, double max) => max <= min ? 0 : (value - min) / (max - min);
+    public sealed record ScoredCandidate(RagChunkResponse Candidate, int OriginalRank, double Score);
 
     [GeneratedRegex("[\\p{L}\\p{N}]+", RegexOptions.CultureInvariant)]
     private static partial Regex WordRegex();

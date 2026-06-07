@@ -151,5 +151,6 @@ public sealed class RagSearchServiceTests
         new CrossEncoderLexicalRerankingStrategy(),
         new LateInteractionRerankingStrategy(),
         new ReciprocalRankFusionRerankingStrategy(),
+        new NoRerankingStrategy(),
     ]);
 }

@@ -37,10 +37,12 @@ public static class ServiceCollectionExtensions
             services.AddScoped<IChunkingService>(serviceProvider => CreateChunkingService(serviceProvider, ChunkingStrategyKind.MarkdownSection));
             services.AddScoped<IChunkingService>(serviceProvider => CreateChunkingService(serviceProvider, ChunkingStrategyKind.Semantic));
 
+            services.AddScoped<NoRerankingStrategy>();
             services.AddScoped<CrossEncoderLexicalRerankingStrategy>();
             services.AddScoped<LateInteractionRerankingStrategy>();
             services.AddScoped<ReciprocalRankFusionRerankingStrategy>();
 
+            services.AddScoped<IRerankingStrategy>(serviceProvider => serviceProvider.GetRequiredService<NoRerankingStrategy>());
             services.AddScoped<IRerankingStrategy>(serviceProvider => serviceProvider.GetRequiredService<CrossEncoderLexicalRerankingStrategy>());
             services.AddScoped<IRerankingStrategy>(serviceProvider => serviceProvider.GetRequiredService<LateInteractionRerankingStrategy>());
             services.AddScoped<IRerankingStrategy>(serviceProvider => serviceProvider.GetRequiredService<ReciprocalRankFusionRerankingStrategy>());
