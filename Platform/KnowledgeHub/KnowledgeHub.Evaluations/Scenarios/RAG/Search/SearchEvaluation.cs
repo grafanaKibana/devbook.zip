@@ -12,7 +12,7 @@ using Microsoft.Extensions.Options;
 public sealed class SearchEvaluation : MongoEvaluationTestBase<SearchPrediction>
 {
     private const string DatasetFile = "golden-rag-cases.json";
-    private const int TopK = 5;
+    private const int TopK = 10;
 
     private static readonly RerankingStrategyKind[] RerankingStrategies =
     [
