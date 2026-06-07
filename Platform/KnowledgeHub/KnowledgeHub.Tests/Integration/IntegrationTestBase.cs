@@ -53,7 +53,7 @@ public abstract class IntegrationTestBase : IAsyncLifetime
                     ["ConnectionStrings:MongoDb"] = mongoConnectionString,
                     ["EmbeddingOptions:ModelId"] = "text-embedding-3-small",
                     ["EmbeddingOptions:VectorDimensions"] = "384",
-                    ["EmbeddingOptions:ApiKey"] = "test-key",
+                    ["OpenAIOptions:ApiKey"] = "test-key",
                 });
             });
 

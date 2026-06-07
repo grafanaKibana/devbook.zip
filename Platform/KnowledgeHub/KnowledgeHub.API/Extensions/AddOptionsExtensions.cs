@@ -17,8 +17,8 @@ public static class AddOptionsExtensions
                 .Bind(configuration.GetSection(nameof(EmbeddingOptions)));
 
             services
-                .AddOptions<AnswerAgentOptions>()
-                .Bind(configuration.GetSection(nameof(AnswerAgentOptions)));
+                .AddOptions<OpenAIOptions>()
+                .Bind(configuration.GetSection(nameof(OpenAIOptions)));
 
             services
                 .AddOptions<RagSearchOptions>()

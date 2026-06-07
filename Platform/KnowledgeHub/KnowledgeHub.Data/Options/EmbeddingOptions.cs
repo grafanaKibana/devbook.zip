@@ -11,9 +11,4 @@ public sealed class EmbeddingOptions
     public string ModelId { get; init; } = "text-embedding-3-small";
 
     public int VectorDimensions { get; init; } = 384;
-
-    public string? ApiKey { get; init; }
-
-    public string? Endpoint { get; init; }
-
 }

@@ -7,15 +7,17 @@ This is a personal R&D proof of concept for learning RAG mechanics, not a produc
 ## Projects
 
 - `KnowledgeHub.API`, minimal ASP.NET Core host.
-- `KnowledgeHub.Data`, ingestion, chunking, small MongoDB.Driver repositories, Hangfire boilerplate for future jobs, and embedding integration.
+- `KnowledgeHub.Data`, ingestion, chunking, small MongoDB.Driver repositories, Hangfire boilerplate for future jobs, embedding integration, RAG search/ask services, agents, and reranking strategies.
 - `KnowledgeHub.Evaluations`, test-style RAG search evaluation over the golden dataset and local HTML report generation.
+- `KnowledgeHub.Tests`, xUnit unit and integration tests for API endpoints, services, chunking, embedding batching, reranking, and evaluation metrics.
 
 ## Prerequisites
 
 - MongoDB connection string in `ConnectionStrings:MongoDb`.
-- Atlas MongoDB for real `/rag/search` vector retrieval. Local or non-Atlas MongoDB is enough for basic storage experiments, but it does not support the `$vectorSearch` stage used by the search endpoint.
-- OpenAI API key in `EmbeddingOptions:ApiKey` or the `EmbeddingOptions__ApiKey` environment variable.
-- Optional `EmbeddingOptions:Endpoint` or `EmbeddingOptions__Endpoint` if you are not using the default OpenAI endpoint.
+- Atlas MongoDB for the current API host. Startup calls `$listSearchIndexes` and creates Atlas Vector Search indexes for each chunking strategy collection before endpoints are served.
+- OpenAI API key in `OpenAIOptions:ApiKey` or the `OpenAIOptions__ApiKey` environment variable.
+- Optional `OpenAIOptions:Endpoint` or `OpenAIOptions__Endpoint` if you are not using the default OpenAI endpoint.
+- Chat agent model IDs come from `AgentConfigBase.ModelId`; override `ModelId` in an agent config when one agent needs a different model.
 
 Required runtime configuration:
 
@@ -25,9 +27,11 @@ Required runtime configuration:
     "MongoDb": "<mongo-connection-string>"
   },
   "EmbeddingOptions": {
-    "ApiKey": "<openai-api-key>",
     "ModelId": "text-embedding-3-small",
     "VectorDimensions": 384
+  },
+  "OpenAIOptions": {
+    "ApiKey": "<openai-api-key>"
   }
 }
 ```
@@ -82,16 +86,16 @@ dotnet tool restore
 
 The tool manifest tracks `Microsoft.Extensions.AI.Evaluation.Console`, which provides `dotnet aieval report`.
 
-Evaluation runs load configuration from `KnowledgeHub.Evaluations/appsettings.json`, `KnowledgeHub.Evaluations/appsettings.Evaluations.json`, and environment variables. The committed `appsettings.Evaluations.json` contains only non-secret defaults and placeholders. Before running live evaluations, provide:
+Evaluation runs load configuration from `KnowledgeHub.Evaluations/appsettings.json`, `KnowledgeHub.Evaluations/appsettings.Evaluations.json`, and environment variables. Before running live evaluations, provide:
 
 - `ConnectionStrings:MongoDb` with an Atlas connection string that has the vector-search index.
-- `EmbeddingOptions:ApiKey` with an OpenAI API key.
+- `OpenAIOptions:ApiKey` with an OpenAI API key.
 
 Use environment variables when you do not want to edit the local settings file:
 
 ```bash
 ConnectionStrings__MongoDb="<mongo-connection-string>" \
-EmbeddingOptions__ApiKey="<openai-api-key>" \
+OpenAIOptions__ApiKey="<openai-api-key>" \
 dotnet run --project Platform/KnowledgeHub/KnowledgeHub.Evaluations/KnowledgeHub.Evaluations.csproj -- --name RAG.Search
 ```
 
@@ -123,7 +127,8 @@ Example request:
 {
   "sourcePath": "11 AI & ML/LLM/RAG",
   "fileName": "Chunking.md",
-  "forceReingest": false
+  "forceReingest": false,
+  "chunkingStrategy": "MarkdownSection"
 }
 ```
 
@@ -153,8 +158,9 @@ Example full-root request:
 - Default ingestion root: `Vault/Software Engineering`.
 - `fileName` is optional, but when present it must be a single `.md` file name with no path segments.
 - `forceReingest` is optional and defaults to `false`; set it to `true` to refresh stored documents/chunks even when the source content is unchanged.
+- `chunkingStrategy` is optional. When omitted, ingestion writes chunks for all registered strategies: `FixedSize`, `MarkdownSection`, and `Semantic`. When set, ingestion updates only that strategy collection.
 - Requests are rejected if they try to escape the configured ingestion root.
-- Folder ingestion reads all matching markdown files; individual markdown file size is not checked.
+- Folder ingestion reads matching markdown files with `dg-publish: true` frontmatter and skips files under `Templates`; individual markdown file size is not checked.
 - Folder ingestion scans current markdown files, compares hashes against stored documents, upserts only new or changed files, deletes only stored documents whose files no longer exist, and chunks/embeds only changed documents. Single-file ingestion stays scoped to that file and does not delete sibling documents.
 - Hangfire server/storage is wired for future background work, but ingestion chunking currently runs inline from the API request; no ingestion job is registered.
 
@@ -162,7 +168,7 @@ Persistence is intentionally driver-only. The app uses two tiny repositories ove
 
 ## RAG API
 
-`/rag/search` performs real vector retrieval against the selected strategy collection: `chunks.fixedsize`, `chunks.markdownsection`, or `chunks.semantic`. It embeds the query with the configured embedding model, runs Atlas `$vectorSearch`, and returns `mode: "vector"` with matching chunk results.
+`/rag/search` performs real vector retrieval against the configured strategy collection: `chunks.fixedsize`, `chunks.markdownsection`, or `chunks.semantic`. It embeds the query with the configured embedding model, retrieves candidates with Atlas `$vectorSearch`, reranks them with the configured reranking strategy, and returns a mode such as `vector+Bm25`.
 
 `/rag/ask` performs the same real vector chunk retrieval as `/rag/search`, sends the retrieved chunks to a Microsoft Agent Framework `AnswerAgent`, and returns the generated answer with the retrieved chunks as sources.
 
@@ -178,6 +184,8 @@ POST /rag/search
   "topK": 5
 }
 ```
+
+`topK` defaults to `5`, values less than or equal to zero fall back to `5`, and values above `10` are capped at `10`. Chunking and reranking are configured through `RagSearchOptions`, not per request. Defaults are `MarkdownSection` and `Bm25`.
 
 Example QA request for a blank query:
 
@@ -211,7 +219,7 @@ Expected response shape:
 ```json
 {
   "query": "when should I use RAG",
-  "mode": "vector",
+  "mode": "vector+Bm25",
   "results": [
     {
       "chunkId": "<chunk-id>",
@@ -244,7 +252,7 @@ Only `markdownsection` chunks preserve Markdown heading metadata and section-lev
 
 ## Atlas Vector Search index
 
-Create this Atlas Vector Search index on every strategy collection you want to search against before calling `/rag/search` with real data: `chunks.fixedsize`, `chunks.markdownsection`, and `chunks.semantic`.
+The API tries to create this Atlas Vector Search index at startup on every strategy collection: `chunks.fixedsize`, `chunks.markdownsection`, and `chunks.semantic`.
 
 ```json
 {
@@ -263,14 +271,15 @@ Create this Atlas Vector Search index on every strategy collection you want to s
 }
 ```
 
-The index dimensions must match `EmbeddingOptions:VectorDimensions`. The path is currently a PoC constant in `RagSearchService` and must stay `Embedding` unless the chunk model and index are changed together.
+The index dimensions come from `EmbeddingOptions:VectorDimensions`. The path is currently a PoC constant in the chunk repository and must stay `Embedding` unless the chunk model and index are changed together.
 
 ## RAG troubleshooting
 
-- Missing index or non-Atlas MongoDB: `/rag/search` depends on Atlas `$vectorSearch`. If the index `chunks_embedding_vector_idx` is missing from the selected strategy collection, or the database is local/non-Atlas MongoDB, vector search fails before returning results.
+- Missing Atlas Search support: the API startup path lists and creates search indexes. A local/non-Atlas MongoDB instance can fail before endpoints are served unless that startup behavior is changed.
+- Missing index: if startup cannot create `chunks_embedding_vector_idx` on the selected strategy collection, `/rag/search` cannot run Atlas `$vectorSearch` successfully.
 - Dimension mismatch: the Atlas index uses `384` dimensions, so `EmbeddingOptions:ModelId` must stay `text-embedding-3-small` with `EmbeddingOptions:VectorDimensions = 384` unless you rebuild stored chunk embeddings and recreate the index with matching dimensions.
-- Empty results: if `/rag/search` returns `mode: "vector"` with an empty `results` array, first ingest markdown documents for the selected chunking strategy so the API can create chunks and embeddings. A valid index cannot return matches when the selected strategy collection has no embedded chunks.
-- Secret handling: keep `ConnectionStrings:MongoDb` and `EmbeddingOptions:ApiKey` in user-secrets or environment variables only. Use double underscores for environment variables, for example `ConnectionStrings__MongoDb` and `EmbeddingOptions__ApiKey`. Committed configuration should contain placeholders or non-secret defaults.
+- Empty results: if `/rag/search` returns a vector mode with an empty `results` array, first ingest publishable markdown documents for the configured chunking strategy so the API can create chunks and embeddings. A valid index cannot return matches when the selected strategy collection has no embedded chunks.
+- Secret handling: keep `ConnectionStrings:MongoDb` and `OpenAIOptions:ApiKey` in user-secrets or environment variables only. Use double underscores for environment variables, for example `ConnectionStrings__MongoDb` and `OpenAIOptions__ApiKey`. Committed configuration should contain placeholders or non-secret defaults.
 
 ## Runtime flow
 

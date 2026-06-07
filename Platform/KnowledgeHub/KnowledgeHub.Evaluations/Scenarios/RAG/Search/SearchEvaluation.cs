@@ -31,38 +31,38 @@ public sealed class SearchEvaluation : MongoEvaluationTestBase<SearchPrediction>
         IReadOnlyList<SearchPrediction> predictions)
         => SearchEvaluator.ComputeSummaryMetrics(predictions, TopK);
 
-    private static IEnumerable<TestCaseData> TestCases() => LoadTestCases<SearchDataset, SearchEvaluationCase>(
-        DatasetFile, dataset => dataset.Cases, testCase => testCase.Id);
-
-    [Test]
-    [TestCaseSource(nameof(TestCases))]
-    public async Task SearchOverFixedSizeChunks(SearchEvaluationCase testCase)
+    private static IEnumerable<TestCaseData> TestCases()
     {
-        await SearchFindsExpectedSources(testCase, ChunkingStrategyKind.FixedSize);
-    }
-
-    [Test]
-    [TestCaseSource(nameof(TestCases))]
-    public async Task SearchOverMarkdownSectionChunks(SearchEvaluationCase testCase)
-    {
-        await SearchFindsExpectedSources(testCase, ChunkingStrategyKind.MarkdownSection);
-    }
-
-    [Test]
-    [TestCaseSource(nameof(TestCases))]
-    public async Task SearchOverSemanticChunks(SearchEvaluationCase testCase)
-    {
-        await SearchFindsExpectedSources(testCase, ChunkingStrategyKind.Semantic);
-    }
-
-    private async Task SearchFindsExpectedSources(
-        SearchEvaluationCase testCase,
-        ChunkingStrategyKind chunkingStrategy)
-    {
-        foreach (var rerankingStrategy in RerankingStrategies)
+        foreach (var testCaseData in LoadTestCases<SearchDataset, SearchEvaluationCase>(DatasetFile, dataset => dataset.Cases, testCase => testCase.Id))
         {
-            await SearchFindsExpectedSources(testCase, chunkingStrategy, rerankingStrategy);
+            var testCase = (SearchEvaluationCase)testCaseData.Arguments[0]!;
+            foreach (var rerankingStrategy in RerankingStrategies)
+            {
+                yield return new TestCaseData(testCase, rerankingStrategy)
+                    .SetArgDisplayNames(testCase.Id, rerankingStrategy.ToString());
+            }
         }
+    }
+
+    [Test]
+    [TestCaseSource(nameof(TestCases))]
+    public async Task SearchOverFixedSizeChunks(SearchEvaluationCase testCase, RerankingStrategyKind rerankingStrategy)
+    {
+        await SearchFindsExpectedSources(testCase, ChunkingStrategyKind.FixedSize, rerankingStrategy);
+    }
+
+    [Test]
+    [TestCaseSource(nameof(TestCases))]
+    public async Task SearchOverMarkdownSectionChunks(SearchEvaluationCase testCase, RerankingStrategyKind rerankingStrategy)
+    {
+        await SearchFindsExpectedSources(testCase, ChunkingStrategyKind.MarkdownSection, rerankingStrategy);
+    }
+
+    [Test]
+    [TestCaseSource(nameof(TestCases))]
+    public async Task SearchOverSemanticChunks(SearchEvaluationCase testCase, RerankingStrategyKind rerankingStrategy)
+    {
+        await SearchFindsExpectedSources(testCase, ChunkingStrategyKind.Semantic, rerankingStrategy);
     }
 
     private async Task SearchFindsExpectedSources(

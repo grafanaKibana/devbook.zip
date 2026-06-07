@@ -28,15 +28,16 @@ public abstract class MongoEvaluationTestBase<TPrediction> : EvaluationTestBase<
     {
         var configuration = BuildConfiguration();
         var connectionString = configuration.GetConnectionString("MongoDb");
-        var embeddingApiKey = configuration.GetSection(nameof(EmbeddingOptions)).Get<EmbeddingOptions>()?.ApiKey;
+        var openAIApiKey = configuration.GetSection(nameof(OpenAIOptions)).Get<OpenAIOptions>()?.ApiKey;
 
-        if (string.IsNullOrWhiteSpace(connectionString) || string.IsNullOrWhiteSpace(embeddingApiKey))
+        if (string.IsNullOrWhiteSpace(connectionString) || string.IsNullOrWhiteSpace(openAIApiKey))
         {
-            Assert.Ignore($"{this.ScenarioDisplayName} evaluation requires ConnectionStrings:MongoDb and EmbeddingOptions:ApiKey.");
+            Assert.Ignore($"{this.ScenarioDisplayName} evaluation requires ConnectionStrings:MongoDb and OpenAIOptions:ApiKey.");
         }
 
         var services = new ServiceCollection();
         services.AddOptions<EmbeddingOptions>().Bind(configuration.GetSection(nameof(EmbeddingOptions)));
+        services.AddOptions<OpenAIOptions>().Bind(configuration.GetSection(nameof(OpenAIOptions)));
         services.AddSingleton<IMongoClient>(_ => new MongoClient(connectionString));
         services.AddSingleton(serviceProvider => serviceProvider.GetRequiredService<IMongoClient>().GetDatabase("KnowledgeHub"));
         services.AddSingleton(serviceProvider => serviceProvider.GetRequiredService<IMongoDatabase>().GetCollection<Document>("documents"));

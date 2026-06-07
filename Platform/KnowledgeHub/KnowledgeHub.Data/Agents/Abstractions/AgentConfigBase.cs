@@ -11,7 +11,7 @@ public abstract record AgentConfigBase : IAgentConfig
 
     public abstract string Description { get; }
 
-    public virtual string ModelId => "gpt-4.1";
+    public virtual string ModelId => "gpt-5.4-mini";
 
     public abstract string Prompt { get; }
 
