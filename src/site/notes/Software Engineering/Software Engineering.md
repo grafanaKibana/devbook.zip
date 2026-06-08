@@ -17,20 +17,20 @@ Organized into 11 topic areas with spaced repetition tracking. The dashboards be
 
 # Recently Updated
 
-| Note                                                                                                               | Date                      |
-| ------------------------------------------------------------------------------------------------------------------ | ------------------------- |
-| [[Software Engineering/11 AI & ML/LLM/RAG/Re-ranking\|Re-ranking]]                                              | 9:56 AM - June 07, 2026   |
-| [[Software Engineering/11 AI & ML/LLM/RAG/RAG\|RAG]]                                                            | 3:00 PM - May 12, 2026    |
-| [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Bridge\|Bridge]]                     | 12:13 PM - March 13, 2026 |
-| [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Visitor\|Visitor]]                   | 12:13 PM - March 13, 2026 |
-| [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Adapter\|Adapter]]                   | 12:13 PM - March 13, 2026 |
-| [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Decorator\|Decorator]]               | 12:13 PM - March 13, 2026 |
-| [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Composite\|Composite]]               | 12:13 PM - March 13, 2026 |
-| [[Software Engineering/05 Architecture/Patterns/Design Patterns/Creational/Abstract Factory\|Abstract Factory]] | 12:13 PM - March 13, 2026 |
-| [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Proxy\|Proxy]]                       | 12:12 PM - March 13, 2026 |
-| [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Strategy\|Strategy]]                 | 12:12 PM - March 13, 2026 |
-| [[Software Engineering/02 Computer Science/Data Structures/Queue\|Queue]]                                       | 1:53 AM - March 13, 2026  |
-| [[Software Engineering/02 Computer Science/Data Structures/Data Structures\|Data Structures]]                   | 1:53 AM - March 13, 2026  |
+| Note                                                                                                 | Date                      |
+| ---------------------------------------------------------------------------------------------------- | ------------------------- |
+| [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation\|Evaluation]]                                | 2:50 PM - June 08, 2026   |
+| [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring\|Monitoring]]                                | 2:50 PM - June 08, 2026   |
+| [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/Evaluation\|Evaluation]]            | 2:40 PM - June 08, 2026   |
+| [[Software Engineering/11 AI & ML/LLM/RAG/Re-ranking\|Re-ranking]]                                | 2:29 PM - June 08, 2026   |
+| [[Software Engineering/11 AI & ML/LLM/RAG/RAG\|RAG]]                                              | 2:29 PM - June 08, 2026   |
+| [[Software Engineering/11 AI & ML/LLM/Hallucinations\|Hallucinations]]                            | 2:29 PM - June 08, 2026   |
+| [[Software Engineering/11 AI & ML/LLM/Embeddings\|Embeddings]]                                    | 2:29 PM - June 08, 2026   |
+| [[Software Engineering/11 AI & ML/LLM/RAG/Retrieval\|Retrieval]]                                  | 2:29 PM - June 08, 2026   |
+| [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Bridge\|Bridge]]       | 12:13 PM - March 13, 2026 |
+| [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Visitor\|Visitor]]     | 12:13 PM - March 13, 2026 |
+| [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Adapter\|Adapter]]     | 12:13 PM - March 13, 2026 |
+| [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Decorator\|Decorator]] | 12:13 PM - March 13, 2026 |
 
 { .block-language-dataview}
 # Publish Distribution
