@@ -52,24 +52,34 @@ Tool design is API design for an LLM consumer. The same principles that make an 
 
 **Error messages as teaching signals.** When a tool call fails, return a structured error that tells the model what went wrong and how to fix it: `{"error": "invalid_date_format", "message": "Expected YYYY-MM-DD, got '12/25/2024'", "hint": "Reformat as 2024-12-25"}`. The model can self-correct on the next [[Software Engineering/11 AI & ML/LLM/Agents/Agent Loop|loop iteration]] if the error is specific. Silent failures or generic "internal error" messages leave the model stuck.
 
-In Semantic Kernel (.NET), a well-designed tool looks like this:
+In the Microsoft Agent Framework (.NET), a well-designed tool looks like this:
 
 ```csharp
-public class WeatherPlugin
+// Any C# method becomes a tool via AIFunctionFactory.Create — the descriptions
+// on the method and each parameter become the schema the model reads.
+[Description(
+    "Get current weather for a city. Returns temperature, conditions, " +
+    "and humidity. Use when the user asks about weather or outdoor plans. " +
+    "Do not use for historical weather data.")]
+static async Task<WeatherResult> GetCurrentWeather(
+    [Description("City name, e.g. 'Seattle' or 'London'")] string city,
+    [Description("Temperature unit")] TemperatureUnit unit = TemperatureUnit.Celsius)
 {
-    [KernelFunction, Description(
-        "Get current weather for a city. Returns temperature, conditions, " +
-        "and humidity. Use when the user asks about weather or outdoor plans. " +
-        "Do not use for historical weather data.")]
-    public async Task<WeatherResult> GetCurrentWeather(
-        [Description("City name, e.g. 'Seattle' or 'London'")] string city,
-        [Description("Temperature unit")] TemperatureUnit unit = TemperatureUnit.Celsius)
-    {
-        // Validate input, call weather API, return compact result
-    }
+    // Validate input, call weather API, return compact result
 }
 
-public enum TemperatureUnit { Celsius, Fahrenheit }
+enum TemperatureUnit { Celsius, Fahrenheit }
+
+// Register the tool on the agent via ChatOptions.Tools
+AIAgent agent = new ChatClientAgent(chatClient, new ChatClientAgentOptions
+{
+    Name = "WeatherAssistant",
+    ChatOptions = new ChatOptions
+    {
+        Instructions = "You answer weather questions.",
+        Tools = [AIFunctionFactory.Create(GetCurrentWeather)],
+    },
+});
 ```
 
 The `Description` attributes become the tool schema the model reads to decide whether and how to call this function. Investing time in descriptions pays more dividends than prompt engineering.
@@ -180,7 +190,7 @@ Three mechanisms compound:
 - [Tool use overview — Anthropic](https://docs.anthropic.com/en/docs/build-with-claude/tool-use/overview)
 - [Tool use best practices — Anthropic](https://docs.anthropic.com/en/docs/build-with-claude/tool-use/best-practices)
 - [Function calling guide — OpenAI](https://platform.openai.com/docs/guides/function-calling)
-- [Function calling with chat completion — Semantic Kernel (Microsoft Learn)](https://learn.microsoft.com/semantic-kernel/concepts/ai-services/chat-completion/function-calling/)
+- [Using function tools with an agent — Microsoft Agent Framework (Microsoft Learn)](https://learn.microsoft.com/en-us/agent-framework/agents/tools/function-tools)
 - [Building Effective Agents — Anthropic Engineering](https://www.anthropic.com/engineering/building-effective-agents)
 - [Prompt caching with tool use — Anthropic](https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching#prompt-caching-with-tool-use)
 - [Key Elements of Agent Tools — DeepLearning.AI / CrewAI course](https://learn.deeplearning.ai/courses/multi-ai-agent-systems-with-crewai/lesson/c4j19/key-elements-of-agent-tools)
