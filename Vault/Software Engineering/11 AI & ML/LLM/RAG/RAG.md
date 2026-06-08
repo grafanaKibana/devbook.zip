@@ -388,7 +388,7 @@ Main risk:
 
 ## Operational Baselines
 
-- Gate every pattern behind a feature flag. Measure retrieval precision, generation faithfulness, latency p95, and cost per query before and after.
+- Gate every pattern behind a feature flag. Measure [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics|retrieval precision]], [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#LLM-as-Judge Metrics|generation faithfulness]], latency p95, and cost per query before and after.
 - Set hard iteration caps on looping patterns (Iterative, Agentic) to bound latency and cost. For corrective/self-reflective patterns, cap retry count and reject unsupported output instead of looping until the answer looks good.
 - Monitor query drift and noise accumulation in iterative patterns. Track semantic similarity between the original query and each iteration's retrieval query.
 - Cache aggressively: community summaries (GraphRAG), query rewrites, multi-query result sets, contextual chunk enrichments, reasoning chains, and agent tool outputs. See [[Software Engineering/11 AI & ML/LLM/RAG/Caching|Caching]] for cache-key risks.

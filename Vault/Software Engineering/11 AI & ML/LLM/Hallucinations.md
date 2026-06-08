@@ -34,7 +34,7 @@ Use multiple detectors because each catches different failure modes.
 
 - **NLI-based fact checking**: decompose an answer into claims, then score each claim against source context as entailed, neutral, or contradicted. This is strong on intrinsic hallucinations where contradictions are explicit in context. Azure AI Content Safety Groundedness detection provides this as a managed path; lightweight open-source NLI classifiers offer a self-hosted alternative.
 - **Self-consistency (SelfCheckGPT)**: sample the same prompt multiple times and compare outputs. If the model has stable knowledge, core claims remain consistent; high variance and contradictions indicate potential hallucination. This is zero-resource and black-box (no logprobs or external KB), but it adds 3-5 extra inference calls.
-- **LLM-as-judge**: score answer faithfulness against context using an evaluator LLM. Common metric: faithfulness = supported claims divided by total claims. Frameworks like RAGAS automate this decomposition.
+- **LLM-as-judge**: score answer [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#LLM-as-Judge Metrics|faithfulness]] against context using an evaluator LLM. Common metric: faithfulness = supported claims divided by total claims. Frameworks like RAGAS automate this decomposition.
 - **Atomic fact verification (FActScore)**: break text into atomic facts, retrieve evidence from a knowledge base, and validate each fact independently. This gives granular failure localization; on biography generation benchmarks, models score around 58% FActScore, illustrating how frequently atomic claims lack support.
 
 For RAG stacks, pair these with [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation|Evaluation]] so retrieval quality and answer faithfulness are measured separately.
@@ -57,7 +57,7 @@ In practice, combine these with [[Software Engineering/11 AI & ML/LLM/Guardrails
 
 - **What goes wrong**: teams ship RAG and assume hallucination is solved, then stop active monitoring.
 - **Why it happens**: RAG introduces its own failure modes: retrieval miss, context overflow, and model additions beyond retrieved evidence.
-- **How to avoid or detect it**: track retrieval recall and faithfulness separately; keep claim-to-context verification in place even after RAG rollout. Stanford and Yale findings on legal RAG tools (>17% hallucination) are the practical warning signal.
+- **How to avoid or detect it**: track [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics|retrieval recall]] and [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#LLM-as-Judge Metrics|faithfulness]] separately; keep claim-to-context verification in place even after RAG rollout. Stanford and Yale findings on legal RAG tools (>17% hallucination) are the practical warning signal.
 
 ### RLHF Makes Factuality Worse
 
