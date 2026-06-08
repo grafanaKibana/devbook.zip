@@ -3,67 +3,7 @@
 ---
 
 
-<h1><span>Table of Contents</span></h1><h2><span>Total questions: <strong>552</strong></span></h2><p><span><ul>
-<li dir="auto"><strong><a class="internal-link" data-href="#01-programming" href="#01-programming" target="_blank" rel="noopener nofollow">01 Programming</a></strong> (124)
-<ul>
-<li dir="auto"><a class="internal-link" data-href="#01-programming-net" href="#01-programming-net" target="_blank" rel="noopener nofollow">NET</a> (124)</li>
-</ul>
-</li>
-<li dir="auto"><strong><a class="internal-link" data-href="#02-computer-science" href="#02-computer-science" target="_blank" rel="noopener nofollow">02 Computer Science</a></strong> (76)
-<ul>
-<li dir="auto"><a class="internal-link" data-href="#02-computer-science-algorithms" href="#02-computer-science-algorithms" target="_blank" rel="noopener nofollow">Algorithms</a> (40)</li>
-<li dir="auto"><a class="internal-link" data-href="#02-computer-science-data-structures" href="#02-computer-science-data-structures" target="_blank" rel="noopener nofollow">Data Structures</a> (34)</li>
-</ul>
-</li>
-<li dir="auto"><strong><a class="internal-link" data-href="#03-data-persistence" href="#03-data-persistence" target="_blank" rel="noopener nofollow">03 Data Persistence</a></strong> (22)
-<ul>
-<li dir="auto"><a class="internal-link" data-href="#03-data-persistence-nosql" href="#03-data-persistence-nosql" target="_blank" rel="noopener nofollow">NoSQL</a> (2)</li>
-<li dir="auto"><a class="internal-link" data-href="#03-data-persistence-orms" href="#03-data-persistence-orms" target="_blank" rel="noopener nofollow">ORMs</a> (2)</li>
-<li dir="auto"><a class="internal-link" data-href="#03-data-persistence-sql" href="#03-data-persistence-sql" target="_blank" rel="noopener nofollow">SQL</a> (15)</li>
-</ul>
-</li>
-<li dir="auto"><strong><a class="internal-link" data-href="#04-networks" href="#04-networks" target="_blank" rel="noopener nofollow">04 Networks</a></strong> (30)
-<ul>
-<li dir="auto"><a class="internal-link" data-href="#04-networks-architecture-ops" href="#04-networks-architecture-ops" target="_blank" rel="noopener nofollow">Architecture &amp; Ops</a> (5)</li>
-<li dir="auto"><a class="internal-link" data-href="#04-networks-protocols" href="#04-networks-protocols" target="_blank" rel="noopener nofollow">Protocols</a> (17)</li>
-<li dir="auto"><a class="internal-link" data-href="#04-networks-transport-sockets" href="#04-networks-transport-sockets" target="_blank" rel="noopener nofollow">Transport &amp; Sockets</a> (8)</li>
-</ul>
-</li>
-<li dir="auto"><strong><a class="internal-link" data-href="#05-architecture" href="#05-architecture" target="_blank" rel="noopener nofollow">05 Architecture</a></strong> (125)
-<ul>
-<li dir="auto"><a class="internal-link" data-href="#05-architecture-application-architecture" href="#05-architecture-application-architecture" target="_blank" rel="noopener nofollow">Application Architecture</a> (9)</li>
-<li dir="auto"><a class="internal-link" data-href="#05-architecture-distributed-systems" href="#05-architecture-distributed-systems" target="_blank" rel="noopener nofollow">Distributed Systems</a> (22)</li>
-<li dir="auto"><a class="internal-link" data-href="#05-architecture-patterns" href="#05-architecture-patterns" target="_blank" rel="noopener nofollow">Patterns</a> (82)</li>
-<li dir="auto"><a class="internal-link" data-href="#05-architecture-system-architecture" href="#05-architecture-system-architecture" target="_blank" rel="noopener nofollow">System Architecture</a> (12)</li>
-</ul>
-</li>
-<li dir="auto"><strong><a class="internal-link" data-href="#06-development-practices" href="#06-development-practices" target="_blank" rel="noopener nofollow">06 Development Practices</a></strong> (30)
-<ul>
-<li dir="auto"><a class="internal-link" data-href="#06-development-practices-paradigms" href="#06-development-practices-paradigms" target="_blank" rel="noopener nofollow">Paradigms</a> (18)</li>
-<li dir="auto"><a class="internal-link" data-href="#06-development-practices-principles" href="#06-development-practices-principles" target="_blank" rel="noopener nofollow">Principles</a> (12)</li>
-</ul>
-</li>
-<li dir="auto"><strong><a class="internal-link" data-href="#07-security" href="#07-security" target="_blank" rel="noopener nofollow">07 Security</a></strong> (20)
-<ul>
-<li dir="auto"><a class="internal-link" data-href="#07-security-authentication" href="#07-security-authentication" target="_blank" rel="noopener nofollow">Authentication</a> (9)</li>
-</ul>
-</li>
-<li dir="auto"><strong><a class="internal-link" data-href="#08-sdlc" href="#08-sdlc" target="_blank" rel="noopener nofollow">08 SDLC</a></strong> (5)</li>
-<li dir="auto"><strong><a class="internal-link" data-href="#09-devops" href="#09-devops" target="_blank" rel="noopener nofollow">09 DevOps</a></strong> (14)
-<ul>
-<li dir="auto"><a class="internal-link" data-href="#09-devops-deployment-strategies" href="#09-devops-deployment-strategies" target="_blank" rel="noopener nofollow">Deployment Strategies</a> (3)</li>
-<li dir="auto"><a class="internal-link" data-href="#09-devops-version-control-systems" href="#09-devops-version-control-systems" target="_blank" rel="noopener nofollow">Version Control Systems</a> (2)</li>
-</ul>
-</li>
-<li dir="auto"><strong><a class="internal-link" data-href="#10-cloud" href="#10-cloud" target="_blank" rel="noopener nofollow">10 Cloud</a></strong> (2)</li>
-<li dir="auto"><strong><a class="internal-link" data-href="#11-ai-ml" href="#11-ai-ml" target="_blank" rel="noopener nofollow">11 AI &amp; ML</a></strong> (104)
-<ul>
-<li dir="auto"><a class="internal-link" data-href="#11-ai-ml-llm" href="#11-ai-ml-llm" target="_blank" rel="noopener nofollow">LLM</a> (73)</li>
-<li dir="auto"><a class="internal-link" data-href="#11-ai-ml-machine-learning" href="#11-ai-ml-machine-learning" target="_blank" rel="noopener nofollow">Machine Learning</a> (15)</li>
-<li dir="auto"><a class="internal-link" data-href="#11-ai-ml-tooling" href="#11-ai-ml-tooling" target="_blank" rel="noopener nofollow">Tooling</a> (16)</li>
-</ul>
-</li>
-</ul></span></p><hr><h1 id="01-programming">01 Programming</h1><h2 id="01-programming-net">NET</h2><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">What are the three layers of the .NET platform, and why does that distinction matter?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
+<div><h1>Table of Contents</h1><h2>Total questions: 552</h2><ul><li><strong><a href="#01-programming">01 Programming</a> (124)</strong><ul><li><a href="#01-programming-net">NET</a> (124)</li></ul></li><li><strong><a href="#02-computer-science">02 Computer Science</a> (76)</strong><ul><li><a href="#02-computer-science-algorithms">Algorithms</a> (40)</li><li><a href="#02-computer-science-data-structures">Data Structures</a> (34)</li></ul></li><li><strong><a href="#03-data-persistence">03 Data Persistence</a> (22)</strong><ul><li><a href="#03-data-persistence-nosql">NoSQL</a> (2)</li><li><a href="#03-data-persistence-orms">ORMs</a> (2)</li><li><a href="#03-data-persistence-sql">SQL</a> (15)</li></ul></li><li><strong><a href="#04-networks">04 Networks</a> (30)</strong><ul><li><a href="#04-networks-architecture-ops">Architecture &amp; Ops</a> (5)</li><li><a href="#04-networks-protocols">Protocols</a> (17)</li><li><a href="#04-networks-transport-sockets">Transport &amp; Sockets</a> (8)</li></ul></li><li><strong><a href="#05-architecture">05 Architecture</a> (125)</strong><ul><li><a href="#05-architecture-application-architecture">Application Architecture</a> (9)</li><li><a href="#05-architecture-distributed-systems">Distributed Systems</a> (22)</li><li><a href="#05-architecture-patterns">Patterns</a> (82)</li><li><a href="#05-architecture-system-architecture">System Architecture</a> (12)</li></ul></li><li><strong><a href="#06-development-practices">06 Development Practices</a> (30)</strong><ul><li><a href="#06-development-practices-paradigms">Paradigms</a> (18)</li><li><a href="#06-development-practices-principles">Principles</a> (12)</li></ul></li><li><strong><a href="#07-security">07 Security</a> (20)</strong><ul><li><a href="#07-security-authentication">Authentication</a> (9)</li></ul></li><li><strong><a href="#08-sdlc">08 SDLC</a> (5)</strong></li><li><strong><a href="#09-devops">09 DevOps</a> (14)</strong><ul><li><a href="#09-devops-deployment-strategies">Deployment Strategies</a> (3)</li><li><a href="#09-devops-version-control-systems">Version Control Systems</a> (2)</li></ul></li><li><strong><a href="#10-cloud">10 Cloud</a> (2)</strong></li><li><strong><a href="#11-ai-ml">11 AI &amp; ML</a> (104)</strong><ul><li><a href="#11-ai-ml-llm">LLM</a> (73)</li><li><a href="#11-ai-ml-machine-learning">Machine Learning</a> (15)</li><li><a href="#11-ai-ml-tooling">Tooling</a> (16)</li></ul></li></ul><hr></div><div><h1 id="01-programming">01 Programming</h1><h2 id="01-programming-net">NET</h2><div><div data-callout-metadata="" data-callout-fold="-" data-callout="question" class="callout is-collapsible is-collapsed node-insert-event"><div class="callout-title" dir="auto"><div class="callout-icon"><svg width="16" height="16"></svg></div><div class="callout-title-inner">What are the three layers of the .NET platform, and why does that distinction matter?</div><div class="callout-fold is-collapsed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg></div></div><div class="callout-content" style="display: none;">
 <p dir="auto">Runtime (CLR), language (C#/F#), and framework libraries (ASP.NET Core, EF Core, extensions).<br>
 It matters because most production issues cross layers: a performance problem might involve language-level allocations (C#), runtime GC behavior (CLR), and framework middleware configuration (ASP.NET Core). Understanding the boundaries helps you diagnose root causes instead of applying surface-level fixes.<br>
 <em><a class="internal-link" data-href="Software Engineering/01 Programming/NET/NET.md" href="Software Engineering/01 Programming/NET/NET.md" target="_blank" rel="noopener nofollow">NET</a></em></p>
@@ -2966,7 +2906,7 @@ Cost of confusing them: retraining on new data for concept drift is necessary; r
 <li dir="auto">If a rule would surprise teammates in a PR review, it should be project-scoped, not global<br>
 <em><a class="internal-link" data-href="Software Engineering/11 AI &amp; ML/Tooling/Skills.md" href="Software Engineering/11 AI &amp; ML/Tooling/Skills.md" target="_blank" rel="noopener nofollow">Skills</a></em></li>
 </ul>
-</div></div></div>
+</div></div></div></div>
 
 <!-- whats-next:start -->
 
