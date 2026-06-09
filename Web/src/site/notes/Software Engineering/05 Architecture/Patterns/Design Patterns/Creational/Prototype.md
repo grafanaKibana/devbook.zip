@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/design-patterns/creational/prototype/"}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/design-patterns/creational/prototype/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Patterns"],"level":["2"],"priority":"High","status":["Done"]}}
 ---
 
 # Prototype

@@ -12,7 +12,7 @@ dg-publish: true
 
 # Intro
 
-The agent loop is the execution cycle that turns an LLM from a single-shot text generator into an autonomous problem solver. Instead of one prompt producing one response, the model runs in a loop: reason about the current state, call a tool, observe the result, then decide whether to continue or stop. This is the ReAct pattern (Reasoning + Acting), introduced by Yao et al. (ICLR 2023), and many production agent frameworks — Semantic Kernel, LangChain, AutoGen — use ReAct-like think-act-observe loops as their core execution model.
+The agent loop is the execution cycle that turns an LLM from a single-shot text generator into an autonomous problem solver. Instead of one prompt producing one response, the model runs in a loop: reason about the current state, call a tool, observe the result, then decide whether to continue or stop. This is the ReAct pattern (Reasoning + Acting), introduced by Yao et al. (ICLR 2023), and many production agent frameworks — Microsoft Agent Framework, LangChain, LangGraph — use ReAct-like think-act-observe loops as their core execution model.
 
 The loop works in four steps:
 
@@ -47,28 +47,34 @@ The loop maps directly to the chat completions API contract. Here is what happen
 
 **Repeat.** The runtime sends the updated history back to the model. If the model responds with text and no tool calls, the loop terminates and the response reaches the user. If it responds with more tool calls, the cycle continues.
 
-In Semantic Kernel (.NET), the loop is automated behind `FunctionChoiceBehavior.Auto()`:
+In the Microsoft Agent Framework (.NET), the loop is automated inside `AIAgent.RunAsync` — a single call runs the whole Think-Act-Observe cycle:
 
 ```csharp
-var builder = Kernel.CreateBuilder()
-    .AddAzureOpenAIChatCompletion(deploymentName, endpoint, apiKey);
-builder.Plugins.AddFromType<WeatherPlugin>("Weather");
-var kernel = builder.Build();
+// A tool the agent can call — any method, described for the model
+[Description("Get the weather forecast for a city.")]
+static string GetWeather([Description("City name, e.g. 'Seattle'")] string city)
+    => $"{city}: light rain, 12°C, 80% chance of showers today.";
 
-var settings = new OpenAIPromptExecutionSettings
+// Build a chat client over Azure OpenAI, then wrap it in an agent
+IChatClient chatClient = new AzureOpenAIClient(new Uri(endpoint), new ApiKeyCredential(apiKey))
+    .GetChatClient(deploymentName)
+    .AsIChatClient();
+
+AIAgent agent = new ChatClientAgent(chatClient, new ChatClientAgentOptions
 {
-    FunctionChoiceBehavior = FunctionChoiceBehavior.Auto()
-};
-
-var history = new ChatHistory();
-history.AddUserMessage("Should I bring an umbrella to Seattle today?");
+    Name = "WeatherAssistant",
+    ChatOptions = new ChatOptions
+    {
+        Instructions = "You help users plan around the weather.",
+        Tools = [AIFunctionFactory.Create(GetWeather)],
+    },
+});
 
 // This single call runs the full Think-Act-Observe-Repeat loop internally
-var response = await kernel.GetRequiredService<IChatCompletionService>()
-    .GetChatMessageContentAsync(history, settings, kernel);
+var response = await agent.RunAsync("Should I bring an umbrella to Seattle today?");
 ```
 
-Behind `GetChatMessageContentAsync`, Semantic Kernel serializes all `[KernelFunction]` methods into JSON tool schemas, sends them with the chat history, invokes any requested functions, appends results, and repeats until the model returns a text response or hits the iteration cap.
+Behind `RunAsync`, the Agent Framework wraps the chat client in a `FunctionInvokingChatClient`: it serializes each `AIFunction` into a JSON tool schema, sends it with the chat history, invokes any functions the model requests, appends the results, and repeats until the model returns a text response or hits the iteration cap.
 
 The equivalent raw loop without framework abstraction:
 
@@ -107,7 +113,7 @@ The model enters a cycle where it repeatedly calls the same tool or alternates b
 
 **Why it happens**: as the context window fills with tool results, earlier reasoning traces fall outside the model's effective attention window. The model "forgets" what it already tried. Models also have no intrinsic sense of diminishing returns — they will keep trying if the prompt does not define a stop condition.
 
-**Mitigation**: set a hard cap on loop iterations (Semantic Kernel's auto function-calling settings accept a maximum iteration count; LangGraph exposes `recursion_limit`). Add explicit stop instructions in the system prompt: "If you have called the same tool twice with the same arguments, stop and answer with what you have." Monitor tool call counts per request and alert on outliers.
+**Mitigation**: set a hard cap on loop iterations (the Agent Framework's `FunctionInvokingChatClient` exposes `MaximumIterationsPerRequest`; LangGraph exposes `recursion_limit`). Add explicit stop instructions in the system prompt: "If you have called the same tool twice with the same arguments, stop and answer with what you have." Monitor tool call counts per request and alert on outliers.
 
 ### Token Explosion
 
@@ -139,8 +145,8 @@ The model invokes a function that does not exist, passes arguments that do not m
 ## References
 
 - [ReAct: Synergizing Reasoning and Acting in Language Models — Yao et al. ICLR 2023](https://arxiv.org/abs/2210.03629)
-- [Function calling with chat completion — Semantic Kernel (Microsoft Learn)](https://learn.microsoft.com/semantic-kernel/concepts/ai-services/chat-completion/function-calling/)
-- [Planning and the automatic function calling loop — Semantic Kernel (Microsoft Learn)](https://learn.microsoft.com/semantic-kernel/concepts/planning)
+- [Using function tools with an agent — Microsoft Agent Framework (Microsoft Learn)](https://learn.microsoft.com/en-us/agent-framework/agents/tools/function-tools)
+- [Microsoft Agent Framework overview — agents, the run loop, and automatic tool invocation (Microsoft Learn)](https://learn.microsoft.com/en-us/agent-framework/overview/)
 - [Function calling guide — OpenAI](https://platform.openai.com/docs/guides/function-calling)
 - [Building Effective Agents — Anthropic Engineering](https://www.anthropic.com/engineering/building-effective-agents)
 - [ReAct Agent Pattern with production safeguards — Agent Patterns](https://www.agentpatterns.tech/en/agent-patterns/react-agent)

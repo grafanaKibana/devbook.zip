@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/runtime/runtime/","tags":["FolderNote"]}
+{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/runtime/runtime/","tags":["FolderNote"],"dg-note-properties":{"topic":["Programming"],"subtopic":["NET"],"tags":["FolderNote"],"status":"Creation","priority":"High","level":["4"]}}
 ---
 
 

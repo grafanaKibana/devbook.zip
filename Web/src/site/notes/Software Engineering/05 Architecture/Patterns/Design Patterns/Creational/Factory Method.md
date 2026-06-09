@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/design-patterns/creational/factory-method/"}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/design-patterns/creational/factory-method/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Patterns"],"level":["1"],"priority":"High","status":["Done"]}}
 ---
 
 # Factory Method

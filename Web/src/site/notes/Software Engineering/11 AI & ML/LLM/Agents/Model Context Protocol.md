@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/agents/model-context-protocol/"}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/agents/model-context-protocol/","dg-note-properties":{"topic":["AI & ML"],"subtopic":["LLM"],"level":["3"],"priority":"Low","status":"Done"}}
 ---
 
 
@@ -122,7 +122,7 @@ MCP adds the most value when you have multiple AI clients (IDE, chatbot, agent f
 - [MCP One Year Later — practitioner retrospective on protocol maturity (Chris Groves)](https://notchrisgroves.com/mcp-protocol/)
 - [The MCP Security Survival Guide — vulnerabilities, incidents, and mitigations (Towards Data Science)](https://towardsdatascience.com/the-mcp-security-survival-guide-best-practices-pitfalls-and-real-world-lessons/)
 - [8 Vulnerabilities I Found in MCP Servers — SQL injection, path traversal, and tenant isolation (Kevin Tan)](https://blog.jztan.com/mcp-server-security-8-vulnerabilities/)
-- [Building a Model Context Protocol Server with Semantic Kernel (Microsoft)](https://devblogs.microsoft.com/semantic-kernel/building-a-model-context-protocol-server-with-semantic-kernel/)
+- [Using MCP tools with an agent — Microsoft Agent Framework (Microsoft Learn)](https://learn.microsoft.com/en-us/agent-framework/agents/tools/local-mcp-tools)
 
 <!-- whats-next:start -->
 

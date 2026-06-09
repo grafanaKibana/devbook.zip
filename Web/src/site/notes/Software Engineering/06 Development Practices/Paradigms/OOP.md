@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/06-development-practices/paradigms/oop/"}
+{"dg-publish":true,"permalink":"/software-engineering/06-development-practices/paradigms/oop/","dg-note-properties":{"topic":["Development Practices"],"subtopic":["Paradigms"],"level":["4"],"priority":"Medium","status":"Creation"}}
 ---
 
 

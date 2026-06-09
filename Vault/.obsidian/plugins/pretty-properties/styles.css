@@ -262,7 +262,7 @@
 
 /* SIDE IMAGES*/
   
-.cm-sizer,
+.markdown-source-view .cm-sizer,
 .mod-header {
   container-type: inline-size;
 }
@@ -1239,6 +1239,7 @@ body:not(.show-hidden-properties) .hover-popover .metadata-property.is-empty.pp-
 
 
 .multi-select-pill.theme-color,
+.metadata-property-value[data-property-type="tags"] .multi-select-pill.theme-color,
 .metadata-property[data-property-key="tags"] .multi-select-pill.theme-color,
 .value-list-element.theme-color {
   --pill-color: rgba(var(--pp-color-rgb), 1);

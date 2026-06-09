@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/04-networks/architecture-and-ops/vpn/"}
+{"dg-publish":true,"permalink":"/software-engineering/04-networks/architecture-and-ops/vpn/","dg-note-properties":{"topic":["Networks"],"subtopic":["Architecture & Ops"],"level":["3"],"priority":"Medium","status":"Creation"}}
 ---
 
 # Intro

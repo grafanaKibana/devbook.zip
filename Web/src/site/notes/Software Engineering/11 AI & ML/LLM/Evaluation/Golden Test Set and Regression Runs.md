@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/evaluation/golden-test-set-and-regression-runs/"}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/evaluation/golden-test-set-and-regression-runs/","dg-note-properties":{"topic":["AI & ML"],"subtopic":["LLM"],"level":["3"],"priority":"Medium","status":"Done"}}
 ---
 
 

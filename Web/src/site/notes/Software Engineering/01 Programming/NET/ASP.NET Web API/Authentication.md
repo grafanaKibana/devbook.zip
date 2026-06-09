@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/asp-net-web-api/authentication/"}
+{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/asp-net-web-api/authentication/","dg-note-properties":{"topic":["Programming"],"subtopic":["NET"],"level":["1"],"priority":"Medium","status":"Creation"}}
 ---
 
 

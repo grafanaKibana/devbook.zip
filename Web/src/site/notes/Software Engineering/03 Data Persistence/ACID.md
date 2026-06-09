@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/acid/"}
+{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/acid/","dg-note-properties":{"topic":["Data Persistence"],"subtopic":["SQL"],"level":["3"],"priority":"High","status":"Creation"}}
 ---
 
 

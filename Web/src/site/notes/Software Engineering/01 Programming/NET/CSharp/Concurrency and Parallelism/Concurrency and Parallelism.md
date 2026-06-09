@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/c-sharp/concurrency-and-parallelism/concurrency-and-parallelism/","tags":["FolderNote"]}
+{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/c-sharp/concurrency-and-parallelism/concurrency-and-parallelism/","tags":["FolderNote"],"dg-note-properties":{"topic":["Programming"],"subtopic":["NET"],"priority":"High","status":"Creation","tags":["FolderNote"],"level":["4"]}}
 ---
 
 

@@ -66,43 +66,15 @@ function sortedKeys(obj) {
   return Object.keys(obj).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 }
 
-// --- Build TOC (H1 + H2 levels) ---
-const tocLines = [];
-for (const h1Key of sortedKeys(tree.children)) {
-  const h1Node = tree.children[h1Key];
-  const h1Count = countItems(h1Node);
-  tocLines.push(`- **[${h1Key}](#${toId(h1Key)})** (${h1Count})`);
-  for (const h2Key of sortedKeys(h1Node.children)) {
-    const h2Count = countItems(h1Node.children[h2Key]);
-    tocLines.push(`    - [${h2Key}](#${toId(h1Key + "-" + h2Key)}) (${h2Count})`);
-  }
-}
-
 const total = countItems(tree);
 
-dv.header(1, `Table of Contents`);
-dv.header(2, `Total questions: **${total}**`);
-dv.paragraph(tocLines.join("\n"));
-dv.el("hr", "");
+// TOC is filled in after the content is rendered, so it can reference the
+// real heading elements. It still lives above the content in the DOM.
+const tocEl = dv.container.createDiv();
+const contentEl = dv.container.createDiv();
 
-// --- Render callouts for a node ---
-function renderItems(items) {
-  for (const item of items) {
-    const src = `*[${item.source}](${encodeURI(item.path)})*`;
-    dv.paragraph(item.block + "\n> " + src);
-  }
-}
-
-// --- Render H3–H6 (regular headers, not foldable) ---
-function renderDeep(node, depth) {
-  for (const key of sortedKeys(node.children)) {
-    const child = node.children[key];
-    const level = Math.min(depth, 6);
-    dv.header(level, key);
-    renderItems(child.items);
-    renderDeep(child, depth + 1);
-  }
-}
+// id -> heading element, populated while rendering the tree below.
+const headingMap = {};
 
 // --- Render tree with regular headings ---
 async function renderTree(node, depth, parentEl, idPrefix) {
@@ -112,7 +84,10 @@ async function renderTree(node, depth, parentEl, idPrefix) {
     const curId = idPrefix ? idPrefix + "-" + toId(key) : toId(key);
 
     const heading = parentEl.createEl(`h${level}`, { text: key });
-    if (depth <= 2) heading.id = curId;
+    if (depth <= 2) {
+      heading.id = curId;
+      headingMap[curId] = heading;
+    }
 
     for (const item of child.items) {
       const src = `*[${item.source}](${encodeURI(item.path)})*`;
@@ -123,7 +98,46 @@ async function renderTree(node, depth, parentEl, idPrefix) {
   }
 }
 
-await renderTree(tree, 1, dv.container, "");
+await renderTree(tree, 1, contentEl, "");
+
+// --- Build TOC (H1 + H2 levels) now that the headings exist ---
+// Use the same id scheme as the headings (toId(h1) + "-" + toId(h2)) and wire
+// each link to scrollIntoView so it works inside Obsidian, where [](#id) links
+// resolve against the heading cache rather than DOM ids. The href="#id" keeps
+// native anchor scrolling working on the published web build.
+function tocLink(parent, label, id) {
+  const a = parent.createEl("a", { text: label, href: `#${id}` });
+  a.addEventListener("click", (e) => {
+    e.preventDefault();
+    headingMap[id]?.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+  return a;
+}
+
+tocEl.createEl("h1", { text: `Table of Contents` });
+tocEl.createEl("h2", { text: `Total questions: ${total}` });
+
+const tocList = tocEl.createEl("ul");
+for (const h1Key of sortedKeys(tree.children)) {
+  const h1Node = tree.children[h1Key];
+  const h1Id = toId(h1Key);
+
+  const li = tocList.createEl("li");
+  const strong = li.createEl("strong");
+  tocLink(strong, h1Key, h1Id);
+  strong.appendText(` (${countItems(h1Node)})`);
+
+  const h2Keys = sortedKeys(h1Node.children);
+  if (h2Keys.length === 0) continue;
+  const subList = li.createEl("ul");
+  for (const h2Key of h2Keys) {
+    const h2Id = h1Id + "-" + toId(h2Key);
+    const li2 = subList.createEl("li");
+    tocLink(li2, h2Key, h2Id);
+    li2.appendText(` (${countItems(h1Node.children[h2Key])})`);
+  }
+}
+tocEl.createEl("hr");
 ```
 
 <!-- whats-next:start -->

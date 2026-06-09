@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/algorithms/graph-algorithms/graph-algorithms/","tags":["FolderNote"]}
+{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/algorithms/graph-algorithms/graph-algorithms/","tags":["FolderNote"],"dg-note-properties":{"topic":["Computer Science"],"subtopic":["Algorithms"],"tags":["FolderNote"],"status":"Ready To Repeat","priority":"Medium","level":["4"]}}
 ---
 
 

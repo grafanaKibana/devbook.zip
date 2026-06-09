@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/other/other/","tags":["FolderNote"]}
+{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/other/other/","tags":["FolderNote"],"dg-note-properties":{"topic":["Programming"],"subtopic":["NET"],"tags":["FolderNote"],"priority":"Medium","level":["3"],"status":"Creation"}}
 ---
 
 

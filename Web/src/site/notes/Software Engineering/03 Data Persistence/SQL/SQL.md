@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/sql/sql/","tags":["FolderNote"]}
+{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/sql/sql/","tags":["FolderNote"],"dg-note-properties":{"topic":["Data Persistence"],"subtopic":["SQL"],"tags":["FolderNote"],"priority":"High","level":["4"],"status":"Creation"}}
 ---
 
 

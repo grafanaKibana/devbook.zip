@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/rag/evaluation/"}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/rag/evaluation/","dg-note-properties":{"topic":["AI & ML"],"subtopic":["LLM"],"level":["2"],"priority":"High","status":"Done"}}
 ---
 
 
@@ -25,21 +25,27 @@ Example: a support bot returns the correct policy document (retrieval passes) bu
 
 Retrieval metrics evaluate whether the relevant documents reached the generator. All assume a labeled set where each query has known relevant documents.
 
-**Recall@k** — of all relevant documents in the corpus, what fraction appears in the top-k results. Recall@5 = 0.8 means 80% of relevant documents land in the top 5. This is the primary retrieval metric for RAG because the generator cannot use evidence it never sees. A recall failure is a hard ceiling on answer quality.
+**[[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics\|Recall@k]]** — of all relevant documents in the corpus, what fraction appears in the top-k results. Recall@5 = 0.8 means 80% of relevant documents land in the top 5. This is the primary retrieval metric for RAG because the generator cannot use evidence it never sees. A recall failure is a hard ceiling on answer quality.
 
-**Precision@k** — of the k documents retrieved, what fraction is relevant. Precision@5 = 0.6 means 3 of 5 retrieved documents are relevant. Low precision floods the context window with noise, which can degrade generation quality and increase token cost.
+**[[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics\|Precision@k]]** — of the k documents retrieved, what fraction is relevant. Precision@5 = 0.6 means 3 of 5 retrieved documents are relevant. Low precision floods the context window with noise, which can degrade generation quality and increase token cost.
 
-**MRR (Mean Reciprocal Rank)** — the average of 1/rank for the first relevant document across queries. If the first relevant result is at position 3, the reciprocal rank is 1/3. MRR rewards pushing the best result higher. Useful when the generator primarily uses the top-ranked chunk.
+**[[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics\|MRR (Mean Reciprocal Rank)]]** — the average of 1/rank for the first relevant document across queries. If the first relevant result is at position 3, the reciprocal rank is 1/3. MRR rewards pushing the best result higher. Useful when the generator primarily uses the top-ranked chunk.
 
-**nDCG@k (Normalized Discounted Cumulative Gain)** — measures ranking quality with graded relevance. Documents at higher positions contribute more to the score, and more relevant documents contribute more than partially relevant ones. nDCG captures both "did you find it" and "did you rank it well" in a single number. Range: 0 to 1.
+**[[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics\|nDCG@k (Normalized Discounted Cumulative Gain)]]** — measures ranking quality with graded relevance. Documents at higher positions contribute more to the score, and more relevant documents contribute more than partially relevant ones. nDCG captures both "did you find it" and "did you rank it well" in a single number. Range: 0 to 1.
 
-**Empty-result rate** — the fraction of queries that return zero results. Even a small empty-result rate can indicate coverage gaps in the index (missing document types, unforeseen query patterns). Track this separately because aggregate recall hides it.
+**[[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics\|HitRate@k]]** — the fraction of queries for which at least one relevant document appears in the top-k results. HitRate@5 = 0.9 means 90% of queries surfaced at least one relevant document in the top 5. Binary per query (hit or miss), so it is simpler to compute than Recall@k and useful as a minimum-bar check: any query where the model gets zero relevant documents is a hard failure.
+
+**[[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics\|MAP (Mean Average Precision)]]** — the mean of Average Precision (AP) scores across all queries. AP for a single query is the mean of Precision@k at each rank position where a relevant document appears. MAP captures both coverage (did you find all relevant documents) and ranking quality (did you rank them early), making it a summary metric for multi-relevant-document retrieval. MAP = 1.0 requires all relevant documents to appear at the top of the ranked list; MAP = 0.5 indicates relevant documents are present but buried.
+
+**[[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#Deterministic Metrics\|Empty-result rate]]** — the fraction of queries that return zero results. Even a small empty-result rate can indicate coverage gaps in the index (missing document types, unforeseen query patterns). Track this separately because aggregate recall hides it.
 
 | Metric | What it answers | When to prefer |
 | --- | --- | --- |
 | Recall@k | Did we find the relevant documents | Primary metric -- always track |
 | Precision@k | How much noise is in the context | Context window is tight or token cost matters |
+| HitRate@k | Did at least one relevant doc appear | Quick minimum-bar check; good for dashboards |
 | MRR | Is the best result ranked first | Generator uses only top-1 or top-2 chunks |
+| MAP | Are all relevant docs found and ranked high | Multiple relevant documents per query expected |
 | nDCG@k | Is the full ranking quality good | Generator uses all k chunks with position-aware weighting |
 | Empty-result rate | Are there coverage gaps | Corpus is growing or query patterns are shifting |
 
@@ -47,13 +53,13 @@ Retrieval metrics evaluate whether the relevant documents reached the generator.
 
 Generation metrics evaluate the quality of the model's output given the retrieved context. Most are computed using an [[Software Engineering/11 AI & ML/LLM/Evaluation/LLM-as-a-Judge\|LLM-as-judge]] pattern — a separate model scores the output against the context and query.
 
-**Faithfulness (groundedness)** — does every claim in the answer trace back to the provided context? A faithfulness evaluator decomposes the answer into individual claims, then checks each claim against the retrieved passages. Claims not supported by any passage are flagged as unfaithful. This is the RAG-specific counterpart to hallucination detection — see [[Software Engineering/11 AI & ML/LLM/Hallucinations\|Hallucinations]] for broader coverage.
+**[[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#LLM-as-Judge Metrics\|Faithfulness (groundedness)]]** — does every claim in the answer trace back to the provided context? A faithfulness evaluator decomposes the answer into individual claims, then checks each claim against the retrieved passages. Claims not supported by any passage are flagged as unfaithful. This is the RAG-specific counterpart to hallucination detection — see [[Software Engineering/11 AI & ML/LLM/Hallucinations\|Hallucinations]] for broader coverage.
 
-**Answer correctness** — does the answer actually solve the user's question? A response can be perfectly faithful (every claim is grounded) but still wrong if it misses the key constraint, answers a different question, or is incomplete. Correctness evaluation compares the answer against a reference answer or expected behavior.
+**[[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#LLM-as-Judge Metrics\|Answer correctness]]** — does the answer actually solve the user's question? A response can be perfectly faithful (every claim is grounded) but still wrong if it misses the key constraint, answers a different question, or is incomplete. Correctness evaluation compares the answer against a reference answer or expected behavior.
 
-**Citation validity** — do the citations in the answer actually support the claims they are attached to? This is stricter than faithfulness: the answer may be grounded overall, but a specific citation may point to an irrelevant passage. Citation validation maps each cited passage to the claim it supposedly supports and checks the entailment.
+**[[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#LLM-as-Judge Metrics\|Citation validity]]** — do the citations in the answer actually support the claims they are attached to? This is stricter than faithfulness: the answer may be grounded overall, but a specific citation may point to an irrelevant passage. Citation validation maps each cited passage to the claim it supposedly supports and checks the entailment.
 
-**Response completeness** — does the answer cover all aspects of the query? A query asking "compare A and B" expects coverage of both. Partial answers score lower. Azure AI Foundry includes completeness as a separate evaluator for this reason.
+**[[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#LLM-as-Judge Metrics\|Response completeness]]** — does the answer cover all aspects of the query? A query asking "compare A and B" expects coverage of both. Partial answers score lower. Azure AI Foundry includes completeness as a separate evaluator for this reason.
 
 ## RAGAS Framework
 
@@ -87,8 +93,8 @@ Individual scores identify symptoms. Reading two scores together identifies root
 
 RAGAS v0.4+ adds two metrics beyond the original four:
 
-- **Noise Sensitivity** — measures incorrect claims introduced when retrieved context contains irrelevant chunks. Catches a gap the original four miss: the model hallucinating claims consistent with noisy context rather than ground truth. Requires reference. Lower is better.
-- **Context Entities Recall** — compares named entities in the reference answer against entities in retrieved context. Useful for entity-heavy domains (legal, medical, financial) where missing a specific name, date, or identifier is a hard failure even when general topic recall is adequate.
+- **[[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#LLM-as-Judge Metrics\|Noise Sensitivity]]** — measures incorrect claims introduced when retrieved context contains irrelevant chunks. Catches a gap the original four miss: the model hallucinating claims consistent with noisy context rather than ground truth. Requires reference. Lower is better.
+- **[[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#LLM-as-Judge Metrics\|Context Entities Recall]]** — compares named entities in the reference answer against entities in retrieved context. Useful for entity-heavy domains (legal, medical, financial) where missing a specific name, date, or identifier is a hard failure even when general topic recall is adequate.
 
 ## Component-Level Evaluation
 

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/caching/"}
+{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/caching/","dg-note-properties":{"topic":["Data Persistence"],"subtopic":[],"level":["4"],"priority":"High","status":"Creation"}}
 ---
 
 

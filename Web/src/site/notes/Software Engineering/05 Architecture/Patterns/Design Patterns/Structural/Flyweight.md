@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/design-patterns/structural/flyweight/"}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/design-patterns/structural/flyweight/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Patterns"],"level":["1"],"priority":"High","status":"Creation"}}
 ---
 
 # Flyweight

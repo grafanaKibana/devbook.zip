@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/prompting/automated-prompt-optimization/"}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/prompting/automated-prompt-optimization/","dg-note-properties":{"topic":["AI & ML"],"subtopic":["LLM"],"level":["3"],"priority":"Low","status":"Done"}}
 ---
 
 

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/06-development-practices/paradigms/paradigms/","tags":["FolderNote"]}
+{"dg-publish":true,"permalink":"/software-engineering/06-development-practices/paradigms/paradigms/","tags":["FolderNote"],"dg-note-properties":{"topic":["Development Practices"],"subtopic":["Paradigms"],"tags":["FolderNote"],"status":"Creation","level":["4"],"priority":"High"}}
 ---
 
 

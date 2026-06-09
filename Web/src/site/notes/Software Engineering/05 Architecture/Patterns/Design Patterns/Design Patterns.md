@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/design-patterns/design-patterns/","tags":["FolderNote"]}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/design-patterns/design-patterns/","tags":["FolderNote"],"dg-note-properties":{"topic":["Architecture"],"subtopic":["Patterns"],"tags":["FolderNote"],"priority":"High","status":"Creation","level":["3"]}}
 ---
 
 # GoF Design Patterns

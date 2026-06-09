@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/06-development-practices/06-development-practices/","tags":["FolderNote"]}
+{"dg-publish":true,"permalink":"/software-engineering/06-development-practices/06-development-practices/","tags":["FolderNote"],"dg-note-properties":{"topic":["Development Practices"],"subtopic":[],"tags":["FolderNote"],"status":"Creation","level":["4"],"priority":"High"}}
 ---
 
 

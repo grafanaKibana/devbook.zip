@@ -18,6 +18,11 @@ _site/
 .omo/
 .opencode
 **/.obsidian/workspace.json
+Vault/.obsidian/plugins/digitalgarden/data.json
+Vault/Assets/Docs/
+**/bin/
+**/obj/
+**.sln.DotSettings.user
 
 # Dotnet
 **/obj/

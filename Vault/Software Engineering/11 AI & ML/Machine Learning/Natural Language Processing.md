@@ -75,7 +75,7 @@ For production NLP in .NET, the primary options are:
 
 - **Azure AI Language** (cloud): sentiment analysis, NER, key phrase extraction, language detection via REST API.
 - **ML.NET**: on-device text classification and sentiment analysis using pre-trained models.
-- **Semantic Kernel / Azure OpenAI**: LLM-based NLP for complex tasks (summarization, QA, classification via prompting).
+- **Microsoft Agent Framework / Azure OpenAI**: LLM-based NLP for complex tasks (summarization, QA, classification via prompting).
 
 ```csharp
 // Azure AI Language: sentiment analysis

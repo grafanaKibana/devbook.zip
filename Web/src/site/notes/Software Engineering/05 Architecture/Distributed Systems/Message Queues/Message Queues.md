@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/distributed-systems/message-queues/message-queues/","tags":["FolderNote"]}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/distributed-systems/message-queues/message-queues/","tags":["FolderNote"],"dg-note-properties":{"topic":["Architecture"],"subtopic":["Distributed Systems"],"tags":["FolderNote"],"priority":"High","level":["2"],"status":"Creation"}}
 ---
 
 

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/sql/sharding/"}
+{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/sql/sharding/","dg-note-properties":{"topic":["Data Persistence"],"subtopic":["SQL"],"level":["4"],"priority":"High","status":"Creation"}}
 ---
 
 

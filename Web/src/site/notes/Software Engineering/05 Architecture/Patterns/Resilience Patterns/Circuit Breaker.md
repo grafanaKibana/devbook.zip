@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/resilience-patterns/circuit-breaker/"}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/resilience-patterns/circuit-breaker/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Patterns"],"level":["3"],"priority":"High","status":"Ready To Repeat"}}
 ---
 
 

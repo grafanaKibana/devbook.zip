@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/rag/retrieval/"}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/rag/retrieval/","dg-note-properties":{"topic":["AI & ML"],"subtopic":["LLM"],"level":["2"],"priority":"High","status":"Done"}}
 ---
 
 
@@ -97,7 +97,7 @@ Metadata filtering is equally critical:
 
 HNSW recall degrades as the corpus grows — no errors, no latency spike, just worse context fed to the LLM. At a fixed `ef_search` value, the index becomes less accurate as more vectors crowd the space. Infrastructure dashboards show healthy metrics while answer quality silently declines. Long-tail and rare-entity queries degrade first.
 
-Detection: maintain ground-truth query-chunk pairs and run Recall@k checks on a schedule. Latency and error-rate monitoring alone will not catch recall regression.
+Detection: maintain ground-truth query-chunk pairs and run [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics\|Recall@k]] checks on a schedule. Latency and error-rate monitoring alone will not catch recall regression.
 
 ### Embedding Model Migration Debt
 
@@ -137,7 +137,7 @@ Decision rule: start with hybrid retrieval (RRF) and conservative top-k (5-20). 
 > When the weaker search mode contributes more noise than signal to the fused list. On homogeneous corpora where one mode dominates (e.g., scientific documents with consistent terminology and natural-language queries), the non-dominant mode pulls in marginally relevant candidates that dilute fused results. In production benchmarks, vector-only has beaten hybrid on scientific corpora because keyword search on specialized vocabulary introduced noise. Always evaluate hybrid against single-mode baselines on your actual corpus before committing to the added complexity.
 
 > [!QUESTION]- Why does HNSW recall degrade silently as the vector database grows?
-> HNSW navigates a graph to find approximate nearest neighbors, not an exhaustive scan. The `ef_search` parameter controls how many candidate nodes the search visits. At small corpus sizes, a moderate `ef_search` finds most true neighbors. As the corpus grows, the graph becomes denser and the same `ef_search` misses more true neighbors — the search path does not explore enough of the graph to find them. Latency stays stable because the search still visits the same number of candidates, and no errors are raised. The only signal is less relevant retrieved chunks. Detection requires explicit Recall@k monitoring against a ground-truth test set.
+> HNSW navigates a graph to find approximate nearest neighbors, not an exhaustive scan. The `ef_search` parameter controls how many candidate nodes the search visits. At small corpus sizes, a moderate `ef_search` finds most true neighbors. As the corpus grows, the graph becomes denser and the same `ef_search` misses more true neighbors — the search path does not explore enough of the graph to find them. Latency stays stable because the search still visits the same number of candidates, and no errors are raised. The only signal is less relevant retrieved chunks. Detection requires explicit [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics\|Recall@k]] monitoring against a ground-truth test set.
 
 ## References
 

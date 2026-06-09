@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/system-architecture/serverless-architecture/"}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/system-architecture/serverless-architecture/","dg-note-properties":{"topic":["Architecture"],"subtopic":["System Architecture"],"level":["3"],"priority":"Medium","status":"Creation"}}
 ---
 
 

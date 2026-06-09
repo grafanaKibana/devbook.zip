@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/evaluation/llm-as-a-judge/"}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/evaluation/llm-as-a-judge/","dg-note-properties":{"topic":["AI & ML"],"subtopic":["LLM"],"level":["3"],"priority":"Medium","status":"Done"}}
 ---
 
 

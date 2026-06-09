@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/rag/monitoring/"}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/rag/monitoring/","dg-note-properties":{"topic":["AI & ML"],"subtopic":["LLM"],"level":["2"],"priority":"High","status":"Done"}}
 ---
 
 
@@ -52,9 +52,44 @@ Compute these on every request — they are free and instant.
 
 **Response length** — median and p95 response token count. Abrupt length shifts can indicate prompt regression, model behavior change after a provider update, or context assembly bugs that produce truncated or bloated prompts.
 
+| Metric | What it answers | Alert when |
+| --- | --- | --- |
+| Empty-result rate | Are there corpus coverage gaps? | Exceeds 2× historical segment average |
+| Retrieval count distribution | Is the index returning expected volumes? | Sudden drop or spike outside normal range |
+| Citation rate | Is the generator attending to retrieved context? | Drops from baseline — early prompt regression signal |
+| Abstention rate | Is the system refusing correctly? | Spikes (over-refusal) or drops with low-evidence queries |
+| Response length | Is context assembly behaving normally? | p95 shifts abruptly in either direction |
+
+### Retrieval Quality Metrics
+
+Retrieval quality metrics require a labeled evaluation set — a set of queries with known relevant documents. Unlike deterministic metrics that run on every request, these are computed on a scheduled basis (nightly or on every deployment) against a golden query set. They complement real-time signals by answering "is retrieval finding the right documents?" rather than just "is it returning documents at all?"
+
+**Recall@k** — of all relevant documents in the corpus, what fraction appears in the top-k results. Recall@5 = 0.8 means 80% of relevant documents land in the top 5. This is the primary retrieval health metric: if relevant evidence is missing from the context, no amount of generation quality can compensate. A drop after a corpus update typically means new documents are poorly embedded or the index structure needs rebuilding. *Example: a support bot's Recall@5 drops from 0.87 to 0.71 after a bulk FAQ import because the imported schema causes the chunking pipeline to split documents across boundaries, breaking embedding coherence.*
+
+**Precision@k** — of the k documents retrieved, what fraction is relevant. Precision@5 = 0.6 means 3 of 5 retrieved chunks are on-topic. Low precision floods the context window with noise — the generator must sift relevant evidence from irrelevant material, which increases hallucination risk and wastes tokens. *Example: expanding retrieval from top-5 to top-10 improves recall but drops Precision@10 to 0.35; adding a re-ranker restores precision to 0.7 while retaining the recall gain.*
+
+**HitRate@k** — the fraction of queries for which at least one relevant document appears in the top-k results. Binary per query (hit or miss), making it the simplest minimum-bar check. HitRate@5 = 0.92 means 8% of queries receive zero relevant context — a hard failure floor regardless of generation quality. *Example: HitRate@5 is 0.94 globally but drops to 0.71 for a specific product category, exposing a corpus coverage gap rather than a ranking problem.*
+
+**MRR (Mean Reciprocal Rank)** — the average of 1/rank for the first relevant document across queries. If the first relevant result is at position 3, the reciprocal rank is 1/3. MRR = 0.75 means the first relevant document lands at an effective average position of 1.33. Rewards pushing the best result higher; particularly sensitive to re-ranker quality when the generator reads only the top-1 or top-2 chunks. *Example: MRR drops from 0.82 to 0.64 after an embedding model upgrade that improves overall Recall@10 but consistently buries the single most relevant chunk at position 3–4.*
+
+**MAP (Mean Average Precision)** — the mean of Average Precision (AP) scores across queries. AP for a single query is the mean of Precision@k at each rank position where a relevant document appears. MAP = 1.0 requires all relevant documents at the top of the ranked list. More informative than MRR when multiple relevant documents per query are expected, because it penalizes both missing documents and ranking them late. *Example: a legal assistant has MRR = 0.88 (finds one relevant case near the top) but MAP = 0.51 (misses most of the additional cases the lawyer needs) — improving MAP requires expanding recall, not just top-1 ranking.*
+
+**nDCG@k (Normalized Discounted Cumulative Gain)** — measures ranking quality with graded relevance. Documents at higher positions contribute more to the score, and more relevant documents contribute more than partially relevant ones. nDCG@5 = 0.83 means the actual ranking is 83% as good as the ideal ordering. Unlike MAP (which treats relevance as binary), nDCG captures the difference between a partially-relevant and a highly-relevant document at the same position. *Example: nDCG@10 = 0.79 but nDCG@3 = 0.61 — the model finds relevant documents but places them at positions 4–7; a re-ranker targeting top-3 precision brings nDCG@3 to 0.81 without changing nDCG@10.*
+
+| Metric | What it answers | When to prefer |
+| --- | --- | --- |
+| Recall@k | Did we find the relevant documents? | Primary metric — always track |
+| Precision@k | How much noise is in the context? | Context window is tight or token cost matters |
+| HitRate@k | Does any relevant doc appear? | Minimum-bar coverage check; fast to interpret |
+| MRR | Is the best result ranked first? | Generator uses only top-1 or top-2 chunks |
+| MAP | Are all relevant docs found and ranked high? | Multiple relevant documents expected per query |
+| nDCG@k | Is the full ranking quality good? | Generator uses all k chunks with position-aware weighting |
+
+Track all six on a nightly schedule against your golden query set. Gate deployments primarily on Recall@k and nDCG@k; use MRR and HitRate for fast diagnosis when those signals drop.
+
 ### LLM-as-Judge Metrics
 
-For semantic quality, run an LLM judge asynchronously on a sampled fraction of production traffic. Use binary pass/fail judgments rather than numeric scales — binary judgments reduce calibration noise and inter-judge variance, and correlate better with domain expert assessment than 1–5 scores.
+For semantic quality, run an LLM judge asynchronously on a sampled fraction of production traffic. Use binary pass/fail judgments rather than numeric scales — binary judgments reduce calibration noise and inter-judge variance, and correlate better with domain expert assessment than 1–5 scores. Use a smaller, cheaper model (GPT-4o-mini, Claude Haiku) as the production judge and reserve the expensive model for weekly calibration runs where you compare cheap-judge scores against expensive-judge scores on the same sample to track judge agreement drift.
 
 **Faithfulness (groundedness)** — does every claim in the answer trace back to the retrieved context? The judge decomposes the response into atomic claims and checks each against the provided passages. Faithfulness = `supported_claims / total_claims`. This is the single most important online quality metric for RAG because it directly measures hallucination risk. For a cheaper alternative in high-volume systems, RAGAS offers FaithfulnesswithHHEM — an open-source T5-based classifier that avoids LLM API costs entirely.
 
@@ -62,21 +97,60 @@ For semantic quality, run an LLM judge asynchronously on a sampled fraction of p
 
 **Context relevancy** — were the retrieved documents relevant to the query? This catches retrieval regressions that have not yet propagated to answer quality because the generator compensated using parametric knowledge. When context relevancy drops but faithfulness holds, the system is at elevated hallucination risk — the retrieved context is no longer providing useful evidence, and the model is filling gaps from its training data. Once parametric knowledge runs out for a query type, faithfulness will follow context relevancy downward.
 
-**Cost control for online judging**: use a smaller, cheaper model (GPT-4o-mini, Claude Haiku) as the production judge. Reserve the expensive model for weekly calibration runs where you compare cheap-judge scores against expensive-judge scores on the same sample to track judge agreement drift.
+**Answer correctness** — does the answer actually solve the user's question? A response can be perfectly faithful (every claim is grounded) but still wrong if it misses the key constraint, answers a different question, or is incomplete. Requires a reference answer, making it an offline metric run against a golden set rather than sampled production traffic.
+
+**Citation validity** — do the citations in the answer actually support the specific claims they are attached to? This is stricter than faithfulness: the answer may be grounded overall, but a specific citation may point to an irrelevant passage. The judge maps each cited passage to the claim it supposedly supports and checks the entailment. Useful when the system surfaces citations to end users and trust in those citations is a product requirement.
+
+**Response completeness** — does the answer cover all aspects of the query? A query asking "compare A and B" expects coverage of both; a query listing three requirements expects all three addressed. Partial answers that are faithful and relevant still fail on completeness. Requires a reference answer or a rubric defining what "complete" means for the query type.
+
+**Noise Sensitivity** — measures incorrect claims introduced when retrieved context contains irrelevant chunks. Catches a failure mode the other metrics miss: the model hallucinating claims that are consistent with noisy context rather than ground truth. Recall@k and faithfulness can both look healthy while noise sensitivity is high — retrieval found enough relevant chunks to pass recall, and the model grounded most claims, but noisy chunks triggered additional fabricated ones. Requires reference. Lower is better.
+
+**Context Entities Recall** — compares named entities in the reference answer against entities present in the retrieved context. Useful for entity-heavy domains (legal, medical, financial) where missing a specific name, date, or identifier is a hard failure even when general topic recall is adequate. A system can score well on Recall@k while consistently missing the exact entity the user needs. Requires reference.
+
+| Metric | What it answers | Reference needed |
+| --- | --- | --- |
+| Faithfulness | Are all claims grounded in retrieved context? | No |
+| Answer relevancy | Does the response address the question? | No |
+| Context relevancy | Were retrieved documents relevant to the query? | No |
+| Answer correctness | Does the answer actually solve the question? | Yes |
+| Citation validity | Does each citation support its attached claim? | No |
+| Response completeness | Are all aspects of the query covered? | Yes |
+| Noise Sensitivity | Does noisy context introduce fabricated claims? | Yes |
+| Context Entities Recall | Are required named entities present in context? | Yes |
 
 ### Performance and Cost Metrics
 
-- **Per-stage latency** — p50, p95, p99 for each stage separately. A p95 spike in reranking is invisible in end-to-end latency if other stages are fast.
-- **End-to-end latency** — total request duration. Set SLOs on p95 end-to-end, but diagnose with per-stage breakdown.
-- **Token usage** — input and output tokens per request via `gen_ai.client.token.usage`. Track daily cost aggregates and per-query cost. A sudden increase suggests prompt bloat or context window misuse.
-- **Cache hit rates** — per [[Software Engineering/11 AI & ML/LLM/RAG/Caching\|Caching]] layer. Drops after corpus updates are expected; sustained drops indicate a key design or invalidation problem.
-- **Error rate** — rate of failed requests (model API errors, timeouts, malformed responses), segmented by stage.
+**Per-stage latency** — p50, p95, p99 for each pipeline stage separately. A p95 spike in reranking is invisible in end-to-end latency if other stages are fast — per-stage breakdown is required to localize it.
+
+**End-to-end latency** — total request duration from query receipt to response delivery. Set SLOs on p95 end-to-end, but always diagnose regressions with per-stage breakdown.
+
+**Token usage** — input and output tokens per request via `gen_ai.client.token.usage`. Track daily cost aggregates and per-query cost. A sudden increase suggests prompt bloat or context window misuse.
+
+**Cache hit rate** — per [[Software Engineering/11 AI & ML/LLM/RAG/Caching\|Caching]] layer. Drops after corpus updates are expected; sustained drops on stable corpora indicate a cache key design or invalidation problem.
+
+**Error rate** — rate of failed requests (model API errors, timeouts, malformed responses), segmented by stage so failures are attributed to the correct component.
+
+| Metric | What it answers | Alert when |
+| --- | --- | --- |
+| Per-stage latency | Which stage is the bottleneck? | p95 for any stage exceeds SLO budget |
+| End-to-end latency | Is the overall SLO being met? | p95 exceeds SLO for 10+ minutes |
+| Token usage | Is prompt assembly efficient? | Per-query cost increases >30% from baseline |
+| Cache hit rate | Is caching working correctly? | Sustained drop on a stable corpus |
+| Error rate | Are pipeline stages failing? | Exceeds historical baseline per stage |
 
 ### Data Health Metrics
 
-- **Index freshness lag** — time between a document being updated in the source system and its new embedding being available in the index. Track as a distribution, not just an average — a median lag of 2 hours is fine, but a p99 lag of 3 days means some documents are silently stale.
-- **Ingestion failure rate** — fraction of documents that fail during the embedding/indexing pipeline. Silent ingestion failures create invisible coverage gaps that surface as empty retrieval results for specific query types.
-- **Corpus size** — total document and chunk count over time. Unexpected drops signal accidental deletions or pipeline failures.
+**Index freshness lag** — time between a document being updated in the source system and its new embedding being available in the index. Track as a distribution, not just an average — a median lag of 2 hours is fine, but a p99 lag of 3 days means some documents are silently stale.
+
+**Ingestion failure rate** — fraction of documents that fail during the embedding/indexing pipeline. Silent ingestion failures create invisible coverage gaps that surface as empty retrieval results for specific query types.
+
+**Corpus size** — total document and chunk count over time. Unexpected drops signal accidental deletions or pipeline failures.
+
+| Metric | What it answers | Alert when |
+| --- | --- | --- |
+| Index freshness lag | Are documents being indexed promptly? | p99 lag exceeds acceptable staleness window |
+| Ingestion failure rate | Are documents being lost silently? | Exceeds 1% of scheduled ingestions |
+| Corpus size | Is the index growing or shrinking as expected? | Unexpected drop (deletion or pipeline failure) |
 
 ## Segmentation
 

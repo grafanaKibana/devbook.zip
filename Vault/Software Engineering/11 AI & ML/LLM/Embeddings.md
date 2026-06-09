@@ -42,7 +42,7 @@ Three categories dominate production RAG systems:
 
 **Open-source bi-encoders** — Sentence Transformers (SBERT) provides models like `all-MiniLM-L6-v2` (384-dim, 22M params, fast) and `all-mpnet-base-v2` (768-dim, 109M params, higher quality). These run locally with no per-token cost, which matters at scale. The tradeoff is infrastructure: you host inference, manage GPU allocation, and handle model updates.
 
-**Domain-finetuned models** — When general-purpose models underperform on internal terminology, finetuning a base model on your corpus can close the gap. Databricks showed that finetuning `gte-large-en-v1.5` (0.4B params) on synthetic domain data beat `text-embedding-3-large` on FinanceBench retrieval (Recall@10: 0.552 vs 0.44). Two common approaches: continued pre-training with MLM for vocabulary adaptation, and contrastive finetuning with synthetic query-document pairs.
+**Domain-finetuned models** — When general-purpose models underperform on internal terminology, finetuning a base model on your corpus can close the gap. Databricks showed that finetuning `gte-large-en-v1.5` (0.4B params) on synthetic domain data beat `text-embedding-3-large` on FinanceBench retrieval ([[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics|Recall@10]]: 0.552 vs 0.44). Two common approaches: continued pre-training with MLM for vocabulary adaptation, and contrastive finetuning with synthetic query-document pairs.
 
 ### Dimensionality
 

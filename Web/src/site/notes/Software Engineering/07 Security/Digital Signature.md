@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/07-security/digital-signature/"}
+{"dg-publish":true,"permalink":"/software-engineering/07-security/digital-signature/","dg-note-properties":{"topic":["Security"],"subtopic":["Security"],"level":["2"],"priority":"Medium","status":"Creation"}}
 ---
 
 

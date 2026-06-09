@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/distributed-systems/message-queues/msmq/"}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/distributed-systems/message-queues/msmq/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Distributed Systems"],"level":["2"],"priority":"High","status":"Creation"}}
 ---
 
 

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/07-security/block-chain/"}
+{"dg-publish":true,"permalink":"/software-engineering/07-security/block-chain/","dg-note-properties":{"topic":["Security"],"subtopic":["Security"],"level":["1"],"priority":"Low","status":"Creation"}}
 ---
 
 

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/system-architecture/monolith-architecture/"}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/system-architecture/monolith-architecture/","dg-note-properties":{"topic":["Architecture"],"subtopic":["System Architecture"],"level":["4"],"priority":"Medium","status":"Creation"}}
 ---
 
 # Intro

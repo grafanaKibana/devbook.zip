@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/application-architecture/clean-architecture/"}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/application-architecture/clean-architecture/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Application Architecture"],"level":["3"],"priority":"High","status":"Creation"}}
 ---
 
 # Intro

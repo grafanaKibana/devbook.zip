@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/event-bus/"}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/event-bus/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Patterns"],"level":["2"],"priority":"Medium","status":"Creation"}}
 ---
 
 
