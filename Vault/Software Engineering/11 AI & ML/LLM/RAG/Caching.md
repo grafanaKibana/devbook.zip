@@ -18,6 +18,31 @@ The correct model is layered caching — a separate cache at each pipeline stage
 
 The hard part specific to RAG is that cache correctness is a security problem, not just a freshness problem. If cache keys omit authorization context, a query from an authorized user can populate the cache with evidence that a second, unauthorized user later receives. Every cache layer must include permission-scoping fields in its key.
 
+## Flow
+
+### Cache Hit Diagram
+
+```mermaid
+sequenceDiagram
+  participant App
+  participant EC as Embedding Cache
+  participant RC as Retrieval Cache
+  participant LC as Response Cache
+
+  App->>EC: hash query + model ver
+  EC-->>App: stored vector
+
+  App->>RC: hash query + filters + tenant + index ver
+  RC-->>App: doc IDs + scores
+
+  Note over App: assemble context from docs
+
+  App->>LC: hash prompt + context + model ver
+  LC-->>App: cached answer
+```
+
+### Cache Miss Diagram
+
 ```mermaid
 sequenceDiagram
   participant App
@@ -29,33 +54,24 @@ sequenceDiagram
   participant LLM
 
   App->>EC: hash query + model ver
-  alt Cache hit
-    EC-->>App: stored vector
-  else Cache miss
-    App->>EM: embed query
-    EM-->>App: vector
-    App->>EC: store vector
-  end
+  EC-->>App: miss
+  App->>EM: embed query
+  EM-->>App: vector
+  App->>EC: store vector
 
   App->>RC: hash query + filters + tenant + index ver
-  alt Cache hit
-    RC-->>App: doc IDs + scores
-  else Cache miss
-    App->>VDB: ANN search
-    VDB-->>App: doc IDs + scores
-    App->>RC: store results
-  end
+  RC-->>App: miss
+  App->>VDB: ANN search
+  VDB-->>App: doc IDs + scores
+  App->>RC: store results
 
   Note over App: assemble context from docs
 
   App->>LC: hash prompt + context + model ver
-  alt Cache hit
-    LC-->>App: cached answer
-  else Cache miss
-    App->>LLM: generate
-    LLM-->>App: answer
-    App->>LC: store response
-  end
+  LC-->>App: miss
+  App->>LLM: generate
+  LLM-->>App: answer
+  App->>LC: store response
 ```
 
 ## Embedding Cache
