@@ -15,6 +15,7 @@ Organized into 11 topic areas with spaced repetition tracking. The dashboards be
 
 | Note                                                                                                             | Date                    |
 | ---------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| [[Software Engineering/11 AI & ML/LLM/RAG/Caching\|Caching]]                                                  | 4:36 PM - June 09, 2026 |
 | [[Software Engineering/11 AI & ML/LLM/Agents/Tools\|Tools]]                                                   | 9:14 PM - June 08, 2026 |
 | [[Software Engineering/11 AI & ML/LLM/Agents/Agent Loop\|Agent Loop]]                                         | 9:13 PM - June 08, 2026 |
 | [[Software Engineering/11 AI & ML/Machine Learning/Natural Language Processing\|Natural Language Processing]] | 9:09 PM - June 08, 2026 |
@@ -26,7 +27,6 @@ Organized into 11 topic areas with spaced repetition tracking. The dashboards be
 | [[Software Engineering/11 AI & ML/LLM/RAG/RAG\|RAG]]                                                          | 2:29 PM - June 08, 2026 |
 | [[Software Engineering/11 AI & ML/LLM/Hallucinations\|Hallucinations]]                                        | 2:29 PM - June 08, 2026 |
 | [[Software Engineering/11 AI & ML/LLM/Embeddings\|Embeddings]]                                                | 2:29 PM - June 08, 2026 |
-| [[Software Engineering/11 AI & ML/LLM/RAG/Retrieval\|Retrieval]]                                              | 2:29 PM - June 08, 2026 |
 
 { .block-language-dataview}
 
