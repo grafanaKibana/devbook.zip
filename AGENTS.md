@@ -94,6 +94,8 @@ If all checks pass, proceed without asking.
 - Every real note must have: intro ("what + why"), at least one concrete example, at least one real reference link.
 - Internal links: Obsidian wikilinks are allowed and common (prefer `[[path/to/note|Title]]` for internal references).
 - External links: Markdown links (`[Title](https://...)`).
+- **Heading levels.** Open each note with `# Intro` (H1). Every other section heading is H2 (`##`); use H3 (`###`) only for nested detail inside a section. Do not give any section other than `Intro` an H1 heading.
+- **Source section naming.** On concept pages, title the closing list of external sources `## References` (annotated links to docs/primary sources). Reserve `## Links` for hub/folder notes, where it lists child and related pages.
 - **No manual folder navigation.** Do not add "Detailed Pages", "See also", or link lists enumerating sibling/child pages in the same folder. The pre-commit hook auto-generates a "Whats next" callout with parent, topic, and sibling links. Targeted cross-links between specific related concepts are fine (e.g., "see [[Task vs ValueTask]]" inside a discussion) — just do not duplicate the auto-generated navigation.
 - **Code fences (enforced)**
   - Every fenced code block MUST specify a language. This is enforced automatically via `markdownlint-cli2` (rule MD040) on staged files before commit.

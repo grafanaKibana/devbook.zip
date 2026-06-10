@@ -52,7 +52,7 @@ Add standalone sections only when they improve clarity:
 > [!QUESTION]- What is abc?
 > Answer
 
-## Links
+## References
 
 Replace or delete these example links.
 

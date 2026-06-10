@@ -31,7 +31,7 @@ graph TD
     N1 --> B[bottom]
 ```
 
-### Example
+## Example
 
 ```csharp
 var stack = new Stack<string>();
@@ -43,13 +43,13 @@ Console.WriteLine(stack.Pop());  // B
 Console.WriteLine(stack.Pop());  // A
 ```
 
-### Pitfalls
+## Pitfalls
 
 - Calling `Pop`/`Peek` on an empty stack throws `InvalidOperationException`. Check `Count` first when emptiness is possible.
 - Using `Stack<T>` for queue-like workflows reverses processing order and causes subtle logic bugs. Validate ordering requirements before choosing it.
 - Large temporary stacks can grow memory and remain allocated. Use `TrimExcess()` if a long-lived stack shrinks significantly.
 
-### Tradeoffs
+## Tradeoffs
 
 - `Stack<T>` vs `Queue<T>`: stack favors LIFO workflows, queue favors FIFO processing pipelines.
 - Recursive DFS vs explicit `Stack<T>`: recursion is concise, explicit stack avoids deep-recursion stack-overflow risk.
@@ -65,7 +65,7 @@ Console.WriteLine(stack.Pop());  // A
 > [!QUESTION]- What is the complexity of `Push` and why is it not always constant in practice?
 > `Push` is O(1) amortized. It can be O(n) during resize because elements are copied to a larger internal array.
 
-## Links
+## References
 
 - [`Stack<T>` class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.stack-1) — API reference covering Push, Pop, Peek, and enumeration order.
 - [Selecting a collection class](https://learn.microsoft.com/en-us/dotnet/standard/collections/selecting-a-collection-class) — Microsoft decision guide for choosing between Stack, Queue, and other collection types.
