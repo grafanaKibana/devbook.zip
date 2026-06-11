@@ -11,63 +11,51 @@ Welcome to my software engineering notebook — the notes I've written to actual
 > [!info] Why this exists
 > I learn by writing things down and coming back to them. This vault is that process in the open — built on spaced repetition, organized into 11 topic areas, and updated continuously. Browse by topic below, or scroll on for progress and recent activity.
 
-```dataviewjs
-const ROOT = "Software Engineering";
-const isFolderNote = (p) => (p.file.tags ?? []).includes("#FolderNote");
-const isMetricsIgnored = (p) => (p.file.tags ?? []).includes("#MetricsIgnore");
-const curPath = dv.current().file.path;
-const notes = dv.pages(`"${ROOT}"`).where(
-  (p) => p.file.path !== curPath && !isMetricsIgnored(p) && !isFolderNote(p)
-);
-
-const STATUS_PROGRESS = new Map([
-  ["Not-Started", 0],
-  ["Creation", 25],
-  ["Repetition", 50],
-  ["Ready To Repeat", 75],
-  ["Done", 100],
-]);
-
-const asStringArray = (v) => {
-  if (Array.isArray(v)) return v.map((x) => String(x).trim()).filter(Boolean);
-  if (typeof v === "string") return [v.trim()].filter(Boolean);
-  return [];
-};
-
-const folderToTopic = (folder) => {
-  if (typeof folder !== "string") return null;
-  if (!folder.startsWith(ROOT + "/")) return null;
-  const seg = folder.slice((ROOT + "/").length).split("/")[0] ?? "";
-  return seg.length ? seg.replace(/^\d+\s+/, "").trim() : null;
-};
-
-const topics = new Set();
-let total = 0;
-let points = 0;
-let done = 0;
-for (const p of notes) {
-  const topic = folderToTopic(p.file.folder);
-  if (topic) topics.add(topic);
-  const status = asStringArray(p.status)[0] ?? "";
-  total += 1;
-  points += STATUS_PROGRESS.get(status) ?? 0;
-  if (status === "Done") done += 1;
-}
-const pct = total > 0 ? Math.round(points / total) : 0;
-
-dv.paragraph(
-  `📚 **${total}** notes · 🗂️ **${topics.size}** topics · ✅ **${done}** done · 📈 **${pct}%** overall`
-);
-```
-
 # Topics
 
-| | | |
-|:---|:---|:---|
-| 🧠 **[[Software Engineering/01 Programming/01 Programming\|Programming]]**<br><sub>Languages, .NET internals, paradigms, clean code.</sub> | 🖥️ **[[Software Engineering/02 Computer Science/02 Computer Science\|Computer Science]]**<br><sub>Algorithms, data structures, the theory underneath.</sub> | 🗄️ **[[Software Engineering/03 Data Persistence/03 Data Persistence\|Data Persistence]]**<br><sub>Databases, indexing, transactions, storage engines.</sub> |
-| 🌐 **[[Software Engineering/04 Networks/04 Networks\|Networks]]**<br><sub>Protocols, HTTP, TCP/IP, how packets travel.</sub> | 🏛️ **[[Software Engineering/05 Architecture/05 Architecture\|Architecture]]**<br><sub>Distributed systems, patterns, designing for scale.</sub> | 🛠️ **[[Software Engineering/06 Development Practices/06 Development Practices\|Development Practices]]**<br><sub>Testing, version control, and the craft.</sub> |
-| 🔒 **[[Software Engineering/07 Security/07 Security\|Security]]**<br><sub>Threats, crypto, auth, defensive design.</sub> | 🔄 **[[Software Engineering/08 SDLC/08 SDLC\|SDLC]]**<br><sub>How software gets planned, built, and shipped.</sub> | 🚀 **[[Software Engineering/09 DevOps/09 DevOps\|DevOps]]**<br><sub>CI/CD, containers, and automation.</sub> |
-| ☁️ **[[Software Engineering/10 Cloud/10 Cloud\|Cloud]]**<br><sub>AWS/Azure, serverless, cloud-native design.</sub> | 🤖 **[[Software Engineering/11 AI & ML/11 AI & ML\|AI & ML]]**<br><sub>Models, training, applied machine learning.</sub> | |
+```dataviewjs
+const { MarkdownRenderer } = require("obsidian");
+
+const cards = [
+  ["🧠", "Software Engineering/01 Programming/01 Programming", "Programming", "Languages, .NET internals, paradigms, clean code."],
+  ["🖥️", "Software Engineering/02 Computer Science/02 Computer Science", "Computer Science", "Algorithms, data structures, the theory underneath."],
+  ["🗄️", "Software Engineering/03 Data Persistence/03 Data Persistence", "Data Persistence", "Databases, indexing, transactions, storage engines."],
+  ["🌐", "Software Engineering/04 Networks/04 Networks", "Networks", "Protocols, HTTP, TCP/IP, how packets travel."],
+  ["🏛️", "Software Engineering/05 Architecture/05 Architecture", "Architecture", "Distributed systems, patterns, designing for scale."],
+  ["🛠️", "Software Engineering/06 Development Practices/06 Development Practices", "Development Practices", "Testing, version control, and the craft."],
+  ["🔒", "Software Engineering/07 Security/07 Security", "Security", "Threats, crypto, auth, defensive design."],
+  ["🔄", "Software Engineering/08 SDLC/08 SDLC", "SDLC", "How software gets planned, built, and shipped."],
+  ["🚀", "Software Engineering/09 DevOps/09 DevOps", "DevOps", "CI/CD, containers, and automation."],
+  ["☁️", "Software Engineering/10 Cloud/10 Cloud", "Cloud", "AWS/Azure, serverless, cloud-native design."],
+  ["🤖", "Software Engineering/11 AI & ML/11 AI & ML", "AI & ML", "Models, training, applied machine learning."],
+];
+
+// Render as a Dataview-classed table so it inherits the same (zero) top
+// margin the other dashboard tables use, instead of the default markdown
+// table margin that leaves a large gap under the heading.
+const wrapper = dv.container.createEl("div");
+wrapper.classList.add("block-language-dataview");
+
+const table = wrapper.createEl("table");
+table.classList.add("dataview", "table-view-table");
+
+const tbody = table.createEl("tbody");
+tbody.classList.add("table-view-tbody");
+
+const COLS = 3;
+const sourcePath = dv.current().file.path;
+for (let i = 0; i < cards.length; i += COLS) {
+  const tr = tbody.createEl("tr");
+  for (let c = 0; c < COLS; c++) {
+    const td = tr.createEl("td");
+    const card = cards[i + c];
+    if (!card) continue;
+    const [icon, target, alias, desc] = card;
+    const md = `${icon} **[[${target}|${alias}]]**<br><sub>${desc}</sub>`;
+    await MarkdownRenderer.render(app, md, td, sourcePath, dv.component);
+  }
+}
+```
 
 # Topic Coverage
 
