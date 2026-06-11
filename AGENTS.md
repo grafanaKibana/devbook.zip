@@ -350,7 +350,7 @@ The `obsidian` CLI interacts with a **running Obsidian instance**. It will not w
 
 ```bash
 # Target this vault explicitly
-obsidian vault="Knowledge Hub" <command>
+obsidian vault="Vault" <command>
 
 # File targeting: file= resolves like a wikilink, path= is exact from vault root
 obsidian read file="Task vs ValueTask"
