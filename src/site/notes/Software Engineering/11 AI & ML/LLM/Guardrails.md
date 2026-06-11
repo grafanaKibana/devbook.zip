@@ -171,8 +171,11 @@ Guardrails that are not tested degrade silently. Build a red-team suite (injecti
 > - [[Software Engineering/11 AI & ML/LLM/RAG/RAG\|RAG]]
 >
 > **Pages**
+> - [[Software Engineering/11 AI & ML/LLM/Context Engineering\|Context Engineering]]
 > - [[Software Engineering/11 AI & ML/LLM/Embeddings\|Embeddings]]
+> - [[Software Engineering/11 AI & ML/LLM/Fine-tuning\|Fine-tuning]]
 > - [[Software Engineering/11 AI & ML/LLM/Generation\|Generation]]
 > - [[Software Engineering/11 AI & ML/LLM/Hallucinations\|Hallucinations]]
+> - [[Software Engineering/11 AI & ML/LLM/Model Selection and Routing\|Model Selection and Routing]]
 > - [[Software Engineering/11 AI & ML/LLM/OWASP vulnerabilities on AI LLM\|OWASP vulnerabilities on AI LLM]]
 <!-- whats-next:end -->

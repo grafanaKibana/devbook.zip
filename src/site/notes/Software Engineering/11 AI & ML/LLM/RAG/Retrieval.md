@@ -28,7 +28,7 @@ Example: a user asks "rate limit error 429 behavior in partner tier." Vector sea
 How it works:
 
 - An embedding model converts the query and each document chunk into fixed-size vectors in the same space. Chunk vectors are pre-computed and stored at index time; only the query vector is computed at search time. This is what makes vector search fast — you pay the embedding cost per document once, not per query.
-- The vector database finds the closest chunk vectors using an approximate index (commonly HNSW or IVF). "Approximate" means it trades a small accuracy loss for massive speed gains — searching millions of vectors in milliseconds instead of scanning every one.
+- The [[Software Engineering/11 AI & ML/LLM/RAG/Vector Databases\|vector database]] finds the closest chunk vectors using an approximate index (commonly HNSW or IVF). "Approximate" means it trades a small accuracy loss for massive speed gains — searching millions of vectors in milliseconds instead of scanning every one.
 - Embedding model choice directly affects retrieval quality. Models differ in dimensionality, training data, and domain coverage. MTEB leaderboard scores are a starting point, but a model topping MTEB on general benchmarks can collapse on specialized corpora or non-English queries — always evaluate on your own data.
 
 Where it fits:
@@ -168,4 +168,5 @@ Decision rule: start with hybrid retrieval (RRF) and conservative top-k (5-20). 
 > - [[Software Engineering/11 AI & ML/LLM/RAG/RAG Evaluation\|RAG Evaluation]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/RAG Patterns\|RAG Patterns]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Re-ranking\|Re-ranking]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/Vector Databases\|Vector Databases]]
 <!-- whats-next:end -->

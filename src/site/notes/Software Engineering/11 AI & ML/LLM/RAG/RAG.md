@@ -21,7 +21,7 @@ flowchart LR
     G --> V[Groundedness and Citation Checks]
 ```
 
-Each stage has its own page: [[Software Engineering/11 AI & ML/LLM/RAG/Query Translation\|Query Translation]] rewrites the user question into retrieval-friendly variants, [[Software Engineering/11 AI & ML/LLM/RAG/Chunking\|Chunking]] defines the unit of retrieval, [[Software Engineering/11 AI & ML/LLM/RAG/Retrieval\|Retrieval]] finds candidate evidence, [[Software Engineering/11 AI & ML/LLM/RAG/Re-ranking\|Re-ranking]] orders it, [[Software Engineering/11 AI & ML/LLM/RAG/RAG Evaluation\|RAG Evaluation]] and [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring\|Monitoring]] measure it offline and in production, and [[Software Engineering/11 AI & ML/LLM/RAG/Caching\|Caching]] keeps the whole pipeline fast and affordable.
+Each stage has its own page: [[Software Engineering/11 AI & ML/LLM/RAG/Query Translation\|Query Translation]] rewrites the user question into retrieval-friendly variants, [[Software Engineering/11 AI & ML/LLM/RAG/Chunking\|Chunking]] defines the unit of retrieval, [[Software Engineering/11 AI & ML/LLM/RAG/Retrieval\|Retrieval]] finds candidate evidence over a [[Software Engineering/11 AI & ML/LLM/RAG/Vector Databases\|vector database]], [[Software Engineering/11 AI & ML/LLM/RAG/Re-ranking\|Re-ranking]] orders it, [[Software Engineering/11 AI & ML/LLM/RAG/RAG Evaluation\|RAG Evaluation]] and [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring\|Monitoring]] measure it offline and in production, and [[Software Engineering/11 AI & ML/LLM/RAG/Caching\|Caching]] keeps the whole pipeline fast and affordable.
 
 ## Choosing a Pattern
 
@@ -52,7 +52,7 @@ Ship the baseline first, add hybrid search and reranking next, and adopt anythin
 
 ## RAG vs Fine-Tuning
 
-RAG and fine-tuning optimize different parts of the system. RAG externalizes knowledge into retrievable sources, while fine-tuning changes model behavior in weights. Choosing correctly prevents expensive retraining for problems that retrieval can solve more safely.
+RAG and [[Software Engineering/11 AI & ML/LLM/Fine-tuning\|fine-tuning]] optimize different parts of the system. RAG externalizes knowledge into retrievable sources, while fine-tuning changes model behavior in weights. Choosing correctly prevents expensive retraining for problems that retrieval can solve more safely.
 
 Example: if product policy changes weekly, RAG can update by reindexing documents. Fine-tuning would require repeated retraining cycles and still provide weak source traceability.
 
@@ -104,4 +104,5 @@ The combined pattern — fine-tune the model for behavior (format, tone, refusal
 > - [[Software Engineering/11 AI & ML/LLM/RAG/RAG Patterns\|RAG Patterns]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Re-ranking\|Re-ranking]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Retrieval\|Retrieval]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/Vector Databases\|Vector Databases]]
 <!-- whats-next:end -->

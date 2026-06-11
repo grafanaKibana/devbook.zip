@@ -270,4 +270,5 @@ Decision rule: combine deterministic metrics on 100% of traffic (fast, free), sa
 > - [[Software Engineering/11 AI & ML/LLM/RAG/RAG Patterns\|RAG Patterns]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Re-ranking\|Re-ranking]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Retrieval\|Retrieval]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/Vector Databases\|Vector Databases]]
 <!-- whats-next:end -->

@@ -134,5 +134,6 @@ When extending precision/recall to multi-class problems, the averaging method ch
 >  [[Software Engineering/11 AI & ML/Machine Learning/Machine Learning\|Machine Learning]]
 >
 > **Pages**
+> - [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/Calibration\|Calibration]]
 > - [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/ROC-AUC and PR-AUC\|ROC-AUC and PR-AUC]]
 <!-- whats-next:end -->

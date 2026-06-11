@@ -183,4 +183,5 @@ Decision rule: start without reranking and measure retrieval quality. Add BM25 o
 > - [[Software Engineering/11 AI & ML/LLM/RAG/RAG Evaluation\|RAG Evaluation]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/RAG Patterns\|RAG Patterns]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Retrieval\|Retrieval]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/Vector Databases\|Vector Databases]]
 <!-- whats-next:end -->

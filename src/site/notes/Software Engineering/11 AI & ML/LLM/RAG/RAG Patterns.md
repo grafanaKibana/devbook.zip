@@ -374,4 +374,5 @@ Main risk:
 > - [[Software Engineering/11 AI & ML/LLM/RAG/RAG Evaluation\|RAG Evaluation]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Re-ranking\|Re-ranking]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Retrieval\|Retrieval]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/Vector Databases\|Vector Databases]]
 <!-- whats-next:end -->

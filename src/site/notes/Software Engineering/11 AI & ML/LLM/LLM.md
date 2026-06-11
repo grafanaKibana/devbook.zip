@@ -30,7 +30,9 @@ Three adaptation levers, ordered by cost. Reach for the cheaper one first:
 
 - **Prompting (zero-shot / few-shot)** — steer behavior entirely through the input: instructions, examples, and output format. No training, instant iteration. Covered in [[Software Engineering/11 AI & ML/LLM/Prompting/Prompting\|Prompting]] and [[Software Engineering/11 AI & ML/LLM/Prompting/In-Context Learning\|In-Context Learning]].
 - **Retrieval-Augmented Generation** — keep knowledge outside the model and inject relevant evidence into the prompt at query time. The right tool when facts change faster than you can retrain or when answers must cite sources. Covered in [[Software Engineering/11 AI & ML/LLM/RAG/RAG\|RAG]], including the RAG-vs-fine-tuning decision.
-- **Fine-tuning** — continue training the model's weights on task-specific data. Buys consistent behavior (format, tone, policy) at the cost of a training pipeline, evaluation discipline, and slower iteration. Use it for stable behavior, not for injecting fast-changing facts.
+- **Fine-tuning** — continue training the model's weights on task-specific data. Buys consistent behavior (format, tone, policy) at the cost of a training pipeline, evaluation discipline, and slower iteration. Use it for stable behavior, not for injecting fast-changing facts. Covered in [[Software Engineering/11 AI & ML/LLM/Fine-tuning\|Fine-tuning]].
+
+Two cross-cutting concerns sit alongside these levers: [[Software Engineering/11 AI & ML/LLM/Context Engineering\|Context Engineering]] — deciding what fills the finite context window and in what order — and [[Software Engineering/11 AI & ML/LLM/Model Selection and Routing\|Model Selection and Routing]] — matching each request to the cheapest model that can handle it.
 
 ## Dictionary
 
@@ -84,9 +86,12 @@ Core terms used throughout this section, each linked to the note that covers it 
 > - [[Software Engineering/11 AI & ML/LLM/RAG/RAG\|RAG]]
 >
 > **Pages**
+> - [[Software Engineering/11 AI & ML/LLM/Context Engineering\|Context Engineering]]
 > - [[Software Engineering/11 AI & ML/LLM/Embeddings\|Embeddings]]
+> - [[Software Engineering/11 AI & ML/LLM/Fine-tuning\|Fine-tuning]]
 > - [[Software Engineering/11 AI & ML/LLM/Generation\|Generation]]
 > - [[Software Engineering/11 AI & ML/LLM/Guardrails\|Guardrails]]
 > - [[Software Engineering/11 AI & ML/LLM/Hallucinations\|Hallucinations]]
+> - [[Software Engineering/11 AI & ML/LLM/Model Selection and Routing\|Model Selection and Routing]]
 > - [[Software Engineering/11 AI & ML/LLM/OWASP vulnerabilities on AI LLM\|OWASP vulnerabilities on AI LLM]]
 <!-- whats-next:end -->
