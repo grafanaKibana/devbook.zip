@@ -61,7 +61,7 @@ Grounding is especially critical in [[Software Engineering/11 AI & ML/LLM/RAG/RA
 
 ## Context Assembly
 
-Context assembly determines what evidence enters the prompt and in what order. Research on how models use long contexts ("Lost in the Middle", Liu et al. 2023) shows a U-shaped performance curve: models attend most to information at the beginning and end of the context, and least to information in the middle.
+Context assembly determines what evidence enters the prompt and in what order — the core of [[Software Engineering/11 AI & ML/LLM/Context Engineering\|Context Engineering]]. Research on how models use long contexts ("Lost in the Middle", Liu et al. 2023) shows a U-shaped performance curve: models attend most to information at the beginning and end of the context, and least to information in the middle.
 
 Practical implications:
 
@@ -160,8 +160,11 @@ Mitigation: validate semantic content in addition to schema compliance. For crit
 > - [[Software Engineering/11 AI & ML/LLM/RAG/RAG\|RAG]]
 >
 > **Pages**
+> - [[Software Engineering/11 AI & ML/LLM/Context Engineering\|Context Engineering]]
 > - [[Software Engineering/11 AI & ML/LLM/Embeddings\|Embeddings]]
+> - [[Software Engineering/11 AI & ML/LLM/Fine-tuning\|Fine-tuning]]
 > - [[Software Engineering/11 AI & ML/LLM/Guardrails\|Guardrails]]
 > - [[Software Engineering/11 AI & ML/LLM/Hallucinations\|Hallucinations]]
+> - [[Software Engineering/11 AI & ML/LLM/Model Selection and Routing\|Model Selection and Routing]]
 > - [[Software Engineering/11 AI & ML/LLM/OWASP vulnerabilities on AI LLM\|OWASP vulnerabilities on AI LLM]]
 <!-- whats-next:end -->

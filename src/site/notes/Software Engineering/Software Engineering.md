@@ -9,30 +9,30 @@ Organized into 11 topic areas with spaced repetition tracking. The dashboards be
 
 # Topic Coverage
 
-<div class="block-language-dataview"><table class="dataview table-view-table"><thead class="table-view-thead"><tr><th>Topic</th><th>Progress</th><th>Done</th></tr></thead><tbody class="table-view-tbody"><tr><td>AI &amp; ML</td><td><progress class="se-progress" max="100" value="100"></progress><span> 100%</span></td><td>36/36</td></tr><tr><td>Architecture</td><td><progress class="se-progress" max="100" value="51"></progress><span> 51%</span></td><td>11/55</td></tr><tr><td>Computer Science</td><td><progress class="se-progress" max="100" value="50"></progress><span> 50%</span></td><td>1/23</td></tr><tr><td>DevOps</td><td><progress class="se-progress" max="100" value="33"></progress><span> 33%</span></td><td>0/6</td></tr><tr><td>Data Persistence</td><td><progress class="se-progress" max="100" value="32"></progress><span> 32%</span></td><td>0/7</td></tr><tr><td>Networks</td><td><progress class="se-progress" max="100" value="29"></progress><span> 29%</span></td><td>0/12</td></tr><tr><td>Programming</td><td><progress class="se-progress" max="100" value="25"></progress><span> 25%</span></td><td>0/32</td></tr><tr><td>Development Practices</td><td><progress class="se-progress" max="100" value="25"></progress><span> 25%</span></td><td>0/11</td></tr><tr><td>Security</td><td><progress class="se-progress" max="100" value="25"></progress><span> 25%</span></td><td>0/10</td></tr><tr><td>SDLC</td><td><progress class="se-progress" max="100" value="25"></progress><span> 25%</span></td><td>0/2</td></tr><tr><td>Cloud</td><td><progress class="se-progress" max="100" value="25"></progress><span> 25%</span></td><td>0/1</td></tr><tr class="se-total-row"><td>Total</td><td><progress class="se-progress" max="100" value="50"></progress><span> 50%</span></td><td>48/195</td></tr></tbody></table></div>
+<div class="block-language-dataview"><table class="dataview table-view-table"><thead class="table-view-thead"><tr><th>Topic</th><th>Progress</th><th>Done</th></tr></thead><tbody class="table-view-tbody"><tr><td>AI &amp; ML</td><td><progress class="se-progress" max="100" value="100"></progress><span> 100%</span></td><td>41/41</td></tr><tr><td>Architecture</td><td><progress class="se-progress" max="100" value="51"></progress><span> 51%</span></td><td>11/55</td></tr><tr><td>Computer Science</td><td><progress class="se-progress" max="100" value="50"></progress><span> 50%</span></td><td>1/23</td></tr><tr><td>DevOps</td><td><progress class="se-progress" max="100" value="33"></progress><span> 33%</span></td><td>0/6</td></tr><tr><td>Data Persistence</td><td><progress class="se-progress" max="100" value="32"></progress><span> 32%</span></td><td>0/7</td></tr><tr><td>Networks</td><td><progress class="se-progress" max="100" value="29"></progress><span> 29%</span></td><td>0/12</td></tr><tr><td>Programming</td><td><progress class="se-progress" max="100" value="25"></progress><span> 25%</span></td><td>0/32</td></tr><tr><td>Development Practices</td><td><progress class="se-progress" max="100" value="25"></progress><span> 25%</span></td><td>0/11</td></tr><tr><td>Security</td><td><progress class="se-progress" max="100" value="25"></progress><span> 25%</span></td><td>0/10</td></tr><tr><td>SDLC</td><td><progress class="se-progress" max="100" value="25"></progress><span> 25%</span></td><td>0/2</td></tr><tr><td>Cloud</td><td><progress class="se-progress" max="100" value="25"></progress><span> 25%</span></td><td>0/1</td></tr><tr class="se-total-row"><td>Total</td><td><progress class="se-progress" max="100" value="51"></progress><span> 51%</span></td><td>53/200</td></tr></tbody></table></div>
 
 # Recently Updated
 
-| Note                                                                                                                           | Date                    |
-| ------------------------------------------------------------------------------------------------------------------------------ | ----------------------- |
-| [[Software Engineering/11 AI & ML/Responsible AI\|Responsible AI]]                                                          | 9:20 AM - June 11, 2026 |
-| [[Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation\|Evaluation]]                                                   | 9:20 AM - June 11, 2026 |
-| [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/Evaluation\|Evaluation]]                                      | 9:20 AM - June 11, 2026 |
-| [[Software Engineering/11 AI & ML/LLM/RAG/RAG Evaluation\|RAG Evaluation]]                                                  | 9:18 AM - June 11, 2026 |
-| [[Software Engineering/11 AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs\|Golden Test Set and Regression Runs]] | 9:08 AM - June 11, 2026 |
-| [[Software Engineering/11 AI & ML/LLM/Guardrails\|Guardrails]]                                                              | 9:01 PM - June 10, 2026 |
-| [[Software Engineering/11 AI & ML/LLM/Agents/Tools\|Tools]]                                                                 | 9:01 PM - June 10, 2026 |
-| [[Software Engineering/11 AI & ML/LLM/Hallucinations\|Hallucinations]]                                                      | 8:59 PM - June 10, 2026 |
-| [[Software Engineering/11 AI & ML/Tooling/Plugins\|Plugins]]                                                                | 8:54 PM - June 10, 2026 |
-| [[Software Engineering/11 AI & ML/Tooling/Skills\|Skills]]                                                                  | 8:54 PM - June 10, 2026 |
-| [[Software Engineering/11 AI & ML/Tooling/Agent Instructions\|Agent Instructions]]                                          | 8:54 PM - June 10, 2026 |
-| [[Software Engineering/11 AI & ML/Tooling/Coding Agents\|Coding Agents]]                                                    | 8:54 PM - June 10, 2026 |
+| Note                                                                                | Date                     |
+| ----------------------------------------------------------------------------------- | ------------------------ |
+| [[Software Engineering/11 AI & ML/LLM/RAG/Retrieval\|Retrieval]]                 | 10:33 AM - June 11, 2026 |
+| [[Software Engineering/11 AI & ML/LLM/Generation\|Generation]]                   | 10:33 AM - June 11, 2026 |
+| [[Software Engineering/11 AI & ML/LLM/RAG/RAG\|RAG]]                             | 10:33 AM - June 11, 2026 |
+| [[Software Engineering/11 AI & ML/LLM/LLM\|LLM]]                                 | 10:32 AM - June 11, 2026 |
+| [[Software Engineering/11 AI & ML/LLM/RAG/Vector Databases\|Vector Databases]]   | 10:31 AM - June 11, 2026 |
+| [[Software Engineering/11 AI & ML/LLM/RAG/Re-ranking\|Re-ranking]]               | 10:31 AM - June 11, 2026 |
+| [[Software Engineering/11 AI & ML/LLM/RAG/RAG Patterns\|RAG Patterns]]           | 10:31 AM - June 11, 2026 |
+| [[Software Engineering/11 AI & ML/LLM/RAG/RAG Evaluation\|RAG Evaluation]]       | 10:31 AM - June 11, 2026 |
+| [[Software Engineering/11 AI & ML/LLM/RAG/Query Translation\|Query Translation]] | 10:31 AM - June 11, 2026 |
+| [[Software Engineering/11 AI & ML/LLM/RAG/Chunking\|Chunking]]                   | 10:31 AM - June 11, 2026 |
+| [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring\|Monitoring]]               | 10:31 AM - June 11, 2026 |
+| [[Software Engineering/11 AI & ML/LLM/RAG/Caching\|Caching]]                     | 10:31 AM - June 11, 2026 |
 
 { .block-language-dataview}
 
 # Publish Distribution
 
-<div class="block-language-dataview"><table class="dataview table-view-table"><thead class="table-view-thead"><tr><th>Publish Status</th><th>Distribution</th><th>Count</th></tr></thead><tbody class="table-view-tbody"><tr><td>Published</td><td><progress class="se-progress" max="100" value="100"></progress><span> 100%</span></td><td>255</td></tr><tr><td>Unpublished</td><td><progress class="se-progress" max="100" value="0"></progress><span> 0%</span></td><td>0</td></tr></tbody></table></div>
+<div class="block-language-dataview"><table class="dataview table-view-table"><thead class="table-view-thead"><tr><th>Publish Status</th><th>Distribution</th><th>Count</th></tr></thead><tbody class="table-view-tbody"><tr><td>Published</td><td><progress class="se-progress" max="100" value="100"></progress><span> 100%</span></td><td>260</td></tr><tr><td>Unpublished</td><td><progress class="se-progress" max="100" value="0"></progress><span> 0%</span></td><td>0</td></tr></tbody></table></div>
 
 <!-- whats-next:start -->
 

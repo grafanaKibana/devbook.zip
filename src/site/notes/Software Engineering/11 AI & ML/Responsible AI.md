@@ -75,7 +75,7 @@ People — not models — are accountable for AI system behavior. Teams deployin
 
 ## References
 
-- [Microsoft Responsible AI Standard](https://www.microsoft.com/en-us/ai/responsible-ai) — the framework this note's six principles are drawn from, with implementation guidance per principle.
+- [Microsoft Responsible AI Standard](https://www.microsoft.com/en-us/ai/responsible-ai) — a leading framework for the six principles, with implementation guidance per principle.
 - [AI Risk Management Framework (NIST)](https://www.nist.gov/itl/ai-risk-management-framework) — vendor-neutral framework for identifying, measuring, and managing AI risk.
 - [Model Cards for Model Reporting (Mitchell et al., 2019)](https://arxiv.org/abs/1810.03993) — the standard practice for documenting model capabilities, limitations, and evaluation slices.
 - [Datasheets for Datasets (Gebru et al., 2021)](https://arxiv.org/abs/1803.09010) — documentation standard for dataset provenance, composition, and intended use.
