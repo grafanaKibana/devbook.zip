@@ -165,7 +165,7 @@ Practical threshold tuning pattern:
 - ROC-AUC can hide poor positive prediction quality on imbalanced data.
 - PR-AUC baseline depends on prevalence, so cross-dataset comparisons can mislead.
 - AUC does not pick your threshold; you still need operating-point tuning.
-- AUC does not measure calibration; a high AUC model can still output bad probabilities.
+- AUC does not measure [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/Calibration|calibration]]; a high AUC model can still output bad probabilities.
 - Data leakage can inflate both metrics and fail in production.
 
 ## Tradeoffs
@@ -208,5 +208,6 @@ Practical threshold tuning pattern:
 >  [[Software Engineering/11 AI & ML/Machine Learning/Machine Learning|Machine Learning]]
 >
 > **Pages**
+> - [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/Calibration|Calibration]]
 > - [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/Classification Evaluation|Classification Evaluation]]
 <!-- whats-next:end -->
