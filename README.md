@@ -1,4 +1,4 @@
-# Knowledge Hub
+# DevBook
 
 A personal software engineering knowledge base built with [Obsidian](https://obsidian.md) and published as a static website via the [Digital Garden](https://github.com/oleeskild/Obsidian-Digital-Garden) plugin + [Eleventy](https://www.11ty.dev/).
 
@@ -53,7 +53,7 @@ Vault/Software Engineering/   ──(Obsidian Git)──>   GitHub repo
 ## Repository Structure
 
 ```
-Knowledge Hub/
+DevBook/
 ├── Vault/                          # The Obsidian vault (open this in Obsidian)
 │   ├── Software Engineering/       # All notes live here
 │   │   ├── 01 Programming/        # Topic folders (numbered for ordering)

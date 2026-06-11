@@ -4,7 +4,7 @@ using DevBook.Data.Agents.Abstractions;
 
 public sealed record RerankingAgent : AgentConfigBase
 {
-    public override string Description => "Ranks retrieved Knowledge Hub chunks by usefulness for answering a query.";
+    public override string Description => "Ranks retrieved DevBook chunks by usefulness for answering a query.";
 
     public override string Prompt =>
         """

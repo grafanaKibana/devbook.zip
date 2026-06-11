@@ -4,7 +4,7 @@ using DevBook.Data.Agents.Abstractions;
 
 public record AnswerAgent : AgentConfigBase
 {
-    public override string Description => "Answers Knowledge Hub RAG questions from retrieved chunk evidence.";
+    public override string Description => "Answers DevBook RAG questions from retrieved chunk evidence.";
 
     public override string Prompt =>
         $"""

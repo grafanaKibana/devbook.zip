@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-# Pre-commit hook for Knowledge Hub Obsidian repo
+# Pre-commit hook for DevBook Obsidian repo
 # Runs vault maintenance automations on staged files
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"

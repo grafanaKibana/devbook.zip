@@ -370,7 +370,7 @@ Compact repo instructions for future OpenCode sessions. Keep this file limited t
 ## Obsidian tooling
 
 - Default to file tools for reads/writes. Use Obsidian CLI only when you need Obsidian-index behavior such as backlinks, tags, or wikilink resolution.
-- Obsidian CLI requires Obsidian running and uses `=` parameters, for example `obsidian vault="Knowledge Hub" read file="Task vs ValueTask"`.
+- Obsidian CLI requires Obsidian running and uses `=` parameters, for example `obsidian vault="DevBook" read file="Task vs ValueTask"`.
 - Load Obsidian skills when delegating vault work: `obsidian-markdown` for notes, `obsidian-cli` for vault-index queries, `obsidian-bases` for `.base`, and `json-canvas` for `.canvas`.
 
 ## Workflow notes
@@ -380,5 +380,5 @@ Compact repo instructions for future OpenCode sessions. Keep this file limited t
 - **AGENTS.md evolution rule.** When updating this contract, prefer extending the writing paradigm or strengthening existing principles over adding prescriptive format rules. If a proposed rule can be derived from the eight writing principles (concrete over abstract, show the machine, depth matches complexity, scannable by design, opinionated over neutral, symmetric treatment, tradeoff-anchored, plain engineer's voice), strengthen the principle instead of adding a new rule. Rules should guide judgment, not prescribe specific section templates or bullet formats for each case.
 - **No automatic commits.** Never create git commits unless the user explicitly asks. Leave changes unstaged/uncommitted so the user controls when and what to commit.
 - Default to file tools for reads/writes. Use Obsidian CLI only when you need Obsidian-index behavior such as backlinks, tags, or wikilink resolution.
-- Obsidian CLI requires Obsidian running and uses `=` parameters, for example `obsidian vault="Knowledge Hub" read file="Task vs ValueTask"`.
+- Obsidian CLI requires Obsidian running and uses `=` parameters, for example `obsidian vault="DevBook" read file="Task vs ValueTask"`.
 - Load Obsidian skills when delegating vault work: `obsidian-markdown` for notes, `obsidian-cli` for vault-index queries, `obsidian-bases` for `.base`, and `json-canvas` for `.canvas`.
