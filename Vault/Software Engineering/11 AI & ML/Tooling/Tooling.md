@@ -6,7 +6,7 @@ subtopic:
 tags:
   - FolderNote
 dg-publish: true
-status: Creation
+status: Done
 level:
   - "2"
 priority: Medium

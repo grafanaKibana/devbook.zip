@@ -6,14 +6,14 @@ subtopic:
 level:
   - "3"
 priority: Medium
-status: Creation
+status: Done
 dg-publish: true
 ---
 # Intro
 
 Guardrails are layered controls around an LLM that reduce risk: they prevent unsafe actions, limit data exposure, and keep outputs within policy and quality constraints. A single safety filter is not enough — production LLM systems need defense in depth across input, context, output, and runtime layers. The goal is not to make the system perfect but to make failures detectable, bounded, and recoverable.
 
-See [[Software Engineering/10 Cloud/Azure/Azure AI Content Safety|Azure AI Content Safety]] for a managed content safety service that implements several of these guardrails.
+[Azure AI Content Safety](https://learn.microsoft.com/en-us/azure/ai-services/content-safety/overview) is a managed service that implements several of these guardrails out of the box — content filtering, prompt injection detection (Prompt Shields), and groundedness checks.
 
 ## Defense-in-Depth Model
 

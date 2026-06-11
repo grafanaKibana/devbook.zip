@@ -122,7 +122,7 @@ These rules exist to make notes useful for the Senior .NET / AI engineering role
 
 Writing paradigm
 
-Seven principles govern note content. Apply them as judgment calls, not checklists.
+Eight principles govern note content. Apply them as judgment calls, not checklists.
 
 1. **Concrete over abstract** — Ground every claim in a specific example, mechanism, or scenario. Never write "it depends" without showing on what. Never describe a technique without showing what it does to real input.
 2. **Show the machine** — Explain how things actually work: what goes in, what comes out, what breaks if you get it wrong. The reader should understand the mechanism, not just the label.
@@ -131,6 +131,7 @@ Seven principles govern note content. Apply them as judgment calls, not checklis
 5. **Opinionated over neutral** — Comparisons exist to help the reader decide, not to present a balanced menu. Every table, every list of alternatives should leave the reader with a concrete recommendation and the conditions under which it changes. Neutral enumeration without a decision rule forces the reader to do the synthesis work the note should have done.
 6. **Symmetric treatment** — When a note presents multiple alternatives, each one deserves the same questions answered at the same depth. If one approach gets a mechanism explanation, failure modes, and use cases, every other approach should too. Asymmetry signals incomplete understanding and undermines trust in the comparison.
 7. **Tradeoff-anchored** — Engineering is choosing under constraints, not following best practices. Every recommendation, every pitfall mitigation, every question answer should make the cost explicit. "Use X" is incomplete; "Use X — it costs Y, which is acceptable when Z" is engineering advice.
+8. **Plain engineer's voice** — Write the way a senior engineer explains something to a peer at a whiteboard: direct, unadorned, occasionally blunt. The tells of generated prose are specific and cuttable — hype adjectives ("powerful", "robust", "seamless", "crucial", "essential", "rich"), inflated verbs ("leverage", "utilize", "facilitate", "delve into"), throat-clearing transitions ("That said", "Moreover", "It's worth noting that"), and meta-signposting ("In this note we'll explore", "As we can see", "In summary"). Cut them when they are filler; keep a word only when it carries real meaning. Don't restate the heading in a section's first sentence, don't open by claiming the topic is "one of the most important", and don't end with a summary that repeats what was already said — stop at the last real point. Vary sentence and paragraph length; uniform rhythm and a relentless rule-of-three cadence are themselves a tell. Name real things throughout the prose, not just in examples — actual API names, real numbers, specific error messages. Let the mechanism and the numbers carry the weight; the prose should disappear.
 
 These principles override specific section rules. If following a section template produces abstract filler, cut the section.
 
@@ -292,6 +293,7 @@ Minimum validation checklist (must all pass)
 - Scope-to-depth fit: note depth matches topic complexity (not overstuffed for small topics; not thin for complex ones).
 - Split heuristic checked: if >1200 words OR >12 headings AND 2+ distinct concepts, Split Suggestion is included.
 - Writing paradigm: note feels scannable (reader orients without reading from the top), opinionated (comparisons end with recommendations), symmetric (alternatives get equal treatment), and tradeoff-anchored (costs are explicit).
+- Voice: reads like a human engineer — no hype adjectives, inflated verbs, throat-clearing transitions, meta-signposting, heading restatement, or summary-restate endings; sentence and paragraph rhythm varies; real names and numbers appear in the prose, not only in code blocks.
 - References are annotated so the reader can assess relevance without clicking.
 
 Mandatory reviewer prompt format
@@ -402,5 +404,5 @@ obsidian tasks daily todo
 
 - If request changes vault structure/formatting rules, ask user whether to update AGENTS.md Memory.
 - **Placement and scope check.** Before creating or moving pages, the agent MUST run the placement and scope check defined in "Creating structure" — even when the user's instruction seems clear. See [Placement and scope check](#placement-and-scope-check-before-creating-pages).
-- **AGENTS.md evolution rule.** When updating this contract, prefer extending the writing paradigm or strengthening existing principles over adding prescriptive format rules. If a proposed rule can be derived from the seven writing principles (concrete over abstract, show the machine, depth matches complexity, scannable by design, opinionated over neutral, symmetric treatment, tradeoff-anchored), strengthen the principle instead of adding a new rule. Rules should guide judgment, not prescribe specific section templates or bullet formats for each case.
+- **AGENTS.md evolution rule.** When updating this contract, prefer extending the writing paradigm or strengthening existing principles over adding prescriptive format rules. If a proposed rule can be derived from the eight writing principles (concrete over abstract, show the machine, depth matches complexity, scannable by design, opinionated over neutral, symmetric treatment, tradeoff-anchored, plain engineer's voice), strengthen the principle instead of adding a new rule. Rules should guide judgment, not prescribe specific section templates or bullet formats for each case.
 - **No automatic commits.** Never create git commits unless the user explicitly asks. Leave changes unstaged/uncommitted so the user controls when and what to commit.

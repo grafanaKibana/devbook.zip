@@ -111,15 +111,15 @@ Calibration tips:
 
 ## Pitfalls
 
-**Verbosity bias** — judge models prefer longer, more detailed answers even when a shorter answer is correct and sufficient. In one production eval, a 3-sentence correct answer scored 3/5 while a 12-sentence answer with minor inaccuracies scored 4/5. Mitigation: add a conciseness dimension to the rubric, include calibration examples where short answers score full marks, and cap acceptable length in the judge prompt.
+**Verbosity bias** — judge models prefer longer, more detailed answers even when a shorter answer is correct and sufficient. Zheng et al. (2023) demonstrated this with a "repetitive list" attack: padding an answer with rephrased duplicates of its own content fooled GPT-3.5 and Claude-v1 judges into scoring it higher, and even GPT-4 was not fully immune. Mitigation: add a conciseness dimension to the rubric, include calibration examples where short answers score full marks, and cap acceptable length in the judge prompt.
 
-**Position bias in pairwise** — when the same answer appears as A in one run and B in another, judges prefer whichever position they see first. In a 100-pair experiment, answer A won 62% of the time regardless of content. Mitigation: always randomize A/B order and verify that win-rates are symmetric (within 5% tolerance). If bias persists, run each pair twice (swapped) and take the consistent verdict.
+**Position bias in pairwise** — judges systematically favor an answer based on the position it appears in, not its content. Zheng et al. (2023) found all tested judge models exhibited position bias, with only GPT-4 staying reasonably consistent when answer order was swapped. Mitigation: always randomize A/B order and verify that win-rates are symmetric. If bias persists, run each pair twice with positions swapped and accept only verdicts that agree across both orderings.
 
-**Prompt sensitivity** — small wording changes in the judge prompt can shift scores by 0.5-1.0 points on a 5-point scale. Changing "evaluate correctness" to "grade factual accuracy" produced a 0.7-point average shift in one eval pipeline. Mitigation: lock the judge prompt in version control, run regression checks when you change it, and treat prompt changes like code changes with tests and review.
+**Prompt sensitivity** — small wording changes in the judge prompt (for example "evaluate correctness" versus "grade factual accuracy") can shift scores across the entire eval set, breaking comparability between runs. Mitigation: lock the judge prompt in version control, run regression checks when you change it, and treat prompt changes like code changes with tests and review.
 
-**Hidden coupling (self-preference)** — if the judge model is the same model or fine-tune as the candidate, it rewards its own style and penalizes outputs from other models. A Claude judge gave Claude answers 0.8 points higher on average than GPT-4 answers of equivalent human-rated quality. Mitigation: use a different model family for judging, or validate judge scores against human labels on a diverse multi-model sample.
+**Hidden coupling (self-preference)** — judges score outputs from their own model family higher than equivalent outputs from other models. Zheng et al. (2023) report GPT-4 favoring its own answers by roughly a 10% higher win rate and Claude-v1 favoring its own by roughly 25%. Mitigation: use a different model family for judging, or validate judge scores against human labels on a diverse multi-model sample.
 
-**Calibration drift** — judge behavior shifts when the underlying model receives updates. A model update that improved reasoning also made the judge stricter on formatting, causing 15% more failures on an unchanged golden set. Mitigation: maintain a fixed gold dataset with known human labels and re-run calibration after every model update. Alert if agreement with human labels drops below 80% on binary pass/fail.
+**Calibration drift** — judge behavior shifts when the underlying model receives updates: a provider-side model change can make the judge stricter or looser on dimensions like formatting, so an unchanged golden set suddenly produces different scores. Mitigation: maintain a fixed gold dataset with known human labels and re-run calibration after every model update. Alert if agreement with human labels drops below 80% on binary pass/fail.
 
 ## Questions
 
@@ -149,15 +149,14 @@ Calibration tips:
 
 ## References
 
-- [Microsoft.Extensions.AI.Evaluation docs (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/ai/conceptual/evaluation-libraries)
-- [MEAI evaluation samples (dotnet/ai-samples)](https://github.com/dotnet/ai-samples/tree/main/src/microsoft-extensions-ai-evaluation)
-- [Microsoft.Extensions.AI.Evaluation source (dotnet/extensions)](https://github.com/dotnet/extensions)
-- [LLM-as-a-judge evals guide (OpenAI API Docs)](https://developers.openai.com/api/docs/guides/evals)
-- [Evaluation best practices (OpenAI API Docs)](https://developers.openai.com/api/docs/guides/evaluation-best-practices)
-- [Define your success criteria (Anthropic Docs)](https://docs.anthropic.com/en/docs/test-and-evaluate/define-success)
-- [AI Risk Management Framework (NIST)](https://www.nist.gov/itl/ai-risk-management-framework)
-
-- [Evaluating LLM outputs in production (Eugene Yan)](https://eugeneyan.com/writing/llm-evaluations/)
+- [Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena (Zheng et al., NeurIPS 2023)](https://arxiv.org/abs/2306.05685) — the paper that established LLM-as-judge and documented its systematic biases: position, verbosity, and self-enhancement.
+- [LLM-as-a-judge evals guide (OpenAI API Docs)](https://developers.openai.com/api/docs/guides/evals) — practical guide to building judge-based eval pipelines.
+- [Evaluation best practices (OpenAI API Docs)](https://developers.openai.com/api/docs/guides/evaluation-best-practices) — rubric design, scoring scales, and regression workflow guidance.
+- [Define your success criteria (Anthropic Docs)](https://docs.anthropic.com/en/docs/test-and-evaluate/define-success) — framework for specifying what good looks like before writing a judge prompt.
+- [Evaluating LLM outputs in production (Eugene Yan)](https://eugeneyan.com/writing/llm-evaluations/) — practitioner deep-dive on judge reliability, calibration, and human agreement tracking.
+- [Microsoft.Extensions.AI.Evaluation docs (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/ai/conceptual/evaluation-libraries) — the .NET evaluation library implementing rubric and judge-based scorers.
+- [MEAI evaluation samples (dotnet/ai-samples)](https://github.com/dotnet/ai-samples/tree/main/src/microsoft-extensions-ai-evaluation) — runnable .NET examples for the evaluation library.
+- [AI Risk Management Framework (NIST)](https://www.nist.gov/itl/ai-risk-management-framework) — vendor-neutral framing for evaluation as part of AI risk management.
 
 <!-- whats-next:start -->
 

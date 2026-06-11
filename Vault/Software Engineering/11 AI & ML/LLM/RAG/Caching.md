@@ -81,6 +81,7 @@ How it works:
 - Maps text to its vector representation so the embedding model is called at most once per unique input. At ingestion time, the cache prevents re-embedding unchanged chunks when the pipeline re-runs. At query time, it prevents re-embedding identical or previously seen queries.
 - The key is `hash(text) + embedding_model_version`. The value is the vector. Because the input fully determines the output (embeddings are deterministic for a given model), this is a pure function cache — if the input has not changed, the output is guaranteed correct.
 - Long TTLs are safe because invalidation is structural: the cache entry becomes invalid only when the source text changes (new content hash) or the embedding model is swapped (new model version). Neither happens on a per-query basis.
+
 Where it fits:
 
 - High-volume ingestion pipelines where documents are re-processed frequently (nightly syncs, incremental updates). Without an embedding cache, every re-run re-embeds unchanged chunks at full cost.
@@ -97,6 +98,7 @@ How it works:
 - Stores the candidate document IDs and their relevance scores for a given query, so the vector search and any reranking are skipped on cache hit. The cache sits between query embedding and context assembly.
 - The key must include every dimension that affects which documents are returned: the processed query text (after query translation), the embedding model version, top-k, filters, the index version, tenant ID, and an authorization context hash. Missing any one of these dimensions either leaks documents across tenants, serves stale results after index updates, or returns the wrong number of candidates.
 - The value is lightweight — a list of `(document_id, score)` pairs, not full document content. This keeps cache entries small and avoids duplicating the document store.
+
 Where it fits:
 
 - Workloads with high query repetition and stable indexes. Customer support systems, internal knowledge bases, and documentation assistants often see the same questions repeatedly. If the index is rebuilt infrequently (daily or weekly), retrieval cache hit rates can be high.
@@ -115,13 +117,14 @@ LLM response caching operates at two levels that solve different problems.
 
 - OpenAI and Anthropic cache the key-value attention tensors computed during the prefill phase. When a new request shares a long prefix with a previous request (system prompt, few-shot examples, retrieved context), the provider skips recomputing attention for the cached prefix and starts generation from the first divergent token.
 - This is automatic (OpenAI) or opt-in via `cache_control` breakpoints (Anthropic). It requires a minimum prefix length (typically 1024+ tokens) and reuses cached KV tensors for a limited window (minutes to hours depending on provider).
-- The savings are significant: up to 90% input token cost reduction and 80% latency reduction on the prefill phase. But it only helps when the prefix is long, stable, and shared across requests.
+- The savings are significant but provider-specific: Anthropic charges cached prefix reads at roughly one tenth of the base input price (up to ~90% cost reduction on the cached portion, with substantial prefill latency savings), while OpenAI's automatic caching discounts cached input tokens by about 50%. Both only help when the prefix is long, stable, and shared across requests.
 
 **Application-level response caching (exact or semantic match):**
 
 - The application caches the final generated answer keyed by the full input (system prompt + retrieved context + user query + model version). On an exact cache hit, the LLM is not called at all.
 - Semantic caching extends this by finding cache hits for queries that are similar but not identical. The cache stores the query embedding alongside the response; on a new query, it embeds the query, searches the cache by vector similarity, and returns the cached response if the similarity score exceeds a threshold.
 - Semantic caching is powerful but dangerous: a query that is semantically close but contextually different can return a wrong cached answer. Example: "What is the largest lake in Africa?" and "What is the second largest lake in Africa?" are semantically similar but have different answers. Threshold tuning is critical — too loose causes false positives, too tight reduces hit rate to near zero.
+
 Where it fits:
 
 - Provider-level caching benefits any system with stable, long system prompts — enable it by default, it is essentially free.
@@ -171,9 +174,10 @@ Main risk:
 >
 > **Pages**
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Chunking|Chunking]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation|Evaluation]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring|Monitoring]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Query Translation|Query Translation]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/RAG Evaluation|RAG Evaluation]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/RAG Patterns|RAG Patterns]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Re-ranking|Re-ranking]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Retrieval|Retrieval]]
 <!-- whats-next:end -->
