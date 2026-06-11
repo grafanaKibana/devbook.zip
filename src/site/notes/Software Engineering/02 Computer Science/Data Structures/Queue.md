@@ -54,7 +54,7 @@ Console.WriteLine(jobs.Peek());    // job-2
 > [!QUESTION]- Why can a queue become a production reliability problem even if operations are O(1)?
 > Complexity is not the only risk. If producers outpace consumers, memory grows and latency spikes. Throughput and backpressure design matter more than method complexity.
 
-## Links
+## References
 
 - [`Queue<T>` class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.queue-1) — API reference covering Enqueue, Dequeue, Peek, and circular buffer internals.
 - [`PriorityQueue<TElement, TPriority>` class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.priorityqueue-2) — use when ordering by priority rather than arrival time is required.

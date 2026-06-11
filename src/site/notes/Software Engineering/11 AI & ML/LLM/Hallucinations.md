@@ -30,7 +30,7 @@ Use multiple detectors because each catches different failure modes.
 - **LLM-as-judge**: score answer [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#LLM-as-Judge Metrics\|faithfulness]] against context using an evaluator LLM. Common metric: faithfulness = supported claims divided by total claims. Frameworks like RAGAS automate this decomposition.
 - **Atomic fact verification (FActScore)**: break text into atomic facts, retrieve evidence from a knowledge base, and validate each fact independently. This gives granular failure localization; on biography generation benchmarks, models score around 58% FActScore, illustrating how frequently atomic claims lack support.
 
-For RAG stacks, pair these with [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation\|Evaluation]] so retrieval quality and answer faithfulness are measured separately.
+For RAG stacks, pair these with [[Software Engineering/11 AI & ML/LLM/RAG/RAG Evaluation\|RAG Evaluation]] so retrieval quality and answer faithfulness are measured separately.
 
 ## Mitigation
 

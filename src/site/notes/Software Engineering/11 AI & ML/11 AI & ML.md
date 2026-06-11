@@ -1,97 +1,73 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/11-ai-and-ml/","tags":["FolderNote"],"dg-note-properties":{"topic":["AI & ML"],"subtopic":[],"tags":["FolderNote"],"status":"Creation","level":["3"],"priority":"High"}}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/11-ai-and-ml/","tags":["FolderNote"],"dg-note-properties":{"topic":["AI & ML"],"subtopic":[],"tags":["FolderNote"],"status":"Done","level":["3"],"priority":"High"}}
 ---
 
 
 # Intro
 
-### Responsible AI Principles
+AI & ML covers how learning systems are built, evaluated, and operated — from classic supervised models through large language models to the agent tooling that turns models into day-to-day engineering leverage. The unifying theme across all three branches: the model is rarely the hard part. Data quality, evaluation discipline, guardrails, and monitoring decide whether a system works in production, and that engineering work looks remarkably similar whether the model is a gradient-boosted tree or a frontier LLM.
 
-#### Fairness: AI systems should treat all people fairly.
+```mermaid
+flowchart TD
+    A[AI & ML] --> ML[Machine Learning]
+    A --> L[LLM]
+    A --> T[Tooling]
+    ML --> ML1[Learning types]
+    ML --> ML2[Evaluation and drift]
+    L --> L1[Prompting and generation]
+    L --> L2[RAG]
+    L --> L3[Agents]
+    L --> L4[Evaluation and guardrails]
+    T --> T1[Coding agents]
+    T --> T2[Skills, plugins, hooks, instructions]
+```
 
-AI systems should treat everyone fairly, avoiding differential impacts on similarly situated groups. In contexts like medical treatment, loan applications, or employment, AI should provide consistent recommendations to individuals with similar symptoms, financial situations, or qualifications.
+## Map of the Section
 
-Employs techniques to detect bias and mitigate unfair impacts such as:
+- **[[Software Engineering/11 AI & ML/Machine Learning/Machine Learning\|Machine Learning]]** — the classic discipline: training pipelines, [[Software Engineering/11 AI & ML/Machine Learning/Types/Types\|learning types]], [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/Evaluation\|evaluation metrics]], [[Software Engineering/11 AI & ML/Machine Learning/Data Drift\|data drift]], and the [[Software Engineering/11 AI & ML/Machine Learning/Spectrum Of Automations\|spectrum of automation]] for deploying models safely. Start here for anything with labeled data and an explicit prediction target.
+- **[[Software Engineering/11 AI & ML/LLM/LLM\|LLM]]** — large language models as an engineering platform: [[Software Engineering/11 AI & ML/LLM/Prompting/Prompting\|prompting]], [[Software Engineering/11 AI & ML/LLM/Generation\|generation]], [[Software Engineering/11 AI & ML/LLM/RAG/RAG\|RAG]], [[Software Engineering/11 AI & ML/LLM/Agents/Agents\|agents]], [[Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation\|evaluation]], [[Software Engineering/11 AI & ML/LLM/Guardrails\|guardrails]], [[Software Engineering/11 AI & ML/LLM/Hallucinations\|hallucinations]], and [[Software Engineering/11 AI & ML/LLM/OWASP vulnerabilities on AI LLM\|security]]. The largest branch, organized around the production pipeline rather than model internals.
+- **[[Software Engineering/11 AI & ML/Tooling/Tooling\|Tooling]]** — AI-assisted development itself: [[Software Engineering/11 AI & ML/Tooling/Coding Agents\|coding agents]] and their control surfaces — [[Software Engineering/11 AI & ML/Tooling/Skills\|skills]], [[Software Engineering/11 AI & ML/Tooling/Plugins\|plugins]], [[Software Engineering/11 AI & ML/Tooling/Hooks\|hooks]], and [[Software Engineering/11 AI & ML/Tooling/Agent Instructions\|agent instructions]].
 
-- Reviewing training data.
-- Testing models with balanced demographic samples.
-- Using adversarial debiasing.
-- Monitoring model performance across user segments.
-- Implementing controls to override unfair model scores.
+A useful reading order for someone new to the section: [[Software Engineering/11 AI & ML/Machine Learning/Machine Learning\|Machine Learning]] for the foundations and vocabulary, then [[Software Engineering/11 AI & ML/LLM/LLM\|LLM]] for the modern stack, then [[Software Engineering/11 AI & ML/Tooling/Tooling\|Tooling]] for applying it to your own workflow.
 
-Training AI models on diverse and balanced data can help reduce biases, ultimately promoting fairness.
+## Choosing an Approach
 
-#### Reliability and safety: AI systems should perform reliably and safely.
+The first engineering decision is usually not which model — it is which class of solution:
 
-To build trust, AI systems must operate reliably, safely, and consistently.
+| Situation | Reach for | Why |
+| --- | --- | --- |
+| Stable rules, auditable logic, tightly controlled error cost | Rules / heuristics | Cheapest to build, test, and explain; no training data needed |
+| Labeled data, explicit prediction target, latency or cost constraints | Classic ML (trees, linear models, small transformers) | Millisecond inference, near-zero unit cost, well-understood evaluation |
+| Open-ended language tasks, no training data, fast iteration | LLM via prompting | No training loop; quality scales with prompt and context engineering |
+| LLM plus current or private knowledge | [[Software Engineering/11 AI & ML/LLM/RAG/RAG\|RAG]] | Updates knowledge without retraining; keeps answers traceable to sources |
+| Multi-step tasks with tools and feedback loops | [[Software Engineering/11 AI & ML/LLM/Agents/Agents\|Agents]] | Only when simpler single-call patterns demonstrably fall short |
 
-These systems need to function as designed, respond safely to unexpected conditions, and resist harmful manipulation. Their behavior and the variety of conditions they handle reflect the foresight of developers during design and testing.
+Whatever the choice, the same operational backbone applies: define success metrics before building, evaluate on held-out data, deploy through the [[Software Engineering/11 AI & ML/Machine Learning/Spectrum Of Automations\|spectrum of automation]], and monitor for drift and regressions.
 
-Safety in AI refers to minimizing unintended harm, including physical, emotional, and financial harm to individuals and societies. Reliability means that AI systems perform consistently as intended without unwanted variability or errors. Safe and reliable systems are robust, accurate, and behave predictably under normal conditions.
+## Responsible AI
 
-#### Privacy and security: AI systems should be secure and respect privacy.
-
-As artificial intelligence (AI) becomes more common, it's important to protect user privacy and data security. Microsoft and GitHub are aware of this tenet and both companies include privacy and security as key parts of their Responsible AI plan. This plan focuses on using principles to guide data practices.
-
-Microsoft and GitHub’s approach to Responsible AI aims to stop abuse and keep user trust. Key points include:
-
-- Getting users' permission before collecting their data. Clearly explain how the AI uses their data and get their consent. Don't collect data secretly. Let users choose if they want to share personal data and inform them through clear prompts and policies.
-- Collecting only the data needed for the AI to work. Avoid gathering extra information and remove sensitive data once the AI is in use. Regularly check data inputs to ensure only essential data is collected.
-- Anonymizing personal data. Use methods like pseudonymization and aggregation to protect identities. Pseudonymization replaces personal details with random identifiers, while aggregation groups data into summaries, removing specific individual details.
-
-Encrypt sensitive data both during transfer and when stored. Use strong encryption methods and secure keys through:
-
-- Hardware Security Modules (HSMs) which store keys in a tamper-proof environment.
-- Secure vaults like Microsoft Azure for key storage with controlled access.
-- Envelope encryption, which uses two keys for added security.
-- Organizations should control who can access keys and models, rotate keys regularly, and securely back up keys. They should also limit employee access to sensitive models and data, classify them based on sensitivity, and conduct regular security audits to prevent unauthorized access.
-
-#### Inclusiveness: AI systems should empower everyone and engage people.
-
-Inclusiveness means ensuring that AI systems are fair, accessible, and empower everyone. Microsoft's Responsible AI standard recognizes that AI creators (including GitHub) must proactively design AI to include all people, communities, and geographies - especially those areas of society historically underrepresented.
-
-Microsoft's Responsible AI standard for inclusiveness means:
-
-- AI systems work well for diverse users and groups. They don't disadvantage some people.
-- AI systems are accessible. Anyone can use AI systems easily, regardless of physical or mental abilities.
-- AI systems are available worldwide, even in developing countries/regions. AI systems can't exclude certain geographies.
-- People from different backgrounds and communities provide input into the development of AI systems.
-- AI systems allow all users to benefit equally from their capabilities. They must empower everyone.
-
-Examples of inclusive AI include:
-
-- Facial recognition that works across skin tones, ages, and genders.
-- Interfaces that support screen readers for the visually impaired.
-- Language translation that supports small regional dialects.
-- Teams that seek diverse perspectives when designing systems.
-
-Microsoft's Responsible AI standard requires that everyone can access AI systems, regardless of their disability, language, or infrastructure barriers. Responsible AI solutions must enable full global inclusion by:
-
-- Offering alternative modes of interaction such as voice control, captions, and screen readers.
-- Supporting adaptation into different languages and local cultural contexts.
-- Working offline and with limited connectivity and computing resources.
-
-#### Transparency: AI systems should be understandable.
-
-Microsoft's Responsible AI principle of Transparency emphasizes that AI systems must be understandable and interpretable. AI creators should:
-
-- Explain how their systems operate clearly through a clear validation framework.
-- Justify the design choices behind AI systems.
-- Be honest about the capabilities and limitations of AI systems.
-- Enable auditability with logging, reporting, and auditing capabilities.
-
-Transparency is essential to build trust, ensure accountability, promote fairness, enhance safety, and support inclusiveness. Implementing transparency involves documenting data and models, creating explanatory interfaces, using AI debugging tools, constructing testing dashboards, and enabling logging and auditing. By being transparent, AI creators can foster trust and responsible AI use.
-
-#### Accountability: People should be accountable for AI systems.
-
-The Accountability principle states that AI creators should be responsible for how their systems operate. They need to continuously monitor system performance and mitigate risks. Accountability in the AI industry is becoming a pressing issue as high-profile cases of algorithmic harm, bias, and abuse come to light. Critics increasingly argue that without accountability, AI creators hold too much power over opaque systems impacting lives.
-Microsoft emphasizes accountability in AI development and deployment through its Responsible AI Standard, which considers accountability a foundational principle. According to Microsoft, AI systems must be accountable to people, and companies deploying AI systems must take responsibility for their operation.
-
-## Deeper Explanation
+Fairness, reliability and safety, privacy and security, inclusiveness, transparency, and accountability are the six principles most industry frameworks converge on. They are covered in [[Software Engineering/11 AI & ML/Responsible AI\|Responsible AI]], including what each principle means in engineering terms and how the major frameworks (Microsoft Responsible AI Standard, NIST AI RMF) operationalize them.
 
 ## Questions
 
-## Links
+> [!QUESTION]- When should you reach for classic ML instead of an LLM API?
+> - Classic ML wins when the task is a well-defined prediction with labeled data: classification, regression, ranking — millisecond latency and near-zero per-request cost at scale
+> - LLMs win when the task involves open-ended language understanding or generation, training data is scarce, or iteration speed matters more than unit cost
+> - A common production pattern: prototype with an LLM to validate the product, then distill the stable, high-volume part into a small fine-tuned model
+> - Key tradeoff: classic ML trades upfront data and training effort for cheap, fast, predictable inference; LLMs trade per-call cost and latency for flexibility and zero training
+
+> [!QUESTION]- Why does evaluation discipline matter more than model choice?
+> - Without held-out evaluation, every model swap, prompt change, or retraining run is a guess — improvements cannot be distinguished from noise or regressions
+> - Production failures are dominated by data and distribution problems (drift, leakage, segment regressions), which only evaluation and monitoring catch — not by raw model capability
+> - A weaker model with solid evaluation and a feedback loop improves over time; a stronger model without them silently degrades
+> - This is why every branch of this section has its own evaluation pages: [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/Evaluation\|ML Evaluation]], [[Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation\|LLM Evaluation]], and [[Software Engineering/11 AI & ML/LLM/RAG/RAG Evaluation\|RAG Evaluation]]
+
+## References
+
+- [Rules of Machine Learning (Google for Developers)](https://developers.google.com/machine-learning/guides/rules-of-ml) — Google's practical guide to ML engineering, including when to use ML versus simpler approaches.
+- [Building Effective Agents (Anthropic Engineering)](https://www.anthropic.com/engineering/building-effective-agents) — the canonical guidance on choosing the simplest agentic pattern that solves the problem.
+- [Hidden Technical Debt in Machine Learning Systems (NeurIPS 2015)](https://papers.nips.cc/paper_files/paper/2015/hash/86df7dcfd896fcaf2674f757a2463eba-Abstract.html) — the classic paper on why the model is a small fraction of a production ML system.
+- [AI Risk Management Framework (NIST)](https://www.nist.gov/itl/ai-risk-management-framework) — vendor-neutral framework for managing AI risk across the lifecycle.
 
 <!-- whats-next:start -->
 
@@ -105,4 +81,7 @@ Microsoft emphasizes accountability in AI development and deployment through its
 > - [[Software Engineering/11 AI & ML/LLM/LLM\|LLM]]
 > - [[Software Engineering/11 AI & ML/Machine Learning/Machine Learning\|Machine Learning]]
 > - [[Software Engineering/11 AI & ML/Tooling/Tooling\|Tooling]]
+>
+> **Pages**
+> - [[Software Engineering/11 AI & ML/Responsible AI\|Responsible AI]]
 <!-- whats-next:end -->

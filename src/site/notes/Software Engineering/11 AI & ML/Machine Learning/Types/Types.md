@@ -1,9 +1,9 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/machine-learning/types/types/","tags":["FolderNote"],"dg-note-properties":{"topic":["AI & ML"],"subtopic":["Machine Learning"],"tags":["FolderNote"],"status":"Creation","priority":"Low","level":["1"]}}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/machine-learning/types/types/","tags":["FolderNote"],"dg-note-properties":{"topic":["AI & ML"],"subtopic":["Machine Learning"],"tags":["FolderNote"],"status":"Done","priority":"Low","level":["1"]}}
 ---
 
 
-# ML Learning Types
+# Intro
 
 Machine learning types describe how a model learns from data and feedback. Choosing the wrong type is expensive: it changes your data requirements, training loop, evaluation criteria, and operational complexity from day one. The decision is driven by what signal you have, not by what architecture is fashionable.
 

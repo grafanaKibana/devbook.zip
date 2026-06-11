@@ -1,11 +1,11 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/machine-learning/natural-language-processing/","dg-note-properties":{"topic":["AI & ML"],"subtopic":["Machine Learning"],"level":["1"],"priority":"Low","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/machine-learning/natural-language-processing/","dg-note-properties":{"topic":["AI & ML"],"subtopic":["Machine Learning"],"level":["1"],"priority":"Low","status":"Done"}}
 ---
 
 
-# Natural Language Processing
+# Intro
 
-Natural Language Processing (NLP) is the field of AI concerned with enabling computers to understand, interpret, and generate human language. NLP powers search engines, chatbots, translation, sentiment analysis, document classification, and the large language models (LLMs) that underpin modern AI assistants. The transformer architecture (2017) fundamentally changed NLP — most modern NLP tasks are now solved by fine-tuning or prompting pre-trained transformer models rather than building task-specific pipelines from scratch. A production document classification system at a legal firm, for example, replaced a hand-tuned regex + TF-IDF pipeline (73% accuracy, 6 months of engineering) with a fine-tuned DistilBERT model (94% accuracy, 2 weeks of labeling + training) — and the model generalized to new document types without additional rules.
+Natural Language Processing (NLP) is the field of AI concerned with enabling computers to understand, interpret, and generate human language. NLP powers search engines, chatbots, translation, sentiment analysis, document classification, and the large language models (LLMs) that underpin modern AI assistants. The transformer architecture (2017) fundamentally changed NLP — most modern NLP tasks are now solved by fine-tuning or prompting pre-trained transformer models rather than building task-specific pipelines from scratch. The practical shift: a hand-tuned regex + TF-IDF classification pipeline that takes months of rule engineering is now routinely outperformed by a small fine-tuned transformer (such as DistilBERT) trained on a few thousand labeled examples — and unlike the rules, the model generalizes to inputs the rules never anticipated.
 
 ## Core NLP Tasks
 
@@ -82,7 +82,7 @@ Console.WriteLine($"Confidence: {result.Value.ConfidenceScores.Positive:P}");
 
 ### Treating Token Count as Word Count
 
-**What goes wrong**: estimating LLM costs or context window usage based on word count. A 1,000-word English document may be 1,200–1,500 tokens depending on vocabulary, but a 1,000-word Japanese document can be 3,000+ tokens because CJK characters require more subword units. A team budgeted $5,000/month for their multilingual summarization pipeline based on English token estimates — actual costs hit $14,000/month because Japanese and Korean inputs consumed 2-3x more tokens than projected.
+**What goes wrong**: estimating LLM costs or context window usage based on word count. A 1,000-word English document may be 1,200–1,500 tokens depending on vocabulary, but the same content in Japanese or Korean can require 2–3× more tokens because CJK characters split into more subword units. A cost budget estimated from English token counts can therefore be off by a factor of 2–3 once multilingual traffic arrives.
 
 **Why it happens**: "token" and "word" are used interchangeably in casual conversation.
 
@@ -142,7 +142,6 @@ Console.WriteLine($"Confidence: {result.Value.ConfidenceScores.Positive:P}");
 - [Hugging Face NLP Course](https://huggingface.co/learn/nlp-course/chapter1/1) — free, comprehensive course covering tokenization, transformers, fine-tuning, and all major NLP tasks with code examples.
 - [Attention Is All You Need (Vaswani et al., 2017)](https://arxiv.org/abs/1706.03762) — the original transformer paper; introduced the self-attention mechanism that replaced RNNs and enabled modern NLP.
 - [Azure AI Language documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/ai-services/language-service/) — official docs for Azure's managed NLP services: sentiment analysis, NER, key phrase extraction, and custom text classification.
-- [[Software Engineering/11 AI & ML/LLM/Embeddings\|Embeddings]] — dense vector representations of text; the foundation of semantic search, RAG, and similarity-based NLP tasks.
 
 <!-- whats-next:start -->
 

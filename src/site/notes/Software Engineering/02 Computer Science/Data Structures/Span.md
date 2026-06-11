@@ -51,7 +51,7 @@ Console.WriteLine(values[2]); // 300
 > [!QUESTION]- When should you choose `Memory<T>` instead of `Span<T>`?
 > Use `Memory<T>` when the buffer must cross async boundaries, be stored in fields, or live longer than a single synchronous scope.
 
-## Links
+## References
 
 - [`Span<T>` struct](https://learn.microsoft.com/en-us/dotnet/api/system.span-1) — API reference covering constructors, Slice, and ref struct constraints.
 - [`Memory<T>` and `Span<T>` usage guidelines](https://learn.microsoft.com/en-us/dotnet/standard/memory-and-spans/) — Microsoft guidance on when to use Span vs Memory, ownership rules, and async boundaries.

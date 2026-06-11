@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/evaluation/evaluation/","tags":["FolderNote"],"dg-note-properties":{"topic":["AI & ML"],"subtopic":["LLM"],"tags":["FolderNote"],"level":["3"],"status":"Done","priority":"Medium"}}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/evaluation/evaluation/","tags":["FolderNote"],"dg-note-properties":{"topic":["AI & ML"],"subtopic":["LLM"],"tags":["FolderNote"],"level":["3"],"priority":"Medium","status":"Done"}}
 ---
 
 
@@ -8,8 +8,6 @@
 Evaluation is how you measure whether an LLM application is doing the right thing: answer quality, grounding, safety, and regressions over time.
 
 This folder focuses on practical evaluation techniques you can apply in day-to-day engineering (offline test sets, automated judges, and scorecards).
-
-## Deeper Explanation
 
 Good evaluation is multi-layered:
 
@@ -52,7 +50,7 @@ When you iterate on prompts or rubrics against a fixed evaluation set, you can o
 > [!QUESTION]- When are classic metrics (BLEU/ROUGE) useful?
 > Mainly for narrow summarization/translation style tasks and as weak signals. For open-ended assistants, rubric-based scoring and pairwise ranking usually track real quality better.
 
-## Links
+## References
 
 - [Evaluation best practices (OpenAI API Docs)](https://developers.openai.com/api/docs/guides/evaluation-best-practices)
 - [Working with evals (OpenAI API Docs)](https://developers.openai.com/api/docs/guides/evals)

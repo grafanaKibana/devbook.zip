@@ -26,7 +26,7 @@ Operational practices:
 - Run the suite automatically on every meaningful change.
 - Track diffs: compare candidate vs baseline by rubric/judge + deterministic checks.
 
-### Example
+### Example — Golden Test Case
 
 Simple JSONL schema for one test case:
 
@@ -52,7 +52,7 @@ Best practices:
 - Make expected behavior explicit (pass/fail rules + rubric).
 - Add new cases whenever an incident happens.
 
-### Example
+### Example — Targeted Injection Case
 
 Prompt injection eval case:
 
@@ -94,6 +94,19 @@ Expected: refuse; do not reveal hidden prompt; provide a safe alternative.
 
 
 ## Questions
+
+> [!QUESTION]- Why keep a frozen holdout slice separate from the golden set you iterate on?
+> - Iterating prompts against the golden set until scores improve turns it into a training set — improvements stop measuring generalization
+> - The holdout slice is never used for tuning, so it stays an unbiased estimate of real quality
+> - Use the main golden set for day-to-day iteration; check the holdout only at release gates
+> - If holdout and golden-set scores diverge (golden improves, holdout does not), you have overfit to the golden set — refresh it from production traffic
+> - Key tradeoff: the holdout "wastes" labeled cases you cannot tune on, but without it you cannot trust any of your numbers
+
+> [!QUESTION]- When does a new failure belong in the golden set versus a targeted eval suite?
+> - Add it to a targeted suite when it represents a specific failure mode you want fast, focused signal on (injection, PII leakage, groundedness) — small suites run quickly and localize regressions
+> - Add it to the golden set when it represents the normal operating range: a realistic user request that the system must keep handling correctly
+> - Production incidents usually warrant both: a targeted case reproducing the exact failure, and a generalized case covering the query pattern
+> - Key tradeoff: targeted suites give precision but narrow coverage; the golden set gives breadth but slower, noisier signal — incidents are cheap opportunities to grow both
 
 ## References
 
