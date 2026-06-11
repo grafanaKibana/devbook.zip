@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/machine-learning/evaluation/evaluation/","tags":["FolderNote"],"dg-note-properties":{"topic":["AI & ML"],"subtopic":["Machine Learning"],"tags":["FolderNote"],"priority":"Medium","status":"Creation","level":["3"]}}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/machine-learning/evaluation/evaluation/","tags":["FolderNote"],"dg-note-properties":{"topic":["AI & ML"],"subtopic":["Machine Learning"],"tags":["FolderNote"],"priority":"Medium","level":["3"],"status":"Done"}}
 ---
 
 
@@ -18,10 +18,23 @@ Key decisions when evaluating a classifier or regressor:
 
 Common metric families:
 
-- Classification ranking: [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/ROC-AUC and PR-AUC\|ROC-AUC and PR-AUC]], F1, precision at k, recall at k
+- Classification at an operating point: precision, recall, F1, confusion matrix — see [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/Classification Evaluation\|Classification Evaluation]]
+- Classification ranking across thresholds: [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/ROC-AUC and PR-AUC\|ROC-AUC and PR-AUC]]
 - Calibration: Brier score, reliability diagrams, expected calibration error
 - Regression: RMSE, MAE, MAPE, quantile loss
-- Information retrieval: NDCG, MAP, MRR
+- Information retrieval: NDCG, MAP, MRR — defined in depth in [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics\|RAG Monitoring]]
+
+## Choosing a Metric Family
+
+| Question you are answering | Metric family | Where it is covered |
+| --- | --- | --- |
+| Is the classifier right at its chosen threshold? | Precision, recall, F1, confusion matrix | [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/Classification Evaluation\|Classification Evaluation]] |
+| How good is the ranking across all thresholds? | ROC-AUC, PR-AUC | [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/ROC-AUC and PR-AUC\|ROC-AUC and PR-AUC]] |
+| Can I trust the predicted probabilities? | Brier score, ECE, reliability diagrams | Not yet covered as its own note |
+| How far off are continuous predictions? | RMSE, MAE, MAPE, quantile loss | This hub (summary above) |
+| Did the right items rank at the top of a result list? | NDCG, MAP, MRR | [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics\|RAG Monitoring]] |
+
+Pick the family from the decision, not from habit: threshold metrics for a fixed operating point, ranking metrics for comparing models before a threshold exists, calibration metrics when downstream logic consumes probabilities rather than labels.
 
 ## Questions
 
@@ -31,7 +44,7 @@ Common metric families:
 > - When the metric looks good overall but fails on critical slices or cohorts
 > - When the metric is a ranking metric but you need calibrated probabilities for downstream logic
 
-## Links
+## References
 
 - [scikit-learn model evaluation](https://scikit-learn.org/stable/modules/model_evaluation.html)
 - [ML.NET model evaluation metrics](https://learn.microsoft.com/dotnet/machine-learning/resources/metrics)

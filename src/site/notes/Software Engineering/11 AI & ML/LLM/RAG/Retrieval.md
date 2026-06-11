@@ -163,8 +163,9 @@ Decision rule: start with hybrid retrieval (RRF) and conservative top-k (5-20). 
 > **Pages**
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Caching\|Caching]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Chunking\|Chunking]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation\|Evaluation]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring\|Monitoring]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Query Translation\|Query Translation]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/RAG Evaluation\|RAG Evaluation]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/RAG Patterns\|RAG Patterns]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Re-ranking\|Re-ranking]]
 <!-- whats-next:end -->
