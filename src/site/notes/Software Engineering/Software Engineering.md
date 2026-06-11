@@ -3,9 +3,21 @@
 ---
 
 
-A structured knowledge base covering the full stack of software engineering — from .NET internals and distributed systems to cloud architecture and AI/ML. Each note is built for depth: core mechanics, concrete examples, production pitfalls, and interview-ready questions.
+Welcome to my software engineering notebook — the notes I've written to actually *understand* the stack, not just recall it for an interview. .NET internals, distributed systems, databases, security, cloud, AI/ML, and most of what sits between. Every note goes deep: core mechanics, real examples, the pitfalls that bite in production, and the questions worth being able to answer.
 
-Organized into 11 topic areas with spaced repetition tracking. The dashboards below show where things stand.
+> [!info] Why this exists
+> I learn by writing things down and coming back to them. This vault is that process in the open — built on spaced repetition, organized into 11 topic areas, and updated continuously. Browse by topic below, or scroll on for progress and recent activity.
+
+<p><span>📚 <strong>200</strong> notes · 🗂️ <strong>11</strong> topics · ✅ <strong>53</strong> done · 📈 <strong>51%</strong> overall</span></p>
+
+# Topics
+
+| | | |
+|:---|:---|:---|
+| 🧠 **[[Software Engineering/01 Programming/01 Programming\|Programming]]**<br><sub>Languages, .NET internals, paradigms, clean code.</sub> | 🖥️ **[[Software Engineering/02 Computer Science/02 Computer Science\|Computer Science]]**<br><sub>Algorithms, data structures, the theory underneath.</sub> | 🗄️ **[[Software Engineering/03 Data Persistence/03 Data Persistence\|Data Persistence]]**<br><sub>Databases, indexing, transactions, storage engines.</sub> |
+| 🌐 **[[Software Engineering/04 Networks/04 Networks\|Networks]]**<br><sub>Protocols, HTTP, TCP/IP, how packets travel.</sub> | 🏛️ **[[Software Engineering/05 Architecture/05 Architecture\|Architecture]]**<br><sub>Distributed systems, patterns, designing for scale.</sub> | 🛠️ **[[Software Engineering/06 Development Practices/06 Development Practices\|Development Practices]]**<br><sub>Testing, version control, and the craft.</sub> |
+| 🔒 **[[Software Engineering/07 Security/07 Security\|Security]]**<br><sub>Threats, crypto, auth, defensive design.</sub> | 🔄 **[[Software Engineering/08 SDLC/08 SDLC\|SDLC]]**<br><sub>How software gets planned, built, and shipped.</sub> | 🚀 **[[Software Engineering/09 DevOps/09 DevOps\|DevOps]]**<br><sub>CI/CD, containers, and automation.</sub> |
+| ☁️ **[[Software Engineering/10 Cloud/10 Cloud\|Cloud]]**<br><sub>AWS/Azure, serverless, cloud-native design.</sub> | 🤖 **[[Software Engineering/11 AI & ML/11 AI & ML\|AI & ML]]**<br><sub>Models, training, applied machine learning.</sub> | |
 
 # Topic Coverage
 
