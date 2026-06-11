@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/tooling/tooling/","tags":["FolderNote"],"dg-note-properties":{"topic":["AI & ML"],"subtopic":["Tooling"],"tags":["FolderNote"],"status":"Creation","level":["2"],"priority":"Medium"}}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/tooling/tooling/","tags":["FolderNote"],"dg-note-properties":{"topic":["AI & ML"],"subtopic":["Tooling"],"tags":["FolderNote"],"status":"Done","level":["2"],"priority":"Medium"}}
 ---
 
 

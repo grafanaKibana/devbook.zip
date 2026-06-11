@@ -1,21 +1,36 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/evaluation/evaluation/","tags":["FolderNote"],"dg-note-properties":{"topic":["AI & ML"],"subtopic":["LLM"],"tags":["FolderNote"],"level":["3"],"status":"Done","priority":"Medium"}}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/evaluation/evaluation/","tags":["FolderNote"],"dg-note-properties":{"topic":["AI & ML"],"subtopic":["LLM"],"tags":["FolderNote"],"level":["3"],"priority":"Medium","status":"Done"}}
 ---
 
 
 # Intro
 
-Evaluation is how you measure whether an LLM application is doing the right thing: answer quality, grounding, safety, and regressions over time.
+Evaluation is how you measure whether an LLM application is doing the right thing: answer quality, grounding, safety, and regressions over time. Because LLM output is probabilistic and open-ended, you cannot rely on a single pass/fail assertion the way you would for deterministic code — evaluation becomes a layered system that combines cheap hard checks, scalable semantic judges, fixed regression sets, and production signals. This folder covers each layer; this hub shows how they fit together.
 
-This folder focuses on practical evaluation techniques you can apply in day-to-day engineering (offline test sets, automated judges, and scorecards).
+## The Evaluation Stack
 
-## Deeper Explanation
+No single technique is sufficient. A production LLM evaluation system layers four, cheapest and strictest first, so expensive judgment is spent only on output that already passed the hard gates:
 
-Good evaluation is multi-layered:
+```mermaid
+flowchart TD
+    O[LLM output] --> D[Deterministic checks]
+    D -->|fail| R[Reject -- hard failure]
+    D -->|pass| J[LLM-as-a-Judge]
+    J --> G[Golden test set regression gate]
+    G -->|regression| F[Block release]
+    G -->|pass| P[Ship to production]
+    P --> ON[Online eval and A/B tests]
+    ON -->|new failures become cases| G
+```
 
-- Offline: fixed test sets to catch regressions
-- Online: production signals and controlled experiments
-- Human + automated: combine rubric-based review with scalable judges
+- **[[Software Engineering/11 AI & ML/LLM/Evaluation/Deterministic Checks\|Deterministic Checks]]** — non-LLM rules that run first on every output: schema validity, allowlisted actions, PII scans, length and format constraints. Microseconds, zero cost, zero false positives. A malformed or unsafe output is a hard failure that never reaches a judge.
+- **[[Software Engineering/11 AI & ML/LLM/Evaluation/LLM-as-a-Judge\|LLM-as-a-Judge]]** — a separate model scores semantic quality (correctness, groundedness, tone) against a rubric, either as absolute scorecards or pairwise comparisons. Scalable where human review is too slow, but carries its own biases (verbosity, position, self-preference) that must be calibrated against human labels.
+- **[[Software Engineering/11 AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs\|Golden Test Set and Regression Runs]]** — a versioned, curated set of representative and adversarial cases run on every change to catch regressions, with a frozen holdout you never tune against. This is the release gate.
+- **[[Software Engineering/11 AI & ML/LLM/Evaluation/Online Evaluation and AB Tests\|Online Evaluation and AB Tests]]** — measure real user outcomes on live traffic, since offline sets cannot anticipate production distribution. New production failures feed back into the golden set, closing the loop.
+
+A useful framing across all four: combine **offline** (fixed sets, fast iteration, regression gating) with **online** (real outcomes, distribution shift), and combine **automated** (deterministic + judge, scalable) with **human** (rubric review, calibration, edge-case discovery). Neither axis alone is enough.
+
+For RAG systems specifically, this stack extends with retrieval-quality and faithfulness metrics — see [[Software Engineering/11 AI & ML/LLM/RAG/RAG Evaluation\|RAG Evaluation]] and [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring\|Monitoring]].
 
 ## Example
 
@@ -52,7 +67,19 @@ When you iterate on prompts or rubrics against a fixed evaluation set, you can o
 > [!QUESTION]- When are classic metrics (BLEU/ROUGE) useful?
 > Mainly for narrow summarization/translation style tasks and as weak signals. For open-ended assistants, rubric-based scoring and pairwise ranking usually track real quality better.
 
-## Links
+> [!QUESTION]- Why run deterministic checks before an LLM judge rather than relying on the judge alone?
+> - Deterministic checks are microseconds and free; LLM-judge calls cost API tokens and seconds — running the cheap gate first avoids paying to judge output that is already invalid
+> - Hard constraints (schema validity, disallowed actions, PII, length) have a zero false-positive rate when expressed as rules, whereas a judge can mis-rule on them
+> - A judge can be distracted into scoring an output "good" that a deterministic rule would reject outright (a fluent answer that violates the output contract)
+> - The two are complementary, not redundant: deterministic checks enforce hard contracts, judges evaluate soft quality — see [[Software Engineering/11 AI & ML/LLM/Evaluation/Deterministic Checks\|Deterministic Checks]]
+
+> [!QUESTION]- Why isn't a strong offline score enough to ship an LLM change?
+> - Offline sets are frozen samples; production traffic shifts in phrasing, intent, and edge-case mix the set never captured
+> - Iterating against a fixed set invites evaluation overfitting — the prompt gets tuned to the benchmark's distribution, not to real quality
+> - Outcome metrics that matter (task resolution, escalation, retention) depend on multi-turn user behavior that no static set simulates
+> - Treat offline evaluation as a release gate, then confirm with [[Software Engineering/11 AI & ML/LLM/Evaluation/Online Evaluation and AB Tests\|online evaluation]] before trusting the change
+
+## References
 
 - [Evaluation best practices (OpenAI API Docs)](https://developers.openai.com/api/docs/guides/evaluation-best-practices)
 - [Working with evals (OpenAI API Docs)](https://developers.openai.com/api/docs/guides/evals)

@@ -6,11 +6,11 @@ subtopic:
 level:
   - "1"
 priority: Low
-status: Creation
+status: Done
 dg-publish: true
 ---
 
-# Spectrum of Automation
+# Intro
 
 The spectrum of automation describes five levels of AI involvement in a task, from fully human-driven to fully autonomous. It provides a framework for deciding how much to trust an AI system at a given maturity level, and how to deploy it safely as confidence grows.
 

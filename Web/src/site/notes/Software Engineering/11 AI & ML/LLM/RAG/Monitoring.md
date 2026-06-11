@@ -5,7 +5,7 @@
 
 # Intro
 
-RAG monitoring is the continuous observation of a deployed RAG pipeline to detect quality regressions, performance degradation, and data staleness before users notice. Offline [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation\|Evaluation]] validates a pipeline before deployment — it answers "is this version good enough to ship?" Monitoring validates it after — it answers "is it still working as expected right now?" The distinction matters because production traffic exposes failure modes that static eval sets cannot anticipate: new query patterns, corpus drift, model behavior changes after provider updates, and load-dependent latency spikes.
+RAG monitoring is the continuous observation of a deployed RAG pipeline to detect quality regressions, performance degradation, and data staleness before users notice. Offline [[Software Engineering/11 AI & ML/LLM/RAG/RAG Evaluation\|Evaluation]] validates a pipeline before deployment — it answers "is this version good enough to ship?" Monitoring validates it after — it answers "is it still working as expected right now?" The distinction matters because production traffic exposes failure modes that static eval sets cannot anticipate: new query patterns, corpus drift, model behavior changes after provider updates, and load-dependent latency spikes.
 
 The mechanism: each request flows through multiple stages — query translation, embedding, retrieval, reranking, context assembly, generation — and each stage can degrade independently. Monitoring instruments each stage with metrics and traces, samples a fraction of responses for quality scoring via [[Software Engineering/11 AI & ML/LLM/Evaluation/LLM-as-a-Judge\|LLM-as-judge]], and fires alerts when metrics breach thresholds relative to a rolling baseline. Without per-stage instrumentation, teams observe "answers got worse" but cannot tell whether retrieval stopped finding relevant documents, the reranker misordered them, or the generator hallucinated despite good context.
 
@@ -177,7 +177,7 @@ Effective RAG alerting uses relative thresholds anchored to a rolling baseline, 
 | Ingestion failure rate | Exceeds 1% of scheduled ingestions | Silent data loss accumulating |
 | Token cost per query | Increases >30% from baseline | Prompt bloat, context window misuse, or upstream retrieval change |
 
-Recompute baselines after any intentional pipeline change (model swap, prompt update, index rebuild). See the same baseline principle in [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation\|Evaluation]].
+Recompute baselines after any intentional pipeline change (model swap, prompt update, index rebuild). See the same baseline principle in [[Software Engineering/11 AI & ML/LLM/RAG/RAG Evaluation\|Evaluation]].
 
 ## Pitfalls
 
@@ -265,8 +265,10 @@ Decision rule: combine deterministic metrics on 100% of traffic (fast, free), sa
 > **Pages**
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Caching\|Caching]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Chunking\|Chunking]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation\|Evaluation]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Query Translation\|Query Translation]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/RAG Evaluation\|RAG Evaluation]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/RAG Patterns\|RAG Patterns]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Re-ranking\|Re-ranking]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Retrieval\|Retrieval]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/Vector Databases\|Vector Databases]]
 <!-- whats-next:end -->

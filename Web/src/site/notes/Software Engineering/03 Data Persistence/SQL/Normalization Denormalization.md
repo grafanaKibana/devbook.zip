@@ -293,7 +293,7 @@ The tradeoff is real: reads get faster, but every write to `Orders` must also up
 > [!QUESTION]- What is the difference between 2NF and 3NF, and how would you recognize a violation of each?
 > 2NF eliminates partial dependencies: every non-key attribute must depend on the entire composite primary key, not just part of it. A violation looks like a column that depends on only one column of a multi-column PK. 3NF eliminates transitive dependencies: non-key attributes must depend directly on the PK, not through another non-key attribute. A violation looks like column A depending on the PK, column B depending on A (not on the PK directly). Fixing both involves decomposing the offending columns into separate tables.
 
-## Links
+## References
 
 For a deeper study of the topic, the book ["Introduction to Database Systems" by Chris J. Date](https://www.oreilly.com/library/view/an-introduction-to/9780132874281/) is recommended.
 

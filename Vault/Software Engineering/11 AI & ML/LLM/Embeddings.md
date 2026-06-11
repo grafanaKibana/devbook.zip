@@ -6,7 +6,7 @@ subtopic:
 level:
   - "2"
 priority: High
-status: Creation
+status: Done
 dg-publish: true
 ---
 
@@ -142,8 +142,11 @@ Decision rule: start with a proprietary API model to establish baseline recall. 
 > - [[Software Engineering/11 AI & ML/LLM/RAG/RAG|RAG]]
 >
 > **Pages**
+> - [[Software Engineering/11 AI & ML/LLM/Context Engineering|Context Engineering]]
+> - [[Software Engineering/11 AI & ML/LLM/Fine-tuning|Fine-tuning]]
 > - [[Software Engineering/11 AI & ML/LLM/Generation|Generation]]
 > - [[Software Engineering/11 AI & ML/LLM/Guardrails|Guardrails]]
 > - [[Software Engineering/11 AI & ML/LLM/Hallucinations|Hallucinations]]
+> - [[Software Engineering/11 AI & ML/LLM/Model Selection and Routing|Model Selection and Routing]]
 > - [[Software Engineering/11 AI & ML/LLM/OWASP vulnerabilities on AI LLM|OWASP vulnerabilities on AI LLM]]
 <!-- whats-next:end -->

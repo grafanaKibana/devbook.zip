@@ -130,7 +130,7 @@ Vague descriptions like "Processes data" or "Handles requests" give the model no
 
 ### Tools with Hidden Side Effects
 
-A tool named `get_user_profile` that also logs an analytics event and updates a "last accessed" timestamp has hidden side effects the model cannot reason about. If the model calls it exploratively during planning, the side effects fire unintentionally. Keep read tools read-only. Separate queries from commands — this is [[Software Engineering/05 Architecture/Patterns/CQRS|CQRS]] applied to tool design.
+A tool named `get_user_profile` that also logs an analytics event and updates a "last accessed" timestamp has hidden side effects the model cannot reason about. If the model calls it exploratively during planning, the side effects fire unintentionally. Keep read tools read-only. Separate queries from commands — this is [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/CQRS|CQRS]] applied to tool design.
 
 ### Context Degradation from Large Toolsets
 
@@ -153,6 +153,7 @@ Three mechanisms compound:
 | **Two-stage routing** | Stage 1 classifies query into a tool category; Stage 2 shows only that category's tools. Can use a small classifier or the tool search itself. | Multi-domain, any scale |
 | **Code generation** | Replace N tool schemas with a single `execute_code` tool + API docs. The model writes code that calls your APIs. | Open-ended data/code tasks |
 | **Structured output routing** | Model returns a structured action JSON; your code dispatches. No tool schemas needed. | Fixed action types |
+
 ## Tradeoffs
 
 | Design choice | Option A | Option B | Decision criteria |
@@ -161,6 +162,7 @@ Three mechanisms compound:
 | **Input handling** | Strict validation — reject malformed input | Flexible normalization — accept variations, convert internally | Normalization reduces loop failures and retries at the cost of implementation complexity. Prefer normalization for agent-facing tools; strict validation for human-facing APIs. |
 | **Caching strategy** | Aggressive — cache all tool results with TTL | Conservative — execute every call fresh | Aggressive caching cuts latency and cost but risks stale data. Cache read-only tools with short TTLs; never cache state-mutating tools. |
 | **Return verbosity** | Full result payload | Minimal fields needed for next step | Minimal returns save context tokens and reduce attention dilution. Full returns are only justified when the model needs to branch on fields that are hard to predict upfront. |
+
 ## Questions
 
 > [!QUESTION]- Why is tool design often more impactful than prompt engineering in agentic systems?

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/machine-learning/machine-learning/","tags":["FolderNote"],"dg-note-properties":{"topic":["AI & ML"],"subtopic":["Machine Learning"],"tags":["FolderNote"],"status":"Creation","priority":"Medium","level":["3"]}}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/machine-learning/machine-learning/","tags":["FolderNote"],"dg-note-properties":{"topic":["AI & ML"],"subtopic":["Machine Learning"],"tags":["FolderNote"],"status":"Done","priority":"Medium","level":["3"]}}
 ---
 
 
@@ -7,9 +7,9 @@
 
 Machine learning is the practice of training models to map inputs to outputs from data rather than encoding the behavior as explicit rules. It matters for a senior engineer because most of the real work is not the algorithm, it is building a reliable pipeline that is testable, deployable, and monitorable. Reach for ML when the decision boundary is fuzzy, the signal is distributed across many weak features, or the rules would be brittle and expensive to maintain. Prefer rules or heuristics when requirements are stable, the logic is auditable, and the error cost is asymmetric and must be tightly controlled; see also [[Software Engineering/11 AI & ML/Machine Learning/Spectrum Of Automations\|Spectrum Of Automations]].
 
-## Deeper Explanation
+## Training
 
-### Mental Model
+### Generic pipeline
 
 ```mermaid
 flowchart TD
@@ -35,7 +35,7 @@ Define the prediction target first, then collect inputs that are available at in
 Make the raw data usable: handle missing values, outliers, duplicates, schema drift, and text normalization, while keeping transformations deterministic. Key decisions are what to impute, what to drop, and how to encode time and joins without leaking future information. Typical tooling is pandas, PySpark, Great Expectations, and feature preprocessing via scikit learn transformers.
 
 #### Feature Engineering and Selection
-Turn raw columns into signals the model can learn, such as aggregates, time windows, text features, or embeddings, depending on the problem type ([[Software Engineering/11 AI & ML/Machine Learning/Types\|Types]], [[Software Engineering/11 AI & ML/Machine Learning/Natural Language Processing\|Natural Language Processing]]). Decide between simple, stable features and complex features that improve accuracy but increase operational risk. For selection, use domain constraints first, then model based importance and ablation tests; consider a feature store if many teams share features.
+Turn raw columns into signals the model can learn, such as aggregates, time windows, text features, or embeddings, depending on the problem type ([[Software Engineering/11 AI & ML/Machine Learning/Types/Types\|Types]], [[Software Engineering/11 AI & ML/Machine Learning/Natural Language Processing\|Natural Language Processing]]). Decide between simple, stable features and complex features that improve accuracy but increase operational risk. For selection, use domain constraints first, then model based importance and ablation tests; consider a feature store if many teams share features.
 
 #### Train Test Validation Split
 Split data to simulate the future: random splits work for IID data, but time based or group based splits are safer for temporal, user, or session correlated data. Keep a true holdout test set you do not touch until the end to estimate generalization. Tools include scikit learn splitters, plus custom splits for time series and leakage resistant grouping.
@@ -85,13 +85,13 @@ Monitor both system health and model health: latency, error rate, and saturation
 > - Keep a safe fallback decision path, such as a baseline model or rules, for overload and error conditions
 > - Align evaluation with production: test on representative traffic and monitor training serving skew after launch
 
-## Links
+## References
 
-[Machine Learning  |  Google for Developers](https://developers.google.com/machine-learning/crash-course)
-[Machine Learning for Beginners](https://microsoft.github.io/ML-For-Beginners/#/)
-[Rules of Machine Learning  |  Google for Developers](https://developers.google.com/machine-learning/guides/rules-of-ml)
-[scikit learn user guide](https://scikit-learn.org/stable/user_guide.html)
-[Hidden Technical Debt in Machine Learning Systems](https://papers.nips.cc/paper_files/paper/2015/hash/86df7dcfd896fcaf2674f757a2463eba-Abstract.html)
+- [Machine Learning Crash Course (Google for Developers)](https://developers.google.com/machine-learning/crash-course)
+- [Machine Learning for Beginners (Microsoft)](https://microsoft.github.io/ML-For-Beginners/#/)
+- [Rules of Machine Learning (Google for Developers)](https://developers.google.com/machine-learning/guides/rules-of-ml)
+- [scikit-learn user guide](https://scikit-learn.org/stable/user_guide.html)
+- [Hidden Technical Debt in Machine Learning Systems (NeurIPS 2015)](https://papers.nips.cc/paper_files/paper/2015/hash/86df7dcfd896fcaf2674f757a2463eba-Abstract.html)
 
 <!-- whats-next:start -->
 

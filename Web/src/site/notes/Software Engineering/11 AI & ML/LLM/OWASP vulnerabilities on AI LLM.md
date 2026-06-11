@@ -165,7 +165,7 @@ Adversaries can trigger denial-of-wallet by forcing high token usage, oversized 
 - [LLM AI Security and Governance Checklist — operational security controls for LLM deployment (OWASP)](https://genai.owasp.org/resource/llm-ai-security-governance-checklist/) — deployment-oriented control checklist.
 - [Samsung employees leak proprietary data via ChatGPT — real-world information disclosure incident (TechCrunch, 2023)](https://techcrunch.com/2023/05/02/samsung-bans-use-of-generative-ai-tools-like-chatgpt-after-internal-data-leak/) — concrete LLM02 incident in an enterprise setting.
 - [AI supply chain security risks — compromised models, plugins, and training data (OWASP LLM03 entry)](https://genai.owasp.org/llmrisk/llm03-supply-chain/) — supply-chain attack surface specific to LLM systems.
-- [Guardrails for LLM applications — output validation, content safety, and response filtering (Anthropic Docs)](https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations) — practical implementation guidance for response filtering and validation.
+- [Reduce hallucinations — grounding, citations, and abstention patterns (Anthropic Docs)](https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations) — practical implementation guidance for grounded, validated responses.
 
 <!-- whats-next:start -->
 
@@ -182,8 +182,11 @@ Adversaries can trigger denial-of-wallet by forcing high token usage, oversized 
 > - [[Software Engineering/11 AI & ML/LLM/RAG/RAG\|RAG]]
 >
 > **Pages**
+> - [[Software Engineering/11 AI & ML/LLM/Context Engineering\|Context Engineering]]
 > - [[Software Engineering/11 AI & ML/LLM/Embeddings\|Embeddings]]
+> - [[Software Engineering/11 AI & ML/LLM/Fine-tuning\|Fine-tuning]]
 > - [[Software Engineering/11 AI & ML/LLM/Generation\|Generation]]
 > - [[Software Engineering/11 AI & ML/LLM/Guardrails\|Guardrails]]
 > - [[Software Engineering/11 AI & ML/LLM/Hallucinations\|Hallucinations]]
+> - [[Software Engineering/11 AI & ML/LLM/Model Selection and Routing\|Model Selection and Routing]]
 <!-- whats-next:end -->

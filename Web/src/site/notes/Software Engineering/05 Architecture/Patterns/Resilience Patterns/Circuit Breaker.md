@@ -7,9 +7,9 @@
 
 The Circuit Breaker pattern stops your service from repeatedly calling a dependency that is already failing, so your system fails fast instead of failing slowly. It matters in distributed systems because it prevents cascading failures: without a breaker, threads, sockets, and retries pile up until healthy parts of the system also degrade. You reach for it when calling external services such as payment providers, LLM APIs, and remote databases where latency spikes and partial outages are normal. In senior .NET systems, a circuit breaker is usually part of a resilience stack with timeout, retry, and fallback, not a standalone feature.
 
-# Mechanism
+## Mechanism
 
-## State model
+### State model
 
 - `Closed`: normal mode; calls flow through and failures are measured over a sampling window.
 - `Open`: fast-fail mode; calls are rejected immediately for a break duration.
@@ -24,7 +24,7 @@ stateDiagram-v2
     HalfOpen --> Open: Probe fails or\nfailure ratio still high
 ```
 
-## How transitions are decided
+### How transitions are decided
 
 - The breaker evaluates a rolling or fixed sampling window.
 - It opens only after `MinimumThroughput` is met, which avoids opening on tiny traffic samples.
@@ -33,7 +33,7 @@ stateDiagram-v2
 
 If you set thresholds too low, the breaker chatters (opens and closes too often). If you set them too high, you discover failures too late and still waste resources on doomed calls.
 
-## What should count as a failure
+### What should count as a failure
 
 For interview depth, explicitly separate expected client errors from server-side dependency failure:
 
@@ -41,9 +41,9 @@ For interview depth, explicitly separate expected client errors from server-side
 - Usually do not count: business/validation `4xx` like `400` or `404`, because these are often caller mistakes, not provider instability.
 - Make this explicit via `ShouldHandle` so the breaker reflects dependency health, not consumer input quality.
 
-# C# Example with Polly v8 in ASP.NET Core
+## C# Example with Polly v8 in ASP.NET Core
 
-## Register an ASP.NET Core HttpClient resilience handler
+### Register an ASP.NET Core HttpClient resilience handler
 
 This example uses the .NET HTTP resilience handler (`AddResilienceHandler`) with Polly v8 strategy options and tracks breaker state changes for telemetry.
 
@@ -135,7 +135,7 @@ var app = builder.Build();
 app.Run();
 ```
 
-## Use the resilient HttpClient in an LLM gateway
+### Use the resilient HttpClient in an LLM gateway
 
 ```csharp
 public sealed class LlmGateway
@@ -156,7 +156,7 @@ public sealed class LlmGateway
 ```
 
 
-# Integration with Other Resilience Patterns
+## Integration with Other Resilience Patterns
 
 For real production systems and AI provider calls, stack strategies deliberately:
 
@@ -169,33 +169,33 @@ Apply stack order as outermost to innermost:
 
 Interview nuance: teams often say "retry inside breaker" to mean retries must contribute to breaker decisions. In Polly's outer-to-inner execution model, that behavior is achieved by placing retry outside and breaker inside, so every retry attempt still passes through breaker evaluation.
 
-# Pitfalls
+## Pitfalls
 
-## 1) Breaking too aggressively on expected errors
+### 1) Breaking too aggressively on expected errors
 
 - What goes wrong: breaker opens on user-caused `4xx` responses and blocks healthy dependency traffic.
 - Why it happens: failure predicates are too broad and treat all non-success status codes as infrastructure failures.
 - Mitigation: define `ShouldHandle` around transient/infrastructure failure classes only, and review real response distribution in telemetry.
 
-## 2) Not distinguishing transient vs permanent failures
+### 2) Not distinguishing transient vs permanent failures
 
 - What goes wrong: permanent failures keep being retried and sampled as if they were recoverable.
 - Why it happens: no taxonomy for failure types and no contract for retryability.
 - Mitigation: classify errors by retryability and idempotency; retry only transient classes and let permanent failures fail fast.
 
-## 3) Assuming one instance protects the whole fleet
+### 3) Assuming one instance protects the whole fleet
 
 - What goes wrong: one pod opens its breaker but other pods continue hammering the same unhealthy dependency.
 - Why it happens: breaker state is process-local by default.
 - Mitigation: combine per-instance breakers with global controls such as rate limits, bulkheads, provider-side quotas, and fleet-level monitoring.
 
-## 4) Half-open allows too many probes
+### 4) Half-open allows too many probes
 
 - What goes wrong: when break duration expires, many instances probe at once and create a thundering herd.
 - Why it happens: synchronized timers and unconstrained probe concurrency.
 - Mitigation: keep probe traffic low, jitter recovery timing, and cap downstream concurrency.
 
-# Tradeoffs
+## Tradeoffs
 
 | Choice | Benefit | Cost | Use when |
 |---|---|---|---|
@@ -204,7 +204,7 @@ Interview nuance: teams often say "retry inside breaker" to mean retries must co
 | Per-instance breakers only | Simple implementation | No fleet-wide coordination | Small deployments and low concurrency |
 | Add centralized protection layers | Better global control | More operational complexity | High-scale multi-instance services |
 
-# Questions
+## Questions
 
 > [!QUESTION]- Why is retry placement relative to circuit breaker important?
 > - Retry should execute inside the same resilience pipeline before breaker decisions.
@@ -219,7 +219,7 @@ Interview nuance: teams often say "retry inside breaker" to mean retries must co
 > - Watch fleet-wide metrics, not only single-instance breaker events.
 > - **Tradeoff**: it tests distributed-systems thinking beyond single-process code.
 
-# References
+## References
 
 - [Polly docs - Circuit breaker strategy (v8)](https://www.pollydocs.org/strategies/circuit-breaker.html)
 - [Polly docs - Resilience pipelines](https://www.pollydocs.org/pipelines/index.html)

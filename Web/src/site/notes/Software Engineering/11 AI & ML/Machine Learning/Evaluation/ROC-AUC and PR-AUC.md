@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/machine-learning/evaluation/roc-auc-and-pr-auc/","dg-note-properties":{"topic":["AI & ML"],"subtopic":["Machine Learning"],"level":["2"],"priority":"Medium","status":"Not-Started"}}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/machine-learning/evaluation/roc-auc-and-pr-auc/","dg-note-properties":{"topic":["AI & ML"],"subtopic":["Machine Learning"],"level":["2"],"priority":"Medium","status":"Done"}}
 ---
 
 
@@ -9,7 +9,7 @@ ROC-AUC means Receiver Operating Characteristic Area Under the Curve. PR-AUC mea
 
 Use ROC-AUC for general ranking quality when classes are fairly balanced. Use PR-AUC for imbalanced data where false positives are expensive.
 
-This note fits the evaluation stage of [[Software Engineering/11 AI & ML/Machine Learning/Machine Learning\|Machine Learning]] and is most relevant for [[Software Engineering/11 AI & ML/Machine Learning/Types\|Types]] like binary classification and rare event detection.
+This note fits the evaluation stage of [[Software Engineering/11 AI & ML/Machine Learning/Machine Learning\|Machine Learning]] and is most relevant for [[Software Engineering/11 AI & ML/Machine Learning/Types/Types\|learning types]] like binary classification and rare event detection.
 
 ## Deeper Explanation
 
@@ -153,15 +153,15 @@ Practical threshold tuning pattern:
 - Start from a constraint like "precision must be at least 0.8" or "recall must be at least 0.9".
 - Sweep score thresholds and pick the one that meets your business constraint. In ML.NET you can iterate `predictions` and test cutoffs.
 
-### Pitfalls
+## Pitfalls
 
 - ROC-AUC can hide poor positive prediction quality on imbalanced data.
 - PR-AUC baseline depends on prevalence, so cross-dataset comparisons can mislead.
 - AUC does not pick your threshold; you still need operating-point tuning.
-- AUC does not measure calibration; a high AUC model can still output bad probabilities.
+- AUC does not measure [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/Calibration\|calibration]]; a high AUC model can still output bad probabilities.
 - Data leakage can inflate both metrics and fail in production.
 
-### Tradeoffs
+## Tradeoffs
 
 | Metric | Measures | Fits when | Misleads when |
 |---|---|---|---|
@@ -184,7 +184,7 @@ Practical threshold tuning pattern:
 > - If negatives dominate, a model can predict mostly negatives and still get high accuracy.
 > - Check PR-AUC, precision, and recall to understand real positive-class performance.
 
-## Links
+## References
 
 - [ML.NET BinaryClassificationMetrics](https://learn.microsoft.com/dotnet/api/microsoft.ml.data.binaryclassificationmetrics) — API reference for .NET binary classification evaluation metrics including AUC, accuracy, and F1.
 - [ML.NET evaluate binary classification model](https://learn.microsoft.com/dotnet/machine-learning/resources/metrics#evaluation-metrics-for-binary-classification) — guide to interpreting binary classification metrics in ML.NET with threshold selection guidance.
@@ -201,5 +201,6 @@ Practical threshold tuning pattern:
 >  [[Software Engineering/11 AI & ML/Machine Learning/Machine Learning\|Machine Learning]]
 >
 > **Pages**
+> - [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/Calibration\|Calibration]]
 > - [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/Classification Evaluation\|Classification Evaluation]]
 <!-- whats-next:end -->

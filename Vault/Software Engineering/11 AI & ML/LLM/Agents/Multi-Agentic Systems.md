@@ -12,7 +12,7 @@ dg-publish: true
 
 # Intro
 
-A multi-agentic system coordinates two or more LLM agents — each with its own context window, tools, and instructions — to solve a task that a single agent handles poorly. The [[Software Engineering/11 AI & ML/LLM/Agents/Agents|Agents]] page covers what agents are, the augmented LLM building block, and autonomous agent design. This page covers all agentic workflow patterns — from simple prompt chaining to multi-agent orchestration — along with communication protocols, coordination structures, and failure modes.
+A multi-agentic system coordinates two or more LLM agents — each with its own context window, tools, and instructions — to solve a task that a single agent handles poorly. The [[Software Engineering/11 AI & ML/LLM/Agents/Agents|Agents]] page covers what agents are, the augmented LLM building block, the five workflow patterns (prompt chaining through orchestrator-workers), and autonomous agent design. This page covers what changes when multiple agents must coordinate: communication patterns, coordination structures, and the failure modes specific to multi-agent systems.
 
 Multi-agent typically uses 3–10× more tokens than single-agent for equivalent tasks, driven by context duplication and coordination messages. That cost is justified under three specific conditions:
 
@@ -34,78 +34,9 @@ Agents must share context to coordinate. Three mechanisms dominate production sy
 
 **Shared external state (blackboard).** A central store — vector database, Redis, filesystem — holds system state. Agents read and write independently without direct messaging. The blackboard pattern works best for non-linear problems where the step sequence is unknown upfront. Agents don't know about each other, only the shared state. The tradeoff: race conditions on concurrent writes and no built-in ordering guarantees.
 
-## Workflow Patterns
-
-Five patterns cover the spectrum from simple single-LLM orchestration to multi-agent coordination. They form a progression of increasing complexity — start with the simplest pattern that solves the problem.
-
-### Prompt Chaining
-
-```mermaid
-flowchart LR
-    In[Input] --> S1[Step 1 LLM] --> G1{Gate} --> S2[Step 2 LLM] --> G2{Gate} --> Out[Output]
-```
-
-Break a task into sequential steps where each LLM call processes the output of the previous one. Add programmatic checks (gates) between steps to verify the process stays on track.
-
-When to use: tasks that decompose cleanly into fixed subtasks. Example: generate marketing copy then translate it, or write an outline, validate it meets criteria, then write the document.
-
-### Routing
-
-```mermaid
-flowchart TD
-    In[Input] --> R[Router LLM]
-    R --> P1[Prompt or Model A]
-    R --> P2[Prompt or Model B]
-    R --> P3[Prompt or Model C]
-```
-
-Classify the input and direct it to a specialized prompt or model. This lets you optimize each downstream path independently — a change to handle refund requests will not degrade general question answering.
-
-When to use: distinct input categories that need different handling. Example: route customer queries to a small fast model for general questions, a larger model for complex technical issues, a constrained workflow for refund requests.
-
-### Parallelization
-
-```mermaid
-flowchart TD
-    In[Input] --> A[LLM Call A] & B[LLM Call B] & C[LLM Call C]
-    A --> Agg[Aggregator]
-    B --> Agg
-    C --> Agg
-    Agg --> Out[Output]
-```
-
-Run multiple LLMs simultaneously and aggregate results. Two variants: **sectioning** splits independent subtasks across parallel agents; **voting** runs the same task through multiple agents for higher confidence. When to use: independent subtasks that benefit from speed, or tasks where multiple perspectives improve reliability — running guardrails in parallel with the main response, multi-aspect code review, content moderation with vote thresholds.
-
-### Orchestrator-Workers
-
-```mermaid
-flowchart TD
-    In[Input] --> O[Orchestrator LLM]
-    O --> W1[Worker 1] & W2[Worker 2] & W3[Worker 3]
-    W1 --> S[Synthesize]
-    W2 --> S
-    W3 --> S
-    S --> Out[Output]
-```
-
-A central LLM dynamically decomposes the task, delegates subtasks to worker LLMs, and synthesizes results. The subtasks are not predefined — the orchestrator determines them based on the input. Topologically similar to parallelization, but the key difference is flexibility: workers and their tasks are determined at runtime. Anthropic's Research system uses Claude Opus 4 as lead with Sonnet 4 subagents — 3 to 5 spawned in parallel, achieving 90.2% improvement over single-agent. The dominant production pattern for complex coding and research tasks.
-
-### Evaluator-Optimizer
-
-```mermaid
-flowchart TD
-    In[Input] --> G[Generator LLM]
-    G --> D[Draft]
-    D --> E[Evaluator LLM]
-    E -->|Revise| G
-    E -->|Accepted| Out[Final Output]
-```
-
-One LLM generates a response; another evaluates it against criteria and provides feedback. The loop continues until the evaluator approves or an iteration cap is hit. Two indicators of good fit: LLM responses demonstrably improve when given human-like feedback, and the LLM can provide such feedback. When to use: tasks with clear evaluation criteria — literary translation with nuance, complex search requiring multiple rounds, code review, compliance checking.
-
 ## Multi-Agent Coordination
 
-Beyond workflow patterns, multi-agent systems use three structural patterns for organizing agent interactions.
+Beyond the [[Software Engineering/11 AI & ML/LLM/Agents/Agents#Workflow Patterns|workflow patterns]] — of which orchestrator-workers is the dominant multi-agent topology — multi-agent systems use three structural patterns for organizing agent interactions.
 
 **Handoff / triage.** One active agent at a time. The current agent decides dynamically when to transfer control to a specialist. In Microsoft Agent Framework, `AgentWorkflowBuilder` declares a handoff routing graph where each agent receives transfer targets as tool definitions:
 

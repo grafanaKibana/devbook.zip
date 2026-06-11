@@ -88,7 +88,7 @@ flowchart TD
 > - Return the stored candidate after the loop ends.
 > - Why it matters: this lower-bound variant is a common interview and production requirement.
 
-## Links
+## References
 
 - [Binary search (cp algorithms)](https://cp-algorithms.com/num_methods/binary_search.html)
 - [Array BinarySearch method .NET](https://learn.microsoft.com/dotnet/api/system.array.binarysearch)

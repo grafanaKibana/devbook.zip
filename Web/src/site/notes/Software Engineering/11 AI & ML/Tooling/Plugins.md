@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/tooling/plugins/","dg-note-properties":{"topic":["AI & ML"],"subtopic":["Tooling"],"status":"Creation","level":["2"],"priority":"Medium"}}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/tooling/plugins/","dg-note-properties":{"topic":["AI & ML"],"subtopic":["Tooling"],"status":"Done","level":["2"],"priority":"Medium"}}
 ---
 
 

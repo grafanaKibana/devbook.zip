@@ -56,7 +56,7 @@ list.Remove("C");
 > [!QUESTION]- What is a common migration signal from `LinkedList<T>` to `List<T>`?
 > If code frequently searches by index/value before each operation, you are paying O(n) traversal repeatedly and should usually switch to `List<T>` or another structure.
 
-## Links
+## References
 
 - [`LinkedList<T>` class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.linkedlist-1) — API reference covering node operations, AddBefore/AddAfter, and enumeration.
 - [Selecting a collection class](https://learn.microsoft.com/en-us/dotnet/standard/collections/selecting-a-collection-class) — Microsoft decision guide; explains when linked list is appropriate vs array-backed collections.

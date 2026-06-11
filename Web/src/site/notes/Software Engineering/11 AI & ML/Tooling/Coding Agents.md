@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/tooling/coding-agents/","dg-note-properties":{"topic":["AI & ML"],"subtopic":["Tooling"],"status":"Creation","level":["2"],"priority":"Medium"}}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/tooling/coding-agents/","dg-note-properties":{"topic":["AI & ML"],"subtopic":["Tooling"],"status":"Done","level":["2"],"priority":"Medium"}}
 ---
 
 
@@ -67,7 +67,8 @@ Amazon Q Developer provides AI coding assistance in IDE and CLI experiences with
 - **Over-reliance without review** — teams accept large agent-generated diffs without understanding side effects. A 400-line diff that passes tests can still introduce architectural violations, security holes, or maintenance debt. Mitigation: limit task scope to single-concern changes, require human review on all PRs, and use instruction files to encode architecture constraints.
 - **Context window limits** — very large repos or long sessions push relevant files out of active context. The agent operates on stale assumptions: it edits a file it read 20 messages ago, not knowing another edit changed the interface. Mitigation: constrain task scope, break large changes into sequential smaller tasks, and use agents that re-read files before editing.
 - **Cost drift** — autonomous retry loops can trigger 50+ model calls during a debugging spiral. At $0.015/1K output tokens, a 30-minute debugging session can cost $5-15. In CI pipelines running agents on every PR, this adds up. Mitigation: set token budgets, loop limits (max 10 iterations), and route simple tasks to cheaper models.
-- **Hallucinated APIs** — agents invent methods, config keys, or package names when context is weak. Example: an agent called `HttpContext.GetBearerToken()` (does not exist) instead of parsing the `Authorization` header. The code compiled but threw `NullReferenceException` at runtime. Mitigation: run builds and tests, use tool-assisted code search before implementation, and include SDK version constraints in instruction files.
+- **Hallucinated APIs** — agents invent methods, config keys, or package names when context is weak. Example: an agent calls `HttpContext.GetBearerToken()` (does not exist) instead of parsing the `Authorization` header — the code may even compile against a generated stub and then fail at runtime. Mitigation: run builds and tests, use tool-assisted code search before implementation, and include SDK version constraints in instruction files.
+
 ## Tradeoffs
 
 | Decision | Option A | Option B | Practical tradeoff |

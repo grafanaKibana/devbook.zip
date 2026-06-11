@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/machine-learning/data-drift/","dg-note-properties":{"topic":["AI & ML"],"subtopic":["Machine Learning"],"level":["1"],"priority":"Low","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/machine-learning/data-drift/","dg-note-properties":{"topic":["AI & ML"],"subtopic":["Machine Learning"],"level":["1"],"priority":"Low","status":"Done"}}
 ---
 
 # Intro

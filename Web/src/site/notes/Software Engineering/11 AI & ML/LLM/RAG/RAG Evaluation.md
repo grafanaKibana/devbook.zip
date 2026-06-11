@@ -1,14 +1,7 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
-level:
-  - "2"
-priority: High
-status: Done
-dg-publish: true
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/rag/rag-evaluation/","dg-note-properties":{"topic":["AI & ML"],"subtopic":["LLM"],"level":["2"],"priority":"High","status":"Done"}}
 ---
+
 
 # Intro
 
@@ -30,47 +23,32 @@ Example: a support bot returns the correct policy document (retrieval passes) bu
 
 ## Retrieval Metrics
 
-Retrieval metrics evaluate whether the relevant documents reached the generator. All assume a labeled set where each query has known relevant documents.
-
-**[[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics|Recall@k]]** — of all relevant documents in the corpus, what fraction appears in the top-k results. Recall@5 = 0.8 means 80% of relevant documents land in the top 5. This is the primary retrieval metric for RAG because the generator cannot use evidence it never sees. A recall failure is a hard ceiling on answer quality.
-
-**[[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics|Precision@k]]** — of the k documents retrieved, what fraction is relevant. Precision@5 = 0.6 means 3 of 5 retrieved documents are relevant. Low precision floods the context window with noise, which can degrade generation quality and increase token cost.
-
-**[[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics|MRR (Mean Reciprocal Rank)]]** — the average of 1/rank for the first relevant document across queries. If the first relevant result is at position 3, the reciprocal rank is 1/3. MRR rewards pushing the best result higher. Useful when the generator primarily uses the top-ranked chunk.
-
-**[[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics|nDCG@k (Normalized Discounted Cumulative Gain)]]** — measures ranking quality with graded relevance. Documents at higher positions contribute more to the score, and more relevant documents contribute more than partially relevant ones. nDCG captures both "did you find it" and "did you rank it well" in a single number. Range: 0 to 1.
-
-**[[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics|HitRate@k]]** — the fraction of queries for which at least one relevant document appears in the top-k results. HitRate@5 = 0.9 means 90% of queries surfaced at least one relevant document in the top 5. Binary per query (hit or miss), so it is simpler to compute than Recall@k and useful as a minimum-bar check: any query where the model gets zero relevant documents is a hard failure.
-
-**[[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics|MAP (Mean Average Precision)]]** — the mean of Average Precision (AP) scores across all queries. AP for a single query is the mean of Precision@k at each rank position where a relevant document appears. MAP captures both coverage (did you find all relevant documents) and ranking quality (did you rank them early), making it a summary metric for multi-relevant-document retrieval. MAP = 1.0 requires all relevant documents to appear at the top of the ranked list; MAP = 0.5 indicates relevant documents are present but buried.
-
-**[[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#Deterministic Metrics|Empty-result rate]]** — the fraction of queries that return zero results. Even a small empty-result rate can indicate coverage gaps in the index (missing document types, unforeseen query patterns). Track this separately because aggregate recall hides it.
+Retrieval metrics evaluate whether the relevant documents reached the generator. All assume a labeled set where each query has known relevant documents. The full definitions, worked examples, and alerting guidance live in [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics\|Monitoring — Retrieval Quality Metrics]]; this table summarizes what each metric answers and when to prefer it.
 
 | Metric | What it answers | When to prefer |
 | --- | --- | --- |
-| Recall@k | Did we find the relevant documents | Primary metric -- always track |
-| Precision@k | How much noise is in the context | Context window is tight or token cost matters |
-| HitRate@k | Did at least one relevant doc appear | Quick minimum-bar check; good for dashboards |
-| MRR | Is the best result ranked first | Generator uses only top-1 or top-2 chunks |
-| MAP | Are all relevant docs found and ranked high | Multiple relevant documents per query expected |
-| nDCG@k | Is the full ranking quality good | Generator uses all k chunks with position-aware weighting |
-| Empty-result rate | Are there coverage gaps | Corpus is growing or query patterns are shifting |
+| [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics\|Recall@k]] | Did we find the relevant documents | Primary metric -- always track |
+| [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics\|Precision@k]] | How much noise is in the context | Context window is tight or token cost matters |
+| [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics\|HitRate@k]] | Did at least one relevant doc appear | Quick minimum-bar check; good for dashboards |
+| [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics\|MRR]] | Is the best result ranked first | Generator uses only top-1 or top-2 chunks |
+| [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics\|MAP]] | Are all relevant docs found and ranked high | Multiple relevant documents per query expected |
+| [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics\|nDCG@k]] | Is the full ranking quality good | Generator uses all k chunks with position-aware weighting |
+| [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#Deterministic Metrics\|Empty-result rate]] | Are there coverage gaps | Corpus is growing or query patterns are shifting |
+
+Two evaluation-side facts matter beyond the definitions. First, a recall failure is a hard ceiling on answer quality — the generator cannot use evidence it never sees, so no generation-side fix compensates for missing context. Second, track [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#Deterministic Metrics\|empty-result rate]] separately: even a small rate signals coverage gaps in the index, and aggregate recall hides it.
 
 ## Generation Metrics
 
-Generation metrics evaluate the quality of the model's output given the retrieved context. Most are computed using an [[Software Engineering/11 AI & ML/LLM/Evaluation/LLM-as-a-Judge|LLM-as-judge]] pattern — a separate model scores the output against the context and query.
+Generation metrics evaluate the quality of the model's output given the retrieved context. Most are computed using an [[Software Engineering/11 AI & ML/LLM/Evaluation/LLM-as-a-Judge\|LLM-as-judge]] pattern — a separate model scores the output against the context and query. Full definitions live in [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#LLM-as-Judge Metrics\|Monitoring — LLM-as-Judge Metrics]]; the four core dimensions:
 
-**[[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#LLM-as-Judge Metrics|Faithfulness (groundedness)]]** — does every claim in the answer trace back to the provided context? A faithfulness evaluator decomposes the answer into individual claims, then checks each claim against the retrieved passages. Claims not supported by any passage are flagged as unfaithful. This is the RAG-specific counterpart to hallucination detection — see [[Software Engineering/11 AI & ML/LLM/Hallucinations|Hallucinations]] for broader coverage.
-
-**[[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#LLM-as-Judge Metrics|Answer correctness]]** — does the answer actually solve the user's question? A response can be perfectly faithful (every claim is grounded) but still wrong if it misses the key constraint, answers a different question, or is incomplete. Correctness evaluation compares the answer against a reference answer or expected behavior.
-
-**[[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#LLM-as-Judge Metrics|Citation validity]]** — do the citations in the answer actually support the claims they are attached to? This is stricter than faithfulness: the answer may be grounded overall, but a specific citation may point to an irrelevant passage. Citation validation maps each cited passage to the claim it supposedly supports and checks the entailment.
-
-**[[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#LLM-as-Judge Metrics|Response completeness]]** — does the answer cover all aspects of the query? A query asking "compare A and B" expects coverage of both. Partial answers score lower. Azure AI Foundry includes completeness as a separate evaluator for this reason.
+- **[[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#LLM-as-Judge Metrics\|Faithfulness (groundedness)]]** — does every claim in the answer trace back to the provided context? The RAG-specific counterpart to hallucination detection — see [[Software Engineering/11 AI & ML/LLM/Hallucinations\|Hallucinations]] for broader coverage.
+- **[[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#LLM-as-Judge Metrics\|Answer correctness]]** — does the answer actually solve the user's question? A response can be perfectly faithful yet still wrong if it misses the key constraint or answers a different question. Requires a reference answer.
+- **[[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#LLM-as-Judge Metrics\|Citation validity]]** — does each citation actually support the claim it is attached to? Stricter than faithfulness: an answer can be grounded overall while a specific citation points to an irrelevant passage.
+- **[[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#LLM-as-Judge Metrics\|Response completeness]]** — does the answer cover all aspects of the query? "Compare A and B" expects coverage of both; partial answers score lower.
 
 ## RAGAS Framework
 
-[RAGAS](https://docs.ragas.io/) (Retrieval-Augmented Generation Assessment) implements the retrieval and generation concepts above as four named, runnable scores. Each uses [[Software Engineering/11 AI & ML/LLM/Evaluation/LLM-as-a-Judge|LLM-as-judge]] evaluation and isolates a specific failure mode in the pipeline.
+[RAGAS](https://docs.ragas.io/) (Retrieval-Augmented Generation Assessment) implements the retrieval and generation concepts above as four named, runnable scores. Each uses [[Software Engineering/11 AI & ML/LLM/Evaluation/LLM-as-a-Judge\|LLM-as-judge]] evaluation and isolates a specific failure mode in the pipeline.
 
 | Metric | Layer | What it measures | Reference needed |
 | --- | --- | --- | --- |
@@ -100,8 +78,8 @@ Individual scores identify symptoms. Reading two scores together identifies root
 
 RAGAS v0.4+ adds two metrics beyond the original four:
 
-- **[[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#LLM-as-Judge Metrics|Noise Sensitivity]]** — measures incorrect claims introduced when retrieved context contains irrelevant chunks. Catches a gap the original four miss: the model hallucinating claims consistent with noisy context rather than ground truth. Requires reference. Lower is better.
-- **[[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#LLM-as-Judge Metrics|Context Entities Recall]]** — compares named entities in the reference answer against entities in retrieved context. Useful for entity-heavy domains (legal, medical, financial) where missing a specific name, date, or identifier is a hard failure even when general topic recall is adequate.
+- **[[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#LLM-as-Judge Metrics\|Noise Sensitivity]]** — measures incorrect claims introduced when retrieved context contains irrelevant chunks. Catches a gap the original four miss: the model hallucinating claims consistent with noisy context rather than ground truth. Requires reference. Lower is better.
+- **[[Software Engineering/11 AI & ML/LLM/RAG/Monitoring#LLM-as-Judge Metrics\|Context Entities Recall]]** — compares named entities in the reference answer against entities in retrieved context. Useful for entity-heavy domains (legal, medical, financial) where missing a specific name, date, or identifier is a hard failure even when general topic recall is adequate.
 
 ## Component-Level Evaluation
 
@@ -135,7 +113,7 @@ Embedding models are evaluated by treating retrieval quality as a proxy for embe
 
 ### Vector Search (ANN) Evaluation
 
-ANN Recall@k measures a different quantity than the retrieval Recall@k defined above. Retrieval Recall@k asks "of all relevant documents, how many appeared in top-k?" ANN Recall@k asks "of the true k nearest neighbors found by exact brute-force search, how many did the approximate index return?" It measures the index's approximation quality in isolation — see [[Software Engineering/11 AI & ML/LLM/RAG/Retrieval|Retrieval]] for how index parameters (HNSW `ef_search`, IVF `nprobe`) and filtered search affect retrieval mechanics.
+ANN Recall@k measures a different quantity than the retrieval Recall@k defined above. Retrieval Recall@k asks "of all relevant documents, how many appeared in top-k?" ANN Recall@k asks "of the true k nearest neighbors found by exact brute-force search, how many did the approximate index return?" It measures the index's approximation quality in isolation — see [[Software Engineering/11 AI & ML/LLM/RAG/Retrieval\|Retrieval]] for how index parameters (HNSW `ef_search`, IVF `nprobe`) and filtered search affect retrieval mechanics.
 
 Ground truth is established by running brute-force (exact) search over the full corpus for every query in a test set. ANN results are then compared against these true neighbors. ANN Recall@10 = 0.85 means the approximate index returned 85% of the actual 10 closest vectors.
 
@@ -185,7 +163,7 @@ flowchart TD
 
 **Release gate** — define regression thresholds relative to the baseline, not absolute targets. Absolute thresholds ("Recall@5 must be above 0.85") are fragile across corpus changes. Relative thresholds ("Recall@5 must not drop more than 3% from baseline") adapt as the system improves.
 
-**Online evaluation** samples production traffic and runs the same metrics on real queries. This catches distribution shift — queries in production that the offline eval set does not cover. For generation metrics, sample a fraction of responses and run [[Software Engineering/11 AI & ML/LLM/Evaluation/LLM-as-a-Judge|LLM-as-judge]] scoring asynchronously. For production monitoring of these metrics, see [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring|Monitoring]].
+**Online evaluation** samples production traffic and runs the same metrics on real queries. This catches distribution shift — queries in production that the offline eval set does not cover. For generation metrics, sample a fraction of responses and run [[Software Engineering/11 AI & ML/LLM/Evaluation/LLM-as-a-Judge\|LLM-as-judge]] scoring asynchronously. For production monitoring of these metrics, see [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring\|Monitoring]].
 
 **Regression set** — a must-pass subset of the eval set covering known past failures. Every pipeline change must pass the regression set. When a new failure is discovered in production, add the failing query to the regression set to prevent recurrence.
 
@@ -207,7 +185,7 @@ Detection: track the fraction of eval set ground-truth documents that still exis
 
 LLM judges exhibit positional bias (scoring the first response higher in pairwise comparisons), verbosity bias (rewarding longer answers regardless of correctness), and self-preference bias (scoring outputs from the same model family higher). For RAG specifically, judges are also sensitive to evaluation prompt wording — small changes in how you ask "is this answer faithful" can shift scores across the entire eval set.
 
-Mitigation: use binary pass/fail judgments instead of numeric scales (reduces calibration noise). Run the same evaluation with varied prompt phrasings and check consistency. Validate judge outputs against a small human-labeled set and track agreement rate over time. See [[Software Engineering/11 AI & ML/LLM/Evaluation/LLM-as-a-Judge|LLM-as-a-Judge]] for deeper coverage of judge reliability.
+Mitigation: use binary pass/fail judgments instead of numeric scales (reduces calibration noise). Run the same evaluation with varied prompt phrasings and check consistency. Validate judge outputs against a small human-labeled set and track agreement rate over time. See [[Software Engineering/11 AI & ML/LLM/Evaluation/LLM-as-a-Judge\|LLM-as-a-Judge]] for deeper coverage of judge reliability.
 
 ### Threshold Cargo-Culting
 
@@ -280,13 +258,15 @@ Decision rule: combine deterministic checks (format, citation presence, length) 
 
 > [!note] Whats next
 > **Parent**
->  [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
+>  [[Software Engineering/11 AI & ML/LLM/LLM\|LLM]]
 >
 > **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Caching|Caching]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Chunking|Chunking]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring|Monitoring]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Query Translation|Query Translation]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Re-ranking|Re-ranking]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Retrieval|Retrieval]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/Caching\|Caching]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/Chunking\|Chunking]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring\|Monitoring]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/Query Translation\|Query Translation]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/RAG Patterns\|RAG Patterns]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/Re-ranking\|Re-ranking]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/Retrieval\|Retrieval]]
+> - [[Software Engineering/11 AI & ML/LLM/RAG/Vector Databases\|Vector Databases]]
 <!-- whats-next:end -->

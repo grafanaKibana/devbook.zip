@@ -6,7 +6,7 @@ subtopic:
 tags:
   - FolderNote
 dg-publish: true
-status: Creation
+status: Done
 level:
   - '3'
 priority: High
@@ -14,70 +14,71 @@ priority: High
 
 # Intro
 
-Large language models, also known as LLMs, are very large [deep learning](https://aws.amazon.com/what-is/deep-learning/) models that are pre-trained on vast amounts of data. The underlying transformer is a set of [neural networks](https://aws.amazon.com/what-is/neural-network/) that consist of an encoder and a decoder with self-attention capabilities. The encoder and decoder extract meanings from a sequence of text and understand the relationships between words and phrases in it.
+A large language model (LLM) is a transformer neural network trained on vast text corpora to predict the next token in a sequence. That single objective — next-token prediction at scale — is what produces the capabilities the rest of this section builds on: answering questions, summarizing, translating, writing code, and calling tools. Virtually all modern generative LLMs (GPT, Claude, Llama, Gemini) are **decoder-only** transformers: self-attention lets every token attend to all earlier tokens, so the model builds contextual meaning across the whole input before predicting what comes next. (Encoder-only transformers like BERT and encoder-decoder models like T5 exist, but they serve classification, [[Software Engineering/11 AI & ML/LLM/Embeddings|embedding]], and translation workloads rather than open-ended generation.)
+
+The engineering consequence: an LLM is not a knowledge database with retrieval semantics. It is a probability distribution over token sequences, shaped by training data and steered at inference time by the prompt. That is why grounding, [[Software Engineering/11 AI & ML/LLM/Prompting/Prompting|prompting]], and [[Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation|evaluation]] are engineering disciplines rather than nice-to-haves — see [[Software Engineering/11 AI & ML/LLM/Hallucinations|Hallucinations]] for what happens when fluent prediction is mistaken for factual recall.
+
+## How LLMs Are Built
 
 ![11 AI & ML-LLM-20260211012223477.png](11%20AI%20&%20ML-LLM-20260211012223477.png)
 
-## Deeper Explanation
+Training a modern LLM is a three-stage pipeline. Each stage changes what the model is good at:
 
-## How are LLMs built?
-
-On a high level, training an LLM model involves three steps i.e. data collection, training and evaluation.
-
-- **Data Collection** The first step is to collect the data that will be used to train the model. The data can be collected from various sources such as Wikipedia, news articles, books, websites etc.
-- **Training**: The data then goes through a training pipeline where it is cleaned and preprocessed before being fed into the model for training. The training process usually takes a long time and requires a lot of computational power.
-- **Evaluation**: The final step is to evaluate the performance of the model to see how well it performs on various tasks such as question answering, summarization, translation etc.
-
-The output from the training Pipeline is an LLM model which is simply the parameters or weights which capture the knowledge learned during the training process. These parameters or weights are typically serialized and stored in a file, which can then be loaded into any application that requires language processing capabilities e.g. text generation, question answering, language processing etc.
-
-Once trained, LLMs can be readily adapted to perform multiple tasks using relatively small sets of supervised data, a process known as fine tuning.
-
-Three common learning models exist:
-
-- Zero-shot learning; Base LLMs can respond to a broad range of requests without explicit training, often through prompts, although answer accuracy varies.
-- Few-shot learning: By providing a few relevant training examples, base model performance significantly improves in that specific area.
-- Fine-tuning: This is an extension of few-shot learning in that data scientists train a base model to adjust its parameters with additional data relevant to the specific application.
-
-## Types of LLMs
-
-Instruction Tuned LLMs, instead of trying to autocomplete your text, try to follow the given instructions using the data that they have been trained on. For example, if you input the sentence “What are LLMs?” it will use the data that it is trained on and try to answer the question. Similarly, if you input “What are some famous social networks?” it will try to answer the question instead of giving you a random answer.
-
-Instruction Tuned LLMs are built on top of Base LLMs:
+1. **Pretraining** — the model learns next-token prediction over trillions of tokens of web text, books, and code. The output is a **base model**: a powerful autocompleter that continues text plausibly but does not reliably follow instructions. Pretraining consumes the overwhelming majority of the compute budget. The result is a file of parameters (weights) that capture everything the model learned, loadable by any inference runtime.
+2. **Supervised fine-tuning (SFT / instruction tuning)** — the base model is further trained on curated example conversations: instructions paired with high-quality responses. This teaches the model to behave as an assistant — to answer the question rather than continue the text. Ask a base model "What are LLMs?" and it may generate more questions in the same style; ask an instruction-tuned model and it answers.
+3. **Preference alignment (RLHF / DPO)** — human raters compare candidate responses, and the model is optimized toward preferred outputs using Reinforcement Learning from Human Feedback or, increasingly, direct preference optimization methods. This stage shapes helpfulness, tone, and refusal behavior — and has a known failure mode: optimizing for human approval can reward confident, agreeable answers over accurate ones (see [[Software Engineering/11 AI & ML/LLM/Hallucinations|Hallucinations]] on sycophancy).
 
 ```text
-Instruction Tuned LLMs = Base LLMs + Further Tuning + RLHF
+Base model  =  pretraining (next-token prediction at scale)
+Instruction-tuned model  =  base model + SFT + preference alignment (RLHF/DPO)
 ```
 
-To build an Instruction Tuned LLM, a Base LLM is taken and is further trained using a large dataset covering sample “Instructions” and how the model should perform as a result of those instructions. The model is then fine-tuned using a technique called “Reinforcement Learning with Human Feedback” (RLHF) which allows the model to learn from human feedback and improve its performance over time.
+## Adapting an LLM to a Task
+
+Three adaptation levers, ordered by cost. Reach for the cheaper one first:
+
+- **Prompting (zero-shot / few-shot)** — steer behavior entirely through the input: instructions, examples, and output format. No training, instant iteration. Covered in [[Software Engineering/11 AI & ML/LLM/Prompting/Prompting|Prompting]] and [[Software Engineering/11 AI & ML/LLM/Prompting/In-Context Learning|In-Context Learning]].
+- **Retrieval-Augmented Generation** — keep knowledge outside the model and inject relevant evidence into the prompt at query time. The right tool when facts change faster than you can retrain or when answers must cite sources. Covered in [[Software Engineering/11 AI & ML/LLM/RAG/RAG|RAG]], including the RAG-vs-fine-tuning decision.
+- **Fine-tuning** — continue training the model's weights on task-specific data. Buys consistent behavior (format, tone, policy) at the cost of a training pipeline, evaluation discipline, and slower iteration. Use it for stable behavior, not for injecting fast-changing facts. Covered in [[Software Engineering/11 AI & ML/LLM/Fine-tuning|Fine-tuning]].
+
+Two cross-cutting concerns sit alongside these levers: [[Software Engineering/11 AI & ML/LLM/Context Engineering|Context Engineering]] — deciding what fills the finite context window and in what order — and [[Software Engineering/11 AI & ML/LLM/Model Selection and Routing|Model Selection and Routing]] — matching each request to the cheapest model that can handle it.
 
 ## Dictionary
 
-When working with LLMs, you will come across a lot of new terms. This section will help you understand the meaning of these terms and how they are used in the context of LLMs.
+Core terms used throughout this section, each linked to the note that covers it in depth:
 
-- **[[Machine Learning]] (ML)** — ML is a field of study that focuses on algorithms that can learn from data. ML is a subfield of AI.
-- **“Model” vs. “AI” vs. “LLM”** — These terms are used somewhat interchangeably throughout this course, but they do not always mean the same thing. LLMs are a type of AI, as noted above, but not all AIs are LLMs. When we mentioned models in this course, we are referring to AI models. As such, in this course, you can consider the terms “model” and “AI” to be interchangeable.
-- **LLM** — Large language model. A large language model is a type of artificial intelligence that can understand and generate human-like text based on the input it receives. These models have been trained on vast amounts of text data and can perform a wide range of language-related tasks, such as answering questions, carrying out conversations, summarizing text, translating languages, and much more.
-- **MLM** — Masked language model. A masked language model is a type of language model that is trained to predict the next word in a sequence of words. It is typically trained on a large corpus of text data and can be used for a variety of tasks, such as machine translation, sentiment analysis, summarization, and more.
-- **NLP** — [[Natural Language Processing]]. Natural language processing is a branch of artificial intelligence that deals with the interaction between computers and human languages. It is used to analyze, understand, and generate human language.
-- **Label** — Labels are just possibilities for the classification of a given text. For example, if you have a text that says “I love you”, then the labels could be “positive”, “negative”, or “neutral”. The model will try to predict which label is most likely to be correct based on the input text.
-- **Label Space** — The label space is the set of all possible labels that can be assigned to a given text. For example, if you have a text that says “I love you”, then the label space could be “positive”, “negative”, or “neutral”.
-- **Label Distribution** — The label distribution is the probability distribution over the label space. For example, if you have a text that says “I love you”, then the label distribution could be [0.8, 0.1, 0.1]. This means that the model thinks there is an 80% chance that the text is positive, a 10% chance that it is negative, and a 10% chance that it is neutral.
-- **Sentiment Analysis** — Sentiment analysis is the process of determining the emotional tone behind a series of words, used to gain an understanding of the attitudes, opinions and emotions expressed within an online mention. Sentiment analysis is also known as opinion mining, deriving the opinion or attitude of a speaker.
-- **Verbalizer** — In the classification setting, verbalizers are mappings from labels to words in a language model’s vocabulary. For example, consider performing sentiment classification with the following prompt:
-    
-    ```text
-    Tweet: "I love hotpockets"What is the sentiment of this tweet? Say 'pos' or 'neg'.
-    ```
-    
-    Here, the verbalizer is the mapping from the conceptual labels of **`positive`** and **`negative`** to the tokens **`pos`** and **`neg`**.
-    
-- **Reinforcement Learning from Human Feedback (RLHF)** — RLHF is a technique for training a model to perform a task by providing it with human feedback. The model is trained to maximize the amount of positive feedback it receives from humans, while minimizing the amount of negative feedback it receives.
+- **Token** — the unit an LLM reads and produces; subword pieces, not words. Token counts determine context usage and API cost — a 1,000-word English text is typically 1,300+ tokens, and non-Latin scripts can need 2–3× more (see [[Software Engineering/11 AI & ML/Machine Learning/Natural Language Processing|Natural Language Processing]] on tokenization).
+- **Context window** — the maximum number of tokens the model can attend to in one request: system prompt, conversation history, retrieved evidence, and the response all share this budget. How models use long contexts unevenly is covered in [[Software Engineering/11 AI & ML/LLM/Generation|Generation]].
+- **Inference and sampling** — generating output token by token from the model's probability distribution; temperature, top-p, and the other knobs are covered in [[Software Engineering/11 AI & ML/LLM/Generation|Generation]].
+- **Embedding** — a dense vector representation of text where semantic similarity becomes geometric proximity; the foundation of semantic search and RAG. Covered in [[Software Engineering/11 AI & ML/LLM/Embeddings|Embeddings]].
+- **Base model vs instruction-tuned model** — a base model continues text; an instruction-tuned model follows instructions. Production systems almost always use instruction-tuned models.
+- **Causal language model (CLM)** — a model trained to predict the *next* token from left-to-right context only. This is the GPT/Claude/Llama family — every generative LLM in this section.
+- **Masked language model (MLM)** — a model trained to predict *masked-out* tokens using context from both directions (BERT-style encoders). MLMs power classification and embedding models, not open-ended generation — they cannot autoregressively produce text the way causal LMs do.
+- **RLHF** — Reinforcement Learning from Human Feedback: optimizing a model against human preference comparisons. The standard third stage of LLM training, and the source of both improved helpfulness and the sycophancy failure mode.
+- **Hallucination** — fluent, confident output unsupported by evidence or reality. Mechanisms, detection, and mitigation are covered in [[Software Engineering/11 AI & ML/LLM/Hallucinations|Hallucinations]].
+- **NLP** — [[Software Engineering/11 AI & ML/Machine Learning/Natural Language Processing|Natural Language Processing]], the broader field; LLMs are its current dominant tool.
 
 ## Questions
 
-## Links
+> [!QUESTION]- Why does "the model just predicts the next token" matter for system design?
+> - Everything an LLM outputs is a high-probability continuation, not a fact lookup — fluency and truth are uncorrelated by default
+> - This is why grounding (RAG, citations), output validation, and evaluation pipelines exist: they add the correctness guarantees that next-token prediction does not provide
+> - It also explains prompt sensitivity: the prompt is not a query against a database, it is the conditioning context that reshapes the entire output distribution
+> - Design rule: treat model output as untrusted, probabilistic input to the rest of the system — validate structure with schemas and content with checks
 
-[What are Large Language Models? - LLM AI Explained - AWS](https://aws.amazon.com/what-is/large-language-model/?nc1=h_ls)
+> [!QUESTION]- What is the practical difference between a base model and an instruction-tuned model?
+> - A base model is an autocompleter: given "What are some famous social networks?" it may continue with more questions in the same style rather than answering
+> - An instruction-tuned model has been trained on instruction-response pairs (SFT) and aligned with human preferences (RLHF/DPO), so it interprets input as a task to perform
+> - Base models are used for further fine-tuning and research; instruction-tuned models are what APIs serve and products build on
+> - The distinction matters when reading benchmarks and papers: results on base models do not transfer directly to chat-tuned variants
+
+## References
+
+- [Attention Is All You Need (Vaswani et al., 2017)](https://arxiv.org/abs/1706.03762) — the transformer paper; the architecture every modern LLM builds on.
+- [Language Models are Few-Shot Learners (Brown et al., 2020)](https://arxiv.org/abs/2005.14165) — the GPT-3 paper; established that scale produces in-context learning.
+- [Training language models to follow instructions with human feedback (Ouyang et al., 2022)](https://arxiv.org/abs/2203.02155) — the InstructGPT paper; the SFT + RLHF recipe that turned base models into assistants.
+- [What are Large Language Models? (AWS)](https://aws.amazon.com/what-is/large-language-model/) — accessible vendor-neutral overview of LLM concepts and use cases.
+- [Intro to Large Language Models (Andrej Karpathy)](https://www.youtube.com/watch?v=zjkBMFhNj_g) — the best single-hour explanation of how LLMs are trained and why they behave the way they do.
 
 <!-- whats-next:start -->
 
@@ -94,9 +95,12 @@ When working with LLMs, you will come across a lot of new terms. This section wi
 > - [[Software Engineering/11 AI & ML/LLM/RAG/RAG|RAG]]
 >
 > **Pages**
+> - [[Software Engineering/11 AI & ML/LLM/Context Engineering|Context Engineering]]
 > - [[Software Engineering/11 AI & ML/LLM/Embeddings|Embeddings]]
+> - [[Software Engineering/11 AI & ML/LLM/Fine-tuning|Fine-tuning]]
 > - [[Software Engineering/11 AI & ML/LLM/Generation|Generation]]
 > - [[Software Engineering/11 AI & ML/LLM/Guardrails|Guardrails]]
 > - [[Software Engineering/11 AI & ML/LLM/Hallucinations|Hallucinations]]
+> - [[Software Engineering/11 AI & ML/LLM/Model Selection and Routing|Model Selection and Routing]]
 > - [[Software Engineering/11 AI & ML/LLM/OWASP vulnerabilities on AI LLM|OWASP vulnerabilities on AI LLM]]
 <!-- whats-next:end -->

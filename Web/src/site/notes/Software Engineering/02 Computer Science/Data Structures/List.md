@@ -55,7 +55,7 @@ Console.WriteLine(users[0]);
 > [!QUESTION]- How do `Clear()` and `Remove()` affect `Capacity` in `List<T>`?
 > They usually change only `Count`. To shrink memory, use `TrimExcess()` or set `Capacity`.
 
-## Links
+## References
 
 - [`List<T>` class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1) — API reference with remarks on capacity, sorting, and searching.
 - [Supplemental API remarks for `List<T>`](https://learn.microsoft.com/en-us/dotnet/fundamentals/runtime-libraries/system-collections-generic-list%7Bt%7D) — additional guidance on performance characteristics and common patterns.
