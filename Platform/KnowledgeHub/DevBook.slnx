@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="DevBook.API\DevBook.API.csproj" />
+  <Project Path="DevBook.Data\DevBook.Data.csproj" />
+  <Project Path="DevBook.Evaluations\DevBook.Evaluations.csproj" />
+  <Project Path="DevBook.Tests\DevBook.Tests.csproj" />
+</Solution>

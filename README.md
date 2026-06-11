@@ -316,8 +316,8 @@ The Eleventy pipeline handles:
 
 ```bash
 # Clone
-git clone https://github.com/grafanaKibana/KnowledgeHub.git
-cd KnowledgeHub
+git clone https://github.com/grafanaKibana/DevBook.git
+cd DevBook
 
 # Install dependencies
 cd Web

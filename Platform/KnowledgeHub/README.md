@@ -1,4 +1,4 @@
-# KnowledgeHub API
+# DevBook API
 
 Small local API for ingesting markdown notes, storing documents/chunks in MongoDB through `MongoDB.Driver`, and generating embeddings through `Microsoft.Extensions.AI` with an OpenAI-backed embedding client.
 
@@ -6,10 +6,10 @@ This is a personal R&D proof of concept for learning RAG mechanics, not a produc
 
 ## Projects
 
-- `KnowledgeHub.API`, minimal ASP.NET Core host.
-- `KnowledgeHub.Data`, ingestion, chunking, small MongoDB.Driver repositories, Hangfire boilerplate for future jobs, embedding integration, RAG search/ask services, agents, and reranking strategies.
-- `KnowledgeHub.Evaluations`, test-style RAG search evaluation over the golden dataset and local HTML report generation.
-- `KnowledgeHub.Tests`, xUnit unit and integration tests for API endpoints, services, chunking, embedding batching, reranking, and evaluation metrics.
+- `DevBook.API`, minimal ASP.NET Core host.
+- `DevBook.Data`, ingestion, chunking, small MongoDB.Driver repositories, Hangfire boilerplate for future jobs, embedding integration, RAG search/ask services, agents, and reranking strategies.
+- `DevBook.Evaluations`, test-style RAG search evaluation over the golden dataset and local HTML report generation.
+- `DevBook.Tests`, xUnit unit and integration tests for API endpoints, services, chunking, embedding batching, reranking, and evaluation metrics.
 
 ## Prerequisites
 
@@ -43,7 +43,7 @@ Keep secret values in user-secrets or environment variables, not in committed `a
 From the repo root:
 
 ```bash
-dotnet run --project Platform/KnowledgeHub/KnowledgeHub.API/KnowledgeHub.API.csproj
+dotnet run --project Platform/DevBook/DevBook.API/DevBook.API.csproj
 ```
 
 The local launch profiles use:
@@ -53,7 +53,7 @@ The local launch profiles use:
 
 ## Debug
 
-- Use the `http` or `https` launch profile from `KnowledgeHub.API/Properties/launchSettings.json`.
+- Use the `http` or `https` launch profile from `DevBook.API/Properties/launchSettings.json`.
 - `ASPNETCORE_ENVIRONMENT` is set to `Development` by those profiles.
 
 ## Build and test
@@ -61,24 +61,24 @@ The local launch profiles use:
 Build:
 
 ```bash
-dotnet build Platform/KnowledgeHub/KnowledgeHub.API/KnowledgeHub.API.csproj
+dotnet build Platform/DevBook/DevBook.API/DevBook.API.csproj
 ```
 
 Test:
 
 ```bash
-dotnet test Platform/KnowledgeHub/KnowledgeHub.Tests/KnowledgeHub.Tests.csproj
+dotnet test Platform/DevBook/DevBook.Tests/DevBook.Tests.csproj
 ```
 
 Build the evaluation project:
 
 ```bash
-dotnet build Platform/KnowledgeHub/KnowledgeHub.Evaluations/KnowledgeHub.Evaluations.csproj
+dotnet build Platform/DevBook/DevBook.Evaluations/DevBook.Evaluations.csproj
 ```
 
 ## RAG evaluation commands
 
-The golden dataset is `Platform/KnowledgeHub/KnowledgeHub.Evaluations/Datasets/golden-rag-cases.json`. Restore the local report tool from the repo root before generating HTML reports:
+The golden dataset is `Platform/DevBook/DevBook.Evaluations/Datasets/golden-rag-cases.json`. Restore the local report tool from the repo root before generating HTML reports:
 
 ```bash
 dotnet tool restore
@@ -86,7 +86,7 @@ dotnet tool restore
 
 The tool manifest tracks `Microsoft.Extensions.AI.Evaluation.Console`, which provides `dotnet aieval report`.
 
-Evaluation runs load configuration from `KnowledgeHub.Evaluations/appsettings.json`, `KnowledgeHub.Evaluations/appsettings.Evaluations.json`, and environment variables. Before running live evaluations, provide:
+Evaluation runs load configuration from `DevBook.Evaluations/appsettings.json`, `DevBook.Evaluations/appsettings.Evaluations.json`, and environment variables. Before running live evaluations, provide:
 
 - `ConnectionStrings:MongoDb` with an Atlas connection string that has the vector-search index.
 - `OpenAIOptions:ApiKey` with an OpenAI API key.
@@ -96,7 +96,7 @@ Use environment variables when you do not want to edit the local settings file:
 ```bash
 ConnectionStrings__MongoDb="<mongo-connection-string>" \
 OpenAIOptions__ApiKey="<openai-api-key>" \
-dotnet run --project Platform/KnowledgeHub/KnowledgeHub.Evaluations/KnowledgeHub.Evaluations.csproj -- --name RAG.Search
+dotnet run --project Platform/DevBook/DevBook.Evaluations/DevBook.Evaluations.csproj -- --name RAG.Search
 ```
 
 If either value is missing, the scenario tests are skipped and no new evaluation report folder is created.
@@ -104,10 +104,10 @@ If either value is missing, the scenario tests are skipped and no new evaluation
 Generate the AI evaluation HTML report from the scenario test run by running the evaluation project:
 
 ```bash
-dotnet run --project Platform/KnowledgeHub/KnowledgeHub.Evaluations/KnowledgeHub.Evaluations.csproj -- --name RAG.Search
+dotnet run --project Platform/DevBook/DevBook.Evaluations/DevBook.Evaluations.csproj -- --name RAG.Search
 ```
 
-Selecting and running the `KnowledgeHub.Evaluations` project in the IDE executes the same `RunEvaluation.cs` report-generation flow. `RunEvaluation.cs` invokes the report command for the latest run folder:
+Selecting and running the `DevBook.Evaluations` project in the IDE executes the same `RunEvaluation.cs` report-generation flow. `RunEvaluation.cs` invokes the report command for the latest run folder:
 
 ```bash
 dotnet aieval report --path EvaluationReports --output <latest-run>/report.html

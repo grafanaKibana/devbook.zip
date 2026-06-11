@@ -1,0 +1,221 @@
+namespace DevBook.Data.Services.Chunking;
+
+using DevBook.Data.Models;
+using DevBook.Data.Services;
+using Markdig;
+using Markdig.Syntax;
+
+public sealed class MarkdownSectionChunkingStrategy : IChunkingStrategy
+{
+    /// <summary>
+    /// Maximum character length for a section chunk before recursive separator-based splitting is applied.
+    /// </summary>
+    private const int MaxChunkLength = 1200;
+
+    private static readonly string[] Separators = ["\n\n", "\n", ". ", " "];
+
+    public ChunkingStrategyKind Strategy => ChunkingStrategyKind.MarkdownSection;
+
+    public Task<IReadOnlyList<ChunkContent>> ChunkAsync(
+        Document document,
+        IEmbeddingService embeddingService,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+        ArgumentNullException.ThrowIfNull(embeddingService);
+
+        var chunks = new List<ChunkContent>();
+
+        foreach (var section in ExtractSections(document.PageContent))
+        {
+            chunks.AddRange(SplitRecursively(section.Content, 0).Select(text => new ChunkContent(text, section.Heading)));
+        }
+
+        return Task.FromResult<IReadOnlyList<ChunkContent>>(chunks);
+    }
+
+    private static IReadOnlyList<Section> ExtractSections(string markdown)
+    {
+        if (string.IsNullOrWhiteSpace(markdown))
+        {
+            return [];
+        }
+
+        var headings = Markdown
+            .Parse(markdown)
+            .OfType<HeadingBlock>()
+            .OrderBy(heading => heading.Span.Start)
+            .ToArray();
+
+        if (headings.Length == 0)
+        {
+            return CreateSection(null, markdown) is { } wholeDocument ? [wholeDocument] : [];
+        }
+
+        var sections = new List<Section>();
+        AddSection(sections, null, markdown[..headings[0].Span.Start]);
+
+        for (var index = 0; index < headings.Length; index++)
+        {
+            var heading = headings[index];
+            var headingText = ExtractHeadingText(markdown, heading);
+            var contentStart = FindNextLineStart(markdown, heading.Span.Start);
+            var contentEnd = index + 1 < headings.Length ? headings[index + 1].Span.Start : markdown.Length;
+
+            AddSection(sections, headingText, markdown[contentStart..contentEnd]);
+        }
+
+        return sections;
+    }
+
+    private IReadOnlyList<string> SplitRecursively(string content, int separatorIndex)
+    {
+        var normalizedContent = content.Trim();
+        if (string.IsNullOrWhiteSpace(normalizedContent))
+        {
+            return [];
+        }
+
+        if (normalizedContent.Length <= MaxChunkLength)
+        {
+            return [normalizedContent];
+        }
+
+        if (separatorIndex >= Separators.Length)
+        {
+            return SplitFixedSize(normalizedContent);
+        }
+
+        var separator = Separators[separatorIndex];
+        if (!normalizedContent.Contains(separator, StringComparison.Ordinal))
+        {
+            return SplitRecursively(normalizedContent, separatorIndex + 1);
+        }
+
+        var parts = normalizedContent
+            .Split(separator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+        if (parts.Length <= 1)
+        {
+            return SplitRecursively(normalizedContent, separatorIndex + 1);
+        }
+
+        var chunks = new List<string>();
+        var current = parts[0];
+
+        for (var index = 1; index < parts.Length; index++)
+        {
+            var candidate = string.Concat(current, separator, parts[index]);
+            if (candidate.Length <= MaxChunkLength)
+            {
+                current = candidate;
+                continue;
+            }
+
+            chunks.AddRange(SplitRecursively(current, separatorIndex + 1));
+            current = parts[index];
+        }
+
+        chunks.AddRange(SplitRecursively(current, separatorIndex + 1));
+
+        return chunks;
+    }
+
+    private IReadOnlyList<string> SplitFixedSize(string content)
+    {
+        if (string.IsNullOrWhiteSpace(content))
+        {
+            return [];
+        }
+
+        var chunks = new List<string>();
+        var start = 0;
+
+        while (start < content.Length)
+        {
+            var remainingLength = content.Length - start;
+            var length = Math.Min(MaxChunkLength, remainingLength);
+            var endExclusive = start + length;
+
+            if (endExclusive < content.Length)
+            {
+                var splitIndex = FindWhitespaceBoundary(content, start, endExclusive);
+                if (splitIndex > start)
+                {
+                    endExclusive = splitIndex;
+                }
+            }
+
+            var text = content[start..endExclusive].Trim();
+            if (!string.IsNullOrWhiteSpace(text))
+            {
+                chunks.Add(text);
+            }
+
+            if (endExclusive >= content.Length)
+            {
+                break;
+            }
+
+            start = endExclusive;
+        }
+
+        return chunks;
+    }
+
+    private static void AddSection(List<Section> sections, string? heading, string content)
+    {
+        if (CreateSection(heading, content) is { } section)
+        {
+            sections.Add(section);
+        }
+    }
+
+    private static Section? CreateSection(string? heading, string content)
+    {
+        var normalizedContent = Normalize(content);
+
+        return string.IsNullOrWhiteSpace(normalizedContent)
+            ? null
+            : new Section(heading, normalizedContent);
+    }
+
+    private static string Normalize(string content)
+    {
+        var lines = content
+            .Replace("\r\n", "\n", StringComparison.Ordinal)
+            .Split('\n')
+            .Select(line => line.TrimEnd());
+
+        return string.Join("\n", lines).Trim();
+    }
+
+    private static int FindNextLineStart(string markdown, int start)
+    {
+        var nextNewline = markdown.IndexOf('\n', start);
+
+        return nextNewline < 0 ? markdown.Length : nextNewline + 1;
+    }
+
+    private static string ExtractHeadingText(string markdown, HeadingBlock heading)
+    {
+        var headingMarkdown = markdown[heading.Span.Start..(heading.Span.End + 1)];
+
+        return headingMarkdown.Trim().TrimStart('#').Trim();
+    }
+
+    private static int FindWhitespaceBoundary(string content, int start, int endExclusive)
+    {
+        for (var index = endExclusive; index > start; index--)
+        {
+            if (char.IsWhiteSpace(content[index - 1]))
+            {
+                return index;
+            }
+        }
+
+        return endExclusive;
+    }
+
+    private sealed record Section(string? Heading, string Content);
+}

@@ -1,6 +1,0 @@
-<Solution>
-  <Project Path="KnowledgeHub.API/KnowledgeHub.API.csproj" />
-  <Project Path="KnowledgeHub.Data/KnowledgeHub.Data.csproj" />
-  <Project Path="KnowledgeHub.Evaluations/KnowledgeHub.Evaluations.csproj" />
-  <Project Path="KnowledgeHub.Tests/KnowledgeHub.Tests.csproj" />
-</Solution>
