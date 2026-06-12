@@ -2,6 +2,7 @@
 tags:
   - FolderNote
   - MetricsIgnore
+  - Template
 dg-publish: true
 dg-home: true
 ---
@@ -52,7 +53,6 @@ const segToTopic = (seg) => seg.replace(/^\d+\s+/, "").trim();
 const topicStats = new Map();
 let notesWithTopicTotal = 0;
 let notesWithTopicPoints = 0;
-let notesWithTopicStarted = 0;
 const notesOutsideTopics = [];
 
 for (const p of notes) {
@@ -65,24 +65,25 @@ for (const p of notes) {
 
   const status = asStringArray(p.status)[0] ?? "";
   const progress = STATUS_PROGRESS.get(status) ?? 0;
-  const isStarted = progress > 0;
 
   notesWithTopicTotal += 1;
   notesWithTopicPoints += progress;
-  if (isStarted) notesWithTopicStarted += 1;
 
-  const cur = topicStats.get(topic) ?? { total: 0, points: 0, started: 0, seg };
+  const cur = topicStats.get(topic) ?? { total: 0, points: 0, seg };
   cur.total += 1;
   cur.points += progress;
-  if (isStarted) cur.started += 1;
   topicStats.set(topic, cur);
 }
 
+// "Done" is expressed in whole-note equivalents: the accumulated progress
+// points (0/25/50/75/100 per note) divided by 100. So a topic averaging 25%
+// across 32 notes reads as 8/32 done.
 const statsFor = (topic) => {
   const s = topicStats.get(topic);
-  if (!s) return { pct: 0, started: 0, total: 0 };
+  if (!s) return { pct: 0, done: 0, total: 0 };
   const pct = s.total > 0 ? Math.round(s.points / s.total) : 0;
-  return { pct, started: s.started, total: s.total };
+  const done = Math.round(s.points / 100);
+  return { pct, done, total: s.total };
 };
 
 // --- Curated cards ------------------------------------------------------------
@@ -123,14 +124,6 @@ table.classList.add("dataview", "table-view-table");
 const tbody = table.createEl("tbody");
 tbody.classList.add("table-view-tbody");
 
-// Tier color: red < 34%, amber 34–66%, green >= 67%. Applied via accent-color
-// so the native <progress> value fill picks it up without any extra CSS.
-const progressColor = (pct) => {
-  if (pct < 34) return "#e0533d";
-  if (pct < 67) return "#d9a441";
-  return "#3fb950";
-};
-
 const appendProgress = (parent, pct) => {
   parent.style.textAlign = "center";
 
@@ -140,7 +133,6 @@ const appendProgress = (parent, pct) => {
   prog.value = pct;
   prog.style.display = "block";
   prog.style.width = "100%";
-  prog.style.accentColor = progressColor(pct);
 
   const line = parent.createEl("div");
   line.style.textAlign = "center";
@@ -155,42 +147,48 @@ for (let i = 0; i < cards.length; i += COLS) {
   for (let c = 0; c < COLS; c++) {
     const td = tr.createEl("td");
     td.style.verticalAlign = "top";
+    // Anchor the footer to the cell's bottom. Table rows equalize cell heights,
+    // so absolute `bottom: 0` lands every bar on the same line across a row —
+    // regardless of how many lines each description wraps to.
+    td.style.position = "relative";
     const card = cards[i + c];
     if (!card) continue;
     const [icon, target, alias, desc] = card;
 
-    // Flex column: body grows, progress sits at the bottom so bars in a row
-    // line up regardless of how long each description is.
-    const cell = td.createEl("div");
-    cell.style.display = "flex";
-    cell.style.flexDirection = "column";
-    cell.style.height = "100%";
-
-    const body = cell.createEl("div");
-    body.style.flex = "1 1 auto";
+    // Body reserves vertical room at the bottom for the pinned footer so the
+    // text never overlaps the progress bar.
+    const body = td.createEl("div");
+    body.style.paddingBottom = "3.5em";
     const md = desc
       ? `${icon} **[[${target}|${alias}]]**<br><sub>${desc}</sub>`
       : `${icon} **[[${target}|${alias}]]**`;
     await MarkdownRenderer.render(app, md, body, sourcePath, dv.component);
 
     const stats = statsFor(alias);
-    const foot = cell.createEl("div");
-    foot.style.marginTop = "0.5em";
+    const foot = td.createEl("div");
+    foot.style.position = "absolute";
+    foot.style.left = "0.75em";
+    foot.style.right = "0.75em";
+    foot.style.bottom = "0";
     const line = appendProgress(foot, stats.pct);
-    const sub = line.createEl("span", { text: ` · ${stats.started}/${stats.total} started` });
+    const sub = line.createEl("span", { text: ` · ${stats.done}/${stats.total} done` });
     sub.style.fontSize = "0.8em";
     sub.style.opacity = "0.7";
   }
 }
 
-// --- Overall total ------------------------------------------------------------
+// --- Overall total, rendered as a callout ------------------------------------
 const totalPct = notesWithTopicTotal > 0 ? Math.round(notesWithTopicPoints / notesWithTopicTotal) : 0;
-const totalWrap = dv.container.createEl("div");
-totalWrap.classList.add("se-topics-total");
-totalWrap.style.marginTop = "0.75em";
-totalWrap.createEl("strong", { text: "Total " });
-const totalLine = appendProgress(totalWrap, totalPct);
-totalLine.createEl("span", { text: ` · ${notesWithTopicStarted}/${notesWithTopicTotal} started` });
+const totalDone = Math.round(notesWithTopicPoints / 100);
+
+const callout = dv.container.createEl("div", { cls: "callout" });
+callout.setAttribute("data-callout", "done");
+
+const calloutContent = callout.createEl("div", { cls: "callout-content" });
+const totalLine = appendProgress(calloutContent, totalPct);
+const totalSub = totalLine.createEl("span", { text: ` · ${totalDone}/${notesWithTopicTotal} done` });
+totalSub.style.fontSize = "0.8em";
+totalSub.style.opacity = "0.7";
 
 // --- Notes that aren't under any top-level topic folder ----------------------
 if (notesOutsideTopics.length > 0) {
