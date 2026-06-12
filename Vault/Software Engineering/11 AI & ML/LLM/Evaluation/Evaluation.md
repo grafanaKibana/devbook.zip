@@ -8,8 +8,8 @@ tags:
 dg-publish: true
 level:
   - "3"
-priority: Medium
-status: Done
+status: Ready To Repeat
+priority: High
 ---
 
 # Intro
@@ -39,7 +39,7 @@ flowchart TD
 
 A useful framing across all four: combine **offline** (fixed sets, fast iteration, regression gating) with **online** (real outcomes, distribution shift), and combine **automated** (deterministic + judge, scalable) with **human** (rubric review, calibration, edge-case discovery). Neither axis alone is enough.
 
-For RAG systems specifically, this stack extends with retrieval-quality and faithfulness metrics — see [[Software Engineering/11 AI & ML/LLM/RAG/RAG Evaluation|RAG Evaluation]] and [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring|Monitoring]].
+All four layers run against an evaluation set; how you construct, synthesize, and size that set is [[Software Engineering/11 AI & ML/LLM/Evaluation/Building an Evaluation Set|Building an Evaluation Set]]. Two domains specialize this general stack with their own metrics and labeling, reusing everything above rather than repeating it: RAG adds retrieval-quality and faithfulness metrics — see [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation/Evaluation|RAG Evaluation]] and [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring|Monitoring]] — and agents add trajectory, tool-call, and task-success metrics — see [[Software Engineering/11 AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]].
 
 ## Example
 
@@ -104,6 +104,7 @@ When you iterate on prompts or rubrics against a fixed evaluation set, you can o
 >  [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
 >
 > **Pages**
+> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Building an Evaluation Set|Building an Evaluation Set]]
 > - [[Software Engineering/11 AI & ML/LLM/Evaluation/Deterministic Checks|Deterministic Checks]]
 > - [[Software Engineering/11 AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs|Golden Test Set and Regression Runs]]
 > - [[Software Engineering/11 AI & ML/LLM/Evaluation/LLM-as-a-Judge|LLM-as-a-Judge]]

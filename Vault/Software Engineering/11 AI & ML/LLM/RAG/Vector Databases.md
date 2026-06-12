@@ -14,7 +14,7 @@ dg-publish: true
 
 A vector database stores [[Software Engineering/11 AI & ML/LLM/Embeddings|embeddings]] alongside their metadata and serves nearest-neighbor search over them at scale. It is the infrastructure under dense [[Software Engineering/11 AI & ML/LLM/RAG/Retrieval|retrieval]]: the [[Software Engineering/11 AI & ML/LLM/RAG/Chunking|chunks]] you embed have to live somewhere that can find the closest vectors to a query in milliseconds, even across millions or billions of them.
 
-The central trick is **approximate** nearest-neighbor (ANN) search. Exact search compares the query against every stored vector — correct but O(N) per query and far too slow at scale. ANN indexes trade a small, measurable amount of recall for orders-of-magnitude speed, returning *most* of the true nearest neighbors in sub-millisecond time. Every engineering decision in a vector database is a point on that recall–latency–memory surface, and the recall you give up is silent unless you measure it (see [[Software Engineering/11 AI & ML/LLM/RAG/RAG Evaluation|RAG Evaluation]] on ANN recall).
+The central trick is **approximate** nearest-neighbor (ANN) search. Exact search compares the query against every stored vector — correct but O(N) per query and far too slow at scale. ANN indexes trade a small, measurable amount of recall for orders-of-magnitude speed, returning *most* of the true nearest neighbors in sub-millisecond time. Every engineering decision in a vector database is a point on that recall–latency–memory surface, and the recall you give up is silent unless you measure it (see [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation/Component-Level Evaluation|Component-Level Evaluation]] on ANN recall).
 
 ```mermaid
 flowchart LR
@@ -55,7 +55,7 @@ See [[Software Engineering/11 AI & ML/LLM/RAG/Retrieval|Retrieval]] for how pre/
 A vector database is a stateful service, not a static index:
 
 - **Upserts and deletes** — many ANN indexes (HNSW especially) degrade with heavy delete/update churn; deletes are often tombstones that leave the graph fragmented. Plan periodic rebuilds.
-- **Index rebuilds and zero-downtime swaps** — re-embedding (a new embedding model) or re-chunking invalidates the index. Build the new collection in parallel and switch via a **collection alias** for instant, reversible cutover (the shadow-index pattern in [[Software Engineering/11 AI & ML/LLM/RAG/RAG Evaluation|RAG Evaluation]]).
+- **Index rebuilds and zero-downtime swaps** — re-embedding (a new embedding model) or re-chunking invalidates the index. Build the new collection in parallel and switch via a **collection alias** for instant, reversible cutover (the shadow-index pattern in [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation/Component-Level Evaluation|Component-Level Evaluation]]).
 - **Sharding and replication** — shard for capacity beyond one node, replicate for throughput and availability; watch for hot shards when data clusters semantically.
 - **Memory budgeting** — for in-memory indexes, plan roughly `N × dimensions × 4 bytes` for the raw vectors plus graph overhead; this is often the dominant cost and the reason to consider PQ or disk-based indexes at scale.
 
@@ -154,12 +154,14 @@ A practical decision: if you already run Postgres and the corpus is modest, **pg
 > **Parent**
 >  [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
 >
+> **Topics**
+> - [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation/Evaluation|Evaluation]]
+>
 > **Pages**
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Caching|Caching]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Chunking|Chunking]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring|Monitoring]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Query Translation|Query Translation]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/RAG Evaluation|RAG Evaluation]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/RAG Patterns|RAG Patterns]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Re-ranking|Re-ranking]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Retrieval|Retrieval]]

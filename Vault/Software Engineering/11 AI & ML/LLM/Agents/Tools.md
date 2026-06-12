@@ -209,6 +209,9 @@ Three mechanisms compound:
 > **Parent**
 >  [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
 >
+> **Topics**
+> - [[Software Engineering/11 AI & ML/LLM/Agents/Evaluation/Evaluation|Evaluation]]
+>
 > **Pages**
 > - [[Software Engineering/11 AI & ML/LLM/Agents/Agent Loop|Agent Loop]]
 > - [[Software Engineering/11 AI & ML/LLM/Agents/Model Context Protocol|Model Context Protocol]]

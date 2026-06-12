@@ -12,7 +12,7 @@ dg-publish: true
 
 # Intro
 
-This is the catalog of production RAG patterns, ranked by how common they are as default guidance in current vendor docs, open-source frameworks, and enterprise architectures. The ranking is a practical adoption heuristic, not market-share data. Start at the top and move down only when [[Software Engineering/11 AI & ML/LLM/RAG/RAG Evaluation|evaluation]] shows a specific failure that cheaper patterns do not fix — each pattern below names the failure mode it solves and the risk it introduces. For the overall pipeline these patterns plug into, see [[Software Engineering/11 AI & ML/LLM/RAG/RAG|RAG]].
+This is the catalog of production RAG patterns, ranked by how common they are as default guidance in current vendor docs, open-source frameworks, and enterprise architectures. The ranking is a practical adoption heuristic, not market-share data. Start at the top and move down only when [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation/Evaluation|evaluation]] shows a specific failure that cheaper patterns do not fix — each pattern below names the failure mode it solves and the risk it introduces. For the overall pipeline these patterns plug into, see [[Software Engineering/11 AI & ML/LLM/RAG/RAG|RAG]].
 
 ## 1. Baseline Single-Pass RAG
 
@@ -373,12 +373,14 @@ Main risk:
 > **Parent**
 >  [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
 >
+> **Topics**
+> - [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation/Evaluation|Evaluation]]
+>
 > **Pages**
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Caching|Caching]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Chunking|Chunking]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring|Monitoring]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Query Translation|Query Translation]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/RAG Evaluation|RAG Evaluation]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Re-ranking|Re-ranking]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Retrieval|Retrieval]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Vector Databases|Vector Databases]]

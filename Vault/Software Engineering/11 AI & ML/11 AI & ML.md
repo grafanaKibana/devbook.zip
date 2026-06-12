@@ -5,10 +5,10 @@ subtopic: []
 tags:
   - FolderNote
 dg-publish: true
-status: Done
 level:
   - '3'
 priority: High
+status: Ready To Repeat
 ---
 
 # Intro
@@ -68,7 +68,7 @@ Fairness, reliability and safety, privacy and security, inclusiveness, transpare
 > - Without held-out evaluation, every model swap, prompt change, or retraining run is a guess — improvements cannot be distinguished from noise or regressions
 > - Production failures are dominated by data and distribution problems (drift, leakage, segment regressions), which only evaluation and monitoring catch — not by raw model capability
 > - A weaker model with solid evaluation and a feedback loop improves over time; a stronger model without them silently degrades
-> - This is why every branch of this section has its own evaluation pages: [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/Evaluation|ML Evaluation]], [[Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation|LLM Evaluation]], and [[Software Engineering/11 AI & ML/LLM/RAG/RAG Evaluation|RAG Evaluation]]
+> - This is why every branch of this section has its own evaluation pages: [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/Evaluation|ML Evaluation]] and the general [[Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation|LLM Evaluation]], which RAG and agents specialize in [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation/Evaluation|RAG Evaluation]] and [[Software Engineering/11 AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]]
 
 ## References
 
