@@ -106,10 +106,13 @@ public sealed class SearchEvaluation : MongoEvaluationTestBase<SearchPrediction>
 
         this.Predictions.Add(prediction);
 
-        await scenarioRun.EvaluateAsync(
-            [new ChatMessage(ChatRole.User, testCase.Query)],
-            new ChatResponse(new ChatMessage(ChatRole.Assistant, string.Join(Environment.NewLine, response.Results.Select(result => result.CitationLabel)))),
-            additionalContext: [new SearchEvaluationContext(prediction, TopK)]);
+        await RunLiveLlmEvaluationAsync(async () =>
+        {
+            await scenarioRun.EvaluateAsync(
+                [new ChatMessage(ChatRole.User, testCase.Query)],
+                new ChatResponse(new ChatMessage(ChatRole.Assistant, string.Join(Environment.NewLine, response.Results.Select(result => result.CitationLabel)))),
+                additionalContext: [new SearchEvaluationContext(prediction, TopK)]);
+        });
     }
 
     private RagSearchService CreateSearchService(

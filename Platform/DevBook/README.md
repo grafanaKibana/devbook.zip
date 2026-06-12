@@ -91,6 +91,16 @@ Evaluation runs load configuration from `DevBook.Evaluations/appsettings.json`, 
 - `ConnectionStrings:MongoDb` with an Atlas connection string that has the vector-search index.
 - `OpenAIOptions:ApiKey` with an OpenAI API key.
 
+Live LLM evaluations cap NUnit worker parallelism at 4. When OpenAI returns HTTP `429` from an evaluation call, the eval runner reads `x-ratelimit-reset-requests` and `x-ratelimit-reset-tokens`, waits for the longer reset duration plus one second, logs the retry delay, then retries up to `EvaluationRateLimitOptions:MaxRetryAttempts`.
+
+```json
+{
+  "EvaluationRateLimitOptions": {
+    "MaxRetryAttempts": 5
+  }
+}
+```
+
 Use environment variables when you do not want to edit the local settings file:
 
 ```bash
