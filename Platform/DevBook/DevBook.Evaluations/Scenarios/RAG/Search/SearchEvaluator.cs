@@ -13,21 +13,11 @@ public sealed class SearchEvaluator : IEvaluator
 {
     private const string EmptyResultRateMetricName = "EmptyResultRate";
     private const string ScoreAverageMetricName = "ScoreAverage";
-    private const string CreditedScoreAverageMetricName = "CreditedScoreAverage";
-    private const string UncreditedScoreAverageMetricName = "UncreditedScoreAverage";
-    private const string CreditedToUncreditedSameSourceScoreGapMetricName = "CreditedToUncreditedSameSourceScoreGap";
 
     /// <summary>
     /// Gets evaluation metric names.
     /// </summary>
-    public IReadOnlyCollection<string> EvaluationMetricNames { get; } =
-    [
-        ..CreateRankingMetricNames(),
-        ScoreAverageMetricName,
-        CreditedScoreAverageMetricName,
-        UncreditedScoreAverageMetricName,
-        CreditedToUncreditedSameSourceScoreGapMetricName,
-    ];
+    public IReadOnlyCollection<string> EvaluationMetricNames { get; } = CreateRankingMetricNames();
 
     /// <summary>
     /// Evaluates one search prediction and returns report-facing metrics.
@@ -52,16 +42,11 @@ public sealed class SearchEvaluator : IEvaluator
         }
 
         var metrics = SearchMetricCalculator.ScoreQuery(context.Prediction, context.TopK);
-        var rankingMetrics = SearchMetricCalculator.RankingCutoffs
-            .SelectMany(cutoff => CreateRankingMetrics(cutoff, metrics.RankingMetrics[cutoff], metrics))
-            .ToArray();
+        var rankingMetrics = CreateRankingMetrics(metrics).ToArray();
 
         return ValueTask.FromResult(new EvaluationResult([
             ..rankingMetrics,
-            CreateScoreMetric(ScoreAverageMetricName, metrics.ScoreAverage, metrics),
-            CreateScoreMetric(CreditedScoreAverageMetricName, metrics.CreditedScoreAverage, metrics),
-            CreateScoreMetric(UncreditedScoreAverageMetricName, metrics.UncreditedScoreAverage, metrics),
-            CreateScoreMetric(CreditedToUncreditedSameSourceScoreGapMetricName, metrics.CreditedToUncreditedSameSourceScoreGap, metrics),
+            CreateScoreMetric(metrics),
         ]));
     }
 
@@ -85,42 +70,59 @@ public sealed class SearchEvaluator : IEvaluator
     private static IEnumerable<SummaryMetric> CreateSummaryMetrics(SearchReport report, ChunkingStrategyKind chunkingStrategy, RerankingStrategyKind rerankingStrategy) =>
     [
         new SummaryMetric("SampleCount", report.QueryCount, $"Total RAG search cases evaluated over {chunkingStrategy} chunks with {rerankingStrategy} reranking.", SummaryMetricKind.Count),
-        ..SearchMetricCalculator.RankingCutoffs.SelectMany(cutoff => CreateSummaryRankingMetrics(report, chunkingStrategy, rerankingStrategy, cutoff)),
+        ..CreateSummaryRankingMetrics(report, chunkingStrategy, rerankingStrategy),
         new SummaryMetric(EmptyResultRateMetricName, report.EmptyResultRate, $"Share of RAG search cases with no retrieved {chunkingStrategy} chunks after {rerankingStrategy} reranking.", SummaryMetricKind.Percentage, GetEmptyResultRateRating(report.EmptyResultRate)),
-        new SummaryMetric(ScoreAverageMetricName, report.ScoreAverage, $"Diagnostic only: average returned score across all scored retrieved {chunkingStrategy} chunks with {rerankingStrategy} reranking. Compare only within the same reranker and scorer scale.", SummaryMetricKind.PlainNumber, EvaluationRating.Unknown),
-        new SummaryMetric(CreditedScoreAverageMetricName, report.CreditedScoreAverage, $"Diagnostic only: average returned score across retrieved {chunkingStrategy} chunks credited against expected evidence with {rerankingStrategy} reranking. Compare only within the same reranker and scorer scale.", SummaryMetricKind.PlainNumber, EvaluationRating.Unknown),
-        new SummaryMetric(UncreditedScoreAverageMetricName, report.UncreditedScoreAverage, $"Diagnostic only: average returned score across retrieved {chunkingStrategy} chunks not credited by the sparse golden dataset with {rerankingStrategy} reranking. Compare only within the same reranker and scorer scale.", SummaryMetricKind.PlainNumber, EvaluationRating.Unknown),
-        new SummaryMetric(CreditedToUncreditedSameSourceScoreGapMetricName, report.CreditedToUncreditedSameSourceScoreGap, $"Diagnostic only: average score difference between the first credited result and the highest-scored uncredited same-source {chunkingStrategy} chunk with {rerankingStrategy} reranking.", SummaryMetricKind.PlainNumber, EvaluationRating.Unknown),
+        new SummaryMetric(ScoreAverageMetricName, report.ScoreAverage, $"Diagnostic only: average returned score across all scored retrieved {chunkingStrategy} chunks with {rerankingStrategy} reranking. Related diagnostics: CreditedScoreAverage={FormatNumber(report.CreditedScoreAverage)}, UncreditedScoreAverage={FormatNumber(report.UncreditedScoreAverage)}, CreditedToUncreditedSameSourceScoreGap={FormatNumber(report.CreditedToUncreditedSameSourceScoreGap)}. Compare only within the same reranker and scorer scale.", SummaryMetricKind.PlainNumber, EvaluationRating.Unknown),
     ];
 
     private static IEnumerable<SummaryMetric> CreateSummaryRankingMetrics(
         SearchReport report,
         ChunkingStrategyKind chunkingStrategy,
-        RerankingStrategyKind rerankingStrategy,
-        int cutoff)
+        RerankingStrategyKind rerankingStrategy)
     {
-        var ranking = report.RankingMetrics[cutoff];
+        var rankingAt1 = report.RankingMetrics[1];
+        var rankingAt5 = report.RankingMetrics[SearchMetricCalculator.PrimaryCutoffValue];
+        var rankingAt10 = report.RankingMetrics[10];
 
         return
         [
-            new SummaryMetric(RecallMetricName(cutoff), ranking.Recall, $"Average Recall@{cutoff} across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking. {FormatConfidenceInterval(ranking.ConfidenceIntervals.Recall)}", SummaryMetricKind.Percentage, GetRating(MetricFamily.Recall, ranking.Recall)),
-            new SummaryMetric(PrecisionMetricName(cutoff), ranking.Precision, $"Average annotated Precision@{cutoff} across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking; sparse expected evidence can cap this below 1 even when the needed evidence is found. {FormatConfidenceInterval(ranking.ConfidenceIntervals.Precision)}", SummaryMetricKind.Percentage, GetRating(MetricFamily.Precision, ranking.Precision)),
-            new SummaryMetric(HitRateMetricName(cutoff), ranking.HitRate, $"Average HitRate@{cutoff} across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking. {FormatConfidenceInterval(ranking.ConfidenceIntervals.HitRate)}", SummaryMetricKind.Percentage, GetRating(MetricFamily.HitRate, ranking.HitRate)),
-            new SummaryMetric(MrrMetricName(cutoff), ranking.MeanReciprocalRank, $"Mean reciprocal rank capped at @{cutoff} across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking. {FormatConfidenceInterval(ranking.ConfidenceIntervals.MeanReciprocalRank)}", SummaryMetricKind.PlainNumber, GetRating(MetricFamily.Mrr, ranking.MeanReciprocalRank)),
-            new SummaryMetric(MapMetricName(cutoff), ranking.MeanAveragePrecision, $"Mean Average Precision@{cutoff} across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking. {FormatConfidenceInterval(ranking.ConfidenceIntervals.MeanAveragePrecision)}", SummaryMetricKind.PlainNumber, GetRating(MetricFamily.Map, ranking.MeanAveragePrecision)),
-            new SummaryMetric(NdcgMetricName(cutoff), ranking.NormalizedDiscountedCumulativeGain, $"Mean nDCG@{cutoff} across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking. {FormatConfidenceInterval(ranking.ConfidenceIntervals.NormalizedDiscountedCumulativeGain)}", SummaryMetricKind.PlainNumber, GetRating(MetricFamily.Ndcg, ranking.NormalizedDiscountedCumulativeGain)),
+            new SummaryMetric(RecallMetricName(1), rankingAt1.Recall, $"Average Recall@1 across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking. {FormatConfidenceInterval(rankingAt1.ConfidenceIntervals.Recall)}", SummaryMetricKind.Percentage, GetRating(MetricFamily.Recall, rankingAt1.Recall)),
+            new SummaryMetric(RecallMetricName(SearchMetricCalculator.PrimaryCutoffValue), rankingAt5.Recall, $"Average Recall@{SearchMetricCalculator.PrimaryCutoffValue} across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking. {FormatConfidenceInterval(rankingAt5.ConfidenceIntervals.Recall)}", SummaryMetricKind.Percentage, GetRating(MetricFamily.Recall, rankingAt5.Recall)),
+            new SummaryMetric(RecallMetricName(10), rankingAt10.Recall, $"Average Recall@10 across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking. {FormatConfidenceInterval(rankingAt10.ConfidenceIntervals.Recall)}", SummaryMetricKind.Percentage, GetRating(MetricFamily.Recall, rankingAt10.Recall)),
+            new SummaryMetric(PrecisionMetricName(1), rankingAt1.Precision, $"Average annotated Precision@1 across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking; sparse expected evidence can cap this below 1 even when the needed evidence is found. {FormatConfidenceInterval(rankingAt1.ConfidenceIntervals.Precision)}", SummaryMetricKind.Percentage, GetRating(MetricFamily.Precision, rankingAt1.Precision)),
+            new SummaryMetric(PrecisionMetricName(SearchMetricCalculator.PrimaryCutoffValue), rankingAt5.Precision, $"Average annotated Precision@{SearchMetricCalculator.PrimaryCutoffValue} across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking; sparse expected evidence can cap this below 1 even when the needed evidence is found. {FormatConfidenceInterval(rankingAt5.ConfidenceIntervals.Precision)}", SummaryMetricKind.Percentage, GetRating(MetricFamily.Precision, rankingAt5.Precision)),
+            new SummaryMetric(PrecisionMetricName(10), rankingAt10.Precision, $"Average annotated Precision@10 across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking; sparse expected evidence can cap this below 1 even when the needed evidence is found. {FormatConfidenceInterval(rankingAt10.ConfidenceIntervals.Precision)}", SummaryMetricKind.Percentage, GetRating(MetricFamily.Precision, rankingAt10.Precision)),
+            new SummaryMetric(HitRateMetricName(1), rankingAt1.HitRate, $"Average HitRate@1 across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking. {FormatConfidenceInterval(rankingAt1.ConfidenceIntervals.HitRate)}", SummaryMetricKind.Percentage, GetRating(MetricFamily.HitRate, rankingAt1.HitRate)),
+            new SummaryMetric(HitRateMetricName(SearchMetricCalculator.PrimaryCutoffValue), rankingAt5.HitRate, $"Average HitRate@{SearchMetricCalculator.PrimaryCutoffValue} across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking. {FormatConfidenceInterval(rankingAt5.ConfidenceIntervals.HitRate)}", SummaryMetricKind.Percentage, GetRating(MetricFamily.HitRate, rankingAt5.HitRate)),
+            new SummaryMetric(HitRateMetricName(10), rankingAt10.HitRate, $"Average HitRate@10 across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking. {FormatConfidenceInterval(rankingAt10.ConfidenceIntervals.HitRate)}", SummaryMetricKind.Percentage, GetRating(MetricFamily.HitRate, rankingAt10.HitRate)),
+            new SummaryMetric(MrrMetricName(SearchMetricCalculator.PrimaryCutoffValue), rankingAt5.MeanReciprocalRank, $"Mean reciprocal rank capped at @{SearchMetricCalculator.PrimaryCutoffValue} across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking. {FormatConfidenceInterval(rankingAt5.ConfidenceIntervals.MeanReciprocalRank)}", SummaryMetricKind.PlainNumber, GetRating(MetricFamily.Mrr, rankingAt5.MeanReciprocalRank)),
+            new SummaryMetric(MapMetricName(SearchMetricCalculator.PrimaryCutoffValue), rankingAt5.MeanAveragePrecision, $"Mean Average Precision@{SearchMetricCalculator.PrimaryCutoffValue} across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking. {FormatConfidenceInterval(rankingAt5.ConfidenceIntervals.MeanAveragePrecision)}", SummaryMetricKind.PlainNumber, GetRating(MetricFamily.Map, rankingAt5.MeanAveragePrecision)),
+            new SummaryMetric(NdcgMetricName(SearchMetricCalculator.PrimaryCutoffValue), rankingAt5.NormalizedDiscountedCumulativeGain, $"Mean nDCG@{SearchMetricCalculator.PrimaryCutoffValue} across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking. {FormatConfidenceInterval(rankingAt5.ConfidenceIntervals.NormalizedDiscountedCumulativeGain)}", SummaryMetricKind.PlainNumber, GetRating(MetricFamily.Ndcg, rankingAt5.NormalizedDiscountedCumulativeGain)),
         ];
     }
 
-    private static IEnumerable<NumericMetric> CreateRankingMetrics(int cutoff, SearchRankingMetrics ranking, SearchQueryMetrics metrics) =>
-    [
-        CreateMetric(RecallMetricName(cutoff), MetricFamily.Recall, cutoff, ranking.Recall, metrics),
-        CreateMetric(PrecisionMetricName(cutoff), MetricFamily.Precision, cutoff, ranking.Precision, metrics),
-        CreateMetric(HitRateMetricName(cutoff), MetricFamily.HitRate, cutoff, ranking.HitRate, metrics),
-        CreateMetric(MrrMetricName(cutoff), MetricFamily.Mrr, cutoff, ranking.MeanReciprocalRank, metrics),
-        CreateMetric(MapMetricName(cutoff), MetricFamily.Map, cutoff, ranking.MeanAveragePrecision, metrics),
-        CreateMetric(NdcgMetricName(cutoff), MetricFamily.Ndcg, cutoff, ranking.NormalizedDiscountedCumulativeGain, metrics),
-    ];
+    private static IEnumerable<NumericMetric> CreateRankingMetrics(SearchQueryMetrics metrics)
+    {
+        var rankingAt1 = metrics.RankingMetrics[1];
+        var rankingAt5 = metrics.RankingMetrics[SearchMetricCalculator.PrimaryCutoffValue];
+        var rankingAt10 = metrics.RankingMetrics[10];
+
+        return
+        [
+            CreateMetric(RecallMetricName(1), MetricFamily.Recall, 1, rankingAt1.Recall, metrics),
+            CreateMetric(RecallMetricName(SearchMetricCalculator.PrimaryCutoffValue), MetricFamily.Recall, SearchMetricCalculator.PrimaryCutoffValue, rankingAt5.Recall, metrics),
+            CreateMetric(RecallMetricName(10), MetricFamily.Recall, 10, rankingAt10.Recall, metrics),
+            CreateMetric(PrecisionMetricName(1), MetricFamily.Precision, 1, rankingAt1.Precision, metrics),
+            CreateMetric(PrecisionMetricName(SearchMetricCalculator.PrimaryCutoffValue), MetricFamily.Precision, SearchMetricCalculator.PrimaryCutoffValue, rankingAt5.Precision, metrics),
+            CreateMetric(PrecisionMetricName(10), MetricFamily.Precision, 10, rankingAt10.Precision, metrics),
+            CreateMetric(HitRateMetricName(1), MetricFamily.HitRate, 1, rankingAt1.HitRate, metrics),
+            CreateMetric(HitRateMetricName(SearchMetricCalculator.PrimaryCutoffValue), MetricFamily.HitRate, SearchMetricCalculator.PrimaryCutoffValue, rankingAt5.HitRate, metrics),
+            CreateMetric(HitRateMetricName(10), MetricFamily.HitRate, 10, rankingAt10.HitRate, metrics),
+            CreateMetric(MrrMetricName(SearchMetricCalculator.PrimaryCutoffValue), MetricFamily.Mrr, SearchMetricCalculator.PrimaryCutoffValue, rankingAt5.MeanReciprocalRank, metrics),
+            CreateMetric(MapMetricName(SearchMetricCalculator.PrimaryCutoffValue), MetricFamily.Map, SearchMetricCalculator.PrimaryCutoffValue, rankingAt5.MeanAveragePrecision, metrics),
+            CreateMetric(NdcgMetricName(SearchMetricCalculator.PrimaryCutoffValue), MetricFamily.Ndcg, SearchMetricCalculator.PrimaryCutoffValue, rankingAt5.NormalizedDiscountedCumulativeGain, metrics),
+        ];
+    }
 
     private static NumericMetric CreateMetric(string name, MetricFamily family, int cutoff, double value, SearchQueryMetrics metrics)
     {
@@ -134,17 +136,18 @@ public sealed class SearchEvaluator : IEvaluator
         };
     }
 
-    private static NumericMetric CreateScoreMetric(string name, double? value, SearchQueryMetrics metrics)
-    {
-        var metricValue = value is null ? 0 : RoundScore(value.Value);
-        var rating = value is null ? EvaluationRating.Inconclusive : EvaluationRating.Unknown;
 
-        return new NumericMetric(name, metricValue, CreateMetricReason(name))
+    private static NumericMetric CreateScoreMetric(SearchQueryMetrics metrics)
+    {
+        var value = metrics.ScoreAverage is null ? 0 : RoundScore(metrics.ScoreAverage.Value);
+        var rating = metrics.ScoreAverage is null ? EvaluationRating.Inconclusive : EvaluationRating.Unknown;
+
+        return new NumericMetric(ScoreAverageMetricName, value, CreateMetricReason(ScoreAverageMetricName))
         {
             Interpretation = new EvaluationMetricInterpretation(
                 rating,
                 failed: false,
-                reason: CreateScoreInterpretationReason(name, metricValue, metrics)),
+                reason: CreateScoreInterpretationReason(value, metrics)),
         };
     }
 
@@ -159,14 +162,8 @@ public sealed class SearchEvaluator : IEvaluator
             MetricFamily.Mrr => "MRR@k measures ranking quality: 1 divided by the rank of the first relevant evidence chunk within k. High means useful evidence appears early; 0 means no relevant evidence appeared in top-k.",
             MetricFamily.Map => "MAP@k averages precision at each relevant result rank within k, then averages across queries. It rewards retrieving multiple expected evidence items early.",
             MetricFamily.Ndcg => "nDCG@k measures discounted ranking quality against the ideal ordering of expected evidence. Range is 0 to 1 for binary relevance here.",
-            _ => name switch
-            {
-                ScoreAverageMetricName => "Diagnostic only: average returned score across all scored retrieved chunks in top-k. Scores are scorer-scale-specific and must not be compared across rerankers.",
-                CreditedScoreAverageMetricName => "Diagnostic only: average returned score across retrieved chunks credited against expected evidence. Compare only within the same reranker and score scale.",
-                UncreditedScoreAverageMetricName => "Diagnostic only: average returned score across retrieved chunks not credited by the sparse golden dataset; uncredited does not mean irrelevant. Compare only within the same reranker and score scale.",
-                CreditedToUncreditedSameSourceScoreGapMetricName => "Diagnostic only: first credited result score minus the highest-scored uncredited result from the same expected source path.",
-                _ => name,
-            },
+            _ when name == ScoreAverageMetricName => "Diagnostic only: average returned score across all scored retrieved chunks in top-k. Related score diagnostics are included in the interpretation reason.",
+            _ => name,
         };
     }
 
@@ -196,23 +193,16 @@ public sealed class SearchEvaluator : IEvaluator
         };
     }
 
-    private static string CreateScoreInterpretationReason(string name, double value, SearchQueryMetrics metrics)
-        => name switch
+
+    private static string CreateScoreInterpretationReason(double value, SearchQueryMetrics metrics)
+    {
+        if (metrics.ScoreAverage is null)
         {
-            ScoreAverageMetricName => metrics.ScoreAverage is null
-                ? "Score 0 (Inconclusive): no retrieved chunks included returned scores."
-                : $"Score {FormatNumber(value)} (Diagnostic): average score across scored retrieved chunks; compare only within the same reranker scale.",
-            CreditedScoreAverageMetricName => metrics.CreditedScoreAverage is null
-                ? "Score 0 (Inconclusive): no credited retrieved chunks included returned scores."
-                : $"Score {FormatNumber(value)} (Diagnostic): average score across scored credited retrieved chunks; compare only within the same reranker scale.",
-            UncreditedScoreAverageMetricName => metrics.UncreditedScoreAverage is null
-                ? "Score 0 (Inconclusive): no uncredited retrieved chunks included returned scores."
-                : $"Score {FormatNumber(value)} (Diagnostic): average score across scored uncredited retrieved chunks; uncredited means absent from the sparse expected-evidence set, not necessarily irrelevant.",
-            CreditedToUncreditedSameSourceScoreGapMetricName => metrics.CreditedToUncreditedSameSourceScoreGap is null
-                ? "Score 0 (Inconclusive): no scored credited and uncredited same-source pair was available."
-                : $"Score {FormatNumber(value)} (Diagnostic): credited score minus highest uncredited same-source score; descriptive only.",
-            _ => $"{name}: {FormatNumber(value)}",
-        };
+            return "Score 0 (Inconclusive): no retrieved chunks included returned scores.";
+        }
+
+        return $"Score {FormatNumber(value)} (Diagnostic): average score across scored retrieved chunks. Related diagnostics: CreditedScoreAverage={FormatOptionalNumber(metrics.CreditedScoreAverage)}, UncreditedScoreAverage={FormatOptionalNumber(metrics.UncreditedScoreAverage)}, CreditedToUncreditedSameSourceScoreGap={FormatOptionalNumber(metrics.CreditedToUncreditedSameSourceScoreGap)}. Compare only within the same reranker scale.";
+    }
 
     private static EvaluationRating GetRating(MetricFamily family, double value)
         => family switch
@@ -254,18 +244,22 @@ public sealed class SearchEvaluator : IEvaluator
             _ => EvaluationRating.Unacceptable,
         };
 
-    private static IReadOnlyList<string> CreateRankingMetricNames()
-        => SearchMetricCalculator.RankingCutoffs
-            .SelectMany(cutoff => new[]
-            {
-                RecallMetricName(cutoff),
-                PrecisionMetricName(cutoff),
-                HitRateMetricName(cutoff),
-                MrrMetricName(cutoff),
-                MapMetricName(cutoff),
-                NdcgMetricName(cutoff),
-            })
-            .ToArray();
+    private static IReadOnlyList<string> CreateRankingMetricNames() =>
+    [
+        RecallMetricName(1),
+        RecallMetricName(SearchMetricCalculator.PrimaryCutoffValue),
+        RecallMetricName(10),
+        PrecisionMetricName(1),
+        PrecisionMetricName(SearchMetricCalculator.PrimaryCutoffValue),
+        PrecisionMetricName(10),
+        HitRateMetricName(1),
+        HitRateMetricName(SearchMetricCalculator.PrimaryCutoffValue),
+        HitRateMetricName(10),
+        MrrMetricName(SearchMetricCalculator.PrimaryCutoffValue),
+        MapMetricName(SearchMetricCalculator.PrimaryCutoffValue),
+        NdcgMetricName(SearchMetricCalculator.PrimaryCutoffValue),
+        ScoreAverageMetricName,
+    ];
 
     private static string RecallMetricName(int cutoff) => $"RecallAt{cutoff}";
 
@@ -293,6 +287,9 @@ public sealed class SearchEvaluator : IEvaluator
 
     private static string FormatNumber(double value)
         => value.ToString("0.###", CultureInfo.InvariantCulture);
+
+    private static string FormatOptionalNumber(double? value)
+        => value is null ? "n/a" : FormatNumber(RoundScore(value.Value));
 
     private static string FormatConfidenceInterval(SearchConfidenceInterval confidenceInterval)
         => $"Bootstrap 95% CI: [{FormatNumber(confidenceInterval.Lower)}, {FormatNumber(confidenceInterval.Upper)}].";

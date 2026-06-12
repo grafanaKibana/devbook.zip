@@ -251,43 +251,25 @@ public sealed class SearchMetricCalculatorTests
         reciprocalRankMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Unacceptable);
         reciprocalRankMetric.Interpretation.Reason.Should().Be("Score 0 (Unacceptable): no retrieved chunk matched the expected evidence.");
         reciprocalRankMetric.Diagnostics.Should().BeNullOrEmpty();
-        result.Metrics.Should().ContainKeys("RecallAt1", "RecallAt3", "RecallAt5", "RecallAt10", "MRRAt1", "MRRAt3", "MRRAt5", "MRRAt10", "MAPAt5", "NDCGAt5");
-
+        result.Metrics.Keys.Should().Equal(PerQueryDashboardMetrics());
+        result.Metrics.Should().NotContainKeys("RecallAt3", "PrecisionAt3", "MRRAt1", "MRRAt3", "MRRAt10", "MAPAt1", "MAPAt3", "MAPAt10", "NDCGAt1", "NDCGAt3", "NDCGAt10", "CreditedScoreAverage", "UncreditedScoreAverage", "CreditedToUncreditedSameSourceScoreGap");
         var scoreAverageMetric = result.Metrics["ScoreAverage"];
         ((NumericMetric)scoreAverageMetric).Value.Should().Be(0.87);
-        scoreAverageMetric.Reason.Should().Be("Diagnostic only: average returned score across all scored retrieved chunks in top-k. Scores are scorer-scale-specific and must not be compared across rerankers.");
-        scoreAverageMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Unknown);
-        scoreAverageMetric.Interpretation.Reason.Should().Be("Score 0.87 (Diagnostic): average score across scored retrieved chunks; compare only within the same reranker scale.");
-        scoreAverageMetric.Diagnostics.Should().BeNullOrEmpty();
-
-        var creditedScoreMetric = result.Metrics["CreditedScoreAverage"];
-        ((NumericMetric)creditedScoreMetric).Value.Should().Be(0);
-        creditedScoreMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Inconclusive);
-        creditedScoreMetric.Interpretation.Reason.Should().Be("Score 0 (Inconclusive): no credited retrieved chunks included returned scores.");
-
-        var uncreditedScoreMetric = result.Metrics["UncreditedScoreAverage"];
-        ((NumericMetric)uncreditedScoreMetric).Value.Should().Be(0.87);
-        uncreditedScoreMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Unknown);
-        uncreditedScoreMetric.Interpretation.Reason.Should().Be("Score 0.87 (Diagnostic): average score across scored uncredited retrieved chunks; uncredited means absent from the sparse expected-evidence set, not necessarily irrelevant.");
-
-        var gapMetric = result.Metrics["CreditedToUncreditedSameSourceScoreGap"];
-        ((NumericMetric)gapMetric).Value.Should().Be(0);
-        gapMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Inconclusive);
-        gapMetric.Interpretation.Reason.Should().Be("Score 0 (Inconclusive): no scored credited and uncredited same-source pair was available.");
+        scoreAverageMetric.Interpretation!.Reason.Should().Be("Score 0.87 (Diagnostic): average score across scored retrieved chunks. Related diagnostics: CreditedScoreAverage=n/a, UncreditedScoreAverage=0.87, CreditedToUncreditedSameSourceScoreGap=n/a. Compare only within the same reranker scale.");
+        evaluator.EvaluationMetricNames.Should().BeEquivalentTo(result.Metrics.Keys);
     }
 
     /// <summary>
-    /// Searches evaluator evaluate rounds score metrics and rates thresholds.
+    /// Searches evaluator evaluate exposes only the dashboard metric surface.
     /// </summary>
     [Fact]
-    public async Task SearchEvaluator_EvaluateAsync_RoundsScoreMetricsAndRatesThresholds()
+    public async Task SearchEvaluator_EvaluateAsync_ExposesOnlyDashboardMetrics()
     {
         var prediction = Prediction(
-            "rounded score query",
+            "dashboard query",
             [Document(EvaluationPath, RetrievalHeading, RetrievalSnippet)],
             [
                 Document(EvaluationPath, RetrievalHeading, "Recall@k is primary because the generator cannot use evidence it never sees.", score: 0.87654),
-                Document(EvaluationPath, RetrievalHeading, "Recall@k is primary because the generator cannot use evidence it never sees.", score: 0.84321),
                 Document(IrrelevantPath, "Composite", "irrelevant", score: 0.18765)
             ]);
         var evaluator = new SearchEvaluator();
@@ -297,51 +279,12 @@ public sealed class SearchMetricCalculatorTests
             new ChatResponse(new ChatMessage(ChatRole.Assistant, "[[Evaluation#Retrieval Metrics]]")),
             additionalContext: [new SearchEvaluationContext(prediction, topK: 5)]);
 
+        result.Metrics.Keys.Should().Equal(PerQueryDashboardMetrics());
         var scoreAverageMetric = result.Metrics["ScoreAverage"];
-        ((NumericMetric)scoreAverageMetric).Value.Should().Be(0.636);
-        scoreAverageMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Unknown);
-        scoreAverageMetric.Interpretation.Reason.Should().Be("Score 0.636 (Diagnostic): average score across scored retrieved chunks; compare only within the same reranker scale.");
-
-        var creditedScoreMetric = result.Metrics["CreditedScoreAverage"];
-        ((NumericMetric)creditedScoreMetric).Value.Should().Be(0.877);
-        creditedScoreMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Unknown);
-
-        var uncreditedScoreMetric = result.Metrics["UncreditedScoreAverage"];
-        ((NumericMetric)uncreditedScoreMetric).Value.Should().Be(0.515);
-        uncreditedScoreMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Unknown);
-        uncreditedScoreMetric.Interpretation.Reason.Should().Be("Score 0.515 (Diagnostic): average score across scored uncredited retrieved chunks; uncredited means absent from the sparse expected-evidence set, not necessarily irrelevant.");
-
-        var gapMetric = result.Metrics["CreditedToUncreditedSameSourceScoreGap"];
-        ((NumericMetric)gapMetric).Value.Should().Be(0.033);
-        gapMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Unknown);
-        gapMetric.Interpretation.Reason.Should().Be("Score 0.033 (Diagnostic): credited score minus highest uncredited same-source score; descriptive only.");
-    }
-
-    /// <summary>
-    /// Tests that search evaluator keeps low score averages diagnostic instead of rating them as pass or fail.
-    /// </summary>
-    [Fact]
-    public async Task SearchEvaluator_EvaluateAsync_RatesLowScoreAverageAsUnacceptable()
-    {
-        var prediction = Prediction(
-            "low score query",
-            [Document(EvaluationPath, RetrievalHeading, RetrievalSnippet)],
-            [Document(EvaluationPath, RetrievalHeading, "Recall@k is primary because the generator cannot use evidence it never sees.", score: 0.2)]);
-        var evaluator = new SearchEvaluator();
-
-        var result = await evaluator.EvaluateAsync(
-            [new ChatMessage(ChatRole.User, prediction.Query)],
-            new ChatResponse(new ChatMessage(ChatRole.Assistant, "[[Evaluation#Retrieval Metrics]]")),
-            additionalContext: [new SearchEvaluationContext(prediction, topK: 5)]);
-
-        var scoreAverageMetric = result.Metrics["ScoreAverage"];
-
-        ((NumericMetric)scoreAverageMetric).Value.Should().Be(0.2);
-        scoreAverageMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Unknown);
-        scoreAverageMetric.Interpretation.Reason.Should().Be("Score 0.2 (Diagnostic): average score across scored retrieved chunks; compare only within the same reranker scale.");
-
-        var creditedScoreMetric = result.Metrics["CreditedScoreAverage"];
-        creditedScoreMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Unknown);
+        ((NumericMetric)scoreAverageMetric).Value.Should().Be(0.532);
+        scoreAverageMetric.Interpretation!.Reason.Should().Contain("CreditedScoreAverage=0.877");
+        scoreAverageMetric.Interpretation.Reason.Should().Contain("UncreditedScoreAverage=0.188");
+        result.Metrics.Should().NotContainKey("MRRAt10");
     }
 
     /// <summary>
@@ -385,11 +328,26 @@ public sealed class SearchMetricCalculatorTests
         metrics["HitRateAt5"].Rating.Should().Be(EvaluationRating.Average);
         metrics["MRRAt5"].Rating.Should().Be(EvaluationRating.Average);
         metrics["EmptyResultRate"].Rating.Should().Be(EvaluationRating.Poor);
-        metrics.Should().ContainKeys("RecallAt1", "RecallAt3", "RecallAt5", "RecallAt10", "MAPAt5", "NDCGAt5", "ScoreAverage", "CreditedScoreAverage", "UncreditedScoreAverage", "CreditedToUncreditedSameSourceScoreGap");
-        metrics["ScoreAverage"].Rating.Should().Be(EvaluationRating.Unknown);
-        metrics["CreditedScoreAverage"].Rating.Should().Be(EvaluationRating.Unknown);
-        metrics["UncreditedScoreAverage"].Rating.Should().Be(EvaluationRating.Unknown);
-        metrics["CreditedToUncreditedSameSourceScoreGap"].Rating.Should().Be(EvaluationRating.Unknown);
+        metrics.Keys.Should().Equal([
+            "SampleCount",
+            "RecallAt1",
+            "RecallAt5",
+            "RecallAt10",
+            "PrecisionAt1",
+            "PrecisionAt5",
+            "PrecisionAt10",
+            "HitRateAt1",
+            "HitRateAt5",
+            "HitRateAt10",
+            "MRRAt5",
+            "MAPAt5",
+            "NDCGAt5",
+            "EmptyResultRate",
+            "ScoreAverage"
+        ]);
+        metrics["ScoreAverage"].Description.Should().Contain("CreditedScoreAverage=0");
+        metrics["ScoreAverage"].Description.Should().Contain("UncreditedScoreAverage=0");
+        metrics.Should().NotContainKeys("RecallAt3", "MRRAt10", "CreditedScoreAverage", "UncreditedScoreAverage", "CreditedToUncreditedSameSourceScoreGap");
     }
 
     /// <summary>
@@ -544,6 +502,24 @@ public sealed class SearchMetricCalculatorTests
         report.UncreditedScoreAverage.Should().BeApproximately(0.7, 0.000001);
         report.CreditedToUncreditedSameSourceScoreGap.Should().Be(0);
     }
+
+
+    private static string[] PerQueryDashboardMetrics() =>
+    [
+        "RecallAt1",
+        "RecallAt5",
+        "RecallAt10",
+        "PrecisionAt1",
+        "PrecisionAt5",
+        "PrecisionAt10",
+        "HitRateAt1",
+        "HitRateAt5",
+        "HitRateAt10",
+        "MRRAt5",
+        "MAPAt5",
+        "NDCGAt5",
+        "ScoreAverage"
+    ];
 
     private static SearchPrediction Prediction(
         string query,

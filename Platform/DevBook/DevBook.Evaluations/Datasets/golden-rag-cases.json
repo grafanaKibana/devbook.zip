@@ -5,7 +5,7 @@
       "query": "Why should RAG evaluation be split into layers?",
       "expectedSources": [
         {
-          "path": "11 AI & ML/LLM/RAG/Evaluation.md",
+          "path": "11 AI & ML/LLM/RAG/RAG Evaluation.md",
           "heading": "Intro",
           "snippet": "RAG evaluation decomposes into three layers: retrieval quality, generation quality, and end-to-end usefulness."
         }
@@ -17,7 +17,7 @@
       "query": "What retrieval metric should I track first for RAG?",
       "expectedSources": [
         {
-          "path": "11 AI & ML/LLM/RAG/Evaluation.md",
+          "path": "11 AI & ML/LLM/RAG/RAG Evaluation.md",
           "heading": "Retrieval Metrics",
           "snippet": "**Recall@k** — of all relevant documents in the corpus, what fraction appears in the top-k results. Recall@5 = 0.8 means 80% of relevant documents land in the top 5. This is the primary retrieval metric for RAG because the generator cannot use evidence it never sees. A recall failure is a hard ceiling on answer quality."
         }

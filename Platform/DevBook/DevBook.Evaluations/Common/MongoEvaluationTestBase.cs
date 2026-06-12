@@ -48,6 +48,7 @@ public abstract class MongoEvaluationTestBase<TPrediction> : EvaluationTestBase<
         var configuration = BuildConfiguration();
         var connectionString = configuration.GetConnectionString("MongoDb");
         var openAIApiKey = configuration.GetSection(nameof(OpenAIOptions)).Get<OpenAIOptions>()?.ApiKey;
+        this.RateLimitOptions = configuration.GetSection(nameof(EvaluationRateLimitOptions)).Get<EvaluationRateLimitOptions>() ?? new EvaluationRateLimitOptions();
 
         if (string.IsNullOrWhiteSpace(connectionString) || string.IsNullOrWhiteSpace(openAIApiKey))
         {

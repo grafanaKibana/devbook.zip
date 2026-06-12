@@ -1,6 +1,8 @@
 namespace DevBook.Evaluations.Common;
 
 using System.Collections.Concurrent;
+using System.ClientModel;
+using System.Globalization;
 using System.Text.Json;
 using DevBook.Evaluations.Common.Evaluators.SummaryGeneration;
 using Microsoft.Extensions.AI;
@@ -17,6 +19,7 @@ using Microsoft.Extensions.AI.Evaluation.Reporting.Storage;
 public abstract class EvaluationTestBase<TPrediction>
 {
     private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
+    private static readonly TimeSpan RateLimitDelayBuffer = TimeSpan.FromSeconds(5);
 
     /// <summary>
     /// Gets predictions captured during scenario iterations for summary reporting.
@@ -37,6 +40,8 @@ public abstract class EvaluationTestBase<TPrediction>
     /// Gets the optional summary group name used in report output.
     /// </summary>
     protected virtual string? SummaryGroupName => null;
+
+    protected EvaluationRateLimitOptions RateLimitOptions { get; set; } = new();
 
     /// <summary>
     /// Runs base setup.
@@ -82,11 +87,112 @@ public abstract class EvaluationTestBase<TPrediction>
     /// <returns>The per-iteration evaluators.</returns>
     protected abstract IEvaluator[] GetPerIterationEvaluators();
 
+    protected async Task RunLiveLlmEvaluationAsync(Func<Task> operation)
+    {
+        ArgumentNullException.ThrowIfNull(operation);
+
+        for (var attempt = 1; ; attempt++)
+        {
+            try
+            {
+                await operation();
+                return;
+            }
+            catch (ClientResultException exception) when (exception.Status == 429 && attempt <= this.RateLimitOptions.MaxRetryAttempts)
+            {
+                var retryDelay = GetRateLimitDelay(exception, out var requestResetDelay, out var tokenResetDelay);
+                await TestContext.Progress.WriteLineAsync($"OpenAI evaluation rate limit hit. Retry {attempt}/{this.RateLimitOptions.MaxRetryAttempts} in {retryDelay.TotalSeconds:F1}s. x-ratelimit-reset-requests={FormatDelay(requestResetDelay)}; x-ratelimit-reset-tokens={FormatDelay(tokenResetDelay)}.");
+                await Task.Delay(retryDelay);
+            }
+        }
+    }
+
     /// <summary>
     /// Builds the current scenario name from the scenario display name and test method.
     /// </summary>
     /// <returns>The scenario name used in evaluation reports.</returns>
     protected string GetScenarioName() => $"{this.ScenarioDisplayName}.{TestContext.CurrentContext.Test.MethodName}";
+
+    private static TimeSpan GetRateLimitDelay(ClientResultException exception, out TimeSpan? requestResetDelay, out TimeSpan? tokenResetDelay)
+    {
+        var response = exception.GetRawResponse();
+        requestResetDelay = TryGetHeaderDelay(response, "x-ratelimit-reset-requests");
+        tokenResetDelay = TryGetHeaderDelay(response, "x-ratelimit-reset-tokens");
+
+        var delay = Max(requestResetDelay, tokenResetDelay) ?? TimeSpan.Zero;
+
+        return delay + RateLimitDelayBuffer;
+    }
+
+    private static TimeSpan? TryGetHeaderDelay(System.ClientModel.Primitives.PipelineResponse? response, string header)
+    {
+        if (response?.Headers.TryGetValue(header, out var value) == true
+            && value is not null
+            && TryParseResetDelay(value, out var parsedDelay))
+        {
+            return parsedDelay;
+        }
+
+        return null;
+    }
+
+    private static TimeSpan? Max(TimeSpan? first, TimeSpan? second) => first > second ? first : second ?? first;
+
+    private static string FormatDelay(TimeSpan? delay) => delay is null ? "missing" : $"{delay.Value.TotalSeconds:F1}s";
+
+    private static bool TryParseResetDelay(string value, out TimeSpan delay)
+    {
+        delay = TimeSpan.Zero;
+
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return false;
+        }
+
+        var remaining = value.AsSpan().Trim();
+        var parsedAny = false;
+
+        while (!remaining.IsEmpty)
+        {
+            var numberLength = 0;
+            while (numberLength < remaining.Length && (char.IsDigit(remaining[numberLength]) || remaining[numberLength] == '.'))
+            {
+                numberLength++;
+            }
+
+            if (numberLength == 0 || !double.TryParse(remaining[..numberLength], NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var amount))
+            {
+                return false;
+            }
+
+            remaining = remaining[numberLength..];
+
+            if (remaining.StartsWith("ms", StringComparison.OrdinalIgnoreCase))
+            {
+                delay += TimeSpan.FromMilliseconds(amount);
+                remaining = remaining[2..];
+            }
+            else if (remaining.StartsWith("s", StringComparison.OrdinalIgnoreCase))
+            {
+                delay += TimeSpan.FromSeconds(amount);
+                remaining = remaining[1..];
+            }
+            else if (remaining.StartsWith("m", StringComparison.OrdinalIgnoreCase))
+            {
+                delay += TimeSpan.FromMinutes(amount);
+                remaining = remaining[1..];
+            }
+            else
+            {
+                return false;
+            }
+
+            parsedAny = true;
+            remaining = remaining.TrimStart();
+        }
+
+        return parsedAny;
+    }
 
     /// <summary>
     /// Computes aggregate metrics for captured predictions.

@@ -22,7 +22,7 @@ public sealed class SearchEvaluation : MongoEvaluationTestBase<SearchPrediction>
         RerankingStrategyKind.NoReranking,
         RerankingStrategyKind.Bm25,
         RerankingStrategyKind.MaximalMarginalRelevance,
-        RerankingStrategyKind.Llm,
+        // RerankingStrategyKind.Llm,
         RerankingStrategyKind.ReciprocalRankFusion,
     ];
 
