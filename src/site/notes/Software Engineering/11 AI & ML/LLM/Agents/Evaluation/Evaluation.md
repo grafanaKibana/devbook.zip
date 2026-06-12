@@ -24,12 +24,14 @@ flowchart TD
 ```
 
 - **Task success (outcome).** Did the world end up in the correct state — the refund issued, the file written, the ticket resolved? This is the metric that matters to the user, and it is best checked against a verifiable end state rather than a judge's opinion: assert the database row, run the produced code against tests, diff the final artifact. Outcome-only scoring is necessary but not sufficient — it hides *how* the result was reached.
-- **Tool-call correctness (process).** For each step: was the right tool selected, were the arguments valid and well-formed, and was the call necessary? Schema validity and allowlisted-action checks are pure [[Software Engineering/11 AI & ML/LLM/Evaluation/Deterministic Checks\|deterministic checks]] — microseconds, zero false positives. "Right tool, wrong tool" and "necessary, redundant" usually need a reference trajectory or an LLM judge.
-- **Trajectory quality (process).** Did the agent take a reasonable path, or did it wander, repeat itself, or recover from a dead end by luck? Score the whole trace with an LLM-as-judge against a rubric, or compare against a reference trajectory when one exists. This is where agents differ most from single-shot eval.
+- **Tool-call correctness (process).** For each step: was the right tool selected, were the arguments valid and well-formed, and was the call necessary? Schema validity and allowlisted-action checks are pure [[Software Engineering/11 AI & ML/LLM/Evaluation/Deterministic Checks\|deterministic checks]] — microseconds, zero false positives. "Right tool, wrong tool" and "necessary, redundant" usually need a reference trajectory or an LLM judge. The full decomposition — selection, arguments, validity, necessity — and its metrics are in [[Software Engineering/11 AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation\|Tool-Call Evaluation]].
+- **Trajectory quality (process).** Did the agent take a reasonable path, or did it wander, repeat itself, or recover from a dead end by luck? Score the whole trace with an LLM-as-judge against a rubric, or compare against a reference trajectory when one exists. This is where agents differ most from single-shot eval — the reference-match modes and judge rubrics are in [[Software Engineering/11 AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation\|Trajectory Evaluation]].
 - **Efficiency.** Steps-to-completion, total token cost, and wall-clock latency per task. An agent that solves the task in 14 tool calls when 4 suffice is a regression even if task success is unchanged — it costs more and compounds error risk.
 - **Robustness and termination.** Does the agent recover from a tool error, and does it *stop*? Non-termination (looping until the step cap) and oscillation between two actions are agent-specific failure modes that a one-shot eval never surfaces. Measure loop rate and cap-hit rate as first-class metrics.
 
 A subtle but critical point for agents: **measure reliability, not just average success.** Because trajectories are stochastic, an agent that passes a task 6 times out of 10 is very different from one that passes 10/10, even though a single run looks identical. Run each task k times and report the fraction of tasks solved on *all* k attempts (a pass^k-style reliability metric), not just mean pass rate — production users feel the variance.
+
+To calibrate against the field — and to understand why public scores rarely predict your own results — [[Software Engineering/11 AI & ML/LLM/Agents/Evaluation/Agent Benchmarks\|Agent Benchmarks]] covers the major public suites (SWE-bench, tau-bench, GAIA, WebArena) and how to read a leaderboard without being misled.
 
 ## Example
 
@@ -92,4 +94,8 @@ Decision rule: gate releases on **verifiable task success plus efficiency guardr
 > **Parent**
 >  [[Software Engineering/11 AI & ML/LLM/Agents/Agents\|Agents]]
 >
+> **Pages**
+> - [[Software Engineering/11 AI & ML/LLM/Agents/Evaluation/Agent Benchmarks\|Agent Benchmarks]]
+> - [[Software Engineering/11 AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation\|Tool-Call Evaluation]]
+> - [[Software Engineering/11 AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation\|Trajectory Evaluation]]
 <!-- whats-next:end -->
