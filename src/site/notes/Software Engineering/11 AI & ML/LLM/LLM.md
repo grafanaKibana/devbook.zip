@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/llm/","tags":["FolderNote"],"dg-note-properties":{"topic":["AI & ML"],"subtopic":["LLM"],"tags":["FolderNote"],"status":"Done","level":["3"],"priority":"High"}}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/llm/","tags":["FolderNote"],"dg-note-properties":{"topic":["AI & ML"],"subtopic":["LLM"],"tags":["FolderNote"],"level":["3"],"priority":"High","status":"Ready To Repeat"}}
 ---
 
 

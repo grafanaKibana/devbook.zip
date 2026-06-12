@@ -113,7 +113,7 @@ Agents are powerful but come with higher costs and compounding error risk. Each 
 2. **Transparency** — show the agent's planning and reasoning steps explicitly. When something fails, you need to see where and why.
 3. **Tool quality** — invest as much effort in tool interfaces (documentation, error messages, parameter design) as in prompts. Think of it as designing an API for a junior developer — if the tool is ambiguous to use, the agent will misuse it.
 
-Where agents work well today: coding tasks (verifiable via tests), customer support (measurable via resolution), and research tasks (structured by sources). The common thread is clear success criteria and feedback loops that let the agent assess its own progress.
+Where agents work well today: coding tasks (verifiable via tests), customer support (measurable via resolution), and research tasks (structured by sources). The common thread is clear success criteria and feedback loops that let the agent assess its own progress. Measuring those criteria rigorously — task success, trajectory quality, tool-call correctness, and reliability across stochastic runs — is [[Software Engineering/11 AI & ML/LLM/Agents/Evaluation/Evaluation\|Agent Evaluation]].
 
 For patterns on coordinating multiple agents, see [[Software Engineering/11 AI & ML/LLM/Agents/Multi-Agentic Systems\|Multi-Agentic Systems]].
 
@@ -142,6 +142,9 @@ For patterns on coordinating multiple agents, see [[Software Engineering/11 AI &
 > [!note] Whats next
 > **Parent**
 >  [[Software Engineering/11 AI & ML/LLM/LLM\|LLM]]
+>
+> **Topics**
+> - [[Software Engineering/11 AI & ML/LLM/Agents/Evaluation/Evaluation\|Evaluation]]
 >
 > **Pages**
 > - [[Software Engineering/11 AI & ML/LLM/Agents/Agent Loop\|Agent Loop]]

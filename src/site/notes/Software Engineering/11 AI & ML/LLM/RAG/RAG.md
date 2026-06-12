@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/rag/rag/","tags":["FolderNote"],"dg-note-properties":{"topic":["AI & ML"],"subtopic":["LLM"],"tags":["FolderNote"],"status":"Done","priority":"High","level":["2"]}}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/rag/rag/","tags":["FolderNote"],"dg-note-properties":{"topic":["AI & ML"],"subtopic":["LLM"],"tags":["FolderNote"],"priority":"High","level":["2"],"status":"Ready To Repeat"}}
 ---
 
 
@@ -21,7 +21,7 @@ flowchart LR
     G --> V[Groundedness and Citation Checks]
 ```
 
-Each stage has its own page: [[Software Engineering/11 AI & ML/LLM/RAG/Query Translation\|Query Translation]] rewrites the user question into retrieval-friendly variants, [[Software Engineering/11 AI & ML/LLM/RAG/Chunking\|Chunking]] defines the unit of retrieval, [[Software Engineering/11 AI & ML/LLM/RAG/Retrieval\|Retrieval]] finds candidate evidence over a [[Software Engineering/11 AI & ML/LLM/RAG/Vector Databases\|vector database]], [[Software Engineering/11 AI & ML/LLM/RAG/Re-ranking\|Re-ranking]] orders it, [[Software Engineering/11 AI & ML/LLM/RAG/RAG Evaluation\|RAG Evaluation]] and [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring\|Monitoring]] measure it offline and in production, and [[Software Engineering/11 AI & ML/LLM/RAG/Caching\|Caching]] keeps the whole pipeline fast and affordable.
+Each stage has its own page: [[Software Engineering/11 AI & ML/LLM/RAG/Query Translation\|Query Translation]] rewrites the user question into retrieval-friendly variants, [[Software Engineering/11 AI & ML/LLM/RAG/Chunking\|Chunking]] defines the unit of retrieval, [[Software Engineering/11 AI & ML/LLM/RAG/Retrieval\|Retrieval]] finds candidate evidence over a [[Software Engineering/11 AI & ML/LLM/RAG/Vector Databases\|vector database]], [[Software Engineering/11 AI & ML/LLM/RAG/Re-ranking\|Re-ranking]] orders it, [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation/Evaluation\|RAG Evaluation]] and [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring\|Monitoring]] measure it offline and in production, and [[Software Engineering/11 AI & ML/LLM/RAG/Caching\|Caching]] keeps the whole pipeline fast and affordable.
 
 ## Choosing a Pattern
 
@@ -40,7 +40,7 @@ Production RAG architectures range from a single retrieve-then-generate pass to 
 - **GraphRAG** — knowledge-graph indexing for relationship and global-synthesis questions.
 - **Corrective / self-reflective RAG** — evaluator-gated retrieval and generation; research-stage for most teams.
 
-Ship the baseline first, add hybrid search and reranking next, and adopt anything further down only for a failure mode your [[Software Engineering/11 AI & ML/LLM/RAG/RAG Evaluation\|evaluation]] actually shows.
+Ship the baseline first, add hybrid search and reranking next, and adopt anything further down only for a failure mode your [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation/Evaluation\|evaluation]] actually shows.
 
 ## Operational Baselines
 
@@ -95,12 +95,14 @@ The combined pattern — fine-tune the model for behavior (format, tone, refusal
 > **Parent**
 >  [[Software Engineering/11 AI & ML/LLM/LLM\|LLM]]
 >
+> **Topics**
+> - [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation/Evaluation\|Evaluation]]
+>
 > **Pages**
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Caching\|Caching]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Chunking\|Chunking]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring\|Monitoring]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Query Translation\|Query Translation]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/RAG Evaluation\|RAG Evaluation]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/RAG Patterns\|RAG Patterns]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Re-ranking\|Re-ranking]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Retrieval\|Retrieval]]
