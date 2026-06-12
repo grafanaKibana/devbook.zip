@@ -1,9 +1,12 @@
 namespace DevBook.Data.Services;
 
+using System.Diagnostics;
 using DevBook.Data.Models;
 using DevBook.Data.Options;
 using DevBook.Data.Repositories;
 using DevBook.Data.Services.Reranking;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 
 /// <summary>
@@ -17,9 +20,11 @@ public class RagSearchService(
     IEmbeddingService embeddingService,
     IChunkRepositoryFactory chunkRepositoryFactory,
     IRerankingStrategyFactory rerankingStrategyFactory,
-    IOptions<RagSearchOptions> options) : IRagSearchService
+    IOptions<RagSearchOptions> options,
+    ILogger<RagSearchService>? logger = null) : IRagSearchService
 {
     private readonly RagSearchOptions options = options.Value;
+    private readonly ILogger<RagSearchService> logger = logger ?? NullLogger<RagSearchService>.Instance;
 
     private const int DefaultTopK = 5;
     private const int MaxTopK = 10;
@@ -49,11 +54,27 @@ public class RagSearchService(
             : Math.Min(request.TopK, MaxTopK);
         var rerankingStrategy = rerankingStrategyFactory.Create(options.RerankingStrategy);
         var candidateCount = Math.Min(topK * RerankingCandidateMultiplier, MaxRerankingCandidateCount);
+        var stopwatch = Stopwatch.StartNew();
+
+        logger.LogInformation(
+            "Starting RAG search with QueryLength {QueryLength}, TopK {TopK}, CandidateCount {CandidateCount}, ChunkingStrategy {ChunkingStrategy}, RerankingStrategy {RerankingStrategy}.",
+            query.Length,
+            topK,
+            candidateCount,
+            options.ChunkingStrategy,
+            options.RerankingStrategy);
 
         var embedding = await embeddingService.GenerateEmbeddingAsync(query, cancellationToken);
         var chunkRepository = chunkRepositoryFactory.Create(options.ChunkingStrategy);
         var candidates = await chunkRepository.VectorSearchAsync(embedding, candidateCount, cancellationToken);
         var results = await rerankingStrategy.RerankAsync(query, candidates, topK, cancellationToken);
+
+        logger.LogInformation(
+            "Completed RAG search in {ElapsedMilliseconds} ms. Retrieved {CandidateCount} candidates, returned {ResultCount} results, mode {Mode}.",
+            stopwatch.ElapsedMilliseconds,
+            candidates.Count,
+            results.Count,
+            $"vector+{options.RerankingStrategy}");
 
         return new RagSearchResponse(query, $"vector+{options.RerankingStrategy}", results);
     }

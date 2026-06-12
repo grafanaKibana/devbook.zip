@@ -1,6 +1,7 @@
 namespace DevBook.Data.Services;
 
 using System.Buffers.Binary;
+using System.Diagnostics;
 using System.IO.Hashing;
 using System.Text;
 using DevBook.Data.Models;
@@ -8,6 +9,8 @@ using DevBook.Data.Options;
 using DevBook.Data.Repositories;
 using DevBook.Data.Services.Chunking;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 
 /// <summary>
@@ -23,9 +26,11 @@ public sealed class IngestionService(
     IChunkRepositoryFactory chunkRepositoryFactory,
     IEnumerable<IChunkingService> chunkingServices,
     IHostEnvironment hostEnvironment,
-    IOptions<IngestionOptions> options) : IIngestionService
+    IOptions<IngestionOptions> options,
+    ILogger<IngestionService>? logger = null) : IIngestionService
 {
     private readonly IngestionOptions options = options.Value;
+    private readonly ILogger<IngestionService> logger = logger ?? NullLogger<IngestionService>.Instance;
 
     /// <summary>
     /// Scans markdown files, upserts changed documents, deletes missing documents, and refreshes chunks.
@@ -58,6 +63,14 @@ public sealed class IngestionService(
         var isFolderIngestion = string.IsNullOrWhiteSpace(request.FileName);
         var selectedChunkingServices = GetSelectedChunkingServices(request.ChunkingStrategy);
         var existingDocumentsBySourcePath = new Dictionary<string, Document>(StringComparer.Ordinal);
+        var totalStopwatch = Stopwatch.StartNew();
+
+        logger.LogInformation(
+            "Starting ingestion for SourcePath {SourcePath}, FileName {FileName}, ForceReingest {ForceReingest}, ChunkingStrategies {ChunkingStrategies}.",
+            string.IsNullOrWhiteSpace(sourcePath) ? "<root>" : sourcePath,
+            string.IsNullOrWhiteSpace(request.FileName) ? "<all>" : request.FileName,
+            request.ForceReingest,
+            string.Join(", ", selectedChunkingServices.Select(service => service.Strategy)));
 
         if (isFolderIngestion)
         {
@@ -74,8 +87,15 @@ public sealed class IngestionService(
 
             foreach (var chunkingService in selectedChunkingServices)
             {
+                var deleteStopwatch = Stopwatch.StartNew();
                 await chunkRepositoryFactory.Create(chunkingService.Strategy)
                     .DeleteByDocumentIdsAsync(deletedDocumentIds, cancellationToken);
+
+                logger.LogInformation(
+                    "Deleted chunks for {DeletedDocumentCount} missing documents from {ChunkingStrategy} collection in {ElapsedMilliseconds} ms.",
+                    deletedDocumentIds.Length,
+                    chunkingService.Strategy,
+                    deleteStopwatch.ElapsedMilliseconds);
             }
 
             await documentRepository.DeleteByIdsAsync(deletedDocumentIds, cancellationToken);
@@ -142,8 +162,26 @@ public sealed class IngestionService(
 
         foreach (var chunkingService in selectedChunkingServices)
         {
+            var chunkingStopwatch = Stopwatch.StartNew();
             await chunkingService.ReplaceDocumentChunksAsync(changedDocuments, cancellationToken);
+
+            logger.LogInformation(
+                "Refreshed chunks for {ChangedDocumentCount} changed documents in {ChunkingStrategy} collection in {ElapsedMilliseconds} ms.",
+                changedDocuments.Count,
+                chunkingService.Strategy,
+                chunkingStopwatch.ElapsedMilliseconds);
         }
+
+        logger.LogInformation(
+            "Completed ingestion for SourcePath {SourcePath}, FileName {FileName} in {ElapsedMilliseconds} ms. Processed {ProcessedCount}, created {CreatedCount}, updated {UpdatedCount}, deleted {DeletedCount}, skipped {SkippedCount}.",
+            string.IsNullOrWhiteSpace(sourcePath) ? "<root>" : sourcePath,
+            string.IsNullOrWhiteSpace(request.FileName) ? "<all>" : request.FileName,
+            totalStopwatch.ElapsedMilliseconds,
+            markdownSnapshots.Count,
+            createdCount,
+            updatedCount,
+            deletedCount,
+            markdownSnapshots.Count - createdCount - updatedCount);
 
         return new IngestionResult(
             true,

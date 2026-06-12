@@ -1,5 +1,6 @@
 namespace DevBook.API.Extensions;
 
+using System.Diagnostics;
 using DevBook.Data.Models;
 using DevBook.Data.Options;
 using Microsoft.Extensions.Options;
@@ -25,22 +26,43 @@ public static class MongoSearchIndexExtensions
             var database = app.Services.GetRequiredService<IMongoDatabase>();
             var options = app.Services.GetRequiredService<IOptions<EmbeddingOptions>>().Value;
             var logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("MongoSearchIndexes");
+            var totalStopwatch = Stopwatch.StartNew();
+
+            logger.LogInformation(
+                "Starting Atlas Vector Search index check for {IndexName} with {VectorDimensions} dimensions.",
+                VectorIndexName,
+                options.VectorDimensions);
 
             foreach (var strategy in Enum.GetValues<ChunkingStrategyKind>())
             {
                 var collectionName = $"chunks.{strategy.ToString().ToLowerInvariant()}";
+                var collectionStopwatch = Stopwatch.StartNew();
                 await EnsureCollectionExistsAsync(database, collectionName, cancellationToken);
 
                 if (await SearchIndexExistsAsync(database, collectionName, cancellationToken))
                 {
+                    logger.LogInformation(
+                        "Atlas Vector Search index {IndexName} already exists on {CollectionName}; checked in {ElapsedMilliseconds} ms.",
+                        VectorIndexName,
+                        collectionName,
+                        collectionStopwatch.ElapsedMilliseconds);
                     continue;
                 }
 
                 if (await TryCreateVectorSearchIndexAsync(database, collectionName, options.VectorDimensions, cancellationToken))
                 {
-                    logger.LogInformation("Created Atlas Vector Search index {IndexName} on {CollectionName}.", VectorIndexName, collectionName);
+                    logger.LogInformation(
+                        "Created Atlas Vector Search index {IndexName} on {CollectionName} in {ElapsedMilliseconds} ms.",
+                        VectorIndexName,
+                        collectionName,
+                        collectionStopwatch.ElapsedMilliseconds);
                 }
             }
+
+            logger.LogInformation(
+                "Completed Atlas Vector Search index check for {IndexName} in {ElapsedMilliseconds} ms.",
+                VectorIndexName,
+                totalStopwatch.ElapsedMilliseconds);
         }
     }
 
