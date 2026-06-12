@@ -4,18 +4,34 @@ using DevBook.Data.Models;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
+/// <summary>
+/// Persists and queries chunk records.
+/// </summary>
+/// <param name="chunks">MongoDB collection storing chunks for one chunking strategy.</param>
 public sealed class ChunkRepository(IMongoCollection<ChunkModel> chunks) : IChunkRepository
 {
     private const string VectorIndexName = "chunks_embedding_vector_idx";
     private const string VectorPath = nameof(ChunkModel.Embedding);
     private const int NumCandidatesMultiplier = 20;
 
+    /// <summary>
+    /// Replaces all chunks for one document.
+    /// </summary>
+    /// <param name="documentId">Document identifier.</param>
+    /// <param name="newChunks">Chunks to store for the document.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
     public async Task ReplaceDocumentChunksAsync(
         string documentId,
         IReadOnlyCollection<ChunkModel> newChunks,
         CancellationToken cancellationToken = default) =>
         await ReplaceDocumentsChunksAsync([documentId], newChunks, cancellationToken);
 
+    /// <summary>
+    /// Replaces chunks for multiple documents in one delete and insert operation.
+    /// </summary>
+    /// <param name="documentIds">Document identifiers whose previous chunks are removed.</param>
+    /// <param name="newChunks">Chunks to store for the document.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
     public async Task ReplaceDocumentsChunksAsync(
         IReadOnlyCollection<string> documentIds,
         IReadOnlyCollection<ChunkModel> newChunks,
@@ -34,6 +50,11 @@ public sealed class ChunkRepository(IMongoCollection<ChunkModel> chunks) : IChun
         }
     }
 
+    /// <summary>
+    /// Deletes chunks by parent document identifier.
+    /// </summary>
+    /// <param name="documentIds">Document identifiers whose previous chunks are removed.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
     public async Task DeleteByDocumentIdsAsync(
         IReadOnlyCollection<string> documentIds,
         CancellationToken cancellationToken = default)
@@ -46,6 +67,13 @@ public sealed class ChunkRepository(IMongoCollection<ChunkModel> chunks) : IChun
         await chunks.DeleteManyAsync(chunk => documentIds.Contains(chunk.DocumentId), cancellationToken);
     }
 
+    /// <summary>
+    /// Runs MongoDB Atlas Vector Search against stored chunk embeddings.
+    /// </summary>
+    /// <param name="queryVector">Embedding vector generated from the search query.</param>
+    /// <param name="topK">Maximum number of results to return.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>Matching chunks ordered by Atlas vector-search score.</returns>
     public async Task<IReadOnlyList<RagChunkResponse>> VectorSearchAsync(
         float[] queryVector,
         int topK,

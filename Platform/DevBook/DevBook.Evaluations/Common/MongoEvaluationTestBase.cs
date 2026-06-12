@@ -10,20 +10,39 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
 
+/// <summary>
+/// Base class for evaluation scenarios that need MongoDB-backed RAG services.
+/// </summary>
 public abstract class MongoEvaluationTestBase<TPrediction> : EvaluationTestBase<TPrediction>
 {
     private ServiceProvider? serviceProvider;
 
+    /// <summary>
+    /// Gets the RAG search service resolved for evaluation runs.
+    /// </summary>
     protected IRagSearchService RagSearchService { get; private set; } = null!;
 
+    /// <summary>
+    /// Gets the embedding service resolved for evaluation runs.
+    /// </summary>
     protected IEmbeddingService EmbeddingService { get; private set; } = null!;
 
+    /// <summary>
+    /// Gets the chunk repository factory resolved for evaluation runs.
+    /// </summary>
     protected IChunkRepositoryFactory ChunkRepositoryFactory { get; private set; } = null!;
 
+    /// <summary>
+    /// Gets the reranking strategy factory resolved for evaluation runs.
+    /// </summary>
     protected IRerankingStrategyFactory RerankingStrategyFactory { get; private set; } = null!;
 
+    /// <summary>
+    /// Gets the document repository resolved for evaluation runs.
+    /// </summary>
     protected IDocumentRepository DocumentRepository { get; private set; } = null!;
 
+    /// <inheritdoc />
     protected override Task OnSetupAsync()
     {
         var configuration = BuildConfiguration();
@@ -53,6 +72,7 @@ public abstract class MongoEvaluationTestBase<TPrediction> : EvaluationTestBase<
         return Task.CompletedTask;
     }
 
+    /// <inheritdoc />
     protected override async Task OnTeardownAsync()
     {
         if (serviceProvider is not null)

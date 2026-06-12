@@ -8,6 +8,9 @@ using DevBook.Data.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 
+/// <summary>
+/// Contains tests for ingestion endpoint.
+/// </summary>
 public sealed class IngestionEndpointTests : IntegrationTestBase
 {
     private const string IngestionPath = "/ingestion/documents";
@@ -38,6 +41,7 @@ public sealed class IngestionEndpointTests : IntegrationTestBase
         body.Should().BeEquivalentTo(expected);
     }
 
+    /// <inheritdoc />
     protected override void ConfigureTestServices(IServiceCollection services)
     {
         services.AddScoped(_ => ingestion.Object);

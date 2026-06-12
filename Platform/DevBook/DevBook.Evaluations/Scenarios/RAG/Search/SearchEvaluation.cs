@@ -9,6 +9,9 @@ using Microsoft.Extensions.AI;
 using Microsoft.Extensions.AI.Evaluation;
 using Microsoft.Extensions.Options;
 
+/// <summary>
+/// Runs RAG search quality evaluations over the golden dataset.
+/// </summary>
 public sealed class SearchEvaluation : MongoEvaluationTestBase<SearchPrediction>
 {
     private const string DatasetFile = "golden-rag-cases.json";
@@ -23,10 +26,13 @@ public sealed class SearchEvaluation : MongoEvaluationTestBase<SearchPrediction>
         RerankingStrategyKind.ReciprocalRankFusion,
     ];
 
+    /// <inheritdoc />
     protected override string ScenarioDisplayName => "RAG.Search";
 
+    /// <inheritdoc />
     protected override IEvaluator[] GetPerIterationEvaluators() => [new SearchEvaluator()];
 
+    /// <inheritdoc />
     protected override Dictionary<string, IEnumerable<SummaryMetric>> ComputeSummaryMetrics(
         IReadOnlyList<SearchPrediction> predictions)
         => SearchEvaluator.ComputeSummaryMetrics(predictions, TopK);
@@ -44,6 +50,11 @@ public sealed class SearchEvaluation : MongoEvaluationTestBase<SearchPrediction>
         }
     }
 
+    /// <summary>
+    /// Evaluates retrieval over fixed-size chunks for one golden query.
+    /// </summary>
+    /// <param name="testCase">The evaluation case.</param>
+    /// <param name="rerankingStrategy">The reranking strategy to use.</param>
     [Test]
     [TestCaseSource(nameof(TestCases))]
     public async Task SearchOverFixedSizeChunks(SearchEvaluationCase testCase, RerankingStrategyKind rerankingStrategy)
@@ -51,6 +62,11 @@ public sealed class SearchEvaluation : MongoEvaluationTestBase<SearchPrediction>
         await SearchFindsExpectedSources(testCase, ChunkingStrategyKind.FixedSize, rerankingStrategy);
     }
 
+    /// <summary>
+    /// Evaluates retrieval over Markdown-section chunks for one golden query.
+    /// </summary>
+    /// <param name="testCase">The evaluation case.</param>
+    /// <param name="rerankingStrategy">The reranking strategy to use.</param>
     [Test]
     [TestCaseSource(nameof(TestCases))]
     public async Task SearchOverMarkdownSectionChunks(SearchEvaluationCase testCase, RerankingStrategyKind rerankingStrategy)
@@ -58,6 +74,11 @@ public sealed class SearchEvaluation : MongoEvaluationTestBase<SearchPrediction>
         await SearchFindsExpectedSources(testCase, ChunkingStrategyKind.MarkdownSection, rerankingStrategy);
     }
 
+    /// <summary>
+    /// Evaluates retrieval over semantic chunks for one golden query.
+    /// </summary>
+    /// <param name="testCase">The evaluation case.</param>
+    /// <param name="rerankingStrategy">The reranking strategy to use.</param>
     [Test]
     [TestCaseSource(nameof(TestCases))]
     public async Task SearchOverSemanticChunks(SearchEvaluationCase testCase, RerankingStrategyKind rerankingStrategy)
@@ -126,22 +147,56 @@ public sealed class SearchEvaluation : MongoEvaluationTestBase<SearchPrediction>
             .ToArray();
     }
 
+    /// <summary>
+    /// Golden search dataset loaded from JSON.
+    /// </summary>
     public sealed record SearchDataset
     {
+        /// <summary>
+        /// Gets the golden query cases.
+        /// </summary>
         public IReadOnlyList<SearchEvaluationCase> Cases { get; init; } = [];
     }
 
+    /// <summary>
+    /// One golden query and the source evidence expected to satisfy it.
+    /// </summary>
     public sealed record SearchEvaluationCase
     {
+        /// <summary>
+        /// Gets the stable case identifier shown in test output.
+        /// </summary>
         public string Id { get; init; } = string.Empty;
+
+        /// <summary>
+        /// Gets the query submitted to RAG search.
+        /// </summary>
         public string Query { get; init; } = string.Empty;
+
+        /// <summary>
+        /// Gets expected source evidence for the query.
+        /// </summary>
         public IReadOnlyList<ExpectedSourceDocument> ExpectedSources { get; init; } = [];
     }
 
+    /// <summary>
+    /// Source document evidence expected for a golden query.
+    /// </summary>
     public sealed record ExpectedSourceDocument
     {
+        /// <summary>
+        /// Gets the expected vault-relative source path.
+        /// </summary>
         public string Path { get; init; } = string.Empty;
+
+        /// <summary>
+        /// Gets the expected heading evidence, when the case requires a section match.
+        /// </summary>
         public string? Heading { get; init; }
+
+        /// <summary>
+        /// Gets the expected snippet evidence, when the case requires text-level verification.
+        /// </summary>
         public string? Snippet { get; init; }
     }
 }

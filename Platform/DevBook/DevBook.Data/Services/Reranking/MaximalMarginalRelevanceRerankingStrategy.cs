@@ -2,12 +2,26 @@ namespace DevBook.Data.Services.Reranking;
 
 using DevBook.Data.Models;
 
+/// <summary>
+/// Reranks chunks with maximal marginal relevance to reduce near-duplicate results.
+/// </summary>
 public sealed class MaximalMarginalRelevanceRerankingStrategy : IRerankingStrategy
 {
     private const double RelevanceWeight = 0.7;
 
+    /// <summary>
+    /// Gets the reranking strategy implemented by this type.
+    /// </summary>
     public RerankingStrategyKind Strategy => RerankingStrategyKind.MaximalMarginalRelevance;
 
+    /// <summary>
+    /// Selects chunks by balancing BM25 relevance against token-overlap similarity to already selected chunks.
+    /// </summary>
+    /// <param name="query">The search query.</param>
+    /// <param name="candidates">The candidate chunks to rerank.</param>
+    /// <param name="topK">Maximum number of results to return.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The selected chunks ordered by maximal marginal relevance score.</returns>
     public Task<IReadOnlyList<RagChunkResponse>> RerankAsync(
         string query,
         IReadOnlyList<RagChunkResponse> candidates,

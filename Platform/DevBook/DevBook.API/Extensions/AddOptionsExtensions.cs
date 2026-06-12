@@ -2,10 +2,18 @@ namespace DevBook.API.Extensions;
 
 using DevBook.Data.Options;
 
+/// <summary>
+/// Adds options binding helpers.
+/// </summary>
 public static class AddOptionsExtensions
 {
     extension(IServiceCollection services)
     {
+        /// <summary>
+        /// Binds application configuration sections to typed option classes.
+        /// </summary>
+        /// <param name="configuration">Application configuration.</param>
+        /// <returns>The same service collection so registrations can be chained.</returns>
         public IServiceCollection BindOptions(IConfiguration configuration)
         {
             services

@@ -4,8 +4,14 @@ using FluentAssertions;
 using DevBook.Data.Models;
 using DevBook.Data.Services.Reranking;
 
+/// <summary>
+/// Contains tests for reranking strategy.
+/// </summary>
 public sealed class RerankingStrategyTests
 {
+    /// <summary>
+    /// Gets no reranking rerank preserves vector order and scores.
+    /// </summary>
     [Fact]
     public async Task NoReranking_Rerank_PreservesVectorOrderAndScores()
     {
@@ -18,6 +24,9 @@ public sealed class RerankingStrategyTests
         results[0].Score.Should().Be(0.99);
     }
 
+    /// <summary>
+    /// Tests that BM25 reranking promotes the best lexical match.
+    /// </summary>
     [Fact]
     public async Task Bm25_Rerank_PromotesBestLexicalMatch()
     {
@@ -31,6 +40,9 @@ public sealed class RerankingStrategyTests
         results[0].Score.Should().BeGreaterThan(0);
     }
 
+    /// <summary>
+    /// Gets maximal marginal relevance rerank promotes relevant diverse matches.
+    /// </summary>
     [Fact]
     public async Task MaximalMarginalRelevance_Rerank_PromotesRelevantDiverseMatches()
     {
@@ -50,6 +62,9 @@ public sealed class RerankingStrategyTests
         results[0].Score.Should().BeInRange(0, 1);
     }
 
+    /// <summary>
+    /// Gets reciprocal rank fusion rerank fuses vector and lexical ranks.
+    /// </summary>
     [Fact]
     public async Task ReciprocalRankFusion_Rerank_FusesVectorAndLexicalRanks()
     {
@@ -63,6 +78,9 @@ public sealed class RerankingStrategyTests
         results[0].Score.Should().BeGreaterThan(0.95);
     }
 
+    /// <summary>
+    /// Reranks ers return expected score ranges for repeated query terms.
+    /// </summary>
     [Fact]
     public async Task Rerankers_ReturnExpectedScoreRangesForRepeatedQueryTerms()
     {

@@ -2,10 +2,19 @@ namespace DevBook.Data.Agents;
 
 using DevBook.Data.Agents.Abstractions;
 
+/// <summary>
+/// Configures the reranking agent.
+/// </summary>
 public sealed record RerankingAgent : AgentConfigBase
 {
+    /// <summary>
+    /// Gets the agent description.
+    /// </summary>
     public override string Description => "Ranks retrieved DevBook chunks by usefulness for answering a query.";
 
+    /// <summary>
+    /// Gets the system prompt used by the agent.
+    /// </summary>
     public override string Prompt =>
         """
         ## Objective

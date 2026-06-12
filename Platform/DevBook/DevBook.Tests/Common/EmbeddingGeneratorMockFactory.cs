@@ -5,6 +5,11 @@ using Moq;
 
 internal static class EmbeddingGeneratorMockFactory
 {
+    /// <summary>
+    /// Creates a strict embedding generator mock using the supplied vector factory.
+    /// </summary>
+    /// <param name="vectorFactory">Function that maps input text values to embedding vectors.</param>
+    /// <returns>The configured embedding generator mock.</returns>
     public static Mock<IEmbeddingGenerator<string, Embedding<float>>> Create(
         Func<IReadOnlyList<string>, IReadOnlyList<float[]>> vectorFactory)
     {
@@ -27,6 +32,10 @@ internal static class EmbeddingGeneratorMockFactory
         return mock;
     }
 
+    /// <summary>
+    /// Creates a strict embedding generator mock that derives vectors from input length and index.
+    /// </summary>
+    /// <returns>The configured embedding generator mock.</returns>
     public static Mock<IEmbeddingGenerator<string, Embedding<float>>> CreateByInputLength() =>
         Create(values => values
             .Select((value, index) => new[] { (float)value.Length, (float)index })

@@ -3,10 +3,17 @@ namespace DevBook.API.Extensions;
 using DevBook.Data.Models;
 using DevBook.Data.Services;
 
+/// <summary>
+/// Adds minimal API endpoint mapping helpers.
+/// </summary>
 public static class AddEndpointsExtensions
 {
     extension(WebApplication app)
     {
+        /// <summary>
+        /// Maps ingestion, RAG search, and RAG ask endpoints.
+        /// </summary>
+        /// <returns>The same web application so endpoint mapping can be chained.</returns>
         public WebApplication AddEndpoints()
         {
             app.MapPost("/ingestion/documents",

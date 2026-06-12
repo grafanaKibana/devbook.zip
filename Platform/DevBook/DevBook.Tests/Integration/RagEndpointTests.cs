@@ -9,6 +9,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 
+/// <summary>
+/// Contains tests for RAG endpoints.
+/// </summary>
 public sealed class RagEndpointTests : IntegrationTestBase
 {
     private const string SearchPath = "/rag/search";
@@ -68,6 +71,9 @@ public sealed class RagEndpointTests : IntegrationTestBase
         });
     }
 
+    /// <summary>
+    /// Tests that the RAG ask endpoint trims questions and returns retrieved sources.
+    /// </summary>
     [Fact]
     public async Task PostRagAsk_QuestionWithWhitespace_ReturnsTrimmedQuestionAndRetrievedSources()
     {
@@ -111,6 +117,7 @@ public sealed class RagEndpointTests : IntegrationTestBase
         problem.Should().BeEquivalentTo(new { Detail = "Question is required." });
     }
 
+    /// <inheritdoc />
     protected override void ConfigureTestServices(IServiceCollection services)
     {
         services.AddScoped(_ => search.Object);

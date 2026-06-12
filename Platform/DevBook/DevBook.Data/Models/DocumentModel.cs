@@ -2,6 +2,9 @@ namespace DevBook.Data.Models;
 
 using MongoDB.Bson.Serialization.Attributes;
 
+/// <summary>
+/// Stored markdown document ingested from the vault.
+/// </summary>
 public record Document
 {
     /// <summary>

@@ -15,10 +15,17 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using OpenAI;
 
+/// <summary>
+/// Registers DevBook data services and RAG agents.
+/// </summary>
 public static class ServiceCollectionExtensions
 {
     extension(IServiceCollection services)
     {
+        /// <summary>
+        /// Registers repositories, chunking services, rerankers, and Microsoft Agent Framework agents.
+        /// </summary>
+        /// <returns>The same service collection so registrations can be chained.</returns>
         public IServiceCollection AddServices()
         {
             ArgumentNullException.ThrowIfNull(services);

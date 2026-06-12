@@ -10,6 +10,9 @@ using DevBook.Tests.Common;
 using Microsoft.Extensions.Options;
 using Moq;
 
+/// <summary>
+/// Contains tests for the RAG search service.
+/// </summary>
 public sealed class RagSearchServiceTests
 {
     private const string QueryWithWhitespace = "  vector search  ";
@@ -71,6 +74,9 @@ public sealed class RagSearchServiceTests
         capturedVector.Should().Equal([13f, 0f]);
     }
 
+    /// <summary>
+    /// Tests that fixed-size retrieval uses the fixed-size chunk repository.
+    /// </summary>
     [Fact]
     public async Task SearchAsync_FixedSizeStrategy_CreatesFixedSizeRepository()
     {
@@ -103,6 +109,9 @@ public sealed class RagSearchServiceTests
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
+    /// <summary>
+    /// Searches reranking strategy reorders candidates and returns requested top k.
+    /// </summary>
     [Fact]
     public async Task SearchAsync_RerankingStrategy_ReordersCandidatesAndReturnsRequestedTopK()
     {

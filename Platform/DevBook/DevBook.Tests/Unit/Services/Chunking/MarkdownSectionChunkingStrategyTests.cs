@@ -11,6 +11,9 @@ using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Options;
 using Moq;
 
+/// <summary>
+/// Contains tests for the Markdown-section chunking strategy.
+/// </summary>
 public sealed class MarkdownSectionChunkingStrategyTests
 {
     private const string EmptyDocumentId = "doc-empty";
@@ -20,7 +23,7 @@ public sealed class MarkdownSectionChunkingStrategyTests
     private const string SecondDocumentId = "doc-second";
 
     /// <summary>
-    /// Tests that markdown section chunking replaces chunks with an empty collection when a document has only whitespace content.
+    /// Tests that Markdown-section chunking replaces chunks with an empty collection when a document has only whitespace content.
     /// </summary>
     [Fact]
     public async Task ReplaceDocumentChunksAsync_WhitespaceDocument_ReplacesChunksWithEmptyCollection()
@@ -38,7 +41,7 @@ public sealed class MarkdownSectionChunkingStrategyTests
     }
 
     /// <summary>
-    /// Tests that markdown section chunking binds each heading section to heading metadata and an Obsidian-style citation label.
+    /// Tests that Markdown-section chunking binds each heading section to heading metadata and an Obsidian-style citation label.
     /// </summary>
     [Fact]
     public async Task ReplaceDocumentChunksAsync_DocumentHasMarkdownHeadings_CreatesChunksWithHeadingMetadataAndCitationLabels()
@@ -64,7 +67,7 @@ public sealed class MarkdownSectionChunkingStrategyTests
     }
 
     /// <summary>
-    /// Tests that markdown section chunking splits an oversized section into embeddable chunks with document citations.
+    /// Tests that Markdown-section chunking splits an oversized section into embeddable chunks with document citations.
     /// </summary>
     [Fact]
     public async Task ReplaceDocumentChunksAsync_SectionExceedsMaxChunkLength_SplitsSectionAndReplacesRepositoryChunks()
@@ -86,7 +89,7 @@ public sealed class MarkdownSectionChunkingStrategyTests
     }
 
     /// <summary>
-    /// Tests that markdown section chunking embeds chunks across multiple documents in one provider batch.
+    /// Tests that Markdown-section chunking embeds chunks across multiple documents in one provider batch.
     /// </summary>
     [Fact]
     public async Task ReplaceDocumentChunksAsync_MultipleDocuments_EmbedsChunksInSingleBatch()

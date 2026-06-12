@@ -10,6 +10,9 @@ using DevBook.Tests.Common;
 using Microsoft.Extensions.Options;
 using Moq;
 
+/// <summary>
+/// Contains tests for ingestion service.
+/// </summary>
 public sealed class IngestionServiceTests
 {
     private const string ScopePath = "Scope";
@@ -136,6 +139,9 @@ public sealed class IngestionServiceTests
         replacedChunks.Should().NotBeEmpty();
     }
 
+    /// <summary>
+    /// Tests that selecting fixed-size chunking updates only the fixed-size chunk collection.
+    /// </summary>
     [Fact]
     public async Task IngestDocumentsAsync_FixedSizeStrategy_RunsOnlyFixedSizeChunkingService()
     {
@@ -168,6 +174,9 @@ public sealed class IngestionServiceTests
             It.IsAny<CancellationToken>()), Times.Never);
     }
 
+    /// <summary>
+    /// Ingests documents semantic strategy runs only semantic chunking service.
+    /// </summary>
     [Fact]
     public async Task IngestDocumentsAsync_SemanticStrategy_RunsOnlySemanticChunkingService()
     {
@@ -204,6 +213,9 @@ public sealed class IngestionServiceTests
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
+    /// <summary>
+    /// Ingests documents null chunking strategy runs all chunking services.
+    /// </summary>
     [Fact]
     public async Task IngestDocumentsAsync_NullChunkingStrategy_RunsAllChunkingServices()
     {
@@ -317,6 +329,9 @@ public sealed class IngestionServiceTests
         upsertedDocument.Should().BeNull();
     }
 
+    /// <summary>
+    /// Ingests documents force reingest unchanged single file updates document and replaces chunks.
+    /// </summary>
     [Fact]
     public async Task IngestDocumentsAsync_ForceReingestUnchangedSingleFile_UpdatesDocumentAndReplacesChunks()
     {
@@ -352,6 +367,9 @@ public sealed class IngestionServiceTests
         replacedDocumentIds.Should().Equal(ExistingDocumentId);
     }
 
+    /// <summary>
+    /// Tests that folder ingestion deletes missing stored documents and ingests changed markdown files.
+    /// </summary>
     [Fact]
     public async Task IngestDocumentsAsync_FolderSource_DeletesMissingDocumentsAndIngestsChangedMarkdownFiles()
     {
@@ -398,6 +416,9 @@ public sealed class IngestionServiceTests
         VerifyFolderRepositoryUsedOnce(documents, ScopePath);
     }
 
+    /// <summary>
+    /// Ingests documents unchanged folder skips document updates and chunking.
+    /// </summary>
     [Fact]
     public async Task IngestDocumentsAsync_UnchangedFolder_SkipsDocumentUpdatesAndChunking()
     {
@@ -429,6 +450,9 @@ public sealed class IngestionServiceTests
         VerifyFolderRepositoryUsedOnce(documents, ScopePath);
     }
 
+    /// <summary>
+    /// Tests that folder ingestion skips markdown files not published for RAG.
+    /// </summary>
     [Fact]
     public async Task IngestDocumentsAsync_FolderSource_SkipsNonRagMarkdownFiles()
     {

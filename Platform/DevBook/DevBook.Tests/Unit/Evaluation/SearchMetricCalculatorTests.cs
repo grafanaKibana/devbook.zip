@@ -7,6 +7,9 @@ using DevBook.Evaluations.Scenarios.RAG.Search;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.AI.Evaluation;
 
+/// <summary>
+/// Contains tests for search metric calculator.
+/// </summary>
 public sealed class SearchMetricCalculatorTests
 {
     private const string EvaluationPath = "Software Engineering/11 AI & ML/LLM/RAG/Evaluation.md";
@@ -120,6 +123,9 @@ public sealed class SearchMetricCalculatorTests
         });
     }
 
+    /// <summary>
+    /// Scores query mixed evidence returns readable diagnostics.
+    /// </summary>
     [Fact]
     public void ScoreQuery_MixedEvidence_ReturnsReadableDiagnostics()
     {
@@ -181,6 +187,9 @@ public sealed class SearchMetricCalculatorTests
         ]);
     }
 
+    /// <summary>
+    /// Scores query scored results returns score analysis metrics.
+    /// </summary>
     [Fact]
     public void ScoreQuery_ScoredResults_ReturnsScoreAnalysisMetrics()
     {
@@ -201,6 +210,9 @@ public sealed class SearchMetricCalculatorTests
         result.CreditedToUncreditedSameSourceScoreGap.Should().BeApproximately(0.05, 0.000001);
     }
 
+    /// <summary>
+    /// Searches evaluator evaluate adds report facing interpretations.
+    /// </summary>
     [Fact]
     public async Task SearchEvaluator_EvaluateAsync_AddsReportFacingInterpretations()
     {
@@ -264,6 +276,9 @@ public sealed class SearchMetricCalculatorTests
         gapMetric.Interpretation.Reason.Should().Be("Score 0 (Inconclusive): no scored credited and uncredited same-source pair was available.");
     }
 
+    /// <summary>
+    /// Searches evaluator evaluate rounds score metrics and rates thresholds.
+    /// </summary>
     [Fact]
     public async Task SearchEvaluator_EvaluateAsync_RoundsScoreMetricsAndRatesThresholds()
     {
@@ -302,6 +317,9 @@ public sealed class SearchMetricCalculatorTests
         gapMetric.Interpretation.Reason.Should().Be("Score 0.033 (Diagnostic): credited score minus highest uncredited same-source score; descriptive only.");
     }
 
+    /// <summary>
+    /// Tests that search evaluator keeps low score averages diagnostic instead of rating them as pass or fail.
+    /// </summary>
     [Fact]
     public async Task SearchEvaluator_EvaluateAsync_RatesLowScoreAverageAsUnacceptable()
     {
@@ -326,6 +344,9 @@ public sealed class SearchMetricCalculatorTests
         creditedScoreMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Unknown);
     }
 
+    /// <summary>
+    /// Searches evaluator evaluate formats fractional scores with invariant culture.
+    /// </summary>
     [Fact]
     public async Task SearchEvaluator_EvaluateAsync_FormatsFractionalScoresWithInvariantCulture()
     {
@@ -344,6 +365,9 @@ public sealed class SearchMetricCalculatorTests
         result.Metrics["MRRAt5"].Interpretation!.Reason.Should().Contain("Score 0.5 (Average)");
     }
 
+    /// <summary>
+    /// Computes summary metrics rates aggregate metrics.
+    /// </summary>
     [Fact]
     public void ComputeSummaryMetrics_RatesAggregateMetrics()
     {
@@ -368,6 +392,9 @@ public sealed class SearchMetricCalculatorTests
         metrics["CreditedToUncreditedSameSourceScoreGap"].Rating.Should().Be(EvaluationRating.Unknown);
     }
 
+    /// <summary>
+    /// Gets summary evaluator evaluate formats fractional scores with invariant culture.
+    /// </summary>
     [Fact]
     public async Task SummaryEvaluator_EvaluateAsync_FormatsFractionalScoresWithInvariantCulture()
     {
@@ -405,6 +432,9 @@ public sealed class SearchMetricCalculatorTests
         result.Diagnostics.Matches.Should().ContainSingle().Which.HeadingMatched.Should().BeTrue();
     }
 
+    /// <summary>
+    /// Scores query semantic strategy uses same heading fallback as other chunkers returns no relevant match.
+    /// </summary>
     [Fact]
     public void ScoreQuery_SemanticStrategyUsesSameHeadingFallbackAsOtherChunkers_ReturnsNoRelevantMatch()
     {

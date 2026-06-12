@@ -6,6 +6,9 @@ using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
+/// <summary>
+/// Adds MongoDB Atlas Search index setup helpers.
+/// </summary>
 public static class MongoSearchIndexExtensions
 {
     private const string VectorIndexName = "chunks_embedding_vector_idx";
@@ -13,6 +16,10 @@ public static class MongoSearchIndexExtensions
 
     extension(WebApplication app)
     {
+        /// <summary>
+        /// Ensures every chunk collection has the configured vector search index.
+        /// </summary>
+        /// <param name="cancellationToken">Token used to cancel the operation.</param>
         public async Task EnsureChunkVectorSearchIndexesAsync(CancellationToken cancellationToken = default)
         {
             var database = app.Services.GetRequiredService<IMongoDatabase>();
@@ -22,14 +29,36 @@ public static class MongoSearchIndexExtensions
             foreach (var strategy in Enum.GetValues<ChunkingStrategyKind>())
             {
                 var collectionName = $"chunks.{strategy.ToString().ToLowerInvariant()}";
+                await EnsureCollectionExistsAsync(database, collectionName, cancellationToken);
+
                 if (await SearchIndexExistsAsync(database, collectionName, cancellationToken))
                 {
                     continue;
                 }
 
-                await CreateVectorSearchIndexAsync(database, collectionName, options.VectorDimensions, cancellationToken);
-                logger.LogInformation("Created Atlas Vector Search index {IndexName} on {CollectionName}.", VectorIndexName, collectionName);
+                if (await TryCreateVectorSearchIndexAsync(database, collectionName, options.VectorDimensions, cancellationToken))
+                {
+                    logger.LogInformation("Created Atlas Vector Search index {IndexName} on {CollectionName}.", VectorIndexName, collectionName);
+                }
             }
+        }
+    }
+
+    private static async Task EnsureCollectionExistsAsync(
+        IMongoDatabase database,
+        string collectionName,
+        CancellationToken cancellationToken)
+    {
+        var collections = await (await database
+                .ListCollectionNamesAsync(new ListCollectionNamesOptions
+                {
+                    Filter = Builders<BsonDocument>.Filter.Eq("name", collectionName),
+                }, cancellationToken))
+            .ToListAsync(cancellationToken);
+
+        if (collections.Count == 0)
+        {
+            await database.CreateCollectionAsync(collectionName, cancellationToken: cancellationToken);
         }
     }
 
@@ -47,7 +76,7 @@ public static class MongoSearchIndexExtensions
         return indexes.Count > 0;
     }
 
-    private static async Task CreateVectorSearchIndexAsync(
+    private static async Task<bool> TryCreateVectorSearchIndexAsync(
         IMongoDatabase database,
         string collectionName,
         int vectorDimensions,
@@ -79,6 +108,17 @@ public static class MongoSearchIndexExtensions
             },
         };
 
-        await database.RunCommandAsync<BsonDocument>(command, cancellationToken: cancellationToken);
+        try
+        {
+            await database.RunCommandAsync<BsonDocument>(command, cancellationToken: cancellationToken);
+            return true;
+        }
+        catch (MongoCommandException exception) when (IsSearchIndexAlreadyDefined(exception))
+        {
+            return false;
+        }
     }
+
+    private static bool IsSearchIndexAlreadyDefined(MongoCommandException exception) =>
+        exception.Message.Contains($"An index named \"{VectorIndexName}\" is already defined", StringComparison.OrdinalIgnoreCase);
 }

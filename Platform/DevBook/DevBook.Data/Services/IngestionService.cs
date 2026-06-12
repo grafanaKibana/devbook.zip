@@ -10,6 +10,14 @@ using DevBook.Data.Services.Chunking;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
+/// <summary>
+/// Ingests publishable Markdown notes into MongoDB document and chunk collections.
+/// </summary>
+/// <param name="documentRepository">Repository used to upsert and delete document records.</param>
+/// <param name="chunkRepositoryFactory">Factory used to delete chunks for removed documents.</param>
+/// <param name="chunkingServices">Chunking services used to replace chunks for changed documents.</param>
+/// <param name="hostEnvironment">Host environment used to resolve the ingestion root.</param>
+/// <param name="options">Ingestion root and concurrency options.</param>
 public sealed class IngestionService(
     IDocumentRepository documentRepository,
     IChunkRepositoryFactory chunkRepositoryFactory,
@@ -19,6 +27,12 @@ public sealed class IngestionService(
 {
     private readonly IngestionOptions options = options.Value;
 
+    /// <summary>
+    /// Scans markdown files, upserts changed documents, deletes missing documents, and refreshes chunks.
+    /// </summary>
+    /// <param name="request">The request to process.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>Counts for processed, created, updated, deleted, and skipped documents.</returns>
     public async Task<IngestionResult> IngestDocumentsAsync(
         IngestionRequest request,
         CancellationToken cancellationToken = default)

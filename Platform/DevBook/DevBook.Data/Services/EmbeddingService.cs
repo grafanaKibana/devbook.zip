@@ -4,6 +4,11 @@ using DevBook.Data.Options;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Options;
 
+/// <summary>
+/// Generates embedding vectors through <see cref="Microsoft.Extensions.AI.IEmbeddingGenerator{TInput,TEmbedding}"/>.
+/// </summary>
+/// <param name="embeddingGenerator">Provider-backed embedding generator.</param>
+/// <param name="options">Embedding batching and model options.</param>
 public sealed class EmbeddingService(
     IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator,
     IOptions<EmbeddingOptions> options) : IEmbeddingService
@@ -11,6 +16,12 @@ public sealed class EmbeddingService(
     private const int EstimatedCharactersPerToken = 4;
     private readonly EmbeddingOptions options = options.Value;
 
+    /// <summary>
+    /// Generates embeddings for multiple text values while preserving input order.
+    /// </summary>
+    /// <param name="values">Text values to embed.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>Embedding vectors in the same order as <paramref name="values"/>.</returns>
     public async Task<IReadOnlyList<float[]>> GenerateEmbeddingsAsync(
         IReadOnlyList<string> values,
         CancellationToken cancellationToken = default)
@@ -83,6 +94,12 @@ public sealed class EmbeddingService(
     private static int EstimateTokenCount(string value) =>
         Math.Max(1, (value.Length + EstimatedCharactersPerToken - 1) / EstimatedCharactersPerToken);
 
+    /// <summary>
+    /// Generates one embedding vector for a text value.
+    /// </summary>
+    /// <param name="value">The value to process.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The generated embedding vector.</returns>
     public async Task<float[]> GenerateEmbeddingAsync(
         string value,
         CancellationToken cancellationToken = default)

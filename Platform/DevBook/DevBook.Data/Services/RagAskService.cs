@@ -5,10 +5,21 @@ using DevBook.Data.Models;
 using Microsoft.Agents.AI;
 using Microsoft.Extensions.DependencyInjection;
 
+/// <summary>
+/// Answers RAG questions using retrieved chunks and the answer agent.
+/// </summary>
+/// <param name="ragSearchService">RAG search service used to retrieve source chunks.</param>
+/// <param name="answerAgent">Agent that generates the grounded answer.</param>
 public sealed class RagAskService(
     IRagSearchService ragSearchService,
     [FromKeyedServices(nameof(AnswerAgent))] AIAgent answerAgent) : IRagAskService
 {
+    /// <summary>
+    /// Answers one RAG question.
+    /// </summary>
+    /// <param name="request">The request to process.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The generated answer and source chunks.</returns>
     public async Task<RagAskResponse> AskAsync(
         RagAskRequest request,
         CancellationToken cancellationToken = default)

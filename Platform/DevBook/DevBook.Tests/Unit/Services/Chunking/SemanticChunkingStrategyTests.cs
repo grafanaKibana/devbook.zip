@@ -11,6 +11,9 @@ using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Options;
 using Moq;
 
+/// <summary>
+/// Contains tests for semantic chunking strategy.
+/// </summary>
 public sealed class SemanticChunkingStrategyTests
 {
     private const string EmptyDocumentId = "doc-empty";
@@ -21,6 +24,9 @@ public sealed class SemanticChunkingStrategyTests
     private const string FirstDocumentId = "doc-first";
     private const string SecondDocumentId = "doc-second";
 
+    /// <summary>
+    /// Replaces document chunks whitespace document replaces chunks with empty collection.
+    /// </summary>
     [Fact]
     public async Task ReplaceDocumentChunksAsync_WhitespaceDocument_ReplacesChunksWithEmptyCollection()
     {
@@ -36,6 +42,9 @@ public sealed class SemanticChunkingStrategyTests
         capturedChunks.Should().BeEmpty();
     }
 
+    /// <summary>
+    /// Tests that semantic chunking can merge related text across Markdown headings without heading metadata.
+    /// </summary>
     [Fact]
     public async Task ReplaceDocumentChunksAsync_RelatedTextCrossesMarkdownHeadings_CreatesSingleChunkWithoutHeadingMetadata()
     {
@@ -62,6 +71,9 @@ public sealed class SemanticChunkingStrategyTests
         capturedChunks.Select(chunk => chunk.Embedding).Should().OnlyContain(vector => vector.Length == 2);
     }
 
+    /// <summary>
+    /// Replaces document chunks embedding similarity drops splits at semantic boundary.
+    /// </summary>
     [Fact]
     public async Task ReplaceDocumentChunksAsync_EmbeddingSimilarityDrops_SplitsAtSemanticBoundary()
     {
@@ -88,6 +100,9 @@ public sealed class SemanticChunkingStrategyTests
         capturedChunks.ElementAt(1).ChunkText.Should().Be("Database indexes speed queries. Database query plans use indexes.");
     }
 
+    /// <summary>
+    /// Replaces document chunks section exceeds max chunk length splits into embeddable chunks.
+    /// </summary>
     [Fact]
     public async Task ReplaceDocumentChunksAsync_SectionExceedsMaxChunkLength_SplitsIntoEmbeddableChunks()
     {
@@ -107,6 +122,9 @@ public sealed class SemanticChunkingStrategyTests
         capturedChunks.Select(chunk => chunk.CitationLabel).Should().OnlyContain(label => label == "[[Long]]");
     }
 
+    /// <summary>
+    /// Tests that semantic chunking embeds a multi-sentence paragraph as one semantic unit.
+    /// </summary>
     [Fact]
     public async Task ReplaceDocumentChunksAsync_MultipleSentencesInParagraph_EmbedsSingleParagraphUnit()
     {
@@ -130,6 +148,9 @@ public sealed class SemanticChunkingStrategyTests
         embeddedCalls[0].Should().Equal("Use .NET for backend APIs. It supports async workflows.");
     }
 
+    /// <summary>
+    /// Replaces document chunks multiple documents embeds semantic units per document and chunks in single batch.
+    /// </summary>
     [Fact]
     public async Task ReplaceDocumentChunksAsync_MultipleDocuments_EmbedsSemanticUnitsPerDocumentAndChunksInSingleBatch()
     {

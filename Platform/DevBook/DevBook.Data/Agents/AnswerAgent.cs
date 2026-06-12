@@ -2,10 +2,19 @@ namespace DevBook.Data.Agents;
 
 using DevBook.Data.Agents.Abstractions;
 
+/// <summary>
+/// Configures the answer agent.
+/// </summary>
 public record AnswerAgent : AgentConfigBase
 {
+    /// <summary>
+    /// Gets the agent description.
+    /// </summary>
     public override string Description => "Answers DevBook RAG questions from retrieved chunk evidence.";
 
+    /// <summary>
+    /// Gets the system prompt used by the agent.
+    /// </summary>
     public override string Prompt =>
         $"""
          ## Objective
@@ -25,6 +34,9 @@ public record AnswerAgent : AgentConfigBase
          {RenderExamples()}
          """;
 
+    /// <summary>
+    /// Gets answer-agent examples rendered into the prompt.
+    /// </summary>
     protected override IReadOnlyList<PromptExample> PromptExamples =>
     [
         new(

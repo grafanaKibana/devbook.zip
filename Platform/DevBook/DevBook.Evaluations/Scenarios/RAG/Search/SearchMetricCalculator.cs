@@ -2,14 +2,29 @@ namespace DevBook.Evaluations.Scenarios.RAG.Search;
 
 using DevBook.Data.Models;
 
+/// <summary>
+/// Calculates search metrics.
+/// </summary>
 public static class SearchMetricCalculator
 {
+    /// <summary>
+    /// Rank cutoffs reported for search quality metrics.
+    /// </summary>
     public static readonly int[] RankingCutoffs = [1, 3, 5, 10];
 
+    /// <summary>
+    /// Primary rank cutoff used by convenience metric properties.
+    /// </summary>
     public const int PrimaryCutoffValue = 5;
 
     private const int BootstrapIterations = 1_000;
 
+    /// <summary>
+    /// Evaluates search predictions and aggregates query-level metrics.
+    /// </summary>
+    /// <param name="cases">Search predictions to aggregate.</param>
+    /// <param name="topK">Maximum number of results to return.</param>
+    /// <returns>Aggregate ranking, empty-result, and score metrics for the predictions.</returns>
     public static SearchReport Evaluate(
         IReadOnlyList<SearchPrediction> cases,
         int topK = 5)
@@ -35,6 +50,12 @@ public static class SearchMetricCalculator
             AverageAvailable(queryMetrics, metric => metric.CreditedToUncreditedSameSourceScoreGap));
     }
 
+    /// <summary>
+    /// Scores one search prediction against its expected sources.
+    /// </summary>
+    /// <param name="queryCase">Search prediction to compare with expected evidence.</param>
+    /// <param name="topK">Maximum number of results to return.</param>
+    /// <returns>Ranking metrics and diagnostics for the query.</returns>
     public static SearchQueryMetrics ScoreQuery(SearchPrediction queryCase, int topK = 5)
     {
         var expectedDocuments = queryCase.ExpectedDocuments;
@@ -422,10 +443,23 @@ public static class SearchMetricCalculator
         bool SnippetMatched,
         string Reason)
     {
+        /// <summary>
+        /// Gets whether the retrieved document matched expected evidence.
+        /// </summary>
         public bool IsRelevant => this.ExpectedIndex is not null;
     }
 }
 
+/// <summary>
+/// Aggregate retrieval-quality report for a set of search predictions.
+/// </summary>
+/// <param name="QueryCount">Number of queries included in the report.</param>
+/// <param name="RankingMetrics">Ranking summaries keyed by rank cutoff.</param>
+/// <param name="EmptyResultRate">Fraction of queries that returned no chunks.</param>
+/// <param name="ScoreAverage">Average score across all scored retrieved chunks.</param>
+/// <param name="CreditedScoreAverage">Average score for chunks credited against expected evidence.</param>
+/// <param name="UncreditedScoreAverage">Average score for retrieved chunks not credited by the expected-evidence set.</param>
+/// <param name="CreditedToUncreditedSameSourceScoreGap">Score gap between credited chunks and higher-scored uncredited chunks from the same source.</param>
 public sealed record SearchReport(
     int QueryCount,
     IReadOnlyDictionary<int, SearchRankingSummary> RankingMetrics,
@@ -435,15 +469,37 @@ public sealed record SearchReport(
     double UncreditedScoreAverage,
     double CreditedToUncreditedSameSourceScoreGap)
 {
+    /// <summary>
+    /// Gets recall at the primary rank cutoff.
+    /// </summary>
     public double RecallAtK => this.RankingMetrics[SearchMetricCalculator.PrimaryCutoffValue].Recall;
 
+    /// <summary>
+    /// Gets precision at the primary rank cutoff.
+    /// </summary>
     public double PrecisionAtK => this.RankingMetrics[SearchMetricCalculator.PrimaryCutoffValue].Precision;
 
+    /// <summary>
+    /// Gets hit rate at the primary rank cutoff.
+    /// </summary>
     public double HitRateAtK => this.RankingMetrics[SearchMetricCalculator.PrimaryCutoffValue].HitRate;
 
+    /// <summary>
+    /// Gets mean reciprocal rank at the primary rank cutoff.
+    /// </summary>
     public double MeanReciprocalRank => this.RankingMetrics[SearchMetricCalculator.PrimaryCutoffValue].MeanReciprocalRank;
 }
 
+/// <summary>
+/// Retrieval metrics and diagnostics for one search query.
+/// </summary>
+/// <param name="RankingMetrics">Ranking metrics keyed by rank cutoff.</param>
+/// <param name="IsEmptyResult">Whether the query returned no chunks.</param>
+/// <param name="ScoreAverage">Average score across scored retrieved chunks.</param>
+/// <param name="CreditedScoreAverage">Average score for chunks credited against expected evidence.</param>
+/// <param name="UncreditedScoreAverage">Average score for chunks not credited by expected evidence.</param>
+/// <param name="CreditedToUncreditedSameSourceScoreGap">Score gap between credited and uncredited same-source chunks.</param>
+/// <param name="Diagnostics">Diagnostics explaining expected, missing, duplicate, and matched evidence.</param>
 public sealed record SearchQueryMetrics(
     IReadOnlyDictionary<int, SearchRankingMetrics> RankingMetrics,
     bool IsEmptyResult,
@@ -453,15 +509,36 @@ public sealed record SearchQueryMetrics(
     double? CreditedToUncreditedSameSourceScoreGap,
     SearchQueryDiagnostics Diagnostics)
 {
+    /// <summary>
+    /// Gets recall at the primary rank cutoff.
+    /// </summary>
     public double RecallAtK => this.RankingMetrics[SearchMetricCalculator.PrimaryCutoffValue].Recall;
 
+    /// <summary>
+    /// Gets precision at the primary rank cutoff.
+    /// </summary>
     public double PrecisionAtK => this.RankingMetrics[SearchMetricCalculator.PrimaryCutoffValue].Precision;
 
+    /// <summary>
+    /// Gets hit rate at the primary rank cutoff.
+    /// </summary>
     public double HitRateAtK => this.RankingMetrics[SearchMetricCalculator.PrimaryCutoffValue].HitRate;
 
+    /// <summary>
+    /// Gets reciprocal rank at the primary rank cutoff.
+    /// </summary>
     public double ReciprocalRank => this.RankingMetrics[SearchMetricCalculator.PrimaryCutoffValue].MeanReciprocalRank;
 }
 
+/// <summary>
+/// Ranking metrics calculated at one cutoff.
+/// </summary>
+/// <param name="Recall">Matched expected evidence divided by expected evidence.</param>
+/// <param name="Precision">Relevant retrieved chunks divided by retrieved chunks at the cutoff.</param>
+/// <param name="HitRate">Whether at least one relevant chunk appears at the cutoff.</param>
+/// <param name="MeanReciprocalRank">Reciprocal rank of the first relevant chunk.</param>
+/// <param name="MeanAveragePrecision">Average precision over relevant chunks at the cutoff.</param>
+/// <param name="NormalizedDiscountedCumulativeGain">Discounted ranking quality normalized against the ideal ordering.</param>
 public sealed record SearchRankingMetrics(
     double Recall,
     double Precision,
@@ -470,6 +547,16 @@ public sealed record SearchRankingMetrics(
     double MeanAveragePrecision,
     double NormalizedDiscountedCumulativeGain);
 
+/// <summary>
+/// Mean ranking metrics and bootstrap confidence intervals for one cutoff.
+/// </summary>
+/// <param name="Recall">Mean recall across queries.</param>
+/// <param name="Precision">Mean precision across queries.</param>
+/// <param name="HitRate">Mean hit rate across queries.</param>
+/// <param name="MeanReciprocalRank">Mean reciprocal rank across queries.</param>
+/// <param name="MeanAveragePrecision">Mean average precision across queries.</param>
+/// <param name="NormalizedDiscountedCumulativeGain">Mean normalized discounted cumulative gain across queries.</param>
+/// <param name="ConfidenceIntervals">Bootstrap confidence intervals for the mean metrics.</param>
 public sealed record SearchRankingSummary(
     double Recall,
     double Precision,
@@ -479,6 +566,15 @@ public sealed record SearchRankingSummary(
     double NormalizedDiscountedCumulativeGain,
     SearchRankingConfidenceIntervals ConfidenceIntervals);
 
+/// <summary>
+/// Confidence intervals for ranking metrics at one cutoff.
+/// </summary>
+/// <param name="Recall">Recall confidence interval.</param>
+/// <param name="Precision">Precision confidence interval.</param>
+/// <param name="HitRate">Hit-rate confidence interval.</param>
+/// <param name="MeanReciprocalRank">Mean reciprocal rank confidence interval.</param>
+/// <param name="MeanAveragePrecision">Mean average precision confidence interval.</param>
+/// <param name="NormalizedDiscountedCumulativeGain">Normalized discounted cumulative gain confidence interval.</param>
 public sealed record SearchRankingConfidenceIntervals(
     SearchConfidenceInterval Recall,
     SearchConfidenceInterval Precision,
@@ -487,6 +583,9 @@ public sealed record SearchRankingConfidenceIntervals(
     SearchConfidenceInterval MeanAveragePrecision,
     SearchConfidenceInterval NormalizedDiscountedCumulativeGain)
 {
+    /// <summary>
+    /// Gets zero-width intervals used when no query metrics exist.
+    /// </summary>
     public static SearchRankingConfidenceIntervals Empty { get; } = new(
         new SearchConfidenceInterval(0, 0),
         new SearchConfidenceInterval(0, 0),
@@ -496,14 +595,36 @@ public sealed record SearchRankingConfidenceIntervals(
         new SearchConfidenceInterval(0, 0));
 }
 
+/// <summary>
+/// Lower and upper bounds for a bootstrap confidence interval.
+/// </summary>
+/// <param name="Lower">Lower interval bound.</param>
+/// <param name="Upper">Upper interval bound.</param>
 public sealed record SearchConfidenceInterval(double Lower, double Upper);
 
+/// <summary>
+/// Score statistics for retrieved chunks.
+/// </summary>
+/// <param name="ScoreAverage">Average score across scored retrieved chunks.</param>
+/// <param name="CreditedScoreAverage">Average score for chunks credited against expected evidence.</param>
+/// <param name="UncreditedScoreAverage">Average score for chunks not credited by expected evidence.</param>
+/// <param name="CreditedToUncreditedSameSourceScoreGap">Score gap between credited and uncredited same-source chunks.</param>
 public sealed record SearchScoreMetrics(
     double? ScoreAverage,
     double? CreditedScoreAverage,
     double? UncreditedScoreAverage,
     double? CreditedToUncreditedSameSourceScoreGap);
 
+/// <summary>
+/// Diagnostic details explaining how one query was scored.
+/// </summary>
+/// <param name="RetrievedCount">Number of retrieved chunks considered for scoring.</param>
+/// <param name="ExpectedCount">Number of expected source documents for the query.</param>
+/// <param name="ExpectedDocuments">Expected evidence and whether each item was matched.</param>
+/// <param name="MissingExpectedSourcePaths">Expected source paths not matched by retrieved chunks.</param>
+/// <param name="DuplicateRetrievedSourcePaths">Retrieved source paths that appeared more than once.</param>
+/// <param name="ChunkDiagnostics">Aggregate diagnostics about retrieved chunks.</param>
+/// <param name="Matches">Per-rank match diagnostics for retrieved chunks.</param>
 public sealed record SearchQueryDiagnostics(
     int RetrievedCount,
     int ExpectedCount,
@@ -513,6 +634,15 @@ public sealed record SearchQueryDiagnostics(
     SearchChunkDiagnostics ChunkDiagnostics,
     IReadOnlyList<SearchMatchDiagnostic> Matches);
 
+/// <summary>
+/// Aggregate diagnostics for retrieved chunks in one query.
+/// </summary>
+/// <param name="RetrievedChunkCount">Number of retrieved chunks inspected.</param>
+/// <param name="UniqueSourceCount">Number of distinct source paths in retrieved chunks.</param>
+/// <param name="DuplicateSourceCount">Number of retrieved source paths repeated at least once.</param>
+/// <param name="AverageRetrievedChunkLength">Average retrieved chunk text length in characters.</param>
+/// <param name="EvidenceCoverage">Share of expected evidence matched by retrieved chunks.</param>
+/// <param name="RelevantRetrievedCount">Number of retrieved chunks credited as relevant.</param>
 public sealed record SearchChunkDiagnostics(
     int RetrievedChunkCount,
     int UniqueSourceCount,
@@ -521,6 +651,14 @@ public sealed record SearchChunkDiagnostics(
     double EvidenceCoverage,
     int RelevantRetrievedCount);
 
+/// <summary>
+/// Diagnostic record for one expected evidence item.
+/// </summary>
+/// <param name="Index">One-based expected evidence index.</param>
+/// <param name="SourcePath">Expected source path.</param>
+/// <param name="Heading">Expected heading evidence, when required.</param>
+/// <param name="SnippetPreview">Preview of expected snippet evidence, when required.</param>
+/// <param name="Matched">Whether retrieved chunks matched this expected evidence item.</param>
 public sealed record SearchExpectedDiagnostic(
     int Index,
     string SourcePath,
@@ -528,6 +666,20 @@ public sealed record SearchExpectedDiagnostic(
     string? SnippetPreview,
     bool Matched);
 
+/// <summary>
+/// Diagnostic record explaining one retrieved chunk match decision.
+/// </summary>
+/// <param name="Rank">One-based retrieved rank.</param>
+/// <param name="SourcePath">Retrieved source path.</param>
+/// <param name="Heading">Retrieved heading metadata.</param>
+/// <param name="Score">Retrieved or reranked score.</param>
+/// <param name="MatchedExpectedSourcePath">Expected source path matched by this chunk, when any.</param>
+/// <param name="MatchedExpectedHeading">Expected heading matched by this chunk, when any.</param>
+/// <param name="SourcePathMatched">Whether the source path matched expected evidence.</param>
+/// <param name="HeadingMatched">Whether the heading matched expected evidence.</param>
+/// <param name="SnippetMatched">Whether the snippet matched expected evidence.</param>
+/// <param name="IsRelevant">Whether the chunk received relevance credit.</param>
+/// <param name="Reason">Human-readable explanation of the match decision.</param>
 public sealed record SearchMatchDiagnostic(
     int Rank,
     string SourcePath,

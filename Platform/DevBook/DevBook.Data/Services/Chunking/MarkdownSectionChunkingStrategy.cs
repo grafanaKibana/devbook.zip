@@ -5,6 +5,9 @@ using DevBook.Data.Services;
 using Markdig;
 using Markdig.Syntax;
 
+/// <summary>
+/// Splits Markdown documents by heading section and keeps heading metadata.
+/// </summary>
 public sealed class MarkdownSectionChunkingStrategy : IChunkingStrategy
 {
     /// <summary>
@@ -14,8 +17,18 @@ public sealed class MarkdownSectionChunkingStrategy : IChunkingStrategy
 
     private static readonly string[] Separators = ["\n\n", "\n", ". ", " "];
 
+    /// <summary>
+    /// Gets the Markdown-section chunking strategy kind.
+    /// </summary>
     public ChunkingStrategyKind Strategy => ChunkingStrategyKind.MarkdownSection;
 
+    /// <summary>
+    /// Splits document content by Markdown headings and recursively splits oversized sections.
+    /// </summary>
+    /// <param name="document">Document whose page content is split.</param>
+    /// <param name="embeddingService">Embedding service used when the strategy needs semantic similarity.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>Section chunks with heading metadata when the source section has a heading.</returns>
     public Task<IReadOnlyList<ChunkContent>> ChunkAsync(
         Document document,
         IEmbeddingService embeddingService,

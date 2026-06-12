@@ -11,18 +11,33 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Moq;
 
+/// <summary>
+/// Base class for offline ASP.NET Core integration tests.
+/// </summary>
 public abstract class IntegrationTestBase : IAsyncLifetime
 {
+    /// <summary>
+    /// ProblemDetails response media type used by endpoint assertions.
+    /// </summary>
     protected const string ProblemJsonMediaType = "application/problem+json";
     private OfflineApplicationFactory? factory;
     private HttpClient? client;
 
+    /// <summary>
+    /// Gets the HTTP client for the offline test application.
+    /// </summary>
     protected HttpClient Client => client ??= this.Factory.CreateClient();
 
     private OfflineApplicationFactory Factory => factory ??= new(ConfigureTestServices);
 
+    /// <summary>
+    /// Initializes the integration test fixture.
+    /// </summary>
     public Task InitializeAsync() => Task.CompletedTask;
 
+    /// <summary>
+    /// Disposes the integration test fixture and HTTP client.
+    /// </summary>
     public async Task DisposeAsync()
     {
         client?.Dispose();
@@ -33,6 +48,10 @@ public abstract class IntegrationTestBase : IAsyncLifetime
         }
     }
 
+    /// <summary>
+    /// Replaces application services for a specific integration test fixture.
+    /// </summary>
+    /// <param name="services">Service collection for the test host.</param>
     protected virtual void ConfigureTestServices(IServiceCollection services)
     {
     }
@@ -72,6 +91,9 @@ public abstract class IntegrationTestBase : IAsyncLifetime
             });
         }
 
+        /// <summary>
+        /// Restores the previous MongoDB environment variable and disposes the factory.
+        /// </summary>
         public override async ValueTask DisposeAsync()
         {
             Environment.SetEnvironmentVariable("ConnectionStrings__MongoDb", previousMongoConnectionString);

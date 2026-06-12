@@ -8,6 +8,9 @@ using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Options;
 using Moq;
 
+/// <summary>
+/// Contains tests for embedding service.
+/// </summary>
 public sealed class EmbeddingServiceTests
 {
     private const string FirstValue = "alpha";

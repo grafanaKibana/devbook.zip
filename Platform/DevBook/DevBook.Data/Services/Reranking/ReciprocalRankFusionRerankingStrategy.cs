@@ -2,6 +2,9 @@ namespace DevBook.Data.Services.Reranking;
 
 using DevBook.Data.Models;
 
+/// <summary>
+/// Reranks chunks by fusing vector rank and BM25 lexical rank.
+/// </summary>
 public sealed class ReciprocalRankFusionRerankingStrategy : IRerankingStrategy
 {
     private const int RankConstant = 60;
@@ -9,8 +12,19 @@ public sealed class ReciprocalRankFusionRerankingStrategy : IRerankingStrategy
     private const double LexicalWeight = 2;
     private const double MaximumScore = VectorWeight + LexicalWeight;
 
+    /// <summary>
+    /// Gets the reranking strategy implemented by this type.
+    /// </summary>
     public RerankingStrategyKind Strategy => RerankingStrategyKind.ReciprocalRankFusion;
 
+    /// <summary>
+    /// Combines the original vector-search rank with a BM25 lexical rank using reciprocal rank fusion.
+    /// </summary>
+    /// <param name="query">The search query.</param>
+    /// <param name="candidates">The candidate chunks to rerank.</param>
+    /// <param name="topK">Maximum number of results to return.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The top chunks ordered by fused vector and lexical rank.</returns>
     public Task<IReadOnlyList<RagChunkResponse>> RerankAsync(
         string query,
         IReadOnlyList<RagChunkResponse> candidates,

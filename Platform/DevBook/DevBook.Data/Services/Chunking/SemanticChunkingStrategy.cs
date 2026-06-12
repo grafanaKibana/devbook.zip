@@ -4,14 +4,27 @@ using System.Text;
 using DevBook.Data.Models;
 using DevBook.Data.Services;
 
+/// <summary>
+/// Splits documents by semantic similarity between neighboring text units.
+/// </summary>
 public sealed class SemanticChunkingStrategy : IChunkingStrategy
 {
     private const int MaxChunkLength = 1200;
     private const double SemanticBreakThreshold = 0.60;
     private const int OverlapLength = 200;
 
+    /// <summary>
+    /// Gets the semantic chunking strategy kind.
+    /// </summary>
     public ChunkingStrategyKind Strategy => ChunkingStrategyKind.Semantic;
 
+    /// <summary>
+    /// Embeds paragraph-like text units and splits where adjacent units are semantically distant.
+    /// </summary>
+    /// <param name="document">Document whose page content is split.</param>
+    /// <param name="embeddingService">Embedding service used when the strategy needs semantic similarity.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>Semantic text chunks without heading metadata.</returns>
     public async Task<IReadOnlyList<ChunkContent>> ChunkAsync(
         Document document,
         IEmbeddingService embeddingService,

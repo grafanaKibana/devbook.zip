@@ -6,6 +6,9 @@ using DevBook.Evaluations.Common.Evaluators.SummaryGeneration;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.AI.Evaluation;
 
+/// <summary>
+/// Evaluates search results.
+/// </summary>
 public sealed class SearchEvaluator : IEvaluator
 {
     private const string EmptyResultRateMetricName = "EmptyResultRate";
@@ -14,6 +17,9 @@ public sealed class SearchEvaluator : IEvaluator
     private const string UncreditedScoreAverageMetricName = "UncreditedScoreAverage";
     private const string CreditedToUncreditedSameSourceScoreGapMetricName = "CreditedToUncreditedSameSourceScoreGap";
 
+    /// <summary>
+    /// Gets evaluation metric names.
+    /// </summary>
     public IReadOnlyCollection<string> EvaluationMetricNames { get; } =
     [
         ..CreateRankingMetricNames(),
@@ -23,6 +29,15 @@ public sealed class SearchEvaluator : IEvaluator
         CreditedToUncreditedSameSourceScoreGapMetricName,
     ];
 
+    /// <summary>
+    /// Evaluates one search prediction and returns report-facing metrics.
+    /// </summary>
+    /// <param name="messages">Messages associated with the evaluation turn.</param>
+    /// <param name="modelResponse">Model response associated with the evaluation turn.</param>
+    /// <param name="chatConfiguration">Optional chat configuration for the evaluation.</param>
+    /// <param name="additionalContext">Evaluation contexts containing the search prediction.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The evaluation result with ranking and score metrics.</returns>
     public ValueTask<EvaluationResult> EvaluateAsync(
         IEnumerable<ChatMessage> messages,
         ChatResponse modelResponse,
@@ -50,6 +65,12 @@ public sealed class SearchEvaluator : IEvaluator
         ]));
     }
 
+    /// <summary>
+    /// Computes summary metrics.
+    /// </summary>
+    /// <param name="predictions">Search predictions to summarize.</param>
+    /// <param name="topK">Maximum number of results to return.</param>
+    /// <returns>Summary metrics grouped by chunking and reranking strategy.</returns>
     public static Dictionary<string, IEnumerable<SummaryMetric>> ComputeSummaryMetrics(
         IReadOnlyList<SearchPrediction> predictions,
         int topK)

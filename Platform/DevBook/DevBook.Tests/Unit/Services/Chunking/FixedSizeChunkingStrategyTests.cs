@@ -11,6 +11,9 @@ using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Options;
 using Moq;
 
+/// <summary>
+/// Contains tests for the fixed-size chunking strategy.
+/// </summary>
 public sealed class FixedSizeChunkingStrategyTests
 {
     private const string EmptyDocumentId = "doc-empty";
