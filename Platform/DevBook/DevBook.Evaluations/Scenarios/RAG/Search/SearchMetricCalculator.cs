@@ -326,9 +326,20 @@ public static class SearchMetricCalculator
             }
 
             var expectedDocument = expectedDocuments[index];
-            if (!MatchesSourcePath(expectedDocument.SourcePath, retrievedDocument.SourcePath))
+            if (!MatchesExpectedIdentity(expectedDocument, retrievedDocument))
             {
                 continue;
+            }
+
+            if (!string.IsNullOrWhiteSpace(expectedDocument.ChunkId))
+            {
+                return new RetrievedDocumentAnalysis(
+                    index,
+                    expectedDocument,
+                    true,
+                    MatchesNormalizedContains(expectedDocument.Heading, retrievedDocument.Heading),
+                    false,
+                    "Matched expected chunk id.");
             }
 
             var headingMatched = MatchesNormalizedContains(expectedDocument.Heading, retrievedDocument.Heading);
@@ -368,7 +379,7 @@ public static class SearchMetricCalculator
 
         var alreadyMatchedExpected = expectedDocuments
             .Select((expectedDocument, index) => new { ExpectedDocument = expectedDocument, Matched = matchedExpected[index] })
-            .FirstOrDefault(item => item.Matched && MatchesSourcePath(item.ExpectedDocument.SourcePath, retrievedDocument.SourcePath));
+            .FirstOrDefault(item => item.Matched && MatchesExpectedIdentity(item.ExpectedDocument, retrievedDocument));
         if (alreadyMatchedExpected is not null)
         {
             return new RetrievedDocumentAnalysis(
@@ -377,7 +388,9 @@ public static class SearchMetricCalculator
                 true,
                 MatchesNormalizedContains(alreadyMatchedExpected.ExpectedDocument.Heading, retrievedDocument.Heading),
                 MatchesNormalizedContains(alreadyMatchedExpected.ExpectedDocument.Snippet, retrievedDocument.Snippet),
-                "Source path matched an expected document that was already credited by an earlier retrieved result; duplicate retrieval does not add recall credit.");
+                !string.IsNullOrWhiteSpace(alreadyMatchedExpected.ExpectedDocument.ChunkId)
+                    ? "Chunk matched expected evidence that was already credited by an earlier retrieved result; duplicate retrieval does not add recall credit."
+                    : "Source path matched an expected document that was already credited by an earlier retrieved result; duplicate retrieval does not add recall credit.");
         }
 
         return new RetrievedDocumentAnalysis(
@@ -386,7 +399,7 @@ public static class SearchMetricCalculator
             false,
             false,
             false,
-            "Retrieved source path did not match any expected source path.");
+            "Retrieved chunk id did not match any expected chunk id.");
     }
 
     private static bool MatchesExpectedEvidence(SearchDocument expectedDocument, bool headingMatched, bool snippetMatched)
@@ -395,9 +408,25 @@ public static class SearchMetricCalculator
             : string.IsNullOrWhiteSpace(expectedDocument.Heading) || headingMatched;
 
     private static string CreateEvidenceMismatchReason(SearchDocument expectedDocument)
-        => !string.IsNullOrWhiteSpace(expectedDocument.Snippet)
-            ? "Source path matched an expected document, but the normalized expected snippet did not appear in the retrieved chunk."
-            : "Source path matched an expected document, but the normalized expected heading did not appear in the retrieved chunk.";
+    {
+        var identity = !string.IsNullOrWhiteSpace(expectedDocument.ChunkId)
+            ? "Chunk id matched expected evidence"
+            : "Source path matched an expected document";
+
+        return !string.IsNullOrWhiteSpace(expectedDocument.Snippet)
+            ? $"{identity}, but the normalized expected snippet did not appear in the retrieved chunk."
+            : $"{identity}, but the normalized expected heading did not appear in the retrieved chunk.";
+    }
+
+    private static bool MatchesExpectedIdentity(SearchDocument expectedDocument, SearchDocument retrievedDocument)
+    {
+        if (!string.IsNullOrWhiteSpace(expectedDocument.ChunkId))
+        {
+            return string.Equals(expectedDocument.ChunkId, retrievedDocument.ChunkId, StringComparison.Ordinal);
+        }
+
+        return MatchesSourcePath(expectedDocument.SourcePath, retrievedDocument.SourcePath);
+    }
 
     private static bool MatchesSourcePath(string expectedSourcePath, string retrievedSourcePath)
     {

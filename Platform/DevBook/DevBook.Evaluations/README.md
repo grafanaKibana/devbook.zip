@@ -2,7 +2,7 @@
 
 Run these commands from the repository root.
 
-## Generate golden datasets
+## Generate search datasets
 
 Generate group artifacts and final dataset files:
 

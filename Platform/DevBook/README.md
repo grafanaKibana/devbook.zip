@@ -8,7 +8,7 @@ This is a personal R&D proof of concept for learning RAG mechanics, not a produc
 
 - `DevBook.API`, minimal ASP.NET Core host.
 - `DevBook.Data`, ingestion, chunking, small MongoDB.Driver repositories, Hangfire boilerplate for future jobs, embedding integration, RAG search/ask services, agents, and reranking strategies.
-- `DevBook.Evaluations`, test-style RAG search evaluation over the golden dataset and local HTML report generation.
+- `DevBook.Evaluations`, test-style RAG search evaluation over generated search datasets and local HTML report generation.
 - `DevBook.Tests`, xUnit unit and integration tests for API endpoints, services, chunking, embedding batching, reranking, and evaluation metrics.
 
 ## Prerequisites
@@ -78,7 +78,7 @@ dotnet build Platform/DevBook/DevBook.Evaluations/DevBook.Evaluations.csproj
 
 ## RAG evaluation commands
 
-The golden dataset is `Platform/DevBook/DevBook.Evaluations/Datasets/golden-rag-cases.json`. Restore the local report tool from the repo root before generating HTML reports:
+Generated search datasets live in `Platform/DevBook/DevBook.Evaluations/Datasets/` as one file per chunk collection: `chunks-fixedsize.json`, `chunks-markdownsection.json`, and `chunks-semantic.json`. Restore the local report tool from the repo root before generating HTML reports:
 
 ```bash
 dotnet tool restore

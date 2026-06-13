@@ -231,25 +231,25 @@ public sealed class SearchMetricCalculatorTests
 
         recallMetric.Reason.Should().Be("Recall@k measures evidence coverage: matched expected evidence divided by expected evidence. High means required evidence was present in top-k; low means generation is capped by missing context.");
         recallMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Unacceptable);
-        recallMetric.Interpretation.Reason.Should().Be("Score 0 (Unacceptable): matched 0/1 expected evidence items within top-5.");
+        recallMetric.Interpretation.Reason.Should().Be("Score 0.00 (Unacceptable): matched 0/1 expected evidence items within top-5.");
         recallMetric.Diagnostics.Should().BeNullOrEmpty();
 
         var precisionMetric = result.Metrics["PrecisionAt5"];
 
         precisionMetric.Reason.Should().Be("Precision@k measures annotated context purity: relevant retrieved chunks divided by retrieved chunks. With sparse expected evidence, precision can look low even when the needed evidence is found.");
         precisionMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Unacceptable);
-        precisionMetric.Interpretation.Reason.Should().Be("Score 0 (Unacceptable): 0/1 retrieved chunks counted as relevant evidence within top-5.");
+        precisionMetric.Interpretation.Reason.Should().Be("Score 0.00 (Unacceptable): 0/1 retrieved chunks counted as relevant evidence within top-5.");
         precisionMetric.Diagnostics.Should().BeNullOrEmpty();
 
         var hitRateMetric = result.Metrics["HitRateAt5"];
         hitRateMetric.Reason.Should().Be("HitRate@k measures whether at least one expected evidence item appeared in top-k.");
         hitRateMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Unacceptable);
-        hitRateMetric.Interpretation.Reason.Should().Be("Score 0 (Unacceptable): no expected evidence item appeared within top-5.");
+        hitRateMetric.Interpretation.Reason.Should().Be("Score 0.00 (Unacceptable): no expected evidence item appeared within top-5.");
 
         var reciprocalRankMetric = result.Metrics["MRRAt5"];
         reciprocalRankMetric.Reason.Should().Be("MRR@k measures ranking quality: 1 divided by the rank of the first relevant evidence chunk within k. High means useful evidence appears early; 0 means no relevant evidence appeared in top-k.");
         reciprocalRankMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Unacceptable);
-        reciprocalRankMetric.Interpretation.Reason.Should().Be("Score 0 (Unacceptable): no retrieved chunk matched the expected evidence.");
+        reciprocalRankMetric.Interpretation.Reason.Should().Be("Score 0.00 (Unacceptable): no retrieved chunk matched the expected evidence.");
         reciprocalRankMetric.Diagnostics.Should().BeNullOrEmpty();
         result.Metrics.Keys.Should().Equal(PerQueryDashboardMetrics());
         result.Metrics.Should().NotContainKeys("RecallAt3", "PrecisionAt3", "MRRAt1", "MRRAt3", "MRRAt10", "MAPAt1", "MAPAt3", "MAPAt10", "NDCGAt1", "NDCGAt3", "NDCGAt10", "CreditedScoreAverage", "UncreditedScoreAverage", "CreditedToUncreditedSameSourceScoreGap");
@@ -281,9 +281,9 @@ public sealed class SearchMetricCalculatorTests
 
         result.Metrics.Keys.Should().Equal(PerQueryDashboardMetrics());
         var scoreAverageMetric = result.Metrics["ScoreAverage"];
-        ((NumericMetric)scoreAverageMetric).Value.Should().Be(0.532);
-        scoreAverageMetric.Interpretation!.Reason.Should().Contain("CreditedScoreAverage=0.877");
-        scoreAverageMetric.Interpretation.Reason.Should().Contain("UncreditedScoreAverage=0.188");
+        ((NumericMetric)scoreAverageMetric).Value.Should().Be(0.53);
+        scoreAverageMetric.Interpretation!.Reason.Should().Contain("CreditedScoreAverage=0.88");
+        scoreAverageMetric.Interpretation.Reason.Should().Contain("UncreditedScoreAverage=0.19");
         result.Metrics.Should().NotContainKey("MRRAt10");
     }
 
@@ -304,8 +304,8 @@ public sealed class SearchMetricCalculatorTests
             new ChatResponse(new ChatMessage(ChatRole.Assistant, "[[Composite]]\n[[Evaluation]]")),
             additionalContext: [new SearchEvaluationContext(prediction, topK: 5)]);
 
-        result.Metrics["PrecisionAt5"].Interpretation!.Reason.Should().Contain("Score 0.5 (Good)");
-        result.Metrics["MRRAt5"].Interpretation!.Reason.Should().Contain("Score 0.5 (Average)");
+        result.Metrics["PrecisionAt5"].Interpretation!.Reason.Should().Contain("Score 0.50 (Good)");
+        result.Metrics["MRRAt5"].Interpretation!.Reason.Should().Contain("Score 0.50 (Average)");
     }
 
     /// <summary>
@@ -364,7 +364,7 @@ public sealed class SearchMetricCalculatorTests
             [new ChatMessage(ChatRole.System, "summary")],
             new ChatResponse(new ChatMessage(ChatRole.Assistant, "summary")));
 
-        result.Metrics["Fractional"].Interpretation!.Reason.Should().Be("Summary score 0.667 rated Average.");
+        result.Metrics["Fractional"].Interpretation!.Reason.Should().Be("Summary score 0.67 rated Average.");
     }
 
     /// <summary>
@@ -388,6 +388,29 @@ public sealed class SearchMetricCalculatorTests
         result.HitRateAtK.Should().Be(1);
         result.ReciprocalRank.Should().Be(1);
         result.Diagnostics.Matches.Should().ContainSingle().Which.HeadingMatched.Should().BeTrue();
+    }
+
+    [Fact]
+    public void ScoreQuery_ChunkIdMatchesExpectedEvidence_ReturnsRelevantMatchWithoutSnippetCheck()
+    {
+        var prediction = Prediction(
+            "generated chunk hit",
+            [Document("[[Prompt Composition]]", chunkId: "chunk-1", documentId: "doc-1")],
+            [Document("Software Engineering/11 AI & ML/LLM/Prompt Composition.md", "Different heading", "retrieved chunk text without generated preview", chunkId: "chunk-1", documentId: "doc-1")]);
+
+        var result = SearchMetricCalculator.ScoreQuery(prediction);
+
+        result.RecallAtK.Should().Be(1);
+        result.PrecisionAtK.Should().Be(1);
+        result.HitRateAtK.Should().Be(1);
+        result.Diagnostics.Matches.Should().ContainSingle().Which.Should().BeEquivalentTo(new
+        {
+            IsRelevant = true,
+            SourcePathMatched = true,
+            HeadingMatched = false,
+            SnippetMatched = false,
+            Reason = "Matched expected chunk id.",
+        });
     }
 
     /// <summary>
@@ -528,6 +551,12 @@ public sealed class SearchMetricCalculatorTests
         ChunkingStrategyKind chunkingStrategy = ChunkingStrategyKind.MarkdownSection) =>
         new(query, expectedDocuments, retrievedDocuments, chunkingStrategy);
 
-    private static SearchDocument Document(string sourcePath, string? heading = null, string? snippet = null, double? score = null) =>
-        new(sourcePath, heading, snippet, Score: score);
+    private static SearchDocument Document(
+        string sourcePath,
+        string? heading = null,
+        string? snippet = null,
+        double? score = null,
+        string? chunkId = null,
+        string? documentId = null) =>
+        new(sourcePath, heading, snippet, Score: score, ChunkId: chunkId, DocumentId: documentId);
 }

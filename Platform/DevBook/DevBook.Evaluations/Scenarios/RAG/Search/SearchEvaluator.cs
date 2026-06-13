@@ -126,13 +126,14 @@ public sealed class SearchEvaluator : IEvaluator
 
     private static NumericMetric CreateMetric(string name, MetricFamily family, int cutoff, double value, SearchQueryMetrics metrics)
     {
-        var failed = family == MetricFamily.Recall && cutoff == SearchMetricCalculator.PrimaryCutoffValue && value < 1;
-        return new NumericMetric(name, value, CreateMetricReason(name))
+        var roundedValue = RoundScore(value);
+        var failed = family == MetricFamily.Recall && cutoff == SearchMetricCalculator.PrimaryCutoffValue && roundedValue < 1;
+        return new NumericMetric(name, roundedValue, CreateMetricReason(name))
         {
             Interpretation = new EvaluationMetricInterpretation(
-                GetRating(family, value),
+                GetRating(family, roundedValue),
                 failed: failed,
-                reason: CreateInterpretationReason(family, cutoff, value, metrics)),
+                reason: CreateInterpretationReason(family, cutoff, roundedValue, metrics)),
         };
     }
 
@@ -182,10 +183,10 @@ public sealed class SearchEvaluator : IEvaluator
             MetricFamily.Recall => $"Score {FormatNumber(value)} ({rating}): matched {matchedExpectedCount}/{diagnostics.ExpectedCount} expected evidence items within top-{cutoff}.",
             MetricFamily.Precision => $"Score {FormatNumber(value)} ({rating}): {matchedExpectedCount}/{retrievedAtCutoff} retrieved chunks counted as relevant evidence within top-{cutoff}.",
             MetricFamily.HitRate => value > 0
-                ? $"Score 1 ({rating}): at least one expected evidence item appeared within top-{cutoff}."
-                : $"Score 0 ({rating}): no expected evidence item appeared within top-{cutoff}.",
+                ? $"Score {FormatNumber(1)} ({rating}): at least one expected evidence item appeared within top-{cutoff}."
+                : $"Score {FormatNumber(0)} ({rating}): no expected evidence item appeared within top-{cutoff}.",
             MetricFamily.Mrr => firstRelevantRank is null
-                ? $"Score 0 ({rating}): no retrieved chunk matched the expected evidence."
+                ? $"Score {FormatNumber(0)} ({rating}): no retrieved chunk matched the expected evidence."
                 : $"Score {FormatNumber(value)} ({rating}): first relevant evidence was at rank {firstRelevantRank}.",
             MetricFamily.Map => $"Score {FormatNumber(value)} ({rating}): average precision within top-{cutoff}; recall at this cutoff is {FormatNumber(ranking.Recall)}.",
             MetricFamily.Ndcg => $"Score {FormatNumber(value)} ({rating}): discounted ranking quality within top-{cutoff}; ideal score is 1.",
@@ -198,7 +199,7 @@ public sealed class SearchEvaluator : IEvaluator
     {
         if (metrics.ScoreAverage is null)
         {
-            return "Score 0 (Inconclusive): no retrieved chunks included returned scores.";
+            return $"Score {FormatNumber(0)} (Inconclusive): no retrieved chunks included returned scores.";
         }
 
         return $"Score {FormatNumber(value)} (Diagnostic): average score across scored retrieved chunks. Related diagnostics: CreditedScoreAverage={FormatOptionalNumber(metrics.CreditedScoreAverage)}, UncreditedScoreAverage={FormatOptionalNumber(metrics.UncreditedScoreAverage)}, CreditedToUncreditedSameSourceScoreGap={FormatOptionalNumber(metrics.CreditedToUncreditedSameSourceScoreGap)}. Compare only within the same reranker scale.";
@@ -286,7 +287,7 @@ public sealed class SearchEvaluator : IEvaluator
     }
 
     private static string FormatNumber(double value)
-        => value.ToString("0.###", CultureInfo.InvariantCulture);
+        => value.ToString("0.00", CultureInfo.InvariantCulture);
 
     private static string FormatOptionalNumber(double? value)
         => value is null ? "n/a" : FormatNumber(RoundScore(value.Value));
@@ -295,7 +296,7 @@ public sealed class SearchEvaluator : IEvaluator
         => $"Bootstrap 95% CI: [{FormatNumber(confidenceInterval.Lower)}, {FormatNumber(confidenceInterval.Upper)}].";
 
     private static double RoundScore(double value)
-        => Math.Round(value, 3);
+        => Math.Round(value, 2);
 
     private static NumericMetric CreateFailedMetric(string name, string reason)
         => new(name, 0, reason)

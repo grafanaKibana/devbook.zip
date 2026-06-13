@@ -2,20 +2,27 @@ namespace DevBook.Evaluations.Scenarios.RAG.Search;
 
 using DevBook.Data.Models;
 using DevBook.Data.Options;
+using DevBook.Data.Repositories;
 using DevBook.Data.Services;
 using DevBook.Evaluations.Common;
 using DevBook.Evaluations.Common.Evaluators.SummaryGeneration;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.AI.Evaluation;
 using Microsoft.Extensions.Options;
+using System.Text.Json;
 
-/// <summary>
-/// Runs RAG search quality evaluations over the golden dataset.
-/// </summary>
 public sealed class SearchEvaluation : MongoEvaluationTestBase<SearchPrediction>
 {
-    private const string DatasetFile = "golden-rag-cases.json";
     private const int TopK = 10;
+
+    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
+
+    private static readonly SearchDatasetConfig[] DatasetConfigs =
+    [
+        new("chunks-fixedsize.json", ChunkingStrategyKind.FixedSize),
+        new("chunks-markdownsection.json", ChunkingStrategyKind.MarkdownSection),
+        new("chunks-semantic.json", ChunkingStrategyKind.Semantic),
+    ];
 
     private static readonly RerankingStrategyKind[] RerankingStrategies =
     [
@@ -39,54 +46,49 @@ public sealed class SearchEvaluation : MongoEvaluationTestBase<SearchPrediction>
 
     private static IEnumerable<TestCaseData> TestCases()
     {
-        foreach (var testCaseData in LoadTestCases<SearchDataset, SearchEvaluationCase>(DatasetFile, dataset => dataset.Cases, testCase => testCase.Id))
+        foreach (var datasetConfig in DatasetConfigs)
         {
-            var testCase = (SearchEvaluationCase)testCaseData.Arguments[0]!;
-            foreach (var rerankingStrategy in RerankingStrategies)
+            var dataset = LoadDataset(datasetConfig);
+            foreach (var testCase in dataset.Cases)
             {
-                yield return new TestCaseData(testCase, rerankingStrategy)
-                    .SetArgDisplayNames(testCase.Id, rerankingStrategy.ToString());
+                foreach (var rerankingStrategy in RerankingStrategies)
+                {
+                    yield return new TestCaseData(testCase, datasetConfig.ChunkingStrategy, rerankingStrategy)
+                        .SetArgDisplayNames(testCase.Id, datasetConfig.ChunkingStrategy.ToString(), rerankingStrategy.ToString());
+                }
             }
         }
     }
 
-    /// <summary>
-    /// Evaluates retrieval over fixed-size chunks for one golden query.
-    /// </summary>
-    /// <param name="testCase">The evaluation case.</param>
-    /// <param name="rerankingStrategy">The reranking strategy to use.</param>
-    [Test]
-    [TestCaseSource(nameof(TestCases))]
-    public async Task SearchOverFixedSizeChunks(SearchEvaluationCase testCase, RerankingStrategyKind rerankingStrategy)
+    private static SearchDataset LoadDataset(SearchDatasetConfig datasetConfig)
     {
-        await SearchFindsExpectedSources(testCase, ChunkingStrategyKind.FixedSize, rerankingStrategy);
+        var datasetPath = Path.Combine(AppContext.BaseDirectory, "Datasets", datasetConfig.FileName);
+        var dataset = JsonSerializer.Deserialize<SearchDataset>(File.ReadAllText(datasetPath), JsonOptions) ?? new SearchDataset();
+        if (dataset.Cases.Count == 0)
+        {
+            throw new InvalidOperationException($"Dataset {datasetConfig.FileName} must contain at least one case.");
+        }
+
+        var expectedCollection = ChunkCollectionNames.ForStrategy(datasetConfig.ChunkingStrategy);
+        if (!string.Equals(dataset.Collection, expectedCollection, StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException($"Dataset {datasetConfig.FileName} declares collection '{dataset.Collection}', expected '{expectedCollection}'.");
+        }
+
+        return dataset;
     }
 
-    /// <summary>
-    /// Evaluates retrieval over Markdown-section chunks for one golden query.
-    /// </summary>
-    /// <param name="testCase">The evaluation case.</param>
-    /// <param name="rerankingStrategy">The reranking strategy to use.</param>
     [Test]
     [TestCaseSource(nameof(TestCases))]
-    public async Task SearchOverMarkdownSectionChunks(SearchEvaluationCase testCase, RerankingStrategyKind rerankingStrategy)
+    public async Task SearchOverGeneratedDataset(
+        SearchEvaluationCase testCase,
+        ChunkingStrategyKind chunkingStrategy,
+        RerankingStrategyKind rerankingStrategy)
     {
-        await SearchFindsExpectedSources(testCase, ChunkingStrategyKind.MarkdownSection, rerankingStrategy);
+        await SearchFindsExpectedChunks(testCase, chunkingStrategy, rerankingStrategy);
     }
 
-    /// <summary>
-    /// Evaluates retrieval over semantic chunks for one golden query.
-    /// </summary>
-    /// <param name="testCase">The evaluation case.</param>
-    /// <param name="rerankingStrategy">The reranking strategy to use.</param>
-    [Test]
-    [TestCaseSource(nameof(TestCases))]
-    public async Task SearchOverSemanticChunks(SearchEvaluationCase testCase, RerankingStrategyKind rerankingStrategy)
-    {
-        await SearchFindsExpectedSources(testCase, ChunkingStrategyKind.Semantic, rerankingStrategy);
-    }
-
-    private async Task SearchFindsExpectedSources(
+    private async Task SearchFindsExpectedChunks(
         SearchEvaluationCase testCase,
         ChunkingStrategyKind chunkingStrategy,
         RerankingStrategyKind rerankingStrategy)
@@ -99,7 +101,12 @@ public sealed class SearchEvaluation : MongoEvaluationTestBase<SearchPrediction>
         var response = await searchService.SearchAsync(new RagSearchRequest(testCase.Query, TopK));
         var prediction = new SearchPrediction(
             testCase.Query,
-            testCase.ExpectedSources.Select(source => new SearchDocument(source.Path, source.Heading, source.Snippet)).ToArray(),
+            testCase.Expected.AllChunks.Select(chunk => new SearchDocument(
+                chunk.CitationLabel,
+                chunk.Heading,
+                chunk.Text,
+                ChunkId: chunk.ChunkId,
+                DocumentId: chunk.DocumentId)).ToArray(),
             await MapRetrievedDocumentsAsync(response.Results),
             chunkingStrategy,
             rerankingStrategy);
@@ -146,60 +153,53 @@ public sealed class SearchEvaluation : MongoEvaluationTestBase<SearchPrediction>
                 result.Heading,
                 result.ChunkText,
                 index + 1,
-                result.Score))
+                result.Score,
+                result.ChunkId,
+                result.DocumentId))
             .ToArray();
     }
 
-    /// <summary>
-    /// Golden search dataset loaded from JSON.
-    /// </summary>
+    private sealed record SearchDatasetConfig(string FileName, ChunkingStrategyKind ChunkingStrategy);
+
     public sealed record SearchDataset
     {
-        /// <summary>
-        /// Gets the golden query cases.
-        /// </summary>
+        public string Collection { get; init; } = string.Empty;
+
         public IReadOnlyList<SearchEvaluationCase> Cases { get; init; } = [];
     }
 
-    /// <summary>
-    /// One golden query and the source evidence expected to satisfy it.
-    /// </summary>
     public sealed record SearchEvaluationCase
     {
-        /// <summary>
-        /// Gets the stable case identifier shown in test output.
-        /// </summary>
         public string Id { get; init; } = string.Empty;
 
-        /// <summary>
-        /// Gets the query submitted to RAG search.
-        /// </summary>
         public string Query { get; init; } = string.Empty;
 
-        /// <summary>
-        /// Gets expected source evidence for the query.
-        /// </summary>
-        public IReadOnlyList<ExpectedSourceDocument> ExpectedSources { get; init; } = [];
+        public ExpectedChunkSet Expected { get; init; } = new();
     }
 
-    /// <summary>
-    /// Source document evidence expected for a golden query.
-    /// </summary>
-    public sealed record ExpectedSourceDocument
+    public sealed record ExpectedChunkSet
     {
-        /// <summary>
-        /// Gets the expected vault-relative source path.
-        /// </summary>
-        public string Path { get; init; } = string.Empty;
+        public IReadOnlyList<ExpectedChunk> PrimaryChunks { get; init; } = [];
 
-        /// <summary>
-        /// Gets the expected heading evidence, when the case requires a section match.
-        /// </summary>
+        public IReadOnlyList<ExpectedChunk> SupportingChunks { get; init; } = [];
+
+        public IReadOnlyList<ExpectedChunk> AcceptableChunks { get; init; } = [];
+
+        public IEnumerable<ExpectedChunk> AllChunks => this.PrimaryChunks.Concat(this.SupportingChunks).Concat(this.AcceptableChunks);
+    }
+
+    public sealed record ExpectedChunk
+    {
+        public string ChunkId { get; init; } = string.Empty;
+
+        public string DocumentId { get; init; } = string.Empty;
+
         public string? Heading { get; init; }
 
-        /// <summary>
-        /// Gets the expected snippet evidence, when the case requires text-level verification.
-        /// </summary>
-        public string? Snippet { get; init; }
+        public int ChunkOrder { get; init; }
+
+        public string CitationLabel { get; init; } = string.Empty;
+
+        public string Text { get; init; } = string.Empty;
     }
 }
