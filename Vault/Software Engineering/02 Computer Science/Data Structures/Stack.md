@@ -14,15 +14,9 @@ dg-publish: true
 
 `Stack<T>` is a LIFO (last in, first out) collection. The most recently pushed element is the first popped. Use it for backtracking, undo flows, and depth-first traversals.
 
-`Stack<T>` in .NET is array-backed and optimized for top-of-stack operations:
+It is array-backed — internally an array plus a `_size` counter. `Push` writes at index `_size` and increments it (doubling the array when full), `Pop` decrements `_size` and returns that slot, and `Peek` reads it without removing. Because all mutation happens at one end, the three operations are O(1) on average and no elements are ever shifted.
 
-- `Push`, `Pop`, and `Peek` are O(1) on average.
-- Capacity grows when needed, similar to `List<T>`.
-- Enumeration is from top to bottom.
-
-The runtime uses a call stack with the same LIFO discipline: each function invocation pushes a stack frame containing its local variables and return address; when the function returns, the frame is popped. An explicit `Stack<T>` mirrors this behavior in application code — useful for undo/redo chains, expression evaluation, and depth-first backtracking without the recursion limit risk. Unlike the implicit call stack, `Stack<T>` capacity is bounded only by heap memory.
-
-## Structure
+The runtime's own call stack follows the same LIFO discipline: each call pushes a frame with local variables and a return address, and returning pops it. An explicit `Stack<T>` mirrors that in application code — handy for undo/redo chains, expression evaluation, and depth-first backtracking without the recursion-depth limit, bounded only by heap memory.
 
 ```mermaid
 graph TD
@@ -46,25 +40,37 @@ Console.WriteLine(stack.Pop());  // A
 
 ## Pitfalls
 
-- Calling `Pop`/`Peek` on an empty stack throws `InvalidOperationException`. Check `Count` first when emptiness is possible.
-- Using `Stack<T>` for queue-like workflows reverses processing order and causes subtle logic bugs. Validate ordering requirements before choosing it.
-- Large temporary stacks can grow memory and remain allocated. Use `TrimExcess()` if a long-lived stack shrinks significantly.
+- **Popping an empty stack** — `Pop`/`Peek` on an empty stack throws `InvalidOperationException`. Check `Count` first (or use `TryPop`/`TryPeek`) when emptiness is possible.
+- **Using LIFO where FIFO is expected** — reaching for `Stack<T>` in a queue-like workflow reverses processing order and causes subtle logic bugs. Validate ordering requirements before choosing it.
+- **Retained capacity after shrinking** — a stack that grew large keeps its backing array even after most items are popped. Call `TrimExcess()` when a long-lived stack shrinks significantly.
 
 ## Tradeoffs
 
-- `Stack<T>` vs `Queue<T>`: stack favors LIFO workflows, queue favors FIFO processing pipelines.
-- Recursive DFS vs explicit `Stack<T>`: recursion is concise, explicit stack avoids deep-recursion stack-overflow risk.
+| Choice | `Stack<T>` | Alternative | Decision criteria |
+| --- | --- | --- | --- |
+| vs [[Queue]] | LIFO — newest item processed first | FIFO — preserves arrival order | Use a stack for backtracking/undo/DFS; use a queue when fairness or arrival order matters. |
+| vs recursive [[DFS BFS\|DFS]] | Explicit state, no call-stack limit | Concise, uses the call stack | Use an explicit stack when depth may be large or unbounded; recursion is fine for shallow, bounded depth. |
+| vs `Stack` (non-generic) | Type-safe, no boxing | Stores `object` | Always prefer the generic `Stack<T>`; the legacy type exists only for old interop. |
 
 ## Questions
 
 > [!QUESTION]- When is an explicit `Stack<T>` better than recursion?
-> When graph/tree depth may be large or unbounded. An explicit stack avoids blowing the call stack and gives more control over traversal state.
+> - Use it when graph/tree depth may be large or unbounded — an explicit stack lives on the heap and avoids a `StackOverflowException`.
+> - It also gives you control over traversal state you can inspect, pause, or resume, which recursion hides in call frames.
+> - The traversal logic is identical: push instead of recurse, pop instead of return.
+> - It is more verbose than recursion, but it is the safe default whenever input depth is attacker- or data-controlled.
 
 > [!QUESTION]- Why can `Stack<T>` be a poor fit for work queues?
-> Work queues usually require FIFO fairness. LIFO processing can starve older items and change expected behavior.
+> - Work queues usually need FIFO fairness so the oldest item is handled first.
+> - LIFO processing serves the newest item first, which can starve older items indefinitely under sustained load.
+> - This is a correctness/SLA bug, not a performance one — it passes tests but misbehaves in production bursts.
+> - A stack is simpler and cache-friendly, but choose `Queue<T>` (or a priority queue) the moment ordering guarantees matter.
 
 > [!QUESTION]- What is the complexity of `Push` and why is it not always constant in practice?
-> `Push` is O(1) amortized. It can be O(n) during resize because elements are copied to a larger internal array.
+> - `Push` is **amortized** O(1): most pushes just write a slot and bump the counter.
+> - When the backing array is full, `Push` allocates a doubled array and copies all elements — that individual call is O(n).
+> - Doubling makes any sequence of n pushes cost O(n) total, so the average stays O(1).
+> - Pre-size with `new Stack<T>(capacity)` when the count is known to flatten those resize spikes on latency-sensitive paths.
 
 ## References
 

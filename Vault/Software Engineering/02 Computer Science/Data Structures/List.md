@@ -14,14 +14,7 @@ dg-publish: true
 
 `List<T>` is the default dynamic array in .NET. Use it when you need ordered data, fast index access, and efficient appends.
 
-## Deeper Explanation
-
-`List<T>` stores items in a contiguous array, so indexing by position is O(1) and iterating is cache friendly.
-When `Count` grows past `Capacity`, the internal array is reallocated and copied to a larger buffer.
-
-When `Count` exceeds `Capacity`, `List<T>` allocates a new internal array with double the current capacity (power-of-two growth), copies all elements, and releases the old buffer. The doubling strategy ensures any sequence of n appends costs O(n) total — amortized O(1) per append — even though individual resize events are O(n). The pre-sizing constructor `new List<T>(capacity)` eliminates resizes for known-size collections, which matters in hot paths where repeated allocation and GC pressure are measurable. Prefer `Capacity` pre-sizing over post-construction `TrimExcess` when the final size is known upfront.
-
-## Structure
+It stores items in a contiguous array and tracks `Count` separately from `Capacity`, so indexing is O(1) and iteration is cache-friendly. When `Count` would exceed `Capacity`, it allocates a new array of double the size, copies the elements, and drops the old one — so any run of n appends costs O(n) total (amortized O(1) each) even though an individual resize is O(n). When the final size is known, `new List<T>(capacity)` skips those resizes, which is worth doing on hot paths where the repeated allocation and GC pressure are measurable.
 
 ```mermaid
 graph LR
@@ -41,26 +34,37 @@ Console.WriteLine(users[0]);
 
 ## Pitfalls
 
-- Repeated growth without pre-sizing can allocate/copy many times.
-- Insert/remove in the middle is O(n) due to shifting.
-- `Clear()` resets `Count` but usually keeps `Capacity`.
+- **Repeated growth without pre-sizing** — appending to a default-constructed list triggers multiple allocate-and-copy resizes. Pass an initial `capacity` when the final size is known.
+- **Middle insert/remove is O(n)** — `Insert`/`RemoveAt` away from the tail shift every following element. Use a different structure if mid-sequence edits dominate.
+- **`Clear()` keeps capacity** — `Clear()` resets `Count` but retains the backing array, so memory is not released. Use `TrimExcess()` or reassign when you need the memory back.
 
 ## Tradeoffs
 
-- Prefer `List<T>` over `LinkedList<T>` for most workloads because iteration is faster in practice.
-- Use `LinkedList<T>` only when you already hold node references and need O(1) inserts/removes around them.
+| Choice | `List<T>` | Alternative | Decision criteria |
+| --- | --- | --- | --- |
+| vs [[LinkedList]] | Contiguous, fast iteration & index access | O(1) edits around held node handles | Default to `List<T>`; pick [[LinkedList]] only when you already hold node references and do many localized inserts/removes. |
+| vs `T[]` (array) | Resizable, rich API | Fixed size, slightly lower overhead | Use a list when the count changes; use an array when the size is fixed and known. |
+| vs `ImmutableList<T>` | Mutable, cheap writes | Safe sharing across threads | Use `List<T>` for single-owner mutation; immutable variants when many readers share without locking. |
 
 ## Questions
 
 > [!QUESTION]- How is `List<T>` implemented under the hood?
-> `List<T>` wraps an internal `T[]` buffer and tracks `Count` separately from `Capacity`.
-> When capacity is exceeded, it allocates a bigger array and copies elements.
+> - It wraps an internal `T[]` buffer and tracks `Count` (logical size) separately from `Capacity` (array length).
+> - When `Count` would exceed `Capacity`, it allocates a new array of double the size, copies the elements, and drops the old one.
+> - Contiguous storage is what makes index access O(1) and iteration cache-friendly.
+> - **Tradeoff**: the contiguous array gives speed and locality but makes mid-sequence inserts O(n) — that shaping decision is the whole reason to sometimes pick another structure.
 
-> [!QUESTION]- What is the difference between `Count` and `Capacity` in `List<T>`?
-> `Count` is the number of logical elements. `Capacity` is the size of the internal array.
+> [!QUESTION]- What is the difference between `Count` and `Capacity`?
+> - `Count` is the number of elements you have actually added.
+> - `Capacity` is how many the current backing array can hold before a resize is needed.
+> - You can raise `Capacity` ahead of time to avoid resizes; `Count` only changes via add/remove.
+> - A large pre-set `Capacity` removes resize copies but holds memory you may not use, so pre-size only when the count is roughly known.
 
-> [!QUESTION]- How do `Clear()` and `Remove()` affect `Capacity` in `List<T>`?
-> They usually change only `Count`. To shrink memory, use `TrimExcess()` or set `Capacity`.
+> [!QUESTION]- How do `Clear()` and `Remove()` affect `Capacity`?
+> - Both change only `Count`; the backing array (and thus `Capacity`) is left intact.
+> - This is deliberate — reusing the array avoids re-allocating if the list fills up again.
+> - To actually reclaim memory, call `TrimExcess()` or set `Capacity` explicitly.
+> - Keeping capacity speeds up refill but pins memory in long-lived lists that briefly spiked large — trim those explicitly.
 
 ## References
 

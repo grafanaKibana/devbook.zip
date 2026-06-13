@@ -14,11 +14,7 @@ dg-publish: true
 
 `LinkedList<T>` is a doubly linked list where each node points to previous and next nodes. It is useful when you already keep node references and need frequent O(1) inserts/removes around those nodes.
 
-Unlike array-backed collections, linked lists do not store elements contiguously:
-
-- Random index access is O(n) because traversal is required.
-- Inserting/removing at a known node is O(1).
-- Each element carries node-pointer overhead, so memory locality is worse than `List<T>`.
+Each element lives in a `LinkedListNode<T>` holding a value plus `Previous` and `Next` references; the list keeps `First`/`Last` handles and a count. Inserting or removing at a node you already hold rewires only two or three pointers — no elements move, so it is O(1). The cost is locality: nodes are scattered across the heap, so reaching the *k*-th element means walking *k* pointers (O(n)), and that pointer-chasing defeats CPU cache prefetching.
 
 ## Structure
 
@@ -49,19 +45,31 @@ list.Remove("C");
 
 ## Tradeoffs
 
-- `LinkedList<T>` vs `List<T>`: linked list wins for O(1) local edits around known nodes; list usually wins for traversal and random access.
-- `LinkedList<T>` vs `Queue<T>`/`Stack<T>`: queue/stack APIs are simpler and often faster when you only need FIFO/LIFO behavior.
+| Choice | `LinkedList<T>` | Alternative | Decision criteria |
+| --- | --- | --- | --- |
+| vs [[List]] | O(1) edits around held nodes | Contiguous, fast iteration & index access | Pick the linked list only when you hold node handles and edit locally; otherwise [[List]] wins in practice. |
+| vs [[Queue]] / [[Stack]] | General two-ended editing | Simpler, faster FIFO/LIFO API | If you only need ends-only access, the dedicated queue/stack is clearer and faster. |
+| vs [[List]] for big O on paper | O(1) insert/remove | O(n) insert/remove (shift) | The asymptotics favor linked list, but cache effects usually make `List<T>` faster for realistic n — measure before trusting big O here. |
 
 ## Questions
 
-> [!QUESTION]- Why is `LinkedList<T>` often slower than `List<T>` in real workloads despite O(1) inserts/removes?
-> CPU cache locality dominates many workloads. `List<T>` keeps data contiguous, while linked-list nodes are scattered and require pointer chasing.
+> [!QUESTION]- Why is `LinkedList<T>` often slower than `List<T>` despite O(1) inserts/removes?
+> - CPU cache locality dominates real workloads: `List<T>` keeps data contiguous and prefetch-friendly.
+> - Linked-list nodes are scattered on the heap, so every traversal step is a cache-missing pointer chase.
+> - The O(1) edit only helps if you *already hold the node* — finding it first is O(n) and erases the advantage.
+> - **Tradeoff**: big-O favors the linked list, but constant factors favor the array — trust measurements over asymptotics for in-memory n.
 
 > [!QUESTION]- When is `LinkedList<T>` the right choice in .NET?
-> When your algorithm already stores `LinkedListNode<T>` handles and performs many localized inserts/removes around them.
+> - When your algorithm already stores `LinkedListNode<T>` handles and performs many inserts/removes around them (e.g. an LRU cache moving a node to the front).
+> - When splicing whole sublists by pointer is a core operation.
+> - When you must avoid the O(n) element shift that `List<T>` pays for mid-sequence edits at very large sizes.
+> - You accept worse iteration speed and per-node memory overhead to get guaranteed O(1) local restructuring.
 
-> [!QUESTION]- What is a common migration signal from `LinkedList<T>` to `List<T>`?
-> If code frequently searches by index/value before each operation, you are paying O(n) traversal repeatedly and should usually switch to `List<T>` or another structure.
+> [!QUESTION]- What is a common signal to migrate from `LinkedList<T>` to `List<T>`?
+> - If code frequently searches by index or value *before* each edit, you are paying O(n) traversal repeatedly.
+> - That pattern means you are not actually exploiting held node handles — the linked list's only advantage.
+> - Iteration-heavy or random-access code is another clear signal.
+> - Switching to `List<T>` improves locality and iteration but reintroduces O(n) mid-sequence inserts, so confirm those are rare before migrating.
 
 ## References
 

@@ -14,19 +14,11 @@ dg-publish: true
 
 `Queue<T>` is a FIFO (first in, first out) collection. The earliest enqueued item is processed first. Use it for buffering, breadth-first traversal, and producer-consumer style pipelines.
 
-`Queue<T>` is implemented as a circular buffer in .NET:
-
-- `Enqueue` adds at the tail; `Dequeue` removes from the head.
-- Head/tail indices wrap around instead of shifting elements.
-- Operations are O(1) on average, with occasional O(n) resize copies.
-
-Because head and tail indices advance modulo the array length, neither `Enqueue` nor `Dequeue` shifts elements — only index arithmetic occurs. When the buffer fills completely, the queue copies all elements to a larger array with the head reset to index 0, then resumes the circular layout. This one-time O(n) resize is amortized over many operations so steady-state throughput stays O(1).
-
-## Structure
+Internally it is a circular buffer — a backing array with separate `head` and `tail` indices. `Enqueue` writes at `tail`, `Dequeue` reads from `head`, and both advance modulo the array length, so the live region wraps around the array instead of shifting elements. That keeps both operations O(1). When the region fills the whole array, the queue copies into a larger one with `head` reset to 0 — a one-time O(n) resize amortized across many operations.
 
 ```mermaid
 graph LR
-    F[front] --> A[item one] --> B[item two] --> C[item three] --> T[back]
+    F[front / head] --> A[item one] --> B[item two] --> C[item three] --> T[back / tail]
 ```
 
 ## Example
@@ -42,25 +34,37 @@ Console.WriteLine(jobs.Peek());    // job-2
 
 ## Pitfalls
 
-- `Dequeue`/`Peek` on an empty queue throws `InvalidOperationException`. Guard with `Count` when queue emptiness is expected.
-- Using a queue where priority matters can delay urgent work. Switch to `PriorityQueue<TElement, TPriority>` when ordering by priority is required.
-- Unbounded enqueues can grow memory silently in bursty systems. Apply backpressure or capacity policies at architecture boundaries.
+- **Dequeuing an empty queue** — `Dequeue`/`Peek` on an empty queue throws `InvalidOperationException`. Guard with `Count` or use `TryDequeue`/`TryPeek`.
+- **Ignoring priority** — a plain FIFO queue delays urgent work behind older low-value items. Switch to `PriorityQueue<TElement, TPriority>` when ordering by priority matters.
+- **Unbounded growth** — silent memory growth occurs when producers outpace consumers in bursty systems. Apply backpressure or a bounded `Channel<T>` at architecture boundaries.
 
 ## Tradeoffs
 
-- `Queue<T>` vs `Stack<T>`: queue preserves arrival order, stack prioritizes newest items.
-- `Queue<T>` vs `Channel<T>`: queue is simple in-memory buffering, channels provide richer async coordination for concurrent producers/consumers.
+| Choice | `Queue<T>` | Alternative | Decision criteria |
+| --- | --- | --- | --- |
+| vs [[Stack]] | FIFO — preserves arrival order | LIFO — newest first | Use a queue for fairness/BFS/pipelines; a stack for backtracking/undo. |
+| vs `PriorityQueue<TElement,TPriority>` | Order = arrival time | Order = priority key | Use the priority queue when urgency, not arrival, decides processing order. |
+| vs `Channel<T>` | Simple in-memory buffer, not thread-safe | Async, bounded, concurrent producers/consumers | Upgrade to a channel when multiple threads coordinate or you need backpressure. |
 
 ## Questions
 
 > [!QUESTION]- Why is `Queue<T>` suitable for BFS?
-> BFS processes nodes in discovery order by levels. FIFO behavior naturally enforces this traversal order.
+> - BFS must visit nodes in order of increasing distance — all of layer *k* before any of layer *k+1*.
+> - A FIFO queue naturally enforces that: neighbors enqueued earlier (closer) are dequeued earlier.
+> - Swapping in a stack would turn the traversal into DFS, changing the result.
+> - The queue guarantees correct level order, but its frontier can hold a whole layer of the graph — a memory cost you accept when shortest-path-by-hops correctness matters.
 
 > [!QUESTION]- When should you replace `Queue<T>` with `PriorityQueue<TElement, TPriority>`?
-> When business correctness depends on priority rather than arrival time, such as shortest-path, scheduler, or SLA-driven dispatching.
+> - When correctness depends on priority rather than arrival time — Dijkstra, schedulers, SLA-driven dispatch.
+> - A FIFO queue would serve a low-priority older item ahead of an urgent newer one.
+> - `PriorityQueue` keeps a heap so the smallest key is always dequeued first.
+> - It moves you from O(1) enqueue/dequeue to O(log n) heap operations, so pay it only when ordering by priority is actually required.
 
-> [!QUESTION]- Why can a queue become a production reliability problem even if operations are O(1)?
-> Complexity is not the only risk. If producers outpace consumers, memory grows and latency spikes. Throughput and backpressure design matter more than method complexity.
+> [!QUESTION]- Why can a queue be a production reliability problem even if operations are O(1)?
+> - Per-operation complexity says nothing about system-level throughput.
+> - If producers persistently outpace consumers, the queue grows without bound — memory climbs and latency spikes as items wait longer.
+> - This is a flow-control problem, not an algorithmic one.
+> - **Tradeoff**: an unbounded in-memory queue maximizes ingest but risks OOM; a bounded queue/channel adds backpressure that protects the system at the cost of rejecting or blocking producers.
 
 ## References
 
