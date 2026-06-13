@@ -6,7 +6,7 @@ subtopic:
 level:
   - "4"
 priority: Medium
-status: Ready To Repeat
+status: Done
 dg-publish: true
 ---
 

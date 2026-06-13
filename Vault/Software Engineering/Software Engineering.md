@@ -112,6 +112,13 @@ for (const [topic, s] of extraTopics) {
   cards.push(["📁", target, topic, ""]);
 }
 
+// Sort cards by coverage, most complete first (tie-break on note count, then name).
+cards.sort((a, b) => {
+  const sa = statsFor(a[2]);
+  const sb = statsFor(b[2]);
+  return sb.pct - sa.pct || sb.total - sa.total || a[2].localeCompare(b[2]);
+});
+
 // --- Render the grid; each cell pins its progress bar to the bottom ----------
 // Use a Dataview-classed table so it inherits the same (zero) top margin the
 // other dashboard tables use, instead of the default markdown table margin.
@@ -212,7 +219,7 @@ FROM "Software Engineering"
 WHERE file.path != this.file.path
   AND !contains(file.tags, "#MetricsIgnore")
 SORT file.mtime DESC
-LIMIT 12
+LIMIT 10
 ```
 
 # Publish Distribution

@@ -6,7 +6,7 @@ subtopic:
 level:
   - "4"
 priority: Medium
-status: Ready To Repeat
+status: Done
 dg-publish: true
 ---
 
@@ -29,7 +29,7 @@ graph LR
     S --> D
 ```
 
-### Example
+## Example
 
 ```csharp
 Span<int> values = stackalloc int[] { 10, 20, 30, 40 };
@@ -39,13 +39,13 @@ tail[0] = 300;
 Console.WriteLine(values[2]); // 300
 ```
 
-### Pitfalls
+## Pitfalls
 
 - Returning a `Span<T>` that points to stack memory is invalid because the underlying buffer is gone after method return. Keep span lifetimes within the owning scope.
 - `Span<T>` cannot be used across `await` boundaries because it is stack-only. Use `Memory<T>` for async flows.
 - Converting every API to `Span<T>` can hurt readability when performance is not a bottleneck. Apply it to measured hot paths.
 
-### Tradeoffs
+## Tradeoffs
 
 - `Span<T>` vs `T[]`: spans avoid copies for slicing, arrays are simpler when you need ownership and long-lived storage.
 - `Span<T>` vs `Memory<T>`: spans are best for synchronous fast paths, `Memory<T>` is better when data must survive async boundaries.

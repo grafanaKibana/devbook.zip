@@ -6,7 +6,7 @@ subtopic:
 level:
   - "4"
 priority: Medium
-status: Ready To Repeat
+status: Done
 dg-publish: true
 ---
 
@@ -30,7 +30,7 @@ graph LR
     N3 --> T[tail]
 ```
 
-### Example
+## Example
 
 ```csharp
 var list = new LinkedList<string>();
@@ -41,13 +41,13 @@ list.AddAfter(a, "B");
 list.Remove("C");
 ```
 
-### Pitfalls
+## Pitfalls
 
 - Using `LinkedList<T>` for index-based access causes O(n) scans and can underperform `List<T>` significantly. Prefer `List<T>`/arrays for index-heavy workloads, or store node handles when linked-list locality edits are truly required.
 - Using detached or foreign `LinkedListNode<T>` instances as anchors (`AddBefore`, `AddAfter`, `Remove`) throws because a node must belong to the target list context. Check `node.List` before using node handles and re-find/re-add nodes when needed.
 - Pointer-rich node allocation hurts cache locality, so iteration can be slower even when complexity looks similar on paper. Prefer `List<T>` for traversal-heavy workloads unless node-local O(1) edits are the dominant operation.
 
-### Tradeoffs
+## Tradeoffs
 
 - `LinkedList<T>` vs `List<T>`: linked list wins for O(1) local edits around known nodes; list usually wins for traversal and random access.
 - `LinkedList<T>` vs `Queue<T>`/`Stack<T>`: queue/stack APIs are simpler and often faster when you only need FIFO/LIFO behavior.

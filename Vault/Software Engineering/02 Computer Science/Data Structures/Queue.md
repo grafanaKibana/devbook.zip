@@ -6,7 +6,7 @@ subtopic:
 level:
   - "4"
 priority: Medium
-status: Ready To Repeat
+status: Done
 dg-publish: true
 ---
 
@@ -21,6 +21,7 @@ dg-publish: true
 - Operations are O(1) on average, with occasional O(n) resize copies.
 
 Because head and tail indices advance modulo the array length, neither `Enqueue` nor `Dequeue` shifts elements — only index arithmetic occurs. When the buffer fills completely, the queue copies all elements to a larger array with the head reset to index 0, then resumes the circular layout. This one-time O(n) resize is amortized over many operations so steady-state throughput stays O(1).
+
 ## Structure
 
 ```mermaid
@@ -28,7 +29,7 @@ graph LR
     F[front] --> A[item one] --> B[item two] --> C[item three] --> T[back]
 ```
 
-### Example
+## Example
 
 ```csharp
 var jobs = new Queue<string>();
@@ -39,13 +40,13 @@ Console.WriteLine(jobs.Dequeue()); // job-1
 Console.WriteLine(jobs.Peek());    // job-2
 ```
 
-### Pitfalls
+## Pitfalls
 
 - `Dequeue`/`Peek` on an empty queue throws `InvalidOperationException`. Guard with `Count` when queue emptiness is expected.
 - Using a queue where priority matters can delay urgent work. Switch to `PriorityQueue<TElement, TPriority>` when ordering by priority is required.
 - Unbounded enqueues can grow memory silently in bursty systems. Apply backpressure or capacity policies at architecture boundaries.
 
-### Tradeoffs
+## Tradeoffs
 
 - `Queue<T>` vs `Stack<T>`: queue preserves arrival order, stack prioritizes newest items.
 - `Queue<T>` vs `Channel<T>`: queue is simple in-memory buffering, channels provide richer async coordination for concurrent producers/consumers.

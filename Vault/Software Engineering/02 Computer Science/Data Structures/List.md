@@ -6,7 +6,7 @@ subtopic:
 level:
   - "4"
 priority: Medium
-status: Ready To Repeat
+status: Done
 dg-publish: true
 ---
 
@@ -28,7 +28,7 @@ graph LR
     I0[index zero ann] --> I1[index one bob] --> I2[index two chris]
 ```
 
-### Example
+## Example
 
 ```csharp
 var users = new List<string>(capacity: 4) { "Ann", "Bob" };
@@ -39,13 +39,13 @@ users.Remove("Bob");
 Console.WriteLine(users[0]);
 ```
 
-### Pitfalls
+## Pitfalls
 
 - Repeated growth without pre-sizing can allocate/copy many times.
 - Insert/remove in the middle is O(n) due to shifting.
 - `Clear()` resets `Count` but usually keeps `Capacity`.
 
-### Tradeoffs
+## Tradeoffs
 
 - Prefer `List<T>` over `LinkedList<T>` for most workloads because iteration is faster in practice.
 - Use `LinkedList<T>` only when you already hold node references and need O(1) inserts/removes around them.

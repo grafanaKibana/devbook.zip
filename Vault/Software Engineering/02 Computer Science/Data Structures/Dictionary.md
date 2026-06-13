@@ -6,7 +6,7 @@ subtopic:
 level:
   - "4"
 priority: Medium
-status: Ready To Repeat
+status: Done
 dg-publish: true
 ---
 
@@ -29,7 +29,7 @@ graph TD
     B1 --> E2[key two value bob]
 ```
 
-### Example
+## Example
 
 ```csharp
 var byId = new Dictionary<int, string>
@@ -44,13 +44,13 @@ if (byId.TryGetValue(2, out var user))
 }
 ```
 
-### Pitfalls
+## Pitfalls
 
 - **`GetHashCode`/`Equals` contract violation** — if `Equals` says two keys are equal but `GetHashCode` returns different values, the dictionary stores both as separate entries. Later lookups find one but not the other, causing silent data duplication. Always ensure: if `a.Equals(b)` then `a.GetHashCode() == b.GetHashCode()`.
 - **Mutable keys become unfindable** — mutating a field that participates in `GetHashCode` after insertion orphans the entry in the wrong bucket. The key still exists but `TryGetValue` returns `false`. Use immutable keys (`string`, `int`, `record` types).
 - **Concurrent writes corrupt state** — `Dictionary` is not thread-safe. Two threads calling `Add` simultaneously can corrupt the internal bucket array, causing infinite loops in `FindValue` (a real production incident pattern). Use `ConcurrentDictionary` for concurrent writes, or externally synchronize with `lock`.
 
-### Tradeoffs
+## Tradeoffs
 
 - For tiny maps (very small `N`), linear search can be cheaper.
 - For sorted key iteration, use `SortedDictionary`/`SortedList`.
