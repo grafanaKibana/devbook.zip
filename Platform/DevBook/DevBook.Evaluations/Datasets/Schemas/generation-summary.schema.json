@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://devbook.local/schemas/generation-summary.schema.json",
+  "title": "DevBook Golden Dataset Generation Summary",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "generatedAt", "collections"],
+  "properties": {
+    "version": { "const": 1 },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "collections": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/collectionSummary" }
+    }
+  },
+  "$defs": {
+    "collectionSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["collection", "sampledChunks", "acceptedGroups", "rejectedGroups", "auditGroups", "datasetCases"],
+      "properties": {
+        "collection": { "type": "string", "pattern": "^chunks\\.(fixedsize|markdownsection|semantic)$" },
+        "sampledChunks": { "type": "integer" },
+        "acceptedGroups": { "type": "integer" },
+        "rejectedGroups": { "type": "integer" },
+        "auditGroups": { "type": "integer" },
+        "datasetCases": { "type": "integer" }
+      }
+    }
+  }
+}

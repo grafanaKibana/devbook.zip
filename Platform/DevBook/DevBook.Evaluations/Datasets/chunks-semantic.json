@@ -1,0 +1,454 @@
+{
+  "version": 2,
+  "generatedAt": "2026-06-13T09:19:37.802771+00:00",
+  "collection": "chunks.semantic",
+  "cases": [
+    {
+      "id": "chunks-semantic-when-should-you-choose-cqrs-over-read-replicas-f-001",
+      "query": "When should you choose CQRS over read replicas for scaling, and what tradeoffs come with eventual consistency and projection lag?",
+      "difficulty": "medium",
+      "expected": {
+        "primaryChunks": [
+          {
+            "chunkId": "chunk_doc_7bd8643762242e96_0030_2b6425c7e577fac7:3126665581780531911",
+            "documentId": "doc_7bd8643762242e96",
+            "chunkOrder": 30,
+            "citationLabel": "[[Scalability Patterns]]",
+            "text": "\u003E [!QUESTION]- When would you choose read replicas instead of CQRS for a scaling problem? \u003E **Expected answer:** \u003E - Choose read replicas when main pressure is read throughput on an existing relational model. \u003E - Choose CQRS when read/write models diverge and read projections need different shape or storage. \u003E - Mentio\u2026"
+          }
+        ],
+        "supportingChunks": [
+          {
+            "chunkId": "chunk_doc_bc2c928a46215116_0029_528d1aac803f882b:5948440011014637611",
+            "documentId": "doc_bc2c928a46215116",
+            "chunkOrder": 29,
+            "citationLabel": "[[CQRS]]",
+            "text": "## Pitfalls - **Eventual consistency surprises users**: a command succeeds but the read model has not caught up, so users see stale dashboards. Use UX hints (\u0022updating...\u0022), projection lag monitoring, and read-your-own-write for critical paths (serve the immediate follow-up read from the write model for that user/sessi\u2026"
+          }
+        ],
+        "acceptableChunks": [
+          {
+            "chunkId": "chunk_doc_bc2c928a46215116_0032_d5d010f9a15bf00f:15406832989574524943",
+            "documentId": "doc_bc2c928a46215116",
+            "chunkOrder": 32,
+            "citationLabel": "[[CQRS]]",
+            "text": "omplex query shapes, independent scaling needs) and the domain has meaningful invariants. It is usually an anti-pattern for simple CRUD with low scale pressure, because projection pipelines, eventual consistency handling, and dual-model maintenance add avoidable complexity. Warm-up refresher: What is CQRS? CQRS separat\u2026"
+          }
+        ]
+      }
+    },
+    {
+      "id": "chunks-semantic-what-are-the-pitfalls-of-cqrs-eventual-consisten-002",
+      "query": "What are the pitfalls of CQRS eventual consistency, and how can teams mitigate stale read models in user-facing flows?",
+      "difficulty": "easy",
+      "expected": {
+        "primaryChunks": [
+          {
+            "chunkId": "chunk_doc_bc2c928a46215116_0029_528d1aac803f882b:5948440011014637611",
+            "documentId": "doc_bc2c928a46215116",
+            "chunkOrder": 29,
+            "citationLabel": "[[CQRS]]",
+            "text": "## Pitfalls - **Eventual consistency surprises users**: a command succeeds but the read model has not caught up, so users see stale dashboards. Use UX hints (\u0022updating...\u0022), projection lag monitoring, and read-your-own-write for critical paths (serve the immediate follow-up read from the write model for that user/sessi\u2026"
+          }
+        ],
+        "supportingChunks": [
+          {
+            "chunkId": "chunk_doc_bc2c928a46215116_0032_d5d010f9a15bf00f:15406832989574524943",
+            "documentId": "doc_bc2c928a46215116",
+            "chunkOrder": 32,
+            "citationLabel": "[[CQRS]]",
+            "text": "omplex query shapes, independent scaling needs) and the domain has meaningful invariants. It is usually an anti-pattern for simple CRUD with low scale pressure, because projection pipelines, eventual consistency handling, and dual-model maintenance add avoidable complexity. Warm-up refresher: What is CQRS? CQRS separat\u2026"
+          }
+        ],
+        "acceptableChunks": [
+          {
+            "chunkId": "chunk_doc_7bd8643762242e96_0030_2b6425c7e577fac7:3126665581780531911",
+            "documentId": "doc_7bd8643762242e96",
+            "chunkOrder": 30,
+            "citationLabel": "[[Scalability Patterns]]",
+            "text": "\u003E [!QUESTION]- When would you choose read replicas instead of CQRS for a scaling problem? \u003E **Expected answer:** \u003E - Choose read replicas when main pressure is read throughput on an existing relational model. \u003E - Choose CQRS when read/write models diverge and read projections need different shape or storage. \u003E - Mentio\u2026"
+          }
+        ]
+      }
+    },
+    {
+      "id": "chunks-semantic-why-is-cqrs-considered-an-anti-pattern-for-simpl-003",
+      "query": "Why is CQRS considered an anti-pattern for simple CRUD systems, and when does it become justified in scalable architecture?",
+      "difficulty": "medium",
+      "expected": {
+        "primaryChunks": [
+          {
+            "chunkId": "chunk_doc_bc2c928a46215116_0032_d5d010f9a15bf00f:15406832989574524943",
+            "documentId": "doc_bc2c928a46215116",
+            "chunkOrder": 32,
+            "citationLabel": "[[CQRS]]",
+            "text": "omplex query shapes, independent scaling needs) and the domain has meaningful invariants. It is usually an anti-pattern for simple CRUD with low scale pressure, because projection pipelines, eventual consistency handling, and dual-model maintenance add avoidable complexity. Warm-up refresher: What is CQRS? CQRS separat\u2026"
+          }
+        ],
+        "supportingChunks": [
+          {
+            "chunkId": "chunk_doc_7bd8643762242e96_0030_2b6425c7e577fac7:3126665581780531911",
+            "documentId": "doc_7bd8643762242e96",
+            "chunkOrder": 30,
+            "citationLabel": "[[Scalability Patterns]]",
+            "text": "\u003E [!QUESTION]- When would you choose read replicas instead of CQRS for a scaling problem? \u003E **Expected answer:** \u003E - Choose read replicas when main pressure is read throughput on an existing relational model. \u003E - Choose CQRS when read/write models diverge and read projections need different shape or storage. \u003E - Mentio\u2026"
+          }
+        ],
+        "acceptableChunks": [
+          {
+            "chunkId": "chunk_doc_bc2c928a46215116_0029_528d1aac803f882b:5948440011014637611",
+            "documentId": "doc_bc2c928a46215116",
+            "chunkOrder": 29,
+            "citationLabel": "[[CQRS]]",
+            "text": "## Pitfalls - **Eventual consistency surprises users**: a command succeeds but the read model has not caught up, so users see stale dashboards. Use UX hints (\u0022updating...\u0022), projection lag monitoring, and read-your-own-write for critical paths (serve the immediate follow-up read from the write model for that user/sessi\u2026"
+          }
+        ]
+      }
+    },
+    {
+      "id": "chunks-semantic-how-does-reranking-work-in-rag-and-how-does-hybr-001",
+      "query": "How does reranking work in RAG, and how does hybrid search plus reranking improve the candidate set before the generator sees it?",
+      "difficulty": "easy",
+      "expected": {
+        "primaryChunks": [
+          {
+            "chunkId": "chunk_doc_a006addda1d65bd7_0001_3ce3a47d82268550:4387531320950424912",
+            "documentId": "doc_a006addda1d65bd7",
+            "chunkOrder": 1,
+            "citationLabel": "[[Re-ranking]]",
+            "text": "Re-ranking is a second-stage scoring pass that takes the candidate set from [[Software Engineering/11 AI \u0026 ML/LLM/RAG/Retrieval|retrieval]] and reorders it using a more expensive, more accurate model before context reaches the generator. Retrieval optimizes for recall at speed \u2014 find plausible candidates from millions\u2026"
+          },
+          {
+            "chunkId": "chunk_doc_d3138e810a4343e9_0008_6eadbb406e2a7298:7975236400543593112",
+            "documentId": "doc_d3138e810a4343e9",
+            "chunkOrder": 8,
+            "citationLabel": "[[RAG Patterns]]",
+            "text": "## 2. Hybrid Search plus Reranking  Run lexical search and vector search together, merge their candidates, then rerank the merged set so the generator sees the best few passages. Lexical search catches exact terms; vector search catches semantic matches; [[Software Engineering/11 AI \u0026 ML/LLM/RAG/Re-ranking|reranking]]\u2026"
+          }
+        ],
+        "supportingChunks": [
+          {
+            "chunkId": "chunk_doc_437cf5cb544e6e00_0021_5c35e3da6781fa17:6644467352433981975",
+            "documentId": "doc_437cf5cb544e6e00",
+            "chunkOrder": 21,
+            "citationLabel": "[[Retrieval]]",
+            "text": "- Run vector search and keyword search in parallel against the same query. Fuse the two ranked lists into a single candidate set. - **[[Software Engineering/11 AI \u0026 ML/LLM/RAG/Re-ranking|Reciprocal Rank Fusion (RRF)]]** is the most common fusion method: for each document, sum \u00601 / (k \u002B rank)\u0060 across retrievers, where k\u2026"
+          }
+        ],
+        "acceptableChunks": [
+          {
+            "chunkId": "chunk_doc_a006addda1d65bd7_0035_ef0bd7828e376290:17225098155540308624",
+            "documentId": "doc_a006addda1d65bd7",
+            "chunkOrder": 35,
+            "citationLabel": "[[Re-ranking]]",
+            "text": "\u003E [!QUESTION]- Why can reranking improve offline [[Software Engineering/11 AI \u0026 ML/LLM/RAG/Monitoring#Retrieval Quality Metrics|nDCG]] without visible quality improvement for end users? \u003E The improvement may be in ranking positions that the generator does not use. If the generator only reads the top-3 chunks, improveme\u2026"
+          },
+          {
+            "chunkId": "chunk_doc_a006addda1d65bd7_0031_7c06e0ebe3d8a0ab:8937077814307889323",
+            "documentId": "doc_a006addda1d65bd7",
+            "chunkOrder": 31,
+            "citationLabel": "[[Re-ranking]]",
+            "text": "| Approach | Quality | Latency per query | Infrastructure | Best for | | --- | --- | --- | --- | --- | | No reranking | Baseline -- retrieval order only | Lowest -- no extra scoring | None | Simple corpora where first-stage ranking is sufficient | | BM25 lexical reranking | Moderate -- exact term precision | Low -- spa\u2026"
+          }
+        ]
+      }
+    },
+    {
+      "id": "chunks-semantic-when-should-you-use-reranking-versus-no-rerankin-002",
+      "query": "When should you use reranking versus no reranking or BM25 lexical reranking in a retrieval pipeline?",
+      "difficulty": "medium",
+      "expected": {
+        "primaryChunks": [
+          {
+            "chunkId": "chunk_doc_a006addda1d65bd7_0031_7c06e0ebe3d8a0ab:8937077814307889323",
+            "documentId": "doc_a006addda1d65bd7",
+            "chunkOrder": 31,
+            "citationLabel": "[[Re-ranking]]",
+            "text": "| Approach | Quality | Latency per query | Infrastructure | Best for | | --- | --- | --- | --- | --- | | No reranking | Baseline -- retrieval order only | Lowest -- no extra scoring | None | Simple corpora where first-stage ranking is sufficient | | BM25 lexical reranking | Moderate -- exact term precision | Low -- spa\u2026"
+          }
+        ],
+        "supportingChunks": [
+          {
+            "chunkId": "chunk_doc_a006addda1d65bd7_0001_3ce3a47d82268550:4387531320950424912",
+            "documentId": "doc_a006addda1d65bd7",
+            "chunkOrder": 1,
+            "citationLabel": "[[Re-ranking]]",
+            "text": "Re-ranking is a second-stage scoring pass that takes the candidate set from [[Software Engineering/11 AI \u0026 ML/LLM/RAG/Retrieval|retrieval]] and reorders it using a more expensive, more accurate model before context reaches the generator. Retrieval optimizes for recall at speed \u2014 find plausible candidates from millions\u2026"
+          }
+        ],
+        "acceptableChunks": [
+          {
+            "chunkId": "chunk_doc_a006addda1d65bd7_0035_ef0bd7828e376290:17225098155540308624",
+            "documentId": "doc_a006addda1d65bd7",
+            "chunkOrder": 35,
+            "citationLabel": "[[Re-ranking]]",
+            "text": "\u003E [!QUESTION]- Why can reranking improve offline [[Software Engineering/11 AI \u0026 ML/LLM/RAG/Monitoring#Retrieval Quality Metrics|nDCG]] without visible quality improvement for end users? \u003E The improvement may be in ranking positions that the generator does not use. If the generator only reads the top-3 chunks, improveme\u2026"
+          },
+          {
+            "chunkId": "chunk_doc_d3138e810a4343e9_0008_6eadbb406e2a7298:7975236400543593112",
+            "documentId": "doc_d3138e810a4343e9",
+            "chunkOrder": 8,
+            "citationLabel": "[[RAG Patterns]]",
+            "text": "## 2. Hybrid Search plus Reranking  Run lexical search and vector search together, merge their candidates, then rerank the merged set so the generator sees the best few passages. Lexical search catches exact terms; vector search catches semantic matches; [[Software Engineering/11 AI \u0026 ML/LLM/RAG/Re-ranking|reranking]]\u2026"
+          },
+          {
+            "chunkId": "chunk_doc_437cf5cb544e6e00_0021_5c35e3da6781fa17:6644467352433981975",
+            "documentId": "doc_437cf5cb544e6e00",
+            "chunkOrder": 21,
+            "citationLabel": "[[Retrieval]]",
+            "text": "- Run vector search and keyword search in parallel against the same query. Fuse the two ranked lists into a single candidate set. - **[[Software Engineering/11 AI \u0026 ML/LLM/RAG/Re-ranking|Reciprocal Rank Fusion (RRF)]]** is the most common fusion method: for each document, sum \u00601 / (k \u002B rank)\u0060 across retrievers, where k\u2026"
+          }
+        ]
+      }
+    },
+    {
+      "id": "chunks-semantic-why-can-reranking-improve-offline-retrieval-metr-003",
+      "query": "Why can reranking improve offline retrieval metrics like nDCG without improving the end-user experience in a RAG system?",
+      "difficulty": "hard",
+      "expected": {
+        "primaryChunks": [
+          {
+            "chunkId": "chunk_doc_a006addda1d65bd7_0035_ef0bd7828e376290:17225098155540308624",
+            "documentId": "doc_a006addda1d65bd7",
+            "chunkOrder": 35,
+            "citationLabel": "[[Re-ranking]]",
+            "text": "\u003E [!QUESTION]- Why can reranking improve offline [[Software Engineering/11 AI \u0026 ML/LLM/RAG/Monitoring#Retrieval Quality Metrics|nDCG]] without visible quality improvement for end users? \u003E The improvement may be in ranking positions that the generator does not use. If the generator only reads the top-3 chunks, improveme\u2026"
+          }
+        ],
+        "supportingChunks": [
+          {
+            "chunkId": "chunk_doc_a006addda1d65bd7_0001_3ce3a47d82268550:4387531320950424912",
+            "documentId": "doc_a006addda1d65bd7",
+            "chunkOrder": 1,
+            "citationLabel": "[[Re-ranking]]",
+            "text": "Re-ranking is a second-stage scoring pass that takes the candidate set from [[Software Engineering/11 AI \u0026 ML/LLM/RAG/Retrieval|retrieval]] and reorders it using a more expensive, more accurate model before context reaches the generator. Retrieval optimizes for recall at speed \u2014 find plausible candidates from millions\u2026"
+          }
+        ],
+        "acceptableChunks": [
+          {
+            "chunkId": "chunk_doc_a006addda1d65bd7_0031_7c06e0ebe3d8a0ab:8937077814307889323",
+            "documentId": "doc_a006addda1d65bd7",
+            "chunkOrder": 31,
+            "citationLabel": "[[Re-ranking]]",
+            "text": "| Approach | Quality | Latency per query | Infrastructure | Best for | | --- | --- | --- | --- | --- | | No reranking | Baseline -- retrieval order only | Lowest -- no extra scoring | None | Simple corpora where first-stage ranking is sufficient | | BM25 lexical reranking | Moderate -- exact term precision | Low -- spa\u2026"
+          },
+          {
+            "chunkId": "chunk_doc_d3138e810a4343e9_0008_6eadbb406e2a7298:7975236400543593112",
+            "documentId": "doc_d3138e810a4343e9",
+            "chunkOrder": 8,
+            "citationLabel": "[[RAG Patterns]]",
+            "text": "## 2. Hybrid Search plus Reranking  Run lexical search and vector search together, merge their candidates, then rerank the merged set so the generator sees the best few passages. Lexical search catches exact terms; vector search catches semantic matches; [[Software Engineering/11 AI \u0026 ML/LLM/RAG/Re-ranking|reranking]]\u2026"
+          },
+          {
+            "chunkId": "chunk_doc_437cf5cb544e6e00_0021_5c35e3da6781fa17:6644467352433981975",
+            "documentId": "doc_437cf5cb544e6e00",
+            "chunkOrder": 21,
+            "citationLabel": "[[Retrieval]]",
+            "text": "- Run vector search and keyword search in parallel against the same query. Fuse the two ranked lists into a single candidate set. - **[[Software Engineering/11 AI \u0026 ML/LLM/RAG/Re-ranking|Reciprocal Rank Fusion (RRF)]]** is the most common fusion method: for each document, sum \u00601 / (k \u002B rank)\u0060 across retrievers, where k\u2026"
+          }
+        ]
+      }
+    },
+    {
+      "id": "chunks-semantic-when-should-you-use-plinq-or-parallel-foreachasy-001",
+      "query": "When should you use PLINQ or Parallel.ForEachAsync for CPU-bound work, and how do you avoid problems with shared mutable state and data races in parallel code?",
+      "difficulty": "medium",
+      "expected": {
+        "primaryChunks": [
+          {
+            "chunkId": "chunk_doc_7efc456d6a850579_0014_bbeb34e4c39ddba6:13540974861758618534",
+            "documentId": "doc_7efc456d6a850579",
+            "chunkOrder": 14,
+            "citationLabel": "[[Parallelism]]",
+            "text": "- **Shared mutable state causes data races**: \u0060ConcurrentBag\u003CT\u003E\u0060 and similar collections add synchronization overhead. Prefer partition-local accumulators and merge at the end \u2014 the PLINQ \u0060Aggregate\u0060 overload or a \u0060ConcurrentDictionary\u0060 keyed by partition ID are common patterns. - **Over-parallelizing I/O-bound work wa\u2026"
+          },
+          {
+            "chunkId": "chunk_doc_7efc456d6a850579_0001_05768900aa21457b:393652653388809595",
+            "documentId": "doc_7efc456d6a850579",
+            "chunkOrder": 1,
+            "citationLabel": "[[Parallelism]]",
+            "text": "Parallelism is about finishing CPU-bound work faster by using multiple cores at the same time. In .NET, the main tools are \u0060Parallel.ForEachAsync\u0060, PLINQ, and custom partitioned pipelines. Effective parallel code maximizes throughput while preserving determinism, bounded resource usage, and observability. - Async does\u2026"
+          }
+        ],
+        "supportingChunks": [
+          {
+            "chunkId": "chunk_doc_49f567a8c35ee2e1_0016_26fccf68628674ed:2809348314808874221",
+            "documentId": "doc_49f567a8c35ee2e1",
+            "chunkOrder": 16,
+            "citationLabel": "[[Concurrency and Parallelism]]",
+            "text": "- Use \u0060Parallel.ForEachAsync\u0060 when you need bounded workers and cancellation with straightforward code. - Use PLINQ for pure data transforms where query readability is better than imperative loops. - If CPU work competes with request handling, move it to background workers with queue-based backpressure."
+          }
+        ],
+        "acceptableChunks": []
+      }
+    },
+    {
+      "id": "chunks-semantic-how-do-plinq-and-parallel-foreachasync-differ-in-002",
+      "query": "How do PLINQ and Parallel.ForEachAsync differ in .NET, and when is each preferred for bounded workers, cancellation, and pure data transforms?",
+      "difficulty": "easy",
+      "expected": {
+        "primaryChunks": [
+          {
+            "chunkId": "chunk_doc_49f567a8c35ee2e1_0016_26fccf68628674ed:2809348314808874221",
+            "documentId": "doc_49f567a8c35ee2e1",
+            "chunkOrder": 16,
+            "citationLabel": "[[Concurrency and Parallelism]]",
+            "text": "- Use \u0060Parallel.ForEachAsync\u0060 when you need bounded workers and cancellation with straightforward code. - Use PLINQ for pure data transforms where query readability is better than imperative loops. - If CPU work competes with request handling, move it to background workers with queue-based backpressure."
+          }
+        ],
+        "supportingChunks": [
+          {
+            "chunkId": "chunk_doc_7efc456d6a850579_0001_05768900aa21457b:393652653388809595",
+            "documentId": "doc_7efc456d6a850579",
+            "chunkOrder": 1,
+            "citationLabel": "[[Parallelism]]",
+            "text": "Parallelism is about finishing CPU-bound work faster by using multiple cores at the same time. In .NET, the main tools are \u0060Parallel.ForEachAsync\u0060, PLINQ, and custom partitioned pipelines. Effective parallel code maximizes throughput while preserving determinism, bounded resource usage, and observability. - Async does\u2026"
+          }
+        ],
+        "acceptableChunks": [
+          {
+            "chunkId": "chunk_doc_7efc456d6a850579_0014_bbeb34e4c39ddba6:13540974861758618534",
+            "documentId": "doc_7efc456d6a850579",
+            "chunkOrder": 14,
+            "citationLabel": "[[Parallelism]]",
+            "text": "- **Shared mutable state causes data races**: \u0060ConcurrentBag\u003CT\u003E\u0060 and similar collections add synchronization overhead. Prefer partition-local accumulators and merge at the end \u2014 the PLINQ \u0060Aggregate\u0060 overload or a \u0060ConcurrentDictionary\u0060 keyed by partition ID are common patterns. - **Over-parallelizing I/O-bound work wa\u2026"
+          }
+        ]
+      }
+    },
+    {
+      "id": "chunks-semantic-what-parallelism-patterns-help-maximize-throughp-003",
+      "query": "What parallelism patterns help maximize throughput while preserving determinism and bounded resource usage, especially when using partition-local accumulators or background workers?",
+      "difficulty": "hard",
+      "expected": {
+        "primaryChunks": [
+          {
+            "chunkId": "chunk_doc_7efc456d6a850579_0014_bbeb34e4c39ddba6:13540974861758618534",
+            "documentId": "doc_7efc456d6a850579",
+            "chunkOrder": 14,
+            "citationLabel": "[[Parallelism]]",
+            "text": "- **Shared mutable state causes data races**: \u0060ConcurrentBag\u003CT\u003E\u0060 and similar collections add synchronization overhead. Prefer partition-local accumulators and merge at the end \u2014 the PLINQ \u0060Aggregate\u0060 overload or a \u0060ConcurrentDictionary\u0060 keyed by partition ID are common patterns. - **Over-parallelizing I/O-bound work wa\u2026"
+          },
+          {
+            "chunkId": "chunk_doc_7efc456d6a850579_0001_05768900aa21457b:393652653388809595",
+            "documentId": "doc_7efc456d6a850579",
+            "chunkOrder": 1,
+            "citationLabel": "[[Parallelism]]",
+            "text": "Parallelism is about finishing CPU-bound work faster by using multiple cores at the same time. In .NET, the main tools are \u0060Parallel.ForEachAsync\u0060, PLINQ, and custom partitioned pipelines. Effective parallel code maximizes throughput while preserving determinism, bounded resource usage, and observability. - Async does\u2026"
+          }
+        ],
+        "supportingChunks": [
+          {
+            "chunkId": "chunk_doc_49f567a8c35ee2e1_0016_26fccf68628674ed:2809348314808874221",
+            "documentId": "doc_49f567a8c35ee2e1",
+            "chunkOrder": 16,
+            "citationLabel": "[[Concurrency and Parallelism]]",
+            "text": "- Use \u0060Parallel.ForEachAsync\u0060 when you need bounded workers and cancellation with straightforward code. - Use PLINQ for pure data transforms where query readability is better than imperative loops. - If CPU work competes with request handling, move it to background workers with queue-based backpressure."
+          }
+        ],
+        "acceptableChunks": []
+      }
+    },
+    {
+      "id": "chunks-semantic-what-are-common-search-algorithm-resources-inclu-001",
+      "query": "What are common search algorithm resources, including binary search references and overviews of search algorithms?",
+      "difficulty": "easy",
+      "expected": {
+        "primaryChunks": [
+          {
+            "chunkId": "chunk_doc_082e8edf8ecf701e_0007_5a31ff0529493398:6499256134904918936",
+            "documentId": "doc_082e8edf8ecf701e",
+            "chunkOrder": 7,
+            "citationLabel": "[[Search Algorithms]]",
+            "text": "- [Search algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Search_algorithm) \u2014 Overview of search algorithm categories. - [BinarySearch method (.NET API)](https://learn.microsoft.com/en-us/dotnet/api/system.array.binarysearch) \u2014 Official .NET binary search reference with usage examples. - [Binary search (CP Algorit\u2026"
+          }
+        ],
+        "supportingChunks": [
+          {
+            "chunkId": "chunk_doc_cc009d6d0cc2ada8_0008_705d6cd73a1a6ee7:8096747376730599143",
+            "documentId": "doc_cc009d6d0cc2ada8",
+            "chunkOrder": 8,
+            "citationLabel": "[[Sorting Algorithms]]",
+            "text": "- [Sorting algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Sorting_algorithm) - [Array Sort method .NET](https://learn.microsoft.com/dotnet/api/system.array.sort) - [Nearly all binary searches and mergesorts are broken](https://research.google/blog/extra-extra-read-all-about-it-nearly-all-binary-searches-and-merge\u2026"
+          }
+        ],
+        "acceptableChunks": [
+          {
+            "chunkId": "chunk_doc_0ac4010325ce398f_0008_114ad19f9c7c932a:1246038730376778538",
+            "documentId": "doc_0ac4010325ce398f",
+            "chunkOrder": 8,
+            "citationLabel": "[[Algorithms]]",
+            "text": "- [Big O notation (Wikipedia)](https://en.wikipedia.org/wiki/Big_O_notation) - [Algorithm design and analysis (MIT OpenCourseWare)](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/) - [Nearly all binary searches and mergesorts are broken](https://research.google/blog/extra-extra-read-all-about-\u2026"
+          }
+        ]
+      }
+    },
+    {
+      "id": "chunks-semantic-which-chunks-provide-references-related-to-binar-002",
+      "query": "Which chunks provide references related to binary search and sorting algorithms, including Wikipedia and .NET documentation?",
+      "difficulty": "medium",
+      "expected": {
+        "primaryChunks": [
+          {
+            "chunkId": "chunk_doc_cc009d6d0cc2ada8_0008_705d6cd73a1a6ee7:8096747376730599143",
+            "documentId": "doc_cc009d6d0cc2ada8",
+            "chunkOrder": 8,
+            "citationLabel": "[[Sorting Algorithms]]",
+            "text": "- [Sorting algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Sorting_algorithm) - [Array Sort method .NET](https://learn.microsoft.com/dotnet/api/system.array.sort) - [Nearly all binary searches and mergesorts are broken](https://research.google/blog/extra-extra-read-all-about-it-nearly-all-binary-searches-and-merge\u2026"
+          }
+        ],
+        "supportingChunks": [
+          {
+            "chunkId": "chunk_doc_082e8edf8ecf701e_0007_5a31ff0529493398:6499256134904918936",
+            "documentId": "doc_082e8edf8ecf701e",
+            "chunkOrder": 7,
+            "citationLabel": "[[Search Algorithms]]",
+            "text": "- [Search algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Search_algorithm) \u2014 Overview of search algorithm categories. - [BinarySearch method (.NET API)](https://learn.microsoft.com/en-us/dotnet/api/system.array.binarysearch) \u2014 Official .NET binary search reference with usage examples. - [Binary search (CP Algorit\u2026"
+          }
+        ],
+        "acceptableChunks": [
+          {
+            "chunkId": "chunk_doc_0ac4010325ce398f_0008_114ad19f9c7c932a:1246038730376778538",
+            "documentId": "doc_0ac4010325ce398f",
+            "chunkOrder": 8,
+            "citationLabel": "[[Algorithms]]",
+            "text": "- [Big O notation (Wikipedia)](https://en.wikipedia.org/wiki/Big_O_notation) - [Algorithm design and analysis (MIT OpenCourseWare)](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/) - [Nearly all binary searches and mergesorts are broken](https://research.google/blog/extra-extra-read-all-about-\u2026"
+          }
+        ]
+      }
+    },
+    {
+      "id": "chunks-semantic-what-algorithm-study-resources-cover-big-o-notat-003",
+      "query": "What algorithm study resources cover big O notation, search algorithms, and sorting algorithms?",
+      "difficulty": "hard",
+      "expected": {
+        "primaryChunks": [
+          {
+            "chunkId": "chunk_doc_0ac4010325ce398f_0008_114ad19f9c7c932a:1246038730376778538",
+            "documentId": "doc_0ac4010325ce398f",
+            "chunkOrder": 8,
+            "citationLabel": "[[Algorithms]]",
+            "text": "- [Big O notation (Wikipedia)](https://en.wikipedia.org/wiki/Big_O_notation) - [Algorithm design and analysis (MIT OpenCourseWare)](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/) - [Nearly all binary searches and mergesorts are broken](https://research.google/blog/extra-extra-read-all-about-\u2026"
+          }
+        ],
+        "supportingChunks": [
+          {
+            "chunkId": "chunk_doc_082e8edf8ecf701e_0007_5a31ff0529493398:6499256134904918936",
+            "documentId": "doc_082e8edf8ecf701e",
+            "chunkOrder": 7,
+            "citationLabel": "[[Search Algorithms]]",
+            "text": "- [Search algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Search_algorithm) \u2014 Overview of search algorithm categories. - [BinarySearch method (.NET API)](https://learn.microsoft.com/en-us/dotnet/api/system.array.binarysearch) \u2014 Official .NET binary search reference with usage examples. - [Binary search (CP Algorit\u2026"
+          },
+          {
+            "chunkId": "chunk_doc_cc009d6d0cc2ada8_0008_705d6cd73a1a6ee7:8096747376730599143",
+            "documentId": "doc_cc009d6d0cc2ada8",
+            "chunkOrder": 8,
+            "citationLabel": "[[Sorting Algorithms]]",
+            "text": "- [Sorting algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Sorting_algorithm) - [Array Sort method .NET](https://learn.microsoft.com/dotnet/api/system.array.sort) - [Nearly all binary searches and mergesorts are broken](https://research.google/blog/extra-extra-read-all-about-it-nearly-all-binary-searches-and-merge\u2026"
+          }
+        ],
+        "acceptableChunks": []
+      }
+    }
+  ]
+}

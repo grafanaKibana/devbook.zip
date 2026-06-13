@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "generatedAt": "2026-06-13T09:40:40.915666+00:00",
+  "collections": [
+    {
+      "collection": "chunks.fixedsize",
+      "sampledChunks": 1000,
+      "acceptedGroups": 120,
+      "rejectedGroups": 0,
+      "auditGroups": 504,
+      "datasetCases": 0
+    },
+    {
+      "collection": "chunks.markdownsection",
+      "sampledChunks": 1357,
+      "acceptedGroups": 104,
+      "rejectedGroups": 0,
+      "auditGroups": 1042,
+      "datasetCases": 0
+    },
+    {
+      "collection": "chunks.semantic",
+      "sampledChunks": 3631,
+      "acceptedGroups": 81,
+      "rejectedGroups": 0,
+      "auditGroups": 3392,
+      "datasetCases": 0
+    }
+  ]
+}

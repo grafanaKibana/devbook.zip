@@ -18,6 +18,30 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
+    },
+    "Run Dataset Generation": {
+      "commandName": "Executable",
+      "executablePath": "dotnet",
+      "commandLineArgs": "run Platform/DevBook/DevBook.Evaluations/RunDatasetGeneration.cs -- --sample-size 1000 --max-groups 120",
+      "workingDirectory": "../../.."
+    },
+    "Run Dataset Generation - Dry Run": {
+      "commandName": "Executable",
+      "executablePath": "dotnet",
+      "commandLineArgs": "run Platform/DevBook/DevBook.Evaluations/RunDatasetGeneration.cs -- --dry-run --sample-size 100 --max-groups 10",
+      "workingDirectory": "../../.."
+    },
+    "Run Evaluation": {
+      "commandName": "Executable",
+      "executablePath": "dotnet",
+      "commandLineArgs": "run Platform/DevBook/DevBook.Evaluations/RunEvaluation.cs -- --name RAG.Search",
+      "workingDirectory": "../../.."
+    },
+    "Run Evaluation - Open Report": {
+      "commandName": "Executable",
+      "executablePath": "dotnet",
+      "commandLineArgs": "run Platform/DevBook/DevBook.Evaluations/RunEvaluation.cs -- --name RAG.Search --open-browser",
+      "workingDirectory": "../../.."
     }
   }
 }
