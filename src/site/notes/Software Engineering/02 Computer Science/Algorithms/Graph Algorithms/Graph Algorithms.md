@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/algorithms/graph-algorithms/graph-algorithms/","tags":["FolderNote"],"dg-note-properties":{"topic":["Computer Science"],"subtopic":["Algorithms"],"tags":["FolderNote"],"priority":"Medium","level":["4"],"status":"Ready To Repeat"}}
+{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/algorithms/graph-algorithms/graph-algorithms/","tags":["FolderNote"],"dg-note-properties":{"topic":["Computer Science"],"subtopic":["Algorithms"],"tags":["FolderNote"],"priority":"Medium","level":["4"],"status":"Done"}}
 ---
 
 
@@ -41,7 +41,7 @@ flowchart TD
 > - Dijkstra assumes once a node is finalized, its best distance is known.
 > - Negative edges can later produce a shorter route to a finalized node.
 > - Bellman Ford handles negative edges by repeated relaxation.
-> - **Tradeoff**: Dijkstra is faster (O((V+E) log V)) but only valid with non-negative weights; Bellman–Ford accepts negative edges at O(V·E) — pay the slower cost only when weights can go negative.
+> - Dijkstra is faster (O((V+E) log V)) but only valid with non-negative weights; Bellman–Ford accepts negative edges at O(V·E) — pay the slower cost only when weights can go negative.
 
 > [!QUESTION]- Adjacency list or adjacency matrix?
 > - Adjacency list is the default for sparse graphs (most real-world graphs): O(V+E) space and efficient neighbor iteration.

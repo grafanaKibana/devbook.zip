@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/distributed-systems/webhooks/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Distributed Systems"],"level":["2"],"priority":"Medium","status":"Ready To Repeat"}}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/distributed-systems/webhooks/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Distributed Systems"],"level":["2"],"priority":"Medium","status":"Done"}}
 ---
 
 
@@ -27,7 +27,7 @@ Webhooks complement [[Software Engineering/05 Architecture/System Architecture/E
 
 ## Receiver Example (ASP.NET Core)
 
-A production-quality webhook receiver needs three things: signature verification, idempotency, and fast acknowledgment. This example receives GitHub-style webhooks signed with HMAC-SHA256.
+A production-quality webhook receiver needs three things: signature verification, [[Software Engineering/05 Architecture/Distributed Systems/Idempotency\|idempotency]], and fast acknowledgment. This example receives GitHub-style webhooks signed with HMAC-SHA256.
 
 ```csharp
 using System.Security.Cryptography;
@@ -138,30 +138,13 @@ Decision heuristic:
 ## Questions
 
 > [!QUESTION]- How do you design webhook consumers to prevent event loss and duplicate processing?
-> **Expected answer:**
-> - Verify HMAC signature on every incoming webhook to reject forged payloads.
-> - Use the provider's event ID as an idempotency key; store processed IDs durably.
-> - Return `200` immediately and process asynchronously from a durable queue.
-> - Implement reconciliation: periodically call the provider's event list API to detect any missed deliveries.
-> - Make state transitions conditional (e.g., only transition an order to "paid" if it is currently "pending").
-> **Why this matters:** Tests understanding of at-least-once semantics, idempotency, and defense-in-depth for webhook reliability.
+> Verify the HMAC signature on every request first, to reject forged payloads. Then defend against duplicates with the provider's event ID as an idempotency key — stored durably and checked before you act, because at-least-once delivery means the same webhook arrives twice eventually. Acknowledge fast: return `200` and process asynchronously from a durable queue so slow work never trips the sender's timeout. And since your consumer can be down when an event fires, add reconciliation — periodically poll the provider's event-list API to catch what you missed. Signature for trust, idempotency for duplicates, reconciliation for gaps.
 
 > [!QUESTION]- When would you choose webhooks over a shared message broker for inter-service event delivery?
-> **Expected answer:**
-> - Webhooks when systems cross organizational boundaries and cannot share infrastructure (SaaS integrations, third-party providers).
-> - Webhooks when the producer is an external system you do not control.
-> - Message broker when both services are internal, you need durable fan-out, back-pressure, and replay.
-> - Message broker when you need ordering guarantees per partition/key.
-> - Hybrid is common: receive external webhooks at the edge and republish to an internal broker for further processing.
-> **Why this matters:** Tests whether the candidate understands the operational boundary between push-over-HTTP and broker-based messaging.
+> Webhooks win when you cross an organizational boundary — a SaaS or third-party provider you don't control can't publish into your broker, but it can POST to a URL. Inside your own platform a message broker is usually better: durable fan-out, back-pressure, replay, and per-key ordering that raw HTTP callbacks don't give you. They aren't exclusive, though — the common pattern is to receive external webhooks at the edge and immediately republish them onto an internal broker, so you get HTTP reach at the boundary and broker guarantees everywhere inside.
 
 > [!QUESTION]- How do you protect a webhook endpoint against replay attacks?
-> **Expected answer:**
-> - Include a timestamp in the signed payload or as a signed header.
-> - Verify the timestamp is within an acceptable window (e.g., reject events older than 5 minutes).
-> - Use the delivery ID as an idempotency key to reject reprocessing even within the time window.
-> - Verify the HMAC signature covers both the payload and the timestamp so neither can be tampered with independently.
-> **Why this matters:** Tests depth of security thinking beyond basic signature verification.
+> Sign a timestamp alongside the payload — in the body or as a signed header — and reject anything outside a tight window, say older than five minutes, so a captured request can't be replayed later. The HMAC has to cover both the payload and the timestamp together, or an attacker just swaps one without invalidating the signature. Inside the window, your idempotency key (the delivery ID) still catches a fast replay. Signature proves authenticity, the timestamp bounds the replay window, idempotency handles what slips through.
 
 ## References
 

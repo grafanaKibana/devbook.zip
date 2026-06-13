@@ -82,7 +82,7 @@ flowchart TD
 > - The half-split decision depends on monotonic ordering.
 > - Without sorting, `a[mid] < target` gives no guarantee about where the target can be.
 > - Binary search can skip over the target on unsorted input and return false negatives.
-> - **Tradeoff**: the O(log n) speed is conditional on the sorted precondition — if data arrives unsorted you must pay an O(n log n) sort first or fall back to a linear scan, so assert or document the requirement.
+> - The O(log n) speed is conditional on the sorted precondition — if data arrives unsorted you must pay an O(n log n) sort first or fall back to a linear scan, so assert or document the requirement.
 
 > [!QUESTION]- How do you find the first occurrence of a duplicated value?
 > - On equality, store `mid` as a candidate answer instead of returning immediately.

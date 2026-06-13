@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/distributed-systems/api-gateway/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Distributed Systems"],"level":["2"],"priority":"High","status":"Ready To Repeat"}}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/distributed-systems/api-gateway/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Distributed Systems"],"level":["2"],"priority":"High","status":"Done"}}
 ---
 
 
@@ -23,10 +23,10 @@ flowchart LR
 - **Authentication and authorization**: Validate tokens at the edge and enforce coarse-grained access policy before forwarding.
 - **Rate limiting and quotas**: Protect services from abusive or accidental traffic spikes.
 - **Request and response transformation**: Normalize payload shape, hide internal endpoint changes, or project data for specific clients.
-- **Load balancing**: Distribute requests across service instances using health-aware selection.
-- **Circuit breaking and resiliency policies**: Fail fast when a downstream is unhealthy and apply retries or fallback only where safe.
+- **[[Software Engineering/05 Architecture/Distributed Systems/Load Balancing\|Load balancing]]**: Distribute requests across service instances using health-aware selection.
+- **[[Software Engineering/05 Architecture/Patterns/Resilience Patterns/Circuit Breaker\|Circuit breaking]] and resiliency policies**: Fail fast when a downstream is unhealthy and apply retries or fallback only where safe.
 - **TLS termination**: Offload certificate handling and HTTPS policy enforcement from every backend service.
-- **Observability**: Emit centralized logs, traces, metrics, and correlation IDs for end-to-end troubleshooting.
+- **[[Software Engineering/09 DevOps/Observability\|Observability]]**: Emit centralized logs, traces, metrics, and correlation IDs for end-to-end troubleshooting.
 
 ## Patterns
 
@@ -174,28 +174,14 @@ Rule of thumb:
 
 ## Questions
 
-> [!QUESTION]- How do you design gateway aggregation endpoints for client efficiency, and what do you explicitly keep out of the gateway?
-> **Expected answer:**
-> - Use gateway routing plus targeted aggregation endpoints for mobile-specific read models.
-> - Keep gateway concerns to auth, throttling, routing, transformation, and observability.
-> - Keep business rules, transactions, and domain invariants inside backend services.
-> - Add correlation IDs and tracing across fan-out calls.
-> **Why this matters:** This tests whether you can design for client efficiency without turning the gateway into a distributed monolith.
+> [!QUESTION]- How do you design gateway aggregation endpoints for client efficiency, and what do you keep out of the gateway?
+> Use gateway routing for normal traffic and add a few targeted aggregation endpoints where a client — usually mobile — would otherwise make five round trips for one screen. The gateway composes those reads and tunes the payload, but it stays thin: auth, throttling, routing, transformation, observability, and nothing else. Business rules, transactions, and domain invariants live in the backend services, with correlation IDs flowing across the fan-out so you can trace a slow screen. The line to hold: aggregation is response-shaping, not orchestration — the moment decision logic creeps in, you have a distributed monolith.
 
 > [!QUESTION]- When would you choose a single API gateway versus a BFF approach?
-> **Expected answer:**
-> - Choose a single gateway for simpler systems with similar client needs and shared release cadence.
-> - Choose BFF when web/mobile/partner clients have materially different payload, auth, or latency profiles.
-> - Consider team ownership boundaries and deployment autonomy.
-> - Evaluate operational cost versus client performance and change isolation.
-> **Why this matters:** This reveals whether you can apply tradeoffs, not just name patterns.
+> A single gateway is simpler to run and the right default when clients have similar needs and ship on a shared cadence. Reach for BFF — a gateway or route set per client type — when web, mobile, and partner clients want materially different payloads, auth, or latency profiles, or when separate teams own them and want deployment autonomy. The catch is operational: every extra gateway is one more thing to deploy, monitor, and secure. Start with one and split to BFF only when client divergence or team boundaries actually justify the cost.
 
-> [!QUESTION]- Explain API Gateway vs Service Mesh in one architecture and where each policy belongs.
-> **Expected answer:**
-> - Gateway owns north-south concerns: edge auth, TLS termination, external rate limits, API surface control.
-> - Mesh owns east-west concerns: mTLS, retries, traffic policy, and internal telemetry.
-> - They complement each other rather than compete.
-> **Why this matters:** Interviewers want clear boundary thinking for platform design decisions.
+> [!QUESTION]- Where do API Gateway and service mesh responsibilities belong in one architecture?
+> They handle different traffic planes, so they sit side by side rather than compete. The gateway owns north-south traffic — clients entering the system — so edge auth, TLS termination, external rate limits, and API surface control belong there. The mesh owns east-west traffic between internal services: mTLS, retries, traffic shifting, and per-service telemetry. The gateway guards the front door; the mesh governs the hallways.
 
 ## References
 

@@ -54,7 +54,7 @@ if (byId.TryGetValue(2, out var user))
 > - A hash table: keys map to buckets by hash code, with equality checks resolving collisions inside a bucket.
 > - This is what gives O(1) average lookup instead of the O(n) scan a list would need.
 > - It also explains the obligations: keys need a good `GetHashCode` and a consistent `Equals`.
-> - **Tradeoff**: hashing buys average O(1) at the cost of unordered iteration and a correctness dependency on the hash contract — accept both, or use a sorted/ordered structure instead.
+> - Hashing buys average O(1) at the cost of unordered iteration and a correctness dependency on the hash contract — accept both, or use a sorted/ordered structure instead.
 
 > [!QUESTION]- Why is `Dictionary` usually faster than `List` for lookups?
 > - It computes a hash and jumps straight to one bucket instead of scanning every element.
@@ -66,7 +66,7 @@ if (byId.TryGetValue(2, out var user))
 > - Colliding keys share a bucket and must be compared one by one, pushing that bucket toward O(n).
 > - Poor `GetHashCode` distribution (or an attacker choosing colliding keys) concentrates entries and degrades the whole table.
 > - .NET mitigates this by resizing/rehashing as load grows, and with randomized string hashing.
-> - **Tradeoff**: a stronger hash spreads keys better but costs more per call — for adversarial input prefer collision-resistant hashing even at that cost.
+> - A stronger hash spreads keys better but costs more per call — for adversarial input prefer collision-resistant hashing even at that cost.
 
 ## Hash-Based Collections Comparison
 

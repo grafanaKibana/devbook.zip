@@ -45,7 +45,7 @@ Console.WriteLine(users[0]);
 > - It wraps an internal `T[]` buffer and tracks `Count` (logical size) separately from `Capacity` (array length).
 > - When `Count` would exceed `Capacity`, it allocates a new array of double the size, copies the elements, and drops the old one.
 > - Contiguous storage is what makes index access O(1) and iteration cache-friendly.
-> - **Tradeoff**: the contiguous array gives speed and locality but makes mid-sequence inserts O(n) — that shaping decision is the whole reason to sometimes pick another structure.
+> - The contiguous array gives speed and locality but makes mid-sequence inserts O(n) — that shaping decision is the whole reason to sometimes pick another structure.
 
 > [!QUESTION]- What is the difference between `Count` and `Capacity`?
 > - `Count` is the number of elements you have actually added.
