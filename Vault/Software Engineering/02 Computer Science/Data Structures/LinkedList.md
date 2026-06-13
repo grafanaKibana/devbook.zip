@@ -57,7 +57,7 @@ list.Remove("C");
 > - CPU cache locality dominates real workloads: `List<T>` keeps data contiguous and prefetch-friendly.
 > - Linked-list nodes are scattered on the heap, so every traversal step is a cache-missing pointer chase.
 > - The O(1) edit only helps if you *already hold the node* — finding it first is O(n) and erases the advantage.
-> - **Tradeoff**: big-O favors the linked list, but constant factors favor the array — trust measurements over asymptotics for in-memory n.
+> - Big-O favors the linked list, but constant factors favor the array — trust measurements over asymptotics for in-memory n.
 
 > [!QUESTION]- When is `LinkedList<T>` the right choice in .NET?
 > - When your algorithm already stores `LinkedListNode<T>` handles and performs many inserts/removes around them (e.g. an LRU cache moving a node to the front).

@@ -6,7 +6,7 @@ subtopic:
 level:
   - "4"
 priority: Medium
-status: Ready To Repeat
+status: Done
 dg-publish: true
 ---
 
@@ -85,7 +85,7 @@ Text: ABABABC
 | --- | --- | --- | --- |
 | Worst-case guarantee needed | KMP `O(n+m)` | Naive `O(nm)` | KMP is strictly better on adversarial inputs. Naive is simpler for small inputs where worst case is unlikely. |
 | Multiple patterns | Aho-Corasick | KMP per pattern | Aho-Corasick scans text once for all patterns. Switch when pattern count exceeds 2-3. |
-| Implementation simplicity | Rabin-Karp | KMP | Rabin-Karp is simpler to code (rolling hash) but has probabilistic worst case. KMP is deterministic but requires understanding the prefix function. |
+| Implementation simplicity | [[Rabin Karp Search\|Rabin-Karp]] | KMP | Rabin-Karp is simpler to code (rolling hash) but has probabilistic worst case. KMP is deterministic but requires understanding the prefix function. |
 
 ## Questions
 
@@ -93,19 +93,19 @@ Text: ABABABC
   > - For each position `j`, `lps[j]` is the length of the longest proper prefix of `pattern[0..j]` that is also a suffix.
   > - On mismatch at position `j`, the algorithm falls back to `lps[j-1]` instead of restarting, preserving valid partial match progress.
   > - This prevents the text pointer `i` from ever moving backward, giving the linear time guarantee.
-  > - **Tradeoff**: the LPS array costs `O(m)` time and space to precompute — negligible for single-use searches, but amortized well when the same pattern is reused across multiple texts.
+  > - The LPS array costs `O(m)` time and space to precompute — negligible for single-use searches, and amortized away when the same pattern is reused across many texts.
 
 > [!QUESTION]- When is KMP worth the implementation complexity over naive search?
   > - When inputs can be adversarial (e.g., user-supplied patterns against server logs) and worst-case `O(nm)` is unacceptable.
   > - When pattern matching runs on large text streams where constant re-scanning wastes throughput.
   > - When predictable latency matters more than average-case speed.
-  > - **Tradeoff**: naive search has smaller code footprint and better constants on typical text — use KMP when the worst-case cost of naive search exceeds the implementation effort.
+  > - Naive search has smaller code footprint and better constants on typical text — use KMP when the worst-case cost of naive search exceeds the implementation effort.
 
 > [!QUESTION]- How does KMP compare to Rabin-Karp for single-pattern matching?
   > - KMP gives deterministic `O(n+m)` worst case. Rabin-Karp gives expected `O(n+m)` but can degrade to `O(nm)` on hash collisions.
   > - Rabin-Karp is simpler to implement (rolling hash arithmetic vs prefix function logic).
   > - Rabin-Karp extends more naturally to multi-pattern search via hash sets.
-  > - **Tradeoff**: choose KMP when deterministic performance is required; choose Rabin-Karp when simplicity and multi-pattern extension matter more than worst-case guarantees.
+  > - Choose KMP when deterministic performance is required; choose Rabin-Karp when simplicity and multi-pattern extension matter more than worst-case guarantees.
 
 ## References
 

@@ -85,7 +85,7 @@ Document store example: a product page is an aggregate, so store it as one docum
 > - When the core use case needs relational constraints and multi-entity ACID transactions, or queries are fundamentally join-heavy.
 > - Forcing those onto NoSQL pushes join logic and consistency into application code, which is error-prone.
 > - Often the better move is to keep SQL and add caching, read replicas, or a denormalized read model.
-> - **Tradeoff**: NoSQL trades joins and strong consistency for scale and flexible schemas — if you need the former, that trade is a net loss.
+> - NoSQL trades joins and strong consistency for scale and flexible schemas — if you need the former, that trade is a net loss.
 
 > [!QUESTION]- Why does NoSQL push you toward denormalization and data duplication?
 > - Without joins, the cheapest read is one that fetches a whole aggregate in a single hit.

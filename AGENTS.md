@@ -171,7 +171,7 @@ Required content (for any non-trivial concept page)
 - **Questions**: conditional content. Include when the topic has non-obvious interview value — judgment calls, tradeoffs, or failure modes that test engineering reasoning beyond what the intro already explains.
   - **MUST include** questions when the topic involves decisions a senior engineer should be able to articulate under pressure (architecture choices, failure analysis, performance tradeoffs).
   - **MAY omit** questions when the topic is definitional or mechanical — where the intro already teaches everything worth knowing and a question would just ask the reader to repeat it.
-  - If `Questions` exists, each should have a short expected answer (3-8 bullets) that demonstrates judgment, not recall.
+  - If `Questions` exists, each should have a short expected answer that demonstrates judgment, not recall — written as a natural explanation (a few sentences or a few distinct bullets), never as scaffolding labels or a mechanical parallel-comparison matrix.
 - **References**: conditional depth. At least 1 external link (official docs or primary source) for any published page.
   - For non-trivial topics, include 2-10 links with at least 1 anchor source (official docs/spec/RFC) and 1 practice source (practitioner blog/postmortem/production deep-dive).
   - For simple/definitional topics, a single official docs link is sufficient — do not pad with marginally relevant links to hit a count.
@@ -238,7 +238,9 @@ Question quality rules
 - Prefer direct interview questions that force judgment (scale, latency, cost, failure modes) over trivia.
 - Avoid scenario-based stems that set up a specific situation before the question ("A team does X and Y happens", "A system uses X with Y configuration"). Prefer direct questions that ask about the concept ("Why can X cause Y?", "When is X justified over Y?", "How does X reduce Y?").
 - Use precise action verbs in stems when helpful: explain, compare, evaluate, choose, justify.
-- Each question should have a short "expected answer" (3-8 bullets) and surface the key tradeoff where one genuinely exists.
+- Each question needs a short expected answer that reads like a person actually talking through it at a whiteboard — a few sentences of natural explanation, or a few genuinely distinct bullets, whichever fits the question. Lead with the direct answer, then the why, then the cost.
+- Do NOT wrap answers in scaffolding labels (`**Expected answer**`, `**Why this matters**`, `**Why this is asked**`); just give the answer.
+- Do NOT answer a comparison question with a mechanical parallel matrix ("X when… / Y when… / X costs… / Y costs…"). That symmetry is a generated-text tell. Explain one side conversationally, then the other, and ground it in a concrete example.
 - Make the cost explicit when the question turns on a real tradeoff — but vary how. Weave it into the reasoning, name it in a closing line, or leave it out entirely when the question is mechanical and has no real tradeoff. Do NOT end every answer with an identical bolded `**Tradeoff:**` label; that uniformity is itself a machine-generated tell (see principle 8). The goal is to train engineering judgment — thinking in constraints and costs — not to fill a fixed slot.
 
 Reference hygiene
