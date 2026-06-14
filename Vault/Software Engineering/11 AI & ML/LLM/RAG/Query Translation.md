@@ -201,11 +201,13 @@ Decision rule: start with no translation and measure baseline retrieval quality.
 > **Parent**
 >  [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
 >
+> **Topics**
+> - [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation/Evaluation|Evaluation]]
+>
 > **Pages**
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Caching|Caching]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Chunking|Chunking]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring|Monitoring]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/RAG Evaluation|RAG Evaluation]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/RAG Patterns|RAG Patterns]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Re-ranking|Re-ranking]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Retrieval|Retrieval]]

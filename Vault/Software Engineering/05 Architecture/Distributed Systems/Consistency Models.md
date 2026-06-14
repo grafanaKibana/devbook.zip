@@ -6,7 +6,7 @@ subtopic:
 level:
   - "2"
 priority: High
-status: Ready To Repeat
+status: Done
 dg-publish: true
 ---
 # Intro
@@ -106,7 +106,7 @@ During a partition, preserving stronger consistency typically means reduced avai
 - For each endpoint, set an explicit freshness budget (for example: "up to 2 seconds stale").
 - Model partition behavior up front: which operations fail closed vs continue degraded.
 - Add observability for replica lag, cache age, and stale-read rate.
-- Use idempotency keys on writes so retries are safe when consistency is weaker.
+- Use [[Idempotency|idempotency]] keys on writes so retries are safe when consistency is weaker.
 - Test failure modes with delayed replication and partial-region outages.
 - Keep consistency decisions visible in architecture docs and API contracts.
 
@@ -144,29 +144,14 @@ This pattern implements read-your-writes at the API layer: the client reads the 
 
 ## Questions
 
-> [!QUESTION]- How do you guarantee read-your-writes when writes go to a strongly consistent store but reads come from an eventually consistent cache?
-> **Expected answer**
-> - Route post-write reads to strong/session-consistent paths for that user.
-> - Invalidate or write-through cache on update.
-> - Include version/timestamp and reject stale follow-up writes.
-> - Keep write operations idempotent.
-> **Why this matters:** tests whether you can combine storage and cache guarantees without breaking read-after-write UX.
+> [!QUESTION]- How do you guarantee read-your-writes when writes go to a strong store but reads come from an eventually consistent cache?
+> The problem is the gap between a committed write and a cache that hasn't caught up. The cleanest fix is to route that user's immediate post-write reads past the cache to a strong or session-consistent path, just while freshness matters. Pair it with write-through or explicit invalidation on update so the cache converges quickly, and carry a version or timestamp so you can reject a stale follow-up write. Keep the writes idempotent so a retry is harmless. You don't need global strong consistency — only read-your-writes for the one user who just acted.
 
-> [!QUESTION]- Which chat features should use linearizable, causal, and eventual consistency, and why?
-> **Expected answer**
-> - Message ordering/reply chains usually need at least causal consistency.
-> - Typing indicators can be eventual.
-> - Compliance-sensitive receipt semantics may justify stronger guarantees.
-> - Pick by user-visible correctness risk vs latency cost.
-> **Why this matters:** tests whether you can map business semantics to the minimum safe consistency level.
+> [!QUESTION]- Which chat features should use linearizable, causal, and eventual consistency?
+> Map each feature to the weakest model that still feels correct. Message ordering and reply chains need at least causal consistency — a reply must never show up before the message it answers. Typing indicators can be eventual; a dropped or reordered one costs nothing, and the latency win is worth it. Read receipts in a compliance-sensitive context might justify something stronger. The skill on display is refusing a one-size-fits-all level: spend strong-consistency latency only where a user would actually notice the inconsistency.
 
-> [!QUESTION]- Why can linearizability reduce availability during a network partition, and how do you reduce blast radius in design?
-> **Expected answer**
-> - Linearizable paths need coordination/quorum that partitions can block.
-> - System must reject or delay some operations to avoid conflicting truths.
-> - Scope strong consistency to critical writes only.
-> - Serve non-critical reads with weaker models and explicit degraded-mode behavior.
-> **Why this matters:** tests CAP tradeoff reasoning and your ability to design graceful degradation boundaries.
+> [!QUESTION]- Why can linearizability reduce availability during a network partition, and how do you contain the blast radius?
+> Linearizable operations need a quorum to agree on one order, and a partition can cut a node off from that quorum. To stop two sides committing conflicting truths, the isolated side must reject or delay those operations — that refusal is the availability you lose (the CP corner of CAP). Contain the blast radius by scoping strong consistency to the writes that truly need it — payments, inventory decrements — and serving everything else from weaker models with explicit degraded-mode behavior. Partition tolerance isn't optional; the real choice is which operations fail closed and which keep serving.
 
 ## References
 

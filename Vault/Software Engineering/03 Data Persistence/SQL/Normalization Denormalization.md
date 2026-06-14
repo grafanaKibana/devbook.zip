@@ -6,7 +6,7 @@ subtopic:
 level:
   - "4"
 priority: High
-status: Ready To Repeat
+status: Done
 
 dg-publish: true
 ---
@@ -246,7 +246,7 @@ The "Employees" relation variable is not in 6NF and can be decomposed into the r
 
 Denormalization is the deliberate introduction of redundancy to speed up reads. Where normalization splits data across tables to eliminate duplication, denormalization collapses it back together to avoid expensive joins at query time.
 
-**When to denormalize:** read-heavy workloads where joins dominate query cost, reporting and analytics queries that aggregate large datasets, and cases where latency requirements can't be met by indexes alone.
+**When to denormalize:** read-heavy workloads where joins dominate query cost, reporting and analytics queries that aggregate large datasets, and cases where latency requirements can't be met by [[Indexes|indexes]] alone.
 
 **Common techniques:**
 - Duplicate a column from a related table to avoid a join (e.g., storing `CustomerName` on the `Orders` table)

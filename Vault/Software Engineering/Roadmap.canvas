@@ -128,7 +128,7 @@
       "y": 1360,
       "width": 340,
       "height": 80,
-      "color": "6"
+      "color": "4"
     },
     {
       "id": "n_4e3f2742c2",
@@ -138,7 +138,7 @@
       "y": 1480,
       "width": 340,
       "height": 80,
-      "color": "6"
+      "color": "4"
     },
     {
       "id": "n_6f67c9766d",
@@ -178,7 +178,7 @@
       "y": 1880,
       "width": 340,
       "height": 80,
-      "color": "6"
+      "color": "4"
     },
     {
       "id": "n_99fd1672ce",
@@ -531,11 +531,21 @@
       "color": "4"
     },
     {
+      "id": "n_64772f1472",
+      "type": "text",
+      "text": "# [[Software Engineering/11 AI & ML/LLM/Agents/Evaluation/Evaluation|Evaluation]]",
+      "x": 1260,
+      "y": 5520,
+      "width": 340,
+      "height": 80,
+      "color": "4"
+    },
+    {
       "id": "n_c515e1fb46",
       "type": "text",
       "text": "# [[Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation|Evaluation]]",
       "x": 840,
-      "y": 5520,
+      "y": 5640,
       "width": 340,
       "height": 80,
       "color": "4"
@@ -545,7 +555,7 @@
       "type": "text",
       "text": "# [[Software Engineering/11 AI & ML/LLM/Prompting/Prompting|Prompting]]",
       "x": 840,
-      "y": 5640,
+      "y": 5760,
       "width": 340,
       "height": 80,
       "color": "4"
@@ -555,7 +565,17 @@
       "type": "text",
       "text": "# [[Software Engineering/11 AI & ML/LLM/RAG/RAG|RAG]]",
       "x": 840,
-      "y": 5760,
+      "y": 5880,
+      "width": 340,
+      "height": 80,
+      "color": "4"
+    },
+    {
+      "id": "n_248481cc04",
+      "type": "text",
+      "text": "# [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation/Evaluation|Evaluation]]",
+      "x": 1260,
+      "y": 6000,
       "width": 340,
       "height": 80,
       "color": "4"
@@ -612,7 +632,7 @@
     {
       "id": "n_b0ac2236f9",
       "type": "text",
-      "text": "#### Roadmap legend\n**Generated:** Jun 11 2026 | 09:20AM",
+      "text": "#### Roadmap legend\n**Generated:** Jun 14 2026 | 10:48AM",
       "x": -1440,
       "y": 0,
       "width": 500,
@@ -651,7 +671,7 @@
     {
       "id": "n_6de0caeeec",
       "type": "text",
-      "text": "Ready To Repeat: 3",
+      "text": "Ready To Repeat: 0",
       "x": -1380,
       "y": 354,
       "width": 380,
@@ -661,7 +681,7 @@
     {
       "id": "n_0e6324d0db",
       "type": "text",
-      "text": "Done: 11",
+      "text": "Done: 16",
       "x": -1380,
       "y": 430,
       "width": 380,
@@ -1035,6 +1055,13 @@
       "toSide": "left"
     },
     {
+      "id": "e_f121b522fa",
+      "fromNode": "n_8d7ef76fdd",
+      "fromSide": "right",
+      "toNode": "n_64772f1472",
+      "toSide": "left"
+    },
+    {
       "id": "e_37c5e94d86",
       "fromNode": "n_c6ccce8189",
       "fromSide": "right",
@@ -1053,6 +1080,13 @@
       "fromNode": "n_c6ccce8189",
       "fromSide": "right",
       "toNode": "n_b94b6593b3",
+      "toSide": "left"
+    },
+    {
+      "id": "e_bab42c7204",
+      "fromNode": "n_b94b6593b3",
+      "fromSide": "right",
+      "toNode": "n_248481cc04",
       "toSide": "left"
     },
     {

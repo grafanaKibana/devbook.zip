@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/system-architecture/microservices/","dg-note-properties":{"topic":["Architecture"],"subtopic":["System Architecture"],"level":["3"],"priority":"Medium","status":"Ready To Repeat"}}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/system-architecture/microservices/","dg-note-properties":{"topic":["Architecture"],"subtopic":["System Architecture"],"level":["3"],"priority":"Medium","status":"Done"}}
 ---
 
 
@@ -157,7 +157,7 @@ spec:
 - Standardize OpenTelemetry, structured logs, and correlation IDs.
 
 ## Microservices vs monolith vs modular monolith
-| Dimension | Monolith | Modular Monolith | Microservices |
+| Dimension | [[Software Engineering/05 Architecture/System Architecture/Monolith Architecture\|Monolith]] | [[Software Engineering/05 Architecture/System Architecture/Modular Monolith\|Modular Monolith]] | Microservices |
 |---|---|---|---|
 | Deployments | Single unit | Single unit with strict module boundaries | Independent service deployments |
 | Team model | Shared ownership | Team ownership by module | Team ownership by service |

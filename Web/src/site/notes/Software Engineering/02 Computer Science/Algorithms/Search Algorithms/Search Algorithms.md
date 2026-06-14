@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/algorithms/search-algorithms/search-algorithms/","tags":["FolderNote"],"dg-note-properties":{"topic":["Computer Science"],"subtopic":["Algorithms"],"tags":["FolderNote"],"status":"Ready To Repeat","priority":"Medium","level":["4"]}}
+{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/algorithms/search-algorithms/search-algorithms/","tags":["FolderNote"],"dg-note-properties":{"topic":["Computer Science"],"subtopic":["Algorithms"],"tags":["FolderNote"],"priority":"Medium","level":["4"],"status":"Done"}}
 ---
 
 
@@ -22,21 +22,37 @@ flowchart TD
   F -->|No| H[Use linear scan or indexing structure]
 ```
 
+## Algorithm Selection
+
+| Data shape | Algorithm | Time | Precondition |
+| --- | --- | --- | --- |
+| Sorted array | [[Software Engineering/02 Computer Science/Algorithms/Search Algorithms/Binary Search\|Binary Search]] | O(log n) | Sorted, random access |
+| Unsorted array | Linear scan | O(n) | None |
+| Graph (unweighted) | [[Software Engineering/02 Computer Science/Algorithms/Search Algorithms/DFS BFS\|BFS / DFS]] | O(V + E) | — |
+| Text + pattern (single) | [[Software Engineering/02 Computer Science/Algorithms/Search Algorithms/KMP (Knuth-Morris-Pratt) Algorithm\|KMP]] | O(n + m) | — |
+| Text + many patterns / rolling | [[Software Engineering/02 Computer Science/Algorithms/Search Algorithms/Rabin Karp Search\|Rabin–Karp]] | O(n + m) avg | Good hash to avoid collisions |
+
 ## Questions
 
 > [!QUESTION]- What is the first decision before picking a search algorithm?
 > - Check whether data is sorted, because that immediately enables Binary Search.
 > - Identify data shape: array, graph, or text stream, because each has specialized methods.
 > - Decide whether worst-case guarantees or average speed matters more.
-> - Why it matters: this quickly narrows the candidate algorithms and prevents wrong assumptions.
+> - Checking these preconditions first avoids picking an algorithm whose assumptions your data violates — the most common source of wrong or slow searches.
 
 > [!QUESTION]- Why is one search algorithm never best for all cases?
 > - Different algorithms optimize for different constraints such as ordering, memory, and preprocessing.
 > - Workload shape changes the winner: single lookup, repeated queries, or many patterns.
 > - Correctness constraints can force specific methods, for example sorted input for Binary Search.
-> - Why it matters: senior-level decisions are tradeoffs, not memorized defaults.
+> - Every choice trades preprocessing and memory against query speed; the senior move is to weigh those for the actual workload instead of reaching for a default.
 
-## Links
+> [!QUESTION]- When does preprocessing (sorting or indexing) pay off versus a plain linear scan?
+> - A one-off search over unsorted data is just O(n) — sorting first (O(n log n)) would cost more than it saves.
+> - Once many queries hit the same data, a single sort or index build is amortized across all of them and each query drops to O(log n) or O(1).
+> - Indexes (hash maps, B-trees) trade memory and write cost for fast reads.
+> - Preprocessing front-loads cost and memory to make repeated queries cheap, so justify it by query volume, not by instinct.
+
+## References
 
 - [Search algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Search_algorithm) — Overview of search algorithm categories.
 - [BinarySearch method (.NET API)](https://learn.microsoft.com/en-us/dotnet/api/system.array.binarysearch) — Official .NET binary search reference with usage examples.

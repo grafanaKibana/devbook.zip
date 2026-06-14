@@ -6,7 +6,7 @@ subtopic:
 level:
   - "3"
 priority: High
-status: Ready To Repeat
+status: Done
 
 dg-publish: true
 ---
@@ -31,7 +31,7 @@ Bridge options between write and read models:
 
 In interviews, emphasize that CQRS is about **separating responsibilities and optimization goals**, not automatically about adding message brokers or multiple databases.
 
-## Deeper Explanation
+## Write and Read Models
 
 ```mermaid
 graph LR
@@ -215,9 +215,16 @@ Use both when auditability, temporal debugging, replay, and multiple read projec
 | Independent scaling | Limited | Strong, especially with separate stores |
 Decision rule: CQRS is usually worth it when at least two are true at once: high read:write ratio, complex query requirements, and clear need to scale read/write paths independently.
 ## Questions
+
 > [!QUESTION]- When is CQRS worth the operational complexity, and when is it an anti-pattern?
-> **Expected answer:** CQRS is justified when read/write workloads differ materially (high read ratio, complex query shapes, independent scaling needs) and the domain has meaningful invariants. It is usually an anti-pattern for simple CRUD with low scale pressure, because projection pipelines, eventual consistency handling, and dual-model maintenance add avoidable complexity.
-Warm-up refresher: What is CQRS? CQRS separates commands (state changes) from queries (read-only data retrieval) so each side can be modeled and optimized independently.
+> CQRS earns its complexity when the read and write sides genuinely want different shapes — a high read:write ratio, broad or expensive queries, real invariants on the write side, and a need to scale the two paths independently. Then a denormalized read model serves screens cheaply while the write model stays focused on enforcing rules. It's an anti-pattern for ordinary CRUD at low scale: the projection pipelines, eventual-consistency handling, and two models to evolve and test are pure tax when one model would have served both. Apply it per bounded context where the constraints justify it, never as a global default.
+
+> [!QUESTION]- Does CQRS require Event Sourcing or two databases?
+> No — and conflating them is the most common CQRS misconception. CQRS is only about separating the command model from the query model, and that can be two classes against the same database. Separate stores, message brokers, and [[Event Sourcing]] are options you add when scale or auditability demands them, not requirements. You can run CQRS on a single relational database, projecting into a denormalized view table inside the same transaction. Start with the cheapest separation that solves the problem and add infrastructure only when a real constraint forces it.
+
+> [!QUESTION]- How do you handle eventual consistency between the write and read models?
+> With asynchronous projection a command can succeed before the read model catches up, so the user who just acted sees stale data. The pragmatic fixes: serve that user's immediate follow-up read from the write model (read-your-own-writes for the session), show a soft "updating…" state, and monitor projection lag so you notice drift. Underneath, make projections idempotent — brokers are at-least-once, so a projector can see the same event twice — using upserts and a record of handled event IDs. Eventual consistency is a UX-and-idempotency problem, not a reason to abandon the split.
+
 ## References
 - [Microsoft Learn - CQRS pattern](https://learn.microsoft.com/azure/architecture/patterns/cqrs)
 - [Martin Fowler - CQRS](https://martinfowler.com/bliki/CQRS.html)

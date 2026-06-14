@@ -6,14 +6,14 @@ subtopic:
 level:
   - "3"
 priority: High
-status: Ready To Repeat
+status: Done
 
 dg-publish: true
 ---
 
 # Intro
 
-The Circuit Breaker pattern stops your service from repeatedly calling a dependency that is already failing, so your system fails fast instead of failing slowly. It matters in distributed systems because it prevents cascading failures: without a breaker, threads, sockets, and retries pile up until healthy parts of the system also degrade. You reach for it when calling external services such as payment providers, LLM APIs, and remote databases where latency spikes and partial outages are normal. In senior .NET systems, a circuit breaker is usually part of a resilience stack with timeout, retry, and fallback, not a standalone feature.
+The Circuit Breaker pattern stops your service from repeatedly calling a dependency that is already failing, so your system fails fast instead of failing slowly. It matters in distributed systems because it prevents cascading failures: without a breaker, threads, sockets, and retries pile up until healthy parts of the system also degrade. You reach for it when calling external services such as payment providers, LLM APIs, and remote databases where latency spikes and partial outages are normal. In senior .NET systems, a circuit breaker is usually part of a resilience stack with [[Retry and Timeout Patterns|retry and timeout]] and fallback, not a standalone feature.
 
 ## Mechanism
 
@@ -218,14 +218,20 @@ Interview nuance: teams often say "retry inside breaker" to mean retries must co
 > - Retry should execute inside the same resilience pipeline before breaker decisions.
 > - Outer retries around an already open breaker create extra pressure and useless attempts.
 > - Proper ordering gives cleaner failure accounting and earlier protection.
-> - **Tradeoff**: it checks if you understand composition semantics, not just individual patterns.
+> - In Polly's outer-to-inner model this means placing retry *outside* the breaker, so each failed retry still passes through breaker evaluation and counts toward tripping it.
 
 > [!QUESTION]- How do you avoid a half-open thundering herd in Kubernetes-scale deployments?
 > - Limit probe concurrency and keep half-open trial volume small.
 > - Add jitter to retry and recovery timing.
 > - Use global controls (rate limits, queueing, bulkheads) so per-pod recovery does not synchronize spikes.
 > - Watch fleet-wide metrics, not only single-instance breaker events.
-> - **Tradeoff**: it tests distributed-systems thinking beyond single-process code.
+> - The core trap: breaker state is process-local, so per-pod recovery must be coordinated with fleet-level controls or every pod probes in lockstep.
+
+> [!QUESTION]- Which failures should trip the breaker, and which should not?
+> - Trip on dependency-health signals: timeouts, connection failures, HTTP `5xx`, and `429` when the client cannot absorb it.
+> - Do not trip on caller-side `4xx` like `400`/`404` — those reflect bad input, not an unhealthy dependency.
+> - Encode this in `ShouldHandle` so the breaker measures the dependency, not your users' mistakes.
+> - Get it wrong and the breaker opens on validation errors, blocking healthy traffic to a perfectly good dependency.
 
 ## References
 

@@ -5,11 +5,11 @@ subtopic:
   - LLM
 tags:
   - FolderNote
-status: Done
 priority: High
 level:
   - "2"
 dg-publish: true
+status: Done
 ---
 
 # Intro
@@ -30,7 +30,7 @@ flowchart LR
     G --> V[Groundedness and Citation Checks]
 ```
 
-Each stage has its own page: [[Software Engineering/11 AI & ML/LLM/RAG/Query Translation|Query Translation]] rewrites the user question into retrieval-friendly variants, [[Software Engineering/11 AI & ML/LLM/RAG/Chunking|Chunking]] defines the unit of retrieval, [[Software Engineering/11 AI & ML/LLM/RAG/Retrieval|Retrieval]] finds candidate evidence over a [[Software Engineering/11 AI & ML/LLM/RAG/Vector Databases|vector database]], [[Software Engineering/11 AI & ML/LLM/RAG/Re-ranking|Re-ranking]] orders it, [[Software Engineering/11 AI & ML/LLM/RAG/RAG Evaluation|RAG Evaluation]] and [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring|Monitoring]] measure it offline and in production, and [[Software Engineering/11 AI & ML/LLM/RAG/Caching|Caching]] keeps the whole pipeline fast and affordable.
+Each stage has its own page: [[Software Engineering/11 AI & ML/LLM/RAG/Query Translation|Query Translation]] rewrites the user question into retrieval-friendly variants, [[Software Engineering/11 AI & ML/LLM/RAG/Chunking|Chunking]] defines the unit of retrieval, [[Software Engineering/11 AI & ML/LLM/RAG/Retrieval|Retrieval]] finds candidate evidence over a [[Software Engineering/11 AI & ML/LLM/RAG/Vector Databases|vector database]], [[Software Engineering/11 AI & ML/LLM/RAG/Re-ranking|Re-ranking]] orders it, [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation/Evaluation|RAG Evaluation]] and [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring|Monitoring]] measure it offline and in production, and [[Software Engineering/11 AI & ML/LLM/RAG/Caching|Caching]] keeps the whole pipeline fast and affordable.
 
 ## Choosing a Pattern
 
@@ -49,7 +49,7 @@ Production RAG architectures range from a single retrieve-then-generate pass to 
 - **GraphRAG** — knowledge-graph indexing for relationship and global-synthesis questions.
 - **Corrective / self-reflective RAG** — evaluator-gated retrieval and generation; research-stage for most teams.
 
-Ship the baseline first, add hybrid search and reranking next, and adopt anything further down only for a failure mode your [[Software Engineering/11 AI & ML/LLM/RAG/RAG Evaluation|evaluation]] actually shows.
+Ship the baseline first, add hybrid search and reranking next, and adopt anything further down only for a failure mode your [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation/Evaluation|evaluation]] actually shows.
 
 ## Operational Baselines
 
@@ -89,6 +89,9 @@ The combined pattern — fine-tune the model for behavior (format, tone, refusal
 > [!QUESTION]- When does fine-tuning beat adding more retrieval sophistication?
 > When the failure is behavioral, not factual: the model retrieves the right evidence but keeps producing the wrong format, tone, or policy behavior despite prompt iteration. Retrieval upgrades cannot fix behavior encoded in weights. Conversely, fine-tuning cannot fix missing or stale knowledge — it bakes in a snapshot that starts aging immediately and provides no source traceability. Diagnose first: if faithfulness is high but style or policy compliance is low, fine-tune; if evidence is missing or wrong, improve retrieval.
 
+> [!QUESTION]- When a RAG answer is wrong, how do you tell whether retrieval or generation is at fault?
+> Split the pipeline and score the two halves separately, because the fixes are opposite. First check whether the right evidence was retrieved at all: if the relevant chunk never made it into the context, it's a retrieval failure — improve chunking, hybrid search, or reranking, and no amount of prompt tuning will help. If the evidence *was* present but the answer ignored or contradicted it, that's a generation/faithfulness failure — tighten the prompt, add groundedness checks, or use a stronger model. This is exactly why RAG evaluation reports retrieval and generation as separate metrics; a single end-to-end accuracy number hides which half to fix.
+
 ## References
 
 - [Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks](https://arxiv.org/abs/2005.11401) — the original RAG paper; useful for understanding the baseline retrieve-then-generate formulation before modern production extensions.
@@ -104,12 +107,14 @@ The combined pattern — fine-tune the model for behavior (format, tone, refusal
 > **Parent**
 >  [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
 >
+> **Topics**
+> - [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation/Evaluation|Evaluation]]
+>
 > **Pages**
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Caching|Caching]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Chunking|Chunking]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring|Monitoring]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Query Translation|Query Translation]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/RAG Evaluation|RAG Evaluation]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/RAG Patterns|RAG Patterns]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Re-ranking|Re-ranking]]
 > - [[Software Engineering/11 AI & ML/LLM/RAG/Retrieval|Retrieval]]

@@ -6,7 +6,7 @@ subtopic:
 level:
   - "4"
 priority: Medium
-status: Ready To Repeat
+status: Done
 dg-publish: true
 ---
 
@@ -14,7 +14,7 @@ dg-publish: true
 
 Binary Search finds a target in a sorted array by repeatedly cutting the search range in half. This gives logarithmic time complexity and predictable performance for large inputs. Use it when the data is sorted and random access is cheap. Example: finding a user id in a sorted list of millions of numeric ids.
 
-## Deeper Explanation
+## How It Works
 
 - Keep two boundaries `left` and `right` and inspect the middle index each loop.
 - If `a[mid]` is less than target, move `left` to `mid + 1`; if `a[mid]` is greater than target, move `right` to `mid - 1`; if equal, return `mid`.
@@ -71,14 +71,17 @@ flowchart TD
 
 ## Pitfalls
 
-- Unsorted input breaks correctness because binary search relies on monotonic ordering; sort first or use a different strategy.
-- Off by one boundary mistakes can produce infinite loops; keep loop condition and boundary updates consistent (`left <= right`).
-- Duplicate values require a variant when you need first or last occurrence, not just any match.
+- **Unsorted input** — binary search relies on monotonic ordering; on unsorted data the half-split decision is meaningless and it returns false negatives. Sort first (amortize the cost over many searches) or use a different strategy.
+- **Off-by-one boundaries** — inconsistent loop condition and boundary updates produce infinite loops or skipped elements. Keep them paired: `left <= right` with `left = mid + 1` / `right = mid - 1`.
+- **Duplicates** — plain binary search returns *any* match. Finding the first or last occurrence needs a lower-/upper-bound variant that keeps searching after a hit.
 
 ## Tradeoffs
 
-- Binary Search vs Linear Search: binary search is much faster on large sorted arrays, but linear search works on unsorted data and tiny lists without sort cost.
-- Binary Search vs Hash lookup: hash lookup is average `O(1)` but needs extra memory and hash maintenance; binary search works in-place on sorted arrays and preserves order for range queries.
+| Choice | Binary Search | Alternative | Decision criteria |
+| --- | --- | --- | --- |
+| vs linear search | O(log n), needs sorted data | O(n), works on any order | Use binary search when data is already sorted or searched repeatedly; linear search for tiny or one-shot unsorted data. |
+| vs hash lookup ([[Dictionary]]) | O(log n), in-place, supports range queries | O(1) average, extra memory, point lookups only | Use a hash when you only need exact-match point lookups; binary search when you also need ordering, ranges, or no extra memory. |
+| sort-then-search vs scan | Pays O(n log n) sort once | No preprocessing | Sort-and-search wins when many queries amortize the sort; a single query over unsorted data does not justify sorting. |
 
 ## Questions
 
@@ -86,20 +89,26 @@ flowchart TD
 > - The half-split decision depends on monotonic ordering.
 > - Without sorting, `a[mid] < target` gives no guarantee about where the target can be.
 > - Binary search can skip over the target on unsorted input and return false negatives.
-> - Why it matters: correctness depends on this precondition, so production code should assert or document it.
+> - The O(log n) speed is conditional on the sorted precondition — if data arrives unsorted you must pay an O(n log n) sort first or fall back to a linear scan, so assert or document the requirement.
 
 > [!QUESTION]- How do you find the first occurrence of a duplicated value?
-> - On equality, store `mid` as a candidate answer.
-> - Continue searching the left half by setting `right = mid - 1`.
-> - Keep the same loop condition and safe midpoint calculation.
+> - On equality, store `mid` as a candidate answer instead of returning immediately.
+> - Continue searching the left half by setting `right = mid - 1` to look for an earlier match.
+> - Keep the same loop condition and overflow-safe midpoint calculation.
 > - Return the stored candidate after the loop ends.
-> - Why it matters: this lower-bound variant is a common interview and production requirement.
+> - This variant never early-exits, so it does slightly more work than a plain search in exchange for well-defined behavior on duplicates — which you need whenever first/last-match semantics matter.
+
+> [!QUESTION]- Why use `mid = left + (right - left) / 2` instead of `(left + right) / 2`?
+> - `(left + right)` can exceed the integer maximum on large arrays, wrapping to a negative index.
+> - `left + (right - left) / 2` computes the same midpoint without ever forming the oversized sum.
+> - This exact bug shipped in the JDK's binary search for years before being caught.
+> - The safe form reads slightly less obviously but is correct across the full index range, so prefer it over the textbook average in any production code.
 
 ## References
 
-- [Binary search (cp algorithms)](https://cp-algorithms.com/num_methods/binary_search.html)
-- [Array BinarySearch method .NET](https://learn.microsoft.com/dotnet/api/system.array.binarysearch)
-- [Nearly all binary searches and mergesorts are broken](https://research.google/blog/extra-extra-read-all-about-it-nearly-all-binary-searches-and-mergesorts-are-broken/)
+- [Binary search (CP Algorithms)](https://cp-algorithms.com/num_methods/binary_search.html) — implementation patterns, lower/upper bound variants, and edge-case analysis.
+- [Array.BinarySearch method (.NET API)](https://learn.microsoft.com/dotnet/api/system.array.binarysearch) — official reference; note it returns the bitwise complement of the insertion point when the value is absent.
+- [Nearly all binary searches and mergesorts are broken (Google Research)](https://research.google/blog/extra-extra-read-all-about-it-nearly-all-binary-searches-and-mergesorts-are-broken/) — the canonical write-up of the midpoint overflow bug.
 
 <!-- whats-next:start -->
 

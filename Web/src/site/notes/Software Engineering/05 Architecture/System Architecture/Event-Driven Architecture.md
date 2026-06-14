@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/system-architecture/event-driven-architecture/","dg-note-properties":{"topic":["Architecture"],"subtopic":["System Architecture"],"level":["2"],"priority":"High","status":"Ready To Repeat"}}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/system-architecture/event-driven-architecture/","dg-note-properties":{"topic":["Architecture"],"subtopic":["System Architecture"],"level":["2"],"priority":"High","status":"Done"}}
 ---
 
 # Intro
@@ -8,7 +8,7 @@ Event-Driven Architecture (EDA) is a style where services communicate by publish
 
 In interview terms: EDA is not "just using a queue". It is a contract-driven communication model where events represent state changes, subscribers own their reaction logic, and consistency is typically eventual rather than immediate.
 
-For related foundations, connect this page with [[Software Engineering/05 Architecture/Distributed Systems/Message Queues\|Message Queues]], [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/RabbitMQ\|RabbitMQ]], and [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/Kafka\|Kafka]].
+EDA runs on a message broker — usually [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/Message Queues\|message queues]] — with [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/RabbitMQ\|RabbitMQ]] and [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/Kafka\|Kafka]] the two dominant choices, the former for flexible routing and the latter for partitioned, retained event logs.
 
 ## Core Concepts
 
@@ -228,22 +228,13 @@ Production note: pair publish with the transactional outbox pattern to avoid "DB
 ## Questions
 
 > [!QUESTION]- When would you choose orchestration over choreography in an event-driven workflow?
-> **Expected answer**
-> - Choose orchestration when the process is long-running, has strict step ordering, and requires explicit compensation/state visibility.
-> - Choreography is better when services can react independently and team autonomy is a top priority.
-> - Orchestration centralizes control (easier reasoning) but adds coordinator complexity and potential bottleneck risk.
-> - Choreography reduces central coupling but raises tracing and governance complexity as fan-out grows.
-> **Why this is asked**
-> - It tests architectural judgment under operational constraints, not just pattern definitions.
+> Orchestrate when the workflow is long-running and needs real ordering or compensation — a checkout that charges payment, reserves inventory, then ships. A central process manager keeps that flow easy to follow and roll back, at the cost of one more component that can bottleneck. Choreography fits loosely-related reactions, like "order placed" fanning out to email, analytics, and search: autonomous and decoupled, but no single place knows the whole story, so tracing gets harder as subscriptions grow. Rule of thumb — orchestrate transactions you must reason about end to end; choreograph independent reactions.
 
 > [!QUESTION]- How do you evolve integration event contracts without breaking consumers?
-> **Expected answer**
-> - Use additive changes first; avoid removing/renaming fields abruptly.
-> - Version contracts (`v1`, `v2`) and support dual publishing during migrations.
-> - Add consumer-driven contract tests in CI.
-> - Monitor deserialization failures and rollout with staged deployments.
-> **Why this is asked**
-> - It tests real-world ownership of compatibility, release safety, and producer-consumer decoupling.
+> Treat the event as a public API — other teams deploy against it on their own schedule. Keep changes additive; never rename or drop a field in place. For a genuine breaking change, version it (`OrderPlaced.v2`) and publish both through a migration window until consumers move over. Consumer-driven contract tests in CI catch regressions before release, and deserialization-failure metrics surface a bad change in minutes. The mindset that keeps you safe: an event schema is a long-lived contract, not an internal DTO you can refactor freely.
+
+> [!QUESTION]- How do you process events reliably under at-least-once delivery?
+> Duplicates and reordering are normal, so the goal is making at-least-once safe, not chasing exactly-once. The core move is idempotent consumers: key on the `EventId`, keep a durable set of handled IDs, and make the second delivery a no-op. A transactional outbox closes the publishing gap so a committed change always emits its event — no "DB committed but publish lost" holes. Where order matters, partition by aggregate key and carry a sequence number so consumers can drop stale events. Exactly-once is a myth; idempotency plus the outbox is how you fake it safely.
 
 ## References
 

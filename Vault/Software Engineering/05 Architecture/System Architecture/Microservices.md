@@ -6,7 +6,7 @@ subtopic:
 level:
   - "3"
 priority: Medium
-status: Ready To Repeat
+status: Done
 
 dg-publish: true
 ---
@@ -165,7 +165,7 @@ spec:
 - Standardize OpenTelemetry, structured logs, and correlation IDs.
 
 ## Microservices vs monolith vs modular monolith
-| Dimension | Monolith | Modular Monolith | Microservices |
+| Dimension | [[Monolith Architecture\|Monolith]] | [[Modular Monolith]] | Microservices |
 |---|---|---|---|
 | Deployments | Single unit | Single unit with strict module boundaries | Independent service deployments |
 | Team model | Shared ownership | Team ownership by module | Team ownership by service |

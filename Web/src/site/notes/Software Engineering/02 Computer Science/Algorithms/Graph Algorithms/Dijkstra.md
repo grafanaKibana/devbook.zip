@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/algorithms/graph-algorithms/dijkstra/","dg-note-properties":{"topic":["Computer Science"],"subtopic":["Algorithms"],"level":["4"],"priority":"Medium","status":"Ready To Repeat"}}
+{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/algorithms/graph-algorithms/dijkstra/","dg-note-properties":{"topic":["Computer Science"],"subtopic":["Algorithms"],"level":["4"],"priority":"Medium","status":"Done"}}
 ---
 
 
@@ -75,7 +75,7 @@ Shortest A→D path: A→B→C→D (cost 4)
 
 | Choice | Option A | Option B | Decision criteria |
 | --- | --- | --- | --- |
-| Unweighted graph | BFS `O(V+E)` | Dijkstra `O((V+E) log V)` | BFS is simpler and faster when all edge weights are equal. Use Dijkstra only when weights differ. |
+| Unweighted graph | [[Software Engineering/02 Computer Science/Algorithms/Search Algorithms/DFS BFS\|BFS]] `O(V+E)` | Dijkstra `O((V+E) log V)` | BFS is simpler and faster when all edge weights are equal. Use Dijkstra only when weights differ. |
 | Negative edges present | Bellman-Ford `O(VE)` | Dijkstra | Dijkstra is faster but requires non-negative weights. Use Bellman-Ford when negative edges exist and no negative cycles. |
 | Target-directed search | A* with heuristic | Dijkstra | A* explores fewer nodes when a good admissible heuristic exists. Fall back to Dijkstra for all-pairs or when no heuristic is available. |
 
@@ -86,20 +86,20 @@ Shortest A→D path: A→B→C→D (cost 4)
   > - Non-negative weights guarantee no future path through unfinalized nodes can undercut a finalized distance.
   > - A negative-weight edge can create a later, cheaper path to an already-finalized node, producing wrong results.
   > - Bellman-Ford relaxes all edges V-1 times without the finalization assumption, handling negative weights at `O(VE)` cost.
-  > - **Tradeoff**: Bellman-Ford handles negative weights but is slower — accept the non-negative constraint when graph structure allows it.
+  > - Bellman-Ford handles negative weights but is slower — accept the non-negative constraint when graph structure allows it.
 
 > [!QUESTION]- What data structures make Dijkstra practical at scale?
   > - Adjacency list keeps memory proportional to edges for sparse graphs vs `O(V²)` for adjacency matrix.
   > - Min-heap priority queue gives `O(log V)` extraction vs `O(V)` linear scan.
   > - Lazy deletion avoids the need for decrease-key, which most standard library heaps lack.
   > - Distance array plus parent array supports `O(V)` path reconstruction by walking parent pointers backward.
-  > - **Tradeoff**: Fibonacci heap improves asymptotic complexity to `O(V log V + E)` but has worse constant factors — binary heap wins in practice for most graph sizes.
+  > - A Fibonacci heap improves the asymptotics to `O(V log V + E)` but has worse constant factors, so a binary heap wins in practice for most graph sizes.
 
 > [!QUESTION]- When should you prefer A* over Dijkstra?
   > - A* adds a heuristic estimating remaining cost to the target, prioritizing nodes that appear closer to the goal.
   > - With an admissible heuristic (never overestimates), A* finds optimal paths while exploring fewer nodes.
   > - Without a good heuristic (e.g., abstract cost graphs, all-pairs queries), A* degrades to Dijkstra with extra overhead.
-  > - **Tradeoff**: A* trades generality for speed — it needs domain-specific knowledge (the heuristic) but can explore orders of magnitude fewer nodes on spatial graphs.
+  > - A* trades generality for speed: it needs domain knowledge (the heuristic) but can explore orders of magnitude fewer nodes on spatial graphs.
 
 ## References
 

@@ -6,7 +6,7 @@ subtopic:
 level:
   - "3"
 priority: High
-status: Ready To Repeat
+status: Done
 
 dg-publish: true
 ---
@@ -41,7 +41,7 @@ Fielding defined six constraints. A system is RESTful when the required constrai
 
 5. **Layered System**
    - A client does not need to know whether it is connected directly to the origin server.
-   - In practice: API gateways, reverse proxies, CDNs, WAFs, service mesh sidecars.
+   - In practice: [[API Gateway|API gateways]], reverse proxies, CDNs, WAFs, service mesh sidecars.
    - Benefit: security, scalability, and operability through composable layers.
 
 6. **Code-on-Demand (optional)**
@@ -184,7 +184,7 @@ Many production APIs are Level 2 because it balances interoperability and implem
 | Style | Protocol | Format | Streaming | Browser Support | Best Fit |
 | --- | --- | --- | --- | --- | --- |
 | REST | HTTP/1.1 or HTTP/2 | Usually JSON (sometimes XML) | Limited with SSE/WebSocket adjuncts | Excellent (native HTTP, CDN-friendly) | Public APIs, CRUD-heavy services, broad interoperability |
-| gRPC | HTTP/2 | Protobuf (binary) | Strong bi-directional streaming | Limited direct browser support (typically gRPC-Web bridge) | Low-latency internal service-to-service calls with strict contracts |
+| [[gRPC]] | HTTP/2 | Protobuf (binary) | Strong bi-directional streaming | Limited direct browser support (typically gRPC-Web bridge) | Low-latency internal service-to-service calls with strict contracts |
 | GraphQL | HTTP (commonly POST) | JSON over typed schema | Subscriptions possible | Strong with modern web clients | Aggregation-heavy UIs needing client-controlled response shape |
 
 Decision heuristic:
@@ -216,20 +216,10 @@ Decision heuristic:
 ## Questions
 
 > [!QUESTION]- Explain `PUT` vs `PATCH` semantics and retry behavior.
-> **Expected answer:**
-> - `PUT` replaces the target resource representation; repeated identical calls are idempotent.
-> - `PATCH` applies partial updates; idempotency depends on patch format and operation semantics.
-> - Clients can safely auto-retry idempotent requests when network failures are ambiguous.
-> - Servers should document patch media type and conflict rules (`409`/`422`).
-> **Why this matters:** tests precise HTTP semantics and failure-mode reasoning.
+> `PUT` replaces the whole resource representation, so sending it twice lands the resource in the same state — it's idempotent, and a client can safely auto-retry it when a network blip leaves the outcome unknown. `PATCH` applies a partial update, and whether it's idempotent depends on the patch format: `set status = "shipped"` is, but `increment quantity by 1` isn't. So servers should document the patch media type and conflict rules (`409`/`422`). The upshot: retry `PUT` freely, but make `PATCH` safe with an idempotency key unless the operation is provably repeatable.
 
 > [!QUESTION]- Why do many teams stop at Richardson Level 2 instead of Level 3 HATEOAS?
-> **Expected answer:**
-> - Level 2 already provides major REST benefits: resource URIs, verb semantics, status codes, cacheability.
-> - Level 3 requires hypermedia-aware clients, link relation design discipline, and tooling investment.
-> - In closed ecosystems, clients often already know workflows, reducing HATEOAS payoff.
-> - Level 3 is valuable when runtime discoverability and loose client coupling are strategic requirements.
-> **Why this matters:** shows tradeoff thinking rather than dogmatic purity.
+> Level 2 already buys most of what REST is good for — resource URIs, proper verbs, status codes, cacheability — and that's enough for the vast majority of APIs. Level 3 adds hypermedia: responses carry the links and actions valid for the current state. It's powerful for discoverability, but it needs clients that understand link relations plus the discipline and tooling to maintain them, and in a closed ecosystem clients already know the workflows, so the payoff shrinks. HATEOAS earns its cost when runtime discoverability and loose coupling are real goals; otherwise Level 2 is the pragmatic stopping point.
 
 ## References
 

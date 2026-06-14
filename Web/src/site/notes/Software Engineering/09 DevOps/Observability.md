@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/09-dev-ops/observability/","dg-note-properties":{"topic":["DevOps"],"subtopic":[],"level":["2"],"priority":"High","status":"Ready To Repeat"}}
+{"dg-publish":true,"permalink":"/software-engineering/09-dev-ops/observability/","dg-note-properties":{"topic":["DevOps"],"subtopic":[],"level":["2"],"priority":"High","status":"Done"}}
 ---
 
 # Intro
@@ -256,24 +256,14 @@ If thresholds are too sensitive or static, teams get constant false positives an
 
 ## Questions
 
-> [!QUESTION]- How do you diagnose an intermittent p95 or p99 latency bottleneck in a multi-service system?
-> - Start from traces to find which span dominates p95/p99 latency on slow requests.
-> - Correlate with RED metrics per service to confirm whether latency is isolated or systemic.
-> - Check dependency spans (DB, cache, external API) to identify downstream propagation.
-> - Use structured logs with the same trace ID to validate edge-case payloads or retries.
-> - Why this answer is strong: it uses all three pillars together instead of guessing from one dashboard.
+> [!QUESTION]- How do you diagnose an intermittent p95/p99 latency bottleneck in a multi-service system?
+> Start from traces and filter to the slow requests — the p99, not the average — to see which span dominates. Correlate with per-service RED metrics to tell whether the latency is isolated or systemic, then walk the dependency spans (DB, cache, external API) to find where it originates. Pull structured logs by the same trace ID to check for edge-case payloads or retries on those requests. The point is using all three pillars together: traces locate it, metrics size it, logs explain it — guessing from one dashboard is how you waste an hour.
 
-> [!QUESTION]- When should you use RED vs USE in a distributed system interview design?
-> - Use RED for customer-facing service endpoints and request pipelines.
-> - Use USE for underlying resources such as CPU, thread pools, queue depth, and DB connections.
-> - Combine both: RED shows symptom at service boundary; USE explains pressure source beneath it.
-> - Why this answer is strong: it separates service health from resource health and links them causally.
+> [!QUESTION]- When should you use RED vs USE?
+> RED — Rate, Errors, Duration — is for customer-facing endpoints and request pipelines: it tells you what users are experiencing. USE — Utilization, Saturation, Errors — is for the resources underneath: CPU, thread pools, queue depth, DB connection pools. You want both, because they pair causally: RED is the symptom at the service boundary, USE is the pressure source beneath it. A rising p99 traced to a saturated connection pool is the canonical chain.
 
 > [!QUESTION]- Why instrument with OpenTelemetry from day one instead of adding observability later?
-> - Early instrumentation bakes telemetry into contracts and code paths before scale complexity appears.
-> - Retrofitting often misses historical baselines and requires invasive code changes across many services.
-> - Vendor-neutral instrumentation preserves backend flexibility as platform needs evolve.
-> - Why this answer is strong: it explains operational risk, engineering cost, and architecture flexibility.
+> Instrumenting early bakes telemetry into your contracts and code paths before the system is complex enough to need it — and before an incident, when there's no time to add it. Retrofitting is worse than it sounds: no historical baselines to compare against, and invasive changes across many services at once, usually under pressure. Going vendor-neutral with OpenTelemetry also keeps your backend choice open, so you can switch APMs without re-instrumenting. The telemetry you never emitted is exactly the data you'll wish you had at 3am.
 
 ## References
 
