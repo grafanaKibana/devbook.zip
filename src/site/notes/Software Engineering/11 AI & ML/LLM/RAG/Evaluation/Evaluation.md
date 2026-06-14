@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/rag/evaluation/evaluation/","tags":["FolderNote"],"dg-note-properties":{"topic":["AI & ML"],"subtopic":["LLM"],"level":["2"],"priority":"High","tags":["FolderNote"],"status":"Ready To Repeat"}}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/rag/evaluation/evaluation/","tags":["FolderNote"],"dg-note-properties":{"topic":["AI & ML"],"subtopic":["LLM"],"level":["2"],"priority":"High","tags":["FolderNote"],"status":"Done"}}
 ---
 
 
@@ -24,6 +24,14 @@ Example: a support bot returns the correct policy document (retrieval passes) bu
 This folder holds only what is specific to RAG. [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation/Evaluation Metrics\|Evaluation Metrics]] defines what to measure at each layer — the retrieval metrics, the generation metrics, and the RAGAS scores plus the two-score diagnostic combinations that point at a root cause. [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation/Component-Level Evaluation\|Component-Level Evaluation]] isolates *which* upstream component — chunking, embedding, or the ANN index — moved a metric, using ablation that holds everything else constant. [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation/Retrieval Evaluation Sets\|Retrieval Evaluation Sets]] covers the RAG-specific labeling problem — substitutable versus complementary chunks — and chunk-anchored synthetic generation.
 
 The domain-independent machinery all of this reuses — [[Software Engineering/11 AI & ML/LLM/Evaluation/LLM-as-a-Judge\|LLM-as-a-Judge]], [[Software Engineering/11 AI & ML/LLM/Evaluation/Deterministic Checks\|deterministic checks]], [[Software Engineering/11 AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs\|golden sets]], [[Software Engineering/11 AI & ML/LLM/Evaluation/Building an Evaluation Set\|synthetic data generation and sizing]], and the [[Software Engineering/11 AI & ML/LLM/Evaluation/Online Evaluation and AB Tests\|online/A-B loop]] — lives under [[Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation\|LLM Evaluation]] and is referenced here rather than repeated. For production-time measurement of these same signals, see [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring\|Monitoring]].
+
+## Questions
+
+> [!QUESTION]- Why decompose RAG evaluation into separate retrieval, generation, and end-to-end layers?
+> Because a single "quality" score tells you something broke but not where, and the fix is completely different per layer. Retrieval metrics ask whether the right evidence even reached the generator; generation metrics ask whether the answer is faithful to that evidence and actually addresses the question; end-to-end asks whether the user's task got solved. The decomposition is what separates the two failures that look identical from outside: perfect retrieval with a model that ignores the context, and flawless generation over irrelevant documents the retriever never should have returned. Without it you chase retrieval tuning that can't fix a generation bug — and burn a sprint doing it.
+
+> [!QUESTION]- What belongs in RAG evaluation specifically versus general LLM evaluation?
+> RAG reuses the whole general eval stack — LLM-as-a-judge, deterministic checks, golden sets, synthetic generation, the online/A-B loop — and adds only what's genuinely RAG-shaped on top. That specific part is three things: retrieval-quality metrics (did the right chunks arrive, ranked well), faithfulness/groundedness (is the answer supported by the retrieved evidence rather than the model's parametric memory), and the labeling problem of which chunks count as relevant when a query maps to several. Everything else is inherited. Keeping that line clean is what stops the eval system from being rebuilt per domain — the general machinery lives once, and RAG, agents, and plain prompts each specialize it.
 
 ## References
 

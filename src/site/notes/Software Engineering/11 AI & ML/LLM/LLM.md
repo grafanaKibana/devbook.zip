@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/llm/","tags":["FolderNote"],"dg-note-properties":{"topic":["AI & ML"],"subtopic":["LLM"],"tags":["FolderNote"],"level":["3"],"priority":"High","status":"Ready To Repeat"}}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/llm/","tags":["FolderNote"],"dg-note-properties":{"topic":["AI & ML"],"subtopic":["LLM"],"tags":["FolderNote"],"level":["3"],"priority":"High","status":"Done"}}
 ---
 
 
@@ -62,6 +62,9 @@ Core terms used throughout this section, each linked to the note that covers it 
 > - An instruction-tuned model has been trained on instruction-response pairs (SFT) and aligned with human preferences (RLHF/DPO), so it interprets input as a task to perform
 > - Base models are used for further fine-tuning and research; instruction-tuned models are what APIs serve and products build on
 > - The distinction matters when reading benchmarks and papers: results on base models do not transfer directly to chat-tuned variants
+
+> [!QUESTION]- How do you decide between prompting, RAG, and fine-tuning to adapt an LLM?
+> Climb the ladder cheapest-first. Start with prompting — zero-shot or few-shot — because it needs no training and you iterate in seconds; most tasks never need more. Reach for RAG when the model lacks the *knowledge*: facts that change faster than you can retrain, or answers that must cite sources. Reach for fine-tuning when the problem is *behavior*, not knowledge — the model has the right information but won't hold a format, tone, or policy after you've exhausted prompting. The classic trap is fine-tuning to inject facts: it bakes in a snapshot that starts aging immediately and gives no traceability. The mature setup often combines them — fine-tune for behavior, RAG for current facts.
 
 ## References
 

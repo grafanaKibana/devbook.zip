@@ -1,11 +1,11 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/distributed-systems/load-balancing/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Distributed Systems"],"level":["2"],"priority":"High","status":"Ready To Repeat"}}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/distributed-systems/load-balancing/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Distributed Systems"],"level":["2"],"priority":"High","status":"Done"}}
 ---
 
 
 # Intro
 
-Load balancing distributes incoming traffic across multiple service instances so one instance does not become a bottleneck or a single point of failure. In system design interviews, this is usually the first infrastructure building block because it enables horizontal scale without changing client behavior. It matters for availability, failure isolation, and predictable latency under burst traffic. Reach for it as soon as a service runs on more than one instance, especially for AI APIs where request cost varies by prompt size and model path.
+Load balancing distributes incoming traffic across multiple service instances so one instance does not become a bottleneck or a single point of failure. In system design interviews, this is usually the first infrastructure building block because it enables [[Software Engineering/05 Architecture/Distributed Systems/Scalability Patterns/Horizontal Scaling\|horizontal scale]] without changing client behavior. It matters for availability, failure isolation, and predictable latency under burst traffic. Reach for it as soon as a service runs on more than one instance, especially for AI APIs where request cost varies by prompt size and model path.
 
 ## Mechanism
 
@@ -155,6 +155,15 @@ TLS strategy | Terminate at LB | End-to-end encryption to service | Operational 
 Health model | Active only | Active plus passive | Simplicity versus better detection of real user-facing failures
 
 ## Questions
+
+> [!QUESTION]- How do you pick a load-balancing algorithm for requests with highly variable duration, like AI inference?
+> Round robin is the right default when instances are similar and requests cost about the same, but it falls apart when duration varies — exactly the inference case, where one long completion ties up an instance while round robin keeps handing it new work. Least-connections handles that better by routing to the instance with the fewest in-flight requests, which tracks real load when durations are uneven. The catch is that connection count doesn't capture per-request CPU cost, so a few short-but-expensive prompts can still skew it. For inference you validate the choice by measuring p95/p99 latency and backend saturation under representative load rather than trusting any default.
+
+> [!QUESTION]- When do you choose an L4 load balancer over L7?
+> L4 balances on connection metadata — IP, port, protocol — without reading the payload, so it's fast and works for any TCP/UDP traffic, but it can't decide based on HTTP path, host, or headers. L7 parses HTTP, so it can route by path or header and do canary, A/B, and edge auth, at the cost of more processing per request. Choose L4 when you need raw throughput and generic transport routing; choose L7 the moment routing depends on request content. Plenty of systems use both — L4 at the edge for raw distribution, L7 deeper for content-aware routing.
+
+> [!QUESTION]- Why must readiness checks differ from liveness checks behind a load balancer?
+> They answer different questions, and conflating them keeps broken instances in rotation. Liveness is "is the process alive" — if it fails, the orchestrator restarts the pod. Readiness is "can this instance serve traffic right now," so it must actually probe critical dependencies (database, cache, downstream) and let the balancer pull a started-but-not-ready instance out of rotation without restarting it. The classic bug is a `/health` that always returns 200: the process is up, its database is unreachable, and the balancer keeps routing real traffic into failures. Keep liveness cheap and dependency-free; put the dependency checks in readiness.
 
 ## References
 
