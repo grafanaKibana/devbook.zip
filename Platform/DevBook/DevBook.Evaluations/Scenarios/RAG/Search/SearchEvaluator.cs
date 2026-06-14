@@ -287,7 +287,7 @@ public sealed class SearchEvaluator : IEvaluator
     }
 
     private static string FormatNumber(double value)
-        => value.ToString("0.00", CultureInfo.InvariantCulture);
+        => value.ToString("0.000", CultureInfo.InvariantCulture);
 
     private static string FormatOptionalNumber(double? value)
         => value is null ? "n/a" : FormatNumber(RoundScore(value.Value));
@@ -296,7 +296,7 @@ public sealed class SearchEvaluator : IEvaluator
         => $"Bootstrap 95% CI: [{FormatNumber(confidenceInterval.Lower)}, {FormatNumber(confidenceInterval.Upper)}].";
 
     private static double RoundScore(double value)
-        => Math.Round(value, 2);
+        => Math.Round(value, 3);
 
     private static NumericMetric CreateFailedMetric(string name, string reason)
         => new(name, 0, reason)

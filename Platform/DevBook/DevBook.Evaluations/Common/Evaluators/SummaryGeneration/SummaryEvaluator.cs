@@ -40,7 +40,7 @@ public sealed class SummaryEvaluator(IEnumerable<SummaryMetric> metrics) : IEval
     {
         var roundedValue = metric.Kind == SummaryMetricKind.Count
             ? Math.Round(metric.Value, 0)
-            : Math.Round(metric.Value, 2);
+            : Math.Round(metric.Value, 3);
 
         return new NumericMetric(metric.Name, roundedValue, metric.Description)
         {
@@ -52,7 +52,7 @@ public sealed class SummaryEvaluator(IEnumerable<SummaryMetric> metrics) : IEval
     }
 
     private static string FormatNumber(double value)
-        => value.ToString("0.00", CultureInfo.InvariantCulture);
+        => value.ToString("0.000", CultureInfo.InvariantCulture);
 }
 
 /// <summary>
