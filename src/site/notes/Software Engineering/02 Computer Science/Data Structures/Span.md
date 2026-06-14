@@ -54,7 +54,7 @@ Console.WriteLine(values[2]); // 300
 > - Use `Memory<T>` when the buffer must survive an async boundary, be stored in a field, or live beyond one synchronous scope.
 > - `Memory<T>` is a heap-storable handle; call `.Span` to get a `Span<T>` view at the point of synchronous use.
 > - `Span<T>` remains the right choice for the tight synchronous parsing/slicing loop itself.
-> - **Tradeoff**: `Memory<T>` buys async/storage flexibility at the cost of one extra indirection — use `Span<T>` where every nanosecond counts, `Memory<T>` where lifetime demands it.
+> - `Memory<T>` buys async/storage flexibility at the cost of one extra indirection — use `Span<T>` where every nanosecond counts, `Memory<T>` where lifetime demands it.
 
 > [!QUESTION]- What is the difference between `Span<T>` and `ReadOnlySpan<T>`?
 > - `ReadOnlySpan<T>` is the same windowed view but forbids writes through it, so it can wrap immutable data such as `string` (as `ReadOnlySpan<char>`).

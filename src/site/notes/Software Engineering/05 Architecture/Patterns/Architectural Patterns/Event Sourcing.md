@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/architectural-patterns/event-sourcing/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Patterns"],"level":["2"],"priority":"High","status":"Ready To Repeat"}}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/architectural-patterns/event-sourcing/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Patterns"],"level":["2"],"priority":"High","status":"Done"}}
 ---
 
 
@@ -240,13 +240,13 @@ You can do CQRS without Event Sourcing, and Event Sourcing without strict CQRS s
 Decision rule: prefer CRUD by default; choose Event Sourcing only when immutable audit history, temporal reconstruction, or replay-based recovery are explicit and valuable requirements.
 
 ## Questions
-> [!QUESTION]- You need a full audit trail for financial transactions. Compare Event Sourcing with a CRUD model plus audit-log table. When does Event Sourcing justify its complexity?
+> [!QUESTION]- When does Event Sourcing justify its complexity over CRUD plus an audit-log table?
 > - CRUD + audit table can satisfy compliance for many systems with lower operational overhead.
 > - Event Sourcing is justified when domain behavior depends on historical intent and replay, not only final values.
 > - If you need deterministic rebuild of multiple read models, Event Sourcing is stronger.
 > - If temporal queries are frequent and core to product value, Event Sourcing can pay off.
 > - If team maturity for schema evolution and projection operations is low, choose CRUD first.
-> - **Tradeoff**: it tests whether you can choose architecture by constraints instead of defaulting to the most sophisticated pattern.
+> - The honest default is CRUD plus an audit table; Event Sourcing earns its cost only when replay and historical intent are core to the product, not merely compliance.
 
 > [!QUESTION]- How do you evolve event schemas safely without breaking old streams?
 > - Use explicit event versioning strategy.
@@ -254,7 +254,7 @@ Decision rule: prefer CRUD by default; choose Event Sourcing only when immutable
 > - Introduce upcasters/adapters for old payloads.
 > - Keep integration tests that replay production-like historical streams.
 > - Treat event contracts as long-lived public interfaces.
-> - **Tradeoff**: schema evolution is a common production failure mode in event-sourced systems, especially when teams skip compatibility testing across historical streams.
+> - Schema evolution is the most common production failure mode in event-sourced systems — especially when teams skip compatibility testing across historical streams.
 ## References
 - [Event Sourcing - Greg Young FAQ](https://cqrs.nu/faq/event-sourcing)
 - [SimpleCQRS - Greg Young sample repository](https://github.com/gregoryyoung/m-r)

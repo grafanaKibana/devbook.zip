@@ -57,7 +57,7 @@ Console.WriteLine(jobs.Peek());    // job-2
 > - Per-operation complexity says nothing about system-level throughput.
 > - If producers persistently outpace consumers, the queue grows without bound — memory climbs and latency spikes as items wait longer.
 > - This is a flow-control problem, not an algorithmic one.
-> - **Tradeoff**: an unbounded in-memory queue maximizes ingest but risks OOM; a bounded queue/channel adds backpressure that protects the system at the cost of rejecting or blocking producers.
+> - An unbounded in-memory queue maximizes ingest but risks OOM; a bounded queue/channel adds backpressure that protects the system at the cost of rejecting or blocking producers.
 
 ## References
 
