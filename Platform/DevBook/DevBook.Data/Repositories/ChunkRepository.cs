@@ -1,6 +1,7 @@
 namespace DevBook.Data.Repositories;
 
 using DevBook.Data.Models;
+using DevBook.Data.Services;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
@@ -12,8 +13,6 @@ public sealed class ChunkRepository(IMongoCollection<ChunkModel> chunks) : IChun
 {
     private const string VectorIndexName = "chunks_embedding_vector_idx";
     private const string VectorPath = nameof(ChunkModel.Embedding);
-    private const int NumCandidatesMultiplier = 20;
-
     /// <summary>
     /// Replaces all chunks for one document.
     /// </summary>
@@ -67,16 +66,9 @@ public sealed class ChunkRepository(IMongoCollection<ChunkModel> chunks) : IChun
         await chunks.DeleteManyAsync(chunk => documentIds.Contains(chunk.DocumentId), cancellationToken);
     }
 
-    /// <summary>
-    /// Runs MongoDB Atlas Vector Search against stored chunk embeddings.
-    /// </summary>
-    /// <param name="queryVector">Embedding vector generated from the search query.</param>
-    /// <param name="topK">Maximum number of results to return.</param>
-    /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>Matching chunks ordered by Atlas vector-search score.</returns>
     public async Task<IReadOnlyList<RagChunkResponse>> VectorSearchAsync(
         float[] queryVector,
-        int topK,
+        int candidateCount,
         CancellationToken cancellationToken = default)
     {
         var pipeline = new[]
@@ -86,8 +78,8 @@ public sealed class ChunkRepository(IMongoCollection<ChunkModel> chunks) : IChun
                 ["index"] = VectorIndexName,
                 ["path"] = VectorPath,
                 ["queryVector"] = new BsonArray(queryVector.Select(value => (double)value)),
-                ["numCandidates"] = topK * NumCandidatesMultiplier,
-                ["limit"] = topK,
+                ["numCandidates"] = RagRetrievalPolicy.GetVectorSearchNumCandidates(candidateCount),
+                ["limit"] = candidateCount,
             }),
             new BsonDocument("$project", new BsonDocument
             {

@@ -13,7 +13,7 @@ using System.Text.Json;
 
 public sealed class SearchEvaluation : MongoEvaluationTestBase<SearchPrediction>
 {
-    private const int TopK = 10;
+    private const int TopK = RagRetrievalPolicy.MaxTopK;
 
     private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
 

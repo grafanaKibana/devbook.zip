@@ -225,7 +225,7 @@ public sealed class SearchMetricCalculatorTests
         var result = await evaluator.EvaluateAsync(
             [new ChatMessage(ChatRole.User, prediction.Query)],
             new ChatResponse(new ChatMessage(ChatRole.Assistant, "[[Evaluation#Questions]]")),
-            additionalContext: [new SearchEvaluationContext(prediction, topK: 5)]);
+            additionalContext: [new SearchEvaluationContext(prediction, topK: 10)]);
 
         var recallMetric = result.Metrics["RecallAt5"];
 
@@ -246,13 +246,13 @@ public sealed class SearchMetricCalculatorTests
         hitRateMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Unacceptable);
         hitRateMetric.Interpretation.Reason.Should().Be("Score 0.000 (Unacceptable): no expected evidence item appeared within top-5.");
 
-        var reciprocalRankMetric = result.Metrics["MRRAt5"];
+        var reciprocalRankMetric = result.Metrics["MRRAt10"];
         reciprocalRankMetric.Reason.Should().Be("MRR@k measures ranking quality: 1 divided by the rank of the first relevant evidence chunk within k. High means useful evidence appears early; 0 means no relevant evidence appeared in top-k.");
         reciprocalRankMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Unacceptable);
         reciprocalRankMetric.Interpretation.Reason.Should().Be("Score 0.000 (Unacceptable): no retrieved chunk matched the expected evidence.");
         reciprocalRankMetric.Diagnostics.Should().BeNullOrEmpty();
         result.Metrics.Keys.Should().Equal(PerQueryDashboardMetrics());
-        result.Metrics.Should().NotContainKeys("RecallAt3", "PrecisionAt3", "MRRAt1", "MRRAt3", "MRRAt10", "MAPAt1", "MAPAt3", "MAPAt10", "NDCGAt1", "NDCGAt3", "NDCGAt10", "CreditedScoreAverage", "UncreditedScoreAverage", "CreditedToUncreditedSameSourceScoreGap");
+        result.Metrics.Should().NotContainKeys("RecallAt3", "PrecisionAt3", "MRRAt1", "MRRAt3", "MRRAt5", "MAPAt1", "MAPAt3", "MAPAt5", "NDCGAt1", "NDCGAt3", "NDCGAt5", "CreditedScoreAverage", "UncreditedScoreAverage", "CreditedToUncreditedSameSourceScoreGap");
         var scoreAverageMetric = result.Metrics["ScoreAverage"];
         ((NumericMetric)scoreAverageMetric).Value.Should().Be(0.87);
         scoreAverageMetric.Interpretation!.Reason.Should().Be("Score 0.870 (Diagnostic): average score across scored retrieved chunks. Related diagnostics: CreditedScoreAverage=n/a, UncreditedScoreAverage=0.870, CreditedToUncreditedSameSourceScoreGap=n/a. Compare only within the same reranker scale.");
@@ -277,14 +277,14 @@ public sealed class SearchMetricCalculatorTests
         var result = await evaluator.EvaluateAsync(
             [new ChatMessage(ChatRole.User, prediction.Query)],
             new ChatResponse(new ChatMessage(ChatRole.Assistant, "[[Evaluation#Retrieval Metrics]]")),
-            additionalContext: [new SearchEvaluationContext(prediction, topK: 5)]);
+            additionalContext: [new SearchEvaluationContext(prediction, topK: 10)]);
 
         result.Metrics.Keys.Should().Equal(PerQueryDashboardMetrics());
         var scoreAverageMetric = result.Metrics["ScoreAverage"];
         ((NumericMetric)scoreAverageMetric).Value.Should().Be(0.532);
         scoreAverageMetric.Interpretation!.Reason.Should().Contain("CreditedScoreAverage=0.877");
         scoreAverageMetric.Interpretation.Reason.Should().Contain("UncreditedScoreAverage=0.188");
-        result.Metrics.Should().NotContainKey("MRRAt10");
+        result.Metrics.Should().NotContainKey("MRRAt5");
     }
 
     /// <summary>
@@ -302,10 +302,37 @@ public sealed class SearchMetricCalculatorTests
         var result = await evaluator.EvaluateAsync(
             [new ChatMessage(ChatRole.User, prediction.Query)],
             new ChatResponse(new ChatMessage(ChatRole.Assistant, "[[Composite]]\n[[Evaluation]]")),
-            additionalContext: [new SearchEvaluationContext(prediction, topK: 5)]);
+            additionalContext: [new SearchEvaluationContext(prediction, topK: 10)]);
 
         result.Metrics["PrecisionAt5"].Interpretation!.Reason.Should().Contain("Score 0.500 (Good)");
-        result.Metrics["MRRAt5"].Interpretation!.Reason.Should().Contain("Score 0.500 (Average)");
+        result.Metrics["MRRAt10"].Interpretation!.Reason.Should().Contain("Score 0.500 (Average)");
+    }
+
+    [Fact]
+    public async Task SearchEvaluator_EvaluateAsync_FailsOnRecallAtRequestedTopK()
+    {
+        var prediction = Prediction(
+            "late hit query",
+            [Document(EvaluationPath)],
+            [
+                Document(IrrelevantPath),
+                Document(ChunkingPath),
+                Document(IrrelevantPath, "second irrelevant"),
+                Document(ChunkingPath, "second chunking"),
+                Document(IrrelevantPath, "third irrelevant"),
+                Document(EvaluationPath)
+            ]);
+        var evaluator = new SearchEvaluator();
+
+        var result = await evaluator.EvaluateAsync(
+            [new ChatMessage(ChatRole.User, prediction.Query)],
+            new ChatResponse(new ChatMessage(ChatRole.Assistant, "late hit")),
+            additionalContext: [new SearchEvaluationContext(prediction, topK: 10)]);
+
+        result.Metrics["RecallAt5"].Interpretation!.Failed.Should().BeFalse();
+        result.Metrics["RecallAt10"].Interpretation!.Failed.Should().BeFalse();
+        ((NumericMetric)result.Metrics["RecallAt5"]).Value.Should().Be(0);
+        ((NumericMetric)result.Metrics["RecallAt10"]).Value.Should().Be(1);
     }
 
     /// <summary>
@@ -321,12 +348,12 @@ public sealed class SearchMetricCalculatorTests
             new SearchPrediction("third query", [Document(ChunkingPath)], [Document(IrrelevantPath), Document(ChunkingPath)]),
         };
 
-        var metrics = SearchEvaluator.ComputeSummaryMetrics(predictions, topK: 5)["MarkdownSection.Bm25"].ToDictionary(metric => metric.Name);
+        var metrics = SearchEvaluator.ComputeSummaryMetrics(predictions, topK: 10)["MarkdownSection.Bm25"].ToDictionary(metric => metric.Name);
 
         metrics["RecallAt5"].Rating.Should().Be(EvaluationRating.Average);
         metrics["PrecisionAt5"].Rating.Should().Be(EvaluationRating.Good);
         metrics["HitRateAt5"].Rating.Should().Be(EvaluationRating.Average);
-        metrics["MRRAt5"].Rating.Should().Be(EvaluationRating.Average);
+        metrics["MRRAt10"].Rating.Should().Be(EvaluationRating.Average);
         metrics["EmptyResultRate"].Rating.Should().Be(EvaluationRating.Poor);
         metrics.Keys.Should().Equal([
             "SampleCount",
@@ -339,15 +366,15 @@ public sealed class SearchMetricCalculatorTests
             "HitRateAt1",
             "HitRateAt5",
             "HitRateAt10",
-            "MRRAt5",
-            "MAPAt5",
-            "NDCGAt5",
+            "MRRAt10",
+            "MAPAt10",
+            "NDCGAt10",
             "EmptyResultRate",
             "ScoreAverage"
         ]);
         metrics["ScoreAverage"].Description.Should().Contain("CreditedScoreAverage=0");
         metrics["ScoreAverage"].Description.Should().Contain("UncreditedScoreAverage=0");
-        metrics.Should().NotContainKeys("RecallAt3", "MRRAt10", "CreditedScoreAverage", "UncreditedScoreAverage", "CreditedToUncreditedSameSourceScoreGap");
+        metrics.Should().NotContainKeys("RecallAt3", "MRRAt5", "CreditedScoreAverage", "UncreditedScoreAverage", "CreditedToUncreditedSameSourceScoreGap");
     }
 
     /// <summary>
@@ -538,9 +565,9 @@ public sealed class SearchMetricCalculatorTests
         "HitRateAt1",
         "HitRateAt5",
         "HitRateAt10",
-        "MRRAt5",
-        "MAPAt5",
-        "NDCGAt5",
+        "MRRAt10",
+        "MAPAt10",
+        "NDCGAt10",
         "ScoreAverage"
     ];
 

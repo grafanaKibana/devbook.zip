@@ -33,12 +33,5 @@ public interface IChunkRepository
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     Task DeleteByDocumentIdsAsync(IReadOnlyCollection<string> documentIds, CancellationToken cancellationToken = default);
 
-    /// <summary>
-    /// Finds chunks nearest to a query embedding.
-    /// </summary>
-    /// <param name="queryVector">Embedding vector for the search query.</param>
-    /// <param name="topK">Maximum number of chunks to return.</param>
-    /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>The matching chunks ordered by vector-search score.</returns>
-    Task<IReadOnlyList<RagChunkResponse>> VectorSearchAsync(float[] queryVector, int topK, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<RagChunkResponse>> VectorSearchAsync(float[] queryVector, int candidateCount, CancellationToken cancellationToken = default);
 }

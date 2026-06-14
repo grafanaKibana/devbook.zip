@@ -22,7 +22,7 @@
     "Run Dataset Generation": {
       "commandName": "Executable",
       "executablePath": "dotnet",
-      "commandLineArgs": "run Platform/DevBook/DevBook.Evaluations/RunDatasetGeneration.cs -- --sample-size 1000 --max-groups 120",
+      "commandLineArgs": "run Platform/DevBook/DevBook.Evaluations/RunDatasetGeneration.cs -- --sample-size 1000 --max-groups 120 --max-llm-groups 30",
       "workingDirectory": "../../.."
     },
     "Run Dataset Generation - Dry Run": {

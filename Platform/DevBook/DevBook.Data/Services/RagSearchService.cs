@@ -26,11 +26,6 @@ public class RagSearchService(
     private readonly RagSearchOptions options = options.Value;
     private readonly ILogger<RagSearchService> logger = logger ?? NullLogger<RagSearchService>.Instance;
 
-    private const int DefaultTopK = 5;
-    private const int MaxTopK = 10;
-    private const int RerankingCandidateMultiplier = 4;
-    private const int MaxRerankingCandidateCount = 50;
-
     /// <summary>
     /// Searches indexed chunks for a normalized query.
     /// </summary>
@@ -49,11 +44,9 @@ public class RagSearchService(
         }
 
         var query = request.Query.Trim();
-        var topK = request.TopK <= 0
-            ? DefaultTopK
-            : Math.Min(request.TopK, MaxTopK);
+        var topK = RagRetrievalPolicy.NormalizeTopK(request.TopK);
         var rerankingStrategy = rerankingStrategyFactory.Create(options.RerankingStrategy);
-        var candidateCount = Math.Min(topK * RerankingCandidateMultiplier, MaxRerankingCandidateCount);
+        var candidateCount = RagRetrievalPolicy.GetRerankingCandidateCount(topK);
         var stopwatch = Stopwatch.StartNew();
 
         logger.LogInformation(

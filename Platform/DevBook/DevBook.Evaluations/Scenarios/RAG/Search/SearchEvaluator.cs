@@ -2,6 +2,7 @@ namespace DevBook.Evaluations.Scenarios.RAG.Search;
 
 using System.Globalization;
 using DevBook.Data.Models;
+using DevBook.Data.Services;
 using DevBook.Evaluations.Common.Evaluators.SummaryGeneration;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.AI.Evaluation;
@@ -17,7 +18,7 @@ public sealed class SearchEvaluator : IEvaluator
     /// <summary>
     /// Gets evaluation metric names.
     /// </summary>
-    public IReadOnlyCollection<string> EvaluationMetricNames { get; } = CreateRankingMetricNames();
+    public IReadOnlyCollection<string> EvaluationMetricNames { get; } = CreateRankingMetricNames(RagRetrievalPolicy.MaxTopK);
 
     /// <summary>
     /// Evaluates one search prediction and returns report-facing metrics.
@@ -42,7 +43,7 @@ public sealed class SearchEvaluator : IEvaluator
         }
 
         var metrics = SearchMetricCalculator.ScoreQuery(context.Prediction, context.TopK);
-        var rankingMetrics = CreateRankingMetrics(metrics).ToArray();
+        var rankingMetrics = CreateRankingMetrics(metrics, context.TopK).ToArray();
 
         return ValueTask.FromResult(new EvaluationResult([
             ..rankingMetrics,
@@ -64,13 +65,13 @@ public sealed class SearchEvaluator : IEvaluator
             .GroupBy(prediction => new { prediction.ChunkingStrategy, prediction.RerankingStrategy })
             .ToDictionary(
                 group => $"{group.Key.ChunkingStrategy}.{group.Key.RerankingStrategy}",
-                group => CreateSummaryMetrics(SearchMetricCalculator.Evaluate(group.ToArray(), topK), group.Key.ChunkingStrategy, group.Key.RerankingStrategy));
+                group => CreateSummaryMetrics(SearchMetricCalculator.Evaluate(group.ToArray(), topK), group.Key.ChunkingStrategy, group.Key.RerankingStrategy, topK));
     }
 
-    private static IEnumerable<SummaryMetric> CreateSummaryMetrics(SearchReport report, ChunkingStrategyKind chunkingStrategy, RerankingStrategyKind rerankingStrategy) =>
+    private static IEnumerable<SummaryMetric> CreateSummaryMetrics(SearchReport report, ChunkingStrategyKind chunkingStrategy, RerankingStrategyKind rerankingStrategy, int primaryCutoff) =>
     [
         new SummaryMetric("SampleCount", report.QueryCount, $"Total RAG search cases evaluated over {chunkingStrategy} chunks with {rerankingStrategy} reranking.", SummaryMetricKind.Count),
-        ..CreateSummaryRankingMetrics(report, chunkingStrategy, rerankingStrategy),
+        ..CreateSummaryRankingMetrics(report, chunkingStrategy, rerankingStrategy, primaryCutoff),
         new SummaryMetric(EmptyResultRateMetricName, report.EmptyResultRate, $"Share of RAG search cases with no retrieved {chunkingStrategy} chunks after {rerankingStrategy} reranking.", SummaryMetricKind.Percentage, GetEmptyResultRateRating(report.EmptyResultRate)),
         new SummaryMetric(ScoreAverageMetricName, report.ScoreAverage, $"Diagnostic only: average returned score across all scored retrieved {chunkingStrategy} chunks with {rerankingStrategy} reranking. Related diagnostics: CreditedScoreAverage={FormatNumber(report.CreditedScoreAverage)}, UncreditedScoreAverage={FormatNumber(report.UncreditedScoreAverage)}, CreditedToUncreditedSameSourceScoreGap={FormatNumber(report.CreditedToUncreditedSameSourceScoreGap)}. Compare only within the same reranker and scorer scale.", SummaryMetricKind.PlainNumber, EvaluationRating.Unknown),
     ];
@@ -78,11 +79,13 @@ public sealed class SearchEvaluator : IEvaluator
     private static IEnumerable<SummaryMetric> CreateSummaryRankingMetrics(
         SearchReport report,
         ChunkingStrategyKind chunkingStrategy,
-        RerankingStrategyKind rerankingStrategy)
+        RerankingStrategyKind rerankingStrategy,
+        int primaryCutoff)
     {
         var rankingAt1 = report.RankingMetrics[1];
         var rankingAt5 = report.RankingMetrics[SearchMetricCalculator.PrimaryCutoffValue];
         var rankingAt10 = report.RankingMetrics[10];
+        var rankingAtPrimaryCutoff = report.RankingMetrics[primaryCutoff];
 
         return
         [
@@ -95,39 +98,40 @@ public sealed class SearchEvaluator : IEvaluator
             new SummaryMetric(HitRateMetricName(1), rankingAt1.HitRate, $"Average HitRate@1 across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking. {FormatConfidenceInterval(rankingAt1.ConfidenceIntervals.HitRate)}", SummaryMetricKind.Percentage, GetRating(MetricFamily.HitRate, rankingAt1.HitRate)),
             new SummaryMetric(HitRateMetricName(SearchMetricCalculator.PrimaryCutoffValue), rankingAt5.HitRate, $"Average HitRate@{SearchMetricCalculator.PrimaryCutoffValue} across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking. {FormatConfidenceInterval(rankingAt5.ConfidenceIntervals.HitRate)}", SummaryMetricKind.Percentage, GetRating(MetricFamily.HitRate, rankingAt5.HitRate)),
             new SummaryMetric(HitRateMetricName(10), rankingAt10.HitRate, $"Average HitRate@10 across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking. {FormatConfidenceInterval(rankingAt10.ConfidenceIntervals.HitRate)}", SummaryMetricKind.Percentage, GetRating(MetricFamily.HitRate, rankingAt10.HitRate)),
-            new SummaryMetric(MrrMetricName(SearchMetricCalculator.PrimaryCutoffValue), rankingAt5.MeanReciprocalRank, $"Mean reciprocal rank capped at @{SearchMetricCalculator.PrimaryCutoffValue} across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking. {FormatConfidenceInterval(rankingAt5.ConfidenceIntervals.MeanReciprocalRank)}", SummaryMetricKind.PlainNumber, GetRating(MetricFamily.Mrr, rankingAt5.MeanReciprocalRank)),
-            new SummaryMetric(MapMetricName(SearchMetricCalculator.PrimaryCutoffValue), rankingAt5.MeanAveragePrecision, $"Mean Average Precision@{SearchMetricCalculator.PrimaryCutoffValue} across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking. {FormatConfidenceInterval(rankingAt5.ConfidenceIntervals.MeanAveragePrecision)}", SummaryMetricKind.PlainNumber, GetRating(MetricFamily.Map, rankingAt5.MeanAveragePrecision)),
-            new SummaryMetric(NdcgMetricName(SearchMetricCalculator.PrimaryCutoffValue), rankingAt5.NormalizedDiscountedCumulativeGain, $"Mean nDCG@{SearchMetricCalculator.PrimaryCutoffValue} across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking. {FormatConfidenceInterval(rankingAt5.ConfidenceIntervals.NormalizedDiscountedCumulativeGain)}", SummaryMetricKind.PlainNumber, GetRating(MetricFamily.Ndcg, rankingAt5.NormalizedDiscountedCumulativeGain)),
+            new SummaryMetric(MrrMetricName(primaryCutoff), rankingAtPrimaryCutoff.MeanReciprocalRank, $"Mean reciprocal rank capped at @{primaryCutoff} across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking. {FormatConfidenceInterval(rankingAtPrimaryCutoff.ConfidenceIntervals.MeanReciprocalRank)}", SummaryMetricKind.PlainNumber, GetRating(MetricFamily.Mrr, rankingAtPrimaryCutoff.MeanReciprocalRank)),
+            new SummaryMetric(MapMetricName(primaryCutoff), rankingAtPrimaryCutoff.MeanAveragePrecision, $"Mean Average Precision@{primaryCutoff} across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking. {FormatConfidenceInterval(rankingAtPrimaryCutoff.ConfidenceIntervals.MeanAveragePrecision)}", SummaryMetricKind.PlainNumber, GetRating(MetricFamily.Map, rankingAtPrimaryCutoff.MeanAveragePrecision)),
+            new SummaryMetric(NdcgMetricName(primaryCutoff), rankingAtPrimaryCutoff.NormalizedDiscountedCumulativeGain, $"Mean nDCG@{primaryCutoff} across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking. {FormatConfidenceInterval(rankingAtPrimaryCutoff.ConfidenceIntervals.NormalizedDiscountedCumulativeGain)}", SummaryMetricKind.PlainNumber, GetRating(MetricFamily.Ndcg, rankingAtPrimaryCutoff.NormalizedDiscountedCumulativeGain)),
         ];
     }
 
-    private static IEnumerable<NumericMetric> CreateRankingMetrics(SearchQueryMetrics metrics)
+    private static IEnumerable<NumericMetric> CreateRankingMetrics(SearchQueryMetrics metrics, int primaryCutoff)
     {
         var rankingAt1 = metrics.RankingMetrics[1];
         var rankingAt5 = metrics.RankingMetrics[SearchMetricCalculator.PrimaryCutoffValue];
         var rankingAt10 = metrics.RankingMetrics[10];
+        var rankingAtPrimaryCutoff = metrics.RankingMetrics[primaryCutoff];
 
         return
         [
-            CreateMetric(RecallMetricName(1), MetricFamily.Recall, 1, rankingAt1.Recall, metrics),
-            CreateMetric(RecallMetricName(SearchMetricCalculator.PrimaryCutoffValue), MetricFamily.Recall, SearchMetricCalculator.PrimaryCutoffValue, rankingAt5.Recall, metrics),
-            CreateMetric(RecallMetricName(10), MetricFamily.Recall, 10, rankingAt10.Recall, metrics),
-            CreateMetric(PrecisionMetricName(1), MetricFamily.Precision, 1, rankingAt1.Precision, metrics),
-            CreateMetric(PrecisionMetricName(SearchMetricCalculator.PrimaryCutoffValue), MetricFamily.Precision, SearchMetricCalculator.PrimaryCutoffValue, rankingAt5.Precision, metrics),
-            CreateMetric(PrecisionMetricName(10), MetricFamily.Precision, 10, rankingAt10.Precision, metrics),
-            CreateMetric(HitRateMetricName(1), MetricFamily.HitRate, 1, rankingAt1.HitRate, metrics),
-            CreateMetric(HitRateMetricName(SearchMetricCalculator.PrimaryCutoffValue), MetricFamily.HitRate, SearchMetricCalculator.PrimaryCutoffValue, rankingAt5.HitRate, metrics),
-            CreateMetric(HitRateMetricName(10), MetricFamily.HitRate, 10, rankingAt10.HitRate, metrics),
-            CreateMetric(MrrMetricName(SearchMetricCalculator.PrimaryCutoffValue), MetricFamily.Mrr, SearchMetricCalculator.PrimaryCutoffValue, rankingAt5.MeanReciprocalRank, metrics),
-            CreateMetric(MapMetricName(SearchMetricCalculator.PrimaryCutoffValue), MetricFamily.Map, SearchMetricCalculator.PrimaryCutoffValue, rankingAt5.MeanAveragePrecision, metrics),
-            CreateMetric(NdcgMetricName(SearchMetricCalculator.PrimaryCutoffValue), MetricFamily.Ndcg, SearchMetricCalculator.PrimaryCutoffValue, rankingAt5.NormalizedDiscountedCumulativeGain, metrics),
+            CreateMetric(RecallMetricName(1), MetricFamily.Recall, 1, rankingAt1.Recall, metrics, primaryCutoff),
+            CreateMetric(RecallMetricName(SearchMetricCalculator.PrimaryCutoffValue), MetricFamily.Recall, SearchMetricCalculator.PrimaryCutoffValue, rankingAt5.Recall, metrics, primaryCutoff),
+            CreateMetric(RecallMetricName(10), MetricFamily.Recall, 10, rankingAt10.Recall, metrics, primaryCutoff),
+            CreateMetric(PrecisionMetricName(1), MetricFamily.Precision, 1, rankingAt1.Precision, metrics, primaryCutoff),
+            CreateMetric(PrecisionMetricName(SearchMetricCalculator.PrimaryCutoffValue), MetricFamily.Precision, SearchMetricCalculator.PrimaryCutoffValue, rankingAt5.Precision, metrics, primaryCutoff),
+            CreateMetric(PrecisionMetricName(10), MetricFamily.Precision, 10, rankingAt10.Precision, metrics, primaryCutoff),
+            CreateMetric(HitRateMetricName(1), MetricFamily.HitRate, 1, rankingAt1.HitRate, metrics, primaryCutoff),
+            CreateMetric(HitRateMetricName(SearchMetricCalculator.PrimaryCutoffValue), MetricFamily.HitRate, SearchMetricCalculator.PrimaryCutoffValue, rankingAt5.HitRate, metrics, primaryCutoff),
+            CreateMetric(HitRateMetricName(10), MetricFamily.HitRate, 10, rankingAt10.HitRate, metrics, primaryCutoff),
+            CreateMetric(MrrMetricName(primaryCutoff), MetricFamily.Mrr, primaryCutoff, rankingAtPrimaryCutoff.MeanReciprocalRank, metrics, primaryCutoff),
+            CreateMetric(MapMetricName(primaryCutoff), MetricFamily.Map, primaryCutoff, rankingAtPrimaryCutoff.MeanAveragePrecision, metrics, primaryCutoff),
+            CreateMetric(NdcgMetricName(primaryCutoff), MetricFamily.Ndcg, primaryCutoff, rankingAtPrimaryCutoff.NormalizedDiscountedCumulativeGain, metrics, primaryCutoff),
         ];
     }
 
-    private static NumericMetric CreateMetric(string name, MetricFamily family, int cutoff, double value, SearchQueryMetrics metrics)
+    private static NumericMetric CreateMetric(string name, MetricFamily family, int cutoff, double value, SearchQueryMetrics metrics, int primaryCutoff)
     {
         var roundedValue = RoundScore(value);
-        var failed = family == MetricFamily.Recall && cutoff == SearchMetricCalculator.PrimaryCutoffValue && roundedValue < 1;
+        var failed = family == MetricFamily.Recall && cutoff == primaryCutoff && roundedValue < 1;
         return new NumericMetric(name, roundedValue, CreateMetricReason(name))
         {
             Interpretation = new EvaluationMetricInterpretation(
@@ -245,7 +249,7 @@ public sealed class SearchEvaluator : IEvaluator
             _ => EvaluationRating.Unacceptable,
         };
 
-    private static IReadOnlyList<string> CreateRankingMetricNames() =>
+    private static IReadOnlyList<string> CreateRankingMetricNames(int primaryCutoff) =>
     [
         RecallMetricName(1),
         RecallMetricName(SearchMetricCalculator.PrimaryCutoffValue),
@@ -256,9 +260,9 @@ public sealed class SearchEvaluator : IEvaluator
         HitRateMetricName(1),
         HitRateMetricName(SearchMetricCalculator.PrimaryCutoffValue),
         HitRateMetricName(10),
-        MrrMetricName(SearchMetricCalculator.PrimaryCutoffValue),
-        MapMetricName(SearchMetricCalculator.PrimaryCutoffValue),
-        NdcgMetricName(SearchMetricCalculator.PrimaryCutoffValue),
+        MrrMetricName(primaryCutoff),
+        MapMetricName(primaryCutoff),
+        NdcgMetricName(primaryCutoff),
         ScoreAverageMetricName,
     ];
 

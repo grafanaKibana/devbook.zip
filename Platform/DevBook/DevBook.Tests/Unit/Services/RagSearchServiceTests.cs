@@ -47,7 +47,7 @@ public sealed class RagSearchServiceTests
     public async Task SearchAsync_QueryWithWhitespaceAndUnnormalizedTopK_CallsVectorSearchWithExpandedCandidateCount(int requestedTopK, int expectedTopK)
     {
         // Arrange
-        var expectedCandidateCount = expectedTopK * 4;
+        var expectedCandidateCount = RagRetrievalPolicy.GetRerankingCandidateCount(expectedTopK);
         var expectedResults = new[]
         {
             new RagChunkResponse("chunk-1", "doc-1", "vector search exact match", "Heading", "[[Doc#Heading]]", 0.93),
@@ -82,9 +82,10 @@ public sealed class RagSearchServiceTests
     {
         // Arrange
         var repository = new Mock<IChunkRepository>(MockBehavior.Strict);
+        var expectedCandidateCount = RagRetrievalPolicy.GetRerankingCandidateCount(5);
         repository.Setup(mock => mock.VectorSearchAsync(
                 It.IsAny<float[]>(),
-                20,
+                expectedCandidateCount,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
         var generator = EmbeddingGeneratorMockFactory.CreateByInputLength();
@@ -105,7 +106,7 @@ public sealed class RagSearchServiceTests
         repositoryFactory.Verify(factory => factory.Create(ChunkingStrategyKind.FixedSize), Times.Once);
         repository.Verify(mock => mock.VectorSearchAsync(
             It.IsAny<float[]>(),
-            20,
+            expectedCandidateCount,
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -123,9 +124,10 @@ public sealed class RagSearchServiceTests
             new RagChunkResponse("chunk-3", "doc-3", "another unrelated text", null, "[[Another]]", 0.70),
         };
         var repository = new Mock<IChunkRepository>(MockBehavior.Strict);
+        var expectedCandidateCount = RagRetrievalPolicy.GetRerankingCandidateCount(2);
         repository.Setup(mock => mock.VectorSearchAsync(
                 It.IsAny<float[]>(),
-                8,
+                expectedCandidateCount,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(candidates);
         var service = CreateService(repository, RerankingStrategyKind.ReciprocalRankFusion);
