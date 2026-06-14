@@ -9,7 +9,7 @@ priority: High
 level:
   - "2"
 dg-publish: true
-status: Ready To Repeat
+status: Done
 ---
 
 # Intro
@@ -88,6 +88,9 @@ The combined pattern — fine-tune the model for behavior (format, tone, refusal
 
 > [!QUESTION]- When does fine-tuning beat adding more retrieval sophistication?
 > When the failure is behavioral, not factual: the model retrieves the right evidence but keeps producing the wrong format, tone, or policy behavior despite prompt iteration. Retrieval upgrades cannot fix behavior encoded in weights. Conversely, fine-tuning cannot fix missing or stale knowledge — it bakes in a snapshot that starts aging immediately and provides no source traceability. Diagnose first: if faithfulness is high but style or policy compliance is low, fine-tune; if evidence is missing or wrong, improve retrieval.
+
+> [!QUESTION]- When a RAG answer is wrong, how do you tell whether retrieval or generation is at fault?
+> Split the pipeline and score the two halves separately, because the fixes are opposite. First check whether the right evidence was retrieved at all: if the relevant chunk never made it into the context, it's a retrieval failure — improve chunking, hybrid search, or reranking, and no amount of prompt tuning will help. If the evidence *was* present but the answer ignored or contradicted it, that's a generation/faithfulness failure — tighten the prompt, add groundedness checks, or use a stronger model. This is exactly why RAG evaluation reports retrieval and generation as separate metrics; a single end-to-end accuracy number hides which half to fix.
 
 ## References
 

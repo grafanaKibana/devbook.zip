@@ -8,7 +8,7 @@ tags:
 dg-publish: true
 level:
   - '3'
-status: Ready To Repeat
+status: Done
 priority: High
 ---
 
@@ -134,6 +134,12 @@ For patterns on coordinating multiple agents, see [[Software Engineering/11 AI &
 > - Use an autonomous agent only when steps are unpredictable, the task is open-ended, and you have feedback mechanisms (tests, eval criteria) to catch errors
 > - Most production "agents" are actually workflows — and that is the right choice for the majority of use cases
 > - Key tradeoff: workflows trade flexibility for reliability; agents trade reliability for adaptability
+
+> [!QUESTION]- Why do autonomous agents accumulate error, and how do you bound it?
+> Each step an agent takes is conditioned on the output of the last one, so a small early mistake — a misread tool result, a wrong assumption — gets carried forward and compounds, pushing the agent further off track with every loop. That compounding is the main reason to prefer a workflow when you can: fixed code paths don't drift. When you do need autonomy, you bound the damage with hard iteration caps, explicit gates that validate progress before continuing, transparency into the planning steps so you can see where it went wrong, and a human-in-the-loop escape hatch when the agent is blocked. The throughline is feedback: the agent needs a way to catch its own drift before it cascades.
+
+> [!QUESTION]- What makes a task a good fit for an autonomous agent?
+> Two things together: the task is genuinely open-ended — you can't predict the number of steps or write a fixed workflow for it — and it has a clear, checkable success signal the agent can use to judge its own progress. That's why coding works (tests pass or fail), customer support works (the issue is resolved or not), and research works (claims trace back to sources). Tasks with vague or delayed success criteria are where agents flail, because there's no feedback to correct the compounding error. If you can't define what "done" and "correct" look like in a way the system can check, the task isn't ready for an agent yet.
 
 ## References
 

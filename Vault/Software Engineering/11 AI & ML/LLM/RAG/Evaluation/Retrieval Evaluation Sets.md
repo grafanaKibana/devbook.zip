@@ -6,7 +6,7 @@ subtopic:
 level:
   - "2"
 priority: High
-status: Ready To Repeat
+status: Done
 dg-publish: true
 ---
 
@@ -63,7 +63,7 @@ This produces exactly the structure the retrieval metrics consume: the query is 
 > - Complementary: score Recall@k and Context Recall — every required chunk must arrive; HitRate is misleading because one-of-three looks like a pass but yields an incomplete answer
 > - When chunks differ in usefulness rather than count, use graded labels (0/1/2) and nDCG@k, the only common metric that consumes grades and rewards ranking the best chunk first
 > - Set k from how many chunks the generator actually consumes; for complementary cases k must be at least the number of required chunks or recall is capped below 1 by construction
-> - Tradeoff: graded multi-chunk labels cost far more annotation effort than single-chunk binary labels — invest only where the generator genuinely fuses multiple sources (multi-hop, comparison), and keep single-label binary sets for simple lookup queries
+> - Graded multi-chunk labels cost far more annotation effort than single-chunk binary labels — invest only where the generator genuinely fuses multiple sources (multi-hop, comparison), and keep single-label binary sets for simple lookup queries
 
 > [!QUESTION]- Why do synthetically generated retrieval eval sets often report worse recall than the system delivers in production?
 > - Chunk-anchored generation labels only the source chunk as relevant, but the synthesized query is frequently answerable by other unlabeled chunks (duplicated text, overview paragraphs, near-identical FAQ entries)
@@ -71,7 +71,7 @@ This produces exactly the structure the retrieval metrics consume: the query is 
 > - This deflates absolute numbers and, worse, can rank a better retriever below a worse one, corrupting model-selection decisions
 > - Fix: after generation, run a second pass (the retriever plus an LLM judge over top-k) to label additional chunks that also answer the query, or discard ambiguous queries
 > - Secondary cause: lexical leakage — the LLM copies rare phrasing from the source chunk, inflating exact-match and BM25 scores on queries no real user would type
-> - Tradeoff: the dedup/judge pass adds LLM cost per query and some noise of its own, but without it synthetic retrieval metrics are systematically pessimistic and unreliable for ranking pipelines
+> - The dedup/judge pass does add LLM cost per query and some noise of its own, but without it synthetic retrieval metrics are systematically pessimistic and unreliable for ranking pipelines
 
 ## References
 

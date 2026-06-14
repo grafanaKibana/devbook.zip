@@ -6,7 +6,7 @@ subtopic:
 level:
   - "3"
 priority: High
-status: Ready To Repeat
+status: Done
 tags:
   - FolderNote
 dg-publish: true
@@ -80,14 +80,14 @@ Decision rule: gate releases on **verifiable task success plus efficiency guardr
 > - Outcome-only hides cost, latency, and compounding error risk, so a more expensive or fragile agent looks equal to a cheaper reliable one
 > - Add process metrics: tool-call validity (deterministic), tool-selection and trajectory quality (judge or reference), and efficiency counters (steps, cost, latency)
 > - Add reliability: run each task k times and report pass^k, since stochastic trajectories make a single run an unreliable estimate
-> - Tradeoff: process and reliability scoring multiply eval cost (k runs, a judge call per trace) — spend it where path quality and variance actually affect users, and keep cheap outcome+efficiency gates everywhere else
+> - Process and reliability scoring multiply eval cost (k runs, a judge call per trace), so spend it where path quality and variance actually affect users and keep cheap outcome+efficiency gates everywhere else
 
 > [!QUESTION]- How do you detect and measure agent non-termination and looping?
 > - Non-termination shows up as runs that hit the step cap without reaching a terminal state; track cap-hit rate as a first-class metric
 > - Oscillation shows up as repeated identical or alternating tool calls; detect by hashing (tool, args) per step and flagging repeats within a trajectory
 > - Both inflate cost and latency long before they change task success, so latency/step-count distributions catch them earlier than outcome metrics
 > - Mitigation: enforce step and cost caps, add progress checks, and make the agent's plan explicit so a judge can see where it stalled
-> - Tradeoff: tight caps cut runaway cost but can truncate genuinely hard tasks — set caps from the step-count distribution of known-good runs, not a round number
+> - Tight caps cut runaway cost but can truncate genuinely hard tasks — set caps from the step-count distribution of known-good runs, not a round number
 
 ## References
 

@@ -6,7 +6,7 @@ subtopic:
 level:
   - "3"
 priority: High
-status: Ready To Repeat
+status: Done
 dg-publish: true
 ---
 
@@ -100,14 +100,14 @@ The most dangerous tool error passes every deterministic check — perfect JSON,
 > - A single averaged number can look healthy while one axis is broken — 95% selection with 70% arguments averages to a misleading 82%
 > - They need different scorers: selection is reference/judge, arguments are exact for structured fields and semantic for free text
 > - Acting on the blended number wastes effort optimizing the half that is already fine
-> - Tradeoff: per-axis scoring costs more labels and more judge calls, but without it you cannot tell which fix to ship — spend the granularity on the tools where a wrong call is expensive
+> - Per-axis scoring costs more labels and more judge calls, but without it you can't tell which fix to ship — spend the granularity on the tools where a wrong call is expensive
 
 > [!QUESTION]- Why are deterministic schema checks necessary but not sufficient for tool-call evaluation?
 > - They catch malformed JSON, unknown tools, and wrong arity for free and pre-execution, so they can block a bad call before it runs
 > - They are blind to semantics: a call with perfect schema and a wrong order id or mis-scoped query passes every check and then executes against real state
 > - They cannot judge selection or necessity — whether a tool should have been called at all
 > - Pair them with reference argument matching (for structured fields) and a judge (for selection/necessity), and add confirmation steps for irreversible actions
-> - Tradeoff: the semantic layers cost labels and judge calls; gate them on the high-risk tools rather than running them on every read-only call
+> - The semantic layers cost labels and judge calls, so gate them on the high-risk tools rather than running them on every read-only call
 
 ## References
 

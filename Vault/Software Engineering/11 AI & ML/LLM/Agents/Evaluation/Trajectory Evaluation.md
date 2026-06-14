@@ -6,7 +6,7 @@ subtopic:
 level:
   - "3"
 priority: High
-status: Ready To Repeat
+status: Done
 dg-publish: true
 ---
 
@@ -93,14 +93,14 @@ If the judge can see that the task succeeded, it rationalizes the path as good r
 > - It breaks when many paths are valid — strict matching then penalizes correct alternate solutions and measures conformance, not quality
 > - A judge handles open-ended tasks and rates plan quality, redundancy, and recovery that matching cannot see, at the cost of a model call per run and long-context bias
 > - Common setup: subset match as a cheap safety gate (no out-of-scope tools) plus a judge for path quality, backed by outcome and efficiency metrics
-> - Tradeoff: matching is cheap but brittle and quality-blind; judging is flexible but expensive and biased — choose by how enumerable the correct paths are
+> - Matching is cheap but brittle and quality-blind; judging is flexible but expensive and biased — choose by how enumerable the correct paths are
 
 > [!QUESTION]- Why can a high trajectory-judge score be misleading, and how do you guard against it?
 > - If the judge sees the task succeeded, outcome leakage makes it rationalize a messy path as good
 > - On long traces the judge skims the middle and rewards verbosity, so a bloated trajectory can outscore a clean one
 > - Guard by withholding the outcome from the path judge (or scoring path and outcome separately) and by validating against human labels on long runs
 > - Pair the judge with objective efficiency counters (steps, cost, redundant calls) that a biased judge cannot launder
-> - Tradeoff: separate, calibrated, step-localized judging costs more calls — spend it on the long, high-stakes trajectories where path quality actually matters
+> - Separate, calibrated, step-localized judging costs more calls, so spend it on the long, high-stakes trajectories where path quality actually matters
 
 ## References
 

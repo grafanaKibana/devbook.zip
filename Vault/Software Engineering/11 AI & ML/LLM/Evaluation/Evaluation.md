@@ -8,7 +8,7 @@ tags:
 dg-publish: true
 level:
   - "3"
-status: Ready To Repeat
+status: Done
 priority: High
 ---
 

@@ -8,7 +8,7 @@ dg-publish: true
 level:
   - '3'
 priority: High
-status: Ready To Repeat
+status: Done
 ---
 
 # Intro

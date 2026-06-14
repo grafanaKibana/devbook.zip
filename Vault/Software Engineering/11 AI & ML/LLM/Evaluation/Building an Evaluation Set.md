@@ -6,7 +6,7 @@ subtopic:
 level:
   - "3"
 priority: High
-status: Ready To Repeat
+status: Done
 dg-publish: true
 ---
 
@@ -63,7 +63,7 @@ Fix: establish your own baseline by running the pipeline on your eval set and me
 > - A threshold set during initial launch becomes meaningless after the data doubles or input distribution shifts
 > - Relative thresholds (no more than N% regression from baseline) adapt automatically because the baseline tracks the current system state
 > - They prevent the failure mode where a team sets an ambitious absolute target, cannot reach it, and disables the gate entirely
-> - Tradeoff: relative thresholds require maintaining a consistent baseline measurement across releases, which adds CI/CD complexity — but this cost is far lower than the risk of shipping regressions that absolute thresholds cannot detect after the first data evolution
+> - Relative thresholds do require a consistent baseline measurement maintained across releases, which adds CI/CD complexity — but that cost is far lower than the risk of shipping regressions absolute thresholds can't catch after the first data evolution
 
 > [!QUESTION]- When should a team invest in a human-annotated golden set versus relying on synthetic generation?
 > - Synthetic generation bootstraps evaluation quickly and covers breadth at low cost
@@ -71,7 +71,7 @@ Fix: establish your own baseline by running the pipeline on your eval set and me
 > - A golden set is worth the investment when the system serves high-stakes decisions (medical, legal, financial) where evaluation failures have direct business or safety impact
 > - Golden sets also serve as regression gates — known past failures are captured permanently, preventing recurrence (see [[Software Engineering/11 AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs|Golden Test Set and Regression Runs]])
 > - In practice, combine both: synthetic for broad coverage, golden for regression gating on known failure modes
-> - Tradeoff: golden sets cost annotator time (typically 2-4 hours per 100 examples) and ongoing maintenance as the data evolves — invest proportionally to the cost of an undetected evaluation failure in your domain
+> - Golden sets do cost annotator time (typically 2-4 hours per 100 examples) and ongoing maintenance as the data evolves — invest proportionally to the cost of an undetected evaluation failure in your domain
 
 ## References
 

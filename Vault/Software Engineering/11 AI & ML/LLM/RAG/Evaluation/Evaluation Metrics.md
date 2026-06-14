@@ -6,7 +6,7 @@ subtopic:
 level:
   - "2"
 priority: High
-status: Ready To Repeat
+status: Done
 dg-publish: true
 ---
 
@@ -114,7 +114,7 @@ Mitigation: use binary pass/fail judgments instead of numeric scales (reduces ca
 > - RAG workloads are heterogeneous — different query types, document formats, and languages have different retrieval characteristics
 > - The fix is segment-level evaluation: slice by tenant, language, query cluster, and document source type
 > - Flag any segment that degrades beyond the threshold, even when the aggregate improves
-> - Tradeoff: per-segment evaluation costs more to maintain (more ground-truth labels, more compute per release) but catches the most common RAG evaluation failure in production — choose granularity based on how heterogeneous your query population is
+> - Per-segment evaluation does cost more to maintain (more ground-truth labels, more compute per release), but it catches the most common RAG evaluation failure in production — choose granularity based on how heterogeneous your query population is
 
 > [!QUESTION]- Given high Faithfulness (0.91) and low Context Recall (0.54), which pipeline layer do you fix first and why?
 > - High faithfulness means the model correctly uses the context it receives — generation is not the problem
@@ -123,7 +123,7 @@ Mitigation: use binary pass/fail judgments instead of numeric scales (reduces ca
 > - Fix retrieval first: add hybrid search (BM25 + dense), expand k, review metadata filters, check embedding domain fit
 > - Do not touch prompts or generation settings until recall improves — optimizing generation against incomplete evidence is wasted effort
 > - After retrieval fix, re-measure both: if faithfulness drops as recall improves, the additional context is confusing the model — add re-ranking or improve prompt grounding
-> - Tradeoff: improving recall often decreases precision (more chunks = more noise) — pair recall improvements with re-ranking to maintain context quality
+> - Improving recall often decreases precision (more chunks = more noise), so pair recall improvements with re-ranking to maintain context quality
 
 ## References
 

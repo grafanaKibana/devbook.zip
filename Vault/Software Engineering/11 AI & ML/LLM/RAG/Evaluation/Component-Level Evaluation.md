@@ -6,7 +6,7 @@ subtopic:
 level:
   - "2"
 priority: High
-status: Ready To Repeat
+status: Done
 dg-publish: true
 ---
 
@@ -60,7 +60,7 @@ Ground truth is established by running brute-force (exact) search over the full 
 > - Latency is driven by the search budget, not corpus size, so it stays constant and gives no signal that recall has dropped
 > - Detection requires explicit ANN recall checks against brute-force ground truth on a scheduled query set — dashboards watching only latency will not catch it
 > - Fix: re-tune `ef_search`/`nprobe` as the corpus grows, or move to a parameterization that scales the search budget with index size
-> - Tradeoff: raising the search budget restores recall but increases p99 latency — pick the knee of the recall-vs-latency curve rather than maxing either
+> - Raising the search budget restores recall but increases p99 latency — pick the knee of the recall-vs-latency curve rather than maxing either
 
 > [!QUESTION]- Why is token-level IoU more informative than Recall@k when comparing chunking strategies?
 > - Recall@k only asks whether a relevant chunk appeared; it ignores how much irrelevant text rode along inside that chunk
@@ -68,7 +68,7 @@ Ground truth is established by running brute-force (exact) search over the full 
 > - Token IoU scores the overlap between retrieved tokens and the gold evidence span, penalizing both missed evidence (recall) and noise (precision) in one number
 > - Concrete gap: the default 800/400 OpenAI config reached 87.9% token recall but 1.4% token precision — Recall@k would call it a success while IoU exposes the waste
 > - Use IoU when context budget or generator attention dilution matters; fall back to ablation via Recall@k and Faithfulness when building token-span ground truth is too expensive
-> - Tradeoff: IoU needs `(query, gold_span)` labels, which cost more to produce than binary relevance — invest only where chunk efficiency materially affects cost or answer quality
+> - IoU needs `(query, gold_span)` labels, which cost more to produce than binary relevance — invest only where chunk efficiency materially affects cost or answer quality
 
 ## References
 
