@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/distributed-systems/cap-theorem/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Distributed Systems"],"level":["2"],"priority":"High","status":"Ready To Repeat"}}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/distributed-systems/cap-theorem/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Distributed Systems"],"level":["2"],"priority":"High","status":"Done"}}
 ---
 
 
@@ -115,7 +115,7 @@ For senior .NET interviews, tie CAP/PACELC to concrete platform choices instead 
 
 ### Azure Cosmos DB (tunable consistency)
 
-- You can select consistency models (Strong, Bounded Staleness, Session, Consistent Prefix, Eventual).
+- You can select [[Software Engineering/05 Architecture/Distributed Systems/Consistency Models\|consistency models]] (Strong, Bounded Staleness, Session, Consistent Prefix, Eventual).
 - This lets you pick different points on latency/freshness per workload.
 - Interview signal: mention that one product can serve CP-like or AP-leaning behaviors depending on configuration and operation.
 
@@ -153,16 +153,18 @@ That per-operation selection is usually what interviewers want to hear.
 
 - **What goes wrong**: system accepts writes under partition but has weak conflict strategy.
 - **Why it is risky**: silent data corruption appears later as duplicate orders or lost preference updates.
-- **How to avoid it**: define merge policy, idempotency keys, causality/version metadata, and repair observability from day one.
+- **How to avoid it**: define merge policy, [[Software Engineering/05 Architecture/Distributed Systems/Idempotency\|idempotency keys]], causality/version metadata, and repair observability from day one.
 
-## Interview Questions
+## Questions
 
 > [!QUESTION]- If CAP is only about partitions, why do we still tune consistency levels on healthy clusters?
-> - Because PACELC: without partition, there is still latency vs consistency tradeoff.
-> - Waiting for more replicas/quorum improves freshness/ordering confidence but increases latency.
-> - Reading locally reduces latency but may return older data.
-> - Practical tuning depends on endpoint SLO and correctness requirements.
-> - **Tradeoff**: it separates textbook CAP knowledge from real operational design judgment.
+> Because CAP only describes the partition case, and partitions are rare — PACELC covers the other 99% of the time. Its "ELC" half says that even with healthy links (Else), a replicated store still trades Latency against Consistency: wait for a quorum to confirm and you get fresher, better-ordered reads at higher latency; answer from the nearest replica and you get speed with a chance of staleness. That is exactly what read-consistency levels, session guarantees, quorum sizes, and timeout tuning are dialing in. CAP tells you how to fail; PACELC tells you what you pay every day.
+
+> [!QUESTION]- Is a system "CP" or "AP" as a whole?
+> Don't think of it system-wide — decide per operation, because different endpoints have different correctness budgets. A `PlaceOrder` or ledger write wants CP: refuse it under partition rather than risk split-brain or a double charge. A `GetRecommendations` read wants AP: keep serving slightly stale data because availability beats freshness there. A profile read might only need session consistency. So the same system is CP on some paths and AP on others; labeling the whole platform and applying one rule everywhere is the mistake. Map each operation to its business invariant and its allowed staleness window.
+
+> [!QUESTION]- Why is "pick two of three" a misleading way to state CAP?
+> Because in any system that replicates data across machines, partition tolerance isn't something you opt out of — networks drop packets and isolate nodes whether you like it or not. So "CA" isn't really on the menu: the moment a partition hits, a system that didn't plan for it just stops being correct or stops responding. The honest framing is that P is a given, and the real decision is what you do *during* a partition — sacrifice consistency to stay available (AP), or sacrifice availability to stay consistent (CP). With no partition you can have both; CAP only forces the choice inside the failure window.
 
 ## References
 
