@@ -105,6 +105,15 @@ builder.Services.AddAuthentication()
 public IActionResult ApiEndpoint() => Ok();
 ```
 
+## Claims, Events, and External Providers
+
+- **`IClaimsTransformation`** runs after a principal is authenticated and lets you add claims (e.g. look up roles/permissions from a store) without touching the token: implement `TransformAsync(ClaimsPrincipal)` and register it. (It can run more than once per request, so make it idempotent.)
+- **`JwtBearerEvents`** hooks let you customize the flow: `OnTokenValidated` (post-validation enrichment/extra checks), `OnAuthenticationFailed` (logging), `OnMessageReceived` (pull the token from a non-standard place, e.g. a SignalR query string).
+- **External / enterprise identity** — beyond hand-rolled JWT and cookies, use `AddOpenIdConnect` for OIDC providers (Auth0, Okta, social logins) and **`Microsoft.Identity.Web`** for Microsoft Entra ID. These handle discovery, key rotation (JWKS), and token validation for you — prefer them over manually configuring `TokenValidationParameters` against an external IdP.
+
+> [!WARNING]
+> **Claim-type mapping gotcha.** The legacy `JwtSecurityTokenHandler` silently rewrites short JWT claim names (`sub`, `email`) into long XML URIs (`http://schemas.xmlsoap.org/...nameidentifier`), so `User.FindFirst("sub")` returns `null`. Set `options.MapInboundClaims = false` to keep the original names, or use the modern `JsonWebTokenHandler` (default in newer stacks) which doesn't remap.
+
 ## Pitfalls
 
 ### Symmetric Key Too Short or Hardcoded

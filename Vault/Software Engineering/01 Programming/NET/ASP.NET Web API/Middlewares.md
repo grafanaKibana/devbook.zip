@@ -112,6 +112,23 @@ public sealed class CorrelationIdMiddleware
 app.UseMiddleware<CorrelationIdMiddleware>();
 ```
 
+> [!WARNING]
+> **Convention-based middleware is constructed once (singleton).** The `CorrelationIdMiddleware` instance above is created a single time at startup, so its constructor must only take singleton-lifetime dependencies. To use a **scoped** service, inject it as a parameter of `InvokeAsync` instead (the framework resolves it per request): `public async Task InvokeAsync(HttpContext ctx, IOrderService orders)`. If you need a fully per-request middleware object, implement the **factory-based `IMiddleware`** interface and register the type in DI with the lifetime you want.
+
+## Branching the Pipeline
+
+Beyond the linear chain, you can fork the pipeline:
+
+- **`app.Map("/admin", branch => ...)`** / **`MapWhen(predicate, ...)`** — split off a sub-pipeline by path or arbitrary predicate.
+- **`app.UseWhen(predicate, branch => ...)`** — run extra middleware for matching requests, then *rejoin* the main pipeline (unlike `MapWhen`, which terminates in the branch).
+- **`app.Run(handler)`** — a terminal middleware that never calls `next` (the end of a branch).
+
+```csharp
+app.UseWhen(
+    ctx => ctx.Request.Path.StartsWithSegments("/api"),
+    api => api.UseMiddleware<ApiKeyMiddleware>()); // only /api gets the API-key check
+```
+
 ## Pitfalls
 
 **Wrong registration order** — placing `UseAuthorization` before `UseAuthentication` means the identity is never populated, so all requests appear anonymous. The canonical order (exception handler → HSTS → static files → routing → CORS → auth → authorization → endpoints) exists for a reason.
@@ -121,6 +138,8 @@ app.UseMiddleware<CorrelationIdMiddleware>();
 **Blocking I/O in synchronous middleware** — calling `Thread.Sleep` or synchronous file/DB operations blocks a thread-pool thread for the duration. Use `async/await` throughout.
 
 **Swallowing exceptions silently** — a `try/catch` in middleware that logs and returns 200 hides failures from callers and monitoring. Either rethrow or return an appropriate error status.
+
+**Reading endpoint metadata too early** — routing only *selects* the endpoint at `UseRouting`. Middleware placed **between `UseRouting` and the endpoint** can inspect the chosen endpoint via `context.GetEndpoint()` (e.g. to read `[Authorize]`/custom metadata); middleware before `UseRouting` always sees `null`. Order your middleware accordingly when it depends on which endpoint will run.
 
 ## Tradeoffs
 

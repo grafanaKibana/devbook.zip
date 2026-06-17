@@ -191,6 +191,30 @@ Key rules:
 - `with`-expressions work across the hierarchy — the copy constructor is virtual.
 - Positional parameters from the base must be forwarded in the derived constructor.
 
+## Records vs C# 12 Primary Constructors
+
+C# 12 added primary constructors to **plain** classes and structs, which looks like record syntax but behaves differently — a common point of confusion:
+
+- `record Person(string Name)` → generates a **public `init` property** `Name`, plus value equality, `ToString`, `Deconstruct`, and `with`.
+- `class Person(string name)` → `name` is just a **captured constructor parameter** (private-ish state); **no** property, equality, or `with` is generated.
+
+Use a record when you want the data-carrier machinery; use a class primary constructor purely to cut constructor boilerplate (e.g. injecting dependencies).
+
+## `required` and Validation
+
+- Combine records with **`required`** to force a nominal property without a positional parameter: `public record User { public required string Email { get; init; } }`.
+- Validate by adding logic in a property initializer or a body block on a positional parameter:
+
+  ```csharp
+  public record Email(string Value)
+  {
+      public string Value { get; } = string.IsNullOrWhiteSpace(Value)
+          ? throw new ArgumentException("Email required") : Value;
+  }
+  ```
+
+- **System.Text.Json** binds JSON to a record's primary constructor by parameter name (use `[JsonConstructor]` to disambiguate when there are multiple constructors).
+
 ## Pitfalls
 
 1. **Record struct mutability by default** — Unlike `record class` (which uses `init` setters), `record struct` positional properties are `get`/`set`. This catches people off guard. Always prefer `readonly record struct` unless you explicitly need mutation.

@@ -20,10 +20,12 @@ Starting raw threads has real cost: setup time (~1ms), stack allocation (1MB def
 The ThreadPool maintains two thread categories:
 
 - **Worker threads** — execute CPU-bound and async continuations. Managed by the hill-climbing algorithm.
-- **I/O completion threads** — handle Windows IOCP callbacks for async I/O. Separate pool, rarely a bottleneck.
+- **I/O completion threads** — on Windows these handle IOCP callbacks for async I/O. On **Linux/macOS there is no IOCP**: async socket I/O is driven by an epoll/kqueue-based event loop, and completions are dispatched onto worker threads. So `completionPortThreads` is largely a Windows concept — don't tune it on Linux expecting the same effect.
 
 **Thread injection (hill-climbing algorithm):**
-The CLR starts with a minimum number of threads (one per logical CPU by default). When all threads are busy and work is queued, the runtime injects new threads at a rate of roughly one per 500ms. This conservative injection rate means starvation can persist for seconds before the pool recovers — a critical production concern.
+The CLR starts with a minimum number of threads (one per logical CPU by default). When all threads are busy and work is queued, the runtime injects new threads conservatively — historically about one per 500ms — so starvation can persist for seconds before the pool recovers.
+
+**Modern runtimes are smarter than the flat "1 per 500ms" rule.** .NET 6+ ships a portable thread pool with improved hill-climbing and **blocking detection** that injects threads faster when it observes pool threads parked in blocking calls. You can still tune behavior via environment knobs — `DOTNET_ThreadPool_UnfairSemaphoreSpinLimit`, `DOTNET_ThreadPool_ForceMinWorkerThreads`/`ForceMaxWorkerThreads` — but treat these as last resorts after fixing the blocking that caused starvation in the first place.
 
 **Min/max thread limits:**
 
@@ -38,6 +40,11 @@ ThreadPool.SetMinThreads(workerThreads: 50, completionPortThreads: 10);
 ```
 
 The default minimum is `Environment.ProcessorCount`. Increasing it pre-allocates threads so the pool can absorb bursts without the 500ms injection delay.
+
+**Allocation-free scheduling and dedicated threads.** Two lower-level escape hatches:
+
+- For high-frequency scheduling, implement `IThreadPoolWorkItem` and queue it with `ThreadPool.UnsafeQueueUserWorkItem(workItem, preferLocal: true)` — this avoids the closure/delegate allocation that `Task.Run` and `QueueUserWorkItem(WaitCallback)` incur.
+- For work that runs for the lifetime of the app or blocks for a long time, **don't** borrow a pool thread — use a dedicated `Thread`, or `Task.Factory.StartNew(..., TaskCreationOptions.LongRunning)`, which spins up a thread outside the pool so it can't contribute to starvation.
 
 ## Example — Bounded Fan-Out
 

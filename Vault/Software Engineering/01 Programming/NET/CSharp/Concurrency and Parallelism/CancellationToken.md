@@ -80,6 +80,20 @@ public async Task ProcessItemsAsync(
 
 `ThrowIfCancellationRequested()` is a cheap check — it reads a volatile bool. Call it at the top of each loop iteration for responsive cancellation.
 
+## Registration Callbacks
+
+For APIs that aren't natively token-aware (e.g. a legacy callback or a `TaskCompletionSource`), `token.Register(callback)` runs the callback when cancellation fires and returns a `CancellationTokenRegistration` you must **dispose** to unhook it (otherwise the callback — and everything it captures — stays alive as long as the token source does, a real leak vector for long-lived tokens).
+
+```csharp
+var tcs = new TaskCompletionSource();
+await using var reg = ct.Register(() => tcs.TrySetCanceled(ct));
+```
+
+> [!WARNING]
+> By default `Register` callbacks run **synchronously on the thread that calls `cts.Cancel()`**. If a callback tries to take a lock that the canceller already holds — or `Cancel()` is called while holding a lock a callback needs — you get a reentrancy deadlock. On **.NET 8+** use **`cts.CancelAsync()`**, which runs the callbacks off the canceller's stack, to avoid this.
+
+`CancellationTokenSource` is `IDisposable` (it backs a timer when you use `CancelAfter`). On **.NET 6+**, `cts.TryReset()` lets you reuse a non-canceled source instead of allocating a new one — useful when pooling CTS objects on a hot path.
+
 ## Pitfalls
 
 **Accepting a token but not forwarding it**
@@ -114,6 +128,21 @@ catch (Exception ex) { _logger.LogError(ex, "Failed"); return null; }
 
 **Using `CancellationToken.None` inside request flow**
 Hardcoding `CancellationToken.None` in a method called from a request pipeline breaks request-abort propagation. The operation continues even after the client disconnects, wasting resources.
+
+**Confusing a timeout with a caller-cancellation**
+Both surface as `OperationCanceledException`, so callers often can't tell "the user canceled" from "we timed out." The idiomatic disambiguation is to check which token fired:
+
+```csharp
+using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+using var linked = CancellationTokenSource.CreateLinkedTokenSource(userToken, timeoutCts.Token);
+try { await DoWorkAsync(linked.Token); }
+catch (OperationCanceledException) when (timeoutCts.IsCancellationRequested && !userToken.IsCancellationRequested)
+{
+    throw new TimeoutException("Operation exceeded 5s."); // a timeout, not a user cancel
+}
+```
+
+On **.NET 8+**, `await task.WaitAsync(TimeSpan.FromSeconds(5), ct)` gives you timeout + cancellation in one call, throwing `TimeoutException` vs `OperationCanceledException` respectively.
 
 **Not disposing `CancellationTokenSource`**
 `CancellationTokenSource` implements `IDisposable`. Forgetting to dispose it leaks a timer registration when a timeout is set.

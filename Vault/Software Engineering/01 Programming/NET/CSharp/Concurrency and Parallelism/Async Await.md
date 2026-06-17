@@ -38,6 +38,13 @@ becomes roughly equivalent to a struct with fields capturing local variables (`u
 
 This is why `await` differs from `Task.Result` and `Task.Wait()`: those block the current thread, while `await` releases it.
 
+**Allocation cost.** The state machine is a `struct`, so a method that completes synchronously (every `await` hits an already-completed awaitable) allocates nothing on the heap. The struct is **boxed to the heap only when the method actually suspends** — at that point the runtime needs to keep it alive across the await. In hot paths that suspend frequently, two techniques cut this allocation:
+
+- Return **`ValueTask`/`ValueTask<T>`** instead of `Task<T>` when the result is often available synchronously.
+- Opt into a **pooled state-machine builder** with `[AsyncMethodBuilder(typeof(PoolingAsyncValueTaskMethodBuilder))]` (or build the project with `DOTNET_ReadyToRun` / pooling enabled) so the boxed boxes are reused rather than GC'd.
+
+Default to `Task` and only reach for these once profiling shows async allocation is a real cost.
+
 ## ConfigureAwait
 
 By default, `await` captures the current `SynchronizationContext` (or `TaskScheduler`) and resumes on it. In a UI app, this means the continuation runs on the UI thread — useful for updating controls. In ASP.NET Core, there is no `SynchronizationContext`, so this is a no-op.
@@ -52,6 +59,21 @@ var data = await _repo.GetAsync(id).ConfigureAwait(false);
 **Rule of thumb:**
 - Library code: always use `ConfigureAwait(false)` to avoid context capture overhead and deadlock risk.
 - Application code (controllers, view models): omit it — you usually want to resume on the original context.
+
+### `ExecutionContext` vs `SynchronizationContext`
+
+These are two different ambient mechanisms, and conflating them is a common source of bugs:
+
+- **`SynchronizationContext`** controls *where* (which thread/scheduler) the continuation resumes. This is what `ConfigureAwait(false)` opts out of.
+- **`ExecutionContext`** carries *ambient state* — `AsyncLocal<T>` values, the security/impersonation context — and **always flows across `await`, even with `ConfigureAwait(false)`**. So `ConfigureAwait(false)` does *not* drop your `AsyncLocal` values; it only changes the resumption thread. To stop `ExecutionContext` from flowing (rare), use `ExecutionContext.SuppressFlow()`.
+
+### `ConfigureAwaitOptions` (.NET 8)
+
+.NET 8 added an overload `ConfigureAwait(ConfigureAwaitOptions)` with composable flags beyond the old boolean:
+
+- `ContinueOnCapturedContext` — the equivalent of the old `true`.
+- `SuppressThrowing` — await a `Task` purely for completion, ignoring faults/cancellation (useful for "fire and observe completion only").
+- `ForceYielding` — always yield, even if the awaitable is already complete (handy to break up synchronous re-entrancy).
 
 ## Example
 
@@ -72,6 +94,33 @@ public async Task<OrderDto?> LoadOrderAsync(
 ```
 
 The method does not hold a thread while waiting on network I/O. The continuation runs only when the response is available.
+
+## Async Streams (`IAsyncEnumerable<T>`)
+
+For data that arrives incrementally (paged APIs, streamed query results, message consumers), `IAsyncEnumerable<T>` lets a producer `yield return` values asynchronously and a consumer pull them with `await foreach` — each item can suspend without buffering the whole sequence in memory.
+
+```csharp
+public async IAsyncEnumerable<Order> StreamOrdersAsync(
+    [EnumeratorCancellation] CancellationToken ct = default)
+{
+    string? cursor = null;
+    do
+    {
+        var page = await _client.GetPageAsync(cursor, ct);
+        foreach (var order in page.Items)
+            yield return order;
+        cursor = page.NextCursor;
+    } while (cursor is not null);
+}
+
+// Consumer — pulls one item at a time, never materializing the full set
+await foreach (var order in StreamOrdersAsync(ct).WithCancellation(ct).ConfigureAwait(false))
+{
+    Process(order);
+}
+```
+
+Note the `[EnumeratorCancellation]` attribute (so a token passed via `.WithCancellation(ct)` reaches the iterator) and `await using` / `IAsyncDisposable` for resources whose cleanup is itself asynchronous (e.g. `DbDataReader`, network streams).
 
 ## Pitfalls
 
@@ -114,6 +163,9 @@ var result = await Task.Run(() => _http.GetAsync(url));
 ```
 
 Fix: `await` the async method directly.
+
+**Only the first exception surfaces from an awaited task**
+A `Task` can hold multiple exceptions (e.g. a faulted `Task.WhenAll`), but `await` rethrows only the **first** one — it unwraps the `AggregateException` for ergonomics. To see all of them, inspect `task.Exception` (an `AggregateException`) directly after the await. Internally the runtime preserves the original throw-site stack with `ExceptionDispatchInfo.Capture(ex).Throw()`, which is why an awaited exception shows the real failure location rather than the resumption point.
 
 ## Questions
 

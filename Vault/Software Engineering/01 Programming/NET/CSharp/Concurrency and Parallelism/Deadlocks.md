@@ -146,6 +146,22 @@ var result = await _http.GetStringAsync(url);
 lock (_lock) { _cache[key] = result; }
 ```
 
+## ThreadPool-Starvation Deadlock
+
+This is the deadlock that *does* strike ASP.NET Core (no `SynchronizationContext` required). Each request that blocks on `.Result`/`.Wait()` parks a pool thread. The continuation it's waiting on needs a pool thread to run — but under load every thread is parked the same way, and the pool injects new threads only slowly (~1 per 500ms). The app hangs even though no single-thread cycle exists; throughput collapses to near zero.
+
+```csharp
+// Under concurrency this exhausts the ThreadPool and the app appears "deadlocked"
+public IActionResult Get() => Ok(_service.LoadAsync().Result); // never block — await instead
+```
+
+The fix is the same as the classic case — **async all the way up** — but the failure mode is different (resource exhaustion, not a wait cycle). See [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/ThreadPool|ThreadPool]].
+
+## Related Failure Modes
+
+- **Livelock** — threads are not blocked but make no progress because they keep reacting to each other (e.g. two `Monitor.TryEnter`/back-off loops that always collide). Add randomized back-off (jitter) to break the symmetry.
+- **Lock convoy** — many threads serialize through one hot lock; no deadlock, but throughput craters and latency spikes as threads queue and context-switch. Reduce lock scope, shard the lock, or use a lock-free/`Interlocked` structure.
+
 ## Pitfalls
 
 **Async deadlock is invisible in logs**
@@ -165,8 +181,17 @@ public async Task UpdateAsync()
 }
 ```
 
+> [!WARNING]
+> **`SemaphoreSlim` is not reentrant.** Unlike `Monitor`/`lock` (and `Mutex`), it has no thread affinity and no recursion count. If a method that already holds the gate calls another method that tries to acquire the *same* 1-permit semaphore, it **self-deadlocks**. Don't make `WaitAsync`-guarded methods call each other; restructure so the lock is taken once at the top.
+
+**`lock` on a shared/public object**
+Never `lock(this)`, `lock(typeof(X))`, or lock on an interned `string`. These objects are visible to other code that may lock on the same instance, creating cross-component lock-ordering cycles you can't see. Always lock on a `private readonly object _gate = new();` (or use `System.Threading.Lock` in .NET 9+).
+
 **Nested locks in library code**
 Third-party libraries may acquire internal locks. Calling library methods while holding your own lock can create unexpected lock ordering dependencies you cannot control.
+
+**Database deadlocks are a separate layer**
+The DB engine has its own lock manager: two transactions touching rows/indexes in opposite order deadlock, and the engine kills one as the *deadlock victim* (SQL Server error 1205). Fix with consistent access order, smaller transactions, and retry-on-1205 — not with CLR locks. See [[Software Engineering/03 Data Persistence/SQL/SQL|SQL]].
 
 ## Questions
 
@@ -176,7 +201,8 @@ Third-party libraries may acquire internal locks. Calling library methods while 
 
 > [!QUESTION]- Why does calling `.Result` on a `Task` deadlock in a UI app but not in a console app?
 > UI apps have a `SynchronizationContext` that marshals continuations back to the UI thread. `.Result` blocks that thread; the continuation needs it to resume — circular wait.
-> Console apps and ASP.NET Core have no `SynchronizationContext`, so continuations resume on any pool thread and `.Result` merely blocks the calling thread without creating a cycle.
+> Console apps and ASP.NET Core have no `SynchronizationContext`, so continuations resume on any pool thread and `.Result` merely blocks the calling thread without creating a *classic* cycle.
+> **But ASP.NET Core is not safe from sync-over-async** — see the ThreadPool-starvation note below. The absence of a `SynchronizationContext` removes the single-thread cycle, not the risk of hanging the whole app.
 
 > [!QUESTION]- How do you diagnose a deadlock in a production .NET service?
 > Capture a process dump with `dotnet-dump collect` or `procdump`. Analyze with `dotnet-dump analyze` and `clrthreads`/`syncblk` commands to find threads blocked on monitors. For async deadlocks, look for threads blocked in `.Result` or `.Wait()` while holding a `SynchronizationContext`.

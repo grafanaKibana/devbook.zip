@@ -14,6 +14,8 @@ views:
       - priority
       - level
     sort:
+      - property: status
+        direction: ASC
       - property: topic
         direction: ASC
     summaries: {}

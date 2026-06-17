@@ -68,6 +68,15 @@ public IActionResult PublicEndpoint() => Ok();
 public IActionResult InternalEndpoint() => Ok();
 ```
 
+## Exposed Headers, Simple vs Preflighted, and Caching
+
+- **Reading custom response headers needs `WithExposedHeaders`.** By default browser JS can only read a small all-list of response headers (`Content-Type`, `Cache-Control`, etc.). If your client needs to read `X-Total-Count`, `Location`, or a custom header, the server must send `Access-Control-Expose-Headers` — `policy.WithExposedHeaders("X-Total-Count")`. This is a frequent "the header is there in DevTools but `response.headers.get()` returns null" bug.
+- **Simple vs preflighted.** A request skips the preflight only if it's a "simple" request: method `GET`/`HEAD`/`POST`, only CORS-safelisted headers, and `Content-Type` is one of `application/x-www-form-urlencoded`, `multipart/form-data`, or `text/plain`. Anything else (a `PUT`, an `Authorization` header, `Content-Type: application/json`) triggers the `OPTIONS` preflight.
+- **Caching caveat.** Preflight results cache per `SetPreflightMaxAge`, and CORS responses should send `Vary: Origin` so a shared cache doesn't serve one origin's allow-headers to another. Don't cache credentialed/authorized responses at a shared layer keyed without `Origin`.
+
+> [!IMPORTANT]
+> CORS is **not** a server-side authorization mechanism — it only constrains *browser* JS. `curl`, Postman, and server-to-server callers ignore it entirely. Always enforce authentication/authorization on the server regardless of CORS configuration.
+
 ## Pitfalls
 
 ### `AllowAnyOrigin()` with `AllowCredentials()`

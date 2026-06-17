@@ -87,6 +87,18 @@ public sealed class ApiExceptionFilter(ILogger<ApiExceptionFilter> logger) : IAs
 ```
 
 Register globally: `builder.Services.AddControllers(opts => opts.Filters.Add<ApiExceptionFilter>());`
+
+## Applying Filters: `[ServiceFilter]` vs `[TypeFilter]` vs `IFilterFactory`
+
+How you attach a filter that has constructor dependencies matters:
+
+- **`[ServiceFilter(typeof(MyFilter))]`** — the filter is resolved from DI, so you **must register it** (`AddScoped<MyFilter>()`). Use this for filters with injected services.
+- **`[TypeFilter(typeof(MyFilter))]`** — the filter is instantiated via `ActivatorUtilities` (DI-resolved constructor args **plus** explicit `Arguments`), and does **not** need to be registered. Use this to pass literal arguments to the filter.
+- **`IFilterFactory`** — implement it on an attribute to build the real filter yourself (this is how attribute-with-dependencies patterns work under the hood).
+- A plain `[MyFilter]` attribute can't receive DI services — it's constructed by the runtime with only literal attribute args.
+
+Note that **`[Authorize]` is itself an authorization filter** — which is why authorization runs first in the filter order (Authorization → Resource → Action → Exception → Result), and why duplicating auth logic in an action filter is redundant. Within a stage, execution order is global → controller → action, refined by `IOrderedFilter.Order`. Also: implement either the sync (`IActionFilter`) **or** async (`IAsyncActionFilter`) interface of a pair, never both — if you implement both, the async one wins and the sync one is ignored.
+
 ## Pitfalls
 
 - Running blocking I/O inside sync filters can hurt throughput because request threads are blocked; use async filters for I/O work. A sync `IActionFilter` that calls a remote validation API with `.Result` instead of using `IAsyncActionFilter` with `await` blocked thread-pool threads under load — at 200 concurrent requests, thread starvation caused p99 latency to spike from 50ms to 12 seconds and triggered 503 responses.
