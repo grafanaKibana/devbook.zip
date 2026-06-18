@@ -78,6 +78,14 @@ foreach (var collectionConfig in CollectionConfig.All)
 
         WriteJson(runOptions.DatasetPath(collectionConfig), new DatasetFile(2, generatedAt, collectionConfig.CollectionName, cases));
         Console.WriteLine($"Wrote dataset cases: {cases.Count}");
+
+        // MarkdownSection chunks are the natural chunker-neutral unit (chunk ≈ note section), so its cases double
+        // as the shared golden dataset. SearchEvaluation matches these by source + heading + snippet, ignoring ids.
+        if (collectionConfig.Strategy == ChunkingStrategyKind.MarkdownSection)
+        {
+            WriteJson(runOptions.SharedDatasetPath, new DatasetFile(2, generatedAt, "shared", cases));
+            Console.WriteLine($"Wrote shared dataset cases: {cases.Count}");
+        }
     }
     else
     {
@@ -558,6 +566,10 @@ sealed record RunOptions(string RepoRoot, int SampleSize, int MaxGroupsPerCollec
     public string GroupOutputDirectory => Path.Combine(this.DatasetOutputDirectory, "Groups");
     public string GroupPath(CollectionConfig config) => Path.Combine(this.GroupOutputDirectory, $"{config.FilePrefix}.groups.json");
     public string DatasetPath(CollectionConfig config) => Path.Combine(this.DatasetOutputDirectory, $"{config.FilePrefix}.json");
+
+    // The shared, chunker-neutral golden dataset consumed by SearchEvaluation. Ground truth is keyed by
+    // source + heading + snippet, so one question set scores every chunking strategy on equal footing.
+    public string SharedDatasetPath => Path.Combine(this.DatasetOutputDirectory, "chunks-shared.json");
 
     public static RunOptions Parse(string[] args, string repoRoot)
     {

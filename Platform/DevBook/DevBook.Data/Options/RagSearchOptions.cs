@@ -15,5 +15,5 @@ public sealed class RagSearchOptions
     /// <summary>
     /// Gets reranking strategy.
     /// </summary>
-    public RerankingStrategyKind RerankingStrategy { get; init; } = RerankingStrategyKind.Bm25;
+    public RerankingStrategyKind RerankingStrategy { get; init; } = RerankingStrategyKind.ReciprocalRankFusion;
 }

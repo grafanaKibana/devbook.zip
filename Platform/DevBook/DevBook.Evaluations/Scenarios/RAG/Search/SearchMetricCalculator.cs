@@ -543,12 +543,25 @@ public static class SearchMetricCalculator
             return string.Equals(expectedDocument.ChunkId, retrievedDocument.ChunkId, StringComparison.Ordinal);
         }
 
-        return MatchesSourcePath(expectedDocument.SourcePath, retrievedDocument.SourcePath);
+        // Chunker-neutral identity: a chunk-id-free expected document (shared golden dataset) is keyed by its
+        // normalized source name, so a citation-labelled expectation ("Bubble Sort") matches a path-labelled
+        // retrieval ("…/Bubble Sort.md") regardless of which chunking strategy produced the retrieved chunk.
+        // The heading and snippet evidence gate still disambiguates sibling sections in the same source.
+        return MatchesSourceName(expectedDocument.SourcePath, retrievedDocument.SourcePath);
     }
 
-    private static bool MatchesSourcePath(string expectedSourcePath, string retrievedSourcePath)
+    private static bool MatchesSourceName(string expectedSourcePath, string retrievedSourcePath)
     {
-        return string.Equals(NormalizePath(expectedSourcePath), NormalizePath(retrievedSourcePath), StringComparison.OrdinalIgnoreCase);
+        return string.Equals(ExtractSourceName(expectedSourcePath), ExtractSourceName(retrievedSourcePath), StringComparison.Ordinal);
+    }
+
+    private static string ExtractSourceName(string value)
+    {
+        var path = NormalizePath(value);
+
+        return TryParseWikiLink(path, out var wikiSource, out _)
+            ? NormalizeSourceName(wikiSource)
+            : NormalizeSourceName(path);
     }
 
     private static bool MatchesNormalizedContains(string? expectedValue, string? actualValue)

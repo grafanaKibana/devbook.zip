@@ -43,6 +43,30 @@ public sealed class SearchMetricCalculatorTests
     }
 
     /// <summary>
+    /// Tests that a chunk-id-free expectation from a shared dataset matches a retrieval that uses a different
+    /// source representation (citation label vs. vault path) and chunk boundaries, so the same golden case can be
+    /// scored against any chunking strategy.
+    /// </summary>
+    [Fact]
+    public void ScoreQuery_ChunkerNeutralIdentity_MatchesAcrossSourceRepresentations()
+    {
+        // Arrange: expected evidence is keyed only by citation label + snippet (no chunk id); the retrieval uses
+        // the full vault path and a differently-cut chunk that still contains the gold snippet.
+        var prediction = Prediction(
+            "chunker-neutral",
+            [Document("Evaluation", RetrievalHeading, RetrievalSnippet)],
+            [Document(EvaluationPath, RetrievalHeading, "Evidence coverage is primary because the generator cannot use evidence it never sees.")]);
+
+        // Act
+        var result = SearchMetricCalculator.ScoreQuery(prediction);
+
+        // Assert
+        result.RBasedMetrics.RecallAtR.Should().Be(1);
+        result.SectionMetrics.RecallAtR.Should().Be(1);
+        result.Diagnostics.MissingExpectedSourcePaths.Should().BeEmpty();
+    }
+
+    /// <summary>
     /// Tests that scoring returns partial retrieval metrics when only one of multiple expected sources is retrieved.
     /// </summary>
     [Fact]
@@ -294,8 +318,7 @@ public sealed class SearchMetricCalculatorTests
         var recallAtRMetric = result.Metrics["RecallAtR"];
         recallAtRMetric.Reason.Should().Contain("Read 1.000 as all required evidence found");
         recallAtRMetric.Interpretation!.Reason.Should().Be("Score 0.000 (Unacceptable): matched 0/1 expected evidence items within top-1.");
-        var precisionAtRMetric = result.Metrics["PrecisionAtR"];
-        precisionAtRMetric.Reason.Should().Contain("same evidence budget used by Recall@R");
+        result.Metrics.Should().NotContainKeys("PrecisionAtR", "SectionPrecisionAtR");
         var sectionRecallAtRMetric = result.Metrics["SectionRecallAtR"];
         sectionRecallAtRMetric.Reason.Should().Contain("collapsing expected chunks by source path and heading");
         sectionRecallAtRMetric.Reason.Should().Contain("shows whether retrieval reached the right section");
@@ -435,7 +458,7 @@ public sealed class SearchMetricCalculatorTests
             new ChatResponse(new ChatMessage(ChatRole.Assistant, "[[Composite]]\n[[Evaluation]]")),
             additionalContext: [new SearchEvaluationContext(prediction, topK: 10)]);
 
-        result.Metrics["PrecisionAtR"].Interpretation!.Reason.Should().Contain("Score 0.000 (Unacceptable)");
+        result.Metrics["RecallAtR"].Interpretation!.Reason.Should().Contain("Score 0.000 (Unacceptable)");
         result.Metrics["MRRAt10"].Interpretation!.Reason.Should().Contain("Score 0.500 (Average)");
     }
 
@@ -484,29 +507,24 @@ public sealed class SearchMetricCalculatorTests
         metrics["HitRateAt1"].Rating.Should().Be(EvaluationRating.Poor);
         metrics["MRRAt10"].Rating.Should().Be(EvaluationRating.Average);
         metrics["RecallAtR"].Rating.Should().Be(EvaluationRating.Poor);
-        metrics["PrecisionAtR"].Rating.Should().Be(EvaluationRating.Average);
         metrics["SectionRecallAtR"].Rating.Should().Be(EvaluationRating.Poor);
-        metrics["SectionPrecisionAtR"].Rating.Should().Be(EvaluationRating.Average);
         metrics["EmptyResultRate"].Rating.Should().Be(EvaluationRating.Poor);
         summaryMetrics.Select(metric => metric.Name).Should().Equal([
             "RecallAtR",
-            "PrecisionAtR",
             "SectionRecallAtR",
-            "SectionPrecisionAtR",
             "HitRateAt1",
-            "MRRAt10",
-            "MAPAt10",
-            "NDCGAt10",
             "SectionHitRateAt1",
+            "MRRAt10",
             "SectionMRRAt10",
+            "MAPAt10",
             "SectionMAPAt10",
+            "NDCGAt10",
             "SectionNDCGAt10",
             "EmptyResultRate",
             "ScoreAverage",
             "SampleCount"
         ]);
         metrics["RecallAtR"].Description.Should().Contain("Read 1.000 as all required evidence found");
-        metrics["PrecisionAtR"].Description.Should().Contain("same evidence budget used by Recall@R");
         metrics["SectionRecallAtR"].Description.Should().Contain("shows whether retrieval reached the right section");
         metrics["ScoreAverage"].Description.Should().NotContain("CreditedScoreAverage");
         metrics["ScoreAverage"].Description.Should().Contain("Compare this metric only within the same reranker and scorer scale.");
@@ -704,16 +722,14 @@ public sealed class SearchMetricCalculatorTests
     private static string[] PerQueryDashboardMetrics() =>
     [
         "RecallAtR",
-        "PrecisionAtR",
         "SectionRecallAtR",
-        "SectionPrecisionAtR",
         "HitRateAt1",
-        "MRRAt10",
-        "MAPAt10",
-        "NDCGAt10",
         "SectionHitRateAt1",
+        "MRRAt10",
         "SectionMRRAt10",
+        "MAPAt10",
         "SectionMAPAt10",
+        "NDCGAt10",
         "SectionNDCGAt10",
         "ScoreAverage"
     ];

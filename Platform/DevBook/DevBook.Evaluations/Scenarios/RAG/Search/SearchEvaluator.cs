@@ -15,9 +15,7 @@ public sealed class SearchEvaluator : IEvaluator
     private const string EmptyResultRateMetricName = "EmptyResultRate";
     private const string ScoreAverageMetricName = "ScoreAverage";
     private const string RecallAtRMetricName = "RecallAtR";
-    private const string PrecisionAtRMetricName = "PrecisionAtR";
     private const string SectionRecallAtRMetricName = "SectionRecallAtR";
-    private const string SectionPrecisionAtRMetricName = "SectionPrecisionAtR";
     private const string SectionHitRateAt1MetricName = "SectionHitRateAt1";
     private const string ScoreScaleGuidance = "Compare this metric only within the same reranker and scorer scale.";
 
@@ -94,16 +92,14 @@ public sealed class SearchEvaluator : IEvaluator
         return
         [
             new SummaryMetric(RecallAtRMetricName, report.RBasedMetrics.RecallAtR, $"{CreateMetricReason(RecallAtRMetricName)} Aggregated as the mean across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking.", SummaryMetricKind.Percentage, GetRating(MetricFamily.Recall, report.RBasedMetrics.RecallAtR)),
-            new SummaryMetric(PrecisionAtRMetricName, report.RBasedMetrics.RPrecision, $"{CreateMetricReason(PrecisionAtRMetricName)} Aggregated as the mean across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking.", SummaryMetricKind.Percentage, GetRating(MetricFamily.Precision, report.RBasedMetrics.RPrecision)),
             new SummaryMetric(SectionRecallAtRMetricName, report.SectionMetrics.RecallAtR, $"{CreateMetricReason(SectionRecallAtRMetricName)} Aggregated as the mean across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking.", SummaryMetricKind.Percentage, GetRating(MetricFamily.Recall, report.SectionMetrics.RecallAtR)),
-            new SummaryMetric(SectionPrecisionAtRMetricName, report.SectionMetrics.RPrecision, $"{CreateMetricReason(SectionPrecisionAtRMetricName)} Aggregated as the mean across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking.", SummaryMetricKind.Percentage, GetRating(MetricFamily.Precision, report.SectionMetrics.RPrecision)),
             new SummaryMetric(HitRateMetricName(1), rankingAt1.HitRate, $"Average HitRate@1 across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking. {FormatConfidenceInterval(rankingAt1.ConfidenceIntervals.HitRate)}", SummaryMetricKind.Percentage, GetRating(MetricFamily.HitRate, rankingAt1.HitRate)),
-            new SummaryMetric(MrrMetricName(primaryCutoff), rankingAtPrimaryCutoff.MeanReciprocalRank, $"Mean reciprocal rank capped at @{primaryCutoff} across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking. {FormatConfidenceInterval(rankingAtPrimaryCutoff.ConfidenceIntervals.MeanReciprocalRank)}", SummaryMetricKind.PlainNumber, GetRating(MetricFamily.Mrr, rankingAtPrimaryCutoff.MeanReciprocalRank)),
-            new SummaryMetric(MapMetricName(primaryCutoff), rankingAtPrimaryCutoff.MeanAveragePrecision, $"Mean Average Precision@{primaryCutoff} across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking. {FormatConfidenceInterval(rankingAtPrimaryCutoff.ConfidenceIntervals.MeanAveragePrecision)}", SummaryMetricKind.PlainNumber, GetRating(MetricFamily.Map, rankingAtPrimaryCutoff.MeanAveragePrecision)),
-            new SummaryMetric(NdcgMetricName(primaryCutoff), rankingAtPrimaryCutoff.NormalizedDiscountedCumulativeGain, $"Mean nDCG@{primaryCutoff} across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking. {FormatConfidenceInterval(rankingAtPrimaryCutoff.ConfidenceIntervals.NormalizedDiscountedCumulativeGain)}", SummaryMetricKind.PlainNumber, GetRating(MetricFamily.Ndcg, rankingAtPrimaryCutoff.NormalizedDiscountedCumulativeGain)),
             new SummaryMetric(SectionHitRateAt1MetricName, report.SectionMetrics.HitRateAt1, $"{CreateMetricReason(SectionHitRateAt1MetricName)} Aggregated as the mean across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking.", SummaryMetricKind.Percentage, GetRating(MetricFamily.HitRate, report.SectionMetrics.HitRateAt1)),
+            new SummaryMetric(MrrMetricName(primaryCutoff), rankingAtPrimaryCutoff.MeanReciprocalRank, $"Mean reciprocal rank capped at @{primaryCutoff} across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking. {FormatConfidenceInterval(rankingAtPrimaryCutoff.ConfidenceIntervals.MeanReciprocalRank)}", SummaryMetricKind.PlainNumber, GetRating(MetricFamily.Mrr, rankingAtPrimaryCutoff.MeanReciprocalRank)),
             new SummaryMetric(SectionMrrMetricName(primaryCutoff), report.SectionMetrics.MeanReciprocalRankAtK, $"{CreateMetricReason(SectionMrrMetricName(primaryCutoff))} Aggregated as the mean across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking.", SummaryMetricKind.PlainNumber, GetRating(MetricFamily.Mrr, report.SectionMetrics.MeanReciprocalRankAtK)),
+            new SummaryMetric(MapMetricName(primaryCutoff), rankingAtPrimaryCutoff.MeanAveragePrecision, $"Mean Average Precision@{primaryCutoff} across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking. {FormatConfidenceInterval(rankingAtPrimaryCutoff.ConfidenceIntervals.MeanAveragePrecision)}", SummaryMetricKind.PlainNumber, GetRating(MetricFamily.Map, rankingAtPrimaryCutoff.MeanAveragePrecision)),
             new SummaryMetric(SectionMapMetricName(primaryCutoff), report.SectionMetrics.MeanAveragePrecisionAtK, $"{CreateMetricReason(SectionMapMetricName(primaryCutoff))} Aggregated as the mean across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking.", SummaryMetricKind.PlainNumber, GetRating(MetricFamily.Map, report.SectionMetrics.MeanAveragePrecisionAtK)),
+            new SummaryMetric(NdcgMetricName(primaryCutoff), rankingAtPrimaryCutoff.NormalizedDiscountedCumulativeGain, $"Mean nDCG@{primaryCutoff} across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking. {FormatConfidenceInterval(rankingAtPrimaryCutoff.ConfidenceIntervals.NormalizedDiscountedCumulativeGain)}", SummaryMetricKind.PlainNumber, GetRating(MetricFamily.Ndcg, rankingAtPrimaryCutoff.NormalizedDiscountedCumulativeGain)),
             new SummaryMetric(SectionNdcgMetricName(primaryCutoff), report.SectionMetrics.NormalizedDiscountedCumulativeGainAtK, $"{CreateMetricReason(SectionNdcgMetricName(primaryCutoff))} Aggregated as the mean across RAG search cases over {chunkingStrategy} chunks with {rerankingStrategy} reranking.", SummaryMetricKind.PlainNumber, GetRating(MetricFamily.Ndcg, report.SectionMetrics.NormalizedDiscountedCumulativeGainAtK)),
         ];
     }
@@ -116,16 +112,14 @@ public sealed class SearchEvaluator : IEvaluator
         return
         [
             CreateRMetric(RecallAtRMetricName, MetricFamily.Recall, metrics.RBasedMetrics.RecallAtR, metrics.RBasedMetrics.ExpectedCount, metrics.RBasedMetrics.MatchedAtR, false, true),
-            CreateRMetric(PrecisionAtRMetricName, MetricFamily.Precision, metrics.RBasedMetrics.RPrecision, metrics.RBasedMetrics.ExpectedCount, metrics.RBasedMetrics.MatchedAtR, false),
             CreateRMetric(SectionRecallAtRMetricName, MetricFamily.Recall, metrics.SectionMetrics.RecallAtR, metrics.SectionMetrics.ExpectedSectionCount, metrics.SectionMetrics.MatchedSectionsAtR, true),
-            CreateRMetric(SectionPrecisionAtRMetricName, MetricFamily.Precision, metrics.SectionMetrics.RPrecision, metrics.SectionMetrics.ExpectedSectionCount, metrics.SectionMetrics.MatchedSectionsAtR, true),
             CreateMetric(HitRateMetricName(1), MetricFamily.HitRate, 1, rankingAt1.HitRate, metrics),
-            CreateMetric(MrrMetricName(primaryCutoff), MetricFamily.Mrr, primaryCutoff, rankingAtPrimaryCutoff.MeanReciprocalRank, metrics),
-            CreateMetric(MapMetricName(primaryCutoff), MetricFamily.Map, primaryCutoff, rankingAtPrimaryCutoff.MeanAveragePrecision, metrics),
-            CreateMetric(NdcgMetricName(primaryCutoff), MetricFamily.Ndcg, primaryCutoff, rankingAtPrimaryCutoff.NormalizedDiscountedCumulativeGain, metrics),
             CreateSectionMetric(SectionHitRateAt1MetricName, MetricFamily.HitRate, 1, metrics.SectionMetrics.HitRateAt1, metrics.SectionMetrics),
+            CreateMetric(MrrMetricName(primaryCutoff), MetricFamily.Mrr, primaryCutoff, rankingAtPrimaryCutoff.MeanReciprocalRank, metrics),
             CreateSectionMetric(SectionMrrMetricName(primaryCutoff), MetricFamily.Mrr, primaryCutoff, metrics.SectionMetrics.MeanReciprocalRankAtK, metrics.SectionMetrics),
+            CreateMetric(MapMetricName(primaryCutoff), MetricFamily.Map, primaryCutoff, rankingAtPrimaryCutoff.MeanAveragePrecision, metrics),
             CreateSectionMetric(SectionMapMetricName(primaryCutoff), MetricFamily.Map, primaryCutoff, metrics.SectionMetrics.MeanAveragePrecisionAtK, metrics.SectionMetrics),
+            CreateMetric(NdcgMetricName(primaryCutoff), MetricFamily.Ndcg, primaryCutoff, rankingAtPrimaryCutoff.NormalizedDiscountedCumulativeGain, metrics),
             CreateSectionMetric(SectionNdcgMetricName(primaryCutoff), MetricFamily.Ndcg, primaryCutoff, metrics.SectionMetrics.NormalizedDiscountedCumulativeGainAtK, metrics.SectionMetrics),
         ];
     }
@@ -185,9 +179,7 @@ public sealed class SearchEvaluator : IEvaluator
     private static string CreateMetricReason(string name)
     {
         if (name == RecallAtRMetricName) return "Recall@R is the share of expected evidence chunks found within the first R retrieved chunks, where R is the number of expected evidence chunks for the case. Read 1.000 as all required evidence found within the evidence budget, 0.500 as half found, and 0.000 as none found. This is the primary retrieval gate because the answer step cannot use evidence that retrieval missed.";
-        if (name == PrecisionAtRMetricName) return "Precision@R measures context purity inside the same evidence budget used by Recall@R: relevant retrieved chunks divided by R, where R is the expected evidence count. Read 1.000 as every chunk in the evidence budget was credited, and lower values as more irrelevant or duplicate context mixed into that budget.";
         if (name == SectionRecallAtRMetricName) return "SectionRecall@R repeats Recall@R after collapsing expected chunks by source path and heading. Use it when several expected chunks come from the same note section: it shows whether retrieval reached the right section even if chunk-level matching over-penalizes sibling chunks. Read 1.000 as every expected section reached, and 0.000 as no expected section reached.";
-        if (name == SectionPrecisionAtRMetricName) return "SectionPrecision@R measures context purity inside the section-level evidence budget after collapsing expected chunks by source path and heading. Read 1.000 as every section in the evidence budget was expected, and lower values as more off-section context.";
         if (name == SectionHitRateAt1MetricName) return "SectionHitRate@1 checks whether the first result lands in any expected source section after section deduplication. Read 1.000 as the top result is from the right section and 0.000 as the top result starts in the wrong section.";
         if (name.StartsWith("SectionMRRAt", StringComparison.Ordinal)) return "SectionMRR@10 is reciprocal rank for the first matching expected section after section deduplication. Read 1.000 as the first result is from the right section, 0.500 as the first matching section is rank 2, and 0.000 as no expected section appears in the top-10.";
         if (name.StartsWith("SectionMAPAt", StringComparison.Ordinal)) return "SectionMAP@10 averages precision at each rank where a new expected section appears. It rewards finding multiple expected sections early; 1.000 means all expected sections appear before any off-section result within top-10, and 0.000 means none appear.";
@@ -289,14 +281,6 @@ public sealed class SearchEvaluator : IEvaluator
                 > 0 => EvaluationRating.Poor,
                 _ => EvaluationRating.Unacceptable,
             },
-            MetricFamily.Precision => value switch
-            {
-                >= 0.8 => EvaluationRating.Exceptional,
-                >= 0.5 => EvaluationRating.Good,
-                >= 0.2 => EvaluationRating.Average,
-                > 0 => EvaluationRating.Poor,
-                _ => EvaluationRating.Unacceptable,
-            },
             MetricFamily.HitRate or MetricFamily.Mrr or MetricFamily.Map or MetricFamily.Ndcg => value switch
             {
                 >= 1 => EvaluationRating.Exceptional,
@@ -321,16 +305,14 @@ public sealed class SearchEvaluator : IEvaluator
     private static IReadOnlyList<string> CreateRankingMetricNames(int primaryCutoff) =>
     [
         RecallAtRMetricName,
-        PrecisionAtRMetricName,
         SectionRecallAtRMetricName,
-        SectionPrecisionAtRMetricName,
         HitRateMetricName(1),
-        MrrMetricName(primaryCutoff),
-        MapMetricName(primaryCutoff),
-        NdcgMetricName(primaryCutoff),
         SectionHitRateAt1MetricName,
+        MrrMetricName(primaryCutoff),
         SectionMrrMetricName(primaryCutoff),
+        MapMetricName(primaryCutoff),
         SectionMapMetricName(primaryCutoff),
+        NdcgMetricName(primaryCutoff),
         SectionNdcgMetricName(primaryCutoff),
         ScoreAverageMetricName,
     ];
@@ -356,7 +338,6 @@ public sealed class SearchEvaluator : IEvaluator
         if (name.StartsWith("MAPAt", StringComparison.Ordinal)) return MetricFamily.Map;
         if (name.StartsWith("NDCGAt", StringComparison.Ordinal)) return MetricFamily.Ndcg;
         if (name == RecallAtRMetricName || name == SectionRecallAtRMetricName) return MetricFamily.Recall;
-        if (name == PrecisionAtRMetricName || name == SectionPrecisionAtRMetricName) return MetricFamily.Precision;
         if (name == SectionHitRateAt1MetricName) return MetricFamily.HitRate;
         if (name.StartsWith("SectionMRRAt", StringComparison.Ordinal)) return MetricFamily.Mrr;
         if (name.StartsWith("SectionMAPAt", StringComparison.Ordinal)) return MetricFamily.Map;
@@ -390,7 +371,6 @@ public sealed class SearchEvaluator : IEvaluator
     {
         Unknown,
         Recall,
-        Precision,
         HitRate,
         Mrr,
         Map,

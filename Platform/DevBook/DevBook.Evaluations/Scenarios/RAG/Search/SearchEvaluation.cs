@@ -17,11 +17,16 @@ public sealed class SearchEvaluation : MongoEvaluationTestBase<SearchPrediction>
 
     private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
 
-    private static readonly SearchDatasetConfig[] DatasetConfigs =
+    // One chunker-neutral golden dataset is evaluated against every chunking strategy. Ground truth is keyed by
+    // source + heading + snippet (not chunk id), so a single shared question set scores all chunkers on the same
+    // footing. See SearchMetricCalculator.MatchesExpectedIdentity for the chunker-neutral matching.
+    private const string SharedDatasetFileName = "chunks-shared.json";
+
+    private static readonly ChunkingStrategyKind[] ChunkingStrategies =
     [
-        new("chunks-fixedsize.json", ChunkingStrategyKind.FixedSize),
-        new("chunks-markdownsection.json", ChunkingStrategyKind.MarkdownSection),
-        new("chunks-semantic.json", ChunkingStrategyKind.Semantic),
+        ChunkingStrategyKind.FixedSize,
+        ChunkingStrategyKind.MarkdownSection,
+        ChunkingStrategyKind.Semantic,
     ];
 
     private static readonly RerankingStrategyKind[] RerankingStrategies =
@@ -46,33 +51,27 @@ public sealed class SearchEvaluation : MongoEvaluationTestBase<SearchPrediction>
 
     private static IEnumerable<TestCaseData> TestCases()
     {
-        foreach (var datasetConfig in DatasetConfigs)
+        var dataset = LoadDataset();
+        foreach (var testCase in dataset.Cases)
         {
-            var dataset = LoadDataset(datasetConfig);
-            foreach (var testCase in dataset.Cases)
+            foreach (var chunkingStrategy in ChunkingStrategies)
             {
                 foreach (var rerankingStrategy in RerankingStrategies)
                 {
-                    yield return new TestCaseData(testCase, datasetConfig.ChunkingStrategy, rerankingStrategy)
-                        .SetArgDisplayNames(testCase.Id, datasetConfig.ChunkingStrategy.ToString(), rerankingStrategy.ToString());
+                    yield return new TestCaseData(testCase, chunkingStrategy, rerankingStrategy)
+                        .SetArgDisplayNames(testCase.Id, chunkingStrategy.ToString(), rerankingStrategy.ToString());
                 }
             }
         }
     }
 
-    private static SearchDataset LoadDataset(SearchDatasetConfig datasetConfig)
+    private static SearchDataset LoadDataset()
     {
-        var datasetPath = Path.Combine(AppContext.BaseDirectory, "Datasets", datasetConfig.FileName);
+        var datasetPath = Path.Combine(AppContext.BaseDirectory, "Datasets", SharedDatasetFileName);
         var dataset = JsonSerializer.Deserialize<SearchDataset>(File.ReadAllText(datasetPath), JsonOptions) ?? new SearchDataset();
         if (dataset.Cases.Count == 0)
         {
-            throw new InvalidOperationException($"Dataset {datasetConfig.FileName} must contain at least one case.");
-        }
-
-        var expectedCollection = ChunkCollectionNames.ForStrategy(datasetConfig.ChunkingStrategy);
-        if (!string.Equals(dataset.Collection, expectedCollection, StringComparison.Ordinal))
-        {
-            throw new InvalidOperationException($"Dataset {datasetConfig.FileName} declares collection '{dataset.Collection}', expected '{expectedCollection}'.");
+            throw new InvalidOperationException($"Dataset {SharedDatasetFileName} must contain at least one case.");
         }
 
         return dataset;
@@ -101,12 +100,12 @@ public sealed class SearchEvaluation : MongoEvaluationTestBase<SearchPrediction>
         var response = await searchService.SearchAsync(new RagSearchRequest(testCase.Query, TopK));
         var prediction = new SearchPrediction(
             testCase.Query,
+            // Expected evidence is matched chunker-neutrally by source name + heading + snippet. Chunk and document
+            // ids are intentionally omitted so the shared golden case is not bound to one chunking strategy's ids.
             testCase.Expected.AllChunks.Select(chunk => new SearchDocument(
                 chunk.CitationLabel,
                 chunk.Heading,
-                chunk.Text,
-                ChunkId: chunk.ChunkId,
-                DocumentId: chunk.DocumentId)).ToArray(),
+                chunk.Text)).ToArray(),
             await MapRetrievedDocumentsAsync(response.Results),
             chunkingStrategy,
             rerankingStrategy);
@@ -158,8 +157,6 @@ public sealed class SearchEvaluation : MongoEvaluationTestBase<SearchPrediction>
                 result.DocumentId))
             .ToArray();
     }
-
-    private sealed record SearchDatasetConfig(string FileName, ChunkingStrategyKind ChunkingStrategy);
 
     public sealed record SearchDataset
     {
