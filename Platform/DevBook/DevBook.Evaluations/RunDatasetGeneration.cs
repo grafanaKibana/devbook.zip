@@ -1,6 +1,8 @@
 #:project ../DevBook.Data/DevBook.Data.csproj
 #:package Microsoft.Extensions.Configuration.EnvironmentVariables@10.0.8
 #:package Microsoft.Extensions.Configuration.Json@10.0.8
+#:package Microsoft.Extensions.Configuration.UserSecrets@10.0.8
+#:property UserSecretsId=25549d38-b8d5-4e6e-b351-636ad02ea3b4
 #:package MongoDB.Driver@3.9.0
 #:package OpenAI@2.11.0
 
@@ -596,6 +598,7 @@ sealed record AppConfig(string MongoConnectionString, OpenAIOptions OpenAIOption
             .SetBasePath(repoRoot)
             .AddJsonFile("Platform/DevBook/DevBook.API/appsettings.Development.json", optional: true)
             .AddJsonFile("Platform/DevBook/DevBook.Evaluations/appsettings.Evaluations.json", optional: true)
+            .AddUserSecrets(System.Reflection.Assembly.GetExecutingAssembly(), optional: true)
             .AddEnvironmentVariables()
             .Build();
         var connectionString = configuration.GetConnectionString(MongoConnectionName);

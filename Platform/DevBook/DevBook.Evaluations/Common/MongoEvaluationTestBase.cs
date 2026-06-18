@@ -87,6 +87,7 @@ public abstract class MongoEvaluationTestBase<TPrediction> : EvaluationTestBase<
             .SetBasePath(AppContext.BaseDirectory)
             .AddJsonFile("appsettings.json", optional: true)
             .AddJsonFile("appsettings.Evaluations.json", optional: true)
+            .AddUserSecrets(System.Reflection.Assembly.GetExecutingAssembly(), optional: true)
             .AddEnvironmentVariables()
             .Build();
 }
