@@ -29,3 +29,4 @@ Vault/Assets/Docs/
 **/bin/
 **/EvaluationReports/
 *.DotSettings.user
+/Platform/AZURE-TRANSITION-PLAN.md

@@ -44,6 +44,7 @@ public sealed class SummaryEvaluator(IEnumerable<SummaryMetric> metrics) : IEval
 
         return new NumericMetric(metric.Name, roundedValue, metric.Description)
         {
+            Diagnostics = metric.Diagnostics?.ToArray() ?? [],
             Interpretation = new EvaluationMetricInterpretation(
                 metric.Rating,
                 failed: false,
@@ -63,12 +64,14 @@ public sealed class SummaryEvaluator(IEnumerable<SummaryMetric> metrics) : IEval
 /// <param name="Description">Report-facing metric description.</param>
 /// <param name="Kind">Metric formatting kind.</param>
 /// <param name="Rating">Interpretation rating for the metric.</param>
+/// <param name="Diagnostics">Optional diagnostics attached to the emitted MEAI metric.</param>
 public sealed record SummaryMetric(
     string Name,
     double Value,
     string Description,
     SummaryMetricKind Kind = SummaryMetricKind.PlainNumber,
-    EvaluationRating Rating = EvaluationRating.Unknown);
+    EvaluationRating Rating = EvaluationRating.Unknown,
+    IReadOnlyList<EvaluationDiagnostic>? Diagnostics = null);
 
 /// <summary>
 /// Selects how a summary metric value should be rounded and displayed in reports.

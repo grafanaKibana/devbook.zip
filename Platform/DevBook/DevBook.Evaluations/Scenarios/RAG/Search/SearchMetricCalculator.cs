@@ -33,7 +33,7 @@ public static class SearchMetricCalculator
 
         if (queryMetrics.Length == 0)
         {
-            return new SearchReport(0, CreateEmptyRankingSummaries(), 0, 0, 0, 0, 0);
+            return new SearchReport(0, CreateEmptyRankingSummaries(), SearchRBasedMetrics.Empty, SearchSectionMetrics.Empty, 0, 0, 0, 0, 0);
         }
 
         var rankingSummaries = RankingCutoffs.ToDictionary(
@@ -43,6 +43,8 @@ public static class SearchMetricCalculator
         return new SearchReport(
             queryMetrics.Length,
             rankingSummaries,
+            CreateRBasedSummary(queryMetrics),
+            CreateSectionSummary(queryMetrics),
             queryMetrics.Count(metric => metric.IsEmptyResult) / (double)queryMetrics.Length,
             AverageAvailable(queryMetrics, metric => metric.ScoreAverage),
             AverageAvailable(queryMetrics, metric => metric.CreditedScoreAverage),
@@ -133,11 +135,15 @@ public static class SearchMetricCalculator
         var rankingMetrics = RankingCutoffs.ToDictionary(
             cutoff => cutoff,
             cutoff => CreateRankingMetrics(expectedCount, retrievedDocuments.Length, matchDiagnostics, cutoff));
+        var rBasedMetrics = CreateRBasedMetrics(expectedCount, matchDiagnostics);
+        var sectionMetrics = CreateSectionMetrics(expectedDocuments, retrievedDocuments);
         var scoreMetrics = CreateScoreMetrics(matchDiagnostics);
 
         return new SearchQueryMetrics(
             rankingMetrics,
             retrievedDocuments.Length == 0,
+            rBasedMetrics,
+            sectionMetrics,
             scoreMetrics.ScoreAverage,
             scoreMetrics.CreditedScoreAverage,
             scoreMetrics.UncreditedScoreAverage,
@@ -186,6 +192,24 @@ public static class SearchMetricCalculator
                 BootstrapMeanConfidenceInterval(ndcgValues)));
     }
 
+    private static SearchRBasedMetrics CreateRBasedSummary(IReadOnlyList<SearchQueryMetrics> queryMetrics)
+        => new(
+            queryMetrics.Select(metric => metric.RBasedMetrics.RecallAtR).Average(),
+            queryMetrics.Select(metric => metric.RBasedMetrics.RPrecision).Average(),
+            0,
+            0);
+
+    private static SearchSectionMetrics CreateSectionSummary(IReadOnlyList<SearchQueryMetrics> queryMetrics)
+        => new(
+            queryMetrics.Select(metric => metric.SectionMetrics.RecallAtR).Average(),
+            queryMetrics.Select(metric => metric.SectionMetrics.RPrecision).Average(),
+            queryMetrics.Select(metric => metric.SectionMetrics.HitRateAt1).Average(),
+            queryMetrics.Select(metric => metric.SectionMetrics.MeanReciprocalRankAtK).Average(),
+            queryMetrics.Select(metric => metric.SectionMetrics.MeanAveragePrecisionAtK).Average(),
+            queryMetrics.Select(metric => metric.SectionMetrics.NormalizedDiscountedCumulativeGainAtK).Average(),
+            0,
+            0);
+
     private static SearchConfidenceInterval BootstrapMeanConfidenceInterval(IReadOnlyList<double> values)
     {
         if (values.Count == 0)
@@ -233,7 +257,80 @@ public static class SearchMetricCalculator
             CalculateNormalizedDiscountedCumulativeGain(expectedCount, matchesAtCutoff, cutoff));
     }
 
+    private static SearchRBasedMetrics CreateRBasedMetrics(int expectedCount, IReadOnlyList<SearchMatchDiagnostic> matches)
+    {
+        if (expectedCount == 0)
+        {
+            return SearchRBasedMetrics.Empty;
+        }
+
+        var relevantAtR = matches.Count(match => match.Rank <= expectedCount && match.IsRelevant);
+        var value = relevantAtR / (double)expectedCount;
+
+        return new SearchRBasedMetrics(value, value, expectedCount, relevantAtR);
+    }
+
+    private static SearchSectionMetrics CreateSectionMetrics(
+        IReadOnlyList<SearchDocument> expectedDocuments,
+        IReadOnlyList<SearchDocument> retrievedDocuments)
+    {
+        var expectedKeys = expectedDocuments.Select(CreateSectionKey).Distinct().ToArray();
+        if (expectedKeys.Length == 0)
+        {
+            return SearchSectionMetrics.Empty;
+        }
+
+        var matchedKeys = new HashSet<SearchSectionKey>();
+        var sectionCutoff = Math.Max(expectedKeys.Length, RankingCutoffs.Max());
+        var sectionMatches = retrievedDocuments
+            .Take(sectionCutoff)
+            .Select((document, index) =>
+            {
+                var key = CreateSectionKey(document);
+                var isRelevant = expectedKeys.Contains(key) && matchedKeys.Add(key);
+
+                return new SectionMatch(index + 1, isRelevant);
+            })
+            .ToArray();
+        var matchedAtR = sectionMatches.Count(match => match.Rank <= expectedKeys.Length && match.IsRelevant);
+        var recallAtR = matchedAtR / (double)expectedKeys.Length;
+        var fixedCutoffMatches = sectionMatches.Where(match => match.Rank <= RankingCutoffs.Max()).ToArray();
+
+        return new SearchSectionMetrics(
+            recallAtR,
+            recallAtR,
+            sectionMatches.Any(match => match.Rank == 1 && match.IsRelevant) ? 1 : 0,
+            fixedCutoffMatches.FirstOrDefault(match => match.IsRelevant) is { } firstRelevant ? 1d / firstRelevant.Rank : 0,
+            CalculateAveragePrecision(expectedKeys.Length, fixedCutoffMatches),
+            CalculateNormalizedDiscountedCumulativeGain(expectedKeys.Length, fixedCutoffMatches, RankingCutoffs.Max()),
+            expectedKeys.Length,
+            matchedAtR);
+    }
+
     private static double CalculateAveragePrecision(int expectedCount, IReadOnlyList<SearchMatchDiagnostic> matchesAtCutoff)
+    {
+        if (expectedCount == 0)
+        {
+            return 0;
+        }
+
+        var relevantSeen = 0;
+        var precisionSum = 0d;
+        foreach (var match in matchesAtCutoff)
+        {
+            if (!match.IsRelevant)
+            {
+                continue;
+            }
+
+            relevantSeen++;
+            precisionSum += relevantSeen / (double)match.Rank;
+        }
+
+        return precisionSum / expectedCount;
+    }
+
+    private static double CalculateAveragePrecision(int expectedCount, IReadOnlyList<SectionMatch> matchesAtCutoff)
     {
         if (expectedCount == 0)
         {
@@ -259,6 +356,27 @@ public static class SearchMetricCalculator
     private static double CalculateNormalizedDiscountedCumulativeGain(
         int expectedCount,
         IReadOnlyList<SearchMatchDiagnostic> matchesAtCutoff,
+        int cutoff)
+    {
+        if (expectedCount == 0)
+        {
+            return 0;
+        }
+
+        var idealRelevantCount = Math.Min(expectedCount, cutoff);
+        var idealDcg = Enumerable.Range(1, idealRelevantCount).Sum(rank => Discount(rank));
+        if (idealDcg == 0)
+        {
+            return 0;
+        }
+
+        var dcg = matchesAtCutoff.Where(match => match.IsRelevant).Sum(match => Discount(match.Rank));
+        return dcg / idealDcg;
+    }
+
+    private static double CalculateNormalizedDiscountedCumulativeGain(
+        int expectedCount,
+        IReadOnlyList<SectionMatch> matchesAtCutoff,
         int cutoff)
     {
         if (expectedCount == 0)
@@ -451,6 +569,61 @@ public static class SearchMetricCalculator
     private static string NormalizeText(string value)
         => string.Join(' ', value.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries)).Trim();
 
+    private static SearchSectionKey CreateSectionKey(SearchDocument document)
+    {
+        var sourcePath = NormalizePath(document.SourcePath);
+        var heading = document.Heading;
+
+        if (TryParseWikiLink(sourcePath, out var wikiSource, out var wikiHeading))
+        {
+            sourcePath = wikiSource;
+            heading = wikiHeading ?? heading;
+        }
+
+        return new SearchSectionKey(NormalizeSourceName(sourcePath), NormalizeOptionalText(heading));
+    }
+
+    private static bool TryParseWikiLink(string value, out string source, out string? heading)
+    {
+        source = value;
+        heading = null;
+
+        if (!value.StartsWith("[[", StringComparison.Ordinal) || !value.EndsWith("]]", StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        var inner = value[2..^2];
+        var aliasIndex = inner.IndexOf('|', StringComparison.Ordinal);
+        if (aliasIndex >= 0)
+        {
+            inner = inner[..aliasIndex];
+        }
+
+        var headingIndex = inner.IndexOf('#', StringComparison.Ordinal);
+        if (headingIndex >= 0)
+        {
+            source = inner[..headingIndex];
+            heading = inner[(headingIndex + 1)..];
+            return true;
+        }
+
+        source = inner;
+        return true;
+    }
+
+    private static string NormalizeSourceName(string value)
+    {
+        var normalized = NormalizePath(value);
+        var fileName = normalized.Split('/', StringSplitOptions.RemoveEmptyEntries).LastOrDefault() ?? normalized;
+
+        return NormalizeText(fileName.EndsWith(".md", StringComparison.OrdinalIgnoreCase) ? fileName[..^3] : fileName)
+            .ToUpperInvariant();
+    }
+
+    private static string? NormalizeOptionalText(string? value)
+        => string.IsNullOrWhiteSpace(value) ? null : NormalizeText(value).ToUpperInvariant();
+
     private static string? Preview(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
@@ -477,6 +650,10 @@ public static class SearchMetricCalculator
         /// </summary>
         public bool IsRelevant => this.ExpectedIndex is not null;
     }
+
+    private sealed record SearchSectionKey(string SourceName, string? Heading);
+
+    private sealed record SectionMatch(int Rank, bool IsRelevant);
 }
 
 /// <summary>
@@ -484,6 +661,8 @@ public static class SearchMetricCalculator
 /// </summary>
 /// <param name="QueryCount">Number of queries included in the report.</param>
 /// <param name="RankingMetrics">Ranking summaries keyed by rank cutoff.</param>
+/// <param name="RBasedMetrics">Aggregate metrics calculated at R, where R is the expected evidence count.</param>
+/// <param name="SectionMetrics">Aggregate source or section-level metrics.</param>
 /// <param name="EmptyResultRate">Fraction of queries that returned no chunks.</param>
 /// <param name="ScoreAverage">Average score across all scored retrieved chunks.</param>
 /// <param name="CreditedScoreAverage">Average score for chunks credited against expected evidence.</param>
@@ -492,6 +671,8 @@ public static class SearchMetricCalculator
 public sealed record SearchReport(
     int QueryCount,
     IReadOnlyDictionary<int, SearchRankingSummary> RankingMetrics,
+    SearchRBasedMetrics RBasedMetrics,
+    SearchSectionMetrics SectionMetrics,
     double EmptyResultRate,
     double ScoreAverage,
     double CreditedScoreAverage,
@@ -524,6 +705,8 @@ public sealed record SearchReport(
 /// </summary>
 /// <param name="RankingMetrics">Ranking metrics keyed by rank cutoff.</param>
 /// <param name="IsEmptyResult">Whether the query returned no chunks.</param>
+/// <param name="RBasedMetrics">Metrics calculated at R, where R is the expected evidence count.</param>
+/// <param name="SectionMetrics">Source or section-level metrics.</param>
 /// <param name="ScoreAverage">Average score across scored retrieved chunks.</param>
 /// <param name="CreditedScoreAverage">Average score for chunks credited against expected evidence.</param>
 /// <param name="UncreditedScoreAverage">Average score for chunks not credited by expected evidence.</param>
@@ -532,6 +715,8 @@ public sealed record SearchReport(
 public sealed record SearchQueryMetrics(
     IReadOnlyDictionary<int, SearchRankingMetrics> RankingMetrics,
     bool IsEmptyResult,
+    SearchRBasedMetrics RBasedMetrics,
+    SearchSectionMetrics SectionMetrics,
     double? ScoreAverage,
     double? CreditedScoreAverage,
     double? UncreditedScoreAverage,
@@ -575,6 +760,52 @@ public sealed record SearchRankingMetrics(
     double MeanReciprocalRank,
     double MeanAveragePrecision,
     double NormalizedDiscountedCumulativeGain);
+
+/// <summary>
+/// Metrics calculated at R, where R is the expected evidence count for the query.
+/// </summary>
+/// <param name="RecallAtR">Matched expected evidence within top-R divided by expected evidence.</param>
+/// <param name="RPrecision">Relevant retrieved chunks within top-R divided by R.</param>
+/// <param name="ExpectedCount">Expected evidence count used as R.</param>
+/// <param name="MatchedAtR">Expected evidence matched within top-R.</param>
+public sealed record SearchRBasedMetrics(
+    double RecallAtR,
+    double RPrecision,
+    int ExpectedCount,
+    int MatchedAtR)
+{
+    /// <summary>
+    /// Gets empty R-based metrics.
+    /// </summary>
+    public static SearchRBasedMetrics Empty { get; } = new(0, 0, 0, 0);
+}
+
+/// <summary>
+/// Source or section-level metrics after deduplicating expected evidence by section.
+/// </summary>
+/// <param name="RecallAtR">Matched expected sections within top-R divided by expected sections.</param>
+/// <param name="RPrecision">Relevant retrieved sections within top-R divided by R.</param>
+/// <param name="HitRateAt1">Whether the first result matched an expected section.</param>
+/// <param name="MeanReciprocalRankAtK">Reciprocal rank of the first matching section within the fixed ranking cutoff.</param>
+/// <param name="MeanAveragePrecisionAtK">Average precision over matching sections within the fixed ranking cutoff.</param>
+/// <param name="NormalizedDiscountedCumulativeGainAtK">Discounted section ranking quality within the fixed ranking cutoff.</param>
+/// <param name="ExpectedSectionCount">Expected section count used as R.</param>
+/// <param name="MatchedSectionsAtR">Expected sections matched within top-R.</param>
+public sealed record SearchSectionMetrics(
+    double RecallAtR,
+    double RPrecision,
+    double HitRateAt1,
+    double MeanReciprocalRankAtK,
+    double MeanAveragePrecisionAtK,
+    double NormalizedDiscountedCumulativeGainAtK,
+    int ExpectedSectionCount,
+    int MatchedSectionsAtR)
+{
+    /// <summary>
+    /// Gets empty section-level metrics.
+    /// </summary>
+    public static SearchSectionMetrics Empty { get; } = new(0, 0, 0, 0, 0, 0, 0, 0);
+}
 
 /// <summary>
 /// Mean ranking metrics and bootstrap confidence intervals for one cutoff.
