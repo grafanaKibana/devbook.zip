@@ -22,13 +22,25 @@
     "Run Dataset Generation": {
       "commandName": "Executable",
       "executablePath": "dotnet",
-      "commandLineArgs": "run Platform/DevBook/DevBook.Evaluations/RunDatasetGeneration.cs -- --sample-size 1000 --max-groups 120 --max-llm-groups 30",
+      "commandLineArgs": "run Platform/DevBook/DevBook.Evaluations/RunDatasetGeneration.cs -- --max-groups 120",
       "workingDirectory": "../../.."
     },
     "Run Dataset Generation - Dry Run": {
       "commandName": "Executable",
       "executablePath": "dotnet",
-      "commandLineArgs": "run Platform/DevBook/DevBook.Evaluations/RunDatasetGeneration.cs -- --dry-run --sample-size 100 --max-groups 10",
+      "commandLineArgs": "run Platform/DevBook/DevBook.Evaluations/RunDatasetGeneration.cs -- --dry-run --max-groups 120",
+      "workingDirectory": "../../.."
+    },
+    "Run Dataset Generation - Mini": {
+      "commandName": "Executable",
+      "executablePath": "dotnet",
+      "commandLineArgs": "run Platform/DevBook/DevBook.Evaluations/RunDatasetGeneration.cs -- --label mini --max-groups 10",
+      "workingDirectory": "../../.."
+    },
+    "Run Dataset Generation - Mini - Dry Run": {
+      "commandName": "Executable",
+      "executablePath": "dotnet",
+      "commandLineArgs": "run Platform/DevBook/DevBook.Evaluations/RunDatasetGeneration.cs -- --label mini --dry-run --max-groups 10",
       "workingDirectory": "../../.."
     },
     "Run Evaluation": {

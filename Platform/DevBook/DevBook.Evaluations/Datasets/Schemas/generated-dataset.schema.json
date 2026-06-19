@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://devbook.local/schemas/generated-dataset.schema.json",
   "title": "DevBook Generated Golden RAG Dataset",
-  "description": "Shared, chunker-neutral RAG retrieval dataset with graded section expectations keyed by source path, heading, and snippet. One question set scores every chunking strategy.",
+  "description": "Shared, chunker-neutral RAG retrieval dataset. Each case lists the expected evidence sections (equal weight) keyed by source path, heading, and snippet. One question set scores every chunking strategy.",
   "type": "object",
   "additionalProperties": false,
   "required": ["version", "generatedAt", "collection", "cases"],
@@ -35,22 +35,13 @@
         "id": { "type": "string", "minLength": 1 },
         "query": { "type": "string", "minLength": 1 },
         "difficulty": { "type": "string", "enum": ["easy", "medium", "hard"] },
-        "expected": { "$ref": "#/$defs/gradedExpectations" }
+        "expected": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Expected evidence sections, all weighted equally for matching.",
+          "items": { "$ref": "#/$defs/chunk" }
+        }
       }
-    },
-    "gradedExpectations": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["primaryChunks", "supportingChunks", "acceptableChunks"],
-      "properties": {
-        "primaryChunks": { "$ref": "#/$defs/chunks", "minItems": 1 },
-        "supportingChunks": { "$ref": "#/$defs/chunks" },
-        "acceptableChunks": { "$ref": "#/$defs/chunks" }
-      }
-    },
-    "chunks": {
-      "type": "array",
-      "items": { "$ref": "#/$defs/chunk" }
     },
     "chunk": {
       "type": "object",

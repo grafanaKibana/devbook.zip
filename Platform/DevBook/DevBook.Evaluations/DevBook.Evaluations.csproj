@@ -43,6 +43,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Datasets\Groups\" />
     <Folder Include="EvaluationReports\results\" />
   </ItemGroup>
 

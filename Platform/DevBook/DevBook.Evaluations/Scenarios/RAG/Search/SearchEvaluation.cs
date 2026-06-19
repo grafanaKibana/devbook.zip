@@ -102,7 +102,7 @@ public sealed class SearchEvaluation : MongoEvaluationTestBase<SearchPrediction>
             testCase.Query,
             // Expected evidence is matched chunker-neutrally by source name + heading + snippet. Chunk and document
             // ids are intentionally omitted so the shared golden case is not bound to one chunking strategy's ids.
-            testCase.Expected.AllChunks.Select(chunk => new SearchDocument(
+            testCase.Expected.Select(chunk => new SearchDocument(
                 chunk.CitationLabel,
                 chunk.Heading,
                 chunk.Text)).ToArray(),
@@ -171,18 +171,7 @@ public sealed class SearchEvaluation : MongoEvaluationTestBase<SearchPrediction>
 
         public string Query { get; init; } = string.Empty;
 
-        public ExpectedChunkSet Expected { get; init; } = new();
-    }
-
-    public sealed record ExpectedChunkSet
-    {
-        public IReadOnlyList<ExpectedChunk> PrimaryChunks { get; init; } = [];
-
-        public IReadOnlyList<ExpectedChunk> SupportingChunks { get; init; } = [];
-
-        public IReadOnlyList<ExpectedChunk> AcceptableChunks { get; init; } = [];
-
-        public IEnumerable<ExpectedChunk> AllChunks => this.PrimaryChunks.Concat(this.SupportingChunks).Concat(this.AcceptableChunks);
+        public IReadOnlyList<ExpectedChunk> Expected { get; init; } = [];
     }
 
     public sealed record ExpectedChunk

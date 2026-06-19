@@ -42,6 +42,7 @@ var generatedAt = DateTimeOffset.UtcNow;
 
 Console.WriteLine("Golden dataset generator (Option 1: raw note sections, cross-note via wikilinks)");
 Console.WriteLine($"Repo root: {runOptions.RepoRoot}");
+Console.WriteLine($"Variant: {(string.IsNullOrWhiteSpace(runOptions.Label) ? "full" : runOptions.Label)} (dataset: {Path.GetFileName(runOptions.SharedDatasetPath)})");
 Console.WriteLine($"Max groups: {runOptions.MaxGroups}");
 Console.WriteLine($"Minimum section characters: {runOptions.MinSectionChars}");
 Console.WriteLine($"Sections per note / max per group / max linked notes: {runOptions.SectionsPerNote} / {runOptions.MaxSectionsPerGroup} / {runOptions.MaxLinkedNotes}");
@@ -520,9 +521,7 @@ static IEnumerable<DatasetCase> KeepValidCases(NoteGroup group, GroupLlmResponse
             continue;
         }
 
-        var primary = new List<ExpectedChunk>();
-        var supporting = new List<ExpectedChunk>();
-        var acceptable = new List<ExpectedChunk>();
+        var expected = new List<ExpectedChunk>();
         var usedSections = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var evidence in query.Evidence)
@@ -534,22 +533,10 @@ static IEnumerable<DatasetCase> KeepValidCases(NoteGroup group, GroupLlmResponse
                 continue;
             }
 
-            var expected = CreateExpectedChunk(section, evidence.Quote);
-            switch (NormalizeRole(evidence.Role))
-            {
-                case "primary":
-                    primary.Add(expected);
-                    break;
-                case "supporting":
-                    supporting.Add(expected);
-                    break;
-                default:
-                    acceptable.Add(expected);
-                    break;
-            }
+            expected.Add(CreateExpectedChunk(section, evidence.Quote));
         }
 
-        if (primary.Count == 0)
+        if (expected.Count == 0)
         {
             continue;
         }
@@ -558,7 +545,7 @@ static IEnumerable<DatasetCase> KeepValidCases(NoteGroup group, GroupLlmResponse
             $"shared-{TextRules.Slug(query.Query)}-{index:000}",
             query.Query.Trim(),
             NormalizeDifficulty(query.Difficulty),
-            new GradedExpectations(primary, supporting, acceptable));
+            expected);
         index++;
     }
 }
@@ -573,16 +560,6 @@ static ExpectedChunk CreateExpectedChunk(NoteSection section, string? quote)
     // section keeps its own source so cross-note evidence is preserved. No chunk id is stored: the gold is matched
     // chunker-neutrally by source + heading + snippet and must not be bound to one chunking strategy's ids.
     return new ExpectedChunk(section.DocumentId, section.Heading, section.SourcePath, snippet);
-}
-
-static string NormalizeRole(string? role)
-{
-    return role?.Trim().ToLowerInvariant() switch
-    {
-        "primary" => "primary",
-        "supporting" => "supporting",
-        _ => "acceptable",
-    };
 }
 
 static string NormalizeDifficulty(string? difficulty)
@@ -619,6 +596,7 @@ static void WriteJson<T>(string path, T value)
 
 sealed record RunOptions(
     string RepoRoot,
+    string Label,
     int MaxGroups,
     int MinSectionChars,
     int SectionsPerNote,
@@ -631,15 +609,20 @@ sealed record RunOptions(
     public string DatasetOutputDirectory => Path.Combine(this.RepoRoot, "Platform/DevBook/DevBook.Evaluations/Datasets");
     public string GroupOutputDirectory => Path.Combine(this.DatasetOutputDirectory, "Groups");
 
+    // Optional variant suffix so independent dataset sizes (e.g. mini and the default full) coexist without
+    // overwriting each other. An empty label keeps the default full file names unchanged.
+    private string Suffix => string.IsNullOrWhiteSpace(this.Label) ? string.Empty : $"-{this.Label.Trim()}";
+
     // The shared, chunker-neutral golden dataset consumed by SearchEvaluation.
-    public string SharedDatasetPath => Path.Combine(this.DatasetOutputDirectory, "chunks-shared.json");
-    public string GroupsPath => Path.Combine(this.GroupOutputDirectory, "shared.groups.json");
-    public string SummaryPath => Path.Combine(this.GroupOutputDirectory, "summary.json");
+    public string SharedDatasetPath => Path.Combine(this.DatasetOutputDirectory, $"chunks-shared{this.Suffix}.json");
+    public string GroupsPath => Path.Combine(this.GroupOutputDirectory, $"shared{this.Suffix}.groups.json");
+    public string SummaryPath => Path.Combine(this.GroupOutputDirectory, $"summary{this.Suffix}.json");
 
     public static RunOptions Parse(string[] args, string repoRoot)
     {
         return new RunOptions(
             GetString(args, "--repo-root") ?? repoRoot,
+            GetString(args, "--label") ?? string.Empty,
             GetInt(args, "--max-groups", 120),
             GetInt(args, "--min-section-chars", 200),
             GetInt(args, "--sections-per-note", 3),
@@ -737,11 +720,10 @@ sealed record NoteGroup(string Id, string SeedTitle, string SeedSourcePath, IRea
 
 sealed record GroupLlmResponse(bool Accepted, string? RejectionReason, IReadOnlyList<QueryCase>? Queries);
 sealed record QueryCase(string Query, string? Difficulty, IReadOnlyList<QueryEvidence>? Evidence);
-sealed record QueryEvidence(string? SectionId, string? Role, string? Quote);
+sealed record QueryEvidence(string? SectionId, string? Quote);
 
 sealed record DatasetFile(int Version, DateTimeOffset GeneratedAt, string Collection, IReadOnlyList<DatasetCase> Cases);
-sealed record DatasetCase(string Id, string Query, string Difficulty, GradedExpectations Expected);
-sealed record GradedExpectations(IReadOnlyList<ExpectedChunk> PrimaryChunks, IReadOnlyList<ExpectedChunk> SupportingChunks, IReadOnlyList<ExpectedChunk> AcceptableChunks);
+sealed record DatasetCase(string Id, string Query, string Difficulty, IReadOnlyList<ExpectedChunk> Expected);
 sealed record ExpectedChunk(string DocumentId, string? Heading, string CitationLabel, string Text);
 
 sealed record GroupFile(int Version, DateTimeOffset GeneratedAt, IReadOnlyList<GroupInfo> Groups);
@@ -771,10 +753,10 @@ sealed record SummaryFile(
     public static SummaryFile Create(DateTimeOffset generatedAt, int documentsLoaded, int documentsWithSections, IReadOnlyList<NoteGroup> groups, IReadOnlyList<DatasetCase> cases)
     {
         var evidenceCounts = cases
-            .Select(item => item.Expected.PrimaryChunks.Count + item.Expected.SupportingChunks.Count + item.Expected.AcceptableChunks.Count)
+            .Select(item => item.Expected.Count)
             .ToArray();
         var sourcesCovered = cases
-            .SelectMany(item => item.Expected.PrimaryChunks.Concat(item.Expected.SupportingChunks).Concat(item.Expected.AcceptableChunks))
+            .SelectMany(item => item.Expected)
             .Select(expected => expected.CitationLabel)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .Count();
@@ -800,9 +782,8 @@ static class PromptBuilder
         var builder = new StringBuilder();
         builder.AppendLine("These sections come from a seed note and notes it links to. Decide whether they can answer coherent user queries.");
         builder.AppendLine("If yes, generate 2-4 realistic retrieval queries. Strongly prefer queries whose evidence spans multiple sections, ideally across different notes; only fall back to a single section when the question genuinely needs just one.");
-        builder.AppendLine("Roles: primary (directly answers), supporting (adds needed detail), acceptable (related and useful), irrelevant (omit).");
-        builder.AppendLine("Every query needs at least one primary section. quote must be a short verbatim sentence copied from that section's text, plain prose without Markdown.");
-        builder.AppendLine("Return JSON: {\"accepted\":true|false,\"rejectionReason\":\"...\",\"queries\":[{\"query\":\"...\",\"difficulty\":\"easy|medium|hard\",\"evidence\":[{\"sectionId\":\"S1\",\"role\":\"primary|supporting|acceptable\",\"quote\":\"...\"}]}]}");
+        builder.AppendLine("For each query, list every section whose content is needed to answer it, and omit unrelated sections. quote must be a short verbatim sentence copied from that section's text, plain prose without Markdown.");
+        builder.AppendLine("Return JSON: {\"accepted\":true|false,\"rejectionReason\":\"...\",\"queries\":[{\"query\":\"...\",\"difficulty\":\"easy|medium|hard\",\"evidence\":[{\"sectionId\":\"S1\",\"quote\":\"...\"}]}]}");
         builder.AppendLine($"Seed note: {group.SeedTitle}");
         foreach (var section in group.Sections)
         {
