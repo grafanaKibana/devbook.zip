@@ -17,6 +17,10 @@
 
   <ItemGroup>
     <Compile Remove="RunDatasetGeneration.cs" />
+    <Compile Remove="RunReport.cs" />
+    <None Update="report.fancy.template.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="appsettings*.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

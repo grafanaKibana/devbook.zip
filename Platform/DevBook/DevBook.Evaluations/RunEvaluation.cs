@@ -211,6 +211,33 @@ if (reportExitCode != 0)
 
 #endregion
 
+#region Step 2b: Generate the fancy report (additive)
+
+// Additive only: this never replaces the `dotnet aieval report` step above. It
+// always runs the read-only RunReport.cs tool to also emit report.fancy.html
+// alongside the unchanged report.html. Failures here are non-fatal — the run has
+// already produced the standard report.
+Console.WriteLine("\n=== Generating Fancy Report (additive) ===\n");
+var fancyScriptPath = Path.Combine(projectDirectory, "RunReport.cs");
+var fancyProcess = Process.Start(new ProcessStartInfo
+{
+    FileName = "dotnet",
+    Arguments = $"run \"{fancyScriptPath}\" -- --run \"{latestRunFolder}\"",
+    WorkingDirectory = projectDirectory,
+    UseShellExecute = false,
+    RedirectStandardOutput = false,
+    RedirectStandardError = false
+});
+
+fancyProcess?.WaitForExit();
+var fancyExitCode = fancyProcess?.ExitCode ?? -1;
+if (fancyExitCode != 0)
+{
+    Console.Error.WriteLine($"Fancy report generation returned exit code {fancyExitCode} (non-fatal; report.html is unaffected).");
+}
+
+#endregion
+
 #region Step 3: Open Report in Browser
 
 if (openBrowser && File.Exists(reportOutputPath))
