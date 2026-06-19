@@ -2,13 +2,13 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://devbook.local/schemas/generated-dataset.schema.json",
   "title": "DevBook Generated Golden RAG Dataset",
-  "description": "Per-Mongo-collection RAG retrieval dataset with graded chunk expectations.",
+  "description": "Shared, chunker-neutral RAG retrieval dataset with graded section expectations keyed by source path, heading, and snippet. One question set scores every chunking strategy.",
   "type": "object",
   "additionalProperties": false,
   "required": ["version", "generatedAt", "collection", "cases"],
   "properties": {
     "version": {
-      "const": 2,
+      "const": 3,
       "description": "Dataset schema version."
     },
     "generatedAt": {
@@ -17,9 +17,8 @@
       "description": "UTC timestamp when this dataset file was generated."
     },
     "collection": {
-      "type": "string",
-      "pattern": "^chunks\\.(fixedsize|markdownsection|semantic)$",
-      "description": "MongoDB chunk collection evaluated by this file."
+      "const": "shared",
+      "description": "Marker that this is the single shared dataset used for every chunking strategy."
     },
     "cases": {
       "type": "array",
@@ -56,14 +55,27 @@
     "chunk": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["chunkId", "documentId", "chunkOrder", "citationLabel", "text"],
+      "required": ["documentId", "citationLabel", "text"],
       "properties": {
-        "chunkId": { "type": "string", "minLength": 1 },
-        "documentId": { "type": "string", "minLength": 1 },
-        "heading": { "type": ["string", "null"] },
-        "chunkOrder": { "type": "integer" },
-        "citationLabel": { "type": "string" },
-        "text": { "type": "string", "minLength": 1 }
+        "documentId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Source document id, kept for traceability. Not used for matching, which is chunker-neutral (source + heading + snippet)."
+        },
+        "heading": {
+          "type": ["string", "null"],
+          "description": "Section heading, when the source section has one. Omitted for headingless (preamble) sections."
+        },
+        "citationLabel": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Source path of the section. SearchEvaluation maps this onto SearchDocument.SourcePath for chunker-neutral matching."
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Verbatim, whitespace-normalized snippet that appears in the source section and is used for snippet-containment matching."
+        }
       }
     }
   }

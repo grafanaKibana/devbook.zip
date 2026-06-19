@@ -187,13 +187,9 @@ public sealed class SearchEvaluation : MongoEvaluationTestBase<SearchPrediction>
 
     public sealed record ExpectedChunk
     {
-        public string ChunkId { get; init; } = string.Empty;
-
         public string DocumentId { get; init; } = string.Empty;
 
         public string? Heading { get; init; }
-
-        public int ChunkOrder { get; init; }
 
         public string CitationLabel { get; init; } = string.Empty;
 

@@ -67,6 +67,31 @@ public sealed class SearchMetricCalculatorTests
     }
 
     /// <summary>
+    /// Tests that a headingless retrieved chunk (as produced by FixedSize and Semantic chunking) still earns section
+    /// credit against a shared golden section when its text contains the expected snippet, so chunkers that drop
+    /// heading metadata are not unfairly zeroed on section-level metrics.
+    /// </summary>
+    [Fact]
+    public void ScoreQuery_HeadinglessRetrieval_CreditsSectionBySnippet()
+    {
+        // Arrange: the golden section carries a heading, but the retrieved chunk (FixedSize) has no heading and only
+        // matches by containing the snippet.
+        var prediction = Prediction(
+            "headingless section credit",
+            [Document(EvaluationPath, RetrievalHeading, RetrievalSnippet)],
+            [Document(EvaluationPath, heading: null, snippet: "Evidence coverage is primary because the generator cannot use evidence it never sees.")],
+            ChunkingStrategyKind.FixedSize);
+
+        // Act
+        var result = SearchMetricCalculator.ScoreQuery(prediction);
+
+        // Assert
+        result.RBasedMetrics.RecallAtR.Should().Be(1);
+        result.SectionMetrics.RecallAtR.Should().Be(1);
+        result.SectionMetrics.HitRateAt1.Should().Be(1);
+    }
+
+    /// <summary>
     /// Tests that scoring returns partial retrieval metrics when only one of multiple expected sources is retrieved.
     /// </summary>
     [Fact]

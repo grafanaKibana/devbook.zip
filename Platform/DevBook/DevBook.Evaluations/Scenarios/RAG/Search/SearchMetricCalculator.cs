@@ -274,26 +274,38 @@ public static class SearchMetricCalculator
         IReadOnlyList<SearchDocument> expectedDocuments,
         IReadOnlyList<SearchDocument> retrievedDocuments)
     {
-        var expectedKeys = expectedDocuments.Select(CreateSectionKey).Distinct().ToArray();
-        if (expectedKeys.Length == 0)
+        var expectedSections = expectedDocuments
+            .GroupBy(CreateSectionKey)
+            .Select(group => new ExpectedSection(
+                group.Key,
+                group.Select(document => document.Heading).FirstOrDefault(value => !string.IsNullOrWhiteSpace(value)),
+                group.Select(document => document.Snippet).Where(value => !string.IsNullOrWhiteSpace(value)).Select(value => value!).ToArray()))
+            .ToArray();
+        if (expectedSections.Length == 0)
         {
             return SearchSectionMetrics.Empty;
         }
 
         var matchedKeys = new HashSet<SearchSectionKey>();
-        var sectionCutoff = Math.Max(expectedKeys.Length, RankingCutoffs.Max());
+        var sectionCutoff = Math.Max(expectedSections.Length, RankingCutoffs.Max());
         var sectionMatches = retrievedDocuments
             .Take(sectionCutoff)
             .Select((document, index) =>
             {
-                var key = CreateSectionKey(document);
-                var isRelevant = expectedKeys.Contains(key) && matchedKeys.Add(key);
+                // Chunker-neutral section credit: a retrieved chunk belongs to an expected section when it comes from
+                // the same source and its content satisfies the section evidence (a matching heading or a contained
+                // snippet). This keeps section recall fair for strategies (FixedSize, Semantic) that do not preserve
+                // heading metadata, so they are not zeroed for matching a section by content rather than by heading.
+                var section = expectedSections.FirstOrDefault(candidate =>
+                    !matchedKeys.Contains(candidate.Key) && MatchesSection(candidate, document));
+                var isRelevant = section is not null && matchedKeys.Add(section.Key);
 
                 return new SectionMatch(index + 1, isRelevant);
             })
             .ToArray();
-        var matchedAtR = sectionMatches.Count(match => match.Rank <= expectedKeys.Length && match.IsRelevant);
-        var recallAtR = matchedAtR / (double)expectedKeys.Length;
+        var expectedCount = expectedSections.Length;
+        var matchedAtR = sectionMatches.Count(match => match.Rank <= expectedCount && match.IsRelevant);
+        var recallAtR = matchedAtR / (double)expectedCount;
         var fixedCutoffMatches = sectionMatches.Where(match => match.Rank <= RankingCutoffs.Max()).ToArray();
 
         return new SearchSectionMetrics(
@@ -301,10 +313,27 @@ public static class SearchMetricCalculator
             recallAtR,
             sectionMatches.Any(match => match.Rank == 1 && match.IsRelevant) ? 1 : 0,
             fixedCutoffMatches.FirstOrDefault(match => match.IsRelevant) is { } firstRelevant ? 1d / firstRelevant.Rank : 0,
-            CalculateAveragePrecision(expectedKeys.Length, fixedCutoffMatches),
-            CalculateNormalizedDiscountedCumulativeGain(expectedKeys.Length, fixedCutoffMatches, RankingCutoffs.Max()),
-            expectedKeys.Length,
+            CalculateAveragePrecision(expectedCount, fixedCutoffMatches),
+            CalculateNormalizedDiscountedCumulativeGain(expectedCount, fixedCutoffMatches, RankingCutoffs.Max()),
+            expectedCount,
             matchedAtR);
+    }
+
+    private static bool MatchesSection(ExpectedSection section, SearchDocument retrievedDocument)
+    {
+        if (!string.Equals(section.Key.SourceName, ExtractSourceName(retrievedDocument.SourcePath), StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        // A source-only expected section (no heading and no snippet evidence) is credited on source match alone.
+        if (string.IsNullOrWhiteSpace(section.Heading) && section.Snippets.Count == 0)
+        {
+            return true;
+        }
+
+        return MatchesNormalizedContains(section.Heading, retrievedDocument.Heading)
+            || section.Snippets.Any(snippet => MatchesNormalizedContains(snippet, retrievedDocument.Snippet));
     }
 
     private static double CalculateAveragePrecision(int expectedCount, IReadOnlyList<SearchMatchDiagnostic> matchesAtCutoff)
@@ -665,6 +694,8 @@ public static class SearchMetricCalculator
     }
 
     private sealed record SearchSectionKey(string SourceName, string? Heading);
+
+    private sealed record ExpectedSection(SearchSectionKey Key, string? Heading, IReadOnlyList<string> Snippets);
 
     private sealed record SectionMatch(int Rank, bool IsRelevant);
 }

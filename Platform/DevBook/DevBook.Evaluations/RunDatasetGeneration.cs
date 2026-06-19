@@ -17,14 +17,21 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using System.Text.RegularExpressions;
-using DevBook.Data.Models;
-using DevBook.Data.Options;
-using DevBook.Data.Repositories;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using OpenAI;
 using OpenAI.Chat;
+
+// Option 1 golden dataset generator.
+//
+// Ground truth is derived from raw note sections in the "documents" collection (the authoritative, chunker-independent
+// copy of each note), NOT from any chunking strategy's stored chunks. Each note is split by Markdown heading into
+// sections, and notes are grouped with the notes they link to via [[wikilinks]] so a single query can require evidence
+// spanning multiple pages (mirroring how vector search returns chunks from several documents). An LLM writes queries
+// over each group and labels each cited section primary / supporting / acceptable with a short verbatim quote. The
+// result is one shared dataset keyed by source + heading + snippet, so a single question set scores every chunking
+// strategy on equal footing. See SearchMetricCalculator for the chunker-neutral matching that consumes it.
 
 var repoRoot = FindRepoRoot(AppContext.BaseDirectory);
 var runOptions = RunOptions.Parse(args, repoRoot);
@@ -33,71 +40,60 @@ var database = new MongoClient(appConfig.MongoConnectionString).GetDatabase(AppC
 var chatClient = CreateChatClient(appConfig);
 var generatedAt = DateTimeOffset.UtcNow;
 
-Console.WriteLine("Golden dataset generator");
+Console.WriteLine("Golden dataset generator (Option 1: raw note sections, cross-note via wikilinks)");
 Console.WriteLine($"Repo root: {runOptions.RepoRoot}");
-Console.WriteLine($"Base sample size: {runOptions.SampleSize}");
-Console.WriteLine($"Max groups per collection: {runOptions.MaxGroupsPerCollection}");
-Console.WriteLine($"Max LLM groups per collection: {(runOptions.MaxLlmGroupsPerCollection is null ? "all" : runOptions.MaxLlmGroupsPerCollection)}");
+Console.WriteLine($"Max groups: {runOptions.MaxGroups}");
+Console.WriteLine($"Minimum section characters: {runOptions.MinSectionChars}");
+Console.WriteLine($"Sections per note / max per group / max linked notes: {runOptions.SectionsPerNote} / {runOptions.MaxSectionsPerGroup} / {runOptions.MaxLinkedNotes}");
 Console.WriteLine($"Max OpenAI retry attempts: {appConfig.RateLimitOptions.MaxRetryAttempts}");
 Console.WriteLine($"Dry run: {runOptions.DryRun}");
 
 Directory.CreateDirectory(runOptions.DatasetOutputDirectory);
-Directory.CreateDirectory(runOptions.GroupOutputDirectory);
 
-var collectionCounts = await CountCollectionChunksAsync(database, CollectionConfig.All, runOptions.CancellationToken);
-var minimumCollectionCount = collectionCounts.Values.Where(count => count > 0).DefaultIfEmpty(runOptions.SampleSize).Min();
-var summaries = new List<CollectionSummary>();
-foreach (var collectionConfig in CollectionConfig.All)
+var documents = await LoadDocumentsAsync(database, runOptions.CancellationToken);
+Console.WriteLine($"Loaded {documents.Count} documents.");
+
+var sectionsByDoc = documents.ToDictionary(
+    document => document.DocumentId,
+    document => ExtractDocSections(document, runOptions),
+    StringComparer.Ordinal);
+var documentsWithSections = documents.Where(document => sectionsByDoc[document.DocumentId].Count > 0).ToArray();
+Console.WriteLine($"Documents with substantive sections: {documentsWithSections.Length}.");
+
+var titleIndex = BuildTitleIndex(documentsWithSections);
+var groups = BuildGroups(documentsWithSections, sectionsByDoc, titleIndex, runOptions);
+Console.WriteLine($"Prepared {groups.Count} groups.");
+
+WriteJson(runOptions.GroupsPath, new GroupFile(1, generatedAt, groups.Select(GroupInfo.FromGroup).ToArray()));
+Console.WriteLine($"Wrote groups -> {runOptions.GroupsPath}");
+
+var cases = new List<DatasetCase>();
+if (!runOptions.DryRun)
 {
-    Console.WriteLine();
-    Console.WriteLine($"== {collectionConfig.CollectionName} ==");
-
-    var collectionCount = collectionCounts[collectionConfig.CollectionName];
-    var proportionalSampleSize = GetProportionalSampleSize(collectionCount, minimumCollectionCount, runOptions.SampleSize);
-    Console.WriteLine($"Collection chunks: {collectionCount}; target sample size: {proportionalSampleSize}.");
-
-    var chunks = await SampleChunksAsync(database, collectionConfig.CollectionName, proportionalSampleSize, runOptions.CancellationToken);
-    Console.WriteLine($"Sampled {chunks.Count} chunks with embeddings.");
-
-    var groupFile = CreateGroups(collectionConfig, chunks, runOptions.MaxGroupsPerCollection, generatedAt);
-    WriteJson(runOptions.GroupPath(collectionConfig), groupFile);
-    Console.WriteLine($"Created {groupFile.AcceptedGroups.Count} accepted groups, {groupFile.RejectedGroups.Count} rejected candidates, {groupFile.AuditGroups.Count} audit-only chunks.");
-
-    var cases = new List<DatasetCase>();
-    if (!runOptions.DryRun)
+    foreach (var group in groups)
     {
-        var groupsForLlm = runOptions.MaxLlmGroupsPerCollection is null
-            ? groupFile.AcceptedGroups
-            : groupFile.AcceptedGroups.Take(runOptions.MaxLlmGroupsPerCollection.Value).ToArray();
-
-        foreach (var group in groupsForLlm)
-        {
-            var llmResponse = await GenerateCasesForGroupWithRetryAsync(chatClient, group, appConfig.RateLimitOptions, runOptions.CancellationToken);
-            var acceptedCases = KeepValidCases(collectionConfig, group, llmResponse).ToArray();
-            cases.AddRange(acceptedCases);
-            Console.WriteLine($"{group.Id}: LLM accepted={llmResponse.Accepted}; keptCases={acceptedCases.Length}");
-        }
-
-        WriteJson(runOptions.DatasetPath(collectionConfig), new DatasetFile(2, generatedAt, collectionConfig.CollectionName, cases));
-        Console.WriteLine($"Wrote dataset cases: {cases.Count}");
-
-        // MarkdownSection chunks are the natural chunker-neutral unit (chunk ≈ note section), so its cases double
-        // as the shared golden dataset. SearchEvaluation matches these by source + heading + snippet, ignoring ids.
-        if (collectionConfig.Strategy == ChunkingStrategyKind.MarkdownSection)
-        {
-            WriteJson(runOptions.SharedDatasetPath, new DatasetFile(2, generatedAt, "shared", cases));
-            Console.WriteLine($"Wrote shared dataset cases: {cases.Count}");
-        }
-    }
-    else
-    {
-        Console.WriteLine("Dry run: skipped final dataset file write.");
+        var llmResponse = await GenerateCasesForGroupWithRetryAsync(chatClient, group, appConfig.RateLimitOptions, runOptions.CancellationToken);
+        var acceptedCases = KeepValidCases(group, llmResponse).ToArray();
+        cases.AddRange(acceptedCases);
+        Console.WriteLine($"{group.Id} ({group.SeedTitle}): LLM accepted={llmResponse.Accepted}; keptCases={acceptedCases.Length}");
     }
 
-    summaries.Add(new CollectionSummary(collectionConfig.CollectionName, chunks.Count, groupFile.AcceptedGroups.Count, groupFile.RejectedGroups.Count, groupFile.AuditGroups.Count, cases.Count));
+    WriteJson(runOptions.SharedDatasetPath, new DatasetFile(3, generatedAt, "shared", cases));
+    Console.WriteLine($"Wrote shared dataset cases: {cases.Count} -> {runOptions.SharedDatasetPath}");
+}
+else
+{
+    foreach (var group in groups)
+    {
+        var sources = group.Sections.Select(section => section.Title).Distinct(StringComparer.Ordinal).Count();
+        Console.WriteLine($"{group.Id} ({group.SeedTitle}): {group.Sections.Count} sections across {sources} notes (dry run).");
+    }
+
+    Console.WriteLine("Dry run: skipped LLM generation and dataset file write.");
 }
 
-WriteJson(Path.Combine(runOptions.GroupOutputDirectory, "summary.json"), new SummaryFile(1, generatedAt, summaries));
+WriteJson(runOptions.SummaryPath, SummaryFile.Create(generatedAt, documents.Count, documentsWithSections.Length, groups, cases));
+Console.WriteLine($"Wrote summary -> {runOptions.SummaryPath}");
 
 Console.WriteLine();
 Console.WriteLine("Generation complete.");
@@ -118,170 +114,220 @@ static ChatClient CreateChatClient(AppConfig config)
     return openAIClient.GetChatClient(config.GeneratorOptions.ModelId);
 }
 
-static async Task<IReadOnlyList<ChunkRecord>> SampleChunksAsync(IMongoDatabase database, string collectionName, int sampleSize, CancellationToken cancellationToken)
+static async Task<IReadOnlyList<DocRecord>> LoadDocumentsAsync(IMongoDatabase database, CancellationToken cancellationToken)
 {
-    var collection = database.GetCollection<BsonDocument>(collectionName);
-    var pipeline = new[]
+    var collection = database.GetCollection<BsonDocument>("documents");
+    var projection = new BsonDocument
     {
-        new BsonDocument("$sample", new BsonDocument("size", sampleSize)),
-        new BsonDocument("$project", new BsonDocument
-        {
-            ["_id"] = 1,
-            ["DocumentId"] = 1,
-            ["Heading"] = 1,
-            ["ChunkText"] = 1,
-            ["ChunkOrder"] = 1,
-            ["Embedding"] = 1,
-            ["CitationLabel"] = 1,
-        }),
+        ["_id"] = 1,
+        ["SourcePath"] = 1,
+        ["Title"] = 1,
+        ["PageContent"] = 1,
     };
 
-    var documents = await collection.Aggregate<BsonDocument>(pipeline, cancellationToken: cancellationToken).ToListAsync(cancellationToken);
-    return documents.Select(ChunkRecord.FromBson).Where(chunk => chunk.Embedding.Length > 0).ToArray();
+    var documents = await collection
+        .Find(FilterDefinition<BsonDocument>.Empty)
+        .Project(projection)
+        .ToListAsync(cancellationToken);
+
+    return documents.Select(DocRecord.FromBson).Where(document => !string.IsNullOrWhiteSpace(document.PageContent)).ToArray();
 }
 
-static async Task<IReadOnlyDictionary<string, long>> CountCollectionChunksAsync(IMongoDatabase database, IReadOnlyList<CollectionConfig> configs, CancellationToken cancellationToken)
+static IReadOnlyList<DocSection> ExtractDocSections(DocRecord document, RunOptions runOptions)
 {
-    var counts = new Dictionary<string, long>(StringComparer.Ordinal);
-    foreach (var config in configs)
+    return SplitSections(document.PageContent)
+        .Where(section => TextRules.IsSubstantive(section.Content, runOptions.MinSectionChars))
+        .Select((section, index) => new DocSection(document.DocumentId, document.SourcePath, document.Title, index, section.Heading, TextRules.Clean(section.Content)))
+        .ToArray();
+}
+
+static IReadOnlyDictionary<string, DocRecord> BuildTitleIndex(IReadOnlyList<DocRecord> documents)
+{
+    var index = new Dictionary<string, DocRecord>(StringComparer.Ordinal);
+    foreach (var document in documents)
     {
-        counts[config.CollectionName] = await database.GetCollection<BsonDocument>(config.CollectionName).CountDocumentsAsync(FilterDefinition<BsonDocument>.Empty, cancellationToken: cancellationToken);
+        foreach (var key in new[] { TextRules.NormalizeKey(document.Title), TextRules.NormalizeKey(LastSegment(document.SourcePath)) })
+        {
+            if (!string.IsNullOrEmpty(key))
+            {
+                index.TryAdd(key, document);
+            }
+        }
     }
 
-    return counts;
+    return index;
 }
 
-static int GetProportionalSampleSize(long collectionCount, long minimumCollectionCount, int baseSampleSize)
+// Builds cross-note groups: a seed note plus the notes it links to via [[wikilinks]], so generated queries can require
+// evidence from several pages. Section reuse across groups is capped so the dataset is not dominated by popular notes.
+static IReadOnlyList<NoteGroup> BuildGroups(
+    IReadOnlyList<DocRecord> documents,
+    IReadOnlyDictionary<string, IReadOnlyList<DocSection>> sectionsByDoc,
+    IReadOnlyDictionary<string, DocRecord> titleIndex,
+    RunOptions runOptions)
 {
-    if (collectionCount <= 0 || minimumCollectionCount <= 0)
-    {
-        return baseSampleSize;
-    }
+    var linksByDoc = documents.ToDictionary(
+        document => document.DocumentId,
+        document => ResolveLinks(document, titleIndex)
+            .Where(linked => linked.DocumentId != document.DocumentId && sectionsByDoc[linked.DocumentId].Count > 0)
+            .DistinctBy(linked => linked.DocumentId, StringComparer.Ordinal)
+            .ToArray(),
+        StringComparer.Ordinal);
 
-    var scaled = (int)Math.Ceiling(baseSampleSize * (collectionCount / (double)minimumCollectionCount));
-    return (int)Math.Min(collectionCount, Math.Max(baseSampleSize, scaled));
-}
-
-static GroupFile CreateGroups(CollectionConfig config, IReadOnlyList<ChunkRecord> chunks, int maxGroups, DateTimeOffset generatedAt)
-{
-    var eligible = chunks.Where(TextRules.IsSubstantive).ToArray();
-    var neighborMap = BuildNeighborMap(eligible, config.MinimumCosineSimilarity);
-    var seeds = eligible
-        .Select(chunk => new { Chunk = chunk, Score = Average(neighborMap[chunk.ChunkId].Take(5).Select(item => item.Similarity)) + Math.Min(TextRules.Clean(chunk.ChunkText).Length, 1200) / 12000d })
-        .OrderByDescending(item => item.Score)
+    var seeds = documents
+        .OrderByDescending(document => linksByDoc[document.DocumentId].Length)
+        .ThenByDescending(document => sectionsByDoc[document.DocumentId].Count)
         .ToArray();
 
     var usage = new Dictionary<string, int>(StringComparer.Ordinal);
-    var accepted = new List<ChunkGroup>();
-    var rejected = new List<ChunkGroup>();
-
+    var groups = new List<NoteGroup>();
     foreach (var seed in seeds)
     {
-        if (accepted.Count >= maxGroups)
+        if (groups.Count >= runOptions.MaxGroups)
         {
             break;
         }
 
-        if (usage.GetValueOrDefault(seed.Chunk.ChunkId) >= 1)
+        var members = new List<DocSection>();
+        members.AddRange(PickSections(seed.DocumentId, sectionsByDoc, usage, runOptions.SectionsPerNote, runOptions.SectionReuseCap));
+        foreach (var linked in linksByDoc[seed.DocumentId].Take(runOptions.MaxLinkedNotes))
+        {
+            if (members.Count >= runOptions.MaxSectionsPerGroup)
+            {
+                break;
+            }
+
+            members.AddRange(PickSections(linked.DocumentId, sectionsByDoc, usage, runOptions.SectionsPerNote, runOptions.SectionReuseCap));
+        }
+
+        var selected = members.Take(runOptions.MaxSectionsPerGroup).ToArray();
+        if (selected.Length < 2)
         {
             continue;
         }
 
-        var neighbors = neighborMap[seed.Chunk.ChunkId]
-            .Where(item => usage.GetValueOrDefault(item.Chunk.ChunkId) < 2)
-            .Take(5)
+        foreach (var section in selected)
+        {
+            usage[SectionKey(section)] = usage.GetValueOrDefault(SectionKey(section)) + 1;
+        }
+
+        var noteSections = selected
+            .Select((section, index) => new NoteSection($"S{index + 1}", section.SourcePath, section.DocumentId, section.Title, section.Heading, section.Text))
             .ToArray();
-        if (neighbors.Length < 2)
-        {
-            continue;
-        }
-
-        var validation = ValidateCoherence([seed.Chunk, .. neighbors.Select(item => item.Chunk)], neighbors.Select(item => item.Similarity).ToArray());
-        var group = CreateGroup(config, validation.Accepted ? accepted.Count + 1 : rejected.Count + 1, validation.Accepted, seed.Chunk, neighbors, validation);
-        if (!validation.Accepted)
-        {
-            rejected.Add(group);
-            continue;
-        }
-
-        foreach (var chunk in group.ChunkIds)
-        {
-            usage[chunk] = usage.GetValueOrDefault(chunk) + 1;
-        }
-
-        accepted.Add(group);
+        groups.Add(new NoteGroup($"shared-group-{groups.Count + 1:0000}", seed.Title, seed.SourcePath, noteSections));
     }
 
-    var acceptedIds = accepted.SelectMany(group => group.ChunkIds).ToHashSet(StringComparer.Ordinal);
-    var audit = chunks
-        .Where(chunk => !acceptedIds.Contains(chunk.ChunkId))
-        .Select((chunk, index) => CreateAuditGroup(config, chunk, index + 1))
-        .ToArray();
-
-    return new GroupFile(1, generatedAt, config.CollectionName, config.MinimumCosineSimilarity, new MinimumQueryReadyContent(220, 22), accepted, rejected, audit);
+    return groups;
 }
 
-static Dictionary<string, IReadOnlyList<Neighbor>> BuildNeighborMap(IReadOnlyList<ChunkRecord> chunks, double threshold)
+static IEnumerable<DocSection> PickSections(
+    string documentId,
+    IReadOnlyDictionary<string, IReadOnlyList<DocSection>> sectionsByDoc,
+    IReadOnlyDictionary<string, int> usage,
+    int take,
+    int reuseCap)
 {
-    var result = new Dictionary<string, IReadOnlyList<Neighbor>>(StringComparer.Ordinal);
-    foreach (var seed in chunks)
+    return sectionsByDoc[documentId]
+        .Where(section => usage.GetValueOrDefault(SectionKey(section)) < reuseCap)
+        .OrderBy(section => usage.GetValueOrDefault(SectionKey(section)))
+        .Take(take);
+}
+
+static string SectionKey(DocSection section) => $"{section.DocumentId}:{section.Index}";
+
+static IEnumerable<DocRecord> ResolveLinks(DocRecord document, IReadOnlyDictionary<string, DocRecord> titleIndex)
+{
+    foreach (Match match in TextRules.WikiLinkPattern.Matches(document.PageContent))
     {
-        result[seed.ChunkId] = chunks
-            .Where(candidate => candidate.ChunkId != seed.ChunkId)
-            .Select(candidate => new Neighbor(candidate, Cosine(seed, candidate)))
-            .Where(neighbor => neighbor.Similarity >= threshold)
-            .OrderByDescending(neighbor => neighbor.Similarity)
-            .ToArray();
+        var inner = match.Groups[1].Value;
+        var target = inner.Split('|')[0].Split('#')[0].Trim();
+        if (target.Length == 0)
+        {
+            continue;
+        }
+
+        if (titleIndex.TryGetValue(TextRules.NormalizeKey(LastSegment(target)), out var resolved))
+        {
+            yield return resolved;
+        }
+    }
+}
+
+static string LastSegment(string value)
+{
+    var trimmed = value.Replace('\\', '/').Trim().TrimEnd('/');
+    var index = trimmed.LastIndexOf('/');
+    return index >= 0 ? trimmed[(index + 1)..] : trimmed;
+}
+
+// Splits raw Markdown into heading sections, mirroring MarkdownSectionChunkingStrategy: content before the first
+// heading becomes a headingless section, and each heading owns the lines until the next heading. Code fences are
+// skipped so a "#comment" inside a code block is not mistaken for a heading.
+static IReadOnlyList<RawSection> SplitSections(string markdown)
+{
+    var lines = markdown.Replace("\r\n", "\n", StringComparison.Ordinal).Split('\n');
+    var sections = new List<RawSection>();
+    string? currentHeading = null;
+    var builder = new StringBuilder();
+    var inFence = false;
+
+    void Flush()
+    {
+        var content = builder.ToString().Trim();
+        if (!string.IsNullOrWhiteSpace(content))
+        {
+            sections.Add(new RawSection(currentHeading, content));
+        }
+
+        builder.Clear();
     }
 
-    return result;
+    foreach (var line in lines)
+    {
+        var trimmed = line.TrimStart();
+        if (trimmed.StartsWith("```", StringComparison.Ordinal) || trimmed.StartsWith("~~~", StringComparison.Ordinal))
+        {
+            inFence = !inFence;
+        }
+
+        if (!inFence && TryParseHeading(line, out var headingText))
+        {
+            Flush();
+            currentHeading = headingText;
+            continue;
+        }
+
+        builder.Append(line).Append('\n');
+    }
+
+    Flush();
+    return sections;
 }
 
-static ChunkGroup CreateGroup(CollectionConfig config, int index, bool accepted, ChunkRecord seed, IReadOnlyList<Neighbor> neighbors, GroupValidation validation)
+static bool TryParseHeading(string line, out string headingText)
 {
-    var members = new[] { seed }.Concat(neighbors.Select(item => item.Chunk)).ToArray();
-    var similarities = neighbors.ToDictionary(item => item.Chunk.ChunkId, item => item.Similarity, StringComparer.Ordinal);
-    var sourceTitles = members.Select(chunk => chunk.SourceTitle).Where(value => !string.IsNullOrWhiteSpace(value)).Select(value => value!).Distinct(StringComparer.Ordinal).Order().ToArray();
-    var topic = string.Join(" — ", new[] { string.Join(" + ", sourceTitles.Take(2)), string.Join(", ", validation.SharedTerms.Take(4)) }.Where(value => !string.IsNullOrWhiteSpace(value)));
-    return new ChunkGroup(
-        $"{config.FilePrefix}-{(accepted ? "group" : "rejected")}-{index:0000}",
-        config.CollectionName,
-        string.IsNullOrWhiteSpace(topic) ? "Embedding neighborhood" : topic,
-        accepted ? "validated-embedding-cosine-neighborhood" : "rejected-embedding-cosine-neighborhood",
-        accepted,
-        seed.ChunkId,
-        members.Select(chunk => chunk.ChunkId).ToArray(),
-        members.Select(chunk => chunk.DocumentId).Distinct(StringComparer.Ordinal).Order().ToArray(),
-        sourceTitles,
-        members.Select(chunk => chunk.Heading).Where(value => !string.IsNullOrWhiteSpace(value)).Select(value => value!).Distinct(StringComparer.Ordinal).Order().ToArray(),
-        TextRules.TopTerms(members, 10),
-        validation,
-        members.Select(chunk => ChunkForPrompt.FromChunk(chunk, similarities.GetValueOrDefault(chunk.ChunkId))).ToArray());
+    headingText = string.Empty;
+    var trimmed = line.TrimStart();
+    var hashes = 0;
+    while (hashes < trimmed.Length && trimmed[hashes] == '#')
+    {
+        hashes++;
+    }
+
+    if (hashes is < 1 or > 6 || hashes >= trimmed.Length || trimmed[hashes] != ' ')
+    {
+        return false;
+    }
+
+    headingText = trimmed[(hashes + 1)..].Trim().TrimEnd('#').Trim();
+    return !string.IsNullOrWhiteSpace(headingText);
 }
 
-static ChunkGroup CreateAuditGroup(CollectionConfig config, ChunkRecord chunk, int index)
-{
-    return new ChunkGroup(
-        $"{config.FilePrefix}-audit-{index:0000}",
-        config.CollectionName,
-        string.Join(" — ", new[] { chunk.SourceTitle, chunk.Heading }.Where(value => !string.IsNullOrWhiteSpace(value))),
-        TextRules.IsSubstantive(chunk) ? "substantive-unselected-audit-only" : "low-information-audit-only",
-        false,
-        chunk.ChunkId,
-        [chunk.ChunkId],
-        [chunk.DocumentId],
-        string.IsNullOrWhiteSpace(chunk.SourceTitle) ? [] : [chunk.SourceTitle],
-        string.IsNullOrWhiteSpace(chunk.Heading) ? [] : [chunk.Heading],
-        TextRules.TopTerms([chunk], 10),
-        new GroupValidation(false, [], 1, string.IsNullOrWhiteSpace(chunk.Heading) ? 0 : 1, 1, 0, 0),
-        [ChunkForPrompt.FromChunk(chunk, null)]);
-}
-
-static async Task<GroupLlmResponse> GenerateCasesForGroupAsync(ChatClient chatClient, ChunkGroup group, CancellationToken cancellationToken)
+static async Task<GroupLlmResponse> GenerateCasesForGroupAsync(ChatClient chatClient, NoteGroup group, CancellationToken cancellationToken)
 {
     var messages = new ChatMessage[]
     {
-        new SystemChatMessage("You create retrieval golden datasets. Use only the supplied chunks. Return strict JSON only. Do not invent chunk IDs."),
+        new SystemChatMessage("You create retrieval golden datasets from note sections. Use only the supplied sections. Reference sections only by their sectionId. Quotes must be copied verbatim from the section text, plain prose without Markdown symbols. Return strict JSON only."),
         new UserChatMessage(PromptBuilder.ForGroup(group)),
     };
     var options = new ChatCompletionOptions
@@ -307,7 +353,7 @@ static async Task<GroupLlmResponse> GenerateCasesForGroupAsync(ChatClient chatCl
     }
 }
 
-static async Task<GroupLlmResponse> GenerateCasesForGroupWithRetryAsync(ChatClient chatClient, ChunkGroup group, EvaluationRateLimitOptions rateLimitOptions, CancellationToken cancellationToken)
+static async Task<GroupLlmResponse> GenerateCasesForGroupWithRetryAsync(ChatClient chatClient, NoteGroup group, EvaluationRateLimitOptions rateLimitOptions, CancellationToken cancellationToken)
 {
     for (var attempt = 1; ; attempt++)
     {
@@ -458,76 +504,85 @@ static TException? FindException<TException>(Exception exception)
     return exception.InnerException is null ? null : FindException<TException>(exception.InnerException);
 }
 
-static IEnumerable<DatasetCase> KeepValidCases(CollectionConfig config, ChunkGroup group, GroupLlmResponse response)
+static IEnumerable<DatasetCase> KeepValidCases(NoteGroup group, GroupLlmResponse response)
 {
     if (!response.Accepted)
     {
         yield break;
     }
 
-    var chunksById = group.Chunks.ToDictionary(chunk => chunk.ChunkId, StringComparer.Ordinal);
-    var allowedIds = chunksById.Keys.ToHashSet(StringComparer.Ordinal);
+    var sectionsById = group.Sections.ToDictionary(section => section.LocalId, StringComparer.OrdinalIgnoreCase);
     var index = 1;
-    foreach (var query in response.Queries)
+    foreach (var query in response.Queries ?? [])
     {
-        var primary = ValidIds(query.PrimaryChunkIds, allowedIds).ToArray();
-        var supporting = ValidIds(query.SupportingChunkIds, allowedIds).Except(primary, StringComparer.Ordinal).ToArray();
-        var acceptable = ValidIds(query.AcceptableChunkIds, allowedIds).Except(primary, StringComparer.Ordinal).Except(supporting, StringComparer.Ordinal).ToArray();
+        if (string.IsNullOrWhiteSpace(query.Query) || query.Evidence is null)
+        {
+            continue;
+        }
 
-        if (string.IsNullOrWhiteSpace(query.Query) || primary.Length == 0 || supporting.Length + acceptable.Length == 0)
+        var primary = new List<ExpectedChunk>();
+        var supporting = new List<ExpectedChunk>();
+        var acceptable = new List<ExpectedChunk>();
+        var usedSections = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var evidence in query.Evidence)
+        {
+            if (evidence.SectionId is null
+                || !sectionsById.TryGetValue(evidence.SectionId.Trim(), out var section)
+                || !usedSections.Add(section.LocalId))
+            {
+                continue;
+            }
+
+            var expected = CreateExpectedChunk(section, evidence.Quote);
+            switch (NormalizeRole(evidence.Role))
+            {
+                case "primary":
+                    primary.Add(expected);
+                    break;
+                case "supporting":
+                    supporting.Add(expected);
+                    break;
+                default:
+                    acceptable.Add(expected);
+                    break;
+            }
+        }
+
+        if (primary.Count == 0)
         {
             continue;
         }
 
         yield return new DatasetCase(
-            $"{config.FilePrefix}-{TextRules.Slug(query.Query)}-{index:000}",
+            $"shared-{TextRules.Slug(query.Query)}-{index:000}",
             query.Query.Trim(),
             NormalizeDifficulty(query.Difficulty),
-            new GradedExpectations(
-                ToExpectedChunks(primary, chunksById),
-                ToExpectedChunks(supporting, chunksById),
-                ToExpectedChunks(acceptable, chunksById)));
+            new GradedExpectations(primary, supporting, acceptable));
         index++;
     }
 }
 
-static IReadOnlyList<ExpectedChunk> ToExpectedChunks(IEnumerable<string> chunkIds, IReadOnlyDictionary<string, ChunkForPrompt> chunksById)
+static ExpectedChunk CreateExpectedChunk(NoteSection section, string? quote)
 {
-    return chunkIds.Select(chunkId => ExpectedChunk.FromChunk(chunksById[chunkId])).ToArray();
+    // Snippet must be a verbatim, whitespace-normalized substring of the section so any chunking strategy that returns
+    // the relevant chunk will contain it. Fall back to the section's leading sentence when the LLM quote does not match.
+    var snippet = TextRules.SelectSnippet(section.Text, quote);
+
+    // CitationLabel carries the source path because SearchEvaluation maps it onto SearchDocument.SourcePath; each cited
+    // section keeps its own source so cross-note evidence is preserved. No chunk id is stored: the gold is matched
+    // chunker-neutrally by source + heading + snippet and must not be bound to one chunking strategy's ids.
+    return new ExpectedChunk(section.DocumentId, section.Heading, section.SourcePath, snippet);
 }
 
-static IEnumerable<string> ValidIds(IEnumerable<string>? ids, HashSet<string> allowedIds)
+static string NormalizeRole(string? role)
 {
-    return (ids ?? []).Where(id => !string.IsNullOrWhiteSpace(id)).Select(id => id.Trim()).Where(allowedIds.Contains).Distinct(StringComparer.Ordinal);
-}
-
-static GroupValidation ValidateCoherence(IReadOnlyList<ChunkRecord> group, IReadOnlyList<double> similarities)
-{
-    var sharedTerms = TextRules.CommonTerms(group).Take(10).ToArray();
-    var rootCount = group.Select(chunk => TextRules.PathRoot(chunk.SourceTitle)).Where(value => value is not null).Distinct(StringComparer.Ordinal).Count();
-    var headingCount = group.Select(chunk => chunk.Heading).Where(value => !string.IsNullOrWhiteSpace(value)).Distinct(StringComparer.Ordinal).Count();
-    var documentCount = group.Select(chunk => chunk.DocumentId).Distinct(StringComparer.Ordinal).Count();
-    var averageSimilarity = Average(similarities);
-    var minimumSimilarity = similarities.Count == 0 ? 0 : similarities.Min();
-    var accepted = group.Count >= 3 && sharedTerms.Length >= 3 && (averageSimilarity >= 0.74 || sharedTerms.Length >= 5 || rootCount <= 2 || headingCount == 1);
-    return new GroupValidation(accepted, sharedTerms, rootCount, headingCount, documentCount, Math.Round(averageSimilarity, 6), Math.Round(minimumSimilarity, 6));
-}
-
-static double Cosine(ChunkRecord first, ChunkRecord second)
-{
-    var dot = 0d;
-    for (var index = 0; index < first.Embedding.Length; index++)
+    return role?.Trim().ToLowerInvariant() switch
     {
-        dot += first.Embedding[index] * second.Embedding[index];
-    }
-
-    return dot / (first.Norm * second.Norm);
-}
-
-static double Average(IEnumerable<double> values)
-{
-    var array = values.ToArray();
-    return array.Length == 0 ? 0 : array.Average();
+        "primary" => "primary",
+        "supporting" => "supporting",
+        _ => "acceptable",
+    };
 }
 
 static string NormalizeDifficulty(string? difficulty)
@@ -562,20 +617,37 @@ static void WriteJson<T>(string path, T value)
     File.WriteAllText(path, JsonSerializer.Serialize(value, JsonDefaults.Options));
 }
 
-sealed record RunOptions(string RepoRoot, int SampleSize, int MaxGroupsPerCollection, int? MaxLlmGroupsPerCollection, bool DryRun, CancellationToken CancellationToken)
+sealed record RunOptions(
+    string RepoRoot,
+    int MaxGroups,
+    int MinSectionChars,
+    int SectionsPerNote,
+    int MaxSectionsPerGroup,
+    int MaxLinkedNotes,
+    int SectionReuseCap,
+    bool DryRun,
+    CancellationToken CancellationToken)
 {
     public string DatasetOutputDirectory => Path.Combine(this.RepoRoot, "Platform/DevBook/DevBook.Evaluations/Datasets");
     public string GroupOutputDirectory => Path.Combine(this.DatasetOutputDirectory, "Groups");
-    public string GroupPath(CollectionConfig config) => Path.Combine(this.GroupOutputDirectory, $"{config.FilePrefix}.groups.json");
-    public string DatasetPath(CollectionConfig config) => Path.Combine(this.DatasetOutputDirectory, $"{config.FilePrefix}.json");
 
-    // The shared, chunker-neutral golden dataset consumed by SearchEvaluation. Ground truth is keyed by
-    // source + heading + snippet, so one question set scores every chunking strategy on equal footing.
+    // The shared, chunker-neutral golden dataset consumed by SearchEvaluation.
     public string SharedDatasetPath => Path.Combine(this.DatasetOutputDirectory, "chunks-shared.json");
+    public string GroupsPath => Path.Combine(this.GroupOutputDirectory, "shared.groups.json");
+    public string SummaryPath => Path.Combine(this.GroupOutputDirectory, "summary.json");
 
     public static RunOptions Parse(string[] args, string repoRoot)
     {
-        return new RunOptions(GetString(args, "--repo-root") ?? repoRoot, GetInt(args, "--sample-size", 1000), GetInt(args, "--max-groups", 120), TryGetInt(args, "--max-llm-groups"), args.Contains("--dry-run", StringComparer.OrdinalIgnoreCase), CancellationToken.None);
+        return new RunOptions(
+            GetString(args, "--repo-root") ?? repoRoot,
+            GetInt(args, "--max-groups", 120),
+            GetInt(args, "--min-section-chars", 200),
+            GetInt(args, "--sections-per-note", 3),
+            GetInt(args, "--max-sections-per-group", 10),
+            GetInt(args, "--max-linked-notes", 4),
+            GetInt(args, "--section-reuse-cap", 2),
+            args.Contains("--dry-run", StringComparer.OrdinalIgnoreCase),
+            CancellationToken.None);
     }
 
     private static int GetInt(string[] args, string name, int fallback) => TryGetInt(args, name) ?? fallback;
@@ -587,7 +659,7 @@ sealed record RunOptions(string RepoRoot, int SampleSize, int MaxGroupsPerCollec
     }
 }
 
-sealed record AppConfig(string MongoConnectionString, OpenAIOptions OpenAIOptions, GoldenDatasetGeneratorOptions GeneratorOptions, EvaluationRateLimitOptions RateLimitOptions)
+sealed record AppConfig(string MongoConnectionString, OpenAIConfig OpenAIOptions, GoldenDatasetGeneratorOptions GeneratorOptions, EvaluationRateLimitOptions RateLimitOptions)
 {
     public const string MongoDatabaseName = "DevBook";
     private const string MongoConnectionName = "MongoDb";
@@ -607,11 +679,11 @@ sealed record AppConfig(string MongoConnectionString, OpenAIOptions OpenAIOption
             throw new InvalidOperationException($"Missing required connection string: {MongoConnectionName}.");
         }
 
-        var openAISection = configuration.GetSection(nameof(OpenAIOptions));
-        var openAIOptions = new OpenAIOptions { ApiKey = openAISection[nameof(OpenAIOptions.ApiKey)], Endpoint = openAISection[nameof(OpenAIOptions.Endpoint)] };
+        var openAISection = configuration.GetSection("OpenAIOptions");
+        var openAIOptions = new OpenAIConfig { ApiKey = openAISection["ApiKey"], Endpoint = openAISection["Endpoint"] };
         if (string.IsNullOrWhiteSpace(openAIOptions.ApiKey))
         {
-            throw new InvalidOperationException($"Missing required configuration: {nameof(OpenAIOptions)}:{nameof(OpenAIOptions.ApiKey)}.");
+            throw new InvalidOperationException("Missing required configuration: OpenAIOptions:ApiKey.");
         }
 
         var generatorSection = configuration.GetSection(nameof(GoldenDatasetGeneratorOptions));
@@ -631,6 +703,12 @@ sealed record AppConfig(string MongoConnectionString, OpenAIOptions OpenAIOption
     }
 }
 
+sealed record OpenAIConfig
+{
+    public string? ApiKey { get; init; }
+    public string? Endpoint { get; init; }
+}
+
 sealed record GoldenDatasetGeneratorOptions
 {
     public string ModelId { get; init; } = "gpt-5.4-mini";
@@ -643,87 +721,137 @@ sealed record EvaluationRateLimitOptions
     public int MaxRetryAttempts { get; init; } = 5;
 }
 
-sealed record CollectionConfig(ChunkingStrategyKind Strategy, double MinimumCosineSimilarity)
+sealed record DocRecord(string DocumentId, string SourcePath, string Title, string PageContent)
 {
-    public string CollectionName => ChunkCollectionNames.ForStrategy(this.Strategy);
-    public string FilePrefix => this.CollectionName.Replace('.', '-');
-    public static readonly CollectionConfig[] All =
-    [
-        new(ChunkingStrategyKind.FixedSize, 0.62),
-        new(ChunkingStrategyKind.MarkdownSection, 0.70),
-        new(ChunkingStrategyKind.Semantic, 0.70),
-    ];
+    public static DocRecord FromBson(BsonDocument document) => new(
+        document.GetValue("_id", string.Empty).AsString,
+        document.GetValue("SourcePath", string.Empty).AsString,
+        document.GetValue("Title", string.Empty).AsString,
+        document.GetValue("PageContent", string.Empty).AsString);
 }
 
-sealed record ChunkRecord(string ChunkId, string DocumentId, string? Heading, int ChunkOrder, string ChunkText, float[] Embedding, string CitationLabel)
-{
-    public string? SourceTitle => TextRules.TitleFromCitation(this.CitationLabel);
-    public double Norm { get; } = Math.Sqrt(Embedding.Sum(value => value * value));
-    public static ChunkRecord FromBson(BsonDocument document) => new(document["_id"].AsString, document.GetValue("DocumentId", string.Empty).AsString, document.GetValue("Heading", BsonNull.Value).IsBsonNull ? null : document.GetValue("Heading").AsString, document.GetValue("ChunkOrder", 0).ToInt32(), document.GetValue("ChunkText", string.Empty).AsString, document.GetValue("Embedding", new BsonArray()).AsBsonArray.Select(value => (float)value.ToDouble()).ToArray(), document.GetValue("CitationLabel", string.Empty).AsString);
-}
+sealed record RawSection(string? Heading, string Content);
+sealed record DocSection(string DocumentId, string SourcePath, string Title, int Index, string? Heading, string Text);
+sealed record NoteSection(string LocalId, string SourcePath, string DocumentId, string Title, string? Heading, string Text);
+sealed record NoteGroup(string Id, string SeedTitle, string SeedSourcePath, IReadOnlyList<NoteSection> Sections);
 
-sealed record Neighbor(ChunkRecord Chunk, double Similarity);
-sealed record GroupFile(int Version, DateTimeOffset GeneratedAt, string Collection, double MinimumCosineSimilarity, MinimumQueryReadyContent MinimumQueryReadyContent, IReadOnlyList<ChunkGroup> AcceptedGroups, IReadOnlyList<ChunkGroup> RejectedGroups, IReadOnlyList<ChunkGroup> AuditGroups);
-sealed record MinimumQueryReadyContent(int MinCharacters, int MinUniqueTerms);
-sealed record ChunkGroup(string Id, string Collection, string Topic, string Basis, bool QueryGenerationReady, string SeedChunkId, IReadOnlyList<string> ChunkIds, IReadOnlyList<string> DocumentIds, IReadOnlyList<string> SourceTitles, IReadOnlyList<string> Headings, IReadOnlyList<string> TopTerms, GroupValidation Validation, IReadOnlyList<ChunkForPrompt> Chunks);
-sealed record GroupValidation(bool Accepted, IReadOnlyList<string> SharedTerms, int RootCount, int HeadingCount, int DocumentCount, double AverageSimilarity, double MinimumSimilarity);
-sealed record ChunkForPrompt(string ChunkId, string DocumentId, string? Heading, int ChunkOrder, string CitationLabel, double? SimilarityToSeed, string Text)
-{
-    public static ChunkForPrompt FromChunk(ChunkRecord chunk, double? similarityToSeed) => new(chunk.ChunkId, chunk.DocumentId, chunk.Heading, chunk.ChunkOrder, chunk.CitationLabel, similarityToSeed is null ? null : Math.Round(similarityToSeed.Value, 6), TextRules.Preview(chunk.ChunkText));
-}
+sealed record GroupLlmResponse(bool Accepted, string? RejectionReason, IReadOnlyList<QueryCase>? Queries);
+sealed record QueryCase(string Query, string? Difficulty, IReadOnlyList<QueryEvidence>? Evidence);
+sealed record QueryEvidence(string? SectionId, string? Role, string? Quote);
 
-sealed record GroupLlmResponse(bool Accepted, string? RejectionReason, IReadOnlyList<QueryClassification> Queries);
-sealed record QueryClassification(string Query, string Difficulty, IReadOnlyList<string> PrimaryChunkIds, IReadOnlyList<string> SupportingChunkIds, IReadOnlyList<string> AcceptableChunkIds, IReadOnlyList<string> IrrelevantChunkIds);
 sealed record DatasetFile(int Version, DateTimeOffset GeneratedAt, string Collection, IReadOnlyList<DatasetCase> Cases);
 sealed record DatasetCase(string Id, string Query, string Difficulty, GradedExpectations Expected);
 sealed record GradedExpectations(IReadOnlyList<ExpectedChunk> PrimaryChunks, IReadOnlyList<ExpectedChunk> SupportingChunks, IReadOnlyList<ExpectedChunk> AcceptableChunks);
-sealed record ExpectedChunk(string ChunkId, string DocumentId, string? Heading, int ChunkOrder, string CitationLabel, string Text)
+sealed record ExpectedChunk(string DocumentId, string? Heading, string CitationLabel, string Text);
+
+sealed record GroupFile(int Version, DateTimeOffset GeneratedAt, IReadOnlyList<GroupInfo> Groups);
+sealed record GroupInfo(string Id, string SeedTitle, string SeedSourcePath, int NoteCount, IReadOnlyList<GroupSection> Sections)
 {
-    public static ExpectedChunk FromChunk(ChunkForPrompt chunk) => new(chunk.ChunkId, chunk.DocumentId, chunk.Heading, chunk.ChunkOrder, chunk.CitationLabel, chunk.Text);
+    public static GroupInfo FromGroup(NoteGroup group) => new(
+        group.Id,
+        group.SeedTitle,
+        group.SeedSourcePath,
+        group.Sections.Select(section => section.SourcePath).Distinct(StringComparer.Ordinal).Count(),
+        group.Sections.Select(section => new GroupSection(section.LocalId, section.Title, section.SourcePath, section.Heading, section.Text.Length)).ToArray());
 }
-sealed record SummaryFile(int Version, DateTimeOffset GeneratedAt, IReadOnlyList<CollectionSummary> Collections);
-sealed record CollectionSummary(string Collection, int SampledChunks, int AcceptedGroups, int RejectedGroups, int AuditGroups, int DatasetCases);
+sealed record GroupSection(string LocalId, string Title, string SourcePath, string? Heading, int CharCount);
+
+sealed record SummaryFile(
+    int Version,
+    DateTimeOffset GeneratedAt,
+    int DocumentsLoaded,
+    int DocumentsWithSections,
+    int Groups,
+    int CrossNoteGroups,
+    int Cases,
+    int SingleEvidenceCases,
+    int MultiEvidenceCases,
+    int SourcesCovered)
+{
+    public static SummaryFile Create(DateTimeOffset generatedAt, int documentsLoaded, int documentsWithSections, IReadOnlyList<NoteGroup> groups, IReadOnlyList<DatasetCase> cases)
+    {
+        var evidenceCounts = cases
+            .Select(item => item.Expected.PrimaryChunks.Count + item.Expected.SupportingChunks.Count + item.Expected.AcceptableChunks.Count)
+            .ToArray();
+        var sourcesCovered = cases
+            .SelectMany(item => item.Expected.PrimaryChunks.Concat(item.Expected.SupportingChunks).Concat(item.Expected.AcceptableChunks))
+            .Select(expected => expected.CitationLabel)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Count();
+
+        return new SummaryFile(
+            1,
+            generatedAt,
+            documentsLoaded,
+            documentsWithSections,
+            groups.Count,
+            groups.Count(group => group.Sections.Select(section => section.SourcePath).Distinct(StringComparer.Ordinal).Count() > 1),
+            cases.Count,
+            evidenceCounts.Count(count => count <= 1),
+            evidenceCounts.Count(count => count > 1),
+            sourcesCovered);
+    }
+}
 
 static class PromptBuilder
 {
-    public static string ForGroup(ChunkGroup group)
+    public static string ForGroup(NoteGroup group)
     {
         var builder = new StringBuilder();
-        builder.AppendLine("Decide whether these chunks can answer one coherent user query. If yes, generate 2-3 retrieval queries and classify every chunk for each query.");
-        builder.AppendLine("Keep a query only when at least one chunk is primary and at least one other chunk is supporting or acceptable. Reject broad topic mismatch.");
-        builder.AppendLine("Labels: primary, supporting, acceptable, irrelevant.");
-        builder.AppendLine("Return JSON: {\"accepted\":true|false,\"rejectionReason\":\"...\",\"queries\":[{\"query\":\"...\",\"difficulty\":\"easy|medium|hard\",\"primaryChunkIds\":[\"...\"],\"supportingChunkIds\":[\"...\"],\"acceptableChunkIds\":[\"...\"],\"irrelevantChunkIds\":[\"...\"]}]}");
-        builder.AppendLine(JsonSerializer.Serialize(group, JsonDefaults.Options));
+        builder.AppendLine("These sections come from a seed note and notes it links to. Decide whether they can answer coherent user queries.");
+        builder.AppendLine("If yes, generate 2-4 realistic retrieval queries. Strongly prefer queries whose evidence spans multiple sections, ideally across different notes; only fall back to a single section when the question genuinely needs just one.");
+        builder.AppendLine("Roles: primary (directly answers), supporting (adds needed detail), acceptable (related and useful), irrelevant (omit).");
+        builder.AppendLine("Every query needs at least one primary section. quote must be a short verbatim sentence copied from that section's text, plain prose without Markdown.");
+        builder.AppendLine("Return JSON: {\"accepted\":true|false,\"rejectionReason\":\"...\",\"queries\":[{\"query\":\"...\",\"difficulty\":\"easy|medium|hard\",\"evidence\":[{\"sectionId\":\"S1\",\"role\":\"primary|supporting|acceptable\",\"quote\":\"...\"}]}]}");
+        builder.AppendLine($"Seed note: {group.SeedTitle}");
+        foreach (var section in group.Sections)
+        {
+            builder.AppendLine($"--- {section.LocalId} (note: {section.Title}; heading: {section.Heading ?? "(none)"}) ---");
+            builder.AppendLine(TextRules.Preview(section.Text, 900));
+        }
+
         return builder.ToString();
     }
 }
 
 static class TextRules
 {
+    public static readonly Regex WikiLinkPattern = new(@"\[\[([^\]\r\n]+)\]\]", RegexOptions.Compiled);
     private static readonly Regex WordPattern = new("[A-Za-z][A-Za-z0-9_+.#-]{2,}", RegexOptions.Compiled);
     private static readonly Regex WhatsNextPattern = new("<!-- whats-next:start -->[\\s\\S]*?(<!-- whats-next:end -->|$)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
     private static readonly Regex SlugPattern = new("[^a-z0-9]+", RegexOptions.Compiled);
-    private static readonly Regex LeadingNumberPattern = new("^\\d+\\s+", RegexOptions.Compiled);
-    private static readonly HashSet<string> StopWords = new(StringComparer.OrdinalIgnoreCase) { "the", "and", "for", "with", "that", "this", "from", "into", "when", "then", "than", "they", "them", "their", "there", "where", "what", "why", "how", "you", "your", "are", "was", "were", "been", "being", "can", "could", "should", "would", "will", "may", "might", "must", "not", "but", "use", "using", "used", "does", "done", "same", "each", "more", "less", "most", "least", "also", "only", "between", "within", "without", "before", "after", "default", "example", "examples", "value", "values", "true", "false", "null", "new", "return", "returns", "section", "intro", "links", "references", "question", "answer", "expected", "tradeoff", "mechanism", "pitfalls", "whats", "next", "whats-next", "parent", "pages", "topics", "software", "engineering", "note" };
-    public static bool IsSubstantive(ChunkRecord chunk) => Clean(chunk.ChunkText).Length >= 220 && TokenSet(chunk.ChunkText).Count >= 22;
-    public static IReadOnlyList<string> CommonTerms(IReadOnlyList<ChunkRecord> chunks) => TermCounts(chunks, true).Where(item => item.Value >= Math.Max(2, (int)Math.Ceiling(chunks.Count * 0.4))).OrderByDescending(item => item.Value).Select(item => item.Key).ToArray();
-    public static IReadOnlyList<string> TopTerms(IReadOnlyList<ChunkRecord> chunks, int count) => TermCounts(chunks, false).OrderByDescending(item => item.Value).Take(count).Select(item => item.Key).ToArray();
+    private static readonly HashSet<string> StopWords = new(StringComparer.OrdinalIgnoreCase) { "the", "and", "for", "with", "that", "this", "from", "into", "when", "then", "than", "they", "them", "their", "there", "where", "what", "why", "how", "you", "your", "are", "was", "were", "been", "being", "can", "could", "should", "would", "will", "may", "might", "must", "not", "but", "use", "using", "used", "same", "each", "more", "less", "most", "least", "also", "only", "between", "within", "without", "before", "after" };
+
+    public static bool IsSubstantive(string text, int minCharacters) => Clean(text).Length >= minCharacters && TokenSet(text).Count >= 12;
     public static string Clean(string text) => WhatsNextPattern.Replace(text, " ").ReplaceLineEndings(" ").Trim();
     public static string Preview(string text, int limit = 320) => Clean(text).Length <= limit ? Clean(text) : Clean(text)[..limit].TrimEnd() + "…";
     public static string Slug(string value) { var slug = SlugPattern.Replace(value.ToLowerInvariant(), "-").Trim('-'); return slug.Length <= 48 ? slug : slug[..48].Trim('-'); }
-    public static string? TitleFromCitation(string? label) { if (string.IsNullOrWhiteSpace(label)) return null; var text = label.Trim(); if (text.StartsWith("[[", StringComparison.Ordinal) && text.EndsWith("]]", StringComparison.Ordinal)) text = text[2..^2]; return text.Split('#', 2)[0].Trim(); }
-    public static string? PathRoot(string? title) => string.IsNullOrWhiteSpace(title) ? null : LeadingNumberPattern.Replace(title, string.Empty).Split('/', '\\')[0].Split('&')[0].Trim().ToLowerInvariant();
+    public static string NormalizeKey(string? value) => string.IsNullOrWhiteSpace(value) ? string.Empty : Normalize(value.EndsWith(".md", StringComparison.OrdinalIgnoreCase) ? value[..^3] : value).ToUpperInvariant();
+
+    // Returns a verbatim, whitespace-normalized snippet that is guaranteed to appear in the section text. Prefers the
+    // LLM's quote when it normalizes to a substring of the section; otherwise falls back to the leading sentence.
+    public static string SelectSnippet(string sectionText, string? quote)
+    {
+        var normalizedSection = Normalize(sectionText);
+        var candidate = Normalize(quote ?? string.Empty);
+        if (candidate.Length >= 12 && normalizedSection.Contains(candidate, StringComparison.OrdinalIgnoreCase))
+        {
+            return Cap(candidate);
+        }
+
+        return Cap(LeadingSentence(normalizedSection));
+    }
+
+    private static string LeadingSentence(string text)
+    {
+        var end = text.IndexOf(". ", StringComparison.Ordinal);
+        return end > 0 ? text[..(end + 1)] : text;
+    }
+
+    private static string Cap(string text, int limit = 200) => text.Length <= limit ? text : text[..limit].TrimEnd();
+    private static string Normalize(string text) => string.Join(' ', Clean(text).Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries)).Trim();
     private static HashSet<string> TokenSet(string text) => Tokens(text).ToHashSet(StringComparer.OrdinalIgnoreCase);
     private static IEnumerable<string> Tokens(string text) => WordPattern.Matches(Clean(text)).Select(match => match.Value.ToLowerInvariant().Trim('-', '_', '.', '#')).Where(term => term.Length >= 3 && !StopWords.Contains(term) && !term.All(char.IsDigit));
-    private static Dictionary<string, int> TermCounts(IReadOnlyList<ChunkRecord> chunks, bool uniquePerChunk)
-    {
-        var counts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-        foreach (var terms in chunks.Select(chunk => uniquePerChunk ? Tokens(chunk.ChunkText).Distinct(StringComparer.OrdinalIgnoreCase) : Tokens(chunk.ChunkText)))
-        {
-            foreach (var term in terms) counts[term] = counts.GetValueOrDefault(term) + 1;
-        }
-        return counts;
-    }
 }
 
 static class JsonDefaults
