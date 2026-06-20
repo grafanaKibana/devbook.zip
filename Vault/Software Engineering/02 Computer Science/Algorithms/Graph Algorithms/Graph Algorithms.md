@@ -6,10 +6,10 @@ subtopic:
 tags:
   - FolderNote
 dg-publish: true
-priority: Medium
 level:
   - '4'
 status: Done
+priority: High
 ---
 
 # Intro
@@ -75,4 +75,6 @@ flowchart TD
 >
 > **Pages**
 > - [[Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]]
+> - [[Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|Minimum Spanning Tree]]
+> - [[Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Topological Sort|Topological Sort]]
 <!-- whats-next:end -->

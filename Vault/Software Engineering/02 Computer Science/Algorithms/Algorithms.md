@@ -6,10 +6,10 @@ subtopic:
 tags:
   - FolderNote
 dg-publish: true
-priority: Medium
 level:
   - '4'
-status: Creation
+status: Done
+priority: High
 ---
 
 # Intro
@@ -54,6 +54,8 @@ Concrete example: for repeated membership checks in a large list of ids, sorting
 > **Topics**
 > - [[Software Engineering/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set|Disjoint Set]]
 > - [[Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Graph Algorithms|Graph Algorithms]]
+> - [[Software Engineering/02 Computer Science/Algorithms/Paradigms/Paradigms|Paradigms]]
+> - [[Software Engineering/02 Computer Science/Algorithms/Patterns/Patterns|Patterns]]
 > - [[Software Engineering/02 Computer Science/Algorithms/Search Algorithms/Search Algorithms|Search Algorithms]]
 > - [[Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms|Sorting Algorithms]]
 <!-- whats-next:end -->

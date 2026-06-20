@@ -6,7 +6,7 @@ subtopic:
 level:
   - "4"
 priority: Medium
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 
@@ -58,10 +58,33 @@ var graph = new Dictionary<string, List<string>>
 - Adjacency matrix can be useful for dense graphs with fixed node sets.
 - `PriorityQueue<TElement, TPriority>` is useful for weighted shortest-path algorithms.
 
+## Core Algorithms
+
+The data structure only matters in service of the algorithms that run on it. The ones worth knowing cold:
+
+| Problem | Algorithm | Complexity | Notes |
+|---|---|---|---|
+| Reachability / shortest path (unweighted) | **BFS** | O(V + E) | Queue + visited set; layer = distance |
+| Explore / detect cycles / components | **DFS** | O(V + E) | Recursion or explicit `Stack`; color nodes white/grey/black to detect back-edges |
+| Shortest path, non-negative weights | **Dijkstra** | O((V + E) log V) | `PriorityQueue`; **fails with negative weights** |
+| Shortest path, negative weights allowed | **Bellman–Ford** | O(V·E) | Detects negative cycles |
+| All-pairs shortest paths | **Floyd–Warshall** | O(V³) | Dense graphs / small V |
+| Order a DAG by dependencies | **Topological sort** | O(V + E) | Kahn's (in-degree queue) or DFS post-order; only valid on a DAG |
+| Minimum spanning tree | **Prim / Kruskal** | O(E log V) | Kruskal pairs with [[Software Engineering/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set Union-Find\|Union-Find]] |
+| Connectivity / dynamic union | **Union-Find** | ~O(α(n)) | Near-constant with path compression — see [[Software Engineering/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set Union-Find\|Disjoint Set]] |
+
+The two decisions that trip people up: **use BFS, not Dijkstra, for unweighted shortest paths** (same answer, far simpler), and **switch from Dijkstra to Bellman–Ford the moment any edge weight can be negative** (Dijkstra's greedy "settle once" assumption breaks).
+
 ## Questions
 
 > [!QUESTION]- Which collections are typically used for BFS?
 > `Queue<T>` for frontier and `HashSet<T>` for visited tracking.
+
+> [!QUESTION]- When must you use Bellman–Ford instead of Dijkstra?
+> When edges can have negative weights. Dijkstra settles each node once on the assumption that a shorter path can never appear later — negative edges violate that. Bellman–Ford relaxes all edges V−1 times and can also report a negative cycle.
+
+> [!QUESTION]- How do you detect a cycle in a directed graph during DFS?
+> Three-color marking: white (unvisited), grey (on the current recursion stack), black (fully explored). Encountering a grey node via an edge means a back-edge → a cycle. (Topological sort via Kahn's algorithm detects the same condition: leftover nodes with non-zero in-degree.)
 
 ## Links
 
@@ -79,6 +102,8 @@ var graph = new Dictionary<string, List<string>>
 >  [[Software Engineering/02 Computer Science/02 Computer Science|02 Computer Science]]
 >
 > **Pages**
+> - [[Software Engineering/02 Computer Science/Data Structures/Bloom Filter|Bloom Filter]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Circular Buffer|Circular Buffer]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Dictionary|Dictionary]]
 > - [[Software Engineering/02 Computer Science/Data Structures/HashMap|HashMap]]
 > - [[Software Engineering/02 Computer Science/Data Structures/HashSet|HashSet]]
@@ -86,8 +111,10 @@ var graph = new Dictionary<string, List<string>>
 > - [[Software Engineering/02 Computer Science/Data Structures/Heap|Heap]]
 > - [[Software Engineering/02 Computer Science/Data Structures/LinkedList|LinkedList]]
 > - [[Software Engineering/02 Computer Science/Data Structures/List|List]]
+> - [[Software Engineering/02 Computer Science/Data Structures/LRU Cache|LRU Cache]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Queue|Queue]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Span|Span]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Stack|Stack]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Trees|Trees]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Trie|Trie]]
 <!-- whats-next:end -->

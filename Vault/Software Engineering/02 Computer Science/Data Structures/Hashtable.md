@@ -6,7 +6,7 @@ subtopic:
 level:
   - "4"
 priority: Medium
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 
@@ -19,7 +19,10 @@ dg-publish: true
 `Hashtable` stores keys and values as `object`, so value types are boxed/unboxed.
 It still uses hash buckets and collision resolution similar to modern hash-based collections.
 
-Internally, `Hashtable` uses separate chaining: when two keys hash to the same bucket, they form a linked list at that slot. Lookup traverses the chain until the matching key is found, making worst-case performance O(n) when all keys collide. `Dictionary<TKey, TValue>` uses open addressing with prime-based probing, which is more cache-friendly and avoids per-collision heap allocations. This is the primary performance reason to prefer `Dictionary` in new code.
+The two collections actually use **opposite** collision strategies (a common point of confusion):
+
+- **`Hashtable` uses open addressing** with double hashing (rehashing): on a collision it probes other slots in the same backing array until it finds a free one. Combined with boxing of every key and value, this is the slower design.
+- **`Dictionary<TKey, TValue>` uses separate chaining** — but not with linked-list *nodes*. It stores all entries in one contiguous `entries[]` array and links collisions with a `next` **index** field, while a `buckets[]` array maps each hash to the head of its chain. Because entries live in a single array there's **no per-collision heap allocation** and traversal is cache-friendly. That array-based chaining (plus no boxing) is the primary performance reason to prefer `Dictionary` in new code. Worst case is still O(n) when every key collides into one chain.
 ## Structure
 
 ```mermaid
@@ -86,6 +89,8 @@ var value = table["user:1"]; // object
 >  [[Software Engineering/02 Computer Science/02 Computer Science|02 Computer Science]]
 >
 > **Pages**
+> - [[Software Engineering/02 Computer Science/Data Structures/Bloom Filter|Bloom Filter]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Circular Buffer|Circular Buffer]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Dictionary|Dictionary]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Graph|Graph]]
 > - [[Software Engineering/02 Computer Science/Data Structures/HashMap|HashMap]]
@@ -93,8 +98,10 @@ var value = table["user:1"]; // object
 > - [[Software Engineering/02 Computer Science/Data Structures/Heap|Heap]]
 > - [[Software Engineering/02 Computer Science/Data Structures/LinkedList|LinkedList]]
 > - [[Software Engineering/02 Computer Science/Data Structures/List|List]]
+> - [[Software Engineering/02 Computer Science/Data Structures/LRU Cache|LRU Cache]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Queue|Queue]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Span|Span]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Stack|Stack]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Trees|Trees]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Trie|Trie]]
 <!-- whats-next:end -->

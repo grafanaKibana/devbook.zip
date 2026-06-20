@@ -6,7 +6,7 @@ subtopic:
 level:
   - "4"
 priority: Low
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 # Intro
@@ -75,6 +75,12 @@ private static void Merge(int[] a, int left, int mid, int right)
 - **Predictable worst case:** unlike quick sort, merge sort never degrades to O(n²).
 
 For in-memory array sorting where stability is not required, `Array.Sort` (introsort) is typically faster due to better cache behavior.
+
+### Bottom-up variant and counting inversions
+
+The recursive version above is **top-down**. A **bottom-up** merge sort skips recursion entirely: merge adjacent runs of width 1, then 2, then 4… doubling each pass. Same O(n log n), but no recursion stack — handy for very large arrays or stack-constrained environments.
+
+Merge sort's merge step also solves a classic problem for free: **counting inversions** (pairs out of order, a measure of "how unsorted" data is). When the right half's front element is taken before the left half is exhausted, every remaining left element forms an inversion — so you can count all inversions in O(n log n) instead of the brute-force O(n²).
 
 ## Pitfalls
 

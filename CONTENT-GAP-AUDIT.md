@@ -13,7 +13,7 @@
 | Area | Notes | Reviewed |
 |------|------:|:--------:|
 | 01 Programming | 32 | ✅ |
-| 02 Computer Science | 12 | — |
+| 02 Computer Science | 12 | ✅ |
 | 03 Data Persistence | 6 | — |
 | 04 Networks | 11 | — |
 | 05 Architecture | 29 | — |
@@ -208,3 +208,38 @@
 - **Static lambdas (C# 9)** and **method-group conversion caching (.NET 7)** to avoid captures/allocations.
 - **Function pointers `delegate*` (C# 9)** as the zero-alloc alternative; `DynamicInvoke` is a slow reflection path; open vs closed delegates.
 
+
+---
+
+## 02 Computer Science — filled ✅
+
+### Data Structures
+- **Graph** — added a Core Algorithms table (BFS/DFS/Dijkstra/Bellman–Ford/Floyd–Warshall/topo-sort/MST/Union-Find), the BFS-vs-Dijkstra and Dijkstra-vs-Bellman–Ford decisions, and three-color cycle detection.
+- **Heap** — array layout (2i+1/2i+2, quaternary), O(n) heapify + heapsort, **no decrease-key in `PriorityQueue`** (lazy-deletion workaround), applications (top-k, streaming median, merge-k).
+- **Trees** — terminology (height/depth/full/complete/perfect), Common Tree Types table (BST/AVL/RB/B-tree/trie/heap/segment), Morris O(1) traversal; cross-links to Indexes & Heap.
+- **Hashtable** — **corrected a factual error**: the note had `Hashtable`/`Dictionary` collision strategies reversed (Hashtable = open addressing; Dictionary = array-based separate chaining).
+- **HashSet / HashMap** — load factor, resize/rehash cost, pre-sizing, and **hash-flooding (algorithmic-complexity DoS)** + string-hash randomization.
+
+### Sorting (already near-complete — one targeted addition each, no padding)
+- **Quick Sort** — Lomuto vs Hoare partition (Hoare ~3× fewer swaps, off-by-one recursion trap).
+- **Merge Sort** — bottom-up iterative variant + counting inversions for free.
+- **Insertion** — binary insertion sort (O(n log n) comparisons, still O(n²) shifts).
+- **Selection** — "heapsort is selection sort with a heap" conceptual link.
+- **Bubble** — cocktail-shaker bidirectional variant (turtles problem).
+
+### Disjoint Set
+- **Union-Find** — added the **incremental-only** limitation (no efficient split; fully-dynamic needs link-cut/Euler-tour; offline-reverse trick for deletions).
+
+---
+
+## 02 Computer Science — new pages added ✅
+
+Created 13 missing common algorithm/data-structure pages (status `Ready to Repeat`, full template) plus 2 folder indexes:
+
+- **Data Structures**: Trie, LRU Cache, Bloom Filter, Circular Buffer.
+- **Algorithms/Patterns** (new folder): Two Pointers, Sliding Window, Bit Manipulation.
+- **Algorithms/Paradigms** (new folder): Dynamic Programming, Greedy Algorithms, Backtracking.
+- **Algorithms/Graph Algorithms**: Topological Sort, Minimum Spanning Tree (Kruskal/Prim).
+- **Algorithms/Sorting Algorithms**: Heap Sort.
+
+Educational-quality review of the existing CS corpus: pages follow a consistent, sound pedagogical template (Intro w/ concrete example → Mechanism → runnable C# → Diagram → named Pitfalls → Tradeoffs tables → interview-style Questions → References). No rewrites needed.
