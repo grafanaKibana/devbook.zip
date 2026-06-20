@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/c-sharp/fundamentals/types/strings/","dg-note-properties":{"topic":["Programming"],"subtopic":["NET"],"level":["4"],"priority":"Medium","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/c-sharp/fundamentals/types/strings/","dg-note-properties":{"topic":["Programming"],"subtopic":["NET"],"level":["4"],"priority":"Medium","status":"Ready to Repeat"}}
 ---
 
 
@@ -37,7 +37,7 @@ var s2 = "dotnet";
 Console.WriteLine(object.ReferenceEquals(s1, s2)); // True
 ```
 
-Interning can reduce duplicate literal allocations, but it should not be used blindly for large dynamic text.
+Interning can reduce duplicate literal allocations, but it should not be used blindly for large dynamic text. You can intern at runtime with `string.Intern(s)` (and probe with `string.IsInterned(s)`), but **interned strings live for the lifetime of the process** — they're rooted in the intern pool and never collected, so interning high-cardinality dynamic strings is a memory leak. Compile-time constant concatenations (`"a" + "b"`) are folded and interned by the compiler; runtime-built strings are not.
 
 ## StringBuilder
 
@@ -57,6 +57,19 @@ Decision rule:
 
 - Use `string` for small/simple composition and readability.
 - Use `StringBuilder` for repeated mutations in hot paths.
+
+## Encoding and Unicode
+
+A .NET `string` is **UTF-16**: each `char` is a 16-bit *code unit*, **not** a full character. Characters outside the Basic Multilingual Plane (emoji, some CJK) are encoded as a **surrogate pair** — two `char`s. So `"👍".Length == 2`, and indexing `s[0]` gives you half a surrogate. To iterate real Unicode scalar values use **`Rune`** (`foreach (Rune r in s.EnumerateRunes())`), and for user-perceived characters (a base letter plus combining marks = one grapheme) use **`StringInfo`/`TextElementEnumerator`**. `string.Normalize()` applies Unicode normalization (NFC/NFD) so that visually identical strings compare equal.
+
+## Low-Allocation String Handling
+
+For hot paths, avoid materializing intermediate strings:
+
+- **`ReadOnlySpan<char>`** — slice and parse without allocating: `text.AsSpan(0, 5)`, and most BCL parse/format APIs accept spans.
+- **`string.Create(length, state, callback)`** — build a string of known length by writing directly into its buffer, skipping a `StringBuilder` allocation.
+- **Interpolated string handlers (C# 10)** — `$"..."` passed to APIs like ` logger.LogInformation` or `StringBuilder.Append` is lowered to write segments directly into a buffer, avoiding the intermediate `string` entirely (and skipping formatting when the log level is disabled).
+- **`ArrayPool<char>`** — rent a scratch buffer for transformations instead of allocating per call.
 
 ## Pitfalls
 

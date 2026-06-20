@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/other/owin/","dg-note-properties":{"topic":["Programming"],"subtopic":["NET"],"level":["3"],"priority":"Low","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/other/owin/","dg-note-properties":{"topic":["Programming"],"subtopic":["NET"],"level":["3"],"priority":"Low","status":"Ready to Repeat"}}
 ---
 
 
@@ -19,6 +19,14 @@ flowchart LR
 ```
 
 At runtime, the host (for example IIS with Katana or self-host) builds the pipeline from `IAppBuilder` registrations. Request handling then flows in registration order, while response handling flows in reverse order.
+
+The entire contract reduces to one delegate, the **AppFunc**:
+
+```csharp
+using AppFunc = System.Func<System.Collections.Generic.IDictionary<string, object>, System.Threading.Tasks.Task>;
+```
+
+Everything else — `IAppBuilder`, `Microsoft.Owin.IOwinContext` — is sugar over "a function that takes the environment dictionary and returns a `Task`." That minimal shape is precisely what ASP.NET Core's `RequestDelegate` (`Func<HttpContext, Task>`) evolved into, which is why the middleware mental model carries over directly. On the Katana side, `Microsoft.Owin.Security.*` packages provided the cookie/OAuth/JWT auth middleware that later became ASP.NET Core's authentication stack.
 
 ### Example
 
@@ -56,6 +64,8 @@ This pattern is conceptually similar to ASP.NET Core middleware, but the abstrac
 - OWIN/Katana vs ASP.NET Core middleware: OWIN gives compatibility with older stacks, while ASP.NET Core provides better performance, modern hosting, richer diagnostics, and active long-term support.
 - Flexible dictionary-based contracts vs strong typing: OWIN is extensible, but strongly typed abstractions in ASP.NET Core are easier to refactor and safer at compile time.
 - Incremental migration vs full rewrite: incremental migration lowers immediate risk, but mixed hosting models increase operational complexity for a period.
+
+For the incremental path, Microsoft's current tooling does the heavy lifting: **`System.Web.Adapters`** lets ASP.NET Framework and ASP.NET Core apps share session/auth state during migration, and **YARP** (Yet Another Reverse Proxy) fronts both apps so you can move routes from the old app to the new one endpoint-by-endpoint (the "strangler fig" pattern) without a big-bang cutover.
 
 ## Questions
 

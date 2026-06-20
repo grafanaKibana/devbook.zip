@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/asp-net-web-api/authorization/","dg-note-properties":{"topic":["Programming"],"subtopic":["NET"],"level":["1"],"priority":"Medium","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/asp-net-web-api/authorization/","dg-note-properties":{"topic":["Programming"],"subtopic":["NET"],"level":["1"],"priority":"Medium","status":"Ready to Repeat"}}
 ---
 
 
@@ -100,6 +100,24 @@ public sealed class DocumentsController(IAuthorizationService authz, IDocumentRe
 ```
 
 The `"CanEditDocument"` policy handler receives the `document` as the resource and can check ownership, team membership, or any other resource-specific condition.
+
+## Defaults, Fallback, and Advanced Hooks
+
+- **Secure-by-default with `FallbackPolicy`** — set a fallback that applies to any endpoint *without* an explicit `[Authorize]`/`[AllowAnonymous]`, so forgetting an attribute fails closed:
+
+  ```csharp
+  builder.Services.AddAuthorization(options =>
+  {
+      options.FallbackPolicy = new AuthorizationPolicyBuilder()
+          .RequireAuthenticatedUser().Build();   // everything requires auth unless [AllowAnonymous]
+  });
+  ```
+
+  `DefaultPolicy` (separately) is what a bare `[Authorize]` with no policy name evaluates.
+- **OR within a requirement = multiple handlers** — the note above notes that stacked `[Authorize]` attributes are **AND**. To express **OR**, register *several handlers for the same requirement*; if **any** handler calls `context.Succeed(requirement)`, it passes. (One handler can also internally check several alternative conditions.)
+- **`RequireAssertion`** — for one-off logic, skip the requirement/handler pair: `policy.RequireAssertion(ctx => ctx.User.HasClaim(...))`.
+- **`IAuthorizationMiddlewareResultHandler`** — customize what a 403/forbidden actually returns (e.g. a Problem Details body) instead of the default empty response.
+- **Minimal APIs** — apply policies fluently: `app.MapGet("/admin", ...).RequireAuthorization("CanApproveOrders")`.
 
 ## Pitfalls
 
