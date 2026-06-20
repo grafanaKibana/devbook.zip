@@ -6,7 +6,7 @@ subtopic:
 level:
   - "3"
 priority: Medium
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 # Intro
@@ -78,6 +78,25 @@ DNSSEC adds cryptographic signatures to DNS records, allowing resolvers to verif
 **How it works:** the authoritative server signs records with a private key. Resolvers verify signatures using the public key published in the DNS hierarchy. A chain of trust runs from the root zone down to the authoritative zone.
 
 **Adoption:** DNSSEC is supported by major TLDs and cloud DNS providers (Azure DNS, Route 53, Cloudflare) but is not universally deployed. It adds complexity (key rotation, signing overhead) and does not encrypt DNS traffic — it only authenticates it.
+
+## Encrypted DNS (DoH / DoT)
+
+DNSSEC authenticates but doesn't *encrypt* — classic DNS queries travel in plaintext on UDP 53, so anyone on-path can see (and tamper with) the names you look up. Two protocols close that gap:
+
+- **DNS-over-TLS (DoT)** — DNS inside a TLS connection on port 853; easy for networks to identify (and block) by port.
+- **DNS-over-HTTPS (DoH)** — DNS queries as HTTPS requests on 443, indistinguishable from normal web traffic; harder to block but controversial because it bypasses network-level DNS controls.
+
+Both give confidentiality and integrity against eavesdropping/poisoning; they're complementary to DNSSEC (authentication), not a replacement.
+
+## DNS as a Traffic Director
+
+Beyond name→IP, DNS is a load-balancing and routing layer because the *answer* can depend on who's asking and what's healthy:
+
+- **Round-robin** — return multiple A records; clients spread across them (crude, no health awareness).
+- **GeoDNS / latency-based** — return the IP of the nearest/fastest region (Route 53 latency routing, Azure Traffic Manager) to cut RTT.
+- **Weighted** — split traffic by percentage for canary/blue-green rollouts.
+- **Health-check-aware failover** — stop returning an endpoint that fails health checks (pairs with short TTLs).
+- **Anycast** — one IP (e.g. `8.8.8.8`, `1.1.1.1`) announced from many locations via BGP; the network routes each client to the closest instance. This is how public resolvers and CDNs appear "everywhere at once."
 
 ## Pitfalls
 
@@ -163,4 +182,5 @@ dig +dnssec api.example.com
 > - [[Software Engineering/04 Networks/Protocols/REST|REST]]
 > - [[Software Engineering/04 Networks/Protocols/RPC|RPC]]
 > - [[Software Engineering/04 Networks/Protocols/SMTP|SMTP]]
+> - [[Software Engineering/04 Networks/Protocols/WebSockets|WebSockets]]
 <!-- whats-next:end -->

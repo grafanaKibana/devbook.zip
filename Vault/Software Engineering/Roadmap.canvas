@@ -187,7 +187,7 @@
       "y": 2120,
       "width": 340,
       "height": 80,
-      "color": "2"
+      "color": "4"
     },
     {
       "id": "n_98d03a0b9a",
@@ -217,7 +217,7 @@
       "y": 2240,
       "width": 340,
       "height": 80,
-      "color": "2"
+      "color": "4"
     },
     {
       "id": "n_562477b458",
@@ -227,7 +227,7 @@
       "y": 2520,
       "width": 340,
       "height": 80,
-      "color": "2"
+      "color": "4"
     },
     {
       "id": "n_0b0a05ce8f",
@@ -247,7 +247,7 @@
       "y": 2520,
       "width": 340,
       "height": 80,
-      "color": "2"
+      "color": "4"
     },
     {
       "id": "n_7069b6749c",
@@ -297,7 +297,7 @@
       "y": 3040,
       "width": 340,
       "height": 80,
-      "color": "2"
+      "color": "4"
     },
     {
       "id": "n_dc4a20647f",
@@ -317,7 +317,7 @@
       "y": 3040,
       "width": 340,
       "height": 80,
-      "color": "2"
+      "color": "4"
     },
     {
       "id": "n_c73870096f",
@@ -327,7 +327,7 @@
       "y": 3160,
       "width": 340,
       "height": 80,
-      "color": "2"
+      "color": "4"
     },
     {
       "id": "n_dbd6442a0b",
@@ -337,7 +337,7 @@
       "y": 3280,
       "width": 340,
       "height": 80,
-      "color": "2"
+      "color": "4"
     },
     {
       "id": "n_1f7479c5a2",
@@ -347,7 +347,7 @@
       "y": 3400,
       "width": 340,
       "height": 80,
-      "color": "2"
+      "color": "4"
     },
     {
       "id": "n_9e8db739d1",
@@ -367,7 +367,7 @@
       "y": 3640,
       "width": 340,
       "height": 80,
-      "color": "2"
+      "color": "4"
     },
     {
       "id": "n_c1a7dd2abf",
@@ -377,7 +377,7 @@
       "y": 3760,
       "width": 340,
       "height": 80,
-      "color": "2"
+      "color": "4"
     },
     {
       "id": "n_c1e483b2d0",
@@ -387,7 +387,7 @@
       "y": 3280,
       "width": 340,
       "height": 80,
-      "color": "2"
+      "color": "4"
     },
     {
       "id": "n_a493e627f8",
@@ -651,7 +651,7 @@
     {
       "id": "n_b0ac2236f9",
       "type": "text",
-      "text": "#### Roadmap legend\n**Generated:** Jun 20 2026 | 08:33AM",
+      "text": "#### Roadmap legend\n**Generated:** Jun 20 2026 | 11:46AM",
       "x": -1440,
       "y": 0,
       "width": 500,
@@ -670,7 +670,7 @@
     {
       "id": "n_c1cf7bc196",
       "type": "text",
-      "text": "Creation: 40",
+      "text": "Creation: 28",
       "x": -1380,
       "y": 202,
       "width": 380,
@@ -700,7 +700,7 @@
     {
       "id": "n_0e6324d0db",
       "type": "text",
-      "text": "Done: 19",
+      "text": "Done: 31",
       "x": -1380,
       "y": 430,
       "width": 380,

@@ -5,10 +5,10 @@ subtopic: []
 tags:
   - FolderNote
 dg-publish: true
-status: Creation
 priority: High
 level:
   - '4'
+status: Done
 ---
 
 # Intro
@@ -34,4 +34,5 @@ Data persistence is how software survives a restart: storing, retrieving, and pr
 > **Pages**
 > - [[Software Engineering/03 Data Persistence/ACID|ACID]]
 > - [[Software Engineering/03 Data Persistence/Caching|Caching]]
+> - [[Software Engineering/03 Data Persistence/Connection Pooling|Connection Pooling]]
 <!-- whats-next:end -->

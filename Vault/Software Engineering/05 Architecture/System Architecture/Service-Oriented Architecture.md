@@ -6,7 +6,7 @@ subtopic:
 level:
   - "3"
 priority: Medium
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 
@@ -28,6 +28,9 @@ SOA and microservices share the same decomposition philosophy but differ in scop
 | Typical context | Enterprise integration (ERP, CRM, legacy systems) | Cloud-native, greenfield, high-scale |
 
 **Key distinction**: SOA uses an ESB as a central integration hub; microservices prefer "smart endpoints, dumb pipes" — the services contain the logic, the message broker is just a transport.
+
+> [!NOTE]
+> The ESB didn't vanish — it **evolved and decomposed**. Its routing/auth/rate-limiting concerns moved to a thin edge **[[Software Engineering/05 Architecture/Distributed Systems/API Gateway|API Gateway]]**, its async transport to a **[[Software Engineering/05 Architecture/Distributed Systems/Message Queues/Message Queues|message broker]]** (Kafka/RabbitMQ), and its orchestration to either the services themselves (**choreography**) or a dedicated workflow engine. The microservices "dumb pipe" is the lesson learned from ESBs accreting too much logic.
 
 ## When SOA Still Applies
 

@@ -6,7 +6,7 @@ subtopic:
 level:
   - "2"
 priority: High
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 
@@ -107,6 +107,10 @@ await tx.CommitAsync(ct);
 ```
 
 Without the Outbox: if the broker publish fails after the DB commit, the event is lost. With the Outbox: the event is durable in the DB and will be published eventually.
+
+## Sagas Sacrifice Isolation
+
+The subtlety most people miss: a Saga trades away the **I** in ACID, not just the easy atomicity. Because each step commits its *local* transaction immediately, a saga's **intermediate state is visible to everyone else** before the saga finishes — another transaction can read an order that's been placed but whose payment will later be compensated (a "dirty read" across the saga). 2PC holds locks to prevent exactly this; sagas can't. The countermeasures from the saga literature are **semantic locks** (a status flag like `PENDING` that other operations must check), **commutative updates**, and **re-read/version before acting**. Idempotent, retry-safe steps are mandatory — see [[Software Engineering/05 Architecture/Distributed Systems/Idempotency|Idempotency]]. Net: a saga buys atomicity-via-compensation and availability at the cost of isolation and a window of observable inconsistency ([[Software Engineering/05 Architecture/Distributed Systems/CAP theorem|CAP/PACELC]]).
 
 ## Pitfalls
 

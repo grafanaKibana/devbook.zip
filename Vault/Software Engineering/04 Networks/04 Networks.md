@@ -5,10 +5,10 @@ subtopic: []
 tags:
   - FolderNote
 dg-publish: true
-status: Creation
 priority: High
 level:
   - "3"
+status: Done
 ---
 
 # Intro
@@ -31,4 +31,7 @@ Networking is how software becomes a system: protocols, latency, reliability, an
 > - [[Software Engineering/04 Networks/Architecture & Ops/Architecture & Ops|Architecture & Ops]]
 > - [[Software Engineering/04 Networks/Protocols/Protocols|Protocols]]
 > - [[Software Engineering/04 Networks/Transport & Sockets/Transport & Sockets|Transport & Sockets]]
+>
+> **Pages**
+> - [[Software Engineering/04 Networks/OSI Model|OSI Model]]
 <!-- whats-next:end -->

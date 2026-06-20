@@ -6,7 +6,7 @@ subtopic:
 level:
   - "3"
 priority: Medium
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 
@@ -67,6 +67,17 @@ Azure Functions and AWS Lambda support multiple trigger types:
 **Why it happens**: provider-specific bindings are convenient and reduce boilerplate.
 
 **Mitigation**: isolate business logic from the function host. The function handler should be a thin adapter that calls a provider-agnostic service. This makes the core logic portable even if the host is not.
+
+### Database Connection Exhaustion
+
+**What goes wrong**: under load the platform spins up hundreds of concurrent function instances, each opening its own database connections, and the database hits `max_connections` and rejects everyone — a self-inflicted outage exactly when traffic is highest.
+
+**Why it happens**: serverless instances are isolated and short-lived, so they **can't share an in-process connection pool** the way a long-running server does. Massive horizontal fan-out multiplies the connection count.
+
+**Mitigation**: front the database with a **server-side pooler** that all instances share (RDS Proxy, Azure SQL, PgBouncer) and cap per-instance pool size. See [[Software Engineering/03 Data Persistence/Connection Pooling|Connection Pooling]] — this is the canonical serverless data gotcha.
+
+> [!NOTE]
+> **"Serverless" now includes containers.** Beyond FaaS (Functions/Lambda), serverless *container* platforms — Azure Container Apps, AWS Fargate, Google Cloud Run — give scale-to-zero and pay-per-use for a normal containerized app, sidestepping the function programming model and much of the cold-start/portability friction. Often the better fit when you want serverless economics without rewriting to a function host.
 
 ## Tradeoffs
 

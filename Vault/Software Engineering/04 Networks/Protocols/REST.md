@@ -244,4 +244,5 @@ Decision heuristic:
 > - [[Software Engineering/04 Networks/Protocols/HTTP 2|HTTP 2]]
 > - [[Software Engineering/04 Networks/Protocols/RPC|RPC]]
 > - [[Software Engineering/04 Networks/Protocols/SMTP|SMTP]]
+> - [[Software Engineering/04 Networks/Protocols/WebSockets|WebSockets]]
 <!-- whats-next:end -->

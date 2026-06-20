@@ -6,7 +6,7 @@ subtopic:
 level:
   - "4"
 priority: High
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 
@@ -89,6 +89,28 @@ EF Core's `DbContext` already gives you Repository + UoW behavior. Adding explic
 - **Multiple persistence backends**: you need to support both SQL and a document store for different aggregate types.
 
 When NOT to add the abstraction: if you're building a simple CRUD service and the only consumer is EF Core, the extra interfaces add indirection without benefit. Inject `DbContext` directly.
+
+## The Specification Pattern
+
+There's a real tension in repository design: exposing `IQueryable<T>` leaks EF Core (bad), but adding a method per query (`FindByCustomer`, `FindPendingOlderThan`, `FindByStatusAndDateRange`…) explodes the interface. The **Specification pattern** resolves it by encapsulating query criteria as a first-class object that the repository translates:
+
+```csharp
+// A reusable, composable, testable query criterion — no IQueryable leaks
+public sealed class OrdersPendingOverdueSpec : Specification<Order>
+{
+    public OrdersPendingOverdueSpec(DateTime cutoff)
+    {
+        Where(o => o.Status == OrderStatus.Pending && o.CreatedAt < cutoff);
+        Include(o => o.LineItems);
+        OrderByDescending(o => o.CreatedAt);
+    }
+}
+
+// One repository method serves every query
+Task<IReadOnlyList<Order>> ListAsync(ISpecification<Order> spec, CancellationToken ct);
+```
+
+The spec is a plain object (unit-testable without a DB), the repository keeps one `ListAsync`, and EF Core leakage stays inside infrastructure. Libraries like **Ardalis.Specification** provide this for .NET. Use it when query variety would otherwise bloat the repository; skip it for a handful of fixed queries.
 
 ## Pitfalls
 

@@ -7,9 +7,9 @@ tags:
   - FolderNote
 dg-publish: true
 priority: High
-status: Creation
 level:
   - "3"
+status: Done
 ---
 
 # Intro
@@ -36,4 +36,5 @@ Protocols are the agreed-upon rules that let machines communicate: what to send,
 > - [[Software Engineering/04 Networks/Protocols/REST|REST]]
 > - [[Software Engineering/04 Networks/Protocols/RPC|RPC]]
 > - [[Software Engineering/04 Networks/Protocols/SMTP|SMTP]]
+> - [[Software Engineering/04 Networks/Protocols/WebSockets|WebSockets]]
 <!-- whats-next:end -->

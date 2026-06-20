@@ -6,7 +6,7 @@ subtopic:
 level:
   - "3"
 priority: Low
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 
@@ -74,6 +74,9 @@ Modern email delivery requires authentication records to avoid spam filters:
 
 Without these, emails from your domain will be marked as spam or rejected.
 
+> [!IMPORTANT]
+> **There are two "From" addresses, and the difference is the heart of email auth.** The **envelope sender** (`MAIL FROM`, also called Return-Path) is used at the SMTP layer for delivery and bounces; the **header From** is what the user sees in their client. SPF checks the *envelope* sender, DKIM signs the *message*, and **DMARC requires "alignment"** — that the header-From domain matches the SPF/DKIM domain. This is why mail sent through a third party (newsletters, `noreply@` services) can pass SPF yet fail DMARC: the envelope domain is the provider's, not yours. Bounces (NDRs) go to the envelope sender, which is also how mailing lists avoid loops.
+
 ## Pitfalls
 
 ### Missing SPF/DKIM/DMARC
@@ -127,4 +130,5 @@ Without these, emails from your domain will be marked as spam or rejected.
 > - [[Software Engineering/04 Networks/Protocols/HTTP 2|HTTP 2]]
 > - [[Software Engineering/04 Networks/Protocols/REST|REST]]
 > - [[Software Engineering/04 Networks/Protocols/RPC|RPC]]
+> - [[Software Engineering/04 Networks/Protocols/WebSockets|WebSockets]]
 <!-- whats-next:end -->

@@ -6,7 +6,7 @@ subtopic:
 level:
   - "1"
 priority: Medium
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 
@@ -27,6 +27,17 @@ Key: SHA1("ubuntu-22.04.iso")
 ```
 
 Each peer knows a subset of other peers (its "routing table"). Lookups route through O(log N) hops to find the peer responsible for a key. BitTorrent's DHT (Kademlia) allows torrent discovery without a central tracker.
+
+## P2P Architecture Spectrum
+
+"Pure P2P" is one end of a spectrum, not the only option:
+
+- **Structured vs unstructured** — *structured* networks place data deterministically by key (a DHT like Kademlia → O(log N) lookups), while *unstructured* networks (early Gnutella) discover content by **flooding** queries to neighbours — simple but O(N) and bandwidth-heavy.
+- **Pure P2P** — every peer is equal (classic BitTorrent swarm, blockchain). Maximum decentralization, hardest coordination.
+- **Hybrid / super-peer** — a few well-resourced peers take on coordination roles: BitTorrent **trackers** and original **Skype supernodes** helped peers find each other while data still flowed peer-to-peer. This blends P2P's bandwidth scaling with a central(ish) discovery point.
+- **Signaling-assisted** — WebRTC is peer-to-peer for *media* but needs a central **signaling server** just to exchange connection info (offer/answer) before the direct link forms.
+
+The practical takeaway: most "P2P" systems are hybrids — they use a small central or super-peer component for bootstrap/discovery, then move the heavy data transfer peer-to-peer.
 
 ## Real-World Applications
 
@@ -98,5 +109,6 @@ Peers join and leave constantly. High churn degrades DHT routing — routing tab
 >  [[Software Engineering/04 Networks/04 Networks|04 Networks]]
 >
 > **Pages**
+> - [[Software Engineering/04 Networks/Architecture & Ops/CDN|CDN]]
 > - [[Software Engineering/04 Networks/Architecture & Ops/VPN|VPN]]
 <!-- whats-next:end -->

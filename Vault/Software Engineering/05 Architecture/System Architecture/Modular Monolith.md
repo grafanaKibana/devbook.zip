@@ -6,12 +6,12 @@ subtopic:
 level:
   - "3"
 priority: High
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 
 # Intro
-A modular monolith is a single deployable application that is intentionally split into strict modules with explicit boundaries. It matters because you get most of the practical benefits people want from [[Microservices]] - clear ownership, clean contracts, and safer parallel development - without paying the full distributed systems tax on day one. Reach for it when your product is growing, domain boundaries are becoming clear, and your team does not want the operational overhead of many services yet. For most product teams, especially on .NET with Aspire, this is the pragmatic default: evolve architecture quality first, then distribute only where pressure proves it is worth it.
+A modular monolith is a single deployable application that is intentionally split into strict modules with explicit boundaries. It matters because you get most of the practical benefits people want from [[Software Engineering/05 Architecture/System Architecture/Microservices|Microservices]] - clear ownership, clean contracts, and safer parallel development - without paying the full distributed systems tax on day one. Reach for it when your product is growing, domain boundaries are becoming clear, and your team does not want the operational overhead of many services yet. For most product teams, especially on .NET with Aspire, this is the pragmatic default: evolve architecture quality first, then distribute only where pressure proves it is worth it.
 
 ## Mechanism
 Each module owns its own domain model, use cases, persistence rules, and public contract.
@@ -35,6 +35,9 @@ flowchart LR
     Orders -- order placed event --> Billing
     Inventory -- stock reserved event --> Orders
 ```
+
+> [!IMPORTANT]
+> **Data isolation reintroduces the cross-boundary consistency problem early.** The moment each module owns a separate `DbContext`/schema, a single use case that touches two modules can no longer wrap them in one ACID transaction — you face the same choice as [[Software Engineering/05 Architecture/Distributed Systems/Distributed Transactions|distributed transactions]]: accept eventual consistency via integration events (the **outbox pattern** to publish reliably) or keep the operation within one module. This is a *feature*, not a bug — it forces you to design real boundaries before extraction — but teams are often surprised that a "monolith" gives up easy cross-module transactions. (If modules share one database, you keep ACID but weaken the boundary.)
 
 ## .NET Implementation
 
@@ -150,7 +153,7 @@ If boundaries are real, extraction is mechanical instead of a rewrite.
 3. Move Inventory module runtime to its own deployable service with owned data.
 4. Keep Orders calling code unchanged because the contract shape stays the same.
 
-This is why modular monolith is often a safer first architecture than either a big unstructured monolith or premature microservices. It gives an incremental path from [[Monolith Architecture]] toward [[Microservices]] only when real scaling or release pressure appears.
+This is why modular monolith is often a safer first architecture than either a big unstructured monolith or premature microservices. It gives an incremental path from [[Software Engineering/05 Architecture/System Architecture/Monolith Architecture|Monolith Architecture]] toward [[Software Engineering/05 Architecture/System Architecture/Microservices|Microservices]] only when real scaling or release pressure appears.
 
 ## Pitfalls
 ### 1 Boundary erosion through shortcuts

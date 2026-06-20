@@ -6,7 +6,7 @@ subtopic:
 level:
   - "2"
 priority: High
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 # Template Method
@@ -169,6 +169,14 @@ Adding an Excel generator now means one new subclass — the fetch, validate, an
 **`DbContext.OnModelCreating()`** — EF Core's template method for model configuration. The base `DbContext` calls `OnModelCreating()` during model building; you override it to configure entities. The overall model-building algorithm is fixed; your configuration is the variable step.
 
 **`AuthenticationHandler<T>.HandleAuthenticateAsync()`** — ASP.NET Core authentication handlers use Template Method. The base class handles scheme registration, result caching, and challenge/forbid responses. `HandleAuthenticateAsync()` is the abstract step you implement.
+
+## Tradeoffs
+
+**Use it when**: several variants share one fixed algorithm skeleton and differ only in a few steps, and you want the shared orchestration in exactly one place. It's an inversion-of-control mechanism — the base class calls *down* to your overridden steps (the "Hollywood Principle," see [[Software Engineering/06 Development Practices/Principles/IoC (Holywood Principle)|IoC]]).
+
+**Don't reach for it when**: the varying steps need to change **at runtime**, or you'd be forcing an inheritance hierarchy just to share code — Template Method locks each variant into a single base class and is vulnerable to the **fragile base class** problem.
+
+**vs Strategy**: this is the key comparison. **Template Method = inheritance** (compile-time; subclasses *override* steps within a fixed skeleton). **[[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Strategy|Strategy]] = composition** (runtime; *inject* the varying behavior as an interface/delegate). Prefer Strategy when you want to swap behavior at runtime or follow "composition over inheritance"; prefer Template Method when the base genuinely owns most of the algorithm and variants only fill gaps. If two dimensions vary independently, that's **[[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Bridge|Bridge]]**, not a deepening inheritance tree.
 
 ## Questions
 

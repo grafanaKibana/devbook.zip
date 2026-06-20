@@ -14,9 +14,9 @@
 |------|------:|:--------:|
 | 01 Programming | 32 | ✅ |
 | 02 Computer Science | 12 | ✅ |
-| 03 Data Persistence | 6 | — |
-| 04 Networks | 11 | — |
-| 05 Architecture | 29 | — |
+| 03 Data Persistence | 6 | ✅ |
+| 04 Networks | 11 | ✅ |
+| 05 Architecture | 29 | ✅ |
 | 06 Development Practices | 11 | — |
 | 07 Security | 10 | — |
 | 08 SDLC | 2 | — |
@@ -243,3 +243,69 @@ Created 13 missing common algorithm/data-structure pages (status `Ready to Repea
 - **Algorithms/Sorting Algorithms**: Heap Sort.
 
 Educational-quality review of the existing CS corpus: pages follow a consistent, sound pedagogical template (Intro w/ concrete example → Mechanism → runnable C# → Diagram → named Pitfalls → Tradeoffs tables → interview-style Questions → References). No rewrites needed.
+
+---
+
+## 03 Data Persistence — filled ✅
+
+- **ACID** — added **MVCC / snapshot isolation** mechanics, the **write-skew** anomaly the standard table misses, distributed atomicity (**2PC vs saga**), and durability-isn't-binary nuance; cross-links to Replication, Distributed Transactions, Deadlocks.
+- **Indexes** — added the **composite-index leftmost-prefix rule** (with equality-before-range ordering) and **index types beyond the B+ tree** (hash, bitmap, GIN/GiST, R-tree).
+- **Entity Framework** *(weakest note — most added)* — `DbContext` lifetime/thread-safety, **transactions + optimistic concurrency** (`DbUpdateConcurrencyException`, execution-strategy retries), **bulk `ExecuteUpdate/Delete` + raw SQL**, **global query filters** (soft delete/multi-tenant), **cartesian-explosion / `AsSplitQuery`**.
+- **Caching** *(already excellent — one addition)* — **eviction under memory pressure** (`IMemoryCache` SizeLimit, Redis `maxmemory-policy`), cross-linked to the new LRU Cache page.
+- **Replication** *(already excellent — one addition)* — named the **CAP / PACELC** framing that underlies every model and sync/async choice.
+- **Sharding** *(already excellent — one addition)* — the **single hot key ("celebrity") problem**, distinct from hotspot shards, with split-key/dedicated-shard mitigations.
+
+---
+
+## 03 Data Persistence — new pages added ✅
+
+Created 3 missing crucial pages (status `Ready to Repeat`, full template, cross-linked):
+
+- **NoSQL Database Types** (NoSQL folder) — consolidated comparison of Document / Key-Value / Wide-Column / Graph, query-first modeling, polyglot persistence.
+- ~~**CAP Theorem** (top-level)~~ — **REMOVED**: turned out to duplicate the existing, more thorough `05 Architecture/Distributed Systems/CAP theorem` + `Consistency Models` (`Done`) pages. Merged the one unique nugget (CAP-C vs ACID-C) into the canonical page, repointed all links there, and deleted the duplicate. **Lesson: audit now includes `Done` notes, not just `Creation`, to avoid duplicating existing pages.**
+- **Connection Pooling** (top-level) — how pools work, HikariCP-style sizing, exhaustion/leaks, fleet × pool math, PgBouncer/RDS Proxy, serverless.
+
+(User declined the SQL-fundamentals bundle — Joins / Query Execution Plans / Locking — for now; candidates if revisited.)
+
+---
+
+## 04 Networks — filled ✅
+
+These notes were largely excellent; additions were targeted (no padding):
+
+- **TCP/IP** — added the missing **IP addressing** layer (IPv4/IPv6/NAT/ports), **MTU/MSS + Path MTU Discovery**, **TCP keep-alive**, window scaling/BDP, and named **head-of-line blocking**.
+- **UDP** — **multicast/broadcast** (a UDP-only capability) and **amplification/reflection DDoS** (spoofed source).
+- **Sockets** — **half-close (`Shutdown(Send)`)** and the **epoll/kqueue/IOCP** connection-scaling model; Links→References.
+- **HTTP** — **range requests (206) / chunked streaming / content negotiation / HSTS**; Links→References.
+- **HTTP/2** — **ALPN negotiation** (how h2 is selected) + h2c/gRPC note.
+- **gRPC** — **status-code error model** + **built-in declarative retry/hedging** (service config); Links→References.
+- **RPC** — **delivery semantics** (at-most-once / at-least-once / exactly-once = at-least-once + idempotency).
+- **DNS** — **encrypted DNS (DoH/DoT)** and **DNS as a traffic director** (round-robin/GeoDNS/weighted/anycast).
+- **SMTP** — the **envelope vs header From** distinction (the heart of SPF/DKIM/DMARC alignment) + bounces.
+- **VPN** — **mesh VPN** and the **ZTNA / Zero Trust** shift away from flat network access.
+- **Peer-2-Peer** — the **architecture spectrum** (structured/unstructured, pure/hybrid/super-peer, signaling-assisted).
+
+---
+
+## 04 Networks — new pages added ✅
+
+Created 3 pages (status `Ready to Repeat`, full template, cross-linked):
+
+- **WebSockets** (Protocols) — RFC 6455 full-duplex protocol; explicit contrast vs raw Sockets and HTTP, the HTTP `Upgrade` handshake, SSE/long-poll/gRPC-streaming tradeoffs, reconnection/scale-out/CSWSH pitfalls, SignalR cross-link.
+- **CDN** (Architecture & Ops) — edge caching, anycast/GeoDNS routing, cache keys/`s-maxage`/`Vary`, invalidation + cache-busting, edge compute & DDoS/WAF, private-content pitfalls.
+- **OSI Model** (top-level) — the 7 layers + units/examples, OSI↔TCP/IP mapping, and *why the layer number matters* (L4 vs L7 load balancers/firewalls, the gRPC pinning case).
+
+Notes: REST page already existed (no new one needed). **Load Balancing** still open — flagged as relevant (system-design staple; the L4/L7 distinction already bites in gRPC/OSI notes), pending user's call on whether/where to add it.
+
+---
+
+## 05 Architecture — filled ✅ (29 notes)
+
+Surveyed the whole folder first (per the new Done-inclusive rule); cross-linked to existing `Done` pages (CQRS, Event Sourcing, DI, Circuit Breaker, Microservices, Event-Driven Architecture, CAP, Consistency Models, Load Balancing, API Gateway, Message Queues) rather than duplicating. Several notes were already complete and needed nothing (CQS, Event Bus, GRASP, Rate Limiting, and 6 of the 12 GoF patterns). Genuine additions:
+
+- **Application Architecture** — Layered: the Hexagonal/Onion/Clean **one-family** clarification (+ ports/adapters). MVC/MVVM: **MVP + MVU/unidirectional** siblings. Clean: NetArchTest enforcement + full-path link fix. Plug-in: **collectible/unloadable ALC** + untrusted-code **out-of-process isolation**.
+- **System Architecture** — Monolith: **scales horizontally** behind a load balancer (myth-bust). Modular Monolith: **data-isolation reintroduces cross-boundary consistency** early (outbox). Serverless: **DB connection exhaustion** + serverless containers. SOA: the **ESB → API Gateway** evolution.
+- **Distributed Systems** — Distributed Transactions: **sagas sacrifice isolation** (write-skew/semantic locks). Idempotency: short-link fixes. MSMQ: filled the **empty Questions section**.
+- **Patterns** — Repository & UoW: the **Specification pattern**. DDD: **Context Mapping (ACL/Shared Kernel/…)**, **Subdomains (Core/Supporting/Generic)**, **Domain Service**, aggregate by-ID + one-per-transaction rules.
+- **GoF design patterns** — added the missing **Tradeoffs/when-to-use/vs-related** section to the 6 that lacked it (Iterator, Mediator, Memento, Template Method, Facade, Flyweight); the other 6 were already complete.
+- Normalized several short-form `[[wikilinks]]` to full paths (publish-safe).

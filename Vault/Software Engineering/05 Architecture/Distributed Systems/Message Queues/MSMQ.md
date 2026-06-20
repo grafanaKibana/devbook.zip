@@ -6,7 +6,7 @@ subtopic:
 level:
   - "2"
 priority: High
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 
@@ -81,6 +81,15 @@ For all new systems, prefer Azure Service Bus (cloud), RabbitMQ (self-hosted cro
 
 
 ## Questions
+
+> [!QUESTION]- Why is MSMQ a maintenance choice rather than a new-system choice?
+> It's **Windows-only** — it cannot run on Linux or in containers, which blocks containerization and cloud-native deployment. Its distributed-transaction story depends on **MSDTC**, which is fragile and unavailable in containers, and `System.Messaging` doesn't exist in .NET 5+. Modern cross-platform brokers (RabbitMQ, Azure Service Bus, Kafka) provide the same durable async messaging without the platform lock-in, so MSMQ is justified only where it's already deployed and migration cost isn't worth it.
+
+> [!QUESTION]- How does a transactional receive prevent message loss in MSMQ?
+> The message is removed from the queue **only if the transaction commits**. You `Begin` a `MessageQueueTransaction`, `Receive` under it, process the message, then `Commit`. If processing throws, you `Abort` and the message is **returned to the queue** for retry. This is the local-transaction equivalent of an ack: a crash mid-processing leaves the message available rather than consumed-and-lost (the same guarantee modern brokers give via manual ack / visibility timeout).
+
+> [!QUESTION]- What replaces MSMQ's MSDTC distributed transactions today?
+> The **Outbox pattern**: write the outgoing message to a table in the *same* local DB transaction as the domain change, then a background relay publishes it to the broker with retries (at-least-once + idempotent consumers). For multi-step cross-service workflows, a **Saga** with compensating transactions. Both avoid MSDTC's coordinator fragility — see [[Software Engineering/05 Architecture/Distributed Systems/Distributed Transactions|Distributed Transactions]].
 
 ## Receive with Transaction Example
 

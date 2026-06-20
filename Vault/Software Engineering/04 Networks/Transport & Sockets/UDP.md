@@ -6,7 +6,7 @@ subtopic:
 level:
   - "3"
 priority: Medium
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 # Intro
@@ -51,6 +51,8 @@ sequenceDiagram
 
 **QUIC (HTTP/3):** QUIC is built on UDP and implements its own reliable, ordered, multiplexed streams — getting TCP's reliability without TCP's head-of-line blocking.
 
+**Multicast / broadcast:** UDP can send **one datagram to many receivers** — *broadcast* to a whole subnet, or *multicast* to a group that subscribed to a multicast address (`224.0.0.0/4`). TCP is strictly point-to-point and cannot do this. It's used for service discovery (mDNS/Bonjour, SSDP), IPTV, and market-data feeds where one stream fans out to thousands of subscribers without the sender tracking each.
+
 ## C# Example
 
 ```csharp
@@ -76,6 +78,9 @@ UDP datagrams are limited to 65,507 bytes (65,535 minus headers). Larger payload
 
 **No built-in security**
 UDP has no authentication or encryption. Use DTLS (Datagram TLS) for encrypted UDP, or build on QUIC which includes TLS 1.3.
+
+**Amplification / reflection attacks**
+Because UDP is connectionless, the source address is trivially **spoofed** — there's no handshake to prove the sender. An attacker sends a small query with the victim's IP as the source to a server that returns a large response (DNS, NTP, memcached), and the server unwittingly floods the victim. The *amplification factor* (response ÷ request size) can be 50× or more, making UDP the basis of the largest DDoS attacks. Mitigations: rate-limit responses, disable open recursion/`monlist`, and deploy source-address validation (BCP 38) at the network edge.
 
 ## Questions
 
