@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/07-security/authentication/sso-single-sign-on/","dg-note-properties":{"topic":["Security"],"subtopic":["Authentication"],"level":["3"],"priority":"High","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/07-security/authentication/sso-single-sign-on/","dg-note-properties":{"topic":["Security"],"subtopic":["Authentication"],"level":["3"],"priority":"High","status":"Ready to Repeat"}}
 ---
 
 # Intro

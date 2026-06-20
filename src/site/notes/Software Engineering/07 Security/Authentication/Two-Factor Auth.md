@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/07-security/authentication/two-factor-auth/","dg-note-properties":{"topic":["Security"],"subtopic":["Authentication"],"level":["3"],"priority":"High","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/07-security/authentication/two-factor-auth/","dg-note-properties":{"topic":["Security"],"subtopic":["Authentication"],"level":["3"],"priority":"High","status":"Ready to Repeat"}}
 ---
 
 
@@ -38,6 +38,9 @@ if (string.IsNullOrEmpty(key))
 FIDO2 (Fast Identity Online) uses public-key cryptography with hardware security keys (YubiKey) or platform authenticators (Windows Hello, Touch ID). The private key never leaves the device. Phishing-resistant — the key is bound to the origin domain.
 
 **When to use**: High-security applications (banking, enterprise admin access). More secure than TOTP but requires hardware or platform support.
+
+> [!NOTE]
+> **Passkeys** are the consumer branding of FIDO2/WebAuthn *discoverable credentials* — synced across devices (iCloud Keychain, Google Password Manager) so you sign in with just Face ID/fingerprint and **no password**. Being phishing-resistant by design (bound to the origin), a passkey serves as first *and* second factor at once, which is why the industry is pushing passwordless. Terminology: **2FA** is exactly two factors; **MFA** is two *or more*.
 
 ```csharp
 // FIDO2 / WebAuthn with Fido2NetLib (server-side assertion verification)

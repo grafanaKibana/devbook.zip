@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/07-security/digital-signature/","dg-note-properties":{"topic":["Security"],"subtopic":["Security"],"level":["2"],"priority":"Medium","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/07-security/digital-signature/","dg-note-properties":{"topic":["Security"],"subtopic":["Security"],"level":["2"],"priority":"Medium","status":"Ready to Repeat"}}
 ---
 
 
@@ -111,6 +111,9 @@ bool isValid = ecdsa.VerifyData(message, signature, HashAlgorithmName.SHA256);
 > **Pages**
 > - [[Software Engineering/07 Security/Block-chain\|Block-chain]]
 > - [[Software Engineering/07 Security/Encryption\|Encryption]]
+> - [[Software Engineering/07 Security/Hashing\|Hashing]]
 > - [[Software Engineering/07 Security/JWT Bearer\|JWT Bearer]]
 > - [[Software Engineering/07 Security/OWASP\|OWASP]]
+> - [[Software Engineering/07 Security/Secrets Management\|Secrets Management]]
+> - [[Software Engineering/07 Security/Web Vulnerabilities\|Web Vulnerabilities]]
 <!-- whats-next:end -->

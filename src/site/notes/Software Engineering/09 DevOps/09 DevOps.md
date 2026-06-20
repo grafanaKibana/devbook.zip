@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/09-dev-ops/09-dev-ops/","tags":["FolderNote"],"dg-note-properties":{"topic":["DevOps"],"subtopic":[],"tags":["FolderNote"],"status":"Creation","priority":"High","level":["4"]}}
+{"dg-publish":true,"permalink":"/software-engineering/09-dev-ops/09-dev-ops/","tags":["FolderNote"],"dg-note-properties":{"topic":["DevOps"],"subtopic":[],"tags":["FolderNote"],"priority":"High","level":["4"],"status":"Done"}}
 ---
 
 
@@ -26,6 +26,7 @@ DevOps is about shortening the path from change to production safely: automation
 > **Pages**
 > - [[Software Engineering/09 DevOps/CI CD tools\|CI CD tools]]
 > - [[Software Engineering/09 DevOps/Docker\|Docker]]
+> - [[Software Engineering/09 DevOps/Infrastructure as Code\|Infrastructure as Code]]
 > - [[Software Engineering/09 DevOps/Kubernetes\|Kubernetes]]
 > - [[Software Engineering/09 DevOps/Observability\|Observability]]
 <!-- whats-next:end -->

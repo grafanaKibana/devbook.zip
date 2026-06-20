@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/06-development-practices/paradigms/integration-testing/","dg-note-properties":{"topic":["Development Practices"],"subtopic":["Paradigms"],"level":["3"],"priority":"High","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/06-development-practices/paradigms/integration-testing/","dg-note-properties":{"topic":["Development Practices"],"subtopic":["Paradigms"],"level":["3"],"priority":"High","status":"Ready to Repeat"}}
 ---
 
 
@@ -75,6 +75,15 @@ public class DatabaseFixture : IAsyncLifetime
     public Task DisposeAsync()    => _postgres.DisposeAsync().AsTask();
 }
 ```
+
+> [!WARNING]
+> **EF Core In-Memory is officially discouraged for testing.** Microsoft's own guidance says it is *not* a relational database — it ignores constraints, transactions, concurrency tokens, raw SQL, and most provider-specific behavior, so it gives **false confidence**. Prefer **SQLite in-memory** (a real relational engine, still fast and Docker-free) for lightweight DB tests, and **Testcontainers** with the actual database when you need full fidelity. Reserve EF In-Memory for the rare case where you truly only exercise LINQ-to-objects.
+
+## Where Integration Tests Sit: the Test Pyramid
+
+The **test pyramid** (Mike Cohn) is the standard model for *how many* of each test to write: a wide base of fast **unit** tests, fewer **integration** tests in the middle, and a thin top of slow **end-to-end** tests. The ratios follow from cost — unit tests are cheap and pinpoint failures; E2E tests are slow, flaky, and hard to diagnose. Integration tests are the pragmatic middle: enough to prove the wiring (DB, HTTP, serialization, DI) without the brittleness of a full E2E suite.
+
+The classic anti-pattern is the **"ice-cream cone"** — inverting the pyramid with mostly manual/E2E tests and few unit tests, producing a slow, flaky, expensive-to-maintain suite. Aim for many unit, some integration, few E2E.
 
 ## Pitfalls
 

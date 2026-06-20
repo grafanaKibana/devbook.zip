@@ -13,9 +13,18 @@ This folder covers the three most important:
 - **Greedy** — make the locally optimal choice at each step and prove it yields a global optimum.
 - **Backtracking** — explore choices depth-first, abandoning (pruning) branches that can't lead to a valid/better solution.
 
-They contrast with [[Software Engineering/02 Computer Science/Algorithms/Patterns/Patterns\|patterns]] (two pointers, sliding window), which are concrete coding idioms rather than design philosophies.
+| Paradigm | Strategy | Must hold to apply | Classic examples |
+|---|---|---|---|
+| [[Software Engineering/02 Computer Science/Algorithms/Paradigms/Dynamic Programming\|Dynamic Programming]] | Reuse answers to overlapping subproblems | Optimal substructure **and** overlapping subproblems | Knapsack, edit distance, longest common subsequence |
+| [[Software Engineering/02 Computer Science/Algorithms/Paradigms/Greedy Algorithms\|Greedy]] | Take the locally optimal choice, never revisit | Greedy-choice property (provable by an exchange argument) | Dijkstra, Huffman coding, interval scheduling |
+| [[Software Engineering/02 Computer Science/Algorithms/Paradigms/Backtracking\|Backtracking]] | DFS over choices, prune dead branches | Partial solutions can be rejected early | N-Queens, Sudoku, permutations/subsets |
 
-## Links
+> [!TIP]
+> A common progression: if backtracking explores the *same* subproblem repeatedly, adding memoisation turns it into dynamic programming; if a greedy choice can be proven always-correct, it replaces DP with something far cheaper.
+
+They contrast with [[Software Engineering/02 Computer Science/Algorithms/Patterns/Patterns\|patterns]] (two pointers, sliding window), which are concrete coding idioms rather than design philosophies. **Divide-and-conquer** (e.g. merge sort, binary search) is another major paradigm; it shows up across the [[Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms\|sorting]] notes.
+
+## References
 
 - [Algorithm design paradigms (Wikipedia)](https://en.wikipedia.org/wiki/Algorithmic_paradigm) — taxonomy of greedy, divide-and-conquer, DP, backtracking, and more.
 - [Competitive Programmer's Handbook (Laaksonen)](https://cses.fi/book/book.pdf) — free book with chapters on each paradigm.

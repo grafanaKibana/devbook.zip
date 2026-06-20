@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/07-security/owasp/","dg-note-properties":{"topic":["Security"],"subtopic":["Security"],"level":["4"],"priority":"High","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/07-security/owasp/","dg-note-properties":{"topic":["Security"],"subtopic":["Security"],"level":["4"],"priority":"High","status":"Ready to Repeat"}}
 ---
 
 
@@ -28,7 +28,7 @@ if (!authResult.Succeeded) return Forbid();
 ### A03: Injection
 **What**: Untrusted data sent to an interpreter as part of a command or query. SQL injection, LDAP injection, OS command injection.
 **Example**: `SELECT * FROM users WHERE name = '` + userInput + `'` — attacker inputs `' OR '1'='1`.
-**Mitigation**: Use parameterized queries (EF Core, Dapper with parameters). Never concatenate user input into SQL. Use ORMs. Validate and sanitize all input.
+**Mitigation**: Use parameterized queries (EF Core, Dapper with parameters). Never concatenate user input into SQL. Use ORMs. Validate and sanitize all input. See [[Software Engineering/07 Security/Web Vulnerabilities\|Web Vulnerabilities]] for SQLi, XSS, and CSRF in depth.
 
 ```csharp
 // Safe: parameterized query with Dapper
@@ -40,7 +40,7 @@ var user = await conn.QueryFirstOrDefaultAsync<User>(
 ### A04: Insecure Design
 **What**: Architectural flaws that cannot be fixed by correct implementation. Missing threat modeling, no rate limiting, no fraud controls.
 **Example**: A password reset flow that allows brute-forcing the reset token because there is no rate limit or token expiry.
-**Mitigation**: Threat model during design. Apply rate limiting (see [[Software Engineering/05 Architecture/Patterns/Rate Limiting\|Rate Limiting]]). Use secure design patterns.
+**Mitigation**: Threat model during design. Apply rate limiting (see [[Software Engineering/05 Architecture/Patterns/Resilience Patterns/Rate Limiting\|Rate Limiting]]). Use secure design patterns.
 
 ### A05: Security Misconfiguration
 **What**: Default credentials, unnecessary features enabled, verbose error messages, missing security headers.
@@ -151,5 +151,8 @@ else
 > - [[Software Engineering/07 Security/Block-chain\|Block-chain]]
 > - [[Software Engineering/07 Security/Digital Signature\|Digital Signature]]
 > - [[Software Engineering/07 Security/Encryption\|Encryption]]
+> - [[Software Engineering/07 Security/Hashing\|Hashing]]
 > - [[Software Engineering/07 Security/JWT Bearer\|JWT Bearer]]
+> - [[Software Engineering/07 Security/Secrets Management\|Secrets Management]]
+> - [[Software Engineering/07 Security/Web Vulnerabilities\|Web Vulnerabilities]]
 <!-- whats-next:end -->

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/09-dev-ops/ci-cd-tools/","dg-note-properties":{"topic":["DevOps"],"subtopic":[],"level":["3"],"priority":"High","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/09-dev-ops/ci-cd-tools/","dg-note-properties":{"topic":["DevOps"],"subtopic":[],"level":["3"],"priority":"High","status":"Ready to Repeat"}}
 ---
 
 
@@ -8,6 +8,9 @@
 CI/CD pipelines automate the path from code commit to production deployment. CI (Continuous Integration) runs builds and tests on every commit to catch regressions early. CD (Continuous Delivery/Deployment) automates the release process so that every passing build can be deployed with minimal manual intervention.
 
 The three dominant tools for .NET teams are GitHub Actions, Azure DevOps Pipelines, and Jenkins. They solve the same problem with different tradeoffs around hosting, cost, and ecosystem integration.
+
+> [!NOTE]
+> **The two "CD"s are different.** *Continuous **Delivery*** means every passing build is *automatically made ready* to release, but a human clicks the button to push to production (a manual approval gate). *Continuous **Deployment*** removes that gate — every commit that passes the pipeline goes to production automatically. Deployment requires more trust in your tests, observability, and rollback (it pairs naturally with [[Software Engineering/09 DevOps/Deployment Strategies/Deployment Strategies\|canary/blue-green deployments]] and feature flags). Most teams practice continuous *delivery*; continuous *deployment* is the further, optional step.
 
 ## GitHub Actions
 
@@ -122,7 +125,7 @@ pipeline {
 
 **Why it happens**: debugging steps (`env`, `printenv`, verbose HTTP logging) are added during troubleshooting and not removed.
 
-**Mitigation**: use the CI platform's secret masking (GitHub Actions masks secrets automatically; Azure DevOps masks pipeline variables marked as secret). Never print environment variables in pipeline steps. Audit pipeline logs before making a repo public.
+**Mitigation**: use the CI platform's secret masking (GitHub Actions masks secrets automatically; Azure DevOps masks pipeline variables marked as secret). Never print environment variables in pipeline steps. Audit pipeline logs before making a repo public. **Better still, eliminate long-lived cloud credentials entirely with OIDC**: GitHub Actions and Azure DevOps can exchange a short-lived, workload-scoped token with AWS/Azure/GCP via federated identity (workload identity federation), so there's no static `AWS_SECRET_ACCESS_KEY` or service-principal secret stored in the repo to leak or rotate.
 
 ### Flaky Tests Blocking Deploys
 
@@ -164,6 +167,7 @@ pipeline {
 >
 > **Pages**
 > - [[Software Engineering/09 DevOps/Docker\|Docker]]
+> - [[Software Engineering/09 DevOps/Infrastructure as Code\|Infrastructure as Code]]
 > - [[Software Engineering/09 DevOps/Kubernetes\|Kubernetes]]
 > - [[Software Engineering/09 DevOps/Observability\|Observability]]
 <!-- whats-next:end -->

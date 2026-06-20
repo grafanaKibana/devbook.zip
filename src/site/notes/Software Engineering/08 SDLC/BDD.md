@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/08-sdlc/bdd/","dg-note-properties":{"topic":["SDLC"],"subtopic":["SDLC"],"level":["1"],"priority":"Medium","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/08-sdlc/bdd/","dg-note-properties":{"topic":["SDLC"],"subtopic":["SDLC"],"level":["1"],"priority":"Medium","status":"Ready to Repeat"}}
 ---
 
 # Intro
@@ -39,7 +39,10 @@ Feature: User login
 
 ## SpecFlow in .NET
 
-SpecFlow is the .NET BDD framework that maps Gherkin scenarios to C# step definitions:
+> [!WARNING]
+> **SpecFlow is discontinued.** Tricentis stopped maintaining it in late 2024 (no .NET 9+ support, deprecated packages). The drop-in community successor is **[Reqnroll](https://reqnroll.net/)** — a fork with the same Gherkin/`[Binding]`/step-definition model, so the code below is identical apart from the namespaces. **Use Reqnroll for new projects**; migrating an existing SpecFlow suite is mostly a package swap.
+
+SpecFlow (and its successor Reqnroll) is the .NET BDD framework that maps Gherkin scenarios to C# step definitions:
 
 ```csharp
 // Step definitions — map Gherkin steps to C# code

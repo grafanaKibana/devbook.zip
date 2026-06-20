@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/06-development-practices/paradigms/functional-programming/","dg-note-properties":{"topic":["Development Practices"],"subtopic":["Paradigms"],"level":["3"],"priority":"Medium","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/06-development-practices/paradigms/functional-programming/","dg-note-properties":{"topic":["Development Practices"],"subtopic":["Paradigms"],"level":["3"],"priority":"Medium","status":"Ready to Repeat"}}
 ---
 
 
