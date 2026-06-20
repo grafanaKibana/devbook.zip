@@ -225,13 +225,64 @@ static string? ResolveRunFolder(string resultsDir, string runArg)
 
 #region Model building
 
-ReportModel BuildModel(string runFolder, string datasetPath)
+ReportModel BuildModel(string primaryRunFolder, string datasetPath)
 {
     var dataset = LoadDataset(datasetPath);
     var hasDataset = dataset.Count > 0;
+    var resultsRoot = Directory.GetParent(primaryRunFolder)?.FullName ?? primaryRunFolder;
 
-    // Discover configuration folders: RAG.Search.<Chunker>.<Reranker>, excluding
-    // the Summary.* aggregate folder and any stray files.
+    // Discover every run that carries aggregate summaries (needed for the cross-run
+    // comparison tab), most-recent first; always include the primary run.
+    var runFolders = Directory.Exists(resultsRoot)
+        ? Directory.GetDirectories(resultsRoot)
+            .Where(d => Directory.Exists(Path.Combine(d, "Summary.RAG.Search")))
+            .OrderByDescending(Directory.GetLastWriteTimeUtc)
+            .ToList()
+        : new List<string>();
+    if (!runFolders.Any(d => PathEquals(d, primaryRunFolder)))
+    {
+        runFolders.Insert(0, primaryRunFolder);
+    }
+
+    var runsList = new List<object?>();          // [{ run, configs }] for the comparison tab
+    RunBuild? primary = null;
+
+    foreach (var rf in runFolders)
+    {
+        var isPrimary = PathEquals(rf, primaryRunFolder);
+        var rb = BuildRunData(rf, dataset, isPrimary);
+        if (rb.ConfigCount == 0) continue;
+        runsList.Add(new Dictionary<string, object?> { ["run"] = rb.Run, ["configs"] = rb.Configs });
+        if (isPrimary) primary = rb;
+    }
+
+    primary ??= BuildRunData(primaryRunFolder, dataset, true);
+
+    var data = new Dictionary<string, object?>
+    {
+        ["run"] = primary.Run,
+        ["configs"] = primary.Configs,
+        ["winnerId"] = primary.WinnerId,
+        ["chunkers"] = primary.Chunkers,
+        ["rerankers"] = primary.Rerankers,
+        ["rShort"] = primary.RShort,
+        ["hasDataset"] = hasDataset,
+        ["cases"] = primary.Cases,
+        ["perCase"] = primary.PerCase,
+        ["metricDefs"] = primary.MetricDefs,
+        ["runs"] = runsList,
+    };
+
+    return new ReportModel(data, primary.RunId, primary.ConfigCount, primary.MaxCases, hasDataset);
+}
+
+// Builds one run: aggregate per-config metrics (always) plus, when wantDetail is
+// set (the primary run), the rich per-query drill-down records, the case map and
+// the static metric definitions. Reading per-case values is also what powers the
+// bootstrap CIs, so it runs for every summarised run.
+RunBuild BuildRunData(string runFolder, Dictionary<string, DatasetCase> dataset, bool wantDetail)
+{
+    var hasDataset = dataset.Count > 0;
     var configDirs = Directory.GetDirectories(runFolder)
         .Where(d =>
         {
@@ -243,8 +294,9 @@ ReportModel BuildModel(string runFolder, string datasetPath)
 
     var summaryDir = Path.Combine(runFolder, "Summary.RAG.Search");
 
-    var cases = new Dictionary<string, object?>();           // caseId -> { query, difficulty, expected[] }
-    var perCase = new Dictionary<string, object?>();         // configId -> [ { id, rc, sr, p, r[] } ]
+    var cases = new Dictionary<string, object?>();
+    var perCase = new Dictionary<string, object?>();
+    var metricDefs = new Dictionary<string, object?>();
     var configs = new List<Dictionary<string, object?>>();
     var seenChunkers = new List<string>();
     var seenRerankers = new List<string>();
@@ -257,10 +309,7 @@ ReportModel BuildModel(string runFolder, string datasetPath)
         var folderName = Path.GetFileName(configDir);
         var rest = folderName["RAG.Search.".Length..]; // "<Chunker>.<Reranker>"
         var dot = rest.IndexOf('.');
-        if (dot < 0)
-        {
-            continue;
-        }
+        if (dot < 0) continue;
 
         var chunker = rest[..dot];
         var reranker = rest[(dot + 1)..];
@@ -269,7 +318,6 @@ ReportModel BuildModel(string runFolder, string datasetPath)
         if (!seenChunkers.Contains(chunker)) seenChunkers.Add(chunker);
         if (!seenRerankers.Contains(reranker)) seenRerankers.Add(reranker);
 
-        // ---- Per-case pass: collect bootstrap arrays + drill-down records ----
         var chunkArrays = new MetricArrays();
         var sectionArrays = new MetricArrays();
         var perCaseRows = new List<object?>();
@@ -277,14 +325,8 @@ ReportModel BuildModel(string runFolder, string datasetPath)
         foreach (var caseFile in Directory.EnumerateFiles(configDir, "*.json"))
         {
             JsonDocument doc;
-            try
-            {
-                doc = JsonDocument.Parse(File.ReadAllText(caseFile));
-            }
-            catch
-            {
-                continue;
-            }
+            try { doc = JsonDocument.Parse(File.ReadAllText(caseFile)); }
+            catch { continue; }
 
             using (doc)
             {
@@ -292,11 +334,22 @@ ReportModel BuildModel(string runFolder, string datasetPath)
                 if (!root.TryGetProperty("iterationName", out var idEl)) continue;
                 var caseId = idEl.GetString() ?? Path.GetFileNameWithoutExtension(caseFile);
 
-                if (root.TryGetProperty("creationTime", out var ctEl)
-                    && ctEl.TryGetDateTime(out var ct))
+                if (root.TryGetProperty("creationTime", out var ctEl) && ctEl.TryGetDateTime(out var ct))
                 {
                     if (latestCaseTime is null || ct > latestCaseTime) latestCaseTime = ct;
                 }
+
+                if (!root.TryGetProperty("evaluationResult", out var evalEl)
+                    || !evalEl.TryGetProperty("metrics", out var metrics))
+                {
+                    continue;
+                }
+
+                // Always collected — these feed the bootstrap CIs for every run.
+                chunkArrays.Add(metrics, MetricNames.Chunk);
+                sectionArrays.Add(metrics, MetricNames.Section);
+
+                if (!wantDetail) continue;
 
                 var query = ExtractText(root, "messages") ?? "";
                 var retrievedText = ExtractModelResponseText(root) ?? "";
@@ -306,29 +359,48 @@ ReportModel BuildModel(string runFolder, string datasetPath)
                     .ToArray();
                 if (retrieved.Length > topKObserved) topKObserved = retrieved.Length;
 
-                if (!root.TryGetProperty("evaluationResult", out var evalEl)
-                    || !evalEl.TryGetProperty("metrics", out var metrics))
+                // Per-metric detail for the expandable drill-down: value, rating,
+                // and the authoritative per-case interpretation.reason.
+                Dictionary<string, object?> MetricDetail(string name) => new()
                 {
-                    continue;
-                }
+                    ["v"] = GetValue(metrics, name),
+                    ["rt"] = GetRating(metrics, name),
+                    ["in"] = GetInterpReason(metrics, name),
+                };
+                var dm = new List<object?>
+                {
+                    MetricDetail("RecallAtR"),
+                    MetricDetail("NDCGAt10"),
+                    MetricDetail("HitRateAt1"),
+                    MetricDetail("MRRAt10"),
+                    MetricDetail("MAPAt10"),
+                };
 
-                chunkArrays.Add(metrics, MetricNames.Chunk);
-                sectionArrays.Add(metrics, MetricNames.Section);
-
-                var recall = GetValue(metrics, "RecallAtR");
-                var sectionRecall = GetValue(metrics, "SectionRecallAtR");
-                var failed = GetFailed(metrics, "RecallAtR");
+                var credited = GetDiagnostic(metrics, "ScoreAverage", "CreditedScoreAverage");
+                var uncredited = GetDiagnostic(metrics, "ScoreAverage", "UncreditedScoreAverage");
 
                 perCaseRows.Add(new Dictionary<string, object?>
                 {
                     ["id"] = caseId,
-                    ["rc"] = recall,
-                    ["sr"] = sectionRecall,
-                    ["p"] = !failed,            // pass = RecallAtR not flagged failed (authoritative)
+                    ["p"] = !GetFailed(metrics, "RecallAtR"),     // authoritative pass/fail
                     ["r"] = retrieved,
+                    ["dm"] = dm,
+                    ["diag"] = new List<object?>
+                    {
+                        credited is null ? null : Round(credited),
+                        uncredited is null ? null : Round(uncredited),
+                    },
                 });
 
-                // Register the case once (query is identical across configs).
+                if (metricDefs.Count == 0)
+                {
+                    metricDefs["recall"] = GetDef(metrics, "RecallAtR");
+                    metricDefs["ndcg"] = GetDef(metrics, "NDCGAt10");
+                    metricDefs["hit"] = GetDef(metrics, "HitRateAt1");
+                    metricDefs["mrr"] = GetDef(metrics, "MRRAt10");
+                    metricDefs["map"] = GetDef(metrics, "MAPAt10");
+                }
+
                 if (!cases.ContainsKey(caseId))
                 {
                     dataset.TryGetValue(caseId, out var dsCase);
@@ -343,32 +415,26 @@ ReportModel BuildModel(string runFolder, string datasetPath)
         }
 
         if (perCaseRows.Count > maxCases) maxCases = perCaseRows.Count;
-        perCase[configId] = perCaseRows;
+        if (wantDetail) perCase[configId] = perCaseRows;
 
-        // ---- Summary aggregate: authoritative point estimates + ratings + CIs ----
         var summaryFile = Path.Combine(summaryDir, $"{chunker}.{reranker}.json");
         JsonElement? summaryMetrics = null;
-        JsonDocument? summaryDoc = null;
         if (File.Exists(summaryFile))
         {
             try
             {
-                summaryDoc = JsonDocument.Parse(File.ReadAllText(summaryFile));
+                using var summaryDoc = JsonDocument.Parse(File.ReadAllText(summaryFile));
                 if (summaryDoc.RootElement.TryGetProperty("evaluationResult", out var er)
                     && er.TryGetProperty("metrics", out var sm))
                 {
                     summaryMetrics = sm.Clone();
                 }
             }
-            catch { /* fall back to per-case means below */ }
-            finally { summaryDoc?.Dispose(); }
+            catch { /* fall back to per-case means in BuildLevel */ }
         }
 
         var chunkLevel = BuildLevel(summaryMetrics, MetricNames.Chunk, chunkArrays, configId, "chunk");
         var sectionLevel = BuildLevel(summaryMetrics, MetricNames.Section, sectionArrays, configId, "section");
-
-        var ci = IndexOfOrAppend(ChunkerOrder, chunker);
-        var ri = IndexOfOrAppend(RerankerOrder, reranker);
 
         configs.Add(new Dictionary<string, object?>
         {
@@ -376,31 +442,21 @@ ReportModel BuildModel(string runFolder, string datasetPath)
             ["chunker"] = chunker,
             ["reranker"] = reranker,
             ["rShort"] = RerankerShort(reranker),
-            ["ci"] = ci,
-            ["ri"] = ri,
-            ["levels"] = new Dictionary<string, object?>
-            {
-                ["chunk"] = chunkLevel,
-                ["section"] = sectionLevel,
-            },
+            ["ci"] = IndexOfOrAppend(ChunkerOrder, chunker),
+            ["ri"] = IndexOfOrAppend(RerankerOrder, reranker),
+            ["levels"] = new Dictionary<string, object?> { ["chunk"] = chunkLevel, ["section"] = sectionLevel },
         });
     }
 
-    // Order axes canonically (known names first in canonical order, unknowns appended).
     var chunkers = OrderKnownFirst(seenChunkers, ChunkerOrder);
     var rerankers = OrderKnownFirst(seenRerankers, RerankerOrder);
 
-    // Winner: highest chunk-level RecallAtR.
     string? winnerId = null;
     var bestRecall = double.NegativeInfinity;
     foreach (var c in configs)
     {
         var v = LevelRecallValue(c);
-        if (v > bestRecall)
-        {
-            bestRecall = v;
-            winnerId = (string)c["id"]!;
-        }
+        if (v > bestRecall) { bestRecall = v; winnerId = (string)c["id"]!; }
     }
 
     var runId = Path.GetFileName(runFolder);
@@ -417,26 +473,14 @@ ReportModel BuildModel(string runFolder, string datasetPath)
         ["rerankersN"] = rerankers.Count,
         ["topK"] = topKObserved,
         ["dataset"] = hasDataset ? $"shared ({cases.Count})" : "—",
+        ["note"] = $"{sampleCount} queries · {configs.Count} configs",
         ["generatedAt"] = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm 'UTC'", CultureInfo.InvariantCulture),
     };
 
     var rShort = new Dictionary<string, object?>();
-    foreach (var r in rerankers) rShort[r] = RerankerShort(r);
+    foreach (var rr in rerankers) rShort[rr] = RerankerShort(rr);
 
-    var data = new Dictionary<string, object?>
-    {
-        ["run"] = run,
-        ["configs"] = configs,
-        ["winnerId"] = winnerId,
-        ["chunkers"] = chunkers,
-        ["rerankers"] = rerankers,
-        ["rShort"] = rShort,
-        ["hasDataset"] = hasDataset,
-        ["cases"] = cases,
-        ["perCase"] = perCase,
-    };
-
-    return new ReportModel(data, runId, configs.Count, maxCases, hasDataset);
+    return new RunBuild(run, configs, winnerId, chunkers, rerankers, rShort, cases, perCase, metricDefs, runId, configs.Count, maxCases);
 }
 
 static Dictionary<string, object?> BuildLevel(
@@ -639,6 +683,63 @@ static (double?, double?) GetStoredCI(JsonElement metrics, string name)
 
     return (null, null);
 }
+
+static string GetInterpReason(JsonElement metrics, string name)
+{
+    if (metrics.TryGetProperty(name, out var m)
+        && m.TryGetProperty("interpretation", out var it)
+        && it.TryGetProperty("reason", out var r)
+        && r.ValueKind == JsonValueKind.String)
+    {
+        return r.GetString() ?? "";
+    }
+
+    return "";
+}
+
+static string GetDef(JsonElement metrics, string name)
+{
+    // The per-case `reason` is the static metric definition (summaries append an
+    // "Aggregated as…" sentence; per-case files do not).
+    if (metrics.TryGetProperty(name, out var m)
+        && m.TryGetProperty("reason", out var r)
+        && r.ValueKind == JsonValueKind.String)
+    {
+        return r.GetString() ?? "";
+    }
+
+    return "";
+}
+
+static double? GetDiagnostic(JsonElement metrics, string metricName, string diagnosticKey)
+{
+    if (metrics.TryGetProperty(metricName, out var m)
+        && m.TryGetProperty("diagnostics", out var diags)
+        && diags.ValueKind == JsonValueKind.Array)
+    {
+        var prefix = diagnosticKey + "=";
+        foreach (var d in diags.EnumerateArray())
+        {
+            if (d.TryGetProperty("message", out var msg)
+                && msg.ValueKind == JsonValueKind.String)
+            {
+                var s = msg.GetString() ?? "";
+                if (s.StartsWith(prefix, StringComparison.Ordinal)
+                    && double.TryParse(s[prefix.Length..], NumberStyles.Float, CultureInfo.InvariantCulture, out var val))
+                {
+                    return val;
+                }
+            }
+        }
+    }
+
+    return null;
+}
+
+static bool PathEquals(string a, string b) => string.Equals(
+    Path.GetFullPath(a).TrimEnd(Path.DirectorySeparatorChar),
+    Path.GetFullPath(b).TrimEnd(Path.DirectorySeparatorChar),
+    StringComparison.OrdinalIgnoreCase);
 
 #endregion
 
@@ -843,6 +944,20 @@ static void OpenInBrowser(string path)
 // =============================================================================
 
 record ReportModel(Dictionary<string, object?> Data, string RunId, int ConfigCount, int MaxCases, bool HasDataset);
+
+record RunBuild(
+    Dictionary<string, object?> Run,
+    List<Dictionary<string, object?>> Configs,
+    string? WinnerId,
+    List<string> Chunkers,
+    List<string> Rerankers,
+    Dictionary<string, object?> RShort,
+    Dictionary<string, object?> Cases,
+    Dictionary<string, object?> PerCase,
+    Dictionary<string, object?> MetricDefs,
+    string RunId,
+    int ConfigCount,
+    int MaxCases);
 
 record DatasetCase(string? Difficulty, List<object?> Expected);
 

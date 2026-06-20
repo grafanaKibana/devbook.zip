@@ -9,7 +9,7 @@
   html,body{margin:0;padding:0}
   body{min-height:100vh;background:#1b1a17}
   button{font:inherit}
-  select{font:inherit}
+  select,input{font:inherit}
   ::selection{background:rgba(120,140,200,.25)}
   ::-webkit-scrollbar{height:10px;width:10px}
   ::-webkit-scrollbar-thumb{background:rgba(128,128,128,.35);border-radius:6px}
@@ -21,10 +21,9 @@
 <script>
 const DATA = "__DC_DATA__";
 
-/* ---------- numeric / colour helpers (ported from the design's DCLogic) ---------- */
-const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
-const fmt = (v,d)=> (v==null||isNaN(v)) ? '—' : Number(v).toFixed(d===undefined?3:d);
-
+/* ---------- numeric / colour helpers ---------- */
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const fmt=(v,d)=> (v==null||isNaN(v)) ? '—' : Number(v).toFixed(d===undefined?3:d);
 function viridisRGB(t){
   t=clamp(t,0,1);
   const A=[[68,1,84],[59,82,139],[33,144,141],[93,201,99],[253,231,37]];
@@ -32,10 +31,12 @@ function viridisRGB(t){
   const a=A[i], b=A[Math.min(i+1,A.length-1)];
   return [Math.round(a[0]+(b[0]-a[0])*f),Math.round(a[1]+(b[1]-a[1])*f),Math.round(a[2]+(b[2]-a[2])*f)];
 }
-const viridis = t=>{const c=viridisRGB(t);return `rgb(${c[0]},${c[1]},${c[2]})`;};
+const viridis=t=>{const c=viridisRGB(t);return `rgb(${c[0]},${c[1]},${c[2]})`;};
 function txtOn(t){const c=viridisRGB(t);const L=(0.2126*c[0]+0.7152*c[1]+0.0722*c[2])/255;return L>0.62?'#16140c':'#f6f5ef';}
 function ratingT(r){const m={Exceptional:0.95,Good:0.74,Average:0.5,Poor:0.3,Unacceptable:0.07,Unknown:0.5};return m[r]!==undefined?m[r]:0.5;}
-
+function rate(v){return v>=0.85?'Exceptional':v>=0.72?'Good':v>=0.55?'Average':v>=0.4?'Poor':'Unacceptable';}
+function hexRGB(h){h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
+function hexTint(hex,a){const c=hexRGB(hex);return `rgba(${c[0]},${c[1]},${c[2]},${a})`;}
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function css(o){return Object.keys(o).map(k=>{const p=k.charAt(0)==='-'?k:k.replace(/[A-Z]/g,m=>'-'+m.toLowerCase());return p+':'+o[k];}).join(';');}
 
@@ -48,6 +49,8 @@ function theme(){
     : {bg:'#f1f0ea',panel:'#fbfaf5',panel2:'#e9e8df',line:'#d8d6ca',line2:'#c3c1b3',fg:'#1a1a16',fg2:'#56544b',fg3:'#8a887c',accent:'#1a1a16',accentFg:'#fbfaf5'};
   t.fhead=mono;t.fbody=mono;t.fnum=mono;t.rad='0px';t.rad2='2px';t.shadow='none';t.shadowLg='none';t.warn='#caa23a';
   t.barbg = dark ? 'rgba(20,20,18,.72)' : 'rgba(255,255,255,.72)';
+  t.ok = dark ? '#4ec77d' : '#1d8a4a';
+  t.danger = dark ? '#ef6a52' : '#cf3a24';
   return t;
 }
 function rootStyle(){
@@ -72,14 +75,11 @@ function metricMeta(){return {
 function getM(cfg,key){const lv=cfg.levels[state.level];return key==='score'?{v:lv.score}:key==='n'?{v:lv.n}:lv[key];}
 function configLabel(c){return c.chunker+' × '+c.rShort;}
 function rerankerLong(r){return r.replace(/([A-Z])/g,' $1').trim();}
-
 function segBtn(active){return {
   fontFamily:'var(--fbody)',fontSize:'12px',fontWeight:'600',padding:'5px 11px',
   border:'none',borderRadius:'calc(var(--rad) - 1px)',cursor:'pointer',whiteSpace:'nowrap',
-  background:active?'var(--accent)':'transparent',color:active?'var(--accentFg)':'var(--fg2)',
-  transition:'background .12s'
+  background:active?'var(--accent)':'transparent',color:active?'var(--accentFg)':'var(--fg2)',transition:'background .12s'
 };}
-
 function bestBy(dim){
   const groups={};const key=state.metric;
   DATA.configs.forEach(c=>{const g=dim==='reranker'?c.rShort:c.chunker;const lv=c.levels[state.level];const v=key==='empty'?lv.empty.v:lv[key].v;(groups[g]=groups[g]||[]).push(v);});
@@ -92,16 +92,24 @@ function bestBy(dim){
 function parseLabel(s){const i=s.indexOf('#');return {note:i>=0?s.slice(0,i):s, head:i>=0?s.slice(i+1):'', raw:s};}
 function norm(s){return String(s==null?'':s).trim().toLowerCase();}
 function matchExp(e,r){return norm(e.note)===norm(r.note) && (e.heading ? norm(e.heading)===norm(r.head) : true);}
+const METRIC_KEYS=['recall','ndcg','hit','mrr','map'];
+const METRIC_LABELS={recall:'RecallAtR',ndcg:'NDCG@10',hit:'HitRate@1',mrr:'MRR@10',map:'MAP@10'};
 
 /* =========================================================================== */
 /* state                                                                       */
 /* =========================================================================== */
+const RUNS = DATA.runs || [];
+const HAS_COMPARE = RUNS.length >= 2;
+const PRIMARY_ID = DATA.run.id;
+const BASELINE_ID = (RUNS.find(r=>r.run.id!==PRIMARY_ID) || {run:{}}).run.id || PRIMARY_ID;
 const state = {
-  mode:'light',
+  tab:'run', mode:'light',
   metric:'recall', level:'chunk',
   sortKey:'recall', sortDir:'desc',
   drill: DATA.winnerId || (DATA.configs[0] && DATA.configs[0].id),
-  diff:'all', failedOnly:false
+  diff:'all', failedOnly:false, expanded:null, search:'',
+  cmpA: BASELINE_ID, cmpB: PRIMARY_ID, cmpLevel:'chunk', cmpMetric:'recall', cmpSort:'delta',
+  _focusSearch:false
 };
 
 /* =========================================================================== */
@@ -110,6 +118,7 @@ const state = {
 function render(){
   const root=document.getElementById('app');
   const S=state, M=metricMeta(), mm=M[S.metric];
+  const th=theme(), isDark=S.mode==='dark';
   const configs=DATA.configs, lvKey=S.level;
   const levelLabel=S.level==='chunk'?'chunk':'section';
   root.setAttribute('style', css(rootStyle()));
@@ -128,8 +137,29 @@ function render(){
     </button>
   </div>`;
 
-  /* ---- run metadata ---- */
+  /* ---- tabs ---- */
+  const tabDefs = HAS_COMPARE ? [['run','Single run'],['cmp','Cross-run comparison']] : [['run','Single run']];
+  const tabBar = `<div style="display:flex; align-items:center; border-bottom:1px solid var(--line); margin-bottom:24px">${
+    tabDefs.map(([k,l])=>{
+      const active=S.tab===k;
+      const st={fontFamily:'var(--fbody)',fontSize:'13px',fontWeight:'600',padding:'9px 4px',marginRight:'22px',border:'none',borderBottom:'2px solid '+(active?'var(--accent)':'transparent'),background:'transparent',color:active?'var(--fg)':'var(--fg3)',cursor:'pointer'};
+      return `<button data-act="tab" data-val="${k}" style="${css(st)}">${l}</button>`;
+    }).join('')}</div>`;
+
+  const body = (S.tab==='cmp' && HAS_COMPARE) ? renderCompare(M,th,isDark) : renderRunTab(M,mm,th,isDark,configs,lvKey,levelLabel);
+
+  root.innerHTML = topBar + `<div style="max-width:1280px; margin:0 auto; padding:18px 26px 90px">${tabBar}${body}</div>`;
+  wire();
+}
+
+/* =========================================================================== */
+/* single-run tab                                                              */
+/* =========================================================================== */
+function renderRunTab(M,mm,th,isDark,configs,lvKey,levelLabel){
+  const S=state;
   const r=DATA.run;
+
+  /* run metadata */
   const meta=[
     {k:'Run',v:r.id},{k:'Finished',v:r.finished},
     {k:'Test cases',v:r.cases+' queries'},{k:'Configs',v:r.configs},
@@ -142,7 +172,7 @@ function render(){
         <div style="font-family:var(--fnum); font-size:14px; font-weight:600; color:var(--fg); font-variant-numeric:tabular-nums; overflow-wrap:anywhere">${esc(m.v)}</div>
       </div>`).join('');
 
-  /* ---- verdict ---- */
+  /* verdict */
   const win=configs.find(c=>c.id===DATA.winnerId)||configs[0];
   const wc=win.levels.chunk.recall, ws=win.levels.section.recall;
   const sorted=configs.slice().sort((a,b)=>b.levels.chunk.recall.v-a.levels.chunk.recall.v);
@@ -203,16 +233,12 @@ function render(){
       </div>
     </div>`;
 
-  /* ---- matrix / heatmap ---- */
+  /* matrix (sorted: best top-left, worst bottom-right) */
   const vals=configs.map(c=>getM(c,S.metric).v);
   let domLo=Math.min(...vals), domHi=Math.max(...vals);
   const pad=(domHi-domLo)*0.04||0.01; domLo-=pad; domHi+=pad;
   const bestVal=mm.better==='low'?Math.min(...vals):Math.max(...vals);
   const normCell=v=>{const t=(v-domLo)/((domHi-domLo)||1);return mm.better==='low'?1-t:t;};
-  // Sort axes so the strongest configuration sits top-left and the weakest
-  // bottom-right: order chunkers (rows) and rerankers (cols) by their marginal
-  // mean on the selected metric/level — descending for higher-is-better,
-  // ascending for EmptyRate (lower is better).
   const marginalMean=(kind,name)=>{const xs=configs.filter(c=>c[kind]===name).map(c=>getM(c,S.metric).v).filter(v=>v!=null&&!isNaN(v));return xs.length?xs.reduce((a,b)=>a+b,0)/xs.length:(mm.better==='low'?Infinity:-Infinity);};
   const sortAxis=(names,kind)=>names.slice().sort((a,b)=>{const av=marginalMean(kind,a),bv=marginalMean(kind,b);return mm.better==='low'?av-bv:bv-av;});
   const rowOrder=sortAxis(DATA.chunkers,'chunker');
@@ -232,9 +258,7 @@ function render(){
           ${isBest?'<span style="position:absolute; top:5px; right:7px; font-size:9px; font-weight:700; letter-spacing:.04em">BEST</span>':''}
         </button>`;
     }).join('');
-    return `<div style="display:grid; grid-template-columns:128px repeat(${nCols},1fr); border-top:1px solid var(--line)">
-        <div style="padding:0 13px; display:flex; align-items:center; font-size:12.5px; font-weight:600; color:var(--fg)">${esc(ch)}</div>${cells}
-      </div>`;
+    return `<div style="display:grid; grid-template-columns:128px repeat(${nCols},1fr); border-top:1px solid var(--line)"><div style="padding:0 13px; display:flex; align-items:center; font-size:12.5px; font-weight:600; color:var(--fg)">${esc(ch)}</div>${cells}</div>`;
   }).join('');
   const scaleNote = mm.better==='low'?'Lower is better, so the scale is inverted — brighter = fewer empty results.':'Brighter = better. Scale is stretched to the observed range to sharpen contrast.';
   const dominate=`On ${mm.label}, ${bestReranker} is the strongest reranker on average and ${bestChunker} the strongest chunker.`;
@@ -248,21 +272,13 @@ function render(){
           <div style="font-size:12.5px; color:var(--fg3); margin-top:2px">${DATA.chunkers.length} chunkers × ${DATA.rerankers.length} rerankers · same ${r.cases} queries · color = ${esc(mm.label)} (${levelLabel}) · sorted best ↖ worst ↘</div>
         </div>
         <div style="display:flex; gap:14px; flex-wrap:wrap; align-items:center">
-          <div style="display:flex; align-items:center; gap:7px">
-            <span style="font-size:11px; color:var(--fg3); text-transform:uppercase; letter-spacing:.07em">Metric</span>
-            <div style="display:flex; background:var(--panel2); border:1px solid var(--line); border-radius:var(--rad); padding:2px">${metricBtns}</div>
-          </div>
-          <div style="display:flex; align-items:center; gap:7px">
-            <span style="font-size:11px; color:var(--fg3); text-transform:uppercase; letter-spacing:.07em">Level</span>
-            <div style="display:flex; background:var(--panel2); border:1px solid var(--line); border-radius:var(--rad); padding:2px">${levelBtns}</div>
-          </div>
+          <div style="display:flex; align-items:center; gap:7px"><span style="font-size:11px; color:var(--fg3); text-transform:uppercase; letter-spacing:.07em">Metric</span><div style="display:flex; background:var(--panel2); border:1px solid var(--line); border-radius:var(--rad); padding:2px">${metricBtns}</div></div>
+          <div style="display:flex; align-items:center; gap:7px"><span style="font-size:11px; color:var(--fg3); text-transform:uppercase; letter-spacing:.07em">Level</span><div style="display:flex; background:var(--panel2); border:1px solid var(--line); border-radius:var(--rad); padding:2px">${levelBtns}</div></div>
         </div>
       </div>
       <div style="display:grid; grid-template-columns:minmax(0,1fr) 250px; gap:20px; align-items:start">
         <div style="border:1px solid var(--line); border-radius:var(--rad2); overflow:hidden; background:var(--panel); box-shadow:var(--shadow)">
-          <div style="display:grid; grid-template-columns:128px repeat(${nCols},1fr)">
-            <div style="padding:11px 13px; font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--fg3); border-bottom:1px solid var(--line)">Chunker ↓ / Reranker →</div>${headCols}
-          </div>${matrixRows}
+          <div style="display:grid; grid-template-columns:128px repeat(${nCols},1fr)"><div style="padding:11px 13px; font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--fg3); border-bottom:1px solid var(--line)">Chunker ↓ / Reranker →</div>${headCols}</div>${matrixRows}
         </div>
         <div style="display:flex; flex-direction:column; gap:14px; padding-top:2px">
           <div>
@@ -279,7 +295,7 @@ function render(){
       </div>
     </div>`;
 
-  /* ---- comparison table ---- */
+  /* comparison table */
   const tcols=[
     {key:'label',label:'Configuration',align:'left',sub:''},
     {key:'recall',label:'RecallAtR',align:'right',sub:'± 95% CI'},
@@ -308,37 +324,10 @@ function render(){
   const tbodyRows=tsorted.map(c=>{
     const lv=c.levels[lvKey];const isW=c.id===DATA.winnerId;
     const dotColor=viridis(ratingT(lv.recall.rating));
-    const recallCell={padding:'8px 14px',borderTop:'1px solid var(--line)',background:tint(lv.recall.rating)};
     return `<tr data-act="drill" data-val="${esc(c.id)}" style="cursor:pointer; background:${S.drill===c.id?'var(--panel2)':'transparent'}">
-        <td style="padding:10px 14px; border-top:1px solid var(--line); white-space:nowrap">
-          <div style="display:flex; align-items:center; gap:8px">
-            <span style="width:8px;height:8px;border-radius:2px;flex:none;display:inline-block;background:${dotColor}"></span>
-            <span style="font-size:13px; font-weight:600; color:var(--fg)">${esc(c.chunker)}</span>
-            <span style="font-size:12px; color:var(--fg3)">×</span>
-            <span style="font-family:var(--fnum); font-size:12px; color:var(--fg2)">${esc(c.rShort)}</span>
-            ${isW?'<span style="font-size:9px; font-weight:700; padding:1px 6px; border-radius:10px; background:var(--accent); color:var(--accentFg)">WIN</span>':''}
-          </div>
-        </td>
-        <td style="${css(recallCell)}">
-          <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px">
-            <span style="font-family:var(--fnum); font-size:13.5px; font-weight:700; color:var(--fg)">${fmt(lv.recall.v)}</span>
-            <div style="position:relative; width:104px; height:9px">
-              <div style="position:absolute; top:4px; left:0; right:0; height:1px; background:var(--line2)"></div>
-              <div style="${css(barLine(lv.recall,domRr,'var(--fg3)',0.6))}"></div>
-              <div style="${css(barDot(lv.recall,domRr,'var(--accent)'))}"></div>
-            </div>
-          </div>
-        </td>
-        <td style="padding:8px 14px; border-top:1px solid var(--line)">
-          <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px">
-            <span style="font-family:var(--fnum); font-size:13.5px; font-weight:600; color:var(--fg2)">${fmt(lv.ndcg.v)}</span>
-            <div style="position:relative; width:104px; height:9px">
-              <div style="position:absolute; top:4px; left:0; right:0; height:1px; background:var(--line2)"></div>
-              <div style="${css(barLine(lv.ndcg,domNn,'var(--fg3)',0.5))}"></div>
-              <div style="${css(barDot(lv.ndcg,domNn,'var(--fg2)'))}"></div>
-            </div>
-          </div>
-        </td>
+        <td style="padding:10px 14px; border-top:1px solid var(--line); white-space:nowrap"><div style="display:flex; align-items:center; gap:8px"><span style="width:8px;height:8px;border-radius:2px;flex:none;display:inline-block;background:${dotColor}"></span><span style="font-size:13px; font-weight:600; color:var(--fg)">${esc(c.chunker)}</span><span style="font-size:12px; color:var(--fg3)">×</span><span style="font-family:var(--fnum); font-size:12px; color:var(--fg2)">${esc(c.rShort)}</span>${isW?'<span style="font-size:9px; font-weight:700; padding:1px 6px; border-radius:10px; background:var(--accent); color:var(--accentFg)">WIN</span>':''}</div></td>
+        <td style="${css({padding:'8px 14px',borderTop:'1px solid var(--line)',background:tint(lv.recall.rating)})}"><div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px"><span style="font-family:var(--fnum); font-size:13.5px; font-weight:700; color:var(--fg)">${fmt(lv.recall.v)}</span><div style="position:relative; width:104px; height:9px"><div style="position:absolute; top:4px; left:0; right:0; height:1px; background:var(--line2)"></div><div style="${css(barLine(lv.recall,domRr,'var(--fg3)',0.6))}"></div><div style="${css(barDot(lv.recall,domRr,'var(--accent)'))}"></div></div></div></td>
+        <td style="padding:8px 14px; border-top:1px solid var(--line)"><div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px"><span style="font-family:var(--fnum); font-size:13.5px; font-weight:600; color:var(--fg2)">${fmt(lv.ndcg.v)}</span><div style="position:relative; width:104px; height:9px"><div style="position:absolute; top:4px; left:0; right:0; height:1px; background:var(--line2)"></div><div style="${css(barLine(lv.ndcg,domNn,'var(--fg3)',0.5))}"></div><div style="${css(barDot(lv.ndcg,domNn,'var(--fg2)'))}"></div></div></div></td>
         <td style="padding:10px 14px; border-top:1px solid var(--line); text-align:right; font-family:var(--fnum); font-size:13px; color:var(--fg2)">${fmt(lv.hit.v)}</td>
         <td style="padding:10px 14px; border-top:1px solid var(--line); text-align:right; font-family:var(--fnum); font-size:13px; color:var(--fg2)">${fmt(lv.mrr.v)}</td>
         <td style="padding:10px 14px; border-top:1px solid var(--line); text-align:right; font-family:var(--fnum); font-size:13px; color:var(--fg2)">${fmt(lv.map.v)}</td>
@@ -350,27 +339,14 @@ function render(){
   const tableHtml=`
     <div style="margin-bottom:38px">
       <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:14px">
-        <div>
-          <div style="font-family:var(--fhead); font-size:20px; font-weight:700; letter-spacing:-.01em">All ${configs.length} configurations</div>
-          <div style="font-size:12.5px; color:var(--fg3); margin-top:2px">${levelLabel}-level · sorted by ${esc(labelOf(S.sortKey))} · click a header to re-sort</div>
-        </div>
-        <div style="display:flex; gap:14px; align-items:center; flex-wrap:wrap">
-          <span style="font-size:12px; font-family:var(--fnum); color:var(--fg2); display:flex; align-items:center; gap:6px"><span style="display:inline-block;width:22px;height:2px;background:var(--fg3)"></span>95% CI</span>
-          <span style="font-size:12px; font-family:var(--fnum); color:var(--fg2); display:flex; align-items:center; gap:6px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent)"></span>point estimate</span>
-        </div>
+        <div><div style="font-family:var(--fhead); font-size:20px; font-weight:700; letter-spacing:-.01em">All ${configs.length} configurations</div><div style="font-size:12.5px; color:var(--fg3); margin-top:2px">${levelLabel}-level · sorted by ${esc(labelOf(S.sortKey))} · click a header to re-sort</div></div>
+        <div style="display:flex; gap:14px; align-items:center; flex-wrap:wrap"><span style="font-size:12px; font-family:var(--fnum); color:var(--fg2); display:flex; align-items:center; gap:6px"><span style="display:inline-block;width:22px;height:2px;background:var(--fg3)"></span>95% CI</span><span style="font-size:12px; font-family:var(--fnum); color:var(--fg2); display:flex; align-items:center; gap:6px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent)"></span>point estimate</span></div>
       </div>
-      <div style="border:1px solid var(--line); border-radius:var(--rad2); overflow:hidden; background:var(--panel); box-shadow:var(--shadow)">
-        <div style="overflow-x:auto">
-          <table style="border-collapse:collapse; width:100%; min-width:1000px; font-variant-numeric:tabular-nums">
-            <thead><tr>${theadCells}</tr></thead>
-            <tbody>${tbodyRows}</tbody>
-          </table>
-        </div>
-      </div>
+      <div style="border:1px solid var(--line); border-radius:var(--rad2); overflow:hidden; background:var(--panel); box-shadow:var(--shadow)"><div style="overflow-x:auto"><table style="border-collapse:collapse; width:100%; min-width:1000px; font-variant-numeric:tabular-nums"><thead><tr>${theadCells}</tr></thead><tbody>${tbodyRows}</tbody></table></div></div>
       <div style="display:flex; gap:8px; margin-top:10px"><span style="color:var(--accent); font-weight:700">▸</span><span style="font-size:12px; color:var(--fg2); line-height:1.45">RecallAtR and NDCG@10 bars share one axis. When two intervals overlap, the gap between those configs is not statistically significant.</span></div>
     </div>`;
 
-  /* ---- chunk vs section dumbbell ---- */
+  /* dumbbell */
   const dsorted=configs.slice().sort((a,b)=>b.levels.section.recall.v-a.levels.section.recall.v);
   const dvals=configs.flatMap(c=>[c.levels.chunk.recall.v,c.levels.section.recall.v]);
   const dom=[Math.min(...dvals)-0.02,Math.max(...dvals)+0.02];
@@ -381,141 +357,235 @@ function render(){
     const chunkDot={position:'absolute',top:'4px',width:'11px',height:'11px',borderRadius:'50%',border:'2px solid var(--fg2)',background:'var(--panel)',transform:'translateX(-50%)',left:dp(ch)+'%'};
     const sectionDot={position:'absolute',top:'3px',width:'13px',height:'13px',borderRadius:'50%',background:'var(--accent)',transform:'translateX(-50%)',left:dp(se)+'%'};
     const gapStyle={fontFamily:'var(--fnum)',fontSize:'12.5px',textAlign:'right',fontVariantNumeric:'tabular-nums',color:gap>0.1?'var(--warn)':'var(--fg2)',fontWeight:gap>0.1?'700':'500'};
-    return `<div style="display:grid; grid-template-columns:188px minmax(0,1fr) 72px; gap:14px; align-items:center; padding:5px 0">
-        <div style="font-size:12.5px; color:var(--fg2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis">${esc(configLabel(c))}</div>
-        <div style="position:relative; height:18px">
-          <div style="position:absolute; top:8px; left:0; right:0; height:1px; background:var(--line2)"></div>
-          <div style="${css(connector)}"></div>
-          <div style="${css(chunkDot)}"></div>
-          <div style="${css(sectionDot)}"></div>
-        </div>
-        <div style="${css(gapStyle)}">+${fmt(gap)}</div>
-      </div>`;
+    return `<div style="display:grid; grid-template-columns:188px minmax(0,1fr) 72px; gap:14px; align-items:center; padding:5px 0"><div style="font-size:12.5px; color:var(--fg2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis">${esc(configLabel(c))}</div><div style="position:relative; height:18px"><div style="position:absolute; top:8px; left:0; right:0; height:1px; background:var(--line2)"></div><div style="${css(connector)}"></div><div style="${css(chunkDot)}"></div><div style="${css(sectionDot)}"></div></div><div style="${css(gapStyle)}">+${fmt(gap)}</div></div>`;
   }).join('');
   const dumbbellHtml=`
     <div style="margin-bottom:38px">
-      <div style="margin-bottom:14px">
-        <div style="font-family:var(--fhead); font-size:20px; font-weight:700; letter-spacing:-.01em">Chunk vs. section gap — RecallAtR</div>
-        <div style="font-size:12.5px; color:var(--fg3); margin-top:2px">A wide gap means retrieval finds the right note section but misses the exact chunk.</div>
-      </div>
+      <div style="margin-bottom:14px"><div style="font-family:var(--fhead); font-size:20px; font-weight:700; letter-spacing:-.01em">Chunk vs. section gap — RecallAtR</div><div style="font-size:12.5px; color:var(--fg3); margin-top:2px">A wide gap means retrieval finds the right note section but misses the exact chunk.</div></div>
       <div style="border:1px solid var(--line); border-radius:var(--rad2); padding:18px 22px; background:var(--panel); box-shadow:var(--shadow)">
-        <div style="display:flex; gap:18px; align-items:center; margin-bottom:14px; font-size:12px; font-family:var(--fnum); color:var(--fg2); flex-wrap:wrap">
-          <span style="display:flex; align-items:center; gap:6px"><span style="width:9px;height:9px;border-radius:50%;border:2px solid var(--fg2);background:var(--panel);display:inline-block"></span>chunk</span>
-          <span style="display:flex; align-items:center; gap:6px"><span style="width:11px;height:11px;border-radius:50%;background:var(--accent);display:inline-block"></span>section</span>
-          <span style="margin-left:auto; color:var(--fg3)">axis: ${fmt(dom[0])} → ${fmt(dom[1])}</span>
-        </div>${dumbRows}
+        <div style="display:flex; gap:18px; align-items:center; margin-bottom:14px; font-size:12px; font-family:var(--fnum); color:var(--fg2); flex-wrap:wrap"><span style="display:flex; align-items:center; gap:6px"><span style="width:9px;height:9px;border-radius:50%;border:2px solid var(--fg2);background:var(--panel);display:inline-block"></span>chunk</span><span style="display:flex; align-items:center; gap:6px"><span style="width:11px;height:11px;border-radius:50%;background:var(--accent);display:inline-block"></span>section</span><span style="margin-left:auto; color:var(--fg3)">axis: ${fmt(dom[0])} → ${fmt(dom[1])}</span></div>${dumbRows}
       </div>
     </div>`;
 
-  /* ---- per-query drill-down ---- */
-  const cfg=configs.find(c=>c.id===S.drill)||win;
+  const metaStrip=`<div style="display:flex; flex-wrap:wrap; align-items:stretch; border:1px solid var(--line); border-radius:var(--rad2); overflow:hidden; background:var(--panel); box-shadow:var(--shadow); margin-bottom:22px">${metaHtml}</div>`;
+  return metaStrip + verdictHtml + matrixHtml + tableHtml + dumbbellHtml + renderDrill(M,th,isDark);
+}
+
+/* =========================================================================== */
+/* per-query drill-down (expandable + search)                                  */
+/* =========================================================================== */
+function renderDrill(M,th,isDark){
+  const S=state, configs=DATA.configs;
+  const cfg=configs.find(c=>c.id===S.drill)||configs.find(c=>c.id===DATA.winnerId)||configs[0];
   const pc=DATA.perCase[cfg.id]||[];
   const allQ=pc.map(rec=>{
     const def=DATA.cases[rec.id]||{query:'',difficulty:null,expected:[]};
     const expected=def.expected||[];
     const retrieved=(rec.r||[]).map(parseLabel);
-    // "found" follows RecallAtR's definition: expected evidence inside the first
-    // R = |expected| retrieved results (the recall budget). The retrieved-ranking
-    // list below still tags matches at every rank, so evidence found beyond the
-    // budget stays visible — that gap is exactly why a query can fail.
     const budget=retrieved.slice(0, Math.max(expected.length,1));
     const evidence=expected.map(e=>({note:e.note,heading:e.heading,found:budget.some(rr=>matchExp(e,rr))}));
-    return {id:rec.id,q:def.query,diff:def.difficulty,pass:rec.p,retrieved,evidence};
+    return {id:rec.id,q:def.query||'',diff:def.difficulty,pass:rec.p,retrieved,evidence,dm:rec.dm||[],diag:rec.diag||[]};
   });
   const passed=allQ.filter(q=>q.pass).length, failedN=allQ.length-passed;
+  const sq=(S.search||'').trim().toLowerCase();
   let fq=allQ;
   if(DATA.hasDataset && S.diff!=='all') fq=fq.filter(q=>q.diff===S.diff);
   if(S.failedOnly) fq=fq.filter(q=>!q.pass);
-  const isDark=S.mode==='dark';
+  if(sq) fq=fq.filter(q=> q.q.toLowerCase().includes(sq) || q.evidence.some(e=>(e.note+' '+e.heading).toLowerCase().includes(sq)) || q.retrieved.some(r=>r.raw.toLowerCase().includes(sq)));
+
   const drillOptions=configs.map(c=>`<option value="${esc(c.id)}" ${c.id===S.drill?'selected':''}>${esc(configLabel(c)+'  ·  RecallAtR '+fmt(c.levels.chunk.recall.v))}</option>`).join('');
   const drillStats=[
-    {k:'queries',v:String(allQ.length),style:{fontFamily:'var(--fnum)',fontSize:'18px',fontWeight:'700',fontVariantNumeric:'tabular-nums',color:'var(--fg)'}},
-    {k:'passed',v:String(passed),style:{fontFamily:'var(--fnum)',fontSize:'18px',fontWeight:'700',fontVariantNumeric:'tabular-nums',color:viridis(isDark?0.85:0.45)}},
-    {k:'failed',v:String(failedN),style:{fontFamily:'var(--fnum)',fontSize:'18px',fontWeight:'700',fontVariantNumeric:'tabular-nums',color:viridis(0.18)}},
-    {k:'pass rate',v:allQ.length?fmt(passed/allQ.length,3):'—',style:{fontFamily:'var(--fnum)',fontSize:'18px',fontWeight:'700',fontVariantNumeric:'tabular-nums',color:'var(--fg)'}}
-  ].map(s=>`<div style="display:flex; align-items:baseline; gap:7px"><span style="${css(s.style)}">${s.v}</span><span style="font-size:11px; text-transform:uppercase; letter-spacing:.07em; color:var(--fg3)">${s.k}</span></div>`).join('');
-  const diffStyleBase={padding:'2px 8px',borderRadius:'4px',fontSize:'10.5px',fontWeight:'600',fontFamily:'var(--fnum)',textTransform:'uppercase',letterSpacing:'.04em',color:'var(--fg2)'};
-  const diffStyleMap={easy:{...diffStyleBase,background:tint('Good')},medium:{...diffStyleBase,background:tint('Average')},hard:{...diffStyleBase,background:tint('Poor')}};
-  const diffControl = DATA.hasDataset ? `
-        <div style="display:flex; gap:7px; align-items:center">
-          <span style="font-size:11px; color:var(--fg3); text-transform:uppercase; letter-spacing:.07em">Difficulty</span>
-          <div style="display:flex; background:var(--panel); border:1px solid var(--line); border-radius:var(--rad); padding:2px">
-            ${[['all','All'],['easy','Easy'],['medium','Medium'],['hard','Hard']].map(([k,l])=>`<button data-act="diff" data-val="${k}" style="${css(segBtn(S.diff===k))}">${l}</button>`).join('')}
-          </div>
-        </div>` : '';
+    {k:'queries',v:String(allQ.length),color:'var(--fg)'},
+    {k:'passed',v:String(passed),color:th.ok},
+    {k:'failed',v:String(failedN),color:th.danger},
+    {k:'pass rate',v:allQ.length?fmt(passed/allQ.length,3):'—',color:'var(--fg)'}
+  ].map(s=>`<div style="display:flex; align-items:baseline; gap:7px"><span style="font-family:var(--fnum); font-size:18px; font-weight:700; font-variant-numeric:tabular-nums; color:${s.color}">${s.v}</span><span style="font-size:11px; text-transform:uppercase; letter-spacing:.07em; color:var(--fg3)">${s.k}</span></div>`).join('');
+  const diffControl = DATA.hasDataset ? `<div style="display:flex; gap:7px; align-items:center"><span style="font-size:11px; color:var(--fg3); text-transform:uppercase; letter-spacing:.07em">Difficulty</span><div style="display:flex; background:var(--panel); border:1px solid var(--line); border-radius:var(--rad); padding:2px">${[['all','All'],['easy','Easy'],['medium','Medium'],['hard','Hard']].map(([k,l])=>`<button data-act="diff" data-val="${k}" style="${css(segBtn(S.diff===k))}">${l}</button>`).join('')}</div></div>` : '';
   const failedBtnStyle={fontFamily:'var(--fbody)',fontSize:'12px',fontWeight:'600',padding:'7px 13px',borderRadius:'var(--rad)',cursor:'pointer',border:'1px solid '+(S.failedOnly?'var(--accent)':'var(--line2)'),background:S.failedOnly?'var(--accent)':'var(--panel)',color:S.failedOnly?'var(--accentFg)':'var(--fg2)'};
-  const queryRows=fq.map(q=>{
+  const diffStyleBase={padding:'2px 9px',borderRadius:'4px',fontSize:'10px',fontWeight:'700',fontFamily:'var(--fnum)',textTransform:'uppercase',letterSpacing:'.05em'};
+  const diffStyleMap={easy:{...diffStyleBase,background:hexTint(th.ok,isDark?0.20:0.12),color:th.ok},medium:{...diffStyleBase,background:hexTint(th.warn,isDark?0.22:0.16),color:th.warn},hard:{...diffStyleBase,background:hexTint(th.danger,isDark?0.20:0.12),color:th.danger}};
+
+  const rowsHtml=fq.map(q=>{
+    const expKey=cfg.id+'|'+q.id;
+    const isExp=S.expanded===expKey;
     const kShown=Math.min(10,q.retrieved.length);
     const ranking=q.retrieved.slice(0,kShown).map((x,i)=>{
-      const match=q.evidence.length?q.evidence.some(e=>matchExp(e,x)) : false;
+      const match=q.evidence.some(e=>matchExp(e,x));
       const disp=x.head?x.note+' › '+x.head:x.note;
-      const st={display:'flex',alignItems:'center',gap:'9px',padding:'4px 9px',borderRadius:'5px',fontFamily:'var(--fnum)',fontSize:'11.5px',background:match?tint('Good'):'var(--panel2)',border:'1px solid '+(match?viridis(0.74):'var(--line)'),color:match?'var(--fg)':'var(--fg2)'};
-      const tagStyle={fontSize:'10px',fontWeight:'700',flex:'none',color:match?viridis(isDark?0.8:0.5):'transparent'};
-      return `<div style="${css(st)}"><span style="color:var(--fg3); width:16px; flex:none">${String(i+1).padStart(2,'0')}</span><span style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">${esc(disp)}</span><span style="${css(tagStyle)}">${match?'✓ match':''}</span></div>`;
+      const st={display:'flex',alignItems:'center',gap:'9px',padding:'4px 9px',borderRadius:'5px',fontFamily:'var(--fnum)',fontSize:'11.5px',background:match?hexTint(th.ok,isDark?0.16:0.10):'var(--panel2)',border:'1px solid '+(match?th.ok:'var(--line)'),color:match?'var(--fg)':'var(--fg2)'};
+      return `<div style="${css(st)}"><span style="color:var(--fg3); width:16px; flex:none">${String(i+1).padStart(2,'0')}</span><span style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">${esc(disp)}</span><span style="font-size:10px; font-weight:700; flex:none; color:${match?th.ok:'transparent'}">${match?'✓ match':''}</span></div>`;
     }).join('');
-    const passStyle={display:'inline-flex',alignItems:'center',gap:'5px',padding:'3px 9px',borderRadius:'20px',fontSize:'11px',fontWeight:'700',fontFamily:'var(--fbody)',background:q.pass?tint('Good'):tint('Unacceptable'),color:q.pass?viridis(isDark?0.85:0.45):viridis(0.16)};
-    const diffChip = q.diff ? `<span style="${css(diffStyleMap[q.diff]||diffStyleBase)}">${esc(q.diff)}</span>` : '';
-    const evidenceHtml = q.evidence.length ? (`<span style="font-size:10.5px; text-transform:uppercase; letter-spacing:.07em; color:var(--fg3); margin-right:2px">Expected</span>`+q.evidence.map(e=>{
+    const evidenceHtml = q.evidence.length ? (`<span style="font-size:10px; text-transform:uppercase; letter-spacing:.07em; color:var(--fg3); margin-right:2px">Expected</span>`+q.evidence.map(e=>{
       const disp=e.heading?e.note+' › '+e.heading:e.note;
-      const st={display:'inline-flex',alignItems:'center',gap:'5px',fontFamily:'var(--fnum)',fontSize:'11px',padding:'3px 8px',borderRadius:'5px',border:'1px solid',borderColor:e.found?viridis(0.74):viridis(0.2),color:e.found?'var(--fg)':viridis(isDark?0.5:0.22),background:e.found?tint('Good'):tint('Poor')};
+      const st={display:'inline-flex',alignItems:'center',gap:'5px',fontFamily:'var(--fnum)',fontSize:'11px',padding:'2px 8px',borderRadius:'4px',border:'1px solid',borderColor:e.found?hexTint(th.ok,0.5):hexTint(th.danger,0.5),color:e.found?'var(--fg2)':th.danger,background:e.found?hexTint(th.ok,isDark?0.13:0.09):hexTint(th.danger,isDark?0.13:0.07)};
       return `<span style="${css(st)}"><span style="font-size:10px; font-weight:700">${e.found?'✓':'✕'}</span>${esc(disp)}</span>`;
     }).join('')) : `<span style="font-size:11px; color:var(--fg3); font-style:italic">No dataset join — expected evidence unavailable</span>`;
-    const rowStyle={display:'grid',gridTemplateColumns:'1.3fr 1.5fr',gap:'22px',padding:'15px 18px',borderTop:'1px solid var(--line)',background:q.pass?'transparent':(isDark?'rgba(120,20,40,.10)':'rgba(180,40,40,.04)')};
-    return `<div style="${css(rowStyle)}">
+    const diffChip = q.diff ? `<span style="${css(diffStyleMap[q.diff]||diffStyleBase)}">${esc(q.diff)}</span>` : '';
+    const containerStyle={borderTop:'1px solid var(--line)',borderLeft:'3px solid '+(q.pass?th.ok:th.danger),background:q.pass?'transparent':hexTint(th.danger,isDark?0.07:0.035)};
+    const rowStyle={display:'grid',gridTemplateColumns:'1.25fr 1.5fr',gap:'22px',padding:'10px 18px 10px 24px',cursor:'pointer',position:'relative'};
+
+    let detail='';
+    if(isExp){
+      const dmHtml=q.dm.map((m,i)=>{
+        const key=METRIC_KEYS[i];
+        const chip={display:'inline-block',padding:'2px 8px',borderRadius:'var(--rad)',fontSize:'10px',fontWeight:'700',fontFamily:'var(--fbody)',...badge(m.rt)};
+        return `<div style="border:1px solid var(--line); border-radius:var(--rad); padding:10px 12px; background:var(--panel2)"><div style="display:flex; align-items:center; gap:8px; margin-bottom:5px"><span style="font-family:var(--fnum); font-size:12.5px; font-weight:700; color:var(--fg)">${esc(METRIC_LABELS[key])}</span><span style="font-family:var(--fnum); font-size:12.5px; color:var(--fg2)">${fmt(m.v)}</span><span style="${css(chip)}">${esc(m.rt)}</span></div><div style="font-size:12px; line-height:1.45; color:var(--fg2); margin-bottom:5px">${esc(m.in)}</div><div style="font-size:11px; line-height:1.4; color:var(--fg3)">${esc(DATA.metricDefs[key]||'')}</div></div>`;
+      }).join('');
+      const gap=(q.diag[0]==null||q.diag[1]==null)?null:(q.diag[0]-q.diag[1]);
+      const diagRows=[['CreditedScoreAverage',q.diag[0]],['UncreditedScoreAverage',q.diag[1]],['Credited→Uncredited gap',gap]].map(([k,v])=>`<div style="display:flex; justify-content:space-between; font-family:var(--fnum); font-size:11.5px; padding:4px 10px; border-radius:4px; background:var(--panel2); color:var(--fg2)"><span>${esc(k)}</span><span style="color:var(--fg); font-variant-numeric:tabular-nums">${v==null?'—':fmt(v)}</span></div>`).join('');
+      const convAssistant=q.retrieved.map(x=>{
+        const match=q.evidence.some(e=>matchExp(e,x));
+        const line='[['+(x.head?x.note+'#'+x.head:x.note)+']]';
+        const st={display:'flex',alignItems:'center',justifyContent:'space-between',gap:'8px',padding:'4px 11px',borderRadius:'5px',fontFamily:'var(--fnum)',fontSize:'11.5px',background:match?hexTint(th.ok,isDark?0.16:0.10):'var(--panel2)',color:match?'var(--fg)':'var(--fg2)',border:'1px solid '+(match?th.ok:'var(--line)')};
+        return `<div style="${css(st)}"><span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis">${esc(line)}</span></div>`;
+      }).join('');
+      detail=`<div style="display:grid; grid-template-columns:1.3fr 1.5fr; gap:22px; padding:4px 18px 20px 30px">
         <div style="min-width:0">
-          <div style="display:flex; align-items:center; gap:9px; margin-bottom:9px; flex-wrap:wrap">
-            <span style="${css(passStyle)}"><span style="font-size:10px">${q.pass?'✓':'✕'}</span>${q.pass?'PASS':'FAIL'}</span>${diffChip}
+          <div style="font-size:10.5px; text-transform:uppercase; letter-spacing:.07em; color:var(--fg3); margin-bottom:8px">Per-metric interpretation</div>
+          <div style="display:flex; flex-direction:column; gap:9px">${dmHtml}</div>
+          <div style="font-size:10.5px; text-transform:uppercase; letter-spacing:.07em; color:var(--fg3); margin:14px 0 7px">Diagnostics · ScoreAverage</div>
+          <div style="display:flex; flex-direction:column; gap:3px">${diagRows}</div>
+        </div>
+        <div style="min-width:0">
+          <div style="font-size:10.5px; text-transform:uppercase; letter-spacing:.07em; color:var(--fg3); margin-bottom:8px">Conversation</div>
+          <div style="border:1px solid var(--line); border-radius:var(--rad); overflow:hidden">
+            <div style="padding:10px 12px; background:var(--panel2); border-bottom:1px solid var(--line)"><div style="font-size:10px; text-transform:uppercase; letter-spacing:.08em; color:var(--fg3); margin-bottom:4px">user</div><div style="font-size:13px; line-height:1.45; color:var(--fg)">${esc(q.q)}</div></div>
+            <div style="padding:10px 12px"><div style="font-size:10px; text-transform:uppercase; letter-spacing:.08em; color:var(--fg3); margin-bottom:7px">assistant · retrieved citations</div><div style="display:flex; flex-direction:column; gap:4px">${convAssistant}</div></div>
           </div>
-          <div style="font-size:14px; font-weight:600; line-height:1.4; color:var(--fg); margin-bottom:11px">${esc(q.q)}</div>
-          <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center">${evidenceHtml}</div>
+        </div>
+      </div>`;
+    }
+
+    return `<div style="${css(containerStyle)}">
+      <div data-act="toggle" data-val="${esc(expKey)}" style="${css(rowStyle)}">
+        <span style="position:absolute; left:9px; top:12px; font-size:10px; color:var(--fg3)">${isExp?'▾':'▸'}</span>
+        <div style="min-width:0">
+          <div style="display:flex; align-items:center; gap:9px; margin-bottom:6px; flex-wrap:wrap"><span style="font-family:var(--fnum); font-size:10.5px; font-weight:700; letter-spacing:.06em; color:${q.pass?th.ok:th.danger}">${q.pass?'PASS':'FAIL'}</span>${diffChip}</div>
+          <div style="font-size:13.5px; font-weight:600; line-height:1.4; color:var(--fg); margin-bottom:8px">${esc(q.q)}</div>
+          <div style="display:flex; flex-wrap:wrap; gap:5px; align-items:center">${evidenceHtml}</div>
         </div>
         <div style="min-width:0">
           <div style="font-size:10.5px; text-transform:uppercase; letter-spacing:.07em; color:var(--fg3); margin-bottom:7px">Retrieved ranking · top ${kShown}</div>
           <div style="display:flex; flex-direction:column; gap:4px">${ranking}</div>
         </div>
-      </div>`;
+      </div>${detail}
+    </div>`;
   }).join('');
-  const drillHtml=`
+
+  return `
     <div>
       <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:14px">
-        <div>
-          <div style="font-family:var(--fhead); font-size:20px; font-weight:700; letter-spacing:-.01em">Per-query drill-down</div>
-          <div style="font-size:12.5px; color:var(--fg3); margin-top:2px">Inspect where a configuration passes and fails on individual queries.</div>
-        </div>
+        <div><div style="font-family:var(--fhead); font-size:20px; font-weight:700; letter-spacing:-.01em">Per-query drill-down</div><div style="font-size:12.5px; color:var(--fg3); margin-top:2px">Inspect where a configuration passes and fails on individual queries. Click a row to expand metrics, diagnostics and the retrieval conversation.</div></div>
         <select id="drillSelect" style="font-family:var(--fbody); font-size:13px; font-weight:600; color:var(--fg); background:var(--panel); border:1px solid var(--line2); border-radius:var(--rad); padding:9px 12px; cursor:pointer; min-width:300px; max-width:100%">${drillOptions}</select>
       </div>
       <div style="display:flex; flex-wrap:wrap; gap:14px; align-items:center; padding:13px 16px; border:1px solid var(--line); border-bottom:none; border-radius:var(--rad2) var(--rad2) 0 0; background:var(--panel2)">
         <div style="display:flex; gap:18px; flex-wrap:wrap">${drillStats}</div>
-        <div style="flex:1"></div>${diffControl}
+        <div style="flex:1; min-width:170px; display:flex; align-items:center; gap:8px; background:var(--panel); border:1px solid var(--line2); border-radius:var(--rad); padding:6px 11px"><span style="font-size:13px; color:var(--fg3); flex:none">⌕</span><input id="drillSearch" type="text" value="${esc(S.search)}" placeholder="Search ${DATA.run.cases} queries or evidence…" style="flex:1; min-width:0; border:none; outline:none; background:transparent; font-family:var(--fbody); font-size:13px; color:var(--fg)"><span style="font-family:var(--fnum); font-size:11px; color:var(--fg3); flex:none">${fq.length} shown</span></div>
+        ${diffControl}
         <button data-act="failed" style="${css(failedBtnStyle)}">Failed only</button>
       </div>
-      <div style="border:1px solid var(--line); border-radius:0 0 var(--rad2) var(--rad2); background:var(--panel); box-shadow:var(--shadow); overflow:hidden">
-        ${queryRows || '<div style="padding:26px; text-align:center; font-size:13px; color:var(--fg3)">No queries match the current filters.</div>'}
-      </div>
-      <div style="font-size:11.5px; color:var(--fg3); margin-top:12px; line-height:1.5">Methodology — point estimates and ratings are read verbatim from the run's summary metrics; pass / fail is the store's authoritative RecallAtR fail flag. 95% intervals are the store's published bootstrap CIs where available, otherwise bootstrapped (2,000 resamples) from this configuration's per-case values. Chunk-level scores the exact passage; section-level credits any chunk from the correct note section. In the drill-down, an expected item is marked found when it appears within the first R = |expected| retrieved results (RecallAtR's budget); the retrieved-ranking list tags every match, so evidence retrieved beyond the budget stays visible. Matching is a heuristic note + heading comparison derived from citation labels (the store does not persist per-chunk text), so it can differ slightly from the authoritative pass / fail. Colour scale is viridis (perceptually uniform, colourblind-safe).</div>
+      <div style="border:1px solid var(--line); border-radius:0 0 var(--rad2) var(--rad2); background:var(--panel); box-shadow:var(--shadow); overflow:hidden">${rowsHtml || '<div style="padding:26px; text-align:center; font-size:13px; color:var(--fg3)">No queries match the current filters.</div>'}</div>
+      <div style="font-size:11.5px; color:var(--fg3); margin-top:12px; line-height:1.5">Methodology — point estimates, ratings and the per-metric interpretation are read verbatim from the run's stored results; pass / fail is the store's authoritative RecallAtR fail flag. An expected item is marked found within the first R = |expected| retrieved results (RecallAtR's budget); the retrieved list tags every match. Matching is a heuristic note + heading comparison from citation labels (the store does not persist per-chunk text), so it can differ slightly from pass / fail. Colour scale is viridis (perceptually uniform, colourblind-safe).</div>
     </div>`;
-
-  root.innerHTML = topBar + `
-    <div style="max-width:1280px; margin:0 auto; padding:26px 26px 90px">
-      <div style="display:flex; flex-wrap:wrap; align-items:stretch; border:1px solid var(--line); border-radius:var(--rad2); overflow:hidden; background:var(--panel); box-shadow:var(--shadow); margin-bottom:22px">${metaHtml}</div>
-      ${verdictHtml}
-      ${matrixHtml}
-      ${tableHtml}
-      ${dumbbellHtml}
-      ${drillHtml}
-    </div>`;
-  wire();
 }
 
+/* =========================================================================== */
+/* cross-run comparison tab                                                    */
+/* =========================================================================== */
+function renderCompare(M,th,isDark){
+  const S=state, runs=DATA.runs;
+  const runOpts=runs.map(rn=>`<option value="${esc(rn.run.id)}">${esc(rn.run.id+'  ·  '+(rn.run.finished||'').slice(0,10))}</option>`);
+  const rA=runs.find(rn=>rn.run.id===S.cmpA)||runs[0];
+  const rB=runs.find(rn=>rn.run.id===S.cmpB)||runs[runs.length-1];
+  const cmpKey=S.cmpMetric, mmC=M[cmpKey], cmpLow=mmC.better==='low';
+  const getCM=(rn,cid)=>{const c=rn.configs.find(x=>x.id===cid);if(!c)return null;const lv=c.levels[S.cmpLevel];return cmpKey==='empty'?lv.empty:(cmpKey==='score'?{v:lv.score}:lv[cmpKey]);};
+  const baseConfigs=DATA.configs;
+  const cmpVals=[];
+  baseConfigs.forEach(c=>{const a=getCM(rA,c.id),b=getCM(rB,c.id);if(a)cmpVals.push(a.v);if(b)cmpVals.push(b.v);});
+  const cmpDom=[Math.min(...cmpVals)-0.02,Math.max(...cmpVals)+0.02];
+  const cdp=v=>clamp((v-cmpDom[0])/((cmpDom[1]-cmpDom[0])||1),0,1)*100;
+  const gainCol=viridis(isDark?0.82:0.58);
+  let cmpData=baseConfigs.map(c=>{
+    const a=getCM(rA,c.id), b=getCM(rB,c.id);
+    if(!a||!b) return null;
+    const delta=b.v-a.v;
+    const haveCI=(a.lo!=null&&b.lo!=null);
+    const overlap=haveCI?(a.lo<=b.hi&&b.lo<=a.hi):true; // no CI => treat as n.s.
+    const improved=cmpLow?delta<0:delta>0;
+    const sig=haveCI && !overlap && Math.abs(delta)>1e-9;
+    const col=!sig?'var(--fg3)':(improved?gainCol:'var(--warn)');
+    return {id:c.id,chunker:c.chunker,reranker:c.rShort,delta,a,b,sig,improved,col,
+      aV:fmt(a.v),bV:fmt(b.v),deltaS:(delta>=0?'+':'−')+fmt(Math.abs(delta)),
+      sigLabel:sig?(improved?'improved':'regressed'):'n.s.'};
+  }).filter(Boolean);
+  if(S.cmpSort==='delta')cmpData.sort((x,y)=>(cmpLow?1:-1)*(y.delta-x.delta));
+  else cmpData.sort((x,y)=>x.id.localeCompare(y.id));
+  const improved=cmpData.filter(d=>d.sig&&d.improved).length;
+  const regressed=cmpData.filter(d=>d.sig&&!d.improved).length;
+  const flat=cmpData.length-improved-regressed;
+
+  const rowsHtml=cmpData.map(cr=>{
+    const conn={position:'absolute',top:'8px',height:'3px',borderRadius:'2px',background:cr.col,opacity:.5,left:Math.min(cdp(cr.a.v),cdp(cr.b.v))+'%',width:Math.abs(cdp(cr.b.v)-cdp(cr.a.v))+'%'};
+    const aDot={position:'absolute',top:'5px',width:'9px',height:'9px',borderRadius:'50%',border:'2px solid var(--fg3)',background:'var(--panel)',transform:'translateX(-50%)',left:cdp(cr.a.v)+'%'};
+    const bDot={position:'absolute',top:'4px',width:'11px',height:'11px',borderRadius:'50%',background:cr.col,transform:'translateX(-50%)',left:cdp(cr.b.v)+'%'};
+    return `<div style="display:grid; grid-template-columns:190px 64px minmax(0,1fr) 64px 92px; gap:14px; align-items:center; padding:9px 16px; border-top:1px solid var(--line)">
+        <div style="display:flex; align-items:center; gap:8px; min-width:0"><span style="width:8px;height:8px;border-radius:2px;background:${viridis(ratingT(cr.b.rating||rate(cr.b.v)))};display:inline-block;flex:none"></span><span style="font-size:13px; font-weight:600; color:var(--fg)">${esc(cr.chunker)}</span><span style="font-size:12px; color:var(--fg3)">×</span><span style="font-family:var(--fnum); font-size:12px; color:var(--fg2)">${esc(cr.reranker)}</span></div>
+        <div style="font-family:var(--fnum); font-size:12.5px; color:var(--fg3); text-align:right; font-variant-numeric:tabular-nums">${cr.aV}</div>
+        <div style="position:relative; height:18px"><div style="position:absolute; top:8px; left:0; right:0; height:1px; background:var(--line2)"></div><div style="${css(conn)}"></div><div style="${css(aDot)}"></div><div style="${css(bDot)}"></div></div>
+        <div style="font-family:var(--fnum); font-size:12.5px; color:var(--fg); font-weight:600; text-align:right; font-variant-numeric:tabular-nums">${cr.bV}</div>
+        <div style="text-align:right"><div style="font-family:var(--fnum); font-size:12.5px; font-weight:700; color:${cr.col}; font-variant-numeric:tabular-nums">${cr.deltaS}</div><div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:${cr.col}">${cr.sigLabel}</div></div>
+      </div>`;
+  }).join('');
+
+  const metricBtns=Object.keys(M).map(k=>`<button data-act="cmpMetric" data-val="${k}" style="${css(segBtn(S.cmpMetric===k))}">${esc(M[k].label)}</button>`).join('');
+  const levelBtns=[['chunk','Chunk'],['section','Section']].map(([k,l])=>`<button data-act="cmpLevel" data-val="${k}" style="${css(segBtn(S.cmpLevel===k))}">${l}</button>`).join('');
+  const sortBtns=[['delta','Δ change'],['config','Config']].map(([k,l])=>`<button data-act="cmpSort" data-val="${k}" style="${css(segBtn(S.cmpSort===k))}">${l}</button>`).join('');
+  const headline=`On ${mmC.label} (${S.cmpLevel}-level), ${improved} of ${cmpData.length} configurations improved significantly, ${regressed} regressed, and ${flat} changed within noise.`;
+  const bigNum=col=>({fontFamily:'var(--fnum)',fontSize:'22px',fontWeight:'700',color:col,fontVariantNumeric:'tabular-nums'});
+
+  return `
+    <div>
+      <div style="margin-bottom:18px"><div style="font-family:var(--fhead); font-size:22px; font-weight:700; letter-spacing:-.01em">Cross-run comparison</div><div style="font-size:12.5px; color:var(--fg3); margin-top:3px">How each configuration moved between two evaluation runs. Pick a baseline and a target; overlapping confidence intervals are flagged <b style="color:var(--fg2)">n.s.</b> (not significant).</div></div>
+      <div style="display:grid; grid-template-columns:1fr 40px 1fr; gap:14px; align-items:stretch; margin-bottom:18px">
+        <div style="border:1px solid var(--line); border-radius:var(--rad2); padding:14px 16px; background:var(--panel); box-shadow:var(--shadow)"><div style="font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--fg3); margin-bottom:8px">Baseline (A)</div><select id="cmpA" style="width:100%; font-family:var(--fbody); font-size:13px; font-weight:600; color:var(--fg); background:var(--panel2); border:1px solid var(--line2); border-radius:var(--rad); padding:8px 10px; cursor:pointer">${runOpts.map((o,i)=>o.replace('<option ', `<option ${runs[i].run.id===S.cmpA?'selected ':''}`)).join('')}</select><div style="font-family:var(--fnum); font-size:11.5px; color:var(--fg3); margin-top:9px; line-height:1.5">${esc(rA.run.finished||'')}<br>${esc(rA.run.note||'')}</div></div>
+        <div style="display:flex; align-items:center; justify-content:center; font-size:20px; color:var(--fg3)">→</div>
+        <div style="border:1px solid var(--line2); border-radius:var(--rad2); padding:14px 16px; background:var(--panel); box-shadow:var(--shadow)"><div style="font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--accent); margin-bottom:8px">Target (B)</div><select id="cmpB" style="width:100%; font-family:var(--fbody); font-size:13px; font-weight:600; color:var(--fg); background:var(--panel2); border:1px solid var(--line2); border-radius:var(--rad); padding:8px 10px; cursor:pointer">${runOpts.map((o,i)=>o.replace('<option ', `<option ${runs[i].run.id===S.cmpB?'selected ':''}`)).join('')}</select><div style="font-family:var(--fnum); font-size:11.5px; color:var(--fg3); margin-top:9px; line-height:1.5">${esc(rB.run.finished||'')}<br>${esc(rB.run.note||'')}</div></div>
+      </div>
+      <div style="display:flex; flex-wrap:wrap; gap:16px; align-items:center; justify-content:space-between; margin-bottom:14px">
+        <div style="display:flex; gap:26px; flex-wrap:wrap"><div style="display:flex; align-items:baseline; gap:7px"><span style="${css(bigNum(gainCol))}">${improved}</span><span style="font-size:11px; text-transform:uppercase; letter-spacing:.07em; color:var(--fg3)">improved</span></div><div style="display:flex; align-items:baseline; gap:7px"><span style="${css(bigNum('var(--warn)'))}">${regressed}</span><span style="font-size:11px; text-transform:uppercase; letter-spacing:.07em; color:var(--fg3)">regressed</span></div><div style="display:flex; align-items:baseline; gap:7px"><span style="${css(bigNum('var(--fg3)'))}">${flat}</span><span style="font-size:11px; text-transform:uppercase; letter-spacing:.07em; color:var(--fg3)">not significant</span></div></div>
+        <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center"><div style="display:flex; background:var(--panel2); border:1px solid var(--line); border-radius:var(--rad); padding:2px">${metricBtns}</div><div style="display:flex; background:var(--panel2); border:1px solid var(--line); border-radius:var(--rad); padding:2px">${levelBtns}</div></div>
+      </div>
+      <div style="border:1px solid var(--accent); border-radius:var(--rad2); padding:13px 16px; background:var(--panel2); margin-bottom:16px; font-size:13.5px; line-height:1.5; color:var(--fg)">${esc(headline)}</div>
+      <div style="border:1px solid var(--line); border-radius:var(--rad2); overflow:hidden; background:var(--panel); box-shadow:var(--shadow)">
+        <div style="display:grid; grid-template-columns:190px 64px minmax(0,1fr) 64px 92px; gap:14px; align-items:center; padding:10px 16px; background:var(--panel2); border-bottom:1px solid var(--line2)">
+          <div style="display:flex; align-items:center; gap:8px"><span style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--fg3)">Configuration</span>${sortBtns}</div>
+          <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--fg3); text-align:right">A</div>
+          <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--fg3); text-align:center">${fmt(cmpDom[0])} → ${fmt(cmpDom[1])}</div>
+          <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--fg3); text-align:right">B</div>
+          <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--fg3); text-align:right">Δ</div>
+        </div>${rowsHtml}
+      </div>
+      <div style="display:flex; gap:18px; flex-wrap:wrap; margin-top:12px; font-size:11.5px; font-family:var(--fnum); color:var(--fg2)"><span style="display:flex; align-items:center; gap:6px"><span style="width:9px;height:9px;border-radius:50%;border:2px solid var(--fg3);background:var(--panel);display:inline-block"></span>A (baseline)</span><span style="display:flex; align-items:center; gap:6px"><span style="width:11px;height:11px;border-radius:50%;background:var(--accent);display:inline-block"></span>B (target)</span><span style="color:var(--fg3)">Δ &amp; dot colour: teal = significant gain · amber = significant regression · grey = within CI (n.s.). Metrics without a CI (EmptyRate, ScoreAvg) are always n.s.</span></div>
+    </div>`;
+}
+
+/* =========================================================================== */
+/* interactions                                                                */
+/* =========================================================================== */
 function applyAct(act,val){
   const S=state;
   if(act==='mode') S.mode=S.mode==='dark'?'light':'dark';
+  else if(act==='tab') S.tab=val;
   else if(act==='metric') S.metric=val;
   else if(act==='level') S.level=val;
   else if(act==='sort'){ if(S.sortKey===val){S.sortDir=S.sortDir==='desc'?'asc':'desc';} else {S.sortKey=val;S.sortDir='desc';} }
-  else if(act==='drill') S.drill=val;
+  else if(act==='drill'){ S.drill=val; S.expanded=null; }
   else if(act==='diff') S.diff=val;
   else if(act==='failed') S.failedOnly=!S.failedOnly;
+  else if(act==='toggle') S.expanded = (S.expanded===val ? null : val);
+  else if(act==='cmpMetric') S.cmpMetric=val;
+  else if(act==='cmpLevel') S.cmpLevel=val;
+  else if(act==='cmpSort') S.cmpSort=val;
   render();
 }
 
@@ -525,7 +595,16 @@ function wire(){
     el.addEventListener('click', ()=>applyAct(el.getAttribute('data-act'), el.getAttribute('data-val')));
   });
   const sel=document.getElementById('drillSelect');
-  if(sel) sel.addEventListener('change', e=>{state.drill=e.target.value; render();});
+  if(sel) sel.addEventListener('change', e=>{state.drill=e.target.value; state.expanded=null; render();});
+  const cmpA=document.getElementById('cmpA');
+  if(cmpA) cmpA.addEventListener('change', e=>{state.cmpA=e.target.value; render();});
+  const cmpB=document.getElementById('cmpB');
+  if(cmpB) cmpB.addEventListener('change', e=>{state.cmpB=e.target.value; render();});
+  const search=document.getElementById('drillSearch');
+  if(search){
+    search.addEventListener('input', e=>{state.search=e.target.value; state._focusSearch=true; render();});
+    if(state._focusSearch){ search.focus(); const v=search.value; search.setSelectionRange(v.length,v.length); state._focusSearch=false; }
+  }
 }
 
 render();
