@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/04-networks/architecture-and-ops/vpn/","dg-note-properties":{"topic":["Networks"],"subtopic":["Architecture & Ops"],"level":["3"],"priority":"Medium","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/04-networks/architecture-and-ops/vpn/","dg-note-properties":{"topic":["Networks"],"subtopic":["Architecture & Ops"],"level":["3"],"priority":"Medium","status":"Ready to Repeat"}}
 ---
 
 # Intro
@@ -30,6 +30,13 @@ A single device connects to a gateway. Common for remote workers accessing corpo
 
 **Site-to-site VPN**
 Two networks connect via gateways. Traffic between the networks flows through the tunnel transparently. Used to connect branch offices or cloud VPCs to on-premises networks.
+
+**Mesh VPN (overlay)**
+Instead of routing everything through a central gateway (hub-and-spoke), every device connects **directly** to every other (peer-to-peer), with a coordination plane handling key exchange and NAT traversal. Tailscale/Netbird (WireGuard-based) popularized this: lower latency (no gateway hop), no single chokepoint, at the cost of a control plane that manages identities.
+
+## Beyond the VPN: Zero Trust (ZTNA)
+
+The traditional VPN model is **"authenticate once, get the whole network"** — a flat trust boundary where a compromised laptop can reach everything. **Zero Trust Network Access (ZTNA)** replaces it with *per-application*, continuously-verified access: every request is authenticated and authorized against identity + device posture, and a user reaches only the specific apps they're entitled to, never the underlying network. The mantra is "never trust, always verify." Many "modern VPN" products (Tailscale, Cloudflare Access, Zscaler) are really ZTNA overlays. This matters because the classic VPN's all-or-nothing network access is one of the biggest **lateral-movement** risks in breaches.
 
 ## Protocols
 
@@ -112,5 +119,6 @@ VPN encapsulation adds overhead (20–60 bytes per packet). If the MTU is not ad
 >  [[Software Engineering/04 Networks/04 Networks\|04 Networks]]
 >
 > **Pages**
+> - [[Software Engineering/04 Networks/Architecture & Ops/CDN\|CDN]]
 > - [[Software Engineering/04 Networks/Architecture & Ops/Peer-2-Peer\|Peer-2-Peer]]
 <!-- whats-next:end -->

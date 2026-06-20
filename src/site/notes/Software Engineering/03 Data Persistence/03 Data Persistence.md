@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/03-data-persistence/","tags":["FolderNote"],"dg-note-properties":{"topic":["Data Persistence"],"subtopic":[],"tags":["FolderNote"],"status":"Creation","priority":"High","level":["4"]}}
+{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/03-data-persistence/","tags":["FolderNote"],"dg-note-properties":{"topic":["Data Persistence"],"subtopic":[],"tags":["FolderNote"],"priority":"High","level":["4"],"status":"Done"}}
 ---
 
 
@@ -26,4 +26,5 @@ Data persistence is how software survives a restart: storing, retrieving, and pr
 > **Pages**
 > - [[Software Engineering/03 Data Persistence/ACID\|ACID]]
 > - [[Software Engineering/03 Data Persistence/Caching\|Caching]]
+> - [[Software Engineering/03 Data Persistence/Connection Pooling\|Connection Pooling]]
 <!-- whats-next:end -->

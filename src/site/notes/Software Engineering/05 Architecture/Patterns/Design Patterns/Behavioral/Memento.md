@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/design-patterns/behavioral/memento/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Patterns"],"level":["1"],"priority":"High","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/design-patterns/behavioral/memento/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Patterns"],"level":["1"],"priority":"High","status":"Ready to Repeat"}}
 ---
 
 # Memento
@@ -132,6 +132,14 @@ Abandoned cart recovery now uses `CartHistory.Serialize()` — the same snapshot
 **JSON serialization as state snapshot** — `JsonSerializer.Serialize(cart)` captures the cart state as a string. `JsonSerializer.Deserialize<ShoppingCart>(json)` restores it. This is the Memento pattern with JSON as the memento format — used for abandoned cart recovery, session state, and event sourcing snapshots.
 
 **`DataSet.GetChanges()` / `RejectChanges()`** — `DataSet.GetChanges()` returns a memento of all modified rows. `RejectChanges()` restores the dataset to its original state.
+
+## Tradeoffs
+
+**Use it when**: you need undo/redo, checkpoints, or rollback of *in-memory* state **without breaking encapsulation** — the caretaker holds opaque snapshots and can't peek inside. Good for editors, wizards, shopping carts, and game saves.
+
+**Don't reach for it when**: the state is large — every snapshot **copies the whole state**, so memory grows with history depth. There, prefer **command-based undo** (store the *inverse* operation, far cheaper) or, for a full audit trail, [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/Event Sourcing\|Event Sourcing]] (which reconstructs state from a log and snapshots only periodically).
+
+**vs Command undo**: a **Command** remembers *how to reverse one action* (delta); a **Memento** remembers *the entire prior state* (snapshot). Command is leaner for big state with small changes; Memento is simpler when changes are complex or scattered. Also mind **deep-copy correctness** — a shallow snapshot that shares mutable references silently corrupts on restore.
 
 ## Questions
 

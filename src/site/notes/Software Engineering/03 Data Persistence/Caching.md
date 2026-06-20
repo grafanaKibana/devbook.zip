@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/caching/","dg-note-properties":{"topic":["Data Persistence"],"subtopic":[],"level":["4"],"priority":"High","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/caching/","dg-note-properties":{"topic":["Data Persistence"],"subtopic":[],"level":["4"],"priority":"High","status":"Ready to Repeat"}}
 ---
 
 
@@ -226,4 +226,5 @@ The eviction policy is the same family of algorithms as an in-process [[Software
 >
 > **Pages**
 > - [[Software Engineering/03 Data Persistence/ACID\|ACID]]
+> - [[Software Engineering/03 Data Persistence/Connection Pooling\|Connection Pooling]]
 <!-- whats-next:end -->

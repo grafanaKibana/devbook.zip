@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/05-architecture/","tags":["FolderNote"],"dg-note-properties":{"topic":["Architecture"],"subtopic":[],"tags":["FolderNote"],"status":"Creation","priority":"High","level":["4"]}}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/05-architecture/","tags":["FolderNote"],"dg-note-properties":{"topic":["Architecture"],"subtopic":[],"tags":["FolderNote"],"priority":"High","level":["4"],"status":"Not-Started"}}
 ---
 
 

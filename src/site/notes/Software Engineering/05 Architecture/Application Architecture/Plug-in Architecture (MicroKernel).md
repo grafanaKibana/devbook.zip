@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/application-architecture/plug-in-architecture-micro-kernel/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Application Architecture"],"level":["3"],"priority":"High","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/application-architecture/plug-in-architecture-micro-kernel/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Application Architecture"],"level":["3"],"priority":"High","status":"Ready to Repeat"}}
 ---
 
 
@@ -71,6 +71,11 @@ public sealed class PdfPlugin : IPlugin
         services.AddScoped<IReportExporter, PdfReportExporter>();
 }
 ```
+
+## Unloading and Isolating Plug-ins
+
+- **Hot reload / unload** — a `new AssemblyLoadContext(name, isCollectible: true)` is **collectible**: drop all references to its assemblies and types, and the runtime can unload it, freeing the DLL so you can update a plug-in without restarting the host. The catch is that *one* lingering reference (an event handler, a cached type, a static) pins the whole context and leaks it — unloading is notoriously easy to get wrong. See [[Software Engineering/01 Programming/NET/Runtime/Common Language Runtime\|AssemblyLoadContext]].
+- **Untrusted plug-ins are a security boundary, not just a loading concern** — a plug-in runs **in-process with full trust**: it can read your memory, secrets, and filesystem. .NET has no in-process sandbox (Code Access Security is gone). For genuinely untrusted third-party code, isolate it **out of process** (a separate process/container with least privilege, or a WASM/`Wasmtime` sandbox) and talk to it over IPC — accept the latency cost in exchange for a real trust boundary.
 
 ## Pitfalls
 
