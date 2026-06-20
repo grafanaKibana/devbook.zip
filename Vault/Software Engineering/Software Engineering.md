@@ -25,13 +25,16 @@ const notes = dv.pages(`"${ROOT}"`).where(
   (p) => p.file.path !== curPath && !isMetricsIgnored(p) && !isFolderNote(p)
 );
 
+// Keyed by lower-cased status so capitalization drift in note frontmatter
+// (e.g. "Ready to Repeat" vs "Ready To Repeat") can't silently score 0.
 const STATUS_PROGRESS = new Map([
-  ["Not-Started", 0],
-  ["Creation", 25],
-  ["Repetition", 50],
-  ["Ready To Repeat", 75],
-  ["Done", 100],
+  ["not-started", 0],
+  ["creation", 25],
+  ["repetition", 50],
+  ["ready to repeat", 75],
+  ["done", 100],
 ]);
+const progressFor = (status) => STATUS_PROGRESS.get(status.toLowerCase()) ?? 0;
 
 const asStringArray = (v) => {
   if (Array.isArray(v)) return v.map((x) => String(x).trim()).filter(Boolean);
@@ -53,6 +56,7 @@ const segToTopic = (seg) => seg.replace(/^\d+\s+/, "").trim();
 const topicStats = new Map();
 let notesWithTopicTotal = 0;
 let notesWithTopicPoints = 0;
+let notesWithTopicDone = 0;
 const notesOutsideTopics = [];
 
 for (const p of notes) {
@@ -64,26 +68,29 @@ for (const p of notes) {
   const topic = segToTopic(seg);
 
   const status = asStringArray(p.status)[0] ?? "";
-  const progress = STATUS_PROGRESS.get(status) ?? 0;
+  const progress = progressFor(status);
+  const isDone = status.toLowerCase() === "done";
 
   notesWithTopicTotal += 1;
   notesWithTopicPoints += progress;
+  if (isDone) notesWithTopicDone += 1;
 
-  const cur = topicStats.get(topic) ?? { total: 0, points: 0, seg };
+  const cur = topicStats.get(topic) ?? { total: 0, points: 0, done: 0, seg };
   cur.total += 1;
   cur.points += progress;
+  if (isDone) cur.done += 1;
   topicStats.set(topic, cur);
 }
 
-// "Done" is expressed in whole-note equivalents: the accumulated progress
-// points (0/25/50/75/100 per note) divided by 100. So a topic averaging 25%
-// across 32 notes reads as 8/32 done.
+// The bar is weighted across every status (Not-Started/Creation/Repetition/
+// Ready-To-Repeat/Done → 0/25/50/75/100), so in-progress notes count toward it.
+// The "n/m done" counter is separate: a plain count of notes whose status is
+// "Done", so it never just mirrors the weighted bar.
 const statsFor = (topic) => {
   const s = topicStats.get(topic);
   if (!s) return { pct: 0, done: 0, total: 0 };
   const pct = s.total > 0 ? Math.round(s.points / s.total) : 0;
-  const done = Math.round(s.points / 100);
-  return { pct, done, total: s.total };
+  return { pct, done: s.done, total: s.total };
 };
 
 // --- Curated cards ------------------------------------------------------------
@@ -186,7 +193,7 @@ for (let i = 0; i < cards.length; i += COLS) {
 
 // --- Overall total, rendered as a callout ------------------------------------
 const totalPct = notesWithTopicTotal > 0 ? Math.round(notesWithTopicPoints / notesWithTopicTotal) : 0;
-const totalDone = Math.round(notesWithTopicPoints / 100);
+const totalDone = notesWithTopicDone;
 
 const callout = dv.container.createEl("div", { cls: "callout" });
 callout.setAttribute("data-callout", "done");

@@ -6,7 +6,7 @@ subtopic:
 level:
   - "4"
 priority: High
-status: Creation
+status: Ready to Repeat
 
 dg-publish: true
 ---
@@ -57,6 +57,19 @@ var encrypted = rsa.Encrypt(plaintext, RSAEncryptionPadding.OaepSHA256);
 // Decrypt with private key
 var decrypted = rsa.Decrypt(encrypted, RSAEncryptionPadding.OaepSHA256);
 ```
+
+## Hashing Is Not Encryption (and Password Storage)
+
+The single most common crypto confusion: **encryption is reversible** (you hold a key and *decrypt* back to plaintext); a **cryptographic hash is one-way** (SHA-256 — no key, no way to "un-hash"). Encoding (Base64) is *neither* — reversible with no secret at all, so it gives **zero** confidentiality. Pick by intent: confidentiality → encrypt; integrity/fingerprint → hash; "make it ASCII-safe" → encode.
+
+**Passwords must be *hashed*, never encrypted.** Encrypt them and a leaked key exposes every password; a one-way hash can't be reversed even if stolen. But a *fast* hash (SHA-256) is brute-forceable at billions/sec, so use a **slow, salted password hash** built for it: **Argon2** (preferred), **bcrypt**, or **PBKDF2**. The per-user salt defeats rainbow tables; the deliberate slowness defeats brute force.
+
+```csharp
+// ASP.NET Core Identity hashes with PBKDF2 by default; for new code prefer Argon2 (e.g. Konscious.Security.Cryptography).
+// NEVER store SHA256(password) — far too fast, and unsalted = rainbow-table-able.
+```
+
+For integrity between parties sharing a secret, use an **HMAC** (keyed hash); for integrity *with non-repudiation*, use a [[Software Engineering/07 Security/Digital Signature|digital signature]]. See [[Software Engineering/07 Security/Hashing|Hashing]] for the full treatment of hash functions, HMAC, and password hashing.
 
 ## TLS — Encryption in Transit
 
@@ -112,6 +125,9 @@ In .NET, TLS is handled automatically by `HttpClient` and ASP.NET Core. Enforce 
 > **Pages**
 > - [[Software Engineering/07 Security/Block-chain|Block-chain]]
 > - [[Software Engineering/07 Security/Digital Signature|Digital Signature]]
+> - [[Software Engineering/07 Security/Hashing|Hashing]]
 > - [[Software Engineering/07 Security/JWT Bearer|JWT Bearer]]
 > - [[Software Engineering/07 Security/OWASP|OWASP]]
+> - [[Software Engineering/07 Security/Secrets Management|Secrets Management]]
+> - [[Software Engineering/07 Security/Web Vulnerabilities|Web Vulnerabilities]]
 <!-- whats-next:end -->

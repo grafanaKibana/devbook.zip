@@ -6,7 +6,7 @@ subtopic:
 level:
   - "1"
 priority: Low
-status: Creation
+status: Ready to Repeat
 
 dg-publish: true
 ---
@@ -116,6 +116,9 @@ var block2Hash = Sha256Hex(block2Prev + block2Data);
 > **Pages**
 > - [[Software Engineering/07 Security/Digital Signature|Digital Signature]]
 > - [[Software Engineering/07 Security/Encryption|Encryption]]
+> - [[Software Engineering/07 Security/Hashing|Hashing]]
 > - [[Software Engineering/07 Security/JWT Bearer|JWT Bearer]]
 > - [[Software Engineering/07 Security/OWASP|OWASP]]
+> - [[Software Engineering/07 Security/Secrets Management|Secrets Management]]
+> - [[Software Engineering/07 Security/Web Vulnerabilities|Web Vulnerabilities]]
 <!-- whats-next:end -->

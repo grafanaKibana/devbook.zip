@@ -5,7 +5,7 @@ subtopic: []
 level:
   - "2"
 priority: High
-status: Creation
+status: Ready to Repeat
 
 dg-publish: true
 ---
@@ -156,6 +156,7 @@ volumes:
 >
 > **Pages**
 > - [[Software Engineering/09 DevOps/CI CD tools|CI CD tools]]
+> - [[Software Engineering/09 DevOps/Infrastructure as Code|Infrastructure as Code]]
 > - [[Software Engineering/09 DevOps/Kubernetes|Kubernetes]]
 > - [[Software Engineering/09 DevOps/Observability|Observability]]
 <!-- whats-next:end -->

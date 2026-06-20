@@ -146,8 +146,7 @@
       "x": 840,
       "y": 1600,
       "width": 340,
-      "height": 80,
-      "color": "1"
+      "height": 80
     },
     {
       "id": "n_4e3f2742c2",
@@ -457,7 +456,7 @@
       "y": 4840,
       "width": 340,
       "height": 80,
-      "color": "2"
+      "color": "4"
     },
     {
       "id": "n_11cf2504d7",
@@ -466,8 +465,7 @@
       "x": 420,
       "y": 4840,
       "width": 340,
-      "height": 80,
-      "color": "2"
+      "height": 80
     },
     {
       "id": "n_619c288a2f",
@@ -651,7 +649,7 @@
     {
       "id": "n_b0ac2236f9",
       "type": "text",
-      "text": "#### Roadmap legend\n**Generated:** Jun 20 2026 | 11:46AM",
+      "text": "#### Roadmap legend\n**Generated:** Jun 21 2026 | 03:32AM",
       "x": -1440,
       "y": 0,
       "width": 500,
@@ -660,7 +658,7 @@
     {
       "id": "n_4a66490dd9",
       "type": "text",
-      "text": "Not-Started: 4",
+      "text": "Not-Started: 3",
       "x": -1380,
       "y": 126,
       "width": 380,
@@ -670,7 +668,7 @@
     {
       "id": "n_c1cf7bc196",
       "type": "text",
-      "text": "Creation: 28",
+      "text": "Creation: 26",
       "x": -1380,
       "y": 202,
       "width": 380,
@@ -700,7 +698,7 @@
     {
       "id": "n_0e6324d0db",
       "type": "text",
-      "text": "Done: 31",
+      "text": "Done: 32",
       "x": -1380,
       "y": 430,
       "width": 380,
