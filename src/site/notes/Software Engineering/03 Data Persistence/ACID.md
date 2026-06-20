@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/acid/","dg-note-properties":{"topic":["Data Persistence"],"subtopic":["SQL"],"level":["3"],"priority":"High","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/acid/","dg-note-properties":{"topic":["Data Persistence"],"subtopic":["SQL"],"level":["3"],"priority":"High","status":"Ready to Repeat"}}
 ---
 
 
@@ -161,4 +161,5 @@ await db.SaveChangesAsync();
 >
 > **Pages**
 > - [[Software Engineering/03 Data Persistence/Caching\|Caching]]
+> - [[Software Engineering/03 Data Persistence/Connection Pooling\|Connection Pooling]]
 <!-- whats-next:end -->

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/architectural-patterns/domain-driven-design/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Patterns"],"level":["2"],"priority":"High","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/architectural-patterns/domain-driven-design/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Patterns"],"level":["2"],"priority":"High","status":"Ready to Repeat"}}
 ---
 
 
@@ -33,6 +33,28 @@ Customer               Customer
 
 OrderPlaced event ──→  BillingService.CreateInvoice()
 ```
+
+### Subdomains: where to invest
+
+Not all of the domain deserves equal effort. DDD classifies subdomains so you spend modeling energy where it pays off:
+
+- **Core domain** — the part that differentiates the business (your competitive advantage). Invest your best people and rich modeling here.
+- **Supporting subdomain** — necessary but not differentiating; build it simply.
+- **Generic subdomain** — a solved problem (auth, billing, notifications); **buy or use off-the-shelf**, don't hand-craft.
+
+The mistake is lavishing DDD tactical patterns on a generic subdomain while under-modeling the core.
+
+### Context Mapping
+
+Bounded contexts don't live in isolation — **context maps** describe the *relationships* between them and how their models integrate:
+
+- **Anti-Corruption Layer (ACL)** — a translation layer that protects your model from a messy/legacy upstream one, converting their concepts into yours so their model can't "leak" in. The single most important integration pattern when wrapping legacy or third-party systems.
+- **Shared Kernel** — two contexts share a small, jointly-owned model subset (high coupling; change requires both teams to agree).
+- **Customer/Supplier** — downstream context's needs influence the upstream's roadmap.
+- **Conformist** — downstream simply adopts the upstream model as-is (no ACL); cheap but you inherit their concepts.
+- **Open Host Service / Published Language** — upstream publishes a stable, well-documented API/schema (e.g. an event contract) for many consumers.
+
+The map is a *strategic* deliverable: it tells you where to put ACLs, which integrations are risky (Shared Kernel), and where team coordination is required.
 
 ## Tactical Patterns
 
@@ -100,6 +122,17 @@ public sealed class Order  // Aggregate Root
 ```
 
 The Aggregate enforces invariants: you cannot confirm an empty order. External code calls `order.Confirm()` — it never sets `order.Status` directly.
+
+Two design rules make aggregates work:
+
+- **Reference other aggregates by ID, not by object reference.** An `Order` holds a `CustomerId`, not a `Customer` object. This keeps each aggregate a small, independently-loadable consistency boundary (and avoids loading half the database to confirm one order).
+- **One aggregate per transaction.** A single transaction should modify exactly one aggregate instance; changes that span aggregates are made *eventually consistent* via [[Software Engineering/05 Architecture/Distributed Systems/Distributed Transactions\|domain events / sagas]], not a big multi-aggregate transaction. The aggregate *is* the transactional consistency boundary.
+
+Keep aggregates **as small as invariants allow** — a too-large aggregate (see Pitfalls) serializes unrelated updates and causes contention.
+
+### Domain Service
+
+When a piece of behavior doesn't naturally belong to any single Entity or Value Object — typically because it **coordinates several aggregates** or expresses a domain concept that isn't a "thing" — put it in a **Domain Service**: a stateless object named in the ubiquitous language (e.g. `FundsTransferService.Transfer(from, to, amount)` where the logic belongs to neither account alone). Don't confuse it with an *application* service (which orchestrates use cases, transactions, and I/O) — a domain service contains **business rules** and lives in the domain layer with no infrastructure dependencies. Reach for it sparingly; most behavior should still live on the aggregate that owns the data (Information Expert).
 
 ### Domain Events
 

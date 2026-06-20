@@ -11,7 +11,7 @@ CAP theorem says that in a distributed data system, once a network partition hap
 
 ### Definitions in operational terms
 
-- **Consistency (C)**: every successful read sees the most recent successful write (or an error), as if there is one up-to-date value.
+- **Consistency (C)**: every successful read sees the most recent successful write (or an error), as if there is one up-to-date value. *(This is **linearizability** — replicas agreeing. It is **not** the "C" in [[Software Engineering/03 Data Persistence/ACID\|ACID]], which means constraint/invariant preservation within one node. A system can be ACID and AP, or CP and non-ACID — the two C's are unrelated.)*
 - **Availability (A)**: every request to a non-failed node receives a non-error response in finite time.
 - **Partition tolerance (P)**: the system continues operating despite message loss/delay between node groups.
 

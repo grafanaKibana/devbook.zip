@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/system-architecture/modular-monolith/","dg-note-properties":{"topic":["Architecture"],"subtopic":["System Architecture"],"level":["3"],"priority":"High","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/system-architecture/modular-monolith/","dg-note-properties":{"topic":["Architecture"],"subtopic":["System Architecture"],"level":["3"],"priority":"High","status":"Ready to Repeat"}}
 ---
 
 
@@ -28,6 +28,9 @@ flowchart LR
     Orders -- order placed event --> Billing
     Inventory -- stock reserved event --> Orders
 ```
+
+> [!IMPORTANT]
+> **Data isolation reintroduces the cross-boundary consistency problem early.** The moment each module owns a separate `DbContext`/schema, a single use case that touches two modules can no longer wrap them in one ACID transaction — you face the same choice as [[Software Engineering/05 Architecture/Distributed Systems/Distributed Transactions\|distributed transactions]]: accept eventual consistency via integration events (the **outbox pattern** to publish reliably) or keep the operation within one module. This is a *feature*, not a bug — it forces you to design real boundaries before extraction — but teams are often surprised that a "monolith" gives up easy cross-module transactions. (If modules share one database, you keep ACID but weaken the boundary.)
 
 ## .NET Implementation
 

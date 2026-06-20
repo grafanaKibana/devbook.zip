@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/resilience-patterns/rate-limiting/","tags":["FolderNote"],"dg-note-properties":{"topic":["Architecture"],"subtopic":["Patterns"],"priority":"High","tags":["FolderNote"],"status":"Creation","level":["3"]}}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/resilience-patterns/rate-limiting/","tags":["FolderNote"],"dg-note-properties":{"topic":["Architecture"],"subtopic":["Patterns"],"priority":"High","tags":["FolderNote"],"level":["3"],"status":"Done"}}
 ---
 
 # Intro

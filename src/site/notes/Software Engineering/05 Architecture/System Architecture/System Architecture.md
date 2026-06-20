@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/system-architecture/system-architecture/","tags":["FolderNote"],"dg-note-properties":{"topic":["Architecture"],"subtopic":["System Architecture"],"tags":["FolderNote"],"level":["4"],"status":"Creation","priority":"High"}}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/system-architecture/system-architecture/","tags":["FolderNote"],"dg-note-properties":{"topic":["Architecture"],"subtopic":["System Architecture"],"tags":["FolderNote"],"level":["4"],"priority":"High","status":"Done"}}
 ---
 
 

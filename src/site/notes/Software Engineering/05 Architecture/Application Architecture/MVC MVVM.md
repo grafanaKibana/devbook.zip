@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/application-architecture/mvc-mvvm/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Application Architecture"],"level":["4"],"priority":"High","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/application-architecture/mvc-mvvm/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Application Architecture"],"level":["4"],"priority":"High","status":"Ready to Repeat"}}
 ---
 
 # Intro
@@ -95,6 +95,15 @@ The View (XAML) binds to `Name` and `LoadCommand` — no code-behind. The ViewMo
 **Use MVVM** for stateful UI applications (WPF, MAUI, Blazor) where the UI reacts to state changes in real time. Two-way data binding eliminates manual UI update code and makes ViewModels independently testable.
 
 **When to switch:** if you find yourself writing significant code-behind in a WPF/MAUI app to update UI elements manually, switch to MVVM. If your ASP.NET Core controllers are growing large with UI logic, consider Razor Pages (a simplified MVC variant) or move logic to services.
+
+## The Wider Family: MVP and MVU
+
+MVC and MVVM are two points in a family of UI separation patterns:
+
+- **MVP (Model-View-Presenter)** — like MVC, but the **Presenter** holds *all* presentation logic and updates a passive View through an interface (`IView`), which makes the View trivially mockable. Common in classic WinForms and Android; the View is dumber than in MVVM (no data binding) and the Presenter pushes values explicitly.
+- **MVU / unidirectional flow (Model-View-Update, a.k.a. Elm/Flux/Redux)** — state flows **one way**: an immutable model renders a view, the view emits messages, an `update` function produces a *new* model, repeat. There's no two-way binding to reason about, so state is predictable and time-travel-debuggable. This is the model behind Elm, Redux/React, and increasingly **Blazor** components and .NET MAUI's `Fabulous`/`Comet`. (So Blazor is better described as component/MVU than classic MVVM, despite supporting binding.)
+
+The trend in modern UI is toward **unidirectional data flow** because two-way binding, while convenient, makes "who changed this state?" hard to trace in complex screens.
 
 ## Pitfalls
 

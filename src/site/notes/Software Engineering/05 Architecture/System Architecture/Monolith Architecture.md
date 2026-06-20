@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/system-architecture/monolith-architecture/","dg-note-properties":{"topic":["Architecture"],"subtopic":["System Architecture"],"level":["4"],"priority":"Medium","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/system-architecture/monolith-architecture/","dg-note-properties":{"topic":["Architecture"],"subtopic":["System Architecture"],"level":["4"],"priority":"Medium","status":"Ready to Repeat"}}
 ---
 
 # Intro
@@ -30,6 +30,9 @@ One `dotnet publish`, one Docker image, one deployment. All requests go to the s
 **Simple transactions:** all operations share a database connection. ACID transactions across components are trivial — no distributed transaction protocols needed.
 
 **Low latency for internal calls:** component-to-component calls are in-process function calls, not network hops.
+
+> [!NOTE]
+> **A monolith still scales horizontally** — the common myth is "monolith = can't scale." You scale it by running **N identical copies behind a [[Software Engineering/05 Architecture/Distributed Systems/Load Balancing\|load balancer]]** (which is why keeping the process **stateless** matters). What you *can't* do is scale components *independently* — if only the report generator is hot, you still replicate the whole app. That inefficiency, not a hard ceiling, is the real scaling argument for microservices.
 
 ## When Monoliths Break Down
 

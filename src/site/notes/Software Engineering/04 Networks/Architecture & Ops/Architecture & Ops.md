@@ -20,6 +20,7 @@ Network architecture and operations cover how networks are designed, observed, a
 >  [[Software Engineering/04 Networks/04 Networks\|04 Networks]]
 >
 > **Pages**
+> - [[Software Engineering/04 Networks/Architecture & Ops/CDN\|CDN]]
 > - [[Software Engineering/04 Networks/Architecture & Ops/Peer-2-Peer\|Peer-2-Peer]]
 > - [[Software Engineering/04 Networks/Architecture & Ops/VPN\|VPN]]
 <!-- whats-next:end -->
