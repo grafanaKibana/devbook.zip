@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/algorithms/sorting-algorithms/insertion-sort/","dg-note-properties":{"topic":["Computer Science"],"subtopic":["Algorithms"],"level":["4"],"priority":"Low","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/algorithms/sorting-algorithms/insertion-sort/","dg-note-properties":{"topic":["Computer Science"],"subtopic":["Algorithms"],"level":["4"],"priority":"Low","status":"Ready to Repeat"}}
 ---
 
 # Intro
@@ -52,6 +52,10 @@ public static void InsertionSort(int[] a)
     }
 }
 ```
+
+### Binary insertion sort
+
+Since the prefix is already sorted, you can find the insertion point with a **binary search** instead of a linear scan, cutting *comparisons* from O(n²) to O(n log n). The catch: you still have to **shift** elements to open the gap, so the total work stays O(n²) (dominated by moves). It's a genuine win only when comparisons are far more expensive than moves (e.g. comparing long strings or via an expensive comparator).
 
 ## When to Use
 

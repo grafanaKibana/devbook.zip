@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/net-standart/","dg-note-properties":{"topic":["Programming"],"subtopic":["NET"],"level":["4"],"priority":"Medium","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/net-standart/","dg-note-properties":{"topic":["Programming"],"subtopic":["NET"],"level":["4"],"priority":"Medium","status":"Ready to Repeat"}}
 ---
 
 
@@ -23,6 +23,16 @@ Key mechanics to remember:
 - `netstandard2.0` is the highest .NET Standard version that .NET Framework can consume.
 - `netstandard2.1` adds APIs, but .NET Framework does not implement it.
 - .NET 5+ unified platform development; no new .NET Standard versions are planned after 2.1.
+
+### How the contract resolves at runtime
+
+A `netstandard2.0` library references a single façade assembly, `netstandard.dll`, that contains no real implementation — just **type forwards**. At load time each type resolves (forwards) to the concrete implementation in whatever runtime is hosting the library (.NET Framework's `mscorlib`, or modern .NET's `System.Private.CoreLib`). That indirection is exactly what lets one compiled DLL run on multiple runtimes.
+
+The **2.0 → 2.1 gap** is the practical fault line: APIs like `Span<T>`, `IAsyncEnumerable<T>`, and `Math.Clamp` are *native* in `netstandard2.1`, but on `netstandard2.0` you get them only by adding the **`System.Memory` / `Microsoft.Bcl.AsyncInterfaces`** NuGet polyfills. Other useful packages: `Microsoft.Bcl.*` for backported BCL surface, and **`PolySharp`** for compiler-feature shims (records, `init`, `required`) — note that **`<LangVersion>` is independent of the TFM**, so you can use modern C# syntax targeting `netstandard2.0` as long as the required runtime types are polyfilled.
+
+### Why it ended
+
+.NET 5 unified the runtimes, so a single TFM family (`net5.0`, `net8.0`, …) now means "this exact platform," with OS-specific variants (`net8.0-android`, `net8.0-ios`, `net8.0-windows`) replacing the abstract-contract approach. .NET Standard stopped at 2.1 and exists today only as a compatibility bridge to .NET Framework.
 
 ### Example
 

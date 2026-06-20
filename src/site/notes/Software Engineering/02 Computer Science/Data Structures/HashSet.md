@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/data-structures/hash-set/","dg-note-properties":{"topic":["Computer Science"],"subtopic":["Data Structures"],"level":["4"],"priority":"Medium","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/data-structures/hash-set/","dg-note-properties":{"topic":["Computer Science"],"subtopic":["Data Structures"],"level":["4"],"priority":"Medium","status":"Ready to Repeat"}}
 ---
 
 
@@ -19,6 +19,13 @@
 - `SymmetricExceptWith` — keeps elements present in exactly one set (A △ B).
 
 These are in-place mutations. `IsSubsetOf`, `IsSupersetOf`, and `SetEquals` test structural relationships without modifying the set. A common production pattern: accumulate processed IDs in a `HashSet<int>`, then call `ExceptWith` against the full batch to find unprocessed items in O(n) instead of O(n²).
+
+### Capacity, load factor, and resizing
+
+Like `Dictionary<TKey,TValue>`, a `HashSet<T>` keeps a backing array sized to a prime number of buckets and tracks a **load factor** (entries ÷ buckets). When it fills past the threshold it **resizes** — allocating a larger array and **rehashing every element** into new buckets, an O(n) operation. Many small grows turn a "fast O(1)" insert loop into repeated O(n) copies, so if you know the rough size up front, **pre-size** with `new HashSet<T>(expectedCount)`. This load-factor/rehash machinery underlies all the hash-based collections — see [[Software Engineering/02 Computer Science/Data Structures/HashMap\|HashMap]].
+
+> [!WARNING]
+> **Hash flooding (algorithmic-complexity DoS).** If an attacker can submit many keys that deliberately collide into one bucket (e.g. user-controlled string keys), every lookup degrades to O(n) and CPU spikes. .NET randomizes the `string` hash seed per process to blunt this, but custom key types with a weak `GetHashCode` remain vulnerable — give user-facing keys a well-distributed hash, or validate/cap untrusted key counts.
 
 ## Structure
 
@@ -87,6 +94,8 @@ var added = tags.Add("DOTNET"); // false, already exists by comparer
 >  [[Software Engineering/02 Computer Science/02 Computer Science\|02 Computer Science]]
 >
 > **Pages**
+> - [[Software Engineering/02 Computer Science/Data Structures/Bloom Filter\|Bloom Filter]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Circular Buffer\|Circular Buffer]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Dictionary\|Dictionary]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Graph\|Graph]]
 > - [[Software Engineering/02 Computer Science/Data Structures/HashMap\|HashMap]]
@@ -94,8 +103,10 @@ var added = tags.Add("DOTNET"); // false, already exists by comparer
 > - [[Software Engineering/02 Computer Science/Data Structures/Heap\|Heap]]
 > - [[Software Engineering/02 Computer Science/Data Structures/LinkedList\|LinkedList]]
 > - [[Software Engineering/02 Computer Science/Data Structures/List\|List]]
+> - [[Software Engineering/02 Computer Science/Data Structures/LRU Cache\|LRU Cache]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Queue\|Queue]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Span\|Span]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Stack\|Stack]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Trees\|Trees]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Trie\|Trie]]
 <!-- whats-next:end -->

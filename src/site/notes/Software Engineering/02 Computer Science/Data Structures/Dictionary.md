@@ -94,6 +94,8 @@ if (byId.TryGetValue(2, out var user))
 >  [[Software Engineering/02 Computer Science/02 Computer Science\|02 Computer Science]]
 >
 > **Pages**
+> - [[Software Engineering/02 Computer Science/Data Structures/Bloom Filter\|Bloom Filter]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Circular Buffer\|Circular Buffer]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Graph\|Graph]]
 > - [[Software Engineering/02 Computer Science/Data Structures/HashMap\|HashMap]]
 > - [[Software Engineering/02 Computer Science/Data Structures/HashSet\|HashSet]]
@@ -101,8 +103,10 @@ if (byId.TryGetValue(2, out var user))
 > - [[Software Engineering/02 Computer Science/Data Structures/Heap\|Heap]]
 > - [[Software Engineering/02 Computer Science/Data Structures/LinkedList\|LinkedList]]
 > - [[Software Engineering/02 Computer Science/Data Structures/List\|List]]
+> - [[Software Engineering/02 Computer Science/Data Structures/LRU Cache\|LRU Cache]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Queue\|Queue]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Span\|Span]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Stack\|Stack]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Trees\|Trees]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Trie\|Trie]]
 <!-- whats-next:end -->
