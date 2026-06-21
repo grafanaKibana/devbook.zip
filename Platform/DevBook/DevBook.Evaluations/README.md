@@ -71,6 +71,8 @@ The crucial field is `text`: it is **not** the chunk body, it is a **short locat
 
 Two companion artifacts are written to `Datasets/Groups/` for inspection (not consumed by the eval): `shared.groups.json` (the groups sent to the LLM) and `summary.json` (run-level counts, including the single- vs multi-evidence split).
 
+**Two dataset kinds.** The generator produces a **search** dataset (`chunks-shared.json`, above — consumed by `RAG.Search`) and an **answer** dataset (`answers-shared.json` — for `RAG.Answer` answer-correctness). The answer record is a *superset* of the search record: the same `query` + `expected` evidence, plus a grounded `referenceAnswer` (prose that cites the evidence inline as `[[wikilinks]]`) and `expectedCitations`. Both are produced in a **single LLM pass per group** and projected to whichever outputs you asked for — choose with `--dataset search|answer|all` (default `all`).
+
 ### How a dataset is generated
 
 Source of truth is the **raw notes** in the Mongo `documents` collection — the un-chunked copy of each note — so generation is independent of any chunking strategy. Pipeline in [`RunDatasetGeneration.cs`](RunDatasetGeneration.cs):
@@ -80,6 +82,7 @@ Source of truth is the **raw notes** in the Mongo `documents` collection — the
 3. **Group cross-note via `[[wikilinks]]`.** A seed note is grouped with the notes it links to, and each section gets a local id (`S1`, `S2`, …). *Why:* real vector search returns chunks from several documents, so a question's evidence should be able to span multiple pages. Wikilinks are the vault's own notion of relatedness, and need no embeddings. Section reuse across groups is capped (`--section-reuse-cap`) so popular notes don't dominate.
 4. **Generate queries with an LLM.** Each group is sent to the model, which writes 2–4 realistic queries and, for each, lists the sections needed to answer it plus a short verbatim quote. The prompt **strongly prefers multi-section evidence** so single-evidence cases stay a minority (mirroring top-K retrieval).
 5. **Build expected evidence.** Each cited section becomes an expected item: `source path + heading + snippet`. The snippet is the LLM's quote *validated to be a verbatim substring of the section* (`SelectSnippet`); if validation fails it falls back to the section's leading sentence. This guarantees the snippet is always findable inside the real chunk.
+6. **Write the reference answer** *(answer dataset only — `--dataset answer|all`)*. In the same call, the LLM also writes a grounded `referenceAnswer` for each query, citing the evidence inline as `[[wikilinks]]`. It is validated loosely (`IsValidReferenceAnswer`: non-trivial length, carries a citation); a query without a valid answer still contributes to the search dataset, just not the answer one.
 
 The LLM model comes from `GoldenDatasetGeneratorOptions:ModelId` (default `gpt-5.4-mini`), overridable per run with the `GOLDEN_DATASET_MODEL` env var. Mongo/OpenAI settings are read from `appsettings.Evaluations.json`, `DevBook.API/appsettings.Development.json`, user-secrets, and environment variables; secrets are never printed.
 
@@ -87,6 +90,7 @@ The LLM model comes from `GoldenDatasetGeneratorOptions:ModelId` (default `gpt-5
 
 | Goal | Lever | Notes |
 | --- | --- | --- |
+| Which dataset(s) to generate | `--dataset search\|answer\|all` | Default `all` — one combined LLM pass writes both. `search` → `chunks-shared.json`; `answer` → `answers-shared.json` (adds reference answers); the flag *narrows* the default. Accepts a comma list (`--dataset search,answer`). |
 | Bigger / smaller dataset | `--max-groups` | Hard cap on groups sent to the LLM. ~120 groups ≈ 450 cases; ~10 ≈ 30–40 cases. The main size dial and the main LLM-cost dial. |
 | Separate sizes that coexist | `--label <name>` | Suffixes all output files (`chunks-shared-<name>.json`, `shared-<name>.groups.json`, `summary-<name>.json`). Empty label = the default *full* names. Used for the **mini** variant so it never overwrites full. |
 | Section selectivity | `--min-section-chars` | Higher = only longer sections become evidence. |
@@ -102,17 +106,23 @@ The LLM model comes from `GoldenDatasetGeneratorOptions:ModelId` (default `gpt-5
 From the repository root:
 
 ```bash
-# Full dataset (default file names)
-dotnet run Platform/DevBook/DevBook.Evaluations/RunDatasetGeneration.cs -- --max-groups 120
+# Both datasets — search + answer — in one LLM pass (default)
+dotnet run Platform/DevBook/DevBook.Evaluations/RunDatasetGeneration.cs -- --dataset all --max-groups 120
 
-# Mini dataset (writes chunks-shared-mini.json etc., coexists with full)
-dotnet run Platform/DevBook/DevBook.Evaluations/RunDatasetGeneration.cs -- --label mini --max-groups 10
+# Search dataset only (chunks-shared.json)
+dotnet run Platform/DevBook/DevBook.Evaluations/RunDatasetGeneration.cs -- --dataset search --max-groups 120
+
+# Answer dataset only (answers-shared.json, adds reference answers)
+dotnet run Platform/DevBook/DevBook.Evaluations/RunDatasetGeneration.cs -- --dataset answer --max-groups 120
+
+# Mini search dataset (writes chunks-shared-mini.json etc., coexists with full)
+dotnet run Platform/DevBook/DevBook.Evaluations/RunDatasetGeneration.cs -- --dataset search --label mini --max-groups 10
 
 # Dry run: grouping + summary only, no LLM cost
-dotnet run Platform/DevBook/DevBook.Evaluations/RunDatasetGeneration.cs -- --dry-run --max-groups 120
+dotnet run Platform/DevBook/DevBook.Evaluations/RunDatasetGeneration.cs -- --dataset all --dry-run --max-groups 120
 ```
 
-The same commands are available as IDE launch profiles in `DevBook.API/Properties/launchSettings.json` (*Run Dataset Generation*, *Run Dataset Generation - Mini*, and their *Dry Run* variants).
+The same commands are available as IDE launch profiles in `DevBook.API/Properties/launchSettings.json`: *Run Dataset Generation - Search*, *- Search - Mini*, *- Answer*, *- All*, and *- All - Dry Run* (dry-run is provided for the **All** variant only).
 
 ---
 

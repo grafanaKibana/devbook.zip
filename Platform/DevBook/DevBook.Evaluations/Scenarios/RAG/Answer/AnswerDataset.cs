@@ -32,6 +32,16 @@ public sealed record AnswerCase
 
     /// <summary>Gets the gold evidence chunks supplied to the agent as fixed context.</summary>
     public IReadOnlyList<AnswerSource> Expected { get; init; } = [];
+
+    /// <summary>
+    /// Gets the gold reference answer for this case, present only in the answer dataset
+    /// (<c>answers-shared.json</c>). Null for the reference-free <c>chunks-shared.json</c>; its presence
+    /// is what unlocks the answer-correctness metric.
+    /// </summary>
+    public string? ReferenceAnswer { get; init; }
+
+    /// <summary>Gets the citation labels a correct answer is expected to cite (answer dataset only).</summary>
+    public IReadOnlyList<string> ExpectedCitations { get; init; } = [];
 }
 
 /// <summary>One gold evidence chunk: the chunker-neutral identity plus the snippet text.</summary>

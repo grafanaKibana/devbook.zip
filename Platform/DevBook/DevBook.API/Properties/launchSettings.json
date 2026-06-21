@@ -19,43 +19,43 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "Run Dataset Generation": {
+    "Run Dataset Generation - Search": {
       "commandName": "Executable",
       "executablePath": "dotnet",
-      "commandLineArgs": "run Platform/DevBook/DevBook.Evaluations/RunDatasetGeneration.cs -- --max-groups 120",
+      "commandLineArgs": "run Platform/DevBook/DevBook.Evaluations/RunDatasetGeneration.cs -- --dataset search --max-groups 120",
       "workingDirectory": "../../.."
     },
-    "Run Dataset Generation - Dry Run": {
+    "Run Dataset Generation - Search - Mini": {
       "commandName": "Executable",
       "executablePath": "dotnet",
-      "commandLineArgs": "run Platform/DevBook/DevBook.Evaluations/RunDatasetGeneration.cs -- --dry-run --max-groups 120",
+      "commandLineArgs": "run Platform/DevBook/DevBook.Evaluations/RunDatasetGeneration.cs -- --dataset search --label mini --max-groups 10",
       "workingDirectory": "../../.."
     },
-    "Run Dataset Generation - Mini": {
+    "Run Dataset Generation - Answer": {
       "commandName": "Executable",
       "executablePath": "dotnet",
-      "commandLineArgs": "run Platform/DevBook/DevBook.Evaluations/RunDatasetGeneration.cs -- --label mini --max-groups 10",
+      "commandLineArgs": "run Platform/DevBook/DevBook.Evaluations/RunDatasetGeneration.cs -- --dataset answer --max-groups 120",
       "workingDirectory": "../../.."
     },
-    "Run Dataset Generation - Mini - Dry Run": {
+    "Run Dataset Generation - All": {
       "commandName": "Executable",
       "executablePath": "dotnet",
-      "commandLineArgs": "run Platform/DevBook/DevBook.Evaluations/RunDatasetGeneration.cs -- --label mini --dry-run --max-groups 10",
+      "commandLineArgs": "run Platform/DevBook/DevBook.Evaluations/RunDatasetGeneration.cs -- --dataset all --max-groups 120",
+      "workingDirectory": "../../.."
+    },
+    "Run Dataset Generation - All - Dry Run": {
+      "commandName": "Executable",
+      "executablePath": "dotnet",
+      "commandLineArgs": "run Platform/DevBook/DevBook.Evaluations/RunDatasetGeneration.cs -- --dataset all --dry-run --max-groups 120",
       "workingDirectory": "../../.."
     },
     "Run Evaluation": {
       "commandName": "Executable",
       "executablePath": "dotnet",
-      "commandLineArgs": "run Platform/DevBook/DevBook.Evaluations/RunEvaluation.cs -- --name RAG.Search",
-      "workingDirectory": "../../.."
-    },
-    "Run Evaluation - Open Report": {
-      "commandName": "Executable",
-      "executablePath": "dotnet",
       "commandLineArgs": "run Platform/DevBook/DevBook.Evaluations/RunEvaluation.cs -- --name RAG.Search --open-browser",
       "workingDirectory": "../../.."
     },
-    "Generate Report": {
+    "Run Report Generation": {
       "commandName": "Executable",
       "executablePath": "dotnet",
       "commandLineArgs": "run Platform/DevBook/DevBook.Evaluations/RunReport.cs -- --run latest --with-standard --open-browser",

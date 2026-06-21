@@ -23,6 +23,7 @@ using OpenAI;
 public sealed class AnswerEvaluation : EvaluationTestBase<AnswerPrediction>
 {
     private const string SharedDatasetFileName = "chunks-shared.json";
+    private const string AnswerDatasetFileName = "answers-shared.json";
 
     private AIAgent answerAgent = null!;
     private IAnswerJudge judge = null!;
@@ -31,7 +32,14 @@ public sealed class AnswerEvaluation : EvaluationTestBase<AnswerPrediction>
     protected override string ScenarioDisplayName => "RAG.Answer";
 
     /// <inheritdoc />
-    protected override IEvaluator[] GetPerIterationEvaluators() => [new AnswerQualityEvaluator(AnswerMetrics.All)];
+    protected override IEvaluator[] GetPerIterationEvaluators() => [new AnswerQualityEvaluator(SelectedMetrics())];
+
+    // Prefer the answer dataset (carries per-case reference answers → unlocks Correctness); fall back to
+    // the reference-free shared search dataset. Both deserialize to AnswerCase. The metric panel and the
+    // loaded file are chosen from the same signal so they always agree.
+    private static bool HasAnswerDataset() => File.Exists(Path.Combine(AppContext.BaseDirectory, "Datasets", AnswerDatasetFileName));
+    private static string ResolveDatasetFileName() => HasAnswerDataset() ? AnswerDatasetFileName : SharedDatasetFileName;
+    private static IReadOnlyList<AnswerMetricDefinition> SelectedMetrics() => HasAnswerDataset() ? AnswerMetrics.All : AnswerMetrics.ReferenceFree;
 
     /// <inheritdoc />
     protected override Task OnSetupAsync()
@@ -65,13 +73,13 @@ public sealed class AnswerEvaluation : EvaluationTestBase<AnswerPrediction>
         this.answerAgent = new ChatClientAgent(
             client.GetChatClient(answerConfig.ModelId).AsIChatClient(),
             answerConfig.ChatClientAgentOptions);
-        this.judge = new LlmAnswerJudge(client.GetChatClient(judgeModelId).AsIChatClient(), judgeModelId);
+        this.judge = new LlmAnswerJudge(client.GetChatClient(judgeModelId).AsIChatClient(), judgeModelId, SelectedMetrics());
 
         return Task.CompletedTask;
     }
 
     private static IEnumerable<TestCaseData> Cases()
-        => LoadTestCases<AnswerDataset, AnswerCase>(SharedDatasetFileName, dataset => dataset.Cases, answerCase => answerCase.Id);
+        => LoadTestCases<AnswerDataset, AnswerCase>(ResolveDatasetFileName(), dataset => dataset.Cases, answerCase => answerCase.Id);
 
     [Test]
     [TestCaseSource(nameof(Cases))]
@@ -114,7 +122,7 @@ public sealed class AnswerEvaluation : EvaluationTestBase<AnswerPrediction>
             .Where(verdict => !verdict.Definition.Informational)
             .ToList();
 
-        var metrics = AnswerMetrics.All
+        var metrics = SelectedMetrics()
             .Where(metric => !metric.Informational)
             .Select(metric =>
             {

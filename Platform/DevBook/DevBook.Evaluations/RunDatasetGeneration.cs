@@ -42,7 +42,8 @@ var generatedAt = DateTimeOffset.UtcNow;
 
 Console.WriteLine("Golden dataset generator (Option 1: raw note sections, cross-note via wikilinks)");
 Console.WriteLine($"Repo root: {runOptions.RepoRoot}");
-Console.WriteLine($"Variant: {(string.IsNullOrWhiteSpace(runOptions.Label) ? "full" : runOptions.Label)} (dataset: {Path.GetFileName(runOptions.SharedDatasetPath)})");
+Console.WriteLine($"Variant: {(string.IsNullOrWhiteSpace(runOptions.Label) ? "full" : runOptions.Label)}");
+Console.WriteLine($"Datasets: {runOptions.DatasetsLabel}");
 Console.WriteLine($"Max groups: {runOptions.MaxGroups}");
 Console.WriteLine($"Minimum section characters: {runOptions.MinSectionChars}");
 Console.WriteLine($"Sections per note / max per group / max linked notes: {runOptions.SectionsPerNote} / {runOptions.MaxSectionsPerGroup} / {runOptions.MaxLinkedNotes}");
@@ -68,19 +69,42 @@ Console.WriteLine($"Prepared {groups.Count} groups.");
 WriteJson(runOptions.GroupsPath, new GroupFile(1, generatedAt, groups.Select(GroupInfo.FromGroup).ToArray()));
 Console.WriteLine($"Wrote groups -> {runOptions.GroupsPath}");
 
-var cases = new List<DatasetCase>();
+// The answer dataset is a superset of the search dataset (same query + evidence, plus a grounded
+// reference answer). Generate the superset once per group and project it to each selected output, so
+// requesting both datasets is a single LLM pass — never two over the same groups.
+var includeAnswer = runOptions.WantAnswer;
+var cases = new List<DatasetCase>();              // search projection (also feeds the summary)
+var answerCases = new List<AnswerDatasetCase>();  // answer dataset rows
 if (!runOptions.DryRun)
 {
     foreach (var group in groups)
     {
-        var llmResponse = await GenerateCasesForGroupWithRetryAsync(chatClient, group, appConfig.RateLimitOptions, runOptions.CancellationToken);
-        var acceptedCases = KeepValidCases(group, llmResponse).ToArray();
-        cases.AddRange(acceptedCases);
-        Console.WriteLine($"{group.Id} ({group.SeedTitle}): LLM accepted={llmResponse.Accepted}; keptCases={acceptedCases.Length}");
+        var llmResponse = await GenerateCasesForGroupWithRetryAsync(chatClient, group, includeAnswer, appConfig.RateLimitOptions, runOptions.CancellationToken);
+        var acceptedCases = KeepValidCases(group, llmResponse, includeAnswer).ToArray();
+        foreach (var generated in acceptedCases)
+        {
+            cases.Add(generated.ToSearchCase());
+            if (includeAnswer && generated.ReferenceAnswer is not null)
+            {
+                answerCases.Add(generated.ToAnswerCase());
+            }
+        }
+
+        var withAnswers = acceptedCases.Count(generated => generated.ReferenceAnswer is not null);
+        Console.WriteLine($"{group.Id} ({group.SeedTitle}): LLM accepted={llmResponse.Accepted}; keptCases={acceptedCases.Length}{(includeAnswer ? $"; withAnswers={withAnswers}" : string.Empty)}");
     }
 
-    WriteJson(runOptions.SharedDatasetPath, new DatasetFile(3, generatedAt, "shared", cases));
-    Console.WriteLine($"Wrote shared dataset cases: {cases.Count} -> {runOptions.SharedDatasetPath}");
+    if (runOptions.WantSearch)
+    {
+        WriteJson(runOptions.SharedDatasetPath, new DatasetFile(3, generatedAt, "shared", cases));
+        Console.WriteLine($"Wrote search dataset cases: {cases.Count} -> {runOptions.SharedDatasetPath}");
+    }
+
+    if (runOptions.WantAnswer)
+    {
+        WriteJson(runOptions.AnswerDatasetPath, new AnswerDatasetFile(1, generatedAt, "shared", answerCases));
+        Console.WriteLine($"Wrote answer dataset cases: {answerCases.Count} -> {runOptions.AnswerDatasetPath}");
+    }
 }
 else
 {
@@ -90,7 +114,7 @@ else
         Console.WriteLine($"{group.Id} ({group.SeedTitle}): {group.Sections.Count} sections across {sources} notes (dry run).");
     }
 
-    Console.WriteLine("Dry run: skipped LLM generation and dataset file write.");
+    Console.WriteLine($"Dry run: would generate [{runOptions.DatasetsLabel}]; skipped LLM generation and dataset file write.");
 }
 
 WriteJson(runOptions.SummaryPath, SummaryFile.Create(generatedAt, documents.Count, documentsWithSections.Length, groups, cases));
@@ -324,12 +348,12 @@ static bool TryParseHeading(string line, out string headingText)
     return !string.IsNullOrWhiteSpace(headingText);
 }
 
-static async Task<GroupLlmResponse> GenerateCasesForGroupAsync(ChatClient chatClient, NoteGroup group, CancellationToken cancellationToken)
+static async Task<GroupLlmResponse> GenerateCasesForGroupAsync(ChatClient chatClient, NoteGroup group, bool includeAnswer, CancellationToken cancellationToken)
 {
     var messages = new ChatMessage[]
     {
         new SystemChatMessage("You create retrieval golden datasets from note sections. Use only the supplied sections. Reference sections only by their sectionId. Quotes must be copied verbatim from the section text, plain prose without Markdown symbols. Return strict JSON only."),
-        new UserChatMessage(PromptBuilder.ForGroup(group)),
+        new UserChatMessage(PromptBuilder.ForGroup(group, includeAnswer)),
     };
     var options = new ChatCompletionOptions
     {
@@ -354,13 +378,13 @@ static async Task<GroupLlmResponse> GenerateCasesForGroupAsync(ChatClient chatCl
     }
 }
 
-static async Task<GroupLlmResponse> GenerateCasesForGroupWithRetryAsync(ChatClient chatClient, NoteGroup group, EvaluationRateLimitOptions rateLimitOptions, CancellationToken cancellationToken)
+static async Task<GroupLlmResponse> GenerateCasesForGroupWithRetryAsync(ChatClient chatClient, NoteGroup group, bool includeAnswer, EvaluationRateLimitOptions rateLimitOptions, CancellationToken cancellationToken)
 {
     for (var attempt = 1; ; attempt++)
     {
         try
         {
-            return await GenerateCasesForGroupAsync(chatClient, group, cancellationToken);
+            return await GenerateCasesForGroupAsync(chatClient, group, includeAnswer, cancellationToken);
         }
         catch (Exception exception) when (ShouldRetryOpenAI(exception, attempt, rateLimitOptions.MaxRetryAttempts, out var retryDelay, out var reason))
         {
@@ -505,7 +529,7 @@ static TException? FindException<TException>(Exception exception)
     return exception.InnerException is null ? null : FindException<TException>(exception.InnerException);
 }
 
-static IEnumerable<DatasetCase> KeepValidCases(NoteGroup group, GroupLlmResponse response)
+static IEnumerable<GeneratedCase> KeepValidCases(NoteGroup group, GroupLlmResponse response, bool includeAnswer)
 {
     if (!response.Accepted)
     {
@@ -541,13 +565,34 @@ static IEnumerable<DatasetCase> KeepValidCases(NoteGroup group, GroupLlmResponse
             continue;
         }
 
-        yield return new DatasetCase(
+        // The reference answer is optional: when requested but missing/invalid for a case, that case
+        // still contributes to the search dataset, just not the answer dataset.
+        string? referenceAnswer = null;
+        IReadOnlyList<string> expectedCitations = [];
+        if (includeAnswer && IsValidReferenceAnswer(query.Answer, out var cleanedAnswer))
+        {
+            referenceAnswer = cleanedAnswer;
+            expectedCitations = expected.Select(chunk => chunk.CitationLabel).Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
+        }
+
+        yield return new GeneratedCase(
             $"shared-{TextRules.Slug(query.Query)}-{index:000}",
             query.Query.Trim(),
             NormalizeDifficulty(query.Difficulty),
-            expected);
+            expected,
+            referenceAnswer,
+            expectedCitations);
         index++;
     }
+}
+
+// A usable gold answer is non-trivial prose that carries at least one inline [[wikilink]] citation, so
+// the downstream Citation/Correctness judge has something to score against. Loose by design — the LLM
+// judge does the real grading; this only rejects obviously-degenerate generations.
+static bool IsValidReferenceAnswer(string? answer, out string cleaned)
+{
+    cleaned = answer?.Trim() ?? string.Empty;
+    return cleaned.Length is >= 40 and <= 1500 && cleaned.Contains("[[", StringComparison.Ordinal);
 }
 
 static ExpectedChunk CreateExpectedChunk(NoteSection section, string? quote)
@@ -597,6 +642,7 @@ static void WriteJson<T>(string path, T value)
 sealed record RunOptions(
     string RepoRoot,
     string Label,
+    DatasetKinds Datasets,
     int MaxGroups,
     int MinSectionChars,
     int SectionsPerNote,
@@ -615,14 +661,21 @@ sealed record RunOptions(
 
     // The shared, chunker-neutral golden dataset consumed by SearchEvaluation.
     public string SharedDatasetPath => Path.Combine(this.DatasetOutputDirectory, $"chunks-shared{this.Suffix}.json");
+    // The answer golden dataset (search superset + reference answer) consumed by AnswerEvaluation.
+    public string AnswerDatasetPath => Path.Combine(this.DatasetOutputDirectory, $"answers-shared{this.Suffix}.json");
     public string GroupsPath => Path.Combine(this.GroupOutputDirectory, $"shared{this.Suffix}.groups.json");
     public string SummaryPath => Path.Combine(this.GroupOutputDirectory, $"summary{this.Suffix}.json");
+
+    public bool WantSearch => this.Datasets.HasFlag(DatasetKinds.Search);
+    public bool WantAnswer => this.Datasets.HasFlag(DatasetKinds.Answer);
+    public string DatasetsLabel => string.Join(", ", new[] { (this.WantSearch, "search"), (this.WantAnswer, "answer") }.Where(item => item.Item1).Select(item => item.Item2));
 
     public static RunOptions Parse(string[] args, string repoRoot)
     {
         return new RunOptions(
             GetString(args, "--repo-root") ?? repoRoot,
             GetString(args, "--label") ?? string.Empty,
+            ParseDatasets(args),
             GetInt(args, "--max-groups", 120),
             GetInt(args, "--min-section-chars", 200),
             GetInt(args, "--sections-per-note", 3),
@@ -633,6 +686,33 @@ sealed record RunOptions(
             CancellationToken.None);
     }
 
+    // --dataset selects which golden datasets to produce: search, answer, or all (default: all).
+    // Accepts repeated flags and comma-separated values, e.g. --dataset answer, --dataset search,answer.
+    private static DatasetKinds ParseDatasets(string[] args)
+    {
+        var kinds = DatasetKinds.None;
+        for (var i = 0; i < args.Length; i++)
+        {
+            if (!args[i].Equals("--dataset", StringComparison.OrdinalIgnoreCase) || i + 1 >= args.Length)
+            {
+                continue;
+            }
+
+            foreach (var token in args[i + 1].Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            {
+                kinds |= token.ToLowerInvariant() switch
+                {
+                    "search" => DatasetKinds.Search,
+                    "answer" => DatasetKinds.Answer,
+                    "all" => DatasetKinds.All,
+                    _ => DatasetKinds.None,
+                };
+            }
+        }
+
+        return kinds == DatasetKinds.None ? DatasetKinds.All : kinds;
+    }
+
     private static int GetInt(string[] args, string name, int fallback) => TryGetInt(args, name) ?? fallback;
     private static int? TryGetInt(string[] args, string name) => int.TryParse(GetString(args, name), out var value) ? value : null;
     private static string? GetString(string[] args, string name)
@@ -640,6 +720,16 @@ sealed record RunOptions(
         var index = Array.FindIndex(args, arg => arg.Equals(name, StringComparison.OrdinalIgnoreCase));
         return index >= 0 && index + 1 < args.Length ? args[index + 1] : null;
     }
+}
+
+// Which golden datasets a run should produce. Default is All; --dataset narrows it.
+[Flags]
+enum DatasetKinds
+{
+    None = 0,
+    Search = 1,
+    Answer = 2,
+    All = Search | Answer,
 }
 
 sealed record AppConfig(string MongoConnectionString, OpenAIConfig OpenAIOptions, GoldenDatasetGeneratorOptions GeneratorOptions, EvaluationRateLimitOptions RateLimitOptions)
@@ -719,12 +809,25 @@ sealed record NoteSection(string LocalId, string SourcePath, string DocumentId, 
 sealed record NoteGroup(string Id, string SeedTitle, string SeedSourcePath, IReadOnlyList<NoteSection> Sections);
 
 sealed record GroupLlmResponse(bool Accepted, string? RejectionReason, IReadOnlyList<QueryCase>? Queries);
-sealed record QueryCase(string Query, string? Difficulty, IReadOnlyList<QueryEvidence>? Evidence);
+sealed record QueryCase(string Query, string? Difficulty, IReadOnlyList<QueryEvidence>? Evidence, string? Answer = null);
 sealed record QueryEvidence(string? SectionId, string? Quote);
 
 sealed record DatasetFile(int Version, DateTimeOffset GeneratedAt, string Collection, IReadOnlyList<DatasetCase> Cases);
 sealed record DatasetCase(string Id, string Query, string Difficulty, IReadOnlyList<ExpectedChunk> Expected);
 sealed record ExpectedChunk(string DocumentId, string? Heading, string CitationLabel, string Text);
+
+// One generated case in superset form: the search fields plus an optional grounded reference answer.
+// Projected to the search and/or answer dataset rows depending on which datasets were requested.
+sealed record GeneratedCase(string Id, string Query, string Difficulty, IReadOnlyList<ExpectedChunk> Expected, string? ReferenceAnswer, IReadOnlyList<string> ExpectedCitations)
+{
+    public DatasetCase ToSearchCase() => new(this.Id, this.Query, this.Difficulty, this.Expected);
+    public AnswerDatasetCase ToAnswerCase() => new(this.Id, this.Query, this.Difficulty, this.Expected, this.ReferenceAnswer!, this.ExpectedCitations);
+}
+
+// answers-shared.json: the search case plus a grounded reference answer and the notes a correct answer
+// should cite. Consumed by RAG.Answer to unlock the correctness/equivalence metric.
+sealed record AnswerDatasetFile(int Version, DateTimeOffset GeneratedAt, string Collection, IReadOnlyList<AnswerDatasetCase> Cases);
+sealed record AnswerDatasetCase(string Id, string Query, string Difficulty, IReadOnlyList<ExpectedChunk> Expected, string ReferenceAnswer, IReadOnlyList<string> ExpectedCitations);
 
 sealed record GroupFile(int Version, DateTimeOffset GeneratedAt, IReadOnlyList<GroupInfo> Groups);
 sealed record GroupInfo(string Id, string SeedTitle, string SeedSourcePath, int NoteCount, IReadOnlyList<GroupSection> Sections)
@@ -777,13 +880,22 @@ sealed record SummaryFile(
 
 static class PromptBuilder
 {
-    public static string ForGroup(NoteGroup group)
+    public static string ForGroup(NoteGroup group, bool includeAnswer)
     {
         var builder = new StringBuilder();
         builder.AppendLine("These sections come from a seed note and notes it links to. Decide whether they can answer coherent user queries.");
         builder.AppendLine("If yes, generate 2-4 realistic retrieval queries. Strongly prefer queries whose evidence spans multiple sections, ideally across different notes; only fall back to a single section when the question genuinely needs just one.");
         builder.AppendLine("For each query, list every section whose content is needed to answer it, and omit unrelated sections. quote must be a short verbatim sentence copied from that section's text, plain prose without Markdown.");
-        builder.AppendLine("Return JSON: {\"accepted\":true|false,\"rejectionReason\":\"...\",\"queries\":[{\"query\":\"...\",\"difficulty\":\"easy|medium|hard\",\"evidence\":[{\"sectionId\":\"S1\",\"quote\":\"...\"}]}]}");
+        if (includeAnswer)
+        {
+            builder.AppendLine("Also produce \"answer\": a correct, self-contained reference answer (2-5 sentences) using ONLY the listed sections. Cite each note inline as [[note title]] or [[note title#heading]] using the note and heading shown in the section header. Do not state any fact that the cited sections do not support.");
+            builder.AppendLine("Return JSON: {\"accepted\":true|false,\"rejectionReason\":\"...\",\"queries\":[{\"query\":\"...\",\"difficulty\":\"easy|medium|hard\",\"evidence\":[{\"sectionId\":\"S1\",\"quote\":\"...\"}],\"answer\":\"... [[Note#Heading]] ...\"}]}");
+        }
+        else
+        {
+            builder.AppendLine("Return JSON: {\"accepted\":true|false,\"rejectionReason\":\"...\",\"queries\":[{\"query\":\"...\",\"difficulty\":\"easy|medium|hard\",\"evidence\":[{\"sectionId\":\"S1\",\"quote\":\"...\"}]}]}");
+        }
+
         builder.AppendLine($"Seed note: {group.SeedTitle}");
         foreach (var section in group.Sections)
         {

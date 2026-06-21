@@ -48,13 +48,14 @@ public sealed record AnswerMetricVerdict(
 /// deterministic citation-rate gate and an informational token count.
 /// </summary>
 /// <remarks>
-/// Answer <em>correctness</em> is intentionally absent: it requires a reference answer, and the
-/// shared golden dataset carries only gold evidence chunks. Add a per-case reference answer to the
-/// dataset to unlock correctness/equivalence.
+/// Answer <em>correctness</em> (equivalence to a gold reference answer) is included in <see cref="All"/>
+/// but only scored when the run uses the answer dataset (<c>answers-shared.json</c>, which carries a
+/// per-case <c>referenceAnswer</c>). For the reference-free <c>chunks-shared.json</c> the scenario uses
+/// <see cref="ReferenceFree"/>, which drops it.
 /// </remarks>
 public static class AnswerMetrics
 {
-    /// <summary>The metric definitions, in report-display order.</summary>
+    /// <summary>The full metric panel (includes reference-dependent Correctness), in report-display order.</summary>
     public static IReadOnlyList<AnswerMetricDefinition> All { get; } =
     [
         new("Faithfulness", "Faith", "Grounding", AnswerMetricKind.Score, "high", false,
@@ -65,11 +66,17 @@ public static class AnswerMetrics
             "Whether the answer addresses the question directly without drifting into unrelated material."),
         new("Completeness", "Compl", "Quality", AnswerMetricKind.Score, "high", false,
             "Whether the answer covers the aspects of the question that the provided sources can support."),
+        new("Correctness", "Correct", "Quality", AnswerMetricKind.Score, "high", false,
+            "Whether the answer is factually equivalent to the gold reference answer — same key facts, no contradictions. Scored only when a reference answer is available."),
         new("Citation Rate", "Cite%", "Citations", AnswerMetricKind.Fraction, "high", false,
             "Deterministic: did the answer include at least one inline [[...]] citation. Averaged, this is the citation rate — an early prompt-regression signal."),
         new("Completion Tokens", "Tokens", "Stats", AnswerMetricKind.Count, "none", true,
             "Informational — approximate completion tokens generated; no pass/fail interpretation."),
     ];
+
+    /// <summary>The panel without reference-dependent metrics, used for the reference-free dataset.</summary>
+    public static IReadOnlyList<AnswerMetricDefinition> ReferenceFree { get; } =
+        All.Where(metric => metric.MetricName != "Correctness").ToArray();
 }
 
 /// <summary>Scores one generated answer against the question and the gold evidence it was given.</summary>
@@ -97,12 +104,13 @@ public interface IAnswerJudge
 /// </summary>
 /// <param name="judgeClient">Chat client used for the judge model.</param>
 /// <param name="judgeModelId">Judge model id, surfaced as <c>meta:judge</c> in the report.</param>
-public sealed class LlmAnswerJudge(IChatClient judgeClient, string judgeModelId) : IAnswerJudge
+/// <param name="metrics">The metric panel to score (full or reference-free, chosen by the scenario).</param>
+public sealed class LlmAnswerJudge(IChatClient judgeClient, string judgeModelId, IReadOnlyList<AnswerMetricDefinition> metrics) : IAnswerJudge
 {
     private static readonly Regex CitationPattern = new(@"\[\[[^\]]+\]\]", RegexOptions.Compiled);
 
     /// <inheritdoc />
-    public IReadOnlyList<AnswerMetricDefinition> Metrics => AnswerMetrics.All;
+    public IReadOnlyList<AnswerMetricDefinition> Metrics => metrics;
 
     /// <inheritdoc />
     public async Task<IReadOnlyList<AnswerMetricVerdict>> JudgeAsync(
@@ -202,13 +210,18 @@ public sealed class LlmAnswerJudge(IChatClient judgeClient, string judgeModelId)
             "Citation Validity" => scores.CitationValidity,
             "Relevance" => scores.Relevance,
             "Completeness" => scores.Completeness,
+            "Correctness" => scores.Correctness,
             _ => null,
         };
 
         var metadata = BaseMetadata(metric);
         metadata["meta:judge"] = judgeModelId;
         metadata["meta:eval"] = $"{elapsedMs}ms";
-        if (metric.MetricName is "Faithfulness" or "Citation Validity" or "Completeness")
+        if (metric.MetricName == "Correctness")
+        {
+            metadata["ctx:reference"] = Truncate(answerCase.ReferenceAnswer ?? "(none)", 240);
+        }
+        else if (metric.MetricName is "Faithfulness" or "Citation Validity" or "Completeness")
         {
             metadata["ctx:sources"] = RenderSources(answerCase.Expected);
         }
@@ -295,6 +308,13 @@ public sealed class LlmAnswerJudge(IChatClient judgeClient, string judgeModelId)
             builder.AppendLine();
         }
 
+        if (!string.IsNullOrWhiteSpace(answerCase.ReferenceAnswer))
+        {
+            builder.AppendLine("REFERENCE ANSWER (gold — the answer should be factually equivalent to this):");
+            builder.AppendLine(answerCase.ReferenceAnswer.Trim());
+            builder.AppendLine();
+        }
+
         builder.AppendLine("ANSWER:").AppendLine(answer);
         return builder.ToString();
     }
@@ -308,7 +328,8 @@ public sealed class LlmAnswerJudge(IChatClient judgeClient, string judgeModelId)
         SOURCES that were provided to the answerer (the ONLY admissible evidence), and the ANSWER that
         was produced. Score each requested dimension on an integer scale of 1 (worst) to 5 (best) and
         give one short reason for each. Treat only the SOURCES as evidence: reward answers that stay
-        grounded in them and that correctly abstain when the evidence is missing.
+        grounded in them and that correctly abstain when the evidence is missing. A REFERENCE ANSWER
+        (gold) may also be provided; when it is, judge Correctness as factual equivalence to it.
         """;
 
     /// <summary>
@@ -329,6 +350,9 @@ public sealed class LlmAnswerJudge(IChatClient judgeClient, string judgeModelId)
 
         [Description("Does the answer cover the aspects of the question that the sources can support? Do not penalise omission of facts absent from the sources.")]
         public JudgeDimension? Completeness { get; init; }
+
+        [Description("If a REFERENCE ANSWER (gold) is provided, is this answer factually equivalent to it — same key facts, no contradictions or missing essentials? Ignore differences in wording and citation style. If no reference is provided, score 3.")]
+        public JudgeDimension? Correctness { get; init; }
     }
 
     private sealed record JudgeDimension
