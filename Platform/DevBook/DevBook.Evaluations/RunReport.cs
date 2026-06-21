@@ -41,11 +41,40 @@ const string DatasetFileName = "chunks-shared.json";
 string[] ChunkerOrder = ["FixedSize", "MarkdownSection", "Semantic"];
 string[] RerankerOrder = ["NoReranking", "Bm25", "MaximalMarginalRelevance", "ReciprocalRankFusion", "Llm"];
 
+// Single source of truth for metrics. Drives store extraction (chunk/section names),
+// the per-case drill detail, the bootstrap-CI samples, and the emitted DATA.metrics
+// registry the report renders from. Adding/changing a metric is one entry here — no
+// code changes in the generator or the template.
+//             key       label        chunk store name   section twin              kind       low    sel    detail bar    gate  table sub
+MetricSpec[] Metrics =
+[
+    new("recall", "RecallAtR", "RecallAtR",       "SectionRecallAtR",       "ranking", false, true,  true,  true,  true,  "± 95% CI"),
+    new("ndcg",   "NDCG@10",   "NDCGAt10",        "SectionNDCGAt10",        "ranking", false, true,  true,  true,  false, "± 95% CI"),
+    new("hit",    "HitRate@1", "HitRateAt1",      "SectionHitRateAt1",      "ranking", false, true,  true,  false, false, ""),
+    new("mrr",    "MRR@10",    "MRRAt10",         "SectionMRRAt10",         "ranking", false, true,  true,  false, false, ""),
+    new("map",    "MAP@10",    "MAPAt10",         "SectionMAPAt10",         "ranking", false, true,  true,  false, false, ""),
+    new("empty",  "EmptyRate", "EmptyResultRate", null,                     "rate",    true,  true,  false, false, false, "lower better"),
+    new("score",  "ScoreAvg",  "ScoreAverage",    null,                     "score",   false, false, false, false, false, "diagnostic"),
+    new("n",      "n",         "SampleCount",     null,                     "count",   false, false, false, false, false, ""),
+];
+var gateMetric = Metrics.First(m => m.Gate);
+
+// The metric registry, shaped for the embedded DATA blob so the report is data-driven.
+List<object?> MetricsForJs() => Metrics.Select(s => (object?)new Dictionary<string, object?>
+{
+    ["key"] = s.Key, ["label"] = s.Label, ["better"] = s.BetterLow ? "low" : "high",
+    ["ci"] = s.Kind == "ranking", ["inSelector"] = s.InSelector, ["inDetail"] = s.InDetail,
+    ["bar"] = s.Bar, ["gate"] = s.Gate, ["kind"] = s.Kind, ["sub"] = s.TableSub,
+}).ToList();
+
 var projectDirectory = ResolveProjectDirectory();
 var resultsDir = Path.Combine(projectDirectory, ReportsFolderName, "results");
 var runArg = ParseOption(args, "--run") ?? "latest";
 var outputArg = ParseOption(args, "--output");
 var openBrowser = ParseFlag(args, "--open-browser");
+// Opt-in: also (re)generate the MEAI standard report.html via `dotnet aieval report`
+// alongside the fancy report. Off by default so this tool stays read-only/additive.
+var withStandard = ParseFlag(args, "--with-standard");
 
 #endregion
 
@@ -95,6 +124,11 @@ File.WriteAllText(outputPath, html);
 Console.WriteLine($"Configurations: {model.ConfigCount} · cases (max per config): {model.MaxCases} · dataset join: {(model.HasDataset ? "yes" : "no")}");
 Console.WriteLine($"Wrote fancy report -> {outputPath}");
 Console.WriteLine($"  ({new FileInfo(outputPath).Length / 1024.0:F0} KiB, self-contained, offline)");
+
+if (withStandard)
+{
+    GenerateStandardReport(projectDirectory, runFolder, ReportsFolderName);
+}
 
 if (openBrowser)
 {
@@ -270,7 +304,11 @@ ReportModel BuildModel(string primaryRunFolder, string datasetPath)
         ["cases"] = primary.Cases,
         ["perCase"] = primary.PerCase,
         ["metricDefs"] = primary.MetricDefs,
+        ["metrics"] = MetricsForJs(),
         ["runs"] = runsList,
+        // Every non-custom scenario in the store, rendered with the generic default view.
+        // RAG.Search above is the bespoke case; everything else flows through here unchanged.
+        ["judge"] = GenericStoreReader.Build(primaryRunFolder),
     };
 
     return new ReportModel(data, primary.RunId, primary.ConfigCount, primary.MaxCases, hasDataset);
@@ -346,8 +384,8 @@ RunBuild BuildRunData(string runFolder, Dictionary<string, DatasetCase> dataset,
                 }
 
                 // Always collected — these feed the bootstrap CIs for every run.
-                chunkArrays.Add(metrics, MetricNames.Chunk);
-                sectionArrays.Add(metrics, MetricNames.Section);
+                chunkArrays.Add(metrics, Metrics, section: false);
+                sectionArrays.Add(metrics, Metrics, section: true);
 
                 if (!wantDetail) continue;
 
@@ -359,22 +397,19 @@ RunBuild BuildRunData(string runFolder, Dictionary<string, DatasetCase> dataset,
                     .ToArray();
                 if (retrieved.Length > topKObserved) topKObserved = retrieved.Length;
 
-                // Per-metric detail for the expandable drill-down: value, rating,
-                // and the authoritative per-case interpretation.reason.
-                Dictionary<string, object?> MetricDetail(string name) => new()
+                // Per-metric detail for the expandable drill-down (registry-driven):
+                // value, rating, and the authoritative per-case interpretation.reason.
+                var dm = new Dictionary<string, object?>();
+                foreach (var s in Metrics)
                 {
-                    ["v"] = GetValue(metrics, name),
-                    ["rt"] = GetRating(metrics, name),
-                    ["in"] = GetInterpReason(metrics, name),
-                };
-                var dm = new List<object?>
-                {
-                    MetricDetail("RecallAtR"),
-                    MetricDetail("NDCGAt10"),
-                    MetricDetail("HitRateAt1"),
-                    MetricDetail("MRRAt10"),
-                    MetricDetail("MAPAt10"),
-                };
+                    if (!s.InDetail) continue;
+                    dm[s.Key] = new Dictionary<string, object?>
+                    {
+                        ["v"] = GetValue(metrics, s.Chunk),
+                        ["rt"] = GetRating(metrics, s.Chunk),
+                        ["in"] = GetInterpReason(metrics, s.Chunk),
+                    };
+                }
 
                 var credited = GetDiagnostic(metrics, "ScoreAverage", "CreditedScoreAverage");
                 var uncredited = GetDiagnostic(metrics, "ScoreAverage", "UncreditedScoreAverage");
@@ -382,7 +417,7 @@ RunBuild BuildRunData(string runFolder, Dictionary<string, DatasetCase> dataset,
                 perCaseRows.Add(new Dictionary<string, object?>
                 {
                     ["id"] = caseId,
-                    ["p"] = !GetFailed(metrics, "RecallAtR"),     // authoritative pass/fail
+                    ["p"] = !GetFailed(metrics, gateMetric.Chunk),   // authoritative pass/fail (coverage gate)
                     ["r"] = retrieved,
                     ["dm"] = dm,
                     ["diag"] = new List<object?>
@@ -394,11 +429,10 @@ RunBuild BuildRunData(string runFolder, Dictionary<string, DatasetCase> dataset,
 
                 if (metricDefs.Count == 0)
                 {
-                    metricDefs["recall"] = GetDef(metrics, "RecallAtR");
-                    metricDefs["ndcg"] = GetDef(metrics, "NDCGAt10");
-                    metricDefs["hit"] = GetDef(metrics, "HitRateAt1");
-                    metricDefs["mrr"] = GetDef(metrics, "MRRAt10");
-                    metricDefs["map"] = GetDef(metrics, "MAPAt10");
+                    foreach (var s in Metrics)
+                    {
+                        if (s.InDetail) metricDefs[s.Key] = GetDef(metrics, s.Chunk);
+                    }
                 }
 
                 if (!cases.ContainsKey(caseId))
@@ -433,8 +467,8 @@ RunBuild BuildRunData(string runFolder, Dictionary<string, DatasetCase> dataset,
             catch { /* fall back to per-case means in BuildLevel */ }
         }
 
-        var chunkLevel = BuildLevel(summaryMetrics, MetricNames.Chunk, chunkArrays, configId, "chunk");
-        var sectionLevel = BuildLevel(summaryMetrics, MetricNames.Section, sectionArrays, configId, "section");
+        var chunkLevel = BuildLevel(summaryMetrics, section: false, chunkArrays, configId, "chunk", Metrics);
+        var sectionLevel = BuildLevel(summaryMetrics, section: true, sectionArrays, configId, "section", Metrics);
 
         configs.Add(new Dictionary<string, object?>
         {
@@ -483,56 +517,58 @@ RunBuild BuildRunData(string runFolder, Dictionary<string, DatasetCase> dataset,
     return new RunBuild(run, configs, winnerId, chunkers, rerankers, rShort, cases, perCase, metricDefs, runId, configs.Count, maxCases);
 }
 
+// Builds one level (chunk or section) of per-config aggregates, registry-driven.
+// Ranking metrics carry a 95% CI (the store's published one where available, else a
+// bootstrap from this config's per-case values); EmptyResultRate / ScoreAverage /
+// SampleCount have no chunk/section twin, so the section level reuses the chunk name.
 static Dictionary<string, object?> BuildLevel(
-    JsonElement? summary, MetricNames names, MetricArrays arrays, string configId, string level)
+    JsonElement? summary, bool section, MetricArrays arrays, string configId, string level, MetricSpec[] specs)
 {
-    Dictionary<string, object?> Metric(string canonicalName, string ciFieldName, double[] samples)
+    double? Val(string name) => summary is not null ? GetValue(summary.Value, name) : null;
+    string Rt(string name) => summary is not null ? GetRating(summary.Value, name) : "Unknown";
+
+    var lvl = new Dictionary<string, object?>();
+    foreach (var s in specs)
     {
-        var v = summary is not null ? GetValue(summary.Value, canonicalName) : null;
-        v ??= Mean(samples);
-        var rating = summary is not null ? GetRating(summary.Value, canonicalName) : "Unknown";
+        var name = section ? (s.Section ?? s.Chunk) : s.Chunk;
+        var v = Val(name);
 
-        // Prefer the store's published bootstrap CI (only present for the four
-        // chunk-level ranking metrics) so numbers match report.html exactly.
-        // Otherwise bootstrap a 95% CI from this config's per-case values.
-        var stored = summary is not null ? GetStoredCI(summary.Value, canonicalName) : (null, null);
-        double lo, hi;
-        if (stored.Item1 is double sl && stored.Item2 is double sh)
+        switch (s.Kind)
         {
-            (lo, hi) = (sl, sh);
-        }
-        else
-        {
-            (lo, hi) = Bootstrap(samples, StableSeed(configId + "|" + level + "|" + ciFieldName));
-        }
+            case "ranking":
+            {
+                var samples = arrays.Get(s.Key);
+                v ??= Mean(samples);
+                var stored = summary is not null ? GetStoredCI(summary.Value, name) : (null, null);
+                double lo, hi;
+                if (stored.Item1 is double sl && stored.Item2 is double sh)
+                {
+                    (lo, hi) = (sl, sh);
+                }
+                else
+                {
+                    (lo, hi) = Bootstrap(samples, StableSeed(configId + "|" + level + "|" + s.Key));
+                }
 
-        return new Dictionary<string, object?>
-        {
-            ["v"] = Round(v),
-            ["lo"] = Round(lo),
-            ["hi"] = Round(hi),
-            ["rating"] = rating,
-        };
+                lvl[s.Key] = new Dictionary<string, object?>
+                {
+                    ["v"] = Round(v), ["lo"] = Round(lo), ["hi"] = Round(hi), ["rating"] = Rt(name),
+                };
+                break;
+            }
+            case "rate":
+                lvl[s.Key] = new Dictionary<string, object?> { ["v"] = Round(v ?? 0), ["rating"] = Rt(name) };
+                break;
+            case "count":
+                lvl[s.Key] = (int)Math.Round(v ?? arrays.Count);
+                break;
+            default: // "score" — bare diagnostic number
+                lvl[s.Key] = Round(v ?? 0);
+                break;
+        }
     }
 
-    var emptyV = summary is not null ? GetValue(summary.Value, "EmptyResultRate") : null;
-    var emptyRating = summary is not null ? GetRating(summary.Value, "EmptyResultRate") : "Unknown";
-    var scoreV = summary is not null ? GetValue(summary.Value, "ScoreAverage") : null;
-    var n = summary is not null ? GetValue(summary.Value, "SampleCount") : null;
-
-    return new Dictionary<string, object?>
-    {
-        ["recall"] = Metric(names.Recall, "recall", arrays.Recall.ToArray()),
-        ["ndcg"] = Metric(names.Ndcg, "ndcg", arrays.Ndcg.ToArray()),
-        ["hit"] = Metric(names.Hit, "hit", arrays.Hit.ToArray()),
-        ["mrr"] = Metric(names.Mrr, "mrr", arrays.Mrr.ToArray()),
-        ["map"] = Metric(names.Map, "map", arrays.Map.ToArray()),
-        // EmptyResultRate, ScoreAverage and SampleCount have no chunk/section twin
-        // in the store, so both levels reuse the single aggregate value.
-        ["empty"] = new Dictionary<string, object?> { ["v"] = Round(emptyV ?? 0), ["rating"] = emptyRating },
-        ["score"] = Round(scoreV ?? 0),
-        ["n"] = (int)Math.Round(n ?? arrays.Recall.Count),
-    };
+    return lvl;
 }
 
 #endregion
@@ -911,6 +947,38 @@ static string HtmlEscape(string s) => s
     .Replace("<", "&lt;")
     .Replace(">", "&gt;");
 
+// Runs the official `dotnet aieval report` tool to (re)generate the MEAI standard
+// report.html for this run, next to the fancy report. Non-fatal: a failure here never
+// affects the already-written report.fancy.html.
+static void GenerateStandardReport(string projectDirectory, string runFolder, string reportsFolderName)
+{
+    var standardOutput = Path.Combine(runFolder, "report.html");
+    Console.WriteLine("Generating MEAI standard report (dotnet aieval report)...");
+    try
+    {
+        var process = Process.Start(new ProcessStartInfo
+        {
+            FileName = "dotnet",
+            Arguments = $"aieval report --path {reportsFolderName} --output \"{standardOutput}\"",
+            WorkingDirectory = projectDirectory,
+            UseShellExecute = false,
+        });
+        process?.WaitForExit();
+        if (process is { ExitCode: 0 })
+        {
+            Console.WriteLine($"Wrote standard report -> {standardOutput}");
+        }
+        else
+        {
+            Console.Error.WriteLine($"`dotnet aieval report` exited with code {process?.ExitCode ?? -1} (non-fatal; the fancy report is unaffected).");
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.Error.WriteLine($"Could not run `dotnet aieval report`: {ex.Message} (non-fatal).");
+    }
+}
+
 static void OpenInBrowser(string path)
 {
     try
@@ -943,6 +1011,574 @@ static void OpenInBrowser(string path)
 // Types
 // =============================================================================
 
+// =============================================================================
+// GenericStoreReader — renders ANY non-custom scenario in the MEAI store with the
+// default ("judge") view. This is the reusable core of the report: copy this file
+// plus the template into another project and every scenario it writes renders here
+// with no changes — only genuinely bespoke scenarios (here, RAG.Search) get the
+// custom handling above. Everything comes straight from the on-disk results: the
+// chat transcript, each metric's value/interpretation/diagnostics, and the
+// presentation hints the evaluator left on metric metadata (kind/group/short,
+// "ctx:<label>" judge-context blocks, "meta:<label>" evaluator rows).
+// =============================================================================
+static class GenericStoreReader
+{
+    // Scenario-name prefixes rendered by a bespoke handler elsewhere (skipped here).
+    // The one project-specific knob: change this when copying to another codebase.
+    static readonly string[] CustomPrefixes = ["RAG"];
+
+    static readonly JsonDocumentOptions DocOptions = new() { AllowTrailingCommas = true };
+
+    public static List<object?> Build(string primaryRunFolder)
+    {
+        var resultsRoot = Directory.GetParent(primaryRunFolder)?.FullName ?? primaryRunFolder;
+        var categories = new List<object?>();
+        foreach (var folder in DiscoverScenarioFolders(primaryRunFolder))
+        {
+            var category = BuildCategory(folder, primaryRunFolder, resultsRoot);
+            if (category is not null)
+            {
+                categories.Add(category);
+            }
+        }
+
+        return categories;
+    }
+
+    static IEnumerable<string> DiscoverScenarioFolders(string runFolder)
+    {
+        foreach (var dir in Directory.GetDirectories(runFolder).OrderBy(Path.GetFileName, StringComparer.Ordinal))
+        {
+            var name = Path.GetFileName(dir);
+            if (name.StartsWith("Summary.", StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            var firstSegment = name.Split('.')[0];
+            if (CustomPrefixes.Contains(firstSegment, StringComparer.Ordinal))
+            {
+                continue;
+            }
+
+            if (Directory.GetFiles(dir, "*.json").Length > 0)
+            {
+                yield return name;
+            }
+        }
+    }
+
+    static Dictionary<string, object?>? BuildCategory(string folder, string primaryRunFolder, string resultsRoot)
+    {
+        var iterations = ReadIterations(Path.Combine(primaryRunFolder, folder));
+        if (iterations.Count == 0)
+        {
+            return null;
+        }
+
+        var metricDefs = BuildMetricDefs(iterations);
+        var defByName = metricDefs.ToDictionary(def => def.Name, StringComparer.Ordinal);
+        var scenarios = iterations.Select(iteration => BuildScenario(iteration, defByName)).ToList();
+        var runs = BuildRuns(folder, resultsRoot, defByName);
+        var latest = runs.Count > 0 ? ((Dictionary<string, object?>)((Dictionary<string, object?>)runs[^1]!)["run"]!) : RunMeta(folder, iterations);
+
+        var hasTools = iterations.Any(iteration => iteration.Messages.Any(message => message.IsTool));
+        var hasAgentGroup = metricDefs.Any(def => def.Group == "Agent");
+        var label = folder;
+
+        return new Dictionary<string, object?>
+        {
+            ["id"] = Slug(folder).ToLowerInvariant(),
+            ["label"] = label,
+            ["scenarioName"] = folder,
+            ["kind"] = hasAgentGroup ? "AgentQuality" : "EvaluationQuality",
+            ["sub"] = hasTools ? "tool-using task agent" : "LLM-as-judge eval",
+            ["unit"] = "scenarios",
+            ["dataset"] = label,
+            ["msg"] = hasTools ? "agent" : "qa",
+            ["metricDefs"] = metricDefs.Select(MetricDefJson).ToList(),
+            ["runs"] = runs,
+            ["run"] = latest,
+            ["scenarios"] = scenarios,
+            ["pool"] = scenarios.Select(scenario => (object?)((Dictionary<string, object?>)scenario!)["id"]).ToList(),
+        };
+    }
+
+    // -------- metric definitions (union across iterations, first-seen order) --------
+
+    sealed record MetricDef(string Name, string Short, string Group, string Kind, string Better, bool Info, string Desc);
+
+    static List<MetricDef> BuildMetricDefs(List<Iteration> iterations)
+    {
+        var defs = new List<MetricDef>();
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var iteration in iterations)
+        {
+            foreach (var metric in iteration.Metrics)
+            {
+                if (!seen.Add(metric.Name))
+                {
+                    continue;
+                }
+
+                var meta = metric.Metadata;
+                var kind = MetaValue(meta, "kind") ?? InferKind(metric);
+                var info = (MetaValue(meta, "info") == "true") || kind == "count";
+                defs.Add(new MetricDef(
+                    metric.Name,
+                    MetaValue(meta, "short") ?? Abbreviate(metric.Name),
+                    MetaValue(meta, "group") ?? "Quality",
+                    kind,
+                    MetaValue(meta, "better") ?? (kind == "severity" ? "low" : info ? "none" : "high"),
+                    info,
+                    metric.Desc));
+            }
+        }
+
+        return defs;
+    }
+
+    static Dictionary<string, object?> MetricDefJson(MetricDef def) => new()
+    {
+        ["key"] = Slug(def.Name),
+        ["name"] = def.Name,
+        ["short"] = def.Short,
+        ["group"] = def.Group,
+        ["kind"] = def.Kind,
+        ["better"] = def.Better,
+        ["info"] = def.Info,
+        ["desc"] = def.Desc,
+        ["scaleLabel"] = ScaleLabel(def.Kind),
+        ["kindLabel"] = KindLabel(def.Kind),
+    };
+
+    // -------- per-scenario (full) --------
+
+    static Dictionary<string, object?> BuildScenario(Iteration iteration, Dictionary<string, MetricDef> defByName)
+    {
+        var metrics = new Dictionary<string, object?>();
+        var failCount = 0;
+        foreach (var metric in iteration.Metrics)
+        {
+            if (!defByName.TryGetValue(metric.Name, out var def))
+            {
+                continue;
+            }
+
+            var info = def.Info;
+            var rating = info ? "—" : RatingDisplay(metric.RatingRaw);
+            var failed = !info && metric.Failed;
+            if (failed)
+            {
+                failCount++;
+            }
+
+            metrics[Slug(metric.Name)] = new Dictionary<string, object?>
+            {
+                ["key"] = Slug(metric.Name),
+                ["name"] = metric.Name,
+                ["group"] = def.Group,
+                ["kind"] = def.Kind,
+                ["info"] = info,
+                ["value"] = metric.Value,
+                ["valStr"] = ValueText(def.Kind, metric.Value),
+                ["rating"] = rating,
+                ["good"] = info ? null : Goodness(def.Kind, metric.Value),
+                ["failed"] = failed,
+                ["kindLabel"] = KindLabel(def.Kind),
+                ["reason"] = metric.InterpReason,
+                ["context"] = ContextBlocks(metric.Metadata),
+                ["diagnostics"] = metric.Diagnostics.Select(d => (object?)new Dictionary<string, object?> { ["severity"] = d.Severity, ["message"] = d.Message }).ToList(),
+                ["metadata"] = MetaRows(metric.Metadata),
+            };
+        }
+
+        return new Dictionary<string, object?>
+        {
+            ["id"] = iteration.Id,
+            ["name"] = string.IsNullOrEmpty(iteration.Name) ? iteration.Id : iteration.Name,
+            ["task"] = iteration.Task,
+            ["diff"] = iteration.Difficulty,
+            ["metrics"] = metrics,
+            ["pass"] = failCount == 0,
+            ["failCount"] = failCount,
+            ["messages"] = iteration.Messages.Select(MessageJson).ToList(),
+        };
+    }
+
+    static object MessageJson(Message message) => new Dictionary<string, object?>
+    {
+        ["role"] = message.Role,
+        ["isTool"] = message.IsTool,
+        ["tool"] = message.Tool,
+        ["text"] = message.Text,
+    };
+
+    // -------- runs (lite, for history + comparison) --------
+
+    static List<object?> BuildRuns(string folder, string resultsRoot, Dictionary<string, MetricDef> defByName)
+    {
+        var runs = new List<(DateTime Finished, Dictionary<string, object?> Entry)>();
+        if (!Directory.Exists(resultsRoot))
+        {
+            return new List<object?>();
+        }
+
+        foreach (var runDir in Directory.GetDirectories(resultsRoot))
+        {
+            var scenarioDir = Path.Combine(runDir, folder);
+            if (!Directory.Exists(scenarioDir) || Directory.GetFiles(scenarioDir, "*.json").Length == 0)
+            {
+                continue;
+            }
+
+            var iterations = ReadIterations(scenarioDir);
+            if (iterations.Count == 0)
+            {
+                continue;
+            }
+
+            var lite = iterations.Select(iteration =>
+            {
+                var values = new Dictionary<string, object?>();
+                var failCount = 0;
+                foreach (var metric in iteration.Metrics)
+                {
+                    if (!defByName.TryGetValue(metric.Name, out var def))
+                    {
+                        continue;
+                    }
+
+                    values[Slug(metric.Name)] = metric.Value;
+                    if (!def.Info && metric.Failed)
+                    {
+                        failCount++;
+                    }
+                }
+
+                return (object?)new Dictionary<string, object?>
+                {
+                    ["id"] = iteration.Id,
+                    ["name"] = string.IsNullOrEmpty(iteration.Name) ? iteration.Id : iteration.Name,
+                    ["diff"] = iteration.Difficulty,
+                    ["vals"] = values,
+                    ["pass"] = failCount == 0,
+                    ["failCount"] = failCount,
+                };
+            }).ToList();
+
+            var finished = iterations.Max(iteration => iteration.Created);
+            runs.Add((finished, new Dictionary<string, object?> { ["run"] = RunMeta(folder, iterations), ["lite"] = lite }));
+        }
+
+        return runs.OrderBy(run => run.Finished).Select(run => (object?)run.Entry).ToList();
+    }
+
+    static Dictionary<string, object?> RunMeta(string folder, List<Iteration> iterations)
+    {
+        var runId = Path.GetFileName(Path.GetDirectoryName(iterations[0].FilePath)?.TrimEnd(Path.DirectorySeparatorChar) ?? folder)!;
+        var parentRun = Path.GetFileName(Directory.GetParent(Path.GetDirectoryName(iterations[0].FilePath)!)?.FullName ?? string.Empty);
+        var name = string.IsNullOrEmpty(parentRun) ? folder : parentRun;
+        var judge = iterations.SelectMany(i => i.Metrics).Select(m => MetaValue(m.Metadata, "meta:judge")).FirstOrDefault(v => v is not null) ?? "—";
+        var finished = iterations.Max(i => i.Created);
+        return new Dictionary<string, object?>
+        {
+            ["id"] = name,
+            ["sha"] = name.Length > 6 ? name[^6..] : name,
+            ["model"] = judge,
+            ["finished"] = finished.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture),
+            ["note"] = string.Empty,
+            ["scenarios"] = iterations.Count,
+            ["dataset"] = folder,
+            ["judge"] = judge,
+            ["duration"] = string.Empty,
+        };
+    }
+
+    // -------- iteration parsing --------
+
+    sealed record Iteration(string Id, string Name, string Task, string? Difficulty, DateTime Created, string FilePath, List<MetricRec> Metrics, List<Message> Messages);
+
+    sealed record MetricRec(string Name, double Value, string Desc, string RatingRaw, bool Failed, string InterpReason, List<(string Severity, string Message)> Diagnostics, List<(string Key, string Value)> Metadata);
+
+    sealed record Message(string Role, bool IsTool, string Tool, string Text);
+
+    static List<Iteration> ReadIterations(string scenarioDir)
+    {
+        var result = new List<Iteration>();
+        foreach (var file in Directory.GetFiles(scenarioDir, "*.json").OrderBy(f => f, StringComparer.Ordinal))
+        {
+            try
+            {
+                result.Add(ParseIteration(file));
+            }
+            catch
+            {
+                // Skip unreadable iteration files rather than failing the whole report.
+            }
+        }
+
+        return result;
+    }
+
+    static Iteration ParseIteration(string file)
+    {
+        using var doc = JsonDocument.Parse(File.ReadAllText(file), DocOptions);
+        var root = doc.RootElement;
+
+        var id = StringProp(root, "iterationName") ?? Path.GetFileNameWithoutExtension(file);
+        var created = root.TryGetProperty("creationTime", out var ct) && ct.TryGetDateTime(out var dt) ? dt : DateTime.MinValue;
+
+        string name = string.Empty;
+        string? difficulty = null;
+        if (root.TryGetProperty("tags", out var tags) && tags.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var tag in tags.EnumerateArray())
+            {
+                var text = tag.GetString() ?? string.Empty;
+                if (text.StartsWith("name:", StringComparison.Ordinal))
+                {
+                    name = text["name:".Length..];
+                }
+                else if (text.StartsWith("difficulty:", StringComparison.Ordinal))
+                {
+                    difficulty = text["difficulty:".Length..];
+                }
+            }
+        }
+
+        var messages = ParseMessages(root, out var task);
+        var metrics = ParseMetrics(root);
+        return new Iteration(id, name, task, difficulty, created, file, metrics, messages);
+    }
+
+    static List<Message> ParseMessages(JsonElement root, out string task)
+    {
+        var messages = new List<Message>();
+        task = string.Empty;
+
+        if (root.TryGetProperty("messages", out var input) && input.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var message in input.EnumerateArray())
+            {
+                AppendMessage(message, messages, ref task);
+            }
+        }
+
+        if (root.TryGetProperty("modelResponse", out var response) && response.TryGetProperty("messages", out var responseMessages) && responseMessages.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var message in responseMessages.EnumerateArray())
+            {
+                AppendMessage(message, messages, ref task);
+            }
+        }
+
+        return messages;
+    }
+
+    static void AppendMessage(JsonElement message, List<Message> messages, ref string task)
+    {
+        var role = StringProp(message, "role") ?? "assistant";
+        if (!message.TryGetProperty("contents", out var contents) || contents.ValueKind != JsonValueKind.Array)
+        {
+            return;
+        }
+
+        var text = new StringBuilder();
+        foreach (var content in contents.EnumerateArray())
+        {
+            var type = StringProp(content, "$type");
+            if (type == "functionCall")
+            {
+                var callName = StringProp(content, "name") ?? "tool";
+                var arguments = JoinArguments(content);
+                messages.Add(new Message("tool call", true, $"{callName}({arguments})", $"→ called {callName} with {arguments}"));
+            }
+            else if (type == "text")
+            {
+                if (text.Length > 0)
+                {
+                    text.Append(' ');
+                }
+
+                text.Append(StringProp(content, "text"));
+            }
+        }
+
+        if (text.Length > 0)
+        {
+            var body = text.ToString();
+            messages.Add(new Message(role, false, string.Empty, body));
+            if (role == "user" && task.Length == 0)
+            {
+                task = body;
+            }
+        }
+    }
+
+    static string JoinArguments(JsonElement content)
+    {
+        if (!content.TryGetProperty("arguments", out var args) || args.ValueKind != JsonValueKind.Object)
+        {
+            return string.Empty;
+        }
+
+        var values = new List<string>();
+        foreach (var property in args.EnumerateObject())
+        {
+            values.Add(property.Value.ValueKind == JsonValueKind.String ? property.Value.GetString() ?? string.Empty : property.Value.ToString());
+        }
+
+        return string.Join(", ", values);
+    }
+
+    static List<MetricRec> ParseMetrics(JsonElement root)
+    {
+        var metrics = new List<MetricRec>();
+        if (!root.TryGetProperty("evaluationResult", out var evalResult) || !evalResult.TryGetProperty("metrics", out var metricObj) || metricObj.ValueKind != JsonValueKind.Object)
+        {
+            return metrics;
+        }
+
+        foreach (var property in metricObj.EnumerateObject())
+        {
+            var metric = property.Value;
+            var name = StringProp(metric, "name") ?? property.Name;
+            var value = metric.TryGetProperty("value", out var v) && v.ValueKind == JsonValueKind.Number ? v.GetDouble() : 0;
+            var desc = StringProp(metric, "reason") ?? string.Empty;
+
+            var ratingRaw = "unknown";
+            var failed = false;
+            var interpReason = string.Empty;
+            if (metric.TryGetProperty("interpretation", out var interp) && interp.ValueKind == JsonValueKind.Object)
+            {
+                ratingRaw = StringProp(interp, "rating") ?? "unknown";
+                failed = interp.TryGetProperty("failed", out var f) && f.ValueKind == JsonValueKind.True;
+                interpReason = StringProp(interp, "reason") ?? string.Empty;
+            }
+
+            var diagnostics = new List<(string, string)>();
+            if (metric.TryGetProperty("diagnostics", out var diags) && diags.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var diag in diags.EnumerateArray())
+                {
+                    diagnostics.Add((StringProp(diag, "severity")?.ToLowerInvariant() ?? "informational", StringProp(diag, "message") ?? string.Empty));
+                }
+            }
+
+            var metadata = new List<(string, string)>();
+            if (metric.TryGetProperty("metadata", out var meta) && meta.ValueKind == JsonValueKind.Object)
+            {
+                foreach (var property2 in meta.EnumerateObject())
+                {
+                    metadata.Add((property2.Name, property2.Value.GetString() ?? string.Empty));
+                }
+            }
+
+            metrics.Add(new MetricRec(name, value, desc, ratingRaw, failed, string.IsNullOrEmpty(interpReason) ? desc : interpReason, diagnostics, metadata));
+        }
+
+        return metrics;
+    }
+
+    // -------- presentation helpers --------
+
+    static List<object?> ContextBlocks(List<(string Key, string Value)> metadata)
+    {
+        var order = new[] { "context", "reference", "expected", "actual", "source", "summary" };
+        var blocks = metadata
+            .Where(entry => entry.Key.StartsWith("ctx:", StringComparison.Ordinal))
+            .Select(entry => (Label: entry.Key["ctx:".Length..], entry.Value))
+            .OrderBy(entry => Array.IndexOf(order, entry.Label) is var index && index >= 0 ? index : int.MaxValue);
+        return blocks.Select(entry => (object?)new Dictionary<string, object?> { ["label"] = entry.Label + ":", ["text"] = entry.Value }).ToList();
+    }
+
+    static List<object?> MetaRows(List<(string Key, string Value)> metadata)
+        => metadata
+            .Where(entry => entry.Key.StartsWith("meta:", StringComparison.Ordinal))
+            .Select(entry => (object?)new Dictionary<string, object?> { ["k"] = entry.Key["meta:".Length..], ["v"] = entry.Value })
+            .ToList();
+
+    static string? MetaValue(List<(string Key, string Value)> metadata, string key)
+    {
+        foreach (var entry in metadata)
+        {
+            if (entry.Key == key)
+            {
+                return entry.Value;
+            }
+        }
+
+        return null;
+    }
+
+    static string Slug(string name) => name.Replace(" ", string.Empty);
+
+    static string Abbreviate(string name)
+    {
+        var compact = name.Replace(" ", string.Empty);
+        return compact.Length <= 6 ? compact : compact[..6];
+    }
+
+    static string InferKind(MetricRec metric)
+    {
+        if (metric.Name.Contains("Token", StringComparison.OrdinalIgnoreCase))
+        {
+            return "count";
+        }
+
+        return metric.Value is >= 0 and <= 1 ? "fraction" : metric.Value <= 5 ? "score" : "count";
+    }
+
+    static string ValueText(string kind, double value) => kind switch
+    {
+        "severity" => $"{SeverityLabel((int)value)} ({(int)value})",
+        "fraction" => value.ToString("0.00", CultureInfo.InvariantCulture),
+        "count" => $"{(int)Math.Round(value)} tok",
+        _ => $"{value.ToString("0.0", CultureInfo.InvariantCulture)} / 5",
+    };
+
+    static double Goodness(string kind, double value) => kind switch
+    {
+        "severity" => 1 - value / 7,
+        "fraction" => value,
+        "count" => 0.5,
+        _ => (value - 1) / 4,
+    };
+
+    static string SeverityLabel(int value) => value <= 1 ? "Very low" : value <= 3 ? "Low" : value <= 5 ? "Medium" : "High";
+
+    static string KindLabel(string kind) => kind switch
+    {
+        "fraction" => "numeric 0–1",
+        "severity" => "severity 0–7",
+        "count" => "count",
+        _ => "numeric 1–5",
+    };
+
+    static string ScaleLabel(string kind) => kind switch
+    {
+        "fraction" => "LLM judge · 0–1",
+        "severity" => "Content safety · 0–7 (lower better)",
+        "count" => "informational · count",
+        _ => "LLM judge · 1–5",
+    };
+
+    static string RatingDisplay(string ratingRaw) => ratingRaw.ToLowerInvariant() switch
+    {
+        "exceptional" => "Exceptional",
+        "good" => "Good",
+        "average" => "Average",
+        "poor" => "Poor",
+        "unacceptable" => "Unacceptable",
+        "inconclusive" => "Inconclusive",
+        _ => "Average",
+    };
+
+    static string? StringProp(JsonElement element, string name)
+        => element.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String ? value.GetString() : null;
+}
+
 record ReportModel(Dictionary<string, object?> Data, string RunId, int ConfigCount, int MaxCases, bool HasDataset);
 
 record RunBuild(
@@ -961,36 +1597,38 @@ record RunBuild(
 
 record DatasetCase(string? Difficulty, List<object?> Expected);
 
-readonly record struct MetricNames(string Recall, string Ndcg, string Hit, string Mrr, string Map)
-{
-    public static readonly MetricNames Chunk = new("RecallAtR", "NDCGAt10", "HitRateAt1", "MRRAt10", "MAPAt10");
-    public static readonly MetricNames Section = new("SectionRecallAtR", "SectionNDCGAt10", "SectionHitRateAt1", "SectionMRRAt10", "SectionMAPAt10");
-}
+// One metric's full specification — the single source of truth (see the `Metrics`
+// registry at the top of the script).
+//   Kind: "ranking" (value + 95% CI + rating) | "rate" (value + rating, no CI)
+//       | "score" (bare diagnostic number) | "count"
+//   Gate: the coverage-gate metric whose `failed` flag drives per-case pass/fail.
+sealed record MetricSpec(
+    string Key, string Label, string Chunk, string? Section, string Kind,
+    bool BetterLow, bool InSelector, bool InDetail, bool Bar, bool Gate, string TableSub);
 
+// Per-config, per-level collector of per-case values, used to bootstrap CIs.
+// Only ranking metrics are sampled; keyed by metric key so it stays registry-driven.
 sealed class MetricArrays
 {
-    public List<double> Recall { get; } = new();
-    public List<double> Ndcg { get; } = new();
-    public List<double> Hit { get; } = new();
-    public List<double> Mrr { get; } = new();
-    public List<double> Map { get; } = new();
+    readonly Dictionary<string, List<double>> _byKey = new();
+    public int Count { get; private set; }
 
-    public void Add(JsonElement metrics, MetricNames names)
+    public void Add(JsonElement metrics, MetricSpec[] specs, bool section)
     {
-        AddOne(metrics, names.Recall, Recall);
-        AddOne(metrics, names.Ndcg, Ndcg);
-        AddOne(metrics, names.Hit, Hit);
-        AddOne(metrics, names.Mrr, Mrr);
-        AddOne(metrics, names.Map, Map);
-    }
-
-    static void AddOne(JsonElement metrics, string name, List<double> target)
-    {
-        if (metrics.TryGetProperty(name, out var m)
-            && m.TryGetProperty("value", out var v)
-            && v.ValueKind == JsonValueKind.Number)
+        this.Count++;
+        foreach (var s in specs)
         {
-            target.Add(v.GetDouble());
+            if (s.Kind != "ranking") continue;
+            var name = section ? (s.Section ?? s.Chunk) : s.Chunk;
+            if (metrics.TryGetProperty(name, out var m)
+                && m.TryGetProperty("value", out var v)
+                && v.ValueKind == JsonValueKind.Number)
+            {
+                if (!_byKey.TryGetValue(s.Key, out var list)) _byKey[s.Key] = list = new List<double>();
+                list.Add(v.GetDouble());
+            }
         }
     }
+
+    public double[] Get(string key) => _byKey.TryGetValue(key, out var l) ? l.ToArray() : [];
 }

@@ -55,16 +55,10 @@
       "commandLineArgs": "run Platform/DevBook/DevBook.Evaluations/RunEvaluation.cs -- --name RAG.Search --open-browser",
       "workingDirectory": "../../.."
     },
-    "Run Report (Fancy)": {
+    "Generate Report": {
       "commandName": "Executable",
       "executablePath": "dotnet",
-      "commandLineArgs": "run Platform/DevBook/DevBook.Evaluations/RunReport.cs -- --run latest",
-      "workingDirectory": "../../.."
-    },
-    "Run Report (Fancy) - Open": {
-      "commandName": "Executable",
-      "executablePath": "dotnet",
-      "commandLineArgs": "run Platform/DevBook/DevBook.Evaluations/RunReport.cs -- --run latest --open-browser",
+      "commandLineArgs": "run Platform/DevBook/DevBook.Evaluations/RunReport.cs -- --run latest --with-standard --open-browser",
       "workingDirectory": "../../.."
     }
   }

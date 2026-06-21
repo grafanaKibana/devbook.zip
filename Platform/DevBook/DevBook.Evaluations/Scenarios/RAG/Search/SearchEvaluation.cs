@@ -9,13 +9,10 @@ using DevBook.Evaluations.Common.Evaluators.SummaryGeneration;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.AI.Evaluation;
 using Microsoft.Extensions.Options;
-using System.Text.Json;
 
 public sealed class SearchEvaluation : MongoEvaluationTestBase<SearchPrediction>
 {
     private const int TopK = RagRetrievalPolicy.MaxTopK;
-
-    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
 
     // One chunker-neutral golden dataset is evaluated against every chunking strategy. Ground truth is keyed by
     // source + heading + snippet (not chunk id), so a single shared question set scores all chunkers on the same
@@ -51,7 +48,12 @@ public sealed class SearchEvaluation : MongoEvaluationTestBase<SearchPrediction>
 
     private static IEnumerable<TestCaseData> TestCases()
     {
-        var dataset = LoadDataset();
+        var dataset = LoadDataset<SearchDataset>(SharedDatasetFileName);
+        if (dataset.Cases.Count == 0)
+        {
+            throw new InvalidOperationException($"Dataset {SharedDatasetFileName} must contain at least one case.");
+        }
+
         foreach (var testCase in dataset.Cases)
         {
             foreach (var chunkingStrategy in ChunkingStrategies)
@@ -63,18 +65,6 @@ public sealed class SearchEvaluation : MongoEvaluationTestBase<SearchPrediction>
                 }
             }
         }
-    }
-
-    private static SearchDataset LoadDataset()
-    {
-        var datasetPath = Path.Combine(AppContext.BaseDirectory, "Datasets", SharedDatasetFileName);
-        var dataset = JsonSerializer.Deserialize<SearchDataset>(File.ReadAllText(datasetPath), JsonOptions) ?? new SearchDataset();
-        if (dataset.Cases.Count == 0)
-        {
-            throw new InvalidOperationException($"Dataset {SharedDatasetFileName} must contain at least one case.");
-        }
-
-        return dataset;
     }
 
     [Test]
@@ -156,32 +146,5 @@ public sealed class SearchEvaluation : MongoEvaluationTestBase<SearchPrediction>
                 result.ChunkId,
                 result.DocumentId))
             .ToArray();
-    }
-
-    public sealed record SearchDataset
-    {
-        public string Collection { get; init; } = string.Empty;
-
-        public IReadOnlyList<SearchEvaluationCase> Cases { get; init; } = [];
-    }
-
-    public sealed record SearchEvaluationCase
-    {
-        public string Id { get; init; } = string.Empty;
-
-        public string Query { get; init; } = string.Empty;
-
-        public IReadOnlyList<ExpectedChunk> Expected { get; init; } = [];
-    }
-
-    public sealed record ExpectedChunk
-    {
-        public string DocumentId { get; init; } = string.Empty;
-
-        public string? Heading { get; init; }
-
-        public string CitationLabel { get; init; } = string.Empty;
-
-        public string Text { get; init; } = string.Empty;
     }
 }

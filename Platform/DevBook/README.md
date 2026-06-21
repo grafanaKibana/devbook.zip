@@ -1,5 +1,7 @@
 # DevBook API
 
+> Part of **[DevBook](../../README.md)** — the .NET RAG backend over the notes. See also the [website README](../../Web/README.md).
+
 Small local API for ingesting markdown notes, storing documents/chunks in MongoDB through `MongoDB.Driver`, and generating embeddings through `Microsoft.Extensions.AI` with an OpenAI-backed embedding client.
 
 This is a personal R&D proof of concept for learning RAG mechanics, not a production enterprise service. The code intentionally favors a small number of classes and visible constants over extra configuration layers, extension points, and defensive edge-case handling.
@@ -70,28 +72,32 @@ Test:
 dotnet test Platform/DevBook/DevBook.Tests/DevBook.Tests.csproj
 ```
 
-Build the evaluation project:
+## Evaluation
+
+The `DevBook.Evaluations` project measures **how well retrieval finds the right evidence** for a question: given a query, does RAG search surface the note sections that actually contain the answer, and rank them near the top? It is a **retrieval** evaluation — it does not grade the generated answer — run across the full matrix of chunking strategies × reranking strategies so configurations can be compared on a level playing field.
+
+[![RAG retrieval evaluation report](DevBook.Evaluations/assets/eval-report.png)](DevBook.Evaluations/README.md)
+
+Established finding: rerankers order **`RRF > NoReranking > BM25 > MMR`** consistently, and the shipped default is **`MarkdownSection` + `ReciprocalRankFusion`** (configured in [`DevBook.Data/Options/RagSearchOptions.cs`](DevBook.Data/Options/RagSearchOptions.cs)).
+
+> **Methodology, golden dataset, and metrics** are documented in the deep-dive: **[DevBook.Evaluations/README.md](DevBook.Evaluations/README.md)**. Every chunking strategy is scored against one chunker-neutral dataset, `chunks-shared.json`, in `DevBook.Evaluations/Datasets/`.
+
+### Build
 
 ```bash
 dotnet build Platform/DevBook/DevBook.Evaluations/DevBook.Evaluations.csproj
 ```
 
-## RAG evaluation commands
-
-Generated search datasets live in `Platform/DevBook/DevBook.Evaluations/Datasets/` as one file per chunk collection: `chunks-fixedsize.json`, `chunks-markdownsection.json`, and `chunks-semantic.json`. Restore the local report tool from the repo root before generating HTML reports:
-
-```bash
-dotnet tool restore
-```
-
-The tool manifest tracks `Microsoft.Extensions.AI.Evaluation.Console`, which provides `dotnet aieval report`.
+### Configuration
 
 Evaluation runs load configuration from `DevBook.Evaluations/appsettings.json`, `DevBook.Evaluations/appsettings.Evaluations.json`, and environment variables. Before running live evaluations, provide:
 
 - `ConnectionStrings:MongoDb` with an Atlas connection string that has the vector-search index.
 - `OpenAIOptions:ApiKey` with an OpenAI API key.
 
-Live LLM evaluations cap NUnit worker parallelism at 4. When OpenAI returns HTTP `429` from an evaluation call, the eval runner reads `x-ratelimit-reset-requests` and `x-ratelimit-reset-tokens`, waits for the longer reset duration plus one second, logs the retry delay, then retries up to `EvaluationRateLimitOptions:MaxRetryAttempts`.
+If either value is missing, the scenario tests are skipped and no new evaluation report folder is created.
+
+Live LLM evaluations cap NUnit worker parallelism at 4. When OpenAI returns HTTP `429` from an evaluation call, the eval runner reads `x-ratelimit-reset-requests` and `x-ratelimit-reset-tokens`, waits for the longer reset duration plus one second, logs the retry delay, then retries up to `EvaluationRateLimitOptions:MaxRetryAttempts`:
 
 ```json
 {
@@ -101,7 +107,15 @@ Live LLM evaluations cap NUnit worker parallelism at 4. When OpenAI returns HTTP
 }
 ```
 
-Use environment variables when you do not want to edit the local settings file:
+### Run
+
+Restore the local report tool once from the repo root — the tool manifest tracks `Microsoft.Extensions.AI.Evaluation.Console`, which provides `dotnet aieval report`:
+
+```bash
+dotnet tool restore
+```
+
+Run the evaluation. This runs the scenario tests, locates the run's report folder, and writes `report.html`:
 
 ```bash
 ConnectionStrings__MongoDb="<mongo-connection-string>" \
@@ -109,15 +123,7 @@ OpenAIOptions__ApiKey="<openai-api-key>" \
 dotnet run --project Platform/DevBook/DevBook.Evaluations/DevBook.Evaluations.csproj -- --name RAG.Search
 ```
 
-If either value is missing, the scenario tests are skipped and no new evaluation report folder is created.
-
-Generate the AI evaluation HTML report from the scenario test run by running the evaluation project:
-
-```bash
-dotnet run --project Platform/DevBook/DevBook.Evaluations/DevBook.Evaluations.csproj -- --name RAG.Search
-```
-
-Selecting and running the `DevBook.Evaluations` project in the IDE executes the same `RunEvaluation.cs` report-generation flow. `RunEvaluation.cs` invokes the report command for the latest run folder:
+Selecting and running the `DevBook.Evaluations` project in the IDE executes the same `RunEvaluation.cs` report-generation flow, which invokes the report command for the latest run folder:
 
 ```bash
 dotnet aieval report --path EvaluationReports --output <latest-run>/report.html

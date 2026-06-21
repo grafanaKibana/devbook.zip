@@ -4,13 +4,17 @@ This project measures **how well DevBook's retrieval finds the right evidence** 
 
 It answers one question precisely: *given a user query, does the RAG search surface the note sections that actually contain the answer, and does it rank them near the top?* It is a **retrieval** evaluation — it does not grade the final generated answer (that would be a separate answer-quality eval).
 
+![RAG retrieval evaluation report](assets/eval-report.png)
+
+*The generated `report.fancy.html`: the recommended configuration, the chunking × reranking comparison matrix, and per-metric detail for all 12 combinations.*
+
 ---
 
 ## How it works (the big picture)
 
 The evaluation has two halves that meet at a single artifact:
 
-```
+```text
  Vault notes ──► (1) Golden dataset generation ──► chunks-shared.json
                                                         │
                                                         ▼
@@ -118,7 +122,7 @@ The same commands are available as IDE launch profiles in `DevBook.API/Propertie
 
 Defined in [`SearchEvaluation.cs`](Scenarios/RAG/Search/SearchEvaluation.cs). It loads `chunks-shared.json` and builds a test matrix:
 
-```
+```text
 test cases  =  dataset cases  ×  chunking strategies  ×  reranking strategies
 ```
 
@@ -146,7 +150,7 @@ Section-level metrics use a **content-aware** section match (same source + match
 
 ### The evaluation flow
 
-```
+```text
 load chunks-shared.json
   for each case × chunker × reranker:
       RagSearchService.SearchAsync(query)         → retrieved chunks

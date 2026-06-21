@@ -62,7 +62,14 @@ public sealed class RagAskService(
         return new RagAskResponse(question, response.Text, searchResult.Mode, searchResult.Results);
     }
 
-    private static string BuildAgentInput(string question, IReadOnlyList<RagChunkResponse> sources)
+    /// <summary>
+    /// Builds the answer-agent input from a question and its source chunks. Public and static so the
+    /// RAG.Answer evaluation can assemble the prompt exactly as this service does — one source of
+    /// truth, so the evaluation cannot drift from the production ask path.
+    /// </summary>
+    /// <param name="question">The user question.</param>
+    /// <param name="sources">The source chunks supplied as evidence.</param>
+    public static string BuildAgentInput(string question, IReadOnlyList<RagChunkResponse> sources)
     {
         return $"""
             Question:

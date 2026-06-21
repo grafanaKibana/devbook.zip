@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>RAG Eval Report — __DC_TITLE__</title>
+<title>Eval Report — __DC_TITLE__</title>
 <style>
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
-  body{min-height:100vh;background:#1b1a17}
-  button{font:inherit}
-  select,input{font:inherit}
+  body{min-height:100vh;background:#111110}
+  #app button{cursor:pointer}
+  #app select,#app input{font:inherit}
   ::selection{background:rgba(120,140,200,.25)}
   ::-webkit-scrollbar{height:10px;width:10px}
   ::-webkit-scrollbar-thumb{background:rgba(128,128,128,.35);border-radius:6px}
@@ -21,592 +21,599 @@
 <script>
 const DATA = "__DC_DATA__";
 
-/* ---------- numeric / colour helpers ---------- */
+/* ============================ tiny helpers ============================ */
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const fmt=(v,d)=> (v==null||isNaN(v)) ? '—' : Number(v).toFixed(d===undefined?3:d);
-function viridisRGB(t){
-  t=clamp(t,0,1);
-  const A=[[68,1,84],[59,82,139],[33,144,141],[93,201,99],[253,231,37]];
-  const x=t*(A.length-1), i=Math.floor(x), f=x-i;
-  const a=A[i], b=A[Math.min(i+1,A.length-1)];
-  return [Math.round(a[0]+(b[0]-a[0])*f),Math.round(a[1]+(b[1]-a[1])*f),Math.round(a[2]+(b[2]-a[2])*f)];
-}
-const viridis=t=>{const c=viridisRGB(t);return `rgb(${c[0]},${c[1]},${c[2]})`;};
-function txtOn(t){const c=viridisRGB(t);const L=(0.2126*c[0]+0.7152*c[1]+0.0722*c[2])/255;return L>0.62?'#16140c':'#f6f5ef';}
-function ratingT(r){const m={Exceptional:0.95,Good:0.74,Average:0.5,Poor:0.3,Unacceptable:0.07,Unknown:0.5};return m[r]!==undefined?m[r]:0.5;}
-function rate(v){return v>=0.85?'Exceptional':v>=0.72?'Good':v>=0.55?'Average':v>=0.4?'Poor':'Unacceptable';}
-function hexRGB(h){h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
-function hexTint(hex,a){const c=hexRGB(hex);return `rgba(${c[0]},${c[1]},${c[2]},${a})`;}
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function css(o){return Object.keys(o).map(k=>{const p=k.charAt(0)==='-'?k:k.replace(/[A-Z]/g,m=>'-'+m.toLowerCase());return p+':'+o[k];}).join(';');}
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function hash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
+function hexRGB(h){h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
+function hexTint(hex,a){const c=hexRGB(hex);return `rgba(${c[0]},${c[1]},${c[2]},${a})`;}
+function lum(hex){const c=hexRGB(hex);return (0.2126*c[0]+0.7152*c[1]+0.0722*c[2])/255;}
 
-/* ---------- theme (terminal only, light/dark) ---------- */
+/* ===== one semantic scale (bad → good), theme-aware. Drives rating chips AND the heatmap. ===== */
+function semAnchors(){return state.mode==='dark'
+  ? ['#e05a45','#e8924a','#ecc056','#5cc07e','#37ab66']
+  : ['#c23a29','#df7e2c','#eaae37','#4aa65d','#2c8b50'];}
+function hexToHsl(hex){let [r,g,b]=hexRGB(hex);r/=255;g/=255;b/=255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b);let h=0,s=0,l=(mx+mn)/2;const d=mx-mn;if(d>0){s=l>0.5?d/(2-mx-mn):d/(mx+mn);if(mx===r)h=((g-b)/d+(g<b?6:0));else if(mx===g)h=((b-r)/d+2);else h=((r-g)/d+4);h*=60;}return [h,s,l];}
+function hslToRgb(h,s,l){h=((h%360)+360)%360;const c=(1-Math.abs(2*l-1))*s,x=c*(1-Math.abs((h/60)%2-1)),m=l-c/2;let r=0,g=0,b=0;if(h<60){r=c;g=x;}else if(h<120){r=x;g=c;}else if(h<180){g=c;b=x;}else if(h<240){g=x;b=c;}else if(h<300){r=x;b=c;}else{r=c;b=x;}return [Math.round((r+m)*255),Math.round((g+m)*255),Math.round((b+m)*255)];}
+function ratingIdx(r){const m={Unacceptable:0,Poor:1,Average:2,Good:3,Exceptional:4,Inconclusive:2};return m[r]==null?2:m[r];}
+function ratingColor(r){return semAnchors()[ratingIdx(r)];}
+function ratingTextOn(r){return lum(ratingColor(r))>0.6?'#16140c':'#f7f4ee';}
+function badge(r){return {background:ratingColor(r),color:ratingTextOn(r)};}
+function tint(r){return hexTint(ratingColor(r),state.mode==='dark'?0.20:0.13);}
+function ratingFracColor(v){return ratingColor(rate(v));}
+function heatHslAnchors(){return semAnchors().map(h=>hexToHsl(h));}
+function heatRGBraw(s){s=clamp(s,0,1);const A=heatHslAnchors();const x=s*(A.length-1),i=Math.floor(x),f=x-i;const a=A[i],b=A[Math.min(i+1,A.length-1)];return hslToRgb(a[0]+(b[0]-a[0])*f,a[1]+(b[1]-a[1])*f,a[2]+(b[2]-a[2])*f);}
+function heatColorRGB(t){t=clamp(t,0,1);const s=Math.pow(t,1);return heatRGBraw(0.06+s*0.9);}
+function heat(t){const c=heatColorRGB(t);return `rgb(${c[0]},${c[1]},${c[2]})`;}
+function heatTxtOn(t){const c=heatColorRGB(t);const L=(0.2126*c[0]+0.7152*c[1]+0.0722*c[2])/255;return L>0.58?'#1a1407':'#f7f4ee';}
+function heatGradient(){const N=8,s=[];for(let k=0;k<=N;k++){const c=heatColorRGB(k/N);s.push(`rgb(${c[0]},${c[1]},${c[2]}) ${Math.round(k/N*100)}%`);}return 'linear-gradient(90deg,'+s.join(',')+')';}
+
+/* ===== rating thresholds ===== */
+function RATINGS(){return ['Exceptional','Good','Average','Poor','Unacceptable'];}
+function rate(v){return v>=0.85?'Exceptional':v>=0.72?'Good':v>=0.55?'Average':v>=0.4?'Poor':'Unacceptable';}
+function rateEmpty(v){return v<0.012?'Exceptional':v<0.03?'Good':v<0.06?'Average':v<0.1?'Poor':'Unacceptable';}
+function ratingNum(v){return v>=4.5?'Exceptional':v>=3.5?'Good':v>=2.5?'Average':v>=1.5?'Poor':'Unacceptable';}
+function ratingSeverity(s){return s<=1?'Exceptional':s<=2?'Good':s<=3?'Average':s<=5?'Poor':'Unacceptable';}
+function sevLabel(s){return s<=1?'Very low':s<=3?'Low':s<=5?'Medium':'High';}
+function groupColor(g){return {Agent:'#6d8df0',Quality:'#33908d',Safety:'#d98a2b',Stats:'#8a887c',Retrieval:'#33908d'}[g]||'#8a887c';}
+
+/* ===== theme (terminal only) ===== */
 function theme(){
   const dark=state.mode==='dark';
   const mono="'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace";
   const t = dark
     ? {bg:'#111110',panel:'#181817',panel2:'#201f1c',line:'#2c2b27',line2:'#3c3a34',fg:'#e9e8df',fg2:'#a4a297',fg3:'#6f6d62',accent:'#e9e8df',accentFg:'#111110'}
     : {bg:'#f1f0ea',panel:'#fbfaf5',panel2:'#e9e8df',line:'#d8d6ca',line2:'#c3c1b3',fg:'#1a1a16',fg2:'#56544b',fg3:'#8a887c',accent:'#1a1a16',accentFg:'#fbfaf5'};
-  t.fhead=mono;t.fbody=mono;t.fnum=mono;t.rad='0px';t.rad2='2px';t.shadow='none';t.shadowLg='none';t.warn='#caa23a';
-  t.barbg = dark ? 'rgba(20,20,18,.72)' : 'rgba(255,255,255,.72)';
-  t.ok = dark ? '#4ec77d' : '#1d8a4a';
-  t.danger = dark ? '#ef6a52' : '#cf3a24';
+  t.fhead=mono;t.fbody=mono;t.fnum=mono;t.rad='2px';t.rad2='2px';t.shadow='none';t.shadowLg='none';t.warn=dark?'#d8b24a':'#b8902a';
+  t.barbg=dark?'rgba(20,20,18,.72)':'rgba(251,250,245,.78)';
+  t.ok=dark?'#4ec77d':'#1d8a4a';
+  t.danger=dark?'#ef6a52':'#cf3a24';
   return t;
 }
-function rootStyle(){
-  const t=theme();const o={};
-  Object.keys(t).forEach(k=>o['--'+k]=t[k]);
-  o.minHeight='100vh';o.background='var(--bg)';o.color='var(--fg)';
-  o.fontFamily='var(--fbody)';o.transition='background .25s, color .25s';o.display='block';
-  o['-webkit-font-smoothing']='antialiased';
-  return o;
-}
-function badge(rating){const tt=ratingT(rating);return {background:viridis(tt),color:txtOn(tt)};}
-function tint(rating){const tt=ratingT(rating);const c=viridisRGB(tt);return `rgba(${c[0]},${c[1]},${c[2]},${state.mode==='dark'?0.20:0.15})`;}
+function rootStyle(){const t=theme();const o={};Object.keys(t).forEach(k=>o['--'+k]=t[k]);o.minHeight='100vh';o.display='flex';o.alignItems='stretch';o.background='var(--bg)';o.color='var(--fg)';o.fontFamily='var(--fbody)';o.transition='background .25s, color .25s';o['-webkit-font-smoothing']='antialiased';return o;}
+function segBtn(active){return {fontFamily:'var(--fbody)',fontSize:'12px',fontWeight:'600',padding:'5px 10px',border:'none',borderRadius:'2px',cursor:'pointer',whiteSpace:'nowrap',background:active?'var(--accent)':'transparent',color:active?'var(--accentFg)':'var(--fg2)',transition:'background .12s'};}
+const STRIPH=28; /* comfortable density */
 
-function metricMeta(){return {
-  recall:{label:'RecallAtR',sub:'top-R coverage',ci:true,better:'high'},
-  ndcg:{label:'NDCG@10',sub:'ranking quality',ci:true,better:'high'},
-  hit:{label:'HitRate@1',sub:'top-1 correct',ci:true,better:'high'},
-  mrr:{label:'MRR@10',sub:'first hit rank',ci:true,better:'high'},
-  map:{label:'MAP@10',sub:'avg precision',ci:true,better:'high'},
-  empty:{label:'EmptyRate',sub:'no results',ci:false,better:'low'}
-};}
-function getM(cfg,key){const lv=cfg.levels[state.level];return key==='score'?{v:lv.score}:key==='n'?{v:lv.n}:lv[key];}
-function configLabel(c){return c.chunker+' × '+c.rShort;}
+/* render a segmented group of buttons that dispatch (act,val) */
+function segGroup(act, items){return items.map(it=>`<button data-act="${act}" data-val="${esc(it.val)}" style="${css(segBtn(it.on))}">${esc(it.label)}</button>`).join('');}
+
+/* ============================ retrieval metric registry (data-driven) ============================ */
+const METRICS=DATA.metrics||[];
+const MM={}; METRICS.forEach(m=>MM[m.key]=m);
+const SELECTOR_METRICS=METRICS.filter(m=>m.inSelector);
+const DETAIL_METRICS=METRICS.filter(m=>m.inDetail);
+const GATE=(METRICS.find(m=>m.gate)||{key:'recall'}).key;
+function getM(cfg,key){const v=cfg.levels[state.rLevel][key];return (v&&typeof v==='object')?v:{v};}
 function rerankerLong(r){return r.replace(/([A-Z])/g,' $1').trim();}
-function segBtn(active){return {
-  fontFamily:'var(--fbody)',fontSize:'12px',fontWeight:'600',padding:'5px 11px',
-  border:'none',borderRadius:'calc(var(--rad) - 1px)',cursor:'pointer',whiteSpace:'nowrap',
-  background:active?'var(--accent)':'transparent',color:active?'var(--accentFg)':'var(--fg2)',transition:'background .12s'
-};}
-function bestBy(dim){
-  const groups={};const key=state.metric;
-  DATA.configs.forEach(c=>{const g=dim==='reranker'?c.rShort:c.chunker;const lv=c.levels[state.level];const v=key==='empty'?lv.empty.v:lv[key].v;(groups[g]=groups[g]||[]).push(v);});
-  let best=null,bv=-Infinity;
-  Object.keys(groups).forEach(g=>{const avg=groups[g].reduce((a,b)=>a+b,0)/groups[g].length;const score=key==='empty'?-avg:avg;if(score>bv){bv=score;best=g;}});
-  return best;
+/* drill evidence matching */
+function parseLabel(s){const i=s.indexOf('#');return {note:i>=0?s.slice(0,i):s,head:i>=0?s.slice(i+1):'',raw:s};}
+function norm(s){return String(s==null?'':s).trim().toLowerCase();}
+function matchExp(e,r){if(norm(e.note)!==norm(r.note))return false;if(!r.head)return true;return e.heading?norm(e.heading)===norm(r.head):true;}
+
+const R = {configs:DATA.configs,winnerId:DATA.winnerId,run:DATA.run,runs:DATA.runs,perCase:DATA.perCase,cases:DATA.cases,metricDefs:DATA.metricDefs,hasDataset:DATA.hasDataset};
+
+/* ====================================================================== */
+/* ============ JUDGE DOMAIN (generic over scenario categories) ========= */
+/* Non-retrieval categories (e.g. AskAgent) arrive fully built in DATA.judge */
+/* from the C# generator — values, ratings, reasons, diagnostics, messages.  */
+/* This template only *styles* them; nothing judge-specific is hard-coded.   */
+/* ====================================================================== */
+const JUDGE = DATA.judge||[];
+function catSpec(id){return JUDGE.find(c=>c.id===id)||JUDGE[0];}
+/* retrieval-domain metric tooltips (judge metrics carry their own .desc) */
+function metricDesc(key){return {
+  recall:'RecallAtR — coverage of expected evidence within a per-query budget of R (the number of expected chunks).',
+  ndcg:'NDCG@10 — graded ranking quality with a rank discount over the top 10 results.',
+  hit:'HitRate@1 — fraction of queries whose top-1 result is an expected evidence chunk.',
+  mrr:'MRR@10 — reciprocal rank of the first relevant evidence within the top 10.',
+  map:'MAP@10 — mean average precision across all relevant evidence within the top 10.',
+  empty:'EmptyRate — fraction of queries returning no usable evidence (lower is better).',
+  score:'ScoreAverage — mean retrieval score, a diagnostic signal.'
+}[key]||'Evaluator metric reported by the result set.';}
+/* generic kind→heat-position and kind→rating, for lite per-run values */
+function goodOf(md,v){return md.kind==='severity'?1-v/7:md.kind==='fraction'?v:(v-1)/4;}
+function ratingOf(md,v){return md.kind==='severity'?ratingSeverity(v):md.kind==='fraction'?rate(v):md.info?'—':ratingNum(v);}
+/* style the raw conversation messages emitted by the generator */
+function styleMessages(msgs){
+  const th=theme(),isDark=state.mode==='dark';
+  const roleStyle=(bg,fg,bd)=>({fontFamily:'var(--fnum)',fontSize:'10px',fontWeight:'700',letterSpacing:'.06em',textTransform:'uppercase',padding:'1px 7px',borderRadius:'2px',background:bg,color:fg,border:'1px solid '+(bd||'var(--line)')});
+  const body={fontSize:'12.5px',lineHeight:'1.5',color:'var(--fg2)'};
+  const wrap={border:'1px solid var(--line)',borderRadius:'2px',padding:'10px 12px',background:'var(--panel2)'};
+  const userRoles={user:1,question:1,source:1,query:1};
+  return (msgs||[]).map(m=>{
+    let rs,w=wrap,bs=body;
+    if(m.isTool){rs=roleStyle(hexTint(th.warn,isDark?0.20:0.14),th.warn,hexTint(th.warn,0.4));bs={...body,fontFamily:'var(--fnum)',fontSize:'11.5px'};}
+    else if(userRoles[m.role]){rs=roleStyle(hexTint(th.accent,isDark?0.18:0.12),'var(--fg)','var(--line2)');if(m.role==='source')bs={...body,fontFamily:'var(--fnum)',fontSize:'11.5px',whiteSpace:'pre-wrap'};if(m.role==='user')w={...wrap,background:'var(--panel)'};}
+    else{rs=roleStyle(hexTint(th.ok,isDark?0.18:0.12),th.ok,hexTint(th.ok,0.4));}
+    return {role:m.role,isTool:m.isTool,tool:m.tool,text:m.text,roleStyle:rs,wrap:w,bodyStyle:bs};
+  });
 }
 
-/* ---------- drill-down matching (heuristic: note + heading from citation labels) ---------- */
-function parseLabel(s){const i=s.indexOf('#');return {note:i>=0?s.slice(0,i):s, head:i>=0?s.slice(i+1):'', raw:s};}
-function norm(s){return String(s==null?'':s).trim().toLowerCase();}
-function matchExp(e,r){return norm(e.note)===norm(r.note) && (e.heading ? norm(e.heading)===norm(r.head) : true);}
-const METRIC_KEYS=['recall','ndcg','hit','mrr','map'];
-const METRIC_LABELS={recall:'RecallAtR',ndcg:'NDCG@10',hit:'HitRate@1',mrr:'MRR@10',map:'MAP@10'};
+/* ============================ shared drill assembly ============================ */
+function buildMetricCard(m){
+  const th=theme(),isDark=state.mode==='dark';
+  return {name:m.name,valStr:m.valStr,rating:m.rating,reason:m.reason,kindLabel:m.kindLabel,desc:m.desc||metricDesc(m.key||m.name),
+    groupDot:{width:'8px',height:'8px',borderRadius:'50%',background:groupColor(m.group),display:'inline-block',flex:'none'},
+    cardStyle:{border:'1px solid '+(m.failed?th.danger:'var(--line)'),borderRadius:'2px',padding:'11px 13px',background:m.failed?hexTint(th.danger,isDark?0.07:0.04):'var(--panel2)'},
+    chip:m.info?{display:'none'}:{display:'inline-block',padding:'1px 7px',borderRadius:'2px',fontSize:'10px',fontWeight:'700',...badge(m.rating)},
+    hasContext:m.context&&m.context.length>0,context:m.context||[],
+    hasDiag:m.diagnostics&&m.diagnostics.length>0,diagnostics:(m.diagnostics||[]).map(d=>diagStyle(d)),
+    metadata:m.metadata||[]};
+}
+function diagStyle(d){
+  const th=theme(),isDark=state.mode==='dark';
+  const map={error:{c:th.danger,icon:'✕'},warning:{c:th.warn,icon:'⚠'},informational:{c:'var(--fg3)',icon:'ℹ'}};
+  const m=map[d.severity]||map.informational;
+  return {message:d.message,icon:m.icon,style:{display:'flex',gap:'7px',alignItems:'flex-start',fontFamily:'var(--fnum)',fontSize:'10.5px',lineHeight:'1.45',padding:'5px 9px',borderRadius:'2px',background:hexTint(d.severity==='informational'?'#8a887c':m.c,isDark?0.16:0.10),color:d.severity==='informational'?'var(--fg2)':m.c,border:'1px solid '+hexTint(d.severity==='informational'?'#8a887c':m.c,0.4)}};
+}
 
-/* =========================================================================== */
-/* state                                                                       */
-/* =========================================================================== */
-const RUNS = DATA.runs || [];
-const HAS_COMPARE = RUNS.length >= 2;
-const PRIMARY_ID = DATA.run.id;
-const BASELINE_ID = (RUNS.find(r=>r.run.id!==PRIMARY_ID) || {run:{}}).run.id || PRIMARY_ID;
-const state = {
-  tab:'run', mode:'light',
-  metric:'recall', level:'chunk',
-  sortKey:'recall', sortDir:'desc',
-  drill: DATA.winnerId || (DATA.configs[0] && DATA.configs[0].id),
-  diff:'all', failedOnly:false, expanded:null, search:'',
-  cmpA: BASELINE_ID, cmpB: PRIMARY_ID, cmpLevel:'chunk', cmpMetric:'recall', cmpSort:'delta',
-  _focusSearch:false
+/* ============================ state ============================ */
+const RJ_RUNS=R.runs||[];
+const rBase=RJ_RUNS[0]?RJ_RUNS[RJ_RUNS.length-1].run.id:DATA.run.id;
+const rBaseA=(RJ_RUNS.find(x=>x.run.id!==DATA.run.id)||{run:{}}).run.id||DATA.run.id;
+const jr=(JUDGE[0]&&JUDGE[0].runs)||[];
+const jHist0=(JUDGE[0]&&JUDGE[0].metricDefs.find(m=>!m.info))||{key:'intent'};
+const state={
+  cat:'rag', tab:'run', mode:'light',
+  search:'', failedOnly:false, diff:'all', expanded:{}, drillLimit:25,
+  rMetric:'recall', rLevel:'chunk', rSortKey:'recall', rSortDir:'desc',
+  rDrillCfg:DATA.winnerId||(DATA.configs[0]&&DATA.configs[0].id),
+  rHistMetric:'recall', rHistLevel:'chunk', rHistAgg:'best',
+  rCmpA:rBaseA, rCmpB:DATA.run.id, rCmpLevel:'chunk', rCmpMetric:'recall',
+  jGroup:'all', jSortKey:'__fail', jSortDir:'desc',
+  jHistMetric:jHist0.key, jHistAgg:'mean',
+  jCmpA:jr[0]?jr[0].run.id:'', jCmpB:jr[jr.length-1]?jr[jr.length-1].run.id:'', jCmpMetric:jHist0.key,
+  _focus:null
 };
+const HAS_RUNS = RJ_RUNS.length>=2;
 
-/* =========================================================================== */
-/* render                                                                      */
-/* =========================================================================== */
+/* ============================ render orchestration ============================ */
 function render(){
   const root=document.getElementById('app');
-  const S=state, M=metricMeta(), mm=M[S.metric];
-  const th=theme(), isDark=S.mode==='dark';
-  const configs=DATA.configs, lvKey=S.level;
-  const levelLabel=S.level==='chunk'?'chunk':'section';
   root.setAttribute('style', css(rootStyle()));
-
-  /* ---- top bar ---- */
-  const topBar=`
-  <div style="position:sticky; top:0; z-index:40; display:flex; align-items:center; gap:18px; padding:12px 26px; background:var(--barbg); backdrop-filter:saturate(1.4) blur(12px); border-bottom:1px solid var(--line)">
-    <div style="display:flex; align-items:baseline; gap:10px; min-width:0">
-      <span style="width:10px;height:10px;border-radius:3px;background:var(--accent);display:inline-block;flex:none"></span>
-      <span style="font-family:var(--fhead); font-weight:700; font-size:15px; letter-spacing:-.01em; white-space:nowrap">Retrieval Evaluation</span>
-      <span style="font-family:var(--fnum); font-size:12px; color:var(--fg3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis">${esc(DATA.run.id)}</span>
-    </div>
-    <div style="flex:1"></div>
-    <button data-act="mode" title="Toggle light / dark" style="display:flex;align-items:center;gap:7px; font-family:var(--fbody); font-size:12px; font-weight:600; padding:7px 12px; border:1px solid var(--line2); background:var(--panel); color:var(--fg2); border-radius:var(--rad); cursor:pointer">
-      <span style="width:9px;height:9px;border-radius:50%;background:var(--accent);display:inline-block"></span>${S.mode==='dark'?'Dark':'Light'}
-    </button>
-  </div>`;
-
-  /* ---- tabs ---- */
-  const tabDefs = HAS_COMPARE ? [['run','Single run'],['cmp','Cross-run comparison']] : [['run','Single run']];
-  const tabBar = `<div style="display:flex; align-items:center; border-bottom:1px solid var(--line); margin-bottom:24px">${
-    tabDefs.map(([k,l])=>{
-      const active=S.tab===k;
-      const st={fontFamily:'var(--fbody)',fontSize:'13px',fontWeight:'600',padding:'9px 4px',marginRight:'22px',border:'none',borderBottom:'2px solid '+(active?'var(--accent)':'transparent'),background:'transparent',color:active?'var(--fg)':'var(--fg3)',cursor:'pointer'};
-      return `<button data-act="tab" data-val="${k}" style="${css(st)}">${l}</button>`;
-    }).join('')}</div>`;
-
-  const body = (S.tab==='cmp' && HAS_COMPARE) ? renderCompare(M,th,isDark) : renderRunTab(M,mm,th,isDark,configs,lvKey,levelLabel);
-
-  root.innerHTML = topBar + `<div style="max-width:1280px; margin:0 auto; padding:18px 26px 90px">${tabBar}${body}</div>`;
+  const dom = state.cat==='rag' ? renderRetrieval() : renderJudge(catSpec(state.cat));
+  root.innerHTML = sidebar() + main(dom);
   wire();
 }
 
-/* =========================================================================== */
-/* single-run tab                                                              */
-/* =========================================================================== */
-function renderRunTab(M,mm,th,isDark,configs,lvKey,levelLabel){
-  const S=state;
-  const r=DATA.run;
-
-  /* run metadata */
-  const meta=[
-    {k:'Run',v:r.id},{k:'Finished',v:r.finished},
-    {k:'Test cases',v:r.cases+' queries'},{k:'Configs',v:r.configs},
-    {k:'Chunkers × Rerankers',v:r.chunkersN+' × '+r.rerankersN},
-    {k:'top-K',v:r.topK},{k:'Dataset',v:r.dataset},{k:'Generated',v:r.generatedAt}
-  ];
-  const metaHtml=meta.map(m=>`
-      <div style="flex:1 1 150px; padding:13px 16px; border-right:1px solid var(--line)">
-        <div style="font-size:10.5px; text-transform:uppercase; letter-spacing:.1em; color:var(--fg3); margin-bottom:5px">${esc(m.k)}</div>
-        <div style="font-family:var(--fnum); font-size:14px; font-weight:600; color:var(--fg); font-variant-numeric:tabular-nums; overflow-wrap:anywhere">${esc(m.v)}</div>
-      </div>`).join('');
-
-  /* verdict */
-  const win=configs.find(c=>c.id===DATA.winnerId)||configs[0];
-  const wc=win.levels.chunk.recall, ws=win.levels.section.recall;
-  const sorted=configs.slice().sort((a,b)=>b.levels.chunk.recall.v-a.levels.chunk.recall.v);
-  const runner=sorted[1]||sorted[0];
-  const rc=runner.levels.chunk.recall;
-  const overlap=wc.lo<=rc.hi && rc.lo<=wc.hi;
-  const bestReranker=bestBy('reranker'), bestChunker=bestBy('chunker');
-  const bigBadge=rt=>({...badge(rt),display:'inline-block',padding:'3px 9px',borderRadius:'var(--rad)',fontSize:'11px',fontWeight:'700',fontFamily:'var(--fbody)'});
-  const smBadge=rt=>({...badge(rt),display:'inline-block',padding:'2px 8px',borderRadius:'var(--rad)',fontSize:'10.5px',fontWeight:'700',fontFamily:'var(--fbody)'});
-  const sig = overlap
-    ? `Its 95% CI overlaps the runner-up ${configLabel(runner)} (${fmt(rc.v)}). On RecallAtR alone that gap is not statistically significant — use NDCG@10 and the failure profile to break the tie.`
-    : `Its 95% CI clears the runner-up ${configLabel(runner)} (${fmt(rc.v)}), so the lead is statistically meaningful at the 95% level.`;
-  const gapText=`A ${fmt(ws.v-wc.v)} chunk→section gap means roughly ${Math.round((ws.v-wc.v)*100)} in 100 wins land in the right note section but miss the exact passage — recoverable by expanding to the parent section at generation time.`;
-  const verdictHtml=`
-    <div style="display:grid; grid-template-columns:1.55fr 1fr; gap:18px; margin-bottom:34px">
-      <div style="position:relative; border:1px solid var(--line2); border-radius:var(--rad2); padding:24px 26px; background:var(--panel); box-shadow:var(--shadowLg); overflow:hidden">
-        <div style="position:absolute; top:0; left:0; right:0; height:4px; background:var(--accent)"></div>
-        <div style="display:flex; align-items:center; gap:9px; margin-bottom:14px; flex-wrap:wrap">
-          <span style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.12em; color:var(--accent)">Recommended configuration</span>
-          <span style="font-size:11px; color:var(--fg3)">— ranked on RecallAtR, the primary coverage gate</span>
-        </div>
-        <div style="font-family:var(--fhead); font-size:30px; font-weight:700; letter-spacing:-.02em; line-height:1.05; margin-bottom:4px">${esc(configLabel(win))}</div>
-        <div style="font-family:var(--fnum); font-size:12.5px; color:var(--fg3); margin-bottom:20px">${esc(win.chunker+' chunking + '+rerankerLong(win.reranker))}</div>
-        <div style="display:flex; gap:30px; flex-wrap:wrap; align-items:flex-end">
-          <div>
-            <div style="font-size:11px; text-transform:uppercase; letter-spacing:.09em; color:var(--fg3); margin-bottom:4px">RecallAtR · chunk</div>
-            <div style="display:flex; align-items:baseline; gap:9px">
-              <span style="font-family:var(--fnum); font-size:46px; font-weight:700; line-height:1; letter-spacing:-.02em; font-variant-numeric:tabular-nums">${fmt(wc.v)}</span>
-              <span style="${css(bigBadge(wc.rating))}">${esc(wc.rating)}</span>
-            </div>
-            <div style="font-family:var(--fnum); font-size:12px; color:var(--fg2); margin-top:5px">95% CI [${fmt(wc.lo)}, ${fmt(wc.hi)}]</div>
-          </div>
-          <div style="padding-bottom:3px">
-            <div style="font-size:11px; text-transform:uppercase; letter-spacing:.09em; color:var(--fg3); margin-bottom:4px">RecallAtR · section</div>
-            <div style="display:flex; align-items:baseline; gap:9px">
-              <span style="font-family:var(--fnum); font-size:30px; font-weight:700; line-height:1; font-variant-numeric:tabular-nums; color:var(--fg2)">${fmt(ws.v)}</span>
-              <span style="${css(smBadge(ws.rating))}">${esc(ws.rating)}</span>
-            </div>
-            <div style="font-family:var(--fnum); font-size:12px; color:var(--fg2); margin-top:5px">95% CI [${fmt(ws.lo)}, ${fmt(ws.hi)}]</div>
-          </div>
-        </div>
-      </div>
-      <div style="display:flex; flex-direction:column; gap:12px">
-        <div style="border:1px solid var(--line); border-radius:var(--rad2); padding:15px 17px; background:var(--panel); box-shadow:var(--shadow)">
-          <div style="display:flex; align-items:center; gap:8px; margin-bottom:7px">
-            <span style="width:7px;height:7px;border-radius:50%;background:var(--warn);display:inline-block"></span>
-            <span style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.09em; color:var(--fg2)">Read the uncertainty</span>
-          </div>
-          <div style="font-size:13px; line-height:1.5; color:var(--fg2)">${esc(sig)}</div>
-        </div>
-        <div style="border:1px solid var(--line); border-radius:var(--rad2); padding:15px 17px; background:var(--panel); box-shadow:var(--shadow)">
-          <div style="display:flex; align-items:center; gap:8px; margin-bottom:7px">
-            <span style="width:7px;height:7px;border-radius:50%;background:var(--accent);display:inline-block"></span>
-            <span style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.09em; color:var(--fg2)">Chunk vs. section</span>
-          </div>
-          <div style="font-size:13px; line-height:1.5; color:var(--fg2)">${esc(gapText)}</div>
-        </div>
-      </div>
-    </div>`;
-
-  /* matrix (sorted: best top-left, worst bottom-right) */
-  const vals=configs.map(c=>getM(c,S.metric).v);
-  let domLo=Math.min(...vals), domHi=Math.max(...vals);
-  const pad=(domHi-domLo)*0.04||0.01; domLo-=pad; domHi+=pad;
-  const bestVal=mm.better==='low'?Math.min(...vals):Math.max(...vals);
-  const normCell=v=>{const t=(v-domLo)/((domHi-domLo)||1);return mm.better==='low'?1-t:t;};
-  const marginalMean=(kind,name)=>{const xs=configs.filter(c=>c[kind]===name).map(c=>getM(c,S.metric).v).filter(v=>v!=null&&!isNaN(v));return xs.length?xs.reduce((a,b)=>a+b,0)/xs.length:(mm.better==='low'?Infinity:-Infinity);};
-  const sortAxis=(names,kind)=>names.slice().sort((a,b)=>{const av=marginalMean(kind,a),bv=marginalMean(kind,b);return mm.better==='low'?av-bv:bv-av;});
-  const rowOrder=sortAxis(DATA.chunkers,'chunker');
-  const colOrder=sortAxis(DATA.rerankers,'reranker');
-  const nCols=colOrder.length;
-  const headCols=colOrder.map(rr=>`<div style="padding:11px 8px; text-align:center; font-size:11.5px; font-weight:700; color:var(--fg2); border-bottom:1px solid var(--line); border-left:1px solid var(--line)">${esc(DATA.rShort[rr]||rr)}</div>`).join('');
-  const matrixRows=rowOrder.map(ch=>{
-    const cells=colOrder.map(rr=>{
-      const c=configs.find(x=>x.chunker===ch&&x.reranker===rr);
-      if(!c) return `<div style="display:flex;align-items:center;justify-content:center;min-height:66px;border-left:1px solid var(--line);color:var(--fg3);font-family:var(--fnum)">—</div>`;
-      const m=getM(c,S.metric);const t=normCell(m.v);const isBest=Math.abs(m.v-bestVal)<1e-9;
-      const ciS = mm.ci && m.lo!=null ? fmt(m.lo,3)+'–'+fmt(m.hi,3) : (mm.better==='low'?m.rating:'');
-      const st={position:'relative',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:'15px 6px',minHeight:'66px',border:'none',borderLeft:'1px solid var(--line)',cursor:'pointer',background:viridis(t),color:txtOn(t),boxShadow:isBest?'inset 0 0 0 3px var(--accent)':'none'};
-      return `<button data-act="drill" data-val="${esc(c.id)}" title="${esc(configLabel(c)+' · '+mm.label+' '+fmt(m.v))}" style="${css(st)}">
-          <span style="font-family:var(--fnum); font-size:17px; font-weight:700; font-variant-numeric:tabular-nums; line-height:1">${fmt(m.v)}</span>
-          <span style="font-family:var(--fnum); font-size:10px; opacity:.82; line-height:1; margin-top:3px">${esc(ciS)}</span>
-          ${isBest?'<span style="position:absolute; top:5px; right:7px; font-size:9px; font-weight:700; letter-spacing:.04em">BEST</span>':''}
-        </button>`;
-    }).join('');
-    return `<div style="display:grid; grid-template-columns:128px repeat(${nCols},1fr); border-top:1px solid var(--line)"><div style="padding:0 13px; display:flex; align-items:center; font-size:12.5px; font-weight:600; color:var(--fg)">${esc(ch)}</div>${cells}</div>`;
+function sidebar(){
+  // Categories are the top-level MEAI ScenarioName groups: RAG.Search (real) + the
+  // judge categories emitted in DATA.judge. Same icon for every category, per design.
+  const ret={id:'rag',label:(R.run.scenarioName||'RAG.Search'),sub:'retrieval quality',kind:'Retrieval'};
+  const cats=[ret,...JUDGE.map(c=>({id:c.id,label:c.label,sub:c.sub||'LLM-as-judge',kind:c.kind}))];
+  const items=cats.map(c=>{const active=state.cat===c.id;
+    const btnStyle={display:'flex',alignItems:'center',gap:'10px',padding:'9px 11px',border:'none',borderRadius:'2px',cursor:'pointer',textAlign:'left',width:'100%',background:active?'var(--accent)':'transparent',color:active?'var(--accentFg)':'var(--fg2)'};
+    const iconStyle={width:'22px',height:'22px',flex:'none',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'11px',borderRadius:'2px',background:active?hexTint('#ffffff',0.18):'var(--panel2)',color:active?'var(--accentFg)':groupColor(c.kind==='Retrieval'?'Retrieval':'Agent')};
+    const kindStyle={marginLeft:'auto',fontFamily:'var(--fnum)',fontSize:'8.5px',fontWeight:'700',letterSpacing:'.04em',textTransform:'uppercase',color:active?'var(--accentFg)':'var(--fg3)',opacity:active?0.85:0.7,whiteSpace:'nowrap'};
+    const kindLabel=c.kind.replace('Quality','').replace('Retrieval','Search')||c.kind;
+    return `<button data-act="nav" data-val="${c.id}" style="${css(btnStyle)}"><span style="${css(iconStyle)}">◆</span><span style="display:flex;flex-direction:column;min-width:0"><span style="font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(c.label)}</span><span style="font-family:var(--fnum);font-size:9.5px;color:${active?'var(--accentFg)':'var(--fg3)'};opacity:${active?0.8:1};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(c.sub)}</span></span><span style="${css(kindStyle)}">${esc(kindLabel)}</span></button>`;
   }).join('');
-  const scaleNote = mm.better==='low'?'Lower is better, so the scale is inverted — brighter = fewer empty results.':'Brighter = better. Scale is stretched to the observed range to sharpen contrast.';
-  const dominate=`On ${mm.label}, ${bestReranker} is the strongest reranker on average and ${bestChunker} the strongest chunker.`;
-  const metricBtns=Object.keys(M).map(k=>`<button data-act="metric" data-val="${k}" style="${css(segBtn(S.metric===k))}">${esc(M[k].label)}</button>`).join('');
-  const levelBtns=[['chunk','Chunk'],['section','Section']].map(([k,l])=>`<button data-act="level" data-val="${k}" style="${css(segBtn(S.level===k))}">${l}</button>`).join('');
-  const matrixHtml=`
-    <div style="margin-bottom:38px">
-      <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:18px; flex-wrap:wrap; margin-bottom:16px">
-        <div>
-          <div style="font-family:var(--fhead); font-size:20px; font-weight:700; letter-spacing:-.01em">Comparison matrix</div>
-          <div style="font-size:12.5px; color:var(--fg3); margin-top:2px">${DATA.chunkers.length} chunkers × ${DATA.rerankers.length} rerankers · same ${r.cases} queries · color = ${esc(mm.label)} (${levelLabel}) · sorted best ↖ worst ↘</div>
-        </div>
-        <div style="display:flex; gap:14px; flex-wrap:wrap; align-items:center">
-          <div style="display:flex; align-items:center; gap:7px"><span style="font-size:11px; color:var(--fg3); text-transform:uppercase; letter-spacing:.07em">Metric</span><div style="display:flex; background:var(--panel2); border:1px solid var(--line); border-radius:var(--rad); padding:2px">${metricBtns}</div></div>
-          <div style="display:flex; align-items:center; gap:7px"><span style="font-size:11px; color:var(--fg3); text-transform:uppercase; letter-spacing:.07em">Level</span><div style="display:flex; background:var(--panel2); border:1px solid var(--line); border-radius:var(--rad); padding:2px">${levelBtns}</div></div>
-        </div>
-      </div>
-      <div style="display:grid; grid-template-columns:minmax(0,1fr) 250px; gap:20px; align-items:start">
-        <div style="border:1px solid var(--line); border-radius:var(--rad2); overflow:hidden; background:var(--panel); box-shadow:var(--shadow)">
-          <div style="display:grid; grid-template-columns:128px repeat(${nCols},1fr)"><div style="padding:11px 13px; font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--fg3); border-bottom:1px solid var(--line)">Chunker ↓ / Reranker →</div>${headCols}</div>${matrixRows}
-        </div>
-        <div style="display:flex; flex-direction:column; gap:14px; padding-top:2px">
-          <div>
-            <div style="font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--fg3); margin-bottom:7px">Scale · low → high</div>
-            <div style="height:12px; border-radius:3px; background:linear-gradient(90deg,#440154,#3b528b,#21908d,#5dc863,#fde725); border:1px solid var(--line)"></div>
-            <div style="display:flex; justify-content:space-between; font-family:var(--fnum); font-size:11px; color:var(--fg2); margin-top:5px; font-variant-numeric:tabular-nums"><span>${fmt(domLo)}</span><span>${fmt(domHi)}</span></div>
-            <div style="font-size:11px; color:var(--fg3); margin-top:6px; line-height:1.45">${esc(scaleNote)}</div>
-          </div>
-          <div style="border-top:1px dashed var(--line2); padding-top:12px; display:flex; flex-direction:column; gap:9px">
-            <div style="display:flex; gap:8px"><span style="color:var(--accent); font-weight:700">▸</span><span style="font-size:12px; color:var(--fg2); line-height:1.45">Click any cell to load that configuration into the drill-down below.</span></div>
-            <div style="display:flex; gap:8px"><span style="color:var(--accent); font-weight:700">▸</span><span style="font-size:12px; color:var(--fg2); line-height:1.45">${esc(dominate)}</span></div>
-          </div>
-        </div>
-      </div>
-    </div>`;
-
-  /* comparison table */
-  const tcols=[
-    {key:'label',label:'Configuration',align:'left',sub:''},
-    {key:'recall',label:'RecallAtR',align:'right',sub:'± 95% CI'},
-    {key:'ndcg',label:'NDCG@10',align:'right',sub:'± 95% CI'},
-    {key:'hit',label:'HitRate@1',align:'right',sub:''},
-    {key:'mrr',label:'MRR@10',align:'right',sub:''},
-    {key:'map',label:'MAP@10',align:'right',sub:''},
-    {key:'empty',label:'EmptyRate',align:'right',sub:'lower better'},
-    {key:'score',label:'ScoreAvg',align:'right',sub:'diagnostic'},
-    {key:'n',label:'n',align:'right',sub:''}
-  ];
-  const sval=c=>{const k=S.sortKey, lv=c.levels[lvKey];if(k==='label')return c.chunker+' '+c.reranker;if(k==='n')return lv.n;if(k==='score')return lv.score;if(k==='empty')return lv.empty.v;return lv[k].v;};
-  const tsorted=configs.slice().sort((a,b)=>{const x=sval(a),y=sval(b);const cmp=typeof x==='string'?x.localeCompare(y):x-y;return S.sortDir==='asc'?cmp:-cmp;});
-  const allR=configs.flatMap(c=>[c.levels[lvKey].recall.lo,c.levels[lvKey].recall.hi]);
-  const allN=configs.flatMap(c=>[c.levels[lvKey].ndcg.lo,c.levels[lvKey].ndcg.hi]);
-  const domRr=[Math.min(...allR)-0.01,Math.max(...allR)+0.01];
-  const domNn=[Math.min(...allN)-0.01,Math.max(...allN)+0.01];
-  const barLine=(m,dom,col,op)=>{const lp=(m.lo-dom[0])/((dom[1]-dom[0])||1)*100;const hp=(m.hi-dom[0])/((dom[1]-dom[0])||1)*100;return {position:'absolute',top:'3px',height:'3px',borderRadius:'2px',background:col,opacity:op,left:lp+'%',width:Math.max(0,hp-lp)+'%'};};
-  const barDot=(m,dom,col)=>{const vp=(m.v-dom[0])/((dom[1]-dom[0])||1)*100;return {position:'absolute',top:'1px',width:'7px',height:'7px',borderRadius:'50%',background:col,transform:'translateX(-50%)',left:vp+'%'};};
-  const labelOf=k=>{const mm2=M[k];return mm2?mm2.label:(k==='label'?'configuration':k);};
-  const theadCells=tcols.map(col=>{
-    const active=S.sortKey===col.key;const arrow=active?(S.sortDir==='asc'?'▲':'▼'):'';
-    const st={padding:'10px 14px',textAlign:col.align,fontSize:'11px',fontWeight:'700',textTransform:'uppercase',letterSpacing:'.05em',color:active?'var(--fg)':'var(--fg3)',cursor:'pointer',whiteSpace:'nowrap',userSelect:'none',background:'var(--panel2)',borderBottom:'1px solid var(--line2)'};
-    return `<th data-act="sort" data-val="${col.key}" style="${css(st)}"><span style="display:inline-flex; align-items:center; gap:4px">${esc(col.label)}<span style="font-size:9px; color:var(--accent)">${arrow}</span></span><span style="display:block; font-family:var(--fnum); font-size:9px; font-weight:400; color:var(--fg3); margin-top:2px">${esc(col.sub)}</span></th>`;
-  }).join('');
-  const tbodyRows=tsorted.map(c=>{
-    const lv=c.levels[lvKey];const isW=c.id===DATA.winnerId;
-    const dotColor=viridis(ratingT(lv.recall.rating));
-    return `<tr data-act="drill" data-val="${esc(c.id)}" style="cursor:pointer; background:${S.drill===c.id?'var(--panel2)':'transparent'}">
-        <td style="padding:10px 14px; border-top:1px solid var(--line); white-space:nowrap"><div style="display:flex; align-items:center; gap:8px"><span style="width:8px;height:8px;border-radius:2px;flex:none;display:inline-block;background:${dotColor}"></span><span style="font-size:13px; font-weight:600; color:var(--fg)">${esc(c.chunker)}</span><span style="font-size:12px; color:var(--fg3)">×</span><span style="font-family:var(--fnum); font-size:12px; color:var(--fg2)">${esc(c.rShort)}</span>${isW?'<span style="font-size:9px; font-weight:700; padding:1px 6px; border-radius:10px; background:var(--accent); color:var(--accentFg)">WIN</span>':''}</div></td>
-        <td style="${css({padding:'8px 14px',borderTop:'1px solid var(--line)',background:tint(lv.recall.rating)})}"><div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px"><span style="font-family:var(--fnum); font-size:13.5px; font-weight:700; color:var(--fg)">${fmt(lv.recall.v)}</span><div style="position:relative; width:104px; height:9px"><div style="position:absolute; top:4px; left:0; right:0; height:1px; background:var(--line2)"></div><div style="${css(barLine(lv.recall,domRr,'var(--fg3)',0.6))}"></div><div style="${css(barDot(lv.recall,domRr,'var(--accent)'))}"></div></div></div></td>
-        <td style="padding:8px 14px; border-top:1px solid var(--line)"><div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px"><span style="font-family:var(--fnum); font-size:13.5px; font-weight:600; color:var(--fg2)">${fmt(lv.ndcg.v)}</span><div style="position:relative; width:104px; height:9px"><div style="position:absolute; top:4px; left:0; right:0; height:1px; background:var(--line2)"></div><div style="${css(barLine(lv.ndcg,domNn,'var(--fg3)',0.5))}"></div><div style="${css(barDot(lv.ndcg,domNn,'var(--fg2)'))}"></div></div></div></td>
-        <td style="padding:10px 14px; border-top:1px solid var(--line); text-align:right; font-family:var(--fnum); font-size:13px; color:var(--fg2)">${fmt(lv.hit.v)}</td>
-        <td style="padding:10px 14px; border-top:1px solid var(--line); text-align:right; font-family:var(--fnum); font-size:13px; color:var(--fg2)">${fmt(lv.mrr.v)}</td>
-        <td style="padding:10px 14px; border-top:1px solid var(--line); text-align:right; font-family:var(--fnum); font-size:13px; color:var(--fg2)">${fmt(lv.map.v)}</td>
-        <td style="padding:10px 14px; border-top:1px solid var(--line); text-align:right; font-family:var(--fnum); font-size:13px; color:var(--fg2)">${fmt(lv.empty.v)}</td>
-        <td style="padding:10px 14px; border-top:1px solid var(--line); text-align:right; font-family:var(--fnum); font-size:13px; color:var(--fg3)">${fmt(lv.score)}</td>
-        <td style="padding:10px 14px; border-top:1px solid var(--line); text-align:right; font-family:var(--fnum); font-size:12px; color:var(--fg3)">${lv.n}</td>
-      </tr>`;
-  }).join('');
-  const tableHtml=`
-    <div style="margin-bottom:38px">
-      <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:14px">
-        <div><div style="font-family:var(--fhead); font-size:20px; font-weight:700; letter-spacing:-.01em">All ${configs.length} configurations</div><div style="font-size:12.5px; color:var(--fg3); margin-top:2px">${levelLabel}-level · sorted by ${esc(labelOf(S.sortKey))} · click a header to re-sort</div></div>
-        <div style="display:flex; gap:14px; align-items:center; flex-wrap:wrap"><span style="font-size:12px; font-family:var(--fnum); color:var(--fg2); display:flex; align-items:center; gap:6px"><span style="display:inline-block;width:22px;height:2px;background:var(--fg3)"></span>95% CI</span><span style="font-size:12px; font-family:var(--fnum); color:var(--fg2); display:flex; align-items:center; gap:6px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent)"></span>point estimate</span></div>
-      </div>
-      <div style="border:1px solid var(--line); border-radius:var(--rad2); overflow:hidden; background:var(--panel); box-shadow:var(--shadow)"><div style="overflow-x:auto"><table style="border-collapse:collapse; width:100%; min-width:1000px; font-variant-numeric:tabular-nums"><thead><tr>${theadCells}</tr></thead><tbody>${tbodyRows}</tbody></table></div></div>
-      <div style="display:flex; gap:8px; margin-top:10px"><span style="color:var(--accent); font-weight:700">▸</span><span style="font-size:12px; color:var(--fg2); line-height:1.45">RecallAtR and NDCG@10 bars share one axis. When two intervals overlap, the gap between those configs is not statistically significant.</span></div>
-    </div>`;
-
-  /* dumbbell */
-  const dsorted=configs.slice().sort((a,b)=>b.levels.section.recall.v-a.levels.section.recall.v);
-  const dvals=configs.flatMap(c=>[c.levels.chunk.recall.v,c.levels.section.recall.v]);
-  const dom=[Math.min(...dvals)-0.02,Math.max(...dvals)+0.02];
-  const dp=v=>((v-dom[0])/((dom[1]-dom[0])||1)*100);
-  const dumbRows=dsorted.map(c=>{
-    const ch=c.levels.chunk.recall.v, se=c.levels.section.recall.v, gap=se-ch;
-    const connector={position:'absolute',top:'7px',height:'3px',borderRadius:'2px',background:'var(--accent)',opacity:0.32,left:dp(Math.min(ch,se))+'%',width:Math.abs(dp(se)-dp(ch))+'%'};
-    const chunkDot={position:'absolute',top:'4px',width:'11px',height:'11px',borderRadius:'50%',border:'2px solid var(--fg2)',background:'var(--panel)',transform:'translateX(-50%)',left:dp(ch)+'%'};
-    const sectionDot={position:'absolute',top:'3px',width:'13px',height:'13px',borderRadius:'50%',background:'var(--accent)',transform:'translateX(-50%)',left:dp(se)+'%'};
-    const gapStyle={fontFamily:'var(--fnum)',fontSize:'12.5px',textAlign:'right',fontVariantNumeric:'tabular-nums',color:gap>0.1?'var(--warn)':'var(--fg2)',fontWeight:gap>0.1?'700':'500'};
-    return `<div style="display:grid; grid-template-columns:188px minmax(0,1fr) 72px; gap:14px; align-items:center; padding:5px 0"><div style="font-size:12.5px; color:var(--fg2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis">${esc(configLabel(c))}</div><div style="position:relative; height:18px"><div style="position:absolute; top:8px; left:0; right:0; height:1px; background:var(--line2)"></div><div style="${css(connector)}"></div><div style="${css(chunkDot)}"></div><div style="${css(sectionDot)}"></div></div><div style="${css(gapStyle)}">+${fmt(gap)}</div></div>`;
-  }).join('');
-  const dumbbellHtml=`
-    <div style="margin-bottom:38px">
-      <div style="margin-bottom:14px"><div style="font-family:var(--fhead); font-size:20px; font-weight:700; letter-spacing:-.01em">Chunk vs. section gap — RecallAtR</div><div style="font-size:12.5px; color:var(--fg3); margin-top:2px">A wide gap means retrieval finds the right note section but misses the exact chunk.</div></div>
-      <div style="border:1px solid var(--line); border-radius:var(--rad2); padding:18px 22px; background:var(--panel); box-shadow:var(--shadow)">
-        <div style="display:flex; gap:18px; align-items:center; margin-bottom:14px; font-size:12px; font-family:var(--fnum); color:var(--fg2); flex-wrap:wrap"><span style="display:flex; align-items:center; gap:6px"><span style="width:9px;height:9px;border-radius:50%;border:2px solid var(--fg2);background:var(--panel);display:inline-block"></span>chunk</span><span style="display:flex; align-items:center; gap:6px"><span style="width:11px;height:11px;border-radius:50%;background:var(--accent);display:inline-block"></span>section</span><span style="margin-left:auto; color:var(--fg3)">axis: ${fmt(dom[0])} → ${fmt(dom[1])}</span></div>${dumbRows}
-      </div>
-    </div>`;
-
-  const metaStrip=`<div style="display:flex; flex-wrap:wrap; align-items:stretch; border:1px solid var(--line); border-radius:var(--rad2); overflow:hidden; background:var(--panel); box-shadow:var(--shadow); margin-bottom:22px">${metaHtml}</div>`;
-  return metaStrip + verdictHtml + matrixHtml + tableHtml + dumbbellHtml + renderDrill(M,th,isDark);
+  return `<aside style="width:236px;flex:none;position:sticky;top:0;height:100vh;border-right:1px solid var(--line);background:var(--panel);display:flex;flex-direction:column">
+    <div style="padding:18px 16px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:9px"><span style="width:11px;height:11px;border-radius:3px;background:var(--accent);display:inline-block;flex:none"></span><div style="min-width:0"><div style="font-family:var(--fhead);font-weight:700;font-size:13px;letter-spacing:-.01em;line-height:1.15;white-space:nowrap">Evaluation Report</div><div style="font-family:var(--fnum);font-size:10px;color:var(--fg3);margin-top:2px">MEAI · generic</div></div></div>
+    <div style="padding:14px 14px 7px;font-size:9.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--fg3)">Scenario categories</div>
+    <nav style="flex:1;overflow-y:auto;padding:0 10px 10px;display:flex;flex-direction:column;gap:3px">${items}</nav>
+    <div style="padding:11px;border-top:1px solid var(--line)"><button data-act="mode" style="width:100%;display:flex;align-items:center;justify-content:center;gap:7px;font-family:var(--fbody);font-size:11.5px;font-weight:600;padding:8px;border:1px solid var(--line2);background:var(--panel2);color:var(--fg2);border-radius:2px;cursor:pointer"><span style="width:8px;height:8px;border-radius:50%;background:var(--accent);display:inline-block"></span>${state.mode==='dark'?'Dark':'Light'}</button></div>
+  </aside>`;
 }
 
-/* =========================================================================== */
-/* per-query drill-down (expandable + search)                                  */
-/* =========================================================================== */
-function renderDrill(M,th,isDark){
-  const S=state, configs=DATA.configs;
-  const cfg=configs.find(c=>c.id===S.drill)||configs.find(c=>c.id===DATA.winnerId)||configs[0];
-  const pc=DATA.perCase[cfg.id]||[];
-  const allQ=pc.map(rec=>{
-    const def=DATA.cases[rec.id]||{query:'',difficulty:null,expected:[]};
-    const expected=def.expected||[];
-    const retrieved=(rec.r||[]).map(parseLabel);
-    const budget=retrieved.slice(0, Math.max(expected.length,1));
-    const evidence=expected.map(e=>({note:e.note,heading:e.heading,found:budget.some(rr=>matchExp(e,rr))}));
-    return {id:rec.id,q:def.query||'',diff:def.difficulty,pass:rec.p,retrieved,evidence,dm:rec.dm||[],diag:rec.diag||[]};
-  });
-  const passed=allQ.filter(q=>q.pass).length, failedN=allQ.length-passed;
+function main(dom){
+  const S=state;
+  const tabs=[['run','Single run'],['hist','History'],['cmp','Cross-run comparison']].map(([k,l])=>{
+    const st={fontFamily:'var(--fbody)',fontSize:'13px',fontWeight:'600',padding:'10px 4px',marginRight:'24px',border:'none',borderBottom:'2px solid '+(S.tab===k?'var(--accent)':'transparent'),background:'transparent',color:S.tab===k?'var(--fg)':'var(--fg3)',cursor:'pointer'};
+    return `<button data-act="tab" data-val="${k}" style="${css(st)}">${l}</button>`;
+  }).join('');
+  const body = S.tab==='hist'? renderHistory(dom.history)
+    : S.tab==='cmp'? renderComparison(dom.comparison)
+    : dom.runHtml;
+  return `<main style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="position:sticky;top:0;z-index:40;padding:16px 30px 0;background:var(--barbg);backdrop-filter:saturate(1.4) blur(12px);border-bottom:1px solid var(--line)">
+      <div style="display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:12px"><div style="min-width:0;flex:1"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span style="font-family:var(--fhead);font-weight:700;font-size:21px;letter-spacing:-.015em;line-height:1.1;white-space:nowrap">${esc(dom.headerTitle)}</span><span style="font-family:var(--fnum);font-size:10.5px;color:var(--fg3);border:1px solid var(--line2);border-radius:2px;padding:3px 8px;white-space:nowrap">${esc(dom.headerTag)}</span>${dom.demo?'<span style="font-family:var(--fnum);font-size:10.5px;color:var(--warn);border:1px solid '+hexTint(theme().warn,0.5)+';border-radius:2px;padding:3px 8px;white-space:nowrap">⚠ synthetic demo data</span>':''}</div><div style="font-family:var(--fnum);font-size:12px;color:var(--fg3);margin-top:5px">${esc(dom.headerSubtitle)}</div></div></div>
+      <div style="display:flex;align-items:center">${tabs}</div>
+    </div>
+    <div style="max-width:1240px;margin:0 auto;width:100%;padding:24px 30px 90px">${body}</div>
+  </main>`;
+}
+
+/* ============================ shared drill render ============================ */
+function assembleDrill(items,opts){
+  const S=state,th=theme(),isDark=S.mode==='dark';
   const sq=(S.search||'').trim().toLowerCase();
-  let fq=allQ;
-  if(DATA.hasDataset && S.diff!=='all') fq=fq.filter(q=>q.diff===S.diff);
-  if(S.failedOnly) fq=fq.filter(q=>!q.pass);
-  if(sq) fq=fq.filter(q=> q.q.toLowerCase().includes(sq) || q.evidence.some(e=>(e.note+' '+e.heading).toLowerCase().includes(sq)) || q.retrieved.some(r=>r.raw.toLowerCase().includes(sq)));
-
-  const drillOptions=configs.map(c=>`<option value="${esc(c.id)}" ${c.id===S.drill?'selected':''}>${esc(configLabel(c)+'  ·  RecallAtR '+fmt(c.levels.chunk.recall.v))}</option>`).join('');
-  const drillStats=[
-    {k:'queries',v:String(allQ.length),color:'var(--fg)'},
-    {k:'passed',v:String(passed),color:th.ok},
-    {k:'failed',v:String(failedN),color:th.danger},
-    {k:'pass rate',v:allQ.length?fmt(passed/allQ.length,3):'—',color:'var(--fg)'}
-  ].map(s=>`<div style="display:flex; align-items:baseline; gap:7px"><span style="font-family:var(--fnum); font-size:18px; font-weight:700; font-variant-numeric:tabular-nums; color:${s.color}">${s.v}</span><span style="font-size:11px; text-transform:uppercase; letter-spacing:.07em; color:var(--fg3)">${s.k}</span></div>`).join('');
-  const diffControl = DATA.hasDataset ? `<div style="display:flex; gap:7px; align-items:center"><span style="font-size:11px; color:var(--fg3); text-transform:uppercase; letter-spacing:.07em">Difficulty</span><div style="display:flex; background:var(--panel); border:1px solid var(--line); border-radius:var(--rad); padding:2px">${[['all','All'],['easy','Easy'],['medium','Medium'],['hard','Hard']].map(([k,l])=>`<button data-act="diff" data-val="${k}" style="${css(segBtn(S.diff===k))}">${l}</button>`).join('')}</div></div>` : '';
-  const failedBtnStyle={fontFamily:'var(--fbody)',fontSize:'12px',fontWeight:'600',padding:'7px 13px',borderRadius:'var(--rad)',cursor:'pointer',border:'1px solid '+(S.failedOnly?'var(--accent)':'var(--line2)'),background:S.failedOnly?'var(--accent)':'var(--panel)',color:S.failedOnly?'var(--accentFg)':'var(--fg2)'};
-  const diffStyleBase={padding:'2px 9px',borderRadius:'4px',fontSize:'10px',fontWeight:'700',fontFamily:'var(--fnum)',textTransform:'uppercase',letterSpacing:'.05em'};
+  let fs=items.slice();
+  if(S.diff!=='all')fs=fs.filter(i=>i.diff===S.diff);
+  if(S.failedOnly)fs=fs.filter(i=>!i.pass);
+  if(sq)fs=fs.filter(i=>i.searchText.toLowerCase().includes(sq));
+  const total=fs.length,limit=S.drillLimit,shownItems=fs.slice(0,limit);
+  const diffStyleBase={padding:'2px 9px',borderRadius:'2px',fontSize:'10px',fontWeight:'700',fontFamily:'var(--fnum)',textTransform:'uppercase',letterSpacing:'.05em'};
   const diffStyleMap={easy:{...diffStyleBase,background:hexTint(th.ok,isDark?0.20:0.12),color:th.ok},medium:{...diffStyleBase,background:hexTint(th.warn,isDark?0.22:0.16),color:th.warn},hard:{...diffStyleBase,background:hexTint(th.danger,isDark?0.20:0.12),color:th.danger}};
-
-  const rowsHtml=fq.map(q=>{
-    const expKey=cfg.id+'|'+q.id;
-    const isExp=S.expanded===expKey;
-    const kShown=Math.min(10,q.retrieved.length);
-    const ranking=q.retrieved.slice(0,kShown).map((x,i)=>{
-      const match=q.evidence.some(e=>matchExp(e,x));
-      const disp=x.head?x.note+' › '+x.head:x.note;
-      const st={display:'flex',alignItems:'center',gap:'9px',padding:'4px 9px',borderRadius:'5px',fontFamily:'var(--fnum)',fontSize:'11.5px',background:match?hexTint(th.ok,isDark?0.16:0.10):'var(--panel2)',border:'1px solid '+(match?th.ok:'var(--line)'),color:match?'var(--fg)':'var(--fg2)'};
-      return `<div style="${css(st)}"><span style="color:var(--fg3); width:16px; flex:none">${String(i+1).padStart(2,'0')}</span><span style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">${esc(disp)}</span><span style="font-size:10px; font-weight:700; flex:none; color:${match?th.ok:'transparent'}">${match?'✓ match':''}</span></div>`;
-    }).join('');
-    const evidenceHtml = q.evidence.length ? (`<span style="font-size:10px; text-transform:uppercase; letter-spacing:.07em; color:var(--fg3); margin-right:2px">Expected</span>`+q.evidence.map(e=>{
-      const disp=e.heading?e.note+' › '+e.heading:e.note;
-      const st={display:'inline-flex',alignItems:'center',gap:'5px',fontFamily:'var(--fnum)',fontSize:'11px',padding:'2px 8px',borderRadius:'4px',border:'1px solid',borderColor:e.found?hexTint(th.ok,0.5):hexTint(th.danger,0.5),color:e.found?'var(--fg2)':th.danger,background:e.found?hexTint(th.ok,isDark?0.13:0.09):hexTint(th.danger,isDark?0.13:0.07)};
-      return `<span style="${css(st)}"><span style="font-size:10px; font-weight:700">${e.found?'✓':'✕'}</span>${esc(disp)}</span>`;
-    }).join('')) : `<span style="font-size:11px; color:var(--fg3); font-style:italic">No dataset join — expected evidence unavailable</span>`;
-    const diffChip = q.diff ? `<span style="${css(diffStyleMap[q.diff]||diffStyleBase)}">${esc(q.diff)}</span>` : '';
-    const containerStyle={borderTop:'1px solid var(--line)',borderLeft:'3px solid '+(q.pass?th.ok:th.danger),background:q.pass?'transparent':hexTint(th.danger,isDark?0.07:0.035)};
-    const rowStyle={display:'grid',gridTemplateColumns:'1.25fr 1.5fr',gap:'22px',padding:'10px 18px 10px 24px',cursor:'pointer',position:'relative'};
-
+  const rowsHtml=shownItems.map(q=>{
+    const isExp=!!S.expanded[q.id];
+    const containerStyle={borderTop:'1px solid var(--line)',borderLeft:'3px solid '+(q.pass?th.ok:th.danger),background:q.pass?'transparent':hexTint(th.danger,isDark?0.06:0.03)};
+    const rowStyle={display:'grid',gridTemplateColumns:'1.3fr 1fr',gap:'22px',padding:'12px 18px 12px 26px',cursor:'pointer',position:'relative'};
+    const passStyle={fontFamily:'var(--fnum)',fontSize:'10.5px',fontWeight:'700',letterSpacing:'.06em',color:q.pass?th.ok:th.danger};
+    const chips=q.chips.map(ch=>`<span style="${css(ch.style)}" title="${esc(ch.title)}">${esc(ch.label)}</span>`).join('');
     let detail='';
     if(isExp){
-      const dmHtml=q.dm.map((m,i)=>{
-        const key=METRIC_KEYS[i];
-        const chip={display:'inline-block',padding:'2px 8px',borderRadius:'var(--rad)',fontSize:'10px',fontWeight:'700',fontFamily:'var(--fbody)',...badge(m.rt)};
-        return `<div style="border:1px solid var(--line); border-radius:var(--rad); padding:10px 12px; background:var(--panel2)"><div style="display:flex; align-items:center; gap:8px; margin-bottom:5px"><span style="font-family:var(--fnum); font-size:12.5px; font-weight:700; color:var(--fg)">${esc(METRIC_LABELS[key])}</span><span style="font-family:var(--fnum); font-size:12.5px; color:var(--fg2)">${fmt(m.v)}</span><span style="${css(chip)}">${esc(m.rt)}</span></div><div style="font-size:12px; line-height:1.45; color:var(--fg2); margin-bottom:5px">${esc(m.in)}</div><div style="font-size:11px; line-height:1.4; color:var(--fg3)">${esc(DATA.metricDefs[key]||'')}</div></div>`;
+      const cardsHtml=q.metricDetail.map(dm=>{
+        const ctx=dm.hasContext?`<div style="display:flex;flex-direction:column;gap:3px;margin-bottom:7px">${dm.context.map(cx=>`<div style="font-family:var(--fnum);font-size:10.5px;line-height:1.45;color:var(--fg3);padding:5px 9px;border-left:2px solid var(--line2);background:var(--panel)"><span style="color:var(--fg2);font-weight:700">${esc(cx.label)}</span> ${esc(cx.text)}</div>`).join('')}</div>`:'';
+        const diag=dm.hasDiag?`<div style="display:flex;flex-direction:column;gap:3px;margin-bottom:7px">${dm.diagnostics.map(dg=>`<div style="${css(dg.style)}"><span style="font-weight:700;flex:none">${esc(dg.icon)}</span><span>${esc(dg.message)}</span></div>`).join('')}</div>`:'';
+        const meta=dm.metadata.map(md=>`<span><span style="color:var(--fg2)">${esc(md.k)}</span> ${esc(md.v)}</span>`).join('');
+        const chip=dm.chip.display==='none'?'':`<span style="${css(dm.chip)}">${esc(dm.rating)}</span>`;
+        return `<div style="${css(dm.cardStyle)}"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px"><span style="${css(dm.groupDot)}"></span><span style="font-family:var(--fnum);font-size:12.5px;font-weight:700;color:var(--fg)">${esc(dm.name)}</span><span style="font-family:var(--fnum);font-size:12.5px;color:var(--fg2)">${esc(dm.valStr)}</span>${chip}<span style="flex:1"></span><span style="font-family:var(--fnum);font-size:10px;color:var(--fg3)">${esc(dm.kindLabel)}</span><span title="${esc(dm.desc)}" style="flex:none;width:14px;height:14px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line2);border-radius:50%;font-size:9px;color:var(--fg3);cursor:help">?</span></div><div style="font-size:12px;line-height:1.5;color:var(--fg2);margin-bottom:7px">${esc(dm.reason)}</div>${ctx}${diag}<div style="display:flex;flex-wrap:wrap;gap:4px 14px;font-family:var(--fnum);font-size:10px;color:var(--fg3)">${meta}</div></div>`;
       }).join('');
-      const gap=(q.diag[0]==null||q.diag[1]==null)?null:(q.diag[0]-q.diag[1]);
-      const diagRows=[['CreditedScoreAverage',q.diag[0]],['UncreditedScoreAverage',q.diag[1]],['Credited→Uncredited gap',gap]].map(([k,v])=>`<div style="display:flex; justify-content:space-between; font-family:var(--fnum); font-size:11.5px; padding:4px 10px; border-radius:4px; background:var(--panel2); color:var(--fg2)"><span>${esc(k)}</span><span style="color:var(--fg); font-variant-numeric:tabular-nums">${v==null?'—':fmt(v)}</span></div>`).join('');
-      const convAssistant=q.retrieved.map(x=>{
-        const match=q.evidence.some(e=>matchExp(e,x));
-        const line='[['+(x.head?x.note+'#'+x.head:x.note)+']]';
-        const st={display:'flex',alignItems:'center',justifyContent:'space-between',gap:'8px',padding:'4px 11px',borderRadius:'5px',fontFamily:'var(--fnum)',fontSize:'11.5px',background:match?hexTint(th.ok,isDark?0.16:0.10):'var(--panel2)',color:match?'var(--fg)':'var(--fg2)',border:'1px solid '+(match?th.ok:'var(--line)')};
-        return `<div style="${css(st)}"><span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis">${esc(line)}</span></div>`;
-      }).join('');
-      detail=`<div style="display:grid; grid-template-columns:1.3fr 1.5fr; gap:22px; padding:4px 18px 20px 30px">
-        <div style="min-width:0">
-          <div style="font-size:10.5px; text-transform:uppercase; letter-spacing:.07em; color:var(--fg3); margin-bottom:8px">Per-metric interpretation</div>
-          <div style="display:flex; flex-direction:column; gap:9px">${dmHtml}</div>
-          <div style="font-size:10.5px; text-transform:uppercase; letter-spacing:.07em; color:var(--fg3); margin:14px 0 7px">Diagnostics · ScoreAverage</div>
-          <div style="display:flex; flex-direction:column; gap:3px">${diagRows}</div>
-        </div>
-        <div style="min-width:0">
-          <div style="font-size:10.5px; text-transform:uppercase; letter-spacing:.07em; color:var(--fg3); margin-bottom:8px">Conversation</div>
-          <div style="border:1px solid var(--line); border-radius:var(--rad); overflow:hidden">
-            <div style="padding:10px 12px; background:var(--panel2); border-bottom:1px solid var(--line)"><div style="font-size:10px; text-transform:uppercase; letter-spacing:.08em; color:var(--fg3); margin-bottom:4px">user</div><div style="font-size:13px; line-height:1.45; color:var(--fg)">${esc(q.q)}</div></div>
-            <div style="padding:10px 12px"><div style="font-size:10px; text-transform:uppercase; letter-spacing:.08em; color:var(--fg3); margin-bottom:7px">assistant · retrieved citations</div><div style="display:flex; flex-direction:column; gap:4px">${convAssistant}</div></div>
-          </div>
-        </div>
-      </div>`;
+      const msgsHtml=q.messages.map(msg=>`<div style="${css(msg.wrap)}"><div style="display:flex;align-items:center;gap:7px;margin-bottom:5px"><span style="${css(msg.roleStyle)}">${esc(msg.role)}</span>${msg.isTool?`<span style="font-family:var(--fnum);font-size:11px;color:var(--fg3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(msg.tool)}</span>`:''}</div><div style="${css(msg.bodyStyle)}">${esc(msg.text)}</div></div>`).join('');
+      detail=`<div style="display:grid;grid-template-columns:1.15fr 1fr;gap:22px;padding:6px 18px 22px 30px"><div style="min-width:0"><div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--fg3);margin-bottom:8px">Metrics · ${q.metricCount} evaluated</div><div style="display:flex;flex-direction:column;gap:9px">${cardsHtml}</div></div><div style="min-width:0"><div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--fg3);margin-bottom:8px">${esc(q.convLabel)}</div><div style="display:flex;flex-direction:column;gap:8px">${msgsHtml}</div></div></div>`;
     }
-
-    return `<div style="${css(containerStyle)}">
-      <div data-act="toggle" data-val="${esc(expKey)}" style="${css(rowStyle)}">
-        <span style="position:absolute; left:9px; top:12px; font-size:10px; color:var(--fg3)">${isExp?'▾':'▸'}</span>
-        <div style="min-width:0">
-          <div style="display:flex; align-items:center; gap:9px; margin-bottom:6px; flex-wrap:wrap"><span style="font-family:var(--fnum); font-size:10.5px; font-weight:700; letter-spacing:.06em; color:${q.pass?th.ok:th.danger}">${q.pass?'PASS':'FAIL'}</span>${diffChip}</div>
-          <div style="font-size:13.5px; font-weight:600; line-height:1.4; color:var(--fg); margin-bottom:8px">${esc(q.q)}</div>
-          <div style="display:flex; flex-wrap:wrap; gap:5px; align-items:center">${evidenceHtml}</div>
-        </div>
-        <div style="min-width:0">
-          <div style="font-size:10.5px; text-transform:uppercase; letter-spacing:.07em; color:var(--fg3); margin-bottom:7px">Retrieved ranking · top ${kShown}</div>
-          <div style="display:flex; flex-direction:column; gap:4px">${ranking}</div>
-        </div>
-      </div>${detail}
-    </div>`;
+    return `<div style="${css(containerStyle)}"><div data-act="exp" data-val="${esc(q.id)}" style="${css(rowStyle)}"><span style="position:absolute;left:10px;top:14px;font-size:10px;color:var(--fg3)">${isExp?'▾':'▸'}</span><div style="min-width:0"><div style="display:flex;align-items:center;gap:9px;margin-bottom:6px;flex-wrap:wrap"><span style="${css(passStyle)}">${q.pass?'PASS':'FAIL'}</span>${q.diff?`<span style="${css(diffStyleMap[q.diff]||diffStyleBase)}">${esc(q.diff)}</span>`:''}<span style="font-family:var(--fnum);font-size:11px;color:var(--fg3)">${esc(q.id)}</span></div><div style="font-size:13.5px;font-weight:600;line-height:1.4;color:var(--fg);margin-bottom:8px">${esc(q.title)}</div><div style="font-size:12.5px;line-height:1.45;color:var(--fg2)">${esc(q.subtitle)}</div></div><div style="min-width:0;display:flex;flex-direction:column;gap:6px;align-items:flex-end"><div style="display:flex;flex-wrap:wrap;gap:5px;justify-content:flex-end">${chips}</div><span style="font-family:var(--fnum);font-size:10.5px;color:var(--fg3)">${esc(q.chipNote)}</span></div></div>${detail}</div>`;
   }).join('');
-
-  return `
-    <div>
-      <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:14px">
-        <div><div style="font-family:var(--fhead); font-size:20px; font-weight:700; letter-spacing:-.01em">Per-query drill-down</div><div style="font-size:12.5px; color:var(--fg3); margin-top:2px">Inspect where a configuration passes and fails on individual queries. Click a row to expand metrics, diagnostics and the retrieval conversation.</div></div>
-        <select id="drillSelect" style="font-family:var(--fbody); font-size:13px; font-weight:600; color:var(--fg); background:var(--panel); border:1px solid var(--line2); border-radius:var(--rad); padding:9px 12px; cursor:pointer; min-width:300px; max-width:100%">${drillOptions}</select>
-      </div>
-      <div style="display:flex; flex-wrap:wrap; gap:14px; align-items:center; padding:13px 16px; border:1px solid var(--line); border-bottom:none; border-radius:var(--rad2) var(--rad2) 0 0; background:var(--panel2)">
-        <div style="display:flex; gap:18px; flex-wrap:wrap">${drillStats}</div>
-        <div style="flex:1; min-width:170px; display:flex; align-items:center; gap:8px; background:var(--panel); border:1px solid var(--line2); border-radius:var(--rad); padding:6px 11px"><span style="font-size:13px; color:var(--fg3); flex:none">⌕</span><input id="drillSearch" type="text" value="${esc(S.search)}" placeholder="Search ${DATA.run.cases} queries or evidence…" style="flex:1; min-width:0; border:none; outline:none; background:transparent; font-family:var(--fbody); font-size:13px; color:var(--fg)"><span style="font-family:var(--fnum); font-size:11px; color:var(--fg3); flex:none">${fq.length} shown</span></div>
-        ${diffControl}
-        <button data-act="failed" style="${css(failedBtnStyle)}">Failed only</button>
-      </div>
-      <div style="border:1px solid var(--line); border-radius:0 0 var(--rad2) var(--rad2); background:var(--panel); box-shadow:var(--shadow); overflow:hidden">${rowsHtml || '<div style="padding:26px; text-align:center; font-size:13px; color:var(--fg3)">No queries match the current filters.</div>'}</div>
-      <div style="font-size:11.5px; color:var(--fg3); margin-top:12px; line-height:1.5">Methodology — point estimates, ratings and the per-metric interpretation are read verbatim from the run's stored results; pass / fail is the store's authoritative RecallAtR fail flag. An expected item is marked found within the first R = |expected| retrieved results (RecallAtR's budget); the retrieved list tags every match. Matching is a heuristic note + heading comparison from citation labels (the store does not persist per-chunk text), so it can differ slightly from pass / fail. Colour scale is viridis (perceptually uniform, colourblind-safe).</div>
-    </div>`;
+  const diffs=segGroup('diff',[['all','All'],['easy','Easy'],['medium','Medium'],['hard','Hard']].map(([v,l])=>({val:v,label:l,on:S.diff===v})));
+  const failedBtn=`<button data-act="failed" style="${css({fontFamily:'var(--fbody)',fontSize:'12px',fontWeight:'600',padding:'7px 13px',borderRadius:'2px',cursor:'pointer',border:'1px solid '+(S.failedOnly?'var(--accent)':'var(--line2)'),background:S.failedOnly?'var(--accent)':'var(--panel)',color:S.failedOnly?'var(--accentFg)':'var(--fg2)'})}">Failures only</button>`;
+  const configSel = opts.hasConfig ? `<div style="position:relative;display:flex;flex:1 1 230px;min-width:170px;max-width:380px"><select id="drillCfg" title="Configuration" style="width:100%;-webkit-appearance:none;appearance:none;font-family:var(--fbody);font-size:12.5px;font-weight:600;color:var(--fg);background:var(--panel);border:1px solid var(--line2);border-radius:2px;padding:8px 28px 8px 11px;cursor:pointer;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${opts.configOptions.map(o=>`<option value="${esc(o.id)}" ${o.id===opts.configValue?'selected':''}>${esc(o.label)}</option>`).join('')}</select><span style="position:absolute;right:11px;top:50%;transform:translateY(-50%);pointer-events:none;font-size:10px;color:var(--fg3)">▾</span></div>` : '';
+  const more = total>limit ? `<div style="display:flex;justify-content:center;margin-top:14px"><button data-act="more" style="font-family:var(--fbody);font-size:12.5px;font-weight:600;padding:9px 18px;border:1px solid var(--line2);background:var(--panel);color:var(--fg2);border-radius:2px;cursor:pointer">Show ${Math.min(25,total-limit)} more · ${total} total</button></div>` : '';
+  return `<div><div style="margin-bottom:14px"><div style="font-family:var(--fhead);font-size:20px;font-weight:700;letter-spacing:-.01em">${esc(opts.title)}</div><div style="font-size:12.5px;color:var(--fg3);margin-top:2px">${esc(opts.subtitle)}</div></div>
+    <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:13px 16px;border:1px solid var(--line);border-bottom:none;border-radius:2px 2px 0 0;background:var(--panel2)">
+      ${configSel}
+      <div style="flex:2 1 240px;min-width:200px;display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line2);border-radius:2px;padding:7px 12px"><span style="font-size:13px;color:var(--fg3);flex:none">⌕</span><input id="drillSearch" type="text" value="${esc(S.search)}" placeholder="${esc(opts.searchPlaceholder)}" style="flex:1;min-width:0;border:none;outline:none;background:transparent;font-family:var(--fbody);font-size:13px;color:var(--fg)"><span style="font-family:var(--fnum);font-size:11px;color:var(--fg3);flex:none">${shownItems.length} shown</span></div>
+      <div style="display:flex;gap:7px;align-items:center"><span style="font-size:11px;color:var(--fg3);text-transform:uppercase;letter-spacing:.07em">Difficulty</span><div style="display:flex;background:var(--panel);border:1px solid var(--line);border-radius:2px;padding:2px">${diffs}</div></div>${failedBtn}
+    </div>
+    <div style="border:1px solid var(--line);border-radius:0 0 2px 2px;background:var(--panel);overflow:hidden">${rowsHtml || `<div style="padding:26px;text-align:center;font-size:13px;color:var(--fg3)">No ${esc(opts.noun)} match the current filters.</div>`}</div>${more}
+    <div style="font-size:11.5px;color:var(--fg3);margin-top:12px;line-height:1.5">${esc(opts.methodology)}</div></div>`;
 }
 
-/* =========================================================================== */
-/* cross-run comparison tab                                                    */
-/* =========================================================================== */
-function renderCompare(M,th,isDark){
-  const S=state, runs=DATA.runs;
-  const runOpts=runs.map(rn=>`<option value="${esc(rn.run.id)}">${esc(rn.run.id+'  ·  '+(rn.run.finished||'').slice(0,10))}</option>`);
-  const rA=runs.find(rn=>rn.run.id===S.cmpA)||runs[0];
-  const rB=runs.find(rn=>rn.run.id===S.cmpB)||runs[runs.length-1];
-  const cmpKey=S.cmpMetric, mmC=M[cmpKey], cmpLow=mmC.better==='low';
-  const getCM=(rn,cid)=>{const c=rn.configs.find(x=>x.id===cid);if(!c)return null;const lv=c.levels[S.cmpLevel];return cmpKey==='empty'?lv.empty:(cmpKey==='score'?{v:lv.score}:lv[cmpKey]);};
-  const baseConfigs=DATA.configs;
-  const cmpVals=[];
-  baseConfigs.forEach(c=>{const a=getCM(rA,c.id),b=getCM(rB,c.id);if(a)cmpVals.push(a.v);if(b)cmpVals.push(b.v);});
-  const cmpDom=[Math.min(...cmpVals)-0.02,Math.max(...cmpVals)+0.02];
-  const cdp=v=>clamp((v-cmpDom[0])/((cmpDom[1]-cmpDom[0])||1),0,1)*100;
-  const gainCol=viridis(isDark?0.82:0.58);
-  let cmpData=baseConfigs.map(c=>{
-    const a=getCM(rA,c.id), b=getCM(rB,c.id);
-    if(!a||!b) return null;
-    const delta=b.v-a.v;
-    const haveCI=(a.lo!=null&&b.lo!=null);
-    const overlap=haveCI?(a.lo<=b.hi&&b.lo<=a.hi):true; // no CI => treat as n.s.
-    const improved=cmpLow?delta<0:delta>0;
-    const sig=haveCI && !overlap && Math.abs(delta)>1e-9;
-    const col=!sig?'var(--fg3)':(improved?gainCol:'var(--warn)');
-    return {id:c.id,chunker:c.chunker,reranker:c.rShort,delta,a,b,sig,improved,col,
-      aV:fmt(a.v),bV:fmt(b.v),deltaS:(delta>=0?'+':'−')+fmt(Math.abs(delta)),
-      sigLabel:sig?(improved?'improved':'regressed'):'n.s.'};
-  }).filter(Boolean);
-  if(S.cmpSort==='delta')cmpData.sort((x,y)=>(cmpLow?1:-1)*(y.delta-x.delta));
-  else cmpData.sort((x,y)=>x.id.localeCompare(y.id));
-  const improved=cmpData.filter(d=>d.sig&&d.improved).length;
-  const regressed=cmpData.filter(d=>d.sig&&!d.improved).length;
-  const flat=cmpData.length-improved-regressed;
-
-  const rowsHtml=cmpData.map(cr=>{
-    const conn={position:'absolute',top:'8px',height:'3px',borderRadius:'2px',background:cr.col,opacity:.5,left:Math.min(cdp(cr.a.v),cdp(cr.b.v))+'%',width:Math.abs(cdp(cr.b.v)-cdp(cr.a.v))+'%'};
-    const aDot={position:'absolute',top:'5px',width:'9px',height:'9px',borderRadius:'50%',border:'2px solid var(--fg3)',background:'var(--panel)',transform:'translateX(-50%)',left:cdp(cr.a.v)+'%'};
-    const bDot={position:'absolute',top:'4px',width:'11px',height:'11px',borderRadius:'50%',background:cr.col,transform:'translateX(-50%)',left:cdp(cr.b.v)+'%'};
-    return `<div style="display:grid; grid-template-columns:190px 64px minmax(0,1fr) 64px 92px; gap:14px; align-items:center; padding:9px 16px; border-top:1px solid var(--line)">
-        <div style="display:flex; align-items:center; gap:8px; min-width:0"><span style="width:8px;height:8px;border-radius:2px;background:${viridis(ratingT(cr.b.rating||rate(cr.b.v)))};display:inline-block;flex:none"></span><span style="font-size:13px; font-weight:600; color:var(--fg)">${esc(cr.chunker)}</span><span style="font-size:12px; color:var(--fg3)">×</span><span style="font-family:var(--fnum); font-size:12px; color:var(--fg2)">${esc(cr.reranker)}</span></div>
-        <div style="font-family:var(--fnum); font-size:12.5px; color:var(--fg3); text-align:right; font-variant-numeric:tabular-nums">${cr.aV}</div>
-        <div style="position:relative; height:18px"><div style="position:absolute; top:8px; left:0; right:0; height:1px; background:var(--line2)"></div><div style="${css(conn)}"></div><div style="${css(aDot)}"></div><div style="${css(bDot)}"></div></div>
-        <div style="font-family:var(--fnum); font-size:12.5px; color:var(--fg); font-weight:600; text-align:right; font-variant-numeric:tabular-nums">${cr.bV}</div>
-        <div style="text-align:right"><div style="font-family:var(--fnum); font-size:12.5px; font-weight:700; color:${cr.col}; font-variant-numeric:tabular-nums">${cr.deltaS}</div><div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:${cr.col}">${cr.sigLabel}</div></div>
-      </div>`;
-  }).join('');
-
-  const metricBtns=Object.keys(M).map(k=>`<button data-act="cmpMetric" data-val="${k}" style="${css(segBtn(S.cmpMetric===k))}">${esc(M[k].label)}</button>`).join('');
-  const levelBtns=[['chunk','Chunk'],['section','Section']].map(([k,l])=>`<button data-act="cmpLevel" data-val="${k}" style="${css(segBtn(S.cmpLevel===k))}">${l}</button>`).join('');
-  const sortBtns=[['delta','Δ change'],['config','Config']].map(([k,l])=>`<button data-act="cmpSort" data-val="${k}" style="${css(segBtn(S.cmpSort===k))}">${l}</button>`).join('');
-  const headline=`On ${mmC.label} (${S.cmpLevel}-level), ${improved} of ${cmpData.length} configurations improved significantly, ${regressed} regressed, and ${flat} changed within noise.`;
-  const bigNum=col=>({fontFamily:'var(--fnum)',fontSize:'22px',fontWeight:'700',color:col,fontVariantNumeric:'tabular-nums'});
-
-  return `
-    <div>
-      <div style="margin-bottom:18px"><div style="font-family:var(--fhead); font-size:22px; font-weight:700; letter-spacing:-.01em">Cross-run comparison</div><div style="font-size:12.5px; color:var(--fg3); margin-top:3px">How each configuration moved between two evaluation runs. Pick a baseline and a target; overlapping confidence intervals are flagged <b style="color:var(--fg2)">n.s.</b> (not significant).</div></div>
-      <div style="display:grid; grid-template-columns:1fr 40px 1fr; gap:14px; align-items:stretch; margin-bottom:18px">
-        <div style="border:1px solid var(--line); border-radius:var(--rad2); padding:14px 16px; background:var(--panel); box-shadow:var(--shadow)"><div style="font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--fg3); margin-bottom:8px">Baseline (A)</div><select id="cmpA" style="width:100%; font-family:var(--fbody); font-size:13px; font-weight:600; color:var(--fg); background:var(--panel2); border:1px solid var(--line2); border-radius:var(--rad); padding:8px 10px; cursor:pointer">${runOpts.map((o,i)=>o.replace('<option ', `<option ${runs[i].run.id===S.cmpA?'selected ':''}`)).join('')}</select><div style="font-family:var(--fnum); font-size:11.5px; color:var(--fg3); margin-top:9px; line-height:1.5">${esc(rA.run.finished||'')}<br>${esc(rA.run.note||'')}</div></div>
-        <div style="display:flex; align-items:center; justify-content:center; font-size:20px; color:var(--fg3)">→</div>
-        <div style="border:1px solid var(--line2); border-radius:var(--rad2); padding:14px 16px; background:var(--panel); box-shadow:var(--shadow)"><div style="font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--accent); margin-bottom:8px">Target (B)</div><select id="cmpB" style="width:100%; font-family:var(--fbody); font-size:13px; font-weight:600; color:var(--fg); background:var(--panel2); border:1px solid var(--line2); border-radius:var(--rad); padding:8px 10px; cursor:pointer">${runOpts.map((o,i)=>o.replace('<option ', `<option ${runs[i].run.id===S.cmpB?'selected ':''}`)).join('')}</select><div style="font-family:var(--fnum); font-size:11.5px; color:var(--fg3); margin-top:9px; line-height:1.5">${esc(rB.run.finished||'')}<br>${esc(rB.run.note||'')}</div></div>
-      </div>
-      <div style="display:flex; flex-wrap:wrap; gap:16px; align-items:center; justify-content:space-between; margin-bottom:14px">
-        <div style="display:flex; gap:26px; flex-wrap:wrap"><div style="display:flex; align-items:baseline; gap:7px"><span style="${css(bigNum(gainCol))}">${improved}</span><span style="font-size:11px; text-transform:uppercase; letter-spacing:.07em; color:var(--fg3)">improved</span></div><div style="display:flex; align-items:baseline; gap:7px"><span style="${css(bigNum('var(--warn)'))}">${regressed}</span><span style="font-size:11px; text-transform:uppercase; letter-spacing:.07em; color:var(--fg3)">regressed</span></div><div style="display:flex; align-items:baseline; gap:7px"><span style="${css(bigNum('var(--fg3)'))}">${flat}</span><span style="font-size:11px; text-transform:uppercase; letter-spacing:.07em; color:var(--fg3)">not significant</span></div></div>
-        <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center"><div style="display:flex; background:var(--panel2); border:1px solid var(--line); border-radius:var(--rad); padding:2px">${metricBtns}</div><div style="display:flex; background:var(--panel2); border:1px solid var(--line); border-radius:var(--rad); padding:2px">${levelBtns}</div></div>
-      </div>
-      <div style="border:1px solid var(--accent); border-radius:var(--rad2); padding:13px 16px; background:var(--panel2); margin-bottom:16px; font-size:13.5px; line-height:1.5; color:var(--fg)">${esc(headline)}</div>
-      <div style="border:1px solid var(--line); border-radius:var(--rad2); overflow:hidden; background:var(--panel); box-shadow:var(--shadow)">
-        <div style="display:grid; grid-template-columns:190px 64px minmax(0,1fr) 64px 92px; gap:14px; align-items:center; padding:10px 16px; background:var(--panel2); border-bottom:1px solid var(--line2)">
-          <div style="display:flex; align-items:center; gap:8px"><span style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--fg3)">Configuration</span>${sortBtns}</div>
-          <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--fg3); text-align:right">A</div>
-          <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--fg3); text-align:center">${fmt(cmpDom[0])} → ${fmt(cmpDom[1])}</div>
-          <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--fg3); text-align:right">B</div>
-          <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--fg3); text-align:right">Δ</div>
-        </div>${rowsHtml}
-      </div>
-      <div style="display:flex; gap:18px; flex-wrap:wrap; margin-top:12px; font-size:11.5px; font-family:var(--fnum); color:var(--fg2)"><span style="display:flex; align-items:center; gap:6px"><span style="width:9px;height:9px;border-radius:50%;border:2px solid var(--fg3);background:var(--panel);display:inline-block"></span>A (baseline)</span><span style="display:flex; align-items:center; gap:6px"><span style="width:11px;height:11px;border-radius:50%;background:var(--accent);display:inline-block"></span>B (target)</span><span style="color:var(--fg3)">Δ &amp; dot colour: teal = significant gain · amber = significant regression · grey = within CI (n.s.). Metrics without a CI (EmptyRate, ScoreAvg) are always n.s.</span></div>
-    </div>`;
+/* ============================ shared history / comparison render ============================ */
+function buildHistory(o){
+  const th=theme();const series=o.series,n=series.length,dpv=o.dpv;
+  const allLo=Math.min(...series.map(s=>s.mn)),allHi=Math.max(...series.map(s=>s.mx));
+  let yLo=allLo,yHi=allHi;const ypad=(yHi-yLo)*0.10||(o.severity?1:0.02);yLo-=ypad;yHi+=ypad;
+  const VW=1000,VH=320,PL=58,PR=20,PT=18,PB=46,IW=VW-PL-PR,IH=VH-PT-PB;
+  const X=i=>PL+(n<=1?IW/2:i*IW/(n-1)),Y=v=>PT+(1-clamp((v-yLo)/((yHi-yLo)||1),0,1))*IH;
+  const f1=v=>Number(v).toFixed(1);
+  const ptsLine=series.map((s,i)=>X(i)+','+f1(Y(s.line))).join(' ');
+  const ptsMean=series.map((s,i)=>X(i)+','+f1(Y(s.mean))).join(' ');
+  const ptsBand=series.map((s,i)=>X(i)+','+f1(Y(s.mx))).concat(series.map((s,i)=>X(i)+','+f1(Y(s.mn))).reverse()).join(' ');
+  const gridY=[0,1,2,3,4].map(i=>{const v=yLo+(yHi-yLo)*i/4;return {y:f1(Y(v)),label:fmt(v,dpv)};});
+  const dots=series.map((s,i)=>{const prev=i>0?series[i-1].line:null;const reg=prev!==null&&(o.better==='low'?s.line>prev+1e-9:s.line<prev-1e-9);return {cx:f1(X(i)),cy:f1(Y(s.line)),fill:reg?'var(--warn)':'var(--accent)',r:reg?'4.5':'3.5',title:s.run.finished.slice(0,10)+' · '+o.metricLabel+' '+fmt(s.line,dpv)};});
+  const xticks=series.map((s,i)=>({show:i%3===0||i===n-1,x:f1(X(i)),label:s.run.finished.slice(5,10)}));
+  const markers=o.markerIdx>0?[{x:f1(X(o.markerIdx)),lx:f1(X(o.markerIdx)-6),label:o.markerLabel}]:[];
+  const first=series[0].line,last=series[n-1].line,hdelta=last-first;
+  const peak=series.reduce((a,b)=>((o.better==='low'?b.line<a.line:b.line>a.line)?b:a));
+  const improved=series.filter((s,i)=>i>0&&(o.better==='low'?s.line<series[i-1].line:s.line>series[i-1].line)).length;
+  const cards=[
+    {k:'First run',v:fmt(first,dpv),sub:series[0].run.finished.slice(0,10),c:'var(--fg2)'},
+    {k:'Latest run',v:fmt(last,dpv),sub:series[n-1].run.finished.slice(0,10),c:'var(--fg)'},
+    {k:'Net change',v:(hdelta>=0?'+':'−')+fmt(Math.abs(hdelta),dpv),sub:'over '+n+' runs',c:(o.better==='low'?hdelta<0:hdelta>0)?th.ok:th.danger},
+    {k:'Peak',v:fmt(peak.line,dpv),sub:peak.run.finished.slice(0,10),c:'var(--accent)'},
+    {k:'Runs improved',v:improved+'/'+(n-1),sub:'vs previous run',c:'var(--fg)'}
+  ];
+  const tableRows=series.map((s,i)=>{const prev=i>0?series[i-1].line:null;const d=prev===null?null:s.line-prev;const up=d!==null&&(o.better==='low'?d<0:d>0);
+    return {date:s.run.finished.slice(0,16),c2:o.col2Of(s),val:fmt(s.line,dpv),note:s.run.note,latest:i===n-1,deltaS:d===null?'—':(d>=0?'+':'−')+fmt(Math.abs(d),dpv),deltaCol:d===null?'var(--fg3)':(up?th.ok:th.danger)};}).reverse();
+  return {VW,VH,PT,PB,ptsLine,ptsMean,ptsBand,gridY,dots,xticks,markers,cards,tableRows,
+    subtitle:o.subtitle,metricLabel:o.metricLabel,col2:o.col2,aggLabel:o.aggLabel,axisNote:o.axisNote,
+    hasLevels:!!o.hasLevels,levels:o.levels||[],aggs:o.aggs,metrics:o.metrics};
+}
+function renderHistory(h){
+  if(h.empty) return `<div><div style="font-family:var(--fhead);font-size:22px;font-weight:700;letter-spacing:-.01em;margin-bottom:18px">Run history</div><div style="border:1px solid var(--line);border-radius:2px;background:var(--panel);padding:46px 30px;text-align:center"><div style="font-size:24px;color:var(--fg3);margin-bottom:10px">⟲</div><div style="font-size:14px;color:var(--fg2);max-width:460px;margin:0 auto;line-height:1.55">${esc(h.message)}</div></div></div>`;
+  const aggBtns=h.aggs.map(a=>`<button data-act="${a.act}" data-val="${esc(a.val)}" style="${css(segBtn(a.on))}">${esc(a.label)}</button>`).join('');
+  const lvlBtns=h.hasLevels?`<div style="display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:2px;padding:2px">${h.levels.map(a=>`<button data-act="${a.act}" data-val="${esc(a.val)}" style="${css(segBtn(a.on))}">${esc(a.label)}</button>`).join('')}</div>`:'';
+  const metricBtns=h.metrics.map(a=>`<button data-act="${a.act}" data-val="${esc(a.val)}" style="${css(segBtn(a.on))}">${esc(a.label)}</button>`).join('');
+  const cards=h.cards.map(c=>`<div style="flex:1 1 150px;padding:14px 18px;border-right:1px solid var(--line)"><div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--fg3);margin-bottom:8px">${esc(c.k)}</div><div style="font-family:var(--fnum);font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1;color:${c.c}">${esc(c.v)}</div><div style="font-family:var(--fnum);font-size:11px;color:var(--fg3);margin-top:5px">${esc(c.sub)}</div></div>`).join('');
+  const svg = h.gridY.map(g=>`<line x1="${58}" y1="${g.y}" x2="${h.VW-20}" y2="${g.y}" stroke="var(--line)" stroke-width="1"/><text x="50" y="${g.y}" text-anchor="end" dominant-baseline="middle" font-size="12" fill="var(--fg3)">${esc(g.label)}</text>`).join('')
+    + h.markers.map(mk=>`<line x1="${mk.x}" y1="${h.PT}" x2="${mk.x}" y2="${h.VH-h.PB}" stroke="var(--accent)" stroke-width="1" stroke-dasharray="3 3" opacity="0.6"/><text x="${mk.lx}" y="${h.PT}" text-anchor="end" font-size="11" fill="var(--accent)" font-weight="700">${esc(mk.label)}</text>`).join('')
+    + `<polygon points="${h.ptsBand}" fill="var(--accent)" opacity="0.13"/><polyline points="${h.ptsMean}" fill="none" stroke="var(--fg3)" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.7"/><polyline points="${h.ptsLine}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round"/>`
+    + h.dots.map(d=>`<circle cx="${d.cx}" cy="${d.cy}" r="${d.r}" fill="${d.fill}" stroke="var(--panel)" stroke-width="1.5"><title>${esc(d.title)}</title></circle>`).join('')
+    + h.xticks.filter(x=>x.show).map(x=>`<text x="${x.x}" y="${h.VH-h.PB+18}" text-anchor="middle" font-size="11" fill="var(--fg3)">${esc(x.label)}</text>`).join('');
+  const hcols='120px 84px 88px 70px minmax(0,1fr)';
+  const tableRows=h.tableRows.map(r=>`<div style="display:grid;grid-template-columns:${hcols};gap:12px;align-items:center;padding:8px 16px;border-top:1px solid var(--line);background:${r.latest?'var(--panel2)':'transparent'}"><div style="font-family:var(--fnum);font-size:11.5px;color:var(--fg2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.date)}</div><div style="font-family:var(--fnum);font-size:11.5px;color:var(--fg3)">${esc(r.c2)}</div><div style="font-family:var(--fnum);font-size:13px;font-weight:700;color:var(--fg);text-align:right;font-variant-numeric:tabular-nums">${esc(r.val)}</div><div style="font-family:var(--fnum);font-size:12px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums;color:${r.deltaCol}">${esc(r.deltaS)}</div><div style="font-size:12px;color:var(--fg2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.note)}</div></div>`).join('');
+  return `<div>
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:18px"><div><div style="font-family:var(--fhead);font-size:22px;font-weight:700;letter-spacing:-.01em">Run history</div><div style="font-size:12.5px;color:var(--fg3);margin-top:3px;max-width:660px">${esc(h.subtitle)}</div></div><div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center"><div style="display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:2px;padding:2px">${aggBtns}</div>${lvlBtns}</div></div>
+    <div style="display:flex;align-items:center;gap:7px;margin-bottom:16px;flex-wrap:wrap"><span style="font-size:11px;color:var(--fg3);text-transform:uppercase;letter-spacing:.07em">Metric</span><div style="display:flex;flex-wrap:wrap;background:var(--panel2);border:1px solid var(--line);border-radius:2px;padding:2px;gap:2px">${metricBtns}</div></div>
+    <div style="display:flex;flex-wrap:wrap;gap:0;border:1px solid var(--line);border-radius:2px;overflow:hidden;background:var(--panel);margin-bottom:18px">${cards}</div>
+    <div style="border:1px solid var(--line);border-radius:2px;padding:18px 20px 10px;background:var(--panel);margin-bottom:18px"><div style="display:flex;gap:18px;align-items:center;margin-bottom:8px;font-size:12px;font-family:var(--fnum);color:var(--fg2);flex-wrap:wrap"><span style="display:flex;align-items:center;gap:6px"><span style="width:16px;height:3px;border-radius:2px;background:var(--accent);display:inline-block"></span>${esc(h.aggLabel)}</span><span style="display:flex;align-items:center;gap:6px"><span style="width:13px;height:11px;border-radius:2px;background:var(--accent);opacity:.16;display:inline-block"></span>spread</span><span style="display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:50%;background:var(--warn);display:inline-block"></span>regression vs prev</span><span style="margin-left:auto;color:var(--fg3)">${esc(h.axisNote)}</span></div><svg viewBox="0 0 ${h.VW} ${h.VH}" style="width:100%;height:auto;display:block;font-family:var(--fnum)">${svg}</svg></div>
+    <div style="border:1px solid var(--line);border-radius:2px;overflow:hidden;background:var(--panel)"><div style="display:grid;grid-template-columns:${hcols};gap:12px;align-items:center;padding:10px 16px;background:var(--panel2);border-bottom:1px solid var(--line2)"><div style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--fg3)">Run</div><div style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--fg3)">${esc(h.col2)}</div><div style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--fg3);text-align:right">${esc(h.metricLabel)}</div><div style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--fg3);text-align:right">Δ prev</div><div style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--fg3)">Change</div></div>${tableRows}</div>
+  </div>`;
+}
+function renderComparison(c){
+  if(c.empty) return `<div><div style="font-family:var(--fhead);font-size:22px;font-weight:700;letter-spacing:-.01em;margin-bottom:18px">Cross-run comparison</div><div style="border:1px solid var(--line);border-radius:2px;background:var(--panel);padding:46px 30px;text-align:center"><div style="font-size:24px;color:var(--fg3);margin-bottom:10px">⇄</div><div style="font-size:14px;color:var(--fg2);max-width:460px;margin:0 auto;line-height:1.55">${esc(c.message)}</div></div></div>`;
+  const metricBtns=c.metrics.map(a=>`<button data-act="${a.act}" data-val="${esc(a.val)}" style="${css(segBtn(a.on))}">${esc(a.label)}</button>`).join('');
+  const lvlBtns=c.hasLevels?`<div style="display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:2px;padding:2px">${c.levels.map(a=>`<button data-act="${a.act}" data-val="${esc(a.val)}" style="${css(segBtn(a.on))}">${esc(a.label)}</button>`).join('')}</div>`:'';
+  const opts=c.runOpts.map(o=>`<option value="${esc(o.id)}">${esc(o.label)}</option>`).join('');
+  const selA=c.runOpts.map(o=>`<option value="${esc(o.id)}" ${o.id===c.cmpA?'selected':''}>${esc(o.label)}</option>`).join('');
+  const selB=c.runOpts.map(o=>`<option value="${esc(o.id)}" ${o.id===c.cmpB?'selected':''}>${esc(o.label)}</option>`).join('');
+  const cgrid='minmax(0,1fr) 70px minmax(120px,1.1fr) 70px 92px';
+  const rows=c.rows.map(cr=>`<div style="display:grid;grid-template-columns:${cgrid};gap:14px;align-items:center;padding:9px 16px;border-top:1px solid var(--line)"><div style="display:flex;align-items:center;gap:8px;min-width:0"><span style="width:8px;height:8px;border-radius:2px;background:${cr.dotCol};display:inline-block;flex:none"></span><span style="font-size:12.5px;font-weight:600;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(cr.name)}</span></div><div style="font-family:var(--fnum);font-size:12.5px;color:var(--fg3);text-align:right;font-variant-numeric:tabular-nums">${esc(cr.aV)}</div><div style="position:relative;height:18px"><div style="position:absolute;top:8px;left:0;right:0;height:1px;background:var(--line2)"></div><div style="position:absolute;top:8px;height:3px;border-radius:2px;opacity:.5;left:${cr.connL}%;width:${cr.connW}%;background:${cr.col}"></div><div style="position:absolute;top:5px;width:9px;height:9px;border-radius:50%;border:2px solid var(--fg3);background:var(--panel);transform:translateX(-50%);left:${cr.aPos}%"></div><div style="position:absolute;top:4px;width:11px;height:11px;border-radius:50%;background:${cr.col};transform:translateX(-50%);left:${cr.bPos}%"></div></div><div style="font-family:var(--fnum);font-size:12.5px;color:var(--fg);font-weight:600;text-align:right;font-variant-numeric:tabular-nums">${esc(cr.bV)}</div><div style="text-align:right"><div style="font-family:var(--fnum);font-size:12.5px;font-weight:700;color:${cr.col};font-variant-numeric:tabular-nums">${esc(cr.deltaS)}</div><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:${cr.col}">${esc(cr.sigLabel)}</div></div></div>`).join('');
+  return `<div>
+    <div style="margin-bottom:18px"><div style="font-family:var(--fhead);font-size:22px;font-weight:700;letter-spacing:-.01em">Cross-run comparison</div><div style="font-size:12.5px;color:var(--fg3);margin-top:3px">${esc(c.subtitle)}</div></div>
+    <div style="display:grid;grid-template-columns:1fr 40px 1fr;gap:14px;align-items:stretch;margin-bottom:18px"><div style="border:1px solid var(--line);border-radius:2px;padding:14px 16px;background:var(--panel)"><div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--fg3);margin-bottom:8px">Baseline (A)</div><select id="cmpA" style="width:100%;font-family:var(--fbody);font-size:13px;font-weight:600;color:var(--fg);background:var(--panel2);border:1px solid var(--line2);border-radius:2px;padding:8px 10px;cursor:pointer">${selA}</select><div style="font-family:var(--fnum);font-size:11.5px;color:var(--fg3);margin-top:9px;line-height:1.5">${esc(c.metaA1)} · ${esc(c.metaA2)}<br>${esc(c.metaA3)}</div></div><div style="display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--fg3)">→</div><div style="border:1px solid var(--line2);border-radius:2px;padding:14px 16px;background:var(--panel)"><div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:8px">Target (B)</div><select id="cmpB" style="width:100%;font-family:var(--fbody);font-size:13px;font-weight:600;color:var(--fg);background:var(--panel2);border:1px solid var(--line2);border-radius:2px;padding:8px 10px;cursor:pointer">${selB}</select><div style="font-family:var(--fnum);font-size:11.5px;color:var(--fg3);margin-top:9px;line-height:1.5">${esc(c.metaB1)} · ${esc(c.metaB2)}<br>${esc(c.metaB3)}</div></div></div>
+    <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;margin-bottom:14px"><div style="display:flex;gap:26px;flex-wrap:wrap"><div style="display:flex;align-items:baseline;gap:7px"><span style="font-family:var(--fnum);font-size:22px;font-weight:700;color:${c.gainCol};font-variant-numeric:tabular-nums">${c.improved}</span><span style="font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--fg3)">improved</span></div><div style="display:flex;align-items:baseline;gap:7px"><span style="font-family:var(--fnum);font-size:22px;font-weight:700;color:var(--warn);font-variant-numeric:tabular-nums">${c.regressed}</span><span style="font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--fg3)">regressed</span></div><div style="display:flex;align-items:baseline;gap:7px"><span style="font-family:var(--fnum);font-size:22px;font-weight:700;color:var(--fg3);font-variant-numeric:tabular-nums">${c.flat}</span><span style="font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--fg3)">${esc(c.flatLabel)}</span></div></div><div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center"><div style="display:flex;flex-wrap:wrap;background:var(--panel2);border:1px solid var(--line);border-radius:2px;padding:2px;gap:2px">${metricBtns}</div>${lvlBtns}</div></div>
+    <div style="border:1px solid var(--accent);border-radius:2px;padding:13px 16px;background:var(--panel2);margin-bottom:16px;font-size:13.5px;line-height:1.5;color:var(--fg)">${esc(c.headline)}</div>
+    <div style="border:1px solid var(--line);border-radius:2px;overflow:hidden;background:var(--panel)"><div style="display:grid;grid-template-columns:${cgrid};gap:14px;align-items:center;padding:10px 16px;background:var(--panel2);border-bottom:1px solid var(--line2)"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--fg3)">${esc(c.rowNoun)}</div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--fg3);text-align:right">A</div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--fg3);text-align:center">${esc(c.domLo)} → ${esc(c.domHi)}</div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--fg3);text-align:right">B</div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--fg3);text-align:right">Δ</div></div>${rows}</div>
+    <div style="display:flex;gap:18px;flex-wrap:wrap;margin-top:12px;font-size:11.5px;font-family:var(--fnum);color:var(--fg2)"><span style="display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:50%;border:2px solid var(--fg3);background:var(--panel);display:inline-block"></span>A (baseline)</span><span style="display:flex;align-items:center;gap:6px"><span style="width:11px;height:11px;border-radius:50%;background:var(--accent);display:inline-block"></span>B (target)</span><span style="color:var(--fg3)">${esc(c.legendNote)}</span></div>
+  </div>`;
 }
 
-/* =========================================================================== */
-/* interactions                                                                */
-/* =========================================================================== */
+/* ============================ RETRIEVAL render (real data) ============================ */
+function renderRetrieval(){
+  const S=state,th=theme(),isDark=S.mode==='dark',mm=MM[S.rMetric],lvKey=S.rLevel;
+  const configs=R.configs,r=R.run;
+  /* verdict */
+  const win=configs.find(c=>c.id===R.winnerId)||configs[0];
+  const wc=win.levels.chunk.recall, ws=win.levels.section.recall;
+  const sorted=configs.slice().sort((a,b)=>b.levels.chunk.recall.v-a.levels.chunk.recall.v);
+  const runner=sorted[1]||sorted[0], rc=runner.levels.chunk.recall;
+  const overlap=wc.lo<=rc.hi&&rc.lo<=wc.hi;
+  const bigBadge=rt=>({...badge(rt),display:'inline-block',padding:'3px 9px',borderRadius:'2px',fontSize:'11px',fontWeight:'700'});
+  const smBadge=rt=>({...badge(rt),display:'inline-block',padding:'2px 8px',borderRadius:'2px',fontSize:'10.5px',fontWeight:'700'});
+  const sig=overlap?'Its 95% CI overlaps the runner-up '+runner.chunker+' × '+runner.rShort+' ('+fmt(rc.v)+'). On RecallAtR alone that gap is not statistically significant — use NDCG@10 and the failure profile to break the tie.':'Its 95% CI clears the runner-up '+runner.chunker+' × '+runner.rShort+' ('+fmt(rc.v)+'), so the lead is statistically meaningful at the 95% level.';
+  const gapText='A '+fmt(ws.v-wc.v)+' chunk→section gap means roughly '+Math.round((ws.v-wc.v)*100)+' in 100 wins land in the right note section but miss the exact passage — recoverable by expanding to the parent section at generation time.';
+  const verdictHtml=`<div style="display:grid;grid-template-columns:1.55fr 1fr;gap:18px;margin-bottom:34px"><div style="position:relative;border:1px solid var(--line2);border-radius:2px;padding:24px 26px;background:var(--panel);overflow:hidden"><div style="position:absolute;top:0;left:0;right:0;height:4px;background:var(--accent)"></div><div style="display:flex;align-items:center;gap:9px;margin-bottom:14px;flex-wrap:wrap"><span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--accent)">Recommended configuration</span><span style="font-size:11px;color:var(--fg3)">— ranked on RecallAtR, the primary coverage gate</span></div><div style="font-family:var(--fhead);font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1.05;margin-bottom:4px">${esc(win.chunker+' × '+win.rShort)}</div><div style="font-family:var(--fnum);font-size:12.5px;color:var(--fg3);margin-bottom:20px">${esc(win.chunker+' chunking + '+rerankerLong(win.reranker))}</div><div style="display:flex;gap:30px;flex-wrap:wrap;align-items:flex-end"><div><div style="font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--fg3);margin-bottom:4px">RecallAtR · chunk</div><div style="display:flex;align-items:baseline;gap:9px"><span style="font-family:var(--fnum);font-size:46px;font-weight:700;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums">${fmt(wc.v)}</span><span style="${css(bigBadge(wc.rating))}">${esc(wc.rating)}</span></div><div style="font-family:var(--fnum);font-size:12px;color:var(--fg2);margin-top:5px">95% CI [${fmt(wc.lo)}, ${fmt(wc.hi)}]</div></div><div style="padding-bottom:3px"><div style="font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--fg3);margin-bottom:4px">RecallAtR · section</div><div style="display:flex;align-items:baseline;gap:9px"><span style="font-family:var(--fnum);font-size:30px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;color:var(--fg2)">${fmt(ws.v)}</span><span style="${css(smBadge(ws.rating))}">${esc(ws.rating)}</span></div><div style="font-family:var(--fnum);font-size:12px;color:var(--fg2);margin-top:5px">95% CI [${fmt(ws.lo)}, ${fmt(ws.hi)}]</div></div></div></div><div style="display:flex;flex-direction:column;gap:12px"><div style="border:1px solid var(--line);border-radius:2px;padding:15px 17px;background:var(--panel)"><div style="display:flex;align-items:center;gap:8px;margin-bottom:7px"><span style="width:7px;height:7px;border-radius:50%;background:var(--warn);display:inline-block"></span><span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--fg2)">Read the uncertainty</span></div><div style="font-size:13px;line-height:1.5;color:var(--fg2)">${esc(sig)}</div></div><div style="border:1px solid var(--line);border-radius:2px;padding:15px 17px;background:var(--panel)"><div style="display:flex;align-items:center;gap:8px;margin-bottom:7px"><span style="width:7px;height:7px;border-radius:50%;background:var(--accent);display:inline-block"></span><span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--fg2)">Chunk vs. section</span></div><div style="font-size:13px;line-height:1.5;color:var(--fg2)">${esc(gapText)}</div></div></div></div>`;
+  /* matrix */
+  const vals=configs.map(c=>getM(c,S.rMetric).v);
+  let domLo=Math.min(...vals),domHi=Math.max(...vals);const pad=(domHi-domLo)*0.04||0.01;domLo-=pad;domHi+=pad;
+  const bestVal=mm.better==='low'?Math.min(...vals):Math.max(...vals);
+  const norm=v=>{const t=(v-domLo)/(domHi-domLo||1);return mm.better==='low'?1-t:t;};
+  const grpAvg=fn=>{const g={};configs.forEach(c=>{const k=fn(c);(g[k]=g[k]||[]).push(getM(c,S.rMetric).v);});const o={};Object.keys(g).forEach(k=>o[k]=g[k].reduce((a,b)=>a+b,0)/g[k].length);return o;};
+  const chAvg=grpAvg(c=>c.chunker),rrAvg=grpAvg(c=>c.reranker);
+  const betterSort=(a,b,avg)=>mm.better==='low'?(avg[a]-avg[b]):(avg[b]-avg[a]);
+  const chunkerNames=DATA.chunkers.slice().sort((a,b)=>betterSort(a,b,chAvg));
+  const rerankerNames=DATA.rerankers.slice().sort((a,b)=>betterSort(a,b,rrAvg));
+  const cols=rerankerNames.map(rr=>DATA.rShort[rr]||rr);
+  const nCols=rerankerNames.length, mgrid=`128px repeat(${nCols},1fr)`;
+  const headCols=cols.map(c=>`<div style="padding:11px 8px;text-align:center;font-size:11.5px;font-weight:700;color:var(--fg2);border-bottom:1px solid var(--line);border-left:1px solid var(--line)">${esc(c)}</div>`).join('');
+  const matrixRows=chunkerNames.map(ch=>{
+    const cells=rerankerNames.map(rr=>{const c=configs.find(x=>x.chunker===ch&&x.reranker===rr);if(!c)return '<div style="display:flex;align-items:center;justify-content:center;min-height:66px;border-left:1px solid var(--line);color:var(--fg3);font-family:var(--fnum)">—</div>';
+      const m=getM(c,S.rMetric),t=norm(m.v),isBest=Math.abs(m.v-bestVal)<1e-9;
+      const ciS=mm.ci!==false&&m.lo!=null?fmt(m.lo,3)+'–'+fmt(m.hi,3):(mm.better==='low'?m.rating:'');
+      const st={position:'relative',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:'15px 6px',minHeight:'66px',border:'none',borderLeft:'1px solid var(--line)',cursor:'pointer',background:heat(t),color:heatTxtOn(t),boxShadow:isBest?'inset 0 0 0 3px var(--accent)':'none'};
+      return `<button data-act="rDrill" data-val="${esc(c.id)}" title="${esc(c.chunker+' × '+c.rShort+' · '+mm.label+' '+fmt(m.v))}" style="${css(st)}"><span style="font-family:var(--fnum);font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1">${fmt(m.v)}</span><span style="font-family:var(--fnum);font-size:10px;opacity:.82;line-height:1;margin-top:3px">${esc(ciS)}</span>${isBest?'<span style="position:absolute;top:5px;right:7px;font-size:9px;font-weight:700;letter-spacing:.04em">BEST</span>':''}</button>`;
+    }).join('');
+    return `<div style="display:grid;grid-template-columns:${mgrid};border-top:1px solid var(--line)"><div style="padding:0 13px;display:flex;align-items:center;font-size:12.5px;font-weight:600;color:var(--fg)">${esc(ch)}</div>${cells}</div>`;
+  }).join('');
+  const bestReranker=rBestBy(configs,'reranker'),bestChunker=rBestBy(configs,'chunker');
+  const metricBtns=segGroup('rMetric',SELECTOR_METRICS.map(m=>({val:m.key,label:m.label,on:S.rMetric===m.key})));
+  const levelBtns=segGroup('rLevel',[['chunk','Chunk'],['section','Section']].map(([v,l])=>({val:v,label:l,on:S.rLevel===v})));
+  const matrixHtml=`<div style="margin-bottom:38px"><div style="display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:16px"><div><div style="font-family:var(--fhead);font-size:20px;font-weight:700;letter-spacing:-.01em">Comparison matrix</div><div style="font-size:12.5px;color:var(--fg3);margin-top:2px">${DATA.chunkers.length} chunkers × ${DATA.rerankers.length} rerankers · color = ${esc(mm.label)} (${lvKey})</div></div><div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center"><div style="display:flex;align-items:center;gap:7px"><span style="font-size:11px;color:var(--fg3);text-transform:uppercase;letter-spacing:.07em">Metric</span><div style="display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:2px;padding:2px">${metricBtns}</div></div><div style="display:flex;align-items:center;gap:7px"><span style="font-size:11px;color:var(--fg3);text-transform:uppercase;letter-spacing:.07em">Level</span><div style="display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:2px;padding:2px">${levelBtns}</div></div></div></div><div style="display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:20px;align-items:start"><div style="border:1px solid var(--line);border-radius:2px;overflow:hidden;background:var(--panel)"><div style="display:grid;grid-template-columns:${mgrid}"><div style="padding:11px 13px;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--fg3);border-bottom:1px solid var(--line)">Chunker ↓ / Reranker →</div>${headCols}</div>${matrixRows}</div><div style="display:flex;flex-direction:column;gap:14px;padding-top:2px"><div><div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--fg3);margin-bottom:7px">Scale · worse → better</div><div style="height:12px;border-radius:3px;background:${heatGradient()};border:1px solid var(--line)"></div><div style="display:flex;justify-content:space-between;font-family:var(--fnum);font-size:11px;color:var(--fg2);margin-top:5px;font-variant-numeric:tabular-nums"><span>${fmt(mm.better==='low'?domHi:domLo)}</span><span>${fmt(mm.better==='low'?domLo:domHi)}</span></div></div><div style="border-top:1px dashed var(--line2);padding-top:12px;display:flex;flex-direction:column;gap:9px"><div style="display:flex;gap:8px"><span style="color:var(--accent);font-weight:700">▸</span><span style="font-size:12px;color:var(--fg2);line-height:1.45">Click any cell to load that configuration into the drill-down below.</span></div><div style="display:flex;gap:8px"><span style="color:var(--accent);font-weight:700">▸</span><span style="font-size:12px;color:var(--fg2);line-height:1.45">On ${esc(mm.label)}, ${esc(bestReranker)} is the strongest reranker on average and ${esc(bestChunker)} the strongest chunker.</span></div></div></div></div></div>`;
+  /* table */
+  const tcols=[{key:'label',label:'Configuration',sub:'',config:true}].concat(METRICS.map(m=>({key:m.key,label:m.label,sub:m.sub,bar:m.bar,gate:m.gate,kind:m.kind})));
+  const tGrid='minmax(190px,1.5fr) 130px 130px 76px 74px 78px 92px 86px 46px';
+  const sval=c=>{const k=S.rSortKey;if(k==='label')return c.chunker+' '+c.reranker;const v=c.levels[lvKey][k];return (v&&typeof v==='object')?v.v:v;};
+  const tsorted=configs.slice().sort((a,b)=>{const x=sval(a),y=sval(b);const cmp=typeof x==='string'?x.localeCompare(y):x-y;return S.rSortDir==='asc'?cmp:-cmp;});
+  const barDom={};METRICS.filter(m=>m.bar).forEach(m=>{const all=configs.flatMap(c=>[c.levels[lvKey][m.key].lo,c.levels[lvKey][m.key].hi]);barDom[m.key]=[Math.min(...all)-0.01,Math.max(...all)+0.01];});
+  const ciStyle=(m,dom,op)=>`position:absolute;top:3px;height:3px;border-radius:2px;background:var(--fg3);opacity:${op};left:${(m.lo-dom[0])/((dom[1]-dom[0])||1)*100}%;width:${Math.max(0,((m.hi-m.lo)/((dom[1]-dom[0])||1)*100))}%`;
+  const dotStyle=(m,dom,col)=>`position:absolute;top:1px;width:7px;height:7px;border-radius:50%;transform:translateX(-50%);background:${col};left:${(m.v-dom[0])/((dom[1]-dom[0])||1)*100}%`;
+  const headCells=tcols.map(col=>{const on=S.rSortKey===col.key,arrow=on?(S.rSortDir==='asc'?'▲':'▼'):'',right=col.config?'flex-start':'flex-end';
+    const st={padding:'10px 14px',display:'flex',flexDirection:'column',alignItems:right,justifyContent:'center',fontSize:'11px',fontWeight:'700',textTransform:'uppercase',letterSpacing:'.05em',color:on?'var(--fg)':'var(--fg3)',cursor:'pointer',whiteSpace:'nowrap',userSelect:'none',background:'var(--panel2)'};
+    return `<div data-act="rSort" data-val="${col.key}" style="${css(st)}"><span style="display:inline-flex;align-items:center;gap:4px">${esc(col.label)}<span style="font-size:9px;color:var(--accent)">${arrow}</span></span><span style="font-family:var(--fnum);font-size:9px;font-weight:400;color:var(--fg3);margin-top:2px">${esc(col.sub)}</span></div>`;
+  }).join('');
+  const gridRows=tsorted.map(c=>{const lv=c.levels[lvKey],isW=c.id===R.winnerId;
+    const cells=tcols.map(col=>{
+      if(col.config)return `<div style="display:flex;align-items:center;gap:8px;padding:10px 14px;white-space:nowrap;overflow:hidden"><span style="width:8px;height:8px;border-radius:2px;flex:none;display:inline-block;background:${ratingColor(lv[GATE].rating)}"></span><span style="font-size:13px;font-weight:600;color:var(--fg)">${esc(c.chunker)}</span><span style="font-size:12px;color:var(--fg3)">×</span><span style="font-family:var(--fnum);font-size:12px;color:var(--fg2)">${esc(c.rShort)}</span>${isW?'<span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px;background:var(--accent);color:var(--accentFg)">WIN</span>':''}</div>`;
+      if(col.bar){const m=lv[col.key],g=col.gate,dom=barDom[col.key],bg=g?`background:${tint(m.rating)};`:'';
+        return `<div style="padding:8px 14px;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:4px;${bg}"><span style="font-family:var(--fnum);font-size:13.5px;font-weight:${g?'700':'600'};color:${g?'var(--fg)':'var(--fg2)'}">${fmt(m.v)}</span><div style="position:relative;width:104px;height:9px"><div style="position:absolute;top:4px;left:0;right:0;height:1px;background:var(--line2)"></div><div style="${ciStyle(m,dom,g?0.6:0.5)}"></div><div style="${dotStyle(m,dom,g?'var(--accent)':'var(--fg2)')}"></div></div></div>`;}
+      const raw=lv[col.key],v=col.kind==='count'?String(raw):fmt((raw&&typeof raw==='object')?raw.v:raw);
+      const c2=col.kind==='score'||col.kind==='count'?'var(--fg3)':'var(--fg2)',sz=col.kind==='count'?'12px':'13px';
+      return `<div style="padding:10px 14px;text-align:right;font-family:var(--fnum);font-size:${sz};color:${c2};font-variant-numeric:tabular-nums">${v}</div>`;
+    }).join('');
+    return `<div data-act="rDrill" data-val="${esc(c.id)}" style="display:grid;grid-template-columns:${tGrid};align-items:center;border-top:1px solid var(--line);cursor:pointer;background:${S.rDrillCfg===c.id?'var(--panel2)':'transparent'}">${cells}</div>`;
+  }).join('');
+  const labelOf=k=>{const m=MM[k];return m?m.label:(k==='label'?'configuration':k);};
+  const tableHtml=`<div style="margin-bottom:38px"><div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px"><div><div style="font-family:var(--fhead);font-size:20px;font-weight:700;letter-spacing:-.01em">All ${configs.length} configurations</div><div style="font-size:12.5px;color:var(--fg3);margin-top:2px">${lvKey}-level · sorted by ${esc(labelOf(S.rSortKey))} · click a header to re-sort</div></div></div><div style="border:1px solid var(--line);border-radius:2px;overflow:hidden;background:var(--panel)"><div style="overflow-x:auto"><div style="min-width:1000px"><div style="display:grid;grid-template-columns:${tGrid};border-bottom:1px solid var(--line2)">${headCells}</div>${gridRows}</div></div></div></div>`;
+  /* dumbbell */
+  const dsorted=configs.slice().sort((a,b)=>b.levels.section.recall.v-a.levels.section.recall.v);
+  const dvals=configs.flatMap(c=>[c.levels.chunk.recall.v,c.levels.section.recall.v]);const dom=[Math.min(...dvals)-0.02,Math.max(...dvals)+0.02];const dp=v=>((v-dom[0])/((dom[1]-dom[0])||1)*100);
+  const dumbRows=dsorted.map(c=>{const ch=c.levels.chunk.recall.v,se=c.levels.section.recall.v,gap=se-ch;
+    return `<div style="display:grid;grid-template-columns:188px minmax(0,1fr) 72px;gap:14px;align-items:center;padding:5px 0"><div style="font-size:12.5px;color:var(--fg2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(c.chunker+' × '+c.rShort)}</div><div style="position:relative;height:18px"><div style="position:absolute;top:8px;left:0;right:0;height:1px;background:var(--line2)"></div><div style="position:absolute;top:7px;height:3px;border-radius:2px;background:var(--accent);opacity:.32;left:${dp(Math.min(ch,se))}%;width:${Math.abs(dp(se)-dp(ch))}%"></div><div style="position:absolute;top:4px;width:11px;height:11px;border-radius:50%;border:2px solid var(--fg2);background:var(--panel);transform:translateX(-50%);left:${dp(ch)}%"></div><div style="position:absolute;top:3px;width:13px;height:13px;border-radius:50%;background:var(--accent);transform:translateX(-50%);left:${dp(se)}%"></div></div><div style="font-family:var(--fnum);font-size:12.5px;text-align:right;font-variant-numeric:tabular-nums;color:${gap>0.1?'var(--warn)':'var(--fg2)'};font-weight:${gap>0.1?'700':'500'}">+${fmt(gap)}</div></div>`;
+  }).join('');
+  const dumbHtml=`<div style="margin-bottom:38px"><div style="margin-bottom:14px"><div style="font-family:var(--fhead);font-size:20px;font-weight:700;letter-spacing:-.01em">Chunk vs. section gap — RecallAtR</div><div style="font-size:12.5px;color:var(--fg3);margin-top:2px">A wide gap means retrieval finds the right note section but misses the exact chunk.</div></div><div style="border:1px solid var(--line);border-radius:2px;padding:18px 22px;background:var(--panel)"><div style="display:flex;gap:18px;align-items:center;margin-bottom:14px;font-size:12px;font-family:var(--fnum);color:var(--fg2);flex-wrap:wrap"><span style="display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:50%;border:2px solid var(--fg2);background:var(--panel);display:inline-block"></span>chunk</span><span style="display:flex;align-items:center;gap:6px"><span style="width:11px;height:11px;border-radius:50%;background:var(--accent);display:inline-block"></span>section</span><span style="margin-left:auto;color:var(--fg3)">axis: ${fmt(dom[0])} → ${fmt(dom[1])}</span></div>${dumbRows}</div></div>`;
+  /* drill (REAL per-case data reshaped) */
+  const cfg=configs.find(c=>c.id===S.rDrillCfg)||win;
+  const pc=R.perCase[cfg.id]||[];
+  const items=pc.map(rec=>{
+    const def=R.cases[rec.id]||{query:'',difficulty:null,expected:[]};
+    const expected=def.expected||[],retrieved=(rec.r||[]).map(parseLabel),N=expected.length,budget=retrieved.slice(0,Math.max(N,1));
+    let heur=expected.map(e=>budget.some(rr=>matchExp(e,rr)));
+    const recallV=(rec.dm&&rec.dm.recall&&rec.dm.recall.v!=null)?rec.dm.recall.v:null;
+    if(recallV!=null&&N>0){let want=Math.round(recallV*N),have=heur.filter(Boolean).length;for(let i=heur.length-1;i>=0&&have>want;i--){if(heur[i]){heur[i]=false;have--;}}for(let i=0;i<heur.length&&have<want;i++){if(!heur[i]){heur[i]=true;have++;}}}
+    const evidence=expected.map((e,i)=>({note:e.note,heading:e.heading,found:heur[i]}));
+    const foundExp=evidence.filter(e=>e.found),isMatch=x=>foundExp.some(e=>matchExp(e,x));
+    const matched=evidence.filter(e=>e.found).length;
+    const th2=theme();
+    const metricDetail=DETAIL_METRICS.map(spec=>{const m=rec.dm[spec.key]||{v:null,rt:'Unknown',in:''};
+      const failed=(spec.key===GATE)?!rec.p:(m.rt==='Poor'||m.rt==='Unacceptable');
+      let context=[],diagnostics=[];
+      if(spec.key===GATE){context=[{label:'expected:',text:expected.map(e=>e.note+(e.heading?'#'+e.heading:'')).join(' · ')||'—'}];if(failed)diagnostics=[{severity:'warning',message:(N-matched)+' expected evidence chunk(s) not credited within the top-'+N+' budget.'}];}
+      if(spec.key==='map'&&rec.diag&&rec.diag[0]!=null&&rec.diag[1]!=null)diagnostics=[{severity:'informational',message:'Credited score avg '+fmt(rec.diag[0],3)+' vs uncredited '+fmt(rec.diag[1],3)+' (gap '+fmt(rec.diag[0]-rec.diag[1],3)+').'}];
+      return buildMetricCard({key:spec.key,name:spec.label,group:'Retrieval',info:false,value:m.v,valStr:fmt(m.v),rating:m.rt,failed,kindLabel:'numeric 0–1',reason:m.in,context,diagnostics,metadata:[{k:'judge',v:'snippet-match'},{k:'n',v:'1 query'},{k:'cutoff',v:'top-'+Math.max(N,10)}]});
+    });
+    const roleQ={fontFamily:'var(--fnum)',fontSize:'10px',fontWeight:'700',letterSpacing:'.06em',textTransform:'uppercase',padding:'1px 7px',borderRadius:'2px',background:hexTint(th2.accent,state.mode==='dark'?0.18:0.12),color:'var(--fg)',border:'1px solid var(--line2)'};
+    const messages=[{role:'query',isTool:false,tool:'',text:def.query||'',roleStyle:roleQ,wrap:{border:'1px solid var(--line)',borderRadius:'2px',padding:'10px 12px',background:'var(--panel2)'},bodyStyle:{fontSize:'12.5px',lineHeight:'1.5',color:'var(--fg2)'}}];
+    retrieved.slice(0,10).forEach((x,i)=>{const match=isMatch(x);const disp='[['+(x.head?x.note+'#'+x.head:x.note)+']]';
+      messages.push({role:'rank '+String(i+1).padStart(2,'0'),isTool:true,tool:match?'✓ credited':'',text:disp,
+        roleStyle:{fontFamily:'var(--fnum)',fontSize:'10px',fontWeight:'700',letterSpacing:'.04em',padding:'1px 7px',borderRadius:'2px',background:match?hexTint(th2.ok,state.mode==='dark'?0.18:0.12):'var(--panel2)',color:match?th2.ok:'var(--fg3)',border:'1px solid '+(match?hexTint(th2.ok,0.4):'var(--line)')},
+        wrap:{border:'1px solid '+(match?hexTint(th2.ok,0.5):'var(--line)'),borderRadius:'2px',padding:'7px 11px',background:match?hexTint(th2.ok,state.mode==='dark'?0.10:0.06):'var(--panel)'},
+        bodyStyle:{fontFamily:'var(--fnum)',fontSize:'11.5px',color:match?'var(--fg)':'var(--fg2)'}});});
+    const chips=metricDetail.map(d=>({label:d.name.replace('@10','').replace('AtR','@R').replace('Rate@1','@1'),title:d.name+': '+d.valStr+' ('+d.rating+')',style:{fontFamily:'var(--fnum)',fontSize:'10px',fontWeight:'700',padding:'2px 6px',borderRadius:'2px',background:ratingColor(d.rating),color:ratingTextOn(d.rating)}}));
+    return {id:rec.id,pass:rec.p,diff:def.difficulty,searchText:(def.query||'')+' '+expected.map(e=>e.note).join(' ')+' '+retrieved.map(x=>x.raw).join(' '),
+      title:def.query||rec.id,subtitle:'Expected evidence: '+(expected.map(e=>e.note+(e.heading?'#'+e.heading:'')).join(' · ')||'—'),
+      chips,chipNote:matched+'/'+N+' evidence found',metricCount:metricDetail.length,metricDetail,messages,convLabel:'Query & retrieved evidence'};
+  });
+  const drillHtml=assembleDrill(items,{title:'Per-query retrieval trace',subtitle:'Metrics, judge reasoning, expected evidence and diagnostics on the left; the query and ranked retrieved chunks on the right.',noun:'queries',searchPlaceholder:'Search queries or evidence notes…',hasConfig:true,configValue:S.rDrillCfg,configOptions:configs.map(c=>({id:c.id,label:c.chunker+' × '+c.rShort+'  ·  RecallAtR '+fmt(c.levels.chunk.recall.v)})),methodology:"Methodology — point estimates, ratings and per-metric interpretation are read verbatim from the run's stored results; pass/fail is the store's authoritative RecallAtR fail flag. Found evidence is reconciled to the RecallAtR count; matching is a heuristic note(+heading) comparison from citation labels (headingless chunkers match on note alone). Switch the configuration above to inspect any of the "+configs.length+" pipelines."});
+  /* history */
+  const runs=R.runs,hKey=S.rHistMetric,hmd=MM[hKey];
+  const getHM=(rn,cid)=>{const c=rn.configs.find(x=>x.id===cid);if(!c)return null;const lv=c.levels[S.rHistLevel][hKey];return (lv&&typeof lv==='object')?lv.v:lv;};
+  const hruns=runs.slice().sort((a,b)=>(a.run.finished||'')<(b.run.finished||'')?-1:1);
+  const series=hruns.map(rn=>{const v=configs.map(c=>getHM(rn,c.id)).filter(x=>x!=null&&!isNaN(x));if(!v.length)return {run:rn.run,mn:0,mx:0,mean:0,line:0};const mn=Math.min(...v),mx=Math.max(...v),mean=v.reduce((a,b)=>a+b,0)/v.length,best=hmd.better==='low'?mn:mx;return {run:rn.run,mn,mx,mean,line:S.rHistAgg==='mean'?mean:best};});
+  const embIdx=hruns.findIndex(rn=>/large/i.test(rn.run.emb||''));
+  const histVM=buildHistory({series,dpv:3,better:hmd.better,metricLabel:hmd.label,markerIdx:embIdx,markerLabel:'→ 3-large',col2:'Embed',col2Of:s=>(s.run.emb||'—').replace('text-embedding-3-',''),hasLevels:true,
+    aggLabel:S.rHistAgg==='mean'?'mean across all 12 configs':'best config per run',axisNote:hmd.better==='low'?'lower is better':'higher is better',
+    levels:[['chunk','Chunk'],['section','Section']].map(([v,l])=>({act:'rHistLevel',val:v,label:l,on:S.rHistLevel===v})),
+    aggs:[['best','Best config'],['mean','Mean of 12']].map(([v,l])=>({act:'rHistAgg',val:v,label:l,on:S.rHistAgg===v})),
+    metrics:SELECTOR_METRICS.map(m=>({act:'rHistMetric',val:m.key,label:m.label,on:hKey===m.key})),
+    subtitle:'Per-run '+hmd.label+' ('+S.rHistLevel+'-level) across '+hruns.length+' evaluation run'+(hruns.length===1?'':'s')+'. Solid line = '+(S.rHistAgg==='mean'?'mean of all 12 configs':'best config')+'; shaded band = min–max spread across the 12 configs.'});
+  /* comparison */
+  const cmpVM=buildRetrievalComparison();
+  return {headerTitle:'RAG.Search',headerTag:'Retrieval metrics',demo:false,
+    headerSubtitle:(R.run.dataset||'shared dataset')+' · '+r.cases+' queries · '+r.configs+' configs'+(r.topK?' · top-K '+r.topK:''),
+    runHtml:verdictHtml+matrixHtml+tableHtml+dumbHtml+drillHtml,history:histVM,comparison:cmpVM};
+}
+function rBestBy(configs,dim){const groups={},key=state.rMetric,low=MM[key]&&MM[key].better==='low';configs.forEach(c=>{const g=dim==='reranker'?c.rShort:c.chunker;const v=c.levels[state.rLevel][key].v;(groups[g]=groups[g]||[]).push(v);});let best=null,bv=-Infinity;Object.keys(groups).forEach(g=>{const avg=groups[g].reduce((a,b)=>a+b,0)/groups[g].length;const sc=low?-avg:avg;if(sc>bv){bv=sc;best=g;}});return best;}
+function buildRetrievalComparison(){
+  const S=state,th=theme(),isDark=S.mode==='dark',configs=R.configs,runs=R.runs;
+  const runOpts=runs.map(rn=>({id:rn.run.id,label:(rn.run.finished||'').slice(0,10)+' · '+(rn.run.note||rn.run.id)}));
+  const rA=runs.find(rn=>rn.run.id===S.rCmpA)||runs[0],rB=runs.find(rn=>rn.run.id===S.rCmpB)||runs[runs.length-1];
+  const cKey=S.rCmpMetric,mmC=MM[cKey],cLow=mmC.better==='low';
+  const getCM=(rn,cid)=>{const c=rn.configs.find(x=>x.id===cid);if(!c)return null;const v=c.levels[S.rCmpLevel][cKey];return (v&&typeof v==='object')?v:{v};};
+  const cvals=[];configs.forEach(c=>{const a=getCM(rA,c.id),b=getCM(rB,c.id);if(a)cvals.push(a.v);if(b)cvals.push(b.v);});
+  const dom=[Math.min(...cvals)-0.02,Math.max(...cvals)+0.02];const dp=v=>clamp((v-dom[0])/((dom[1]-dom[0])||1),0,1)*100;
+  const gainCol=heat(isDark?0.78:0.5);
+  let data=configs.map(c=>{const a=getCM(rA,c.id),b=getCM(rB,c.id);if(!a||!b)return null;const delta=b.v-a.v;const haveCI=(a.lo!=null&&b.lo!=null);const ov=haveCI?(a.lo<=b.hi&&b.lo<=a.hi):true;const improved=cLow?delta<0:delta>0;const sig=haveCI&&!ov&&Math.abs(delta)>1e-9;const col=!sig?'var(--fg3)':(improved?gainCol:'var(--warn)');
+    return {name:c.chunker+' × '+c.rShort,delta,col,dotCol:ratingColor(b.rating||rate(b.v)),aV:fmt(a.v),bV:fmt(b.v),deltaS:(delta>=0?'+':'−')+fmt(Math.abs(delta)),sigLabel:sig?(improved?'improved':'regressed'):'n.s.',sig,improved,
+      aPos:dp(a.v),bPos:dp(b.v),connL:Math.min(dp(a.v),dp(b.v)),connW:Math.abs(dp(b.v)-dp(a.v))};}).filter(Boolean);
+  const imp=data.filter(d=>d.sig&&d.improved).length,reg=data.filter(d=>d.sig&&!d.improved).length,flat=data.length-imp-reg;
+  data.sort((x,y)=>(cLow?1:-1)*(y.delta-x.delta));
+  return {subtitle:'How each configuration moved between two evaluation runs. Overlapping confidence intervals are flagged n.s. (not significant).',
+    runOpts,cmpA:S.rCmpA,cmpB:S.rCmpB,gainCol,rowNoun:'Configuration',rows:data,improved:imp,regressed:reg,flat,flatLabel:'not significant',
+    metaA1:(rA.run.emb||'—').replace('text-embedding-3-','3-'),metaA2:(rA.run.finished||'').slice(0,10),metaA3:rA.run.note||'',
+    metaB1:(rB.run.emb||'—').replace('text-embedding-3-','3-'),metaB2:(rB.run.finished||'').slice(0,10),metaB3:rB.run.note||'',
+    domLo:fmt(dom[0]),domHi:fmt(dom[1]),
+    metrics:SELECTOR_METRICS.map(m=>({act:'rCmpMetric',val:m.key,label:m.label,on:S.rCmpMetric===m.key})),
+    hasLevels:true,levels:[['chunk','Chunk'],['section','Section']].map(([v,l])=>({act:'rCmpLevel',val:v,label:l,on:S.rCmpLevel===v})),
+    legendNote:'teal = significant gain · amber = significant regression · grey = within CI (n.s.)',
+    headline:'On '+mmC.label+' ('+S.rCmpLevel+'-level), '+imp+' of '+data.length+' configurations improved significantly, '+reg+' regressed, and '+flat+' changed within noise.'};
+}
+
+/* ============================ JUDGE render (mock, generic over categories) ============================ */
+function renderJudge(spec){
+  const S=state,th=theme(),isDark=S.mode==='dark';
+  const defs=spec.metricDefs,judged=defs.filter(m=>!m.info),scenarios=spec.scenarios,r=spec.run;
+  const passN=scenarios.filter(s=>s.pass).length,failN=scenarios.length-passN,passPct=Math.round(passN/scenarios.length*100);
+  const ratingCounts={};RATINGS().forEach(rt=>ratingCounts[rt]=0);let totalCells=0;
+  scenarios.forEach(s=>judged.forEach(md=>{ratingCounts[s.metrics[md.key].rating]++;totalCells++;}));
+  const gateBar=RATINGS().map(rt=>`<div style="width:${ratingCounts[rt]/totalCells*100}%;background:${ratingColor(rt)}" title="${rt}: ${ratingCounts[rt]}"></div>`).join('');
+  const gateLegend=RATINGS().map(rt=>`<div style="display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:2px;background:${ratingColor(rt)};display:inline-block"></span><span style="font-size:11px;color:var(--fg2)">${rt}</span><span style="font-family:var(--fnum);font-size:11px;color:var(--fg3)">${ratingCounts[rt]}</span></div>`).join('');
+  const gateRating=passPct>=85?'Good':passPct>=65?'Average':'Poor';
+  const failedCells=scenarios.reduce((acc,s)=>acc+judged.filter(md=>s.metrics[md.key].failed).length,0);
+  const meanOf=key=>{const a=scenarios.map(s=>s.metrics[key].value);return a.reduce((x,y)=>x+y,0)/a.length;};
+  const meanMetrics=judged.filter(m=>m.kind==='score').slice(0,4);
+  const summaryCards=[{k:'Pass rate',v:passPct+'%',sub:passN+' of '+scenarios.length,c:passPct>=85?th.ok:passPct>=65?'var(--fg)':th.danger},{k:'Failed values',v:String(failedCells),sub:'of '+totalCells+' judged',c:failedCells?th.danger:th.ok},...meanMetrics.map(md=>({k:'Mean '+md.name,v:fmt(meanOf(md.key),2),sub:'1–5 scale',c:'var(--fg)'}))]
+    .map(c=>`<div style="flex:1 1 33%;min-width:120px;padding:15px 17px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)"><div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--fg3);margin-bottom:8px">${esc(c.k)}</div><div style="font-family:var(--fnum);font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1;color:${c.c}">${esc(c.v)}</div><div style="font-family:var(--fnum);font-size:11px;color:var(--fg3);margin-top:5px">${esc(c.sub)}</div></div>`).join('');
+  const ratingLegend=RATINGS().map(rt=>`<div style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:2px;background:${ratingColor(rt)};display:inline-block"></span><span style="font-size:11px;color:var(--fg2)">${rt}</span></div>`).join('');
+  const gateHtml=`<div style="display:grid;grid-template-columns:1.1fr 1.6fr;gap:18px;margin-bottom:34px"><div style="position:relative;border:1px solid var(--line2);border-radius:2px;padding:22px 24px;background:var(--panel);overflow:hidden"><div style="position:absolute;top:0;left:0;right:0;height:4px;background:var(--accent)"></div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);margin-bottom:14px">Evaluation gate</div><div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--fnum);font-size:50px;font-weight:700;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums">${passPct}%</span><span style="${css({display:'inline-block',padding:'3px 9px',borderRadius:'2px',fontSize:'11px',fontWeight:'700',...badge(gateRating)})}">${passN}/${scenarios.length} pass</span></div><div style="font-family:var(--fnum);font-size:12.5px;color:var(--fg3);margin-top:8px">${failN} ${spec.unit.replace(/s$/,'')}${failN===1?'':'s'} tripped a failure threshold across ${totalCells} judged metric values.</div><div style="display:flex;height:9px;border-radius:5px;overflow:hidden;margin-top:16px;border:1px solid var(--line)">${gateBar}</div><div style="display:flex;flex-wrap:wrap;gap:10px 16px;margin-top:13px">${gateLegend}</div></div><div style="display:flex;flex-wrap:wrap;gap:0;border:1px solid var(--line);border-radius:2px;overflow:hidden;background:var(--panel);align-content:flex-start">${summaryCards}</div></div>`;
+  /* overview */
+  const overview=judged.map(md=>{const ms=scenarios.map(s=>s.metrics[md.key]);const counts={};RATINGS().forEach(rt=>counts[rt]=0);ms.forEach(m=>counts[m.rating]++);
+    const segs=RATINGS().map(rt=>`<div style="width:${counts[rt]/ms.length*100}%;background:${ratingColor(rt)}" title="${rt}: ${counts[rt]}"></div>`).join('');
+    const mean=ms.reduce((a,m)=>a+m.value,0)/ms.length,passRate=Math.round(ms.filter(m=>!m.failed).length/ms.length*100),meanS=md.kind==='fraction'?fmt(mean,2):fmt(mean,1);
+    return `<div style="display:grid;grid-template-columns:188px 78px minmax(0,1fr) 116px;gap:16px;align-items:center;padding:11px 18px;border-top:1px solid var(--line)"><div style="min-width:0"><div style="display:flex;align-items:center;gap:7px"><span style="width:8px;height:8px;border-radius:50%;background:${groupColor(md.group)};display:inline-block;flex:none"></span><span style="font-size:13px;font-weight:600;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(md.name)}</span><span title="${esc(md.desc)}" style="flex:none;width:14px;height:14px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line2);border-radius:50%;font-size:9px;color:var(--fg3);cursor:help">?</span></div><div style="font-family:var(--fnum);font-size:10.5px;color:var(--fg3);margin-top:3px">${esc(md.scaleLabel)}</div></div><div style="font-family:var(--fnum);font-size:18px;font-weight:700;color:var(--fg);text-align:right;font-variant-numeric:tabular-nums">${meanS}</div><div style="display:flex;height:13px;border-radius:4px;overflow:hidden;border:1px solid var(--line)">${segs}</div><div style="font-family:var(--fnum);font-size:12px;font-weight:700;text-align:right;color:${passRate>=85?th.ok:passRate>=60?'var(--fg2)':th.danger};font-variant-numeric:tabular-nums">${passRate}% pass</div></div>`;
+  }).join('');
+  const overviewHtml=`<div style="margin-bottom:38px"><div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:16px"><div><div style="font-family:var(--fhead);font-size:20px;font-weight:700;letter-spacing:-.01em">Metric overview</div><div style="font-size:12.5px;color:var(--fg3);margin-top:2px">Every metric the report carries — rating distribution across ${scenarios.length} items. Rendered straight from the result set.</div></div><div style="display:flex;gap:18px;flex-wrap:wrap;align-items:center">${ratingLegend}</div></div><div style="border:1px solid var(--line);border-radius:2px;overflow:hidden;background:var(--panel)">${overview}</div></div>`;
+  /* heat strips */
+  const visMetrics=S.jGroup==='all'?judged:judged.filter(m=>m.group.toLowerCase()===S.jGroup);
+  let order=scenarios.slice();
+  if(S.jSortKey==='__name')order.sort((a,b)=>S.jSortDir==='asc'?a.name.localeCompare(b.name):b.name.localeCompare(a.name));
+  else if(S.jSortKey==='__fail')order.sort((a,b)=>(b.failCount-a.failCount)||a.name.localeCompare(b.name));
+  else order.sort((a,b)=>{const x=a.metrics[S.jSortKey].good,y=b.metrics[S.jSortKey].good;return S.jSortDir==='asc'?x-y:y-x;});
+  const arrowFor=k=>S.jSortKey===k?(S.jSortDir==='asc'?'▲':'▼'):'';
+  const sortControls=segGroup('jSort',[['__fail','Most failures'],['__name','Name']].map(([v,l])=>({val:v,label:l,on:S.jSortKey===v})));
+  const sortNote=S.jSortKey==='__name'?'ordered by name':S.jSortKey==='__fail'?'ordered by failure count':'ordered by '+((defs.find(m=>m.key===S.jSortKey)||{}).name)+' '+(S.jSortDir==='asc'?'(worst first)':'(best first)');
+  const groupNames=['all',...Array.from(new Set(judged.map(m=>m.group.toLowerCase())))];
+  const groupFilter=segGroup('jGroup',groupNames.map(k=>({val:k,label:k==='all'?'All':k.charAt(0).toUpperCase()+k.slice(1),on:S.jGroup===k})));
+  const stripRows=visMetrics.map(md=>{const ms=order.map(s=>s.metrics[md.key]);const mean=ms.reduce((a,m)=>a+m.value,0)/ms.length;const active=S.jSortKey===md.key;
+    const cells=order.map(s=>{const m=s.metrics[md.key];const g=m.good;return `<div data-act="strip" data-val="${esc(s.id)}" title="${esc(s.name+' — '+md.name+': '+m.valStr+' ('+m.rating+')')}" style="flex:1 1 0;min-width:1px;height:100%;cursor:pointer;background:${heat(g)}"></div>`;}).join('');
+    return `<div style="display:grid;grid-template-columns:186px minmax(0,1fr);gap:14px;align-items:center"><div data-act="jSort" data-val="${md.key}" style="display:flex;align-items:center;gap:6px;padding:0 10px;cursor:pointer;user-select:none;color:${active?'var(--fg)':'var(--fg2)'}"><span style="width:7px;height:7px;border-radius:50%;background:${groupColor(md.group)};display:inline-block;flex:none"></span><span style="font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(md.name)}</span><span title="${esc(md.desc)}" style="flex:none;width:13px;height:13px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line2);border-radius:50%;font-size:8.5px;color:var(--fg3);cursor:help">?</span><span style="flex:1"></span><span style="font-family:var(--fnum);font-size:12px;font-weight:700;color:var(--fg);font-variant-numeric:tabular-nums">${md.kind==='fraction'?fmt(mean,2):fmt(mean,1)}</span><span style="font-size:9px;color:var(--accent);width:9px">${arrowFor(md.key)}</span></div><div style="display:flex;height:${STRIPH}px;width:100%;border-radius:2px;overflow:hidden;border:1px solid var(--line)">${cells}</div></div>`;
+  }).join('');
+  const stripsHtml=`<div style="margin-bottom:38px"><div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px"><div><div style="font-family:var(--fhead);font-size:20px;font-weight:700;letter-spacing:-.01em">Metric heat strips</div><div style="font-size:12.5px;color:var(--fg3);margin-top:2px">One strip per metric · each sliver is one item (${scenarios.length} total) · ${esc(sortNote)}. Click a metric to re-sort, click a sliver to open it.</div></div><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><div style="display:flex;align-items:center;gap:7px"><span style="font-size:11px;color:var(--fg3);text-transform:uppercase;letter-spacing:.07em">Group</span><div style="display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:2px;padding:2px">${groupFilter}</div></div><div style="display:flex;align-items:center;gap:7px"><span style="font-size:11px;color:var(--fg3);text-transform:uppercase;letter-spacing:.07em">Sort</span><div style="display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:2px;padding:2px">${sortControls}</div></div></div></div><div style="border:1px solid var(--line);border-radius:2px;background:var(--panel);padding:14px 16px;display:flex;flex-direction:column;gap:7px">${stripRows}<div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-top:6px;padding-top:11px;border-top:1px solid var(--line)"><span style="font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--fg3)">Worse → better</span>${ratingLegend}</div></div></div>`;
+  /* drill */
+  const items=scenarios.map(s=>{
+    const chips=judged.map(md=>{const m=s.metrics[md.key];return {label:md.short,title:md.name+': '+m.valStr+' ('+m.rating+')',style:{fontFamily:'var(--fnum)',fontSize:'10px',fontWeight:'700',padding:'2px 6px',borderRadius:'2px',background:ratingColor(m.rating),color:ratingTextOn(m.rating),opacity:m.failed?1:0.92,outline:m.failed?'1px solid '+th.danger:'none'}};});
+    const metricDetail=defs.map(md=>buildMetricCard(s.metrics[md.key]));
+    const messages=styleMessages(s.messages);
+    const convLabel=spec.msg==='summ'?'Source & summary':spec.msg==='qa'?'Question & answer':'Conversation';
+    return {id:s.id,pass:s.pass,diff:s.diff,searchText:s.name+' '+s.task,title:s.name,subtitle:s.task,chips,chipNote:s.failCount?s.failCount+' below threshold':'all metrics pass',metricCount:defs.length,metricDetail,messages,convLabel};
+  });
+  const drillHtml=assembleDrill(items,{title:'Per-'+spec.unit.replace(/s$/,'')+' judge trace',subtitle:'Metrics, judge reasoning, diagnostics, context and evaluator metadata on the left; the full '+(spec.msg==='summ'?'source and summary':spec.msg==='qa'?'question and answer':'conversation')+' on the right.',noun:spec.unit,searchPlaceholder:'Search '+spec.unit+', tasks or evidence…',methodology:'Methodology — each '+spec.unit.replace(/s$/,'')+' is scored by an LLM judge ('+r.judge+') against the configured evaluators for this category. Numeric metrics use a 1–5 quality scale, fractional metrics a 0–1 scale, and safety metrics the 0–7 content-severity scale (lower is better). A '+spec.unit.replace(/s$/,'')+' fails the gate when any metric falls below its evaluator’s failure threshold. Everything shown is read straight from this scenario'+"'"+'s stored results — nothing is hard-coded to a specific evaluator or category.'});
+  /* history */
+  const runs=spec.runs,hKey=(defs.find(m=>m.key===S.jHistMetric)?S.jHistMetric:judged[0].key),hmd=defs.find(m=>m.key===hKey);
+  const hAgg=arr=>S.jHistAgg==='mean'?arr.reduce((a,b)=>a+b,0)/arr.length:(hmd.better==='low'?Math.max(...arr):Math.min(...arr));
+  const dpv=hmd.kind==='fraction'?2:1;
+  const series=runs.map(rn=>{const vals=rn.lite.map(s=>s.vals[hKey]);return {run:rn.run,mn:Math.min(...vals),mx:Math.max(...vals),mean:vals.reduce((a,b)=>a+b,0)/vals.length,line:hAgg(vals),passRate:Math.round(rn.lite.filter(s=>s.pass).length/rn.lite.length*100)};});
+  const modelIdx=runs.findIndex(rn=>rn.run.model==='gpt-4o');
+  const histVM=runs.length<2?{empty:true,message:'This scenario has only one stored run, so there is no run-over-run history yet. Run '+spec.label+' again and this chart will track '+hmd.name+' across runs.'}:buildHistory({series,dpv,better:hmd.better,severity:hmd.kind==='severity',metricLabel:hmd.name,markerIdx:modelIdx,markerLabel:'→ gpt-4o',col2:'Pass',col2Of:s=>s.passRate+'%',hasLevels:false,
+    aggLabel:S.jHistAgg==='mean'?'mean across '+scenarios.length+' '+spec.unit:'worst '+spec.unit.replace(/s$/,'')+' per run',axisNote:hmd.better==='low'?'lower is better':'higher is better',
+    aggs:[['mean','Mean'],['worst','Worst '+spec.unit.replace(/s$/,'')]].map(([v,l])=>({act:'jHistAgg',val:v,label:l,on:S.jHistAgg===v})),
+    metrics:judged.map(md=>({act:'jHistMetric',val:md.key,label:md.short,on:hKey===md.key})),
+    subtitle:'Per-run '+hmd.name+' across the last '+runs.length+' executions. Solid line = '+(S.jHistAgg==='mean'?'mean of all '+scenarios.length+' '+spec.unit:'worst '+spec.unit.replace(/s$/,''))+'; shaded band = best–worst spread. Metric-agnostic — every metric is selectable.'});
+  /* comparison */
+  const cmpVM=buildJudgeComparison(spec);
+  const unitCap=spec.unit.charAt(0).toUpperCase()+spec.unit.slice(1);
+  return {headerTitle:spec.label,headerTag:spec.kind,demo:!!spec.demo,
+    headerSubtitle:r.dataset+' · '+r.model+' · '+r.scenarios+' '+spec.unit+' · judge '+r.judge,
+    runHtml:gateHtml+overviewHtml+stripsHtml+drillHtml,history:histVM,comparison:cmpVM};
+}
+function buildJudgeComparison(spec){
+  const S=state,th=theme(),isDark=S.mode==='dark',defs=spec.metricDefs,judged=defs.filter(m=>!m.info),runs=spec.runs,pool=spec.scenarios;
+  if(runs.length<2) return {empty:true,message:'This scenario has only one stored run, so there is nothing to compare yet. Run '+spec.label+' again — each run is appended to the store — and this view will line the runs up side by side.'};
+  const runOpts=runs.map(rn=>({id:rn.run.id,label:rn.run.finished.slice(0,10)+' · '+rn.run.sha}));
+  const rA=runs.find(rn=>rn.run.id===S.jCmpA)||runs[0],rB=runs.find(rn=>rn.run.id===S.jCmpB)||runs[runs.length-1];
+  const cKey=(defs.find(m=>m.key===S.jCmpMetric)?S.jCmpMetric:judged[0].key),cmd=defs.find(m=>m.key===cKey),cLow=cmd.better==='low';
+  const cvals=pool.flatMap(sc=>{const a=rA.lite.find(x=>x.id===sc.id).vals[cKey],b=rB.lite.find(x=>x.id===sc.id).vals[cKey];return [a,b];});
+  let cLo=Math.min(...cvals),cHi=Math.max(...cvals);if(cmd.kind==='severity'){cLo=0;cHi=Math.max(2,cHi);}const cpad=(cHi-cLo)*0.06||0.3;cLo-=cpad;cHi+=cpad;
+  const dp=v=>clamp((v-cLo)/((cHi-cLo)||1),0,1)*100;
+  const eps=cmd.kind==='fraction'?0.03:cmd.kind==='severity'?0.5:0.12,cdpFmt=cmd.kind==='fraction'?2:cmd.kind==='severity'?0:1;
+  const gainCol=heat(isDark?0.8:0.78);
+  let data=pool.map(sc=>{const ma=rA.lite.find(x=>x.id===sc.id),mb=rB.lite.find(x=>x.id===sc.id);const av=ma.vals[cKey],bv=mb.vals[cKey];const delta=bv-av;const changed=Math.abs(delta)>eps;const improved=cLow?delta<0:delta>0;const sig=changed;const col=!changed?'var(--fg3)':(improved?gainCol:'var(--warn)');
+    return {name:sc.name,delta,col,dotCol:ratingColor(ratingOf(cmd,bv)),aV:fmt(av,cdpFmt),bV:fmt(bv,cdpFmt),deltaS:(delta>=0?'+':'−')+fmt(Math.abs(delta),cdpFmt),sigLabel:changed?(improved?'improved':'regressed'):'n.s.',sig,improved,
+      aPos:dp(av),bPos:dp(bv),connL:Math.min(dp(av),dp(bv)),connW:Math.abs(dp(bv)-dp(av))};});
+  const imp=data.filter(d=>d.sig&&d.improved).length,reg=data.filter(d=>d.sig&&!d.improved).length,flat=data.length-imp-reg;
+  data.sort((x,y)=>(cLow?1:-1)*(y.delta-x.delta));
+  data=data.slice(0,40);
+  return {subtitle:'How each '+spec.unit.replace(/s$/,'')+' moved between two runs on '+cmd.name+'. Changes beyond ±'+eps+' are flagged.',
+    runOpts,cmpA:S.jCmpA,cmpB:S.jCmpB,gainCol,rowNoun:unitWord(spec),rows:data,improved:imp,regressed:reg,flat,flatLabel:'unchanged',
+    metaA1:rA.run.model,metaA2:rA.run.finished.slice(0,10),metaA3:rA.run.note,metaB1:rB.run.model,metaB2:rB.run.finished.slice(0,10),metaB3:rB.run.note,
+    domLo:fmt(cLo,cdpFmt),domHi:fmt(cHi,cdpFmt),
+    metrics:judged.map(md=>({act:'jCmpMetric',val:md.key,label:md.short,on:S.jCmpMetric===md.key})),
+    hasLevels:false,levels:[],legendNote:'teal = gain · amber = regression · grey = within ±'+eps+'. Showing up to 40 '+spec.unit+'.',
+    headline:'On '+cmd.name+', '+imp+' '+spec.unit+' improved, '+reg+' regressed, and '+flat+' stayed within noise between the two runs.'};
+}
+function unitWord(spec){return spec.unit.charAt(0).toUpperCase()+spec.unit.slice(1).replace(/s$/,'');}
+
+/* ============================ interactions ============================ */
+function setSt(patch){Object.assign(state,patch);render();}
 function applyAct(act,val){
   const S=state;
-  if(act==='mode') S.mode=S.mode==='dark'?'light':'dark';
-  else if(act==='tab') S.tab=val;
-  else if(act==='metric') S.metric=val;
-  else if(act==='level') S.level=val;
-  else if(act==='sort'){ if(S.sortKey===val){S.sortDir=S.sortDir==='desc'?'asc':'desc';} else {S.sortKey=val;S.sortDir='desc';} }
-  else if(act==='drill'){ S.drill=val; S.expanded=null; }
-  else if(act==='diff') S.diff=val;
-  else if(act==='failed') S.failedOnly=!S.failedOnly;
-  else if(act==='toggle') S.expanded = (S.expanded===val ? null : val);
-  else if(act==='cmpMetric') S.cmpMetric=val;
-  else if(act==='cmpLevel') S.cmpLevel=val;
-  else if(act==='cmpSort') S.cmpSort=val;
-  render();
+  if(act==='nav') setSt({cat:val,tab:'run',search:'',failedOnly:false,diff:'all',expanded:{},drillLimit:25});
+  else if(act==='mode') setSt({mode:S.mode==='dark'?'light':'dark'});
+  else if(act==='tab') setSt({tab:val});
+  else if(act==='exp'){ S.expanded={...S.expanded,[val]:!S.expanded[val]}; render(); }
+  else if(act==='diff') setSt({diff:val,drillLimit:25});
+  else if(act==='failed') setSt({failedOnly:!S.failedOnly,drillLimit:25});
+  else if(act==='more') setSt({drillLimit:S.drillLimit+25});
+  else if(act==='rMetric') setSt({rMetric:val});
+  else if(act==='rLevel') setSt({rLevel:val});
+  else if(act==='rSort'){ if(S.rSortKey===val){setSt({rSortDir:S.rSortDir==='desc'?'asc':'desc'});}else{setSt({rSortKey:val,rSortDir:'desc'});} }
+  else if(act==='rDrill') setSt({rDrillCfg:val,expanded:{},drillLimit:25});
+  else if(act==='rHistMetric') setSt({rHistMetric:val});
+  else if(act==='rHistLevel') setSt({rHistLevel:val});
+  else if(act==='rHistAgg') setSt({rHistAgg:val});
+  else if(act==='rCmpMetric') setSt({rCmpMetric:val});
+  else if(act==='rCmpLevel') setSt({rCmpLevel:val});
+  else if(act==='jGroup') setSt({jGroup:val});
+  else if(act==='jSort'){ if(val==='__fail'){setSt({jSortKey:val,jSortDir:'desc'});}else if(val==='__name'){setSt({jSortKey:val,jSortDir:S.jSortKey===val&&S.jSortDir==='asc'?'desc':'asc'});}else{setSt({jSortKey:val,jSortDir:S.jSortKey===val&&S.jSortDir==='asc'?'desc':'asc'});} }
+  else if(act==='strip'){ setSt({tab:'run',expanded:{...S.expanded,[val]:true}}); }
+  else if(act==='jHistMetric') setSt({jHistMetric:val});
+  else if(act==='jHistAgg') setSt({jHistAgg:val});
+  else if(act==='jCmpMetric') setSt({jCmpMetric:val});
 }
-
 function wire(){
   const root=document.getElementById('app');
-  root.querySelectorAll('[data-act]').forEach(el=>{
-    el.addEventListener('click', ()=>applyAct(el.getAttribute('data-act'), el.getAttribute('data-val')));
-  });
-  const sel=document.getElementById('drillSelect');
-  if(sel) sel.addEventListener('change', e=>{state.drill=e.target.value; state.expanded=null; render();});
-  const cmpA=document.getElementById('cmpA');
-  if(cmpA) cmpA.addEventListener('change', e=>{state.cmpA=e.target.value; render();});
-  const cmpB=document.getElementById('cmpB');
-  if(cmpB) cmpB.addEventListener('change', e=>{state.cmpB=e.target.value; render();});
-  const search=document.getElementById('drillSearch');
-  if(search){
-    search.addEventListener('input', e=>{state.search=e.target.value; state._focusSearch=true; render();});
-    if(state._focusSearch){ search.focus(); const v=search.value; search.setSelectionRange(v.length,v.length); state._focusSearch=false; }
-  }
+  root.querySelectorAll('[data-act]').forEach(el=>el.addEventListener('click',ev=>{ev.stopPropagation();applyAct(el.getAttribute('data-act'),el.getAttribute('data-val'));}));
+  const dc=document.getElementById('drillCfg'); if(dc) dc.addEventListener('change',e=>setSt(state.cat==='rag'?{rDrillCfg:e.target.value,expanded:{},drillLimit:25}:{}));
+  const ca=document.getElementById('cmpA'); if(ca) ca.addEventListener('change',e=>setSt(state.cat==='rag'?{rCmpA:e.target.value}:{jCmpA:e.target.value}));
+  const cb=document.getElementById('cmpB'); if(cb) cb.addEventListener('change',e=>setSt(state.cat==='rag'?{rCmpB:e.target.value}:{jCmpB:e.target.value}));
+  const sb=document.getElementById('drillSearch');
+  if(sb){ sb.addEventListener('input',e=>{state.search=e.target.value;state.drillLimit=25;state._focus='drillSearch';render();});
+    if(state._focus==='drillSearch'){sb.focus();const v=sb.value;sb.setSelectionRange(v.length,v.length);state._focus=null;} }
 }
-
 render();
 </script>
 </body>

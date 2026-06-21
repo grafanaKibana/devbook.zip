@@ -203,6 +203,19 @@ public abstract class EvaluationTestBase<TPrediction>
         IReadOnlyList<TPrediction> predictions);
 
     /// <summary>
+    /// Loads and deserializes a dataset JSON file from the Datasets output folder.
+    /// </summary>
+    /// <typeparam name="TDataset">Dataset root type.</typeparam>
+    /// <param name="datasetFileName">Dataset file name under the Datasets output folder.</param>
+    /// <returns>The deserialized dataset.</returns>
+    protected static TDataset LoadDataset<TDataset>(string datasetFileName)
+        where TDataset : new()
+    {
+        var datasetPath = Path.Combine(AppContext.BaseDirectory, "Datasets", datasetFileName);
+        return JsonSerializer.Deserialize<TDataset>(File.ReadAllText(datasetPath), JsonOptions) ?? new TDataset();
+    }
+
+    /// <summary>
     /// Loads typed test cases from a dataset JSON file.
     /// </summary>
     /// <typeparam name="TDataset">Dataset root type.</typeparam>
@@ -217,9 +230,7 @@ public abstract class EvaluationTestBase<TPrediction>
         Func<TCase, string> getTestCaseId)
         where TDataset : new()
     {
-        var datasetPath = Path.Combine(AppContext.BaseDirectory, "Datasets", datasetFileName);
-        var dataset = JsonSerializer.Deserialize<TDataset>(File.ReadAllText(datasetPath), JsonOptions) ?? new TDataset();
-        var cases = getCases(dataset);
+        var cases = getCases(LoadDataset<TDataset>(datasetFileName));
 
         if (cases.Count == 0)
         {
