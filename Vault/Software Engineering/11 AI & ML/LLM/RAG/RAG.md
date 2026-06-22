@@ -49,7 +49,7 @@ Production RAG architectures range from a single retrieve-then-generate pass to 
 - **GraphRAG** — knowledge-graph indexing for relationship and global-synthesis questions.
 - **Corrective / self-reflective RAG** — evaluator-gated retrieval and generation; research-stage for most teams.
 
-Ship the baseline first, add hybrid search and reranking next, and adopt anything further down only for a failure mode your [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation/Evaluation|evaluation]] actually shows.
+Ship the baseline first, add [[Software Engineering/11 AI & ML/LLM/RAG/Retrieval#Hybrid Retrieval — Vector + Keyword|hybrid search]] and reranking next, and adopt anything further down only for a failure mode your [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation/Evaluation|evaluation]] actually shows.
 
 ## Operational Baselines
 

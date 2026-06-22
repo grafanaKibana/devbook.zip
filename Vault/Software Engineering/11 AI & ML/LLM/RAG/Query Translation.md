@@ -178,7 +178,7 @@ Decision rule: start with no translation and measure baseline retrieval quality.
 > - The encoder's bottleneck filters hallucinated details while preserving the correct semantic neighborhood
 > - For specific factual queries (error codes, versions), the LLM may hallucinate wrong details — different error code, different version
 > - The hallucinated embedding steers retrieval toward documents matching the wrong specifics
-> - Direct query embedding, while sparse, preserves exact tokens that keyword search in a hybrid setup can catch
+> - Direct query embedding, while sparse, preserves exact tokens that [[Software Engineering/11 AI & ML/LLM/RAG/Retrieval#Sparse Retrieval — Keyword Search (BM25)|keyword search]] in a hybrid setup can catch
 > - HyDE failure is stealth: retrieved documents look topically relevant but answer the wrong specific question
 
 ## References

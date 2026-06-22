@@ -38,7 +38,7 @@ Main risk:
 
 ## 2. Hybrid Search plus Reranking
 
-Run lexical search and vector search together, merge their candidates, then rerank the merged set so the generator sees the best few passages. Lexical search catches exact terms; vector search catches semantic matches; [[Software Engineering/11 AI & ML/LLM/RAG/Re-ranking|reranking]] removes noise before context assembly.
+Run [[Software Engineering/11 AI & ML/LLM/RAG/Retrieval#Sparse Retrieval — Keyword Search (BM25)|lexical search]] and [[Software Engineering/11 AI & ML/LLM/RAG/Retrieval#Dense Retrieval — Vector Search|vector search]] together, merge their candidates, then rerank the merged set so the generator sees the best few passages. Lexical search catches exact terms; vector search catches semantic matches; [[Software Engineering/11 AI & ML/LLM/RAG/Re-ranking|reranking]] removes noise before context assembly.
 
 ```mermaid
 flowchart LR
