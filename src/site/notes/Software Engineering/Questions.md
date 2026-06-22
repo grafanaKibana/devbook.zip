@@ -3137,7 +3137,7 @@ Why this matters: these limits tell you when to pivot to other techniques instea
 <li dir="auto">The encoder's bottleneck filters hallucinated details while preserving the correct semantic neighborhood</li>
 <li dir="auto">For specific factual queries (error codes, versions), the LLM may hallucinate wrong details — different error code, different version</li>
 <li dir="auto">The hallucinated embedding steers retrieval toward documents matching the wrong specifics</li>
-<li dir="auto">Direct query embedding, while sparse, preserves exact tokens that keyword search in a hybrid setup can catch</li>
+<li dir="auto">Direct query embedding, while sparse, preserves exact tokens that <a data-tooltip-position="top" aria-label="Software Engineering/11 AI &amp; ML/LLM/RAG/Retrieval &gt; Sparse Retrieval — Keyword Search (BM25)" data-href="Software Engineering/11 AI &amp; ML/LLM/RAG/Retrieval#Sparse Retrieval — Keyword Search (BM25)" href="Software Engineering/11 AI &amp; ML/LLM/RAG/Retrieval#Sparse Retrieval — Keyword Search (BM25)" class="internal-link" target="_blank" rel="noopener nofollow">keyword search</a> in a hybrid setup can catch</li>
 <li dir="auto">HyDE failure is stealth: retrieved documents look topically relevant but answer the wrong specific question<br>
 <em><a class="internal-link" data-href="Software Engineering/11 AI &amp; ML/LLM/RAG/Query Translation.md" href="Software Engineering/11 AI &amp; ML/LLM/RAG/Query Translation.md" target="_blank" rel="noopener nofollow">Query Translation</a></em></li>
 </ul>
