@@ -35,10 +35,12 @@ public sealed class AnswerEvaluation : EvaluationTestBase<AnswerPrediction>
     protected override IEvaluator[] GetPerIterationEvaluators() => [new AnswerQualityEvaluator(SelectedMetrics())];
 
     // Prefer the answer dataset (carries per-case reference answers → unlocks Correctness); fall back to
-    // the reference-free shared search dataset. Both deserialize to AnswerCase. The metric panel and the
-    // loaded file are chosen from the same signal so they always agree.
-    private static bool HasAnswerDataset() => File.Exists(Path.Combine(AppContext.BaseDirectory, "Datasets", AnswerDatasetFileName));
-    private static string ResolveDatasetFileName() => HasAnswerDataset() ? AnswerDatasetFileName : SharedDatasetFileName;
+    // the reference-free shared search dataset. Both deserialize to AnswerCase. With --mini,
+    // ResolveDatasetVariant swaps in the "-mini" sibling when it exists, else keeps the full file. The
+    // metric panel and the loaded file are derived from the same resolved file so they always agree.
+    private static string ResolveAnswerDatasetFileName() => ResolveDatasetVariant(AnswerDatasetFileName);
+    private static bool HasAnswerDataset() => DatasetExists(ResolveAnswerDatasetFileName());
+    private static string ResolveDatasetFileName() => HasAnswerDataset() ? ResolveAnswerDatasetFileName() : ResolveDatasetVariant(SharedDatasetFileName);
     private static IReadOnlyList<AnswerMetricDefinition> SelectedMetrics() => HasAnswerDataset() ? AnswerMetrics.All : AnswerMetrics.ReferenceFree;
 
     /// <inheritdoc />
@@ -55,13 +57,14 @@ public sealed class AnswerEvaluation : EvaluationTestBase<AnswerPrediction>
 
         var answerConfig = new AnswerAgent();
 
-        // The judge defaults to the answer agent's own model so the scenario runs out of the box;
-        // override AnswerEvaluationOptions:JudgeModelId with a different/stronger model to avoid the
-        // self-preference bias an LLM judge has for outputs from its own model family.
+        // The judge defaults to GPT-5.4 nano (the budget tier) to keep run cost low, and is overridable
+        // via AnswerEvaluationOptions:JudgeModelId. Nano is positioned for narrow/high-volume tasks, so
+        // validate its agreement against a labeled subset before trusting it on the nuanced
+        // faithfulness/citation-validity scoring.
         var judgeModelId = configuration["AnswerEvaluationOptions:JudgeModelId"];
         if (string.IsNullOrWhiteSpace(judgeModelId))
         {
-            judgeModelId = answerConfig.ModelId;
+            judgeModelId = "gpt-5.4-nano";
         }
 
         var client = string.IsNullOrWhiteSpace(openAIOptions!.Endpoint)
@@ -111,6 +114,54 @@ public sealed class AnswerEvaluation : EvaluationTestBase<AnswerPrediction>
             additionalContext: [new AnswerCaseContext(answerCase, verdicts)]);
 
         this.Predictions.Add(new AnswerPrediction(answerCase, verdicts));
+    }
+
+    /// <summary>
+    /// Diagnostic probe (run explicitly): judges a concise grounded answer and a verbosity-padded
+    /// variant of it, and asserts the padding does not inflate the claim-grounded Faithfulness ratio.
+    /// Two live judge calls — not part of a normal run.
+    /// </summary>
+    [Test]
+    [Explicit("Live judge calls; run manually to check verbosity-bias robustness.")]
+    public async Task VerbosityBiasProbe()
+    {
+        var probeCase = new AnswerCase
+        {
+            Id = "verbosity-probe",
+            Query = "When should I use RAG instead of fine-tuning?",
+            Difficulty = "probe",
+            Expected =
+            [
+                new AnswerSource
+                {
+                    DocumentId = "doc_probe",
+                    Heading = "Tradeoffs",
+                    CitationLabel = "RAG/RAG.md",
+                    Text = "Retrieval adds external knowledge at query time and keeps answers tied to current documents. Fine-tuning changes model behaviour but does not reliably inject fresh facts.",
+                },
+            ],
+        };
+
+        const string concise =
+            "Use RAG when the answer must be grounded in current or inspectable documents; use fine-tuning to change model behaviour rather than supply facts. [[RAG/RAG.md#Tradeoffs]]";
+
+        var filler = string.Concat(Enumerable.Repeat(
+            " It is worth noting that this is an important and widely discussed consideration that many teams weigh carefully in practice.", 5));
+        var verbose = concise + filler;
+
+        static double Faithfulness(IReadOnlyList<AnswerMetricVerdict> verdicts)
+            => verdicts.First(verdict => verdict.Definition.MetricName == "Faithfulness").Value;
+
+        var faithConcise = Faithfulness(await this.judge.JudgeAsync(probeCase, concise));
+        var faithVerbose = Faithfulness(await this.judge.JudgeAsync(probeCase, verbose));
+
+        await TestContext.Progress.WriteLineAsync(
+            $"Verbosity probe — Faithfulness concise={faithConcise:0.000}, verbose={faithVerbose:0.000}, delta={faithVerbose - faithConcise:+0.000;-0.000}");
+
+        Assert.That(
+            faithVerbose,
+            Is.LessThanOrEqualTo(faithConcise + 0.10),
+            "Padding the answer with ungrounded filler must not inflate the claim-grounded Faithfulness ratio.");
     }
 
     /// <inheritdoc />

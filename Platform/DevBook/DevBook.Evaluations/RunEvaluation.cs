@@ -8,6 +8,7 @@ const string ReportsFolderName = "EvaluationReports";
 const string ReportFileName = "report.html";
 
 var openBrowser = ParseOpenBrowserFlag(args);
+var useMiniDatasets = ParseMiniFlag(args);
 var evaluationName = ParseEvaluationName(args) ?? "RAG.Search";
 var projectDirectory = ResolveProjectDirectory();
 
@@ -27,6 +28,25 @@ bool ParseOpenBrowserFlag(string[] arguments)
         if (arg.StartsWith("--open-browser=", StringComparison.OrdinalIgnoreCase))
         {
             var value = arg["--open-browser=".Length..];
+            return !value.Equals("false", StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
+    return false;
+}
+
+bool ParseMiniFlag(string[] arguments)
+{
+    foreach (var arg in arguments)
+    {
+        if (arg.Equals("--mini", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        if (arg.StartsWith("--mini=", StringComparison.OrdinalIgnoreCase))
+        {
+            var value = arg["--mini=".Length..];
             return !value.Equals("false", StringComparison.OrdinalIgnoreCase);
         }
     }
@@ -55,11 +75,20 @@ string? ParseEvaluationName(string[] arguments)
 }
 
 
+// Builds the `dotnet test --filter` expression for the requested evaluation. `all` runs every
+// evaluation scenario (they all carry [Category("LLMCalls")]) into a single run folder so one report
+// covers them; otherwise a single scenario is selected by test name.
 string ResolveEvaluationTestFilter(string evaluationName)
 {
-    return evaluationName.Equals("RAG.Search", StringComparison.OrdinalIgnoreCase)
+    if (evaluationName.Equals("all", StringComparison.OrdinalIgnoreCase))
+    {
+        return "Category=LLMCalls";
+    }
+
+    var testName = evaluationName.Equals("RAG.Search", StringComparison.OrdinalIgnoreCase)
         ? "SearchOver"
         : evaluationName;
+    return $"Name~{testName.Replace("\"", "\\\"")}";
 }
 
 string ResolveProjectDirectory([CallerFilePath] string scriptPath = "")
@@ -132,15 +161,15 @@ Console.WriteLine($"Working directory: {projectDirectory}");
 #region Step 1: Run evaluation tests
 
 Console.WriteLine("\n=== Running Evaluation Tests ===\n");
-var testFilterName = ResolveEvaluationTestFilter(evaluationName);
-Console.WriteLine($"Filtering evaluations by Name: {evaluationName} (test filter: {testFilterName})");
+var testFilterExpression = ResolveEvaluationTestFilter(evaluationName);
+Console.WriteLine($"Filtering evaluations by: {evaluationName} (test filter: {testFilterExpression})");
+Console.WriteLine($"Dataset mode: {(useMiniDatasets ? "mini (falls back to full where a mini dataset is absent)" : "full")}");
 
 var testStopwatch = Stopwatch.StartNew();
 var runStartedAtUtc = DateTime.UtcNow;
-var escapedEvaluationName = testFilterName.Replace("\"", "\\\"");
-var testFilterArgs = $" --filter \"Name~{escapedEvaluationName}\"";
+var testFilterArgs = $" --filter \"{testFilterExpression}\"";
 
-var testProcess = Process.Start(new ProcessStartInfo
+var testStartInfo = new ProcessStartInfo
 {
     FileName = "dotnet",
     Arguments = $"test \"{Path.Combine(projectDirectory, "DevBook.Evaluations.csproj")}\" " +
@@ -151,7 +180,16 @@ var testProcess = Process.Start(new ProcessStartInfo
     UseShellExecute = false,
     RedirectStandardOutput = false,
     RedirectStandardError = false
-});
+};
+
+// Steer the scenarios to the mini datasets via the environment (inherited by the test process).
+// Each scenario prefers its "-mini" dataset and falls back to the full file when the mini one is absent.
+if (useMiniDatasets)
+{
+    testStartInfo.Environment["EVAL_DATASET"] = "mini";
+}
+
+var testProcess = Process.Start(testStartInfo);
 
 testProcess?.WaitForExit();
 testStopwatch.Stop();
@@ -218,12 +256,24 @@ if (reportExitCode != 0)
 // alongside the unchanged report.html. Failures here are non-fatal — the run has
 // already produced the standard report.
 Console.WriteLine("\n=== Generating Fancy Report (additive) ===\n");
+Console.WriteLine("(compiling the file-based report tool if needed — the first run after a change can take a moment)\n");
 var fancyScriptPath = Path.Combine(projectDirectory, "RunReport.cs");
+
+// RunReport.cs is a file-based app (excluded from the project's compile). Two constraints decide the
+// working directory:
+//   1. It must NOT be projectDirectory (which contains DevBook.Evaluations.csproj): `dotnet run` would
+//      launch the PROJECT — whose entry point is this very script — and re-run the whole evaluation.
+//   2. It must NOT be a volatile dir like the system temp: from there the file-based restore can't reuse
+//      the repo's build/NuGet context and does a cold ~90s restore on every run (observed).
+// The repo root satisfies both — it is project-free here AND is exactly where the IDE launch profiles
+// run the tool (fast). RunReport.cs self-locates via [CallerFilePath] and takes an absolute --run folder,
+// so it does not otherwise depend on the working directory.
+var repoRoot = Path.GetFullPath(Path.Combine(projectDirectory, "..", "..", ".."));
 var fancyProcess = Process.Start(new ProcessStartInfo
 {
     FileName = "dotnet",
     Arguments = $"run \"{fancyScriptPath}\" -- --run \"{latestRunFolder}\"",
-    WorkingDirectory = projectDirectory,
+    WorkingDirectory = repoRoot,
     UseShellExecute = false,
     RedirectStandardOutput = false,
     RedirectStandardError = false
@@ -240,14 +290,19 @@ if (fancyExitCode != 0)
 
 #region Step 3: Open Report in Browser
 
-if (openBrowser && File.Exists(reportOutputPath))
+// Prefer opening the fancy report (the richer view); fall back to the standard report.html if the
+// additive fancy step did not produce one.
+var fancyReportPath = Path.Combine(latestRunFolder, "report.fancy.html");
+var reportToOpen = File.Exists(fancyReportPath) ? fancyReportPath : reportOutputPath;
+
+if (openBrowser && File.Exists(reportToOpen))
 {
-    Console.WriteLine($"\n=== Opening Report: {reportOutputPath} ===\n");
-    OpenReport(reportOutputPath);
+    Console.WriteLine($"\n=== Opening Report: {reportToOpen} ===\n");
+    OpenReport(reportToOpen);
 }
 else if (File.Exists(reportOutputPath))
 {
-    Console.WriteLine($"\nReport generated at: {reportOutputPath}");
+    Console.WriteLine($"\nReports generated in: {latestRunFolder}");
 }
 else
 {

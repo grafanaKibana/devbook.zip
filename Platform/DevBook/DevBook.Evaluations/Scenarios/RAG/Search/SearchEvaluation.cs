@@ -48,10 +48,11 @@ public sealed class SearchEvaluation : MongoEvaluationTestBase<SearchPrediction>
 
     private static IEnumerable<TestCaseData> TestCases()
     {
-        var dataset = LoadDataset<SearchDataset>(SharedDatasetFileName);
+        var datasetFileName = ResolveDatasetVariant(SharedDatasetFileName);
+        var dataset = LoadDataset<SearchDataset>(datasetFileName);
         if (dataset.Cases.Count == 0)
         {
-            throw new InvalidOperationException($"Dataset {SharedDatasetFileName} must contain at least one case.");
+            throw new InvalidOperationException($"Dataset {datasetFileName} must contain at least one case.");
         }
 
         foreach (var testCase in dataset.Cases)

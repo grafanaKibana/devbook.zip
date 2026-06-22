@@ -23,7 +23,6 @@ public enum AnswerMetricKind
 /// <summary>Definition of one judge metric: identity plus presentation hints carried into report metadata.</summary>
 public sealed record AnswerMetricDefinition(
     string MetricName,
-    string ShortName,
     string Group,
     AnswerMetricKind Kind,
     string Better,
@@ -58,19 +57,19 @@ public static class AnswerMetrics
     /// <summary>The full metric panel (includes reference-dependent Correctness), in report-display order.</summary>
     public static IReadOnlyList<AnswerMetricDefinition> All { get; } =
     [
-        new("Faithfulness", "Faith", "Grounding", AnswerMetricKind.Score, "high", false,
-            "Whether every claim in the answer is supported by the provided source chunks (no outside knowledge, no fabrication)."),
-        new("Citation Validity", "Cite✓", "Grounding", AnswerMetricKind.Score, "high", false,
-            "Whether each inline citation points to a source chunk that actually supports the claim it is attached to."),
-        new("Relevance", "Relev", "Quality", AnswerMetricKind.Score, "high", false,
-            "Whether the answer addresses the question directly without drifting into unrelated material."),
-        new("Completeness", "Compl", "Quality", AnswerMetricKind.Score, "high", false,
-            "Whether the answer covers the aspects of the question that the provided sources can support."),
-        new("Correctness", "Correct", "Quality", AnswerMetricKind.Score, "high", false,
+        new("Faithfulness", "Grounding", AnswerMetricKind.Fraction, "high", false,
+            "Fraction of the answer's atomic claims that are supported by the provided sources. Claim-grounded, so padding the answer cannot inflate it — unsupported elaboration lowers it."),
+        new("Citation Validity", "Grounding", AnswerMetricKind.Fraction, "high", false,
+            "Fraction of the answer's inline citations that point to a source actually supporting the cited claim."),
+        new("Relevance", "Quality", AnswerMetricKind.Fraction, "high", false,
+            "Fraction of the answer's atomic claims that are relevant to the question. Off-topic padding lowers it."),
+        new("Completeness", "Quality", AnswerMetricKind.Fraction, "high", false,
+            "Fraction of the question's expected points (from the reference, or what the sources support) that the answer covers."),
+        new("Correctness", "Quality", AnswerMetricKind.Score, "high", false,
             "Whether the answer is factually equivalent to the gold reference answer — same key facts, no contradictions. Scored only when a reference answer is available."),
-        new("Citation Rate", "Cite%", "Citations", AnswerMetricKind.Fraction, "high", false,
+        new("Citation Rate", "Citations", AnswerMetricKind.Fraction, "high", false,
             "Deterministic: did the answer include at least one inline [[...]] citation. Averaged, this is the citation rate — an early prompt-regression signal."),
-        new("Completion Tokens", "Tokens", "Stats", AnswerMetricKind.Count, "none", true,
+        new("Completion Tokens", "Stats", AnswerMetricKind.Count, "none", true,
             "Informational — approximate completion tokens generated; no pass/fail interpretation."),
     ];
 
@@ -96,11 +95,13 @@ public interface IAnswerJudge
 }
 
 /// <summary>
-/// A real LLM-as-judge. The four semantic metrics (faithfulness, citation validity, relevance,
-/// completeness) come from a single structured judge call over {question, sources, answer}; the
-/// citation-rate gate and token count are computed deterministically without a model. Verdicts carry
-/// the report-metadata conventions (kind/group/better/short presentation hints, <c>ctx:</c> judge
-/// context, <c>meta:</c> evaluator rows) so the fancy report renders them generically.
+/// A real LLM-as-judge. A single structured judge call over {question, sources, [reference,] answer}
+/// decomposes the answer into atomic claims (each graded for grounding, relevance and citation) plus
+/// the question's expected points; the grounding/quality metrics are then computed as claim/point
+/// <em>ratios</em>, so answer length cannot inflate them — unsupported padding lowers the ratio. The
+/// citation-rate gate and token count are deterministic. Verdicts carry the report-metadata
+/// conventions (kind/group/better/short hints, <c>ctx:</c> judge context, <c>meta:</c> rows) so the
+/// fancy report renders them generically.
 /// </summary>
 /// <param name="judgeClient">Chat client used for the judge model.</param>
 /// <param name="judgeModelId">Judge model id, surfaced as <c>meta:judge</c> in the report.</param>
@@ -204,16 +205,6 @@ public sealed class LlmAnswerJudge(IChatClient judgeClient, string judgeModelId,
         string? judgeError,
         long elapsedMs)
     {
-        var dimension = scores is null ? null : metric.MetricName switch
-        {
-            "Faithfulness" => scores.Faithfulness,
-            "Citation Validity" => scores.CitationValidity,
-            "Relevance" => scores.Relevance,
-            "Completeness" => scores.Completeness,
-            "Correctness" => scores.Correctness,
-            _ => null,
-        };
-
         var metadata = BaseMetadata(metric);
         metadata["meta:judge"] = judgeModelId;
         metadata["meta:eval"] = $"{elapsedMs}ms";
@@ -230,35 +221,107 @@ public sealed class LlmAnswerJudge(IChatClient judgeClient, string judgeModelId,
             metadata["ctx:question"] = answerCase.Query;
         }
 
-        if (dimension is null)
+        if (scores is null)
         {
-            var reason = judgeError ?? $"Judge did not return a score for {metric.MetricName}.";
-            return new AnswerMetricVerdict(
-                metric,
-                0,
-                EvaluationRating.Inconclusive,
-                Failed: true,
-                reason,
-                [EvaluationDiagnostic.Error(reason)],
-                metadata);
+            return InconclusiveVerdict(metric, judgeError ?? $"Judge returned no result for {metric.MetricName}.", metadata);
         }
 
-        var value = Math.Clamp(dimension.Score, 1, 5);
-        var rating = ScoreRating(value);
-        var failed = rating is EvaluationRating.Poor or EvaluationRating.Unacceptable;
-        var reasonText = string.IsNullOrWhiteSpace(dimension.Reason)
-            ? $"{metric.MetricName} scored {value:0.0}/5 ({rating})."
-            : $"{metric.MetricName} scored {value:0.0}/5 ({rating}). {dimension.Reason.Trim()}";
+        var claims = scores.Claims ?? [];
 
-        return new AnswerMetricVerdict(
-            metric,
-            Math.Round(value, 3),
-            rating,
-            failed,
-            reasonText,
-            Diagnostics(rating),
-            metadata);
+        switch (metric.MetricName)
+        {
+            case "Faithfulness":
+            {
+                if (claims.Count == 0)
+                {
+                    return InconclusiveVerdict(metric, "Judge extracted no claims from the answer.", metadata);
+                }
+
+                metadata["ctx:claims"] = RenderClaims(claims);
+                var supported = claims.Count(claim => claim.Supported);
+                var firstUnsupported = claims.FirstOrDefault(claim => !claim.Supported)?.Claim;
+                var detail = firstUnsupported is null ? string.Empty : $" Unsupported e.g.: \"{Truncate(firstUnsupported, 100)}\".";
+                return RatioVerdict(metric, supported, claims.Count, $"{supported}/{claims.Count} claims grounded in the sources.{detail}", metadata);
+            }
+
+            case "Relevance":
+            {
+                if (claims.Count == 0)
+                {
+                    return InconclusiveVerdict(metric, "Judge extracted no claims from the answer.", metadata);
+                }
+
+                metadata["ctx:claims"] = RenderClaims(claims);
+                var relevant = claims.Count(claim => claim.Relevant);
+                return RatioVerdict(metric, relevant, claims.Count, $"{relevant}/{claims.Count} claims are relevant to the question.", metadata);
+            }
+
+            case "Citation Validity":
+            {
+                metadata["ctx:claims"] = RenderClaims(claims);
+                var cited = claims.Where(claim => claim.HasCitation).ToList();
+                if (cited.Count == 0)
+                {
+                    return new AnswerMetricVerdict(
+                        metric,
+                        0,
+                        EvaluationRating.Unacceptable,
+                        Failed: true,
+                        "No inline citations to validate — the answer made claims without citing sources.",
+                        [EvaluationDiagnostic.Warning("Answer claims carry no inline citations.")],
+                        metadata);
+                }
+
+                var valid = cited.Count(claim => claim.CitationSupportsClaim);
+                return RatioVerdict(metric, valid, cited.Count, $"{valid}/{cited.Count} inline citations support their claim.", metadata);
+            }
+
+            case "Completeness":
+            {
+                var points = scores.ExpectedPoints ?? [];
+                if (points.Count == 0)
+                {
+                    return InconclusiveVerdict(metric, "Judge listed no expected points for the question.", metadata);
+                }
+
+                metadata["ctx:points"] = RenderPoints(points);
+                var covered = points.Count(point => point.Covered);
+                var firstMissing = points.FirstOrDefault(point => !point.Covered)?.Point;
+                var detail = firstMissing is null ? string.Empty : $" Missing e.g.: \"{Truncate(firstMissing, 100)}\".";
+                return RatioVerdict(metric, covered, points.Count, $"{covered}/{points.Count} expected points covered.{detail}", metadata);
+            }
+
+            case "Correctness":
+            {
+                if (scores.Correctness is not { } dimension)
+                {
+                    return InconclusiveVerdict(metric, "Judge returned no Correctness score.", metadata);
+                }
+
+                var value = Math.Clamp(dimension.Score, 1, 5);
+                var rating = ScoreRating(value);
+                var failed = rating is EvaluationRating.Poor or EvaluationRating.Unacceptable;
+                var reason = string.IsNullOrWhiteSpace(dimension.Reason)
+                    ? $"Correctness scored {value:0.0}/5 ({rating})."
+                    : $"Correctness scored {value:0.0}/5 ({rating}). {dimension.Reason.Trim()}";
+                return new AnswerMetricVerdict(metric, Math.Round(value, 3), rating, failed, reason, Diagnostics(rating), metadata);
+            }
+
+            default:
+                return InconclusiveVerdict(metric, $"Unknown semantic metric {metric.MetricName}.", metadata);
+        }
     }
+
+    private static AnswerMetricVerdict RatioVerdict(AnswerMetricDefinition metric, int numerator, int denominator, string reason, Dictionary<string, string> metadata)
+    {
+        var value = denominator == 0 ? 0 : (double)numerator / denominator;
+        var rating = FractionRating(value);
+        var failed = rating is EvaluationRating.Poor or EvaluationRating.Unacceptable;
+        return new AnswerMetricVerdict(metric, Math.Round(value, 3), rating, failed, reason, Diagnostics(rating), metadata);
+    }
+
+    private static AnswerMetricVerdict InconclusiveVerdict(AnswerMetricDefinition metric, string reason, Dictionary<string, string> metadata)
+        => new(metric, 0, EvaluationRating.Inconclusive, Failed: true, reason, [EvaluationDiagnostic.Error(reason)], metadata);
 
     private static EvaluationRating ScoreRating(double value) => value switch
     {
@@ -266,6 +329,15 @@ public sealed class LlmAnswerJudge(IChatClient judgeClient, string judgeModelId,
         >= 3.5 => EvaluationRating.Good,
         >= 2.5 => EvaluationRating.Average,
         >= 1.5 => EvaluationRating.Poor,
+        _ => EvaluationRating.Unacceptable,
+    };
+
+    private static EvaluationRating FractionRating(double value) => value switch
+    {
+        >= 0.9 => EvaluationRating.Exceptional,
+        >= 0.75 => EvaluationRating.Good,
+        >= 0.5 => EvaluationRating.Average,
+        >= 0.3 => EvaluationRating.Poor,
         _ => EvaluationRating.Unacceptable,
     };
 
@@ -283,7 +355,6 @@ public sealed class LlmAnswerJudge(IChatClient judgeClient, string judgeModelId,
         ["kind"] = metric.Kind.ToString().ToLowerInvariant(),
         ["group"] = metric.Group,
         ["better"] = metric.Better,
-        ["short"] = metric.ShortName,
     };
 
     private static string RenderSources(IReadOnlyList<AnswerSource> sources)
@@ -294,6 +365,20 @@ public sealed class LlmAnswerJudge(IChatClient judgeClient, string judgeModelId,
                 var heading = string.IsNullOrWhiteSpace(source.Heading) ? string.Empty : $" #{source.Heading}";
                 return $"[{index + 1}] {source.CitationLabel}{heading}: {Truncate(source.Text, 160)}";
             }));
+
+    private static string RenderClaims(IReadOnlyList<ClaimVerdict> claims)
+        => string.Join(
+            Environment.NewLine,
+            claims.Select(claim =>
+            {
+                var cite = !claim.HasCitation ? "–cite" : claim.CitationSupportsClaim ? "✓cite" : "✗cite";
+                return $"[{(claim.Supported ? "✓" : "✗")}grounded {(claim.Relevant ? "✓" : "✗")}relevant {cite}] {Truncate(claim.Claim ?? string.Empty, 120)}";
+            }));
+
+    private static string RenderPoints(IReadOnlyList<PointVerdict> points)
+        => string.Join(
+            Environment.NewLine,
+            points.Select(point => $"[{(point.Covered ? "✓" : "✗")}] {Truncate(point.Point ?? string.Empty, 120)}"));
 
     private static string BuildJudgePayload(AnswerCase answerCase, string answer)
     {
@@ -325,34 +410,70 @@ public sealed class LlmAnswerJudge(IChatClient judgeClient, string judgeModelId,
     private const string JudgeSystemPrompt =
         """
         You are a strict evaluator of retrieval-augmented answers. You are given a user QUESTION, the
-        SOURCES that were provided to the answerer (the ONLY admissible evidence), and the ANSWER that
-        was produced. Score each requested dimension on an integer scale of 1 (worst) to 5 (best) and
-        give one short reason for each. Treat only the SOURCES as evidence: reward answers that stay
-        grounded in them and that correctly abstain when the evidence is missing. A REFERENCE ANSWER
-        (gold) may also be provided; when it is, judge Correctness as factual equivalence to it.
+        SOURCES provided to the answerer (the ONLY admissible evidence), optionally a gold REFERENCE
+        ANSWER, and the ANSWER produced.
+
+        Judge substance, not length. Do not reward verbosity, hedging, or repetition: a concise, fully
+        grounded answer must score at least as high as a longer one, and unsupported elaboration must
+        lower the grounding scores rather than raise them.
+
+        Decompose the ANSWER into its atomic factual claims. For each claim decide, independently:
+        - Supported: is the claim fully entailed by the SOURCES (not outside knowledge)?
+        - Relevant: does the claim help answer the QUESTION (not a tangent)?
+        - HasCitation: does the claim carry an inline [[...]] citation?
+        - CitationSupportsClaim: if it is cited, does that cited source actually support the claim?
+
+        Separately, list the key points the QUESTION warrants — taken from the REFERENCE ANSWER if one
+        is provided, otherwise from what the SOURCES can support — and mark each as Covered by the
+        ANSWER or not. Do not invent points the sources cannot support.
+
+        If a REFERENCE ANSWER is provided, also score Correctness as factual equivalence to it (1–5),
+        ignoring wording and citation style. If no reference is provided, score Correctness 3.
         """;
 
     /// <summary>
     /// Structured judge output. MEAI generates the request's JSON schema from this type, so the
-    /// <see cref="DescriptionAttribute"/> text on each property is what guides the model per dimension
-    /// (the rubric lives here, not in hand-written prompt JSON).
+    /// <see cref="DescriptionAttribute"/> text on each property guides the model. Grounding/quality
+    /// metrics are computed from the per-claim and per-point verdicts as ratios (length-robust); only
+    /// Correctness, which is judged against a gold reference, stays a holistic score.
     /// </summary>
     private sealed record JudgeResult
     {
-        [Description("Is every factual claim in the answer supported by the sources? Penalise outside knowledge or claims not entailed by the sources; a correct abstention when evidence is missing is faithful.")]
-        public JudgeDimension? Faithfulness { get; init; }
+        [Description("Every atomic factual claim stated in the answer, each graded for grounding, relevance and citation.")]
+        public IReadOnlyList<ClaimVerdict>? Claims { get; init; }
 
-        [Description("Does each inline [[...]] citation point to a source that actually supports the adjacent claim? If there are no citations at all, score 1.")]
-        public JudgeDimension? CitationValidity { get; init; }
+        [Description("The key points the question warrants (from the reference answer if provided, else from what the sources support), each marked covered by the answer or not.")]
+        public IReadOnlyList<PointVerdict>? ExpectedPoints { get; init; }
 
-        [Description("Does the answer address the question directly, without drifting into unrelated material?")]
-        public JudgeDimension? Relevance { get; init; }
-
-        [Description("Does the answer cover the aspects of the question that the sources can support? Do not penalise omission of facts absent from the sources.")]
-        public JudgeDimension? Completeness { get; init; }
-
-        [Description("If a REFERENCE ANSWER (gold) is provided, is this answer factually equivalent to it — same key facts, no contradictions or missing essentials? Ignore differences in wording and citation style. If no reference is provided, score 3.")]
+        [Description("If a REFERENCE ANSWER (gold) is provided, is this answer factually equivalent to it — same key facts, no contradictions or missing essentials? Ignore wording and citation style. If no reference is provided, score 3.")]
         public JudgeDimension? Correctness { get; init; }
+    }
+
+    private sealed record ClaimVerdict
+    {
+        [Description("One atomic factual claim stated in the answer.")]
+        public string? Claim { get; init; }
+
+        [Description("True if the claim is fully entailed by the sources (not outside knowledge).")]
+        public bool Supported { get; init; }
+
+        [Description("True if the claim helps answer the question (not a tangent).")]
+        public bool Relevant { get; init; }
+
+        [Description("True if the claim carries an inline [[...]] citation in the answer.")]
+        public bool HasCitation { get; init; }
+
+        [Description("True if the claim is cited AND that cited source actually supports it. False if uncited or the citation does not support the claim.")]
+        public bool CitationSupportsClaim { get; init; }
+    }
+
+    private sealed record PointVerdict
+    {
+        [Description("A key point the question warrants, given the sources (or the reference answer if provided).")]
+        public string? Point { get; init; }
+
+        [Description("True if the answer covers this point.")]
+        public bool Covered { get; init; }
     }
 
     private sealed record JudgeDimension

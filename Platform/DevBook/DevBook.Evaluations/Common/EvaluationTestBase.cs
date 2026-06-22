@@ -2,6 +2,7 @@ namespace DevBook.Evaluations.Common;
 
 using System.Collections.Concurrent;
 using System.ClientModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.Text.Json;
 using DevBook.Evaluations.Common.Evaluators.SummaryGeneration;
@@ -42,6 +43,36 @@ public abstract class EvaluationTestBase<TPrediction>
     protected virtual string? SummaryGroupName => null;
 
     protected EvaluationRateLimitOptions RateLimitOptions { get; set; } = new();
+
+    // Live progress markers. TestContext.Progress streams to the console in real time and survives
+    // parallel execution — unlike Console/TestContext.Out, which NUnit buffers until the test ends.
+    // One START line per iteration and one DONE line carrying the outcome and a running completed-count
+    // is enough to confirm tests are executing and finishing.
+    private static int completedCount;
+    private long iterationStartTicks;
+
+    /// <summary>
+    /// Logs a START marker before each scenario iteration.
+    /// </summary>
+    [SetUp]
+    public void LogIterationStart()
+    {
+        this.iterationStartTicks = Stopwatch.GetTimestamp();
+        TestContext.Progress.WriteLine($"  -> START {TestContext.CurrentContext.Test.Name}");
+    }
+
+    /// <summary>
+    /// Logs a DONE marker with the outcome and elapsed time after each scenario iteration.
+    /// </summary>
+    [TearDown]
+    public void LogIterationDone()
+    {
+        var elapsed = Stopwatch.GetElapsedTime(this.iterationStartTicks);
+        var done = Interlocked.Increment(ref completedCount);
+        var outcome = TestContext.CurrentContext.Result.Outcome.Status; // Passed / Failed / Skipped
+        TestContext.Progress.WriteLine(
+            $"  <- DONE  [{done}] {TestContext.CurrentContext.Test.Name} :: {outcome} ({elapsed.TotalSeconds:F1}s)");
+    }
 
     /// <summary>
     /// Runs base setup.
@@ -213,6 +244,38 @@ public abstract class EvaluationTestBase<TPrediction>
     {
         var datasetPath = Path.Combine(AppContext.BaseDirectory, "Datasets", datasetFileName);
         return JsonSerializer.Deserialize<TDataset>(File.ReadAllText(datasetPath), JsonOptions) ?? new TDataset();
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether the run requested the smaller "mini" datasets
+    /// (set by <c>RunEvaluation.cs --mini</c>, which exports <c>EVAL_DATASET=mini</c>).
+    /// </summary>
+    protected static bool UseMiniDatasets =>
+        string.Equals(Environment.GetEnvironmentVariable("EVAL_DATASET"), "mini", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Returns true when a dataset file exists in the Datasets output folder.
+    /// </summary>
+    /// <param name="datasetFileName">Dataset file name under the Datasets output folder.</param>
+    protected static bool DatasetExists(string datasetFileName) =>
+        File.Exists(Path.Combine(AppContext.BaseDirectory, "Datasets", datasetFileName));
+
+    /// <summary>
+    /// Resolves which dataset file to load for a given canonical (full) file name. When the run is in
+    /// mini mode (<see cref="UseMiniDatasets"/>) and a <c>&lt;name&gt;-mini&lt;ext&gt;</c> sibling exists,
+    /// that mini file is used; otherwise the full file name is returned unchanged. This is the single
+    /// place the "mini where it exists, else full" rule lives.
+    /// </summary>
+    /// <param name="fullDatasetFileName">The canonical full dataset file name (e.g. <c>chunks-shared.json</c>).</param>
+    protected static string ResolveDatasetVariant(string fullDatasetFileName)
+    {
+        if (!UseMiniDatasets)
+        {
+            return fullDatasetFileName;
+        }
+
+        var miniFileName = $"{Path.GetFileNameWithoutExtension(fullDatasetFileName)}-mini{Path.GetExtension(fullDatasetFileName)}";
+        return DatasetExists(miniFileName) ? miniFileName : fullDatasetFileName;
     }
 
     /// <summary>

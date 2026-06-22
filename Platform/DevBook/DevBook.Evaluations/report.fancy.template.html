@@ -123,12 +123,14 @@ function styleMessages(msgs){
   const body={fontSize:'12.5px',lineHeight:'1.5',color:'var(--fg2)'};
   const wrap={border:'1px solid var(--line)',borderRadius:'2px',padding:'10px 12px',background:'var(--panel2)'};
   const userRoles={user:1,question:1,source:1,query:1};
+  const systemRoles={system:1};
   return (msgs||[]).map(m=>{
-    let rs,w=wrap,bs=body;
-    if(m.isTool){rs=roleStyle(hexTint(th.warn,isDark?0.20:0.14),th.warn,hexTint(th.warn,0.4));bs={...body,fontFamily:'var(--fnum)',fontSize:'11.5px'};}
-    else if(userRoles[m.role]){rs=roleStyle(hexTint(th.accent,isDark?0.18:0.12),'var(--fg)','var(--line2)');if(m.role==='source')bs={...body,fontFamily:'var(--fnum)',fontSize:'11.5px',whiteSpace:'pre-wrap'};if(m.role==='user')w={...wrap,background:'var(--panel)'};}
-    else{rs=roleStyle(hexTint(th.ok,isDark?0.18:0.12),th.ok,hexTint(th.ok,0.4));}
-    return {role:m.role,isTool:m.isTool,tool:m.tool,text:m.text,roleStyle:rs,wrap:w,bodyStyle:bs};
+    let rs,w=wrap,bs=body,align;
+    if(m.isTool){rs=roleStyle(hexTint(th.warn,isDark?0.20:0.14),th.warn,hexTint(th.warn,0.4));bs={...body,fontFamily:'var(--fnum)',fontSize:'11.5px'};align='center';}
+    else if(systemRoles[m.role]){rs=roleStyle(hexTint('#8a887c',isDark?0.18:0.12),'var(--fg2)','var(--line2)');align='center';}
+    else if(userRoles[m.role]){rs=roleStyle(hexTint(th.accent,isDark?0.18:0.12),'var(--fg)','var(--line2)');if(m.role==='source')bs={...body,fontFamily:'var(--fnum)',fontSize:'11.5px',whiteSpace:'pre-wrap'};if(m.role==='user')w={...wrap,background:'var(--panel)'};align='left';}
+    else{rs=roleStyle(hexTint(th.ok,isDark?0.18:0.12),th.ok,hexTint(th.ok,0.4));align='right';}
+    return {role:m.role,isTool:m.isTool,tool:m.tool,text:m.text,roleStyle:rs,wrap:w,bodyStyle:bs,align};
   });
 }
 
@@ -156,8 +158,11 @@ const rBase=RJ_RUNS[0]?RJ_RUNS[RJ_RUNS.length-1].run.id:DATA.run.id;
 const rBaseA=(RJ_RUNS.find(x=>x.run.id!==DATA.run.id)||{run:{}}).run.id||DATA.run.id;
 const jr=(JUDGE[0]&&JUDGE[0].runs)||[];
 const jHist0=(JUDGE[0]&&JUDGE[0].metricDefs.find(m=>!m.info))||{key:'intent'};
+// Follow the OS theme by default. `modeUserSet` flips once the user clicks the toggle,
+// after which we stop tracking the system preference for the rest of the session.
+const prefersDark=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;
 const state={
-  cat:'rag', tab:'run', mode:'light',
+  cat:'rag', tab:'run', mode:prefersDark?'dark':'light', modeUserSet:false,
   search:'', failedOnly:false, diff:'all', expanded:{}, drillLimit:25,
   rMetric:'recall', rLevel:'chunk', rSortKey:'recall', rSortDir:'desc',
   rDrillCfg:DATA.winnerId||(DATA.configs[0]&&DATA.configs[0].id),
@@ -239,14 +244,24 @@ function assembleDrill(items,opts){
       const cardsHtml=q.metricDetail.map(dm=>{
         const ctx=dm.hasContext?`<div style="display:flex;flex-direction:column;gap:3px;margin-bottom:7px">${dm.context.map(cx=>`<div style="font-family:var(--fnum);font-size:10.5px;line-height:1.45;color:var(--fg3);padding:5px 9px;border-left:2px solid var(--line2);background:var(--panel)"><span style="color:var(--fg2);font-weight:700">${esc(cx.label)}</span> ${esc(cx.text)}</div>`).join('')}</div>`:'';
         const diag=dm.hasDiag?`<div style="display:flex;flex-direction:column;gap:3px;margin-bottom:7px">${dm.diagnostics.map(dg=>`<div style="${css(dg.style)}"><span style="font-weight:700;flex:none">${esc(dg.icon)}</span><span>${esc(dg.message)}</span></div>`).join('')}</div>`:'';
-        const meta=dm.metadata.map(md=>`<span><span style="color:var(--fg2)">${esc(md.k)}</span> ${esc(md.v)}</span>`).join('');
+        const meta=dm.metadata.length?`<div style="display:flex;flex-wrap:wrap;gap:4px 14px;font-family:var(--fnum);font-size:10px;color:var(--fg3)">${dm.metadata.map(md=>`<span><span style="color:var(--fg2)">${esc(md.k)}</span> ${esc(md.v)}</span>`).join('')}</div>`:'';
         const chip=dm.chip.display==='none'?'':`<span style="${css(dm.chip)}">${esc(dm.rating)}</span>`;
-        return `<div style="${css(dm.cardStyle)}"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px"><span style="${css(dm.groupDot)}"></span><span style="font-family:var(--fnum);font-size:12.5px;font-weight:700;color:var(--fg)">${esc(dm.name)}</span><span style="font-family:var(--fnum);font-size:12.5px;color:var(--fg2)">${esc(dm.valStr)}</span>${chip}<span style="flex:1"></span><span style="font-family:var(--fnum);font-size:10px;color:var(--fg3)">${esc(dm.kindLabel)}</span><span title="${esc(dm.desc)}" style="flex:none;width:14px;height:14px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line2);border-radius:50%;font-size:9px;color:var(--fg3);cursor:help">?</span></div><div style="font-size:12px;line-height:1.5;color:var(--fg2);margin-bottom:7px">${esc(dm.reason)}</div>${ctx}${diag}<div style="display:flex;flex-wrap:wrap;gap:4px 14px;font-family:var(--fnum);font-size:10px;color:var(--fg3)">${meta}</div></div>`;
+        return `<div style="${css(dm.cardStyle)}"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px"><span style="${css(dm.groupDot)}"></span><span title="${esc(dm.desc)}" style="font-family:var(--fnum);font-size:12.5px;font-weight:700;color:var(--fg);text-decoration:underline dotted;text-decoration-color:var(--line2);text-underline-offset:3px;cursor:help">${esc(dm.name)}</span><span style="font-family:var(--fnum);font-size:12.5px;color:var(--fg2)">${esc(dm.valStr)}</span>${chip}<span style="flex:1"></span><span style="font-family:var(--fnum);font-size:10px;color:var(--fg3)">${esc(dm.kindLabel)}</span></div><div style="font-size:12px;line-height:1.5;color:var(--fg2);margin-bottom:7px">${esc(dm.reason)}</div>${ctx}${diag}${meta}</div>`;
       }).join('');
-      const msgsHtml=q.messages.map(msg=>`<div style="${css(msg.wrap)}"><div style="display:flex;align-items:center;gap:7px;margin-bottom:5px"><span style="${css(msg.roleStyle)}">${esc(msg.role)}</span>${msg.isTool?`<span style="font-family:var(--fnum);font-size:11px;color:var(--fg3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(msg.tool)}</span>`:''}</div><div style="${css(msg.bodyStyle)}">${esc(msg.text)}</div></div>`).join('');
+      const msgsHtml=q.messages.map(msg=>{
+        const al=opts.chat?(msg.align||'left'):'block';
+        const tool=msg.isTool?`<span style="font-family:var(--fnum);font-size:11px;color:var(--fg3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(msg.tool)}</span>`:'';
+        const headJustify=al==='right'?'flex-end':'flex-start';
+        const head=`<div style="display:flex;align-items:center;gap:7px;margin-bottom:5px;justify-content:${headJustify}"><span style="${css(msg.roleStyle)}">${esc(msg.role)}</span>${tool}</div>`;
+        const wrapStyle=(al==='left'||al==='right')?{...msg.wrap,maxWidth:'84%'}:msg.wrap;
+        const bubble=`<div style="${css(wrapStyle)}">${head}<div style="${css(msg.bodyStyle)}">${esc(msg.text)}</div></div>`;
+        if(al==='block')return bubble;
+        const rowJustify=al==='right'?'flex-end':al==='center'?'center':'flex-start';
+        return `<div style="display:flex;justify-content:${rowJustify}">${bubble}</div>`;
+      }).join('');
       detail=`<div style="display:grid;grid-template-columns:1.15fr 1fr;gap:22px;padding:6px 18px 22px 30px"><div style="min-width:0"><div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--fg3);margin-bottom:8px">Metrics · ${q.metricCount} evaluated</div><div style="display:flex;flex-direction:column;gap:9px">${cardsHtml}</div></div><div style="min-width:0"><div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--fg3);margin-bottom:8px">${esc(q.convLabel)}</div><div style="display:flex;flex-direction:column;gap:8px">${msgsHtml}</div></div></div>`;
     }
-    return `<div style="${css(containerStyle)}"><div data-act="exp" data-val="${esc(q.id)}" style="${css(rowStyle)}"><span style="position:absolute;left:10px;top:14px;font-size:10px;color:var(--fg3)">${isExp?'▾':'▸'}</span><div style="min-width:0"><div style="display:flex;align-items:center;gap:9px;margin-bottom:6px;flex-wrap:wrap"><span style="${css(passStyle)}">${q.pass?'PASS':'FAIL'}</span>${q.diff?`<span style="${css(diffStyleMap[q.diff]||diffStyleBase)}">${esc(q.diff)}</span>`:''}<span style="font-family:var(--fnum);font-size:11px;color:var(--fg3)">${esc(q.id)}</span></div><div style="font-size:13.5px;font-weight:600;line-height:1.4;color:var(--fg);margin-bottom:8px">${esc(q.title)}</div><div style="font-size:12.5px;line-height:1.45;color:var(--fg2)">${esc(q.subtitle)}</div></div><div style="min-width:0;display:flex;flex-direction:column;gap:6px;align-items:flex-end"><div style="display:flex;flex-wrap:wrap;gap:5px;justify-content:flex-end">${chips}</div><span style="font-family:var(--fnum);font-size:10.5px;color:var(--fg3)">${esc(q.chipNote)}</span></div></div>${detail}</div>`;
+    return `<div style="${css(containerStyle)}"><div data-act="exp" data-val="${esc(q.id)}" style="${css(rowStyle)}"><span style="position:absolute;left:10px;top:14px;font-size:10px;color:var(--fg3)">${isExp?'▾':'▸'}</span><div style="min-width:0"><div style="display:flex;align-items:center;gap:9px;margin-bottom:6px;flex-wrap:wrap"><span style="${css(passStyle)}">${q.pass?'PASS':'FAIL'}</span>${q.diff?`<span style="${css(diffStyleMap[q.diff]||diffStyleBase)}">${esc(q.diff)}</span>`:''}<span style="font-family:var(--fnum);font-size:11px;color:var(--fg3)">${esc(q.id)}</span></div><div style="font-size:13.5px;font-weight:600;line-height:1.4;color:var(--fg)${q.subtitle?';margin-bottom:8px':''}">${esc(q.title)}</div>${q.subtitle?`<div style="font-size:12.5px;line-height:1.45;color:var(--fg2)">${esc(q.subtitle)}</div>`:''}</div><div style="min-width:0;display:flex;flex-direction:column;gap:6px;align-items:flex-end"><div style="display:flex;flex-wrap:wrap;gap:5px;justify-content:flex-end">${chips}</div><span style="font-family:var(--fnum);font-size:10.5px;color:var(--fg3)">${esc(q.chipNote)}</span></div></div>${detail}</div>`;
   }).join('');
   const diffs=segGroup('diff',[['all','All'],['easy','Easy'],['medium','Medium'],['hard','Hard']].map(([v,l])=>({val:v,label:l,on:S.diff===v})));
   const failedBtn=`<button data-act="failed" style="${css({fontFamily:'var(--fbody)',fontSize:'12px',fontWeight:'600',padding:'7px 13px',borderRadius:'2px',cursor:'pointer',border:'1px solid '+(S.failedOnly?'var(--accent)':'var(--line2)'),background:S.failedOnly?'var(--accent)':'var(--panel)',color:S.failedOnly?'var(--accentFg)':'var(--fg2)'})}">Failures only</button>`;
@@ -422,9 +437,11 @@ function renderRetrieval(){
     const metricDetail=DETAIL_METRICS.map(spec=>{const m=rec.dm[spec.key]||{v:null,rt:'Unknown',in:''};
       const failed=(spec.key===GATE)?!rec.p:(m.rt==='Poor'||m.rt==='Unacceptable');
       let context=[],diagnostics=[];
-      if(spec.key===GATE){context=[{label:'expected:',text:expected.map(e=>e.note+(e.heading?'#'+e.heading:'')).join(' · ')||'—'}];if(failed)diagnostics=[{severity:'warning',message:(N-matched)+' expected evidence chunk(s) not credited within the top-'+N+' budget.'}];}
+      if(spec.key===GATE){context=[{label:'expected:',text:expected.map(e=>e.note+(e.heading?'#'+e.heading:'')).join(' · ')||'—'}];if(failed&&N>0)diagnostics=[{severity:'warning',message:(N-matched)+' of '+N+' expected evidence chunk(s) not credited within the top-'+N+' budget.'}];}
       if(spec.key==='map'&&rec.diag&&rec.diag[0]!=null&&rec.diag[1]!=null)diagnostics=[{severity:'informational',message:'Credited score avg '+fmt(rec.diag[0],3)+' vs uncredited '+fmt(rec.diag[1],3)+' (gap '+fmt(rec.diag[0]-rec.diag[1],3)+').'}];
-      return buildMetricCard({key:spec.key,name:spec.label,group:'Retrieval',info:false,value:m.v,valStr:fmt(m.v),rating:m.rt,failed,kindLabel:'numeric 0–1',reason:m.in,context,diagnostics,metadata:[{k:'judge',v:'snippet-match'},{k:'n',v:'1 query'},{k:'cutoff',v:'top-'+Math.max(N,10)}]});
+      // No metadata rows: retrieval metrics are computed algorithmically (no LLM judge), and a
+      // per-case n/cutoff would be constant noise. buildMetricCard renders nothing for [].
+      return buildMetricCard({key:spec.key,name:spec.label,group:'Retrieval',info:false,value:m.v,valStr:fmt(m.v),rating:m.rt,failed,kindLabel:'numeric 0–1',reason:m.in,context,diagnostics,metadata:[]});
     });
     const roleQ={fontFamily:'var(--fnum)',fontSize:'10px',fontWeight:'700',letterSpacing:'.06em',textTransform:'uppercase',padding:'1px 7px',borderRadius:'2px',background:hexTint(th2.accent,state.mode==='dark'?0.18:0.12),color:'var(--fg)',border:'1px solid var(--line2)'};
     const messages=[{role:'query',isTool:false,tool:'',text:def.query||'',roleStyle:roleQ,wrap:{border:'1px solid var(--line)',borderRadius:'2px',padding:'10px 12px',background:'var(--panel2)'},bodyStyle:{fontSize:'12.5px',lineHeight:'1.5',color:'var(--fg2)'}}];
@@ -435,7 +452,7 @@ function renderRetrieval(){
         bodyStyle:{fontFamily:'var(--fnum)',fontSize:'11.5px',color:match?'var(--fg)':'var(--fg2)'}});});
     const chips=metricDetail.map(d=>({label:d.name.replace('@10','').replace('AtR','@R').replace('Rate@1','@1'),title:d.name+': '+d.valStr+' ('+d.rating+')',style:{fontFamily:'var(--fnum)',fontSize:'10px',fontWeight:'700',padding:'2px 6px',borderRadius:'2px',background:ratingColor(d.rating),color:ratingTextOn(d.rating)}}));
     return {id:rec.id,pass:rec.p,diff:def.difficulty,searchText:(def.query||'')+' '+expected.map(e=>e.note).join(' ')+' '+retrieved.map(x=>x.raw).join(' '),
-      title:def.query||rec.id,subtitle:'Expected evidence: '+(expected.map(e=>e.note+(e.heading?'#'+e.heading:'')).join(' · ')||'—'),
+      title:def.query||rec.id,subtitle:'',
       chips,chipNote:matched+'/'+N+' evidence found',metricCount:metricDetail.length,metricDetail,messages,convLabel:'Query & retrieved evidence'};
   });
   const drillHtml=assembleDrill(items,{title:'Per-query retrieval trace',subtitle:'Metrics, judge reasoning, expected evidence and diagnostics on the left; the query and ranked retrieved chunks on the right.',noun:'queries',searchPlaceholder:'Search queries or evidence notes…',hasConfig:true,configValue:S.rDrillCfg,configOptions:configs.map(c=>({id:c.id,label:c.chunker+' × '+c.rShort+'  ·  RecallAtR '+fmt(c.levels.chunk.recall.v)})),methodology:"Methodology — point estimates, ratings and per-metric interpretation are read verbatim from the run's stored results; pass/fail is the store's authoritative RecallAtR fail flag. Found evidence is reconciled to the RecallAtR count; matching is a heuristic note(+heading) comparison from citation labels (headingless chunkers match on note alone). Switch the configuration above to inspect any of the "+configs.length+" pipelines."});
@@ -490,7 +507,10 @@ function renderJudge(spec){
   const passN=scenarios.filter(s=>s.pass).length,failN=scenarios.length-passN,passPct=Math.round(passN/scenarios.length*100);
   const ratingCounts={};RATINGS().forEach(rt=>ratingCounts[rt]=0);let totalCells=0;
   scenarios.forEach(s=>judged.forEach(md=>{ratingCounts[s.metrics[md.key].rating]++;totalCells++;}));
-  const gateBar=RATINGS().map(rt=>`<div style="width:${ratingCounts[rt]/totalCells*100}%;background:${ratingColor(rt)}" title="${rt}: ${ratingCounts[rt]}"></div>`).join('');
+  // The 5 rating segments plus a neutral remainder for any non-standard ratings (e.g. Inconclusive from
+  // judge parse errors), so the distribution bar always fills its full width instead of leaving a gap.
+  const ratingSegs=(counts,total)=>{const t=total||1;const segs=RATINGS().map(rt=>`<div style="width:${(counts[rt]||0)/t*100}%;background:${ratingColor(rt)}" title="${rt}: ${counts[rt]||0}"></div>`).join('');const other=total-RATINGS().reduce((a,rt)=>a+(counts[rt]||0),0);return segs+(other>0.5?`<div style="width:${other/t*100}%;background:var(--line2)" title="Inconclusive / not scored: ${Math.round(other)}"></div>`:'');};
+  const gateBar=ratingSegs(ratingCounts,totalCells);
   const gateLegend=RATINGS().map(rt=>`<div style="display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:2px;background:${ratingColor(rt)};display:inline-block"></span><span style="font-size:11px;color:var(--fg2)">${rt}</span><span style="font-family:var(--fnum);font-size:11px;color:var(--fg3)">${ratingCounts[rt]}</span></div>`).join('');
   const gateRating=passPct>=85?'Good':passPct>=65?'Average':'Poor';
   const failedCells=scenarios.reduce((acc,s)=>acc+judged.filter(md=>s.metrics[md.key].failed).length,0);
@@ -499,39 +519,36 @@ function renderJudge(spec){
   const summaryCards=[{k:'Pass rate',v:passPct+'%',sub:passN+' of '+scenarios.length,c:passPct>=85?th.ok:passPct>=65?'var(--fg)':th.danger},{k:'Failed values',v:String(failedCells),sub:'of '+totalCells+' judged',c:failedCells?th.danger:th.ok},...meanMetrics.map(md=>({k:'Mean '+md.name,v:fmt(meanOf(md.key),2),sub:'1–5 scale',c:'var(--fg)'}))]
     .map(c=>`<div style="flex:1 1 33%;min-width:120px;padding:15px 17px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)"><div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--fg3);margin-bottom:8px">${esc(c.k)}</div><div style="font-family:var(--fnum);font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1;color:${c.c}">${esc(c.v)}</div><div style="font-family:var(--fnum);font-size:11px;color:var(--fg3);margin-top:5px">${esc(c.sub)}</div></div>`).join('');
   const ratingLegend=RATINGS().map(rt=>`<div style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:2px;background:${ratingColor(rt)};display:inline-block"></span><span style="font-size:11px;color:var(--fg2)">${rt}</span></div>`).join('');
-  const gateHtml=`<div style="display:grid;grid-template-columns:1.1fr 1.6fr;gap:18px;margin-bottom:34px"><div style="position:relative;border:1px solid var(--line2);border-radius:2px;padding:22px 24px;background:var(--panel);overflow:hidden"><div style="position:absolute;top:0;left:0;right:0;height:4px;background:var(--accent)"></div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);margin-bottom:14px">Evaluation gate</div><div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--fnum);font-size:50px;font-weight:700;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums">${passPct}%</span><span style="${css({display:'inline-block',padding:'3px 9px',borderRadius:'2px',fontSize:'11px',fontWeight:'700',...badge(gateRating)})}">${passN}/${scenarios.length} pass</span></div><div style="font-family:var(--fnum);font-size:12.5px;color:var(--fg3);margin-top:8px">${failN} ${spec.unit.replace(/s$/,'')}${failN===1?'':'s'} tripped a failure threshold across ${totalCells} judged metric values.</div><div style="display:flex;height:9px;border-radius:5px;overflow:hidden;margin-top:16px;border:1px solid var(--line)">${gateBar}</div><div style="display:flex;flex-wrap:wrap;gap:10px 16px;margin-top:13px">${gateLegend}</div></div><div style="display:flex;flex-wrap:wrap;gap:0;border:1px solid var(--line);border-radius:2px;overflow:hidden;background:var(--panel);align-content:flex-start">${summaryCards}</div></div>`;
+  const gateHtml=`<div style="display:grid;grid-template-columns:1.1fr 1.6fr;gap:18px;margin-bottom:34px;align-items:stretch"><div style="position:relative;border:1px solid var(--line2);border-radius:2px;padding:22px 24px;background:var(--panel);overflow:hidden"><div style="position:absolute;top:0;left:0;right:0;height:4px;background:var(--accent)"></div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);margin-bottom:14px">Evaluation gate</div><div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--fnum);font-size:50px;font-weight:700;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums">${passPct}%</span><span style="${css({display:'inline-block',padding:'3px 9px',borderRadius:'2px',fontSize:'11px',fontWeight:'700',...badge(gateRating)})}">${passN}/${scenarios.length} pass</span></div><div style="font-family:var(--fnum);font-size:12.5px;color:var(--fg3);margin-top:8px">${failN} ${spec.unit.replace(/s$/,'')}${failN===1?'':'s'} tripped a failure threshold across ${totalCells} judged metric values.</div><div style="display:flex;height:9px;border-radius:5px;overflow:hidden;margin-top:16px;border:1px solid var(--line)">${gateBar}</div><div style="display:flex;flex-wrap:wrap;gap:10px 16px;margin-top:13px">${gateLegend}</div></div><div style="display:flex;flex-wrap:wrap;gap:0;border-top:1px solid var(--line);border-left:1px solid var(--line);border-radius:2px;overflow:hidden;background:var(--panel);align-content:stretch">${summaryCards}</div></div>`;
   /* overview */
-  const overview=judged.map(md=>{const ms=scenarios.map(s=>s.metrics[md.key]);const counts={};RATINGS().forEach(rt=>counts[rt]=0);ms.forEach(m=>counts[m.rating]++);
-    const segs=RATINGS().map(rt=>`<div style="width:${counts[rt]/ms.length*100}%;background:${ratingColor(rt)}" title="${rt}: ${counts[rt]}"></div>`).join('');
-    const mean=ms.reduce((a,m)=>a+m.value,0)/ms.length,passRate=Math.round(ms.filter(m=>!m.failed).length/ms.length*100),meanS=md.kind==='fraction'?fmt(mean,2):fmt(mean,1);
-    return `<div style="display:grid;grid-template-columns:188px 78px minmax(0,1fr) 116px;gap:16px;align-items:center;padding:11px 18px;border-top:1px solid var(--line)"><div style="min-width:0"><div style="display:flex;align-items:center;gap:7px"><span style="width:8px;height:8px;border-radius:50%;background:${groupColor(md.group)};display:inline-block;flex:none"></span><span style="font-size:13px;font-weight:600;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(md.name)}</span><span title="${esc(md.desc)}" style="flex:none;width:14px;height:14px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line2);border-radius:50%;font-size:9px;color:var(--fg3);cursor:help">?</span></div><div style="font-family:var(--fnum);font-size:10.5px;color:var(--fg3);margin-top:3px">${esc(md.scaleLabel)}</div></div><div style="font-family:var(--fnum);font-size:18px;font-weight:700;color:var(--fg);text-align:right;font-variant-numeric:tabular-nums">${meanS}</div><div style="display:flex;height:13px;border-radius:4px;overflow:hidden;border:1px solid var(--line)">${segs}</div><div style="font-family:var(--fnum);font-size:12px;font-weight:700;text-align:right;color:${passRate>=85?th.ok:passRate>=60?'var(--fg2)':th.danger};font-variant-numeric:tabular-nums">${passRate}% pass</div></div>`;
-  }).join('');
-  const overviewHtml=`<div style="margin-bottom:38px"><div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:16px"><div><div style="font-family:var(--fhead);font-size:20px;font-weight:700;letter-spacing:-.01em">Metric overview</div><div style="font-size:12.5px;color:var(--fg3);margin-top:2px">Every metric the report carries — rating distribution across ${scenarios.length} items. Rendered straight from the result set.</div></div><div style="display:flex;gap:18px;flex-wrap:wrap;align-items:center">${ratingLegend}</div></div><div style="border:1px solid var(--line);border-radius:2px;overflow:hidden;background:var(--panel)">${overview}</div></div>`;
-  /* heat strips */
+  /* metric overview — per-metric distribution shown as a heat strip, with group + sort controls */
   const visMetrics=S.jGroup==='all'?judged:judged.filter(m=>m.group.toLowerCase()===S.jGroup);
   let order=scenarios.slice();
   if(S.jSortKey==='__name')order.sort((a,b)=>S.jSortDir==='asc'?a.name.localeCompare(b.name):b.name.localeCompare(a.name));
   else if(S.jSortKey==='__fail')order.sort((a,b)=>(b.failCount-a.failCount)||a.name.localeCompare(b.name));
-  else order.sort((a,b)=>{const x=a.metrics[S.jSortKey].good,y=b.metrics[S.jSortKey].good;return S.jSortDir==='asc'?x-y:y-x;});
+  else order.sort((a,b)=>{const x=(a.metrics[S.jSortKey]||{}).good||0,y=(b.metrics[S.jSortKey]||{}).good||0;return S.jSortDir==='asc'?x-y:y-x;});
   const arrowFor=k=>S.jSortKey===k?(S.jSortDir==='asc'?'▲':'▼'):'';
   const sortControls=segGroup('jSort',[['__fail','Most failures'],['__name','Name']].map(([v,l])=>({val:v,label:l,on:S.jSortKey===v})));
   const sortNote=S.jSortKey==='__name'?'ordered by name':S.jSortKey==='__fail'?'ordered by failure count':'ordered by '+((defs.find(m=>m.key===S.jSortKey)||{}).name)+' '+(S.jSortDir==='asc'?'(worst first)':'(best first)');
   const groupNames=['all',...Array.from(new Set(judged.map(m=>m.group.toLowerCase())))];
   const groupFilter=segGroup('jGroup',groupNames.map(k=>({val:k,label:k==='all'?'All':k.charAt(0).toUpperCase()+k.slice(1),on:S.jGroup===k})));
-  const stripRows=visMetrics.map(md=>{const ms=order.map(s=>s.metrics[md.key]);const mean=ms.reduce((a,m)=>a+m.value,0)/ms.length;const active=S.jSortKey===md.key;
-    const cells=order.map(s=>{const m=s.metrics[md.key];const g=m.good;return `<div data-act="strip" data-val="${esc(s.id)}" title="${esc(s.name+' — '+md.name+': '+m.valStr+' ('+m.rating+')')}" style="flex:1 1 0;min-width:1px;height:100%;cursor:pointer;background:${heat(g)}"></div>`;}).join('');
-    return `<div style="display:grid;grid-template-columns:186px minmax(0,1fr);gap:14px;align-items:center"><div data-act="jSort" data-val="${md.key}" style="display:flex;align-items:center;gap:6px;padding:0 10px;cursor:pointer;user-select:none;color:${active?'var(--fg)':'var(--fg2)'}"><span style="width:7px;height:7px;border-radius:50%;background:${groupColor(md.group)};display:inline-block;flex:none"></span><span style="font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(md.name)}</span><span title="${esc(md.desc)}" style="flex:none;width:13px;height:13px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line2);border-radius:50%;font-size:8.5px;color:var(--fg3);cursor:help">?</span><span style="flex:1"></span><span style="font-family:var(--fnum);font-size:12px;font-weight:700;color:var(--fg);font-variant-numeric:tabular-nums">${md.kind==='fraction'?fmt(mean,2):fmt(mean,1)}</span><span style="font-size:9px;color:var(--accent);width:9px">${arrowFor(md.key)}</span></div><div style="display:flex;height:${STRIPH}px;width:100%;border-radius:2px;overflow:hidden;border:1px solid var(--line)">${cells}</div></div>`;
+  const ovData=visMetrics.map(md=>{const ms=order.map(s=>s.metrics[md.key]);const passRate=Math.round(ms.filter(m=>!m.failed).length/ms.length*100);return {md,ms,passRate};});
+  ovData.sort((a,b)=>b.passRate-a.passRate);  // metric rows ordered by pass rate, 100% → 0%
+  const ovRows=ovData.map(({md,ms,passRate})=>{
+    const mean=ms.reduce((a,m)=>a+m.value,0)/ms.length,meanS=md.kind==='fraction'?fmt(mean,2):fmt(mean,1);
+    const cells=order.map(s=>{const m=s.metrics[md.key];return `<div data-act="strip" data-val="${esc(s.id)}" title="${esc(s.name+' — '+md.name+': '+m.valStr+' ('+m.rating+')')}" style="flex:1 1 0;min-width:1px;height:100%;cursor:pointer;background:${heat(m.good)}"></div>`;}).join('');
+    return `<div style="display:grid;grid-template-columns:206px 56px minmax(0,1fr) 84px;gap:14px;align-items:center;padding:9px 16px;border-top:1px solid var(--line)"><div style="min-width:0"><div data-act="jSort" data-val="${md.key}" style="display:flex;align-items:center;gap:6px;user-select:none"><span style="width:8px;height:8px;border-radius:50%;background:${groupColor(md.group)};display:inline-block;flex:none"></span><span title="${esc(md.desc)}" style="font-family:var(--fnum);font-size:12.5px;font-weight:700;color:var(--fg);white-space:nowrap;text-decoration:underline dotted;text-decoration-color:var(--line2);text-underline-offset:3px;cursor:help">${esc(md.name)}</span><span style="font-size:9px;color:var(--accent);flex:none;width:9px;cursor:pointer">${arrowFor(md.key)}</span></div><div style="font-family:var(--fnum);font-size:10.5px;color:var(--fg3);margin-top:3px;padding-left:14px">${esc(md.scaleLabel)}</div></div><div style="font-family:var(--fnum);font-size:17px;font-weight:700;color:var(--fg);text-align:right;font-variant-numeric:tabular-nums">${meanS}</div><div style="display:flex;height:${STRIPH}px;width:100%;border-radius:2px;overflow:hidden;border:1px solid var(--line)">${cells}</div><div style="font-family:var(--fnum);font-size:12px;font-weight:700;text-align:right;color:${passRate>=85?th.ok:passRate>=60?'var(--fg2)':th.danger};font-variant-numeric:tabular-nums">${passRate}% pass</div></div>`;
   }).join('');
-  const stripsHtml=`<div style="margin-bottom:38px"><div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px"><div><div style="font-family:var(--fhead);font-size:20px;font-weight:700;letter-spacing:-.01em">Metric heat strips</div><div style="font-size:12.5px;color:var(--fg3);margin-top:2px">One strip per metric · each sliver is one item (${scenarios.length} total) · ${esc(sortNote)}. Click a metric to re-sort, click a sliver to open it.</div></div><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><div style="display:flex;align-items:center;gap:7px"><span style="font-size:11px;color:var(--fg3);text-transform:uppercase;letter-spacing:.07em">Group</span><div style="display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:2px;padding:2px">${groupFilter}</div></div><div style="display:flex;align-items:center;gap:7px"><span style="font-size:11px;color:var(--fg3);text-transform:uppercase;letter-spacing:.07em">Sort</span><div style="display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:2px;padding:2px">${sortControls}</div></div></div></div><div style="border:1px solid var(--line);border-radius:2px;background:var(--panel);padding:14px 16px;display:flex;flex-direction:column;gap:7px">${stripRows}<div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-top:6px;padding-top:11px;border-top:1px solid var(--line)"><span style="font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--fg3)">Worse → better</span>${ratingLegend}</div></div></div>`;
+  const overviewHtml=`<div style="margin-bottom:38px"><div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px"><div><div style="font-family:var(--fhead);font-size:20px;font-weight:700;letter-spacing:-.01em">Metric overview</div><div style="font-size:12.5px;color:var(--fg3);margin-top:2px">Metrics ordered by pass rate — each strip is the per-item distribution across ${scenarios.length} items (slivers ${esc(sortNote)}). Hover a metric for its definition, click it to re-sort the slivers, or click a sliver to open that item.</div></div><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><div style="display:flex;align-items:center;gap:7px"><span style="font-size:11px;color:var(--fg3);text-transform:uppercase;letter-spacing:.07em">Group</span><div style="display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:2px;padding:2px">${groupFilter}</div></div><div style="display:flex;align-items:center;gap:7px"><span style="font-size:11px;color:var(--fg3);text-transform:uppercase;letter-spacing:.07em">Sort</span><div style="display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:2px;padding:2px">${sortControls}</div></div></div></div><div style="border:1px solid var(--line);border-radius:2px;overflow:hidden;background:var(--panel)">${ovRows}<div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:11px 16px;border-top:1px solid var(--line);background:var(--panel2)"><span style="font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--fg3)">Worse → better</span>${ratingLegend}</div></div></div>`;
   /* drill */
   const items=scenarios.map(s=>{
-    const chips=judged.map(md=>{const m=s.metrics[md.key];return {label:md.short,title:md.name+': '+m.valStr+' ('+m.rating+')',style:{fontFamily:'var(--fnum)',fontSize:'10px',fontWeight:'700',padding:'2px 6px',borderRadius:'2px',background:ratingColor(m.rating),color:ratingTextOn(m.rating),opacity:m.failed?1:0.92,outline:m.failed?'1px solid '+th.danger:'none'}};});
+    const chips=judged.map(md=>{const m=s.metrics[md.key];return {label:md.name,title:md.name+': '+m.valStr+' ('+m.rating+')',style:{fontFamily:'var(--fnum)',fontSize:'10px',fontWeight:'700',padding:'2px 6px',borderRadius:'2px',background:ratingColor(m.rating),color:ratingTextOn(m.rating),opacity:m.failed?1:0.92,outline:m.failed?'1px solid '+th.danger:'none'}};});
     const metricDetail=defs.map(md=>buildMetricCard(s.metrics[md.key]));
     const messages=styleMessages(s.messages);
     const convLabel=spec.msg==='summ'?'Source & summary':spec.msg==='qa'?'Question & answer':'Conversation';
-    return {id:s.id,pass:s.pass,diff:s.diff,searchText:s.name+' '+s.task,title:s.name,subtitle:s.task,chips,chipNote:s.failCount?s.failCount+' below threshold':'all metrics pass',metricCount:defs.length,metricDetail,messages,convLabel};
+    return {id:s.id,pass:s.pass,diff:s.diff,searchText:s.name+' '+s.task,title:s.name,subtitle:s.task===s.name?'':s.task,chips,chipNote:s.failCount?s.failCount+' below threshold':'all metrics pass',metricCount:defs.length,metricDetail,messages,convLabel};
   });
-  const drillHtml=assembleDrill(items,{title:'Per-'+spec.unit.replace(/s$/,'')+' judge trace',subtitle:'Metrics, judge reasoning, diagnostics, context and evaluator metadata on the left; the full '+(spec.msg==='summ'?'source and summary':spec.msg==='qa'?'question and answer':'conversation')+' on the right.',noun:spec.unit,searchPlaceholder:'Search '+spec.unit+', tasks or evidence…',methodology:'Methodology — each '+spec.unit.replace(/s$/,'')+' is scored by an LLM judge ('+r.judge+') against the configured evaluators for this category. Numeric metrics use a 1–5 quality scale, fractional metrics a 0–1 scale, and safety metrics the 0–7 content-severity scale (lower is better). A '+spec.unit.replace(/s$/,'')+' fails the gate when any metric falls below its evaluator’s failure threshold. Everything shown is read straight from this scenario'+"'"+'s stored results — nothing is hard-coded to a specific evaluator or category.'});
+  const drillHtml=assembleDrill(items,{title:'Per-'+spec.unit.replace(/s$/,'')+' judge trace',subtitle:'Metrics, judge reasoning, diagnostics, context and evaluator metadata on the left; the full '+(spec.msg==='summ'?'source and summary':spec.msg==='qa'?'question and answer':'conversation')+' on the right.',noun:spec.unit,chat:true,searchPlaceholder:'Search '+spec.unit+', tasks or evidence…',methodology:'Methodology — each '+spec.unit.replace(/s$/,'')+' is scored by an LLM judge ('+r.judge+') against the configured evaluators for this category. Numeric metrics use a 1–5 quality scale, fractional metrics a 0–1 scale, and safety metrics the 0–7 content-severity scale (lower is better). A '+spec.unit.replace(/s$/,'')+' fails the gate when any metric falls below its evaluator’s failure threshold. Everything shown is read straight from this scenario'+"'"+'s stored results — nothing is hard-coded to a specific evaluator or category.'});
   /* history */
   const runs=spec.runs,hKey=(defs.find(m=>m.key===S.jHistMetric)?S.jHistMetric:judged[0].key),hmd=defs.find(m=>m.key===hKey);
   const hAgg=arr=>S.jHistAgg==='mean'?arr.reduce((a,b)=>a+b,0)/arr.length:(hmd.better==='low'?Math.max(...arr):Math.min(...arr));
@@ -541,14 +558,14 @@ function renderJudge(spec){
   const histVM=runs.length<2?{empty:true,message:'This scenario has only one stored run, so there is no run-over-run history yet. Run '+spec.label+' again and this chart will track '+hmd.name+' across runs.'}:buildHistory({series,dpv,better:hmd.better,severity:hmd.kind==='severity',metricLabel:hmd.name,markerIdx:modelIdx,markerLabel:'→ gpt-4o',col2:'Pass',col2Of:s=>s.passRate+'%',hasLevels:false,
     aggLabel:S.jHistAgg==='mean'?'mean across '+scenarios.length+' '+spec.unit:'worst '+spec.unit.replace(/s$/,'')+' per run',axisNote:hmd.better==='low'?'lower is better':'higher is better',
     aggs:[['mean','Mean'],['worst','Worst '+spec.unit.replace(/s$/,'')]].map(([v,l])=>({act:'jHistAgg',val:v,label:l,on:S.jHistAgg===v})),
-    metrics:judged.map(md=>({act:'jHistMetric',val:md.key,label:md.short,on:hKey===md.key})),
+    metrics:judged.map(md=>({act:'jHistMetric',val:md.key,label:md.name,on:hKey===md.key})),
     subtitle:'Per-run '+hmd.name+' across the last '+runs.length+' executions. Solid line = '+(S.jHistAgg==='mean'?'mean of all '+scenarios.length+' '+spec.unit:'worst '+spec.unit.replace(/s$/,''))+'; shaded band = best–worst spread. Metric-agnostic — every metric is selectable.'});
   /* comparison */
   const cmpVM=buildJudgeComparison(spec);
   const unitCap=spec.unit.charAt(0).toUpperCase()+spec.unit.slice(1);
   return {headerTitle:spec.label,headerTag:spec.kind,demo:!!spec.demo,
     headerSubtitle:r.dataset+' · '+r.model+' · '+r.scenarios+' '+spec.unit+' · judge '+r.judge,
-    runHtml:gateHtml+overviewHtml+stripsHtml+drillHtml,history:histVM,comparison:cmpVM};
+    runHtml:gateHtml+overviewHtml+drillHtml,history:histVM,comparison:cmpVM};
 }
 function buildJudgeComparison(spec){
   const S=state,th=theme(),isDark=S.mode==='dark',defs=spec.metricDefs,judged=defs.filter(m=>!m.info),runs=spec.runs,pool=spec.scenarios;
@@ -556,12 +573,17 @@ function buildJudgeComparison(spec){
   const runOpts=runs.map(rn=>({id:rn.run.id,label:rn.run.finished.slice(0,10)+' · '+rn.run.sha}));
   const rA=runs.find(rn=>rn.run.id===S.jCmpA)||runs[0],rB=runs.find(rn=>rn.run.id===S.jCmpB)||runs[runs.length-1];
   const cKey=(defs.find(m=>m.key===S.jCmpMetric)?S.jCmpMetric:judged[0].key),cmd=defs.find(m=>m.key===cKey),cLow=cmd.better==='low';
-  const cvals=pool.flatMap(sc=>{const a=rA.lite.find(x=>x.id===sc.id).vals[cKey],b=rB.lite.find(x=>x.id===sc.id).vals[cKey];return [a,b];});
+  // Runs need not share the same scenario set (different dataset variants/sizes), so compare only the
+  // items present in BOTH runs — keyed by id, guarding every lite lookup.
+  const aById={},bById={};rA.lite.forEach(x=>{aById[x.id]=x;});rB.lite.forEach(x=>{bById[x.id]=x;});
+  const common=pool.filter(sc=>aById[sc.id]&&bById[sc.id]);
+  if(common.length===0) return {empty:true,message:'The two selected runs share no common '+spec.unit+' to line up — they were generated from different datasets. Pick two runs of the same dataset to compare.'};
+  const cvals=common.flatMap(sc=>[aById[sc.id].vals[cKey],bById[sc.id].vals[cKey]]);
   let cLo=Math.min(...cvals),cHi=Math.max(...cvals);if(cmd.kind==='severity'){cLo=0;cHi=Math.max(2,cHi);}const cpad=(cHi-cLo)*0.06||0.3;cLo-=cpad;cHi+=cpad;
   const dp=v=>clamp((v-cLo)/((cHi-cLo)||1),0,1)*100;
   const eps=cmd.kind==='fraction'?0.03:cmd.kind==='severity'?0.5:0.12,cdpFmt=cmd.kind==='fraction'?2:cmd.kind==='severity'?0:1;
   const gainCol=heat(isDark?0.8:0.78);
-  let data=pool.map(sc=>{const ma=rA.lite.find(x=>x.id===sc.id),mb=rB.lite.find(x=>x.id===sc.id);const av=ma.vals[cKey],bv=mb.vals[cKey];const delta=bv-av;const changed=Math.abs(delta)>eps;const improved=cLow?delta<0:delta>0;const sig=changed;const col=!changed?'var(--fg3)':(improved?gainCol:'var(--warn)');
+  let data=common.map(sc=>{const av=aById[sc.id].vals[cKey],bv=bById[sc.id].vals[cKey];const delta=bv-av;const changed=Math.abs(delta)>eps;const improved=cLow?delta<0:delta>0;const sig=changed;const col=!changed?'var(--fg3)':(improved?gainCol:'var(--warn)');
     return {name:sc.name,delta,col,dotCol:ratingColor(ratingOf(cmd,bv)),aV:fmt(av,cdpFmt),bV:fmt(bv,cdpFmt),deltaS:(delta>=0?'+':'−')+fmt(Math.abs(delta),cdpFmt),sigLabel:changed?(improved?'improved':'regressed'):'n.s.',sig,improved,
       aPos:dp(av),bPos:dp(bv),connL:Math.min(dp(av),dp(bv)),connW:Math.abs(dp(bv)-dp(av))};});
   const imp=data.filter(d=>d.sig&&d.improved).length,reg=data.filter(d=>d.sig&&!d.improved).length,flat=data.length-imp-reg;
@@ -571,7 +593,7 @@ function buildJudgeComparison(spec){
     runOpts,cmpA:S.jCmpA,cmpB:S.jCmpB,gainCol,rowNoun:unitWord(spec),rows:data,improved:imp,regressed:reg,flat,flatLabel:'unchanged',
     metaA1:rA.run.model,metaA2:rA.run.finished.slice(0,10),metaA3:rA.run.note,metaB1:rB.run.model,metaB2:rB.run.finished.slice(0,10),metaB3:rB.run.note,
     domLo:fmt(cLo,cdpFmt),domHi:fmt(cHi,cdpFmt),
-    metrics:judged.map(md=>({act:'jCmpMetric',val:md.key,label:md.short,on:S.jCmpMetric===md.key})),
+    metrics:judged.map(md=>({act:'jCmpMetric',val:md.key,label:md.name,on:S.jCmpMetric===md.key})),
     hasLevels:false,levels:[],legendNote:'teal = gain · amber = regression · grey = within ±'+eps+'. Showing up to 40 '+spec.unit+'.',
     headline:'On '+cmd.name+', '+imp+' '+spec.unit+' improved, '+reg+' regressed, and '+flat+' stayed within noise between the two runs.'};
 }
@@ -582,7 +604,7 @@ function setSt(patch){Object.assign(state,patch);render();}
 function applyAct(act,val){
   const S=state;
   if(act==='nav') setSt({cat:val,tab:'run',search:'',failedOnly:false,diff:'all',expanded:{},drillLimit:25});
-  else if(act==='mode') setSt({mode:S.mode==='dark'?'light':'dark'});
+  else if(act==='mode') setSt({mode:S.mode==='dark'?'light':'dark',modeUserSet:true});
   else if(act==='tab') setSt({tab:val});
   else if(act==='exp'){ S.expanded={...S.expanded,[val]:!S.expanded[val]}; render(); }
   else if(act==='diff') setSt({diff:val,drillLimit:25});
@@ -614,6 +636,10 @@ function wire(){
   if(sb){ sb.addEventListener('input',e=>{state.search=e.target.value;state.drillLimit=25;state._focus='drillSearch';render();});
     if(state._focus==='drillSearch'){sb.focus();const v=sb.value;sb.setSelectionRange(v.length,v.length);state._focus=null;} }
 }
+// Track live OS theme changes until the user takes manual control via the toggle.
+if(window.matchMedia){const mq=window.matchMedia('(prefers-color-scheme: dark)');
+  const onChange=e=>{if(!state.modeUserSet)setSt({mode:e.matches?'dark':'light'});};
+  if(mq.addEventListener)mq.addEventListener('change',onChange);else if(mq.addListener)mq.addListener(onChange);}
 render();
 </script>
 </body>

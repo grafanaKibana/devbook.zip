@@ -33,7 +33,6 @@ using System.Text.RegularExpressions;
 
 const string ReportsFolderName = "EvaluationReports";
 const string FancyReportFileName = "report.fancy.html";
-const string DatasetFileName = "chunks-shared.json";
 
 // Canonical ordering for stable matrix axes; unknown names are appended in
 // discovery order so the tool stays robust to runs with a different config set
@@ -91,8 +90,8 @@ if (runFolder is null)
 
 Console.WriteLine($"Run folder: {runFolder}");
 
-var datasetPath = Path.Combine(projectDirectory, "Datasets", DatasetFileName);
-var model = BuildModel(runFolder, datasetPath);
+var datasetDir = Path.Combine(projectDirectory, "Datasets");
+var model = BuildModel(runFolder, datasetDir);
 
 if (model.ConfigCount == 0)
 {
@@ -259,9 +258,9 @@ static string? ResolveRunFolder(string resultsDir, string runArg)
 
 #region Model building
 
-ReportModel BuildModel(string primaryRunFolder, string datasetPath)
+ReportModel BuildModel(string primaryRunFolder, string datasetDir)
 {
-    var dataset = LoadDataset(datasetPath);
+    var dataset = LoadDataset(datasetDir);
     var hasDataset = dataset.Count > 0;
     var resultsRoot = Directory.GetParent(primaryRunFolder)?.FullName ?? primaryRunFolder;
 
@@ -575,20 +574,39 @@ static Dictionary<string, object?> BuildLevel(
 
 #region Dataset join
 
-static Dictionary<string, DatasetCase> LoadDataset(string datasetPath)
+// Merges every chunks-*.json under Datasets/ into one case→evidence lookup. A run only
+// records which dataset variant it used via an env var at eval time (not on disk), so the
+// report cannot tell a full run from a --mini run; merging full and mini files keeps the
+// join correct for either. Mini files are read last so their entries win on id collision
+// (a mini case is a freshly generated copy, not necessarily identical to the full one).
+static Dictionary<string, DatasetCase> LoadDataset(string datasetDir)
 {
     var map = new Dictionary<string, DatasetCase>(StringComparer.Ordinal);
-    if (!File.Exists(datasetPath))
+    if (!Directory.Exists(datasetDir))
     {
         return map;
     }
 
+    var files = Directory.GetFiles(datasetDir, "chunks-*.json")
+        .OrderBy(f => f.Contains("-mini", StringComparison.OrdinalIgnoreCase) ? 1 : 0)
+        .ThenBy(Path.GetFileName, StringComparer.Ordinal);
+
+    foreach (var file in files)
+    {
+        MergeDatasetFile(file, map);
+    }
+
+    return map;
+}
+
+static void MergeDatasetFile(string datasetPath, Dictionary<string, DatasetCase> map)
+{
     try
     {
         using var doc = JsonDocument.Parse(File.ReadAllText(datasetPath));
         if (!doc.RootElement.TryGetProperty("cases", out var caseArray))
         {
-            return map;
+            return;
         }
 
         foreach (var c in caseArray.EnumerateArray())
@@ -620,10 +638,8 @@ static Dictionary<string, DatasetCase> LoadDataset(string datasetPath)
     }
     catch
     {
-        return new Dictionary<string, DatasetCase>(StringComparer.Ordinal);
+        // Skip an unreadable/malformed dataset file rather than dropping the whole join.
     }
-
-    return map;
 }
 
 #endregion
@@ -1023,9 +1039,11 @@ static void OpenInBrowser(string path)
 // =============================================================================
 static class GenericStoreReader
 {
-    // Scenario-name prefixes rendered by a bespoke handler elsewhere (skipped here).
+    // Scenario-name prefixes rendered by a bespoke handler elsewhere (skipped here). Matched as a
+    // dotted prefix, so "RAG.Search" skips the 12 "RAG.Search.<Chunker>.<Reranker>" folders but NOT
+    // sibling scenarios like "RAG.Answer", which flow through the generic default view.
     // The one project-specific knob: change this when copying to another codebase.
-    static readonly string[] CustomPrefixes = ["RAG"];
+    static readonly string[] CustomPrefixes = ["RAG.Search"];
 
     static readonly JsonDocumentOptions DocOptions = new() { AllowTrailingCommas = true };
 
@@ -1055,8 +1073,7 @@ static class GenericStoreReader
                 continue;
             }
 
-            var firstSegment = name.Split('.')[0];
-            if (CustomPrefixes.Contains(firstSegment, StringComparer.Ordinal))
+            if (CustomPrefixes.Any(prefix => name.Equals(prefix, StringComparison.Ordinal) || name.StartsWith(prefix + ".", StringComparison.Ordinal)))
             {
                 continue;
             }
@@ -1106,7 +1123,7 @@ static class GenericStoreReader
 
     // -------- metric definitions (union across iterations, first-seen order) --------
 
-    sealed record MetricDef(string Name, string Short, string Group, string Kind, string Better, bool Info, string Desc);
+    sealed record MetricDef(string Name, string Group, string Kind, string Better, bool Info, string Desc);
 
     static List<MetricDef> BuildMetricDefs(List<Iteration> iterations)
     {
@@ -1126,7 +1143,6 @@ static class GenericStoreReader
                 var info = (MetaValue(meta, "info") == "true") || kind == "count";
                 defs.Add(new MetricDef(
                     metric.Name,
-                    MetaValue(meta, "short") ?? Abbreviate(metric.Name),
                     MetaValue(meta, "group") ?? "Quality",
                     kind,
                     MetaValue(meta, "better") ?? (kind == "severity" ? "low" : info ? "none" : "high"),
@@ -1142,7 +1158,6 @@ static class GenericStoreReader
     {
         ["key"] = Slug(def.Name),
         ["name"] = def.Name,
-        ["short"] = def.Short,
         ["group"] = def.Group,
         ["kind"] = def.Kind,
         ["better"] = def.Better,
@@ -1179,6 +1194,7 @@ static class GenericStoreReader
                 ["name"] = metric.Name,
                 ["group"] = def.Group,
                 ["kind"] = def.Kind,
+                ["desc"] = def.Desc,
                 ["info"] = info,
                 ["value"] = metric.Value,
                 ["valStr"] = ValueText(def.Kind, metric.Value),
@@ -1196,7 +1212,7 @@ static class GenericStoreReader
         return new Dictionary<string, object?>
         {
             ["id"] = iteration.Id,
-            ["name"] = string.IsNullOrEmpty(iteration.Name) ? iteration.Id : iteration.Name,
+            ["name"] = DisplayName(iteration),
             ["task"] = iteration.Task,
             ["diff"] = iteration.Difficulty,
             ["metrics"] = metrics,
@@ -1259,7 +1275,7 @@ static class GenericStoreReader
                 return (object?)new Dictionary<string, object?>
                 {
                     ["id"] = iteration.Id,
-                    ["name"] = string.IsNullOrEmpty(iteration.Name) ? iteration.Id : iteration.Name,
+                    ["name"] = DisplayName(iteration),
                     ["diff"] = iteration.Difficulty,
                     ["vals"] = values,
                     ["pass"] = failCount == 0,
@@ -1512,13 +1528,24 @@ static class GenericStoreReader
         return null;
     }
 
-    static string Slug(string name) => name.Replace(" ", string.Empty);
-
-    static string Abbreviate(string name)
+    // Drill title: the friendly "name:" tag when present, else the user prompt/question (e.g. RAG.Answer,
+    // which only tags difficulty), else the raw iteration id as a last resort.
+    static string DisplayName(Iteration iteration)
     {
-        var compact = name.Replace(" ", string.Empty);
-        return compact.Length <= 6 ? compact : compact[..6];
+        if (!string.IsNullOrEmpty(iteration.Name))
+        {
+            return iteration.Name;
+        }
+
+        if (!string.IsNullOrWhiteSpace(iteration.Task))
+        {
+            return iteration.Task.Length <= 100 ? iteration.Task : iteration.Task[..100].TrimEnd() + "…";
+        }
+
+        return iteration.Id;
     }
+
+    static string Slug(string name) => name.Replace(" ", string.Empty);
 
     static string InferKind(MetricRec metric)
     {
