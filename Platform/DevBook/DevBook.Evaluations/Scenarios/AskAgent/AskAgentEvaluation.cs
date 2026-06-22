@@ -1,8 +1,9 @@
 namespace DevBook.Evaluations.Scenarios.AskAgent;
 
-using DevBook.Evaluations.Common;
-using DevBook.Evaluations.Common.Evaluation;
-using DevBook.Evaluations.Common.Evaluators.SummaryGeneration;
+using DevBook.Evaluations.Common.Hosting;
+using DevBook.Evaluations.Common.Evaluation.Metrics;
+using DevBook.Evaluations.Common.Evaluation.Judging;
+using DevBook.Evaluations.Common.Evaluation.Summary;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.AI.Evaluation;
 
@@ -84,14 +85,4 @@ public sealed class AskAgentEvaluation : EvaluationTestBase<AskAgentPrediction>
 
         return new Dictionary<string, IEnumerable<SummaryMetric>> { ["overall"] = metrics };
     }
-}
-
-/// <summary>Captured agent case plus the metrics the judge produced, used to compute summary aggregates.</summary>
-public sealed record AskAgentPrediction(AgentCase Case, IReadOnlyList<EvaluationMetric> Metrics);
-
-/// <summary>Carries the agent case into the evaluation pipeline so the judge can score it.</summary>
-public sealed class AskAgentCaseContext(AgentCase agentCase)
-    : EvaluationContext(nameof(AskAgentCaseContext), new TextContent(agentCase.Task))
-{
-    public AgentCase Case { get; } = agentCase;
 }

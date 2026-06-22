@@ -1,25 +1,6 @@
 namespace DevBook.Evaluations.Scenarios.AskAgent;
 
 /// <summary>
-/// A single agent task plus the (currently mocked) agent transcript that the judge scores.
-/// </summary>
-public sealed record AgentCase(
-    string Id,
-    string Name,
-    string Task,
-    string Difficulty,
-    double QualityBias,
-    int RiskLevel,
-    int ApproxTokens,
-    IReadOnlyList<AgentToolCall> ToolCalls,
-    string ExpectedTools,
-    string Answer,
-    string ContextNote);
-
-/// <summary>One tool invocation the agent made while solving a task.</summary>
-public sealed record AgentToolCall(string Name, string Arguments);
-
-/// <summary>
 /// The agent task corpus for the AskAgent scenario. This is demo content: a real AskAgent
 /// scenario would drive the live agent and feed its real transcripts to the judge. Here the
 /// transcripts are synthesised deterministically from a small topic × task-form grid so the

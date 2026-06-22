@@ -2,30 +2,27 @@ namespace DevBook.Tests.Unit.Evaluation;
 
 using FluentAssertions;
 using DevBook.Data.Models;
-using DevBook.Evaluations.Common.Evaluators.SummaryGeneration;
 using DevBook.Evaluations.Scenarios.RAG.Search;
-using Microsoft.Extensions.AI;
-using Microsoft.Extensions.AI.Evaluation;
+using static DevBook.Tests.Unit.Evaluation.SearchEvaluationTestData;
 
 /// <summary>
-/// Contains tests for search metric calculator.
+/// Unit tests for <see cref="SearchMetricCalculator"/> per-query scoring and aggregate evaluation.
 /// </summary>
 public sealed class SearchMetricCalculatorTests
 {
-    private const string EvaluationPath = "Software Engineering/11 AI & ML/LLM/RAG/Evaluation.md";
-    private const string ChunkingPath = "Software Engineering/11 AI & ML/LLM/RAG/Chunking.md";
-    private const string IrrelevantPath = "Software Engineering/05 Architecture/Patterns/Design Patterns/Composite.md";
-    private const string RetrievalHeading = "Retrieval Metrics";
-    private const string RetrievalSnippet = "Evidence coverage is primary";
+    #region ScoreQuery
 
     /// <summary>
-    /// Tests that scoring returns perfect retrieval metrics when the first retrieved document exactly matches expected evidence.
+    /// Returns perfect retrieval metrics when the first retrieved document exactly matches the expected evidence.
     /// </summary>
     [Fact]
     public void ScoreQuery_PerfectHit_ReturnsPerfectMetrics()
     {
         // Arrange
-        var prediction = Prediction("perfect hit", [Document(EvaluationPath, RetrievalHeading, RetrievalSnippet)], [Document(EvaluationPath, "Retrieval Metrics and more", "Evidence coverage is primary because the generator cannot use evidence it never sees.")]);
+        var prediction = Prediction(
+            "perfect hit",
+            expectedDocuments: [Document(EvaluationPath, RetrievalHeading, RetrievalSnippet)],
+            retrievedDocuments: [Document(EvaluationPath, "Retrieval Metrics and more", RetrievalChunkText)]);
 
         // Act
         var result = SearchMetricCalculator.ScoreQuery(prediction);
@@ -43,9 +40,8 @@ public sealed class SearchMetricCalculatorTests
     }
 
     /// <summary>
-    /// Tests that a chunk-id-free expectation from a shared dataset matches a retrieval that uses a different
-    /// source representation (citation label vs. vault path) and chunk boundaries, so the same golden case can be
-    /// scored against any chunking strategy.
+    /// Matches a chunk-id-free expectation against a retrieval that uses a different source representation
+    /// (citation label vs. vault path) and chunk boundaries, so one golden case can score any chunking strategy.
     /// </summary>
     [Fact]
     public void ScoreQuery_ChunkerNeutralIdentity_MatchesAcrossSourceRepresentations()
@@ -54,8 +50,8 @@ public sealed class SearchMetricCalculatorTests
         // the full vault path and a differently-cut chunk that still contains the gold snippet.
         var prediction = Prediction(
             "chunker-neutral",
-            [Document("Evaluation", RetrievalHeading, RetrievalSnippet)],
-            [Document(EvaluationPath, RetrievalHeading, "Evidence coverage is primary because the generator cannot use evidence it never sees.")]);
+            expectedDocuments: [Document("Evaluation", RetrievalHeading, RetrievalSnippet)],
+            retrievedDocuments: [Document(EvaluationPath, RetrievalHeading, RetrievalChunkText)]);
 
         // Act
         var result = SearchMetricCalculator.ScoreQuery(prediction);
@@ -67,20 +63,20 @@ public sealed class SearchMetricCalculatorTests
     }
 
     /// <summary>
-    /// Tests that a headingless retrieved chunk (as produced by FixedSize and Semantic chunking) still earns section
-    /// credit against a shared golden section when its text contains the expected snippet, so chunkers that drop
-    /// heading metadata are not unfairly zeroed on section-level metrics.
+    /// Credits a headingless retrieved chunk (as produced by FixedSize and Semantic chunking) against a shared
+    /// golden section when its text contains the expected snippet, so chunkers that drop heading metadata are
+    /// not unfairly zeroed on section-level metrics.
     /// </summary>
     [Fact]
     public void ScoreQuery_HeadinglessRetrieval_CreditsSectionBySnippet()
     {
-        // Arrange: the golden section carries a heading, but the retrieved chunk (FixedSize) has no heading and only
-        // matches by containing the snippet.
+        // Arrange: the golden section carries a heading, but the retrieved FixedSize chunk has no heading and
+        // only matches by containing the snippet.
         var prediction = Prediction(
             "headingless section credit",
-            [Document(EvaluationPath, RetrievalHeading, RetrievalSnippet)],
-            [Document(EvaluationPath, heading: null, snippet: "Evidence coverage is primary because the generator cannot use evidence it never sees.")],
-            ChunkingStrategyKind.FixedSize);
+            expectedDocuments: [Document(EvaluationPath, RetrievalHeading, RetrievalSnippet)],
+            retrievedDocuments: [Document(EvaluationPath, heading: null, snippet: RetrievalChunkText)],
+            chunkingStrategy: ChunkingStrategyKind.FixedSize);
 
         // Act
         var result = SearchMetricCalculator.ScoreQuery(prediction);
@@ -92,7 +88,7 @@ public sealed class SearchMetricCalculatorTests
     }
 
     /// <summary>
-    /// Tests that scoring returns partial retrieval metrics when only one of multiple expected sources is retrieved.
+    /// Returns partial retrieval metrics when only one of multiple expected sources is retrieved.
     /// </summary>
     [Fact]
     public void ScoreQuery_PartialHit_ReturnsPartialMetrics()
@@ -100,8 +96,16 @@ public sealed class SearchMetricCalculatorTests
         // Arrange
         var prediction = Prediction(
             "partial hit",
-            [Document(EvaluationPath, RetrievalHeading, RetrievalSnippet), Document(ChunkingPath, "Parent-Child Chunking", "search child chunks")],
-            [Document(EvaluationPath, RetrievalHeading, "Evidence coverage is primary because the generator cannot use evidence it never sees."), Document(IrrelevantPath, "Composite", "irrelevant")]);
+            expectedDocuments:
+            [
+                Document(EvaluationPath, RetrievalHeading, RetrievalSnippet),
+                Document(ChunkingPath, ParentChildHeading, ChildChunkSnippet)
+            ],
+            retrievedDocuments:
+            [
+                Document(EvaluationPath, RetrievalHeading, RetrievalChunkText),
+                Document(IrrelevantPath, CompositeHeading, IrrelevantSnippet)
+            ]);
 
         // Act
         var result = SearchMetricCalculator.ScoreQuery(prediction);
@@ -115,7 +119,7 @@ public sealed class SearchMetricCalculatorTests
     }
 
     /// <summary>
-    /// Tests that scoring returns zero metrics when no retrieved document matches expected evidence.
+    /// Returns zero metrics when no retrieved document matches the expected evidence.
     /// </summary>
     [Fact]
     public void ScoreQuery_NoHit_ReturnsZeroMetrics()
@@ -123,8 +127,8 @@ public sealed class SearchMetricCalculatorTests
         // Arrange
         var prediction = Prediction(
             "no hit",
-            [Document(EvaluationPath, RetrievalHeading, "MRR rewards pushing the first relevant result higher")],
-            [Document(ChunkingPath, "Parent-Child Chunking", "different source")]);
+            expectedDocuments: [Document(EvaluationPath, RetrievalHeading, UnmatchedSnippet)],
+            retrievedDocuments: [Document(ChunkingPath, ParentChildHeading, "different source")]);
 
         // Act
         var result = SearchMetricCalculator.ScoreQuery(prediction);
@@ -141,7 +145,7 @@ public sealed class SearchMetricCalculatorTests
     }
 
     /// <summary>
-    /// Tests that scoring does not count a source-path match as relevant when required heading and snippet evidence differ.
+    /// Does not count a source-path match as relevant when the required heading and snippet evidence differ.
     /// </summary>
     [Fact]
     public void ScoreQuery_SourcePathMatchesButEvidenceDiffers_ReturnsNoRelevantMatch()
@@ -149,8 +153,8 @@ public sealed class SearchMetricCalculatorTests
         // Arrange
         var prediction = Prediction(
             "source document match",
-            [Document(EvaluationPath, RetrievalHeading, "MRR rewards pushing the first relevant result higher")],
-            [Document(EvaluationPath, "Other heading", "different snippet")]);
+            expectedDocuments: [Document(EvaluationPath, RetrievalHeading, UnmatchedSnippet)],
+            retrievedDocuments: [Document(EvaluationPath, "Other heading", "different snippet")]);
 
         // Act
         var result = SearchMetricCalculator.ScoreQuery(prediction);
@@ -173,446 +177,30 @@ public sealed class SearchMetricCalculatorTests
     }
 
     /// <summary>
-    /// Scores query mixed evidence returns readable diagnostics.
+    /// Credits the right chunk id even when the retrieved heading and snippet differ, because chunk identity
+    /// is authoritative when present.
     /// </summary>
     [Fact]
-    public void ScoreQuery_MixedEvidence_ReturnsReadableDiagnostics()
-    {
-        var prediction = Prediction(
-            "diagnostic query",
-            [Document(EvaluationPath, RetrievalHeading, RetrievalSnippet), Document(ChunkingPath, "Parent-Child Chunking", "search child chunks")],
-            [
-                Document(EvaluationPath, "Questions", "different chunk"),
-                Document(ChunkingPath, "Parent-Child Chunking", "different chunk with search child chunks evidence"),
-                Document(ChunkingPath, "Parent-Child Chunking", "different chunk")
-            ]);
-
-        var result = SearchMetricCalculator.ScoreQuery(prediction);
-
-        result.Diagnostics.ExpectedDocuments.Should().BeEquivalentTo([
-            new { Index = 1, SourcePath = EvaluationPath, Heading = RetrievalHeading, SnippetPreview = RetrievalSnippet, Matched = false },
-            new { Index = 2, SourcePath = ChunkingPath, Heading = "Parent-Child Chunking", SnippetPreview = "search child chunks", Matched = true }
-        ]);
-        result.Diagnostics.Matches.Should().BeEquivalentTo([
-            new
-            {
-                Rank = 1,
-                SourcePath = EvaluationPath,
-                Heading = "Questions",
-                Score = (double?)null,
-                MatchedExpectedSourcePath = EvaluationPath,
-                SourcePathMatched = true,
-                HeadingMatched = false,
-                SnippetMatched = false,
-                IsRelevant = false,
-                Reason = "Source path matched an expected document, but the normalized expected snippet did not appear in the retrieved chunk."
-            },
-            new
-            {
-                Rank = 2,
-                SourcePath = ChunkingPath,
-                Heading = "Parent-Child Chunking",
-                Score = (double?)null,
-                MatchedExpectedSourcePath = ChunkingPath,
-                SourcePathMatched = true,
-                HeadingMatched = true,
-                SnippetMatched = true,
-                IsRelevant = true,
-                Reason = "Matched expected source path, heading, and snippet."
-            },
-            new
-            {
-                Rank = 3,
-                SourcePath = ChunkingPath,
-                Heading = "Parent-Child Chunking",
-                Score = (double?)null,
-                MatchedExpectedSourcePath = ChunkingPath,
-                SourcePathMatched = true,
-                HeadingMatched = true,
-                SnippetMatched = false,
-                IsRelevant = false,
-                Reason = "Source path matched an expected document that was already credited by an earlier retrieved result; duplicate retrieval does not add recall credit."
-            }
-        ]);
-    }
-
-    /// <summary>
-    /// Scores query scored results returns score analysis metrics.
-    /// </summary>
-    [Fact]
-    public void ScoreQuery_ScoredResults_ReturnsScoreAnalysisMetrics()
-    {
-        var prediction = Prediction(
-            "score analysis query",
-            [Document(EvaluationPath, RetrievalHeading, RetrievalSnippet)],
-            [
-                Document(EvaluationPath, RetrievalHeading, "Evidence coverage is primary because the generator cannot use evidence it never sees.", score: 0.8),
-                Document(EvaluationPath, RetrievalHeading, "Evidence coverage is primary because the generator cannot use evidence it never sees.", score: 0.75),
-                Document(IrrelevantPath, "Composite", "irrelevant", score: 0.7)
-            ]);
-
-        var result = SearchMetricCalculator.ScoreQuery(prediction);
-
-        result.ScoreAverage.Should().BeApproximately(0.75, 0.000001);
-        result.CreditedScoreAverage.Should().BeApproximately(0.8, 0.000001);
-        result.UncreditedScoreAverage.Should().BeApproximately(0.725, 0.000001);
-        result.CreditedToUncreditedSameSourceScoreGap.Should().BeApproximately(0.05, 0.000001);
-    }
-
-    [Fact]
-    public void ScoreQuery_MultipleExpectedChunks_ReturnsRBasedMetrics()
-    {
-        var prediction = Prediction(
-            "r based query",
-            [
-                Document(EvaluationPath, RetrievalHeading, RetrievalSnippet, chunkId: "eval-1"),
-                Document(EvaluationPath, "Questions", "interview", chunkId: "eval-2"),
-                Document(ChunkingPath, "Parent-Child Chunking", "search child chunks", chunkId: "chunking-1")
-            ],
-            [
-                Document(EvaluationPath, RetrievalHeading, "Evidence coverage is primary because the generator cannot use evidence it never sees.", chunkId: "eval-1"),
-                Document(IrrelevantPath, "Composite", "irrelevant"),
-                Document(ChunkingPath, "Parent-Child Chunking", "search child chunks evidence", chunkId: "chunking-1"),
-                Document(EvaluationPath, "Questions", "interview prompts", chunkId: "eval-2")
-            ]);
-
-        var result = SearchMetricCalculator.ScoreQuery(prediction, topK: 10);
-
-        result.RBasedMetrics.RecallAtR.Should().BeApproximately(2d / 3d, 0.000001);
-        result.RBasedMetrics.RPrecision.Should().BeApproximately(2d / 3d, 0.000001);
-        result.SectionMetrics.RecallAtR.Should().BeApproximately(2d / 3d, 0.000001);
-        result.SectionMetrics.RPrecision.Should().BeApproximately(2d / 3d, 0.000001);
-        result.SectionMetrics.HitRateAt1.Should().Be(1);
-        result.SectionMetrics.MeanReciprocalRankAtK.Should().Be(1);
-        result.SectionMetrics.MeanAveragePrecisionAtK.Should().BeApproximately((1d + (2d / 3d) + (3d / 4d)) / 3d, 0.000001);
-        result.SectionMetrics.NormalizedDiscountedCumulativeGainAtK.Should().BeApproximately((1d + (1d / Math.Log2(4)) + (1d / Math.Log2(5))) / (1d + (1d / Math.Log2(3)) + (1d / Math.Log2(4))), 0.000001);
-    }
-
-    [Fact]
-    public void ScoreQuery_DuplicateExpectedSection_ReturnsSectionLevelMetrics()
-    {
-        var prediction = Prediction(
-            "section level query",
-            [
-                Document("[[RAG Patterns#Pattern Selection Guide]]", chunkId: "patterns-1"),
-                Document("[[RAG Patterns#Pattern Selection Guide]]", chunkId: "patterns-2"),
-                Document("[[Retrieval#Intro]]", chunkId: "retrieval-1")
-            ],
-            [
-                Document("Software Engineering/11 AI & ML/LLM/RAG/RAG Patterns.md", "Pattern Selection Guide", "baseline first", chunkId: "patterns-1"),
-                Document(IrrelevantPath, "Composite", "irrelevant"),
-                Document("Software Engineering/11 AI & ML/LLM/RAG/Retrieval.md", "Intro", "retrieval mechanics", chunkId: "retrieval-1")
-            ]);
-
-        var result = SearchMetricCalculator.ScoreQuery(prediction, topK: 10);
-
-        result.RBasedMetrics.RecallAtR.Should().BeApproximately(2d / 3d, 0.000001);
-        result.SectionMetrics.RecallAtR.Should().Be(0.5);
-        result.SectionMetrics.RPrecision.Should().Be(0.5);
-        result.SectionMetrics.MeanAveragePrecisionAtK.Should().BeApproximately(5d / 6d, 0.000001);
-        result.SectionMetrics.NormalizedDiscountedCumulativeGainAtK.Should().BeApproximately((1d + (1d / Math.Log2(4))) / (1d + (1d / Math.Log2(3))), 0.000001);
-    }
-
-    /// <summary>
-    /// Searches evaluator evaluate adds report facing interpretations.
-    /// </summary>
-    [Fact]
-    public async Task SearchEvaluator_EvaluateAsync_AddsReportFacingInterpretations()
-    {
-        var prediction = Prediction(
-            "report diagnostic query",
-            [Document(EvaluationPath, RetrievalHeading, "MRR rewards pushing the first relevant result higher")],
-            [Document(EvaluationPath, "Questions", "different chunk", score: 0.87)]);
-        var evaluator = new SearchEvaluator();
-
-        var result = await evaluator.EvaluateAsync(
-            [new ChatMessage(ChatRole.User, prediction.Query)],
-            new ChatResponse(new ChatMessage(ChatRole.Assistant, "[[Evaluation#Questions]]")),
-            additionalContext: [new SearchEvaluationContext(prediction, topK: 10)]);
-
-        var hitRateMetric = result.Metrics["HitRateAt1"];
-        hitRateMetric.Reason.Should().Be("HitRate@1 checks whether the first retrieved chunk is credited against expected evidence. Read 1.000 as the top result is immediately useful and 0.000 as the top result is not credited.");
-        hitRateMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Unacceptable);
-        hitRateMetric.Interpretation.Reason.Should().Be("Score 0.000 (Unacceptable): no expected evidence item appeared within top-1.");
-
-        var reciprocalRankMetric = result.Metrics["MRRAt10"];
-        reciprocalRankMetric.Reason.Should().Be("MRR@10 is reciprocal rank for the first credited evidence chunk. Read 1.000 as the first result is relevant, 0.500 as the first relevant result is rank 2, 0.100 as rank 10, and 0.000 as no relevant chunk appears in top-10.");
-        reciprocalRankMetric.Interpretation!.Rating.Should().Be(EvaluationRating.Unacceptable);
-        reciprocalRankMetric.Interpretation.Reason.Should().Be("Score 0.000 (Unacceptable): no retrieved chunk matched the expected evidence.");
-        reciprocalRankMetric.Diagnostics.Should().BeNullOrEmpty();
-        var recallAtRMetric = result.Metrics["RecallAtR"];
-        recallAtRMetric.Reason.Should().Contain("Read 1.000 as all required evidence found");
-        recallAtRMetric.Interpretation!.Reason.Should().Be("Score 0.000 (Unacceptable): matched 0/1 expected evidence items within top-1.");
-        result.Metrics.Should().NotContainKeys("PrecisionAtR", "SectionPrecisionAtR");
-        var sectionRecallAtRMetric = result.Metrics["SectionRecallAtR"];
-        sectionRecallAtRMetric.Reason.Should().Contain("collapsing expected chunks by source path and heading");
-        sectionRecallAtRMetric.Reason.Should().Contain("shows whether retrieval reached the right section");
-        sectionRecallAtRMetric.Interpretation!.Reason.Should().Be("Score 0.000 (Unacceptable): matched 0/1 expected sections within top-1.");
-        result.Metrics.Keys.Should().Equal(PerQueryDashboardMetrics());
-        result.Metrics.Should().NotContainKeys("RecallAt1", "RecallAt5", "RecallAt10", "PrecisionAt1", "PrecisionAt5", "PrecisionAt10", "HitRateAt5", "HitRateAt10", "MRRAt1", "MRRAt3", "MRRAt5", "MAPAt1", "MAPAt3", "MAPAt5", "NDCGAt1", "NDCGAt3", "NDCGAt5", "CreditedScoreAverage", "UncreditedScoreAverage", "CreditedToUncreditedSameSourceScoreGap");
-        var scoreAverageMetric = result.Metrics["ScoreAverage"];
-        ((NumericMetric)scoreAverageMetric).Value.Should().Be(0.87);
-        scoreAverageMetric.Reason.Should().NotContain("CreditedScoreAverage");
-        scoreAverageMetric.Interpretation!.Reason.Should().Be("Score 0.870 (Diagnostic): average raw score across scored retrieved chunks. Compare this metric only within the same reranker and scorer scale.");
-        scoreAverageMetric.Diagnostics.Should().Contain(diagnostic => diagnostic.Message == "CreditedScoreAverage=n/a" && diagnostic.Severity == EvaluationDiagnosticSeverity.Informational);
-        scoreAverageMetric.Diagnostics.Should().Contain(diagnostic => diagnostic.Message == "UncreditedScoreAverage=0.870" && diagnostic.Severity == EvaluationDiagnosticSeverity.Informational);
-        scoreAverageMetric.Diagnostics.Should().Contain(diagnostic => diagnostic.Message == "CreditedToUncreditedSameSourceScoreGap=n/a" && diagnostic.Severity == EvaluationDiagnosticSeverity.Informational);
-        scoreAverageMetric.Diagnostics.Should().NotContain(diagnostic => diagnostic.Message.Contains("same reranker", StringComparison.Ordinal));
-        evaluator.EvaluationMetricNames.Should().Equal(result.Metrics.Keys);
-    }
-
-    /// <summary>
-    /// Searches evaluator evaluate exposes only the dashboard metric surface.
-    /// </summary>
-    [Fact]
-    public async Task SearchEvaluator_EvaluateAsync_ExposesOnlyDashboardMetrics()
-    {
-        var prediction = Prediction(
-            "dashboard query",
-            [Document(EvaluationPath, RetrievalHeading, RetrievalSnippet)],
-            [
-                Document(EvaluationPath, RetrievalHeading, "Evidence coverage is primary because the generator cannot use evidence it never sees.", score: 0.87654),
-                Document(IrrelevantPath, "Composite", "irrelevant", score: 0.18765)
-            ]);
-        var evaluator = new SearchEvaluator();
-
-        var result = await evaluator.EvaluateAsync(
-            [new ChatMessage(ChatRole.User, prediction.Query)],
-            new ChatResponse(new ChatMessage(ChatRole.Assistant, "[[Evaluation#Retrieval Metrics]]")),
-            additionalContext: [new SearchEvaluationContext(prediction, topK: 10)]);
-
-        result.Metrics.Keys.Should().Equal(PerQueryDashboardMetrics());
-        var scoreAverageMetric = result.Metrics["ScoreAverage"];
-        ((NumericMetric)scoreAverageMetric).Value.Should().Be(0.532);
-        scoreAverageMetric.Interpretation!.Reason.Should().NotContain("CreditedScoreAverage");
-        scoreAverageMetric.Diagnostics.Should().Contain(diagnostic => diagnostic.Message == "CreditedScoreAverage=0.877");
-        scoreAverageMetric.Diagnostics.Should().Contain(diagnostic => diagnostic.Message == "UncreditedScoreAverage=0.188");
-        result.Metrics.Should().NotContainKey("MRRAt5");
-    }
-
-    [Fact]
-    public async Task SearchEvaluator_EvaluateAsync_WithoutSearchContext_FailsRecallAtR()
-    {
-        var evaluator = new SearchEvaluator();
-
-        var result = await evaluator.EvaluateAsync(
-            [new ChatMessage(ChatRole.User, "missing context")],
-            new ChatResponse(new ChatMessage(ChatRole.Assistant, "missing context")));
-
-        result.Metrics.Keys.Should().Equal("RecallAtR");
-        result.Metrics["RecallAtR"].Interpretation!.Failed.Should().BeTrue();
-        result.Metrics.Should().NotContainKeys("RecallAt5", "RecallAt10");
-    }
-
-    [Fact]
-    public async Task SearchEvaluator_EvaluateAsync_UsesFixedReportCutoffNames()
-    {
-        var prediction = Prediction(
-            "fixed report cutoff",
-            [Document(EvaluationPath)],
-            [Document(EvaluationPath)]);
-        var evaluator = new SearchEvaluator();
-
-        var result = await evaluator.EvaluateAsync(
-            [new ChatMessage(ChatRole.User, prediction.Query)],
-            new ChatResponse(new ChatMessage(ChatRole.Assistant, "fixed report cutoff")),
-            additionalContext: [new SearchEvaluationContext(prediction, topK: 5)]);
-
-        result.Metrics.Keys.Should().Equal(PerQueryDashboardMetrics());
-        result.Metrics.Should().ContainKeys("MRRAt10", "MAPAt10", "NDCGAt10");
-        result.Metrics.Should().NotContainKeys("MRRAt5", "MAPAt5", "NDCGAt5");
-    }
-
-    [Fact]
-    public async Task SearchEvaluator_EvaluateAsync_SectionRankingUsesFixedTopTenCutoff()
-    {
-        var retrieved = Enumerable.Range(0, 10)
-            .Select(index => Document($"[[Irrelevant {index}]]"))
-            .Append(Document(EvaluationPath))
-            .ToArray();
-        var prediction = Prediction("section rank eleven", [Document(EvaluationPath)], retrieved);
-        var evaluator = new SearchEvaluator();
-
-        var result = await evaluator.EvaluateAsync(
-            [new ChatMessage(ChatRole.User, prediction.Query)],
-            new ChatResponse(new ChatMessage(ChatRole.Assistant, "section rank eleven")),
-            additionalContext: [new SearchEvaluationContext(prediction, topK: 11)]);
-
-        ((NumericMetric)result.Metrics["SectionMRRAt10"]).Value.Should().Be(0);
-        ((NumericMetric)result.Metrics["SectionMAPAt10"]).Value.Should().Be(0);
-        ((NumericMetric)result.Metrics["SectionNDCGAt10"]).Value.Should().Be(0);
-        ((NumericMetric)result.Metrics["MRRAt10"]).Value.Should().Be(0);
-        result.Metrics.Should().NotContainKey("SectionMRRAt11");
-    }
-
-    [Fact]
-    public async Task SearchEvaluator_EvaluateAsync_FailsIncompleteRecallAtRBeforeRounding()
-    {
-        var expected = Enumerable.Range(0, 2_500)
-            .Select(index => Document($"[[Expected {index}]]", chunkId: $"expected-{index}"))
-            .ToArray();
-        var retrieved = Enumerable.Range(0, 2_499)
-            .Select(index => Document($"[[Expected {index}]]", chunkId: $"expected-{index}"))
-            .ToArray();
-        var prediction = Prediction("rounding gate", expected, retrieved);
-        var evaluator = new SearchEvaluator();
-
-        var result = await evaluator.EvaluateAsync(
-            [new ChatMessage(ChatRole.User, prediction.Query)],
-            new ChatResponse(new ChatMessage(ChatRole.Assistant, "rounding gate")),
-            additionalContext: [new SearchEvaluationContext(prediction, topK: 2_500)]);
-
-        ((NumericMetric)result.Metrics["RecallAtR"]).Value.Should().Be(1);
-        result.Metrics["RecallAtR"].Interpretation!.Failed.Should().BeTrue();
-    }
-
-    /// <summary>
-    /// Searches evaluator evaluate formats fractional scores with invariant culture.
-    /// </summary>
-    [Fact]
-    public async Task SearchEvaluator_EvaluateAsync_FormatsFractionalScoresWithInvariantCulture()
-    {
-        var prediction = Prediction(
-            "fractional score query",
-            [Document(EvaluationPath)],
-            [Document(IrrelevantPath), Document(EvaluationPath)]);
-        var evaluator = new SearchEvaluator();
-
-        var result = await evaluator.EvaluateAsync(
-            [new ChatMessage(ChatRole.User, prediction.Query)],
-            new ChatResponse(new ChatMessage(ChatRole.Assistant, "[[Composite]]\n[[Evaluation]]")),
-            additionalContext: [new SearchEvaluationContext(prediction, topK: 10)]);
-
-        result.Metrics["RecallAtR"].Interpretation!.Reason.Should().Contain("Score 0.000 (Unacceptable)");
-        result.Metrics["MRRAt10"].Interpretation!.Reason.Should().Contain("Score 0.500 (Average)");
-    }
-
-    [Fact]
-    public async Task SearchEvaluator_EvaluateAsync_FailsOnIncompleteRecallAtR()
-    {
-        var prediction = Prediction(
-            "late hit query",
-            [Document(EvaluationPath)],
-            [
-                Document(IrrelevantPath),
-                Document(ChunkingPath),
-                Document(IrrelevantPath, "second irrelevant"),
-                Document(ChunkingPath, "second chunking"),
-                Document(IrrelevantPath, "third irrelevant"),
-                Document(EvaluationPath)
-            ]);
-        var evaluator = new SearchEvaluator();
-
-        var result = await evaluator.EvaluateAsync(
-            [new ChatMessage(ChatRole.User, prediction.Query)],
-            new ChatResponse(new ChatMessage(ChatRole.Assistant, "late hit")),
-            additionalContext: [new SearchEvaluationContext(prediction, topK: 10)]);
-
-        result.Metrics["RecallAtR"].Interpretation!.Failed.Should().BeTrue();
-        ((NumericMetric)result.Metrics["RecallAtR"]).Value.Should().Be(0);
-        ((NumericMetric)result.Metrics["MRRAt10"]).Value.Should().BeApproximately(0.167, 0.000001);
-    }
-
-    /// <summary>
-    /// Computes summary metrics rates aggregate metrics.
-    /// </summary>
-    [Fact]
-    public async Task ComputeSummaryMetrics_RatesAggregateMetrics()
-    {
-        var predictions = new[]
-        {
-            new SearchPrediction("first query", [Document(EvaluationPath)], [Document(EvaluationPath)]),
-            new SearchPrediction("second query", [Document(EvaluationPath)], []),
-            new SearchPrediction("third query", [Document(ChunkingPath)], [Document(IrrelevantPath), Document(ChunkingPath)]),
-        };
-
-        var summaryMetrics = SearchEvaluator.ComputeSummaryMetrics(predictions, topK: 10)["MarkdownSection.Bm25"].ToArray();
-        var metrics = summaryMetrics.ToDictionary(metric => metric.Name);
-
-        metrics["HitRateAt1"].Rating.Should().Be(EvaluationRating.Poor);
-        metrics["MRRAt10"].Rating.Should().Be(EvaluationRating.Average);
-        metrics["RecallAtR"].Rating.Should().Be(EvaluationRating.Poor);
-        metrics["SectionRecallAtR"].Rating.Should().Be(EvaluationRating.Poor);
-        metrics["EmptyResultRate"].Rating.Should().Be(EvaluationRating.Poor);
-        summaryMetrics.Select(metric => metric.Name).Should().Equal([
-            "RecallAtR",
-            "SectionRecallAtR",
-            "HitRateAt1",
-            "SectionHitRateAt1",
-            "MRRAt10",
-            "SectionMRRAt10",
-            "MAPAt10",
-            "SectionMAPAt10",
-            "NDCGAt10",
-            "SectionNDCGAt10",
-            "EmptyResultRate",
-            "ScoreAverage",
-            "SampleCount"
-        ]);
-        metrics["RecallAtR"].Description.Should().Contain("Read 1.000 as all required evidence found");
-        metrics["SectionRecallAtR"].Description.Should().Contain("shows whether retrieval reached the right section");
-        metrics["ScoreAverage"].Description.Should().NotContain("CreditedScoreAverage");
-        metrics["ScoreAverage"].Description.Should().Contain("Compare this metric only within the same reranker and scorer scale.");
-        metrics["ScoreAverage"].Diagnostics.Should().Contain(diagnostic => diagnostic.Message == "CreditedScoreAverage=0.000");
-        metrics["ScoreAverage"].Diagnostics.Should().Contain(diagnostic => diagnostic.Message == "UncreditedScoreAverage=0.000");
-        metrics["ScoreAverage"].Diagnostics.Should().NotContain(diagnostic => diagnostic.Message.Contains("same reranker", StringComparison.Ordinal));
-        var summaryResult = await new SummaryEvaluator(summaryMetrics).EvaluateAsync(
-            [new ChatMessage(ChatRole.System, "summary")],
-            new ChatResponse(new ChatMessage(ChatRole.Assistant, "summary")));
-        summaryResult.Metrics["ScoreAverage"].Diagnostics.Should().Contain(diagnostic => diagnostic.Message == "CreditedScoreAverage=0.000");
-        metrics.Should().NotContainKeys("RecallAt1", "RecallAt5", "RecallAt10", "PrecisionAt1", "PrecisionAt5", "PrecisionAt10", "RPrecision", "SectionRPrecision", "HitRateAt5", "HitRateAt10", "RecallAt3", "MRRAt5", "CreditedScoreAverage", "UncreditedScoreAverage", "CreditedToUncreditedSameSourceScoreGap");
-    }
-
-    /// <summary>
-    /// Gets summary evaluator evaluate formats fractional scores with invariant culture.
-    /// </summary>
-    [Fact]
-    public async Task SummaryEvaluator_EvaluateAsync_FormatsFractionalScoresWithInvariantCulture()
-    {
-        var evaluator = new SummaryEvaluator([
-            new SummaryMetric("Fractional", 2d / 3d, "Fractional summary", SummaryMetricKind.PlainNumber, EvaluationRating.Average)
-        ]);
-
-        var result = await evaluator.EvaluateAsync(
-            [new ChatMessage(ChatRole.System, "summary")],
-            new ChatResponse(new ChatMessage(ChatRole.Assistant, "summary")));
-
-        result.Metrics["Fractional"].Interpretation!.Reason.Should().Be("Summary score 0.667 rated Average.");
-    }
-
-    /// <summary>
-    /// Tests that scoring counts a retrieved document as relevant when the heading matches expected evidence.
-    /// </summary>
-    [Fact]
-    public void ScoreQuery_HeadingMatchesExpectedEvidence_ReturnsRelevantMatch()
+    public void ScoreQuery_ChunkIdMatchesExpectedEvidence_ReturnsRelevantMatchWithoutSnippetCheck()
     {
         // Arrange
         var prediction = Prediction(
-            "evidence hit",
-            [Document(EvaluationPath, RetrievalHeading)],
-            [Document(EvaluationPath, RetrievalHeading, "different chunk text")]);
+            "generated chunk hit",
+            expectedDocuments: [Document("[[Prompt Composition]]", chunkId: "chunk-1", documentId: "doc-1")],
+            retrievedDocuments:
+            [
+                Document(
+                    "Software Engineering/11 AI & ML/LLM/Prompt Composition.md",
+                    "Different heading",
+                    "retrieved chunk text without generated preview",
+                    chunkId: "chunk-1",
+                    documentId: "doc-1")
+            ]);
 
         // Act
         var result = SearchMetricCalculator.ScoreQuery(prediction);
 
         // Assert
-        result.RecallAtK.Should().Be(1);
-        result.PrecisionAtK.Should().Be(1);
-        result.HitRateAtK.Should().Be(1);
-        result.ReciprocalRank.Should().Be(1);
-        result.Diagnostics.Matches.Should().ContainSingle().Which.HeadingMatched.Should().BeTrue();
-    }
-
-    [Fact]
-    public void ScoreQuery_ChunkIdMatchesExpectedEvidence_ReturnsRelevantMatchWithoutSnippetCheck()
-    {
-        var prediction = Prediction(
-            "generated chunk hit",
-            [Document("[[Prompt Composition]]", chunkId: "chunk-1", documentId: "doc-1")],
-            [Document("Software Engineering/11 AI & ML/LLM/Prompt Composition.md", "Different heading", "retrieved chunk text without generated preview", chunkId: "chunk-1", documentId: "doc-1")]);
-
-        var result = SearchMetricCalculator.ScoreQuery(prediction);
-
         result.RecallAtK.Should().Be(1);
         result.PrecisionAtK.Should().Be(1);
         result.HitRateAtK.Should().Be(1);
@@ -627,19 +215,46 @@ public sealed class SearchMetricCalculatorTests
     }
 
     /// <summary>
-    /// Scores query semantic strategy uses same heading fallback as other chunkers returns no relevant match.
+    /// Counts a retrieved document as relevant when the heading matches expected evidence, even with different chunk text.
+    /// </summary>
+    [Fact]
+    public void ScoreQuery_HeadingMatchesExpectedEvidence_ReturnsRelevantMatch()
+    {
+        // Arrange
+        var prediction = Prediction(
+            "evidence hit",
+            expectedDocuments: [Document(EvaluationPath, RetrievalHeading)],
+            retrievedDocuments: [Document(EvaluationPath, RetrievalHeading, "different chunk text")]);
+
+        // Act
+        var result = SearchMetricCalculator.ScoreQuery(prediction);
+
+        // Assert
+        result.RecallAtK.Should().Be(1);
+        result.PrecisionAtK.Should().Be(1);
+        result.HitRateAtK.Should().Be(1);
+        result.ReciprocalRank.Should().Be(1);
+        result.Diagnostics.Matches.Should().ContainSingle().Which.HeadingMatched.Should().BeTrue();
+    }
+
+    /// <summary>
+    /// Applies the same heading fallback to Semantic chunking as to other chunkers, so a headingless chunk whose
+    /// text omits the expected heading earns no relevant match.
     /// </summary>
     [Fact]
     public void ScoreQuery_SemanticStrategyUsesSameHeadingFallbackAsOtherChunkers_ReturnsNoRelevantMatch()
     {
+        // Arrange
         var prediction = Prediction(
             "semantic evidence hit",
-            [Document(EvaluationPath, RetrievalHeading)],
-            [Document(EvaluationPath, heading: null, snippet: "semantic chunk crosses source sections")],
-            ChunkingStrategyKind.Semantic);
+            expectedDocuments: [Document(EvaluationPath, RetrievalHeading)],
+            retrievedDocuments: [Document(EvaluationPath, heading: null, snippet: "semantic chunk crosses source sections")],
+            chunkingStrategy: ChunkingStrategyKind.Semantic);
 
+        // Act
         var result = SearchMetricCalculator.ScoreQuery(prediction);
 
+        // Assert
         result.RecallAtK.Should().Be(0);
         result.PrecisionAtK.Should().Be(0);
         result.Diagnostics.Matches.Should().ContainSingle().Which.Should().BeEquivalentTo(new
@@ -653,7 +268,130 @@ public sealed class SearchMetricCalculatorTests
     }
 
     /// <summary>
-    /// Tests that scoring records duplicate retrieved source paths while counting precision against all retrieved results.
+    /// Uses the rank of the first relevant result to compute reciprocal rank.
+    /// </summary>
+    [Fact]
+    public void ScoreQuery_FirstRelevantSourceAtSecondRank_ReturnsReciprocalRankForSecondRank()
+    {
+        // Arrange
+        var prediction = Prediction(
+            "rank two hit",
+            expectedDocuments: [Document(EvaluationPath)],
+            retrievedDocuments: [Document(ChunkingPath), Document(EvaluationPath)]);
+
+        // Act
+        var result = SearchMetricCalculator.ScoreQuery(prediction);
+
+        // Assert
+        result.RecallAtK.Should().Be(1);
+        result.PrecisionAtK.Should().Be(0.5);
+        result.HitRateAtK.Should().Be(1);
+        result.ReciprocalRank.Should().Be(0.5);
+    }
+
+    /// <summary>
+    /// Computes R-based and section ranking metrics across multiple expected chunks spanning two sources.
+    /// </summary>
+    [Fact]
+    public void ScoreQuery_MultipleExpectedChunks_ReturnsRBasedMetrics()
+    {
+        // Arrange
+        var prediction = Prediction(
+            "r based query",
+            expectedDocuments:
+            [
+                Document(EvaluationPath, RetrievalHeading, RetrievalSnippet, chunkId: "eval-1"),
+                Document(EvaluationPath, QuestionsHeading, "interview", chunkId: "eval-2"),
+                Document(ChunkingPath, ParentChildHeading, ChildChunkSnippet, chunkId: "chunking-1")
+            ],
+            retrievedDocuments:
+            [
+                Document(EvaluationPath, RetrievalHeading, RetrievalChunkText, chunkId: "eval-1"),
+                Document(IrrelevantPath, CompositeHeading, IrrelevantSnippet),
+                Document(ChunkingPath, ParentChildHeading, "search child chunks evidence", chunkId: "chunking-1"),
+                Document(EvaluationPath, QuestionsHeading, "interview prompts", chunkId: "eval-2")
+            ]);
+
+        // Act
+        var result = SearchMetricCalculator.ScoreQuery(prediction, topK: 10);
+
+        // Assert
+        result.RBasedMetrics.RecallAtR.Should().BeApproximately(2d / 3d, 0.000001);
+        result.RBasedMetrics.RPrecision.Should().BeApproximately(2d / 3d, 0.000001);
+        result.SectionMetrics.RecallAtR.Should().BeApproximately(2d / 3d, 0.000001);
+        result.SectionMetrics.RPrecision.Should().BeApproximately(2d / 3d, 0.000001);
+        result.SectionMetrics.HitRateAt1.Should().Be(1);
+        result.SectionMetrics.MeanReciprocalRankAtK.Should().Be(1);
+        result.SectionMetrics.MeanAveragePrecisionAtK.Should().BeApproximately((1d + (2d / 3d) + (3d / 4d)) / 3d, 0.000001);
+        result.SectionMetrics.NormalizedDiscountedCumulativeGainAtK.Should().BeApproximately(
+            (1d + (1d / Math.Log2(4)) + (1d / Math.Log2(5))) / (1d + (1d / Math.Log2(3)) + (1d / Math.Log2(4))),
+            0.000001);
+    }
+
+    /// <summary>
+    /// Collapses duplicate expected chunks into one expected section so section metrics differ from chunk-level R metrics.
+    /// </summary>
+    [Fact]
+    public void ScoreQuery_DuplicateExpectedSection_ReturnsSectionLevelMetrics()
+    {
+        // Arrange
+        var prediction = Prediction(
+            "section level query",
+            expectedDocuments:
+            [
+                Document("[[RAG Patterns#Pattern Selection Guide]]", chunkId: "patterns-1"),
+                Document("[[RAG Patterns#Pattern Selection Guide]]", chunkId: "patterns-2"),
+                Document("[[Retrieval#Intro]]", chunkId: "retrieval-1")
+            ],
+            retrievedDocuments:
+            [
+                Document("Software Engineering/11 AI & ML/LLM/RAG/RAG Patterns.md", "Pattern Selection Guide", "baseline first", chunkId: "patterns-1"),
+                Document(IrrelevantPath, CompositeHeading, IrrelevantSnippet),
+                Document("Software Engineering/11 AI & ML/LLM/RAG/Retrieval.md", "Intro", "retrieval mechanics", chunkId: "retrieval-1")
+            ]);
+
+        // Act
+        var result = SearchMetricCalculator.ScoreQuery(prediction, topK: 10);
+
+        // Assert
+        result.RBasedMetrics.RecallAtR.Should().BeApproximately(2d / 3d, 0.000001);
+        result.SectionMetrics.RecallAtR.Should().Be(0.5);
+        result.SectionMetrics.RPrecision.Should().Be(0.5);
+        result.SectionMetrics.MeanAveragePrecisionAtK.Should().BeApproximately(5d / 6d, 0.000001);
+        result.SectionMetrics.NormalizedDiscountedCumulativeGainAtK.Should().BeApproximately(
+            (1d + (1d / Math.Log2(4))) / (1d + (1d / Math.Log2(3))),
+            0.000001);
+    }
+
+    /// <summary>
+    /// Reports score-analysis metrics that separate credited from uncredited same-source chunk scores.
+    /// </summary>
+    [Fact]
+    public void ScoreQuery_ScoredResults_ReturnsScoreAnalysisMetrics()
+    {
+        // Arrange
+        var prediction = Prediction(
+            "score analysis query",
+            expectedDocuments: [Document(EvaluationPath, RetrievalHeading, RetrievalSnippet)],
+            retrievedDocuments:
+            [
+                Document(EvaluationPath, RetrievalHeading, RetrievalChunkText, score: 0.8),
+                Document(EvaluationPath, RetrievalHeading, RetrievalChunkText, score: 0.75),
+                Document(IrrelevantPath, CompositeHeading, IrrelevantSnippet, score: 0.7)
+            ]);
+
+        // Act
+        var result = SearchMetricCalculator.ScoreQuery(prediction);
+
+        // Assert
+        result.ScoreAverage.Should().BeApproximately(0.75, 0.000001);
+        result.CreditedScoreAverage.Should().BeApproximately(0.8, 0.000001);
+        result.UncreditedScoreAverage.Should().BeApproximately(0.725, 0.000001);
+        result.CreditedToUncreditedSameSourceScoreGap.Should().BeApproximately(0.05, 0.000001);
+    }
+
+    /// <summary>
+    /// Records duplicate retrieved source paths while still counting precision against every retrieved result.
     /// </summary>
     [Fact]
     public void ScoreQuery_DuplicateRetrievedSources_ReturnsDuplicateDiagnostics()
@@ -661,11 +399,12 @@ public sealed class SearchMetricCalculatorTests
         // Arrange
         var prediction = Prediction(
             "duplicate retrieved source",
-            [Document(EvaluationPath, RetrievalHeading, RetrievalSnippet)],
+            expectedDocuments: [Document(EvaluationPath, RetrievalHeading, RetrievalSnippet)],
+            retrievedDocuments:
             [
-                Document(EvaluationPath, RetrievalHeading, "Evidence coverage is primary because the generator cannot use evidence it never sees."),
-                Document(EvaluationPath, RetrievalHeading, "Evidence coverage is primary because the generator cannot use evidence it never sees."),
-                Document(IrrelevantPath, "Composite", "irrelevant")
+                Document(EvaluationPath, RetrievalHeading, RetrievalChunkText),
+                Document(EvaluationPath, RetrievalHeading, RetrievalChunkText),
+                Document(IrrelevantPath, CompositeHeading, IrrelevantSnippet)
             ]);
 
         // Act
@@ -688,26 +427,83 @@ public sealed class SearchMetricCalculatorTests
     }
 
     /// <summary>
-    /// Tests that scoring uses the first relevant result rank to calculate reciprocal rank.
+    /// Produces report-facing expected-document and per-rank match diagnostics for a query with mixed evidence.
     /// </summary>
     [Fact]
-    public void ScoreQuery_FirstRelevantSourceAtSecondRank_ReturnsReciprocalRankForSecondRank()
+    public void ScoreQuery_MixedEvidence_ReturnsReadableDiagnostics()
     {
         // Arrange
-        var prediction = Prediction("rank two hit", [Document(EvaluationPath)], [Document(ChunkingPath), Document(EvaluationPath)]);
+        var prediction = Prediction(
+            "diagnostic query",
+            expectedDocuments:
+            [
+                Document(EvaluationPath, RetrievalHeading, RetrievalSnippet),
+                Document(ChunkingPath, ParentChildHeading, ChildChunkSnippet)
+            ],
+            retrievedDocuments:
+            [
+                Document(EvaluationPath, QuestionsHeading, "different chunk"),
+                Document(ChunkingPath, ParentChildHeading, "different chunk with search child chunks evidence"),
+                Document(ChunkingPath, ParentChildHeading, "different chunk")
+            ]);
 
         // Act
         var result = SearchMetricCalculator.ScoreQuery(prediction);
 
         // Assert
-        result.RecallAtK.Should().Be(1);
-        result.PrecisionAtK.Should().Be(0.5);
-        result.HitRateAtK.Should().Be(1);
-        result.ReciprocalRank.Should().Be(0.5);
+        result.Diagnostics.ExpectedDocuments.Should().BeEquivalentTo([
+            new { Index = 1, SourcePath = EvaluationPath, Heading = RetrievalHeading, SnippetPreview = RetrievalSnippet, Matched = false },
+            new { Index = 2, SourcePath = ChunkingPath, Heading = ParentChildHeading, SnippetPreview = ChildChunkSnippet, Matched = true }
+        ]);
+        result.Diagnostics.Matches.Should().BeEquivalentTo([
+            new
+            {
+                Rank = 1,
+                SourcePath = EvaluationPath,
+                Heading = QuestionsHeading,
+                Score = (double?)null,
+                MatchedExpectedSourcePath = EvaluationPath,
+                SourcePathMatched = true,
+                HeadingMatched = false,
+                SnippetMatched = false,
+                IsRelevant = false,
+                Reason = "Source path matched an expected document, but the normalized expected snippet did not appear in the retrieved chunk."
+            },
+            new
+            {
+                Rank = 2,
+                SourcePath = ChunkingPath,
+                Heading = ParentChildHeading,
+                Score = (double?)null,
+                MatchedExpectedSourcePath = ChunkingPath,
+                SourcePathMatched = true,
+                HeadingMatched = true,
+                SnippetMatched = true,
+                IsRelevant = true,
+                Reason = "Matched expected source path, heading, and snippet."
+            },
+            new
+            {
+                Rank = 3,
+                SourcePath = ChunkingPath,
+                Heading = ParentChildHeading,
+                Score = (double?)null,
+                MatchedExpectedSourcePath = ChunkingPath,
+                SourcePathMatched = true,
+                HeadingMatched = true,
+                SnippetMatched = false,
+                IsRelevant = false,
+                Reason = "Source path matched an expected document that was already credited by an earlier retrieved result; duplicate retrieval does not add recall credit."
+            }
+        ]);
     }
 
+    #endregion
+
+    #region Evaluate
+
     /// <summary>
-    /// Tests that evaluation aggregates query count, retrieval metrics, and empty-result rate for reports.
+    /// Aggregates query count, ranking metrics, R-based and section metrics, empty-result rate, and score gaps across queries.
     /// </summary>
     [Fact]
     public void Evaluate_MixedQueryResults_ReturnsAggregateMetrics()
@@ -715,9 +511,9 @@ public sealed class SearchMetricCalculatorTests
         // Arrange
         var predictions = new[]
         {
-            new SearchPrediction("first query", [Document(EvaluationPath)], [Document(EvaluationPath, score: 0.9)]),
-            new SearchPrediction("second query", [Document(EvaluationPath)], []),
-            new SearchPrediction("third query", [Document(ChunkingPath)], [Document(IrrelevantPath, score: 0.7), Document(ChunkingPath, score: 0.8)]),
+            Prediction("first query", expectedDocuments: [Document(EvaluationPath)], retrievedDocuments: [Document(EvaluationPath, score: 0.9)]),
+            Prediction("second query", expectedDocuments: [Document(EvaluationPath)], retrievedDocuments: []),
+            Prediction("third query", expectedDocuments: [Document(ChunkingPath)], retrievedDocuments: [Document(IrrelevantPath, score: 0.7), Document(ChunkingPath, score: 0.8)]),
         };
 
         // Act
@@ -743,35 +539,5 @@ public sealed class SearchMetricCalculatorTests
         report.CreditedToUncreditedSameSourceScoreGap.Should().Be(0);
     }
 
-
-    private static string[] PerQueryDashboardMetrics() =>
-    [
-        "RecallAtR",
-        "SectionRecallAtR",
-        "HitRateAt1",
-        "SectionHitRateAt1",
-        "MRRAt10",
-        "SectionMRRAt10",
-        "MAPAt10",
-        "SectionMAPAt10",
-        "NDCGAt10",
-        "SectionNDCGAt10",
-        "ScoreAverage"
-    ];
-
-    private static SearchPrediction Prediction(
-        string query,
-        IReadOnlyList<SearchDocument> expectedDocuments,
-        IReadOnlyList<SearchDocument> retrievedDocuments,
-        ChunkingStrategyKind chunkingStrategy = ChunkingStrategyKind.MarkdownSection) =>
-        new(query, expectedDocuments, retrievedDocuments, chunkingStrategy);
-
-    private static SearchDocument Document(
-        string sourcePath,
-        string? heading = null,
-        string? snippet = null,
-        double? score = null,
-        string? chunkId = null,
-        string? documentId = null) =>
-        new(sourcePath, heading, snippet, Score: score, ChunkId: chunkId, DocumentId: documentId);
+    #endregion
 }

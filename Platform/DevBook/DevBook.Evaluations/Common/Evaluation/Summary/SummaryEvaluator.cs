@@ -1,4 +1,4 @@
-namespace DevBook.Evaluations.Common.Evaluators.SummaryGeneration;
+namespace DevBook.Evaluations.Common.Evaluation.Summary;
 
 using System.Globalization;
 using Microsoft.Extensions.AI;
@@ -54,42 +54,4 @@ public sealed class SummaryEvaluator(IEnumerable<SummaryMetric> metrics) : IEval
 
     private static string FormatNumber(double value)
         => value.ToString("0.000", CultureInfo.InvariantCulture);
-}
-
-/// <summary>
-/// Aggregate metric written to the evaluation report.
-/// </summary>
-/// <param name="Name">Metric name shown in the report.</param>
-/// <param name="Value">Numeric metric value.</param>
-/// <param name="Description">Report-facing metric description.</param>
-/// <param name="Kind">Metric formatting kind.</param>
-/// <param name="Rating">Interpretation rating for the metric.</param>
-/// <param name="Diagnostics">Optional diagnostics attached to the emitted MEAI metric.</param>
-public sealed record SummaryMetric(
-    string Name,
-    double Value,
-    string Description,
-    SummaryMetricKind Kind = SummaryMetricKind.PlainNumber,
-    EvaluationRating Rating = EvaluationRating.Unknown,
-    IReadOnlyList<EvaluationDiagnostic>? Diagnostics = null);
-
-/// <summary>
-/// Selects how a summary metric value should be rounded and displayed in reports.
-/// </summary>
-public enum SummaryMetricKind
-{
-    /// <summary>
-    /// Whole-number metric such as evaluated sample count.
-    /// </summary>
-    Count,
-
-    /// <summary>
-    /// Decimal metric shown as a plain number, such as an average score.
-    /// </summary>
-    PlainNumber,
-
-    /// <summary>
-    /// Fractional metric interpreted as a rate, such as recall or empty-result rate.
-    /// </summary>
-    Percentage,
 }

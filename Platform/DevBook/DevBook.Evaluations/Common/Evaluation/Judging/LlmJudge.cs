@@ -1,6 +1,7 @@
-namespace DevBook.Evaluations.Common.Evaluation;
+namespace DevBook.Evaluations.Common.Evaluation.Judging;
 
 using System.Diagnostics;
+using DevBook.Evaluations.Common.Evaluation.Metrics;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.AI.Evaluation;
 

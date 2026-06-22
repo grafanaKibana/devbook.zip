@@ -10,6 +10,7 @@ using DevBook.Tests.Common;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Options;
 using Moq;
+using static DevBook.Tests.Common.ChunkingStrategyTestData;
 
 /// <summary>
 /// Contains tests for the fixed-size chunking strategy.
@@ -129,43 +130,4 @@ public sealed class FixedSizeChunkingStrategyTests
             embeddingService,
             new FixedSizeChunkingStrategy());
     }
-
-    private static Mock<IChunkRepository> CaptureReplace(
-        string expectedDocumentId,
-        Action<IReadOnlyCollection<ChunkModel>> capture)
-    {
-        var repository = new Mock<IChunkRepository>(MockBehavior.Strict);
-        repository.Setup(mock => mock.ReplaceDocumentsChunksAsync(
-                It.Is<IReadOnlyCollection<string>>(documentIds => documentIds.Count == 1 && documentIds.Contains(expectedDocumentId)),
-                It.IsAny<IReadOnlyCollection<ChunkModel>>(),
-                It.IsAny<CancellationToken>()))
-            .Callback<IReadOnlyCollection<string>, IReadOnlyCollection<ChunkModel>, CancellationToken>((_, chunks, _) => capture(chunks))
-            .Returns(Task.CompletedTask);
-
-        return repository;
-    }
-
-    private static Mock<IChunkRepository> CaptureReplaceForDocuments(params string[] documentIds)
-    {
-        var repository = new Mock<IChunkRepository>(MockBehavior.Strict);
-        repository.Setup(mock => mock.ReplaceDocumentsChunksAsync(
-                It.Is<IReadOnlyCollection<string>>(actual => actual.Order().SequenceEqual(documentIds.Order())),
-                It.IsAny<IReadOnlyCollection<ChunkModel>>(),
-                It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
-
-        return repository;
-    }
-
-    private static Document Document(string documentId, string title, string pageContent) => new()
-    {
-        DocumentId = documentId,
-        SourcePath = $"Notes/{title}.md",
-        Title = title,
-        RawMarkdown = pageContent,
-        Frontmatter = string.Empty,
-        PageContent = pageContent,
-        SourceHash = $"hash-{documentId}",
-        UpdatedAt = DateTimeOffset.UnixEpoch,
-    };
 }

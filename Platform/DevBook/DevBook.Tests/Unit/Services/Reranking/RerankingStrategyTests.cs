@@ -5,20 +5,25 @@ using DevBook.Data.Models;
 using DevBook.Data.Services.Reranking;
 
 /// <summary>
-/// Contains tests for reranking strategy.
+/// Contains tests for the reranking strategies.
 /// </summary>
 public sealed class RerankingStrategyTests
 {
+    private const string Query = "reciprocal rank fusion";
+
     /// <summary>
-    /// Gets no reranking rerank preserves vector order and scores.
+    /// Tests that no-op reranking preserves the original vector order and scores.
     /// </summary>
     [Fact]
     public async Task NoReranking_Rerank_PreservesVectorOrderAndScores()
     {
+        // Arrange
         var strategy = new NoRerankingStrategy();
 
-        var results = await strategy.RerankAsync("reciprocal rank fusion", Candidates(), topK: 2);
+        // Act
+        var results = await strategy.RerankAsync(Query, Candidates(), topK: 2);
 
+        // Assert
         results.Should().HaveCount(2);
         results.Select(result => result.ChunkId).Should().Equal("generic", "rrf");
         results[0].Score.Should().Be(0.99);
@@ -30,10 +35,13 @@ public sealed class RerankingStrategyTests
     [Fact]
     public async Task Bm25_Rerank_PromotesBestLexicalMatch()
     {
+        // Arrange
         var strategy = new Bm25RerankingStrategy();
 
-        var results = await strategy.RerankAsync("reciprocal rank fusion", Candidates(), topK: 2);
+        // Act
+        var results = await strategy.RerankAsync(Query, Candidates(), topK: 2);
 
+        // Assert
         results.Should().HaveCount(2);
         results[0].ChunkId.Should().Be("rrf");
         results[0].Score.Should().BeInRange(0, 1);
@@ -41,11 +49,12 @@ public sealed class RerankingStrategyTests
     }
 
     /// <summary>
-    /// Gets maximal marginal relevance rerank promotes relevant diverse matches.
+    /// Tests that maximal marginal relevance reranking promotes relevant but diverse matches.
     /// </summary>
     [Fact]
     public async Task MaximalMarginalRelevance_Rerank_PromotesRelevantDiverseMatches()
     {
+        // Arrange
         var strategy = new MaximalMarginalRelevanceRerankingStrategy();
         var candidates = new[]
         {
@@ -54,8 +63,10 @@ public sealed class RerankingStrategyTests
             new RagChunkResponse("diverse", "doc-3", "reciprocal rank fusion reranking compares BM25 and MMR", null, "[[Diverse]]", 0.70),
         };
 
-        var results = await strategy.RerankAsync("reciprocal rank fusion reranking", candidates, topK: 2);
+        // Act
+        var results = await strategy.RerankAsync($"{Query} reranking", candidates, topK: 2);
 
+        // Assert
         results.Should().HaveCount(2);
         results.Select(result => result.ChunkId).Should().Contain("diverse");
         results.Select(result => result.ChunkId).Should().NotContain("duplicate-2");
@@ -63,15 +74,18 @@ public sealed class RerankingStrategyTests
     }
 
     /// <summary>
-    /// Gets reciprocal rank fusion rerank fuses vector and lexical ranks.
+    /// Tests that reciprocal rank fusion reranking fuses the vector rank and the lexical rank.
     /// </summary>
     [Fact]
     public async Task ReciprocalRankFusion_Rerank_FusesVectorAndLexicalRanks()
     {
+        // Arrange
         var strategy = new ReciprocalRankFusionRerankingStrategy();
 
-        var results = await strategy.RerankAsync("reciprocal rank fusion", Candidates(), topK: 2);
+        // Act
+        var results = await strategy.RerankAsync(Query, Candidates(), topK: 2);
 
+        // Assert
         results.Should().HaveCount(2);
         results[0].ChunkId.Should().Be("rrf");
         results[0].Score.Should().BeInRange(0, 1);
@@ -79,31 +93,27 @@ public sealed class RerankingStrategyTests
     }
 
     /// <summary>
-    /// Reranks ers return expected score ranges for repeated query terms.
+    /// Tests that every reranking strategy returns normalized scores within [0, 1] for repeated query terms.
     /// </summary>
     [Fact]
     public async Task Rerankers_ReturnExpectedScoreRangesForRepeatedQueryTerms()
     {
+        // Arrange
         var candidates = new[]
         {
             new RagChunkResponse("repeated", "doc-1", "fusion fusion fusion fusion reciprocal rank", null, "[[Repeated]]", 0.9),
             new RagChunkResponse("other", "doc-2", "unrelated content", null, "[[Other]]", 0.8),
         };
 
-        (await new Bm25RerankingStrategy()
-            .RerankAsync("reciprocal rank fusion", candidates, topK: 2))
-            .Select(result => result.Score)
-            .Should().OnlyContain(score => score >= 0 && score <= 1);
+        // Act
+        var bm25Scores = (await new Bm25RerankingStrategy().RerankAsync(Query, candidates, topK: 2)).Select(result => result.Score);
+        var mmrScores = (await new MaximalMarginalRelevanceRerankingStrategy().RerankAsync(Query, candidates, topK: 2)).Select(result => result.Score);
+        var rrfScores = (await new ReciprocalRankFusionRerankingStrategy().RerankAsync(Query, candidates, topK: 2)).Select(result => result.Score);
 
-        (await new MaximalMarginalRelevanceRerankingStrategy()
-            .RerankAsync("reciprocal rank fusion", candidates, topK: 2))
-            .Select(result => result.Score)
-            .Should().OnlyContain(score => score >= 0 && score <= 1);
-
-        (await new ReciprocalRankFusionRerankingStrategy()
-            .RerankAsync("reciprocal rank fusion", candidates, topK: 2))
-            .Select(result => result.Score)
-            .Should().OnlyContain(score => score >= 0 && score <= 1);
+        // Assert
+        bm25Scores.Should().OnlyContain(score => score >= 0 && score <= 1);
+        mmrScores.Should().OnlyContain(score => score >= 0 && score <= 1);
+        rrfScores.Should().OnlyContain(score => score >= 0 && score <= 1);
     }
 
     private static IReadOnlyList<RagChunkResponse> Candidates() =>

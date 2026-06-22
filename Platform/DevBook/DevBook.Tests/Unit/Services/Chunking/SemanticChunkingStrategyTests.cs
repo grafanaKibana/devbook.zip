@@ -10,9 +10,10 @@ using DevBook.Tests.Common;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Options;
 using Moq;
+using static DevBook.Tests.Common.ChunkingStrategyTestData;
 
 /// <summary>
-/// Contains tests for semantic chunking strategy.
+/// Contains tests for the semantic chunking strategy.
 /// </summary>
 public sealed class SemanticChunkingStrategyTests
 {
@@ -25,7 +26,7 @@ public sealed class SemanticChunkingStrategyTests
     private const string SecondDocumentId = "doc-second";
 
     /// <summary>
-    /// Replaces document chunks whitespace document replaces chunks with empty collection.
+    /// Tests that semantic chunking replaces chunks with an empty collection when a document has only whitespace content.
     /// </summary>
     [Fact]
     public async Task ReplaceDocumentChunksAsync_WhitespaceDocument_ReplacesChunksWithEmptyCollection()
@@ -72,7 +73,7 @@ public sealed class SemanticChunkingStrategyTests
     }
 
     /// <summary>
-    /// Replaces document chunks embedding similarity drops splits at semantic boundary.
+    /// Tests that semantic chunking splits into separate chunks where embedding similarity drops at a topic boundary.
     /// </summary>
     [Fact]
     public async Task ReplaceDocumentChunksAsync_EmbeddingSimilarityDrops_SplitsAtSemanticBoundary()
@@ -101,7 +102,7 @@ public sealed class SemanticChunkingStrategyTests
     }
 
     /// <summary>
-    /// Replaces document chunks section exceeds max chunk length splits into embeddable chunks.
+    /// Tests that semantic chunking splits an oversized section into chunks that stay within the embeddable length limit.
     /// </summary>
     [Fact]
     public async Task ReplaceDocumentChunksAsync_SectionExceedsMaxChunkLength_SplitsIntoEmbeddableChunks()
@@ -149,7 +150,7 @@ public sealed class SemanticChunkingStrategyTests
     }
 
     /// <summary>
-    /// Replaces document chunks multiple documents embeds semantic units per document and chunks in single batch.
+    /// Tests that semantic chunking embeds each document's semantic units separately, then persists all chunks in one batch.
     /// </summary>
     [Fact]
     public async Task ReplaceDocumentChunksAsync_MultipleDocuments_EmbedsSemanticUnitsPerDocumentAndChunksInSingleBatch()
@@ -195,43 +196,4 @@ public sealed class SemanticChunkingStrategyTests
             embeddingService,
             new SemanticChunkingStrategy());
     }
-
-    private static Mock<IChunkRepository> CaptureReplace(
-        string expectedDocumentId,
-        Action<IReadOnlyCollection<ChunkModel>> capture)
-    {
-        var repository = new Mock<IChunkRepository>(MockBehavior.Strict);
-        repository.Setup(mock => mock.ReplaceDocumentsChunksAsync(
-                It.Is<IReadOnlyCollection<string>>(documentIds => documentIds.Count == 1 && documentIds.Contains(expectedDocumentId)),
-                It.IsAny<IReadOnlyCollection<ChunkModel>>(),
-                It.IsAny<CancellationToken>()))
-            .Callback<IReadOnlyCollection<string>, IReadOnlyCollection<ChunkModel>, CancellationToken>((_, chunks, _) => capture(chunks))
-            .Returns(Task.CompletedTask);
-
-        return repository;
-    }
-
-    private static Mock<IChunkRepository> CaptureReplaceForDocuments(params string[] documentIds)
-    {
-        var repository = new Mock<IChunkRepository>(MockBehavior.Strict);
-        repository.Setup(mock => mock.ReplaceDocumentsChunksAsync(
-                It.Is<IReadOnlyCollection<string>>(actual => actual.Order().SequenceEqual(documentIds.Order())),
-                It.IsAny<IReadOnlyCollection<ChunkModel>>(),
-                It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
-
-        return repository;
-    }
-
-    private static Document Document(string documentId, string title, string pageContent) => new()
-    {
-        DocumentId = documentId,
-        SourcePath = $"Notes/{title}.md",
-        Title = title,
-        RawMarkdown = pageContent,
-        Frontmatter = string.Empty,
-        PageContent = pageContent,
-        SourceHash = $"hash-{documentId}",
-        UpdatedAt = DateTimeOffset.UnixEpoch,
-    };
 }

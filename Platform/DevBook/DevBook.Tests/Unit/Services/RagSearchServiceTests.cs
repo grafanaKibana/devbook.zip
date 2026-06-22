@@ -111,7 +111,7 @@ public sealed class RagSearchServiceTests
     }
 
     /// <summary>
-    /// Searches reranking strategy reorders candidates and returns requested top k.
+    /// Tests that the configured reranking strategy reorders candidates and returns the requested top-K.
     /// </summary>
     [Fact]
     public async Task SearchAsync_RerankingStrategy_ReordersCandidatesAndReturnsRequestedTopK()

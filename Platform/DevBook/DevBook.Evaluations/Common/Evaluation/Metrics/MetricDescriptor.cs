@@ -1,6 +1,4 @@
-namespace DevBook.Evaluations.Common.Evaluation;
-
-using Microsoft.Extensions.AI;
+namespace DevBook.Evaluations.Common.Evaluation.Metrics;
 
 /// <summary>
 /// Declares one metric once: its identity plus the presentation hints carried into report metadata

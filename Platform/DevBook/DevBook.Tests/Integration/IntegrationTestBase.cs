@@ -1,7 +1,6 @@
 namespace DevBook.Tests.Integration;
 
 using Hangfire;
-using DevBook.API;
 using DevBook.Data.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;

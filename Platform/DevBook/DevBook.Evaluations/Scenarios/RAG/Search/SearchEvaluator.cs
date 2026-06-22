@@ -3,7 +3,8 @@ namespace DevBook.Evaluations.Scenarios.RAG.Search;
 using System.Globalization;
 using DevBook.Data.Models;
 using DevBook.Data.Services;
-using DevBook.Evaluations.Common.Evaluators.SummaryGeneration;
+using DevBook.Evaluations.Common.Evaluation.Summary;
+using DevBook.Evaluations.Scenarios.RAG.Search.Model;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.AI.Evaluation;
 

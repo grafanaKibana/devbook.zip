@@ -3,7 +3,8 @@ namespace DevBook.Evaluations.Scenarios.RAG.Answer;
 using System.ComponentModel;
 using System.Text;
 using System.Text.RegularExpressions;
-using DevBook.Evaluations.Common.Evaluation;
+using DevBook.Evaluations.Common.Evaluation.Metrics;
+using DevBook.Evaluations.Common.Evaluation.Judging;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.AI.Evaluation;
 

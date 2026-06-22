@@ -175,7 +175,7 @@ public sealed class IngestionServiceTests
     }
 
     /// <summary>
-    /// Ingests documents semantic strategy runs only semantic chunking service.
+    /// Tests that selecting semantic chunking updates only the semantic chunk collection.
     /// </summary>
     [Fact]
     public async Task IngestDocumentsAsync_SemanticStrategy_RunsOnlySemanticChunkingService()
@@ -214,7 +214,7 @@ public sealed class IngestionServiceTests
     }
 
     /// <summary>
-    /// Ingests documents null chunking strategy runs all chunking services.
+    /// Tests that omitting a chunking strategy runs every registered chunking service.
     /// </summary>
     [Fact]
     public async Task IngestDocumentsAsync_NullChunkingStrategy_RunsAllChunkingServices()
@@ -330,11 +330,12 @@ public sealed class IngestionServiceTests
     }
 
     /// <summary>
-    /// Ingests documents force reingest unchanged single file updates document and replaces chunks.
+    /// Tests that force-reingesting an unchanged single file still updates the document and replaces its chunks.
     /// </summary>
     [Fact]
     public async Task IngestDocumentsAsync_ForceReingestUnchangedSingleFile_UpdatesDocumentAndReplacesChunks()
     {
+        // Arrange
         using var workspace = TestWorkspace.Create();
         var rawMarkdown = Published("# Note\n\nStable content.");
         workspace.WriteMarkdown(ScopedNotePath, rawMarkdown);
@@ -353,8 +354,10 @@ public sealed class IngestionServiceTests
         var chunks = CaptureReplaceChunks((documentId, _) => replacedDocumentIds.Add(documentId));
         var service = CreateService(workspace.RootDirectory, documents, chunks);
 
+        // Act
         var result = await service.IngestDocumentsAsync(new IngestionRequest(ScopePath, NoteFileName, ForceReingest: true));
 
+        // Assert
         result.Should().BeEquivalentTo(new
         {
             ProcessedCount = 1,
@@ -417,7 +420,7 @@ public sealed class IngestionServiceTests
     }
 
     /// <summary>
-    /// Ingests documents unchanged folder skips document updates and chunking.
+    /// Tests that folder ingestion skips document updates and chunking when every file is unchanged.
     /// </summary>
     [Fact]
     public async Task IngestDocumentsAsync_UnchangedFolder_SkipsDocumentUpdatesAndChunking()
@@ -456,6 +459,7 @@ public sealed class IngestionServiceTests
     [Fact]
     public async Task IngestDocumentsAsync_FolderSource_SkipsNonRagMarkdownFiles()
     {
+        // Arrange
         using var workspace = TestWorkspace.Create();
         workspace.WriteMarkdown("Scope/Published.md", Published("# Published\n\nUseful RAG content."));
         workspace.WriteMarkdown("Scope/Draft.md", "# Draft\n\nNot published yet.");
@@ -465,8 +469,10 @@ public sealed class IngestionServiceTests
         var chunks = CreateReplacingChunkRepository();
         var service = CreateService(workspace.RootDirectory, documents, chunks);
 
+        // Act
         var result = await service.IngestDocumentsAsync(new IngestionRequest(ScopePath, null));
 
+        // Assert
         result.Should().BeEquivalentTo(new
         {
             ProcessedCount = 1,

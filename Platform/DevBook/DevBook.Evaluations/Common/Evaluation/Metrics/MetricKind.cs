@@ -1,4 +1,4 @@
-namespace DevBook.Evaluations.Common.Evaluation;
+namespace DevBook.Evaluations.Common.Evaluation.Metrics;
 
 /// <summary>
 /// How a metric's raw value should be read, rounded and coloured in the report. One shared vocabulary

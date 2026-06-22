@@ -1,4 +1,4 @@
-namespace DevBook.Evaluations.Common;
+namespace DevBook.Evaluations.Common.Hosting;
 
 using DevBook.Data;
 using DevBook.Data.Models;

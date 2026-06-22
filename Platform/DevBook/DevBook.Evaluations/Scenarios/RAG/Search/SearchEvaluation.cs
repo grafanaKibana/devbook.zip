@@ -2,10 +2,9 @@ namespace DevBook.Evaluations.Scenarios.RAG.Search;
 
 using DevBook.Data.Models;
 using DevBook.Data.Options;
-using DevBook.Data.Repositories;
 using DevBook.Data.Services;
-using DevBook.Evaluations.Common;
-using DevBook.Evaluations.Common.Evaluators.SummaryGeneration;
+using DevBook.Evaluations.Common.Hosting;
+using DevBook.Evaluations.Common.Evaluation.Summary;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.AI.Evaluation;
 using Microsoft.Extensions.Options;

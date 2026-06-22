@@ -1,10 +1,9 @@
-namespace DevBook.Evaluations.Common;
+namespace DevBook.Evaluations.Common.Hosting;
 
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Text.Json;
-using DevBook.Evaluations.Common.Evaluation;
-using DevBook.Evaluations.Common.Evaluators.SummaryGeneration;
+using DevBook.Evaluations.Common.Evaluation.Summary;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.AI.Evaluation;
 using Microsoft.Extensions.AI.Evaluation.Reporting;

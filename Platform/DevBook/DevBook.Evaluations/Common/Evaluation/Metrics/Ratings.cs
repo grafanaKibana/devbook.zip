@@ -1,4 +1,4 @@
-namespace DevBook.Evaluations.Common.Evaluation;
+namespace DevBook.Evaluations.Common.Evaluation.Metrics;
 
 using Microsoft.Extensions.AI.Evaluation;
 

@@ -1,7 +1,8 @@
 namespace DevBook.Evaluations.Scenarios.AskAgent;
 
 using System.Globalization;
-using DevBook.Evaluations.Common.Evaluation;
+using DevBook.Evaluations.Common.Evaluation.Metrics;
+using DevBook.Evaluations.Common.Evaluation.Judging;
 using Microsoft.Extensions.AI.Evaluation;
 
 /// <summary>

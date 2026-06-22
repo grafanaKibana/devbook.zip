@@ -1,6 +1,6 @@
 namespace DevBook.Evaluations.Scenarios.RAG.Answer;
 
-using DevBook.Evaluations.Common.Evaluation;
+using DevBook.Evaluations.Common.Evaluation.Metrics;
 
 /// <summary>
 /// The generation-quality metric panel for the RAG answer scenario. These measure the
