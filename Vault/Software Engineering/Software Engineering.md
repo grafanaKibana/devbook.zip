@@ -29,12 +29,28 @@ const notes = dv.pages(`"${ROOT}"`).where(
 // (e.g. "Ready to Repeat" vs "Ready To Repeat") can't silently score 0.
 const STATUS_PROGRESS = new Map([
   ["not-started", 0],
-  ["creation", 25],
-  ["repetition", 50],
-  ["ready to repeat", 75],
+  ["creation", 33],
+  ["ready to repeat", 66],
   ["done", 100],
 ]);
 const progressFor = (status) => STATUS_PROGRESS.get(status.toLowerCase()) ?? 0;
+
+// Ordered status ramp powering the multicolour bars + legend. Each in-progress
+// status contributes `weight` points; a status's coloured segment is sized to
+// its share of those points (count·weight / total), so the filled portion of
+// the bar always sums back to the topic's weighted percentage. "Not-Started"
+// contributes 0, so it has no segment (it's the empty track).
+//
+// Colours are shades of the theme accent — var(--text-accent), the exact colour
+// native progress bars fill with (--progress-complete) — dimmed via element
+// opacity. This tracks the monochrome Obsidian/Eleventy theme in both light and
+// dark mode without needing an "R, G, B" accent triplet. Ordered Done-first so
+// each bar reads completed → earliest stage.
+const STATUS_RAMP = [
+  { key: "done",            label: "Done",            weight: 100, alpha: 1 },
+  { key: "ready to repeat", label: "Ready to Repeat", weight: 66,  alpha: 0.6 },
+  { key: "creation",        label: "Creation",        weight: 33,  alpha: 0.28 },
+];
 
 const asStringArray = (v) => {
   if (Array.isArray(v)) return v.map((x) => String(x).trim()).filter(Boolean);
@@ -57,6 +73,7 @@ const topicStats = new Map();
 let notesWithTopicTotal = 0;
 let notesWithTopicPoints = 0;
 let notesWithTopicDone = 0;
+const overallByStatus = new Map();
 const notesOutsideTopics = [];
 
 for (const p of notes) {
@@ -68,29 +85,32 @@ for (const p of notes) {
   const topic = segToTopic(seg);
 
   const status = asStringArray(p.status)[0] ?? "";
+  const statusKey = status.toLowerCase();
   const progress = progressFor(status);
-  const isDone = status.toLowerCase() === "done";
+  const isDone = statusKey === "done";
 
   notesWithTopicTotal += 1;
   notesWithTopicPoints += progress;
   if (isDone) notesWithTopicDone += 1;
+  overallByStatus.set(statusKey, (overallByStatus.get(statusKey) ?? 0) + 1);
 
-  const cur = topicStats.get(topic) ?? { total: 0, points: 0, done: 0, seg };
+  const cur = topicStats.get(topic) ?? { total: 0, points: 0, done: 0, seg, byStatus: new Map() };
   cur.total += 1;
   cur.points += progress;
   if (isDone) cur.done += 1;
+  cur.byStatus.set(statusKey, (cur.byStatus.get(statusKey) ?? 0) + 1);
   topicStats.set(topic, cur);
 }
 
-// The bar is weighted across every status (Not-Started/Creation/Repetition/
-// Ready-To-Repeat/Done → 0/25/50/75/100), so in-progress notes count toward it.
+// The bar is weighted across every status (Not-Started/Creation/
+// Ready-To-Repeat/Done → 0/33/66/100), so in-progress notes count toward it.
 // The "n/m done" counter is separate: a plain count of notes whose status is
 // "Done", so it never just mirrors the weighted bar.
 const statsFor = (topic) => {
   const s = topicStats.get(topic);
-  if (!s) return { pct: 0, done: 0, total: 0 };
+  if (!s) return { pct: 0, done: 0, total: 0, byStatus: new Map() };
   const pct = s.total > 0 ? Math.round(s.points / s.total) : 0;
-  return { pct, done: s.done, total: s.total };
+  return { pct, done: s.done, total: s.total, byStatus: s.byStatus };
 };
 
 // --- Curated cards ------------------------------------------------------------
@@ -138,20 +158,76 @@ table.classList.add("dataview", "table-view-table");
 const tbody = table.createEl("tbody");
 tbody.classList.add("table-view-tbody");
 
-const appendProgress = (parent, pct) => {
+// Multicolour stacked bar: one coloured slice per in-progress status, each sized
+// to that status's contribution to the weighted percentage (count·weight/total).
+// The slices therefore fill exactly `pct%` of the track; the rest stays empty.
+const appendStackedBar = (parent, byStatus, total) => {
+  const bar = parent.createEl("div");
+  bar.classList.add("se-progress");
+  bar.style.display = "flex";
+  bar.style.width = "100%";
+  bar.style.height = "0.7em";
+  bar.style.borderRadius = "999px";
+  bar.style.overflow = "hidden";
+  bar.style.background = "var(--background-modifier-border)";
+
+  if (total > 0) {
+    for (const s of STATUS_RAMP) {
+      const cnt = byStatus.get(s.key) ?? 0;
+      if (cnt <= 0) continue;
+      const widthPct = (cnt * s.weight) / total; // percentage points of the whole bar
+      if (widthPct <= 0) continue;
+      const seg = bar.createEl("div");
+      seg.style.width = `${widthPct}%`;
+      seg.style.background = "var(--text-accent)";
+      seg.style.opacity = String(s.alpha);
+      seg.setAttribute(
+        "aria-label",
+        `${s.label}: ${cnt} note${cnt === 1 ? "" : "s"} → ${widthPct.toFixed(1)}%`,
+      );
+    }
+  }
+  return bar;
+};
+
+const appendProgress = (parent, pct, byStatus, total) => {
   parent.style.textAlign = "center";
 
-  const prog = parent.createEl("progress");
-  prog.classList.add("se-progress");
-  prog.max = 100;
-  prog.value = pct;
-  prog.style.display = "block";
-  prog.style.width = "100%";
+  appendStackedBar(parent, byStatus, total);
 
   const line = parent.createEl("div");
   line.style.textAlign = "center";
   line.createEl("span", { text: `${pct}%` });
   return line;
+};
+
+// Shared colour legend, rendered once beneath the grid + total.
+const appendLegend = (parent) => {
+  const legend = parent.createEl("div");
+  legend.classList.add("se-progress-legend");
+  legend.style.display = "flex";
+  legend.style.flexWrap = "wrap";
+  legend.style.justifyContent = "center";
+  legend.style.gap = "0.4em 1.1em";
+  legend.style.marginTop = "0.7em";
+  legend.style.fontSize = "0.8em";
+  legend.style.opacity = "0.85";
+  for (const s of STATUS_RAMP) {
+    const item = legend.createEl("span");
+    item.style.display = "inline-flex";
+    item.style.alignItems = "center";
+    item.style.gap = "0.4em";
+    const sw = item.createEl("span");
+    sw.style.width = "0.8em";
+    sw.style.height = "0.8em";
+    sw.style.borderRadius = "3px";
+    sw.style.flex = "0 0 auto";
+    sw.style.background = "var(--text-accent)";
+    sw.style.opacity = String(s.alpha);
+    sw.style.display = "inline-block";
+    item.createEl("span", { text: `${s.label} · ${s.weight}%` });
+  }
+  return legend;
 };
 
 const COLS = 3;
@@ -184,7 +260,7 @@ for (let i = 0; i < cards.length; i += COLS) {
     foot.style.left = "0.75em";
     foot.style.right = "0.75em";
     foot.style.bottom = "0";
-    const line = appendProgress(foot, stats.pct);
+    const line = appendProgress(foot, stats.pct, stats.byStatus, stats.total);
     const sub = line.createEl("span", { text: ` · ${stats.done}/${stats.total} done` });
     sub.style.fontSize = "0.8em";
     sub.style.opacity = "0.7";
@@ -199,10 +275,13 @@ const callout = dv.container.createEl("div", { cls: "callout" });
 callout.setAttribute("data-callout", "done");
 
 const calloutContent = callout.createEl("div", { cls: "callout-content" });
-const totalLine = appendProgress(calloutContent, totalPct);
+const totalLine = appendProgress(calloutContent, totalPct, overallByStatus, notesWithTopicTotal);
 const totalSub = totalLine.createEl("span", { text: ` · ${totalDone}/${notesWithTopicTotal} done` });
 totalSub.style.fontSize = "0.8em";
 totalSub.style.opacity = "0.7";
+
+// Colour key for every stacked bar above.
+appendLegend(calloutContent);
 
 // --- Notes that aren't under any top-level topic folder ----------------------
 if (notesOutsideTopics.length > 0) {
