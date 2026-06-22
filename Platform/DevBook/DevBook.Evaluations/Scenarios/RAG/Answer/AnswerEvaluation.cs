@@ -5,6 +5,7 @@ using DevBook.Data.Agents;
 using DevBook.Data.Options;
 using DevBook.Data.Services;
 using DevBook.Evaluations.Common;
+using DevBook.Evaluations.Common.Evaluation;
 using DevBook.Evaluations.Common.Evaluators.SummaryGeneration;
 using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
@@ -26,13 +27,14 @@ public sealed class AnswerEvaluation : EvaluationTestBase<AnswerPrediction>
     private const string AnswerDatasetFileName = "answers-shared.json";
 
     private AIAgent answerAgent = null!;
-    private IAnswerJudge judge = null!;
+    private IJudge<AnswerJudgeInput> judge = null!;
+    private IEvaluator[] evaluators = [];
 
     /// <inheritdoc />
     protected override string ScenarioDisplayName => "RAG.Answer";
 
     /// <inheritdoc />
-    protected override IEvaluator[] GetPerIterationEvaluators() => [new AnswerQualityEvaluator(SelectedMetrics())];
+    protected override IEvaluator[] GetPerIterationEvaluators() => this.evaluators;
 
     // Prefer the answer dataset (carries per-case reference answers → unlocks Correctness); fall back to
     // the reference-free shared search dataset. Both deserialize to RagGoldenCase. With --mini,
@@ -41,7 +43,7 @@ public sealed class AnswerEvaluation : EvaluationTestBase<AnswerPrediction>
     private static string ResolveAnswerDatasetFileName() => ResolveDatasetVariant(AnswerDatasetFileName);
     private static bool HasAnswerDataset() => DatasetExists(ResolveAnswerDatasetFileName());
     private static string ResolveDatasetFileName() => HasAnswerDataset() ? ResolveAnswerDatasetFileName() : ResolveDatasetVariant(SharedDatasetFileName);
-    private static IReadOnlyList<AnswerMetricDefinition> SelectedMetrics() => HasAnswerDataset() ? AnswerMetrics.All : AnswerMetrics.ReferenceFree;
+    private static IReadOnlyList<MetricDescriptor> SelectedMetrics() => HasAnswerDataset() ? AnswerMetrics.All : AnswerMetrics.ReferenceFree;
 
     /// <inheritdoc />
     protected override Task OnSetupAsync()
@@ -73,10 +75,15 @@ public sealed class AnswerEvaluation : EvaluationTestBase<AnswerPrediction>
                 new ApiKeyCredential(openAIOptions.ApiKey),
                 new OpenAIClientOptions { Endpoint = new Uri(openAIOptions.Endpoint, UriKind.Absolute) });
 
-        this.answerAgent = new ChatClientAgent(
-            client.GetChatClient(answerConfig.ModelId).AsIChatClient(),
-            answerConfig.ChatClientAgentOptions);
-        this.judge = new LlmAnswerJudge(client.GetChatClient(judgeModelId).AsIChatClient(), judgeModelId, SelectedMetrics());
+        // Wrap both chat clients with the rate-limit retry middleware so 429s are handled inside the MEAI
+        // pipeline: the answer agent's RunAsync and the judge's structured-output call each retry on their
+        // own, which is what lets the judge run as a plain evaluator (no test-body retry wrapper).
+        var agentClient = new RateLimitingChatClient(client.GetChatClient(answerConfig.ModelId).AsIChatClient(), this.RateLimitOptions);
+        this.answerAgent = new ChatClientAgent(agentClient, answerConfig.ChatClientAgentOptions);
+
+        var judgeChatClient = new RateLimitingChatClient(client.GetChatClient(judgeModelId).AsIChatClient(), this.RateLimitOptions);
+        this.judge = new AnswerJudge(judgeChatClient, judgeModelId, SelectedMetrics());
+        this.evaluators = [new JudgeEvaluator<AnswerJudgeInput, AnswerCaseContext>(this.judge, (context, response) => new AnswerJudgeInput(context.Case, response.Text))];
 
         return Task.CompletedTask;
     }
@@ -98,22 +105,17 @@ public sealed class AnswerEvaluation : EvaluationTestBase<AnswerPrediction>
         var sources = answerCase.Expected.Select(source => source.ToChunkResponse()).ToList();
         var input = RagAskService.BuildAgentInput(answerCase.Query, sources);
 
-        var answer = string.Empty;
-        IReadOnlyList<AnswerMetricVerdict> verdicts = [];
+        // The answer agent's client retries 429s internally, so no test-body wrapper is needed. The judge
+        // runs inside EvaluateAsync (via JudgeEvaluator) and its metrics come back on the returned result.
+        var agentResponse = await this.answerAgent.RunAsync(input);
+        var answer = agentResponse.Text;
 
-        await RunLiveLlmEvaluationAsync(async () =>
-        {
-            var agentResponse = await this.answerAgent.RunAsync(input);
-            answer = agentResponse.Text;
-            verdicts = await this.judge.JudgeAsync(answerCase, answer);
-        });
-
-        await scenarioRun.EvaluateAsync(
+        var result = await scenarioRun.EvaluateAsync(
             [new ChatMessage(ChatRole.User, answerCase.Query)],
             new ChatResponse(new ChatMessage(ChatRole.Assistant, answer)),
-            additionalContext: [new AnswerCaseContext(answerCase, verdicts)]);
+            additionalContext: [new AnswerCaseContext(answerCase)]);
 
-        this.Predictions.Add(new AnswerPrediction(answerCase, verdicts));
+        this.Predictions.Add(new AnswerPrediction(answerCase, result.Metrics.Values.ToList()));
     }
 
     /// <summary>
@@ -149,11 +151,11 @@ public sealed class AnswerEvaluation : EvaluationTestBase<AnswerPrediction>
             " It is worth noting that this is an important and widely discussed consideration that many teams weigh carefully in practice.", 5));
         var verbose = concise + filler;
 
-        static double Faithfulness(IReadOnlyList<AnswerMetricVerdict> verdicts)
-            => verdicts.First(verdict => verdict.Definition.MetricName == "Faithfulness").Value;
+        static double Faithfulness(EvaluationResult result)
+            => result.Get<NumericMetric>("Faithfulness").Value ?? 0;
 
-        var faithConcise = Faithfulness(await this.judge.JudgeAsync(probeCase, concise));
-        var faithVerbose = Faithfulness(await this.judge.JudgeAsync(probeCase, verbose));
+        var faithConcise = Faithfulness(await this.judge.JudgeAsync(new AnswerJudgeInput(probeCase, concise)));
+        var faithVerbose = Faithfulness(await this.judge.JudgeAsync(new AnswerJudgeInput(probeCase, verbose)));
 
         await TestContext.Progress.WriteLineAsync(
             $"Verbosity probe — Faithfulness concise={faithConcise:0.000}, verbose={faithVerbose:0.000}, delta={faithVerbose - faithConcise:+0.000;-0.000}");
@@ -169,24 +171,24 @@ public sealed class AnswerEvaluation : EvaluationTestBase<AnswerPrediction>
         IReadOnlyList<AnswerPrediction> predictions)
     {
         var scored = predictions
-            .SelectMany(prediction => prediction.Verdicts)
-            .Where(verdict => !verdict.Definition.Informational)
+            .SelectMany(prediction => prediction.Metrics)
+            .OfType<NumericMetric>()
             .ToList();
 
         var metrics = SelectedMetrics()
             .Where(metric => !metric.Informational)
             .Select(metric =>
             {
-                var values = scored.Where(verdict => verdict.Definition.MetricName == metric.MetricName).Select(verdict => verdict.Value).ToList();
+                var values = scored.Where(value => value.Name == metric.Name).Select(value => value.Value ?? 0).ToList();
                 var mean = values.Count == 0 ? 0 : values.Average();
-                var kind = metric.Kind == AnswerMetricKind.Fraction ? SummaryMetricKind.Percentage : SummaryMetricKind.PlainNumber;
-                return new SummaryMetric(metric.MetricName, mean, metric.Description, kind);
+                var kind = metric.Kind == MetricKind.Fraction ? SummaryMetricKind.Percentage : SummaryMetricKind.PlainNumber;
+                return new SummaryMetric(metric.Name, mean, metric.Description, kind);
             })
             .ToList();
 
         var passRate = predictions.Count == 0
             ? 0
-            : predictions.Count(prediction => prediction.Verdicts.All(verdict => !verdict.Failed)) / (double)predictions.Count;
+            : predictions.Count(prediction => prediction.Metrics.All(metric => metric.Interpretation?.Failed != true)) / (double)predictions.Count;
 
         metrics.Add(new SummaryMetric("PassRate", passRate, "Share of answers with no metric below its failure threshold.", SummaryMetricKind.Percentage));
         metrics.Add(new SummaryMetric("SampleCount", predictions.Count, "Number of answers scored.", SummaryMetricKind.Count));

@@ -1,218 +1,124 @@
 namespace DevBook.Evaluations.Scenarios.RAG.Answer;
 
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
+using DevBook.Evaluations.Common.Evaluation;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.AI.Evaluation;
 
-/// <summary>How an answer-judge metric's raw value should be read and coloured in the report.</summary>
-public enum AnswerMetricKind
-{
-    /// <summary>1–5 LLM quality score.</summary>
-    Score,
-
-    /// <summary>0–1 fractional rate.</summary>
-    Fraction,
-
-    /// <summary>Informational count (e.g. tokens); no pass/fail.</summary>
-    Count,
-}
-
-/// <summary>Definition of one judge metric: identity plus presentation hints carried into report metadata.</summary>
-public sealed record AnswerMetricDefinition(
-    string MetricName,
-    string Group,
-    AnswerMetricKind Kind,
-    string Better,
-    bool Informational,
-    string Description);
-
-/// <summary>One verdict: the value plus the MEAI interpretation, diagnostics and report metadata.</summary>
-public sealed record AnswerMetricVerdict(
-    AnswerMetricDefinition Definition,
-    double Value,
-    EvaluationRating Rating,
-    bool Failed,
-    string Reason,
-    IReadOnlyList<EvaluationDiagnostic> Diagnostics,
-    IReadOnlyDictionary<string, string> Metadata);
-
 /// <summary>
-/// The generation-quality metric panel for the RAG answer scenario. These measure the
-/// <c>AnswerAgent</c> (the generation layer) — not retrieval, which <c>RAG.Search</c> already
-/// covers. The panel is deliberately the RAG-specific generation set: grounding/faithfulness and
-/// citation validity (the agent's core contract), plus relevance and completeness, plus a cheap
-/// deterministic citation-rate gate and an informational token count.
+/// The LLM-as-judge for generated answers. A single structured judge call over
+/// {question, sources, [reference,] answer} decomposes the answer into atomic claims (each graded for
+/// grounding, relevance and citation) plus the question's expected points; the grounding/quality
+/// metrics are then computed as claim/point <em>ratios</em>, so answer length cannot inflate them —
+/// unsupported padding lowers the ratio. The citation-rate gate and token count are deterministic. The
+/// reusable plumbing (the model call, structured output, timing, parse-guard) lives in
+/// <see cref="LlmJudge{TInput, TResult}"/>; this type adds only the rubric, the payload, and the
+/// per-metric scoring. Bridge it into the MEAI pipeline with
+/// <see cref="JudgeEvaluator{TInput, TContext}"/>.
 /// </summary>
-/// <remarks>
-/// Answer <em>correctness</em> (equivalence to a gold reference answer) is included in <see cref="All"/>
-/// but only scored when the run uses the answer dataset (<c>answers-shared.json</c>, which carries a
-/// per-case <c>referenceAnswer</c>). For the reference-free <c>chunks-shared.json</c> the scenario uses
-/// <see cref="ReferenceFree"/>, which drops it.
-/// </remarks>
-public static class AnswerMetrics
-{
-    /// <summary>The full metric panel (includes reference-dependent Correctness), in report-display order.</summary>
-    public static IReadOnlyList<AnswerMetricDefinition> All { get; } =
-    [
-        new("Faithfulness", "Grounding", AnswerMetricKind.Fraction, "high", false,
-            "Fraction of the answer's atomic claims that are supported by the provided sources. Claim-grounded, so padding the answer cannot inflate it — unsupported elaboration lowers it."),
-        new("Citation Validity", "Grounding", AnswerMetricKind.Fraction, "high", false,
-            "Fraction of the answer's inline citations that point to a source actually supporting the cited claim."),
-        new("Relevance", "Quality", AnswerMetricKind.Fraction, "high", false,
-            "Fraction of the answer's atomic claims that are relevant to the question. Off-topic padding lowers it."),
-        new("Completeness", "Quality", AnswerMetricKind.Fraction, "high", false,
-            "Fraction of the question's expected points (from the reference, or what the sources support) that the answer covers."),
-        new("Correctness", "Quality", AnswerMetricKind.Score, "high", false,
-            "Whether the answer is factually equivalent to the gold reference answer — same key facts, no contradictions. Scored only when a reference answer is available."),
-        new("Citation Rate", "Citations", AnswerMetricKind.Fraction, "high", false,
-            "Deterministic: did the answer include at least one inline [[...]] citation. Averaged, this is the citation rate — an early prompt-regression signal."),
-        new("Completion Tokens", "Stats", AnswerMetricKind.Count, "none", true,
-            "Informational — approximate completion tokens generated; no pass/fail interpretation."),
-    ];
-
-    /// <summary>The panel without reference-dependent metrics, used for the reference-free dataset.</summary>
-    public static IReadOnlyList<AnswerMetricDefinition> ReferenceFree { get; } =
-        All.Where(metric => metric.MetricName != "Correctness").ToArray();
-}
-
-/// <summary>Scores one generated answer against the question and the gold evidence it was given.</summary>
-public interface IAnswerJudge
-{
-    /// <summary>The metric panel this judge reports.</summary>
-    IReadOnlyList<AnswerMetricDefinition> Metrics { get; }
-
-    /// <summary>Scores a single generated answer.</summary>
-    /// <param name="answerCase">The case, carrying the question and gold evidence.</param>
-    /// <param name="answer">The answer the agent generated from that evidence.</param>
-    /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    Task<IReadOnlyList<AnswerMetricVerdict>> JudgeAsync(
-        RagGoldenCase answerCase,
-        string answer,
-        CancellationToken cancellationToken = default);
-}
-
-/// <summary>
-/// A real LLM-as-judge. A single structured judge call over {question, sources, [reference,] answer}
-/// decomposes the answer into atomic claims (each graded for grounding, relevance and citation) plus
-/// the question's expected points; the grounding/quality metrics are then computed as claim/point
-/// <em>ratios</em>, so answer length cannot inflate them — unsupported padding lowers the ratio. The
-/// citation-rate gate and token count are deterministic. Verdicts carry the report-metadata
-/// conventions (kind/group/better/short hints, <c>ctx:</c> judge context, <c>meta:</c> rows) so the
-/// fancy report renders them generically.
-/// </summary>
-/// <param name="judgeClient">Chat client used for the judge model.</param>
+/// <param name="judgeClient">Chat client for the judge model (wrap with <see cref="RateLimitingChatClient"/>).</param>
 /// <param name="judgeModelId">Judge model id, surfaced as <c>meta:judge</c> in the report.</param>
 /// <param name="metrics">The metric panel to score (full or reference-free, chosen by the scenario).</param>
-public sealed class LlmAnswerJudge(IChatClient judgeClient, string judgeModelId, IReadOnlyList<AnswerMetricDefinition> metrics) : IAnswerJudge
+public sealed class AnswerJudge(IChatClient judgeClient, string judgeModelId, IReadOnlyList<MetricDescriptor> metrics)
+    : LlmJudge<AnswerJudgeInput, AnswerJudge.JudgeResult>(judgeClient, judgeModelId, metrics)
 {
     private static readonly Regex CitationPattern = new(@"\[\[[^\]]+\]\]", RegexOptions.Compiled);
 
     /// <inheritdoc />
-    public IReadOnlyList<AnswerMetricDefinition> Metrics => metrics;
+    protected override string SystemPrompt => JudgeSystemPrompt;
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<AnswerMetricVerdict>> JudgeAsync(
-        RagGoldenCase answerCase,
-        string answer,
-        CancellationToken cancellationToken = default)
+    protected override string BuildPayload(AnswerJudgeInput input)
     {
-        answer ??= string.Empty;
-
-        var citations = CitationPattern.Matches(answer).Select(match => match.Value).Distinct(StringComparer.Ordinal).ToList();
-        var (scores, judgeError, elapsed) = await ScoreSemanticAsync(answerCase, answer, cancellationToken);
-
-        return Metrics.Select(metric => metric.MetricName switch
+        var answerCase = input.Case;
+        var builder = new StringBuilder();
+        builder.AppendLine("QUESTION:").AppendLine(answerCase.Query).AppendLine();
+        builder.AppendLine("SOURCES (the only admissible evidence):");
+        for (var index = 0; index < answerCase.Expected.Count; index++)
         {
-            "Citation Rate" => CitationRateVerdict(metric, citations),
-            "Completion Tokens" => TokenVerdict(metric, answer),
-            _ => SemanticVerdict(metric, answerCase, scores, judgeError, elapsed),
-        }).ToList();
+            var source = answerCase.Expected[index];
+            builder.AppendLine($"[{index + 1}] {source.CitationLabel}");
+            builder.AppendLine(source.Text.Trim());
+            builder.AppendLine();
+        }
+
+        if (!string.IsNullOrWhiteSpace(answerCase.ReferenceAnswer))
+        {
+            builder.AppendLine("REFERENCE ANSWER (gold — the answer should be factually equivalent to this):");
+            builder.AppendLine(answerCase.ReferenceAnswer.Trim());
+            builder.AppendLine();
+        }
+
+        builder.AppendLine("ANSWER:").AppendLine(input.Answer);
+        return builder.ToString();
     }
 
-    // -------- deterministic metrics (no model call) --------
+    /// <inheritdoc />
+    protected override NumericMetric Score(MetricDescriptor metric, AnswerJudgeInput input, JudgeResult? result, string? judgeError, long elapsedMs)
+        => metric.Name switch
+        {
+            "Citation Rate" => CitationRateMetric(metric, input.Answer),
+            "Completion Tokens" => TokenMetric(metric, input.Answer),
+            _ => SemanticMetric(metric, input.Case, result, judgeError, elapsedMs),
+        };
 
-    private static AnswerMetricVerdict CitationRateVerdict(AnswerMetricDefinition metric, IReadOnlyList<string> citations)
+    // -------- deterministic metrics (no model output) --------
+
+    private static NumericMetric CitationRateMetric(MetricDescriptor metric, string answer)
     {
-        var value = citations.Count > 0 ? 1.0 : 0.0;
-        var rating = value > 0 ? EvaluationRating.Exceptional : EvaluationRating.Unacceptable;
-        var reason = value > 0
+        var citations = CitationPattern.Matches(answer).Select(match => match.Value).Distinct(StringComparer.Ordinal).ToList();
+        var present = citations.Count > 0;
+        var reason = present
             ? $"Answer included {citations.Count} inline citation(s)."
             : "Answer included no inline [[...]] citation despite being given sources.";
 
-        IReadOnlyList<EvaluationDiagnostic> diagnostics = value > 0
+        IReadOnlyList<EvaluationDiagnostic> diagnostics = present
             ? []
             : [EvaluationDiagnostic.Warning("No inline citation found — the answer agent may be ignoring the retrieved context.")];
 
-        var metadata = BaseMetadata(metric);
-        metadata["ctx:citations"] = citations.Count > 0 ? string.Join(", ", citations) : "(none)";
-        metadata["meta:source"] = "deterministic";
+        var metadata = new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["ctx:citations"] = present ? string.Join(", ", citations) : "(none)",
+            ["meta:source"] = "deterministic",
+        };
 
-        return new AnswerMetricVerdict(metric, value, rating, value == 0, reason, diagnostics, metadata);
+        return MetricFactory.Numeric(metric, present ? 1.0 : 0.0, present ? EvaluationRating.Exceptional : EvaluationRating.Unacceptable, failed: !present, reason, diagnostics, metadata);
     }
 
-    private static AnswerMetricVerdict TokenVerdict(AnswerMetricDefinition metric, string answer)
+    private static NumericMetric TokenMetric(MetricDescriptor metric, string answer)
     {
         // No usage is surfaced through the agent run here, so approximate from text length (~4 chars/token).
-        var value = Math.Round(answer.Length / 4.0);
-        var metadata = BaseMetadata(metric);
-        metadata["info"] = "true";
-        metadata["meta:source"] = "agent runtime";
-        metadata["meta:unit"] = "tokens";
+        var metadata = new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["meta:source"] = "agent runtime",
+            ["meta:unit"] = "tokens",
+        };
 
-        return new AnswerMetricVerdict(
+        return MetricFactory.Numeric(
             metric,
-            value,
+            Math.Round(answer.Length / 4.0),
             EvaluationRating.Unknown,
-            Failed: false,
+            failed: false,
             "Informational metric — reported without a pass/fail interpretation.",
-            [],
-            metadata);
+            metadata: metadata);
     }
 
     // -------- LLM-judged semantic metrics --------
 
-    private async Task<(JudgeResult? Scores, string? Error, long ElapsedMs)> ScoreSemanticAsync(
-        RagGoldenCase answerCase,
-        string answer,
-        CancellationToken cancellationToken)
+    private NumericMetric SemanticMetric(MetricDescriptor metric, RagGoldenCase answerCase, JudgeResult? result, string? judgeError, long elapsedMs)
     {
-        var messages = new List<ChatMessage>
+        var metadata = new Dictionary<string, string>(StringComparer.Ordinal)
         {
-            new(ChatRole.System, JudgeSystemPrompt),
-            new(ChatRole.User, BuildJudgePayload(answerCase, answer)),
+            ["meta:judge"] = JudgeModelId,
+            ["meta:eval"] = $"{elapsedMs}ms",
         };
-
-        // MEAI structured output: the JSON schema is generated from JudgeResult and applied to the
-        // request, and the response is deserialized for us — no hand-written JSON instructions or
-        // parsing. Transport faults (e.g. 429) propagate so the caller's rate-limit retry handles
-        // them; an unparseable result is surfaced per metric rather than throwing.
-        var stopwatch = Stopwatch.StartNew();
-        var response = await judgeClient.GetResponseAsync<JudgeResult>(messages, cancellationToken: cancellationToken);
-        stopwatch.Stop();
-
-        return response.TryGetResult(out var result) && result is not null
-            ? (result, null, stopwatch.ElapsedMilliseconds)
-            : (null, "Judge did not return a parseable structured result.", stopwatch.ElapsedMilliseconds);
-    }
-
-    private AnswerMetricVerdict SemanticVerdict(
-        AnswerMetricDefinition metric,
-        RagGoldenCase answerCase,
-        JudgeResult? scores,
-        string? judgeError,
-        long elapsedMs)
-    {
-        var metadata = BaseMetadata(metric);
-        metadata["meta:judge"] = judgeModelId;
-        metadata["meta:eval"] = $"{elapsedMs}ms";
-        if (metric.MetricName == "Correctness")
+        if (metric.Name == "Correctness")
         {
             metadata["ctx:reference"] = Truncate(answerCase.ReferenceAnswer ?? "(none)", 240);
         }
-        else if (metric.MetricName is "Faithfulness" or "Citation Validity" or "Completeness")
+        else if (metric.Name is "Faithfulness" or "Citation Validity" or "Completeness")
         {
             metadata["ctx:sources"] = RenderSources(answerCase.Expected);
         }
@@ -221,39 +127,39 @@ public sealed class LlmAnswerJudge(IChatClient judgeClient, string judgeModelId,
             metadata["ctx:question"] = answerCase.Query;
         }
 
-        if (scores is null)
+        if (result is null)
         {
-            return InconclusiveVerdict(metric, judgeError ?? $"Judge returned no result for {metric.MetricName}.", metadata);
+            return MetricFactory.Inconclusive(metric, judgeError ?? $"Judge returned no result for {metric.Name}.", metadata);
         }
 
-        var claims = scores.Claims ?? [];
+        var claims = result.Claims ?? [];
 
-        switch (metric.MetricName)
+        switch (metric.Name)
         {
             case "Faithfulness":
             {
                 if (claims.Count == 0)
                 {
-                    return InconclusiveVerdict(metric, "Judge extracted no claims from the answer.", metadata);
+                    return MetricFactory.Inconclusive(metric, "Judge extracted no claims from the answer.", metadata);
                 }
 
                 metadata["ctx:claims"] = RenderClaims(claims);
                 var supported = claims.Count(claim => claim.Supported);
                 var firstUnsupported = claims.FirstOrDefault(claim => !claim.Supported)?.Claim;
                 var detail = firstUnsupported is null ? string.Empty : $" Unsupported e.g.: \"{Truncate(firstUnsupported, 100)}\".";
-                return RatioVerdict(metric, supported, claims.Count, $"{supported}/{claims.Count} claims grounded in the sources.{detail}", metadata);
+                return MetricFactory.Ratio(metric, supported, claims.Count, $"{supported}/{claims.Count} claims grounded in the sources.{detail}", metadata);
             }
 
             case "Relevance":
             {
                 if (claims.Count == 0)
                 {
-                    return InconclusiveVerdict(metric, "Judge extracted no claims from the answer.", metadata);
+                    return MetricFactory.Inconclusive(metric, "Judge extracted no claims from the answer.", metadata);
                 }
 
                 metadata["ctx:claims"] = RenderClaims(claims);
                 var relevant = claims.Count(claim => claim.Relevant);
-                return RatioVerdict(metric, relevant, claims.Count, $"{relevant}/{claims.Count} claims are relevant to the question.", metadata);
+                return MetricFactory.Ratio(metric, relevant, claims.Count, $"{relevant}/{claims.Count} claims are relevant to the question.", metadata);
             }
 
             case "Citation Validity":
@@ -262,100 +168,56 @@ public sealed class LlmAnswerJudge(IChatClient judgeClient, string judgeModelId,
                 var cited = claims.Where(claim => claim.HasCitation).ToList();
                 if (cited.Count == 0)
                 {
-                    return new AnswerMetricVerdict(
+                    return MetricFactory.Numeric(
                         metric,
                         0,
                         EvaluationRating.Unacceptable,
-                        Failed: true,
+                        failed: true,
                         "No inline citations to validate — the answer made claims without citing sources.",
                         [EvaluationDiagnostic.Warning("Answer claims carry no inline citations.")],
                         metadata);
                 }
 
                 var valid = cited.Count(claim => claim.CitationSupportsClaim);
-                return RatioVerdict(metric, valid, cited.Count, $"{valid}/{cited.Count} inline citations support their claim.", metadata);
+                return MetricFactory.Ratio(metric, valid, cited.Count, $"{valid}/{cited.Count} inline citations support their claim.", metadata);
             }
 
             case "Completeness":
             {
-                var points = scores.ExpectedPoints ?? [];
+                var points = result.ExpectedPoints ?? [];
                 if (points.Count == 0)
                 {
-                    return InconclusiveVerdict(metric, "Judge listed no expected points for the question.", metadata);
+                    return MetricFactory.Inconclusive(metric, "Judge listed no expected points for the question.", metadata);
                 }
 
                 metadata["ctx:points"] = RenderPoints(points);
                 var covered = points.Count(point => point.Covered);
                 var firstMissing = points.FirstOrDefault(point => !point.Covered)?.Point;
                 var detail = firstMissing is null ? string.Empty : $" Missing e.g.: \"{Truncate(firstMissing, 100)}\".";
-                return RatioVerdict(metric, covered, points.Count, $"{covered}/{points.Count} expected points covered.{detail}", metadata);
+                return MetricFactory.Ratio(metric, covered, points.Count, $"{covered}/{points.Count} expected points covered.{detail}", metadata);
             }
 
             case "Correctness":
             {
-                if (scores.Correctness is not { } dimension)
+                if (result.Correctness is not { } dimension)
                 {
-                    return InconclusiveVerdict(metric, "Judge returned no Correctness score.", metadata);
+                    return MetricFactory.Inconclusive(metric, "Judge returned no Correctness score.", metadata);
                 }
 
                 var value = Math.Clamp(dimension.Score, 1, 5);
-                var rating = ScoreRating(value);
-                var failed = rating is EvaluationRating.Poor or EvaluationRating.Unacceptable;
+                var rating = Ratings.ForScore(value);
                 var reason = string.IsNullOrWhiteSpace(dimension.Reason)
                     ? $"Correctness scored {value:0.0}/5 ({rating})."
                     : $"Correctness scored {value:0.0}/5 ({rating}). {dimension.Reason.Trim()}";
-                return new AnswerMetricVerdict(metric, Math.Round(value, 3), rating, failed, reason, Diagnostics(rating), metadata);
+                return MetricFactory.Numeric(metric, value, rating, Ratings.IsFailing(rating), reason, MetricFactory.RatingDiagnostics(rating), metadata);
             }
 
             default:
-                return InconclusiveVerdict(metric, $"Unknown semantic metric {metric.MetricName}.", metadata);
+                return MetricFactory.Inconclusive(metric, $"Unknown semantic metric {metric.Name}.", metadata);
         }
     }
 
-    private static AnswerMetricVerdict RatioVerdict(AnswerMetricDefinition metric, int numerator, int denominator, string reason, Dictionary<string, string> metadata)
-    {
-        var value = denominator == 0 ? 0 : (double)numerator / denominator;
-        var rating = FractionRating(value);
-        var failed = rating is EvaluationRating.Poor or EvaluationRating.Unacceptable;
-        return new AnswerMetricVerdict(metric, Math.Round(value, 3), rating, failed, reason, Diagnostics(rating), metadata);
-    }
-
-    private static AnswerMetricVerdict InconclusiveVerdict(AnswerMetricDefinition metric, string reason, Dictionary<string, string> metadata)
-        => new(metric, 0, EvaluationRating.Inconclusive, Failed: true, reason, [EvaluationDiagnostic.Error(reason)], metadata);
-
-    private static EvaluationRating ScoreRating(double value) => value switch
-    {
-        >= 4.5 => EvaluationRating.Exceptional,
-        >= 3.5 => EvaluationRating.Good,
-        >= 2.5 => EvaluationRating.Average,
-        >= 1.5 => EvaluationRating.Poor,
-        _ => EvaluationRating.Unacceptable,
-    };
-
-    private static EvaluationRating FractionRating(double value) => value switch
-    {
-        >= 0.9 => EvaluationRating.Exceptional,
-        >= 0.75 => EvaluationRating.Good,
-        >= 0.5 => EvaluationRating.Average,
-        >= 0.3 => EvaluationRating.Poor,
-        _ => EvaluationRating.Unacceptable,
-    };
-
-    private static IReadOnlyList<EvaluationDiagnostic> Diagnostics(EvaluationRating rating) => rating switch
-    {
-        EvaluationRating.Unacceptable => [EvaluationDiagnostic.Error("Judge marked this metric below the failure threshold; gating this scenario.")],
-        EvaluationRating.Poor => [EvaluationDiagnostic.Warning("Judge cited a missing or unsupported element in the answer.")],
-        _ => [],
-    };
-
-    // -------- metadata + rendering helpers --------
-
-    private static Dictionary<string, string> BaseMetadata(AnswerMetricDefinition metric) => new(StringComparer.Ordinal)
-    {
-        ["kind"] = metric.Kind.ToString().ToLowerInvariant(),
-        ["group"] = metric.Group,
-        ["better"] = metric.Better,
-    };
+    // -------- rendering helpers --------
 
     private static string RenderSources(IReadOnlyList<RagGoldenChunk> sources)
         => string.Join(
@@ -379,30 +241,6 @@ public sealed class LlmAnswerJudge(IChatClient judgeClient, string judgeModelId,
         => string.Join(
             Environment.NewLine,
             points.Select(point => $"[{(point.Covered ? "✓" : "✗")}] {Truncate(point.Point ?? string.Empty, 120)}"));
-
-    private static string BuildJudgePayload(RagGoldenCase answerCase, string answer)
-    {
-        var builder = new StringBuilder();
-        builder.AppendLine("QUESTION:").AppendLine(answerCase.Query).AppendLine();
-        builder.AppendLine("SOURCES (the only admissible evidence):");
-        for (var index = 0; index < answerCase.Expected.Count; index++)
-        {
-            var source = answerCase.Expected[index];
-            builder.AppendLine($"[{index + 1}] {source.CitationLabel}");
-            builder.AppendLine(source.Text.Trim());
-            builder.AppendLine();
-        }
-
-        if (!string.IsNullOrWhiteSpace(answerCase.ReferenceAnswer))
-        {
-            builder.AppendLine("REFERENCE ANSWER (gold — the answer should be factually equivalent to this):");
-            builder.AppendLine(answerCase.ReferenceAnswer.Trim());
-            builder.AppendLine();
-        }
-
-        builder.AppendLine("ANSWER:").AppendLine(answer);
-        return builder.ToString();
-    }
 
     private static string Truncate(string value, int max)
         => value.Length <= max ? value : value[..max] + "…";
@@ -437,7 +275,7 @@ public sealed class LlmAnswerJudge(IChatClient judgeClient, string judgeModelId,
     /// metrics are computed from the per-claim and per-point verdicts as ratios (length-robust); only
     /// Correctness, which is judged against a gold reference, stays a holistic score.
     /// </summary>
-    private sealed record JudgeResult
+    public sealed record JudgeResult
     {
         [Description("Every atomic factual claim stated in the answer, each graded for grounding, relevance and citation.")]
         public IReadOnlyList<ClaimVerdict>? Claims { get; init; }
@@ -449,7 +287,8 @@ public sealed class LlmAnswerJudge(IChatClient judgeClient, string judgeModelId,
         public JudgeDimension? Correctness { get; init; }
     }
 
-    private sealed record ClaimVerdict
+    /// <summary>One atomic claim from the answer, graded along the four grounding/citation axes.</summary>
+    public sealed record ClaimVerdict
     {
         [Description("One atomic factual claim stated in the answer.")]
         public string? Claim { get; init; }
@@ -467,7 +306,8 @@ public sealed class LlmAnswerJudge(IChatClient judgeClient, string judgeModelId,
         public bool CitationSupportsClaim { get; init; }
     }
 
-    private sealed record PointVerdict
+    /// <summary>One expected point the question warrants, marked covered by the answer or not.</summary>
+    public sealed record PointVerdict
     {
         [Description("A key point the question warrants, given the sources (or the reference answer if provided).")]
         public string? Point { get; init; }
@@ -476,7 +316,8 @@ public sealed class LlmAnswerJudge(IChatClient judgeClient, string judgeModelId,
         public bool Covered { get; init; }
     }
 
-    private sealed record JudgeDimension
+    /// <summary>A holistic 1–5 score with a one-line justification (used for Correctness).</summary>
+    public sealed record JudgeDimension
     {
         [Description("Score from 1 (worst) to 5 (best).")]
         public double Score { get; init; }

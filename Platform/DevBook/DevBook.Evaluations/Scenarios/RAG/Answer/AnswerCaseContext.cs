@@ -3,13 +3,14 @@ namespace DevBook.Evaluations.Scenarios.RAG.Answer;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.AI.Evaluation;
 
-/// <summary>Carries the case and its precomputed verdicts into the evaluation pipeline.</summary>
-public sealed class AnswerCaseContext(RagGoldenCase answerCase, IReadOnlyList<AnswerMetricVerdict> verdicts)
+/// <summary>
+/// Carries the golden case into the evaluation pipeline. The judge runs inside the MEAI evaluator
+/// (see <c>JudgeEvaluator</c>) and reads the question, gold sources and optional reference answer from
+/// here — the chat transcript only carries the question and the produced answer.
+/// </summary>
+public sealed class AnswerCaseContext(RagGoldenCase answerCase)
     : EvaluationContext(nameof(AnswerCaseContext), new TextContent(answerCase.Query))
 {
     /// <summary>Gets the scored case.</summary>
     public RagGoldenCase Case { get; } = answerCase;
-
-    /// <summary>Gets the verdicts produced by the judge for this case.</summary>
-    public IReadOnlyList<AnswerMetricVerdict> Verdicts { get; } = verdicts;
 }
