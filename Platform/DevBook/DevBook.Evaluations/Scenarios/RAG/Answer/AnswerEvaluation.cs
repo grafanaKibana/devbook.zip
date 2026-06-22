@@ -35,7 +35,7 @@ public sealed class AnswerEvaluation : EvaluationTestBase<AnswerPrediction>
     protected override IEvaluator[] GetPerIterationEvaluators() => [new AnswerQualityEvaluator(SelectedMetrics())];
 
     // Prefer the answer dataset (carries per-case reference answers → unlocks Correctness); fall back to
-    // the reference-free shared search dataset. Both deserialize to AnswerCase. With --mini,
+    // the reference-free shared search dataset. Both deserialize to RagGoldenCase. With --mini,
     // ResolveDatasetVariant swaps in the "-mini" sibling when it exists, else keeps the full file. The
     // metric panel and the loaded file are derived from the same resolved file so they always agree.
     private static string ResolveAnswerDatasetFileName() => ResolveDatasetVariant(AnswerDatasetFileName);
@@ -82,11 +82,11 @@ public sealed class AnswerEvaluation : EvaluationTestBase<AnswerPrediction>
     }
 
     private static IEnumerable<TestCaseData> Cases()
-        => LoadTestCases<AnswerDataset, AnswerCase>(ResolveDatasetFileName(), dataset => dataset.Cases, answerCase => answerCase.Id);
+        => LoadTestCases<RagGoldenDataset, RagGoldenCase>(ResolveDatasetFileName(), dataset => dataset.Cases, answerCase => answerCase.Id);
 
     [Test]
     [TestCaseSource(nameof(Cases))]
-    public async Task JudgeAnswer(AnswerCase answerCase)
+    public async Task JudgeAnswer(RagGoldenCase answerCase)
     {
         await using var scenarioRun = await this.ReportingConfig.CreateScenarioRunAsync(
             scenarioName: this.ScenarioDisplayName,
@@ -125,14 +125,14 @@ public sealed class AnswerEvaluation : EvaluationTestBase<AnswerPrediction>
     [Explicit("Live judge calls; run manually to check verbosity-bias robustness.")]
     public async Task VerbosityBiasProbe()
     {
-        var probeCase = new AnswerCase
+        var probeCase = new RagGoldenCase
         {
             Id = "verbosity-probe",
             Query = "When should I use RAG instead of fine-tuning?",
             Difficulty = "probe",
             Expected =
             [
-                new AnswerSource
+                new RagGoldenChunk
                 {
                     DocumentId = "doc_probe",
                     Heading = "Tradeoffs",
@@ -202,66 +202,4 @@ public sealed class AnswerEvaluation : EvaluationTestBase<AnswerPrediction>
             .AddUserSecrets(System.Reflection.Assembly.GetExecutingAssembly(), optional: true)
             .AddEnvironmentVariables()
             .Build();
-}
-
-/// <summary>Captured answer case plus the judge verdicts, used to compute summary aggregates.</summary>
-public sealed record AnswerPrediction(AnswerCase Case, IReadOnlyList<AnswerMetricVerdict> Verdicts);
-
-/// <summary>Carries the case and its precomputed verdicts into the evaluation pipeline.</summary>
-public sealed class AnswerCaseContext(AnswerCase answerCase, IReadOnlyList<AnswerMetricVerdict> verdicts)
-    : EvaluationContext(nameof(AnswerCaseContext), new TextContent(answerCase.Query))
-{
-    /// <summary>Gets the scored case.</summary>
-    public AnswerCase Case { get; } = answerCase;
-
-    /// <summary>Gets the verdicts produced by the judge for this case.</summary>
-    public IReadOnlyList<AnswerMetricVerdict> Verdicts { get; } = verdicts;
-}
-
-/// <summary>
-/// Maps the precomputed judge verdicts into MEAI metrics. The judge runs once in the test method and
-/// its verdicts ride along on <see cref="AnswerCaseContext"/>, so this evaluator does not make a
-/// second model call. Presentation hints, per-metric judge context and evaluator metadata are carried
-/// on metric metadata so the report can render them generically.
-/// </summary>
-public sealed class AnswerQualityEvaluator(IReadOnlyList<AnswerMetricDefinition> metrics) : IEvaluator
-{
-    /// <inheritdoc />
-    public IReadOnlyCollection<string> EvaluationMetricNames { get; } = metrics.Select(metric => metric.MetricName).ToArray();
-
-    /// <inheritdoc />
-    public ValueTask<EvaluationResult> EvaluateAsync(
-        IEnumerable<ChatMessage> messages,
-        ChatResponse modelResponse,
-        ChatConfiguration? chatConfiguration = null,
-        IEnumerable<EvaluationContext>? additionalContext = null,
-        CancellationToken cancellationToken = default)
-    {
-        var context = additionalContext?.OfType<AnswerCaseContext>().FirstOrDefault();
-        if (context is null)
-        {
-            return ValueTask.FromResult(new EvaluationResult(new NumericMetric("Faithfulness", 0, "AnswerCaseContext not provided.")
-            {
-                Interpretation = new EvaluationMetricInterpretation(EvaluationRating.Inconclusive, failed: true, reason: "AnswerCaseContext not provided."),
-            }));
-        }
-
-        return ValueTask.FromResult(new EvaluationResult(context.Verdicts.Select(ToMetric)));
-    }
-
-    private static NumericMetric ToMetric(AnswerMetricVerdict verdict)
-    {
-        var metric = new NumericMetric(verdict.Definition.MetricName, verdict.Value, verdict.Definition.Description)
-        {
-            Interpretation = new EvaluationMetricInterpretation(verdict.Rating, failed: verdict.Failed, reason: verdict.Reason),
-            Diagnostics = verdict.Diagnostics.ToArray(),
-        };
-
-        foreach (var (key, value) in verdict.Metadata)
-        {
-            metric.AddOrUpdateMetadata(key, value);
-        }
-
-        return metric;
-    }
 }

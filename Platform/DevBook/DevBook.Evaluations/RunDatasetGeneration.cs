@@ -73,7 +73,7 @@ Console.WriteLine($"Wrote groups -> {runOptions.GroupsPath}");
 // reference answer). Generate the superset once per group and project it to each selected output, so
 // requesting both datasets is a single LLM pass — never two over the same groups.
 var includeAnswer = runOptions.WantAnswer;
-var cases = new List<DatasetCase>();              // search projection (also feeds the summary)
+var cases = new List<SearchDatasetCase>();        // search projection (also feeds the summary)
 var answerCases = new List<AnswerDatasetCase>();  // answer dataset rows
 if (!runOptions.DryRun)
 {
@@ -96,13 +96,13 @@ if (!runOptions.DryRun)
 
     if (runOptions.WantSearch)
     {
-        WriteJson(runOptions.SharedDatasetPath, new DatasetFile(3, generatedAt, "shared", cases));
+        WriteJson(runOptions.SharedDatasetPath, new RagDatasetFile<SearchDatasetCase>(3, generatedAt, "shared", cases));
         Console.WriteLine($"Wrote search dataset cases: {cases.Count} -> {runOptions.SharedDatasetPath}");
     }
 
     if (runOptions.WantAnswer)
     {
-        WriteJson(runOptions.AnswerDatasetPath, new AnswerDatasetFile(1, generatedAt, "shared", answerCases));
+        WriteJson(runOptions.AnswerDatasetPath, new RagDatasetFile<AnswerDatasetCase>(1, generatedAt, "shared", answerCases));
         Console.WriteLine($"Wrote answer dataset cases: {answerCases.Count} -> {runOptions.AnswerDatasetPath}");
     }
 }
@@ -545,7 +545,7 @@ static IEnumerable<GeneratedCase> KeepValidCases(NoteGroup group, GroupLlmRespon
             continue;
         }
 
-        var expected = new List<ExpectedChunk>();
+        var expected = new List<RagGoldenChunk>();
         var usedSections = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var evidence in query.Evidence)
@@ -557,7 +557,7 @@ static IEnumerable<GeneratedCase> KeepValidCases(NoteGroup group, GroupLlmRespon
                 continue;
             }
 
-            expected.Add(CreateExpectedChunk(section, evidence.Quote));
+            expected.Add(CreateGoldenChunk(section, evidence.Quote));
         }
 
         if (expected.Count == 0)
@@ -595,7 +595,7 @@ static bool IsValidReferenceAnswer(string? answer, out string cleaned)
     return cleaned.Length is >= 40 and <= 1500 && cleaned.Contains("[[", StringComparison.Ordinal);
 }
 
-static ExpectedChunk CreateExpectedChunk(NoteSection section, string? quote)
+static RagGoldenChunk CreateGoldenChunk(NoteSection section, string? quote)
 {
     // Snippet must be a verbatim, whitespace-normalized substring of the section so any chunking strategy that returns
     // the relevant chunk will contain it. Fall back to the section's leading sentence when the LLM quote does not match.
@@ -604,7 +604,7 @@ static ExpectedChunk CreateExpectedChunk(NoteSection section, string? quote)
     // CitationLabel carries the source path because SearchEvaluation maps it onto SearchDocument.SourcePath; each cited
     // section keeps its own source so cross-note evidence is preserved. No chunk id is stored: the gold is matched
     // chunker-neutrally by source + heading + snippet and must not be bound to one chunking strategy's ids.
-    return new ExpectedChunk(section.DocumentId, section.Heading, section.SourcePath, snippet);
+    return new RagGoldenChunk(section.DocumentId, section.Heading, section.SourcePath, snippet);
 }
 
 static string NormalizeDifficulty(string? difficulty)
@@ -812,22 +812,28 @@ sealed record GroupLlmResponse(bool Accepted, string? RejectionReason, IReadOnly
 sealed record QueryCase(string Query, string? Difficulty, IReadOnlyList<QueryEvidence>? Evidence, string? Answer = null);
 sealed record QueryEvidence(string? SectionId, string? Quote);
 
-sealed record DatasetFile(int Version, DateTimeOffset GeneratedAt, string Collection, IReadOnlyList<DatasetCase> Cases);
-sealed record DatasetCase(string Id, string Query, string Difficulty, IReadOnlyList<ExpectedChunk> Expected);
-sealed record ExpectedChunk(string DocumentId, string? Heading, string CitationLabel, string Text);
+// File envelope shared by both golden datasets (chunks-shared.json and answers-shared.json): version +
+// timestamp + collection label wrapping the rows. TCase selects which projection is serialized.
+sealed record RagDatasetFile<TCase>(int Version, DateTimeOffset GeneratedAt, string Collection, IReadOnlyList<TCase> Cases);
+
+// One gold evidence chunk, matched chunker-neutrally by source + heading + snippet. This mirrors the
+// reader-side RagGoldenChunk in DevBook.Evaluations.Scenarios.RAG; it is redeclared here only because
+// this generator is a file-based script that references DevBook.Data, not the Evaluations assembly.
+sealed record RagGoldenChunk(string DocumentId, string? Heading, string CitationLabel, string Text);
+
+// The two serialized case projections. SearchDatasetCase stays reference-free so chunks-shared.json
+// scores every chunker on the same footing; AnswerDatasetCase adds the grounded reference answer and
+// expected citations that unlock RAG.Answer's correctness metric. They differ on purpose, so both are kept.
+sealed record SearchDatasetCase(string Id, string Query, string Difficulty, IReadOnlyList<RagGoldenChunk> Expected);
+sealed record AnswerDatasetCase(string Id, string Query, string Difficulty, IReadOnlyList<RagGoldenChunk> Expected, string ReferenceAnswer, IReadOnlyList<string> ExpectedCitations);
 
 // One generated case in superset form: the search fields plus an optional grounded reference answer.
 // Projected to the search and/or answer dataset rows depending on which datasets were requested.
-sealed record GeneratedCase(string Id, string Query, string Difficulty, IReadOnlyList<ExpectedChunk> Expected, string? ReferenceAnswer, IReadOnlyList<string> ExpectedCitations)
+sealed record GeneratedCase(string Id, string Query, string Difficulty, IReadOnlyList<RagGoldenChunk> Expected, string? ReferenceAnswer, IReadOnlyList<string> ExpectedCitations)
 {
-    public DatasetCase ToSearchCase() => new(this.Id, this.Query, this.Difficulty, this.Expected);
+    public SearchDatasetCase ToSearchCase() => new(this.Id, this.Query, this.Difficulty, this.Expected);
     public AnswerDatasetCase ToAnswerCase() => new(this.Id, this.Query, this.Difficulty, this.Expected, this.ReferenceAnswer!, this.ExpectedCitations);
 }
-
-// answers-shared.json: the search case plus a grounded reference answer and the notes a correct answer
-// should cite. Consumed by RAG.Answer to unlock the correctness/equivalence metric.
-sealed record AnswerDatasetFile(int Version, DateTimeOffset GeneratedAt, string Collection, IReadOnlyList<AnswerDatasetCase> Cases);
-sealed record AnswerDatasetCase(string Id, string Query, string Difficulty, IReadOnlyList<ExpectedChunk> Expected, string ReferenceAnswer, IReadOnlyList<string> ExpectedCitations);
 
 sealed record GroupFile(int Version, DateTimeOffset GeneratedAt, IReadOnlyList<GroupInfo> Groups);
 sealed record GroupInfo(string Id, string SeedTitle, string SeedSourcePath, int NoteCount, IReadOnlyList<GroupSection> Sections)
@@ -853,7 +859,7 @@ sealed record SummaryFile(
     int MultiEvidenceCases,
     int SourcesCovered)
 {
-    public static SummaryFile Create(DateTimeOffset generatedAt, int documentsLoaded, int documentsWithSections, IReadOnlyList<NoteGroup> groups, IReadOnlyList<DatasetCase> cases)
+    public static SummaryFile Create(DateTimeOffset generatedAt, int documentsLoaded, int documentsWithSections, IReadOnlyList<NoteGroup> groups, IReadOnlyList<SearchDatasetCase> cases)
     {
         var evidenceCounts = cases
             .Select(item => item.Expected.Count)

@@ -49,7 +49,7 @@ public sealed class SearchEvaluation : MongoEvaluationTestBase<SearchPrediction>
     private static IEnumerable<TestCaseData> TestCases()
     {
         var datasetFileName = ResolveDatasetVariant(SharedDatasetFileName);
-        var dataset = LoadDataset<SearchDataset>(datasetFileName);
+        var dataset = LoadDataset<RagGoldenDataset>(datasetFileName);
         if (dataset.Cases.Count == 0)
         {
             throw new InvalidOperationException($"Dataset {datasetFileName} must contain at least one case.");
@@ -71,7 +71,7 @@ public sealed class SearchEvaluation : MongoEvaluationTestBase<SearchPrediction>
     [Test]
     [TestCaseSource(nameof(TestCases))]
     public async Task SearchOverGeneratedDataset(
-        SearchEvaluationCase testCase,
+        RagGoldenCase testCase,
         ChunkingStrategyKind chunkingStrategy,
         RerankingStrategyKind rerankingStrategy)
     {
@@ -79,7 +79,7 @@ public sealed class SearchEvaluation : MongoEvaluationTestBase<SearchPrediction>
     }
 
     private async Task SearchFindsExpectedChunks(
-        SearchEvaluationCase testCase,
+        RagGoldenCase testCase,
         ChunkingStrategyKind chunkingStrategy,
         RerankingStrategyKind rerankingStrategy)
     {

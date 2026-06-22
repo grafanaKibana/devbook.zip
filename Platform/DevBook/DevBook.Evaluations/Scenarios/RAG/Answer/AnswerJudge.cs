@@ -89,7 +89,7 @@ public interface IAnswerJudge
     /// <param name="answer">The answer the agent generated from that evidence.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     Task<IReadOnlyList<AnswerMetricVerdict>> JudgeAsync(
-        AnswerCase answerCase,
+        RagGoldenCase answerCase,
         string answer,
         CancellationToken cancellationToken = default);
 }
@@ -115,7 +115,7 @@ public sealed class LlmAnswerJudge(IChatClient judgeClient, string judgeModelId,
 
     /// <inheritdoc />
     public async Task<IReadOnlyList<AnswerMetricVerdict>> JudgeAsync(
-        AnswerCase answerCase,
+        RagGoldenCase answerCase,
         string answer,
         CancellationToken cancellationToken = default)
     {
@@ -175,7 +175,7 @@ public sealed class LlmAnswerJudge(IChatClient judgeClient, string judgeModelId,
     // -------- LLM-judged semantic metrics --------
 
     private async Task<(JudgeResult? Scores, string? Error, long ElapsedMs)> ScoreSemanticAsync(
-        AnswerCase answerCase,
+        RagGoldenCase answerCase,
         string answer,
         CancellationToken cancellationToken)
     {
@@ -200,7 +200,7 @@ public sealed class LlmAnswerJudge(IChatClient judgeClient, string judgeModelId,
 
     private AnswerMetricVerdict SemanticVerdict(
         AnswerMetricDefinition metric,
-        AnswerCase answerCase,
+        RagGoldenCase answerCase,
         JudgeResult? scores,
         string? judgeError,
         long elapsedMs)
@@ -357,7 +357,7 @@ public sealed class LlmAnswerJudge(IChatClient judgeClient, string judgeModelId,
         ["better"] = metric.Better,
     };
 
-    private static string RenderSources(IReadOnlyList<AnswerSource> sources)
+    private static string RenderSources(IReadOnlyList<RagGoldenChunk> sources)
         => string.Join(
             Environment.NewLine,
             sources.Select((source, index) =>
@@ -380,7 +380,7 @@ public sealed class LlmAnswerJudge(IChatClient judgeClient, string judgeModelId,
             Environment.NewLine,
             points.Select(point => $"[{(point.Covered ? "✓" : "✗")}] {Truncate(point.Point ?? string.Empty, 120)}"));
 
-    private static string BuildJudgePayload(AnswerCase answerCase, string answer)
+    private static string BuildJudgePayload(RagGoldenCase answerCase, string answer)
     {
         var builder = new StringBuilder();
         builder.AppendLine("QUESTION:").AppendLine(answerCase.Query).AppendLine();
