@@ -6,7 +6,7 @@ subtopic:
 level:
   - "4"
 priority: Low
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 # Intro
@@ -74,6 +74,10 @@ private static int Partition(int[] a, int left, int right)
     return i + 1;
 }
 ```
+
+### Lomuto vs Hoare partition
+
+The code above uses the **Lomuto** scheme (single forward scan, pivot at the end) — easiest to write and reason about. The original **Hoare** scheme walks two pointers inward from both ends and, on average, does roughly **3× fewer swaps**, which is why it's often faster in practice. The trap: Hoare's returned index is *not* the pivot's final resting position, so you recurse on `[left, p]` and `[p+1, right]` (not `p-1`/`p+1`). For duplicate-heavy input, three-way (Dutch National Flag) partitioning beats both.
 
 ## When to Use
 

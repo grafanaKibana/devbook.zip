@@ -6,7 +6,7 @@ subtopic:
 level:
   - "1"
 priority: High
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 # Iterator
@@ -126,6 +126,14 @@ The caller uses `await foreach` without knowing whether the source is a database
 **`IAsyncEnumerable<T>` / `await foreach`** — the async variant. `Channel<T>.ReadAllAsync()`, EF Core `AsAsyncEnumerable()`, and gRPC streaming all return `IAsyncEnumerable<T>`. The caller uses `await foreach` without knowing the source.
 
 **LINQ `IQueryable<T>`** — a deferred iterator over a database query. The query is built lazily; execution happens when the iterator is consumed (`ToListAsync()`, `FirstOrDefaultAsync()`).
+
+## Tradeoffs
+
+**Use it when**: you need sequential access without exposing the underlying structure, you're streaming a large or **infinite/unbounded** sequence (lazy, constant memory), or a type can be traversed multiple ways. In C# you almost never *implement* `IEnumerator<T>` by hand — `yield return` generates it for you, so "using the Iterator pattern" just means returning `IEnumerable<T>`/`IAsyncEnumerable<T>`.
+
+**Don't reach for it when**: you need random access by index or a `Count` — an iterator is single-pass and forward-only; use a `List`/array. And remember the lazy-iteration footguns: **deferred execution** means exceptions and DB queries fire *when consumed*, not when called, and enumerating twice re-runs the work.
+
+**vs related**: Iterator gives sequential *access*; **[[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Visitor|Visitor]]** adds *operations* over a structure's elements; **[[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Composite|Composite]]** is the tree structure you often iterate. See [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Foreach|foreach & yield]] for the language mechanics.
 
 ## Questions
 

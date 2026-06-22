@@ -6,7 +6,7 @@ subtopic:
 level:
   - "3"
 priority: Medium
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 
@@ -26,6 +26,16 @@ Link Layer          Ethernet, Wi-Fi (physical transmission)
 ```
 
 Each layer adds a header and passes the packet down. On the receiving end, each layer strips its header and passes the payload up.
+
+## IP Addressing, Ports, and NAT
+
+The "IP" half of TCP/IP is addressing. An **IP address** identifies a host; a **port** (16-bit, 0–65535) identifies a process on that host. The 4-tuple `(src IP, src port, dst IP, dst port)` uniquely identifies a connection.
+
+- **IPv4** — 32-bit addresses (~4.3 billion), written `192.168.1.10`. Exhausted, which is why **NAT** exists.
+- **IPv6** — 128-bit addresses, written `2001:db8::1`. Vast space, no NAT needed, but dual-stack deployment is still ongoing.
+- **Private ranges** (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`) are non-routable on the public internet.
+- **NAT (Network Address Translation)** — a router maps many private hosts onto one public IP by rewriting addresses/ports. This is why your laptop's `192.168.x.x` reaches the internet, and why inbound connections to a host behind NAT need port-forwarding or hole-punching (relevant to [[Software Engineering/04 Networks/Architecture & Ops/Peer-2-Peer|peer-to-peer]]).
+- **Ports** split into well-known (0–1023, e.g. 80/443), registered, and **ephemeral** (the dynamic client-side ports that `TIME_WAIT` can exhaust).
 
 ## TCP Connection: Three-Way Handshake
 
@@ -53,6 +63,15 @@ TCP guarantees delivery through:
 - **Acknowledgments (ACK)**: the receiver acknowledges received bytes. Unacknowledged segments are retransmitted.
 - **Retransmission timeout (RTO)**: if no ACK arrives within the timeout, the segment is retransmitted.
 - **Duplicate ACKs / Fast Retransmit**: three duplicate ACKs signal a lost segment; TCP retransmits without waiting for the timeout.
+
+> [!WARNING]
+> **Head-of-line (HOL) blocking** is the price of in-order delivery: if segment #5 is lost, segments #6–#10 sit in the receive buffer and **cannot be delivered to the application** until #5 is retransmitted — even though they arrived fine. This is exactly why HTTP/2's many streams over one TCP connection can stall together on a single lost packet, and why **QUIC/HTTP/3** moves multiplexing into independent UDP-based streams. See [[Software Engineering/04 Networks/Transport & Sockets/UDP|UDP]].
+
+## MTU, MSS, and Keep-Alive
+
+- **MTU (Maximum Transmission Unit)** — the largest frame a link carries, typically **1500 bytes** on Ethernet. **MSS (Maximum Segment Size)** is the TCP payload that fits in one unfragmented packet (MTU minus IP+TCP headers, ~1460). Exceed the path MTU and packets fragment (or get dropped if "don't fragment" is set), hurting throughput — **Path MTU Discovery** negotiates the largest size that traverses the whole path.
+- **TCP keep-alive** sends periodic probes on an idle connection to detect a peer that vanished without a FIN (crash, cable pull). Without it, a half-open connection can sit "established" forever. Tune intervals (`SO_KEEPALIVE`) for long-lived connections behind NAT/load balancers, which silently drop idle flows.
+- **Window scaling / bandwidth-delay product** — on high-latency, high-bandwidth links ("long fat networks"), the default receive window caps throughput; the window-scaling option (and a window ≥ bandwidth × RTT) is needed to keep the pipe full.
 
 ## Flow Control and Congestion Control
 

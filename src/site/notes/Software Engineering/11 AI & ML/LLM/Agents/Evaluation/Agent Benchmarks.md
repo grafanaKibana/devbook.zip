@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/agents/evaluation/agent-benchmarks/","dg-note-properties":{"topic":["AI & ML"],"subtopic":["LLM"],"level":["3"],"priority":"Medium","status":"Ready To Repeat"}}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/llm/agents/evaluation/agent-benchmarks/","dg-note-properties":{"topic":["AI & ML"],"subtopic":["LLM"],"level":["3"],"priority":"Medium","status":"Done"}}
 ---
 
 
@@ -52,14 +52,14 @@ comparable. Decide on your own repos, same scaffold, with cost and pass^k.
 > - Two teams running the same base model with different harnesses get different SWE-bench numbers, so cross-paper comparisons are unreliable unless the scaffold is held constant
 > - Contamination and harness-specific prompt tuning add further variance over time
 > - The takeaway: use leaderboards to shortlist models, then re-evaluate candidates under *your* scaffold on *your* tasks
-> - Tradeoff: holding the scaffold constant for a fair comparison costs engineering setup, but without it the numbers do not mean what they appear to
+> - Holding the scaffold constant for a fair comparison costs engineering setup, but without it the numbers don't mean what they appear to
 
 > [!QUESTION]- Why is pass^k a more honest agent metric than pass@1, and when does it matter most?
 > - pass@1 averages success over independent attempts and hides variance; an agent that solves a task 6/10 times looks similar to one that solves it 10/10
 > - pass^k credits a task only if solved on all k tries, directly measuring reliability — the property production users actually experience
 > - It matters most for high-stakes or unattended tasks (payments, code merges) where one failure in k is unacceptable
 > - pass^k is typically well below pass@1, so reporting only pass@1 overstates production readiness
-> - Tradeoff: measuring pass^k costs k× the eval runs — spend it on the tasks where variance is intolerable and use cheaper mean success for low-stakes breadth
+> - Measuring pass^k costs k× the eval runs, so spend it on the tasks where variance is intolerable and use cheaper mean success for low-stakes breadth
 
 ## References
 

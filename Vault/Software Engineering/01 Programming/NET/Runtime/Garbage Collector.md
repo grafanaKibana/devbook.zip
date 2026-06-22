@@ -6,7 +6,7 @@ subtopic:
 level:
   - "4"
 priority: High
-status: Creation
+status: Ready to Repeat
 
 dg-publish: true
 ---
@@ -27,7 +27,10 @@ After the garbage collector is initialized, the CLR allocates a segment of memor
 
 Each managed process has its own managed heap. All threads in the process allocate memory for objects from the same heap.
 
-To reserve memory, the garbage collector calls the Windows function [VirtualAlloc](https://learn.microsoft.com/ru-ru/windows/desktop/api/memoryapi/nf-memoryapi-virtualalloc) and reserves one memory segment at a time for managed applications. The GC also reserves additional segments as needed and releases segments back to the operating system (after clearing any objects) by calling [Windows VirtualFree](https://learn.microsoft.com/ru-ru/windows/desktop/api/memoryapi/nf-memoryapi-virtualfree).
+To reserve memory, the garbage collector calls the OS (`VirtualAlloc` on Windows, `mmap` on Linux) and releases it back (`VirtualFree`/`munmap`) after clearing objects.
+
+> [!INFO]
+> **Segments vs regions.** The "one large segment per heap" model described here is the *legacy* layout. Since **.NET 7** the GC uses **regions** instead — many small, fixed-size regions that the GC assigns to generations independently. This makes it far cheaper to give memory back to the OS and to rebalance generations, but the mental model (Gen 0/1/2 + LOH, mark/compact) is unchanged. Treat "segment" below as "the memory the GC manages," not a literal contiguous block on modern runtimes.
 
 > [!TIP]
 > 🚨 The size of segments allocated by the garbage collector is implementation-dependent and can change at any time, including in periodic updates. An application should not make assumptions about the size of a particular segment, rely on it, or attempt to tune the amount of memory available for segment allocations.
@@ -38,10 +41,10 @@ When a garbage collection is triggered, it reclaims memory occupied by unused ob
 
 The level of GC activity (frequency and duration of collections) depends on the number of allocations and the amount of memory that remains on the managed heap.
 
-You can think of the heap as consisting of two heaps: the [Large Object Heap](https://learn.microsoft.com/ru-ru/dotnet/standard/garbage-collection/large-object-heap) (LOH) and the Small Object Heap (SOH). The LOH contains objects of size 85,000 bytes and larger, typically arrays. In rare cases, an instance object can also be very large.
+You can think of the heap as consisting of two heaps: the [Large Object Heap](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/large-object-heap) (LOH) and the Small Object Heap (SOH). The LOH contains objects of size 85,000 bytes and larger, typically arrays. In rare cases, an instance object can also be very large.
 
 > [!TIP]
-> You can [**configure the threshold size**](https://learn.microsoft.com/ru-ru/dotnet/core/runtime-config/garbage-collector#large-object-heap-threshold) for objects placed on the Large Object Heap.
+> You can [**configure the threshold size**](https://learn.microsoft.com/en-us/dotnet/core/runtime-config/garbage-collector#large-object-heap-threshold) for objects placed on the Large Object Heap.
 
 ## Reclaiming memory
 
@@ -55,7 +58,7 @@ Garbage collection occurs when one of the following conditions is met:
 
 - There is not enough physical memory in the system. The available memory size is determined by a low-memory notification from the OS or by a low-memory condition as indicated by the host.
 - The amount of memory used by objects allocated on the managed heap exceeds an acceptable threshold. This threshold is continuously adjusted during process execution.
-- The [GC.Collect](https://learn.microsoft.com/ru-ru/dotnet/api/system.gc.collect) method is called. In almost all cases you should not call this method, because the GC runs automatically. It is primarily used for special scenarios and testing.
+- The [GC.Collect](https://learn.microsoft.com/en-us/dotnet/api/system.gc.collect) method is called. In almost all cases you should not call this method, because the GC runs automatically. It is primarily used for special scenarios and testing.
 
 ## GC execution model
 
@@ -162,6 +165,23 @@ For example, a class defined in the main window of a desktop application may rem
 - *Generation 2.* Identifies an object that has survived more than one garbage collection.
 
 The GC first analyzes all objects that belong to generation 0. If, after collecting Gen 0, there is enough memory, all surviving objects are promoted to Gen 1. If Gen 0 has been collected but additional space is still required, the GC will also collect Gen 1. Objects that survive Gen 1 become Gen 2 objects. If the GC still needs memory, it will perform a Gen 2 collection. Since there are no generations above Gen 2, the generation of surviving objects does not increase further. From this, you can conclude that newer objects tend to be collected faster than older ones.
+
+### Card tables and write barriers
+
+A Gen 0 collection must *not* scan all of Gen 2 to find roots — that would defeat the point of generations. But an old object can reference a young one (e.g. a long-lived cache holding a freshly created entry). The GC solves this with a **write barrier**: every reference-type field assignment runs a tiny piece of JIT-emitted code that marks the corresponding **card** (a small range of the old heap) as dirty in a **card table**. An ephemeral (Gen 0/1) collection then scans only the dirty cards for old→young references, treating them as extra roots. This is why reference assignments cost slightly more than value writes, and why allocation-heavy code with many old→young links raises GC cost.
+
+### Boxing as a hidden allocation source
+
+Every time a value type is converted to `object` or an interface (`object o = 42;`, `IComparable c = myStruct;`, non-generic collections, `params object[]`, string-interpolating a struct) the runtime **boxes** it — a Gen 0 heap allocation. In hot loops this is a common, invisible source of GC pressure; prefer generics/`Span<T>` to keep value types unboxed.
+
+### Latency modes and low-pause regions
+
+Beyond Workstation/Server/Background, the GC exposes runtime controls:
+
+- **`GCSettings.LatencyMode`** (`Batch`, `Interactive`, `LowLatency`, `SustainedLowLatency`) biases the GC toward throughput or short pauses for a window of work.
+- **`GC.TryStartNoGCRegion(totalBytes)`** pre-reserves a budget and suppresses GC entirely for a critical section (e.g. an order-matching burst), then `GC.EndNoGCRegion()`.
+- **DATAS** (Dynamic Adaptation To Application Sizes, on by default for Server GC in .NET 8/9) auto-tunes heap count to the actual load, so you rarely need to hand-set `HeapCount` anymore.
+- **Frozen/NonGC heap** (.NET 8) holds objects the GC never scans or moves (e.g. readonly statics), shaving work off every collection.
 
 ## Questions
 

@@ -8,8 +8,8 @@ tags:
 level:
   - "3"
 priority: High
-status: Creation
 dg-publish: true
+status: Done
 ---
 # Behavioral Patterns
 

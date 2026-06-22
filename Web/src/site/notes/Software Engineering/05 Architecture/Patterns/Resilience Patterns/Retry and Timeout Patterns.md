@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/resilience-patterns/retry-and-timeout-patterns/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Patterns"],"level":["3"],"priority":"High","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/resilience-patterns/retry-and-timeout-patterns/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Patterns"],"level":["3"],"priority":"High","status":"Ready to Repeat"}}
 ---
 
 

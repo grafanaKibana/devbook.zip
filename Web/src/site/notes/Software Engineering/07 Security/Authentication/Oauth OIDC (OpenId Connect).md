@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/07-security/authentication/oauth-oidc-open-id-connect/","dg-note-properties":{"topic":["Security"],"subtopic":["Authentication"],"level":["3"],"priority":"High","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/07-security/authentication/oauth-oidc-open-id-connect/","dg-note-properties":{"topic":["Security"],"subtopic":["Authentication"],"level":["3"],"priority":"High","status":"Ready to Repeat"}}
 ---
 
 
@@ -33,6 +33,29 @@ var response = await client.PostAsync("https://login.microsoftonline.com/{tenant
         ["scope"] = "https://my-api/.default"
     }));
 ```
+
+## The Four Roles
+
+OAuth's vocabulary trips people up; four roles do all the work:
+
+- **Resource Owner** — the user who owns the data.
+- **Client** — the app requesting access on the user's behalf.
+- **Authorization Server** — issues tokens after authenticating the user (Entra ID, Auth0, Google).
+- **Resource Server** — the API that holds the protected data and accepts access tokens.
+
+And three tokens: an **access token** (a bearer credential to call the resource server — treat it like a password), an **ID token** (OIDC only — proves *who* the user is, for the client to consume), and a **refresh token** (long-lived, used to get new access tokens without re-prompting).
+
+## Choosing a Flow
+
+| Client type | Flow | Why |
+|---|---|---|
+| Web app, SPA, mobile | **Authorization Code + PKCE** | The default for anything with a user; PKCE is now required even for confidential clients |
+| Service-to-service (no user) | **Client Credentials** | App authenticates as itself |
+| TV / CLI / input-constrained device | **Device Authorization (Device Code)** | User authorizes on a second device via a short code |
+| ~~SPA without a backend~~ | ~~Implicit~~ — **deprecated** | Leaked tokens in URL fragments; use Auth Code + PKCE instead |
+| ~~First-party password~~ | ~~Resource Owner Password (ROPC)~~ — **deprecated** | Defeats the point (app handles the password); avoid |
+
+The takeaway: **Authorization Code + PKCE for users, Client Credentials for machines** covers nearly everything; Device Code for constrained devices; never Implicit or ROPC in new systems. **Scopes** (`profile`, `mail.read`) bound what an access token may do; the **consent** screen is where the user grants them.
 
 ## OIDC: Authentication Layer
 
@@ -83,6 +106,15 @@ builder.Services.AddAuthentication(options =>
 **Use OIDC** for new applications. **Use SAML** only when integrating with legacy enterprise identity providers that do not support OIDC.
 
 ## Questions
+
+> [!QUESTION]- What's the difference between OAuth 2.0 and OpenID Connect?
+> OAuth 2.0 is an **authorization** framework — it issues *access tokens* that let an app call an API on the user's behalf, but it says nothing standard about *who* the user is. OpenID Connect is a thin **authentication** layer on top that adds an *ID token* (a JWT with verified identity claims: `sub`, `email`, `name`). Rule of thumb: "Sign in with…" needs OIDC; "let this app read my calendar" is OAuth. Using a raw OAuth access token as proof of login is a classic mistake.
+
+> [!QUESTION]- Why is PKCE required even for confidential clients now?
+> PKCE binds the authorization request to the token exchange via a one-time `code_verifier`/`code_challenge`, so an intercepted authorization code is useless without the verifier. It was designed for public clients (SPAs/mobile that can't keep a secret), but the OAuth 2.1 guidance now recommends it for **all** clients because it also defends confidential clients against code-injection/interception, at essentially no cost.
+
+> [!QUESTION]- Which flow do you use for a CLI tool or a smart TV, and why not Authorization Code?
+> The **Device Authorization (Device Code) flow**: the device shows a short code and a URL, the user authorizes on a phone/laptop, and the device polls the token endpoint until approved. Authorization Code assumes a browser redirect back to the app, which input-constrained or browserless devices can't do. (Implicit and ROPC are deprecated and shouldn't be used at all.)
 
 ## References
 

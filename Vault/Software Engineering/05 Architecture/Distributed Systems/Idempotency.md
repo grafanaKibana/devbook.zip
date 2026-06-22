@@ -6,7 +6,7 @@ subtopic:
 level:
   - "2"
 priority: High
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 
@@ -76,7 +76,7 @@ sequenceDiagram
     Api-->>Client: Return cached result
 ```
 
-Idempotency is especially important for [[Message Queues]] consumers and for multi step workflows like [[Distributed Transactions]] where partial failures are expected.
+Idempotency is especially important for [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/Message Queues|Message Queues]] consumers and for multi step workflows like [[Software Engineering/05 Architecture/Distributed Systems/Distributed Transactions|Distributed Transactions]] where partial failures are expected.
 
 ## HTTP Methods and Idempotency
 
@@ -88,7 +88,7 @@ Interview critical distinction:
 - `PUT` is idempotent because it replaces the representation with a full target state.
 - `PATCH` applies a delta, and applying the same delta repeatedly can compound side effects unless the patch document itself is designed to be idempotent.
 
-Even with idempotent methods, distributed replicas can still show temporary divergence depending on [[Consistency Models]], so method semantics and system consistency level are separate concerns.
+Even with idempotent methods, distributed replicas can still show temporary divergence depending on [[Software Engineering/05 Architecture/Distributed Systems/Consistency Models|Consistency Models]], so method semantics and system consistency level are separate concerns.
 
 ## .NET Implementation Example
 

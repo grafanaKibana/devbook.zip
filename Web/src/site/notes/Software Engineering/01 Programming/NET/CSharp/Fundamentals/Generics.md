@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/c-sharp/fundamentals/generics/","dg-note-properties":{"topic":["Programming"],"subtopic":["NET"],"level":["4"],"priority":"Medium","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/c-sharp/fundamentals/generics/","dg-note-properties":{"topic":["Programming"],"subtopic":["NET"],"level":["4"],"priority":"Medium","status":"Ready to Repeat"}}
 ---
 
 # Intro
@@ -62,9 +62,37 @@ public static T CreateAndValidate<T>()
 }
 ```
 
+## Generic Math (.NET 7+)
+
+For years you couldn't write a generic `Sum<T>` because `T` had no way to express "supports `+`." **Static abstract interface members** fixed that: interfaces like `INumber<T>` declare static operators, so the constraint `where T : INumber<T>` (the "curiously recurring" self-referencing pattern) unlocks arithmetic on the type parameter.
+
+```csharp
+public static T Sum<T>(ReadOnlySpan<T> values) where T : INumber<T>
+{
+    T total = T.Zero;
+    foreach (var v in values) total += v;   // operators resolved via the interface
+    return total;
+}
+```
+
+This is also the mechanism behind `IParsable<T>`, `ISpanFormattable`, and other "static contract" interfaces.
+
+## Reflection over Generics
+
+An *open* generic (`List<>`) can't be instantiated until its type arguments are supplied at runtime via `MakeGenericType` (and `MakeGenericMethod` for methods):
+
+```csharp
+Type closed = typeof(List<>).MakeGenericType(itemType); // e.g. List<Order>
+var list = Activator.CreateInstance(closed);
+```
+
+Newer constraints worth knowing: `where T : struct, Enum` (enum-only generics), `where T : unmanaged`, and **`allows ref struct`** (C# 13) which lets `Span<T>` flow through generic code.
+
 ## Pitfalls
 
 - Unconstrained `T` blocks member/operator usage because the compiler cannot prove capabilities, which pushes unsafe casts and weakens API clarity; add the smallest constraint set (`where T : IFoo`, `where T : struct`, etc.) that encodes what the algorithm really needs.
+- **Static members are per-closed-type.** A `static` field in `Cache<T>` is *not* shared across `Cache<int>` and `Cache<string>` — each closed type gets its own copy of the static state. Handy for per-type caches, but a classic surprise if you expected one shared counter.
+- **Value-type specialization bloats code.** The JIT emits a separate native body per value-type argument (`List<int>`, `List<double>`, `List<MyStruct>`…). Great for speed, but a generic-heavy library instantiated over many value types grows the code/JIT footprint — a real cost on memory-constrained or fast-startup targets.
 - `default(T)` can hide correctness bugs because reference and nullable types become `null` while value types become zeroed data, which may be interpreted as valid business values; model absence explicitly (for example, `Try` pattern, `Option`, or nullable annotations) and validate before use.
 - Over-constraining (`where T : class, SomeConcreteType`) couples generic APIs to one hierarchy, which prevents reuse and forces duplicate implementations later; prefer interface-based constraints that describe behavior instead of concrete inheritance chains.
 

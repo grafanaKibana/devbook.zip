@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/algorithms/graph-algorithms/graph-algorithms/","tags":["FolderNote"],"dg-note-properties":{"topic":["Computer Science"],"subtopic":["Algorithms"],"tags":["FolderNote"],"priority":"Medium","level":["4"],"status":"Done"}}
+{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/algorithms/graph-algorithms/graph-algorithms/","tags":["FolderNote"],"dg-note-properties":{"topic":["Computer Science"],"subtopic":["Algorithms"],"tags":["FolderNote"],"level":["4"],"status":"Done","priority":"High"}}
 ---
 
 
@@ -66,4 +66,6 @@ flowchart TD
 >
 > **Pages**
 > - [[Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Dijkstra\|Dijkstra]]
+> - [[Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree\|Minimum Spanning Tree]]
+> - [[Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Topological Sort\|Topological Sort]]
 <!-- whats-next:end -->

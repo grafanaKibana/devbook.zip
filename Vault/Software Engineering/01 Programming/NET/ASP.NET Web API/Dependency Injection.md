@@ -6,7 +6,7 @@ subtopic:
 level:
   - "1"
 priority: Medium
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 
@@ -75,6 +75,27 @@ public sealed class NotificationService(IEnumerable<INotificationSender> senders
 }
 ```
 
+## Keyed Services (.NET 8)
+
+When you have multiple implementations and want to pick a *specific* one (not all of them), register and resolve by key:
+
+```csharp
+builder.Services.AddKeyedScoped<INotificationSender, EmailNotificationSender>("email");
+builder.Services.AddKeyedScoped<INotificationSender, SmsNotificationSender>("sms");
+
+public sealed class OrderConfirmation(
+    [FromKeyedServices("email")] INotificationSender sender) { /* ... */ }
+```
+
+This replaces the old workarounds (factory delegates, marker interfaces) for "same interface, choose by name."
+
+## Advanced Registration
+
+- **Open generics** — register a generic interface to a generic implementation once: `services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));`. Resolving `IRepository<Order>` constructs `EfRepository<Order>`.
+- **`TryAdd*` / `TryAddEnumerable`** — register only if not already present (libraries use these so apps can override defaults without duplicate registrations).
+- **Decorators** — the built-in container has no native decoration; use [Scrutor](https://github.com/khellang/Scrutor)'s `Decorate<TService, TDecorator>()` (or assembly scanning) for cross-cutting wrappers.
+- **`ActivatorUtilities.CreateInstance<T>(provider, args)`** — construct a type with a mix of DI-resolved and explicit constructor args without registering it.
+
 ## Pitfalls
 
 ### Captive Dependency (Singleton Consuming Scoped)
@@ -104,6 +125,13 @@ public sealed class BackgroundWorker(IServiceScopeFactory scopeFactory) : Backgr
 **Why it happens**: `AddDbContext<T>()` defaults to Scoped, but developers sometimes override this.
 
 **Mitigation**: always use `AddDbContext<T>()` without overriding the lifetime. If you need a `DbContext` in a Singleton, use `IDbContextFactory<T>` (registered with `AddDbContextFactory<T>()`).
+
+### Disposal and the Transient `IDisposable` Trap
+
+The container **owns disposal of the instances it creates**: when a scope ends it disposes the `IDisposable`/`IAsyncDisposable` services it resolved in that scope, and singletons are disposed when the root provider is disposed. Two consequences:
+
+- A **transient `IDisposable` resolved from the root provider lives until the app shuts down** — the container holds it to dispose it later, so a "transient" disposable can pile up as a leak. Resolve disposables from a scope, or don't make hot transients disposable.
+- **Don't register an instance you also dispose yourself** (`AddSingleton(myInstance)` then `using`) — you'll double-dispose. If *you* own the lifetime, register a factory that returns it without the container taking ownership, or let the container own it exclusively.
 
 ## Tradeoffs
 

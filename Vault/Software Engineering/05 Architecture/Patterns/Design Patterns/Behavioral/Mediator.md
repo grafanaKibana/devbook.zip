@@ -6,7 +6,7 @@ subtopic:
 level:
   - "1"
 priority: High
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 # Mediator
@@ -128,6 +128,14 @@ Adding fraud detection now means adding a MediatR pipeline behavior — the cont
 **SignalR `IHubContext<T>`** — the hub context is a mediator between server code and connected clients. `hubContext.Clients.All.SendAsync("OrderUpdated", order)` broadcasts without the sender knowing which clients are connected.
 
 **MassTransit / NServiceBus** — message buses act as mediators between services. Publishing a `CheckoutCompletedEvent` routes to all registered consumers without the publisher knowing the consumers.
+
+## Tradeoffs
+
+**Use it when**: many components interact in a tangled many-to-many web and you want to collapse it to one-to-many through a hub; or (the dominant .NET use) you want thin controllers and a CQRS-style command/handler split via MediatR, with pipeline behaviors for cross-cutting concerns.
+
+**Don't reach for it when**: a direct method call would do — wrapping a two-class app in MediatR is ceremony and adds indirection that makes "what handles this request?" harder to trace. Watch for the mediator itself becoming a **god object** if coordination logic accretes in it instead of in handlers.
+
+**vs related**: **Mediator routes one request → one handler** (`Send`); an **[[Software Engineering/05 Architecture/Patterns/Event Bus|Event Bus]]** / **[[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Observer|Observer]]** fans **one event → many** subscribers (`Publish`). A **[[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Facade|Facade]]** is a one-way simplifying entry point to a subsystem (no routing/coordination); a Mediator coordinates peers bidirectionally.
 
 ## Questions
 

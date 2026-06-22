@@ -6,7 +6,7 @@ subtopic:
 level:
   - "4"
 priority: Medium
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 
@@ -73,6 +73,23 @@ var method = typeof(Jobs)
 
 method?.Invoke(target, null);
 ```
+
+## From Slow Reflection to Fast Access
+
+`MethodInfo.Invoke` is slow because every call re-marshals arguments and does runtime checks. When you call the same member repeatedly, **do the reflection once and cache a delegate**:
+
+```csharp
+// Bind a strongly-typed delegate to a discovered method — invoked at near-direct-call speed
+var action = (Action<Jobs>)method!.CreateDelegate(typeof(Action<Jobs>));
+action(target); // no per-call reflection overhead
+
+// Or compile an expression tree (works for constructors, property getters, etc.)
+var ctor = Expression.Lambda<Func<Jobs>>(Expression.New(typeof(Jobs))).Compile();
+```
+
+For runtime code generation there's `System.Reflection.Emit` / `DynamicMethod` (emit IL directly) — powerful but **incompatible with NativeAOT/trimming** since there's no JIT to compile the emitted IL. On AOT targets, prefer **source generators**, which produce the code at build time.
+
+To reach **private members**, the old way is `BindingFlags.NonPublic` (slow, breaks encapsulation, fragile under trimming). On **.NET 8+** use **`[UnsafeAccessor]`** — a zero-overhead, AOT-safe, statically-checked way to call a private method or access a private field without reflection at all.
 
 ## Pitfalls
 

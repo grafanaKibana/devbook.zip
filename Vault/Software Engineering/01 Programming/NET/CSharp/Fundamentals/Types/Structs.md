@@ -6,7 +6,7 @@ subtopic:
 level:
   - "4"
 priority: Medium
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 # Intro
@@ -135,6 +135,25 @@ public partial struct Measurement
 | `abstract` | No — structs are implicitly sealed |
 | `sealed` | Redundant — already implicit |
 | `static` | No |
+
+## Boxing — When a Value Type Lands on the Heap
+
+The whole point of a struct (no allocation) is lost the moment it's **boxed**. The implicit triggers are easy to miss:
+
+- Assigning to `object` or `dynamic`: `object o = myStruct;`
+- Casting to an interface the struct implements: `IComparable c = myStruct;` (constrained generic calls — `where T : IComparable` — avoid this)
+- Adding to a non-generic collection (`ArrayList`) or a `params object[]`
+- String interpolation / `string.Format` of a struct (the value is boxed to call `object.ToString()` unless the type implements `ISpanFormattable`)
+- Calling a non-overridden `ToString()`/`Equals()`/`GetHashCode()` inherited from `object`
+
+## Memory Layout
+
+A struct's size is the sum of its fields plus **padding** the runtime inserts for alignment (a `bool` + `long` field often occupies 16 bytes, not 9). That alignment cost is part of *why* the "keep structs ≤16 bytes" heuristic exists — beyond that, copy cost outweighs the allocation you saved. `[StructLayout(LayoutKind.Sequential)]` (or `Explicit` with `[FieldOffset]`) controls layout for interop/SIMD; `[StructLayout(LayoutKind.Auto)]` lets the runtime reorder fields to minimize padding.
+
+## Modern Struct Features
+
+- **Primary constructors (C# 12)** work on structs too: `public readonly struct Point(int x, int y) { public int X => x; }`.
+- **`ref` fields and `scoped` (C# 11)** let a `ref struct` *store* a reference (this is how `Span<T>` holds a pointer into memory), with `scoped` constraining how long that reference may escape — the compiler enforces it can't outlive the data it points to.
 
 ## Pitfalls
 

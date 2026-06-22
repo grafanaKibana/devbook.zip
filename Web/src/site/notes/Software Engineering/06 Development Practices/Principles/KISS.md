@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/06-development-practices/principles/kiss/","dg-note-properties":{"topic":["Development Practices"],"subtopic":["Principles"],"level":["4"],"priority":"High","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/06-development-practices/principles/kiss/","dg-note-properties":{"topic":["Development Practices"],"subtopic":["Principles"],"level":["4"],"priority":"High","status":"Ready to Repeat"}}
 ---
 
 # Intro

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/distributed-systems/message-queues/kafka/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Distributed Systems"],"level":["2"],"priority":"High","status":"Ready To Repeat"}}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/distributed-systems/message-queues/kafka/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Distributed Systems"],"level":["2"],"priority":"High","status":"Done"}}
 ---
 
 
@@ -8,7 +8,7 @@
 Apache Kafka is a distributed event streaming platform built around an append-only commit log: producers append records to topic partitions, and consumers read at their own pace using offsets.
 It matters because it combines durability, high throughput, and replayability, which makes it the backbone of many event-driven architectures at scale.
 You reach for Kafka when you need independent producers and consumers, long-lived event history, and horizontal scaling without losing per-key ordering.
-Common use cases include event sourcing, stream processing, log aggregation, change data capture, and real-time analytics.
+Common use cases include [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/Event Sourcing\|event sourcing]], stream processing, log aggregation, change data capture, and real-time analytics.
 
 ## Core Architecture
 
@@ -208,7 +208,7 @@ finally
 
 ## Kafka vs RabbitMQ Tradeoffs
 
-| Dimension | Kafka | RabbitMQ |
+| Dimension | Kafka | [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/RabbitMQ\|RabbitMQ]] |
 | --- | --- | --- |
 | Model | Distributed append-only log | Queue and exchange broker model |
 | Ordering | Strong ordering per partition | Queue order exists but can vary with competing consumers and requeue |
@@ -248,33 +248,20 @@ kafka-consumer-groups.sh --bootstrap-server localhost:9092 --group orders-worker
 - **Why it happens:** weaker ack modes return success before enough replication.
 - **How to avoid or detect:** enforce `acks=all` for critical topics and combine with idempotent producer defaults.
 
-## Interview Questions
+## Questions
 
-> [!question]- You need to process order events in order per customer but handle 50K events per second. How do you design the Kafka topic?
-> **Expected answer:**
-> - Use `customer_id` as partition key so each customer stream stays ordered.
-> - Provision enough partitions for parallelism based on measured per-partition consumer throughput and latency targets.
-> - Scale consumer group instances up to partition count.
-> - Monitor hot partitions and lag; if one customer dominates, consider composite key strategy.
-> - Keep consumers idempotent because retries and reprocessing can still happen.
->
-> **Why this question matters:** it checks whether the candidate can balance ordering guarantees and horizontal scalability.
+> [!QUESTION]- How do you design a Kafka topic to keep per-customer ordering while handling high throughput?
+> Use `customer_id` as the partition key so every event for a customer lands in the same partition and stays ordered — Kafka only guarantees order within a partition. Then provision enough partitions for parallelism, sized from measured per-partition consumer throughput against your latency target, and scale the consumer group up to (but not beyond) the partition count, since extra consumers just sit idle. Watch for hot partitions: if one customer dominates traffic, a plain `customer_id` key overloads one partition, so move to a composite key like `customer_id:region`. Keep consumers [[Software Engineering/05 Architecture/Distributed Systems/Idempotency\|idempotent]], because rebalances and retries will reprocess records. Ordering and scale pull against each other, and the partition key is where you resolve the tension.
 
-> [!question]- Compare at-most-once, at-least-once, and exactly-once in Kafka. Which do you choose for payment events and why?
-> **Expected answer:**
-> - At-most-once risks loss and is rarely valid for payments.
-> - At-least-once is common if handlers are idempotent and duplicates are acceptable.
-> - Exactly-once requires transactions and idempotent producer flow, with added latency and complexity.
-> - For payment events, choose at-least-once plus strict idempotency or exactly-once when duplicate side effects are too costly.
->
-> **Why this question matters:** it tests tradeoff judgment under reliability constraints.
+> [!QUESTION]- Compare at-most-once, at-least-once, and exactly-once in Kafka — which fits payment events?
+> At-most-once commits the offset before processing, so a crash loses events — almost never acceptable for payments. At-least-once processes first and commits after, so a crash before commit reprocesses; it's the common production default and safe as long as handlers are idempotent. Exactly-once is real but narrow: Kafka transactions plus an idempotent producer give atomic consume-process-produce, but only for Kafka-to-Kafka flows — a database write or HTTP call inside the handler still needs its own idempotency or an outbox. For payments, the usual answer is at-least-once with strict idempotency (dedupe on a payment ID), reaching for exactly-once only when a duplicate side effect is too costly to risk and the whole flow stays inside Kafka.
 
 ## References
 
-- [Apache Kafka Documentation](https://kafka.apache.org/documentation/)
-- [Confluent Kafka .NET Client Documentation](https://docs.confluent.io/kafka-clients/dotnet/current/overview.html)
-- [The Log: What every software engineer should know about real-time data's unifying abstraction](https://engineering.linkedin.com/distributed-systems/log-what-every-software-engineer-should-know-about-real-time-datas-unifying)
-- [The Apache Kafka Monitoring Blog Post to End Most Posts](https://www.confluent.io/blog/blog-post-on-monitoring-an-apache-kafka-deployment-to-end-most-blog-posts/)
+- [Apache Kafka Documentation](https://kafka.apache.org/documentation/) — official docs; the anchor source for topics, partitions, replication, delivery semantics, and configuration.
+- [Confluent Kafka .NET Client Documentation](https://docs.confluent.io/kafka-clients/dotnet/current/overview.html) — official `Confluent.Kafka` client reference covering `ProducerConfig`/`ConsumerConfig`, idempotence, and offset management.
+- [The Log: What every software engineer should know about real-time data's unifying abstraction](https://engineering.linkedin.com/distributed-systems/log-what-every-software-engineer-should-know-about-real-time-datas-unifying) — Jay Kreps' foundational essay on the log abstraction Kafka is built on.
+- [The Apache Kafka Monitoring Blog Post to End Most Posts](https://www.confluent.io/blog/blog-post-on-monitoring-an-apache-kafka-deployment-to-end-most-blog-posts/) — Confluent practitioner deep-dive on metrics, consumer lag, and operating a Kafka cluster in production.
 
 <!-- whats-next:start -->
 

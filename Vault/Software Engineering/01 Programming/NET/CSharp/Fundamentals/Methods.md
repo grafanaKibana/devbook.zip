@@ -6,7 +6,7 @@ subtopic:
 level:
   - "4"
 priority: Medium
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 # Intro
@@ -63,6 +63,24 @@ static void ProcessData(in int value)
     Console.WriteLine(value);
 }
 ```
+
+### out
+
+`out` passes by reference for **output**: the callee *must* assign it before returning, and the caller need not initialize it. It's the basis of the `TryParse` pattern (return a `bool` for success, hand back the value via `out`) and pairs with inline `out var`:
+
+```csharp
+static bool TryDivide(int a, int b, out int result)
+{
+    if (b == 0) { result = 0; return false; }
+    result = a / b;
+    return true;
+}
+
+if (TryDivide(10, 2, out var quotient))   // 'quotient' declared inline
+    Console.WriteLine(quotient);           // 5
+```
+
+Use `out` (success-or-default) instead of throwing for *expected* failures on hot paths; `Dictionary.TryGetValue` is the canonical example.
 
 ### params
 
@@ -172,6 +190,15 @@ Console.WriteLine(asDog.Category());    // Dog
 ```
 
 `override` participates in polymorphism; `new` does not.
+
+## Other Method Forms
+
+- **`ref return` / `ref readonly return`** — return an *alias* to existing storage instead of a copy, letting callers read (and with `ref`, mutate) the original. Combined with `ref` locals (`ref var slot = ref array[i];`) this enables in-place updates of array/struct fields with no copying — used heavily in high-performance code (`Span<T>`, `Dictionary.GetValueRefOrAddDefault`).
+- **Local functions vs lambdas** — a local function is a named method nested in another method. Prefer it over a lambda when you don't need a delegate: it can be `static` (forbids accidental captures), supports `ref`/`out` and iterators, and **doesn't allocate a delegate/closure** unless converted to one. Lambdas are for when you actually need a `Func`/`Action` value.
+- **Extension methods** — `static` methods in a `static` class with a `this`-modified first parameter, letting you "add" methods to existing types (the whole of LINQ is extension methods on `IEnumerable<T>`).
+- **Expression-bodied members** (`=> ...`) are just concise syntax for single-expression methods/properties.
+
+**Overload resolution** picks the "best" match by a betterness algorithm (most specific parameter types, fewest conversions); named and optional arguments interact here, and an ambiguous tie is a compile error. Since **.NET 7**, a method-group conversion (`Func<int,int> f = Square;`) is **cached**, so repeatedly assigning the same method group no longer allocates a new delegate each time.
 
 ## Pitfalls
 

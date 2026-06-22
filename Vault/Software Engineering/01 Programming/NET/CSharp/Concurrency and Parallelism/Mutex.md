@@ -6,7 +6,7 @@ subtopic:
 level:
   - "4"
 priority: High
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 
@@ -16,12 +16,38 @@ dg-publish: true
 
 ## How It Works
 
-`Mutex` has ownership semantics:
+`Mutex` derives from `WaitHandle` (it wraps an OS handle exposed through `SafeWaitHandle`), and has ownership semantics:
 
 - A thread acquires ownership with `WaitOne`.
 - Other waiters block until the owner releases it.
 - The owning thread must call `ReleaseMutex`.
 - Named mutexes can coordinate multiple processes on the same machine; `Global\` / `Local\` prefixes are Windows Terminal Services scope controls, not general cross-platform naming defaults.
+
+**`Mutex` is reentrant (recursive).** The owning thread can call `WaitOne` multiple times without blocking itself — but ownership is reference-counted, so it must call `ReleaseMutex` an equal number of times before another thread can acquire it. This differs from `SemaphoreSlim`, which has no thread affinity and is **not** reentrant (a recursive acquire on a 1-permit semaphore self-deadlocks).
+
+```csharp
+using var m = new Mutex();
+m.WaitOne();      // count = 1
+m.WaitOne();      // count = 2 — same thread, does not block
+// ...
+m.ReleaseMutex(); // count = 1 — still owned
+m.ReleaseMutex(); // count = 0 — now released for other threads
+```
+
+### Acquiring multiple handles
+
+Because `Mutex` is a `WaitHandle`, you can acquire several at once with `WaitHandle.WaitAll` (atomic — avoids the lock-ordering deadlocks of nested `WaitOne` calls) or race them with `WaitAny`:
+
+```csharp
+var handles = new WaitHandle[] { mutexA, mutexB };
+WaitHandle.WaitAll(handles);   // acquire both atomically, no ordering deadlock
+// ...
+mutexB.ReleaseMutex();
+mutexA.ReleaseMutex();
+```
+
+> [!WARNING]
+> `WaitAll` is not supported on an STA thread (e.g. a WinForms/WPF UI thread) and throws `NotSupportedException` there.
 
 ## Example
 
@@ -71,6 +97,7 @@ finally
 - **Release from wrong thread throws** — calling `ReleaseMutex` from a thread that does not own it throws `ApplicationException`. In async code where continuations can run on different threads, this is a landmine. Keep `WaitOne`/`ReleaseMutex` in the same synchronous method scope; for async patterns, use `SemaphoreSlim.WaitAsync` instead.
 - **Abandoned mutex corruption risk** — if the owner thread exits without releasing (crash, `Thread.Abort`, unhandled exception), the next waiter gets `AbandonedMutexException`. This means the protected resource may be in an inconsistent state. Always validate shared state after acquiring an abandoned mutex.
 - **Security on shared machines** — named mutexes are not automatically restricted to your process or user context. On Windows, another process can open your named mutex and interfere with coordination. Use `MutexAccessRule`/`MutexSecurity` to restrict access. On Linux, named mutexes use shared memory files with no ACL support — avoid named mutexes on multi-tenant machines.
+- **Named-mutex lifetime is not the same across platforms** — on Windows a named mutex is a kernel object that survives as long as a handle is open. On Linux/macOS, .NET backs named mutexes with shared-memory files under `/tmp` (or `TMPDIR`) that are tied to the process/boot lifetime, not kernel-persistent; the `Global\`/`Local\` session prefixes are also Windows-only concepts. Don't assume identical cross-machine semantics — for distributed single-instance guards use a real distributed lock (database row lock, Redis `SETNX`, lease), not a named `Mutex`.
 
 ## Tradeoffs
 

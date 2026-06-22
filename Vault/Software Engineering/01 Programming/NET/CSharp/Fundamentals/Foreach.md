@@ -6,7 +6,7 @@ subtopic:
 level:
   - "4"
 priority: High
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 
@@ -30,12 +30,24 @@ Under the hood, foreach compiles into:
 
 ```csharp
 var enumerator = collection.GetEnumerator();
-while (enumerator.MoveNext())
+try
 {
-    var item = enumerator.Current;
-    // Use item
+    while (enumerator.MoveNext())
+    {
+        var item = enumerator.Current;
+        // Use item
+    }
+}
+finally
+{
+    // If the enumerator is IDisposable, foreach disposes it — even on early break/exception.
+    (enumerator as IDisposable)?.Dispose();
 }
 ```
+
+The `finally`/`Dispose` is the part people forget: it's what runs the `finally` block inside an iterator method (and disposes a `DbDataReader`, file enumerator, etc.) when you `break` out of a loop early. Hand-rolling the `while (MoveNext())` form skips this cleanup.
+
+**Struct enumerators and boxing.** `List<T>`, arrays, and `Span<T>` expose a **struct** enumerator, so `foreach` over them allocates nothing (the JIT also elides bounds checks on `Span<T>`/arrays). But if you access the collection through `IEnumerable<T>`, `GetEnumerator()` returns the enumerator **boxed** to the interface — reintroducing the allocation. Iterate the concrete type on hot paths.
 
 ## Iterators and yield
 
@@ -64,6 +76,11 @@ foreach (var number in CountNumbers(1, 5))
     Console.WriteLine(number);
 }
 ```
+
+Two iterator gotchas:
+
+- **Deferred execution moves exceptions.** Because the body doesn't run until enumeration starts, an argument check inside an iterator method throws *when the caller starts iterating*, not at the call site. For eager validation, split a public wrapper (validate, then return) from a private iterator (`yield`).
+- **`yield` can't live inside a `try` with a `catch`** (only `try`/`finally` is allowed), and not inside a `lock`/`unsafe` block. If you need catch semantics around yielded work, wrap the consumption, not the production.
 
 ## Pitfalls
 

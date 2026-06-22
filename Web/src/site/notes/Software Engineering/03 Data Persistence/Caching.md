@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/caching/","dg-note-properties":{"topic":["Data Persistence"],"subtopic":[],"level":["4"],"priority":"High","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/caching/","dg-note-properties":{"topic":["Data Persistence"],"subtopic":[],"level":["4"],"priority":"High","status":"Ready to Repeat"}}
 ---
 
 
@@ -178,6 +178,15 @@ sequenceDiagram
 
 Decision rule: start with `HybridCache` for new .NET 9+ projects — it handles L1/L2 layering, stampede protection, and serialization out of the box. Fall back to `IDistributedCache` when you need explicit control over cache writes, or `IMemoryCache` for single-instance scenarios where distributed state is unnecessary.
 
+## Eviction Under Memory Pressure
+
+Invalidation removes data that's *wrong*; **eviction** removes data when the cache is *full*. A cache is bounded, so it must decide what to drop — and if you don't configure that, the runtime decides for you (often badly):
+
+- **`IMemoryCache`** does not bound itself by default. You must set `SizeLimit` and give every entry a `Size`, otherwise an unbounded cache becomes a memory leak (the "unbounded growth" pitfall below). It then evicts by a priority + recency heuristic.
+- **Redis** evicts according to its `maxmemory-policy`: `noeviction` (reject writes — surprises people), `allkeys-lru`, `allkeys-lfu` (Redis 4+, better for skewed popularity), `volatile-ttl` (drop soonest-to-expire), etc. Choosing the policy *is* a design decision; `allkeys-lru`/`allkeys-lfu` are the usual choices for a pure cache.
+
+The eviction policy is the same family of algorithms as an in-process [[Software Engineering/02 Computer Science/Data Structures/LRU Cache\|LRU cache]]: LRU is the simple default, LFU resists scan pollution. Watch the **eviction rate** metric — a high rate means the working set no longer fits and hit rate is collapsing, the signal to grow the cache or shrink what you store.
+
 ## Pitfalls
 
 - **Cache poisoning** — key includes untrusted input, missing tenant boundary, or cache stores error responses. Mitigation: strict key design, include auth and tenant scope, do not cache failures unless explicitly modeled.
@@ -217,4 +226,5 @@ Decision rule: start with `HybridCache` for new .NET 9+ projects — it handles 
 >
 > **Pages**
 > - [[Software Engineering/03 Data Persistence/ACID\|ACID]]
+> - [[Software Engineering/03 Data Persistence/Connection Pooling\|Connection Pooling]]
 <!-- whats-next:end -->

@@ -6,7 +6,7 @@ subtopic:
 level:
   - "4"
 priority: High
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 
@@ -63,6 +63,12 @@ Asynchronous replication means replicas are always slightly behind the leader. T
 **3. Consistent prefix reads**: causally related writes appear out of order on a replica. A reply appears before the original message. Fix: route causally related writes to the same partition so they're applied in order.
 
 **Sync vs async tradeoff**: synchronous replication means the leader waits for at least one replica to confirm before acknowledging the write. Zero data loss on failover, but every write pays the round-trip latency to the replica. Asynchronous replication acknowledges immediately: lower latency, but any writes not yet replicated are lost if the leader crashes before they propagate. Most production systems use async with a semi-sync option (one synchronous replica for failover safety).
+
+## CAP and PACELC
+
+The sync/async and leader-model choices above are all instances of one theorem. **CAP** says that when a network **P**artition splits your replicas, you must choose between **C**onsistency (reject reads/writes that can't be coordinated) and **A**vailability (keep serving, accept divergence) — you cannot have both *during a partition*. A single-leader system that refuses writes when it can't reach a quorum is **CP**; a leaderless Dynamo-style system that keeps accepting writes and reconciles later is **AP**.
+
+CAP only describes the partition case, which is why **PACELC** is the more useful framing: *if* **P**artition, choose **A**vailability or **C**onsistency; **E**lse (normal operation) choose **L**atency or **C**onsistency. Synchronous replication is the "**C** over **L**" choice (pay latency for consistency); async is "**L** over **C**" (faster, but stale reads). Most SQL setups are **PC/EC**-leaning (consistency-first); Cassandra/DynamoDB default to **PA/EL** (availability- and latency-first). This is the lens behind every model and mode in this note — see [[Software Engineering/05 Architecture/Distributed Systems/CAP theorem|CAP theorem]] for the full treatment.
 
 ## Tradeoffs
 

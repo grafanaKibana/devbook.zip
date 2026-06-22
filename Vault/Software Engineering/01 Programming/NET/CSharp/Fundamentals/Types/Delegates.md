@@ -6,7 +6,7 @@ subtopic:
 level:
   - "4"
 priority: Medium
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 # Intro
@@ -113,6 +113,14 @@ handlers.ForEach(h => h()); // 0, 1, 2
 ```
 
 Use this pattern when the captured variable would otherwise be shared and mutated after handler creation (most commonly `for` loop indices).
+
+## Allocation, Captures, and Function Pointers
+
+- **Delegates are immutable.** `+=` and `-=` don't mutate the delegate in place — they allocate a **new** multicast delegate with an updated invocation list (`Delegate.Combine`/`Remove` under the hood). Frequent subscribe/unsubscribe on a hot path therefore allocates.
+- **A capturing lambda allocates a closure object** plus the delegate. To prevent accidental captures, mark a lambda **`static` (C# 9)** — the compiler then errors if it tries to capture state, and can cache the delegate instance.
+- **Method-group conversions are cached (.NET 7+)**: `Func<int,int> f = Square;` no longer allocates a fresh delegate on each conversion.
+- **`DynamicInvoke`** invokes a delegate via reflection (slow, boxes args) — avoid it in favor of a typed invoke. Delegates are also "open" or "closed": a closed delegate binds a target instance; an open delegate leaves the receiver as the first argument.
+- **Function pointers `delegate*` (C# 9)** are the zero-allocation alternative for `unsafe`/interop hot paths — a raw managed function pointer with no delegate object at all (`delegate*<int,int>`), optionally `unmanaged`.
 
 ## Pitfalls
 

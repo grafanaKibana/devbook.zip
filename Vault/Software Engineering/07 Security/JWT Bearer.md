@@ -6,7 +6,7 @@ subtopic:
 level:
   - "4"
 priority: High
-status: Creation
+status: Ready to Repeat
 
 dg-publish: true
 ---
@@ -75,6 +75,8 @@ The middleware automatically fetches the JWKS (public keys) from the authority's
 
 **`alg: none` attack**: Some early JWT libraries accepted tokens with `alg: none` in the header, bypassing signature verification. Fix: always explicitly specify allowed algorithms in `TokenValidationParameters.ValidAlgorithms`. Never accept `none`.
 
+**Algorithm-confusion attack (RS256 → HS256)**: the *other* famous JWT vuln. The server expects an RS256 (asymmetric) token and verifies with the issuer's **public** key. An attacker forges a token with the header changed to **HS256** (symmetric) and signs it using that *public key as the HMAC secret* — which is public. A library that picks the verification algorithm from the token's own header will happily verify it. Fix (same root cause as `alg:none`): **pin the expected algorithm server-side** (`ValidAlgorithms = ["RS256"]`); never let the token's header choose how it's verified.
+
 **Long expiry times**: JWTs cannot be revoked without a token blacklist (which defeats the stateless benefit). A token with a 24-hour expiry that is stolen gives the attacker 24 hours of access. Fix: use short expiry (15-60 minutes) with refresh tokens. Revoke refresh tokens on logout.
 
 **Storing JWTs in localStorage**: localStorage is accessible to JavaScript, making it vulnerable to XSS attacks. Fix: store JWTs in HttpOnly cookies (not accessible to JS). Accept the CSRF tradeoff and mitigate with `SameSite=Strict`.
@@ -129,5 +131,8 @@ The middleware automatically fetches the JWKS (public keys) from the authority's
 > - [[Software Engineering/07 Security/Block-chain|Block-chain]]
 > - [[Software Engineering/07 Security/Digital Signature|Digital Signature]]
 > - [[Software Engineering/07 Security/Encryption|Encryption]]
+> - [[Software Engineering/07 Security/Hashing|Hashing]]
 > - [[Software Engineering/07 Security/OWASP|OWASP]]
+> - [[Software Engineering/07 Security/Secrets Management|Secrets Management]]
+> - [[Software Engineering/07 Security/Web Vulnerabilities|Web Vulnerabilities]]
 <!-- whats-next:end -->

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/04-networks/04-networks/","tags":["FolderNote"],"dg-note-properties":{"topic":["Networks"],"subtopic":[],"tags":["FolderNote"],"status":"Creation","priority":"High","level":["3"]}}
+{"dg-publish":true,"permalink":"/software-engineering/04-networks/04-networks/","tags":["FolderNote"],"dg-note-properties":{"topic":["Networks"],"subtopic":[],"tags":["FolderNote"],"priority":"High","level":["3"],"status":"Done"}}
 ---
 
 
@@ -23,4 +23,7 @@ Networking is how software becomes a system: protocols, latency, reliability, an
 > - [[Software Engineering/04 Networks/Architecture & Ops/Architecture & Ops\|Architecture & Ops]]
 > - [[Software Engineering/04 Networks/Protocols/Protocols\|Protocols]]
 > - [[Software Engineering/04 Networks/Transport & Sockets/Transport & Sockets\|Transport & Sockets]]
+>
+> **Pages**
+> - [[Software Engineering/04 Networks/OSI Model\|OSI Model]]
 <!-- whats-next:end -->

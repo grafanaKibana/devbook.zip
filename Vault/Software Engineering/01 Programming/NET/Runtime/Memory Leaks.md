@@ -6,7 +6,7 @@ subtopic:
 level:
   - "4"
 priority: High
-status: Creation
+status: Ready to Repeat
 
 dg-publish: true
 ---
@@ -64,7 +64,7 @@ public class MyClass
 	private JobQueue _jobQueue;
 	private int _id;
 
-	public My Class(JobQueue jobQueue)
+	public MyClass(JobQueue jobQueue)
 	{
 		_jobQueue = jobQueue;
 	}
@@ -87,7 +87,7 @@ The fix here is simple: use a local variable instead:
 ```csharp
 public class MyClass
 {
-	public My Class(JobQueue jobQueue)
+	public MyClass(JobQueue jobQueue)
 	{
 		_jobQueue = jobQueue;
 	}
@@ -262,7 +262,7 @@ public class SomeClass
 {
 	private IntPtr _buffer;
 
-	publicSomeClass()
+	public SomeClass()
 	{
 		_buffer = Marshal.AllocHGlobal(1000);
 	}
@@ -280,7 +280,7 @@ public class SomeClass : IDisposable
 {
 	private IntPtr _buffer;
 
-	publicSomeClass()
+	public SomeClass()
 	{
 		_buffer = Marshal.AllocHGlobal(1000);
 		// do something, but do not free the memory
@@ -330,12 +330,12 @@ For maximum reliability, MSDN suggests the [Dispose implementation pattern](http
 public class MyClass : IDisposable
 {
 	private IntPtr _bufferPtr;
-	public int BUFFER_SIZE = 1024 * 1024; // 1 MB
+	private const int BufferSize = 1024 * 1024; // 1 MB
 	private bool _disposed = false;
 	
-	publicMyClass()
+	public MyClass()
 	{
-		_bufferPtr =  Marshal.AllocHGlobal(BUFFER_SIZE);
+		_bufferPtr =  Marshal.AllocHGlobal(BufferSize);
 	}
 
 	protected virtual void Dispose(bool disposing)
@@ -369,6 +369,23 @@ public class MyClass : IDisposable
 Using this pattern helps ensure that even if `Dispose` is not called explicitly, it will still be called by the finalizer when the garbage collector decides to collect the object. If `Dispose` is called manually, the object's finalizer is suppressed and will not run. Suppressing finalization is important because running a finalizer is [relatively expensive](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/finalizers) and can cause performance issues.
 
 But keep in mind that Microsoft's `Dispose` pattern is not a silver bullet. If you do not call `Dispose` manually and the object is not collected because of a managed leak, the unmanaged resources will not be released either.
+
+### More modern leak sources (ASP.NET Core era)
+
+The classic eight above predate today's stacks. The leaks (and pseudo-leaks) most teams actually hit now:
+
+- **`HttpClient` socket exhaustion** — `new HttpClient()` per request doesn't leak managed memory, but it leaks **sockets**: each disposed client leaves a connection in `TIME_WAIT`, eventually exhausting ports (`SocketException`). Use `IHttpClientFactory` (or a single long-lived static client) so connections are pooled.
+- **DI captive dependencies** — injecting a *scoped* (or transient `IDisposable`) service into a **singleton** pins the shorter-lived object for the app's lifetime. Equivalent to a static reference. Enable scope validation and resolve scoped services via `IServiceScopeFactory` from singletons. See [[Software Engineering/01 Programming/NET/ASP.NET Web API/Dependency Injection|Dependency Injection]].
+- **Pooled buffers never returned** — renting from `ArrayPool<T>.Shared` / `MemoryPool<T>` and not returning (or returning then continuing to use) the buffer defeats the pool and grows retained memory.
+- **`AsyncLocal<T>` / `ThreadLocal<T>` retention** — values stored in ambient state flow into captured contexts and can outlive their intended scope, keeping large graphs alive. Clear them at the end of the logical operation.
+- **Tasks that never complete** — an `await`ed `TaskCompletionSource` that is never `SetResult`/`SetCanceled` keeps the entire async state machine (and everything it captured) alive forever. Always complete or time out every TCS.
+- **`ConditionalWeakTable<TKey,TValue>`** is the right tool when you must attach state to an object *without* keeping it alive — the value is collected once the key is unreachable (also how weak-event patterns avoid the event-handler leak above).
+
+### Diagnosing in production
+
+- **`dotnet-gcdump collect`** captures a managed heap graph cheaply (no full process dump). The high-signal workflow is a **two-snapshot delta**: take one gcdump, apply load, take a second, and compare retained-type counts — the types that grew are your leak.
+- **`dotnet-counters monitor System.Runtime`** to watch `gc-heap-size`, `gen-2-gc-count`, and GC-handle counts climb in real time; alert before OOM.
+- **`dotnet-trace`** for allocation/event tracing when you need to find *where* the allocations originate, then `gcroot <address>` (in `dotnet-dump analyze`) to trace a leaked instance back to the root that holds it — the root is where the fix goes.
 
 ## Tradeoffs
 
@@ -405,7 +422,7 @@ But keep in mind that Microsoft's `Dispose` pattern is not a silver bullet. If y
 > A standard way to implement `IDisposable` so both explicit cleanup (`Dispose()`) and (optionally) finalization are supported.
 > Typical shape: `Dispose()` calls `Dispose(true)` and then `GC.SuppressFinalize(this)`; a finalizer (if needed) calls `Dispose(false)`; `Dispose(bool disposing)` releases unmanaged resources and, when `disposing` is true, also disposes managed fields.
 
-## Links
+## References
 
 - [Garbage collection fundamentals (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/fundamentals) — explains GC roots, reachability, and why managed leaks are possible despite automatic memory management.
 - [Implementing a Dispose method (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose) — official pattern for deterministic cleanup of managed and unmanaged resources.

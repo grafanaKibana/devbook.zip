@@ -6,7 +6,7 @@ subtopic:
 level:
   - "4"
 priority: High
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 # Intro
@@ -23,6 +23,15 @@ A `Task` is a promise: it starts in one of three terminal states — `RanToCompl
 - `Task` — represents an operation with no return value.
 - `Task<T>` — represents an operation that produces a value of type `T`.
 - `ValueTask` / `ValueTask<T>` — stack-allocated alternative for hot paths where the result is often synchronously available (e.g., cached reads). Has strict consumption rules.
+
+**Hot vs cold tasks.** Tasks returned from `async` methods, `Task.Run`, and most BCL APIs are **hot** — already started. Only a `Task` created with the `new Task(...)` constructor is **cold** and must be `.Start()`ed; this form is essentially never correct in modern code. Avoid `Task.Factory.StartNew` too — it is full of foot-guns:
+
+- It is **not async-aware**: passing an `async` lambda returns a `Task<Task>`, so you must call `.Unwrap()` (or you'll "complete" before the inner work does).
+- It defaults to **`TaskScheduler.Current`**, not `TaskScheduler.Default` — inside a parallel/UI context that can schedule your work somewhere surprising.
+
+Use `Task.Run` for CPU-bound offload; reserve `Task.Factory.StartNew` for the rare case you genuinely need `TaskCreationOptions.LongRunning` (which spins a dedicated thread instead of borrowing a pool thread).
+
+**Cached completed tasks.** Don't allocate a fresh task for synchronous results — use the runtime's cached singletons: `Task.CompletedTask`, `Task.FromResult(value)`, `Task.FromException(ex)`, `Task.FromCanceled(token)`. `Task.FromResult` caches common values (e.g. `true`/`false`/small ints) so it is allocation-free in the common case.
 
 ## Example — Parallel Fan-Out
 
@@ -76,6 +85,20 @@ public async Task SyncAllAsync(CancellationToken cancellationToken)
 | `TaskCompletionSource<T>` | Bridge callback/event APIs into task-based APIs |
 | `Task.Run(action)` | Offload CPU-bound work to a pool thread |
 | `ValueTask<T>` | Hot-path optimization when result is often synchronously available |
+
+### Processing tasks as they finish
+
+A common anti-pattern is "loop, `WhenAny`, remove the winner, repeat" to process tasks in completion order. That is **O(n²)** — each `WhenAny` re-registers a continuation on every remaining task — and leaves the losing tasks unobserved if you exit early. On **.NET 9+** use `Task.WhenEach`, which yields each task as it completes:
+
+```csharp
+await foreach (var finished in Task.WhenEach(tasks))
+{
+    // handle each result/fault as soon as it's ready, in completion order
+    Use(await finished);
+}
+```
+
+`TaskScheduler` is the abstraction that decides where continuations run; you rarely implement one, but it's why `Task.Factory.StartNew` defaulting to `TaskScheduler.Current` matters (above). For bounded concurrent fan-out over a collection, prefer `Parallel.ForEachAsync` (see [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Parallelism|Parallelism]]) over hand-rolled `WhenAll` + `SemaphoreSlim`.
 
 ## Pitfalls
 

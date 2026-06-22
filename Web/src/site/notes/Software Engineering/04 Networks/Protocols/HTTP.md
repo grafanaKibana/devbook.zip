@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/04-networks/protocols/http/","dg-note-properties":{"topic":["Networks"],"subtopic":["Protocols"],"level":["3"],"priority":"High","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/04-networks/protocols/http/","dg-note-properties":{"topic":["Networks"],"subtopic":["Protocols"],"level":["3"],"priority":"High","status":"Ready to Repeat"}}
 ---
 
 
@@ -132,6 +132,17 @@ ETags are preferred over `Last-Modified` because `Last-Modified` has only 1-seco
 
 `Vary: Accept-Encoding` tells caches to key on both URL and the listed request headers. Without it, a CDN might serve a gzip-compressed response to a client that only accepts brotli. `Vary: User-Agent` is a cache-killing anti-pattern — thousands of User-Agent variants effectively disable caching.
 
+## Body Transfer: Length, Chunking, Ranges, Compression
+
+How the body is delimited and moved matters as much as the headers:
+
+- **`Content-Length`** tells the receiver exactly how many bytes to read. When the size isn't known up front (generated/streamed responses), HTTP/1.1 uses **`Transfer-Encoding: chunked`** — the body is sent as a series of length-prefixed chunks terminated by a zero-length chunk. This is what enables streaming responses and Server-Sent Events without buffering the whole body.
+- **Range requests** let a client fetch part of a resource: `Range: bytes=0-1023` → the server replies **`206 Partial Content`** with `Content-Range`, or `416 Range Not Satisfiable`. This powers video seeking, resumable downloads, and parallel chunked downloads; `Accept-Ranges: bytes` advertises support.
+- **Content negotiation**: the client states preferences (`Accept`, `Accept-Encoding`, `Accept-Language`) and the server picks a representation, echoing the choice (`Content-Type`, `Content-Encoding`) — and **must** add the corresponding `Vary` header so caches don't cross-serve. Compression (`gzip`, `br`) is negotiated this way.
+
+> [!NOTE]
+> **HSTS** (`Strict-Transport-Security`) is a response header that tells browsers "only ever reach me over HTTPS" for a max-age, eliminating the initial plaintext request an attacker could hijack (SSL-strip). It's the security-header complement to the TLS section above.
+
 ## Pitfalls
 
 ### 1) HttpClient Socket Exhaustion in .NET
@@ -194,7 +205,7 @@ ETags are preferred over `Last-Modified` because `Last-Modified` has only 1-seco
 >
 > **Why this matters:** authentication vs authorization is a fundamental security distinction; misusing these codes breaks client auth flows and retry logic.
 
-## Links
+## References
 
 - [RFC 9110 — HTTP Semantics](https://www.rfc-editor.org/rfc/rfc9110)
 - [RFC 9111 — HTTP Caching](https://www.rfc-editor.org/rfc/rfc9111)
@@ -220,4 +231,5 @@ ETags are preferred over `Last-Modified` because `Last-Modified` has only 1-seco
 > - [[Software Engineering/04 Networks/Protocols/REST\|REST]]
 > - [[Software Engineering/04 Networks/Protocols/RPC\|RPC]]
 > - [[Software Engineering/04 Networks/Protocols/SMTP\|SMTP]]
+> - [[Software Engineering/04 Networks/Protocols/WebSockets\|WebSockets]]
 <!-- whats-next:end -->

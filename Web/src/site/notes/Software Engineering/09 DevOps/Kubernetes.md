@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/09-dev-ops/kubernetes/","dg-note-properties":{"topic":["DevOps"],"subtopic":[],"level":["2"],"priority":"High","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/09-dev-ops/kubernetes/","dg-note-properties":{"topic":["DevOps"],"subtopic":[],"level":["2"],"priority":"High","status":"Ready to Repeat"}}
 ---
 
 
@@ -148,5 +148,6 @@ spec:
 > **Pages**
 > - [[Software Engineering/09 DevOps/CI CD tools\|CI CD tools]]
 > - [[Software Engineering/09 DevOps/Docker\|Docker]]
+> - [[Software Engineering/09 DevOps/Infrastructure as Code\|Infrastructure as Code]]
 > - [[Software Engineering/09 DevOps/Observability\|Observability]]
 <!-- whats-next:end -->

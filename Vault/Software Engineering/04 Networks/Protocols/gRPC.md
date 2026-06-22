@@ -6,7 +6,7 @@ subtopic:
 level:
   - "3"
 priority: High
-status: Creation
+status: Ready to Repeat
 
 dg-publish: true
 ---
@@ -135,6 +135,34 @@ Interceptors inherit from `Interceptor` and operate at the typed message level �
 
 Registration order matters: `channel.Intercept(A).Intercept(B).Intercept(C)` executes C → B → A (reverse of chaining order).
 
+### Error Model and Retries
+
+gRPC has its own **status-code** model (not HTTP status codes) carried in the trailing `grpc-status`: `OK (0)`, `NOT_FOUND (5)`, `INVALID_ARGUMENT (3)`, `DEADLINE_EXCEEDED (4)`, `UNAVAILABLE (14)`, `RESOURCE_EXHAUSTED (8)`, etc. The server throws `RpcException(new Status(StatusCode.NotFound, "..."))`; the client catches `RpcException` and inspects `ex.StatusCode`. Rich, structured error details (field violations, retry hints) travel via the `google.rpc.Status` message in metadata rather than a string.
+
+gRPC also has **built-in, declarative retries** configured through the **service config** — no interceptor needed:
+
+```csharp
+var channel = GrpcChannel.ForAddress(address, new GrpcChannelOptions
+{
+    ServiceConfig = new ServiceConfig
+    {
+        MethodConfigs = { new MethodConfig
+        {
+            Names = { MethodName.Default },
+            RetryPolicy = new RetryPolicy
+            {
+                MaxAttempts = 4,
+                InitialBackoff = TimeSpan.FromSeconds(1),
+                BackoffMultiplier = 2,
+                RetryableStatusCodes = { StatusCode.Unavailable }  // only safe codes
+            }
+        }}
+    }
+});
+```
+
+Only retry **idempotent** methods on safe codes (`Unavailable`, `ResourceExhausted`) — retrying a non-idempotent write on an ambiguous failure can double-apply it (the [[Software Engineering/04 Networks/Protocols/RPC|RPC delivery-semantics]] problem). **Hedging** (fire parallel attempts, take the first success) is the latency-focused alternative for read-only calls.
+
 ## Pitfalls
 
 ### 1) L4 Load Balancer Pins All Calls to One Backend
@@ -213,7 +241,7 @@ message UserRequest {
 >
 > **Why this matters:** proto versioning is the contract management layer of gRPC; getting it wrong causes silent data corruption that is extremely hard to debug.
 
-## Links
+## References
 
 - [gRPC Core Concepts](https://grpc.io/docs/what-is-grpc/core-concepts/)
 - [gRPC HTTP/2 Protocol Spec](https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md)
@@ -239,4 +267,5 @@ message UserRequest {
 > - [[Software Engineering/04 Networks/Protocols/REST|REST]]
 > - [[Software Engineering/04 Networks/Protocols/RPC|RPC]]
 > - [[Software Engineering/04 Networks/Protocols/SMTP|SMTP]]
+> - [[Software Engineering/04 Networks/Protocols/WebSockets|WebSockets]]
 <!-- whats-next:end -->

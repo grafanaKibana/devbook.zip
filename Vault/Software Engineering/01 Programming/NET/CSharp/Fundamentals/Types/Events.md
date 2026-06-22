@@ -6,7 +6,7 @@ subtopic:
 level:
   - "4"
 priority: Medium
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 # Intro
@@ -74,10 +74,14 @@ public event EventHandler Tick
 }
 ```
 
+> [!INFO]
+> **The default (field-like) event is already thread-safe to subscribe/unsubscribe.** When you write `public event EventHandler Tick;`, the compiler generates `add`/`remove` accessors that update the backing delegate with a lock-free `Interlocked.CompareExchange` loop. So you only need a custom `add`/`remove` (like above) for *extra* behavior — weak references, deduplication, logging — not merely for thread safety. Note this protects the subscription list, not the *raising* of the event.
+
 ## Pitfalls
 
 1. **Memory leaks via long-lived publishers**: subscribers stay alive while subscribed.
 2. **Forgotten unsubscribe**: common in UI/view-model/service lifetimes.
+3. **`async void` event handlers**: the standard event signature is synchronous, so an `async` handler must be `async void` — which means exceptions can't be caught by the publisher and crash the process, and the publisher can't await completion. Keep the handler body minimal, wrap it in its own `try/catch`, and offload real async work to a properly awaited path (a queue/channel). See [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Async Await|Async Await]].
 
 Example leak-safe subscription pattern:
 

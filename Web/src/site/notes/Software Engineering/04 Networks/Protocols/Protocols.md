@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/04-networks/protocols/protocols/","tags":["FolderNote"],"dg-note-properties":{"topic":["Networks"],"subtopic":["Protocols"],"tags":["FolderNote"],"priority":"High","status":"Creation","level":["3"]}}
+{"dg-publish":true,"permalink":"/software-engineering/04-networks/protocols/protocols/","tags":["FolderNote"],"dg-note-properties":{"topic":["Networks"],"subtopic":["Protocols"],"tags":["FolderNote"],"priority":"High","level":["3"],"status":"Done"}}
 ---
 
 
@@ -27,4 +27,5 @@ Protocols are the agreed-upon rules that let machines communicate: what to send,
 > - [[Software Engineering/04 Networks/Protocols/REST\|REST]]
 > - [[Software Engineering/04 Networks/Protocols/RPC\|RPC]]
 > - [[Software Engineering/04 Networks/Protocols/SMTP\|SMTP]]
+> - [[Software Engineering/04 Networks/Protocols/WebSockets\|WebSockets]]
 <!-- whats-next:end -->

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/07-security/authentication/basic-auth/","dg-note-properties":{"topic":["Security"],"subtopic":["Authentication"],"level":["4"],"priority":"High","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/07-security/authentication/basic-auth/","dg-note-properties":{"topic":["Security"],"subtopic":["Authentication"],"level":["4"],"priority":"High","status":"Ready to Repeat"}}
 ---
 
 

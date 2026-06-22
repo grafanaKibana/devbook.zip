@@ -6,7 +6,7 @@ subtopic:
 level:
   - "1"
 priority: High
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 

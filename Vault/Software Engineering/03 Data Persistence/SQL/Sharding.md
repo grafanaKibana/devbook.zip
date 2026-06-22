@@ -6,7 +6,7 @@ subtopic:
 level:
   - "4"
 priority: High
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 
@@ -63,6 +63,8 @@ flowchart TD
 ## Pitfalls
 
 **Hotspot shards.** Uneven key distribution concentrates load on one shard while others sit idle. Sequential keys (auto-increment IDs, timestamps) are the classic cause with range-based sharding. Mitigation: use hash-based keys and monitor per-shard CPU and query latency separately.
+
+**The single hot key ("celebrity problem").** Even with a perfect hash, *one* key can be too active or too large for any single shard — a celebrity with millions of followers, or one enterprise tenant dwarfing the rest. Hashing doesn't help because all that traffic shares one key and therefore one shard. Mitigations: **split the hot key** by appending a random/bounded suffix (`celebrityId:0..N`) so its data spreads across shards (the app fans the key's reads/writes back together), cache the hot key in front of the shard, or give the outlier tenant its **own dedicated shard**. This is distinct from a hotspot *shard* (skewed key distribution) — here the skew is within a single key.
 
 **Wrong shard key.** A key absent from most query WHERE clauses forces scatter queries on every read. Changing the key later requires a full data migration. Mitigation: analyze your top queries before choosing; the key must appear in the majority of them.
 

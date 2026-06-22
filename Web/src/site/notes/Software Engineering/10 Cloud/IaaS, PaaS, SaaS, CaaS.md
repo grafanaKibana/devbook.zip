@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/10-cloud/iaa-s-paa-s-saa-s-caa-s/","dg-note-properties":{"topic":["Cloud"],"subtopic":["Cloud"],"level":["2"],"priority":"High","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/10-cloud/iaa-s-paa-s-saa-s-caa-s/","dg-note-properties":{"topic":["Cloud"],"subtopic":["Cloud"],"level":["2"],"priority":"High","status":"Ready to Repeat"}}
 ---
 
 
@@ -39,6 +39,14 @@ The provider manages the container orchestration layer (Kubernetes control plane
 
 **When to use**: Containerized workloads that need orchestration (scaling, rolling updates, self-healing) without managing the Kubernetes control plane. Sits between IaaS (raw VMs) and PaaS (managed app platform) in terms of control vs. convenience.
 
+## FaaS — Functions as a Service (Serverless)
+
+The provider manages *everything* up to and including the runtime process — you supply only individual **functions** that run in response to events (an HTTP request, a queue message, a timer). There are **no servers to provision and no idle cost**: you're billed per invocation and per millisecond of execution, and the platform scales from zero to thousands of concurrent instances automatically.
+
+**Examples**: AWS Lambda, Azure Functions, Google Cloud Functions, Cloudflare Workers.
+
+**When to use**: event-driven, spiky, or low-baseline workloads — webhooks, scheduled jobs, glue between services, image/file processing. **The catch is the cold start** (a scaled-to-zero function pays startup latency on the first request) and a stateless, time-limited execution model that doesn't suit long-running or latency-critical request paths. "Serverless" is the umbrella term: FaaS plus fully-managed backing services (managed DBs, queues, auth) that also scale to zero — see [[Software Engineering/05 Architecture/System Architecture/Serverless Architecture\|Serverless Architecture]] for the design-level treatment.
+
 ## Comparison
 
 | Model | You Manage | Provider Manages | Control | Operational Overhead |
@@ -46,7 +54,11 @@ The provider manages the container orchestration layer (Kubernetes control plane
 | IaaS | OS, runtime, app, data | Hardware, network, virtualization | Highest | Highest |
 | CaaS | Containers, app, data | Hardware, OS, K8s control plane | High | Medium |
 | PaaS | App code, data | Hardware, OS, runtime, middleware | Medium | Low |
+| FaaS | Function code, data | Everything incl. the runtime process & scaling | Low (event-bound) | Lowest (scales to zero) |
 | SaaS | Configuration, data | Everything | Lowest | Lowest |
+
+> [!TIP]
+> The classic mnemonic is **"Pizza as a Service"**: cook at home (on-prem) → take-and-bake (IaaS) → delivery (PaaS) → dine-out (SaaS). Each step the provider supplies more of the stack so you focus on less plumbing and more product.
 
 ## Decision Rule
 
@@ -55,6 +67,8 @@ The provider manages the container orchestration layer (Kubernetes control plane
 **Move to CaaS** (AKS, EKS, GKE) when you need: container portability, multi-service orchestration, or fine-grained resource control that PaaS cannot provide.
 
 **Use IaaS** only when: you need a specific OS configuration, GPU instances, or are lifting-and-shifting an on-prem workload that cannot be containerized.
+
+**Reach for FaaS** for event-driven, bursty, or low-baseline work (webhooks, scheduled jobs, light glue code) where scale-to-zero billing wins — provided cold-start latency and the stateless, time-limited model are acceptable.
 
 **Use SaaS** for any business function where the software is a commodity (email, CRM, source control, CI/CD).
 

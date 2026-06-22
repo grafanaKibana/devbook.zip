@@ -6,7 +6,7 @@ subtopic:
 level:
   - "3"
 priority: Medium
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 
@@ -56,12 +56,34 @@ app.MapHub<ChatHub>("/hubs/chat");
 app.Run();
 ```
 
+### Pushing from outside a hub
+
+Most real apps push messages from a controller or background service, not from inside a hub method. Inject **`IHubContext<THub>`** to do that:
+
+```csharp
+public sealed class PriceUpdater(IHubContext<PriceHub> hub)
+{
+    public Task BroadcastAsync(decimal price, CancellationToken ct) =>
+        hub.Clients.All.SendAsync("price", price, ct);
+}
+```
+
+### Streaming and client results
+
+- **Streaming**: a hub method returning `IAsyncEnumerable<T>` (or accepting a `ChannelReader<T>`) streams items incrementally instead of one big payload — good for live feeds and large transfers with backpressure.
+- **Client results (.NET 7+)**: the server can *invoke a method on a client and await its return value* with `Clients.Client(id).InvokeAsync<T>(...)` — turning the normally fire-and-forget push into a request/response.
+
+### Connection lifecycle
+
+Override `OnConnectedAsync` / `OnDisconnectedAsync` to manage group membership and presence. The client supports **automatic reconnect** (`.WithAutomaticReconnect()`), but reconnection assigns a **new `ConnectionId`**, so re-add the connection to its groups on reconnect. SignalR delivers **at-most-once** with no built-in durability — if a client is offline when a message is sent, it's gone. Persist anything that must survive a disconnect (DB/queue) and replay on reconnect.
+
 ## Pitfalls
 
 - Assuming hub instances are stateful leads to lost data because hubs are transient per invocation; keep connection/session state in `Context.Items` or external stores. In one production incident, a team stored a user's shopping cart in a hub field — every subsequent `SendAsync` call operated on an empty cart because the hub was a new instance, resulting in 12 hours of lost cart data before the bug was traced.
 - Skipping `await` on `SendAsync` can drop messages when hub execution completes before send operations finish.
 - Treating groups as authorization boundaries is unsafe: groups are routing constructs, not security policy enforcement.
-- Multi-node deployments fail unpredictably without a scale-out plan (Azure SignalR Service or backplane) and correct session-affinity assumptions. A 4-node deployment without a backplane delivers messages only to clients connected to the originating node — roughly 75% of connected clients silently miss every broadcast, and the bug only manifests under load when connections distribute across nodes.
+- Multi-node deployments fail unpredictably without a scale-out plan (Azure SignalR Service or backplane) and correct session-affinity assumptions. A 4-node deployment without a backplane delivers messages only to clients connected to the originating node — roughly 75% of connected clients silently miss every broadcast, and the bug only manifests under load when connections distribute across nodes. The fix is a **backplane** (`AddStackExchangeRedis(...)`) that fans every message out to all nodes, **or** Azure SignalR Service which offloads connections entirely. Either way self-hosted SignalR needs **sticky sessions** (ARR affinity), because the initial negotiate and the transport connection must land on the same node — unless you disable the negotiate step or use the managed service.
+- Forgetting that the transport **falls back** (WebSockets → Server-Sent Events → Long Polling) when WebSockets are unavailable. Long Polling especially amplifies the sticky-session requirement and the cost of a missing backplane; verify your proxy/load balancer allows WebSocket upgrades so you actually get the fast transport.
 
 ## Tradeoffs
 

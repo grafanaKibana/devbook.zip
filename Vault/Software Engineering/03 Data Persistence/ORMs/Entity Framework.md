@@ -6,7 +6,7 @@ subtopic:
 level:
   - "4"
 priority: High
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 
@@ -59,6 +59,27 @@ var orders = await db.Orders
     .Where(o => o.CustomerId == customerId)
     .ToListAsync();
 ```
+
+> [!WARNING]
+> **`DbContext` is a unit of work, not a singleton.** It is **not thread-safe** and is designed to be short-lived — one per request/operation. In ASP.NET Core it's registered **scoped**; injecting it into a singleton (or sharing one instance across concurrent tasks) corrupts the change tracker and throws "a second operation was started on this context." For long-lived or parallel work, create a fresh context per unit via `IDbContextFactory<T>` (see the captive-dependency note in [[Software Engineering/01 Programming/NET/ASP.NET Web API/Dependency Injection|Dependency Injection]]). For high-throughput apps, `AddDbContextPool` reuses context instances to cut allocation.
+
+### Transactions and Concurrency
+
+A single `SaveChangesAsync()` is **atomic** — EF Core wraps all of its INSERT/UPDATE/DELETE statements in one transaction automatically, so they all commit or all roll back. To make **multiple** `SaveChanges` calls (or raw SQL plus EF) atomic, open an explicit transaction:
+
+```csharp
+await using var tx = await db.Database.BeginTransactionAsync(ct);
+try
+{
+    db.Orders.Add(order);
+    await db.SaveChangesAsync(ct);
+    await db.Database.ExecuteSqlAsync($"UPDATE Inventory SET Qty = Qty - 1 WHERE Id = {sku}", ct);
+    await tx.CommitAsync(ct);
+}
+catch { await tx.RollbackAsync(ct); throw; }
+```
+
+**Optimistic concurrency** prevents lost updates without locking. Mark a column as a concurrency token (a `[Timestamp]`/`rowversion`, or `IsConcurrencyToken()`); EF Core then appends it to the `WHERE` clause of every UPDATE. If another transaction changed the row since you read it, zero rows match and EF throws **`DbUpdateConcurrencyException`** — catch it to retry or surface a conflict to the user (this is the lighter alternative to Serializable from [[Software Engineering/03 Data Persistence/ACID|ACID]]). For providers with transient faults (Azure SQL), enable a **retrying execution strategy** with `EnableRetryOnFailure()` — note it then requires manual transactions to be wrapped in `strategy.ExecuteAsync(...)`.
 
 ### Migrations
 
@@ -126,6 +147,30 @@ var orders = await db.Orders
     .ToListAsync();
 ```
 
+### Bulk Updates and Raw SQL
+
+The classic "load → modify → SaveChanges" round-trips every row through the change tracker. For set-based updates/deletes, **`ExecuteUpdateAsync` / `ExecuteDeleteAsync` (EF Core 7+)** issue a single SQL statement and touch **no** entities in memory:
+
+```csharp
+// One UPDATE statement; nothing loaded or tracked
+await db.Orders
+    .Where(o => o.Status == OrderStatus.Pending && o.CreatedAt < cutoff)
+    .ExecuteUpdateAsync(s => s.SetProperty(o => o.Status, OrderStatus.Expired), ct);
+```
+
+(Caveat: these bypass the change tracker, so already-tracked entities in the same context go stale.) When LINQ can't express a query, drop to **`FromSql`/`SqlQuery`** — parameterized to stay injection-safe.
+
+### Global Query Filters
+
+Define a predicate once on the model and EF Core appends it to **every** query for that entity — the standard way to implement **soft delete** and **multi-tenancy** without repeating `Where` everywhere:
+
+```csharp
+modelBuilder.Entity<Order>().HasQueryFilter(o => !o.IsDeleted && o.TenantId == _tenant.Id);
+// Opt out per-query with .IgnoreQueryFilters()
+```
+
+The risk to know: a forgotten filter on a related type, or `IgnoreQueryFilters()` in the wrong place, silently leaks soft-deleted or cross-tenant rows.
+
 ## Pitfalls
 
 ### Lazy Loading in Production
@@ -135,6 +180,10 @@ var orders = await db.Orders
 **Why it happens**: lazy loading is convenient in development but hides query patterns.
 
 **Mitigation**: disable lazy loading in production (it's off by default in EF Core). Use explicit `Include()` for eager loading or split queries for large result sets.
+
+### Cartesian Explosion from Multiple Includes
+
+`Include`-ing two or more **collection** navigations in one query makes EF Core emit a single JOIN whose row count is the *product* of the collections — an order with 50 line items and 20 history rows returns 1,000 duplicated rows, which EF then de-duplicates client-side. Fix with **`AsSplitQuery()`**, which runs one SQL query per collection and stitches them in memory (trading a JOIN for extra round-trips). Use single (joined) queries for one-to-one/small includes; split queries when you `Include` multiple or large collections.
 
 ### Code First vs Database First
 

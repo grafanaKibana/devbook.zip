@@ -6,7 +6,7 @@ subtopic:
 level:
   - "3"
 priority: Medium
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 # Intro
@@ -51,6 +51,12 @@ In practice, server push has limited adoption — it is hard to predict what the
 
 **Stream prioritization**
 Clients can assign priorities to streams, allowing the server to allocate bandwidth accordingly (e.g., prioritize HTML over images). In practice, priority support varies across implementations.
+
+## How HTTP/2 Is Negotiated (ALPN)
+
+A client and server don't just "speak HTTP/2" — they have to agree to. For HTTPS (the only mode browsers allow), this happens **during the TLS handshake via ALPN** (Application-Layer Protocol Negotiation): the `ClientHello` lists supported protocols (`h2`, `http/1.1`) and the server picks one in its reply — **zero extra round-trips**. This is why HTTP/2 is "TLS-required in practice": ALPN rides along on the handshake that's already happening.
+
+Cleartext HTTP/2 (**h2c**) exists via an HTTP/1.1 `Upgrade` header, but browsers don't support it; it's mostly used **server-to-server** (e.g. behind a load balancer, or [[Software Engineering/04 Networks/Protocols/gRPC|gRPC]], which runs on HTTP/2 and relies on this multiplexing).
 
 ## HTTP/2 vs HTTP/1.1
 
@@ -134,4 +140,5 @@ Pushed resources may already be in the client's cache. The server has no way to 
 > - [[Software Engineering/04 Networks/Protocols/REST|REST]]
 > - [[Software Engineering/04 Networks/Protocols/RPC|RPC]]
 > - [[Software Engineering/04 Networks/Protocols/SMTP|SMTP]]
+> - [[Software Engineering/04 Networks/Protocols/WebSockets|WebSockets]]
 <!-- whats-next:end -->

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/06-development-practices/paradigms/unit-testing/","dg-note-properties":{"topic":["Development Practices"],"subtopic":["Paradigms"],"level":["4"],"priority":"High","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/06-development-practices/paradigms/unit-testing/","dg-note-properties":{"topic":["Development Practices"],"subtopic":["Paradigms"],"level":["4"],"priority":"High","status":"Ready to Repeat"}}
 ---
 
 
@@ -66,6 +66,15 @@ emailSender.Verify(e => e.Send("c1", It.IsAny<string>()), Times.Once);
 ```
 
 **Rule of thumb**: stub dependencies that provide data; mock dependencies that represent side effects (email, SMS, audit log). Over-mocking — mocking every dependency including internal ones — produces brittle tests that break on every refactor.
+
+### Two schools: classicist vs mockist
+
+How much you mock isn't just taste — it's two named philosophies, and knowing them resolves most "should I mock this?" arguments:
+
+- **Classicist / Detroit / "solitary-ish but sociable"** — mock only at true system boundaries (DB, HTTP, clock); let a unit use its *real* collaborators (real value objects, real domain services). Tests assert on **observable state/results**. Tests survive refactors because they don't know internal call structure, but a failure can implicate several classes.
+- **Mockist / London / "outside-in"** — isolate the unit by mocking **all** collaborators and assert on the **interactions** between them. Tests pinpoint the exact class and drive interface design top-down, but they couple to implementation and break when you reshuffle internals (the over-mocking brittleness above).
+
+Most pragmatic suites lean **classicist** — mock the boundary, use the real thing inside — precisely to avoid that brittleness, reaching for interaction verification only for genuine side effects. The same split shows up in [[Software Engineering/06 Development Practices/Paradigms/Test-Driven Development\|TDD]] as inside-out (Detroit) vs outside-in (London).
 
 ## xUnit in .NET
 

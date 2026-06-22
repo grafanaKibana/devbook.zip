@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/data-structures/hash-map/","dg-note-properties":{"topic":["Computer Science"],"subtopic":["Data Structures"],"level":["4"],"priority":"Medium","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/data-structures/hash-map/","dg-note-properties":{"topic":["Computer Science"],"subtopic":["Data Structures"],"level":["4"],"priority":"Medium","status":"Ready to Repeat"}}
 ---
 
 
@@ -14,6 +14,18 @@ Hash maps use two rules together: hash distribution and equality checks.
 - The key hash chooses an index or bucket.
 - If multiple keys land in the same bucket, equality checks resolve collisions.
 - Good hash distribution keeps buckets short and operations fast.
+
+### Load factor and resizing
+
+The reason inserts are *amortized* O(1) — not strictly O(1) — is resizing. The map tracks a **load factor** (entries ÷ buckets). When it crosses the threshold, the map allocates a larger bucket array and **rehashes every existing entry** into it, an O(n) operation. Across many inserts this averages out to O(1) each, but any single insert can trigger a full O(n) rehash.
+
+Two practical consequences:
+
+- **Pre-size when you know the count.** `new Dictionary<TKey,TValue>(expectedCount)` allocates enough buckets up front, skipping the repeated grow-and-rehash churn. Filling a 1M-entry map from default capacity rehashes ~20 times along the way.
+- **`.NET`'s `Dictionary` resizes to the next prime** above double the current size, which improves hash distribution (modulo a prime scatters keys better than modulo a power of two).
+
+> [!WARNING]
+> **Hash flooding (algorithmic-complexity DoS).** If an attacker controls the keys and can force many into one bucket, every operation degrades from O(1) to O(n) and CPU spikes — a real denial-of-service vector for anything that builds a map from untrusted input (HTTP form/query keys, JSON properties). .NET randomizes the `string` hash seed per process to defend against this; custom key types with a weak `GetHashCode` (or one returning a constant) are still exposed.
 
 ## Structure
 
@@ -88,6 +100,8 @@ if (usersById.TryGetValue(1002, out var name))
 >  [[Software Engineering/02 Computer Science/02 Computer Science\|02 Computer Science]]
 >
 > **Pages**
+> - [[Software Engineering/02 Computer Science/Data Structures/Bloom Filter\|Bloom Filter]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Circular Buffer\|Circular Buffer]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Dictionary\|Dictionary]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Graph\|Graph]]
 > - [[Software Engineering/02 Computer Science/Data Structures/HashSet\|HashSet]]
@@ -95,8 +109,10 @@ if (usersById.TryGetValue(1002, out var name))
 > - [[Software Engineering/02 Computer Science/Data Structures/Heap\|Heap]]
 > - [[Software Engineering/02 Computer Science/Data Structures/LinkedList\|LinkedList]]
 > - [[Software Engineering/02 Computer Science/Data Structures/List\|List]]
+> - [[Software Engineering/02 Computer Science/Data Structures/LRU Cache\|LRU Cache]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Queue\|Queue]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Span\|Span]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Stack\|Stack]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Trees\|Trees]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Trie\|Trie]]
 <!-- whats-next:end -->

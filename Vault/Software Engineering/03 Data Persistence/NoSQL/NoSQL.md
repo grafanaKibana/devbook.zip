@@ -5,12 +5,12 @@ subtopic:
   - NoSQL
 level:
   - "3"
-priority: Medium
 status: Done
 tags:
   - FolderNote
 
 dg-publish: true
+priority: High
 ---
 
 # Intro
@@ -108,4 +108,6 @@ Document store example: a product page is an aggregate, so store it as one docum
 > **Parent**
 >  [[Software Engineering/03 Data Persistence/03 Data Persistence|03 Data Persistence]]
 >
+> **Pages**
+> - [[Software Engineering/03 Data Persistence/NoSQL/NoSQL Database Types|NoSQL Database Types]]
 <!-- whats-next:end -->

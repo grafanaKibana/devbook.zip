@@ -6,7 +6,7 @@ subtopic:
 level:
   - "4"
 priority: Medium
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 # Intro
@@ -71,6 +71,43 @@ public static string NormalizeName(string? value)
     return name.Trim();
 }
 ```
+
+## Custom Exceptions
+
+Create a custom exception type when callers need to **catch your failure specifically** (vs a generic `InvalidOperationException`). Derive from `Exception` (not `ApplicationException`, which is obsolete), provide the three conventional constructors, and prefer immutable, meaningful state:
+
+```csharp
+public sealed class OrderNotFoundException(int orderId)
+    : Exception($"Order {orderId} was not found.")
+{
+    public int OrderId { get; } = orderId;
+}
+```
+
+Don't create a custom type when a built-in one already communicates intent (`ArgumentException`, `KeyNotFoundException`, `TimeoutException`). Note that `[Serializable]` + the serialization constructor are legacy (binary serialization is obsolete in modern .NET) — skip them unless you specifically cross an AppDomain/remoting boundary.
+
+## Aggregated and Cross-Boundary Exceptions
+
+- **`AggregateException`** wraps multiple failures — it's what `Task.WhenAll` and parallel code produce. `await` rethrows only the first; to handle all, inspect `task.Exception` and use `.Flatten()` (collapse nested aggregates) and `.Handle(predicate)` (mark some inner exceptions as handled, rethrow the rest). See [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Tasks|Tasks]].
+- **`ExceptionDispatchInfo`** lets you capture an exception and rethrow it later — from another thread or stack frame — **without losing the original stack trace**:
+
+  ```csharp
+  ExceptionDispatchInfo? captured = null;
+  try { Work(); } catch (Exception ex) { captured = ExceptionDispatchInfo.Capture(ex); }
+  // ...later, elsewhere...
+  captured?.Throw(); // original throw-site preserved
+  ```
+
+  This is exactly the machinery `await` uses to surface task exceptions at the real failure location.
+
+## Global / Last-Chance Handlers
+
+Always have a top-level net so a stray exception is logged, not silently lost or process-killing:
+
+- ASP.NET Core: `app.UseExceptionHandler(...)` (return RFC 7807 Problem Details).
+- `AppDomain.CurrentDomain.UnhandledException` — last-chance log before the process terminates (you cannot stop it).
+- `TaskScheduler.UnobservedTaskException` — catches faults from tasks nobody awaited (see the fire-and-forget pitfall).
+- `AppDomain.CurrentDomain.FirstChanceException` — fires for *every* exception as it's thrown (before any catch); useful for diagnostics, noisy in production.
 
 ## Pitfalls
 

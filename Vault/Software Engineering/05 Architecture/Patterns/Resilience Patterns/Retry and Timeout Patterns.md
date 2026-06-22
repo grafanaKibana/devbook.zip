@@ -6,7 +6,7 @@ subtopic:
 level:
   - "3"
 priority: High
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 
@@ -156,7 +156,7 @@ For production systems, compose retry and timeout with neighboring patterns in a
 4. `Circuit Breaker` to fast-fail during sustained instability.
 5. `Per-attempt timeout` innermost to cap single attempt duration.
 
-Use this pipeline together with [[Circuit Breaker]] and [[Rate Limiting]] to protect both dependency health and caller latency.
+Use this pipeline together with [[Software Engineering/05 Architecture/Patterns/Resilience Patterns/Circuit Breaker|Circuit Breaker]] and [[Software Engineering/05 Architecture/Patterns/Resilience Patterns/Rate Limiting|Rate Limiting]] to protect both dependency health and caller latency.
 
 # Pitfalls
 

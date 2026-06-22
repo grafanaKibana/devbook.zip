@@ -6,7 +6,7 @@ subtopic:
 level:
   - "3"
 priority: High
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 # Intro
@@ -42,7 +42,7 @@ The arrows point inward because outer circles implement details for inner policy
 
 ## Clean Architecture vs simple Layered Architecture
 
-Traditional layered systems often become UI to business to data access, where business logic ends up coupled to repository implementation details and ORM behavior. Clean Architecture keeps similar responsibilities but changes ownership of dependencies: domain and use cases define interfaces, outer infrastructure implements them. Interview shorthand: Layered often describes responsibility stacking, while Clean Architecture adds a strict dependency direction contract. See [[Layered Architecture]] for the baseline model this approach refines.
+Traditional layered systems often become UI to business to data access, where business logic ends up coupled to repository implementation details and ORM behavior. Clean Architecture keeps similar responsibilities but changes ownership of dependencies: domain and use cases define interfaces, outer infrastructure implements them. Interview shorthand: Layered often describes responsibility stacking, while Clean Architecture adds a strict dependency direction contract. See [[Software Engineering/05 Architecture/Application Architecture/Layered Architecture|Layered Architecture]] for the baseline model this approach refines (and how Hexagonal/Onion/Clean are one family).
 
 ## .NET project structure
 
@@ -225,7 +225,7 @@ The dependency arrow is the key: `PlaceOrderUseCase` depends on `IOrderRepositor
 
 - What goes wrong: projects are named Domain Application Infrastructure but business code still depends on EF Core or HTTP clients from inside use cases.
 - Why it happens: teams copy template folders without automated dependency checks.
-- How to avoid it: validate project references in CI and add architecture tests that fail when inner layers reference outer packages.
+- How to avoid it: validate project references in CI and add **architecture tests** (e.g. **NetArchTest** or **ArchUnitNET**) that fail the build when inner layers reference outer packages — the dependency rule only holds if something enforces it.
 
 ### Premature abstraction everywhere
 

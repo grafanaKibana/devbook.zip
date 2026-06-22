@@ -6,7 +6,7 @@ subtopic:
 level:
   - "3"
 priority: Medium
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 # Intro
@@ -143,6 +143,12 @@ public static List<(int u, int v, int w)> KruskalMST(
 Path halving is often preferred in cache-sensitive code because fewer writes reduce cache-line dirtying. The standard implementation above uses full compression for clarity.
 
 **DSU vs adjacency-list union-find**: DSU only answers connectivity queries, not path or degree queries. If you need to know the actual path between two nodes, maintain an adjacency list alongside DSU. DSU is the right tool when you only need "are a and b connected?" in O(α(n)) — not when you need to reconstruct how.
+
+**DSU is incremental-only — it can't efficiently split.** Union merges sets cheaply, but there is no fast `split`/`un-union`: after path compression the structure has forgotten the original tree shape. This dictates the algorithm class:
+
+- **Edges only ever added** (incremental connectivity) → DSU is ideal.
+- **Edges added *and* removed** (fully dynamic connectivity) → DSU can't do it; you need link-cut trees or Euler-tour trees.
+- **A known-in-advance sequence with deletions** → process it **offline in reverse** (each deletion becomes an addition) with the rollback DSU (union by rank, no path compression — see the Pitfalls). This reverse-time trick is the standard way DSU copes with deletions.
 
 
 ## References

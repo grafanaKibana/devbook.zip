@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/suggest-review.mjs\"",
+            "statusMessage": "Checking if a note review is warranted..."
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -6,7 +6,7 @@ subtopic:
 level:
   - "3"
 priority: Medium
-status: Creation
+status: Ready to Repeat
 
 dg-publish: true
 ---
@@ -116,6 +116,12 @@ Console.WriteLine($"Received {result.Buffer.Length} bytes from {result.RemoteEnd
 
 **No framing on TCP** — TCP delivers a stream of bytes with no concept of message boundaries. If your protocol sends variable-length messages, you must add framing: length-prefix, delimiter, or fixed-size headers. A chat application that sent messages as raw UTF-8 without framing worked fine in local testing but in production, high-throughput scenarios caused two messages to arrive in a single `ReadAsync` call, merging "Hello" and "World" into "HelloWorld" — the bug took weeks to reproduce because it only occurred under network congestion.
 
+## Half-Close and the Scaling Model
+
+**Half-close** — TCP connections are bidirectional and each direction closes independently. `socket.Shutdown(SocketShutdown.Send)` sends a FIN to signal "I'm done writing" while you keep *reading* the peer's response — the standard way to tell a server "request complete" without tearing down the read side. The peer sees end-of-stream (a 0-byte read) on its side.
+
+**How one server handles thousands of connections** — you don't dedicate a thread per socket. The OS provides an **event-notification** mechanism — `epoll` (Linux), `kqueue` (BSD/macOS), **IOCP** (Windows) — that lets one (or a few) threads wait on many sockets and wake only for the ones with data ready. This is the "C10k" solution, and it's exactly what .NET's async socket APIs sit on top of: `await ReceiveAsync()` registers interest and releases the thread until the OS signals readiness/completion. Reaching for `SocketAsyncEventArgs` or `System.IO.Pipelines` squeezes out the remaining per-operation allocation for very high-throughput servers.
+
 ## Tradeoffs
 
 | Option | Best for | Weakness |
@@ -137,7 +143,7 @@ Console.WriteLine($"Received {result.Buffer.Length} bytes from {result.RemoteEnd
 > [!QUESTION]- When would you choose UDP over TCP for a production system?
 > When latency matters more than delivery guarantees and the application can tolerate or recover from packet loss. Examples: real-time game state updates (stale frames are discarded anyway), DNS queries (fast retry is cheaper than TCP handshake), telemetry/metrics (occasional loss is acceptable). The application must implement its own reliability if needed.
 
-## Links
+## References
 
 - [System.Net.Sockets namespace](https://learn.microsoft.com/dotnet/api/system.net.sockets) — API reference for Socket, TcpClient, TcpListener, UdpClient, and NetworkStream.
 - [TcpClient class](https://learn.microsoft.com/dotnet/api/system.net.sockets.tcpclient) — API reference with examples for connecting, reading, and writing over TCP.

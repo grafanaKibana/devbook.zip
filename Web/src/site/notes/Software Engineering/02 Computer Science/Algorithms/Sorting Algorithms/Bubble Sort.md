@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/algorithms/sorting-algorithms/bubble-sort/","dg-note-properties":{"topic":["Computer Science"],"subtopic":["Algorithms"],"level":["4"],"priority":"Low","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/algorithms/sorting-algorithms/bubble-sort/","dg-note-properties":{"topic":["Computer Science"],"subtopic":["Algorithms"],"level":["4"],"priority":"Low","status":"Ready to Repeat"}}
 ---
 
 # Intro
@@ -59,6 +59,9 @@ public static void BubbleSort(int[] a)
     } while (swapped);
 }
 ```
+
+> [!NOTE]
+> **Cocktail shaker sort** is the bidirectional variant: alternate a left-to-right pass (bubbling the max up) with a right-to-left pass (bubbling the min down). It fixes bubble sort's "turtles" problem — small values near the end that move left only one step per full pass — but it's still O(n²) and remains a teaching curiosity, not a production choice.
 
 ## When to Use
 

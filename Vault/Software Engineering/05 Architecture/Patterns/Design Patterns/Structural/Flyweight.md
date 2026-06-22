@@ -6,7 +6,7 @@ subtopic:
 level:
   - "1"
 priority: High
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 # Flyweight
@@ -127,6 +127,14 @@ Updating the Electronics tax rate now means updating one `CategoryFlyweight` ins
 **`ArrayPool<T>` / `MemoryPool<T>`** — rent a buffer, use it, return it to the pool. The pool shares buffer instances across operations, avoiding repeated allocations. The rented buffer is the flyweight; the data written into it is the extrinsic state.
 
 **`ObjectPool<T>` (ASP.NET Core)** — pools expensive-to-create objects (e.g., `StringBuilder`, regex matchers). The pooled object is the flyweight; the content processed by it is extrinsic.
+
+## Tradeoffs
+
+**Use it when**: you have a *very large* number of objects whose state cleanly splits into shared-immutable **intrinsic** state and per-instance **extrinsic** state, and memory (not CPU) is the bottleneck. The win scales with the duplication ratio — 100k products over 50 categories is a 2000× saving on that data.
+
+**Don't reach for it when**: the object count is modest — the factory/indirection is premature optimization that buys nothing. It also **requires the shared state to be immutable**; sharing mutable intrinsic state means one caller's change silently affects thousands of others (a nasty class of bug). And if the state can't be split cleanly, the pattern doesn't apply.
+
+**vs a cache**: both reuse instances, but a Flyweight specifically shares **immutable intrinsic** state to cut memory across many fine-grained objects, whereas a [[Software Engineering/03 Data Persistence/Caching|cache]] stores *any* expensive-to-recompute value for latency. In modern .NET you often get Flyweight for free — `string.Intern`, an interned `record`, or a small dictionary cache — without building an explicit factory.
 
 ## Questions
 

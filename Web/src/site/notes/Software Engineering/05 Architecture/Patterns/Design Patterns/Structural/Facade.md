@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/design-patterns/structural/facade/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Patterns"],"level":["2"],"priority":"High","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/design-patterns/structural/facade/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Patterns"],"level":["2"],"priority":"High","status":"Ready to Repeat"}}
 ---
 
 # Facade
@@ -153,6 +153,14 @@ Adding fraud detection now means editing `OrderFacade.PlaceOrderAsync` in one pl
 **`DbContext` (EF Core)** — a facade over `DbConnection`, `DbCommand`, change tracking, identity map, and SQL generation. `context.Orders.Where(o => o.Status == OrderStatus.Pending).ToListAsync()` hides all of it.
 
 **`WebApplication` minimal APIs** — a facade over `IApplicationBuilder`, `IEndpointRouteBuilder`, `IServiceProvider`, and the hosting infrastructure. `app.MapGet("/orders", handler)` hides the routing pipeline setup.
+
+## Tradeoffs
+
+**Use it when**: a complex subsystem (several collaborating classes, a tricky call sequence) is used the same way by many clients — wrap it in one high-level entry point so callers (and the rest of your code) don't depend on the subsystem's shape. It also decouples clients from churn inside the subsystem.
+
+**Don't reach for it when**: there's no real complexity to hide (one class behind one class is just indirection), or the facade starts **accreting business rules** and becomes a god object — a facade should *orchestrate/simplify*, not *own* domain logic. Keep the subsystem directly accessible for callers that need fine control; a facade is a convenience, not a gatekeeper.
+
+**vs related**: **[[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Adapter\|Adapter]]** changes an interface to make things *compatible* (required); Facade *simplifies* an interface for convenience (optional) — see the note above. A **[[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Mediator\|Mediator]]** coordinates peers bidirectionally; a Facade is a one-way front door. At the network boundary, an **[[Software Engineering/05 Architecture/Distributed Systems/API Gateway\|API Gateway]]** is essentially a Facade over many microservices.
 
 ## Questions
 

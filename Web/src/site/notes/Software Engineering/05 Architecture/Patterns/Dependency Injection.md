@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/dependency-injection/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Patterns"],"level":["4"],"priority":"High","status":"Ready To Repeat"}}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/patterns/dependency-injection/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Patterns"],"level":["4"],"priority":"High","status":"Done"}}
 ---
 
 # Intro
@@ -251,15 +251,16 @@ Use this when selection is explicit and stable; avoid turning keys into hidden r
 - Built-in container vs external container: built-in is usually enough and operationally simpler; external containers may offer advanced features but add complexity.
 - Constructor injection vs method/locator resolution: constructor injection maximizes explicitness and testability; method injection (`[FromServices]`) is fine at endpoint boundaries; locator resolution should stay in infrastructure code.
 
-## Interview Questions
+## Questions
 
-> [!QUESTION]- Explain `Transient`, `Scoped`, and `Singleton` lifetimes with one safe production example each.
-> **Expected answer:** transient for lightweight stateless services, scoped for request-bound consistency (`DbContext`), singleton for thread-safe shared services (cache/config/factory).
-> **Why:** checks whether candidate maps lifetime to runtime behavior.
+> [!QUESTION]- Explain `Transient`, `Scoped`, and `Singleton` lifetimes with a safe production example each.
+> The three differ by how long the container keeps one instance. Transient is a fresh instance per resolution — fine for lightweight stateless services like mappers or formatters. Scoped is one instance per scope, which in ASP.NET Core means per HTTP request; the canonical case is `DbContext`, where one unit of work per request keeps tracking and transactions coherent. Singleton is one instance for the app's lifetime — good for thread-safe shared state like a cache, an `IClock`, or `IHttpClientFactory` — but it must be thread-safe and must never capture a scoped dependency. The thing to get right: lifetime is about shared state and thread-safety, not performance.
 
 > [!QUESTION]- Why is Service Locator an anti-pattern in business logic, and when is it acceptable?
-> **Expected answer:** it hides dependencies and hurts testability; acceptable in factories, middleware activation, and explicit scope-managed infrastructure.
-> **Why:** tests architecture judgment and boundary discipline.
+> Service Locator means reaching into `IServiceProvider` (`GetRequiredService<T>()`) from inside a class instead of declaring the dependency in its constructor. In business logic that hides what the class actually needs — the constructor stops telling the truth — so a missing registration fails at runtime instead of compile time, and tests have to mimic the container instead of just passing fakes. It's acceptable in the places that genuinely pick implementations at runtime: factories, middleware activation, and explicit scope management in background jobs. The rule: constructor injection for anything with business logic; the locator only in infrastructure that has no other way to resolve.
+
+> [!QUESTION]- What is a captive dependency, and how do you fix it?
+> It's when a longer-lived service captures a shorter-lived one — classically a singleton or `IHostedService` holding a scoped `DbContext`. The scoped object then outlives its intended request boundary, giving you stale state, broken EF Core change tracking, and disposal at the wrong time. In Development the scope validator catches it and throws `InvalidOperationException`; in Production it just misbehaves quietly. The fix is to not inject the scoped service at all: inject `IServiceScopeFactory`, open a short scope where you need the work, resolve inside it, and let it dispose. The tell to watch for is a singleton constructor asking for anything request-scoped.
 
 ## References
 

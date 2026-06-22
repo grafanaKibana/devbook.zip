@@ -1,11 +1,11 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/distributed-systems/message-queues/rabbit-mq/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Distributed Systems"],"level":["2"],"priority":"High","status":"Ready To Repeat"}}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/distributed-systems/message-queues/rabbit-mq/","dg-note-properties":{"topic":["Architecture"],"subtopic":["Distributed Systems"],"level":["2"],"priority":"High","status":"Done"}}
 ---
 
 
 # Intro
 
-RabbitMQ is an open-source message broker implementing AMQP 0-9-1, where producers publish to exchanges and messages are routed to queues through bindings and routing keys before consumers process them. It matters because it decouples producers and consumers, enables asynchronous processing, and absorbs traffic spikes without forcing synchronous dependency chains. In interviews, reach for RabbitMQ when you need task queues, request-reply, pub/sub fan-out, or fair work distribution across multiple workers. In a `Webhook -> Queue -> Worker` system, RabbitMQ is usually the safety valve between bursty ingress and bounded worker throughput.
+RabbitMQ is an open-source message broker implementing AMQP 0-9-1, where producers publish to exchanges and messages are routed to queues through bindings and routing keys before consumers process them. It matters because it decouples producers and consumers, enables asynchronous processing, and absorbs traffic spikes without forcing synchronous dependency chains. In interviews, reach for RabbitMQ when you need task queues, request-reply, pub/sub fan-out, or fair work distribution across multiple workers. In a `[[Webhooks|Webhook]] -> Queue -> Worker` system, RabbitMQ is usually the safety valve between bursty ingress and bounded worker throughput.
 
 ## AMQP Model
 
@@ -196,7 +196,7 @@ public sealed record Order(string OrderId, string CustomerId, decimal Amount);
 
 ## RabbitMQ vs Kafka
 
-| Dimension | RabbitMQ | Kafka |
+| Dimension | RabbitMQ | [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/Kafka\|Kafka]] |
 | --- | --- | --- |
 | Model | Queue broker with exchanges and bindings | Partitioned append-only log |
 | Ordering | Per queue/consumer semantics; strict global ordering is hard | Strong ordering within partition |
@@ -236,29 +236,16 @@ public sealed record Order(string OrderId, string CustomerId, decimal Amount);
 - **Impact**: higher tail latency and poor parallelism.
 - **Mitigation**: set and tune `BasicQos` prefetch via load tests.
 
-## Interview Questions
+## Questions
 
-### How do you use RabbitMQ to absorb bursty ingress when producers outpace consumers?
+> [!QUESTION]- How do you use RabbitMQ to absorb bursty ingress when producers outpace consumers?
+> Put a durable queue between the ingress and the workers so bursts land in the queue instead of overwhelming the worker tier. Keep the ingress path thin — validate, enqueue, return `200` fast — so a webhook sender never waits on your processing. Then scale competing consumers horizontally off the same queue, and use prefetch (`BasicQos`) so one slow worker can't hoard unacked messages while others sit idle. Route poison messages to a dead-letter exchange and watch queue depth, redelivery rate, and message age. The queue is the shock absorber: it turns a traffic spike into a temporary backlog instead of dropped requests or a melted worker tier.
 
-Expected answer:
+> [!QUESTION]- How do you implement at-least-once delivery, and what new risk appears?
+> At-least-once is four settings working together: a durable queue, persistent messages (`DeliveryMode = 2`), publisher confirms so the producer knows the broker accepted the message, and manual consumer ack so a message isn't removed until processing succeeds. If a consumer crashes before acking, the broker redelivers. The risk that buys you is duplicates — a redelivery can race an ack — so consumers must be [[Software Engineering/05 Architecture/Distributed Systems/Idempotency\|idempotent]], keyed on a stable message ID with a dedupe store. You trade the possibility of loss for the certainty of occasional duplicates, which is the far easier problem to make safe.
 
-- Put a durable queue between webhook ingress and workers to absorb bursts.
-- Keep the webhook path thin: validate, enqueue, return quickly.
-- Scale competing consumers horizontally.
-- Tune prefetch and worker concurrency for fairness and throughput.
-- Route poison messages to DLX and monitor queue depth, redelivery rate, and message age.
-
-Why: demonstrates backpressure design, reliability, and operational thinking.
-
-### How do you implement at-least-once delivery in RabbitMQ, and what new risk appears?
-
-Expected answer:
-
-- Durable queues, persistent messages, publisher confirms, manual consumer ack.
-- Nack and controlled retry for transient failures, DLX for poison messages.
-- New risk is duplicate delivery; mitigate via idempotent consumers and dedupe keys.
-
-Why: shows understanding of guarantees and their costs.
+> [!QUESTION]- When would you choose RabbitMQ over Kafka?
+> Choose RabbitMQ when you want a smart broker doing the routing — direct, topic, fanout, and header exchanges, per-message TTL, priorities, dead-lettering — for task queues, request-reply, and command dispatch where low latency and flexible routing matter more than retention. Choose [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/Kafka\|Kafka]] when you need a durable, replayable log: high-throughput event streams, ordering per partition, and multiple independent consumers re-reading history by offset. The rough line is that RabbitMQ moves a message and forgets it, while Kafka stores an event history. If you keep wishing you could re-consume past messages, you actually wanted Kafka.
 
 ## References
 

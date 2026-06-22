@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/data-structures/trees/","dg-note-properties":{"topic":["Computer Science"],"subtopic":["Data Structures"],"level":["4"],"priority":"Medium","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/data-structures/trees/","dg-note-properties":{"topic":["Computer Science"],"subtopic":["Data Structures"],"level":["4"],"priority":"Medium","status":"Ready to Repeat"}}
 ---
 
 
@@ -19,6 +19,25 @@ A tree organizes nodes so each node has at most one parent (except the root) and
 - *BFS (level-order)*: uses a `Queue<T>` to visit nodes level by level, natural for shortest-path in unweighted trees.
 
 `SortedSet<T>` in .NET uses a red-black tree internally, guaranteeing O(log n) insert and lookup regardless of insertion order.
+
+**Terminology:** *height* (longest root-to-leaf path), *depth* (distance from root), *balance factor* (height difference between subtrees). A *full* tree has 0 or 2 children per node; a *complete* tree fills levels left-to-right (the heap shape); a *perfect* tree is both.
+
+## Common Tree Types
+
+"Tree" is a family — the right one depends on the operation you need:
+
+| Type | What it adds | Used for |
+|---|---|---|
+| **BST** | Ordered left < node < right | Baseline ordered lookup — but degrades to O(n) if unbalanced |
+| **AVL / Red-Black** | Self-balancing rotations → guaranteed O(log n) | `SortedSet`/`SortedDictionary` (red-black); AVL is more rigidly balanced (faster reads, more rotations) |
+| **B-tree / B+-tree** | High fan-out, shallow; node = disk/page sized | **Database & filesystem indexes** — minimizes disk seeks. See [[Software Engineering/03 Data Persistence/SQL/Indexes\|Indexes]] |
+| **Trie (prefix tree)** | Path = sequence of characters | Autocomplete, prefix search, routing tables — O(k) by key length, independent of n |
+| **Heap** | Parent/child priority, array-backed | Priority queues — see [[Software Engineering/02 Computer Science/Data Structures/Heap\|Heap]] |
+| **Segment / Fenwick (BIT)** | Range aggregates with point updates | Range-sum/min queries in O(log n) |
+
+## Traversal Without Recursion
+
+The depth pitfall (below) is why production traversal of unbounded-depth trees uses an explicit `Stack<T>` rather than recursion. For the extreme case, **Morris traversal** achieves in-order traversal in **O(1) extra space** by temporarily rewiring leaf `right` pointers (threading) instead of using a stack at all — niche, but the canonical answer to "traverse a tree without recursion *and* without a stack."
 
 ## Structure
 
@@ -75,6 +94,8 @@ var ids = new SortedSet<int> { 5, 1, 3, 3 };
 >  [[Software Engineering/02 Computer Science/02 Computer Science\|02 Computer Science]]
 >
 > **Pages**
+> - [[Software Engineering/02 Computer Science/Data Structures/Bloom Filter\|Bloom Filter]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Circular Buffer\|Circular Buffer]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Dictionary\|Dictionary]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Graph\|Graph]]
 > - [[Software Engineering/02 Computer Science/Data Structures/HashMap\|HashMap]]
@@ -83,7 +104,9 @@ var ids = new SortedSet<int> { 5, 1, 3, 3 };
 > - [[Software Engineering/02 Computer Science/Data Structures/Heap\|Heap]]
 > - [[Software Engineering/02 Computer Science/Data Structures/LinkedList\|LinkedList]]
 > - [[Software Engineering/02 Computer Science/Data Structures/List\|List]]
+> - [[Software Engineering/02 Computer Science/Data Structures/LRU Cache\|LRU Cache]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Queue\|Queue]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Span\|Span]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Stack\|Stack]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Trie\|Trie]]
 <!-- whats-next:end -->

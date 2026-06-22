@@ -6,7 +6,7 @@ subtopic:
 level:
   - "4"
 priority: High
-status: Creation
+status: Ready to Repeat
 
 dg-publish: true
 ---
@@ -72,7 +72,7 @@ public static class EmailRules
 > When the repetition is small, the meaning is different, or the logic is expected to diverge.
 > Local duplication is sometimes safer than a shared abstraction.
 
-## Links
+## References
 
 - [The Pragmatic Programmer](https://pragprog.com/titles/tpp20/the-pragmatic-programmer-20th-anniversary-edition/) — the book that coined DRY; Chapter 7 explains the principle with examples of knowledge duplication vs code duplication.
 - [DRY principle (Wikipedia)](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself) — concise definition and common misapplications.

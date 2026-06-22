@@ -6,7 +6,7 @@ subtopic:
 level:
   - "4"
 priority: Medium
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 
@@ -41,6 +41,22 @@ public static class MathUtility
     public static int Add(int a, int b) => a + b;
 }
 ```
+
+## using Directives and Aliases
+
+`using` brings names into scope; it has several flavours beyond the basic import:
+
+- **Type/namespace alias** — disambiguate or shorten: `using Json = System.Text.Json;` then `Json.JsonSerializer`.
+- **`using static`** — import a type's static members directly: `using static System.Math;` lets you write `Sqrt(x)` instead of `Math.Sqrt(x)`.
+- **Alias *any* type (C# 12)** — including tuples, arrays, and generics: `using Point = (int X, int Y);` or `using IntList = System.Collections.Generic.List<int>;`.
+- **`extern alias`** — the heavy hammer for the rare case where two referenced assemblies expose the *same* fully-qualified type. You assign each reference an alias in the project file and qualify with `extern alias OldSql;` / `OldSql::System.Data.SqlClient.SqlConnection`.
+
+Name resolution searches from the **most-nested** namespace outward, so a type in the current namespace shadows a same-named type in an outer one.
+
+### Project-level conventions
+
+- **`<ImplicitUsings>enable</ImplicitUsings>`** auto-adds a set of `global using`s (System, Linq, Collections.Generic, …) for the SDK, removing boilerplate from every file.
+- **`<RootNamespace>`** sets the default namespace the templates/`dotnet new` use; the compiler does **not** force namespace to match folder structure, but most teams keep `Namespace == folder path` by convention for navigability.
 
 ## Pitfalls
 

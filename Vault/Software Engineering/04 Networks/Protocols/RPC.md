@@ -6,7 +6,7 @@ subtopic:
 level:
   - "3"
 priority: Medium
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 
@@ -56,6 +56,16 @@ RPC's "local call" abstraction is leaky. The eight fallacies of distributed comp
 4. The network is secure — calls can be intercepted or replayed.
 
 **Practical implication**: always handle RPC failures explicitly. Implement retries with idempotency keys, timeouts, and circuit breakers. Never assume a failed RPC means the server didn't execute the operation — it may have executed and the response was lost.
+
+## Delivery Semantics
+
+Because the network can drop either the request or the response, an RPC framework can offer one of three guarantees — and the difference drives your whole error-handling design:
+
+- **At-most-once** — never retry; the call runs zero or one times. No duplicates, but a lost response means the operation may not have happened and you'll never know. Fine for non-critical, naturally-idempotent reads.
+- **At-least-once** — retry until acknowledged; the call runs one *or more* times. No lost work, but **duplicates are possible** (the request succeeded, the ACK was lost, you retry). This is what naive "just retry on timeout" gives you.
+- **Exactly-once** — the holy grail, and **not achievable at the transport layer** in the presence of failures. It's *approximated* end-to-end by combining at-least-once delivery with **idempotency**: the server deduplicates retries via an idempotency key / sequence number so re-execution has no extra effect.
+
+The practical rule: assume at-least-once and make your operations idempotent (so duplicates are harmless) rather than chasing true exactly-once. This is the same conclusion the [[Software Engineering/04 Networks/Protocols/gRPC|gRPC retry policy]] and [[Software Engineering/03 Data Persistence/ACID|distributed transactions]] reach.
 
 ## Pitfalls
 
@@ -127,4 +137,5 @@ var response = await client.PlaceOrderAsync(
 > - [[Software Engineering/04 Networks/Protocols/HTTP 2|HTTP 2]]
 > - [[Software Engineering/04 Networks/Protocols/REST|REST]]
 > - [[Software Engineering/04 Networks/Protocols/SMTP|SMTP]]
+> - [[Software Engineering/04 Networks/Protocols/WebSockets|WebSockets]]
 <!-- whats-next:end -->

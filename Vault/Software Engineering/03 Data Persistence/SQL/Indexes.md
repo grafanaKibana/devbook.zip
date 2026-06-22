@@ -7,7 +7,7 @@ dg-publish: true
 level:
   - "4"
 priority: High
-status: Creation
+status: Ready to Repeat
 ---
 
 # Intro
@@ -108,6 +108,37 @@ CREATE INDEX IX_Users_Status_Covering
 - SARGable columns (used in `WHERE`, `JOIN`, `GROUP BY`, `ORDER BY`) go in the key.
 - SELECT-only columns go in `INCLUDE`. They bypass the 1700-byte nonclustered key size limit (900-byte for clustered) and the 32-column key limit (SQL Server 2016+).
 - Eliminating Key Lookups is the primary index tuning lever. Check execution plans for "Key Lookup" operators; each one is a candidate for an INCLUDE column.
+
+## Composite Indexes and the Leftmost-Prefix Rule
+
+Column **order** in a multi-column index is not cosmetic — it determines which queries can seek. A B-tree on `(A, B, C)` is sorted by A, then B within equal A, then C. The optimizer can use it only for a **leftmost prefix** of the key:
+
+| Query predicate | Index `(A, B, C)` usable? |
+|---|---|
+| `WHERE A = ?` | ✅ seek |
+| `WHERE A = ? AND B = ?` | ✅ seek |
+| `WHERE A = ? AND B = ? AND C = ?` | ✅ seek |
+| `WHERE B = ?` (skips A) | ❌ no seek — usually a scan |
+| `WHERE A = ? AND C = ?` | ⚠️ seeks on A, then *residual* filter on C (B gap) |
+
+```sql
+-- Serves WHERE TenantId=? , and WHERE TenantId=? AND Status=? , and ORDER BY ... within a tenant
+CREATE INDEX IX_Orders_Tenant_Status_Date ON Orders (TenantId, Status, CreatedAt);
+-- Does NOT efficiently serve  WHERE Status = ?  alone (TenantId is the leftmost key)
+```
+
+Practical ordering rules: put **equality** predicates before **range** predicates (a range "opens" the key, so columns after it can't seek), and put the most selective/most-common equality column first. This left-to-right matching is also why one well-ordered composite index often replaces several single-column ones.
+
+## Index Types Beyond the B+ Tree
+
+The B+ tree is the default for a reason (ordered, range-friendly, balanced), but other engines/structures fit other access patterns:
+
+- **Hash index** — O(1) *equality* lookups, but **no range or ordering** support. Used by SQL Server memory-optimized tables and PostgreSQL `USING hash`.
+- **Bitmap index** — one bitmap per distinct value; superb for **low-cardinality** columns and `AND`/`OR` combinations in data warehouses (Oracle/Postgres analytics), poor for high-churn OLTP.
+- **GIN / GiST (PostgreSQL)** — inverted/generalized indexes for **full-text search, JSONB containment, arrays, and geospatial** (`@>`, nearest-neighbor) queries a B-tree can't answer.
+- **Spatial / R-tree** — multidimensional range queries (bounding boxes, "points within this region").
+
+The takeaway: when a query type (text search, JSON, geo, pure equality at scale) is slow despite a B-tree, the fix may be a *different kind of index*, not a bigger one.
 
 ## Columnstore Indexes
 

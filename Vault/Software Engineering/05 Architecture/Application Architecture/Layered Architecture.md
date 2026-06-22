@@ -6,7 +6,7 @@ subtopic:
 level:
   - "4"
 priority: High
-status: Creation
+status: Ready to Repeat
 dg-publish: true
 ---
 # Intro
@@ -78,6 +78,17 @@ graph LR
 ```
 
 In traditional layered architecture, changing the database affects everything above it. In Onion/Clean Architecture, the dependency is **inverted**: Infrastructure depends on the Domain through interfaces, so you can swap databases without touching business rules.
+
+## One Family: Layered, Hexagonal, Onion, Clean
+
+These names get used interchangeably, but they're variations on one idea — *protect the domain by pointing dependencies inward*:
+
+- **Traditional layered (n-tier)** — strict top-down: UI → Business → Data. Simple, but the domain still depends on data access.
+- **Hexagonal (Ports & Adapters, Alistair Cockburn)** — the domain defines **ports** (interfaces); the outside world plugs in **adapters** (a DB adapter, an HTTP adapter, a test adapter). The `IOrderRepository`/`IEmailSender` interfaces in the diagrams above *are* ports. There's no "up/down," just "inside the hexagon" (domain) vs "outside" (adapters).
+- **Onion (Jeffrey Palermo)** — concentric rings with the domain at the center; same inward rule, drawn as circles.
+- **Clean (Robert C. Martin)** — the same again with named rings (Entities → Use Cases → Interface Adapters → Frameworks) and the explicit **Dependency Rule**.
+
+The takeaway: don't agonize over the name — they all enforce the same Dependency Rule, differing mostly in vocabulary and diagram shape. See [[Software Engineering/05 Architecture/Application Architecture/Clean Architecture|Clean Architecture]] for the most prescriptive variant; the same boundary discipline scales up to the [[Software Engineering/05 Architecture/System Architecture/Modular Monolith|modular monolith]] and microservices.
 
 ## .NET Example
 

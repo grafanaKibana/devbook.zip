@@ -6,10 +6,10 @@ subtopic:
 tags:
   - FolderNote
 priority: High
-status: Creation
 dg-publish: true
 level:
   - "3"
+status: Done
 ---
 # GoF Design Patterns
 

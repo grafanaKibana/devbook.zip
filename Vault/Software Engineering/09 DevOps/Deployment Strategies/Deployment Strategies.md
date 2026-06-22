@@ -5,7 +5,7 @@ subtopic:
   - Deployment Strategies
 dg-publish: true
 status:
-  - Creation
+  - Ready to Repeat
 priority: Medium
 level:
   - "2"

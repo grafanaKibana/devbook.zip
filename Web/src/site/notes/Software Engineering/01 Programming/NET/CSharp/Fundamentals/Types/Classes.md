@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/c-sharp/fundamentals/types/classes/","dg-note-properties":{"topic":["Programming"],"subtopic":["NET"],"level":["4"],"priority":"Medium","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/01-programming/net/c-sharp/fundamentals/types/classes/","dg-note-properties":{"topic":["Programming"],"subtopic":["NET"],"level":["4"],"priority":"Medium","status":"Ready to Repeat"}}
 ---
 
 # Intro
@@ -167,6 +167,27 @@ Key rules:
 | `partial` + any modifier | Yes |
 | `abstract` + `partial` | Yes |
 | `sealed` + `partial` | Yes |
+
+## Modern Construction Features
+
+- **Primary constructors (C# 12)** — declare constructor parameters on the class header; they're in scope for the whole body (field/property initializers, methods). Unlike record primary constructors, they do **not** auto-generate public properties — the parameters are captured as private state:
+
+  ```csharp
+  public sealed class OrderService(IOrderRepository repo, ILogger<OrderService> log)
+  {
+      public Task SaveAsync(Order o) { log.LogInformation("saving"); return repo.SaveAsync(o); }
+  }
+  ```
+
+- **`required` members (C# 11)** force the caller to set a property in the object initializer even though it's not a constructor parameter — compile-time enforcement without boilerplate constructors:
+
+  ```csharp
+  public sealed class Customer { public required string Name { get; init; } }
+  var c = new Customer { Name = "Acme" }; // omitting Name is a compile error
+  ```
+
+- **Constructor chaining** with `: this(...)` reuses one constructor from another (and `: base(...)` calls the base). **Initialization order** matters: instance field initializers run *before* the constructor body; a **`static` constructor** runs once, lazily, before first use — and if it throws, the type is permanently unusable (`TypeInitializationException` on every later access).
+- **`file`-scoped types (C# 11)** (`file class X`) limit visibility to one source file — useful for source generators. The full access ladder is `private` → `private protected` → `protected`/`internal` → `protected internal` → `public`.
 
 ## Pitfalls
 

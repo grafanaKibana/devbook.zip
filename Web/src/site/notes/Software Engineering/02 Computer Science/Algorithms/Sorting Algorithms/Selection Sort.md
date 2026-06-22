@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/algorithms/sorting-algorithms/selection-sort/","dg-note-properties":{"topic":["Computer Science"],"subtopic":["Algorithms"],"level":["4"],"priority":"Low","status":"Creation"}}
+{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/algorithms/sorting-algorithms/selection-sort/","dg-note-properties":{"topic":["Computer Science"],"subtopic":["Algorithms"],"level":["4"],"priority":"Low","status":"Ready to Repeat"}}
 ---
 
 # Intro
@@ -57,6 +57,9 @@ public static void SelectionSort(int[] a)
     }
 }
 ```
+
+> [!TIP]
+> **Heapsort is selection sort done right.** Selection sort's cost is the O(n) linear scan to find the minimum each round. Replace that flat scan with a **heap**, which surrenders the min/max in O(log n), and the whole sort drops from O(n²) to O(n log n) — that's exactly heapsort. Seeing selection sort as "repeatedly select the extreme" makes the [[Software Engineering/02 Computer Science/Data Structures/Heap\|heap]] the natural optimization.
 
 ## When to Use
 

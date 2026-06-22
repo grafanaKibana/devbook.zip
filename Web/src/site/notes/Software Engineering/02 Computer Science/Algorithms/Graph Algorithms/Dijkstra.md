@@ -114,4 +114,7 @@ Shortest A→D path: A→B→C→D (cost 4)
 > **Parent**
 >  [[Software Engineering/02 Computer Science/Algorithms/Algorithms\|Algorithms]]
 >
+> **Pages**
+> - [[Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree\|Minimum Spanning Tree]]
+> - [[Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Topological Sort\|Topological Sort]]
 <!-- whats-next:end -->
