@@ -2,7 +2,7 @@ namespace DevBook.Evaluations.Common.Evaluation.Metrics;
 
 /// <summary>
 /// How a metric's raw value should be read, rounded and coloured in the report. One shared vocabulary
-/// for every judged scenario (RAG.Answer, AskAgent, …) — this replaces the per-scenario
+/// for every judged scenario (RAG.Answer, AnswerAgent, …) — this replaces the per-scenario
 /// <c>AnswerMetricKind</c> / <c>AgentMetricKind</c> / <c>SummaryMetricKind</c> enums. Direction
 /// (higher- vs lower-is-better) is a <em>separate</em> concern carried by
 /// <see cref="MetricDescriptor.Better"/>, not folded in here.

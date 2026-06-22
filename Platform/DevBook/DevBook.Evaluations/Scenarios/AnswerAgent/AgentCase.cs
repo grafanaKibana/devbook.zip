@@ -1,4 +1,4 @@
-namespace DevBook.Evaluations.Scenarios.AskAgent;
+namespace DevBook.Evaluations.Scenarios.AnswerAgent;
 
 /// <summary>
 /// A single agent task plus the (currently mocked) agent transcript that the judge scores.

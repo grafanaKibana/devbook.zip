@@ -1,15 +1,15 @@
-namespace DevBook.Evaluations.Scenarios.AskAgent;
+namespace DevBook.Evaluations.Scenarios.AnswerAgent;
 
 /// <summary>
-/// The agent task corpus for the AskAgent scenario. This is demo content: a real AskAgent
+/// The agent task corpus for the AnswerAgent scenario. This is demo content: a real AnswerAgent
 /// scenario would drive the live agent and feed its real transcripts to the judge. Here the
 /// transcripts are synthesised deterministically from a small topic × task-form grid so the
 /// generic (default) report rendering has data to show.
 /// </summary>
-public static class AskAgentCorpus
+public static class AnswerAgentCorpus
 {
-    public const string DisplayName = "AskAgent";
-    public const string DatasetLabel = "DevBook · AskAgent (demo)";
+    public const string DisplayName = "AnswerAgent";
+    public const string DatasetLabel = "DevBook · AnswerAgent (demo)";
 
     private static readonly (string Key, string Short, string Note, string Fact)[] Topics =
     [

@@ -1,4 +1,4 @@
-namespace DevBook.Evaluations.Scenarios.AskAgent;
+namespace DevBook.Evaluations.Scenarios.AnswerAgent;
 
 using System.Globalization;
 using DevBook.Evaluations.Common.Evaluation.Metrics;

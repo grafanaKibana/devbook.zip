@@ -4,7 +4,7 @@ using Microsoft.Extensions.AI.Evaluation;
 
 /// <summary>
 /// Standard rating curves mapping a raw value onto an <see cref="EvaluationRating"/>. Centralises the
-/// thresholds that judges previously each re-declared. Scenarios with a bespoke curve (e.g. AskAgent's
+/// thresholds that judges previously each re-declared. Scenarios with a bespoke curve (e.g. AnswerAgent's
 /// demo severity scale) keep their own; everyone else uses these.
 /// </summary>
 public static class Ratings

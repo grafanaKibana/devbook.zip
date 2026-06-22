@@ -1,4 +1,4 @@
-namespace DevBook.Evaluations.Scenarios.AskAgent;
+namespace DevBook.Evaluations.Scenarios.AnswerAgent;
 
 using DevBook.Evaluations.Common.Hosting;
 using DevBook.Evaluations.Common.Evaluation.Metrics;
@@ -14,18 +14,18 @@ using Microsoft.Extensions.AI.Evaluation;
 /// view; no part of this scenario is special-cased in the report generator.
 /// </summary>
 [Category("Offline")]
-public sealed class AskAgentEvaluation : EvaluationTestBase<AskAgentPrediction>
+public sealed class AnswerAgentEvaluation : EvaluationTestBase<AnswerAgentPrediction>
 {
     private static readonly IJudge<AgentCase> Judge = new MockAgentJudge();
 
     /// <inheritdoc />
-    protected override string ScenarioDisplayName => AskAgentCorpus.DisplayName;
+    protected override string ScenarioDisplayName => AnswerAgentCorpus.DisplayName;
 
     /// <inheritdoc />
-    protected override IEvaluator[] GetPerIterationEvaluators() => [new JudgeEvaluator<AgentCase, AskAgentCaseContext>(Judge, (context, _) => context.Case)];
+    protected override IEvaluator[] GetPerIterationEvaluators() => [new JudgeEvaluator<AgentCase, AnswerAgentCaseContext>(Judge, (context, _) => context.Case)];
 
     private static IEnumerable<TestCaseData> Cases()
-        => AskAgentCorpus.BuildCases().Select(agentCase => new TestCaseData(agentCase).SetArgDisplayNames(agentCase.Id));
+        => AnswerAgentCorpus.BuildCases().Select(agentCase => new TestCaseData(agentCase).SetArgDisplayNames(agentCase.Id));
 
     [Test]
     [TestCaseSource(nameof(Cases))]
@@ -51,14 +51,14 @@ public sealed class AskAgentEvaluation : EvaluationTestBase<AskAgentPrediction>
         var result = await scenarioRun.EvaluateAsync(
             messages,
             new ChatResponse(responseMessages),
-            additionalContext: [new AskAgentCaseContext(agentCase)]);
+            additionalContext: [new AnswerAgentCaseContext(agentCase)]);
 
-        this.Predictions.Add(new AskAgentPrediction(agentCase, result.Metrics.Values.ToList()));
+        this.Predictions.Add(new AnswerAgentPrediction(agentCase, result.Metrics.Values.ToList()));
     }
 
     /// <inheritdoc />
     protected override Dictionary<string, IEnumerable<SummaryMetric>> ComputeSummaryMetrics(
-        IReadOnlyList<AskAgentPrediction> predictions)
+        IReadOnlyList<AnswerAgentPrediction> predictions)
     {
         var scored = predictions
             .SelectMany(prediction => prediction.Metrics)
