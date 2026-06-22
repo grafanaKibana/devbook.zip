@@ -9,7 +9,8 @@ dg-publish: true
 priority: Medium
 level:
   - "4"
-status: Ready to Repeat
+status:
+  - Ready to Repeat
 ---
 
 # Intro

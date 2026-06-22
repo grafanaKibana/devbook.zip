@@ -23,6 +23,10 @@
       "pillColor": "red",
       "textColor": "default"
     },
+    "Repetition": {
+      "pillColor": "blue",
+      "textColor": "default"
+    },
     "Creation": {
       "pillColor": "orange",
       "textColor": "default"
@@ -49,6 +53,9 @@
     },
     "Programming": {
       "textColor": "default"
+    },
+    "Ready to Repeat": {
+      "pillColor": "purple"
     }
   },
   "propertyLongtextColors": {},
@@ -96,6 +103,7 @@
   "showColorSettings": false,
   "showTextColorSettings": false,
   "showHiddenSettings": false,
+  "showHiddenEmptySettings": false,
   "iconsFolder": "",
   "iconSize": 70,
   "iconTopMargin": 70,
@@ -173,5 +181,7 @@
   "hideMetadataContainerIfAllPropertiesHiddenEditing": false,
   "hideMetadataContainerIfAllPropertiesHiddenReading": true,
   "autoHidePropertiesWithBanner": false,
-  "hideCoverCollapsed": false
+  "hideCoverCollapsed": false,
+  "hidePropTitle": false,
+  "hideAddPropertyButton": false
 }

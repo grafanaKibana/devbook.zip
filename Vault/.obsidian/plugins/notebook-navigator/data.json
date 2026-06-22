@@ -571,7 +571,18 @@
   "propertyIcons": {
     "key:level": "arrow-up-01",
     "key:priority": "alert-circle",
-    "key:status": "list-checks"
+    "key:status": "list-checks",
+    "key:status=done": "check",
+    "key:status=not-started": "cross",
+    "key:status=ready to repeat": "question-mark-glyph",
+    "key:status=creation": "arrow-big-right-dash",
+    "key:level=4": "tally-4",
+    "key:level=3": "tally-3",
+    "key:level=2": "tally-2",
+    "key:level=1": "tally-1",
+    "key:priority=high": "signal-high",
+    "key:priority=low": "signal-low",
+    "key:priority=medium": "signal-medium"
   },
   "propertyColors": {
     "key:level=4": "#8b5cf6",
@@ -581,9 +592,10 @@
     "key:level=3": "#3b82f6",
     "key:level=1": "#84cc16",
     "key:level=2": "#06b6d4",
-    "key:status=creation": "#f59e0b",
+    "key:status=creation": "#f97316",
     "key:status=not-started": "#ef4444",
-    "key:status=ready to repeat": "#a855f7"
+    "key:status=ready to repeat": "#a855f7",
+    "key:status=done": "#22c55e"
   },
   "propertyBackgroundColors": {},
   "propertySortOverrides": {},
