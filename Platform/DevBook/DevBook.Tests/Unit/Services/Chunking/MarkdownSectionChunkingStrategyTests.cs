@@ -30,7 +30,7 @@ public sealed class MarkdownSectionChunkingStrategyTests
     public async Task ReplaceDocumentChunksAsync_WhitespaceDocument_ReplacesChunksWithEmptyCollection()
     {
         // Arrange
-        IReadOnlyCollection<ChunkModel>? capturedChunks = null;
+        IReadOnlyCollection<StoredChunk>? capturedChunks = null;
         var repository = CaptureReplace(EmptyDocumentId, chunks => capturedChunks = chunks);
         var service = CreateService(repository);
 
@@ -48,7 +48,7 @@ public sealed class MarkdownSectionChunkingStrategyTests
     public async Task ReplaceDocumentChunksAsync_DocumentHasMarkdownHeadings_CreatesChunksWithHeadingMetadataAndCitationLabels()
     {
         // Arrange
-        IReadOnlyCollection<ChunkModel>? capturedChunks = null;
+        IReadOnlyCollection<StoredChunk>? capturedChunks = null;
         var repository = CaptureReplace(RagDocumentId, chunks => capturedChunks = chunks);
         var service = CreateService(repository);
 
@@ -74,7 +74,7 @@ public sealed class MarkdownSectionChunkingStrategyTests
     public async Task ReplaceDocumentChunksAsync_SectionExceedsMaxChunkLength_SplitsSectionAndReplacesRepositoryChunks()
     {
         // Arrange
-        IReadOnlyCollection<ChunkModel>? capturedChunks = null;
+        IReadOnlyCollection<StoredChunk>? capturedChunks = null;
         var repository = CaptureReplace(LongDocumentId, chunks => capturedChunks = chunks);
         var service = CreateService(repository);
         var content = string.Join(". ", Enumerable.Range(0, 80).Select(index => $"Sentence {index:D2} explains markdown chunking behavior"));

@@ -20,7 +20,7 @@ public interface IChunkingStrategy
     /// <param name="embeddingService">Embedding service used by semantic chunking strategies.</param>
     /// <param name="cancellationToken">Token used to cancel chunking or embedding work.</param>
     /// <returns>The chunks created from the document content.</returns>
-    Task<IReadOnlyList<ChunkContent>> ChunkAsync(
+    Task<IReadOnlyList<DraftChunk>> ChunkAsync(
         Document document,
         IEmbeddingService embeddingService,
         CancellationToken cancellationToken = default);

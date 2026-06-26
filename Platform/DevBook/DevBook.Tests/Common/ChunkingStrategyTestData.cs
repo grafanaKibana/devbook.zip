@@ -36,14 +36,14 @@ internal static class ChunkingStrategyTestData
     /// <param name="capture">Receives the replacement chunks for assertions.</param>
     public static Mock<IChunkRepository> CaptureReplace(
         string expectedDocumentId,
-        Action<IReadOnlyCollection<ChunkModel>> capture)
+        Action<IReadOnlyCollection<StoredChunk>> capture)
     {
         var repository = new Mock<IChunkRepository>(MockBehavior.Strict);
         repository.Setup(mock => mock.ReplaceDocumentsChunksAsync(
                 It.Is<IReadOnlyCollection<string>>(documentIds => documentIds.Count == 1 && documentIds.Contains(expectedDocumentId)),
-                It.IsAny<IReadOnlyCollection<ChunkModel>>(),
+                It.IsAny<IReadOnlyCollection<StoredChunk>>(),
                 It.IsAny<CancellationToken>()))
-            .Callback<IReadOnlyCollection<string>, IReadOnlyCollection<ChunkModel>, CancellationToken>((_, chunks, _) => capture(chunks))
+            .Callback<IReadOnlyCollection<string>, IReadOnlyCollection<StoredChunk>, CancellationToken>((_, chunks, _) => capture(chunks))
             .Returns(Task.CompletedTask);
 
         return repository;
@@ -58,7 +58,7 @@ internal static class ChunkingStrategyTestData
         var repository = new Mock<IChunkRepository>(MockBehavior.Strict);
         repository.Setup(mock => mock.ReplaceDocumentsChunksAsync(
                 It.Is<IReadOnlyCollection<string>>(actual => actual.Order().SequenceEqual(documentIds.Order())),
-                It.IsAny<IReadOnlyCollection<ChunkModel>>(),
+                It.IsAny<IReadOnlyCollection<StoredChunk>>(),
                 It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 

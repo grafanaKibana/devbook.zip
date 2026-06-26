@@ -15,7 +15,7 @@ public interface IChunkRepository
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     Task ReplaceDocumentsChunksAsync(
         IReadOnlyCollection<string> documentIds,
-        IReadOnlyCollection<ChunkModel> chunks,
+        IReadOnlyCollection<StoredChunk> chunks,
         CancellationToken cancellationToken = default);
 
     /// <summary>

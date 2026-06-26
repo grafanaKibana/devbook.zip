@@ -38,7 +38,7 @@ public sealed class ChunkingService(
             return;
         }
 
-        var chunkDrafts = new List<ChunkDraft>();
+        var chunkDrafts = new List<StagedChunk>();
 
         foreach (var document in documents)
         {
@@ -51,7 +51,7 @@ public sealed class ChunkingService(
                 continue;
             }
 
-            chunkDrafts.AddRange(documentChunks.Select((chunk, index) => new ChunkDraft(document, chunk, index)));
+            chunkDrafts.AddRange(documentChunks.Select((chunk, index) => new StagedChunk(document, chunk, index)));
         }
 
         var documentIds = documents.Select(document => document.DocumentId).ToArray();
@@ -67,7 +67,7 @@ public sealed class ChunkingService(
             cancellationToken);
 
         var newChunks = chunkDrafts
-            .Select((draft, index) => new ChunkModel
+            .Select((draft, index) => new StoredChunk
             {
                 ChunkId = GenerateChunkId(draft.Document.DocumentId, draft.Document.SourceHash, draft.ChunkOrder, draft.Chunk.Text),
                 DocumentId = draft.Document.DocumentId,
@@ -97,5 +97,5 @@ public sealed class ChunkingService(
             : $"[[{title}#{heading}]]";
     }
 
-    private sealed record ChunkDraft(Document Document, ChunkContent Chunk, int ChunkOrder);
+    private sealed record StagedChunk(Document Document, DraftChunk Chunk, int ChunkOrder);
 }

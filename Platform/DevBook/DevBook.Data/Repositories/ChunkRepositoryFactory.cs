@@ -16,7 +16,7 @@ public sealed class ChunkRepositoryFactory(IMongoDatabase database) : IChunkRepo
     /// <returns>The chunk repository for the strategy.</returns>
     public IChunkRepository Create(ChunkingStrategyKind strategy)
     {
-        var chunks = database.GetCollection<ChunkModel>(ChunkCollectionNames.ForStrategy(strategy));
+        var chunks = database.GetCollection<StoredChunk>(ChunkCollectionNames.ForStrategy(strategy));
 
         return new ChunkRepository(chunks);
     }

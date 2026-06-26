@@ -25,7 +25,7 @@ public sealed class SemanticChunkingStrategy : IChunkingStrategy
     /// <param name="embeddingService">Embedding service used when the strategy needs semantic similarity.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>Semantic text chunks without heading metadata.</returns>
-    public async Task<IReadOnlyList<ChunkContent>> ChunkAsync(
+    public async Task<IReadOnlyList<DraftChunk>> ChunkAsync(
         Document document,
         IEmbeddingService embeddingService,
         CancellationToken cancellationToken = default)
@@ -42,7 +42,7 @@ public sealed class SemanticChunkingStrategy : IChunkingStrategy
         var embeddings = await embeddingService.GenerateEmbeddingsAsync(units, cancellationToken);
 
         return BuildSemanticChunks(units, embeddings)
-            .Select(text => new ChunkContent(text, null))
+            .Select(text => new DraftChunk(text, null))
             .ToArray();
     }
 

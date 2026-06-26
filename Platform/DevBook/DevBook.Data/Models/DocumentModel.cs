@@ -61,5 +61,5 @@ public sealed record Document
     /// Example: <c>[chunk_rag_md_0001, chunk_rag_md_0002, chunk_rag_md_0003]</c>
     /// </summary>
     [BsonIgnore]
-    public List<ChunkModel> Chunks { get; init; } = [];
+    public List<StoredChunk> Chunks { get; init; } = [];
 }

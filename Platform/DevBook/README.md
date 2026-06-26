@@ -65,8 +65,8 @@ sequenceDiagram
 
 | Type | Stage | Lives in |
 |---|---|---|
-| `ChunkContent` | produced by a chunking strategy, **before** embedding | `Services/Chunking/` |
-| `ChunkModel` | **stored** MongoDB chunk (text + embedding + citation) | `Models/` |
+| `DraftChunk` | produced by a chunking strategy, **before** embedding | `Services/Chunking/` |
+| `StoredChunk` | **stored** MongoDB chunk (text + embedding + citation) | `Models/` |
 | `RagChunkResponse` | **returned** to API callers and the answer agent | `Models/` |
 
 **Adding a strategy.** Implement `IChunkingStrategy` (or `IRerankingStrategy`), add a `…Kind` enum member, and register it in `AddServices()`. Chunkers are resolved at DI time and filtered by `Strategy`; rerankers are resolved per request through `IRerankingStrategyFactory`.

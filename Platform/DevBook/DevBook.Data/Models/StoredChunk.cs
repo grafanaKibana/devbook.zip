@@ -5,7 +5,7 @@ using MongoDB.Bson.Serialization.Attributes;
 /// <summary>
 /// Stored retrievable chunk derived from an ingested document.
 /// </summary>
-public sealed record ChunkModel
+public sealed record StoredChunk
 {
     /// <summary>
     /// Unique chunk identifier.

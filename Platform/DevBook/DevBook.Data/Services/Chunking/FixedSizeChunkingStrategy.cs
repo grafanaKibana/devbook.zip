@@ -30,7 +30,7 @@ public sealed class FixedSizeChunkingStrategy : IChunkingStrategy
     /// <param name="embeddingService">Embedding service used when the strategy needs semantic similarity.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>Text chunks with null headings.</returns>
-    public Task<IReadOnlyList<ChunkContent>> ChunkAsync(
+    public Task<IReadOnlyList<DraftChunk>> ChunkAsync(
         Document document,
         IEmbeddingService embeddingService,
         CancellationToken cancellationToken = default)
@@ -39,9 +39,9 @@ public sealed class FixedSizeChunkingStrategy : IChunkingStrategy
         ArgumentNullException.ThrowIfNull(embeddingService);
 
         var chunks = ChunkText.SplitFixedSize(document.PageContent, MaxChunkLength, OverlapLength)
-            .Select(text => new ChunkContent(text, null))
+            .Select(text => new DraftChunk(text, null))
             .ToArray();
 
-        return Task.FromResult<IReadOnlyList<ChunkContent>>(chunks);
+        return Task.FromResult<IReadOnlyList<DraftChunk>>(chunks);
     }
 }

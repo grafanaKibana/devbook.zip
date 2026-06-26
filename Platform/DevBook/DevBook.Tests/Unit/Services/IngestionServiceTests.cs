@@ -106,7 +106,7 @@ public sealed class IngestionServiceTests
         using var workspace = TestWorkspace.Create();
         workspace.WriteMarkdown(ScopedNotePath, Published("# Note\n\nFresh content.", "status: Creation"));
         Document? upsertedDocument = null;
-        IReadOnlyCollection<ChunkModel>? replacedChunks = null;
+        IReadOnlyCollection<StoredChunk>? replacedChunks = null;
         var documents = new Mock<IDocumentRepository>(MockBehavior.Strict);
         documents.Setup(mock => mock.GetBySourcePathAsync(ScopedNotePath, It.IsAny<CancellationToken>()))
             .ReturnsAsync((Document?)null);
@@ -542,14 +542,14 @@ public sealed class IngestionServiceTests
         return chunks;
     }
 
-    private static Mock<IChunkRepository> CaptureReplaceChunks(Action<string, IReadOnlyCollection<ChunkModel>> capture)
+    private static Mock<IChunkRepository> CaptureReplaceChunks(Action<string, IReadOnlyCollection<StoredChunk>> capture)
     {
         var chunks = new Mock<IChunkRepository>(MockBehavior.Strict);
         chunks.Setup(mock => mock.ReplaceDocumentsChunksAsync(
                 It.IsAny<IReadOnlyCollection<string>>(),
-                It.IsAny<IReadOnlyCollection<ChunkModel>>(),
+                It.IsAny<IReadOnlyCollection<StoredChunk>>(),
                 It.IsAny<CancellationToken>()))
-            .Callback<IReadOnlyCollection<string>, IReadOnlyCollection<ChunkModel>, CancellationToken>((documentIds, newChunks, _) =>
+            .Callback<IReadOnlyCollection<string>, IReadOnlyCollection<StoredChunk>, CancellationToken>((documentIds, newChunks, _) =>
             {
                 foreach (var documentId in documentIds)
                 {

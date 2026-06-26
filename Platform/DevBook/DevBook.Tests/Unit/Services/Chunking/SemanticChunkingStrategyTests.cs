@@ -32,7 +32,7 @@ public sealed class SemanticChunkingStrategyTests
     public async Task ReplaceDocumentChunksAsync_WhitespaceDocument_ReplacesChunksWithEmptyCollection()
     {
         // Arrange
-        IReadOnlyCollection<ChunkModel>? capturedChunks = null;
+        IReadOnlyCollection<StoredChunk>? capturedChunks = null;
         var repository = CaptureReplace(EmptyDocumentId, chunks => capturedChunks = chunks);
         var service = CreateService(repository);
 
@@ -50,7 +50,7 @@ public sealed class SemanticChunkingStrategyTests
     public async Task ReplaceDocumentChunksAsync_RelatedTextCrossesMarkdownHeadings_CreatesSingleChunkWithoutHeadingMetadata()
     {
         // Arrange
-        IReadOnlyCollection<ChunkModel>? capturedChunks = null;
+        IReadOnlyCollection<StoredChunk>? capturedChunks = null;
         var repository = CaptureReplace(RagDocumentId, chunks => capturedChunks = chunks);
         var generator = EmbeddingGeneratorMockFactory.Create(values => values.Select(_ => new[] { 1f, 0f }).ToArray());
         var service = CreateService(repository, generator.Object);
@@ -79,7 +79,7 @@ public sealed class SemanticChunkingStrategyTests
     public async Task ReplaceDocumentChunksAsync_EmbeddingSimilarityDrops_SplitsAtSemanticBoundary()
     {
         // Arrange
-        IReadOnlyCollection<ChunkModel>? capturedChunks = null;
+        IReadOnlyCollection<StoredChunk>? capturedChunks = null;
         var repository = CaptureReplace(BlocksDocumentId, chunks => capturedChunks = chunks);
         var generator = EmbeddingGeneratorMockFactory.Create(values => values.Select(value =>
             value.Contains("database", StringComparison.OrdinalIgnoreCase)
@@ -108,7 +108,7 @@ public sealed class SemanticChunkingStrategyTests
     public async Task ReplaceDocumentChunksAsync_SectionExceedsMaxChunkLength_SplitsIntoEmbeddableChunks()
     {
         // Arrange
-        IReadOnlyCollection<ChunkModel>? capturedChunks = null;
+        IReadOnlyCollection<StoredChunk>? capturedChunks = null;
         var repository = CaptureReplace(LongDocumentId, chunks => capturedChunks = chunks);
         var service = CreateService(repository);
         var content = string.Join(". ", Enumerable.Range(0, 80).Select(index => $"Sentence {index:D2} explains semantic chunking behavior"));

@@ -215,6 +215,11 @@ Established findings from this setup: reranking orders **`RRF > NoReranking > BM
 - **Flat, equal-weight evidence** — the scorer never used graded relevance, so the buckets were removed to keep the data honest about what's measured. If evidence *criticality* ever matters, reintroduce graded relevance and switch nDCG to graded gain.
 - **Strategy lists are code, not flags** — the chunking/reranking matrix lives in `SearchEvaluation.cs` and the default config in `RagSearchOptions.cs`, so evaluation stays aligned with the app.
 
+### Project shape: file-based scripts and two test frameworks
+
+- **The `Run*.cs` are self-contained file-based scripts, not part of the compiled assembly.** `RunDatasetGeneration.cs` and `RunReport.cs` are excluded from the project compile (`<Compile Remove>`) and launched as single-file apps (`dotnet run RunReport.cs -- …`); `RunReport.cs` even locates its HTML template relative to its own path. They deliberately stay standalone so the project keeps one real entry point (`RunEvaluation.cs`) and each script can be run or copied in isolation. **CWD trap:** always run them as `dotnet run <Script>.cs -- <args>`. A bare `dotnet run` from the project directory executes `RunEvaluation.cs` (the csproj entry point) instead of the script you meant.
+- **Two test frameworks, on purpose.** The Evaluations project hosts scenarios as **NUnit** tests (`[TestFixture]`/`[Test]`) because the eval host wants NUnit's live `TestContext.Progress` streaming and parallelism while a run executes. The separate `DevBook.Tests` project is the **xUnit** unit/integration suite. You will see two assertion idioms across the solution — that split is intentional, not drift.
+
 ### Key files
 
 | File | Role |

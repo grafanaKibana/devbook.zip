@@ -30,7 +30,7 @@ public sealed class FixedSizeChunkingStrategyTests
     public async Task ReplaceDocumentChunksAsync_WhitespaceDocument_ReplacesChunksWithEmptyCollection()
     {
         // Arrange
-        IReadOnlyCollection<ChunkModel>? capturedChunks = null;
+        IReadOnlyCollection<StoredChunk>? capturedChunks = null;
         var repository = CaptureReplace(EmptyDocumentId, chunks => capturedChunks = chunks);
         var service = CreateService(repository);
 
@@ -48,7 +48,7 @@ public sealed class FixedSizeChunkingStrategyTests
     public async Task ReplaceDocumentChunksAsync_TextExceedsMaxChunkLength_CreatesFixedSizeChunksWithoutHeadingMetadata()
     {
         // Arrange
-        IReadOnlyCollection<ChunkModel>? capturedChunks = null;
+        IReadOnlyCollection<StoredChunk>? capturedChunks = null;
         var repository = CaptureReplace(FixedDocumentId, chunks => capturedChunks = chunks);
         var service = CreateService(repository);
         var content = string.Join(' ', Enumerable.Repeat("Alpha beta gamma delta", 70));
@@ -73,7 +73,7 @@ public sealed class FixedSizeChunkingStrategyTests
     public async Task ReplaceDocumentChunksAsync_OverlapConfigured_CreatesOverlappingChunks()
     {
         // Arrange
-        IReadOnlyCollection<ChunkModel>? capturedChunks = null;
+        IReadOnlyCollection<StoredChunk>? capturedChunks = null;
         var repository = CaptureReplace(OverlapDocumentId, chunks => capturedChunks = chunks);
         var service = CreateService(repository);
         var content = string.Concat(Enumerable.Range(0, 1300).Select(index => (char)('a' + index % 26)));

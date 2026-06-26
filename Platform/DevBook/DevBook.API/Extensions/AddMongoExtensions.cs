@@ -21,7 +21,8 @@ public static class AddMongoExtensions
         /// <returns>The same service collection so registrations can be chained.</returns>
         public IServiceCollection AddMongoDb(IConfiguration configuration, out string connectionString, out string databaseName)
         {
-            var mongoConnectionString = configuration.GetConnectionString("MongoDb") ?? throw new ArgumentNullException();
+            var mongoConnectionString = configuration.GetConnectionString("MongoDb")
+                ?? throw new InvalidOperationException("MongoDB connection string is required. Configure ConnectionStrings:MongoDb.");
             connectionString = mongoConnectionString;
             databaseName = MongoDatabaseName;
 

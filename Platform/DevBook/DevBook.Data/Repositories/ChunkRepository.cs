@@ -9,7 +9,7 @@ using MongoDB.Driver;
 /// Persists and queries chunk records.
 /// </summary>
 /// <param name="chunks">MongoDB collection storing chunks for one chunking strategy.</param>
-public sealed class ChunkRepository(IMongoCollection<ChunkModel> chunks) : IChunkRepository
+public sealed class ChunkRepository(IMongoCollection<StoredChunk> chunks) : IChunkRepository
 {
     /// <summary>
     /// Replaces chunks for multiple documents in one delete and insert operation.
@@ -19,7 +19,7 @@ public sealed class ChunkRepository(IMongoCollection<ChunkModel> chunks) : IChun
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     public async Task ReplaceDocumentsChunksAsync(
         IReadOnlyCollection<string> documentIds,
-        IReadOnlyCollection<ChunkModel> newChunks,
+        IReadOnlyCollection<StoredChunk> newChunks,
         CancellationToken cancellationToken = default)
     {
         if (documentIds.Count == 0)

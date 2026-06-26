@@ -14,7 +14,7 @@ public static class ChunkVectorIndex
     public const string IndexName = "chunks_embedding_vector_idx";
 
     /// <summary>Document field that stores the embedding vector.</summary>
-    public const string VectorPath = nameof(ChunkModel.Embedding);
+    public const string VectorPath = nameof(StoredChunk.Embedding);
 
     /// <summary>Similarity function used by the vector index.</summary>
     public const string Similarity = "cosine";

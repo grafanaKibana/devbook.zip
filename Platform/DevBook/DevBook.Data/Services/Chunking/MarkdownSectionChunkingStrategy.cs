@@ -29,7 +29,7 @@ public sealed class MarkdownSectionChunkingStrategy : IChunkingStrategy
     /// <param name="embeddingService">Embedding service used when the strategy needs semantic similarity.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>Section chunks with heading metadata when the source section has a heading.</returns>
-    public Task<IReadOnlyList<ChunkContent>> ChunkAsync(
+    public Task<IReadOnlyList<DraftChunk>> ChunkAsync(
         Document document,
         IEmbeddingService embeddingService,
         CancellationToken cancellationToken = default)
@@ -37,14 +37,14 @@ public sealed class MarkdownSectionChunkingStrategy : IChunkingStrategy
         ArgumentNullException.ThrowIfNull(document);
         ArgumentNullException.ThrowIfNull(embeddingService);
 
-        var chunks = new List<ChunkContent>();
+        var chunks = new List<DraftChunk>();
 
         foreach (var section in ExtractSections(document.PageContent))
         {
-            chunks.AddRange(SplitRecursively(section.Content, 0).Select(text => new ChunkContent(text, section.Heading)));
+            chunks.AddRange(SplitRecursively(section.Content, 0).Select(text => new DraftChunk(text, section.Heading)));
         }
 
-        return Task.FromResult<IReadOnlyList<ChunkContent>>(chunks);
+        return Task.FromResult<IReadOnlyList<DraftChunk>>(chunks);
     }
 
     private static IReadOnlyList<Section> ExtractSections(string markdown)
