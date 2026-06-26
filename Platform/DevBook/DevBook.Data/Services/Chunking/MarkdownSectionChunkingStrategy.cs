@@ -96,7 +96,7 @@ public sealed class MarkdownSectionChunkingStrategy : IChunkingStrategy
 
         if (separatorIndex >= Separators.Length)
         {
-            return SplitFixedSize(normalizedContent);
+            return ChunkText.SplitFixedSize(normalizedContent, MaxChunkLength, overlapLength: 0);
         }
 
         var separator = Separators[separatorIndex];
@@ -130,48 +130,6 @@ public sealed class MarkdownSectionChunkingStrategy : IChunkingStrategy
         }
 
         chunks.AddRange(SplitRecursively(current, separatorIndex + 1));
-
-        return chunks;
-    }
-
-    private IReadOnlyList<string> SplitFixedSize(string content)
-    {
-        if (string.IsNullOrWhiteSpace(content))
-        {
-            return [];
-        }
-
-        var chunks = new List<string>();
-        var start = 0;
-
-        while (start < content.Length)
-        {
-            var remainingLength = content.Length - start;
-            var length = Math.Min(MaxChunkLength, remainingLength);
-            var endExclusive = start + length;
-
-            if (endExclusive < content.Length)
-            {
-                var splitIndex = FindWhitespaceBoundary(content, start, endExclusive);
-                if (splitIndex > start)
-                {
-                    endExclusive = splitIndex;
-                }
-            }
-
-            var text = content[start..endExclusive].Trim();
-            if (!string.IsNullOrWhiteSpace(text))
-            {
-                chunks.Add(text);
-            }
-
-            if (endExclusive >= content.Length)
-            {
-                break;
-            }
-
-            start = endExclusive;
-        }
 
         return chunks;
     }
@@ -215,19 +173,6 @@ public sealed class MarkdownSectionChunkingStrategy : IChunkingStrategy
         var headingMarkdown = markdown[heading.Span.Start..(heading.Span.End + 1)];
 
         return headingMarkdown.Trim().TrimStart('#').Trim();
-    }
-
-    private static int FindWhitespaceBoundary(string content, int start, int endExclusive)
-    {
-        for (var index = endExclusive; index > start; index--)
-        {
-            if (char.IsWhiteSpace(content[index - 1]))
-            {
-                return index;
-            }
-        }
-
-        return endExclusive;
     }
 
     private sealed record Section(string? Heading, string Content);

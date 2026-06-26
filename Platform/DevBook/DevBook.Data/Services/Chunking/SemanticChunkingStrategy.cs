@@ -92,44 +92,7 @@ public sealed class SemanticChunkingStrategy : IChunkingStrategy
 
         return normalizedContent.Length <= MaxChunkLength
             ? [normalizedContent]
-            : SplitFixedSize(normalizedContent);
-    }
-
-    private static IReadOnlyList<string> SplitFixedSize(string content)
-    {
-        var chunks = new List<string>();
-        var start = 0;
-
-        while (start < content.Length)
-        {
-            var remainingLength = content.Length - start;
-            var length = Math.Min(MaxChunkLength, remainingLength);
-            var endExclusive = start + length;
-
-            if (endExclusive < content.Length)
-            {
-                var splitIndex = FindWhitespaceBoundary(content, start, endExclusive);
-                if (splitIndex > start)
-                {
-                    endExclusive = splitIndex;
-                }
-            }
-
-            var text = content[start..endExclusive].Trim();
-            if (!string.IsNullOrWhiteSpace(text))
-            {
-                chunks.Add(text);
-            }
-
-            if (endExclusive >= content.Length)
-            {
-                break;
-            }
-
-            start = Math.Max(endExclusive - OverlapLength, start + 1);
-        }
-
-        return chunks;
+            : ChunkText.SplitFixedSize(normalizedContent, MaxChunkLength, OverlapLength);
     }
 
     private static double CosineSimilarity(IReadOnlyList<float> left, IReadOnlyList<float> right)
@@ -198,16 +161,4 @@ public sealed class SemanticChunkingStrategy : IChunkingStrategy
         current.Clear();
     }
 
-    private static int FindWhitespaceBoundary(string content, int start, int endExclusive)
-    {
-        for (var index = endExclusive; index > start; index--)
-        {
-            if (char.IsWhiteSpace(content[index - 1]))
-            {
-                return index;
-            }
-        }
-
-        return endExclusive;
-    }
 }

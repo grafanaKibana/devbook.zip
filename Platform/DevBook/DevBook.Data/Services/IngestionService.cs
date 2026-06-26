@@ -211,7 +211,7 @@ public sealed class IngestionService(
         var snapshots = new MarkdownFileSnapshot?[markdownFiles.Count];
 
         await Parallel.ForEachAsync(
-            markdownFiles.Select((path, index) => new { path, index }),
+            markdownFiles.Select((path, index) => (path, index)),
             new ParallelOptions
             {
                 MaxDegreeOfParallelism = Math.Max(1, options.MaxFileReadConcurrency),

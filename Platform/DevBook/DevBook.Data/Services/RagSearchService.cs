@@ -16,7 +16,7 @@ using Microsoft.Extensions.Options;
 /// <param name="chunkRepositoryFactory">Factory for the configured chunk collection.</param>
 /// <param name="rerankingStrategyFactory">Factory for the configured reranking strategy.</param>
 /// <param name="options">Configured retrieval and reranking options.</param>
-public class RagSearchService(
+public sealed class RagSearchService(
     IEmbeddingService embeddingService,
     IChunkRepositoryFactory chunkRepositoryFactory,
     IRerankingStrategyFactory rerankingStrategyFactory,

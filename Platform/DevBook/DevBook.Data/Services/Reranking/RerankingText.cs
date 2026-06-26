@@ -82,7 +82,9 @@ internal static partial class RerankingText
     }
 
     /// <summary>
-    /// Creates the searchable text used by lexical rerankers.
+    /// Creates the searchable text used by lexical rerankers. Heading and citation label are included
+    /// alongside the chunk body on purpose, so section titles and citations contribute to lexical
+    /// (BM25) relevance — not just the body text.
     /// </summary>
     /// <param name="candidate">The candidate chunk.</param>
     /// <returns>Heading, citation, and chunk text joined into one searchable string.</returns>
