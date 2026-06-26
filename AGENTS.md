@@ -2,6 +2,14 @@
 
 Obsidian knowledge base. These rules govern all human and agent operations.
 
+## The core paradigm
+
+1. Ask, don't assume. If something is unclear, ask before writing a single line. Never make silent assumptions about intent, architecture, or requirements. When running unattended, pick the most reasonable interpretation, proceed, and record the assumption rather than blocking.
+2. Implement the simplest solution for simple problems, better solutions for harder problems. Do not over-engineer or add flexibility that isn't needed yet.
+3. Don't touch unrelated code but please do surface bad code or design smells you discover with me so we can address them as a separate issue.
+4. Flag uncertainty explicitly. If you're unsure about something, see point 1 above. If it makes sense to do so, conduct a small, localised and low-risk experiment and bring the hypothesis and results to me to discuss. Confidence without certainty causes more damage than admitting a gap.
+5. I'm always open to ideas on better ways to do things. Please don't hesitate to suggest a better way, or one that has long lasting impact over a tactical change. (as a few examples)
+
 ## Vault layout
 
 - The editable Obsidian vault lives under `Vault/` in this repo.
@@ -121,7 +129,7 @@ These rules exist to make notes useful for the Senior .NET / AI engineering role
 - `dg-publish: true` notes MUST meet the quality bar below; otherwise keep `dg-publish: false` until ready.
 - Prefer short, high-signal writing: decision rules, pitfalls, and concrete examples over broad definitions.
 
-Writing paradigm
+#### Writing paradigm
 
 Eight principles govern note content. Apply them as judgment calls, not checklists.
 
@@ -138,7 +146,7 @@ These principles override specific section rules. If following a section templat
 
 These principles apply recursively. In a note covering multiple approaches, patterns, or strategies, apply them to each sub-concept — not just to the note as a whole.
 
-Required content (for any non-trivial concept page)
+#### Required content (for any non-trivial concept page)
 
 - These are content requirements, not mandatory section headings. For simple topics, keep content compact under `Intro`.
 
@@ -176,7 +184,7 @@ Required content (for any non-trivial concept page)
   - For non-trivial topics, include 2-10 links with at least 1 anchor source (official docs/spec/RFC) and 1 practice source (practitioner blog/postmortem/production deep-dive).
   - For simple/definitional topics, a single official docs link is sufficient — do not pad with marginally relevant links to hit a count.
 
-Section minimalism rule
+#### Section minimalism rule
 
 - For simple topics, prefer a compact note: `Intro` + inline example + `References`.
 - Add standalone `Examples` and `Pitfalls` headings only when they add unique value beyond Intro.
@@ -184,7 +192,7 @@ Section minimalism rule
 - A short mechanism explanation for a simple topic belongs in `Intro`, not a standalone `How It Works`. Reserve a dedicated mechanism heading for topics whose machinery genuinely needs its own section (multi-step flows, state lifecycles, non-obvious internals). For a single data structure or enum, one or two sentences of "how it works" under `Intro` is enough.
 - Avoid creating multiple tiny sections that fragment one idea.
 
-Scope-to-depth fit
+#### Scope-to-depth fit
 
 A note's depth must match its topic's actual complexity. More content is not always better.
 
@@ -196,7 +204,7 @@ Reviewer check: Does the note have the right depth for its topic? Flag overstuff
 
 **Publish gate for `dg-publish: true`**: A published note MUST have non-empty, substantive content — not a template skeleton or a heading with no body. This is content-based, not status-based. A note can be `status: Creation` and still be published if it already has meaningful content.
 
-Note size and splitting
+#### Note size and splitting
 
 When a note grows large, the reviewer MUST include a **Split Suggestion** section in their output — either recommending a split or explicitly justifying why it's not needed.
 
@@ -216,7 +224,7 @@ rg -c "^#+\s" "<note>.md"   # heading count
 
 **This rule is a suggestion, not a mandate.** The reviewer must justify their recommendation; the author decides whether to split.
 
-Mermaid diagram triggers
+#### Mermaid diagram triggers
 
 Add a Mermaid diagram when it reduces cognitive load, especially for:
 
@@ -226,14 +234,14 @@ Add a Mermaid diagram when it reduces cognitive load, especially for:
 - Architecture boundaries and dependencies → small `flowchart`/`graph` (C4-style simplified)
 - Data model relationships (EF Core, indexing, schemas) → `erDiagram` or `classDiagram`
 
-Tradeoffs and pros/cons triggers
+#### Tradeoffs and pros/cons triggers
 
 If the topic has multiple competing options, include a short comparison (table is fine):
 
 - .NET: `Task` vs `ValueTask`, `IEnumerable` vs `IAsyncEnumerable`, `Singleton` vs `Scoped`, `Include` vs projection, middleware vs filters.
 - AI: RAG vs fine-tuning, hybrid search vs vector-only, LLM-as-judge vs human eval, caching vs freshness, safety filters vs false positives.
 
-Question quality rules
+#### Question quality rules
 
 - Prefer direct interview questions that force judgment (scale, latency, cost, failure modes) over trivia.
 - Avoid scenario-based stems that set up a specific situation before the question ("A team does X and Y happens", "A system uses X with Y configuration"). Prefer direct questions that ask about the concept ("Why can X cause Y?", "When is X justified over Y?", "How does X reduce Y?").
@@ -243,7 +251,7 @@ Question quality rules
 - Do NOT answer a comparison question with a mechanical parallel matrix ("X when… / Y when… / X costs… / Y costs…"). That symmetry is a generated-text tell. Explain one side conversationally, then the other, and ground it in a concrete example.
 - Make the cost explicit when the question turns on a real tradeoff — but vary how. Weave it into the reasoning, name it in a closing line, or leave it out entirely when the question is mechanical and has no real tradeoff. Do NOT end every answer with an identical bolded `**Tradeoff:**` label; that uniformity is itself a machine-generated tell (see principle 8). The goal is to train engineering judgment — thinking in constraints and costs — not to fill a fixed slot.
 
-Reference hygiene
+#### Reference hygiene
 
 - Prefer stable/primary sources when available (Microsoft Learn/.NET API refs, RFCs, OWASP, NIST, Kubernetes docs).
 - Avoid link dumps; keep references focused and capped at 10 links.
@@ -262,7 +270,7 @@ This gate applies to all created or updated notes under `Vault/Software Engineer
 - Reviewer subagent is suggest-only: it MUST NOT edit files directly.
 - Completion is blocked until the reviewer reports zero findings.
 
-Reviewer objective
+#### Reviewer objective
 
 - Validate technical correctness and remove unsupported claims.
 - Validate source legitimacy and reference quality.
@@ -270,7 +278,7 @@ Reviewer objective
 - Ensure the note is a quick intro: what it is, why it matters, core mechanics, and interview readiness.
 - Ensure deeper study is delegated to curated references.
 
-Reviewer output contract (strict)
+#### Reviewer output contract (strict)
 
 - Treat every finding as a blocking error until fixed.
 - Provide a detailed summary with each finding explained using:
@@ -281,7 +289,7 @@ Reviewer output contract (strict)
 - Do not return generic advice. Feedback must be file-specific and actionable.
 - Every review MUST include a **Split Suggestion** section. When the note exceeds the size heuristic (>1200 words OR >12 headings AND 2+ distinct concepts), include a specific split recommendation. Otherwise, include "Split Suggestion: No split needed — [brief justification]".
 
-Minimum validation checklist (must all pass)
+#### Minimum validation checklist (must all pass)
 
 - Frontmatter and section structure match this contract and the selected template.
 - Intro is clear, concise, and in own words.
@@ -300,7 +308,7 @@ Minimum validation checklist (must all pass)
 - Voice: reads like a human engineer — no hype adjectives, inflated verbs, throat-clearing transitions, meta-signposting, heading restatement, or summary-restate endings; sentence and paragraph rhythm varies; real names and numbers appear in the prose, not only in code blocks.
 - References are annotated so the reader can assess relevance without clicking.
 
-Mandatory reviewer prompt format
+#### Mandatory reviewer prompt format
 
 Use this structure when spawning the reviewer subagent:
 

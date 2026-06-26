@@ -16,6 +16,7 @@ _site/
 .git/
 .sisyphus/
 .omo/
+.omc/
 .opencode
 **/.obsidian/workspace.json
 Vault/.obsidian/plugins/digitalgarden/data.json
