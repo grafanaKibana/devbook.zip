@@ -5,7 +5,7 @@ using DevBook.Data.Agents.Abstractions;
 /// <summary>
 /// Configures the answer agent.
 /// </summary>
-public record AnswerAgent : AgentConfigBase
+public sealed record AnswerAgent : AgentConfigBase
 {
     /// <summary>
     /// Gets the agent description.

@@ -3,6 +3,7 @@ namespace DevBook.API.Extensions;
 using System.Diagnostics;
 using DevBook.Data.Models;
 using DevBook.Data.Options;
+using DevBook.Data.Repositories;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -12,9 +13,6 @@ using MongoDB.Driver;
 /// </summary>
 public static class MongoSearchIndexExtensions
 {
-    private const string VectorIndexName = "chunks_embedding_vector_idx";
-    private const string VectorSimilarity = "cosine";
-
     extension(WebApplication app)
     {
         /// <summary>
@@ -30,12 +28,12 @@ public static class MongoSearchIndexExtensions
 
             logger.LogInformation(
                 "Starting Atlas Vector Search index check for {IndexName} with {VectorDimensions} dimensions.",
-                VectorIndexName,
+                ChunkVectorIndex.IndexName,
                 options.VectorDimensions);
 
             foreach (var strategy in Enum.GetValues<ChunkingStrategyKind>())
             {
-                var collectionName = $"chunks.{strategy.ToString().ToLowerInvariant()}";
+                var collectionName = ChunkCollectionNames.ForStrategy(strategy);
                 var collectionStopwatch = Stopwatch.StartNew();
                 await EnsureCollectionExistsAsync(database, collectionName, cancellationToken);
 
@@ -43,7 +41,7 @@ public static class MongoSearchIndexExtensions
                 {
                     logger.LogInformation(
                         "Atlas Vector Search index {IndexName} already exists on {CollectionName}; checked in {ElapsedMilliseconds} ms.",
-                        VectorIndexName,
+                        ChunkVectorIndex.IndexName,
                         collectionName,
                         collectionStopwatch.ElapsedMilliseconds);
                     continue;
@@ -53,7 +51,7 @@ public static class MongoSearchIndexExtensions
                 {
                     logger.LogInformation(
                         "Created Atlas Vector Search index {IndexName} on {CollectionName} in {ElapsedMilliseconds} ms.",
-                        VectorIndexName,
+                        ChunkVectorIndex.IndexName,
                         collectionName,
                         collectionStopwatch.ElapsedMilliseconds);
                 }
@@ -61,7 +59,7 @@ public static class MongoSearchIndexExtensions
 
             logger.LogInformation(
                 "Completed Atlas Vector Search index check for {IndexName} in {ElapsedMilliseconds} ms.",
-                VectorIndexName,
+                ChunkVectorIndex.IndexName,
                 totalStopwatch.ElapsedMilliseconds);
         }
     }
@@ -92,7 +90,7 @@ public static class MongoSearchIndexExtensions
         var indexes = await database
             .GetCollection<BsonDocument>(collectionName)
             .Aggregate()
-            .AppendStage<BsonDocument>(new BsonDocument("$listSearchIndexes", new BsonDocument("name", VectorIndexName)))
+            .AppendStage<BsonDocument>(new BsonDocument("$listSearchIndexes", new BsonDocument("name", ChunkVectorIndex.IndexName)))
             .ToListAsync(cancellationToken);
 
         return indexes.Count > 0;
@@ -111,7 +109,7 @@ public static class MongoSearchIndexExtensions
             {
                 new BsonDocument
                 {
-                    ["name"] = VectorIndexName,
+                    ["name"] = ChunkVectorIndex.IndexName,
                     ["type"] = "vectorSearch",
                     ["definition"] = new BsonDocument
                     {
@@ -120,9 +118,9 @@ public static class MongoSearchIndexExtensions
                             new BsonDocument
                             {
                                 ["type"] = "vector",
-                                ["path"] = nameof(ChunkModel.Embedding),
+                                ["path"] = ChunkVectorIndex.VectorPath,
                                 ["numDimensions"] = vectorDimensions,
-                                ["similarity"] = VectorSimilarity,
+                                ["similarity"] = ChunkVectorIndex.Similarity,
                             },
                         },
                     },
@@ -142,5 +140,5 @@ public static class MongoSearchIndexExtensions
     }
 
     private static bool IsSearchIndexAlreadyDefined(MongoCommandException exception) =>
-        exception.Message.Contains($"An index named \"{VectorIndexName}\" is already defined", StringComparison.OrdinalIgnoreCase);
+        exception.Message.Contains($"An index named \"{ChunkVectorIndex.IndexName}\" is already defined", StringComparison.OrdinalIgnoreCase);
 }

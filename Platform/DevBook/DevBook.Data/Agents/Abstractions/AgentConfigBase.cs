@@ -13,7 +13,7 @@ public abstract record AgentConfigBase : IAgentConfig
     /// <summary>
     /// Gets the agent configuration name.
     /// </summary>
-        public string Name => GetType().Name;
+    public string Name => GetType().Name;
 
     /// <summary>
     /// Gets the agent description.

@@ -13,6 +13,64 @@ This is a personal R&D proof of concept for learning RAG mechanics, not a produc
 - `DevBook.Evaluations`, test-style RAG search evaluation over generated search datasets and local HTML report generation.
 - `DevBook.Tests`, xUnit unit and integration tests for API endpoints, services, chunking, embedding batching, reranking, and evaluation metrics.
 
+## Architecture at a glance
+
+**Composition root.** [`DevBook.API/Program.cs`](DevBook.API/Program.cs) wires the app top to bottom. Every data-layer service, chunking/reranking strategy, repository, agent, and the embedding generator is registered in one place: [`DevBook.Data/ServiceCollectionExtensions.AddServices()`](DevBook.Data/ServiceCollectionExtensions.cs). The knobs and constants a newcomer goes looking for live in [`RagSearchOptions`](DevBook.Data/Options/RagSearchOptions.cs) (active chunker + reranker), [`RagRetrievalPolicy`](DevBook.Data/Services/RagRetrievalPolicy.cs) (top-K caps and candidate multipliers), and [`ChunkVectorIndex`](DevBook.Data/Repositories/ChunkVectorIndex.cs) (the Atlas index name/path/similarity).
+
+**Request lifecycle.** `POST /rag/ask` reuses the entire `/rag/search` retrieval path, then grounds an answer with the `AnswerAgent`. The shaded block is exactly what `/rag/search` runs on its own:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Client
+    participant EP as Minimal API endpoint
+    participant Ask as RagAskService
+    participant Search as RagSearchService
+    participant Embed as EmbeddingService
+    participant Repo as ChunkRepository
+    participant Mongo as MongoDB Atlas
+    participant Rerank as IRerankingStrategy
+    participant Agent as AnswerAgent
+    participant OpenAI as OpenAI API
+
+    Client->>EP: POST /rag/ask {question, topK}
+    EP->>Ask: AskAsync(request)
+    Ask->>Search: SearchAsync(query, topK)
+
+    rect rgb(235, 244, 255)
+        note over Search,Rerank: Shared retrieval path —<br/>this whole block is also POST /rag/search
+        Search->>Embed: GenerateEmbeddingAsync(query)
+        Embed->>OpenAI: embed query (OpenAIOptions)
+        OpenAI-->>Embed: query vector
+        Search->>Repo: VectorSearchAsync(vector, candidateCount)
+        note right of Repo: collection chosen by<br/>RagSearchOptions.ChunkingStrategy
+        Repo->>Mongo: $vectorSearch (chunks_embedding_vector_idx)
+        Mongo-->>Repo: candidate chunks
+        Search->>Rerank: RerankAsync(query, candidates, topK)
+        note right of Rerank: strategy chosen per request by<br/>RerankingStrategyFactory (RagSearchOptions)
+        Rerank-->>Search: top-K RagChunkResponse[]
+    end
+
+    Search-->>Ask: RagSearchResponse {mode, results}
+    note over Ask: POST /rag/search returns here
+    Ask->>Agent: RunAsync(BuildAgentInput(question, sources))
+    Agent->>OpenAI: grounded chat completion
+    OpenAI-->>Agent: answer text
+    Agent-->>Ask: response
+    Ask-->>EP: RagAskResponse {answer, sources}
+    EP-->>Client: 200 OK
+```
+
+**Chunk domain model.** Several "chunk" types appear in the code; they are pipeline stages, not duplicates:
+
+| Type | Stage | Lives in |
+|---|---|---|
+| `ChunkContent` | produced by a chunking strategy, **before** embedding | `Services/Chunking/` |
+| `ChunkModel` | **stored** MongoDB chunk (text + embedding + citation) | `Models/` |
+| `RagChunkResponse` | **returned** to API callers and the answer agent | `Models/` |
+
+**Adding a strategy.** Implement `IChunkingStrategy` (or `IRerankingStrategy`), add a `…Kind` enum member, and register it in `AddServices()`. Chunkers are resolved at DI time and filtered by `Strategy`; rerankers are resolved per request through `IRerankingStrategyFactory`.
+
 ## Prerequisites
 
 - MongoDB connection string in `ConnectionStrings:MongoDb`.
@@ -287,7 +345,7 @@ The API tries to create this Atlas Vector Search index at startup on every strat
 }
 ```
 
-The index dimensions come from `EmbeddingOptions:VectorDimensions`. The path is currently a PoC constant in the chunk repository and must stay `Embedding` unless the chunk model and index are changed together.
+The index dimensions come from `EmbeddingOptions:VectorDimensions`. The index name, vector path (`Embedding`), and similarity are defined once in [`ChunkVectorIndex`](DevBook.Data/Repositories/ChunkVectorIndex.cs) — the single source shared by index creation at startup ([`MongoSearchIndexExtensions`](DevBook.API/Extensions/MongoSearchIndexExtensions.cs)) and `$vectorSearch` at query time ([`ChunkRepository`](DevBook.Data/Repositories/ChunkRepository.cs)) — and must stay `Embedding` unless the chunk model and index are changed together.
 
 ## RAG troubleshooting
 

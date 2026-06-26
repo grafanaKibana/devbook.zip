@@ -17,8 +17,6 @@ public static class SearchMetricCalculator
     /// </summary>
     public const int PrimaryCutoffValue = 5;
 
-    private const int BootstrapIterations = 1_000;
-
     /// <summary>
     /// Evaluates search predictions and aggregates query-level metrics.
     /// </summary>
@@ -75,7 +73,7 @@ public static class SearchMetricCalculator
             var retrievedDocument = retrievedDocuments[index];
             var rank = index + 1;
 
-            if (!seenRetrievedSourcePaths.Add(NormalizePath(retrievedDocument.SourcePath)))
+            if (!seenRetrievedSourcePaths.Add(SearchTextNormalizer.NormalizePath(retrievedDocument.SourcePath)))
             {
                 duplicateRetrievedSourcePaths.Add(retrievedDocument.SourcePath);
             }
@@ -129,7 +127,7 @@ public static class SearchMetricCalculator
                 index + 1,
                 expectedDocument.SourcePath,
                 expectedDocument.Heading,
-                Preview(expectedDocument.Snippet),
+                SearchTextNormalizer.Preview(expectedDocument.Snippet),
                 matchedExpected[index]))
             .ToArray();
         var rankingMetrics = RankingCutoffs.ToDictionary(
@@ -156,7 +154,7 @@ public static class SearchMetricCalculator
                 duplicateRetrievedSourcePaths.OrderBy(path => path, StringComparer.OrdinalIgnoreCase).ToArray(),
                 new SearchChunkDiagnostics(
                     retrievedDocuments.Length,
-                    retrievedDocuments.Select(document => NormalizePath(document.SourcePath)).Distinct(StringComparer.OrdinalIgnoreCase).Count(),
+                    retrievedDocuments.Select(document => SearchTextNormalizer.NormalizePath(document.SourcePath)).Distinct(StringComparer.OrdinalIgnoreCase).Count(),
                     duplicateRetrievedSourcePaths.Count,
                     retrievedDocuments.Length == 0 ? 0 : retrievedDocuments.Average(document => document.Snippet?.Length ?? 0),
                     expectedCount == 0 ? 0 : matchedExpected.Count(matched => matched) / (double)expectedCount,
@@ -184,12 +182,12 @@ public static class SearchMetricCalculator
             mapValues.Average(),
             ndcgValues.Average(),
             new SearchRankingConfidenceIntervals(
-                BootstrapMeanConfidenceInterval(recallValues),
-                BootstrapMeanConfidenceInterval(precisionValues),
-                BootstrapMeanConfidenceInterval(hitRateValues),
-                BootstrapMeanConfidenceInterval(mrrValues),
-                BootstrapMeanConfidenceInterval(mapValues),
-                BootstrapMeanConfidenceInterval(ndcgValues)));
+                SearchRankingMath.BootstrapMeanConfidenceInterval(recallValues),
+                SearchRankingMath.BootstrapMeanConfidenceInterval(precisionValues),
+                SearchRankingMath.BootstrapMeanConfidenceInterval(hitRateValues),
+                SearchRankingMath.BootstrapMeanConfidenceInterval(mrrValues),
+                SearchRankingMath.BootstrapMeanConfidenceInterval(mapValues),
+                SearchRankingMath.BootstrapMeanConfidenceInterval(ndcgValues)));
     }
 
     private static SearchRBasedMetrics CreateRBasedSummary(IReadOnlyList<SearchQueryMetrics> queryMetrics)
@@ -210,32 +208,6 @@ public static class SearchMetricCalculator
             0,
             0);
 
-    private static SearchConfidenceInterval BootstrapMeanConfidenceInterval(IReadOnlyList<double> values)
-    {
-        if (values.Count == 0)
-        {
-            return new SearchConfidenceInterval(0, 0);
-        }
-
-        var random = new Random(17_317 + values.Count);
-        var means = new double[BootstrapIterations];
-        for (var iteration = 0; iteration < BootstrapIterations; iteration++)
-        {
-            var sum = 0d;
-            for (var sample = 0; sample < values.Count; sample++)
-            {
-                sum += values[random.Next(values.Count)];
-            }
-
-            means[iteration] = sum / values.Count;
-        }
-
-        Array.Sort(means);
-        return new SearchConfidenceInterval(
-            means[(int)Math.Floor((BootstrapIterations - 1) * 0.025)],
-            means[(int)Math.Ceiling((BootstrapIterations - 1) * 0.975)]);
-    }
-
     private static SearchRankingMetrics CreateRankingMetrics(
         int expectedCount,
         int retrievedCount,
@@ -253,8 +225,8 @@ public static class SearchMetricCalculator
             retrievedAtCutoff == 0 ? 0 : relevantCount / (double)retrievedAtCutoff,
             relevantCount > 0 ? 1d : 0d,
             firstRelevantRank is null ? 0 : 1d / firstRelevantRank.Value,
-            CalculateAveragePrecision(expectedCount, matchesAtCutoff),
-            CalculateNormalizedDiscountedCumulativeGain(expectedCount, matchesAtCutoff, cutoff));
+            SearchRankingMath.AveragePrecision(expectedCount, matchesAtCutoff, match => match.Rank, match => match.IsRelevant),
+            SearchRankingMath.NormalizedDiscountedCumulativeGain(expectedCount, matchesAtCutoff, cutoff, match => match.Rank, match => match.IsRelevant));
     }
 
     private static SearchRBasedMetrics CreateRBasedMetrics(int expectedCount, IReadOnlyList<SearchMatchDiagnostic> matches)
@@ -313,15 +285,15 @@ public static class SearchMetricCalculator
             recallAtR,
             sectionMatches.Any(match => match.Rank == 1 && match.IsRelevant) ? 1 : 0,
             fixedCutoffMatches.FirstOrDefault(match => match.IsRelevant) is { } firstRelevant ? 1d / firstRelevant.Rank : 0,
-            CalculateAveragePrecision(expectedCount, fixedCutoffMatches),
-            CalculateNormalizedDiscountedCumulativeGain(expectedCount, fixedCutoffMatches, RankingCutoffs.Max()),
+            SearchRankingMath.AveragePrecision(expectedCount, fixedCutoffMatches, match => match.Rank, match => match.IsRelevant),
+            SearchRankingMath.NormalizedDiscountedCumulativeGain(expectedCount, fixedCutoffMatches, RankingCutoffs.Max(), match => match.Rank, match => match.IsRelevant),
             expectedCount,
             matchedAtR);
     }
 
     private static bool MatchesSection(ExpectedSection section, SearchDocument retrievedDocument)
     {
-        if (!string.Equals(section.Key.SourceName, ExtractSourceName(retrievedDocument.SourcePath), StringComparison.Ordinal))
+        if (!string.Equals(section.Key.SourceName, SearchTextNormalizer.ExtractSourceName(retrievedDocument.SourcePath), StringComparison.Ordinal))
         {
             return false;
         }
@@ -332,99 +304,9 @@ public static class SearchMetricCalculator
             return true;
         }
 
-        return MatchesNormalizedContains(section.Heading, retrievedDocument.Heading)
-            || section.Snippets.Any(snippet => MatchesNormalizedContains(snippet, retrievedDocument.Snippet));
+        return SearchTextNormalizer.MatchesNormalizedContains(section.Heading, retrievedDocument.Heading)
+            || section.Snippets.Any(snippet => SearchTextNormalizer.MatchesNormalizedContains(snippet, retrievedDocument.Snippet));
     }
-
-    private static double CalculateAveragePrecision(int expectedCount, IReadOnlyList<SearchMatchDiagnostic> matchesAtCutoff)
-    {
-        if (expectedCount == 0)
-        {
-            return 0;
-        }
-
-        var relevantSeen = 0;
-        var precisionSum = 0d;
-        foreach (var match in matchesAtCutoff)
-        {
-            if (!match.IsRelevant)
-            {
-                continue;
-            }
-
-            relevantSeen++;
-            precisionSum += relevantSeen / (double)match.Rank;
-        }
-
-        return precisionSum / expectedCount;
-    }
-
-    private static double CalculateAveragePrecision(int expectedCount, IReadOnlyList<SectionMatch> matchesAtCutoff)
-    {
-        if (expectedCount == 0)
-        {
-            return 0;
-        }
-
-        var relevantSeen = 0;
-        var precisionSum = 0d;
-        foreach (var match in matchesAtCutoff)
-        {
-            if (!match.IsRelevant)
-            {
-                continue;
-            }
-
-            relevantSeen++;
-            precisionSum += relevantSeen / (double)match.Rank;
-        }
-
-        return precisionSum / expectedCount;
-    }
-
-    private static double CalculateNormalizedDiscountedCumulativeGain(
-        int expectedCount,
-        IReadOnlyList<SearchMatchDiagnostic> matchesAtCutoff,
-        int cutoff)
-    {
-        if (expectedCount == 0)
-        {
-            return 0;
-        }
-
-        var idealRelevantCount = Math.Min(expectedCount, cutoff);
-        var idealDcg = Enumerable.Range(1, idealRelevantCount).Sum(rank => Discount(rank));
-        if (idealDcg == 0)
-        {
-            return 0;
-        }
-
-        var dcg = matchesAtCutoff.Where(match => match.IsRelevant).Sum(match => Discount(match.Rank));
-        return dcg / idealDcg;
-    }
-
-    private static double CalculateNormalizedDiscountedCumulativeGain(
-        int expectedCount,
-        IReadOnlyList<SectionMatch> matchesAtCutoff,
-        int cutoff)
-    {
-        if (expectedCount == 0)
-        {
-            return 0;
-        }
-
-        var idealRelevantCount = Math.Min(expectedCount, cutoff);
-        var idealDcg = Enumerable.Range(1, idealRelevantCount).Sum(rank => Discount(rank));
-        if (idealDcg == 0)
-        {
-            return 0;
-        }
-
-        var dcg = matchesAtCutoff.Where(match => match.IsRelevant).Sum(match => Discount(match.Rank));
-        return dcg / idealDcg;
-    }
-
-    private static double Discount(int rank) => 1d / Math.Log2(rank + 1);
 
     private static double AverageAvailable(IReadOnlyList<SearchQueryMetrics> metrics, Func<SearchQueryMetrics, double?> selector)
     {
@@ -447,16 +329,13 @@ public static class SearchMetricCalculator
                 .FirstOrDefault();
 
         return new SearchScoreMetrics(
-            AverageOrNull(scoredMatches.Select(match => match.Score!.Value).ToArray()),
-            AverageOrNull(creditedScores),
-            AverageOrNull(uncreditedScores),
+            SearchRankingMath.AverageOrNull(scoredMatches.Select(match => match.Score!.Value).ToArray()),
+            SearchRankingMath.AverageOrNull(creditedScores),
+            SearchRankingMath.AverageOrNull(uncreditedScores),
             firstCredited?.Score is not null && highestUncreditedSameSource?.Score is not null
                 ? firstCredited.Score - highestUncreditedSameSource.Score
                 : null);
     }
-
-    private static double? AverageOrNull(IReadOnlyList<double> values)
-        => values.Count == 0 ? null : values.Average();
 
     private static RetrievedDocumentAnalysis AnalyzeRetrievedDocument(
         IReadOnlyList<SearchDocument> expectedDocuments,
@@ -484,13 +363,13 @@ public static class SearchMetricCalculator
                     index,
                     expectedDocument,
                     true,
-                    MatchesNormalizedContains(expectedDocument.Heading, retrievedDocument.Heading),
+                    SearchTextNormalizer.MatchesNormalizedContains(expectedDocument.Heading, retrievedDocument.Heading),
                     false,
                     "Matched expected chunk id.");
             }
 
-            var headingMatched = MatchesNormalizedContains(expectedDocument.Heading, retrievedDocument.Heading);
-            var snippetMatched = MatchesNormalizedContains(expectedDocument.Snippet, retrievedDocument.Snippet);
+            var headingMatched = SearchTextNormalizer.MatchesNormalizedContains(expectedDocument.Heading, retrievedDocument.Heading);
+            var snippetMatched = SearchTextNormalizer.MatchesNormalizedContains(expectedDocument.Snippet, retrievedDocument.Snippet);
 
             if (!MatchesExpectedEvidence(expectedDocument, headingMatched, snippetMatched))
             {
@@ -533,8 +412,8 @@ public static class SearchMetricCalculator
                 null,
                 alreadyMatchedExpected.ExpectedDocument,
                 true,
-                MatchesNormalizedContains(alreadyMatchedExpected.ExpectedDocument.Heading, retrievedDocument.Heading),
-                MatchesNormalizedContains(alreadyMatchedExpected.ExpectedDocument.Snippet, retrievedDocument.Snippet),
+                SearchTextNormalizer.MatchesNormalizedContains(alreadyMatchedExpected.ExpectedDocument.Heading, retrievedDocument.Heading),
+                SearchTextNormalizer.MatchesNormalizedContains(alreadyMatchedExpected.ExpectedDocument.Snippet, retrievedDocument.Snippet),
                 !string.IsNullOrWhiteSpace(alreadyMatchedExpected.ExpectedDocument.ChunkId)
                     ? "Chunk matched expected evidence that was already credited by an earlier retrieved result; duplicate retrieval does not add recall credit."
                     : "Source path matched an expected document that was already credited by an earlier retrieved result; duplicate retrieval does not add recall credit.");
@@ -576,107 +455,21 @@ public static class SearchMetricCalculator
         // normalized source name, so a citation-labelled expectation ("Bubble Sort") matches a path-labelled
         // retrieval ("…/Bubble Sort.md") regardless of which chunking strategy produced the retrieved chunk.
         // The heading and snippet evidence gate still disambiguates sibling sections in the same source.
-        return MatchesSourceName(expectedDocument.SourcePath, retrievedDocument.SourcePath);
+        return SearchTextNormalizer.MatchesSourceName(expectedDocument.SourcePath, retrievedDocument.SourcePath);
     }
-
-    private static bool MatchesSourceName(string expectedSourcePath, string retrievedSourcePath)
-    {
-        return string.Equals(ExtractSourceName(expectedSourcePath), ExtractSourceName(retrievedSourcePath), StringComparison.Ordinal);
-    }
-
-    private static string ExtractSourceName(string value)
-    {
-        var path = NormalizePath(value);
-
-        return TryParseWikiLink(path, out var wikiSource, out _)
-            ? NormalizeSourceName(wikiSource)
-            : NormalizeSourceName(path);
-    }
-
-    private static bool MatchesNormalizedContains(string? expectedValue, string? actualValue)
-    {
-        if (string.IsNullOrWhiteSpace(expectedValue) || string.IsNullOrWhiteSpace(actualValue))
-        {
-            return false;
-        }
-
-        return NormalizeText(actualValue).Contains(NormalizeText(expectedValue), StringComparison.OrdinalIgnoreCase);
-    }
-
-    private static string NormalizePath(string value)
-    {
-        return value.Replace('\\', '/').Trim();
-    }
-
-    private static string NormalizeText(string value)
-        => string.Join(' ', value.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries)).Trim();
 
     private static SearchSectionKey CreateSectionKey(SearchDocument document)
     {
-        var sourcePath = NormalizePath(document.SourcePath);
+        var sourcePath = SearchTextNormalizer.NormalizePath(document.SourcePath);
         var heading = document.Heading;
 
-        if (TryParseWikiLink(sourcePath, out var wikiSource, out var wikiHeading))
+        if (SearchTextNormalizer.TryParseWikiLink(sourcePath, out var wikiSource, out var wikiHeading))
         {
             sourcePath = wikiSource;
             heading = wikiHeading ?? heading;
         }
 
-        return new SearchSectionKey(NormalizeSourceName(sourcePath), NormalizeOptionalText(heading));
-    }
-
-    private static bool TryParseWikiLink(string value, out string source, out string? heading)
-    {
-        source = value;
-        heading = null;
-
-        if (!value.StartsWith("[[", StringComparison.Ordinal) || !value.EndsWith("]]", StringComparison.Ordinal))
-        {
-            return false;
-        }
-
-        var inner = value[2..^2];
-        var aliasIndex = inner.IndexOf('|', StringComparison.Ordinal);
-        if (aliasIndex >= 0)
-        {
-            inner = inner[..aliasIndex];
-        }
-
-        var headingIndex = inner.IndexOf('#', StringComparison.Ordinal);
-        if (headingIndex >= 0)
-        {
-            source = inner[..headingIndex];
-            heading = inner[(headingIndex + 1)..];
-            return true;
-        }
-
-        source = inner;
-        return true;
-    }
-
-    private static string NormalizeSourceName(string value)
-    {
-        var normalized = NormalizePath(value);
-        var fileName = normalized.Split('/', StringSplitOptions.RemoveEmptyEntries).LastOrDefault() ?? normalized;
-
-        return NormalizeText(fileName.EndsWith(".md", StringComparison.OrdinalIgnoreCase) ? fileName[..^3] : fileName)
-            .ToUpperInvariant();
-    }
-
-    private static string? NormalizeOptionalText(string? value)
-        => string.IsNullOrWhiteSpace(value) ? null : NormalizeText(value).ToUpperInvariant();
-
-    private static string? Preview(string? value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return null;
-        }
-
-        var normalized = string.Join(' ', value.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
-        const int maxLength = 180;
-
-        return normalized.Length <= maxLength ? normalized : normalized[..maxLength] + "…";
+        return new SearchSectionKey(SearchTextNormalizer.NormalizeSourceName(sourcePath), SearchTextNormalizer.NormalizeOptionalText(heading));
     }
 
     private sealed record RetrievedDocumentAnalysis(

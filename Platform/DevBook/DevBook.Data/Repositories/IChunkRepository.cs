@@ -8,14 +8,6 @@ using DevBook.Data.Models;
 public interface IChunkRepository
 {
     /// <summary>
-    /// Replaces all chunks for one document.
-    /// </summary>
-    /// <param name="documentId">Document identifier whose chunks are replaced.</param>
-    /// <param name="chunks">Chunks to persist for the document.</param>
-    /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    Task ReplaceDocumentChunksAsync(string documentId, IReadOnlyCollection<ChunkModel> chunks, CancellationToken cancellationToken = default);
-
-    /// <summary>
     /// Replaces chunks for multiple documents in one operation.
     /// </summary>
     /// <param name="documentIds">Document identifiers whose previous chunks are removed.</param>

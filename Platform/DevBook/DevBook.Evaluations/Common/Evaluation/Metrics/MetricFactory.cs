@@ -4,10 +4,9 @@ using Microsoft.Extensions.AI.Evaluation;
 
 /// <summary>
 /// Builds MEAI <see cref="NumericMetric"/> values from a <see cref="MetricDescriptor"/> plus a score,
-/// applying the report metadata convention in one place: the base <c>kind</c>/<c>group</c>/<c>better</c>/
-/// <c>short</c>/<c>info</c> hints, plus any caller-supplied <c>ctx:</c> judge-context and <c>meta:</c>
-/// evaluator rows. This is the single seam judges and evaluators funnel through, so no scenario
-/// hand-rolls metric metadata or a parallel "verdict" type that mirrors <see cref="EvaluationMetric"/>.
+/// applying the base <c>kind</c>/<c>group</c>/<c>better</c>/<c>short</c>/<c>info</c> metadata hints in one
+/// place. This is the single seam judges and evaluators funnel through, so no scenario hand-rolls metric
+/// metadata or a parallel "verdict" type that mirrors <see cref="EvaluationMetric"/>.
 /// </summary>
 public static class MetricFactory
 {
@@ -15,10 +14,7 @@ public static class MetricFactory
     /// Builds a numeric metric for <paramref name="descriptor"/>, rounding by kind (counts to whole
     /// numbers, everything else to three places) and attaching the standard report metadata.
     /// </summary>
-    /// <param name="metadata">
-    /// Extra metadata to merge verbatim — keys are expected to carry the <c>ctx:</c> (judge context) or
-    /// <c>meta:</c> (evaluator row) prefixes the report reads. The base hints are added automatically.
-    /// </param>
+    /// <param name="metadata">Optional extra metadata merged verbatim onto the metric; the base hints are added automatically.</param>
     public static NumericMetric Numeric(
         MetricDescriptor descriptor,
         double value,

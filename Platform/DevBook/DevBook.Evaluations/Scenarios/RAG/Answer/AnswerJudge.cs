@@ -20,7 +20,7 @@ using Microsoft.Extensions.AI.Evaluation;
 /// <see cref="JudgeEvaluator{TInput, TContext}"/>.
 /// </summary>
 /// <param name="judgeClient">Chat client for the judge model (wrap with <see cref="RateLimitingChatClient"/>).</param>
-/// <param name="judgeModelId">Judge model id, surfaced as <c>meta:judge</c> in the report.</param>
+/// <param name="judgeModelId">Judge model id used by the base judge for the model call.</param>
 /// <param name="metrics">The metric panel to score (full or reference-free, chosen by the scenario).</param>
 public sealed class AnswerJudge(IChatClient judgeClient, string judgeModelId, IReadOnlyList<MetricDescriptor> metrics)
     : LlmJudge<AnswerJudgeInput, AnswerJudge.JudgeResult>(judgeClient, judgeModelId, metrics)
@@ -62,7 +62,7 @@ public sealed class AnswerJudge(IChatClient judgeClient, string judgeModelId, IR
         {
             "Citation Rate" => CitationRateMetric(metric, input.Answer),
             "Completion Tokens" => TokenMetric(metric, input.Answer),
-            _ => SemanticMetric(metric, input.Case, result, judgeError, elapsedMs),
+            _ => SemanticMetric(metric, input.Case, result, judgeError),
         };
 
     // -------- deterministic metrics (no model output) --------
@@ -79,58 +79,27 @@ public sealed class AnswerJudge(IChatClient judgeClient, string judgeModelId, IR
             ? []
             : [EvaluationDiagnostic.Warning("No inline citation found — the answer agent may be ignoring the retrieved context.")];
 
-        var metadata = new Dictionary<string, string>(StringComparer.Ordinal)
-        {
-            ["ctx:citations"] = present ? string.Join(", ", citations) : "(none)",
-            ["meta:source"] = "deterministic",
-        };
-
-        return MetricFactory.Numeric(metric, present ? 1.0 : 0.0, present ? EvaluationRating.Exceptional : EvaluationRating.Unacceptable, failed: !present, reason, diagnostics, metadata);
+        return MetricFactory.Numeric(metric, present ? 1.0 : 0.0, present ? EvaluationRating.Exceptional : EvaluationRating.Unacceptable, failed: !present, reason, diagnostics);
     }
 
     private static NumericMetric TokenMetric(MetricDescriptor metric, string answer)
     {
         // No usage is surfaced through the agent run here, so approximate from text length (~4 chars/token).
-        var metadata = new Dictionary<string, string>(StringComparer.Ordinal)
-        {
-            ["meta:source"] = "agent runtime",
-            ["meta:unit"] = "tokens",
-        };
-
         return MetricFactory.Numeric(
             metric,
             Math.Round(answer.Length / 4.0),
             EvaluationRating.Unknown,
             failed: false,
-            "Informational metric — reported without a pass/fail interpretation.",
-            metadata: metadata);
+            "Informational metric — reported without a pass/fail interpretation.");
     }
 
     // -------- LLM-judged semantic metrics --------
 
-    private NumericMetric SemanticMetric(MetricDescriptor metric, RagGoldenCase answerCase, JudgeResult? result, string? judgeError, long elapsedMs)
+    private NumericMetric SemanticMetric(MetricDescriptor metric, RagGoldenCase answerCase, JudgeResult? result, string? judgeError)
     {
-        var metadata = new Dictionary<string, string>(StringComparer.Ordinal)
-        {
-            ["meta:judge"] = JudgeModelId,
-            ["meta:eval"] = $"{elapsedMs}ms",
-        };
-        if (metric.Name == "Correctness")
-        {
-            metadata["ctx:reference"] = Truncate(answerCase.ReferenceAnswer ?? "(none)", 240);
-        }
-        else if (metric.Name is "Faithfulness" or "Citation Validity" or "Completeness")
-        {
-            metadata["ctx:sources"] = RenderSources(answerCase.Expected);
-        }
-        else
-        {
-            metadata["ctx:question"] = answerCase.Query;
-        }
-
         if (result is null)
         {
-            return MetricFactory.Inconclusive(metric, judgeError ?? $"Judge returned no result for {metric.Name}.", metadata);
+            return MetricFactory.Inconclusive(metric, judgeError ?? $"Judge returned no result for {metric.Name}.");
         }
 
         var claims = result.Claims ?? [];
@@ -141,31 +110,28 @@ public sealed class AnswerJudge(IChatClient judgeClient, string judgeModelId, IR
             {
                 if (claims.Count == 0)
                 {
-                    return MetricFactory.Inconclusive(metric, "Judge extracted no claims from the answer.", metadata);
+                    return MetricFactory.Inconclusive(metric, "Judge extracted no claims from the answer.");
                 }
 
-                metadata["ctx:claims"] = RenderClaims(claims);
                 var supported = claims.Count(claim => claim.Supported);
                 var firstUnsupported = claims.FirstOrDefault(claim => !claim.Supported)?.Claim;
                 var detail = firstUnsupported is null ? string.Empty : $" Unsupported e.g.: \"{Truncate(firstUnsupported, 100)}\".";
-                return MetricFactory.Ratio(metric, supported, claims.Count, $"{supported}/{claims.Count} claims grounded in the sources.{detail}", metadata);
+                return MetricFactory.Ratio(metric, supported, claims.Count, $"{supported}/{claims.Count} claims grounded in the sources.{detail}");
             }
 
             case "Relevance":
             {
                 if (claims.Count == 0)
                 {
-                    return MetricFactory.Inconclusive(metric, "Judge extracted no claims from the answer.", metadata);
+                    return MetricFactory.Inconclusive(metric, "Judge extracted no claims from the answer.");
                 }
 
-                metadata["ctx:claims"] = RenderClaims(claims);
                 var relevant = claims.Count(claim => claim.Relevant);
-                return MetricFactory.Ratio(metric, relevant, claims.Count, $"{relevant}/{claims.Count} claims are relevant to the question.", metadata);
+                return MetricFactory.Ratio(metric, relevant, claims.Count, $"{relevant}/{claims.Count} claims are relevant to the question.");
             }
 
             case "Citation Validity":
             {
-                metadata["ctx:claims"] = RenderClaims(claims);
                 var cited = claims.Where(claim => claim.HasCitation).ToList();
                 if (cited.Count == 0)
                 {
@@ -175,12 +141,11 @@ public sealed class AnswerJudge(IChatClient judgeClient, string judgeModelId, IR
                         EvaluationRating.Unacceptable,
                         failed: true,
                         "No inline citations to validate — the answer made claims without citing sources.",
-                        [EvaluationDiagnostic.Warning("Answer claims carry no inline citations.")],
-                        metadata);
+                        [EvaluationDiagnostic.Warning("Answer claims carry no inline citations.")]);
                 }
 
                 var valid = cited.Count(claim => claim.CitationSupportsClaim);
-                return MetricFactory.Ratio(metric, valid, cited.Count, $"{valid}/{cited.Count} inline citations support their claim.", metadata);
+                return MetricFactory.Ratio(metric, valid, cited.Count, $"{valid}/{cited.Count} inline citations support their claim.");
             }
 
             case "Completeness":
@@ -188,21 +153,20 @@ public sealed class AnswerJudge(IChatClient judgeClient, string judgeModelId, IR
                 var points = result.ExpectedPoints ?? [];
                 if (points.Count == 0)
                 {
-                    return MetricFactory.Inconclusive(metric, "Judge listed no expected points for the question.", metadata);
+                    return MetricFactory.Inconclusive(metric, "Judge listed no expected points for the question.");
                 }
 
-                metadata["ctx:points"] = RenderPoints(points);
                 var covered = points.Count(point => point.Covered);
                 var firstMissing = points.FirstOrDefault(point => !point.Covered)?.Point;
                 var detail = firstMissing is null ? string.Empty : $" Missing e.g.: \"{Truncate(firstMissing, 100)}\".";
-                return MetricFactory.Ratio(metric, covered, points.Count, $"{covered}/{points.Count} expected points covered.{detail}", metadata);
+                return MetricFactory.Ratio(metric, covered, points.Count, $"{covered}/{points.Count} expected points covered.{detail}");
             }
 
             case "Correctness":
             {
                 if (result.Correctness is not { } dimension)
                 {
-                    return MetricFactory.Inconclusive(metric, "Judge returned no Correctness score.", metadata);
+                    return MetricFactory.Inconclusive(metric, "Judge returned no Correctness score.");
                 }
 
                 var value = Math.Clamp(dimension.Score, 1, 5);
@@ -210,38 +174,13 @@ public sealed class AnswerJudge(IChatClient judgeClient, string judgeModelId, IR
                 var reason = string.IsNullOrWhiteSpace(dimension.Reason)
                     ? $"Correctness scored {value:0.0}/5 ({rating})."
                     : $"Correctness scored {value:0.0}/5 ({rating}). {dimension.Reason.Trim()}";
-                return MetricFactory.Numeric(metric, value, rating, Ratings.IsFailing(rating), reason, MetricFactory.RatingDiagnostics(rating), metadata);
+                return MetricFactory.Numeric(metric, value, rating, Ratings.IsFailing(rating), reason, MetricFactory.RatingDiagnostics(rating));
             }
 
             default:
-                return MetricFactory.Inconclusive(metric, $"Unknown semantic metric {metric.Name}.", metadata);
+                return MetricFactory.Inconclusive(metric, $"Unknown semantic metric {metric.Name}.");
         }
     }
-
-    // -------- rendering helpers --------
-
-    private static string RenderSources(IReadOnlyList<RagGoldenChunk> sources)
-        => string.Join(
-            Environment.NewLine,
-            sources.Select((source, index) =>
-            {
-                var heading = string.IsNullOrWhiteSpace(source.Heading) ? string.Empty : $" #{source.Heading}";
-                return $"[{index + 1}] {source.CitationLabel}{heading}: {Truncate(source.Text, 160)}";
-            }));
-
-    private static string RenderClaims(IReadOnlyList<ClaimVerdict> claims)
-        => string.Join(
-            Environment.NewLine,
-            claims.Select(claim =>
-            {
-                var cite = !claim.HasCitation ? "–cite" : claim.CitationSupportsClaim ? "✓cite" : "✗cite";
-                return $"[{(claim.Supported ? "✓" : "✗")}grounded {(claim.Relevant ? "✓" : "✗")}relevant {cite}] {Truncate(claim.Claim ?? string.Empty, 120)}";
-            }));
-
-    private static string RenderPoints(IReadOnlyList<PointVerdict> points)
-        => string.Join(
-            Environment.NewLine,
-            points.Select(point => $"[{(point.Covered ? "✓" : "✗")}] {Truncate(point.Point ?? string.Empty, 120)}"));
 
     private static string Truncate(string value, int max)
         => value.Length <= max ? value : value[..max] + "…";

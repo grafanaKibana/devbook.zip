@@ -3,6 +3,7 @@ namespace DevBook.Evaluations.Common.Hosting;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Text.Json;
+using DevBook.Evaluations.Common.Evaluation.Metrics;
 using DevBook.Evaluations.Common.Evaluation.Summary;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.AI.Evaluation;
@@ -133,6 +134,50 @@ public abstract class EvaluationTestBase<TPrediction>
     /// <returns>Summary metrics grouped by report iteration name.</returns>
     protected abstract Dictionary<string, IEnumerable<SummaryMetric>> ComputeSummaryMetrics(
         IReadOnlyList<TPrediction> predictions);
+
+    /// <summary>
+    /// Builds the standard single-group ("overall") panel summary shared by judge-panel scenarios: the
+    /// mean of each non-informational metric, a <c>PassRate</c> (share of predictions whose metrics all
+    /// pass), and a <c>SampleCount</c>. Scenarios differ only by their metric source and the two
+    /// description strings, so this is the one place the aggregation logic lives.
+    /// </summary>
+    /// <param name="panel">Metric descriptors to summarize.</param>
+    /// <param name="predictions">Captured predictions to aggregate.</param>
+    /// <param name="getMetrics">Extracts the scored metrics from one prediction.</param>
+    /// <param name="passRateDescription">Description for the <c>PassRate</c> summary metric.</param>
+    /// <param name="sampleCountDescription">Description for the <c>SampleCount</c> summary metric.</param>
+    protected static Dictionary<string, IEnumerable<SummaryMetric>> BuildPanelSummary(
+        IEnumerable<MetricDescriptor> panel,
+        IReadOnlyList<TPrediction> predictions,
+        Func<TPrediction, IEnumerable<EvaluationMetric>> getMetrics,
+        string passRateDescription,
+        string sampleCountDescription)
+    {
+        var scored = predictions
+            .SelectMany(getMetrics)
+            .OfType<NumericMetric>()
+            .ToList();
+
+        var metrics = panel
+            .Where(metric => !metric.Informational)
+            .Select(metric =>
+            {
+                var values = scored.Where(value => value.Name == metric.Name).Select(value => value.Value ?? 0).ToList();
+                var mean = values.Count == 0 ? 0 : values.Average();
+                var kind = metric.Kind == MetricKind.Fraction ? SummaryMetricKind.Percentage : SummaryMetricKind.PlainNumber;
+                return new SummaryMetric(metric.Name, mean, metric.Description, kind);
+            })
+            .ToList();
+
+        var passRate = predictions.Count == 0
+            ? 0
+            : predictions.Count(prediction => getMetrics(prediction).All(metric => metric.Interpretation?.Failed != true)) / (double)predictions.Count;
+
+        metrics.Add(new SummaryMetric("PassRate", passRate, passRateDescription, SummaryMetricKind.Percentage));
+        metrics.Add(new SummaryMetric("SampleCount", predictions.Count, sampleCountDescription, SummaryMetricKind.Count));
+
+        return new Dictionary<string, IEnumerable<SummaryMetric>> { ["overall"] = metrics };
+    }
 
     /// <summary>
     /// Loads and deserializes a dataset JSON file from the Datasets output folder.

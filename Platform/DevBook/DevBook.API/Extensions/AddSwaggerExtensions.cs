@@ -13,7 +13,6 @@ public static class AddSwaggerExtensions
         /// <returns>The same service collection so calls can be chained.</returns>
         public IServiceCollection AddOpenApiWithSwagger()
         {
-            // Add services to the container.
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             services.AddOpenApi();
             services.AddEndpointsApiExplorer();

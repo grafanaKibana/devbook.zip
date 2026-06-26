@@ -170,32 +170,12 @@ public sealed class AnswerEvaluation : EvaluationTestBase<AnswerPrediction>
     /// <inheritdoc />
     protected override Dictionary<string, IEnumerable<SummaryMetric>> ComputeSummaryMetrics(
         IReadOnlyList<AnswerPrediction> predictions)
-    {
-        var scored = predictions
-            .SelectMany(prediction => prediction.Metrics)
-            .OfType<NumericMetric>()
-            .ToList();
-
-        var metrics = SelectedMetrics()
-            .Where(metric => !metric.Informational)
-            .Select(metric =>
-            {
-                var values = scored.Where(value => value.Name == metric.Name).Select(value => value.Value ?? 0).ToList();
-                var mean = values.Count == 0 ? 0 : values.Average();
-                var kind = metric.Kind == MetricKind.Fraction ? SummaryMetricKind.Percentage : SummaryMetricKind.PlainNumber;
-                return new SummaryMetric(metric.Name, mean, metric.Description, kind);
-            })
-            .ToList();
-
-        var passRate = predictions.Count == 0
-            ? 0
-            : predictions.Count(prediction => prediction.Metrics.All(metric => metric.Interpretation?.Failed != true)) / (double)predictions.Count;
-
-        metrics.Add(new SummaryMetric("PassRate", passRate, "Share of answers with no metric below its failure threshold.", SummaryMetricKind.Percentage));
-        metrics.Add(new SummaryMetric("SampleCount", predictions.Count, "Number of answers scored.", SummaryMetricKind.Count));
-
-        return new Dictionary<string, IEnumerable<SummaryMetric>> { ["overall"] = metrics };
-    }
+        => BuildPanelSummary(
+            SelectedMetrics(),
+            predictions,
+            prediction => prediction.Metrics,
+            "Share of answers with no metric below its failure threshold.",
+            "Number of answers scored.");
 
     private static IConfiguration BuildConfiguration()
         => new ConfigurationBuilder()

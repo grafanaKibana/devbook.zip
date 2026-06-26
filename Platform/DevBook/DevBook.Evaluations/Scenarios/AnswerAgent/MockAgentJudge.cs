@@ -65,8 +65,7 @@ public sealed class MockAgentJudge : IJudge<AgentCase>
             metric.Informational
                 ? "Informational metric — reported without a pass/fail interpretation."
                 : ReasonFor(metric, rating, valueText),
-            metric.Informational ? [] : Diagnostics(metric, rating, value),
-            BuildMetadata(metric, agentCase));
+            metric.Informational ? [] : Diagnostics(metric, rating, value));
     }
 
     /// <summary>
@@ -192,42 +191,6 @@ public sealed class MockAgentJudge : IJudge<AgentCase>
         }
 
         return diagnostics;
-    }
-
-    // Report metadata convention (read back generically by RunReport): the optional "ctx:<label>"
-    // judge-context blocks and "meta:<label>" evaluator rows. The base presentation hints
-    // (kind/group/better/short/info) are added by MetricFactory from the descriptor.
-    private static IReadOnlyDictionary<string, string> BuildMetadata(MetricDescriptor metric, AgentCase agentCase)
-    {
-        var metadata = new Dictionary<string, string>(StringComparer.Ordinal);
-
-        if (metric.Informational)
-        {
-            metadata["meta:source"] = "agent runtime";
-            metadata["meta:unit"] = "tokens";
-            return metadata;
-        }
-
-        switch (metric.Name)
-        {
-            case "Groundedness" or "Relevance" or "Completeness":
-                metadata["ctx:context"] = agentCase.ContextNote;
-                break;
-            case "Equivalence":
-                metadata["ctx:reference"] = agentCase.Answer.Length > 120 ? agentCase.Answer[..120] + "…" : agentCase.Answer;
-                break;
-            case "Tool Call Accuracy":
-                metadata["ctx:expected"] = agentCase.ExpectedTools;
-                metadata["ctx:actual"] = string.Join(", ", agentCase.ToolCalls.Select(call => call.Name));
-                break;
-        }
-
-        var random = new Mulberry32(Fnv1a(agentCase.Id + metric.Name + "meta"));
-        metadata["meta:judge"] = "gpt-4o";
-        metadata["meta:prompt"] = $"{(int)Math.Round(380 + agentCase.ApproxTokens * 0.9 + random.NextDouble() * 240)}t";
-        metadata["meta:completion"] = $"{(int)Math.Round(30 + random.NextDouble() * 90)}t";
-        metadata["meta:eval"] = $"{(int)Math.Round(420 + random.NextDouble() * 1500)}ms";
-        return metadata;
     }
 
     private static uint Fnv1a(string text)

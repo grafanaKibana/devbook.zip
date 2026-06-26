@@ -11,20 +11,6 @@ using MongoDB.Driver;
 /// <param name="chunks">MongoDB collection storing chunks for one chunking strategy.</param>
 public sealed class ChunkRepository(IMongoCollection<ChunkModel> chunks) : IChunkRepository
 {
-    private const string VectorIndexName = "chunks_embedding_vector_idx";
-    private const string VectorPath = nameof(ChunkModel.Embedding);
-    /// <summary>
-    /// Replaces all chunks for one document.
-    /// </summary>
-    /// <param name="documentId">Document identifier.</param>
-    /// <param name="newChunks">Chunks to store for the document.</param>
-    /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    public async Task ReplaceDocumentChunksAsync(
-        string documentId,
-        IReadOnlyCollection<ChunkModel> newChunks,
-        CancellationToken cancellationToken = default) =>
-        await ReplaceDocumentsChunksAsync([documentId], newChunks, cancellationToken);
-
     /// <summary>
     /// Replaces chunks for multiple documents in one delete and insert operation.
     /// </summary>
@@ -75,8 +61,8 @@ public sealed class ChunkRepository(IMongoCollection<ChunkModel> chunks) : IChun
         {
             new BsonDocument("$vectorSearch", new BsonDocument
             {
-                ["index"] = VectorIndexName,
-                ["path"] = VectorPath,
+                ["index"] = ChunkVectorIndex.IndexName,
+                ["path"] = ChunkVectorIndex.VectorPath,
                 ["queryVector"] = new BsonArray(queryVector.Select(value => (double)value)),
                 ["numCandidates"] = RagRetrievalPolicy.GetVectorSearchNumCandidates(candidateCount),
                 ["limit"] = candidateCount,

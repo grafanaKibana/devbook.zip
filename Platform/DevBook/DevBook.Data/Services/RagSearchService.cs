@@ -62,13 +62,15 @@ public class RagSearchService(
         var candidates = await chunkRepository.VectorSearchAsync(embedding, candidateCount, cancellationToken);
         var results = await rerankingStrategy.RerankAsync(query, candidates, topK, cancellationToken);
 
+        var mode = $"vector+{options.RerankingStrategy}";
+
         logger.LogInformation(
             "Completed RAG search in {ElapsedMilliseconds} ms. Retrieved {CandidateCount} candidates, returned {ResultCount} results, mode {Mode}.",
             stopwatch.ElapsedMilliseconds,
             candidates.Count,
             results.Count,
-            $"vector+{options.RerankingStrategy}");
+            mode);
 
-        return new RagSearchResponse(query, $"vector+{options.RerankingStrategy}", results);
+        return new RagSearchResponse(query, mode, results);
     }
 }

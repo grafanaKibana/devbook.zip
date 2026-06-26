@@ -1,9 +1,6 @@
 namespace DevBook.Data.Services;
 
-using System.Buffers.Binary;
 using System.Diagnostics;
-using System.IO.Hashing;
-using System.Text;
 using DevBook.Data.Models;
 using DevBook.Data.Options;
 using DevBook.Data.Repositories;
@@ -44,16 +41,16 @@ public sealed class IngestionService(
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        var ingestionRootDirectory = ResolveIngestionRootDirectory(hostEnvironment.ContentRootPath, options.ContentRootPath);
+        var ingestionRootDirectory = FilePathHelper.ResolveIngestionRootDirectory(hostEnvironment.ContentRootPath, options.ContentRootPath);
         var sourcePath = string.IsNullOrWhiteSpace(request.SourcePath) ? string.Empty : request.SourcePath;
-        var sourceDirectory = ResolveSourceDirectory(ingestionRootDirectory, sourcePath);
+        var sourceDirectory = FilePathHelper.ResolveSourceDirectory(ingestionRootDirectory, sourcePath);
 
         if (!Directory.Exists(sourceDirectory))
         {
             throw new DirectoryNotFoundException($"Source directory was not found: '{sourceDirectory}'.");
         }
 
-        var markdownFiles = GetMarkdownFiles(ingestionRootDirectory, sourceDirectory, request.FileName);
+        var markdownFiles = FilePathHelper.GetMarkdownFiles(ingestionRootDirectory, sourceDirectory, request.FileName);
         var markdownSnapshots = await ReadMarkdownFileSnapshotsAsync(markdownFiles, ingestionRootDirectory, cancellationToken);
         var createdCount = 0;
         var updatedCount = 0;
@@ -74,7 +71,7 @@ public sealed class IngestionService(
 
         if (isFolderIngestion)
         {
-            var sourcePathPrefix = GetSourcePathPrefix(ingestionRootDirectory, sourceDirectory);
+            var sourcePathPrefix = FilePathHelper.GetSourcePathPrefix(ingestionRootDirectory, sourceDirectory);
             var existingDocuments = await documentRepository.GetBySourcePathPrefixAsync(sourcePathPrefix, cancellationToken);
             existingDocumentsBySourcePath = existingDocuments.ToDictionary(document => document.SourcePath, StringComparer.Ordinal);
             var currentSourcePaths = markdownSnapshots
@@ -113,17 +110,7 @@ public sealed class IngestionService(
 
             if (existingDocument is null)
             {
-                var newDocument = new Document
-                {
-                    DocumentId = GenerateDocumentId(snapshot.SourcePath),
-                    SourcePath = snapshot.SourcePath,
-                    Title = snapshot.Title,
-                    RawMarkdown = snapshot.RawMarkdown,
-                    Frontmatter = snapshot.Frontmatter,
-                    PageContent = snapshot.PageContent,
-                    SourceHash = snapshot.SourceHash,
-                    UpdatedAt = snapshot.UpdatedAt,
-                };
+                var newDocument = CreateDocument(snapshot, HashingHelper.GenerateDocumentId(snapshot.SourcePath));
 
                 createdCount++;
                 changedDocuments.Add(newDocument);
@@ -138,17 +125,7 @@ public sealed class IngestionService(
                 continue;
             }
 
-            var updatedDocument = new Document
-            {
-                DocumentId = existingDocument.DocumentId,
-                SourcePath = snapshot.SourcePath,
-                Title = snapshot.Title,
-                RawMarkdown = snapshot.RawMarkdown,
-                Frontmatter = snapshot.Frontmatter,
-                PageContent = snapshot.PageContent,
-                SourceHash = snapshot.SourceHash,
-                UpdatedAt = snapshot.UpdatedAt,
-            };
+            var updatedDocument = CreateDocument(snapshot, existingDocument.DocumentId);
 
             updatedCount++;
             changedDocuments.Add(updatedDocument);
@@ -192,6 +169,19 @@ public sealed class IngestionService(
             changedDocumentIds);
     }
 
+    private static Document CreateDocument(MarkdownFileSnapshot snapshot, string documentId) =>
+        new()
+        {
+            DocumentId = documentId,
+            SourcePath = snapshot.SourcePath,
+            Title = snapshot.Title,
+            RawMarkdown = snapshot.RawMarkdown,
+            Frontmatter = snapshot.Frontmatter,
+            PageContent = snapshot.PageContent,
+            SourceHash = snapshot.SourceHash,
+            UpdatedAt = snapshot.UpdatedAt,
+        };
+
     private IReadOnlyList<IChunkingService> GetSelectedChunkingServices(ChunkingStrategyKind? requestedStrategy)
     {
         var services = chunkingServices.ToArray();
@@ -230,10 +220,10 @@ public sealed class IngestionService(
             async (item, token) =>
             {
                 var rawMarkdown = await File.ReadAllTextAsync(item.path, token);
-                var markdownParts = SplitFrontmatter(rawMarkdown);
-                var normalizedSourcePath = NormalizePath(Path.GetRelativePath(ingestionRootDirectory, item.path));
+                var markdownParts = MarkdownHelper.SplitFrontmatter(rawMarkdown);
+                var normalizedSourcePath = FilePathHelper.NormalizePath(Path.GetRelativePath(ingestionRootDirectory, item.path));
 
-                if (!ShouldIngest(normalizedSourcePath, markdownParts.Frontmatter))
+                if (!MarkdownHelper.ShouldIngest(normalizedSourcePath, markdownParts.Frontmatter))
                 {
                     return;
                 }
@@ -244,198 +234,12 @@ public sealed class IngestionService(
                     rawMarkdown,
                     markdownParts.Frontmatter,
                     markdownParts.PageContent,
-                    ComputeXxHash3(rawMarkdown),
+                    HashingHelper.ComputeXxHash3(rawMarkdown),
                     DateTimeOffset.UtcNow);
             });
 
         return snapshots.OfType<MarkdownFileSnapshot>().ToArray();
     }
-
-    private static bool ShouldIngest(string normalizedSourcePath, string frontmatter) =>
-        !IsTemplatePath(normalizedSourcePath) && HasPublishFlag(frontmatter);
-
-    private static bool IsTemplatePath(string normalizedSourcePath) =>
-        normalizedSourcePath
-            .Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Any(segment => string.Equals(segment, "Templates", StringComparison.OrdinalIgnoreCase));
-
-    private static bool HasPublishFlag(string frontmatter) =>
-        frontmatter
-            .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Any(line =>
-            {
-                var parts = line.Split(':', 2, StringSplitOptions.TrimEntries);
-                return parts.Length == 2
-                       && string.Equals(parts[0], "dg-publish", StringComparison.OrdinalIgnoreCase)
-                       && string.Equals(parts[1].Trim('\'', '"'), "true", StringComparison.OrdinalIgnoreCase);
-            });
-
-    private static string GetSourcePathPrefix(string ingestionRootDirectory, string sourceDirectory)
-    {
-        var relativePath = NormalizePath(Path.GetRelativePath(ingestionRootDirectory, sourceDirectory));
-
-        return string.Equals(relativePath, ".", StringComparison.Ordinal) ? string.Empty : relativePath.TrimEnd('/');
-    }
-
-    private static string ResolveIngestionRootDirectory(string hostContentRootPath, string configuredContentRootPath)
-    {
-        if (string.IsNullOrWhiteSpace(configuredContentRootPath))
-        {
-            throw new InvalidOperationException("Ingestion content root path is required.");
-        }
-
-        return Path.IsPathRooted(configuredContentRootPath)
-            ? Path.GetFullPath(configuredContentRootPath)
-            : Path.GetFullPath(configuredContentRootPath, hostContentRootPath);
-    }
-
-    private static string ResolveSourceDirectory(string ingestionRootDirectory, string sourcePath)
-    {
-        if (Path.IsPathRooted(sourcePath))
-        {
-            throw new ArgumentException("SourcePath must be relative to the configured ingestion root.", nameof(sourcePath));
-        }
-
-        if (ContainsTraversal(sourcePath))
-        {
-            throw new ArgumentException("SourcePath must stay within the configured ingestion root.", nameof(sourcePath));
-        }
-
-        var sourceDirectory = Path.GetFullPath(Path.Combine(ingestionRootDirectory, sourcePath));
-        EnsurePathIsUnderRoot(ingestionRootDirectory, sourceDirectory, nameof(sourcePath));
-
-        return sourceDirectory;
-    }
-
-    private static IReadOnlyList<string> GetMarkdownFiles(
-        string ingestionRootDirectory,
-        string sourceDirectory,
-        string? fileName)
-    {
-        if (!string.IsNullOrWhiteSpace(fileName))
-        {
-            ValidateFileName(fileName);
-
-            var filePath = Path.Combine(sourceDirectory, fileName);
-            var normalizedFilePath = Path.GetFullPath(filePath);
-
-            EnsurePathIsUnderRoot(ingestionRootDirectory, normalizedFilePath, nameof(fileName));
-
-            if (!File.Exists(normalizedFilePath))
-            {
-                throw new FileNotFoundException($"Markdown file was not found: '{normalizedFilePath}'.", normalizedFilePath);
-            }
-
-            return [normalizedFilePath];
-        }
-
-        var markdownFiles = Directory
-            .EnumerateFiles(sourceDirectory, "*.md", SearchOption.AllDirectories)
-            .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
-            .ToArray();
-
-        return markdownFiles;
-    }
-
-    private static string GenerateDocumentId(string normalizedSourcePath)
-    {
-        var hash = ComputeXxHash3(normalizedSourcePath).Split(':', 2)[0];
-
-        return $"doc_{hash}";
-    }
-
-    private static string ComputeXxHash3(string value)
-    {
-        var hashBytes = XxHash3.Hash(Encoding.UTF8.GetBytes(value));
-        var hashValue = BinaryPrimitives.ReadUInt64BigEndian(hashBytes);
-
-        return Convert.ToHexStringLower(hashBytes) + $":{hashValue}";
-    }
-
-    private static MarkdownParts SplitFrontmatter(string rawMarkdown)
-    {
-        if (!rawMarkdown.StartsWith("---", StringComparison.Ordinal))
-        {
-            return new MarkdownParts(string.Empty, rawMarkdown);
-        }
-
-        using var reader = new StringReader(rawMarkdown);
-        var firstLine = reader.ReadLine();
-        if (!string.Equals(firstLine, "---", StringComparison.Ordinal))
-        {
-            return new MarkdownParts(string.Empty, rawMarkdown);
-        }
-
-        var frontmatterBuilder = new StringBuilder();
-        while (reader.ReadLine() is { } line)
-        {
-            if (string.Equals(line, "---", StringComparison.Ordinal))
-            {
-                return new MarkdownParts(frontmatterBuilder.ToString().TrimEnd(), reader.ReadToEnd().TrimStart());
-            }
-
-            frontmatterBuilder.AppendLine(line);
-        }
-
-        return new MarkdownParts(string.Empty, rawMarkdown);
-    }
-
-    private static void ValidateFileName(string fileName)
-    {
-        if (Path.IsPathRooted(fileName))
-        {
-            throw new ArgumentException("FileName must be relative to the selected source directory.", nameof(fileName));
-        }
-
-        if (!string.Equals(fileName, Path.GetFileName(fileName), StringComparison.Ordinal)
-            || fileName.Contains(Path.DirectorySeparatorChar)
-            || fileName.Contains(Path.AltDirectorySeparatorChar)
-            || ContainsTraversal(fileName))
-        {
-            throw new ArgumentException("FileName must be a single markdown file name without path segments.", nameof(fileName));
-        }
-
-        if (!string.Equals(Path.GetExtension(fileName), ".md", StringComparison.OrdinalIgnoreCase))
-        {
-            throw new ArgumentException("Only markdown files with the .md extension are supported.", nameof(fileName));
-        }
-    }
-
-    private static void EnsurePathIsUnderRoot(string ingestionRootDirectory, string candidatePath, string parameterName)
-    {
-        var normalizedRoot = TrimDirectorySeparator(Path.GetFullPath(ingestionRootDirectory));
-        var normalizedRootWithSeparator = AppendDirectorySeparator(normalizedRoot);
-        var normalizedCandidate = Path.GetFullPath(candidatePath);
-
-        if (!string.Equals(normalizedCandidate, normalizedRoot, StringComparison.Ordinal)
-            && !normalizedCandidate.StartsWith(normalizedRootWithSeparator, StringComparison.Ordinal))
-        {
-            throw new ArgumentException("The requested path must stay within the configured ingestion root.", parameterName);
-        }
-    }
-
-    private static bool ContainsTraversal(string path)
-    {
-        var pathSegments = path.Split(['/', '\\'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-
-        return pathSegments.Any(segment => string.Equals(segment, "..", StringComparison.Ordinal));
-    }
-
-    private static string AppendDirectorySeparator(string path)
-    {
-        return path.EndsWith(Path.DirectorySeparatorChar)
-            ? path
-            : path + Path.DirectorySeparatorChar;
-    }
-
-    private static string TrimDirectorySeparator(string path)
-    {
-        return path.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-    }
-
-    private static string NormalizePath(string path) => path.Replace('\\', '/');
-
-    private sealed record MarkdownParts(string Frontmatter, string PageContent);
 
     private sealed record MarkdownFileSnapshot(
         string SourcePath,

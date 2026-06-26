@@ -5,7 +5,7 @@ using MongoDB.Bson.Serialization.Attributes;
 /// <summary>
 /// Stored markdown document ingested from the vault.
 /// </summary>
-public record Document
+public sealed record Document
 {
     /// <summary>
     /// Unique document identifier.

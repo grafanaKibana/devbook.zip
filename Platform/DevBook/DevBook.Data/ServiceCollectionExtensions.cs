@@ -30,8 +30,12 @@ public static class ServiceCollectionExtensions
         {
             ArgumentNullException.ThrowIfNull(services);
 
+            // Ingestion
             services.AddScoped<IIngestionService, IngestionService>();
 
+            // Chunking strategies. Each concrete strategy is registered once and then re-resolved as
+            // IChunkingStrategy, so a single shared instance is reachable both by concrete type and via
+            // GetServices<IChunkingStrategy>() (which CreateChunkingService selects from by Strategy).
             services.AddScoped<FixedSizeChunkingStrategy>();
             services.AddScoped<MarkdownSectionChunkingStrategy>();
             services.AddScoped<SemanticChunkingStrategy>();
@@ -40,10 +44,15 @@ public static class ServiceCollectionExtensions
             services.AddScoped<IChunkingStrategy>(serviceProvider => serviceProvider.GetRequiredService<MarkdownSectionChunkingStrategy>());
             services.AddScoped<IChunkingStrategy>(serviceProvider => serviceProvider.GetRequiredService<SemanticChunkingStrategy>());
 
+            // One IChunkingService per strategy, resolved at registration time. There is deliberately no
+            // IChunkingStrategyFactory (unlike reranking below): the chunker set is built here and later
+            // filtered by IngestionService via service.Strategy, so no per-request factory is needed.
             services.AddScoped<IChunkingService>(serviceProvider => CreateChunkingService(serviceProvider, ChunkingStrategyKind.FixedSize));
             services.AddScoped<IChunkingService>(serviceProvider => CreateChunkingService(serviceProvider, ChunkingStrategyKind.MarkdownSection));
             services.AddScoped<IChunkingService>(serviceProvider => CreateChunkingService(serviceProvider, ChunkingStrategyKind.Semantic));
 
+            // Reranking strategies. Same concrete-then-interface idiom as chunking, but selection is exposed
+            // through IRerankingStrategyFactory because the active reranker is chosen per request from RagSearchOptions.
             services.AddScoped<NoRerankingStrategy>();
             services.AddScoped<Bm25RerankingStrategy>();
             services.AddScoped<MaximalMarginalRelevanceRerankingStrategy>();
@@ -57,15 +66,19 @@ public static class ServiceCollectionExtensions
             services.AddScoped<IRerankingStrategy>(serviceProvider => serviceProvider.GetRequiredService<ReciprocalRankFusionRerankingStrategy>());
             services.AddScoped<IRerankingStrategyFactory, RerankingStrategyFactory>();
 
+            // Repositories
             services.AddScoped<IDocumentRepository, DocumentRepository>();
             services.AddScoped<IChunkRepositoryFactory, ChunkRepositoryFactory>();
 
+            // RAG services
             services.AddScoped<IRagSearchService, RagSearchService>();
             services.AddScoped<IRagAskService, RagAskService>();
 
+            // Agents
             services.AddAgent<AnswerAgent>();
             services.AddAgent<RerankingAgent>();
 
+            // Embeddings
             services.AddEmbeddingGenerator(CreateEmbeddingGenerator);
             services.AddSingleton<IEmbeddingService, EmbeddingService>();
 
@@ -91,17 +104,29 @@ public static class ServiceCollectionExtensions
         var options = serviceProvider.GetRequiredService<IOptions<EmbeddingOptions>>().Value;
         var openAIOptions = serviceProvider.GetRequiredService<IOptions<OpenAIOptions>>().Value;
 
-        if (string.IsNullOrWhiteSpace(openAIOptions.ApiKey))
-        {
-            throw new InvalidOperationException("OpenAIOptions API key is required. Configure OpenAIOptions:ApiKey.");
-        }
+        var client = CreateOpenAIClient(openAIOptions);
 
         if (string.IsNullOrWhiteSpace(options.ModelId))
         {
             throw new InvalidOperationException("EmbeddingOptions model ID is required. Configure EmbeddingOptions:ModelId.");
         }
 
-        var client = string.IsNullOrWhiteSpace(openAIOptions.Endpoint)
+        return client.GetEmbeddingClient(options.ModelId).AsIEmbeddingGenerator(options.VectorDimensions);
+    }
+
+    /// <summary>
+    /// Builds an <see cref="OpenAIClient"/> from <see cref="OpenAIOptions"/>, honoring the configured
+    /// endpoint when present. Shared by the embedding generator and every chat agent so the API-key
+    /// guard and endpoint policy live in exactly one place.
+    /// </summary>
+    private static OpenAIClient CreateOpenAIClient(OpenAIOptions openAIOptions)
+    {
+        if (string.IsNullOrWhiteSpace(openAIOptions.ApiKey))
+        {
+            throw new InvalidOperationException("OpenAIOptions API key is required. Configure OpenAIOptions:ApiKey.");
+        }
+
+        return string.IsNullOrWhiteSpace(openAIOptions.Endpoint)
             ? new OpenAIClient(openAIOptions.ApiKey)
             : new OpenAIClient(
                 new ApiKeyCredential(openAIOptions.ApiKey),
@@ -109,8 +134,6 @@ public static class ServiceCollectionExtensions
                 {
                     Endpoint = new Uri(openAIOptions.Endpoint, UriKind.Absolute),
                 });
-
-        return client.GetEmbeddingClient(options.ModelId).AsIEmbeddingGenerator(options.VectorDimensions);
     }
 
     private static void AddAgent<T>(this IServiceCollection services)
@@ -123,24 +146,12 @@ public static class ServiceCollectionExtensions
             var config = serviceProvider.GetRequiredService<T>();
             var openAIOptions = serviceProvider.GetRequiredService<IOptions<OpenAIOptions>>().Value;
 
-            if (string.IsNullOrWhiteSpace(openAIOptions.ApiKey))
-            {
-                throw new InvalidOperationException("OpenAIOptions API key is required. Configure OpenAIOptions:ApiKey.");
-            }
+            var client = CreateOpenAIClient(openAIOptions);
 
             if (string.IsNullOrWhiteSpace(config.ModelId))
             {
                 throw new InvalidOperationException($"{config.Name} model ID is required. Override {nameof(IAgentConfig.ModelId)} with a non-empty value.");
             }
-
-            var client = string.IsNullOrWhiteSpace(openAIOptions.Endpoint)
-                ? new OpenAIClient(openAIOptions.ApiKey)
-                : new OpenAIClient(
-                    new ApiKeyCredential(openAIOptions.ApiKey),
-                    new OpenAIClientOptions
-                    {
-                        Endpoint = new Uri(openAIOptions.Endpoint, UriKind.Absolute),
-                    });
 
             var chatClient = client.GetChatClient(config.ModelId).AsIChatClient();
 
