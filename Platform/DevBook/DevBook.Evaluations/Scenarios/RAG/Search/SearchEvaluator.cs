@@ -274,15 +274,7 @@ public sealed class SearchEvaluator : IEvaluator
     private static EvaluationRating GetRating(MetricFamily family, double value)
         => family switch
         {
-            MetricFamily.Recall => value switch
-            {
-                >= 1 => EvaluationRating.Exceptional,
-                >= 0.8 => EvaluationRating.Good,
-                >= 0.5 => EvaluationRating.Average,
-                > 0 => EvaluationRating.Poor,
-                _ => EvaluationRating.Unacceptable,
-            },
-            MetricFamily.HitRate or MetricFamily.Mrr or MetricFamily.Map or MetricFamily.Ndcg => value switch
+            MetricFamily.Recall or MetricFamily.HitRate or MetricFamily.Mrr or MetricFamily.Map or MetricFamily.Ndcg => value switch
             {
                 >= 1 => EvaluationRating.Exceptional,
                 >= 0.8 => EvaluationRating.Good,

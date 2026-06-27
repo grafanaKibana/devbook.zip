@@ -87,7 +87,7 @@ internal static class SearchTextNormalizer
             return null;
         }
 
-        var normalized = string.Join(' ', value.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
+        var normalized = NormalizeText(value);
         const int maxLength = 180;
 
         return normalized.Length <= maxLength ? normalized : normalized[..maxLength] + "…";
