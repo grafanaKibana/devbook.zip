@@ -190,7 +190,7 @@ Beyond Workstation/Server/Background, the GC exposes runtime controls:
 > The GC is generational (Gen 0/1/2): most collections are small and fast, while full collections are less frequent. Generations exploit the generational hypothesis — most objects die young — so collecting Gen 0 frequently and cheaply avoids scanning the entire heap.
 > Workstation GC (default) runs collections on the allocating thread; Server GC uses dedicated threads per logical processor for higher throughput but more memory overhead.
 > Background GC (default for Gen 2) allows Gen 0/1 collections to proceed during a long Gen 2 collection, reducing pause times for latency-sensitive workloads.
-> **Tradeoff**: Server GC maximizes throughput for multi-core services but uses more memory per heap; Workstation GC minimizes memory footprint for client apps and small containers. Tune based on workload sensitivity to pause duration vs throughput.
+> Server GC maximizes throughput for multi-core services but uses more memory per heap; Workstation GC minimizes footprint for client apps and small containers. Choose based on whether the workload cares more about pause duration or throughput.
 
 > [!QUESTION]- What are the Small Object Heap (SOH) and the Large Object Heap (LOH)?
 > The SOH stores most objects (typically smaller than ~85,000 bytes) and is compacted regularly.

@@ -159,7 +159,7 @@ The tradeoff is explicit: you own the execution strategy but you own the registr
 > - Bus abstraction can sit on top of a broker (MassTransit does this) — bus adds handler resolution and retry semantics, broker provides transport and durability
 > - Cost of broker: operational complexity, network latency, serialization overhead
 > - Cost of in-process bus: no durability, no cross-service delivery
-> - **Tradeoff**: broker guarantees delivery at the cost of infrastructure complexity; in-process bus is simple but ephemeral
+> - A broker guarantees delivery at the cost of operational complexity; the in-process bus is simple but ephemeral
 
 > [!QUESTION]- Why should event handlers be independent rather than ordered?
 > - Event bus contract is fan-out — "these N things happen when X occurs" — not a sequential pipeline
@@ -168,14 +168,14 @@ The tradeoff is explicit: you own the execution strategy but you own the registr
 > - Breaks when: order changes (new handler inserted), parallelism enabled, or handler moved to another service
 > - Fix: model the dependency as a saga or command chain where A publishes a new event that triggers B
 > - This makes the dependency visible, testable, and deployable independently
-> - **Tradeoff**: more events and handlers, but each is self-contained and the workflow is explicit in the codebase
+> - You end up with more events and handlers, but each is self-contained and the workflow is explicit in the codebase
 
 > [!QUESTION]- When is MediatR INotification insufficient as an event bus?
 > - **Exception isolation**: default MediatR stops at the first handler failure — unacceptable when independent side effects (email, analytics, inventory) must not block each other
 > - **Scope isolation**: all handlers share the same DI scope, so DbContext mutations in handler A leak into handler B
 > - **Execution strategy**: default is sequential; parallel execution requires custom `INotificationPublisher`
 > - Each fix requires either replacing MediatR's publisher or building a custom bus
-> - **Tradeoff**: custom bus gives you control over all three concerns, but you lose MediatR's pipeline behavior ecosystem (validation, logging, caching behaviors) and auto-discovery
+> - A custom bus gives you control over all three concerns, but you lose MediatR's pipeline-behavior ecosystem (validation, logging, caching) and auto-discovery
 
 ## References
 

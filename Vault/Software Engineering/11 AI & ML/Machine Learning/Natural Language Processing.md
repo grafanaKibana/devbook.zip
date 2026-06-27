@@ -134,14 +134,14 @@ Console.WriteLine($"Confidence: {result.Value.ConfidenceScores.Positive:P}");
 > - Fine-tuned small models (BERT, DistilBERT) run at millisecond latency on-device vs seconds for LLM API calls.
 > - Per-request cost is near zero for on-device inference vs $0.01–$0.10+ per LLM call at scale.
 > - LLMs win when the task is complex (multi-step reasoning, summarization), training data is scarce, or rapid iteration matters more than unit cost.
-> - **Tradeoff**: fine-tuning trades upfront training effort and data collection for dramatically lower latency and cost at scale — use LLMs for prototyping, then evaluate whether fine-tuning is worth the investment for production.
+> - Fine-tuning costs you labeled data and training effort upfront, then pays it back as millisecond latency and near-zero per-request cost at scale; prototype with an LLM, then check whether production volume justifies the fine-tune.
 
 > [!QUESTION]- Why do multilingual NLP models underperform monolingual ones, and when is that acceptable?
 > - Multilingual models split their capacity across 100+ languages, so per-language representation quality is lower.
 > - Monolingual models concentrate all parameters on one language, achieving higher accuracy on that language's benchmarks.
 > - Multilingual models are acceptable when you need coverage across many languages and per-language accuracy can be slightly lower.
 > - For high-stakes tasks (medical NER, legal classification), the accuracy gap may be unacceptable — use language-specific models.
-> - **Tradeoff**: multilingual models trade per-language accuracy for language coverage — accept the tradeoff when serving many languages with limited ML infrastructure, but validate on your target languages explicitly.
+> - Multilingual models trade per-language accuracy for breadth of coverage; accept that when you serve many languages on limited ML infrastructure, but validate explicitly on the languages you actually care about.
 
 
 ## References

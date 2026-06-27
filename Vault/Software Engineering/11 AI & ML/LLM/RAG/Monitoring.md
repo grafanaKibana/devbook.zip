@@ -233,7 +233,7 @@ Decision rule: combine deterministic metrics on 100% of traffic (fast, free), sa
 > - Stratified sampling ensures rare but important query types (multi-hop, negation, edge-case domains) are represented.
 > - Async execution decouples scoring from user-facing latency — users never wait for the judge.
 > - Full scoring is reserved for offline evaluation runs against labeled eval sets.
-> - **Tradeoff**: lower sample rates reduce cost but increase the risk of missing localized regressions in small query clusters. Start at 10–20% and reduce only with evidence that the distribution is stable.
+> - Lower sample rates cut cost but raise the odds of missing a localized regression in a small query cluster; start at 10–20% and reduce only once the distribution looks stable.
 
 > [!QUESTION]- Why should RAG alerting use relative regression thresholds instead of absolute quality targets?
 > - Absolute thresholds ("faithfulness > 0.9") are brittle across corpus changes, model updates, and query distribution shifts.
@@ -241,7 +241,7 @@ Decision rule: combine deterministic metrics on 100% of traffic (fast, free), sa
 > - Relative thresholds ("no more than 5% drop from 7-day rolling baseline") adapt automatically because the baseline tracks current system state.
 > - Relative thresholds prevent the failure mode where a team sets an ambitious absolute target, cannot reach it consistently, and silently disables the alert.
 > - Baselines must be recomputed after intentional pipeline changes (model swap, prompt update, index rebuild) to avoid false alarms on expected shifts.
-> - **Tradeoff**: relative thresholds can miss slow, gradual degradation that stays within the rolling window. Complement with periodic absolute floor checks (e.g., monthly review of whether the baseline itself is still acceptable).
+> - Relative thresholds can miss slow drift that stays inside the rolling window, so pair them with a periodic absolute floor check — a monthly look at whether the baseline itself is still acceptable.
 
 > [!QUESTION]- How does monitoring differ from evaluation in a RAG system, and why do you need both?
 > - Evaluation validates a pipeline configuration against a labeled dataset before deployment — it gates releases.
@@ -249,7 +249,7 @@ Decision rule: combine deterministic metrics on 100% of traffic (fast, free), sa
 > - Eval sets are static snapshots; production traffic shifts continuously with new query patterns, corpus updates, and model provider changes.
 > - Monitoring catches failure modes that no static eval set anticipates: seasonal query shifts, silent model downgrades, load-dependent degradation.
 > - The feedback loop connects them: failing production traces identified by monitoring get added to the eval set, preventing recurrence in future releases.
-> - **Tradeoff**: monitoring alone detects problems after users are affected; evaluation alone misses production-specific failures. Neither is sufficient without the other.
+> - Monitoring alone catches problems only after users feel them; evaluation alone misses production-specific failures. You need both.
 
 ## References
 
