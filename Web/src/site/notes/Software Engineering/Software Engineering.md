@@ -23,9 +23,9 @@ Welcome to my software engineering notebook — the notes I've written to actual
 | [[Software Engineering/11 AI & ML/LLM/RAG/RAG\|RAG]]                                          | 8:57 AM - June 22, 2026 |
 | [[Software Engineering/07 Security/OWASP\|OWASP]]                                             | 3:32 AM - June 21, 2026 |
 | [[Software Engineering/07 Security/Web Vulnerabilities\|Web Vulnerabilities]]                 | 3:32 AM - June 21, 2026 |
-| [[Software Engineering/07 Security/Block-chain\|Block-chain]]                                 | 3:32 AM - June 21, 2026 |
-| [[Software Engineering/07 Security/Encryption\|Encryption]]                                   | 3:32 AM - June 21, 2026 |
 | [[Software Engineering/07 Security/Hashing\|Hashing]]                                         | 3:32 AM - June 21, 2026 |
+| [[Software Engineering/07 Security/Encryption\|Encryption]]                                   | 3:32 AM - June 21, 2026 |
+| [[Software Engineering/07 Security/Secrets Management\|Secrets Management]]                   | 3:32 AM - June 21, 2026 |
 
 { .block-language-dataview}
 

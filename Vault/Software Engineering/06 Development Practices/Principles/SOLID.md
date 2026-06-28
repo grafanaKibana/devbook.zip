@@ -436,7 +436,7 @@ The practical implication: when debugging a SOLID violation, look one level deep
 > - **SRP**: the singleton class mixes business logic with lifecycle management (lazy initialization, thread-safety) and global access control. Changes to any of these concerns affect the same class.
 > - **OCP**: replacing or extending behavior usually requires changing call sites or the singleton itself — you cannot plug in an alternative without modifying existing code.
 > - **Fix in .NET**: expose an interface, register the implementation with `AddSingleton<IService, ConcreteService>()` in the DI container. The container manages lifetime; the class manages only its business logic.
-> - **Tradeoff**: DI adds indirection and configuration overhead. A static singleton is simpler for genuinely global, stateless utilities (e.g., `StringComparer.OrdinalIgnoreCase`) — but for anything with state or infrastructure dependencies, DI-managed singletons are strictly superior.
+> - DI adds indirection and configuration overhead, so a static singleton is simpler for genuinely global, stateless utilities (`StringComparer.OrdinalIgnoreCase`). For anything stateful or with infrastructure dependencies, DI-managed singletons win outright.
 
 > [!QUESTION]- How would you refactor a 2,000-line service class to satisfy SRP without breaking existing callers?
 > - **Step 1**: Identify actors — group methods by which team or business process triggers changes to them. Common groupings: persistence, notification, validation, reporting.
@@ -444,14 +444,14 @@ The practical implication: when debugging a SOLID violation, look one level deep
 > - **Step 3**: Introduce interfaces for each new class. The original `OrderService` becomes a thin facade that delegates to the extracted classes via interfaces.
 > - **Step 4**: Existing callers continue using `OrderService` (facade). New callers depend on the focused interfaces directly.
 > - **Step 5**: Gradually migrate existing callers away from the facade as you touch them for other reasons. Eventually remove the facade.
-> - **Tradeoff**: The intermediate facade state adds indirection without full SRP benefit. But it avoids a big-bang rewrite and lets the team migrate incrementally over multiple sprints instead of blocking all feature work for a refactoring project.
+> - The intermediate facade adds indirection without the full SRP payoff, but it buys an incremental migration over several sprints instead of a big-bang rewrite that freezes feature work.
 
 > [!QUESTION]- When is it acceptable to violate SOLID principles, and how do you decide?
 > - **Small scripts and prototypes**: abstractions cost more than the code they protect. A 50-line console app does not need interfaces.
 > - **Performance-critical hot paths**: virtual dispatch, interface resolution, and DI overhead are measurable in tight loops processing millions of items per second. Profile first — if the abstraction boundary appears in your flame graph, inline it.
 > - **Premature abstraction risk**: when you have exactly one implementation and no foreseeable second one, extracting an interface adds navigation cost without substitution value. Wait for the second use case.
 > - **Decision heuristic**: apply SOLID when you have evidence — when tests are hard to write, when unrelated teams edit the same file, when adding a feature requires modifying code that already works. Do not apply it to prevent hypothetical future problems.
-> - **Tradeoff**: every SOLID application trades simplicity for flexibility. The question is not "should I apply SOLID" but "does the flexibility this gives me outweigh the complexity it adds right now?"
+> - Every SOLID application trades simplicity for flexibility. The real question is never "should I apply SOLID" but "does the flexibility outweigh the complexity it adds right now?"
 
 ## References
 
