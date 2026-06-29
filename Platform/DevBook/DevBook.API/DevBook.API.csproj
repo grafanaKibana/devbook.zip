@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <UserSecretsId>25549d38-b8d5-4e6e-b351-636ad02ea3b4</UserSecretsId>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Hangfire.AspNetCore" Version="1.8.23" />
+        <PackageReference Include="Hangfire.Mongo" Version="1.16.0" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.8" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="obj\Debug\net10.0\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\DevBook.Data\DevBook.Data.csproj" />
+    </ItemGroup>
+
+</Project>

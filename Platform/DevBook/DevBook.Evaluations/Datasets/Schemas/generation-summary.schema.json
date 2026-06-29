@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://devbook.local/schemas/generation-summary.schema.json",
+  "title": "DevBook Golden Dataset Generation Summary",
+  "description": "Run-level counts for the shared golden dataset generation, including the single- vs multi-evidence split so the dataset's resemblance to top-K retrieval can be checked.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "generatedAt",
+    "documentsLoaded",
+    "documentsWithSections",
+    "groups",
+    "crossNoteGroups",
+    "cases",
+    "singleEvidenceCases",
+    "multiEvidenceCases",
+    "sourcesCovered"
+  ],
+  "properties": {
+    "version": { "const": 1 },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "documentsLoaded": { "type": "integer", "description": "Documents read from the Mongo documents collection." },
+    "documentsWithSections": { "type": "integer", "description": "Documents that yielded at least one substantive section." },
+    "groups": { "type": "integer", "description": "Total cross-note groups prepared for query generation." },
+    "crossNoteGroups": { "type": "integer", "description": "Groups whose sections span more than one note." },
+    "cases": { "type": "integer", "description": "Dataset cases (queries) kept after generation." },
+    "singleEvidenceCases": { "type": "integer", "description": "Cases whose expected evidence is a single section (should be a minority)." },
+    "multiEvidenceCases": { "type": "integer", "description": "Cases whose expected evidence spans two or more sections." },
+    "sourcesCovered": { "type": "integer", "description": "Distinct source paths referenced across all cases' expected evidence." }
+  }
+}

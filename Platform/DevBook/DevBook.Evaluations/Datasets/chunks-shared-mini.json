@@ -1,0 +1,797 @@
+{
+  "version": 3,
+  "generatedAt": "2026-06-21T19:45:18.404397+00:00",
+  "collection": "shared",
+  "cases": [
+    {
+      "id": "shared-how-should-i-choose-between-rules-classic-machin-001",
+      "query": "How should I choose between rules, classic machine learning, LLM prompting, RAG, and agents for a new product requirement?",
+      "difficulty": "medium",
+      "expected": [
+        {
+          "documentId": "doc_e540ad226bc02dc4",
+          "heading": "Choosing an Approach",
+          "citationLabel": "11 AI \u0026 ML/11 AI \u0026 ML.md",
+          "text": "The first engineering decision is usually not which model \u2014 it is which class of solution:"
+        },
+        {
+          "documentId": "doc_fe7c1106bee34f68",
+          "heading": "Intro",
+          "citationLabel": "11 AI \u0026 ML/Machine Learning/Machine Learning.md",
+          "text": "Reach for ML when the decision boundary is fuzzy, the signal is distributed across many weak features, or the rules would be brittle and expensive to maintain."
+        },
+        {
+          "documentId": "doc_f45c56ff81e86508",
+          "heading": "Intro",
+          "citationLabel": "11 AI \u0026 ML/LLM/Evaluation/Evaluation.md",
+          "text": "Evaluation is how you measure whether an LLM application is doing the right thing: answer quality, grounding, safety, and regressions over time."
+        }
+      ]
+    },
+    {
+      "id": "shared-what-are-the-main-stages-of-a-machine-learning-p-002",
+      "query": "What are the main stages of a machine learning pipeline from data collection through monitoring?",
+      "difficulty": "easy",
+      "expected": [
+        {
+          "documentId": "doc_fe7c1106bee34f68",
+          "heading": "Generic pipeline",
+          "citationLabel": "11 AI \u0026 ML/Machine Learning/Machine Learning.md",
+          "text": "Data collection"
+        },
+        {
+          "documentId": "doc_fe7c1106bee34f68",
+          "heading": "Data Collection and Labeling",
+          "citationLabel": "11 AI \u0026 ML/Machine Learning/Machine Learning.md",
+          "text": "Define the prediction target first, then collect inputs that are available at inference time and representative of production traffic."
+        },
+        {
+          "documentId": "doc_fe7c1106bee34f68",
+          "heading": "Intro",
+          "citationLabel": "11 AI \u0026 ML/Machine Learning/Machine Learning.md",
+          "text": "the real work is not the algorithm, it is building a reliable pipeline that is testable, deployable, and monitorable."
+        }
+      ]
+    },
+    {
+      "id": "shared-why-is-evaluation-for-llm-applications-more-laye-003",
+      "query": "Why is evaluation for LLM applications more layered than ordinary pass/fail testing, and what does it need to cover?",
+      "difficulty": "medium",
+      "expected": [
+        {
+          "documentId": "doc_f45c56ff81e86508",
+          "heading": "Intro",
+          "citationLabel": "11 AI \u0026 ML/LLM/Evaluation/Evaluation.md",
+          "text": "Because LLM output is probabilistic and open-ended, you cannot rely on a single pass/fail assertion the way you would for deterministic code"
+        }
+      ]
+    },
+    {
+      "id": "shared-what-kinds-of-bugs-can-happen-with-c-value-types-004",
+      "query": "What kinds of bugs can happen with C# value types versus reference types, and how can they be mitigated?",
+      "difficulty": "hard",
+      "expected": [
+        {
+          "documentId": "doc_9764ef0a84d97e65",
+          "heading": "Intro",
+          "citationLabel": "01 Programming/NET/CSharp/Fundamentals/Types/Types.md",
+          "text": "A common source of bugs is value semantics versus reference semantics:"
+        },
+        {
+          "documentId": "doc_9764ef0a84d97e65",
+          "heading": "How It Works",
+          "citationLabel": "01 Programming/NET/CSharp/Fundamentals/Types/Types.md",
+          "text": "Repeated boxing in hot paths can create avoidable GC pressure."
+        },
+        {
+          "documentId": "doc_9764ef0a84d97e65",
+          "heading": "Pitfalls",
+          "citationLabel": "01 Programming/NET/CSharp/Fundamentals/Types/Types.md",
+          "text": "Mitigate by preferring immutability for shared models or cloning at ownership boundaries."
+        }
+      ]
+    },
+    {
+      "id": "shared-what-should-you-consider-when-deciding-what-to-i-001",
+      "query": "What should you consider when deciding what to include in an LLM\u0027s context window, and why is more context not always better?",
+      "difficulty": "medium",
+      "expected": [
+        {
+          "documentId": "doc_5c4e5646102bed88",
+          "heading": "Intro",
+          "citationLabel": "11 AI \u0026 ML/LLM/Context Engineering.md",
+          "text": "Context engineering is the practice of deliberately deciding what goes into the model\u0027s context window"
+        },
+        {
+          "documentId": "doc_5c4e5646102bed88",
+          "heading": "The Context Budget",
+          "citationLabel": "11 AI \u0026 ML/LLM/Context Engineering.md",
+          "text": "Everything competes for the same window"
+        },
+        {
+          "documentId": "doc_5c4e5646102bed88",
+          "heading": "Techniques",
+          "citationLabel": "11 AI \u0026 ML/LLM/Context Engineering.md",
+          "text": "**Ordering and positioning.** Place the most important evidence at the start and end of the context to exploit primacy and recency; bury nothing critical in the middle."
+        }
+      ]
+    },
+    {
+      "id": "shared-how-do-you-manage-a-limited-context-budget-when-002",
+      "query": "How do you manage a limited context budget when using retrieval, tools, and conversation history in an agentic system?",
+      "difficulty": "hard",
+      "expected": [
+        {
+          "documentId": "doc_5c4e5646102bed88",
+          "heading": "The Context Budget",
+          "citationLabel": "11 AI \u0026 ML/LLM/Context Engineering.md",
+          "text": "Everything competes for the same window"
+        },
+        {
+          "documentId": "doc_5c4e5646102bed88",
+          "heading": "Techniques",
+          "citationLabel": "11 AI \u0026 ML/LLM/Context Engineering.md",
+          "text": "**Ordering and positioning.** Place the most important evidence at the start and end of the context to exploit primacy and recency; bury nothing critical in the middle."
+        },
+        {
+          "documentId": "doc_738f5a6a5ff81927",
+          "heading": "Intro",
+          "citationLabel": "11 AI \u0026 ML/LLM/Agents/Tools.md",
+          "text": "Tools are the interface between an LLM\u0027s reasoning and the external world"
+        }
+      ]
+    },
+    {
+      "id": "shared-what-techniques-help-improve-the-quality-of-asse-003",
+      "query": "What techniques help improve the quality of assembled context for retrieval-augmented generation or long conversations?",
+      "difficulty": "medium",
+      "expected": [
+        {
+          "documentId": "doc_5c4e5646102bed88",
+          "heading": "Techniques",
+          "citationLabel": "11 AI \u0026 ML/LLM/Context Engineering.md",
+          "text": "Place the most important evidence at the start and end of the context"
+        }
+      ]
+    },
+    {
+      "id": "shared-how-do-prompt-text-generation-settings-and-groun-004",
+      "query": "How do prompt text, generation settings, and grounding work together to produce reliable model output?",
+      "difficulty": "hard",
+      "expected": [
+        {
+          "documentId": "doc_f12b56d0b9c85969",
+          "heading": "LLM Settings",
+          "citationLabel": "11 AI \u0026 ML/LLM/Prompting/Prompting.md",
+          "text": "Prompt text controls intent, while generation settings control sampling behavior and output boundaries."
+        },
+        {
+          "documentId": "doc_f53d72f211994a50",
+          "heading": "Generation Parameters",
+          "citationLabel": "11 AI \u0026 ML/LLM/Generation.md",
+          "text": "Generation parameters control how the model selects the next token from the predicted distribution."
+        },
+        {
+          "documentId": "doc_f53d72f211994a50",
+          "heading": "Grounding and Citations",
+          "citationLabel": "11 AI \u0026 ML/LLM/Generation.md",
+          "text": "Grounding constrains model output to evidence from provided context rather than parametric memory."
+        }
+      ]
+    },
+    {
+      "id": "shared-how-do-embeddings-and-retrieval-work-together-to-001",
+      "query": "How do embeddings and retrieval work together to match a natural-language query to the most relevant document chunks, even when there are no keyword overlaps?",
+      "difficulty": "easy",
+      "expected": [
+        {
+          "documentId": "doc_a3d744375a3d9729",
+          "heading": "Intro",
+          "citationLabel": "11 AI \u0026 ML/LLM/Embeddings.md",
+          "text": "Embeddings map text into a dense vector space where semantic similarity becomes geometric proximity"
+        },
+        {
+          "documentId": "doc_437cf5cb544e6e00",
+          "heading": "Intro",
+          "citationLabel": "11 AI \u0026 ML/LLM/RAG/Retrieval.md",
+          "text": "Retrieval is the stage that decides what evidence enters the prompt."
+        },
+        {
+          "documentId": "doc_437cf5cb544e6e00",
+          "heading": "Dense Retrieval \u2014 Vector Search",
+          "citationLabel": "11 AI \u0026 ML/LLM/RAG/Retrieval.md",
+          "text": "An embedding model converts the query and each document chunk into fixed-size vectors in the same space."
+        }
+      ]
+    },
+    {
+      "id": "shared-when-should-a-rag-system-use-dense-vector-search-002",
+      "query": "When should a RAG system use dense vector search, sparse keyword search, or both, and how are the results combined?",
+      "difficulty": "medium",
+      "expected": [
+        {
+          "documentId": "doc_437cf5cb544e6e00",
+          "heading": "Intro",
+          "citationLabel": "11 AI \u0026 ML/LLM/RAG/Retrieval.md",
+          "text": "The goal is to balance recall (find everything relevant), precision (exclude everything irrelevant), and latency across query types"
+        },
+        {
+          "documentId": "doc_437cf5cb544e6e00",
+          "heading": "Dense Retrieval \u2014 Vector Search",
+          "citationLabel": "11 AI \u0026 ML/LLM/RAG/Retrieval.md",
+          "text": "How it works: - An embedding model converts the query and each document chunk into fixed-size vectors in the same space."
+        },
+        {
+          "documentId": "doc_437cf5cb544e6e00",
+          "heading": "Sparse Retrieval \u2014 Keyword Search (BM25)",
+          "citationLabel": "11 AI \u0026 ML/LLM/RAG/Retrieval.md",
+          "text": "BM25 is the same core idea \u2014 it is the algorithm behind those search indexes."
+        }
+      ]
+    },
+    {
+      "id": "shared-what-are-the-tradeoffs-of-using-higher-dimension-003",
+      "query": "What are the tradeoffs of using higher-dimensional embeddings, and how can Matryoshka training let you search faster without always using the full vector?",
+      "difficulty": "medium",
+      "expected": [
+        {
+          "documentId": "doc_a3d744375a3d9729",
+          "heading": "Model Families",
+          "citationLabel": "11 AI \u0026 ML/LLM/Embeddings.md",
+          "text": "Three categories dominate production RAG systems: **Proprietary API models** \u2014 OpenAI \u0060text-embedding-3-small\u0060 (1536-dim) and \u0060text-embedding-3-large\u0060 (3072-dim) are the most widely deployed."
+        },
+        {
+          "documentId": "doc_a3d744375a3d9729",
+          "heading": "Dimensionality",
+          "citationLabel": "11 AI \u0026 ML/LLM/Embeddings.md",
+          "text": "Higher dimensions give the model more room to represent fine-grained distinctions."
+        }
+      ]
+    },
+    {
+      "id": "shared-what-should-a-team-monitor-to-detect-retrieval-r-004",
+      "query": "What should a team monitor to detect retrieval regressions in a deployed RAG system, and which metrics would reveal coverage gaps or query-translation problems?",
+      "difficulty": "hard",
+      "expected": [
+        {
+          "documentId": "doc_c67298463ea876e7",
+          "heading": "Intro",
+          "citationLabel": "11 AI \u0026 ML/LLM/RAG/Monitoring.md",
+          "text": "RAG monitoring is the continuous observation of a deployed RAG pipeline to detect quality regressions, performance degradation, and data staleness before users notice."
+        },
+        {
+          "documentId": "doc_c67298463ea876e7",
+          "heading": "Deterministic Metrics",
+          "citationLabel": "11 AI \u0026 ML/LLM/RAG/Monitoring.md",
+          "text": "Even a small empty-result rate (\u003E1%) signals coverage gaps in the index."
+        },
+        {
+          "documentId": "doc_c67298463ea876e7",
+          "heading": "Instrumentation",
+          "citationLabel": "11 AI \u0026 ML/LLM/RAG/Monitoring.md",
+          "text": "Each pipeline stage \u2014 query translation, embedding, retrieval, reranking, context assembly, generation \u2014 should emit its own span within a parent trace."
+        }
+      ]
+    },
+    {
+      "id": "shared-what-are-the-main-stages-of-training-a-modern-ll-001",
+      "query": "What are the main stages of training a modern LLM, and how does each stage change what the model is good at?",
+      "difficulty": "medium",
+      "expected": [
+        {
+          "documentId": "doc_c7a47152e39950af",
+          "heading": "How LLMs Are Built",
+          "citationLabel": "11 AI \u0026 ML/LLM/LLM.md",
+          "text": "Training a modern LLM is a three-stage pipeline."
+        }
+      ]
+    },
+    {
+      "id": "shared-when-should-you-use-prompting-retrieval-augmente-002",
+      "query": "When should you use prompting, retrieval-augmented generation, or fine-tuning to adapt an LLM to a task?",
+      "difficulty": "hard",
+      "expected": [
+        {
+          "documentId": "doc_c7a47152e39950af",
+          "heading": "Adapting an LLM to a Task",
+          "citationLabel": "11 AI \u0026 ML/LLM/LLM.md",
+          "text": "Three adaptation levers, ordered by cost."
+        }
+      ]
+    },
+    {
+      "id": "shared-how-do-cosine-similarity-dot-product-and-euclide-003",
+      "query": "How do cosine similarity, dot product, and Euclidean distance differ for embeddings, and which is usually preferred for RAG?",
+      "difficulty": "medium",
+      "expected": [
+        {
+          "documentId": "doc_a3d744375a3d9729",
+          "heading": "Similarity Metrics",
+          "citationLabel": "11 AI \u0026 ML/LLM/Embeddings.md",
+          "text": "The choice of similarity metric determines how \u0022closeness\u0022 is calculated in vector space: **Cosine similarity** measures the angle between vectors, ignoring magnitude."
+        }
+      ]
+    },
+    {
+      "id": "shared-why-can-an-embedding-model-swap-break-an-existin-004",
+      "query": "Why can an embedding model swap break an existing vector index, and what should be done to avoid stale vectors?",
+      "difficulty": "hard",
+      "expected": [
+        {
+          "documentId": "doc_a3d744375a3d9729",
+          "heading": "Embedding Model Swap Invalidation",
+          "citationLabel": "11 AI \u0026 ML/LLM/Embeddings.md",
+          "text": "Changing the embedding model \u2014 even a minor version \u2014 invalidates every stored vector."
+        }
+      ]
+    },
+    {
+      "id": "shared-when-should-you-choose-fine-tuning-instead-of-pr-001",
+      "query": "When should you choose fine-tuning instead of prompting or RAG for an LLM application?",
+      "difficulty": "medium",
+      "expected": [
+        {
+          "documentId": "doc_93c8ef8286440f26",
+          "heading": "Intro",
+          "citationLabel": "11 AI \u0026 ML/LLM/Fine-tuning.md",
+          "text": "It is the most powerful and most expensive of the three adaptation levers"
+        },
+        {
+          "documentId": "doc_93c8ef8286440f26",
+          "heading": "When to Fine-tune",
+          "citationLabel": "11 AI \u0026 ML/LLM/Fine-tuning.md",
+          "text": "Reach for fine-tuning only after prompting and retrieval have been tried"
+        },
+        {
+          "documentId": "doc_d03a6bceb46b2ca1",
+          "heading": "Intro",
+          "citationLabel": "11 AI \u0026 ML/LLM/RAG/RAG.md",
+          "text": "It matters because knowledge changes faster than model weights"
+        }
+      ]
+    },
+    {
+      "id": "shared-what-are-the-main-tradeoffs-between-full-fine-tu-002",
+      "query": "What are the main tradeoffs between full fine-tuning and using a smaller model with distillation?",
+      "difficulty": "medium",
+      "expected": [
+        {
+          "documentId": "doc_93c8ef8286440f26",
+          "heading": "When to Fine-tune",
+          "citationLabel": "11 AI \u0026 ML/LLM/Fine-tuning.md",
+          "text": "You want a smaller, cheaper model to match a larger one"
+        },
+        {
+          "documentId": "doc_93c8ef8286440f26",
+          "heading": "Full Fine-tuning",
+          "citationLabel": "11 AI \u0026 ML/LLM/Fine-tuning.md",
+          "text": "Update every weight in the model."
+        }
+      ]
+    },
+    {
+      "id": "shared-why-is-fine-tuning-better-than-long-prompts-when-003",
+      "query": "Why is fine-tuning better than long prompts when prompt overhead is dominating cost?",
+      "difficulty": "medium",
+      "expected": [
+        {
+          "documentId": "doc_93c8ef8286440f26",
+          "heading": "When to Fine-tune",
+          "citationLabel": "11 AI \u0026 ML/LLM/Fine-tuning.md",
+          "text": "Prompt overhead is dominating cost"
+        },
+        {
+          "documentId": "doc_93c8ef8286440f26",
+          "heading": "Intro",
+          "citationLabel": "11 AI \u0026 ML/LLM/Fine-tuning.md",
+          "text": "without consuming context tokens"
+        },
+        {
+          "documentId": "doc_c7a47152e39950af",
+          "heading": "Dictionary",
+          "citationLabel": "11 AI \u0026 ML/LLM/LLM.md",
+          "text": "Token counts determine context usage and API cost"
+        }
+      ]
+    },
+    {
+      "id": "shared-what-kind-of-behavior-is-fine-tuning-best-suited-004",
+      "query": "What kind of behavior is fine-tuning best suited to change, and what kinds of tasks are poor fits?",
+      "difficulty": "hard",
+      "expected": [
+        {
+          "documentId": "doc_93c8ef8286440f26",
+          "heading": "Intro",
+          "citationLabel": "11 AI \u0026 ML/LLM/Fine-tuning.md",
+          "text": "Fine-tuning continues training a pretrained model\u0027s weights on task-specific data, changing the model\u0027s behavior rather than just its inputs."
+        },
+        {
+          "documentId": "doc_93c8ef8286440f26",
+          "heading": "When to Fine-tune",
+          "citationLabel": "11 AI \u0026 ML/LLM/Fine-tuning.md",
+          "text": "The behavior is hard to specify in words but easy to demonstrate"
+        }
+      ]
+    },
+    {
+      "id": "shared-what-criteria-should-i-use-to-choose-a-model-for-001",
+      "query": "What criteria should I use to choose a model for a production task, and how do latency, cost, and task difficulty affect that choice?",
+      "difficulty": "medium",
+      "expected": [
+        {
+          "documentId": "doc_6dc2bf3583851563",
+          "heading": "Intro",
+          "citationLabel": "11 AI \u0026 ML/LLM/Model Selection and Routing.md",
+          "text": "Model selection is choosing which model serves a request; routing is choosing per-request among several models."
+        },
+        {
+          "documentId": "doc_6dc2bf3583851563",
+          "heading": "Selection Criteria",
+          "citationLabel": "11 AI \u0026 ML/LLM/Model Selection and Routing.md",
+          "text": "Choose a model against the actual requirements of the task, not its leaderboard rank:"
+        }
+      ]
+    },
+    {
+      "id": "shared-how-does-cascade-routing-work-in-a-system-that-u-002",
+      "query": "How does cascade routing work in a system that uses multiple models, and when should a request be escalated from a cheap model to a stronger one?",
+      "difficulty": "medium",
+      "expected": [
+        {
+          "documentId": "doc_6dc2bf3583851563",
+          "heading": "Intro",
+          "citationLabel": "11 AI \u0026 ML/LLM/Model Selection and Routing.md",
+          "text": "The engineering job is to match each request to the cheapest model that can handle it, and to keep that mapping changeable as models and prices shift underneath you."
+        },
+        {
+          "documentId": "doc_6dc2bf3583851563",
+          "heading": "Routing Patterns",
+          "citationLabel": "11 AI \u0026 ML/LLM/Model Selection and Routing.md",
+          "text": "Send the request to a cheap model first; escalate to a stronger one only when the cheap model fails a check"
+        }
+      ]
+    },
+    {
+      "id": "shared-what-are-the-main-stages-of-a-rag-pipeline-and-w-003",
+      "query": "What are the main stages of a RAG pipeline, and where do query translation, retrieval, reranking, context assembly, and groundedness checks fit?",
+      "difficulty": "easy",
+      "expected": [
+        {
+          "documentId": "doc_d03a6bceb46b2ca1",
+          "heading": "Core Flow",
+          "citationLabel": "11 AI \u0026 ML/LLM/RAG/RAG.md",
+          "text": "Each stage has its own page:"
+        }
+      ]
+    },
+    {
+      "id": "shared-which-production-rag-pattern-is-the-mainstream-d-004",
+      "query": "Which production RAG pattern is the mainstream default, and how does it compare with query rewriting and routing or baseline single-pass RAG?",
+      "difficulty": "medium",
+      "expected": [
+        {
+          "documentId": "doc_d03a6bceb46b2ca1",
+          "heading": "Choosing a Pattern",
+          "citationLabel": "11 AI \u0026 ML/LLM/RAG/RAG.md",
+          "text": "The short version, in adoption order:"
+        }
+      ]
+    },
+    {
+      "id": "shared-how-do-intrinsic-and-extrinsic-hallucinations-di-001",
+      "query": "How do intrinsic and extrinsic hallucinations differ, and which detection methods are best suited to each?",
+      "difficulty": "medium",
+      "expected": [
+        {
+          "documentId": "doc_ce2e3e5f10040aeb",
+          "heading": "Intrinsic vs Extrinsic",
+          "citationLabel": "11 AI \u0026 ML/LLM/Hallucinations.md",
+          "text": "Ji et al."
+        },
+        {
+          "documentId": "doc_ce2e3e5f10040aeb",
+          "heading": "Detection",
+          "citationLabel": "11 AI \u0026 ML/LLM/Hallucinations.md",
+          "text": "This is strong on intrinsic hallucinations where contradictions are explicit in context."
+        }
+      ]
+    },
+    {
+      "id": "shared-what-are-the-main-root-causes-of-hallucinations-002",
+      "query": "What are the main root causes of hallucinations in LLMs, and how can temperature settings make them worse?",
+      "difficulty": "medium",
+      "expected": [
+        {
+          "documentId": "doc_ce2e3e5f10040aeb",
+          "heading": "Intro",
+          "citationLabel": "11 AI \u0026 ML/LLM/Hallucinations.md",
+          "text": "Three root causes show up repeatedly in production."
+        },
+        {
+          "documentId": "doc_f53d72f211994a50",
+          "heading": "Temperature Miscalibration",
+          "citationLabel": "11 AI \u0026 ML/LLM/Generation.md",
+          "text": "Setting temperature too high for factual tasks introduces token-level randomness that manifests as hallucinated details"
+        }
+      ]
+    },
+    {
+      "id": "shared-if-a-rag-system-s-answers-seem-unfaithful-how-ca-003",
+      "query": "If a RAG system\u0027s answers seem unfaithful, how can you tell whether the problem is retrieval quality or generation quality?",
+      "difficulty": "hard",
+      "expected": [
+        {
+          "documentId": "doc_277bbb146d0ebf99",
+          "heading": "Intro",
+          "citationLabel": "11 AI \u0026 ML/LLM/RAG/RAG Evaluation.md",
+          "text": "RAG evaluation decomposes into three layers: retrieval quality, generation quality, and end-to-end usefulness."
+        },
+        {
+          "documentId": "doc_c67298463ea876e7",
+          "heading": "Retrieval Quality Metrics",
+          "citationLabel": "11 AI \u0026 ML/LLM/RAG/Monitoring.md",
+          "text": "Retrieval quality metrics require a labeled evaluation set"
+        },
+        {
+          "documentId": "doc_c67298463ea876e7",
+          "heading": "LLM-as-Judge Metrics",
+          "citationLabel": "11 AI \u0026 ML/LLM/RAG/Monitoring.md",
+          "text": "For semantic quality, run an LLM judge asynchronously on a sampled fraction of production traffic."
+        }
+      ]
+    },
+    {
+      "id": "shared-what-metrics-and-evaluation-setup-should-be-used-004",
+      "query": "What metrics and evaluation setup should be used to monitor a RAG pipeline over time?",
+      "difficulty": "hard",
+      "expected": [
+        {
+          "documentId": "doc_c67298463ea876e7",
+          "heading": "Retrieval Quality Metrics",
+          "citationLabel": "11 AI \u0026 ML/LLM/RAG/Monitoring.md",
+          "text": "These are computed on a scheduled basis (nightly or on every deployment) against a golden query set."
+        },
+        {
+          "documentId": "doc_c67298463ea876e7",
+          "heading": "LLM-as-Judge Metrics",
+          "citationLabel": "11 AI \u0026 ML/LLM/RAG/Monitoring.md",
+          "text": "Use binary pass/fail judgments rather than numeric scales"
+        },
+        {
+          "documentId": "doc_c67298463ea876e7",
+          "heading": "Performance and Cost Metrics",
+          "citationLabel": "11 AI \u0026 ML/LLM/RAG/Monitoring.md",
+          "text": "Set SLOs on p95 end-to-end, but always diagnose regressions with per-stage breakdown."
+        },
+        {
+          "documentId": "doc_277bbb146d0ebf99",
+          "heading": "Intro",
+          "citationLabel": "11 AI \u0026 ML/LLM/RAG/RAG Evaluation.md",
+          "text": "Each layer has its own metrics, its own failure modes, and its own fix."
+        }
+      ]
+    },
+    {
+      "id": "shared-when-should-i-choose-a-dictionary-tkey-tvalue-in-001",
+      "query": "When should I choose a Dictionary\u003CTKey, TValue\u003E instead of a List\u003CT\u003E or HashSet\u003CT\u003E in .NET?",
+      "difficulty": "easy",
+      "expected": [
+        {
+          "documentId": "doc_764010df6337fa83",
+          "heading": "Intro",
+          "citationLabel": "02 Computer Science/Data Structures/Data Structures.md",
+          "text": "A data structure organizes data for efficient access, mutation, and iteration."
+        },
+        {
+          "documentId": "doc_764010df6337fa83",
+          "heading": "Questions",
+          "citationLabel": "02 Computer Science/Data Structures/Data Structures.md",
+          "text": "\u003E [!QUESTION]- What is a data structure? Which ones do you know? Which of them exist in .NET? \u003E A data structure is a way to organize related data into a collection-like object."
+        },
+        {
+          "documentId": "doc_d44d9158d058c023",
+          "heading": "Intro",
+          "citationLabel": "02 Computer Science/Data Structures/Dictionary.md",
+          "text": "\u0060Dictionary\u003CTKey, TValue\u003E\u0060 is the primary key-value collection in .NET and the default choice for fast lookups by key in single-threaded or externally synchronized code."
+        }
+      ]
+    },
+    {
+      "id": "shared-what-are-the-main-pitfalls-of-using-dictionary-t-002",
+      "query": "What are the main pitfalls of using Dictionary\u003CTKey, TValue\u003E with custom or mutable keys?",
+      "difficulty": "medium",
+      "expected": [
+        {
+          "documentId": "doc_d44d9158d058c023",
+          "heading": "Pitfalls",
+          "citationLabel": "02 Computer Science/Data Structures/Dictionary.md",
+          "text": "- **\u0060GetHashCode\u0060/\u0060Equals\u0060 contract violation** \u2014 if \u0060Equals\u0060 says two keys are equal but \u0060GetHashCode\u0060 returns different values, the dictionary stores both as separate entries."
+        }
+      ]
+    },
+    {
+      "id": "shared-how-do-data-structure-choice-and-algorithm-choic-003",
+      "query": "How do data structure choice and algorithm choice interact when optimizing .NET code?",
+      "difficulty": "medium",
+      "expected": [
+        {
+          "documentId": "doc_474d54615318ba8d",
+          "heading": "Intro",
+          "citationLabel": "02 Computer Science/02 Computer Science.md",
+          "text": "choosing the right collection, avoiding quadratic blowups in batch processing, and reasoning about tradeoffs before writing code."
+        },
+        {
+          "documentId": "doc_474d54615318ba8d",
+          "heading": "Questions",
+          "citationLabel": "02 Computer Science/02 Computer Science.md",
+          "text": "Start with the data structure."
+        },
+        {
+          "documentId": "doc_764010df6337fa83",
+          "heading": "Intro",
+          "citationLabel": "02 Computer Science/Data Structures/Data Structures.md",
+          "text": "Choosing the right collection usually has a bigger impact on performance than micro-optimizing the code that uses it."
+        }
+      ]
+    },
+    {
+      "id": "shared-how-are-graphs-represented-in-net-and-what-colle-004",
+      "query": "How are graphs represented in .NET, and what collections are commonly used to model them?",
+      "difficulty": "medium",
+      "expected": [
+        {
+          "documentId": "doc_2b776cad1839dfae",
+          "heading": "Intro",
+          "citationLabel": "02 Computer Science/Data Structures/Graph.md",
+          "text": "Graphs model relationships between entities using vertices (nodes) and edges."
+        },
+        {
+          "documentId": "doc_764010df6337fa83",
+          "heading": "Questions",
+          "citationLabel": "02 Computer Science/Data Structures/Data Structures.md",
+          "text": "Examples include arrays, lists, queues, stacks, linked lists, dictionaries/hash tables, hash sets, graphs, and trees."
+        }
+      ]
+    },
+    {
+      "id": "shared-how-do-prompt-injection-attacks-differ-between-d-001",
+      "query": "How do prompt injection attacks differ between direct, indirect, and multimodal forms in LLM applications, and why do retrieval pathways increase the risk?",
+      "difficulty": "medium",
+      "expected": [
+        {
+          "documentId": "doc_2aa056ae0ced4fe8",
+          "heading": "Prompt Injection (LLM01)",
+          "citationLabel": "11 AI \u0026 ML/LLM/OWASP vulnerabilities on AI LLM.md",
+          "text": "**Mechanism**: The model receives attacker instructions in the same natural-language channel as legitimate instructions, so it may follow malicious text even when system guidance says not to."
+        }
+      ]
+    },
+    {
+      "id": "shared-what-are-the-main-owasp-top-10-for-llm-applicati-002",
+      "query": "What are the main OWASP Top 10 for LLM Applications vulnerabilities in the 2025 edition, and which new items were added compared with the classic list?",
+      "difficulty": "easy",
+      "expected": [
+        {
+          "documentId": "doc_2aa056ae0ced4fe8",
+          "heading": "Intro",
+          "citationLabel": "11 AI \u0026 ML/LLM/OWASP vulnerabilities on AI LLM.md",
+          "text": "The OWASP Top 10 for LLM Applications (2025 edition) catalogs the highest-impact security failures in systems that integrate large language models."
+        },
+        {
+          "documentId": "doc_2aa056ae0ced4fe8",
+          "heading": "The 2025 List",
+          "citationLabel": "11 AI \u0026 ML/LLM/OWASP vulnerabilities on AI LLM.md",
+          "text": "LLM01 | Prompt Injection | Attacker-crafted input overrides system instructions"
+        }
+      ]
+    },
+    {
+      "id": "shared-how-should-a-team-decide-between-rag-and-fine-tu-003",
+      "query": "How should a team decide between RAG and fine-tuning when knowledge changes frequently versus when the problem is behavioral?",
+      "difficulty": "medium",
+      "expected": [
+        {
+          "documentId": "doc_d03a6bceb46b2ca1",
+          "heading": "RAG vs Fine-Tuning",
+          "citationLabel": "11 AI \u0026 ML/LLM/RAG/RAG.md",
+          "text": "RAG externalizes knowledge into retrievable sources, while fine-tuning changes model behavior in weights."
+        },
+        {
+          "documentId": "doc_d03a6bceb46b2ca1",
+          "heading": "Questions",
+          "citationLabel": "11 AI \u0026 ML/LLM/RAG/RAG.md",
+          "text": "When the failure is behavioral, not factual: the model retrieves the right evidence but keeps producing the wrong format, tone, or policy behavior despite prompt iteration."
+        }
+      ]
+    },
+    {
+      "id": "shared-what-layered-guardrails-are-recommended-to-reduc-004",
+      "query": "What layered guardrails are recommended to reduce prompt injection risk and keep LLM systems bounded in production?",
+      "difficulty": "medium",
+      "expected": [
+        {
+          "documentId": "doc_da226501809ab831",
+          "heading": "Intro",
+          "citationLabel": "11 AI \u0026 ML/LLM/Guardrails.md",
+          "text": "Guardrails are layered controls around an LLM that reduce risk: they prevent unsafe actions, limit data exposure, and keep outputs within policy and quality constraints."
+        },
+        {
+          "documentId": "doc_da226501809ab831",
+          "heading": "Defense-in-Depth Model",
+          "citationLabel": "11 AI \u0026 ML/LLM/Guardrails.md",
+          "text": "\u0060\u0060\u0060mermaid flowchart TD U[User Input] --\u003E IG[Input Guardrails] IG --\u003E|blocked| R1[Reject / Rephrase] IG --\u003E|allowed| CG[Context Guardrails] CG --\u003E LLM[LLM] LLM --\u003E OG[Output Guardrails] OG --\u003E|blocked"
+        },
+        {
+          "documentId": "doc_da226501809ab831",
+          "heading": "Input Guardrails",
+          "citationLabel": "11 AI \u0026 ML/LLM/Guardrails.md",
+          "text": "Validate and filter what reaches the LLM: - **Prompt injection detection** \u2014 identify attempts to override system instructions (\u0022Ignore all previous instructions and...\u0022)."
+        }
+      ]
+    },
+    {
+      "id": "shared-why-can-adding-more-retrieved-documents-or-a-lon-001",
+      "query": "Why can adding more retrieved documents or a longer prompt make answer quality worse, and what should you do instead?",
+      "difficulty": "easy",
+      "expected": [
+        {
+          "documentId": "doc_5c4e5646102bed88",
+          "heading": "More Context, Worse Answers",
+          "citationLabel": "11 AI \u0026 ML/LLM/Context Engineering.md",
+          "text": "attention dilutes across a larger window (context rot), and critical evidence lands in the low-attention middle (lost in the middle)."
+        },
+        {
+          "documentId": "doc_f53d72f211994a50",
+          "heading": "Lost-in-the-Middle Attention Failure",
+          "citationLabel": "11 AI \u0026 ML/LLM/Generation.md",
+          "text": "When relevant evidence lands in the middle of a long context, the model underweights it relative to evidence at the start or end."
+        }
+      ]
+    },
+    {
+      "id": "shared-how-should-a-rag-system-be-designed-to-reduce-ha-002",
+      "query": "How should a RAG system be designed to reduce hallucinations and keep answers grounded after retrieval?",
+      "difficulty": "medium",
+      "expected": [
+        {
+          "documentId": "doc_d03a6bceb46b2ca1",
+          "heading": "Intro",
+          "citationLabel": "11 AI \u0026 ML/LLM/RAG/RAG.md",
+          "text": "Retrieval-Augmented Generation (RAG) combines retrieval and generation: retrieve evidence from your corpus, then generate an answer grounded in that evidence."
+        },
+        {
+          "documentId": "doc_ce2e3e5f10040aeb",
+          "heading": "RAG Does Not Eliminate Hallucinations",
+          "citationLabel": "11 AI \u0026 ML/LLM/Hallucinations.md",
+          "text": "RAG introduces its own failure modes: retrieval miss, context overflow, and model additions beyond retrieved evidence."
+        }
+      ]
+    },
+    {
+      "id": "shared-what-should-a-system-do-when-retrieved-sources-d-003",
+      "query": "What should a system do when retrieved sources disagree, instead of silently choosing one version?",
+      "difficulty": "medium",
+      "expected": [
+        {
+          "documentId": "doc_f53d72f211994a50",
+          "heading": "Grounding Bypass Under Conflicting Evidence",
+          "citationLabel": "11 AI \u0026 ML/LLM/Generation.md",
+          "text": "When retrieved sources contain conflicting information, models often silently pick one version instead of flagging the conflict."
+        }
+      ]
+    },
+    {
+      "id": "shared-how-can-you-reduce-the-risk-that-a-model-returns-004",
+      "query": "How can you reduce the risk that a model returns a schema-valid JSON response with the wrong semantic values?",
+      "difficulty": "hard",
+      "expected": [
+        {
+          "documentId": "doc_f53d72f211994a50",
+          "heading": "Structured Output Schema Mismatch",
+          "citationLabel": "11 AI \u0026 ML/LLM/Generation.md",
+          "text": "The model produces valid JSON that passes schema validation but contains semantically wrong values \u2014 wrong field mappings, hallucinated enum values that happen to be valid strings, or arrays with the"
+        }
+      ]
+    }
+  ]
+}

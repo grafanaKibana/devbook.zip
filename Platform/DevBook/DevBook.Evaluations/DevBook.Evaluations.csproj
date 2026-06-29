@@ -1,0 +1,54 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <GenerateProgramFile>false</GenerateProgramFile>
+    <RootNamespace>DevBook.Evaluations</RootNamespace>
+    <UserSecretsId>25549d38-b8d5-4e6e-b351-636ad02ea3b4</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Using Include="NUnit.Framework" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="RunDatasetGeneration.cs" />
+    <Compile Remove="RunReport.cs" />
+    <None Update="report.fancy.template.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="appsettings*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Datasets\*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.8" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.8" />
+    <PackageReference Include="Microsoft.Extensions.AI.Evaluation.Reporting" Version="10.6.0" />
+    <PackageReference Include="Microsoft.Extensions.AI.Evaluation.Quality" Version="10.6.0" />
+    <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.6.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.6.0" PrivateAssets="all" />
+    <PackageReference Include="NUnit" Version="4.6.1" PrivateAssets="all" />
+    <PackageReference Include="NUnit3TestAdapter" Version="6.2.0" PrivateAssets="all" />
+    <PackageReference Include="OpenAI" Version="2.11.0" />
+    <ProjectReference Include="..\DevBook.Data\DevBook.Data.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Datasets\Groups\" />
+    <Folder Include="EvaluationReports\results\" />
+  </ItemGroup>
+
+</Project>

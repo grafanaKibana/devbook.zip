@@ -59,19 +59,19 @@ if [[ ${#STAGED_MD[@]} -gt 0 ]]; then
     echo "[pre-commit] Checking fenced code block languages (MD040)..."
     # Run only on staged files; pass each file as a positional argument
     LINT_CMD=()
-    if [[ -x "$REPO_ROOT/node_modules/.bin/markdownlint-cli2" ]]; then
-        LINT_CMD=("$REPO_ROOT/node_modules/.bin/markdownlint-cli2")
+    if [[ -x "$REPO_ROOT/Web/node_modules/.bin/markdownlint-cli2" ]]; then
+        LINT_CMD=("$REPO_ROOT/Web/node_modules/.bin/markdownlint-cli2")
     elif command -v npx >/dev/null 2>&1; then
         LINT_CMD=(npx --no-install markdownlint-cli2)
     else
         echo ""
         echo "[pre-commit] ✗ markdownlint-cli2 runtime not found."
-        echo "  Install dependencies: npm install"
+        echo "  Install dependencies: (cd Web && npm install)"
         echo "  Or ensure Node tools are on PATH for GUI apps (Obsidian)."
         exit 1
     fi
 
-    if ! "${LINT_CMD[@]}" --config "$REPO_ROOT/.markdownlint.json" "${STAGED_MD[@]}"; then
+    if ! "${LINT_CMD[@]}" --config "$REPO_ROOT/Web/.markdownlint.json" "${STAGED_MD[@]}"; then
         echo ""
         echo "[pre-commit] ✗ MD040: Add a language to every fenced code block."
         echo "  Fallback: use 'text' when no specific language applies."

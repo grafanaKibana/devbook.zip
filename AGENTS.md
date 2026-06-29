@@ -2,6 +2,14 @@
 
 Obsidian knowledge base. These rules govern all human and agent operations.
 
+## The core paradigm
+
+1. Ask, don't assume. If something is unclear, ask before writing a single line. Never make silent assumptions about intent, architecture, or requirements. When running unattended, pick the most reasonable interpretation, proceed, and record the assumption rather than blocking.
+2. Implement the simplest solution for simple problems, better solutions for harder problems. Do not over-engineer or add flexibility that isn't needed yet.
+3. Don't touch unrelated code but please do surface bad code or design smells you discover with me so we can address them as a separate issue.
+4. Flag uncertainty explicitly. If you're unsure about something, see point 1 above. If it makes sense to do so, conduct a small, localised and low-risk experiment and bring the hypothesis and results to me to discuss. Confidence without certainty causes more damage than admitting a gap.
+5. I'm always open to ideas on better ways to do things. Please don't hesitate to suggest a better way, or one that has long lasting impact over a tactical change. (as a few examples)
+
 ## Vault layout
 
 - The editable Obsidian vault lives under `Vault/` in this repo.
@@ -121,7 +129,7 @@ These rules exist to make notes useful for the Senior .NET / AI engineering role
 - `dg-publish: true` notes MUST meet the quality bar below; otherwise keep `dg-publish: false` until ready.
 - Prefer short, high-signal writing: decision rules, pitfalls, and concrete examples over broad definitions.
 
-Writing paradigm
+#### Writing paradigm
 
 Eight principles govern note content. Apply them as judgment calls, not checklists.
 
@@ -138,7 +146,7 @@ These principles override specific section rules. If following a section templat
 
 These principles apply recursively. In a note covering multiple approaches, patterns, or strategies, apply them to each sub-concept — not just to the note as a whole.
 
-Required content (for any non-trivial concept page)
+#### Required content (for any non-trivial concept page)
 
 - These are content requirements, not mandatory section headings. For simple topics, keep content compact under `Intro`.
 
@@ -176,7 +184,7 @@ Required content (for any non-trivial concept page)
   - For non-trivial topics, include 2-10 links with at least 1 anchor source (official docs/spec/RFC) and 1 practice source (practitioner blog/postmortem/production deep-dive).
   - For simple/definitional topics, a single official docs link is sufficient — do not pad with marginally relevant links to hit a count.
 
-Section minimalism rule
+#### Section minimalism rule
 
 - For simple topics, prefer a compact note: `Intro` + inline example + `References`.
 - Add standalone `Examples` and `Pitfalls` headings only when they add unique value beyond Intro.
@@ -184,7 +192,7 @@ Section minimalism rule
 - A short mechanism explanation for a simple topic belongs in `Intro`, not a standalone `How It Works`. Reserve a dedicated mechanism heading for topics whose machinery genuinely needs its own section (multi-step flows, state lifecycles, non-obvious internals). For a single data structure or enum, one or two sentences of "how it works" under `Intro` is enough.
 - Avoid creating multiple tiny sections that fragment one idea.
 
-Scope-to-depth fit
+#### Scope-to-depth fit
 
 A note's depth must match its topic's actual complexity. More content is not always better.
 
@@ -196,7 +204,7 @@ Reviewer check: Does the note have the right depth for its topic? Flag overstuff
 
 **Publish gate for `dg-publish: true`**: A published note MUST have non-empty, substantive content — not a template skeleton or a heading with no body. This is content-based, not status-based. A note can be `status: Creation` and still be published if it already has meaningful content.
 
-Note size and splitting
+#### Note size and splitting
 
 When a note grows large, the reviewer MUST include a **Split Suggestion** section in their output — either recommending a split or explicitly justifying why it's not needed.
 
@@ -216,7 +224,7 @@ rg -c "^#+\s" "<note>.md"   # heading count
 
 **This rule is a suggestion, not a mandate.** The reviewer must justify their recommendation; the author decides whether to split.
 
-Mermaid diagram triggers
+#### Mermaid diagram triggers
 
 Add a Mermaid diagram when it reduces cognitive load, especially for:
 
@@ -226,14 +234,14 @@ Add a Mermaid diagram when it reduces cognitive load, especially for:
 - Architecture boundaries and dependencies → small `flowchart`/`graph` (C4-style simplified)
 - Data model relationships (EF Core, indexing, schemas) → `erDiagram` or `classDiagram`
 
-Tradeoffs and pros/cons triggers
+#### Tradeoffs and pros/cons triggers
 
 If the topic has multiple competing options, include a short comparison (table is fine):
 
 - .NET: `Task` vs `ValueTask`, `IEnumerable` vs `IAsyncEnumerable`, `Singleton` vs `Scoped`, `Include` vs projection, middleware vs filters.
 - AI: RAG vs fine-tuning, hybrid search vs vector-only, LLM-as-judge vs human eval, caching vs freshness, safety filters vs false positives.
 
-Question quality rules
+#### Question quality rules
 
 - Prefer direct interview questions that force judgment (scale, latency, cost, failure modes) over trivia.
 - Avoid scenario-based stems that set up a specific situation before the question ("A team does X and Y happens", "A system uses X with Y configuration"). Prefer direct questions that ask about the concept ("Why can X cause Y?", "When is X justified over Y?", "How does X reduce Y?").
@@ -243,7 +251,7 @@ Question quality rules
 - Do NOT answer a comparison question with a mechanical parallel matrix ("X when… / Y when… / X costs… / Y costs…"). That symmetry is a generated-text tell. Explain one side conversationally, then the other, and ground it in a concrete example.
 - Make the cost explicit when the question turns on a real tradeoff — but vary how. Weave it into the reasoning, name it in a closing line, or leave it out entirely when the question is mechanical and has no real tradeoff. Do NOT end every answer with an identical bolded `**Tradeoff:**` label; that uniformity is itself a machine-generated tell (see principle 8). The goal is to train engineering judgment — thinking in constraints and costs — not to fill a fixed slot.
 
-Reference hygiene
+#### Reference hygiene
 
 - Prefer stable/primary sources when available (Microsoft Learn/.NET API refs, RFCs, OWASP, NIST, Kubernetes docs).
 - Avoid link dumps; keep references focused and capped at 10 links.
@@ -262,7 +270,7 @@ This gate applies to all created or updated notes under `Vault/Software Engineer
 - Reviewer subagent is suggest-only: it MUST NOT edit files directly.
 - Completion is blocked until the reviewer reports zero findings.
 
-Reviewer objective
+#### Reviewer objective
 
 - Validate technical correctness and remove unsupported claims.
 - Validate source legitimacy and reference quality.
@@ -270,7 +278,7 @@ Reviewer objective
 - Ensure the note is a quick intro: what it is, why it matters, core mechanics, and interview readiness.
 - Ensure deeper study is delegated to curated references.
 
-Reviewer output contract (strict)
+#### Reviewer output contract (strict)
 
 - Treat every finding as a blocking error until fixed.
 - Provide a detailed summary with each finding explained using:
@@ -281,7 +289,7 @@ Reviewer output contract (strict)
 - Do not return generic advice. Feedback must be file-specific and actionable.
 - Every review MUST include a **Split Suggestion** section. When the note exceeds the size heuristic (>1200 words OR >12 headings AND 2+ distinct concepts), include a specific split recommendation. Otherwise, include "Split Suggestion: No split needed — [brief justification]".
 
-Minimum validation checklist (must all pass)
+#### Minimum validation checklist (must all pass)
 
 - Frontmatter and section structure match this contract and the selected template.
 - Intro is clear, concise, and in own words.
@@ -300,109 +308,83 @@ Minimum validation checklist (must all pass)
 - Voice: reads like a human engineer — no hype adjectives, inflated verbs, throat-clearing transitions, meta-signposting, heading restatement, or summary-restate endings; sentence and paragraph rhythm varies; real names and numbers appear in the prose, not only in code blocks.
 - References are annotated so the reader can assess relevance without clicking.
 
-Mandatory reviewer prompt format
+#### Mandatory reviewer prompt format
 
 Use this structure when spawning the reviewer subagent:
 
-```text
-1. TASK: Review created/updated notes for technical correctness, source legitimacy, clarity, and interview readiness.
-2. EXPECTED OUTCOME: Return PASS only when zero findings remain (including code fence language, scope-to-depth fit, and split heuristic); otherwise return a blocking error list with exact fixes and which rule each issue violates.
-3. REQUIRED TOOLS: Repository read/search tools and trusted documentation lookup tools.
-4. MUST DO: Validate against AGENTS.md quality bar, templates, and source rules. Verify every claim is supported or remove it.
-5. MUST NOT DO: Do not edit files. Do not provide vague suggestions. Do not approve notes with unresolved issues.
-6. CONTEXT: Include changed file paths and relevant constraints for this batch.
-```
+Compact repo instructions for future OpenCode sessions. Keep this file limited to facts an agent would likely miss without reading several repo files.
 
-Enforcement note
+## Repo shape
 
-- If the reviewer reports any issue, the main agent MUST fix all issues, then rerun the reviewer subagent.
-- Main agent MUST repeat this loop until the reviewer returns PASS with zero findings.
+- This repo has three top-level work areas: `Vault/` for editable Obsidian content, `Web/` for the Eleventy/Digital Garden site, and `Platform/DevBook/` for the .NET RAG API PoC.
+- Do not create new root app folders outside `Platform/`, `Vault/`, and `Web/` unless the user explicitly asks for a restructure.
+- `Web/src/site/notes/` is Digital Garden export output. Prefer editing notes in `Vault/`; touch exported notes only when fixing the publish/export layer.
+- `Vault/Software Engineering/Roadmap.canvas` is generated by `.scripts/generate-roadmap.py`; do not hand-edit it.
+- Root `.github/` has Dependabot only; no CI workflows are present. Local verification and the pre-commit hook are the executable checks.
 
-### Publishing frontmatter
+## Commands
 
-- `dg-publish: true` marks a note publishable.
-- `dg-home: true` marks the Digital Garden home note (currently `Vault/Software Engineering/Software Engineering.md`).
+- Web setup/dev/build from `Web/`:
+  - `npm install`
+  - `npm start`
+  - `npm run build`
+  - `npm run lint:md:all` to lint all vault notes for fenced-code-block languages.
+- Deployment config runs the same Web commands: root `vercel.json` uses `cd Web && npm install` and `cd Web && npm run build`, outputting `Web/dist`.
+- .NET API commands from repo root:
+  - `dotnet run --project Platform/DevBook/DevBook.API/DevBook.API.csproj`
+  - `dotnet build Platform/DevBook/DevBook.API/DevBook.API.csproj`
+  - `dotnet test Platform/DevBook/DevBook.Tests/DevBook.Tests.csproj`
+- `Platform/DevBook/DevBook.slnx` lists the three projects, but the README documents project-file commands; target `.csproj` files for focused runs.
 
-## Plugin essentials
+## Git hook and generated changes
 
-- **Folder Notes**: auto-creates hubs; hidden in some views. Always verify `FolderNote` tag.
-- **Templater**: templates in `Vault/Templates/` write/normalize frontmatter.
-- **Dataview/DataviewJS**: enabled. Only trusted snippets.
-- **Bases**: `.base` files define filtered views (e.g., `Vault/Software Engineering/Topics.base`).
-- **Digital Garden**: uses `dg-*` frontmatter and drives the publish/export flow.
-- **Obsidian Git**: manual sync only. Remind user to sync after work.
-- **Omnisearch**: vault-wide full-text search. No HTTP API.
+- Git is configured with `core.hooksPath=.githooks`; `.githooks/pre-commit` runs only when staged Markdown files are under `Vault/`.
+- The hook mutates and re-stages vault files in this order: folder rollup frontmatter, `Whats next` callouts, `Roadmap.canvas`, then Markdown MD040 lint.
+- MD040 is the only markdownlint rule (`Web/.markdownlint.json`): every fenced code block in staged vault notes needs a language. Use `text` for generic blocks.
+- Do not manually add folder navigation sections such as sibling/child link lists; `render-whats-next.py` owns the marker block between `<!-- whats-next:start -->` and `<!-- whats-next:end -->`.
+- Never commit unless the user explicitly asks. Leave hook-generated changes visible for the user if you are not committing.
 
-## Agent tooling (Obsidian skills & CLI)
+## Vault content rules
 
-Agents have four Obsidian-specific skills available. Load them via `load_skills=["obsidian-markdown", ...]` when delegating tasks that touch vault content.
+- Open/edit the Obsidian vault at `Vault/`. All real notes belong under `Vault/Software Engineering/`; attachments belong under `Vault/Assets/`.
+- Before creating or moving a note, check placement, naming, scope, and duplication against existing notes. If a better location/name/merge target is clear, present that recommendation instead of blindly creating a duplicate.
+- Hub notes are folder notes named `<Folder>/<Folder>.md` and must keep `tags: [FolderNote]`; the tag drives rollups/views even though Folder Notes also recognizes the filename.
+- Concept-note frontmatter uses arrays for `topic`, `subtopic`, and `level`, plus `priority` and `status`. Agents may set only `Not-Started`, `Creation`, or `Ready To Repeat`; never set `Repetition` or `Done`.
+- `dg-publish: true` means the note is publishable. Only set it when the note has substantive content, at least one concrete example, and at least one useful external reference.
+- Real notes must not contain template placeholders. Start from `Vault/Templates/Pages/Template - Concept Page.md` or `Template - Index.md`, then delete irrelevant scaffold.
+- Prefer wikilinks for internal note links and Markdown links for external references. Do not create documentation-index pages that mostly duplicate folder navigation.
 
-### Skills overview
+## Note quality bar
 
-| Skill | When to load | What it provides |
-|-------|-------------|-----------------|
-| `obsidian-markdown` | Any note creation/editing | Obsidian Flavored Markdown reference: wikilinks (`[[note\|display]]`), embeds (`![[note]]`), callouts (`> [!type]`), properties/frontmatter YAML, tags, block IDs, Mermaid syntax, LaTeX math, footnotes, comments (`%%hidden%%`) |
-| `obsidian-cli` | Vault queries, bulk operations, property updates (requires Obsidian running) | CLI commands to read, create, search, append notes, manage properties, list tags/backlinks, and run tasks — all without opening files manually |
-| `obsidian-bases` | Creating/editing `.base` files | Bases YAML schema: views (table/cards/list/map), filters, formulas, properties config, summaries, file/date/string/list functions |
-| `json-canvas` | Creating/editing `.canvas` files | JSON Canvas spec: node types (text/file/link/group), edges, colors, layout guidelines, ID generation |
+- Optimize notes for Senior .NET / AI interview readiness: concrete mechanisms, decision rules, production pitfalls, tradeoffs, and concise expected answers where questions add value.
+- Keep simple topics compact (`Intro` with an inline example and references is enough). Add `Pitfalls`, `Tradeoffs`, diagrams, or questions only when they teach non-obvious mechanics or judgment.
+- Every non-trivial claim should be grounded in a concrete example, a mechanism, or a reference. Avoid abstract filler like “handle errors” unless tied to a topic-specific failure mode.
+- If a note compares options, treat options symmetrically and close with a decision rule: when to start with one option, when to switch, and what cost changes the decision.
+- For .NET examples, prefer `csharp`; for AI/agent orchestration examples, prefer C# with Microsoft Agent Framework APIs over Python or older Semantic Kernel/AutoGen patterns.
+- After creating or updating notes under `Vault/Software Engineering/`, run a reviewer subagent before completion. It must not edit files and must return PASS or exact blocking fixes, including split suggestion, reference quality, MD040, and scope-to-depth fit.
 
-### Obsidian CLI quick reference
+## Web site rules
 
-The `obsidian` CLI interacts with a **running Obsidian instance**. It will not work if Obsidian is closed. Install via [Obsidian CLI docs](https://help.obsidian.md/cli).
+- `Web/` is an Eleventy 3.x site generated from Digital Garden output plus customizations.
+- Safe customization areas are `Web/src/site/styles/user/` and `Web/src/site/_includes/components/user/`; README notes that some stock files are modified and may need reapplying after template updates.
+- Web runtime expects Node `24.x` per `Web/package.json`; `Web/package-lock.json` still says Node `22.x` and has a `markdown-it-mathjax3` version mismatch, so prefer `npm install` over assuming `npm ci` is clean until the lockfile is refreshed.
+- Personal site metadata/contact overrides are loaded from `Web/.env.local`; this repo does not currently ignore that file, so do not put secrets there unless it is explicitly ignored or kept out of commits.
 
-**Syntax**: parameters use `=`, flags are bare booleans. Quote values with spaces.
+## Platform API rules
 
-```bash
-# Target this vault explicitly
-obsidian vault="Vault" <command>
+- `Platform/DevBook/` is a small .NET `net10.0` R&D PoC for learning RAG and agentic-system mechanics, not an enterprise production product. Favor code that makes the mechanics easy to study over production abstractions.
+- Projects: `DevBook.API` minimal ASP.NET Core host, `DevBook.Data` ingestion/chunking/MongoDB/embedding logic, `DevBook.Tests` xUnit tests.
+- Runtime config currently needs `ConnectionStrings:MongoDb` and `EmbeddingOptions:ApiKey` (for env vars, use `EmbeddingOptions__ApiKey`; current code does not map bare `OPENAI_API_KEY`). The Mongo database name is hard-coded as `DevBook` in `Program.cs`; do not commit secrets in `appsettings*.json`.
+- Default ingestion root is `Vault/Software Engineering` via `IngestionOptions:ContentRootPath`; ingestion paths must stay relative to that root.
+- `/rag/search` requires Atlas MongoDB `$vectorSearch` and the `chunks_embedding_vector_idx` index with `384` dimensions on `Embedding`. Local/non-Atlas MongoDB is enough only for basic storage experiments.
+- `/rag/ask` is intentionally mock-only for now; do not imply it calls MongoDB or an LLM unless implementing that feature.
+- **Conservative API logging.** When adding or changing API operations, think explicitly about progress logging at operation boundaries. Log start/end for user-triggered or startup-blocking work such as ingestion, RAG search/ask, index creation, embedding batches, and LLM calls when they can take noticeable time or fail externally. Prefer service-boundary logs over endpoint-only logs so the behavior is visible from every caller. Use structured `ILogger` messages with stable field names and elapsed milliseconds from `Stopwatch`; include safe operational metadata such as source path, file name, strategy names, requested/normalized counts, candidate/result/source counts, mode, dimensions, and collection/index names. Do not log secrets, connection strings, API keys, raw prompts, questions, answers, query text, markdown content, chunk text, embeddings, document IDs, or full exception-sensitive payloads unless the user explicitly asks for temporary debugging. Keep logs conservative: `Information` for operation start/end and major per-collection/per-strategy milestones, `Debug` for noisy internals, no per-item logs inside large loops unless diagnosing a specific bug.
 
-# File targeting: file= resolves like a wikilink, path= is exact from vault root
-obsidian read file="Task vs ValueTask"
-obsidian read path="Software Engineering/01 Programming/.NET/Task vs ValueTask.md"
-```
+## Obsidian tooling
 
-**Common operations for note workflows**:
-
-```bash
-# Read a note
-obsidian read file="My Note"
-
-# Create a note (silent = don't open in UI, overwrite = replace if exists)
-obsidian create name="New Note" content="# Hello" template="Template" silent
-
-# Append content to a note
-obsidian append file="My Note" content="\n## New Section\nContent here"
-
-# Set/get frontmatter properties
-obsidian property:set name="status" value="Creation" file="My Note"
-obsidian property:set name="dg-publish" value="true" file="My Note"
-
-# Search vault content
-obsidian search query="async await" limit=10
-
-# List tags with counts
-obsidian tags sort=count counts
-
-# Get backlinks for a note
-obsidian backlinks file="My Note"
-
-# List tasks
-obsidian tasks daily todo
-```
-
-### When to use CLI vs file tools
-
-| Operation | Use | Reason |
-|-----------|-----|--------|
-| Read note content | File tools (`Read`) | Always available, no Obsidian dependency |
-| Edit/create notes | File tools (`Edit`/`Write`) | Precise line-level control, always available |
-| Search vault content | File tools (`Grep`/`Glob`) | Always available; CLI search is supplementary |
-| Set frontmatter properties | CLI `property:set` | Cleaner than parsing YAML manually, handles edge cases |
-| Get backlinks/tags | CLI `backlinks`/`tags` | Only way to query Obsidian's link index |
-| Bulk property updates | CLI `property:set` in loop | Faster than editing YAML in each file |
-| Verify note exists by wikilink name | CLI `read file=` | Resolves wikilinks the same way Obsidian does |
-
-**Default**: Use standard file tools for all read/write operations. Use CLI as a supplement when Obsidian is running and you need vault-index features (backlinks, wikilink resolution, property management).
+- Default to file tools for reads/writes. Use Obsidian CLI only when you need Obsidian-index behavior such as backlinks, tags, or wikilink resolution.
+- Obsidian CLI requires Obsidian running and uses `=` parameters, for example `obsidian vault="DevBook" read file="Task vs ValueTask"`.
+- Load Obsidian skills when delegating vault work: `obsidian-markdown` for notes, `obsidian-cli` for vault-index queries, `obsidian-bases` for `.base`, and `json-canvas` for `.canvas`.
 
 ## Workflow notes
 
@@ -410,3 +392,6 @@ obsidian tasks daily todo
 - **Placement and scope check.** Before creating or moving pages, the agent MUST run the placement and scope check defined in "Creating structure" — even when the user's instruction seems clear. See [Placement and scope check](#placement-and-scope-check-before-creating-pages).
 - **AGENTS.md evolution rule.** When updating this contract, prefer extending the writing paradigm or strengthening existing principles over adding prescriptive format rules. If a proposed rule can be derived from the eight writing principles (concrete over abstract, show the machine, depth matches complexity, scannable by design, opinionated over neutral, symmetric treatment, tradeoff-anchored, plain engineer's voice), strengthen the principle instead of adding a new rule. Rules should guide judgment, not prescribe specific section templates or bullet formats for each case.
 - **No automatic commits.** Never create git commits unless the user explicitly asks. Leave changes unstaged/uncommitted so the user controls when and what to commit.
+- Default to file tools for reads/writes. Use Obsidian CLI only when you need Obsidian-index behavior such as backlinks, tags, or wikilink resolution.
+- Obsidian CLI requires Obsidian running and uses `=` parameters, for example `obsidian vault="DevBook" read file="Task vs ValueTask"`.
+- Load Obsidian skills when delegating vault work: `obsidian-markdown` for notes, `obsidian-cli` for vault-index queries, `obsidian-bases` for `.base`, and `json-canvas` for `.canvas`.

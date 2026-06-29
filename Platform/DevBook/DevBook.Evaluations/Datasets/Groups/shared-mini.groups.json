@@ -1,0 +1,786 @@
+{
+  "version": 1,
+  "generatedAt": "2026-06-21T19:45:18.404397+00:00",
+  "groups": [
+    {
+      "id": "shared-group-0001",
+      "seedTitle": "11 AI \u0026 ML",
+      "seedSourcePath": "11 AI \u0026 ML/11 AI \u0026 ML.md",
+      "noteCount": 4,
+      "sections": [
+        {
+          "localId": "S1",
+          "title": "11 AI \u0026 ML",
+          "sourcePath": "11 AI \u0026 ML/11 AI \u0026 ML.md",
+          "heading": "Intro",
+          "charCount": 887
+        },
+        {
+          "localId": "S2",
+          "title": "11 AI \u0026 ML",
+          "sourcePath": "11 AI \u0026 ML/11 AI \u0026 ML.md",
+          "heading": "Map of the Section",
+          "charCount": 2165
+        },
+        {
+          "localId": "S3",
+          "title": "11 AI \u0026 ML",
+          "sourcePath": "11 AI \u0026 ML/11 AI \u0026 ML.md",
+          "heading": "Choosing an Approach",
+          "charCount": 1288
+        },
+        {
+          "localId": "S4",
+          "title": "Machine Learning",
+          "sourcePath": "11 AI \u0026 ML/Machine Learning/Machine Learning.md",
+          "heading": "Intro",
+          "charCount": 723
+        },
+        {
+          "localId": "S5",
+          "title": "Machine Learning",
+          "sourcePath": "11 AI \u0026 ML/Machine Learning/Machine Learning.md",
+          "heading": "Generic pipeline",
+          "charCount": 319
+        },
+        {
+          "localId": "S6",
+          "title": "Machine Learning",
+          "sourcePath": "11 AI \u0026 ML/Machine Learning/Machine Learning.md",
+          "heading": "Data Collection and Labeling",
+          "charCount": 406
+        },
+        {
+          "localId": "S7",
+          "title": "Types",
+          "sourcePath": "01 Programming/NET/CSharp/Fundamentals/Types/Types.md",
+          "heading": "Intro",
+          "charCount": 361
+        },
+        {
+          "localId": "S8",
+          "title": "Types",
+          "sourcePath": "01 Programming/NET/CSharp/Fundamentals/Types/Types.md",
+          "heading": "How It Works",
+          "charCount": 745
+        },
+        {
+          "localId": "S9",
+          "title": "Types",
+          "sourcePath": "01 Programming/NET/CSharp/Fundamentals/Types/Types.md",
+          "heading": "Pitfalls",
+          "charCount": 637
+        },
+        {
+          "localId": "S10",
+          "title": "Evaluation",
+          "sourcePath": "11 AI \u0026 ML/LLM/Evaluation/Evaluation.md",
+          "heading": "Intro",
+          "charCount": 498
+        }
+      ]
+    },
+    {
+      "id": "shared-group-0002",
+      "seedTitle": "Context Engineering",
+      "seedSourcePath": "11 AI \u0026 ML/LLM/Context Engineering.md",
+      "noteCount": 4,
+      "sections": [
+        {
+          "localId": "S1",
+          "title": "Context Engineering",
+          "sourcePath": "11 AI \u0026 ML/LLM/Context Engineering.md",
+          "heading": "Intro",
+          "charCount": 1472
+        },
+        {
+          "localId": "S2",
+          "title": "Context Engineering",
+          "sourcePath": "11 AI \u0026 ML/LLM/Context Engineering.md",
+          "heading": "The Context Budget",
+          "charCount": 1228
+        },
+        {
+          "localId": "S3",
+          "title": "Context Engineering",
+          "sourcePath": "11 AI \u0026 ML/LLM/Context Engineering.md",
+          "heading": "Techniques",
+          "charCount": 2445
+        },
+        {
+          "localId": "S4",
+          "title": "Prompting",
+          "sourcePath": "11 AI \u0026 ML/LLM/Prompting/Prompting.md",
+          "heading": "Intro",
+          "charCount": 518
+        },
+        {
+          "localId": "S5",
+          "title": "Prompting",
+          "sourcePath": "11 AI \u0026 ML/LLM/Prompting/Prompting.md",
+          "heading": "Prompt Anatomy",
+          "charCount": 785
+        },
+        {
+          "localId": "S6",
+          "title": "Prompting",
+          "sourcePath": "11 AI \u0026 ML/LLM/Prompting/Prompting.md",
+          "heading": "LLM Settings",
+          "charCount": 1098
+        },
+        {
+          "localId": "S7",
+          "title": "Generation",
+          "sourcePath": "11 AI \u0026 ML/LLM/Generation.md",
+          "heading": "Intro",
+          "charCount": 1077
+        },
+        {
+          "localId": "S8",
+          "title": "Generation",
+          "sourcePath": "11 AI \u0026 ML/LLM/Generation.md",
+          "heading": "Generation Parameters",
+          "charCount": 3133
+        },
+        {
+          "localId": "S9",
+          "title": "Generation",
+          "sourcePath": "11 AI \u0026 ML/LLM/Generation.md",
+          "heading": "Grounding and Citations",
+          "charCount": 1968
+        },
+        {
+          "localId": "S10",
+          "title": "Tools",
+          "sourcePath": "11 AI \u0026 ML/LLM/Agents/Tools.md",
+          "heading": "Intro",
+          "charCount": 2036
+        }
+      ]
+    },
+    {
+      "id": "shared-group-0003",
+      "seedTitle": "Embeddings",
+      "seedSourcePath": "11 AI \u0026 ML/LLM/Embeddings.md",
+      "noteCount": 4,
+      "sections": [
+        {
+          "localId": "S1",
+          "title": "Embeddings",
+          "sourcePath": "11 AI \u0026 ML/LLM/Embeddings.md",
+          "heading": "Intro",
+          "charCount": 1447
+        },
+        {
+          "localId": "S2",
+          "title": "Embeddings",
+          "sourcePath": "11 AI \u0026 ML/LLM/Embeddings.md",
+          "heading": "Model Families",
+          "charCount": 1451
+        },
+        {
+          "localId": "S3",
+          "title": "Embeddings",
+          "sourcePath": "11 AI \u0026 ML/LLM/Embeddings.md",
+          "heading": "Dimensionality",
+          "charCount": 756
+        },
+        {
+          "localId": "S4",
+          "title": "Monitoring",
+          "sourcePath": "11 AI \u0026 ML/LLM/RAG/Monitoring.md",
+          "heading": "Intro",
+          "charCount": 2213
+        },
+        {
+          "localId": "S5",
+          "title": "Monitoring",
+          "sourcePath": "11 AI \u0026 ML/LLM/RAG/Monitoring.md",
+          "heading": "Instrumentation",
+          "charCount": 1308
+        },
+        {
+          "localId": "S6",
+          "title": "Monitoring",
+          "sourcePath": "11 AI \u0026 ML/LLM/RAG/Monitoring.md",
+          "heading": "Deterministic Metrics",
+          "charCount": 2083
+        },
+        {
+          "localId": "S7",
+          "title": "Retrieval",
+          "sourcePath": "11 AI \u0026 ML/LLM/RAG/Retrieval.md",
+          "heading": "Intro",
+          "charCount": 1580
+        },
+        {
+          "localId": "S8",
+          "title": "Retrieval",
+          "sourcePath": "11 AI \u0026 ML/LLM/RAG/Retrieval.md",
+          "heading": "Dense Retrieval \u2014 Vector Search",
+          "charCount": 1576
+        },
+        {
+          "localId": "S9",
+          "title": "Retrieval",
+          "sourcePath": "11 AI \u0026 ML/LLM/RAG/Retrieval.md",
+          "heading": "Sparse Retrieval \u2014 Keyword Search (BM25)",
+          "charCount": 1760
+        },
+        {
+          "localId": "S10",
+          "title": "Caching",
+          "sourcePath": "03 Data Persistence/Caching.md",
+          "heading": "Intro",
+          "charCount": 1421
+        }
+      ]
+    },
+    {
+      "id": "shared-group-0004",
+      "seedTitle": "LLM",
+      "seedSourcePath": "11 AI \u0026 ML/LLM/LLM.md",
+      "noteCount": 4,
+      "sections": [
+        {
+          "localId": "S1",
+          "title": "LLM",
+          "sourcePath": "11 AI \u0026 ML/LLM/LLM.md",
+          "heading": "Intro",
+          "charCount": 1419
+        },
+        {
+          "localId": "S2",
+          "title": "LLM",
+          "sourcePath": "11 AI \u0026 ML/LLM/LLM.md",
+          "heading": "How LLMs Are Built",
+          "charCount": 1700
+        },
+        {
+          "localId": "S3",
+          "title": "LLM",
+          "sourcePath": "11 AI \u0026 ML/LLM/LLM.md",
+          "heading": "Adapting an LLM to a Task",
+          "charCount": 1468
+        },
+        {
+          "localId": "S4",
+          "title": "Embeddings",
+          "sourcePath": "11 AI \u0026 ML/LLM/Embeddings.md",
+          "heading": "Similarity Metrics",
+          "charCount": 924
+        },
+        {
+          "localId": "S5",
+          "title": "Embeddings",
+          "sourcePath": "11 AI \u0026 ML/LLM/Embeddings.md",
+          "heading": "Distribution Shift on Internal Terminology",
+          "charCount": 744
+        },
+        {
+          "localId": "S6",
+          "title": "Embeddings",
+          "sourcePath": "11 AI \u0026 ML/LLM/Embeddings.md",
+          "heading": "Embedding Model Swap Invalidation",
+          "charCount": 503
+        },
+        {
+          "localId": "S7",
+          "title": "Prompting",
+          "sourcePath": "11 AI \u0026 ML/LLM/Prompting/Prompting.md",
+          "heading": "Instruction Prompting",
+          "charCount": 931
+        },
+        {
+          "localId": "S8",
+          "title": "Prompting",
+          "sourcePath": "11 AI \u0026 ML/LLM/Prompting/Prompting.md",
+          "heading": "Role Prompting",
+          "charCount": 719
+        },
+        {
+          "localId": "S9",
+          "title": "Prompting",
+          "sourcePath": "11 AI \u0026 ML/LLM/Prompting/Prompting.md",
+          "heading": "Choosing a Technique",
+          "charCount": 964
+        },
+        {
+          "localId": "S10",
+          "title": "Evaluation",
+          "sourcePath": "11 AI \u0026 ML/LLM/Evaluation/Evaluation.md",
+          "heading": "The Evaluation Stack",
+          "charCount": 2458
+        }
+      ]
+    },
+    {
+      "id": "shared-group-0005",
+      "seedTitle": "Fine-tuning",
+      "seedSourcePath": "11 AI \u0026 ML/LLM/Fine-tuning.md",
+      "noteCount": 4,
+      "sections": [
+        {
+          "localId": "S1",
+          "title": "Fine-tuning",
+          "sourcePath": "11 AI \u0026 ML/LLM/Fine-tuning.md",
+          "heading": "Intro",
+          "charCount": 1605
+        },
+        {
+          "localId": "S2",
+          "title": "Fine-tuning",
+          "sourcePath": "11 AI \u0026 ML/LLM/Fine-tuning.md",
+          "heading": "When to Fine-tune",
+          "charCount": 1139
+        },
+        {
+          "localId": "S3",
+          "title": "Fine-tuning",
+          "sourcePath": "11 AI \u0026 ML/LLM/Fine-tuning.md",
+          "heading": "Full Fine-tuning",
+          "charCount": 492
+        },
+        {
+          "localId": "S4",
+          "title": "LLM",
+          "sourcePath": "11 AI \u0026 ML/LLM/LLM.md",
+          "heading": "Dictionary",
+          "charCount": 2478
+        },
+        {
+          "localId": "S5",
+          "title": "LLM",
+          "sourcePath": "11 AI \u0026 ML/LLM/LLM.md",
+          "heading": "Questions",
+          "charCount": 1416
+        },
+        {
+          "localId": "S6",
+          "title": "LLM",
+          "sourcePath": "11 AI \u0026 ML/LLM/LLM.md",
+          "heading": "References",
+          "charCount": 899
+        },
+        {
+          "localId": "S7",
+          "title": "Prompting",
+          "sourcePath": "11 AI \u0026 ML/LLM/Prompting/Prompting.md",
+          "heading": "Pitfalls",
+          "charCount": 1104
+        },
+        {
+          "localId": "S8",
+          "title": "Prompting",
+          "sourcePath": "11 AI \u0026 ML/LLM/Prompting/Prompting.md",
+          "heading": "Questions",
+          "charCount": 1290
+        },
+        {
+          "localId": "S9",
+          "title": "Prompting",
+          "sourcePath": "11 AI \u0026 ML/LLM/Prompting/Prompting.md",
+          "heading": "References",
+          "charCount": 907
+        },
+        {
+          "localId": "S10",
+          "title": "RAG",
+          "sourcePath": "11 AI \u0026 ML/LLM/RAG/RAG.md",
+          "heading": "Intro",
+          "charCount": 722
+        }
+      ]
+    },
+    {
+      "id": "shared-group-0006",
+      "seedTitle": "Model Selection and Routing",
+      "seedSourcePath": "11 AI \u0026 ML/LLM/Model Selection and Routing.md",
+      "noteCount": 4,
+      "sections": [
+        {
+          "localId": "S1",
+          "title": "Model Selection and Routing",
+          "sourcePath": "11 AI \u0026 ML/LLM/Model Selection and Routing.md",
+          "heading": "Intro",
+          "charCount": 1008
+        },
+        {
+          "localId": "S2",
+          "title": "Model Selection and Routing",
+          "sourcePath": "11 AI \u0026 ML/LLM/Model Selection and Routing.md",
+          "heading": "Selection Criteria",
+          "charCount": 1228
+        },
+        {
+          "localId": "S3",
+          "title": "Model Selection and Routing",
+          "sourcePath": "11 AI \u0026 ML/LLM/Model Selection and Routing.md",
+          "heading": "Routing Patterns",
+          "charCount": 1253
+        },
+        {
+          "localId": "S4",
+          "title": "Prompting",
+          "sourcePath": "11 AI \u0026 ML/LLM/Prompting/Prompting.md",
+          "heading": "Intro",
+          "charCount": 518
+        },
+        {
+          "localId": "S5",
+          "title": "Prompting",
+          "sourcePath": "11 AI \u0026 ML/LLM/Prompting/Prompting.md",
+          "heading": "Prompt Anatomy",
+          "charCount": 785
+        },
+        {
+          "localId": "S6",
+          "title": "Prompting",
+          "sourcePath": "11 AI \u0026 ML/LLM/Prompting/Prompting.md",
+          "heading": "LLM Settings",
+          "charCount": 1098
+        },
+        {
+          "localId": "S7",
+          "title": "RAG",
+          "sourcePath": "11 AI \u0026 ML/LLM/RAG/RAG.md",
+          "heading": "Core Flow",
+          "charCount": 1049
+        },
+        {
+          "localId": "S8",
+          "title": "RAG",
+          "sourcePath": "11 AI \u0026 ML/LLM/RAG/RAG.md",
+          "heading": "Choosing a Pattern",
+          "charCount": 1716
+        },
+        {
+          "localId": "S9",
+          "title": "RAG",
+          "sourcePath": "11 AI \u0026 ML/LLM/RAG/RAG.md",
+          "heading": "Operational Baselines",
+          "charCount": 1078
+        },
+        {
+          "localId": "S10",
+          "title": "Fine-tuning",
+          "sourcePath": "11 AI \u0026 ML/LLM/Fine-tuning.md",
+          "heading": "Parameter-Efficient Fine-tuning (PEFT)",
+          "charCount": 992
+        }
+      ]
+    },
+    {
+      "id": "shared-group-0007",
+      "seedTitle": "Hallucinations",
+      "seedSourcePath": "11 AI \u0026 ML/LLM/Hallucinations.md",
+      "noteCount": 4,
+      "sections": [
+        {
+          "localId": "S1",
+          "title": "Hallucinations",
+          "sourcePath": "11 AI \u0026 ML/LLM/Hallucinations.md",
+          "heading": "Intro",
+          "charCount": 1175
+        },
+        {
+          "localId": "S2",
+          "title": "Hallucinations",
+          "sourcePath": "11 AI \u0026 ML/LLM/Hallucinations.md",
+          "heading": "Intrinsic vs Extrinsic",
+          "charCount": 617
+        },
+        {
+          "localId": "S3",
+          "title": "Hallucinations",
+          "sourcePath": "11 AI \u0026 ML/LLM/Hallucinations.md",
+          "heading": "Detection",
+          "charCount": 1579
+        },
+        {
+          "localId": "S4",
+          "title": "Generation",
+          "sourcePath": "11 AI \u0026 ML/LLM/Generation.md",
+          "heading": "Context Assembly",
+          "charCount": 1288
+        },
+        {
+          "localId": "S5",
+          "title": "Generation",
+          "sourcePath": "11 AI \u0026 ML/LLM/Generation.md",
+          "heading": "Structured Output",
+          "charCount": 1548
+        },
+        {
+          "localId": "S6",
+          "title": "Generation",
+          "sourcePath": "11 AI \u0026 ML/LLM/Generation.md",
+          "heading": "Temperature Miscalibration",
+          "charCount": 563
+        },
+        {
+          "localId": "S7",
+          "title": "Monitoring",
+          "sourcePath": "11 AI \u0026 ML/LLM/RAG/Monitoring.md",
+          "heading": "Retrieval Quality Metrics",
+          "charCount": 4729
+        },
+        {
+          "localId": "S8",
+          "title": "Monitoring",
+          "sourcePath": "11 AI \u0026 ML/LLM/RAG/Monitoring.md",
+          "heading": "LLM-as-Judge Metrics",
+          "charCount": 4911
+        },
+        {
+          "localId": "S9",
+          "title": "Monitoring",
+          "sourcePath": "11 AI \u0026 ML/LLM/RAG/Monitoring.md",
+          "heading": "Performance and Cost Metrics",
+          "charCount": 1485
+        },
+        {
+          "localId": "S10",
+          "title": "RAG Evaluation",
+          "sourcePath": "11 AI \u0026 ML/LLM/RAG/RAG Evaluation.md",
+          "heading": "Intro",
+          "charCount": 1378
+        }
+      ]
+    },
+    {
+      "id": "shared-group-0008",
+      "seedTitle": "Data Structures",
+      "seedSourcePath": "02 Computer Science/Data Structures/Data Structures.md",
+      "noteCount": 4,
+      "sections": [
+        {
+          "localId": "S1",
+          "title": "Data Structures",
+          "sourcePath": "02 Computer Science/Data Structures/Data Structures.md",
+          "heading": "Intro",
+          "charCount": 954
+        },
+        {
+          "localId": "S2",
+          "title": "Data Structures",
+          "sourcePath": "02 Computer Science/Data Structures/Data Structures.md",
+          "heading": "Example",
+          "charCount": 231
+        },
+        {
+          "localId": "S3",
+          "title": "Data Structures",
+          "sourcePath": "02 Computer Science/Data Structures/Data Structures.md",
+          "heading": "Questions",
+          "charCount": 1810
+        },
+        {
+          "localId": "S4",
+          "title": "02 Computer Science",
+          "sourcePath": "02 Computer Science/02 Computer Science.md",
+          "heading": "Intro",
+          "charCount": 1116
+        },
+        {
+          "localId": "S5",
+          "title": "02 Computer Science",
+          "sourcePath": "02 Computer Science/02 Computer Science.md",
+          "heading": "Questions",
+          "charCount": 933
+        },
+        {
+          "localId": "S6",
+          "title": "02 Computer Science",
+          "sourcePath": "02 Computer Science/02 Computer Science.md",
+          "heading": "Links",
+          "charCount": 524
+        },
+        {
+          "localId": "S7",
+          "title": "Dictionary",
+          "sourcePath": "02 Computer Science/Data Structures/Dictionary.md",
+          "heading": "Intro",
+          "charCount": 641
+        },
+        {
+          "localId": "S8",
+          "title": "Dictionary",
+          "sourcePath": "02 Computer Science/Data Structures/Dictionary.md",
+          "heading": "Deeper Explanation",
+          "charCount": 201
+        },
+        {
+          "localId": "S9",
+          "title": "Dictionary",
+          "sourcePath": "02 Computer Science/Data Structures/Dictionary.md",
+          "heading": "Pitfalls",
+          "charCount": 901
+        },
+        {
+          "localId": "S10",
+          "title": "Graph",
+          "sourcePath": "02 Computer Science/Data Structures/Graph.md",
+          "heading": "Intro",
+          "charCount": 628
+        }
+      ]
+    },
+    {
+      "id": "shared-group-0009",
+      "seedTitle": "OWASP vulnerabilities on AI LLM",
+      "seedSourcePath": "11 AI \u0026 ML/LLM/OWASP vulnerabilities on AI LLM.md",
+      "noteCount": 4,
+      "sections": [
+        {
+          "localId": "S1",
+          "title": "OWASP vulnerabilities on AI LLM",
+          "sourcePath": "11 AI \u0026 ML/LLM/OWASP vulnerabilities on AI LLM.md",
+          "heading": "Intro",
+          "charCount": 832
+        },
+        {
+          "localId": "S2",
+          "title": "OWASP vulnerabilities on AI LLM",
+          "sourcePath": "11 AI \u0026 ML/LLM/OWASP vulnerabilities on AI LLM.md",
+          "heading": "The 2025 List",
+          "charCount": 1039
+        },
+        {
+          "localId": "S3",
+          "title": "OWASP vulnerabilities on AI LLM",
+          "sourcePath": "11 AI \u0026 ML/LLM/OWASP vulnerabilities on AI LLM.md",
+          "heading": "Prompt Injection (LLM01)",
+          "charCount": 1183
+        },
+        {
+          "localId": "S4",
+          "title": "RAG",
+          "sourcePath": "11 AI \u0026 ML/LLM/RAG/RAG.md",
+          "heading": "RAG vs Fine-Tuning",
+          "charCount": 1257
+        },
+        {
+          "localId": "S5",
+          "title": "RAG",
+          "sourcePath": "11 AI \u0026 ML/LLM/RAG/RAG.md",
+          "heading": "Questions",
+          "charCount": 996
+        },
+        {
+          "localId": "S6",
+          "title": "RAG",
+          "sourcePath": "11 AI \u0026 ML/LLM/RAG/RAG.md",
+          "heading": "References",
+          "charCount": 882
+        },
+        {
+          "localId": "S7",
+          "title": "Guardrails",
+          "sourcePath": "11 AI \u0026 ML/LLM/Guardrails.md",
+          "heading": "Intro",
+          "charCount": 681
+        },
+        {
+          "localId": "S8",
+          "title": "Guardrails",
+          "sourcePath": "11 AI \u0026 ML/LLM/Guardrails.md",
+          "heading": "Defense-in-Depth Model",
+          "charCount": 316
+        },
+        {
+          "localId": "S9",
+          "title": "Guardrails",
+          "sourcePath": "11 AI \u0026 ML/LLM/Guardrails.md",
+          "heading": "Input Guardrails",
+          "charCount": 640
+        },
+        {
+          "localId": "S10",
+          "title": "Hallucinations",
+          "sourcePath": "11 AI \u0026 ML/LLM/Hallucinations.md",
+          "heading": "Mitigation",
+          "charCount": 1651
+        }
+      ]
+    },
+    {
+      "id": "shared-group-0010",
+      "seedTitle": "Generation",
+      "seedSourcePath": "11 AI \u0026 ML/LLM/Generation.md",
+      "noteCount": 4,
+      "sections": [
+        {
+          "localId": "S1",
+          "title": "Generation",
+          "sourcePath": "11 AI \u0026 ML/LLM/Generation.md",
+          "heading": "Lost-in-the-Middle Attention Failure",
+          "charCount": 494
+        },
+        {
+          "localId": "S2",
+          "title": "Generation",
+          "sourcePath": "11 AI \u0026 ML/LLM/Generation.md",
+          "heading": "Grounding Bypass Under Conflicting Evidence",
+          "charCount": 494
+        },
+        {
+          "localId": "S3",
+          "title": "Generation",
+          "sourcePath": "11 AI \u0026 ML/LLM/Generation.md",
+          "heading": "Structured Output Schema Mismatch",
+          "charCount": 563
+        },
+        {
+          "localId": "S4",
+          "title": "Hallucinations",
+          "sourcePath": "11 AI \u0026 ML/LLM/Hallucinations.md",
+          "heading": "RAG Does Not Eliminate Hallucinations",
+          "charCount": 654
+        },
+        {
+          "localId": "S5",
+          "title": "Hallucinations",
+          "sourcePath": "11 AI \u0026 ML/LLM/Hallucinations.md",
+          "heading": "RLHF Makes Factuality Worse",
+          "charCount": 538
+        },
+        {
+          "localId": "S6",
+          "title": "Hallucinations",
+          "sourcePath": "11 AI \u0026 ML/LLM/Hallucinations.md",
+          "heading": "Over-Aggressive Mitigation Causes Over-Refusal",
+          "charCount": 449
+        },
+        {
+          "localId": "S7",
+          "title": "RAG",
+          "sourcePath": "11 AI \u0026 ML/LLM/RAG/RAG.md",
+          "heading": "Intro",
+          "charCount": 722
+        },
+        {
+          "localId": "S8",
+          "title": "RAG",
+          "sourcePath": "11 AI \u0026 ML/LLM/RAG/RAG.md",
+          "heading": "Core Flow",
+          "charCount": 1049
+        },
+        {
+          "localId": "S9",
+          "title": "RAG",
+          "sourcePath": "11 AI \u0026 ML/LLM/RAG/RAG.md",
+          "heading": "Choosing a Pattern",
+          "charCount": 1716
+        },
+        {
+          "localId": "S10",
+          "title": "Context Engineering",
+          "sourcePath": "11 AI \u0026 ML/LLM/Context Engineering.md",
+          "heading": "More Context, Worse Answers",
+          "charCount": 597
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,494 @@
+namespace DevBook.Evaluations.Scenarios.RAG.Search;
+
+using DevBook.Evaluations.Scenarios.RAG.Search.Model;
+
+/// <summary>
+/// Calculates search metrics.
+/// </summary>
+public static class SearchMetricCalculator
+{
+    /// <summary>
+    /// Rank cutoffs reported for search quality metrics.
+    /// </summary>
+    public static readonly int[] RankingCutoffs = [1, 3, 5, 10];
+
+    /// <summary>
+    /// Primary rank cutoff used by convenience metric properties.
+    /// </summary>
+    public const int PrimaryCutoffValue = 5;
+
+    /// <summary>
+    /// Evaluates search predictions and aggregates query-level metrics.
+    /// </summary>
+    /// <param name="cases">Search predictions to aggregate.</param>
+    /// <param name="topK">Maximum number of results to return.</param>
+    /// <returns>Aggregate ranking, empty-result, and score metrics for the predictions.</returns>
+    public static SearchReport Evaluate(
+        IReadOnlyList<SearchPrediction> cases,
+        int topK = 5)
+    {
+        var queryMetrics = cases.Select(queryCase => ScoreQuery(queryCase, topK)).ToArray();
+
+        if (queryMetrics.Length == 0)
+        {
+            return new SearchReport(0, CreateEmptyRankingSummaries(), SearchRBasedMetrics.Empty, SearchSectionMetrics.Empty, 0, 0, 0, 0, 0);
+        }
+
+        var rankingSummaries = RankingCutoffs.ToDictionary(
+            cutoff => cutoff,
+            cutoff => CreateRankingSummary(queryMetrics, cutoff));
+
+        return new SearchReport(
+            queryMetrics.Length,
+            rankingSummaries,
+            CreateRBasedSummary(queryMetrics),
+            CreateSectionSummary(queryMetrics),
+            queryMetrics.Count(metric => metric.IsEmptyResult) / (double)queryMetrics.Length,
+            AverageAvailable(queryMetrics, metric => metric.ScoreAverage),
+            AverageAvailable(queryMetrics, metric => metric.CreditedScoreAverage),
+            AverageAvailable(queryMetrics, metric => metric.UncreditedScoreAverage),
+            AverageAvailable(queryMetrics, metric => metric.CreditedToUncreditedSameSourceScoreGap));
+    }
+
+    /// <summary>
+    /// Scores one search prediction against its expected sources.
+    /// </summary>
+    /// <param name="queryCase">Search prediction to compare with expected evidence.</param>
+    /// <param name="topK">Maximum number of results to return.</param>
+    /// <returns>Ranking metrics and diagnostics for the query.</returns>
+    public static SearchQueryMetrics ScoreQuery(SearchPrediction queryCase, int topK = 5)
+    {
+        var expectedDocuments = queryCase.ExpectedDocuments;
+        var maxCutoff = Math.Max(topK, RankingCutoffs.Max());
+        var retrievedDocuments = queryCase.RetrievedDocuments.Take(maxCutoff).ToArray();
+        var matchedExpected = new bool[expectedDocuments.Count];
+        var duplicateRetrievedSourcePaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var seenRetrievedSourcePaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var matchDiagnostics = new List<SearchMatchDiagnostic>(retrievedDocuments.Length);
+        var relevantRetrievedCount = 0;
+        var reciprocalRank = 0d;
+
+        for (var index = 0; index < retrievedDocuments.Length; index++)
+        {
+            var retrievedDocument = retrievedDocuments[index];
+            var rank = index + 1;
+
+            if (!seenRetrievedSourcePaths.Add(SearchTextNormalizer.NormalizePath(retrievedDocument.SourcePath)))
+            {
+                duplicateRetrievedSourcePaths.Add(retrievedDocument.SourcePath);
+            }
+
+            var analysis = AnalyzeRetrievedDocument(expectedDocuments, matchedExpected, retrievedDocument);
+            if (!analysis.IsRelevant)
+            {
+                matchDiagnostics.Add(new SearchMatchDiagnostic(
+                    rank,
+                    retrievedDocument.SourcePath,
+                    retrievedDocument.Heading,
+                    retrievedDocument.Score,
+                    analysis.Expected?.SourcePath,
+                    analysis.Expected?.Heading,
+                    analysis.SourcePathMatched,
+                    analysis.HeadingMatched,
+                    analysis.SnippetMatched,
+                    false,
+                    analysis.Reason));
+                continue;
+            }
+
+            matchedExpected[analysis.ExpectedIndex!.Value] = true;
+            relevantRetrievedCount++;
+            reciprocalRank = reciprocalRank == 0 ? 1d / rank : reciprocalRank;
+
+            matchDiagnostics.Add(new SearchMatchDiagnostic(
+                rank,
+                retrievedDocument.SourcePath,
+                retrievedDocument.Heading,
+                retrievedDocument.Score,
+                analysis.Expected!.SourcePath,
+                analysis.Expected.Heading,
+                analysis.SourcePathMatched,
+                analysis.HeadingMatched,
+                analysis.SnippetMatched,
+                true,
+                analysis.Reason));
+        }
+
+        var missingExpectedSourcePaths = expectedDocuments
+            .Select((expectedDocument, index) => new { expectedDocument.SourcePath, Matched = matchedExpected[index] })
+            .Where(item => !item.Matched)
+            .Select(item => item.SourcePath)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        var expectedCount = expectedDocuments.Count;
+        var expectedDiagnostics = expectedDocuments
+            .Select((expectedDocument, index) => new SearchExpectedDiagnostic(
+                index + 1,
+                expectedDocument.SourcePath,
+                expectedDocument.Heading,
+                SearchTextNormalizer.Preview(expectedDocument.Snippet),
+                matchedExpected[index]))
+            .ToArray();
+        var rankingMetrics = RankingCutoffs.ToDictionary(
+            cutoff => cutoff,
+            cutoff => CreateRankingMetrics(expectedCount, retrievedDocuments.Length, matchDiagnostics, cutoff));
+        var rBasedMetrics = CreateRBasedMetrics(expectedCount, matchDiagnostics);
+        var sectionMetrics = CreateSectionMetrics(expectedDocuments, retrievedDocuments);
+        var scoreMetrics = CreateScoreMetrics(matchDiagnostics);
+
+        return new SearchQueryMetrics(
+            rankingMetrics,
+            retrievedDocuments.Length == 0,
+            rBasedMetrics,
+            sectionMetrics,
+            scoreMetrics.ScoreAverage,
+            scoreMetrics.CreditedScoreAverage,
+            scoreMetrics.UncreditedScoreAverage,
+            scoreMetrics.CreditedToUncreditedSameSourceScoreGap,
+            new SearchQueryDiagnostics(
+                retrievedDocuments.Length,
+                expectedCount,
+                expectedDiagnostics,
+                missingExpectedSourcePaths,
+                duplicateRetrievedSourcePaths.OrderBy(path => path, StringComparer.OrdinalIgnoreCase).ToArray(),
+                new SearchChunkDiagnostics(
+                    retrievedDocuments.Length,
+                    retrievedDocuments.Select(document => SearchTextNormalizer.NormalizePath(document.SourcePath)).Distinct(StringComparer.OrdinalIgnoreCase).Count(),
+                    duplicateRetrievedSourcePaths.Count,
+                    retrievedDocuments.Length == 0 ? 0 : retrievedDocuments.Average(document => document.Snippet?.Length ?? 0),
+                    expectedCount == 0 ? 0 : matchedExpected.Count(matched => matched) / (double)expectedCount,
+                    relevantRetrievedCount),
+                matchDiagnostics));
+    }
+
+    private static IReadOnlyDictionary<int, SearchRankingSummary> CreateEmptyRankingSummaries()
+        => RankingCutoffs.ToDictionary(cutoff => cutoff, _ => new SearchRankingSummary(0, 0, 0, 0, 0, 0, SearchRankingConfidenceIntervals.Empty));
+
+    private static SearchRankingSummary CreateRankingSummary(IReadOnlyList<SearchQueryMetrics> queryMetrics, int cutoff)
+    {
+        var recallValues = queryMetrics.Select(metric => metric.RankingMetrics[cutoff].Recall).ToArray();
+        var precisionValues = queryMetrics.Select(metric => metric.RankingMetrics[cutoff].Precision).ToArray();
+        var hitRateValues = queryMetrics.Select(metric => metric.RankingMetrics[cutoff].HitRate).ToArray();
+        var mrrValues = queryMetrics.Select(metric => metric.RankingMetrics[cutoff].MeanReciprocalRank).ToArray();
+        var mapValues = queryMetrics.Select(metric => metric.RankingMetrics[cutoff].MeanAveragePrecision).ToArray();
+        var ndcgValues = queryMetrics.Select(metric => metric.RankingMetrics[cutoff].NormalizedDiscountedCumulativeGain).ToArray();
+
+        return new SearchRankingSummary(
+            recallValues.Average(),
+            precisionValues.Average(),
+            hitRateValues.Average(),
+            mrrValues.Average(),
+            mapValues.Average(),
+            ndcgValues.Average(),
+            new SearchRankingConfidenceIntervals(
+                SearchRankingMath.BootstrapMeanConfidenceInterval(recallValues),
+                SearchRankingMath.BootstrapMeanConfidenceInterval(precisionValues),
+                SearchRankingMath.BootstrapMeanConfidenceInterval(hitRateValues),
+                SearchRankingMath.BootstrapMeanConfidenceInterval(mrrValues),
+                SearchRankingMath.BootstrapMeanConfidenceInterval(mapValues),
+                SearchRankingMath.BootstrapMeanConfidenceInterval(ndcgValues)));
+    }
+
+    private static SearchRBasedMetrics CreateRBasedSummary(IReadOnlyList<SearchQueryMetrics> queryMetrics)
+        => new(
+            queryMetrics.Select(metric => metric.RBasedMetrics.RecallAtR).Average(),
+            queryMetrics.Select(metric => metric.RBasedMetrics.RPrecision).Average(),
+            0,
+            0);
+
+    private static SearchSectionMetrics CreateSectionSummary(IReadOnlyList<SearchQueryMetrics> queryMetrics)
+        => new(
+            queryMetrics.Select(metric => metric.SectionMetrics.RecallAtR).Average(),
+            queryMetrics.Select(metric => metric.SectionMetrics.RPrecision).Average(),
+            queryMetrics.Select(metric => metric.SectionMetrics.HitRateAt1).Average(),
+            queryMetrics.Select(metric => metric.SectionMetrics.MeanReciprocalRankAtK).Average(),
+            queryMetrics.Select(metric => metric.SectionMetrics.MeanAveragePrecisionAtK).Average(),
+            queryMetrics.Select(metric => metric.SectionMetrics.NormalizedDiscountedCumulativeGainAtK).Average(),
+            0,
+            0);
+
+    private static SearchRankingMetrics CreateRankingMetrics(
+        int expectedCount,
+        int retrievedCount,
+        IReadOnlyList<SearchMatchDiagnostic> matches,
+        int cutoff)
+    {
+        var retrievedAtCutoff = Math.Min(cutoff, retrievedCount);
+        var matchesAtCutoff = matches.Where(match => match.Rank <= cutoff).ToArray();
+        var relevantMatches = matchesAtCutoff.Where(match => match.IsRelevant).ToArray();
+        var relevantCount = relevantMatches.Length;
+        var firstRelevantRank = relevantMatches.FirstOrDefault()?.Rank;
+
+        return new SearchRankingMetrics(
+            expectedCount == 0 ? 0 : relevantCount / (double)expectedCount,
+            retrievedAtCutoff == 0 ? 0 : relevantCount / (double)retrievedAtCutoff,
+            relevantCount > 0 ? 1d : 0d,
+            firstRelevantRank is null ? 0 : 1d / firstRelevantRank.Value,
+            SearchRankingMath.AveragePrecision(expectedCount, matchesAtCutoff, match => match.Rank, match => match.IsRelevant),
+            SearchRankingMath.NormalizedDiscountedCumulativeGain(expectedCount, matchesAtCutoff, cutoff, match => match.Rank, match => match.IsRelevant));
+    }
+
+    private static SearchRBasedMetrics CreateRBasedMetrics(int expectedCount, IReadOnlyList<SearchMatchDiagnostic> matches)
+    {
+        if (expectedCount == 0)
+        {
+            return SearchRBasedMetrics.Empty;
+        }
+
+        var relevantAtR = matches.Count(match => match.Rank <= expectedCount && match.IsRelevant);
+        var value = relevantAtR / (double)expectedCount;
+
+        return new SearchRBasedMetrics(value, value, expectedCount, relevantAtR);
+    }
+
+    private static SearchSectionMetrics CreateSectionMetrics(
+        IReadOnlyList<SearchDocument> expectedDocuments,
+        IReadOnlyList<SearchDocument> retrievedDocuments)
+    {
+        var expectedSections = expectedDocuments
+            .GroupBy(CreateSectionKey)
+            .Select(group => new ExpectedSection(
+                group.Key,
+                group.Select(document => document.Heading).FirstOrDefault(value => !string.IsNullOrWhiteSpace(value)),
+                group.Select(document => document.Snippet).Where(value => !string.IsNullOrWhiteSpace(value)).Select(value => value!).ToArray()))
+            .ToArray();
+        if (expectedSections.Length == 0)
+        {
+            return SearchSectionMetrics.Empty;
+        }
+
+        var matchedKeys = new HashSet<SearchSectionKey>();
+        var sectionCutoff = Math.Max(expectedSections.Length, RankingCutoffs.Max());
+        var sectionMatches = retrievedDocuments
+            .Take(sectionCutoff)
+            .Select((document, index) =>
+            {
+                // Chunker-neutral section credit: a retrieved chunk belongs to an expected section when it comes from
+                // the same source and its content satisfies the section evidence (a matching heading or a contained
+                // snippet). This keeps section recall fair for strategies (FixedSize, Semantic) that do not preserve
+                // heading metadata, so they are not zeroed for matching a section by content rather than by heading.
+                var section = expectedSections.FirstOrDefault(candidate =>
+                    !matchedKeys.Contains(candidate.Key) && MatchesSection(candidate, document));
+                var isRelevant = section is not null && matchedKeys.Add(section.Key);
+
+                return new SectionMatch(index + 1, isRelevant);
+            })
+            .ToArray();
+        var expectedCount = expectedSections.Length;
+        var matchedAtR = sectionMatches.Count(match => match.Rank <= expectedCount && match.IsRelevant);
+        var recallAtR = matchedAtR / (double)expectedCount;
+        var fixedCutoffMatches = sectionMatches.Where(match => match.Rank <= RankingCutoffs.Max()).ToArray();
+
+        return new SearchSectionMetrics(
+            recallAtR,
+            recallAtR,
+            sectionMatches.Any(match => match.Rank == 1 && match.IsRelevant) ? 1 : 0,
+            fixedCutoffMatches.FirstOrDefault(match => match.IsRelevant) is { } firstRelevant ? 1d / firstRelevant.Rank : 0,
+            SearchRankingMath.AveragePrecision(expectedCount, fixedCutoffMatches, match => match.Rank, match => match.IsRelevant),
+            SearchRankingMath.NormalizedDiscountedCumulativeGain(expectedCount, fixedCutoffMatches, RankingCutoffs.Max(), match => match.Rank, match => match.IsRelevant),
+            expectedCount,
+            matchedAtR);
+    }
+
+    private static bool MatchesSection(ExpectedSection section, SearchDocument retrievedDocument)
+    {
+        if (!string.Equals(section.Key.SourceName, SearchTextNormalizer.ExtractSourceName(retrievedDocument.SourcePath), StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        // A source-only expected section (no heading and no snippet evidence) is credited on source match alone.
+        if (string.IsNullOrWhiteSpace(section.Heading) && section.Snippets.Count == 0)
+        {
+            return true;
+        }
+
+        return SearchTextNormalizer.MatchesNormalizedContains(section.Heading, retrievedDocument.Heading)
+            || section.Snippets.Any(snippet => SearchTextNormalizer.MatchesNormalizedContains(snippet, retrievedDocument.Snippet));
+    }
+
+    private static double AverageAvailable(IReadOnlyList<SearchQueryMetrics> metrics, Func<SearchQueryMetrics, double?> selector)
+    {
+        var values = metrics.Select(selector).OfType<double>().ToArray();
+
+        return values.Length == 0 ? 0 : values.Average();
+    }
+
+    private static SearchScoreMetrics CreateScoreMetrics(IReadOnlyList<SearchMatchDiagnostic> matches)
+    {
+        var scoredMatches = matches.Where(match => match.Score.HasValue).ToArray();
+        var creditedScores = scoredMatches.Where(match => match.IsRelevant).Select(match => match.Score!.Value).ToArray();
+        var uncreditedScores = scoredMatches.Where(match => !match.IsRelevant).Select(match => match.Score!.Value).ToArray();
+        var firstCredited = scoredMatches.FirstOrDefault(match => match.IsRelevant);
+        var highestUncreditedSameSource = firstCredited is null
+            ? null
+            : scoredMatches
+                .Where(match => !match.IsRelevant && match.SourcePathMatched)
+                .OrderByDescending(match => match.Score)
+                .FirstOrDefault();
+
+        return new SearchScoreMetrics(
+            SearchRankingMath.AverageOrNull(scoredMatches.Select(match => match.Score!.Value).ToArray()),
+            SearchRankingMath.AverageOrNull(creditedScores),
+            SearchRankingMath.AverageOrNull(uncreditedScores),
+            firstCredited?.Score is not null && highestUncreditedSameSource?.Score is not null
+                ? firstCredited.Score - highestUncreditedSameSource.Score
+                : null);
+    }
+
+    private static RetrievedDocumentAnalysis AnalyzeRetrievedDocument(
+        IReadOnlyList<SearchDocument> expectedDocuments,
+        bool[] matchedExpected,
+        SearchDocument retrievedDocument)
+    {
+        RetrievedDocumentAnalysis? evidenceMismatch = null;
+
+        for (var index = 0; index < expectedDocuments.Count; index++)
+        {
+            if (matchedExpected[index])
+            {
+                continue;
+            }
+
+            var expectedDocument = expectedDocuments[index];
+            if (!MatchesExpectedIdentity(expectedDocument, retrievedDocument))
+            {
+                continue;
+            }
+
+            if (!string.IsNullOrWhiteSpace(expectedDocument.ChunkId))
+            {
+                return new RetrievedDocumentAnalysis(
+                    index,
+                    expectedDocument,
+                    true,
+                    SearchTextNormalizer.MatchesNormalizedContains(expectedDocument.Heading, retrievedDocument.Heading),
+                    false,
+                    "Matched expected chunk id.");
+            }
+
+            var headingMatched = SearchTextNormalizer.MatchesNormalizedContains(expectedDocument.Heading, retrievedDocument.Heading);
+            var snippetMatched = SearchTextNormalizer.MatchesNormalizedContains(expectedDocument.Snippet, retrievedDocument.Snippet);
+
+            if (!MatchesExpectedEvidence(expectedDocument, headingMatched, snippetMatched))
+            {
+                evidenceMismatch ??= new RetrievedDocumentAnalysis(
+                    null,
+                    expectedDocument,
+                    true,
+                    headingMatched,
+                    snippetMatched,
+                    CreateEvidenceMismatchReason(expectedDocument));
+                continue;
+            }
+
+            return new RetrievedDocumentAnalysis(
+                index,
+                expectedDocument,
+                true,
+                headingMatched,
+                snippetMatched,
+                headingMatched && snippetMatched
+                    ? "Matched expected source path, heading, and snippet."
+                    : headingMatched
+                        ? "Matched expected source path and heading."
+                        : snippetMatched
+                            ? "Matched expected source path and snippet."
+                            : "Matched expected source path; no heading or snippet was required.");
+        }
+
+        if (evidenceMismatch is not null)
+        {
+            return evidenceMismatch;
+        }
+
+        var alreadyMatchedExpected = expectedDocuments
+            .Select((expectedDocument, index) => new { ExpectedDocument = expectedDocument, Matched = matchedExpected[index] })
+            .FirstOrDefault(item => item.Matched && MatchesExpectedIdentity(item.ExpectedDocument, retrievedDocument));
+        if (alreadyMatchedExpected is not null)
+        {
+            return new RetrievedDocumentAnalysis(
+                null,
+                alreadyMatchedExpected.ExpectedDocument,
+                true,
+                SearchTextNormalizer.MatchesNormalizedContains(alreadyMatchedExpected.ExpectedDocument.Heading, retrievedDocument.Heading),
+                SearchTextNormalizer.MatchesNormalizedContains(alreadyMatchedExpected.ExpectedDocument.Snippet, retrievedDocument.Snippet),
+                !string.IsNullOrWhiteSpace(alreadyMatchedExpected.ExpectedDocument.ChunkId)
+                    ? "Chunk matched expected evidence that was already credited by an earlier retrieved result; duplicate retrieval does not add recall credit."
+                    : "Source path matched an expected document that was already credited by an earlier retrieved result; duplicate retrieval does not add recall credit.");
+        }
+
+        return new RetrievedDocumentAnalysis(
+            null,
+            null,
+            false,
+            false,
+            false,
+            "Retrieved chunk id did not match any expected chunk id.");
+    }
+
+    private static bool MatchesExpectedEvidence(SearchDocument expectedDocument, bool headingMatched, bool snippetMatched)
+        => !string.IsNullOrWhiteSpace(expectedDocument.Snippet)
+            ? snippetMatched
+            : string.IsNullOrWhiteSpace(expectedDocument.Heading) || headingMatched;
+
+    private static string CreateEvidenceMismatchReason(SearchDocument expectedDocument)
+    {
+        var identity = !string.IsNullOrWhiteSpace(expectedDocument.ChunkId)
+            ? "Chunk id matched expected evidence"
+            : "Source path matched an expected document";
+
+        return !string.IsNullOrWhiteSpace(expectedDocument.Snippet)
+            ? $"{identity}, but the normalized expected snippet did not appear in the retrieved chunk."
+            : $"{identity}, but the normalized expected heading did not appear in the retrieved chunk.";
+    }
+
+    private static bool MatchesExpectedIdentity(SearchDocument expectedDocument, SearchDocument retrievedDocument)
+    {
+        if (!string.IsNullOrWhiteSpace(expectedDocument.ChunkId))
+        {
+            return string.Equals(expectedDocument.ChunkId, retrievedDocument.ChunkId, StringComparison.Ordinal);
+        }
+
+        // Chunker-neutral identity: a chunk-id-free expected document (shared golden dataset) is keyed by its
+        // normalized source name, so a citation-labelled expectation ("Bubble Sort") matches a path-labelled
+        // retrieval ("…/Bubble Sort.md") regardless of which chunking strategy produced the retrieved chunk.
+        // The heading and snippet evidence gate still disambiguates sibling sections in the same source.
+        return SearchTextNormalizer.MatchesSourceName(expectedDocument.SourcePath, retrievedDocument.SourcePath);
+    }
+
+    private static SearchSectionKey CreateSectionKey(SearchDocument document)
+    {
+        var sourcePath = SearchTextNormalizer.NormalizePath(document.SourcePath);
+        var heading = document.Heading;
+
+        if (SearchTextNormalizer.TryParseWikiLink(sourcePath, out var wikiSource, out var wikiHeading))
+        {
+            sourcePath = wikiSource;
+            heading = wikiHeading ?? heading;
+        }
+
+        return new SearchSectionKey(SearchTextNormalizer.NormalizeSourceName(sourcePath), SearchTextNormalizer.NormalizeOptionalText(heading));
+    }
+
+    private sealed record RetrievedDocumentAnalysis(
+        int? ExpectedIndex,
+        SearchDocument? Expected,
+        bool SourcePathMatched,
+        bool HeadingMatched,
+        bool SnippetMatched,
+        string Reason)
+    {
+        /// <summary>
+        /// Gets whether the retrieved document matched expected evidence.
+        /// </summary>
+        public bool IsRelevant => this.ExpectedIndex is not null;
+    }
+
+    private sealed record SearchSectionKey(string SourceName, string? Heading);
+
+    private sealed record ExpectedSection(SearchSectionKey Key, string? Heading, IReadOnlyList<string> Snippets);
+
+    private sealed record SectionMatch(int Rank, bool IsRelevant);
+}
