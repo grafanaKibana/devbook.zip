@@ -119,6 +119,7 @@ public class Trie
 > - [[Software Engineering/02 Computer Science/Data Structures/Bloom Filter|Bloom Filter]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Circular Buffer|Circular Buffer]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Dictionary|Dictionary]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Disjoint Set|Disjoint Set]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Graph|Graph]]
 > - [[Software Engineering/02 Computer Science/Data Structures/HashMap|HashMap]]
 > - [[Software Engineering/02 Computer Science/Data Structures/HashSet|HashSet]]

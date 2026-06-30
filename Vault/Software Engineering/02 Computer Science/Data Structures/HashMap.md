@@ -110,6 +110,7 @@ if (usersById.TryGetValue(1002, out var name))
 > - [[Software Engineering/02 Computer Science/Data Structures/Bloom Filter|Bloom Filter]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Circular Buffer|Circular Buffer]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Dictionary|Dictionary]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Disjoint Set|Disjoint Set]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Graph|Graph]]
 > - [[Software Engineering/02 Computer Science/Data Structures/HashSet|HashSet]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Hashtable|Hashtable]]
