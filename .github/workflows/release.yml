@@ -1,0 +1,94 @@
+name: Release
+
+# Fires when a PR is squash-merged into main. The squash commit subject is the
+# PR title (notes:/feat:/fix:), which drives a vYY.MINOR.PATCH version.
+# Generates release notes and publishes a GitHub Release + tag.
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write   # required to create tags + releases
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history + tags for version + changelog
+
+      - name: Compute next version
+        id: version
+        run: |
+          set -euo pipefail
+
+          LAST_TAG=$(git tag --list 'v*' --sort=-v:refname | head -n1 || true)
+          if [ -z "$LAST_TAG" ]; then
+            RANGE=""
+            B=0; C=0
+            echo "No previous tag; starting from 0."
+          else
+            RANGE="${LAST_TAG}..HEAD"
+            VER="${LAST_TAG#v}"
+            B=$(echo "$VER" | cut -d. -f2)
+            C=$(echo "$VER" | cut -d. -f3)
+            echo "Last tag: $LAST_TAG"
+          fi
+          YY=$(date +%y)
+
+          # Subjects + bodies of the new, non-merge commits.
+          SUBJECTS=$(git log ${RANGE} --no-merges --format='%s' || true)
+          BODIES=$(git log ${RANGE} --no-merges --format='%b' || true)
+
+          # Drop any stray noise so it can't influence the bump.
+          SUBJECTS=$(printf '%s\n' "$SUBJECTS" | grep -vE '^vault backup:' || true)
+
+          BUMP=none
+          # notes / feat, or a breaking change -> minor.
+          if printf '%s\n' "$SUBJECTS" | grep -qE '^(notes|feat)(\([^)]+\))?!?:' \
+             || printf '%s\n' "$SUBJECTS" | grep -qE '^fix(\([^)]+\))?!:' \
+             || printf '%s\n' "$BODIES" | grep -qE 'BREAKING[ -]CHANGE'; then
+            BUMP=minor
+          # A platform fix -> patch.
+          elif printf '%s\n' "$SUBJECTS" | grep -qE '^fix(\([^)]+\))?:'; then
+            BUMP=patch
+          fi
+
+          case "$BUMP" in
+            minor) B=$((B + 1)) ;;
+            patch) C=$((C + 1)) ;;
+            none)  echo "No release-worthy commits; skipping." ;;
+          esac
+
+          NEXT="v${YY}.${B}.${C}"
+          echo "bump=$BUMP"     >> "$GITHUB_OUTPUT"
+          echo "next=$NEXT"     >> "$GITHUB_OUTPUT"
+          echo "Computed: bump=$BUMP next=$NEXT"
+
+      - name: Generate release notes
+        if: steps.version.outputs.bump != 'none'
+        uses: orhun/git-cliff-action@v4
+        with:
+          config: cliff.toml
+          args: --tag ${{ steps.version.outputs.next }} --unreleased --strip header -o RELEASE_NOTES.md
+
+      - name: Create tag + GitHub Release
+        if: steps.version.outputs.bump != 'none'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NEXT: ${{ steps.version.outputs.next }}
+        run: |
+          set -euo pipefail
+          # gh creates the annotated tag at this commit and the release in one step,
+          # so no push to a (possibly protected) main branch is needed.
+          gh release create "$NEXT" \
+            --target "$GITHUB_SHA" \
+            --title "$NEXT" \
+            --notes-file RELEASE_NOTES.md \
+            --latest

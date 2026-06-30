@@ -1,0 +1,38 @@
+# git-cliff configuration — https://git-cliff.org
+# Generates release notes from Conventional Commits.
+
+[changelog]
+header = "# Changelog\n\nAll notable changes are generated from Conventional Commits.\n"
+body = """
+{% if version %}\
+## {{ version }} — {{ timestamp | date(format="%Y-%m-%d") }}
+{% else %}\
+## Unreleased
+{% endif %}\
+{% for group, commits in commits | group_by(attribute="group") %}
+### {{ group | upper_first }}
+{% for commit in commits %}\
+- {{ commit.message | upper_first }}{% if commit.scope %} _(scope: {{ commit.scope }})_{% endif %}{% if commit.breaking %} **[breaking]**{% endif %}
+{% endfor %}\
+{% endfor %}
+"""
+trim = true
+footer = ""
+
+[git]
+conventional_commits = true
+filter_unconventional = true   # drop non-Conventional commits (e.g. "vault backup:")
+filter_commits = true
+protect_breaking_commits = true
+split_commits = false
+topo_order = false
+sort_commits = "newest"
+tag_pattern = "v[0-9]+\\.[0-9]+\\.[0-9]+"
+
+commit_parsers = [
+  { message = "^vault backup", skip = true },
+  { message = "^Merge ", skip = true },
+  { message = "^notes", group = "Notes" },
+  { message = "^feat", group = "Platform — Features" },
+  { message = "^fix", group = "Platform — Fixes" },
+]
