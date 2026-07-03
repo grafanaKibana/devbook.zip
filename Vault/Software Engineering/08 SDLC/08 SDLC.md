@@ -1,4 +1,6 @@
 ---
+icon: area-chart
+color: "#0ea5e9"
 topic:
   - SDLC
 subtopic: []

@@ -1,4 +1,6 @@
 ---
+icon: network
+color: "#f59e0b"
 topic:
   - Networks
 subtopic: []

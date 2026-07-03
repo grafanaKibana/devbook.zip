@@ -1,4 +1,6 @@
 ---
+icon: flask-round
+color: "#ef4444"
 topic:
   - Computer Science
 subtopic: []

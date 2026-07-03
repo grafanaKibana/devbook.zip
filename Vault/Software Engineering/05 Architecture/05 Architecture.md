@@ -1,4 +1,6 @@
 ---
+icon: building-2
+color: "#eab308"
 topic:
   - Architecture
 subtopic: []

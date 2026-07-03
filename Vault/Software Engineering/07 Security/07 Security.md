@@ -1,4 +1,6 @@
 ---
+icon: lock
+color: "#10b981"
 topic:
   - Security
 subtopic: []

@@ -1,4 +1,6 @@
 ---
+icon: code-2
+color: "#f43f5e"
 topic:
   - Programming
 subtopic: []
@@ -7,7 +9,7 @@ tags:
 dg-publish: true
 status: Creation
 level:
-  - '4'
+  - "4"
 priority: High
 ---
 

@@ -270,10 +270,10 @@
   "quickActionPinNote": true,
   "quickActionOpenInNewTab": false,
   "hideDrawingPreviewImages": true,
-  "useFrontmatterMetadata": false,
+  "useFrontmatterMetadata": true,
   "frontmatterIconField": "icon",
   "frontmatterColorField": "color",
-  "frontmatterBackgroundField": "background",
+  "frontmatterBackgroundField": "",
   "frontmatterNameField": "",
   "frontmatterCreatedField": "",
   "frontmatterModifiedField": "",
@@ -544,7 +544,6 @@
   "fileColors": {},
   "fileBackgroundColors": {},
   "folderIcons": {
-    "Software Engineering/01 Programming": "code-2",
     "Software Engineering/02 Computer Science": "flask-round",
     "Software Engineering/03 Data Persistence": "database",
     "Software Engineering/04 Networks": "network",
@@ -559,7 +558,6 @@
     "Templates": "book-dashed"
   },
   "folderColors": {
-    "Software Engineering/01 Programming": "#f43f5e",
     "Software Engineering/02 Computer Science": "#ef4444",
     "Software Engineering/03 Data Persistence": "#f97316",
     "Software Engineering/04 Networks": "#f59e0b",

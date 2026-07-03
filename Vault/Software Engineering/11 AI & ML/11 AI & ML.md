@@ -1,4 +1,6 @@
 ---
+icon: brain-circuit
+color: "#a855f7"
 topic:
   - AI & ML
 subtopic: []

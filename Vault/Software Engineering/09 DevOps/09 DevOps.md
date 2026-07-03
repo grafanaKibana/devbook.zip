@@ -1,4 +1,6 @@
 ---
+icon: skull
+color: "#3b82f6"
 topic:
   - DevOps
 subtopic: []
