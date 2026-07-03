@@ -9,6 +9,12 @@ updates:
     directory: "/Web" # Location of package manifests
     schedule:
       interval: "weekly"
+    commit-message:
+      prefix: "bump"
+    groups:
+      npm:
+        patterns:
+          - "*"
     ignore:
       - dependency-name: "@sindresorhus/slugify"
         # For slugify, ignore all updates.
