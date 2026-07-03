@@ -13,20 +13,61 @@ body {
   --dg-depth-display-size: 1rem;
   --dg-depth-slider-width: 100px;
 
-  @media (min-width: 1980px) {
-    --dg-filetree-width: 400px;
-    --dg-filetree-min-width: 400px;
-    --dg-sidebar-min-width: 400px;
-    --dg-sidebar-max-width: 400px;
-    --dg-content-max-width: 900px;
+  /* Max content width on wide screens — the one tunable
+     (1100 = tighter prose, 1200 = balanced, 1360 = max density). */
+  --dg-content-max-width: 1200px;
+}
+
+/* ── Edge-anchored "fill" layout (desktop, min-width > 1400px) ──────────────
+   The file tree, content column and right TOC/graph act as one CENTERED,
+   max-width block:
+     - Narrower than the block  -> the block fills the viewport: the file tree
+       touches the left edge, the TOC touches the right, and content fills the
+       space between them (up to its ceiling).
+     - Wider than the block     -> the block centers and equal gutters open on
+       both sides; the block never grows past its max, so 21:9 / 32:9 only add
+       gutter (the container does not expand).
+   Overrides the theme's centering math but stays entirely in the custom layer
+   (no DG base files). Canvas pages excluded; tablet/mobile (<=1400) untouched. */
+@media (min-width: 1401px) {
+  body:not(:has(.content.canvas-page)) {
+    /* width of the whole block when content is at its ceiling */
+    --dg-block-max: calc(
+      var(--dg-filetree-width) + var(--dg-filetree-gap) +
+      var(--dg-content-max-width) +
+      var(--dg-sidebar-gap) + var(--dg-sidebar-max-width)
+    );
+    /* 0 while filling; grows once the viewport is wider than the block */
+    --dg-block-gutter: max(0px, calc((100vw - var(--dg-block-max)) / 2));
+
+    /* drop the theme's 32px side padding so the panels can reach the edges */
+    padding-left: 0;
+    padding-right: 0;
   }
 
-  @media (min-width: 2560px) {
-    --dg-filetree-width: 500px;
-    --dg-filetree-min-width: 500px;
-    --dg-sidebar-min-width: 500px;
-    --dg-sidebar-max-width: 500px;
-    --dg-content-max-width: 1000px;
+  /* file tree pinned to the block's left edge */
+  body:not(:has(.content.canvas-page)) .filetree-wrapper {
+    left: var(--dg-block-gutter);
+    width: var(--dg-filetree-width);
+    min-width: var(--dg-filetree-width);
+    justify-content: flex-start;
+  }
+
+  /* content fills between tree and TOC, capped at the ceiling */
+  body:not(:has(.content.canvas-page)) .content {
+    margin-left: calc(var(--dg-block-gutter) + var(--dg-filetree-width) + var(--dg-filetree-gap));
+    margin-right: auto;
+    max-width: calc(
+      min(100vw, var(--dg-block-max))
+      - var(--dg-filetree-width) - var(--dg-filetree-gap)
+      - var(--dg-sidebar-gap) - var(--dg-sidebar-max-width)
+    );
+  }
+
+  /* TOC/graph pinned to the block's right edge */
+  body:not(:has(.content.canvas-page)) .sidebar {
+    left: auto;
+    right: var(--dg-block-gutter);
   }
 }
 
