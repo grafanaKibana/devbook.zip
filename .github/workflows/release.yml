@@ -1,15 +1,11 @@
 name: Release
 
-# Fires when a PR is squash-merged into main. The squash commit subject is the
-# PR title (notes:/feat:/fix:), which drives a vYY.MINOR.PATCH version.
-# Generates release notes and publishes a GitHub Release + tag.
-
 on:
   push:
     branches: [main]
 
 permissions:
-  contents: write   # required to create tags + releases
+  contents: write
 
 concurrency:
   group: release
@@ -21,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # full history + tags for version + changelog
+          fetch-depth: 0
 
       - name: Compute next version
         id: version
@@ -42,20 +38,11 @@ jobs:
           fi
           YY=$(date +%y)
 
-          # Subjects + bodies of the new, non-merge commits.
           SUBJECTS=$(git log ${RANGE} --no-merges --format='%s' || true)
-          BODIES=$(git log ${RANGE} --no-merges --format='%b' || true)
-
-          # Drop any stray noise so it can't influence the bump.
-          SUBJECTS=$(printf '%s\n' "$SUBJECTS" | grep -vE '^vault backup:' || true)
 
           BUMP=none
-          # notes / feat, or a breaking change -> minor.
-          if printf '%s\n' "$SUBJECTS" | grep -qE '^(notes|feat)(\([^)]+\))?!?:' \
-             || printf '%s\n' "$SUBJECTS" | grep -qE '^fix(\([^)]+\))?!:' \
-             || printf '%s\n' "$BODIES" | grep -qE 'BREAKING[ -]CHANGE'; then
+          if printf '%s\n' "$SUBJECTS" | grep -qE '^(notes|feat)(\([^)]+\))?:'; then
             BUMP=minor
-          # A platform fix -> patch.
           elif printf '%s\n' "$SUBJECTS" | grep -qE '^fix(\([^)]+\))?:'; then
             BUMP=patch
           fi
@@ -67,8 +54,8 @@ jobs:
           esac
 
           NEXT="v${YY}.${B}.${C}"
-          echo "bump=$BUMP"     >> "$GITHUB_OUTPUT"
-          echo "next=$NEXT"     >> "$GITHUB_OUTPUT"
+          echo "bump=$BUMP" >> "$GITHUB_OUTPUT"
+          echo "next=$NEXT" >> "$GITHUB_OUTPUT"
           echo "Computed: bump=$BUMP next=$NEXT"
 
       - name: Generate release notes
@@ -85,8 +72,6 @@ jobs:
           NEXT: ${{ steps.version.outputs.next }}
         run: |
           set -euo pipefail
-          # gh creates the annotated tag at this commit and the release in one step,
-          # so no push to a (possibly protected) main branch is needed.
           gh release create "$NEXT" \
             --target "$GITHUB_SHA" \
             --title "$NEXT" \

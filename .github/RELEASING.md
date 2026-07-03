@@ -30,9 +30,8 @@ notes, and publishes a GitHub Release + tag. Direct pushes to `main` are blocked
 | `feat:`  | platform feature           | **MINOR**    |
 | `fix:`   | platform bug fix           | **PATCH**    |
 
-Optional `(scope)` and a trailing `!` for a breaking platform change (→ MINOR).
-Only the PR title matters — individual commits on your branch can be anything
-(including `vault backup:`); they're squashed away.
+Optional `(scope)`. Only the PR title matters — individual commits on your
+branch can be anything (including `vault backup:`); they're squashed away.
 
 Examples:
 
@@ -40,7 +39,6 @@ Examples:
 notes: add Dijkstra walkthrough to Graph Algorithms
 feat: add MongoDB chunk repository to evaluation pipeline
 fix: correct rate-limit handling in the LLM judge client
-feat!: restructure evaluation store schema
 ```
 
 ## Version scheme — `vYY.MINOR.PATCH`

@@ -1,8 +1,5 @@
 name: PR Title
 
-# Enforces the commit convention on the PR title. Because PRs are squash-merged,
-# the PR title becomes the single commit on main that drives the release.
-
 on:
   pull_request:
     types: [opened, edited, synchronize, reopened]
@@ -20,9 +17,9 @@ jobs:
           TITLE: ${{ github.event.pull_request.title }}
         run: |
           set -euo pipefail
-          if printf '%s' "$TITLE" | grep -qE '^(notes|feat|fix)(\([^)]+\))?!?: .+'; then
+          if printf '%s' "$TITLE" | grep -qE '^(notes|feat|fix)(\([^)]+\))?: .+'; then
             echo "✓ $TITLE"
           else
-            echo "::error::PR title must start with 'notes:', 'feat:' or 'fix:' (optional (scope), '!' for breaking). Got: ${TITLE:-<empty>}"
+            echo "::error::PR title must start with 'notes:', 'feat:' or 'fix:' (optional (scope)). Got: ${TITLE:-<empty>}"
             exit 1
           fi

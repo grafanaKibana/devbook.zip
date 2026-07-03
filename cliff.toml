@@ -12,7 +12,7 @@ body = """
 {% for group, commits in commits | group_by(attribute="group") %}
 ### {{ group | upper_first }}
 {% for commit in commits %}\
-- {{ commit.message | upper_first }}{% if commit.scope %} _(scope: {{ commit.scope }})_{% endif %}{% if commit.breaking %} **[breaking]**{% endif %}
+- {{ commit.message | upper_first }}{% if commit.scope %} _(scope: {{ commit.scope }})_{% endif %}
 {% endfor %}\
 {% endfor %}
 """
@@ -23,7 +23,6 @@ footer = ""
 conventional_commits = true
 filter_unconventional = true   # drop non-Conventional commits (e.g. "vault backup:")
 filter_commits = true
-protect_breaking_commits = true
 split_commits = false
 topo_order = false
 sort_commits = "newest"
