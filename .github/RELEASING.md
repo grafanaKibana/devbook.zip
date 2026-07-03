@@ -46,11 +46,13 @@ feat: add MongoDB chunk repository to evaluation pipeline
 fix: correct rate-limit handling in the LLM judge client
 ```
 
-## Version scheme — `vYY.MINOR.PATCH`
+## Version scheme — `vMAJOR.MINOR.PATCH` (SemVer)
 
-- `YY` — current two-digit year, stamped automatically at release time.
-- `MINOR` / `PATCH` — monotonic counters; nothing resets (the year just
-  re-stamps). e.g. `v26.1.15` → `v26.2.15` (notes/feat) → `v27.2.16` (fix next year).
+- `notes:` / `feat:` → **MINOR** (`PATCH` resets to 0). e.g. `v1.2.3` → `v1.3.0`.
+- `fix:` / `bump:` → **PATCH**. e.g. `v1.2.3` → `v1.2.4`.
+- `MAJOR` never bumps automatically — bump it deliberately by tagging when you
+  decide (there is no breaking-change trigger).
+- The first release (no existing tag) is **`v1.0.0`**.
 
 ## Enforcement (GitHub rulesets)
 
