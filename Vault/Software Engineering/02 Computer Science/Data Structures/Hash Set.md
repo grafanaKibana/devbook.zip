@@ -12,7 +12,7 @@ dg-publish: true
 
 # Intro
 
-`HashSet<T>` stores unique values with O(1) average membership checks. Use it when uniqueness and lookup speed matter more than ordering. A concrete use case: deduplicating 500K event IDs in a message processing pipeline — `HashSet<string>.Contains` checks each ID in sub-microsecond time, while `List<string>.Contains` would scan up to 500K entries per check, turning a 200 ms job into a 40-minute one.
+A hash set is a collection of **unique** values backed by a hash table, giving O(1) average membership checks, inserts, and removals. Use it when uniqueness and lookup speed matter more than ordering. In .NET it is `HashSet<T>`, with `SortedSet<T>` as the ordered (O(log n)) alternative. A concrete use case: deduplicating 500K event IDs in a message processing pipeline — `HashSet<string>.Contains` checks each ID in sub-microsecond time, while `List<string>.Contains` would scan up to 500K entries per check, turning a 200 ms job into a 40-minute one.
 
 ## Deeper Explanation
 
@@ -103,14 +103,12 @@ var added = tags.Add("DOTNET"); // false, already exists by comparer
 > **Pages**
 > - [[Software Engineering/02 Computer Science/Data Structures/Bloom Filter|Bloom Filter]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Circular Buffer|Circular Buffer]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Dictionary|Dictionary]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Disjoint Set|Disjoint Set]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Dynamic Array|Dynamic Array]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Graph|Graph]]
 > - [[Software Engineering/02 Computer Science/Data Structures/HashMap|HashMap]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Hashtable|Hashtable]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Heap|Heap]]
 > - [[Software Engineering/02 Computer Science/Data Structures/LinkedList|LinkedList]]
-> - [[Software Engineering/02 Computer Science/Data Structures/List|List]]
 > - [[Software Engineering/02 Computer Science/Data Structures/LRU Cache|LRU Cache]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Queue|Queue]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Span|Span]]

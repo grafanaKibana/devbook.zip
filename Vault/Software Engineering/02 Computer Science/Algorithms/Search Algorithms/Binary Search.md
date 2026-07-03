@@ -80,7 +80,7 @@ flowchart TD
 | Choice | Binary Search | Alternative | Decision criteria |
 | --- | --- | --- | --- |
 | vs linear search | O(log n), needs sorted data | O(n), works on any order | Use binary search when data is already sorted or searched repeatedly; linear search for tiny or one-shot unsorted data. |
-| vs hash lookup ([[Dictionary]]) | O(log n), in-place, supports range queries | O(1) average, extra memory, point lookups only | Use a hash when you only need exact-match point lookups; binary search when you also need ordering, ranges, or no extra memory. |
+| vs hash lookup ([[Software Engineering/02 Computer Science/Data Structures/HashMap\|HashMap]]) | O(log n), in-place, supports range queries | O(1) average, extra memory, point lookups only | Use a hash when you only need exact-match point lookups; binary search when you also need ordering, ranges, or no extra memory. |
 | sort-then-search vs scan | Pays O(n log n) sort once | No preprocessing | Sort-and-search wins when many queries amortize the sort; a single query over unsorted data does not justify sorting. |
 
 ## Questions

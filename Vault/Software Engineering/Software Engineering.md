@@ -146,17 +146,19 @@ cards.sort((a, b) => {
   return sb.pct - sa.pct || sb.total - sa.total || a[2].localeCompare(b[2]);
 });
 
-// --- Render the grid; each cell pins its progress bar to the bottom ----------
-// Use a Dataview-classed table so it inherits the same (zero) top margin the
-// other dashboard tables use, instead of the default markdown table margin.
+// --- Render the grid as a wrapping flex row ----------------------------------
+// Flexbox (not a table) so two behaviours fall out for free: every card in a
+// row stretches to the tallest one (align-items: stretch is the flex default),
+// and a short final row grows its cards to fill the full width (flex-grow)
+// instead of leaving an empty hole where the missing cells would be.
 const wrapper = dv.container.createEl("div");
 wrapper.classList.add("block-language-dataview");
 
-const table = wrapper.createEl("table");
-table.classList.add("dataview", "table-view-table");
-
-const tbody = table.createEl("tbody");
-tbody.classList.add("table-view-tbody");
+const grid = wrapper.createEl("div");
+grid.style.display = "flex";
+grid.style.flexWrap = "wrap";
+grid.style.gap = "0.6em";
+grid.style.width = "100%";
 
 // Multicolour stacked bar: one coloured slice per in-progress status, each sized
 // to that status's contribution to the weighted percentage (count·weight/total).
@@ -230,41 +232,94 @@ const appendLegend = (parent) => {
   return legend;
 };
 
-const COLS = 3;
 const sourcePath = dv.current().file.path;
-for (let i = 0; i < cards.length; i += COLS) {
-  const tr = tbody.createEl("tr");
-  for (let c = 0; c < COLS; c++) {
-    const td = tr.createEl("td");
-    td.style.verticalAlign = "top";
-    // Anchor the footer to the cell's bottom. Table rows equalize cell heights,
-    // so absolute `bottom: 0` lands every bar on the same line across a row —
-    // regardless of how many lines each description wraps to.
-    td.style.position = "relative";
-    const card = cards[i + c];
-    if (!card) continue;
-    const [icon, target, alias, desc] = card;
+// Callout type for each topic card — drives the accent colour of the title bar
+// and left border (built like a native `> [!info]` callout). Any built-in type
+// works: note/info/todo (blue), tip/abstract (cyan), success/done (green),
+// question (yellow), warning (orange), failure/danger/bug (red), example
+// (purple), quote (grey).
+const CARD_CALLOUT = "quote";
 
-    // Body reserves vertical room at the bottom for the pinned footer so the
-    // text never overlaps the progress bar.
-    const body = td.createEl("div");
-    body.style.paddingBottom = "3.5em";
-    const md = desc
-      ? `${icon} **[[${target}|${alias}]]**<br><sub>${desc}</sub>`
-      : `${icon} **[[${target}|${alias}]]**`;
-    await MarkdownRenderer.render(app, md, body, sourcePath, dv.component);
+// Style the title link via CSS (not inline) so it can carry a real :hover — it
+// takes the callout's accent colour and only underlines on hover, like a link.
+const style = wrapper.createEl("style");
+style.textContent = `
+  .se-topic-card .callout-title-inner a { color: rgb(var(--callout-color)); text-decoration: none; }
+  .se-topic-card .callout-title-inner a:hover { text-decoration: underline; }
+`;
 
-    const stats = statsFor(alias);
-    const foot = td.createEl("div");
-    foot.style.position = "absolute";
-    foot.style.left = "0.75em";
-    foot.style.right = "0.75em";
-    foot.style.bottom = "0";
-    const line = appendProgress(foot, stats.pct, stats.byStatus, stats.total);
-    const sub = line.createEl("span", { text: ` · ${stats.done}/${stats.total} done` });
-    sub.style.fontSize = "0.8em";
-    sub.style.opacity = "0.7";
+for (const card of cards) {
+  const [icon, target, alias, desc] = card;
+
+  // Each card is a titled callout AND a flex item. `flex-basis` = a third minus
+  // its share of the two inter-card gaps → exactly 3 per row; `flex-grow: 1`
+  // lets a short final row widen its cards to span the full width. `min-width:
+  // 0` stops a long title from blowing past that basis.
+  const callout = grid.createEl("div", { cls: "callout se-topic-card" });
+  callout.setAttribute("data-callout", CARD_CALLOUT);
+  callout.style.flex = "1 1 calc(33.333% - 0.4em)";
+  callout.style.minWidth = "0";
+  callout.style.boxSizing = "border-box";
+  callout.style.margin = "0";
+  callout.style.display = "flex";
+  callout.style.flexDirection = "column";
+  // Compact, symmetric padding — the default `--callout-padding` has an
+  // oversized left indent (room for the title icon) that looks huge in a narrow
+  // card; override it so the boxes read tighter than the full-width total.
+  callout.style.padding = "0.75em";
+
+  // Title row: the emoji fills the icon slot (a hand-built callout gets no
+  // auto-injected SVG, so this is the only icon) and the topic link is the
+  // bold title, exactly like a native `> [!info] …` header.
+  const title = callout.createEl("div", { cls: "callout-title" });
+  const iconEl = title.createEl("div", { cls: "callout-icon", text: icon });
+  iconEl.style.fontSize = "1.1em";
+  iconEl.style.lineHeight = "1";
+  const titleInner = title.createEl("div", { cls: "callout-title-inner" });
+  titleInner.style.fontWeight = "700";
+  await MarkdownRenderer.render(app, `[[${target}|${alias}]]`, titleInner, sourcePath, dv.component);
+  // Flatten the <p> Markdown wraps the link in so it sits inline with the icon,
+  // and let it inherit the bold weight from the title.
+  titleInner.querySelectorAll("p").forEach((p) => {
+    p.style.margin = "0";
+    p.style.display = "inline";
+    p.style.fontWeight = "inherit";
+  });
+  // Link colour + hover underline are handled by the injected `.se-topic-card`
+  // CSS above so the title reads like a native callout header, not a wiki-link.
+
+  const calloutContent = callout.createEl("div", { cls: "callout-content" });
+  calloutContent.style.display = "flex";
+  calloutContent.style.flexDirection = "column";
+  // Top-align the body: description hugs the title, and the flexible spacer
+  // below (not centring) is what absorbs the extra height on equalized rows.
+  calloutContent.style.justifyContent = "flex-start";
+  calloutContent.style.flex = "1";
+  calloutContent.style.padding = "0";
+  calloutContent.style.marginTop = "0.4em";
+
+  // Description sits directly under the title, at the normal callout body size.
+  // Rendered as plain text (not <sub>, which drops the baseline and reads as a
+  // gap); its paragraph margins are zeroed so it starts flush at the top.
+  const body = calloutContent.createEl("div");
+  if (desc) {
+    await MarkdownRenderer.render(app, desc, body, sourcePath, dv.component);
+    body.querySelectorAll("p").forEach((p) => { p.style.margin = "0"; });
   }
+
+  // Flexible gap: it grows to absorb the extra height when the row is equalized
+  // to the tallest card, so every bar lands on the same line. `min-height`
+  // keeps a floor of breathing room even on the tallest card in the row.
+  const spacer = calloutContent.createEl("div");
+  spacer.style.flex = "1 0 auto";
+  spacer.style.minHeight = "0.75em";
+
+  const stats = statsFor(alias);
+  const foot = calloutContent.createEl("div");
+  const line = appendProgress(foot, stats.pct, stats.byStatus, stats.total);
+  const sub = line.createEl("span", { text: ` · ${stats.done}/${stats.total} done` });
+  sub.style.fontSize = "0.8em";
+  sub.style.opacity = "0.7";
 }
 
 // --- Overall total, rendered as a callout ------------------------------------
