@@ -1,11 +1,11 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/data-structures/list/","dg-note-properties":{"topic":["Computer Science"],"subtopic":["Data Structures"],"level":["4"],"priority":"Medium","status":"Done"}}
+{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/data-structures/dynamic-array/","dg-note-properties":{"topic":["Computer Science"],"subtopic":["Data Structures"],"level":["4"],"priority":"Medium","status":"Done"}}
 ---
 
 
 # Intro
 
-`List<T>` is the default dynamic array in .NET. Use it when you need ordered data, fast index access, and efficient appends.
+A dynamic array is a contiguous, index-addressable buffer that grows automatically as elements are appended — O(1) random access and amortized O(1) append, with O(n) inserts or removes away from the tail. In .NET it is `List<T>` (other ecosystems call it an *array list* or *vector*). Use it when you need ordered data, fast index access, and efficient appends.
 
 It stores items in a contiguous array and tracks `Count` separately from `Capacity`, so indexing is O(1) and iteration is cache-friendly. When `Count` would exceed `Capacity`, it allocates a new array of double the size, copies the elements, and drops the old one — so any run of n appends costs O(n) total (amortized O(1) each) even though an individual resize is O(n). When the final size is known, `new List<T>(capacity)` skips those resizes, which is worth doing on hot paths where the repeated allocation and GC pressure are measurable.
 
@@ -77,11 +77,10 @@ Console.WriteLine(users[0]);
 > **Pages**
 > - [[Software Engineering/02 Computer Science/Data Structures/Bloom Filter\|Bloom Filter]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Circular Buffer\|Circular Buffer]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Dictionary\|Dictionary]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Disjoint Set\|Disjoint Set]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Graph\|Graph]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Hash Set\|Hash Set]]
 > - [[Software Engineering/02 Computer Science/Data Structures/HashMap\|HashMap]]
-> - [[Software Engineering/02 Computer Science/Data Structures/HashSet\|HashSet]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Hashtable\|Hashtable]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Heap\|Heap]]
 > - [[Software Engineering/02 Computer Science/Data Structures/LinkedList\|LinkedList]]
 > - [[Software Engineering/02 Computer Science/Data Structures/LRU Cache\|LRU Cache]]

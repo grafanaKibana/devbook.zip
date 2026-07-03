@@ -11,7 +11,7 @@ A minimum spanning tree (MST) of a connected, undirected, weighted graph is a su
 
 Both are [[Software Engineering/02 Computer Science/Algorithms/Paradigms/Greedy Algorithms\|greedy]] and both are provably optimal via the **cut property** (the lightest edge crossing any partition of the vertices is safe to include in some MST).
 
-- **Kruskal's** — sort all edges by weight; add each edge if it connects two **different** components (i.e. doesn't form a cycle), using a [[Software Engineering/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set Union-Find\|Union-Find]] to test connectivity in near-O(1). Builds the tree as a "forest" that merges. **O(E log E)**, dominated by the sort. Great for **sparse** graphs.
+- **Kruskal's** — sort all edges by weight; add each edge if it connects two **different** components (i.e. doesn't form a cycle), using a [[Software Engineering/02 Computer Science/Algorithms/Union-Find\|Union-Find]] to test connectivity in near-O(1). Builds the tree as a "forest" that merges. **O(E log E)**, dominated by the sort. Great for **sparse** graphs.
 - **Prim's** — grow a single tree from an arbitrary start vertex; repeatedly add the cheapest edge crossing from the tree to a vertex outside it, using a [[Software Engineering/02 Computer Science/Data Structures/Heap\|priority queue]]. **O(E log V)**. Better for **dense** graphs.
 
 ## Example
@@ -65,7 +65,7 @@ public static int PrimWeight(int n, List<(int to, int w)>[] adj)
 
 | Algorithm | Complexity | Best for | Key structure |
 |---|---|---|---|
-| **Kruskal's** | O(E log E) | Sparse graphs; edge list given | [[Software Engineering/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set Union-Find\|Union-Find]] |
+| **Kruskal's** | O(E log E) | Sparse graphs; edge list given | [[Software Engineering/02 Computer Science/Algorithms/Union-Find\|Union-Find]] |
 | **Prim's** | O(E log V) with a binary heap | Dense graphs; adjacency given | [[Software Engineering/02 Computer Science/Data Structures/Heap\|Priority queue]] |
 
 **Decision rule**: if the graph is given as an edge list and is sparse, **Kruskal's** is simplest and fast. If it's dense or given as an adjacency structure, **Prim's** with a heap edges ahead. Both produce the same total weight; the choice is about graph shape and which structure you already have.

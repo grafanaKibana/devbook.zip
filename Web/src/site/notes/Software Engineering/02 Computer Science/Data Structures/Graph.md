@@ -63,8 +63,8 @@ The data structure only matters in service of the algorithms that run on it. The
 | Shortest path, negative weights allowed | **Bellman–Ford** | O(V·E) | Detects negative cycles |
 | All-pairs shortest paths | **Floyd–Warshall** | O(V³) | Dense graphs / small V |
 | Order a DAG by dependencies | **Topological sort** | O(V + E) | Kahn's (in-degree queue) or DFS post-order; only valid on a DAG |
-| Minimum spanning tree | **Prim / Kruskal** | O(E log V) | Kruskal pairs with [[Software Engineering/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set Union-Find\|Union-Find]] |
-| Connectivity / dynamic union | **Union-Find** | ~O(α(n)) | Near-constant with path compression — see [[Software Engineering/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set Union-Find\|Disjoint Set]] |
+| Minimum spanning tree | **Prim / Kruskal** | O(E log V) | Kruskal pairs with [[Software Engineering/02 Computer Science/Algorithms/Union-Find\|Union-Find]] |
+| Connectivity / dynamic union | **Union-Find** | ~O(α(n)) | Near-constant with path compression — see [[Software Engineering/02 Computer Science/Algorithms/Union-Find\|Union-Find]] |
 
 The two decisions that trip people up: **use BFS, not Dijkstra, for unweighted shortest paths** (same answer, far simpler), and **switch from Dijkstra to Bellman–Ford the moment any edge weight can be negative** (Dijkstra's greedy "settle once" assumption breaks).
 
@@ -97,13 +97,12 @@ The two decisions that trip people up: **use BFS, not Dijkstra, for unweighted s
 > **Pages**
 > - [[Software Engineering/02 Computer Science/Data Structures/Bloom Filter\|Bloom Filter]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Circular Buffer\|Circular Buffer]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Dictionary\|Dictionary]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Disjoint Set\|Disjoint Set]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Dynamic Array\|Dynamic Array]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Hash Set\|Hash Set]]
 > - [[Software Engineering/02 Computer Science/Data Structures/HashMap\|HashMap]]
-> - [[Software Engineering/02 Computer Science/Data Structures/HashSet\|HashSet]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Hashtable\|Hashtable]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Heap\|Heap]]
 > - [[Software Engineering/02 Computer Science/Data Structures/LinkedList\|LinkedList]]
-> - [[Software Engineering/02 Computer Science/Data Structures/List\|List]]
 > - [[Software Engineering/02 Computer Science/Data Structures/LRU Cache\|LRU Cache]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Queue\|Queue]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Span\|Span]]

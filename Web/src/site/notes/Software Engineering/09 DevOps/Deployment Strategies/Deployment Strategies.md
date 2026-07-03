@@ -149,14 +149,14 @@ Increase traffic to the new version in fixed increments on a fixed schedule (e.g
 > - Choose canary when you need production validation with real traffic patterns that staging cannot replicate.
 > - Choose blue-green when you need atomic cutover and can afford double infrastructure cost during the switch.
 > - Canary requires traffic splitting infrastructure (service mesh, load balancer rules, or a progressive delivery controller like Argo Rollouts).
-> - **Tradeoff**: canary reduces blast radius but extends the deployment window and requires monitoring automation to detect regressions; blue-green is simpler but doubles infrastructure cost during deployment.
+> - Canary shrinks blast radius but stretches the deployment window and leans on monitoring automation to catch regressions; blue-green is simpler but doubles infrastructure cost during the switch.
 
 > [!QUESTION]- What failure mode makes rolling deployments unsafe for database schema changes?
 > - Rolling deployments run old and new code side by side during the rollout window.
 > - A destructive schema change (dropping a column, renaming a table, changing a constraint) breaks the old instances still serving traffic.
 > - Safe approach: expand-and-contract migrations — add the new column first, deploy code that writes to both, then remove the old column in a later release.
 > - If schema changes are not backward-compatible, rolling deployment causes partial failures, data corruption, or 500 errors from old instances.
-> - **Tradeoff**: expand-and-contract adds migration complexity and requires multiple deployment cycles, but it is the only safe path for zero-downtime schema evolution with rolling deploys.
+> - Expand-and-contract spreads one change across several deploys and adds migration bookkeeping, but it is the only safe path to zero-downtime schema evolution under rolling deploys.
 
 > [!QUESTION]- How do you decide between A/B testing and canary when both are available?
 > - Canary validates operational health — does the new version crash, timeout, or degrade throughput.
@@ -164,7 +164,7 @@ Increase traffic to the new version in fixed increments on a fixed schedule (e.g
 > - Use canary first to confirm the release is safe, then A/B test to measure business impact.
 > - A/B testing requires statistically significant traffic volumes and longer observation windows than canary health checks.
 > - Canary can auto-rollback on error rate spikes in minutes; A/B tests typically run days or weeks.
-> - **Tradeoff**: combining both gives the most confidence but requires traffic management infrastructure, metric pipelines, and longer release cycles — justified for high-impact user-facing changes, overkill for internal services.
+> - Running both gives the most confidence but demands traffic management, metric pipelines, and longer release cycles — justified for high-impact user-facing changes, overkill for an internal service.
 
 <!-- whats-next:start -->
 

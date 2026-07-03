@@ -281,7 +281,7 @@ Decision rule: start with database uniqueness for core entities, add idempotency
 > - Idempotency converts ambiguous outcomes into deterministic behavior, so retries do not amplify side effects.
 > - Without it, transient faults become correctness bugs such as duplicate charges or duplicate shipment commands.
 > - Idempotency also improves operational recovery because replay jobs and dead letter reprocessing become safe.
-> - **Tradeoff**: stronger idempotency guarantees require extra storage, key lifecycle management, and stricter request validation.
+> - Stronger idempotency guarantees cost extra storage, key lifecycle management, and stricter request validation.
 
 > [!QUESTION]- How do you implement idempotency for a payment endpoint that processes charges through a third party provider?
 > - Require `Idempotency-Key` for `POST /payments` and hash a canonical request payload.
@@ -289,7 +289,7 @@ Decision rule: start with database uniqueness for core entities, add idempotency
 > - If key exists with matching hash and completed state, return cached response with same status code.
 > - Pass the same key to the provider when supported so upstream retries are also deduplicated.
 > - If key exists but hash differs, reject with conflict to prevent accidental key reuse.
-> - **Tradeoff**: caching and replaying responses gives predictable retries but adds storage overhead and response schema coupling.
+> - Caching and replaying responses makes retries predictable, but it adds storage overhead and couples you to the stored response schema.
 
 ## References
 

@@ -43,10 +43,12 @@ Concrete example: for repeated membership checks in a large list of ids, sorting
 >  [[Software Engineering/02 Computer Science/02 Computer Science\|02 Computer Science]]
 >
 > **Topics**
-> - [[Software Engineering/02 Computer Science/Algorithms/Disjoint Set/Disjoint Set\|Disjoint Set]]
 > - [[Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Graph Algorithms\|Graph Algorithms]]
 > - [[Software Engineering/02 Computer Science/Algorithms/Paradigms/Paradigms\|Paradigms]]
 > - [[Software Engineering/02 Computer Science/Algorithms/Patterns/Patterns\|Patterns]]
 > - [[Software Engineering/02 Computer Science/Algorithms/Search Algorithms/Search Algorithms\|Search Algorithms]]
 > - [[Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms\|Sorting Algorithms]]
+>
+> **Pages**
+> - [[Software Engineering/02 Computer Science/Algorithms/Union-Find\|Union-Find]]
 <!-- whats-next:end -->

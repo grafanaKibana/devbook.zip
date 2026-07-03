@@ -5,7 +5,7 @@
 
 # Intro
 
-A Bloom filter is a **probabilistic** set membership structure that answers "have I seen this item?" using a tiny, fixed amount of memory — at the cost of allowing **false positives** (it may say "maybe present" for something never added) but **never false negatives** (if it says "no", that's certain). It stores no elements, only bits, so it can track billions of items in megabytes. It's the standard front-line filter in databases (skip disk reads for keys that definitely aren't there), CDNs/caches, web crawlers (dedupe seen URLs), and spam/malware blocklists.
+A Bloom filter is a **probabilistic** set membership structure that answers "have I seen this item?" using a tiny, fixed amount of memory — at the cost of allowing **false positives** (it may say "maybe present" for something never added) but **never false negatives** (if it says "no", that's certain). It stores no elements, only bits, so it can track billions of items in megabytes. It's the standard front-line filter in databases (skip disk reads for keys that definitely aren't there), CDNs/caches, web crawlers (dedupe seen URLs), and spam/malware blocklists. .NET has no built-in Bloom filter type — you implement one over a `BitArray` (or a rented bit buffer) with *k* independent hash functions, or use a library.
 
 ## How It Works
 
@@ -113,14 +113,13 @@ Roughly: ~10 bits per element gives ~1% false positives; ~15 bits gives ~0.1%. T
 >
 > **Pages**
 > - [[Software Engineering/02 Computer Science/Data Structures/Circular Buffer\|Circular Buffer]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Dictionary\|Dictionary]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Disjoint Set\|Disjoint Set]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Dynamic Array\|Dynamic Array]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Graph\|Graph]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Hash Set\|Hash Set]]
 > - [[Software Engineering/02 Computer Science/Data Structures/HashMap\|HashMap]]
-> - [[Software Engineering/02 Computer Science/Data Structures/HashSet\|HashSet]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Hashtable\|Hashtable]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Heap\|Heap]]
 > - [[Software Engineering/02 Computer Science/Data Structures/LinkedList\|LinkedList]]
-> - [[Software Engineering/02 Computer Science/Data Structures/List\|List]]
 > - [[Software Engineering/02 Computer Science/Data Structures/LRU Cache\|LRU Cache]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Queue\|Queue]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Span\|Span]]

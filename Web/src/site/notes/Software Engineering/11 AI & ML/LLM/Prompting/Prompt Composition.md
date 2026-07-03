@@ -106,7 +106,6 @@ This page covers the human-guided version. For fully automated loops, see [[Soft
 > - Prefer chaining when you need step-level observability for debugging.
 > - Accept the latency and token overhead when reliability matters more than speed.
 > - Use a single prompt for simple, low-risk tasks with stable behavior.
-> - **Tradeoff**: this tests whether the engineer can trade off latency and cost against controllability and reliability.
 
 > [!QUESTION]- What is the main risk of generated knowledge prompting, and how do you mitigate it?
 > - The generated background facts can be wrong or fabricated.
@@ -114,7 +113,6 @@ This page covers the human-guided version. For fully automated loops, see [[Soft
 > - Constrain the final prompt to use only explicit generated facts.
 > - Validate critical claims against trusted context before final output.
 > - Add abstain or reject behavior when facts are inconsistent or low confidence.
-> - **Tradeoff**: this checks production judgment, not just technique familiarity.
 
 > [!QUESTION]- What is a practical meta prompting workflow for improving a weak prompt?
 > - Collect real failures and cluster them by error type.
@@ -122,7 +120,6 @@ This page covers the human-guided version. For fully automated loops, see [[Soft
 > - Request a revised prompt with explicit constraints and output schema.
 > - Evaluate on a held-out test set, not only the examples used for revision.
 > - Version prompts and keep rollback criteria if quality regresses.
-> - **Tradeoff**: this verifies iterative prompt engineering discipline and evaluation mindset.
 
 ## References
 
