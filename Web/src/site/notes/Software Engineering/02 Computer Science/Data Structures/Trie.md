@@ -5,7 +5,7 @@
 
 # Intro
 
-A trie (prefix tree, pronounced "try") stores a set of strings as a tree of characters, where the path from the root to a node spells a prefix. Its defining property: lookup, insert, and prefix queries are **O(k)** where k is the key length — completely independent of how many keys are stored. That is why a trie of 1M product names answers "what completes `lap`?" in the time it takes to walk three nodes, while a `Dictionary` scan would be O(n). Tries power autocomplete, spell-checkers, IP routing tables (longest-prefix match), and T9-style text entry.
+A trie (prefix tree, pronounced "try") stores a set of strings as a tree of characters, where the path from the root to a node spells a prefix. Its defining property: lookup, insert, and prefix queries are **O(k)** where k is the key length — completely independent of how many keys are stored. That is why a trie of 1M product names answers "what completes `lap`?" in the time it takes to walk three nodes, while a `Dictionary` scan would be O(n). Tries power autocomplete, spell-checkers, IP routing tables (longest-prefix match), and T9-style text entry. .NET has no built-in trie type — you build one from nodes holding a `Dictionary<char, TrieNode>` (or a fixed child array for a known alphabet).
 
 ## How It Works
 
@@ -111,14 +111,13 @@ public class Trie
 > **Pages**
 > - [[Software Engineering/02 Computer Science/Data Structures/Bloom Filter\|Bloom Filter]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Circular Buffer\|Circular Buffer]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Dictionary\|Dictionary]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Disjoint Set\|Disjoint Set]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Dynamic Array\|Dynamic Array]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Graph\|Graph]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Hash Set\|Hash Set]]
 > - [[Software Engineering/02 Computer Science/Data Structures/HashMap\|HashMap]]
-> - [[Software Engineering/02 Computer Science/Data Structures/HashSet\|HashSet]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Hashtable\|Hashtable]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Heap\|Heap]]
 > - [[Software Engineering/02 Computer Science/Data Structures/LinkedList\|LinkedList]]
-> - [[Software Engineering/02 Computer Science/Data Structures/List\|List]]
 > - [[Software Engineering/02 Computer Science/Data Structures/LRU Cache\|LRU Cache]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Queue\|Queue]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Span\|Span]]

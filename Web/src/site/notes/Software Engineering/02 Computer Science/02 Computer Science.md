@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/02-computer-science/","tags":["FolderNote"],"dg-note-properties":{"topic":["Computer Science"],"subtopic":[],"tags":["FolderNote"],"level":["4"],"status":"Done","priority":"High"}}
+{"dg-publish":true,"permalink":"/software-engineering/02-computer-science/02-computer-science/","tags":["FolderNote"],"dg-note-properties":{"icon":"flask-round","color":"#ef4444","topic":["Computer Science"],"subtopic":[],"tags":["FolderNote"],"level":["4"],"status":"Done","priority":"High"}}
 ---
 
 

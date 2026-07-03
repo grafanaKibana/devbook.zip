@@ -47,7 +47,7 @@ STATUS_COLORS = {
     "Not-Started": "1",  # red
     "Creation": "2",  # orange
     "Repetition": "5",  # cyan
-    "Ready To Repeat": "6",  # purple
+    "Ready to Repeat": "6",  # purple
     "Done": "4",  # green
 }
 

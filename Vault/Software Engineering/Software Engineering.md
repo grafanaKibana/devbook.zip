@@ -15,7 +15,7 @@ Welcome to my software engineering notebook — the notes I've written to actual
 # Topics
 
 ```dataviewjs
-const { MarkdownRenderer } = require("obsidian");
+const { MarkdownRenderer, setIcon } = require("obsidian");
 
 const ROOT = "Software Engineering";
 const isFolderNote = (p) => (p.file.tags ?? []).includes("#FolderNote");
@@ -41,10 +41,9 @@ const progressFor = (status) => STATUS_PROGRESS.get(status.toLowerCase()) ?? 0;
 // the bar always sums back to the topic's weighted percentage. "Not-Started"
 // contributes 0, so it has no segment (it's the empty track).
 //
-// Colours are shades of the theme accent — var(--text-accent), the exact colour
-// native progress bars fill with (--progress-complete) — dimmed via element
-// opacity. This tracks the monochrome Obsidian/Eleventy theme in both light and
-// dark mode without needing an "R, G, B" accent triplet. Ordered Done-first so
+// Each segment is a shade of the card's own accent — rgb(var(--callout-color)),
+// the topic colour set from the page's `color` frontmatter — dimmed via element
+// opacity so Done reads solid and earlier stages fade out. Ordered Done-first so
 // each bar reads completed → earliest stage.
 const STATUS_RAMP = [
   { key: "done",            label: "Done",            weight: 100, alpha: 1 },
@@ -114,49 +113,55 @@ const statsFor = (topic) => {
 };
 
 // --- Curated cards ------------------------------------------------------------
+// Each card is [target, alias, description]. The icon + accent colour come from
+// the topic page's own frontmatter (see the loop); DEFAULT_ICON is the fallback
+// when a page has no `icon` field.
+const DEFAULT_ICON = "folder";
 const cards = [
-  ["🧠", "Software Engineering/01 Programming/01 Programming", "Programming", "Languages, .NET internals, paradigms, clean code."],
-  ["🖥️", "Software Engineering/02 Computer Science/02 Computer Science", "Computer Science", "Algorithms, data structures, the theory underneath."],
-  ["🗄️", "Software Engineering/03 Data Persistence/03 Data Persistence", "Data Persistence", "Databases, indexing, transactions, storage engines."],
-  ["🌐", "Software Engineering/04 Networks/04 Networks", "Networks", "Protocols, HTTP, TCP/IP, how packets travel."],
-  ["🏛️", "Software Engineering/05 Architecture/05 Architecture", "Architecture", "Distributed systems, patterns, designing for scale."],
-  ["🛠️", "Software Engineering/06 Development Practices/06 Development Practices", "Development Practices", "Testing, version control, and the craft."],
-  ["🔒", "Software Engineering/07 Security/07 Security", "Security", "Threats, crypto, auth, defensive design."],
-  ["🔄", "Software Engineering/08 SDLC/08 SDLC", "SDLC", "How software gets planned, built, and shipped."],
-  ["🚀", "Software Engineering/09 DevOps/09 DevOps", "DevOps", "CI/CD, containers, and automation."],
-  ["☁️", "Software Engineering/10 Cloud/10 Cloud", "Cloud", "AWS/Azure, serverless, cloud-native design."],
-  ["🤖", "Software Engineering/11 AI & ML/11 AI & ML", "AI & ML", "Models, training, applied machine learning."],
+  ["Software Engineering/01 Programming/01 Programming", "Programming", "Languages, .NET internals, paradigms, clean code."],
+  ["Software Engineering/02 Computer Science/02 Computer Science", "Computer Science", "Algorithms, data structures, the theory underneath."],
+  ["Software Engineering/03 Data Persistence/03 Data Persistence", "Data Persistence", "Databases, indexing, transactions, storage engines."],
+  ["Software Engineering/04 Networks/04 Networks", "Networks", "Protocols, HTTP, TCP/IP, how packets travel."],
+  ["Software Engineering/05 Architecture/05 Architecture", "Architecture", "Distributed systems, patterns, designing for scale."],
+  ["Software Engineering/06 Development Practices/06 Development Practices", "Development Practices", "Testing, version control, and the craft."],
+  ["Software Engineering/07 Security/07 Security", "Security", "Threats, crypto, auth, defensive design."],
+  ["Software Engineering/08 SDLC/08 SDLC", "SDLC", "How software gets planned, built, and shipped."],
+  ["Software Engineering/09 DevOps/09 DevOps", "DevOps", "CI/CD, containers, and automation."],
+  ["Software Engineering/10 Cloud/10 Cloud", "Cloud", "AWS/Azure, serverless, cloud-native design."],
+  ["Software Engineering/11 AI & ML/11 AI & ML", "AI & ML", "Models, training, applied machine learning."],
 ];
 
 // Topics that have notes but no curated card → appended so they fill the
 // trailing empty cell(s) of the grid instead of dropping their progress.
-const curatedTopics = new Set(cards.map((c) => c[2]));
+const curatedTopics = new Set(cards.map((c) => c[1]));
 const extraTopics = [...topicStats.entries()]
   .filter(([topic]) => !curatedTopics.has(topic))
   .sort((a, b) => a[0].localeCompare(b[0]));
 for (const [topic, s] of extraTopics) {
   const target = `${ROOT}/${s.seg}/${s.seg}`;
-  cards.push(["📁", target, topic, ""]);
+  cards.push([target, topic, ""]);
 }
 
 // Sort cards by coverage, most complete first (tie-break on note count, then name).
 cards.sort((a, b) => {
-  const sa = statsFor(a[2]);
-  const sb = statsFor(b[2]);
-  return sb.pct - sa.pct || sb.total - sa.total || a[2].localeCompare(b[2]);
+  const sa = statsFor(a[1]);
+  const sb = statsFor(b[1]);
+  return sb.pct - sa.pct || sb.total - sa.total || a[1].localeCompare(b[1]);
 });
 
-// --- Render the grid; each cell pins its progress bar to the bottom ----------
-// Use a Dataview-classed table so it inherits the same (zero) top margin the
-// other dashboard tables use, instead of the default markdown table margin.
+// --- Render the grid as a wrapping flex row ----------------------------------
+// Flexbox (not a table) so two behaviours fall out for free: every card in a
+// row stretches to the tallest one (align-items: stretch is the flex default),
+// and a short final row grows its cards to fill the full width (flex-grow)
+// instead of leaving an empty hole where the missing cells would be.
 const wrapper = dv.container.createEl("div");
 wrapper.classList.add("block-language-dataview");
 
-const table = wrapper.createEl("table");
-table.classList.add("dataview", "table-view-table");
-
-const tbody = table.createEl("tbody");
-tbody.classList.add("table-view-tbody");
+const grid = wrapper.createEl("div");
+grid.style.display = "flex";
+grid.style.flexWrap = "wrap";
+grid.style.gap = "0.6em";
+grid.style.width = "100%";
 
 // Multicolour stacked bar: one coloured slice per in-progress status, each sized
 // to that status's contribution to the weighted percentage (count·weight/total).
@@ -179,7 +184,7 @@ const appendStackedBar = (parent, byStatus, total) => {
       if (widthPct <= 0) continue;
       const seg = bar.createEl("div");
       seg.style.width = `${widthPct}%`;
-      seg.style.background = "var(--text-accent)";
+      seg.style.background = "rgb(var(--callout-color))"; // topic accent (from the card's --callout-color)
       seg.style.opacity = String(s.alpha);
       seg.setAttribute(
         "aria-label",
@@ -222,7 +227,7 @@ const appendLegend = (parent) => {
     sw.style.height = "0.8em";
     sw.style.borderRadius = "3px";
     sw.style.flex = "0 0 auto";
-    sw.style.background = "var(--text-accent)";
+    sw.style.background = "rgb(var(--callout-color))"; // follows the enclosing callout's accent
     sw.style.opacity = String(s.alpha);
     sw.style.display = "inline-block";
     item.createEl("span", { text: `${s.label} · ${s.weight}%` });
@@ -230,41 +235,127 @@ const appendLegend = (parent) => {
   return legend;
 };
 
-const COLS = 3;
 const sourcePath = dv.current().file.path;
-for (let i = 0; i < cards.length; i += COLS) {
-  const tr = tbody.createEl("tr");
-  for (let c = 0; c < COLS; c++) {
-    const td = tr.createEl("td");
-    td.style.verticalAlign = "top";
-    // Anchor the footer to the cell's bottom. Table rows equalize cell heights,
-    // so absolute `bottom: 0` lands every bar on the same line across a row —
-    // regardless of how many lines each description wraps to.
-    td.style.position = "relative";
-    const card = cards[i + c];
-    if (!card) continue;
-    const [icon, target, alias, desc] = card;
+// Callout type for each topic card — drives the accent colour of the title bar
+// and left border (built like a native `> [!info]` callout). Any built-in type
+// works: note/info/todo (blue), tip/abstract (cyan), success/done (green),
+// question (yellow), warning (orange), failure/danger/bug (red), example
+// (purple), quote (grey).
+const CARD_CALLOUT = "quote";
 
-    // Body reserves vertical room at the bottom for the pinned footer so the
-    // text never overlaps the progress bar.
-    const body = td.createEl("div");
-    body.style.paddingBottom = "3.5em";
-    const md = desc
-      ? `${icon} **[[${target}|${alias}]]**<br><sub>${desc}</sub>`
-      : `${icon} **[[${target}|${alias}]]**`;
-    await MarkdownRenderer.render(app, md, body, sourcePath, dv.component);
+// Style the title link via CSS (not inline) so it can carry a real :hover — it
+// takes the callout's accent colour and only underlines on hover, like a link.
+const style = wrapper.createEl("style");
+style.textContent = `
+  .se-topic-card .callout-title-inner a { color: rgb(var(--callout-color)); text-decoration: none; }
+  .se-topic-card .callout-title-inner a:hover { text-decoration: underline; }
+`;
 
-    const stats = statsFor(alias);
-    const foot = td.createEl("div");
-    foot.style.position = "absolute";
-    foot.style.left = "0.75em";
-    foot.style.right = "0.75em";
-    foot.style.bottom = "0";
-    const line = appendProgress(foot, stats.pct, stats.byStatus, stats.total);
-    const sub = line.createEl("span", { text: ` · ${stats.done}/${stats.total} done` });
-    sub.style.fontSize = "0.8em";
-    sub.style.opacity = "0.7";
+// Read the icon id + accent colour from a topic page's own frontmatter — the
+// same `icon`/`color` fields Notebook Navigator uses — so the page is the single
+// source of truth. `icon` accepts a bare Lucide id, a "lucide-…" class, or a
+// "provider:name" form; `color` is a hex string.
+const iconIdOf = (v) => {
+  if (typeof v !== "string") return "";
+  let s = v.trim();
+  if (s.includes(":")) s = s.slice(s.indexOf(":") + 1);
+  return s.replace(/^lucide-/, "");
+};
+const hexToRgbTriple = (v) => {
+  if (typeof v !== "string") return null;
+  let h = v.trim().replace(/^#/, "");
+  if (h.length === 3) h = h.split("").map((c) => c + c).join("");
+  if (!/^[0-9a-fA-F]{6}$/.test(h)) return null;
+  const n = parseInt(h, 16);
+  return `${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}`;
+};
+
+for (const card of cards) {
+  const [target, alias, desc] = card;
+  // Icon + accent colour come from the topic page's own frontmatter (single
+  // source of truth); fall back to DEFAULT_ICON / the type default colour.
+  const page = dv.page(target);
+  const iconName = iconIdOf(page?.icon) || DEFAULT_ICON;
+  const colorTriple = hexToRgbTriple(page?.color);
+
+  // Each card is a titled callout AND a flex item. `flex-basis` = a third minus
+  // its share of the two inter-card gaps → exactly 3 per row; `flex-grow: 1`
+  // lets a short final row widen its cards to span the full width. `min-width:
+  // 0` stops a long title from blowing past that basis.
+  const callout = grid.createEl("div", { cls: "callout se-topic-card" });
+  callout.setAttribute("data-callout", CARD_CALLOUT);
+  // Frontmatter colour overrides the type accent for icon + title + border
+  // (all read `--callout-color`); no colour → keep the CARD_CALLOUT default.
+  if (colorTriple) callout.style.setProperty("--callout-color", colorTriple);
+  callout.style.flex = "1 1 calc(33.333% - 0.4em)";
+  callout.style.minWidth = "0";
+  callout.style.boxSizing = "border-box";
+  callout.style.margin = "0";
+  callout.style.display = "flex";
+  callout.style.flexDirection = "column";
+  // Compact, symmetric padding — the default `--callout-padding` has an
+  // oversized left indent (room for the title icon) that looks huge in a narrow
+  // card; override it so the boxes read tighter than the full-width total.
+  callout.style.padding = "0.75em";
+
+  // Title row: a Lucide SVG fills the icon slot (setIcon injects it) and the
+  // topic link is the bold title, exactly like a native `> [!info] …` header.
+  const title = callout.createEl("div", { cls: "callout-title" });
+  const iconEl = title.createEl("div", { cls: "callout-icon" });
+  iconEl.style.display = "flex";
+  iconEl.style.color = "rgb(var(--callout-color))"; // match the accent, like a native icon
+  setIcon(iconEl, iconName);
+  // Size the injected SVG relative to the title text.
+  const svg = iconEl.querySelector("svg");
+  if (svg) {
+    svg.style.width = "1.15em";
+    svg.style.height = "1.15em";
   }
+  const titleInner = title.createEl("div", { cls: "callout-title-inner" });
+  titleInner.style.fontWeight = "700";
+  await MarkdownRenderer.render(app, `[[${target}|${alias}]]`, titleInner, sourcePath, dv.component);
+  // Flatten the <p> Markdown wraps the link in so it sits inline with the icon,
+  // and let it inherit the bold weight from the title.
+  titleInner.querySelectorAll("p").forEach((p) => {
+    p.style.margin = "0";
+    p.style.display = "inline";
+    p.style.fontWeight = "inherit";
+  });
+  // Link colour + hover underline are handled by the injected `.se-topic-card`
+  // CSS above so the title reads like a native callout header, not a wiki-link.
+
+  const calloutContent = callout.createEl("div", { cls: "callout-content" });
+  calloutContent.style.display = "flex";
+  calloutContent.style.flexDirection = "column";
+  // Top-align the body: description hugs the title, and the flexible spacer
+  // below (not centring) is what absorbs the extra height on equalized rows.
+  calloutContent.style.justifyContent = "flex-start";
+  calloutContent.style.flex = "1";
+  calloutContent.style.padding = "0";
+  calloutContent.style.marginTop = "0.4em";
+
+  // Description sits directly under the title, at the normal callout body size.
+  // Rendered as plain text (not <sub>, which drops the baseline and reads as a
+  // gap); its paragraph margins are zeroed so it starts flush at the top.
+  const body = calloutContent.createEl("div");
+  if (desc) {
+    await MarkdownRenderer.render(app, desc, body, sourcePath, dv.component);
+    body.querySelectorAll("p").forEach((p) => { p.style.margin = "0"; });
+  }
+
+  // Flexible gap: it grows to absorb the extra height when the row is equalized
+  // to the tallest card, so every bar lands on the same line. `min-height`
+  // keeps a floor of breathing room even on the tallest card in the row.
+  const spacer = calloutContent.createEl("div");
+  spacer.style.flex = "1 0 auto";
+  spacer.style.minHeight = "0.75em";
+
+  const stats = statsFor(alias);
+  const foot = calloutContent.createEl("div");
+  const line = appendProgress(foot, stats.pct, stats.byStatus, stats.total);
+  const sub = line.createEl("span", { text: ` · ${stats.done}/${stats.total} done` });
+  sub.style.fontSize = "0.8em";
+  sub.style.opacity = "0.7";
 }
 
 // --- Overall total, rendered as a callout ------------------------------------

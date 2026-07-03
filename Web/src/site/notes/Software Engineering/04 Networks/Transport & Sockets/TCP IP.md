@@ -126,14 +126,14 @@ socket.NoDelay = true;  // disables Nagle's algorithm
 > - It adds one full round-trip of latency before the first byte of application data can be sent.
 > - For short-lived connections (single HTTP request, DNS-over-TCP), handshake latency dominates total request time.
 > - HTTP/2 multiplexing amortizes the handshake across many requests on one connection. QUIC (HTTP/3) eliminates it entirely by combining transport and TLS handshakes.
-> - **Tradeoff**: the handshake guarantees reliable connection setup but costs latency — use connection pooling or QUIC when handshake overhead is unacceptable.
+> - The handshake guarantees reliable setup but costs a full round-trip; reach for connection pooling or QUIC when that overhead is unacceptable.
 
 > [!QUESTION]- How do flow control and congestion control differ, and what happens when you confuse them?
 > - Flow control protects the receiver: the receive window limits how much unacknowledged data the sender can push.
 > - Congestion control protects the network: the congestion window limits send rate based on detected packet loss.
 > - The effective send rate is the minimum of both windows.
 > - Tuning only one side causes problems: a large receive window with aggressive congestion control still causes network drops; a small receive window with conservative congestion control wastes available bandwidth.
-> - **Tradeoff**: flow control is endpoint-local and deterministic; congestion control is network-wide and heuristic — both must be tuned together for optimal throughput.
+> - Flow control is endpoint-local and deterministic; congestion control is network-wide and heuristic — tune them together or one silently caps the other.
 
 
 ## References

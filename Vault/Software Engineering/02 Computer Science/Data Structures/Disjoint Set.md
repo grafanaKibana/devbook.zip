@@ -11,7 +11,7 @@ dg-publish: true
 ---
 # Intro
 
-A disjoint set (also called a union-find structure) tracks a collection of elements partitioned into disjoint (non-overlapping) sets. Each set has a single **representative** (canonical element) that identifies it. The structure answers one core question — "do these two elements belong to the same set?" — while letting you merge sets over time.
+A disjoint set (also called a union-find structure) tracks a collection of elements partitioned into disjoint (non-overlapping) sets. Each set has a single **representative** (canonical element) that identifies it. The structure answers one core question — "do these two elements belong to the same set?" — while letting you merge sets over time. .NET has no built-in disjoint-set type — you implement it with two `int[]` arrays (parent and rank/size), as shown below.
 
 This note covers the **data structure** itself: how the sets are represented in memory and the cost of its operations. The optimizations that make those operations near-constant time (path compression, union by rank) and the analysis behind them live in the [[Software Engineering/02 Computer Science/Algorithms/Union-Find|Union-Find]] algorithm note.
 
@@ -128,14 +128,12 @@ The two lines doing the real work — `_parent[x] = Find(_parent[x])` (path comp
 > **Pages**
 > - [[Software Engineering/02 Computer Science/Data Structures/Bloom Filter|Bloom Filter]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Circular Buffer|Circular Buffer]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Dictionary|Dictionary]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Dynamic Array|Dynamic Array]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Graph|Graph]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Hash Set|Hash Set]]
 > - [[Software Engineering/02 Computer Science/Data Structures/HashMap|HashMap]]
-> - [[Software Engineering/02 Computer Science/Data Structures/HashSet|HashSet]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Hashtable|Hashtable]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Heap|Heap]]
 > - [[Software Engineering/02 Computer Science/Data Structures/LinkedList|LinkedList]]
-> - [[Software Engineering/02 Computer Science/Data Structures/List|List]]
 > - [[Software Engineering/02 Computer Science/Data Structures/LRU Cache|LRU Cache]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Queue|Queue]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Span|Span]]

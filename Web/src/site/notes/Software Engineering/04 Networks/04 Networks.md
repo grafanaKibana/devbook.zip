@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/04-networks/04-networks/","tags":["FolderNote"],"dg-note-properties":{"topic":["Networks"],"subtopic":[],"tags":["FolderNote"],"priority":"High","level":["3"],"status":"Done"}}
+{"dg-publish":true,"permalink":"/software-engineering/04-networks/04-networks/","tags":["FolderNote"],"dg-note-properties":{"icon":"network","color":"#f59e0b","topic":["Networks"],"subtopic":[],"tags":["FolderNote"],"priority":"High","level":["3"],"status":"Done"}}
 ---
 
 

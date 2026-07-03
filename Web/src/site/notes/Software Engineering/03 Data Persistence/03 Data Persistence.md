@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/03-data-persistence/","tags":["FolderNote"],"dg-note-properties":{"topic":["Data Persistence"],"subtopic":[],"tags":["FolderNote"],"priority":"High","level":["4"],"status":"Done"}}
+{"dg-publish":true,"permalink":"/software-engineering/03-data-persistence/03-data-persistence/","tags":["FolderNote"],"dg-note-properties":{"icon":"database","color":"#f97316","topic":["Data Persistence"],"subtopic":[],"tags":["FolderNote"],"priority":"High","level":["4"],"status":"Done"}}
 ---
 
 

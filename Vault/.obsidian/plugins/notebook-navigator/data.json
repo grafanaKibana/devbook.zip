@@ -111,6 +111,9 @@
     "useFloatingToolbars": "synced",
     "dualPane": "synced",
     "dualPaneOrientation": "synced",
+    "narrowSidebarLayout": "synced",
+    "narrowSidebarTriggerMode": "synced",
+    "narrowSidebarCustomWidth": "synced",
     "paneTransitionDuration": "synced",
     "toolbarVisibility": "synced",
     "pinNavigationBanner": "synced",
@@ -146,6 +149,9 @@
   },
   "dualPane": true,
   "dualPaneOrientation": "vertical",
+  "narrowSidebarLayout": "singlePane",
+  "narrowSidebarTriggerMode": "fitPanes",
+  "narrowSidebarCustomWidth": 350,
   "showTooltips": false,
   "showTooltipPath": true,
   "showTooltipWordCount": false,
@@ -165,6 +171,7 @@
     "list": {
       "back": true,
       "search": true,
+      "reveal": false,
       "descendants": true,
       "sort": true,
       "appearance": false,
@@ -194,6 +201,8 @@
   "navItemHeightScaleText": true,
   "collapseBehavior": "all",
   "smartCollapse": true,
+  "excludeVaultRootFromCollapse": false,
+  "collapseOtherBranchesOnExpand": false,
   "autoSelectFirstFileOnFocusChange": true,
   "autoExpandNavItems": true,
   "springLoadedFolders": true,
@@ -261,10 +270,10 @@
   "quickActionPinNote": true,
   "quickActionOpenInNewTab": false,
   "hideDrawingPreviewImages": true,
-  "useFrontmatterMetadata": false,
+  "useFrontmatterMetadata": true,
   "frontmatterIconField": "icon",
   "frontmatterColorField": "color",
-  "frontmatterBackgroundField": "background",
+  "frontmatterBackgroundField": "",
   "frontmatterNameField": "",
   "frontmatterCreatedField": "",
   "frontmatterModifiedField": "",
@@ -280,6 +289,7 @@
   "fileTypeIconMap": {
     "png,jpg,jpeg": "image"
   },
+  "fileTypeIconPreset": "none",
   "fileNameRows": 1,
   "useFolderColorForTitles": false,
   "showFilePreview": true,
@@ -384,6 +394,12 @@
         "modifiers": []
       }
     ],
+    "pane:rename": [
+      {
+        "key": "Enter",
+        "modifiers": []
+      }
+    ],
     "navigation:collapse-or-parent": [
       {
         "key": "ArrowLeft",
@@ -458,6 +474,22 @@
         ]
       }
     ],
+    "list:manual-sort-up": [
+      {
+        "key": "ArrowUp",
+        "modifiers": [
+          "Mod"
+        ]
+      }
+    ],
+    "list:manual-sort-down": [
+      {
+        "key": "ArrowDown",
+        "modifiers": [
+          "Mod"
+        ]
+      }
+    ],
     "list:range-to-start": [
       {
         "key": "Home",
@@ -512,7 +544,6 @@
   "fileColors": {},
   "fileBackgroundColors": {},
   "folderIcons": {
-    "Software Engineering/01 Programming": "code-2",
     "Software Engineering/02 Computer Science": "flask-round",
     "Software Engineering/03 Data Persistence": "database",
     "Software Engineering/04 Networks": "network",
@@ -527,7 +558,6 @@
     "Templates": "book-dashed"
   },
   "folderColors": {
-    "Software Engineering/01 Programming": "#f43f5e",
     "Software Engineering/02 Computer Science": "#ef4444",
     "Software Engineering/03 Data Persistence": "#f97316",
     "Software Engineering/04 Networks": "#f59e0b",
@@ -614,7 +644,7 @@
     "#404040",
     "#404040"
   ],
-  "lastShownVersion": "3.1.2",
+  "lastShownVersion": "3.2.2",
   "rootFolderOrder": [],
   "rootTagOrder": [],
   "rootPropertyOrder": []

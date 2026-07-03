@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/11-ai-and-ml/","tags":["FolderNote"],"dg-note-properties":{"topic":["AI & ML"],"subtopic":[],"tags":["FolderNote"],"level":["3"],"priority":"High","status":"Done"}}
+{"dg-publish":true,"permalink":"/software-engineering/11-ai-and-ml/11-ai-and-ml/","tags":["FolderNote"],"dg-note-properties":{"icon":"brain-circuit","color":"#a855f7","topic":["AI & ML"],"subtopic":[],"tags":["FolderNote"],"level":["3"],"priority":"High","status":"Done"}}
 ---
 
 

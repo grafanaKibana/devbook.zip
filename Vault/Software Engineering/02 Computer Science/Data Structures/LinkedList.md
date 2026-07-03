@@ -47,9 +47,9 @@ list.Remove("C");
 
 | Choice | `LinkedList<T>` | Alternative | Decision criteria |
 | --- | --- | --- | --- |
-| vs [[List]] | O(1) edits around held nodes | Contiguous, fast iteration & index access | Pick the linked list only when you hold node handles and edit locally; otherwise [[List]] wins in practice. |
+| vs [[Dynamic Array]] | O(1) edits around held nodes | Contiguous, fast iteration & index access | Pick the linked list only when you hold node handles and edit locally; otherwise [[Dynamic Array]] wins in practice. |
 | vs [[Queue]] / [[Stack]] | General two-ended editing | Simpler, faster FIFO/LIFO API | If you only need ends-only access, the dedicated queue/stack is clearer and faster. |
-| vs [[List]] for big O on paper | O(1) insert/remove | O(n) insert/remove (shift) | The asymptotics favor linked list, but cache effects usually make `List<T>` faster for realistic n — measure before trusting big O here. |
+| vs [[Dynamic Array]] for big O on paper | O(1) insert/remove | O(n) insert/remove (shift) | The asymptotics favor linked list, but cache effects usually make `List<T>` faster for realistic n — measure before trusting big O here. |
 
 ## Questions
 
@@ -89,14 +89,12 @@ list.Remove("C");
 > **Pages**
 > - [[Software Engineering/02 Computer Science/Data Structures/Bloom Filter|Bloom Filter]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Circular Buffer|Circular Buffer]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Dictionary|Dictionary]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Disjoint Set|Disjoint Set]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Dynamic Array|Dynamic Array]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Graph|Graph]]
+> - [[Software Engineering/02 Computer Science/Data Structures/Hash Set|Hash Set]]
 > - [[Software Engineering/02 Computer Science/Data Structures/HashMap|HashMap]]
-> - [[Software Engineering/02 Computer Science/Data Structures/HashSet|HashSet]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Hashtable|Hashtable]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Heap|Heap]]
-> - [[Software Engineering/02 Computer Science/Data Structures/List|List]]
 > - [[Software Engineering/02 Computer Science/Data Structures/LRU Cache|LRU Cache]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Queue|Queue]]
 > - [[Software Engineering/02 Computer Science/Data Structures/Span|Span]]

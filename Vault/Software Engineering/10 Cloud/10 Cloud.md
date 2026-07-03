@@ -1,4 +1,6 @@
 ---
+icon: cloud
+color: "#6366f1"
 topic:
   - Cloud
 subtopic: []
