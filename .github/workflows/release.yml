@@ -25,35 +25,37 @@ jobs:
           set -euo pipefail
 
           LAST_TAG=$(git tag --list 'v*' --sort=-v:refname | head -n1 || true)
+
           if [ -z "$LAST_TAG" ]; then
-            RANGE=""
-            B=0; C=0
-            echo "No previous tag; starting from 0."
+            NEXT="v1.0.0"
+            BUMP=initial
+            echo "No previous tag; initial release $NEXT."
           else
             RANGE="${LAST_TAG}..HEAD"
             VER="${LAST_TAG#v}"
-            B=$(echo "$VER" | cut -d. -f2)
-            C=$(echo "$VER" | cut -d. -f3)
+            MAJOR=$(echo "$VER" | cut -d. -f1)
+            MINOR=$(echo "$VER" | cut -d. -f2)
+            PATCH=$(echo "$VER" | cut -d. -f3)
             echo "Last tag: $LAST_TAG"
+
+            SUBJECTS=$(git log ${RANGE} --no-merges --format='%s' || true)
+
+            BUMP=none
+            if printf '%s\n' "$SUBJECTS" | grep -qE '^(notes|feat)(\([^)]+\))?:'; then
+              BUMP=minor
+            elif printf '%s\n' "$SUBJECTS" | grep -qE '^(fix|bump)(\([^)]+\))?:'; then
+              BUMP=patch
+            fi
+
+            case "$BUMP" in
+              minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
+              patch) PATCH=$((PATCH + 1)) ;;
+              none)  echo "No release-worthy commits; skipping." ;;
+            esac
+
+            NEXT="v${MAJOR}.${MINOR}.${PATCH}"
           fi
-          YY=$(date +%y)
 
-          SUBJECTS=$(git log ${RANGE} --no-merges --format='%s' || true)
-
-          BUMP=none
-          if printf '%s\n' "$SUBJECTS" | grep -qE '^(notes|feat)(\([^)]+\))?:'; then
-            BUMP=minor
-          elif printf '%s\n' "$SUBJECTS" | grep -qE '^(fix|bump)(\([^)]+\))?:'; then
-            BUMP=patch
-          fi
-
-          case "$BUMP" in
-            minor) B=$((B + 1)) ;;
-            patch) C=$((C + 1)) ;;
-            none)  echo "No release-worthy commits; skipping." ;;
-          esac
-
-          NEXT="v${YY}.${B}.${C}"
           echo "bump=$BUMP" >> "$GITHUB_OUTPUT"
           echo "next=$NEXT" >> "$GITHUB_OUTPUT"
           echo "Computed: bump=$BUMP next=$NEXT"
