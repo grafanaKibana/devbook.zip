@@ -24,11 +24,16 @@ notes, and publishes a GitHub Release + tag. Direct pushes to `main` are blocked
 <type>: <description>
 ```
 
-| `type`   | Use for                    | Version bump |
-| -------- | -------------------------- | ------------ |
-| `notes:` | vault / note content       | **MINOR**    |
-| `feat:`  | platform feature           | **MINOR**    |
-| `fix:`   | platform bug fix           | **PATCH**    |
+| `type`   | Use for                       | Version bump |
+| -------- | ----------------------------- | ------------ |
+| `notes:` | vault / note content          | **MINOR**    |
+| `feat:`  | platform feature              | **MINOR**    |
+| `fix:`   | platform bug fix              | **PATCH**    |
+| `bump:`  | dependency / version upgrade  | **PATCH**    |
+
+`bump:` PR titles are produced automatically by Dependabot (via its
+`commit-message.prefix` in [dependabot.yml](dependabot.yml)), which also groups
+all dependency updates into a single weekly PR → one patch release.
 
 Optional `(scope)`. Only the PR title matters — individual commits on your
 branch can be anything (including `vault backup:`); they're squashed away.

@@ -43,7 +43,7 @@ jobs:
           BUMP=none
           if printf '%s\n' "$SUBJECTS" | grep -qE '^(notes|feat)(\([^)]+\))?:'; then
             BUMP=minor
-          elif printf '%s\n' "$SUBJECTS" | grep -qE '^fix(\([^)]+\))?:'; then
+          elif printf '%s\n' "$SUBJECTS" | grep -qE '^(fix|bump)(\([^)]+\))?:'; then
             BUMP=patch
           fi
 

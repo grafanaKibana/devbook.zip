@@ -34,4 +34,5 @@ commit_parsers = [
   { message = "^notes", group = "Notes" },
   { message = "^feat", group = "Platform — Features" },
   { message = "^fix", group = "Platform — Fixes" },
+  { message = "^bump", group = "Dependencies" },
 ]
