@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/10-cloud/10-cloud/","tags":["FolderNote"],"dg-note-properties":{"topic":["Cloud"],"subtopic":[],"tags":["FolderNote"],"status":"Creation","priority":"High","level":["2"]}}
+{"dg-publish":true,"permalink":"/software-engineering/10-cloud/10-cloud/","tags":["FolderNote"],"dg-note-properties":{"icon":"cloud","color":"#6366f1","topic":["Cloud"],"subtopic":[],"tags":["FolderNote"],"status":"Creation","priority":"High","level":["2"]}}
 ---
 
 

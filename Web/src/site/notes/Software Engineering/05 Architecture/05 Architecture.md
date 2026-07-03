@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/05-architecture/05-architecture/","tags":["FolderNote"],"dg-note-properties":{"topic":["Architecture"],"subtopic":[],"tags":["FolderNote"],"priority":"High","level":["4"],"status":"Not-Started"}}
+{"dg-publish":true,"permalink":"/software-engineering/05-architecture/05-architecture/","tags":["FolderNote"],"dg-note-properties":{"icon":"building-2","color":"#eab308","topic":["Architecture"],"subtopic":[],"tags":["FolderNote"],"priority":"High","level":["4"],"status":"Not-Started"}}
 ---
 
 

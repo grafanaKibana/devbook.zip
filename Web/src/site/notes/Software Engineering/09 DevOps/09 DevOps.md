@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/09-dev-ops/09-dev-ops/","tags":["FolderNote"],"dg-note-properties":{"topic":["DevOps"],"subtopic":[],"tags":["FolderNote"],"priority":"High","level":["4"],"status":"Done"}}
+{"dg-publish":true,"permalink":"/software-engineering/09-dev-ops/09-dev-ops/","tags":["FolderNote"],"dg-note-properties":{"icon":"skull","color":"#3b82f6","topic":["DevOps"],"subtopic":[],"tags":["FolderNote"],"priority":"High","level":["4"],"status":"Done"}}
 ---
 
 

@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/01-programming/01-programming/","tags":["FolderNote"],"dg-note-properties":{"topic":["Programming"],"subtopic":[],"tags":["FolderNote"],"status":"Creation","level":["4"],"priority":"High"}}
+{"dg-publish":true,"permalink":"/software-engineering/01-programming/01-programming/","tags":["FolderNote"],"dg-note-properties":{"icon":"code-2","color":"#f43f5e","topic":["Programming"],"subtopic":[],"tags":["FolderNote"],"status":"Creation","level":["4"],"priority":"High"}}
 ---
 
 
