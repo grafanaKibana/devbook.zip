@@ -1,0 +1,25 @@
+name: PR Title
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  pr-title:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate PR title
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          set -euo pipefail
+          if printf '%s' "$TITLE" | grep -qE '^(notes|feat|fix)(\([^)]+\))?: .+'; then
+            echo "✓ $TITLE"
+          else
+            echo "::error::PR title must start with 'notes:', 'feat:' or 'fix:' (optional (scope)). Got: ${TITLE:-<empty>}"
+            exit 1
+          fi
