@@ -84,25 +84,49 @@ body {
      it at the bottom too (base --dg-filetree-padding only gives 10px bottom). */
   padding-bottom: 20px;
 
-  /* Fade the scrollable tree into the graph: items dissolve at the bottom edge
-     instead of a hard cut, so they appear to hide behind the gradient as they scroll. */
+  /* Tree→graph seam: a single crossfade. The graph is pulled UP behind the tree by
+     --dg-seam, and its top fades over those same --dg-seam pixels where the tree's
+     bottom fades out — complementary fades summing to full coverage, so it reads as ONE
+     shared transition (no double gradient). Keep --dg-seam SMALL so the graph disappears
+     right where the tree starts to appear, instead of lingering far up into the tree.
+     The left/right/bottom edges use the larger --dg-graph-fade so nodes still dissolve
+     softly when the graph is zoomed. */
+  --dg-graph-fade: 34px;   /* L/R/bottom vignette — zoom edge softness */
+  --dg-seam: 12px;         /* tree↔graph crossfade depth — smaller = graph vanishes earlier */
+
   > .folder {
-    --dg-filetree-fade: 40px;
-    -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - var(--dg-filetree-fade)), transparent 100%);
-    mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - var(--dg-filetree-fade)), transparent 100%);
+    position: relative;
+    z-index: 1;
+    -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - var(--dg-seam)), transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - var(--dg-seam)), transparent 100%);
   }
 
   .filetree-graph {
     flex-shrink: 0;
-    margin-top: 0; /* no gap — the tree fades directly into the graph via the mask above */
+    position: relative;
+    z-index: 0;                              /* behind the tree */
+    margin-top: calc(-1 * var(--dg-seam));    /* overlap only the small seam depth */
   }
 
   #link-graph {
     width: 100%;
-    height: var(--dg-filetree-graph-height, 240px);
-    margin: 0;               /* reduce the graph's own margin */
-    background: transparent;  /* transparent graph background */
-    border: none;             /* blend into the nav (no boxed border) */
+    /* grow by the overlap so the visible graph area (and 20px bottom inset) is unchanged */
+    height: calc(var(--dg-filetree-graph-height, 240px) + var(--dg-seam));
+    margin: 0;
+    background: transparent;
+    border: none;
+    /* Vignette: TOP fades over --dg-seam (meets the tree crossfade so the graph vanishes
+       right at the tree edge); LEFT/RIGHT/BOTTOM fade over the larger --dg-graph-fade.
+       Intersect a vertical and horizontal fade so every edge dissolves (no hard cut). */
+    --e: var(--dg-graph-fade);
+    -webkit-mask-image:
+      linear-gradient(to bottom, transparent 0, #000 var(--dg-seam), #000 calc(100% - var(--e)), transparent 100%),
+      linear-gradient(to right,  transparent 0, #000 var(--e), #000 calc(100% - var(--e)), transparent 100%);
+    -webkit-mask-composite: source-in;
+    mask-image:
+      linear-gradient(to bottom, transparent 0, #000 var(--dg-seam), #000 calc(100% - var(--e)), transparent 100%),
+      linear-gradient(to right,  transparent 0, #000 var(--e), #000 calc(100% - var(--e)), transparent 100%);
+    mask-composite: intersect;
   }
 
   .graph {
