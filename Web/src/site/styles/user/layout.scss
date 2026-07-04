@@ -7,28 +7,16 @@ body {
   --dg-sidebar-min-width: 300px;
   --dg-sidebar-max-width: 300px;
 
-  --dg-graph-width: 300px;
-  --dg-graph-height: 300px;
+  --dg-graph-width: calc(var(--dg-sidebar-max-width) - var(--dg-sidebar-container-padding));
+  --dg-graph-height: calc(var(--dg-sidebar-max-width) - var(--dg-sidebar-container-padding));
 
   --dg-depth-display-size: 1rem;
   --dg-depth-slider-width: 100px;
 
-  /* Max content width on wide screens — the one tunable
-     (1100 = tighter prose, 1200 = balanced, 1360 = max density). */
+  /* Max content width on wide screens — the one tunable (1100 = tighter prose, 1200 = balanced, 1360 = max density). */
   --dg-content-max-width: 1200px;
 }
 
-/* ── Edge-anchored "fill" layout (desktop, min-width > 1400px) ──────────────
-   The file tree, content column and right TOC/graph act as one CENTERED,
-   max-width block:
-     - Narrower than the block  -> the block fills the viewport: the file tree
-       touches the left edge, the TOC touches the right, and content fills the
-       space between them (up to its ceiling).
-     - Wider than the block     -> the block centers and equal gutters open on
-       both sides; the block never grows past its max, so 21:9 / 32:9 only add
-       gutter (the container does not expand).
-   Overrides the theme's centering math but stays entirely in the custom layer
-   (no DG base files). Canvas pages excluded; tablet/mobile (<=1400) untouched. */
 @media (min-width: 1401px) {
   body:not(:has(.content.canvas-page)) {
     /* width of the whole block when content is at its ceiling */
