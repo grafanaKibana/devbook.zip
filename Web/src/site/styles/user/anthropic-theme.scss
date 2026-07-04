@@ -42,6 +42,15 @@ body.theme-dark {
   --text-accent-hover: hsl(158, 24%, 58%);
 }
 
+html {
+  color-scheme: light dark;
+}
+
+body.theme-dark,
+body.theme-light {
+  background-color: var(--background-primary);
+}
+
 .markdown-preview-view pre.mermaid {
   background: transparent;
 }

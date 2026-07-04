@@ -1,0 +1,24 @@
+<script>
+  /* Auto light/dark: follow the visitor's OS setting, overriding the build-time
+     baseTheme. Applied as soon as <body> exists (before first paint) so the
+     theme never flashes, and updated live if the OS preference changes. */
+  (function () {
+    try {
+      var mq = window.matchMedia('(prefers-color-scheme: dark)');
+      function apply() {
+        var b = document.body;
+        if (!b) return false;
+        b.classList.remove('theme-light', 'theme-dark');
+        b.classList.add(mq.matches ? 'theme-dark' : 'theme-light');
+        return true;
+      }
+      if (!apply()) {
+        var obs = new MutationObserver(function () {
+          if (apply()) obs.disconnect();
+        });
+        obs.observe(document.documentElement, { childList: true, subtree: true });
+      }
+      mq.addEventListener('change', apply);
+    } catch (e) {}
+  })();
+</script>
