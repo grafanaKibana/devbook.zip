@@ -5,7 +5,6 @@ tags:
   - Template
 dg-publish: true
 dg-home: true
-flashcard_uid: 5d8000c8
 ---
 
 Welcome to my software engineering notebook — the notes I've written to actually *understand* the stack, not just recall it for an interview. .NET internals, distributed systems, databases, security, cloud, AI/ML, and most of what sits between. Every note goes deep: core mechanics, real examples, the pitfalls that bite in production, and the questions worth being able to answer.
