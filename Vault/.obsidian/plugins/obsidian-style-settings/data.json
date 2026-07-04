@@ -18,5 +18,6 @@
   "obsidian-velocity-config@@active-line-highlight": false,
   "obsidian-velocity-config@@hide-bases-header": false,
   "obsidian-velocity-config@@enable-dim-img": false,
-  "obsidian-velocity-config@@improve-pinned-tabs": false
+  "obsidian-velocity-config@@improve-pinned-tabs": false,
+  "obsidian-velocity@@theme-paint-light": "jetblue"
 }
