@@ -69,6 +69,7 @@ module.exports = async (data) => {
   };
 
   const uiStrings = {
+    tocHeader: process.env.UI_TOC_HEADER || "Table of Content",
     backlinkHeader: process.env.UI_BACKLINK_HEADER || "Pages mentioning this page",
     noBacklinksMessage: process.env.UI_NO_BACKLINKS_MESSAGE || "No other pages mentions this page",
     searchButtonText: process.env.UI_SEARCH_BUTTON_TEXT || "Search",

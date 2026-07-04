@@ -146,6 +146,13 @@ function renderGraph(graphData, containerId, isFullScreen) {
         .force('collide', forceCollide(d => nodeRadius(d.id, degreeMap) + 1).iterations(3))
         .force('radial', forceRadial(radius, width / 2, height / 2).strength(0.05));
 
+    // Local nav graph: settle the layout synchronously so the fit has real bounds
+    // immediately, regardless of main-thread throttling during page load.
+    // (Fullscreen is user-triggered on an idle page and animates in, so leave it alone.)
+    if (!isFullScreen) {
+        for (let i = 0; i < 300; i++) simulation.tick();
+    }
+
     // Pixi v7 Application (synchronous constructor)
     const app = new Application({
         width,
@@ -389,32 +396,57 @@ function renderGraph(graphData, containerId, isFullScreen) {
 
     requestAnimationFrame(animate);
 
-    // Zoom to fit after simulation settles
+    // Zoom to fit — computes bounds from current node positions and applies
+    // a transform that frames them. Called both as an early best-effort fit
+    // (before the sim may have settled) and once authoritatively when the
+    // sim actually reports 'end', since under main-thread contention on
+    // initial page load the sim can still be under-advanced at the early
+    // fit's fixed delay.
+    function fitToView() {
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+        for (const n of nodes) {
+            if (n.x == null || n.y == null) continue;
+            minX = Math.min(minX, n.x);
+            maxX = Math.max(maxX, n.x);
+            minY = Math.min(minY, n.y);
+            maxY = Math.max(maxY, n.y);
+        }
+        if (minX === Infinity) return;
+
+        const padding = 50;
+        const gw = (maxX - minX) + padding * 2;
+        const gh = (maxY - minY) + padding * 2;
+        const k = Math.min(width / gw, height / gh, 2);
+        const cx = (minX + maxX) / 2;
+        const cy = (minY + maxY) / 2;
+
+        const transform = zoomIdentity
+            .translate(width / 2 - cx * k, height / 2 - cy * k)
+            .scale(k);
+
+        select(app.view).call(zoomBehavior.transform, transform);
+    }
+
     if (isFullScreen || graphData.nodes.length > 4) {
-        setTimeout(() => {
-            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-            for (const n of nodes) {
-                if (n.x == null || n.y == null) continue;
-                minX = Math.min(minX, n.x);
-                maxX = Math.max(maxX, n.x);
-                minY = Math.min(minY, n.y);
-                maxY = Math.max(maxY, n.y);
-            }
-            if (minX === Infinity) return;
+        if (isFullScreen) {
+            // Fullscreen is user-triggered on an idle page: animate in, then fit.
+            setTimeout(fitToView, 500);
+        } else {
+            // Local graph was pre-warmed synchronously above, so bounds are
+            // already real — fit immediately instead of waiting 500ms.
+            fitToView();
+        }
 
-            const padding = 50;
-            const gw = (maxX - minX) + padding * 2;
-            const gh = (maxY - minY) + padding * 2;
-            const k = Math.min(width / gw, height / gh, 2);
-            const cx = (minX + maxX) / 2;
-            const cy = (minY + maxY) / 2;
-
-            const transform = zoomIdentity
-                .translate(width / 2 - cx * k, height / 2 - cy * k)
-                .scale(k);
-
-            select(app.view).call(zoomBehavior.transform, transform);
-        }, 500);
+        // Authoritative one-time fit once the simulation actually settles.
+        // Guarded by didSettleFit so later user drags (which restart the
+        // sim via alphaTarget(1) and re-emit 'end' on release) don't yank
+        // the view out from under the user. Kept as a backup for both paths.
+        let didSettleFit = false;
+        simulation.on('end', () => {
+            if (didSettleFit) return;
+            didSettleFit = true;
+            fitToView();
+        });
     }
 
     return function cleanup() {
@@ -431,21 +463,76 @@ let fullGraphDataCache = null;
 let localGraphCleanup = null;
 let globalGraphCleanup = null;
 
-async function init() {
-    const { graphData, fullGraphData } = await fetchGraphData();
-    graphDataCache = graphData;
-    fullGraphDataCache = fullGraphData;
-    renderLocal();
-}
+// Coalescing state for the local graph render. Multiple near-simultaneous
+// triggers (init, ResizeObserver firing on display:none -> visible, Alpine
+// x-effect) must collapse into a single actual render, otherwise overlapping
+// Pixi apps race the internal zoom-to-fit setTimeout and the survivor never
+// gets framed.
+let localRenderTimer = null;
+let lastRenderedWidth = 0;
+let localGraphResizeObserver = null;
 
-function renderLocal() {
+// The real render. Guarded so it's a no-op until data exists and the
+// container has an actual (non-zero) width, and always tears down any prior
+// render first so we never end up with two live Pixi apps.
+function doRenderLocal() {
+    const el = document.getElementById('link-graph');
+    if (!el || !graphDataCache) return;
+    if (el.offsetWidth === 0) return;
+
     if (localGraphCleanup) {
         localGraphCleanup();
         localGraphCleanup = null;
     }
+
     const data = filterLocalGraphData(graphDataCache);
-    const cleanup = renderGraph(data, 'link-graph', false);
-    localGraphCleanup = cleanup;
+    localGraphCleanup = renderGraph(data, 'link-graph', false);
+    lastRenderedWidth = el.offsetWidth;
+}
+
+// Debounced entry point. Every trigger (init, resize, Alpine x-effect, CSS
+// change) calls this instead of doRenderLocal directly, so rapid successive
+// calls coalesce into one render.
+function scheduleRenderLocal() {
+    clearTimeout(localRenderTimer);
+    localRenderTimer = setTimeout(() => {
+        localRenderTimer = null;
+        doRenderLocal();
+    }, 60);
+}
+
+// Public API (also exposed on window.__graph.rerenderLocal) — kept as a
+// simple alias so external callers don't need to know about debouncing.
+function renderLocal() {
+    scheduleRenderLocal();
+}
+
+// Single persistent observer on #link-graph, created once. Handles both the
+// display:none -> visible width flip and any later container resize (e.g.
+// sidebar width changes), replacing the old one-shot zero-width observer.
+function setupLocalGraphObserver() {
+    if (localGraphResizeObserver) return;
+    const el = document.getElementById('link-graph');
+    if (!el || typeof ResizeObserver === 'undefined') return;
+
+    localGraphResizeObserver = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+            const w = entry.contentRect.width;
+            if (w > 0 && Math.abs(w - lastRenderedWidth) > 1) {
+                scheduleRenderLocal();
+                return;
+            }
+        }
+    });
+    localGraphResizeObserver.observe(el);
+}
+
+async function init() {
+    const { graphData, fullGraphData } = await fetchGraphData();
+    graphDataCache = graphData;
+    fullGraphDataCache = fullGraphData;
+    setupLocalGraphObserver();
+    scheduleRenderLocal();
 }
 
 function openModal(data) {

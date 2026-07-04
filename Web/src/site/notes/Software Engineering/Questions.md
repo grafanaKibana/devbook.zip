@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/questions/","tags":["FolderNote","MetricsIgnore"],"dg-note-properties":{"tags":["FolderNote","MetricsIgnore"]}}
+{"dg-publish":true,"permalink":"/software-engineering/questions/","tags":["FolderNote","MetricsIgnore"],"dg-note-properties":{"tags":["FolderNote","MetricsIgnore"],"whats-next":false}}
 ---
 
 
@@ -3461,22 +3461,3 @@ Cost of confusing them: retraining on new data for concept drift is necessary; r
 <em><a class="internal-link" data-href="Software Engineering/11 AI &amp; ML/Tooling/Tooling.md" href="Software Engineering/11 AI &amp; ML/Tooling/Tooling.md" target="_blank" rel="noopener nofollow">Tooling</a></em></li>
 </ul>
 </div></div></div></div>
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Topics**
-> - [[Software Engineering/01 Programming/01 Programming\|01 Programming]]
-> - [[Software Engineering/02 Computer Science/02 Computer Science\|02 Computer Science]]
-> - [[Software Engineering/03 Data Persistence/03 Data Persistence\|03 Data Persistence]]
-> - [[Software Engineering/04 Networks/04 Networks\|04 Networks]]
-> - [[Software Engineering/05 Architecture/05 Architecture\|05 Architecture]]
-> - [[Software Engineering/06 Development Practices/06 Development Practices\|06 Development Practices]]
-> - [[Software Engineering/07 Security/07 Security\|07 Security]]
-> - [[Software Engineering/08 SDLC/08 SDLC\|08 SDLC]]
-> - [[Software Engineering/09 DevOps/09 DevOps\|09 DevOps]]
-> - [[Software Engineering/10 Cloud/10 Cloud\|10 Cloud]]
-> - [[Software Engineering/11 AI & ML/11 AI & ML\|11 AI & ML]]
-<!-- whats-next:end -->

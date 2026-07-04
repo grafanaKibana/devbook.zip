@@ -4,9 +4,6 @@
                   {% for imp in dynamics.sidebar.top %}
                         {% include imp %}
                   {% endfor %}
-                  {%if settings.dgShowLocalGraph === true%}
-                        {%include "components/graphScript.njk"%}
-                  {%endif%}
 
                   {%if settings.dgShowToc === true%}
                         {%set tocHtml= (content and (content | hideDataview | link | toc)) %}
@@ -14,7 +11,7 @@
                               <div class="toc">
                                     <div class="toc-title-container">
                                           <div class="toc-title">
-                                                {% if title %}{{ title }}{% else %}{{ page.fileSlug }}{% endif %}
+                                                {{ meta.uiStrings.tocHeader }}
                                           </div>
                                     </div>
                                     <div class="toc-container">

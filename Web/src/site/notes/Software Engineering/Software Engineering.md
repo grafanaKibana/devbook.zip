@@ -1,5 +1,5 @@
 ---
-{"dg-publish":true,"permalink":"/software-engineering/software-engineering/","tags":["FolderNote","MetricsIgnore","Template","gardenEntry"],"dg-note-properties":{"tags":["FolderNote","MetricsIgnore","Template","gardenEntry"]}}
+{"dg-publish":true,"permalink":"/software-engineering/software-engineering/","tags":["FolderNote","MetricsIgnore","Template","gardenEntry"],"dg-note-properties":{"tags":["FolderNote","MetricsIgnore","Template","gardenEntry"],"whats-next":false}}
 ---
 
 
@@ -45,22 +45,3 @@ Welcome to my software engineering notebook — the notes I've written to actual
 # Publish Distribution
 
 <div class="block-language-dataview"><table class="dataview table-view-table"><thead class="table-view-thead"><tr><th>Publish Status</th><th>Distribution</th><th>Count</th></tr></thead><tbody class="table-view-tbody"><tr><td>Published</td><td><progress class="se-progress" max="100" value="100"></progress><span> 100%</span></td><td>290</td></tr><tr><td>Unpublished</td><td><progress class="se-progress" max="100" value="0"></progress><span> 0%</span></td><td>0</td></tr></tbody></table></div>
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Topics**
-> - [[Software Engineering/01 Programming/01 Programming\|01 Programming]]
-> - [[Software Engineering/02 Computer Science/02 Computer Science\|02 Computer Science]]
-> - [[Software Engineering/03 Data Persistence/03 Data Persistence\|03 Data Persistence]]
-> - [[Software Engineering/04 Networks/04 Networks\|04 Networks]]
-> - [[Software Engineering/05 Architecture/05 Architecture\|05 Architecture]]
-> - [[Software Engineering/06 Development Practices/06 Development Practices\|06 Development Practices]]
-> - [[Software Engineering/07 Security/07 Security\|07 Security]]
-> - [[Software Engineering/08 SDLC/08 SDLC\|08 SDLC]]
-> - [[Software Engineering/09 DevOps/09 DevOps\|09 DevOps]]
-> - [[Software Engineering/10 Cloud/10 Cloud\|10 Cloud]]
-> - [[Software Engineering/11 AI & ML/11 AI & ML\|11 AI & ML]]
-<!-- whats-next:end -->

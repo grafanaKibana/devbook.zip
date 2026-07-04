@@ -7,6 +7,10 @@ body {
   --dg-sidebar-min-width: 300px;
   --dg-sidebar-max-width: 300px;
 
+  /* Align the right sidebar's top with the filetree header (DEVBOOK). Tuned so the
+     ToC title's top matches the DEVBOOK title's top (both at ~20px). No top margin. */
+  --dg-sidebar-top: 15px;
+
   --dg-graph-width: calc(var(--dg-sidebar-max-width) - var(--dg-sidebar-container-padding));
   --dg-graph-height: calc(var(--dg-sidebar-max-width) - var(--dg-sidebar-container-padding));
 
@@ -74,7 +78,56 @@ body {
   display: none;
 }
 
-/* ── Mobile sidebar: full width ── */
+/* ── Graph moved into the filetree nav (bottom, pinned below the scrollable tree) ── */
+.filetree-sidebar {
+  /* Equal inset around the graph: sides come from the 20px side padding, so match
+     it at the bottom too (base --dg-filetree-padding only gives 10px bottom). */
+  padding-bottom: 20px;
+
+  /* Fade the scrollable tree into the graph: items dissolve at the bottom edge
+     instead of a hard cut, so they appear to hide behind the gradient as they scroll. */
+  > .folder {
+    --dg-filetree-fade: 40px;
+    -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - var(--dg-filetree-fade)), transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - var(--dg-filetree-fade)), transparent 100%);
+  }
+
+  .filetree-graph {
+    flex-shrink: 0;
+    margin-top: 0; /* no gap — the tree fades directly into the graph via the mask above */
+  }
+
+  #link-graph {
+    width: 100%;
+    height: var(--dg-filetree-graph-height, 240px);
+    margin: 0;               /* reduce the graph's own margin */
+    background: transparent;  /* transparent graph background */
+    border: none;             /* blend into the nav (no boxed border) */
+  }
+
+  .graph {
+    width: 100%;
+  }
+}
+
+/* ── ToC + Backlinks: unify header and item typography ──
+   "Pages mentioning this page" header matches the "Table of Content" header;
+   backlink items match ToC item font size + weight. */
+.backlinks .backlink-title {
+  /* selector matches the base's specificity (.backlinks .backlink-title) so this
+     override wins by load order; base font-size uses !important, so match it. */
+  font-size: var(--dg-toc-title-size) !important;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 400;
+}
+.backlink-card {
+  font-size: var(--dg-toc-font-size);
+  font-weight: 400;
+}
+
+/* ── Mobile sidebar: full width, no graph ── */
 @media (max-width: 1000px) {
   .filetree-wrapper {
     width: 100% !important;
@@ -83,6 +136,70 @@ body {
 
   .filetree-sidebar {
     width: 100% !important;
+  }
+
+  /* No graph in the mobile filetree drawer */
+  .filetree-sidebar .filetree-graph {
+    display: none !important;
+  }
+
+  /* No scroll-fade on mobile — nothing sits below the tree to fade into */
+  .filetree-sidebar > .folder {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}
+
+/* ── Right sidebar: fixed height, non-scrolling; ToC + Backlinks scroll independently ── */
+@media (min-width: 1401px) {
+  .sidebar {
+    top: var(--dg-sidebar-top);
+    margin-top: 0;
+    height: calc(100vh - var(--dg-sidebar-top) - 20px);
+  }
+
+  .sidebar-container {
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+  }
+
+  .toc {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    flex: 0 1 auto;
+  }
+
+  .toc-title-container {
+    flex-shrink: 0;
+  }
+
+  .toc-container {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+    overflow-y: auto;
+  }
+
+  .backlinks {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    flex: 0 1 auto;
+  }
+
+  .backlink-title {
+    flex-shrink: 0;
+  }
+
+  .backlink-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+    overflow-y: auto;
   }
 }
 

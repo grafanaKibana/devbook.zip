@@ -36,6 +36,7 @@ class NoteIndexEntry:
     folder_name: str
     is_folder_note: bool
     has_foldernote_tag: bool
+    skip_whats_next: bool
 
 
 def parse_args(argv: list[str]):
@@ -145,6 +146,25 @@ def tags_from_fm_lines(fm_lines: list[str] | None) -> set[str]:
     return tags
 
 
+def read_fm_scalar(fm_lines: list[str] | None, key: str) -> str | None:
+    if not fm_lines:
+        return None
+
+    key_lower = key.lower()
+    for ln in fm_lines:
+        stripped = ln.strip()
+        if ":" not in stripped:
+            continue
+        k, _, v = stripped.partition(":")
+        if k.strip().lower() != key_lower:
+            continue
+        value = v.strip()
+        if value == "":
+            return None
+        return value.lower()
+    return None
+
+
 def norm_rel(p: str) -> str:
     return p.replace(os.path.sep, "/")
 
@@ -171,6 +191,7 @@ def scan_notes(root_abs: str) -> list[NoteIndexEntry]:
             is_folder_note_by_name = file_stem == folder_name
             has_foldernote_tag = "FolderNote" in tags
             is_folder_note = is_folder_note_by_name or has_foldernote_tag
+            skip_whats_next = read_fm_scalar(fm_lines, "whats-next") in {"false", "no", "off"}
 
             out.append(
                 NoteIndexEntry(
@@ -182,6 +203,7 @@ def scan_notes(root_abs: str) -> list[NoteIndexEntry]:
                     folder_name=folder_name,
                     is_folder_note=is_folder_note,
                     has_foldernote_tag=has_foldernote_tag,
+                    skip_whats_next=skip_whats_next,
                 )
             )
     return out
@@ -386,6 +408,36 @@ def _folders_to_update_from_staged() -> tuple[set[str], set[str]]:
     return update_files, update_folders
 
 
+def strip_marker_block(content: str) -> str:
+    start = content.find(MARKER_START)
+    if start == -1:
+        return content
+    end = content.find(MARKER_END, start)
+    if end == -1:
+        return content
+    end_after = end + len(MARKER_END)
+
+    before = content[:start]
+    after = content[end_after:]
+
+    # insert_rendered_block_at_end prepends blank line(s) before the marker;
+    # drop trailing whitespace-only lines so the preceding content keeps a
+    # single trailing newline (or none, if it was the whole file).
+    before = before.rstrip("\n")
+    # replace_marker_block consumes one newline after MARKER_END; mirror that so
+    # the leading newline of the appended block doesn't linger.
+    if after.startswith("\r\n"):
+        after = after[2:]
+    elif after.startswith("\n"):
+        after = after[1:]
+
+    if before == "":
+        return after
+    if after == "":
+        return before + "\n"
+    return before + "\n" + after
+
+
 def replace_marker_block(content: str, rendered_block: str) -> str | None:
     start = content.find(MARKER_START)
     if start == -1:
@@ -485,14 +537,18 @@ def main(argv: list[str]) -> int:
         if not should_update(e):
             continue
         original = read_file(e.abs_path)
-        rendered = render_callout(e, entries, by_folder)
 
-        updated = replace_marker_block(original, rendered)
-        if updated is None:
-            updated = replace_legacy_whats_next_section(original, rendered)
+        if e.skip_whats_next:
+            updated = strip_marker_block(original)
+        else:
+            rendered = render_callout(e, entries, by_folder)
 
-        if updated is None:
-            updated = insert_rendered_block_at_end(original, rendered)
+            updated = replace_marker_block(original, rendered)
+            if updated is None:
+                updated = replace_legacy_whats_next_section(original, rendered)
+
+            if updated is None:
+                updated = insert_rendered_block_at_end(original, rendered)
 
         if updated != original:
             changed_rel_paths.append(norm_rel(os.path.relpath(e.abs_path, REPO_ROOT)))

@@ -29,6 +29,10 @@ Vault/Assets/Docs/
 **/obj/
 **.sln.DotSettings.user
 
+# Python bytecode caches (never track compiled artifacts)
+__pycache__/
+*.pyc
+
 # Dotnet
 **/obj/
 **/bin/
