@@ -160,7 +160,7 @@ wrapper.classList.add("block-language-dataview");
 const grid = wrapper.createEl("div");
 grid.style.display = "flex";
 grid.style.flexWrap = "wrap";
-grid.style.gap = "0.6em";
+grid.style.gap = "0.75rem";
 grid.style.width = "100%";
 
 // Multicolour stacked bar: one coloured slice per in-progress status, each sized
@@ -249,6 +249,7 @@ const style = wrapper.createEl("style");
 style.textContent = `
   .se-topic-card .callout-title-inner a { color: rgb(var(--callout-color)); text-decoration: none; }
   .se-topic-card .callout-title-inner a:hover { text-decoration: underline; }
+  .se-topic-card:hover { border-color: var(--background-modifier-border-hover) !important; }
 `;
 
 // Read the icon id + accent colour from a topic page's own frontmatter — the
@@ -284,19 +285,29 @@ for (const card of cards) {
   // 0` stops a long title from blowing past that basis.
   const callout = grid.createEl("div", { cls: "callout se-topic-card" });
   callout.setAttribute("data-callout", CARD_CALLOUT);
-  // Frontmatter colour overrides the type accent for icon + title + border
+  // Frontmatter colour overrides the type accent for icon + title + bar
   // (all read `--callout-color`); no colour → keep the CARD_CALLOUT default.
   if (colorTriple) callout.style.setProperty("--callout-color", colorTriple);
-  callout.style.flex = "1 1 calc(33.333% - 0.4em)";
+  // 3 per row (basis = a third minus its share of the two 0.75rem gaps), and
+  // `flex-grow: 1` lets a short final row widen its cards to fill the full width
+  // instead of leaving a hole — the reason for flex over CSS grid here.
+  callout.style.flex = "1 1 calc(33.333% - 0.5rem)";
   callout.style.minWidth = "0";
   callout.style.boxSizing = "border-box";
   callout.style.margin = "0";
   callout.style.display = "flex";
   callout.style.flexDirection = "column";
-  // Compact, symmetric padding — the default `--callout-padding` has an
-  // oversized left indent (room for the title icon) that looks huge in a narrow
-  // card; override it so the boxes read tighter than the full-width total.
+  // Flat "list-cards" look, but self-contained (no Minimal theme needed): a
+  // hairline border + neutral background, so the topic accent lives only in the
+  // title and the progress bar — not tinting the whole box like a callout does.
+  // Inline styles beat the theme's `.callout[data-callout=…]` rules; the :hover
+  // border swap in the injected <style> uses !important to win over these.
+  callout.style.background = "var(--background-primary)";
+  callout.style.border = "1px solid var(--background-modifier-border)";
+  callout.style.borderRadius = "var(--radius-m)";
+  callout.style.boxShadow = "none";
   callout.style.padding = "0.75em";
+  callout.style.transition = "border-color 120ms ease";
 
   // Title row: a Lucide SVG fills the icon slot (setIcon injects it) and the
   // topic link is the bold title, exactly like a native `> [!info] …` header.
@@ -339,6 +350,9 @@ for (const card of cards) {
   // gap); its paragraph margins are zeroed so it starts flush at the top.
   const body = calloutContent.createEl("div");
   if (desc) {
+    // Muted + smaller, matching Minimal's list-cards subtext treatment.
+    body.style.color = "var(--text-muted)";
+    body.style.fontSize = "var(--font-smaller)";
     await MarkdownRenderer.render(app, desc, body, sourcePath, dv.component);
     body.querySelectorAll("p").forEach((p) => { p.style.margin = "0"; });
   }
