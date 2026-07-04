@@ -280,9 +280,10 @@ const sourcePath = dv.current().file.path;
 const CARD_CALLOUT = "quote";
 
 // Title reads like a native callout header — accent colour, no underline. The
-// whole card is made clickable by a stretched overlay link (`.se-card-link`) that
-// covers it: a real internal link the digital garden resolves, so the entire card
-// navigates on the published site, not just the header.
+// whole card is made clickable by stretching the title link's hit area over the
+// card (the `::after` below). Because it's the real header link — which the
+// garden's `dataview-js-links` transform rewrites to a working permalink — the
+// entire card navigates on the published site, not just the title text.
 const style = wrapper.createEl("style");
 style.textContent = `
   .se-topic-card { cursor: pointer; position: relative; }
@@ -291,14 +292,11 @@ style.textContent = `
     border-color: rgba(var(--callout-color), 0.5) !important;
     background: rgba(var(--callout-color), 0.1) !important;
   }
-  .se-card-link {
+  .se-topic-card .callout-title-inner a::after {
+    content: "";
     position: absolute;
     inset: 0;
     z-index: 1;
-    font-size: 0;
-    color: transparent;
-    text-decoration: none;
-    border-radius: inherit;
   }
 `;
 
@@ -386,9 +384,6 @@ for (const card of cards) {
     p.style.display = "inline";
     p.style.fontWeight = "inherit";
   });
-  // Capture the rendered link to clone into the stretched card-overlay below.
-  const headerLink = titleInner.querySelector("a");
-
   const calloutContent = callout.createEl("div", { cls: "callout-content" });
   calloutContent.style.display = "flex";
   calloutContent.style.flexDirection = "column";
@@ -432,18 +427,6 @@ for (const card of cards) {
     spread: true,
     counter: `${stats.done}/${stats.total} done`,
   });
-
-  // Stretched overlay link: a clone of the header link, absolutely positioned to
-  // cover the whole card, so a click anywhere navigates to the topic — including
-  // on the published site, where it's a real internal link the garden resolves
-  // (a runtime click handler would not survive the static export). Its text is
-  // hidden; the header link underneath keeps the visible, normal-weight title.
-  if (headerLink) {
-    const overlayLink = headerLink.cloneNode(true);
-    overlayLink.classList.add("se-card-link");
-    overlayLink.setAttribute("aria-label", alias);
-    callout.appendChild(overlayLink);
-  }
 }
 
 // --- Overall total, rendered as a callout ------------------------------------
