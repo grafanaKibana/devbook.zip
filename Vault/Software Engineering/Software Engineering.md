@@ -279,13 +279,18 @@ const sourcePath = dv.current().file.path;
 // (purple), quote (grey).
 const CARD_CALLOUT = "quote";
 
-// Style the title link via CSS (not inline) so it can carry a real :hover — it
-// takes the callout's accent colour and only underlines on hover, like a link.
+// The whole card is a link, so hovering anywhere underlines the title (the
+// header's hovered state) — not only a direct hover on the title text. The card
+// itself is forced text-decoration:none so only the title underlines, not the
+// description/counter which also sit inside the anchor.
 const style = wrapper.createEl("style");
 style.textContent = `
-  .se-topic-card { cursor: pointer; }
-  .se-topic-card .callout-title-inner a { color: rgb(var(--callout-color)); text-decoration: none; }
-  .se-topic-card:hover .callout-title-inner a { text-decoration: none; }
+  .se-topic-card { cursor: pointer; text-decoration: none; color: inherit; }
+  .se-topic-card .se-topic-title { color: rgb(var(--callout-color)); text-decoration: none; }
+  .se-topic-card:hover .se-topic-title {
+    text-decoration: underline;
+    text-decoration-color: rgb(var(--callout-color));
+  }
   .se-topic-card:hover {
     border-color: rgba(var(--callout-color), 0.5) !important;
     background: rgba(var(--callout-color), 0.1) !important;
@@ -323,15 +328,16 @@ for (const card of cards) {
   // its share of the two inter-card gaps → exactly 3 per row; `flex-grow: 1`
   // lets a short final row widen its cards to span the full width. `min-width:
   // 0` stops a long title from blowing past that basis.
-  const callout = grid.createEl("div", { cls: "callout se-topic-card" });
+  // The whole card is a real internal-link anchor (not a div with a JS click
+  // handler) so it navigates both in Obsidian AND on the published digital
+  // garden — where runtime listeners are stripped but static <a> links survive.
+  // Same target string as the old title link, so the garden rewrites it the same.
+  const callout = grid.createEl("a", { cls: "callout se-topic-card internal-link" });
   callout.setAttribute("data-callout", CARD_CALLOUT);
-  // The whole card links to the topic. A direct click on the inner title link is
-  // left to Obsidian's native handling (hover-preview, right-click menu); clicks
-  // anywhere else navigate too, honouring Cmd/Ctrl-click to open in a new tab.
-  callout.addEventListener("click", (evt) => {
-    if (evt.target.closest("a")) return;
-    app.workspace.openLinkText(target, sourcePath, evt.metaKey || evt.ctrlKey);
-  });
+  callout.setAttribute("href", target);
+  callout.setAttribute("data-href", target);
+  callout.setAttribute("aria-label", alias);
+  callout.style.textDecoration = "none";
   // Frontmatter colour overrides the type accent for icon + title + bar
   // (all read `--callout-color`); no colour → keep the CARD_CALLOUT default.
   if (colorTriple) callout.style.setProperty("--callout-color", colorTriple);
@@ -371,16 +377,10 @@ for (const card of cards) {
   }
   const titleInner = title.createEl("div", { cls: "callout-title-inner" });
   titleInner.style.fontWeight = "700";
-  await MarkdownRenderer.render(app, `[[${target}|${alias}]]`, titleInner, sourcePath, dv.component);
-  // Flatten the <p> Markdown wraps the link in so it sits inline with the icon,
-  // and let it inherit the bold weight from the title.
-  titleInner.querySelectorAll("p").forEach((p) => {
-    p.style.margin = "0";
-    p.style.display = "inline";
-    p.style.fontWeight = "inherit";
-  });
-  // Link colour + hover underline are handled by the injected `.se-topic-card`
-  // CSS above so the title reads like a native callout header, not a wiki-link.
+  // A plain span, not a nested <a> — the whole card is already the link, and an
+  // <a> inside an <a> is invalid and would break the card anchor. Its accent
+  // colour + hover underline come from the injected `.se-topic-title` CSS above.
+  titleInner.createEl("span", { cls: "se-topic-title", text: alias });
 
   const calloutContent = callout.createEl("div", { cls: "callout-content" });
   calloutContent.style.display = "flex";
