@@ -5,6 +5,7 @@ tags:
   - Template
 dg-publish: true
 dg-home: true
+flashcard_uid: 5d8000c8
 ---
 
 Welcome to my software engineering notebook — the notes I've written to actually *understand* the stack, not just recall it for an interview. .NET internals, distributed systems, databases, security, cloud, AI/ML, and most of what sits between. Every note goes deep: core mechanics, real examples, the pitfalls that bite in production, and the questions worth being able to answer.
@@ -166,12 +167,12 @@ grid.style.width = "100%";
 // Multicolour stacked bar: one coloured slice per in-progress status, each sized
 // to that status's contribution to the weighted percentage (count·weight/total).
 // The slices therefore fill exactly `pct%` of the track; the rest stays empty.
-const appendStackedBar = (parent, byStatus, total) => {
+const appendStackedBar = (parent, byStatus, total, height = "0.7em") => {
   const bar = parent.createEl("div");
   bar.classList.add("se-progress");
   bar.style.display = "flex";
   bar.style.width = "100%";
-  bar.style.height = "0.7em";
+  bar.style.height = height;
   bar.style.borderRadius = "999px";
   bar.style.overflow = "hidden";
   bar.style.background = "var(--background-modifier-border)";
@@ -195,14 +196,49 @@ const appendStackedBar = (parent, byStatus, total) => {
   return bar;
 };
 
-const appendProgress = (parent, pct, byStatus, total) => {
+const appendProgress = (parent, pct, byStatus, total, opts = {}) => {
+  const {
+    barHeight = "0.7em",
+    textAbove = false,
+    fontSize = null,
+    spread = false,
+    counter = null,
+    counterOpacity = null,
+  } = opts;
   parent.style.textAlign = "center";
 
-  appendStackedBar(parent, byStatus, total);
+  const addLine = () => {
+    const line = parent.createEl("div");
+    if (fontSize) line.style.fontSize = fontSize;
+    if (spread) {
+      // Counter at the start, percentage at the end — both muted grey, their
+      // edges aligned to the bar underneath instead of centred.
+      line.style.display = "flex";
+      line.style.justifyContent = "space-between";
+      line.style.alignItems = "baseline";
+      line.style.color = "var(--text-muted)";
+      if (counter != null) {
+        const c = line.createEl("span", { text: counter });
+        if (counterOpacity != null) c.style.opacity = String(counterOpacity);
+      }
+      line.createEl("span", { text: `${pct}%` });
+    } else {
+      line.style.textAlign = "center";
+      line.createEl("span", { text: `${pct}%` });
+    }
+    return line;
+  };
 
-  const line = parent.createEl("div");
-  line.style.textAlign = "center";
-  line.createEl("span", { text: `${pct}%` });
+  // `textAbove` puts the caption over the bar (topic cards); the default keeps
+  // the bar first, then the caption (the overall-total callout at the bottom).
+  let line;
+  if (textAbove) {
+    line = addLine();
+    appendStackedBar(parent, byStatus, total, barHeight);
+  } else {
+    appendStackedBar(parent, byStatus, total, barHeight);
+    line = addLine();
+  }
   return line;
 };
 
@@ -247,9 +283,13 @@ const CARD_CALLOUT = "quote";
 // takes the callout's accent colour and only underlines on hover, like a link.
 const style = wrapper.createEl("style");
 style.textContent = `
+  .se-topic-card { cursor: pointer; }
   .se-topic-card .callout-title-inner a { color: rgb(var(--callout-color)); text-decoration: none; }
-  .se-topic-card .callout-title-inner a:hover { text-decoration: underline; }
-  .se-topic-card:hover { border-color: var(--background-modifier-border-hover) !important; }
+  .se-topic-card:hover .callout-title-inner a { text-decoration: none; }
+  .se-topic-card:hover {
+    border-color: rgba(var(--callout-color), 0.5) !important;
+    background: rgba(var(--callout-color), 0.1) !important;
+  }
 `;
 
 // Read the icon id + accent colour from a topic page's own frontmatter — the
@@ -285,6 +325,13 @@ for (const card of cards) {
   // 0` stops a long title from blowing past that basis.
   const callout = grid.createEl("div", { cls: "callout se-topic-card" });
   callout.setAttribute("data-callout", CARD_CALLOUT);
+  // The whole card links to the topic. A direct click on the inner title link is
+  // left to Obsidian's native handling (hover-preview, right-click menu); clicks
+  // anywhere else navigate too, honouring Cmd/Ctrl-click to open in a new tab.
+  callout.addEventListener("click", (evt) => {
+    if (evt.target.closest("a")) return;
+    app.workspace.openLinkText(target, sourcePath, evt.metaKey || evt.ctrlKey);
+  });
   // Frontmatter colour overrides the type accent for icon + title + bar
   // (all read `--callout-color`); no colour → keep the CARD_CALLOUT default.
   if (colorTriple) callout.style.setProperty("--callout-color", colorTriple);
@@ -307,7 +354,7 @@ for (const card of cards) {
   callout.style.borderRadius = "var(--radius-m)";
   callout.style.boxShadow = "none";
   callout.style.padding = "0.75em";
-  callout.style.transition = "border-color 120ms ease";
+  callout.style.transition = "border-color 120ms ease, background-color 120ms ease";
 
   // Title row: a Lucide SVG fills the icon slot (setIcon injects it) and the
   // topic link is the bold title, exactly like a native `> [!info] …` header.
@@ -366,10 +413,18 @@ for (const card of cards) {
 
   const stats = statsFor(alias);
   const foot = calloutContent.createEl("div");
-  const line = appendProgress(foot, stats.pct, stats.byStatus, stats.total);
-  const sub = line.createEl("span", { text: ` · ${stats.done}/${stats.total} done` });
-  sub.style.fontSize = "0.8em";
-  sub.style.opacity = "0.7";
+  foot.style.display = "flex";
+  foot.style.flexDirection = "column";
+  foot.style.gap = "4px";
+  // Caption above a thin bar, sized to match the description under the title:
+  // counter aligned to the bar's start, percentage to its end, both grey.
+  appendProgress(foot, stats.pct, stats.byStatus, stats.total, {
+    barHeight: "0.35em",
+    textAbove: true,
+    fontSize: "var(--font-smaller)",
+    spread: true,
+    counter: `${stats.done}/${stats.total} done`,
+  });
 }
 
 // --- Overall total, rendered as a callout ------------------------------------
@@ -378,12 +433,29 @@ const totalDone = notesWithTopicDone;
 
 const callout = dv.container.createEl("div", { cls: "callout" });
 callout.setAttribute("data-callout", "done");
+// Symmetric padding so the full-width bar sits centred — the default callout
+// padding indents the left more (room for a title icon this callout omits).
+callout.style.padding = "0.75em";
 
 const calloutContent = callout.createEl("div", { cls: "callout-content" });
-const totalLine = appendProgress(calloutContent, totalPct, overallByStatus, notesWithTopicTotal);
-const totalSub = totalLine.createEl("span", { text: ` · ${totalDone}/${notesWithTopicTotal} done` });
-totalSub.style.fontSize = "0.8em";
-totalSub.style.opacity = "0.7";
+calloutContent.style.padding = "0";
+calloutContent.style.margin = "0";
+
+// Wrap bar + caption in their own column so the gap between them matches the
+// cards (4px); the legend stays below with its own spacing.
+const totalFoot = calloutContent.createEl("div");
+totalFoot.style.display = "flex";
+totalFoot.style.flexDirection = "column";
+totalFoot.style.gap = "4px";
+// Same spread caption as the cards — counter at the start, percentage at the
+// end, at the same smaller size — but left under the bar. The counter keeps its
+// old faded grey so it reads a touch softer than the percentage.
+appendProgress(totalFoot, totalPct, overallByStatus, notesWithTopicTotal, {
+  spread: true,
+  counter: `${totalDone}/${notesWithTopicTotal} done`,
+  fontSize: "var(--font-smaller)",
+  counterOpacity: 0.7,
+});
 
 // Colour key for every stacked bar above.
 appendLegend(calloutContent);
