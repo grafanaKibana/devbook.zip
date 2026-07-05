@@ -17,11 +17,11 @@ return function TopicDashboard() {
     { folder: "04 Networks", title: "Networks", desc: "Protocols, HTTP, TCP/IP, how packets travel." },
     { folder: "05 Architecture", title: "Architecture", desc: "Distributed systems, patterns, designing for scale." },
     { folder: "06 Development Practices", title: "Development Practices", desc: "Testing, version control, and the craft." },
-    { folder: "07 Security", title: "Security", desc: "Threats, crypto, auth, defensive design." },
-    { folder: "08 SDLC", title: "SDLC", desc: "How software gets planned, built, and shipped." },
-    { folder: "09 DevOps", title: "DevOps", desc: "CI/CD, containers, and automation." },
-    { folder: "10 Cloud", title: "Cloud", desc: "AWS/Azure, serverless, cloud-native design." },
-    { folder: "11 AI & ML", title: "AI & ML", desc: "Models, training, applied machine learning." },
+    { folder: "08 Security", title: "Security", desc: "Threats, crypto, auth, defensive design." },
+    { folder: "11 SDLC", title: "SDLC", desc: "How software gets planned, built, and shipped." },
+    { folder: "10 DevOps", title: "DevOps", desc: "CI/CD, containers, and automation." },
+    { folder: "09 Cloud", title: "Cloud", desc: "AWS/Azure, serverless, cloud-native design." },
+    { folder: "07 AI & ML", title: "AI & ML", desc: "Models, training, applied machine learning." },
   ];
 
   const ICONS = {

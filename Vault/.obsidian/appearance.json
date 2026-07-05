@@ -8,5 +8,8 @@
   "interfaceFontFamily": "SF Pro",
   "textFontFamily": "SF Pro Text",
   "theme": "system",
-  "baseFontSize": 16
+  "baseFontSize": 16,
+  "enabledCssSnippets": [
+    "devbook-site-fonts"
+  ]
 }

@@ -546,24 +546,14 @@
     "Home/03 Data Persistence": "database",
     "Home/04 Networks": "network",
     "Home/05 Architecture": "building-2",
-    "Home/06 Development Practices": "ruler-dimension-line",
-    "Home/07 Security": "lock",
-    "Home/08 SDLC": "area-chart",
-    "Home/09 DevOps": "skull",
-    "Home/10 Cloud": "cloud",
-    "Home/11 AI & ML": "brain-circuit"
+    "Home/06 Development Practices": "ruler-dimension-line"
   },
   "folderColors": {
     "Home/02 Computer Science": "#ef4444",
     "Home/03 Data Persistence": "#f97316",
     "Home/04 Networks": "#f59e0b",
     "Home/05 Architecture": "#eab308",
-    "Home/06 Development Practices": "#84cc16",
-    "Home/07 Security": "#10b981",
-    "Home/08 SDLC": "#0ea5e9",
-    "Home/09 DevOps": "#3b82f6",
-    "Home/10 Cloud": "#6366f1",
-    "Home/11 AI & ML": "#a855f7"
+    "Home/06 Development Practices": "#84cc16"
   },
   "folderBackgroundColors": {},
   "folderSortOverrides": {},
