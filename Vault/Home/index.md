@@ -6,14 +6,6 @@ tags:
   - Template
 publish: true
 ---
-
-Welcome to my software engineering notebook — the notes I've written to actually *understand* the stack, not just recall it for an interview. .NET internals, distributed systems, databases, security, cloud, AI/ML, and most of what sits between. Every note goes deep: core mechanics, real examples, the pitfalls that bite in production, and the questions worth being able to answer.
-
-> [!info] Why this exists
-> I learn by writing things down and coming back to them. This vault is that process in the open — built on spaced repetition, organized into 11 topic areas, and updated continuously. Browse by topic below, or scroll on for progress and recent activity.
-
-# Topics
-
 ```datacorejsx
 return function TopicDashboard() {
   const ROOT = (dc.useCurrentFile()?.$path || "Home").split("/")[0];
@@ -98,7 +90,7 @@ return function TopicDashboard() {
       const iconSvg = wrapSvg(ICONS[firstString(fn?.value("icon"))] ?? DEFAULT_ICON);
       return { ...t, fn, rgb, iconSvg, ...statsFor(t.folder) };
     })
-    .sort((a, b) => b.pct - a.pct || b.total - a.total || a.title.localeCompare(b.title));
+    .sort((a, b) => a.folder.localeCompare(b.folder));
 
   let oDone = 0, oTotal = 0, oPoints = 0;
   const oByStatus = {};
@@ -118,7 +110,7 @@ return function TopicDashboard() {
 
   const CSS = `
 .dc-topic-grid { display: flex; flex-wrap: wrap; gap: 1rem; width: 100%; }
-.dc-topic-card { position: relative; cursor: pointer; flex: 1 1 240px; min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-direction: column; background: var(--background-primary, var(--light, #ffffff)); border: 1px solid var(--background-modifier-border, var(--lightgray, #e5e5e5)); border-radius: var(--radius-m, 8px); box-shadow: none; padding: 1rem 1.1rem 1.1rem; transition: border-color 120ms, background-color 120ms; }
+.dc-topic-card { position: relative; cursor: pointer; flex: 1 1 240px; min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-direction: column; background: transparent; border: 1px solid var(--background-modifier-border, var(--lightgray, #e5e5e5)); border-radius: var(--radius-m, 8px); box-shadow: none; padding: 1rem 1.1rem 1.1rem; transition: border-color 120ms, background-color 120ms; }
 .dc-topic-card:hover { border-color: rgba(var(--topic-rgb), 0.5); background: rgba(var(--topic-rgb), 0.1); }
 .dc-topic-title { display: flex; gap: 0.55rem; align-items: center; line-height: 1.3; }
 .dc-topic-icon { display: flex; align-self: center; color: rgb(var(--topic-rgb)); }
@@ -179,13 +171,9 @@ return function TopicDashboard() {
 }
 ```
 
-# Recently Updated
+# Welcome to my software engineering notebook
 
-```dataview
-TABLE WITHOUT ID file.link as "Note", file.mtime as "Date"
-FROM "Home"
-WHERE file.path != this.file.path
-  AND !contains(file.tags, "#MetricsIgnore")
-SORT file.mtime DESC
-LIMIT 10
-```
+The notes I've written to actually *understand* the stack, not just recall it for an interview. .NET internals, distributed systems, databases, security, cloud, AI/ML, and most of what sits between. Every note goes deep: core mechanics, real examples, the pitfalls that bite in production, and the questions worth being able to answer.
+
+> [!info] Why this exists
+> I learn by writing things down and coming back to them. This vault is that process in the open — built on spaced repetition, organized into 11 topic areas, and updated continuously. Browse by topic below, or scroll on for progress and recent activity.
