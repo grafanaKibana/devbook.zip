@@ -2,9 +2,9 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "dev",
+      "name": "quartz",
       "runtimeExecutable": "sh",
-      "runtimeArgs": ["-c", "cd Web && npm run dev"],
+      "runtimeArgs": ["-c", "cd Web && npx quartz build --serve --port 8080"],
       "port": 8080
     }
   ]
