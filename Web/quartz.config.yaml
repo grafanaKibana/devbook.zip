@@ -12,6 +12,11 @@ configuration:
     - private
     - templates
     - .obsidian
+    # Topics.base is an Obsidian-only Bases view. Quartz Syncer strips note
+    # frontmatter on publish (see includeAllFrontmatter) and the web file
+    # universe includes generated pages, so the rendered base showed empty
+    # columns and junk rows (404, tags, canvas). Keep it out of the build.
+    - Topics.base
   theme:
     fontOrigin: googleFonts
     cdnCaching: true
