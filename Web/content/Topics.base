@@ -2,7 +2,8 @@ filters:
   and:
     - '!file.hasTag("FolderNote")'
     - '!file.ext.containsAny("base", "canvas")'
-    - file.path.startsWith("Home")
+    - '!file.path.startsWith("Templates")'
+    - '!file.path.startsWith("Assets")'
 views:
   - type: table
     name: Table
