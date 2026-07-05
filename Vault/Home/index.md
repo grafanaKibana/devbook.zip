@@ -33,7 +33,6 @@ return function TopicDashboard() {
     { folder: "11 AI & ML", title: "AI & ML", desc: "Models, training, applied machine learning." },
   ];
 
-  // lucide inner-SVG for the icon each topic folder-note declares in `icon`.
   const ICONS = {
     "code-2": `<path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/>`,
     "flask-round": `<path d="M10 2v6.292a7 7 0 1 0 4 0V2"/><path d="M5 15h14"/><path d="M8.5 2h7"/>`,
@@ -48,22 +47,28 @@ return function TopicDashboard() {
     "brain-circuit": `<path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M9 13a4.5 4.5 0 0 0 3-4"/><path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"/><path d="M3.477 10.896a4 4 0 0 1 .585-.396"/><path d="M6 18a4 4 0 0 1-1.967-.516"/><path d="M12 13h4"/><path d="M12 18h6a2 2 0 0 1 2 2v1"/><path d="M12 8h8"/><path d="M16 8V5a2 2 0 0 1 2-2"/><circle cx="16" cy="13" r=".5"/><circle cx="18" cy="3" r=".5"/><circle cx="20" cy="21" r=".5"/><circle cx="20" cy="8" r=".5"/>`,
   };
   const DEFAULT_ICON = `<path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>`;
-  const wrapSvg = (inner) => `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;
+  const wrapSvg = (inner) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;
 
   const STATUS_PROGRESS = { "not-started": 0, "creation": 33, "ready to repeat": 66, "done": 100 };
   const STATUS_RAMP = [
-    { key: "done", weight: 100, alpha: 1 },
-    { key: "ready to repeat", weight: 66, alpha: 0.6 },
-    { key: "creation", weight: 33, alpha: 0.28 },
+    { key: "done", label: "Done", weight: 100, alpha: 1 },
+    { key: "ready to repeat", label: "Ready to Repeat", weight: 66, alpha: 0.6 },
+    { key: "creation", label: "Creation", weight: 33, alpha: 0.28 },
   ];
 
   const firstString = (v) =>
     Array.isArray(v) ? (v.length ? String(v[0]).trim() : "") : (v == null ? "" : String(v).trim());
   const hasTag = (p, t) => (p.$tags ?? []).some((x) => String(x).replace(/^#/, "") === t);
+  const hexToRgbTriple = (v) => {
+    let h = firstString(v).replace(/^#/, "");
+    if (h.length === 3) h = h.split("").map((c) => c + c).join("");
+    if (!/^[0-9a-fA-F]{6}$/.test(h)) return null;
+    const n = parseInt(h, 16);
+    return `${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}`;
+  };
 
   const pages = dc.useQuery(`@page and path("${ROOT}")`);
 
-  // Map each topic folder -> its FolderNote page (for icon + accent colour).
   const folderNoteFor = new Map();
   for (const p of pages) {
     if (!hasTag(p, "FolderNote")) continue;
@@ -84,42 +89,91 @@ return function TopicDashboard() {
       if (key === "done") done += 1;
       byStatus[key] = (byStatus[key] ?? 0) + 1;
     }
-    return { pct: total > 0 ? Math.round(points / total) : 0, done, total, byStatus };
+    return { pct: total > 0 ? Math.round(points / total) : 0, done, total, points, byStatus };
   };
 
   const cards = TOPICS
     .map((t) => {
       const fn = folderNoteFor.get(`${ROOT}/${t.folder}`);
-      const color = firstString(fn?.value("color")) || "var(--secondary)";
+      const rgb = hexToRgbTriple(fn?.value("color")) || "125, 125, 125";
       const iconSvg = wrapSvg(ICONS[firstString(fn?.value("icon"))] ?? DEFAULT_ICON);
-      return { ...t, fn, color, iconSvg, ...statsFor(t.folder) };
+      return { ...t, fn, rgb, iconSvg, ...statsFor(t.folder) };
     })
     .sort((a, b) => b.pct - a.pct || b.total - a.total || a.title.localeCompare(b.title));
 
+  let oDone = 0, oTotal = 0, oPoints = 0;
+  const oByStatus = {};
+  for (const c of cards) {
+    oDone += c.done; oTotal += c.total; oPoints += c.points;
+    for (const k of Object.keys(c.byStatus)) oByStatus[k] = (oByStatus[k] ?? 0) + c.byStatus[k];
+  }
+  const oPct = oTotal > 0 ? Math.round(oPoints / oTotal) : 0;
+
+  const segments = (byStatus, total) =>
+    STATUS_RAMP.map((seg) => {
+      const cnt = byStatus[seg.key] ?? 0;
+      const width = total > 0 ? (cnt * seg.weight) / total : 0;
+      if (width <= 0) return null;
+      return <span style={{ width: `${width}%`, background: "rgb(var(--topic-rgb))", opacity: seg.alpha }} />;
+    });
+
+  const CSS = `
+.dc-topic-grid { display: flex; flex-wrap: wrap; gap: 0.75rem; width: 100%; }
+.dc-topic-card { position: relative; cursor: pointer; flex: 1 1 calc(33.333% - 0.5rem); min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-direction: column; background: var(--background-primary); border: 1px solid var(--background-modifier-border); border-radius: var(--radius-m); box-shadow: none; padding: 0.75em; transition: border-color 120ms, background-color 120ms; }
+.dc-topic-card:hover { border-color: rgba(var(--topic-rgb), 0.5); background: rgba(var(--topic-rgb), 0.1); }
+.dc-topic-title { display: flex; gap: 4px; align-items: center; line-height: 1.3; }
+.dc-topic-icon { display: flex; align-self: center; color: rgb(var(--topic-rgb)); }
+.dc-topic-icon svg { width: 1.15em; height: 1.15em; }
+.dc-topic-name { font-weight: 700; color: rgb(var(--topic-rgb)); }
+.dc-topic-body { display: flex; flex-direction: column; flex: 1 1 0%; margin-top: 0.4em; }
+.dc-topic-desc { margin: 0; color: var(--text-muted); font-size: var(--font-smaller); }
+.dc-topic-spacer { flex: 1 0 auto; min-height: 0.75em; }
+.dc-topic-foot { display: flex; flex-direction: column; gap: 4px; }
+.dc-topic-cap { font-size: var(--font-smaller); display: flex; justify-content: space-between; align-items: baseline; color: var(--text-muted); }
+.dc-topic-bar { display: flex; width: 100%; height: 0.35em; border-radius: 999px; overflow: hidden; background: var(--background-modifier-border); }
+.dc-topic-link { position: absolute; inset: 0; z-index: 1; }
+.dc-topic-link a { position: absolute; inset: 0; font-size: 0; }
+.dc-topic-total { margin-top: 0.75rem; padding: 0.75em; border-radius: var(--radius-m); border: 1px solid rgba(var(--topic-rgb), 0.4); background: rgba(var(--topic-rgb), 0.1); }
+.dc-topic-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4em 1.1em; margin-top: 0.7em; font-size: 0.8em; opacity: 0.85; }
+.dc-topic-legend-item { display: inline-flex; align-items: center; gap: 0.4em; }
+.dc-topic-legend-sw { width: 0.8em; height: 0.8em; border-radius: 3px; flex: 0 0 auto; display: inline-block; background: rgb(var(--topic-rgb)); }
+`;
+
   return (
     <div style={{ marginTop: "1.5rem" }}>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "1rem" }}>
+      <style dangerouslySetInnerHTML={{ __html: CSS }} />
+      <div class="dc-topic-grid">
         {cards.map((c) => (
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", padding: "1rem 1.1rem 1.1rem", border: "1px solid var(--lightgray)", borderRadius: "8px", background: "var(--light)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.55rem" }}>
-              <span style={{ color: c.color, display: "inline-flex" }} dangerouslySetInnerHTML={{ __html: c.iconSvg }} />
-              <span style={{ fontWeight: 600, fontSize: "1.02rem", flex: 1, lineHeight: 1.2 }}>
-                {c.fn ? <dc.Link link={c.fn.$link} /> : c.title}
-              </span>
-              <span style={{ fontSize: "0.8rem", fontWeight: 600, color: c.color }}>{c.pct}%</span>
+          <div class="dc-topic-card" style={{ "--topic-rgb": c.rgb }}>
+            <div class="dc-topic-title">
+              <span class="dc-topic-icon" dangerouslySetInnerHTML={{ __html: c.iconSvg }} />
+              <span class="dc-topic-name">{c.title}</span>
             </div>
-            <p style={{ margin: 0, fontSize: "0.82rem", lineHeight: 1.35, color: "var(--gray)" }}>{c.desc}</p>
-            <div style={{ display: "flex", height: "7px", borderRadius: "4px", overflow: "hidden", background: "var(--lightgray)", marginTop: "0.15rem" }}>
-              {STATUS_RAMP.map((seg) => {
-                const cnt = c.byStatus[seg.key] ?? 0;
-                const width = c.total > 0 ? (cnt * seg.weight) / c.total : 0;
-                if (width <= 0) return null;
-                return <span style={{ width: `${width}%`, height: "100%", background: c.color, opacity: seg.alpha }} />;
-              })}
+            <div class="dc-topic-body">
+              <p class="dc-topic-desc">{c.desc}</p>
+              <div class="dc-topic-spacer" />
+              <div class="dc-topic-foot">
+                <div class="dc-topic-cap"><span>{c.done}/{c.total} done</span><span>{c.pct}%</span></div>
+                <div class="dc-topic-bar">{segments(c.byStatus, c.total)}</div>
+              </div>
             </div>
-            <div style={{ fontSize: "0.72rem", color: "var(--gray)" }}>{c.done}/{c.total} done</div>
+            {c.fn ? <span class="dc-topic-link"><dc.Link link={c.fn.$link} /></span> : null}
           </div>
         ))}
+      </div>
+      <div class="dc-topic-total" style={{ "--topic-rgb": "0, 200, 83" }}>
+        <div class="dc-topic-foot">
+          <div class="dc-topic-bar" style={{ height: "0.7em" }}>{segments(oByStatus, oTotal)}</div>
+          <div class="dc-topic-cap"><span style={{ opacity: 0.7 }}>{oDone}/{oTotal} done</span><span>{oPct}%</span></div>
+        </div>
+        <div class="dc-topic-legend">
+          {STATUS_RAMP.map((seg) => (
+            <span class="dc-topic-legend-item">
+              <span class="dc-topic-legend-sw" style={{ opacity: seg.alpha }} />
+              <span>{seg.label} · {seg.weight}%</span>
+            </span>
+          ))}
+        </div>
       </div>
     </div>
   );

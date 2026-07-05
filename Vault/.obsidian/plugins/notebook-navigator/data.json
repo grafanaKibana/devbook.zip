@@ -13,10 +13,6 @@
       "periodicNotesFolder": "",
       "shortcuts": [
         {
-          "type": "folder",
-          "path": "Home"
-        },
-        {
           "type": "note",
           "path": "Home/Questions.md"
         },
