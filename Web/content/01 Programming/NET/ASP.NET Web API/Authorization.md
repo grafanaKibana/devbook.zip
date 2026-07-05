@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-05T10:53:26.796+03:00
-modified: 2026-07-05T15:49:35.398+03:00
+modified: 2026-07-05T17:36:34.273+03:00
 ---
 
 # Authorization in ASP.NET Core

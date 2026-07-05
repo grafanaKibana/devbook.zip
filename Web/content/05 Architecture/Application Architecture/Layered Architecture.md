@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-05T10:53:43.304+03:00
-modified: 2026-07-05T15:49:34.784+03:00
+modified: 2026-07-05T17:35:40.806+03:00
 ---
 
 # Intro
@@ -83,7 +83,7 @@ These names get used interchangeably, but they're variations on one idea — _pr
 - **Onion (Jeffrey Palermo)** — concentric rings with the domain at the center; same inward rule, drawn as circles.
 - **Clean (Robert C. Martin)** — the same again with named rings (Entities → Use Cases → Interface Adapters → Frameworks) and the explicit **Dependency Rule**.
 
-The takeaway: don't agonize over the name — they all enforce the same Dependency Rule, differing mostly in vocabulary and diagram shape. See [[Clean Architecture]] for the most prescriptive variant; the same boundary discipline scales up to the [[modular monolith]] and microservices.
+The takeaway: don't agonize over the name — they all enforce the same Dependency Rule, differing mostly in vocabulary and diagram shape. See [[Clean Architecture]] for the most prescriptive variant; the same boundary discipline scales up to the [[Modular Monolith]] and microservices.
 
 ## .NET Example
 

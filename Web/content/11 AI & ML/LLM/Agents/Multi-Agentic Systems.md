@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-05T10:54:06.807+03:00
-modified: 2026-07-05T15:49:35.342+03:00
+modified: 2026-07-05T17:35:42.931+03:00
 ---
 
 # Intro
@@ -14,7 +14,7 @@ Multi-agent typically uses 3–10× more tokens than single-agent for equivalent
 2. **Parallelization** — independent work paths can run concurrently, and sequential execution is unacceptably slow.
 3. **Specialization** — the agent has 20+ tools and selection accuracy drops, or the task requires conflicting behavioral modes (empathetic support vs. precise code review in the same session).
 
-If none of these apply, a single well-prompted agent with good [[tools]] outperforms multi-agent on cost, latency, and debuggability. Anthropic reports that teams have invested months building multi-agent architectures only to discover that improved prompting on a single agent achieved equivalent results.
+If none of these apply, a single well-prompted agent with good [[Tools]] outperforms multi-agent on cost, latency, and debuggability. Anthropic reports that teams have invested months building multi-agent architectures only to discover that improved prompting on a single agent achieved equivalent results.
 
 The key design principle is **context-centric decomposition**: split agents along context boundaries, not problem boundaries. An agent handling a feature should also handle its tests — it already has the context. Only introduce a new agent when one genuinely cannot hold the relevant context in its window. Problem-centric splits (one agent writes code, another writes tests, a third reviews) force constant coordination and lose information at each handoff — a "telephone game" where fidelity drops with every transfer.
 

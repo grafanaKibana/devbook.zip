@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-05T10:53:40.604+03:00
-modified: 2026-07-05T15:49:34.445+03:00
+modified: 2026-07-05T17:36:33.090+03:00
 ---
 
 # Intro
@@ -61,12 +61,12 @@ Stores **nodes** and **edges** as first-class citizens, making relationship trav
 - **"Schemaless" means schema-on-read, not no schema.** The schema moves from the database to your application code. Without discipline (and ideally validation), document collections drift into inconsistent shapes that every reader must defensively handle.
 - **Modeling NoSQL like SQL.** Normalizing a document store or expecting joins defeats the point and performs badly. NoSQL is **query-driven**: design the data around the reads you'll do, accepting denormalization and duplication.
 - **Assuming strong consistency.** Most of these default to eventual consistency for availability/latency (see [[CAP theorem|CAP / PACELC]]). Read-your-writes and cross-document atomicity often require explicit opt-in (tunable consistency, transactions) or aren't available at all.
-- **Hot partitions.** Wide-column and key-value stores spread load by partition key; a poorly chosen key concentrates traffic on one node — the same hot-key problem as [[sharding]].
+- **Hot partitions.** Wide-column and key-value stores spread load by partition key; a poorly chosen key concentrates traffic on one node — the same hot-key problem as [[Sharding]].
 - **NoSQL ≠ "no SQL needed."** Most real systems are **polyglot**: a relational store as the system of record plus a key-value cache and maybe a search/graph store — not one database for everything.
 
 ## Tradeoffs
 
-**Relational vs NoSQL (when to leave SQL):** stay relational when you need ad-hoc queries, multi-row ACID transactions, and strong consistency over moderate data. Reach for a NoSQL family when a _specific_ access pattern (huge write volume, deep traversals, simple key lookups at massive scale, or rapidly-evolving documents) outgrows what a single relational node serves well — and only after exhausting [[replication]] and [[03 Data Persistence/Caching|caching]].
+**Relational vs NoSQL (when to leave SQL):** stay relational when you need ad-hoc queries, multi-row ACID transactions, and strong consistency over moderate data. Reach for a NoSQL family when a _specific_ access pattern (huge write volume, deep traversals, simple key lookups at massive scale, or rapidly-evolving documents) outgrows what a single relational node serves well — and only after exhausting [[Replication]] and [[03 Data Persistence/Caching|caching]].
 
 **NewSQL** (CockroachDB, Spanner, Vitess) is the third option: relational semantics and SQL with horizontal scaling — worth considering before giving up ACID for scale.
 

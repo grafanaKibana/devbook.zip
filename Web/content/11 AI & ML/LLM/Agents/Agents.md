@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-05T10:54:06.812+03:00
-modified: 2026-07-05T15:49:37.047+03:00
+modified: 2026-07-05T17:36:35.301+03:00
 tags:
   - FolderNote
 ---
@@ -17,7 +17,7 @@ Most production systems that people call "agents" are actually workflows — and
 
 ## The Augmented LLM
 
-The building block of every agentic system is an LLM enhanced with retrieval, [[tools]], and memory. The model generates its own search queries, selects appropriate tools, and decides what information to retain. Before building multi-step systems, invest in making this single building block work well — choose the right model, tune the prompts, and ensure tools have clear, well-documented interfaces.
+The building block of every agentic system is an LLM enhanced with retrieval, [[Tools]], and memory. The model generates its own search queries, selects appropriate tools, and decides what information to retain. Before building multi-step systems, invest in making this single building block work well — choose the right model, tune the prompts, and ensure tools have clear, well-documented interfaces.
 
 [[Model Context Protocol|Model Context Protocol (MCP)]] standardizes how an augmented LLM connects to external tools and data sources.
 

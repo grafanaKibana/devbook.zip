@@ -1,12 +1,12 @@
 ---
 publish: true
 created: 2026-07-05T10:54:06.731+03:00
-modified: 2026-07-05T15:49:36.405+03:00
+modified: 2026-07-05T17:36:34.741+03:00
 ---
 
 # Intro
 
-Fine-tuning continues training a pretrained model's weights on task-specific data, changing the model's behavior rather than just its inputs. It is the most powerful and most expensive of the three adaptation levers in [[LLM]] — the others being [[prompting]] (no weight change) and [[RAG]] (external knowledge at query time). The defining trait: fine-tuning bakes behavior into the weights, so it persists across every request without consuming context tokens — but it also bakes in a snapshot that starts aging the moment training ends.
+Fine-tuning continues training a pretrained model's weights on task-specific data, changing the model's behavior rather than just its inputs. It is the most powerful and most expensive of the three adaptation levers in [[LLM]] — the others being [[Prompting]] (no weight change) and [[RAG]] (external knowledge at query time). The defining trait: fine-tuning bakes behavior into the weights, so it persists across every request without consuming context tokens — but it also bakes in a snapshot that starts aging the moment training ends.
 
 The single most important decision is _what_ you are trying to change. Fine-tuning is the right tool for **behavior** — output format, tone, refusal policy, domain style, structured-output reliability, or compressing a large model's behavior into a smaller one. It is the wrong tool for **knowledge** — facts change faster than you can retrain, fine-tuning provides no source traceability, and a model fine-tuned to "know" a fact will still hallucinate confidently at the edges. Keep mutable facts in retrieval; keep durable behavior in weights.
 

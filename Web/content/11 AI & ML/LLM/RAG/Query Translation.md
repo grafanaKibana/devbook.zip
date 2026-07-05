@@ -1,14 +1,14 @@
 ---
 publish: true
 created: 2026-07-05T10:54:06.888+03:00
-modified: 2026-07-05T15:49:36.017+03:00
+modified: 2026-07-05T17:36:34.893+03:00
 ---
 
 # Intro
 
 Query translation rewrites a user question into one or more retrieval-optimized variants before search. The core problem: user phrasing rarely matches document phrasing. A user asks "Can partners burst above limits now?" but the answer lives in a document titled "Q3 Quota Policy Update — Partner Tier Burst Allowance." A single query embedding captures one neighborhood in vector space; translation expands coverage to multiple neighborhoods without changing the corpus or the [[Embeddings|embedding model]].
 
-The mechanism: the user query goes to an LLM that generates N translated variants — paraphrases, sub-questions, abstractions, or hypothetical answers depending on the technique. Each variant runs through [[retrieval]] independently. Results are fused and deduplicated into a single candidate set, then passed to [[Re-ranking|reranking]] or directly to the generator.
+The mechanism: the user query goes to an LLM that generates N translated variants — paraphrases, sub-questions, abstractions, or hypothetical answers depending on the technique. Each variant runs through [[Retrieval]] independently. Results are fused and deduplicated into a single candidate set, then passed to [[Re-ranking|reranking]] or directly to the generator.
 
 ```mermaid
 flowchart LR

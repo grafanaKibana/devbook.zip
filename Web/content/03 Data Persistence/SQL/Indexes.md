@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-05T10:53:40.609+03:00
-modified: 2026-07-05T15:49:34.244+03:00
+modified: 2026-07-05T17:36:33.487+03:00
 ---
 
 # Intro
@@ -14,7 +14,7 @@ An index is a sorted auxiliary structure that helps the SQL engine avoid full ta
 - Indexes hurt write-heavy tables because inserts, updates, and deletes also maintain index pages.
 - Indexes consume extra disk space; wider keys and many indexes increase storage and memory pressure.
 
-![03 Data Persistence-Indexes-20260705154934186](Assets/03 Data Persistence/03 Data Persistence-Indexes-20260705154934186.png)
+![03 Data Persistence-Indexes-20260705173633411](Assets/03 Data Persistence/03 Data Persistence-Indexes-20260705173633411.png)
 
 ## Mental model: how index pages are organized
 
@@ -46,13 +46,13 @@ In a clustered index, leaf pages are the table's real data pages.
 
 #### Diagram: Clustered index page hierarchy
 
-![[Assets/03 Data Persistence/03 Data Persistence-Indexes-20260705154934187.png]]
+![[Assets/03 Data Persistence/03 Data Persistence-Indexes-20260705173633411-1.png]]
 
 This diagram shows the clustered index B+ tree shape: one root page points to intermediate index pages, and the leaf level contains the actual table rows linked left-to-right for range scans.
 
 #### Diagram: Clustered index seek path
 
-![[Assets/03 Data Persistence/03 Data Persistence-Indexes-20260705154934187-1.png]]
+![[Assets/03 Data Persistence/03 Data Persistence-Indexes-20260705173633411-2.png]]
 
 This diagram shows an index seek path through key ranges: the engine starts at the root, chooses the matching intermediate branch, and reaches the leaf page that holds the target row.
 
@@ -64,13 +64,13 @@ The leaf level of a nonclustered index stores key columns plus a pointer to actu
 
 Leaf entries store the clustered key value (key lookup path).
 
-![[Assets/03 Data Persistence/03 Data Persistence-Indexes-20260705154934187-2.png]]
+![[Assets/03 Data Persistence/03 Data Persistence-Indexes-20260705173633411-3.png]]
 
 #### Without a clustered index (heap)
 
 Leaf entries store a row identifier (RID): file, page, and slot location.
 
-![[Assets/03 Data Persistence/03 Data Persistence-Indexes-20260705154934187-3.png]]
+![[Assets/03 Data Persistence/03 Data Persistence-Indexes-20260705173633411-4.png]]
 
 ## Simplified seek example
 

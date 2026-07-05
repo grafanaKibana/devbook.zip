@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-05T10:53:43.310+03:00
-modified: 2026-07-05T15:49:34.453+03:00
+modified: 2026-07-05T17:35:40.867+03:00
 ---
 
 # Intro
@@ -116,7 +116,7 @@ For senior .NET interviews, tie CAP/PACELC to concrete platform choices instead 
 
 ### Azure Cosmos DB (tunable consistency)
 
-- You can select [[consistency models]] (Strong, Bounded Staleness, Session, Consistent Prefix, Eventual).
+- You can select [[Consistency Models]] (Strong, Bounded Staleness, Session, Consistent Prefix, Eventual).
 - This lets you pick different points on latency/freshness per workload.
 - Interview signal: mention that one product can serve CP-like or AP-leaning behaviors depending on configuration and operation.
 

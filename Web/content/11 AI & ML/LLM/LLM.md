@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-05T10:54:06.735+03:00
-modified: 2026-07-05T15:49:36.362+03:00
+modified: 2026-07-05T17:36:34.753+03:00
 tags:
   - FolderNote
 ---
@@ -10,11 +10,11 @@ tags:
 
 A large language model (LLM) is a transformer neural network trained on vast text corpora to predict the next token in a sequence. That single objective — next-token prediction at scale — is what produces the capabilities the rest of this section builds on: answering questions, summarizing, translating, writing code, and calling tools. Virtually all modern generative LLMs (GPT, Claude, Llama, Gemini) are **decoder-only** transformers: self-attention lets every token attend to all earlier tokens, so the model builds contextual meaning across the whole input before predicting what comes next. (Encoder-only transformers like BERT and encoder-decoder models like T5 exist, but they serve classification, [[Embeddings|embedding]], and translation workloads rather than open-ended generation.)
 
-The engineering consequence: an LLM is not a knowledge database with retrieval semantics. It is a probability distribution over token sequences, shaped by training data and steered at inference time by the prompt. That is why grounding, [[prompting]], and [[11 AI & ML/LLM/Evaluation/Evaluation|evaluation]] are engineering disciplines rather than nice-to-haves — see [[Hallucinations]] for what happens when fluent prediction is mistaken for factual recall.
+The engineering consequence: an LLM is not a knowledge database with retrieval semantics. It is a probability distribution over token sequences, shaped by training data and steered at inference time by the prompt. That is why grounding, [[Prompting]], and [[11 AI & ML/LLM/Evaluation/Evaluation|evaluation]] are engineering disciplines rather than nice-to-haves — see [[Hallucinations]] for what happens when fluent prediction is mistaken for factual recall.
 
 ## How LLMs Are Built
 
-![11 AI & ML-LLM-20260705154933466.png](Assets/11 AI & ML/11 AI & ML-LLM-20260705154933466.png)
+![11 AI & ML-LLM-20260705173634102.png](Assets/11 AI & ML/11 AI & ML-LLM-20260705173634102.png)
 
 Training a modern LLM is a three-stage pipeline. Each stage changes what the model is good at:
 

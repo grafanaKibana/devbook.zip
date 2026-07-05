@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-05T10:53:40.584+03:00
-modified: 2026-07-05T15:49:34.951+03:00
+modified: 2026-07-05T17:35:39.945+03:00
 ---
 
 # Intro
@@ -186,7 +186,7 @@ Invalidation removes data that's _wrong_; **eviction** removes data when the cac
 - **`IMemoryCache`** does not bound itself by default. You must set `SizeLimit` and give every entry a `Size`, otherwise an unbounded cache becomes a memory leak (the "unbounded growth" pitfall below). It then evicts by a priority + recency heuristic.
 - **Redis** evicts according to its `maxmemory-policy`: `noeviction` (reject writes — surprises people), `allkeys-lru`, `allkeys-lfu` (Redis 4+, better for skewed popularity), `volatile-ttl` (drop soonest-to-expire), etc. Choosing the policy _is_ a design decision; `allkeys-lru`/`allkeys-lfu` are the usual choices for a pure cache.
 
-The eviction policy is the same family of algorithms as an in-process [[LRU cache]]: LRU is the simple default, LFU resists scan pollution. Watch the **eviction rate** metric — a high rate means the working set no longer fits and hit rate is collapsing, the signal to grow the cache or shrink what you store.
+The eviction policy is the same family of algorithms as an in-process [[LRU Cache]]: LRU is the simple default, LFU resists scan pollution. Watch the **eviction rate** metric — a high rate means the working set no longer fits and hit rate is collapsing, the signal to grow the cache or shrink what you store.
 
 ## Pitfalls
 

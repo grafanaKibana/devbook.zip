@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-05T16:17:30.062+03:00
-modified: 2026-07-05T16:24:08.352+03:00
+modified: 2026-07-05T17:37:38.121+03:00
 tags:
   - FolderNote
   - MetricsIgnore
@@ -478,15 +478,15 @@ if (notesOutsideTopics.length > 0) {
 
 # Recently Updated
 
-| Note                                                                                                            | Date                    |
-| --------------------------------------------------------------------------------------------------------------- | ----------------------- |
-| [[05 Architecture/Distributed Systems/Scalability Patterns/Scalability Patterns.md\|Scalability Patterns]] | 4:18 PM - July 05, 2026 |
-| [[11 AI & ML/LLM/RAG/Evaluation/Evaluation Metrics.md\|Evaluation Metrics]]                                | 4:18 PM - July 05, 2026 |
-| [[11 AI & ML/Machine Learning/Evaluation/Evaluation.md\|Evaluation]]                                       | 4:18 PM - July 05, 2026 |
-| [[11 AI & ML/11 AI & ML.md\|11 AI & ML]]                                                                   | 4:18 PM - July 05, 2026 |
-| [[11 AI & ML/LLM/RAG/Evaluation/Evaluation.md\|Evaluation]]                                                | 3:49 PM - July 05, 2026 |
-| [[11 AI & ML/LLM/RAG/Vector Databases.md\|Vector Databases]]                                               | 3:49 PM - July 05, 2026 |
-| [[11 AI & ML/LLM/RAG/Evaluation/Component-Level Evaluation.md\|Component-Level Evaluation]]                | 3:49 PM - July 05, 2026 |
-| [[11 AI & ML/LLM/RAG/Evaluation/Retrieval Evaluation Sets.md\|Retrieval Evaluation Sets]]                  | 3:49 PM - July 05, 2026 |
-| [[11 AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md\|Tool-Call Evaluation]]                         | 3:49 PM - July 05, 2026 |
-| [[11 AI & ML/LLM/Evaluation/Building an Evaluation Set.md\|Building an Evaluation Set]]                    | 3:49 PM - July 05, 2026 |
+| Note                                                                                      | Date                    |
+| ----------------------------------------------------------------------------------------- | ----------------------- |
+| [[11 AI & ML/LLM/RAG/RAG.md\|RAG]]                                                   | 5:36 PM - July 05, 2026 |
+| [[11 AI & ML/LLM/RAG/RAG Patterns.md\|RAG Patterns]]                                 | 5:36 PM - July 05, 2026 |
+| [[11 AI & ML/LLM/RAG/Monitoring.md\|Monitoring]]                                     | 5:36 PM - July 05, 2026 |
+| [[11 AI & ML/LLM/Evaluation/Evaluation.md\|Evaluation]]                              | 5:36 PM - July 05, 2026 |
+| [[11 AI & ML/LLM/Hallucinations.md\|Hallucinations]]                                 | 5:36 PM - July 05, 2026 |
+| [[11 AI & ML/11 AI & ML.md\|11 AI & ML]]                                             | 5:36 PM - July 05, 2026 |
+| [[11 AI & ML/LLM/RAG/Evaluation/Evaluation Metrics.md\|Evaluation Metrics]]          | 5:36 PM - July 05, 2026 |
+| [[11 AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md\|Trajectory Evaluation]] | 5:36 PM - July 05, 2026 |
+| [[11 AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md\|Tool-Call Evaluation]]   | 5:36 PM - July 05, 2026 |
+| [[11 AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md\|Agent Benchmarks]]           | 5:36 PM - July 05, 2026 |

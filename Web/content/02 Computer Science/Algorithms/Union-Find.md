@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-05T10:53:24.505+03:00
-modified: 2026-07-05T15:49:36.685+03:00
+modified: 2026-07-05T17:35:40.273+03:00
 ---
 
 # Intro
@@ -49,7 +49,7 @@ Before adding an edge `(u, v)` to a graph, call `find(u)` and `find(v)`. If they
 
 ## Application — Kruskal's MST
 
-Kruskal's algorithm builds a [[minimum spanning tree]] by greedily adding the cheapest edge that does not form a cycle, using Union-Find for the cycle test:
+Kruskal's algorithm builds a [[Minimum Spanning Tree]] by greedily adding the cheapest edge that does not form a cycle, using Union-Find for the cycle test:
 
 ```csharp
 public static List<(int u, int v, int w)> KruskalMST(

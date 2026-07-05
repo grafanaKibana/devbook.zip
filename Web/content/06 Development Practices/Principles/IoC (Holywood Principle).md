@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-05T10:53:48.524+03:00
-modified: 2026-07-05T15:49:33.018+03:00
+modified: 2026-07-05T17:36:33.779+03:00
 ---
 
 # Inversion of Control (Hollywood Principle)

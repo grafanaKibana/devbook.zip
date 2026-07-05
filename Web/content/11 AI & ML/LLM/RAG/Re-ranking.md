@@ -1,12 +1,12 @@
 ---
 publish: true
 created: 2026-07-05T10:54:06.895+03:00
-modified: 2026-07-05T15:49:36.027+03:00
+modified: 2026-07-05T17:35:43.549+03:00
 ---
 
 # Intro
 
-Re-ranking is a second-stage scoring pass that takes the candidate set from [[retrieval]] and reorders it using a more expensive, more accurate model before context reaches the generator. Retrieval optimizes for recall at speed — find plausible candidates from millions of chunks. Re-ranking optimizes for precision — push the most relevant candidates to the top of a small list.
+Re-ranking is a second-stage scoring pass that takes the candidate set from [[Retrieval]] and reorders it using a more expensive, more accurate model before context reaches the generator. Retrieval optimizes for recall at speed — find plausible candidates from millions of chunks. Re-ranking optimizes for precision — push the most relevant candidates to the top of a small list.
 
 The mechanism: first-stage retrieval (dense, sparse, or hybrid) returns a candidate set of 20–100 chunks ranked by approximate similarity. The reranker then scores each candidate against the query using a model that can read both query and document together (joint encoding), producing a more accurate relevance score. The reranked top-k goes to the generator.
 

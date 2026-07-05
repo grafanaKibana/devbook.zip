@@ -1,14 +1,14 @@
 ---
 publish: true
 created: 2026-07-05T10:53:23.442+03:00
-modified: 2026-07-05T15:49:34.893+03:00
+modified: 2026-07-05T17:35:40.344+03:00
 ---
 
 # Intro
 
 A hash map (also called a hash table, associative array, or dictionary) stores key-value pairs and uses **hashing** to find the bucket for a key in near-constant time. The goal is fast insert, lookup, and delete by key — **O(1) average**, **O(n) worst case** when all keys collide into one bucket. A concrete example: a session cache storing 50K active sessions by session ID achieves sub-microsecond lookups, where the same lookup in a linear [[Dynamic Array]] would scan 25K entries on average.
 
-In .NET the hash map is realized by several types: `Dictionary<TKey, TValue>` (generic, the default), the legacy non-generic `Hashtable`, `ConcurrentDictionary<TKey, TValue>` (thread-safe), and `FrozenDictionary<TKey, TValue>` (read-optimized, .NET 8+). These are covered under [.NET implementations](#net-implementations) below.
+In .NET the hash map is realized by several types: `Dictionary<TKey, TValue>` (generic, the default), the legacy non-generic `Hashtable`, `ConcurrentDictionary<TKey, TValue>` (thread-safe), and `FrozenDictionary<TKey, TValue>` (read-optimized, .NET 8+). These are covered under [.NET implementations](HashMap.md#net-implementations) below.
 
 ## How It Works
 

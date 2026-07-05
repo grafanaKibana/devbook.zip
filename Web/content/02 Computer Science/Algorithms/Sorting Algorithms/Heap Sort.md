@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-05T10:53:25.488+03:00
-modified: 2026-07-05T15:49:36.821+03:00
+modified: 2026-07-05T17:35:42.585+03:00
 tags:
   - FolderNote
 ---
@@ -82,7 +82,7 @@ For general in-memory sorting, `Array.Sort` (introsort) is the right default; he
 
 ## Pitfalls
 
-- **Not stable** — equal elements can be reordered by the swaps, so heap sort is wrong when you need to preserve the order of equal keys (e.g. a secondary sort). Use [[merge sort]] or `OrderBy` for stability.
+- **Not stable** — equal elements can be reordered by the swaps, so heap sort is wrong when you need to preserve the order of equal keys (e.g. a secondary sort). Use [[Merge Sort]] or `OrderBy` for stability.
 - **Poor cache locality** — sift-down jumps between parent index `i` and children `2i+1`/`2i+2`, which are far apart in memory for large arrays, causing cache misses. This is why heap sort is typically ~2× slower than quicksort in practice even with identical Big-O.
 - **Building the heap the slow way** — inserting elements one at a time is O(n log n); the bottom-up heapify above is O(n). Using the slow build wastes the algorithm's one structural advantage.
 - **Index errors in sift-down** — off-by-one in the child indices or the `size` bound (which shrinks each round) silently corrupts the result; the `l < size`/`r < size` guards are essential.

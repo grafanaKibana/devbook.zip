@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-05T10:53:25.656+03:00
-modified: 2026-07-05T15:49:36.819+03:00
+modified: 2026-07-05T17:35:42.491+03:00
 ---
 
 # Intro
@@ -14,7 +14,7 @@ Three common configurations:
 
 - **Opposite ends (converging)** — `left = 0`, `right = n-1`, move them toward each other based on a comparison. Classic for "pair with target sum" in a sorted array: if the sum is too small advance `left`, too big retreat `right`.
 - **Same direction (fast/slow)** — both start at the front; one advances conditionally. Used for in-place dedup, partitioning, and (with different speeds) **Floyd's cycle detection** in a linked list.
-- **Two sequences** — one pointer per array, advancing whichever is behind. The merge step of [[merge sort]] is exactly this.
+- **Two sequences** — one pointer per array, advancing whichever is behind. The merge step of [[Merge Sort]] is exactly this.
 
 The reason it's O(n): each pointer only ever moves forward (or they only converge), so the total number of moves is bounded by n — you never re-examine the same pair twice.
 

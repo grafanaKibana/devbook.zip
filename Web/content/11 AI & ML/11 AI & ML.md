@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-05T16:18:39.919+03:00
-modified: 2026-07-05T16:18:39.919+03:00
+modified: 2026-07-05T17:36:35.492+03:00
 tags:
   - FolderNote
 ---
@@ -27,9 +27,9 @@ flowchart TD
 
 ## Map of the Section
 
-- **[[Machine Learning]]** — the classic discipline: training pipelines, [[11 AI & ML/Machine Learning/Types/Types|learning types]], [[11 AI & ML/Machine Learning/Evaluation/Evaluation|evaluation metrics]], [[data drift]], and the [[Spectrum Of Automations|spectrum of automation]] for deploying models safely. Start here for anything with labeled data and an explicit prediction target.
-- **[[LLM]]** — large language models as an engineering platform: [[prompting]], [[generation]], [[RAG]], [[agents]], [[11 AI & ML/LLM/Evaluation/Evaluation|evaluation]], [[guardrails]], [[hallucinations]], and [[OWASP vulnerabilities on AI LLM|security]]. The largest branch, organized around the production pipeline rather than model internals.
-- **[[Tooling]]** — AI-assisted development itself: [[coding agents]] and their control surfaces — [[skills]], [[plugins]], [[hooks]], and [[agent instructions]].
+- **[[Machine Learning]]** — the classic discipline: training pipelines, [[11 AI & ML/Machine Learning/Types/Types|learning types]], [[11 AI & ML/Machine Learning/Evaluation/Evaluation|evaluation metrics]], [[Data Drift]], and the [[Spectrum Of Automations|spectrum of automation]] for deploying models safely. Start here for anything with labeled data and an explicit prediction target.
+- **[[LLM]]** — large language models as an engineering platform: [[Prompting]], [[Generation]], [[RAG]], [[Agents]], [[11 AI & ML/LLM/Evaluation/Evaluation|evaluation]], [[Guardrails]], [[Hallucinations]], and [[OWASP vulnerabilities on AI LLM|security]]. The largest branch, organized around the production pipeline rather than model internals.
+- **[[Tooling]]** — AI-assisted development itself: [[Coding Agents]] and their control surfaces — [[Skills]], [[Plugins]], [[Hooks]], and [[Agent Instructions]].
 
 A useful reading order for someone new to the section: [[Machine Learning]] for the foundations and vocabulary, then [[LLM]] for the modern stack, then [[Tooling]] for applying it to your own workflow.
 

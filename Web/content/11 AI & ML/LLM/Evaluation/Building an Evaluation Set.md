@@ -1,12 +1,12 @@
 ---
 publish: true
 created: 2026-07-05T10:54:06.921+03:00
-modified: 2026-07-05T15:49:37.617+03:00
+modified: 2026-07-05T17:35:42.976+03:00
 ---
 
 # Intro
 
-An evaluation set is the labeled data every other eval technique runs against — [[LLM-as-a-Judge]], [[deterministic checks]], and the regression gate all score against it. A bad eval set produces misleading numbers no matter how sophisticated the scoring is, so the set itself is the foundation. This page covers the parts that are the same whether you are evaluating a RAG pipeline, an agent, or a single-shot prompt: how an example is structured, how to bootstrap one with synthetic generation, and how large it must be to detect a real change.
+An evaluation set is the labeled data every other eval technique runs against — [[LLM-as-a-Judge]], [[Deterministic Checks]], and the regression gate all score against it. A bad eval set produces misleading numbers no matter how sophisticated the scoring is, so the set itself is the foundation. This page covers the parts that are the same whether you are evaluating a RAG pipeline, an agent, or a single-shot prompt: how an example is structured, how to bootstrap one with synthetic generation, and how large it must be to detect a real change.
 
 Two design choices drive whether the numbers mean anything. The first is **labeling** — what counts as a correct output, which gets domain-specific fast (retrieval relevance in [[Retrieval Evaluation Sets]], trajectory and tool-call correctness for agents). The second is **size** relative to the effect you want to detect; get this wrong and the eval cannot distinguish two configurations at all. The curated regression subset and the offline/online loop that consume this set are covered in [[Golden Test Set and Regression Runs]] and [[Online Evaluation and AB Tests]].
 

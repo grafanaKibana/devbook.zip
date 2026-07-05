@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-05T10:53:40.600+03:00
-modified: 2026-07-05T15:49:35.424+03:00
+modified: 2026-07-05T17:36:34.304+03:00
 ---
 
 # Entity Framework Core

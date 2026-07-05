@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-05T10:54:06.800+03:00
-modified: 2026-07-05T15:49:35.326+03:00
+modified: 2026-07-05T17:35:42.862+03:00
 ---
 
 # Intro
@@ -11,7 +11,7 @@ The agent loop is the execution cycle that turns an LLM from a single-shot text 
 The loop works in four steps:
 
 1. **Think** — the model receives the conversation history (including any prior tool results) and generates a reasoning trace. It decides what information it still needs or what action to take next.
-2. **Act** — the model emits a structured tool call — a function name plus arguments — choosing from the [[tools]] provided in its schema.
+2. **Act** — the model emits a structured tool call — a function name plus arguments — choosing from the [[Tools]] provided in its schema.
 3. **Observe** — the runtime executes the tool and appends the result to the conversation history as a tool-role message.
 4. **Repeat** — the updated history goes back to the model. It either reasons and acts again (back to step 1) or returns a final text response to the user.
 
