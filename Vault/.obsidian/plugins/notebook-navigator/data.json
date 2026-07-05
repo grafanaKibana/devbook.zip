@@ -140,7 +140,7 @@
   "showInfoButtons": true,
   "homepage": {
     "source": "file",
-    "file": "Knowledge/Knowledge.md",
+    "file": "Home/index.md",
     "createMissingPeriodicNote": true
   },
   "dualPane": true,
@@ -152,21 +152,21 @@
   "showTooltipPath": true,
   "showTooltipWordCount": false,
   "desktopBackground": "primary",
-  "desktopScale": 1,
+  "desktopScale": 1.05,
   "mobileScale": 1,
   "useFloatingToolbars": true,
   "toolbarVisibility": {
     "navigation": {
-      "toggleDualPane": true,
-      "expandCollapse": true,
+      "toggleDualPane": false,
+      "expandCollapse": false,
       "calendar": true,
-      "hiddenItems": true,
+      "hiddenItems": false,
       "rootReorder": true,
       "newFolder": true
     },
     "list": {
-      "back": true,
-      "search": true,
+      "back": false,
+      "search": false,
       "reveal": false,
       "descendants": true,
       "sort": true,
@@ -558,7 +558,12 @@
   "folderBackgroundColors": {},
   "folderSortOverrides": {},
   "folderTreeSortOverrides": {},
-  "folderAppearances": {},
+  "folderAppearances": {
+    "Home/01 Programming": {
+      "mode": "standard",
+      "previewRows": 5
+    }
+  },
   "tagIcons": {},
   "tagColors": {},
   "tagBackgroundColors": {},

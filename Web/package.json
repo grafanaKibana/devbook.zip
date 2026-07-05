@@ -12,8 +12,9 @@
     "url": "https://github.com/jackyzha0/quartz.git"
   },
   "scripts": {
-    "quartz": "./quartz/bootstrap-cli.mjs",
-    "docs": "npx quartz build --serve -d docs",
+    "quartz": "node ./quartz/bootstrap-cli.mjs",
+    "serve": "node ./quartz/bootstrap-cli.mjs build --serve --port 8080",
+    "docs": "node ./quartz/bootstrap-cli.mjs build --serve -d docs",
     "check": "tsc --noEmit && npx prettier . --check",
     "format": "npx prettier . --write",
     "test": "tsx --test",

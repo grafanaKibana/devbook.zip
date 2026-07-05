@@ -123,7 +123,7 @@ return function TopicDashboard() {
 .dc-topic-cap { font-size: 0.72rem; display: flex; justify-content: space-between; align-items: baseline; color: var(--text-muted, var(--gray, #9ca3af)); }
 .dc-topic-bar { display: flex; width: 100%; height: 7px; border-radius: 4px; margin-top: 0.15rem; overflow: hidden; background: var(--background-modifier-border, var(--lightgray, #e5e5e5)); }
 .dc-topic-link { position: absolute; inset: 0; z-index: 1; }
-.dc-topic-link a { position: absolute; inset: 0; font-size: 0; }
+.dc-topic-link a { position: absolute; inset: 0; font-size: 0; background: none !important; }
 .dc-topic-total { margin-top: 0.75rem; padding: 0.75em; border-radius: var(--radius-m, 8px); border: 1px solid rgba(var(--topic-rgb), 0.4); background: rgba(var(--topic-rgb), 0.1); }
 .dc-topic-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4em 1.1em; margin-top: 0.7em; font-size: 0.8em; opacity: 0.85; }
 .dc-topic-legend-item { display: inline-flex; align-items: center; gap: 0.4em; }
