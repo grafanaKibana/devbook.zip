@@ -4,3 +4,13 @@
 //   Web/custom/components/topic-dashboard.tsx  → .topic-* rules
 //   Web/custom/components/questions-index.tsx  → .questions-index / .qi-* rules
 // Put only truly global overrides here.
+
+:root {
+  --surface-radius: var(--radius-m, 8px);
+}
+
+.callout,
+.graph > .graph-outer,
+.graph > .global-graph-outer > .global-graph-container {
+  border-radius: var(--surface-radius);
+}
