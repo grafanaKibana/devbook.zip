@@ -3688,9 +3688,10 @@ var MetadataCanvasExtension = class extends CanvasExtension {
 // src/utils/modal-helper.ts
 var import_obsidian12 = require("obsidian");
 var AbstractSelectionModal = class extends import_obsidian12.FuzzySuggestModal {
-  constructor(app, placeholder, suggestions) {
+  constructor(app, placeholder, suggestions, arbitrary = false) {
     super(app);
     this.suggestions = suggestions;
+    this.arbitrary = arbitrary;
     this.setPlaceholder(placeholder);
     this.setInstructions([{
       command: "\u2191\u2193",
@@ -3706,13 +3707,17 @@ var AbstractSelectionModal = class extends import_obsidian12.FuzzySuggestModal {
   getItemText(item) {
     return item;
   }
+  getSuggestions(query) {
+    const suggestions = super.getSuggestions(query);
+    if (this.arbitrary && query.length > 0 && !suggestions.some((s) => s.item === query))
+      suggestions.splice(0, 0, { item: query, match: { score: 1, matches: [[0, query.length]] } });
+    return suggestions;
+  }
   onChooseItem(_item, _evt) {
   }
   awaitInput() {
     return new Promise((resolve, _reject) => {
-      this.onChooseItem = (item) => {
-        resolve(item);
-      };
+      this.onChooseItem = (item) => resolve(item);
       this.open();
     });
   }
@@ -3935,10 +3940,42 @@ var NodeTemplatesCanvasExtension = class extends CanvasExtension {
         (canvas) => void this.saveNodeAsTemplate(canvas)
       )
     });
+    this.registeredNodeTemplateCommandIds = [];
+    this.registerNodeTemplateCommands();
     this.plugin.registerEvent(this.plugin.app.workspace.on(
       "advanced-canvas:canvas-changed",
       (canvas) => this.onCardMenuCreated(canvas)
     ));
+  }
+  registerNodeTemplateCommands() {
+    for (const commandId of this.registeredNodeTemplateCommandIds)
+      this.plugin.removeCommand(commandId);
+    this.registeredNodeTemplateCommandIds = [];
+    const templates = this.plugin.settings.getSetting("nodeTemplates");
+    for (let i = 0; i < templates.length; i++) {
+      const template = templates[i];
+      const commandId = `create-template-node-${i}`;
+      this.plugin.addCommand({
+        id: commandId,
+        name: "Create template node " + (template.label ? `"${template.label}"` : i + 1),
+        checkCallback: CanvasHelper.canvasCommand(
+          this.plugin,
+          (_) => true,
+          (canvas) => {
+            const center = canvas.posCenter();
+            void this.createNodeFromTemplate(
+              canvas,
+              template,
+              {
+                x: center.x - template.width / 2,
+                y: center.y - template.height / 2
+              }
+            );
+          }
+        )
+      });
+      this.registeredNodeTemplateCommandIds.push(commandId);
+    }
   }
   onCardMenuCreated(canvas) {
     var _a;
@@ -3953,7 +3990,7 @@ var NodeTemplatesCanvasExtension = class extends CanvasExtension {
           canvas,
           {
             id: `${TEMPLATE_NODE_BUTTON_ID_PREFIX}${i}`,
-            label: `Drag to add template node ${i + 1}`,
+            label: "Drag to add template node " + (template.label ? `"${template.label}"` : i + 1),
             icon: (_a = template.icon) != null ? _a : "book-dashed"
           },
           () => ({ width: template.width, height: template.height }),
@@ -4021,11 +4058,13 @@ var NodeTemplatesCanvasExtension = class extends CanvasExtension {
       new import_obsidian13.Notice("No icon selected, template creation cancelled.");
       return;
     }
+    const label = await new AbstractSelectionModal(this.plugin.app, "Set template label (optional)", [], true).awaitInput();
     await this.plugin.settings.setSetting({
       nodeTemplates: [
         ...this.plugin.settings.getSetting("nodeTemplates"),
         {
           icon,
+          label: label != null ? label : void 0,
           type: selectedNodeData.type,
           width: selectedNodeData.width,
           height: selectedNodeData.height,
@@ -4036,10 +4075,15 @@ var NodeTemplatesCanvasExtension = class extends CanvasExtension {
         }
       ]
     });
+    this.registerNodeTemplateCommands();
     this.onCardMenuCreated(canvas);
   }
 };
 var IconModal = class extends import_obsidian13.FuzzySuggestModal {
+  constructor(app) {
+    super(app);
+    this.setPlaceholder("Set template icon");
+  }
   getItems() {
     return (0, import_obsidian13.getIconIds)();
   }

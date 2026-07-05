@@ -39,7 +39,7 @@ fi
 
 # 2. Generate roadmap canvas from folder structure
 python3 "$REPO_ROOT/.scripts/generate-roadmap.py"
-ROADMAP_FILE="Vault/Software Engineering/Roadmap.canvas"
+ROADMAP_FILE="Vault/Home/Roadmap.canvas"
 if ! git diff --quiet -- "$REPO_ROOT/$ROADMAP_FILE" 2>/dev/null; then
     git add "$REPO_ROOT/$ROADMAP_FILE"
     echo "[pre-commit] ✓ Roadmap canvas regenerated"

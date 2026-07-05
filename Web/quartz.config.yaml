@@ -5,7 +5,7 @@ configuration:
   enableSPA: true
   enablePopovers: true
   analytics:
-    provider: null
+    provider: vercel
   locale: en-US
   baseUrl: devbook.zip
   ignorePatterns:
@@ -114,7 +114,7 @@ plugins:
   - source: github:quartz-community/favicon
     enabled: true
   - source: github:quartz-community/og-image
-    enabled: false
+    enabled: true
   - source: github:quartz-community/cname
     enabled: true
   - source: github:quartz-community/canvas-page
@@ -132,6 +132,13 @@ plugins:
       priority: 50
   - source: github:quartz-community/graph
     enabled: true
+    options:
+      localGraph:
+        drag: false
+        zoom: false
+        showTags: false
+      globalGraph:
+        showTags: false
     layout:
       position: right
       priority: 10
@@ -198,8 +205,9 @@ plugins:
     enabled: true
     options:
       links:
-        GitHub: https://github.com/jackyzha0/quartz
-        Discord Community: https://discord.gg/cRFFHYye7t
+        Email: reshetnik.nikita@gmail.com
+        LinkedId: https://www.linkedin.com/in/nikitareshetnik/
+        GitHub: https://github.com/grafanaKibana
   - source: github:quartz-community/recent-notes
     enabled: false
   - source: github:quartz-community/spacer
@@ -219,9 +227,8 @@ plugins:
     options:
       includeAll: false
       includedProperties:
-        - description
-        - tags
-        - aliases
+        - topic
+        - subtopic
       excludedProperties: []
       hidePropertiesView: false
       delimiters: ---

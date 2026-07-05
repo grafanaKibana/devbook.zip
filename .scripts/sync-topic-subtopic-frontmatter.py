@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Sync topic/subtopic frontmatter for all .md files under Vault/Software Engineering/.
+Sync topic/subtopic frontmatter for all .md files under Vault/Home/.
 
 Rules:
-- Folder structure: Vault / Software Engineering / <level1> / <level2> / <level3> / ...
+- Folder structure: Vault / Home / <level1> / <level2> / <level3> / ...
 - Strip leading number prefixes from folder names (e.g. "01 Programming" -> "Programming")
 - topic = level-1 folder name (cleaned)
 - subtopic = level-2 folder name (as-is), or empty if page is in level-1 folder
@@ -13,7 +13,7 @@ For FolderNote index pages:
 - Level-2+ index: topic = level-1 (cleaned), subtopic = level-2
   (same as concept pages at that depth)
 
-Skip: Software Engineering.md, Questions.md, .canvas, .base files
+Skip: index.md, Questions.md, .canvas, .base files
 """
 
 import os
@@ -21,7 +21,7 @@ import re
 import sys
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SE_DIR = os.path.join(REPO_ROOT, "Vault", "Software Engineering")
+SE_DIR = os.path.join(REPO_ROOT, "Vault", "Home")
 
 
 def strip_number_prefix(name: str) -> str:
@@ -97,7 +97,7 @@ def process_file(filepath: str, dry_run: bool = False):
     rel = os.path.relpath(filepath, SE_DIR)
     parts = rel.replace("\\", "/").split("/")
 
-    # Skip root-level files (Software Engineering.md, Questions.md)
+    # Skip root-level files (index.md, Questions.md)
     if len(parts) < 2:
         return None
 

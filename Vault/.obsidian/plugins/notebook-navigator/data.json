@@ -14,19 +14,19 @@
       "shortcuts": [
         {
           "type": "folder",
-          "path": "Software Engineering"
+          "path": "Home"
         },
         {
           "type": "note",
-          "path": "Software Engineering/Questions.md"
+          "path": "Home/Questions.md"
         },
         {
           "type": "note",
-          "path": "Software Engineering/Roadmap.canvas"
+          "path": "Home/Roadmap.canvas"
         },
         {
           "type": "note",
-          "path": "Software Engineering/Topics.base"
+          "path": "Home/Topics.base"
         }
       ],
       "propertyKeys": [
@@ -544,30 +544,30 @@
   "fileColors": {},
   "fileBackgroundColors": {},
   "folderIcons": {
-    "Software Engineering/02 Computer Science": "flask-round",
-    "Software Engineering/03 Data Persistence": "database",
-    "Software Engineering/04 Networks": "network",
-    "Software Engineering/05 Architecture": "building-2",
-    "Software Engineering/06 Development Practices": "ruler-dimension-line",
-    "Software Engineering/07 Security": "lock",
-    "Software Engineering/08 SDLC": "area-chart",
-    "Software Engineering/09 DevOps": "skull",
-    "Software Engineering/10 Cloud": "cloud",
-    "Software Engineering/11 AI & ML": "brain-circuit",
     "Assets": "book-image",
-    "Templates": "book-dashed"
+    "Templates": "book-dashed",
+    "Home/02 Computer Science": "flask-round",
+    "Home/03 Data Persistence": "database",
+    "Home/04 Networks": "network",
+    "Home/05 Architecture": "building-2",
+    "Home/06 Development Practices": "ruler-dimension-line",
+    "Home/07 Security": "lock",
+    "Home/08 SDLC": "area-chart",
+    "Home/09 DevOps": "skull",
+    "Home/10 Cloud": "cloud",
+    "Home/11 AI & ML": "brain-circuit"
   },
   "folderColors": {
-    "Software Engineering/02 Computer Science": "#ef4444",
-    "Software Engineering/03 Data Persistence": "#f97316",
-    "Software Engineering/04 Networks": "#f59e0b",
-    "Software Engineering/05 Architecture": "#eab308",
-    "Software Engineering/06 Development Practices": "#84cc16",
-    "Software Engineering/07 Security": "#10b981",
-    "Software Engineering/08 SDLC": "#0ea5e9",
-    "Software Engineering/09 DevOps": "#3b82f6",
-    "Software Engineering/10 Cloud": "#6366f1",
-    "Software Engineering/11 AI & ML": "#a855f7"
+    "Home/02 Computer Science": "#ef4444",
+    "Home/03 Data Persistence": "#f97316",
+    "Home/04 Networks": "#f59e0b",
+    "Home/05 Architecture": "#eab308",
+    "Home/06 Development Practices": "#84cc16",
+    "Home/07 Security": "#10b981",
+    "Home/08 SDLC": "#0ea5e9",
+    "Home/09 DevOps": "#3b82f6",
+    "Home/10 Cloud": "#6366f1",
+    "Home/11 AI & ML": "#a855f7"
   },
   "folderBackgroundColors": {},
   "folderSortOverrides": {},
@@ -620,7 +620,7 @@
   "virtualFolderBackgroundColors": {},
   "navigationSeparators": {
     "folder:Templates": true,
-    "folder:Software Engineering": true
+    "folder:Home": true
   },
   "userColors": [
     "#ffffff",

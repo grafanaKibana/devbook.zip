@@ -1,6 +1,6 @@
 {
     "installCommand": "cd Web && npm ci",
-    "buildCommand": "python3 .scripts/bootstrap-quartz-content.py --clean && cd Web && npx quartz plugin install --from-config && npx quartz build",
+    "buildCommand": "cd Web && npx quartz plugin install --from-config && npx quartz build",
     "outputDirectory": "Web/public",
     "cleanUrls": true
 }
