@@ -7,7 +7,7 @@ level:
   - "1"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 # Mediator
 
@@ -151,24 +151,3 @@ Adding fraud detection now means adding a MediatR pipeline behavior — the cont
 - [MediatR — GitHub](https://github.com/jbogard/MediatR) — the standard .NET Mediator implementation with pipeline behaviors
 - [IHubContext — Microsoft Learn](https://learn.microsoft.com/en-us/aspnet/core/signalr/hubcontext) — SignalR's mediator for server-to-client communication
 - [CQRS pattern — Microsoft Learn](https://learn.microsoft.com/en-us/azure/architecture/patterns/cqrs) — Mediator pattern applied to command/query separation
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/Patterns/Design Patterns/Design Patterns|Design Patterns]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Chain of Responsibility|Chain of Responsibility]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Command|Command]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Interpreter|Interpreter]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Iterator|Iterator]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Memento|Memento]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Observer|Observer]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/State|State]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Strategy|Strategy]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Template Method|Template Method]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Visitor|Visitor]]
-<!-- whats-next:end -->

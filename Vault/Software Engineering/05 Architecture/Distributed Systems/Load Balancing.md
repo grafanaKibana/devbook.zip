@@ -7,7 +7,7 @@ level:
   - "2"
 priority: High
 status: Done
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -179,24 +179,3 @@ Health model | Active only | Active plus passive | Simplicity versus better dete
 - [NGINX HTTP load balancing guide](https://docs.nginx.com/nginx/admin-guide/load-balancer/http-load-balancer/) — practical configuration guide for round-robin, least-connections, and IP-hash algorithms in NGINX.
 - [Xabaril ASP.NET Core Diagnostics Health Checks](https://github.com/Xabaril/AspNetCore.Diagnostics.HealthChecks) — community library providing health check integrations for databases, message queues, and external services.
 - [Google SRE book chapter on handling overload](https://sre.google/sre-book/handling-overload/) — production-grade strategies for load shedding, client-side throttling, and graceful degradation under overload.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/05 Architecture|05 Architecture]]
->
-> **Topics**
-> - [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/Message Queues|Message Queues]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Scalability Patterns/Scalability Patterns|Scalability Patterns]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Distributed Systems/API Gateway|API Gateway]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/CAP theorem|CAP theorem]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Consistency Models|Consistency Models]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Distributed Transactions|Distributed Transactions]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Idempotency|Idempotency]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Webhooks|Webhooks]]
-<!-- whats-next:end -->

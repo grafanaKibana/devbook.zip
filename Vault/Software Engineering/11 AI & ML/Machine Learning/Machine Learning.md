@@ -5,7 +5,7 @@ subtopic:
   - Machine Learning
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 status: Done
 priority: Medium
 level:
@@ -101,21 +101,3 @@ Monitor both system health and model health: latency, error rate, and saturation
 - [Rules of Machine Learning (Google for Developers)](https://developers.google.com/machine-learning/guides/rules-of-ml)
 - [scikit-learn user guide](https://scikit-learn.org/stable/user_guide.html)
 - [Hidden Technical Debt in Machine Learning Systems (NeurIPS 2015)](https://papers.nips.cc/paper_files/paper/2015/hash/86df7dcfd896fcaf2674f757a2463eba-Abstract.html)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/11 AI & ML|11 AI & ML]]
->
-> **Topics**
-> - [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/Evaluation|Evaluation]]
-> - [[Software Engineering/11 AI & ML/Machine Learning/Types/Types|Types]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/Machine Learning/Data Drift|Data Drift]]
-> - [[Software Engineering/11 AI & ML/Machine Learning/Natural Language Processing|Natural Language Processing]]
-> - [[Software Engineering/11 AI & ML/Machine Learning/Spectrum Of Automations|Spectrum Of Automations]]
-<!-- whats-next:end -->

@@ -3,7 +3,7 @@ topic:
   - DevOps
 subtopic:
   - Deployment Strategies
-dg-publish: true
+publish: true
 status:
   - Ready to Repeat
 priority: Medium
@@ -173,13 +173,3 @@ Increase traffic to the new version in fixed increments on a fixed schedule (e.g
 > - A/B testing requires statistically significant traffic volumes and longer observation windows than canary health checks.
 > - Canary can auto-rollback on error rate spikes in minutes; A/B tests typically run days or weeks.
 > - Running both gives the most confidence but demands traffic management, metric pipelines, and longer release cycles — justified for high-impact user-facing changes, overkill for an internal service.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/09 DevOps/09 DevOps|09 DevOps]]
->
-<!-- whats-next:end -->

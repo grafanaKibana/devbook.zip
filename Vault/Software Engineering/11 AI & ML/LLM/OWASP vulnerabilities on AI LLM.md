@@ -7,7 +7,7 @@ level:
   - "3"
 priority: Medium
 status: Done
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -173,27 +173,3 @@ Adversaries can trigger denial-of-wallet by forcing high token usage, oversized 
 - [Samsung employees leak proprietary data via ChatGPT — real-world information disclosure incident (TechCrunch, 2023)](https://techcrunch.com/2023/05/02/samsung-bans-use-of-generative-ai-tools-like-chatgpt-after-internal-data-leak/) — concrete LLM02 incident in an enterprise setting.
 - [AI supply chain security risks — compromised models, plugins, and training data (OWASP LLM03 entry)](https://genai.owasp.org/llmrisk/llm03-supply-chain/) — supply-chain attack surface specific to LLM systems.
 - [Reduce hallucinations — grounding, citations, and abstention patterns (Anthropic Docs)](https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations) — practical implementation guidance for grounded, validated responses.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/11 AI & ML|11 AI & ML]]
->
-> **Topics**
-> - [[Software Engineering/11 AI & ML/LLM/Agents/Agents|Agents]]
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation|Evaluation]]
-> - [[Software Engineering/11 AI & ML/LLM/Prompting/Prompting|Prompting]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/RAG|RAG]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/Context Engineering|Context Engineering]]
-> - [[Software Engineering/11 AI & ML/LLM/Embeddings|Embeddings]]
-> - [[Software Engineering/11 AI & ML/LLM/Fine-tuning|Fine-tuning]]
-> - [[Software Engineering/11 AI & ML/LLM/Generation|Generation]]
-> - [[Software Engineering/11 AI & ML/LLM/Guardrails|Guardrails]]
-> - [[Software Engineering/11 AI & ML/LLM/Hallucinations|Hallucinations]]
-> - [[Software Engineering/11 AI & ML/LLM/Model Selection and Routing|Model Selection and Routing]]
-<!-- whats-next:end -->

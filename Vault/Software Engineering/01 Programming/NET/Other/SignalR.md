@@ -7,7 +7,7 @@ level:
   - "3"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -115,15 +115,3 @@ Override `OnConnectedAsync` / `OnDisconnectedAsync` to manage group membership a
 - [Scale ASP.NET Core SignalR](https://learn.microsoft.com/aspnet/core/signalr/scale?view=aspnetcore-10.0) - Scale-out models, sticky sessions, and hosting constraints.
 - [Authentication and authorization in SignalR](https://learn.microsoft.com/aspnet/core/signalr/authn-and-authz?view=aspnetcore-10.0) - Auth flows, token handling, and security rules.
 - [Scaling SignalR at production scale (Ably)](https://ably.com/topic/scaling-signalr) - Practical scaling tradeoffs and operational pitfalls.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/01 Programming/NET/NET|NET]]
->
-> **Pages**
-> - [[Software Engineering/01 Programming/NET/Other/OWIN|OWIN]]
-<!-- whats-next:end -->

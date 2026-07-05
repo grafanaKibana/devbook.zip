@@ -7,7 +7,7 @@ level:
   - "2"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 # Template Method
 
@@ -193,24 +193,3 @@ Adding an Excel generator now means one new subclass — the fetch, validate, an
 - [BackgroundService — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.hosting.backgroundservice) — Template Method for hosted background services
 - [Stream abstract class — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.io.stream) — Template Method in the .NET I/O hierarchy
 - [`AuthenticationHandler<T>` — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.authentication.authenticationhandler-1) — Template Method for ASP.NET Core authentication schemes
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/Patterns/Design Patterns/Design Patterns|Design Patterns]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Chain of Responsibility|Chain of Responsibility]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Command|Command]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Interpreter|Interpreter]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Iterator|Iterator]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Mediator|Mediator]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Memento|Memento]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Observer|Observer]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/State|State]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Strategy|Strategy]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Visitor|Visitor]]
-<!-- whats-next:end -->

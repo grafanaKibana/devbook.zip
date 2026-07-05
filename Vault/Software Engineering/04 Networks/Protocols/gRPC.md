@@ -8,7 +8,7 @@ level:
 priority: High
 status: Ready to Repeat
 
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -251,21 +251,3 @@ message UserRequest {
 - [Microsoft Learn — Compare gRPC with HTTP APIs](https://learn.microsoft.com/aspnet/core/grpc/comparison)
 - [gRPC Load Balancing (grpc.io)](https://grpc.io/blog/grpc-load-balancing/)
 - [Dropbox — Our Journey to gRPC](https://dropbox.tech/infrastructure/courier-dropbox-migration-to-grpc)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/04 Networks/04 Networks|04 Networks]]
->
-> **Pages**
-> - [[Software Engineering/04 Networks/Protocols/DNS|DNS]]
-> - [[Software Engineering/04 Networks/Protocols/HTTP|HTTP]]
-> - [[Software Engineering/04 Networks/Protocols/HTTP 2|HTTP 2]]
-> - [[Software Engineering/04 Networks/Protocols/REST|REST]]
-> - [[Software Engineering/04 Networks/Protocols/RPC|RPC]]
-> - [[Software Engineering/04 Networks/Protocols/SMTP|SMTP]]
-> - [[Software Engineering/04 Networks/Protocols/WebSockets|WebSockets]]
-<!-- whats-next:end -->

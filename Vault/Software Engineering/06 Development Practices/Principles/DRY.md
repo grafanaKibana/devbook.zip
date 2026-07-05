@@ -8,7 +8,7 @@ level:
 priority: High
 status: Ready to Repeat
 
-dg-publish: true
+publish: true
 ---
 # Intro
 
@@ -78,18 +78,3 @@ public static class EmailRules
 - [DRY principle (Wikipedia)](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself) — concise definition and common misapplications.
 - [The Law of Leaky Abstractions (Joel Spolsky)](https://www.joelonsoftware.com/2002/11/11/the-law-of-leaky-abstractions/) — practitioner essay on why premature abstraction (the DRY failure mode) creates more problems than it solves.
 - [AHA Programming (Kent C. Dodds)](https://kentcdodds.com/blog/aha-programming) — 'Avoid Hasty Abstractions': prefer duplication over the wrong abstraction; abstract only when the pattern is clear from multiple concrete use cases.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/06 Development Practices/06 Development Practices|06 Development Practices]]
->
-> **Pages**
-> - [[Software Engineering/06 Development Practices/Principles/IoC (Holywood Principle)|IoC (Holywood Principle)]]
-> - [[Software Engineering/06 Development Practices/Principles/KISS|KISS]]
-> - [[Software Engineering/06 Development Practices/Principles/SOLID|SOLID]]
-> - [[Software Engineering/06 Development Practices/Principles/YAGNI|YAGNI]]
-<!-- whats-next:end -->

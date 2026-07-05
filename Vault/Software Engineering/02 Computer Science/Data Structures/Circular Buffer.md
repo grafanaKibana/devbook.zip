@@ -7,7 +7,7 @@ level:
   - "4"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -96,28 +96,3 @@ public class CircularBuffer<T>
 - [Circular buffer (Wikipedia)](https://en.wikipedia.org/wiki/Circular_buffer) — index schemes, full/empty disambiguation, and applications.
 - [System.Threading.Channels (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/core/extensions/channels) — production ring-buffer-backed producer/consumer with async + backpressure.
 - [The LMAX Disruptor](https://lmax-exchange.github.io/disruptor/) — a high-performance lock-free ring buffer design and its rationale.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/02 Computer Science/02 Computer Science|02 Computer Science]]
->
-> **Pages**
-> - [[Software Engineering/02 Computer Science/Data Structures/Bloom Filter|Bloom Filter]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Disjoint Set|Disjoint Set]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Dynamic Array|Dynamic Array]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Graph|Graph]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Hash Set|Hash Set]]
-> - [[Software Engineering/02 Computer Science/Data Structures/HashMap|HashMap]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Heap|Heap]]
-> - [[Software Engineering/02 Computer Science/Data Structures/LinkedList|LinkedList]]
-> - [[Software Engineering/02 Computer Science/Data Structures/LRU Cache|LRU Cache]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Queue|Queue]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Span|Span]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Stack|Stack]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Trees|Trees]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Trie|Trie]]
-<!-- whats-next:end -->

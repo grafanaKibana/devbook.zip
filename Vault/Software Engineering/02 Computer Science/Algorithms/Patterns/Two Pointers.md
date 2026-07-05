@@ -7,7 +7,7 @@ level:
   - "4"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -91,16 +91,3 @@ public static int RemoveDuplicates(int[] a)
 - [Two pointers technique (cp-algorithms)](https://cp-algorithms.com/others/tortoise_and_hare.html) — Floyd's cycle detection and related two-pointer methods.
 - [Two Sum II (LeetCode #167)](https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/) — the canonical converging-pointer exercise.
 - [Two pointers (USACO Guide)](https://usaco.guide/silver/two-pointers) — categorised problems and patterns.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/02 Computer Science/Algorithms/Algorithms|Algorithms]]
->
-> **Pages**
-> - [[Software Engineering/02 Computer Science/Algorithms/Patterns/Bit Manipulation|Bit Manipulation]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Patterns/Sliding Window|Sliding Window]]
-<!-- whats-next:end -->

@@ -7,7 +7,7 @@ level:
   - "4"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -83,21 +83,3 @@ Name resolution searches from the **most-nested** namespace outward, so a type i
 - [namespace keyword](https://learn.microsoft.com/dotnet/csharp/language-reference/keywords/namespace) — exact language rules and syntax variants including file-scoped form.
 - [Global using directives (C# 10)](https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-10#global-using-directives) — covers the new `global using` syntax, when to use it, and common pitfalls.
 - [Namespace naming guidelines](https://learn.microsoft.com/en-us/dotnet/standard/design-guidelines/names-of-namespaces) — Framework Design Guidelines naming conventions for public APIs.
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/01 Programming/NET/CSharp/CSharp|CSharp]]
->
-> **Topics**
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types|Types]]
->
-> **Pages**
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Exception Handling|Exception Handling]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Foreach|Foreach]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Generics|Generics]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Methods|Methods]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Reflection|Reflection]]
-<!-- whats-next:end -->

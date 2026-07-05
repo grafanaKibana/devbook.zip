@@ -7,7 +7,7 @@ level:
   - "2"
 priority: Medium
 status: Done
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -198,16 +198,3 @@ Practical threshold tuning pattern:
 - [ML.NET tutorial binary classification](https://learn.microsoft.com/dotnet/machine-learning/tutorials/sentiment-analysis) — end-to-end sentiment analysis tutorial showing model training, evaluation, and metric interpretation.
 - [The Relationship Between Precision Recall and ROC Curves](https://dl.acm.org/doi/10.1145/1143844.1143874) — foundational paper proving that PR curves are more informative than ROC curves for imbalanced datasets.
 - [Precision Recall Plot is More Informative than the ROC Plot when Evaluating Binary Classifiers on Imbalanced Datasets](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4349800/) — empirical study demonstrating PR-AUC superiority for rare-event classification tasks.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/Machine Learning/Machine Learning|Machine Learning]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/Calibration|Calibration]]
-> - [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/Classification Evaluation|Classification Evaluation]]
-<!-- whats-next:end -->

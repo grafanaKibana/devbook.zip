@@ -7,7 +7,7 @@ level:
   - "1"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 # Intro
 
@@ -143,15 +143,3 @@ Writing Gherkin scenarios alone (without business stakeholders) defeats the purp
 - [Reqnroll (SpecFlow successor)](https://reqnroll.net/) — the community-maintained fork of SpecFlow, actively developed for .NET 6+.
 - [Introducing BDD (Dan North)](https://dannorth.net/introducing-bdd/) — the original article that defined BDD and the Given/When/Then vocabulary.
 - [The Three Amigos (Agile Alliance)](https://www.agilealliance.org/glossary/three-amigos/) — the collaboration practice (developer + tester + business) that makes BDD effective.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/Software Engineering|Software Engineering]]
->
-> **Pages**
-> - [[Software Engineering/08 SDLC/Estimation Techniques|Estimation Techniques]]
-<!-- whats-next:end -->

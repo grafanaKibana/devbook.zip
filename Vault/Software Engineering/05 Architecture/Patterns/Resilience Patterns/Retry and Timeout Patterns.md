@@ -7,7 +7,7 @@ level:
   - "3"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -219,15 +219,3 @@ Decision rule: start with exponential backoff plus jitter and dual timeout bound
 - [Microsoft Learn .NET HTTP resilience](https://learn.microsoft.com/dotnet/core/resilience/http-resilience) - `Microsoft.Extensions.Http.Resilience` guidance for composing retry, timeout, circuit breaker, and fallback in `HttpClient` pipelines.
 - [Microsoft Learn transient fault handling](https://learn.microsoft.com/azure/architecture/best-practices/transient-faults) - Cloud architecture guidance on identifying transient failures and choosing retry and timeout policies.
 - [AWS Architecture Blog Exponential Backoff and Jitter](https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/) - Marc Brooker explanation of why jitter reduces coordinated retries and improves system recovery under contention.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/Patterns/Patterns|Patterns]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Patterns/Resilience Patterns/Circuit Breaker|Circuit Breaker]]
-<!-- whats-next:end -->

@@ -8,7 +8,7 @@ level:
 priority: High
 status: Ready to Repeat
 
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -224,16 +224,3 @@ Beyond Workstation/Server/Background, the GC exposes runtime controls:
 - [Runtime configuration options for GC (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/core/runtime-config/garbage-collector) — reference for all GC-related MSBuild properties and environment variables (ServerGC, ConcurrentGC, HeapCount, LOH threshold).
 - [Pro .NET Memory Management (Konrad Kokosa)](https://prodotnetmemory.com/) — practitioner deep-dive into GC internals, heap segments, pinning, finalization, and performance tuning with real profiling sessions.
 - [Maoni Stephens' blog](https://maoni0.medium.com/) — GC design insights from the principal engineer who built the .NET GC; covers heap tuning, region-based GC in .NET 7+, and production debugging.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/01 Programming/NET/NET|NET]]
->
-> **Pages**
-> - [[Software Engineering/01 Programming/NET/Runtime/Common Language Runtime|Common Language Runtime]]
-> - [[Software Engineering/01 Programming/NET/Runtime/Memory Leaks|Memory Leaks]]
-<!-- whats-next:end -->

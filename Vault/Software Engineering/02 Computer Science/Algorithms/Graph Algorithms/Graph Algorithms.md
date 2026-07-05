@@ -5,7 +5,7 @@ subtopic:
   - Algorithms
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 level:
   - '4'
 status: Done
@@ -64,17 +64,3 @@ flowchart TD
 - [Introduction to algorithms graph lectures MIT](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/pages/lecture-notes/)
 - [Graph algorithms cp algorithms](https://cp-algorithms.com/graph/)
 - [Graph algorithms (Sedgewick and Wayne, Algorithms 4th ed.)](https://algs4.cs.princeton.edu/40graphs/) — Practitioner-oriented chapter covering graph representations, traversal implementations, and shortest-path algorithms with Java code and performance analysis.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/02 Computer Science/Algorithms/Algorithms|Algorithms]]
->
-> **Pages**
-> - [[Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|Minimum Spanning Tree]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Topological Sort|Topological Sort]]
-<!-- whats-next:end -->

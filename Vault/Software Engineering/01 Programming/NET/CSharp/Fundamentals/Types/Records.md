@@ -7,7 +7,7 @@ level:
   - "4"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 # Intro
 
@@ -266,19 +266,3 @@ Console.WriteLine(a.Items.Count); // 3 — same list instance
 - [Create record types - C# tutorial](https://learn.microsoft.com/dotnet/csharp/whats-new/tutorials/records)
 - [Positional syntax for property definition](https://learn.microsoft.com/dotnet/csharp/language-reference/builtin-types/record#positional-syntax-for-property-definition)
 - [Equality in record types - C# spec](https://learn.microsoft.com/dotnet/csharp/language-reference/builtin-types/record#equality-in-inheritance-hierarchies)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals|Fundamentals]]
->
-> **Pages**
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Classes|Classes]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Delegates|Delegates]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Events|Events]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Strings|Strings]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Structs|Structs]]
-<!-- whats-next:end -->

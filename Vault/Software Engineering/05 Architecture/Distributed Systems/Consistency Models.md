@@ -7,7 +7,7 @@ level:
   - "2"
 priority: High
 status: Done
-dg-publish: true
+publish: true
 ---
 # Intro
 Consistency models define what value a read is allowed to return relative to writes in a distributed system.
@@ -160,24 +160,3 @@ This pattern implements read-your-writes at the API layer: the client reads the 
 - [Manage consistency levels in Azure Cosmos DB](https://learn.microsoft.com/azure/cosmos-db/nosql/how-to-manage-consistency) — how to configure and override consistency per request in Cosmos DB.
 - [ZooKeeper Internals](https://zookeeper.apache.org/doc/current/zookeeperInternals.html) — explains ZooKeeper's linearizable writes + sequentially consistent reads model.
 - [Meta Engineering - Cache made consistent](https://engineering.fb.com/2022/06/08/core-infra/cache-made-consistent/) — Meta's production experience with cache consistency at scale; real-world example of read-your-writes and invalidation challenges.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/05 Architecture|05 Architecture]]
->
-> **Topics**
-> - [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/Message Queues|Message Queues]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Scalability Patterns/Scalability Patterns|Scalability Patterns]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Distributed Systems/API Gateway|API Gateway]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/CAP theorem|CAP theorem]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Distributed Transactions|Distributed Transactions]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Idempotency|Idempotency]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Load Balancing|Load Balancing]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Webhooks|Webhooks]]
-<!-- whats-next:end -->

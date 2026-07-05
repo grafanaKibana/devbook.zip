@@ -5,7 +5,7 @@ subtopic:
   - Transport & Sockets
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 status: Creation
 priority: Medium
 level:
@@ -19,17 +19,3 @@ Transport and sockets are the practical interface to the network: ports, connect
 ## Links
 
 - [Network socket (Wikipedia)](https://en.wikipedia.org/wiki/Network_socket)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/04 Networks/04 Networks|04 Networks]]
->
-> **Pages**
-> - [[Software Engineering/04 Networks/Transport & Sockets/Sockets|Sockets]]
-> - [[Software Engineering/04 Networks/Transport & Sockets/TCP IP|TCP IP]]
-> - [[Software Engineering/04 Networks/Transport & Sockets/UDP|UDP]]
-<!-- whats-next:end -->

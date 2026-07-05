@@ -4,7 +4,7 @@ tags:
   - MetricsIgnore
   - Template
 whats-next: false
-dg-publish: true
+publish: true
 dg-home: true
 ---
 
@@ -519,7 +519,7 @@ let publishedCount = 0;
 const unpublishedNotes = [];
 
 for (const p of notes) {
-  if (asBoolean(p["dg-publish"])) {
+  if (asBoolean(p["publish"])) {
     publishedCount += 1;
   } else {
     unpublishedNotes.push(p);

@@ -5,7 +5,7 @@ subtopic:
   - LLM
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 level:
   - '3'
 priority: High
@@ -82,28 +82,3 @@ Core terms used throughout this section, each linked to the note that covers it 
 - [Training language models to follow instructions with human feedback (Ouyang et al., 2022)](https://arxiv.org/abs/2203.02155) — the InstructGPT paper; the SFT + RLHF recipe that turned base models into assistants.
 - [What are Large Language Models? (AWS)](https://aws.amazon.com/what-is/large-language-model/) — accessible vendor-neutral overview of LLM concepts and use cases.
 - [Intro to Large Language Models (Andrej Karpathy)](https://www.youtube.com/watch?v=zjkBMFhNj_g) — the best single-hour explanation of how LLMs are trained and why they behave the way they do.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/11 AI & ML|11 AI & ML]]
->
-> **Topics**
-> - [[Software Engineering/11 AI & ML/LLM/Agents/Agents|Agents]]
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation|Evaluation]]
-> - [[Software Engineering/11 AI & ML/LLM/Prompting/Prompting|Prompting]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/RAG|RAG]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/Context Engineering|Context Engineering]]
-> - [[Software Engineering/11 AI & ML/LLM/Embeddings|Embeddings]]
-> - [[Software Engineering/11 AI & ML/LLM/Fine-tuning|Fine-tuning]]
-> - [[Software Engineering/11 AI & ML/LLM/Generation|Generation]]
-> - [[Software Engineering/11 AI & ML/LLM/Guardrails|Guardrails]]
-> - [[Software Engineering/11 AI & ML/LLM/Hallucinations|Hallucinations]]
-> - [[Software Engineering/11 AI & ML/LLM/Model Selection and Routing|Model Selection and Routing]]
-> - [[Software Engineering/11 AI & ML/LLM/OWASP vulnerabilities on AI LLM|OWASP vulnerabilities on AI LLM]]
-<!-- whats-next:end -->

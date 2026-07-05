@@ -7,7 +7,7 @@ level:
   - "4"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 # Intro
 
@@ -209,19 +209,3 @@ Mark structs `readonly` to make this class of bug impossible.
 - [ref struct types - C# reference](https://learn.microsoft.com/dotnet/csharp/language-reference/builtin-types/ref-struct) - Stack-only semantics and restrictions.
 - [Choose between class and struct - Microsoft Learn](https://learn.microsoft.com/dotnet/standard/design-guidelines/choosing-between-class-and-struct) - Official design heuristics and tradeoffs.
 - [Choosing Between Struct and Class (Akritidis)](https://giannisakritidis.com/blog/Struct-VS-Class/) - Practical guidance with real-world tradeoff examples.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals|Fundamentals]]
->
-> **Pages**
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Classes|Classes]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Delegates|Delegates]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Events|Events]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Records|Records]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Strings|Strings]]
-<!-- whats-next:end -->

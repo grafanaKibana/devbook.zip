@@ -7,7 +7,7 @@ level:
   - "3"
 priority: Medium
 status: Done
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -152,20 +152,3 @@ The model invokes a function that does not exist, passes arguments that do not m
 - [ReAct Agent Pattern with production safeguards — Agent Patterns](https://www.agentpatterns.tech/en/agent-patterns/react-agent)
 - [The 100th Tool Call Problem — production failure analysis (Hugo Nogueira)](https://www.hugo.im/posts/100th-tool-call-problem)
 - [ReAct agent from scratch — LangGraph](https://langchain-ai.github.io/langgraph/how-tos/react-agent-from-scratch-functional/)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
->
-> **Topics**
-> - [[Software Engineering/11 AI & ML/LLM/Agents/Evaluation/Evaluation|Evaluation]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/Agents/Model Context Protocol|Model Context Protocol]]
-> - [[Software Engineering/11 AI & ML/LLM/Agents/Multi-Agentic Systems|Multi-Agentic Systems]]
-> - [[Software Engineering/11 AI & ML/LLM/Agents/Tools|Tools]]
-<!-- whats-next:end -->

@@ -7,7 +7,7 @@ level:
   - "2"
 priority: High
 status: Done
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -234,24 +234,3 @@ The table compares steady-state characteristics. In practice, most teams start w
 - [Chunking Strategies for RAG Systems: A Practical Engineering Guide](https://zenvanriel.com/ai-engineer-blog/chunking-strategies-for-rag-systems/)
 - [5 Levels of Text Splitting (Greg Kamradt)](https://github.com/FullStackRetrieval-com/RetrievalTutorials/blob/main/tutorials/LevelsOfTextSplitting/5_Levels_Of_Text_Splitting.ipynb)
 - [Unstructured: Document preprocessing and chunking](https://docs.unstructured.io/open-source/core-functionality/chunking)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
->
-> **Topics**
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation/Evaluation|Evaluation]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Caching|Caching]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring|Monitoring]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Query Translation|Query Translation]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/RAG Patterns|RAG Patterns]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Re-ranking|Re-ranking]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Retrieval|Retrieval]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Vector Databases|Vector Databases]]
-<!-- whats-next:end -->

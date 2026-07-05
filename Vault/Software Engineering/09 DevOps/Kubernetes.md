@@ -7,7 +7,7 @@ level:
 priority: High
 status: Ready to Repeat
 
-dg-publish: true
+publish: true
 ---
 
 # Kubernetes
@@ -140,21 +140,3 @@ spec:
 - [AKS documentation](https://learn.microsoft.com/en-us/azure/aks/) — Azure Kubernetes Service guide; covers cluster creation, scaling, monitoring, and .NET deployment
 - [Kubernetes Patterns](https://k8spatterns.io/) — practitioner patterns for K8s workloads; covers sidecar, ambassador, adapter, and lifecycle patterns
 - [Kubernetes Security Best Practices](https://kubernetes.io/docs/concepts/security/security-checklist/) — official security checklist covering RBAC, network policies, and secret management
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/Software Engineering|Software Engineering]]
->
-> **Topics**
-> - [[Software Engineering/09 DevOps/Deployment Strategies/Deployment Strategies|Deployment Strategies]]
-> - [[Software Engineering/09 DevOps/Version Control Systems/Version Control Systems|Version Control Systems]]
->
-> **Pages**
-> - [[Software Engineering/09 DevOps/CI CD tools|CI CD tools]]
-> - [[Software Engineering/09 DevOps/Docker|Docker]]
-> - [[Software Engineering/09 DevOps/Infrastructure as Code|Infrastructure as Code]]
-> - [[Software Engineering/09 DevOps/Observability|Observability]]
-<!-- whats-next:end -->

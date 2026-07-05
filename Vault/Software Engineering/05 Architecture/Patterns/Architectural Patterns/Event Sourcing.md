@@ -8,7 +8,7 @@ level:
 priority: High
 status: Done
 
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -270,16 +270,3 @@ Decision rule: prefer CRUD by default; choose Event Sourcing only when immutable
 - [CQRS pattern - Azure Architecture Center](https://learn.microsoft.com/azure/architecture/patterns/cqrs)
 - [Event Sourcing - Martin Fowler](https://martinfowler.com/eaaDev/EventSourcing.html)
 - [Turning the database inside out with Apache Samza - Martin Kleppmann](https://www.confluent.io/blog/turning-the-database-inside-out-with-apache-samza/)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/Patterns/Patterns|Patterns]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/CQRS|CQRS]]
-> - [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/Domain-Driven Design|Domain-Driven Design]]
-<!-- whats-next:end -->

@@ -7,7 +7,7 @@ level:
   - "3"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 # Intro
 
@@ -116,28 +116,3 @@ The two lines doing the real work — `_parent[x] = Find(_parent[x])` (path comp
 
 - [Disjoint-set data structure (Wikipedia)](https://en.wikipedia.org/wiki/Disjoint-set_data_structure) — formal description, proof of O(α(n)) amortized complexity, and history.
 - [Union-Find (Princeton Algorithms)](https://algs4.cs.princeton.edu/15uf/) — Sedgewick's implementation walkthrough with complexity analysis and practical variants.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/02 Computer Science/02 Computer Science|02 Computer Science]]
->
-> **Pages**
-> - [[Software Engineering/02 Computer Science/Data Structures/Bloom Filter|Bloom Filter]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Circular Buffer|Circular Buffer]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Dynamic Array|Dynamic Array]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Graph|Graph]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Hash Set|Hash Set]]
-> - [[Software Engineering/02 Computer Science/Data Structures/HashMap|HashMap]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Heap|Heap]]
-> - [[Software Engineering/02 Computer Science/Data Structures/LinkedList|LinkedList]]
-> - [[Software Engineering/02 Computer Science/Data Structures/LRU Cache|LRU Cache]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Queue|Queue]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Span|Span]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Stack|Stack]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Trees|Trees]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Trie|Trie]]
-<!-- whats-next:end -->

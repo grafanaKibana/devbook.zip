@@ -1,8 +1,8 @@
 import { loadQuartzConfig, loadQuartzLayout } from "./quartz/plugins/loader/config-loader"
 import { PageTypes } from "./quartz/plugins"
-import { TopicDashboard } from "./lib/topic-dashboard"
-import { QuestionsIndex } from "./lib/questions-index"
-import { QuestionCollector } from "./lib/question-collector"
+import { TopicDashboard } from "./custom/components/topic-dashboard"
+import { QuestionsIndex } from "./custom/components/questions-index"
+import { QuestionCollector } from "./custom/transformers/question-collector"
 
 // DevBook customizations live here (the sanctioned Quartz override entrypoint)
 // and in ./lib — no engine files under quartz/ are modified. These replace the

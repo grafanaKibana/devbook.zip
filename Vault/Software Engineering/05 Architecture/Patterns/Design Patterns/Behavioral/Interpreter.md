@@ -7,7 +7,7 @@ level:
   - "3"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 # Interpreter
 
@@ -211,24 +211,3 @@ var rules = new[]
 - [How EF Core translates LINQ to SQL — Microsoft Learn](https://learn.microsoft.com/en-us/ef/core/querying/how-query-works) — EF Core's ExpressionVisitor-based Interpreter in production
 - [NCalc — GitHub](https://github.com/ncalc/ncalc) — .NET expression evaluator library implementing the Interpreter pattern
 - [DynamicExpresso — GitHub](https://github.com/dynamicexpresso/DynamicExpresso) — .NET runtime expression interpreter with C#-like syntax
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/Patterns/Design Patterns/Design Patterns|Design Patterns]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Chain of Responsibility|Chain of Responsibility]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Command|Command]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Iterator|Iterator]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Mediator|Mediator]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Memento|Memento]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Observer|Observer]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/State|State]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Strategy|Strategy]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Template Method|Template Method]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Visitor|Visitor]]
-<!-- whats-next:end -->

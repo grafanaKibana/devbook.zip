@@ -7,7 +7,7 @@ level:
   - "2"
 priority: High
 status: Done
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -261,23 +261,3 @@ Decision rule: combine deterministic metrics on 100% of traffic (fast, free), sa
 - [Embedding drift detection methods — statistical approaches for retrieval distribution monitoring (Evidently AI)](https://www.evidentlyai.com/blog/embedding-drift-detection)
 - [Creating a LLM-as-a-judge that drives business results — binary pass/fail, critique shadowing, and calibration (Hamel Husain)](https://hamel.dev/blog/posts/llm-judge/)
 - [What we learned from a year of building with LLMs — eval strategy, monitoring, and production judge reliability (Applied LLMs)](https://applied-llms.org/)
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
->
-> **Topics**
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation/Evaluation|Evaluation]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Caching|Caching]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Chunking|Chunking]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Query Translation|Query Translation]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/RAG Patterns|RAG Patterns]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Re-ranking|Re-ranking]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Retrieval|Retrieval]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Vector Databases|Vector Databases]]
-<!-- whats-next:end -->

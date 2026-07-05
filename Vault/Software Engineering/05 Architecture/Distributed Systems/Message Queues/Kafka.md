@@ -8,7 +8,7 @@ level:
 priority: High
 status: Done
 
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -270,16 +270,3 @@ kafka-consumer-groups.sh --bootstrap-server localhost:9092 --group orders-worker
 - [Confluent Kafka .NET Client Documentation](https://docs.confluent.io/kafka-clients/dotnet/current/overview.html) — official `Confluent.Kafka` client reference covering `ProducerConfig`/`ConsumerConfig`, idempotence, and offset management.
 - [The Log: What every software engineer should know about real-time data's unifying abstraction](https://engineering.linkedin.com/distributed-systems/log-what-every-software-engineer-should-know-about-real-time-datas-unifying) — Jay Kreps' foundational essay on the log abstraction Kafka is built on.
 - [The Apache Kafka Monitoring Blog Post to End Most Posts](https://www.confluent.io/blog/blog-post-on-monitoring-an-apache-kafka-deployment-to-end-most-blog-posts/) — Confluent practitioner deep-dive on metrics, consumer lag, and operating a Kafka cluster in production.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/Distributed Systems/Distributed Systems|Distributed Systems]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/MSMQ|MSMQ]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/RabbitMQ|RabbitMQ]]
-<!-- whats-next:end -->

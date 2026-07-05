@@ -8,7 +8,7 @@ level:
 priority: High
 status: Ready to Repeat
 
-dg-publish: true
+publish: true
 ---
 
 # Basic Authentication
@@ -109,17 +109,3 @@ var response = await httpClient.GetAsync("/api/internal/data");
 - [Microsoft — ASP.NET Core Authentication](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/) — overview of ASP.NET Core authentication schemes and middleware pipeline
 - [OWASP — Authentication Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html) — OWASP guidance on secure credential handling, transport requirements, and when to avoid Basic Auth
 - [RFC 9110 §11.7 — HTTP Semantics: Authorization](https://www.rfc-editor.org/rfc/rfc9110#section-11.7) — the HTTP/1.1 semantics spec defining the `Authorization` header and `WWW-Authenticate` challenge/response flow
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/07 Security/07 Security|07 Security]]
->
-> **Pages**
-> - [[Software Engineering/07 Security/Authentication/Oauth OIDC (OpenId Connect)|Oauth OIDC (OpenId Connect)]]
-> - [[Software Engineering/07 Security/Authentication/Resource-based Auth|Resource-based Auth]]
-> - [[Software Engineering/07 Security/Authentication/SSO (Single Sign-On)|SSO (Single Sign-On)]]
-> - [[Software Engineering/07 Security/Authentication/Two-Factor Auth|Two-Factor Auth]]
-<!-- whats-next:end -->

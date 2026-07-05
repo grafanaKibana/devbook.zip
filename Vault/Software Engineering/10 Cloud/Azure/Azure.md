@@ -9,7 +9,7 @@ priority: Medium
 status: Creation
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 ---
 
 # Azure Services Overview
@@ -104,12 +104,3 @@ Built-in evaluation runs and tracing in Azure AI Foundry. Evaluators: groundedne
 - [Azure documentation](https://learn.microsoft.com/en-us/azure/) — Microsoft's official Azure docs hub; starting point for any Azure service
 - [Azure SDK for .NET](https://learn.microsoft.com/en-us/dotnet/azure/) — .NET integration guide for Azure services; covers authentication, SDK packages, and samples
 - [Azure AI Foundry docs](https://learn.microsoft.com/en-us/azure/ai-foundry/) — Azure's unified AI development platform; covers model deployments, evaluation, and guardrails
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/10 Cloud/10 Cloud|10 Cloud]]
->
-<!-- whats-next:end -->

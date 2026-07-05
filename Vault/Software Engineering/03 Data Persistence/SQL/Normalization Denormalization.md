@@ -8,7 +8,7 @@ level:
 priority: High
 status: Done
 
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -310,17 +310,3 @@ For a deeper study of the topic, the book ["Introduction to Database Systems" by
 - [Data partitioning strategies (Azure Architecture Center)](https://learn.microsoft.com/azure/architecture/best-practices/data-partitioning-strategies) — practical guidance on horizontal, vertical, and functional partitioning for scalable systems.
 - [Designing Data-Intensive Applications (Martin Kleppmann, O'Reilly)](https://www.oreilly.com/library/view/designing-data-intensive-applications/9781491903063/) — covers denormalization, replication, and consistency tradeoffs in production systems; chapters 2-3 are directly relevant.
 - [Description of the database normalization basics (Microsoft Learn)](https://learn.microsoft.com/troubleshoot/microsoft-365-apps/access/database-normalization-description) — accessible walkthrough of 1NF through 3NF with concrete table examples.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/03 Data Persistence/03 Data Persistence|03 Data Persistence]]
->
-> **Pages**
-> - [[Software Engineering/03 Data Persistence/SQL/Indexes|Indexes]]
-> - [[Software Engineering/03 Data Persistence/SQL/Replication|Replication]]
-> - [[Software Engineering/03 Data Persistence/SQL/Sharding|Sharding]]
-<!-- whats-next:end -->

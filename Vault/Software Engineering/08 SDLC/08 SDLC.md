@@ -6,7 +6,7 @@ topic:
 subtopic: []
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 priority: Medium
 level:
   - '4'
@@ -20,15 +20,3 @@ The Software Development Lifecycle is the sequence of phases a feature travels f
 ## Links
 
 - [Software development process (Wikipedia)](https://en.wikipedia.org/wiki/Software_development_process)
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/Software Engineering|Software Engineering]]
->
-> **Pages**
-> - [[Software Engineering/08 SDLC/BDD|BDD]]
-> - [[Software Engineering/08 SDLC/Estimation Techniques|Estimation Techniques]]
-<!-- whats-next:end -->

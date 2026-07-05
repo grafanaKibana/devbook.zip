@@ -7,7 +7,7 @@ level:
   - "3"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 # Intro
 
@@ -124,21 +124,3 @@ Pushed resources may already be in the client's cache. The server has no way to 
 - [HTTP/2 in ASP.NET Core (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/servers/kestrel/http2) — Kestrel configuration for HTTP/2 including TLS requirements and protocol negotiation.
 - [HPACK header compression (RFC 7541)](https://www.rfc-editor.org/rfc/rfc7541) — the header compression algorithm used by HTTP/2.
 - [HTTP/2 is trickier than I thought (Cloudflare blog)](https://blog.cloudflare.com/http-2-for-web-developers/) — practitioner analysis of HTTP/2 performance characteristics and when it helps vs hurts.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/04 Networks/04 Networks|04 Networks]]
->
-> **Pages**
-> - [[Software Engineering/04 Networks/Protocols/DNS|DNS]]
-> - [[Software Engineering/04 Networks/Protocols/gRPC|gRPC]]
-> - [[Software Engineering/04 Networks/Protocols/HTTP|HTTP]]
-> - [[Software Engineering/04 Networks/Protocols/REST|REST]]
-> - [[Software Engineering/04 Networks/Protocols/RPC|RPC]]
-> - [[Software Engineering/04 Networks/Protocols/SMTP|SMTP]]
-> - [[Software Engineering/04 Networks/Protocols/WebSockets|WebSockets]]
-<!-- whats-next:end -->

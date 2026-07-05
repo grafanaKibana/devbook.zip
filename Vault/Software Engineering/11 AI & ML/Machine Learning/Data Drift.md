@@ -7,7 +7,7 @@ level:
   - "1"
 priority: Low
 status: Done
-dg-publish: true
+publish: true
 ---
 # Intro
 
@@ -139,20 +139,3 @@ Data drift (P(X) changes) does not always require retraining — the model may g
 - [Population Stability Index (PSI) explained](https://www.listendata.com/2015/05/population-stability-index.html) — detailed explanation of PSI calculation, interpretation thresholds, and use in credit scoring.
 - [Monitoring ML models in production (Google MLOps)](https://cloud.google.com/architecture/mlops-continuous-delivery-and-automation-pipelines-in-machine-learning) — Google's MLOps guide covering data validation, model monitoring, and retraining triggers.
 - [Failing Loudly: An Empirical Study of Methods for Detecting Dataset Shift (Rabanser et al., 2019)](https://arxiv.org/abs/1810.11953) — empirical comparison of drift detection methods across different shift types and dataset sizes.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/11 AI & ML|11 AI & ML]]
->
-> **Topics**
-> - [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/Evaluation|Evaluation]]
-> - [[Software Engineering/11 AI & ML/Machine Learning/Types/Types|Types]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/Machine Learning/Natural Language Processing|Natural Language Processing]]
-> - [[Software Engineering/11 AI & ML/Machine Learning/Spectrum Of Automations|Spectrum Of Automations]]
-<!-- whats-next:end -->

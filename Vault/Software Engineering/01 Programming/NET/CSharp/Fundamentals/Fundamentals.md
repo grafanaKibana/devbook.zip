@@ -5,7 +5,7 @@ subtopic:
   - NET
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 level:
   - '4'
 priority: High
@@ -26,22 +26,3 @@ These are not beginner topics with a ceiling. A senior developer's edge comes fr
 - [C# programming guide (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/) — In-depth coverage of language concepts.
 - [Framework design guidelines: member design (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/design-guidelines/member) — Design conventions for methods, properties, and constructors.
 - [Effective C# (Bill Wagner)](https://www.oreilly.com/library/view/effective-c-50/9780135159941/) — Practitioner guide to idiomatic C# patterns and common mistakes.
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/01 Programming/NET/CSharp/CSharp|CSharp]]
->
-> **Topics**
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types|Types]]
->
-> **Pages**
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Exception Handling|Exception Handling]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Foreach|Foreach]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Generics|Generics]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Methods|Methods]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Namespaces|Namespaces]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Reflection|Reflection]]
-<!-- whats-next:end -->

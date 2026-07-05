@@ -7,7 +7,7 @@ level:
 priority: High
 status: Ready to Repeat
 
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -217,21 +217,3 @@ The eviction policy is the same family of algorithms as an in-process [[Software
 - [Cache-aside pattern (Azure Architecture Center)](https://learn.microsoft.com/azure/architecture/patterns/cache-aside)
 - [RFC 5861 — HTTP cache-control extensions for stale content](https://www.rfc-editor.org/rfc/rfc5861)
 - [Solving thundering herds with request coalescing (jazco.dev)](https://jazco.dev/2023/09/28/request-coalescing)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/Software Engineering|Software Engineering]]
->
-> **Topics**
-> - [[Software Engineering/03 Data Persistence/NoSQL/NoSQL|NoSQL]]
-> - [[Software Engineering/03 Data Persistence/ORMs/ORMs|ORMs]]
-> - [[Software Engineering/03 Data Persistence/SQL/SQL|SQL]]
->
-> **Pages**
-> - [[Software Engineering/03 Data Persistence/ACID|ACID]]
-> - [[Software Engineering/03 Data Persistence/Connection Pooling|Connection Pooling]]
-<!-- whats-next:end -->

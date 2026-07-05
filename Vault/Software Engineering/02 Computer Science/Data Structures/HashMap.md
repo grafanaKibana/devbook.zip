@@ -7,7 +7,7 @@ level:
   - "4"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -111,28 +111,3 @@ Before generics, .NET's hash map was the non-generic `Hashtable` (in `System.Col
 - [Dictionary<TKey, TValue> class (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.dictionary-2) — API reference; the primary hash map in modern .NET, with remarks on hash contract requirements and capacity.
 - [Selecting a collection class (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/collections/selecting-a-collection-class) — decision guide for choosing between hash-based and sorted collections.
 - [Anatomy of the .NET dictionary](https://dunnhq.com/posts/2024/anatomy-of-the-dotnet-dictionary/) — practitioner deep-dive into bucket layout, collision handling, and resize behavior.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/02 Computer Science/02 Computer Science|02 Computer Science]]
->
-> **Pages**
-> - [[Software Engineering/02 Computer Science/Data Structures/Bloom Filter|Bloom Filter]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Circular Buffer|Circular Buffer]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Disjoint Set|Disjoint Set]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Dynamic Array|Dynamic Array]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Graph|Graph]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Hash Set|Hash Set]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Heap|Heap]]
-> - [[Software Engineering/02 Computer Science/Data Structures/LinkedList|LinkedList]]
-> - [[Software Engineering/02 Computer Science/Data Structures/LRU Cache|LRU Cache]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Queue|Queue]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Span|Span]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Stack|Stack]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Trees|Trees]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Trie|Trie]]
-<!-- whats-next:end -->

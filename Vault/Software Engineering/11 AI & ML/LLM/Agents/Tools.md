@@ -8,7 +8,7 @@ level:
 priority: Low
 status: Done
 
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -200,20 +200,3 @@ Three mechanisms compound:
 - [Tool search tool — deferred loading for large toolsets (Anthropic)](https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/tool-search-tool)
 - [MCP-Zero: Active Tool Discovery — 98% token reduction via on-demand retrieval (arXiv 2506.01056)](https://arxiv.org/abs/2506.01056)
 - [Lost in the Middle — how LLMs use long contexts (Liu et al., Stanford 2023)](https://arxiv.org/abs/2307.03172)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
->
-> **Topics**
-> - [[Software Engineering/11 AI & ML/LLM/Agents/Evaluation/Evaluation|Evaluation]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/Agents/Agent Loop|Agent Loop]]
-> - [[Software Engineering/11 AI & ML/LLM/Agents/Model Context Protocol|Model Context Protocol]]
-> - [[Software Engineering/11 AI & ML/LLM/Agents/Multi-Agentic Systems|Multi-Agentic Systems]]
-<!-- whats-next:end -->

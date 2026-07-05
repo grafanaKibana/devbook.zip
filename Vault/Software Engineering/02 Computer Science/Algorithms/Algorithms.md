@@ -5,7 +5,7 @@ subtopic:
   - Algorithms
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 level:
   - '4'
 status: Done
@@ -42,22 +42,3 @@ Concrete example: for repeated membership checks in a large list of ids, sorting
 - [Big O notation (Wikipedia)](https://en.wikipedia.org/wiki/Big_O_notation)
 - [Algorithm design and analysis (MIT OpenCourseWare)](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/)
 - [Nearly all binary searches and mergesorts are broken](https://research.google/blog/extra-extra-read-all-about-it-nearly-all-binary-searches-and-mergesorts-are-broken/)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/02 Computer Science/02 Computer Science|02 Computer Science]]
->
-> **Topics**
-> - [[Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Graph Algorithms|Graph Algorithms]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Paradigms/Paradigms|Paradigms]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Patterns/Patterns|Patterns]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Search Algorithms/Search Algorithms|Search Algorithms]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms|Sorting Algorithms]]
->
-> **Pages**
-> - [[Software Engineering/02 Computer Science/Algorithms/Union-Find|Union-Find]]
-<!-- whats-next:end -->

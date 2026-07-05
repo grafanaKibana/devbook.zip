@@ -7,7 +7,7 @@ level:
   - "4"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -83,16 +83,3 @@ public static List<int>? TopoSort(int n, List<int>[] adj)
 - [Topological sorting (Wikipedia)](https://en.wikipedia.org/wiki/Topological_sorting) — Kahn's and DFS algorithms with correctness proofs.
 - [Topological sort (cp-algorithms)](https://cp-algorithms.com/graph/topological-sort.html) — DFS implementation and applications.
 - [Course Schedule II (LeetCode #210)](https://leetcode.com/problems/course-schedule-ii/) — topological sort with cycle detection as a coding exercise.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/02 Computer Science/Algorithms/Algorithms|Algorithms]]
->
-> **Pages**
-> - [[Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|Minimum Spanning Tree]]
-<!-- whats-next:end -->

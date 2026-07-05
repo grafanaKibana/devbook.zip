@@ -3,7 +3,7 @@ tags:
   - FolderNote
   - MetricsIgnore
 whats-next: false
-dg-publish: true
+publish: true
 ---
 
 ```dataviewjs

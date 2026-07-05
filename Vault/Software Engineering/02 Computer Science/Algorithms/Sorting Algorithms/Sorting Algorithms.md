@@ -5,7 +5,7 @@ subtopic:
   - Algorithms
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 priority: Low
 level:
   - '4'
@@ -52,19 +52,3 @@ flowchart TD
 - [Sorting algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Sorting_algorithm)
 - [Array Sort method .NET](https://learn.microsoft.com/dotnet/api/system.array.sort)
 - [Nearly all binary searches and mergesorts are broken](https://research.google/blog/extra-extra-read-all-about-it-nearly-all-binary-searches-and-mergesorts-are-broken/)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/02 Computer Science/Algorithms/Algorithms|Algorithms]]
->
-> **Pages**
-> - [[Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Bubble Sort|Bubble Sort]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Insertion Sort|Insertion Sort]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Merge Sort|Merge Sort]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Quick Sort|Quick Sort]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Selection Sort|Selection Sort]]
-<!-- whats-next:end -->

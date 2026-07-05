@@ -7,7 +7,7 @@ level:
   - "4"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -101,16 +101,3 @@ public static int LongestUnique(string s)
 - [Sliding window technique (cp-algorithms / GeeksforGeeks)](https://www.geeksforgeeks.org/window-sliding-technique/) — fixed and variable windows with worked examples.
 - [Longest Substring Without Repeating Characters (LeetCode #3)](https://leetcode.com/problems/longest-substring-without-repeating-characters/) — canonical variable-window problem.
 - [Sliding Window Maximum (LeetCode #239)](https://leetcode.com/problems/sliding-window-maximum/) — the monotonic-deque variant.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/02 Computer Science/Algorithms/Algorithms|Algorithms]]
->
-> **Pages**
-> - [[Software Engineering/02 Computer Science/Algorithms/Patterns/Bit Manipulation|Bit Manipulation]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Patterns/Two Pointers|Two Pointers]]
-<!-- whats-next:end -->

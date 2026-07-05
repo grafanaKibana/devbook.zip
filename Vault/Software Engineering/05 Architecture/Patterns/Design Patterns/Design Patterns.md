@@ -6,7 +6,7 @@ subtopic:
 tags:
   - FolderNote
 priority: High
-dg-publish: true
+publish: true
 level:
   - "3"
 status: Done
@@ -48,20 +48,3 @@ Each pattern page shows the same e-commerce scenario coded **without** the patte
 - [Design Patterns: Elements of Reusable Object-Oriented Software (GoF)](https://www.pearson.com/en-us/subject-catalog/p/design-patterns-elements-of-reusable-object-oriented-software/P200000009480/9780321700698) — the original 1994 book defining all 23 patterns; the authoritative primary source.
 - [Martin Fowler — Patterns of Enterprise Application Architecture](https://martinfowler.com/eaaCatalog/) — enterprise-level pattern catalog extending GoF into application architecture concerns; complements GoF for service and data layer design.
 - [Wikipedia — Software design pattern](https://en.wikipedia.org/wiki/Design_pattern) — overview of all 23 GoF patterns with intent summaries, the original categorization table, and historical context.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/Patterns/Patterns|Patterns]]
->
-> **Topics**
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Behavioral|Behavioral]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Creational/Creational|Creational]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Structural|Structural]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/GRASP|GRASP]]
-<!-- whats-next:end -->

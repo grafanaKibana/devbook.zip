@@ -7,7 +7,7 @@ level:
   - "3"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -91,16 +91,3 @@ The hard part, as always, is invalidation. Two strategies:
 - [HTTP caching (RFC 9111)](https://www.rfc-editor.org/rfc/rfc9111) — the freshness/validation model CDNs implement (`s-maxage`, `ETag`, `Vary`).
 - [Caching best practices & cache-busting (Jake Archibald)](https://jakearchibald.com/2016/caching-best-practices/) — the immutable-URL + content-hash strategy explained.
 - [Amazon CloudFront / cache behaviors (AWS)](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Introduction.html) — a production CDN's cache-key, TTL, and invalidation model.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/04 Networks/04 Networks|04 Networks]]
->
-> **Pages**
-> - [[Software Engineering/04 Networks/Architecture & Ops/Peer-2-Peer|Peer-2-Peer]]
-> - [[Software Engineering/04 Networks/Architecture & Ops/VPN|VPN]]
-<!-- whats-next:end -->

@@ -7,7 +7,7 @@ level:
   - "2"
 priority: Medium
 status: Done
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -117,16 +117,3 @@ For LLMs, the analogous signal is token-level [[Software Engineering/11 AI & ML/
 - [Probability calibration (scikit-learn user guide)](https://scikit-learn.org/stable/modules/calibration.html) — `CalibratedClassifierCV`, `calibration_curve`, and `brier_score_loss` with worked examples.
 - [Calibrators in ML.NET (Microsoft Learn)](https://learn.microsoft.com/dotnet/api/microsoft.ml.calibratorscatalog) — Platt, naive, and isotonic calibrators for .NET binary classification pipelines.
 - [Verification of Forecasts Expressed in Terms of Probability (Brier, 1950)](https://journals.ametsoc.org/view/journals/mwre/78/1/1520-0493_1950_078_0001_vofeit_2_0_co_2.xml) — the original Brier score.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/Machine Learning/Machine Learning|Machine Learning]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/Classification Evaluation|Classification Evaluation]]
-> - [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/ROC-AUC and PR-AUC|ROC-AUC and PR-AUC]]
-<!-- whats-next:end -->

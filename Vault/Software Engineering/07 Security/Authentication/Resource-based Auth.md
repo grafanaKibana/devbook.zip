@@ -8,7 +8,7 @@ level:
 priority: High
 status: Ready to Repeat
 
-dg-publish: true
+publish: true
 ---
 
 # Resource-Based Authorization
@@ -148,17 +148,3 @@ public class DocumentOwnerHandlerTests
 - [Microsoft — Policy-based authorization](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/policies) — how to define and use authorization policies; covers requirement composition and handler ordering
 - [OWASP — Broken Access Control (A01:2021)](https://owasp.org/Top10/A01_2021-Broken_Access_Control/) — OWASP's top vulnerability category; Insecure Direct Object Reference (IDOR) is the canonical resource-based auth failure mode
 - [Microsoft — Authorization in ASP.NET Core (overview)](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/introduction) — covers the full authorization model: simple, role-based, claims-based, and resource-based
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/07 Security/07 Security|07 Security]]
->
-> **Pages**
-> - [[Software Engineering/07 Security/Authentication/Basic Auth|Basic Auth]]
-> - [[Software Engineering/07 Security/Authentication/Oauth OIDC (OpenId Connect)|Oauth OIDC (OpenId Connect)]]
-> - [[Software Engineering/07 Security/Authentication/SSO (Single Sign-On)|SSO (Single Sign-On)]]
-> - [[Software Engineering/07 Security/Authentication/Two-Factor Auth|Two-Factor Auth]]
-<!-- whats-next:end -->

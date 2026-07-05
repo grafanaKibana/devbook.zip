@@ -7,7 +7,7 @@ level:
   - "2"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -144,19 +144,3 @@ Note that **`[Authorize]` is itself an authorization filter** — which is why a
 - [Middleware in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/middleware?view=aspnetcore-8.0) — use alongside this page to understand when middleware is the better choice.
 - [Minimal API endpoint filters](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis/min-api-filters?view=aspnetcore-8.0) — endpoint-scoped filter equivalent for Minimal APIs.
 - [Filter pipeline in ASP.NET Core (ABP blog)](https://abp.today/blog/2021/06/08/filter-pipeline-aspnet-core) — practitioner walkthrough of filter ordering and real-world usage patterns.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/01 Programming/NET/NET|NET]]
->
-> **Pages**
-> - [[Software Engineering/01 Programming/NET/ASP.NET Web API/Authentication|Authentication]]
-> - [[Software Engineering/01 Programming/NET/ASP.NET Web API/Authorization|Authorization]]
-> - [[Software Engineering/01 Programming/NET/ASP.NET Web API/CORS|CORS]]
-> - [[Software Engineering/01 Programming/NET/ASP.NET Web API/Dependency Injection|Dependency Injection]]
-> - [[Software Engineering/01 Programming/NET/ASP.NET Web API/Middlewares|Middlewares]]
-<!-- whats-next:end -->

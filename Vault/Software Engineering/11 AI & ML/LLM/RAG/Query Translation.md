@@ -7,7 +7,7 @@ level:
   - "2"
 priority: High
 status: Done
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -192,24 +192,3 @@ Decision rule: start with no translation and measure baseline retrieval quality.
 - [MultiQueryRetriever — multi-query implementation and usage patterns (LangChain)](https://python.langchain.com/docs/how_to/MultiQueryRetriever/)
 - [Query Transform Cookbook — HyDE, step-back, and decomposition implementations (LlamaIndex)](https://docs.llamaindex.ai/en/stable/examples/query_transformations/query_transform_cookbook/)
 - [Deconstructing RAG — retrieval patterns and query strategy evaluation (LangChain Engineering)](https://blog.langchain.com/deconstructing-rag/)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
->
-> **Topics**
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation/Evaluation|Evaluation]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Caching|Caching]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Chunking|Chunking]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring|Monitoring]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/RAG Patterns|RAG Patterns]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Re-ranking|Re-ranking]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Retrieval|Retrieval]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Vector Databases|Vector Databases]]
-<!-- whats-next:end -->

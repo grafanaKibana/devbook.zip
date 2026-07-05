@@ -7,7 +7,7 @@ level:
   - "3"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Event-Driven Development
@@ -129,19 +129,3 @@ await tx.CommitAsync(ct);
 - [Outbox pattern (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/architecture/best-practices/transactional-outbox-cosmos) — detailed explanation of the Outbox pattern for reliable event publishing with transactional guarantees.
 - [MediatR (GitHub)](https://github.com/jbogard/MediatR) — the standard .NET in-process mediator library used for domain events, commands, and queries; supports both synchronous and asynchronous handlers.
 - [Event-Driven Architecture (Martin Fowler)](https://martinfowler.com/articles/201701-event-driven.html) — practitioner article distinguishing event notification, event-carried state transfer, event sourcing, and CQRS — four patterns often confused under the "event-driven" label.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/06 Development Practices/06 Development Practices|06 Development Practices]]
->
-> **Pages**
-> - [[Software Engineering/06 Development Practices/Paradigms/Functional Programming|Functional Programming]]
-> - [[Software Engineering/06 Development Practices/Paradigms/Integration Testing|Integration Testing]]
-> - [[Software Engineering/06 Development Practices/Paradigms/OOP|OOP]]
-> - [[Software Engineering/06 Development Practices/Paradigms/Test-Driven Development|Test-Driven Development]]
-> - [[Software Engineering/06 Development Practices/Paradigms/Unit Testing|Unit Testing]]
-<!-- whats-next:end -->

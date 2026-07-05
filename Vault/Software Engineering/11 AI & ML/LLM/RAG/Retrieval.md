@@ -7,7 +7,7 @@ level:
   - "2"
 priority: High
 status: Done
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -158,24 +158,3 @@ Decision rule: start with hybrid retrieval (RRF) and conservative top-k (5-20). 
 - [How to systematically improve RAG — segmentation and failure taxonomy (Jason Liu)](https://jxnl.co/writing/2025/01/24/systematically-improving-rag-applications/)
 - [Deconstructing RAG — retrieval patterns and evaluation (LangChain Engineering)](https://blog.langchain.com/deconstructing-rag/)
 - [MTEB leaderboard — retrieval task benchmarks (Hugging Face)](https://huggingface.co/spaces/mteb/leaderboard)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
->
-> **Topics**
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation/Evaluation|Evaluation]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Caching|Caching]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Chunking|Chunking]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring|Monitoring]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Query Translation|Query Translation]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/RAG Patterns|RAG Patterns]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Re-ranking|Re-ranking]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Vector Databases|Vector Databases]]
-<!-- whats-next:end -->

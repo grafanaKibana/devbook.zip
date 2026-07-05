@@ -7,7 +7,7 @@ level:
   - "2"
 priority: High
 status: Done
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -132,16 +132,3 @@ Mitigation: use binary pass/fail judgments instead of numeric scales (reduces ca
 - [RAGAS -- automated evaluation of RAG pipelines (EACL 2024)](https://arxiv.org/abs/2309.15217)
 - [Creating a LLM-as-a-judge that drives business results (Hamel Husain)](https://hamel.dev/blog/posts/llm-judge/)
 - [Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena -- positional and verbosity bias (NeurIPS 2023)](https://arxiv.org/abs/2306.05685)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/LLM/RAG/RAG|RAG]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation/Component-Level Evaluation|Component-Level Evaluation]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation/Retrieval Evaluation Sets|Retrieval Evaluation Sets]]
-<!-- whats-next:end -->

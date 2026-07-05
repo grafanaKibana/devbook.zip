@@ -3,7 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - Tooling
-dg-publish: true
+publish: true
 status: Done
 level:
   - "2"
@@ -114,18 +114,3 @@ Amazon Q Developer provides AI coding assistance in IDE and CLI experiences with
 - [Windsurf Documentation (Codeium)](https://docs.windsurf.com/) — Windsurf IDE docs covering Cascade agent, flows, and context management.
 - [Amazon Q Developer documentation](https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/what-is.html) — AWS coding assistant docs covering inline suggestions, chat, and code transformation.
 - [Building Effective Agents (Anthropic Engineering)](https://www.anthropic.com/engineering/building-effective-agents) — Anthropic's engineering guide on agentic system design principles applicable to coding agent workflows.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/11 AI & ML|11 AI & ML]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/Tooling/Agent Instructions|Agent Instructions]]
-> - [[Software Engineering/11 AI & ML/Tooling/Hooks|Hooks]]
-> - [[Software Engineering/11 AI & ML/Tooling/Plugins|Plugins]]
-> - [[Software Engineering/11 AI & ML/Tooling/Skills|Skills]]
-<!-- whats-next:end -->

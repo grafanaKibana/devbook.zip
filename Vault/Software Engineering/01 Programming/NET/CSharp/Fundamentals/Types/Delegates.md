@@ -7,7 +7,7 @@ level:
   - "4"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 # Intro
 
@@ -150,19 +150,3 @@ Use this pattern when the captured variable would otherwise be shared and mutate
 - [Remoting APIs unavailable on .NET and delegate BeginInvoke/EndInvoke behavior](https://learn.microsoft.com/dotnet/core/porting/net-framework-tech-unavailable#remoting) — explains why `BeginInvoke`/`EndInvoke` throw on modern .NET and what to use instead.
 - [Migrating delegate BeginInvoke calls for .NET Core](https://devblogs.microsoft.com/dotnet/migrating-delegate-begininvoke-calls-for-net-core/) — .NET team migration guide with `Task`-based replacements for async delegate patterns.
 - [Closing over the loop variable considered harmful (Eric Lippert)](https://ericlippert.com/2009/11/12/closing-over-the-loop-variable-considered-harmful-part-one/) — canonical explanation of the loop-variable capture pitfall with C# examples.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals|Fundamentals]]
->
-> **Pages**
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Classes|Classes]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Events|Events]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Records|Records]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Strings|Strings]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Structs|Structs]]
-<!-- whats-next:end -->

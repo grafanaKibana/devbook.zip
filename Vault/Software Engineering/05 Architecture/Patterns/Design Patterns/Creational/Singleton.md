@@ -8,7 +8,7 @@ level:
 priority: High
 status:
   - Done
-dg-publish: true
+publish: true
 ---
 # Singleton
 
@@ -183,18 +183,3 @@ public class ExpensiveConnectionPool
 - [Dependency injection in .NET — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection) — `AddSingleton<T>()` and service lifetime management
 - [Dependency injection guidelines — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection-guidelines) — captive dependency detection and `ValidateScopes`
 - [`Lazy<T>` — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.lazy-1) — thread-safe lazy initialization without manual locking
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/Patterns/Design Patterns/Design Patterns|Design Patterns]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Creational/Abstract Factory|Abstract Factory]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Creational/Builder|Builder]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Creational/Factory Method|Factory Method]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Creational/Prototype|Prototype]]
-<!-- whats-next:end -->

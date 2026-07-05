@@ -5,7 +5,7 @@ subtopic:
   - Tooling
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 status: Done
 level:
   - "2"
@@ -84,19 +84,3 @@ Working teams usually combine all four: instructions define policy, hooks enforc
 - [Aider documentation](https://aider.chat/docs/)
 - [OpenCode documentation](https://opencode.ai/docs/)
 - [Building Effective Agents (Anthropic Engineering)](https://www.anthropic.com/engineering/building-effective-agents)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/11 AI & ML|11 AI & ML]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/Tooling/Agent Instructions|Agent Instructions]]
-> - [[Software Engineering/11 AI & ML/Tooling/Coding Agents|Coding Agents]]
-> - [[Software Engineering/11 AI & ML/Tooling/Hooks|Hooks]]
-> - [[Software Engineering/11 AI & ML/Tooling/Plugins|Plugins]]
-> - [[Software Engineering/11 AI & ML/Tooling/Skills|Skills]]
-<!-- whats-next:end -->

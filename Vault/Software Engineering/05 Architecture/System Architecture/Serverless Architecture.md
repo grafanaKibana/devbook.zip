@@ -7,7 +7,7 @@ level:
   - "3"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Serverless Architecture
@@ -107,19 +107,3 @@ Azure Functions and AWS Lambda support multiple trigger types:
 - [Serverless architectures (Martin Fowler)](https://martinfowler.com/articles/serverless.html) — practitioner article covering the tradeoffs of serverless, when it fits, and the operational challenges (cold starts, observability, testing).
 - [Azure Functions performance and reliability (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/azure-functions/functions-best-practices) — best practices for cold start mitigation, connection reuse, and scaling configuration.
 - [Cold starts in Azure Functions (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/azure-functions/functions-scale#cold-start-behavior) — explains cold start behavior across hosting plans and mitigation options including Premium Plan and Provisioned Concurrency.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/05 Architecture|05 Architecture]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/System Architecture/Event-Driven Architecture|Event-Driven Architecture]]
-> - [[Software Engineering/05 Architecture/System Architecture/Microservices|Microservices]]
-> - [[Software Engineering/05 Architecture/System Architecture/Modular Monolith|Modular Monolith]]
-> - [[Software Engineering/05 Architecture/System Architecture/Monolith Architecture|Monolith Architecture]]
-> - [[Software Engineering/05 Architecture/System Architecture/Service-Oriented Architecture|Service-Oriented Architecture]]
-<!-- whats-next:end -->

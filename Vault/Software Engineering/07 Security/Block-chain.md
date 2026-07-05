@@ -8,7 +8,7 @@ level:
 priority: Low
 status: Ready to Repeat
 
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -102,23 +102,3 @@ var block2Hash = Sha256Hex(block2Prev + block2Data);
 - [Bitcoin whitepaper (Satoshi Nakamoto)](https://bitcoin.org/bitcoin.pdf) — the original blockchain paper; explains the proof-of-work consensus mechanism
 - [Ethereum — Proof-of-Stake](https://ethereum.org/en/developers/docs/consensus-mechanisms/pos/) — Ethereum's official explanation of PoS, how validators are selected, and how slashing deters dishonest behavior
 - [Hyperledger Fabric — Introduction](https://hyperledger-fabric.readthedocs.io/en/latest/whatis.html) — enterprise permissioned blockchain; explains PoA-style consensus and where private chains fit
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/Software Engineering|Software Engineering]]
->
-> **Topics**
-> - [[Software Engineering/07 Security/Authentication/Authentication|Authentication]]
->
-> **Pages**
-> - [[Software Engineering/07 Security/Digital Signature|Digital Signature]]
-> - [[Software Engineering/07 Security/Encryption|Encryption]]
-> - [[Software Engineering/07 Security/Hashing|Hashing]]
-> - [[Software Engineering/07 Security/JWT Bearer|JWT Bearer]]
-> - [[Software Engineering/07 Security/OWASP|OWASP]]
-> - [[Software Engineering/07 Security/Secrets Management|Secrets Management]]
-> - [[Software Engineering/07 Security/Web Vulnerabilities|Web Vulnerabilities]]
-<!-- whats-next:end -->

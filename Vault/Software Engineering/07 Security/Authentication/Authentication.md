@@ -5,7 +5,7 @@ subtopic:
   - Authentication
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 priority: High
 level:
   - '4'
@@ -19,19 +19,3 @@ Authentication is how a system proves who a user or service is, and it is a core
 ## Links
 
 - [OWASP Authentication Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/07 Security/07 Security|07 Security]]
->
-> **Pages**
-> - [[Software Engineering/07 Security/Authentication/Basic Auth|Basic Auth]]
-> - [[Software Engineering/07 Security/Authentication/Oauth OIDC (OpenId Connect)|Oauth OIDC (OpenId Connect)]]
-> - [[Software Engineering/07 Security/Authentication/Resource-based Auth|Resource-based Auth]]
-> - [[Software Engineering/07 Security/Authentication/SSO (Single Sign-On)|SSO (Single Sign-On)]]
-> - [[Software Engineering/07 Security/Authentication/Two-Factor Auth|Two-Factor Auth]]
-<!-- whats-next:end -->

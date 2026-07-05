@@ -7,7 +7,7 @@ level:
   - "1"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 # Iterator
 
@@ -150,24 +150,3 @@ The caller uses `await foreach` without knowing whether the source is a database
 - [`IEnumerable<T>` — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.ienumerable-1) — the .NET Iterator interface
 - [yield statement — C# reference — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/yield) — how `yield return` implements the Iterator pattern
 - [`IAsyncEnumerable<T>` — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.iasyncenumerable-1) — async Iterator for streaming data sources
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/Patterns/Design Patterns/Design Patterns|Design Patterns]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Chain of Responsibility|Chain of Responsibility]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Command|Command]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Interpreter|Interpreter]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Mediator|Mediator]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Memento|Memento]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Observer|Observer]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/State|State]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Strategy|Strategy]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Template Method|Template Method]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Visitor|Visitor]]
-<!-- whats-next:end -->

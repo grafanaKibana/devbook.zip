@@ -8,7 +8,7 @@ level:
 priority: High
 status:
   - Done
-dg-publish: true
+publish: true
 ---
 # Adapter
 
@@ -194,20 +194,3 @@ Replacing the legacy system now means writing a new adapter class — `OrderServ
 - [StreamReader — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.io.streamreader) — .NET's built-in Adapter for byte-to-text stream translation
 - [DelegatingHandler — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.net.http.delegatinghandler) — HTTP pipeline adapter pattern in .NET
 - [Strangler Fig pattern — Microsoft Learn](https://learn.microsoft.com/en-us/azure/architecture/patterns/strangler-fig) — using Adapters to incrementally replace legacy systems
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/Patterns/Design Patterns/Design Patterns|Design Patterns]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Bridge|Bridge]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Composite|Composite]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Decorator|Decorator]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Facade|Facade]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Flyweight|Flyweight]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Proxy|Proxy]]
-<!-- whats-next:end -->

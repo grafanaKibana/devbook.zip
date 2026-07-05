@@ -7,7 +7,7 @@ level:
   - "3"
 priority: High
 status: Done
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -107,16 +107,3 @@ If the judge can see that the task succeeded, it rationalizes the path as good r
 - [Trajectory evaluations -- reference-match modes and LLM-judge scoring of agent trajectories (LangSmith docs)](https://docs.langchain.com/langsmith/trajectory-evals) — practitioner how-to for both families, including the strict/unordered/subset/superset match modes.
 - [AgentBench -- evaluating LLMs as agents across eight interactive environments (Liu et al., 2023)](https://arxiv.org/abs/2308.03688) — multi-environment agent benchmark and a reference point for trajectory-level success measurement.
 - [tau-bench -- tool-agent-user interaction with policy-grounded trajectories (Yao et al., Sierra, 2024)](https://arxiv.org/abs/2406.12045) — supplies reference end states and rules that make trajectory ground truth tractable.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/LLM/Agents/Agents|Agents]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/Agents/Evaluation/Agent Benchmarks|Agent Benchmarks]]
-> - [[Software Engineering/11 AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation|Tool-Call Evaluation]]
-<!-- whats-next:end -->

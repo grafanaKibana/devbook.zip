@@ -8,7 +8,7 @@ level:
 priority: High
 status:
   - Done
-dg-publish: true
+publish: true
 ---
 # Abstract Factory
 
@@ -211,18 +211,3 @@ Adding BankTransfer now means one new `BankTransferFactory` class. `CheckoutServ
 - [DbProviderFactory — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.data.common.dbproviderfactory) — ADO.NET's built-in Abstract Factory for database provider families
 - [Dependency injection in .NET — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection) — how the DI container acts as a runtime Abstract Factory
 - [Design Patterns: Elements of Reusable Object-Oriented Software — GoF](https://www.amazon.com/Design-Patterns-Elements-Reusable-Object-Oriented/dp/0201633612) — original pattern definition and intent
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/Patterns/Design Patterns/Design Patterns|Design Patterns]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Creational/Builder|Builder]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Creational/Factory Method|Factory Method]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Creational/Prototype|Prototype]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Creational/Singleton|Singleton]]
-<!-- whats-next:end -->

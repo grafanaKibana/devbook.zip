@@ -7,7 +7,7 @@ level:
   - "4"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -101,16 +101,3 @@ N-Queens-style pruning is the same skeleton with a constraint check (`IsSafe(row
 - [Backtracking (Wikipedia)](https://en.wikipedia.org/wiki/Backtracking) — formal definition, the search tree, and branch-and-bound.
 - [Backtracking (GeeksforGeeks)](https://www.geeksforgeeks.org/backtracking-algorithms/) — N-Queens, Sudoku, and subset/permutation templates.
 - [Recursion and backtracking (USACO Guide)](https://usaco.guide/silver/intro-backtracking) — categorised problems and pruning techniques.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/02 Computer Science/Algorithms/Algorithms|Algorithms]]
->
-> **Pages**
-> - [[Software Engineering/02 Computer Science/Algorithms/Paradigms/Dynamic Programming|Dynamic Programming]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Paradigms/Greedy Algorithms|Greedy Algorithms]]
-<!-- whats-next:end -->

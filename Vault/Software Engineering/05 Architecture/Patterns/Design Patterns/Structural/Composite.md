@@ -7,7 +7,7 @@ level:
   - "3"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 # Composite
 
@@ -210,20 +210,3 @@ Adding a `SubscriptionProduct` now means one new class implementing `IOrderCompo
 - [IConfiguration — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.configuration.iconfiguration) — .NET's built-in Composite for layered configuration
 - [CompositeFileProvider — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.fileproviders.compositefileprovider) — composing multiple file providers uniformly
 - [Design Patterns: Elements of Reusable Object-Oriented Software — GoF](https://www.amazon.com/Design-Patterns-Elements-Reusable-Object-Oriented/dp/0201633612) — original Composite pattern with transparency vs safety tradeoff discussion
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/Patterns/Design Patterns/Design Patterns|Design Patterns]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Adapter|Adapter]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Bridge|Bridge]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Decorator|Decorator]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Facade|Facade]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Flyweight|Flyweight]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Proxy|Proxy]]
-<!-- whats-next:end -->

@@ -7,7 +7,7 @@ level:
   - "2"
 priority: High
 status: Done
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -197,24 +197,3 @@ Rule of thumb:
 - [YARP GitHub repository](https://github.com/dotnet/yarp) — source code, samples, and issue tracker for the YARP project.
 - [Ocelot documentation](https://ocelot.readthedocs.io/en/latest/) — configuration reference for the Ocelot .NET API gateway including routing, authentication, and rate limiting.
 - [Microservices.io — API Gateway pattern (Chris Richardson)](https://microservices.io/patterns/apigateway.html) — pattern catalog entry covering API gateway vs BFF, forces, and consequences in microservices architectures.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/05 Architecture|05 Architecture]]
->
-> **Topics**
-> - [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/Message Queues|Message Queues]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Scalability Patterns/Scalability Patterns|Scalability Patterns]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Distributed Systems/CAP theorem|CAP theorem]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Consistency Models|Consistency Models]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Distributed Transactions|Distributed Transactions]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Idempotency|Idempotency]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Load Balancing|Load Balancing]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Webhooks|Webhooks]]
-<!-- whats-next:end -->

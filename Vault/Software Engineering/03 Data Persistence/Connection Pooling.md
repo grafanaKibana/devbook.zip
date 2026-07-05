@@ -6,7 +6,7 @@ level:
   - "4"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -98,21 +98,3 @@ When the *client*-side pool isn't enough — too many app instances, or serverle
 - [Npgsql connection string parameters (pooling)](https://www.npgsql.org/doc/connection-string-parameters.html) — Min/Max pool size, lifetime, and timeout tuning.
 - [About Pool Sizing (HikariCP wiki)](https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing) — the canonical, math-backed argument for small pools.
 - [PgBouncer documentation](https://www.pgbouncer.org/) — transaction vs session pooling modes for PostgreSQL at scale.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/Software Engineering|Software Engineering]]
->
-> **Topics**
-> - [[Software Engineering/03 Data Persistence/NoSQL/NoSQL|NoSQL]]
-> - [[Software Engineering/03 Data Persistence/ORMs/ORMs|ORMs]]
-> - [[Software Engineering/03 Data Persistence/SQL/SQL|SQL]]
->
-> **Pages**
-> - [[Software Engineering/03 Data Persistence/ACID|ACID]]
-> - [[Software Engineering/03 Data Persistence/Caching|Caching]]
-<!-- whats-next:end -->

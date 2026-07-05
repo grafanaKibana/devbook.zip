@@ -7,7 +7,7 @@ level:
   - "3"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # TCP/IP
@@ -149,16 +149,3 @@ socket.NoDelay = true;  // disables Nagle's algorithm
 - [TCP/IP Illustrated, Volume 1 (W. Richard Stevens)](https://www.oreilly.com/library/view/tcpip-illustrated-volume/9780132808200/) — the definitive practitioner reference for TCP/IP internals; covers every mechanism with packet traces.
 - [High Performance Browser Networking (Ilya Grigorik)](https://hpbn.co/building-blocks-of-tcp/) — free online book chapter on TCP building blocks: handshake latency, slow start, congestion control, and how HTTP/2 and QUIC address TCP's limitations.
 - [Beej's Guide to Network Programming](https://beej.us/guide/bgnet/) — practical socket programming guide covering TCP/UDP sockets, connection setup, and common pitfalls.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/04 Networks/04 Networks|04 Networks]]
->
-> **Pages**
-> - [[Software Engineering/04 Networks/Transport & Sockets/Sockets|Sockets]]
-> - [[Software Engineering/04 Networks/Transport & Sockets/UDP|UDP]]
-<!-- whats-next:end -->

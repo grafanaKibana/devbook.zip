@@ -7,7 +7,7 @@ level:
   - "3"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 # Intro
 
@@ -166,21 +166,3 @@ dig +dnssec api.example.com
 - [DNS basics (Cloudflare Learning)](https://www.cloudflare.com/learning/dns/what-is-dns/) — accessible explanation of the resolution process with diagrams; good for building intuition.
 - [DNSSEC overview (ICANN)](https://www.icann.org/resources/pages/dnssec-what-is-it-why-important-2019-03-05-en) — authoritative explanation of DNSSEC, chain of trust, and deployment considerations.
 - [DNS record types (Cloudflare)](https://www.cloudflare.com/learning/dns/dns-records/) — practical guide to A, AAAA, CNAME, MX, TXT, and SRV records with use cases.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/04 Networks/04 Networks|04 Networks]]
->
-> **Pages**
-> - [[Software Engineering/04 Networks/Protocols/gRPC|gRPC]]
-> - [[Software Engineering/04 Networks/Protocols/HTTP|HTTP]]
-> - [[Software Engineering/04 Networks/Protocols/HTTP 2|HTTP 2]]
-> - [[Software Engineering/04 Networks/Protocols/REST|REST]]
-> - [[Software Engineering/04 Networks/Protocols/RPC|RPC]]
-> - [[Software Engineering/04 Networks/Protocols/SMTP|SMTP]]
-> - [[Software Engineering/04 Networks/Protocols/WebSockets|WebSockets]]
-<!-- whats-next:end -->

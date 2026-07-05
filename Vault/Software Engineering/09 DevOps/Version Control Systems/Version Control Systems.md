@@ -9,7 +9,7 @@ priority: High
 tags:
   - FolderNote
 
-dg-publish: true
+publish: true
 status: Creation
 ---
 
@@ -26,15 +26,3 @@ Git is the dominant distributed VCS, where every developer holds a full copy of 
 - [Branching workflows](https://git-scm.com/book/en/v2/Git-Branching-Branching-Workflows)
 - [Trunk based development](https://trunkbaseddevelopment.com/)
 - [git-flow cheatsheet](https://danielkummer.github.io/git-flow-cheatsheet/index.ru_RU.html)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/09 DevOps/09 DevOps|09 DevOps]]
->
-> **Pages**
-> - [[Software Engineering/09 DevOps/Version Control Systems/Branching Stratagies|Branching Stratagies]]
-<!-- whats-next:end -->

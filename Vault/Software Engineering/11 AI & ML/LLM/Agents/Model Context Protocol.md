@@ -8,7 +8,7 @@ level:
 priority: Low
 status: Done
 
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -131,20 +131,3 @@ MCP adds the most value when you have multiple AI clients (IDE, chatbot, agent f
 - [The MCP Security Survival Guide — vulnerabilities, incidents, and mitigations (Towards Data Science)](https://towardsdatascience.com/the-mcp-security-survival-guide-best-practices-pitfalls-and-real-world-lessons/)
 - [8 Vulnerabilities I Found in MCP Servers — SQL injection, path traversal, and tenant isolation (Kevin Tan)](https://blog.jztan.com/mcp-server-security-8-vulnerabilities/)
 - [Using MCP tools with an agent — Microsoft Agent Framework (Microsoft Learn)](https://learn.microsoft.com/en-us/agent-framework/agents/tools/local-mcp-tools)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
->
-> **Topics**
-> - [[Software Engineering/11 AI & ML/LLM/Agents/Evaluation/Evaluation|Evaluation]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/Agents/Agent Loop|Agent Loop]]
-> - [[Software Engineering/11 AI & ML/LLM/Agents/Multi-Agentic Systems|Multi-Agentic Systems]]
-> - [[Software Engineering/11 AI & ML/LLM/Agents/Tools|Tools]]
-<!-- whats-next:end -->

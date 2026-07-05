@@ -7,7 +7,7 @@ level:
   - "4"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -106,28 +106,3 @@ public class Trie
 - [Trie (Wikipedia)](https://en.wikipedia.org/wiki/Trie) — formal definition, radix/Patricia variants, and complexity.
 - [Trie data structure (cp-algorithms)](https://cp-algorithms.com/string/aho_corasick.html) — tries as the basis of Aho-Corasick multi-pattern search.
 - [Prefix and suffix trees overview (GeeksforGeeks)](https://www.geeksforgeeks.org/trie-insert-and-search/) — worked insert/search walkthrough with diagrams.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/02 Computer Science/02 Computer Science|02 Computer Science]]
->
-> **Pages**
-> - [[Software Engineering/02 Computer Science/Data Structures/Bloom Filter|Bloom Filter]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Circular Buffer|Circular Buffer]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Disjoint Set|Disjoint Set]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Dynamic Array|Dynamic Array]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Graph|Graph]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Hash Set|Hash Set]]
-> - [[Software Engineering/02 Computer Science/Data Structures/HashMap|HashMap]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Heap|Heap]]
-> - [[Software Engineering/02 Computer Science/Data Structures/LinkedList|LinkedList]]
-> - [[Software Engineering/02 Computer Science/Data Structures/LRU Cache|LRU Cache]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Queue|Queue]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Span|Span]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Stack|Stack]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Trees|Trees]]
-<!-- whats-next:end -->

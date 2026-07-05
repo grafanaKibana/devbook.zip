@@ -7,7 +7,7 @@ level:
   - "3"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 # Bridge
 
@@ -215,20 +215,3 @@ Adding a new payment type now means one new `PaymentOperation` subclass that wor
 - [DbConnection — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.data.common.dbconnection) — ADO.NET's Bridge abstraction for database connections
 - [IDistributedCache — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.caching.distributed.idistributedcache) — .NET caching Bridge with multiple provider implementations
 - [Design Patterns: Elements of Reusable Object-Oriented Software — GoF](https://www.amazon.com/Design-Patterns-Elements-Reusable-Object-Oriented/dp/0201633612) — original Bridge pattern definition and Handle/Body idiom
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/Patterns/Design Patterns/Design Patterns|Design Patterns]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Adapter|Adapter]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Composite|Composite]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Decorator|Decorator]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Facade|Facade]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Flyweight|Flyweight]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Proxy|Proxy]]
-<!-- whats-next:end -->

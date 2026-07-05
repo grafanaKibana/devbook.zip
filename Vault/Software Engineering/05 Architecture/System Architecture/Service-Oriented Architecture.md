@@ -7,7 +7,7 @@ level:
   - "3"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Service-Oriented Architecture
@@ -104,19 +104,3 @@ The contract boundary is the key SOA discipline: services communicate through pu
 - [[Software Engineering/05 Architecture/System Architecture/Microservices|Microservices]] — the modern evolution of SOA: fine-grained services, decentralized data, independent deployment, and "smart endpoints, dumb pipes."
 - [Azure Integration Services overview (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/architecture/reference-architectures/enterprise-integration/basic-enterprise-integration) — Microsoft's modern SOA integration reference architecture using API Management, Logic Apps, and Service Bus as the integration layer.
 - [SOA Manifesto](http://www.soa-manifesto.org/) — the original SOA design principles: service contracts, loose coupling, abstraction, reusability, autonomy, statelessness, discoverability, and composability.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/05 Architecture|05 Architecture]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/System Architecture/Event-Driven Architecture|Event-Driven Architecture]]
-> - [[Software Engineering/05 Architecture/System Architecture/Microservices|Microservices]]
-> - [[Software Engineering/05 Architecture/System Architecture/Modular Monolith|Modular Monolith]]
-> - [[Software Engineering/05 Architecture/System Architecture/Monolith Architecture|Monolith Architecture]]
-> - [[Software Engineering/05 Architecture/System Architecture/Serverless Architecture|Serverless Architecture]]
-<!-- whats-next:end -->

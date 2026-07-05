@@ -8,7 +8,7 @@ level:
 status: Done
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 priority: Medium
 ---
 
@@ -162,18 +162,3 @@ For deeper implementation patterns, use targeted follow-ups such as [[Software E
 - [OWASP Top 10 for LLM Applications](https://owasp.org/www-project-top-10-for-large-language-model-applications/)
 - [OWASP LLM Prompt Injection Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/LLM_Prompt_Injection_Prevention_Cheat_Sheet.html)
 - [Simon Willison - Delimiters won't save you from prompt injection](https://simonwillison.net/2023/May/11/delimiters-wont-save-you/)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/Prompting/Automated Prompt Optimization|Automated Prompt Optimization]]
-> - [[Software Engineering/11 AI & ML/LLM/Prompting/In-Context Learning|In-Context Learning]]
-> - [[Software Engineering/11 AI & ML/LLM/Prompting/Prompt Composition|Prompt Composition]]
-> - [[Software Engineering/11 AI & ML/LLM/Prompting/Reasoning Techniques|Reasoning Techniques]]
-<!-- whats-next:end -->

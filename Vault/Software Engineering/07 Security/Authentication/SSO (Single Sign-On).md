@@ -7,7 +7,7 @@ level:
   - "3"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 # Intro
 
@@ -121,18 +121,3 @@ Logging out of one application does not automatically log out of the IdP or othe
 - [OAuth 2.0 (RFC 6749)](https://www.rfc-editor.org/rfc/rfc6749) — the underlying authorization framework that OIDC builds on.
 - [NIST Digital Identity Guidelines (SP 800-63)](https://pages.nist.gov/800-63-3/) — authoritative guidance on identity assurance levels, federation, and token validation requirements.
 - [SAML vs OIDC (Okta)](https://developer.okta.com/docs/concepts/saml-vs-oidc/) — practitioner comparison of SAML and OIDC with migration guidance.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/07 Security/07 Security|07 Security]]
->
-> **Pages**
-> - [[Software Engineering/07 Security/Authentication/Basic Auth|Basic Auth]]
-> - [[Software Engineering/07 Security/Authentication/Oauth OIDC (OpenId Connect)|Oauth OIDC (OpenId Connect)]]
-> - [[Software Engineering/07 Security/Authentication/Resource-based Auth|Resource-based Auth]]
-> - [[Software Engineering/07 Security/Authentication/Two-Factor Auth|Two-Factor Auth]]
-<!-- whats-next:end -->

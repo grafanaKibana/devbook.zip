@@ -8,7 +8,7 @@ level:
 priority: High
 status:
   - Done
-dg-publish: true
+publish: true
 ---
 # Builder
 
@@ -247,18 +247,3 @@ Adding priority shipping now means one new `WithPriorityShipping()` method — e
 - [WebApplicationBuilder — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.builder.webapplicationbuilder) — .NET's primary Builder in production use
 - [StringBuilder — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.text.stringbuilder) — the original .NET Builder for string construction
 - [Required members (C# reference) — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/required) — modern C# alternative for simple object construction
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/Patterns/Design Patterns/Design Patterns|Design Patterns]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Creational/Abstract Factory|Abstract Factory]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Creational/Factory Method|Factory Method]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Creational/Prototype|Prototype]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Creational/Singleton|Singleton]]
-<!-- whats-next:end -->

@@ -108,12 +108,12 @@ Your Dataview usage makes the publishing model the pivotal choice:
 
 ## B5. Build automation (vault-side — keep = repoint paths, don't rewrite)
 
-- [ ] **`render-whats-next.py`** — nav callouts. *rec: keep.*
+- [x] **`render-whats-next.py`** — nav callouts. *removed: feature dropped; marker blocks stripped from `Vault/` source and the script + pre-commit step deleted.*
 - [ ] **`sync-folder-rollup-frontmatter.py`** — status/priority/level rollup (feeds the dashboard). *rec: keep.*
 - [ ] **`sync-topic-subtopic-frontmatter.py`** — topic/subtopic from path. *rec: keep.*
 - [ ] **`generate-roadmap.py`** — regenerates `Roadmap.canvas`. *rec: keep (pairs with the Canvas plugin above).*
 - [ ] **`audit_all_pages.py`** — quality report. *rec: keep (SSG-agnostic).*
-- [ ] **`.githooks/pre-commit` + markdownlint MD040** — *rec: keep; only swap the `dg-publish` assumption.*
+- [ ] **`.githooks/pre-commit` + markdownlint MD040** — *rec: keep; only swap the `publish` assumption.*
 
 ---
 
@@ -132,7 +132,7 @@ Your Dataview usage makes the publishing model the pivotal choice:
 
 # Required regardless (not optional — the migration needs these)
 
-- **Publish gate `dg-publish: true`** — Model A: Syncer selection rules keyed off it; Model B: custom Quartz filter. Either way, no mass frontmatter edits.
+- **Publish gate `publish: true`** — Model A: Syncer selection rules keyed off it; Model B: custom Quartz filter. Either way, no mass frontmatter edits.
 - **`.env` / `.env.local` → `quartz.config.ts` / `quartz.layout.ts`** — secrets stay out of git.
 - **Deploy** — Quartz build command → Vercel (`devbook.zip`).
 
@@ -140,7 +140,7 @@ Your Dataview usage makes the publishing model the pivotal choice:
 
 # Phased execution plan
 
-**Phase 0 — Scaffold + architecture (½ day)** — decide **B0**. Model A: install Quartz Syncer in Obsidian, create the target repo, wire selection to `dg-publish`. Model B: `npx quartz create`, point content at the vault + custom filter. Baseline `quartz.config.ts`; confirm first build.
+**Phase 0 — Scaffold + architecture (½ day)** — decide **B0**. Model A: install Quartz Syncer in Obsidian, create the target repo, wire selection to `publish`. Model B: `npx quartz create`, point content at the vault + custom filter. Baseline `quartz.config.ts`; confirm first build.
 
 **Phase 1 — Part A verification (½ day)** — confirm all the automatic features render (spot-check one page per top-level folder).
 
@@ -156,7 +156,7 @@ Your Dataview usage makes the publishing model the pivotal choice:
 
 # Parity checklist (before cutover)
 
-- [ ] Every `dg-publish: true` note appears; private notes absent.
+- [ ] Every `publish: true` note appears; private notes absent.
 - [ ] Wikilinks resolve; dead-link count matches current build.
 - [ ] Callouts, math, mermaid, code highlighting render (sample per folder).
 - [ ] **Homepage Dataview dashboard renders** (the critical check).
@@ -187,13 +187,13 @@ Read `QUARTZ-MIGRATION-PLAN.md` in full — it is the source of truth. Honor it 
   exists, flag it and get my approval before writing custom code.
 - Architecture: follow B0. Model A → set up Quartz Syncer in Obsidian (compiles Dataview/Datacore/Bases
   to static) and publish to a new Quartz repo. Model B → vanilla Quartz reading Vault/Software Engineering/
-  with a custom dg-publish filter.
+  with a custom publish filter.
 - Specifically: Bases → Quartz BasesPage; Canvas (incl. Roadmap.canvas) → Quartz Canvas component +
   Obsidian Canvas Export; Dataview/DataviewJS → Quartz Syncer. Do NOT reimplement these.
 
 Constraints:
 - Scaffold in a NEW directory / repo so the current `Web/` keeps working until cutover. Use a branch.
-- Keep the dg-publish gate via config/plugin — no mass frontmatter edits.
+- Keep the publish gate via config/plugin — no mass frontmatter edits.
 - Theming is deliberately minimal: stock Quartz theme + only the ticked B3 items. Do NOT port typography,
   style-settings, ultra-wide layout, or the Obsidian Minimal theme fetch.
 - Python scripts + .githooks/pre-commit stay; only repoint paths and the publish-gate assumption.

@@ -3,7 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - Tooling
-dg-publish: true
+publish: true
 status: Done
 level:
   - "2"
@@ -93,18 +93,3 @@ This pattern keeps integration concerns in config instead of hardcoding service 
 - [GitHub Copilot Extension API - chat participants (Microsoft)](https://code.visualstudio.com/api/extension-guides/ai/chat)
 - [MCPGauge - token overhead and accuracy impact benchmark (arXiv 2508.12566)](https://arxiv.org/abs/2508.12566)
 - [MCP Security Notification - tool poisoning attack class (Invariant Labs)](https://invariantlabs.ai/blog/mcp-security-notification-tool-poisoning-attacks)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/11 AI & ML|11 AI & ML]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/Tooling/Agent Instructions|Agent Instructions]]
-> - [[Software Engineering/11 AI & ML/Tooling/Coding Agents|Coding Agents]]
-> - [[Software Engineering/11 AI & ML/Tooling/Hooks|Hooks]]
-> - [[Software Engineering/11 AI & ML/Tooling/Skills|Skills]]
-<!-- whats-next:end -->

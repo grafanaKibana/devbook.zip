@@ -7,7 +7,7 @@ level:
   - "2"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Event Bus
@@ -184,22 +184,3 @@ The tradeoff is explicit: you own the execution strategy but you own the registr
 - [Event-driven architecture style — Azure Architecture Center](https://learn.microsoft.com/en-us/azure/architecture/guide/architecture-styles/event-driven) — architectural overview of event-driven patterns, broker topologies, and when to apply them; provides the broader context for where an event bus fits.
 - [MassTransit Documentation](https://masstransit.io/documentation/concepts) — production-grade .NET event bus abstraction over RabbitMQ, Azure Service Bus, and Amazon SQS; covers sagas, retry policies, and outbox patterns.
 - [Event Aggregator vs Mediator (Martin Fowler)](https://martinfowler.com/eaaDev/EventAggregator.html) — practitioner explanation of the Event Aggregator pattern (the formal name for event bus), distinguishing it from Mediator and Observer; clarifies when centralized event routing helps vs when direct references are simpler.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/05 Architecture|05 Architecture]]
->
-> **Topics**
-> - [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/Architectural Patterns|Architectural Patterns]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Design Patterns|Design Patterns]]
-> - [[Software Engineering/05 Architecture/Patterns/Resilience Patterns/Resilience Patterns|Resilience Patterns]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Patterns/CQS|CQS]]
-> - [[Software Engineering/05 Architecture/Patterns/Dependency Injection|Dependency Injection]]
-> - [[Software Engineering/05 Architecture/Patterns/Repository & UoW|Repository & UoW]]
-<!-- whats-next:end -->

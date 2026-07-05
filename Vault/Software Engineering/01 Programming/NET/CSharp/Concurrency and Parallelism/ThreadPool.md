@@ -7,7 +7,7 @@ level:
   - "4"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 # Intro
 
@@ -158,21 +158,3 @@ Each pre-allocated thread consumes ~1MB of stack. Setting min threads to 500 on 
 - [ThreadPool class API (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.threading.threadpool) — `SetMinThreads`, `GetMinThreads`, `QueueUserWorkItem` reference.
 - [Threading in C#: Thread Pooling (Joe Albahari)](https://www.albahari.com/threading/#_Thread_Pooling) — comprehensive reference on pool internals, hill-climbing, and starvation scenarios.
 - [Parallel.ForEachAsync (.NET 6+)](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.parallel.foreachasync) — async-aware parallel iteration that avoids the `async void` trap of `Parallel.ForEach`.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/01 Programming/NET/CSharp/CSharp|CSharp]]
->
-> **Pages**
-> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Async Await|Async Await]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/CancellationToken|CancellationToken]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Deadlocks|Deadlocks]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Mutex|Mutex]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Parallelism|Parallelism]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Semaphore|Semaphore]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Tasks|Tasks]]
-<!-- whats-next:end -->

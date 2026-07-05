@@ -27,10 +27,10 @@ level:
   - "2"            # "1".."4", difficulty/depth
 priority: Medium   # Low | Medium | High
 status: Not-Started # Not-Started | In-Progress | Done
-dg-publish: false
+publish: false
 ---
 ```
-Derive `topic`/`subtopic` from the folder path (the segment after `Software Engineering`, with leading `NN ` numbering stripped). Default a brand-new note to `status: Not-Started`, `dg-publish: false` unless told otherwise.
+Derive `topic`/`subtopic` from the folder path (the segment after `Software Engineering`, with leading `NN ` numbering stripped). Default a brand-new note to `status: Not-Started`, `publish: false` unless told otherwise.
 
 **Body structure:**
 - `# Intro` — lead with a concise, concrete explanation: what it is, the mechanism, and an inline example for simple topics. Avoid filler and marketing language.

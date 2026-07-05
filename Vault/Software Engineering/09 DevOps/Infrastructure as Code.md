@@ -6,7 +6,7 @@ level:
   - "3"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Infrastructure as Code
@@ -112,22 +112,3 @@ State is the crux of Terraform-style tools (Bicep/ARM and CloudFormation keep st
 - [Bicep documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/overview) — Azure-native declarative IaC.
 - [Pulumi documentation](https://www.pulumi.com/docs/) — IaC in general-purpose languages.
 - [OpenTofu](https://opentofu.org/) — the open-source Terraform fork and its governance.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/Software Engineering|Software Engineering]]
->
-> **Topics**
-> - [[Software Engineering/09 DevOps/Deployment Strategies/Deployment Strategies|Deployment Strategies]]
-> - [[Software Engineering/09 DevOps/Version Control Systems/Version Control Systems|Version Control Systems]]
->
-> **Pages**
-> - [[Software Engineering/09 DevOps/CI CD tools|CI CD tools]]
-> - [[Software Engineering/09 DevOps/Docker|Docker]]
-> - [[Software Engineering/09 DevOps/Kubernetes|Kubernetes]]
-> - [[Software Engineering/09 DevOps/Observability|Observability]]
-<!-- whats-next:end -->

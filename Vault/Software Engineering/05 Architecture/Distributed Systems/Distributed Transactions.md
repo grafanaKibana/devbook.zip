@@ -7,7 +7,7 @@ level:
   - "2"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Distributed Transactions
@@ -162,24 +162,3 @@ The subtlety most people miss: a Saga trades away the **I** in ACID, not just th
 - [MassTransit Saga documentation](https://masstransit.io/documentation/patterns/saga) — the leading .NET message bus library; includes state machine sagas with automatic persistence and retry.
 - [Pattern: Saga (microservices.io)](https://microservices.io/patterns/data/saga.html) — Chris Richardson's canonical description of the Saga pattern with choreography vs orchestration comparison and failure scenarios.
 - [Two-Phase Commit (Martin Fowler)](https://martinfowler.com/articles/patterns-of-distributed-systems/two-phase-commit.html) — detailed explanation of 2PC mechanics, failure modes, and why it's rarely used in modern distributed systems.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/05 Architecture|05 Architecture]]
->
-> **Topics**
-> - [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/Message Queues|Message Queues]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Scalability Patterns/Scalability Patterns|Scalability Patterns]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Distributed Systems/API Gateway|API Gateway]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/CAP theorem|CAP theorem]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Consistency Models|Consistency Models]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Idempotency|Idempotency]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Load Balancing|Load Balancing]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Webhooks|Webhooks]]
-<!-- whats-next:end -->

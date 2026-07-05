@@ -7,7 +7,7 @@ level:
   - "1"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # GRASP
@@ -122,17 +122,3 @@ public sealed class CsvReportGenerator : IReportGenerator
 - [Applying UML and Patterns (Craig Larman)](https://www.oreilly.com/library/view/applying-uml-and/0131489062/) — the book that introduced GRASP; covers all nine principles with detailed worked examples in the context of iterative OO design.
 - [[Software Engineering/06 Development Practices/Paradigms/OOP|OOP]] — object-oriented programming fundamentals that GRASP principles build on: encapsulation, polymorphism, and responsibility assignment.
 - [GRASP Patterns Explained (Baeldung)](https://www.baeldung.com/java-grasp-patterns) — practical walkthrough of all nine GRASP principles with code examples; Java-based but the responsibility assignment concepts apply directly to C#.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/Patterns/Patterns|Patterns]]
->
-> **Topics**
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Behavioral|Behavioral]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Creational/Creational|Creational]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Structural|Structural]]
-<!-- whats-next:end -->

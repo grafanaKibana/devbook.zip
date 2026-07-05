@@ -4,7 +4,7 @@
     {
       "name": "quartz",
       "runtimeExecutable": "sh",
-      "runtimeArgs": ["-c", "cd Web && npx quartz build --serve --port 8080"],
+      "runtimeArgs": ["-c", "python3 .scripts/bootstrap-quartz-content.py --clean && cd Web && npx quartz build --serve --port 8080"],
       "port": 8080
     }
   ]

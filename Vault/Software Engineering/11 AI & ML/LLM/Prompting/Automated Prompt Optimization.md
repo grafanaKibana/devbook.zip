@@ -7,7 +7,7 @@ level:
   - "3"
 priority: Low
 status: Done
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -129,17 +129,3 @@ For most practitioners, strong manual prompting plus meta-prompting covers most 
 - [Prompt Engineering Guide - Active-Prompt](https://www.promptingguide.ai/techniques/activeprompt) — practitioner summary of Active-Prompt.
 - [Prompt Engineering Guide - Directional Stimulus Prompting](https://www.promptingguide.ai/techniques/dsp) — practitioner summary of DSP.
 - [Prompt Engineering Guide - Program-Aided Language Models (PAL)](https://www.promptingguide.ai/techniques/pal) — practitioner summary of PAL with examples.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/Prompting/In-Context Learning|In-Context Learning]]
-> - [[Software Engineering/11 AI & ML/LLM/Prompting/Prompt Composition|Prompt Composition]]
-> - [[Software Engineering/11 AI & ML/LLM/Prompting/Reasoning Techniques|Reasoning Techniques]]
-<!-- whats-next:end -->

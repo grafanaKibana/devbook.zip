@@ -7,7 +7,7 @@ level:
   - "2"
 priority: High
 status: Done
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -75,16 +75,3 @@ Ground truth is established by running brute-force (exact) search over the full 
 - [Evaluating chunking strategies for retrieval -- token-level IoU methodology and benchmark (Chroma Research)](https://research.trychroma.com/evaluating-chunking)
 - [A practical guide to selecting HNSW hyperparameters -- portfolio learning across 15 datasets (OpenSearch)](https://opensearch.org/blog/a-practical-guide-to-selecting-hnsw-hyperparameters/)
 - [BEIR -- heterogeneous zero-shot retrieval benchmark across 18 datasets (NeurIPS 2021)](https://arxiv.org/abs/2104.08663)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/LLM/RAG/RAG|RAG]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation/Evaluation Metrics|Evaluation Metrics]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation/Retrieval Evaluation Sets|Retrieval Evaluation Sets]]
-<!-- whats-next:end -->

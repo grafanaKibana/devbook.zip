@@ -7,7 +7,7 @@ level:
   - "4"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Test-Driven Development
@@ -141,19 +141,3 @@ Both tests pass. Now Refactor: the logic is already clean, so nothing to change.
 - [Unit testing best practices (.NET) — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-best-practices) — Microsoft's guidance on naming conventions, AAA pattern, avoiding anti-patterns, and test isolation in .NET.
 - [Test-Driven Development: By Example (Kent Beck)](https://www.oreilly.com/library/view/test-driven-development/0321146530/) — the original TDD book; short, practical, and still the best introduction to the Red-Green-Refactor discipline.
 - [TimeProvider in .NET 8 (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-8/runtime#time-abstraction) — built-in time abstraction that replaces `DateTime.UtcNow` coupling in testable code.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/06 Development Practices/06 Development Practices|06 Development Practices]]
->
-> **Pages**
-> - [[Software Engineering/06 Development Practices/Paradigms/Event-driven|Event-driven]]
-> - [[Software Engineering/06 Development Practices/Paradigms/Functional Programming|Functional Programming]]
-> - [[Software Engineering/06 Development Practices/Paradigms/Integration Testing|Integration Testing]]
-> - [[Software Engineering/06 Development Practices/Paradigms/OOP|OOP]]
-> - [[Software Engineering/06 Development Practices/Paradigms/Unit Testing|Unit Testing]]
-<!-- whats-next:end -->

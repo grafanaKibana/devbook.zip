@@ -7,7 +7,7 @@ level:
   - "4"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -91,28 +91,3 @@ var ids = new SortedSet<int> { 5, 1, 3, 3 };
 - [Sorted collection types](https://learn.microsoft.com/en-us/dotnet/standard/collections/sorted-collection-types) — Microsoft overview of SortedSet, SortedDictionary, and SortedList with complexity comparison.
 - [Traverse a binary tree with parallel tasks](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/how-to-traverse-a-binary-tree-with-parallel-tasks) — example of parallel tree traversal using Task Parallel Library.
 - [SortedSet implementation in dotnet runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Collections/src/System/Collections/Generic/SortedSet.cs) — source code for the red-black tree backing `SortedSet<T>`.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/02 Computer Science/02 Computer Science|02 Computer Science]]
->
-> **Pages**
-> - [[Software Engineering/02 Computer Science/Data Structures/Bloom Filter|Bloom Filter]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Circular Buffer|Circular Buffer]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Disjoint Set|Disjoint Set]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Dynamic Array|Dynamic Array]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Graph|Graph]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Hash Set|Hash Set]]
-> - [[Software Engineering/02 Computer Science/Data Structures/HashMap|HashMap]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Heap|Heap]]
-> - [[Software Engineering/02 Computer Science/Data Structures/LinkedList|LinkedList]]
-> - [[Software Engineering/02 Computer Science/Data Structures/LRU Cache|LRU Cache]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Queue|Queue]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Span|Span]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Stack|Stack]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Trie|Trie]]
-<!-- whats-next:end -->

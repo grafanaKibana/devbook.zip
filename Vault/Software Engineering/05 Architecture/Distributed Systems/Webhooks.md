@@ -7,7 +7,7 @@ level:
   - "2"
 priority: Medium
 status: Done
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -163,24 +163,3 @@ Decision heuristic:
 - [Standard Webhooks](https://www.standardwebhooks.com/) — Open specification for webhook signing, verification, and delivery semantics backed by Svix, aiming to standardize webhook behavior across providers.
 - [Asynchronous messaging options (Microsoft Learn)](https://learn.microsoft.com/azure/architecture/guide/technology-choices/messaging) — Azure architecture guide comparing webhooks, queues, event hubs, and event grid for event delivery.
 - [Retry pattern (Azure Architecture Center)](https://learn.microsoft.com/azure/architecture/patterns/retry) — Canonical guidance on retry strategies with exponential backoff, directly applicable to webhook sender retry loops.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/05 Architecture|05 Architecture]]
->
-> **Topics**
-> - [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/Message Queues|Message Queues]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Scalability Patterns/Scalability Patterns|Scalability Patterns]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Distributed Systems/API Gateway|API Gateway]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/CAP theorem|CAP theorem]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Consistency Models|Consistency Models]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Distributed Transactions|Distributed Transactions]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Idempotency|Idempotency]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Load Balancing|Load Balancing]]
-<!-- whats-next:end -->

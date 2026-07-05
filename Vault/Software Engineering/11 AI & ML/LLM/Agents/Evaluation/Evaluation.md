@@ -9,7 +9,7 @@ priority: High
 status: Done
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -94,17 +94,3 @@ Decision rule: gate releases on **verifiable task success plus efficiency guardr
 - [tau-bench -- a benchmark for tool-agent-user interaction with pass^k reliability (Yao et al., Sierra, 2024)](https://arxiv.org/abs/2406.12045)
 - [Building Effective Agents -- measurement and the simplest-pattern principle (Anthropic Engineering)](https://www.anthropic.com/engineering/building-effective-agents)
 - [Trajectory evaluations -- reference-match and LLM-judge scoring of agent trajectories (LangSmith docs)](https://docs.langchain.com/langsmith/trajectory-evals)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/LLM/Agents/Agents|Agents]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/Agents/Evaluation/Agent Benchmarks|Agent Benchmarks]]
-> - [[Software Engineering/11 AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation|Tool-Call Evaluation]]
-> - [[Software Engineering/11 AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation|Trajectory Evaluation]]
-<!-- whats-next:end -->

@@ -6,7 +6,7 @@ level:
   - "3"
 priority: Medium
 status: Done
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -86,17 +86,3 @@ People — not models — are accountable for AI system behavior. Teams deployin
 - [Model Cards for Model Reporting (Mitchell et al., 2019)](https://arxiv.org/abs/1810.03993) — the standard practice for documenting model capabilities, limitations, and evaluation slices.
 - [Datasheets for Datasets (Gebru et al., 2021)](https://arxiv.org/abs/1803.09010) — documentation standard for dataset provenance, composition, and intended use.
 - [Fairness and Machine Learning (Barocas, Hardt, Narayanan)](https://fairmlbook.org/) — free textbook covering fairness definitions, measurement, and mitigation in depth.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/Software Engineering|Software Engineering]]
->
-> **Topics**
-> - [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
-> - [[Software Engineering/11 AI & ML/Machine Learning/Machine Learning|Machine Learning]]
-> - [[Software Engineering/11 AI & ML/Tooling/Tooling|Tooling]]
-<!-- whats-next:end -->

@@ -7,7 +7,7 @@ level:
   - "3"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -93,13 +93,3 @@ Stores **nodes** and **edges** as first-class citizens, making relationship trav
 - [NoSQL data modeling techniques (Highly Scalable Blog)](https://highlyscalable.wordpress.com/2012/03/01/nosql-data-modeling-techniques/) — query-first modeling patterns across families.
 - [DynamoDB single-table design (AWS)](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/bp-general-nosql-design.html) — access-pattern-driven modeling for key-value/wide-column.
 - [Designing Data-Intensive Applications, Ch. 2 (Martin Kleppmann)](https://dataintensive.net/) — relational vs document vs graph data models compared in depth.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/03 Data Persistence/03 Data Persistence|03 Data Persistence]]
->
-<!-- whats-next:end -->

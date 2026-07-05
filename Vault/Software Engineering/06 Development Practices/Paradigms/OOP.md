@@ -7,7 +7,7 @@ level:
   - "4"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Object-Oriented Programming (OOP)
@@ -263,18 +263,3 @@ decimal discount = discountStrategy.Calculate(order); // runtime dispatches
 - [Microsoft — Interfaces in C#](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/interfaces) — interface declaration, explicit implementation, default interface methods (C# 8+), and design guidance.
 - [Microsoft — Composition over inheritance](https://learn.microsoft.com/en-us/dotnet/architecture/modern-web-apps-azure/architectural-principles#prefer-composition-over-inheritance) — .NET architecture guidance explaining when and why to prefer composition over class inheritance.
 - [Anemic Domain Model (Martin Fowler)](https://martinfowler.com/bliki/AnemicDomainModel.html) — Fowler's critique of the anti-pattern: why separating data from behavior loses the benefits of OOP and how to fix it.
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/06 Development Practices/06 Development Practices|06 Development Practices]]
->
-> **Pages**
-> - [[Software Engineering/06 Development Practices/Paradigms/Event-driven|Event-driven]]
-> - [[Software Engineering/06 Development Practices/Paradigms/Functional Programming|Functional Programming]]
-> - [[Software Engineering/06 Development Practices/Paradigms/Integration Testing|Integration Testing]]
-> - [[Software Engineering/06 Development Practices/Paradigms/Test-Driven Development|Test-Driven Development]]
-> - [[Software Engineering/06 Development Practices/Paradigms/Unit Testing|Unit Testing]]
-<!-- whats-next:end -->

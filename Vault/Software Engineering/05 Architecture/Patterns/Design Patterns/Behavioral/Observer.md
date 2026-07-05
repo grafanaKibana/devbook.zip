@@ -8,7 +8,7 @@ level:
 priority: High
 status:
   - Done
-dg-publish: true
+publish: true
 ---
 # Observer
 
@@ -192,24 +192,3 @@ Adding a push notification subscriber now means a new class registered in DI —
 - [Events (C# programming guide) — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/events/) — C# event/delegate as the language-native Observer
 - [`IObservable<T>` — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.iobservable-1) — Reactive Extensions Observer interfaces
 - [Weak event patterns — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/events/weak-event-patterns) — preventing memory leaks in long-lived publishers
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/Patterns/Design Patterns/Design Patterns|Design Patterns]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Chain of Responsibility|Chain of Responsibility]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Command|Command]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Interpreter|Interpreter]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Iterator|Iterator]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Mediator|Mediator]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Memento|Memento]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/State|State]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Strategy|Strategy]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Template Method|Template Method]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Visitor|Visitor]]
-<!-- whats-next:end -->

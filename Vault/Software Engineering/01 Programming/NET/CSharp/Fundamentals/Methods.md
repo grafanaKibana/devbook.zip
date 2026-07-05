@@ -7,7 +7,7 @@ level:
   - "4"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 # Intro
 
@@ -241,22 +241,3 @@ Console.WriteLine(asDog.Category());    // Dog
 - [Method parameters and modifiers (ref/in/out)](https://learn.microsoft.com/dotnet/csharp/language-reference/keywords/method-parameters#reference-parameters) — official reference for all parameter modifiers with semantics and examples.
 - [C# 13: params collections](https://learn.microsoft.com/dotnet/csharp/whats-new/csharp-13#params-collections) — explains the C# 13 extension of `params` to any collection type, not just arrays.
 - [C# 13: calling methods is easier and faster](https://devblogs.microsoft.com/dotnet/csharp13-calling-methods-is-easier-and-faster/) — .NET team blog post on the performance and ergonomics improvements to method calls in C# 13.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/01 Programming/NET/CSharp/CSharp|CSharp]]
->
-> **Topics**
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types|Types]]
->
-> **Pages**
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Exception Handling|Exception Handling]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Foreach|Foreach]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Generics|Generics]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Namespaces|Namespaces]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Reflection|Reflection]]
-<!-- whats-next:end -->

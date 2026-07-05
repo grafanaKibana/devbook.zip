@@ -6,7 +6,7 @@ topic:
 subtopic: []
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 level:
   - '3'
 priority: High
@@ -78,20 +78,3 @@ Fairness, reliability and safety, privacy and security, inclusiveness, transpare
 - [Building Effective Agents (Anthropic Engineering)](https://www.anthropic.com/engineering/building-effective-agents) — the canonical guidance on choosing the simplest agentic pattern that solves the problem.
 - [Hidden Technical Debt in Machine Learning Systems (NeurIPS 2015)](https://papers.nips.cc/paper_files/paper/2015/hash/86df7dcfd896fcaf2674f757a2463eba-Abstract.html) — the classic paper on why the model is a small fraction of a production ML system.
 - [AI Risk Management Framework (NIST)](https://www.nist.gov/itl/ai-risk-management-framework) — vendor-neutral framework for managing AI risk across the lifecycle.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/Software Engineering|Software Engineering]]
->
-> **Topics**
-> - [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
-> - [[Software Engineering/11 AI & ML/Machine Learning/Machine Learning|Machine Learning]]
-> - [[Software Engineering/11 AI & ML/Tooling/Tooling|Tooling]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/Responsible AI|Responsible AI]]
-<!-- whats-next:end -->

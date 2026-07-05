@@ -7,7 +7,7 @@ level:
   - "3"
 priority: Medium
 status: Done
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -131,16 +131,3 @@ When extending precision/recall to multi-class problems, the averaging method ch
 - [Google ML Crash Course: Accuracy, precision, recall](https://developers.google.com/machine-learning/crash-course/classification/accuracy-precision-recall) — interactive tutorial with threshold visualization and worked examples.
 - [Precision-recall tradeoff in production ML (Eugene Yan)](https://eugeneyan.com/writing/simplicity/) — practitioner perspective on choosing operating points, monitoring metric drift, and when simpler models with better-understood failure modes beat complex ones.
 - [Beyond Accuracy: Behavioral Testing of NLP Models (Ribeiro et al., ACL 2020)](https://aclanthology.org/2020.acl-main.442/) — introduces CheckList methodology for testing classification models beyond aggregate metrics, with per-capability precision/recall analysis.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/Machine Learning/Machine Learning|Machine Learning]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/Calibration|Calibration]]
-> - [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/ROC-AUC and PR-AUC|ROC-AUC and PR-AUC]]
-<!-- whats-next:end -->

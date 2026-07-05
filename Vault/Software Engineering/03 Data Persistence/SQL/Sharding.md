@@ -7,7 +7,7 @@ level:
   - "4"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -100,17 +100,3 @@ flowchart TD
 - [Scaling Etsy Payments with Vitess — Part 1](https://www.etsy.com/codeascraft/scaling-etsy-payments-with-vitess-part-1--the-data-model) — real-world account of migrating a payments system to Vitess (MySQL sharding layer) with data model decisions.
 - [Designing Data-Intensive Applications, Ch. 6 (Martin Kleppmann)](https://www.oreilly.com/library/view/designing-data-intensive-applications/9781098119058/) — covers partitioning strategies, secondary indexes on sharded data, and rebalancing algorithms.
 - [Don't shard yet — 8 strategies to try first](https://www.lazertechnologies.com/insights/dont-shard-yet-8-database-performance-strategies-to-try-before-sharding) — practitioner post on exhausting simpler scaling options before committing to sharding complexity.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/03 Data Persistence/03 Data Persistence|03 Data Persistence]]
->
-> **Pages**
-> - [[Software Engineering/03 Data Persistence/SQL/Indexes|Indexes]]
-> - [[Software Engineering/03 Data Persistence/SQL/Normalization Denormalization|Normalization Denormalization]]
-> - [[Software Engineering/03 Data Persistence/SQL/Replication|Replication]]
-<!-- whats-next:end -->

@@ -6,7 +6,7 @@ topic:
 subtopic: []
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 status: Creation
 priority: High
 level:
@@ -20,20 +20,3 @@ Cloud computing is renting capabilities (compute, storage, networking) with mana
 ## Links
 
 - [NIST definition of cloud computing (SP 800-145)](https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-145.pdf)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/Software Engineering|Software Engineering]]
->
-> **Topics**
-> - [[Software Engineering/10 Cloud/AWS/AWS|AWS]]
-> - [[Software Engineering/10 Cloud/Azure/Azure|Azure]]
-> - [[Software Engineering/10 Cloud/Google Cloud/Google Cloud|Google Cloud]]
->
-> **Pages**
-> - [[Software Engineering/10 Cloud/IaaS, PaaS, SaaS, CaaS|IaaS, PaaS, SaaS, CaaS]]
-<!-- whats-next:end -->

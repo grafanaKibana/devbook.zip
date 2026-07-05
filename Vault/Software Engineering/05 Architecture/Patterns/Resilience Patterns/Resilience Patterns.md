@@ -5,7 +5,7 @@ subtopic:
   - Patterns
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 priority: High
 level:
   - "3"
@@ -22,16 +22,3 @@ The two foundational patterns here are [[Software Engineering/05 Architecture/Pa
 
 - [Release It! Second Edition -- foundational patterns for production resilience covering circuit breakers, bulkheads, timeouts, and steady-state design (Michael Nygard, Pragmatic Bookshelf)](https://pragprog.com/titles/mnee2/release-it-second-edition/)
 - [Resiliency patterns -- cloud design patterns for retry, circuit breaker, bulkhead, and health endpoint monitoring (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/architecture/patterns/category/resiliency)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/Patterns/Patterns|Patterns]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Patterns/Resilience Patterns/Circuit Breaker|Circuit Breaker]]
-> - [[Software Engineering/05 Architecture/Patterns/Resilience Patterns/Retry and Timeout Patterns|Retry and Timeout Patterns]]
-<!-- whats-next:end -->

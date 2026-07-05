@@ -7,7 +7,7 @@ level:
   - "4"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -115,19 +115,3 @@ For hot paths, avoid materializing intermediate strings:
 - [Best practices for strings in .NET](https://learn.microsoft.com/en-us/dotnet/standard/base-types/best-practices-strings) - Performance and correctness recommendations.
 - [String comparison in .NET](https://learn.microsoft.com/en-us/dotnet/standard/base-types/comparing) - Culture/ordinal comparison rules.
 - [StringBuilder performance best practices (Meziantou)](https://www.meziantou.net/stringbuilder-performance-pitfalls.htm) - Practical optimization patterns and pitfalls.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals|Fundamentals]]
->
-> **Pages**
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Classes|Classes]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Delegates|Delegates]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Events|Events]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Records|Records]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Structs|Structs]]
-<!-- whats-next:end -->

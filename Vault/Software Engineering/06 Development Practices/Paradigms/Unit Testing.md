@@ -7,7 +7,7 @@ level:
   - "4"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Unit Testing
@@ -174,19 +174,3 @@ public void DiscountCalculation(int orderCount, decimal price, decimal expected)
 - [Moq quickstart](https://github.com/devlooped/moq/wiki/Quickstart) — the most widely used .NET mocking library; covers setup, verification, argument matchers, and callbacks.
 - [The Art of Unit Testing (Roy Osherove)](https://www.artofunittesting.com/) — practitioner book covering test design, mocking strategies, and how to maintain a large test suite without it becoming a burden.
 - [TimeProvider in .NET 8 (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-8/runtime#time-abstraction) — built-in time abstraction replacing `DateTime.UtcNow` coupling; includes `FakeTimeProvider` for tests.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/06 Development Practices/06 Development Practices|06 Development Practices]]
->
-> **Pages**
-> - [[Software Engineering/06 Development Practices/Paradigms/Event-driven|Event-driven]]
-> - [[Software Engineering/06 Development Practices/Paradigms/Functional Programming|Functional Programming]]
-> - [[Software Engineering/06 Development Practices/Paradigms/Integration Testing|Integration Testing]]
-> - [[Software Engineering/06 Development Practices/Paradigms/OOP|OOP]]
-> - [[Software Engineering/06 Development Practices/Paradigms/Test-Driven Development|Test-Driven Development]]
-<!-- whats-next:end -->

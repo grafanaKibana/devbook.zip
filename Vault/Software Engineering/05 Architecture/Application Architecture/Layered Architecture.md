@@ -7,7 +7,7 @@ level:
   - "4"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 # Intro
 
@@ -159,17 +159,3 @@ Four layers with interfaces and DI for a 3-endpoint CRUD API adds ceremony witho
 - [The Clean Architecture (Robert C. Martin)](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html) — the canonical article defining the dependency rule and how Clean Architecture relates to Onion and Hexagonal.
 - [Onion Architecture (Jeffrey Palermo)](https://jeffreypalermo.com/2008/07/the-onion-architecture-part-1/) — original blog post introducing Onion Architecture with the inward-dependency model.
 - [ASP.NET Core architecture guidance (Microsoft)](https://learn.microsoft.com/en-us/dotnet/architecture/modern-web-apps-azure/common-web-application-architectures) — Microsoft's guidance on layered, clean, and modular architectures for ASP.NET Core applications.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/05 Architecture|05 Architecture]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Application Architecture/Clean Architecture|Clean Architecture]]
-> - [[Software Engineering/05 Architecture/Application Architecture/MVC MVVM|MVC MVVM]]
-> - [[Software Engineering/05 Architecture/Application Architecture/Plug-in Architecture (MicroKernel)|Plug-in Architecture (MicroKernel)]]
-<!-- whats-next:end -->

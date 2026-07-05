@@ -7,7 +7,7 @@ level:
   - "3"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -211,19 +211,3 @@ Decision rule: default to modular monolith for most product teams, choose tradit
 - [Modular Monolith Communication Patterns by Milan Jovanovic](https://www.milanjovanovic.tech/blog/modular-monolith-communication-patterns) - Practitioner guidance on in process communication choices and contract based module interaction in .NET.
 - [.NET Microservices Architecture guide](https://learn.microsoft.com/en-us/dotnet/architecture/microservices/) - Microsoft architecture anchor describing service boundaries, independent deployment, and distributed systems tradeoffs.
 - [.NET Aspire overview](https://aspire.dev/get-started/what-is-aspire/) - Official .NET Aspire guidance covering local orchestration, code first service composition, and deployment flexibility when evolving modules into separately deployed services.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/05 Architecture|05 Architecture]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/System Architecture/Event-Driven Architecture|Event-Driven Architecture]]
-> - [[Software Engineering/05 Architecture/System Architecture/Microservices|Microservices]]
-> - [[Software Engineering/05 Architecture/System Architecture/Monolith Architecture|Monolith Architecture]]
-> - [[Software Engineering/05 Architecture/System Architecture/Serverless Architecture|Serverless Architecture]]
-> - [[Software Engineering/05 Architecture/System Architecture/Service-Oriented Architecture|Service-Oriented Architecture]]
-<!-- whats-next:end -->

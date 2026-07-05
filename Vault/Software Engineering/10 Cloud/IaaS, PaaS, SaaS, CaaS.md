@@ -8,7 +8,7 @@ level:
 priority: High
 status: Ready to Repeat
 
-dg-publish: true
+publish: true
 ---
 
 # IaaS, PaaS, SaaS, CaaS
@@ -152,16 +152,3 @@ resource vm 'Microsoft.Compute/virtualMachines@2023-03-01' = {
 - [Azure — What are IaaS, PaaS, SaaS?](https://azure.microsoft.com/en-us/resources/cloud-computing-dictionary/what-is-iaas/) — Microsoft's explanation with Azure service examples for each model
 - [Azure App Service overview](https://learn.microsoft.com/en-us/azure/app-service/overview) — PaaS reference: what the platform manages, supported runtimes, scaling options, and deployment slots
 - [Azure Kubernetes Service (AKS) overview](https://learn.microsoft.com/en-us/azure/aks/intro-kubernetes) — CaaS reference: what AKS manages vs what you manage, and when to choose AKS over App Service
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/Software Engineering|Software Engineering]]
->
-> **Topics**
-> - [[Software Engineering/10 Cloud/AWS/AWS|AWS]]
-> - [[Software Engineering/10 Cloud/Azure/Azure|Azure]]
-> - [[Software Engineering/10 Cloud/Google Cloud/Google Cloud|Google Cloud]]
-<!-- whats-next:end -->

@@ -7,7 +7,7 @@ level:
   - "2"
 priority: Medium
 status: Done
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -133,27 +133,3 @@ Cost is driven by tokens, and input and output are usually priced differently (o
 - [Models overview and pricing (Anthropic)](https://docs.anthropic.com/en/docs/about-claude/models) — capability and price comparison across a model family.
 - [Models and pricing (OpenAI)](https://platform.openai.com/docs/models) — capability and price reference for selection.
 - [LiteLLM — unified gateway across LLM providers](https://docs.litellm.ai/) — an abstraction layer that makes model choice, fallback, and routing configuration rather than code.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/11 AI & ML|11 AI & ML]]
->
-> **Topics**
-> - [[Software Engineering/11 AI & ML/LLM/Agents/Agents|Agents]]
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation|Evaluation]]
-> - [[Software Engineering/11 AI & ML/LLM/Prompting/Prompting|Prompting]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/RAG|RAG]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/Context Engineering|Context Engineering]]
-> - [[Software Engineering/11 AI & ML/LLM/Embeddings|Embeddings]]
-> - [[Software Engineering/11 AI & ML/LLM/Fine-tuning|Fine-tuning]]
-> - [[Software Engineering/11 AI & ML/LLM/Generation|Generation]]
-> - [[Software Engineering/11 AI & ML/LLM/Guardrails|Guardrails]]
-> - [[Software Engineering/11 AI & ML/LLM/Hallucinations|Hallucinations]]
-> - [[Software Engineering/11 AI & ML/LLM/OWASP vulnerabilities on AI LLM|OWASP vulnerabilities on AI LLM]]
-<!-- whats-next:end -->

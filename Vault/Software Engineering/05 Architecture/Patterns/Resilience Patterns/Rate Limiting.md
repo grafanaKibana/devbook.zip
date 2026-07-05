@@ -4,7 +4,7 @@ topic:
 subtopic:
   - Patterns
 priority: High
-dg-publish: true
+publish: true
 tags:
   - FolderNote
 level:
@@ -290,16 +290,3 @@ Mitigation: include `Retry-After` and useful quota headers such as `X-RateLimit-
 - [Redis transactions (MULTI and EXEC)](https://redis.io/docs/latest/develop/interact/transactions/)
 - [Scaling your API with rate limiters (Stripe Engineering)](https://stripe.com/blog/rate-limiters)
 - [Cloudflare rate limiting rules](https://developers.cloudflare.com/waf/rate-limiting-rules/)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/Patterns/Patterns|Patterns]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Patterns/Resilience Patterns/Circuit Breaker|Circuit Breaker]]
-> - [[Software Engineering/05 Architecture/Patterns/Resilience Patterns/Retry and Timeout Patterns|Retry and Timeout Patterns]]
-<!-- whats-next:end -->

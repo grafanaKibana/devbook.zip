@@ -6,7 +6,7 @@ subtopic:
 level:
   - "4"
 status: Ready to Repeat
-dg-publish: true
+publish: true
 tags:
   - FolderNote
 priority: Low
@@ -119,19 +119,3 @@ For general in-memory sorting, `Array.Sort` (introsort) is the right default; he
 - [Heapsort (Wikipedia)](https://en.wikipedia.org/wiki/Heapsort) — algorithm, heapify analysis, and stability discussion.
 - [Introsort (Wikipedia)](https://en.wikipedia.org/wiki/Introsort) — the hybrid (quick + heap + insertion) used by `Array.Sort`.
 - [Sorting algorithms comparison (Big-O Cheat Sheet)](https://www.bigocheatsheet.com/) — time/space complexity of all common sorts side by side.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/02 Computer Science/Algorithms/Algorithms|Algorithms]]
->
-> **Pages**
-> - [[Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Bubble Sort|Bubble Sort]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Insertion Sort|Insertion Sort]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Merge Sort|Merge Sort]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Quick Sort|Quick Sort]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Selection Sort|Selection Sort]]
-<!-- whats-next:end -->

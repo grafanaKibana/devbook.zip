@@ -8,7 +8,7 @@ level:
 priority: High
 status: Done
 
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -261,16 +261,3 @@ public sealed record Order(string OrderId, string CustomerId, decimal Amount);
 - [RabbitMQ Tutorials](https://www.rabbitmq.com/tutorials) — step-by-step tutorials for common messaging patterns: work queues, pub/sub, routing, topics, and RPC.
 - [CloudAMQP: RabbitMQ Best Practice for High Performance](https://www.cloudamqp.com/blog/part1-rabbitmq-best-practice.html) — practitioner guide on connection pooling, prefetch count, persistent messages, and avoiding common performance pitfalls.
 - [RabbitMQ .NET API Guide](https://www.rabbitmq.com/client-libraries/dotnet-api-guide) — official .NET client library reference covering connection management, channel lifecycle, and consumer patterns.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/Distributed Systems/Distributed Systems|Distributed Systems]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/Kafka|Kafka]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/MSMQ|MSMQ]]
-<!-- whats-next:end -->

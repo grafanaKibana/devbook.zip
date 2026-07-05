@@ -6,7 +6,7 @@ topic:
 subtopic: []
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 status: Creation
 level:
   - '4'
@@ -20,16 +20,3 @@ Development practices are the habits and processes that keep software shippable:
 ## Links
 
 - [Software development process (Wikipedia)](https://en.wikipedia.org/wiki/Software_development_process)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/Software Engineering|Software Engineering]]
->
-> **Topics**
-> - [[Software Engineering/06 Development Practices/Paradigms/Paradigms|Paradigms]]
-> - [[Software Engineering/06 Development Practices/Principles/Principles|Principles]]
-<!-- whats-next:end -->

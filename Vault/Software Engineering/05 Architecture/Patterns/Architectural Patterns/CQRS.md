@@ -8,7 +8,7 @@ level:
 priority: High
 status: Done
 
-dg-publish: true
+publish: true
 ---
 # Intro
 
@@ -232,15 +232,3 @@ Decision rule: CQRS is usually worth it when at least two are true at once: high
 - [Chris Richardson - Idempotent Consumer pattern](https://microservices.io/post/microservices/patterns/2020/10/16/idempotent-consumer.html)
 - [Udi Dahan - Clarified CQRS](https://udidahan.com/2009/12/09/clarified-cqrs/)
 - [Greg Young - CQRS Documents](https://cqrs.files.wordpress.com/2010/11/cqrs_documents.pdf)
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/Patterns/Patterns|Patterns]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/Domain-Driven Design|Domain-Driven Design]]
-> - [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/Event Sourcing|Event Sourcing]]
-<!-- whats-next:end -->

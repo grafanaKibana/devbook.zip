@@ -3,7 +3,7 @@ topic:
   - Data Persistence
 subtopic:
   - SQL
-dg-publish: true
+publish: true
 level:
   - "4"
 priority: High
@@ -222,17 +222,3 @@ Two maintenance operations:
 - [Use The Index, Luke — The B-Tree](https://use-the-index-luke.com/sql/anatomy/the-tree) — practitioner deep-dive into B-tree structure, leaf nodes, and how the optimizer uses indexes; vendor-neutral.
 - [The Clustered Index Debate (Kimberly Tripp / SQLskills)](https://www.sqlskills.com/blogs/kimberly/the-clustered-index-debate-continues/) — expert analysis of clustered index key selection, GUIDs vs integers, and fragmentation implications.
 - [Erin Stellato — Index Maintenance Myths (SQLskills)](https://www.sqlskills.com/blogs/erin/index-maintenance-myths-misconceptions-and-realities/) — debunks common misconceptions about fragmentation thresholds and maintenance schedules with real benchmark data.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/03 Data Persistence/03 Data Persistence|03 Data Persistence]]
->
-> **Pages**
-> - [[Software Engineering/03 Data Persistence/SQL/Normalization Denormalization|Normalization Denormalization]]
-> - [[Software Engineering/03 Data Persistence/SQL/Replication|Replication]]
-> - [[Software Engineering/03 Data Persistence/SQL/Sharding|Sharding]]
-<!-- whats-next:end -->

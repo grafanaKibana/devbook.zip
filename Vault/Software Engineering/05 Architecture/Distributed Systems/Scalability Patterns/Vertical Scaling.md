@@ -7,7 +7,7 @@ level:
   - "2"
 priority: High
 status: Not-Started
-dg-publish: true
+publish: true
 ---
 
 # Vertical Scaling
@@ -126,15 +126,3 @@ The practical decision rule: start vertical, switch to horizontal when you hit t
 - [Azure App Service plan overview](https://learn.microsoft.com/en-us/azure/app-service/overview-hosting-plans) — plan tiers, scaling options, and compute characteristics
 - [Designing Data-Intensive Applications, Chapter 1 — Scalability](https://dataintensive.net/) — Kleppmann's treatment of scaling approaches, load parameters, and the limits of vertical scaling
 - [The Pragmatic Engineer: Scaling Databases](https://blog.pragmaticengineer.com/scaling-databases/) — practitioner perspective on when vertical scaling breaks down and what comes next
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/Distributed Systems/Distributed Systems|Distributed Systems]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Distributed Systems/Scalability Patterns/Horizontal Scaling|Horizontal Scaling]]
-<!-- whats-next:end -->

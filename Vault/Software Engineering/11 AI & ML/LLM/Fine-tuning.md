@@ -7,7 +7,7 @@ level:
   - "2"
 priority: High
 status: Done
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -146,27 +146,3 @@ Data quality dominates data quantity. A few hundred to a few thousand clean, con
 - [Hugging Face PEFT documentation](https://huggingface.co/docs/peft) — practical reference for LoRA, QLoRA, and other PEFT methods.
 - [Fine-tuning guide (OpenAI)](https://platform.openai.com/docs/guides/fine-tuning) — provider guidance on when fine-tuning helps, data preparation, and evaluation.
 - [When to fine-tune vs RAG (Azure AI Foundry)](https://learn.microsoft.com/en-us/azure/ai-foundry/concepts/fine-tuning-considerations) — decision framing for fine-tuning versus retrieval in production.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/11 AI & ML|11 AI & ML]]
->
-> **Topics**
-> - [[Software Engineering/11 AI & ML/LLM/Agents/Agents|Agents]]
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation|Evaluation]]
-> - [[Software Engineering/11 AI & ML/LLM/Prompting/Prompting|Prompting]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/RAG|RAG]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/Context Engineering|Context Engineering]]
-> - [[Software Engineering/11 AI & ML/LLM/Embeddings|Embeddings]]
-> - [[Software Engineering/11 AI & ML/LLM/Generation|Generation]]
-> - [[Software Engineering/11 AI & ML/LLM/Guardrails|Guardrails]]
-> - [[Software Engineering/11 AI & ML/LLM/Hallucinations|Hallucinations]]
-> - [[Software Engineering/11 AI & ML/LLM/Model Selection and Routing|Model Selection and Routing]]
-> - [[Software Engineering/11 AI & ML/LLM/OWASP vulnerabilities on AI LLM|OWASP vulnerabilities on AI LLM]]
-<!-- whats-next:end -->

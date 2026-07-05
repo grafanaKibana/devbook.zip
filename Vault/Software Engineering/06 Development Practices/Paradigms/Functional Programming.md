@@ -7,7 +7,7 @@ level:
   - "3"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Functional Programming
@@ -174,19 +174,3 @@ var count = items.Count;
 - [C# records (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record) — value semantics, non-destructive mutation with `with`, and positional records.
 - [Functional Programming in C# (Enrico Buonanno, Manning)](https://www.manning.com/books/functional-programming-in-c-sharp-second-edition) — practitioner book covering Option/Either types, railway-oriented programming, and applying FP patterns in real .NET codebases.
 - [Why Functional Programming Matters (John Hughes)](https://www.cs.kent.ac.uk/people/staff/dat/miranda/whyfp90.pdf) — foundational paper explaining the composability benefits of higher-order functions and lazy evaluation.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/06 Development Practices/06 Development Practices|06 Development Practices]]
->
-> **Pages**
-> - [[Software Engineering/06 Development Practices/Paradigms/Event-driven|Event-driven]]
-> - [[Software Engineering/06 Development Practices/Paradigms/Integration Testing|Integration Testing]]
-> - [[Software Engineering/06 Development Practices/Paradigms/OOP|OOP]]
-> - [[Software Engineering/06 Development Practices/Paradigms/Test-Driven Development|Test-Driven Development]]
-> - [[Software Engineering/06 Development Practices/Paradigms/Unit Testing|Unit Testing]]
-<!-- whats-next:end -->

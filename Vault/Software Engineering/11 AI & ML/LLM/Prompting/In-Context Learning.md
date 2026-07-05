@@ -7,7 +7,7 @@ level:
   - "3"
 priority: Medium
 status: Done
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -175,17 +175,3 @@ When this pattern is not enough for reasoning-heavy tasks, continue with [[Softw
 - [Min et al. 2022 - Rethinking the Role of Demonstrations](https://arxiv.org/abs/2202.12837) — shows that demonstration format and label space matter more than per-example label correctness.
 - [Anthropic Prompt Engineering Overview](https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview) — Anthropic's practical guide to prompt design including zero-shot and few-shot patterns for Claude.
 - [Prompt Engineering for Large Language Models (Eugene Yan)](https://eugeneyan.com/writing/prompting/) — practitioner deep-dive covering shot selection, formatting, and evaluation of prompting strategies.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/Prompting/Automated Prompt Optimization|Automated Prompt Optimization]]
-> - [[Software Engineering/11 AI & ML/LLM/Prompting/Prompt Composition|Prompt Composition]]
-> - [[Software Engineering/11 AI & ML/LLM/Prompting/Reasoning Techniques|Reasoning Techniques]]
-<!-- whats-next:end -->

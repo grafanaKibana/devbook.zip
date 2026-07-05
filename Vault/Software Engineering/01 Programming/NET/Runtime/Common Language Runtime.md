@@ -8,7 +8,7 @@ level:
 priority: High
 status: Ready to Repeat
 
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -143,16 +143,3 @@ The CLR defines a memory model that governs how writes become visible across thr
 - [Managed execution process — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/standard/managed-execution-process) — step-by-step walkthrough from source code to running application.
 - [NativeAOT deployment — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/) — when and how to use ahead-of-time compilation.
 - [Fundamentals of garbage collection — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/fundamentals) — generational GC, LOH, and GC modes explained.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/01 Programming/NET/NET|NET]]
->
-> **Pages**
-> - [[Software Engineering/01 Programming/NET/Runtime/Garbage Collector|Garbage Collector]]
-> - [[Software Engineering/01 Programming/NET/Runtime/Memory Leaks|Memory Leaks]]
-<!-- whats-next:end -->

@@ -7,7 +7,7 @@ level:
   - "4"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 # Intro
 
@@ -180,21 +180,3 @@ await DoWorkAsync(linkedCts.Token);
 - [Cancellation in ASP.NET Core request pipelines (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/use-http-context#requestaborted) — how `HttpContext.RequestAborted` integrates with the cancellation model.
 - [Threading in C#: Cancellation Tokens (Joe Albahari)](https://www.albahari.com/threading/part3.aspx#_Cancellation_Tokens) — practical examples of token propagation, linked sources, and CPU-loop cancellation.
 - [Async cancellation best practices (Stephen Cleary)](https://blog.stephencleary.com/2022/02/cancellation-1-overview.html) — practitioner guide covering propagation patterns, exception handling, and common mistakes.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/01 Programming/NET/CSharp/CSharp|CSharp]]
->
-> **Pages**
-> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Async Await|Async Await]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Deadlocks|Deadlocks]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Mutex|Mutex]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Parallelism|Parallelism]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Semaphore|Semaphore]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Tasks|Tasks]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/ThreadPool|ThreadPool]]
-<!-- whats-next:end -->

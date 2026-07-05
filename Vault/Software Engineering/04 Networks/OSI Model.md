@@ -6,7 +6,7 @@ level:
   - "3"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -74,17 +74,3 @@ The whole reason to know OSI is that infrastructure operates *at* a layer, and t
 - [OSI model (Wikipedia)](https://en.wikipedia.org/wiki/OSI_model) — the seven layers, history, and how they map to real protocols.
 - [OSI model explained (Cloudflare Learning)](https://www.cloudflare.com/learning/ddos/glossary/open-systems-interconnection-model-osi/) — accessible per-layer walkthrough with attack/defense framing.
 - [TCP/IP model (Wikipedia)](https://en.wikipedia.org/wiki/Internet_protocol_suite) — the 4-layer model the internet actually uses, and how it relates to OSI.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/Software Engineering|Software Engineering]]
->
-> **Topics**
-> - [[Software Engineering/04 Networks/Architecture & Ops/Architecture & Ops|Architecture & Ops]]
-> - [[Software Engineering/04 Networks/Protocols/Protocols|Protocols]]
-> - [[Software Engineering/04 Networks/Transport & Sockets/Transport & Sockets|Transport & Sockets]]
-<!-- whats-next:end -->

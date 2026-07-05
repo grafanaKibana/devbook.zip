@@ -7,7 +7,7 @@ level:
   - "4"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -95,16 +95,3 @@ public static int Knapsack(int[] w, int[] v, int capacity)
 - [Dynamic programming (Wikipedia)](https://en.wikipedia.org/wiki/Dynamic_programming) — formal definitions, classic problems, and Bellman's origin.
 - [DP for Computing Contests (cp-algorithms)](https://cp-algorithms.com/dynamic_programming/intro-to-dp.html) — state design and common DP families.
 - [Dynamic Programming patterns (LeetCode discuss)](https://leetcode.com/discuss/general-discussion/458695/dynamic-programming-patterns) — a categorised tour of the recurring DP templates.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/02 Computer Science/Algorithms/Algorithms|Algorithms]]
->
-> **Pages**
-> - [[Software Engineering/02 Computer Science/Algorithms/Paradigms/Backtracking|Backtracking]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Paradigms/Greedy Algorithms|Greedy Algorithms]]
-<!-- whats-next:end -->

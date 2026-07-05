@@ -3,7 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - Tooling
-dg-publish: true
+publish: true
 status: Done
 level:
   - "2"
@@ -104,18 +104,3 @@ Assume your team has strict API error contracts and logging conventions. Without
 - [Adding custom instructions for GitHub Copilot CLI (GitHub Docs)](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-custom-instructions) — GitHub Copilot's equivalent of skills via `.github/copilot-instructions.md`.
 - [.clinerules: Version-Controlled, Shareable, and AI-Editable Instructions (Cline)](https://cline.ghost.io/clinerules-version-controlled-shareable-and-ai-editable-instructions/) — Cline's approach to version-controlled instruction files.
 - [What are Cursor Rules? (WorkOS)](https://workos.com/blog/what-are-cursor-rules) — overview of Cursor's `.cursorrules` and `.cursor/rules/` modular rule system.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/11 AI & ML|11 AI & ML]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/Tooling/Agent Instructions|Agent Instructions]]
-> - [[Software Engineering/11 AI & ML/Tooling/Coding Agents|Coding Agents]]
-> - [[Software Engineering/11 AI & ML/Tooling/Hooks|Hooks]]
-> - [[Software Engineering/11 AI & ML/Tooling/Plugins|Plugins]]
-<!-- whats-next:end -->

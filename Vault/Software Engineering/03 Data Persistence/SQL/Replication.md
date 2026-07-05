@@ -7,7 +7,7 @@ level:
   - "4"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -121,17 +121,3 @@ Typical scaling progression: vertical scale → read replicas → caching layer 
 - [PostgreSQL High Availability and Replication](https://www.postgresql.org/docs/15/high-availability.html) — official docs covering streaming replication, WAL shipping, and standby configuration.
 - [Designing Data-Intensive Applications, Ch. 5: Replication (Martin Kleppmann)](https://www.oreilly.com/library/view/designing-data-intensive-applications/9781098119058/) — deep-dive into leader-follower, multi-leader, and leaderless replication with replication lag and consistency analysis.
 - [Read-your-writes on replicas: PostgreSQL WAIT FOR LSN and MongoDB causal consistency](https://dev.to/franckpachot/read-your-writes-on-replicas-postgresql-wait-for-lsn-and-mongodb-causal-consistency-4he2) — practitioner post on implementing read-your-writes consistency across replicas in PostgreSQL and MongoDB.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/03 Data Persistence/03 Data Persistence|03 Data Persistence]]
->
-> **Pages**
-> - [[Software Engineering/03 Data Persistence/SQL/Indexes|Indexes]]
-> - [[Software Engineering/03 Data Persistence/SQL/Normalization Denormalization|Normalization Denormalization]]
-> - [[Software Engineering/03 Data Persistence/SQL/Sharding|Sharding]]
-<!-- whats-next:end -->

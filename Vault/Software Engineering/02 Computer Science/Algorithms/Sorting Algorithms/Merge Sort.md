@@ -7,7 +7,7 @@ level:
   - "4"
 priority: Low
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 # Intro
 
@@ -124,18 +124,3 @@ Merge sort's merge step also solves a classic problem for free: **counting inver
 
 - [Timsort (Wikipedia)](https://en.wikipedia.org/wiki/Timsort) — the hybrid sort used by Python and Java; built on merge sort's merge step with insertion sort for small runs; the production evolution of merge sort.
 - [Sorting algorithms comparison (Big-O Cheat Sheet)](https://www.bigocheatsheet.com/) — quick reference for time and space complexity of all common sorting algorithms.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/02 Computer Science/Algorithms/Algorithms|Algorithms]]
->
-> **Pages**
-> - [[Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Bubble Sort|Bubble Sort]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Insertion Sort|Insertion Sort]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Quick Sort|Quick Sort]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Selection Sort|Selection Sort]]
-<!-- whats-next:end -->

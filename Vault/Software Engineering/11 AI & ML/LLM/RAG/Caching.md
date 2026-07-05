@@ -7,7 +7,7 @@ level:
   - "2"
 priority: High
 status: Done
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -163,24 +163,3 @@ Main risk:
 - [Semantic cache with Azure Cosmos DB](https://learn.microsoft.com/en-us/azure/cosmos-db/gen-ai/semantic-cache) — Azure-specific implementation of semantic caching using Cosmos DB vector search.
 - [Reducing false positives in RAG semantic caching (InfoQ)](https://www.infoq.com/articles/reducing-false-positives-retrieval-augmented-generation/) — practitioner analysis of threshold calibration and false-positive mitigation strategies.
 - [RAGOps: Operating and Managing RAG Pipelines](https://arxiv.org/abs/2506.03401) — survey paper covering caching, monitoring, and operational patterns for production RAG systems.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
->
-> **Topics**
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation/Evaluation|Evaluation]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Chunking|Chunking]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Monitoring|Monitoring]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Query Translation|Query Translation]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/RAG Patterns|RAG Patterns]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Re-ranking|Re-ranking]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Retrieval|Retrieval]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Vector Databases|Vector Databases]]
-<!-- whats-next:end -->

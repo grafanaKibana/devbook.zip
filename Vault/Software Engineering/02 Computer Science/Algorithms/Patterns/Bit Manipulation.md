@@ -7,7 +7,7 @@ level:
   - "4"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -87,16 +87,3 @@ In .NET, prefer `[Flags]` enums and `System.Numerics.BitOperations` (`PopCount`,
 - [Bit manipulation (cp-algorithms)](https://cp-algorithms.com/algebra/bit-manipulation.html) — idioms, popcount, and subset enumeration with proofs.
 - [BitOperations class (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.numerics.bitoperations) — hardware-accelerated PopCount / leading/trailing zero count.
 - [Bit Twiddling Hacks (Sean Eron Anderson)](https://graphics.stanford.edu/~seander/bithacks.html) — the classic catalogue of branch-free bit tricks.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/02 Computer Science/Algorithms/Algorithms|Algorithms]]
->
-> **Pages**
-> - [[Software Engineering/02 Computer Science/Algorithms/Patterns/Sliding Window|Sliding Window]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Patterns/Two Pointers|Two Pointers]]
-<!-- whats-next:end -->

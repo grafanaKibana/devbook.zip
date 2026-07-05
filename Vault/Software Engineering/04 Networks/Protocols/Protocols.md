@@ -5,7 +5,7 @@ subtopic:
   - Protocols
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 priority: High
 level:
   - "3"
@@ -20,21 +20,3 @@ Protocols are the agreed-upon rules that let machines communicate: what to send,
 
 - [RFC 3986: Uniform Resource Identifier (URI): Generic Syntax](https://datatracker.ietf.org/doc/html/rfc3986)
 - [MDN: URL](https://developer.mozilla.org/en-US/docs/Web/API/URL)
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/04 Networks/04 Networks|04 Networks]]
->
-> **Pages**
-> - [[Software Engineering/04 Networks/Protocols/DNS|DNS]]
-> - [[Software Engineering/04 Networks/Protocols/gRPC|gRPC]]
-> - [[Software Engineering/04 Networks/Protocols/HTTP|HTTP]]
-> - [[Software Engineering/04 Networks/Protocols/HTTP 2|HTTP 2]]
-> - [[Software Engineering/04 Networks/Protocols/REST|REST]]
-> - [[Software Engineering/04 Networks/Protocols/RPC|RPC]]
-> - [[Software Engineering/04 Networks/Protocols/SMTP|SMTP]]
-> - [[Software Engineering/04 Networks/Protocols/WebSockets|WebSockets]]
-<!-- whats-next:end -->

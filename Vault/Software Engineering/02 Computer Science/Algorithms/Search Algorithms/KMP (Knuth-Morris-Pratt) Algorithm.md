@@ -7,7 +7,7 @@ level:
   - "4"
 priority: Medium
 status: Done
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -111,17 +111,3 @@ Text: ABABABC
 
 - [Knuth-Morris-Pratt algorithm -- encyclopedic overview with formal correctness argument and history (Wikipedia)](https://en.wikipedia.org/wiki/Knuth%E2%80%93Morris%E2%80%93Pratt_algorithm)
 - [Prefix function and KMP -- implementation guide with LPS construction, code examples, and applications to string problems (cp-algorithms)](https://cp-algorithms.com/string/prefix-function.html)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/02 Computer Science/Algorithms/Algorithms|Algorithms]]
->
-> **Pages**
-> - [[Software Engineering/02 Computer Science/Algorithms/Search Algorithms/Binary Search|Binary Search]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Search Algorithms/DFS BFS|DFS BFS]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Search Algorithms/Rabin Karp Search|Rabin Karp Search]]
-<!-- whats-next:end -->

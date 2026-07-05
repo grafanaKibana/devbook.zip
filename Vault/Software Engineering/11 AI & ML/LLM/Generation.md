@@ -7,7 +7,7 @@ level:
   - "2"
 priority: High
 status: Done
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -151,27 +151,3 @@ Mitigation: validate semantic content in addition to schema compliance. For crit
 - [MiniCheck — efficient fact-checking of LLMs on grounding documents (EMNLP 2024)](https://aclanthology.org/2024.emnlp-main.499)
 - [Using logprobs for debugging and confidence estimation (OpenAI Cookbook)](https://cookbook.openai.com/examples/using_logprobs)
 - [Evaluating LLM temperature — systematic methodology for production tuning (Promptfoo)](https://www.promptfoo.dev/docs/guides/evaluate-llm-temperature/)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/11 AI & ML|11 AI & ML]]
->
-> **Topics**
-> - [[Software Engineering/11 AI & ML/LLM/Agents/Agents|Agents]]
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation|Evaluation]]
-> - [[Software Engineering/11 AI & ML/LLM/Prompting/Prompting|Prompting]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/RAG|RAG]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/Context Engineering|Context Engineering]]
-> - [[Software Engineering/11 AI & ML/LLM/Embeddings|Embeddings]]
-> - [[Software Engineering/11 AI & ML/LLM/Fine-tuning|Fine-tuning]]
-> - [[Software Engineering/11 AI & ML/LLM/Guardrails|Guardrails]]
-> - [[Software Engineering/11 AI & ML/LLM/Hallucinations|Hallucinations]]
-> - [[Software Engineering/11 AI & ML/LLM/Model Selection and Routing|Model Selection and Routing]]
-> - [[Software Engineering/11 AI & ML/LLM/OWASP vulnerabilities on AI LLM|OWASP vulnerabilities on AI LLM]]
-<!-- whats-next:end -->

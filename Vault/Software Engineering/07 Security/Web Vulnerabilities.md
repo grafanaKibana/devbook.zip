@@ -7,7 +7,7 @@ level:
   - "4"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Common Web Vulnerabilities
@@ -117,24 +117,3 @@ public IActionResult Transfer(TransferDto dto) { /* ... */ }
 - [OWASP CSRF Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html) — synchronizer token and `SameSite`.
 - [Prevent XSS in ASP.NET Core (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/security/cross-site-scripting) — Razor encoding and `Html.Raw` caveats.
 - [Anti-forgery / CSRF in ASP.NET Core (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/security/anti-request-forgery) — token generation and validation.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/Software Engineering|Software Engineering]]
->
-> **Topics**
-> - [[Software Engineering/07 Security/Authentication/Authentication|Authentication]]
->
-> **Pages**
-> - [[Software Engineering/07 Security/Block-chain|Block-chain]]
-> - [[Software Engineering/07 Security/Digital Signature|Digital Signature]]
-> - [[Software Engineering/07 Security/Encryption|Encryption]]
-> - [[Software Engineering/07 Security/Hashing|Hashing]]
-> - [[Software Engineering/07 Security/JWT Bearer|JWT Bearer]]
-> - [[Software Engineering/07 Security/OWASP|OWASP]]
-> - [[Software Engineering/07 Security/Secrets Management|Secrets Management]]
-<!-- whats-next:end -->

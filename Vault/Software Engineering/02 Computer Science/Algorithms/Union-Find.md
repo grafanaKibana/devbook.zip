@@ -7,7 +7,7 @@ level:
   - "3"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 # Intro
 
@@ -114,19 +114,3 @@ Path halving is often preferred in cache-sensitive code because fewer writes red
 - [DSU / Union-Find (cp-algorithms)](https://cp-algorithms.com/data_structures/disjoint_set_union.html) — practical implementation guide with path compression, union by rank, and applications including Kruskal's MST and offline LCA.
 - [Kruskal's algorithm (cp-algorithms)](https://cp-algorithms.com/graph/mst_kruskal.html) — MST construction using Union-Find with worked examples.
 - [Disjoint-set data structure (Wikipedia)](https://en.wikipedia.org/wiki/Disjoint-set_data_structure) — proof of the O(α(n)) amortized bound.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/02 Computer Science/02 Computer Science|02 Computer Science]]
->
-> **Topics**
-> - [[Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Graph Algorithms|Graph Algorithms]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Paradigms/Paradigms|Paradigms]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Patterns/Patterns|Patterns]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Search Algorithms/Search Algorithms|Search Algorithms]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms|Sorting Algorithms]]
-<!-- whats-next:end -->

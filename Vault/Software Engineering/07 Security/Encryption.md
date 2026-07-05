@@ -8,7 +8,7 @@ level:
 priority: High
 status: Ready to Repeat
 
-dg-publish: true
+publish: true
 ---
 
 # Encryption
@@ -111,23 +111,3 @@ In .NET, TLS is handled automatically by `HttpClient` and ASP.NET Core. Enforce 
 - [NIST Cryptographic Standards](https://csrc.nist.gov/projects/cryptographic-standards-and-guidelines) — authoritative cryptographic standards; covers AES, RSA, ECDSA, and key management guidelines
 - [Microsoft — Cryptography in .NET](https://learn.microsoft.com/en-us/dotnet/standard/security/cryptography-model) — .NET cryptography model; covers `System.Security.Cryptography` classes and best practices
 - [OWASP Cryptographic Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html) — practical guidance on algorithm selection, key management, and common mistakes
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/Software Engineering|Software Engineering]]
->
-> **Topics**
-> - [[Software Engineering/07 Security/Authentication/Authentication|Authentication]]
->
-> **Pages**
-> - [[Software Engineering/07 Security/Block-chain|Block-chain]]
-> - [[Software Engineering/07 Security/Digital Signature|Digital Signature]]
-> - [[Software Engineering/07 Security/Hashing|Hashing]]
-> - [[Software Engineering/07 Security/JWT Bearer|JWT Bearer]]
-> - [[Software Engineering/07 Security/OWASP|OWASP]]
-> - [[Software Engineering/07 Security/Secrets Management|Secrets Management]]
-> - [[Software Engineering/07 Security/Web Vulnerabilities|Web Vulnerabilities]]
-<!-- whats-next:end -->

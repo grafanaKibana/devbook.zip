@@ -7,7 +7,7 @@ level:
   - "2"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Domain-Driven Design
@@ -215,16 +215,3 @@ See [[Software Engineering/05 Architecture/Patterns/Repository & UoW|Repository 
 - [Implementing Domain-Driven Design (Vaughn Vernon)](https://www.oreilly.com/library/view/implementing-domain-driven-design/9780133039900/) — more practical than Evans; covers Aggregate design, Domain Events, and Bounded Context integration with code examples.
 - [CQRS.nu DDD FAQ](https://cqrs.nu/faq/Domain%20Driven%20Design) — concise Q&A on DDD concepts, Aggregates, and how DDD relates to CQRS and Event Sourcing.
 - [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/CQRS|CQRS]] — architectural pattern that pairs naturally with DDD: commands map to Aggregate operations, queries bypass the domain model for read efficiency.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/Patterns/Patterns|Patterns]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/CQRS|CQRS]]
-> - [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/Event Sourcing|Event Sourcing]]
-<!-- whats-next:end -->

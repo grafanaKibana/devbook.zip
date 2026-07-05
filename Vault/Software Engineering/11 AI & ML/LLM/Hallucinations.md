@@ -7,7 +7,7 @@ level:
   - "3"
 priority: Medium
 status: Done
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -118,27 +118,3 @@ In practice, combine these with [[Software Engineering/11 AI & ML/LLM/Guardrails
 - [Chain-of-Verification reduces hallucination in LLMs -- factored verification methodology (Dhuliawala et al., Meta AI 2023)](https://arxiv.org/abs/2309.11495) - Core paper for generate-verify-revise decomposition.
 - [Hallucination in RAG-based legal AI tools -- Stanford and Yale study finding over 17% rate (Magesh et al., JELS 2025)](https://law.stanford.edu/wp-content/uploads/2024/05/Legal_RAG_Hallucinations.pdf) - Domain-specific evidence that RAG meaningfully reduces but does not remove hallucinations.
 - [Extrinsic hallucinations in LLMs -- mechanistic causes and mitigation survey (Lilian Weng, July 2024)](https://lilianweng.github.io/posts/2024-07-07-hallucination/) - Mechanism-focused practitioner synthesis with concrete mitigation patterns.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/11 AI & ML|11 AI & ML]]
->
-> **Topics**
-> - [[Software Engineering/11 AI & ML/LLM/Agents/Agents|Agents]]
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Evaluation|Evaluation]]
-> - [[Software Engineering/11 AI & ML/LLM/Prompting/Prompting|Prompting]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/RAG|RAG]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/Context Engineering|Context Engineering]]
-> - [[Software Engineering/11 AI & ML/LLM/Embeddings|Embeddings]]
-> - [[Software Engineering/11 AI & ML/LLM/Fine-tuning|Fine-tuning]]
-> - [[Software Engineering/11 AI & ML/LLM/Generation|Generation]]
-> - [[Software Engineering/11 AI & ML/LLM/Guardrails|Guardrails]]
-> - [[Software Engineering/11 AI & ML/LLM/Model Selection and Routing|Model Selection and Routing]]
-> - [[Software Engineering/11 AI & ML/LLM/OWASP vulnerabilities on AI LLM|OWASP vulnerabilities on AI LLM]]
-<!-- whats-next:end -->

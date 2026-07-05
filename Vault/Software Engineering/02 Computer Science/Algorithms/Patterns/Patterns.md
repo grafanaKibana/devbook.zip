@@ -5,7 +5,7 @@ subtopic:
   - Algorithms
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 priority: Medium
 level:
   - "4"
@@ -36,17 +36,3 @@ This folder covers three of the most widely applicable:
 
 - [14 patterns to ace coding interviews (educative)](https://www.educative.io/blog/coding-interview-patterns) — the broader catalogue these belong to.
 - [Competitive Programmer's Handbook (Laaksonen)](https://cses.fi/book/book.pdf) — free book covering these techniques with proofs and exercises.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/02 Computer Science/Algorithms/Algorithms|Algorithms]]
->
-> **Pages**
-> - [[Software Engineering/02 Computer Science/Algorithms/Patterns/Bit Manipulation|Bit Manipulation]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Patterns/Sliding Window|Sliding Window]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Patterns/Two Pointers|Two Pointers]]
-<!-- whats-next:end -->

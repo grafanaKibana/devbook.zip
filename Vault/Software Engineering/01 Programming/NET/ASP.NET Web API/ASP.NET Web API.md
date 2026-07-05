@@ -9,7 +9,7 @@ priority: High
 tags:
   - FolderNote
 
-dg-publish: true
+publish: true
 status: Creation
 ---
 
@@ -73,20 +73,3 @@ public sealed class OrdersController : ControllerBase
 - [Filters in ASP.NET Core](https://learn.microsoft.com/aspnet/core/mvc/controllers/filters?view=aspnetcore-10.0)
 - [Minimal API filters](https://learn.microsoft.com/aspnet/core/fundamentals/minimal-apis/min-api-filters?view=aspnetcore-10.0)
 - [OWASP API Security Top 10 2023](https://owasp.org/API-Security/editions/2023/en/0x11-t10/)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/01 Programming/NET/NET|NET]]
->
-> **Pages**
-> - [[Software Engineering/01 Programming/NET/ASP.NET Web API/Authentication|Authentication]]
-> - [[Software Engineering/01 Programming/NET/ASP.NET Web API/Authorization|Authorization]]
-> - [[Software Engineering/01 Programming/NET/ASP.NET Web API/CORS|CORS]]
-> - [[Software Engineering/01 Programming/NET/ASP.NET Web API/Dependency Injection|Dependency Injection]]
-> - [[Software Engineering/01 Programming/NET/ASP.NET Web API/Filters|Filters]]
-> - [[Software Engineering/01 Programming/NET/ASP.NET Web API/Middlewares|Middlewares]]
-<!-- whats-next:end -->

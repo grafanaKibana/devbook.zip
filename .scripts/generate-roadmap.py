@@ -24,7 +24,7 @@ MAX_DEPTH = 5
 
 DG_ROADMAP_PERMALINK = "/software-engineering/roadmap/"
 DG_ROADMAP_FRONTMATTER = {
-    "dg-publish": True,
+    "publish": True,
     "permalink": DG_ROADMAP_PERMALINK,
     "title": "Roadmap",
 }

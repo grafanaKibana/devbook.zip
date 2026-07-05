@@ -5,7 +5,7 @@ subtopic:
   - Patterns
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 priority: High
 level:
   - "3"
@@ -22,17 +22,3 @@ The three patterns here compose naturally: [[Software Engineering/05 Architectur
 
 - [Patterns of Enterprise Application Architecture -- foundational catalog of enterprise patterns covering domain logic, data source, and distribution patterns (Martin Fowler)](https://martinfowler.com/eaaCatalog/)
 - [Cloud design patterns -- Azure architecture center catalog covering CQRS, Event Sourcing, and related cloud-native patterns (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/architecture/patterns/)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/Patterns/Patterns|Patterns]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/CQRS|CQRS]]
-> - [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/Domain-Driven Design|Domain-Driven Design]]
-> - [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/Event Sourcing|Event Sourcing]]
-<!-- whats-next:end -->

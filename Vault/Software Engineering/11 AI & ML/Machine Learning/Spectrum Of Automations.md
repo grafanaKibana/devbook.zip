@@ -7,7 +7,7 @@ level:
   - "1"
 priority: Low
 status: Done
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -133,20 +133,3 @@ def process_transaction_partial(tx: Transaction) -> Action:
 - [ML deployment strategies (Chip Huyen, Designing Machine Learning Systems)](https://www.oreilly.com/library/view/designing-machine-learning/9781098107956/) — Chapter 9 covers deployment patterns including shadow mode, canary deployment, and A/B testing for ML systems.
 - [Human-in-the-loop ML (Hugging Face)](https://huggingface.co/blog/human-in-the-loop) — practical discussion of when and how to keep humans in the loop for AI-assisted workflows.
 - [Shadow mode deployment (Martin Fowler)](https://martinfowler.com/bliki/ShadowDeployment.html) — explanation of shadow mode as a deployment technique for validating new system behavior against production traffic without user impact.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/11 AI & ML|11 AI & ML]]
->
-> **Topics**
-> - [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/Evaluation|Evaluation]]
-> - [[Software Engineering/11 AI & ML/Machine Learning/Types/Types|Types]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/Machine Learning/Data Drift|Data Drift]]
-> - [[Software Engineering/11 AI & ML/Machine Learning/Natural Language Processing|Natural Language Processing]]
-<!-- whats-next:end -->

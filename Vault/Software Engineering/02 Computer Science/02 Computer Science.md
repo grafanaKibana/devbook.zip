@@ -6,7 +6,7 @@ topic:
 subtopic: []
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 level:
   - '4'
 status: Done
@@ -35,15 +35,3 @@ A concrete example: a code review reveals a nested loop checking membership in a
 - [Big O cheat sheet](https://www.bigocheatsheet.com/) — Visual comparison of data structure and algorithm complexities.
 - [Introduction to Algorithms (MIT OpenCourseWare)](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/) — University-level CS fundamentals with lectures and problem sets.
 - [Steve Yegge — Get That Job at Google](https://steve-yegge.blogspot.com/2008/03/get-that-job-at-google.html) — Practitioner perspective on why CS fundamentals matter in industry interviews and system design.
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/Software Engineering|Software Engineering]]
->
-> **Topics**
-> - [[Software Engineering/02 Computer Science/Algorithms/Algorithms|Algorithms]]
-> - [[Software Engineering/02 Computer Science/Data Structures/Data Structures|Data Structures]]
-<!-- whats-next:end -->

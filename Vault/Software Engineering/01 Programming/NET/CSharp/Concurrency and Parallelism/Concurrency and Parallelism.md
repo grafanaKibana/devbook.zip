@@ -7,7 +7,7 @@ priority: High
 status: Creation
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 level:
   - "4"
 ---
@@ -117,22 +117,3 @@ public async Task<IReadOnlyList<UserDto>> LoadUsersBoundedAsync(
 - [Threading in C# (Joe Albahari)](https://www.albahari.com/threading/)
 - [Threading in C#: Basic synchronization and deadlocks (Joe Albahari)](https://www.albahari.com/threading/part2.aspx)
 - [Threading in C#: Parallel programming and tasks (Joe Albahari)](https://www.albahari.com/threading/part5.aspx)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/01 Programming/NET/CSharp/CSharp|CSharp]]
->
-> **Pages**
-> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Async Await|Async Await]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/CancellationToken|CancellationToken]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Deadlocks|Deadlocks]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Mutex|Mutex]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Parallelism|Parallelism]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Semaphore|Semaphore]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Tasks|Tasks]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/ThreadPool|ThreadPool]]
-<!-- whats-next:end -->

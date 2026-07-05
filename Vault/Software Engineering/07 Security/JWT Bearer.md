@@ -8,7 +8,7 @@ level:
 priority: High
 status: Ready to Repeat
 
-dg-publish: true
+publish: true
 ---
 
 # JWT Bearer Authentication
@@ -116,23 +116,3 @@ The middleware automatically fetches the JWKS (public keys) from the authority's
 - [jwt.io](https://jwt.io/) — interactive JWT decoder and algorithm reference; useful for debugging tokens
 - [Microsoft — JWT Bearer in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/jwt-authn) — official ASP.NET Core JWT authentication guide
 - [RFC 7517 — JSON Web Key (JWK)](https://datatracker.ietf.org/doc/html/rfc7517) — the JWKS standard for publishing public keys
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/Software Engineering|Software Engineering]]
->
-> **Topics**
-> - [[Software Engineering/07 Security/Authentication/Authentication|Authentication]]
->
-> **Pages**
-> - [[Software Engineering/07 Security/Block-chain|Block-chain]]
-> - [[Software Engineering/07 Security/Digital Signature|Digital Signature]]
-> - [[Software Engineering/07 Security/Encryption|Encryption]]
-> - [[Software Engineering/07 Security/Hashing|Hashing]]
-> - [[Software Engineering/07 Security/OWASP|OWASP]]
-> - [[Software Engineering/07 Security/Secrets Management|Secrets Management]]
-> - [[Software Engineering/07 Security/Web Vulnerabilities|Web Vulnerabilities]]
-<!-- whats-next:end -->

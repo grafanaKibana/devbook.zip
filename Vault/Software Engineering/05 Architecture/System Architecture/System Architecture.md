@@ -5,7 +5,7 @@ subtopic:
   - System Architecture
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 level:
   - '4'
 priority: High
@@ -19,20 +19,3 @@ Architecture styles are high-level ways to organize systems: monoliths, microser
 ## Links
 
 - [Architectural pattern (Wikipedia)](https://en.wikipedia.org/wiki/Architectural_pattern)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/05 Architecture|05 Architecture]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/System Architecture/Event-Driven Architecture|Event-Driven Architecture]]
-> - [[Software Engineering/05 Architecture/System Architecture/Microservices|Microservices]]
-> - [[Software Engineering/05 Architecture/System Architecture/Modular Monolith|Modular Monolith]]
-> - [[Software Engineering/05 Architecture/System Architecture/Monolith Architecture|Monolith Architecture]]
-> - [[Software Engineering/05 Architecture/System Architecture/Serverless Architecture|Serverless Architecture]]
-> - [[Software Engineering/05 Architecture/System Architecture/Service-Oriented Architecture|Service-Oriented Architecture]]
-<!-- whats-next:end -->

@@ -7,7 +7,7 @@ level:
   - "3"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # ACID
@@ -152,21 +152,3 @@ await db.SaveChangesAsync();
 - [Transaction isolation levels (PostgreSQL docs)](https://www.postgresql.org/docs/current/transaction-iso.html) — PostgreSQL's implementation of isolation levels with concrete examples of each anomaly.
 - [Transaction isolation in SQL Server (Microsoft Learn)](https://learn.microsoft.com/en-us/sql/relational-databases/sql-server-transaction-locking-and-row-versioning-guide) — SQL Server's locking and row versioning guide; covers all isolation levels including the SNAPSHOT isolation level unique to SQL Server.
 - [Designing Data-Intensive Applications (Martin Kleppmann)](https://dataintensive.net/) — Chapter 7 covers transactions in depth: ACID semantics, isolation levels, and the tradeoffs between consistency and performance in distributed systems.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/Software Engineering|Software Engineering]]
->
-> **Topics**
-> - [[Software Engineering/03 Data Persistence/NoSQL/NoSQL|NoSQL]]
-> - [[Software Engineering/03 Data Persistence/ORMs/ORMs|ORMs]]
-> - [[Software Engineering/03 Data Persistence/SQL/SQL|SQL]]
->
-> **Pages**
-> - [[Software Engineering/03 Data Persistence/Caching|Caching]]
-> - [[Software Engineering/03 Data Persistence/Connection Pooling|Connection Pooling]]
-<!-- whats-next:end -->

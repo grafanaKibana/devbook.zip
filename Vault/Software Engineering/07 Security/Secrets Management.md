@@ -7,7 +7,7 @@ level:
   - "3"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Secrets Management
@@ -104,24 +104,3 @@ Secrets must be rotatable on a schedule and *immediately* on suspected compromis
 - [The Twelve-Factor App — Config](https://12factor.net/config) — the case for keeping config/secrets in the environment, not the code.
 - [HashiCorp Vault — dynamic secrets](https://developer.hashicorp.com/vault/docs/secrets) — generating short-lived, per-request credentials.
 - [OWASP Secrets Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html) — practical guidance on storage, rotation, and leak response.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/Software Engineering|Software Engineering]]
->
-> **Topics**
-> - [[Software Engineering/07 Security/Authentication/Authentication|Authentication]]
->
-> **Pages**
-> - [[Software Engineering/07 Security/Block-chain|Block-chain]]
-> - [[Software Engineering/07 Security/Digital Signature|Digital Signature]]
-> - [[Software Engineering/07 Security/Encryption|Encryption]]
-> - [[Software Engineering/07 Security/Hashing|Hashing]]
-> - [[Software Engineering/07 Security/JWT Bearer|JWT Bearer]]
-> - [[Software Engineering/07 Security/OWASP|OWASP]]
-> - [[Software Engineering/07 Security/Web Vulnerabilities|Web Vulnerabilities]]
-<!-- whats-next:end -->

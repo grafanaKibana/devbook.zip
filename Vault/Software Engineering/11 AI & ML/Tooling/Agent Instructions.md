@@ -3,7 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - Tooling
-dg-publish: true
+publish: true
 status: Done
 level:
   - "2"
@@ -100,18 +100,3 @@ This works because it sets: execution defaults (stack, verification command), da
 - [Windsurf Cascade memories and workspace rules (`.windsurf/rules/*.md`) (Windsurf Docs)](https://docs.windsurf.com/windsurf/cascade/memories)
 - [Claude Code best practices (Anthropic)](https://docs.anthropic.com/en/docs/claude-code/best-practices)
 - [OpenCode documentation (AGENTS-style project instructions) (OpenCode)](https://opencode.ai/docs/)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/11 AI & ML|11 AI & ML]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/Tooling/Coding Agents|Coding Agents]]
-> - [[Software Engineering/11 AI & ML/Tooling/Hooks|Hooks]]
-> - [[Software Engineering/11 AI & ML/Tooling/Plugins|Plugins]]
-> - [[Software Engineering/11 AI & ML/Tooling/Skills|Skills]]
-<!-- whats-next:end -->

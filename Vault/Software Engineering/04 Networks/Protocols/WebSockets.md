@@ -7,7 +7,7 @@ level:
   - "3"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -118,21 +118,3 @@ Most apps use a higher-level layer instead of raw frames — **[[Software Engine
 - [WebSockets API (MDN)](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API) — browser client API and usage patterns.
 - [WebSockets support in ASP.NET Core (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/websockets) — raw WebSocket handling in Kestrel.
 - [Cross-Site WebSocket Hijacking (PortSwigger)](https://portswigger.net/web-security/websockets/cross-site-websocket-hijacking) — the Origin-validation security pitfall.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/04 Networks/04 Networks|04 Networks]]
->
-> **Pages**
-> - [[Software Engineering/04 Networks/Protocols/DNS|DNS]]
-> - [[Software Engineering/04 Networks/Protocols/gRPC|gRPC]]
-> - [[Software Engineering/04 Networks/Protocols/HTTP|HTTP]]
-> - [[Software Engineering/04 Networks/Protocols/HTTP 2|HTTP 2]]
-> - [[Software Engineering/04 Networks/Protocols/REST|REST]]
-> - [[Software Engineering/04 Networks/Protocols/RPC|RPC]]
-> - [[Software Engineering/04 Networks/Protocols/SMTP|SMTP]]
-<!-- whats-next:end -->

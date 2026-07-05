@@ -5,7 +5,7 @@ subtopic:
   - Machine Learning
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 status: Done
 priority: Low
 level:
@@ -115,12 +115,3 @@ Train an agent to choose actions that maximize long-term reward through interact
 - [Hugging Face — Self-supervised learning](https://huggingface.co/blog/self-supervised-learning) — practitioner explanation of SSL and its role in LLM and vision model pretraining
 - [OpenAI Spinning Up in Deep RL](https://spinningup.openai.com/en/latest/spinningup/rl_intro.html) — canonical RL intro from practitioners; covers policy gradients, value functions, and exploration
 - [Rules of ML](https://developers.google.com/machine-learning/guides/rules-of-ml) — Google's practical ML engineering guide; covers when to use ML vs simpler approaches
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/Machine Learning/Machine Learning|Machine Learning]]
->
-<!-- whats-next:end -->

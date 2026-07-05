@@ -5,7 +5,7 @@ subtopic:
   - NET
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 status: Creation
 priority: High
 level:
@@ -42,16 +42,3 @@ A practical example: your API handles 1000 req/s fine in testing. In production 
 - [Memory management and garbage collection (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/) — Full GC documentation hub.
 - [Diagnosing memory leaks with dotnet-dump (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/core/diagnostics/debug-memory-leak) — Step-by-step leak diagnosis.
 - [Pro .NET Memory Management (Konrad Kokosa)](https://prodotnetmemory.com/) — Practitioner deep-dive into .NET memory internals and GC tuning.
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/01 Programming/NET/NET|NET]]
->
-> **Pages**
-> - [[Software Engineering/01 Programming/NET/Runtime/Common Language Runtime|Common Language Runtime]]
-> - [[Software Engineering/01 Programming/NET/Runtime/Garbage Collector|Garbage Collector]]
-> - [[Software Engineering/01 Programming/NET/Runtime/Memory Leaks|Memory Leaks]]
-<!-- whats-next:end -->

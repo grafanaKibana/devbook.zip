@@ -7,7 +7,7 @@ level:
 priority: High
 status: Ready to Repeat
 
-dg-publish: true
+publish: true
 ---
 
 # CI/CD Tools
@@ -160,21 +160,3 @@ pipeline {
 - [Azure DevOps Pipelines](https://learn.microsoft.com/en-us/azure/devops/pipelines/) — official Azure DevOps docs; covers YAML pipelines, environments, and Azure deployment tasks
 - [Martin Fowler — Continuous Integration](https://martinfowler.com/articles/continuousIntegration.html) — canonical CI definition and practices by the originator of the concept
 - [Jenkins documentation](https://www.jenkins.io/doc/) — official Jenkins docs; covers pipeline syntax, plugins, and administration
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/Software Engineering|Software Engineering]]
->
-> **Topics**
-> - [[Software Engineering/09 DevOps/Deployment Strategies/Deployment Strategies|Deployment Strategies]]
-> - [[Software Engineering/09 DevOps/Version Control Systems/Version Control Systems|Version Control Systems]]
->
-> **Pages**
-> - [[Software Engineering/09 DevOps/Docker|Docker]]
-> - [[Software Engineering/09 DevOps/Infrastructure as Code|Infrastructure as Code]]
-> - [[Software Engineering/09 DevOps/Kubernetes|Kubernetes]]
-> - [[Software Engineering/09 DevOps/Observability|Observability]]
-<!-- whats-next:end -->

@@ -5,7 +5,7 @@ subtopic:
   - Principles
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 priority: High
 level:
   - '4'
@@ -19,19 +19,3 @@ Principles like SOLID, DRY, KISS, and YAGNI are guardrails for keeping systems u
 ## Links
 
 - [Software design principles (Wikipedia)](https://en.wikipedia.org/wiki/Software_design#Design_principles)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/06 Development Practices/06 Development Practices|06 Development Practices]]
->
-> **Pages**
-> - [[Software Engineering/06 Development Practices/Principles/DRY|DRY]]
-> - [[Software Engineering/06 Development Practices/Principles/IoC (Holywood Principle)|IoC (Holywood Principle)]]
-> - [[Software Engineering/06 Development Practices/Principles/KISS|KISS]]
-> - [[Software Engineering/06 Development Practices/Principles/SOLID|SOLID]]
-> - [[Software Engineering/06 Development Practices/Principles/YAGNI|YAGNI]]
-<!-- whats-next:end -->

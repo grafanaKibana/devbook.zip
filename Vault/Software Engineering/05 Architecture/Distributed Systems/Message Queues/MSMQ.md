@@ -7,7 +7,7 @@ level:
   - "2"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # MSMQ
@@ -118,16 +118,3 @@ catch
 - [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/RabbitMQ|RabbitMQ]] — the standard modern alternative for on-premise or self-hosted message brokering; cross-platform, actively maintained.
 - [Outbox pattern (Microsoft Azure Architecture Center)](https://learn.microsoft.com/en-us/azure/architecture/best-practices/transactional-outbox-cosmos) — the modern replacement for MSDTC-based distributed transactions: write message to DB in the same transaction as the domain change, then relay to the broker.
 - [Azure Service Bus overview (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-messaging-overview) — the cloud-managed successor to MSMQ for Azure-hosted systems; supports sessions, dead-lettering, and scheduled delivery.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/Distributed Systems/Distributed Systems|Distributed Systems]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/Kafka|Kafka]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Message Queues/RabbitMQ|RabbitMQ]]
-<!-- whats-next:end -->

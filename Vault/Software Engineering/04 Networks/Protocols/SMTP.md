@@ -7,7 +7,7 @@ level:
   - "3"
 priority: Low
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # SMTP
@@ -114,21 +114,3 @@ Without these, emails from your domain will be marked as spam or rejected.
 - [SMTP (RFC 5321)](https://www.rfc-editor.org/rfc/rfc5321) — the current SMTP specification; defines the protocol commands, response codes, and message format.
 - [MailKit documentation](https://github.com/jstedfast/MailKit) — the recommended .NET email library; supports SMTP, IMAP, POP3, MIME, and OAuth2 authentication. `System.Net.Mail.SmtpClient` is marked obsolete.
 - [Email authentication (Cloudflare)](https://www.cloudflare.com/learning/email-security/dmarc-dkim-spf/) — practical explanation of SPF, DKIM, and DMARC with configuration examples.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/04 Networks/04 Networks|04 Networks]]
->
-> **Pages**
-> - [[Software Engineering/04 Networks/Protocols/DNS|DNS]]
-> - [[Software Engineering/04 Networks/Protocols/gRPC|gRPC]]
-> - [[Software Engineering/04 Networks/Protocols/HTTP|HTTP]]
-> - [[Software Engineering/04 Networks/Protocols/HTTP 2|HTTP 2]]
-> - [[Software Engineering/04 Networks/Protocols/REST|REST]]
-> - [[Software Engineering/04 Networks/Protocols/RPC|RPC]]
-> - [[Software Engineering/04 Networks/Protocols/WebSockets|WebSockets]]
-<!-- whats-next:end -->

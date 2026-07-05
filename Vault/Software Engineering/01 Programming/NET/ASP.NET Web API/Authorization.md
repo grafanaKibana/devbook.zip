@@ -7,7 +7,7 @@ level:
   - "1"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Authorization in ASP.NET Core
@@ -169,19 +169,3 @@ The `"CanEditDocument"` policy handler receives the `document` as the resource a
 - [Resource-based authorization (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/resourcebased) — how to use `IAuthorizationService` for per-resource authorization decisions.
 - [[Software Engineering/01 Programming/NET/ASP.NET Web API/Authentication|Authentication]] — the prerequisite: how ASP.NET Core establishes the `ClaimsPrincipal` before authorization runs.
 - [[Software Engineering/07 Security/Authentication/Resource-based Auth|Resource-based Auth]] — the general pattern for resource-level access control, independent of ASP.NET Core.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/01 Programming/NET/NET|NET]]
->
-> **Pages**
-> - [[Software Engineering/01 Programming/NET/ASP.NET Web API/Authentication|Authentication]]
-> - [[Software Engineering/01 Programming/NET/ASP.NET Web API/CORS|CORS]]
-> - [[Software Engineering/01 Programming/NET/ASP.NET Web API/Dependency Injection|Dependency Injection]]
-> - [[Software Engineering/01 Programming/NET/ASP.NET Web API/Filters|Filters]]
-> - [[Software Engineering/01 Programming/NET/ASP.NET Web API/Middlewares|Middlewares]]
-<!-- whats-next:end -->

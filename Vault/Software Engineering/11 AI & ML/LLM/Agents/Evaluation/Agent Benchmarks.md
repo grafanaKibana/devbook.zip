@@ -7,7 +7,7 @@ level:
   - "3"
 priority: Medium
 status: Done
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -75,16 +75,3 @@ comparable. Decide on your own repos, same scaffold, with cost and pass^k.
 - [WebArena -- a realistic web environment for autonomous agents (Zhou et al., 2023)](https://arxiv.org/abs/2307.13854) — self-hosted real web apps for grounded, long-horizon web tasks.
 - [tau-bench -- tool-agent-user interaction with pass^k reliability (Yao et al., Sierra, 2024)](https://arxiv.org/abs/2406.12045) — the benchmark that popularized reporting reliability across repeated runs.
 - [Berkeley Function-Calling Leaderboard -- tool selection and argument accuracy (Gorilla, UC Berkeley)](https://gorilla.cs.berkeley.edu/blogs/8_berkeley_function_calling_leaderboard.html) — the standard function-calling benchmark and live leaderboard.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/LLM/Agents/Agents|Agents]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation|Tool-Call Evaluation]]
-> - [[Software Engineering/11 AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation|Trajectory Evaluation]]
-<!-- whats-next:end -->

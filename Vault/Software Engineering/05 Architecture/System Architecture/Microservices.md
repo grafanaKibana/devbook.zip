@@ -8,7 +8,7 @@ level:
 priority: Medium
 status: Done
 
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -225,19 +225,3 @@ spec:
 - [.NET Microservices: Architecture for Containerized .NET Applications](https://learn.microsoft.com/en-us/dotnet/architecture/microservices/) — official Microsoft .NET guidance.
 - [Default ASP.NET Core port changed from 80 to 8080](https://learn.microsoft.com/en-us/dotnet/core/compatibility/containers/8.0/aspnet-port) — container port behavior in modern ASP.NET Core images.
 - [Building Microservices (2nd Edition) — Sam Newman](https://samnewman.io/books/building_microservices_2nd_edition/) — practical production lessons on boundaries and migration.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/05 Architecture|05 Architecture]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/System Architecture/Event-Driven Architecture|Event-Driven Architecture]]
-> - [[Software Engineering/05 Architecture/System Architecture/Modular Monolith|Modular Monolith]]
-> - [[Software Engineering/05 Architecture/System Architecture/Monolith Architecture|Monolith Architecture]]
-> - [[Software Engineering/05 Architecture/System Architecture/Serverless Architecture|Serverless Architecture]]
-> - [[Software Engineering/05 Architecture/System Architecture/Service-Oriented Architecture|Service-Oriented Architecture]]
-<!-- whats-next:end -->

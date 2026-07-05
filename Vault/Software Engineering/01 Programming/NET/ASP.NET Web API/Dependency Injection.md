@@ -7,7 +7,7 @@ level:
   - "1"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Dependency Injection in ASP.NET Core
@@ -159,19 +159,3 @@ The container **owns disposal of the instances it creates**: when a scope ends i
 - [IServiceScopeFactory (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.dependencyinjection.iservicescopefactory) — API reference for creating manual service scopes; the correct pattern for Singletons that need Scoped dependencies.
 - [[Software Engineering/05 Architecture/Patterns/Dependency Injection|Dependency Injection]] — the general DI pattern: why it improves testability and decoupling, independent of ASP.NET Core.
 - [[Software Engineering/06 Development Practices/Principles/IoC (Holywood Principle)|IoC (Hollywood Principle)]] — the underlying principle: the framework provides dependencies rather than your code creating them.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/01 Programming/NET/NET|NET]]
->
-> **Pages**
-> - [[Software Engineering/01 Programming/NET/ASP.NET Web API/Authentication|Authentication]]
-> - [[Software Engineering/01 Programming/NET/ASP.NET Web API/Authorization|Authorization]]
-> - [[Software Engineering/01 Programming/NET/ASP.NET Web API/CORS|CORS]]
-> - [[Software Engineering/01 Programming/NET/ASP.NET Web API/Filters|Filters]]
-> - [[Software Engineering/01 Programming/NET/ASP.NET Web API/Middlewares|Middlewares]]
-<!-- whats-next:end -->

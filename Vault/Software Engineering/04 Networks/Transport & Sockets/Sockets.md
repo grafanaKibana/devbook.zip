@@ -8,7 +8,7 @@ level:
 priority: Medium
 status: Ready to Repeat
 
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -150,16 +150,3 @@ Console.WriteLine($"Received {result.Buffer.Length} bytes from {result.RemoteEnd
 - [Use sockets to send and receive data over TCP](https://learn.microsoft.com/dotnet/fundamentals/networking/sockets/tcp-classes) — Microsoft guide covering TcpClient/TcpListener patterns and async usage.
 - [Use UDP sockets](https://learn.microsoft.com/dotnet/fundamentals/networking/sockets/udp-client) — Microsoft guide for UdpClient send/receive patterns.
 - [Socket performance enhancements in .NET](https://learn.microsoft.com/dotnet/fundamentals/networking/sockets/socket-services) — covers SocketAsyncEventArgs and high-throughput socket patterns.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/04 Networks/04 Networks|04 Networks]]
->
-> **Pages**
-> - [[Software Engineering/04 Networks/Transport & Sockets/TCP IP|TCP IP]]
-> - [[Software Engineering/04 Networks/Transport & Sockets/UDP|UDP]]
-<!-- whats-next:end -->

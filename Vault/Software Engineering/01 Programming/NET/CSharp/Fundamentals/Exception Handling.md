@@ -7,7 +7,7 @@ level:
   - "4"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 # Intro
 
@@ -144,22 +144,3 @@ Always have a top-level net so a stray exception is logged, not silently lost or
 - [Exception throwing (Framework Design Guidelines)](https://learn.microsoft.com/dotnet/standard/design-guidelines/exception-throwing) — API design rules for exception usage in library code.
 - [Using standard exception types](https://learn.microsoft.com/dotnet/standard/design-guidelines/using-standard-exception-types) — which built-in exception types to use for which scenarios.
 - [Catch handler search in call stack (Metanit)](https://metanit.com/sharp/tutorial/2.30.php) — Russian-language practitioner walkthrough of how the runtime searches for matching handlers up the call stack.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/01 Programming/NET/CSharp/CSharp|CSharp]]
->
-> **Topics**
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types|Types]]
->
-> **Pages**
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Foreach|Foreach]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Generics|Generics]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Methods|Methods]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Namespaces|Namespaces]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Reflection|Reflection]]
-<!-- whats-next:end -->

@@ -7,7 +7,7 @@ level:
   - "4"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 # Intro
 
@@ -216,21 +216,3 @@ The DB engine has its own lock manager: two transactions touching rows/indexes i
 - [Threading in C#: Deadlocks (Joe Albahari)](https://www.albahari.com/threading/part2.aspx#_Deadlocks) — lock-based deadlock examples with step-by-step analysis.
 - [Threading in C#: Monitor.TryEnter (Joe Albahari)](https://www.albahari.com/threading/part2.aspx#_MonitorEnter_and_MonitorExit) — timeout-based lock acquisition to break the no-preemption condition.
 - [Diagnosing .NET deadlocks with dotnet-dump (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/core/diagnostics/debug-deadlock) — production diagnosis workflow using `dotnet-dump` and `syncblk`.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/01 Programming/NET/CSharp/CSharp|CSharp]]
->
-> **Pages**
-> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Async Await|Async Await]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/CancellationToken|CancellationToken]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Mutex|Mutex]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Parallelism|Parallelism]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Semaphore|Semaphore]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Tasks|Tasks]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/ThreadPool|ThreadPool]]
-<!-- whats-next:end -->

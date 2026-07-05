@@ -5,7 +5,7 @@ subtopic:
   - NET
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 status: Creation
 priority: Medium
 level:
@@ -93,20 +93,3 @@ Console.WriteLine(h.Counter.Value); // 1
 - [Choosing between class and struct](https://learn.microsoft.com/en-us/dotnet/standard/design-guidelines/choosing-between-class-and-struct)
 - [Writing large responsive .NET apps: common allocations](https://learn.microsoft.com/en-us/dotnet/framework/performance/writing-large-responsive-apps#common-allocations-and-examples)
 - [Mutating readonly structs (Eric Lippert)](https://ericlippert.com/2008/05/14/mutating-readonly-structs/)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals|Fundamentals]]
->
-> **Pages**
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Classes|Classes]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Delegates|Delegates]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Events|Events]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Records|Records]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Strings|Strings]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Structs|Structs]]
-<!-- whats-next:end -->

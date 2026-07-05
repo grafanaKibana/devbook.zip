@@ -7,7 +7,7 @@ level:
   - "4"
 priority: Medium
 status: Done
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -113,17 +113,3 @@ Roll to "aba": (312 - 3·100)·10 + 1 = 121 → verify → match at 4
 
 - [Rabin-Karp algorithm -- encyclopedic overview covering rolling hash mechanics, collision analysis, and multi-pattern extension (Wikipedia)](https://en.wikipedia.org/wiki/Rabin%E2%80%93Karp_algorithm)
 - [String hashing -- implementation guide for polynomial rolling hash with base and modulus selection, and applications to string matching (cp-algorithms)](https://cp-algorithms.com/string/string-hashing.html)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/02 Computer Science/Algorithms/Algorithms|Algorithms]]
->
-> **Pages**
-> - [[Software Engineering/02 Computer Science/Algorithms/Search Algorithms/Binary Search|Binary Search]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Search Algorithms/DFS BFS|DFS BFS]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Search Algorithms/KMP (Knuth-Morris-Pratt) Algorithm|KMP (Knuth-Morris-Pratt) Algorithm]]
-<!-- whats-next:end -->

@@ -7,7 +7,7 @@ level:
   - "3"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # RPC — Remote Procedure Call
@@ -121,21 +121,3 @@ var response = await client.PlaceOrderAsync(
 - [gRPC core concepts](https://grpc.io/docs/what-is-grpc/core-concepts/) — official gRPC documentation covering service definitions, stub generation, and the four service types (unary, server streaming, client streaming, bidirectional).
 - [Protocol Buffers language guide (Google)](https://protobuf.dev/programming-guides/proto3/) — field numbering rules, reserved fields, and backward compatibility; essential for safe schema evolution.
 - [gRPC .NET documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/grpc/) — ASP.NET Core gRPC server setup, client factory, interceptors, and health checks.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/04 Networks/04 Networks|04 Networks]]
->
-> **Pages**
-> - [[Software Engineering/04 Networks/Protocols/DNS|DNS]]
-> - [[Software Engineering/04 Networks/Protocols/gRPC|gRPC]]
-> - [[Software Engineering/04 Networks/Protocols/HTTP|HTTP]]
-> - [[Software Engineering/04 Networks/Protocols/HTTP 2|HTTP 2]]
-> - [[Software Engineering/04 Networks/Protocols/REST|REST]]
-> - [[Software Engineering/04 Networks/Protocols/SMTP|SMTP]]
-> - [[Software Engineering/04 Networks/Protocols/WebSockets|WebSockets]]
-<!-- whats-next:end -->

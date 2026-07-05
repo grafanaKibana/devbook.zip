@@ -7,7 +7,7 @@ level:
   - "2"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 # Facade
 
@@ -184,20 +184,3 @@ Adding fraud detection now means editing `OrderFacade.PlaceOrderAsync` in one pl
 - [File class — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.io.file) — .NET's built-in Facade for file I/O operations
 - [HttpClient — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.net.http.httpclient) — Facade over the HTTP message handler pipeline
 - [DbContext — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/microsoft.entityframeworkcore.dbcontext) — EF Core's Facade over database operations and change tracking
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/Patterns/Design Patterns/Design Patterns|Design Patterns]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Adapter|Adapter]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Bridge|Bridge]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Composite|Composite]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Decorator|Decorator]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Flyweight|Flyweight]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Proxy|Proxy]]
-<!-- whats-next:end -->

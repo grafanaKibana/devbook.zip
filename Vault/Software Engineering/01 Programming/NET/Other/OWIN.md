@@ -7,7 +7,7 @@ level:
   - "3"
 priority: Low
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -93,15 +93,3 @@ For the incremental path, Microsoft's current tooling does the heavy lifting: **
 - [ASP.NET Core middleware](https://learn.microsoft.com/aspnet/core/fundamentals/middleware/?view=aspnetcore-8.0) - Modern pipeline model and ordering guidance.
 - [OWIN integration during ASP.NET Framework to Core migration](https://learn.microsoft.com/aspnet/core/migration/fx-to-core/areas/owin?view=aspnetcore-10.0) - Official migration patterns and compatibility options.
 - [Migration trenches: middleware lessons (Jimmy Bogard)](https://www.jimmybogard.com/tales-from-the-net-migration-trenches-middleware/) - Practical migration pain points and tradeoffs.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/01 Programming/NET/NET|NET]]
->
-> **Pages**
-> - [[Software Engineering/01 Programming/NET/Other/SignalR|SignalR]]
-<!-- whats-next:end -->

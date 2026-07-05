@@ -8,7 +8,7 @@ level:
 priority: High
 status: Ready to Repeat
 
-dg-publish: true
+publish: true
 ---
 
 # Two-Factor Authentication (2FA)
@@ -106,17 +106,3 @@ var result = await fido2.MakeAssertionAsync(
 - [NIST SP 800-63B — Digital Identity Guidelines](https://pages.nist.gov/800-63-3/sp800-63b.html) — NIST's authoritative guide on authentication assurance levels and MFA requirements
 - [Microsoft — Two-factor authentication with ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/2fa) — official guide for implementing 2FA with ASP.NET Core Identity
 - [FIDO Alliance — WebAuthn](https://fidoalliance.org/fido2/) — the FIDO2/WebAuthn standard for phishing-resistant authentication
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/07 Security/07 Security|07 Security]]
->
-> **Pages**
-> - [[Software Engineering/07 Security/Authentication/Basic Auth|Basic Auth]]
-> - [[Software Engineering/07 Security/Authentication/Oauth OIDC (OpenId Connect)|Oauth OIDC (OpenId Connect)]]
-> - [[Software Engineering/07 Security/Authentication/Resource-based Auth|Resource-based Auth]]
-> - [[Software Engineering/07 Security/Authentication/SSO (Single Sign-On)|SSO (Single Sign-On)]]
-<!-- whats-next:end -->

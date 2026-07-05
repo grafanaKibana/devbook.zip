@@ -7,7 +7,7 @@ level:
   - "4"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Repository and Unit of Work
@@ -159,22 +159,3 @@ The spec is a plain object (unit-testable without a DB), the repository keeps on
 - [Unit of Work pattern (Martin Fowler)](https://martinfowler.com/eaaCatalog/unitOfWork.html) — original definition; explains change tracking and the commit boundary.
 - [Repository pattern in ASP.NET Core (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/mvc/overview/older-versions/getting-started-with-ef-5-using-mvc-4/implementing-the-repository-and-unit-of-work-patterns-in-an-asp-net-mvc-application) — practical implementation guide with EF Core, including the UoW interface and DI registration.
 - [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/Domain-Driven Design|Domain-Driven Design]] — DDD context for Repositories: they should be defined per Aggregate Root and expose domain-meaningful query methods.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/05 Architecture|05 Architecture]]
->
-> **Topics**
-> - [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/Architectural Patterns|Architectural Patterns]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Design Patterns|Design Patterns]]
-> - [[Software Engineering/05 Architecture/Patterns/Resilience Patterns/Resilience Patterns|Resilience Patterns]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Patterns/CQS|CQS]]
-> - [[Software Engineering/05 Architecture/Patterns/Dependency Injection|Dependency Injection]]
-> - [[Software Engineering/05 Architecture/Patterns/Event Bus|Event Bus]]
-<!-- whats-next:end -->

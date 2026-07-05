@@ -7,7 +7,7 @@ level:
   - "1"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Authentication in ASP.NET Core
@@ -165,19 +165,3 @@ public IActionResult ApiEndpoint() => Ok();
 - [Cookie authentication (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/cookie) — cookie-based authentication for web applications: sign-in, sign-out, sliding expiration, and claims transformation.
 - [[Software Engineering/07 Security/JWT Bearer|JWT Bearer]] — how JWTs work: structure, signing algorithms, claims, and security considerations.
 - [[Software Engineering/01 Programming/NET/ASP.NET Web API/Authorization|Authorization]] — what happens after authentication: policy-based, role-based, and resource-based authorization in ASP.NET Core.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/01 Programming/NET/NET|NET]]
->
-> **Pages**
-> - [[Software Engineering/01 Programming/NET/ASP.NET Web API/Authorization|Authorization]]
-> - [[Software Engineering/01 Programming/NET/ASP.NET Web API/CORS|CORS]]
-> - [[Software Engineering/01 Programming/NET/ASP.NET Web API/Dependency Injection|Dependency Injection]]
-> - [[Software Engineering/01 Programming/NET/ASP.NET Web API/Filters|Filters]]
-> - [[Software Engineering/01 Programming/NET/ASP.NET Web API/Middlewares|Middlewares]]
-<!-- whats-next:end -->

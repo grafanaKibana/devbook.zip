@@ -7,7 +7,7 @@ level:
   - "3"
 priority: Medium
 status: Done
-dg-publish: true
+publish: true
 ---
 # Intro
 
@@ -87,18 +87,3 @@ If safety metrics are included in the optimization objective, the system may lea
 - [Observability in generative AI (Azure AI Foundry)](https://learn.microsoft.com/en-us/azure/ai-foundry/concepts/observability) — Microsoft's framework for monitoring LLM applications in production including tracing, metrics, and evaluation integration.
 - [Trustworthy Online Controlled Experiments (Kohavi et al.)](https://www.cambridge.org/core/books/trustworthy-online-controlled-experiments/D97B26382EB0EB2DC2019A7A7B518F59) — the definitive book on A/B testing methodology including statistical significance, segmentation, and common pitfalls.
 - [Sequential testing for A/B tests (Optimizely)](https://www.optimizely.com/optimization-glossary/sequential-testing/) — how to monitor A/B test results continuously without inflating false positive rates.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Building an Evaluation Set|Building an Evaluation Set]]
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Deterministic Checks|Deterministic Checks]]
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs|Golden Test Set and Regression Runs]]
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/LLM-as-a-Judge|LLM-as-a-Judge]]
-<!-- whats-next:end -->

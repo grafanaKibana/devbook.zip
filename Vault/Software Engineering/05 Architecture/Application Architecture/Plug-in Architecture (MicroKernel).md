@@ -7,7 +7,7 @@ level:
   - "3"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Plug-in Architecture (Microkernel)
@@ -129,17 +129,3 @@ public sealed class PdfPlugin : IPlugin
 - [AssemblyLoadContext (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.loader.assemblyloadcontext) — the .NET API for isolated plug-in loading; prevents version conflicts between plug-ins by giving each its own assembly resolution context.
 - [Managed Extensibility Framework (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/framework/mef/) — MEF provides attribute-based plug-in discovery and composition for .NET applications; useful for structured extension point registration.
 - [Microkernel architecture pattern (Software Architecture Patterns, O'Reilly)](https://www.oreilly.com/library/view/software-architecture-patterns/9781491971437/ch03.html) — Mark Richards' concise treatment of the Microkernel pattern with real-world examples and tradeoffs.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/05 Architecture|05 Architecture]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Application Architecture/Clean Architecture|Clean Architecture]]
-> - [[Software Engineering/05 Architecture/Application Architecture/Layered Architecture|Layered Architecture]]
-> - [[Software Engineering/05 Architecture/Application Architecture/MVC MVVM|MVC MVVM]]
-<!-- whats-next:end -->

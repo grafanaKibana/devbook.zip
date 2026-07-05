@@ -7,7 +7,7 @@ level:
   - "4"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Inversion of Control (Hollywood Principle)
@@ -107,18 +107,3 @@ DIP is the *why* (depend on interfaces); IoC/DI is the *how* (let the container 
 - [[Software Engineering/06 Development Practices/Principles/SOLID|SOLID]] — covers the Dependency Inversion Principle (DIP) in context with the other SOLID principles.
 - [Dependency injection in ASP.NET Core (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/dependency-injection) — official guide to ASP.NET Core's built-in DI container: service registration, lifetimes, and constructor injection patterns.
 - [Service Locator is an Anti-Pattern (Mark Seemann)](https://blog.ploeh.dk/2010/02/03/ServiceLocatorisanAnti-Pattern/) — practitioner post explaining why Service Locator violates the explicit dependency principle and how to replace it with constructor injection.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/06 Development Practices/06 Development Practices|06 Development Practices]]
->
-> **Pages**
-> - [[Software Engineering/06 Development Practices/Principles/DRY|DRY]]
-> - [[Software Engineering/06 Development Practices/Principles/KISS|KISS]]
-> - [[Software Engineering/06 Development Practices/Principles/SOLID|SOLID]]
-> - [[Software Engineering/06 Development Practices/Principles/YAGNI|YAGNI]]
-<!-- whats-next:end -->

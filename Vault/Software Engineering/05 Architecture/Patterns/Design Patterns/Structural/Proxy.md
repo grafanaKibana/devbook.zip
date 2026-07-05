@@ -7,7 +7,7 @@ level:
   - "3"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 # Proxy
 
@@ -219,20 +219,3 @@ Adding a rate-limiting proxy now means one new class implementing `IProductServi
 - [Lazy loading related data — EF Core — Microsoft Learn](https://learn.microsoft.com/en-us/ef/core/querying/related-data/lazy) — EF Core lazy-loading proxy in production use
 - [DispatchProxy — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.reflection.dispatchproxy) — .NET's runtime proxy generation mechanism
 - [Castle DynamicProxy — GitHub](https://github.com/castleproject/Core) — the proxy library used by Moq, NSubstitute, and EF Core
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/Patterns/Design Patterns/Design Patterns|Design Patterns]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Adapter|Adapter]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Bridge|Bridge]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Composite|Composite]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Decorator|Decorator]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Facade|Facade]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Flyweight|Flyweight]]
-<!-- whats-next:end -->

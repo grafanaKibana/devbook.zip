@@ -7,7 +7,7 @@ level:
   - "4"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Estimation Techniques
@@ -91,15 +91,3 @@ When velocity is used as a performance metric, teams optimize for points rather 
 - [Planning Poker (Mountain Goat Software)](https://www.mountaingoatsoftware.com/agile/planning-poker) — the original Planning Poker description by Mike Cohn; explains the technique, card values, and why simultaneous reveal prevents anchoring.
 - [Story Points (Martin Fowler)](https://martinfowler.com/bliki/StoryPoint.html) — Fowler's explanation of story points: what they measure, why they're not hours, and how velocity emerges from historical data.
 - [PERT (Wikipedia)](https://en.wikipedia.org/wiki/Program_evaluation_and_review_technique) — PERT history, the three-point formula, and how it's used in critical path analysis.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/Software Engineering|Software Engineering]]
->
-> **Pages**
-> - [[Software Engineering/08 SDLC/BDD|BDD]]
-<!-- whats-next:end -->

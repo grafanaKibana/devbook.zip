@@ -7,7 +7,7 @@ level:
   - "4"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -98,18 +98,3 @@ var buffer = new byte[256];
 - [Cross-platform targeting for .NET libraries](https://learn.microsoft.com/dotnet/standard/library-guidance/cross-platform-targeting) - Practical targeting and multi-targeting decision rules.
 - [Target frameworks in SDK-style projects](https://learn.microsoft.com/dotnet/standard/frameworks) - TFM syntax and compatibility basics.
 - [The future of .NET Standard (.NET Blog)](https://devblogs.microsoft.com/dotnet/the-future-of-net-standard/) - Official rationale for the post-2.1 direction.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/01 Programming/01 Programming|01 Programming]]
->
-> **Topics**
-> - [[Software Engineering/01 Programming/NET/ASP.NET Web API/ASP.NET Web API|ASP.NET Web API]]
-> - [[Software Engineering/01 Programming/NET/CSharp/CSharp|CSharp]]
-> - [[Software Engineering/01 Programming/NET/Other/Other|Other]]
-> - [[Software Engineering/01 Programming/NET/Runtime/Runtime|Runtime]]
-<!-- whats-next:end -->

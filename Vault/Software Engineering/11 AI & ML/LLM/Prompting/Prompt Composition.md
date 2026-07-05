@@ -7,7 +7,7 @@ level:
   - "3"
 priority: Medium
 status: Done
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -137,17 +137,3 @@ This page covers the human-guided version. For fully automated loops, see [[Soft
 - [Prompt Chaining for Complex Workflows - Anthropic Documentation](https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/chain-prompts)
 - [OpenAI Prompt Engineering Guide](https://platform.openai.com/docs/guides/prompt-engineering)
 - [Prompt Injection Attacks Against GPT 3 - Simon Willison](https://simonwillison.net/2022/Sep/12/prompt-injection/)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/Prompting/Automated Prompt Optimization|Automated Prompt Optimization]]
-> - [[Software Engineering/11 AI & ML/LLM/Prompting/In-Context Learning|In-Context Learning]]
-> - [[Software Engineering/11 AI & ML/LLM/Prompting/Reasoning Techniques|Reasoning Techniques]]
-<!-- whats-next:end -->

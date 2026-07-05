@@ -5,7 +5,7 @@ subtopic:
   - SQL
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 priority: High
 level:
   - '4'
@@ -86,18 +86,3 @@ ORDER BY headcount DESC;
 - [Execution plans overview](https://learn.microsoft.com/sql/relational-databases/performance/execution-plans?view=sql-server-ver16)
 - [SQL Server index design guide](https://learn.microsoft.com/sql/relational-databases/sql-server-index-design-guide?view=sql-server-ver17)
 - [Use The Index, Luke](https://use-the-index-luke.com/)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/03 Data Persistence/03 Data Persistence|03 Data Persistence]]
->
-> **Pages**
-> - [[Software Engineering/03 Data Persistence/SQL/Indexes|Indexes]]
-> - [[Software Engineering/03 Data Persistence/SQL/Normalization Denormalization|Normalization Denormalization]]
-> - [[Software Engineering/03 Data Persistence/SQL/Replication|Replication]]
-> - [[Software Engineering/03 Data Persistence/SQL/Sharding|Sharding]]
-<!-- whats-next:end -->

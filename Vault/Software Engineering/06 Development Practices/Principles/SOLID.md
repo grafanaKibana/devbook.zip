@@ -7,7 +7,7 @@ level:
   - "4"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # SOLID Principles
@@ -460,18 +460,3 @@ The practical implication: when debugging a SOLID violation, look one level deep
 - [SOLID Principles in C# — dotnetcurry](https://www.dotnetcurry.com/software-gardening/1235/solid-principles-csharp-dotnet) — practitioner walkthrough of all five principles with C# examples showing before/after refactorings in realistic codebases
 - [The Principles of OOD — Robert C. Martin](http://butunclebob.com/ArticleS.UncleBob.PrinciplesOfOod) — the original article series where Robert C. Martin articulated the SOLID principles with links to individual principle papers on SRP, OCP, LSP, ISP, and DIP
 - [Dependency Injection in .NET — Mark Seemann](https://www.manning.com/books/dependency-injection-principles-practices-patterns) — deep practitioner treatment of DIP in .NET: composition roots, lifetime management, decorator patterns, and the pitfalls of service locator anti-patterns
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/06 Development Practices/06 Development Practices|06 Development Practices]]
->
-> **Pages**
-> - [[Software Engineering/06 Development Practices/Principles/DRY|DRY]]
-> - [[Software Engineering/06 Development Practices/Principles/IoC (Holywood Principle)|IoC (Holywood Principle)]]
-> - [[Software Engineering/06 Development Practices/Principles/KISS|KISS]]
-> - [[Software Engineering/06 Development Practices/Principles/YAGNI|YAGNI]]
-<!-- whats-next:end -->

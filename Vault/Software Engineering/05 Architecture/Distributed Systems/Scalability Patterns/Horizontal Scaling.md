@@ -7,7 +7,7 @@ level:
   - "2"
 priority: High
 status: Not-Started
-dg-publish: true
+publish: true
 ---
 
 # Horizontal Scaling
@@ -149,15 +149,3 @@ Vertical scaling is the right first move for a stateful service you can't refact
 - [Azure App Service autoscale](https://learn.microsoft.com/en-us/azure/app-service/manage-scale-up) — Azure-specific scale-out configuration and limits
 - [Designing Distributed Systems — Brendan Burns (O'Reilly)](https://www.oreilly.com/library/view/designing-distributed-systems/9781491983638/) — practitioner patterns for scalable, reliable distributed architectures
 - [The Twelve-Factor App — Processes](https://12factor.net/processes) — canonical reference for stateless process design, the foundational prerequisite for horizontal scaling
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/Distributed Systems/Distributed Systems|Distributed Systems]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Distributed Systems/Scalability Patterns/Vertical Scaling|Vertical Scaling]]
-<!-- whats-next:end -->

@@ -7,7 +7,7 @@ level:
   - "4"
 priority: Low
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 # Intro
 
@@ -129,18 +129,3 @@ Avoid naive quick sort (fixed pivot) on inputs that may be sorted or reverse-sor
 
 - [Introsort (Wikipedia)](https://en.wikipedia.org/wiki/Introsort) — the hybrid algorithm used by .NET's Array.Sort; combines quick sort, heapsort, and insertion sort to guarantee O(n log n) worst case while keeping quick sort's cache efficiency.
 - [Sorting algorithms comparison (Big-O Cheat Sheet)](https://www.bigocheatsheet.com/) — quick reference for time and space complexity of all common sorting algorithms.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/02 Computer Science/Algorithms/Algorithms|Algorithms]]
->
-> **Pages**
-> - [[Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Bubble Sort|Bubble Sort]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Insertion Sort|Insertion Sort]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Merge Sort|Merge Sort]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Selection Sort|Selection Sort]]
-<!-- whats-next:end -->

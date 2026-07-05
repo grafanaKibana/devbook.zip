@@ -5,7 +5,7 @@ subtopic:
   - Paradigms
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 status: Creation
 level:
   - '4'
@@ -31,20 +31,3 @@ A *paradigm* here is a way of modelling and building software — the mental mod
 ## Links
 
 - [Programming paradigm (Wikipedia)](https://en.wikipedia.org/wiki/Programming_paradigm)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/06 Development Practices/06 Development Practices|06 Development Practices]]
->
-> **Pages**
-> - [[Software Engineering/06 Development Practices/Paradigms/Event-driven|Event-driven]]
-> - [[Software Engineering/06 Development Practices/Paradigms/Functional Programming|Functional Programming]]
-> - [[Software Engineering/06 Development Practices/Paradigms/Integration Testing|Integration Testing]]
-> - [[Software Engineering/06 Development Practices/Paradigms/OOP|OOP]]
-> - [[Software Engineering/06 Development Practices/Paradigms/Test-Driven Development|Test-Driven Development]]
-> - [[Software Engineering/06 Development Practices/Paradigms/Unit Testing|Unit Testing]]
-<!-- whats-next:end -->

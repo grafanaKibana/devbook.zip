@@ -7,7 +7,7 @@ level:
 priority: High
 status: Ready to Repeat
 
-dg-publish: true
+publish: true
 ---
 
 # Docker
@@ -142,21 +142,3 @@ volumes:
 - [Docker multi-stage builds](https://docs.docker.com/build/building/multi-stage/) — official guide to multi-stage builds; essential for .NET production images
 - [.NET Docker samples](https://github.com/dotnet/dotnet-docker/tree/main/samples) — official Microsoft .NET Docker examples including multi-stage builds and Compose
 - [Docker security best practices](https://docs.docker.com/develop/security-best-practices/) — official guide covering rootless containers, secrets, and image scanning
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/Software Engineering|Software Engineering]]
->
-> **Topics**
-> - [[Software Engineering/09 DevOps/Deployment Strategies/Deployment Strategies|Deployment Strategies]]
-> - [[Software Engineering/09 DevOps/Version Control Systems/Version Control Systems|Version Control Systems]]
->
-> **Pages**
-> - [[Software Engineering/09 DevOps/CI CD tools|CI CD tools]]
-> - [[Software Engineering/09 DevOps/Infrastructure as Code|Infrastructure as Code]]
-> - [[Software Engineering/09 DevOps/Kubernetes|Kubernetes]]
-> - [[Software Engineering/09 DevOps/Observability|Observability]]
-<!-- whats-next:end -->

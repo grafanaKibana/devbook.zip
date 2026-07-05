@@ -7,7 +7,7 @@ level:
   - "4"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # CQS — Command-Query Separation
@@ -113,22 +113,3 @@ The query methods can be called freely in any order without side effects. The co
 - [CommandQuerySeparation (Martin Fowler)](https://martinfowler.com/bliki/CommandQuerySeparation.html) — concise explanation of CQS with the Stack.Pop() exception and the relationship to CQRS.
 - [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/CQRS|CQRS]] — the architectural extension of CQS: separate read and write models, often with separate data stores and optimized query paths.
 - [Object-Oriented Software Construction (Bertrand Meyer)](https://www.eiffel.com/values/design-by-contract/introduction/) — the original source of CQS; Meyer coined the principle in the context of Design by Contract and the Eiffel language.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/05 Architecture|05 Architecture]]
->
-> **Topics**
-> - [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/Architectural Patterns|Architectural Patterns]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Design Patterns|Design Patterns]]
-> - [[Software Engineering/05 Architecture/Patterns/Resilience Patterns/Resilience Patterns|Resilience Patterns]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Patterns/Dependency Injection|Dependency Injection]]
-> - [[Software Engineering/05 Architecture/Patterns/Event Bus|Event Bus]]
-> - [[Software Engineering/05 Architecture/Patterns/Repository & UoW|Repository & UoW]]
-<!-- whats-next:end -->

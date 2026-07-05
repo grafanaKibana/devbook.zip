@@ -7,7 +7,7 @@ level:
   - "4"
 priority: Medium
 status: Done
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -109,17 +109,3 @@ flowchart TD
 - [Binary search (CP Algorithms)](https://cp-algorithms.com/num_methods/binary_search.html) — implementation patterns, lower/upper bound variants, and edge-case analysis.
 - [Array.BinarySearch method (.NET API)](https://learn.microsoft.com/dotnet/api/system.array.binarysearch) — official reference; note it returns the bitwise complement of the insertion point when the value is absent.
 - [Nearly all binary searches and mergesorts are broken (Google Research)](https://research.google/blog/extra-extra-read-all-about-it-nearly-all-binary-searches-and-mergesorts-are-broken/) — the canonical write-up of the midpoint overflow bug.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/02 Computer Science/Algorithms/Algorithms|Algorithms]]
->
-> **Pages**
-> - [[Software Engineering/02 Computer Science/Algorithms/Search Algorithms/DFS BFS|DFS BFS]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Search Algorithms/KMP (Knuth-Morris-Pratt) Algorithm|KMP (Knuth-Morris-Pratt) Algorithm]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Search Algorithms/Rabin Karp Search|Rabin Karp Search]]
-<!-- whats-next:end -->

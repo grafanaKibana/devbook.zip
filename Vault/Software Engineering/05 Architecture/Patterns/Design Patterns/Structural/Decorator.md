@@ -8,7 +8,7 @@ level:
 priority: High
 status:
   - Done
-dg-publish: true
+publish: true
 ---
 # Decorator
 
@@ -253,20 +253,3 @@ Adding idempotency checking now means one new `IdempotencyOrderHandler` class �
 - [ASP.NET Core Middleware — Microsoft Learn](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/middleware/) — Decorator pattern in the ASP.NET Core request pipeline
 - [Scrutor — GitHub](https://github.com/khellang/Scrutor) — DI-based decorator registration for .NET without manual wiring
 - [DelegatingHandler — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.net.http.delegatinghandler) — Decorator pattern in the HttpClient pipeline
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/Patterns/Design Patterns/Design Patterns|Design Patterns]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Adapter|Adapter]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Bridge|Bridge]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Composite|Composite]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Facade|Facade]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Flyweight|Flyweight]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Proxy|Proxy]]
-<!-- whats-next:end -->

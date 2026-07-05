@@ -5,7 +5,7 @@ subtopic:
   - Machine Learning
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 priority: Medium
 level:
   - "3"
@@ -76,17 +76,3 @@ Decision rule: default to RMSE when large errors hurt most and MAE when they sho
 
 - [scikit-learn model evaluation](https://scikit-learn.org/stable/modules/model_evaluation.html)
 - [ML.NET model evaluation metrics](https://learn.microsoft.com/dotnet/machine-learning/resources/metrics)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/Machine Learning/Machine Learning|Machine Learning]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/Calibration|Calibration]]
-> - [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/Classification Evaluation|Classification Evaluation]]
-> - [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/ROC-AUC and PR-AUC|ROC-AUC and PR-AUC]]
-<!-- whats-next:end -->

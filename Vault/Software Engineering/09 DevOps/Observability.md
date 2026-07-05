@@ -6,7 +6,7 @@ level:
   - "2"
 priority: High
 status: Done
-dg-publish: true
+publish: true
 ---
 # Intro
 
@@ -278,22 +278,3 @@ If thresholds are too sensitive or static, teams get constant false positives an
 - [W3C Trace Context (traceparent and tracestate)](https://www.w3.org/TR/trace-context/)
 - [Prometheus ASP.NET Core exporter README (OpenTelemetry .NET)](https://github.com/open-telemetry/opentelemetry-dotnet/tree/main/src/OpenTelemetry.Exporter.Prometheus.AspNetCore)
 - [Google SRE Book: Monitoring Distributed Systems (practitioner)](https://sre.google/sre-book/monitoring-distributed-systems/)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/Software Engineering|Software Engineering]]
->
-> **Topics**
-> - [[Software Engineering/09 DevOps/Deployment Strategies/Deployment Strategies|Deployment Strategies]]
-> - [[Software Engineering/09 DevOps/Version Control Systems/Version Control Systems|Version Control Systems]]
->
-> **Pages**
-> - [[Software Engineering/09 DevOps/CI CD tools|CI CD tools]]
-> - [[Software Engineering/09 DevOps/Docker|Docker]]
-> - [[Software Engineering/09 DevOps/Infrastructure as Code|Infrastructure as Code]]
-> - [[Software Engineering/09 DevOps/Kubernetes|Kubernetes]]
-<!-- whats-next:end -->

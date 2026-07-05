@@ -7,7 +7,7 @@ level:
   - "1"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Peer-to-Peer (P2P)
@@ -99,16 +99,3 @@ Peers join and leave constantly. High churn degrades DHT routing — routing tab
 - [WebRTC (MDN)](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API) — browser P2P API for real-time audio, video, and data channels; includes ICE/STUN/TURN for NAT traversal.
 - [IPFS documentation](https://docs.ipfs.tech/concepts/how-ipfs-works/) — content-addressed P2P storage: how content IDs, DHT routing, and Bitswap work together.
 - [WebRTC for the Curious](https://webrtcforthecurious.com/) — deep dive into ICE, STUN, TURN, DTLS, and SRTP written by WebRTC implementers; explains why NAT traversal is hard and how TURN relay works.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/04 Networks/04 Networks|04 Networks]]
->
-> **Pages**
-> - [[Software Engineering/04 Networks/Architecture & Ops/CDN|CDN]]
-> - [[Software Engineering/04 Networks/Architecture & Ops/VPN|VPN]]
-<!-- whats-next:end -->

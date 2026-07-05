@@ -7,7 +7,7 @@ level:
   - "4"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # YAGNI
@@ -109,18 +109,3 @@ public class FeatureConfig
 - [[Software Engineering/06 Development Practices/Principles/KISS|KISS]] — related principle: keep implementations simple; complexity should be justified by current requirements.
 - [Extreme Programming Explained (Kent Beck)](https://www.oreilly.com/library/view/extreme-programming-explained/0321278658/) — the XP book that established YAGNI as a core practice; explains the economic argument for deferring features until they are needed.
 - [Speculative Generality (Refactoring Guru)](https://refactoring.guru/smells/speculative-generality) — the code smell that YAGNI prevents: hooks, abstract classes, and parameters added for hypothetical future use that never arrives.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/06 Development Practices/06 Development Practices|06 Development Practices]]
->
-> **Pages**
-> - [[Software Engineering/06 Development Practices/Principles/DRY|DRY]]
-> - [[Software Engineering/06 Development Practices/Principles/IoC (Holywood Principle)|IoC (Holywood Principle)]]
-> - [[Software Engineering/06 Development Practices/Principles/KISS|KISS]]
-> - [[Software Engineering/06 Development Practices/Principles/SOLID|SOLID]]
-<!-- whats-next:end -->

@@ -8,7 +8,7 @@ level:
 priority: High
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 status: Done
 ---
 
@@ -46,17 +46,3 @@ The domain-independent machinery all of this reuses — [[Software Engineering/1
 
 - [RAGAS metrics reference -- faithfulness, context precision, answer correctness (RAGAS docs)](https://docs.ragas.io/en/stable/concepts/metrics/available_metrics/)
 - [RAG evaluators -- groundedness, relevance, completeness (Azure AI Foundry)](https://learn.microsoft.com/en-us/azure/ai-foundry/concepts/evaluation-evaluators/rag-evaluators)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/LLM/RAG/RAG|RAG]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation/Component-Level Evaluation|Component-Level Evaluation]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation/Evaluation Metrics|Evaluation Metrics]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation/Retrieval Evaluation Sets|Retrieval Evaluation Sets]]
-<!-- whats-next:end -->

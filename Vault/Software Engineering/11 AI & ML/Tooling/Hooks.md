@@ -3,7 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - Tooling
-dg-publish: true
+publish: true
 status: Done
 level:
   - "2"
@@ -156,18 +156,3 @@ Cursor uses a similar structure in `.cursor/hooks.json` with event names like `a
 - [Git hooks -- official reference for the foundational lifecycle hook model (git-scm)](https://git-scm.com/docs/githooks) -- the original hook pattern that agent hooks extend.
 - [Building effective agents -- architecture patterns including tool use and control flow (Anthropic Engineering)](https://www.anthropic.com/engineering/building-effective-agents) -- broader context on agent architecture where hooks fit as the control layer.
 - [Cursor rules, commands, skills, and hooks -- complete guide to agent customization features (Theodoros Kokosioulis, 2026)](https://theodoroskokosioulis.com/blog/cursor-rules-commands-skills-hooks-guide/) -- practitioner guide comparing hooks with rules, commands, and skills in Cursor.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/11 AI & ML|11 AI & ML]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/Tooling/Agent Instructions|Agent Instructions]]
-> - [[Software Engineering/11 AI & ML/Tooling/Coding Agents|Coding Agents]]
-> - [[Software Engineering/11 AI & ML/Tooling/Plugins|Plugins]]
-> - [[Software Engineering/11 AI & ML/Tooling/Skills|Skills]]
-<!-- whats-next:end -->

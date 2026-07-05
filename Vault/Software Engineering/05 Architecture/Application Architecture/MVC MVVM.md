@@ -7,7 +7,7 @@ level:
   - "4"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 # Intro
 
@@ -147,17 +147,3 @@ The trend in modern UI is toward **unidirectional data flow** because two-way bi
 - [Model-View-ViewModel (Wikipedia)](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93viewmodel) — MVVM pattern origin (Microsoft WPF), data binding mechanics, and comparison with MVC.
 - [Data binding in WPF (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/data/) — how `INotifyPropertyChanged` and `ICommand` power MVVM in WPF.
 - [MVVM in .NET MAUI (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/maui/xaml/fundamentals/mvvm) — MVVM pattern applied to cross-platform .NET MAUI apps.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/05 Architecture|05 Architecture]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Application Architecture/Clean Architecture|Clean Architecture]]
-> - [[Software Engineering/05 Architecture/Application Architecture/Layered Architecture|Layered Architecture]]
-> - [[Software Engineering/05 Architecture/Application Architecture/Plug-in Architecture (MicroKernel)|Plug-in Architecture (MicroKernel)]]
-<!-- whats-next:end -->

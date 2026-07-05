@@ -5,7 +5,7 @@ subtopic:
   - NET
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 status: Creation
 level:
   - '4'
@@ -41,15 +41,3 @@ The notes in this folder cover two areas: **language fundamentals** (type system
 - [What's new in C# (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-13) — Feature changelog per version.
 - [C# language design proposals (GitHub)](https://github.com/dotnet/csharplang/tree/main/proposals) — Design rationale and discussion for language features.
 - [C# in Depth (Jon Skeet)](https://csharpindepth.com/) — Practitioner deep-dive into language mechanics and evolution.
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/01 Programming/NET/NET|NET]]
->
-> **Topics**
-> - [[Software Engineering/01 Programming/NET/CSharp/Concurrency and Parallelism/Concurrency and Parallelism|Concurrency and Parallelism]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals|Fundamentals]]
-<!-- whats-next:end -->

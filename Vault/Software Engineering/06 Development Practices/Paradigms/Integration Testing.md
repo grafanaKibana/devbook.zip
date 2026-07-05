@@ -7,7 +7,7 @@ level:
   - "3"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Integration Testing
@@ -149,19 +149,3 @@ The classic anti-pattern is the **"ice-cream cone"** — inverting the pyramid w
 - [Testcontainers for .NET](https://dotnet.testcontainers.org/) — library for spinning up real Docker containers (Postgres, Redis, RabbitMQ) in integration tests; includes pre-built modules for common databases.
 - [WireMock.Net](https://github.com/WireMock-Net/WireMock.Net) — HTTP mock server for .NET; use it to stub external HTTP dependencies in integration tests with realistic request/response matching.
 - [xUnit shared context (fixtures)](https://xunit.net/docs/shared-context) — how to share expensive setup (database, test server) across tests using `IClassFixture<T>` and `ICollectionFixture<T>`.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/06 Development Practices/06 Development Practices|06 Development Practices]]
->
-> **Pages**
-> - [[Software Engineering/06 Development Practices/Paradigms/Event-driven|Event-driven]]
-> - [[Software Engineering/06 Development Practices/Paradigms/Functional Programming|Functional Programming]]
-> - [[Software Engineering/06 Development Practices/Paradigms/OOP|OOP]]
-> - [[Software Engineering/06 Development Practices/Paradigms/Test-Driven Development|Test-Driven Development]]
-> - [[Software Engineering/06 Development Practices/Paradigms/Unit Testing|Unit Testing]]
-<!-- whats-next:end -->

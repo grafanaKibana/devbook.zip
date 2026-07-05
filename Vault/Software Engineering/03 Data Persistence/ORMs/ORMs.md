@@ -5,7 +5,7 @@ subtopic:
   - ORMs
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 priority: High
 level:
   - "4"
@@ -19,15 +19,3 @@ Object-Relational Mappers bridge the gap between in-memory objects and relationa
 ## Links
 
 - [Object-relational mapping (Wikipedia)](https://en.wikipedia.org/wiki/Object%E2%80%93relational_mapping)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/03 Data Persistence/03 Data Persistence|03 Data Persistence]]
->
-> **Pages**
-> - [[Software Engineering/03 Data Persistence/ORMs/Entity Framework|Entity Framework]]
-<!-- whats-next:end -->

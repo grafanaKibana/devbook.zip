@@ -5,7 +5,7 @@ subtopic:
   - LLM
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 level:
   - "3"
 status: Done
@@ -94,19 +94,3 @@ When you iterate on prompts or rubrics against a fixed evaluation set, you can o
 - [Working with evals (OpenAI API Docs)](https://developers.openai.com/api/docs/guides/evals)
 - [Define your success criteria (Anthropic Docs)](https://docs.anthropic.com/en/docs/test-and-evaluate/define-success)
 - [AI Risk Management Framework (NIST)](https://www.nist.gov/itl/ai-risk-management-framework)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Building an Evaluation Set|Building an Evaluation Set]]
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Deterministic Checks|Deterministic Checks]]
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs|Golden Test Set and Regression Runs]]
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/LLM-as-a-Judge|LLM-as-a-Judge]]
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Online Evaluation and AB Tests|Online Evaluation and AB Tests]]
-<!-- whats-next:end -->

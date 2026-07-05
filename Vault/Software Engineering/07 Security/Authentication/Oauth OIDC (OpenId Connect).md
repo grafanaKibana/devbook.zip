@@ -8,7 +8,7 @@ level:
 priority: High
 status: Ready to Repeat
 
-dg-publish: true
+publish: true
 ---
 
 # OAuth 2.0 and OpenID Connect
@@ -130,17 +130,3 @@ builder.Services.AddAuthentication(options =>
 - [OpenID Connect spec](https://openid.net/specs/openid-connect-core-1_0.html) — OIDC layer on top of OAuth 2.0; defines ID tokens and UserInfo endpoint
 - [Microsoft Identity Platform docs](https://learn.microsoft.com/en-us/entra/identity-platform/) — ASP.NET Core integration guide for Microsoft Entra ID (Azure AD)
 - [RFC 7636 — PKCE](https://datatracker.ietf.org/doc/html/rfc7636) — Proof Key for Code Exchange; required for public clients
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/07 Security/07 Security|07 Security]]
->
-> **Pages**
-> - [[Software Engineering/07 Security/Authentication/Basic Auth|Basic Auth]]
-> - [[Software Engineering/07 Security/Authentication/Resource-based Auth|Resource-based Auth]]
-> - [[Software Engineering/07 Security/Authentication/SSO (Single Sign-On)|SSO (Single Sign-On)]]
-> - [[Software Engineering/07 Security/Authentication/Two-Factor Auth|Two-Factor Auth]]
-<!-- whats-next:end -->

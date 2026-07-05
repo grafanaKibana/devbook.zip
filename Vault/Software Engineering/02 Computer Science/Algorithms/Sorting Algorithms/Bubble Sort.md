@@ -7,7 +7,7 @@ level:
   - "4"
 priority: Low
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 # Intro
 
@@ -120,18 +120,3 @@ Bubble sort is useful as a teaching example and for understanding stability and 
 
 - [Timsort (Wikipedia)](https://en.wikipedia.org/wiki/Timsort) — Python's and Java's default sort; replaced bubble sort and insertion sort for general use; shows why O(n²) algorithms are only kept as base cases for small partitions.
 - [Sorting algorithms comparison (Big-O Cheat Sheet)](https://www.bigocheatsheet.com/) — quick reference for time and space complexity of all common sorting algorithms.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/02 Computer Science/Algorithms/Algorithms|Algorithms]]
->
-> **Pages**
-> - [[Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Insertion Sort|Insertion Sort]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Merge Sort|Merge Sort]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Quick Sort|Quick Sort]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Sorting Algorithms/Selection Sort|Selection Sort]]
-<!-- whats-next:end -->

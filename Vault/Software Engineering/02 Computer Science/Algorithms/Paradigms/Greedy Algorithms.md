@@ -7,7 +7,7 @@ level:
   - "4"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -95,16 +95,3 @@ public static int CoinsGreedy(int[] coins, int amount) // coins sorted desc
 - [Greedy algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Greedy_algorithm) — definition, matroid theory, and where greedy is provably optimal.
 - [Greedy algorithms (cp-algorithms)](https://cp-algorithms.com/) — scheduling and exchange-argument proofs.
 - [Greedy vs DP (Stanford CS161 notes)](https://web.stanford.edu/class/cs161/) — formal treatment of the greedy-choice property and exchange arguments.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/02 Computer Science/Algorithms/Algorithms|Algorithms]]
->
-> **Pages**
-> - [[Software Engineering/02 Computer Science/Algorithms/Paradigms/Backtracking|Backtracking]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Paradigms/Dynamic Programming|Dynamic Programming]]
-<!-- whats-next:end -->

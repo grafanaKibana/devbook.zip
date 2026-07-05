@@ -7,7 +7,7 @@ level:
   - "3"
 priority: Medium
 status: Done
-dg-publish: true
+publish: true
 ---
 # Intro
 
@@ -105,18 +105,3 @@ Run deterministic checks first. A malformed JSON or a disallowed action does not
 - [OWASP Top 10 for LLM Applications](https://genai.owasp.org/llm-top-10/) — the canonical list of LLM security risks including prompt injection, insecure output handling, and data leakage — each maps to a deterministic check category.
 - [OWASP LLM Prompt Injection Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/LLM_Prompt_Injection_Prevention_Cheat_Sheet.html) — specific mitigations for prompt injection, including input validation and output sanitization.
 - [LLM-as-a-Judge (Zheng et al., 2023)](https://arxiv.org/abs/2306.05685) — the paper that established LLM-as-judge as an evaluation method; useful for understanding what deterministic checks cannot cover.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Building an Evaluation Set|Building an Evaluation Set]]
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs|Golden Test Set and Regression Runs]]
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/LLM-as-a-Judge|LLM-as-a-Judge]]
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Online Evaluation and AB Tests|Online Evaluation and AB Tests]]
-<!-- whats-next:end -->

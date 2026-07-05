@@ -7,7 +7,7 @@ level:
   - "4"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -93,16 +93,3 @@ public static int PrimWeight(int n, List<(int to, int w)>[] adj)
 - [Minimum spanning tree (Wikipedia)](https://en.wikipedia.org/wiki/Minimum_spanning_tree) — cut property, uniqueness, and applications.
 - [Kruskal's & Prim's (cp-algorithms)](https://cp-algorithms.com/graph/mst_kruskal.html) — both algorithms with proofs and complexity.
 - [Minimum spanning trees (Princeton Algorithms)](https://algs4.cs.princeton.edu/43mst/) — Sedgewick's thorough treatment with visualisations.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/02 Computer Science/Algorithms/Algorithms|Algorithms]]
->
-> **Pages**
-> - [[Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Topological Sort|Topological Sort]]
-<!-- whats-next:end -->

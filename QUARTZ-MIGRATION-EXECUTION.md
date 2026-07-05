@@ -8,7 +8,7 @@
 
 | Axis | Decision |
 |---|---|
-| **Architecture** | **Model A — quartz-syncer**: the Obsidian plugin compiles Dataview/DataviewJS → static and publishes to `Web/content`, gated on `dg-publish`. |
+| **Architecture** | **Model A — quartz-syncer**: the Obsidian plugin compiles Dataview/DataviewJS → static and publishes to `Web/content`, gated on `publish`. |
 | **Rollout** | **Rename now**: `Web/`→`OldWeb/`, Quartz into `Web/`, repoint `vercel.json`. Verify each layer on a **Vercel branch preview**. Production (main) stays on the old site until **merge = cutover**. |
 | **Customizations to port** | branding (title/subtitle/logo + accent green) · number-prefix stripping · what's-next callouts · Canvas/Roadmap · automation scripts · Vercel Analytics |
 | **Dropped (for now)** | contact footer · sidebar quicklinks · dg-permalinks · lucide note icons · graph color groups · all Part C items |
@@ -43,7 +43,7 @@ Legend: 🤖 = I can do autonomously · 🧑 = needs you · ✅ = verify-and-sto
 ### Phase 0 — Default Quartz in `Web/`, deployed & checked  *(your "step 1")*
 1. 🤖 `git mv Web OldWeb` (Eleventy preserved for parity, wired to nothing).
 2. 🤖 Scaffold Quartz v5 into `Web/` (clone `jackyzha0/quartz` v5 → `npx quartz create`), commit `quartz.lock.json`.
-3. 🤖 **Bootstrap content**: small script copies `dg-publish: true` notes + referenced assets from `Vault/Software Engineering` → `Web/content` (committed; Vercel-safe). Doubles as the Model-B fallback pipeline.
+3. 🤖 **Bootstrap content**: small script copies `publish: true` notes + referenced assets from `Vault/Software Engineering` → `Web/content` (committed; Vercel-safe). Doubles as the Model-B fallback pipeline.
 4. 🤖 `quartz.config.yaml`: `pageTitle: DEVBOOK`, `baseUrl: devbook.zip`, `ignorePatterns` for private/templates/`.obsidian`.
 5. 🤖 Repoint root `vercel.json`:
    ```json
@@ -60,7 +60,7 @@ Spot-check one page per top-level folder: wikilinks, embeds, callouts, highlight
 
 ### Phase 2 — Content pipeline (Model A / Syncer) + **CRITICAL DataviewJS gate** 🧑✅
 1. 🧑 Install **quartz-syncer** in Obsidian; fine-grained GitHub PAT (Contents: R/W).
-2. 🧑 Settings: **Publish key → `dg-publish`**, **Content folder → `Web/content`**.
+2. 🧑 Settings: **Publish key → `publish`**, **Content folder → `Web/content`**.
 3. 🤖 Reconcile monorepo layout — test **(B)** single-repo push to `Web/content`; fallback **(A)** dedicated Quartz repo + CI mirror into `Web/content`. Document which.
 4. ✅ **STOP-gate**: do the homepage + Questions dashboards render acceptably? Per finding #1, expect degradation → implement the agreed dashboard approach, then verify. **Stop & report if unresolved.**
 
@@ -72,14 +72,14 @@ Spot-check one page per top-level folder: wikilinks, embeds, callouts, highlight
 - **3e Vercel Analytics** — `analytics: {provider: vercel}`; confirm `/_vercel/insights/script.js` 200s in prod.
 
 ### Phase 4 — Automation repoint + parity + cutover 🤖🧑✅
-- Repoint `.githooks/pre-commit` markdownlint path (`Web/node_modules` → new Quartz `Web/` or vendored) + relocate `Web/.markdownlint.json`. The 5 Python scripts are generator-agnostic (operate on `Vault/`); only the `dg-publish`/permalink metadata in `generate-roadmap.py` needs reconciling with Quartz's gate.
+- Repoint `.githooks/pre-commit` markdownlint path (`Web/node_modules` → new Quartz `Web/` or vendored) + relocate `Web/.markdownlint.json`. The 5 Python scripts are generator-agnostic (operate on `Vault/`); only the `publish`/permalink metadata in `generate-roadmap.py` needs reconciling with Quartz's gate.
 - Run the full **parity checklist** (below).
 - 🧑 **Cutover = merge to main** (keeps `OldWeb/` until you approve; DNS unchanged until you say so).
 
 ---
 
 ## Parity checklist (before cutover)
-- [ ] Every `dg-publish: true` note present; private notes absent.
+- [ ] Every `publish: true` note present; private notes absent.
 - [ ] Wikilinks resolve; dead-link count matches OldWeb.
 - [ ] Callouts, math, mermaid, code highlighting render (sample per folder).
 - [ ] **Homepage dashboard renders** (per the Phase-2 decision).

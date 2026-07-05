@@ -7,7 +7,7 @@ level:
   - "4"
 priority: High
 status: Done
-dg-publish: true
+publish: true
 ---
 # Intro
 
@@ -275,22 +275,3 @@ Use this when selection is explicit and stable; avoid turning keys into hidden r
 - [Dependency injection guidelines - .NET](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection-guidelines)
 - [Understanding scopes in ASP.NET Core - Andrew Lock](https://andrewlock.net/understanding-scopes-in-asp-net-core/)
 - [Service Locator is an Anti-Pattern - Steve Smith](https://ardalis.com/service-locator-is-an-anti-pattern/)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/05 Architecture|05 Architecture]]
->
-> **Topics**
-> - [[Software Engineering/05 Architecture/Patterns/Architectural Patterns/Architectural Patterns|Architectural Patterns]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Design Patterns|Design Patterns]]
-> - [[Software Engineering/05 Architecture/Patterns/Resilience Patterns/Resilience Patterns|Resilience Patterns]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Patterns/CQS|CQS]]
-> - [[Software Engineering/05 Architecture/Patterns/Event Bus|Event Bus]]
-> - [[Software Engineering/05 Architecture/Patterns/Repository & UoW|Repository & UoW]]
-<!-- whats-next:end -->

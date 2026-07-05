@@ -7,7 +7,7 @@ level:
   - "3"
 priority: High
 status: Done
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -114,16 +114,3 @@ The most dangerous tool error passes every deterministic check — perfect JSON,
 - [Berkeley Function-Calling Leaderboard -- AST and executable accuracy for tool/function calls, including irrelevance detection (Gorilla, UC Berkeley)](https://gorilla.cs.berkeley.edu/blogs/8_berkeley_function_calling_leaderboard.html) — the standard methodology for scoring tool selection and arguments, and a live leaderboard of model performance.
 - [Tool use (function calling) overview (Anthropic Docs)](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview) — how tool schemas, calls, and results are structured, which defines what a deterministic validity check enforces.
 - [tau-bench -- tool-agent-user interaction with rule-grounded ground truth (Yao et al., Sierra, 2024)](https://arxiv.org/abs/2406.12045) — a benchmark whose tasks supply reference end states and policies, a practical source of tool-call ground truth.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/LLM/Agents/Agents|Agents]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/Agents/Evaluation/Agent Benchmarks|Agent Benchmarks]]
-> - [[Software Engineering/11 AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation|Trajectory Evaluation]]
-<!-- whats-next:end -->

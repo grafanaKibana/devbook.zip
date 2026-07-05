@@ -5,7 +5,7 @@ subtopic:
   - NET
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 status: Creation
 level:
   - '4'
@@ -33,20 +33,3 @@ The platform has three layers worth understanding separately: the **runtime** (C
 - [.NET release lifecycle](https://dotnet.microsoft.com/en-us/platform/support/policy/dotnet-core) — LTS vs STS release support timelines.
 - [ASP.NET Core documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/) — Web framework guide.
 - [Performance improvements in .NET 9 (Stephen Toub)](https://devblogs.microsoft.com/dotnet/performance-improvements-in-net-9/) — Practitioner walkthrough of runtime optimizations with benchmarks.
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/01 Programming/01 Programming|01 Programming]]
->
-> **Topics**
-> - [[Software Engineering/01 Programming/NET/ASP.NET Web API/ASP.NET Web API|ASP.NET Web API]]
-> - [[Software Engineering/01 Programming/NET/CSharp/CSharp|CSharp]]
-> - [[Software Engineering/01 Programming/NET/Other/Other|Other]]
-> - [[Software Engineering/01 Programming/NET/Runtime/Runtime|Runtime]]
->
-> **Pages**
-> - [[Software Engineering/01 Programming/NET/NET Standart|NET Standart]]
-<!-- whats-next:end -->

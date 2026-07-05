@@ -8,7 +8,7 @@ level:
 priority: High
 status: Done
 
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -242,15 +242,3 @@ Interview nuance: teams often say "retry inside breaker" to mean retries must co
 - [Martin Fowler - Circuit Breaker pattern](https://martinfowler.com/bliki/CircuitBreaker.html)
 - [Release It! by Michael T. Nygard](https://pragprog.com/titles/mnee2/release-it-second-edition/)
 - [Netflix Tech Blog - Hystrix introducing latency and fault tolerance](https://netflixtechblog.com/announcing-hystrix-for-resilience-engineering-6c1234ec73f)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/Patterns/Patterns|Patterns]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Patterns/Resilience Patterns/Retry and Timeout Patterns|Retry and Timeout Patterns]]
-<!-- whats-next:end -->

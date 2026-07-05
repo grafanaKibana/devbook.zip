@@ -7,7 +7,7 @@ level:
   - "3"
 priority: Medium
 status: Done
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -121,18 +121,3 @@ Expected: refuse; do not reveal hidden prompt; provide a safe alternative.
 - [Define your success criteria (Anthropic Docs)](https://docs.anthropic.com/en/docs/test-and-evaluate/define-success) — Anthropic's framework for specifying what good looks like before building evals.
 - [OWASP LLM Prompt Injection Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/LLM_Prompt_Injection_Prevention_Cheat_Sheet.html) — OWASP guidance on prompt injection; useful for designing adversarial test cases.
 - [Groundedness in Azure AI Content Safety](https://learn.microsoft.com/azure/ai-services/content-safety/concepts/groundedness) — Microsoft's definition and detection approach for groundedness; relevant for targeted hallucination eval suites.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Building an Evaluation Set|Building an Evaluation Set]]
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Deterministic Checks|Deterministic Checks]]
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/LLM-as-a-Judge|LLM-as-a-Judge]]
-> - [[Software Engineering/11 AI & ML/LLM/Evaluation/Online Evaluation and AB Tests|Online Evaluation and AB Tests]]
-<!-- whats-next:end -->

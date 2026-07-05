@@ -8,7 +8,7 @@ level:
 priority: High
 status: Ready to Repeat
 
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -429,15 +429,3 @@ The classic eight above predate today's stacks. The leaks (and pseudo-leaks) mos
 - [Weak event patterns in WPF (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/advanced/weak-event-patterns) — how to subscribe to events without creating strong references that prevent GC.
 - [8 Ways You Can Cause Memory Leaks in .NET (Michael's Coding Spot)](https://michaelscodingspot.com/memory-leaks-dotnet/) — practitioner walkthrough of the 8 most common .NET leak patterns with code examples and fixes.
 - [5 Techniques to Avoid Memory Leaks by Events in C# .NET (Michael's Coding Spot)](https://michaelscodingspot.com/5-techniques-to-avoid-memory-leaks-by-events-in-c-net-you-should-know/) — event-specific leak patterns and mitigation strategies including weak event and anonymous handler approaches.
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/01 Programming/NET/NET|NET]]
->
-> **Pages**
-> - [[Software Engineering/01 Programming/NET/Runtime/Common Language Runtime|Common Language Runtime]]
-> - [[Software Engineering/01 Programming/NET/Runtime/Garbage Collector|Garbage Collector]]
-<!-- whats-next:end -->

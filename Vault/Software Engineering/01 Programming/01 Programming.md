@@ -6,7 +6,7 @@ topic:
 subtopic: []
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 status: Creation
 level:
   - "4"
@@ -23,14 +23,3 @@ What separates senior programming skill from junior: knowing when *not* to use a
 
 - [.NET documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/) — Entry point for the .NET platform covered in this section.
 - [The Pragmatic Programmer (Hunt & Thomas)](https://pragprog.com/titles/tpp20/the-pragmatic-programmer-20th-anniversary-edition/) — Practitioner guide to programming craft and engineering judgment.
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/Software Engineering|Software Engineering]]
->
-> **Topics**
-> - [[Software Engineering/01 Programming/NET/NET|NET]]
-<!-- whats-next:end -->

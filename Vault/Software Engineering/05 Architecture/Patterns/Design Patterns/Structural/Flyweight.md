@@ -7,7 +7,7 @@ level:
   - "1"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 # Flyweight
 
@@ -150,20 +150,3 @@ Updating the Electronics tax rate now means updating one `CategoryFlyweight` ins
 - [`ArrayPool<T>` — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.buffers.arraypool-1) — .NET's built-in Flyweight for buffer reuse
 - [`ObjectPool<T>` — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.objectpool.objectpool-1) — ASP.NET Core object pooling (Flyweight for expensive objects)
 - [string.Intern — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.string.intern) — CLR string intern pool as a Flyweight factory
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/Patterns/Design Patterns/Design Patterns|Design Patterns]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Adapter|Adapter]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Bridge|Bridge]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Composite|Composite]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Decorator|Decorator]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Facade|Facade]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Structural/Proxy|Proxy]]
-<!-- whats-next:end -->

@@ -7,7 +7,7 @@ level:
   - "4"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 # Intro
 
@@ -98,18 +98,3 @@ Removing a safety mechanism (retry logic, circuit breaker, idempotency key) beca
 - [The Pragmatic Programmer (Hunt & Thomas)](https://pragprog.com/titles/tpp20/the-pragmatic-programmer-20th-anniversary-edition/) — Chapter on "Good Enough Software" and avoiding over-engineering.
 - [The law of leaky abstractions (Joel Spolsky)](https://www.joelonsoftware.com/2002/11/11/the-law-of-leaky-abstractions/) — why abstractions always leak and why understanding the underlying mechanism matters.
 - [Simple Made Easy (Rich Hickey)](https://www.infoq.com/presentations/Simple-Made-Easy/) — the definitive talk distinguishing 'simple' (few interleaved concerns) from 'easy' (familiar); explains why simplicity is a design goal, not a feeling.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/06 Development Practices/06 Development Practices|06 Development Practices]]
->
-> **Pages**
-> - [[Software Engineering/06 Development Practices/Principles/DRY|DRY]]
-> - [[Software Engineering/06 Development Practices/Principles/IoC (Holywood Principle)|IoC (Holywood Principle)]]
-> - [[Software Engineering/06 Development Practices/Principles/SOLID|SOLID]]
-> - [[Software Engineering/06 Development Practices/Principles/YAGNI|YAGNI]]
-<!-- whats-next:end -->

@@ -5,7 +5,7 @@ subtopic:
   - NET
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 priority: Medium
 level:
   - '3'
@@ -31,16 +31,3 @@ Not everything in .NET fits cleanly into language/runtime buckets. This folder c
 - [.NET documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/) — Platform overview and official references.
 - [ASP.NET Core documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/) — Modern web stack guidance for middleware and real-time features.
 - [ASP.NET Core diagnostic scenarios (David Fowler)](https://github.com/davidfowl/AspNetCoreDiagnosticScenarios) — Practitioner patterns for async, SignalR, and common .NET pitfalls from the ASP.NET team architect.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/01 Programming/NET/NET|NET]]
->
-> **Pages**
-> - [[Software Engineering/01 Programming/NET/Other/OWIN|OWIN]]
-> - [[Software Engineering/01 Programming/NET/Other/SignalR|SignalR]]
-<!-- whats-next:end -->

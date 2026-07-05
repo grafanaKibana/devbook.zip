@@ -7,7 +7,7 @@ level:
   - "4"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 # Intro
 
@@ -128,19 +128,3 @@ The cost of premature microservices is high: distributed systems complexity, eve
 - [Microservices (Martin Fowler)](https://martinfowler.com/articles/microservices.html) — the canonical microservices article; useful for understanding what you are trading away when you leave the monolith.
 - [Modular Monolith: A Primer (Kamil Grzybek)](https://www.kamilgrzybek.com/blog/posts/modular-monolith-primer) — practitioner guide to enforcing module boundaries in a .NET monolith.
 - [Building Microservices (Sam Newman)](https://samnewman.io/books/building_microservices/) — the definitive book on microservices; Chapter 1 covers when NOT to use them.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/05 Architecture|05 Architecture]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/System Architecture/Event-Driven Architecture|Event-Driven Architecture]]
-> - [[Software Engineering/05 Architecture/System Architecture/Microservices|Microservices]]
-> - [[Software Engineering/05 Architecture/System Architecture/Modular Monolith|Modular Monolith]]
-> - [[Software Engineering/05 Architecture/System Architecture/Serverless Architecture|Serverless Architecture]]
-> - [[Software Engineering/05 Architecture/System Architecture/Service-Oriented Architecture|Service-Oriented Architecture]]
-<!-- whats-next:end -->

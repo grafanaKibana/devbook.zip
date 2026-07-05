@@ -8,7 +8,7 @@ level:
 priority: High
 status:
   - Done
-dg-publish: true
+publish: true
 ---
 # Prototype
 
@@ -153,18 +153,3 @@ Adding a new field to `Product` record automatically includes it in `with` copie
 - [Records (C# reference) — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record) — `record with {}` as the modern C# Prototype
 - [Object.MemberwiseClone — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.object.memberwiseclone) — classical shallow copy mechanism
 - [ICloneable interface — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.icloneable) — why the interface is problematic and when to avoid it
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/Patterns/Design Patterns/Design Patterns|Design Patterns]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Creational/Abstract Factory|Abstract Factory]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Creational/Builder|Builder]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Creational/Factory Method|Factory Method]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Creational/Singleton|Singleton]]
-<!-- whats-next:end -->

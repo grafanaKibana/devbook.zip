@@ -7,7 +7,7 @@ level:
   - "1"
 priority: Low
 status: Done
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -149,20 +149,3 @@ Console.WriteLine($"Confidence: {result.Value.ConfidenceScores.Positive:P}");
 - [Hugging Face NLP Course](https://huggingface.co/learn/nlp-course/chapter1/1) — free, comprehensive course covering tokenization, transformers, fine-tuning, and all major NLP tasks with code examples.
 - [Attention Is All You Need (Vaswani et al., 2017)](https://arxiv.org/abs/1706.03762) — the original transformer paper; introduced the self-attention mechanism that replaced RNNs and enabled modern NLP.
 - [Azure AI Language documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/ai-services/language-service/) — official docs for Azure's managed NLP services: sentiment analysis, NER, key phrase extraction, and custom text classification.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/11 AI & ML|11 AI & ML]]
->
-> **Topics**
-> - [[Software Engineering/11 AI & ML/Machine Learning/Evaluation/Evaluation|Evaluation]]
-> - [[Software Engineering/11 AI & ML/Machine Learning/Types/Types|Types]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/Machine Learning/Data Drift|Data Drift]]
-> - [[Software Engineering/11 AI & ML/Machine Learning/Spectrum Of Automations|Spectrum Of Automations]]
-<!-- whats-next:end -->

@@ -8,7 +8,7 @@ level:
 priority: Medium
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 status: Creation
 ---
 
@@ -86,12 +86,3 @@ Mobile and web application platform. Includes: Firestore (real-time NoSQL docume
 - [Google Cloud documentation](https://cloud.google.com/docs) — GCP official docs hub; covers all services with quickstarts and API references
 - [Google Cloud .NET client libraries](https://cloud.google.com/dotnet/docs/reference) — .NET integration guide for GCP services
 - [BigQuery documentation](https://cloud.google.com/bigquery/docs) — comprehensive BigQuery guide including BigQuery ML and data transfer service
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/10 Cloud/10 Cloud|10 Cloud]]
->
-<!-- whats-next:end -->

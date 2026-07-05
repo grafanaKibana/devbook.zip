@@ -7,7 +7,7 @@ level:
   - "4"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 # Intro
 
@@ -133,22 +133,3 @@ Newer constraints worth knowing: `where T : struct, Enum` (enum-only generics), 
 - [Constraints on type parameters](https://learn.microsoft.com/dotnet/csharp/programming-guide/generics/constraints-on-type-parameters) — full list of constraint keywords and their semantics.
 - [Covariance and contravariance in generics](https://learn.microsoft.com/dotnet/standard/generics/covariance-and-contravariance) — Microsoft reference on `in`/`out` variance with interface and delegate examples.
 - [Covariance and Contravariance in C# (Eric Lippert)](https://ericlippert.com/2007/10/16/covariance-and-contravariance-in-c-part-1/) — 10-part series by a former C# compiler team member; the definitive practitioner explanation of variance semantics.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/01 Programming/NET/CSharp/CSharp|CSharp]]
->
-> **Topics**
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types|Types]]
->
-> **Pages**
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Exception Handling|Exception Handling]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Foreach|Foreach]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Methods|Methods]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Namespaces|Namespaces]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Reflection|Reflection]]
-<!-- whats-next:end -->

@@ -7,7 +7,7 @@ level:
   - "3"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 # Intro
 
@@ -116,16 +116,3 @@ VPN encapsulation adds overhead (20–60 bytes per packet). If the MTU is not ad
 - [IPsec architecture (RFC 4301)](https://www.rfc-editor.org/rfc/rfc4301) — the authoritative specification for IPsec tunnel and transport modes.
 - [Virtual private network (Wikipedia)](https://en.wikipedia.org/wiki/Virtual_private_network) — overview of VPN types, protocols, and use cases.
 - [WireGuard vs OpenVPN vs IPsec (Tailscale blog)](https://tailscale.com/blog/how-tailscale-works) — practitioner comparison of VPN protocols with real-world performance data.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/04 Networks/04 Networks|04 Networks]]
->
-> **Pages**
-> - [[Software Engineering/04 Networks/Architecture & Ops/CDN|CDN]]
-> - [[Software Engineering/04 Networks/Architecture & Ops/Peer-2-Peer|Peer-2-Peer]]
-<!-- whats-next:end -->

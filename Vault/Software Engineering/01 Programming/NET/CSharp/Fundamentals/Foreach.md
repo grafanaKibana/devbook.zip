@@ -7,7 +7,7 @@ level:
   - "4"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -117,22 +117,3 @@ Two iterator gotchas:
 - [Iterators (overview)](https://learn.microsoft.com/dotnet/csharp/iterators) — conceptual guide covering lazy evaluation, deferred execution, and `IAsyncEnumerable<T>`.
 - [How is foreach implemented in C#? (StackOverflow)](https://stackoverflow.com/questions/11179156/how-is-foreach-implemented-in-c) — community explanation of compiler lowering with IL examples.
 - [Yield: what, where, and why (Habr)](https://habr.com/ru/post/311094/) — Russian-language practitioner deep-dive into iterator state machines.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/01 Programming/NET/CSharp/CSharp|CSharp]]
->
-> **Topics**
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types|Types]]
->
-> **Pages**
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Exception Handling|Exception Handling]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Generics|Generics]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Methods|Methods]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Namespaces|Namespaces]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Reflection|Reflection]]
-<!-- whats-next:end -->

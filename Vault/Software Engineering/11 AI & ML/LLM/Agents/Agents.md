@@ -5,7 +5,7 @@ subtopic:
   - LLM
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 level:
   - '3'
 status: Done
@@ -149,21 +149,3 @@ For patterns on coordinating multiple agents, see [[Software Engineering/11 AI &
 - [Claude Agent SDK — overview and patterns (Anthropic)](https://platform.claude.com/docs/en/agent-sdk/overview)
 - [Microsoft Agent Framework — Overview (Microsoft Learn)](https://learn.microsoft.com/en-us/agent-framework/overview/)
 - [Semantic Kernel to Agent Framework Migration Guide (Microsoft)](https://learn.microsoft.com/en-us/agent-framework/migration-guide/from-semantic-kernel/)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
->
-> **Topics**
-> - [[Software Engineering/11 AI & ML/LLM/Agents/Evaluation/Evaluation|Evaluation]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/Agents/Agent Loop|Agent Loop]]
-> - [[Software Engineering/11 AI & ML/LLM/Agents/Model Context Protocol|Model Context Protocol]]
-> - [[Software Engineering/11 AI & ML/LLM/Agents/Multi-Agentic Systems|Multi-Agentic Systems]]
-> - [[Software Engineering/11 AI & ML/LLM/Agents/Tools|Tools]]
-<!-- whats-next:end -->

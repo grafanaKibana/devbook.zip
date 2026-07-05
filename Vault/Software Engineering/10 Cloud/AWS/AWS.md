@@ -9,7 +9,7 @@ priority: Medium
 status: Creation
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 ---
 
 # AWS Services Overview
@@ -89,12 +89,3 @@ aws sqs receive-message --queue-url https://sqs.us-east-1.amazonaws.com/12345678
 - [AWS Documentation](https://docs.aws.amazon.com/) — AWS official docs hub; covers all services with API references and tutorials
 - [AWS SDK for .NET](https://docs.aws.amazon.com/sdk-for-net/v3/developer-guide/welcome.html) — .NET integration guide; covers authentication, service clients, and async patterns
 - [AWS Well-Architected Framework](https://docs.aws.amazon.com/wellarchitected/latest/framework/welcome.html) — AWS best practices for reliability, security, performance, and cost optimization
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/10 Cloud/10 Cloud|10 Cloud]]
->
-<!-- whats-next:end -->

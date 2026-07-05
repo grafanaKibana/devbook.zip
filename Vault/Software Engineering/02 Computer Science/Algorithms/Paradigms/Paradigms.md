@@ -5,7 +5,7 @@ subtopic:
   - Algorithms
 tags:
   - FolderNote
-dg-publish: true
+publish: true
 priority: High
 level:
   - "4"
@@ -37,17 +37,3 @@ They contrast with [[Software Engineering/02 Computer Science/Algorithms/Pattern
 
 - [Algorithm design paradigms (Wikipedia)](https://en.wikipedia.org/wiki/Algorithmic_paradigm) — taxonomy of greedy, divide-and-conquer, DP, backtracking, and more.
 - [Competitive Programmer's Handbook (Laaksonen)](https://cses.fi/book/book.pdf) — free book with chapters on each paradigm.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/02 Computer Science/Algorithms/Algorithms|Algorithms]]
->
-> **Pages**
-> - [[Software Engineering/02 Computer Science/Algorithms/Paradigms/Backtracking|Backtracking]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Paradigms/Dynamic Programming|Dynamic Programming]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Paradigms/Greedy Algorithms|Greedy Algorithms]]
-<!-- whats-next:end -->

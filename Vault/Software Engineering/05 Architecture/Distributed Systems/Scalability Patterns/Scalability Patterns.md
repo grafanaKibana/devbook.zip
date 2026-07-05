@@ -6,7 +6,7 @@ subtopic:
 level:
   - "2"
 priority: High
-dg-publish: true
+publish: true
 tags:
   - FolderNote
 status: Not-Started
@@ -149,16 +149,3 @@ Simple production pattern:
 - [Azure App Service - Scale up and scale out](https://learn.microsoft.com/azure/app-service/manage-scale-up)
 - [Amazon Builders Library - Using load shedding to avoid overload](https://aws.amazon.com/builders-library/using-load-shedding-to-avoid-overload/)
 - [ASP.NET Core distributed caching guidance](https://learn.microsoft.com/aspnet/core/performance/caching/distributed?view=aspnetcore-10.0)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/Distributed Systems/Distributed Systems|Distributed Systems]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Distributed Systems/Scalability Patterns/Horizontal Scaling|Horizontal Scaling]]
-> - [[Software Engineering/05 Architecture/Distributed Systems/Scalability Patterns/Vertical Scaling|Vertical Scaling]]
-<!-- whats-next:end -->

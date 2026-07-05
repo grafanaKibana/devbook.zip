@@ -7,7 +7,7 @@ level:
   - "3"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 # Intro
 
@@ -269,17 +269,3 @@ Decision rule: start with Layered or Vertical Slice for simple domains, and move
 - [CleanArchitecture template by Jason Taylor](https://github.com/jasontaylordev/CleanArchitecture) — widely used production oriented .NET template showing how Application Domain Infrastructure and Web projects are composed.
 - [CleanArchitecture by Steve Smith](https://github.com/ardalis/CleanArchitecture) — pragmatic .NET implementation from Steve Smith that demonstrates boundaries use cases and test strategy.
 - [Vertical Slice Architecture by Jimmy Bogard](https://www.jimmybogard.com/vertical-slice-architecture/) — practitioner explanation of an alternative architecture style and why feature oriented slices can reduce coupling.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/05 Architecture|05 Architecture]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Application Architecture/Layered Architecture|Layered Architecture]]
-> - [[Software Engineering/05 Architecture/Application Architecture/MVC MVVM|MVC MVVM]]
-> - [[Software Engineering/05 Architecture/Application Architecture/Plug-in Architecture (MicroKernel)|Plug-in Architecture (MicroKernel)]]
-<!-- whats-next:end -->

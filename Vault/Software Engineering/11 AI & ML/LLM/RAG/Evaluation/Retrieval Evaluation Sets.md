@@ -7,7 +7,7 @@ level:
   - "2"
 priority: High
 status: Done
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -77,16 +77,3 @@ This produces exactly the structure the retrieval metrics consume: the query is 
 
 - [RAGAS synthetic test data generation -- chunk-to-query generation, query types, and labeling (RAGAS docs)](https://docs.ragas.io/en/stable/concepts/test_data_generation/rag/)
 - [BEIR -- heterogeneous zero-shot retrieval benchmark with qrels-style relevance judgments (NeurIPS 2021)](https://arxiv.org/abs/2104.08663)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/LLM/RAG/RAG|RAG]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation/Component-Level Evaluation|Component-Level Evaluation]]
-> - [[Software Engineering/11 AI & ML/LLM/RAG/Evaluation/Evaluation Metrics|Evaluation Metrics]]
-<!-- whats-next:end -->

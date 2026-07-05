@@ -9,7 +9,7 @@ status: Done
 tags:
   - FolderNote
 
-dg-publish: true
+publish: true
 priority: High
 ---
 
@@ -99,15 +99,3 @@ Document store example: a product page is an aggregate, so store it as one docum
 - [Relational vs NoSQL data](https://learn.microsoft.com/dotnet/architecture/cloud-native/relational-vs-nosql-data)
 - [Choose a data store](https://learn.microsoft.com/azure/architecture/guide/technology-choices/data-stores-getting-started)
 - [Designing Data Intensive Applications chapter on storage and retrieval](https://www.oreilly.com/library/view/designing-data-intensive-applications/9781098119058/ch04.html)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/03 Data Persistence/03 Data Persistence|03 Data Persistence]]
->
-> **Pages**
-> - [[Software Engineering/03 Data Persistence/NoSQL/NoSQL Database Types|NoSQL Database Types]]
-<!-- whats-next:end -->

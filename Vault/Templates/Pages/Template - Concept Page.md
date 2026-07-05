@@ -6,7 +6,7 @@ priority: Medium
 status: Not-Started
 tags:
   - Template
-dg-publish: false
+publish: false
 ---
 <%*
 // Derive topic/subtopic from folder path
@@ -58,10 +58,3 @@ Replace or delete these example links.
 
 - [Link 1](https://example.com)
 - [Link 2](https://example.com)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-<!-- whats-next:end -->

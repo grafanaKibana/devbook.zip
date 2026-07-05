@@ -7,7 +7,7 @@ level:
   - "4"
 priority: Medium
 status: Done
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -112,16 +112,3 @@ Shortest A→D path: A→B→C→D (cost 4)
 
 - [Dijkstra's algorithm -- encyclopedic overview covering correctness proof, complexity analysis, and historical context (Wikipedia)](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm)
 - [Dijkstra on sparse graphs -- implementation guide with adjacency list, binary heap, and code examples for competitive programming (cp-algorithms)](https://cp-algorithms.com/graph/dijkstra.html)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/02 Computer Science/Algorithms/Algorithms|Algorithms]]
->
-> **Pages**
-> - [[Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|Minimum Spanning Tree]]
-> - [[Software Engineering/02 Computer Science/Algorithms/Graph Algorithms/Topological Sort|Topological Sort]]
-<!-- whats-next:end -->

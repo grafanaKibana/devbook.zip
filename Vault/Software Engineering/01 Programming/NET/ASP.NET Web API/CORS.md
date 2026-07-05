@@ -7,7 +7,7 @@ level:
   - "1"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # CORS in ASP.NET Core
@@ -114,19 +114,3 @@ public IActionResult InternalEndpoint() => Ok();
 - [Cross-Origin Resource Sharing (MDN)](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) — browser-side explanation of CORS: simple requests, preflight, credentials, and the headers involved.
 - [CORS security considerations (OWASP)](https://cheatsheetseries.owasp.org/cheatsheets/CORS_Security_Cheat_Sheet.html) — OWASP cheat sheet covering common CORS misconfigurations and how to avoid them.
 - [Fetch standard CORS protocol](https://fetch.spec.whatwg.org/#cors-protocol) — WHATWG fetch specification defining the exact CORS protocol browsers must follow.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/01 Programming/NET/NET|NET]]
->
-> **Pages**
-> - [[Software Engineering/01 Programming/NET/ASP.NET Web API/Authentication|Authentication]]
-> - [[Software Engineering/01 Programming/NET/ASP.NET Web API/Authorization|Authorization]]
-> - [[Software Engineering/01 Programming/NET/ASP.NET Web API/Dependency Injection|Dependency Injection]]
-> - [[Software Engineering/01 Programming/NET/ASP.NET Web API/Filters|Filters]]
-> - [[Software Engineering/01 Programming/NET/ASP.NET Web API/Middlewares|Middlewares]]
-<!-- whats-next:end -->

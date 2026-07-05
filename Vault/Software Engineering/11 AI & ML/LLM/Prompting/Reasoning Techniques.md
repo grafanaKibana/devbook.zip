@@ -7,7 +7,7 @@ level:
   - "3"
 priority: Medium
 status: Done
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -127,17 +127,3 @@ Decision rule:
 - [Prompting Guide: Self-Consistency](https://www.promptingguide.ai/techniques/consistency) — explains the self-consistency sampling approach with implementation guidance.
 - [Prompting Guide: Tree of Thoughts](https://www.promptingguide.ai/techniques/tot) — practical guide to ToT with prompt templates and use-case recommendations.
 - [Engineering Blog: Tree of Thoughts Prompting](https://github.com/dave1010/tree-of-thought-prompting) — community implementation of ToT prompting with examples and prompt templates.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/Prompting/Automated Prompt Optimization|Automated Prompt Optimization]]
-> - [[Software Engineering/11 AI & ML/LLM/Prompting/In-Context Learning|In-Context Learning]]
-> - [[Software Engineering/11 AI & ML/LLM/Prompting/Prompt Composition|Prompt Composition]]
-<!-- whats-next:end -->

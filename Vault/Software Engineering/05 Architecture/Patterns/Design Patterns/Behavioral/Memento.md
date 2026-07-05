@@ -7,7 +7,7 @@ level:
   - "1"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 # Memento
 
@@ -161,24 +161,3 @@ Abandoned cart recovery now uses `CartHistory.Serialize()` — the same snapshot
 - [Memento — refactoring.guru](https://refactoring.guru/design-patterns/memento) — canonical pattern description with originator/caretaker diagram and C# example
 - [ChangeTracker — EF Core — Microsoft Learn](https://learn.microsoft.com/en-us/ef/core/change-tracking/) — EF Core's built-in Memento for entity state tracking
 - [Event Sourcing pattern — Microsoft Learn](https://learn.microsoft.com/en-us/azure/architecture/patterns/event-sourcing) — Memento at scale: storing state changes as an immutable event log
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/05 Architecture/Patterns/Design Patterns/Design Patterns|Design Patterns]]
->
-> **Pages**
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Chain of Responsibility|Chain of Responsibility]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Command|Command]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Interpreter|Interpreter]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Iterator|Iterator]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Mediator|Mediator]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Observer|Observer]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/State|State]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Strategy|Strategy]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Template Method|Template Method]]
-> - [[Software Engineering/05 Architecture/Patterns/Design Patterns/Behavioral/Visitor|Visitor]]
-<!-- whats-next:end -->

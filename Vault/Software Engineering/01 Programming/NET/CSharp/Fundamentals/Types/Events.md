@@ -7,7 +7,7 @@ level:
   - "4"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 # Intro
 
@@ -130,19 +130,3 @@ public sealed class Listener : IDisposable
 - [Modern events in C#](https://learn.microsoft.com/dotnet/csharp/modern-events) — covers relaxed `EventArgs` constraint and modern subscription patterns.
 - [Null-conditional operator and thread-safe delegate invoke](https://learn.microsoft.com/dotnet/csharp/language-reference/operators/member-access-operators#null-conditional-operators--and-) — explains why `?.Invoke` is safer than null-check + call.
 - [Weak event patterns (WPF)](https://learn.microsoft.com/dotnet/desktop/wpf/events/weak-event-patterns) — pattern for preventing memory leaks when subscriber lifetime is shorter than publisher lifetime.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Fundamentals|Fundamentals]]
->
-> **Pages**
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Classes|Classes]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Delegates|Delegates]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Records|Records]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Strings|Strings]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Structs|Structs]]
-<!-- whats-next:end -->

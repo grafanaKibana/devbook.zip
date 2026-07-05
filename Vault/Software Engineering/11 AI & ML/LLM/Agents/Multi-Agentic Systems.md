@@ -7,7 +7,7 @@ level:
   - "3"
 priority: Low
 status: Done
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -165,20 +165,3 @@ The "bitter lesson" of multi-agent: elaborate coordination architectures built t
 - [Why Multi-Agent Systems Fail (Galileo)](https://galileo.ai/blog/why-multi-agent-systems-fail)
 - [OWASP Top 10 for LLM Applications — Agentic Security (OWASP)](https://genai.owasp.org/resource/owasp-top-10-for-llm-applications-2025/)
 - [MAS-FIRE: A Fault Injection Framework for Multi-Agent Systems (arxiv)](https://arxiv.org/abs/2602.19843)
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/11 AI & ML/LLM/LLM|LLM]]
->
-> **Topics**
-> - [[Software Engineering/11 AI & ML/LLM/Agents/Evaluation/Evaluation|Evaluation]]
->
-> **Pages**
-> - [[Software Engineering/11 AI & ML/LLM/Agents/Agent Loop|Agent Loop]]
-> - [[Software Engineering/11 AI & ML/LLM/Agents/Model Context Protocol|Model Context Protocol]]
-> - [[Software Engineering/11 AI & ML/LLM/Agents/Tools|Tools]]
-<!-- whats-next:end -->

@@ -7,7 +7,7 @@ level:
   - "4"
 priority: High
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Entity Framework Core
@@ -222,13 +222,3 @@ Adding a non-nullable column without a default value locks the table during migr
 - [EF Core performance (Microsoft Learn)](https://learn.microsoft.com/en-us/ef/core/performance/) — official performance guide: AsNoTracking, projections, compiled queries, bulk operations, and connection pooling.
 - [EF Core migrations (Microsoft Learn)](https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/) — complete migrations guide: creating, applying, reverting, and customizing migrations for production deployments.
 - [Using lazy loading in EF Core 8](https://toreaurstad.blogspot.com/2024/09/using-lazy-loading-in-entity-framework.html) — practitioner post on EF Core 8 lazy loading configuration, pitfalls, and when to use it vs eager loading.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/03 Data Persistence/03 Data Persistence|03 Data Persistence]]
->
-<!-- whats-next:end -->

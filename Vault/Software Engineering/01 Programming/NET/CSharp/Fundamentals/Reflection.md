@@ -7,7 +7,7 @@ level:
   - "4"
 priority: Medium
 status: Ready to Repeat
-dg-publish: true
+publish: true
 ---
 
 # Intro
@@ -127,22 +127,3 @@ To reach **private members**, the old way is `BindingFlags.NonPublic` (slow, bre
 - [Type.GetMembers and BindingFlags behavior](https://learn.microsoft.com/dotnet/api/system.type.getmembers) - Exact member lookup semantics and edge cases.
 - [Fixing trim warnings for reflection](https://learn.microsoft.com/dotnet/core/deploying/trimming/fixing-warnings) - Practical guidance for trimming/AOT-safe reflection.
 - [Why is Reflection slow? (Matt Warren)](https://mattwarren.org/2016/12/14/Why-is-Reflection-slow/) - Performance internals and benchmark-driven intuition.
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Parent**
->  [[Software Engineering/01 Programming/NET/CSharp/CSharp|CSharp]]
->
-> **Topics**
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Types/Types|Types]]
->
-> **Pages**
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Exception Handling|Exception Handling]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Foreach|Foreach]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Generics|Generics]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Methods|Methods]]
-> - [[Software Engineering/01 Programming/NET/CSharp/Fundamentals/Namespaces|Namespaces]]
-<!-- whats-next:end -->
