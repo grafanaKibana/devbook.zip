@@ -2,10 +2,7 @@
 title: DEVBOOK
 ---
 
-> [!info] Baseline landing page
-> This placeholder is replaced in Phase 2 by a native Quartz component that
-> renders the topic dashboard (card grid + progress bars). For now, browse the
-> knowledge base:
+Welcome to my software engineering notebook — the notes I've written to actually *understand* the stack, not just recall it for an interview. .NET internals, distributed systems, databases, security, cloud, AI/ML, and most of what sits between. Every note goes deep: core mechanics, real examples, the pitfalls that bite in production, and the questions worth being able to answer.
 
-- [[Software Engineering/Software Engineering|Software Engineering]]
-- [[Software Engineering/Questions|Questions]]
+> [!info] Why this exists
+> I learn by writing things down and coming back to them. This vault is that process in the open — built on spaced repetition, organized into 11 topic areas, and updated continuously. Browse by topic below, or jump into [[Software Engineering/Questions|Questions]] and the [[Software Engineering/Roadmap.canvas|Roadmap]].
