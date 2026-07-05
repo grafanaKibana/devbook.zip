@@ -93,3 +93,50 @@
     font-variant-numeric: tabular-nums;
   }
 }
+
+// ── Questions aggregation (QuestionsIndex.tsx) ──────────────────────────────
+.questions-index {
+  .qi-toc {
+    ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    ul ul {
+      padding-left: 1.2rem;
+      margin: 0.15rem 0 0.4rem;
+    }
+    li {
+      margin: 0.1rem 0;
+    }
+    .qi-total {
+      color: var(--gray);
+      margin-top: -0.4rem;
+    }
+    hr {
+      margin: 1.5rem 0;
+    }
+  }
+
+  .qi-content {
+    .qi-heading {
+      scroll-margin-top: 2rem;
+    }
+    .qi-item {
+      margin: 0.6rem 0 1rem;
+    }
+    // The aggregated question callouts render slightly tighter than in-body.
+    .callout {
+      margin-bottom: 0.25rem;
+    }
+    .qi-source {
+      font-size: 0.75rem;
+      font-style: italic;
+      color: var(--gray);
+      margin-top: 0.25rem;
+
+      &::before {
+        content: "— from ";
+      }
+    }
+  }
+}

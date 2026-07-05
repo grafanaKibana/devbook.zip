@@ -1,20 +1,37 @@
 import { loadQuartzConfig, loadQuartzLayout } from "./quartz/plugins/loader/config-loader"
-import TopicDashboard from "./quartz/components/TopicDashboard"
-import ConditionalRender from "./quartz/components/ConditionalRender"
+import { PageTypes } from "./quartz/plugins"
+import { TopicDashboard } from "./lib/topic-dashboard"
+import { QuestionsIndex } from "./lib/questions-index"
+import { QuestionCollector } from "./lib/question-collector"
 
-// Native homepage dashboard: render the topic card grid after the index body,
-// only on the site root (slug "index"). Replaces the old DataviewJS dashboard.
-const dashboard = ConditionalRender({
-  component: TopicDashboard(),
-  condition: (props) => props.fileData.slug === "index",
-})
+// DevBook customizations live here (the sanctioned Quartz override entrypoint)
+// and in ./lib — no engine files under quartz/ are modified. These replace the
+// old Obsidian DataviewJS blocks with build-time components:
+//   - TopicDashboard   → homepage topic cards (self-gates to slug "index")
+//   - QuestionsIndex   → Questions.md aggregation (self-gates to that slug)
+//   - QuestionCollector→ transformer that feeds QuestionsIndex
 
-const config = await loadQuartzConfig(undefined, (layout) => {
-  const content = { ...(layout.byPageType.content ?? {}) }
-  content.afterBody = [dashboard, ...(content.afterBody ?? [])]
-  layout.byPageType.content = content
-  return layout
-})
+const config = await loadQuartzConfig()
+
+// Collect [!QUESTION] callouts across the vault. Appended after the built-in
+// transformers so callouts (obsidian-flavored-markdown) and links (crawl-links)
+// are already resolved.
+config.plugins.transformers.push(QuestionCollector())
+
+// Inject the two page components into every content page's afterBody; each
+// component self-gates to its target slug, so they only render where intended.
+const layout = await loadQuartzLayout()
+const content = { ...(layout.byPageType.content ?? {}) }
+content.afterBody = [TopicDashboard(), QuestionsIndex(), ...(content.afterBody ?? [])]
+layout.byPageType.content = content
+
+// loadQuartzConfig already baked its own layout into a PageTypeDispatcher
+// emitter; replace it with one built from our augmented layout so the injected
+// components actually render.
+config.plugins.emitters = config.plugins.emitters.filter((e) => e.name !== "PageTypeDispatcher")
+config.plugins.emitters.push(
+  PageTypes.PageTypeDispatcher({ defaults: layout.defaults, byPageType: layout.byPageType }),
+)
+
 export default config
-
-export const layout = await loadQuartzLayout()
+export { layout }

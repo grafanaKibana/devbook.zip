@@ -1,20 +1,24 @@
-import { QuartzComponent, QuartzComponentConstructor, QuartzComponentProps } from "./types"
-import { resolveRelative, FullSlug } from "../util/path"
+import type {
+  QuartzComponent,
+  QuartzComponentConstructor,
+  QuartzComponentProps,
+} from "@quartz-community/types"
+import { resolveRelative, type FullSlug } from "@quartz-community/utils"
 
 // Native replacement for the old Obsidian DataviewJS homepage dashboard.
 // Renders one card per curated topic; icon + accent colour are read live from
 // each topic folder-note's frontmatter, and the weighted progress bar is
 // computed from every published note's `status` frontmatter at build time.
+// Self-gates to the site root (slug "index").
 
 const ROOT = "software-engineering"
 
 interface TopicCard {
-  folder: string // slug segment under software-engineering/
+  folder: string
   title: string
   desc: string
 }
 
-// Curated cards (order + descriptions). Icon/colour/stats come from the vault.
 const TOPICS: TopicCard[] = [
   { folder: "01-programming", title: "Programming", desc: "Languages, .NET internals, paradigms, clean code." },
   { folder: "02-computer-science", title: "Computer Science", desc: "Algorithms, data structures, the theory underneath." },
@@ -43,21 +47,17 @@ const ICONS: Record<string, string> = {
   cloud: `<path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>`,
   "brain-circuit": `<path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M9 13a4.5 4.5 0 0 0 3-4"/><path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"/><path d="M3.477 10.896a4 4 0 0 1 .585-.396"/><path d="M6 18a4 4 0 0 1-1.967-.516"/><path d="M12 13h4"/><path d="M12 18h6a2 2 0 0 1 2 2v1"/><path d="M12 8h8"/><path d="M16 8V5a2 2 0 0 1 2-2"/><circle cx="16" cy="13" r=".5"/><circle cx="18" cy="3" r=".5"/><circle cx="20" cy="21" r=".5"/><circle cx="20" cy="8" r=".5"/>`,
 }
-// lucide "folder" as the fallback icon.
 const DEFAULT_ICON = `<path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>`
 
 const wrapSvg = (inner: string): string =>
   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${inner}</svg>`
 
-// Status → weighted progress (matches the vault's SRS ramp).
 const STATUS_PROGRESS: Record<string, number> = {
   "not-started": 0,
   creation: 33,
   "ready to repeat": 66,
   done: 100,
 }
-// Done-first ramp: each in-progress status is a dimmed shade of the card accent;
-// not-started contributes nothing (it is the empty track).
 const STATUS_RAMP: { key: string; label: string; weight: number; alpha: number }[] = [
   { key: "done", label: "Done", weight: 100, alpha: 1 },
   { key: "ready to repeat", label: "Ready to Repeat", weight: 66, alpha: 0.6 },
@@ -75,8 +75,10 @@ const hasTag = (fm: Record<string, any> | undefined, tag: string): boolean => {
   return false
 }
 
-export default (() => {
-  const TopicDashboard: QuartzComponent = ({ allFiles, fileData }: QuartzComponentProps) => {
+export const TopicDashboard: QuartzComponentConstructor = () => {
+  const Dashboard: QuartzComponent = ({ allFiles, fileData }: QuartzComponentProps) => {
+    if (fileData.slug !== "index") return null
+
     const bySlug = new Map<string, (typeof allFiles)[number]>()
     for (const f of allFiles) if (f.slug) bySlug.set(f.slug, f)
 
@@ -153,5 +155,5 @@ export default (() => {
     )
   }
 
-  return TopicDashboard
-}) satisfies QuartzComponentConstructor
+  return Dashboard
+}

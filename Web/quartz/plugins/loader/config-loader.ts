@@ -235,17 +235,8 @@ async function getManifest(source: PluginSource): Promise<PluginManifest | null>
   return (await readManifestFromPackageJson(source)) ?? (await resolvePluginManifest(source))
 }
 
-type LayoutResult = {
-  defaults: Partial<FullPageLayout>
-  byPageType: Record<string, Partial<FullPageLayout>>
-}
-
 export async function loadQuartzConfig(
   configOverrides?: Partial<GlobalConfiguration>,
-  // DevBook customization hook: lets quartz.ts augment the resolved layout
-  // (e.g. inject the native homepage TopicDashboard) before the
-  // PageTypeDispatcher is built from it.
-  layoutTransform?: (layout: LayoutResult) => LayoutResult,
 ): Promise<QuartzConfig> {
   const json = readPluginsJson()
 
@@ -499,8 +490,7 @@ export async function loadQuartzConfig(
 
   // Load layout and add PageTypeDispatcher to emitters.
   // This must happen after plugin instantiation so the component registry is populated.
-  const rawLayout = await loadQuartzLayout()
-  const layout = layoutTransform ? layoutTransform(rawLayout) : rawLayout
+  const layout = await loadQuartzLayout()
   plugins.emitters.push(
     builtinPlugins.PageTypes.PageTypeDispatcher({
       defaults: layout.defaults,
