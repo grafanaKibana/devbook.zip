@@ -155,7 +155,7 @@
   "showTooltips": false,
   "showTooltipPath": true,
   "showTooltipWordCount": false,
-  "desktopBackground": "separate",
+  "desktopBackground": "primary",
   "desktopScale": 1,
   "mobileScale": 1,
   "useFloatingToolbars": true,

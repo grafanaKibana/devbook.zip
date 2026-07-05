@@ -2,7 +2,7 @@
   "obsidian-velocity@@theme-paint-dark": "velocity-gray",
   "obsidian-velocity@@color-highlight-rgb": "var(--highlight-green-rgb)",
   "obsidian-velocity@@enable-special-text": false,
-  "obsidian-velocity@@enable-special-code": false,
+  "obsidian-velocity@@enable-special-code": true,
   "obsidian-velocity@@line-height-normal": "1.6",
   "obsidian-velocity@@vl-layout-padding": "8px",
   "obsidian-velocity-config@@disable-list-styling": false,
@@ -18,5 +18,8 @@
   "obsidian-velocity-config@@active-line-highlight": false,
   "obsidian-velocity-config@@hide-bases-header": false,
   "obsidian-velocity-config@@enable-dim-img": false,
-  "obsidian-velocity-config@@improve-pinned-tabs": false
+  "obsidian-velocity-config@@improve-pinned-tabs": false,
+  "obsidian-velocity@@theme-paint-light": "velocity",
+  "obsidian-velocity@@override-default-font": false,
+  "obsidian-velocity@@titlebar-button-visibility": "none"
 }

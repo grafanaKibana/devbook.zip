@@ -3,6 +3,7 @@ tags:
   - FolderNote
   - MetricsIgnore
   - Template
+whats-next: false
 dg-publish: true
 dg-home: true
 ---
@@ -160,18 +161,18 @@ wrapper.classList.add("block-language-dataview");
 const grid = wrapper.createEl("div");
 grid.style.display = "flex";
 grid.style.flexWrap = "wrap";
-grid.style.gap = "0.6em";
+grid.style.gap = "0.75rem";
 grid.style.width = "100%";
 
 // Multicolour stacked bar: one coloured slice per in-progress status, each sized
 // to that status's contribution to the weighted percentage (count·weight/total).
 // The slices therefore fill exactly `pct%` of the track; the rest stays empty.
-const appendStackedBar = (parent, byStatus, total) => {
+const appendStackedBar = (parent, byStatus, total, height = "0.7em") => {
   const bar = parent.createEl("div");
   bar.classList.add("se-progress");
   bar.style.display = "flex";
   bar.style.width = "100%";
-  bar.style.height = "0.7em";
+  bar.style.height = height;
   bar.style.borderRadius = "999px";
   bar.style.overflow = "hidden";
   bar.style.background = "var(--background-modifier-border)";
@@ -195,14 +196,49 @@ const appendStackedBar = (parent, byStatus, total) => {
   return bar;
 };
 
-const appendProgress = (parent, pct, byStatus, total) => {
+const appendProgress = (parent, pct, byStatus, total, opts = {}) => {
+  const {
+    barHeight = "0.7em",
+    textAbove = false,
+    fontSize = null,
+    spread = false,
+    counter = null,
+    counterOpacity = null,
+  } = opts;
   parent.style.textAlign = "center";
 
-  appendStackedBar(parent, byStatus, total);
+  const addLine = () => {
+    const line = parent.createEl("div");
+    if (fontSize) line.style.fontSize = fontSize;
+    if (spread) {
+      // Counter at the start, percentage at the end — both muted grey, their
+      // edges aligned to the bar underneath instead of centred.
+      line.style.display = "flex";
+      line.style.justifyContent = "space-between";
+      line.style.alignItems = "baseline";
+      line.style.color = "var(--text-muted)";
+      if (counter != null) {
+        const c = line.createEl("span", { text: counter });
+        if (counterOpacity != null) c.style.opacity = String(counterOpacity);
+      }
+      line.createEl("span", { text: `${pct}%` });
+    } else {
+      line.style.textAlign = "center";
+      line.createEl("span", { text: `${pct}%` });
+    }
+    return line;
+  };
 
-  const line = parent.createEl("div");
-  line.style.textAlign = "center";
-  line.createEl("span", { text: `${pct}%` });
+  // `textAbove` puts the caption over the bar (topic cards); the default keeps
+  // the bar first, then the caption (the overall-total callout at the bottom).
+  let line;
+  if (textAbove) {
+    line = addLine();
+    appendStackedBar(parent, byStatus, total, barHeight);
+  } else {
+    appendStackedBar(parent, byStatus, total, barHeight);
+    line = addLine();
+  }
   return line;
 };
 
@@ -243,12 +279,25 @@ const sourcePath = dv.current().file.path;
 // (purple), quote (grey).
 const CARD_CALLOUT = "quote";
 
-// Style the title link via CSS (not inline) so it can carry a real :hover — it
-// takes the callout's accent colour and only underlines on hover, like a link.
+// Title reads like a native callout header — accent colour, no underline. The
+// whole card is made clickable by stretching the title link's hit area over the
+// card (the `::after` below). Because it's the real header link — which the
+// garden's `dataview-js-links` transform rewrites to a working permalink — the
+// entire card navigates on the published site, not just the title text.
 const style = wrapper.createEl("style");
 style.textContent = `
+  .se-topic-card { cursor: pointer; position: relative; }
   .se-topic-card .callout-title-inner a { color: rgb(var(--callout-color)); text-decoration: none; }
-  .se-topic-card .callout-title-inner a:hover { text-decoration: underline; }
+  .se-topic-card:hover {
+    border-color: rgba(var(--callout-color), 0.5) !important;
+    background: rgba(var(--callout-color), 0.1) !important;
+  }
+  .se-topic-card .callout-title-inner a::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
 `;
 
 // Read the icon id + accent colour from a topic page's own frontmatter — the
@@ -282,21 +331,34 @@ for (const card of cards) {
   // its share of the two inter-card gaps → exactly 3 per row; `flex-grow: 1`
   // lets a short final row widen its cards to span the full width. `min-width:
   // 0` stops a long title from blowing past that basis.
+  // A plain callout div. Full-card clickability comes from a stretched overlay
+  // link appended at the end — a real internal link (cloned from the header) that
+  // the digital garden resolves, so the whole card navigates on the site too.
   const callout = grid.createEl("div", { cls: "callout se-topic-card" });
   callout.setAttribute("data-callout", CARD_CALLOUT);
-  // Frontmatter colour overrides the type accent for icon + title + border
+  // Frontmatter colour overrides the type accent for icon + title + bar
   // (all read `--callout-color`); no colour → keep the CARD_CALLOUT default.
   if (colorTriple) callout.style.setProperty("--callout-color", colorTriple);
-  callout.style.flex = "1 1 calc(33.333% - 0.4em)";
+  // 3 per row (basis = a third minus its share of the two 0.75rem gaps), and
+  // `flex-grow: 1` lets a short final row widen its cards to fill the full width
+  // instead of leaving a hole — the reason for flex over CSS grid here.
+  callout.style.flex = "1 1 calc(33.333% - 0.5rem)";
   callout.style.minWidth = "0";
   callout.style.boxSizing = "border-box";
   callout.style.margin = "0";
   callout.style.display = "flex";
   callout.style.flexDirection = "column";
-  // Compact, symmetric padding — the default `--callout-padding` has an
-  // oversized left indent (room for the title icon) that looks huge in a narrow
-  // card; override it so the boxes read tighter than the full-width total.
+  // Flat "list-cards" look, but self-contained (no Minimal theme needed): a
+  // hairline border + neutral background, so the topic accent lives only in the
+  // title and the progress bar — not tinting the whole box like a callout does.
+  // Inline styles beat the theme's `.callout[data-callout=…]` rules; the :hover
+  // border swap in the injected <style> uses !important to win over these.
+  callout.style.background = "var(--background-primary)";
+  callout.style.border = "1px solid var(--background-modifier-border)";
+  callout.style.borderRadius = "var(--radius-m)";
+  callout.style.boxShadow = "none";
   callout.style.padding = "0.75em";
+  callout.style.transition = "border-color 120ms ease, background-color 120ms ease";
 
   // Title row: a Lucide SVG fills the icon slot (setIcon injects it) and the
   // topic link is the bold title, exactly like a native `> [!info] …` header.
@@ -315,15 +377,13 @@ for (const card of cards) {
   titleInner.style.fontWeight = "700";
   await MarkdownRenderer.render(app, `[[${target}|${alias}]]`, titleInner, sourcePath, dv.component);
   // Flatten the <p> Markdown wraps the link in so it sits inline with the icon,
-  // and let it inherit the bold weight from the title.
+  // and let it inherit the bold weight from the title. On the published site the
+  // `.internal-link` rule resets it to the normal link weight — same as before.
   titleInner.querySelectorAll("p").forEach((p) => {
     p.style.margin = "0";
     p.style.display = "inline";
     p.style.fontWeight = "inherit";
   });
-  // Link colour + hover underline are handled by the injected `.se-topic-card`
-  // CSS above so the title reads like a native callout header, not a wiki-link.
-
   const calloutContent = callout.createEl("div", { cls: "callout-content" });
   calloutContent.style.display = "flex";
   calloutContent.style.flexDirection = "column";
@@ -339,6 +399,9 @@ for (const card of cards) {
   // gap); its paragraph margins are zeroed so it starts flush at the top.
   const body = calloutContent.createEl("div");
   if (desc) {
+    // Muted + smaller, matching Minimal's list-cards subtext treatment.
+    body.style.color = "var(--text-muted)";
+    body.style.fontSize = "var(--font-smaller)";
     await MarkdownRenderer.render(app, desc, body, sourcePath, dv.component);
     body.querySelectorAll("p").forEach((p) => { p.style.margin = "0"; });
   }
@@ -352,10 +415,18 @@ for (const card of cards) {
 
   const stats = statsFor(alias);
   const foot = calloutContent.createEl("div");
-  const line = appendProgress(foot, stats.pct, stats.byStatus, stats.total);
-  const sub = line.createEl("span", { text: ` · ${stats.done}/${stats.total} done` });
-  sub.style.fontSize = "0.8em";
-  sub.style.opacity = "0.7";
+  foot.style.display = "flex";
+  foot.style.flexDirection = "column";
+  foot.style.gap = "4px";
+  // Caption above a thin bar, sized to match the description under the title:
+  // counter aligned to the bar's start, percentage to its end, both grey.
+  appendProgress(foot, stats.pct, stats.byStatus, stats.total, {
+    barHeight: "0.35em",
+    textAbove: true,
+    fontSize: "var(--font-smaller)",
+    spread: true,
+    counter: `${stats.done}/${stats.total} done`,
+  });
 }
 
 // --- Overall total, rendered as a callout ------------------------------------
@@ -364,12 +435,29 @@ const totalDone = notesWithTopicDone;
 
 const callout = dv.container.createEl("div", { cls: "callout" });
 callout.setAttribute("data-callout", "done");
+// Symmetric padding so the full-width bar sits centred — the default callout
+// padding indents the left more (room for a title icon this callout omits).
+callout.style.padding = "0.75em";
 
 const calloutContent = callout.createEl("div", { cls: "callout-content" });
-const totalLine = appendProgress(calloutContent, totalPct, overallByStatus, notesWithTopicTotal);
-const totalSub = totalLine.createEl("span", { text: ` · ${totalDone}/${notesWithTopicTotal} done` });
-totalSub.style.fontSize = "0.8em";
-totalSub.style.opacity = "0.7";
+calloutContent.style.padding = "0";
+calloutContent.style.margin = "0";
+
+// Wrap bar + caption in their own column so the gap between them matches the
+// cards (4px); the legend stays below with its own spacing.
+const totalFoot = calloutContent.createEl("div");
+totalFoot.style.display = "flex";
+totalFoot.style.flexDirection = "column";
+totalFoot.style.gap = "4px";
+// Same spread caption as the cards — counter at the start, percentage at the
+// end, at the same smaller size — but left under the bar. The counter keeps its
+// old faded grey so it reads a touch softer than the percentage.
+appendProgress(totalFoot, totalPct, overallByStatus, notesWithTopicTotal, {
+  spread: true,
+  counter: `${totalDone}/${notesWithTopicTotal} done`,
+  fontSize: "var(--font-smaller)",
+  counterOpacity: 0.7,
+});
 
 // Colour key for every stacked bar above.
 appendLegend(calloutContent);
@@ -492,22 +580,3 @@ if (unpublishedNotes.length > 0) {
   dv.paragraph(calloutMarkdown);
 }
 ```
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Topics**
-> - [[Software Engineering/01 Programming/01 Programming|01 Programming]]
-> - [[Software Engineering/02 Computer Science/02 Computer Science|02 Computer Science]]
-> - [[Software Engineering/03 Data Persistence/03 Data Persistence|03 Data Persistence]]
-> - [[Software Engineering/04 Networks/04 Networks|04 Networks]]
-> - [[Software Engineering/05 Architecture/05 Architecture|05 Architecture]]
-> - [[Software Engineering/06 Development Practices/06 Development Practices|06 Development Practices]]
-> - [[Software Engineering/07 Security/07 Security|07 Security]]
-> - [[Software Engineering/08 SDLC/08 SDLC|08 SDLC]]
-> - [[Software Engineering/09 DevOps/09 DevOps|09 DevOps]]
-> - [[Software Engineering/10 Cloud/10 Cloud|10 Cloud]]
-> - [[Software Engineering/11 AI & ML/11 AI & ML|11 AI & ML]]
-<!-- whats-next:end -->

@@ -2,6 +2,7 @@
 tags:
   - FolderNote
   - MetricsIgnore
+whats-next: false
 dg-publish: true
 ---
 
@@ -139,22 +140,3 @@ for (const h1Key of sortedKeys(tree.children)) {
 }
 tocEl.createEl("hr");
 ```
-
-<!-- whats-next:start -->
-
----
-
-> [!note] Whats next
-> **Topics**
-> - [[Software Engineering/01 Programming/01 Programming|01 Programming]]
-> - [[Software Engineering/02 Computer Science/02 Computer Science|02 Computer Science]]
-> - [[Software Engineering/03 Data Persistence/03 Data Persistence|03 Data Persistence]]
-> - [[Software Engineering/04 Networks/04 Networks|04 Networks]]
-> - [[Software Engineering/05 Architecture/05 Architecture|05 Architecture]]
-> - [[Software Engineering/06 Development Practices/06 Development Practices|06 Development Practices]]
-> - [[Software Engineering/07 Security/07 Security|07 Security]]
-> - [[Software Engineering/08 SDLC/08 SDLC|08 SDLC]]
-> - [[Software Engineering/09 DevOps/09 DevOps|09 DevOps]]
-> - [[Software Engineering/10 Cloud/10 Cloud|10 Cloud]]
-> - [[Software Engineering/11 AI & ML/11 AI & ML|11 AI & ML]]
-<!-- whats-next:end -->

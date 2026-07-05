@@ -7,6 +7,11 @@
 /* ── Fonts ── */
 @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;0,8..60,700;1,8..60,300;1,8..60,400;1,8..60,500&family=Inter:wght@300;400;500;600;700&family=Source+Code+Pro:wght@400;500;600&display=swap');
 
+/* Single source of truth for the code typeface: the exact stack prism-vsc-dark-plus
+   ships (resolves to Menlo on macOS). Reused by the inline-code font (--font-monospace-theme)
+   and the light-mode block parity rule so inline `code` and fenced blocks never diverge. */
+$code-font: Menlo, Monaco, Consolas, "Andale Mono", "Ubuntu Mono", "Courier New", monospace;
+
 body {
   /* Paragraph / body text — serif, like Anthropic's anthropicSerif */
   --font-text-theme: 'Source Serif 4', Georgia, 'Times New Roman', serif;
@@ -14,8 +19,8 @@ body {
   /* UI / headings / nav / sidebar — clean sans, like Anthropic's anthropicSans */
   --font-interface-theme: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 
-  /* Code — Source Code Pro for clean VS Code feel */
-  --font-monospace-theme: 'Source Code Pro', ui-monospace, SFMono-Regular, Menlo, Monaco, 'Cascadia Code', monospace;
+  /* Code — same Menlo stack as the Prism code blocks, so inline `code` matches them */
+  --font-monospace-theme: #{$code-font};
 
   /* ── Headings in sans-serif, like Anthropic ── */
   --h1-font: var(--font-interface-theme);
@@ -42,8 +47,39 @@ body.theme-dark {
   --text-accent-hover: hsl(158, 24%, 58%);
 }
 
+html {
+  color-scheme: light dark;
+}
+
+body.theme-dark,
+body.theme-light {
+  background-color: var(--background-primary);
+}
+
 .markdown-preview-view pre.mermaid {
   background: transparent;
+}
+
+/* ── Code font parity between light/dark ──
+   The two ready-made Prism themes ship different code fonts and sizes
+   (prism-vsc-dark-plus: Menlo 13px/1.5 ; prism-vs: Consolas→Courier New .9em/1.2).
+   Match light mode to the dark theme's stack so both render identically on every
+   platform. Higher specificity (body.theme-light …) wins over the CDN theme. */
+body.theme-light {
+  code[class*="language-"],
+  pre[class*="language-"],
+  pre[class*="language-"] > code[class*="language-"] {
+    font-family: $code-font;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+}
+
+/* ── Inline `code` in the accent color (British Racing Green) instead of plain text ──
+   The language-* exclusion leaves syntax-highlighted code blocks untouched; this only
+   recolors inline snippets. More specific than the base `.markdown-rendered code`. */
+.markdown-rendered code:not([class*="language-"]) {
+  color: var(--text-accent);
 }
 
 /* ── Dramatic page titles ── */

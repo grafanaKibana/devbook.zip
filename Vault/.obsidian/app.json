@@ -6,9 +6,9 @@
   "defaultViewMode": "source",
   "readableLineLength": false,
   "strictLineBreaks": false,
-  "propertiesInDocument": "source",
+  "propertiesInDocument": "hidden",
   "showLineNumber": false,
-  "openBehavior": "file:Knowledge/Knowledge",
+  "openBehavior": "file:Software Engineering/Software Engineering",
   "userIgnoreFilters": [
     "Assets/"
   ],

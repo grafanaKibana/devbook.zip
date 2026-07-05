@@ -88,7 +88,7 @@ public async Task<OrderDto?> LoadOrderAsync(
 
 The method does not hold a thread while waiting on network I/O. The continuation runs only when the response is available.
 
-## Async Streams (`IAsyncEnumerable<T>`)
+## Async Streams (IAsyncEnumerable)
 
 For data that arrives incrementally (paged APIs, streamed query results, message consumers), `IAsyncEnumerable<T>` lets a producer `yield return` values asynchronously and a consumer pull them with `await foreach` — each item can suspend without buffering the whole sequence in memory.
 
