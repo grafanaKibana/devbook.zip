@@ -1,13 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Distributed Systems
-level:
-  - "2"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:43.309+03:00
+modified: 2026-07-05T15:49:34.606+03:00
 ---
 
 # Distributed Transactions
@@ -110,7 +104,7 @@ Without the Outbox: if the broker publish fails after the DB commit, the event i
 
 ## Sagas Sacrifice Isolation
 
-The subtlety most people miss: a Saga trades away the **I** in ACID, not just the easy atomicity. Because each step commits its *local* transaction immediately, a saga's **intermediate state is visible to everyone else** before the saga finishes — another transaction can read an order that's been placed but whose payment will later be compensated (a "dirty read" across the saga). 2PC holds locks to prevent exactly this; sagas can't. The countermeasures from the saga literature are **semantic locks** (a status flag like `PENDING` that other operations must check), **commutative updates**, and **re-read/version before acting**. Idempotent, retry-safe steps are mandatory — see [[05 Architecture/Distributed Systems/Idempotency|Idempotency]]. Net: a saga buys atomicity-via-compensation and availability at the cost of isolation and a window of observable inconsistency ([[05 Architecture/Distributed Systems/CAP theorem|CAP/PACELC]]).
+The subtlety most people miss: a Saga trades away the **I** in ACID, not just the easy atomicity. Because each step commits its _local_ transaction immediately, a saga's **intermediate state is visible to everyone else** before the saga finishes — another transaction can read an order that's been placed but whose payment will later be compensated (a "dirty read" across the saga). 2PC holds locks to prevent exactly this; sagas can't. The countermeasures from the saga literature are **semantic locks** (a status flag like `PENDING` that other operations must check), **commutative updates**, and **re-read/version before acting**. Idempotent, retry-safe steps are mandatory — see [[Idempotency]]. Net: a saga buys atomicity-via-compensation and availability at the cost of isolation and a window of observable inconsistency ([[CAP theorem|CAP/PACELC]]).
 
 ## Pitfalls
 
@@ -143,12 +137,14 @@ The subtlety most people miss: a Saga trades away the **I** in ACID, not just th
 ## Questions
 
 > [!QUESTION]- Why is 2PC problematic in microservices?
+>
 > - 2PC requires all participants to hold locks during the prepare-to-commit window. In microservices, this window spans network calls, making lock duration unpredictable.
 > - The coordinator is a single point of failure. A crash after PREPARE but before COMMIT leaves participants locked indefinitely.
 > - Most microservice infrastructure (HTTP APIs, NoSQL, cloud queues) doesn't support XA transactions.
 > - Tradeoff: 2PC gives strong consistency but at the cost of availability and throughput. CAP theorem: under a partition, you must choose consistency or availability — 2PC chooses consistency.
 
 > [!QUESTION]- How does the Outbox pattern guarantee at-least-once event delivery?
+>
 > - The event is written to an `OutboxMessages` table in the same DB transaction as the domain change. If the transaction commits, the event is durable.
 > - A background worker reads unprocessed outbox entries and publishes them to the broker, retrying until the broker acknowledges.
 > - This guarantees at-least-once delivery (the event may be published more than once if the worker crashes after publishing but before marking the entry as processed).

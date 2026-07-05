@@ -1,14 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Patterns
-level:
-  - "3"
-priority: High
-status:
-  - Done
 publish: true
+created: 2026-07-05T10:53:43.327+03:00
+modified: 2026-07-05T10:53:43.327+03:00
 ---
 
 # Builder

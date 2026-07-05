@@ -1,20 +1,14 @@
 ---
-topic:
-  - Networks
-subtopic:
-  - Protocols
-level:
-  - "3"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:36.592+03:00
+modified: 2026-07-05T15:49:32.880+03:00
 ---
 
 # Intro
 
 HTTP/2 is the second major version of the HTTP protocol, standardized in 2015 (RFC 7540, superseded by RFC 9113). It runs over a single TCP connection and multiplexes many request/response pairs simultaneously, eliminating the head-of-line blocking and connection overhead that limited HTTP/1.1. The result is lower latency and higher throughput for web applications that make many concurrent requests — without changing the HTTP semantics (methods, headers, status codes) that applications already use.
 
-See [[04 Networks/Protocols/HTTP|HTTP]] for the foundational HTTP concepts that HTTP/2 builds on.
+See [[HTTP]] for the foundational HTTP concepts that HTTP/2 builds on.
 
 ## What HTTP/1.1 Got Wrong
 
@@ -57,7 +51,7 @@ Clients can assign priorities to streams, allowing the server to allocate bandwi
 
 A client and server don't just "speak HTTP/2" — they have to agree to. For HTTPS (the only mode browsers allow), this happens **during the TLS handshake via ALPN** (Application-Layer Protocol Negotiation): the `ClientHello` lists supported protocols (`h2`, `http/1.1`) and the server picks one in its reply — **zero extra round-trips**. This is why HTTP/2 is "TLS-required in practice": ALPN rides along on the handshake that's already happening.
 
-Cleartext HTTP/2 (**h2c**) exists via an HTTP/1.1 `Upgrade` header, but browsers don't support it; it's mostly used **server-to-server** (e.g. behind a load balancer, or [[04 Networks/Protocols/gRPC|gRPC]], which runs on HTTP/2 and relies on this multiplexing).
+Cleartext HTTP/2 (**h2c**) exists via an HTTP/1.1 `Upgrade` header, but browsers don't support it; it's mostly used **server-to-server** (e.g. behind a load balancer, or [[gRPC]], which runs on HTTP/2 and relies on this multiplexing).
 
 ## HTTP/2 vs HTTP/1.1
 

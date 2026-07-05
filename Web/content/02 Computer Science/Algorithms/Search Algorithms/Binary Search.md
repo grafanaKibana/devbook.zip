@@ -1,13 +1,7 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
-level:
-  - "4"
-priority: Medium
-status: Done
 publish: true
+created: 2026-07-05T10:53:26.083+03:00
+modified: 2026-07-05T15:49:34.879+03:00
 ---
 
 # Intro
@@ -73,25 +67,27 @@ flowchart TD
 
 - **Unsorted input** — binary search relies on monotonic ordering; on unsorted data the half-split decision is meaningless and it returns false negatives. Sort first (amortize the cost over many searches) or use a different strategy.
 - **Off-by-one boundaries** — inconsistent loop condition and boundary updates produce infinite loops or skipped elements. Keep them paired: `left <= right` with `left = mid + 1` / `right = mid - 1`.
-- **Duplicates** — plain binary search returns *any* match. Finding the first or last occurrence needs a lower-/upper-bound variant that keeps searching after a hit.
+- **Duplicates** — plain binary search returns _any_ match. Finding the first or last occurrence needs a lower-/upper-bound variant that keeps searching after a hit.
 
 ## Tradeoffs
 
 | Choice | Binary Search | Alternative | Decision criteria |
 | --- | --- | --- | --- |
 | vs linear search | O(log n), needs sorted data | O(n), works on any order | Use binary search when data is already sorted or searched repeatedly; linear search for tiny or one-shot unsorted data. |
-| vs hash lookup ([[02 Computer Science/Data Structures/HashMap\|HashMap]]) | O(log n), in-place, supports range queries | O(1) average, extra memory, point lookups only | Use a hash when you only need exact-match point lookups; binary search when you also need ordering, ranges, or no extra memory. |
+| vs hash lookup ([[HashMap]]) | O(log n), in-place, supports range queries | O(1) average, extra memory, point lookups only | Use a hash when you only need exact-match point lookups; binary search when you also need ordering, ranges, or no extra memory. |
 | sort-then-search vs scan | Pays O(n log n) sort once | No preprocessing | Sort-and-search wins when many queries amortize the sort; a single query over unsorted data does not justify sorting. |
 
 ## Questions
 
 > [!QUESTION]- Why does binary search require sorted data?
+>
 > - The half-split decision depends on monotonic ordering.
 > - Without sorting, `a[mid] < target` gives no guarantee about where the target can be.
 > - Binary search can skip over the target on unsorted input and return false negatives.
 > - The O(log n) speed is conditional on the sorted precondition — if data arrives unsorted you must pay an O(n log n) sort first or fall back to a linear scan, so assert or document the requirement.
 
 > [!QUESTION]- How do you find the first occurrence of a duplicated value?
+>
 > - On equality, store `mid` as a candidate answer instead of returning immediately.
 > - Continue searching the left half by setting `right = mid - 1` to look for an earlier match.
 > - Keep the same loop condition and overflow-safe midpoint calculation.
@@ -99,6 +95,7 @@ flowchart TD
 > - This variant never early-exits, so it does slightly more work than a plain search in exchange for well-defined behavior on duplicates — which you need whenever first/last-match semantics matter.
 
 > [!QUESTION]- Why use `mid = left + (right - left) / 2` instead of `(left + right) / 2`?
+>
 > - `(left + right)` can exceed the integer maximum on large arrays, wrapping to a negative index.
 > - `left + (right - left) / 2` computes the same midpoint without ever forming the oversized sum.
 > - This exact bug shipped in the JDK's binary search for years before being caught.

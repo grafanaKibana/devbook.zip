@@ -1,15 +1,9 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - Tooling
+publish: true
+created: 2026-07-05T10:54:06.687+03:00
+modified: 2026-07-05T15:49:34.097+03:00
 tags:
   - FolderNote
-publish: true
-status: Done
-level:
-  - "2"
-priority: Medium
 ---
 
 # Intro
@@ -22,7 +16,7 @@ The landscape now breaks into three operational buckets: coding agents that can 
 
 ### Coding agents
 
-Coding agents are the most autonomous class. They can inspect project files, propose plans, apply edits, run commands, and iterate based on test or lint output. Common tools include Claude Code, Cursor, GitHub Copilot (agent mode), Cline, Aider, Windsurf, and Opencode. See [[11 AI & ML/Tooling/Coding Agents|Coding Agents]] for mechanism details and tradeoffs.
+Coding agents are the most autonomous class. They can inspect project files, propose plans, apply edits, run commands, and iterate based on test or lint output. Common tools include Claude Code, Cursor, GitHub Copilot (agent mode), Cline, Aider, Windsurf, and Opencode. See [[Coding Agents]] for mechanism details and tradeoffs.
 
 ### Code review agents
 
@@ -48,28 +42,31 @@ IDE extensions prioritize in-flow assistance: inline completion, chat panes, ref
 
 The tooling ecosystem shares four control surfaces that determine how reliably agents integrate with real codebases:
 
-- **[[11 AI & ML/Tooling/Skills|Skills]]:** reusable instruction packages loaded on demand that give the agent domain-specific expertise (code review, docs lookup, framework conventions)
-- **[[11 AI & ML/Tooling/Plugins|Plugins]]:** integrations that connect agents to external services, databases, and APIs at runtime
-- **[[11 AI & ML/Tooling/Hooks|Hooks]]:** event-based automation points (pre-edit, post-edit, pre-commit) that enforce policy or run checks without modifying the agent itself
-- **[[11 AI & ML/Tooling/Agent Instructions|Agent Instructions]]:** project-local guidance files that align agent behavior with architecture, coding standards, and security boundaries
+- **[[Skills]]:** reusable instruction packages loaded on demand that give the agent domain-specific expertise (code review, docs lookup, framework conventions)
+- **[[Plugins]]:** integrations that connect agents to external services, databases, and APIs at runtime
+- **[[Hooks]]:** event-based automation points (pre-edit, post-edit, pre-commit) that enforce policy or run checks without modifying the agent itself
+- **[[Agent Instructions]]:** project-local guidance files that align agent behavior with architecture, coding standards, and security boundaries
 
 Working teams usually combine all four: instructions define policy, hooks enforce it, plugins connect external systems, and skills keep repeated workflows fast.
 
 ## Questions
 
 > [!QUESTION]- How do you choose between a terminal-first coding agent and an IDE-first coding agent?
+>
 > - Start with team workflow: terminal-first fits script-heavy and CI-centric teams, IDE-first fits interactive editing-heavy teams
 > - Compare observability: terminal-first often exposes every command clearly, while IDE-first may optimize UX but hide low-level steps
 > - Validate integration needs: if your process depends on PR workflows, issue trackers, and editor navigation, IDE integration can reduce friction
 > - Check policy controls: hooks, rules files, and approval gates matter more than UI style in regulated or production-sensitive environments
 
 > [!QUESTION]- Why are agent instructions and hooks more important than model quality in long-running repos?
+>
 > - Instructions encode project constraints (architecture, naming, testing expectations) that the base model does not know
 > - Hooks create automatic guardrails, catching policy violations before merge
 > - Better models can still make wrong local decisions without repo-specific constraints
 > - Reliable behavior over months depends on repeatable controls, not one-off prompt quality
 
 > [!QUESTION]- What is the practical difference between a coding agent and a code review agent?
+>
 > - Coding agents optimize change creation: plan, edit, run checks, iterate
 > - Review agents optimize change evaluation: identify risk, gaps, regressions, and missing tests
 > - They complement each other: one increases delivery speed, the other protects quality and maintainability

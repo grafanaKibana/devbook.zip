@@ -1,20 +1,14 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
-level:
-  - "2"
-priority: High
-status: Done
 publish: true
+created: 2026-07-05T10:54:06.731+03:00
+modified: 2026-07-05T17:36:34.741+03:00
 ---
 
 # Intro
 
-Fine-tuning continues training a pretrained model's weights on task-specific data, changing the model's behavior rather than just its inputs. It is the most powerful and most expensive of the three adaptation levers in [[11 AI & ML/LLM/LLM|LLM]] — the others being [[11 AI & ML/LLM/Prompting/Prompting|prompting]] (no weight change) and [[11 AI & ML/LLM/RAG/RAG|RAG]] (external knowledge at query time). The defining trait: fine-tuning bakes behavior into the weights, so it persists across every request without consuming context tokens — but it also bakes in a snapshot that starts aging the moment training ends.
+Fine-tuning continues training a pretrained model's weights on task-specific data, changing the model's behavior rather than just its inputs. It is the most powerful and most expensive of the three adaptation levers in [[LLM]] — the others being [[Prompting]] (no weight change) and [[RAG]] (external knowledge at query time). The defining trait: fine-tuning bakes behavior into the weights, so it persists across every request without consuming context tokens — but it also bakes in a snapshot that starts aging the moment training ends.
 
-The single most important decision is *what* you are trying to change. Fine-tuning is the right tool for **behavior** — output format, tone, refusal policy, domain style, structured-output reliability, or compressing a large model's behavior into a smaller one. It is the wrong tool for **knowledge** — facts change faster than you can retrain, fine-tuning provides no source traceability, and a model fine-tuned to "know" a fact will still hallucinate confidently at the edges. Keep mutable facts in retrieval; keep durable behavior in weights.
+The single most important decision is _what_ you are trying to change. Fine-tuning is the right tool for **behavior** — output format, tone, refusal policy, domain style, structured-output reliability, or compressing a large model's behavior into a smaller one. It is the wrong tool for **knowledge** — facts change faster than you can retrain, fine-tuning provides no source traceability, and a model fine-tuned to "know" a fact will still hallucinate confidently at the edges. Keep mutable facts in retrieval; keep durable behavior in weights.
 
 ```mermaid
 flowchart TD
@@ -55,7 +49,7 @@ PEFT methods freeze the base model and train a small number of additional parame
 
 ### Preference Alignment
 
-Supervised fine-tuning (SFT) teaches the model to imitate good responses. **Preference alignment** goes further, training the model to prefer better responses over worse ones — this is the stage that shapes helpfulness, tone, and refusal behavior (see [[11 AI & ML/LLM/LLM|LLM]] on the training pipeline).
+Supervised fine-tuning (SFT) teaches the model to imitate good responses. **Preference alignment** goes further, training the model to prefer better responses over worse ones — this is the stage that shapes helpfulness, tone, and refusal behavior (see [[LLM]] on the training pipeline).
 
 - **RLHF** — train a reward model from human preference comparisons, then optimize the policy against it with reinforcement learning. Powerful but operationally heavy.
 - **DPO (Direct Preference Optimization)** — optimize directly on preference pairs with a simple classification-style loss, skipping the separate reward model and RL loop. Much simpler to run and now a common default for preference tuning; newer variants (ORPO, KTO) push simplicity further.
@@ -66,7 +60,7 @@ Data quality dominates data quantity. A few hundred to a few thousand clean, con
 
 - **Match the inference format exactly.** Training examples must use the same chat template, system prompt, and structure the model will see in production. A mismatch silently degrades results.
 - **Be consistent.** Inconsistent formatting or labeling in the training set teaches the model to be inconsistent. Audit examples the way you would audit few-shot demonstrations.
-- **Hold out an evaluation split.** Reserve representative cases the model never trains on, and evaluate the fine-tune against the base model on both that split and your [[11 AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs|golden set]] — training loss going down is not proof of task improvement.
+- **Hold out an evaluation split.** Reserve representative cases the model never trains on, and evaluate the fine-tune against the base model on both that split and your [[Golden Test Set and Regression Runs|golden set]] — training loss going down is not proof of task improvement.
 
 ## Pitfalls
 
@@ -76,7 +70,7 @@ Data quality dominates data quantity. A few hundred to a few thousand clean, con
 
 **Why it happens**: fine-tuning shifts behavior and style far more reliably than it implants retrievable facts, and it bakes a snapshot with no source traceability.
 
-**How to avoid it**: use [[11 AI & ML/LLM/RAG/RAG|RAG]] for knowledge. Fine-tune for how the model should behave with that knowledge, not to store the knowledge itself.
+**How to avoid it**: use [[RAG]] for knowledge. Fine-tune for how the model should behave with that knowledge, not to store the knowledge itself.
 
 ### Catastrophic Forgetting
 
@@ -117,6 +111,7 @@ Data quality dominates data quantity. A few hundred to a few thousand clean, con
 ## Questions
 
 > [!QUESTION]- When should you fine-tune instead of using RAG or prompting?
+>
 > - Fine-tune when the gap is **behavioral** — format, tone, refusal policy, domain style, or structured-output reliability that prompting cannot stabilize
 > - Use **RAG** when the gap is **knowledge** — facts that change, need citation, or are too large to fit in context; fine-tuning bakes a stale, untraceable snapshot
 > - Use **prompting** first for everything: it is the cheapest to iterate and solves most tasks without a training pipeline
@@ -124,6 +119,7 @@ Data quality dominates data quantity. A few hundred to a few thousand clean, con
 > - Decision test: if the model retrieves the right information but presents it wrong, fine-tune; if it presents things well but lacks the facts, use RAG
 
 > [!QUESTION]- Why is LoRA the default fine-tuning method rather than full fine-tuning?
+>
 > - LoRA freezes the base model and trains tiny low-rank adapters (~0.1–1% of parameters), capturing most of full fine-tuning's quality at a fraction of the compute and memory
 > - Adapters are megabytes, not gigabytes — cheap to store, swap, stack, or merge into the base weights for zero inference overhead
 > - Because the base weights are frozen, LoRA largely avoids the catastrophic forgetting that narrow full fine-tuning causes
@@ -131,6 +127,7 @@ Data quality dominates data quantity. A few hundred to a few thousand clean, con
 > - Full fine-tuning is reserved for when the absolute quality ceiling matters and compute is ample
 
 > [!QUESTION]- What are the main ways a fine-tuning project fails even when training loss looks good?
+>
 > - Trying to inject knowledge: the model hallucinates at the edges and goes stale — that is a RAG problem
 > - Catastrophic forgetting: narrow data erodes general capability, invisible unless you evaluate broadly
 > - Overfitting a small set: memorization instead of generalization, from too many epochs or too high a learning rate

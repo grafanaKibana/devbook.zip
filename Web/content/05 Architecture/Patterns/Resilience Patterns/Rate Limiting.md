@@ -1,29 +1,26 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Patterns
-priority: High
 publish: true
+created: 2026-07-05T10:53:43.322+03:00
+modified: 2026-07-05T10:53:43.322+03:00
 tags:
   - FolderNote
-level:
-  - "3"
-status: Done
 ---
 
 # Intro
+
 Rate limiting controls how many requests a client can make in a period of time so one caller cannot exhaust shared resources. It matters because it protects reliability, reduces abuse, and keeps cost predictable when downstream work is expensive, especially LLM inference and embedding calls billed per request or token. In system design interviews, rate limiting is usually a quota protection mechanism, not just a security feature: it keeps latency stable for well-behaved users when traffic spikes. Reach for it on public APIs, shared multi-tenant services, and any endpoint that fans out to costly dependencies.
 
 In .NET systems, rate limiting is often a layered decision: edge gateway limits, app-level per-tenant limits, and provider-level limits from dependencies like OpenAI or Stripe. The algorithm you choose defines failure behavior under burst traffic, memory usage, and fairness.
 
 ## Why It Matters in Senior Design Discussions
+
 - Reliability: shields thread pools, DB connections, and downstream APIs from overload.
 - Cost control: caps spend for metered dependencies such as LLM completions and vector search.
 - Fairness: prevents a noisy tenant from starving others in shared infrastructure.
 - Backpressure signal: explicit `429 Too Many Requests` tells clients when and how to retry.
 
 ## Core Algorithms
+
 ### Token Bucket
 
 Token bucket maintains a bucket with capacity `B` tokens. Tokens are added at a refill rate `R` over time, and each request consumes one or more tokens. If tokens are available, the request is allowed; if not, it is rejected or queued.
@@ -112,6 +109,7 @@ When to prefer it:
 - Early implementation where simplicity is the dominant requirement.
 
 ## Quick Comparison
+
 | Algorithm | Burst support | Accuracy | Memory cost | Operational complexity | Typical fit |
 | --- | --- | --- | --- | --- | --- |
 | Fixed Window | Poor at edges | Low to medium | Low | Low | Simple internal quotas |
@@ -120,6 +118,7 @@ When to prefer it:
 | Token Bucket | Strong and controlled | Medium to high | Medium | Medium | Public APIs and tenant burst tolerance |
 
 ## ASP.NET Core Example
+
 ASP.NET Core has first-class middleware support via `Microsoft.AspNetCore.RateLimiting`. You register policies in `AddRateLimiter` and attach a policy globally or per endpoint.
 
 ```csharp
@@ -164,6 +163,7 @@ app.Run();
 ```
 
 ### Per Tenant Partitioning
+
 For multi-tenant APIs, partition by tenant or API key, not only by IP address. ASP.NET Core supports partitioning with `PartitionedRateLimiter` so each key gets its own limiter state.
 
 ```csharp
@@ -198,6 +198,7 @@ builder.Services.AddRateLimiter(options =>
 Design note: partition key choice is part of domain design. For B2B SaaS, tenant key is usually correct for fairness and billing. For public anonymous APIs, IP plus user agent or a gateway-issued client ID can be more robust than raw IP alone.
 
 ## Distributed Rate Limiting
+
 In-memory limiter state works only per process. With multiple instances behind a load balancer, each instance sees only a subset of requests, so a "100 req/min" limit can become roughly `100 x instance_count` if state is not shared.
 
 Single-instance in-memory:
@@ -224,6 +225,7 @@ EXEC
 ```
 
 ## Pitfalls
+
 ### 1) Fixed window boundary spike
 
 What goes wrong: with a limit of 100/minute, a client can send 100 requests at 12:00:59 and another 100 at 12:01:00, effectively 200 in two seconds.
@@ -257,35 +259,40 @@ Why it happens: only status code is returned, no quota context.
 Mitigation: include `Retry-After` and useful quota headers such as `X-RateLimit-Remaining`, `X-RateLimit-Limit`, and `X-RateLimit-Reset`.
 
 ## Interview Questions
+
 > [!question] Your AI service wraps OpenAI APIs with per-tenant limits and runs on 4 instances. How do you enforce limits accurately, and which algorithm do you choose?
 > **Expected answer**
+>
 > - Use distributed shared state, usually Redis, because per-instance memory breaks global accuracy.
 > - Partition by tenant ID so quotas align with billing and fairness.
 > - Choose token bucket when tenants need controlled burst capacity with stable average throughput.
 > - Use atomic operations (Lua or transaction pattern) for refill and consume to avoid race conditions.
 > - Return `429` with `Retry-After` and remaining quota headers to support client backoff.
-> **Why this question matters**
+>   **Why this question matters**
 > - It tests algorithm choice plus distributed systems correctness, not just definition recall.
 
 > [!question] When would you prefer sliding window counter over fixed window in a public API?
 > **Expected answer**
+>
 > - Prefer sliding window counter when edge fairness matters and fixed window boundary bursts are unacceptable.
 > - It gives near-rolling behavior with lower memory than sliding log.
 > - Accept approximation error in exchange for better operational cost.
 > - Keep fixed window only where simplicity dominates and traffic patterns are predictable.
-> **Why this question matters**
+>   **Why this question matters**
 > - It checks whether the candidate can justify tradeoffs under realistic constraints.
 
 > [!question] What failure mode should you choose if Redis-based rate limiting is unavailable: fail-open or fail-closed?
 > **Expected answer**
+>
 > - Decide by endpoint risk profile, not globally.
 > - Fail-open for low-risk endpoints when availability is the top priority.
 > - Fail-closed for sensitive operations where abuse or cost explosion is unacceptable.
 > - Document and test the behavior with chaos drills.
-> **Why this question matters**
+>   **Why this question matters**
 > - It tests operational judgment and explicit risk tradeoff reasoning.
 
 ## References
+
 - [Rate limiting in ASP.NET Core](https://learn.microsoft.com/aspnet/core/performance/rate-limit)
 - [System.Threading.RateLimiting namespace](https://learn.microsoft.com/dotnet/api/system.threading.ratelimiting)
 - [Redis transactions (MULTI and EXEC)](https://redis.io/docs/latest/develop/interact/transactions/)

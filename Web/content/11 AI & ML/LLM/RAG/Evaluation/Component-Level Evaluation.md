@@ -1,20 +1,14 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
-level:
-  - "2"
-priority: High
-status: Done
 publish: true
+created: 2026-07-05T10:54:06.966+03:00
+modified: 2026-07-05T15:49:37.718+03:00
 ---
 
 # Intro
 
 End-to-end retrieval and generation metrics measure layer quality — whether the right chunks arrived and whether the answer is faithful — but they do not isolate which upstream component caused a failure. A drop in Recall@5 could come from bad chunking (evidence split across boundaries), weak embeddings (model misrepresents domain vocabulary), or poor ANN approximation (index too lossy). Component-level evaluation isolates each layer so fixes target the actual bottleneck.
 
-The methodology is ablation: change one component while holding all others constant, then measure the retrieval metric delta. If the delta is within noise, that component is not the bottleneck. The metrics these ablations move — Recall@k, nDCG@10, Faithfulness — are defined in [[11 AI & ML/LLM/RAG/Evaluation/Evaluation Metrics|Evaluation Metrics]], and the labeled query sets, qrels, and token-span ground truth they consume come from [[11 AI & ML/LLM/RAG/Evaluation/Retrieval Evaluation Sets|Retrieval Evaluation Sets]].
+The methodology is ablation: change one component while holding all others constant, then measure the retrieval metric delta. If the delta is within noise, that component is not the bottleneck. The metrics these ablations move — Recall@k, nDCG@10, Faithfulness — are defined in [[Evaluation Metrics]], and the labeled query sets, qrels, and token-span ground truth they consume come from [[Retrieval Evaluation Sets]].
 
 ## Chunking Evaluation
 
@@ -42,11 +36,11 @@ Embedding models are evaluated by treating retrieval quality as a proxy for embe
 
 ## Vector Search (ANN) Evaluation
 
-ANN Recall@k measures a different quantity than the retrieval Recall@k defined above. Retrieval Recall@k asks "of all relevant documents, how many appeared in top-k?" ANN Recall@k asks "of the true k nearest neighbors found by exact brute-force search, how many did the approximate index return?" It measures the index's approximation quality in isolation — see [[11 AI & ML/LLM/RAG/Retrieval|Retrieval]] for how index parameters (HNSW `ef_search`, IVF `nprobe`) and filtered search affect retrieval mechanics.
+ANN Recall@k measures a different quantity than the retrieval Recall@k defined above. Retrieval Recall@k asks "of all relevant documents, how many appeared in top-k?" ANN Recall@k asks "of the true k nearest neighbors found by exact brute-force search, how many did the approximate index return?" It measures the index's approximation quality in isolation — see [[Retrieval]] for how index parameters (HNSW `ef_search`, IVF `nprobe`) and filtered search affect retrieval mechanics.
 
 Ground truth is established by running brute-force (exact) search over the full corpus for every query in a test set. ANN results are then compared against these true neighbors. ANN Recall@10 = 0.85 means the approximate index returned 85% of the actual 10 closest vectors.
 
-**Tuning protocol.** Sweep `ef_search` (HNSW) or `nprobe` (IVF) across a range, plot ANN recall vs p99 latency for each value, and pick the knee of the curve — the point where recall plateaus but latency continues rising. A practical HNSW starting point is M=16-32, ef_construction=100-200, ef_search=64-128. Re-tune when the corpus grows significantly — at fixed parameters, recall degrades silently as more vectors crowd the graph because the search path explores proportionally less of it. Latency remains constant, so only explicit ANN recall checks against brute-force ground truth on a scheduled query set will detect the regression.
+**Tuning protocol.** Sweep `ef_search` (HNSW) or `nprobe` (IVF) across a range, plot ANN recall vs p99 latency for each value, and pick the knee of the curve — the point where recall plateaus but latency continues rising. A practical HNSW starting point is M=16-32, ef\_construction=100-200, ef\_search=64-128. Re-tune when the corpus grows significantly — at fixed parameters, recall degrades silently as more vectors crowd the graph because the search path explores proportionally less of it. Latency remains constant, so only explicit ANN recall checks against brute-force ground truth on a scheduled query set will detect the regression.
 
 **Filtered search evaluation** requires separate ground truth: brute-force over only the vectors that pass the metadata filter, then compare ANN filtered results against this restricted set. Post-filtering HNSW (run ANN first, then apply filter) degrades recall significantly under high selectivity because the graph becomes disconnected when most nodes are filtered out — the severity depends on the index configuration and selectivity ratio. Test at multiple selectivity levels (100%, 10%, 1%) to characterize the degradation curve for your workload. Some vector databases offer filtered indexes that maintain graph connectivity across filter boundaries, preserving recall under narrow filters at the cost of additional index storage.
 
@@ -55,6 +49,7 @@ Ground truth is established by running brute-force (exact) search over the full 
 ## Questions
 
 > [!QUESTION]- Why does ANN recall degrade silently as the corpus grows while latency stays flat?
+>
 > - At fixed `ef_search`/`nprobe`, the search explores a constant amount of work regardless of corpus size
 > - As more vectors crowd the graph, that fixed search path covers a proportionally smaller fraction of it, so true neighbors are missed more often
 > - Latency is driven by the search budget, not corpus size, so it stays constant and gives no signal that recall has dropped
@@ -63,6 +58,7 @@ Ground truth is established by running brute-force (exact) search over the full 
 > - Raising the search budget restores recall but increases p99 latency — pick the knee of the recall-vs-latency curve rather than maxing either
 
 > [!QUESTION]- Why is token-level IoU more informative than Recall@k when comparing chunking strategies?
+>
 > - Recall@k only asks whether a relevant chunk appeared; it ignores how much irrelevant text rode along inside that chunk
 > - A strategy can hit high Recall@k by returning large, noisy chunks that waste context-window tokens on irrelevant content
 > - Token IoU scores the overlap between retrieved tokens and the gold evidence span, penalizing both missed evidence (recall) and noise (precision) in one number

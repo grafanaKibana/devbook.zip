@@ -1,13 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Distributed Systems
-level:
-  - "2"
-priority: High
-status: Done
 publish: true
+created: 2026-07-05T10:53:43.309+03:00
+modified: 2026-07-05T15:49:34.420+03:00
 ---
 
 # Intro
@@ -30,7 +24,7 @@ flowchart LR
 - **Authentication and authorization**: Validate tokens at the edge and enforce coarse-grained access policy before forwarding.
 - **Rate limiting and quotas**: Protect services from abusive or accidental traffic spikes.
 - **Request and response transformation**: Normalize payload shape, hide internal endpoint changes, or project data for specific clients.
-- **[[Load Balancing|Load balancing]]**: Distribute requests across service instances using health-aware selection.
+- **[[Load Balancing]]**: Distribute requests across service instances using health-aware selection.
 - **[[Circuit Breaker|Circuit breaking]] and resiliency policies**: Fail fast when a downstream is unhealthy and apply retries or fallback only where safe.
 - **TLS termination**: Offload certificate handling and HTTPS policy enforcement from every backend service.
 - **[[Observability]]**: Emit centralized logs, traces, metrics, and correlation IDs for end-to-end troubleshooting.

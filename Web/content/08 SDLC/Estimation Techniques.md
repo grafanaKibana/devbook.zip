@@ -1,13 +1,7 @@
 ---
-topic:
-  - SDLC
-subtopic:
-  - SDLC
-level:
-  - "4"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:58.581+03:00
+modified: 2026-07-05T10:53:58.581+03:00
 ---
 
 # Estimation Techniques
@@ -45,6 +39,7 @@ Expected = (Optimistic + 4 × Most Likely + Pessimistic) / 6
 ```
 
 Example: a feature estimated at O=2d, ML=5d, P=14d:
+
 ```text
 Expected = (2 + 4×5 + 14) / 6 = 36 / 6 = 6 days
 ```

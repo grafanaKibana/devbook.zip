@@ -1,14 +1,7 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
-level:
-  - "4"
-priority: High
-status: Ready to Repeat
-
 publish: true
+created: 2026-07-05T10:53:26.787+03:00
+modified: 2026-07-05T10:53:37.151+03:00
 ---
 
 # Intro
@@ -121,7 +114,7 @@ app.UseMiddleware<CorrelationIdMiddleware>();
 Beyond the linear chain, you can fork the pipeline:
 
 - **`app.Map("/admin", branch => ...)`** / **`MapWhen(predicate, ...)`** — split off a sub-pipeline by path or arbitrary predicate.
-- **`app.UseWhen(predicate, branch => ...)`** — run extra middleware for matching requests, then *rejoin* the main pipeline (unlike `MapWhen`, which terminates in the branch).
+- **`app.UseWhen(predicate, branch => ...)`** — run extra middleware for matching requests, then _rejoin_ the main pipeline (unlike `MapWhen`, which terminates in the branch).
 - **`app.Run(handler)`** — a terminal middleware that never calls `next` (the end of a branch).
 
 ```csharp
@@ -140,7 +133,7 @@ app.UseWhen(
 
 **Swallowing exceptions silently** — a `try/catch` in middleware that logs and returns 200 hides failures from callers and monitoring. Either rethrow or return an appropriate error status.
 
-**Reading endpoint metadata too early** — routing only *selects* the endpoint at `UseRouting`. Middleware placed **between `UseRouting` and the endpoint** can inspect the chosen endpoint via `context.GetEndpoint()` (e.g. to read `[Authorize]`/custom metadata); middleware before `UseRouting` always sees `null`. Order your middleware accordingly when it depends on which endpoint will run.
+**Reading endpoint metadata too early** — routing only _selects_ the endpoint at `UseRouting`. Middleware placed **between `UseRouting` and the endpoint** can inspect the chosen endpoint via `context.GetEndpoint()` (e.g. to read `[Authorize]`/custom metadata); middleware before `UseRouting` always sees `null`. Order your middleware accordingly when it depends on which endpoint will run.
 
 ## Tradeoffs
 

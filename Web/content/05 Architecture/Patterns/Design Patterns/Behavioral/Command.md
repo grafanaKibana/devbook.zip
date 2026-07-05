@@ -1,14 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Patterns
-level:
-  - "2"
-priority: High
-status:
-  - Done
 publish: true
+created: 2026-07-05T10:53:43.331+03:00
+modified: 2026-07-05T15:49:37.351+03:00
 ---
 
 # Command
@@ -32,7 +25,7 @@ sequenceDiagram
 ```
 
 > [!NOTE] Command vs Strategy
-> **Command** encapsulates a **request** with all its data — what to do, when, and with what context. [[05 Architecture/Patterns/Design Patterns/Behavioral/Strategy|Strategy]] encapsulates an **algorithm** — how to do something. Command is about WHAT and WHEN; Strategy is about HOW. A `PlaceOrderCommand` carries the order data and knows how to place it. A `ShippingCostStrategy` knows how to calculate cost but doesn't carry the order.
+> **Command** encapsulates a **request** with all its data — what to do, when, and with what context. [[Strategy]] encapsulates an **algorithm** — how to do something. Command is about WHAT and WHEN; Strategy is about HOW. A `PlaceOrderCommand` carries the order data and knows how to place it. A `ShippingCostStrategy` knows how to calculate cost but doesn't carry the order.
 
 ## Problem
 
@@ -195,7 +188,7 @@ Adding a `PartialRefundCommand` now means one new class — the invoker and audi
 
 ## References
 
-- [Command Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=9qA5kw8dcSU&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=7) — video walkthrough of the Command pattern with OOP examples
+- [Command Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=9qA5kw8dcSU\&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc\&index=7) — video walkthrough of the Command pattern with OOP examples
 - [Command — refactoring.guru](https://refactoring.guru/design-patterns/command) — canonical pattern description with invoker/command/receiver diagram and C# example
 - [ICommand interface (WPF) — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.windows.input.icommand) — Command pattern in WPF/MAUI UI frameworks
 - [MediatR — GitHub](https://github.com/jbogard/MediatR) — Command pattern implementation for .NET with pipeline behaviors

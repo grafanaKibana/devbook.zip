@@ -1,15 +1,9 @@
 ---
-topic:
-  - Networks
-subtopic:
-  - Architecture & Ops
+publish: true
+created: 2026-07-05T10:53:36.464+03:00
+modified: 2026-07-05T10:53:37.361+03:00
 tags:
   - FolderNote
-publish: true
-priority: Medium
-level:
-  - "3"
-status: Creation
 ---
 
 # Intro

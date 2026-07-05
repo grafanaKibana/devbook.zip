@@ -1,18 +1,12 @@
 ---
-topic:
-  - Security
-subtopic:
-  - Security
-level:
-  - "3"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:54:04.309+03:00
+modified: 2026-07-05T15:49:32.138+03:00
 ---
 
 # Secrets Management
 
-A *secret* is any credential that grants access: database connection strings, API keys, signing keys, TLS private keys, OAuth client secrets, cloud-provider credentials. Secrets management is the discipline of keeping these out of source code and build artifacts, distributing them to the workloads that need them, and rotating them — ideally without anyone ever pasting a long-lived secret into a config file. The single most common breach starter is a credential committed to a Git repo; everything here exists to make that impossible.
+A _secret_ is any credential that grants access: database connection strings, API keys, signing keys, TLS private keys, OAuth client secrets, cloud-provider credentials. Secrets management is the discipline of keeping these out of source code and build artifacts, distributing them to the workloads that need them, and rotating them — ideally without anyone ever pasting a long-lived secret into a config file. The single most common breach starter is a credential committed to a Git repo; everything here exists to make that impossible.
 
 ## The Core Rule: Never Commit Secrets
 
@@ -20,7 +14,7 @@ A secret in Git is compromised the moment it's pushed — and **deleting it in a
 
 - **`.gitignore`** every local secret file (`appsettings.*.json` with real values, `.env`, `*.pem`).
 - **Pre-commit / push scanning** — tools like `gitleaks`, `trufflehog`, or GitHub **Push Protection** block known secret patterns before they land.
-- **Assume-breach on leak** — if a secret reaches history, *rotate it*, don't just rewrite history. Revocation is the only real remediation.
+- **Assume-breach on leak** — if a secret reaches history, _rotate it_, don't just rewrite history. Revocation is the only real remediation.
 
 ## Where Secrets Should Live Instead
 
@@ -29,10 +23,10 @@ A rough hierarchy from worst to best:
 | Approach | Problem / when acceptable |
 |---|---|
 | Hard-coded in source | Never. Leaks with the code. |
-| Config file in the repo | Never for real values; fine for *placeholders*/local dev defaults. |
+| Config file in the repo | Never for real values; fine for _placeholders_/local dev defaults. |
 | Environment variables | Better — keeps secrets out of the image; the [12-Factor](https://12factor.net/config) baseline. But visible to the whole process and child processes, and easily logged. |
 | **Dedicated secret store** (Key Vault, AWS Secrets Manager, HashiCorp Vault) | The target state: access-controlled, audited, versioned, rotatable. |
-| **Keyless / workload identity** (OIDC federation, managed identity) | Best — *no stored secret at all*; the workload proves its identity to get short-lived tokens. |
+| **Keyless / workload identity** (OIDC federation, managed identity) | Best — _no stored secret at all_; the workload proves its identity to get short-lived tokens. |
 
 ## .NET Configuration and User Secrets
 
@@ -57,23 +51,23 @@ var connectionString = builder.Configuration["Db:ConnectionString"];
 
 ## Managed Identity / Keyless Auth (the best option)
 
-The strongest pattern removes the bootstrap secret entirely. In Azure, a **managed identity** gives the app an identity the platform vouches for, so `DefaultAzureCredential` fetches a short-lived token to read Key Vault — there's no Key Vault *password* anywhere. The CI equivalent is **OIDC / workload identity federation** (covered in [[09 DevOps/CI CD tools|CI/CD tools]]): the pipeline exchanges a job-scoped token with AWS/Azure/GCP instead of holding a static cloud key. The "secret zero" / bootstrapping problem — *how does the app authenticate to the secret store?* — is solved by the platform's identity rather than yet another stored credential.
+The strongest pattern removes the bootstrap secret entirely. In Azure, a **managed identity** gives the app an identity the platform vouches for, so `DefaultAzureCredential` fetches a short-lived token to read Key Vault — there's no Key Vault _password_ anywhere. The CI equivalent is **OIDC / workload identity federation** (covered in [[CI CD tools|CI/CD tools]]): the pipeline exchanges a job-scoped token with AWS/Azure/GCP instead of holding a static cloud key. The "secret zero" / bootstrapping problem — _how does the app authenticate to the secret store?_ — is solved by the platform's identity rather than yet another stored credential.
 
 ## Rotation
 
-Secrets must be rotatable on a schedule and *immediately* on suspected compromise. Two models:
+Secrets must be rotatable on a schedule and _immediately_ on suspected compromise. Two models:
 
 - **Static secrets with rotation** — the store holds the value and you rotate it periodically; apps re-read on a cache expiry. Managed stores can rotate some secrets (e.g. database passwords) automatically.
-- **Dynamic secrets** — HashiCorp Vault can *generate* short-lived, per-request credentials (a database user that expires in an hour), so a leaked secret is useless almost immediately. This is the gold standard but requires the app to fetch on demand.
+- **Dynamic secrets** — HashiCorp Vault can _generate_ short-lived, per-request credentials (a database user that expires in an hour), so a leaked secret is useless almost immediately. This is the gold standard but requires the app to fetch on demand.
 
 ## Pitfalls
 
 - **Secret committed then "removed"** — deleting in a later commit leaves it in history forever. Rotate the secret; scrubbing history is cleanup, not remediation.
 - **Logging secrets** — connection strings or tokens printed to logs (exception dumps, `Console.WriteLine(config)`, verbose HTTP tracing) leak into log aggregators readable by many. Mask at the source.
-- **Baking secrets into Docker images** — `ENV API_KEY=...` in a Dockerfile is permanent and visible in `docker history` (see [[09 DevOps/Docker|Docker]]). Inject at runtime.
+- **Baking secrets into Docker images** — `ENV API_KEY=...` in a Dockerfile is permanent and visible in `docker history` (see [[Docker]]). Inject at runtime.
 - **Over-broad access** — one shared "god" secret with access to everything. Scope secrets per service and grant least privilege so a single leak has a small blast radius.
 - **No rotation plan** — a 5-year-old API key that "can't" be rotated because nobody knows what uses it. Inventory and rotate from day one.
-- **Treating Kubernetes Secrets as encrypted** — they're base64-encoded, not encrypted at rest by default (see [[09 DevOps/Kubernetes|Kubernetes]]). Enable etcd encryption or use an external store via the Secrets Store CSI driver.
+- **Treating Kubernetes Secrets as encrypted** — they're base64-encoded, not encrypted at rest by default (see [[Kubernetes]]). Enable etcd encryption or use an external store via the Secrets Store CSI driver.
 
 ## Tradeoffs
 
@@ -92,7 +86,7 @@ Secrets must be rotatable on a schedule and *immediately* on suspected compromis
 > Treat it as compromised and **rotate (revoke + reissue) it immediately** — that's the only real fix, because the value persists in Git history, clones, forks, and CI caches even after you delete it. Rewriting history (e.g. `git filter-repo`) is useful cleanup to stop further exposure, but it does not un-leak a secret that others may already have. Afterward, add push protection / secret scanning so it can't recur.
 
 > [!QUESTION]- What is the "secret zero" (bootstrapping) problem and how is it solved?
-> If all your secrets live in a vault, the app still needs *one* credential to authenticate to the vault — secret zero. Storing it just moves the problem. The modern solution is **platform-provided identity**: a managed identity (Azure) / IAM role (AWS) / workload identity (Kubernetes/GCP) that the infrastructure vouches for, letting the workload obtain a short-lived token with no stored secret. CI pipelines do the same via OIDC federation.
+> If all your secrets live in a vault, the app still needs _one_ credential to authenticate to the vault — secret zero. Storing it just moves the problem. The modern solution is **platform-provided identity**: a managed identity (Azure) / IAM role (AWS) / workload identity (Kubernetes/GCP) that the infrastructure vouches for, letting the workload obtain a short-lived token with no stored secret. CI pipelines do the same via OIDC federation.
 
 > [!QUESTION]- Why are environment variables a weak place to store secrets despite being common?
 > They keep secrets out of the image (good, and the 12-factor standard), but the whole process and any child processes can read them, they're easy to leak accidentally (a crash dump, a `printenv` in a build log, an APM that captures env), they aren't audited or versioned, and rotating them means redeploying. A dedicated secret store adds access control, auditing, versioning, and rotation that env vars lack — so env vars are fine for dev but a managed store is better for production.

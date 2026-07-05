@@ -1,13 +1,7 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - Machine Learning
-level:
-  - "2"
-priority: Medium
-status: Done
 publish: true
+created: 2026-07-05T10:54:06.754+03:00
+modified: 2026-07-05T17:36:35.066+03:00
 ---
 
 # Intro
@@ -16,7 +10,7 @@ ROC-AUC means Receiver Operating Characteristic Area Under the Curve. PR-AUC mea
 
 Use ROC-AUC for general ranking quality when classes are fairly balanced. Use PR-AUC for imbalanced data where false positives are expensive.
 
-This note fits the evaluation stage of [[11 AI & ML/Machine Learning/Machine Learning|Machine Learning]] and is most relevant for [[11 AI & ML/Machine Learning/Types/Types|learning types]] like binary classification and rare event detection.
+This note fits the evaluation stage of [[Machine Learning]] and is most relevant for [[11 AI & ML/Machine Learning/Types/Types|learning types]] like binary classification and rare event detection.
 
 ## Deeper Explanation
 
@@ -73,6 +67,7 @@ What this PR diagram shows:
 - If your model line tracks red, the alert queue will be noisy.
 
 Area under the curve is average performance across thresholds.
+
 - `ROC AUC` can be read as probability that a random positive gets a higher score than a random negative.
 
 In ML.NET, `BinaryClassificationMetrics` exposes both `AreaUnderRocCurve` and `AreaUnderPrecisionRecallCurve` directly after calling `mlContext.BinaryClassification.Evaluate`.
@@ -164,7 +159,7 @@ Practical threshold tuning pattern:
 - ROC-AUC can hide poor positive prediction quality on imbalanced data.
 - PR-AUC baseline depends on prevalence, so cross-dataset comparisons can mislead.
 - AUC does not pick your threshold; you still need operating-point tuning.
-- AUC does not measure [[11 AI & ML/Machine Learning/Evaluation/Calibration|calibration]]; a high AUC model can still output bad probabilities.
+- AUC does not measure [[Calibration]]; a high AUC model can still output bad probabilities.
 - Data leakage can inflate both metrics and fail in production.
 
 ## Tradeoffs
@@ -179,14 +174,17 @@ Practical threshold tuning pattern:
 ## Questions
 
 > [!QUESTION]- What does ROC-AUC measure?
+>
 > - It measures ranking quality across thresholds.
 > - A higher ROC-AUC means positives usually get higher scores than negatives.
 
 > [!QUESTION]- When should I use PR-AUC instead of ROC-AUC?
+>
 > - Use PR-AUC when positives are rare, like fraud or anomaly detection.
 > - PR-AUC shows how precision changes as recall increases, which is key when false positives are costly.
 
 > [!QUESTION]- Why can high accuracy be misleading on imbalanced data?
+>
 > - If negatives dominate, a model can predict mostly negatives and still get high accuracy.
 > - Check PR-AUC, precision, and recall to understand real positive-class performance.
 

@@ -1,13 +1,7 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
-level:
-  - "4"
-priority: Medium
-status: Done
 publish: true
+created: 2026-07-05T10:53:25.971+03:00
+modified: 2026-07-05T10:53:37.221+03:00
 ---
 
 # Intro
@@ -19,11 +13,13 @@ The choice between them is not about speed — both visit every reachable node e
 ## How It Works
 
 **BFS** maintains a queue and a visited set:
+
 1. Enqueue the source and mark it visited.
 2. Dequeue the front node `v`. For each unvisited neighbor `u`, mark `u` visited and enqueue it.
 3. Repeat until the queue is empty. The first visit to any node is along a shortest path by hop count.
 
 **DFS** maintains a stack (explicit or call stack) and a visited set:
+
 1. Push the source (or call `dfs(source)`). Mark it visited.
 2. Pop (or recurse into) an unvisited neighbor `u`, mark visited.
 3. When a node has no unvisited neighbors, backtrack. Nodes get a finish time when backtracking completes.
@@ -101,22 +97,25 @@ DFS from A (recursive, left neighbor first):
 ## Questions
 
 > [!QUESTION]- When should you choose BFS over DFS?
-  > - Use BFS when you need shortest path by hop count in an unweighted graph — BFS visits nodes in order of increasing distance from the source.
-  > - Use BFS when you need level-order properties (e.g., minimum moves in a puzzle, shortest transformation sequence).
-  > - DFS cannot guarantee shortest path because it may reach a node through a longer branch first.
-  > - BFS guarantees shortest paths but can use more memory on wide graphs — accept the memory cost when correctness requires distance ordering.
+>
+> - Use BFS when you need shortest path by hop count in an unweighted graph — BFS visits nodes in order of increasing distance from the source.
+> - Use BFS when you need level-order properties (e.g., minimum moves in a puzzle, shortest transformation sequence).
+> - DFS cannot guarantee shortest path because it may reach a node through a longer branch first.
+> - BFS guarantees shortest paths but can use more memory on wide graphs — accept the memory cost when correctness requires distance ordering.
 
 > [!QUESTION]- Why can recursive DFS cause stack overflow and how do you fix it?
-  > - Recursive DFS adds one stack frame per depth level. Graphs shaped like chains with 10k+ depth exceed typical stack limits.
-  > - Iterative DFS with an explicit stack has identical traversal logic but uses heap memory instead of call stack, avoiding overflow.
-  > - The conversion is mechanical: replace function calls with stack pushes, returns with stack pops.
-  > - Iterative DFS is slightly more verbose but safe for arbitrary graph sizes — always prefer it in production code where graph depth is unbounded.
+>
+> - Recursive DFS adds one stack frame per depth level. Graphs shaped like chains with 10k+ depth exceed typical stack limits.
+> - Iterative DFS with an explicit stack has identical traversal logic but uses heap memory instead of call stack, avoiding overflow.
+> - The conversion is mechanical: replace function calls with stack pushes, returns with stack pops.
+> - Iterative DFS is slightly more verbose but safe for arbitrary graph sizes — always prefer it in production code where graph depth is unbounded.
 
 > [!QUESTION]- How do you detect cycles using DFS in a directed graph?
-  > - Maintain three states for each node: unvisited, in-progress (on recursion stack), and completed.
-  > - A cycle exists if DFS reaches a node that is currently in-progress — this means a back edge closes a cycle.
-  > - This is more precise than checking "visited" alone because a cross edge to a completed node is not a cycle.
-  > - Three-state tracking adds slight implementation complexity over basic visited-set DFS, but correctly distinguishes back edges from cross edges — necessary for correctness in directed graphs.
+>
+> - Maintain three states for each node: unvisited, in-progress (on recursion stack), and completed.
+> - A cycle exists if DFS reaches a node that is currently in-progress — this means a back edge closes a cycle.
+> - This is more precise than checking "visited" alone because a cross edge to a completed node is not a cycle.
+> - Three-state tracking adds slight implementation complexity over basic visited-set DFS, but correctly distinguishes back edges from cross edges — necessary for correctness in directed graphs.
 
 ## References
 

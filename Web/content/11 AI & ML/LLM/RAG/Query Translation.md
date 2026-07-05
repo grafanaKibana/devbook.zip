@@ -1,20 +1,14 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
-level:
-  - "2"
-priority: High
-status: Done
 publish: true
+created: 2026-07-05T10:54:06.888+03:00
+modified: 2026-07-05T17:36:34.893+03:00
 ---
 
 # Intro
 
-Query translation rewrites a user question into one or more retrieval-optimized variants before search. The core problem: user phrasing rarely matches document phrasing. A user asks "Can partners burst above limits now?" but the answer lives in a document titled "Q3 Quota Policy Update — Partner Tier Burst Allowance." A single query embedding captures one neighborhood in vector space; translation expands coverage to multiple neighborhoods without changing the corpus or the [[11 AI & ML/LLM/Embeddings|embedding model]].
+Query translation rewrites a user question into one or more retrieval-optimized variants before search. The core problem: user phrasing rarely matches document phrasing. A user asks "Can partners burst above limits now?" but the answer lives in a document titled "Q3 Quota Policy Update — Partner Tier Burst Allowance." A single query embedding captures one neighborhood in vector space; translation expands coverage to multiple neighborhoods without changing the corpus or the [[Embeddings|embedding model]].
 
-The mechanism: the user query goes to an LLM that generates N translated variants — paraphrases, sub-questions, abstractions, or hypothetical answers depending on the technique. Each variant runs through [[11 AI & ML/LLM/RAG/Retrieval|retrieval]] independently. Results are fused and deduplicated into a single candidate set, then passed to [[11 AI & ML/LLM/RAG/Re-ranking|reranking]] or directly to the generator.
+The mechanism: the user query goes to an LLM that generates N translated variants — paraphrases, sub-questions, abstractions, or hypothetical answers depending on the technique. Each variant runs through [[Retrieval]] independently. Results are fused and deduplicated into a single candidate set, then passed to [[Re-ranking|reranking]] or directly to the generator.
 
 ```mermaid
 flowchart LR
@@ -33,7 +27,7 @@ flowchart LR
 
 Example: a user asks "rate limit behavior for partner tier accounts." Multi-query generates paraphrases — "partner tier throttling policy," "API quota enforcement for partner customers," "rate limiting rules by account tier." Each paraphrase hits a different document neighborhood. Fusion combines the best candidates from all three retrieval runs. Without translation, only chunks matching the exact phrasing "rate limit behavior" surface, missing policy documents that use "throttling" or "quota enforcement" instead.
 
-Query translation addresses a specific failure mode: recall gaps caused by vocabulary mismatch between queries and documents. It does not fix [[11 AI & ML/LLM/RAG/Chunking|chunking]] problems, embedding model quality, or index configuration — those are upstream issues. If relevant documents are not in the corpus at all, no amount of query rewriting will find them.
+Query translation addresses a specific failure mode: recall gaps caused by vocabulary mismatch between queries and documents. It does not fix [[Chunking]] problems, embedding model quality, or index configuration — those are upstream issues. If relevant documents are not in the corpus at all, no amount of query rewriting will find them.
 
 ## Approaches
 
@@ -58,7 +52,7 @@ Main risk: query drift — a paraphrase that subtly shifts intent pulls in irrel
 
 ### RAG-Fusion
 
-RAG-Fusion extends multi-query with explicit rank fusion. Instead of simple deduplication, results from all query variants are merged using [[11 AI & ML/LLM/RAG/Re-ranking|Reciprocal Rank Fusion (RRF)]]: for each document, sum `1 / (rank + k)` across all query variant result lists, where k=60 is the standard constant.
+RAG-Fusion extends multi-query with explicit rank fusion. Instead of simple deduplication, results from all query variants are merged using [[Re-ranking|Reciprocal Rank Fusion (RRF)]]: for each document, sum `1 / (rank + k)` across all query variant result lists, where k=60 is the standard constant.
 
 The mechanism rewards consensus — a document that appears in the top results for 3 of 4 query variants scores higher than one that ranks first for a single variant but is absent from the others. This acts as an implicit relevance vote: agreement across phrasings is a stronger signal than high rank from one phrasing.
 
@@ -84,7 +78,7 @@ Main risk: overly abstract retrieval. If the step-back question is too general (
 
 ### Decomposition
 
-Decomposition splits a complex multi-part question into focused sub-questions, retrieves evidence for each independently, and synthesizes the final answer from the combined context. Unlike multi-query, the sub-questions are *different questions* — each targets a distinct piece of evidence needed for the answer.
+Decomposition splits a complex multi-part question into focused sub-questions, retrieves evidence for each independently, and synthesizes the final answer from the combined context. Unlike multi-query, the sub-questions are _different questions_ — each targets a distinct piece of evidence needed for the answer.
 
 Example — original query: "How does Task compare to ValueTask for high-throughput API endpoints?"
 
@@ -155,6 +149,7 @@ Decision rule: start with no translation and measure baseline retrieval quality.
 
 > [!QUESTION]- Why does query translation often improve recall but sometimes hurt precision, and how do you detect the tradeoff?
 > Expected answer:
+>
 > - Additional query variants cover vocabulary the original misses, hitting more document neighborhoods and improving recall
 > - Weak variants introduce concepts not in the original intent, pulling related-but-irrelevant documents into the candidate set
 > - Precision drop is invisible in aggregate recall metrics — recall goes up while noisy candidates are buried in the ranked list
@@ -164,6 +159,7 @@ Decision rule: start with no translation and measure baseline retrieval quality.
 
 > [!QUESTION]- When is decomposition a better choice than multi-query, and when does it hurt?
 > Expected answer:
+>
 > - Decomposition fits when the original query has distinct sub-problems requiring separate evidence — comparisons, multi-entity questions, timeline questions
 > - Multi-query fits when the question has a single intent but user phrasing may not match document terminology
 > - Decomposition hurts on single-intent questions: sub-questions fragment a coherent topic and lose the constraints that make the original specific
@@ -173,12 +169,13 @@ Decision rule: start with no translation and measure baseline retrieval quality.
 
 > [!QUESTION]- Why can HyDE outperform direct query embedding for vague questions but fail on specific factual queries?
 > Expected answer:
+>
 > - Vague queries produce sparse, underspecified embeddings equidistant from many document clusters — poor retrieval signal
 > - HyDE generates a hypothetical answer paragraph, creating a denser point in embedding space closer to real answer documents
 > - The encoder's bottleneck filters hallucinated details while preserving the correct semantic neighborhood
 > - For specific factual queries (error codes, versions), the LLM may hallucinate wrong details — different error code, different version
 > - The hallucinated embedding steers retrieval toward documents matching the wrong specifics
-> - Direct query embedding, while sparse, preserves exact tokens that [[11 AI & ML/LLM/RAG/Retrieval#Sparse Retrieval — Keyword Search (BM25)|keyword search]] in a hybrid setup can catch
+> - Direct query embedding, while sparse, preserves exact tokens that [[Retrieval#Sparse Retrieval — Keyword Search (BM25)|keyword search]] in a hybrid setup can catch
 > - HyDE failure is stealth: retrieved documents look topically relevant but answer the wrong specific question
 
 ## References

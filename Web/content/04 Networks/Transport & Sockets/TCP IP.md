@@ -1,13 +1,7 @@
 ---
-topic:
-  - Networks
-subtopic:
-  - Transport & Sockets
-level:
-  - "3"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:36.360+03:00
+modified: 2026-07-05T15:49:32.736+03:00
 ---
 
 # TCP/IP
@@ -34,7 +28,7 @@ The "IP" half of TCP/IP is addressing. An **IP address** identifies a host; a **
 - **IPv4** — 32-bit addresses (~4.3 billion), written `192.168.1.10`. Exhausted, which is why **NAT** exists.
 - **IPv6** — 128-bit addresses, written `2001:db8::1`. Vast space, no NAT needed, but dual-stack deployment is still ongoing.
 - **Private ranges** (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`) are non-routable on the public internet.
-- **NAT (Network Address Translation)** — a router maps many private hosts onto one public IP by rewriting addresses/ports. This is why your laptop's `192.168.x.x` reaches the internet, and why inbound connections to a host behind NAT need port-forwarding or hole-punching (relevant to [[04 Networks/Architecture & Ops/Peer-2-Peer|peer-to-peer]]).
+- **NAT (Network Address Translation)** — a router maps many private hosts onto one public IP by rewriting addresses/ports. This is why your laptop's `192.168.x.x` reaches the internet, and why inbound connections to a host behind NAT need port-forwarding or hole-punching (relevant to [[Peer-2-Peer|peer-to-peer]]).
 - **Ports** split into well-known (0–1023, e.g. 80/443), registered, and **ephemeral** (the dynamic client-side ports that `TIME_WAIT` can exhaust).
 
 ## TCP Connection: Three-Way Handshake
@@ -65,7 +59,7 @@ TCP guarantees delivery through:
 - **Duplicate ACKs / Fast Retransmit**: three duplicate ACKs signal a lost segment; TCP retransmits without waiting for the timeout.
 
 > [!WARNING]
-> **Head-of-line (HOL) blocking** is the price of in-order delivery: if segment #5 is lost, segments #6–#10 sit in the receive buffer and **cannot be delivered to the application** until #5 is retransmitted — even though they arrived fine. This is exactly why HTTP/2's many streams over one TCP connection can stall together on a single lost packet, and why **QUIC/HTTP/3** moves multiplexing into independent UDP-based streams. See [[04 Networks/Transport & Sockets/UDP|UDP]].
+> **Head-of-line (HOL) blocking** is the price of in-order delivery: if segment #5 is lost, segments #6–#10 sit in the receive buffer and **cannot be delivered to the application** until #5 is retransmitted — even though they arrived fine. This is exactly why HTTP/2's many streams over one TCP connection can stall together on a single lost packet, and why **QUIC/HTTP/3** moves multiplexing into independent UDP-based streams. See [[UDP]].
 
 ## MTU, MSS, and Keep-Alive
 
@@ -106,7 +100,7 @@ var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolT
 socket.NoDelay = true;  // disables Nagle's algorithm
 ```
 
-### TIME_WAIT Port Exhaustion
+### TIME\_WAIT Port Exhaustion
 
 **What goes wrong**: a high-throughput service opens and closes many short-lived connections. The OS runs out of ephemeral ports because they're all in `TIME_WAIT`.
 
@@ -129,6 +123,7 @@ socket.NoDelay = true;  // disables Nagle's algorithm
 ## Questions
 
 > [!QUESTION]- Why does TCP's three-way handshake exist, and when does its latency cost become a real problem?
+>
 > - The handshake synchronizes sequence numbers and confirms both sides are reachable before sending data.
 > - It adds one full round-trip of latency before the first byte of application data can be sent.
 > - For short-lived connections (single HTTP request, DNS-over-TCP), handshake latency dominates total request time.
@@ -136,6 +131,7 @@ socket.NoDelay = true;  // disables Nagle's algorithm
 > - The handshake guarantees reliable setup but costs a full round-trip; reach for connection pooling or QUIC when that overhead is unacceptable.
 
 > [!QUESTION]- How do flow control and congestion control differ, and what happens when you confuse them?
+>
 > - Flow control protects the receiver: the receive window limits how much unacknowledged data the sender can push.
 > - Congestion control protects the network: the congestion window limits send rate based on detected packet loss.
 > - The effective send rate is the minimum of both windows.

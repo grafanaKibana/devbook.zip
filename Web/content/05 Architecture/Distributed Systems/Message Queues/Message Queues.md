@@ -1,15 +1,9 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Distributed Systems
+publish: true
+created: 2026-07-05T10:53:43.320+03:00
+modified: 2026-07-05T10:53:43.320+03:00
 tags:
   - FolderNote
-publish: true
-priority: High
-level:
-  - '2'
-status: Done
 ---
 
 # Intro
@@ -33,43 +27,67 @@ flowchart LR
 ```
 
 - **Delivery guarantees**
+
 - `At-most-once`: possible loss, no redelivery.
+
 - `At-least-once`: redelivery until ack or policy cutoff (DLQ/TTL), duplicates expected.
+
 - `Effectively-once` for one side effect is usually `at-least-once + idempotency + transactional boundary`.
+
 - End-to-end exactly-once across external systems is generally not realistic.
 
 - **Ordering and partitioning**
+
 - Ordering is usually per partition/queue shard, not global.
+
 - More partitions improve throughput but weaken global order guarantees.
+
 - If per-entity ordering matters (for example `OrderId`), route by a stable key to one partition.
+
 - Retries/redelivery and competing consumers can reorder events.
+
 - Kafka rebalances can cause duplicate processing when offsets were not committed; out-of-order effects usually come from multi-partition reads or concurrent handlers.
 
 ## Reliability patterns
 
 - **DLQ for poison messages**
+
 - Use DLQ when messages repeatedly fail and block healthy traffic.
+
 - Broker specifics: Service Bus uses `MaxDeliveryCount`; RabbitMQ uses DLX + TTL/retry queues; Kafka has no broker DLQ and uses an app dead-letter topic.
+
 - Operate DLQ as a first-class system: alerts, replay tooling, retention ownership.
 
 - **Retry with backoff**
+
 - Retry transient failures with exponential backoff + jitter.
+
 - If the broker supports delayed delivery, prefer broker-managed delay; otherwise use retry queues/topics.
 
 - **Idempotency keys**
+
 - Persist a durable idempotency key (`MessageId` or business key).
+
 - Avoid check-then-act; it races. Reserve/upsert key atomically (unique index or transactional insert), then apply side effects.
+
 - Commit business write and idempotency completion in one database transaction; broker ack/offset commit follows after success.
 
 - **Ack modes and offset commits**
+
 - Auto-ack favors throughput but risks loss on mid-processing crashes.
+
 - Manual ack after successful side effects favors correctness.
+
 - RabbitMQ `nack`/requeue and Service Bus `Abandon` cause retry/redelivery; dead-lettering is separate.
+
 - Kafka uses offset commits instead of ack/nack: commit after processing and rely on idempotency for duplicate safety.
+
 - Lock or visibility expiration can also trigger redelivery, so long handlers need lock renewal/extension.
 
 - **Backpressure**
+
 - Limit in-flight work using prefetch/QoS.
+
 - Track queue depth, lag, and oldest-message age to avoid memory and latency collapse.
 
 ## Concrete .NET example (Webhook -> Queue -> Worker)
@@ -158,28 +176,41 @@ Use [[RabbitMQ]] for routing-heavy queues and latency-sensitive tasks. Use [[Kaf
 ## Pitfalls
 
 - **1) Ordering assumptions across partitions**
+
 - What goes wrong: teams assume global ordering and break business invariants.
+
 - Why: most brokers guarantee order per partition, and retries/prefetch/competing consumers can still reorder work.
+
 - Mitigation: partition by entity key, limit concurrency per key, and make handlers reorder-tolerant.
 
 - **2) Poison messages without DLQ**
+
 - What goes wrong: one bad message retries forever and starves healthy traffic.
+
 - Why: missing dead-letter policy.
+
 - Mitigation: bounded retries plus DLQ routing and alerts.
 
 - **3) At-least-once without idempotency**
+
 - What goes wrong: duplicate charges, emails, or external calls.
+
 - Why: redelivery is expected but handler side effects are not deduplicated.
+
 - Mitigation: durable idempotency keys with atomic reservation.
 
 - **4) Silent queue growth**
+
 - What goes wrong: backlog grows until OOM or latency SLO failure.
+
 - Why: weak observability and missing backpressure/autoscaling.
+
 - Mitigation: alert on depth, oldest-message age, lag, and in-flight count.
 
 ## Questions
 
 - **1) In at-least-once processing, how do you prevent loss and duplicate side effects when a consumer crashes?**
+
 - Expected answer:
   - Use manual ack only after successful business commit.
   - If crash happens before ack, rely on broker redelivery.
@@ -187,6 +218,7 @@ Use [[RabbitMQ]] for routing-heavy queues and latency-sensitive tasks. Use [[Kaf
   - Bound retries and route persistent failures to DLQ.
 
 - **2) When do you choose Kafka over RabbitMQ for a .NET service?**
+
 - Expected answer:
   - Choose Kafka for replayable event streams with high throughput.
   - Choose RabbitMQ for low-latency work queues and routing-key patterns.
@@ -194,6 +226,7 @@ Use [[RabbitMQ]] for routing-heavy queues and latency-sensitive tasks. Use [[Kaf
   - Compare operational complexity and team experience.
 
 - **3) Which metrics should page you first in queue-driven systems?**
+
 - Expected answer:
   - Queue depth and age of oldest message.
   - Consumer lag or unacked in-flight count.

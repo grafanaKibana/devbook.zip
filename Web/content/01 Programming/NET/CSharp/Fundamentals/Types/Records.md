@@ -1,13 +1,7 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
-level:
-  - "4"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:27.195+03:00
+modified: 2026-07-05T10:53:37.202+03:00
 ---
 
 # Intro
@@ -204,6 +198,7 @@ Use a record when you want the data-carrier machinery; use a class primary const
 ## `required` and Validation
 
 - Combine records with **`required`** to force a nominal property without a positional parameter: `public record User { public required string Email { get; init; } }`.
+
 - Validate by adding logic in a property initializer or a body block on a positional parameter:
 
   ```csharp
@@ -222,9 +217,9 @@ Use a record when you want the data-carrier machinery; use a class primary const
 
 2. **EqualityContract breaks cross-type equality** — Two records of different runtime types are never equal, even if all shared properties match. This is by design (prevents sliced-equality bugs) but can surprise developers expecting base-type comparison.
 
-3. **Reference-type properties in records** — Value-based equality compares each property with its own `Equals`. If a record has a `List<string>` property, two records with identical-content lists will be considered *not equal* because `List<T>.Equals` uses reference equality. Fix: use immutable collections (`ImmutableArray<T>`) or override `Equals`.
+3. **Reference-type properties in records** — Value-based equality compares each property with its own `Equals`. If a record has a `List<string>` property, two records with identical-content lists will be considered _not equal_ because `List<T>.Equals` uses reference equality. Fix: use immutable collections (`ImmutableArray<T>`) or override `Equals`.
 
-4. **with-expression shallow copies** — `with` calls the copy constructor and sets changed properties. For reference-type properties, it copies the *reference*, not the object. Mutating a nested object through one copy affects the other:
+4. **with-expression shallow copies** — `with` calls the copy constructor and sets changed properties. For reference-type properties, it copies the _reference_, not the object. Mutating a nested object through one copy affects the other:
 
 ```csharp
 public record Wrapper(List<int> Items);
@@ -239,16 +234,18 @@ Console.WriteLine(a.Items.Count); // 3 — same list instance
 ## Questions
 
 > [!QUESTION]- In `record Wrapper(List<int> Items)`, if `var b = a with { };` and an item is added to `b.Items`, does `a` observe the change, and why?
-> Yes — `a` sees the change. `with` performs a *shallow copy*: it copies references, not the underlying objects. Both `a.Items` and `b.Items` point to the same `List<int>` instance. Furthermore, `a == b` was `true` before the mutation (same reference in both), but the equality check still uses `List<T>.Equals` which is reference equality — so it remains `true` even after the content changes. To get proper deep value semantics, use immutable collections (`ImmutableList<T>`, `ImmutableArray<T>`) or override `Equals` to compare content.
+> Yes — `a` sees the change. `with` performs a _shallow copy_: it copies references, not the underlying objects. Both `a.Items` and `b.Items` point to the same `List<int>` instance. Furthermore, `a == b` was `true` before the mutation (same reference in both), but the equality check still uses `List<T>.Equals` which is reference equality — so it remains `true` even after the content changes. To get proper deep value semantics, use immutable collections (`ImmutableList<T>`, `ImmutableArray<T>`) or override `Equals` to compare content.
 
 > [!QUESTION]- When would you choose `record class` over `readonly record struct`?
 > Choose `record class` when:
+>
 > - The data contains variable-length reference types (strings, collections) — the struct would not avoid heap allocation anyway.
 > - The type participates in an inheritance hierarchy (only record classes support inheritance).
 > - The data is large (more than ~16 bytes of value-type fields) — copy cost outweighs GC cost.
 > - You need `null` semantics (e.g. optional return values without `Nullable<T>`).
 >
 > Choose `readonly record struct` when:
+>
 > - The data is small and all fields are value types — avoids heap allocation entirely.
 > - You are on a hot path where GC pressure matters (e.g. tight loops, high-throughput pipelines).
 > - No inheritance is needed.
@@ -258,6 +255,7 @@ Console.WriteLine(a.Items.Count); // 3 — same list instance
 
 > [!QUESTION]- Can a record struct be used as a `Dictionary` key safely? What do you need to watch out for?
 > Yes, `record struct` works well as a dictionary key because the compiler generates value-based `Equals` and `GetHashCode` by default. Watch out for:
+>
 > - **Mutable record structs** — if a key is mutated after insertion, its hash code changes and it becomes unreachable in the dictionary. Use `readonly record struct` for keys.
 > - **Reference-type properties** — if the record struct contains a reference-type property (e.g. `string[]`), the generated `GetHashCode` calls that property's `GetHashCode`, which for arrays is reference-based (not content-based). Two structurally identical keys with different array instances will hash differently. Override `GetHashCode` or use immutable value-semantic collections.
 

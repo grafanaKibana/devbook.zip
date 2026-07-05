@@ -1,14 +1,7 @@
 ---
-topic:
-  - Cloud
-subtopic:
-  - Cloud
-level:
-  - "2"
-priority: High
-status: Ready to Repeat
-
 publish: true
+created: 2026-07-05T10:54:10.832+03:00
+modified: 2026-07-05T15:49:34.761+03:00
 ---
 
 # IaaS, PaaS, SaaS, CaaS
@@ -49,11 +42,11 @@ The provider manages the container orchestration layer (Kubernetes control plane
 
 ## FaaS — Functions as a Service (Serverless)
 
-The provider manages *everything* up to and including the runtime process — you supply only individual **functions** that run in response to events (an HTTP request, a queue message, a timer). There are **no servers to provision and no idle cost**: you're billed per invocation and per millisecond of execution, and the platform scales from zero to thousands of concurrent instances automatically.
+The provider manages _everything_ up to and including the runtime process — you supply only individual **functions** that run in response to events (an HTTP request, a queue message, a timer). There are **no servers to provision and no idle cost**: you're billed per invocation and per millisecond of execution, and the platform scales from zero to thousands of concurrent instances automatically.
 
 **Examples**: AWS Lambda, Azure Functions, Google Cloud Functions, Cloudflare Workers.
 
-**When to use**: event-driven, spiky, or low-baseline workloads — webhooks, scheduled jobs, glue between services, image/file processing. **The catch is the cold start** (a scaled-to-zero function pays startup latency on the first request) and a stateless, time-limited execution model that doesn't suit long-running or latency-critical request paths. "Serverless" is the umbrella term: FaaS plus fully-managed backing services (managed DBs, queues, auth) that also scale to zero — see [[05 Architecture/System Architecture/Serverless Architecture|Serverless Architecture]] for the design-level treatment.
+**When to use**: event-driven, spiky, or low-baseline workloads — webhooks, scheduled jobs, glue between services, image/file processing. **The catch is the cold start** (a scaled-to-zero function pays startup latency on the first request) and a stateless, time-limited execution model that doesn't suit long-running or latency-critical request paths. "Serverless" is the umbrella term: FaaS plus fully-managed backing services (managed DBs, queues, auth) that also scale to zero — see [[Serverless Architecture]] for the design-level treatment.
 
 ## Comparison
 

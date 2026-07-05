@@ -1,14 +1,7 @@
 ---
-topic:
-  - Security
-subtopic:
-  - Security
-level:
-  - "4"
-priority: High
-status: Ready to Repeat
-
 publish: true
+created: 2026-07-05T10:54:04.323+03:00
+modified: 2026-07-05T15:49:31.808+03:00
 ---
 
 # Encryption
@@ -60,20 +53,21 @@ var decrypted = rsa.Decrypt(encrypted, RSAEncryptionPadding.OaepSHA256);
 
 ## Hashing Is Not Encryption (and Password Storage)
 
-The single most common crypto confusion: **encryption is reversible** (you hold a key and *decrypt* back to plaintext); a **cryptographic hash is one-way** (SHA-256 — no key, no way to "un-hash"). Encoding (Base64) is *neither* — reversible with no secret at all, so it gives **zero** confidentiality. Pick by intent: confidentiality → encrypt; integrity/fingerprint → hash; "make it ASCII-safe" → encode.
+The single most common crypto confusion: **encryption is reversible** (you hold a key and _decrypt_ back to plaintext); a **cryptographic hash is one-way** (SHA-256 — no key, no way to "un-hash"). Encoding (Base64) is _neither_ — reversible with no secret at all, so it gives **zero** confidentiality. Pick by intent: confidentiality → encrypt; integrity/fingerprint → hash; "make it ASCII-safe" → encode.
 
-**Passwords must be *hashed*, never encrypted.** Encrypt them and a leaked key exposes every password; a one-way hash can't be reversed even if stolen. But a *fast* hash (SHA-256) is brute-forceable at billions/sec, so use a **slow, salted password hash** built for it: **Argon2** (preferred), **bcrypt**, or **PBKDF2**. The per-user salt defeats rainbow tables; the deliberate slowness defeats brute force.
+**Passwords must be _hashed_, never encrypted.** Encrypt them and a leaked key exposes every password; a one-way hash can't be reversed even if stolen. But a _fast_ hash (SHA-256) is brute-forceable at billions/sec, so use a **slow, salted password hash** built for it: **Argon2** (preferred), **bcrypt**, or **PBKDF2**. The per-user salt defeats rainbow tables; the deliberate slowness defeats brute force.
 
 ```csharp
 // ASP.NET Core Identity hashes with PBKDF2 by default; for new code prefer Argon2 (e.g. Konscious.Security.Cryptography).
 // NEVER store SHA256(password) — far too fast, and unsalted = rainbow-table-able.
 ```
 
-For integrity between parties sharing a secret, use an **HMAC** (keyed hash); for integrity *with non-repudiation*, use a [[07 Security/Digital Signature|digital signature]]. See [[07 Security/Hashing|Hashing]] for the full treatment of hash functions, HMAC, and password hashing.
+For integrity between parties sharing a secret, use an **HMAC** (keyed hash); for integrity _with non-repudiation_, use a [[Digital Signature]]. See [[Hashing]] for the full treatment of hash functions, HMAC, and password hashing.
 
 ## TLS — Encryption in Transit
 
 TLS (Transport Layer Security) combines asymmetric and symmetric encryption:
+
 1. **Handshake**: Client and server use asymmetric crypto (RSA or ECDH) to agree on a shared symmetric key
 2. **Data transfer**: All subsequent data is encrypted with the symmetric key (AES-GCM)
 

@@ -1,14 +1,7 @@
 ---
-topic:
-  - Security
-subtopic:
-  - Authentication
-level:
-  - "3"
-priority: High
-status: Ready to Repeat
-
 publish: true
+created: 2026-07-05T10:54:04.358+03:00
+modified: 2026-07-05T10:54:04.359+03:00
 ---
 
 # Two-Factor Authentication (2FA)
@@ -48,7 +41,7 @@ FIDO2 (Fast Identity Online) uses public-key cryptography with hardware security
 **When to use**: High-security applications (banking, enterprise admin access). More secure than TOTP but requires hardware or platform support.
 
 > [!NOTE]
-> **Passkeys** are the consumer branding of FIDO2/WebAuthn *discoverable credentials* — synced across devices (iCloud Keychain, Google Password Manager) so you sign in with just Face ID/fingerprint and **no password**. Being phishing-resistant by design (bound to the origin), a passkey serves as first *and* second factor at once, which is why the industry is pushing passwordless. Terminology: **2FA** is exactly two factors; **MFA** is two *or more*.
+> **Passkeys** are the consumer branding of FIDO2/WebAuthn _discoverable credentials_ — synced across devices (iCloud Keychain, Google Password Manager) so you sign in with just Face ID/fingerprint and **no password**. Being phishing-resistant by design (bound to the origin), a passkey serves as first _and_ second factor at once, which is why the industry is pushing passwordless. Terminology: **2FA** is exactly two factors; **MFA** is two _or more_.
 
 ```csharp
 // FIDO2 / WebAuthn with Fido2NetLib (server-side assertion verification)

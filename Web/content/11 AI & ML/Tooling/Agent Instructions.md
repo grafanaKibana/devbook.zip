@@ -1,13 +1,7 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - Tooling
 publish: true
-status: Done
-level:
-  - "2"
-priority: Medium
+created: 2026-07-05T10:54:06.683+03:00
+modified: 2026-07-05T15:49:34.078+03:00
 ---
 
 # Intro
@@ -36,13 +30,13 @@ Mechanically, the agent loads instruction files when a session starts (and in so
 - **Project-specific knowledge:** domain terms, business invariants, and integration constraints that are not obvious from code alone
 - **Prompt-efficiency discipline:** short, actionable rules with clear verbs; avoid long narrative text that wastes context tokens
 
-For modular, reusable behavior packs that complement instruction files, see [[11 AI & ML/Tooling/Skills|Skills]].
+For modular, reusable behavior packs that complement instruction files, see [[Skills]].
 
 ## Example
 
 Minimal but effective `AGENTS.md` for a .NET API project:
 
-````markdown
+```markdown
 # Project Instructions
 
 - Stack: .NET 9, ASP.NET Core, PostgreSQL 16, xUnit
@@ -52,7 +46,7 @@ Minimal but effective `AGENTS.md` for a .NET API project:
 - Do not introduce new top-level folders without explicit rationale
 - Error responses use ProblemDetails (RFC 9457) with `type` URI
 - All new endpoints require at least one integration test
-````
+```
 
 This works because it sets: execution defaults (stack, verification command), data boundaries (DTO mapping), structural constraints (feature folders), error format (ProblemDetails), and quality gates (integration tests). Each rule is actionable — the agent can verify compliance mechanically.
 
@@ -75,18 +69,21 @@ This works because it sets: execution defaults (stack, verification command), da
 ## Questions
 
 > [!QUESTION]- Why do hierarchical instruction files often outperform a single giant root file?
+>
 > - Rules stay close to the code they govern, reducing ambiguity in mixed-language or mixed-architecture repos
 > - Subdirectory instructions can refine local constraints without polluting global context
 > - Smaller scoped files usually improve relevance-to-token ratio in the agent prompt
 > - The tradeoff is governance complexity: teams need clear precedence and periodic cleanup
 
 > [!QUESTION]- What is the fastest way to detect that an instruction file is harming agent quality?
+>
 > - Repeated command failures from outdated scripts or wrong paths
 > - Inconsistent code style across tasks despite explicit rules
 > - Frequent edits that violate architecture constraints the file claims to enforce
 > - Rapid fix is to trim to high-signal rules, remove contradictions, then re-add specifics incrementally
 
 > [!QUESTION]- When should a team keep instructions minimal and rely more on repository inspection?
+>
 > - Early prototype phases where architecture and conventions are changing weekly
 > - Small codebases where implicit conventions are obvious from a few files
 > - Teams that cannot maintain rule quality yet; stale detail is worse than concise accurate guidance

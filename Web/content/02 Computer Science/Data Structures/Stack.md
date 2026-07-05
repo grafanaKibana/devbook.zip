@@ -1,13 +1,7 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
-level:
-  - "4"
-priority: Medium
-status: Done
 publish: true
+created: 2026-07-05T10:53:23.238+03:00
+modified: 2026-07-05T10:53:37.203+03:00
 ---
 
 # Intro
@@ -55,18 +49,21 @@ Console.WriteLine(stack.Pop());  // A
 ## Questions
 
 > [!QUESTION]- When is an explicit `Stack<T>` better than recursion?
+>
 > - Use it when graph/tree depth may be large or unbounded — an explicit stack lives on the heap and avoids a `StackOverflowException`.
 > - It also gives you control over traversal state you can inspect, pause, or resume, which recursion hides in call frames.
 > - The traversal logic is identical: push instead of recurse, pop instead of return.
 > - It is more verbose than recursion, but it is the safe default whenever input depth is attacker- or data-controlled.
 
 > [!QUESTION]- Why can `Stack<T>` be a poor fit for work queues?
+>
 > - Work queues usually need FIFO fairness so the oldest item is handled first.
 > - LIFO processing serves the newest item first, which can starve older items indefinitely under sustained load.
 > - This is a correctness/SLA bug, not a performance one — it passes tests but misbehaves in production bursts.
 > - A stack is simpler and cache-friendly, but choose `Queue<T>` (or a priority queue) the moment ordering guarantees matter.
 
 > [!QUESTION]- What is the complexity of `Push` and why is it not always constant in practice?
+>
 > - `Push` is **amortized** O(1): most pushes just write a slot and bump the counter.
 > - When the backing array is full, `Push` allocates a doubled array and copies all elements — that individual call is O(n).
 > - Doubling makes any sequence of n pushes cost O(n) total, so the average stays O(1).

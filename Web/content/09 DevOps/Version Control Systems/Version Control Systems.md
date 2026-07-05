@@ -1,21 +1,14 @@
 ---
-topic:
-  - DevOps
-subtopic:
-  - Version Control Systems
-level:
-  - "4"
-priority: High
+publish: true
+created: 2026-07-05T10:54:08.003+03:00
+modified: 2026-07-05T10:54:08.004+03:00
 tags:
   - FolderNote
-
-publish: true
-status: Creation
 ---
 
 # Intro
 
-A version control system (VCS) tracks changes to files over time, enabling collaboration, branching, merging, and the ability to revert to any previous state. 
+A version control system (VCS) tracks changes to files over time, enabling collaboration, branching, merging, and the ability to revert to any previous state.
 Git is the dominant distributed VCS, where every developer holds a full copy of the repository history, and workflows like git-flow or trunk-based development define how teams coordinate changes.
 
 ## Questions

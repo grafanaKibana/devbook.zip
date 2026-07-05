@@ -1,15 +1,9 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
-level:
-  - "2"
-priority: High
+publish: true
+created: 2026-07-05T10:54:06.973+03:00
+modified: 2026-07-05T17:36:34.783+03:00
 tags:
   - FolderNote
-publish: true
-status: Done
 ---
 
 # Intro
@@ -30,9 +24,9 @@ flowchart LR
 
 Example: a support bot returns the correct policy document (retrieval passes) but the model misreads a date constraint and answers with the wrong deadline (generation fails). Without layer separation, the team would chase retrieval improvements that cannot fix a generation problem.
 
-This folder holds only what is specific to RAG. [[11 AI & ML/LLM/RAG/Evaluation/Evaluation Metrics|Evaluation Metrics]] defines what to measure at each layer — the retrieval metrics, the generation metrics, and the RAGAS scores plus the two-score diagnostic combinations that point at a root cause. [[11 AI & ML/LLM/RAG/Evaluation/Component-Level Evaluation|Component-Level Evaluation]] isolates *which* upstream component — chunking, embedding, or the ANN index — moved a metric, using ablation that holds everything else constant. [[11 AI & ML/LLM/RAG/Evaluation/Retrieval Evaluation Sets|Retrieval Evaluation Sets]] covers the RAG-specific labeling problem — substitutable versus complementary chunks — and chunk-anchored synthetic generation.
+This folder holds only what is specific to RAG. [[Evaluation Metrics]] defines what to measure at each layer — the retrieval metrics, the generation metrics, and the RAGAS scores plus the two-score diagnostic combinations that point at a root cause. [[Component-Level Evaluation]] isolates _which_ upstream component — chunking, embedding, or the ANN index — moved a metric, using ablation that holds everything else constant. [[Retrieval Evaluation Sets]] covers the RAG-specific labeling problem — substitutable versus complementary chunks — and chunk-anchored synthetic generation.
 
-The domain-independent machinery all of this reuses — [[11 AI & ML/LLM/Evaluation/LLM-as-a-Judge|LLM-as-a-Judge]], [[11 AI & ML/LLM/Evaluation/Deterministic Checks|deterministic checks]], [[11 AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs|golden sets]], [[11 AI & ML/LLM/Evaluation/Building an Evaluation Set|synthetic data generation and sizing]], and the [[11 AI & ML/LLM/Evaluation/Online Evaluation and AB Tests|online/A-B loop]] — lives under [[11 AI & ML/LLM/Evaluation/Evaluation|LLM Evaluation]] and is referenced here rather than repeated. For production-time measurement of these same signals, see [[11 AI & ML/LLM/RAG/Monitoring|Monitoring]].
+The domain-independent machinery all of this reuses — [[LLM-as-a-Judge]], [[Deterministic Checks]], [[Golden Test Set and Regression Runs|golden sets]], [[Building an Evaluation Set|synthetic data generation and sizing]], and the [[Online Evaluation and AB Tests|online/A-B loop]] — lives under [[11 AI & ML/LLM/Evaluation/Evaluation|LLM Evaluation]] and is referenced here rather than repeated. For production-time measurement of these same signals, see [[Monitoring]].
 
 ## Questions
 

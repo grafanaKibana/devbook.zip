@@ -1,18 +1,12 @@
 ---
-topic:
-  - Development Practices
-subtopic:
-  - Paradigms
-level:
-  - "4"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:48.560+03:00
+modified: 2026-07-05T10:53:48.560+03:00
 ---
 
 # Test-Driven Development
 
-Test-Driven Development (TDD) is a development practice where you write a failing test *before* writing the production code that satisfies it. The cycle is **Red → Green → Refactor**: write a test that fails (Red), write the minimum code to make it pass (Green), then clean up the design without breaking the test (Refactor). TDD is not primarily about test coverage — it is a design technique. Writing the test first forces you to define the public interface and expected behavior before implementation, which consistently produces smaller, more focused units with clearer contracts.
+Test-Driven Development (TDD) is a development practice where you write a failing test _before_ writing the production code that satisfies it. The cycle is **Red → Green → Refactor**: write a test that fails (Red), write the minimum code to make it pass (Green), then clean up the design without breaking the test (Refactor). TDD is not primarily about test coverage — it is a design technique. Writing the test first forces you to define the public interface and expected behavior before implementation, which consistently produces smaller, more focused units with clearer contracts.
 
 ## The Red-Green-Refactor Loop
 
@@ -26,7 +20,7 @@ Each iteration should take 2–10 minutes. If a cycle takes longer, the step is 
 
 ## Concrete Example
 
-Implementing a `PriceCalculator` that applies a discount for orders over $100:
+Implementing a `PriceCalculator` that applies a discount for orders over \$100:
 
 ```csharp
 // Step 1 — RED: write the test first
@@ -66,12 +60,14 @@ Both tests pass. Now Refactor: the logic is already clean, so nothing to change.
 ## What TDD Improves (and What It Doesn't)
 
 **Improves**:
+
 - **Design**: writing the test first forces a usable public API. Classes that are hard to test are usually poorly designed (too many dependencies, too much responsibility).
 - **Regression safety**: the test suite grows with the codebase. Refactoring is safe because failures are caught immediately.
 - **Feedback speed**: a failing test pinpoints the broken behavior in seconds, not after a full build-and-run cycle.
 - **Documentation**: tests describe expected behavior in executable form. `AppliesDiscountWhenOrderExceedsThreshold` is clearer than a comment.
 
 **Does not improve**:
+
 - **Architecture**: TDD operates at the unit level. It won't catch wrong service boundaries or bad data models.
 - **Integration correctness**: unit tests with mocks can pass while the real system is broken. Integration tests are still needed.
 - **Performance**: TDD doesn't test latency or throughput.
@@ -115,6 +111,7 @@ Both tests pass. Now Refactor: the logic is already clean, so nothing to change.
 ## Questions
 
 > [!QUESTION]- Why does TDD improve design, not just test coverage?
+>
 > - Writing the test first forces you to define the public interface before the implementation exists.
 > - If the test is hard to write (too many constructor arguments, complex setup), that's a design signal: the class has too many responsibilities or too many dependencies.
 > - TDD naturally produces smaller classes with single responsibilities because each test targets one behavior.
@@ -122,12 +119,14 @@ Both tests pass. Now Refactor: the logic is already clean, so nothing to change.
 > - Tradeoff: TDD's design benefit requires discipline. Skipping the Red step (writing a test that already passes) eliminates the feedback loop.
 
 > [!QUESTION]- When is TDD not worth the overhead?
+>
 > - Exploratory/spike code: you don't know the right design yet. Write the spike without tests, learn from it, then delete it and rebuild with TDD.
 > - UI rendering logic: visual behavior is hard to unit-test meaningfully; use snapshot tests or manual QA instead.
 > - Trivial CRUD with no branching: a single-line property setter doesn't need a test-first cycle.
 > - Tradeoff: TDD overhead is ~20-30% more time upfront. The payback is faster debugging and safer refactoring over the life of the codebase. For short-lived code, the payback never arrives.
 
 > [!QUESTION]- How do you handle external dependencies (DB, HTTP) in TDD?
+>
 > - Inject dependencies as interfaces. In tests, provide a fake or in-memory implementation.
 > - For repositories: use an in-memory implementation (e.g., `Dictionary<Guid, Order>`) rather than mocking every method.
 > - For HTTP clients: use `HttpMessageHandler` fakes or `WireMock.Net` for realistic HTTP stubs.

@@ -1,14 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Patterns
-level:
-  - "3"
-priority: High
-status: Done
-
 publish: true
+created: 2026-07-05T10:53:43.325+03:00
+modified: 2026-07-05T10:53:43.325+03:00
 ---
 
 # Intro
@@ -27,6 +20,7 @@ At the core, CQRS uses two different models with different responsibilities:
 The write side is typically normalized and transactional (for example, EF Core with aggregate boundaries and concurrency control). The read side is often denormalized (materialized views, projection tables, or document-style records) to avoid expensive joins at query time.
 
 Bridge options between write and read models:
+
 - **Synchronous projection**: update read model in the same request path. Lower staleness, higher coupling and latency.
 - **Asynchronous projection**: publish domain/integration events and project in background. Better decoupling and throughput, but eventual consistency.
 
@@ -70,6 +64,7 @@ graph LR
 The key insight: the **write model** is normalized and enforces business rules, while the **read model** is denormalized and shaped for fast queries. They can use different databases, different schemas, or even different technologies. The trade-off is **eventual consistency** between the two sides.
 
 ## ASP.NET Core Example (EF Core writes + Dapper reads)
+
 This sample uses MediatR for handler wiring; CQRS itself is library-agnostic. MediatR has community and commercial licensing options, so verify current terms at [mediatr.io](https://mediatr.io/). Alternatives include direct DI-wired command/query handlers with custom interfaces.
 Write side: command handler validates invariants and persists normalized state.
 
@@ -191,6 +186,7 @@ public sealed class OrderSummaryProjection : INotificationHandler<OrderPlaced>
 ```
 
 ## CQRS and Event Sourcing
+
 CQRS pairs naturally with [[Event Sourcing]] because events are already the canonical change stream that can project into one or many read models. This makes rebuilding read views and supporting new query shapes easier.
 Important distinction for interviews: **CQRS does not require Event Sourcing**.
 
@@ -200,6 +196,7 @@ Important distinction for interviews: **CQRS does not require Event Sourcing**.
 Use both when auditability, temporal debugging, replay, and multiple read projections are first-class requirements.
 
 ## Pitfalls
+
 - **Eventual consistency surprises users**: a command succeeds but the read model has not caught up, so users see stale dashboards. Use UX hints ("updating..."), projection lag monitoring, and read-your-own-write for critical paths (serve the immediate follow-up read from the write model for that user/session).
 - **Overkill for simple CRUD**: if the same model can handle reads and writes with acceptable performance, CQRS adds architecture tax without clear payoff.
 - **Two models double maintenance**: schema evolution, testing, and observability now span command flow, events, and projections. A common failure is non-idempotent projections duplicating or corrupting read rows because brokers are usually at-least-once: a consumer can write, crash before ack, then process the same event again. Use upserts, store processed event IDs to skip duplicates, and run replay tests.
@@ -207,6 +204,7 @@ Use both when auditability, temporal debugging, replay, and multiple read projec
 - **"CQRS everywhere" anti-pattern**: applying CQRS globally increases complexity and cognitive load. Use it selectively per bounded context where constraints justify it.
 
 ## Tradeoffs: CQRS vs Simple CRUD
+
 | Criterion | Simple CRUD model | CQRS model |
 |---|---|---|
 | Read/write ratio close to 1:1 | Usually sufficient | Often unnecessary complexity |
@@ -215,6 +213,7 @@ Use both when auditability, temporal debugging, replay, and multiple read projec
 | Operational complexity | Lower | Higher (projections, lag, retries, idempotency) |
 | Independent scaling | Limited | Strong, especially with separate stores |
 Decision rule: CQRS is usually worth it when at least two are true at once: high read:write ratio, complex query requirements, and clear need to scale read/write paths independently.
+
 ## Questions
 
 > [!QUESTION]- When is CQRS worth the operational complexity, and when is it an anti-pattern?
@@ -227,6 +226,7 @@ Decision rule: CQRS is usually worth it when at least two are true at once: high
 > With asynchronous projection a command can succeed before the read model catches up, so the user who just acted sees stale data. The pragmatic fixes: serve that user's immediate follow-up read from the write model (read-your-own-writes for the session), show a soft "updating…" state, and monitor projection lag so you notice drift. Underneath, make projections idempotent — brokers are at-least-once, so a projector can see the same event twice — using upserts and a record of handled event IDs. Eventual consistency is a UX-and-idempotency problem, not a reason to abandon the split.
 
 ## References
+
 - [Microsoft Learn - CQRS pattern](https://learn.microsoft.com/azure/architecture/patterns/cqrs)
 - [Martin Fowler - CQRS](https://martinfowler.com/bliki/CQRS.html)
 - [Microservices.io - CQRS pattern](https://microservices.io/patterns/data/cqrs.html)

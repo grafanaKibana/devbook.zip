@@ -1,13 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Distributed Systems
-level:
-  - "2"
-priority: High
-status: Not-Started
 publish: true
+created: 2026-07-05T10:53:43.326+03:00
+modified: 2026-07-05T10:53:43.326+03:00
 ---
 
 # Horizontal Scaling
@@ -127,21 +121,23 @@ Vertical scaling is the right first move for a stateful service you can't refact
 
 > [!QUESTION]- What architectural prerequisites must be met before horizontal scaling works?
 > **Expected answer:**
+>
 > - Service must be stateless — no in-memory session or local file state.
 > - All shared state externalized (Redis for cache/session, blob storage for files, database for persistent data).
 > - A [[Load Balancing|load balancer]] must distribute traffic across instances.
 > - Without statelessness, adding instances creates inconsistency rather than capacity.
 > - Without a load balancer, all traffic still hits one node.
-> **Why this is strong:** It shows horizontal scaling is an architectural property, not just an ops action. Many engineers think "add more servers" is always safe.
+>   **Why this is strong:** It shows horizontal scaling is an architectural property, not just an ops action. Many engineers think "add more servers" is always safe.
 
 > [!QUESTION]- Why can horizontal scaling fail even with many instances?
 > **Expected answer:**
+>
 > - Database becomes the bottleneck — each instance opens its own connection pool (20 instances × 100 pool size = 2,000 connections).
 > - Stateful services silently break (in-memory session on pod 1 invisible to pod 2).
 > - Uneven load distribution from sticky sessions or hot partitions.
 > - Thundering herd during scale-out when new instances aren't ready fast enough.
 > - Connection pool or thread pool saturation before CPU becomes the bottleneck.
-> **Why this is strong:** It demonstrates awareness that scaling one tier shifts the bottleneck downstream — a classic distributed-systems trap.
+>   **Why this is strong:** It demonstrates awareness that scaling one tier shifts the bottleneck downstream — a classic distributed-systems trap.
 
 ## References
 

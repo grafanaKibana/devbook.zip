@@ -1,18 +1,13 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
-level:
-  - "4"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:27.242+03:00
+modified: 2026-07-05T15:49:36.939+03:00
 ---
 
 # Intro
 
 Exception handling in C# uses `try`, `catch`, and `finally` to handle failures and guarantee cleanup. In a production ASP.NET Core API handling 5,000 requests/second, the difference between a well-structured exception strategy and ad-hoc `catch (Exception)` blocks is the difference between actionable Application Insights traces with full stack context and a wall of swallowed errors that hide the root cause for days. In modern C#, `using` / `await using` is the preferred way to ensure `Dispose` / `DisposeAsync` runs.
+
 - `try` contains code that may throw.
 - `catch` handles exceptions you know how to handle.
 - `finally` normally runs when leaving the `try` block (success or failure) and is used for cleanup.
@@ -89,7 +84,7 @@ Don't create a custom type when a built-in one already communicates intent (`Arg
 
 ## Aggregated and Cross-Boundary Exceptions
 
-- **`AggregateException`** wraps multiple failures — it's what `Task.WhenAll` and parallel code produce. `await` rethrows only the first; to handle all, inspect `task.Exception` and use `.Flatten()` (collapse nested aggregates) and `.Handle(predicate)` (mark some inner exceptions as handled, rethrow the rest). See [[01 Programming/NET/CSharp/Concurrency and Parallelism/Tasks|Tasks]].
+- **`AggregateException`** wraps multiple failures — it's what `Task.WhenAll` and parallel code produce. `await` rethrows only the first; to handle all, inspect `task.Exception` and use `.Flatten()` (collapse nested aggregates) and `.Handle(predicate)` (mark some inner exceptions as handled, rethrow the rest). See [[Tasks]].
 - **`ExceptionDispatchInfo`** lets you capture an exception and rethrow it later — from another thread or stack frame — **without losing the original stack trace**:
 
   ```csharp
@@ -108,7 +103,7 @@ Always have a top-level net so a stray exception is logged, not silently lost or
 - ASP.NET Core: `app.UseExceptionHandler(...)` (return RFC 7807 Problem Details).
 - `AppDomain.CurrentDomain.UnhandledException` — last-chance log before the process terminates (you cannot stop it).
 - `TaskScheduler.UnobservedTaskException` — catches faults from tasks nobody awaited (see the fire-and-forget pitfall).
-- `AppDomain.CurrentDomain.FirstChanceException` — fires for *every* exception as it's thrown (before any catch); useful for diagnostics, noisy in production.
+- `AppDomain.CurrentDomain.FirstChanceException` — fires for _every_ exception as it's thrown (before any catch); useful for diagnostics, noisy in production.
 
 ## Pitfalls
 

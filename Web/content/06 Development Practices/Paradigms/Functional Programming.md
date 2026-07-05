@@ -1,18 +1,12 @@
 ---
-topic:
-  - Development Practices
-subtopic:
-  - Paradigms
-level:
-  - "3"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:48.595+03:00
+modified: 2026-07-05T10:53:48.596+03:00
 ---
 
 # Functional Programming
 
-Functional programming (FP) is a paradigm that models computation as the evaluation of pure functions over immutable data. Instead of describing *how* to mutate state step by step (imperative), you describe *what* to compute through function composition and data transformations. The payoff: code that is easier to reason about, test in isolation, and parallelize — because a pure function with the same inputs always produces the same output and never touches shared state.
+Functional programming (FP) is a paradigm that models computation as the evaluation of pure functions over immutable data. Instead of describing _how_ to mutate state step by step (imperative), you describe _what_ to compute through function composition and data transformations. The payoff: code that is easier to reason about, test in isolation, and parallelize — because a pure function with the same inputs always produces the same output and never touches shared state.
 
 C# is not a pure FP language, but it has absorbed enough FP features (LINQ, records, pattern matching, lambdas, `ImmutableList<T>`) that senior .NET engineers are expected to apply FP thinking selectively alongside OOP.
 
@@ -148,6 +142,7 @@ var count = items.Count;
 ## Questions
 
 > [!QUESTION]- What makes a function "pure" and why does purity matter for testing?
+>
 > - A pure function has no side effects and is referentially transparent: same inputs always produce the same output.
 > - No side effects means no I/O, no global state reads/writes, no exceptions from external dependencies.
 > - Testing cost: pure functions need zero mocks — just call with inputs and assert outputs.
@@ -155,6 +150,7 @@ var count = items.Count;
 > - Tradeoff: real systems need side effects (DB writes, HTTP calls). The FP discipline is to push side effects to the edges and keep the core logic pure.
 
 > [!QUESTION]- How does immutability prevent bugs in concurrent code?
+>
 > - Shared mutable state is the root cause of race conditions: two threads read-modify-write the same object.
 > - Immutable objects can be shared freely across threads — no lock needed because no mutation is possible.
 > - In C#: `record` types with `init`-only properties, `ImmutableDictionary<K,V>`, `string` (already immutable).
@@ -162,6 +158,7 @@ var count = items.Count;
 > - Tradeoff: immutability shifts cost from runtime synchronization to GC pressure. Profile before applying everywhere.
 
 > [!QUESTION]- When would you choose LINQ over a manual loop in production code?
+>
 > - LINQ: when the transformation is a pipeline of filter/map/reduce steps and readability matters more than micro-performance.
 > - Manual loop: when you need early exit with complex state, when profiling shows LINQ overhead is significant, or when you need to avoid multiple enumerations.
 > - Key risk with LINQ: deferred execution — materializing with `.ToList()` at the right point is non-obvious and a common source of double-query bugs.

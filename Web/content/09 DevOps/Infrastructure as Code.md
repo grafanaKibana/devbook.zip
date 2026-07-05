@@ -1,12 +1,7 @@
 ---
-topic:
-  - DevOps
-subtopic: []
-level:
-  - "3"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:54:07.994+03:00
+modified: 2026-07-05T15:49:32.092+03:00
 ---
 
 # Infrastructure as Code
@@ -15,7 +10,7 @@ Infrastructure as Code (IaC) is the practice of defining and provisioning infras
 
 ## Why IaC
 
-- **Reproducibility** — the definition *is* the environment; spin up an identical stack anywhere, every time.
+- **Reproducibility** — the definition _is_ the environment; spin up an identical stack anywhere, every time.
 - **Version control** — infrastructure changes go through Git: diffs, code review, blame, and rollback to a known-good state.
 - **Eliminates configuration drift** — manual console tweaks ("snowflake servers") diverge from documented state; IaC re-asserts the declared state.
 - **Disaster recovery & scale** — recreate a region from code; provision 100 identical nodes from one definition.
@@ -25,8 +20,8 @@ Infrastructure as Code (IaC) is the practice of defining and provisioning infras
 
 The central distinction in IaC tools:
 
-- **Declarative ("what")** — you describe the *desired end state* and the tool figures out the steps to reach it, creating/updating/deleting to converge. Idempotent: applying twice yields the same result. **Terraform, Bicep, CloudFormation, Pulumi, Kubernetes manifests** are declarative.
-- **Imperative ("how")** — you write the *sequence of commands* to execute (a bash script of `az`/`aws` CLI calls). Flexible but not idempotent and hard to reason about as it grows.
+- **Declarative ("what")** — you describe the _desired end state_ and the tool figures out the steps to reach it, creating/updating/deleting to converge. Idempotent: applying twice yields the same result. **Terraform, Bicep, CloudFormation, Pulumi, Kubernetes manifests** are declarative.
+- **Imperative ("how")** — you write the _sequence of commands_ to execute (a bash script of `az`/`aws` CLI calls). Flexible but not idempotent and hard to reason about as it grows.
 
 Declarative is the modern default because **idempotency** and a computed diff (plan) make changes safe and predictable.
 
@@ -71,15 +66,15 @@ State is the crux of Terraform-style tools (Bicep/ARM and CloudFormation keep st
 | **Ansible** | Config mgmt | YAML | More config management than provisioning; often paired with the above. |
 
 > [!NOTE]
-> **Provisioning vs configuration management.** Terraform/Bicep *provision* infrastructure (create the VM, network, DB). Tools like Ansible/Chef/Puppet *configure* what's inside (install packages, set files). They're complementary — provision with one, configure with the other — though containers + Kubernetes increasingly fold configuration into immutable images.
+> **Provisioning vs configuration management.** Terraform/Bicep _provision_ infrastructure (create the VM, network, DB). Tools like Ansible/Chef/Puppet _configure_ what's inside (install packages, set files). They're complementary — provision with one, configure with the other — though containers + Kubernetes increasingly fold configuration into immutable images.
 
 ## Pitfalls
 
-- **Committing state or secrets** — the state file can contain plaintext secrets and full resource maps; keep it in a locked remote backend, never in Git. Don't hard-code secrets in IaC — reference a [[07 Security/Secrets Management|secret store]].
-- **Manual console changes ("ClickOps")** — editing resources by hand creates drift the code doesn't know about; a later apply may revert or conflict. Make *all* changes through code.
+- **Committing state or secrets** — the state file can contain plaintext secrets and full resource maps; keep it in a locked remote backend, never in Git. Don't hard-code secrets in IaC — reference a [[Secrets Management|secret store]].
+- **Manual console changes ("ClickOps")** — editing resources by hand creates drift the code doesn't know about; a later apply may revert or conflict. Make _all_ changes through code.
 - **No state locking** — two engineers applying at once corrupt shared state. Use a backend with locking.
 - **Giant monolithic stacks** — one state file for everything makes every change slow and risky. Split by lifecycle/blast-radius (network vs app vs data) and compose with modules.
-- **No plan review** — applying without reading the plan can silently destroy/recreate a database. Treat the plan as a mandatory review gate, ideally in [[09 DevOps/CI CD tools|CI]].
+- **No plan review** — applying without reading the plan can silently destroy/recreate a database. Treat the plan as a mandatory review gate, ideally in [[CI CD tools|CI]].
 - **Hand-rolled credentials in CI** — authenticate the pipeline to the cloud with **OIDC/workload identity**, not a long-lived stored key.
 
 ## Tradeoffs
@@ -97,13 +92,13 @@ State is the crux of Terraform-style tools (Bicep/ARM and CloudFormation keep st
 ## Questions
 
 > [!QUESTION]- What is the difference between declarative and imperative IaC?
-> **Declarative** IaC describes the *desired end state* (e.g. "an S3 bucket named X exists") and the tool computes and executes whatever create/update/delete actions converge reality to that state — it's idempotent, so re-applying is safe. **Imperative** IaC specifies the *exact sequence of commands* to run (a CLI script); it's flexible but not idempotent and gets brittle as it grows. Modern tools (Terraform, Bicep, CloudFormation) are declarative precisely because the computed diff (plan) and idempotency make changes predictable and reviewable.
+> **Declarative** IaC describes the _desired end state_ (e.g. "an S3 bucket named X exists") and the tool computes and executes whatever create/update/delete actions converge reality to that state — it's idempotent, so re-applying is safe. **Imperative** IaC specifies the _exact sequence of commands_ to run (a CLI script); it's flexible but not idempotent and gets brittle as it grows. Modern tools (Terraform, Bicep, CloudFormation) are declarative precisely because the computed diff (plan) and idempotency make changes predictable and reviewable.
 
 > [!QUESTION]- Why is the Terraform state file important, and how should it be managed?
 > The state file is Terraform's record of which real cloud resources correspond to your code; it's how `plan` computes a diff and how `apply` knows what already exists. If it's lost or corrupted, Terraform can't map config to reality and may try to recreate or orphan resources. Manage it in a **remote, locked backend** (S3 + DynamoDB, Terraform Cloud, Azure Storage) so the team shares one source of truth and concurrent applies can't corrupt it — and never commit it to Git, because it can contain secrets and full resource details.
 
 > [!QUESTION]- What is configuration drift and how does IaC address it?
-> Drift is when the real infrastructure diverges from the declared definition — usually because someone changed a resource manually in the console. It's dangerous because the documented state no longer matches reality, so deployments behave unpredictably. IaC addresses it by making the code the single source of truth: `plan` surfaces the difference between declared and actual state, and `apply` re-converges the infrastructure back to the definition. The discipline that makes this work is forbidding manual changes — *all* changes go through the code.
+> Drift is when the real infrastructure diverges from the declared definition — usually because someone changed a resource manually in the console. It's dangerous because the documented state no longer matches reality, so deployments behave unpredictably. IaC addresses it by making the code the single source of truth: `plan` surfaces the difference between declared and actual state, and `apply` re-converges the infrastructure back to the definition. The discipline that makes this work is forbidding manual changes — _all_ changes go through the code.
 
 ## References
 

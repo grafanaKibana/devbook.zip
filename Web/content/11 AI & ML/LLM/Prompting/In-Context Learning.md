@@ -1,13 +1,7 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
-level:
-  - "3"
-priority: Medium
-status: Done
 publish: true
+created: 2026-07-05T10:54:06.770+03:00
+modified: 2026-07-05T15:49:35.604+03:00
 ---
 
 # Intro
@@ -19,6 +13,7 @@ In-context learning is the ability of an LLM to adapt to a task from the prompt 
 Zero-shot prompting asks the model to perform a task with no demonstrations, relying on instruction quality and prior training.
 
 When it works well:
+
 - classification with clear labels
 - extraction with explicit fields
 - transformations with deterministic rules
@@ -64,6 +59,7 @@ Possible output:
 Few-shot prompting provides multiple demonstrations so the model can copy task structure, label space, and output format. In practice, a small number of examples often improves stability on noisier inputs compared with one-shot.
 
 Why it works:
+
 - examples define the allowed labels and schema
 - examples teach output style more reliably than prose instructions alone
 - examples give local task context that may override vague priors
@@ -107,7 +103,7 @@ Possible output:
 - long demonstration blocks consume context window and can reduce room for actual user input
 - performance can be brittle across model versions, prompt order, and minor formatting changes
 
-When this pattern is not enough for reasoning-heavy tasks, continue with [[11 AI & ML/LLM/Prompting/Reasoning Techniques|Reasoning Techniques]].
+When this pattern is not enough for reasoning-heavy tasks, continue with [[Reasoning Techniques]].
 
 ## Pitfalls
 
@@ -145,26 +141,29 @@ When this pattern is not enough for reasoning-heavy tasks, continue with [[11 AI
 
 > [!QUESTION]- When should you start with zero-shot versus few-shot?
 > Expected answer:
+>
 > - Start zero-shot for simple, well-specified tasks (basic classification, extraction, rewrite).
 > - Move to one-shot/few-shot when output format is inconsistent or class boundaries are ambiguous.
 > - Use one-shot first for lightweight steering, then increase shots only if failure patterns persist.
-> Why this matters: it minimizes prompt complexity and token cost while improving reliability only where needed.
+>   Why this matters: it minimizes prompt complexity and token cost while improving reliability only where needed.
 
 > [!QUESTION]- What makes a good few-shot example set?
 > Expected answer:
+>
 > - Consistent input and output structure.
 > - Coverage of real label space and edge cases.
 > - Examples representative of production distribution, not synthetic easy cases.
 > - Minimal but sufficient count (often 1-5) to show mapping clearly.
-> Why this matters: demonstration quality usually matters more than raw quantity.
+>   Why this matters: demonstration quality usually matters more than raw quantity.
 
 > [!QUESTION]- What are the main failure modes of few-shot prompting?
 > Expected answer:
+>
 > - Breakdown on tasks requiring multi-step reasoning.
 > - Sensitivity to example order and formatting drift.
 > - Context-window pressure from too many demonstrations.
 > - Poor transfer when task needs external facts not present in model knowledge.
-> Why this matters: these limits tell you when to pivot to other techniques instead of adding more shots.
+>   Why this matters: these limits tell you when to pivot to other techniques instead of adding more shots.
 
 ## References
 

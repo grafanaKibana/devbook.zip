@@ -1,13 +1,7 @@
 ---
-topic:
-  - Networks
-subtopic:
-  - Architecture & Ops
-level:
-  - "1"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:36.453+03:00
+modified: 2026-07-05T10:53:37.360+03:00
 ---
 
 # Peer-to-Peer (P2P)
@@ -32,10 +26,10 @@ Each peer knows a subset of other peers (its "routing table"). Lookups route thr
 
 "Pure P2P" is one end of a spectrum, not the only option:
 
-- **Structured vs unstructured** — *structured* networks place data deterministically by key (a DHT like Kademlia → O(log N) lookups), while *unstructured* networks (early Gnutella) discover content by **flooding** queries to neighbours — simple but O(N) and bandwidth-heavy.
+- **Structured vs unstructured** — _structured_ networks place data deterministically by key (a DHT like Kademlia → O(log N) lookups), while _unstructured_ networks (early Gnutella) discover content by **flooding** queries to neighbours — simple but O(N) and bandwidth-heavy.
 - **Pure P2P** — every peer is equal (classic BitTorrent swarm, blockchain). Maximum decentralization, hardest coordination.
 - **Hybrid / super-peer** — a few well-resourced peers take on coordination roles: BitTorrent **trackers** and original **Skype supernodes** helped peers find each other while data still flowed peer-to-peer. This blends P2P's bandwidth scaling with a central(ish) discovery point.
-- **Signaling-assisted** — WebRTC is peer-to-peer for *media* but needs a central **signaling server** just to exchange connection info (offer/answer) before the direct link forms.
+- **Signaling-assisted** — WebRTC is peer-to-peer for _media_ but needs a central **signaling server** just to exchange connection info (offer/answer) before the direct link forms.
 
 The practical takeaway: most "P2P" systems are hybrids — they use a small central or super-peer component for bootstrap/discovery, then move the heavy data transfer peer-to-peer.
 

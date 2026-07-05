@@ -1,20 +1,14 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
-level:
-  - "2"
-priority: High
-status: Done
 publish: true
+created: 2026-07-05T10:54:06.912+03:00
+modified: 2026-07-05T17:36:34.911+03:00
 ---
 
 # Intro
 
-A vector database stores [[11 AI & ML/LLM/Embeddings|embeddings]] alongside their metadata and serves nearest-neighbor search over them at scale. It is the infrastructure under dense [[11 AI & ML/LLM/RAG/Retrieval|retrieval]]: the [[11 AI & ML/LLM/RAG/Chunking|chunks]] you embed have to live somewhere that can find the closest vectors to a query in milliseconds, even across millions or billions of them.
+A vector database stores [[Embeddings]] alongside their metadata and serves nearest-neighbor search over them at scale. It is the infrastructure under dense [[Retrieval]]: the [[Chunking|chunks]] you embed have to live somewhere that can find the closest vectors to a query in milliseconds, even across millions or billions of them.
 
-The central trick is **approximate** nearest-neighbor (ANN) search. Exact search compares the query against every stored vector — correct but O(N) per query and far too slow at scale. ANN indexes trade a small, measurable amount of recall for orders-of-magnitude speed, returning *most* of the true nearest neighbors in sub-millisecond time. Every engineering decision in a vector database is a point on that recall–latency–memory surface, and the recall you give up is silent unless you measure it (see [[11 AI & ML/LLM/RAG/Evaluation/Component-Level Evaluation|Component-Level Evaluation]] on ANN recall).
+The central trick is **approximate** nearest-neighbor (ANN) search. Exact search compares the query against every stored vector — correct but O(N) per query and far too slow at scale. ANN indexes trade a small, measurable amount of recall for orders-of-magnitude speed, returning _most_ of the true nearest neighbors in sub-millisecond time. Every engineering decision in a vector database is a point on that recall–latency–memory surface, and the recall you give up is silent unless you measure it (see [[Component-Level Evaluation]] on ANN recall).
 
 ```mermaid
 flowchart LR
@@ -38,24 +32,24 @@ The index is the core choice; it sets the recall, latency, memory, and build-tim
 - **PQ (Product Quantization)** — compress each vector into a compact code from a learned codebook, shrinking memory dramatically. Usually combined as **IVF-PQ** for very large corpora where storing full vectors is infeasible, at the cost of additional recall loss from the lossy compression.
 - **Disk-based (e.g. DiskANN)** — keep the graph on SSD instead of RAM to serve billion-scale collections where an in-memory index would be prohibitively expensive, trading some latency for far lower memory cost.
 
-[[11 AI & ML/LLM/Embeddings|Distance metric]] must match how the embedding model was trained — cosine for most text embedding models, dot product when relevance is encoded in magnitude, Euclidean rarely. An index built for one metric returns wrong neighbors if queried with another.
+[[Embeddings|Distance metric]] must match how the embedding model was trained — cosine for most text embedding models, dot product when relevance is encoded in magnitude, Euclidean rarely. An index built for one metric returns wrong neighbors if queried with another.
 
 ## Metadata Filtering
 
-Real queries are rarely pure similarity — they are "similar *and* authorized, *and* in this date range, *and* this tenant." How filtering combines with ANN matters:
+Real queries are rarely pure similarity — they are "similar _and_ authorized, _and_ in this date range, _and_ this tenant." How filtering combines with ANN matters:
 
-- **Pre-filtering** narrows the candidate set by metadata *before* the vector search. Required for tenant-safe and ACL-scoped retrieval — semantic similarity does not enforce authorization, so the filter must constrain *which* vectors are even eligible.
+- **Pre-filtering** narrows the candidate set by metadata _before_ the vector search. Required for tenant-safe and ACL-scoped retrieval — semantic similarity does not enforce authorization, so the filter must constrain _which_ vectors are even eligible.
 - **Post-filtering** runs ANN first, then drops results failing the filter. Simpler, but dangerous under high selectivity: if most top-k results are filtered out, the effective result set shrinks unpredictably and recall collapses.
 - **Filtered indexes** — some engines maintain graph connectivity across filter boundaries so recall holds even under narrow filters, at the cost of extra index structure.
 
-See [[11 AI & ML/LLM/RAG/Retrieval|Retrieval]] for how pre/post-filtering interacts with the rest of the retrieval pipeline.
+See [[Retrieval]] for how pre/post-filtering interacts with the rest of the retrieval pipeline.
 
 ## Operations
 
 A vector database is a stateful service, not a static index:
 
 - **Upserts and deletes** — many ANN indexes (HNSW especially) degrade with heavy delete/update churn; deletes are often tombstones that leave the graph fragmented. Plan periodic rebuilds.
-- **Index rebuilds and zero-downtime swaps** — re-embedding (a new embedding model) or re-chunking invalidates the index. Build the new collection in parallel and switch via a **collection alias** for instant, reversible cutover (the shadow-index pattern in [[11 AI & ML/LLM/RAG/Evaluation/Component-Level Evaluation|Component-Level Evaluation]]).
+- **Index rebuilds and zero-downtime swaps** — re-embedding (a new embedding model) or re-chunking invalidates the index. Build the new collection in parallel and switch via a **collection alias** for instant, reversible cutover (the shadow-index pattern in [[Component-Level Evaluation]]).
 - **Sharding and replication** — shard for capacity beyond one node, replicate for throughput and availability; watch for hot shards when data clusters semantically.
 - **Memory budgeting** — for in-memory indexes, plan roughly `N × dimensions × 4 bytes` for the raw vectors plus graph overhead; this is often the dominant cost and the reason to consider PQ or disk-based indexes at scale.
 
@@ -68,7 +62,7 @@ A vector database is a stateful service, not a static index:
 | Add-on to existing store | pgvector (Postgres), OpenSearch/Elasticsearch kNN | Already run the database; want vectors beside relational/lexical data and one fewer system |
 | Library, not a service | FAISS, hnswlib | Embedding search inside your own app; you own persistence, scaling, and serving |
 
-A practical decision: if you already run Postgres and the corpus is modest, **pgvector** keeps vectors next to your relational data and your existing [[11 AI & ML/LLM/RAG/Retrieval|keyword search]], avoiding a second system. Reach for a dedicated vector database when scale, filtered-search recall, or specialized index types (IVF-PQ, DiskANN) exceed what an add-on can do.
+A practical decision: if you already run Postgres and the corpus is modest, **pgvector** keeps vectors next to your relational data and your existing [[Retrieval|keyword search]], avoiding a second system. Reach for a dedicated vector database when scale, filtered-search recall, or specialized index types (IVF-PQ, DiskANN) exceed what an add-on can do.
 
 ## Pitfalls
 
@@ -78,7 +72,7 @@ A practical decision: if you already run Postgres and the corpus is modest, **pg
 
 **Why it happens**: a denser graph needs more exploration to find true neighbors, but `ef_search` stays constant, so the search covers proportionally less of it. Latency is stable because the search visits the same number of candidates.
 
-**How to avoid it**: measure ANN recall against brute-force ground truth on a schedule, and re-tune `ef_search` (or `nprobe`) as the corpus grows. Infrastructure dashboards will not catch this — only an explicit recall check will (see [[11 AI & ML/LLM/RAG/Retrieval|Retrieval]] on silent recall degradation).
+**How to avoid it**: measure ANN recall against brute-force ground truth on a schedule, and re-tune `ef_search` (or `nprobe`) as the corpus grows. Infrastructure dashboards will not catch this — only an explicit recall check will (see [[Retrieval]] on silent recall degradation).
 
 ### Filtered-Search Recall Collapse
 
@@ -94,7 +88,7 @@ A practical decision: if you already run Postgres and the corpus is modest, **pg
 
 **Why it happens**: HNSW keeps full vectors plus the graph in RAM; cost grows with `N × dimensions` plus graph overhead, and high dimensionality multiplies it.
 
-**How to avoid it**: budget memory up front, reduce dimensionality where the embedding model supports it (see [[11 AI & ML/LLM/Embeddings|Matryoshka truncation]]), and move to IVF-PQ or a disk-based index before the corpus outgrows RAM.
+**How to avoid it**: budget memory up front, reduce dimensionality where the embedding model supports it (see [[Embeddings|Matryoshka truncation]]), and move to IVF-PQ or a disk-based index before the corpus outgrows RAM.
 
 ### Stale Index After Re-embedding
 
@@ -119,18 +113,21 @@ A practical decision: if you already run Postgres and the corpus is modest, **pg
 ## Questions
 
 > [!QUESTION]- Why do vector databases use approximate nearest-neighbor search instead of exact search?
+>
 > - Exact (brute-force) search compares the query against every stored vector — correct, but O(N) per query and far too slow once there are millions of vectors
 > - ANN indexes (HNSW, IVF, IVF-PQ) trade a small, measurable amount of recall for orders-of-magnitude lower latency, returning most of the true nearest neighbors in sub-millisecond time
 > - The recall given up is silent: there is no error, and latency stays stable, so it only shows up as slightly worse retrieved context unless you measure ANN recall against brute-force ground truth
 > - The right operating point is chosen by tuning index parameters (`ef_search`, `nprobe`) on the recall–latency curve for your corpus and SLA
 
 > [!QUESTION]- When should you use pgvector or an existing search engine instead of a dedicated vector database?
+>
 > - When you already run the database (Postgres, OpenSearch) and the corpus is modest: keeping vectors beside your relational or lexical data avoids operating a second system and simplifies hybrid search
 > - pgvector gives you transactional consistency and joins with existing data, which a standalone vector DB cannot
 > - Reach for a dedicated vector database when scale, filtered-search recall under narrow filters, or specialized indexes (IVF-PQ, DiskANN) exceed what the add-on supports
 > - The tradeoff is operational simplicity (one system) versus peak scale and index flexibility (dedicated engine) — start with the add-on and migrate only when a real limit is hit
 
 > [!QUESTION]- Why does HNSW recall degrade as the corpus grows, and how do you catch it?
+>
 > - HNSW finds neighbors by walking a proximity graph, exploring a number of candidates set by `ef_search`; as the graph grows denser, a fixed `ef_search` covers proportionally less of it and misses more true neighbors
 > - Latency stays constant (the search visits the same number of candidates) and no error is raised, so infrastructure dashboards show everything healthy while retrieval quality silently drops
 > - Detection requires an explicit Recall@k check against brute-force ground truth on a scheduled query set

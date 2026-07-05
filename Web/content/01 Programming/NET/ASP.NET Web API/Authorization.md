@@ -1,18 +1,12 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
-level:
-  - "1"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:26.796+03:00
+modified: 2026-07-05T17:36:34.273+03:00
 ---
 
 # Authorization in ASP.NET Core
 
-Authorization determines *what* an authenticated user is allowed to do. It runs after authentication (which establishes *who* the user is) and evaluates whether the current `ClaimsPrincipal` has permission to access a resource or perform an action. ASP.NET Core supports three authorization models: **role-based**, **claims-based**, and **policy-based** (the most flexible). Resource-based authorization handles cases where the decision depends on the specific resource being accessed.
+Authorization determines _what_ an authenticated user is allowed to do. It runs after authentication (which establishes _who_ the user is) and evaluates whether the current `ClaimsPrincipal` has permission to access a resource or perform an action. ASP.NET Core supports three authorization models: **role-based**, **claims-based**, and **policy-based** (the most flexible). Resource-based authorization handles cases where the decision depends on the specific resource being accessed.
 
 ## Role-Based Authorization
 
@@ -84,7 +78,7 @@ builder.Services.AddSingleton<IAuthorizationHandler, MinimumAgeHandler>();
 
 ## Resource-Based Authorization
 
-When the authorization decision depends on the specific resource (e.g., "can this user edit *this* document?"), inject `IAuthorizationService` and evaluate imperatively:
+When the authorization decision depends on the specific resource (e.g., "can this user edit _this_ document?"), inject `IAuthorizationService` and evaluate imperatively:
 
 ```csharp
 public sealed class DocumentsController(IAuthorizationService authz, IDocumentRepository docs)
@@ -110,7 +104,7 @@ The `"CanEditDocument"` policy handler receives the `document` as the resource a
 
 ## Defaults, Fallback, and Advanced Hooks
 
-- **Secure-by-default with `FallbackPolicy`** — set a fallback that applies to any endpoint *without* an explicit `[Authorize]`/`[AllowAnonymous]`, so forgetting an attribute fails closed:
+- **Secure-by-default with `FallbackPolicy`** — set a fallback that applies to any endpoint _without_ an explicit `[Authorize]`/`[AllowAnonymous]`, so forgetting an attribute fails closed:
 
   ```csharp
   builder.Services.AddAuthorization(options =>
@@ -121,7 +115,7 @@ The `"CanEditDocument"` policy handler receives the `document` as the resource a
   ```
 
   `DefaultPolicy` (separately) is what a bare `[Authorize]` with no policy name evaluates.
-- **OR within a requirement = multiple handlers** — the note above notes that stacked `[Authorize]` attributes are **AND**. To express **OR**, register *several handlers for the same requirement*; if **any** handler calls `context.Succeed(requirement)`, it passes. (One handler can also internally check several alternative conditions.)
+- **OR within a requirement = multiple handlers** — the note above notes that stacked `[Authorize]` attributes are **AND**. To express **OR**, register _several handlers for the same requirement_; if **any** handler calls `context.Succeed(requirement)`, it passes. (One handler can also internally check several alternative conditions.)
 - **`RequireAssertion`** — for one-off logic, skip the requirement/handler pair: `policy.RequireAssertion(ctx => ctx.User.HasClaim(...))`.
 - **`IAuthorizationMiddlewareResultHandler`** — customize what a 403/forbidden actually returns (e.g. a Problem Details body) instead of the default empty response.
 - **Minimal APIs** — apply policies fluently: `app.MapGet("/admin", ...).RequireAuthorization("CanApproveOrders")`.
@@ -167,4 +161,4 @@ The `"CanEditDocument"` policy handler receives the `document` as the resource a
 - [Policy-based authorization (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/policies) — detailed guide to custom requirements, handlers, and policy registration.
 - [Resource-based authorization (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/resourcebased) — how to use `IAuthorizationService` for per-resource authorization decisions.
 - [[01 Programming/NET/ASP.NET Web API/Authentication|Authentication]] — the prerequisite: how ASP.NET Core establishes the `ClaimsPrincipal` before authorization runs.
-- [[07 Security/Authentication/Resource-based Auth|Resource-based Auth]] — the general pattern for resource-level access control, independent of ASP.NET Core.
+- [[Resource-based Auth]] — the general pattern for resource-level access control, independent of ASP.NET Core.

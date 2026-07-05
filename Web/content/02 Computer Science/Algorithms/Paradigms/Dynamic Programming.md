@@ -1,13 +1,7 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
-level:
-  - "4"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:25.821+03:00
+modified: 2026-07-05T15:49:37.215+03:00
 ---
 
 # Intro
@@ -63,10 +57,10 @@ public static int Knapsack(int[] w, int[] v, int capacity)
 
 ## Pitfalls
 
-- **No optimal substructure ⇒ DP is wrong** — DP assumes a globally optimal answer is composed of optimal sub-answers. Problems where a locally suboptimal choice can lead to a better whole (e.g. longest *simple* path in a general graph) are **not** DP-solvable this way; don't force it.
-- **Wrong iteration order** — bottom-up only works if every cell's dependencies are filled first. The knapsack capacity loop runs *downward* precisely so each item is used at most once; reversing it silently turns 0/1 knapsack into unbounded knapsack.
+- **No optimal substructure ⇒ DP is wrong** — DP assumes a globally optimal answer is composed of optimal sub-answers. Problems where a locally suboptimal choice can lead to a better whole (e.g. longest _simple_ path in a general graph) are **not** DP-solvable this way; don't force it.
+- **Wrong iteration order** — bottom-up only works if every cell's dependencies are filled first. The knapsack capacity loop runs _downward_ precisely so each item is used at most once; reversing it silently turns 0/1 knapsack into unbounded knapsack.
 - **State that's too coarse or too fine** — miss a dimension and different subproblems collide (wrong answers); add an unnecessary dimension and the table explodes (TLE/MLE). Defining the minimal correct state is the real skill.
-- **Memoisation key/recursion-depth issues** — deep top-down DP can `StackOverflow` on large inputs; convert to bottom-up. And the memo key must capture *all* arguments that affect the result, or you'll cache and return stale answers.
+- **Memoisation key/recursion-depth issues** — deep top-down DP can `StackOverflow` on large inputs; convert to bottom-up. And the memo key must capture _all_ arguments that affect the result, or you'll cache and return stale answers.
 
 ## Tradeoffs
 
@@ -77,7 +71,7 @@ public static int Knapsack(int[] w, int[] v, int capacity)
 | Computes | Only states actually reached (lazy) | Often all states (even unused ones) |
 | Space optimisation | Harder | Easy — drop old rows |
 
-**Decision rule**: prototype with top-down memoisation (fastest to get correct from the recurrence); convert to bottom-up when you hit stack limits or want to shrink memory. Before reaching for DP, confirm optimal substructure — otherwise consider [[02 Computer Science/Algorithms/Paradigms/Greedy Algorithms|greedy]] (if a local rule provably suffices) or [[02 Computer Science/Algorithms/Paradigms/Backtracking|backtracking]] (if you must search all configurations).
+**Decision rule**: prototype with top-down memoisation (fastest to get correct from the recurrence); convert to bottom-up when you hit stack limits or want to shrink memory. Before reaching for DP, confirm optimal substructure — otherwise consider [[Greedy Algorithms|greedy]] (if a local rule provably suffices) or [[Backtracking]] (if you must search all configurations).
 
 ## Questions
 
@@ -88,7 +82,7 @@ public static int Knapsack(int[] w, int[] v, int capacity)
 > Both store subproblem results to avoid recomputation. **Memoisation** is top-down: recurse naturally and cache on the way, computing only the states you actually need. **Tabulation** is bottom-up: iteratively fill a table from base cases in dependency order, with no recursion and easier space optimisation. They produce the same answers; the choice is about overhead, stack depth, and memory.
 
 > [!QUESTION]- How is DP related to greedy and divide-and-conquer?
-> All three break a problem into subproblems. **Divide-and-conquer** subproblems are *independent* (no overlap) so no caching helps. **DP** subproblems *overlap*, so you cache. **Greedy** is a special case where a single local choice is provably optimal, so you don't even explore alternatives — when greedy works it's faster than DP, but it works far less often.
+> All three break a problem into subproblems. **Divide-and-conquer** subproblems are _independent_ (no overlap) so no caching helps. **DP** subproblems _overlap_, so you cache. **Greedy** is a special case where a single local choice is provably optimal, so you don't even explore alternatives — when greedy works it's faster than DP, but it works far less often.
 
 ## References
 

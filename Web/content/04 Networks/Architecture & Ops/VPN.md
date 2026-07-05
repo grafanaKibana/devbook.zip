@@ -1,13 +1,7 @@
 ---
-topic:
-  - Networks
-subtopic:
-  - Architecture & Ops
-level:
-  - "3"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:36.444+03:00
+modified: 2026-07-05T10:53:37.360+03:00
 ---
 
 # Intro
@@ -44,14 +38,15 @@ Instead of routing everything through a central gateway (hub-and-spoke), every d
 
 ## Beyond the VPN: Zero Trust (ZTNA)
 
-The traditional VPN model is **"authenticate once, get the whole network"** — a flat trust boundary where a compromised laptop can reach everything. **Zero Trust Network Access (ZTNA)** replaces it with *per-application*, continuously-verified access: every request is authenticated and authorized against identity + device posture, and a user reaches only the specific apps they're entitled to, never the underlying network. The mantra is "never trust, always verify." Many "modern VPN" products (Tailscale, Cloudflare Access, Zscaler) are really ZTNA overlays. This matters because the classic VPN's all-or-nothing network access is one of the biggest **lateral-movement** risks in breaches.
+The traditional VPN model is **"authenticate once, get the whole network"** — a flat trust boundary where a compromised laptop can reach everything. **Zero Trust Network Access (ZTNA)** replaces it with _per-application_, continuously-verified access: every request is authenticated and authorized against identity + device posture, and a user reaches only the specific apps they're entitled to, never the underlying network. The mantra is "never trust, always verify." Many "modern VPN" products (Tailscale, Cloudflare Access, Zscaler) are really ZTNA overlays. This matters because the classic VPN's all-or-nothing network access is one of the biggest **lateral-movement** risks in breaches.
 
 ## Protocols
 
 **IPsec**
 The traditional standard. Operates at the network layer (Layer 3). Supports two modes:
-- *Transport mode*: encrypts only the payload, used for host-to-host.
-- *Tunnel mode*: encrypts the entire packet, used for site-to-site and client VPN.
+
+- _Transport mode_: encrypts only the payload, used for host-to-host.
+- _Tunnel mode_: encrypts the entire packet, used for site-to-site and client VPN.
 
 IPsec is complex to configure (IKE negotiation, SA management) but is widely supported by hardware appliances and cloud providers (AWS VPN, Azure VPN Gateway).
 

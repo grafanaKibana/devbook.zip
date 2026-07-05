@@ -1,14 +1,7 @@
 ---
-topic:
-  - Networks
-subtopic:
-  - Protocols
-level:
-  - "3"
-priority: High
-status: Done
-
 publish: true
+created: 2026-07-05T10:53:36.700+03:00
+modified: 2026-07-05T10:53:37.367+03:00
 ---
 
 # Intro

@@ -1,13 +1,7 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
-level:
-  - "4"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:23.331+03:00
+modified: 2026-07-05T10:53:37.205+03:00
 ---
 
 # Intro
@@ -19,7 +13,7 @@ A trie (prefix tree, pronounced "try") stores a set of strings as a tree of char
 Each node holds links to child nodes (one per possible next character) and a flag marking whether a word ends there. Shared prefixes share nodes, so `car`, `card`, and `care` reuse the `c→a→r` path.
 
 - **Insert**: walk/create one node per character, set `IsEnd` on the last.
-- **Search (exact)**: walk the characters; the word exists only if every step exists *and* the final node has `IsEnd`.
+- **Search (exact)**: walk the characters; the word exists only if every step exists _and_ the final node has `IsEnd`.
 - **StartsWith (prefix)**: same walk, but success is just reaching the last character — no `IsEnd` check.
 
 ```mermaid

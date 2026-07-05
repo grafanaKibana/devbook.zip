@@ -1,16 +1,9 @@
 ---
-icon: cloud
-color: "#6366f1"
-topic:
-  - Cloud
-subtopic: []
+publish: true
+created: 2026-07-05T10:54:10.844+03:00
+modified: 2026-07-05T10:54:10.845+03:00
 tags:
   - FolderNote
-publish: true
-status: Creation
-priority: High
-level:
-  - "2"
 ---
 
 # Intro

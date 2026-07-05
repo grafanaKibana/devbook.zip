@@ -1,13 +1,7 @@
 ---
-topic:
-  - Development Practices
-subtopic:
-  - Paradigms
-level:
-  - "4"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:48.584+03:00
+modified: 2026-07-05T15:49:32.598+03:00
 ---
 
 # Unit Testing
@@ -78,10 +72,10 @@ emailSender.Verify(e => e.Send("c1", It.IsAny<string>()), Times.Once);
 
 How much you mock isn't just taste — it's two named philosophies, and knowing them resolves most "should I mock this?" arguments:
 
-- **Classicist / Detroit / "solitary-ish but sociable"** — mock only at true system boundaries (DB, HTTP, clock); let a unit use its *real* collaborators (real value objects, real domain services). Tests assert on **observable state/results**. Tests survive refactors because they don't know internal call structure, but a failure can implicate several classes.
+- **Classicist / Detroit / "solitary-ish but sociable"** — mock only at true system boundaries (DB, HTTP, clock); let a unit use its _real_ collaborators (real value objects, real domain services). Tests assert on **observable state/results**. Tests survive refactors because they don't know internal call structure, but a failure can implicate several classes.
 - **Mockist / London / "outside-in"** — isolate the unit by mocking **all** collaborators and assert on the **interactions** between them. Tests pinpoint the exact class and drive interface design top-down, but they couple to implementation and break when you reshuffle internals (the over-mocking brittleness above).
 
-Most pragmatic suites lean **classicist** — mock the boundary, use the real thing inside — precisely to avoid that brittleness, reaching for interaction verification only for genuine side effects. The same split shows up in [[06 Development Practices/Paradigms/Test-Driven Development|TDD]] as inside-out (Detroit) vs outside-in (London).
+Most pragmatic suites lean **classicist** — mock the boundary, use the real thing inside — precisely to avoid that brittleness, reaching for interaction verification only for genuine side effects. The same split shows up in [[Test-Driven Development|TDD]] as inside-out (Detroit) vs outside-in (London).
 
 ## xUnit in .NET
 
@@ -148,6 +142,7 @@ public void DiscountCalculation(int orderCount, decimal price, decimal expected)
 ## Questions
 
 > [!QUESTION]- What is the difference between a stub and a mock?
+>
 > - A stub provides canned return values so the test can proceed — it answers questions ("what orders does customer X have?").
 > - A mock verifies interactions — it records calls and lets you assert that a specific method was called with specific arguments.
 > - Practical rule: stub data sources (repositories, config); mock side-effect sinks (email, SMS, audit log, event bus).
@@ -155,12 +150,14 @@ public void DiscountCalculation(int orderCount, decimal price, decimal expected)
 > - Tradeoff: mocks couple tests to implementation details. Prefer fakes (working in-memory implementations) when the dependency has non-trivial behavior.
 
 > [!QUESTION]- How do you test code that depends on the current time?
+>
 > - Inject `TimeProvider` (built into .NET 8+) instead of calling `DateTime.UtcNow` directly.
 > - In tests, use `FakeTimeProvider` (from `Microsoft.Extensions.TimeProvider.Testing`) to control "now".
 > - This makes time-dependent logic (expiry checks, scheduling, TTL calculations) fully deterministic in tests.
 > - Tradeoff: requires changing existing code that calls `DateTime.UtcNow` directly — a one-time refactor cost that pays off in every time-sensitive test.
 
 > [!QUESTION]- When should you NOT write unit tests?
+>
 > - Trivial property getters/setters with no logic — the test adds noise without catching real bugs.
 > - UI rendering logic — visual correctness is better verified with snapshot tests or manual QA.
 > - Infrastructure wiring (DI registration, config parsing) — test this with integration tests that boot the real container.

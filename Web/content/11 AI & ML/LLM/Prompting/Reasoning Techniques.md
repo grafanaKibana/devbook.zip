@@ -1,13 +1,7 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
-level:
-  - "3"
-priority: Medium
-status: Done
 publish: true
+created: 2026-07-05T10:54:06.788+03:00
+modified: 2026-07-05T10:54:06.789+03:00
 ---
 
 # Intro
@@ -95,27 +89,30 @@ Decision rule:
 
 > [!QUESTION]- When does Chain-of-Thought usually help, and when can it hurt?
 > **Expected answer:**
+>
 > - Helps on multi-step arithmetic, logic, and planning where intermediate state tracking matters.
 > - Helps when tasks are decomposable into small correct sub-steps.
 > - Can hurt on simple factual queries by adding unnecessary tokens and extra room for drift.
 > - Can also hurt if the first bad assumption propagates through a single chain.
-> **Why:** this tests whether the candidate understands mechanism-level fit, not just a slogan like "CoT is always better".
+>   **Why:** this tests whether the candidate understands mechanism-level fit, not just a slogan like "CoT is always better".
 
 > [!QUESTION]- Explain the cost vs. accuracy tradeoff in self-consistency.
 > **Expected answer:**
+>
 > - Accuracy often improves because multiple sampled chains reduce single-path bias.
 > - Cost and latency increase roughly with sample count N.
 > - Diminishing returns appear after a small N; tune N against SLA and budget.
 > - Works best when there is a clear way to compare or vote on final answers.
-> **Why:** this checks practical engineering judgment under production constraints.
+>   **Why:** this checks practical engineering judgment under production constraints.
 
 > [!QUESTION]- When is Tree of Thoughts justified over CoT or self-consistency?
 > **Expected answer:**
+>
 > - Use ToT when success requires explicit exploration of alternatives and backtracking.
 > - Typical cases: planning, combinatorial puzzles, multi-constraint decision paths.
 > - Not justified for easy tasks where CoT already reaches target quality.
 > - Choose search strategy (BFS/DFS/beam) based on branching factor, depth, and compute budget.
-> **Why:** this evaluates whether the candidate can map algorithmic search cost to task difficulty.
+>   **Why:** this evaluates whether the candidate can map algorithmic search cost to task difficulty.
 
 ## References
 

@@ -1,14 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Patterns
-level:
-  - "3"
-priority: High
-status: Done
-
 publish: true
+created: 2026-07-05T10:53:43.321+03:00
+modified: 2026-07-05T10:53:43.321+03:00
 ---
 
 # Intro
@@ -214,12 +207,14 @@ Interview nuance: teams often say "retry inside breaker" to mean retries must co
 ## Questions
 
 > [!QUESTION]- Why is retry placement relative to circuit breaker important?
+>
 > - Retry should execute inside the same resilience pipeline before breaker decisions.
 > - Outer retries around an already open breaker create extra pressure and useless attempts.
 > - Proper ordering gives cleaner failure accounting and earlier protection.
-> - In Polly's outer-to-inner model this means placing retry *outside* the breaker, so each failed retry still passes through breaker evaluation and counts toward tripping it.
+> - In Polly's outer-to-inner model this means placing retry _outside_ the breaker, so each failed retry still passes through breaker evaluation and counts toward tripping it.
 
 > [!QUESTION]- How do you avoid a half-open thundering herd in Kubernetes-scale deployments?
+>
 > - Limit probe concurrency and keep half-open trial volume small.
 > - Add jitter to retry and recovery timing.
 > - Use global controls (rate limits, queueing, bulkheads) so per-pod recovery does not synchronize spikes.
@@ -227,6 +222,7 @@ Interview nuance: teams often say "retry inside breaker" to mean retries must co
 > - The core trap: breaker state is process-local, so per-pod recovery must be coordinated with fleet-level controls or every pod probes in lockstep.
 
 > [!QUESTION]- Which failures should trip the breaker, and which should not?
+>
 > - Trip on dependency-health signals: timeouts, connection failures, HTTP `5xx`, and `429` when the client cannot absorb it.
 > - Do not trip on caller-side `4xx` like `400`/`404` — those reflect bad input, not an unhealthy dependency.
 > - Encode this in `ShouldHandle` so the breaker measures the dependency, not your users' mistakes.

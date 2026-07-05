@@ -1,13 +1,7 @@
 ---
-topic:
-  - Development Practices
-subtopic:
-  - Principles
-level:
-  - "4"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:48.516+03:00
+modified: 2026-07-05T10:53:48.516+03:00
 ---
 
 # Intro
@@ -61,6 +55,7 @@ The principle is: add complexity only to solve a proven problem, not a hypotheti
 Distributed systems are where KISS violations are most costly. Each added component (message broker, cache, service mesh, saga orchestrator) multiplies operational complexity: more failure modes, more observability requirements, more deployment dependencies.
 
 **Common over-engineering patterns:**
+
 - Adding a message broker between two services that could communicate directly via HTTP, because 'we might need async later.'
 - Implementing event sourcing for a domain that has no audit or temporal query requirements.
 - Building a microservices architecture for a team of 3 engineers where a modular monolith would suffice.

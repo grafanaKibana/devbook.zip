@@ -1,20 +1,14 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
-level:
-  - "2"
-priority: High
-status: Done
 publish: true
+created: 2026-07-05T10:54:06.908+03:00
+modified: 2026-07-05T17:36:35.516+03:00
 ---
 
 # Intro
 
 RAG monitoring is the continuous observation of a deployed RAG pipeline to detect quality regressions, performance degradation, and data staleness before users notice. Offline [[11 AI & ML/LLM/RAG/Evaluation/Evaluation|Evaluation]] validates a pipeline before deployment — it answers "is this version good enough to ship?" Monitoring validates it after — it answers "is it still working as expected right now?" The distinction matters because production traffic exposes failure modes that static eval sets cannot anticipate: new query patterns, corpus drift, model behavior changes after provider updates, and load-dependent latency spikes.
 
-The mechanism: each request flows through multiple stages — query translation, embedding, retrieval, reranking, context assembly, generation — and each stage can degrade independently. Monitoring instruments each stage with metrics and traces, samples a fraction of responses for quality scoring via [[11 AI & ML/LLM/Evaluation/LLM-as-a-Judge|LLM-as-judge]], and fires alerts when metrics breach thresholds relative to a rolling baseline. Without per-stage instrumentation, teams observe "answers got worse" but cannot tell whether retrieval stopped finding relevant documents, the reranker misordered them, or the generator hallucinated despite good context.
+The mechanism: each request flows through multiple stages — query translation, embedding, retrieval, reranking, context assembly, generation — and each stage can degrade independently. Monitoring instruments each stage with metrics and traces, samples a fraction of responses for quality scoring via [[LLM-as-a-Judge|LLM-as-judge]], and fires alerts when metrics breach thresholds relative to a rolling baseline. Without per-stage instrumentation, teams observe "answers got worse" but cannot tell whether retrieval stopped finding relevant documents, the reranker misordered them, or the generator hallucinated despite good context.
 
 Example: aggregate faithfulness scores look stable at 0.91, but segmenting by tenant reveals that a financial services tenant dropped to 0.72 after a corpus update replaced their regulatory FAQ with a new document format that the chunking pipeline handles poorly. A global dashboard shows green. The tenant files a support ticket before the engineering team notices — because the alert fires on the global metric, not the segment.
 
@@ -71,17 +65,17 @@ Compute these on every request — they are free and instant.
 
 Retrieval quality metrics require a labeled evaluation set — a set of queries with known relevant documents. Unlike deterministic metrics that run on every request, these are computed on a scheduled basis (nightly or on every deployment) against a golden query set. They complement real-time signals by answering "is retrieval finding the right documents?" rather than just "is it returning documents at all?"
 
-**Recall@k** — of all relevant documents in the corpus, what fraction appears in the top-k results. Recall@5 = 0.8 means 80% of relevant documents land in the top 5. This is the primary retrieval health metric: if relevant evidence is missing from the context, no amount of generation quality can compensate. A drop after a corpus update typically means new documents are poorly embedded or the index structure needs rebuilding. *Example: a support bot's Recall@5 drops from 0.87 to 0.71 after a bulk FAQ import because the imported schema causes the chunking pipeline to split documents across boundaries, breaking embedding coherence.*
+**Recall@k** — of all relevant documents in the corpus, what fraction appears in the top-k results. Recall@5 = 0.8 means 80% of relevant documents land in the top 5. This is the primary retrieval health metric: if relevant evidence is missing from the context, no amount of generation quality can compensate. A drop after a corpus update typically means new documents are poorly embedded or the index structure needs rebuilding. _Example: a support bot's Recall@5 drops from 0.87 to 0.71 after a bulk FAQ import because the imported schema causes the chunking pipeline to split documents across boundaries, breaking embedding coherence._
 
-**Precision@k** — of the k documents retrieved, what fraction is relevant. Precision@5 = 0.6 means 3 of 5 retrieved chunks are on-topic. Low precision floods the context window with noise — the generator must sift relevant evidence from irrelevant material, which increases hallucination risk and wastes tokens. *Example: expanding retrieval from top-5 to top-10 improves recall but drops Precision@10 to 0.35; adding a re-ranker restores precision to 0.7 while retaining the recall gain.*
+**Precision@k** — of the k documents retrieved, what fraction is relevant. Precision@5 = 0.6 means 3 of 5 retrieved chunks are on-topic. Low precision floods the context window with noise — the generator must sift relevant evidence from irrelevant material, which increases hallucination risk and wastes tokens. _Example: expanding retrieval from top-5 to top-10 improves recall but drops Precision@10 to 0.35; adding a re-ranker restores precision to 0.7 while retaining the recall gain._
 
-**HitRate@k** — the fraction of queries for which at least one relevant document appears in the top-k results. Binary per query (hit or miss), making it the simplest minimum-bar check. HitRate@5 = 0.92 means 8% of queries receive zero relevant context — a hard failure floor regardless of generation quality. *Example: HitRate@5 is 0.94 globally but drops to 0.71 for a specific product category, exposing a corpus coverage gap rather than a ranking problem.*
+**HitRate@k** — the fraction of queries for which at least one relevant document appears in the top-k results. Binary per query (hit or miss), making it the simplest minimum-bar check. HitRate@5 = 0.92 means 8% of queries receive zero relevant context — a hard failure floor regardless of generation quality. _Example: HitRate@5 is 0.94 globally but drops to 0.71 for a specific product category, exposing a corpus coverage gap rather than a ranking problem._
 
-**MRR (Mean Reciprocal Rank)** — the average of 1/rank for the first relevant document across queries. If the first relevant result is at position 3, the reciprocal rank is 1/3. MRR = 0.75 means the first relevant document lands at an effective average position of 1.33. Rewards pushing the best result higher; particularly sensitive to re-ranker quality when the generator reads only the top-1 or top-2 chunks. *Example: MRR drops from 0.82 to 0.64 after an embedding model upgrade that improves overall Recall@10 but consistently buries the single most relevant chunk at position 3–4.*
+**MRR (Mean Reciprocal Rank)** — the average of 1/rank for the first relevant document across queries. If the first relevant result is at position 3, the reciprocal rank is 1/3. MRR = 0.75 means the first relevant document lands at an effective average position of 1.33. Rewards pushing the best result higher; particularly sensitive to re-ranker quality when the generator reads only the top-1 or top-2 chunks. _Example: MRR drops from 0.82 to 0.64 after an embedding model upgrade that improves overall Recall@10 but consistently buries the single most relevant chunk at position 3–4._
 
-**MAP (Mean Average Precision)** — the mean of Average Precision (AP) scores across queries. AP for a single query is the mean of Precision@k at each rank position where a relevant document appears. MAP = 1.0 requires all relevant documents at the top of the ranked list. More informative than MRR when multiple relevant documents per query are expected, because it penalizes both missing documents and ranking them late. *Example: a legal assistant has MRR = 0.88 (finds one relevant case near the top) but MAP = 0.51 (misses most of the additional cases the lawyer needs) — improving MAP requires expanding recall, not just top-1 ranking.*
+**MAP (Mean Average Precision)** — the mean of Average Precision (AP) scores across queries. AP for a single query is the mean of Precision@k at each rank position where a relevant document appears. MAP = 1.0 requires all relevant documents at the top of the ranked list. More informative than MRR when multiple relevant documents per query are expected, because it penalizes both missing documents and ranking them late. _Example: a legal assistant has MRR = 0.88 (finds one relevant case near the top) but MAP = 0.51 (misses most of the additional cases the lawyer needs) — improving MAP requires expanding recall, not just top-1 ranking._
 
-**nDCG@k (Normalized Discounted Cumulative Gain)** — measures ranking quality with graded relevance. Documents at higher positions contribute more to the score, and more relevant documents contribute more than partially relevant ones. nDCG@5 = 0.83 means the actual ranking is 83% as good as the ideal ordering. Unlike MAP (which treats relevance as binary), nDCG captures the difference between a partially-relevant and a highly-relevant document at the same position. *Example: nDCG@10 = 0.79 but nDCG@3 = 0.61 — the model finds relevant documents but places them at positions 4–7; a re-ranker targeting top-3 precision brings nDCG@3 to 0.81 without changing nDCG@10.*
+**nDCG@k (Normalized Discounted Cumulative Gain)** — measures ranking quality with graded relevance. Documents at higher positions contribute more to the score, and more relevant documents contribute more than partially relevant ones. nDCG@5 = 0.83 means the actual ranking is 83% as good as the ideal ordering. Unlike MAP (which treats relevance as binary), nDCG captures the difference between a partially-relevant and a highly-relevant document at the same position. _Example: nDCG@10 = 0.79 but nDCG@3 = 0.61 — the model finds relevant documents but places them at positions 4–7; a re-ranker targeting top-3 precision brings nDCG@3 to 0.81 without changing nDCG@10._
 
 | Metric | What it answers | When to prefer |
 | --- | --- | --- |
@@ -198,7 +192,7 @@ Mitigation: always pair latency metrics with sampled quality metrics. A dashboar
 
 The LLM judge used for production scoring drifts over time — either because the judge model is updated by the provider, or because the distribution of inputs changes. Faithfulness scores shift gradually but nobody notices because the absolute numbers still look reasonable.
 
-Mitigation: maintain a small calibration set (50–100 examples) with human-labeled ground truth. Run the judge against this set weekly. Track judge-human agreement rate. If agreement drops below 80%, recalibrate the judge prompt or switch to a different judge model. This is the monitoring-side counterpart to the LLM-as-judge bias problem described in [[11 AI & ML/LLM/Evaluation/LLM-as-a-Judge|LLM-as-a-Judge]].
+Mitigation: maintain a small calibration set (50–100 examples) with human-labeled ground truth. Run the judge against this set weekly. Track judge-human agreement rate. If agreement drops below 80%, recalibrate the judge prompt or switch to a different judge model. This is the monitoring-side counterpart to the LLM-as-judge bias problem described in [[LLM-as-a-Judge]].
 
 ### Alerting on Global Aggregates Instead of Segments
 
@@ -227,6 +221,7 @@ Decision rule: combine deterministic metrics on 100% of traffic (fast, free), sa
 ## Questions
 
 > [!QUESTION]- Why is sampled LLM-as-judge scoring preferred over scoring every response in production?
+>
 > - Scoring every response doubles per-request cost and adds latency if synchronous.
 > - At production scale (thousands of queries/hour), full scoring is prohibitively expensive.
 > - Sampled scoring (5–20%) provides statistical coverage of the quality distribution at a fraction of the cost.
@@ -236,6 +231,7 @@ Decision rule: combine deterministic metrics on 100% of traffic (fast, free), sa
 > - Lower sample rates cut cost but raise the odds of missing a localized regression in a small query cluster; start at 10–20% and reduce only once the distribution looks stable.
 
 > [!QUESTION]- Why should RAG alerting use relative regression thresholds instead of absolute quality targets?
+>
 > - Absolute thresholds ("faithfulness > 0.9") are brittle across corpus changes, model updates, and query distribution shifts.
 > - A threshold calibrated at launch becomes meaningless after the corpus doubles or query mix evolves.
 > - Relative thresholds ("no more than 5% drop from 7-day rolling baseline") adapt automatically because the baseline tracks current system state.
@@ -244,6 +240,7 @@ Decision rule: combine deterministic metrics on 100% of traffic (fast, free), sa
 > - Relative thresholds can miss slow drift that stays inside the rolling window, so pair them with a periodic absolute floor check — a monthly look at whether the baseline itself is still acceptable.
 
 > [!QUESTION]- How does monitoring differ from evaluation in a RAG system, and why do you need both?
+>
 > - Evaluation validates a pipeline configuration against a labeled dataset before deployment — it gates releases.
 > - Monitoring validates the pipeline continuously against live traffic after deployment — it catches production regressions.
 > - Eval sets are static snapshots; production traffic shifts continuously with new query patterns, corpus updates, and model provider changes.

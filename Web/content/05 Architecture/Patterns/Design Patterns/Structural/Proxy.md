@@ -1,13 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Patterns
-level:
-  - "3"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:43.336+03:00
+modified: 2026-07-05T15:49:37.487+03:00
 ---
 
 # Proxy
@@ -38,7 +32,7 @@ classDiagram
 ```
 
 > [!NOTE] Proxy vs Decorator
-> Both wrap the same interface. **Proxy CONTROLS ACCESS** — lazy loading, caching, auth. [[05 Architecture/Patterns/Design Patterns/Structural/Decorator|Decorator]] **ADDS BEHAVIOR** — logging, metrics, validation. The structural difference is intent: Proxy restricts or defers; Decorator enriches. A caching proxy that also logs is a Proxy with a Decorator concern mixed in — keep them separate.
+> Both wrap the same interface. **Proxy CONTROLS ACCESS** — lazy loading, caching, auth. [[Decorator]] **ADDS BEHAVIOR** — logging, metrics, validation. The structural difference is intent: Proxy restricts or defers; Decorator enriches. A caching proxy that also logs is a Proxy with a Decorator concern mixed in — keep them separate.
 
 ## Problem
 
@@ -215,7 +209,7 @@ Adding a rate-limiting proxy now means one new class implementing `IProductServi
 
 ## References
 
-- [Proxy Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=NwaabHqPHeM&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=10) — video walkthrough of the Proxy pattern with OOP examples
+- [Proxy Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=NwaabHqPHeM\&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc\&index=10) — video walkthrough of the Proxy pattern with OOP examples
 - [Proxy — refactoring.guru](https://refactoring.guru/design-patterns/proxy) — canonical pattern description with virtual/caching/protection variants and C# example
 - [Lazy loading related data — EF Core — Microsoft Learn](https://learn.microsoft.com/en-us/ef/core/querying/related-data/lazy) — EF Core lazy-loading proxy in production use
 - [DispatchProxy — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.reflection.dispatchproxy) — .NET's runtime proxy generation mechanism

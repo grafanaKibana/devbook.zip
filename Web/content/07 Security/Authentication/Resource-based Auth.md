@@ -1,14 +1,7 @@
 ---
-topic:
-  - Security
-subtopic:
-  - Authentication
-level:
-  - "3"
-priority: High
-status: Ready to Repeat
-
 publish: true
+created: 2026-07-05T10:54:04.374+03:00
+modified: 2026-07-05T15:49:35.409+03:00
 ---
 
 # Resource-Based Authorization
@@ -23,11 +16,11 @@ Role-based authorization (`[Authorize(Roles = "Admin")]`) checks what type of us
 
 Resource-based auth is one point on a spectrum of access-control models:
 
-- **RBAC (Role-Based)** — permissions attached to roles, roles to users. Simple and the common default, but coarse: "Admin can edit documents" can't express "only *this* document's owner."
-- **ABAC (Attribute-Based)** — decisions from attributes of the *user, resource, action, and context* ("editors in the EU during business hours"). Flexible, but rules can sprawl.
-- **ReBAC (Relationship-Based)** — decisions from the *relationship graph* between subject and resource ("user is in the team that owns the folder"). The Google Zanzibar / OpenFGA model, ideal for sharing/hierarchy-heavy apps.
+- **RBAC (Role-Based)** — permissions attached to roles, roles to users. Simple and the common default, but coarse: "Admin can edit documents" can't express "only _this_ document's owner."
+- **ABAC (Attribute-Based)** — decisions from attributes of the _user, resource, action, and context_ ("editors in the EU during business hours"). Flexible, but rules can sprawl.
+- **ReBAC (Relationship-Based)** — decisions from the _relationship graph_ between subject and resource ("user is in the team that owns the folder"). The Google Zanzibar / OpenFGA model, ideal for sharing/hierarchy-heavy apps.
 
-Resource-based authorization is the *implementation mechanism* (evaluate a rule against a specific resource instance) that ABAC and ReBAC require — in ASP.NET Core it's expressed as policy handlers given the resource. It complements RBAC rather than replacing it: use roles for coarse gates and resource-based checks for per-instance ownership. See [[01 Programming/NET/ASP.NET Web API/Authorization|ASP.NET Authorization]].
+Resource-based authorization is the _implementation mechanism_ (evaluate a rule against a specific resource instance) that ABAC and ReBAC require — in ASP.NET Core it's expressed as policy handlers given the resource. It complements RBAC rather than replacing it: use roles for coarse gates and resource-based checks for per-instance ownership. See [[Authorization|ASP.NET Authorization]].
 
 ## ASP.NET Core Implementation
 

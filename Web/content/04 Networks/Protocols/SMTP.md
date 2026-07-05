@@ -1,13 +1,7 @@
 ---
-topic:
-  - Networks
-subtopic:
-  - Protocols
-level:
-  - "3"
-priority: Low
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:36.505+03:00
+modified: 2026-07-05T10:53:37.362+03:00
 ---
 
 # SMTP
@@ -75,7 +69,7 @@ Modern email delivery requires authentication records to avoid spam filters:
 Without these, emails from your domain will be marked as spam or rejected.
 
 > [!IMPORTANT]
-> **There are two "From" addresses, and the difference is the heart of email auth.** The **envelope sender** (`MAIL FROM`, also called Return-Path) is used at the SMTP layer for delivery and bounces; the **header From** is what the user sees in their client. SPF checks the *envelope* sender, DKIM signs the *message*, and **DMARC requires "alignment"** — that the header-From domain matches the SPF/DKIM domain. This is why mail sent through a third party (newsletters, `noreply@` services) can pass SPF yet fail DMARC: the envelope domain is the provider's, not yours. Bounces (NDRs) go to the envelope sender, which is also how mailing lists avoid loops.
+> **There are two "From" addresses, and the difference is the heart of email auth.** The **envelope sender** (`MAIL FROM`, also called Return-Path) is used at the SMTP layer for delivery and bounces; the **header From** is what the user sees in their client. SPF checks the _envelope_ sender, DKIM signs the _message_, and **DMARC requires "alignment"** — that the header-From domain matches the SPF/DKIM domain. This is why mail sent through a third party (newsletters, `noreply@` services) can pass SPF yet fail DMARC: the envelope domain is the provider's, not yours. Bounces (NDRs) go to the envelope sender, which is also how mailing lists avoid loops.
 
 ## Pitfalls
 

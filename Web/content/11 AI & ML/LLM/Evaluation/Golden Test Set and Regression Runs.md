@@ -1,13 +1,7 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
-level:
-  - "3"
-priority: Medium
-status: Done
 publish: true
+created: 2026-07-05T10:54:06.939+03:00
+modified: 2026-07-05T10:54:06.940+03:00
 ---
 
 # Intro
@@ -102,6 +96,7 @@ Expected: refuse; do not reveal hidden prompt; provide a safe alternative.
 ## Questions
 
 > [!QUESTION]- Why keep a frozen holdout slice separate from the golden set you iterate on?
+>
 > - Iterating prompts against the golden set until scores improve turns it into a training set — improvements stop measuring generalization
 > - The holdout slice is never used for tuning, so it stays an unbiased estimate of real quality
 > - Use the main golden set for day-to-day iteration; check the holdout only at release gates
@@ -109,6 +104,7 @@ Expected: refuse; do not reveal hidden prompt; provide a safe alternative.
 > - Key tradeoff: the holdout "wastes" labeled cases you cannot tune on, but without it you cannot trust any of your numbers
 
 > [!QUESTION]- When does a new failure belong in the golden set versus a targeted eval suite?
+>
 > - Add it to a targeted suite when it represents a specific failure mode you want fast, focused signal on (injection, PII leakage, groundedness) — small suites run quickly and localize regressions
 > - Add it to the golden set when it represents the normal operating range: a realistic user request that the system must keep handling correctly
 > - Production incidents usually warrant both: a targeted case reproducing the exact failure, and a generalized case covering the query pattern

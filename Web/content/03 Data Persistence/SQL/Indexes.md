@@ -1,13 +1,7 @@
 ---
-topic:
-  - Data Persistence
-subtopic:
-  - SQL
 publish: true
-level:
-  - "4"
-priority: High
-status: Ready to Repeat
+created: 2026-07-05T10:53:40.609+03:00
+modified: 2026-07-05T17:36:33.487+03:00
 ---
 
 # Intro
@@ -20,7 +14,7 @@ An index is a sorted auxiliary structure that helps the SQL engine avoid full ta
 - Indexes hurt write-heavy tables because inserts, updates, and deletes also maintain index pages.
 - Indexes consume extra disk space; wider keys and many indexes increase storage and memory pressure.
 
-![03 Data Persistence-Indexes-20260210205141994](../../../Assets/03%20Data%20Persistence/03%20Data%20Persistence-Indexes-20260210205141994.png)
+![03 Data Persistence-Indexes-20260705173633411](Assets/03 Data Persistence/03 Data Persistence-Indexes-20260705173633411.png)
 
 ## Mental model: how index pages are organized
 
@@ -35,11 +29,11 @@ An index is a tree-like, sorted on-disk structure where key values guide navigat
 The B+ tree has three logical levels:
 
 1. Root node
-    1. Stores key ranges and pointers to intermediate nodes
+   1. Stores key ranges and pointers to intermediate nodes
 2. Intermediate level
-    1. Stores key ranges and pointers to leaf nodes
+   1. Stores key ranges and pointers to leaf nodes
 3. Leaf level
-    1. Contains the final entries for the range (data rows for clustered indexes, row locators for nonclustered indexes)
+   1. Contains the final entries for the range (data rows for clustered indexes, row locators for nonclustered indexes)
 
 ### Clustered index
 
@@ -52,13 +46,13 @@ In a clustered index, leaf pages are the table's real data pages.
 
 #### Diagram: Clustered index page hierarchy
 
-![[03 Data Persistence-Indexes-20260218030128746.png]]
+![[Assets/03 Data Persistence/03 Data Persistence-Indexes-20260705173633411-1.png]]
 
 This diagram shows the clustered index B+ tree shape: one root page points to intermediate index pages, and the leaf level contains the actual table rows linked left-to-right for range scans.
 
 #### Diagram: Clustered index seek path
 
-![[03 Data Persistence-Indexes-20260218023449265.png]]
+![[Assets/03 Data Persistence/03 Data Persistence-Indexes-20260705173633411-2.png]]
 
 This diagram shows an index seek path through key ranges: the engine starts at the root, chooses the matching intermediate branch, and reaches the leaf page that holds the target row.
 
@@ -70,13 +64,13 @@ The leaf level of a nonclustered index stores key columns plus a pointer to actu
 
 Leaf entries store the clustered key value (key lookup path).
 
-![[03 Data Persistence-Indexes-20260218023920650.png]]
+![[Assets/03 Data Persistence/03 Data Persistence-Indexes-20260705173633411-3.png]]
 
 #### Without a clustered index (heap)
 
 Leaf entries store a row identifier (RID): file, page, and slot location.
 
-![[03 Data Persistence-Indexes-20260218024130357.png]]
+![[Assets/03 Data Persistence/03 Data Persistence-Indexes-20260705173633411-4.png]]
 
 ## Simplified seek example
 
@@ -105,6 +99,7 @@ CREATE INDEX IX_Users_Status_Covering
 ```
 
 **Key rules:**
+
 - SARGable columns (used in `WHERE`, `JOIN`, `GROUP BY`, `ORDER BY`) go in the key.
 - SELECT-only columns go in `INCLUDE`. They bypass the 1700-byte nonclustered key size limit (900-byte for clustered) and the 32-column key limit (SQL Server 2016+).
 - Eliminating Key Lookups is the primary index tuning lever. Check execution plans for "Key Lookup" operators; each one is a candidate for an INCLUDE column.
@@ -119,7 +114,7 @@ Column **order** in a multi-column index is not cosmetic — it determines which
 | `WHERE A = ? AND B = ?` | ✅ seek |
 | `WHERE A = ? AND B = ? AND C = ?` | ✅ seek |
 | `WHERE B = ?` (skips A) | ❌ no seek — usually a scan |
-| `WHERE A = ? AND C = ?` | ⚠️ seeks on A, then *residual* filter on C (B gap) |
+| `WHERE A = ? AND C = ?` | ⚠️ seeks on A, then _residual_ filter on C (B gap) |
 
 ```sql
 -- Serves WHERE TenantId=? , and WHERE TenantId=? AND Status=? , and ORDER BY ... within a tenant
@@ -133,12 +128,12 @@ Practical ordering rules: put **equality** predicates before **range** predicate
 
 The B+ tree is the default for a reason (ordered, range-friendly, balanced), but other engines/structures fit other access patterns:
 
-- **Hash index** — O(1) *equality* lookups, but **no range or ordering** support. Used by SQL Server memory-optimized tables and PostgreSQL `USING hash`.
+- **Hash index** — O(1) _equality_ lookups, but **no range or ordering** support. Used by SQL Server memory-optimized tables and PostgreSQL `USING hash`.
 - **Bitmap index** — one bitmap per distinct value; superb for **low-cardinality** columns and `AND`/`OR` combinations in data warehouses (Oracle/Postgres analytics), poor for high-churn OLTP.
 - **GIN / GiST (PostgreSQL)** — inverted/generalized indexes for **full-text search, JSONB containment, arrays, and geospatial** (`@>`, nearest-neighbor) queries a B-tree can't answer.
 - **Spatial / R-tree** — multidimensional range queries (bounding boxes, "points within this region").
 
-The takeaway: when a query type (text search, JSON, geo, pure equality at scale) is slow despite a B-tree, the fix may be a *different kind of index*, not a bigger one.
+The takeaway: when a query type (text search, JSON, geo, pure equality at scale) is slow despite a B-tree, the fix may be a _different kind of index_, not a bigger one.
 
 ## Columnstore Indexes
 
@@ -147,6 +142,7 @@ Columnstore indexes store data column-by-column rather than row-by-row, compress
 Batch execution mode processes rows in groups of up to ~900 at a time rather than one row at a time, which is why columnstore queries on large aggregations are significantly faster than equivalent rowstore queries on the same data.
 
 Two variants:
+
 - **Clustered columnstore**: the entire table is stored as columnstore. Ideal for data warehouse fact tables where you always aggregate large ranges.
 - **Nonclustered columnstore**: a secondary index on a rowstore table, enabling HTAP (hybrid transactional/analytical) workloads without a separate DW.
 
@@ -172,6 +168,7 @@ Best for: columns with many NULLs (add `WHERE Col IS NOT NULL` to exclude them f
 On modern SSD and cloud storage, random I/O is cheap, so logical fragmentation has less impact than it did on spinning disks, especially for point lookups. For large range scans, page density still matters: sparse pages mean more I/O to read the same data.
 
 Two maintenance operations:
+
 - **REORGANIZE**: online, leaf-level only, compacts pages in place. Does not update statistics.
 - **REBUILD**: recreates the index from scratch, updates statistics with a full scan. Can be offline or online (online rebuild availability depends on SQL Server edition and index type; it's supported in Azure SQL Database and SQL Server Enterprise).
 
@@ -196,18 +193,21 @@ Two maintenance operations:
 ## Questions
 
 > [!QUESTION]- What is an index and what types exist?
+>
 > - An index is an auxiliary on-disk structure (usually a B+ tree) that lets the engine seek to rows without scanning the whole table.
 > - Common types: clustered, nonclustered, unique, composite, filtered, covering (nonclustered with INCLUDE), and columnstore.
 > - Clustered defines physical row order; nonclustered is a separate structure with a pointer back to the row.
 > - Columnstore stores data column-by-column for analytics; rowstore B+ tree is for OLTP.
 
 > [!QUESTION]- When should a column go in INCLUDE rather than the index key?
+>
 > - Key columns participate in B-tree navigation and are subject to the 1700-byte nonclustered key size limit (900-byte for clustered) and the 32-column key limit (SQL Server 2016+).
 > - INCLUDE columns live only at the leaf level. They bypass both limits and don't affect seek/sort behavior.
 > - Rule: SARGable columns (used in `WHERE`, `JOIN`, `GROUP BY`, `ORDER BY`) go in the key; SELECT-only columns go in INCLUDE.
 > - The goal is eliminating Key Lookup operators in execution plans. Each lookup is a round-trip to the clustered index per row.
 
 > [!QUESTION]- Why can an index rebuild appear to fix a slow query, and how do you verify whether statistics were the real cause?
+>
 > - Rebuilding implicitly runs a FULLSCAN statistics update, giving the optimizer accurate cardinality estimates.
 > - Stale statistics causing a bad plan is a far more common culprit than fragmentation on SSD/cloud storage.
 > - Test first: run `UPDATE STATISTICS ... WITH FULLSCAN` without rebuilding. If that fixes the plan, fragmentation was never the issue.

@@ -1,21 +1,14 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+publish: true
+created: 2026-07-05T10:53:25.576+03:00
+modified: 2026-07-05T17:36:34.417+03:00
 tags:
   - FolderNote
-publish: true
-priority: Medium
-level:
-  - "4"
-status:
-  - Ready to Repeat
 ---
 
 # Intro
 
-Patterns are reusable problem-solving idioms — not full named algorithms like Dijkstra, but recurring *techniques* you apply to turn a brute-force solution into an efficient one. Recognising the pattern is usually the hard part of a coding problem; once you see "this is a sliding window," the implementation follows. They differ from [[02 Computer Science/Algorithms/Paradigms/Paradigms|paradigms]] (DP, greedy, backtracking), which are broader *design philosophies* — patterns are the concrete moves.
+Patterns are reusable problem-solving idioms — not full named algorithms like Dijkstra, but recurring _techniques_ you apply to turn a brute-force solution into an efficient one. Recognising the pattern is usually the hard part of a coding problem; once you see "this is a sliding window," the implementation follows. They differ from [[02 Computer Science/Algorithms/Paradigms/Paradigms|paradigms]] (DP, greedy, backtracking), which are broader _design philosophies_ — patterns are the concrete moves.
 
 This folder covers three of the most widely applicable:
 
@@ -25,12 +18,12 @@ This folder covers three of the most widely applicable:
 
 | Pattern | The move | Tells you to reach for it | Typical win |
 |---|---|---|---|
-| [[02 Computer Science/Algorithms/Patterns/Two Pointers\|Two Pointers]] | Two coordinated indices (ends-in, or fast/slow) | Sorted array, pair/triplet sums, in-place partition, cycle detection | O(n²) → O(n) |
-| [[02 Computer Science/Algorithms/Patterns/Sliding Window\|Sliding Window]] | A moving contiguous range updated incrementally | "Longest/shortest/contiguous subarray or substring with a constraint" | O(n·k) → O(n) |
-| [[02 Computer Science/Algorithms/Patterns/Bit Manipulation\|Bit Manipulation]] | Operate on the binary representation directly | Small fixed sets, parity/toggles, subset enumeration, no-extra-space tricks | O(n) → O(1) space/time tricks |
+| [[Two Pointers]] | Two coordinated indices (ends-in, or fast/slow) | Sorted array, pair/triplet sums, in-place partition, cycle detection | O(n²) → O(n) |
+| [[Sliding Window]] | A moving contiguous range updated incrementally | "Longest/shortest/contiguous subarray or substring with a constraint" | O(n·k) → O(n) |
+| [[Bit Manipulation]] | Operate on the binary representation directly | Small fixed sets, parity/toggles, subset enumeration, no-extra-space tricks | O(n) → O(1) space/time tricks |
 
 > [!TIP]
-> The interview skill is *recognition*: most problems announce their pattern through a keyword — "contiguous … with sum/length" → sliding window; "sorted … pair that sums to" → two pointers; "appears once / toggled / subsets of a small set" → bit manipulation.
+> The interview skill is _recognition_: most problems announce their pattern through a keyword — "contiguous … with sum/length" → sliding window; "sorted … pair that sums to" → two pointers; "appears once / toggled / subsets of a small set" → bit manipulation.
 
 ## References
 

@@ -1,16 +1,9 @@
 ---
-icon: lock
-color: "#10b981"
-topic:
-  - Security
-subtopic: []
+publish: true
+created: 2026-07-05T10:54:04.288+03:00
+modified: 2026-07-05T10:54:04.289+03:00
 tags:
   - FolderNote
-publish: true
-priority: High
-level:
-  - '4'
-status: Creation
 ---
 
 # Intro

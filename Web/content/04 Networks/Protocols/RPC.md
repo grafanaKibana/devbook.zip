@@ -1,20 +1,14 @@
 ---
-topic:
-  - Networks
-subtopic:
-  - Protocols
-level:
-  - "3"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:36.526+03:00
+modified: 2026-07-05T15:49:32.896+03:00
 ---
 
 # RPC — Remote Procedure Call
 
 RPC (Remote Procedure Call) is a communication style where a client invokes a server operation as if it were a local function call. The RPC framework handles serialization, network transport, and deserialization, hiding the network boundary from the caller. You define a service interface; the framework generates client stubs that make remote calls look like local method calls.
 
-RPC is the foundation of [[04 Networks/Protocols/gRPC|gRPC]] (Google's modern RPC framework) and was the basis of SOAP/WCF. It contrasts with [[04 Networks/Protocols/REST|REST]], which models resources and uses HTTP verbs rather than procedure calls.
+RPC is the foundation of [[gRPC]] (Google's modern RPC framework) and was the basis of SOAP/WCF. It contrasts with [[REST]], which models resources and uses HTTP verbs rather than procedure calls.
 
 ## How RPC Works
 
@@ -62,10 +56,10 @@ RPC's "local call" abstraction is leaky. The eight fallacies of distributed comp
 Because the network can drop either the request or the response, an RPC framework can offer one of three guarantees — and the difference drives your whole error-handling design:
 
 - **At-most-once** — never retry; the call runs zero or one times. No duplicates, but a lost response means the operation may not have happened and you'll never know. Fine for non-critical, naturally-idempotent reads.
-- **At-least-once** — retry until acknowledged; the call runs one *or more* times. No lost work, but **duplicates are possible** (the request succeeded, the ACK was lost, you retry). This is what naive "just retry on timeout" gives you.
-- **Exactly-once** — the holy grail, and **not achievable at the transport layer** in the presence of failures. It's *approximated* end-to-end by combining at-least-once delivery with **idempotency**: the server deduplicates retries via an idempotency key / sequence number so re-execution has no extra effect.
+- **At-least-once** — retry until acknowledged; the call runs one _or more_ times. No lost work, but **duplicates are possible** (the request succeeded, the ACK was lost, you retry). This is what naive "just retry on timeout" gives you.
+- **Exactly-once** — the holy grail, and **not achievable at the transport layer** in the presence of failures. It's _approximated_ end-to-end by combining at-least-once delivery with **idempotency**: the server deduplicates retries via an idempotency key / sequence number so re-execution has no extra effect.
 
-The practical rule: assume at-least-once and make your operations idempotent (so duplicates are harmless) rather than chasing true exactly-once. This is the same conclusion the [[04 Networks/Protocols/gRPC|gRPC retry policy]] and [[03 Data Persistence/ACID|distributed transactions]] reach.
+The practical rule: assume at-least-once and make your operations idempotent (so duplicates are harmless) rather than chasing true exactly-once. This is the same conclusion the [[gRPC|gRPC retry policy]] and [[ACID|distributed transactions]] reach.
 
 ## Pitfalls
 
@@ -114,8 +108,8 @@ var response = await client.PlaceOrderAsync(
 
 ## References
 
-- [[04 Networks/Protocols/gRPC|gRPC]] — the modern RPC framework: Protobuf contracts, HTTP/2 transport, streaming, and .NET implementation.
-- [[04 Networks/Protocols/REST|REST]] — the alternative communication style: resource-oriented, HTTP verbs, JSON, browser-native.
+- [[gRPC]] — the modern RPC framework: Protobuf contracts, HTTP/2 transport, streaming, and .NET implementation.
+- [[REST]] — the alternative communication style: resource-oriented, HTTP verbs, JSON, browser-native.
 - [Fallacies of distributed computing (Wikipedia)](https://en.wikipedia.org/wiki/Fallacies_of_distributed_computing) — the eight assumptions that make distributed systems harder than they appear; essential context for any RPC-based system.
 - [gRPC core concepts](https://grpc.io/docs/what-is-grpc/core-concepts/) — official gRPC documentation covering service definitions, stub generation, and the four service types (unary, server streaming, client streaming, bidirectional).
 - [Protocol Buffers language guide (Google)](https://protobuf.dev/programming-guides/proto3/) — field numbering rules, reserved fields, and backward compatibility; essential for safe schema evolution.

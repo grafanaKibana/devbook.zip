@@ -1,14 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Distributed Systems
-level:
-  - "2"
-priority: High
-status: Done
-
 publish: true
+created: 2026-07-05T10:53:43.310+03:00
+modified: 2026-07-05T17:35:40.867+03:00
 ---
 
 # Intro
@@ -19,7 +12,7 @@ CAP theorem says that in a distributed data system, once a network partition hap
 
 ### Definitions in operational terms
 
-- **Consistency (C)**: every successful read sees the most recent successful write (or an error), as if there is one up-to-date value. *(This is **linearizability** — replicas agreeing. It is **not** the "C" in [[03 Data Persistence/ACID|ACID]], which means constraint/invariant preservation within one node. A system can be ACID and AP, or CP and non-ACID — the two C's are unrelated.)*
+- **Consistency (C)**: every successful read sees the most recent successful write (or an error), as if there is one up-to-date value. _(This is **linearizability** — replicas agreeing. It is **not** the "C" in [[ACID]], which means constraint/invariant preservation within one node. A system can be ACID and AP, or CP and non-ACID — the two C's are unrelated.)_
 - **Availability (A)**: every request to a non-failed node receives a non-error response in finite time.
 - **Partition tolerance (P)**: the system continues operating despite message loss/delay between node groups.
 
@@ -123,7 +116,7 @@ For senior .NET interviews, tie CAP/PACELC to concrete platform choices instead 
 
 ### Azure Cosmos DB (tunable consistency)
 
-- You can select [[Consistency Models|consistency models]] (Strong, Bounded Staleness, Session, Consistent Prefix, Eventual).
+- You can select [[Consistency Models]] (Strong, Bounded Staleness, Session, Consistent Prefix, Eventual).
 - This lets you pick different points on latency/freshness per workload.
 - Interview signal: mention that one product can serve CP-like or AP-leaning behaviors depending on configuration and operation.
 
@@ -172,7 +165,7 @@ That per-operation selection is usually what interviewers want to hear.
 > Don't think of it system-wide — decide per operation, because different endpoints have different correctness budgets. A `PlaceOrder` or ledger write wants CP: refuse it under partition rather than risk split-brain or a double charge. A `GetRecommendations` read wants AP: keep serving slightly stale data because availability beats freshness there. A profile read might only need session consistency. So the same system is CP on some paths and AP on others; labeling the whole platform and applying one rule everywhere is the mistake. Map each operation to its business invariant and its allowed staleness window.
 
 > [!QUESTION]- Why is "pick two of three" a misleading way to state CAP?
-> Because in any system that replicates data across machines, partition tolerance isn't something you opt out of — networks drop packets and isolate nodes whether you like it or not. So "CA" isn't really on the menu: the moment a partition hits, a system that didn't plan for it just stops being correct or stops responding. The honest framing is that P is a given, and the real decision is what you do *during* a partition — sacrifice consistency to stay available (AP), or sacrifice availability to stay consistent (CP). With no partition you can have both; CAP only forces the choice inside the failure window.
+> Because in any system that replicates data across machines, partition tolerance isn't something you opt out of — networks drop packets and isolate nodes whether you like it or not. So "CA" isn't really on the menu: the moment a partition hits, a system that didn't plan for it just stops being correct or stops responding. The honest framing is that P is a given, and the real decision is what you do _during_ a partition — sacrifice consistency to stay available (AP), or sacrifice availability to stay consistent (CP). With no partition you can have both; CAP only forces the choice inside the failure window.
 
 ## References
 

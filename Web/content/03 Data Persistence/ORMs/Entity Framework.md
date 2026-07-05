@@ -1,13 +1,7 @@
 ---
-topic:
-  - Data Persistence
-subtopic:
-  - ORMs
-level:
-  - "4"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:40.600+03:00
+modified: 2026-07-05T17:36:34.304+03:00
 ---
 
 # Entity Framework Core
@@ -79,7 +73,7 @@ try
 catch { await tx.RollbackAsync(ct); throw; }
 ```
 
-**Optimistic concurrency** prevents lost updates without locking. Mark a column as a concurrency token (a `[Timestamp]`/`rowversion`, or `IsConcurrencyToken()`); EF Core then appends it to the `WHERE` clause of every UPDATE. If another transaction changed the row since you read it, zero rows match and EF throws **`DbUpdateConcurrencyException`** — catch it to retry or surface a conflict to the user (this is the lighter alternative to Serializable from [[03 Data Persistence/ACID|ACID]]). For providers with transient faults (Azure SQL), enable a **retrying execution strategy** with `EnableRetryOnFailure()` — note it then requires manual transactions to be wrapped in `strategy.ExecuteAsync(...)`.
+**Optimistic concurrency** prevents lost updates without locking. Mark a column as a concurrency token (a `[Timestamp]`/`rowversion`, or `IsConcurrencyToken()`); EF Core then appends it to the `WHERE` clause of every UPDATE. If another transaction changed the row since you read it, zero rows match and EF throws **`DbUpdateConcurrencyException`** — catch it to retry or surface a conflict to the user (this is the lighter alternative to Serializable from [[ACID]]). For providers with transient faults (Azure SQL), enable a **retrying execution strategy** with `EnableRetryOnFailure()` — note it then requires manual transactions to be wrapped in `strategy.ExecuteAsync(...)`.
 
 ### Migrations
 
@@ -183,7 +177,7 @@ The risk to know: a forgotten filter on a related type, or `IgnoreQueryFilters()
 
 ### Cartesian Explosion from Multiple Includes
 
-`Include`-ing two or more **collection** navigations in one query makes EF Core emit a single JOIN whose row count is the *product* of the collections — an order with 50 line items and 20 history rows returns 1,000 duplicated rows, which EF then de-duplicates client-side. Fix with **`AsSplitQuery()`**, which runs one SQL query per collection and stitches them in memory (trading a JOIN for extra round-trips). Use single (joined) queries for one-to-one/small includes; split queries when you `Include` multiple or large collections.
+`Include`-ing two or more **collection** navigations in one query makes EF Core emit a single JOIN whose row count is the _product_ of the collections — an order with 50 line items and 20 history rows returns 1,000 duplicated rows, which EF then de-duplicates client-side. Fix with **`AsSplitQuery()`**, which runs one SQL query per collection and stitches them in memory (trading a JOIN for extra round-trips). Use single (joined) queries for one-to-one/small includes; split queries when you `Include` multiple or large collections.
 
 ### Code First vs Database First
 
@@ -197,6 +191,7 @@ The risk to know: a forgotten filter on a related type, or `IgnoreQueryFilters()
 Adding a non-nullable column without a default value locks the table during migration. For large tables, this causes downtime.
 
 **Mitigation**: use the expand-contract pattern:
+
 1. Add the column as nullable (no lock).
 2. Backfill existing rows in batches.
 3. Add a NOT NULL constraint after backfill completes.
@@ -205,12 +200,14 @@ Adding a non-nullable column without a default value locks the table during migr
 ## Questions
 
 > [!QUESTION]- How does EF Core's change tracker work, and when should you disable it?
+>
 > - EF Core takes a snapshot of each loaded entity's property values. On `SaveChangesAsync()`, it compares current values to the snapshot and generates SQL for changed properties.
 > - Overhead: change tracking adds memory (snapshot storage) and CPU (comparison on save) per tracked entity.
 > - Disable with `.AsNoTracking()` for read-only queries (reports, API responses that don't modify data). This is the single most impactful EF Core performance optimization for read-heavy workloads.
 > - Tradeoff: `.AsNoTracking()` entities cannot be modified and saved — you must re-attach them or use `ExecuteUpdateAsync()` for bulk updates.
 
 > [!QUESTION]- What is the N+1 query problem and how do you detect it?
+>
 > - N+1 occurs when loading N entities and then accessing a navigation property on each, triggering N additional queries.
 > - Detection: enable EF Core query logging (`LogTo(Console.WriteLine)`) or use MiniProfiler/Application Insights to see query counts per request.
 > - Fix: use `Include()` for eager loading, or split into two queries and join in memory for large result sets.

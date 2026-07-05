@@ -1,13 +1,7 @@
 ---
-topic:
-  - Data Persistence
-subtopic:
-  - SQL
-level:
-  - "4"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:40.607+03:00
+modified: 2026-07-05T15:49:34.447+03:00
 ---
 
 # Intro
@@ -66,9 +60,9 @@ Asynchronous replication means replicas are always slightly behind the leader. T
 
 ## CAP and PACELC
 
-The sync/async and leader-model choices above are all instances of one theorem. **CAP** says that when a network **P**artition splits your replicas, you must choose between **C**onsistency (reject reads/writes that can't be coordinated) and **A**vailability (keep serving, accept divergence) — you cannot have both *during a partition*. A single-leader system that refuses writes when it can't reach a quorum is **CP**; a leaderless Dynamo-style system that keeps accepting writes and reconciles later is **AP**.
+The sync/async and leader-model choices above are all instances of one theorem. **CAP** says that when a network **P**artition splits your replicas, you must choose between **C**onsistency (reject reads/writes that can't be coordinated) and **A**vailability (keep serving, accept divergence) — you cannot have both _during a partition_. A single-leader system that refuses writes when it can't reach a quorum is **CP**; a leaderless Dynamo-style system that keeps accepting writes and reconciles later is **AP**.
 
-CAP only describes the partition case, which is why **PACELC** is the more useful framing: *if* **P**artition, choose **A**vailability or **C**onsistency; **E**lse (normal operation) choose **L**atency or **C**onsistency. Synchronous replication is the "**C** over **L**" choice (pay latency for consistency); async is "**L** over **C**" (faster, but stale reads). Most SQL setups are **PC/EC**-leaning (consistency-first); Cassandra/DynamoDB default to **PA/EL** (availability- and latency-first). This is the lens behind every model and mode in this note — see [[05 Architecture/Distributed Systems/CAP theorem|CAP theorem]] for the full treatment.
+CAP only describes the partition case, which is why **PACELC** is the more useful framing: _if_ **P**artition, choose **A**vailability or **C**onsistency; **E**lse (normal operation) choose **L**atency or **C**onsistency. Synchronous replication is the "**C** over **L**" choice (pay latency for consistency); async is "**L** over **C**" (faster, but stale reads). Most SQL setups are **PC/EC**-leaning (consistency-first); Cassandra/DynamoDB default to **PA/EL** (availability- and latency-first). This is the lens behind every model and mode in this note — see [[CAP theorem]] for the full treatment.
 
 ## Tradeoffs
 
@@ -99,16 +93,19 @@ Typical scaling progression: vertical scale → read replicas → caching layer 
 ## Questions
 
 > [!QUESTION]- What are the three replication lag anomalies, and how do you mitigate each?
+>
 > - **Read-your-writes**: user writes then reads from a stale replica and sees their write missing. Fix: route post-write reads to the leader for a short window, or use LSN/timestamp tracking to wait for the replica to catch up.
 > - **Monotonic reads**: user sees newer data on one request, then older data on the next (different replicas). Fix: sticky sessions. Pin the user to the same replica.
 > - **Consistent prefix reads**: causally related writes appear out of order (a reply before the original message). Fix: route causally related writes to the same partition so ordering is preserved.
 
 > [!QUESTION]- When would you choose synchronous vs asynchronous replication?
+>
 > - **Synchronous**: when zero data loss is a hard requirement (financial transactions, audit logs). The leader waits for replica acknowledgment before confirming the write. Cost: every write pays the replica round-trip latency.
 > - **Asynchronous**: when write latency matters more than guaranteed durability. Replicas may lag; any unconfirmed writes are lost if the leader crashes.
 > - Most production systems use async replication with one semi-synchronous replica for failover safety. SQL Server Always On supports both modes per replica. PostgreSQL `synchronous_standby_names` controls which standbys must confirm before commit.
 
 > [!QUESTION]- How does split-brain occur and how is it prevented?
+>
 > - A network partition isolates the primary from the rest of the cluster. A quorum of remaining nodes elects a new primary. When the partition heals, both nodes believe they are primary and have accepted divergent writes.
 > - Prevention: quorum-based election. A node must hold a majority of votes to become primary, so only one node can win. Fencing (STONITH) ensures the old primary is forcibly terminated before the new one starts accepting writes, eliminating the window where both are active.
 > - WSFC uses quorum witnesses; Patroni uses distributed locks in etcd/Consul. Without fencing, quorum alone is not sufficient. A slow primary that loses quorum might still be processing writes for a few seconds.

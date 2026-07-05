@@ -1,13 +1,7 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
-level:
-  - "4"
-priority: Low
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:25.472+03:00
+modified: 2026-07-05T15:49:36.844+03:00
 ---
 
 # Intro
@@ -67,11 +61,12 @@ public static void SelectionSort(int[] a)
 ```
 
 > [!TIP]
-> **Heapsort is selection sort done right.** Selection sort's cost is the O(n) linear scan to find the minimum each round. Replace that flat scan with a **heap**, which surrenders the min/max in O(log n), and the whole sort drops from O(n²) to O(n log n) — that's exactly heapsort. Seeing selection sort as "repeatedly select the extreme" makes the [[02 Computer Science/Data Structures/Heap\|heap]] the natural optimization.
+> **Heapsort is selection sort done right.** Selection sort's cost is the O(n) linear scan to find the minimum each round. Replace that flat scan with a **heap**, which surrenders the min/max in O(log n), and the whole sort drops from O(n²) to O(n log n) — that's exactly heapsort. Seeing selection sort as "repeatedly select the extreme" makes the [[Heap]] the natural optimization.
 
 ## When to Use
 
 Rarely in production. The O(n) swap count is its only advantage over bubble sort. Consider it when:
+
 - Writes are significantly more expensive than reads (e.g., flash memory with limited write cycles).
 - You need a simple, predictable algorithm with no extra memory.
 
@@ -108,12 +103,14 @@ For general use, prefer insertion sort (better on nearly-sorted data) or `Array.
 > Selection sort scans the entire unsorted suffix to find the minimum, then performs exactly one swap per iteration — n−1 swaps total. This matters when writes are significantly more expensive than reads, such as flash memory with limited write cycles or EEPROM. In those cases, minimizing swaps is worth the O(n²) comparison cost. For RAM-based sorting, the swap count advantage is irrelevant — use insertion sort or Array.Sort instead.
 
 > [!QUESTION]- Why is selection sort not stable, and how can it be made stable?
-> Selection sort swaps the minimum element into position, which can move an equal element past another equal element. For example, sorting [3a, 3b, 1] by value: the 1 swaps with 3a, giving [1, 3b, 3a] — the relative order of the two 3s is reversed. To make it stable, replace the swap with a shift (like insertion sort does), but that eliminates the O(n) swap advantage. In practice, if stability is needed, use merge sort.
+> Selection sort swaps the minimum element into position, which can move an equal element past another equal element. For example, sorting \[3a, 3b, 1] by value: the 1 swaps with 3a, giving \[1, 3b, 3a] — the relative order of the two 3s is reversed. To make it stable, replace the swap with a shift (like insertion sort does), but that eliminates the O(n) swap advantage. In practice, if stability is needed, use merge sort.
 
 ## References
 
 - [Selection sort (Wikipedia)](https://en.wikipedia.org/wiki/Selection_sort) — algorithm description, stability discussion, and comparison with insertion sort.
+
 - [Sorting visualizations (VisuAlgo)](https://visualgo.net/en/sorting) — step-by-step animation comparing all basic sorting algorithms.
 
 - [Timsort (Wikipedia)](https://en.wikipedia.org/wiki/Timsort) — Python's and Java's default sort; uses insertion sort (not selection sort) for small runs, illustrating why insertion sort is preferred over selection sort in practice.
+
 - [Sorting algorithms comparison (Big-O Cheat Sheet)](https://www.bigocheatsheet.com/) — quick reference for time and space complexity of all common sorting algorithms.

@@ -1,14 +1,7 @@
 ---
-topic:
-  - DevOps
-subtopic:
-  - Deployment Strategies
 publish: true
-status:
-  - Ready to Repeat
-priority: Medium
-level:
-  - "2"
+created: 2026-07-05T10:54:08.006+03:00
+modified: 2026-07-05T10:54:08.007+03:00
 ---
 
 # Deployment Strategies
@@ -26,6 +19,7 @@ Replace every instance simultaneously. The old version stops; the new version st
 **Scenario**: A startup with a single EC2 instance and a 2 AM maintenance window. Downtime is acceptable; infrastructure cost is the constraint.
 
 **Risks**:
+
 - Full downtime during the swap
 - If the new version is broken, 100% of users are affected immediately
 - Rollback requires another full deploy cycle
@@ -49,6 +43,7 @@ strategy:
 **Scenario**: A SaaS app with 10 pods. Rolling update replaces pods one by one over ~5 minutes. At any point, 9 pods serve traffic. Users see no downtime.
 
 **Risks**:
+
 - During rollout, old and new versions run simultaneously — your API must be backward-compatible (no breaking schema changes)
 - Rollback requires another rolling update in reverse (slow)
 - If a bug only manifests under load, it may not surface until most pods are updated
@@ -71,6 +66,7 @@ aws elbv2 modify-listener \
 **Scenario**: A fintech app processing payments. Zero-downtime is non-negotiable. Blue-green lets you validate green with synthetic transactions before switching. If green fails, flip back to blue in seconds.
 
 **Risks**:
+
 - Double infrastructure cost during the transition (two full environments)
 - Database migrations must be backward-compatible with both versions simultaneously
 - Session state tied to blue instances is lost on cutover (use external session stores)
@@ -98,6 +94,7 @@ strategy:
 **Scenario**: An e-commerce platform with 500k daily users. A new checkout flow is deployed to 5% of users. After 10 minutes, error rate on the canary is 0.3% vs 0.1% baseline — automated rollback triggers. Only 25k users were exposed to the bug.
 
 **Risks**:
+
 - Requires sophisticated traffic splitting (service mesh, weighted load balancer, or feature flags)
 - Monitoring must be granular enough to detect issues at 5% traffic
 - Longer rollout window means old and new versions coexist for hours
@@ -113,6 +110,7 @@ Increase traffic to the new version in fixed increments on a fixed schedule (e.g
 **Scenario**: A Lambda function update. CodeDeploy shifts 10% of invocations to the new version every 10 minutes. After 100 minutes, 100% of traffic is on the new version. CloudWatch alarms trigger automatic rollback if error rate spikes.
 
 **Risks**:
+
 - Less adaptive than canary — traffic increases on schedule even if early signals are ambiguous
 - Requires automated rollback hooks (CloudWatch alarms → CodeDeploy rollback)
 - Not suitable for services where 10% traffic is too small to surface bugs
@@ -152,6 +150,7 @@ Increase traffic to the new version in fixed increments on a fixed schedule (e.g
 ## Questions
 
 > [!QUESTION]- When would you choose canary over blue-green deployment?
+>
 > - Blue-green gives instant rollback by switching traffic back to the old environment, but requires running two full environments simultaneously.
 > - Canary gradually shifts traffic to the new version, catching issues in production with real users before full rollout.
 > - Choose canary when you need production validation with real traffic patterns that staging cannot replicate.
@@ -160,6 +159,7 @@ Increase traffic to the new version in fixed increments on a fixed schedule (e.g
 > - Canary shrinks blast radius but stretches the deployment window and leans on monitoring automation to catch regressions; blue-green is simpler but doubles infrastructure cost during the switch.
 
 > [!QUESTION]- What failure mode makes rolling deployments unsafe for database schema changes?
+>
 > - Rolling deployments run old and new code side by side during the rollout window.
 > - A destructive schema change (dropping a column, renaming a table, changing a constraint) breaks the old instances still serving traffic.
 > - Safe approach: expand-and-contract migrations — add the new column first, deploy code that writes to both, then remove the old column in a later release.
@@ -167,6 +167,7 @@ Increase traffic to the new version in fixed increments on a fixed schedule (e.g
 > - Expand-and-contract spreads one change across several deploys and adds migration bookkeeping, but it is the only safe path to zero-downtime schema evolution under rolling deploys.
 
 > [!QUESTION]- How do you decide between A/B testing and canary when both are available?
+>
 > - Canary validates operational health — does the new version crash, timeout, or degrade throughput.
 > - A/B testing validates user behavior — does the new version improve conversion, engagement, or other business metrics.
 > - Use canary first to confirm the release is safe, then A/B test to measure business impact.

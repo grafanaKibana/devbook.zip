@@ -1,18 +1,12 @@
 ---
-topic:
-  - Development Practices
-subtopic:
-  - Paradigms
-level:
-  - "3"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:48.571+03:00
+modified: 2026-07-05T15:49:37.295+03:00
 ---
 
 # Event-Driven Development
 
-Event-driven development builds systems around *events* — immutable facts that something happened — and reactions to those events. Producers publish events without knowing who will consume them; consumers subscribe and handle events independently. This decouples components: the order service doesn't call the inventory service directly, it publishes `OrderPlaced` and the inventory service reacts on its own schedule.
+Event-driven development builds systems around _events_ — immutable facts that something happened — and reactions to those events. Producers publish events without knowing who will consume them; consumers subscribe and handle events independently. This decouples components: the order service doesn't call the inventory service directly, it publishes `OrderPlaced` and the inventory service reacts on its own schedule.
 
 The pattern appears at two scales: **in-process** (domain events within a single application, dispatched via MediatR or a simple in-memory bus) and **distributed** (events published to a message broker like RabbitMQ, Azure Service Bus, or Kafka, consumed by separate services).
 
@@ -20,21 +14,21 @@ The pattern appears at two scales: **in-process** (domain events within a single
 
 A distinction "event-driven" tends to blur:
 
-- A **command** is an instruction to *one* handler to *do* something — imperative, present tense (`ReserveStock`); the sender expects it carried out, and it **can be rejected**.
-- An **event** is a notification that something *already happened* — a past-tense immutable fact (`OrderPlaced`), broadcast to *zero-to-many* subscribers who each decide how to react. It can't be rejected — it's history.
+- A **command** is an instruction to _one_ handler to _do_ something — imperative, present tense (`ReserveStock`); the sender expects it carried out, and it **can be rejected**.
+- An **event** is a notification that something _already happened_ — a past-tense immutable fact (`OrderPlaced`), broadcast to _zero-to-many_ subscribers who each decide how to react. It can't be rejected — it's history.
 
-Routing a command to one handler is the [[05 Architecture/Patterns/Design Patterns/Behavioral/Mediator|Mediator]] pattern; fanning an event out to many is an [[05 Architecture/Patterns/Event Bus|Event Bus]] over a [[05 Architecture/Distributed Systems/Message Queues/Message Queues|message broker]].
+Routing a command to one handler is the [[Mediator]] pattern; fanning an event out to many is an [[Event Bus]] over a [[Message Queues|message broker]].
 
 ## Four Styles of "Event-Driven" (Fowler)
 
 The term covers four distinct patterns that are often conflated — naming which one you mean avoids a lot of confusion:
 
-1. **Event Notification** — the event carries just an ID/reference ("order 42 placed"); consumers call *back* to the source for details. Lowest coupling, but chatty and the source must stay available.
-2. **Event-Carried State Transfer** — the event carries *all* the data a consumer needs ("order 42: items, total, address"), so consumers keep a local copy and never call back. More decoupled and resilient, at the cost of data duplication and eventual consistency.
-3. **Event Sourcing** — events are the **source of truth**; current state is *derived* by replaying the log. See [[05 Architecture/Patterns/Architectural Patterns/Event Sourcing|Event Sourcing]].
-4. **CQRS** — separate the write model (commands) from read models (queries), often kept in sync via events. See [[05 Architecture/Patterns/Architectural Patterns/CQRS|CQRS]].
+1. **Event Notification** — the event carries just an ID/reference ("order 42 placed"); consumers call _back_ to the source for details. Lowest coupling, but chatty and the source must stay available.
+2. **Event-Carried State Transfer** — the event carries _all_ the data a consumer needs ("order 42: items, total, address"), so consumers keep a local copy and never call back. More decoupled and resilient, at the cost of data duplication and eventual consistency.
+3. **Event Sourcing** — events are the **source of truth**; current state is _derived_ by replaying the log. See [[Event Sourcing]].
+4. **CQRS** — separate the write model (commands) from read models (queries), often kept in sync via events. See [[CQRS]].
 
-The first two are *communication* styles (how services talk); the last two are *architectural* patterns (how you store and model state). Most systems use event notification or state transfer **without** event sourcing.
+The first two are _communication_ styles (how services talk); the last two are _architectural_ patterns (how you store and model state). Most systems use event notification or state transfer **without** event sourcing.
 
 ## In-Process Domain Events
 
@@ -92,7 +86,7 @@ await tx.CommitAsync(ct);
 
 **Why it happens**: publishing feels like a natural "last step" after business logic, but it happens before the DB confirms success.
 
-**Mitigation**: always publish events *after* a successful commit, or use the Outbox pattern for guaranteed delivery.
+**Mitigation**: always publish events _after_ a successful commit, or use the Outbox pattern for guaranteed delivery.
 
 ### Ignoring Consumer Idempotency
 

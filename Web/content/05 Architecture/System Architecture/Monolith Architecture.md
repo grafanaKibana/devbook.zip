@@ -1,13 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - System Architecture
-level:
-  - "4"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:43.312+03:00
+modified: 2026-07-05T15:49:34.725+03:00
 ---
 
 # Intro
@@ -40,7 +34,7 @@ One `dotnet publish`, one Docker image, one deployment. All requests go to the s
 **Low latency for internal calls:** component-to-component calls are in-process function calls, not network hops.
 
 > [!NOTE]
-> **A monolith still scales horizontally** — the common myth is "monolith = can't scale." You scale it by running **N identical copies behind a [[05 Architecture/Distributed Systems/Load Balancing|load balancer]]** (which is why keeping the process **stateless** matters). What you *can't* do is scale components *independently* — if only the report generator is hot, you still replicate the whole app. That inefficiency, not a hard ceiling, is the real scaling argument for microservices.
+> **A monolith still scales horizontally** — the common myth is "monolith = can't scale." You scale it by running **N identical copies behind a [[Load Balancing|load balancer]]** (which is why keeping the process **stateless** matters). What you _can't_ do is scale components _independently_ — if only the report generator is hot, you still replicate the whole app. That inefficiency, not a hard ceiling, is the real scaling argument for microservices.
 
 ## When Monoliths Break Down
 
@@ -84,11 +78,12 @@ Modules communicate through public interfaces, not by reaching into each other's
 | Development speed (early) | Fast | Slow (infrastructure overhead) |
 | Development speed (at scale) | Slow (coupling) | Fast (independent teams) |
 
-See [[05 Architecture/System Architecture/Microservices|Microservices]] for the full microservices pattern.
+See [[Microservices]] for the full microservices pattern.
 
 ## Decision Rule
 
 **Start with a monolith** (ideally modular). The operational simplicity and development speed advantages are significant in the early stages of a product. Microservices are justified when:
+
 - Independent deployment is a hard requirement (different release cadences per team).
 - A specific component needs independent scaling (e.g., a video processing service).
 - Teams are large enough that shared codebase coordination becomes the bottleneck.

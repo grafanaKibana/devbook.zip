@@ -1,14 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Patterns
-level:
-  - "2"
-priority: High
-status: Done
-
 publish: true
+created: 2026-07-05T10:53:43.323+03:00
+modified: 2026-07-05T10:53:43.323+03:00
 ---
 
 # Intro
@@ -16,36 +9,51 @@ publish: true
 Event Sourcing stores each aggregate's state as an ordered stream of domain events instead of saving only the latest row snapshot. That event history gives you a built-in audit trail, enables temporal queries like "what did we believe at 10:15 yesterday", and allows replay when you need to rebuild read models or recover from projection bugs. You usually reach for it when business value depends on immutable history, traceability, and intent-level debugging, not just current state reads. In .NET systems, it often appears together with [[CQRS]] so writes persist events and reads consume projections optimized for query use cases.
 
 ## Mechanism
+
 ### Core flow
+
 1. A command reaches the write model (`PlaceOrder`, `AddItem`, `ShipOrder`).
 2. The aggregate loads its prior event stream and replays events to rebuild current in-memory state.
 3. Business invariants are validated against that rebuilt state.
 4. New domain event(s) are appended to an append-only event store.
 5. Projection handlers consume appended events and update one or more read models.
+
 ### Why append-only matters
+
 - **Immutability**: old facts are never updated in place, so history stays trustworthy.
 - **Auditability**: every state transition is explainable by concrete business events.
 - **Temporal analysis**: you can rehydrate state as-of a version or timestamp.
 - **Operational recovery**: if a projection is corrupted, rebuild it by replaying events.
+
 ### State reconstruction by replay
+
 At load time, you fetch events for a stream (for example `order-123`) and apply them in sequence.
+
 - `OrderPlaced` creates base state.
 - `ItemAdded` mutates line items and totals.
 - `OrderShipped` flips lifecycle status and shipment metadata.
-Your aggregate is deterministic if applying the same ordered events always yields the same state.
+  Your aggregate is deterministic if applying the same ordered events always yields the same state.
+
 ### Projections and read models
+
 Write-side aggregates enforce invariants; read-side models optimize querying.
+
 - A projection can build `OrderSummary` for dashboard lookups.
 - Another projection can build `RevenueByDay` for analytics.
 - A third can drive search indexing.
-Read models are disposable when they are derived only from replayable event history and can be rebuilt deterministically.
+  Read models are disposable when they are derived only from replayable event history and can be rebuilt deterministically.
+
 ### Snapshots
+
 As streams grow, replay cost increases.
-- A snapshot stores aggregate state at a known version (for example, version 5_000).
+
+- A snapshot stores aggregate state at a known version (for example, version 5\_000).
 - Rebuild starts from snapshot then replays only newer events.
 - This reduces load latency but adds extra persistence/versioning logic.
-Snapshots are a performance optimization, not a source of truth.
+  Snapshots are a performance optimization, not a source of truth.
+
 ### Request-to-projection sequence
+
 ```mermaid
 sequenceDiagram
     participant C as Client
@@ -65,7 +73,9 @@ sequenceDiagram
 ```
 
 ## C# Example
+
 The example shows a minimal event-sourced `Order` aggregate with three events and replay-based state rebuild.
+
 ```csharp
 using System;
 using System.Collections.Generic;
@@ -183,7 +193,9 @@ public sealed class Order
     }
 }
 ```
+
 Typical write path in a repository:
+
 ```csharp
 using System.Threading;
 using System.Threading.Tasks;
@@ -209,34 +221,46 @@ public static async Task AddItemToOrderAsync(IEventStore eventStore, Guid orderI
     order.ClearUncommittedEvents();
 }
 ```
+
 `expectedRevision` semantics are store-specific (for example, some stores use `-1` for an empty stream), so use your event store's concurrency API exactly.
 
 ## Event Sourcing + CQRS
+
 Event Sourcing and [[CQRS]] solve different concerns and complement each other well.
+
 - **Write side**: command handlers persist validated domain events to the event store.
 - **Bridge**: those events become the integration boundary between write and read models.
 - **Read side**: projectors consume events and maintain query-optimized denormalized views.
-You can do CQRS without Event Sourcing, and Event Sourcing without strict CQRS separation, but pairing them usually gives the cleanest model when auditability and replay are first-class requirements.
+  You can do CQRS without Event Sourcing, and Event Sourcing without strict CQRS separation, but pairing them usually gives the cleanest model when auditability and replay are first-class requirements.
 
 ## Pitfalls
+
 ### 1) Event schema evolution breaks replay without versioning
+
 - **What can go wrong**: adding/removing/renaming event fields causes old events to deserialize incorrectly.
 - **Why**: event history is immutable; consumers evolve while old payloads remain in prior formats.
 - **Mitigation**: version event contracts, keep upcasters/migrators, and prefer additive schema changes.
+
 ### 2) Event store growth increases replay cost
+
 - **What can go wrong**: long streams increase aggregate load latency and infrastructure cost.
 - **Why**: every command may require replaying many historical events.
 - **Mitigation**: snapshot strategic aggregates, and if you tier cold streams ensure full replay remains possible end-to-end with automated rebuild tests and clear retrieval SLAs.
+
 ### 3) Eventual consistency between store and projections
+
 - **What can go wrong**: user reads stale data immediately after a successful command.
 - **Why**: projection update is asynchronous and may lag during spikes or failures.
 - **Mitigation**: communicate async behavior in UX, use idempotent projectors, expose projection lag metrics.
+
 ### 4) Event soup from overly fine-grained modeling
+
 - **What can go wrong**: huge noisy event streams become hard to reason about during incidents.
 - **Why**: events are modeled as technical deltas instead of meaningful domain facts.
 - **Mitigation**: model events around business intent, establish naming guidelines, and review event taxonomy.
 
 ## Tradeoffs
+
 | Concern | Event Sourcing | Traditional CRUD |
 |---|---|---|
 | Source of truth | Immutable event history | Latest row/document state |
@@ -248,7 +272,9 @@ You can do CQRS without Event Sourcing, and Event Sourcing without strict CQRS s
 Decision rule: prefer CRUD by default; choose Event Sourcing only when immutable audit history, temporal reconstruction, or replay-based recovery are explicit and valuable requirements.
 
 ## Questions
+
 > [!QUESTION]- When does Event Sourcing justify its complexity over CRUD plus an audit-log table?
+>
 > - CRUD + audit table can satisfy compliance for many systems with lower operational overhead.
 > - Event Sourcing is justified when domain behavior depends on historical intent and replay, not only final values.
 > - If you need deterministic rebuild of multiple read models, Event Sourcing is stronger.
@@ -257,13 +283,16 @@ Decision rule: prefer CRUD by default; choose Event Sourcing only when immutable
 > - The honest default is CRUD plus an audit table; Event Sourcing earns its cost only when replay and historical intent are core to the product, not merely compliance.
 
 > [!QUESTION]- How do you evolve event schemas safely without breaking old streams?
+>
 > - Use explicit event versioning strategy.
 > - Prefer backward-compatible additive changes.
 > - Introduce upcasters/adapters for old payloads.
 > - Keep integration tests that replay production-like historical streams.
 > - Treat event contracts as long-lived public interfaces.
 > - Schema evolution is the most common production failure mode in event-sourced systems — especially when teams skip compatibility testing across historical streams.
+
 ## References
+
 - [Event Sourcing - Greg Young FAQ](https://cqrs.nu/faq/event-sourcing)
 - [SimpleCQRS - Greg Young sample repository](https://github.com/gregoryyoung/m-r)
 - [Event Sourcing pattern - Azure Architecture Center](https://learn.microsoft.com/azure/architecture/patterns/event-sourcing)

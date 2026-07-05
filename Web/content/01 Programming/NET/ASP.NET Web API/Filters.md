@@ -1,13 +1,7 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
-level:
-  - "2"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:26.804+03:00
+modified: 2026-07-05T10:53:37.159+03:00
 ---
 
 # Intro
@@ -117,26 +111,29 @@ Note that **`[Authorize]` is itself an authorization filter** — which is why a
 
 > [!QUESTION]- Explain when to choose middleware over an MVC action filter.
 > Expected answer:
+>
 > - Middleware when concern is app-wide and independent of controller/action internals.
 > - Action filter when concern needs `ActionExecutingContext`, action arguments, or action result wrapping.
 > - Middleware runs earlier in pipeline and can affect all endpoints.
 > - Filters are more granular for controller/action scope.
-> Why this matters: this is a common architecture tradeoff in API design interviews.
+>   Why this matters: this is a common architecture tradeoff in API design interviews.
 
 > [!QUESTION]- What is the execution order of ASP.NET Core filter types?
 > Expected answer:
+>
 > - Authorization -> Resource -> Action -> Exception -> Result (with before/after phases where applicable).
 > - Scope affects order: global, then controller, then action.
 > - `IOrderedFilter` can override default order.
-> Why this matters: ordering mistakes cause hidden bugs in validation, caching, and error handling.
+>   Why this matters: ordering mistakes cause hidden bugs in validation, caching, and error handling.
 
 > [!QUESTION]- How do you inject services into a filter safely?
 > Expected answer:
+>
 > - Register filter/service in DI container.
 > - Use `ServiceFilter`/`TypeFilter` or `options.Filters.AddService<TFilter>()`.
 > - Prefer constructor injection and async interfaces.
 > - Avoid `RequestServices.GetService` inside filter bodies unless absolutely necessary.
-> Why this matters: DI misuse in filters causes brittle code and testing pain.
+>   Why this matters: DI misuse in filters causes brittle code and testing pain.
 
 ## Links
 

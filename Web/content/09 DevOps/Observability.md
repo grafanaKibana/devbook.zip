@@ -1,12 +1,7 @@
 ---
-topic:
-  - DevOps
-subtopic: []
-level:
-  - "2"
-priority: High
-status: Done
 publish: true
+created: 2026-07-05T10:54:07.987+03:00
+modified: 2026-07-05T10:54:07.988+03:00
 ---
 
 # Intro

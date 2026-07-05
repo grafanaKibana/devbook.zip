@@ -1,21 +1,14 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
-level:
-  - "3"
-priority: Low
-status: Done
-
 publish: true
+created: 2026-07-05T10:54:06.854+03:00
+modified: 2026-07-05T15:49:35.348+03:00
 ---
 
 # Intro
 
-Tools are the interface between an LLM's reasoning and the external world — they let the model read data, perform computations, and trigger side effects that text generation alone cannot accomplish. In agentic systems, tools determine what the agent can actually *do*: without well-designed tools, even a strong model with perfect reasoning produces useless output. Anthropic's SWE-bench agent team found that tool quality had more impact on task success than prompt quality — switching from relative to absolute file paths in one tool eliminated an entire class of failures.
+Tools are the interface between an LLM's reasoning and the external world — they let the model read data, perform computations, and trigger side effects that text generation alone cannot accomplish. In agentic systems, tools determine what the agent can actually _do_: without well-designed tools, even a strong model with perfect reasoning produces useless output. Anthropic's SWE-bench agent team found that tool quality had more impact on task success than prompt quality — switching from relative to absolute file paths in one tool eliminated an entire class of failures.
 
-The mechanism is function calling: the model receives JSON schemas describing available tools (name, description, parameters), and when it decides a tool is needed, it emits a structured call instead of text. The runtime executes the function, returns the result, and the model continues reasoning. This cycle repeats inside the [[11 AI & ML/LLM/Agents/Agent Loop|agent loop]] until the model produces a final answer.
+The mechanism is function calling: the model receives JSON schemas describing available tools (name, description, parameters), and when it decides a tool is needed, it emits a structured call instead of text. The runtime executes the function, returns the result, and the model continues reasoning. This cycle repeats inside the [[Agent Loop]] until the model produces a final answer.
 
 ```mermaid
 sequenceDiagram
@@ -34,9 +27,9 @@ sequenceDiagram
     R->>U: Answer
 ```
 
-The model never executes tools directly — it only predicts *which* tool to call and *what arguments* to pass. The runtime handles execution, validation, and error propagation. This separation is a security boundary: the model cannot bypass schema validation or invoke tools not in its provided schema.
+The model never executes tools directly — it only predicts _which_ tool to call and _what arguments_ to pass. The runtime handles execution, validation, and error propagation. This separation is a security boundary: the model cannot bypass schema validation or invoke tools not in its provided schema.
 
-For how tools are standardized across clients via a shared protocol, see [[11 AI & ML/LLM/Agents/Model Context Protocol|Model Context Protocol]]. For how the model selects and calls tools within a reasoning loop, see [[11 AI & ML/LLM/Agents/Agent Loop|Agent Loop]].
+For how tools are standardized across clients via a shared protocol, see [[Model Context Protocol]]. For how the model selects and calls tools within a reasoning loop, see [[Agent Loop]].
 
 ## Tool Design Principles
 
@@ -44,13 +37,13 @@ Tool design is API design for an LLM consumer. The same principles that make an 
 
 **Naming.** Use specific, self-documenting function names that signal exactly what the tool does. `search_company_directory` beats `search`. `get_weather_forecast` beats `get_data`. The model picks tools by matching names and descriptions to its current subgoal — ambiguous names cause wrong tool selection.
 
-**Descriptions.** Write tool descriptions for the model, not for humans. Include: what the tool does, when to use it, what it returns, and when *not* to use it. Anthropic recommends including boundary conditions: "Use this to search for employees by name or department. Do not use this for contractor lookup — use search_contractor_database instead."
+**Descriptions.** Write tool descriptions for the model, not for humans. Include: what the tool does, when to use it, what it returns, and when _not_ to use it. Anthropic recommends including boundary conditions: "Use this to search for employees by name or department. Do not use this for contractor lookup — use search\_contractor\_database instead."
 
 **Parameters.** Keep schemas flat and simple. Nested objects degrade argument accuracy. Use enums to constrain values where possible — `{"type": "string", "enum": ["celsius", "fahrenheit"]}` prevents the model from inventing units. Mark required versus optional fields explicitly. Every parameter needs a description that explains both format and purpose.
 
 **Return values.** Return only the fields the model needs for its next reasoning step. Returning a full database row when the model only needs one field wastes context tokens and dilutes attention. Structure returns consistently across tools — if all tools return `{"result": ..., "error": ...}`, the model learns the pattern quickly.
 
-**Error messages as teaching signals.** When a tool call fails, return a structured error that tells the model what went wrong and how to fix it: `{"error": "invalid_date_format", "message": "Expected YYYY-MM-DD, got '12/25/2024'", "hint": "Reformat as 2024-12-25"}`. The model can self-correct on the next [[11 AI & ML/LLM/Agents/Agent Loop|loop iteration]] if the error is specific. Silent failures or generic "internal error" messages leave the model stuck.
+**Error messages as teaching signals.** When a tool call fails, return a structured error that tells the model what went wrong and how to fix it: `{"error": "invalid_date_format", "message": "Expected YYYY-MM-DD, got '12/25/2024'", "hint": "Reformat as 2024-12-25"}`. The model can self-correct on the next [[Agent Loop|loop iteration]] if the error is specific. Silent failures or generic "internal error" messages leave the model stuck.
 
 In the Microsoft Agent Framework (.NET), a well-designed tool looks like this:
 
@@ -106,13 +99,13 @@ Tools in agentic systems run inside a loop where failures compound — one faile
 
 **Timeout handling.** Long-running tools (API calls, database queries) need timeouts with partial result support. Rather than hanging indefinitely, return what you have: `{"status": "partial", "results": [...], "message": "Query timed out after 5s, returning first 50 results"}`. The model can decide whether to proceed with partial data or retry.
 
-**Input validation before execution.** Validate tool arguments *before* performing any side effect. A tool that sends an email should validate the address format before making the API call, not after. Return validation errors as structured feedback so the model can fix and retry.
+**Input validation before execution.** Validate tool arguments _before_ performing any side effect. A tool that sends an email should validate the address format before making the API call, not after. Return validation errors as structured feedback so the model can fix and retry.
 
 ## Caching
 
 Caching reduces latency, cost, and token waste in agent loops. There are two layers to consider:
 
-**Tool result caching.** When the same tool is called with the same arguments within a session, cache the result instead of re-executing. This is especially valuable for read-only tools (database lookups, search queries, API fetches) that the model calls repeatedly. A common production pattern: hash the function name + arguments as a cache key with a short TTL (30s–5min depending on data freshness requirements). In the [[11 AI & ML/LLM/Agents/Agent Loop|agent loop]], this prevents the infinite-loop pitfall where the model calls the same search repeatedly without making progress.
+**Tool result caching.** When the same tool is called with the same arguments within a session, cache the result instead of re-executing. This is especially valuable for read-only tools (database lookups, search queries, API fetches) that the model calls repeatedly. A common production pattern: hash the function name + arguments as a cache key with a short TTL (30s–5min depending on data freshness requirements). In the [[Agent Loop]], this prevents the infinite-loop pitfall where the model calls the same search repeatedly without making progress.
 
 **Prompt caching for tool schemas.** When tool schemas are large (many tools, detailed descriptions), they consume significant input tokens on every request. Anthropic's prompt caching feature caches the system prompt and tool definitions across requests, reducing input token cost by up to 90% and latency by up to 85% for subsequent calls. OpenAI's API also supports automatic prompt caching for tool definitions that remain stable across requests.
 
@@ -130,7 +123,7 @@ Vague descriptions like "Processes data" or "Handles requests" give the model no
 
 ### Tools with Hidden Side Effects
 
-A tool named `get_user_profile` that also logs an analytics event and updates a "last accessed" timestamp has hidden side effects the model cannot reason about. If the model calls it exploratively during planning, the side effects fire unintentionally. Keep read tools read-only. Separate queries from commands — this is [[05 Architecture/Patterns/Architectural Patterns/CQRS|CQRS]] applied to tool design.
+A tool named `get_user_profile` that also logs an analytics event and updates a "last accessed" timestamp has hidden side effects the model cannot reason about. If the model calls it exploratively during planning, the side effects fire unintentionally. Keep read tools read-only. Separate queries from commands — this is [[CQRS]] applied to tool design.
 
 ### Context Degradation from Large Toolsets
 
@@ -166,6 +159,7 @@ Three mechanisms compound:
 ## Questions
 
 > [!QUESTION]- Why is tool design often more impactful than prompt engineering in agentic systems?
+>
 > - In a single LLM call, the prompt is the entire interface — prompt quality is everything
 > - In an agentic system, the model interacts with tools across multiple loop iterations — each tool call is a decision point where errors compound
 > - Wrong tool selection, malformed arguments, or unhelpful error messages cascade across steps
@@ -173,6 +167,7 @@ Three mechanisms compound:
 > - Tradeoff: tool design effort is amortized across all agent runs; prompt tweaks are fragile and session-specific
 
 > [!QUESTION]- How would you decide between one broad tool and many narrow tools?
+>
 > - Narrow tools reduce parameter count and ambiguity — fewer hallucinated arguments per call
 > - Too many tools degrades selection accuracy — MCPGauge measured 9.5% accuracy drop from irrelevant tool presence alone
 > - Split when a tool serves genuinely different use cases needing different descriptions and parameters
@@ -181,6 +176,7 @@ Three mechanisms compound:
 > - Tradeoff: per-call reliability (narrow) versus selection accuracy (fewer options)
 
 > [!QUESTION]- What makes a tool safe for caching in an agent loop versus unsafe?
+>
 > - Cache-safe: read-only (no side effects), deterministic output for same inputs within TTL, acceptable staleness
 > - Examples: database lookups, weather API calls, search queries — all safe with short TTLs
 > - Cache-unsafe: mutates state (create/update/delete), result depends on rapidly changing context, caching would mask failures

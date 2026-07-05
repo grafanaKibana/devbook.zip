@@ -1,13 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Patterns
-level:
-  - "4"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:43.307+03:00
+modified: 2026-07-05T15:49:35.096+03:00
 ---
 
 # Repository and Unit of Work
@@ -142,12 +136,14 @@ The spec is a plain object (unit-testable without a DB), the repository keeps on
 ## Questions
 
 > [!QUESTION]- Why does EF Core's DbContext already implement the Unit of Work pattern?
+>
 > - `DbContext` tracks all changes to loaded entities in its change tracker.
 > - `SaveChangesAsync()` wraps all pending inserts, updates, and deletes in a single database transaction.
 > - This means multiple repository operations within one request share the same `DbContext` instance and commit atomically — exactly what Unit of Work provides.
 > - Tradeoff: this only works if all repositories share the same `DbContext` instance (Scoped lifetime in ASP.NET Core DI). If you accidentally register `DbContext` as Singleton or Transient, the Unit of Work semantics break.
 
 > [!QUESTION]- When is a generic `IRepository<T>` an anti-pattern?
+>
 > - A generic repository exposes the same interface for every entity, including operations that don't make sense for some aggregates (e.g., `GetAll()` on an `Order` aggregate with millions of rows).
 > - It encourages callers to treat all entities the same, bypassing aggregate-specific access patterns and invariants.
 > - It often leaks `IQueryable<T>`, coupling callers to EF Core.
@@ -158,4 +154,4 @@ The spec is a plain object (unit-testable without a DB), the repository keeps on
 - [Repository pattern (Martin Fowler)](https://martinfowler.com/eaaCatalog/repository.html) — original pattern definition from Patterns of Enterprise Application Architecture; explains the collection metaphor and when to use it.
 - [Unit of Work pattern (Martin Fowler)](https://martinfowler.com/eaaCatalog/unitOfWork.html) — original definition; explains change tracking and the commit boundary.
 - [Repository pattern in ASP.NET Core (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/mvc/overview/older-versions/getting-started-with-ef-5-using-mvc-4/implementing-the-repository-and-unit-of-work-patterns-in-an-asp-net-mvc-application) — practical implementation guide with EF Core, including the UoW interface and DI registration.
-- [[05 Architecture/Patterns/Architectural Patterns/Domain-Driven Design|Domain-Driven Design]] — DDD context for Repositories: they should be defined per Aggregate Root and expose domain-meaningful query methods.
+- [[Domain-Driven Design]] — DDD context for Repositories: they should be defined per Aggregate Root and expose domain-meaningful query methods.

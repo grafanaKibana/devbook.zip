@@ -1,16 +1,9 @@
 ---
-icon: building-2
-color: "#eab308"
-topic:
-  - Architecture
-subtopic: []
+publish: true
+created: 2026-07-05T10:53:43.304+03:00
+modified: 2026-07-05T10:53:43.304+03:00
 tags:
   - FolderNote
-publish: true
-priority: High
-level:
-  - '4'
-status: Not-Started
 ---
 
 # Intro

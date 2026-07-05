@@ -1,14 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Distributed Systems
-level:
-  - "2"
-priority: High
-status: Done
-
 publish: true
+created: 2026-07-05T10:53:43.319+03:00
+modified: 2026-07-05T10:53:43.319+03:00
 ---
 
 # Intro

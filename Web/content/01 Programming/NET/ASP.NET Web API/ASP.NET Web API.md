@@ -1,16 +1,9 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
-level:
-  - "4"
-priority: High
+publish: true
+created: 2026-07-05T10:53:26.812+03:00
+modified: 2026-07-05T10:53:37.161+03:00
 tags:
   - FolderNote
-
-publish: true
-status: Creation
 ---
 
 # Intro
@@ -58,7 +51,7 @@ public sealed class OrdersController : ControllerBase
     public ActionResult<OrderDto> GetById(string id) => Ok(new OrderDto(id));
 }
 ```
- 
+
 ## Questions
 
 > [!QUESTION]- Where should authentication and authorization live in an ASP.NET Core API?

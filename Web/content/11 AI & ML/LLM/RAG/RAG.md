@@ -1,15 +1,9 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+publish: true
+created: 2026-07-05T10:54:06.864+03:00
+modified: 2026-07-05T17:36:35.545+03:00
 tags:
   - FolderNote
-priority: High
-level:
-  - "2"
-publish: true
-status: Done
 ---
 
 # Intro
@@ -30,11 +24,11 @@ flowchart LR
     G --> V[Groundedness and Citation Checks]
 ```
 
-Each stage has its own page: [[11 AI & ML/LLM/RAG/Query Translation|Query Translation]] rewrites the user question into retrieval-friendly variants, [[11 AI & ML/LLM/RAG/Chunking|Chunking]] defines the unit of retrieval, [[11 AI & ML/LLM/RAG/Retrieval|Retrieval]] finds candidate evidence over a [[11 AI & ML/LLM/RAG/Vector Databases|vector database]], [[11 AI & ML/LLM/RAG/Re-ranking|Re-ranking]] orders it, [[11 AI & ML/LLM/RAG/Evaluation/Evaluation|RAG Evaluation]] and [[11 AI & ML/LLM/RAG/Monitoring|Monitoring]] measure it offline and in production, and [[11 AI & ML/LLM/RAG/Caching|Caching]] keeps the whole pipeline fast and affordable.
+Each stage has its own page: [[Query Translation]] rewrites the user question into retrieval-friendly variants, [[Chunking]] defines the unit of retrieval, [[Retrieval]] finds candidate evidence over a [[Vector Databases|vector database]], [[Re-ranking]] orders it, [[11 AI & ML/LLM/RAG/Evaluation/Evaluation|RAG Evaluation]] and [[Monitoring]] measure it offline and in production, and [[11 AI & ML/LLM/RAG/Caching|Caching]] keeps the whole pipeline fast and affordable.
 
 ## Choosing a Pattern
 
-Production RAG architectures range from a single retrieve-then-generate pass to agentic, graph-backed systems. The full catalog — twelve patterns with diagrams, fit criteria, risks, and a selection guide — lives in [[11 AI & ML/LLM/RAG/RAG Patterns|RAG Patterns]]. The short version, in adoption order:
+Production RAG architectures range from a single retrieve-then-generate pass to agentic, graph-backed systems. The full catalog — twelve patterns with diagrams, fit criteria, risks, and a selection guide — lives in [[RAG Patterns]]. The short version, in adoption order:
 
 - **Baseline single-pass RAG** — embed, retrieve, generate; the mandatory starting point and measurement baseline.
 - **Hybrid search plus reranking** — lexical + vector retrieval with a rerank stage; the mainstream production default.
@@ -49,11 +43,11 @@ Production RAG architectures range from a single retrieve-then-generate pass to 
 - **GraphRAG** — knowledge-graph indexing for relationship and global-synthesis questions.
 - **Corrective / self-reflective RAG** — evaluator-gated retrieval and generation; research-stage for most teams.
 
-Ship the baseline first, add [[11 AI & ML/LLM/RAG/Retrieval#Hybrid Retrieval — Vector + Keyword|hybrid search]] and reranking next, and adopt anything further down only for a failure mode your [[11 AI & ML/LLM/RAG/Evaluation/Evaluation|evaluation]] actually shows.
+Ship the baseline first, add [[Retrieval#Hybrid Retrieval — Vector + Keyword|hybrid search]] and reranking next, and adopt anything further down only for a failure mode your [[11 AI & ML/LLM/RAG/Evaluation/Evaluation|evaluation]] actually shows.
 
 ## Operational Baselines
 
-- Gate every pattern behind a feature flag. Measure [[11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics|retrieval precision]], [[11 AI & ML/LLM/RAG/Monitoring#LLM-as-Judge Metrics|generation faithfulness]], latency p95, and cost per query before and after.
+- Gate every pattern behind a feature flag. Measure [[Monitoring#Retrieval Quality Metrics|retrieval precision]], [[Monitoring#LLM-as-Judge Metrics|generation faithfulness]], latency p95, and cost per query before and after.
 - Set hard iteration caps on looping patterns (iterative, agentic) to bound latency and cost. For corrective/self-reflective patterns, cap retry count and reject unsupported output instead of looping until the answer looks good.
 - Monitor query drift and noise accumulation in iterative patterns. Track semantic similarity between the original query and each iteration's retrieval query.
 - Cache aggressively: community summaries (GraphRAG), query rewrites, multi-query result sets, contextual chunk enrichments, reasoning chains, and agent tool outputs. See [[11 AI & ML/LLM/RAG/Caching|Caching]] for cache-key risks.
@@ -61,7 +55,7 @@ Ship the baseline first, add [[11 AI & ML/LLM/RAG/Retrieval#Hybrid Retrieval —
 
 ## RAG vs Fine-Tuning
 
-RAG and [[11 AI & ML/LLM/Fine-tuning|fine-tuning]] optimize different parts of the system. RAG externalizes knowledge into retrievable sources, while fine-tuning changes model behavior in weights. Choosing correctly prevents expensive retraining for problems that retrieval can solve more safely.
+RAG and [[Fine-tuning]] optimize different parts of the system. RAG externalizes knowledge into retrievable sources, while fine-tuning changes model behavior in weights. Choosing correctly prevents expensive retraining for problems that retrieval can solve more safely.
 
 Example: if product policy changes weekly, RAG can update by reindexing documents. Fine-tuning would require repeated retraining cycles and still provide weak source traceability.
 
@@ -90,7 +84,7 @@ The combined pattern — fine-tune the model for behavior (format, tone, refusal
 > When the failure is behavioral, not factual: the model retrieves the right evidence but keeps producing the wrong format, tone, or policy behavior despite prompt iteration. Retrieval upgrades cannot fix behavior encoded in weights. Conversely, fine-tuning cannot fix missing or stale knowledge — it bakes in a snapshot that starts aging immediately and provides no source traceability. Diagnose first: if faithfulness is high but style or policy compliance is low, fine-tune; if evidence is missing or wrong, improve retrieval.
 
 > [!QUESTION]- When a RAG answer is wrong, how do you tell whether retrieval or generation is at fault?
-> Split the pipeline and score the two halves separately, because the fixes are opposite. First check whether the right evidence was retrieved at all: if the relevant chunk never made it into the context, it's a retrieval failure — improve chunking, hybrid search, or reranking, and no amount of prompt tuning will help. If the evidence *was* present but the answer ignored or contradicted it, that's a generation/faithfulness failure — tighten the prompt, add groundedness checks, or use a stronger model. This is exactly why RAG evaluation reports retrieval and generation as separate metrics; a single end-to-end accuracy number hides which half to fix.
+> Split the pipeline and score the two halves separately, because the fixes are opposite. First check whether the right evidence was retrieved at all: if the relevant chunk never made it into the context, it's a retrieval failure — improve chunking, hybrid search, or reranking, and no amount of prompt tuning will help. If the evidence _was_ present but the answer ignored or contradicted it, that's a generation/faithfulness failure — tighten the prompt, add groundedness checks, or use a stronger model. This is exactly why RAG evaluation reports retrieval and generation as separate metrics; a single end-to-end accuracy number hides which half to fix.
 
 ## References
 

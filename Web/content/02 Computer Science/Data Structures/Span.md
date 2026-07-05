@@ -1,13 +1,7 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
-level:
-  - "4"
-priority: Medium
-status: Done
 publish: true
+created: 2026-07-05T10:53:23.309+03:00
+modified: 2026-07-05T10:53:37.205+03:00
 ---
 
 # Intro
@@ -52,18 +46,21 @@ Console.WriteLine(values[2]); // 300
 ## Questions
 
 > [!QUESTION]- Why is `Span<T>` a `ref struct`?
+>
 > - A `ref struct` is confined to the stack: it cannot be boxed, captured in a lambda, stored in a class field, or used as a generic type argument.
 > - This guarantees the span never outlives the buffer it points to (stack, `stackalloc`, or array), preserving memory safety.
 > - The same restriction is why it cannot cross `await` or `yield` — those would move it to the heap.
 > - You give up flexibility (no async, no fields) for zero-copy, allocation-free access, so it earns its place only on synchronous hot paths.
 
 > [!QUESTION]- When should you choose `Memory<T>` instead of `Span<T>`?
+>
 > - Use `Memory<T>` when the buffer must survive an async boundary, be stored in a field, or live beyond one synchronous scope.
 > - `Memory<T>` is a heap-storable handle; call `.Span` to get a `Span<T>` view at the point of synchronous use.
 > - `Span<T>` remains the right choice for the tight synchronous parsing/slicing loop itself.
 > - `Memory<T>` buys async/storage flexibility at the cost of one extra indirection — use `Span<T>` where every nanosecond counts, `Memory<T>` where lifetime demands it.
 
 > [!QUESTION]- What is the difference between `Span<T>` and `ReadOnlySpan<T>`?
+>
 > - `ReadOnlySpan<T>` is the same windowed view but forbids writes through it, so it can wrap immutable data such as `string` (as `ReadOnlySpan<char>`).
 > - Methods should accept `ReadOnlySpan<T>` when they only read, which makes them callable from the widest set of sources.
 > - `Span<T>` converts implicitly to `ReadOnlySpan<T>`, but not the reverse.

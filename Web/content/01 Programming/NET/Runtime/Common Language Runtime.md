@@ -1,14 +1,7 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
-level:
-  - "4"
-priority: High
-status: Ready to Repeat
-
 publish: true
+created: 2026-07-05T10:53:26.756+03:00
+modified: 2026-07-05T15:49:36.997+03:00
 ---
 
 # Intro
@@ -63,6 +56,7 @@ flowchart TB
 ## Managed vs Unmanaged Code
 
 **Managed code** runs under the CLR. The runtime provides:
+
 - Automatic memory management (GC)
 - Type safety and bounds checking
 - Structured exception handling
@@ -95,16 +89,16 @@ Beep(440, 500); // A4 note for 500ms
 
 - **Tier 0** — a quick, minimally-optimized compile on first call, so startup is fast.
 - **Tier 1** — once a method is called enough times (or loops enough), it's recompiled with full optimizations in the background and the call site is swapped to the fast version.
-- **OSR (On-Stack Replacement)** lets a long-running loop that started in Tier 0 jump to optimized code *mid-execution*, without waiting for the next call — important for `Main`-style hot loops.
+- **OSR (On-Stack Replacement)** lets a long-running loop that started in Tier 0 jump to optimized code _mid-execution_, without waiting for the next call — important for `Main`-style hot loops.
 - **Dynamic PGO** (default in .NET 8) instruments Tier 0 code to gather real call/branch data, then feeds it into Tier 1 for guided devirtualization and inlining. `ReadyToRun` images participate as a pre-baked Tier-0-equivalent.
 
 ### Assembly Loading and the Type System
 
-The loader resolves and loads assemblies (IL + metadata) into an **`AssemblyLoadContext`**. A *collectible* `AssemblyLoadContext` can be unloaded, which is how plugin hosts load and later drop assemblies without recycling the process. At the type-system level the CLR represents each loaded type by a **MethodTable** (vtable, interface map, type flags); every reference-type object carries an **object header** (sync-block index used for `lock`/hash code) plus a MethodTable pointer. Generics are instantiated lazily: the runtime shares one JIT-compiled body across all reference-type arguments but generates a specialized body per value-type argument (why `List<int>` is as fast as hand-written code — see [[01 Programming/NET/CSharp/Fundamentals/Generics|Generics]]).
+The loader resolves and loads assemblies (IL + metadata) into an **`AssemblyLoadContext`**. A _collectible_ `AssemblyLoadContext` can be unloaded, which is how plugin hosts load and later drop assemblies without recycling the process. At the type-system level the CLR represents each loaded type by a **MethodTable** (vtable, interface map, type flags); every reference-type object carries an **object header** (sync-block index used for `lock`/hash code) plus a MethodTable pointer. Generics are instantiated lazily: the runtime shares one JIT-compiled body across all reference-type arguments but generates a specialized body per value-type argument (why `List<int>` is as fast as hand-written code — see [[Generics]]).
 
 ### Memory Model and Exceptions
 
-The CLR defines a memory model that governs how writes become visible across threads; `volatile`, `Interlocked`, and explicit memory barriers (`Thread.MemoryBarrier`) are the tools for ordering guarantees the JIT/CPU would otherwise be free to reorder. Exceptions use a **two-pass model**: a first pass walks up the stack evaluating `catch`/`when` filters to *select* a handler (the stack is still intact, which is why filters see the original state), then a second pass unwinds, running `finally` blocks on the way to the chosen handler.
+The CLR defines a memory model that governs how writes become visible across threads; `volatile`, `Interlocked`, and explicit memory barriers (`Thread.MemoryBarrier`) are the tools for ordering guarantees the JIT/CPU would otherwise be free to reorder. Exceptions use a **two-pass model**: a first pass walks up the stack evaluating `catch`/`when` filters to _select_ a handler (the stack is still intact, which is why filters see the original state), then a second pass unwinds, running `finally` blocks on the way to the chosen handler.
 
 ## Pitfalls
 

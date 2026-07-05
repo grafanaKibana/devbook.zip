@@ -1,13 +1,7 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
-level:
-  - "4"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:23.518+03:00
+modified: 2026-07-05T10:53:37.206+03:00
 ---
 
 # Intro
@@ -16,7 +10,7 @@ A circular buffer (ring buffer) is a fixed-size array treated as if its ends wer
 
 ## How It Works
 
-Keep a backing array of size *n*, a `head` (next read), a `tail` (next write), and a count.
+Keep a backing array of size _n_, a `head` (next read), a `tail` (next write), and a count.
 
 - **Enqueue(x)**: write at `tail`, advance `tail = (tail + 1) % n`.
 - **Dequeue()**: read at `head`, advance `head = (head + 1) % n`.
@@ -89,7 +83,7 @@ public class CircularBuffer<T>
 > It writes into a pre-allocated fixed array and reuses slots via index wrap-around, so steady-state operation allocates nothing and creates no GC pressure. That matters on hot paths (audio, networking, high-frequency telemetry) where per-item allocation would cause latency spikes from garbage collection.
 
 > [!QUESTION]- When should you overwrite the oldest element instead of rejecting new writes?
-> Overwrite when you only care about the *most recent* N items and old data is disposable — debug ring logs, latest sensor readings, a frame buffer. Reject (or block/backpressure) when every item must be processed — a task queue — so you don't silently drop work.
+> Overwrite when you only care about the _most recent_ N items and old data is disposable — debug ring logs, latest sensor readings, a frame buffer. Reject (or block/backpressure) when every item must be processed — a task queue — so you don't silently drop work.
 
 ## References
 

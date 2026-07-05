@@ -1,13 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - System Architecture
-level:
-  - "3"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:43.317+03:00
+modified: 2026-07-05T15:49:36.225+03:00
 ---
 
 # Service-Oriented Architecture
@@ -30,7 +24,7 @@ SOA and microservices share the same decomposition philosophy but differ in scop
 **Key distinction**: SOA uses an ESB as a central integration hub; microservices prefer "smart endpoints, dumb pipes" — the services contain the logic, the message broker is just a transport.
 
 > [!NOTE]
-> The ESB didn't vanish — it **evolved and decomposed**. Its routing/auth/rate-limiting concerns moved to a thin edge **[[05 Architecture/Distributed Systems/API Gateway|API Gateway]]**, its async transport to a **[[05 Architecture/Distributed Systems/Message Queues/Message Queues|message broker]]** (Kafka/RabbitMQ), and its orchestration to either the services themselves (**choreography**) or a dedicated workflow engine. The microservices "dumb pipe" is the lesson learned from ESBs accreting too much logic.
+> The ESB didn't vanish — it **evolved and decomposed**. Its routing/auth/rate-limiting concerns moved to a thin edge **[[API Gateway]]**, its async transport to a **[[Message Queues|message broker]]** (Kafka/RabbitMQ), and its orchestration to either the services themselves (**choreography**) or a dedicated workflow engine. The microservices "dumb pipe" is the lesson learned from ESBs accreting too much logic.
 
 ## When SOA Still Applies
 
@@ -99,6 +93,6 @@ The contract boundary is the key SOA discipline: services communicate through pu
 
 - [Service-oriented architecture (Wikipedia)](https://en.wikipedia.org/wiki/Service-oriented_architecture) — historical context, ESB patterns, and the evolution from SOA to microservices.
 - [Microservices vs SOA (Martin Fowler)](https://martinfowler.com/articles/microservices.html#MicroservicesAndSOA) — Fowler's comparison of the two approaches, explaining why microservices emerged as a reaction to SOA's centralized governance model.
-- [[05 Architecture/System Architecture/Microservices|Microservices]] — the modern evolution of SOA: fine-grained services, decentralized data, independent deployment, and "smart endpoints, dumb pipes."
+- [[Microservices]] — the modern evolution of SOA: fine-grained services, decentralized data, independent deployment, and "smart endpoints, dumb pipes."
 - [Azure Integration Services overview (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/architecture/reference-architectures/enterprise-integration/basic-enterprise-integration) — Microsoft's modern SOA integration reference architecture using API Management, Logic Apps, and Service Bus as the integration layer.
 - [SOA Manifesto](http://www.soa-manifesto.org/) — the original SOA design principles: service contracts, loose coupling, abstraction, reusability, autonomy, statelessness, discoverability, and composability.

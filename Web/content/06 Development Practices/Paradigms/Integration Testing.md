@@ -1,13 +1,7 @@
 ---
-topic:
-  - Development Practices
-subtopic:
-  - Paradigms
-level:
-  - "3"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:48.577+03:00
+modified: 2026-07-05T10:53:48.577+03:00
 ---
 
 # Integration Testing
@@ -84,11 +78,11 @@ public class DatabaseFixture : IAsyncLifetime
 ```
 
 > [!WARNING]
-> **EF Core In-Memory is officially discouraged for testing.** Microsoft's own guidance says it is *not* a relational database — it ignores constraints, transactions, concurrency tokens, raw SQL, and most provider-specific behavior, so it gives **false confidence**. Prefer **SQLite in-memory** (a real relational engine, still fast and Docker-free) for lightweight DB tests, and **Testcontainers** with the actual database when you need full fidelity. Reserve EF In-Memory for the rare case where you truly only exercise LINQ-to-objects.
+> **EF Core In-Memory is officially discouraged for testing.** Microsoft's own guidance says it is _not_ a relational database — it ignores constraints, transactions, concurrency tokens, raw SQL, and most provider-specific behavior, so it gives **false confidence**. Prefer **SQLite in-memory** (a real relational engine, still fast and Docker-free) for lightweight DB tests, and **Testcontainers** with the actual database when you need full fidelity. Reserve EF In-Memory for the rare case where you truly only exercise LINQ-to-objects.
 
 ## Where Integration Tests Sit: the Test Pyramid
 
-The **test pyramid** (Mike Cohn) is the standard model for *how many* of each test to write: a wide base of fast **unit** tests, fewer **integration** tests in the middle, and a thin top of slow **end-to-end** tests. The ratios follow from cost — unit tests are cheap and pinpoint failures; E2E tests are slow, flaky, and hard to diagnose. Integration tests are the pragmatic middle: enough to prove the wiring (DB, HTTP, serialization, DI) without the brittleness of a full E2E suite.
+The **test pyramid** (Mike Cohn) is the standard model for _how many_ of each test to write: a wide base of fast **unit** tests, fewer **integration** tests in the middle, and a thin top of slow **end-to-end** tests. The ratios follow from cost — unit tests are cheap and pinpoint failures; E2E tests are slow, flaky, and hard to diagnose. Integration tests are the pragmatic middle: enough to prove the wiring (DB, HTTP, serialization, DI) without the brittleness of a full E2E suite.
 
 The classic anti-pattern is the **"ice-cream cone"** — inverting the pyramid with mostly manual/E2E tests and few unit tests, producing a slow, flaky, expensive-to-maintain suite. Aim for many unit, some integration, few E2E.
 
@@ -131,6 +125,7 @@ The classic anti-pattern is the **"ice-cream cone"** — inverting the pyramid w
 ## Questions
 
 > [!QUESTION]- What does `WebApplicationFactory` test that unit tests cannot?
+>
 > - DI registration: if a service is missing from the container, the integration test fails at startup.
 > - Middleware ordering: authentication, authorization, exception handling, and routing all run in the real pipeline.
 > - Serialization contracts: JSON serialization settings (camelCase, nullable handling, custom converters) are applied.
@@ -138,6 +133,7 @@ The classic anti-pattern is the **"ice-cream cone"** — inverting the pyramid w
 > - Tradeoff: `WebApplicationFactory` tests are slower than unit tests (seconds vs milliseconds). Run them in a separate test project so they don't slow down the unit test feedback loop.
 
 > [!QUESTION]- When should you use Testcontainers instead of EF In-Memory?
+>
 > - When your queries use SQL features that EF In-Memory doesn't support: raw SQL, stored procedures, database constraints, `RETURNING` clauses, CTEs.
 > - When you need to test database migrations (EF In-Memory doesn't run migrations).
 > - When a bug was caused by SQL behavior that the in-memory provider masked.

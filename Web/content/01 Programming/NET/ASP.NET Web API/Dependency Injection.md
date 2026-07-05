@@ -1,13 +1,7 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
-level:
-  - "1"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:26.836+03:00
+modified: 2026-07-05T17:36:33.796+03:00
 ---
 
 # Dependency Injection in ASP.NET Core
@@ -77,7 +71,7 @@ public sealed class NotificationService(IEnumerable<INotificationSender> senders
 
 ## Keyed Services (.NET 8)
 
-When you have multiple implementations and want to pick a *specific* one (not all of them), register and resolve by key:
+When you have multiple implementations and want to pick a _specific_ one (not all of them), register and resolve by key:
 
 ```csharp
 builder.Services.AddKeyedScoped<INotificationSender, EmailNotificationSender>("email");
@@ -131,7 +125,7 @@ public sealed class BackgroundWorker(IServiceScopeFactory scopeFactory) : Backgr
 The container **owns disposal of the instances it creates**: when a scope ends it disposes the `IDisposable`/`IAsyncDisposable` services it resolved in that scope, and singletons are disposed when the root provider is disposed. Two consequences:
 
 - A **transient `IDisposable` resolved from the root provider lives until the app shuts down** — the container holds it to dispose it later, so a "transient" disposable can pile up as a leak. Resolve disposables from a scope, or don't make hot transients disposable.
-- **Don't register an instance you also dispose yourself** (`AddSingleton(myInstance)` then `using`) — you'll double-dispose. If *you* own the lifetime, register a factory that returns it without the container taking ownership, or let the container own it exclusively.
+- **Don't register an instance you also dispose yourself** (`AddSingleton(myInstance)` then `using`) — you'll double-dispose. If _you_ own the lifetime, register a factory that returns it without the container taking ownership, or let the container own it exclusively.
 
 ## Tradeoffs
 
@@ -157,4 +151,4 @@ The container **owns disposal of the instances it creates**: when a scope ends i
 - [Dependency injection guidelines](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection-guidelines) — best practices including captive dependency avoidance, scope validation, and testing patterns.
 - [IServiceScopeFactory (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.dependencyinjection.iservicescopefactory) — API reference for creating manual service scopes; the correct pattern for Singletons that need Scoped dependencies.
 - [[05 Architecture/Patterns/Dependency Injection|Dependency Injection]] — the general DI pattern: why it improves testability and decoupling, independent of ASP.NET Core.
-- [[06 Development Practices/Principles/IoC (Holywood Principle)|IoC (Hollywood Principle)]] — the underlying principle: the framework provides dependencies rather than your code creating them.
+- [[IoC (Holywood Principle)|IoC (Hollywood Principle)]] — the underlying principle: the framework provides dependencies rather than your code creating them.

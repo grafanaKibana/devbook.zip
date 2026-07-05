@@ -1,13 +1,7 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
-level:
-  - "4"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:27.047+03:00
+modified: 2026-07-05T10:53:37.187+03:00
 ---
 
 # Intro
@@ -149,12 +143,12 @@ The whole point of a struct (no allocation) is lost the moment it's **boxed**. T
 
 ## Memory Layout
 
-A struct's size is the sum of its fields plus **padding** the runtime inserts for alignment (a `bool` + `long` field often occupies 16 bytes, not 9). That alignment cost is part of *why* the "keep structs ≤16 bytes" heuristic exists — beyond that, copy cost outweighs the allocation you saved. `[StructLayout(LayoutKind.Sequential)]` (or `Explicit` with `[FieldOffset]`) controls layout for interop/SIMD; `[StructLayout(LayoutKind.Auto)]` lets the runtime reorder fields to minimize padding.
+A struct's size is the sum of its fields plus **padding** the runtime inserts for alignment (a `bool` + `long` field often occupies 16 bytes, not 9). That alignment cost is part of _why_ the "keep structs ≤16 bytes" heuristic exists — beyond that, copy cost outweighs the allocation you saved. `[StructLayout(LayoutKind.Sequential)]` (or `Explicit` with `[FieldOffset]`) controls layout for interop/SIMD; `[StructLayout(LayoutKind.Auto)]` lets the runtime reorder fields to minimize padding.
 
 ## Modern Struct Features
 
 - **Primary constructors (C# 12)** work on structs too: `public readonly struct Point(int x, int y) { public int X => x; }`.
-- **`ref` fields and `scoped` (C# 11)** let a `ref struct` *store* a reference (this is how `Span<T>` holds a pointer into memory), with `scoped` constraining how long that reference may escape — the compiler enforces it can't outlive the data it points to.
+- **`ref` fields and `scoped` (C# 11)** let a `ref struct` _store_ a reference (this is how `Span<T>` holds a pointer into memory), with `scoped` constraining how long that reference may escape — the compiler enforces it can't outlive the data it points to.
 
 ## Pitfalls
 
@@ -187,18 +181,21 @@ Mark structs `readonly` to make this class of bug impossible.
 
 > [!QUESTION]- For a high-throughput service processing 100k messages per second (Id, Timestamp, Status), would class or struct be the better model, and why?
 > A `readonly struct` (or `readonly record struct`) is the best fit:
+>
 > - Total payload is roughly 28 bytes before alignment (Guid 16 + DateTime 8 + enum ~4), so it is above the strict 16-byte heuristic and should be benchmarked in your workload.
 > - Value semantics avoid a separate object allocation per message when values stay inline and are not boxed/captured, reducing GC pressure at 100k/s.
 > - `readonly` prevents accidental mutation.
 > - If the message grows or needs richer behavior/reference sharing, a class can become the better tradeoff.
 
 > [!QUESTION]- Why does mutating a struct returned from a property or indexer not compile (or silently do nothing)?
+>
 > - Property/indexer access usually returns a value copy, not a reference to the original storage.
 > - Mutating that copy would be discarded immediately, so the compiler blocks common forms (for example CS1612 scenarios).
 > - Even when a pattern compiles, mutations can affect only the temporary copy, not the original struct instance.
 > - Mitigate with `readonly struct` for safer value semantics, or expose `ref`/`ref readonly` returns when true by-reference behavior is required.
 
 > [!QUESTION]- Why does `ValueType.Equals` perform so poorly on structs with reference-type fields? What should you do about it?
+>
 > - Default value-type equality is field-by-field and can be expensive in hot paths.
 > - Depending on type shape/runtime path, equality can include reflection-like overhead and extra indirection.
 > - Using such structs as keys in dictionaries/sets amplifies the cost because equality and hashing are called frequently.

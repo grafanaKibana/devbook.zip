@@ -1,15 +1,9 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
+publish: true
+created: 2026-07-05T10:53:23.354+03:00
+modified: 2026-07-05T10:53:37.205+03:00
 tags:
   - FolderNote
-publish: true
-level:
-  - '4'
-status: Done
-priority: High
 ---
 
 # Intro

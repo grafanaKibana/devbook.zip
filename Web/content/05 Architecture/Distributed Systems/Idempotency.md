@@ -1,13 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Distributed Systems
-level:
-  - "2"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:43.311+03:00
+modified: 2026-07-05T15:49:36.217+03:00
 ---
 
 # Intro
@@ -76,7 +70,7 @@ sequenceDiagram
     Api-->>Client: Return cached result
 ```
 
-Idempotency is especially important for [[05 Architecture/Distributed Systems/Message Queues/Message Queues|Message Queues]] consumers and for multi step workflows like [[05 Architecture/Distributed Systems/Distributed Transactions|Distributed Transactions]] where partial failures are expected.
+Idempotency is especially important for [[Message Queues]] consumers and for multi step workflows like [[Distributed Transactions]] where partial failures are expected.
 
 ## HTTP Methods and Idempotency
 
@@ -88,7 +82,7 @@ Interview critical distinction:
 - `PUT` is idempotent because it replaces the representation with a full target state.
 - `PATCH` applies a delta, and applying the same delta repeatedly can compound side effects unless the patch document itself is designed to be idempotent.
 
-Even with idempotent methods, distributed replicas can still show temporary divergence depending on [[05 Architecture/Distributed Systems/Consistency Models|Consistency Models]], so method semantics and system consistency level are separate concerns.
+Even with idempotent methods, distributed replicas can still show temporary divergence depending on [[Consistency Models]], so method semantics and system consistency level are separate concerns.
 
 ## .NET Implementation Example
 
@@ -284,6 +278,7 @@ Decision rule: start with database uniqueness for core entities, add idempotency
 ## Questions
 
 > [!QUESTION]- Why is idempotency essential for reliable retry strategies, and what happens without it?
+>
 > - Retries are a certainty in distributed systems because clients cannot always distinguish failure from delayed success.
 > - Idempotency converts ambiguous outcomes into deterministic behavior, so retries do not amplify side effects.
 > - Without it, transient faults become correctness bugs such as duplicate charges or duplicate shipment commands.
@@ -291,6 +286,7 @@ Decision rule: start with database uniqueness for core entities, add idempotency
 > - Stronger idempotency guarantees cost extra storage, key lifecycle management, and stricter request validation.
 
 > [!QUESTION]- How do you implement idempotency for a payment endpoint that processes charges through a third party provider?
+>
 > - Require `Idempotency-Key` for `POST /payments` and hash a canonical request payload.
 > - Use an atomic insert into an idempotency table keyed by that header to gate concurrent duplicates.
 > - If key exists with matching hash and completed state, return cached response with same status code.

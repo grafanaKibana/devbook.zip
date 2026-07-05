@@ -1,13 +1,7 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
-level:
-  - "4"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:23.558+03:00
+modified: 2026-07-05T15:49:34.910+03:00
 ---
 
 # Intro
@@ -20,14 +14,14 @@ A tree organizes nodes so each node has at most one parent (except the root) and
 
 **Traversal orders** define processing sequence:
 
-- *Pre-order* (root → left → right): used to serialize or copy a tree.
-- *In-order* (left → root → right): visits nodes in sorted order for a BST — the basis for `SortedSet<T>` enumeration.
-- *Post-order* (left → right → root): used when children must be processed before parents, such as deleting a subtree or evaluating an expression tree.
-- *BFS (level-order)*: uses a `Queue<T>` to visit nodes level by level, natural for shortest-path in unweighted trees.
+- _Pre-order_ (root → left → right): used to serialize or copy a tree.
+- _In-order_ (left → root → right): visits nodes in sorted order for a BST — the basis for `SortedSet<T>` enumeration.
+- _Post-order_ (left → right → root): used when children must be processed before parents, such as deleting a subtree or evaluating an expression tree.
+- _BFS (level-order)_: uses a `Queue<T>` to visit nodes level by level, natural for shortest-path in unweighted trees.
 
 `SortedSet<T>` in .NET uses a red-black tree internally, guaranteeing O(log n) insert and lookup regardless of insertion order.
 
-**Terminology:** *height* (longest root-to-leaf path), *depth* (distance from root), *balance factor* (height difference between subtrees). A *full* tree has 0 or 2 children per node; a *complete* tree fills levels left-to-right (the heap shape); a *perfect* tree is both.
+**Terminology:** _height_ (longest root-to-leaf path), _depth_ (distance from root), _balance factor_ (height difference between subtrees). A _full_ tree has 0 or 2 children per node; a _complete_ tree fills levels left-to-right (the heap shape); a _perfect_ tree is both.
 
 ## Common Tree Types
 
@@ -37,14 +31,14 @@ A tree organizes nodes so each node has at most one parent (except the root) and
 |---|---|---|
 | **BST** | Ordered left < node < right | Baseline ordered lookup — but degrades to O(n) if unbalanced |
 | **AVL / Red-Black** | Self-balancing rotations → guaranteed O(log n) | `SortedSet`/`SortedDictionary` (red-black); AVL is more rigidly balanced (faster reads, more rotations) |
-| **B-tree / B+-tree** | High fan-out, shallow; node = disk/page sized | **Database & filesystem indexes** — minimizes disk seeks. See [[03 Data Persistence/SQL/Indexes\|Indexes]] |
+| **B-tree / B+-tree** | High fan-out, shallow; node = disk/page sized | **Database & filesystem indexes** — minimizes disk seeks. See [[Indexes]] |
 | **Trie (prefix tree)** | Path = sequence of characters | Autocomplete, prefix search, routing tables — O(k) by key length, independent of n |
-| **Heap** | Parent/child priority, array-backed | Priority queues — see [[02 Computer Science/Data Structures/Heap\|Heap]] |
+| **Heap** | Parent/child priority, array-backed | Priority queues — see [[Heap]] |
 | **Segment / Fenwick (BIT)** | Range aggregates with point updates | Range-sum/min queries in O(log n) |
 
 ## Traversal Without Recursion
 
-The depth pitfall (below) is why production traversal of unbounded-depth trees uses an explicit `Stack<T>` rather than recursion. For the extreme case, **Morris traversal** achieves in-order traversal in **O(1) extra space** by temporarily rewiring leaf `right` pointers (threading) instead of using a stack at all — niche, but the canonical answer to "traverse a tree without recursion *and* without a stack."
+The depth pitfall (below) is why production traversal of unbounded-depth trees uses an explicit `Stack<T>` rather than recursion. For the extreme case, **Morris traversal** achieves in-order traversal in **O(1) extra space** by temporarily rewiring leaf `right` pointers (threading) instead of using a stack at all — niche, but the canonical answer to "traverse a tree without recursion _and_ without a stack."
 
 ## Structure
 

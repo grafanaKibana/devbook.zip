@@ -1,18 +1,12 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
-level:
-  - "2"
-priority: High
-status: Done
 publish: true
+created: 2026-07-05T10:54:06.895+03:00
+modified: 2026-07-05T17:35:43.549+03:00
 ---
 
 # Intro
 
-Re-ranking is a second-stage scoring pass that takes the candidate set from [[11 AI & ML/LLM/RAG/Retrieval|retrieval]] and reorders it using a more expensive, more accurate model before context reaches the generator. Retrieval optimizes for recall at speed — find plausible candidates from millions of chunks. Re-ranking optimizes for precision — push the most relevant candidates to the top of a small list.
+Re-ranking is a second-stage scoring pass that takes the candidate set from [[Retrieval]] and reorders it using a more expensive, more accurate model before context reaches the generator. Retrieval optimizes for recall at speed — find plausible candidates from millions of chunks. Re-ranking optimizes for precision — push the most relevant candidates to the top of a small list.
 
 The mechanism: first-stage retrieval (dense, sparse, or hybrid) returns a candidate set of 20–100 chunks ranked by approximate similarity. The reranker then scores each candidate against the query using a model that can read both query and document together (joint encoding), producing a more accurate relevance score. The reranked top-k goes to the generator.
 
@@ -38,7 +32,7 @@ A cross-encoder takes the query and a single document as a concatenated input, p
 
 The tradeoff is speed: a cross-encoder must run inference once per query-document pair. Scoring 50 candidates means 50 forward passes. This makes cross-encoders impractical for first-stage retrieval over millions of chunks, but well-suited for rescoring a small candidate set.
 
-SBERT provides pretrained cross-encoder models across a speed-quality spectrum. At one end, `cross-encoder/ms-marco-TinyBERT-L-2-v2` scores ~9000 docs/sec with moderate quality. At the other, `cross-encoder/ms-marco-MiniLM-L-12-v2` scores ~960 docs/sec with substantially higher [[11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics|nDCG]] and [[11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics|MRR]] on MS MARCO.
+SBERT provides pretrained cross-encoder models across a speed-quality spectrum. At one end, `cross-encoder/ms-marco-TinyBERT-L-2-v2` scores ~9000 docs/sec with moderate quality. At the other, `cross-encoder/ms-marco-MiniLM-L-12-v2` scores ~960 docs/sec with substantially higher [[Monitoring#Retrieval Quality Metrics|nDCG]] and [[Monitoring#Retrieval Quality Metrics|MRR]] on MS MARCO.
 
 **Cohere Rerank** offers cross-encoder reranking as a managed API. Models like `rerank-v3.5` and the `rerank-v4.0` family accept JSON and semi-structured data natively, handle multilingual queries, and require no infrastructure. The tradeoff is per-query API cost and network latency.
 
@@ -48,7 +42,7 @@ ColBERT (Contextualized Late Interaction over BERT) encodes query and document i
 
 The key advantage over cross-encoders: document embeddings are pre-computed and stored at index time. At query time, only the query needs encoding. Scoring is a matrix operation (MaxSim) over pre-stored document token vectors, which is significantly faster than full cross-encoder inference per candidate.
 
-ColBERTv2 adds residual compression that reduces per-document storage by 6–10x while retaining most of the quality. On BEIR zero-shot benchmarks, ColBERTv2 achieves competitive [[11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics|nDCG]] with full cross-encoders at a fraction of the latency.
+ColBERTv2 adds residual compression that reduces per-document storage by 6–10x while retaining most of the quality. On BEIR zero-shot benchmarks, ColBERTv2 achieves competitive [[Monitoring#Retrieval Quality Metrics|nDCG]] with full cross-encoders at a fraction of the latency.
 
 The tradeoff: ColBERT requires multi-vector storage (one vector per token per document), which standard single-vector stores do not support natively. Dedicated engines like PLAID (ColBERTv2's retrieval engine) or vector stores with multi-vector support are needed.
 
@@ -130,7 +124,7 @@ Mitigation: evaluate the reranker on your own query-document pairs before commit
 
 ### Over-Reliance on Reranking to Fix Retrieval
 
-Reranking can only reorder what retrieval found. If the relevant document is not in the candidate set at all (recall failure), no amount of reranking will surface it. Teams sometimes add rerankers expecting them to fix retrieval coverage problems, when the actual fix is better [[11 AI & ML/LLM/RAG/Chunking|chunking]], [[11 AI & ML/LLM/Embeddings|embedding model selection]], or query expansion.
+Reranking can only reorder what retrieval found. If the relevant document is not in the candidate set at all (recall failure), no amount of reranking will surface it. Teams sometimes add rerankers expecting them to fix retrieval coverage problems, when the actual fix is better [[Chunking]], [[Embeddings|embedding model selection]], or query expansion.
 
 Diagnostic: if reranking improves precision but not recall, the pipeline has a first-stage recall problem, not a ranking problem.
 
@@ -152,11 +146,11 @@ Decision rule: start without reranking and measure retrieval quality. Add BM25 o
 
 ## Questions
 
-> [!QUESTION]- Why can reranking improve offline [[11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics|nDCG]] without visible quality improvement for end users?
-> The improvement may be in ranking positions that the generator does not use. If the generator only reads the top-3 chunks, improvements at positions 4–5 are invisible to users. Evaluate whether the reranker changes the top-k composition that actually enters the prompt, not just overall [[11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics|nDCG]]. Also verify that the eval set reflects production query distribution — gains on eval-set query types may not represent the queries users actually send.
+> [!QUESTION]- Why can reranking improve offline [[Monitoring#Retrieval Quality Metrics|nDCG]] without visible quality improvement for end users?
+> The improvement may be in ranking positions that the generator does not use. If the generator only reads the top-3 chunks, improvements at positions 4–5 are invisible to users. Evaluate whether the reranker changes the top-k composition that actually enters the prompt, not just overall [[Monitoring#Retrieval Quality Metrics|nDCG]]. Also verify that the eval set reflects production query distribution — gains on eval-set query types may not represent the queries users actually send.
 
 > [!QUESTION]- When does reranking hurt retrieval quality instead of helping?
-> When the reranker is out-of-distribution for your domain. A reranker trained on short web passages may misjudge relevance on long technical documents, internal terminology, or multilingual content — demoting actually relevant documents. Also when the candidate count is too small: if first-stage recall@N is already low, the reranker only reorders noise. Always compare [[11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics|recall and precision]] before and after reranking on domain-specific queries.
+> When the reranker is out-of-distribution for your domain. A reranker trained on short web passages may misjudge relevance on long technical documents, internal terminology, or multilingual content — demoting actually relevant documents. Also when the candidate count is too small: if first-stage recall@N is already low, the reranker only reorders noise. Always compare [[Monitoring#Retrieval Quality Metrics|recall and precision]] before and after reranking on domain-specific queries.
 
 > [!QUESTION]- Why is ColBERT faster than a cross-encoder at query time despite also using token-level scoring?
 > ColBERT pre-computes per-token document embeddings at index time and stores them. At query time, only the query tokens need encoding (one forward pass regardless of candidate count). Scoring is a MaxSim matrix operation over pre-stored vectors, not a full transformer forward pass per document. Cross-encoders must run a complete forward pass for each query-document pair because they jointly encode the concatenated input. The tradeoff is that ColBERT needs multi-vector storage, which uses more space and requires specialized indexes.

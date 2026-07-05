@@ -1,14 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Patterns
-level:
-  - "3"
-priority: High
-status:
-  - Done
 publish: true
+created: 2026-07-05T10:53:43.335+03:00
+modified: 2026-07-05T15:49:37.530+03:00
 ---
 
 # Decorator
@@ -48,7 +41,7 @@ classDiagram
 ```
 
 > [!NOTE] Decorator vs Proxy
-> Both wrap the same interface. **Decorator ADDS new behavior** — logging, caching, validation. [[05 Architecture/Patterns/Design Patterns/Structural/Proxy|Proxy]] **CONTROLS ACCESS** to the real object — lazy loading, auth checks, remote calls. The structural difference is intent: Decorator enriches; Proxy restricts or defers.
+> Both wrap the same interface. **Decorator ADDS new behavior** — logging, caching, validation. [[Proxy]] **CONTROLS ACCESS** to the real object — lazy loading, auth checks, remote calls. The structural difference is intent: Decorator enriches; Proxy restricts or defers.
 
 ## Problem
 
@@ -249,7 +242,7 @@ Adding idempotency checking now means one new `IdempotencyOrderHandler` class �
 
 ## References
 
-- [Decorator Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=GCraGHx6gso&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=3) — video walkthrough of the Decorator pattern with OOP examples
+- [Decorator Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=GCraGHx6gso\&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc\&index=3) — video walkthrough of the Decorator pattern with OOP examples
 - [Decorator — refactoring.guru](https://refactoring.guru/design-patterns/decorator) — canonical pattern description with wrapper chain diagram and C# example
 - [ASP.NET Core Middleware — Microsoft Learn](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/middleware/) — Decorator pattern in the ASP.NET Core request pipeline
 - [Scrutor — GitHub](https://github.com/khellang/Scrutor) — DI-based decorator registration for .NET without manual wiring

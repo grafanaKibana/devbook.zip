@@ -1,18 +1,12 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
-level:
-  - "4"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:25.893+03:00
+modified: 2026-07-05T15:49:37.225+03:00
 ---
 
 # Intro
 
-A greedy algorithm builds a solution by repeatedly making the choice that looks best **right now**, never reconsidering. It's the simplest and fastest design paradigm — usually a sort plus a single linear pass — but it's only *correct* when local optimality provably leads to global optimality. That's the catch: greedy is fast when it works and silently wrong when it doesn't, so the real work is **proving** it applies. It powers Dijkstra, Huffman coding, Kruskal/Prim's MST, interval scheduling, and many scheduling/allocation problems.
+A greedy algorithm builds a solution by repeatedly making the choice that looks best **right now**, never reconsidering. It's the simplest and fastest design paradigm — usually a sort plus a single linear pass — but it's only _correct_ when local optimality provably leads to global optimality. That's the catch: greedy is fast when it works and silently wrong when it doesn't, so the real work is **proving** it applies. It powers Dijkstra, Huffman coding, Kruskal/Prim's MST, interval scheduling, and many scheduling/allocation problems.
 
 ## How It Works
 
@@ -64,9 +58,9 @@ public static int CoinsGreedy(int[] coins, int amount) // coins sorted desc
 ## Pitfalls
 
 - **Greedy is often plausible but wrong** — coin change is the cautionary tale: greedy is optimal for standard currency but **fails** for coin sets like {1, 3, 4} making 6 (greedy → 4+1+1 = 3 coins; optimal → 3+3 = 2 coins). Always verify with a proof or counter-example; "it looks obviously optimal" is not a proof.
-- **No proof, no greedy** — if you can't construct an exchange argument, assume greedy is unsafe and fall back to [[02 Computer Science/Algorithms/Paradigms/Dynamic Programming|dynamic programming]] (which *does* solve general coin change and 0/1 knapsack, where greedy fails).
-- **Wrong greedy criterion** — many problems have several tempting local rules, only one of which is correct (activity selection needs *earliest finish*, not *shortest duration* or *earliest start*). Picking the wrong key gives a confident wrong answer.
-- **Ignoring ties / feasibility** — the local choice must remain *feasible*; forgetting the feasibility check (e.g. `start >= lastEnd`) produces invalid solutions.
+- **No proof, no greedy** — if you can't construct an exchange argument, assume greedy is unsafe and fall back to [[Dynamic Programming]] (which _does_ solve general coin change and 0/1 knapsack, where greedy fails).
+- **Wrong greedy criterion** — many problems have several tempting local rules, only one of which is correct (activity selection needs _earliest finish_, not _shortest duration_ or _earliest start_). Picking the wrong key gives a confident wrong answer.
+- **Ignoring ties / feasibility** — the local choice must remain _feasible_; forgetting the feasibility check (e.g. `start >= lastEnd`) produces invalid solutions.
 
 ## Tradeoffs
 
@@ -77,12 +71,12 @@ public static int CoinsGreedy(int[] coins, int amount) // coins sorted desc
 | Memory | O(1)–O(n) | Often O(states) |
 | Risk | Silent wrong answers if misapplied | Reliable but heavier |
 
-**Decision rule**: try greedy first *only if you can prove the greedy-choice property* (exchange argument) — then enjoy its speed. If you can't prove it, or a small counter-example breaks it, use DP. The classic split: **interval scheduling, MST, Huffman, Dijkstra** ⇒ greedy is proven; **0/1 knapsack, general coin change, edit distance** ⇒ DP.
+**Decision rule**: try greedy first _only if you can prove the greedy-choice property_ (exchange argument) — then enjoy its speed. If you can't prove it, or a small counter-example breaks it, use DP. The classic split: **interval scheduling, MST, Huffman, Dijkstra** ⇒ greedy is proven; **0/1 knapsack, general coin change, edit distance** ⇒ DP.
 
 ## Questions
 
 > [!QUESTION]- Why does greedy fail for general coin change but succeed for standard currency?
-> Standard coin systems are *canonical* — each coin is large enough that taking as many of the biggest as possible is always optimal, provable by exchange argument. Arbitrary systems break that: for {1,3,4} making 6, greedy takes 4 then 1+1 (3 coins), but 3+3 (2 coins) is better. The greedy-choice property simply doesn't hold, so you need DP.
+> Standard coin systems are _canonical_ — each coin is large enough that taking as many of the biggest as possible is always optimal, provable by exchange argument. Arbitrary systems break that: for {1,3,4} making 6, greedy takes 4 then 1+1 (3 coins), but 3+3 (2 coins) is better. The greedy-choice property simply doesn't hold, so you need DP.
 
 > [!QUESTION]- How do you prove a greedy algorithm is correct?
 > Usually an **exchange argument**: assume an optimal solution differs from the greedy one, then show you can swap one of its choices for the greedy choice without making it worse — repeating until it becomes the greedy solution. This proves greedy is at least as good as any optimal solution. The "greedy stays ahead" technique (induct that greedy's partial solution is never behind) is a common variant.

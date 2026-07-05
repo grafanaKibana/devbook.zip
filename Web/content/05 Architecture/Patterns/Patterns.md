@@ -1,15 +1,9 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Patterns
+publish: true
+created: 2026-07-05T10:53:43.307+03:00
+modified: 2026-07-05T10:53:43.307+03:00
 tags:
   - FolderNote
-publish: true
-priority: High
-level:
-  - '4'
-status: Done
 ---
 
 # Intro

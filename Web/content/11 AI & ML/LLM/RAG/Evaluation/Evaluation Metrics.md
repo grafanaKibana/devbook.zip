@@ -1,51 +1,45 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
-level:
-  - "2"
-priority: High
-status: Done
 publish: true
+created: 2026-07-05T16:18:39.926+03:00
+modified: 2026-07-05T17:36:35.458+03:00
 ---
 
 # Intro
 
 Three metric layers answer three different questions. Retrieval metrics ask whether the right evidence reached the generator; generation metrics ask whether the output is faithful to that evidence and actually answers the question; end-to-end metrics ask whether the user's task got solved. The separation is what makes a regression diagnosable — a pipeline can have perfect retrieval but poor generation (the model ignores its context), or perfect generation but poor retrieval (the model faithfully summarizes irrelevant documents), and the fix is different in each case.
 
-All of these metrics assume a labeled set — see [[11 AI & ML/LLM/RAG/Evaluation/Retrieval Evaluation Sets|Retrieval Evaluation Sets]] for how to label one for retrieval, which builds on the general [[11 AI & ML/LLM/Evaluation/Building an Evaluation Set|Building an Evaluation Set]] technique. When a metric moves, the metric alone does not tell you which upstream stage caused it; [[11 AI & ML/LLM/RAG/Evaluation/Component-Level Evaluation|Component-Level Evaluation]] isolates chunking, embedding, and index effects.
+All of these metrics assume a labeled set — see [[Retrieval Evaluation Sets]] for how to label one for retrieval, which builds on the general [[Building an Evaluation Set]] technique. When a metric moves, the metric alone does not tell you which upstream stage caused it; [[Component-Level Evaluation]] isolates chunking, embedding, and index effects.
 
 Example: a support bot returns the correct policy document (retrieval passes) but the model misreads a date constraint and answers with the wrong deadline (generation fails). Without layer separation, the team would chase retrieval improvements that cannot fix a generation problem.
 
 ## Retrieval Metrics
 
-Retrieval metrics evaluate whether the relevant documents reached the generator. All assume a labeled set where each query has known relevant documents. The full definitions, worked examples, and alerting guidance live in [[11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics|Monitoring — Retrieval Quality Metrics]]; this table summarizes what each metric answers and when to prefer it.
+Retrieval metrics evaluate whether the relevant documents reached the generator. All assume a labeled set where each query has known relevant documents. The full definitions, worked examples, and alerting guidance live in [[Monitoring#Retrieval Quality Metrics|Monitoring — Retrieval Quality Metrics]]; this table summarizes what each metric answers and when to prefer it.
 
 | Metric | What it answers | When to prefer |
 | --- | --- | --- |
-| [[11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics\|Recall@k]] | Did we find the relevant documents | Primary metric -- always track |
-| [[11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics\|Precision@k]] | How much noise is in the context | Context window is tight or token cost matters |
-| [[11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics\|HitRate@k]] | Did at least one relevant doc appear | Quick minimum-bar check; good for dashboards |
-| [[11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics\|MRR]] | Is the best result ranked first | Generator uses only top-1 or top-2 chunks |
-| [[11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics\|MAP]] | Are all relevant docs found and ranked high | Multiple relevant documents per query expected |
-| [[11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics\|nDCG@k]] | Is the full ranking quality good | Generator uses all k chunks with position-aware weighting |
-| [[11 AI & ML/LLM/RAG/Monitoring#Deterministic Metrics\|Empty-result rate]] | Are there coverage gaps | Corpus is growing or query patterns are shifting |
+| [[Monitoring#Retrieval Quality Metrics\|Recall@k]] | Did we find the relevant documents | Primary metric -- always track |
+| [[Monitoring#Retrieval Quality Metrics\|Precision@k]] | How much noise is in the context | Context window is tight or token cost matters |
+| [[Monitoring#Retrieval Quality Metrics\|HitRate@k]] | Did at least one relevant doc appear | Quick minimum-bar check; good for dashboards |
+| [[Monitoring#Retrieval Quality Metrics\|MRR]] | Is the best result ranked first | Generator uses only top-1 or top-2 chunks |
+| [[Monitoring#Retrieval Quality Metrics\|MAP]] | Are all relevant docs found and ranked high | Multiple relevant documents per query expected |
+| [[Monitoring#Retrieval Quality Metrics\|nDCG@k]] | Is the full ranking quality good | Generator uses all k chunks with position-aware weighting |
+| [[Monitoring#Deterministic Metrics\|Empty-result rate]] | Are there coverage gaps | Corpus is growing or query patterns are shifting |
 
-Two evaluation-side facts matter beyond the definitions. First, a recall failure is a hard ceiling on answer quality — the generator cannot use evidence it never sees, so no generation-side fix compensates for missing context. Second, track [[11 AI & ML/LLM/RAG/Monitoring#Deterministic Metrics|empty-result rate]] separately: even a small rate signals coverage gaps in the index, and aggregate recall hides it.
+Two evaluation-side facts matter beyond the definitions. First, a recall failure is a hard ceiling on answer quality — the generator cannot use evidence it never sees, so no generation-side fix compensates for missing context. Second, track [[Monitoring#Deterministic Metrics|empty-result rate]] separately: even a small rate signals coverage gaps in the index, and aggregate recall hides it.
 
 ## Generation Metrics
 
-Generation metrics evaluate the quality of the model's output given the retrieved context. Most are computed using an [[11 AI & ML/LLM/Evaluation/LLM-as-a-Judge|LLM-as-judge]] pattern — a separate model scores the output against the context and query. Full definitions live in [[11 AI & ML/LLM/RAG/Monitoring#LLM-as-Judge Metrics|Monitoring — LLM-as-Judge Metrics]]; the four core dimensions:
+Generation metrics evaluate the quality of the model's output given the retrieved context. Most are computed using an [[LLM-as-a-Judge|LLM-as-judge]] pattern — a separate model scores the output against the context and query. Full definitions live in [[Monitoring#LLM-as-Judge Metrics|Monitoring — LLM-as-Judge Metrics]]; the four core dimensions:
 
-- **[[11 AI & ML/LLM/RAG/Monitoring#LLM-as-Judge Metrics|Faithfulness (groundedness)]]** — does every claim in the answer trace back to the provided context? The RAG-specific counterpart to hallucination detection — see [[11 AI & ML/LLM/Hallucinations|Hallucinations]] for broader coverage.
-- **[[11 AI & ML/LLM/RAG/Monitoring#LLM-as-Judge Metrics|Answer correctness]]** — does the answer actually solve the user's question? A response can be perfectly faithful yet still wrong if it misses the key constraint or answers a different question. Requires a reference answer.
-- **[[11 AI & ML/LLM/RAG/Monitoring#LLM-as-Judge Metrics|Citation validity]]** — does each citation actually support the claim it is attached to? Stricter than faithfulness: an answer can be grounded overall while a specific citation points to an irrelevant passage.
-- **[[11 AI & ML/LLM/RAG/Monitoring#LLM-as-Judge Metrics|Response completeness]]** — does the answer cover all aspects of the query? "Compare A and B" expects coverage of both; partial answers score lower.
+- **[[Monitoring#LLM-as-Judge Metrics|Faithfulness (groundedness)]]** — does every claim in the answer trace back to the provided context? The RAG-specific counterpart to hallucination detection — see [[Hallucinations]] for broader coverage.
+- **[[Monitoring#LLM-as-Judge Metrics|Answer correctness]]** — does the answer actually solve the user's question? A response can be perfectly faithful yet still wrong if it misses the key constraint or answers a different question. Requires a reference answer.
+- **[[Monitoring#LLM-as-Judge Metrics|Citation validity]]** — does each citation actually support the claim it is attached to? Stricter than faithfulness: an answer can be grounded overall while a specific citation points to an irrelevant passage.
+- **[[Monitoring#LLM-as-Judge Metrics|Response completeness]]** — does the answer cover all aspects of the query? "Compare A and B" expects coverage of both; partial answers score lower.
 
 ## RAGAS Framework
 
-[RAGAS](https://docs.ragas.io/) (Retrieval-Augmented Generation Assessment) implements the retrieval and generation concepts above as four named, runnable scores. Each uses [[11 AI & ML/LLM/Evaluation/LLM-as-a-Judge|LLM-as-judge]] evaluation and isolates a specific failure mode in the pipeline.
+[RAGAS](https://docs.ragas.io/) (Retrieval-Augmented Generation Assessment) implements the retrieval and generation concepts above as four named, runnable scores. Each uses [[LLM-as-a-Judge|LLM-as-judge]] evaluation and isolates a specific failure mode in the pipeline.
 
 | Metric | Layer | What it measures | Reference needed |
 | --- | --- | --- | --- |
@@ -69,14 +63,14 @@ Individual scores identify symptoms. Reading two scores together identifies root
 | Context Precision | Context Recall | Diagnosis | Fix |
 | --- | --- | --- | --- |
 | Low | High | Noise — retrieval finds relevant docs but drowns them in irrelevant chunks | Re-ranking, tighter metadata filters, reduce k |
-| High | Low | Incomplete — retrieved set is clean but missing relevant evidence | Expand k, add [[11 AI & ML/LLM/RAG/Retrieval#Hybrid Retrieval — Vector + Keyword|hybrid search]], improve chunk boundaries |
+| High | Low | Incomplete — retrieved set is clean but missing relevant evidence | Expand k, add [[11 AI & ML/LLM/RAG/Retrieval#Hybrid Retrieval — Vector + Keyword\|hybrid search]], improve chunk boundaries |
 
 ### Additional RAGAS Metrics
 
 RAGAS v0.4+ adds two metrics beyond the original four:
 
-- **[[11 AI & ML/LLM/RAG/Monitoring#LLM-as-Judge Metrics|Noise Sensitivity]]** — measures incorrect claims introduced when retrieved context contains irrelevant chunks. Catches a gap the original four miss: the model hallucinating claims consistent with noisy context rather than ground truth. Requires reference. Lower is better.
-- **[[11 AI & ML/LLM/RAG/Monitoring#LLM-as-Judge Metrics|Context Entities Recall]]** — compares named entities in the reference answer against entities in retrieved context. Useful for entity-heavy domains (legal, medical, financial) where missing a specific name, date, or identifier is a hard failure even when general topic recall is adequate.
+- **[[Monitoring#LLM-as-Judge Metrics|Noise Sensitivity]]** — measures incorrect claims introduced when retrieved context contains irrelevant chunks. Catches a gap the original four miss: the model hallucinating claims consistent with noisy context rather than ground truth. Requires reference. Lower is better.
+- **[[Monitoring#LLM-as-Judge Metrics|Context Entities Recall]]** — compares named entities in the reference answer against entities in retrieved context. Useful for entity-heavy domains (legal, medical, financial) where missing a specific name, date, or identifier is a hard failure even when general topic recall is adequate.
 
 ## Tradeoffs
 
@@ -104,11 +98,12 @@ Detection: always slice metrics by meaningful segments — tenant, language, que
 
 LLM judges exhibit positional bias (scoring the first response higher in pairwise comparisons), verbosity bias (rewarding longer answers regardless of correctness), and self-preference bias (scoring outputs from the same model family higher). For RAG specifically, judges are also sensitive to evaluation prompt wording — small changes in how you ask "is this answer faithful" can shift scores across the entire eval set.
 
-Mitigation: use binary pass/fail judgments instead of numeric scales (reduces calibration noise). Run the same evaluation with varied prompt phrasings and check consistency. Validate judge outputs against a small human-labeled set and track agreement rate over time. See [[11 AI & ML/LLM/Evaluation/LLM-as-a-Judge|LLM-as-a-Judge]] for deeper coverage of judge reliability.
+Mitigation: use binary pass/fail judgments instead of numeric scales (reduces calibration noise). Run the same evaluation with varied prompt phrasings and check consistency. Validate judge outputs against a small human-labeled set and track agreement rate over time. See [[LLM-as-a-Judge]] for deeper coverage of judge reliability.
 
 ## Questions
 
 > [!QUESTION]- Why can aggregate retrieval metrics improve while individual user segments degrade?
+>
 > - Aggregate metrics average across query types and tenants, masking localized regressions
 > - A pipeline change improving average Recall@5 can simultaneously degrade recall by double digits on a specific tenant's query cluster
 > - RAG workloads are heterogeneous — different query types, document formats, and languages have different retrieval characteristics
@@ -117,6 +112,7 @@ Mitigation: use binary pass/fail judgments instead of numeric scales (reduces ca
 > - Per-segment evaluation does cost more to maintain (more ground-truth labels, more compute per release), but it catches the most common RAG evaluation failure in production — choose granularity based on how heterogeneous your query population is
 
 > [!QUESTION]- Given high Faithfulness (0.91) and low Context Recall (0.54), which pipeline layer do you fix first and why?
+>
 > - High faithfulness means the model correctly uses the context it receives — generation is not the problem
 > - Low context recall means retrieval misses roughly half the necessary evidence — the retrieval layer is the bottleneck
 > - Retrieval quality is a hard ceiling on answer quality: the generator cannot use evidence it never sees

@@ -1,13 +1,7 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
-level:
-  - "4"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:23.258+03:00
+modified: 2026-07-05T15:49:34.877+03:00
 ---
 
 # Intro
@@ -29,7 +23,7 @@ These are in-place mutations. `IsSubsetOf`, `IsSupersetOf`, and `SetEquals` test
 
 ### Capacity, load factor, and resizing
 
-Like `Dictionary<TKey,TValue>`, a `HashSet<T>` keeps a backing array sized to a prime number of buckets and tracks a **load factor** (entries ÷ buckets). When it fills past the threshold it **resizes** — allocating a larger array and **rehashing every element** into new buckets, an O(n) operation. Many small grows turn a "fast O(1)" insert loop into repeated O(n) copies, so if you know the rough size up front, **pre-size** with `new HashSet<T>(expectedCount)`. This load-factor/rehash machinery underlies all the hash-based collections — see [[02 Computer Science/Data Structures/HashMap\|HashMap]].
+Like `Dictionary<TKey,TValue>`, a `HashSet<T>` keeps a backing array sized to a prime number of buckets and tracks a **load factor** (entries ÷ buckets). When it fills past the threshold it **resizes** — allocating a larger array and **rehashing every element** into new buckets, an O(n) operation. Many small grows turn a "fast O(1)" insert loop into repeated O(n) copies, so if you know the rough size up front, **pre-size** with `new HashSet<T>(expectedCount)`. This load-factor/rehash machinery underlies all the hash-based collections — see [[HashMap]].
 
 > [!WARNING]
 > **Hash flooding (algorithmic-complexity DoS).** If an attacker can submit many keys that deliberately collide into one bucket (e.g. user-controlled string keys), every lookup degrades to O(n) and CPU spikes. .NET randomizes the `string` hash seed per process to blunt this, but custom key types with a weak `GetHashCode` remain vulnerable — give user-facing keys a well-distributed hash, or validate/cap untrusted key counts.

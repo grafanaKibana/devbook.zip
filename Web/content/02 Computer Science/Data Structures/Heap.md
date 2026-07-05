@@ -1,13 +1,7 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
-level:
-  - "4"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:23.596+03:00
+modified: 2026-07-05T10:53:37.206+03:00
 ---
 
 # Intro
@@ -24,7 +18,7 @@ Heaps are not globally sorted like a list. They only guarantee local ordering be
 
 ### Array layout
 
-A heap is stored as a flat array, not linked nodes — the "complete tree" shape means levels fill left-to-right with no gaps, so positions map arithmetically. For a binary heap, node `i`'s children are at `2i+1` and `2i+2` and its parent is at `(i-1)/2`. (.NET's `PriorityQueue` uses a *quaternary* heap — 4 children per node — which is shallower and more cache-friendly.) No pointers means no per-node allocation and excellent locality.
+A heap is stored as a flat array, not linked nodes — the "complete tree" shape means levels fill left-to-right with no gaps, so positions map arithmetically. For a binary heap, node `i`'s children are at `2i+1` and `2i+2` and its parent is at `(i-1)/2`. (.NET's `PriorityQueue` uses a _quaternary_ heap — 4 children per node — which is shallower and more cache-friendly.) No pointers means no per-node allocation and excellent locality.
 
 ### Building a heap: O(n), not O(n log n)
 
@@ -61,9 +55,9 @@ Console.WriteLine(pq.Peek());    // high
 - **Assuming full sort order**: only root priority is guaranteed, so iterating a heap does not return sorted output. Use a sorted set or sort explicitly when ordered iteration is required.
 - **Mixing priority direction**: in .NET, lower `TPriority` values are dequeued first. Invert priority intentionally (e.g., negate integers) if you need max-first behavior.
 - **Mutating priority after enqueue**: if priority changes after insertion, the heap does not reorder automatically. Remove and reinsert instead of mutating external state.
-- **No decrease-key in .NET's `PriorityQueue`**: a classic Dijkstra implementation wants to *lower* a node's tentative distance in place. `PriorityQueue` has no `DecreaseKey`/`Remove(element)`, so the standard workaround is **lazy deletion** — enqueue the node again with the new lower priority and, on dequeue, skip it if you've already finalized that node (track a `visited`/best-distance map). `EnqueueDequeue`/`DequeueEnqueue` exist for the common "push then pop" combos but not for arbitrary updates.
+- **No decrease-key in .NET's `PriorityQueue`**: a classic Dijkstra implementation wants to _lower_ a node's tentative distance in place. `PriorityQueue` has no `DecreaseKey`/`Remove(element)`, so the standard workaround is **lazy deletion** — enqueue the node again with the new lower priority and, on dequeue, skip it if you've already finalized that node (track a `visited`/best-distance map). `EnqueueDequeue`/`DequeueEnqueue` exist for the common "push then pop" combos but not for arbitrary updates.
 
-**Where heaps show up:** Dijkstra/A* frontiers, OS/job schedulers, **top-k** (keep a bounded size-k min-heap of the largest items), **streaming median** (a max-heap and min-heap balanced around the middle), and **merging k sorted lists** (a heap of the k front elements).
+**Where heaps show up:** Dijkstra/A\* frontiers, OS/job schedulers, **top-k** (keep a bounded size-k min-heap of the largest items), **streaming median** (a max-heap and min-heap balanced around the middle), and **merging k sorted lists** (a heap of the k front elements).
 
 ## Tradeoffs
 
@@ -71,6 +65,7 @@ Console.WriteLine(pq.Peek());    // high
 |---|---|---|---|
 | Repeated best-item extraction | `PriorityQueue` O(log n) per op | Sorted list O(n) insert | Heap wins for incremental arrivals. Sorted list is simpler when all data is known upfront and you need ordered iteration. |
 | Ordered iteration | Not suitable | `SortedSet<T>` | Use `SortedSet` when you need both priority extraction and in-order traversal. |
+
 ## Questions
 
 > [!QUESTION]- Why is `Dequeue` on a heap O(log n) instead of O(1)?
@@ -84,6 +79,6 @@ Console.WriteLine(pq.Peek());    // high
 
 ## Links
 
-- [PriorityQueue\<TElement, TPriority\> class (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.priorityqueue-2) — API reference covering enqueue, dequeue, peek, and update priority semantics.
+- [PriorityQueue\<TElement, TPriority> class (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.priorityqueue-2) — API reference covering enqueue, dequeue, peek, and update priority semantics.
 - [Collections and data structures (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/collections/) — overview of .NET collection types with guidance on choosing the right structure for your use case.
 - [PriorityQueue source in dotnet/runtime (GitHub)](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Collections/src/System/Collections/Generic/PriorityQueue.cs) — quaternary heap implementation showing the actual sift-up and sift-down logic.

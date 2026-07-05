@@ -1,21 +1,14 @@
 ---
-topic:
-  - Development Practices
-subtopic:
-  - Principles
-level:
-  - "4"
-priority: High
-status: Ready to Repeat
-
 publish: true
+created: 2026-07-05T10:53:48.510+03:00
+modified: 2026-07-05T10:53:48.510+03:00
 ---
 
 # Intro
 
 DRY means one place should own a single piece of knowledge, so you do not have to change the same rule in multiple places.
 It is not "never repeat code." It is "avoid duplicated business rules and duplicated decision logic."
-You reach for DRY when duplication causes bugs, inconsistent behavior, or high change cost. In a payments codebase, the tax calculation formula was duplicated in the checkout API and the invoicing batch job — when tax rates changed, only the API was updated, causing a $43,000 discrepancy over two months before the invoicing path was discovered.
+You reach for DRY when duplication causes bugs, inconsistent behavior, or high change cost. In a payments codebase, the tax calculation formula was duplicated in the checkout API and the invoicing batch job — when tax rates changed, only the API was updated, causing a \$43,000 discrepancy over two months before the invoicing path was discovered.
 
 ## Deeper Explanation
 
@@ -63,6 +56,7 @@ public static class EmailRules
 - Local duplication can be cheaper than a shared abstraction when future divergence is likely. The cost of duplication is paid once (when the rule changes and you miss a copy). The cost of a wrong abstraction is paid continuously (every time you touch the shared code).
 - DRY often increases coupling. A shared abstraction means two callers depend on the same code. Balance DRY with the ability to change each caller independently.
 - The Rule of Three: tolerate duplication once, consider abstracting on the second occurrence, abstract on the third. One occurrence is not enough information to design the right abstraction.
+
 ## Questions
 
 > [!QUESTION]- What is DRY actually trying to prevent?

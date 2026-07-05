@@ -1,15 +1,9 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Distributed Systems
+publish: true
+created: 2026-07-05T10:53:43.310+03:00
+modified: 2026-07-05T10:53:43.310+03:00
 tags:
   - FolderNote
-publish: true
-priority: High
-level:
-  - "2"
-status: Not-Started
 ---
 
 # Intro

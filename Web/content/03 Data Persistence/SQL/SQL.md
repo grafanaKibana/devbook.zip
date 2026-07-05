@@ -1,20 +1,14 @@
 ---
-topic:
-  - Data Persistence
-subtopic:
-  - SQL
+publish: true
+created: 2026-07-05T10:53:40.612+03:00
+modified: 2026-07-05T10:53:40.612+03:00
 tags:
   - FolderNote
-publish: true
-priority: High
-level:
-  - '4'
-status: Done
 ---
 
 # Intro
 
-The relational model organizes data into tables of rows and columns, with relationships expressed through keys rather than nesting. SQL (Structured Query Language) is the declarative standard for querying and manipulating that data: you describe *what* you want, and the engine decides *how* to get it. For backend engineers, SQL fluency is non-negotiable because most production systems store critical state in a relational database, and understanding how the engine actually executes queries is what separates correct code from performant code. Relational databases enforce a schema and provide ACID transactions by default across relational workloads; this lets you express complex multi-table queries without denormalizing your data model upfront.
+The relational model organizes data into tables of rows and columns, with relationships expressed through keys rather than nesting. SQL (Structured Query Language) is the declarative standard for querying and manipulating that data: you describe _what_ you want, and the engine decides _how_ to get it. For backend engineers, SQL fluency is non-negotiable because most production systems store critical state in a relational database, and understanding how the engine actually executes queries is what separates correct code from performant code. Relational databases enforce a schema and provide ACID transactions by default across relational workloads; this lets you express complex multi-table queries without denormalizing your data model upfront.
 
 ## Logical Query Execution Order
 
@@ -38,8 +32,8 @@ graph LR
 
 Think of it as: **"The engine builds a table first, then decorates it."**
 
-1. **FROM/JOIN first, SELECT near last.** The engine needs to know *which tables* before it can do anything.
-2. **WHERE before GROUP BY.** Filter rows *before* grouping. Cheaper to discard rows early.
+1. **FROM/JOIN first, SELECT near last.** The engine needs to know _which tables_ before it can do anything.
+2. **WHERE before GROUP BY.** Filter rows _before_ grouping. Cheaper to discard rows early.
 3. **HAVING is WHERE for groups.** Use it only when filtering on an aggregate; otherwise use `WHERE`.
 4. **SELECT runs late.** Column aliases from `SELECT` are invisible to `WHERE` and `GROUP BY`, but visible to `ORDER BY`.
 5. **ORDER BY then TOP/LIMIT last.** Sorting is expensive. Slicing happens only after everything else is settled.
@@ -81,7 +75,7 @@ ORDER BY headcount DESC;
 ## Links
 
 - [Query processing architecture guide (Microsoft Learn)](https://learn.microsoft.com/sql/relational-databases/query-processing-architecture-guide?view=sql-server-ver16)
-- [WITH common_table_expression (T-SQL)](https://learn.microsoft.com/sql/t-sql/queries/with-common-table-expression-transact-sql?view=sql-server-ver16)
+- [WITH common\_table\_expression (T-SQL)](https://learn.microsoft.com/sql/t-sql/queries/with-common-table-expression-transact-sql?view=sql-server-ver16)
 - [Joins — Microsoft Learn](https://learn.microsoft.com/sql/relational-databases/performance/joins?view=sql-server-ver16)
 - [Execution plans overview](https://learn.microsoft.com/sql/relational-databases/performance/execution-plans?view=sql-server-ver16)
 - [SQL Server index design guide](https://learn.microsoft.com/sql/relational-databases/sql-server-index-design-guide?view=sql-server-ver17)

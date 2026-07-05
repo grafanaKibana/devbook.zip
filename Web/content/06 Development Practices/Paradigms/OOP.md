@@ -1,13 +1,7 @@
 ---
-topic:
-  - Development Practices
-subtopic:
-  - Paradigms
-level:
-  - "4"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:48.555+03:00
+modified: 2026-07-05T10:53:48.556+03:00
 ---
 
 # Object-Oriented Programming (OOP)
@@ -211,6 +205,7 @@ decimal discount = discountStrategy.Calculate(order); // runtime dispatches
 **Anemic domain model** — objects with only getters/setters and no behavior. All logic lives in service classes. This is procedural programming with OOP syntax — invariants are enforced in service code (scattered, easy to miss), and objects can be put into invalid states. Common failure mode: an `Order` class with public `Status` setter allows any service to set `Status = Shipped` without checking whether payment was confirmed. Moving the transition to `Order.Ship()` with a guard (`if (Status != PaymentConfirmed) throw`) eliminates an entire category of invalid-state bugs.
 
 **Overusing inheritance for code reuse** — inheriting from a class just to reuse a method creates an "is-a" relationship that may not be semantically correct. Example: `EmailNotifier : SmtpClient` just to get `Send()` — now `EmailNotifier` IS an SMTP client and exposes 40+ public methods from `SmtpClient` that callers shouldn't use. Use composition (`EmailNotifier` has an `ISmtpClient` field) or extension methods instead.
+
 ## Tradeoffs
 
 | Decision | OOP Approach | Alternative | When OOP Wins | When Alternative Wins |
@@ -225,6 +220,7 @@ decimal discount = discountStrategy.Calculate(order); // runtime dispatches
 ## Questions
 
 > [!QUESTION]- When should you prefer composition over inheritance?
+>
 > - Prefer composition when the relationship is "has-a" rather than "is-a"
 > - Use composition when you need to combine behaviors from multiple sources (C# has no multiple class inheritance)
 > - Use composition when the base class is not designed for extension (`sealed` or has complex internal invariants)
@@ -234,6 +230,7 @@ decimal discount = discountStrategy.Calculate(order); // runtime dispatches
 > - Tradeoff: composition requires more explicit wiring (constructor injection, delegation) but buys flexibility and testability; inheritance is less boilerplate but creates coupling that compounds with depth
 
 > [!QUESTION]- What is the Anemic Domain Model and why is it considered an anti-pattern?
+>
 > - Objects have only getters/setters with no behavior — all logic lives in service classes
 > - Violates encapsulation: services reach into objects to get data, compute, and set results back
 > - This is procedural programming with OOP syntax — invariants are enforced in scattered service code
@@ -242,6 +239,7 @@ decimal discount = discountStrategy.Calculate(order); // runtime dispatches
 > - Tradeoff: rich domain models enforce invariants at the source but require more upfront design investment; anemic models are simpler to write initially but accumulate inconsistency bugs as the system grows
 
 > [!QUESTION]- How does polymorphism reduce conditional complexity?
+>
 > - Without polymorphism, varying behavior by type requires if/switch chains that grow with every new type
 > - Each new type forces editing existing code — a direct Open/Closed violation
 > - With polymorphism, each type implements a shared interface and handles its own behavior
@@ -250,12 +248,14 @@ decimal discount = discountStrategy.Calculate(order); // runtime dispatches
 > - Tradeoff: polymorphism adds indirection — debugging requires knowing which concrete type is active, and navigating call hierarchies takes extra IDE steps. Worth paying when you have 3+ variant types or expect new types over time
 
 > [!QUESTION]- What is the difference between an interface and an abstract class in C#?
+>
 > - Interface: defines a contract without instance state; can include default method implementations (C# 8+); a class can implement many interfaces
 > - Abstract class: defines a contract plus shared implementation and instance state; a class can inherit from only one abstract class
 > - Use interfaces when unrelated types share a capability (`IDisposable`, `IComparable`)
 > - Use abstract classes when related types form a genuine hierarchy with shared invariants
 > - In practice, most OOD designs use both: interface for external consumers, abstract class for the internal hierarchy (`Robot : IMovable`)
 > - Tradeoff: interfaces are more flexible (no coupling to shared state, multiple implementation) but force every implementer to write the full implementation; abstract classes reduce duplication but create a single coupling point that all derived classes depend on
+
 ## References
 
 - [Microsoft — Object-oriented programming in C#](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/tutorials/oop) — official C# OOP tutorial covering classes, inheritance, interfaces, and polymorphism with runnable examples.

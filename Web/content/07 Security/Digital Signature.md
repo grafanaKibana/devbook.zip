@@ -1,14 +1,7 @@
 ---
-topic:
-  - Security
-subtopic:
-  - Security
-level:
-  - "2"
-priority: Medium
-status: Ready to Repeat
-
 publish: true
+created: 2026-07-05T10:54:04.280+03:00
+modified: 2026-07-05T15:49:31.839+03:00
 ---
 
 # Digital Signature
@@ -58,7 +51,7 @@ bool isValid = ecdsa.VerifyData(message, signature, HashAlgorithmName.SHA256);
 
 ## Use Cases
 
-- **JWT signing**: The identity provider signs the JWT with its private key; APIs verify with the public key (JWKS endpoint). See [[07 Security/JWT Bearer|JWT Bearer]].
+- **JWT signing**: The identity provider signs the JWT with its private key; APIs verify with the public key (JWKS endpoint). See [[JWT Bearer]].
 - **Code signing**: Software publishers sign executables so users can verify the binary has not been tampered with.
 - **Document signing**: PDF signatures, contract signing (DocuSign uses digital signatures under the hood).
 - **TLS certificates**: Certificate authorities sign server certificates to prove domain ownership.

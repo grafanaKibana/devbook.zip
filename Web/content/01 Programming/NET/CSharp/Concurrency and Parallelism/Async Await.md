@@ -1,13 +1,7 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
-level:
-  - "4"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:26.920+03:00
+modified: 2026-07-05T10:53:37.174+03:00
 ---
 
 # Intro
@@ -58,6 +52,7 @@ var data = await _repo.GetAsync(id).ConfigureAwait(false);
 ```
 
 **Rule of thumb:**
+
 - Library code: always use `ConfigureAwait(false)` to avoid context capture overhead and deadlock risk.
 - Application code (controllers, view models): omit it — you usually want to resume on the original context.
 
@@ -65,8 +60,8 @@ var data = await _repo.GetAsync(id).ConfigureAwait(false);
 
 These are two different ambient mechanisms, and conflating them is a common source of bugs:
 
-- **`SynchronizationContext`** controls *where* (which thread/scheduler) the continuation resumes. This is what `ConfigureAwait(false)` opts out of.
-- **`ExecutionContext`** carries *ambient state* — `AsyncLocal<T>` values, the security/impersonation context — and **always flows across `await`, even with `ConfigureAwait(false)`**. So `ConfigureAwait(false)` does *not* drop your `AsyncLocal` values; it only changes the resumption thread. To stop `ExecutionContext` from flowing (rare), use `ExecutionContext.SuppressFlow()`.
+- **`SynchronizationContext`** controls _where_ (which thread/scheduler) the continuation resumes. This is what `ConfigureAwait(false)` opts out of.
+- **`ExecutionContext`** carries _ambient state_ — `AsyncLocal<T>` values, the security/impersonation context — and **always flows across `await`, even with `ConfigureAwait(false)`**. So `ConfigureAwait(false)` does _not_ drop your `AsyncLocal` values; it only changes the resumption thread. To stop `ExecutionContext` from flowing (rare), use `ExecutionContext.SuppressFlow()`.
 
 ### `ConfigureAwaitOptions` (.NET 8)
 

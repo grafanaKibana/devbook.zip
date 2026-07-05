@@ -1,27 +1,21 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
-level:
-  - "2"
-priority: Medium
-status: Done
 publish: true
+created: 2026-07-05T10:54:06.714+03:00
+modified: 2026-07-05T17:36:34.871+03:00
 ---
 
 # Intro
 
 Model selection is choosing which model serves a request; routing is choosing per-request among several models. Both exist because there is no single best model — every choice trades **quality against cost and latency**. Frontier models give the highest quality at the highest price and slowest response; small models are cheap and fast but weaker. A production system that sends every request to the largest model overpays and runs slow; one that uses a small model everywhere fails the hard queries. The engineering job is to match each request to the cheapest model that can handle it, and to keep that mapping changeable as models and prices shift underneath you.
 
-This decision compounds with the rest of the stack: a stronger [[11 AI & ML/LLM/Prompting/Prompting|prompt]], [[11 AI & ML/LLM/RAG/RAG|retrieval]], or a [[11 AI & ML/LLM/Fine-tuning|fine-tuned]] small model can let a cheaper model do a job that otherwise needs a frontier one.
+This decision compounds with the rest of the stack: a stronger [[Prompting|prompt]], [[RAG|retrieval]], or a [[Fine-tuning|fine-tuned]] small model can let a cheaper model do a job that otherwise needs a frontier one.
 
 ## Selection Criteria
 
 Choose a model against the actual requirements of the task, not its leaderboard rank:
 
 - **Task difficulty** — multi-step reasoning and ambiguous tasks need stronger models; classification, extraction, and routing often run well on small ones.
-- **Context length** — does the task need a large window, and does the model hold quality across it (see [[11 AI & ML/LLM/Context Engineering|Context Engineering]])?
+- **Context length** — does the task need a large window, and does the model hold quality across it (see [[Context Engineering]])?
 - **Capabilities** — structured-output and tool-calling support, multimodality, and language coverage are hard constraints, not preferences.
 - **Latency SLA and cost ceiling** — a p95 latency budget or a per-request cost cap can rule out frontier models regardless of quality.
 - **Privacy and residency** — data-handling, region, and self-hosting requirements can force a specific provider or an open model.
@@ -46,7 +40,7 @@ flowchart TD
     L --> Out
 ```
 
-**Classifier routing.** A small, fast classifier (or the model itself) labels each query and dispatches it to the right model up front, rather than escalating after a failure. This is the [[11 AI & ML/LLM/Agents/Agents#Workflow Patterns|routing workflow pattern]] applied to model choice, and the same idea as query routing in [[11 AI & ML/LLM/RAG/RAG|RAG]].
+**Classifier routing.** A small, fast classifier (or the model itself) labels each query and dispatches it to the right model up front, rather than escalating after a failure. This is the [[Agents#Workflow Patterns|routing workflow pattern]] applied to model choice, and the same idea as query routing in [[RAG]].
 
 **Task-based mapping.** A fixed, deterministic mapping: classification and extraction to a small model, complex reasoning to a frontier model, code to a code-specialized model. Simplest to reason about when traffic is cleanly segmented by task type.
 
@@ -54,16 +48,16 @@ flowchart TD
 
 Cost is driven by tokens, and input and output are usually priced differently (output is typically several times more expensive). Levers:
 
-- **Output-length control** — cap and shape output with `max_tokens` and stop sequences (see [[11 AI & ML/LLM/Generation|Generation]]); output tokens dominate cost on generative tasks.
+- **Output-length control** — cap and shape output with `max_tokens` and stop sequences (see [[Generation]]); output tokens dominate cost on generative tasks.
 - **Prompt caching** — when a long, stable prefix repeats across requests, caching cuts its input cost and latency dramatically (see [[11 AI & ML/LLM/RAG/Caching|Caching]]).
 - **Right-sizing via routing** — cascades and classifier routing keep the expensive model off the easy majority of traffic.
-- **Distillation** — [[11 AI & ML/LLM/Fine-tuning|fine-tune]] a small model on a frontier model's outputs to move a high-volume task down a tier permanently.
+- **Distillation** — [[Fine-tuning|fine-tune]] a small model on a frontier model's outputs to move a high-volume task down a tier permanently.
 
 ## Operations
 
 - **Put a gateway in front of models.** Route all calls through an abstraction layer (a model gateway) so swapping providers or models is a config change, not a code change rippling through the app. This is what makes routing, fallback, and A/B model tests practical.
 - **Plan for provider failure.** Define a fallback model and degrade gracefully on outages or rate limits rather than failing the request.
-- **Pin and watch versions.** Providers update models under stable names; behavior can shift without a code change. Pin versions where possible and re-run [[11 AI & ML/LLM/Evaluation/Evaluation|evaluation]] when a provider ships an update (the same calibration-drift problem judges face in [[11 AI & ML/LLM/Evaluation/LLM-as-a-Judge|LLM-as-a-Judge]]).
+- **Pin and watch versions.** Providers update models under stable names; behavior can shift without a code change. Pin versions where possible and re-run [[11 AI & ML/LLM/Evaluation/Evaluation|evaluation]] when a provider ships an update (the same calibration-drift problem judges face in [[LLM-as-a-Judge]]).
 
 ## Pitfalls
 
@@ -79,7 +73,7 @@ Cost is driven by tokens, and input and output are usually priced differently (o
 
 **What goes wrong**: a team picks a model because it tops a public leaderboard, ships it, and sees no improvement — or a regression — on their actual task.
 
-**Why it happens**: public benchmarks aggregate over generic tasks and are overfit by model vendors; they do not represent a specific production distribution (the same trap as MTEB for [[11 AI & ML/LLM/Embeddings|embeddings]]).
+**Why it happens**: public benchmarks aggregate over generic tasks and are overfit by model vendors; they do not represent a specific production distribution (the same trap as MTEB for [[Embeddings]]).
 
 **How to avoid it**: evaluate candidates on your own labeled task set and choose on that. Use leaderboards only to shortlist.
 
@@ -114,12 +108,14 @@ Cost is driven by tokens, and input and output are usually priced differently (o
 ## Questions
 
 > [!QUESTION]- Why route requests across models instead of picking one good model?
+>
 > - There is no single best model: frontier models maximize quality but cost the most and are slowest; small models are cheap and fast but weaker — most traffic does not need the frontier model
 > - Routing sends the easy majority to a cheap model and reserves the expensive one for the hard fraction, cutting cost and latency without sacrificing quality where it matters
 > - A cascade escalates only after a cheap-model failure; a classifier routes up front by predicted difficulty or task type
 > - The tradeoff is added routing complexity and the risk of mis-routing a hard query to a weak model — calibrate the router on real traffic and validate escalation triggers
 
 > [!QUESTION]- Why pick a model on your own evaluation rather than public benchmarks?
+>
 > - Public leaderboards aggregate over generic tasks and are heavily optimized by vendors, so they overfit and rarely predict performance on a specific production distribution
 > - The same model can top a benchmark yet underperform on your task, or vice versa — the only reliable signal is measurement on your labeled task set
 > - Benchmarks are useful to shortlist candidates, not to make the final choice

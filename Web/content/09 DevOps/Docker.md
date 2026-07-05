@@ -1,13 +1,7 @@
 ---
-topic:
-  - DevOps
-subtopic: []
-level:
-  - "2"
-priority: High
-status: Ready to Repeat
-
 publish: true
+created: 2026-07-05T10:54:07.997+03:00
+modified: 2026-07-05T10:54:07.998+03:00
 ---
 
 # Docker
@@ -17,6 +11,7 @@ Docker packages an application and its dependencies into a container — an isol
 ## How Containers Work
 
 A container is not a VM. It is a process on the host OS that uses two Linux kernel features:
+
 - **Namespaces**: isolate what the process can see (filesystem, network, PIDs, users)
 - **cgroups**: limit what the process can use (CPU, memory, I/O)
 
@@ -123,6 +118,7 @@ volumes:
 ## Questions
 
 > [!QUESTION]- Why use multi-stage builds for .NET applications?
+>
 > - The .NET SDK image (~800MB) includes compilers and build tools not needed at runtime.
 > - The ASP.NET runtime image (~200MB) is sufficient for running the published app.
 > - Multi-stage builds copy only the published output to the final image, reducing size by ~75%.
@@ -130,6 +126,7 @@ volumes:
 > - Cost: slightly more complex Dockerfile; worth it for any production workload.
 
 > [!QUESTION]- How do you prevent secrets from leaking into Docker images?
+>
 > - Never use `ENV` or `ARG` for secrets in Dockerfiles — they are visible in `docker history`.
 > - Pass secrets at runtime via environment variables (`docker run -e`) or Docker secrets.
 > - For build-time secrets (e.g., NuGet feeds), use `RUN --mount=type=secret` (BuildKit).

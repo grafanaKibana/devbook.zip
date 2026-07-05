@@ -2,7 +2,7 @@ filters:
   and:
     - '!file.hasTag("FolderNote")'
     - '!file.ext.containsAny("base", "canvas")'
-    - file.path.startsWith("Software Engineering")
+    - file.path.startsWith("Home")
 views:
   - type: table
     name: Table

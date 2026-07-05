@@ -1,20 +1,14 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
-level:
-  - "4"
-priority: Medium
-status: Done
 publish: true
+created: 2026-07-05T10:53:24.312+03:00
+modified: 2026-07-05T10:53:37.207+03:00
 ---
 
 # Intro
 
 `LinkedList<T>` is a doubly linked list where each node points to previous and next nodes. It is useful when you already keep node references and need frequent O(1) inserts/removes around those nodes.
 
-Each element lives in a `LinkedListNode<T>` holding a value plus `Previous` and `Next` references; the list keeps `First`/`Last` handles and a count. Inserting or removing at a node you already hold rewires only two or three pointers — no elements move, so it is O(1). The cost is locality: nodes are scattered across the heap, so reaching the *k*-th element means walking *k* pointers (O(n)), and that pointer-chasing defeats CPU cache prefetching.
+Each element lives in a `LinkedListNode<T>` holding a value plus `Previous` and `Next` references; the list keeps `First`/`Last` handles and a count. Inserting or removing at a node you already hold rewires only two or three pointers — no elements move, so it is O(1). The cost is locality: nodes are scattered across the heap, so reaching the _k_-th element means walking _k_ pointers (O(n)), and that pointer-chasing defeats CPU cache prefetching.
 
 ## Structure
 
@@ -54,19 +48,22 @@ list.Remove("C");
 ## Questions
 
 > [!QUESTION]- Why is `LinkedList<T>` often slower than `List<T>` despite O(1) inserts/removes?
+>
 > - CPU cache locality dominates real workloads: `List<T>` keeps data contiguous and prefetch-friendly.
 > - Linked-list nodes are scattered on the heap, so every traversal step is a cache-missing pointer chase.
-> - The O(1) edit only helps if you *already hold the node* — finding it first is O(n) and erases the advantage.
+> - The O(1) edit only helps if you _already hold the node_ — finding it first is O(n) and erases the advantage.
 > - Big-O favors the linked list, but constant factors favor the array — trust measurements over asymptotics for in-memory n.
 
 > [!QUESTION]- When is `LinkedList<T>` the right choice in .NET?
+>
 > - When your algorithm already stores `LinkedListNode<T>` handles and performs many inserts/removes around them (e.g. an LRU cache moving a node to the front).
 > - When splicing whole sublists by pointer is a core operation.
 > - When you must avoid the O(n) element shift that `List<T>` pays for mid-sequence edits at very large sizes.
 > - You accept worse iteration speed and per-node memory overhead to get guaranteed O(1) local restructuring.
 
 > [!QUESTION]- What is a common signal to migrate from `LinkedList<T>` to `List<T>`?
-> - If code frequently searches by index or value *before* each edit, you are paying O(n) traversal repeatedly.
+>
+> - If code frequently searches by index or value _before_ each edit, you are paying O(n) traversal repeatedly.
 > - That pattern means you are not actually exploiting held node handles — the linked list's only advantage.
 > - Iteration-heavy or random-access code is another clear signal.
 > - Switching to `List<T>` improves locality and iteration but reintroduces O(n) mid-sequence inserts, so confirm those are rare before migrating.

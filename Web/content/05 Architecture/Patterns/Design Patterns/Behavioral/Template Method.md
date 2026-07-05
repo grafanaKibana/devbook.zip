@@ -1,13 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Patterns
-level:
-  - "2"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:43.332+03:00
+modified: 2026-07-05T15:49:37.462+03:00
 ---
 
 # Template Method
@@ -173,11 +167,11 @@ Adding an Excel generator now means one new subclass — the fetch, validate, an
 
 ## Tradeoffs
 
-**Use it when**: several variants share one fixed algorithm skeleton and differ only in a few steps, and you want the shared orchestration in exactly one place. It's an inversion-of-control mechanism — the base class calls *down* to your overridden steps (the "Hollywood Principle," see [[06 Development Practices/Principles/IoC (Holywood Principle)|IoC]]).
+**Use it when**: several variants share one fixed algorithm skeleton and differ only in a few steps, and you want the shared orchestration in exactly one place. It's an inversion-of-control mechanism — the base class calls _down_ to your overridden steps (the "Hollywood Principle," see [[IoC (Holywood Principle)|IoC]]).
 
 **Don't reach for it when**: the varying steps need to change **at runtime**, or you'd be forcing an inheritance hierarchy just to share code — Template Method locks each variant into a single base class and is vulnerable to the **fragile base class** problem.
 
-**vs Strategy**: this is the key comparison. **Template Method = inheritance** (compile-time; subclasses *override* steps within a fixed skeleton). **[[05 Architecture/Patterns/Design Patterns/Behavioral/Strategy|Strategy]] = composition** (runtime; *inject* the varying behavior as an interface/delegate). Prefer Strategy when you want to swap behavior at runtime or follow "composition over inheritance"; prefer Template Method when the base genuinely owns most of the algorithm and variants only fill gaps. If two dimensions vary independently, that's **[[05 Architecture/Patterns/Design Patterns/Structural/Bridge|Bridge]]**, not a deepening inheritance tree.
+**vs Strategy**: this is the key comparison. **Template Method = inheritance** (compile-time; subclasses _override_ steps within a fixed skeleton). **[[Strategy]] = composition** (runtime; _inject_ the varying behavior as an interface/delegate). Prefer Strategy when you want to swap behavior at runtime or follow "composition over inheritance"; prefer Template Method when the base genuinely owns most of the algorithm and variants only fill gaps. If two dimensions vary independently, that's **[[Bridge]]**, not a deepening inheritance tree.
 
 ## Questions
 
@@ -189,7 +183,7 @@ Adding an Excel generator now means one new subclass — the fetch, validate, an
 
 ## References
 
-- [Template Method Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=7ocpwK9uesw&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=13) — video walkthrough of the Template Method pattern with OOP examples
+- [Template Method Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=7ocpwK9uesw\&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc\&index=13) — video walkthrough of the Template Method pattern with OOP examples
 - [Template Method — refactoring.guru](https://refactoring.guru/design-patterns/template-method) — canonical pattern description with base/subclass diagram and C# example
 - [BackgroundService — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.hosting.backgroundservice) — Template Method for hosted background services
 - [Stream abstract class — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.io.stream) — Template Method in the .NET I/O hierarchy

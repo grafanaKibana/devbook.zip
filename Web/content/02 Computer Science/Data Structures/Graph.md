@@ -1,13 +1,7 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
-level:
-  - "4"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:24.222+03:00
+modified: 2026-07-05T15:49:34.995+03:00
 ---
 
 # Intro
@@ -70,8 +64,8 @@ The data structure only matters in service of the algorithms that run on it. The
 | Shortest path, negative weights allowed | **Bellman–Ford** | O(V·E) | Detects negative cycles |
 | All-pairs shortest paths | **Floyd–Warshall** | O(V³) | Dense graphs / small V |
 | Order a DAG by dependencies | **Topological sort** | O(V + E) | Kahn's (in-degree queue) or DFS post-order; only valid on a DAG |
-| Minimum spanning tree | **Prim / Kruskal** | O(E log V) | Kruskal pairs with [[02 Computer Science/Algorithms/Union-Find\|Union-Find]] |
-| Connectivity / dynamic union | **Union-Find** | ~O(α(n)) | Near-constant with path compression — see [[02 Computer Science/Algorithms/Union-Find\|Union-Find]] |
+| Minimum spanning tree | **Prim / Kruskal** | O(E log V) | Kruskal pairs with [[Union-Find]] |
+| Connectivity / dynamic union | **Union-Find** | ~O(α(n)) | Near-constant with path compression — see [[Union-Find]] |
 
 The two decisions that trip people up: **use BFS, not Dijkstra, for unweighted shortest paths** (same answer, far simpler), and **switch from Dijkstra to Bellman–Ford the moment any edge weight can be negative** (Dijkstra's greedy "settle once" assumption breaks).
 
@@ -89,6 +83,6 @@ The two decisions that trip people up: **use BFS, not Dijkstra, for unweighted s
 ## Links
 
 - [Collections and data structures overview](https://learn.microsoft.com/en-us/dotnet/standard/collections/) — Microsoft overview of built-in collection types; graphs are typically composed from these primitives.
-- [PriorityQueue<TElement, TPriority> class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.priorityqueue-2) — API reference for the priority queue used in weighted graph algorithms like Dijkstra.
+- [PriorityQueue\<TElement, TPriority> class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.priorityqueue-2) — API reference for the priority queue used in weighted graph algorithms like Dijkstra.
 - [.NET libraries update with Dijkstra example](https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-9/libraries#collections) — .NET 9 release notes showing PriorityQueue usage in a real Dijkstra implementation.
 - [Dijkstra test implementation in dotnet runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Collections/tests/Generic/PriorityQueue/PriorityQueue.Tests.Dijkstra.cs) — reference implementation of Dijkstra using .NET collections.

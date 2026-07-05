@@ -1,22 +1,16 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Patterns
-level:
-  - "2"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:43.306+03:00
+modified: 2026-07-05T15:49:37.325+03:00
 ---
 
 # Event Bus
 
 An event bus is a centralized publish/subscribe dispatcher: publishers emit events into the bus without knowing who listens, and subscribers register handlers by event type without knowing who publishes. The bus resolves handlers at runtime and invokes all of them when an event arrives. The core value is **double decoupling** — neither side knows the other exists, and adding a new subscriber means registering a handler, not editing the publisher.
 
-This sits between two related concepts. The [[05 Architecture/Patterns/Design Patterns/Behavioral/Observer|Observer]] pattern couples subscribers to a specific subject instance — you subscribe to *this* order's `StatusChanged` event. An event bus removes that coupling: you subscribe to *any* `OrderPlaced` event regardless of which object publishes it. The [[05 Architecture/Patterns/Design Patterns/Behavioral/Mediator|Mediator]] pattern (MediatR `Send`) routes one request to one handler. An event bus routes one event to *many* handlers — `Publish(OrderPlaced)` fans out to inventory, billing, and notification handlers simultaneously.
+This sits between two related concepts. The [[Observer]] pattern couples subscribers to a specific subject instance — you subscribe to _this_ order's `StatusChanged` event. An event bus removes that coupling: you subscribe to _any_ `OrderPlaced` event regardless of which object publishes it. The [[Mediator]] pattern (MediatR `Send`) routes one request to one handler. An event bus routes one event to _many_ handlers — `Publish(OrderPlaced)` fans out to inventory, billing, and notification handlers simultaneously.
 
-In .NET, the most common in-process event bus is **MediatR's `INotification` / `INotificationHandler<T>`** pipeline. For cross-service communication, [[05 Architecture/Distributed Systems/Message Queues/Message Queues|message brokers]] (RabbitMQ, Azure Service Bus, Kafka) serve as the distributed event bus, often abstracted through MassTransit or NServiceBus. The [[06 Development Practices/Paradigms/Event-driven|Event-driven]] page covers the broader paradigm and the Outbox pattern for reliable distributed publishing.
+In .NET, the most common in-process event bus is **MediatR's `INotification` / `INotificationHandler<T>`** pipeline. For cross-service communication, [[Message Queues|message brokers]] (RabbitMQ, Azure Service Bus, Kafka) serve as the distributed event bus, often abstracted through MassTransit or NServiceBus. The [[Event-driven]] page covers the broader paradigm and the Outbox pattern for reliable distributed publishing.
 
 ## MediatR Notification Bus
 
@@ -153,6 +147,7 @@ The tradeoff is explicit: you own the execution strategy but you own the registr
 ## Questions
 
 > [!QUESTION]- How does an event bus differ from a message broker?
+>
 > - Event bus is a **dispatch mechanism** — resolves handlers and invokes them, typically in-process
 > - Message broker is **infrastructure** — durable middleware (RabbitMQ, Kafka, Service Bus) that persists and delivers messages across processes
 > - In-process bus loses unprocessed events on crash; broker persists them
@@ -162,6 +157,7 @@ The tradeoff is explicit: you own the execution strategy but you own the registr
 > - A broker guarantees delivery at the cost of operational complexity; the in-process bus is simple but ephemeral
 
 > [!QUESTION]- Why should event handlers be independent rather than ordered?
+>
 > - Event bus contract is fan-out — "these N things happen when X occurs" — not a sequential pipeline
 > - If handler B depends on handler A's side effect, you have a hidden workflow disguised as fan-out
 > - Execution order depends on DI registration order, which is fragile and undocumented
@@ -171,6 +167,7 @@ The tradeoff is explicit: you own the execution strategy but you own the registr
 > - You end up with more events and handlers, but each is self-contained and the workflow is explicit in the codebase
 
 > [!QUESTION]- When is MediatR INotification insufficient as an event bus?
+>
 > - **Exception isolation**: default MediatR stops at the first handler failure — unacceptable when independent side effects (email, analytics, inventory) must not block each other
 > - **Scope isolation**: all handlers share the same DI scope, so DbContext mutations in handler A leak into handler B
 > - **Execution strategy**: default is sequential; parallel execution requires custom `INotificationPublisher`

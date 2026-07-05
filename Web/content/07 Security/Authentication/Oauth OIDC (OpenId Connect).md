@@ -1,14 +1,7 @@
 ---
-topic:
-  - Security
-subtopic:
-  - Authentication
-level:
-  - "3"
-priority: High
-status: Ready to Repeat
-
 publish: true
+created: 2026-07-05T10:54:04.362+03:00
+modified: 2026-07-05T10:54:04.362+03:00
 ---
 
 # OAuth 2.0 and OpenID Connect
@@ -51,7 +44,7 @@ OAuth's vocabulary trips people up; four roles do all the work:
 - **Authorization Server** — issues tokens after authenticating the user (Entra ID, Auth0, Google).
 - **Resource Server** — the API that holds the protected data and accepts access tokens.
 
-And three tokens: an **access token** (a bearer credential to call the resource server — treat it like a password), an **ID token** (OIDC only — proves *who* the user is, for the client to consume), and a **refresh token** (long-lived, used to get new access tokens without re-prompting).
+And three tokens: an **access token** (a bearer credential to call the resource server — treat it like a password), an **ID token** (OIDC only — proves _who_ the user is, for the client to consume), and a **refresh token** (long-lived, used to get new access tokens without re-prompting).
 
 ## Choosing a Flow
 
@@ -116,7 +109,7 @@ builder.Services.AddAuthentication(options =>
 ## Questions
 
 > [!QUESTION]- What's the difference between OAuth 2.0 and OpenID Connect?
-> OAuth 2.0 is an **authorization** framework — it issues *access tokens* that let an app call an API on the user's behalf, but it says nothing standard about *who* the user is. OpenID Connect is a thin **authentication** layer on top that adds an *ID token* (a JWT with verified identity claims: `sub`, `email`, `name`). Rule of thumb: "Sign in with…" needs OIDC; "let this app read my calendar" is OAuth. Using a raw OAuth access token as proof of login is a classic mistake.
+> OAuth 2.0 is an **authorization** framework — it issues _access tokens_ that let an app call an API on the user's behalf, but it says nothing standard about _who_ the user is. OpenID Connect is a thin **authentication** layer on top that adds an _ID token_ (a JWT with verified identity claims: `sub`, `email`, `name`). Rule of thumb: "Sign in with…" needs OIDC; "let this app read my calendar" is OAuth. Using a raw OAuth access token as proof of login is a classic mistake.
 
 > [!QUESTION]- Why is PKCE required even for confidential clients now?
 > PKCE binds the authorization request to the token exchange via a one-time `code_verifier`/`code_challenge`, so an intercepted authorization code is useless without the verifier. It was designed for public clients (SPAs/mobile that can't keep a secret), but the OAuth 2.1 guidance now recommends it for **all** clients because it also defends confidential clients against code-injection/interception, at essentially no cost.

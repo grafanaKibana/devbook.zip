@@ -1,13 +1,7 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - Tooling
 publish: true
-status: Done
-level:
-  - "2"
-priority: Medium
+created: 2026-07-05T10:54:06.693+03:00
+modified: 2026-07-05T10:54:06.694+03:00
 ---
 
 # Intro
@@ -87,18 +81,21 @@ Amazon Q Developer provides AI coding assistance in IDE and CLI experiences with
 ## Questions
 
 > [!QUESTION]- Why is an agentic coding tool not just "better autocomplete"?
+>
 > - Autocomplete predicts local tokens, while coding agents execute multi-step plans across files and tools
 > - Agents can run verification commands and revise output based on failures, which autocomplete does not do autonomously
 > - The mechanism changes risk: agent output must be governed with approvals, tests, and repository rules
 > - Net benefit comes from closed-loop execution, not from raw text quality alone
 
 > [!QUESTION]- When should a team prefer terminal agents over IDE agents?
+>
 > - Prefer terminal agents when workflows are command-heavy, scriptable, and CI-first
 > - Prefer IDE agents when developers rely on interactive navigation, visual diffing, and editor-native refactors
 > - The deciding factor is operational fit with current engineering process, not vendor marketing claims
 > - Teams can mix both if shared instruction files and validation gates keep behavior consistent
 
 > [!QUESTION]- What controls reduce production risk when adopting coding agents?
+>
 > - Repository instruction files to encode architecture and testing constraints
 > - Hooks and policy checks to block unsafe operations automatically
 > - Bounded execution: cost limits, step limits, and explicit approval points

@@ -1,13 +1,7 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
-level:
-  - "3"
-priority: Medium
-status: Done
 publish: true
+created: 2026-07-05T10:54:06.935+03:00
+modified: 2026-07-05T10:54:06.935+03:00
 ---
 
 # Intro
@@ -125,6 +119,7 @@ Calibration tips:
 
 > [!QUESTION]- When should I prefer LLM-as-a-judge over classic metrics, and how do I know the judge is trustworthy?
 > Expected answer:
+>
 > - Use judges for open-ended generation where semantics matter and deterministic metrics (exact match, BLEU) can't capture quality.
 > - Use classic metrics for deterministic outputs or when you need hard guarantees.
 > - The key signal: if a human would need to read the answer to evaluate it, a judge model probably should too.
@@ -134,6 +129,7 @@ Calibration tips:
 
 > [!QUESTION]- When should I prefer pairwise comparisons over rubric scorecards?
 > Expected answer:
+>
 > - Pairwise works best when iterating rapidly and the goal is "better than baseline" rather than a specific threshold.
 > - Scorecards work better when you need hard pass/fail criteria, want to track specific dimensions over time, or need to gate a release on a minimum score.
 > - Pairwise results aggregate into win-rates or Elo ratings, which are useful for comparing prompt versions or model checkpoints.
@@ -141,6 +137,7 @@ Calibration tips:
 
 > [!QUESTION]- What are the most dangerous pitfalls when using LLM-as-a-judge in production?
 > Expected answer:
+>
 > - Verbosity bias: judges prefer longer answers even when shorter ones are correct. Mitigate with a conciseness dimension and length caps.
 > - Position bias: in pairwise, judges favor whichever answer appears first. Always randomize A/B order.
 > - Hidden coupling: using the same model as judge and candidate inflates scores. Use a different judge model.

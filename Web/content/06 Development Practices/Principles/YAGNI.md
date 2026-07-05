@@ -1,18 +1,12 @@
 ---
-topic:
-  - Development Practices
-subtopic:
-  - Principles
-level:
-  - "4"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:48.546+03:00
+modified: 2026-07-05T15:49:32.867+03:00
 ---
 
 # YAGNI
 
-YAGNI — *You Aren't Gonna Need It* — means: do not build a feature until you have a real, current need for it. It protects against speculative complexity: abstractions, extension points, and configuration options added for hypothetical future requirements that never arrive. Every line of code you write has a maintenance cost; YAGNI says don't pay that cost for features you don't need yet. A team spent 3 sprints building a plugin architecture for their notification system "in case we need to support SMS, push, and Slack" — 18 months later, only email was used, and the plugin abstraction layer had accumulated 40+ unit tests, a factory, a registry, and a configuration schema that all needed maintenance for a single implementation.
+YAGNI — _You Aren't Gonna Need It_ — means: do not build a feature until you have a real, current need for it. It protects against speculative complexity: abstractions, extension points, and configuration options added for hypothetical future requirements that never arrive. Every line of code you write has a maintenance cost; YAGNI says don't pay that cost for features you don't need yet. A team spent 3 sprints building a plugin architecture for their notification system "in case we need to support SMS, push, and Slack" — 18 months later, only email was used, and the plugin abstraction layer had accumulated 40+ unit tests, a factory, a registry, and a configuration schema that all needed maintenance for a single implementation.
 
 YAGNI is most useful when design discussions drift toward "what if we need to support X later?" — the answer is: build it when X is a real requirement with a real user, not before.
 
@@ -24,7 +18,7 @@ The signal that YAGNI applies: a design decision is driven by a hypothetical fut
 - Building a generic configuration system for a feature that has exactly one configuration today.
 - Adding an abstraction layer over a library "in case we switch libraries" — when there is no plan to switch.
 
-The counter-signal: YAGNI does *not* mean "never design for change." It means don't pay the cost of flexibility until the need is real. Reversible decisions (feature flags, thin adapters, config values) are cheap — build them. Irreversible decisions (public API contracts, database schemas, wire protocols) deserve more upfront thought because changing them later is expensive.
+The counter-signal: YAGNI does _not_ mean "never design for change." It means don't pay the cost of flexibility until the need is real. Reversible decisions (feature flags, thin adapters, config values) are cheap — build them. Irreversible decisions (public API contracts, database schemas, wire protocols) deserve more upfront thought because changing them later is expensive.
 
 ## Example
 
@@ -101,8 +95,8 @@ public class FeatureConfig
 
 ## References
 
-- [YAGNI (Martin Fowler)](https://martinfowler.com/bliki/Yagni.html) — concise explanation of YAGNI with the important nuance: it applies to *features*, not to good engineering practices like testing and refactoring.
+- [YAGNI (Martin Fowler)](https://martinfowler.com/bliki/Yagni.html) — concise explanation of YAGNI with the important nuance: it applies to _features_, not to good engineering practices like testing and refactoring.
 - [You aren't gonna need it (Wikipedia)](https://en.wikipedia.org/wiki/You_aren%27t_gonna_need_it) — origin in Extreme Programming and the relationship to the broader XP principle of doing the simplest thing that could possibly work.
-- [[06 Development Practices/Principles/KISS|KISS]] — related principle: keep implementations simple; complexity should be justified by current requirements.
+- [[KISS]] — related principle: keep implementations simple; complexity should be justified by current requirements.
 - [Extreme Programming Explained (Kent Beck)](https://www.oreilly.com/library/view/extreme-programming-explained/0321278658/) — the XP book that established YAGNI as a core practice; explains the economic argument for deferring features until they are needed.
 - [Speculative Generality (Refactoring Guru)](https://refactoring.guru/smells/speculative-generality) — the code smell that YAGNI prevents: hooks, abstract classes, and parameters added for hypothetical future use that never arrives.

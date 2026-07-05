@@ -1,18 +1,12 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - Tooling
 publish: true
-status: Done
-level:
-  - "2"
-priority: Medium
+created: 2026-07-05T10:54:06.703+03:00
+modified: 2026-07-05T15:49:35.272+03:00
 ---
 
 # Intro
 
-In AI coding agents, plugins are extension mechanisms that add capabilities the base model does not have on its own: external tools, data sources, and reusable workflows. They matter because agent output quality depends not only on model reasoning, but on what the runtime can execute and fetch during a task. Today, the dominant cross-tool plugin standard is [[11 AI & ML/LLM/Agents/Model Context Protocol|Model Context Protocol]], which lets different clients connect to external servers through one protocol instead of bespoke integrations.
+In AI coding agents, plugins are extension mechanisms that add capabilities the base model does not have on its own: external tools, data sources, and reusable workflows. They matter because agent output quality depends not only on model reasoning, but on what the runtime can execute and fetch during a task. Today, the dominant cross-tool plugin standard is [[Model Context Protocol]], which lets different clients connect to external servers through one protocol instead of bespoke integrations.
 
 The mechanism is capability discovery plus runtime invocation. A plugin server exposes three primitives: **tools** (callable functions), **resources** (readable context/data), and **prompts** (reusable templates). The agent client discovers these capabilities through the protocol, selects what is relevant for the current request, and invokes them during its loop.
 
@@ -56,7 +50,7 @@ A typical project-level MCP configuration looks like this:
 }
 ```
 
-This pattern keeps integration concerns in config instead of hardcoding service logic in prompts. For reusable loading and capability packaging patterns, see [[11 AI & ML/Tooling/Skills|Skills]].
+This pattern keeps integration concerns in config instead of hardcoding service logic in prompts. For reusable loading and capability packaging patterns, see [[Skills]].
 
 ## Pitfalls
 
@@ -74,12 +68,14 @@ This pattern keeps integration concerns in config instead of hardcoding service 
 ## Questions
 
 > [!QUESTION]- Why does MCP reduce integration complexity for agent tooling ecosystems?
+>
 > - Without a shared protocol, each client-service pair needs custom integration code, creating N x M scaling
 > - MCP changes this to N + M: each client implements MCP once, each service exposes one MCP server
 > - The shared primitives (tools, resources, prompts) standardize capability discovery and invocation
 > - Tradeoff: protocol standardization simplifies interoperability but adds runtime/server management overhead
 
 > [!QUESTION]- When should a team intentionally limit plugin count even if more integrations are available?
+>
 > - When accuracy and latency degrade from too many tool schemas in context
 > - When the security team cannot properly review or monitor additional server dependencies
 > - When task scope is narrow and extra plugins create more selection noise than value

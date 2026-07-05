@@ -1,13 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Distributed Systems
-level:
-  - "2"
-priority: Medium
-status: Done
 publish: true
+created: 2026-07-05T10:53:43.308+03:00
+modified: 2026-07-05T15:49:36.219+03:00
 ---
 
 # Intro
@@ -30,11 +24,11 @@ sequenceDiagram
     Note over Producer: If no 2xx within timeout retry with exponential backoff
 ```
 
-Webhooks complement [[05 Architecture/System Architecture/Event-Driven Architecture|Event-Driven Architecture]] — they are the HTTP-native way to deliver events between systems that do not share a message broker. For internal service-to-service communication within the same platform, [[05 Architecture/Distributed Systems/Message Queues/Message Queues|Message Queues]] are usually a better fit because they provide built-in durability, fan-out, and back-pressure.
+Webhooks complement [[Event-Driven Architecture]] — they are the HTTP-native way to deliver events between systems that do not share a message broker. For internal service-to-service communication within the same platform, [[Message Queues]] are usually a better fit because they provide built-in durability, fan-out, and back-pressure.
 
 ## Receiver Example (ASP.NET Core)
 
-A production-quality webhook receiver needs three things: signature verification, [[Idempotency|idempotency]], and fast acknowledgment. This example receives GitHub-style webhooks signed with HMAC-SHA256.
+A production-quality webhook receiver needs three things: signature verification, [[Idempotency]], and fast acknowledgment. This example receives GitHub-style webhooks signed with HMAC-SHA256.
 
 ```csharp
 using System.Security.Cryptography;

@@ -1,15 +1,9 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Distributed Systems
-level:
-  - "2"
-priority: High
 publish: true
+created: 2026-07-05T16:18:39.932+03:00
+modified: 2026-07-05T16:18:39.933+03:00
 tags:
   - FolderNote
-status: Not-Started
 ---
 
 # Intro
@@ -30,11 +24,11 @@ Two fundamental approaches to adding capacity: [[Vertical Scaling]] (bigger node
 | Database read replicas | Read-heavy relational load | Offload read queries from primary to replicas | Replica lag can break read-after-write expectations |
 | Database sharding | Write throughput and dataset size | Partition data by key so writes and storage spread across shards | Rebalancing, cross-shard queries, and hotspot keys add major complexity |
 | CQRS (see [[CQRS]]) | Read/write contention with different query needs | Separate write model from read model to optimize each independently | Eventual consistency and projection maintenance must be explicit |
-| Caching (see [[03 Data Persistence/Caching|Caching]]) | Repeated expensive reads | Serve hot data from in-memory cache to reduce DB/API pressure | Cache invalidation and staleness policy drive correctness risk |
+| Caching (see [[03 Data Persistence/Caching\|Caching]]) | Repeated expensive reads | Serve hot data from in-memory cache to reduce DB/API pressure | Cache invalidation and staleness policy drive correctness risk |
 | CDN | Static asset latency and origin egress | Move static content to edge locations close to users | Cache-control mistakes can serve stale or private content |
-| Async processing and message queues (see [[05 Architecture/Distributed Systems/Message Queues/Message Queues|Message Queues]]) | Synchronous dependency latency and burst traffic | Buffer work, decouple producers/consumers, smooth spikes | Requires idempotency, retry policy, and dead-letter handling |
+| Async processing and message queues (see [[05 Architecture/Distributed Systems/Message Queues/Message Queues\|Message Queues]]) | Synchronous dependency latency and burst traffic | Buffer work, decouple producers/consumers, smooth spikes | Requires idempotency, retry policy, and dead-letter handling |
 | Connection pooling | Expensive connection setup and DB connection limits | Reuse open connections to reduce handshake cost and limit churn | Pool exhaustion often appears as latency spikes before hard failures |
-| Event-Driven Architecture (see [[05 Architecture/System Architecture/Event-Driven Architecture|Event-Driven Architecture]]) | Tight coupling between services | Publish events so services scale and evolve independently | Ordering, duplication, and schema evolution must be designed upfront |
+| Event-Driven Architecture (see [[05 Architecture/System Architecture/Event-Driven Architecture\|Event-Driven Architecture]]) | Tight coupling between services | Publish events so services scale and evolve independently | Ordering, duplication, and schema evolution must be designed upfront |
 | Load shedding and rate limiting | Overload collapse during spikes | Reject or defer excess traffic early to protect critical paths | Requires clear priority rules and client retry behavior |
 
 How to use this table in interviews: name the bottleneck first, then pick one or two patterns that directly reduce that bottleneck.
@@ -112,35 +106,36 @@ Simple production pattern:
 
 ## Pitfalls
 
-1. **Scaling before finding the real bottleneck**  
-   What goes wrong: teams add app instances while p95 remains high.  
-   Why: the bottleneck is often DB lock contention, external API latency, or connection saturation.  
+1. **Scaling before finding the real bottleneck**\
+   What goes wrong: teams add app instances while p95 remains high.\
+   Why: the bottleneck is often DB lock contention, external API latency, or connection saturation.\
    Mitigation: baseline telemetry first, then scale the saturated component.
 
-2. **Premature sharding**  
-   What goes wrong: delivery speed drops and incident complexity rises.  
-   Why: shard routing, cross-shard queries, and resharding become permanent operational overhead.  
+2. **Premature sharding**\
+   What goes wrong: delivery speed drops and incident complexity rises.\
+   Why: shard routing, cross-shard queries, and resharding become permanent operational overhead.\
    Mitigation: exhaust simpler options first (indexes, read replicas, caching, partitioning, queueing).
 
-3. **Stateful services that cannot scale horizontally**  
-   What goes wrong: sticky sessions and per-node memory state cause uneven load and failover pain.  
-   Why: user session or cache state is stored in-process.  
+3. **Stateful services that cannot scale horizontally**\
+   What goes wrong: sticky sessions and per-node memory state cause uneven load and failover pain.\
+   Why: user session or cache state is stored in-process.\
    Mitigation: externalize session to Redis and keep handlers stateless.
 
-4. **Ignoring database bottlenecks while scaling app tier**  
-   What goes wrong: more app instances generate more DB pressure and failures happen faster.  
-   Why: DB CPU, locks, or connection limits were already near saturation.  
+4. **Ignoring database bottlenecks while scaling app tier**\
+   What goes wrong: more app instances generate more DB pressure and failures happen faster.\
+   Why: DB CPU, locks, or connection limits were already near saturation.\
    Mitigation: profile queries, add indexes, tune pools, use read replicas, then scale app tier.
 
 ## Questions
 
 > [!QUESTION]- When would you choose read replicas instead of CQRS for a scaling problem?
 > **Expected answer:**
+>
 > - Choose read replicas when main pressure is read throughput on an existing relational model.
 > - Choose CQRS when read/write models diverge and read projections need different shape or storage.
 > - Mention consistency behavior: replicas have lag; CQRS read models are eventually consistent by design.
 > - Mention complexity: replicas are simpler operationally than full CQRS/event projection pipelines.
-> **Why this is strong:** It balances architecture fit, consistency, and operational cost.
+>   **Why this is strong:** It balances architecture fit, consistency, and operational cost.
 
 ## References
 

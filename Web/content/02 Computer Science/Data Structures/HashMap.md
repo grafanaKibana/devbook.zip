@@ -1,20 +1,14 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
-level:
-  - "4"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:23.442+03:00
+modified: 2026-07-05T17:35:40.344+03:00
 ---
 
 # Intro
 
-A hash map (also called a hash table, associative array, or dictionary) stores key-value pairs and uses **hashing** to find the bucket for a key in near-constant time. The goal is fast insert, lookup, and delete by key — **O(1) average**, **O(n) worst case** when all keys collide into one bucket. A concrete example: a session cache storing 50K active sessions by session ID achieves sub-microsecond lookups, where the same lookup in a linear [[02 Computer Science/Data Structures/Dynamic Array|dynamic array]] would scan 25K entries on average.
+A hash map (also called a hash table, associative array, or dictionary) stores key-value pairs and uses **hashing** to find the bucket for a key in near-constant time. The goal is fast insert, lookup, and delete by key — **O(1) average**, **O(n) worst case** when all keys collide into one bucket. A concrete example: a session cache storing 50K active sessions by session ID achieves sub-microsecond lookups, where the same lookup in a linear [[Dynamic Array]] would scan 25K entries on average.
 
-In .NET the hash map is realized by several types: `Dictionary<TKey, TValue>` (generic, the default), the legacy non-generic `Hashtable`, `ConcurrentDictionary<TKey, TValue>` (thread-safe), and `FrozenDictionary<TKey, TValue>` (read-optimized, .NET 8+). These are covered under [.NET implementations](#net-implementations) below.
+In .NET the hash map is realized by several types: `Dictionary<TKey, TValue>` (generic, the default), the legacy non-generic `Hashtable`, `ConcurrentDictionary<TKey, TValue>` (thread-safe), and `FrozenDictionary<TKey, TValue>` (read-optimized, .NET 8+). These are covered under [.NET implementations](HashMap.md#net-implementations) below.
 
 ## How It Works
 
@@ -36,7 +30,7 @@ graph TD
 
 ### Load factor and resizing
 
-The reason inserts are *amortized* O(1) — not strictly O(1) — is resizing. The map tracks a **load factor** (entries ÷ buckets). When it crosses the threshold, the map allocates a larger bucket array and **rehashes every existing entry** into it, an O(n) operation. Across many inserts this averages out to O(1) each, but any single insert can trigger a full O(n) rehash.
+The reason inserts are _amortized_ O(1) — not strictly O(1) — is resizing. The map tracks a **load factor** (entries ÷ buckets). When it crosses the threshold, the map allocates a larger bucket array and **rehashes every existing entry** into it, an O(n) operation. Across many inserts this averages out to O(1) each, but any single insert can trigger a full O(n) rehash.
 
 Two practical consequences:
 
@@ -69,7 +63,7 @@ A production example: an ASP.NET Core middleware that resolves tenant configurat
 |---|---|---|---|---|
 | `Dictionary<TKey,TValue>` | Generic | No | Insertion (not guaranteed) | Default key-value map in modern .NET |
 | `Hashtable` | `object` | No (Synchronized wrapper only) | None | Legacy interop only (see below) |
-| `HashSet<T>` | N/A (values only) | No | None | Unique value membership — see [[02 Computer Science/Data Structures/Hash Set\|Hash Set]] |
+| `HashSet<T>` | N/A (values only) | No | None | Unique value membership — see [[Hash Set]] |
 | `ConcurrentDictionary<TKey,TValue>` | Generic | Yes | None | Concurrent read/write without external locks |
 | `FrozenDictionary<TKey,TValue>` | Generic | Yes (read-only) | None | Build-once, read-many hot paths |
 
@@ -91,7 +85,7 @@ Before generics, .NET's hash map was the non-generic `Hashtable` (in `System.Col
 
 | Choice | Hash map | Alternative | Decision criteria |
 | --- | --- | --- | --- |
-| vs linear search in a [[02 Computer Science/Data Structures/Dynamic Array\|Dynamic Array]] | O(1) average lookup | O(n) scan, no hashing overhead | For very small N a list scan can win (no hashing, better locality); use the hash map as N grows. |
+| vs linear search in a [[Dynamic Array]] | O(1) average lookup | O(n) scan, no hashing overhead | For very small N a list scan can win (no hashing, better locality); use the hash map as N grows. |
 | vs sorted map (`SortedDictionary`) | Unordered, O(1) average | Ordered keys, O(log n) | Pick the sorted variant only when you need ordered iteration or range queries. |
 | vs read-optimized (`FrozenDictionary`) | Cheap writes, mutable | Read-optimized, build cost | Use the frozen variant for build-once/read-many hot paths; never for collections that keep changing. |
 
@@ -108,6 +102,6 @@ Before generics, .NET's hash map was the non-generic `Hashtable` (in `System.Col
 
 ## References
 
-- [Dictionary<TKey, TValue> class (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.dictionary-2) — API reference; the primary hash map in modern .NET, with remarks on hash contract requirements and capacity.
+- [Dictionary\<TKey, TValue> class (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.dictionary-2) — API reference; the primary hash map in modern .NET, with remarks on hash contract requirements and capacity.
 - [Selecting a collection class (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/collections/selecting-a-collection-class) — decision guide for choosing between hash-based and sorted collections.
 - [Anatomy of the .NET dictionary](https://dunnhq.com/posts/2024/anatomy-of-the-dotnet-dictionary/) — practitioner deep-dive into bucket layout, collision handling, and resize behavior.

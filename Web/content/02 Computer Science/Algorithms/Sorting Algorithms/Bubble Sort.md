@@ -1,13 +1,7 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
-level:
-  - "4"
-priority: Low
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:25.101+03:00
+modified: 2026-07-05T10:53:37.209+03:00
 ---
 
 # Intro
@@ -74,6 +68,7 @@ public static void BubbleSort(int[] a)
 ## When to Use
 
 Almost never in production. Prefer:
+
 - **Insertion sort** for small arrays (n ≤ 20) or nearly-sorted data — better constant factors.
 - **Array.Sort** (introsort) for general-purpose sorting in .NET.
 
@@ -115,7 +110,9 @@ Bubble sort is useful as a teaching example and for understanding stability and 
 ## References
 
 - [Bubble sort (Wikipedia)](https://en.wikipedia.org/wiki/Bubble_sort) — algorithm description, variants (cocktail shaker sort), and stability proof.
+
 - [Sorting visualizations (VisuAlgo)](https://visualgo.net/en/sorting) — step-by-step animation to build intuition for all comparison sorts.
 
 - [Timsort (Wikipedia)](https://en.wikipedia.org/wiki/Timsort) — Python's and Java's default sort; replaced bubble sort and insertion sort for general use; shows why O(n²) algorithms are only kept as base cases for small partitions.
+
 - [Sorting algorithms comparison (Big-O Cheat Sheet)](https://www.bigocheatsheet.com/) — quick reference for time and space complexity of all common sorting algorithms.

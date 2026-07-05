@@ -1,18 +1,12 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
-level:
-  - "2"
-priority: High
-status: Done
 publish: true
+created: 2026-07-05T10:54:06.868+03:00
+modified: 2026-07-05T17:36:35.531+03:00
 ---
 
 # Intro
 
-This is the catalog of production RAG patterns, ranked by how common they are as default guidance in current vendor docs, open-source frameworks, and enterprise architectures. The ranking is a practical adoption heuristic, not market-share data. Start at the top and move down only when [[11 AI & ML/LLM/RAG/Evaluation/Evaluation|evaluation]] shows a specific failure that cheaper patterns do not fix — each pattern below names the failure mode it solves and the risk it introduces. For the overall pipeline these patterns plug into, see [[11 AI & ML/LLM/RAG/RAG|RAG]].
+This is the catalog of production RAG patterns, ranked by how common they are as default guidance in current vendor docs, open-source frameworks, and enterprise architectures. The ranking is a practical adoption heuristic, not market-share data. Start at the top and move down only when [[11 AI & ML/LLM/RAG/Evaluation/Evaluation|evaluation]] shows a specific failure that cheaper patterns do not fix — each pattern below names the failure mode it solves and the risk it introduces. For the overall pipeline these patterns plug into, see [[RAG]].
 
 ## 1. Baseline Single-Pass RAG
 
@@ -29,7 +23,7 @@ flowchart LR
 Where it fits:
 
 - First production version of a documentation assistant or support bot.
-- Small curated corpora where [[11 AI & ML/LLM/RAG/Chunking|chunking]] is clean and the answer usually lives in one document.
+- Small curated corpora where [[Chunking]] is clean and the answer usually lives in one document.
 - Baseline measurement before adding expensive retrieval logic.
 
 Main risk:
@@ -38,7 +32,7 @@ Main risk:
 
 ## 2. Hybrid Search plus Reranking
 
-Run [[11 AI & ML/LLM/RAG/Retrieval#Sparse Retrieval — Keyword Search (BM25)|lexical search]] and [[11 AI & ML/LLM/RAG/Retrieval#Dense Retrieval — Vector Search|vector search]] together, merge their candidates, then rerank the merged set so the generator sees the best few passages. Lexical search catches exact terms; vector search catches semantic matches; [[11 AI & ML/LLM/RAG/Re-ranking|reranking]] removes noise before context assembly.
+Run [[Retrieval#Sparse Retrieval — Keyword Search (BM25)|lexical search]] and [[Retrieval#Dense Retrieval — Vector Search|vector search]] together, merge their candidates, then rerank the merged set so the generator sees the best few passages. Lexical search catches exact terms; vector search catches semantic matches; [[Re-ranking|reranking]] removes noise before context assembly.
 
 ```mermaid
 flowchart LR
@@ -250,7 +244,7 @@ Main risk:
 
 ## 10. Agentic RAG
 
-An [[11 AI & ML/LLM/Agents/Agents|agent]] decides which retrieval or data tools to call, observes the result, and chooses the next action. Unlike a fixed pipeline, the path can change per query.
+An [[Agents|agent]] decides which retrieval or data tools to call, observes the result, and chooses the next action. Unlike a fixed pipeline, the path can change per query.
 
 ```mermaid
 flowchart LR
@@ -298,7 +292,7 @@ Where it fits:
 
 Main risk:
 
-- **Expensive and brittle indexing** — entity extraction, entity linking, graph construction, and community summaries all introduce errors. GraphRAG is powerful when relationships matter, but overkill for ordinary support Q&A.
+- **Expensive and brittle indexing** — entity extraction, entity linking, graph construction, and community summaries all introduce errors. GraphRAG is powerful when relationships matter, but overkill for ordinary support Q\&A.
 
 ## 12. Corrective and Self-Reflective RAG
 

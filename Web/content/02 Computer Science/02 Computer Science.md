@@ -1,16 +1,9 @@
 ---
-icon: flask-round
-color: "#ef4444"
-topic:
-  - Computer Science
-subtopic: []
+publish: true
+created: 2026-07-05T10:53:23.194+03:00
+modified: 2026-07-05T10:53:37.203+03:00
 tags:
   - FolderNote
-publish: true
-level:
-  - '4'
-status: Done
-priority: High
 ---
 
 # Intro

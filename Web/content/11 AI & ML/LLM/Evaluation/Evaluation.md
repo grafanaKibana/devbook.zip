@@ -1,15 +1,9 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+publish: true
+created: 2026-07-05T10:54:06.943+03:00
+modified: 2026-07-05T17:36:35.507+03:00
 tags:
   - FolderNote
-publish: true
-level:
-  - "3"
-status: Done
-priority: High
 ---
 
 # Intro
@@ -32,14 +26,14 @@ flowchart TD
     ON -->|new failures become cases| G
 ```
 
-- **[[11 AI & ML/LLM/Evaluation/Deterministic Checks|Deterministic Checks]]** — non-LLM rules that run first on every output: schema validity, allowlisted actions, PII scans, length and format constraints. Microseconds, zero cost, zero false positives. A malformed or unsafe output is a hard failure that never reaches a judge.
-- **[[11 AI & ML/LLM/Evaluation/LLM-as-a-Judge|LLM-as-a-Judge]]** — a separate model scores semantic quality (correctness, groundedness, tone) against a rubric, either as absolute scorecards or pairwise comparisons. Scalable where human review is too slow, but carries its own biases (verbosity, position, self-preference) that must be calibrated against human labels.
-- **[[11 AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs|Golden Test Set and Regression Runs]]** — a versioned, curated set of representative and adversarial cases run on every change to catch regressions, with a frozen holdout you never tune against. This is the release gate.
-- **[[11 AI & ML/LLM/Evaluation/Online Evaluation and AB Tests|Online Evaluation and AB Tests]]** — measure real user outcomes on live traffic, since offline sets cannot anticipate production distribution. New production failures feed back into the golden set, closing the loop.
+- **[[Deterministic Checks]]** — non-LLM rules that run first on every output: schema validity, allowlisted actions, PII scans, length and format constraints. Microseconds, zero cost, zero false positives. A malformed or unsafe output is a hard failure that never reaches a judge.
+- **[[LLM-as-a-Judge]]** — a separate model scores semantic quality (correctness, groundedness, tone) against a rubric, either as absolute scorecards or pairwise comparisons. Scalable where human review is too slow, but carries its own biases (verbosity, position, self-preference) that must be calibrated against human labels.
+- **[[Golden Test Set and Regression Runs]]** — a versioned, curated set of representative and adversarial cases run on every change to catch regressions, with a frozen holdout you never tune against. This is the release gate.
+- **[[Online Evaluation and AB Tests]]** — measure real user outcomes on live traffic, since offline sets cannot anticipate production distribution. New production failures feed back into the golden set, closing the loop.
 
 A useful framing across all four: combine **offline** (fixed sets, fast iteration, regression gating) with **online** (real outcomes, distribution shift), and combine **automated** (deterministic + judge, scalable) with **human** (rubric review, calibration, edge-case discovery). Neither axis alone is enough.
 
-All four layers run against an evaluation set; how you construct, synthesize, and size that set is [[11 AI & ML/LLM/Evaluation/Building an Evaluation Set|Building an Evaluation Set]]. Two domains specialize this general stack with their own metrics and labeling, reusing everything above rather than repeating it: RAG adds retrieval-quality and faithfulness metrics — see [[11 AI & ML/LLM/RAG/Evaluation/Evaluation|RAG Evaluation]] and [[11 AI & ML/LLM/RAG/Monitoring|Monitoring]] — and agents add trajectory, tool-call, and task-success metrics — see [[11 AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]].
+All four layers run against an evaluation set; how you construct, synthesize, and size that set is [[Building an Evaluation Set]]. Two domains specialize this general stack with their own metrics and labeling, reusing everything above rather than repeating it: RAG adds retrieval-quality and faithfulness metrics — see [[11 AI & ML/LLM/RAG/Evaluation/Evaluation|RAG Evaluation]] and [[Monitoring]] — and agents add trajectory, tool-call, and task-success metrics — see [[11 AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]].
 
 ## Example
 
@@ -77,16 +71,18 @@ When you iterate on prompts or rubrics against a fixed evaluation set, you can o
 > Mainly for narrow summarization/translation style tasks and as weak signals. For open-ended assistants, rubric-based scoring and pairwise ranking usually track real quality better.
 
 > [!QUESTION]- Why run deterministic checks before an LLM judge rather than relying on the judge alone?
+>
 > - Deterministic checks are microseconds and free; LLM-judge calls cost API tokens and seconds — running the cheap gate first avoids paying to judge output that is already invalid
 > - Hard constraints (schema validity, disallowed actions, PII, length) have a zero false-positive rate when expressed as rules, whereas a judge can mis-rule on them
 > - A judge can be distracted into scoring an output "good" that a deterministic rule would reject outright (a fluent answer that violates the output contract)
-> - The two are complementary, not redundant: deterministic checks enforce hard contracts, judges evaluate soft quality — see [[11 AI & ML/LLM/Evaluation/Deterministic Checks|Deterministic Checks]]
+> - The two are complementary, not redundant: deterministic checks enforce hard contracts, judges evaluate soft quality — see [[Deterministic Checks]]
 
 > [!QUESTION]- Why isn't a strong offline score enough to ship an LLM change?
+>
 > - Offline sets are frozen samples; production traffic shifts in phrasing, intent, and edge-case mix the set never captured
 > - Iterating against a fixed set invites evaluation overfitting — the prompt gets tuned to the benchmark's distribution, not to real quality
 > - Outcome metrics that matter (task resolution, escalation, retention) depend on multi-turn user behavior that no static set simulates
-> - Treat offline evaluation as a release gate, then confirm with [[11 AI & ML/LLM/Evaluation/Online Evaluation and AB Tests|online evaluation]] before trusting the change
+> - Treat offline evaluation as a release gate, then confirm with [[Online Evaluation and AB Tests|online evaluation]] before trusting the change
 
 ## References
 

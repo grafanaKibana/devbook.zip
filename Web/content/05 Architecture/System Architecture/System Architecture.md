@@ -1,15 +1,9 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - System Architecture
+publish: true
+created: 2026-07-05T10:53:43.313+03:00
+modified: 2026-07-05T10:53:43.313+03:00
 tags:
   - FolderNote
-publish: true
-level:
-  - '4'
-priority: High
-status: Done
 ---
 
 # Intro

@@ -1,14 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Patterns
-level:
-  - "3"
-priority: High
-status:
-  - Done
 publish: true
+created: 2026-07-05T10:53:43.332+03:00
+modified: 2026-07-05T10:53:43.332+03:00
 ---
 
 # Observer
@@ -188,7 +181,7 @@ Adding a push notification subscriber now means a new class registered in DI —
 
 ## References
 
-- [Observer Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=_BpmfnqjgzQ&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=2) — video walkthrough of the Observer pattern with OOP examples
+- [Observer Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=_BpmfnqjgzQ\&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc\&index=2) — video walkthrough of the Observer pattern with OOP examples
 - [Observer — refactoring.guru](https://refactoring.guru/design-patterns/observer) — canonical pattern description with subject/observer diagram and C# example
 - [Events (C# programming guide) — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/events/) — C# event/delegate as the language-native Observer
 - [`IObservable<T>` — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.iobservable-1) — Reactive Extensions Observer interfaces

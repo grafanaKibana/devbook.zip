@@ -1,13 +1,7 @@
 ---
-topic:
-  - Data Persistence
-subtopic:
-  - SQL
-level:
-  - "4"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:40.620+03:00
+modified: 2026-07-05T10:53:40.620+03:00
 ---
 
 # Intro
@@ -64,7 +58,7 @@ flowchart TD
 
 **Hotspot shards.** Uneven key distribution concentrates load on one shard while others sit idle. Sequential keys (auto-increment IDs, timestamps) are the classic cause with range-based sharding. Mitigation: use hash-based keys and monitor per-shard CPU and query latency separately.
 
-**The single hot key ("celebrity problem").** Even with a perfect hash, *one* key can be too active or too large for any single shard — a celebrity with millions of followers, or one enterprise tenant dwarfing the rest. Hashing doesn't help because all that traffic shares one key and therefore one shard. Mitigations: **split the hot key** by appending a random/bounded suffix (`celebrityId:0..N`) so its data spreads across shards (the app fans the key's reads/writes back together), cache the hot key in front of the shard, or give the outlier tenant its **own dedicated shard**. This is distinct from a hotspot *shard* (skewed key distribution) — here the skew is within a single key.
+**The single hot key ("celebrity problem").** Even with a perfect hash, _one_ key can be too active or too large for any single shard — a celebrity with millions of followers, or one enterprise tenant dwarfing the rest. Hashing doesn't help because all that traffic shares one key and therefore one shard. Mitigations: **split the hot key** by appending a random/bounded suffix (`celebrityId:0..N`) so its data spreads across shards (the app fans the key's reads/writes back together), cache the hot key in front of the shard, or give the outlier tenant its **own dedicated shard**. This is distinct from a hotspot _shard_ (skewed key distribution) — here the skew is within a single key.
 
 **Wrong shard key.** A key absent from most query WHERE clauses forces scatter queries on every read. Changing the key later requires a full data migration. Mitigation: analyze your top queries before choosing; the key must appear in the majority of them.
 
@@ -78,6 +72,7 @@ flowchart TD
 
 > [!QUESTION]- When should you shard a database, and what should you try first?
 > Shard only when write throughput or storage saturates a single node. Try these first:
+>
 > - **Vertical scaling**: operationally trivial, preserves full SQL semantics.
 > - **Read replicas**: offload reads but don't help writes.
 > - **Caching**: reduces DB load for hot reads.
@@ -92,6 +87,7 @@ flowchart TD
 > With `hash(key) % N`, adding one shard changes N and remaps almost every key, requiring a near-total data migration.
 >
 > Consistent hashing maps keys and shards onto a circular ring. Adding a shard displaces only the keys between the new shard and its predecessor, roughly 1/N of all keys. Virtual nodes (multiple ring positions per physical shard) prevent any shard from owning a disproportionately large arc.
+
 ## Links
 
 - [Horizontal, vertical, and functional data partitioning (Azure Architecture Center)](https://learn.microsoft.com/azure/architecture/best-practices/data-partitioning) — practical guidance on partitioning strategies with tradeoffs for each approach.

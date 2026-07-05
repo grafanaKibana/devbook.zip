@@ -1,14 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Distributed Systems
-level:
-  - "2"
-priority: High
-status: Done
-
 publish: true
+created: 2026-07-05T10:53:43.319+03:00
+modified: 2026-07-05T15:49:36.185+03:00
 ---
 
 # Intro
@@ -16,7 +9,7 @@ publish: true
 Apache Kafka is a distributed event streaming platform built around an append-only commit log: producers append records to topic partitions, and consumers read at their own pace using offsets.
 It matters because it combines durability, high throughput, and replayability, which makes it the backbone of many event-driven architectures at scale.
 You reach for Kafka when you need independent producers and consumers, long-lived event history, and horizontal scaling without losing per-key ordering.
-Common use cases include [[Event Sourcing|event sourcing]], stream processing, log aggregation, change data capture, and real-time analytics.
+Common use cases include [[Event Sourcing]], stream processing, log aggregation, change data capture, and real-time analytics.
 
 ## Core Architecture
 

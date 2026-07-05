@@ -1,13 +1,7 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
-level:
-  - "4"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:23.822+03:00
+modified: 2026-07-05T10:53:37.206+03:00
 ---
 
 # Intro
@@ -26,7 +20,7 @@ Operations:
 - **Get(key)**: hash-lookup the node, **move it to the head** (now most recent), return its value.
 - **Put(key, value)**: insert/update at the head. If size exceeds capacity, **remove the tail node** and its map entry.
 
-The doubly linked list is essential: moving or removing a node is O(1) only if you have pointers to both neighbours, which a *singly* linked list can't give you cheaply.
+The doubly linked list is essential: moving or removing a node is O(1) only if you have pointers to both neighbours, which a _singly_ linked list can't give you cheaply.
 
 ```mermaid
 graph LR
@@ -80,9 +74,9 @@ public class LruCache<TKey, TValue> where TKey : notnull
 ## Pitfalls
 
 - **Singly linked list can't be O(1)** — to move/evict a node you need its predecessor. With a singly linked list that's an O(n) scan, collapsing the whole point. Use a doubly linked list (or `LinkedList<T>`, which is doubly linked).
-- **Forgetting to update *both* structures** — every move/evict must keep the map and the list in lockstep. A common bug evicts the list tail but leaves the stale key in the map, causing a memory leak and false hits.
+- **Forgetting to update _both_ structures** — every move/evict must keep the map and the list in lockstep. A common bug evicts the list tail but leaves the stale key in the map, causing a memory leak and false hits.
 - **Thread safety** — the two-structure dance is not atomic. Concurrent `Get`/`Put` corrupt the list. Guard with a lock, or use a sharded/striped design; for high-concurrency caches consider policies like **LRU-K**, **segmented LRU**, or **TinyLFU** (what Caffeine/`MemoryCache` lean toward) which also resist scan-pollution.
-- **LRU isn't always the best policy** — a single large scan can evict the entire hot set ("cache pollution"). **LFU** (least *frequently* used) or admission policies handle that better; LRU just trades simplicity for that weakness.
+- **LRU isn't always the best policy** — a single large scan can evict the entire hot set ("cache pollution"). **LFU** (least _frequently_ used) or admission policies handle that better; LRU just trades simplicity for that weakness.
 
 ## Tradeoffs
 
@@ -101,10 +95,10 @@ public class LruCache<TKey, TValue> where TKey : notnull
 > Both operations must be O(1): `Get` moves a node to the head and `Put` evicts the tail. Moving or removing an arbitrary node in O(1) requires constant-time access to its neighbours, which only a doubly linked list provides. A singly linked list would need an O(n) scan to find the predecessor.
 
 > [!QUESTION]- How do the hash map and linked list divide responsibility?
-> The hash map answers "where is key k?" in O(1) (random access by key). The linked list answers "what is the recency order?" and supports O(1) move-to-front and remove-from-tail (ordering). Neither structure alone gives both fast lookup *and* fast ordered eviction.
+> The hash map answers "where is key k?" in O(1) (random access by key). The linked list answers "what is the recency order?" and supports O(1) move-to-front and remove-from-tail (ordering). Neither structure alone gives both fast lookup _and_ fast ordered eviction.
 
 > [!QUESTION]- What is cache pollution and which policy resists it?
-> A large one-off scan touches many items once, pushing the genuinely hot items out of an LRU cache even though they'll be needed again. Frequency-aware policies (LFU, TinyLFU/W-TinyLFU) resist it by favouring items accessed *often*, not merely *recently*.
+> A large one-off scan touches many items once, pushing the genuinely hot items out of an LRU cache even though they'll be needed again. Frequency-aware policies (LFU, TinyLFU/W-TinyLFU) resist it by favouring items accessed _often_, not merely _recently_.
 
 ## References
 

@@ -1,13 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Patterns
-level:
-  - "3"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:43.321+03:00
+modified: 2026-07-05T15:49:35.161+03:00
 ---
 
 # Intro
@@ -156,7 +150,7 @@ For production systems, compose retry and timeout with neighboring patterns in a
 4. `Circuit Breaker` to fast-fail during sustained instability.
 5. `Per-attempt timeout` innermost to cap single attempt duration.
 
-Use this pipeline together with [[05 Architecture/Patterns/Resilience Patterns/Circuit Breaker|Circuit Breaker]] and [[05 Architecture/Patterns/Resilience Patterns/Rate Limiting|Rate Limiting]] to protect both dependency health and caller latency.
+Use this pipeline together with [[Circuit Breaker]] and [[Rate Limiting]] to protect both dependency health and caller latency.
 
 # Pitfalls
 
@@ -199,6 +193,7 @@ Decision rule: start with exponential backoff plus jitter and dual timeout bound
 # Questions
 
 > [!QUESTION]- Why does retry without jitter make outages worse and how does jitter fix it
+>
 > - Without jitter each client computes nearly identical retry times so failures synchronize into periodic traffic spikes.
 > - Those spikes hit while the dependency is already degraded which increases queue depth and recovery time.
 > - Jitter randomizes each delay so retries spread over time and reduce synchronized pressure.
@@ -206,6 +201,7 @@ Decision rule: start with exponential backoff plus jitter and dual timeout bound
 > - **Tradeoff** jitter reduces herd effects but increases per request timing variance and makes behavior slightly harder to predict.
 
 > [!QUESTION]- How do you prevent retry amplification in a multi layer microservices system
+>
 > - Assign retry ownership to one layer per call path usually the edge caller or the service nearest the user boundary.
 > - Propagate cancellation tokens and deadlines so downstream services respect the remaining time budget.
 > - Keep low retry counts and combine with circuit breaker and rate limits to avoid multiplicative pressure.

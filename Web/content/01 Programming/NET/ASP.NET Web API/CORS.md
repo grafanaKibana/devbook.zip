@@ -1,13 +1,7 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
-level:
-  - "1"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:26.824+03:00
+modified: 2026-07-05T10:53:37.163+03:00
 ---
 
 # CORS in ASP.NET Core
@@ -75,7 +69,7 @@ public IActionResult InternalEndpoint() => Ok();
 - **Caching caveat.** Preflight results cache per `SetPreflightMaxAge`, and CORS responses should send `Vary: Origin` so a shared cache doesn't serve one origin's allow-headers to another. Don't cache credentialed/authorized responses at a shared layer keyed without `Origin`.
 
 > [!IMPORTANT]
-> CORS is **not** a server-side authorization mechanism — it only constrains *browser* JS. `curl`, Postman, and server-to-server callers ignore it entirely. Always enforce authentication/authorization on the server regardless of CORS configuration.
+> CORS is **not** a server-side authorization mechanism — it only constrains _browser_ JS. `curl`, Postman, and server-to-server callers ignore it entirely. Always enforce authentication/authorization on the server regardless of CORS configuration.
 
 ## Pitfalls
 

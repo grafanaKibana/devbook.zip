@@ -1,13 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Patterns
-level:
-  - "3"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:43.334+03:00
+modified: 2026-07-05T10:53:43.334+03:00
 ---
 
 # Composite
@@ -206,7 +200,7 @@ Adding a `SubscriptionProduct` now means one new class implementing `IOrderCompo
 
 ## References
 
-- [Composite Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=EWDmWbJ4wRA&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=14) — video walkthrough of the Composite pattern with OOP examples
+- [Composite Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=EWDmWbJ4wRA\&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc\&index=14) — video walkthrough of the Composite pattern with OOP examples
 - [Composite — refactoring.guru](https://refactoring.guru/design-patterns/composite) — canonical pattern description with tree structure diagram and C# example
 - [IConfiguration — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.configuration.iconfiguration) — .NET's built-in Composite for layered configuration
 - [CompositeFileProvider — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.fileproviders.compositefileprovider) — composing multiple file providers uniformly

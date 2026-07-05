@@ -1,13 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Distributed Systems
-level:
-  - "2"
-priority: High
-status: Done
 publish: true
+created: 2026-07-05T10:53:43.308+03:00
+modified: 2026-07-05T10:53:43.309+03:00
 ---
 
 # Intro
@@ -43,7 +37,7 @@ Practical interview rule: pick L4 for high-throughput generic transport routing,
 No single algorithm is best; choose based on workload shape and fairness goals.
 
 Algorithm | How it routes | Prefer when | Main risk
---- | --- | --- | ---
+\--- | --- | --- | ---
 Round robin | Cycles requests evenly across instances. | Backend instances are similar and request cost is roughly uniform. | Slow instances still get equal share and can queue up.
 Weighted round robin | Round robin with per-instance weight multipliers. | Instance sizes differ, such as mixed VM sizes or mixed CPU generations. | Static weights drift from real capacity after noisy-neighbor effects or throttling.
 Least connections | Picks the instance with the fewest active connections. | Connection duration varies, such as streaming or long-running AI completions. | Connection count may not reflect CPU or memory cost for short but expensive requests.
@@ -155,7 +149,7 @@ Session affinity in .NET systems:
 ## Tradeoffs
 
 Decision | Option A | Option B | How to choose
---- | --- | --- | ---
+\--- | --- | --- | ---
 Layer | L4 | L7 | Need content-aware routing and edge features versus lower overhead data-plane routing
 Session model | Sticky sessions | Stateless with shared store | Migration speed versus long-term resilience and autoscaling quality
 TLS strategy | Terminate at LB | End-to-end encryption to service | Operational simplicity versus stricter east-west security requirements

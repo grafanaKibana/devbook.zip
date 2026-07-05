@@ -1,15 +1,9 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
-level:
-  - "3"
-status: Done
+publish: true
+created: 2026-07-05T10:54:06.793+03:00
+modified: 2026-07-05T15:49:35.509+03:00
 tags:
   - FolderNote
-publish: true
-priority: Medium
 ---
 
 # Intro
@@ -51,7 +45,7 @@ Starting ranges below are heuristics, not universal defaults. Validate them with
 |---|---:|---:|---:|---|
 | Creative writing | 0.8-1.0 | 0.9-1.0 | 600-1200 | Optional section markers |
 | Classification | 0.0-0.2 | 0.1-0.4 | 20-80 | Label boundary, newline |
-| Code generation | 0.1-0.3 | 0.8-1.0 | 200-800 | ``` or custom delimiter |
+| Code generation | 0.1-0.3 | 0.8-1.0 | 200-800 | \`\`\` or custom delimiter |
 
 Practical rule: tune `temperature` first, keep `top-p` near default unless you have a measured reason to change both.
 
@@ -124,7 +118,7 @@ flowchart TD
     J --> K
 ```
 
-For deeper implementation patterns, use targeted follow-ups such as [[11 AI & ML/LLM/Prompting/In-Context Learning|In-Context Learning]] when format consistency is weak and [[11 AI & ML/LLM/Prompting/Prompt Composition|Prompt Composition]] when one prompt is not enough. Prefer verifiable outputs over eliciting hidden reasoning traces.
+For deeper implementation patterns, use targeted follow-ups such as [[In-Context Learning]] when format consistency is weak and [[Prompt Composition]] when one prompt is not enough. Prefer verifiable outputs over eliciting hidden reasoning traces.
 
 ## Pitfalls
 
@@ -135,18 +129,21 @@ For deeper implementation patterns, use targeted follow-ups such as [[11 AI & ML
 ## Questions
 
 > [!QUESTION]- Why do prompt anatomy and model settings have to be designed together?
+>
 > - Prompt text defines intent and constraints, settings define sampling behavior.
 > - A precise prompt can still fail with overly random settings.
 > - Conservative settings can still produce poor output if instructions are ambiguous.
 > - Reliable systems tune both and evaluate with task-specific metrics.
 
 > [!QUESTION]- When should you prefer few-shot prompting over pure instruction prompting?
+>
 > - When output format is strict or hard to describe in words.
 > - When label boundaries are subtle and examples clarify decision edges.
 > - When consistency matters more than novelty.
 > - Start with minimal examples, then add edge cases.
 
 > [!QUESTION]- How would you debug a prompt that is accurate but too verbose and expensive?
+>
 > - Tighten output indicator with length limits and schema.
 > - Lower `max tokens` and add stop sequences.
 > - Keep `temperature` low for deterministic concise tasks.

@@ -1,13 +1,7 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
-level:
-  - "4"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:27.140+03:00
+modified: 2026-07-05T10:53:37.197+03:00
 ---
 
 # Intro
@@ -194,7 +188,8 @@ Key rules:
   var c = new Customer { Name = "Acme" }; // omitting Name is a compile error
   ```
 
-- **Constructor chaining** with `: this(...)` reuses one constructor from another (and `: base(...)` calls the base). **Initialization order** matters: instance field initializers run *before* the constructor body; a **`static` constructor** runs once, lazily, before first use — and if it throws, the type is permanently unusable (`TypeInitializationException` on every later access).
+- **Constructor chaining** with `: this(...)` reuses one constructor from another (and `: base(...)` calls the base). **Initialization order** matters: instance field initializers run _before_ the constructor body; a **`static` constructor** runs once, lazily, before first use — and if it throws, the type is permanently unusable (`TypeInitializationException` on every later access).
+
 - **`file`-scoped types (C# 11)** (`file class X`) limit visibility to one source file — useful for source generators. The full access ladder is `private` → `private protected` → `protected`/`internal` → `protected internal` → `public`.
 
 ## Pitfalls
@@ -219,24 +214,28 @@ Key rules:
 | **`static class` vs singleton** | Static class (no instance, no DI, no interface) | Singleton via DI (`services.AddSingleton<T>()`) | Pure utility functions with no state and no need for testing isolation | Needs DI injection, interface-based testing, or configuration-dependent behavior |
 
 **Decision rule**: default to `sealed class` for new types (prevents accidental inheritance, enables compiler optimizations). Use `record class` for immutable data carriers. Use `abstract class` only when you need shared instance state across a type hierarchy — otherwise prefer interfaces.
+
 ## Questions
 
 > [!QUESTION]- What is the difference between `abstract class` and `interface` with default interface methods (C# 8+)? When would you still choose an abstract class?
 > Both can define contracts with shared implementation. Key differences:
+>
 > - **State**: abstract classes can have instance fields and constructors; interfaces cannot hold instance state (only static fields).
 > - **Inheritance**: a class can implement many interfaces but inherit from only one class.
 > - **Access modifiers**: abstract classes support `protected`/`internal` members; interface members are implicitly public (C# 8+ allows explicit modifiers but no `protected` instance state).
 > - **Performance**: virtual dispatch on abstract class methods is a single vtable lookup; default interface methods may involve additional dispatch overhead.
-> - **Use Case**: The default implementation for interface methods have different goal compared to the abstract class implemented methods. While in class, semantically methods providing the basic shared functionality for the delivered classes, that don't have to be overriden. While default implementation exist for making extending the interfaces without breaking the inheritors. 
+> - **Use Case**: The default implementation for interface methods have different goal compared to the abstract class implemented methods. While in class, semantically methods providing the basic shared functionality for the delivered classes, that don't have to be overriden. While default implementation exist for making extending the interfaces without breaking the inheritors.
 
 > [!QUESTION]- Can a static class implement an interface? Why or why not?
 > No. A static class compiles to an `abstract sealed` class at IL level — it cannot be instantiated, so there is no object to dispatch interface calls through. Interfaces require an instance for virtual dispatch. If you need a "static implementation" of a contract, the patterns are:
+>
 > - Use static abstract/virtual interface members (C# 11+) with generics: `where T : IMyInterface`.
 > - Use a singleton instance of a regular class that implements the interface.
 > - Use delegates/`Func<T>` instead of an interface.
 
 > [!QUESTION]- A `sealed override` stops further overriding, but can a derived class use `new` to hide the sealed method? What happens at runtime?
 > Yes, `new` compiles and hides the sealed method. But the behavior depends on the variable's compile-time type:
+>
 > ```csharp
 > class Base { public virtual void Do() => Console.WriteLine("Base"); }
 > class Middle : Base { public sealed override void Do() => Console.WriteLine("Middle"); }
@@ -249,6 +248,7 @@ Key rules:
 > Base x = b;
 > x.Do();           // "Middle" — same virtual dispatch
 > ```
+>
 > The `new` method is completely invisible to polymorphic code. This is almost always a design smell — if you need to change behavior, the method should not have been sealed, or you should use composition instead.
 
 > [!QUESTION]- Can you have an abstract sealed class? What about in IL?
@@ -256,15 +256,17 @@ Key rules:
 
 > [!QUESTION]- Why can `partial` be dangerous with source generators? Give a concrete scenario.
 > Partial classes merge at compile time, and source generators can add members to your type that you do not see in your source file. Dangers:
+>
 > - **Name collisions**: a generator adds a method `Validate()` and you also write `Validate()` — compile error with a confusing message pointing at generated code.
 > - **Implicit behavior changes**: a generator adds `INotifyPropertyChanged` implementation and overrides `Equals`. Your tests pass locally but break in CI where a different generator version runs.
 > - **Debugging opacity**: stepping through code jumps into generated files that may not be in source control.
 > - **Partial method removal**: if a partial method (without accessibility modifier) has no implementing declaration, the compiler silently removes all calls to it. If you forget to generate the body, the call vanishes with no warning.
-> Best practice: always inspect generated output (visible in IDE under Dependencies and Analyzers), and write tests that verify generator-dependent behavior explicitly.
+>   Best practice: always inspect generated output (visible in IDE under Dependencies and Analyzers), and write tests that verify generator-dependent behavior explicitly.
 
 > [!QUESTION]- Two classes have identical fields and values. You compare them with `==`. Why is it `false`, and what are the three ways to fix it?
 > `==` compares references by default for classes — two separate `new` calls produce different heap objects with different references.
 > Fixes:
+>
 > 1. **Override `Equals`/`GetHashCode` and overload `==`/`!=`** — full manual control, but tedious and error-prone.
 > 2. **Implement `IEquatable<T>`** — avoids boxing in generic code and gives a clean `Equals(T)` method. Still need to overload `==`.
 > 3. **Use `record class` instead** — the compiler generates value-based `Equals`, `GetHashCode`, `==`, and `!=` automatically. This is the recommended approach for data-carrier types.

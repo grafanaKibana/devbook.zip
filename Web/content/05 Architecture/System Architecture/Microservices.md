@@ -1,20 +1,15 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - System Architecture
-level:
-  - "3"
-priority: Medium
-status: Done
-
 publish: true
+created: 2026-07-05T10:53:43.314+03:00
+modified: 2026-07-05T15:49:36.220+03:00
 ---
 
 # Intro
+
 Microservices are an architecture style where a system is split into independently deployable services, each aligned to a business capability and owning its own data. They matter because they let teams release changes independently, scale only hot paths, and use technology choices per domain when needed. You usually reach for microservices when team count grows, deployment independence becomes a bottleneck, and domains have different scaling or availability needs. The tradeoff is distributed-systems complexity: network latency, partial failures, eventual consistency, and heavier operational tooling.
 
 ## Core principles
+
 - **Boundaries follow business capabilities**: split by bounded contexts like Orders, Inventory, Billing, Shipping.
 - **Database per service**: each service owns its schema and persistence model; no cross-service table reads.
 - **Communication by contracts**: integrate through versioned APIs/events, avoid shared databases, and keep shared libraries limited to generated contracts or platform primitives.
@@ -39,25 +34,31 @@ flowchart LR
 ```
 
 ## Communication patterns
+
 **Synchronous calls**
+
 - Use synchronous communication when the caller needs an immediate answer.
 - Common options are [[REST]] and [[gRPC]].
 - Best for short request-response interactions on the critical path.
 - Risk: long synchronous chains amplify latency and failure propagation.
 
 **Asynchronous messaging**
-- Use [[05 Architecture/Distributed Systems/Message Queues/Message Queues|Message Queues]] and [[Event-Driven Architecture]] when temporal decoupling matters.
+
+- Use [[Message Queues]] and [[Event-Driven Architecture]] when temporal decoupling matters.
 - Best for workflows, retries, burst smoothing, and eventual consistency.
 - Publish immutable events like `OrderPlaced` or `InventoryReserved`.
 - Make handlers idempotent to survive retries and duplicate delivery.
 
 **Rule of thumb**
+
 - Prefer synchronous for short, local decisions.
 - Prefer asynchronous for cross-domain workflows and side effects.
 - Avoid deep synchronous chains (`A -> B -> C -> D`) on critical paths.
 
 ## .NET implementation notes
+
 **Service boundaries with ASP.NET Core Minimal APIs**
+
 ```csharp
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -101,22 +102,26 @@ app.MapHealthChecks("/health/ready", new HealthCheckOptions
 
 app.Run();
 ```
+
 - `AddOpenApi`/`MapOpenApi` comes from `Microsoft.AspNetCore.OpenApi`.
 - If missing in your service project, add it with:
 
 ```bash
 dotnet add package Microsoft.AspNetCore.OpenApi
 ```
+
 - Keep each service API focused on its own bounded context.
 - Version contracts intentionally; prefer backward-compatible evolution.
 - If `AddOpenApi` is enabled, expose OpenAPI in development only.
 
 **Service discovery**
+
 - In Kubernetes, discovery is usually DNS-based (`inventory-service.default.svc.cluster.local`).
 - Outside Kubernetes, use platform-native discovery or a registry.
 - Apply timeouts on all outbound calls, retries with jitter only for idempotent operations (or with idempotency keys), and circuit breakers where appropriate.
 
 **Health checks and readiness**
+
 - Keep liveness cheap (process-level signal) and avoid dependency checks there.
 - Put dependency checks in readiness so traffic is removed without restarting healthy processes.
 
@@ -160,11 +165,13 @@ spec:
 ```
 
 **Containers and orchestration**
+
 - Package each service as its own Docker image.
 - Use Kubernetes for scheduling, scaling, rollout, and service discovery.
 - Standardize OpenTelemetry, structured logs, and correlation IDs.
 
 ## Microservices vs monolith vs modular monolith
+
 | Dimension | [[Monolith Architecture\|Monolith]] | [[Modular Monolith]] | Microservices |
 |---|---|---|---|
 | Deployments | Single unit | Single unit with strict module boundaries | Independent service deployments |
@@ -177,6 +184,7 @@ spec:
 [[Monolith Architecture]] is usually the best starting point when boundaries are still evolving and operational maturity is limited.
 
 **Migration path: start monolith, then extract**
+
 1. Start with a modular monolith and enforce boundaries internally.
 2. Measure release bottlenecks, scale asymmetry, and team contention.
 3. Extract one bounded context with clear API contracts and isolated data ownership.
@@ -184,28 +192,35 @@ spec:
 5. Repeat only when another boundary has clear business pressure.
 
 ## Pitfalls
+
 **1) Distributed monolith**
+
 - **What goes wrong**: services are physically separate but tightly coupled via shared DBs or sync chains.
 - **Why it happens**: boundaries follow technical layers, not business capabilities.
 - **How to avoid it**: enforce database-per-service and reduce synchronous depth.
 
 **2) Data consistency across services**
+
 - **What goes wrong**: one service commits and another fails, leaving partial business state.
 - **Why it happens**: distributed ACID transactions (for example, 2PC) are possible but usually avoided due to coupling, latency, and failure complexity.
 - **How to avoid it**: use sagas, compensating actions, outbox pattern, and idempotent consumers.
 
 **3) Operational complexity explosion**
+
 - **What goes wrong**: incidents are hard to debug because logs/metrics/traces are fragmented.
 - **Why it happens**: every service adds pipelines, dependencies, and monitoring surfaces.
 - **How to avoid it**: standardize deployment templates, telemetry, alerts, and runbooks.
 
 **4) Network is not reliable**
+
 - **What goes wrong**: latency spikes, partial failures, and retry storms hurt end-to-end flow.
 - **Why it happens**: network calls are slower and less reliable than in-process calls.
 - **How to avoid it**: strict timeouts, bounded retries with jitter, circuit breakers, and backpressure.
 
 ## Questions
+
 > [!QUESTION]- Why can microservices lead to distributed data consistency problems, and how do you address them?
+>
 > - Each service owns its data, so cross-service business actions cannot rely on one ACID transaction.
 > - A later step can fail after an earlier local commit, producing partial state.
 > - Use sagas with compensating actions across local transactions.
@@ -213,6 +228,7 @@ spec:
 > - Accept eventual consistency and make process state observable.
 
 > [!QUESTION]- How do you decide between monolith, modular monolith, and microservices for a new product?
+>
 > - Decide from team size, release pressure, domain volatility, and ops maturity.
 > - One team in discovery phase usually benefits most from monolith speed.
 > - Clear domains with limited platform capacity often fit modular monolith.
@@ -220,6 +236,7 @@ spec:
 > - Re-evaluate architecture periodically as constraints change.
 
 ## References
+
 - [Microservices Pattern: Microservice Architecture](https://microservices.io/patterns/microservices.html) — core microservices patterns and decomposition guidance.
 - [Microservices — Martin Fowler](https://martinfowler.com/articles/microservices.html) — original definition and key characteristics.
 - [.NET Microservices: Architecture for Containerized .NET Applications](https://learn.microsoft.com/en-us/dotnet/architecture/microservices/) — official Microsoft .NET guidance.

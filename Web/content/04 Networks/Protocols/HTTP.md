@@ -1,14 +1,7 @@
 ---
-topic:
-  - Networks
-subtopic:
-  - Protocols
-level:
-  - "3"
-priority: High
-status: Ready to Repeat
-
 publish: true
+created: 2026-07-05T10:53:36.481+03:00
+modified: 2026-07-05T15:49:32.664+03:00
 ---
 
 # Intro
@@ -38,7 +31,7 @@ HTTP/1.0 opened a new TCP connection per request — catastrophically expensive.
 
 ### Head-of-Line Blocking
 
-HTTP/1.1 processes requests sequentially on each connection: the response to request #1 must complete before request #2 begins. If request #1 triggers a slow database query, requests #2 and #3 wait behind it. Browsers work around this by opening up to 6 parallel TCP connections per origin, but this wastes resources and still hits limits. [[04 Networks/Protocols/HTTP 2|HTTP 2]] solves this with stream multiplexing.
+HTTP/1.1 processes requests sequentially on each connection: the response to request #1 must complete before request #2 begins. If request #1 triggers a slow database query, requests #2 and #3 wait behind it. Browsers work around this by opening up to 6 parallel TCP connections per origin, but this wastes resources and still hits limits. [[HTTP 2]] solves this with stream multiplexing.
 
 **Pipelining** was an HTTP/1.1 attempt to fix HOL blocking by sending multiple requests without waiting for responses. It failed in practice because responses still had to arrive in order, and buggy intermediary proxies mishandled pipelined responses. Browsers disabled it by default.
 
@@ -187,6 +180,7 @@ How the body is delimited and moved matters as much as the headers:
 
 > [!QUESTION]- Why is creating a new HttpClient per request dangerous in .NET, and what are the two correct alternatives?
 > **Expected answer:**
+>
 > - `HttpClient.Dispose()` does not immediately release sockets — the OS holds them in `TIME_WAIT` for ~4 minutes.
 > - Under load, this exhausts the ephemeral port range → `SocketException`.
 > - Fix 1: `IHttpClientFactory` with default 2-minute handler lifetime — handles both socket pooling and DNS re-resolution.
@@ -197,6 +191,7 @@ How the body is delimited and moved matters as much as the headers:
 
 > [!QUESTION]- What is the difference between Cache-Control no-cache and no-store?
 > **Expected answer:**
+>
 > - `no-cache` means the response CAN be stored, but the cache MUST revalidate with the origin server before every use via conditional request (`If-None-Match` or `If-Modified-Since`).
 > - `no-store` means the response MUST NOT be stored at all — not in browser cache, not in CDN, not on disk.
 > - `no-cache` is appropriate for content that changes but benefits from 304 responses (saves bandwidth when content has not changed). `no-store` is for sensitive data like banking pages or PII.
@@ -206,6 +201,7 @@ How the body is delimited and moved matters as much as the headers:
 
 > [!QUESTION]- Explain the difference between 401 and 403 status codes.
 > **Expected answer:**
+>
 > - 401 Unauthorized means the client is not authenticated — no credentials were provided, or they are invalid. The response MUST include a `WWW-Authenticate` header.
 > - 403 Forbidden means the client IS authenticated but not authorized — the server knows who you are, but you lack permission for this resource.
 > - 401 tells the client to retry with valid credentials. 403 tells the client that retrying with the same identity is pointless.

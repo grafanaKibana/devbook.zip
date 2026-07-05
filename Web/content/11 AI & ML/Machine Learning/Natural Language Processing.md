@@ -1,13 +1,7 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - Machine Learning
-level:
-  - "1"
-priority: Low
-status: Done
 publish: true
+created: 2026-07-05T10:54:06.670+03:00
+modified: 2026-07-05T15:49:33.206+03:00
 ---
 
 # Intro
@@ -67,7 +61,7 @@ Before transformers (2017), NLP tasks required separate models for each task (LS
 
 The result: BERT (2018) achieved state-of-the-art on 11 NLP benchmarks simultaneously. GPT-3/4 showed that large enough models can perform NLP tasks with zero or few examples (zero-shot, few-shot prompting).
 
-For embeddings — the dense vector representations that power semantic search and RAG — see [[11 AI & ML/LLM/Embeddings|Embeddings]].
+For embeddings — the dense vector representations that power semantic search and RAG — see [[Embeddings]].
 
 ## NLP in .NET
 
@@ -129,6 +123,7 @@ Console.WriteLine($"Confidence: {result.Value.ConfidenceScores.Positive:P}");
 ## Questions
 
 > [!QUESTION]- When should you fine-tune a small model instead of prompting an LLM for an NLP task?
+>
 > - Fine-tune when you have labeled training data and the task is well-defined (classification, NER, sentiment).
 > - Fine-tuned small models (BERT, DistilBERT) run at millisecond latency on-device vs seconds for LLM API calls.
 > - Per-request cost is near zero for on-device inference vs $0.01–$0.10+ per LLM call at scale.
@@ -136,6 +131,7 @@ Console.WriteLine($"Confidence: {result.Value.ConfidenceScores.Positive:P}");
 > - Fine-tuning costs you labeled data and training effort upfront, then pays it back as millisecond latency and near-zero per-request cost at scale; prototype with an LLM, then check whether production volume justifies the fine-tune.
 
 > [!QUESTION]- Why do multilingual NLP models underperform monolingual ones, and when is that acceptable?
+>
 > - Multilingual models split their capacity across 100+ languages, so per-language representation quality is lower.
 > - Monolingual models concentrate all parameters on one language, achieving higher accuracy on that language's benchmarks.
 > - Multilingual models are acceptable when you need coverage across many languages and per-language accuracy can be slightly lower.

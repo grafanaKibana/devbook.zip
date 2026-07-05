@@ -1,13 +1,7 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
-level:
-  - "2"
-priority: High
-status: Done
 publish: true
+created: 2026-07-05T10:54:06.711+03:00
+modified: 2026-07-05T17:36:34.861+03:00
 ---
 
 # Intro
@@ -42,7 +36,7 @@ Three categories dominate production RAG systems:
 
 **Open-source bi-encoders** — Sentence Transformers (SBERT) provides models like `all-MiniLM-L6-v2` (384-dim, 22M params, fast) and `all-mpnet-base-v2` (768-dim, 109M params, higher quality). These run locally with no per-token cost, which matters at scale. The tradeoff is infrastructure: you host inference, manage GPU allocation, and handle model updates.
 
-**Domain-finetuned models** — When general-purpose models underperform on internal terminology, finetuning a base model on your corpus can close the gap. Databricks showed that finetuning `gte-large-en-v1.5` (0.4B params) on synthetic domain data beat `text-embedding-3-large` on FinanceBench retrieval ([[11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics|Recall@10]]: 0.552 vs 0.44). Two common approaches: continued pre-training with MLM for vocabulary adaptation, and contrastive finetuning with synthetic query-document pairs.
+**Domain-finetuned models** — When general-purpose models underperform on internal terminology, finetuning a base model on your corpus can close the gap. Databricks showed that finetuning `gte-large-en-v1.5` (0.4B params) on synthetic domain data beat `text-embedding-3-large` on FinanceBench retrieval ([[Monitoring#Retrieval Quality Metrics|Recall@10]]: 0.552 vs 0.44). Two common approaches: continued pre-training with MLM for vocabulary adaptation, and contrastive finetuning with synthetic query-document pairs.
 
 ### Dimensionality
 
@@ -72,7 +66,7 @@ A model that scores well on MTEB benchmarks may still fail on your domain. MTEB 
 
 Detection: compare recall@k on a held-out set of domain-specific queries vs generic queries. A significant gap signals distribution shift.
 
-Mitigation: finetune with domain data (GPL or continued pre-training on your corpus), or supplement embeddings with keyword search in a [[11 AI & ML/LLM/RAG/Retrieval|hybrid retrieval]] setup where BM25 handles exact lexical matches.
+Mitigation: finetune with domain data (GPL or continued pre-training on your corpus), or supplement embeddings with keyword search in a [[Retrieval|hybrid retrieval]] setup where BM25 handles exact lexical matches.
 
 ### Embedding Model Swap Invalidation
 
@@ -125,5 +119,5 @@ Decision rule: start with a proprietary API model to establish baseline recall. 
 - [Domain adaptation — GPL and adaptive pre-training (SBERT)](https://sbert.net/examples/sentence_transformer/domain_adaptation/README.html)
 - [Improving retrieval with embedding finetuning — FinanceBench experiment (Databricks)](https://www.databricks.com/blog/improving-retrieval-and-rag-embedding-model-finetuning)
 - [Fine-tuning embeddings for enterprise RAG — Glean lessons (Jason Liu / Glean)](https://jxnl.co/writing/2025/03/06/fine-tuning-embedding-models-for-enterprise-rag-lessons-from-glean/)
-- [Introducing Embed v3 — input_type and compression-aware training (Cohere)](https://cohere.com/blog/introducing-embed-v3)
+- [Introducing Embed v3 — input\_type and compression-aware training (Cohere)](https://cohere.com/blog/introducing-embed-v3)
 - [Azure OpenAI embeddings — deployment and SDK usage (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/embeddings)

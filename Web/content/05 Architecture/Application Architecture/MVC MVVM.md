@@ -1,13 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Application Architecture
-level:
-  - "4"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:43.305+03:00
+modified: 2026-07-05T10:53:43.305+03:00
 ---
 
 # Intro
@@ -17,6 +11,7 @@ MVC and MVVM are UI architecture patterns that separate data, presentation, and 
 ## MVC — Model-View-Controller
 
 **Roles:**
+
 - **Model** — domain data and business rules. Independent of UI.
 - **View** — renders the UI from the model/view-model data.
 - **Controller** — handles incoming requests, invokes application logic, selects the response view.
@@ -48,6 +43,7 @@ The Controller is the entry point. It is thin — it delegates to services and p
 ## MVVM — Model-View-ViewModel
 
 **Roles:**
+
 - **Model** — domain data and business rules. Same as MVC.
 - **View** — UI that binds to ViewModel properties and commands. No code-behind logic.
 - **ViewModel** — exposes observable state (`INotifyPropertyChanged`) and commands (`ICommand`). The View binds to it; the ViewModel does not reference the View.
@@ -108,8 +104,8 @@ The View (XAML) binds to `Name` and `LoadCommand` — no code-behind. The ViewMo
 
 MVC and MVVM are two points in a family of UI separation patterns:
 
-- **MVP (Model-View-Presenter)** — like MVC, but the **Presenter** holds *all* presentation logic and updates a passive View through an interface (`IView`), which makes the View trivially mockable. Common in classic WinForms and Android; the View is dumber than in MVVM (no data binding) and the Presenter pushes values explicitly.
-- **MVU / unidirectional flow (Model-View-Update, a.k.a. Elm/Flux/Redux)** — state flows **one way**: an immutable model renders a view, the view emits messages, an `update` function produces a *new* model, repeat. There's no two-way binding to reason about, so state is predictable and time-travel-debuggable. This is the model behind Elm, Redux/React, and increasingly **Blazor** components and .NET MAUI's `Fabulous`/`Comet`. (So Blazor is better described as component/MVU than classic MVVM, despite supporting binding.)
+- **MVP (Model-View-Presenter)** — like MVC, but the **Presenter** holds _all_ presentation logic and updates a passive View through an interface (`IView`), which makes the View trivially mockable. Common in classic WinForms and Android; the View is dumber than in MVVM (no data binding) and the Presenter pushes values explicitly.
+- **MVU / unidirectional flow (Model-View-Update, a.k.a. Elm/Flux/Redux)** — state flows **one way**: an immutable model renders a view, the view emits messages, an `update` function produces a _new_ model, repeat. There's no two-way binding to reason about, so state is predictable and time-travel-debuggable. This is the model behind Elm, Redux/React, and increasingly **Blazor** components and .NET MAUI's `Fabulous`/`Comet`. (So Blazor is better described as component/MVU than classic MVVM, despite supporting binding.)
 
 The trend in modern UI is toward **unidirectional data flow** because two-way binding, while convenient, makes "who changed this state?" hard to trace in complex screens.
 

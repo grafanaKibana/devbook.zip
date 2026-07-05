@@ -1,13 +1,7 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
-level:
-  - "3"
-priority: Medium
-status: Done
 publish: true
+created: 2026-07-05T10:54:06.745+03:00
+modified: 2026-07-05T15:49:35.899+03:00
 ---
 
 # Intro
@@ -33,7 +27,7 @@ The OWASP Top 10 for LLM Applications (2025 edition) catalogs the highest-impact
 
 ### Prompt Injection (LLM01)
 
-**Mechanism**: The model receives attacker instructions in the same natural-language channel as legitimate instructions, so it may follow malicious text even when system guidance says not to. **Direct injection** is the obvious case (`Ignore previous instructions and ...`) entered in a user prompt. **Indirect injection** is more dangerous in production: the attacker plants instructions in content that gets retrieved through [[11 AI & ML/LLM/RAG/RAG|RAG]] or browsing. **Multimodal injection** (new in 2025) extends this to hidden instructions in images or audio that multimodal models process.
+**Mechanism**: The model receives attacker instructions in the same natural-language channel as legitimate instructions, so it may follow malicious text even when system guidance says not to. **Direct injection** is the obvious case (`Ignore previous instructions and ...`) entered in a user prompt. **Indirect injection** is more dangerous in production: the attacker plants instructions in content that gets retrieved through [[RAG]] or browsing. **Multimodal injection** (new in 2025) extends this to hidden instructions in images or audio that multimodal models process.
 
 **Concrete examples**: Slack AI indirect injection was used to extract private channel data, and Microsoft Copilot retrieved poisoned SharePoint documents containing embedded instructions. Both cases show why retrieval pathways become execution pathways when trust boundaries are unclear.
 
@@ -61,7 +55,7 @@ The OWASP Top 10 for LLM Applications (2025 edition) catalogs the highest-impact
 
 **Concrete pattern**: teams that correctly sanitize user input still skip validation for LLM output because it appears to come from "our AI." That assumption collapses once attackers influence output via injection or adversarial retrieval.
 
-**Mitigations**: treat every LLM response as untrusted input; parameterize database access, encode output for rendering context, and run risky execution paths in sandboxed environments. See [[11 AI & ML/LLM/Guardrails|Guardrails]].
+**Mitigations**: treat every LLM response as untrusted input; parameterize database access, encode output for rendering context, and run risky execution paths in sandboxed environments. See [[Guardrails]].
 
 ## Remaining Vulnerabilities
 
@@ -79,11 +73,11 @@ New in 2025, this risk captures adversarial extraction of the system prompt itse
 
 ### Vector and Embedding Weaknesses (LLM08)
 
-New in 2025, this risk targets retrieval layers: poisoned corpus documents and adversarial embeddings can make irrelevant or malicious content rank highly. Monitor embedding distribution drift, validate document provenance, and harden [[11 AI & ML/LLM/RAG/RAG|RAG]] ingestion pipelines.
+New in 2025, this risk targets retrieval layers: poisoned corpus documents and adversarial embeddings can make irrelevant or malicious content rank highly. Monitor embedding distribution drift, validate document provenance, and harden [[RAG]] ingestion pipelines.
 
 ### Misinformation (LLM09)
 
-New in 2025, this frames plausible false generation as a security issue when adversaries exploit model confidence to spread false claims. This overlaps with [[11 AI & ML/LLM/Hallucinations|Hallucinations]], but the emphasis here is exploitability and downstream impact.
+New in 2025, this frames plausible false generation as a security issue when adversaries exploit model confidence to spread false claims. This overlaps with [[Hallucinations]], but the emphasis here is exploitability and downstream impact.
 
 ### Unbounded Consumption (LLM10)
 
@@ -142,25 +136,28 @@ Adversaries can trigger denial-of-wallet by forcing high token usage, oversized 
 ## Questions
 
 > [!QUESTION]- Why is prompt injection fundamentally harder to prevent than SQL injection?
-  > - SQL injection is mainly a syntax boundary problem, and parameterized queries create a deterministic code-data split.
-  > - Prompt injection is a semantic boundary problem where instructions and data coexist in natural language.
-  > - There is no universally reliable delimiter the model can always respect across direct, indirect, and multimodal inputs.
-  > - The practical defense model is layered and probabilistic: filtering, monitoring, privilege separation, and output sanitization.
-  > - Stronger defenses add latency and engineering complexity, so match the depth of controls to the expected blast radius.
+>
+> - SQL injection is mainly a syntax boundary problem, and parameterized queries create a deterministic code-data split.
+> - Prompt injection is a semantic boundary problem where instructions and data coexist in natural language.
+> - There is no universally reliable delimiter the model can always respect across direct, indirect, and multimodal inputs.
+> - The practical defense model is layered and probabilistic: filtering, monitoring, privilege separation, and output sanitization.
+> - Stronger defenses add latency and engineering complexity, so match the depth of controls to the expected blast radius.
 
 > [!QUESTION]- How does Excessive Agency (LLM06) compound with Prompt Injection (LLM01)?
-  > - Prompt injection gives an attacker influence over model decisions.
-  > - Excessive agency converts that influence into real actions through tools and permissions.
-  > - Combined, the attacker effectively operates with the model's authority boundary.
-  > - Mitigation must address both sides: reduce injection success rate and reduce available authority after compromise.
-  > - Tighter permissions cost automation convenience, but they realign the model's capabilities with its trust boundary — usually the right trade for high-authority tools.
+>
+> - Prompt injection gives an attacker influence over model decisions.
+> - Excessive agency converts that influence into real actions through tools and permissions.
+> - Combined, the attacker effectively operates with the model's authority boundary.
+> - Mitigation must address both sides: reduce injection success rate and reduce available authority after compromise.
+> - Tighter permissions cost automation convenience, but they realign the model's capabilities with its trust boundary — usually the right trade for high-authority tools.
 
 > [!QUESTION]- Why should system prompts be treated as public rather than secret?
-  > - Adversarial prompting and jailbreak techniques can extract hidden instructions in real systems.
-  > - Security that depends on prompt secrecy is obscurity, not enforceable control.
-  > - System prompts should be written as if attackers can read them.
-  > - Deterministic enforcement belongs in RBAC, output filtering, and tool permission architecture.
-  > - This shifts effort from prompt wording to code-level controls — more work upfront, but far more auditable and durable.
+>
+> - Adversarial prompting and jailbreak techniques can extract hidden instructions in real systems.
+> - Security that depends on prompt secrecy is obscurity, not enforceable control.
+> - System prompts should be written as if attackers can read them.
+> - Deterministic enforcement belongs in RBAC, output filtering, and tool permission architecture.
+> - This shifts effort from prompt wording to code-level controls — more work upfront, but far more auditable and durable.
 
 ## References
 

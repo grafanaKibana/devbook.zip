@@ -1,13 +1,7 @@
 ---
-topic:
-  - DevOps
-subtopic: []
-level:
-  - "2"
-priority: High
-status: Ready to Repeat
-
 publish: true
+created: 2026-07-05T10:54:07.982+03:00
+modified: 2026-07-05T10:54:07.983+03:00
 ---
 
 # Kubernetes
@@ -109,13 +103,14 @@ spec:
 | Scale | Multi-node, auto-scale | Multi-node | Single host |
 | Production fit | Yes | Yes (with expertise) | No |
 
-**Managed vs self-hosted**: Use managed K8s (AKS, EKS, GKE) unless you have a specific reason to self-host. The control plane management overhead (etcd backups, API server upgrades, certificate rotation) is significant. Managed services handle this for ~$0.10/hour.
+**Managed vs self-hosted**: Use managed K8s (AKS, EKS, GKE) unless you have a specific reason to self-host. The control plane management overhead (etcd backups, API server upgrades, certificate rotation) is significant. Managed services handle this for ~\$0.10/hour.
 
 **K8s vs Docker Compose**: Compose is for local development and simple single-host deployments. K8s is for production multi-node workloads that need rolling updates, auto-scaling, and self-healing. Do not use Compose in production for anything that needs HA.
 
 ## Questions
 
 > [!QUESTION]- What is the difference between a Pod, Deployment, and Service?
+>
 > - Pod: the smallest unit; wraps one or more containers sharing a network namespace.
 > - Deployment: manages a set of identical pods; handles rolling updates and scaling.
 > - Service: stable network endpoint (DNS name + IP) that load-balances across pods.
@@ -123,12 +118,14 @@ spec:
 > - Tradeoff: Deployments add a layer of abstraction over pods, but that abstraction enables zero-downtime updates.
 
 > [!QUESTION]- Why do Kubernetes Secrets need additional protection beyond base64 encoding?
+>
 > - Base64 is encoding, not encryption — anyone with etcd access can decode secrets trivially.
 > - By default, etcd stores secrets in plaintext (base64 is just a transport format).
 > - Mitigations: enable etcd encryption at rest, use Sealed Secrets (encrypted in git), or use Azure Key Vault with the Secrets Store CSI driver.
 > - Tradeoff: external secret management adds operational complexity but is required for regulated workloads.
 
 > [!QUESTION]- What causes CrashLoopBackOff and how do you debug it?
+>
 > - CrashLoopBackOff means the container starts, crashes, and Kubernetes keeps restarting it with exponential backoff.
 > - Common causes: app crashes on startup (missing config, DB connection failure), liveness probe failing before app is ready, OOMKilled (memory limit too low).
 > - Debug: `kubectl logs <pod> --previous` (logs from the crashed instance), `kubectl describe pod <pod>` (events and exit codes), `kubectl exec -it <pod> -- /bin/sh` (if the container starts briefly).

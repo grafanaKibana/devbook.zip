@@ -1,13 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - System Architecture
-level:
-  - "3"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:43.313+03:00
+modified: 2026-07-05T15:49:32.290+03:00
 ---
 
 # Serverless Architecture
@@ -74,10 +68,10 @@ Azure Functions and AWS Lambda support multiple trigger types:
 
 **Why it happens**: serverless instances are isolated and short-lived, so they **can't share an in-process connection pool** the way a long-running server does. Massive horizontal fan-out multiplies the connection count.
 
-**Mitigation**: front the database with a **server-side pooler** that all instances share (RDS Proxy, Azure SQL, PgBouncer) and cap per-instance pool size. See [[03 Data Persistence/Connection Pooling|Connection Pooling]] — this is the canonical serverless data gotcha.
+**Mitigation**: front the database with a **server-side pooler** that all instances share (RDS Proxy, Azure SQL, PgBouncer) and cap per-instance pool size. See [[Connection Pooling]] — this is the canonical serverless data gotcha.
 
 > [!NOTE]
-> **"Serverless" now includes containers.** Beyond FaaS (Functions/Lambda), serverless *container* platforms — Azure Container Apps, AWS Fargate, Google Cloud Run — give scale-to-zero and pay-per-use for a normal containerized app, sidestepping the function programming model and much of the cold-start/portability friction. Often the better fit when you want serverless economics without rewriting to a function host.
+> **"Serverless" now includes containers.** Beyond FaaS (Functions/Lambda), serverless _container_ platforms — Azure Container Apps, AWS Fargate, Google Cloud Run — give scale-to-zero and pay-per-use for a normal containerized app, sidestepping the function programming model and much of the cold-start/portability friction. Often the better fit when you want serverless economics without rewriting to a function host.
 
 ## Tradeoffs
 

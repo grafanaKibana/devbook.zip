@@ -1,13 +1,7 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
-level:
-  - "4"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:26.950+03:00
+modified: 2026-07-05T10:53:37.174+03:00
 ---
 
 # Intro

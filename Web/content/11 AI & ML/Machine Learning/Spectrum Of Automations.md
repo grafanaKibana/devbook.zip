@@ -1,13 +1,7 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - Machine Learning
-level:
-  - "1"
-priority: Low
-status: Done
 publish: true
+created: 2026-07-05T10:54:06.667+03:00
+modified: 2026-07-05T10:54:06.667+03:00
 ---
 
 # Intro

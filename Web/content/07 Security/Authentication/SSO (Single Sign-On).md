@@ -1,20 +1,14 @@
 ---
-topic:
-  - Security
-subtopic:
-  - Authentication
-level:
-  - "3"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:54:04.354+03:00
+modified: 2026-07-05T15:49:32.952+03:00
 ---
 
 # Intro
 
 Single Sign-On (SSO) lets a user authenticate once with a central Identity Provider (IdP) and then access multiple applications without re-entering credentials. The IdP issues tokens or assertions that each application validates independently. In modern systems, SSO is implemented with OpenID Connect (OIDC) on top of OAuth 2.0. The core engineering work is session management, token validation, and handling failure modes safely.
 
-See [[07 Security/Authentication/Oauth OIDC (OpenId Connect)|OAuth OIDC]] for the underlying protocol details.
+See [[Oauth OIDC (OpenId Connect)|OAuth OIDC]] for the underlying protocol details.
 
 ## How It Works — OIDC Flow
 
@@ -36,6 +30,7 @@ sequenceDiagram
 ```
 
 **Key points:**
+
 - The application never sees the user's password — only tokens from the IdP.
 - The `state` parameter prevents CSRF attacks on the redirect.
 - The `nonce` prevents replay attacks on the ID token.
@@ -110,7 +105,7 @@ Logging out of one application does not automatically log out of the IdP or othe
 > SSO eliminates repeated interactive logins across applications — users authenticate once and access many services. It does not replace per-application authorization (what the user can do) or per-application session management (how long the session lasts). Each application still manages its own session and access control.
 
 > [!QUESTION]- What must you validate when accepting an ID token from an IdP?
-> Signature (using IdP's public key), issuer, audience (your client_id), expiry, and nonce. Also validate the redirect URI matches the registered value. Missing any of these opens the door to token forgery, replay attacks, or open redirect vulnerabilities.
+> Signature (using IdP's public key), issuer, audience (your client\_id), expiry, and nonce. Also validate the redirect URI matches the registered value. Missing any of these opens the door to token forgery, replay attacks, or open redirect vulnerabilities.
 
 > [!QUESTION]- When would you choose SAML over OIDC?
 > When integrating with legacy enterprise IdPs that only support SAML (older ADFS, some SaaS products). For new systems, OIDC is simpler, better supported on mobile/SPA, and has a richer ecosystem of libraries. The cost of SAML: XML parsing complexity, larger message sizes, and harder debugging.

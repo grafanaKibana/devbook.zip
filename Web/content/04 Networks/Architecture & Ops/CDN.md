@@ -1,13 +1,7 @@
 ---
-topic:
-  - Networks
-subtopic:
-  - Architecture & Ops
-level:
-  - "3"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:36.416+03:00
+modified: 2026-07-05T17:36:33.099+03:00
 ---
 
 # Intro
@@ -16,7 +10,7 @@ A CDN (Content Delivery Network) is a globally distributed network of caching se
 
 ## How It Works
 
-A user's request resolves — usually via [[04 Networks/Protocols/DNS|DNS]] (GeoDNS/anycast) — to the nearest edge node rather than the origin:
+A user's request resolves — usually via [[DNS]] (GeoDNS/anycast) — to the nearest edge node rather than the origin:
 
 ```mermaid
 flowchart LR
@@ -29,13 +23,13 @@ flowchart LR
 - **Cache hit** — the edge has a fresh copy and returns it immediately (most requests).
 - **Cache miss** — the edge fetches from the **origin**, stores it per the caching headers, and serves it. Subsequent users in that region hit the warm cache.
 
-Edge selection is typically **anycast** (one IP announced from many locations; the network routes to the closest) or **GeoDNS** (DNS returns the nearest edge's address) — see [[04 Networks/Protocols/DNS|DNS as a traffic director]].
+Edge selection is typically **anycast** (one IP announced from many locations; the network routes to the closest) or **GeoDNS** (DNS returns the nearest edge's address) — see [[DNS|DNS as a traffic director]].
 
 ## What the CDN Caches and For How Long
 
 CDNs obey the same [[03 Data Persistence/Caching|HTTP caching]] semantics your app already sets:
 
-- **`Cache-Control: max-age` / `s-maxage`** — `s-maxage` targets *shared* caches (the CDN) specifically, letting the edge cache longer than browsers.
+- **`Cache-Control: max-age` / `s-maxage`** — `s-maxage` targets _shared_ caches (the CDN) specifically, letting the edge cache longer than browsers.
 - **`ETag` / `Last-Modified`** — let the edge revalidate cheaply with the origin (`304 Not Modified`) instead of refetching.
 - **`Vary`** — the edge keys the cache on the listed headers (e.g. `Accept-Encoding`); a careless `Vary: User-Agent` shreds the hit rate.
 - **Cache key** — by default the URL; CDNs let you customize it (ignore tracking query params, include a device class, etc.).
@@ -46,17 +40,17 @@ The hard part, as always, is invalidation. Two strategies:
 
 - **TTL expiry** — let content age out naturally. Simple, but stale until it expires.
 - **Purge / invalidation** — explicitly evict a URL or tag when content changes. Effective but rate-limited and not instant across all edges.
-- **Cache-busting / immutable URLs** — the dominant pattern for assets: embed a content hash in the filename (`app.9f2c1.js`) and serve it `Cache-Control: immutable, max-age=31536000`. A new version is a *new URL*, so there's nothing to invalidate — the old file simply stops being referenced.
+- **Cache-busting / immutable URLs** — the dominant pattern for assets: embed a content hash in the filename (`app.9f2c1.js`) and serve it `Cache-Control: immutable, max-age=31536000`. A new version is a _new URL_, so there's nothing to invalidate — the old file simply stops being referenced.
 
 ## Beyond Static Caching
 
 - **Dynamic acceleration** — even uncacheable responses benefit: the CDN terminates TLS at the edge and reuses warm, optimized backbone connections to the origin, cutting handshake and routing latency.
 - **Edge compute** — run code at the edge (Cloudflare Workers, Lambda@Edge, Fastly Compute) for auth, A/B testing, redirects, personalization, and API responses — close to the user, off the origin.
-- **Security** — CDNs are a natural place for **TLS termination**, **DDoS absorption** (huge distributed capacity soaks up [[04 Networks/Transport & Sockets/UDP|volumetric floods]]), **WAF**, and bot mitigation.
+- **Security** — CDNs are a natural place for **TLS termination**, **DDoS absorption** (huge distributed capacity soaks up [[UDP|volumetric floods]]), **WAF**, and bot mitigation.
 
 ## Pitfalls
 
-- **Caching personalized or private content** — caching a response that includes a user's name/cart at a *shared* edge can leak it to other users. Mark per-user responses `Cache-Control: private, no-store` and never cache anything behind auth without a per-user cache key.
+- **Caching personalized or private content** — caching a response that includes a user's name/cart at a _shared_ edge can leak it to other users. Mark per-user responses `Cache-Control: private, no-store` and never cache anything behind auth without a per-user cache key.
 - **Forgetting `Vary` / cache-key hygiene** — serving a brotli body to a gzip-only client (missing `Vary: Accept-Encoding`), or letting unique query strings (tracking params) fragment the cache into millions of one-hit entries that never warm.
 - **No explicit `Cache-Control`** — CDNs may apply heuristic freshness and serve stale content, or refuse to cache and hammer the origin. Always set headers deliberately (the same trap as [[03 Data Persistence/Caching|application caching]]).
 - **Thundering herd on the origin** — when a popular object expires, many edges miss simultaneously and stampede the origin. Mitigate with origin shield (a mid-tier cache), request coalescing, and stale-while-revalidate.
@@ -83,7 +77,7 @@ The hard part, as always, is invalidation. Two strategies:
 > Either purge/invalidate the specific URL or cache tag (explicit but rate-limited and not instantaneous everywhere), or — better for static assets — use **content-hashed, immutable URLs** so a new version is a brand-new URL that nothing stale points to. For HTML that references those assets, keep a short TTL or `no-cache` so it picks up the new asset URLs promptly.
 
 > [!QUESTION]- What content should you NOT cache on a CDN, and why?
-> Per-user or sensitive responses (anything containing a logged-in user's data, or behind auth) must not sit in a *shared* edge cache, or one user's data can be served to another. Mark them `Cache-Control: private` / `no-store`, or only cache with a per-user cache key. Static, public, identical-for-everyone content is the ideal CDN candidate.
+> Per-user or sensitive responses (anything containing a logged-in user's data, or behind auth) must not sit in a _shared_ edge cache, or one user's data can be served to another. Mark them `Cache-Control: private` / `no-store`, or only cache with a per-user cache key. Static, public, identical-for-everyone content is the ideal CDN candidate.
 
 ## References
 

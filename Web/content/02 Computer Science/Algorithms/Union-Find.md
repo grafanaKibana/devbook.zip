@@ -1,22 +1,16 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
-level:
-  - "3"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:24.505+03:00
+modified: 2026-07-05T17:35:40.273+03:00
 ---
 
 # Intro
 
-Union-Find is the algorithmic technique that operates over a [[02 Computer Science/Data Structures/Disjoint Set|disjoint set]] to answer connectivity queries efficiently as sets are merged. It supports two operations — `find(x)` (which set is x in?) and `union(a, b)` (merge the sets of a and b) — and with two optimizations runs both in near-constant amortized time **O(α(n))**, where α is the inverse Ackermann function: effectively O(1) for any practical input.
+Union-Find is the algorithmic technique that operates over a [[Disjoint Set]] to answer connectivity queries efficiently as sets are merged. It supports two operations — `find(x)` (which set is x in?) and `union(a, b)` (merge the sets of a and b) — and with two optimizations runs both in near-constant amortized time **O(α(n))**, where α is the inverse Ackermann function: effectively O(1) for any practical input.
 
 Union-Find is the backbone of Kruskal's minimum spanning tree algorithm and shows up in network connectivity, image segmentation, clustering, account linking, and cycle detection. Mapping a problem to Union-Find quickly is a strong interview signal.
 
-This note covers the **algorithm** — the operations, their optimizations, and the analysis. The underlying [[02 Computer Science/Data Structures/Disjoint Set|Disjoint Set]] note covers how the data is laid out in memory.
+This note covers the **algorithm** — the operations, their optimizations, and the analysis. The underlying [[Disjoint Set]] note covers how the data is laid out in memory.
 
 ## The Algorithm
 
@@ -55,7 +49,7 @@ Before adding an edge `(u, v)` to a graph, call `find(u)` and `find(v)`. If they
 
 ## Application — Kruskal's MST
 
-Kruskal's algorithm builds a [[02 Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|minimum spanning tree]] by greedily adding the cheapest edge that does not form a cycle, using Union-Find for the cycle test:
+Kruskal's algorithm builds a [[Minimum Spanning Tree]] by greedily adding the cheapest edge that does not form a cycle, using Union-Find for the cycle test:
 
 ```csharp
 public static List<(int u, int v, int w)> KruskalMST(
@@ -97,18 +91,19 @@ public static List<(int u, int v, int w)> KruskalMST(
 **Union by rank vs union by size**: Both bound tree height at O(log n) without path compression and achieve O(α(n)) together with it. Union by size is often preferred because element count is a natural quantity and enables O(1) set-size queries via `_size[Find(x)]`. Union by rank is marginally simpler when size queries are not needed. Choose based on whether downstream code needs to know partition sizes.
 
 **Path compression variants**: Three strategies achieve the same O(α(n)) amortized bound but differ in write volume:
-- *Full compression* (point every node directly to root): most aggressive, maximum pointer rewrites per call.
-- *Path halving* (skip every other node): half the writes, nearly identical empirical speed.
-- *Path splitting* (each node points to its grandparent): similar to halving, easier to implement iteratively.
-Path halving is often preferred in cache-sensitive code because fewer writes reduce cache-line dirtying. The standard implementation uses full compression for clarity.
+
+- _Full compression_ (point every node directly to root): most aggressive, maximum pointer rewrites per call.
+- _Path halving_ (skip every other node): half the writes, nearly identical empirical speed.
+- _Path splitting_ (each node points to its grandparent): similar to halving, easier to implement iteratively.
+  Path halving is often preferred in cache-sensitive code because fewer writes reduce cache-line dirtying. The standard implementation uses full compression for clarity.
 
 **Union-Find is incremental-only — it can't efficiently split.** Union merges sets cheaply, but there is no fast `split`/`un-union`: after path compression the structure has forgotten the original tree shape. This dictates the algorithm class:
 
 - **Edges only ever added** (incremental connectivity) → Union-Find is ideal.
-- **Edges added *and* removed** (fully dynamic connectivity) → Union-Find can't do it; you need link-cut trees or Euler-tour trees.
+- **Edges added _and_ removed** (fully dynamic connectivity) → Union-Find can't do it; you need link-cut trees or Euler-tour trees.
 - **A known-in-advance sequence with deletions** → process it **offline in reverse** (each deletion becomes an addition) with a rollback variant (union by rank, no path compression). This reverse-time trick is the standard way Union-Find copes with deletions.
 
-**Connectivity only, not paths**: Union-Find answers "are a and b connected?" in O(α(n)) but not *how* they connect. If you need the actual path or node degrees, maintain an adjacency list alongside it.
+**Connectivity only, not paths**: Union-Find answers "are a and b connected?" in O(α(n)) but not _how_ they connect. If you need the actual path or node degrees, maintain an adjacency list alongside it.
 
 ## References
 

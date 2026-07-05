@@ -1,13 +1,7 @@
 ---
-topic:
-  - Data Persistence
-subtopic:
-  - SQL
-level:
-  - "3"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:40.581+03:00
+modified: 2026-07-05T15:49:36.902+03:00
 ---
 
 # ACID
@@ -22,7 +16,7 @@ Understanding ACID is essential for designing systems that handle money, invento
 
 All operations in a transaction succeed together, or none of them take effect. There is no partial commit.
 
-**Example**: transferring $100 from Account A to Account B requires two writes: debit A and credit B. If the debit succeeds but the credit fails (crash, constraint violation), the transaction rolls back — Account A is not debited.
+**Example**: transferring \$100 from Account A to Account B requires two writes: debit A and credit B. If the debit succeeds but the credit fails (crash, constraint violation), the transaction rolls back — Account A is not debited.
 
 ```sql
 BEGIN TRANSACTION;
@@ -56,27 +50,27 @@ Concurrent transactions do not observe each other's intermediate (uncommitted) s
 
 #### MVCC and snapshot isolation
 
-Modern databases mostly avoid read locks via **MVCC (Multi-Version Concurrency Control)**: each write creates a new *version* of a row, and a transaction reads the version that was committed when it began. The headline benefit is **readers never block writers and writers never block readers** — a long report doesn't stall the write path. PostgreSQL is MVCC throughout; SQL Server's `SNAPSHOT` / `READ_COMMITTED_SNAPSHOT` is its MVCC mode (that's why the table above lists Snapshot as low-contention). The cost is version bookkeeping: PostgreSQL needs `VACUUM` to reclaim dead row versions; SQL Server keeps versions in `tempdb`.
+Modern databases mostly avoid read locks via **MVCC (Multi-Version Concurrency Control)**: each write creates a new _version_ of a row, and a transaction reads the version that was committed when it began. The headline benefit is **readers never block writers and writers never block readers** — a long report doesn't stall the write path. PostgreSQL is MVCC throughout; SQL Server's `SNAPSHOT` / `READ_COMMITTED_SNAPSHOT` is its MVCC mode (that's why the table above lists Snapshot as low-contention). The cost is version bookkeeping: PostgreSQL needs `VACUUM` to reclaim dead row versions; SQL Server keeps versions in `tempdb`.
 
 #### Write skew — the anomaly the table misses
 
-The dirty/non-repeatable/phantom list covers the SQL-standard anomalies, but **Snapshot isolation still permits *write skew***: two transactions each read an overlapping set, each makes a decision that's valid in isolation, and together they break an invariant. Classic example: two doctors are on call; each transaction reads "2 on call, safe to leave" and each takes themselves off — leaving zero on call. Only true **Serializable** (e.g. PostgreSQL's Serializable Snapshot Isolation, or materializing the conflict with `SELECT ... FOR UPDATE`) prevents it. If your logic is "read X, then conditionally write Y," Snapshot/Repeatable Read is not enough.
+The dirty/non-repeatable/phantom list covers the SQL-standard anomalies, but **Snapshot isolation still permits _write skew_**: two transactions each read an overlapping set, each makes a decision that's valid in isolation, and together they break an invariant. Classic example: two doctors are on call; each transaction reads "2 on call, safe to leave" and each takes themselves off — leaving zero on call. Only true **Serializable** (e.g. PostgreSQL's Serializable Snapshot Isolation, or materializing the conflict with `SELECT ... FOR UPDATE`) prevents it. If your logic is "read X, then conditionally write Y," Snapshot/Repeatable Read is not enough.
 
 ### Durability
 
 Once a transaction commits, its changes survive crashes. The database achieves this through write-ahead logging (WAL): changes are written to a durable log before being applied to data pages. On recovery, the log is replayed to restore committed state.
 
 > [!NOTE]
-> Durability is not binary. `fsync`-on-commit is the strict default, but databases offer weaker modes (PostgreSQL `synchronous_commit = off`, group commit) that trade a few milliseconds of crash-window data loss for throughput. In replicated setups, **durability also means "acknowledged by N replicas"** — see [[03 Data Persistence/SQL/Replication|Replication]] (synchronous vs asynchronous commit).
+> Durability is not binary. `fsync`-on-commit is the strict default, but databases offer weaker modes (PostgreSQL `synchronous_commit = off`, group commit) that trade a few milliseconds of crash-window data loss for throughput. In replicated setups, **durability also means "acknowledged by N replicas"** — see [[Replication]] (synchronous vs asynchronous commit).
 
 ## Beyond a Single Database
 
-ACID guarantees are easy *within one database engine*. The moment a unit of work spans **two databases or services**, atomicity is no longer free:
+ACID guarantees are easy _within one database engine_. The moment a unit of work spans **two databases or services**, atomicity is no longer free:
 
-- **Two-Phase Commit (2PC)** — a coordinator asks every participant to *prepare* (vote), then *commit* or *abort* all together. It preserves atomicity across resources but is slow and **blocks if the coordinator dies mid-protocol** (participants hold locks waiting), so it's avoided in high-scale systems.
-- **Saga pattern** — instead of one distributed transaction, run a sequence of *local* ACID transactions, each with a **compensating action** to undo it if a later step fails. You trade atomicity for eventual consistency and explicit rollback logic. This is the dominant approach in microservices. See [[05 Architecture/Distributed Systems/Distributed Transactions|Distributed Transactions]].
+- **Two-Phase Commit (2PC)** — a coordinator asks every participant to _prepare_ (vote), then _commit_ or _abort_ all together. It preserves atomicity across resources but is slow and **blocks if the coordinator dies mid-protocol** (participants hold locks waiting), so it's avoided in high-scale systems.
+- **Saga pattern** — instead of one distributed transaction, run a sequence of _local_ ACID transactions, each with a **compensating action** to undo it if a later step fails. You trade atomicity for eventual consistency and explicit rollback logic. This is the dominant approach in microservices. See [[Distributed Transactions]].
 
-Also note that lock-based isolation can produce **deadlocks** (two transactions each holding a lock the other needs); the engine picks a victim and rolls it back, so transactional code must be retry-safe — see [[01 Programming/NET/CSharp/Concurrency and Parallelism/Deadlocks|Deadlocks]].
+Also note that lock-based isolation can produce **deadlocks** (two transactions each holding a lock the other needs); the engine picks a victim and rolls it back, so transactional code must be retry-safe — see [[Deadlocks]].
 
 ## Pitfalls
 

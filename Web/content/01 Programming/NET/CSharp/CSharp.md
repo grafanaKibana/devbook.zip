@@ -1,22 +1,16 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
+publish: true
+created: 2026-07-05T10:53:27.320+03:00
+modified: 2026-07-05T10:53:37.169+03:00
 tags:
   - FolderNote
-publish: true
-status: Creation
-level:
-  - '4'
-priority: High
 ---
 
 # Intro
 
 C# is a statically typed, multi-paradigm language designed for the .NET platform. It combines object-oriented fundamentals with functional programming features — pattern matching, LINQ, expression-bodied members, immutable records — and evolves with annual releases tied to .NET versions. For backend and enterprise development, C# is the primary language choice because of its type safety, mature tooling (Visual Studio, Rider, OmniSharp), and native integration with the .NET runtime.
 
-What makes C# distinct in practice: the type system enforces correctness at compile time (nullable reference type analysis, generic constraints, pattern matching exhaustiveness), async/await is a first-class language feature wired directly into the runtime's task scheduler, and the language design committee publishes rationale for every feature on GitHub. This means you can trace *why* a feature works the way it does, which matters when debugging edge cases or choosing between overlapping features.
+What makes C# distinct in practice: the type system enforces correctness at compile time (nullable reference type analysis, generic constraints, pattern matching exhaustiveness), async/await is a first-class language feature wired directly into the runtime's task scheduler, and the language design committee publishes rationale for every feature on GitHub. This means you can trace _why_ a feature works the way it does, which matters when debugging edge cases or choosing between overlapping features.
 
 The notes in this folder cover two areas: **language fundamentals** (type system, generics, methods, error handling, reflection) and **concurrency** (async/await, tasks, synchronization, thread pool behavior). Fundamentals are prerequisite knowledge for everything else in .NET; concurrency is where most production bugs and performance issues live.
 
@@ -28,11 +22,12 @@ The notes in this folder cover two areas: **language fundamentals** (type system
 > In API design, mixing paradigms intentionally (e.g., immutable records for DTOs, interfaces for extensibility, LINQ for queries) produces cleaner, more testable code than forcing everything into one style.
 
 > [!QUESTION]- How does C#'s type system help prevent bugs at compile time?
+>
 > - Nullable reference types flag potential null dereferences before runtime.
 > - Generic constraints enforce type relationships without casting.
 > - Pattern matching with exhaustiveness checks catch missing cases in switch expressions.
 > - Strong typing prevents accidental type confusion that would be runtime errors in dynamic languages.
-> The practical impact: many bugs that surface as runtime exceptions in Python or JavaScript are caught during compilation in C#.
+>   The practical impact: many bugs that surface as runtime exceptions in Python or JavaScript are caught during compilation in C#.
 
 ## Links
 

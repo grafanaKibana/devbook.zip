@@ -1,13 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Patterns
-level:
-  - "1"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:43.323+03:00
+modified: 2026-07-05T15:49:32.562+03:00
 ---
 
 # GRASP
@@ -115,7 +109,7 @@ public sealed class CsvReportGenerator : IReportGenerator
 
 ## References
 
-- [GRASP (Wikipedia)](https://en.wikipedia.org/wiki/GRASP_(object-oriented_design)) — overview of all nine principles with definitions and examples.
+- [GRASP (Wikipedia)](https://en.wikipedia.org/wiki/GRASP_\(object-oriented_design\)) — overview of all nine principles with definitions and examples.
 - [Applying UML and Patterns (Craig Larman)](https://www.oreilly.com/library/view/applying-uml-and/0131489062/) — the book that introduced GRASP; covers all nine principles with detailed worked examples in the context of iterative OO design.
-- [[06 Development Practices/Paradigms/OOP|OOP]] — object-oriented programming fundamentals that GRASP principles build on: encapsulation, polymorphism, and responsibility assignment.
+- [[OOP]] — object-oriented programming fundamentals that GRASP principles build on: encapsulation, polymorphism, and responsibility assignment.
 - [GRASP Patterns Explained (Baeldung)](https://www.baeldung.com/java-grasp-patterns) — practical walkthrough of all nine GRASP principles with code examples; Java-based but the responsibility assignment concepts apply directly to C#.

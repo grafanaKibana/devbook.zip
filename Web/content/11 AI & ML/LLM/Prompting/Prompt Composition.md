@@ -1,13 +1,7 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
-level:
-  - "3"
-priority: Medium
-status: Done
 publish: true
+created: 2026-07-05T10:54:06.781+03:00
+modified: 2026-07-05T15:49:35.465+03:00
 ---
 
 # Intro
@@ -87,7 +81,7 @@ Concrete prompt refinement example:
 - Meta prompt request: "Rewrite this prompt so output must include timeline, root cause, and actions in JSON with required keys."
 - Refined prompt outcome: stricter instructions, explicit schema, and a stronger completion criterion.
 
-This page covers the human-guided version. For fully automated loops, see [[11 AI & ML/LLM/Prompting/Automated Prompt Optimization|Automated Prompt Optimization]].
+This page covers the human-guided version. For fully automated loops, see [[Automated Prompt Optimization]].
 
 ## Pitfalls
 
@@ -108,6 +102,7 @@ This page covers the human-guided version. For fully automated loops, see [[11 A
 ## Questions
 
 > [!QUESTION]- When should you choose prompt chaining instead of a single large prompt?
+>
 > - Choose chaining when the task has clear stages with different goals.
 > - Use chaining when intermediate validation reduces business or safety risk.
 > - Prefer chaining when you need step-level observability for debugging.
@@ -115,6 +110,7 @@ This page covers the human-guided version. For fully automated loops, see [[11 A
 > - Use a single prompt for simple, low-risk tasks with stable behavior.
 
 > [!QUESTION]- What is the main risk of generated knowledge prompting, and how do you mitigate it?
+>
 > - The generated background facts can be wrong or fabricated.
 > - Treat generated facts as untrusted intermediate context.
 > - Constrain the final prompt to use only explicit generated facts.
@@ -122,6 +118,7 @@ This page covers the human-guided version. For fully automated loops, see [[11 A
 > - Add abstain or reject behavior when facts are inconsistent or low confidence.
 
 > [!QUESTION]- What is a practical meta prompting workflow for improving a weak prompt?
+>
 > - Collect real failures and cluster them by error type.
 > - Ask the model to critique the current prompt against those failures.
 > - Request a revised prompt with explicit constraints and output schema.

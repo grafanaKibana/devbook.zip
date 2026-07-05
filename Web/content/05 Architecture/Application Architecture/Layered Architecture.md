@@ -1,13 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Application Architecture
-level:
-  - "4"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:43.304+03:00
+modified: 2026-07-05T17:35:40.806+03:00
 ---
 
 # Intro
@@ -82,14 +76,14 @@ In traditional layered architecture, changing the database affects everything ab
 
 ## One Family: Layered, Hexagonal, Onion, Clean
 
-These names get used interchangeably, but they're variations on one idea — *protect the domain by pointing dependencies inward*:
+These names get used interchangeably, but they're variations on one idea — _protect the domain by pointing dependencies inward_:
 
 - **Traditional layered (n-tier)** — strict top-down: UI → Business → Data. Simple, but the domain still depends on data access.
-- **Hexagonal (Ports & Adapters, Alistair Cockburn)** — the domain defines **ports** (interfaces); the outside world plugs in **adapters** (a DB adapter, an HTTP adapter, a test adapter). The `IOrderRepository`/`IEmailSender` interfaces in the diagrams above *are* ports. There's no "up/down," just "inside the hexagon" (domain) vs "outside" (adapters).
+- **Hexagonal (Ports & Adapters, Alistair Cockburn)** — the domain defines **ports** (interfaces); the outside world plugs in **adapters** (a DB adapter, an HTTP adapter, a test adapter). The `IOrderRepository`/`IEmailSender` interfaces in the diagrams above _are_ ports. There's no "up/down," just "inside the hexagon" (domain) vs "outside" (adapters).
 - **Onion (Jeffrey Palermo)** — concentric rings with the domain at the center; same inward rule, drawn as circles.
 - **Clean (Robert C. Martin)** — the same again with named rings (Entities → Use Cases → Interface Adapters → Frameworks) and the explicit **Dependency Rule**.
 
-The takeaway: don't agonize over the name — they all enforce the same Dependency Rule, differing mostly in vocabulary and diagram shape. See [[05 Architecture/Application Architecture/Clean Architecture|Clean Architecture]] for the most prescriptive variant; the same boundary discipline scales up to the [[05 Architecture/System Architecture/Modular Monolith|modular monolith]] and microservices.
+The takeaway: don't agonize over the name — they all enforce the same Dependency Rule, differing mostly in vocabulary and diagram shape. See [[Clean Architecture]] for the most prescriptive variant; the same boundary discipline scales up to the [[Modular Monolith]] and microservices.
 
 ## .NET Example
 

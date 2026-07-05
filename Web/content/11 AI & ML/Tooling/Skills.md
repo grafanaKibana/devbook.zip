@@ -1,20 +1,14 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - Tooling
 publish: true
-status: Done
-level:
-  - "2"
-priority: Medium
+created: 2026-07-05T10:54:06.698+03:00
+modified: 2026-07-05T15:49:34.047+03:00
 ---
 
 # Intro
 
 In coding agents, skills are reusable instruction packages that make the model behave like it has specialized domain expertise for a task. Instead of repeating the same guidance in every prompt, you encode conventions once and load them at session start or on demand. Mechanically, a skill is usually a markdown file with structured instructions; when loaded, its content is injected into the agent context (often the system prompt or tool-visible context), which changes tool choice, code style, and decision rules. Tool access control is platform-specific: Claude Code skills can include `allowed-tools`, while OpenCode keeps skill permission policy in `opencode.json`.
 
-For the broader project-level instruction pattern, see [[11 AI & ML/Tooling/Agent Instructions|Agent Instructions]]. For tool/plugin integration patterns skills often rely on, see [[11 AI & ML/Tooling/Plugins|Plugins]].
+For the broader project-level instruction pattern, see [[Agent Instructions]]. For tool/plugin integration patterns skills often rely on, see [[Plugins]].
 
 ## How Skills Work Across Tools
 
@@ -85,12 +79,14 @@ Assume your team has strict API error contracts and logging conventions. Without
 ## Questions
 
 > [!QUESTION]- Why do skills usually improve agent reliability more than repeating instructions in every prompt?
+>
 > - Skills are persistent and reusable, so important constraints are present every time instead of being forgotten in ad-hoc prompts
 > - They standardize behavior across contributors and sessions, reducing output variance
 > - Structured frontmatter plus explicit usage guidance improves skill selection and timing
 > - Skills are version-controlled artifacts, so teams can review and evolve them like code
 
 > [!QUESTION]- When should you choose project-scoped skills over user-global skills?
+>
 > - Choose project scope when conventions are repository-specific and must be shared by all contributors
 > - Choose project scope when CI, linters, or architecture rules are tightly coupled to that codebase
 > - Use user-global skills for personal productivity preferences that should not override team policy

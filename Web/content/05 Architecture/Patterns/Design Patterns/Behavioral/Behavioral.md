@@ -1,15 +1,9 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Patterns
+publish: true
+created: 2026-07-05T10:53:43.329+03:00
+modified: 2026-07-05T10:53:43.329+03:00
 tags:
   - FolderNote
-level:
-  - "3"
-priority: High
-publish: true
-status: Done
 ---
 
 # Behavioral Patterns

@@ -1,26 +1,20 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
-level:
-  - "4"
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:25.488+03:00
+modified: 2026-07-05T17:35:42.585+03:00
 tags:
   - FolderNote
-priority: Low
 ---
 
 # Intro
 
-Heap sort turns the array into a [[02 Computer Science/Data Structures/Heap|binary heap]] and then repeatedly extracts the maximum to build the sorted output from the back. It is the only common comparison sort that is **both O(n log n) in the worst case *and* O(1) extra space (in-place)** — the combination merge sort and quicksort each give up one of. That guaranteed worst case with no extra memory is exactly why .NET's `Array.Sort` (introsort) uses heap sort as its **fallback** when quicksort's recursion goes too deep, defending against quicksort's O(n²) blow-up.
+Heap sort turns the array into a [[Heap|binary heap]] and then repeatedly extracts the maximum to build the sorted output from the back. It is the only common comparison sort that is **both O(n log n) in the worst case _and_ O(1) extra space (in-place)** — the combination merge sort and quicksort each give up one of. That guaranteed worst case with no extra memory is exactly why .NET's `Array.Sort` (introsort) uses heap sort as its **fallback** when quicksort's recursion goes too deep, defending against quicksort's O(n²) blow-up.
 
 ## Mechanism
 
 Two phases over the same array:
 
-1. **Build a max-heap** in place via [[02 Computer Science/Data Structures/Heap|heapify]] — sift down from the last internal node up to the root. This is **O(n)**, not O(n log n).
+1. **Build a max-heap** in place via [[Heap|heapify]] — sift down from the last internal node up to the root. This is **O(n)**, not O(n log n).
 2. **Sort-down** — repeatedly swap the root (the current maximum) with the last unsorted element, shrink the heap by one, and sift the new root down to restore the heap. Each of the n extractions costs O(log n).
 
 The largest element "bubbles" to the end of the array on each round, growing a sorted suffix while the heap shrinks — all within the original array, no buffer.
@@ -80,7 +74,7 @@ private static void SiftDown(int[] a, int root, int size)
 
 ## When to Use
 
-- **Worst-case guarantee with no extra memory:** when you need O(n log n) *and* O(1) space and cannot tolerate quicksort's O(n²) risk — real-time/embedded contexts, or as a safety net.
+- **Worst-case guarantee with no extra memory:** when you need O(n log n) _and_ O(1) space and cannot tolerate quicksort's O(n²) risk — real-time/embedded contexts, or as a safety net.
 - **Introsort fallback:** .NET's `Array.Sort` switches to heap sort once quicksort recursion exceeds ~2·log(n) depth, guaranteeing O(n log n) overall.
 - **Selecting the top-k (partial sort):** stop the sort-down phase after k extractions to get the k largest in O(n + k log n) — or just use a bounded heap / `PriorityQueue`.
 
@@ -88,7 +82,7 @@ For general in-memory sorting, `Array.Sort` (introsort) is the right default; he
 
 ## Pitfalls
 
-- **Not stable** — equal elements can be reordered by the swaps, so heap sort is wrong when you need to preserve the order of equal keys (e.g. a secondary sort). Use [[02 Computer Science/Algorithms/Sorting Algorithms/Merge Sort|merge sort]] or `OrderBy` for stability.
+- **Not stable** — equal elements can be reordered by the swaps, so heap sort is wrong when you need to preserve the order of equal keys (e.g. a secondary sort). Use [[Merge Sort]] or `OrderBy` for stability.
 - **Poor cache locality** — sift-down jumps between parent index `i` and children `2i+1`/`2i+2`, which are far apart in memory for large arrays, causing cache misses. This is why heap sort is typically ~2× slower than quicksort in practice even with identical Big-O.
 - **Building the heap the slow way** — inserting elements one at a time is O(n log n); the bottom-up heapify above is O(n). Using the slow build wastes the algorithm's one structural advantage.
 - **Index errors in sift-down** — off-by-one in the child indices or the `size` bound (which shrinks each round) silently corrupts the result; the `l < size`/`r < size` guards are essential.
@@ -101,7 +95,7 @@ For general in-memory sorting, `Array.Sort` (introsort) is the right default; he
 | Quick sort (introsort) | O(n log n) (introsort) | O(log n) | No | Excellent | General-purpose; fastest in practice |
 | Merge sort | O(n log n) | O(n) | Yes | Good | Stability required; linked lists; external sort |
 
-**Decision rule**: choose heap sort when you specifically need **guaranteed O(n log n) and O(1) space**. Otherwise use `Array.Sort` (introsort), which already *contains* heap sort as its worst-case shield while getting quicksort's cache-friendly average case.
+**Decision rule**: choose heap sort when you specifically need **guaranteed O(n log n) and O(1) space**. Otherwise use `Array.Sort` (introsort), which already _contains_ heap sort as its worst-case shield while getting quicksort's cache-friendly average case.
 
 ## Questions
 

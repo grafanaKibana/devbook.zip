@@ -1,18 +1,13 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
-level:
-  - "4"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:26.855+03:00
+modified: 2026-07-05T10:53:37.173+03:00
 ---
 
 # Intro
 
 Parallelism is about finishing CPU-bound work faster by using multiple cores at the same time. In .NET, the main tools are `Parallel.ForEachAsync`, PLINQ, and custom partitioned pipelines. Effective parallel code maximizes throughput while preserving determinism, bounded resource usage, and observability.
+
 - Async does not automatically mean parallel CPU execution.
 - Parallelism helps when each unit does meaningful CPU work.
 - Shared mutable state is the core risk; minimize or isolate it.
@@ -95,7 +90,7 @@ This replaces N contended writes with one merge per worker — far better scalin
 ## Pitfalls
 
 - **Shared mutable state causes data races**: `ConcurrentBag<T>` and similar collections add synchronization overhead. Prefer partition-local accumulators and merge at the end — the PLINQ `Aggregate` overload, the `Parallel.For` `localInit`/`localFinally` pattern above, or a `ConcurrentDictionary` keyed by partition ID are common patterns.
-- **False sharing kills scaling silently**: when workers update adjacent fields that share a 64-byte CPU cache line (e.g. `long[] counts` indexed per-thread), each write invalidates the line in every other core's cache, serializing what looks like independent work. Symptom: adding cores makes it *slower*. Fix with per-worker locals (above), padding (`[StructLayout]` / spacing array entries onto separate cache lines), or `PaddedReference`-style wrappers.
+- **False sharing kills scaling silently**: when workers update adjacent fields that share a 64-byte CPU cache line (e.g. `long[] counts` indexed per-thread), each write invalidates the line in every other core's cache, serializing what looks like independent work. Symptom: adding cores makes it _slower_. Fix with per-worker locals (above), padding (`[StructLayout]` / spacing array entries onto separate cache lines), or `PaddedReference`-style wrappers.
 - **Over-parallelizing I/O-bound work wastes threads**: `Parallel.ForEach` on I/O operations blocks thread-pool threads while waiting on I/O. Use `async/await` with `SemaphoreSlim` to cap concurrency without blocking threads.
 - **Ignoring Amdahl's Law**: the serial fraction of your workload caps the maximum speedup regardless of core count. Profile first — if 20% of work is serial, you can never exceed 5× speedup no matter how many cores you add.
 - **PLINQ ordering overhead**: `.AsParallel().AsOrdered()` forces a merge step that can negate parallelism gains. Only add `AsOrdered()` when the consumer actually requires ordered output.
@@ -115,7 +110,7 @@ This replaces N contended writes with one merge per worker — far better scalin
 **Two other parallelism axes** worth knowing exist beyond multi-threading:
 
 - **TPL Dataflow** (`System.Threading.Tasks.Dataflow`) — composable blocks (`TransformBlock`, `ActionBlock`, `BufferBlock`) for multi-stage producer/consumer pipelines with per-block degree-of-parallelism and built-in backpressure.
-- **SIMD / data-level parallelism** — `Vector<T>`, `System.Numerics`, and hardware intrinsics process multiple elements per instruction on a single thread. For tight numeric loops this can beat thread-level parallelism with none of the coordination cost, and composes *with* it.
+- **SIMD / data-level parallelism** — `Vector<T>`, `System.Numerics`, and hardware intrinsics process multiple elements per instruction on a single thread. For tight numeric loops this can beat thread-level parallelism with none of the coordination cost, and composes _with_ it.
 
 ## Questions
 

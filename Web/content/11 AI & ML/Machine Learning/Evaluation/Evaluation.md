@@ -1,20 +1,14 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - Machine Learning
+publish: true
+created: 2026-07-05T16:18:39.923+03:00
+modified: 2026-07-05T16:18:39.923+03:00
 tags:
   - FolderNote
-publish: true
-priority: Medium
-level:
-  - "3"
-status: Done
 ---
 
 # Intro
 
-Evaluation is how you measure whether a model actually solves the problem it was built for, under the conditions it will face in production. The gap between offline metrics and real-world usefulness is where most ML projects fail silently. A senior engineer needs to pick the right metric for the decision, understand what each curve and score hides, and connect evaluation to business outcomes and deployment gates. This hub orients the family of metrics; the dedicated pages — [[11 AI & ML/Machine Learning/Evaluation/Classification Evaluation|Classification Evaluation]], [[11 AI & ML/Machine Learning/Evaluation/ROC-AUC and PR-AUC|ROC-AUC and PR-AUC]], and [[11 AI & ML/Machine Learning/Evaluation/Calibration|Calibration]] — carry the depth.
+Evaluation is how you measure whether a model actually solves the problem it was built for, under the conditions it will face in production. The gap between offline metrics and real-world usefulness is where most ML projects fail silently. A senior engineer needs to pick the right metric for the decision, understand what each curve and score hides, and connect evaluation to business outcomes and deployment gates. This hub orients the family of metrics; the dedicated pages — [[Classification Evaluation]], [[ROC-AUC and PR-AUC]], and [[Calibration]] — carry the depth.
 
 ## The Evaluation Discipline
 
@@ -31,11 +25,11 @@ The recurring failure across all four is the **offline–online gap**: a metric 
 
 | Question you are answering | Metric family | Where it is covered |
 | --- | --- | --- |
-| Is the classifier right at its chosen threshold? | Precision, recall, F1, confusion matrix | [[11 AI & ML/Machine Learning/Evaluation/Classification Evaluation|Classification Evaluation]] |
-| How good is the ranking across all thresholds? | ROC-AUC, PR-AUC | [[11 AI & ML/Machine Learning/Evaluation/ROC-AUC and PR-AUC|ROC-AUC and PR-AUC]] |
-| Can I trust the predicted probabilities? | Brier score, ECE, reliability diagrams | [[11 AI & ML/Machine Learning/Evaluation/Calibration|Calibration]] |
+| Is the classifier right at its chosen threshold? | Precision, recall, F1, confusion matrix | [[11 AI & ML/Machine Learning/Evaluation/Classification Evaluation\|Classification Evaluation]] |
+| How good is the ranking across all thresholds? | ROC-AUC, PR-AUC | [[11 AI & ML/Machine Learning/Evaluation/ROC-AUC and PR-AUC\|ROC-AUC and PR-AUC]] |
+| Can I trust the predicted probabilities? | Brier score, ECE, reliability diagrams | [[11 AI & ML/Machine Learning/Evaluation/Calibration\|Calibration]] |
 | How far off are continuous predictions? | RMSE, MAE, MAPE, quantile loss | This hub (summary below) |
-| Did the right items rank at the top of a result list? | NDCG, MAP, MRR | [[11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics|RAG Monitoring]] |
+| Did the right items rank at the top of a result list? | NDCG, MAP, MRR | [[11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics\|RAG Monitoring]] |
 
 Pick the family from the decision, not from habit: threshold metrics for a fixed operating point, ranking metrics for comparing models before a threshold exists, calibration metrics when downstream logic consumes probabilities rather than labels.
 
@@ -61,12 +55,14 @@ Decision rule: default to RMSE when large errors hurt most and MAE when they sho
 ## Questions
 
 > [!QUESTION]- When should you distrust a single evaluation metric?
+>
 > - When the metric does not encode the cost asymmetry of the decision, for example accuracy on imbalanced classes
 > - When the test set does not represent production traffic, for example a random split on time-dependent data
 > - When the metric looks good overall but fails on critical slices or cohorts
 > - When the metric is a ranking metric but you need calibrated probabilities for downstream logic
 
 > [!QUESTION]- Why is the offline–online gap the central risk in ML evaluation?
+>
 > - Offline metrics are computed on a frozen sample; production traffic shifts in distribution, user behavior, and edge-case mix that the sample never captured
 > - A change can improve the offline number while leaving real outcomes flat — or reverse them — because the offline set rewards patterns that do not generalize
 > - Leakage, non-representative splits, and metric-proxy mismatch all widen the gap silently

@@ -1,13 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Patterns
-level:
-  - "1"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:43.331+03:00
+modified: 2026-07-05T15:49:35.121+03:00
 ---
 
 # Memento
@@ -143,11 +137,11 @@ Abandoned cart recovery now uses `CartHistory.Serialize()` — the same snapshot
 
 ## Tradeoffs
 
-**Use it when**: you need undo/redo, checkpoints, or rollback of *in-memory* state **without breaking encapsulation** — the caretaker holds opaque snapshots and can't peek inside. Good for editors, wizards, shopping carts, and game saves.
+**Use it when**: you need undo/redo, checkpoints, or rollback of _in-memory_ state **without breaking encapsulation** — the caretaker holds opaque snapshots and can't peek inside. Good for editors, wizards, shopping carts, and game saves.
 
-**Don't reach for it when**: the state is large — every snapshot **copies the whole state**, so memory grows with history depth. There, prefer **command-based undo** (store the *inverse* operation, far cheaper) or, for a full audit trail, [[05 Architecture/Patterns/Architectural Patterns/Event Sourcing|Event Sourcing]] (which reconstructs state from a log and snapshots only periodically).
+**Don't reach for it when**: the state is large — every snapshot **copies the whole state**, so memory grows with history depth. There, prefer **command-based undo** (store the _inverse_ operation, far cheaper) or, for a full audit trail, [[Event Sourcing]] (which reconstructs state from a log and snapshots only periodically).
 
-**vs Command undo**: a **Command** remembers *how to reverse one action* (delta); a **Memento** remembers *the entire prior state* (snapshot). Command is leaner for big state with small changes; Memento is simpler when changes are complex or scattered. Also mind **deep-copy correctness** — a shallow snapshot that shares mutable references silently corrupts on restore.
+**vs Command undo**: a **Command** remembers _how to reverse one action_ (delta); a **Memento** remembers _the entire prior state_ (snapshot). Command is leaner for big state with small changes; Memento is simpler when changes are complex or scattered. Also mind **deep-copy correctness** — a shallow snapshot that shares mutable references silently corrupts on restore.
 
 ## Questions
 

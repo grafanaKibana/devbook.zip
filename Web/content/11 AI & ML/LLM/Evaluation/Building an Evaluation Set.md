@@ -1,20 +1,14 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
-level:
-  - "3"
-priority: High
-status: Done
 publish: true
+created: 2026-07-05T10:54:06.921+03:00
+modified: 2026-07-05T17:35:42.976+03:00
 ---
 
 # Intro
 
-An evaluation set is the labeled data every other eval technique runs against — [[11 AI & ML/LLM/Evaluation/LLM-as-a-Judge|LLM-as-a-Judge]], [[11 AI & ML/LLM/Evaluation/Deterministic Checks|deterministic checks]], and the regression gate all score against it. A bad eval set produces misleading numbers no matter how sophisticated the scoring is, so the set itself is the foundation. This page covers the parts that are the same whether you are evaluating a RAG pipeline, an agent, or a single-shot prompt: how an example is structured, how to bootstrap one with synthetic generation, and how large it must be to detect a real change.
+An evaluation set is the labeled data every other eval technique runs against — [[LLM-as-a-Judge]], [[Deterministic Checks]], and the regression gate all score against it. A bad eval set produces misleading numbers no matter how sophisticated the scoring is, so the set itself is the foundation. This page covers the parts that are the same whether you are evaluating a RAG pipeline, an agent, or a single-shot prompt: how an example is structured, how to bootstrap one with synthetic generation, and how large it must be to detect a real change.
 
-Two design choices drive whether the numbers mean anything. The first is **labeling** — what counts as a correct output, which gets domain-specific fast (retrieval relevance in [[11 AI & ML/LLM/RAG/Evaluation/Retrieval Evaluation Sets|Retrieval Evaluation Sets]], trajectory and tool-call correctness for agents). The second is **size** relative to the effect you want to detect; get this wrong and the eval cannot distinguish two configurations at all. The curated regression subset and the offline/online loop that consume this set are covered in [[11 AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs|Golden Test Set and Regression Runs]] and [[11 AI & ML/LLM/Evaluation/Online Evaluation and AB Tests|Online Evaluation and AB Tests]].
+Two design choices drive whether the numbers mean anything. The first is **labeling** — what counts as a correct output, which gets domain-specific fast (retrieval relevance in [[Retrieval Evaluation Sets]], trajectory and tool-call correctness for agents). The second is **size** relative to the effect you want to detect; get this wrong and the eval cannot distinguish two configurations at all. The curated regression subset and the offline/online loop that consume this set are covered in [[Golden Test Set and Regression Runs]] and [[Online Evaluation and AB Tests]].
 
 ## Structure
 
@@ -36,11 +30,11 @@ for item in sample(source_material, n=2000):
         eval_set.append({"input": q, "expected_source_id": item.id})
 ```
 
-The failure mode every synthetic set shares is **distributional homogeneity**: generated cases are individually reasonable but collectively cluster in the style and difficulty the model finds easy to produce, missing ambiguous, multi-hop, and adversarial inputs real users send. Mitigation: stratify the source sample so common boilerplate does not dominate, vary the prompt to request different input types, and augment with real production logs to cover the actual distribution. Domain-specific distortions — retrieval false-negatives and lexical leakage — are covered where they bite, in [[11 AI & ML/LLM/RAG/Evaluation/Retrieval Evaluation Sets|Retrieval Evaluation Sets]].
+The failure mode every synthetic set shares is **distributional homogeneity**: generated cases are individually reasonable but collectively cluster in the style and difficulty the model finds easy to produce, missing ambiguous, multi-hop, and adversarial inputs real users send. Mitigation: stratify the source sample so common boilerplate does not dominate, vary the prompt to request different input types, and augment with real production logs to cover the actual distribution. Domain-specific distortions — retrieval false-negatives and lexical leakage — are covered where they bite, in [[Retrieval Evaluation Sets]].
 
 ## Size and statistical power
 
-Most eval sets are too small to detect meaningful differences between configurations. Anthropic's analysis shows that treating eval questions as samples from a query universe and computing confidence intervals reveals that many published eval results lack statistical power — the observed difference is inside the noise band. Required sample size depends on the target effect size, the confidence level, and the metric's variance. End-to-end metrics typically have higher variance than component metrics and therefore need *more* samples, not fewer. For regression detection, size the set so that a 3-5% change in your target metric is statistically significant at your chosen confidence level; below that, a "regression" or "improvement" may be sampling noise you will chase for nothing.
+Most eval sets are too small to detect meaningful differences between configurations. Anthropic's analysis shows that treating eval questions as samples from a query universe and computing confidence intervals reveals that many published eval results lack statistical power — the observed difference is inside the noise band. Required sample size depends on the target effect size, the confidence level, and the metric's variance. End-to-end metrics typically have higher variance than component metrics and therefore need _more_ samples, not fewer. For regression detection, size the set so that a 3-5% change in your target metric is statistically significant at your chosen confidence level; below that, a "regression" or "improvement" may be sampling noise you will chase for nothing.
 
 ## Pitfalls
 
@@ -59,6 +53,7 @@ Fix: establish your own baseline by running the pipeline on your eval set and me
 ## Questions
 
 > [!QUESTION]- Why are relative regression thresholds preferable to absolute quality targets for release gates?
+>
 > - Absolute thresholds are brittle across data changes, model updates, and workload shifts
 > - A threshold set during initial launch becomes meaningless after the data doubles or input distribution shifts
 > - Relative thresholds (no more than N% regression from baseline) adapt automatically because the baseline tracks the current system state
@@ -66,10 +61,11 @@ Fix: establish your own baseline by running the pipeline on your eval set and me
 > - Relative thresholds do require a consistent baseline measurement maintained across releases, which adds CI/CD complexity — but that cost is far lower than the risk of shipping regressions absolute thresholds can't catch after the first data evolution
 
 > [!QUESTION]- When should a team invest in a human-annotated golden set versus relying on synthetic generation?
+>
 > - Synthetic generation bootstraps evaluation quickly and covers breadth at low cost
 > - LLM-generated inputs cluster around patterns the model finds easy to generate, missing adversarial cases, ambiguous inputs, and domain edge cases
 > - A golden set is worth the investment when the system serves high-stakes decisions (medical, legal, financial) where evaluation failures have direct business or safety impact
-> - Golden sets also serve as regression gates — known past failures are captured permanently, preventing recurrence (see [[11 AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs|Golden Test Set and Regression Runs]])
+> - Golden sets also serve as regression gates — known past failures are captured permanently, preventing recurrence (see [[Golden Test Set and Regression Runs]])
 > - In practice, combine both: synthetic for broad coverage, golden for regression gating on known failure modes
 > - Golden sets do cost annotator time (typically 2-4 hours per 100 examples) and ongoing maintenance as the data evolves — invest proportionally to the cost of an undetected evaluation failure in your domain
 

@@ -1,13 +1,7 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
-level:
-  - "4"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:26.901+03:00
+modified: 2026-07-05T15:49:36.960+03:00
 ---
 
 # Intro
@@ -21,6 +15,7 @@ publish: true
 A `Task` is a promise: it starts in one of three terminal states — `RanToCompletion`, `Faulted`, or `Canceled`. The runtime tracks the state and stores the result or exception. When you `await` a task, the compiler generates a continuation that runs when the task reaches a terminal state.
 
 **Key types:**
+
 - `Task` — represents an operation with no return value.
 - `Task<T>` — represents an operation that produces a value of type `T`.
 - `ValueTask` / `ValueTask<T>` — stack-allocated alternative for hot paths where the result is often synchronously available (e.g., cached reads). Has strict consumption rules.
@@ -99,7 +94,7 @@ await foreach (var finished in Task.WhenEach(tasks))
 }
 ```
 
-`TaskScheduler` is the abstraction that decides where continuations run; you rarely implement one, but it's why `Task.Factory.StartNew` defaulting to `TaskScheduler.Current` matters (above). For bounded concurrent fan-out over a collection, prefer `Parallel.ForEachAsync` (see [[01 Programming/NET/CSharp/Concurrency and Parallelism/Parallelism|Parallelism]]) over hand-rolled `WhenAll` + `SemaphoreSlim`.
+`TaskScheduler` is the abstraction that decides where continuations run; you rarely implement one, but it's why `Task.Factory.StartNew` defaulting to `TaskScheduler.Current` matters (above). For bounded concurrent fan-out over a collection, prefer `Parallel.ForEachAsync` (see [[Parallelism]]) over hand-rolled `WhenAll` + `SemaphoreSlim`.
 
 ## Pitfalls
 
@@ -148,7 +143,7 @@ Calling `Task.WhenAll` on thousands of tasks simultaneously can overwhelm the Th
 var results = await Task.WhenAll(items.Select(i => ProcessAsync(i)));
 ```
 
-Fix: use `SemaphoreSlim` to bound concurrency (see [[01 Programming/NET/CSharp/Concurrency and Parallelism/ThreadPool|ThreadPool]]).
+Fix: use `SemaphoreSlim` to bound concurrency (see [[ThreadPool]]).
 
 ## Questions
 

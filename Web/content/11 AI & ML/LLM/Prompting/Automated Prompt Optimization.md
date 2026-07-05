@@ -1,13 +1,7 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
-level:
-  - "3"
-priority: Low
-status: Done
 publish: true
+created: 2026-07-05T10:54:06.775+03:00
+modified: 2026-07-05T10:54:06.776+03:00
 ---
 
 # Intro
@@ -25,6 +19,7 @@ One notable result is that APE found a stronger zero-shot reasoning trigger than
 Diao et al. (2023) observe that standard CoT often reuses fixed demonstrations, even when those examples are not the most informative for a given task distribution. Active-Prompt instead asks: which examples is the model most uncertain about?
 
 The loop is:
+
 1. estimate uncertainty by sampling multiple outputs and measuring disagreement
 2. select the most uncertain examples
 3. request human CoT annotations for those examples
@@ -103,19 +98,21 @@ For most practitioners, strong manual prompting plus meta-prompting covers most 
 
 > [!QUESTION]- When is automated prompt optimization worth the setup cost?
 > Expected answer:
+>
 > - It is worth it when prompt quality directly impacts key metrics and manual iteration is too slow.
 > - You need repeatable optimization across many tasks or datasets, not one-off prompt crafting.
 > - You have an evaluation loop (datasets, acceptance metrics, or human labels) to score changes objectively.
 > - Without measurement infrastructure, automation usually adds complexity without reliable gains.
-> Why this matters: the optimization loop only pays off when evaluation discipline exists.
+>   Why this matters: the optimization loop only pays off when evaluation discipline exists.
 
 > [!QUESTION]- What is PAL's key insight compared to chain-of-thought prompting?
 > Expected answer:
+>
 > - PAL moves intermediate reasoning from free-form text to executable code.
 > - The interpreter, not the language model, performs deterministic computation.
 > - This reduces arithmetic/symbolic errors common in text-only reasoning traces.
 > - It naturally connects to tool-use agents that route subtasks to calculators, Python, or external systems.
-> Why this matters: it separates language understanding from computation for better reliability.
+>   Why this matters: it separates language understanding from computation for better reliability.
 
 ## References
 

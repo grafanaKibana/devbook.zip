@@ -1,13 +1,7 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
-level:
-  - "4"
-priority: Medium
-status: Done
 publish: true
+created: 2026-07-05T10:53:23.736+03:00
+modified: 2026-07-05T10:53:37.206+03:00
 ---
 
 # Intro
@@ -49,18 +43,21 @@ Console.WriteLine(jobs.Peek());    // job-2
 ## Questions
 
 > [!QUESTION]- Why is `Queue<T>` suitable for BFS?
-> - BFS must visit nodes in order of increasing distance — all of layer *k* before any of layer *k+1*.
+>
+> - BFS must visit nodes in order of increasing distance — all of layer _k_ before any of layer _k+1_.
 > - A FIFO queue naturally enforces that: neighbors enqueued earlier (closer) are dequeued earlier.
 > - Swapping in a stack would turn the traversal into DFS, changing the result.
 > - The queue guarantees correct level order, but its frontier can hold a whole layer of the graph — a memory cost you accept when shortest-path-by-hops correctness matters.
 
 > [!QUESTION]- When should you replace `Queue<T>` with `PriorityQueue<TElement, TPriority>`?
+>
 > - When correctness depends on priority rather than arrival time — Dijkstra, schedulers, SLA-driven dispatch.
 > - A FIFO queue would serve a low-priority older item ahead of an urgent newer one.
 > - `PriorityQueue` keeps a heap so the smallest key is always dequeued first.
 > - It moves you from O(1) enqueue/dequeue to O(log n) heap operations, so pay it only when ordering by priority is actually required.
 
 > [!QUESTION]- Why can a queue be a production reliability problem even if operations are O(1)?
+>
 > - Per-operation complexity says nothing about system-level throughput.
 > - If producers persistently outpace consumers, the queue grows without bound — memory climbs and latency spikes as items wait longer.
 > - This is a flow-control problem, not an algorithmic one.

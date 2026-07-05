@@ -1,13 +1,7 @@
 ---
-topic:
-  - Development Practices
-subtopic:
-  - Principles
-level:
-  - "4"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:48.539+03:00
+modified: 2026-07-05T10:53:48.539+03:00
 ---
 
 # SOLID Principles
@@ -54,7 +48,7 @@ public class OrderService
 }
 ```
 
-Marketing wants to redesign the confirmation email. A developer adds the customer's shipping address to the template — `order.Customer.ShippingAddress.City` — but digital-only orders have a null `ShippingAddress`. The `NullReferenceException` fires *after* `SaveChangesAsync` completes: the order is persisted and the customer is charged, but the confirmation email never sends. The bug originates in marketing's email template, but it breaks the warehouse workflow because operators rely on confirmation emails to start packing.
+Marketing wants to redesign the confirmation email. A developer adds the customer's shipping address to the template — `order.Customer.ShippingAddress.City` — but digital-only orders have a null `ShippingAddress`. The `NullReferenceException` fires _after_ `SaveChangesAsync` completes: the order is persisted and the customer is charged, but the confirmation email never sends. The bug originates in marketing's email template, but it breaks the warehouse workflow because operators rely on confirmation emails to start packing.
 
 **Fix — each actor gets its own class:**
 
@@ -92,13 +86,13 @@ public class InvoiceGenerator
 
 **Why breaking SRP hurts you:** Every bug fix and feature request requires reading and understanding code that has nothing to do with the change. Test setup explodes — testing email logic requires mocking the database. Deployment risk compounds — a finance-team invoice format change forces redeploying the entire order pipeline.
 
-**Detection:** If describing a class requires the word "and" ("it saves orders *and* sends emails *and* generates invoices"), it has multiple responsibilities. If two different teams file tickets that touch the same class, SRP is violated.
+**Detection:** If describing a class requires the word "and" ("it saves orders _and_ sends emails _and_ generates invoices"), it has multiple responsibilities. If two different teams file tickets that touch the same class, SRP is violated.
 
 ## O — Open/Closed Principle
 
 **Open for extension, closed for modification.** Add new behavior by adding new code — not by editing existing code that already works.
 
-Think of a power strip. When you buy a new appliance, you plug it into an open socket. You do not rewire the strip's internals. The strip is *closed* for modification (its wiring is fixed) but *open* for extension (new plugs fit existing sockets).
+Think of a power strip. When you buy a new appliance, you plug it into an open socket. You do not rewire the strip's internals. The strip is _closed_ for modification (its wiring is fixed) but _open_ for extension (new plugs fit existing sockets).
 
 The problem surfaces when behavior selection lives inside a method as branching logic. Every new variant forces modifying the same method, retesting all existing branches, and risking regressions in paths that were working fine.
 
@@ -159,7 +153,7 @@ public class ShippingCostCalculator
 
 **Subtypes must honor the contract of their base type.** If calling code works with a base class reference, swapping in any derived class must not break correctness — no surprises, no silent behavioral changes, no weakened guarantees.
 
-Imagine hiring a substitute teacher. Parents expect the substitute to follow the same curriculum, the same grading policy, and the same classroom rules. A substitute who cancels all homework and gives everyone an A *technically fills the role* but violates the contract the parents relied on. LSP says: substitutes must honor the original's promises.
+Imagine hiring a substitute teacher. Parents expect the substitute to follow the same curriculum, the same grading policy, and the same classroom rules. A substitute who cancels all homework and gives everyone an A _technically fills the role_ but violates the contract the parents relied on. LSP says: substitutes must honor the original's promises.
 
 The violation is subtle because the code compiles and runs. The damage is silent incorrectness — logic that depends on base-class behavior quietly produces wrong results.
 
@@ -310,7 +304,7 @@ public class NotificationHandler : IOrderNotifier
 }
 ```
 
-**Why breaking ISP hurts you:** Fat interfaces turn unrelated classes into change partners. Adding a `Task TrackShipmentAsync()` method to `IOrderService` forces *every* implementation to add a stub — including `NotificationHandler` which has nothing to do with shipment tracking. This means every new method triggers changes in N classes, N sets of tests, and N code reviews for zero business value.
+**Why breaking ISP hurts you:** Fat interfaces turn unrelated classes into change partners. Adding a `Task TrackShipmentAsync()` method to `IOrderService` forces _every_ implementation to add a stub — including `NotificationHandler` which has nothing to do with shipment tracking. This means every new method triggers changes in N classes, N sets of tests, and N code reviews for zero business value.
 
 **Detection:** Count `throw new NotSupportedException()` or `throw new NotImplementedException()` in interface implementations. Each one signals a method that the class was forced to "implement" but does not actually support.
 
@@ -318,7 +312,7 @@ public class NotificationHandler : IOrderNotifier
 
 **High-level modules should not depend on low-level modules. Both should depend on abstractions.** The direction of source-code dependency should point toward the business policy, not toward the implementation detail.
 
-Think of a wall outlet. Your laptop charger depends on the outlet *shape* (the abstraction), not on the specific wiring inside the wall. The power company can completely rewire the building infrastructure without you buying a new charger — because both sides agreed on the outlet interface.
+Think of a wall outlet. Your laptop charger depends on the outlet _shape_ (the abstraction), not on the specific wiring inside the wall. The power company can completely rewire the building infrastructure without you buying a new charger — because both sides agreed on the outlet interface.
 
 Without DIP, high-level business logic reaches directly into low-level infrastructure. The `OrderProcessor` below knows the concrete type of every dependency — SQL Server for storage, Stripe for payments, SMTP for emails. Replacing any of these requires rewriting the core business class.
 
@@ -432,6 +426,7 @@ The practical implication: when debugging a SOLID violation, look one level deep
 ## Questions
 
 > [!QUESTION]- Which SOLID principles does a typical Singleton violate, and why does it matter in a microservice?
+>
 > - **DIP**: consuming code depends on a concrete global instance (`Singleton.Instance`) instead of an abstraction injected via DI. This makes it impossible to swap implementations per-tenant or per-environment.
 > - **SRP**: the singleton class mixes business logic with lifecycle management (lazy initialization, thread-safety) and global access control. Changes to any of these concerns affect the same class.
 > - **OCP**: replacing or extending behavior usually requires changing call sites or the singleton itself — you cannot plug in an alternative without modifying existing code.
@@ -439,6 +434,7 @@ The practical implication: when debugging a SOLID violation, look one level deep
 > - DI adds indirection and configuration overhead, so a static singleton is simpler for genuinely global, stateless utilities (`StringComparer.OrdinalIgnoreCase`). For anything stateful or with infrastructure dependencies, DI-managed singletons win outright.
 
 > [!QUESTION]- How would you refactor a 2,000-line service class to satisfy SRP without breaking existing callers?
+>
 > - **Step 1**: Identify actors — group methods by which team or business process triggers changes to them. Common groupings: persistence, notification, validation, reporting.
 > - **Step 2**: Extract method groups into focused classes (e.g., `OrderValidator`, `OrderNotifier`, `OrderRepository`). Each class gets one actor's methods.
 > - **Step 3**: Introduce interfaces for each new class. The original `OrderService` becomes a thin facade that delegates to the extracted classes via interfaces.
@@ -447,6 +443,7 @@ The practical implication: when debugging a SOLID violation, look one level deep
 > - The intermediate facade adds indirection without the full SRP payoff, but it buys an incremental migration over several sprints instead of a big-bang rewrite that freezes feature work.
 
 > [!QUESTION]- When is it acceptable to violate SOLID principles, and how do you decide?
+>
 > - **Small scripts and prototypes**: abstractions cost more than the code they protect. A 50-line console app does not need interfaces.
 > - **Performance-critical hot paths**: virtual dispatch, interface resolution, and DI overhead are measurable in tight loops processing millions of items per second. Profile first — if the abstraction boundary appears in your flame graph, inline it.
 > - **Premature abstraction risk**: when you have exactly one implementation and no foreseeable second one, extracting an interface adds navigation cost without substitution value. Wait for the second use case.

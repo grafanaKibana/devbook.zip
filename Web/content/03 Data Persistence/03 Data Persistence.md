@@ -1,16 +1,9 @@
 ---
-icon: database
-color: "#f97316"
-topic:
-  - Data Persistence
-subtopic: []
+publish: true
+created: 2026-07-05T10:53:40.594+03:00
+modified: 2026-07-05T10:53:40.594+03:00
 tags:
   - FolderNote
-publish: true
-priority: High
-level:
-  - '4'
-status: Done
 ---
 
 # Intro

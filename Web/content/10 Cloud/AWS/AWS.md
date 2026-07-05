@@ -1,15 +1,9 @@
 ---
-topic:
-  - Cloud
-subtopic:
-  - AWS
-level:
-  - "3"
-priority: Medium
-status: Creation
+publish: true
+created: 2026-07-05T10:54:10.897+03:00
+modified: 2026-07-05T10:54:10.902+03:00
 tags:
   - FolderNote
-publish: true
 ---
 
 # AWS Services Overview
@@ -26,6 +20,7 @@ aws s3 ls
 ## Compute
 
 ### EC2 (Elastic Compute Cloud)
+
 Virtual machines in the cloud. Choose instance type (CPU/memory/GPU), OS, and networking. The foundation of most AWS workloads.
 
 **When to reach for it**: When you need full control over the OS, custom software, or GPU instances for ML training. For containerized .NET apps, prefer ECS or EKS over raw EC2. EC2 is the right choice for lift-and-shift of on-prem VMs.
@@ -38,6 +33,7 @@ aws ec2 run-instances --image-id ami-0c55b159cbfafe1f0 --instance-type t3.micro 
 ## Storage
 
 ### S3 (Simple Storage Service)
+
 Object storage for any file type. Virtually unlimited capacity. 11 nines durability. Versioning, lifecycle policies, and event notifications built in.
 
 **When to reach for it**: Any unstructured data storage — ML datasets, model artifacts, backups, static website assets, application logs. The default choice for object storage on AWS. Equivalent to Azure Blob Storage.
@@ -52,6 +48,7 @@ aws s3 sync ./data/ s3://my-bucket/data/
 ## Databases
 
 ### DynamoDB
+
 Fully managed NoSQL key-value and document database. Single-digit millisecond performance at any scale. On-demand or provisioned capacity. Global tables for multi-region replication.
 
 **When to reach for it**: High-throughput, low-latency key-value access patterns. Session stores, user profiles, IoT data, gaming leaderboards. Avoid for complex relational queries or ad-hoc analytics — use RDS or Redshift instead. Equivalent to Azure Cosmos DB.
@@ -64,6 +61,7 @@ aws dynamodb get-item --table-name Users --key '{"UserId": {"S": "user-123"}}'
 ## Messaging
 
 ### SQS (Simple Queue Service)
+
 Fully managed message queue. Standard queues (at-least-once, best-effort ordering) and FIFO queues (exactly-once, strict ordering). Scales automatically. Dead-letter queues for failed messages.
 
 **When to reach for it**: Decoupling producers from consumers. Background job processing. Buffer between high-throughput producers and slower consumers. Equivalent to Azure Storage Queues (simple) or Azure Service Bus (FIFO/advanced).

@@ -1,13 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Patterns
-level:
-  - "1"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:43.336+03:00
+modified: 2026-07-05T17:36:33.110+03:00
 ---
 
 # Flyweight
@@ -131,11 +125,11 @@ Updating the Electronics tax rate now means updating one `CategoryFlyweight` ins
 
 ## Tradeoffs
 
-**Use it when**: you have a *very large* number of objects whose state cleanly splits into shared-immutable **intrinsic** state and per-instance **extrinsic** state, and memory (not CPU) is the bottleneck. The win scales with the duplication ratio — 100k products over 50 categories is a 2000× saving on that data.
+**Use it when**: you have a _very large_ number of objects whose state cleanly splits into shared-immutable **intrinsic** state and per-instance **extrinsic** state, and memory (not CPU) is the bottleneck. The win scales with the duplication ratio — 100k products over 50 categories is a 2000× saving on that data.
 
 **Don't reach for it when**: the object count is modest — the factory/indirection is premature optimization that buys nothing. It also **requires the shared state to be immutable**; sharing mutable intrinsic state means one caller's change silently affects thousands of others (a nasty class of bug). And if the state can't be split cleanly, the pattern doesn't apply.
 
-**vs a cache**: both reuse instances, but a Flyweight specifically shares **immutable intrinsic** state to cut memory across many fine-grained objects, whereas a [[03 Data Persistence/Caching|cache]] stores *any* expensive-to-recompute value for latency. In modern .NET you often get Flyweight for free — `string.Intern`, an interned `record`, or a small dictionary cache — without building an explicit factory.
+**vs a cache**: both reuse instances, but a Flyweight specifically shares **immutable intrinsic** state to cut memory across many fine-grained objects, whereas a [[03 Data Persistence/Caching|cache]] stores _any_ expensive-to-recompute value for latency. In modern .NET you often get Flyweight for free — `string.Intern`, an interned `record`, or a small dictionary cache — without building an explicit factory.
 
 ## Questions
 

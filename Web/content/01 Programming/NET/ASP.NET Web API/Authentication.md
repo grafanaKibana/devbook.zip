@@ -1,18 +1,12 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
-level:
-  - "1"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:26.778+03:00
+modified: 2026-07-05T15:49:35.412+03:00
 ---
 
 # Authentication in ASP.NET Core
 
-Authentication is the process of verifying *who* a caller is. In ASP.NET Core, authentication is handled by the authentication middleware, which runs early in the pipeline, reads credentials from the request, and populates `HttpContext.User` with a `ClaimsPrincipal` if the credentials are valid. Authorization (what the caller can do) runs after authentication — see [[01 Programming/NET/ASP.NET Web API/Authorization|Authorization]].
+Authentication is the process of verifying _who_ a caller is. In ASP.NET Core, authentication is handled by the authentication middleware, which runs early in the pipeline, reads credentials from the request, and populates `HttpContext.User` with a `ClaimsPrincipal` if the credentials are valid. Authorization (what the caller can do) runs after authentication — see [[Authorization]].
 
 ASP.NET Core supports multiple authentication schemes simultaneously. The most common for APIs are **JWT Bearer** tokens and **API Keys**. Cookie authentication is standard for web applications.
 
@@ -162,5 +156,5 @@ public IActionResult ApiEndpoint() => Ok();
 - [Authentication in ASP.NET Core (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/) — official overview of the authentication middleware, scheme registration, and `ClaimsPrincipal` population.
 - [JWT Bearer authentication (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/jwt-authn) — step-by-step guide to configuring JWT Bearer in ASP.NET Core with token generation and validation.
 - [Cookie authentication (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/cookie) — cookie-based authentication for web applications: sign-in, sign-out, sliding expiration, and claims transformation.
-- [[07 Security/JWT Bearer|JWT Bearer]] — how JWTs work: structure, signing algorithms, claims, and security considerations.
-- [[01 Programming/NET/ASP.NET Web API/Authorization|Authorization]] — what happens after authentication: policy-based, role-based, and resource-based authorization in ASP.NET Core.
+- [[JWT Bearer]] — how JWTs work: structure, signing algorithms, claims, and security considerations.
+- [[Authorization]] — what happens after authentication: policy-based, role-based, and resource-based authorization in ASP.NET Core.

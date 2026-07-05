@@ -1,14 +1,7 @@
 ---
-topic:
-  - Security
-subtopic:
-  - Security
-level:
-  - "1"
-priority: Low
-status: Ready to Repeat
-
 publish: true
+created: 2026-07-05T10:54:04.304+03:00
+modified: 2026-07-05T10:54:04.305+03:00
 ---
 
 # Intro
@@ -46,7 +39,7 @@ var block2Hash = Sha256Hex(block2Prev + block2Data);
 
 ### Using Blockchain When a Database Suffices
 
-**What goes wrong**: teams adopt blockchain for internal systems where all parties trust a central authority, gaining none of the decentralization benefits while paying the full cost in throughput, complexity, and compliance risk. An Australian government agency spent AUD $8.5M on a blockchain-based supply chain system that was eventually replaced by a PostgreSQL database with audit logging — all participants were government departments that already trusted a central authority, so the consensus mechanism added latency and complexity with zero benefit.
+**What goes wrong**: teams adopt blockchain for internal systems where all parties trust a central authority, gaining none of the decentralization benefits while paying the full cost in throughput, complexity, and compliance risk. An Australian government agency spent AUD \$8.5M on a blockchain-based supply chain system that was eventually replaced by a PostgreSQL database with audit logging — all participants were government departments that already trusted a central authority, so the consensus mechanism added latency and complexity with zero benefit.
 
 **Why it happens**: blockchain is associated with innovation and security, making it attractive even when the problem doesn't require it.
 

@@ -1,13 +1,7 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
-level:
-  - "4"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:25.550+03:00
+modified: 2026-07-05T10:53:37.211+03:00
 ---
 
 # Intro
@@ -20,10 +14,10 @@ The core operators (`&` AND, `|` OR, `^` XOR, `~` NOT, `<<`/`>>` shifts) compose
 
 | Goal | Expression |
 |---|---|
-| Test bit *i* | `(x >> i) & 1` |
-| Set bit *i* | `x \| (1 << i)` |
-| Clear bit *i* | `x & ~(1 << i)` |
-| Toggle bit *i* | `x ^ (1 << i)` |
+| Test bit _i_ | `(x >> i) & 1` |
+| Set bit _i_ | `x \| (1 << i)` |
+| Clear bit _i_ | `x & ~(1 << i)` |
+| Toggle bit _i_ | `x ^ (1 << i)` |
 | Is power of two? | `x > 0 && (x & (x - 1)) == 0` |
 | Clear lowest set bit | `x & (x - 1)` |
 | Isolate lowest set bit | `x & (-x)` |
@@ -55,9 +49,9 @@ In .NET, prefer `[Flags]` enums and `System.Numerics.BitOperations` (`PopCount`,
 
 ## Pitfalls
 
-- **Signed shift surprises** — `>>` on a signed `int` is an *arithmetic* shift that copies the sign bit, so `-8 >> 1 == -4`, not a logical shift. Use unsigned types (`uint`/`ulong`) or `>>>` (C# 11 unsigned right shift) when you want zero-fill.
+- **Signed shift surprises** — `>>` on a signed `int` is an _arithmetic_ shift that copies the sign bit, so `-8 >> 1 == -4`, not a logical shift. Use unsigned types (`uint`/`ulong`) or `>>>` (C# 11 unsigned right shift) when you want zero-fill.
 - **Shift count overflow / width** — `1 << 31` overflows a signed `int` into negative; for a 32-bit mask use `1u << 31`, and for ≥ 32 bits use `1L`/`1UL`. Shifting by ≥ the type width is undefined-ish (in C# the count is masked to the bit width), a frequent off-by-one in bitset DP.
-- **Operator precedence** — `&`, `|`, `^` bind *looser* than `==` and `+`. `x & 1 == 0` parses as `x & (1 == 0)` and won't even compile against an int in C#; always parenthesise: `(x & 1) == 0`.
+- **Operator precedence** — `&`, `|`, `^` bind _looser_ than `==` and `+`. `x & 1 == 0` parses as `x & (1 == 0)` and won't even compile against an int in C#; always parenthesise: `(x & 1) == 0`.
 - **Readability cost** — clever bit tricks are write-once, read-never. Use them where they earn their keep (hot loops, flags, subset enumeration) and comment the intent; elsewhere a plain boolean or `HashSet` is clearer and just as fast.
 
 ## Tradeoffs

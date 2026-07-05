@@ -1,15 +1,9 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+publish: true
+created: 2026-07-05T10:54:06.812+03:00
+modified: 2026-07-05T17:36:35.301+03:00
 tags:
   - FolderNote
-publish: true
-level:
-  - '3'
-status: Done
-priority: High
 ---
 
 # Intro
@@ -23,9 +17,9 @@ Most production systems that people call "agents" are actually workflows — and
 
 ## The Augmented LLM
 
-The building block of every agentic system is an LLM enhanced with retrieval, [[11 AI & ML/LLM/Agents/Tools|tools]], and memory. The model generates its own search queries, selects appropriate tools, and decides what information to retain. Before building multi-step systems, invest in making this single building block work well — choose the right model, tune the prompts, and ensure tools have clear, well-documented interfaces.
+The building block of every agentic system is an LLM enhanced with retrieval, [[Tools]], and memory. The model generates its own search queries, selects appropriate tools, and decides what information to retain. Before building multi-step systems, invest in making this single building block work well — choose the right model, tune the prompts, and ensure tools have clear, well-documented interfaces.
 
-[[11 AI & ML/LLM/Agents/Model Context Protocol|Model Context Protocol (MCP)]] standardizes how an augmented LLM connects to external tools and data sources.
+[[Model Context Protocol|Model Context Protocol (MCP)]] standardizes how an augmented LLM connects to external tools and data sources.
 
 ## Workflow Patterns
 
@@ -83,7 +77,7 @@ flowchart TD
     S --> Out[Output]
 ```
 
-A central LLM dynamically decomposes the task, delegates subtasks to worker LLMs, and synthesizes results. The subtasks are not predefined — the orchestrator determines them based on the input. Topologically similar to parallelization, but the key difference is flexibility: workers and their tasks are determined at runtime. Anthropic's Research system uses this pattern — a lead agent spawning 3–5 subagents in parallel — and reports a 90.2% improvement over single-agent on their internal research eval. The dominant production pattern for complex coding and research tasks, and the bridge into [[11 AI & ML/LLM/Agents/Multi-Agentic Systems|Multi-Agentic Systems]].
+A central LLM dynamically decomposes the task, delegates subtasks to worker LLMs, and synthesizes results. The subtasks are not predefined — the orchestrator determines them based on the input. Topologically similar to parallelization, but the key difference is flexibility: workers and their tasks are determined at runtime. Anthropic's Research system uses this pattern — a lead agent spawning 3–5 subagents in parallel — and reports a 90.2% improvement over single-agent on their internal research eval. The dominant production pattern for complex coding and research tasks, and the bridge into [[Multi-Agentic Systems]].
 
 ### Evaluator-Optimizer
 
@@ -124,11 +118,12 @@ Agents are powerful but come with higher costs and compounding error risk. Each 
 
 Where agents work well today: coding tasks (verifiable via tests), customer support (measurable via resolution), and research tasks (structured by sources). The common thread is clear success criteria and feedback loops that let the agent assess its own progress. Measuring those criteria rigorously — task success, trajectory quality, tool-call correctness, and reliability across stochastic runs — is [[11 AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]].
 
-For patterns on coordinating multiple agents, see [[11 AI & ML/LLM/Agents/Multi-Agentic Systems|Multi-Agentic Systems]].
+For patterns on coordinating multiple agents, see [[Multi-Agentic Systems]].
 
 ## Questions
 
 > [!QUESTION]- When should you use a workflow instead of an autonomous agent?
+>
 > - Use a workflow when the task decomposes into predictable steps with clear inputs and outputs at each stage
 > - Workflows are cheaper, faster, and more debuggable than autonomous agents
 > - Use an autonomous agent only when steps are unpredictable, the task is open-ended, and you have feedback mechanisms (tests, eval criteria) to catch errors

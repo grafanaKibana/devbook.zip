@@ -1,15 +1,9 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
+publish: true
+created: 2026-07-05T10:53:27.155+03:00
+modified: 2026-07-05T10:53:37.202+03:00
 tags:
   - FolderNote
-publish: true
-status: Creation
-priority: Medium
-level:
-  - '4'
 ---
 
 # Intro
@@ -66,18 +60,21 @@ Console.WriteLine(h.Counter.Value); // 1
 ## Questions
 
 > [!QUESTION]- Why can updating a value-type item inside `foreach` fail to persist, and what are safe fixes?
+>
 > - The loop variable was a copy of a value type, so mutations were applied to the copy.
 > - The same issue appears when mutating structs returned by properties, because property access often returns a copy.
 > - Fix by making the struct immutable and replacing whole values, or by redesigning to avoid mutable structs in those paths.
 > - If mutation is required, use APIs with explicit `ref` semantics very carefully.
 
 > [!QUESTION]- Where does boxing usually sneak in, and what is the practical mitigation in production code?
+>
 > - Boxing happens when a value type is converted to `object` or interface-typed APIs.
 > - Each boxing operation allocates and can increase GC pressure in hot paths.
 > - Prefer generic APIs (`List<T>`, `EqualityComparer<T>`, generic interfaces) so calls stay strongly typed.
 > - Verify with profiling before optimizing, then remove high-frequency boxing boundaries.
 
 > [!QUESTION]- What criteria should drive choosing between `struct`, `class`, and `record class`?
+>
 > - Use `struct` for tiny immutable value objects when copy semantics are desired and boxing is controlled.
 > - Use `class` for identity-rich entities where reference identity and lifecycle matter.
 > - Use `record class` for data-centric models where value-based equality improves correctness.

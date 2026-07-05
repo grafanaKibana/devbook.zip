@@ -1,19 +1,12 @@
 ---
-topic:
-  - Networks
-subtopic:
-  - Protocols
-level:
-  - "3"
-priority: High
-status: Ready to Repeat
-
 publish: true
+created: 2026-07-05T10:53:36.570+03:00
+modified: 2026-07-05T15:49:32.782+03:00
 ---
 
 # Intro
 
-gRPC is a remote procedure call framework that runs over [[04 Networks/Protocols/HTTP 2|HTTP 2]] and uses Protocol Buffers for message serialization by default. You reach for it when you control both client and server and want strong contracts, fast binary payloads, and first-class streaming — the typical case for internal service-to-service communication in microservices. What makes gRPC distinct from REST is not just performance: it gives you code-generated clients in any language, four streaming patterns, built-in deadline propagation, and a contract-first workflow where the `.proto` file is the API specification.
+gRPC is a remote procedure call framework that runs over [[HTTP 2]] and uses Protocol Buffers for message serialization by default. You reach for it when you control both client and server and want strong contracts, fast binary payloads, and first-class streaming — the typical case for internal service-to-service communication in microservices. What makes gRPC distinct from REST is not just performance: it gives you code-generated clients in any language, four streaming patterns, built-in deadline propagation, and a contract-first workflow where the `.proto` file is the API specification.
 
 In production, gRPC design is about deadlines, load balancing awareness, proto versioning discipline, and observability — not just defining a service.
 
@@ -161,7 +154,7 @@ var channel = GrpcChannel.ForAddress(address, new GrpcChannelOptions
 });
 ```
 
-Only retry **idempotent** methods on safe codes (`Unavailable`, `ResourceExhausted`) — retrying a non-idempotent write on an ambiguous failure can double-apply it (the [[04 Networks/Protocols/RPC|RPC delivery-semantics]] problem). **Hedging** (fire parallel attempts, take the first success) is the latency-focused alternative for read-only calls.
+Only retry **idempotent** methods on safe codes (`Unavailable`, `ResourceExhausted`) — retrying a non-idempotent write on an ambiguous failure can double-apply it (the [[RPC|RPC delivery-semantics]] problem). **Hedging** (fire parallel attempts, take the first success) is the latency-focused alternative for read-only calls.
 
 ## Pitfalls
 
@@ -215,6 +208,7 @@ message UserRequest {
 
 > [!QUESTION]- Why does gRPC not work well with L4 load balancers, and how do you fix it?
 > **Expected answer:**
+>
 > - gRPC multiplexes all calls over a single HTTP/2 TCP connection.
 > - L4 load balancers distribute at the TCP connection level — they cannot see individual HTTP/2 streams within that connection.
 > - All calls from one client land on the same backend, defeating load distribution.
@@ -224,6 +218,7 @@ message UserRequest {
 
 > [!QUESTION]- What happens if you call a gRPC service without setting a deadline?
 > **Expected answer:**
+>
 > - The call has no timeout and can hang indefinitely.
 > - Resources (threads, sockets, memory) on both client and server are consumed with no bound.
 > - In a microservice chain, one hanging call can exhaust connection pools upstream, causing cascading failures across services.
@@ -234,6 +229,7 @@ message UserRequest {
 
 > [!QUESTION]- Why is renaming a proto field safe but renumbering it is not?
 > **Expected answer:**
+>
 > - Protobuf binary encoding uses the field **number** as the wire identifier, not the name.
 > - Renaming a field changes only the generated code accessor — the wire format is unchanged, so old and new clients interoperate seamlessly.
 > - Renumbering changes the wire identity — old clients sending the old number will have their data silently interpreted as the new field by the updated server.

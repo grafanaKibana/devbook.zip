@@ -1,15 +1,9 @@
 ---
-topic:
-  - Security
-subtopic:
-  - Authentication
+publish: true
+created: 2026-07-05T10:54:04.349+03:00
+modified: 2026-07-05T10:54:04.350+03:00
 tags:
   - FolderNote
-publish: true
-priority: High
-level:
-  - '4'
-status: Creation
 ---
 
 # Intro

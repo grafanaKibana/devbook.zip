@@ -1,14 +1,7 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
-level:
-  - "4"
-priority: High
-status: Ready to Repeat
-
 publish: true
+created: 2026-07-05T10:53:26.772+03:00
+modified: 2026-07-05T17:36:34.313+03:00
 ---
 
 # Intro
@@ -80,7 +73,7 @@ public class MyClass
 }
 ```
 
-In this example, the class member `_id` is **captured** by the anonymous method and, as a result, the class instance ends up holding a reference to itself. This means that as long as `_jobQueue` exists and references the anonymous delegate, it [`_jobQueue`] also references the `MyClass` instance.
+In this example, the class member `_id` is **captured** by the anonymous method and, as a result, the class instance ends up holding a reference to itself. This means that as long as `_jobQueue` exists and references the anonymous delegate, it \[`_jobQueue`] also references the `MyClass` instance.
 
 The fix here is simple: use a local variable instead:
 
@@ -109,7 +102,7 @@ public class MyClass
 
 If you copy the value into a local variable, the class member will not be captured and you will prevent the leak.
 
-***Note:** if the root cause of the leak in this case is not entirely clear, take a look at [this comment](https://habr.com/ru/post/589005/#comment_23709379).*
+_**Note:** if the root cause of the leak in this case is not entirely clear, take a look at [this comment](https://habr.com/ru/post/589005/#comment_23709379)._
 
 ### Static variables
 
@@ -226,7 +219,7 @@ public string SomeText
 
 In fact, it does not even matter whether you raise `PropertyChanged` or not; the key point is that the class implements `INotifyPropertyChanged`. This tells the WPF infrastructure not to create a strong reference.
 
-*Memory leaks occur only when the binding mode is* `OneWay` *or* `TwoWay`*. If the binding uses* `OneTime` *or* `OneWayToSource`*, there is no problem.*
+_Memory leaks occur only when the binding mode is_ `OneWay` _or_ `TwoWay`_. If the binding uses_ `OneTime` _or_ `OneWayToSource`_, there is no problem._
 
 Memory leaks in WPF can also happen when binding collections. If the collection does not implement `INotifyCollectionChanged`, you will get a memory leak. You can avoid the problem by using `ObservableCollection`, which implements this interface.
 
@@ -290,7 +283,7 @@ public class SomeClass : IDisposable
 }
 ```
 
-*Unmanaged memory leaks can be even worse than managed leaks due to [fragmentation](https://stackoverflow.com/questions/3770457/what-is-memory-fragmentation). The GC can defragment managed memory by moving surviving objects next to each other to free space for new allocations. Unmanaged memory, on the other hand, stays tied to the location where it was allocated.*
+_Unmanaged memory leaks can be even worse than managed leaks due to [fragmentation](https://stackoverflow.com/questions/3770457/what-is-memory-fragmentation). The GC can defragment managed memory by moving surviving objects next to each other to free space for new allocations. Unmanaged memory, on the other hand, stays tied to the location where it was allocated._
 
 ### Dispose not called
 
@@ -375,17 +368,17 @@ But keep in mind that Microsoft's `Dispose` pattern is not a silver bullet. If y
 The classic eight above predate today's stacks. The leaks (and pseudo-leaks) most teams actually hit now:
 
 - **`HttpClient` socket exhaustion** — `new HttpClient()` per request doesn't leak managed memory, but it leaks **sockets**: each disposed client leaves a connection in `TIME_WAIT`, eventually exhausting ports (`SocketException`). Use `IHttpClientFactory` (or a single long-lived static client) so connections are pooled.
-- **DI captive dependencies** — injecting a *scoped* (or transient `IDisposable`) service into a **singleton** pins the shorter-lived object for the app's lifetime. Equivalent to a static reference. Enable scope validation and resolve scoped services via `IServiceScopeFactory` from singletons. See [[01 Programming/NET/ASP.NET Web API/Dependency Injection|Dependency Injection]].
+- **DI captive dependencies** — injecting a _scoped_ (or transient `IDisposable`) service into a **singleton** pins the shorter-lived object for the app's lifetime. Equivalent to a static reference. Enable scope validation and resolve scoped services via `IServiceScopeFactory` from singletons. See [[01 Programming/NET/ASP.NET Web API/Dependency Injection|Dependency Injection]].
 - **Pooled buffers never returned** — renting from `ArrayPool<T>.Shared` / `MemoryPool<T>` and not returning (or returning then continuing to use) the buffer defeats the pool and grows retained memory.
 - **`AsyncLocal<T>` / `ThreadLocal<T>` retention** — values stored in ambient state flow into captured contexts and can outlive their intended scope, keeping large graphs alive. Clear them at the end of the logical operation.
 - **Tasks that never complete** — an `await`ed `TaskCompletionSource` that is never `SetResult`/`SetCanceled` keeps the entire async state machine (and everything it captured) alive forever. Always complete or time out every TCS.
-- **`ConditionalWeakTable<TKey,TValue>`** is the right tool when you must attach state to an object *without* keeping it alive — the value is collected once the key is unreachable (also how weak-event patterns avoid the event-handler leak above).
+- **`ConditionalWeakTable<TKey,TValue>`** is the right tool when you must attach state to an object _without_ keeping it alive — the value is collected once the key is unreachable (also how weak-event patterns avoid the event-handler leak above).
 
 ### Diagnosing in production
 
 - **`dotnet-gcdump collect`** captures a managed heap graph cheaply (no full process dump). The high-signal workflow is a **two-snapshot delta**: take one gcdump, apply load, take a second, and compare retained-type counts — the types that grew are your leak.
 - **`dotnet-counters monitor System.Runtime`** to watch `gc-heap-size`, `gen-2-gc-count`, and GC-handle counts climb in real time; alert before OOM.
-- **`dotnet-trace`** for allocation/event tracing when you need to find *where* the allocations originate, then `gcroot <address>` (in `dotnet-dump analyze`) to trace a leaked instance back to the root that holds it — the root is where the fix goes.
+- **`dotnet-trace`** for allocation/event tracing when you need to find _where_ the allocations originate, then `gcroot <address>` (in `dotnet-dump analyze`) to trace a leaked instance back to the root that holds it — the root is where the fix goes.
 
 ## Tradeoffs
 
@@ -403,6 +396,7 @@ The classic eight above predate today's stacks. The leaks (and pseudo-leaks) mos
 > [!QUESTION]- What is a memory leak? Is it possible in .NET? How?
 > A memory leak is memory that is no longer needed but cannot be reclaimed, so the process keeps growing over time.
 > Yes, it is possible in .NET:
+>
 > - Managed leaks: objects stay reachable (for example via static caches, event subscriptions, long-lived collections), so GC cannot collect them.
 > - Unmanaged leaks: native memory/handles are allocated (directly or indirectly) and not released (for example, missing `Dispose()` / `using`).
 

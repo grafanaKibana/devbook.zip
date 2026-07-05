@@ -1,20 +1,14 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
-level:
-  - "3"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:23.290+03:00
+modified: 2026-07-05T15:49:34.992+03:00
 ---
 
 # Intro
 
 A disjoint set (also called a union-find structure) tracks a collection of elements partitioned into disjoint (non-overlapping) sets. Each set has a single **representative** (canonical element) that identifies it. The structure answers one core question — "do these two elements belong to the same set?" — while letting you merge sets over time. .NET has no built-in disjoint-set type — you implement it with two `int[]` arrays (parent and rank/size), as shown below.
 
-This note covers the **data structure** itself: how the sets are represented in memory and the cost of its operations. The optimizations that make those operations near-constant time (path compression, union by rank) and the analysis behind them live in the [[02 Computer Science/Algorithms/Union-Find|Union-Find]] algorithm note.
+This note covers the **data structure** itself: how the sets are represented in memory and the cost of its operations. The optimizations that make those operations near-constant time (path compression, union by rank) and the analysis behind them live in the [[Union-Find]] algorithm note.
 
 ## How It Works
 
@@ -82,7 +76,7 @@ public class DisjointSet
 }
 ```
 
-The two lines doing the real work — `_parent[x] = Find(_parent[x])` (path compression) and the rank comparison (union by rank) — are *algorithmic* optimizations. Why they reduce the cost to near-constant time is explained in the [[02 Computer Science/Algorithms/Union-Find|Union-Find]] note.
+The two lines doing the real work — `_parent[x] = Find(_parent[x])` (path compression) and the rank comparison (union by rank) — are _algorithmic_ optimizations. Why they reduce the cost to near-constant time is explained in the [[Union-Find]] note.
 
 ## Complexity
 

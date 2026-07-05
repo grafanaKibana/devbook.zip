@@ -1,13 +1,7 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
-level:
-  - "4"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:27.255+03:00
+modified: 2026-07-05T10:53:37.175+03:00
 ---
 
 # Intro
@@ -15,6 +9,7 @@ publish: true
 A namespace is a logical scope for organizing types (classes, structs, interfaces, enums, delegates) in C#. It prevents naming collisions and makes large solutions easier to navigate by grouping related code into a clear, discoverable API surface. Encapsulation and versioning boundaries come from assemblies and access modifiers, not namespaces.
 
 Namespaces provide:
+
 1. Disambiguation for type names (`User` can exist in multiple namespaces)
 2. Logical modularization of large codebases
 3. Better readability and discoverability in tooling
@@ -48,8 +43,8 @@ public static class MathUtility
 
 - **Type/namespace alias** — disambiguate or shorten: `using Json = System.Text.Json;` then `Json.JsonSerializer`.
 - **`using static`** — import a type's static members directly: `using static System.Math;` lets you write `Sqrt(x)` instead of `Math.Sqrt(x)`.
-- **Alias *any* type (C# 12)** — including tuples, arrays, and generics: `using Point = (int X, int Y);` or `using IntList = System.Collections.Generic.List<int>;`.
-- **`extern alias`** — the heavy hammer for the rare case where two referenced assemblies expose the *same* fully-qualified type. You assign each reference an alias in the project file and qualify with `extern alias OldSql;` / `OldSql::System.Data.SqlClient.SqlConnection`.
+- **Alias _any_ type (C# 12)** — including tuples, arrays, and generics: `using Point = (int X, int Y);` or `using IntList = System.Collections.Generic.List<int>;`.
+- **`extern alias`** — the heavy hammer for the rare case where two referenced assemblies expose the _same_ fully-qualified type. You assign each reference an alias in the project file and qualify with `extern alias OldSql;` / `OldSql::System.Data.SqlClient.SqlConnection`.
 
 Name resolution searches from the **most-nested** namespace outward, so a type in the current namespace shadows a same-named type in an outer one.
 

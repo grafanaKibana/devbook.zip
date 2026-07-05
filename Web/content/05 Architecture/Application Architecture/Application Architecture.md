@@ -1,15 +1,9 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Application Architecture
+publish: true
+created: 2026-07-05T10:53:43.306+03:00
+modified: 2026-07-05T10:53:43.306+03:00
 tags:
   - FolderNote
-publish: true
-priority: High
-level:
-  - '4'
-status: Creation
 ---
 
 # Intro

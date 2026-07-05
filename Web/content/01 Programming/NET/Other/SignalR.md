@@ -1,13 +1,7 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
-level:
-  - "3"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:26.726+03:00
+modified: 2026-07-05T10:53:37.144+03:00
 ---
 
 # Intro
@@ -71,7 +65,7 @@ public sealed class PriceUpdater(IHubContext<PriceHub> hub)
 ### Streaming and client results
 
 - **Streaming**: a hub method returning `IAsyncEnumerable<T>` (or accepting a `ChannelReader<T>`) streams items incrementally instead of one big payload — good for live feeds and large transfers with backpressure.
-- **Client results (.NET 7+)**: the server can *invoke a method on a client and await its return value* with `Clients.Client(id).InvokeAsync<T>(...)` — turning the normally fire-and-forget push into a request/response.
+- **Client results (.NET 7+)**: the server can _invoke a method on a client and await its return value_ with `Clients.Client(id).InvokeAsync<T>(...)` — turning the normally fire-and-forget push into a request/response.
 
 ### Connection lifecycle
 
@@ -94,16 +88,19 @@ Override `OnConnectedAsync` / `OnDisconnectedAsync` to manage group membership a
 ## Questions
 
 > [!QUESTION]- When is SignalR a good fit?
+>
 > - Use SignalR when clients need server-pushed updates with low latency (chat, collaboration, live telemetry).
 > - It is most valuable when update frequency is high enough that polling wastes bandwidth or increases staleness.
 > - If updates are rare and latency tolerance is high, simpler HTTP polling can be cheaper to operate.
 
 > [!QUESTION]- What is the first scaling problem you will hit?
+>
 > - Cross-node message fan-out: messages sent on one server do not automatically reach clients connected to another node.
 > - Plan scale-out early with Azure SignalR Service or a supported backplane, then validate routing under load tests.
 > - Also validate sticky-session requirements for your chosen topology and transport strategy.
 
 > [!QUESTION]- Why are SignalR groups not enough for authorization?
+>
 > - Groups control message routing, not permission checks.
 > - Membership can change/rejoin over reconnect paths, so relying on groups alone risks privilege drift.
 > - Enforce security with authentication and policy/role-based authorization on hub methods.

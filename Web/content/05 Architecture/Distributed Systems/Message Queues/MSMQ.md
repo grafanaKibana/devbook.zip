@@ -1,13 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Distributed Systems
-level:
-  - "2"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:43.320+03:00
+modified: 2026-07-05T15:49:36.254+03:00
 ---
 
 # MSMQ
@@ -48,11 +42,12 @@ In .NET 5+, `System.Messaging` is not available. Use the community `MSMQ.Messagi
 ## When to Use MSMQ Today
 
 MSMQ is appropriate only when:
+
 - The system already uses MSMQ and migration cost is not justified.
 - The environment is on-premise Windows with no cloud connectivity.
 - MSDTC-based distributed transactions are required and cannot be replaced with Saga/Outbox patterns.
 
-For all new systems, prefer Azure Service Bus (cloud), RabbitMQ (self-hosted cross-platform), or Kafka (high-throughput streaming). See [[05 Architecture/Distributed Systems/Message Queues/RabbitMQ|RabbitMQ]] and [[05 Architecture/Distributed Systems/Message Queues/Kafka|Kafka]] for modern alternatives.
+For all new systems, prefer Azure Service Bus (cloud), RabbitMQ (self-hosted cross-platform), or Kafka (high-throughput streaming). See [[RabbitMQ]] and [[Kafka]] for modern alternatives.
 
 ## Pitfalls
 
@@ -88,7 +83,7 @@ For all new systems, prefer Azure Service Bus (cloud), RabbitMQ (self-hosted cro
 > The message is removed from the queue **only if the transaction commits**. You `Begin` a `MessageQueueTransaction`, `Receive` under it, process the message, then `Commit`. If processing throws, you `Abort` and the message is **returned to the queue** for retry. This is the local-transaction equivalent of an ack: a crash mid-processing leaves the message available rather than consumed-and-lost (the same guarantee modern brokers give via manual ack / visibility timeout).
 
 > [!QUESTION]- What replaces MSMQ's MSDTC distributed transactions today?
-> The **Outbox pattern**: write the outgoing message to a table in the *same* local DB transaction as the domain change, then a background relay publishes it to the broker with retries (at-least-once + idempotent consumers). For multi-step cross-service workflows, a **Saga** with compensating transactions. Both avoid MSDTC's coordinator fragility — see [[05 Architecture/Distributed Systems/Distributed Transactions|Distributed Transactions]].
+> The **Outbox pattern**: write the outgoing message to a table in the _same_ local DB transaction as the domain change, then a background relay publishes it to the broker with retries (at-least-once + idempotent consumers). For multi-step cross-service workflows, a **Saga** with compensating transactions. Both avoid MSDTC's coordinator fragility — see [[Distributed Transactions]].
 
 ## Receive with Transaction Example
 
@@ -113,7 +108,7 @@ catch
 ## References
 
 - [System.Messaging namespace (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.messaging) — API reference for the .NET Framework MSMQ client; note this is not available in .NET 5+.
-- [Message Queuing (MSMQ) overview (Microsoft Learn)](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/msmq/ms711472(v=vs.85)) — Windows MSMQ architecture, queue types, and transactional messaging.
-- [[05 Architecture/Distributed Systems/Message Queues/RabbitMQ|RabbitMQ]] — the standard modern alternative for on-premise or self-hosted message brokering; cross-platform, actively maintained.
+- [Message Queuing (MSMQ) overview (Microsoft Learn)](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/msmq/ms711472\(v=vs.85\)) — Windows MSMQ architecture, queue types, and transactional messaging.
+- [[RabbitMQ]] — the standard modern alternative for on-premise or self-hosted message brokering; cross-platform, actively maintained.
 - [Outbox pattern (Microsoft Azure Architecture Center)](https://learn.microsoft.com/en-us/azure/architecture/best-practices/transactional-outbox-cosmos) — the modern replacement for MSDTC-based distributed transactions: write message to DB in the same transaction as the domain change, then relay to the broker.
 - [Azure Service Bus overview (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-messaging-overview) — the cloud-managed successor to MSMQ for Azure-hosted systems; supports sessions, dead-lettering, and scheduled delivery.

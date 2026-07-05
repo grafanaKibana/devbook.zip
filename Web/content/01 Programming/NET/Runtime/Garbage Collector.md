@@ -1,14 +1,7 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
-level:
-  - "4"
-priority: High
-status: Ready to Repeat
-
 publish: true
+created: 2026-07-05T10:53:26.748+03:00
+modified: 2026-07-05T10:53:37.145+03:00
 ---
 
 # Intro
@@ -30,7 +23,7 @@ Each managed process has its own managed heap. All threads in the process alloca
 To reserve memory, the garbage collector calls the OS (`VirtualAlloc` on Windows, `mmap` on Linux) and releases it back (`VirtualFree`/`munmap`) after clearing objects.
 
 > [!INFO]
-> **Segments vs regions.** The "one large segment per heap" model described here is the *legacy* layout. Since **.NET 7** the GC uses **regions** instead — many small, fixed-size regions that the GC assigns to generations independently. This makes it far cheaper to give memory back to the OS and to rebalance generations, but the mental model (Gen 0/1/2 + LOH, mark/compact) is unchanged. Treat "segment" below as "the memory the GC manages," not a literal contiguous block on modern runtimes.
+> **Segments vs regions.** The "one large segment per heap" model described here is the _legacy_ layout. Since **.NET 7** the GC uses **regions** instead — many small, fixed-size regions that the GC assigns to generations independently. This makes it far cheaper to give memory back to the OS and to rebalance generations, but the mental model (Gen 0/1/2 + LOH, mark/compact) is unchanged. Treat "segment" below as "the memory the GC manages," not a literal contiguous block on modern runtimes.
 
 > [!TIP]
 > 🚨 The size of segments allocated by the garbage collector is implementation-dependent and can change at any time, including in periodic updates. An application should not make assumptions about the size of a particular segment, rely on it, or attempt to tune the amount of memory available for segment allocations.
@@ -48,7 +41,7 @@ You can think of the heap as consisting of two heaps: the [Large Object Heap](ht
 
 ## Reclaiming memory
 
-The GC optimization mechanism determines the best time to run a collection based on allocation activity. When the GC runs, it reclaims memory allocated for objects that are no longer used by the application. It determines which objects are no longer used by analyzing the application's *roots*. Application roots include static fields, local variables on thread stacks, CPU registers, GC handles, and the finalization queue. Each root either references an object on the managed heap or has a NULL value. The GC can ask the rest of the runtime for these roots. The GC uses this list to build a graph containing all objects reachable from the roots.
+The GC optimization mechanism determines the best time to run a collection based on allocation activity. When the GC runs, it reclaims memory allocated for objects that are no longer used by the application. It determines which objects are no longer used by analyzing the application's _roots_. Application roots include static fields, local variables on thread stacks, CPU registers, GC handles, and the finalization queue. Each root either references an object on the managed heap or has a NULL value. The GC can ask the rest of the runtime for these roots. The GC uses this list to build a graph containing all objects reachable from the roots.
 
 Objects that are not in the graph are unreachable from the application's roots. The GC considers unreachable objects to be garbage and reclaims the memory allocated for them. During a collection, the GC inspects the managed heap, looking for blocks of address space occupied by unreachable objects. When it finds unreachable objects, it uses memory copying to compact reachable objects in memory, freeing the address space previously occupied by unreachable objects. After compaction, the GC updates references so that application roots point to the new locations of objects. It also sets the managed heap pointer to the position after the last reachable object.
 
@@ -126,17 +119,17 @@ graph LR
 Most objects die young in Gen 0 and never promote. A Gen 0 collection typically takes <1 ms. Gen 1 runs less frequently and takes 1-10 ms. Gen 2 is the expensive one: a full blocking Gen 2 can pause all managed threads for 100-500 ms on heaps larger than 2 GB. Background GC mitigates this by running the Gen 2 mark concurrently, reducing application-visible pauses to 1-10 ms in most workloads — but the sweep phase still requires a brief suspension.
 
 1. **Mark phase - marking live objects**
-    1. **Start of garbage collection:** The garbage collector starts from a set of references known as **roots**. These are memory locations that, for various reasons, must always be accessible and that contain references to objects created by the application. This can include CPU registers, thread call stacks, static variables, and other memory locations holding object references. The GC marks these objects as "live".
-    2. **Graph walk and marking:** The GC walks all objects referenced by roots, marking them as "live". It then recursively repeats this process for objects referenced by already-marked objects until it has visited all objects reachable from the roots.
-    3. **"Live" object criteria:** An object is considered "live" if it is referenced from the root set or from other "live" objects. The GC treats an object as a reference type if it has a field that contains a reference to another object.
+   1. **Start of garbage collection:** The garbage collector starts from a set of references known as **roots**. These are memory locations that, for various reasons, must always be accessible and that contain references to objects created by the application. This can include CPU registers, thread call stacks, static variables, and other memory locations holding object references. The GC marks these objects as "live".
+   2. **Graph walk and marking:** The GC walks all objects referenced by roots, marking them as "live". It then recursively repeats this process for objects referenced by already-marked objects until it has visited all objects reachable from the roots.
+   3. **"Live" object criteria:** An object is considered "live" if it is referenced from the root set or from other "live" objects. The GC treats an object as a reference type if it has a field that contains a reference to another object.
 2. **Move phase**
-    1. **Updating references to compacted objects:** After the GC determines which objects are "live", the move phase begins. In this phase, the GC moves "live" objects so they occupy a contiguous region of memory. During this process, the GC updates all references to these objects so they point to the new memory addresses after the move.
+   1. **Updating references to compacted objects:** After the GC determines which objects are "live", the move phase begins. In this phase, the GC moves "live" objects so they occupy a contiguous region of memory. During this process, the GC updates all references to these objects so they point to the new memory addresses after the move.
 3. **Compact phase**
-    1. **Freeing space and compacting survivors:** After moving "live" objects into a contiguous memory block, the GC frees memory occupied by unused objects. The freed space can then be used for new objects. The GC also compacts surviving objects to reduce memory fragmentation.
+   1. **Freeing space and compacting survivors:** After moving "live" objects into a contiguous memory block, the GC frees memory occupied by unused objects. The freed space can then be used for new objects. The GC also compacts surviving objects to reduce memory fragmentation.
 
 ## Root objects
 
-To understand how the garbage collector decides when an object is no longer needed, you need to know what *application roots* are. Simply put, a *root* is a memory slot that contains a reference to an object located on the heap.
+To understand how the garbage collector decides when an object is no longer needed, you need to know what _application roots_ are. Simply put, a _root_ is a memory slot that contains a reference to an object located on the heap.
 
 Strictly speaking, roots can include:
 
@@ -144,31 +137,30 @@ Strictly speaking, roots can include:
 - References to any static objects or static fields.
 - References to local objects within the application's codebase.
 - References to object parameters passed to methods.
-- References to an object awaiting *finalization*.
+- References to an object awaiting _finalization_.
 - Any CPU registers that reference an object.
 
 ## Object generations
 
 When trying to find unreachable objects, the CLR does not literally inspect every object on the heap each time. Obviously, that would take a lot of time, especially in large projects.
 
-To optimize the process, each object on the heap belongs to a specific *"generation"*.
+To optimize the process, each object on the heap belongs to a specific _"generation"_.
 
 The idea behind generations is fairly simple:
 
 > The longer an object stays on the heap, the more likely it is to remain there.
-> 
 
 For example, a class defined in the main window of a desktop application may remain in memory until the program exits. On the other hand, an object that was allocated very recently (for example, one that is only in method scope) is likely to become unreachable fairly quickly. Based on these assumptions, each object on the heap belongs to:
 
-- *Generation 0.* Identifies a new object that has just been allocated and has not yet survived a garbage collection.
-- *Generation 1.* Identifies an object that has already survived one garbage collection.
-- *Generation 2.* Identifies an object that has survived more than one garbage collection.
+- _Generation 0._ Identifies a new object that has just been allocated and has not yet survived a garbage collection.
+- _Generation 1._ Identifies an object that has already survived one garbage collection.
+- _Generation 2._ Identifies an object that has survived more than one garbage collection.
 
 The GC first analyzes all objects that belong to generation 0. If, after collecting Gen 0, there is enough memory, all surviving objects are promoted to Gen 1. If Gen 0 has been collected but additional space is still required, the GC will also collect Gen 1. Objects that survive Gen 1 become Gen 2 objects. If the GC still needs memory, it will perform a Gen 2 collection. Since there are no generations above Gen 2, the generation of surviving objects does not increase further. From this, you can conclude that newer objects tend to be collected faster than older ones.
 
 ### Card tables and write barriers
 
-A Gen 0 collection must *not* scan all of Gen 2 to find roots — that would defeat the point of generations. But an old object can reference a young one (e.g. a long-lived cache holding a freshly created entry). The GC solves this with a **write barrier**: every reference-type field assignment runs a tiny piece of JIT-emitted code that marks the corresponding **card** (a small range of the old heap) as dirty in a **card table**. An ephemeral (Gen 0/1) collection then scans only the dirty cards for old→young references, treating them as extra roots. This is why reference assignments cost slightly more than value writes, and why allocation-heavy code with many old→young links raises GC cost.
+A Gen 0 collection must _not_ scan all of Gen 2 to find roots — that would defeat the point of generations. But an old object can reference a young one (e.g. a long-lived cache holding a freshly created entry). The GC solves this with a **write barrier**: every reference-type field assignment runs a tiny piece of JIT-emitted code that marks the corresponding **card** (a small range of the old heap) as dirty in a **card table**. An ephemeral (Gen 0/1) collection then scans only the dirty cards for old→young references, treating them as extra roots. This is why reference assignments cost slightly more than value writes, and why allocation-heavy code with many old→young links raises GC cost.
 
 ### Boxing as a hidden allocation source
 

@@ -1,13 +1,7 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - Machine Learning
-level:
-  - "3"
-priority: Medium
-status: Done
 publish: true
+created: 2026-07-05T10:54:06.762+03:00
+modified: 2026-07-05T10:54:06.763+03:00
 ---
 
 # Intro
@@ -123,6 +117,7 @@ When extending precision/recall to multi-class problems, the averaging method ch
 > Optimize precision when false positives are expensive: blocking legitimate users (and churning them), flooding a manual review queue with false alarms, or triggering expensive downstream actions (automated account lockouts). Optimize recall when misses are dangerous: fraud slipping through, safety violations in content moderation (regulatory exposure), or medical screening (missed diagnosis). Operationalize by setting a hard constraint on the priority metric (e.g., "recall ≥ 0.95"), then maximizing the other. Freeze the threshold and monitor both metrics daily with alerting on ≥5% drift.
 
 > [!QUESTION]- How do you pick a classification threshold in practice?
+>
 > 1. Define the business constraint: "recall must be ≥ 0.95" or "FP rate must be ≤ 0.02." 2. Plot the precision-recall curve on a held-out validation set. 3. Find the threshold that satisfies your constraint while maximizing the complementary metric. 4. Validate on a separate golden test set (not the validation set used for selection). 5. Freeze the threshold in production config (not hardcoded). 6. Set up monitoring: if the metric drops ≥5% on weekly golden-set runs, trigger re-evaluation. A static threshold degrades as the data distribution shifts, so schedule quarterly threshold reviews or move to dynamic thresholding with confidence calibration.
 
 ## References

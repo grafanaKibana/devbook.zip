@@ -1,16 +1,9 @@
 ---
-topic:
-  - Data Persistence
-subtopic:
-  - NoSQL
-level:
-  - "3"
-status: Done
+publish: true
+created: 2026-07-05T10:53:40.602+03:00
+modified: 2026-07-05T10:53:40.602+03:00
 tags:
   - FolderNote
-
-publish: true
-priority: High
 ---
 
 # Intro
@@ -76,18 +69,21 @@ Document store example: a product page is an aggregate, so store it as one docum
 ## Questions
 
 > [!QUESTION]- Which NoSQL family fits a user-profile API with very frequent reads by user id?
+>
 > - Key-value or document store, because the access pattern is dominated by point reads on a single id.
 > - Use key-value if it is almost entirely get/put by id with no rich querying.
 > - Use document if you read/update an aggregate (profile + preferences) and occasionally query a few indexed fields.
 > - Key-value gives the simplest, fastest id lookups but no secondary queries; the document store adds query flexibility at some indexing and storage cost.
 
 > [!QUESTION]- When is NoSQL a bad idea?
+>
 > - When the core use case needs relational constraints and multi-entity ACID transactions, or queries are fundamentally join-heavy.
 > - Forcing those onto NoSQL pushes join logic and consistency into application code, which is error-prone.
 > - Often the better move is to keep SQL and add caching, read replicas, or a denormalized read model.
 > - NoSQL trades joins and strong consistency for scale and flexible schemas — if you need the former, that trade is a net loss.
 
 > [!QUESTION]- Why does NoSQL push you toward denormalization and data duplication?
+>
 > - Without joins, the cheapest read is one that fetches a whole aggregate in a single hit.
 > - So you model data per query, duplicating fields across documents/rows instead of normalizing them once.
 > - That makes reads fast and partition-friendly but means a single logical change may touch many copies.

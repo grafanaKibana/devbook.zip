@@ -1,20 +1,14 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Patterns
-level:
-  - "4"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:43.306+03:00
+modified: 2026-07-05T15:49:35.046+03:00
 ---
 
 # CQS — Command-Query Separation
 
 Command-Query Separation (CQS) is a design principle that says every method should be either a **command** (changes state, returns void) or a **query** (returns data, has no side effects) — never both. Coined by Bertrand Meyer, it makes code easier to reason about: if a method returns a value, you can call it freely without worrying about side effects; if it changes state, you know it won't return data you depend on. In a 200-endpoint e-commerce API, applying CQS to the repository layer made it immediately clear which methods could be safely retried, cached, or called in parallel (queries) and which required idempotency guards and transaction boundaries (commands) — cutting the time to diagnose a double-charge bug from hours of tracing to minutes of checking command call sites.
 
-CQS is a method-level principle. [[05 Architecture/Patterns/Architectural Patterns/CQRS|CQRS]] (Command-Query Responsibility Segregation) applies the same idea at the architectural level — separate read and write models, separate data stores, separate code paths.
+CQS is a method-level principle. [[CQRS]] (Command-Query Responsibility Segregation) applies the same idea at the architectural level — separate read and write models, separate data stores, separate code paths.
 
 ## The Principle in Practice
 
@@ -61,7 +55,7 @@ The principle is a guideline, not a law. Apply it where it improves clarity; rel
 | Data store | Single shared store | Often separate read/write stores |
 | Complexity | Low | High |
 
-CQS is a prerequisite mindset for CQRS. If you're applying CQRS, you're already following CQS at the method level. See [[05 Architecture/Patterns/Architectural Patterns/CQRS|CQRS]] for the architectural pattern.
+CQS is a prerequisite mindset for CQRS. If you're applying CQRS, you're already following CQS at the method level. See [[CQRS]] for the architectural pattern.
 
 ## CQS in a Repository
 
@@ -108,5 +102,5 @@ The query methods can be called freely in any order without side effects. The co
 ## References
 
 - [CommandQuerySeparation (Martin Fowler)](https://martinfowler.com/bliki/CommandQuerySeparation.html) — concise explanation of CQS with the Stack.Pop() exception and the relationship to CQRS.
-- [[05 Architecture/Patterns/Architectural Patterns/CQRS|CQRS]] — the architectural extension of CQS: separate read and write models, often with separate data stores and optimized query paths.
+- [[CQRS]] — the architectural extension of CQS: separate read and write models, often with separate data stores and optimized query paths.
 - [Object-Oriented Software Construction (Bertrand Meyer)](https://www.eiffel.com/values/design-by-contract/introduction/) — the original source of CQS; Meyer coined the principle in the context of Design by Contract and the Eiffel language.

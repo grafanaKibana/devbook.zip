@@ -1,15 +1,9 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
+publish: true
+created: 2026-07-05T10:53:27.335+03:00
+modified: 2026-07-05T10:53:37.144+03:00
 tags:
   - FolderNote
-publish: true
-status: Creation
-level:
-  - '4'
-priority: High
 ---
 
 # Intro

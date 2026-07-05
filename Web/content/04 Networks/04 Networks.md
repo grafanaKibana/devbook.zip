@@ -1,16 +1,9 @@
 ---
-icon: network
-color: "#f59e0b"
-topic:
-  - Networks
-subtopic: []
+publish: true
+created: 2026-07-05T10:53:36.344+03:00
+modified: 2026-07-05T10:53:37.354+03:00
 tags:
   - FolderNote
-publish: true
-priority: High
-level:
-  - "3"
-status: Done
 ---
 
 # Intro

@@ -1,13 +1,7 @@
 ---
-topic:
-  - SDLC
-subtopic:
-  - SDLC
-level:
-  - "1"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:58.532+03:00
+modified: 2026-07-05T10:53:58.534+03:00
 ---
 
 # Intro
@@ -41,6 +35,7 @@ Feature: User login
 ```
 
 **Additional keywords:**
+
 - `And` / `But` — extend Given/When/Then steps
 - `Background` — shared Given steps for all scenarios in a feature
 - `Scenario Outline` + `Examples` — parameterized scenarios for data-driven testing
@@ -105,11 +100,13 @@ SpecFlow generates test methods from the `.feature` files and runs them via xUni
 ## When to Use BDD
 
 **Good fit:**
+
 - Complex business rules where misunderstanding requirements is costly.
 - Cross-functional teams where business stakeholders need to understand and validate tests.
 - Acceptance testing for user-facing features.
 
 **Poor fit:**
+
 - Pure technical components (algorithms, infrastructure) with no business language.
 - Small teams where the overhead of Gherkin + step definitions exceeds the benefit.
 - Rapidly changing requirements where maintaining `.feature` files becomes a burden.

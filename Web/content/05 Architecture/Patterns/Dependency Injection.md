@@ -1,13 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Patterns
-level:
-  - "4"
-priority: High
-status: Done
 publish: true
+created: 2026-07-05T10:53:43.308+03:00
+modified: 2026-07-05T10:53:43.308+03:00
 ---
 
 # Intro
@@ -15,6 +9,7 @@ publish: true
 Dependency Injection (DI) is a design pattern where objects receive dependencies from an external source instead of creating them internally, which is a practical form of Inversion of Control (IoC). It matters because it improves testability, keeps components loosely coupled, and makes systems composable as they grow. In modern .NET, DI is not optional architecture flavor: ASP.NET Core uses the built-in container as the default composition root for wiring the application.
 
 ## How It Works
+
 The container lifecycle is three steps: register, resolve, dispose.
 
 ### 1) Registration (`builder.Services.Add*`)

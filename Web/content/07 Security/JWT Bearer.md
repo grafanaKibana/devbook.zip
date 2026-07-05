@@ -1,14 +1,7 @@
 ---
-topic:
-  - Security
-subtopic:
-  - Security
-level:
-  - "4"
-priority: High
-status: Ready to Repeat
-
 publish: true
+created: 2026-07-05T10:54:04.332+03:00
+modified: 2026-07-05T10:54:04.332+03:00
 ---
 
 # JWT Bearer Authentication
@@ -75,7 +68,7 @@ The middleware automatically fetches the JWKS (public keys) from the authority's
 
 **`alg: none` attack**: Some early JWT libraries accepted tokens with `alg: none` in the header, bypassing signature verification. Fix: always explicitly specify allowed algorithms in `TokenValidationParameters.ValidAlgorithms`. Never accept `none`.
 
-**Algorithm-confusion attack (RS256 → HS256)**: the *other* famous JWT vuln. The server expects an RS256 (asymmetric) token and verifies with the issuer's **public** key. An attacker forges a token with the header changed to **HS256** (symmetric) and signs it using that *public key as the HMAC secret* — which is public. A library that picks the verification algorithm from the token's own header will happily verify it. Fix (same root cause as `alg:none`): **pin the expected algorithm server-side** (`ValidAlgorithms = ["RS256"]`); never let the token's header choose how it's verified.
+**Algorithm-confusion attack (RS256 → HS256)**: the _other_ famous JWT vuln. The server expects an RS256 (asymmetric) token and verifies with the issuer's **public** key. An attacker forges a token with the header changed to **HS256** (symmetric) and signs it using that _public key as the HMAC secret_ — which is public. A library that picks the verification algorithm from the token's own header will happily verify it. Fix (same root cause as `alg:none`): **pin the expected algorithm server-side** (`ValidAlgorithms = ["RS256"]`); never let the token's header choose how it's verified.
 
 **Long expiry times**: JWTs cannot be revoked without a token blacklist (which defeats the stateless benefit). A token with a 24-hour expiry that is stolen gives the attacker 24 hours of access. Fix: use short expiry (15-60 minutes) with refresh tokens. Revoke refresh tokens on logout.
 
@@ -99,12 +92,14 @@ The middleware automatically fetches the JWKS (public keys) from the authority's
 ## Questions
 
 > [!QUESTION]- What is a JWT token and why is it not encrypted by default?
+>
 > - JWT is a compact token format: `header.payload.signature` (base64url encoded).
 > - Signed (JWS) means the signature proves integrity and issuer, but the payload is readable by anyone with the token.
 > - Encryption (JWE) is a separate standard that wraps the JWT in an encrypted envelope.
 > - Tradeoff: signed-only JWTs are simpler and faster to validate; JWE adds encryption overhead and key management complexity.
 
 > [!QUESTION]- Why should JWTs have short expiry times?
+>
 > - JWTs are stateless — the server cannot revoke them without a blacklist (which defeats the stateless benefit).
 > - A stolen JWT is valid until it expires. Short expiry (15-60 min) limits the damage window.
 > - Refresh tokens (stored server-side) allow issuing new JWTs without re-authentication.

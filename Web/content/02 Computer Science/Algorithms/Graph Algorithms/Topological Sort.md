@@ -1,13 +1,7 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
-level:
-  - "4"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:24.765+03:00
+modified: 2026-07-05T10:53:37.209+03:00
 ---
 
 # Intro
@@ -19,7 +13,7 @@ Topological sort produces a linear ordering of the vertices of a **directed acyc
 Two standard algorithms, both **O(V + E)**:
 
 - **Kahn's algorithm (BFS / in-degree)** — compute each node's in-degree, start a queue with all in-degree-0 nodes (no dependencies), repeatedly remove one, append it to the order, and decrement its neighbours' in-degrees, enqueuing any that hit 0. If you output fewer than V nodes, the graph had a **cycle**.
-- **DFS-based** — depth-first search; when a node's recursion *finishes* (all descendants done), push it onto a stack. The reversed stack is a valid topological order. Detect cycles via the grey/black coloring (a back-edge to a node on the current stack = cycle).
+- **DFS-based** — depth-first search; when a node's recursion _finishes_ (all descendants done), push it onto a stack. The reversed stack is a valid topological order. Detect cycles via the grey/black coloring (a back-edge to a node on the current stack = cycle).
 
 Kahn's is usually preferred in practice: it detects cycles naturally and avoids recursion-depth limits.
 
@@ -53,9 +47,9 @@ public static List<int>? TopoSort(int n, List<int>[] adj)
 
 ## Pitfalls
 
-- **Cycles have no topological order** — this is not an edge case to ignore; it's *the* validity check. Kahn's flags it (fewer than V nodes emitted); DFS flags it (a back-edge). Skipping the check produces a silently truncated/invalid order. A "we got a cycle" result is often itself the useful answer (e.g. "circular dependency between modules A and B").
+- **Cycles have no topological order** — this is not an edge case to ignore; it's _the_ validity check. Kahn's flags it (fewer than V nodes emitted); DFS flags it (a back-edge). Skipping the check produces a silently truncated/invalid order. A "we got a cycle" result is often itself the useful answer (e.g. "circular dependency between modules A and B").
 - **Only valid on directed graphs** — an undirected edge has no before/after; topological sort is meaningless without direction.
-- **Order is not unique** — any node with no remaining dependencies can come next, so a DAG usually has many valid orders. If you need a *specific* tie-break (e.g. lexicographically smallest), use a **priority queue** instead of a plain queue in Kahn's.
+- **Order is not unique** — any node with no remaining dependencies can come next, so a DAG usually has many valid orders. If you need a _specific_ tie-break (e.g. lexicographically smallest), use a **priority queue** instead of a plain queue in Kahn's.
 - **DFS recursion depth** — the recursive DFS version can `StackOverflow` on long dependency chains (10k+); prefer Kahn's or an explicit stack.
 
 ## Tradeoffs

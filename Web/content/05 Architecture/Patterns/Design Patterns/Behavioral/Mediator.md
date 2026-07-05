@@ -1,13 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Patterns
-level:
-  - "1"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:43.333+03:00
+modified: 2026-07-05T15:49:37.499+03:00
 ---
 
 # Mediator
@@ -136,7 +130,7 @@ Adding fraud detection now means adding a MediatR pipeline behavior — the cont
 
 **Don't reach for it when**: a direct method call would do — wrapping a two-class app in MediatR is ceremony and adds indirection that makes "what handles this request?" harder to trace. Watch for the mediator itself becoming a **god object** if coordination logic accretes in it instead of in handlers.
 
-**vs related**: **Mediator routes one request → one handler** (`Send`); an **[[05 Architecture/Patterns/Event Bus|Event Bus]]** / **[[05 Architecture/Patterns/Design Patterns/Behavioral/Observer|Observer]]** fans **one event → many** subscribers (`Publish`). A **[[05 Architecture/Patterns/Design Patterns/Structural/Facade|Facade]]** is a one-way simplifying entry point to a subsystem (no routing/coordination); a Mediator coordinates peers bidirectionally.
+**vs related**: **Mediator routes one request → one handler** (`Send`); an **[[Event Bus]]** / **[[Observer]]** fans **one event → many** subscribers (`Publish`). A **[[Facade]]** is a one-way simplifying entry point to a subsystem (no routing/coordination); a Mediator coordinates peers bidirectionally.
 
 ## Questions
 

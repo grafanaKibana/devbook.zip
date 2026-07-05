@@ -1,13 +1,7 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
-level:
-  - "4"
-priority: Low
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:25.367+03:00
+modified: 2026-07-05T10:53:37.210+03:00
 ---
 
 # Intro
@@ -78,7 +72,7 @@ private static int Partition(int[] a, int left, int right)
 
 ### Lomuto vs Hoare partition
 
-The code above uses the **Lomuto** scheme (single forward scan, pivot at the end) — easiest to write and reason about. The original **Hoare** scheme walks two pointers inward from both ends and, on average, does roughly **3× fewer swaps**, which is why it's often faster in practice. The trap: Hoare's returned index is *not* the pivot's final resting position, so you recurse on `[left, p]` and `[p+1, right]` (not `p-1`/`p+1`). For duplicate-heavy input, three-way (Dutch National Flag) partitioning beats both.
+The code above uses the **Lomuto** scheme (single forward scan, pivot at the end) — easiest to write and reason about. The original **Hoare** scheme walks two pointers inward from both ends and, on average, does roughly **3× fewer swaps**, which is why it's often faster in practice. The trap: Hoare's returned index is _not_ the pivot's final resting position, so you recurse on `[left, p]` and `[p+1, right]` (not `p-1`/`p+1`). For duplicate-heavy input, three-way (Dutch National Flag) partitioning beats both.
 
 ## When to Use
 
@@ -124,7 +118,9 @@ Avoid naive quick sort (fixed pivot) on inputs that may be sorted or reverse-sor
 ## References
 
 - [Quicksort (Wikipedia)](https://en.wikipedia.org/wiki/Quicksort) — Lomuto and Hoare partition schemes, randomization, and introsort.
+
 - [Quick sort (cp-algorithms)](https://cp-algorithms.com/sorting/quick_sort.html) — practical implementation tips including three-way partition for duplicate keys.
 
 - [Introsort (Wikipedia)](https://en.wikipedia.org/wiki/Introsort) — the hybrid algorithm used by .NET's Array.Sort; combines quick sort, heapsort, and insertion sort to guarantee O(n log n) worst case while keeping quick sort's cache efficiency.
+
 - [Sorting algorithms comparison (Big-O Cheat Sheet)](https://www.bigocheatsheet.com/) — quick reference for time and space complexity of all common sorting algorithms.

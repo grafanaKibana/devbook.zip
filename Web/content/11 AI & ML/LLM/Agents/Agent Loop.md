@@ -1,13 +1,7 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
-level:
-  - "3"
-priority: Medium
-status: Done
 publish: true
+created: 2026-07-05T10:54:06.800+03:00
+modified: 2026-07-05T17:35:42.862+03:00
 ---
 
 # Intro
@@ -17,7 +11,7 @@ The agent loop is the execution cycle that turns an LLM from a single-shot text 
 The loop works in four steps:
 
 1. **Think** — the model receives the conversation history (including any prior tool results) and generates a reasoning trace. It decides what information it still needs or what action to take next.
-2. **Act** — the model emits a structured tool call — a function name plus arguments — choosing from the [[11 AI & ML/LLM/Agents/Tools|tools]] provided in its schema.
+2. **Act** — the model emits a structured tool call — a function name plus arguments — choosing from the [[Tools]] provided in its schema.
 3. **Observe** — the runtime executes the tool and appends the result to the conversation history as a tool-role message.
 4. **Repeat** — the updated history goes back to the model. It either reasons and acts again (back to step 1) or returns a final text response to the user.
 
@@ -33,7 +27,7 @@ stateDiagram-v2
 
 The critical insight from the ReAct paper: interleaving reasoning traces with tool use outperforms either approach alone. Chain-of-thought without tools hallucinates facts — the model fabricates answers from parametric memory when it should look them up. Tool use without reasoning cannot decompose complex goals into subgoals. On ALFWorld decision-making tasks, ReAct outperformed imitation learning and reinforcement learning baselines by 34% absolute success rate. The loop lets reasoning guide tool selection while tool outputs ground the reasoning in reality.
 
-For the broader context of when an agent loop is the right choice versus simpler [[11 AI & ML/LLM/Agents/Agents|workflow patterns]], see the Agents hub page.
+For the broader context of when an agent loop is the right choice versus simpler [[Agents|workflow patterns]], see the Agents hub page.
 
 ## How It Works in Practice
 
@@ -109,7 +103,7 @@ Both examples implement the same four-step cycle. The framework version hides th
 
 ### Infinite Loops and Tool Spam
 
-The model enters a cycle where it repeatedly calls the same tool or alternates between two tools without making progress toward an answer. A production case documented by Hugo Nogueira: one agent run made 369 tool calls, consumed 9.7M tokens, and cost $2.74 — without ever reaching an answer. The model kept searching for information it had already retrieved because its reasoning trace lost track of prior observations.
+The model enters a cycle where it repeatedly calls the same tool or alternates between two tools without making progress toward an answer. A production case documented by Hugo Nogueira: one agent run made 369 tool calls, consumed 9.7M tokens, and cost \$2.74 — without ever reaching an answer. The model kept searching for information it had already retrieved because its reasoning trace lost track of prior observations.
 
 **Why it happens**: as the context window fills with tool results, earlier reasoning traces fall outside the model's effective attention window. The model "forgets" what it already tried. Models also have no intrinsic sense of diminishing returns — they will keep trying if the prompt does not define a stop condition.
 
@@ -137,6 +131,7 @@ The model invokes a function that does not exist, passes arguments that do not m
 > Chain-of-thought generates reasoning traces but has no mechanism to verify claims against external reality. When the model encounters a factual question it must rely on parametric memory, which produces confident but fabricated answers. ReAct interleaves reasoning with tool calls — the model can search, look up, or compute before continuing its chain. This grounds each step in real data, cutting hallucination. The original paper showed this on HotpotQA: CoT alone frequently hallucinated intermediate facts, while ReAct retrieved them. The tradeoff is latency and cost — each tool call adds a round trip and tokens.
 
 > [!QUESTION]- What are the three most critical production safeguards for an agent loop?
+>
 > 1. **Iteration cap** — prevents infinite loops and cost runaway. Without a hard limit a confused agent loops indefinitely. Set per-request, not globally. 2. **Token budget tracking** — each iteration grows the context. Track cumulative tokens and terminate or summarize before hitting the window limit. Without this the model silently loses earlier context and quality degrades. 3. **Tool call validation** — validate function names and arguments against the schema before execution. A hallucinated tool call that passes through can trigger unintended side effects — database writes, payments, external API calls. Return errors to the model so it can self-correct.
 
 > [!QUESTION]- When is a simple prompt chain preferable to an agent loop?

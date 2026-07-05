@@ -1,13 +1,7 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
-level:
-  - "4"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:27.096+03:00
+modified: 2026-07-05T10:53:37.194+03:00
 ---
 
 # Intro
@@ -67,7 +61,7 @@ Decision rule:
 
 ## Encoding and Unicode
 
-A .NET `string` is **UTF-16**: each `char` is a 16-bit *code unit*, **not** a full character. Characters outside the Basic Multilingual Plane (emoji, some CJK) are encoded as a **surrogate pair** — two `char`s. So `"👍".Length == 2`, and indexing `s[0]` gives you half a surrogate. To iterate real Unicode scalar values use **`Rune`** (`foreach (Rune r in s.EnumerateRunes())`), and for user-perceived characters (a base letter plus combining marks = one grapheme) use **`StringInfo`/`TextElementEnumerator`**. `string.Normalize()` applies Unicode normalization (NFC/NFD) so that visually identical strings compare equal.
+A .NET `string` is **UTF-16**: each `char` is a 16-bit _code unit_, **not** a full character. Characters outside the Basic Multilingual Plane (emoji, some CJK) are encoded as a **surrogate pair** — two `char`s. So `"👍".Length == 2`, and indexing `s[0]` gives you half a surrogate. To iterate real Unicode scalar values use **`Rune`** (`foreach (Rune r in s.EnumerateRunes())`), and for user-perceived characters (a base letter plus combining marks = one grapheme) use **`StringInfo`/`TextElementEnumerator`**. `string.Normalize()` applies Unicode normalization (NFC/NFD) so that visually identical strings compare equal.
 
 ## Low-Allocation String Handling
 
@@ -93,16 +87,19 @@ For hot paths, avoid materializing intermediate strings:
 ## Questions
 
 > [!QUESTION]- When should you choose `StringBuilder` over `string`?
+>
 > - Use `StringBuilder` for iterative construction (loops, batched appends, streaming transforms) where many intermediate strings would otherwise be allocated.
 > - Prefer interpolation/concatenation for one-off formatting with a small number of values because readability is usually better.
 > - In hot paths, benchmark both options and pre-size `StringBuilder` capacity to reduce buffer growth and copying.
 
 > [!QUESTION]- Why can `ReferenceEquals(a, b)` be `false` even when `a == b` is `true` for strings?
+>
 > - `==` for strings compares content, while `ReferenceEquals` checks object identity.
 > - Two strings can contain identical text but be different objects (for example, literal vs runtime-composed value).
 > - Use `ReferenceEquals` only for diagnostics/allocation analysis, not for business equality logic.
 
 > [!QUESTION]- How should string comparisons be written in production code?
+>
 > - Always call APIs that accept `StringComparison` (`string.Equals`, `StartsWith`, `EndsWith`, `IndexOf`) instead of culture-implicit overloads.
 > - Use `Ordinal`/`OrdinalIgnoreCase` for identifiers, protocol values, keys, and security-sensitive comparisons.
 > - Use culture-aware comparison only for user-facing natural-language text where locale behavior is expected.

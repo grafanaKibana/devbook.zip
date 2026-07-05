@@ -1,14 +1,7 @@
 ---
-topic:
-  - Data Persistence
-subtopic:
-  - SQL
-level:
-  - "4"
-priority: High
-status: Done
-
 publish: true
+created: 2026-07-05T10:53:40.617+03:00
+modified: 2026-07-05T15:49:34.329+03:00
 ---
 
 # Intro
@@ -108,15 +101,15 @@ As a result of decomposing the original relation, we get two relations that are 
 
 ## Boyce-Codd Normal Form (BCNF)
 
-*(A stricter variant of 3NF.)*
+_(A stricter variant of 3NF.)_
 
 The definition of 3NF is not fully suitable for the following relations:
 
-1) the relation has two or more candidate keys;
+1. the relation has two or more candidate keys;
 
-2) two or more candidate keys are composite;
+2. two or more candidate keys are composite;
 
-3) they overlap, i.e., they share at least one common attribute.
+3. they overlap, i.e., they share at least one common attribute.
 
 For relations that have one candidate key (primary), BCNF is equivalent to 3NF.
 
@@ -216,7 +209,7 @@ A relation variable is in Sixth Normal Form if and only if it satisfies all non-
 
 The idea of "decomposing all the way" was proposed before research into temporal data began, but it did not gain support. However, for temporal databases, maximal decomposition helps combat redundancy and simplifies maintaining database integrity.
 
-For temporal databases, U operators are defined that unpack relations on the specified attributes, perform the corresponding operation, and pack the result back. In this example, the join of relation projections should be performed using the U_JOIN operator.
+For temporal databases, U operators are defined that unpack relations on the specified attributes, perform the corresponding operation, and pack the result back. In this example, the join of relation projections should be performed using the U\_JOIN operator.
 
 **Employees**
 
@@ -246,9 +239,10 @@ The "Employees" relation variable is not in 6NF and can be decomposed into the r
 
 Denormalization is the deliberate introduction of redundancy to speed up reads. Where normalization splits data across tables to eliminate duplication, denormalization collapses it back together to avoid expensive joins at query time.
 
-**When to denormalize:** read-heavy workloads where joins dominate query cost, reporting and analytics queries that aggregate large datasets, and cases where latency requirements can't be met by [[Indexes|indexes]] alone.
+**When to denormalize:** read-heavy workloads where joins dominate query cost, reporting and analytics queries that aggregate large datasets, and cases where latency requirements can't be met by [[Indexes]] alone.
 
 **Common techniques:**
+
 - Duplicate a column from a related table to avoid a join (e.g., storing `CustomerName` on the `Orders` table)
 - Pre-compute aggregates and store them as columns
 - Materialized views that cache the result of a complex query
@@ -273,7 +267,7 @@ The tradeoff is real: reads get faster, but every write to `Orders` must also up
 
 **Over-normalizing into join hell** — a schema in 5NF or 6NF is theoretically clean but forces multi-way joins for simple queries. A real example: a SaaS app normalized `Users`, `Addresses`, `PhoneNumbers`, `Emails`, and `Preferences` into separate tables. Loading a user profile required a 5-table JOIN that took 12 ms at 100K rows. After the table grew to 10M rows, the same query took 340 ms even with proper indexes, because each join multiplied the working set. They denormalized `Addresses` and `Preferences` back onto `Users`, dropping the query to 8 ms. Rule of thumb: if a query joins 4+ tables and runs on every request, measure it under production load before committing to that schema.
 
-**Under-normalizing and silent data corruption** — storing the same fact in multiple places creates update anomalies that are invisible until they cause business impact. A concrete scenario: an e-commerce system stored `product_price` on both `Products` and `OrderLineItems` (for historical pricing). A bug in the price-update API updated `Products` but not `OrderLineItems` for pending carts. 2,300 orders shipped at stale prices over a weekend — $47K revenue discrepancy discovered during Monday reconciliation. Fix: use a `PriceHistory` table with effective dates, and join to it at order-finalization time. The join costs 1-2 ms; the data integrity is worth it.
+**Under-normalizing and silent data corruption** — storing the same fact in multiple places creates update anomalies that are invisible until they cause business impact. A concrete scenario: an e-commerce system stored `product_price` on both `Products` and `OrderLineItems` (for historical pricing). A bug in the price-update API updated `Products` but not `OrderLineItems` for pending carts. 2,300 orders shipped at stale prices over a weekend — \$47K revenue discrepancy discovered during Monday reconciliation. Fix: use a `PriceHistory` table with effective dates, and join to it at order-finalization time. The join costs 1-2 ms; the data integrity is worth it.
 
 **Premature denormalization** — adding redundant columns or materialized aggregates before measuring whether reads are actually slow. A team pre-stored `TotalOrderAmount` on `Customers` from day one, requiring triggers on every `INSERT`, `UPDATE`, and `DELETE` to `Orders`. The triggers added 3 ms per write and caused deadlocks under concurrent order processing (trigger locks `Customers` row while another transaction tries to insert an `Order` for the same customer). The read query they were "optimizing" ran twice per day for a dashboard. Profile first: `EXPLAIN ANALYZE` the query, check if an index or a covering index solves it. Denormalize only when a specific query is a proven bottleneck and indexes can't fix it.
 

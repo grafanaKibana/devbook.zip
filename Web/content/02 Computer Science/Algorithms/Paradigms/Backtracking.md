@@ -1,13 +1,7 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
-level:
-  - "4"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:25.742+03:00
+modified: 2026-07-05T15:49:37.208+03:00
 ---
 
 # Intro
@@ -69,7 +63,7 @@ N-Queens-style pruning is the same skeleton with a constraint check (`IsSafe(row
 
 ## Pitfalls
 
-- **Forgetting to un-choose** — the state mutation made before recursing *must* be reverted after, or sibling branches inherit corrupt state. The single most common backtracking bug is a missing "undo" line.
+- **Forgetting to un-choose** — the state mutation made before recursing _must_ be reverted after, or sibling branches inherit corrupt state. The single most common backtracking bug is a missing "undo" line.
 - **Snapshotting the result** — when you record a solution, copy it (`new List<int>(current)`); adding the live `current` list stores a reference that later mutations will clobber, leaving you with N copies of the same final state.
 - **Weak pruning ⇒ exponential blowup** — backtracking without good constraint checks degenerates to brute force. The art is pruning early and cheaply (constraint propagation, bounds, ordering choices to fail fast).
 - **Duplicate solutions** — with repeated input elements, naive enumeration yields duplicate permutations/subsets; you typically sort and skip equal siblings (`if (i > start && a[i] == a[i-1]) continue;`) to dedupe.
@@ -78,12 +72,12 @@ N-Queens-style pruning is the same skeleton with a constraint check (`IsSafe(row
 
 | Approach | Explores | Cost | Use when |
 |---|---|---|---|
-| **Backtracking** | Valid partial branches only (pruned DFS) | Exponential worst case, far better in practice | Enumerate/solve constraint problems; need *all* or *a* valid configuration |
+| **Backtracking** | Valid partial branches only (pruned DFS) | Exponential worst case, far better in practice | Enumerate/solve constraint problems; need _all_ or _a_ valid configuration |
 | Brute force | Every full configuration | Always exponential | Almost never — strictly worse |
-| [[02 Computer Science/Algorithms/Paradigms/Dynamic Programming\|Dynamic Programming]] | Reuses overlapping subproblems | Polynomial | Optimisation with optimal substructure + overlap |
-| [[02 Computer Science/Algorithms/Paradigms/Greedy Algorithms\|Greedy]] | One path, no backtrack | O(n log n) | A provable local rule reaches the optimum |
+| [[Dynamic Programming]] | Reuses overlapping subproblems | Polynomial | Optimisation with optimal substructure + overlap |
+| [[Greedy Algorithms\|Greedy]] | One path, no backtrack | O(n log n) | A provable local rule reaches the optimum |
 
-**Decision rule**: use backtracking when you must **search a space of configurations** under constraints and pruning can eliminate most of it — Sudoku, N-Queens, generating subsets/permutations, parsing. If the problem is *optimisation* with overlapping subproblems, DP is usually exponentially faster; if a greedy rule provably works, it's faster still. Branch-and-bound is backtracking plus a bound to prune for optimisation problems.
+**Decision rule**: use backtracking when you must **search a space of configurations** under constraints and pruning can eliminate most of it — Sudoku, N-Queens, generating subsets/permutations, parsing. If the problem is _optimisation_ with overlapping subproblems, DP is usually exponentially faster; if a greedy rule provably works, it's faster still. Branch-and-bound is backtracking plus a bound to prune for optimisation problems.
 
 ## Questions
 
@@ -94,7 +88,7 @@ N-Queens-style pruning is the same skeleton with a constraint check (`IsSafe(row
 > Backtracking shares one mutable state (the current partial solution / used-set) across all branches to avoid copying. After exploring a choice you must revert it so the next sibling branch starts from the correct state. Skipping the undo leaks state between branches and produces wrong results.
 
 > [!QUESTION]- When is backtracking the wrong tool?
-> When the problem is an *optimisation* with overlapping subproblems (use DP — exponentially faster) or when a provable greedy choice exists (faster still). Backtracking shines for *enumeration* and *constraint satisfaction* where you genuinely must search configurations, and where pruning makes the exponential worst case rare in practice.
+> When the problem is an _optimisation_ with overlapping subproblems (use DP — exponentially faster) or when a provable greedy choice exists (faster still). Backtracking shines for _enumeration_ and _constraint satisfaction_ where you genuinely must search configurations, and where pruning makes the exponential worst case rare in practice.
 
 ## References
 

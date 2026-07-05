@@ -1,13 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Application Architecture
-level:
-  - "3"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:43.305+03:00
+modified: 2026-07-05T15:49:34.667+03:00
 ---
 
 # Intro
@@ -21,6 +15,7 @@ Clean Architecture, popularized by Robert C Martin, organizes software so busine
 Inward means code at the center defines policy, and code farther out implements details. A use case can depend on an `IOrderRepository` abstraction, but the EF Core repository implementation must depend on that abstraction, not the other way around. This reverses the typical framework first dependency chain and keeps business rules independent from storage, web, or messaging tools.
 
 If you enforce this consistently:
+
 - You can replace UI from MVC to Minimal API or gRPC without rewriting domain rules.
 - You can swap persistence from EF Core to Dapper or Cosmos without changing use case logic.
 - You can run fast unit tests over Entities and Use Cases without booting ASP NET Core.
@@ -43,7 +38,7 @@ The arrows point inward because outer circles implement details for inner policy
 
 ## Clean Architecture vs simple Layered Architecture
 
-Traditional layered systems often become UI to business to data access, where business logic ends up coupled to repository implementation details and ORM behavior. Clean Architecture keeps similar responsibilities but changes ownership of dependencies: domain and use cases define interfaces, outer infrastructure implements them. Interview shorthand: Layered often describes responsibility stacking, while Clean Architecture adds a strict dependency direction contract. See [[05 Architecture/Application Architecture/Layered Architecture|Layered Architecture]] for the baseline model this approach refines (and how Hexagonal/Onion/Clean are one family).
+Traditional layered systems often become UI to business to data access, where business logic ends up coupled to repository implementation details and ORM behavior. Clean Architecture keeps similar responsibilities but changes ownership of dependencies: domain and use cases define interfaces, outer infrastructure implements them. Interview shorthand: Layered often describes responsibility stacking, while Clean Architecture adds a strict dependency direction contract. See [[Layered Architecture]] for the baseline model this approach refines (and how Hexagonal/Onion/Clean are one family).
 
 ## .NET project structure
 
@@ -67,6 +62,7 @@ src
 ```
 
 The project references should follow this direction:
+
 - `Ordering Domain` references nothing from other projects.
 - `Ordering Application` references only `Ordering Domain`.
 - `Ordering Infrastructure` references `Ordering Application` and `Ordering Domain`.
@@ -250,6 +246,7 @@ Decision rule: start with Layered or Vertical Slice for simple domains, and move
 ## Questions
 
 > [!QUESTION]- How does Clean Architecture differ from traditional N Layer, and when does the extra indirection pay off
+>
 > - N Layer often keeps downward dependencies from UI to business to data, while Clean Architecture enforces inward dependencies toward policy.
 > - In Clean Architecture, inner layers define contracts and outer layers implement them, so domain logic survives framework changes.
 > - The indirection pays off when business rules are complex, testing speed matters, and infrastructure churn is expected over multiple years.
@@ -257,6 +254,7 @@ Decision rule: start with Layered or Vertical Slice for simple domains, and move
 > - Tradeoff statement: Clean Architecture buys adaptability and testability by paying upfront complexity and wiring overhead.
 
 > [!QUESTION]- What happens when you apply Clean Architecture to a simple CRUD service
+>
 > - You often create command handlers ports and adapters that do little more than pass data through, so cycle time drops without stronger correctness.
 > - Teams spend effort maintaining abstractions instead of shipping user value because domain complexity never materializes.
 > - Operationally it can still work, but the architecture tax shows up in onboarding and debugging cost.

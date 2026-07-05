@@ -1,13 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Patterns
-level:
-  - "2"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:43.324+03:00
+modified: 2026-07-05T15:49:35.071+03:00
 ---
 
 # Domain-Driven Design
@@ -53,7 +47,7 @@ The mistake is lavishing DDD tactical patterns on a generic subdomain while unde
 
 ### Context Mapping
 
-Bounded contexts don't live in isolation — **context maps** describe the *relationships* between them and how their models integrate:
+Bounded contexts don't live in isolation — **context maps** describe the _relationships_ between them and how their models integrate:
 
 - **Anti-Corruption Layer (ACL)** — a translation layer that protects your model from a messy/legacy upstream one, converting their concepts into yours so their model can't "leak" in. The single most important integration pattern when wrapping legacy or third-party systems.
 - **Shared Kernel** — two contexts share a small, jointly-owned model subset (high coupling; change requires both teams to agree).
@@ -61,7 +55,7 @@ Bounded contexts don't live in isolation — **context maps** describe the *rela
 - **Conformist** — downstream simply adopts the upstream model as-is (no ACL); cheap but you inherit their concepts.
 - **Open Host Service / Published Language** — upstream publishes a stable, well-documented API/schema (e.g. an event contract) for many consumers.
 
-The map is a *strategic* deliverable: it tells you where to put ACLs, which integrations are risky (Shared Kernel), and where team coordination is required.
+The map is a _strategic_ deliverable: it tells you where to put ACLs, which integrations are risky (Shared Kernel), and where team coordination is required.
 
 ## Tactical Patterns
 
@@ -133,13 +127,13 @@ The Aggregate enforces invariants: you cannot confirm an empty order. External c
 Two design rules make aggregates work:
 
 - **Reference other aggregates by ID, not by object reference.** An `Order` holds a `CustomerId`, not a `Customer` object. This keeps each aggregate a small, independently-loadable consistency boundary (and avoids loading half the database to confirm one order).
-- **One aggregate per transaction.** A single transaction should modify exactly one aggregate instance; changes that span aggregates are made *eventually consistent* via [[05 Architecture/Distributed Systems/Distributed Transactions|domain events / sagas]], not a big multi-aggregate transaction. The aggregate *is* the transactional consistency boundary.
+- **One aggregate per transaction.** A single transaction should modify exactly one aggregate instance; changes that span aggregates are made _eventually consistent_ via [[Distributed Transactions|domain events / sagas]], not a big multi-aggregate transaction. The aggregate _is_ the transactional consistency boundary.
 
 Keep aggregates **as small as invariants allow** — a too-large aggregate (see Pitfalls) serializes unrelated updates and causes contention.
 
 ### Domain Service
 
-When a piece of behavior doesn't naturally belong to any single Entity or Value Object — typically because it **coordinates several aggregates** or expresses a domain concept that isn't a "thing" — put it in a **Domain Service**: a stateless object named in the ubiquitous language (e.g. `FundsTransferService.Transfer(from, to, amount)` where the logic belongs to neither account alone). Don't confuse it with an *application* service (which orchestrates use cases, transactions, and I/O) — a domain service contains **business rules** and lives in the domain layer with no infrastructure dependencies. Reach for it sparingly; most behavior should still live on the aggregate that owns the data (Information Expert).
+When a piece of behavior doesn't naturally belong to any single Entity or Value Object — typically because it **coordinates several aggregates** or expresses a domain concept that isn't a "thing" — put it in a **Domain Service**: a stateless object named in the ubiquitous language (e.g. `FundsTransferService.Transfer(from, to, amount)` where the logic belongs to neither account alone). Don't confuse it with an _application_ service (which orchestrates use cases, transactions, and I/O) — a domain service contains **business rules** and lives in the domain layer with no infrastructure dependencies. Reach for it sparingly; most behavior should still live on the aggregate that owns the data (Information Expert).
 
 ### Domain Events
 
@@ -150,7 +144,7 @@ public sealed record OrderConfirmed(OrderId OrderId, DateTimeOffset OccurredAt)
     : IDomainEvent;
 ```
 
-Domain Events are raised inside the Aggregate and dispatched after the transaction commits (see [[06 Development Practices/Paradigms/Event-driven|Event-driven Development]] for the dispatch mechanism).
+Domain Events are raised inside the Aggregate and dispatched after the transaction commits (see [[Event-driven|Event-driven Development]] for the dispatch mechanism).
 
 ### Repository
 
@@ -164,7 +158,7 @@ public interface IOrderRepository
 }
 ```
 
-See [[05 Architecture/Patterns/Repository & UoW|Repository & Unit of Work]] for the full pattern.
+See [[Repository & UoW|Repository & Unit of Work]] for the full pattern.
 
 ## Pitfalls
 
@@ -197,12 +191,14 @@ See [[05 Architecture/Patterns/Repository & UoW|Repository & Unit of Work]] for 
 ## Questions
 
 > [!QUESTION]- What is the difference between an Entity and a Value Object?
+>
 > - Entity: has a unique identity that persists over time. Two entities with the same data are different if their IDs differ. Example: `Order` with `OrderId`.
 > - Value Object: defined entirely by its attributes, no identity. Two Value Objects with the same data are equal. Immutable. Example: `Money(10, "USD")`.
-> - Rule of thumb: if you care about *which* instance it is, it's an Entity. If you only care about *what* it contains, it's a Value Object.
+> - Rule of thumb: if you care about _which_ instance it is, it's an Entity. If you only care about _what_ it contains, it's a Value Object.
 > - Tradeoff: Value Objects are simpler to reason about (immutable, no identity tracking) but require copying on mutation. Use them for concepts like Money, Address, DateRange, Coordinates.
 
 > [!QUESTION]- Why should external code only interact with an Aggregate through its root?
+>
 > - The Aggregate Root enforces all invariants for the cluster. If external code modifies a `LineItem` directly, it bypasses the `Order`'s consistency checks.
 > - Example: adding a line item after an order is confirmed should be rejected. If `LineItem` is modified directly, the `Order` never gets a chance to enforce this rule.
 > - Practical implication: repositories load and save entire Aggregates, not individual child entities. EF Core's change tracking makes this natural.
@@ -213,5 +209,5 @@ See [[05 Architecture/Patterns/Repository & UoW|Repository & Unit of Work]] for 
 - [Domain-Driven Design (Martin Fowler)](https://martinfowler.com/tags/domain%20driven%20design.html) — Fowler's collection of DDD articles covering Aggregates, Bounded Contexts, and the Ubiquitous Language with practical examples.
 - [Domain-Driven Design: Tackling Complexity in the Heart of Software (Eric Evans)](https://www.oreilly.com/library/view/domain-driven-design-tackling/0321125215/) — the original DDD book; dense but authoritative. Read Part II (Building Blocks) for tactical patterns.
 - [Implementing Domain-Driven Design (Vaughn Vernon)](https://www.oreilly.com/library/view/implementing-domain-driven-design/9780133039900/) — more practical than Evans; covers Aggregate design, Domain Events, and Bounded Context integration with code examples.
-- [CQRS.nu DDD FAQ](https://cqrs.nu/faq/Domain%20Driven%20Design) — concise Q&A on DDD concepts, Aggregates, and how DDD relates to CQRS and Event Sourcing.
-- [[05 Architecture/Patterns/Architectural Patterns/CQRS|CQRS]] — architectural pattern that pairs naturally with DDD: commands map to Aggregate operations, queries bypass the domain model for read efficiency.
+- [CQRS.nu DDD FAQ](https://cqrs.nu/faq/Domain%20Driven%20Design) — concise Q\&A on DDD concepts, Aggregates, and how DDD relates to CQRS and Event Sourcing.
+- [[CQRS]] — architectural pattern that pairs naturally with DDD: commands map to Aggregate operations, queries bypass the domain model for read efficiency.

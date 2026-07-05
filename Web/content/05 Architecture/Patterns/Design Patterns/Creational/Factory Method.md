@@ -1,14 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Patterns
-level:
-  - "1"
-priority: High
-status:
-  - Done
 publish: true
+created: 2026-07-05T10:53:43.328+03:00
+modified: 2026-07-05T15:49:37.388+03:00
 ---
 
 # Factory Method
@@ -35,7 +28,7 @@ flowchart LR
 ```
 
 > [!NOTE] Factory Method vs Abstract Factory
-> Factory Method creates **one product** via inheritance — the subclass decides. [[05 Architecture/Patterns/Design Patterns/Creational/Abstract Factory|Abstract Factory]] creates a **family of related products** via composition. If you only need one object type, Factory Method is simpler.
+> Factory Method creates **one product** via inheritance — the subclass decides. [[Abstract Factory]] creates a **family of related products** via composition. If you only need one object type, Factory Method is simpler.
 
 ## Problem
 
@@ -171,7 +164,7 @@ Adding a Slack channel now means a new `SlackNotificationCreator` class — zero
 
 ## References
 
-- [Factory Method Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=EcFVTgRHJLM&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=4) — video walkthrough of the Factory Method pattern with OOP examples
+- [Factory Method Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=EcFVTgRHJLM\&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc\&index=4) — video walkthrough of the Factory Method pattern with OOP examples
 - [Factory Method — refactoring.guru](https://refactoring.guru/design-patterns/factory-method) — canonical pattern description with structure diagram and C# example
 - [ILoggerFactory interface — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.logging.iloggerfactory) — .NET logging factory method in production use
 - [DbProviderFactory — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.data.common.dbproviderfactory) — ADO.NET abstract factory method for database providers

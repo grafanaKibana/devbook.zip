@@ -1,16 +1,11 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Distributed Systems
-level:
-  - "2"
-priority: High
-status: Done
 publish: true
+created: 2026-07-05T10:53:43.311+03:00
+modified: 2026-07-05T15:49:34.543+03:00
 ---
 
 # Intro
+
 Consistency models define what value a read is allowed to return relative to writes in a distributed system.
 They matter because every replication, partition-tolerance, and caching decision is also a consistency decision.
 You think about consistency when selecting storage, designing leader/replica topology, and deciding whether stale reads are acceptable.
@@ -107,7 +102,7 @@ During a partition, preserving stronger consistency typically means reduced avai
 - For each endpoint, set an explicit freshness budget (for example: "up to 2 seconds stale").
 - Model partition behavior up front: which operations fail closed vs continue degraded.
 - Add observability for replica lag, cache age, and stale-read rate.
-- Use [[Idempotency|idempotency]] keys on writes so retries are safe when consistency is weaker.
+- Use [[Idempotency]] keys on writes so retries are safe when consistency is weaker.
 - Test failure modes with delayed replication and partial-region outages.
 - Keep consistency decisions visible in architecture docs and API contracts.
 

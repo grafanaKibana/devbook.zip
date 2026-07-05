@@ -1,14 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Patterns
-level:
-  - "2"
-priority: High
-status:
-  - Done
 publish: true
+created: 2026-07-05T10:53:43.333+03:00
+modified: 2026-07-05T15:49:37.342+03:00
 ---
 
 # Strategy
@@ -43,7 +36,7 @@ classDiagram
 ```
 
 > [!NOTE] Strategy vs State vs Command
-> **Strategy** selection is **driven by the client** — the caller injects which algorithm to use. [[05 Architecture/Patterns/Design Patterns/Behavioral/State|State]] transitions are **driven by the object** — the object changes its own behavior. [[05 Architecture/Patterns/Design Patterns/Behavioral/Command|Command]] encapsulates a **request** with context — what to do and when. If the caller decides the algorithm, it's Strategy. If the object decides, it's State.
+> **Strategy** selection is **driven by the client** — the caller injects which algorithm to use. [[State]] transitions are **driven by the object** — the object changes its own behavior. [[Command]] encapsulates a **request** with context — what to do and when. If the caller decides the algorithm, it's Strategy. If the object decides, it's State.
 
 ## Problem
 
@@ -188,7 +181,7 @@ Adding same-day delivery now means one new class and one DI registration — `Sh
 
 ## References
 
-- [Strategy Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=v9ejT8FO-7I&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=1) — video walkthrough of the Strategy pattern with OOP examples
+- [Strategy Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=v9ejT8FO-7I\&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc\&index=1) — video walkthrough of the Strategy pattern with OOP examples
 - [Strategy — refactoring.guru](https://refactoring.guru/design-patterns/strategy) — canonical pattern description with context/strategy diagram and C# example
 - [`IComparer<T>` — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.icomparer-1) — .NET's built-in Strategy for comparison algorithms
 - [`JsonConverter<T>` — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.text.json.serialization.jsonconverter-1) — Strategy pattern for JSON serialization

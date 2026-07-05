@@ -1,13 +1,7 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
-level:
-  - "4"
-priority: Low
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:25.040+03:00
+modified: 2026-07-05T10:53:37.209+03:00
 ---
 
 # Intro
@@ -63,7 +57,7 @@ public static void InsertionSort(int[] a)
 
 ### Binary insertion sort
 
-Since the prefix is already sorted, you can find the insertion point with a **binary search** instead of a linear scan, cutting *comparisons* from O(n²) to O(n log n). The catch: you still have to **shift** elements to open the gap, so the total work stays O(n²) (dominated by moves). It's a genuine win only when comparisons are far more expensive than moves (e.g. comparing long strings or via an expensive comparator).
+Since the prefix is already sorted, you can find the insertion point with a **binary search** instead of a linear scan, cutting _comparisons_ from O(n²) to O(n log n). The catch: you still have to **shift** elements to open the gap, so the total work stays O(n²) (dominated by moves). It's a genuine win only when comparisons are far more expensive than moves (e.g. comparing long strings or via an expensive comparator).
 
 ## When to Use
 
@@ -109,7 +103,9 @@ Since the prefix is already sorted, you can find the insertion point with a **bi
 ## References
 
 - [Insertion sort (Wikipedia)](https://en.wikipedia.org/wiki/Insertion_sort) — algorithm description, binary insertion sort variant, and complexity analysis.
+
 - [Insertion sort (cp-algorithms)](https://cp-algorithms.com/sorting/insertion_sort.html) — competitive programming perspective with implementation notes.
 
 - [Timsort (Wikipedia)](https://en.wikipedia.org/wiki/Timsort) — Python's and Java's default sort; uses insertion sort for small runs (< 64 elements), explaining why insertion sort matters in practice despite its O(n²) complexity.
+
 - [Sorting algorithms comparison (Big-O Cheat Sheet)](https://www.bigocheatsheet.com/) — quick reference for time and space complexity of all common sorting algorithms.

@@ -1,16 +1,9 @@
 ---
-icon: ruler-dimension-line
-color: "#84cc16"
-topic:
-  - Development Practices
-subtopic: []
+publish: true
+created: 2026-07-05T10:53:48.495+03:00
+modified: 2026-07-05T10:53:48.495+03:00
 tags:
   - FolderNote
-publish: true
-status: Creation
-level:
-  - '4'
-priority: High
 ---
 
 # Intro

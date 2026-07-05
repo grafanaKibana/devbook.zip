@@ -1,15 +1,9 @@
 ---
-topic:
-  - Networks
-subtopic:
-  - Transport & Sockets
+publish: true
+created: 2026-07-05T10:53:36.350+03:00
+modified: 2026-07-05T10:53:37.354+03:00
 tags:
   - FolderNote
-publish: true
-status: Creation
-priority: Medium
-level:
-  - '3'
 ---
 
 # Intro

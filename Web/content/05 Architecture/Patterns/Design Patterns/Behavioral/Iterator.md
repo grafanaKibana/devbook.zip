@@ -1,13 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Patterns
-level:
-  - "1"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:43.329+03:00
+modified: 2026-07-05T15:49:37.477+03:00
 ---
 
 # Iterator
@@ -130,11 +124,11 @@ The caller uses `await foreach` without knowing whether the source is a database
 
 ## Tradeoffs
 
-**Use it when**: you need sequential access without exposing the underlying structure, you're streaming a large or **infinite/unbounded** sequence (lazy, constant memory), or a type can be traversed multiple ways. In C# you almost never *implement* `IEnumerator<T>` by hand — `yield return` generates it for you, so "using the Iterator pattern" just means returning `IEnumerable<T>`/`IAsyncEnumerable<T>`.
+**Use it when**: you need sequential access without exposing the underlying structure, you're streaming a large or **infinite/unbounded** sequence (lazy, constant memory), or a type can be traversed multiple ways. In C# you almost never _implement_ `IEnumerator<T>` by hand — `yield return` generates it for you, so "using the Iterator pattern" just means returning `IEnumerable<T>`/`IAsyncEnumerable<T>`.
 
-**Don't reach for it when**: you need random access by index or a `Count` — an iterator is single-pass and forward-only; use a `List`/array. And remember the lazy-iteration footguns: **deferred execution** means exceptions and DB queries fire *when consumed*, not when called, and enumerating twice re-runs the work.
+**Don't reach for it when**: you need random access by index or a `Count` — an iterator is single-pass and forward-only; use a `List`/array. And remember the lazy-iteration footguns: **deferred execution** means exceptions and DB queries fire _when consumed_, not when called, and enumerating twice re-runs the work.
 
-**vs related**: Iterator gives sequential *access*; **[[05 Architecture/Patterns/Design Patterns/Behavioral/Visitor|Visitor]]** adds *operations* over a structure's elements; **[[05 Architecture/Patterns/Design Patterns/Structural/Composite|Composite]]** is the tree structure you often iterate. See [[01 Programming/NET/CSharp/Fundamentals/Foreach|foreach & yield]] for the language mechanics.
+**vs related**: Iterator gives sequential _access_; **[[Visitor]]** adds _operations_ over a structure's elements; **[[Composite]]** is the tree structure you often iterate. See [[Foreach|foreach & yield]] for the language mechanics.
 
 ## Questions
 
@@ -146,7 +140,7 @@ The caller uses `await foreach` without knowing whether the source is a database
 
 ## References
 
-- [Iterator Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=uNTNEfwYXhI&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=16) — video walkthrough of the Iterator pattern with OOP examples
+- [Iterator Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=uNTNEfwYXhI\&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc\&index=16) — video walkthrough of the Iterator pattern with OOP examples
 - [Iterator — refactoring.guru](https://refactoring.guru/design-patterns/iterator) — canonical pattern description with C# example
 - [`IEnumerable<T>` — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.ienumerable-1) — the .NET Iterator interface
 - [yield statement — C# reference — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/yield) — how `yield return` implements the Iterator pattern

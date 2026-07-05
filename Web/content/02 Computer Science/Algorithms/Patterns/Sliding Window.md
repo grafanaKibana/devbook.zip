@@ -1,13 +1,7 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
-level:
-  - "4"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:25.602+03:00
+modified: 2026-07-05T10:53:37.211+03:00
 ---
 
 # Intro
@@ -69,7 +63,7 @@ public static int LongestUnique(string s)
 ## Pitfalls
 
 - **Recomputing the aggregate each slide** — the whole point is incremental update. Re-summing the window every step makes it O(n·k) again, no better than brute force.
-- **Window contents only valid for the right monotonicity** — variable windows assume that once a window is invalid, *growing* it keeps it invalid until you shrink. This holds for sums of **non-negative** numbers and for "distinct count" constraints, but **breaks with negative numbers** (a longer window can become valid again) — those need prefix sums + a hash map or a deque, not a plain sliding window.
+- **Window contents only valid for the right monotonicity** — variable windows assume that once a window is invalid, _growing_ it keeps it invalid until you shrink. This holds for sums of **non-negative** numbers and for "distinct count" constraints, but **breaks with negative numbers** (a longer window can become valid again) — those need prefix sums + a hash map or a deque, not a plain sliding window.
 - **Forgetting to shrink fully** — after a violation you must shrink `left` until the window is valid again, which can be several steps; a single decrement is a common bug.
 - **Max/min over the window** needs a **monotonic deque** — tracking the maximum of every window in O(1) amortised requires a deque of candidate indices, not just a running variable (you can't "remove the max" from a plain sum).
 
@@ -83,7 +77,7 @@ public static int LongestUnique(string s)
 | Max/min of every window | Sliding window + monotonic deque | O(n) |
 | Brute force all sub-arrays | Nested loops | O(n²) |
 
-**Decision rule**: if the answer is about a **contiguous** range and you can update a running metric in O(1) as the range moves, it's a sliding window. If the constraint can be re-satisfied by *extending* (negatives, "exactly k" sums), switch to prefix sums + hashing.
+**Decision rule**: if the answer is about a **contiguous** range and you can update a running metric in O(1) as the range moves, it's a sliding window. If the constraint can be re-satisfied by _extending_ (negatives, "exactly k" sums), switch to prefix sums + hashing.
 
 ## Questions
 

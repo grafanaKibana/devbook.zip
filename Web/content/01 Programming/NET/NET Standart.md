@@ -1,13 +1,7 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
-level:
-  - "4"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:26.720+03:00
+modified: 2026-07-05T10:53:37.144+03:00
 ---
 
 # Intro
@@ -35,7 +29,7 @@ Key mechanics to remember:
 
 A `netstandard2.0` library references a single façade assembly, `netstandard.dll`, that contains no real implementation — just **type forwards**. At load time each type resolves (forwards) to the concrete implementation in whatever runtime is hosting the library (.NET Framework's `mscorlib`, or modern .NET's `System.Private.CoreLib`). That indirection is exactly what lets one compiled DLL run on multiple runtimes.
 
-The **2.0 → 2.1 gap** is the practical fault line: APIs like `Span<T>`, `IAsyncEnumerable<T>`, and `Math.Clamp` are *native* in `netstandard2.1`, but on `netstandard2.0` you get them only by adding the **`System.Memory` / `Microsoft.Bcl.AsyncInterfaces`** NuGet polyfills. Other useful packages: `Microsoft.Bcl.*` for backported BCL surface, and **`PolySharp`** for compiler-feature shims (records, `init`, `required`) — note that **`<LangVersion>` is independent of the TFM**, so you can use modern C# syntax targeting `netstandard2.0` as long as the required runtime types are polyfilled.
+The **2.0 → 2.1 gap** is the practical fault line: APIs like `Span<T>`, `IAsyncEnumerable<T>`, and `Math.Clamp` are _native_ in `netstandard2.1`, but on `netstandard2.0` you get them only by adding the **`System.Memory` / `Microsoft.Bcl.AsyncInterfaces`** NuGet polyfills. Other useful packages: `Microsoft.Bcl.*` for backported BCL surface, and **`PolySharp`** for compiler-feature shims (records, `init`, `required`) — note that **`<LangVersion>` is independent of the TFM**, so you can use modern C# syntax targeting `netstandard2.0` as long as the required runtime types are polyfilled.
 
 ### Why it ended
 
@@ -88,6 +82,7 @@ var buffer = new byte[256];
 ## Questions
 
 > [!QUESTION]- When should you still target netstandard?
+>
 > - Target `netstandard2.0` when you must support .NET Framework or older ecosystem consumers that cannot load modern `netX` assemblies.
 > - Prefer adding it as part of multi-targeting (`net8.0;netstandard2.0`) instead of making it your only target for new libraries.
 > - If all known consumers are modern .NET, target modern `netX` directly.

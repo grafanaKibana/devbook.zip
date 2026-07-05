@@ -1,18 +1,12 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
-level:
-  - "3"
-priority: Low
-status: Done
 publish: true
+created: 2026-07-05T10:54:06.807+03:00
+modified: 2026-07-05T17:35:42.931+03:00
 ---
 
 # Intro
 
-A multi-agentic system coordinates two or more LLM agents — each with its own context window, tools, and instructions — to solve a task that a single agent handles poorly. The [[11 AI & ML/LLM/Agents/Agents|Agents]] page covers what agents are, the augmented LLM building block, the five workflow patterns (prompt chaining through orchestrator-workers), and autonomous agent design. This page covers what changes when multiple agents must coordinate: communication patterns, coordination structures, and the failure modes specific to multi-agent systems.
+A multi-agentic system coordinates two or more LLM agents — each with its own context window, tools, and instructions — to solve a task that a single agent handles poorly. The [[Agents]] page covers what agents are, the augmented LLM building block, the five workflow patterns (prompt chaining through orchestrator-workers), and autonomous agent design. This page covers what changes when multiple agents must coordinate: communication patterns, coordination structures, and the failure modes specific to multi-agent systems.
 
 Multi-agent typically uses 3–10× more tokens than single-agent for equivalent tasks, driven by context duplication and coordination messages. That cost is justified under three specific conditions:
 
@@ -20,7 +14,7 @@ Multi-agent typically uses 3–10× more tokens than single-agent for equivalent
 2. **Parallelization** — independent work paths can run concurrently, and sequential execution is unacceptably slow.
 3. **Specialization** — the agent has 20+ tools and selection accuracy drops, or the task requires conflicting behavioral modes (empathetic support vs. precise code review in the same session).
 
-If none of these apply, a single well-prompted agent with good [[11 AI & ML/LLM/Agents/Tools|tools]] outperforms multi-agent on cost, latency, and debuggability. Anthropic reports that teams have invested months building multi-agent architectures only to discover that improved prompting on a single agent achieved equivalent results.
+If none of these apply, a single well-prompted agent with good [[Tools]] outperforms multi-agent on cost, latency, and debuggability. Anthropic reports that teams have invested months building multi-agent architectures only to discover that improved prompting on a single agent achieved equivalent results.
 
 The key design principle is **context-centric decomposition**: split agents along context boundaries, not problem boundaries. An agent handling a feature should also handle its tests — it already has the context. Only introduce a new agent when one genuinely cannot hold the relevant context in its window. Problem-centric splits (one agent writes code, another writes tests, a third reviews) force constant coordination and lose information at each handoff — a "telephone game" where fidelity drops with every transfer.
 
@@ -36,7 +30,7 @@ Agents must share context to coordinate. Three mechanisms dominate production sy
 
 ## Multi-Agent Coordination
 
-Beyond the [[11 AI & ML/LLM/Agents/Agents#Workflow Patterns|workflow patterns]] — of which orchestrator-workers is the dominant multi-agent topology — multi-agent systems use three structural patterns for organizing agent interactions.
+Beyond the [[Agents#Workflow Patterns|workflow patterns]] — of which orchestrator-workers is the dominant multi-agent topology — multi-agent systems use three structural patterns for organizing agent interactions.
 
 **Handoff / triage.** One active agent at a time. The current agent decides dynamically when to transfer control to a specialist. In Microsoft Agent Framework, `AgentWorkflowBuilder` declares a handoff routing graph where each agent receives transfer targets as tool definitions:
 
@@ -136,12 +130,14 @@ The "bitter lesson" of multi-agent: elaborate coordination architectures built t
 ## Questions
 
 > [!QUESTION]- When is multi-agent coordination justified over a single agent with more tools?
+>
 > - Justified under three conditions: context pollution (subtask degrades main agent reasoning), parallelization (independent paths need concurrent execution), specialization (20+ tools degrade selection accuracy, or conflicting behavioral modes needed)
 > - If none apply, single agent wins: 3–10× fewer tokens, lower latency, single linear trace for debugging
 > - Many teams investing months in multi-agent discover equivalent results from better prompting on one agent
 > - Key tradeoff: multi-agent buys context isolation and parallelism at the cost of coordination overhead and debugging complexity
 
 > [!QUESTION]- Why does context-centric decomposition outperform problem-centric decomposition?
+>
 > - Problem-centric (code agent + test agent + review agent) forces constant coordination — each agent needs context from the others, creating lossy handoffs
 > - Context-centric splits along natural context boundaries — agent handling a feature also handles its tests because it already has the context
 > - Introduce a new agent only when context genuinely cannot fit in one window
@@ -149,6 +145,7 @@ The "bitter lesson" of multi-agent: elaborate coordination architectures built t
 > - Key tradeoff: context-centric may produce broader agents (more tools per agent), but avoids the "telephone game" of multi-hop handoffs
 
 > [!QUESTION]- What makes multi-agent failures harder to diagnose than single-agent failures?
+>
 > - Semantic opacity: natural language errors pass as "valid" data between agents — no schema violations, no exceptions raised. A hallucinated fact from Agent A becomes trusted input for Agent B
 > - Non-linear traces: multiple interleaving reasoning chains with handoffs instead of one sequential trace, making root cause analysis harder
 > - Emergent behavior: agent interactions produce outcomes no single agent's instructions predict

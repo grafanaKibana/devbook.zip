@@ -1,13 +1,7 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
-level:
-  - "4"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:24.843+03:00
+modified: 2026-07-05T15:49:37.204+03:00
 ---
 
 # Intro
@@ -16,10 +10,10 @@ A minimum spanning tree (MST) of a connected, undirected, weighted graph is a su
 
 ## How It Works
 
-Both are [[02 Computer Science/Algorithms/Paradigms/Greedy Algorithms|greedy]] and both are provably optimal via the **cut property** (the lightest edge crossing any partition of the vertices is safe to include in some MST).
+Both are [[Greedy Algorithms|greedy]] and both are provably optimal via the **cut property** (the lightest edge crossing any partition of the vertices is safe to include in some MST).
 
-- **Kruskal's** — sort all edges by weight; add each edge if it connects two **different** components (i.e. doesn't form a cycle), using a [[02 Computer Science/Algorithms/Union-Find|Union-Find]] to test connectivity in near-O(1). Builds the tree as a "forest" that merges. **O(E log E)**, dominated by the sort. Great for **sparse** graphs.
-- **Prim's** — grow a single tree from an arbitrary start vertex; repeatedly add the cheapest edge crossing from the tree to a vertex outside it, using a [[02 Computer Science/Data Structures/Heap|priority queue]]. **O(E log V)**. Better for **dense** graphs.
+- **Kruskal's** — sort all edges by weight; add each edge if it connects two **different** components (i.e. doesn't form a cycle), using a [[Union-Find]] to test connectivity in near-O(1). Builds the tree as a "forest" that merges. **O(E log E)**, dominated by the sort. Great for **sparse** graphs.
+- **Prim's** — grow a single tree from an arbitrary start vertex; repeatedly add the cheapest edge crossing from the tree to a vertex outside it, using a [[Heap|priority queue]]. **O(E log V)**. Better for **dense** graphs.
 
 ## Example
 
@@ -63,17 +57,17 @@ public static int PrimWeight(int n, List<(int to, int w)>[] adj)
 
 ## Pitfalls
 
-- **Graph must be connected** — an MST spans *all* vertices, so a disconnected graph has none. Kruskal's on a disconnected graph yields a minimum spanning *forest* (one tree per component) and will add fewer than V−1 edges; check for that rather than assuming success.
+- **Graph must be connected** — an MST spans _all_ vertices, so a disconnected graph has none. Kruskal's on a disconnected graph yields a minimum spanning _forest_ (one tree per component) and will add fewer than V−1 edges; check for that rather than assuming success.
 - **Directed graphs don't have MSTs** — MST is defined for undirected graphs. The directed analogue (minimum arborescence) needs a different algorithm (Chu–Liu/Edmonds).
-- **Stale priority-queue entries in Prim's** — .NET's `PriorityQueue` has no decrease-key, so you push duplicates and **skip already-in-tree nodes on dequeue** (the `if (inTree[u]) continue;` line). Forgetting that check double-counts edges. (Same lazy-deletion pattern as [[02 Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]].)
-- **MST is not unique with equal weights** — multiple MSTs can exist when edge weights tie; both algorithms return *a* minimum-weight tree, not a canonical one. (The total weight is unique, though.)
+- **Stale priority-queue entries in Prim's** — .NET's `PriorityQueue` has no decrease-key, so you push duplicates and **skip already-in-tree nodes on dequeue** (the `if (inTree[u]) continue;` line). Forgetting that check double-counts edges. (Same lazy-deletion pattern as [[Dijkstra]].)
+- **MST is not unique with equal weights** — multiple MSTs can exist when edge weights tie; both algorithms return _a_ minimum-weight tree, not a canonical one. (The total weight is unique, though.)
 
 ## Tradeoffs
 
 | Algorithm | Complexity | Best for | Key structure |
 |---|---|---|---|
-| **Kruskal's** | O(E log E) | Sparse graphs; edge list given | [[02 Computer Science/Algorithms/Union-Find\|Union-Find]] |
-| **Prim's** | O(E log V) with a binary heap | Dense graphs; adjacency given | [[02 Computer Science/Data Structures/Heap\|Priority queue]] |
+| **Kruskal's** | O(E log E) | Sparse graphs; edge list given | [[Union-Find]] |
+| **Prim's** | O(E log V) with a binary heap | Dense graphs; adjacency given | [[Heap\|Priority queue]] |
 
 **Decision rule**: if the graph is given as an edge list and is sparse, **Kruskal's** is simplest and fast. If it's dense or given as an adjacency structure, **Prim's** with a heap edges ahead. Both produce the same total weight; the choice is about graph shape and which structure you already have.
 

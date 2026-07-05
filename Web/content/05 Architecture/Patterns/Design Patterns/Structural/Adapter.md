@@ -1,14 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Patterns
-level:
-  - "2"
-priority: High
-status:
-  - Done
 publish: true
+created: 2026-07-05T10:53:43.335+03:00
+modified: 2026-07-05T15:49:37.502+03:00
 ---
 
 # Adapter
@@ -39,7 +32,7 @@ classDiagram
 ```
 
 > [!NOTE] Adapter vs Facade vs Bridge
-> **Adapter** makes an existing incompatible interface work — it's a retrofit. [[05 Architecture/Patterns/Design Patterns/Structural/Facade|Facade]] creates a new simplified interface over a complex subsystem — it's about convenience. [[05 Architecture/Patterns/Design Patterns/Structural/Bridge|Bridge]] is designed upfront to separate abstraction from implementation — it's not a retrofit at all.
+> **Adapter** makes an existing incompatible interface work — it's a retrofit. [[Facade]] creates a new simplified interface over a complex subsystem — it's about convenience. [[Bridge]] is designed upfront to separate abstraction from implementation — it's not a retrofit at all.
 
 ## Problem
 
@@ -190,7 +183,7 @@ Replacing the legacy system now means writing a new adapter class — `OrderServ
 
 ## References
 
-- [Adapter Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=2PKQtcJjYvc&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=8) — video walkthrough of the Adapter pattern with OOP examples
+- [Adapter Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=2PKQtcJjYvc\&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc\&index=8) — video walkthrough of the Adapter pattern with OOP examples
 - [Adapter — refactoring.guru](https://refactoring.guru/design-patterns/adapter) — canonical pattern description with object and class adapter variants, C# example
 - [StreamReader — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.io.streamreader) — .NET's built-in Adapter for byte-to-text stream translation
 - [DelegatingHandler — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.net.http.delegatinghandler) — HTTP pipeline adapter pattern in .NET

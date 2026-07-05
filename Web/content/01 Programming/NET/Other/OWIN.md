@@ -1,18 +1,12 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
-level:
-  - "3"
-priority: Low
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:26.732+03:00
+modified: 2026-07-05T10:53:37.144+03:00
 ---
 
 # Intro
 
-OWIN (Open Web Interface for .NET) defines a standard boundary between .NET web servers and web applications. 
+OWIN (Open Web Interface for .NET) defines a standard boundary between .NET web servers and web applications.
 It became popular through Katana and is most relevant today when you maintain legacy ASP.NET applications or migrate them to ASP.NET Core.
 The key value is understanding middleware pipeline composition and host decoupling, because those ideas carry directly into modern .NET web stacks.
 An OWIN app is middleware chained around an environment dictionary (`IDictionary<string, object>`).
@@ -77,11 +71,13 @@ For the incremental path, Microsoft's current tooling does the heavy lifting: **
 ## Questions
 
 > [!QUESTION]- What problem did OWIN solve?
+>
 > - It standardized the server-application boundary so middleware/app components were portable across hosts.
 > - It enabled a composable pipeline model independent of `System.Web` internals.
 > - It reduced host lock-in for teams maintaining ASP.NET-era applications.
 
 > [!QUESTION]- How should incremental migration vs full rewrite be chosen when modernizing an OWIN app under strict uptime requirements?
+>
 > - Prefer incremental migration when downtime risk and release pressure are high; isolate seams (auth, API endpoints, cross-cutting middleware) and move components in slices.
 > - Prefer rewrite when current architecture blocks critical goals (performance, security posture, operability) and business can fund a transition window.
 > - Decide with hard constraints: SLA tolerance, test coverage quality, team expertise, and ability to run parallel environments safely.

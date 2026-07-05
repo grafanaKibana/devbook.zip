@@ -1,13 +1,7 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
-level:
-  - "4"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:25.656+03:00
+modified: 2026-07-05T17:35:42.491+03:00
 ---
 
 # Intro
@@ -20,7 +14,7 @@ Three common configurations:
 
 - **Opposite ends (converging)** — `left = 0`, `right = n-1`, move them toward each other based on a comparison. Classic for "pair with target sum" in a sorted array: if the sum is too small advance `left`, too big retreat `right`.
 - **Same direction (fast/slow)** — both start at the front; one advances conditionally. Used for in-place dedup, partitioning, and (with different speeds) **Floyd's cycle detection** in a linked list.
-- **Two sequences** — one pointer per array, advancing whichever is behind. The merge step of [[02 Computer Science/Algorithms/Sorting Algorithms/Merge Sort|merge sort]] is exactly this.
+- **Two sequences** — one pointer per array, advancing whichever is behind. The merge step of [[Merge Sort]] is exactly this.
 
 The reason it's O(n): each pointer only ever moves forward (or they only converge), so the total number of moves is bounded by n — you never re-examine the same pair twice.
 
@@ -62,7 +56,7 @@ public static int RemoveDuplicates(int[] a)
 - **Requires the right precondition** — converging two-sum only works because the array is **sorted**. On unsorted input you either sort first (O(n log n)) or use a hash set (O(n) time, O(n) space). Applying it to unsorted data gives wrong answers, not just slow ones.
 - **Off-by-one and termination** — `while (left < right)` vs `<=` changes whether the middle element is considered and whether equal-index pairs are allowed. Pick deliberately and test the 0/1/2-element cases.
 - **Infinite loops** — every iteration must move at least one pointer toward termination. A branch that advances neither pointer hangs.
-- **Confusing with sliding window** — both use two indices moving forward, but a [[02 Computer Science/Algorithms/Patterns/Sliding Window|sliding window]] maintains a *contiguous range and its aggregate*; two pointers usually compare or partition *elements*. If you're tracking a running sum/count over a sub-array, it's a window.
+- **Confusing with sliding window** — both use two indices moving forward, but a [[Sliding Window]] maintains a _contiguous range and its aggregate_; two pointers usually compare or partition _elements_. If you're tracking a running sum/count over a sub-array, it's a window.
 
 ## Tradeoffs
 
@@ -84,7 +78,7 @@ public static int RemoveDuplicates(int[] a)
 > Advance `slow` by one node and `fast` by two each step (Floyd's tortoise-and-hare). If there's a cycle, `fast` eventually laps and meets `slow`; if `fast` reaches the end (`null`), the list is acyclic. It's O(n) time and O(1) space — no visited set needed.
 
 > [!QUESTION]- How is two pointers different from a sliding window?
-> Both move indices forward in O(n), but a sliding window maintains a *contiguous sub-range and an aggregate over it* (sum, distinct count), expanding/shrinking to satisfy a constraint. Two pointers typically compares or rearranges individual elements (pair sum, partition, merge). Tracking a running window metric ⇒ sliding window; comparing/partitioning ends ⇒ two pointers.
+> Both move indices forward in O(n), but a sliding window maintains a _contiguous sub-range and an aggregate over it_ (sum, distinct count), expanding/shrinking to satisfy a constraint. Two pointers typically compares or rearranges individual elements (pair sum, partition, merge). Tracking a running window metric ⇒ sliding window; comparing/partitioning ends ⇒ two pointers.
 
 ## References
 

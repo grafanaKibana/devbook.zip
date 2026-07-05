@@ -1,13 +1,7 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
-level:
-  - "4"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:27.287+03:00
+modified: 2026-07-05T10:53:37.179+03:00
 ---
 
 # Intro
@@ -67,7 +61,7 @@ static void ProcessData(in int value)
 
 ### out
 
-`out` passes by reference for **output**: the callee *must* assign it before returning, and the caller need not initialize it. It's the basis of the `TryParse` pattern (return a `bool` for success, hand back the value via `out`) and pairs with inline `out var`:
+`out` passes by reference for **output**: the callee _must_ assign it before returning, and the caller need not initialize it. It's the basis of the `TryParse` pattern (return a `bool` for success, hand back the value via `out`) and pairs with inline `out var`:
 
 ```csharp
 static bool TryDivide(int a, int b, out int result)
@@ -81,7 +75,7 @@ if (TryDivide(10, 2, out var quotient))   // 'quotient' declared inline
     Console.WriteLine(quotient);           // 5
 ```
 
-Use `out` (success-or-default) instead of throwing for *expected* failures on hot paths; `Dictionary.TryGetValue` is the canonical example.
+Use `out` (success-or-default) instead of throwing for _expected_ failures on hot paths; `Dictionary.TryGetValue` is the canonical example.
 
 ### params
 
@@ -194,7 +188,7 @@ Console.WriteLine(asDog.Category());    // Dog
 
 ## Other Method Forms
 
-- **`ref return` / `ref readonly return`** — return an *alias* to existing storage instead of a copy, letting callers read (and with `ref`, mutate) the original. Combined with `ref` locals (`ref var slot = ref array[i];`) this enables in-place updates of array/struct fields with no copying — used heavily in high-performance code (`Span<T>`, `Dictionary.GetValueRefOrAddDefault`).
+- **`ref return` / `ref readonly return`** — return an _alias_ to existing storage instead of a copy, letting callers read (and with `ref`, mutate) the original. Combined with `ref` locals (`ref var slot = ref array[i];`) this enables in-place updates of array/struct fields with no copying — used heavily in high-performance code (`Span<T>`, `Dictionary.GetValueRefOrAddDefault`).
 - **Local functions vs lambdas** — a local function is a named method nested in another method. Prefer it over a lambda when you don't need a delegate: it can be `static` (forbids accidental captures), supports `ref`/`out` and iterators, and **doesn't allocate a delegate/closure** unless converted to one. Lambdas are for when you actually need a `Func`/`Action` value.
 - **Extension methods** — `static` methods in a `static` class with a `this`-modified first parameter, letting you "add" methods to existing types (the whole of LINQ is extension methods on `IEnumerable<T>`).
 - **Expression-bodied members** (`=> ...`) are just concise syntax for single-expression methods/properties.
@@ -217,10 +211,11 @@ Console.WriteLine(asDog.Category());    // Dog
 | **`params T[]` vs `params ReadOnlySpan<T>`** | `params T[]` (heap array per call) | `params ReadOnlySpan<T>` (stack or inline buffer) | Pre-C# 13 code, or when caller needs to store the array | C# 13+, hot paths where allocation pressure matters — span-based avoids the heap allocation |
 
 **Decision rule**: default to by-value for types ≤16 bytes and `override` for all polymorphic methods. Introduce `in` only when profiling shows copy cost matters (typically structs >16 bytes called >10K/sec). Use `new` only when you own both types and the behavior split is documented in XML comments.
+
 ## Questions
 
 > [!QUESTION]- Why might you need `ref` for reference types if reference types are already passed by reference?
-> Reference type *values* (the reference) are passed by value. `ref` is needed when you want the callee to replace the caller's reference (rebind it to a different object).
+> Reference type _values_ (the reference) are passed by value. `ref` is needed when you want the callee to replace the caller's reference (rebind it to a different object).
 
 > [!QUESTION]- What is an `in` parameter used for?
 > To pass an argument by readonly reference: avoid copies for large structs and communicate that the method should not modify the argument.

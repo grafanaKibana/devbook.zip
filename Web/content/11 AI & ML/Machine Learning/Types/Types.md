@@ -1,15 +1,9 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - Machine Learning
+publish: true
+created: 2026-07-05T10:54:06.750+03:00
+modified: 2026-07-05T10:54:06.750+03:00
 tags:
   - FolderNote
-publish: true
-status: Done
-priority: Low
-level:
-  - "1"
 ---
 
 # Intro

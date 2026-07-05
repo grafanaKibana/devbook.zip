@@ -1,12 +1,7 @@
 ---
-topic:
-  - AI & ML
-subtopic: []
-level:
-  - "3"
-priority: Medium
-status: Done
 publish: true
+created: 2026-07-05T10:54:06.659+03:00
+modified: 2026-07-05T15:49:33.918+03:00
 ---
 
 # Intro
@@ -30,7 +25,7 @@ Engineering practices that operationalize fairness:
 
 AI systems should behave as designed, respond safely to unexpected inputs, and resist harmful manipulation. Reliability means consistent behavior without unwanted variability; safety means minimizing unintended harm — physical, emotional, or financial — when the system is wrong.
 
-In practice this means testing beyond the happy path (adversarial inputs, out-of-distribution data, degraded dependencies), defining fallback behavior for low-confidence cases, and deploying through staged rollouts — see [[11 AI & ML/Machine Learning/Spectrum Of Automations|Spectrum Of Automations]] for the shadow-mode-to-full-automation progression.
+In practice this means testing beyond the happy path (adversarial inputs, out-of-distribution data, degraded dependencies), defining fallback behavior for low-confidence cases, and deploying through staged rollouts — see [[Spectrum Of Automations]] for the shadow-mode-to-full-automation progression.
 
 ### Privacy and Security
 
@@ -41,7 +36,7 @@ AI systems should protect the data they are trained on and the data they process
 - **Encryption and key management** — encrypt data in transit and at rest; manage keys through hardware security modules or managed vaults with controlled access, rotation, and audited usage.
 - **Access control** — classify models and datasets by sensitivity, restrict access by role, and audit regularly.
 
-For LLM-specific data exposure risks (training data leakage, retrieval over-scoping, prompt-based exfiltration), see [[11 AI & ML/LLM/OWASP vulnerabilities on AI LLM|OWASP vulnerabilities on AI LLM]] and [[11 AI & ML/LLM/Guardrails|Guardrails]].
+For LLM-specific data exposure risks (training data leakage, retrieval over-scoping, prompt-based exfiltration), see [[OWASP vulnerabilities on AI LLM]] and [[Guardrails]].
 
 ### Inclusiveness
 
@@ -65,6 +60,7 @@ People — not models — are accountable for AI system behavior. Teams deployin
 ## Questions
 
 > [!QUESTION]- How do the six principles translate into concrete engineering work?
+>
 > - Fairness → slice-based evaluation, dataset audits, per-segment production monitoring
 > - Reliability and safety → adversarial testing, fallback paths, staged rollout via shadow mode
 > - Privacy and security → data minimization, anonymization, encryption, RBAC on models and data
@@ -74,6 +70,7 @@ People — not models — are accountable for AI system behavior. Teams deployin
 > - The common thread: every principle is testable and monitorable — if it only lives in a policy document, it is not implemented
 
 > [!QUESTION]- Why is aggregate accuracy insufficient evidence that a system is fair?
+>
 > - Aggregate metrics average over the whole population, so strong majority-group performance can mask poor performance on minority groups
 > - A system can be 95% accurate overall while being 70% accurate for a specific demographic — the aggregate number hides exactly the disparity fairness is about
 > - The fix is slice-based evaluation: measure the same metrics per demographic segment and treat a large gap as a defect, even when the aggregate looks healthy

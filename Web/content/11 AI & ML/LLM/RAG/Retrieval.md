@@ -1,20 +1,14 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
-level:
-  - "2"
-priority: High
-status: Done
 publish: true
+created: 2026-07-05T10:54:06.859+03:00
+modified: 2026-07-05T15:49:36.080+03:00
 ---
 
 # Intro
 
 Retrieval is the stage that decides what evidence enters the prompt. In most RAG systems, generation quality plateaus at the quality of retrieval — no prompt engineering or model upgrade compensates for missing or wrong context. The goal is to balance recall (find everything relevant), precision (exclude everything irrelevant), and latency across query types: semantic paraphrases, exact identifiers, and multi-constraint requests.
 
-The mechanism: the user query is converted into one or more search representations — a vector (for semantic search), a set of weighted terms (for keyword search), or both. The vector is matched against pre-indexed chunk vectors in a vector database. The terms are matched via a keyword index (BM25). The top-k candidates from one or both paths are fused into a single ranked list and passed to [[11 AI & ML/LLM/RAG/Re-ranking|reranking]] or directly to the generator.
+The mechanism: the user query is converted into one or more search representations — a vector (for semantic search), a set of weighted terms (for keyword search), or both. The vector is matched against pre-indexed chunk vectors in a vector database. The terms are matched via a keyword index (BM25). The top-k candidates from one or both paths are fused into a single ranked list and passed to [[Re-ranking|reranking]] or directly to the generator.
 
 ```mermaid
 flowchart LR
@@ -35,7 +29,7 @@ Example: a user asks "rate limit error 429 behavior in partner tier." Vector sea
 How it works:
 
 - An embedding model converts the query and each document chunk into fixed-size vectors in the same space. Chunk vectors are pre-computed and stored at index time; only the query vector is computed at search time. This is what makes vector search fast — you pay the embedding cost per document once, not per query.
-- The [[11 AI & ML/LLM/RAG/Vector Databases|vector database]] finds the closest chunk vectors using an approximate index (commonly HNSW or IVF). "Approximate" means it trades a small accuracy loss for massive speed gains — searching millions of vectors in milliseconds instead of scanning every one.
+- The [[Vector Databases|vector database]] finds the closest chunk vectors using an approximate index (commonly HNSW or IVF). "Approximate" means it trades a small accuracy loss for massive speed gains — searching millions of vectors in milliseconds instead of scanning every one.
 - Embedding model choice directly affects retrieval quality. Models differ in dimensionality, training data, and domain coverage. MTEB leaderboard scores are a starting point, but a model topping MTEB on general benchmarks can collapse on specialized corpora or non-English queries — always evaluate on your own data.
 
 Where it fits:
@@ -73,7 +67,7 @@ Hybrid retrieval is like running both a full-text search (`WHERE body @@ to_tsqu
 How it works:
 
 - Run vector search and keyword search in parallel against the same query. Fuse the two ranked lists into a single candidate set.
-- **[[11 AI & ML/LLM/RAG/Re-ranking|Reciprocal Rank Fusion (RRF)]]** is the most common fusion method: for each document, sum `1 / (k + rank)` across retrievers, where k=60 is the standard constant. RRF only uses rank positions, not scores — so it works even though vector similarity and BM25 scores are on completely different scales. A document ranked high in both lists scores higher than one ranked first in only one list, rewarding agreement.
+- **[[Re-ranking|Reciprocal Rank Fusion (RRF)]]** is the most common fusion method: for each document, sum `1 / (k + rank)` across retrievers, where k=60 is the standard constant. RRF only uses rank positions, not scores — so it works even though vector similarity and BM25 scores are on completely different scales. A document ranked high in both lists scores higher than one ranked first in only one list, rewarding agreement.
 - **Linear combination** normalizes scores and computes `alpha * vector_score + (1 - alpha) * keyword_score`. More tunable but requires choosing alpha per domain. Identifier-heavy corpora benefit from higher keyword weight (alpha around 0.4); conversational queries benefit from higher vector weight (alpha around 0.7).
 
 Where it fits:
@@ -83,7 +77,7 @@ Where it fits:
 Main risk:
 
 - **Not universally better than single-mode.** On homogeneous corpora where one search mode dominates, the weaker one introduces noise into the fused results. In one production benchmark on scientific documents, vector-only achieved 69.2% hit rate versus hybrid's 63.5% — keyword search added noise, not signal. The "weakest link" phenomenon: adding a weak retrieval path to a hybrid system can degrade overall performance. Evaluate hybrid against single-mode baselines on your actual corpus.
-- **Over-retrieval noise when top-k is high.** Fusing two ranked lists with large top-k produces candidates with diminishing relevance. Without [[11 AI & ML/LLM/RAG/Re-ranking|reranking]] or deduplication, low-ranked fused candidates dilute generation context.
+- **Over-retrieval noise when top-k is high.** Fusing two ranked lists with large top-k produces candidates with diminishing relevance. Without [[Re-ranking|reranking]] or deduplication, low-ranked fused candidates dilute generation context.
 
 ## Indexing and Filtering
 
@@ -104,7 +98,7 @@ Metadata filtering is equally critical:
 
 HNSW recall degrades as the corpus grows — no errors, no latency spike, just worse context fed to the LLM. At a fixed `ef_search` value, the index becomes less accurate as more vectors crowd the space. Infrastructure dashboards show healthy metrics while answer quality silently declines. Long-tail and rare-entity queries degrade first.
 
-Detection: maintain ground-truth query-chunk pairs and run [[11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics|Recall@k]] checks on a schedule. Latency and error-rate monitoring alone will not catch recall regression.
+Detection: maintain ground-truth query-chunk pairs and run [[Monitoring#Retrieval Quality Metrics|Recall@k]] checks on a schedule. Latency and error-rate monitoring alone will not catch recall regression.
 
 ### Embedding Model Migration Debt
 
@@ -133,7 +127,7 @@ Mitigation: use hybrid retrieval for identifier-heavy corpora. Explicitly test r
 | Hybrid -- RRF | Broad -- covers semantic and lexical queries | Moderate -- two parallel searches plus fusion | Higher -- two indexes and fusion logic | Mixed query patterns -- default for most production systems |
 | Hybrid -- linear combination | Tunable -- weight toward dominant search mode | Moderate -- same as RRF | Highest -- requires alpha tuning per domain | When one search mode is consistently stronger and you want explicit weighting |
 
-Decision rule: start with hybrid retrieval (RRF) and conservative top-k (5-20). Evaluate against single-mode baselines on your actual corpus and query distribution — hybrid is the safe default but not always the winner. Add [[11 AI & ML/LLM/RAG/Re-ranking|reranking]] only after baseline retrieval is stable and precision at the top of the ranked list is the dominant error mode.
+Decision rule: start with hybrid retrieval (RRF) and conservative top-k (5-20). Evaluate against single-mode baselines on your actual corpus and query distribution — hybrid is the safe default but not always the winner. Add [[Re-ranking|reranking]] only after baseline retrieval is stable and precision at the top of the ranked list is the dominant error mode.
 
 ## Questions
 
@@ -144,7 +138,7 @@ Decision rule: start with hybrid retrieval (RRF) and conservative top-k (5-20). 
 > When the weaker search mode contributes more noise than signal to the fused list. On homogeneous corpora where one mode dominates (e.g., scientific documents with consistent terminology and natural-language queries), the non-dominant mode pulls in marginally relevant candidates that dilute fused results. In production benchmarks, vector-only has beaten hybrid on scientific corpora because keyword search on specialized vocabulary introduced noise. Always evaluate hybrid against single-mode baselines on your actual corpus before committing to the added complexity.
 
 > [!QUESTION]- Why does HNSW recall degrade silently as the vector database grows?
-> HNSW navigates a graph to find approximate nearest neighbors, not an exhaustive scan. The `ef_search` parameter controls how many candidate nodes the search visits. At small corpus sizes, a moderate `ef_search` finds most true neighbors. As the corpus grows, the graph becomes denser and the same `ef_search` misses more true neighbors — the search path does not explore enough of the graph to find them. Latency stays stable because the search still visits the same number of candidates, and no errors are raised. The only signal is less relevant retrieved chunks. Detection requires explicit [[11 AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics|Recall@k]] monitoring against a ground-truth test set.
+> HNSW navigates a graph to find approximate nearest neighbors, not an exhaustive scan. The `ef_search` parameter controls how many candidate nodes the search visits. At small corpus sizes, a moderate `ef_search` finds most true neighbors. As the corpus grows, the graph becomes denser and the same `ef_search` misses more true neighbors — the search path does not explore enough of the graph to find them. Latency stays stable because the search still visits the same number of candidates, and no errors are raised. The only signal is less relevant retrieved chunks. Detection requires explicit [[Monitoring#Retrieval Quality Metrics|Recall@k]] monitoring against a ground-truth test set.
 
 ## References
 

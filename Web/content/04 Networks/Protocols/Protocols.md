@@ -1,15 +1,9 @@
 ---
-topic:
-  - Networks
-subtopic:
-  - Protocols
+publish: true
+created: 2026-07-05T10:53:36.602+03:00
+modified: 2026-07-05T10:53:37.367+03:00
 tags:
   - FolderNote
-publish: true
-priority: High
-level:
-  - "3"
-status: Done
 ---
 
 # Intro

@@ -1,14 +1,7 @@
 ---
-topic:
-  - Networks
-subtopic:
-  - Transport & Sockets
-level:
-  - "3"
-priority: Medium
-status: Ready to Repeat
-
 publish: true
+created: 2026-07-05T10:53:36.372+03:00
+modified: 2026-07-05T10:53:37.358+03:00
 ---
 
 # Intro
@@ -118,7 +111,7 @@ Console.WriteLine($"Received {result.Buffer.Length} bytes from {result.RemoteEnd
 
 ## Half-Close and the Scaling Model
 
-**Half-close** — TCP connections are bidirectional and each direction closes independently. `socket.Shutdown(SocketShutdown.Send)` sends a FIN to signal "I'm done writing" while you keep *reading* the peer's response — the standard way to tell a server "request complete" without tearing down the read side. The peer sees end-of-stream (a 0-byte read) on its side.
+**Half-close** — TCP connections are bidirectional and each direction closes independently. `socket.Shutdown(SocketShutdown.Send)` sends a FIN to signal "I'm done writing" while you keep _reading_ the peer's response — the standard way to tell a server "request complete" without tearing down the read side. The peer sees end-of-stream (a 0-byte read) on its side.
 
 **How one server handles thousands of connections** — you don't dedicate a thread per socket. The OS provides an **event-notification** mechanism — `epoll` (Linux), `kqueue` (BSD/macOS), **IOCP** (Windows) — that lets one (or a few) threads wait on many sockets and wake only for the ones with data ready. This is the "C10k" solution, and it's exactly what .NET's async socket APIs sit on top of: `await ReceiveAsync()` registers interest and releases the thread until the OS signals readiness/completion. Reaching for `SocketAsyncEventArgs` or `System.IO.Pipelines` squeezes out the remaining per-operation allocation for very high-throughput servers.
 

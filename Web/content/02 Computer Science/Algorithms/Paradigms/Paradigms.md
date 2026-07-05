@@ -1,20 +1,14 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+publish: true
+created: 2026-07-05T10:53:25.922+03:00
+modified: 2026-07-05T17:36:34.441+03:00
 tags:
   - FolderNote
-publish: true
-priority: High
-level:
-  - "4"
-status: Ready to Repeat
 ---
 
 # Intro
 
-Algorithm-design paradigms are the broad *strategies* for constructing a solution — the lens you choose before writing any code. Most named algorithms are instances of one: merge sort is divide-and-conquer, Dijkstra is greedy, Fibonacci-with-memoisation is dynamic programming. Knowing the paradigm tells you the shape of the answer and the proof obligations (e.g. greedy needs an exchange argument; DP needs optimal substructure).
+Algorithm-design paradigms are the broad _strategies_ for constructing a solution — the lens you choose before writing any code. Most named algorithms are instances of one: merge sort is divide-and-conquer, Dijkstra is greedy, Fibonacci-with-memoisation is dynamic programming. Knowing the paradigm tells you the shape of the answer and the proof obligations (e.g. greedy needs an exchange argument; DP needs optimal substructure).
 
 This folder covers the three most important:
 
@@ -24,14 +18,14 @@ This folder covers the three most important:
 
 | Paradigm | Strategy | Must hold to apply | Classic examples |
 |---|---|---|---|
-| [[02 Computer Science/Algorithms/Paradigms/Dynamic Programming\|Dynamic Programming]] | Reuse answers to overlapping subproblems | Optimal substructure **and** overlapping subproblems | Knapsack, edit distance, longest common subsequence |
-| [[02 Computer Science/Algorithms/Paradigms/Greedy Algorithms\|Greedy]] | Take the locally optimal choice, never revisit | Greedy-choice property (provable by an exchange argument) | Dijkstra, Huffman coding, interval scheduling |
-| [[02 Computer Science/Algorithms/Paradigms/Backtracking\|Backtracking]] | DFS over choices, prune dead branches | Partial solutions can be rejected early | N-Queens, Sudoku, permutations/subsets |
+| [[Dynamic Programming]] | Reuse answers to overlapping subproblems | Optimal substructure **and** overlapping subproblems | Knapsack, edit distance, longest common subsequence |
+| [[Greedy Algorithms\|Greedy]] | Take the locally optimal choice, never revisit | Greedy-choice property (provable by an exchange argument) | Dijkstra, Huffman coding, interval scheduling |
+| [[Backtracking]] | DFS over choices, prune dead branches | Partial solutions can be rejected early | N-Queens, Sudoku, permutations/subsets |
 
 > [!TIP]
-> A common progression: if backtracking explores the *same* subproblem repeatedly, adding memoisation turns it into dynamic programming; if a greedy choice can be proven always-correct, it replaces DP with something far cheaper.
+> A common progression: if backtracking explores the _same_ subproblem repeatedly, adding memoisation turns it into dynamic programming; if a greedy choice can be proven always-correct, it replaces DP with something far cheaper.
 
-They contrast with [[02 Computer Science/Algorithms/Patterns/Patterns|patterns]] (two pointers, sliding window), which are concrete coding idioms rather than design philosophies. **Divide-and-conquer** (e.g. merge sort, binary search) is another major paradigm; it shows up across the [[02 Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms|sorting]] notes.
+They contrast with [[02 Computer Science/Algorithms/Patterns/Patterns|patterns]] (two pointers, sliding window), which are concrete coding idioms rather than design philosophies. **Divide-and-conquer** (e.g. merge sort, binary search) is another major paradigm; it shows up across the [[Sorting Algorithms|sorting]] notes.
 
 ## References
 

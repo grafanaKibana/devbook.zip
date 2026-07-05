@@ -1,13 +1,7 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
-level:
-  - "4"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:27.216+03:00
+modified: 2026-07-05T10:53:37.175+03:00
 ---
 
 # Intro
@@ -79,7 +73,7 @@ foreach (var number in CountNumbers(1, 5))
 
 Two iterator gotchas:
 
-- **Deferred execution moves exceptions.** Because the body doesn't run until enumeration starts, an argument check inside an iterator method throws *when the caller starts iterating*, not at the call site. For eager validation, split a public wrapper (validate, then return) from a private iterator (`yield`).
+- **Deferred execution moves exceptions.** Because the body doesn't run until enumeration starts, an argument check inside an iterator method throws _when the caller starts iterating_, not at the call site. For eager validation, split a public wrapper (validate, then return) from a private iterator (`yield`).
 - **`yield` can't live inside a `try` with a `catch`** (only `try`/`finally` is allowed), and not inside a `lock`/`unsafe` block. If you need catch semantics around yielded work, wrap the consumption, not the production.
 
 ## Pitfalls

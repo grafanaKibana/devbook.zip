@@ -1,13 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Patterns
-level:
-  - "2"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:43.334+03:00
+modified: 2026-07-05T15:49:37.450+03:00
 ---
 
 # Facade
@@ -27,7 +21,7 @@ flowchart LR
 ```
 
 > [!NOTE] Facade vs Adapter
-> **Facade** creates a **new simplified interface** for your convenience — it's about reducing complexity. [[05 Architecture/Patterns/Design Patterns/Structural/Adapter|Adapter]] makes an **existing incompatible interface** fit a target interface — it's about compatibility. Facade is optional (you could call the subsystems directly); Adapter is required (the interfaces are incompatible without it).
+> **Facade** creates a **new simplified interface** for your convenience — it's about reducing complexity. [[Adapter]] makes an **existing incompatible interface** fit a target interface — it's about compatibility. Facade is optional (you could call the subsystems directly); Adapter is required (the interfaces are incompatible without it).
 
 ## Problem
 
@@ -166,9 +160,9 @@ Adding fraud detection now means editing `OrderFacade.PlaceOrderAsync` in one pl
 
 **Use it when**: a complex subsystem (several collaborating classes, a tricky call sequence) is used the same way by many clients — wrap it in one high-level entry point so callers (and the rest of your code) don't depend on the subsystem's shape. It also decouples clients from churn inside the subsystem.
 
-**Don't reach for it when**: there's no real complexity to hide (one class behind one class is just indirection), or the facade starts **accreting business rules** and becomes a god object — a facade should *orchestrate/simplify*, not *own* domain logic. Keep the subsystem directly accessible for callers that need fine control; a facade is a convenience, not a gatekeeper.
+**Don't reach for it when**: there's no real complexity to hide (one class behind one class is just indirection), or the facade starts **accreting business rules** and becomes a god object — a facade should _orchestrate/simplify_, not _own_ domain logic. Keep the subsystem directly accessible for callers that need fine control; a facade is a convenience, not a gatekeeper.
 
-**vs related**: **[[05 Architecture/Patterns/Design Patterns/Structural/Adapter|Adapter]]** changes an interface to make things *compatible* (required); Facade *simplifies* an interface for convenience (optional) — see the note above. A **[[05 Architecture/Patterns/Design Patterns/Behavioral/Mediator|Mediator]]** coordinates peers bidirectionally; a Facade is a one-way front door. At the network boundary, an **[[05 Architecture/Distributed Systems/API Gateway|API Gateway]]** is essentially a Facade over many microservices.
+**vs related**: **[[Adapter]]** changes an interface to make things _compatible_ (required); Facade _simplifies_ an interface for convenience (optional) — see the note above. A **[[Mediator]]** coordinates peers bidirectionally; a Facade is a one-way front door. At the network boundary, an **[[API Gateway]]** is essentially a Facade over many microservices.
 
 ## Questions
 
@@ -180,7 +174,7 @@ Adding fraud detection now means editing `OrderFacade.PlaceOrderAsync` in one pl
 
 ## References
 
-- [Facade Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=K4FkHVO5iac&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=9) — video walkthrough of the Facade pattern with OOP examples
+- [Facade Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=K4FkHVO5iac\&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc\&index=9) — video walkthrough of the Facade pattern with OOP examples
 - [Facade — refactoring.guru](https://refactoring.guru/design-patterns/facade) — canonical pattern description with subsystem diagram and C# example
 - [File class — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.io.file) — .NET's built-in Facade for file I/O operations
 - [HttpClient — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.net.http.httpclient) — Facade over the HTTP message handler pipeline

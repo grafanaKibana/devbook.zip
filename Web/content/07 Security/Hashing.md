@@ -1,18 +1,12 @@
 ---
-topic:
-  - Security
-subtopic:
-  - Security
-level:
-  - "4"
-priority: High
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:54:04.298+03:00
+modified: 2026-07-05T15:49:32.013+03:00
 ---
 
 # Hashing
 
-A cryptographic hash function maps data of any size to a fixed-size value (a *digest*) in a way that is **one-way** (you cannot recover the input from the digest) and **collision-resistant** (you can't feasibly find two inputs with the same digest). Hashing is the workhorse behind integrity checks, digital signatures, password storage, deduplication, and content addressing. The defining contrast with [[07 Security/Encryption|encryption]]: encryption is *reversible* with a key; hashing is *deliberately irreversible* and keyless.
+A cryptographic hash function maps data of any size to a fixed-size value (a _digest_) in a way that is **one-way** (you cannot recover the input from the digest) and **collision-resistant** (you can't feasibly find two inputs with the same digest). Hashing is the workhorse behind integrity checks, digital signatures, password storage, deduplication, and content addressing. The defining contrast with [[Encryption]]: encryption is _reversible_ with a key; hashing is _deliberately irreversible_ and keyless.
 
 ## Properties of a Cryptographic Hash
 
@@ -33,7 +27,7 @@ string hex = Convert.ToHexString(digest);   // 64 hex chars, 256 bits
 
 ## Hashing vs Encryption vs Encoding
 
-The three are constantly confused; pick by *intent*:
+The three are constantly confused; pick by _intent_:
 
 | | Reversible? | Needs a key? | Purpose |
 |---|---|---|---|
@@ -45,11 +39,11 @@ Base64 "looks scrambled" but provides no protection — it's reversible by anyon
 
 ## Integrity: Plain Hash vs HMAC vs Signature
 
-To prove data wasn't altered, the mechanism depends on *who you're defending against*:
+To prove data wasn't altered, the mechanism depends on _who you're defending against_:
 
-- **Plain hash** — detects *accidental* corruption (a download checksum). Useless against a deliberate attacker, who can change the data *and* recompute the hash.
-- **HMAC (keyed hash)** — combines the message with a **shared secret key**, so only parties holding the key can produce or verify the tag. Proves integrity *and* authenticity between two trusted parties (e.g. signing a [[07 Security/JWT Bearer|JWT]] with HS256, or webhook signatures).
-- **[[07 Security/Digital Signature|Digital signature]]** — hashes the data then signs the digest with a **private key**; anyone with the public key can verify. Adds **non-repudiation** (only the key holder could have signed it) that HMAC can't, since HMAC's secret is shared.
+- **Plain hash** — detects _accidental_ corruption (a download checksum). Useless against a deliberate attacker, who can change the data _and_ recompute the hash.
+- **HMAC (keyed hash)** — combines the message with a **shared secret key**, so only parties holding the key can produce or verify the tag. Proves integrity _and_ authenticity between two trusted parties (e.g. signing a [[JWT Bearer|JWT]] with HS256, or webhook signatures).
+- **[[Digital Signature]]** — hashes the data then signs the digest with a **private key**; anyone with the public key can verify. Adds **non-repudiation** (only the key holder could have signed it) that HMAC can't, since HMAC's secret is shared.
 
 ```csharp
 // HMAC-SHA256: integrity + authenticity with a shared key
@@ -60,11 +54,11 @@ bool ok = CryptographicOperations.FixedTimeEquals(tag, receivedTag);
 
 ## Password Hashing Is a Special Case
 
-Storing passwords is the most common hashing task — and a plain SHA-256 is the **wrong** tool. General-purpose hashes are designed to be *fast*, so an attacker with a stolen database can try billions of guesses per second. Password hashing needs the opposite: deliberate slowness plus a per-user salt.
+Storing passwords is the most common hashing task — and a plain SHA-256 is the **wrong** tool. General-purpose hashes are designed to be _fast_, so an attacker with a stolen database can try billions of guesses per second. Password hashing needs the opposite: deliberate slowness plus a per-user salt.
 
 - **Salt** — a unique random value per password, stored alongside the hash. Defeats **rainbow tables** (precomputed digest lookups) and ensures two users with the same password get different hashes.
-- **Slow / memory-hard KDF** — use a purpose-built algorithm: **Argon2id** (preferred today), **bcrypt**, **scrypt**, or **PBKDF2**. A *work factor* sets how expensive each guess is, tunable upward as hardware improves.
-- **Pepper** (optional) — a secret added to all passwords, kept in a [[07 Security/Secrets Management|secret store]] separate from the database, so a DB-only leak isn't enough.
+- **Slow / memory-hard KDF** — use a purpose-built algorithm: **Argon2id** (preferred today), **bcrypt**, **scrypt**, or **PBKDF2**. A _work factor_ sets how expensive each guess is, tunable upward as hardware improves.
+- **Pepper** (optional) — a secret added to all passwords, kept in a [[Secrets Management|secret store]] separate from the database, so a DB-only leak isn't enough.
 
 ```csharp
 // ASP.NET Core Identity's PasswordHasher uses salted PBKDF2 by default and is fine;
@@ -95,13 +89,13 @@ Storing passwords is the most common hashing task — and a plain SHA-256 is the
 ## Questions
 
 > [!QUESTION]- Why can't you use SHA-256 directly to store passwords?
-> SHA-256 is engineered to be *fast*, which is exactly wrong for passwords: an attacker who steals the hash database can compute billions of guesses per second and crack weak/common passwords quickly, and without a salt they can use precomputed rainbow tables. Password hashing needs a **slow, memory-hard, salted** function (Argon2id, bcrypt, scrypt, PBKDF2) with a tunable work factor so each guess is expensive and every user's hash is unique.
+> SHA-256 is engineered to be _fast_, which is exactly wrong for passwords: an attacker who steals the hash database can compute billions of guesses per second and crack weak/common passwords quickly, and without a salt they can use precomputed rainbow tables. Password hashing needs a **slow, memory-hard, salted** function (Argon2id, bcrypt, scrypt, PBKDF2) with a tunable work factor so each guess is expensive and every user's hash is unique.
 
 > [!QUESTION]- What's the difference between a hash, an HMAC, and a digital signature?
-> A **hash** is keyless and only detects accidental change — an attacker can alter data and recompute it. An **HMAC** mixes in a shared secret key, so it proves integrity *and* authenticity between parties who both hold the key. A **digital signature** hashes then signs with a *private* key, so anyone with the public key can verify, adding **non-repudiation** (the signer can't deny it) that HMAC lacks because its key is shared. Escalating from hash → HMAC → signature trades simplicity for stronger guarantees.
+> A **hash** is keyless and only detects accidental change — an attacker can alter data and recompute it. An **HMAC** mixes in a shared secret key, so it proves integrity _and_ authenticity between parties who both hold the key. A **digital signature** hashes then signs with a _private_ key, so anyone with the public key can verify, adding **non-repudiation** (the signer can't deny it) that HMAC lacks because its key is shared. Escalating from hash → HMAC → signature trades simplicity for stronger guarantees.
 
 > [!QUESTION]- What does a salt protect against, and why must it be unique per user?
-> A salt is a per-password random value stored with the hash. It defeats **rainbow tables** (precomputed digest→password lookups can't be built without knowing each salt) and ensures that two users who pick the same password produce *different* stored hashes, so a cracker can't crack many accounts at once or spot shared passwords. A single global salt would still let one rainbow table target the whole database — uniqueness per user is what forces the attacker to attack each hash individually.
+> A salt is a per-password random value stored with the hash. It defeats **rainbow tables** (precomputed digest→password lookups can't be built without knowing each salt) and ensures that two users who pick the same password produce _different_ stored hashes, so a cracker can't crack many accounts at once or spot shared passwords. A single global salt would still let one rainbow table target the whole database — uniqueness per user is what forces the attacker to attack each hash individually.
 
 ## References
 

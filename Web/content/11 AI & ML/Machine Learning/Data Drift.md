@@ -1,13 +1,7 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - Machine Learning
-level:
-  - "1"
-priority: Low
-status: Done
 publish: true
+created: 2026-07-05T10:54:06.674+03:00
+modified: 2026-07-05T10:54:06.674+03:00
 ---
 
 # Intro
@@ -20,8 +14,8 @@ Data drift is when the statistical properties of your input data change over tim
 |------|-------------|---------|
 | **Data drift** (feature drift) | P(X) — input distribution | Users start asking questions in a new language |
 | **Label drift** (prior probability shift) | P(Y) — label distribution | Fraud rate increases from 1% to 5% |
-| **Concept drift** | P(Y\|X) — the relationship between inputs and labels | "Spam" patterns change as spammers adapt |
-| **Covariate shift** | P(X) changes but P(Y\|X) stays the same | New user segment with different demographics |
+| **Concept drift** | P(Y|X) — the relationship between inputs and labels | "Spam" patterns change as spammers adapt |
+| **Covariate shift** | P(X) changes but P(Y|X) stays the same | New user segment with different demographics |
 
 **Concept drift is the most dangerous** — the model's learned relationship is no longer valid, so retraining on new data is the only fix. Data drift may be benign if the model generalizes well to the new distribution.
 
@@ -54,7 +48,7 @@ def psi(expected, actual, bins=10, eps=1e-6):
 
 **Chi-square test** — for categorical features. Tests whether observed frequencies match expected frequencies.
 
-**Jensen-Shannon divergence** — symmetric measure of distribution distance. Bounded [0, 1], easier to interpret than KL divergence.
+**Jensen-Shannon divergence** — symmetric measure of distribution distance. Bounded \[0, 1], easier to interpret than KL divergence.
 
 ## Monitoring Workflow
 

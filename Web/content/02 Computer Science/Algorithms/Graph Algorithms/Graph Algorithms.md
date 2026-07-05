@@ -1,15 +1,9 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+publish: true
+created: 2026-07-05T10:53:24.916+03:00
+modified: 2026-07-05T17:36:19.575+03:00
 tags:
   - FolderNote
-publish: true
-level:
-  - '4'
-status: Done
-priority: High
 ---
 
 # Intro
@@ -41,18 +35,21 @@ flowchart TD
 ## Questions
 
 > [!QUESTION]- When do you pick BFS over DFS?
+>
 > - BFS is preferred for shortest path by edge count in unweighted graphs.
 > - DFS is preferred for deep traversal tasks like cycle detection and topological ordering.
 > - BFS uses more memory on wide graphs because of the frontier queue.
 > - Both are O(V+E), so pick by the property you need, not by speed: BFS guarantees shortest paths but its frontier can hold a whole layer; DFS uses depth-bounded memory but gives no distance guarantee.
 
 > [!QUESTION]- Why is Dijkstra not valid with negative edges?
+>
 > - Dijkstra assumes once a node is finalized, its best distance is known.
 > - Negative edges can later produce a shorter route to a finalized node.
 > - Bellman Ford handles negative edges by repeated relaxation.
 > - Dijkstra is faster (O((V+E) log V)) but only valid with non-negative weights; Bellman–Ford accepts negative edges at O(V·E) — pay the slower cost only when weights can go negative.
 
 > [!QUESTION]- Adjacency list or adjacency matrix?
+>
 > - Adjacency list is the default for sparse graphs (most real-world graphs): O(V+E) space and efficient neighbor iteration.
 > - Adjacency matrix uses O(V²) space but answers "is there an edge A→B?" in O(1).
 > - In .NET, `Dictionary<T, List<T>>` is a common adjacency-list implementation.

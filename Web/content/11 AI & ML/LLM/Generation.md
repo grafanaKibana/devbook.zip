@@ -1,13 +1,7 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
-level:
-  - "2"
-priority: High
-status: Done
 publish: true
+created: 2026-07-05T10:54:06.723+03:00
+modified: 2026-07-05T15:49:35.886+03:00
 ---
 
 # Intro
@@ -31,9 +25,9 @@ Generation parameters control how the model selects the next token from the pred
 
 **`temperature`** scales the logit distribution before softmax. Temperature 0 (or near-zero) makes the model deterministic — it always picks the highest-probability token. Temperature 1.0 samples proportionally to learned probabilities. Temperature above 1.0 flattens the distribution, increasing diversity but also increasing the chance of low-quality tokens. In practice: use 0–0.3 for factual/grounded tasks, 0.7–1.0 for creative generation.
 
-**`top_p`** (nucleus sampling) truncates the distribution to the smallest set of tokens whose cumulative probability mass reaches the threshold. `top_p=0.9` means the model samples from the top 90% of probability mass, discarding the long tail of unlikely tokens. This is an alternative way to control randomness — most provider documentation recommends adjusting temperature OR top_p, not both simultaneously.
+**`top_p`** (nucleus sampling) truncates the distribution to the smallest set of tokens whose cumulative probability mass reaches the threshold. `top_p=0.9` means the model samples from the top 90% of probability mass, discarding the long tail of unlikely tokens. This is an alternative way to control randomness — most provider documentation recommends adjusting temperature OR top\_p, not both simultaneously.
 
-**`top_k`** limits sampling to the top K most probable tokens regardless of their cumulative probability. Available in Anthropic's API and open-source inference stacks, but not in OpenAI's API. Less adaptive than top_p because a fixed K may be too restrictive for some distributions and too permissive for others.
+**`top_k`** limits sampling to the top K most probable tokens regardless of their cumulative probability. Available in Anthropic's API and open-source inference stacks, but not in OpenAI's API. Less adaptive than top\_p because a fixed K may be too restrictive for some distributions and too permissive for others.
 
 **`frequency_penalty`** and **`presence_penalty`** control repetition. Frequency penalty scales with how many times a token has appeared (discourages repeating proportionally). Presence penalty applies a flat bias against any token that has appeared at all (pushes toward new topics). Range: -2.0 to 2.0 in OpenAI's API. Use moderate values (0.3–0.8) for generation tasks prone to looping.
 
@@ -49,7 +43,7 @@ Note: some reasoning-focused models do not support certain sampling parameters o
 
 ## Grounding and Citations
 
-Grounding constrains model output to evidence from provided context rather than parametric memory. A model can produce fluent, confident text that is entirely fabricated — grounding makes the evidence link explicit and testable. See [[11 AI & ML/LLM/Hallucinations|Hallucinations]] for broader coverage of why models fabricate.
+Grounding constrains model output to evidence from provided context rather than parametric memory. A model can produce fluent, confident text that is entirely fabricated — grounding makes the evidence link explicit and testable. See [[Hallucinations]] for broader coverage of why models fabricate.
 
 The grounding contract defines the rules the model must follow:
 
@@ -64,11 +58,11 @@ The grounding contract defines the rules the model must follow:
 
 **Abstention** — when evidence is insufficient, the model should explicitly state this rather than fabricate an answer. Abstention preserves user trust. Define the abstention output format in the system prompt: a specific phrase like "I don't have enough information to answer this" rather than a vague hedge.
 
-Grounding is especially critical in [[11 AI & ML/LLM/RAG/RAG|RAG]] pipelines where the model must stay faithful to retrieved documents, but the same principles apply to any context-augmented generation: tool outputs, database results, or user-provided documents.
+Grounding is especially critical in [[RAG]] pipelines where the model must stay faithful to retrieved documents, but the same principles apply to any context-augmented generation: tool outputs, database results, or user-provided documents.
 
 ## Context Assembly
 
-Context assembly determines what evidence enters the prompt and in what order — the core of [[11 AI & ML/LLM/Context Engineering|Context Engineering]]. Research on how models use long contexts ("Lost in the Middle", Liu et al. 2023) shows a U-shaped performance curve: models attend most to information at the beginning and end of the context, and least to information in the middle.
+Context assembly determines what evidence enters the prompt and in what order — the core of [[Context Engineering]]. Research on how models use long contexts ("Lost in the Middle", Liu et al. 2023) shows a U-shaped performance curve: models attend most to information at the beginning and end of the context, and least to information in the middle.
 
 Practical implications:
 
@@ -78,7 +72,7 @@ Practical implications:
 - Include source identifiers (document IDs, section markers) in the context payload so the model can produce traceable citations.
 - When the total evidence exceeds the context window, truncate lower-ranked chunks rather than truncating all chunks. A complete chunk with full context is more useful than fragments of many chunks.
 
-For RAG-specific context assembly patterns, see [[11 AI & ML/LLM/RAG/RAG|RAG]].
+For RAG-specific context assembly patterns, see [[RAG]].
 
 ## Structured Output
 
@@ -130,8 +124,8 @@ Mitigation: validate semantic content in addition to schema compliance. For crit
 
 ## Questions
 
-> [!QUESTION]- Why is adjusting temperature and top_p simultaneously discouraged?
-> Both reshape the same token probability distribution but through different mechanisms. Temperature scales the logit distribution (sharpening or flattening), while top_p truncates it to a cumulative mass threshold. Changing both creates unpredictable interactions — a low temperature already concentrates probability mass, so a low top_p on top of it may have no additional effect, while a high temperature with a low top_p creates conflicting signals. Tuning one while keeping the other at default keeps behavior predictable.
+> [!QUESTION]- Why is adjusting temperature and top\_p simultaneously discouraged?
+> Both reshape the same token probability distribution but through different mechanisms. Temperature scales the logit distribution (sharpening or flattening), while top\_p truncates it to a cumulative mass threshold. Changing both creates unpredictable interactions — a low temperature already concentrates probability mass, so a low top\_p on top of it may have no additional effect, while a high temperature with a low top\_p creates conflicting signals. Tuning one while keeping the other at default keeps behavior predictable.
 
 > [!QUESTION]- Why can a grounded response still contain unsupported claims despite citation tags?
 > Models can attach citation markers to claims without verifying entailment. The citation looks correct but the cited passage may not actually support the claim — it may be topically related but not evidentially sufficient. This is why citation generation alone is not grounding: a separate claim-to-source verification step (NLI or similar) is needed to confirm that each cited passage actually entails the claim it is attached to.
@@ -142,7 +136,7 @@ Mitigation: validate semantic content in addition to schema compliance. For crit
 ## References
 
 - [Chat Completions API — generation parameters reference (OpenAI)](https://platform.openai.com/docs/api-reference/chat/create)
-- [Messages API — temperature, top_p, top_k, stop_sequences (Anthropic)](https://docs.anthropic.com/en/api/messages)
+- [Messages API — temperature, top\_p, top\_k, stop\_sequences (Anthropic)](https://docs.anthropic.com/en/api/messages)
 - [REST API reference — generation parameters for Azure OpenAI (Microsoft Learn)](https://learn.microsoft.com/azure/ai-foundry/openai/reference)
 - [Structured Outputs — JSON schema enforcement and constrained decoding (OpenAI)](https://platform.openai.com/docs/guides/structured-outputs)
 - [Citations API — source-grounded responses with citation objects (Anthropic)](https://docs.anthropic.com/en/docs/build-with-claude/citations)

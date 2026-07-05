@@ -1,13 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Distributed Systems
-level:
-  - "2"
-priority: High
-status: Not-Started
 publish: true
+created: 2026-07-05T10:53:43.325+03:00
+modified: 2026-07-05T10:53:43.325+03:00
 ---
 
 # Vertical Scaling
@@ -69,7 +63,7 @@ resource sqlDatabase 'Microsoft.Sql/servers/databases@2022-05-01-preview' = {
 
 ## Pitfalls
 
-**Hard ceiling on machine size.** Every cloud provider has a maximum VM SKU. Azure's largest general-purpose VM (Standard_M416ms_v2) has 416 vCores and 11.4 TB RAM. Once you hit it, vertical scaling is exhausted. Workloads that grow beyond that ceiling have no escape except horizontal scaling, which may require significant re-architecture if the system was designed assuming a single node.
+**Hard ceiling on machine size.** Every cloud provider has a maximum VM SKU. Azure's largest general-purpose VM (Standard\_M416ms\_v2) has 416 vCores and 11.4 TB RAM. Once you hit it, vertical scaling is exhausted. Workloads that grow beyond that ceiling have no escape except horizontal scaling, which may require significant re-architecture if the system was designed assuming a single node.
 
 **Single point of failure.** A larger single node concentrates blast radius. If the VM crashes, the entire workload goes down. Horizontal scaling distributes failure across nodes; vertical scaling does the opposite. Mitigation: pair vertical scaling with availability zones or active-passive failover (e.g., Azure SQL Business Critical tier includes a built-in secondary replica).
 
@@ -95,30 +89,33 @@ The practical decision rule: start vertical, switch to horizontal when you hit t
 
 > [!QUESTION]- When is vertical scaling the right first move over horizontal scaling?
 > **Expected answer:**
+>
 > - When the workload is stateful and hard to shard (e.g., a relational database).
 > - When the bottleneck is clearly resource-bound on a single node.
 > - When the operational cost of distributed coordination (consensus, partitioning, eventual consistency) exceeds the cost of a larger machine.
 > - Vertical scaling is faster to implement and avoids distributed-systems complexity.
 > - It's the right first move for most monoliths and managed databases in early growth phases.
-> **Why this is strong:** It shows the candidate reasons about tradeoffs (complexity vs cost) rather than defaulting to "just add more servers."
+>   **Why this is strong:** It shows the candidate reasons about tradeoffs (complexity vs cost) rather than defaulting to "just add more servers."
 
 > [!QUESTION]- Why does vertical scaling have diminishing returns at high scale?
 > **Expected answer:**
+>
 > - Hardware cost scales super-linearly: premium SKUs charge a multiplier for the same resource increment.
 > - Not all workloads parallelize across additional cores — Amdahl's Law bounds speedup by the serial fraction.
 > - A process with 20% serial code can never exceed 5x speedup regardless of core count.
 > - Memory bandwidth and cache coherency become bottlenecks as core counts grow.
 > - The cost-per-unit-of-capacity curve inflects sharply at high tiers.
-> **Why this is strong:** It demonstrates understanding of hardware economics and parallelism limits, not just "bigger is better."
+>   **Why this is strong:** It demonstrates understanding of hardware economics and parallelism limits, not just "bigger is better."
 
 > [!QUESTION]- What's the failure mode of relying solely on vertical scaling for availability?
 > **Expected answer:**
+>
 > - A single large node is a single point of failure — any hardware fault, OS crash, or maintenance window causes full outage.
 > - Vertical scaling increases capacity but does nothing for availability.
 > - Mitigation: pair with redundancy (active-passive failover, read replicas, multi-AZ deployment).
 > - Azure SQL Business Critical tier includes a built-in secondary replica for reads and failover.
 > - This is distinct from [[Horizontal Scaling]], which inherently distributes failure across nodes.
-> **Why this is strong:** It shows the candidate distinguishes capacity from availability — a common interview blind spot.
+>   **Why this is strong:** It shows the candidate distinguishes capacity from availability — a common interview blind spot.
 
 ## References
 

@@ -1,13 +1,7 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
-level:
-  - "4"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:26.979+03:00
+modified: 2026-07-05T10:53:37.175+03:00
 ---
 
 # Intro
@@ -47,6 +41,7 @@ public async Task<OrderDto?> GetOrderAsync(
 ```
 
 **What happens when canceled:**
+
 1. Caller calls `cts.Cancel()` or the timeout fires.
 2. `GetAsync` observes the token and throws `OperationCanceledException`.
 3. The exception propagates up the call stack.

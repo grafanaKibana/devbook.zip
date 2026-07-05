@@ -1,13 +1,7 @@
 ---
-topic:
-  - Data Persistence
-subtopic: []
-level:
-  - "4"
-priority: High
-status: Ready to Repeat
-
 publish: true
+created: 2026-07-05T10:53:40.584+03:00
+modified: 2026-07-05T17:35:39.945+03:00
 ---
 
 # Intro
@@ -81,7 +75,7 @@ Invalidation strategy is a correctness decision, not an optimization detail. Sta
 - **Explicit delete on write** — on successful write, delete `key` or write the new value. If deletes can be lost, you still need a TTL as a safety net. Best when all writes go through one path that can delete or update cache.
 - **TTL only** — choose TTL from a staleness budget, not from guesswork. Add jitter and stampede protection for hot keys. Best when stale reads are acceptable and updates are infrequent or hard to observe.
 - **Event-driven** — publish invalidation events on writes, consume them in all app instances. Typical transports: message broker pub/sub, database change data capture, outbox pattern. If you cannot guarantee delivery, treat events as best-effort and keep TTL. Best when correctness matters and you can reliably emit change events.
-- **Versioned keys** — key includes a version, for example `user-name:{userId}:v{version}`. Version comes from row version, updated_at, etag, or a separate version store. Old keys naturally age out by TTL, no delete required. Best when deletes are expensive or unreliable, and you can carry a version token.
+- **Versioned keys** — key includes a version, for example `user-name:{userId}:v{version}`. Version comes from row version, updated\_at, etag, or a separate version store. Old keys naturally age out by TTL, no delete required. Best when deletes are expensive or unreliable, and you can carry a version token.
 
 Decision rule of thumb:
 
@@ -187,12 +181,12 @@ Decision rule: start with `HybridCache` for new .NET 9+ projects — it handles 
 
 ## Eviction Under Memory Pressure
 
-Invalidation removes data that's *wrong*; **eviction** removes data when the cache is *full*. A cache is bounded, so it must decide what to drop — and if you don't configure that, the runtime decides for you (often badly):
+Invalidation removes data that's _wrong_; **eviction** removes data when the cache is _full_. A cache is bounded, so it must decide what to drop — and if you don't configure that, the runtime decides for you (often badly):
 
 - **`IMemoryCache`** does not bound itself by default. You must set `SizeLimit` and give every entry a `Size`, otherwise an unbounded cache becomes a memory leak (the "unbounded growth" pitfall below). It then evicts by a priority + recency heuristic.
-- **Redis** evicts according to its `maxmemory-policy`: `noeviction` (reject writes — surprises people), `allkeys-lru`, `allkeys-lfu` (Redis 4+, better for skewed popularity), `volatile-ttl` (drop soonest-to-expire), etc. Choosing the policy *is* a design decision; `allkeys-lru`/`allkeys-lfu` are the usual choices for a pure cache.
+- **Redis** evicts according to its `maxmemory-policy`: `noeviction` (reject writes — surprises people), `allkeys-lru`, `allkeys-lfu` (Redis 4+, better for skewed popularity), `volatile-ttl` (drop soonest-to-expire), etc. Choosing the policy _is_ a design decision; `allkeys-lru`/`allkeys-lfu` are the usual choices for a pure cache.
 
-The eviction policy is the same family of algorithms as an in-process [[02 Computer Science/Data Structures/LRU Cache|LRU cache]]: LRU is the simple default, LFU resists scan pollution. Watch the **eviction rate** metric — a high rate means the working set no longer fits and hit rate is collapsing, the signal to grow the cache or shrink what you store.
+The eviction policy is the same family of algorithms as an in-process [[LRU Cache]]: LRU is the simple default, LFU resists scan pollution. Watch the **eviction rate** metric — a high rate means the working set no longer fits and hit rate is collapsing, the signal to grow the cache or shrink what you store.
 
 ## Pitfalls
 

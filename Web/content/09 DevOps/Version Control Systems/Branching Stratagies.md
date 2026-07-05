@@ -1,14 +1,7 @@
 ---
-topic:
-  - DevOps
-subtopic:
-  - Version Control Systems
-level:
-  - "4"
-priority: High
-status: Ready to Repeat
-
 publish: true
+created: 2026-07-05T10:54:08.000+03:00
+modified: 2026-07-05T10:54:08.000+03:00
 ---
 
 # Branching Strategies
@@ -54,7 +47,7 @@ A branching strategy defines how a team uses Git branches to manage parallel dev
 ## Comparison
 
 | Strategy | Long-lived Branches | Release Cadence | CI/CD Fit | Team Size |
-|----------|--------------------|-----------------|-----------|-----------| 
+|----------|--------------------|-----------------|-----------|-----------|
 | GitFlow | Yes (develop, main) | Scheduled (weekly+) | Manual CD | Medium-large |
 | Trunk-Based | No | Continuous | Excellent | Any |
 | GitHub Flow | No (short PRs) | Continuous | Good | Small-medium |

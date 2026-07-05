@@ -1,15 +1,9 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+publish: true
+created: 2026-07-05T10:53:24.677+03:00
+modified: 2026-07-05T10:53:37.208+03:00
 tags:
   - FolderNote
-publish: true
-level:
-  - '4'
-status: Done
-priority: High
 ---
 
 # Intro
@@ -23,6 +17,7 @@ Concrete example: for repeated membership checks in a large list of ids, sorting
 ## Questions
 
 > [!QUESTION]- What is an algorithm? How is its efficiency measured?
+>
 > - An algorithm is a finite, ordered set of steps that transforms input into the required output.
 > - Time complexity describes how runtime grows as input size increases.
 > - Space complexity describes extra memory needed as input grows.

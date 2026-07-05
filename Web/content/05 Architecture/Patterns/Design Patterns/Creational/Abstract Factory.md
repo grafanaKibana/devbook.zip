@@ -1,14 +1,7 @@
 ---
-topic:
-  - Architecture
-subtopic:
-  - Patterns
-level:
-  - "3"
-priority: High
-status:
-  - Done
 publish: true
+created: 2026-07-05T10:53:43.328+03:00
+modified: 2026-07-05T15:49:37.426+03:00
 ---
 
 # Abstract Factory
@@ -46,7 +39,7 @@ classDiagram
 ```
 
 > [!NOTE] Abstract Factory vs Factory Method
-> [[05 Architecture/Patterns/Design Patterns/Creational/Factory Method|Factory Method]] creates **one product** via inheritance. Abstract Factory creates a **family of related products** via composition. If your products need to work together (Stripe payment + Stripe receipt + Stripe refund handler), use Abstract Factory to enforce that constraint.
+> [[Factory Method]] creates **one product** via inheritance. Abstract Factory creates a **family of related products** via composition. If your products need to work together (Stripe payment + Stripe receipt + Stripe refund handler), use Abstract Factory to enforce that constraint.
 
 ## Problem
 
@@ -207,7 +200,7 @@ Adding BankTransfer now means one new `BankTransferFactory` class. `CheckoutServ
 
 ## References
 
-- [Abstract Factory Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=v-GiuMmsXj4&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=5) — video walkthrough of the Abstract Factory pattern with OOP examples
+- [Abstract Factory Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=v-GiuMmsXj4\&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc\&index=5) — video walkthrough of the Abstract Factory pattern with OOP examples
 - [Abstract Factory — refactoring.guru](https://refactoring.guru/design-patterns/abstract-factory) — canonical pattern description with structure diagram and C# example
 - [DbProviderFactory — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.data.common.dbproviderfactory) — ADO.NET's built-in Abstract Factory for database provider families
 - [Dependency injection in .NET — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection) — how the DI container acts as a runtime Abstract Factory

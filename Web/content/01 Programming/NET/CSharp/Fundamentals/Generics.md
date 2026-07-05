@@ -1,18 +1,13 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
-level:
-  - "4"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:27.234+03:00
+modified: 2026-07-05T10:53:37.175+03:00
 ---
 
 # Intro
 
 Generics let you write type-safe, reusable code without duplicating logic per type. Instead of accepting `object` and casting later, you keep strong compile-time guarantees and better IDE support. In .NET, generics also matter for performance because collections like `List<int>` avoid boxing that older non-generic APIs caused.
+
 - `T` is a placeholder for a type chosen by the caller.
 - `List<T>` is an open generic type definition; `List<int>` is a closed constructed type.
 - Constraints (`where T : ...`) are capability contracts that unlock members safely.
@@ -86,7 +81,7 @@ This is also the mechanism behind `IParsable<T>`, `ISpanFormattable`, and other 
 
 ## Reflection over Generics
 
-An *open* generic (`List<>`) can't be instantiated until its type arguments are supplied at runtime via `MakeGenericType` (and `MakeGenericMethod` for methods):
+An _open_ generic (`List<>`) can't be instantiated until its type arguments are supplied at runtime via `MakeGenericType` (and `MakeGenericMethod` for methods):
 
 ```csharp
 Type closed = typeof(List<>).MakeGenericType(itemType); // e.g. List<Order>
@@ -98,7 +93,7 @@ Newer constraints worth knowing: `where T : struct, Enum` (enum-only generics), 
 ## Pitfalls
 
 - Unconstrained `T` blocks member/operator usage because the compiler cannot prove capabilities, which pushes unsafe casts and weakens API clarity; add the smallest constraint set (`where T : IFoo`, `where T : struct`, etc.) that encodes what the algorithm really needs.
-- **Static members are per-closed-type.** A `static` field in `Cache<T>` is *not* shared across `Cache<int>` and `Cache<string>` — each closed type gets its own copy of the static state. Handy for per-type caches, but a classic surprise if you expected one shared counter.
+- **Static members are per-closed-type.** A `static` field in `Cache<T>` is _not_ shared across `Cache<int>` and `Cache<string>` — each closed type gets its own copy of the static state. Handy for per-type caches, but a classic surprise if you expected one shared counter.
 - **Value-type specialization bloats code.** The JIT emits a separate native body per value-type argument (`List<int>`, `List<double>`, `List<MyStruct>`…). Great for speed, but a generic-heavy library instantiated over many value types grows the code/JIT footprint — a real cost on memory-constrained or fast-startup targets.
 - `default(T)` can hide correctness bugs because reference and nullable types become `null` while value types become zeroed data, which may be interpreted as valid business values; model absence explicitly (for example, `Try` pattern, `Option`, or nullable annotations) and validate before use.
 - Over-constraining (`where T : class, SomeConcreteType`) couples generic APIs to one hierarchy, which prevents reuse and forces duplicate implementations later; prefer interface-based constraints that describe behavior instead of concrete inheritance chains.

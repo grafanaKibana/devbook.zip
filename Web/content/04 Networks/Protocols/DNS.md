@@ -1,13 +1,7 @@
 ---
-topic:
-  - Networks
-subtopic:
-  - Protocols
-level:
-  - "3"
-priority: Medium
-status: Ready to Repeat
 publish: true
+created: 2026-07-05T10:53:36.551+03:00
+modified: 2026-07-05T10:53:37.364+03:00
 ---
 
 # Intro
@@ -39,6 +33,7 @@ sequenceDiagram
 ```
 
 **Steps:**
+
 1. Client checks its local cache. If a valid cached answer exists, return it.
 2. Client asks its configured recursive resolver (ISP resolver, 8.8.8.8, 1.1.1.1).
 3. Resolver checks its cache. If cached, return it.
@@ -68,6 +63,7 @@ This full walk (iterative resolution) only happens on a cache miss. Most queries
 Every DNS record has a TTL (Time To Live) in seconds. Resolvers and clients cache the answer for the TTL duration. After expiry, they re-query.
 
 **Implications:**
+
 - **Propagation delay:** when you change a DNS record, old answers persist in caches until their TTL expires. A 24-hour TTL means changes take up to 24 hours to propagate globally.
 - **Pre-change TTL reduction:** before a planned migration, lower the TTL to 60–300 seconds a day in advance. After the change, raise it back.
 - **Negative caching:** NXDOMAIN (name not found) responses are also cached for the SOA's negative TTL. A misconfigured record can cause "DNS not found" errors that persist for minutes.
@@ -82,7 +78,7 @@ DNSSEC adds cryptographic signatures to DNS records, allowing resolvers to verif
 
 ## Encrypted DNS (DoH / DoT)
 
-DNSSEC authenticates but doesn't *encrypt* — classic DNS queries travel in plaintext on UDP 53, so anyone on-path can see (and tamper with) the names you look up. Two protocols close that gap:
+DNSSEC authenticates but doesn't _encrypt_ — classic DNS queries travel in plaintext on UDP 53, so anyone on-path can see (and tamper with) the names you look up. Two protocols close that gap:
 
 - **DNS-over-TLS (DoT)** — DNS inside a TLS connection on port 853; easy for networks to identify (and block) by port.
 - **DNS-over-HTTPS (DoH)** — DNS queries as HTTPS requests on 443, indistinguishable from normal web traffic; harder to block but controversial because it bypasses network-level DNS controls.
@@ -91,7 +87,7 @@ Both give confidentiality and integrity against eavesdropping/poisoning; they're
 
 ## DNS as a Traffic Director
 
-Beyond name→IP, DNS is a load-balancing and routing layer because the *answer* can depend on who's asking and what's healthy:
+Beyond name→IP, DNS is a load-balancing and routing layer because the _answer_ can depend on who's asking and what's healthy:
 
 - **Round-robin** — return multiple A records; clients spread across them (crude, no health awareness).
 - **GeoDNS / latency-based** — return the IP of the nearest/fastest region (Route 53 latency routing, Azure Traffic Manager) to cut RTT.
