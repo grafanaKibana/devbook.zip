@@ -119,21 +119,21 @@ return function TopicDashboard() {
 
   const CSS = `
 .dc-topic-grid { display: flex; flex-wrap: wrap; gap: 0.75rem; width: 100%; }
-.dc-topic-card { position: relative; cursor: pointer; flex: 1 1 calc(33.333% - 0.5rem); min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-direction: column; background: var(--background-primary); border: 1px solid var(--background-modifier-border); border-radius: var(--radius-m); box-shadow: none; padding: 0.75em; transition: border-color 120ms, background-color 120ms; }
+.dc-topic-card { position: relative; cursor: pointer; flex: 1 1 calc(33.333% - 0.5rem); min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-direction: column; background: var(--background-primary, var(--light, #ffffff)); border: 1px solid var(--background-modifier-border, var(--lightgray, #e5e5e5)); border-radius: var(--radius-m, 8px); box-shadow: none; padding: 0.75em; transition: border-color 120ms, background-color 120ms; }
 .dc-topic-card:hover { border-color: rgba(var(--topic-rgb), 0.5); background: rgba(var(--topic-rgb), 0.1); }
 .dc-topic-title { display: flex; gap: 4px; align-items: center; line-height: 1.3; }
 .dc-topic-icon { display: flex; align-self: center; color: rgb(var(--topic-rgb)); }
 .dc-topic-icon svg { width: 1.15em; height: 1.15em; }
 .dc-topic-name { font-weight: 700; color: rgb(var(--topic-rgb)); }
 .dc-topic-body { display: flex; flex-direction: column; flex: 1 1 0%; margin-top: 0.4em; }
-.dc-topic-desc { margin: 0; color: var(--text-muted); font-size: var(--font-smaller); }
+.dc-topic-desc { margin: 0; color: var(--text-muted, var(--gray, #9ca3af)); font-size: var(--font-smaller, 0.85em); }
 .dc-topic-spacer { flex: 1 0 auto; min-height: 0.75em; }
 .dc-topic-foot { display: flex; flex-direction: column; gap: 4px; }
-.dc-topic-cap { font-size: var(--font-smaller); display: flex; justify-content: space-between; align-items: baseline; color: var(--text-muted); }
-.dc-topic-bar { display: flex; width: 100%; height: 0.35em; border-radius: 999px; overflow: hidden; background: var(--background-modifier-border); }
+.dc-topic-cap { font-size: var(--font-smaller, 0.85em); display: flex; justify-content: space-between; align-items: baseline; color: var(--text-muted, var(--gray, #9ca3af)); }
+.dc-topic-bar { display: flex; width: 100%; height: 0.35em; border-radius: 999px; overflow: hidden; background: var(--background-modifier-border, var(--lightgray, #e5e5e5)); }
 .dc-topic-link { position: absolute; inset: 0; z-index: 1; }
 .dc-topic-link a { position: absolute; inset: 0; font-size: 0; }
-.dc-topic-total { margin-top: 0.75rem; padding: 0.75em; border-radius: var(--radius-m); border: 1px solid rgba(var(--topic-rgb), 0.4); background: rgba(var(--topic-rgb), 0.1); }
+.dc-topic-total { margin-top: 0.75rem; padding: 0.75em; border-radius: var(--radius-m, 8px); border: 1px solid rgba(var(--topic-rgb), 0.4); background: rgba(var(--topic-rgb), 0.1); }
 .dc-topic-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4em 1.1em; margin-top: 0.7em; font-size: 0.8em; opacity: 0.85; }
 .dc-topic-legend-item { display: inline-flex; align-items: center; gap: 0.4em; }
 .dc-topic-legend-sw { width: 0.8em; height: 0.8em; border-radius: 3px; flex: 0 0 auto; display: inline-block; background: rgb(var(--topic-rgb)); }
