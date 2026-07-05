@@ -1,10 +1,13 @@
-import { ContentDetails } from "../../.quartz/plugins"
 import { FullSlug, joinSegments } from "./path"
 
 interface FileTrieData {
   slug: string
   title: string
   filePath: string
+}
+
+export interface ContentDetails extends FileTrieData {
+  [key: string]: unknown
 }
 
 export class FileTrieNode<T extends FileTrieData = ContentDetails> {
