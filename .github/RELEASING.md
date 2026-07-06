@@ -72,12 +72,12 @@ bug: correct rate-limit handling in the LLM judge client
 
 ## Enforcement (GitHub rulesets)
 
-- **`main` PR-only + title check** (branch ruleset) — requires a pull request,
-  the `pr-title` status check, and allows merge-commit merges. No bypass: nobody
-  pushes to `main` directly.
-- **Protect release tags** (tag ruleset, `v*`) — blocks deletion and force-moves.
-- **`major-approval` required check** (branch ruleset) — required status check
-  on PRs into `main`, so a breaking PR can't merge until it's confirmed (below).
+- **Protect main branch** (branch ruleset, `~DEFAULT_BRANCH`) — requires a PR,
+  the `pr-title` **and** `major-approval` status checks, merge-commit merges only,
+  and blocks direct pushes, deletion, and force-pushes. No bypass — the checks
+  apply to everyone, including admins.
+- **Protect release tags** (tag ruleset, `refs/tags/v*`) — blocks tag deletion
+  and force-moves; creation stays open so the Release workflow can tag.
 
 ## Guardrail — major needs confirmation in the PR
 
@@ -97,6 +97,9 @@ owner/collaborators can run the commands. So shipping a major takes two
 deliberate acts — the `!` title *and* the `/approve-major` — and a stray `!`
 just parks the PR until you decide.
 
-> One-time: mark **`major-approval`** as a required status check in the `main`
-> branch ruleset, and keep Actions **Workflow permissions** on "Read and write".
+> `major-approval` is already a required check on the **Protect main branch**
+> ruleset. It only reports once [`major-approval.yml`](workflows/major-approval.yml)
+> lives on `main`, so merge this workflow in first — until then, PRs whose branch
+> lacks the workflow will sit blocked on the (never-reported) check. Also keep
+> Actions **Workflow permissions** on "Read and write".
 
