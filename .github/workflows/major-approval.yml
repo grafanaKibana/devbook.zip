@@ -1,0 +1,113 @@
+name: Major Release Approval
+
+# Gates MAJOR releases at PR time. A PR whose **title** carries a breaking `!`
+# prefix (e.g. `feature!: ...`) parks a required `major-approval` status check
+# as pending, and the bot asks for confirmation. Reply `/approve-major` to clear
+# the check, or `/no-major` to drop the `!` from the title. PRs without a `!`
+# title pass the check automatically. Commits never trigger a major — only the
+# PR title does.
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+    branches: [main]
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read # checkout (read tags for the version preview)
+  pull-requests: write # post comments, edit the PR title
+  statuses: write # set the major-approval gate status
+
+env:
+  BANG_RE: '^(feature|docs|bug|maintenance)!:'
+  MARKER: '<!-- major-approval -->'
+
+jobs:
+  # ── PR opened / edited / pushed: gate on a breaking (!) title ───────────────
+  gate:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set major-approval status
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          set -euo pipefail
+
+          if printf '%s' "$PR_TITLE" | grep -qE "$BANG_RE"; then
+            NEXT=$(bash .github/scripts/next-version.sh "$PR_TITLE" | sed -n 's/^next=//p')
+            gh api -X POST "repos/$REPO/statuses/$HEAD_SHA" \
+              -f state=pending -f context=major-approval \
+              -f description="Breaking (!) title — reply /approve-major to confirm $NEXT"
+
+            HAS=$(gh api "repos/$REPO/issues/$PR/comments" \
+              --jq "[.[] | select(.body | contains(\"$MARKER\"))] | length")
+            if [ "$HAS" = "0" ]; then
+              gh pr comment "$PR" --body "$MARKER
+          ⚠️ This PR's title has a breaking \`!\`, so merging it publishes a **MAJOR** release (**$NEXT**).
+
+          - Reply \`/approve-major\` to confirm — the check clears and merge is unblocked.
+          - Reply \`/no-major\` to drop the \`!\` from the title (it becomes a normal release)."
+            fi
+          else
+            gh api -X POST "repos/$REPO/statuses/$HEAD_SHA" \
+              -f state=success -f context=major-approval \
+              -f description="No breaking change"
+          fi
+
+  # ── /approve-major or /no-major comment on the PR ───────────────────────────
+  command:
+    if: >-
+      github.event_name == 'issue_comment' &&
+      github.event.issue.pull_request &&
+      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association) &&
+      (startsWith(github.event.comment.body, '/approve-major') ||
+       startsWith(github.event.comment.body, '/no-major'))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Handle command
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.issue.number }}
+          BODY: ${{ github.event.comment.body }}
+          ACTOR: ${{ github.event.comment.user.login }}
+        run: |
+          set -euo pipefail
+
+          TITLE=$(gh pr view "$PR" --json title --jq '.title')
+          HEAD_SHA=$(gh pr view "$PR" --json headRefOid --jq '.headRefOid')
+
+          if printf '%s' "$BODY" | grep -q '^/approve-major'; then
+            NEXT=$(bash .github/scripts/next-version.sh "$TITLE" | sed -n 's/^next=//p')
+            gh api -X POST "repos/$REPO/statuses/$HEAD_SHA" \
+              -f state=success -f context=major-approval \
+              -f description="Major approved by @$ACTOR"
+            gh pr comment "$PR" --body "✅ Approved by @$ACTOR. Merging this publishes **$NEXT**."
+            exit 0
+          fi
+
+          # /no-major → strip the `!` from the PR title (no history rewrite).
+          NEW_TITLE=$(printf '%s' "$TITLE" | sed -E 's/^(feature|docs|bug|maintenance)!:/\1:/')
+          gh pr edit "$PR" --title "$NEW_TITLE"
+
+          # Preview the resulting (commit-driven) version from the PR head.
+          HEAD_REF=$(gh pr view "$PR" --json headRefName --jq '.headRefName')
+          git fetch --tags origin "$HEAD_REF"
+          git checkout FETCH_HEAD
+          NEXT=$(bash .github/scripts/next-version.sh "$NEW_TITLE" | sed -n 's/^next=//p')
+
+          gh pr comment "$PR" --body "↩️ Dropped \`!\` from the title (requested by @$ACTOR). It's now \`$NEW_TITLE\` → this will publish **$NEXT**."

@@ -10,7 +10,7 @@ updates:
     schedule:
       interval: "weekly"
     commit-message:
-      prefix: "bump"
+      prefix: "maintenance"
     groups:
       npm:
         patterns:

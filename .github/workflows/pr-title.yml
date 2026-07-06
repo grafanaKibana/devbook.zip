@@ -17,9 +17,9 @@ jobs:
           TITLE: ${{ github.event.pull_request.title }}
         run: |
           set -euo pipefail
-          if printf '%s' "$TITLE" | grep -qE '^(notes|feat|fix|bump)(\([^)]+\))?: .+'; then
+          if printf '%s' "$TITLE" | grep -qE '^(feature|docs|bug|maintenance)!?: .+'; then
             echo "✓ $TITLE"
           else
-            echo "::error::PR title must start with 'notes:', 'feat:', 'fix:' or 'bump:' (optional (scope)). Got: ${TITLE:-<empty>}"
+            echo "::error::PR title must start with 'feature:', 'docs:', 'bug:' or 'maintenance:' (append '!' for a breaking/major change, e.g. 'feature!:'). Got: ${TITLE:-<empty>}"
             exit 1
           fi
