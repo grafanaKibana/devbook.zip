@@ -1,41 +1,37 @@
 /* DevBook — match the published Quartz site fonts inside Obsidian.
  *
- * Site config lives in Web/quartz.config.yaml (theme.typography):
- *   headings → Schibsted Grotesk
- *   body     → Source Sans Pro
- *   code     → IBM Plex Mono
+ * Site config (Web/quartz.config.yaml → theme.typography):
+ *   headings → Schibsted Grotesk   body → Source Sans Pro   code → IBM Plex Mono
+ * Installed locally as: Schibsted Grotesk, Source Sans 3 (the current name for
+ * Source Sans Pro — same design), IBM Plex Mono.
  *
- * The three fonts must be installed locally first (Google Fonts / Homebrew).
  * Enable in: Settings → Appearance → CSS snippets → 🔄 reload → toggle on.
+ *
+ * Why !important: Settings → Appearance → "Text font" (currently SF Pro Text)
+ * sets a higher-priority override that otherwise beats a snippet. !important
+ * wins over it. Alternatively, clear the Text font in Appearance and you can
+ * drop the !important — but leaving it is harmless.
  */
 
-/* Body text + code. These are the same CSS variables the Appearance
- * "Text font" / "Monospace font" pickers write, so this snippet alone is
- * enough — you don't also have to set them in the UI. */
-.theme-light,
-.theme-dark {
-  --font-text-theme: "Source Sans Pro", "Source Sans 3", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-monospace-theme: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+body.theme-light,
+body.theme-dark {
+  --font-text: "Source Sans 3", "Source Sans Pro", -apple-system, BlinkMacSystemFont, sans-serif !important;
+  --font-monospace: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace !important;
 }
 
-/* The site uses a separate heading font, which Obsidian has no setting for.
- * Force Schibsted Grotesk on headings in both Reading and Live Preview. */
-.markdown-rendered h1,
-.markdown-rendered h2,
-.markdown-rendered h3,
-.markdown-rendered h4,
-.markdown-rendered h5,
-.markdown-rendered h6,
+/* The site uses a separate heading font; Obsidian has no setting for it.
+ * Covers Reading view, Live Preview headings, and the note's inline title. */
+.markdown-rendered :is(h1, h2, h3, h4, h5, h6),
 .inline-title,
-.HyperMD-header,
-.cm-header {
-  font-family: "Schibsted Grotesk", -apple-system, BlinkMacSystemFont, sans-serif;
+.cm-editor .HyperMD-header,
+.cm-editor .cm-header {
+  font-family: "Schibsted Grotesk", -apple-system, BlinkMacSystemFont, sans-serif !important;
 }
 
-/* Optional: also use the header font in the app UI (menus, sidebars, tabs).
- * Uncomment if you want the whole interface to match.
-.theme-light,
-.theme-dark {
-  --font-interface-theme: "Schibsted Grotesk", -apple-system, sans-serif;
+/* Optional: match the header font in the app UI too (menus, sidebars, tabs).
+ * Uncomment to enable.
+body.theme-light,
+body.theme-dark {
+  --font-interface: "Schibsted Grotesk", -apple-system, sans-serif !important;
 }
 */

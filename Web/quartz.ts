@@ -1,8 +1,9 @@
-import { loadQuartzConfig, loadQuartzLayout } from "./quartz/plugins/loader/config-loader"
-import { PageTypes } from "./quartz/plugins"
 import { QuestionsIndex } from "./custom/components/questions-index"
+import { SiteMarquee } from "./custom/components/site-marquee"
 import { QuestionCollector } from "./custom/transformers/question-collector"
 import { SyncerFixups } from "./custom/transformers/syncer-fixups"
+import { PageTypes } from "./quartz/plugins"
+import { loadQuartzConfig, loadQuartzLayout } from "./quartz/plugins/loader/config-loader"
 
 // DevBook customizations live here (the sanctioned Quartz override entrypoint)
 // and under ./custom — no engine files under quartz/ are modified.
@@ -33,9 +34,13 @@ config.plugins.transformers.splice(
 // are already resolved.
 config.plugins.transformers.push(QuestionCollector())
 
-// Inject the Questions component into every content page's afterBody; it
-// self-gates to its target slug, so it only renders where intended.
 const layout = await loadQuartzLayout()
+const siteMarquee = SiteMarquee()
+layout.defaults.beforeBody = [siteMarquee, ...(layout.defaults.beforeBody ?? [])]
+for (const pageLayout of Object.values(layout.byPageType)) {
+  pageLayout.beforeBody = [siteMarquee, ...(pageLayout.beforeBody ?? [])]
+}
+
 const content = { ...(layout.byPageType.content ?? {}) }
 content.afterBody = [QuestionsIndex(), ...(content.afterBody ?? [])]
 layout.byPageType.content = content
