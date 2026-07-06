@@ -44,7 +44,7 @@ flowchart LR
 
 **Asynchronous messaging**
 
-- Use [[Message Queues]] and [[Event-Driven Architecture]] when temporal decoupling matters.
+- Use [[05 Architecture/Distributed Systems/Message Queues/Message Queues|Message Queues]] and [[Event-Driven Architecture]] when temporal decoupling matters.
 - Best for workflows, retries, burst smoothing, and eventual consistency.
 - Publish immutable events like `OrderPlaced` or `InventoryReserved`.
 - Make handlers idempotent to survive retries and duplicate delivery.

@@ -17,11 +17,11 @@ return function TopicDashboard() {
     { folder: "04 Networks", title: "Networks", desc: "Protocols, HTTP, TCP/IP, how packets travel." },
     { folder: "05 Architecture", title: "Architecture", desc: "Distributed systems, patterns, designing for scale." },
     { folder: "06 Development Practices", title: "Development Practices", desc: "Testing, version control, and the craft." },
-    { folder: "08 Security", title: "Security", desc: "Threats, crypto, auth, defensive design." },
-    { folder: "11 SDLC", title: "SDLC", desc: "How software gets planned, built, and shipped." },
-    { folder: "10 DevOps", title: "DevOps", desc: "CI/CD, containers, and automation." },
-    { folder: "09 Cloud", title: "Cloud", desc: "AWS/Azure, serverless, cloud-native design." },
     { folder: "07 AI & ML", title: "AI & ML", desc: "Models, training, applied machine learning." },
+    { folder: "08 Security", title: "Security", desc: "Threats, crypto, auth, defensive design." },
+    { folder: "09 Cloud", title: "Cloud", desc: "AWS/Azure, serverless, cloud-native design." },
+    { folder: "10 DevOps", title: "DevOps", desc: "CI/CD, containers, and automation." },
+    { folder: "11 SDLC", title: "SDLC", desc: "How software gets planned, built, and shipped." },
   ];
 
   const ICONS = {
@@ -90,7 +90,12 @@ return function TopicDashboard() {
       const iconSvg = wrapSvg(ICONS[firstString(fn?.value("icon"))] ?? DEFAULT_ICON);
       return { ...t, fn, rgb, iconSvg, ...statsFor(t.folder) };
     })
-    .sort((a, b) => a.folder.localeCompare(b.folder));
+    .map((c, index) => ({
+      ...c,
+      spanDesktop: index < 3 ? 4 : 3,
+      spanMedium: index < 2 ? 6 : 4,
+      spanNarrow: index === 0 ? 12 : 6,
+    }));
 
   let oDone = 0, oTotal = 0, oPoints = 0;
   const oByStatus = {};
@@ -109,25 +114,28 @@ return function TopicDashboard() {
     });
 
   const CSS = `
-.dc-topic-grid { display: flex; flex-wrap: wrap; gap: 1rem; width: 100%; }
-.dc-topic-card { position: relative; cursor: pointer; flex: 1 1 240px; min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-direction: column; background: transparent; border: 1px solid var(--background-modifier-border, var(--lightgray, #e5e5e5)); border-radius: var(--radius-m, 8px); box-shadow: none; padding: 1rem 1.1rem 1.1rem; transition: border-color 120ms, background-color 120ms; }
+.dc-topic-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 0.75rem; width: 100%; }
+.dc-topic-card { position: relative; cursor: pointer; grid-column: span var(--topic-span-desktop); min-width: 0; min-height: 7rem; box-sizing: border-box; margin: 0; display: flex; flex-direction: column; background: transparent; border: 1px solid var(--background-modifier-border, var(--lightgray, #e5e5e5)); border-radius: var(--radius-m, 8px); box-shadow: none; padding: 0.9rem 1rem 1rem; transition: border-color 120ms, background-color 120ms; }
 .dc-topic-card:hover { border-color: rgba(var(--topic-rgb), 0.5); background: rgba(var(--topic-rgb), 0.1); }
 .dc-topic-title { display: flex; gap: 0.55rem; align-items: center; line-height: 1.3; }
 .dc-topic-icon { display: flex; align-self: center; color: rgb(var(--topic-rgb)); }
 .dc-topic-icon svg { width: 22px; height: 22px; }
-.dc-topic-name { font-weight: 600; font-size: 1.02rem; color: rgb(var(--topic-rgb)); }
-.dc-topic-body { display: flex; flex-direction: column; flex: 1 1 0%; margin-top: 0.4em; }
-.dc-topic-desc { margin: 0; color: var(--text-muted, var(--gray, #9ca3af)); font-size: 0.82rem; line-height: 1.35; }
-.dc-topic-spacer { flex: 1 0 auto; min-height: 0.75em; }
+.dc-topic-name { font-weight: 600; font-size: 0.95rem; color: rgb(var(--topic-rgb)); }
+.dc-topic-body { display: flex; flex-direction: column; flex: 1 0 auto; margin-top: 0.4em; }
+.dc-topic-desc { margin: 0; color: var(--text-muted, var(--gray, #9ca3af)); font-size: 0.78rem; line-height: 1.3; }
+.dc-topic-spacer { flex: 1 0 auto; min-height: 0.55em; }
 .dc-topic-foot { display: flex; flex-direction: column; gap: 4px; }
 .dc-topic-cap { font-size: 0.72rem; display: flex; justify-content: space-between; align-items: baseline; color: var(--text-muted, var(--gray, #9ca3af)); }
-.dc-topic-bar { display: flex; width: 100%; height: 7px; border-radius: 4px; margin-top: 0.15rem; overflow: hidden; background: var(--background-modifier-border, var(--lightgray, #e5e5e5)); }
+.dc-topic-bar { display: flex; width: 100%; height: 6px; border-radius: 4px; margin-top: 0.15rem; overflow: hidden; background: var(--background-modifier-border, var(--lightgray, #e5e5e5)); }
 .dc-topic-link { position: absolute; inset: 0; z-index: 1; }
 .dc-topic-link a { position: absolute; inset: 0; font-size: 0; background: none !important; }
 .dc-topic-total { margin-top: 0.75rem; padding: 0.75em; border-radius: var(--radius-m, 8px); border: 1px solid rgba(var(--topic-rgb), 0.4); background: rgba(var(--topic-rgb), 0.1); }
 .dc-topic-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4em 1.1em; margin-top: 0.7em; font-size: 0.8em; opacity: 0.85; }
 .dc-topic-legend-item { display: inline-flex; align-items: center; gap: 0.4em; }
 .dc-topic-legend-sw { width: 0.8em; height: 0.8em; border-radius: 3px; flex: 0 0 auto; display: inline-block; background: rgb(var(--topic-rgb)); }
+@media (max-width: 1500px) { .dc-topic-card { grid-column: span var(--topic-span-medium); } }
+@media (max-width: 760px) { .dc-topic-card { grid-column: span var(--topic-span-narrow); } }
+@media (max-width: 430px) { .dc-topic-grid { grid-template-columns: 1fr; } .dc-topic-card { grid-column: span 1; } }
 `;
 
   return (
@@ -135,7 +143,7 @@ return function TopicDashboard() {
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
       <div class="dc-topic-grid">
         {cards.map((c) => (
-          <div class="dc-topic-card" style={{ "--topic-rgb": c.rgb }}>
+          <div class="dc-topic-card" style={{ "--topic-rgb": c.rgb, "--topic-span-desktop": c.spanDesktop, "--topic-span-medium": c.spanMedium, "--topic-span-narrow": c.spanNarrow }}>
             <div class="dc-topic-title">
               <span class="dc-topic-icon" dangerouslySetInnerHTML={{ __html: c.iconSvg }} />
               <span class="dc-topic-name">{c.title}</span>

@@ -25,7 +25,7 @@ This folder covers the three most important:
 > [!TIP]
 > A common progression: if backtracking explores the _same_ subproblem repeatedly, adding memoisation turns it into dynamic programming; if a greedy choice can be proven always-correct, it replaces DP with something far cheaper.
 
-They contrast with [[02 Computer Science/Algorithms/Patterns/Patterns|patterns]] (two pointers, sliding window), which are concrete coding idioms rather than design philosophies. **Divide-and-conquer** (e.g. merge sort, binary search) is another major paradigm; it shows up across the [[Sorting Algorithms|sorting]] notes.
+They contrast with [[02 Computer Science/Algorithms/Patterns/Patterns|patterns]] (two pointers, sliding window), which are concrete coding idioms rather than design philosophies. **Divide-and-conquer** (e.g. merge sort, binary search) is another major paradigm; it shows up across the [[02 Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms|sorting]] notes.
 
 ## References
 

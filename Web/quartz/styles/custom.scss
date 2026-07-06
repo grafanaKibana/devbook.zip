@@ -14,3 +14,8 @@
 .graph > .global-graph-outer > .global-graph-container {
   border-radius: var(--surface-radius);
 }
+
+// Remove tags from the tags page.
+.page-listing .tag-link {
+  display: none;
+}

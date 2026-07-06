@@ -12,7 +12,7 @@ publish: true
 
 # Intro
 
-"NoSQL" isn't one thing — it's four distinct data models, each trading the relational model's rigid schema and joins for a different scaling and access pattern. Picking the right one is a data-modeling decision driven by *how you query*, not a popularity contest. The four families are **document**, **key-value**, **wide-column**, and **graph**. They share themes (horizontal scaling, flexible schema, usually [[Replication|eventual consistency]] under the [[CAP theorem|CAP]] lens) but differ sharply in what they're good at. This page compares them; for the general "why NoSQL" framing see [[NoSQL]].
+"NoSQL" isn't one thing — it's four distinct data models, each trading the relational model's rigid schema and joins for a different scaling and access pattern. Picking the right one is a data-modeling decision driven by *how you query*, not a popularity contest. The four families are **document**, **key-value**, **wide-column**, and **graph**. They share themes (horizontal scaling, flexible schema, usually [[Replication|eventual consistency]] under the [[CAP theorem|CAP]] lens) but differ sharply in what they're good at. This page compares them; for the general "why NoSQL" framing see [[Home/03 Data Persistence/NoSQL/NoSQL|NoSQL]].
 
 ## The Four Families
 

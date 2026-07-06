@@ -191,7 +191,7 @@ Never `lock(this)`, `lock(typeof(X))`, or lock on an interned `string`. These ob
 Third-party libraries may acquire internal locks. Calling library methods while holding your own lock can create unexpected lock ordering dependencies you cannot control.
 
 **Database deadlocks are a separate layer**
-The DB engine has its own lock manager: two transactions touching rows/indexes in opposite order deadlock, and the engine kills one as the *deadlock victim* (SQL Server error 1205). Fix with consistent access order, smaller transactions, and retry-on-1205 — not with CLR locks. See [[SQL]].
+The DB engine has its own lock manager: two transactions touching rows/indexes in opposite order deadlock, and the engine kills one as the *deadlock victim* (SQL Server error 1205). Fix with consistent access order, smaller transactions, and retry-on-1205 — not with CLR locks. See [[Home/03 Data Persistence/SQL/SQL|SQL]].
 
 ## Questions
 

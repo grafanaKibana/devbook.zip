@@ -17,11 +17,11 @@ GoF (Gang of Four) Design Patterns are 23 reusable solutions to recurring object
 
 ## The Three Categories
 
-**[[Creational|Creational Patterns]]** (5 patterns) abstract the instantiation process, making systems independent of how objects are created. Reach for them when construction logic becomes complex or needs to vary by context.
+**[[Home/05 Architecture/Patterns/Design Patterns/Creational/Creational|Creational Patterns]]** (5 patterns) abstract the instantiation process, making systems independent of how objects are created. Reach for them when construction logic becomes complex or needs to vary by context.
 
-**[[Structural|Structural Patterns]]** (7 patterns) deal with how classes and objects compose into larger, flexible structures. Reach for them when you need to adapt incompatible interfaces, wrap objects transparently, or simplify complex subsystems.
+**[[Home/05 Architecture/Patterns/Design Patterns/Structural/Structural|Structural Patterns]]** (7 patterns) deal with how classes and objects compose into larger, flexible structures. Reach for them when you need to adapt incompatible interfaces, wrap objects transparently, or simplify complex subsystems.
 
-**[[Behavioral|Behavioral Patterns]]** (11 patterns) are concerned with algorithms and communication between objects. Reach for them when you need to decouple senders from receivers, make algorithms swappable, or orchestrate complex workflows without tight coupling.
+**[[Home/05 Architecture/Patterns/Design Patterns/Behavioral/Behavioral|Behavioral Patterns]]** (11 patterns) are concerned with algorithms and communication between objects. Reach for them when you need to decouple senders from receivers, make algorithms swappable, or orchestrate complex workflows without tight coupling.
 
 ## How to Use This Section
 

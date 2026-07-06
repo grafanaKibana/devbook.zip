@@ -27,7 +27,7 @@ stateDiagram-v2
 
 The critical insight from the ReAct paper: interleaving reasoning traces with tool use outperforms either approach alone. Chain-of-thought without tools hallucinates facts — the model fabricates answers from parametric memory when it should look them up. Tool use without reasoning cannot decompose complex goals into subgoals. On ALFWorld decision-making tasks, ReAct outperformed imitation learning and reinforcement learning baselines by 34% absolute success rate. The loop lets reasoning guide tool selection while tool outputs ground the reasoning in reality.
 
-For the broader context of when an agent loop is the right choice versus simpler [[Agents|workflow patterns]], see the Agents hub page.
+For the broader context of when an agent loop is the right choice versus simpler [[07 AI & ML/LLM/Agents/Agents|workflow patterns]], see the Agents hub page.
 
 ## How It Works in Practice
 

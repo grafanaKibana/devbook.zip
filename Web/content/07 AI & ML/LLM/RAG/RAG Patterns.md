@@ -6,7 +6,7 @@ modified: 2026-07-05T20:28:24.171+03:00
 
 # Intro
 
-This is the catalog of production RAG patterns, ranked by how common they are as default guidance in current vendor docs, open-source frameworks, and enterprise architectures. The ranking is a practical adoption heuristic, not market-share data. Start at the top and move down only when [[07 AI & ML/LLM/RAG/Evaluation/Evaluation|evaluation]] shows a specific failure that cheaper patterns do not fix — each pattern below names the failure mode it solves and the risk it introduces. For the overall pipeline these patterns plug into, see [[RAG]].
+This is the catalog of production RAG patterns, ranked by how common they are as default guidance in current vendor docs, open-source frameworks, and enterprise architectures. The ranking is a practical adoption heuristic, not market-share data. Start at the top and move down only when [[07 AI & ML/LLM/RAG/Evaluation/Evaluation|evaluation]] shows a specific failure that cheaper patterns do not fix — each pattern below names the failure mode it solves and the risk it introduces. For the overall pipeline these patterns plug into, see [[07 AI & ML/LLM/RAG/RAG|RAG]].
 
 ## 1. Baseline Single-Pass RAG
 
@@ -244,7 +244,7 @@ Main risk:
 
 ## 10. Agentic RAG
 
-An [[Agents|agent]] decides which retrieval or data tools to call, observes the result, and chooses the next action. Unlike a fixed pipeline, the path can change per query.
+An [[07 AI & ML/LLM/Agents/Agents|agent]] decides which retrieval or data tools to call, observes the result, and chooses the next action. Unlike a fixed pipeline, the path can change per query.
 
 ```mermaid
 flowchart LR

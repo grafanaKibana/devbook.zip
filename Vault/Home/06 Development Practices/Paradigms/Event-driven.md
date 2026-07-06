@@ -23,7 +23,7 @@ A distinction "event-driven" tends to blur:
 - A **command** is an instruction to *one* handler to *do* something — imperative, present tense (`ReserveStock`); the sender expects it carried out, and it **can be rejected**.
 - An **event** is a notification that something *already happened* — a past-tense immutable fact (`OrderPlaced`), broadcast to *zero-to-many* subscribers who each decide how to react. It can't be rejected — it's history.
 
-Routing a command to one handler is the [[Mediator]] pattern; fanning an event out to many is an [[Event Bus]] over a [[Message Queues|message broker]].
+Routing a command to one handler is the [[Mediator]] pattern; fanning an event out to many is an [[Event Bus]] over a [[Home/05 Architecture/Distributed Systems/Message Queues/Message Queues|message broker]].
 
 ## Four Styles of "Event-Driven" (Fowler)
 

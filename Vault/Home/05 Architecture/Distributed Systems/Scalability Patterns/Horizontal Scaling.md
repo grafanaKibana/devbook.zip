@@ -12,7 +12,7 @@ publish: true
 
 # Horizontal Scaling
 
-Horizontal scaling (scale-out) means adding more instances of a service and distributing incoming load across all of them, rather than making a single instance bigger (see [[Vertical Scaling]] for the alternative). It's the standard long-term strategy for stateless services because it offers near-linear capacity growth, fault tolerance through redundancy, and no single-instance ceiling. The catch: it only works when the service is genuinely stateless, all shared state lives outside the instance (database, cache, queue), and a [[Load Balancing|load balancer]] sits in front to route traffic. Without those prerequisites, adding instances doesn't increase capacity — it creates inconsistency. For the broader context, see [[Scalability Patterns]].
+Horizontal scaling (scale-out) means adding more instances of a service and distributing incoming load across all of them, rather than making a single instance bigger (see [[Vertical Scaling]] for the alternative). It's the standard long-term strategy for stateless services because it offers near-linear capacity growth, fault tolerance through redundancy, and no single-instance ceiling. The catch: it only works when the service is genuinely stateless, all shared state lives outside the instance (database, cache, queue), and a [[Load Balancing|load balancer]] sits in front to route traffic. Without those prerequisites, adding instances doesn't increase capacity — it creates inconsistency. For the broader context, see [[Home/05 Architecture/Distributed Systems/Scalability Patterns/Scalability Patterns|Scalability Patterns]].
 
 ## How It Works
 

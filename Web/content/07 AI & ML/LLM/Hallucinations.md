@@ -37,7 +37,7 @@ For RAG stacks, pair these with [[07 AI & ML/LLM/RAG/Evaluation/Evaluation|RAG E
 
 Start with grounding, then add targeted controls where risk justifies cost.
 
-- **Retrieval grounding (RAG)**: move from memory recall to source summarization. This is usually the single biggest reduction in fabricated claims because it gives explicit evidence boundaries. It is not a hard guarantee: RAG-based legal tools still report hallucination rates above 17%, so treat grounding as risk reduction, not elimination. See [[RAG]].
+- **Retrieval grounding (RAG)**: move from memory recall to source summarization. This is usually the single biggest reduction in fabricated claims because it gives explicit evidence boundaries. It is not a hard guarantee: RAG-based legal tools still report hallucination rates above 17%, so treat grounding as risk reduction, not elimination. See [[07 AI & ML/LLM/RAG/RAG|RAG]].
 - **Chain-of-Verification (CoVe)**: run a factored loop of generate answer, plan verification questions, answer verification questions independently without original draft context, then revise. Independent verification interrupts the feedback loop where the model reuses its own hallucinated tokens as if they were evidence.
 - **Structured output with constrained decoding**: enforce schema, enums, and field contracts so the model cannot invent arbitrary free-form structures. This shrinks the space of possible fabrications and is especially useful for downstream automation.
 - **Abstention policy**: define a strict fallback phrase (for example, "I do not have enough evidence in the provided context") when evidence is insufficient. Explicit abstention is safer than confident guessing in high-stakes flows.

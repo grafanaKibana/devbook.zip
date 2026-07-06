@@ -6,7 +6,7 @@ modified: 2026-07-05T20:28:24.164+03:00
 
 # Intro
 
-A multi-agentic system coordinates two or more LLM agents — each with its own context window, tools, and instructions — to solve a task that a single agent handles poorly. The [[Agents]] page covers what agents are, the augmented LLM building block, the five workflow patterns (prompt chaining through orchestrator-workers), and autonomous agent design. This page covers what changes when multiple agents must coordinate: communication patterns, coordination structures, and the failure modes specific to multi-agent systems.
+A multi-agentic system coordinates two or more LLM agents — each with its own context window, tools, and instructions — to solve a task that a single agent handles poorly. The [[07 AI & ML/LLM/Agents/Agents|Agents]] page covers what agents are, the augmented LLM building block, the five workflow patterns (prompt chaining through orchestrator-workers), and autonomous agent design. This page covers what changes when multiple agents must coordinate: communication patterns, coordination structures, and the failure modes specific to multi-agent systems.
 
 Multi-agent typically uses 3–10× more tokens than single-agent for equivalent tasks, driven by context duplication and coordination messages. That cost is justified under three specific conditions:
 
@@ -30,7 +30,7 @@ Agents must share context to coordinate. Three mechanisms dominate production sy
 
 ## Multi-Agent Coordination
 
-Beyond the [[Agents#Workflow Patterns|workflow patterns]] — of which orchestrator-workers is the dominant multi-agent topology — multi-agent systems use three structural patterns for organizing agent interactions.
+Beyond the [[07 AI & ML/LLM/Agents/Agents#Workflow Patterns|workflow patterns]] — of which orchestrator-workers is the dominant multi-agent topology — multi-agent systems use three structural patterns for organizing agent interactions.
 
 **Handoff / triage.** One active agent at a time. The current agent decides dynamically when to transfer control to a specialist. In Microsoft Agent Framework, `AgentWorkflowBuilder` declares a handoff routing graph where each agent receives transfer targets as tool definitions:
 

@@ -24,7 +24,7 @@ sequenceDiagram
     Note over Producer: If no 2xx within timeout retry with exponential backoff
 ```
 
-Webhooks complement [[Event-Driven Architecture]] — they are the HTTP-native way to deliver events between systems that do not share a message broker. For internal service-to-service communication within the same platform, [[Message Queues]] are usually a better fit because they provide built-in durability, fan-out, and back-pressure.
+Webhooks complement [[Event-Driven Architecture]] — they are the HTTP-native way to deliver events between systems that do not share a message broker. For internal service-to-service communication within the same platform, [[05 Architecture/Distributed Systems/Message Queues/Message Queues|Message Queues]] are usually a better fit because they provide built-in durability, fan-out, and back-pressure.
 
 ## Receiver Example (ASP.NET Core)
 

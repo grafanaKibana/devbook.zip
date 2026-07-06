@@ -10,7 +10,7 @@ ROC-AUC means Receiver Operating Characteristic Area Under the Curve. PR-AUC mea
 
 Use ROC-AUC for general ranking quality when classes are fairly balanced. Use PR-AUC for imbalanced data where false positives are expensive.
 
-This note fits the evaluation stage of [[Machine Learning]] and is most relevant for [[07 AI & ML/Machine Learning/Types/Types|learning types]] like binary classification and rare event detection.
+This note fits the evaluation stage of [[07 AI & ML/Machine Learning/Machine Learning|Machine Learning]] and is most relevant for [[07 AI & ML/Machine Learning/Types/Types|learning types]] like binary classification and rare event detection.
 
 ## Deeper Explanation
 

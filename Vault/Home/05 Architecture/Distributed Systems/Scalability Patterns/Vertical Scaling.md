@@ -12,7 +12,7 @@ publish: true
 
 # Vertical Scaling
 
-Vertical scaling (scale-up) means giving a single node more resources: more CPU cores, more RAM, faster disks, or higher network throughput. The mechanism is direct: a process that was CPU-starved gets more cores and can run more threads concurrently; a database that was spilling to disk gets enough RAM to keep the working set in memory. No code changes, no topology changes. That simplicity makes it the right first move for monoliths and managed databases where adding nodes would require significant re-architecture. For the broader context of scaling strategies, see [[Scalability Patterns]].
+Vertical scaling (scale-up) means giving a single node more resources: more CPU cores, more RAM, faster disks, or higher network throughput. The mechanism is direct: a process that was CPU-starved gets more cores and can run more threads concurrently; a database that was spilling to disk gets enough RAM to keep the working set in memory. No code changes, no topology changes. That simplicity makes it the right first move for monoliths and managed databases where adding nodes would require significant re-architecture. For the broader context of scaling strategies, see [[Home/05 Architecture/Distributed Systems/Scalability Patterns/Scalability Patterns|Scalability Patterns]].
 
 You reach for it when: the bottleneck is clearly resource-bound on a single node, the workload doesn't parallelize cleanly across nodes, or the cost of [[Horizontal Scaling]] complexity (sharding, distributed coordination, eventual consistency) outweighs the cost of a larger machine.
 

@@ -76,7 +76,7 @@ sequenceDiagram
     Api-->>Client: Return cached result
 ```
 
-Idempotency is especially important for [[Message Queues]] consumers and for multi step workflows like [[Distributed Transactions]] where partial failures are expected.
+Idempotency is especially important for [[Home/05 Architecture/Distributed Systems/Message Queues/Message Queues|Message Queues]] consumers and for multi step workflows like [[Distributed Transactions]] where partial failures are expected.
 
 ## HTTP Methods and Idempotency
 

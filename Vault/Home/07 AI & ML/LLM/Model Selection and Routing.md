@@ -14,7 +14,7 @@ publish: true
 
 Model selection is choosing which model serves a request; routing is choosing per-request among several models. Both exist because there is no single best model — every choice trades **quality against cost and latency**. Frontier models give the highest quality at the highest price and slowest response; small models are cheap and fast but weaker. A production system that sends every request to the largest model overpays and runs slow; one that uses a small model everywhere fails the hard queries. The engineering job is to match each request to the cheapest model that can handle it, and to keep that mapping changeable as models and prices shift underneath you.
 
-This decision compounds with the rest of the stack: a stronger [[Prompting|prompt]], [[RAG|retrieval]], or a [[Fine-tuning|fine-tuned]] small model can let a cheaper model do a job that otherwise needs a frontier one.
+This decision compounds with the rest of the stack: a stronger [[Home/07 AI & ML/LLM/Prompting/Prompting|prompt]], [[Home/07 AI & ML/LLM/RAG/RAG|retrieval]], or a [[Fine-tuning|fine-tuned]] small model can let a cheaper model do a job that otherwise needs a frontier one.
 
 ## Selection Criteria
 
@@ -46,7 +46,7 @@ flowchart TD
     L --> Out
 ```
 
-**Classifier routing.** A small, fast classifier (or the model itself) labels each query and dispatches it to the right model up front, rather than escalating after a failure. This is the [[Agents#Workflow Patterns|routing workflow pattern]] applied to model choice, and the same idea as query routing in [[RAG]].
+**Classifier routing.** A small, fast classifier (or the model itself) labels each query and dispatches it to the right model up front, rather than escalating after a failure. This is the [[Home/07 AI & ML/LLM/Agents/Agents#Workflow Patterns|routing workflow pattern]] applied to model choice, and the same idea as query routing in [[Home/07 AI & ML/LLM/RAG/RAG|RAG]].
 
 **Task-based mapping.** A fixed, deterministic mapping: classification and extraction to a small model, complex reasoning to a frontier model, code to a code-specialized model. Simplest to reason about when traffic is cleanly segmented by task type.
 

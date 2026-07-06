@@ -26,25 +26,25 @@ configuration:
       code: IBM Plex Mono
     colors:
       lightMode:
-        light: "#faf8f8"
-        lightgray: "#e5e5e5"
-        gray: "#b8b8b8"
-        darkgray: "#4e4e4e"
-        dark: "#2b2b2b"
-        secondary: "#284b63"
-        tertiary: "#84a59d"
-        highlight: rgba(143, 159, 169, 0.15)
-        textHighlight: "#fff23688"
+        light: "#eef3e8"
+        lightgray: "#c8d4bd"
+        gray: "#7c8b70"
+        darkgray: "#26301f"
+        dark: "#12180f"
+        secondary: "#3f6212"
+        tertiary: "#65a30d"
+        highlight: rgba(101, 163, 13, 0.18)
+        textHighlight: "#84cc1688"
       darkMode:
         light: "#161618"
         lightgray: "#393639"
         gray: "#646464"
         darkgray: "#d4d4d4"
         dark: "#ebebec"
-        secondary: "#7b97aa"
-        tertiary: "#84a59d"
-        highlight: rgba(143, 159, 169, 0.15)
-        textHighlight: "#b3aa0288"
+        secondary: "#a3e635"
+        tertiary: "#bef264"
+        highlight: rgba(163, 230, 53, 0.16)
+        textHighlight: "#84cc1688"
 plugins:
   - source: github:quartz-community/created-modified-date
     enabled: true
@@ -132,6 +132,8 @@ plugins:
     enabled: true
   - source: github:quartz-community/explorer
     enabled: true
+    options:
+      title: Topics
     layout:
       position: left
       priority: 50
@@ -147,6 +149,7 @@ plugins:
     layout:
       position: right
       priority: 10
+      condition: not-index
   - source: github:quartz-community/search
     enabled: true
     layout:
@@ -160,6 +163,7 @@ plugins:
     layout:
       position: right
       priority: 50
+      condition: not-index
   - source: github:quartz-community/article-title
     enabled: true
     layout:
@@ -210,8 +214,8 @@ plugins:
     enabled: true
     options:
       links:
-        Email: reshetnik.nikita@gmail.com
-        LinkedId: https://www.linkedin.com/in/nikitareshetnik/
+        Email: mailto:reshetnik.nikita@gmail.com
+        LinkedIn: https://www.linkedin.com/in/nikitareshetnik/
         GitHub: https://github.com/grafanaKibana
   - source: github:quartz-community/recent-notes
     enabled: false

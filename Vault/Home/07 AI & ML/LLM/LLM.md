@@ -16,7 +16,7 @@ status: Done
 
 A large language model (LLM) is a transformer neural network trained on vast text corpora to predict the next token in a sequence. That single objective — next-token prediction at scale — is what produces the capabilities the rest of this section builds on: answering questions, summarizing, translating, writing code, and calling tools. Virtually all modern generative LLMs (GPT, Claude, Llama, Gemini) are **decoder-only** transformers: self-attention lets every token attend to all earlier tokens, so the model builds contextual meaning across the whole input before predicting what comes next. (Encoder-only transformers like BERT and encoder-decoder models like T5 exist, but they serve classification, [[Embeddings|embedding]], and translation workloads rather than open-ended generation.)
 
-The engineering consequence: an LLM is not a knowledge database with retrieval semantics. It is a probability distribution over token sequences, shaped by training data and steered at inference time by the prompt. That is why grounding, [[Prompting]], and [[Home/07 AI & ML/LLM/Evaluation/Evaluation|evaluation]] are engineering disciplines rather than nice-to-haves — see [[Hallucinations]] for what happens when fluent prediction is mistaken for factual recall.
+The engineering consequence: an LLM is not a knowledge database with retrieval semantics. It is a probability distribution over token sequences, shaped by training data and steered at inference time by the prompt. That is why grounding, [[Home/07 AI & ML/LLM/Prompting/Prompting|Prompting]], and [[Home/07 AI & ML/LLM/Evaluation/Evaluation|evaluation]] are engineering disciplines rather than nice-to-haves — see [[Hallucinations]] for what happens when fluent prediction is mistaken for factual recall.
 
 ## How LLMs Are Built
 
@@ -37,8 +37,8 @@ Instruction-tuned model  =  base model + SFT + preference alignment (RLHF/DPO)
 
 Three adaptation levers, ordered by cost. Reach for the cheaper one first:
 
-- **Prompting (zero-shot / few-shot)** — steer behavior entirely through the input: instructions, examples, and output format. No training, instant iteration. Covered in [[Prompting]] and [[In-Context Learning]].
-- **Retrieval-Augmented Generation** — keep knowledge outside the model and inject relevant evidence into the prompt at query time. The right tool when facts change faster than you can retrain or when answers must cite sources. Covered in [[RAG]], including the RAG-vs-fine-tuning decision.
+- **Prompting (zero-shot / few-shot)** — steer behavior entirely through the input: instructions, examples, and output format. No training, instant iteration. Covered in [[Home/07 AI & ML/LLM/Prompting/Prompting|Prompting]] and [[In-Context Learning]].
+- **Retrieval-Augmented Generation** — keep knowledge outside the model and inject relevant evidence into the prompt at query time. The right tool when facts change faster than you can retrain or when answers must cite sources. Covered in [[Home/07 AI & ML/LLM/RAG/RAG|RAG]], including the RAG-vs-fine-tuning decision.
 - **Fine-tuning** — continue training the model's weights on task-specific data. Buys consistent behavior (format, tone, policy) at the cost of a training pipeline, evaluation discipline, and slower iteration. Use it for stable behavior, not for injecting fast-changing facts. Covered in [[Fine-tuning]].
 
 Two cross-cutting concerns sit alongside these levers: [[Context Engineering]] — deciding what fills the finite context window and in what order — and [[Model Selection and Routing]] — matching each request to the cheapest model that can handle it.

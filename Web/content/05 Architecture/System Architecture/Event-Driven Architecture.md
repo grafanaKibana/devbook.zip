@@ -10,7 +10,7 @@ Event-Driven Architecture (EDA) is a style where services communicate by publish
 
 In interview terms: EDA is not "just using a queue". It is a contract-driven communication model where events represent state changes, subscribers own their reaction logic, and consistency is typically eventual rather than immediate.
 
-EDA runs on a message broker — usually [[Message Queues]] — with [[RabbitMQ]] and [[Kafka]] the two dominant choices, the former for flexible routing and the latter for partitioned, retained event logs.
+EDA runs on a message broker — usually [[05 Architecture/Distributed Systems/Message Queues/Message Queues|Message Queues]] — with [[RabbitMQ]] and [[Kafka]] the two dominant choices, the former for flexible routing and the latter for partitioned, retained event logs.
 
 ## Core Concepts
 

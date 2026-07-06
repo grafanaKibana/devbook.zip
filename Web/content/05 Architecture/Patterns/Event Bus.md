@@ -10,7 +10,7 @@ An event bus is a centralized publish/subscribe dispatcher: publishers emit even
 
 This sits between two related concepts. The [[Observer]] pattern couples subscribers to a specific subject instance — you subscribe to _this_ order's `StatusChanged` event. An event bus removes that coupling: you subscribe to _any_ `OrderPlaced` event regardless of which object publishes it. The [[Mediator]] pattern (MediatR `Send`) routes one request to one handler. An event bus routes one event to _many_ handlers — `Publish(OrderPlaced)` fans out to inventory, billing, and notification handlers simultaneously.
 
-In .NET, the most common in-process event bus is **MediatR's `INotification` / `INotificationHandler<T>`** pipeline. For cross-service communication, [[Message Queues|message brokers]] (RabbitMQ, Azure Service Bus, Kafka) serve as the distributed event bus, often abstracted through MassTransit or NServiceBus. The [[Event-driven]] page covers the broader paradigm and the Outbox pattern for reliable distributed publishing.
+In .NET, the most common in-process event bus is **MediatR's `INotification` / `INotificationHandler<T>`** pipeline. For cross-service communication, [[05 Architecture/Distributed Systems/Message Queues/Message Queues|message brokers]] (RabbitMQ, Azure Service Bus, Kafka) serve as the distributed event bus, often abstracted through MassTransit or NServiceBus. The [[Event-driven]] page covers the broader paradigm and the Outbox pattern for reliable distributed publishing.
 
 ## MediatR Notification Bus
 

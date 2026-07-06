@@ -17,7 +17,7 @@ CI/CD pipelines automate the path from code commit to production deployment. CI 
 The three dominant tools for .NET teams are GitHub Actions, Azure DevOps Pipelines, and Jenkins. They solve the same problem with different tradeoffs around hosting, cost, and ecosystem integration.
 
 > [!NOTE]
-> **The two "CD"s are different.** *Continuous **Delivery*** means every passing build is *automatically made ready* to release, but a human clicks the button to push to production (a manual approval gate). *Continuous **Deployment*** removes that gate — every commit that passes the pipeline goes to production automatically. Deployment requires more trust in your tests, observability, and rollback (it pairs naturally with [[Deployment Strategies|canary/blue-green deployments]] and feature flags). Most teams practice continuous *delivery*; continuous *deployment* is the further, optional step.
+> **The two "CD"s are different.** *Continuous **Delivery*** means every passing build is *automatically made ready* to release, but a human clicks the button to push to production (a manual approval gate). *Continuous **Deployment*** removes that gate — every commit that passes the pipeline goes to production automatically. Deployment requires more trust in your tests, observability, and rollback (it pairs naturally with [[Home/10 DevOps/Deployment Strategies/Deployment Strategies|canary/blue-green deployments]] and feature flags). Most teams practice continuous *delivery*; continuous *deployment* is the further, optional step.
 
 ## GitHub Actions
 
