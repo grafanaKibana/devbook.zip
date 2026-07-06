@@ -25,7 +25,7 @@ from dataclasses import dataclass
 
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-VAULT_SE_ROOT = os.path.join(REPO_ROOT, "Vault", "Software Engineering")
+VAULT_SE_ROOT = os.path.join(REPO_ROOT, "Vault", "Home")
 
 VALID_STATUSES = ["Done", "Ready To Repeat", "Repetition", "Creation", "Not-Started"]
 VALID_PRIORITIES = ["High", "Medium", "Low"]

@@ -1,10 +1,6 @@
 {
-    "outputDirectory": "Web/dist",
-    "installCommand": "cd Web && npm install",
-    "buildCommand": "cd Web && npm run build",
-    "devCommand": "cd Web && npm run start",
-    "routes": [
-        { "handle": "filesystem" },
-        { "src": "/(.*)", "status": 404, "dest": "/404" }
-    ]
+    "installCommand": "cd Web && npm ci",
+    "buildCommand": "cd Web && npx quartz plugin install --from-config && npx quartz build",
+    "outputDirectory": "Web/public",
+    "cleanUrls": true
 }

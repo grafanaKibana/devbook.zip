@@ -1,0 +1,95 @@
+name: Issue Management
+
+on:
+  issues:
+    types: [opened, edited, labeled, unlabeled, reopened, transferred]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add needs:triage when no type label is set
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          LABELS_JSON: ${{ toJson(github.event.issue.labels) }}
+        run: |
+          set -euo pipefail
+
+          gh label create "needs:triage" --color "fbca04" --description "Needs clarification before work starts" || true
+
+          if printf '%s' "$LABELS_JSON" | jq -e 'any(.[]; .name | startswith("type:"))' >/dev/null; then
+            echo "Issue already has a type label."
+            exit 0
+          fi
+
+          if printf '%s' "$LABELS_JSON" | jq -e 'any(.[]; .name == "needs:triage")' >/dev/null; then
+            echo "Issue already has needs:triage."
+            exit 0
+          fi
+
+          gh issue edit "$ISSUE_NUMBER" --add-label "needs:triage"
+
+  project-area-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set Project Area from area label
+        env:
+          GH_TOKEN: ${{ secrets.DEVBOOK_PROJECT_TOKEN }}
+          ISSUE_NODE_ID: ${{ github.event.issue.node_id }}
+          LABELS_JSON: ${{ toJson(github.event.issue.labels) }}
+          PROJECT_ID: ${{ vars.DEVBOOK_PROJECT_ID }}
+          AREA_FIELD_ID: ${{ vars.DEVBOOK_PROJECT_AREA_FIELD_ID }}
+          VAULT_OPTION_ID: ${{ vars.DEVBOOK_PROJECT_AREA_VAULT_OPTION_ID }}
+          WEB_OPTION_ID: ${{ vars.DEVBOOK_PROJECT_AREA_WEB_OPTION_ID }}
+          PLATFORM_OPTION_ID: ${{ vars.DEVBOOK_PROJECT_AREA_PLATFORM_OPTION_ID }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${GH_TOKEN:-}" ] || [ -z "${PROJECT_ID:-}" ] || [ -z "${AREA_FIELD_ID:-}" ]; then
+            echo "Project sync is not configured. Set DEVBOOK_PROJECT_TOKEN and project field variables to enable it."
+            exit 0
+          fi
+
+          AREA_OPTION_ID=""
+          if printf '%s' "$LABELS_JSON" | jq -e 'any(.[]; .name == "area:vault")' >/dev/null; then
+            AREA_OPTION_ID="$VAULT_OPTION_ID"
+          elif printf '%s' "$LABELS_JSON" | jq -e 'any(.[]; .name == "area:web")' >/dev/null; then
+            AREA_OPTION_ID="$WEB_OPTION_ID"
+          elif printf '%s' "$LABELS_JSON" | jq -e 'any(.[]; .name == "area:platform")' >/dev/null; then
+            AREA_OPTION_ID="$PLATFORM_OPTION_ID"
+          else
+            echo "No area label is set."
+            exit 0
+          fi
+
+          if [ -z "${AREA_OPTION_ID:-}" ]; then
+            echo "The matching Area option variable is not configured."
+            exit 0
+          fi
+
+          ITEM_ID=$(gh api graphql \
+            -f issue="$ISSUE_NODE_ID" \
+            -f project="$PROJECT_ID" \
+            -f query='query($issue:ID!, $project:ID!) { node(id: $issue) { ... on Issue { projectItems(first: 20) { nodes { id project { id } } } } } }' \
+            --jq '.data.node.projectItems.nodes[] | select(.project.id == $project) | .id' | head -n 1)
+
+          if [ -z "${ITEM_ID:-}" ]; then
+            ITEM_ID=$(gh api graphql \
+              -f project="$PROJECT_ID" \
+              -f content="$ISSUE_NODE_ID" \
+              -f query='mutation($project:ID!, $content:ID!) { addProjectV2ItemById(input: { projectId: $project, contentId: $content }) { item { id } } }' \
+              --jq '.data.addProjectV2ItemById.item.id')
+          fi
+
+          gh api graphql \
+            -f project="$PROJECT_ID" \
+            -f item="$ITEM_ID" \
+            -f field="$AREA_FIELD_ID" \
+            -f option="$AREA_OPTION_ID" \
+            -f query='mutation($project:ID!, $item:ID!, $field:ID!, $option:String!) { updateProjectV2ItemFieldValue(input: { projectId: $project, itemId: $item, fieldId: $field, value: { singleSelectOptionId: $option } }) { projectV2Item { id } } }' \
+            --silent

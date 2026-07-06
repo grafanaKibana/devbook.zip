@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regenerate Vault/Software Engineering/Roadmap.canvas from folder structure.
+"""Regenerate Vault/Home/Roadmap.canvas from folder structure.
 
 Usage:
     python3 .scripts/generate-roadmap.py
@@ -18,13 +18,13 @@ from typing import Any
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 VAULT_ROOT = os.path.join(REPO_ROOT, "Vault")
-KNOWLEDGE = os.path.join(VAULT_ROOT, "Software Engineering")
+KNOWLEDGE = os.path.join(VAULT_ROOT, "Home")
 CANVAS_PATH = os.path.join(KNOWLEDGE, "Roadmap.canvas")
 MAX_DEPTH = 5
 
-DG_ROADMAP_PERMALINK = "/software-engineering/roadmap/"
+DG_ROADMAP_PERMALINK = "/roadmap/"
 DG_ROADMAP_FRONTMATTER = {
-    "dg-publish": True,
+    "publish": True,
     "permalink": DG_ROADMAP_PERMALINK,
     "title": "Roadmap",
 }

@@ -1,0 +1,37 @@
+/* DevBook — match the published Quartz site fonts inside Obsidian.
+ *
+ * Site config (Web/quartz.config.yaml → theme.typography):
+ *   headings → Schibsted Grotesk   body → Source Sans Pro   code → IBM Plex Mono
+ * Installed locally as: Schibsted Grotesk, Source Sans 3 (the current name for
+ * Source Sans Pro — same design), IBM Plex Mono.
+ *
+ * Enable in: Settings → Appearance → CSS snippets → 🔄 reload → toggle on.
+ *
+ * Why !important: Settings → Appearance → "Text font" (currently SF Pro Text)
+ * sets a higher-priority override that otherwise beats a snippet. !important
+ * wins over it. Alternatively, clear the Text font in Appearance and you can
+ * drop the !important — but leaving it is harmless.
+ */
+
+body.theme-light,
+body.theme-dark {
+  --font-text: "Source Sans 3", "Source Sans Pro", -apple-system, BlinkMacSystemFont, sans-serif !important;
+  --font-monospace: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace !important;
+}
+
+/* The site uses a separate heading font; Obsidian has no setting for it.
+ * Covers Reading view, Live Preview headings, and the note's inline title. */
+.markdown-rendered :is(h1, h2, h3, h4, h5, h6),
+.inline-title,
+.cm-editor .HyperMD-header,
+.cm-editor .cm-header {
+  font-family: "Schibsted Grotesk", -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+
+/* Optional: match the header font in the app UI too (menus, sidebars, tabs).
+ * Uncomment to enable.
+body.theme-light,
+body.theme-dark {
+  --font-interface: "Schibsted Grotesk", -apple-system, sans-serif !important;
+}
+*/

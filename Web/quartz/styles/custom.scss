@@ -1,0 +1,29 @@
+@use "./variables.scss" as *;
+@use "sass:map";
+
+
+// Component-specific styles live with their components (each sets `.css`):
+//   Web/custom/components/topic-dashboard.tsx  → .topic-* rules
+//   Web/custom/components/questions-index.tsx  → .questions-index / .qi-* rules
+// Put only truly global overrides here.
+
+:root {
+  --surface-radius: var(--radius-m, 8px);
+}
+
+.callout,
+.graph > .graph-outer,
+.graph > .global-graph-outer > .global-graph-container {
+  border-radius: var(--surface-radius);
+}
+
+// Remove tags from the tags page.
+.page-listing .tags {
+  display: none;
+}
+
+// Wider view port 300px > 400px
+.page {
+  max-width: calc(#{map.get($breakpoints, desktop)} + 400px);
+}
+

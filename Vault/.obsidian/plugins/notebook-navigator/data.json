@@ -13,20 +13,16 @@
       "periodicNotesFolder": "",
       "shortcuts": [
         {
-          "type": "folder",
-          "path": "Software Engineering"
+          "type": "note",
+          "path": "Home/Questions.md"
         },
         {
           "type": "note",
-          "path": "Software Engineering/Questions.md"
+          "path": "Home/Roadmap.canvas"
         },
         {
           "type": "note",
-          "path": "Software Engineering/Roadmap.canvas"
-        },
-        {
-          "type": "note",
-          "path": "Software Engineering/Topics.base"
+          "path": "Home/Topics.base"
         }
       ],
       "propertyKeys": [
@@ -144,7 +140,7 @@
   "showInfoButtons": true,
   "homepage": {
     "source": "file",
-    "file": "Knowledge/Knowledge.md",
+    "file": "Home/index.md",
     "createMissingPeriodicNote": true
   },
   "dualPane": true,
@@ -156,21 +152,21 @@
   "showTooltipPath": true,
   "showTooltipWordCount": false,
   "desktopBackground": "primary",
-  "desktopScale": 1,
+  "desktopScale": 1.05,
   "mobileScale": 1,
   "useFloatingToolbars": true,
   "toolbarVisibility": {
     "navigation": {
-      "toggleDualPane": true,
-      "expandCollapse": true,
+      "toggleDualPane": false,
+      "expandCollapse": false,
       "calendar": true,
-      "hiddenItems": true,
+      "hiddenItems": false,
       "rootReorder": true,
       "newFolder": true
     },
     "list": {
-      "back": true,
-      "search": true,
+      "back": false,
+      "search": false,
       "reveal": false,
       "descendants": true,
       "sort": true,
@@ -195,13 +191,13 @@
   "separateNoteCounts": true,
   "showIndentGuides": false,
   "navCountLeaderStyle": "none",
-  "rootLevelSpacing": 0,
+  "rootLevelSpacing": 4,
   "navIndent": 12,
   "navItemHeight": 24,
   "navItemHeightScaleText": true,
   "collapseBehavior": "all",
   "smartCollapse": true,
-  "excludeVaultRootFromCollapse": false,
+  "excludeVaultRootFromCollapse": true,
   "collapseOtherBranchesOnExpand": false,
   "autoSelectFirstFileOnFocusChange": true,
   "autoExpandNavItems": true,
@@ -247,7 +243,7 @@
   "defaultListMode": "compact",
   "includeDescendantNotes": true,
   "defaultFolderSort": "title-asc",
-  "propertySortKey": "",
+  "propertySortKey": "order",
   "propertySortSecondary": "title",
   "manualSortPropertyKey": "sort_index",
   "manualSortGroupHeaderProperty": "group_header",
@@ -544,35 +540,30 @@
   "fileColors": {},
   "fileBackgroundColors": {},
   "folderIcons": {
-    "Software Engineering/02 Computer Science": "flask-round",
-    "Software Engineering/03 Data Persistence": "database",
-    "Software Engineering/04 Networks": "network",
-    "Software Engineering/05 Architecture": "building-2",
-    "Software Engineering/06 Development Practices": "ruler-dimension-line",
-    "Software Engineering/07 Security": "lock",
-    "Software Engineering/08 SDLC": "area-chart",
-    "Software Engineering/09 DevOps": "skull",
-    "Software Engineering/10 Cloud": "cloud",
-    "Software Engineering/11 AI & ML": "brain-circuit",
     "Assets": "book-image",
-    "Templates": "book-dashed"
+    "Templates": "book-dashed",
+    "Home/02 Computer Science": "flask-round",
+    "Home/03 Data Persistence": "database",
+    "Home/04 Networks": "network",
+    "Home/05 Architecture": "building-2",
+    "Home/06 Development Practices": "ruler-dimension-line"
   },
   "folderColors": {
-    "Software Engineering/02 Computer Science": "#ef4444",
-    "Software Engineering/03 Data Persistence": "#f97316",
-    "Software Engineering/04 Networks": "#f59e0b",
-    "Software Engineering/05 Architecture": "#eab308",
-    "Software Engineering/06 Development Practices": "#84cc16",
-    "Software Engineering/07 Security": "#10b981",
-    "Software Engineering/08 SDLC": "#0ea5e9",
-    "Software Engineering/09 DevOps": "#3b82f6",
-    "Software Engineering/10 Cloud": "#6366f1",
-    "Software Engineering/11 AI & ML": "#a855f7"
+    "Home/02 Computer Science": "#ef4444",
+    "Home/03 Data Persistence": "#f97316",
+    "Home/04 Networks": "#f59e0b",
+    "Home/05 Architecture": "#eab308",
+    "Home/06 Development Practices": "#84cc16"
   },
   "folderBackgroundColors": {},
   "folderSortOverrides": {},
   "folderTreeSortOverrides": {},
-  "folderAppearances": {},
+  "folderAppearances": {
+    "Home/01 Programming": {
+      "mode": "standard",
+      "previewRows": 5
+    }
+  },
   "tagIcons": {},
   "tagColors": {},
   "tagBackgroundColors": {},
@@ -620,7 +611,7 @@
   "virtualFolderBackgroundColors": {},
   "navigationSeparators": {
     "folder:Templates": true,
-    "folder:Software Engineering": true
+    "folder:Home": true
   },
   "userColors": [
     "#ffffff",

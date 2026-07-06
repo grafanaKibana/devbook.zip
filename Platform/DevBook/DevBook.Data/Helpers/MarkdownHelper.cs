@@ -51,7 +51,7 @@ internal static class MarkdownHelper
             {
                 var parts = line.Split(':', 2, StringSplitOptions.TrimEntries);
                 return parts.Length == 2
-                       && string.Equals(parts[0], "dg-publish", StringComparison.OrdinalIgnoreCase)
+                       && string.Equals(parts[0], "publish", StringComparison.OrdinalIgnoreCase)
                        && string.Equals(parts[1].Trim('\'', '"'), "true", StringComparison.OrdinalIgnoreCase);
             });
 

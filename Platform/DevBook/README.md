@@ -234,7 +234,7 @@ Example full-root request:
 - `forceReingest` is optional and defaults to `false`; set it to `true` to refresh stored documents/chunks even when the source content is unchanged.
 - `chunkingStrategy` is optional. When omitted, ingestion writes chunks for all registered strategies: `FixedSize`, `MarkdownSection`, and `Semantic`. When set, ingestion updates only that strategy collection.
 - Requests are rejected if they try to escape the configured ingestion root.
-- Folder ingestion reads matching markdown files with `dg-publish: true` frontmatter and skips files under `Templates`; individual markdown file size is not checked.
+- Folder ingestion reads matching markdown files with `publish: true` frontmatter and skips files under `Templates`; individual markdown file size is not checked.
 - Folder ingestion scans current markdown files, compares hashes against stored documents, upserts only new or changed files, deletes only stored documents whose files no longer exist, and chunks/embeds only changed documents. Single-file ingestion stays scoped to that file and does not delete sibling documents.
 - Hangfire server/storage is wired for future background work, but ingestion chunking currently runs inline from the API request; no ingestion job is registered.
 

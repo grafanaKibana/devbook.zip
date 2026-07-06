@@ -133,7 +133,7 @@ public sealed class IngestionServiceTests
         {
             SourcePath = ScopedNotePath,
             Title = "Note",
-            Frontmatter = "dg-publish: true\nstatus: Creation",
+            Frontmatter = "publish: true\nstatus: Creation",
             PageContent = "# Note\n\nFresh content.",
         });
         replacedChunks.Should().NotBeEmpty();
@@ -593,8 +593,8 @@ public sealed class IngestionServiceTests
     private static string Published(string pageContent, string? extraFrontmatter = null)
     {
         var frontmatter = string.IsNullOrWhiteSpace(extraFrontmatter)
-            ? "dg-publish: true"
-            : $"dg-publish: true\n{extraFrontmatter}";
+            ? "publish: true"
+            : $"publish: true\n{extraFrontmatter}";
 
         return $"---\n{frontmatter}\n---\n{pageContent}";
     }

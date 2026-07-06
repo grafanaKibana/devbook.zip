@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+set -e
+
+# Post-commit hook for DevBook Obsidian repo
+# Auto-triggers Quartz Syncer to publish after a commit that touched the vault,
+# so you never have to run "publish" by hand.
+#
+# Requirements & caveats:
+#   - Obsidian MUST be running: the Quartz Syncer CLI dispatches into the live
+#     Obsidian process (that's how Dataview/Datacore queries get rendered).
+#   - This does NOT fold the render into the current commit. Syncer publishes by
+#     pushing a separate commit to your Quartz content repo — that is inherent to
+#     how it works and cannot be turned off. This hook only removes the manual
+#     "publish" step; the publish commit still lands in the content repo.
+#   - Runs in the background so it never blocks or delays your commit.
+#     Output is logged (see LOG_FILE below).
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+
+# Obsidian Git plugin can run hooks with a minimal PATH.
+# Add common Node binary locations for parity with the pre-commit hook.
+for bin_dir in /opt/homebrew/bin /opt/homebrew/opt/node@22/bin /usr/local/bin; do
+    [[ -d "$bin_dir" ]] && PATH="$bin_dir:$PATH"
+done
+
+# Only publish when the just-created commit actually changed publishable vault
+# content. Includes notes, Bases, canvases, and attachments under Vault/, but
+# skips Obsidian's internal config (Vault/.obsidian/) and non-vault paths
+# (.scripts/, Web/, root config, etc.).
+VAULT_CHANGED=false
+while IFS= read -r file; do
+    [[ "$file" == Vault/* ]] || continue
+    [[ "$file" == Vault/.obsidian/* ]] && continue
+    VAULT_CHANGED=true
+    break
+done < <(git diff-tree --no-commit-id --name-only -r HEAD)
+
+if [[ "$VAULT_CHANGED" != true ]]; then
+    exit 0
+fi
+
+# Resolve the Obsidian binary (it lives inside the app bundle, not on PATH
+# for GUI-launched hooks).
+OBSIDIAN_BIN=""
+if command -v obsidian >/dev/null 2>&1; then
+    OBSIDIAN_BIN="$(command -v obsidian)"
+elif [[ -x /Applications/Obsidian.app/Contents/MacOS/obsidian ]]; then
+    OBSIDIAN_BIN="/Applications/Obsidian.app/Contents/MacOS/obsidian"
+fi
+
+if [[ -z "$OBSIDIAN_BIN" ]]; then
+    echo "[post-commit] ⚠ Obsidian binary not found — skipping auto-publish."
+    echo "  Publish manually from Obsidian, or set OBSIDIAN_BIN in this hook."
+    exit 0
+fi
+
+LOG_FILE="$(git rev-parse --git-path quartz-syncer-publish.log)"
+
+# Warn (but still try) if Obsidian doesn't appear to be running — the CLI needs it.
+if ! pgrep -x Obsidian >/dev/null 2>&1; then
+    echo "[post-commit] ⚠ Obsidian does not appear to be running."
+    echo "  Quartz Syncer needs Obsidian open to render; publish may be skipped."
+    echo "  (attempting anyway; see $LOG_FILE)"
+fi
+
+echo "[post-commit] Publishing vault changes via Quartz Syncer (background)…"
+echo "  Log: $LOG_FILE"
+
+# Fire-and-forget so the commit returns immediately.
+# Using "publish" (non-destructive). To also mirror deletions, replace with:
+#   "$OBSIDIAN_BIN" quartz-syncer:sync force
+{
+    echo "===== $(date '+%Y-%m-%d %H:%M:%S') post-commit publish for $(git rev-parse --short HEAD) ====="
+    "$OBSIDIAN_BIN" quartz-syncer:publish
+    echo "----- exit: $? -----"
+} >>"$LOG_FILE" 2>&1 &
+
+# Detach so git doesn't wait on the background job.
+disown 2>/dev/null || true
+
+exit 0

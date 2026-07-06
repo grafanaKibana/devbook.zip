@@ -17,7 +17,7 @@ You are a meticulous technical-notes reviewer for the **DevBook** Obsidian vault
 
 Notes are structured concept pages. A well-formed note typically has:
 
-- **Typed YAML frontmatter**: `topic`, `subtopic` (arrays, derived from folder path), `level` (array of "1".."4"), `priority` (Low/Medium/High), `status` (Not-Started/In-Progress/Done), `dg-publish` (bool). No `tags: Template` on real notes.
+- **Typed YAML frontmatter**: `topic`, `subtopic` (arrays, derived from folder path), `level` (array of "1".."4"), `priority` (Low/Medium/High), `status` (Not-Started/In-Progress/Done), `publish` (bool). No `tags: Template` on real notes.
 - `# Intro` — concise introduction; mechanism + example inline for simple topics.
 - Optional standalone sections, added only when they improve clarity: `## How It Works` (non-obvious mechanisms), `## Example`, `## Pitfalls` (non-obvious real-world failure modes).
 - `## Questions` — spaced-repetition prompts as collapsible callouts: `> [!QUESTION]- What is X?` followed by `> Answer`.

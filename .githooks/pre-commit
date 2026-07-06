@@ -37,18 +37,9 @@ if [[ -n "$ROLLUP_CHANGED" ]]; then
     echo "[pre-commit] ✓ Folder frontmatter synced ($(echo "$ROLLUP_CHANGED" | wc -l | tr -d ' ') notes)"
 fi
 
-# 2. Render whats-next navigation callouts
-WHATSNEXT_CHANGED=$(python3 "$REPO_ROOT/.scripts/render-whats-next.py" --staged --write --print-changed)
-if [[ -n "$WHATSNEXT_CHANGED" ]]; then
-    while IFS= read -r file; do
-        git add "$REPO_ROOT/$file"
-    done <<< "$WHATSNEXT_CHANGED"
-    echo "[pre-commit] ✓ Whats-next callouts updated ($(echo "$WHATSNEXT_CHANGED" | wc -l | tr -d ' ') notes)"
-fi
-
-# 3. Generate roadmap canvas from folder structure
+# 2. Generate roadmap canvas from folder structure
 python3 "$REPO_ROOT/.scripts/generate-roadmap.py"
-ROADMAP_FILE="Vault/Software Engineering/Roadmap.canvas"
+ROADMAP_FILE="Vault/Home/Roadmap.canvas"
 if ! git diff --quiet -- "$REPO_ROOT/$ROADMAP_FILE" 2>/dev/null; then
     git add "$REPO_ROOT/$ROADMAP_FILE"
     echo "[pre-commit] ✓ Roadmap canvas regenerated"
@@ -57,10 +48,15 @@ fi
 ### MD040 LINT — markdownlint-cli2 (staged-only) ###
 if [[ ${#STAGED_MD[@]} -gt 0 ]]; then
     echo "[pre-commit] Checking fenced code block languages (MD040)..."
+
+    # markdownlint-cli2 and its config live in the Quartz web project (Web/).
+    LINT_BIN="$REPO_ROOT/Web/node_modules/.bin/markdownlint-cli2"
+    LINT_CONFIG="$REPO_ROOT/Web/.markdownlint.json"
+
     # Run only on staged files; pass each file as a positional argument
     LINT_CMD=()
-    if [[ -x "$REPO_ROOT/Web/node_modules/.bin/markdownlint-cli2" ]]; then
-        LINT_CMD=("$REPO_ROOT/Web/node_modules/.bin/markdownlint-cli2")
+    if [[ -x "$LINT_BIN" ]]; then
+        LINT_CMD=("$LINT_BIN")
     elif command -v npx >/dev/null 2>&1; then
         LINT_CMD=(npx --no-install markdownlint-cli2)
     else
@@ -71,7 +67,13 @@ if [[ ${#STAGED_MD[@]} -gt 0 ]]; then
         exit 1
     fi
 
-    if ! "${LINT_CMD[@]}" --config "$REPO_ROOT/Web/.markdownlint.json" "${STAGED_MD[@]}"; then
+    if [[ ! -f "$LINT_CONFIG" ]]; then
+        echo ""
+        echo "[pre-commit] ✗ .markdownlint.json not found at Web/.markdownlint.json."
+        exit 1
+    fi
+
+    if ! "${LINT_CMD[@]}" --config "$LINT_CONFIG" "${STAGED_MD[@]}"; then
         echo ""
         echo "[pre-commit] ✗ MD040: Add a language to every fenced code block."
         echo "  Fallback: use 'text' when no specific language applies."
