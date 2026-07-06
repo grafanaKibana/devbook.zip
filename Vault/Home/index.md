@@ -113,9 +113,15 @@ return function TopicDashboard() {
       return <span style={{ width: `${width}%`, background: "rgb(var(--topic-rgb))", opacity: seg.alpha }} />;
     });
 
+  // Safari/WebKit does not resolve a var() used as the count in `grid-column: span var(--x)`;
+  // it drops the declaration and falls back to `span 1`, breaking the grid. Emit static
+  // `grid-column: span N` utility classes instead (works in every browser).
+  const spanRules = (cls) =>
+    Array.from({ length: 12 }, (_, i) => `.dc-topic-card.${cls}-${i + 1} { grid-column: span ${i + 1}; }`).join(" ");
+
   const CSS = `
 .dc-topic-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 0.75rem; width: 100%; }
-.dc-topic-card { position: relative; cursor: pointer; grid-column: span var(--topic-span-desktop); min-width: 0; min-height: 7rem; box-sizing: border-box; margin: 0; display: flex; flex-direction: column; background: transparent; border: 1px solid var(--background-modifier-border, var(--lightgray, #e5e5e5)); border-radius: var(--radius-m, 8px); box-shadow: none; padding: 0.9rem 1rem 1rem; transition: border-color 120ms, background-color 120ms; }
+.dc-topic-card { position: relative; cursor: pointer; min-width: 0; min-height: 7rem; box-sizing: border-box; margin: 0; display: flex; flex-direction: column; background: transparent; border: 1px solid var(--background-modifier-border, var(--lightgray, #e5e5e5)); border-radius: var(--radius-m, 8px); box-shadow: none; padding: 0.9rem 1rem 1rem; transition: border-color 120ms, background-color 120ms; }
 .dc-topic-card:hover { border-color: rgba(var(--topic-rgb), 0.5); background: rgba(var(--topic-rgb), 0.1); }
 .dc-topic-title { display: flex; gap: 0.55rem; align-items: center; line-height: 1.3; }
 .dc-topic-icon { display: flex; align-self: center; color: rgb(var(--topic-rgb)); }
@@ -133,9 +139,10 @@ return function TopicDashboard() {
 .dc-topic-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4em 1.1em; margin-top: 0.7em; font-size: 0.8em; opacity: 0.85; }
 .dc-topic-legend-item { display: inline-flex; align-items: center; gap: 0.4em; }
 .dc-topic-legend-sw { width: 0.8em; height: 0.8em; border-radius: 3px; flex: 0 0 auto; display: inline-block; background: rgb(var(--topic-rgb)); }
-@media (max-width: 1500px) { .dc-topic-card { grid-column: span var(--topic-span-medium); } }
-@media (max-width: 760px) { .dc-topic-card { grid-column: span var(--topic-span-narrow); } }
-@media (max-width: 430px) { .dc-topic-grid { grid-template-columns: 1fr; } .dc-topic-card { grid-column: span 1; } }
+${spanRules("dsk")}
+@media (max-width: 1600px) { ${spanRules("med")} }
+@media (max-width: 760px) { ${spanRules("nar")} }
+@media (max-width: 430px) { .dc-topic-grid { grid-template-columns: 1fr; } .dc-topic-grid .dc-topic-card { grid-column: span 1; } }
 `;
 
   return (
@@ -143,7 +150,7 @@ return function TopicDashboard() {
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
       <div class="dc-topic-grid">
         {cards.map((c) => (
-          <div class="dc-topic-card" style={{ "--topic-rgb": c.rgb, "--topic-span-desktop": c.spanDesktop, "--topic-span-medium": c.spanMedium, "--topic-span-narrow": c.spanNarrow }}>
+          <div class={`dc-topic-card dsk-${c.spanDesktop} med-${c.spanMedium} nar-${c.spanNarrow}`} style={{ "--topic-rgb": c.rgb }}>
             <div class="dc-topic-title">
               <span class="dc-topic-icon" dangerouslySetInnerHTML={{ __html: c.iconSvg }} />
               <span class="dc-topic-name">{c.title}</span>
