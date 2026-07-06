@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-05T10:53:43.317+03:00
-modified: 2026-07-05T15:49:36.225+03:00
+modified: 2026-07-06T09:25:44.423+03:00
 ---
 
 # Service-Oriented Architecture

@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-05T10:53:48.571+03:00
-modified: 2026-07-05T15:49:37.295+03:00
+modified: 2026-07-06T09:25:44.487+03:00
 ---
 
 # Event-Driven Development
