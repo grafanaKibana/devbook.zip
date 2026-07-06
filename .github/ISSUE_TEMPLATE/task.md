@@ -1,6 +1,6 @@
 ---
 name: Task
-about: Standard work item — problem, affected surface, approach, and acceptance criteria
+about: Standard work item — problem, affected surface, agent instructions, and acceptance criteria
 title: ""
 labels: ""
 assignees: ""
@@ -15,9 +15,9 @@ assignees: ""
 <!-- Files, resources, or areas touched. Use `path:line` where it helps. -->
 -
 
-## Proposed approach
+## Instructions for the agent
 
-<!-- How you intend to solve it. Bullets are fine. -->
+<!-- The plan as imperative directions for whoever (incl. Claude) implements this: do X, be aware of Y, don't Z. -->
 -
 
 ## Acceptance criteria

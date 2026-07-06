@@ -15,9 +15,9 @@ assignees: ""
 <!-- Files, resources, or areas involved. Use `path:line` where it helps. -->
 -
 
-## Proposed approach
+## Instructions for the agent
 
-<!-- Suspected cause and how you intend to fix it. Bullets are fine. -->
+<!-- Imperative directions for whoever (incl. Claude) fixes this: suspected cause, what to do, what to avoid. -->
 -
 
 ## Acceptance criteria
