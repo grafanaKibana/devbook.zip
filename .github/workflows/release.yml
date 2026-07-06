@@ -21,44 +21,7 @@ jobs:
 
       - name: Compute next version
         id: version
-        run: |
-          set -euo pipefail
-
-          LAST_TAG=$(git tag --list 'v*' --sort=-v:refname | head -n1 || true)
-
-          if [ -z "$LAST_TAG" ]; then
-            NEXT="v1.0.0"
-            BUMP=initial
-            echo "No previous tag; initial release $NEXT."
-          else
-            RANGE="${LAST_TAG}..HEAD"
-            VER="${LAST_TAG#v}"
-            MAJOR=$(echo "$VER" | cut -d. -f1)
-            MINOR=$(echo "$VER" | cut -d. -f2)
-            PATCH=$(echo "$VER" | cut -d. -f3)
-            echo "Last tag: $LAST_TAG"
-
-            SUBJECTS=$(git log ${RANGE} --no-merges --format='%s' || true)
-
-            BUMP=none
-            if printf '%s\n' "$SUBJECTS" | grep -qE '^(feature|docs):'; then
-              BUMP=minor
-            elif printf '%s\n' "$SUBJECTS" | grep -qE '^(bug|maintenance):'; then
-              BUMP=patch
-            fi
-
-            case "$BUMP" in
-              minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
-              patch) PATCH=$((PATCH + 1)) ;;
-              none)  echo "No release-worthy commits; skipping." ;;
-            esac
-
-            NEXT="v${MAJOR}.${MINOR}.${PATCH}"
-          fi
-
-          echo "bump=$BUMP" >> "$GITHUB_OUTPUT"
-          echo "next=$NEXT" >> "$GITHUB_OUTPUT"
-          echo "Computed: bump=$BUMP next=$NEXT"
+        run: bash .github/scripts/next-version.sh auto | tee -a "$GITHUB_OUTPUT"
 
       - name: Generate release notes
         if: steps.version.outputs.bump != 'none'

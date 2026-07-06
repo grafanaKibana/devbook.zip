@@ -1,0 +1,116 @@
+name: Major Release Approval
+
+# Gates MAJOR releases at PR time. A PR whose commits carry a breaking `!`
+# prefix (e.g. `feature!:`) parks a required `major-approval` status check as
+# pending, and the bot asks for confirmation. Reply `/approve-major` to clear
+# the check, or `/no-major` to strip the `!` (force-pushes the branch). PRs with
+# no `!` pass the check automatically.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main]
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write # force-push to strip `!` on /no-major
+  pull-requests: write # post + read PR comments
+  statuses: write # set the major-approval gate status
+
+env:
+  BANG_RE: '^(feature|docs|bug|maintenance)!:'
+  MARKER: '<!-- major-approval -->'
+
+jobs:
+  # ── PR opened / pushed: detect `!` and set the gate status ──────────────────
+  gate:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set major-approval status
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+
+          # First line (subject) of every commit in the PR:
+          SUBJECTS=$(gh api "repos/$REPO/pulls/$PR/commits" --jq '.[].commit.message | split("\n")[0]')
+
+          if printf '%s\n' "$SUBJECTS" | grep -qE "$BANG_RE"; then
+            NEXT=$(bash .github/scripts/next-version.sh major | sed -n 's/^next=//p')
+            gh api -X POST "repos/$REPO/statuses/$HEAD_SHA" \
+              -f state=pending -f context=major-approval \
+              -f description="Breaking (!) commit — reply /approve-major to confirm $NEXT"
+
+            HAS=$(gh api "repos/$REPO/issues/$PR/comments" \
+              --jq "[.[] | select(.body | contains(\"$MARKER\"))] | length")
+            if [ "$HAS" = "0" ]; then
+              gh pr comment "$PR" --body "$MARKER
+          ⚠️ This PR has a breaking \`!\` commit, so merging it publishes a **MAJOR** release (**$NEXT**).
+
+          - Reply \`/approve-major\` to confirm — the check clears and merge is unblocked.
+          - Reply \`/no-major\` to strip the \`!\` from the commits (I'll force-push and it becomes a normal release)."
+            fi
+          else
+            gh api -X POST "repos/$REPO/statuses/$HEAD_SHA" \
+              -f state=success -f context=major-approval \
+              -f description="No breaking change"
+          fi
+
+  # ── /approve-major or /no-major comment on the PR ───────────────────────────
+  command:
+    if: >-
+      github.event_name == 'issue_comment' &&
+      github.event.issue.pull_request &&
+      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association) &&
+      (startsWith(github.event.comment.body, '/approve-major') ||
+       startsWith(github.event.comment.body, '/no-major'))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Handle command
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.issue.number }}
+          BODY: ${{ github.event.comment.body }}
+          ACTOR: ${{ github.event.comment.user.login }}
+        run: |
+          set -euo pipefail
+
+          read HEAD_REF BASE_REF HEAD_SHA < <(gh pr view "$PR" \
+            --json headRefName,baseRefName,headRefOid \
+            --jq '"\(.headRefName) \(.baseRefName) \(.headRefOid)"')
+
+          if printf '%s' "$BODY" | grep -q '^/approve-major'; then
+            NEXT=$(bash .github/scripts/next-version.sh major | sed -n 's/^next=//p')
+            gh api -X POST "repos/$REPO/statuses/$HEAD_SHA" \
+              -f state=success -f context=major-approval \
+              -f description="Major approved by @$ACTOR"
+            gh pr comment "$PR" --body "✅ Approved by @$ACTOR. Merging this publishes **$NEXT**."
+            exit 0
+          fi
+
+          # /no-major → rewrite subjects to drop `!`, then force-push.
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin "$BASE_REF" "$HEAD_REF"
+          git checkout "$HEAD_REF"
+          FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch -f --msg-filter \
+            'sed -E "1s/^(feature|docs|bug|maintenance)!:/\1:/"' "origin/$BASE_REF..HEAD"
+          git push --force-with-lease origin "HEAD:$HEAD_REF"
+
+          # The force-push re-runs the gate job, which re-computes the status.
+          NEXT=$(bash .github/scripts/next-version.sh auto | sed -n 's/^next=//p')
+          gh pr comment "$PR" --body "↩️ Stripped \`!\` from the commits (requested by @$ACTOR). This will now publish **$NEXT**."

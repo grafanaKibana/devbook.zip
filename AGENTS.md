@@ -87,7 +87,7 @@ A `net10.0` R&D PoC for studying RAG + agentic mechanics — favor code that mak
 ## Working agreements
 
 - **Never auto-commit.** Don't create commits unless I explicitly ask; leave changes (including hook-generated ones) uncommitted so I control what lands. When I do commit, hand me a ready message.
-- **Commit messages.** One line, short and concise. Each commit starts with its own type prefix — `docs:`, `feature:`, `bug:`, or `maintenance:` (matching the repo's `type:*` issue labels) — because we merge with merge commits (not squash), so every commit's prefix drives the version + changelog (see [RELEASING.md](.github/RELEASING.md)). No parenthetical scope, no `(details)`, no body unless I ask. **Never attribute a commit to an agent** — no `Co-Authored-By`, no tool footers.
+- **Commit messages.** One line, short and concise. Each commit starts with its own type prefix — `docs:`, `feature:`, `bug:`, or `maintenance:` (matching the repo's `type:*` issue labels) — because we merge with merge commits (not squash), so every commit's prefix drives the version + changelog (see [RELEASING.md](.github/RELEASING.md)). Append `!` to the prefix (e.g. `feature!:`) only for a breaking change that should force a MAJOR release. No parenthetical scope, no `(details)`, no body unless I ask. **Never attribute a commit to an agent** — no `Co-Authored-By`, no tool footers.
 - **Pre-commit hook** (`core.hooksPath=.githooks`) runs only on staged `Vault/**/*.md`, in order: folder-rollup frontmatter → regenerate `Roadmap.canvas` → MD040 lint via `markdownlint-cli2` (needs `Web/node_modules` or `npx`).
 
 ### Capturing ideas (never derail)
