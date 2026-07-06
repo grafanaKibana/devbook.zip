@@ -1,4 +1,6 @@
 @use "./variables.scss" as *;
+@use "sass:map";
+
 
 // Component-specific styles live with their components (each sets `.css`):
 //   Web/custom/components/topic-dashboard.tsx  → .topic-* rules
@@ -19,3 +21,9 @@
 .page-listing .tags {
   display: none;
 }
+
+// Wider view port 300px > 400px
+.page {
+  max-width: calc(#{map.get($breakpoints, desktop)} + 400px);
+}
+
