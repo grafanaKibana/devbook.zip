@@ -41,9 +41,9 @@ jobs:
             SUBJECTS=$(git log ${RANGE} --no-merges --format='%s' || true)
 
             BUMP=none
-            if printf '%s\n' "$SUBJECTS" | grep -qE '^(notes|feat)(\([^)]+\))?:'; then
+            if printf '%s\n' "$SUBJECTS" | grep -qE '^(feature|docs):'; then
               BUMP=minor
-            elif printf '%s\n' "$SUBJECTS" | grep -qE '^(fix|bump)(\([^)]+\))?:'; then
+            elif printf '%s\n' "$SUBJECTS" | grep -qE '^(bug|maintenance):'; then
               BUMP=patch
             fi
 
