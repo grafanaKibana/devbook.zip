@@ -1,6 +1,7 @@
 import { QuestionsIndex } from "./custom/components/questions-index"
 import { SiteMarquee } from "./custom/components/site-marquee"
 import { QuestionCollector } from "./custom/transformers/question-collector"
+import { StatusBackfill } from "./custom/transformers/status-backfill"
 import { SyncerFixups } from "./custom/transformers/syncer-fixups"
 import { PageTypes } from "./quartz/plugins"
 import { loadQuartzConfig, loadQuartzLayout } from "./quartz/plugins/loader/config-loader"
@@ -33,6 +34,10 @@ config.plugins.transformers.splice(
 // transformers so callouts (obsidian-flavored-markdown) and links (crawl-links)
 // are already resolved.
 config.plugins.transformers.push(QuestionCollector())
+
+// Restore the `status` frontmatter that Syncer drops on publish, so status-gated
+// components (SiteMarquee) can read it. Reads from the Vault source note.
+config.plugins.transformers.push(StatusBackfill())
 
 const layout = await loadQuartzLayout()
 const siteMarquee = SiteMarquee()

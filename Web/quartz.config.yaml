@@ -256,6 +256,7 @@ plugins:
       includedProperties:
         - topic
         - subtopic
+        - status
       excludedProperties: []
       hidePropertiesView: false
       delimiters: ---

@@ -20,9 +20,9 @@ const modifiedTime = (file: QuartzPluginData): number => {
   return Number.isFinite(time) ? time : 0
 }
 
-const latestModifiedDate = (files: QuartzPluginData[]): Date => {
-  const latest = Math.max(...files.map(modifiedTime))
-  return latest > 0 ? new Date(latest) : new Date()
+const pageModifiedDate = (file: QuartzPluginData): Date => {
+  const time = modifiedTime(file)
+  return time > 0 ? new Date(time) : new Date()
 }
 
 const formatDate = (date: Date, locale: string): string =>
@@ -36,14 +36,19 @@ const frontmatterValue = (value: unknown): string[] => {
   return typeof value === "string" ? [value] : []
 }
 
-const isDone = (status: unknown): boolean =>
-  frontmatterValue(status).some((value) => value.toLowerCase() === "done")
+// Show the marquee only on in-progress content notes: a status must be present
+// and must not be "done". This hides it on finished pages *and* on notes/pages
+// with no status at all (auto-generated tag/folder/404 listings, statusless notes).
+const showMarquee = (status: unknown): boolean => {
+  const values = frontmatterValue(status)
+  return values.length > 0 && !values.some((value) => value.toLowerCase() === "done")
+}
 
 export const SiteMarquee: QuartzComponentConstructor = () => {
-  const Marquee: QuartzComponent = ({ allFiles, cfg, fileData }) => {
-    if (isDone(fileData.frontmatter?.status)) return null
+  const Marquee: QuartzComponent = ({ cfg, fileData }) => {
+    if (!showMarquee(fileData.frontmatter?.status)) return null
 
-    const lastUpdate = formatDate(latestModifiedDate(allFiles), cfg.locale ?? "en-US")
+    const lastUpdate = formatDate(pageModifiedDate(fileData), cfg.locale ?? "en-US")
     const message = `${developmentText} ${separatorText} ${lastUpdatePrefix} ${lastUpdate} ${separatorText} ${issueText} ${issueLinkText}`
 
     return (
