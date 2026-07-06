@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-05T10:53:43.325+03:00
-modified: 2026-07-05T10:53:43.325+03:00
+modified: 2026-07-06T09:25:44.424+03:00
 ---
 
 # Vertical Scaling
