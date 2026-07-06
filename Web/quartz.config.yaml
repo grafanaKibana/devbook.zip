@@ -26,8 +26,8 @@ configuration:
       code: IBM Plex Mono
     colors:
       lightMode:
-        light: "#eef3e8"
-        lightgray: "#c8d4bd"
+        light: "#fafbf8"
+        lightgray: "#e3e9de"
         gray: "#7c8b70"
         darkgray: "#26301f"
         dark: "#12180f"
@@ -45,6 +45,18 @@ configuration:
         tertiary: "#bef264"
         highlight: rgba(163, 230, 53, 0.16)
         textHighlight: "#84cc1688"
+# bottle-green:
+#   '50': '#f3faf6',
+#   '100': '#e2f6eb',
+#   '200': '#c7ebd7',
+#   '300': '#9adbb8',
+#   '400': '#67c191',
+#   '500': '#42a570',
+#   '600': '#31885a',
+#   '700': '#2a6b49',
+#   '800': '#25563c',
+#   '900': '#204733',
+#   '950': '#123524',
 plugins:
   - source: github:quartz-community/created-modified-date
     enabled: true
@@ -206,7 +218,13 @@ plugins:
     enabled: false
     options:
       provider: giscus
-      options: {}
+      options:
+        repo: grafanaKibana/devbook.zip
+        repoId: myRepoID,
+        category: Comments
+        categoryId: myCategoryID,
+        lang: en
+        reactionsEnabled: false
     layout:
       position: afterBody
       priority: 10
