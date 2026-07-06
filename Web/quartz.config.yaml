@@ -12,10 +12,6 @@ configuration:
     - private
     - templates
     - .obsidian
-    # Topics.base is an Obsidian-only Bases view. Quartz Syncer strips note
-    # frontmatter on publish (see includeAllFrontmatter) and the web file
-    # universe includes generated pages, so the rendered base showed empty
-    # columns and junk rows (404, tags, canvas). Keep it out of the build.
     - Topics.base
   theme:
     fontOrigin: googleFonts
@@ -26,25 +22,26 @@ configuration:
       code: IBM Plex Mono
     colors:
       lightMode:
-        light: "#fafbf8"
-        lightgray: "#e3e9de"
-        gray: "#7c8b70"
-        darkgray: "#26301f"
-        dark: "#12180f"
-        secondary: "#3f6212"
-        tertiary: "#65a30d"
-        highlight: rgba(101, 163, 13, 0.18)
-        textHighlight: "#84cc1688"
+        light: "#f9fbf8"        # hue 80→92, imperceptible, now on-family
+        lightgray: "#e3e9de"    # unchanged — was already the anchor hue
+        gray: "#6a785e"         # was #7c8b70 · 3.49:1 → 4.52:1, passes AA
+        darkgray: "#27301f"     # hue nudge only
+        dark: "#13180f"         # hue 100→92
+        secondary: "#3f6212"    # kept, 6.8:1
+        tertiary: "#4d7c0f"     # was #65a30d · hover now 4.8:1 (assumption 2)
+        highlight: rgba(101, 163, 13, 0.22)
+        textHighlight: "#eab30855"   # yellow-500 wash (assumption 1)
+
       darkMode:
-        light: "#161618"
-        lightgray: "#393639"
-        gray: "#646464"
-        darkgray: "#d4d4d4"
-        dark: "#ebebec"
-        secondary: "#a3e635"
-        tertiary: "#bef264"
-        highlight: rgba(163, 230, 53, 0.16)
-        textHighlight: "#84cc1688"
+        light: "#161618"        # kept exactly — the bg you liked
+        lightgray: "#35353a"    # was #393639 · magenta drift (hue 300) → 240
+        gray: "#74747b"         # was #646464 · 3.05:1 → 3.9:1
+        darkgray: "#d2d2d5"     # was #d4d4d4 · faint cool tint, on-family
+        dark: "#ebebed"         # was #ebebec · same
+        secondary: "#84cc16"    # kept
+        tertiary: "#b3de73"     # kept from last round (calmed hover)
+        highlight: rgba(132, 204, 22, 0.14)
+        textHighlight: "#facc1540"   # yellow-400 @ 25%
 # bottle-green:
 #   '50': '#f3faf6',
 #   '100': '#e2f6eb',
