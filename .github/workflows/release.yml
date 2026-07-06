@@ -21,7 +21,21 @@ jobs:
 
       - name: Compute next version
         id: version
-        run: bash .github/scripts/next-version.sh auto | tee -a "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          # The merged PR's title decides a MAJOR (its `!`); commits decide the
+          # rest. Look the title up from the pushed merge commit.
+          TITLE=""
+          for _ in 1 2 3; do
+            TITLE=$(gh api "repos/$REPO/commits/$GITHUB_SHA/pulls" --jq '.[0].title // ""' 2>/dev/null || true)
+            [ -n "$TITLE" ] && break
+            sleep 5
+          done
+          echo "Merged PR title: ${TITLE:-<none>}"
+          bash .github/scripts/next-version.sh "$TITLE" | tee -a "$GITHUB_OUTPUT"
 
       - name: Generate release notes
         if: steps.version.outputs.bump != 'none'
