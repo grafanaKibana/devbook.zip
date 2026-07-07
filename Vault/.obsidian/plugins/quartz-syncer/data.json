@@ -1,14 +1,11 @@
 {
-  "git": {
-    "remoteUrl": "https://github.com/grafanaKibana/devbook.zip.git",
-    "branch": "feat/digitalgarden-to-quartz",
-    "corsProxyUrl": "",
-    "auth": {
-      "type": "basic",
-      "username": "grafanaKibana"
-    },
-    "providerHint": "github"
-  },
+  "settingsSchemaVersion": 2,
+  "gitRemoteUrl": "https://github.com/grafanaKibana/devbook.zip.git",
+  "gitBranch": "main",
+  "gitCorsProxyUrl": "",
+  "gitAuthType": "basic",
+  "gitAuthUsername": "grafanaKibana",
+  "gitProviderHint": "github",
   "vaultPath": "Home/",
   "contentFolder": "Web/content",
   "publishFrontmatterKey": "publish",
@@ -36,9 +33,9 @@
   "useBases": true,
   "useCanvas": true,
   "manageSyncerStyles": true,
-  "lastUsedSettingsTab": "frontmatter",
+  "lastUsedSettingsTab": "git",
   "noteSettingsIsInitialized": true,
-  "pluginVersion": "1.15.3",
+  "pluginVersion": "1.18.0",
   "lastUpstreamCommitSha": "",
   "upgradeCheckStrategy": "version",
   "diffViewStyle": "auto",
