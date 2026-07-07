@@ -236,6 +236,11 @@
   display: none;
 }
 
+// Reader mode is a distraction-free view — hide the "in development" marquee.
+:root[reader-mode="on"] .site-marquee {
+  display: none;
+}
+
 // Reader mode: the stock rule fades `.sidebar.left` entirely, which on mobile
 // IS the header bar and on desktop holds the fixed title/toolbar. Keep those
 // visible/interactive and fade only the sidebar's in-flow content (Explorer).
