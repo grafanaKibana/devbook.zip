@@ -1,10 +1,12 @@
 import { ExplorerIcons } from "./custom/components/explorer-icons"
 import { QuestionsIndex } from "./custom/components/questions-index"
 import { SiteMarquee } from "./custom/components/site-marquee"
+import { Steptrace } from "./custom/components/steptrace"
 import { IconBackfill } from "./custom/transformers/icon-backfill"
 import { QuestionCollector } from "./custom/transformers/question-collector"
 import { StatusBackfill } from "./custom/transformers/status-backfill"
 import { SyncerFixups } from "./custom/transformers/syncer-fixups"
+import { SteptraceBlock } from "./custom/transformers/steptrace-block"
 import { PageTypes } from "./quartz/plugins"
 import { loadQuartzConfig, loadQuartzLayout } from "./quartz/plugins/loader/config-loader"
 
@@ -46,6 +48,11 @@ config.plugins.transformers.push(StatusBackfill())
 // Reads from the Vault source note.
 config.plugins.transformers.push(IconBackfill())
 
+// Rewrite ```steptrace fences (committed raw by Syncer — not on its freeze
+// allowlist) into the <div class="steptrace-mount" data-config> markers that the
+// Steptrace component hydrates. Only touches lang=steptrace, so order-independent.
+config.plugins.transformers.push(SteptraceBlock())
+
 const layout = await loadQuartzLayout()
 const siteMarquee = SiteMarquee()
 layout.defaults.beforeBody = [siteMarquee, ...(layout.defaults.beforeBody ?? [])]
@@ -62,6 +69,14 @@ const explorerIcons = ExplorerIcons()
 layout.defaults.afterBody = [...(layout.defaults.afterBody ?? []), explorerIcons]
 for (const pageLayout of Object.values(layout.byPageType)) {
   pageLayout.afterBody = [...(pageLayout.afterBody ?? []), explorerIcons]
+}
+
+// steptrace: ships the engine loader (afterDOMLoaded) + Quartz theme binding on
+// every content page so `steptrace` cards hydrate live. Renders nothing itself.
+const steptrace = Steptrace()
+layout.defaults.afterBody = [...(layout.defaults.afterBody ?? []), steptrace]
+for (const pageLayout of Object.values(layout.byPageType)) {
+  pageLayout.afterBody = [...(pageLayout.afterBody ?? []), steptrace]
 }
 
 const content = { ...(layout.byPageType.content ?? {}) }

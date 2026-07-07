@@ -12,6 +12,10 @@ Bubble sort repeatedly swaps adjacent out-of-order elements, pushing large value
 
 Each pass scans left-to-right and swaps `a[i]` with `a[i+1]` when they are out of order. After one full pass, the largest element is in its final position. With an early-exit flag, the algorithm stops as soon as a pass makes zero swaps — giving O(n) best case on already-sorted input.
 
+```steptrace
+{ "algorithm": "bubble-sort", "array": [5, 2, 9, 1, 5, 6], "speed": 1 }
+```
+
 ```mermaid
 graph TD
   A[Start array A] --> B[Set swapped true]
