@@ -1173,7 +1173,7 @@
     adjacency,
     mount,
   }
-})
+});
 
 /* ============================================================================
  * steptrace — Obsidian adapter. CONCATENATED AFTER engine.js by sync.mjs into

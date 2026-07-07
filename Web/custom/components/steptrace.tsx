@@ -1,5 +1,5 @@
 import { readFileSync } from "fs"
-import { fileURLToPath } from "url"
+import { join } from "path"
 import type { QuartzComponent, QuartzComponentConstructor } from "@quartz-community/types"
 
 // steptrace — live algorithm-visualizer cards on the published site.
@@ -16,32 +16,45 @@ import type { QuartzComponent, QuartzComponentConstructor } from "@quartz-commun
 // it here, so the served script is always fresh from source — no /static file,
 // no manual copy, and no ESM import (afterDOMLoaded is transform-only anyway).
 
-const ENGINE = readFileSync(fileURLToPath(new URL("../steptrace/engine.js", import.meta.url)), "utf8")
+// Quartz bundles the config into quartz/.quartz-cache before running it, so
+// import.meta.url points at the cache dir — not this file. Resolve from the
+// project root instead (cwd is always the Web/ Quartz project at build time).
+const ENGINE = readFileSync(join(process.cwd(), "custom", "steptrace", "engine.js"), "utf8")
 
 const hydrate = `
 (function () {
+  if (window.__steptraceHydrator) return;
+  window.__steptraceHydrator = true;
   function fail(root, msg, e) {
     var pre = document.createElement("pre");
     pre.textContent = "steptrace: " + msg + "\\n" + (e && e.message ? e.message : e);
     root.replaceChildren(pre);
   }
-  function run() {
-    var st = window.steptrace;
-    if (!st || !st.mount) return;
-    document.querySelectorAll(".steptrace-mount:not([data-steptrace-mounted])").forEach(function (root) {
-      root.dataset.steptraceMounted = "1";
-      var config;
-      try { config = JSON.parse(root.dataset.config || "{}"); }
-      catch (e) { fail(root, "invalid config", e); return; }
-      try {
-        var handle = st.mount(root, config);
-        if (typeof window !== "undefined" && window.addCleanup) {
-          window.addCleanup(function () { if (handle && handle.destroy) handle.destroy(); });
-        }
-      } catch (e) { fail(root, "mount failed", e); }
-    });
+  function mountOne(root) {
+    if (root.dataset.steptraceMounted) return;
+    root.dataset.steptraceMounted = "1";
+    var config;
+    try { config = JSON.parse(root.dataset.config || "{}"); }
+    catch (e) { fail(root, "invalid config", e); return; }
+    try {
+      var handle = window.steptrace.mount(root, config);
+      if (window.addCleanup) window.addCleanup(function () { if (handle && handle.destroy) handle.destroy(); });
+    } catch (e) { fail(root, "mount failed", e); }
   }
+  function run() {
+    if (!window.steptrace || !window.steptrace.mount) return;
+    document.querySelectorAll(".steptrace-mount:not([data-steptrace-mounted])").forEach(mountOne);
+  }
+  // The mount div can appear after this script (SPA render/swap), so run on every
+  // hook: nav + render (Quartz SPA events), immediately, and via a MutationObserver
+  // that only re-runs when an UNMOUNTED div exists (cheap during playback).
   document.addEventListener("nav", run);
+  document.addEventListener("render", run);
+  if (document.body) {
+    new MutationObserver(function () {
+      if (document.querySelector(".steptrace-mount:not([data-steptrace-mounted])")) run();
+    }).observe(document.body, { childList: true, subtree: true });
+  }
   run();
 })();
 `
@@ -49,8 +62,9 @@ const hydrate = `
 export const Steptrace: QuartzComponentConstructor = () => {
   const Component: QuartzComponent = () => null
   // Engine (sets window.steptrace) then the hydration tail — one script, so order
-  // is guaranteed and there is no load race.
-  Component.afterDOMLoaded = ENGINE + "\n" + hydrate
+  // is guaranteed and there is no load race. The explicit `;` separator prevents
+  // ASI from parsing the engine IIFE's return value as a call on the next line.
+  Component.afterDOMLoaded = ENGINE + "\n;\n" + hydrate
   // The only per-host piece: bind the neutral --st-* tokens to Quartz's palette.
   Component.css = `
 .steptrace {
