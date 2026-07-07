@@ -47,6 +47,13 @@ graph TD
   K --> E
 ```
 
+
+## Visualization
+
+```steptrace
+{"algorithm":"rabin-karp","text":"GEEKSFORGEEKS","pattern":"GEEK"}
+```
+
 ## Example
 
 ```text

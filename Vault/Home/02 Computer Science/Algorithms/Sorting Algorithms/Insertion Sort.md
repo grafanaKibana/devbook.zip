@@ -30,7 +30,6 @@ graph TD
   H --> C
 ```
 
-
 ## Visualization
 
 ```steptrace

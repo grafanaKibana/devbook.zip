@@ -34,7 +34,6 @@ graph TD
   E -->|No| Z[Sorted]
 ```
 
-
 ## Visualization
 
 ```steptrace

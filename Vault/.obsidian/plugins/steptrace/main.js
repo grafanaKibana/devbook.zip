@@ -171,6 +171,117 @@
   color: var(--_green);
 }
 
+/* ---- string matching: text with the pattern aligned underneath ---- */
+.steptrace__hash {
+  align-self: flex-start;
+  font: 600 12px ui-monospace, "SF Mono", Menlo, monospace;
+  color: var(--_text);
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  background: var(--_surface);
+}
+.steptrace__match {
+  overflow-x: auto;
+  padding: 0.25rem 0 0.5rem;
+}
+.steptrace__cells {
+  display: flex;
+}
+.steptrace__cells--pat {
+  margin-top: 4px;
+  transition: transform var(--_tween) ease;
+}
+.steptrace__cell {
+  width: 30px;
+  height: 34px;
+  flex: 0 0 30px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--_border);
+  font: 600 15px ui-monospace, "SF Mono", Menlo, monospace;
+  color: var(--_text);
+  background: var(--_surface);
+  transition:
+    background var(--_tween) ease,
+    border-color var(--_tween) ease;
+}
+.steptrace__cell--pat {
+  border-color: var(--_muted);
+  background: transparent;
+}
+.steptrace__cell[data-state="window"] {
+  background: color-mix(in srgb, var(--_blue) 12%, var(--_surface));
+}
+.steptrace__cell[data-state="match"] {
+  background: var(--_green);
+  border-color: var(--_green);
+  color: var(--_on-accent);
+}
+.steptrace__cell[data-state="mismatch"] {
+  background: var(--_amber);
+  border-color: var(--_amber);
+  color: var(--_on-accent);
+}
+.steptrace__cell[data-state="probe"] {
+  border-color: var(--_blue);
+  border-width: 2px;
+}
+.steptrace__cell[data-state="found"] {
+  background: color-mix(in srgb, var(--_green) 30%, var(--_surface));
+  border-color: var(--_green);
+}
+
+/* ---- array pointers: value cells with named pointers + a window ---- */
+.steptrace__parr {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.steptrace__pcell {
+  min-width: 42px;
+  flex: 1 1 42px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+.steptrace__pval {
+  width: 100%;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--_border);
+  border-radius: 7px;
+  font: 600 15px ui-monospace, "SF Mono", Menlo, monospace;
+  color: var(--_text);
+  background: var(--_surface);
+  transition:
+    background var(--_tween) ease,
+    border-color var(--_tween) ease;
+}
+.steptrace__pcell[data-state="window"] .steptrace__pval {
+  background: color-mix(in srgb, var(--_blue) 14%, var(--_surface));
+  border-color: color-mix(in srgb, var(--_blue) 45%, var(--_border));
+}
+.steptrace__pcell[data-state="pointer"] .steptrace__pval {
+  border-color: var(--_blue);
+  border-width: 2px;
+}
+.steptrace__pcell[data-state="found"] .steptrace__pval {
+  background: var(--_green);
+  border-color: var(--_green);
+  color: var(--_on-accent);
+}
+.steptrace__ptr {
+  min-height: 1.1em;
+  font: 700 11px ui-monospace, "SF Mono", Menlo, monospace;
+  letter-spacing: 0.03em;
+  color: var(--_blue);
+}
+
 /* ---- graph: svg ---- */
 .steptrace__graph {
   display: flex;
@@ -382,6 +493,8 @@
   const sortReg = new Map()
   const graphReg = new Map()
   const searchReg = new Map()
+  const stringReg = new Map()
+  const pointerReg = new Map()
 
   /** Register a sort algorithm. `fn(input, ops)` drives a SortRecorder via ops.*. */
   function registerSort(id, meta, fn) {
@@ -398,9 +511,24 @@
     searchReg.set(id, { meta, fn })
   }
 
+  /** Register a string-matching algorithm (text + pattern). `fn(input, ops)` drives a StringRecorder. */
+  function registerString(id, meta, fn) {
+    stringReg.set(id, { meta, fn })
+  }
+
+  /** Register an array-pointer algorithm (array + target). `fn(input, ops)` drives a PointerRecorder. */
+  function registerPointer(id, meta, fn) {
+    pointerReg.set(id, { meta, fn })
+  }
+
   /** Kind of a registered algorithm id, or null if unknown. */
   function kindOf(id) {
-    return sortReg.has(id) ? "sort" : graphReg.has(id) ? "graph" : searchReg.has(id) ? "search" : null
+    if (sortReg.has(id)) return "sort"
+    if (graphReg.has(id)) return "graph"
+    if (searchReg.has(id)) return "search"
+    if (stringReg.has(id)) return "string"
+    if (pointerReg.has(id)) return "pointers"
+    return null
   }
 
   /** List registered algorithms of a kind as [{ id, label }] for the toolbar select. */
@@ -429,6 +557,18 @@
       const rec = new SearchRecorder(config.array, config.target)
       fn(config, rec)
       return { kind: "search", frames: rec.frames }
+    }
+    if (stringReg.has(config.algorithm)) {
+      const { fn } = stringReg.get(config.algorithm)
+      const rec = new StringRecorder(config.text, config.pattern)
+      fn(config, rec)
+      return { kind: "string", frames: rec.frames }
+    }
+    if (pointerReg.has(config.algorithm)) {
+      const { fn } = pointerReg.get(config.algorithm)
+      const rec = new PointerRecorder(config.array)
+      fn(config, rec)
+      return { kind: "pointers", frames: rec.frames }
     }
     throw new Error(`steptrace: unknown algorithm "${config.algorithm}".`)
   }
@@ -673,6 +813,105 @@
     }
     done(message) {
       this._push("done", message)
+    }
+  }
+
+  // A StringRecorder snapshot: { text, pattern, shift, cmpT, cmpP, cmpResult,
+  //   found[], hash, message }. Renders the text with the pattern aligned under
+  //   it at `shift`; compared cells and matched regions are highlighted.
+  class StringRecorder {
+    constructor(text, pattern) {
+      this.text = String(text || "")
+      this.pattern = String(pattern || "")
+      this.frames = []
+      this.shift = 0
+      this.found = []
+      this.hash = null
+    }
+    _push(type, extra, message) {
+      this.frames.push(
+        Object.freeze({
+          type,
+          text: this.text,
+          pattern: this.pattern,
+          shift: this.shift,
+          cmpT: extra.cmpT == null ? null : extra.cmpT,
+          cmpP: extra.cmpP == null ? null : extra.cmpP,
+          cmpResult: extra.cmpResult || null,
+          found: this.found.slice(),
+          hash: this.hash,
+          message,
+        }),
+      )
+    }
+    init(message) {
+      this._push("init", {}, message)
+    }
+    /** Compare text[ti] with pattern[pj] at alignment `shift`. */
+    compare(ti, pj, shift, isMatch, message) {
+      this.shift = shift
+      this._push("compare", { cmpT: ti, cmpP: pj, cmpResult: isMatch ? "match" : "mismatch" }, message)
+    }
+    /** Slide the pattern to a new alignment. */
+    slide(shift, message) {
+      this.shift = shift
+      this._push("slide", {}, message)
+    }
+    /** Record a full match starting at `shift`. */
+    matchAt(shift, message) {
+      this.shift = shift
+      if (this.found.indexOf(shift) < 0) this.found.push(shift)
+      this._push("match", {}, message)
+    }
+    /** Rabin-Karp: show the window hash vs the pattern hash (stays visible after). */
+    hashStep(shift, windowHash, patternHash, message) {
+      this.shift = shift
+      this.hash = { window: windowHash, pattern: patternHash }
+      this._push("hash", {}, message)
+    }
+    done(message) {
+      this._push("done", {}, message)
+    }
+  }
+
+  // A PointerRecorder snapshot: { array, pointers{name:idx}, window[lo,hi]|null,
+  //   marked[], message }. Renders a value-cell row with named pointer markers,
+  //   an optional highlighted window, and marked (result) cells.
+  class PointerRecorder {
+    constructor(array) {
+      this.a = (array || []).slice()
+      this.frames = []
+      this.pointers = {}
+      this.window = null
+      this.marked = []
+    }
+    get value() {
+      return this.a.slice()
+    }
+    _push(message) {
+      this.frames.push(
+        Object.freeze({
+          array: this.a.slice(),
+          pointers: { ...this.pointers },
+          window: this.window ? this.window.slice() : null,
+          marked: this.marked.slice(),
+          message,
+        }),
+      )
+    }
+    init(message) {
+      this._push(message)
+    }
+    /** One logical step: update named pointers, the window span, and/or marks. */
+    step(update, message) {
+      update = update || {}
+      if (update.pointers) this.pointers = { ...update.pointers }
+      if ("window" in update) this.window = update.window ? update.window.slice() : null
+      if (update.mark) this.marked = this.marked.concat(update.mark)
+      this._push(message)
+    }
+    done(message) {
+      this._push(message)
     }
   }
 
@@ -1029,6 +1268,162 @@
     ops.done(`${target} is not in the array — the range is empty after ${ops.comparisons} probes.`)
   })
 
+  // ───────────────────────────────── kmp ─────────────────────────────────
+  registerString("kmp", { label: "KMP" }, (input, ops) => {
+    const text = String(input.text || "")
+    const pattern = String(input.pattern || "")
+    const n = text.length
+    const m = pattern.length
+    ops.init(
+      `KMP search for "${pattern}" — on a mismatch, the failure function slides the pattern forward without re-checking characters already known to match.`,
+    )
+    if (!m || m > n) {
+      ops.done("Nothing to search.")
+      return
+    }
+    // failure function (longest proper prefix that is also a suffix)
+    const lps = new Array(m).fill(0)
+    let len = 0
+    for (let idx = 1; idx < m; ) {
+      if (pattern[idx] === pattern[len]) {
+        len++
+        lps[idx] = len
+        idx++
+      } else if (len > 0) {
+        len = lps[len - 1]
+      } else {
+        lps[idx] = 0
+        idx++
+      }
+    }
+    let i = 0
+    let j = 0
+    while (i < n) {
+      const isMatch = text[i] === pattern[j]
+      ops.compare(i, j, i - j, isMatch, `Compare text[${i}]='${text[i]}' with pattern[${j}]='${pattern[j]}' → ${isMatch ? "match" : "mismatch"}.`)
+      if (isMatch) {
+        i++
+        j++
+        if (j === m) {
+          ops.matchAt(i - j, `Whole pattern matched — occurrence at index ${i - j}.`)
+          j = lps[j - 1]
+        }
+      } else if (j > 0) {
+        j = lps[j - 1]
+        ops.slide(i - j, `Mismatch — reuse the matched prefix: realign so ${j} char${j === 1 ? "" : "s"} already line up (no re-check).`)
+      } else {
+        i++
+        ops.slide(i, `Mismatch at the pattern start — slide forward by one.`)
+      }
+    }
+    ops.done(ops.found.length ? `Found ${ops.found.length} occurrence(s): index ${ops.found.join(", ")}.` : `Pattern not found.`)
+  })
+
+  // ────────────────────────────── rabin-karp ─────────────────────────────
+  registerString("rabin-karp", { label: "Rabin-Karp" }, (input, ops) => {
+    const text = String(input.text || "")
+    const pattern = String(input.pattern || "")
+    const n = text.length
+    const m = pattern.length
+    const B = 256
+    const MOD = 101 // small modulus so the displayed hashes stay readable
+    const hash = (s) => {
+      let h = 0
+      for (let k = 0; k < s.length; k++) h = (h * B + s.charCodeAt(k)) % MOD
+      return h
+    }
+    if (!m || m > n) {
+      ops.init(`Rabin-Karp for "${pattern}".`)
+      ops.done("Nothing to search.")
+      return
+    }
+    const ph = hash(pattern)
+    ops.init(
+      `Rabin-Karp search for "${pattern}" — slide a window, compare its rolling hash to the pattern hash (${ph}), and only verify character-by-character when the hashes collide.`,
+    )
+    let highPow = 1
+    for (let k = 0; k < m - 1; k++) highPow = (highPow * B) % MOD
+    let wh = hash(text.slice(0, m))
+    for (let s = 0; s <= n - m; s++) {
+      ops.hashStep(s, wh, ph, `Window [${s}, ${s + m - 1}]: hash ${wh} ${wh === ph ? "=" : "≠"} pattern hash ${ph}${wh === ph ? " — verify" : " — skip"}.`)
+      if (wh === ph) {
+        let ok = true
+        for (let j = 0; j < m; j++) {
+          const isMatch = text[s + j] === pattern[j]
+          ops.compare(s + j, j, s, isMatch, `Hash hit — verify text[${s + j}]='${text[s + j]}' vs pattern[${j}]='${pattern[j]}'.`)
+          if (!isMatch) {
+            ok = false
+            break
+          }
+        }
+        if (ok) ops.matchAt(s, `Verified — occurrence at index ${s}.`)
+      }
+      if (s < n - m) {
+        const removed = (text.charCodeAt(s) * highPow) % MOD
+        wh = (wh - removed + MOD) % MOD
+        wh = (wh * B + text.charCodeAt(s + m)) % MOD
+      }
+    }
+    ops.done(ops.found.length ? `Found ${ops.found.length} occurrence(s): index ${ops.found.join(", ")}.` : `Pattern not found.`)
+  })
+
+  // ───────────────────────────── two-pointers ────────────────────────────
+  registerPointer("two-pointers", { label: "Two pointers" }, (input, ops) => {
+    const a = ops.value
+    const target = input.target
+    ops.init(
+      `Two pointers on a sorted array — find a pair summing to ${target}. Move the left pointer right to raise the sum, the right pointer left to lower it.`,
+    )
+    let l = 0
+    let r = a.length - 1
+    while (l < r) {
+      const sum = a[l] + a[r]
+      ops.step({ pointers: { L: l, R: r }, window: [l, r] }, `a[${l}] + a[${r}] = ${a[l]} + ${a[r]} = ${sum}.`)
+      if (sum === target) {
+        ops.step({ pointers: { L: l, R: r }, window: [l, r], mark: [l, r] }, `${a[l]} + ${a[r]} = ${target} — found the pair.`)
+        ops.done(`Found a pair at indices ${l} and ${r}.`)
+        return
+      }
+      if (sum < target) l++
+      else r--
+    }
+    ops.done(`No pair sums to ${target}.`)
+  })
+
+  // ──────────────────────────── sliding-window ───────────────────────────
+  registerPointer("sliding-window", { label: "Sliding window" }, (input, ops) => {
+    const a = ops.value
+    const target = input.target
+    ops.init(
+      `Sliding window — find the shortest contiguous subarray with sum ≥ ${target}. Expand the window right to grow the sum; shrink from the left while it stays ≥ ${target}.`,
+    )
+    let lo = 0
+    let sum = 0
+    let best = Infinity
+    let bestRange = null
+    for (let hi = 0; hi < a.length; hi++) {
+      sum += a[hi]
+      ops.step({ pointers: { lo, hi }, window: [lo, hi] }, `Expand right to index ${hi}: window sum = ${sum}.`)
+      while (sum >= target) {
+        if (hi - lo + 1 < best) {
+          best = hi - lo + 1
+          bestRange = [lo, hi]
+        }
+        ops.step({ pointers: { lo, hi }, window: [lo, hi] }, `Sum ${sum} ≥ ${target} (length ${hi - lo + 1}) — record it, then shrink from the left.`)
+        sum -= a[lo]
+        lo++
+      }
+    }
+    if (bestRange) {
+      const marks = []
+      for (let k = bestRange[0]; k <= bestRange[1]; k++) marks.push(k)
+      ops.step({ pointers: {}, window: bestRange, mark: marks }, `Shortest window: indices ${bestRange[0]}..${bestRange[1]} (length ${best}).`)
+      ops.done(`Answer: the shortest qualifying length is ${best}.`)
+    } else {
+      ops.done(`No subarray reaches ${target}.`)
+    }
+  })
+
   // ==========================================================================
   //  5. RENDER  —  builds DOM only. Sets semantic classes + data attributes +
   //  data-driven geometry (bar heights, node coordinates). It sets NO colours
@@ -1128,6 +1523,97 @@
     }
 
     return { nodes: [banner, stage, status], paint }
+  }
+
+  // ---- string-matching view: text with the pattern aligned underneath ----
+  const CELL_W = 30 // px; must match .steptrace__cell width for shift alignment
+  function makeMatchView(frames) {
+    const text = frames[0].text
+    const pattern = frames[0].pattern
+
+    const hashBadge = el("div", "steptrace__hash")
+    const textRow = el("div", "steptrace__cells")
+    const tcells = []
+    for (let k = 0; k < text.length; k++) {
+      const c = el("div", "steptrace__cell")
+      c.textContent = text[k]
+      textRow.append(c)
+      tcells.push(c)
+    }
+    const patRow = el("div", "steptrace__cells steptrace__cells--pat")
+    const pcells = []
+    for (let k = 0; k < pattern.length; k++) {
+      const c = el("div", "steptrace__cell steptrace__cell--pat")
+      c.textContent = pattern[k]
+      patRow.append(c)
+      pcells.push(c)
+    }
+    const stage = el("div", "steptrace__match")
+    stage.append(textRow, patRow)
+    const status = statusEl()
+
+    function paint(frame, i, total) {
+      patRow.style.transform = `translateX(${frame.shift * CELL_W}px)`
+      for (let k = 0; k < tcells.length; k++) tcells[k].dataset.state = ""
+      for (let k = 0; k < pcells.length; k++) pcells[k].dataset.state = ""
+      // matched regions (persist)
+      for (const s of frame.found) for (let k = 0; k < pattern.length; k++) if (tcells[s + k]) tcells[s + k].dataset.state = "found"
+      // current window under the pattern
+      for (let k = 0; k < pattern.length; k++) {
+        const t = tcells[frame.shift + k]
+        if (t && t.dataset.state !== "found") t.dataset.state = "window"
+      }
+      // current comparison
+      if (frame.cmpT != null && tcells[frame.cmpT]) tcells[frame.cmpT].dataset.state = frame.cmpResult || "probe"
+      if (frame.cmpP != null && pcells[frame.cmpP]) pcells[frame.cmpP].dataset.state = frame.cmpResult || "probe"
+      if (frame.hash) {
+        hashBadge.style.display = ""
+        hashBadge.textContent = `window hash ${frame.hash.window} ${frame.hash.window === frame.hash.pattern ? "=" : "≠"} pattern hash ${frame.hash.pattern}`
+      } else {
+        hashBadge.style.display = "none"
+      }
+      status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`
+    }
+
+    return { nodes: [hashBadge, stage, status], paint }
+  }
+
+  // ---- array-pointer view: value cells with named pointers + a window ----
+  function makePointerView(frames) {
+    const n = frames[0].array.length
+    const stage = el("div", "steptrace__parr")
+    const cells = []
+    for (let k = 0; k < n; k++) {
+      const cell = el("div", "steptrace__pcell")
+      const val = el("div", "steptrace__pval")
+      val.textContent = frames[0].array[k]
+      const ptr = el("div", "steptrace__ptr")
+      cell.append(val, ptr)
+      stage.append(cell)
+      cells.push({ cell, val, ptr })
+    }
+    const status = statusEl()
+
+    function paint(frame, i, total) {
+      const byIdx = {}
+      for (const name in frame.pointers) {
+        const idx = frame.pointers[name]
+        ;(byIdx[idx] = byIdx[idx] || []).push(name)
+      }
+      for (let k = 0; k < n; k++) {
+        const c = cells[k]
+        c.val.textContent = frame.array[k]
+        let state = "idle"
+        if (frame.window && k >= frame.window[0] && k <= frame.window[1]) state = "window"
+        if (byIdx[k]) state = "pointer"
+        if (frame.marked.indexOf(k) >= 0) state = "found"
+        c.cell.dataset.state = state
+        c.ptr.textContent = byIdx[k] ? byIdx[k].join(" ") : ""
+      }
+      status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`
+    }
+
+    return { nodes: [stage, status], paint }
   }
 
   // ---- graph view: svg ----
@@ -1487,16 +1973,18 @@
         array: state.array,
         start: state.start,
         target: state.config.target,
+        text: state.config.text,
+        pattern: state.config.pattern,
         directed: state.config.directed,
         nodes: state.config.nodes,
         edges: state.config.edges,
       })
-      const view =
-        built.kind === "graph"
-          ? makeGraphView(built.frames, built.graph, built.frontierLabel)
-          : built.kind === "search"
-            ? makeSearchView(built.frames)
-            : makeSortView(built.frames)
+      let view
+      if (built.kind === "graph") view = makeGraphView(built.frames, built.graph, built.frontierLabel)
+      else if (built.kind === "search") view = makeSearchView(built.frames)
+      else if (built.kind === "string") view = makeMatchView(built.frames)
+      else if (built.kind === "pointers") view = makePointerView(built.frames)
+      else view = makeSortView(built.frames)
       if (built.kind === "graph" && startSel) syncStartOptions(built.graph)
       stageSlot.replaceChildren(...view.nodes)
       player = new Player(built.frames, view.paint, state.speed)
@@ -1581,6 +2069,8 @@
     registerSort,
     registerGraph,
     registerSearch,
+    registerString,
+    registerPointer,
     listAlgorithms,
     kindOf,
     buildFrames,

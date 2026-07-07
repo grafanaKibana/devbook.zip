@@ -29,7 +29,6 @@ graph TD
   G --> R
 ```
 
-
 ## Visualization
 
 ```steptrace

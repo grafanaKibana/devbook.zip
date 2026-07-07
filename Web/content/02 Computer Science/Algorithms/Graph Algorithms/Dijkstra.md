@@ -36,7 +36,6 @@ graph TD
   E -->|Yes| L[Output dist and optionally parent]
 ```
 
-
 ## Visualization
 
 ```steptrace

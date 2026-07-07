@@ -23,6 +23,13 @@ graph LR
     B -.->|window slides right| E
 ```
 
+
+## Visualization
+
+```steptrace
+{"algorithm":"sliding-window","array":[2,3,1,2,4,3],"target":7}
+```
+
 ## Example
 
 Fixed window — maximum sum of any k consecutive elements:

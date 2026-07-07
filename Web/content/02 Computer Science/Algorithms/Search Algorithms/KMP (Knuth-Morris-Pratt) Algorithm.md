@@ -40,6 +40,13 @@ graph TD
   J --> B
 ```
 
+
+## Visualization
+
+```steptrace
+{"algorithm":"kmp","text":"ABABCABAB","pattern":"ABAB"}
+```
+
 ## Example
 
 ```text

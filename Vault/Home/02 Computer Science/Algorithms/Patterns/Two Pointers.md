@@ -24,6 +24,13 @@ Three common configurations:
 
 The reason it's O(n): each pointer only ever moves forward (or they only converge), so the total number of moves is bounded by n — you never re-examine the same pair twice.
 
+
+## Visualization
+
+```steptrace
+{"algorithm":"two-pointers","array":[1,3,4,6,8,10,13],"target":14}
+```
+
 ## Example
 
 Two-sum on a **sorted** array, converging pointers:

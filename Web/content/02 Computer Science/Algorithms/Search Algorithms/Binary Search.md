@@ -15,7 +15,6 @@ Binary Search finds a target in a sorted array by repeatedly cutting the search 
 - Use `mid = left + (right - left) / 2` to avoid integer overflow in fixed-width integer languages.
 - Complexity: `O(log n)` time, `O(1)` extra space for iterative implementation.
 
-
 ## Visualization
 
 ```steptrace

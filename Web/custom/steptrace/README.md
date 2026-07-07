@@ -33,9 +33,13 @@ In any note, add a fenced block with the info-string `steptrace` and a flat JSON
   (omit `nodes`/`edges` for the built-in default graph; omit node `x`/`y` for an
   automatic circular layout; Dijkstra reads edge `weight`).
 - Search — `{ "algorithm": "binary-search", "array": number[] (sorted!), "target": number }`.
+- String — `{ "algorithm": "kmp" | "rabin-karp", "text": string, "pattern": string }`.
+- Pointers — `{ "algorithm": "two-pointers" | "sliding-window", "array": number[], "target": number }`
+  (two-pointers wants a sorted array).
 
 Built in — **sorts:** bubble-sort, insertion-sort, selection-sort, quick-sort, heap-sort,
-merge-sort · **graph:** bfs, dfs, dijkstra · **search:** binary-search.
+merge-sort · **graph:** bfs, dfs, dijkstra · **search:** binary-search ·
+**string:** kmp, rabin-karp · **pointers:** two-pointers, sliding-window.
 
 Each card visualizes exactly one algorithm (there is no algorithm selector).
 
