@@ -3,37 +3,27 @@ dist
 
 # Quartz (build output, transform cache, installed community plugins —
 # reinstalled in CI from the committed quartz.lock.json)
-Web/public/
-Web/.quartz-cache/
-Web/.quartz/
-# Digital Garden publishes to the repo-root src/ only via the GitHub-publish flow.
-# The live site builds from Web/src/, so a stray root src/ must never be committed.
-# Use the plugin's "Export Garden to Local Folder" command (localExportPath -> Web) instead.
-/src/
-netlify/functions/search/data.json
-netlify/functions/search/index.json
-src/site/styles/theme.*.css
-src/site/styles/_theme.*.css
+Web/**/public/
+Web/**/.quartz-cache/
+Web/**/.quartz/
 
-# Local Netlify folder
-.netlify
+# Local environment
 .idea/
+.git/
 .vercel
 .cache
 _site/
 **/.DS_Store
 
-.git/
+# AI agents
 .sisyphus/
 .omo/
 .omc/
 .opencode
+
+# Obsidian
 **/.obsidian/workspace.json
-Vault/.obsidian/plugins/digitalgarden/data.json
 Vault/Assets/Docs/
-**/bin/
-**/obj/
-**.sln.DotSettings.user
 
 # Python bytecode caches (never track compiled artifacts)
 __pycache__/
@@ -44,4 +34,4 @@ __pycache__/
 **/bin/
 **/EvaluationReports/
 *.DotSettings.user
-/Platform/AZURE-TRANSITION-PLAN.md
+**.sln.DotSettings.user
