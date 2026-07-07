@@ -1,0 +1,672 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Graph Traversal Visualizer — DevBook prototype</title>
+  <style>
+    /* Standalone page chrome — NOT ported; Quartz provides the page frame so
+       the bare prototype page stays legible in both light and dark. */
+    html { color-scheme: light dark; }
+    body {
+      background: #fafbf8;
+      color: #14180f;
+      margin: 1.5rem 1rem;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    @media (prefers-color-scheme: dark) { body { background: #161618; color: #ebebed; } }
+
+    /* Theme bridge — same approach as the sorting prototype: read Quartz's
+       palette when present, fall back to DevBook's values, and swap the
+       non-Quartz state hues for dark via prefers-color-scheme + saved-theme. */
+    .algviz {
+      --az-page:    var(--light,     #fafbf8);
+      --az-surface: var(--lightgray, #e5e9de);
+      --az-muted:   var(--gray,      #6e785e);
+      --az-text:    var(--darkgray,  #29301f);
+      --az-strong:  var(--dark,      #14180f);
+      --az-accent:  var(--secondary, #4c8000);
+
+      --az-frontier:      #d97706;                 /* in queue/stack/PQ (amber) */
+      --az-frontier-fill: #fbe6c2;
+      --az-visited:       var(--secondary, #4c8000); /* finalized/visited (green)*/
+      --az-visited-fill:  #d7e8b6;
+      --az-current:       #2563eb;                 /* node processed this step  */
+      --az-relax:         #7c3aed;                 /* Dijkstra edge relax (violet)*/
+
+      --az-tween: 260ms;
+      color: var(--az-text);
+      font-family: var(--bodyFont, system-ui, -apple-system, "Segoe UI", sans-serif);
+      display: block;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+    @media (prefers-color-scheme: dark) {
+      .algviz {
+        --az-page:    var(--light,     #161618);
+        --az-surface: var(--lightgray, #35353a);
+        --az-muted:   var(--gray,      #74747b);
+        --az-text:    var(--darkgray,  #d2d2d5);
+        --az-strong:  var(--dark,      #ebebed);
+        --az-accent:  var(--secondary, #84cc16);
+        --az-frontier:      #f59e0b;
+        --az-frontier-fill: #4a3717;
+        --az-visited:       var(--secondary, #84cc16);
+        --az-visited-fill:  #2f3d16;
+        --az-current:       #60a5fa;
+        --az-relax:         #a78bfa;
+      }
+    }
+    :root[saved-theme="dark"] .algviz {
+      --az-frontier:      #f59e0b;
+      --az-frontier-fill: #4a3717;
+      --az-current:       #60a5fa;
+      --az-relax:         #a78bfa;
+      --az-visited-fill:  #2f3d16;
+    }
+
+    .algviz *, .algviz *::before, .algviz *::after { box-sizing: border-box; }
+
+    .algviz-head { margin-bottom: 0.75rem; }
+    .algviz-title { font-size: 1.1rem; font-weight: 700; color: var(--az-strong); margin: 0; }
+    .algviz-sub { font-size: 0.85rem; color: var(--az-muted); margin: 0.1rem 0 0; }
+
+    /* Stage: graph + sidebar --------------------------------------------- */
+    .algviz-graph-wrap { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+    .algviz-svg-box {
+      flex: 2 1 360px;
+      min-width: 0;
+      background: var(--az-surface);
+      border-radius: 0.6rem;
+      padding: 0.4rem;
+    }
+    .algviz-svg-box svg { display: block; width: 100%; height: auto; }
+    .algviz-side {
+      flex: 1 1 210px;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+    .algviz-panel {
+      background: var(--az-surface);
+      border-radius: 0.6rem;
+      padding: 0.6rem 0.7rem;
+    }
+    .algviz-panel h3 {
+      margin: 0 0 0.4rem;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--az-muted);
+    }
+    .algviz-chips { display: flex; flex-wrap: wrap; gap: 0.3rem; min-height: 1.6rem; }
+    .algviz-chip {
+      font-size: 0.8rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      padding: 0.15rem 0.45rem;
+      border-radius: 0.35rem;
+      background: var(--az-frontier-fill);
+      color: var(--az-strong);
+      border: 1px solid var(--az-frontier);
+    }
+    .algviz-chip.head { outline: 2px solid var(--az-current); }
+    .algviz-empty { font-size: 0.8rem; color: var(--az-muted); font-style: italic; }
+    .algviz-dist { width: 100%; border-collapse: collapse; font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+    .algviz-dist th, .algviz-dist td { text-align: left; padding: 0.15rem 0.3rem; }
+    .algviz-dist th { color: var(--az-muted); font-weight: 600; }
+    .algviz-dist tr.is-visited td { color: var(--az-visited); font-weight: 700; }
+    .algviz-dist tr.is-current td { background: color-mix(in srgb, var(--az-current) 16%, transparent); }
+
+    /* SVG element styling ------------------------------------------------ */
+    .edge { stroke: var(--az-muted); stroke-width: 2; opacity: 0.55; fill: none; transition: stroke var(--az-tween) ease, stroke-width var(--az-tween) ease; }
+    .edge.is-traverse { stroke: var(--az-frontier); stroke-width: 4.5; opacity: 1; }
+    .edge.is-relax    { stroke: var(--az-relax); stroke-width: 4.5; opacity: 1; }
+    .edge.is-path     { stroke: var(--az-visited); stroke-width: 5.5; opacity: 1; }
+
+    .weight { display: none; }
+    svg.show-weights .weight { display: block; }
+    .weight text {
+      font-size: 13px; font-weight: 700; fill: var(--az-strong);
+      paint-order: stroke; stroke: var(--az-surface); stroke-width: 4px; stroke-linejoin: round;
+      text-anchor: middle; dominant-baseline: central;
+    }
+
+    .node .ring { fill: none; stroke: var(--az-current); stroke-width: 3; opacity: 0; transition: opacity var(--az-tween) ease; }
+    .node.is-current .ring { opacity: 1; }
+    .node .main { fill: var(--az-page); stroke: var(--az-muted); stroke-width: 2.5; transition: fill var(--az-tween) ease, stroke var(--az-tween) ease; }
+    .node.is-frontier .main { fill: var(--az-frontier-fill); stroke: var(--az-frontier); }
+    .node.is-visited  .main { fill: var(--az-visited-fill); stroke: var(--az-visited); }
+    .node.is-path     .main { stroke: var(--az-visited); stroke-width: 4; }
+    .node .nid { font-size: 15px; font-weight: 700; fill: var(--az-strong); text-anchor: middle; dominant-baseline: central; }
+    .node .dist { display: none; font-size: 12px; font-weight: 700; fill: var(--az-current); text-anchor: middle; paint-order: stroke; stroke: var(--az-surface); stroke-width: 3px; }
+    svg.show-dist .node .dist { display: block; }
+    .node .tag { display: none; font-size: 11px; font-weight: 700; fill: var(--az-muted); text-anchor: middle; text-transform: uppercase; letter-spacing: 0.04em; }
+    .node.is-start .tag.start, .node.is-target .tag.target { display: block; }
+
+    /* Status + toolbar --------------------------------------------------- */
+    .algviz-status { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1rem; margin: 0.7rem 0; font-size: 0.85rem; }
+    .algviz-step { font-weight: 700; color: var(--az-strong); font-variant-numeric: tabular-nums; }
+    .algviz-live {
+      flex: 1 1 100%; min-height: 1.4em; color: var(--az-text);
+      background: var(--az-surface); border-left: 3px solid var(--az-accent);
+      padding: 0.4rem 0.6rem; border-radius: 0 0.35rem 0.35rem 0;
+    }
+    .algviz-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.6rem; }
+    .algviz-toolbar .group { display: flex; align-items: center; gap: 0.35rem; }
+    .algviz button, .algviz select {
+      font: inherit; font-size: 0.85rem; color: var(--az-strong);
+      background: var(--az-page); border: 1px solid var(--az-muted);
+      border-radius: 0.4rem; padding: 0.35rem 0.6rem; cursor: pointer;
+    }
+    .algviz button:hover, .algviz select:hover { border-color: var(--az-accent); }
+    .algviz button.primary { background: var(--az-accent); border-color: var(--az-accent); color: var(--az-page); font-weight: 700; min-width: 5.2rem; }
+    .algviz button:disabled { opacity: 0.45; cursor: not-allowed; }
+    .algviz label { font-size: 0.82rem; color: var(--az-muted); }
+    .algviz input[type="range"] { accent-color: var(--az-accent); vertical-align: middle; }
+    .algviz .group.hidden { display: none; }
+    .algviz :focus-visible { outline: 2px solid var(--az-current); outline-offset: 2px; }
+
+    .algviz-legend { display: flex; flex-wrap: wrap; gap: 0.35rem 0.9rem; margin-top: 0.8rem; font-size: 0.78rem; color: var(--az-muted); }
+    .algviz-legend span { display: inline-flex; align-items: center; gap: 0.35rem; }
+    .algviz-dot { width: 0.85rem; height: 0.85rem; border-radius: 50%; display: inline-block; flex: none; border: 2px solid; }
+    .dot-unvisited { background: var(--az-page); border-color: var(--az-muted); }
+    .dot-frontier  { background: var(--az-frontier-fill); border-color: var(--az-frontier); }
+    .dot-visited   { background: var(--az-visited-fill); border-color: var(--az-visited); }
+    .dot-current   { background: var(--az-page); border-color: var(--az-current); }
+    .algviz-line { width: 1rem; height: 0; border-top: 4px solid; display: inline-block; }
+    .line-relax { border-color: var(--az-relax); }
+    .line-path  { border-color: var(--az-visited); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .algviz *, .algviz *::before, .algviz *::after { transition: none !important; animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="algviz" data-algviz>
+    <script type="application/json" class="algviz-config">
+      {
+        "algorithm": "dijkstra",
+        "directed": false,
+        "start": "A",
+        "target": "F",
+        "nodes": [
+          { "id": "A", "x": 60,  "y": 200 },
+          { "id": "B", "x": 190, "y": 80  },
+          { "id": "C", "x": 390, "y": 120 },
+          { "id": "D", "x": 190, "y": 300 },
+          { "id": "E", "x": 410, "y": 280 },
+          { "id": "F", "x": 540, "y": 190 }
+        ],
+        "edges": [
+          { "from": "A", "to": "B", "weight": 2 },
+          { "from": "A", "to": "D", "weight": 1 },
+          { "from": "B", "to": "C", "weight": 3 },
+          { "from": "B", "to": "E", "weight": 2 },
+          { "from": "D", "to": "E", "weight": 4 },
+          { "from": "D", "to": "C", "weight": 6 },
+          { "from": "C", "to": "F", "weight": 1 },
+          { "from": "E", "to": "F", "weight": 5 }
+        ]
+      }
+    </script>
+  </div>
+
+  <script type="module">
+    /* ================================================================== *
+     * ENGINE — buildFrames(input) -> Frame[]                             *
+     *                                                                    *
+     * Pure. BFS / DFS / Dijkstra share one step-emit shape; Dijkstra     *
+     * extends it with edge relaxation and a final path. Each frame is a   *
+     * full state snapshot so step-back is free.                          *
+     *                                                                    *
+     * Frame = {                                                          *
+     *   type: 'init'|'visit'|'traverse'|'relax'|'skip'|'path'|'done',    *
+     *   visited: string[],           // finalized / visited, in order    *
+     *   frontier: string[],          // queue|stack|PQ contents, ordered *
+     *   current: string|null,        // node processed this step         *
+     *   activeEdge: [u,v]|null,                                          *
+     *   edgeKind: 'traverse'|'relax'|null,                              *
+     *   dist: {id:number}|null,       // Dijkstra tentative distances     *
+     *   path: string[]|null,          // final shortest path             *
+     *   containerLabel: string,       // 'Queue'|'Stack'|'Priority queue' *
+     *   message: string                                                  *
+     * }                                                                  *
+     * ================================================================== */
+
+    function buildGraph(cfg) {
+      const nodes = cfg.nodes;
+      const directed = !!cfg.directed;
+      const adj = new Map(nodes.map((n) => [n.id, []]));
+      const w = new Map();
+      for (const e of cfg.edges) {
+        adj.get(e.from).push(e.to);
+        w.set(e.from + "|" + e.to, e.weight ?? 1);
+        if (!directed) { adj.get(e.to).push(e.from); w.set(e.to + "|" + e.from, e.weight ?? 1); }
+      }
+      for (const list of adj.values()) list.sort();
+      return { nodes, directed, adj, weight: (u, v) => w.get(u + "|" + v) };
+    }
+
+    function bfsFrames(g, start) {
+      const frames = [], visited = [], discovered = new Set([start]), queue = [start];
+      const snap = (type, x) => frames.push({
+        type, visited: [...visited], frontier: [...queue], current: null,
+        activeEdge: null, edgeKind: null, dist: null, path: null,
+        containerLabel: "Queue (FIFO)", message: "", ...x,
+      });
+      snap("init", { message: `Start BFS at ${start}. Enqueue ${start}.` });
+      while (queue.length) {
+        const u = queue.shift();
+        visited.push(u);
+        snap("visit", { current: u, message: `Dequeue and visit ${u} (breadth-first / level order).` });
+        for (const v of g.adj.get(u)) {
+          if (!discovered.has(v)) {
+            discovered.add(v); queue.push(v);
+            snap("traverse", { current: u, activeEdge: [u, v], edgeKind: "traverse", message: `Edge ${u}–${v}: ${v} is undiscovered, enqueue it.` });
+          } else {
+            snap("skip", { current: u, activeEdge: [u, v], edgeKind: "traverse", message: `Edge ${u}–${v}: ${v} already discovered, skip.` });
+          }
+        }
+      }
+      snap("done", { message: `BFS complete. Visit order: ${visited.join(" → ")}.` });
+      return frames;
+    }
+
+    function dfsFrames(g, start) {
+      const frames = [], visited = [], seen = new Set(), stack = [];
+      const snap = (type, x) => frames.push({
+        type, visited: [...visited], frontier: [...stack], current: null,
+        activeEdge: null, edgeKind: null, dist: null, path: null,
+        containerLabel: "Stack (call path)", message: "", ...x,
+      });
+      snap("init", { message: `Start DFS at ${start}.` });
+      (function dfs(u) {
+        seen.add(u); visited.push(u); stack.push(u);
+        snap("visit", { current: u, message: `Visit ${u}; push it onto the call stack.` });
+        for (const v of g.adj.get(u)) {
+          if (!seen.has(v)) {
+            snap("traverse", { current: u, activeEdge: [u, v], edgeKind: "traverse", message: `Edge ${u}–${v}: descend depth-first into ${v}.` });
+            dfs(v);
+            snap("traverse", { current: u, activeEdge: null, message: `Backtrack to ${u}.` });
+          } else {
+            snap("skip", { current: u, activeEdge: [u, v], edgeKind: "traverse", message: `Edge ${u}–${v}: ${v} already visited, skip.` });
+          }
+        }
+        stack.pop();
+      })(start);
+      snap("done", { message: `DFS complete. Visit order: ${visited.join(" → ")}.` });
+      return frames;
+    }
+
+    function dijkstraFrames(g, start, target) {
+      const frames = [], visited = [], visitedSet = new Set(), dist = {}, prev = {};
+      g.nodes.forEach((n) => (dist[n.id] = Infinity));
+      dist[start] = 0;
+      const frontier = () => g.nodes.map((n) => n.id)
+        .filter((id) => !visitedSet.has(id) && dist[id] < Infinity)
+        .sort((a, b) => dist[a] - dist[b] || (a < b ? -1 : 1));
+      const snap = (type, x) => frames.push({
+        type, visited: [...visited], frontier: frontier(), current: null,
+        activeEdge: null, edgeKind: null, dist: { ...dist }, prev: { ...prev }, path: null,
+        containerLabel: "Priority queue (min dist)", message: "", ...x,
+      });
+      snap("init", { message: `Start Dijkstra at ${start} (distance 0). Every other node is ∞.` });
+      while (true) {
+        const cand = frontier();
+        if (!cand.length) break;
+        const u = cand[0];
+        visitedSet.add(u); visited.push(u);
+        snap("visit", { current: u, message: `Pop ${u} — the smallest tentative distance (${dist[u]}) — and finalize it.` });
+        if (target && u === target) break;
+        for (const v of g.adj.get(u)) {
+          const wt = g.weight(u, v);
+          if (visitedSet.has(v)) {
+            snap("skip", { current: u, activeEdge: [u, v], edgeKind: "traverse", message: `Edge ${u}→${v} (weight ${wt}): ${v} already finalized, skip.` });
+            continue;
+          }
+          const nd = dist[u] + wt;
+          if (nd < dist[v]) {
+            const old = dist[v] === Infinity ? "∞" : dist[v];
+            dist[v] = nd; prev[v] = u;
+            snap("relax", { current: u, activeEdge: [u, v], edgeKind: "relax", message: `Relax ${u}→${v} (weight ${wt}): ${v} improves ${old} → ${nd}.` });
+          } else {
+            snap("traverse", { current: u, activeEdge: [u, v], edgeKind: "traverse", message: `Edge ${u}→${v} (weight ${wt}): ${dist[u]}+${wt} ≥ ${dist[v]}, no improvement.` });
+          }
+        }
+      }
+      if (target && dist[target] < Infinity) {
+        const path = []; let cur = target;
+        while (cur !== undefined) { path.unshift(cur); if (cur === start) break; cur = prev[cur]; }
+        snap("path", { path, message: `Shortest path ${start} → ${target}: ${path.join(" → ")} (total distance ${dist[target]}).` });
+        snap("done", { path, message: `Done. Shortest distance ${start} → ${target} is ${dist[target]}.` });
+      } else if (target) {
+        snap("done", { message: `${target} is unreachable from ${start}.` });
+      } else {
+        snap("done", { message: `Dijkstra complete.` });
+      }
+      return frames;
+    }
+
+    const ALGORITHMS = {
+      bfs: { label: "BFS", weighted: false, build: (g, s) => bfsFrames(g, s) },
+      dfs: { label: "DFS", weighted: false, build: (g, s) => dfsFrames(g, s) },
+      dijkstra: { label: "Dijkstra", weighted: true, build: (g, s, t) => dijkstraFrames(g, s, t) },
+    };
+
+    function buildFrames(input) {
+      const g = buildGraph(input);
+      const algo = ALGORITHMS[input.algorithm] || ALGORITHMS.bfs;
+      const ids = new Set(g.nodes.map((n) => n.id));
+      const start = ids.has(input.start) ? input.start : g.nodes[0].id;
+      const target = ids.has(input.target) ? input.target : g.nodes[g.nodes.length - 1].id;
+      return algo.build(g, start, target);
+    }
+
+    /* ================================================================== *
+     * TRANSPORT — identical shape to the sorting prototype.              *
+     * ================================================================== */
+    class Player {
+      constructor(total, onFrame) {
+        this.total = total; this.onFrame = onFrame; this.i = 0; this.speed = 1;
+        this.playing = false; this.timer = null; this.base = 850; this.onState = null;
+      }
+      interval() { return this.base / this.speed; }
+      emit() { this.onFrame(this.i); this.onState && this.onState(); }
+      set(i) { this.i = Math.max(0, Math.min(this.total - 1, i)); this.emit(); }
+      next() { if (this.i < this.total - 1) this.set(this.i + 1); else this.pause(); }
+      prev() { this.pause(); this.set(this.i - 1); }
+      reset() { this.pause(); this.set(0); }
+      play() { if (this.playing) return; if (this.i >= this.total - 1) this.set(0); this.playing = true; this.onState && this.onState(); this.tick(); }
+      pause() { this.playing = false; clearTimeout(this.timer); this.onState && this.onState(); }
+      toggle() { this.playing ? this.pause() : this.play(); }
+      tick() { if (!this.playing) return; if (this.i >= this.total - 1) { this.pause(); return; } this.set(this.i + 1); this.timer = setTimeout(() => this.tick(), this.interval()); }
+    }
+
+    /* ================================================================== *
+     * MOUNT                                                              *
+     * ================================================================== */
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let _n = 0;
+    const uid = (p) => `algviz-${p}-${_n++}`;
+    const SVGNS = "http://www.w3.org/2000/svg";
+    const svgEl = (tag, attrs) => { const e = document.createElementNS(SVGNS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; };
+    const NODE_R = 20;
+    const edgeKey = (g, u, v) => (g.directed ? u + "|" + v : [u, v].sort().join("|"));
+
+    function mount(root) {
+      let config = {};
+      const marker = root.querySelector(".algviz-config");
+      if (marker) { try { config = JSON.parse(marker.textContent); } catch (e) { console.error("algviz: bad config JSON", e); } }
+
+      const g = buildGraph(config);
+      const ids = g.nodes.map((n) => n.id);
+      let algorithm = ALGORITHMS[config.algorithm] ? config.algorithm : "bfs";
+      let start = ids.includes(config.start) ? config.start : ids[0];
+      let target = ids.includes(config.target) ? config.target : ids[ids.length - 1];
+      let speed = Number(config.speed) > 0 ? Number(config.speed) : 1;
+
+      const opts = (sel) => ids.map((id) => `<option value="${id}"${id === sel ? " selected" : ""}>${id}</option>`).join("");
+      const algoId = uid("algo"), startId = uid("start"), targetId = uid("target"), speedId = uid("speed");
+      root.innerHTML = `
+        <div class="algviz-head">
+          <p class="algviz-title">Graph traversal visualizer</p>
+          <p class="algviz-sub" data-algo-name></p>
+        </div>
+        <div class="algviz-graph-wrap">
+          <div class="algviz-svg-box"><div data-svg></div></div>
+          <div class="algviz-side">
+            <div class="algviz-panel">
+              <h3 data-container-label>Queue</h3>
+              <div class="algviz-chips" data-frontier aria-live="polite"></div>
+            </div>
+            <div class="algviz-panel">
+              <h3>Visited order</h3>
+              <div class="algviz-chips" data-visited></div>
+            </div>
+            <div class="algviz-panel" data-dist-panel>
+              <h3>Distances</h3>
+              <table class="algviz-dist"><thead><tr><th>node</th><th>dist</th><th>via</th></tr></thead><tbody data-dist></tbody></table>
+            </div>
+          </div>
+        </div>
+        <div class="algviz-status">
+          <span class="algviz-step" data-step></span>
+          <p class="algviz-live" data-live aria-live="polite"></p>
+        </div>
+        <div class="algviz-toolbar">
+          <div class="group">
+            <button class="primary" data-play aria-label="Play"></button>
+            <button data-prev aria-label="Step backward">◀ Step</button>
+            <button data-next aria-label="Step forward">Step ▶</button>
+            <button data-reset aria-label="Reset to start">Reset</button>
+          </div>
+          <div class="group">
+            <label for="${algoId}">Algorithm</label>
+            <select id="${algoId}" data-algo aria-label="Algorithm">
+              <option value="bfs">BFS</option>
+              <option value="dfs">DFS</option>
+              <option value="dijkstra">Dijkstra</option>
+            </select>
+          </div>
+          <div class="group">
+            <label for="${startId}">Start</label>
+            <select id="${startId}" data-start aria-label="Start node">${opts(start)}</select>
+          </div>
+          <div class="group" data-target-group>
+            <label for="${targetId}">Target</label>
+            <select id="${targetId}" data-target aria-label="Target node">${opts(target)}</select>
+          </div>
+          <div class="group">
+            <label for="${speedId}">Speed</label>
+            <input id="${speedId}" data-speed type="range" min="0.25" max="4" step="0.25" aria-label="Playback speed" />
+            <span data-speed-label aria-hidden="true"></span>
+          </div>
+        </div>
+        <div class="algviz-legend" aria-hidden="true">
+          <span><i class="algviz-dot dot-unvisited"></i>unvisited</span>
+          <span><i class="algviz-dot dot-frontier"></i>frontier</span>
+          <span><i class="algviz-dot dot-current"></i>current</span>
+          <span><i class="algviz-dot dot-visited"></i>visited</span>
+          <span><i class="algviz-line line-relax"></i>relax</span>
+          <span><i class="algviz-line line-path"></i>shortest path</span>
+        </div>`;
+
+      const el = {
+        algoName: root.querySelector("[data-algo-name]"),
+        svgHost: root.querySelector("[data-svg]"),
+        containerLabel: root.querySelector("[data-container-label]"),
+        frontier: root.querySelector("[data-frontier]"),
+        visited: root.querySelector("[data-visited]"),
+        distPanel: root.querySelector("[data-dist-panel]"),
+        dist: root.querySelector("[data-dist]"),
+        step: root.querySelector("[data-step]"),
+        live: root.querySelector("[data-live]"),
+        play: root.querySelector("[data-play]"),
+        prev: root.querySelector("[data-prev]"),
+        next: root.querySelector("[data-next]"),
+        reset: root.querySelector("[data-reset]"),
+        algo: root.querySelector("[data-algo]"),
+        startSel: root.querySelector("[data-start]"),
+        target: root.querySelector("[data-target]"),
+        targetGroup: root.querySelector("[data-target-group]"),
+        speed: root.querySelector("[data-speed]"),
+        speedLabel: root.querySelector("[data-speed-label]"),
+      };
+      el.algo.value = algorithm;
+      el.speed.value = String(speed);
+      el.speedLabel.textContent = speed.toFixed(2) + "×";
+
+      // ---- Build the SVG scene once (geometry is fixed) ----------------
+      const bounds = g.nodes.reduce((b, n) => ({
+        maxX: Math.max(b.maxX, n.x), maxY: Math.max(b.maxY, n.y),
+      }), { maxX: 0, maxY: 0 });
+      const vbW = bounds.maxX + 60, vbH = bounds.maxY + 60;
+      const svg = svgEl("svg", { viewBox: `0 0 ${vbW} ${vbH}`, role: "img", "aria-hidden": "true" });
+      const pos = new Map(g.nodes.map((n) => [n.id, n]));
+
+      const edgeEls = new Map();
+      const seenEdge = new Set();
+      const gEdges = svgEl("g", {});
+      for (const e of config.edges) {
+        const key = edgeKey(g, e.from, e.to);
+        if (seenEdge.has(key)) continue;
+        seenEdge.add(key);
+        const a = pos.get(e.from), b = pos.get(e.to);
+        const line = svgEl("line", { x1: a.x, y1: a.y, x2: b.x, y2: b.y, class: "edge" });
+        gEdges.appendChild(line);
+        const wg = svgEl("g", { class: "weight" });
+        const t = svgEl("text", { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
+        t.textContent = String(e.weight ?? 1);
+        wg.appendChild(t);
+        gEdges.appendChild(wg);
+        edgeEls.set(key, line);
+      }
+      svg.appendChild(gEdges);
+
+      const nodeEls = new Map();
+      const gNodes = svgEl("g", {});
+      for (const n of g.nodes) {
+        const ng = svgEl("g", { class: "node" });
+        ng.appendChild(svgEl("circle", { class: "ring", cx: n.x, cy: n.y, r: NODE_R + 6 }));
+        ng.appendChild(svgEl("circle", { class: "main", cx: n.x, cy: n.y, r: NODE_R }));
+        const idt = svgEl("text", { class: "nid", x: n.x, y: n.y }); idt.textContent = n.id; ng.appendChild(idt);
+        const dt = svgEl("text", { class: "dist", x: n.x, y: n.y - NODE_R - 8 }); ng.appendChild(dt);
+        const startTag = svgEl("text", { class: "tag start", x: n.x, y: n.y + NODE_R + 15 }); startTag.textContent = "start"; ng.appendChild(startTag);
+        const targetTag = svgEl("text", { class: "tag target", x: n.x, y: n.y + NODE_R + 15 }); targetTag.textContent = "target"; ng.appendChild(targetTag);
+        gNodes.appendChild(ng);
+        nodeEls.set(n.id, { group: ng, dist: dt });
+      }
+      svg.appendChild(gNodes);
+      el.svgHost.appendChild(svg);
+
+      let frames = [], player = null;
+
+      function render(index) {
+        const f = frames[index];
+        const pathSet = new Set(f.path || []);
+        const pathEdges = new Set();
+        if (f.path) for (let i = 0; i < f.path.length - 1; i++) pathEdges.add(edgeKey(g, f.path[i], f.path[i + 1]));
+        const visitedSet = new Set(f.visited);
+        const frontierSet = new Set(f.frontier);
+
+        // Nodes
+        for (const n of g.nodes) {
+          const ng = nodeEls.get(n.id).group;
+          ng.classList.toggle("is-visited", visitedSet.has(n.id));
+          ng.classList.toggle("is-frontier", frontierSet.has(n.id) && !visitedSet.has(n.id));
+          ng.classList.toggle("is-current", f.current === n.id);
+          ng.classList.toggle("is-path", pathSet.has(n.id));
+          ng.classList.toggle("is-start", n.id === start);
+          ng.classList.toggle("is-target", ALGORITHMS[algorithm].weighted && n.id === target);
+          if (f.dist) {
+            const d = f.dist[n.id];
+            nodeEls.get(n.id).dist.textContent = d === Infinity ? "∞" : String(d);
+          }
+        }
+        // Edges
+        for (const [key, line] of edgeEls) {
+          line.classList.remove("is-traverse", "is-relax", "is-path");
+          if (pathEdges.has(key)) line.classList.add("is-path");
+          else if (f.activeEdge && edgeKey(g, f.activeEdge[0], f.activeEdge[1]) === key) {
+            line.classList.add(f.edgeKind === "relax" ? "is-relax" : "is-traverse");
+          }
+        }
+        // Sidebar
+        el.containerLabel.textContent = f.containerLabel;
+        renderChips(el.frontier, f.frontier, f.dist, algorithm === "dfs" ? "last" : "first");
+        renderChips(el.visited, f.visited, null, "none");
+        if (f.dist) renderDist(f);
+        el.step.textContent = `Step ${index} / ${frames.length - 1}`;
+        el.live.textContent = f.message;
+      }
+
+      function renderChips(host, list, dist, headMode) {
+        host.innerHTML = "";
+        if (!list.length) { host.innerHTML = `<span class="algviz-empty">empty</span>`; return; }
+        const head = headMode === "first" ? 0 : headMode === "last" ? list.length - 1 : -1;
+        list.forEach((id, i) => {
+          const c = document.createElement("span");
+          c.className = "algviz-chip" + (i === head ? " head" : "");
+          c.textContent = dist ? `${id}:${dist[id] === Infinity ? "∞" : dist[id]}` : id;
+          host.appendChild(c);
+        });
+      }
+
+      function renderDist(f) {
+        el.dist.innerHTML = "";
+        const visitedSet = new Set(f.visited);
+        for (const n of g.nodes) {
+          const tr = document.createElement("tr");
+          if (visitedSet.has(n.id)) tr.className = "is-visited";
+          if (f.current === n.id) tr.className += " is-current";
+          const d = f.dist[n.id];
+          tr.innerHTML = `<td>${n.id}</td><td>${d === Infinity ? "∞" : d}</td><td>${prevVia(f, n.id)}</td>`;
+          el.dist.appendChild(tr);
+        }
+      }
+      function prevVia(f, id) {
+        // Live predecessor from Dijkstra's prev map; "·" until a node is reached.
+        if (f.prev && f.prev[id] != null) return f.prev[id];
+        return "·";
+      }
+
+      function syncControls() {
+        const atEnd = player.i >= frames.length - 1;
+        el.play.textContent = player.playing ? "⏸ Pause" : (atEnd ? "↻ Replay" : "▶ Play");
+        el.play.setAttribute("aria-label", player.playing ? "Pause" : (atEnd ? "Replay" : "Play"));
+        el.prev.disabled = player.i <= 0;
+        el.next.disabled = atEnd;
+      }
+      function applyTween() {
+        const ms = reduceMotion.matches ? 0 : Math.min(player.interval() * 0.5, 300);
+        root.style.setProperty("--az-tween", ms + "ms");
+      }
+
+      function rebuild() {
+        const weighted = ALGORITHMS[algorithm].weighted;
+        svg.classList.toggle("show-weights", weighted);
+        svg.classList.toggle("show-dist", weighted);
+        el.targetGroup.classList.toggle("hidden", !weighted);
+        el.distPanel.style.display = weighted ? "" : "none";
+        el.algoName.textContent = `${ALGORITHMS[algorithm].label} · start ${start}${weighted ? ` · target ${target}` : ""} · ${g.nodes.length} nodes`;
+        frames = buildFrames({ ...config, algorithm, start, target });
+        player = new Player(frames.length, render);
+        player.speed = speed;
+        player.onState = () => { syncControls(); applyTween(); };
+        player.set(0);
+        applyTween();
+      }
+
+      rebuild();
+
+      el.play.addEventListener("click", () => player.toggle());
+      el.next.addEventListener("click", () => { player.pause(); player.next(); });
+      el.prev.addEventListener("click", () => player.prev());
+      el.reset.addEventListener("click", () => player.reset());
+      el.algo.addEventListener("change", () => { algorithm = el.algo.value; rebuild(); });
+      el.startSel.addEventListener("change", () => { start = el.startSel.value; rebuild(); });
+      el.target.addEventListener("change", () => { target = el.target.value; rebuild(); });
+      el.speed.addEventListener("input", () => {
+        speed = Number(el.speed.value);
+        el.speedLabel.textContent = speed.toFixed(2) + "×";
+        player.speed = speed;
+        applyTween();
+      });
+
+      root.addEventListener("keydown", (e) => {
+        const t = e.target;
+        const isField = t.matches && t.matches("input, select");
+        if ((e.key === " " || e.code === "Space") && t.tagName !== "BUTTON") { e.preventDefault(); player.toggle(); }
+        else if (e.key === "ArrowRight" && !isField) { e.preventDefault(); player.pause(); player.next(); }
+        else if (e.key === "ArrowLeft" && !isField) { e.preventDefault(); player.prev(); }
+      });
+      reduceMotion.addEventListener?.("change", applyTween);
+    }
+
+    document.querySelectorAll("[data-algviz]").forEach(mount);
+  </script>
+</body>
+</html>

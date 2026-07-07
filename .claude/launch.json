@@ -6,6 +6,12 @@
       "runtimeExecutable": "sh",
       "runtimeArgs": ["-c", "cd Web && npx quartz build --serve --port 8080"],
       "port": 8080
+    },
+    {
+      "name": "algviz-prototypes",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "4599", "--directory", "prototypes/algviz"],
+      "port": 4599
     }
   ]
 }
