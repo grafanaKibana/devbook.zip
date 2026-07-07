@@ -159,15 +159,11 @@ plugins:
       priority: 10
       condition: not-index
   - source: github:quartz-community/search
-    enabled: false
-    # Rendered by the custom SiteHeader (header slot), not the left sidebar.
-    # See Web/quartz.ts and Web/custom/components/site-header.tsx.
-    layout:
-      position: left
-      priority: 20
-      group: toolbar
-      groupOptions:
-        grow: true
+    enabled: true
+    # Enabled so it is installed + registered, but intentionally has NO `layout`
+    # block: it is rendered by the custom SiteHeader (header slot), not the left
+    # sidebar. See Web/quartz.ts and Web/custom/components/site-header.tsx.
+    # (Disabling it un-registers the component and crashes the build.)
   - source: github:quartz-community/backlinks
     enabled: true
     layout:
@@ -190,25 +186,14 @@ plugins:
       position: beforeBody
       priority: 30
   - source: github:quartz-community/page-title
-    enabled: false
-    # Rendered by the custom SiteHeader (header slot), not the left sidebar.
-    layout:
-      position: left
-      priority: 10
+    enabled: true
+    # Enabled (installed + registered) but no `layout`: rendered by SiteHeader.
   - source: github:quartz-community/darkmode
-    enabled: false
-    # Rendered by the custom SiteHeader (header slot), not the left sidebar.
-    layout:
-      position: left
-      priority: 30
-      group: toolbar
+    enabled: true
+    # Enabled (installed + registered) but no `layout`: rendered by SiteHeader.
   - source: github:quartz-community/reader-mode
-    enabled: false
-    # Rendered by the custom SiteHeader (header slot), not the left sidebar.
-    layout:
-      position: left
-      priority: 35
-      group: toolbar
+    enabled: true
+    # Enabled (installed + registered) but no `layout`: rendered by SiteHeader.
   - source: github:quartz-community/breadcrumbs
     enabled: true
     layout:
