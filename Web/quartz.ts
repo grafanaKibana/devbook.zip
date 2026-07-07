@@ -1,5 +1,7 @@
+import { ExplorerIcons } from "./custom/components/explorer-icons"
 import { QuestionsIndex } from "./custom/components/questions-index"
 import { SiteMarquee } from "./custom/components/site-marquee"
+import { IconBackfill } from "./custom/transformers/icon-backfill"
 import { QuestionCollector } from "./custom/transformers/question-collector"
 import { StatusBackfill } from "./custom/transformers/status-backfill"
 import { SyncerFixups } from "./custom/transformers/syncer-fixups"
@@ -39,11 +41,27 @@ config.plugins.transformers.push(QuestionCollector())
 // components (SiteMarquee) can read it. Reads from the Vault source note.
 config.plugins.transformers.push(StatusBackfill())
 
+// Restore the `icon` frontmatter that Syncer drops on publish, so the Explorer
+// file-tree icons (ExplorerIcons) can render a note's assigned Lucide icon.
+// Reads from the Vault source note.
+config.plugins.transformers.push(IconBackfill())
+
 const layout = await loadQuartzLayout()
 const siteMarquee = SiteMarquee()
 layout.defaults.beforeBody = [siteMarquee, ...(layout.defaults.beforeBody ?? [])]
 for (const pageLayout of Object.values(layout.byPageType)) {
   pageLayout.beforeBody = [siteMarquee, ...(pageLayout.beforeBody ?? [])]
+}
+
+// Inject the Explorer file-tree icons (issue #51). It renders nothing itself —
+// it only contributes css + afterDOMLoaded that decorate the community
+// Explorer's client-built tree — so it just needs to be present in the layout
+// on every page (the left sidebar shows everywhere). afterBody is set before the
+// content block below so `content` picks it up too.
+const explorerIcons = ExplorerIcons()
+layout.defaults.afterBody = [...(layout.defaults.afterBody ?? []), explorerIcons]
+for (const pageLayout of Object.values(layout.byPageType)) {
+  pageLayout.afterBody = [...(pageLayout.afterBody ?? []), explorerIcons]
 }
 
 const content = { ...(layout.byPageType.content ?? {}) }
