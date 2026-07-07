@@ -74,9 +74,8 @@ jobs:
 
           ITEM_ID=$(gh api graphql \
             -f issue="$ISSUE_NODE_ID" \
-            -f project="$PROJECT_ID" \
-            -f query='query($issue:ID!, $project:ID!) { node(id: $issue) { ... on Issue { projectItems(first: 20) { nodes { id project { id } } } } } }' \
-            --jq '.data.node.projectItems.nodes[] | select(.project.id == $project) | .id' | head -n 1)
+            -f query='query($issue:ID!) { node(id: $issue) { ... on Issue { projectItems(first: 20) { nodes { id project { id } } } } } }' \
+            --jq ".data.node.projectItems.nodes[] | select(.project.id == \"$PROJECT_ID\") | .id" | head -n 1)
 
           if [ -z "${ITEM_ID:-}" ]; then
             ITEM_ID=$(gh api graphql \
