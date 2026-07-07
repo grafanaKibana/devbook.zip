@@ -12,7 +12,6 @@ publish: true
 # Intro
 
 Quick sort partitions the array around a pivot so smaller elements go left and larger go right, then recursively sorts the partitions. It is often the fastest comparison sort in practice due to excellent cache behavior and low constant factors, but it has a worst-case O(n²) if pivots are consistently bad. Production implementations use randomized pivots or introsort (fallback to heapsort) to guarantee O(n log n) worst case.
-
 ## Mechanism
 
 Choose a pivot, partition the array in-place so all elements less than the pivot are to its left and all greater are to its right, then recurse on both sides. The pivot is in its final sorted position after partitioning.
@@ -28,6 +27,13 @@ graph TD
   E --> G[quickSort A from p plus 1 to r]
   F --> R
   G --> R
+```
+
+
+## Visualization
+
+```steptrace
+{"algorithm":"quick-sort","array":[8,3,5,1,9,2,7,4]}
 ```
 
 ## Complexity

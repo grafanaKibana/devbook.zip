@@ -9,7 +9,6 @@ tags:
 # Intro
 
 Heap sort turns the array into a [[Heap|binary heap]] and then repeatedly extracts the maximum to build the sorted output from the back. It is the only common comparison sort that is **both O(n log n) in the worst case _and_ O(1) extra space (in-place)** — the combination merge sort and quicksort each give up one of. That guaranteed worst case with no extra memory is exactly why .NET's `Array.Sort` (introsort) uses heap sort as its **fallback** when quicksort's recursion goes too deep, defending against quicksort's O(n²) blow-up.
-
 ## Mechanism
 
 Two phases over the same array:
@@ -27,6 +26,13 @@ graph TD
   D --> E{heap size > 1}
   E -->|Yes| B
   E -->|No| Z[Sorted]
+```
+
+
+## Visualization
+
+```steptrace
+{"algorithm":"heap-sort","array":[8,3,5,1,9,2,7,4]}
 ```
 
 ## Complexity

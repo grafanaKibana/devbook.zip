@@ -21,6 +21,13 @@ Binary Search finds a target in a sorted array by repeatedly cutting the search 
 - Use `mid = left + (right - left) / 2` to avoid integer overflow in fixed-width integer languages.
 - Complexity: `O(log n)` time, `O(1)` extra space for iterative implementation.
 
+
+## Visualization
+
+```steptrace
+{"algorithm":"binary-search","array":[3,8,12,17,23,31,44,52,60,71],"target":31}
+```
+
 ## Example
 
 ```csharp

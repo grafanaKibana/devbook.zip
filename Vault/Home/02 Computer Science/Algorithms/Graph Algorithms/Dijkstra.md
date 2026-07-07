@@ -15,7 +15,6 @@ publish: true
 Dijkstra's algorithm computes shortest paths from a single source to all other nodes in a graph with non-negative edge weights. It works by greedily finalizing the node with the smallest tentative distance, then relaxing its outgoing edges to improve neighbor distances. The greedy choice is correct because non-negative weights guarantee that no future path through an unfinalized node can beat the current shortest — once a node is extracted from the priority queue, its distance is final.
 
 Use Dijkstra for routing (network shortest paths, GPS navigation), cost minimization (cheapest flight itinerary), and resource planning where edge costs represent real quantities like latency, distance, or price. It does not work when edges have negative weights — that breaks the finalization invariant and requires Bellman-Ford instead.
-
 ## How It Works
 
 1. Initialize `dist[source] = 0` and `dist[v] = ∞` for all other nodes. Push `(0, source)` into a min-priority queue.
@@ -41,6 +40,13 @@ graph TD
   K --> H
   I -->|No| H
   E -->|Yes| L[Output dist and optionally parent]
+```
+
+
+## Visualization
+
+```steptrace
+{"algorithm":"dijkstra","start":"A","directed":false,"nodes":[{"id":"A"},{"id":"B"},{"id":"C"},{"id":"D"},{"id":"E"},{"id":"F"}],"edges":[{"from":"A","to":"B","weight":2},{"from":"A","to":"C","weight":5},{"from":"B","to":"C","weight":1},{"from":"B","to":"D","weight":6},{"from":"C","to":"D","weight":3},{"from":"D","to":"E","weight":1},{"from":"D","to":"F","weight":4},{"from":"E","to":"F","weight":2}]}
 ```
 
 ## Example

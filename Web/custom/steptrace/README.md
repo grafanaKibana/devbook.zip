@@ -26,13 +26,18 @@ In any note, add a fenced block with the info-string `steptrace` and a flat JSON
 
 **Config schema**
 
-- Sort — `{ "algorithm": "bubble-sort", "array"?: number[], "speed"?: number }`
+- Sort — `{ "algorithm": <sort id>, "array"?: number[], "speed"?: number }`
   (omit `array` for a random one).
-- Graph — `{ "algorithm": "bfs", "start"?: string, "directed"?: boolean,
-  "nodes"?: [{id,x,y}], "edges"?: [{from,to,weight?}], "speed"?: number }`
-  (omit `nodes`/`edges` for the built-in default graph).
+- Graph — `{ "algorithm": <graph id>, "start"?: string, "directed"?: boolean,
+  "nodes"?: [{id,x?,y?}], "edges"?: [{from,to,weight?}], "speed"?: number }`
+  (omit `nodes`/`edges` for the built-in default graph; omit node `x`/`y` for an
+  automatic circular layout; Dijkstra reads edge `weight`).
+- Search — `{ "algorithm": "binary-search", "array": number[] (sorted!), "target": number }`.
 
-Built in: **bubble-sort** and **bfs**.
+Built in — **sorts:** bubble-sort, insertion-sort, selection-sort, quick-sort, heap-sort,
+merge-sort · **graph:** bfs, dfs, dijkstra · **search:** binary-search.
+
+Each card visualizes exactly one algorithm (there is no algorithm selector).
 
 ## Adding an algorithm
 

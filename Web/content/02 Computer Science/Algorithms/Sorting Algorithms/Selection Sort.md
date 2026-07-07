@@ -7,7 +7,6 @@ modified: 2026-07-05T15:49:36.844+03:00
 # Intro
 
 Selection sort builds a sorted prefix by repeatedly finding the minimum element in the unsorted suffix and swapping it into place. It always performs exactly O(n²) comparisons regardless of input order, but only O(n) swaps — making it useful in the rare case where writes are expensive but comparisons are cheap.
-
 ## Mechanism
 
 For each position `i`, scan `a[i..n-1]` to find the minimum, then swap it with `a[i]`. After each iteration, the sorted prefix grows by one element.
@@ -28,6 +27,13 @@ graph TD
   I --> K[Increment j]
   J --> K
   K --> E
+```
+
+
+## Visualization
+
+```steptrace
+{"algorithm":"selection-sort","array":[8,3,5,1,9,2,7,4]}
 ```
 
 ## Complexity

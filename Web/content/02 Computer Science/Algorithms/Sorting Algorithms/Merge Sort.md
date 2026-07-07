@@ -7,7 +7,6 @@ modified: 2026-07-05T10:53:37.210+03:00
 # Intro
 
 Merge sort is a divide-and-conquer algorithm: split the array in half, recursively sort each half, then merge the two sorted halves into one. It guarantees O(n log n) time in all cases and is stable, at the cost of O(n) extra memory. It is the algorithm of choice when stability matters or when sorting linked lists and external data.
-
 ## Mechanism
 
 Recursively split until each partition has size 1 (trivially sorted). Then merge pairs of sorted partitions by repeatedly taking the smaller front element from the two halves.
@@ -22,6 +21,13 @@ graph TD
   D --> F[merge two sorted halves]
   E --> F
   F --> R
+```
+
+
+## Visualization
+
+```steptrace
+{"algorithm":"merge-sort","array":[8,3,5,1,9,2,7,4]}
 ```
 
 ## Complexity

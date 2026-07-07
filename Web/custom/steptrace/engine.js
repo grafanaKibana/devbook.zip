@@ -135,6 +135,41 @@
   color: var(--_text);
 }
 
+/* ---- search: bars with a live range + probed middle ---- */
+.steptrace__target {
+  align-self: flex-start;
+  font: 600 13px ui-monospace, "SF Mono", Menlo, monospace;
+  color: var(--_text);
+  padding: 0.25rem 0.6rem;
+  border-radius: 7px;
+  background: var(--_surface);
+}
+.steptrace__bar[data-state="range"] .steptrace__fill {
+  background: var(--_neutral);
+}
+.steptrace__bar[data-state="eliminated"] .steptrace__fill {
+  background: var(--_neutral);
+  opacity: 0.28;
+}
+.steptrace__bar[data-state="eliminated"] .steptrace__num {
+  opacity: 0.4;
+}
+.steptrace__bar[data-state="probe"] .steptrace__fill {
+  background: var(--_blue);
+  border-color: var(--_blue);
+}
+.steptrace__bar[data-state="probe"] .steptrace__cue {
+  color: var(--_blue);
+  font-weight: 700;
+}
+.steptrace__bar[data-state="found"] .steptrace__fill {
+  background: var(--_green);
+  border-color: var(--_green);
+}
+.steptrace__bar[data-state="found"] .steptrace__num {
+  color: var(--_green);
+}
+
 /* ---- graph: svg ---- */
 .steptrace__graph {
   display: flex;
@@ -143,11 +178,11 @@
   align-items: flex-start;
 }
 .steptrace__svg {
-  flex: 1 1 300px;
+  flex: 1 1 320px;
   width: 100%;
-  max-width: 100%;
+  max-width: 560px;
   height: auto;
-  max-height: 320px;
+  max-height: 300px;
   overflow: visible;
 }
 .steptrace__arrow {
@@ -345,6 +380,7 @@
 
   const sortReg = new Map()
   const graphReg = new Map()
+  const searchReg = new Map()
 
   /** Register a sort algorithm. `fn(input, ops)` drives a SortRecorder via ops.*. */
   function registerSort(id, meta, fn) {
@@ -356,9 +392,14 @@
     graphReg.set(id, { meta, fn })
   }
 
+  /** Register a search algorithm (array + target). `fn(input, ops)` drives a SearchRecorder. */
+  function registerSearch(id, meta, fn) {
+    searchReg.set(id, { meta, fn })
+  }
+
   /** Kind of a registered algorithm id, or null if unknown. */
   function kindOf(id) {
-    return sortReg.has(id) ? "sort" : graphReg.has(id) ? "graph" : null
+    return sortReg.has(id) ? "sort" : graphReg.has(id) ? "graph" : searchReg.has(id) ? "search" : null
   }
 
   /** List registered algorithms of a kind as [{ id, label }] for the toolbar select. */
@@ -377,10 +418,16 @@
     }
     if (graphReg.has(config.algorithm)) {
       const graph = normalizeGraph(config)
-      const { fn } = graphReg.get(config.algorithm)
+      const { fn, meta } = graphReg.get(config.algorithm)
       const rec = new GraphRecorder(graph)
       fn({ ...config, start: graph.start }, rec, graph)
-      return { kind: "graph", frames: rec.frames, graph }
+      return { kind: "graph", frames: rec.frames, graph, frontierLabel: meta.frontierLabel }
+    }
+    if (searchReg.has(config.algorithm)) {
+      const { fn } = searchReg.get(config.algorithm)
+      const rec = new SearchRecorder(config.array, config.target)
+      fn(config, rec)
+      return { kind: "search", frames: rec.frames }
     }
     throw new Error(`steptrace: unknown algorithm "${config.algorithm}".`)
   }
@@ -538,6 +585,14 @@
       this._push("frontier", null, message)
     }
 
+    /** Relax a node to a shorter distance (Dijkstra): update its distance and
+     *  make sure it is shown in the frontier. */
+    relax(node, d, message) {
+      this._dist[node] = d
+      if (this._frontier.indexOf(node) < 0) this._frontier.push(node)
+      this._push("relax", null, message)
+    }
+
     /** Explore an edge u -> v (highlight only; no state change). */
     edge(u, v, message) {
       this._push("edge", { from: u, to: v }, message)
@@ -559,17 +614,72 @@
   }
 
   // A small, sensible default graph so a bare { "algorithm": "bfs" } runs.
+  // A SearchRecorder snapshot: { type, array, lo, hi, mid, found, target,
+  //   comparisons, message }. Rendered as a bar row with the live [lo, hi] range,
+  //   the probed middle, and the eliminated halves faded out.
+  class SearchRecorder {
+    constructor(array, target) {
+      this.a = (array || []).slice()
+      this.target = target
+      this.frames = []
+      this.lo = 0
+      this.hi = this.a.length - 1
+      this.mid = null
+      this.found = null
+      this.comparisons = 0
+    }
+    get value() {
+      return this.a.slice()
+    }
+    _push(type, message) {
+      this.frames.push(
+        Object.freeze({
+          type,
+          array: this.a.slice(),
+          lo: this.lo,
+          hi: this.hi,
+          mid: this.mid,
+          found: this.found,
+          target: this.target,
+          comparisons: this.comparisons,
+          message,
+        }),
+      )
+    }
+    init(message) {
+      this._push("init", message)
+    }
+    /** Probe the middle of the current [lo, hi] range. */
+    probe(lo, hi, mid, message) {
+      this.lo = lo
+      this.hi = hi
+      this.mid = mid
+      this.comparisons++
+      this._push("probe", message)
+    }
+    /** Narrow the range after a probe (discard a half). */
+    narrow(lo, hi, message) {
+      this.lo = lo
+      this.hi = hi
+      this.mid = null
+      this._push("narrow", message)
+    }
+    /** Mark the target found at index mid. */
+    hit(mid, message) {
+      this.found = mid
+      this.mid = mid
+      this._push("found", message)
+    }
+    done(message) {
+      this._push("done", message)
+    }
+  }
+
   const DEFAULT_GRAPH = {
     directed: false,
     start: "A",
-    nodes: [
-      { id: "A", x: 60, y: 60 },
-      { id: "B", x: 200, y: 40 },
-      { id: "C", x: 60, y: 180 },
-      { id: "D", x: 200, y: 160 },
-      { id: "E", x: 340, y: 80 },
-      { id: "F", x: 340, y: 200 },
-    ],
+    // No coordinates → the engine lays these out on an ellipse (circular look).
+    nodes: [{ id: "A" }, { id: "B" }, { id: "C" }, { id: "D" }, { id: "E" }, { id: "F" }],
     edges: [
       { from: "A", to: "B" },
       { from: "A", to: "C" },
@@ -583,7 +693,17 @@
 
   function normalizeGraph(config) {
     const src = Array.isArray(config.nodes) && config.nodes.length ? config : DEFAULT_GRAPH
-    const nodes = src.nodes.map((n) => ({ id: String(n.id), x: Number(n.x), y: Number(n.y) }))
+    // If any node lacks coordinates, arrange ALL nodes on an ellipse (a regular
+    // polygon — circular / pentagonic look) spread wide so the graph fills the
+    // card without over-zooming.
+    const needLayout = src.nodes.some((n) => n.x == null || n.y == null)
+    const N = src.nodes.length
+    const nodes = needLayout
+      ? src.nodes.map((n, i) => {
+          const ang = -Math.PI / 2 + (i * 2 * Math.PI) / N
+          return { id: String(n.id), x: Math.round(290 + 250 * Math.cos(ang)), y: Math.round(150 + 120 * Math.sin(ang)) }
+        })
+      : src.nodes.map((n) => ({ id: String(n.id), x: Number(n.x), y: Number(n.y) }))
     const ids = new Set(nodes.map((n) => n.id))
     const edges = (src.edges || [])
       .filter((e) => ids.has(String(e.from)) && ids.has(String(e.to)))
@@ -628,6 +748,168 @@
     ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} swaps.`)
   })
 
+  // ─────────────────────────────── insertion-sort ─────────────────────────
+  registerSort("insertion-sort", { label: "Insertion sort" }, (input, ops) => {
+    const n = ops.value.length
+    ops.init(
+      `Insertion sort — grow a sorted prefix on the left; take each next value and slide it left past larger values into place.`,
+    )
+    ops.markSorted([0], [0], `The first element alone is a sorted prefix.`)
+    for (let i = 1; i < n; i++) {
+      const key = ops.value[i]
+      ops.holdKey(key)
+      ops.compare(i, i - 1, `Take ${key} (index ${i}) and compare it into the sorted prefix.`)
+      let j = i - 1
+      while (j >= 0 && ops.value[j] > key) {
+        ops.overwrite(j + 1, ops.value[j], `${ops.value[j]} > ${key}: shift it right into index ${j + 1}.`)
+        j--
+        if (j >= 0) ops.compare(j, null, `Compare ${key} with ${ops.value[j]}.`)
+      }
+      ops.overwrite(j + 1, key, `Insert ${key} at index ${j + 1}.`)
+      ops.holdKey(null)
+      ops.markSorted(
+        Array.from({ length: i + 1 }, (_, k) => k),
+        [j + 1],
+        `Sorted prefix now spans indices 0..${i}.`,
+      )
+    }
+    ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} moves.`)
+  })
+
+  // ─────────────────────────────── selection-sort ─────────────────────────
+  registerSort("selection-sort", { label: "Selection sort" }, (input, ops) => {
+    const n = ops.value.length
+    ops.init(
+      `Selection sort — repeatedly find the smallest value in the unsorted region and swap it into the next sorted slot.`,
+    )
+    for (let i = 0; i < n - 1; i++) {
+      let min = i
+      ops.candidate(min, `Assume index ${i} (${ops.value[i]}) is the smallest of the rest.`)
+      for (let j = i + 1; j < n; j++) {
+        ops.compare(j, min, `Compare ${ops.value[j]} with the current smallest ${ops.value[min]}.`)
+        if (ops.value[j] < ops.value[min]) {
+          min = j
+          ops.candidate(min, `New smallest: ${ops.value[min]} at index ${min}.`)
+        }
+      }
+      if (min !== i) ops.swap(i, min, `Swap the smallest (${ops.value[min]}) into index ${i}.`)
+      ops.candidate(null, `Index ${i} settled — scan the remaining region next.`)
+      ops.markSorted([i], [i], `Index ${i} now holds its final value.`)
+    }
+    ops.lockAll([n - 1])
+    ops.markSorted([n - 1], [n - 1], `The last element is already in place.`)
+    ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} swaps.`)
+  })
+
+  // ─────────────────────────────── quick-sort ─────────────────────────────
+  registerSort("quick-sort", { label: "Quick sort" }, (input, ops) => {
+    const n = ops.value.length
+    ops.init(
+      `Quick sort — pick a pivot, partition values so smaller ones go left and larger ones go right, then recurse on each side.`,
+    )
+    function partition(lo, hi) {
+      const pivot = ops.value[hi]
+      ops.candidate(hi, `Pivot = ${pivot} (index ${hi}); partition the range ${lo}..${hi}.`)
+      let i = lo
+      for (let j = lo; j < hi; j++) {
+        ops.compare(j, hi, `Compare ${ops.value[j]} with pivot ${pivot}.`)
+        if (ops.value[j] < pivot) {
+          if (i !== j) ops.swap(i, j, `${ops.value[j]} < pivot: move it left to index ${i}.`)
+          i++
+        }
+      }
+      if (i !== hi) ops.swap(i, hi, `Place the pivot ${pivot} at index ${i}.`)
+      ops.candidate(null, `Pivot ${pivot} is now at its final index ${i}.`)
+      ops.markSorted([i], [i], `Index ${i} is final.`)
+      return i
+    }
+    function qs(lo, hi) {
+      if (lo > hi) return
+      if (lo === hi) {
+        ops.markSorted([lo], [lo], `A single element at index ${lo} is already in place.`)
+        return
+      }
+      const p = partition(lo, hi)
+      qs(lo, p - 1)
+      qs(p + 1, hi)
+    }
+    qs(0, n - 1)
+    ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} swaps.`)
+  })
+
+  // ─────────────────────────────── heap-sort ──────────────────────────────
+  registerSort("heap-sort", { label: "Heap sort" }, (input, ops) => {
+    const n = ops.value.length
+    ops.init(
+      `Heap sort — build a max-heap (each parent ≥ its children), then repeatedly swap the root to the end and sift the new root down.`,
+    )
+    function siftDown(lo, hi) {
+      let root = lo
+      while (2 * root + 1 < hi) {
+        let child = 2 * root + 1
+        if (child + 1 < hi) {
+          ops.compare(child, child + 1, `Compare children ${ops.value[child]} and ${ops.value[child + 1]}.`)
+          if (ops.value[child + 1] > ops.value[child]) child++
+        }
+        ops.compare(root, child, `Compare parent ${ops.value[root]} with its larger child ${ops.value[child]}.`)
+        if (ops.value[root] >= ops.value[child]) break
+        ops.swap(root, child, `Parent is smaller — sift it down.`)
+        root = child
+      }
+    }
+    for (let i = Math.floor(n / 2) - 1; i >= 0; i--) siftDown(i, n)
+    for (let end = n - 1; end > 0; end--) {
+      ops.swap(0, end, `Move the largest value (the root) to index ${end}.`)
+      ops.markSorted([end], [end], `Index ${end} now holds its final value.`)
+      siftDown(0, end)
+    }
+    ops.lockAll([0])
+    ops.markSorted([0], [0], `The remaining root is the smallest — done.`)
+    ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} swaps.`)
+  })
+
+  // ─────────────────────────────── merge-sort ─────────────────────────────
+  registerSort("merge-sort", { label: "Merge sort" }, (input, ops) => {
+    const n = ops.value.length
+    ops.init(
+      `Merge sort — start with runs of length 1, then repeatedly merge adjacent runs into larger sorted runs (watch the sorted runs double).`,
+    )
+    for (let width = 1; width < n; width *= 2) {
+      for (let lo = 0; lo < n; lo += 2 * width) {
+        const mid = Math.min(lo + width, n)
+        const hi = Math.min(lo + 2 * width, n)
+        if (mid >= hi) continue
+        const left = ops.value.slice(lo, mid)
+        const right = ops.value.slice(mid, hi)
+        let i = 0
+        let j = 0
+        let k = lo
+        while (i < left.length && j < right.length) {
+          if (left[i] <= right[j]) {
+            ops.overwrite(k, left[i], `Merge: ${left[i]} ≤ ${right[j]} — write ${left[i]} to index ${k}.`)
+            i++
+          } else {
+            ops.overwrite(k, right[j], `Merge: ${right[j]} < ${left[i]} — write ${right[j]} to index ${k}.`)
+            j++
+          }
+          k++
+        }
+        while (i < left.length) {
+          ops.overwrite(k, left[i], `Merge: copy remaining ${left[i]} to index ${k}.`)
+          i++
+          k++
+        }
+        while (j < right.length) {
+          ops.overwrite(k, right[j], `Merge: copy remaining ${right[j]} to index ${k}.`)
+          j++
+          k++
+        }
+      }
+    }
+    ops.lockAll(Array.from({ length: n }, (_, k) => k))
+    ops.done(`Sorted in ${ops.swaps} writes.`)
+  })
+
   // ───────────────────────────────── bfs ─────────────────────────────────
   registerGraph("bfs", { label: "Breadth-first search" }, (input, ops, graph) => {
     const adj = adjacency(graph)
@@ -648,6 +930,102 @@
       }
     }
     ops.done(`Breadth-first search complete — visited ${ops.visitedCount} node${ops.visitedCount === 1 ? "" : "s"}.`)
+  })
+
+  // ───────────────────────────────── dfs ─────────────────────────────────
+  registerGraph("dfs", { label: "Depth-first search", frontierLabel: "Stack (bottom → top)" }, (input, ops, graph) => {
+    const adj = adjacency(graph)
+    const start = input.start
+    ops.init(`Depth-first search from ${start} — dive as deep as possible using a stack, backtracking when a node has no unvisited neighbours.`)
+    const stack = [start]
+    const seen = new Set([start])
+    ops.enqueue(start, 0, `Push the start node ${start} onto the stack.`)
+    while (stack.length) {
+      const u = stack.pop()
+      ops.visit(u, `Pop ${u} off the stack and mark it visited.`)
+      // Push unvisited neighbours in reverse so the lowest id is explored first.
+      const neighbours = adj[u].slice().reverse()
+      for (const v of neighbours) {
+        if (seen.has(v)) continue
+        ops.edge(u, v, `Explore edge ${u} → ${v}.`)
+        seen.add(v)
+        stack.push(v)
+        ops.enqueue(v, ops.dist(u) + 1, `Push ${v} onto the stack (depth ${ops.dist(u) + 1}).`)
+      }
+    }
+    ops.done(`Depth-first search complete — visited ${ops.visitedCount} node${ops.visitedCount === 1 ? "" : "s"}.`)
+  })
+
+  // ─────────────────────────────── dijkstra ──────────────────────────────
+  registerGraph(
+    "dijkstra",
+    { label: "Dijkstra", frontierLabel: "Frontier (settle nearest first)" },
+    (input, ops, graph) => {
+      // Weighted adjacency (missing weights default to 1); neighbours sorted by id.
+      const adj = {}
+      for (const nd of graph.nodes) adj[nd.id] = []
+      for (const e of graph.edges) {
+        const w = e.weight == null ? 1 : e.weight
+        adj[e.from].push({ to: e.to, w })
+        if (!graph.directed) adj[e.to].push({ to: e.from, w })
+      }
+      for (const id in adj) adj[id].sort((a, b) => (a.to < b.to ? -1 : 1))
+
+      const start = input.start
+      ops.init(
+        `Dijkstra from ${start} — repeatedly settle the nearest unsettled node, then relax its edges to shorten neighbours' distances.`,
+      )
+      const dist = { [start]: 0 }
+      const settled = new Set()
+      const inQ = new Set([start])
+      ops.enqueue(start, 0, `Start ${start} at distance 0.`)
+      while (inQ.size) {
+        let u = null
+        for (const id of inQ) if (u === null || dist[id] < dist[u]) u = id
+        inQ.delete(u)
+        settled.add(u)
+        ops.visit(u, `Settle ${u} (distance ${dist[u]}) — its shortest distance is now final.`)
+        for (const { to: v, w } of adj[u]) {
+          if (settled.has(v)) continue
+          ops.edge(u, v, `Explore edge ${u} → ${v} (weight ${w}).`)
+          const nd = dist[u] + w
+          if (dist[v] === undefined || nd < dist[v]) {
+            dist[v] = nd
+            inQ.add(v)
+            ops.relax(v, nd, `Relax ${v}: shorter path via ${u} gives distance ${nd}.`)
+          }
+        }
+      }
+      ops.done(`Dijkstra complete — shortest distances from ${start} are final.`)
+    },
+  )
+
+  // ────────────────────────────── binary-search ──────────────────────────
+  registerSearch("binary-search", { label: "Binary search" }, (input, ops) => {
+    const a = ops.value
+    const target = input.target
+    ops.init(
+      `Binary search for ${target} in a sorted array — check the middle of the range, then discard the half that can't contain it.`,
+    )
+    let lo = 0
+    let hi = a.length - 1
+    while (lo <= hi) {
+      const mid = Math.floor((lo + hi) / 2)
+      ops.probe(lo, hi, mid, `Range [${lo}, ${hi}]: probe the middle — index ${mid} holds ${a[mid]}.`)
+      if (a[mid] === target) {
+        ops.hit(mid, `${a[mid]} equals ${target} — found it at index ${mid}.`)
+        ops.done(`Found ${target} after ${ops.comparisons} probe${ops.comparisons === 1 ? "" : "s"}.`)
+        return
+      }
+      if (a[mid] < target) {
+        lo = mid + 1
+        ops.narrow(lo, hi, `${a[mid]} < ${target}: discard the left half; search [${lo}, ${hi}].`)
+      } else {
+        hi = mid - 1
+        ops.narrow(lo, hi, `${a[mid]} > ${target}: discard the right half; search [${lo}, ${hi}].`)
+      }
+    }
+    ops.done(`${target} is not in the array — the range is empty after ${ops.comparisons} probes.`)
   })
 
   // ==========================================================================
@@ -708,11 +1086,54 @@
     return { nodes: [stage, status], paint }
   }
 
+  // ---- search view: bars with a live [lo, hi] range + probed middle ----
+  function makeSearchView(frames) {
+    const maxVal = Math.max(...frames[0].array, 1)
+    const n = frames[0].array.length
+
+    const banner = el("div", "steptrace__target")
+    banner.textContent = `Searching for ${frames[0].target}`
+
+    const stage = el("div", "steptrace__stage")
+    const bars = []
+    for (let k = 0; k < n; k++) {
+      const bar = el("div", "steptrace__bar")
+      const fill = el("div", "steptrace__fill")
+      const num = el("div", "steptrace__num")
+      const cue = el("div", "steptrace__cue")
+      cue.setAttribute("aria-hidden", "true")
+      bar.append(fill, num, cue)
+      stage.append(bar)
+      bars.push({ bar, fill, num, cue })
+    }
+    const status = statusEl()
+
+    function paint(frame, i, total) {
+      for (let k = 0; k < n; k++) {
+        const b = bars[k]
+        // data-driven geometry only; colours come from --az-* via data-state.
+        b.fill.style.height = `${Math.max(2, (frame.array[k] / maxVal) * 100)}%`
+        b.num.textContent = frame.array[k]
+        let state = "range"
+        if (k < frame.lo || k > frame.hi) state = "eliminated"
+        if (frame.mid === k) state = "probe"
+        if (frame.found === k) state = "found"
+        b.bar.dataset.state = state
+        b.cue.textContent = frame.found === k ? "✓" : frame.mid === k ? "▲" : ""
+      }
+      status.innerHTML =
+        escapeHtml(frame.message) +
+        ` <span class="steptrace__counts">· ${frame.comparisons} probe${frame.comparisons === 1 ? "" : "s"} · step ${i + 1}/${total}</span>`
+    }
+
+    return { nodes: [banner, stage, status], paint }
+  }
+
   // ---- graph view: svg ----
   const SVGNS = "http://www.w3.org/2000/svg"
-  const R = 18 // node radius
+  const R = 16 // node radius
 
-  function makeGraphView(frames, graph) {
+  function makeGraphView(frames, graph, frontierLabel) {
     const pad = 34
     const xs = graph.nodes.map((n) => n.x)
     const ys = graph.nodes.map((n) => n.y)
@@ -793,7 +1214,7 @@
     const aside = el("div", "steptrace__aside")
     const queueWrap = el("div")
     const queueLabel = el("div", "steptrace__queue-label")
-    queueLabel.textContent = "Queue (front → back)"
+    queueLabel.textContent = frontierLabel || "Queue (front → back)"
     const queue = el("div", "steptrace__queue")
     queueWrap.append(queueLabel, queue)
     const legend = el("div", "steptrace__legend")
@@ -1026,38 +1447,28 @@
     showSpeed()
     speedWrap.append("Speed ", speedInput, speedVal)
 
-    // --- algorithm selector (algorithms of this kind) ---
-    const algoSel = el("select")
-    algoSel.setAttribute("aria-label", "Algorithm")
-    for (const a of listAlgorithms(kind)) {
-      const opt = document.createElement("option")
-      opt.value = a.id
-      opt.textContent = a.label
-      if (a.id === state.algorithm) opt.selected = true
-      algoSel.append(opt)
-    }
-
-    // --- kind-specific extra control (shuffle for sort, start-node for graph) ---
-    let extra = null
+    // --- kind-specific control: shuffle (sort) or start-node (graph). There is
+    //     NO algorithm selector — each card visualizes exactly one algorithm. ---
+    let shuffleBtn = null
     let startSel = null
     if (kind === "sort") {
-      extra = button("Shuffle / new array", "⤨")
-      extra.addEventListener("click", () => {
+      shuffleBtn = button("Shuffle / new array", "⤨")
+      shuffleBtn.addEventListener("click", () => {
         state.array = randomArray()
         build()
       })
-    } else {
+    } else if (kind === "graph") {
       startSel = el("select")
       startSel.setAttribute("aria-label", "Start node")
-      extra = startSel // populated after first build (needs the normalized graph)
     }
 
     const toolbar = el("div", "steptrace__toolbar")
-    if (kind === "sort") {
-      toolbar.append(algoSel, btnReset, btnBack, btnPlay, btnFwd, spacer(), speedWrap, extra, stepLabel)
-    } else {
-      toolbar.append(algoSel, startSel, btnReset, btnBack, btnPlay, btnFwd, spacer(), speedWrap, stepLabel)
-    }
+    const items = []
+    if (startSel) items.push(startSel)
+    items.push(btnReset, btnBack, btnPlay, btnFwd, spacer(), speedWrap)
+    if (shuffleBtn) items.push(shuffleBtn)
+    items.push(stepLabel)
+    toolbar.append(...items)
 
     const stageSlot = el("div")
     root.replaceChildren(stageSlot, toolbar)
@@ -1074,11 +1485,17 @@
         algorithm: state.algorithm,
         array: state.array,
         start: state.start,
+        target: state.config.target,
         directed: state.config.directed,
         nodes: state.config.nodes,
         edges: state.config.edges,
       })
-      const view = built.kind === "graph" ? makeGraphView(built.frames, built.graph) : makeSortView(built.frames)
+      const view =
+        built.kind === "graph"
+          ? makeGraphView(built.frames, built.graph, built.frontierLabel)
+          : built.kind === "search"
+            ? makeSearchView(built.frames)
+            : makeSortView(built.frames)
       if (built.kind === "graph" && startSel) syncStartOptions(built.graph)
       stageSlot.replaceChildren(...view.nodes)
       player = new Player(built.frames, view.paint, state.speed)
@@ -1104,10 +1521,6 @@
     build()
 
     // --- wiring ---
-    algoSel.addEventListener("change", () => {
-      state.algorithm = algoSel.value
-      build()
-    })
     if (startSel)
       startSel.addEventListener("change", () => {
         state.start = startSel.value
@@ -1166,6 +1579,7 @@
     VERSION,
     registerSort,
     registerGraph,
+    registerSearch,
     listAlgorithms,
     kindOf,
     buildFrames,
