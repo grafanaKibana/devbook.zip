@@ -159,7 +159,9 @@ plugins:
       priority: 10
       condition: not-index
   - source: github:quartz-community/search
-    enabled: true
+    enabled: false
+    # Rendered by the custom SiteHeader (header slot), not the left sidebar.
+    # See Web/quartz.ts and Web/custom/components/site-header.tsx.
     layout:
       position: left
       priority: 20
@@ -188,18 +190,21 @@ plugins:
       position: beforeBody
       priority: 30
   - source: github:quartz-community/page-title
-    enabled: true
+    enabled: false
+    # Rendered by the custom SiteHeader (header slot), not the left sidebar.
     layout:
       position: left
       priority: 10
   - source: github:quartz-community/darkmode
-    enabled: true
+    enabled: false
+    # Rendered by the custom SiteHeader (header slot), not the left sidebar.
     layout:
       position: left
       priority: 30
       group: toolbar
   - source: github:quartz-community/reader-mode
-    enabled: true
+    enabled: false
+    # Rendered by the custom SiteHeader (header slot), not the left sidebar.
     layout:
       position: left
       priority: 35

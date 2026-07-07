@@ -28,17 +28,18 @@
 }
 
 // ============================================================================
-// Office-365-style top header (CSS-only, no layout/DOM changes)
+// Office-365-style top header.
 //
-// The left sidebar renders, in order: h2.page-title, the "toolbar" flex group
-// (.flex-component = .search + .darkmode + .readermode), then the Explorer.
-// We lift the title and the toolbar out of the sidebar flow with fixed
-// positioning and shape them into a slim full-width app bar:
-//   title top-left · search top-center · icon buttons top-right.
-// The Explorer stays in the sidebar and simply moves up.
-//
-// Mobile (< 800px) keeps the stock Quartz layout — the sidebar already
-// collapses into a top row there.
+// The title, search, and theme/reader toggles are rendered by the custom
+// SiteHeader component (Web/custom/components/site-header.tsx) into the page's
+// semantic `header` slot — NOT the left sidebar. See Web/quartz.ts. The markup:
+//   header > .site-header
+//     .site-header-title   → h2.page-title
+//     .site-header-search  → .search
+//     .site-header-actions → .darkmode, .readermode
+// Layout: title left · search center · toggles right (desktop); on mobile the
+// title centers, search collapses to an icon, and the Explorer's hamburger
+// (still in the left sidebar) is lifted into the bar's left edge.
 // ============================================================================
 
 :root {
@@ -52,78 +53,74 @@
   }
 }
 
+// Neutralize Quartz's default <header> chrome (it adds `margin: 2rem 0` + flex).
+// The bar inside it is fixed, so the wrapper should take up no space.
+.page-header > header {
+  margin: 0;
+  display: block;
+  gap: 0;
+}
+
+// The bar itself — a fixed full-width strip on every breakpoint.
+.site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  box-sizing: border-box;
+  height: var(--site-header-height);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0 1.5rem;
+  background-color: var(--light);
+  border-bottom: 1px solid var(--lightgray);
+}
+
+.site-header .page-title {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.site-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
 // ---------------------------------------------------------------------------
-// Desktop / tablet (≥ 800px): title and toolbar become the fixed app bar.
+// Desktop / tablet (≥ 800px): title left · search centered · toggles right.
 // ---------------------------------------------------------------------------
 @media all and not ($mobile) {
-  // The toolbar group becomes the header bar itself.
-  .page > #quartz-body > .sidebar.left > .flex-component {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: var(--site-header-height);
-    z-index: 100;
-    margin: 0;
-    padding: 0 1.5rem;
+  .site-header-title {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .site-header-search {
+    flex: 0 1 32rem;
     display: flex;
-    align-items: center;
     justify-content: center;
-    background-color: var(--light);
-    border-bottom: 1px solid var(--lightgray);
+  }
+  .site-header-search .search {
+    width: 100%;
+    max-width: 32rem;
 
-    // Flex.tsx wraps every group member in an anonymous <div>, so target the
-    // wrappers/components accordingly. The search wrapper carries the group's
-    // grow:true and spans the bar; center the search box inside it.
-    & > div:has(> .search) {
-      display: flex;
-      justify-content: center;
-    }
-    & .search {
-      flex: 0 1 32rem;
-      max-width: 32rem;
+    & > .search-button {
+      width: 100%;
+      background-color: var(--lightgray);
+      border: 1px solid transparent;
+      border-radius: 6px;
 
-      & > .search-button {
-        width: 100%;
-        background-color: var(--lightgray);
-        border: 1px solid transparent;
-        border-radius: 6px;
-
-        &:hover,
-        &:focus-visible {
-          border-color: var(--gray);
-        }
+      &:hover,
+      &:focus-visible {
+        border-color: var(--gray);
       }
     }
-
-    // Icon buttons pin to the right edge of the bar (their static wrapper
-    // divs make the fixed .flex-component the positioning anchor).
-    & .darkmode,
-    & .readermode {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-    }
-    & .darkmode {
-      right: 3.25rem;
-    }
-    & .readermode {
-      right: 1.25rem;
-    }
   }
-
-  // Site title overlays the left end of the bar.
-  .page > #quartz-body > .sidebar.left > .page-title {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: var(--site-header-height);
-    z-index: 101;
-    margin: 0;
-    padding: 0 1.5rem;
-    display: flex;
-    align-items: center;
-    font-size: 1.1rem;
+  .site-header-actions {
+    flex: 1 1 0;
+    justify-content: flex-end;
   }
 
   // Start the sidebars and article below the fixed bar, leaving room for the
@@ -139,75 +136,75 @@
 }
 
 // ---------------------------------------------------------------------------
-// Mobile (< 800px): the whole left sidebar row is already an app-bar shape
-// (explorer toggle · title · search · buttons); pin it to the top and give it
-// the same surface treatment so it stays consistent with desktop.
+// Mobile (< 800px): hamburger left · title centered · search icon + toggles
+// right. The Explorer stays in the left sidebar; only its hamburger is pulled
+// into the bar.
 // ---------------------------------------------------------------------------
 @media all and ($mobile) {
-  .page > #quartz-body > .sidebar.left {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 100;
-    box-sizing: border-box;
-    height: var(--site-header-height);
-    // Match the desktop bar's 1.5rem edge inset. The explorer toggle and the
-    // toolbar sit at the two edges; the title is centered over them (below).
-    padding: 0 1.5rem;
-    gap: 1.5rem;
-    align-items: center;
-    justify-content: space-between;
-    background-color: var(--light);
-    border-bottom: 1px solid var(--lightgray);
+  // Reserve room at the left for the fixed hamburger so the search icon (the
+  // first in-flow item) tucks in just to its right.
+  .site-header {
+    padding-left: 4rem;
+  }
 
-    // Explorer toggle sits flush at the left; drop its stock left padding so
-    // it lines up with the desktop bar's 1.5rem inset.
-    & .mobile-explorer {
-      padding-left: 0;
-    }
+  // Title centered over the bar (like Office headers).
+  .site-header-title {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
 
-    // Now that search is an icon, the middle is free: center the title in the
-    // bar (like Office headers) and match the desktop title's 1.1rem size.
-    & > .page-title {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      margin: 0;
-      font-size: 1.1rem;
-    }
+  // Search icon sits at the left next to the hamburger; the toggles go right.
+  .site-header-search {
+    margin-left: 0;
+  }
+  .site-header-actions {
+    margin-left: auto;
+  }
 
-    // The toolbar is now just icons — size it to content and space the icons
-    // like the desktop bar (~1rem apart).
-    & > .flex-component {
-      flex: 0 0 auto;
-      gap: 1rem;
-    }
+  // Collapse search to an icon-only button, matching the toggle icons.
+  .site-header-search .search {
+    flex: 0 0 auto;
+    min-width: 0;
+    max-width: none;
 
-    // Collapse search to an icon-only button, matching the darkmode / reader
-    // buttons beside it.
-    & .search {
-      flex: 0 0 auto;
-      min-width: 0;
-      max-width: none;
+    & > .search-button {
+      width: auto;
+      padding: 0;
+      background: none;
+      border: none;
 
-      & > .search-button {
-        width: auto;
-        padding: 0;
-        background: none;
-        border: none;
-
-        & > p {
-          display: none;
-        }
-        & svg {
-          width: 20px;
-          min-width: 20px;
-          margin: 0;
-        }
+      & > p {
+        display: none;
+      }
+      & svg {
+        width: 20px;
+        min-width: 20px;
+        margin: 0;
       }
     }
+  }
+
+  // The left sidebar is a sticky, z-index:1 stacking context, so its hamburger
+  // would be trapped below the z-100 header bar. Lift the whole sidebar above
+  // the bar so the hamburger (and, when open, the full-screen explorer overlay)
+  // paints on top.
+  .page > #quartz-body > .sidebar.left {
+    z-index: 101;
+  }
+
+  // Lift the Explorer's hamburger (still rendered in the left sidebar) into the
+  // top-left of the fixed bar so the header reads hamburger · title · toggles.
+  .page > #quartz-body > .sidebar.left .mobile-explorer {
+    position: fixed;
+    top: 0;
+    left: 1.5rem;
+    height: var(--site-header-height);
+    display: flex;
+    align-items: center;
+    padding: 0;
+    z-index: 101;
   }
 
   // The fixed bar leaves the grid content flush to the top; push it down clear
@@ -218,10 +215,10 @@
 }
 
 // ---------------------------------------------------------------------------
-// Site marquee: make it part of the fixed header — pinned just below the bar
-// and staying put while the page scrolls (it was absolute, so it used to
-// scroll away). z-index sits just under the bar (100) but above page content,
-// which scrolls beneath it. The content offsets above already reserve room.
+// Site marquee: part of the fixed header — pinned just below the bar and
+// staying put while the page scrolls (it was absolute, so it used to scroll
+// away). z-index sits just under the bar (100) but above page content, which
+// scrolls beneath it. The content offsets above already reserve room.
 // ---------------------------------------------------------------------------
 .site-marquee {
   position: fixed;
@@ -237,23 +234,9 @@
 }
 
 // Reader mode is a distraction-free view — hide the "in development" marquee.
+// The header itself lives in `.center`, not a sidebar, so the stock reader-mode
+// rule (which fades the sidebars) leaves it visible and interactive.
 :root[reader-mode="on"] .site-marquee {
   display: none;
-}
-
-// Reader mode: the stock rule fades `.sidebar.left` entirely, which on mobile
-// IS the header bar and on desktop holds the fixed title/toolbar. Keep those
-// visible/interactive and fade only the sidebar's in-flow content (Explorer).
-:root[reader-mode="on"] .sidebar.left {
-  opacity: 1;
-
-  & > *:not(.page-title):not(.flex-component) {
-    opacity: 0;
-    transition: opacity 0.2s ease;
-  }
-
-  &:hover > *:not(.page-title):not(.flex-component) {
-    opacity: 1;
-  }
 }
 
