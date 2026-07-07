@@ -27,3 +27,216 @@
   max-width: calc(#{map.get($breakpoints, desktop)} + 400px);
 }
 
+// ============================================================================
+// Office-365-style top header.
+//
+// The title, search, and theme/reader toggles are rendered by the custom
+// SiteHeader component (Web/custom/components/site-header.tsx) into the page's
+// semantic `header` slot — NOT the left sidebar. See Web/quartz.ts. The markup:
+//   header > .site-header
+//     .site-header-title   → h2.page-title
+//     .site-header-search  → .search
+//     .site-header-actions → .darkmode, .readermode
+// Layout: title left · search center · toggles right (desktop); on mobile the
+// title centers, search collapses to an icon, and the Explorer's hamburger
+// (still in the left sidebar) is lifted into the bar's left edge.
+// ============================================================================
+
+:root {
+  --site-header-height: 3rem;
+}
+// The mobile bar packs the explorer toggle, title, search and buttons into one
+// row, so it needs a touch more height than the desktop bar.
+@media all and ($mobile) {
+  :root {
+    --site-header-height: 3.5rem;
+  }
+}
+
+// Neutralize Quartz's default <header> chrome (it adds `margin: 2rem 0` + flex).
+// The bar inside it is fixed, so the wrapper should take up no space.
+.page-header > header {
+  margin: 0;
+  display: block;
+  gap: 0;
+}
+
+// The bar itself — a fixed full-width strip on every breakpoint.
+.site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  box-sizing: border-box;
+  height: var(--site-header-height);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0 1.5rem;
+  background-color: var(--light);
+  border-bottom: 1px solid var(--lightgray);
+}
+
+.site-header .page-title {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.site-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+// ---------------------------------------------------------------------------
+// Desktop / tablet (≥ 800px): title left · search centered · toggles right.
+// ---------------------------------------------------------------------------
+@media all and not ($mobile) {
+  .site-header-title {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .site-header-search {
+    flex: 0 1 32rem;
+    display: flex;
+    justify-content: center;
+  }
+  .site-header-search .search {
+    width: 100%;
+    max-width: 32rem;
+
+    & > .search-button {
+      width: 100%;
+      background-color: var(--lightgray);
+      border: 1px solid transparent;
+      border-radius: 6px;
+
+      &:hover,
+      &:focus-visible {
+        border-color: var(--gray);
+      }
+    }
+  }
+  .site-header-actions {
+    flex: 1 1 0;
+    justify-content: flex-end;
+  }
+
+  // Start the sidebars and article below the fixed bar, leaving room for the
+  // marquee strip that now sits directly under it (see marquee block below).
+  .page > #quartz-body {
+    & .sidebar {
+      padding-top: calc(var(--site-header-height) + 3rem);
+    }
+    & .page-header {
+      margin-top: calc(var(--site-header-height) + 3rem);
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Mobile (< 800px): hamburger left · title centered · search icon + toggles
+// right. The Explorer stays in the left sidebar; only its hamburger is pulled
+// into the bar.
+// ---------------------------------------------------------------------------
+@media all and ($mobile) {
+  // Reserve room at the left for the fixed hamburger so the search icon (the
+  // first in-flow item) tucks in just to its right.
+  .site-header {
+    padding-left: 4rem;
+  }
+
+  // Title centered over the bar (like Office headers).
+  .site-header-title {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  // Search icon sits at the left next to the hamburger; the toggles go right.
+  .site-header-search {
+    margin-left: 0;
+  }
+  .site-header-actions {
+    margin-left: auto;
+  }
+
+  // Collapse search to an icon-only button, matching the toggle icons.
+  .site-header-search .search {
+    flex: 0 0 auto;
+    min-width: 0;
+    max-width: none;
+
+    & > .search-button {
+      width: auto;
+      padding: 0;
+      background: none;
+      border: none;
+
+      & > p {
+        display: none;
+      }
+      & svg {
+        width: 20px;
+        min-width: 20px;
+        margin: 0;
+      }
+    }
+  }
+
+  // The left sidebar is a sticky, z-index:1 stacking context, so its hamburger
+  // would be trapped below the z-100 header bar. Lift the whole sidebar above
+  // the bar so the hamburger (and, when open, the full-screen explorer overlay)
+  // paints on top.
+  .page > #quartz-body > .sidebar.left {
+    z-index: 101;
+  }
+
+  // Lift the Explorer's hamburger (still rendered in the left sidebar) into the
+  // top-left of the fixed bar so the header reads hamburger · title · toggles.
+  .page > #quartz-body > .sidebar.left .mobile-explorer {
+    position: fixed;
+    top: 0;
+    left: 1.5rem;
+    height: var(--site-header-height);
+    display: flex;
+    align-items: center;
+    padding: 0;
+    z-index: 101;
+  }
+
+  // The fixed bar leaves the grid content flush to the top; push it down clear
+  // of both the bar and the marquee strip beneath it.
+  .page > #quartz-body {
+    padding-top: calc(var(--site-header-height) + 2.5rem);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Site marquee: part of the fixed header — pinned just below the bar and
+// staying put while the page scrolls (it was absolute, so it used to scroll
+// away). z-index sits just under the bar (100) but above page content, which
+// scrolls beneath it. The content offsets above already reserve room.
+// ---------------------------------------------------------------------------
+.site-marquee {
+  position: fixed;
+  top: var(--site-header-height);
+  z-index: 99;
+}
+
+// The search preview clones the target page's `.popover-hint` (marquee
+// included) into `.preview-container`; that stray absolute marquee otherwise
+// surfaces over the search overlay. Hide it there, like the hover popover rule.
+.preview-container .site-marquee {
+  display: none;
+}
+
+// Reader mode is a distraction-free view — hide the "in development" marquee.
+// The header itself lives in `.center`, not a sidebar, so the stock reader-mode
+// rule (which fades the sidebars) leaves it visible and interactive.
+:root[reader-mode="on"] .site-marquee {
+  display: none;
+}
+
