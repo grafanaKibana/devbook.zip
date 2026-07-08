@@ -40,7 +40,19 @@ const hydrate = `
     catch (e) { fail(root, "invalid config", e); return; }
     try {
       var handle = st.mount(root, config);
-      if (window.addCleanup) window.addCleanup(function () { if (handle && handle.destroy) handle.destroy(); });
+      var destroy = function () { if (handle && handle.destroy) handle.destroy(); };
+      if (window.addCleanup) {
+        window.addCleanup(destroy);
+      } else {
+        // spa.inline.ts is appended AFTER component scripts, so on the initially
+        // loaded page addCleanup isn't defined during this eager run() and the
+        // mounted guard would then block the nav re-run from wiring teardown.
+        // The router's first notifyNav() fires once addCleanup exists — hook it
+        // once to register real cleanup (guards the play-timer against a
+        // navigate-away leak). On non-SPA builds nav never fires, but those do
+        // full reloads so there is nothing to leak.
+        document.addEventListener("nav", function () { (window.addCleanup || function () {})(destroy); }, { once: true });
+      }
     } catch (e) { fail(root, "mount failed", e); }
   }
   function run() {

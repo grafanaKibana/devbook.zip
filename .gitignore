@@ -20,6 +20,7 @@ _site/
 .omo/
 .omc/
 .opencode
+.claude/launch.json
 
 # Obsidian
 **/.obsidian/workspace.json

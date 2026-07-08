@@ -536,7 +536,9 @@
     }
   },
   "collapsedPinnedContexts": {},
-  "fileIcons": {},
+  "fileIcons": {
+    "Home/Roadmap.canvas": "map"
+  },
   "fileColors": {},
   "fileBackgroundColors": {},
   "folderIcons": {
