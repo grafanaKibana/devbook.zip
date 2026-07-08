@@ -1,22 +1,16 @@
-/* ============================================================================
- * steptrace — Obsidian adapter. CONCATENATED AFTER engine.js by sync.mjs into
- * the plugin's main.js. The engine ran just above and set globalThis.steptrace;
- * this file has NO import/export so the concatenation stays valid CommonJS
- * (Obsidian loads main.js via require).
- *
- * Registers the `steptrace` code-block processor → the shared engine's mount(),
- * torn down on unload, and binds --st-* to Obsidian's own CSS variables so the
- * card looks native. (The engine still exposes registerSort/registerGraph for a
- * future runtime-extension UI; none is wired here for now.)
- * ========================================================================== */
+/* steptrace — Obsidian host adapter. Concatenated after engine.js into the vault
+ * plugin's main.js by sync.mjs, so it uses no import/export and reads
+ * globalThis.steptrace directly (main.js loads as CommonJS via require). Registers
+ * the `steptrace` code-block processor → engine.mount(), tears each card down on
+ * unload, and binds --st-* to Obsidian's palette so the card looks native.
+ */
 
 const { Plugin, MarkdownRenderChild } = require("obsidian")
 
 const st = globalThis.steptrace
 
-// The ONLY per-host styling: bind the neutral --st-* tokens to Obsidian's palette
-// so the card looks native. Base tokens auto-flip with the Obsidian theme; the
-// abstract state hues get an explicit dark override.
+// The only per-host styling: bind the neutral --st-* tokens to Obsidian's palette.
+// Base tokens auto-flip with the theme; the state hues get an explicit dark override.
 const THEME = `
 .steptrace {
   --st-page: var(--background-primary);

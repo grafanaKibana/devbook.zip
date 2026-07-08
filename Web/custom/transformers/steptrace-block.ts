@@ -2,20 +2,17 @@ import { visit, SKIP } from "unist-util-visit"
 import type { Root } from "mdast"
 import type { QuartzTransformerPlugin } from "@quartz-community/types"
 
-// Rewrites each ```steptrace fenced code block (body = flat JSON config) that
-// Syncer commits raw into the mount marker the Steptrace component hydrates:
-//   <div class="steptrace-mount" data-config="{…}"></div>
+// steptrace — Quartz mdast transformer. Rewrites each ```steptrace fenced code
+// block (body = JSON config) into the mount marker the Steptrace component
+// hydrates: <div class="steptrace-mount" data-config="{…}">.
 //
-// Done at the mdast stage: the `code` node is REPLACED (not mutated — mutating
-// keeps mdast's <pre> wrapper) with a node carrying the mdast→hast escape hatch
-// (data.hName/hProperties/hChildren), so it converts to a REAL bare <div> hast
-// element — not a raw HTML node, which Quartz (no rehype-raw) would silently
-// drop. Config rides in a data-config attribute rather than a <script> a
-// sanitizer might strip. A block with invalid JSON is left as an ordinary code
-// block rather than crashing the build.
-//
-// steptrace fences are NOT on Quartz Syncer's execute/freeze allowlist (only
-// dataview*/datacore*), so Syncer passes them through untouched for this to run.
+// At the mdast stage the `code` node is REPLACED (not mutated — mutating keeps
+// mdast's <pre> wrapper) with a custom node carrying the mdast→hast escape hatch
+// (data.hName/hProperties/hChildren), so it becomes a REAL bare <div> — not a
+// {type:"html"} raw node, which Quartz (no rehype-raw) would drop. Config rides in
+// data-config, not a <script> a sanitizer might strip. Invalid JSON is left as an
+// ordinary code block. (steptrace fences aren't on Syncer's freeze allowlist — only
+// dataview*/datacore* — so they pass through raw for this to run.)
 
 export const SteptraceBlock: QuartzTransformerPlugin = () => ({
   name: "SteptraceBlock",
@@ -30,9 +27,7 @@ export const SteptraceBlock: QuartzTransformerPlugin = () => ({
           } catch {
             return // leave a malformed block as a normal code block
           }
-          // A custom (non-"html") node type so mdast→hast uses the escape-hatch
-          // path and emits a bare <div> element — NOT a `raw` node (type:"html"),
-          // which Quartz would drop for having no rehype-raw.
+          // Custom node type → mdast→hast escape hatch → bare <div> (see header).
           parent.children[index] = {
             type: "steptraceBlock",
             data: {

@@ -1,108 +1,144 @@
-# steptrace
+# steptrace — Algorithm Visualizer Framework
 
-Interactive, step-by-step **algorithm-visualizer cards** for DevBook — live in both
-the Obsidian editor and the published Quartz site, from a single authored code block.
+Interactive, step-by-step algorithm-visualizer cards that live in both the Obsidian editor and the published Quartz site, sourced from a single `steptrace` fence in any note. Built as one self-contained, dependency-free UMD module (`engine.js`) that runs verbatim on both hosts.
 
-The whole framework is **one file**: [`engine.js`](engine.js) — a dependency-free, UMD
-vanilla module (frame engine + registry + renderers + styles). It runs **verbatim** on
-both hosts, so there is no bundler and no compile step. Each host is a thin adapter that
-binds the theme and calls `mount()`.
+## File Map
 
-## Authoring a card
+| File | Role | Edit? |
+|------|------|-------|
+| `engine.js` | Single source of truth: UMD module with all logic (styles § 1, registry § 2, recorders § 3, algorithms § 4, render § 5, player § 6, mount § 7). | **Edit often** — all algorithm changes and visual tweaks go here. |
+| `obsidian-plugin.js` | Obsidian bootstrap (appended to engine via sync). Registers the `steptrace` code-block processor, wires theme tokens, and binds mount/destroy lifecycle. | Edit rarely — only if Obsidian integration changes. |
+| `manifest.json` | Obsidian plugin manifest (id drives folder name). | Edit rarely — version bumps only. |
+| `sync.mjs` | Build script: concatenates engine.js + obsidian-plugin.js → vault plugin main.js, and copies engine.js → Quartz static dir. Plain concat, no compilation. | Never — maintenance only. |
+| `../components/steptrace.tsx` | Quartz component: inlines CSS, provides afterDOMLoaded hydrator that loads `/static/steptrace/engine.js` at runtime and mounts cards on SPA nav. Registered in quartz.ts. | Edit rarely — Quartz integration only. |
+| `../transformers/steptrace-block.ts` | Quartz transformer: converts ```steptrace fence blocks (JSON config) into `<div class="steptrace-mount" data-config>` elements. Registered in quartz.ts. | Never — handles all fences automatically. |
+| `../../quartz.ts` | Registers both Steptrace component and SteptraceBlock transformer in Quartz config. | Edit only if plugin paths change. |
+| `Vault/.obsidian/plugins/steptrace/main.js` | **GENERATED** — concatenation of engine.js + obsidian-plugin.js. Banner says "do not edit". | Never hand-edit — regenerate via `npm run steptrace:sync`. |
+| `Vault/.obsidian/plugins/steptrace/manifest.json` | **GENERATED** — copy of manifest.json. | Never hand-edit — regenerate via `npm run steptrace:sync`. |
+| `Web/quartz/static/steptrace/engine.js` | **GENERATED** — copy of engine.js served at runtime. Banner says "do not edit". | Never hand-edit — regenerate via `npm run steptrace:sync`. |
 
-In any note, add a fenced block with the info-string `steptrace` and a flat JSON body:
+## The Single Source of Truth: engine.js
 
-~~~markdown
-```steptrace
-{ "algorithm": "bubble-sort", "array": [5, 2, 9, 1, 5, 6], "speed": 1 }
-```
-~~~
+```engine.js``` is a 2600-line UMD module with seven sections (§1–§7):
 
-~~~markdown
-```steptrace
-{ "algorithm": "bfs", "start": "A" }
-```
-~~~
+| § | Section | What lives here | Edit when... |
+|---|---------|-----------------|--------------|
+| 1 | **STYLES** | All CSS: colors, layout, transitions. Tied to `--st-*` tokens so hosts rebind the palette without touching this. | Tweaking visual appearance, changing layout, adjusting animations. |
+| 2 | **REGISTRY** | `registerSort()`, `registerGraph()`, `buildFrames()` — extension API and frame-building entry point. | Rarely; sets the contract for algorithms. |
+| 3 | **RECORDERS** | Turn `ops.*` calls (e.g., `ops.swap(i, j)`, `ops.visit(n)`) into immutable step frames. Per-renderer kind (Sort, Graph, Search, String, Pointers, DP, UnionFind). | Changing what information is captured per step. |
+| 4 | **ALGORITHMS** | 17 built-ins across 7 renderer kinds: 6 sorts (bubble, insertion, selection, quick, heap, merge) · 5 graph algorithms (bfs, dfs, dijkstra, prim, topological-sort) · binary-search · 2 string (kmp, rabin-karp) · 2 pointer (two-pointers, sliding-window) · lcs · union-find. Each block calls `registerSort()` or `registerGraph()`. | Adding a new algorithm (edit one block here). |
+| 5 | **RENDER** | DOM builder: creates HTML structure with semantic classes and data-driven geometry (no inline styles for colors/layout — those live entirely in STYLES §1). | Never for appearance — only if DOM structure changes. |
+| 6 | **PLAYER** | Transport controls: play, pause, step, speed. Iterates precomputed frames. Step-back is a free re-render (no history). | Tweaking playback behavior. |
+| 7 | **MOUNT** | Assembles a card into a given `root` element: parses config, runs the algorithm once (to build frames), wires the player, and returns `{ destroy }` for cleanup. | Never — orchestration only. |
 
-**Config schema**
-
-- Sort — `{ "algorithm": <sort id>, "array"?: number[], "speed"?: number }`
-  (omit `array` for a random one).
-- Graph — `{ "algorithm": <graph id>, "start"?: string, "directed"?: boolean,
-  "nodes"?: [{id,x?,y?}], "edges"?: [{from,to,weight?}], "speed"?: number }`
-  (omit `nodes`/`edges` for the built-in default graph; omit node `x`/`y` for an
-  automatic circular layout; Dijkstra/Prim read edge `weight`; Topological sort needs `directed: true`).
-- Search — `{ "algorithm": "binary-search", "array": number[] (sorted!), "target": number }`.
-- String — `{ "algorithm": "kmp" | "rabin-karp", "text": string, "pattern": string }`.
-- Pointers — `{ "algorithm": "two-pointers" | "sliding-window", "array": number[], "target": number }`
-  (two-pointers wants a sorted array).
-- DP — `{ "algorithm": "lcs", "a": string, "b": string }`.
-- Union-Find — `{ "algorithm": "union-find", "n": number, "ops"?: [ ["union",a,b] | ["find",x], … ] }`.
-
-Built in — **sorts:** bubble-sort, insertion-sort, selection-sort, quick-sort, heap-sort,
-merge-sort · **graph:** bfs, dfs, dijkstra, prim, topological-sort · **search:**
-binary-search · **string:** kmp, rabin-karp · **pointers:** two-pointers, sliding-window ·
-**dp:** lcs · **union-find:** union-find.
-
-Each card visualizes exactly one algorithm (there is no algorithm selector).
-
-## Adding an algorithm
-
-**A shipped built-in (appears on the published site too):** add one block in `engine.js`
-section 4. An algorithm never builds a frame — it only calls the Recorder's `ops.*`:
-
-```js
-// engine.js §4 — ALGORITHMS
-registerSort("selection-sort", { label: "Selection sort" }, (input, ops) => {
-  // ops.compare(i, j, msg) · ops.swap(i, j, msg) · ops.overwrite(i, v, msg)
-  // ops.candidate(i, msg) · ops.holdKey(v) · ops.markSorted([k], [k], msg) · ops.done(msg)
-})
-registerGraph("dfs", { label: "Depth-first search" }, (input, ops, graph) => {
-  const adj = adjacency(graph) // neighbours sorted by id → deterministic
-  // ops.enqueue(n, d, msg) · ops.visit(n, msg) · ops.edge(u, v, msg) · ops.done(msg)
-})
-```
-
-After editing `engine.js`, refresh the Obsidian plugin (Quartz reloads it automatically —
-see below):
-
-```
+After editing engine.js, run:
+```bash
 npm run steptrace:sync
 ```
 
-(The engine also exposes `registerSort` / `registerGraph` at runtime, so a settings-based
-"add your own algorithm" UI could be layered on later — none is wired today.)
+This regenerates both host copies: the Obsidian plugin and the Quartz static server file.
 
-## How the one file reaches both hosts
+## The Two Hosts
 
-`engine.js` is UMD: it sets `globalThis.steptrace` (and `module.exports`), so it needs no
-compilation on either side.
+Each host loads engine.js independently. Neither reads the other's files at build or run time — they can be added or removed without side effects.
 
-- **Quartz** — [`custom/components/steptrace.tsx`](../components/steptrace.tsx) **reads
-  `engine.js` at build time and inlines it** into its `afterDOMLoaded` script (then a
-  small hydration tail scans `.steptrace-mount`, on the SPA `nav` event, and calls
-  `window.steptrace.mount`). So a `quartz build` always picks up `engine.js` edits — no
-  copy, no `/static` file, no manual step. [`custom/transformers/steptrace-block.ts`](../transformers/steptrace-block.ts)
-  rewrites each `steptrace` fence into `<div class="steptrace-mount" data-config="…">`.
-  Both are wired in [`quartz.ts`](../../quartz.ts).
-- **Obsidian** — the `steptrace` plugin's `main.js` is `engine.js` + `obsidian-plugin.js`
-  concatenated by `sync.mjs` (pure concat — no transform, since UMD runs as-is). It
-  registers the `steptrace` code-block processor and binds `--st-*` to Obsidian's
-  variables. Run `npm run steptrace:sync` after editing `engine.js` or the bootstrap;
-  enable it once in *Settings → Community plugins*.
+### Obsidian
 
-Both converge on the same `engine.js` + `mount()`; only the theme binding and how the
-engine is loaded differ. Why one fence works on both: `steptrace` is off Quartz Syncer's
-freeze allowlist, so Syncer commits it raw for the transformer to hydrate.
+**Load path:** `Vault/.obsidian/plugins/steptrace/main.js` (concatenated at build time)
 
-## Files
+**How it works:**
+1. `obsidian-plugin.js` runs after the engine (same process, same globalThis) and registers the `steptrace` code-block processor.
+2. On render, it parses the fence config (flat JSON), calls `steptrace.mount(root, config)`, and wraps the handle in Obsidian's `MarkdownRenderChild` lifecycle.
+3. Theme tokens (`--st-*`) are bound to Obsidian's CSS variables at plugin load.
+4. The `.hotreload` marker signals the Hot Reload community plugin to refresh.
 
-| Path | Role |
-|---|---|
-| `custom/steptrace/engine.js` | **The framework.** One UMD file: §1 styles · §2 registry/API · §3 recorders · §4 algorithms · §5 render · §6 player · §7 mount. Edit visuals in §1, add algorithms in §4. |
-| `custom/steptrace/obsidian-plugin.js` | Obsidian bootstrap (concatenated after the engine): code-block processor, theme binding, custom-algorithm settings tab. |
-| `custom/steptrace/sync.mjs` | Concatenates engine + bootstrap → the Obsidian plugin `main.js`. No transform. |
-| `custom/steptrace/manifest.json` | Obsidian plugin manifest (`id` drives the plugin folder name). |
-| `custom/components/steptrace.tsx` | Quartz component — inlines `engine.js` at build + hydration + Quartz theme. |
-| `custom/transformers/steptrace-block.ts` | Quartz transformer — `steptrace` fence → mount `<div>`. |
-| `Vault/.obsidian/plugins/steptrace/` | **Generated** — the enabled Obsidian plugin (`main.js` + `manifest.json`). |
+**Manual steps after editing engine.js:**
+```bash
+npm run steptrace:sync     # Regenerate main.js and manifest.json
+```
+Then reload the plugin in Obsidian:
+- *Cmd+P* → "Reload app without saving", or
+- Enable/disable the plugin in *Settings → Community plugins → Steptrace*, or
+- Use the Hot Reload community plugin (if installed)
+
+### Quartz
+
+**Load path:** Engine loaded at runtime from `/static/steptrace/engine.js` (copied at build time)
+
+**How it works:**
+1. The `SteptraceBlock` transformer (at build time) rewrites each ```steptrace fence into `<div class="steptrace-mount" data-config="{…}">`.
+2. The `Steptrace` component (registered in quartz.ts) provides `afterDOMLoaded` hydration and CSS.
+3. At runtime, a hydrator script (lazy-loaded `<script>`) fetches `/static/steptrace/engine.js` and mounts every `.steptrace-mount` div on page nav or SPA `render` event.
+4. Theme tokens are bound to Quartz's CSS variables in the component.
+5. `addCleanup()` hooks stop timers/listeners on navigation.
+
+**Manual steps:**
+- After editing engine.js: `npm run steptrace:sync` writes a fresh copy to `Web/quartz/static/steptrace/engine.js`.
+- Quartz detects the change and rebuilds automatically (or run `quartz build`).
+
+**Publishing gotcha:**
+Quartz builds from `Web/content/`, NOT the live Vault. A steptrace fence added to a note in the Vault is not visible on the published site until it is mirrored into `Web/content/` (via your publish workflow, e.g., git sync, Syncer, or manual copy).
+
+## How to Change Things
+
+### Add an Algorithm
+
+1. Open `engine.js` and find section 4 (ALGORITHMS).
+2. Pick the matching renderer kind (sort, graph, search, string, pointers, dp, unionfind) and add one block:
+   ```js
+   registerSort("insertion-sort", { label: "Insertion Sort" }, (input, ops) => {
+     // input is the array; ops are: compare, swap, overwrite, candidate, holdKey, markSorted, done
+     for (let i = 1; i < input.length; i++) {
+       ops.candidate(i)
+       for (let j = i - 1; j >= 0; j--) {
+         if (ops.compare(j, j + 1, "compare")) ops.swap(j, j + 1, "shift")
+       }
+       ops.markSorted([0], [i])
+     }
+     ops.done()
+   })
+   ```
+3. Run `npm run steptrace:sync`.
+4. Reload the Obsidian plugin (Cmd+P → "Reload app without saving").
+5. Add a fence to a note:
+   ```steptrace
+   { "algorithm": "insertion-sort", "array": [5, 2, 9, 1] }
+   ```
+
+See the header comment in §4 for all available `ops.*` methods per kind.
+
+### Tweak Visual Appearance (Colors, Layout, Animations)
+
+1. Open `engine.js` section 1 (STYLES).
+2. Edit the CSS. All colors are `--st-*` tokens (mapped to internal `--_*`) so hosts can rebind via the cascade without touching this file.
+3. Run `npm run steptrace:sync`.
+4. In Obsidian: reload the plugin.
+5. In Quartz: rebuild (`quartz build`).
+
+### Add a New Renderer Kind (New Visual Primitive)
+
+1. Add a new recorder class in section 3 (RECORDERS) that captures the ops for your kind.
+2. Add render logic in section 5 (RENDER) that builds the DOM for this kind.
+3. Add CSS for the new kind in section 1 (STYLES).
+4. Export `registerYourKind()` from the REGISTRY (§2) and call it for your algorithm in section 4 (ALGORITHMS).
+5. Run `npm run steptrace:sync`, reload both hosts.
+
+## Where It Can Fail
+
+| Symptom | Likely Cause | Fix |
+|---------|--------------|-----|
+| Card doesn't render in Obsidian (blank or "steptrace: mount failed") | engine.js config is invalid JSON, or the algorithm doesn't exist. | Check the fence in the note: valid JSON in the code block? Algorithm name matches §4? |
+| Card renders but is unstyled (no colors, squished) in Obsidian | engine.js did not run (main.js is stale) or Obsidian theme tokens are missing. | Run `npm run steptrace:sync` and reload the plugin (Cmd+P → "Reload app without saving"). |
+| Card doesn't appear on the published Quartz site | Fence is in the Vault but not mirrored to `Web/content/` yet, or `/static/steptrace/engine.js` is stale. | (1) Ensure the note with the fence has been synced to `Web/content/`. (2) Run `npm run steptrace:sync` and `quartz build`. |
+| Card shows "steptrace: failed to load engine" on published site | `/static/steptrace/engine.js` returned 404 or a network error. | Check the Quartz build log. Ensure `Web/quartz/static/steptrace/engine.js` exists and is readable. Run `npm run steptrace:sync` and `quartz build`. |
+| Card mounts but shows wrong rendering (e.g., graph doesn't layout correctly) | Config is valid but has missing or malformed array/edges/nodes. | Consult the schema below; ensure `algorithm` matches §4 exactly. |
+
+### Config Schema
+
+- **Sort:** `{ "algorithm": <id>, "array"?: number[], "speed"?: number }` — omit `array` for random.
+- **Graph:** `{ "algorithm": <id>, "start"?: string, "directed"?: boolean, "nodes"?: [{id, x?, y?}], "edges"?: [{from, to, weight?}], "speed"?: number }` — omit nodes/edges for default; omit node x/y for circular layout; Dijkstra/Prim read edge `weight`; topological-sort needs `directed: true`.
+- **Search:** `{ "algorithm": "binary-search", "array": number[] (sorted!), "target": number }`.
+- **String:** `{ "algorithm": "kmp" | "rabin-karp", "text": string, "pattern": string }`.
+- **Pointers:** `{ "algorithm": "two-pointers" | "sliding-window", "array": number[], "target": number }` — two-pointers expects sorted array.
+- **DP:** `{ "algorithm": "lcs", "a": string, "b": string }`.
+- **UnionFind:** `{ "algorithm": "union-find", "n": number, "ops"?: [ ["union", a, b] | ["find", x], … ] }`.

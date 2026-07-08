@@ -17,5 +17,6 @@
   "quartz-syncer",
   "datacore",
   "obsidian-excalidraw-plugin",
+  "hot-reload",
   "steptrace"
 ]

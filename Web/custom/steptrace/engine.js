@@ -2,7 +2,7 @@
 //  steptrace — interactive, step-by-step algorithm-visualizer cards.
 //  ONE self-contained file. No build, no dependencies. Runs verbatim in:
 //    • the browser (Quartz inlines this file into an afterDOMLoaded script)
-//    • Obsidian   (the devbook-steptrace plugin reads + evaluates this file)
+//    • Obsidian   (the steptrace plugin concatenates this file into its main.js)
 //    • Node       (headless: new Function(src)(); then globalThis.steptrace)
 //  It exposes a global `steptrace` (and module.exports) via the UMD wrapper at
 //  the very bottom — no ESM import/export, so nothing needs compiling.
@@ -862,7 +862,6 @@
     }
   }
 
-  // A small, sensible default graph so a bare { "algorithm": "bfs" } runs.
   // A SearchRecorder snapshot: { type, array, lo, hi, mid, found, target,
   //   comparisons, message }. Rendered as a bar row with the live [lo, hi] range,
   //   the probed middle, and the eliminated halves faded out.
@@ -1131,6 +1130,7 @@
     }
   }
 
+  // A small, sensible default graph so a bare { "algorithm": "bfs" } runs.
   const DEFAULT_GRAPH = {
     directed: false,
     start: "A",
@@ -1825,11 +1825,17 @@
   // ==========================================================================
 
   function injectStyle() {
-    if (typeof document === "undefined" || document.getElementById(STYLE_ID)) return
-    const style = document.createElement("style")
-    style.id = STYLE_ID
-    style.textContent = STYLES
-    document.head.appendChild(style)
+    if (typeof document === "undefined") return
+    let style = document.getElementById(STYLE_ID)
+    if (!style) {
+      style = document.createElement("style")
+      style.id = STYLE_ID
+      document.head.appendChild(style)
+    }
+    // Always refresh the content: Obsidian keeps the DOM across plugin reloads,
+    // so a stale stylesheet from an older build must be overwritten — if we
+    // skipped when the tag existed, new renderers/size-caps would never apply.
+    if (style.textContent !== STYLES) style.textContent = STYLES
   }
 
   // ---- sort view: bars ----
@@ -1900,7 +1906,7 @@
     function paint(frame, i, total) {
       for (let k = 0; k < n; k++) {
         const b = bars[k]
-        // data-driven geometry only; colours come from --az-* via data-state.
+        // data-driven geometry only; colours come from --_* tokens via data-state.
         b.fill.style.height = `${Math.max(2, (frame.array[k] / maxVal) * 100)}%`
         b.num.textContent = frame.array[k]
         let state = "range"
@@ -2620,4 +2626,4 @@
     adjacency,
     mount,
   }
-});
+}); // trailing ";" is load-bearing — an ASI guard so this IIFE stays separate when concatenated into Obsidian's main.js.

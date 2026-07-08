@@ -1,49 +1,56 @@
-import { readFileSync } from "fs"
-import { join } from "path"
 import type { QuartzComponent, QuartzComponentConstructor } from "@quartz-community/types"
 
-// steptrace — live algorithm-visualizer cards on the published site.
-//
-// Renders nothing server-side (like ExplorerIcons): it only contributes css +
-// afterDOMLoaded. The SteptraceBlock transformer turns each ```steptrace fence
-// into <div class="steptrace-mount" data-config="…">; this script hydrates each
-// by calling the shared engine's mount(). Wired on the SPA `nav` event with
-// window.addCleanup so cards mount after client-side navigation and tear down
-// (stop timers/listeners) when leaving the page.
-//
-// The engine is the SAME custom/steptrace/engine.js the Obsidian plugin uses.
-// It's a UMD file (sets window.steptrace); we read it at build time and inline
-// it here, so the served script is always fresh from source — no /static file,
-// no manual copy, and no ESM import (afterDOMLoaded is transform-only anyway).
+// steptrace — Quartz host component. Renders nothing server-side; only contributes
+// css + an afterDOMLoaded hydrator. The SteptraceBlock transformer emits
+// <div class="steptrace-mount" data-config="…"> nodes; this hydrator loads the
+// engine at RUNTIME from /static/steptrace/engine.js (a classic <script>, NOT an
+// ESM import or inlined file — keeps it decoupled from the Obsidian copy) and
+// mounts each div.
 
-// Quartz bundles the config into quartz/.quartz-cache before running it, so
-// import.meta.url points at the cache dir — not this file. Resolve from the
-// project root instead (cwd is always the Web/ Quartz project at build time).
-const ENGINE = readFileSync(join(process.cwd(), "custom", "steptrace", "engine.js"), "utf8")
+const ENGINE_URL = "/static/steptrace/engine.js"
 
 const hydrate = `
 (function () {
   if (window.__steptraceHydrator) return;
   window.__steptraceHydrator = true;
+  var enginePromise = null;
+  function engine() {
+    if (enginePromise) return enginePromise;
+    enginePromise = new Promise(function (resolve, reject) {
+      if (window.steptrace && window.steptrace.mount) return resolve(window.steptrace);
+      var s = document.createElement("script");
+      s.src = ${JSON.stringify(ENGINE_URL)};
+      s.onload = function () { resolve(window.steptrace); };
+      s.onerror = function () { reject(new Error("could not load ${ENGINE_URL}")); };
+      document.head.appendChild(s);
+    });
+    return enginePromise;
+  }
   function fail(root, msg, e) {
+    root.dataset.steptraceMounted = "1";
     var pre = document.createElement("pre");
     pre.textContent = "steptrace: " + msg + "\\n" + (e && e.message ? e.message : e);
     root.replaceChildren(pre);
   }
-  function mountOne(root) {
+  function mountOne(root, st) {
     if (root.dataset.steptraceMounted) return;
     root.dataset.steptraceMounted = "1";
     var config;
     try { config = JSON.parse(root.dataset.config || "{}"); }
     catch (e) { fail(root, "invalid config", e); return; }
     try {
-      var handle = window.steptrace.mount(root, config);
+      var handle = st.mount(root, config);
       if (window.addCleanup) window.addCleanup(function () { if (handle && handle.destroy) handle.destroy(); });
     } catch (e) { fail(root, "mount failed", e); }
   }
   function run() {
-    if (!window.steptrace || !window.steptrace.mount) return;
-    document.querySelectorAll(".steptrace-mount:not([data-steptrace-mounted])").forEach(mountOne);
+    if (!document.querySelector(".steptrace-mount:not([data-steptrace-mounted])")) return;
+    engine().then(function (st) {
+      if (!st || !st.mount) throw new Error("engine loaded but exposed no mount()");
+      document.querySelectorAll(".steptrace-mount:not([data-steptrace-mounted])").forEach(function (root) { mountOne(root, st); });
+    }).catch(function (e) {
+      document.querySelectorAll(".steptrace-mount:not([data-steptrace-mounted])").forEach(function (root) { fail(root, "failed to load engine", e); });
+    });
   }
   // The mount div can appear after this script (SPA render/swap), so run on every
   // hook: nav + render (Quartz SPA events), immediately, and via a MutationObserver
@@ -61,10 +68,7 @@ const hydrate = `
 
 export const Steptrace: QuartzComponentConstructor = () => {
   const Component: QuartzComponent = () => null
-  // Engine (sets window.steptrace) then the hydration tail — one script, so order
-  // is guaranteed and there is no load race. The explicit `;` separator prevents
-  // ASI from parsing the engine IIFE's return value as a call on the next line.
-  Component.afterDOMLoaded = ENGINE + "\n;\n" + hydrate
+  Component.afterDOMLoaded = hydrate
   // The only per-host piece: bind the neutral --st-* tokens to Quartz's palette.
   Component.css = `
 .steptrace {
