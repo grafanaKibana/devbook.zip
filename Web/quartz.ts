@@ -1,5 +1,6 @@
 import { ExplorerIcons } from "./custom/components/explorer-icons"
 import { ExplorerOrder } from "./custom/components/explorer-order"
+import { NavScopeDropdown } from "./custom/components/nav-scope-dropdown"
 import { QuestionsIndex } from "./custom/components/questions-index"
 import { SiteHeader } from "./custom/components/site-header"
 import { SiteMarquee } from "./custom/components/site-marquee"
@@ -52,17 +53,28 @@ for (const pageLayout of Object.values(layout.byPageType)) {
   pageLayout.beforeBody = [siteMarquee, ...(pageLayout.beforeBody ?? [])]
 }
 
-// Inject the Explorer file-tree icons (issue #51) and topic ordering (issue #57).
-// Neither renders visible markup itself — they contribute css / afterDOMLoaded /
-// an inert JSON map that decorate and reorder the community Explorer's
-// client-built tree — so they just need to be present in the layout on every
-// page (the left sidebar shows everywhere). afterBody is set before the content
-// block below so `content` picks them up too.
+// Inject the Explorer file-tree icons (issue #51), topic ordering (issue #57) and
+// the top-level scope selector (issue #64). None render visible markup themselves
+// — they contribute css / afterDOMLoaded / an inert JSON map that decorate,
+// reorder and scope the community Explorer's client-built tree — so they just need
+// to be present in the layout on every page (the left sidebar shows everywhere).
+// afterBody is set before the content block below so `content` picks them up too.
 const explorerIcons = ExplorerIcons()
 const explorerOrder = ExplorerOrder()
-layout.defaults.afterBody = [...(layout.defaults.afterBody ?? []), explorerIcons, explorerOrder]
+const navScopeDropdown = NavScopeDropdown()
+layout.defaults.afterBody = [
+  ...(layout.defaults.afterBody ?? []),
+  explorerIcons,
+  explorerOrder,
+  navScopeDropdown,
+]
 for (const pageLayout of Object.values(layout.byPageType)) {
-  pageLayout.afterBody = [...(pageLayout.afterBody ?? []), explorerIcons, explorerOrder]
+  pageLayout.afterBody = [
+    ...(pageLayout.afterBody ?? []),
+    explorerIcons,
+    explorerOrder,
+    navScopeDropdown,
+  ]
 }
 
 const content = { ...(layout.byPageType.content ?? {}) }
