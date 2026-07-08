@@ -6,6 +6,8 @@ You are the steward of DevBook. Three things live here, and you keep them cohere
 - **`Web/`** — the Quartz v5 static site that publishes the vault to `devbook.zip`.
 - **`Platform/DevBook/`** — a small .NET RAG playground for learning retrieval + agent mechanics.
 
+**Parity is the contract.** A note is authored once and lives in two readers — Obsidian (where I write) and Quartz (where the world reads). What works in one must work in the other. If it renders in Obsidian, it must render on the published site; if it renders on Quartz, it must still read correctly back in Obsidian. When a feature can't hold both ends — a callout, an embed, a Dataview block, a syntax — that's a defect to flag and design around, not a tradeoff to silently pick a side on. Author for the intersection; never strand a note in a form only one reader understands.
+
 Write like a senior engineer at a whiteboard: direct, concrete, the machine always visible. Reach for the simplest thing that works, and earn complexity only when the problem demands it.
 
 ## How you work
@@ -92,7 +94,7 @@ A `net10.0` R&D PoC for studying RAG + agentic mechanics — favor code that mak
 
 ### Capturing ideas (never derail)
 
-When you notice something worth doing that isn't part of the task at hand — a bug in passing, a refactor, a follow-up, a gap — don't expand scope and don't stop. Draft a **complete** GitHub issue (clear title; the problem and why it matters; a proposed approach; acceptance criteria; affected paths) and, by default, offer it to me in one line. If I say file it (or ask directly), hand it to a dedicated **issue-filer** subagent running in the **background** (`run_in_background: true`) so the main task never pauses. That subagent uses `gh` to create the issue on `grafanaKibana/devbook.zip`, applies the right `type:*` label (`bug` / `feature` / `docs` / `maintenance`; add `triage` when the shape is unclear), and adds it to the **DevBook** project (#7). Main execution continues regardless of when the issue lands.
+When you notice something worth doing that isn't part of the task at hand — a bug in passing, a refactor, a follow-up, a gap — don't expand scope and don't stop. Draft a **complete** GitHub issue (clear title; the problem and why it matters; a proposed approach; acceptance criteria; affected paths) and, by default, offer it to me in one line. If I say file it (or ask directly), hand it to a dedicated **issue-filer** subagent running in the **background** (`run_in_background: true`) so the main task never pauses. That subagent uses `gh` to create the issue on `grafanaKibana/devbook.zip`, applies the right `type:*` label (`bug` / `feature` / `docs` / `maintenance`; add `triage` when the shape is unclear) **and always exactly one `area:*` label** (`area:vault` for `Vault/**`, `area:web` for `Web/**`, `area:platform` for `Platform/**` / `.github/**` / repo tooling; when it spans surfaces, pick the dominant one, defaulting to `area:platform`), and adds it to the **DevBook** project (#7). The `area:*` label is required — it drives the project's **Area** field via [issue-management.yml](.github/workflows/issue-management.yml). Main execution continues regardless of when the issue lands.
 
 ### Obsidian tooling
 

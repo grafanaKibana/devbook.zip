@@ -1,5 +1,6 @@
 import { ExplorerIcons } from "./custom/components/explorer-icons"
 import { QuestionsIndex } from "./custom/components/questions-index"
+import { SiteHeader } from "./custom/components/site-header"
 import { SiteMarquee } from "./custom/components/site-marquee"
 import { Steptrace } from "./custom/components/steptrace"
 import { IconBackfill } from "./custom/transformers/icon-backfill"
@@ -7,6 +8,8 @@ import { QuestionCollector } from "./custom/transformers/question-collector"
 import { StatusBackfill } from "./custom/transformers/status-backfill"
 import { SyncerFixups } from "./custom/transformers/syncer-fixups"
 import { SteptraceBlock } from "./custom/transformers/steptrace-block"
+import { componentRegistry } from "./quartz/components/registry"
+import type { QuartzComponent, QuartzComponentConstructor } from "./quartz/components/types"
 import { PageTypes } from "./quartz/plugins"
 import { loadQuartzConfig, loadQuartzLayout } from "./quartz/plugins/loader/config-loader"
 
@@ -82,6 +85,35 @@ for (const pageLayout of Object.values(layout.byPageType)) {
 const content = { ...(layout.byPageType.content ?? {}) }
 content.afterBody = [QuestionsIndex(), ...(content.afterBody ?? [])]
 layout.byPageType.content = content
+
+// Site header (title · search · theme/reader toggles). These four community
+// components are no longer positioned in the left sidebar (their `layout` was
+// removed from quartz.config.yaml); instead we render them here, in the page's
+// semantic `header` slot, wrapped by our SiteHeader. They're still registered,
+// so the resource collector ships their CSS/JS — we only need their instances.
+const instantiateRegistered = (name: string): QuartzComponent => {
+  const registered = componentRegistry.get(name)
+  if (!registered) {
+    throw new Error(`SiteHeader: expected component "${name}" to be registered`)
+  }
+  const component = registered.component
+  // Match the loader's convention: a bare constructor (no displayName) must be
+  // instantiated; the registry caches by constructor so scripts aren't duplicated.
+  return typeof component === "function" && !("displayName" in component)
+    ? componentRegistry.instantiate(component as QuartzComponentConstructor, undefined)
+    : (component as QuartzComponent)
+}
+
+const siteHeader = SiteHeader({
+  title: instantiateRegistered("page-title"),
+  search: instantiateRegistered("search"),
+  darkmode: instantiateRegistered("darkmode"),
+  readerMode: instantiateRegistered("reader-mode"),
+})
+layout.defaults.header = [siteHeader, ...(layout.defaults.header ?? [])]
+for (const pageLayout of Object.values(layout.byPageType)) {
+  pageLayout.header = [siteHeader, ...(pageLayout.header ?? [])]
+}
 
 // loadQuartzConfig already baked its own layout into a PageTypeDispatcher
 // emitter; replace it with one built from our augmented layout so the injected
