@@ -1,7 +1,15 @@
 ---
 publish: true
-created: 2026-07-05T10:54:07.987+03:00
-modified: 2026-07-05T20:28:24.147+03:00
+created: 2026-07-08T16:14:17.510+03:00
+modified: 2026-07-08T16:14:17.510+03:00
+published: 2026-07-08T16:14:17.510+03:00
+topic:
+  - DevOps
+subtopic: []
+level:
+  - "2"
+priority: High
+status: Done
 ---
 
 # Intro

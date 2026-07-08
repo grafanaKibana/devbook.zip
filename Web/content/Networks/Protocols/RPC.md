@@ -1,7 +1,16 @@
 ---
 publish: true
-created: 2026-07-05T10:53:36.526+03:00
-modified: 2026-07-05T15:49:32.896+03:00
+created: 2026-07-08T16:14:17.362+03:00
+modified: 2026-07-08T16:14:17.362+03:00
+published: 2026-07-08T16:14:17.362+03:00
+topic:
+  - Networks
+subtopic:
+  - Protocols
+level:
+  - "3"
+priority: Medium
+status: Ready to Repeat
 ---
 
 # RPC — Remote Procedure Call

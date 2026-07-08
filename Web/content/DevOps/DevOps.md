@@ -1,9 +1,20 @@
 ---
 publish: true
-created: 2026-07-05T10:54:07.985+03:00
-modified: 2026-07-05T20:28:24.145+03:00
+created: 2026-07-08T16:14:17.507+03:00
+modified: 2026-07-08T16:28:37.344+03:00
+published: 2026-07-08T16:28:37.344+03:00
 tags:
   - FolderNote
+icon: skull
+order: 100
+color: "#6366f1"
+topic:
+  - DevOps
+subtopic: []
+priority: High
+level:
+  - "4"
+status: Done
 ---
 
 # Intro

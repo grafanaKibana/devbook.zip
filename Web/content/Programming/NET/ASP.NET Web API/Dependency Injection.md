@@ -1,7 +1,16 @@
 ---
 publish: true
-created: 2026-07-05T10:53:26.836+03:00
-modified: 2026-07-05T17:36:33.796+03:00
+created: 2026-07-08T16:14:17.318+03:00
+modified: 2026-07-08T16:28:37.366+03:00
+published: 2026-07-08T16:28:37.366+03:00
+topic:
+  - Programming
+subtopic:
+  - NET
+level:
+  - "1"
+priority: Medium
+status: Ready to Repeat
 ---
 
 # Dependency Injection in ASP.NET Core

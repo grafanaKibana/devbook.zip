@@ -1,7 +1,16 @@
 ---
 publish: true
-created: 2026-07-05T10:53:36.372+03:00
-modified: 2026-07-05T10:53:37.358+03:00
+created: 2026-07-08T16:14:17.363+03:00
+modified: 2026-07-08T16:14:17.363+03:00
+published: 2026-07-08T16:14:17.363+03:00
+topic:
+  - Networks
+subtopic:
+  - Transport & Sockets
+level:
+  - "3"
+priority: Medium
+status: Ready to Repeat
 ---
 
 # Intro

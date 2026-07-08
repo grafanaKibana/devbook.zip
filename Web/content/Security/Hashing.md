@@ -1,7 +1,16 @@
 ---
 publish: true
-created: 2026-07-05T10:54:04.298+03:00
-modified: 2026-07-05T20:28:24.123+03:00
+created: 2026-07-08T16:14:17.503+03:00
+modified: 2026-07-08T16:14:17.503+03:00
+published: 2026-07-08T16:14:17.503+03:00
+topic:
+  - Security
+subtopic:
+  - Security
+level:
+  - "4"
+priority: High
+status: Ready to Repeat
 ---
 
 # Hashing

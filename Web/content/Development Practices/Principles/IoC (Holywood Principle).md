@@ -1,7 +1,16 @@
 ---
 publish: true
-created: 2026-07-05T10:53:48.524+03:00
-modified: 2026-07-05T17:36:33.779+03:00
+created: 2026-07-08T16:14:17.466+03:00
+modified: 2026-07-08T16:28:37.401+03:00
+published: 2026-07-08T16:28:37.401+03:00
+topic:
+  - Development Practices
+subtopic:
+  - Principles
+level:
+  - "4"
+priority: High
+status: Ready to Repeat
 ---
 
 # Inversion of Control (Hollywood Principle)

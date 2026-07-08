@@ -1,9 +1,18 @@
 ---
 publish: true
-created: 2026-07-05T10:53:36.464+03:00
-modified: 2026-07-05T10:53:37.361+03:00
+created: 2026-07-08T16:14:17.356+03:00
+modified: 2026-07-08T16:14:17.356+03:00
+published: 2026-07-08T16:14:17.356+03:00
 tags:
   - FolderNote
+topic:
+  - Networks
+subtopic:
+  - Architecture & Ops
+priority: Medium
+level:
+  - "3"
+status: Creation
 ---
 
 # Intro

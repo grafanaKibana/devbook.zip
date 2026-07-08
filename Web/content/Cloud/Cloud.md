@@ -1,9 +1,20 @@
 ---
 publish: true
-created: 2026-07-05T10:54:10.844+03:00
-modified: 2026-07-05T20:28:24.149+03:00
+created: 2026-07-08T16:14:17.505+03:00
+modified: 2026-07-08T16:28:37.344+03:00
+published: 2026-07-08T16:28:37.344+03:00
 tags:
   - FolderNote
+icon: cloud
+order: 90
+color: "#3b82f6"
+topic:
+  - Cloud
+subtopic: []
+status: Creation
+priority: High
+level:
+  - "2"
 ---
 
 # Intro

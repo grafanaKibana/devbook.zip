@@ -1,9 +1,20 @@
 ---
 publish: true
-created: 2026-07-05T10:54:04.288+03:00
-modified: 2026-07-05T20:28:24.114+03:00
+created: 2026-07-08T16:14:17.498+03:00
+modified: 2026-07-08T16:28:37.343+03:00
+published: 2026-07-08T16:28:37.343+03:00
 tags:
   - FolderNote
+icon: lock
+order: 80
+color: "#0ea5e9"
+topic:
+  - Security
+subtopic: []
+priority: High
+level:
+  - "4"
+status: Creation
 ---
 
 # Intro

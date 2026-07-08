@@ -1,7 +1,16 @@
 ---
 publish: true
-created: 2026-07-05T10:53:43.331+03:00
-modified: 2026-07-05T15:49:35.121+03:00
+created: 2026-07-08T16:14:17.444+03:00
+modified: 2026-07-08T16:14:17.445+03:00
+published: 2026-07-08T16:14:17.445+03:00
+topic:
+  - Architecture
+subtopic:
+  - Patterns
+level:
+  - "1"
+priority: High
+status: Ready to Repeat
 ---
 
 # Memento

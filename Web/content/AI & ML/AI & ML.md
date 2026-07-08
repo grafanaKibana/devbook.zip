@@ -1,9 +1,20 @@
 ---
 publish: true
-created: 2026-07-05T16:18:39.919+03:00
-modified: 2026-07-06T09:25:44.390+03:00
+created: 2026-07-08T16:14:17.468+03:00
+modified: 2026-07-08T16:28:37.402+03:00
+published: 2026-07-08T16:28:37.402+03:00
 tags:
   - FolderNote
+icon: brain-circuit
+order: 70
+color: "#10b981"
+topic:
+  - AI & ML
+subtopic: []
+level:
+  - "3"
+priority: High
+status: Done
 ---
 
 # Intro

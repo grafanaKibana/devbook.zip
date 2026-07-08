@@ -1,7 +1,16 @@
 ---
 publish: true
-created: 2026-07-05T10:53:23.442+03:00
-modified: 2026-07-05T17:35:40.344+03:00
+created: 2026-07-08T16:14:17.345+03:00
+modified: 2026-07-08T16:14:17.345+03:00
+published: 2026-07-08T16:14:17.345+03:00
+topic:
+  - Computer Science
+subtopic:
+  - Data Structures
+level:
+  - "4"
+priority: Medium
+status: Ready to Repeat
 ---
 
 # Intro

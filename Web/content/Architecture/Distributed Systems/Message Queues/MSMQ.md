@@ -1,7 +1,16 @@
 ---
 publish: true
-created: 2026-07-05T10:53:43.320+03:00
-modified: 2026-07-05T15:49:36.254+03:00
+created: 2026-07-08T16:14:17.385+03:00
+modified: 2026-07-08T16:14:17.387+03:00
+published: 2026-07-08T16:14:17.387+03:00
+topic:
+  - Architecture
+subtopic:
+  - Distributed Systems
+level:
+  - "2"
+priority: High
+status: Ready to Repeat
 ---
 
 # MSMQ

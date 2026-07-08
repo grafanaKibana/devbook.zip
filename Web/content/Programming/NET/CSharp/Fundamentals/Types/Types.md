@@ -1,9 +1,18 @@
 ---
 publish: true
-created: 2026-07-05T10:53:27.155+03:00
-modified: 2026-07-05T10:53:37.202+03:00
+created: 2026-07-08T16:14:17.328+03:00
+modified: 2026-07-08T16:14:17.329+03:00
+published: 2026-07-08T16:14:17.329+03:00
 tags:
   - FolderNote
+topic:
+  - Programming
+subtopic:
+  - NET
+status: Creation
+priority: Medium
+level:
+  - "4"
 ---
 
 # Intro

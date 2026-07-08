@@ -1,7 +1,16 @@
 ---
 publish: true
-created: 2026-07-05T10:54:04.362+03:00
-modified: 2026-07-05T20:28:24.142+03:00
+created: 2026-07-08T16:14:17.499+03:00
+modified: 2026-07-08T16:14:17.500+03:00
+published: 2026-07-08T16:14:17.500+03:00
+topic:
+  - Security
+subtopic:
+  - Authentication
+level:
+  - "3"
+priority: High
+status: Ready to Repeat
 ---
 
 # OAuth 2.0 and OpenID Connect

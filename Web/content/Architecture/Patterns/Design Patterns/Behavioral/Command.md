@@ -1,7 +1,17 @@
 ---
 publish: true
-created: 2026-07-05T10:53:43.331+03:00
-modified: 2026-07-05T15:49:37.351+03:00
+created: 2026-07-08T16:14:17.432+03:00
+modified: 2026-07-08T16:14:17.438+03:00
+published: 2026-07-08T16:14:17.438+03:00
+topic:
+  - Architecture
+subtopic:
+  - Patterns
+level:
+  - "2"
+priority: High
+status:
+  - Done
 ---
 
 # Command

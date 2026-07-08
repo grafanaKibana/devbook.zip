@@ -1,9 +1,18 @@
 ---
 publish: true
-created: 2026-07-05T10:53:48.603+03:00
-modified: 2026-07-05T15:49:32.619+03:00
+created: 2026-07-08T16:14:17.464+03:00
+modified: 2026-07-08T16:14:17.464+03:00
+published: 2026-07-08T16:14:17.464+03:00
 tags:
   - FolderNote
+topic:
+  - Development Practices
+subtopic:
+  - Paradigms
+status: Creation
+level:
+  - "4"
+priority: High
 ---
 
 # Intro

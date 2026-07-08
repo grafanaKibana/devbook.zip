@@ -1,7 +1,16 @@
 ---
 publish: true
-created: 2026-07-05T10:54:06.868+03:00
-modified: 2026-07-06T09:25:44.771+03:00
+created: 2026-07-08T16:14:17.488+03:00
+modified: 2026-07-08T16:28:37.415+03:00
+published: 2026-07-08T16:28:37.415+03:00
+topic:
+  - AI & ML
+subtopic:
+  - LLM
+level:
+  - "2"
+priority: High
+status: Done
 ---
 
 # Intro

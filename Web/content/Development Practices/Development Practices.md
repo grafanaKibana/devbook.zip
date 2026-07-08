@@ -1,9 +1,20 @@
 ---
 publish: true
-created: 2026-07-05T10:53:48.495+03:00
-modified: 2026-07-05T10:53:48.495+03:00
+created: 2026-07-08T16:14:17.462+03:00
+modified: 2026-07-08T16:28:37.343+03:00
+published: 2026-07-08T16:28:37.343+03:00
 tags:
   - FolderNote
+icon: ruler-dimension-line
+order: 60
+color: "#84cc16"
+topic:
+  - Development Practices
+subtopic: []
+status: Creation
+level:
+  - "4"
+priority: High
 ---
 
 # Intro

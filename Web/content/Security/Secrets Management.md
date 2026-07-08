@@ -1,7 +1,16 @@
 ---
 publish: true
-created: 2026-07-05T10:54:04.309+03:00
-modified: 2026-07-05T20:28:24.140+03:00
+created: 2026-07-08T16:14:17.504+03:00
+modified: 2026-07-08T16:14:17.504+03:00
+published: 2026-07-08T16:14:17.504+03:00
+topic:
+  - Security
+subtopic:
+  - Security
+level:
+  - "3"
+priority: High
+status: Ready to Repeat
 ---
 
 # Secrets Management

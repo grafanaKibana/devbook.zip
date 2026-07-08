@@ -1,9 +1,18 @@
 ---
 publish: true
-created: 2026-07-05T10:53:43.320+03:00
-modified: 2026-07-05T10:53:43.320+03:00
+created: 2026-07-08T16:14:17.420+03:00
+modified: 2026-07-08T16:14:17.422+03:00
+published: 2026-07-08T16:14:17.422+03:00
 tags:
   - FolderNote
+topic:
+  - Architecture
+subtopic:
+  - Distributed Systems
+priority: High
+level:
+  - "2"
+status: Done
 ---
 
 # Intro

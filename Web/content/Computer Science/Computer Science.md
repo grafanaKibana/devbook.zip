@@ -1,9 +1,20 @@
 ---
 publish: true
-created: 2026-07-05T10:53:23.194+03:00
-modified: 2026-07-05T10:53:37.203+03:00
+created: 2026-07-08T16:14:17.332+03:00
+modified: 2026-07-08T16:28:37.342+03:00
+published: 2026-07-08T16:28:37.342+03:00
 tags:
   - FolderNote
+icon: flask-round
+order: 20
+color: "#ef4444"
+topic:
+  - Computer Science
+subtopic: []
+level:
+  - "4"
+status: Done
+priority: High
 ---
 
 # Intro

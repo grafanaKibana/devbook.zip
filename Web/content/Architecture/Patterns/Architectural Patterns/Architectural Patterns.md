@@ -1,9 +1,18 @@
 ---
 publish: true
-created: 2026-07-05T10:53:43.324+03:00
-modified: 2026-07-05T15:49:35.118+03:00
+created: 2026-07-08T16:14:17.425+03:00
+modified: 2026-07-08T16:14:17.425+03:00
+published: 2026-07-08T16:14:17.425+03:00
 tags:
   - FolderNote
+topic:
+  - Architecture
+subtopic:
+  - Patterns
+priority: High
+level:
+  - "3"
+status: Done
 ---
 
 # Intro

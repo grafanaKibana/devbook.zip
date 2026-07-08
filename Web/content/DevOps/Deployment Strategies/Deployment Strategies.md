@@ -1,7 +1,17 @@
 ---
 publish: true
-created: 2026-07-05T10:54:08.006+03:00
-modified: 2026-07-05T20:28:24.148+03:00
+created: 2026-07-08T16:14:17.508+03:00
+modified: 2026-07-08T16:14:17.508+03:00
+published: 2026-07-08T16:14:17.508+03:00
+topic:
+  - DevOps
+subtopic:
+  - Deployment Strategies
+status:
+  - Ready to Repeat
+priority: Medium
+level:
+  - "2"
 ---
 
 # Deployment Strategies

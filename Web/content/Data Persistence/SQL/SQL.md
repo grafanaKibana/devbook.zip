@@ -1,9 +1,18 @@
 ---
 publish: true
-created: 2026-07-05T10:53:40.612+03:00
-modified: 2026-07-05T10:53:40.612+03:00
+created: 2026-07-08T16:14:17.354+03:00
+modified: 2026-07-08T16:14:17.354+03:00
+published: 2026-07-08T16:14:17.354+03:00
 tags:
   - FolderNote
+topic:
+  - Data Persistence
+subtopic:
+  - SQL
+priority: High
+level:
+  - "4"
+status: Done
 ---
 
 # Intro

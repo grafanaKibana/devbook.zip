@@ -1,9 +1,18 @@
 ---
 publish: true
-created: 2026-07-05T16:18:39.923+03:00
-modified: 2026-07-05T20:28:24.173+03:00
+created: 2026-07-08T16:14:17.493+03:00
+modified: 2026-07-08T16:28:37.417+03:00
+published: 2026-07-08T16:28:37.417+03:00
 tags:
   - FolderNote
+topic:
+  - AI & ML
+subtopic:
+  - Machine Learning
+priority: Medium
+level:
+  - "3"
+status: Done
 ---
 
 # Intro

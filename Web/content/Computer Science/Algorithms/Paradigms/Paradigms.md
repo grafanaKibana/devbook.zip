@@ -1,9 +1,18 @@
 ---
 publish: true
-created: 2026-07-05T10:53:25.922+03:00
-modified: 2026-07-06T09:25:44.557+03:00
+created: 2026-07-08T16:14:17.336+03:00
+modified: 2026-07-08T16:28:37.375+03:00
+published: 2026-07-08T16:28:37.375+03:00
 tags:
   - FolderNote
+topic:
+  - Computer Science
+subtopic:
+  - Algorithms
+priority: High
+level:
+  - "4"
+status: Ready to Repeat
 ---
 
 # Intro

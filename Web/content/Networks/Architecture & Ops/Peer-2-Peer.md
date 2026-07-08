@@ -1,7 +1,16 @@
 ---
 publish: true
-created: 2026-07-05T10:53:36.453+03:00
-modified: 2026-07-05T10:53:37.360+03:00
+created: 2026-07-08T16:14:17.357+03:00
+modified: 2026-07-08T16:14:17.358+03:00
+published: 2026-07-08T16:14:17.358+03:00
+topic:
+  - Networks
+subtopic:
+  - Architecture & Ops
+level:
+  - "1"
+priority: Medium
+status: Ready to Repeat
 ---
 
 # Peer-to-Peer (P2P)

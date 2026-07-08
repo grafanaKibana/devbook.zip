@@ -1,9 +1,18 @@
 ---
 publish: true
-created: 2026-07-05T10:53:43.328+03:00
-modified: 2026-07-05T10:53:43.329+03:00
+created: 2026-07-08T16:14:17.449+03:00
+modified: 2026-07-08T16:14:17.450+03:00
+published: 2026-07-08T16:14:17.450+03:00
 tags:
   - FolderNote
+topic:
+  - Architecture
+subtopic:
+  - Patterns
+level:
+  - "3"
+priority: High
+status: Done
 ---
 
 # Creational Patterns

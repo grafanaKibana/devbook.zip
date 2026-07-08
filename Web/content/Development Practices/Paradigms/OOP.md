@@ -1,7 +1,16 @@
 ---
 publish: true
-created: 2026-07-05T10:53:48.555+03:00
-modified: 2026-07-05T10:53:48.556+03:00
+created: 2026-07-08T16:14:17.464+03:00
+modified: 2026-07-08T16:14:17.464+03:00
+published: 2026-07-08T16:14:17.464+03:00
+topic:
+  - Development Practices
+subtopic:
+  - Paradigms
+level:
+  - "4"
+priority: Medium
+status: Ready to Repeat
 ---
 
 # Object-Oriented Programming (OOP)

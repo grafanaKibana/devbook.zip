@@ -1,9 +1,20 @@
 ---
 publish: true
-created: 2026-07-05T10:53:58.559+03:00
-modified: 2026-07-05T20:28:24.143+03:00
+created: 2026-07-08T16:14:17.511+03:00
+modified: 2026-07-08T16:28:37.344+03:00
+published: 2026-07-08T16:28:37.344+03:00
 tags:
   - FolderNote
+icon: area-chart
+order: 110
+color: "#a855f7"
+topic:
+  - SDLC
+subtopic: []
+priority: Medium
+level:
+  - "4"
+status: Creation
 ---
 
 # Intro

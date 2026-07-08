@@ -1,7 +1,15 @@
 ---
 publish: true
-created: 2026-07-05T10:54:07.994+03:00
-modified: 2026-07-05T20:28:24.146+03:00
+created: 2026-07-08T16:14:17.509+03:00
+modified: 2026-07-08T16:14:17.509+03:00
+published: 2026-07-08T16:14:17.509+03:00
+topic:
+  - DevOps
+subtopic: []
+level:
+  - "3"
+priority: High
+status: Ready to Repeat
 ---
 
 # Infrastructure as Code

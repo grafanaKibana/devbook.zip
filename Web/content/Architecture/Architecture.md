@@ -1,9 +1,20 @@
 ---
 publish: true
-created: 2026-07-05T10:53:43.304+03:00
-modified: 2026-07-05T10:53:43.304+03:00
+created: 2026-07-08T16:14:17.364+03:00
+modified: 2026-07-08T16:28:37.343+03:00
+published: 2026-07-08T16:28:37.343+03:00
 tags:
   - FolderNote
+icon: building-2
+order: 50
+color: "#eab308"
+topic:
+  - Architecture
+subtopic: []
+priority: High
+level:
+  - "4"
+status: Not-Started
 ---
 
 # Intro

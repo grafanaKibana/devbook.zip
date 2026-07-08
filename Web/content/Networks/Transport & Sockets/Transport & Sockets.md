@@ -1,9 +1,18 @@
 ---
 publish: true
-created: 2026-07-05T10:53:36.350+03:00
-modified: 2026-07-05T10:53:37.354+03:00
+created: 2026-07-08T16:14:17.364+03:00
+modified: 2026-07-08T16:14:17.364+03:00
+published: 2026-07-08T16:14:17.364+03:00
 tags:
   - FolderNote
+topic:
+  - Networks
+subtopic:
+  - Transport & Sockets
+status: Creation
+priority: Medium
+level:
+  - "3"
 ---
 
 # Intro

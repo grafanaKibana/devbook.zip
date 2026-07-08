@@ -1,7 +1,16 @@
 ---
 publish: true
-created: 2026-07-05T10:53:40.600+03:00
-modified: 2026-07-05T17:36:34.304+03:00
+created: 2026-07-08T16:14:17.351+03:00
+modified: 2026-07-08T16:28:37.381+03:00
+published: 2026-07-08T16:28:37.381+03:00
+topic:
+  - Data Persistence
+subtopic:
+  - ORMs
+level:
+  - "4"
+priority: High
+status: Ready to Repeat
 ---
 
 # Entity Framework Core

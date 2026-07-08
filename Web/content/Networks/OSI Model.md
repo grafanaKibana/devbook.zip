@@ -1,7 +1,15 @@
 ---
 publish: true
-created: 2026-07-05T10:53:36.339+03:00
-modified: 2026-07-05T15:49:32.878+03:00
+created: 2026-07-08T16:14:17.359+03:00
+modified: 2026-07-08T16:14:17.360+03:00
+published: 2026-07-08T16:14:17.360+03:00
+topic:
+  - Networks
+subtopic: []
+level:
+  - "3"
+priority: Medium
+status: Ready to Repeat
 ---
 
 # Intro

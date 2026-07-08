@@ -1,7 +1,16 @@
 ---
 publish: true
-created: 2026-07-05T10:54:06.674+03:00
-modified: 2026-07-05T20:28:24.161+03:00
+created: 2026-07-08T16:14:17.491+03:00
+modified: 2026-07-08T16:14:17.491+03:00
+published: 2026-07-08T16:14:17.491+03:00
+topic:
+  - AI & ML
+subtopic:
+  - Machine Learning
+level:
+  - "1"
+priority: Low
+status: Done
 ---
 
 # Intro

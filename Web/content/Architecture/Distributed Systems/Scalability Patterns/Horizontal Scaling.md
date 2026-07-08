@@ -1,7 +1,16 @@
 ---
 publish: true
-created: 2026-07-05T10:53:43.326+03:00
-modified: 2026-07-06T09:25:44.425+03:00
+created: 2026-07-08T16:14:17.423+03:00
+modified: 2026-07-08T16:28:37.389+03:00
+published: 2026-07-08T16:28:37.389+03:00
+topic:
+  - Architecture
+subtopic:
+  - Distributed Systems
+level:
+  - "2"
+priority: High
+status: Not-Started
 ---
 
 # Horizontal Scaling

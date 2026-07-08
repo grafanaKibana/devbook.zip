@@ -1,7 +1,16 @@
 ---
 publish: true
-created: 2026-07-05T10:53:40.609+03:00
-modified: 2026-07-05T17:36:33.487+03:00
+created: 2026-07-08T16:14:17.352+03:00
+modified: 2026-07-08T16:14:17.352+03:00
+published: 2026-07-08T16:14:17.352+03:00
+topic:
+  - Data Persistence
+subtopic:
+  - SQL
+level:
+  - "4"
+priority: High
+status: Ready to Repeat
 ---
 
 # Intro

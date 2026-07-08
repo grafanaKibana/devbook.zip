@@ -1,7 +1,16 @@
 ---
 publish: true
-created: 2026-07-05T10:53:48.571+03:00
-modified: 2026-07-06T09:25:44.487+03:00
+created: 2026-07-08T16:14:17.462+03:00
+modified: 2026-07-08T16:28:37.400+03:00
+published: 2026-07-08T16:28:37.400+03:00
+topic:
+  - Development Practices
+subtopic:
+  - Paradigms
+level:
+  - "3"
+priority: Medium
+status: Ready to Repeat
 ---
 
 # Event-Driven Development

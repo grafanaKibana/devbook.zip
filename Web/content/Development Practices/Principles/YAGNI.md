@@ -1,7 +1,16 @@
 ---
 publish: true
-created: 2026-07-05T10:53:48.546+03:00
-modified: 2026-07-05T15:49:32.867+03:00
+created: 2026-07-08T16:14:17.467+03:00
+modified: 2026-07-08T16:14:17.468+03:00
+published: 2026-07-08T16:14:17.468+03:00
+topic:
+  - Development Practices
+subtopic:
+  - Principles
+level:
+  - "4"
+priority: High
+status: Ready to Repeat
 ---
 
 # YAGNI

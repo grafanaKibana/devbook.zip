@@ -1,9 +1,18 @@
 ---
 publish: true
-created: 2026-07-05T10:53:25.488+03:00
-modified: 2026-07-05T17:35:42.585+03:00
+created: 2026-07-08T16:14:17.340+03:00
+modified: 2026-07-08T16:14:17.340+03:00
+published: 2026-07-08T16:14:17.340+03:00
 tags:
   - FolderNote
+topic:
+  - Computer Science
+subtopic:
+  - Algorithms
+level:
+  - "4"
+status: Ready to Repeat
+priority: Low
 ---
 
 # Intro
@@ -21,9 +30,9 @@ The largest element "bubbles" to the end of the array on each round, growing a s
 
 ```mermaid
 graph TD
-  A[Build max-heap O(n)] --> B[Swap root with last heap element]
+  A["Build max-heap O(n)"] --> B[Swap root with last heap element]
   B --> C[Shrink heap by 1]
-  C --> D[Sift new root down O(log n)]
+  C --> D["Sift new root down O(log n)"]
   D --> E{heap size > 1}
   E -->|Yes| B
   E -->|No| Z[Sorted]

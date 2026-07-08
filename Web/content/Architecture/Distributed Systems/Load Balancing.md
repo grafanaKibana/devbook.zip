@@ -1,7 +1,16 @@
 ---
 publish: true
-created: 2026-07-05T10:53:43.308+03:00
-modified: 2026-07-05T10:53:43.309+03:00
+created: 2026-07-08T16:14:17.370+03:00
+modified: 2026-07-08T16:14:17.379+03:00
+published: 2026-07-08T16:14:17.379+03:00
+topic:
+  - Architecture
+subtopic:
+  - Distributed Systems
+level:
+  - "2"
+priority: High
+status: Done
 ---
 
 # Intro

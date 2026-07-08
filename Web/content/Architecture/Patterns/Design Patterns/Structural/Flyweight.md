@@ -1,7 +1,16 @@
 ---
 publish: true
-created: 2026-07-05T10:53:43.336+03:00
-modified: 2026-07-05T17:36:33.110+03:00
+created: 2026-07-08T16:14:17.454+03:00
+modified: 2026-07-08T16:28:37.395+03:00
+published: 2026-07-08T16:28:37.395+03:00
+topic:
+  - Architecture
+subtopic:
+  - Patterns
+level:
+  - "1"
+priority: High
+status: Ready to Repeat
 ---
 
 # Flyweight

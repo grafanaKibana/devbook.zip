@@ -1,9 +1,18 @@
 ---
 publish: true
-created: 2026-07-05T10:54:06.943+03:00
-modified: 2026-07-05T20:28:24.165+03:00
+created: 2026-07-08T16:14:17.474+03:00
+modified: 2026-07-08T16:28:37.407+03:00
+published: 2026-07-08T16:28:37.407+03:00
 tags:
   - FolderNote
+topic:
+  - AI & ML
+subtopic:
+  - LLM
+level:
+  - "3"
+status: Done
+priority: High
 ---
 
 # Intro

@@ -1,7 +1,16 @@
 ---
 publish: true
-created: 2026-07-05T10:53:26.778+03:00
-modified: 2026-07-05T15:49:35.412+03:00
+created: 2026-07-08T16:14:17.317+03:00
+modified: 2026-07-08T16:14:17.317+03:00
+published: 2026-07-08T16:14:17.317+03:00
+topic:
+  - Programming
+subtopic:
+  - NET
+level:
+  - "1"
+priority: Medium
+status: Ready to Repeat
 ---
 
 # Authentication in ASP.NET Core

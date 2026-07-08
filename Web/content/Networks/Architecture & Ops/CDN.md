@@ -1,7 +1,16 @@
 ---
 publish: true
-created: 2026-07-05T10:53:36.416+03:00
-modified: 2026-07-05T17:36:33.099+03:00
+created: 2026-07-08T16:14:17.356+03:00
+modified: 2026-07-08T16:28:37.383+03:00
+published: 2026-07-08T16:28:37.383+03:00
+topic:
+  - Networks
+subtopic:
+  - Architecture & Ops
+level:
+  - "3"
+priority: Medium
+status: Ready to Repeat
 ---
 
 # Intro

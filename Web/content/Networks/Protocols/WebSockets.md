@@ -1,7 +1,16 @@
 ---
 publish: true
-created: 2026-07-05T10:53:36.613+03:00
-modified: 2026-07-05T15:49:35.025+03:00
+created: 2026-07-08T16:14:17.362+03:00
+modified: 2026-07-08T16:14:17.363+03:00
+published: 2026-07-08T16:14:17.363+03:00
+topic:
+  - Networks
+subtopic:
+  - Protocols
+level:
+  - "3"
+priority: High
+status: Ready to Repeat
 ---
 
 # Intro

@@ -1,9 +1,18 @@
 ---
 publish: true
-created: 2026-07-05T10:54:04.349+03:00
-modified: 2026-07-05T20:28:24.141+03:00
+created: 2026-07-08T16:14:17.499+03:00
+modified: 2026-07-08T16:14:17.499+03:00
+published: 2026-07-08T16:14:17.499+03:00
 tags:
   - FolderNote
+topic:
+  - Security
+subtopic:
+  - Authentication
+priority: High
+level:
+  - "4"
+status: Creation
 ---
 
 # Intro

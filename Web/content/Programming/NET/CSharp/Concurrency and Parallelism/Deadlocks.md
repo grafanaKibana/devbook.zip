@@ -1,7 +1,16 @@
 ---
 publish: true
-created: 2026-07-05T10:53:26.862+03:00
-modified: 2026-07-06T09:25:44.836+03:00
+created: 2026-07-08T16:14:17.321+03:00
+modified: 2026-07-08T16:28:37.367+03:00
+published: 2026-07-08T16:28:37.367+03:00
+topic:
+  - Programming
+subtopic:
+  - NET
+level:
+  - "4"
+priority: High
+status: Ready to Repeat
 ---
 
 # Intro

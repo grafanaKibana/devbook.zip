@@ -1,7 +1,16 @@
 ---
 publish: true
-created: 2026-07-05T10:53:25.656+03:00
-modified: 2026-07-05T17:35:42.491+03:00
+created: 2026-07-08T16:14:17.337+03:00
+modified: 2026-07-08T16:14:17.338+03:00
+published: 2026-07-08T16:14:17.338+03:00
+topic:
+  - Computer Science
+subtopic:
+  - Algorithms
+level:
+  - "4"
+priority: Medium
+status: Ready to Repeat
 ---
 
 # Intro

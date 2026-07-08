@@ -1,9 +1,20 @@
 ---
 publish: true
-created: 2026-07-05T10:53:27.356+03:00
-modified: 2026-07-05T10:53:37.143+03:00
+created: 2026-07-08T16:14:17.316+03:00
+modified: 2026-07-08T16:28:37.340+03:00
+published: 2026-07-08T16:28:37.340+03:00
 tags:
   - FolderNote
+icon: code-2
+order: 10
+color: "#f43f5e"
+topic:
+  - Programming
+subtopic: []
+status: Creation
+level:
+  - "4"
+priority: High
 ---
 
 # Intro

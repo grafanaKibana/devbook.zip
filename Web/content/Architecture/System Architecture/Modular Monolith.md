@@ -1,7 +1,16 @@
 ---
 publish: true
-created: 2026-07-05T10:53:43.313+03:00
-modified: 2026-07-05T15:49:34.787+03:00
+created: 2026-07-08T16:14:17.460+03:00
+modified: 2026-07-08T16:14:17.460+03:00
+published: 2026-07-08T16:14:17.460+03:00
+topic:
+  - Architecture
+subtopic:
+  - System Architecture
+level:
+  - "3"
+priority: High
+status: Ready to Repeat
 ---
 
 # Intro
