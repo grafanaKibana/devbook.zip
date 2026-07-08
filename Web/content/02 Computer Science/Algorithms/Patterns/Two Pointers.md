@@ -18,7 +18,6 @@ Three common configurations:
 
 The reason it's O(n): each pointer only ever moves forward (or they only converge), so the total number of moves is bounded by n — you never re-examine the same pair twice.
 
-
 ## Visualization
 
 ```steptrace

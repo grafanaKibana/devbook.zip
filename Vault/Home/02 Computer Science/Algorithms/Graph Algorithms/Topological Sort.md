@@ -23,6 +23,13 @@ Two standard algorithms, both **O(V + E)**:
 
 Kahn's is usually preferred in practice: it detects cycles naturally and avoids recursion-depth limits.
 
+
+## Visualization
+
+```steptrace
+{"algorithm":"topological-sort","directed":true,"nodes":[{"id":"A"},{"id":"B"},{"id":"C"},{"id":"D"},{"id":"E"},{"id":"F"}],"edges":[{"from":"A","to":"B"},{"from":"A","to":"C"},{"from":"B","to":"D"},{"from":"C","to":"D"},{"from":"D","to":"E"},{"from":"C","to":"F"},{"from":"F","to":"E"}]}
+```
+
 ## Example
 
 Kahn's algorithm:

@@ -31,15 +31,18 @@ In any note, add a fenced block with the info-string `steptrace` and a flat JSON
 - Graph — `{ "algorithm": <graph id>, "start"?: string, "directed"?: boolean,
   "nodes"?: [{id,x?,y?}], "edges"?: [{from,to,weight?}], "speed"?: number }`
   (omit `nodes`/`edges` for the built-in default graph; omit node `x`/`y` for an
-  automatic circular layout; Dijkstra reads edge `weight`).
+  automatic circular layout; Dijkstra/Prim read edge `weight`; Topological sort needs `directed: true`).
 - Search — `{ "algorithm": "binary-search", "array": number[] (sorted!), "target": number }`.
 - String — `{ "algorithm": "kmp" | "rabin-karp", "text": string, "pattern": string }`.
 - Pointers — `{ "algorithm": "two-pointers" | "sliding-window", "array": number[], "target": number }`
   (two-pointers wants a sorted array).
+- DP — `{ "algorithm": "lcs", "a": string, "b": string }`.
+- Union-Find — `{ "algorithm": "union-find", "n": number, "ops"?: [ ["union",a,b] | ["find",x], … ] }`.
 
 Built in — **sorts:** bubble-sort, insertion-sort, selection-sort, quick-sort, heap-sort,
-merge-sort · **graph:** bfs, dfs, dijkstra · **search:** binary-search ·
-**string:** kmp, rabin-karp · **pointers:** two-pointers, sliding-window.
+merge-sort · **graph:** bfs, dfs, dijkstra, prim, topological-sort · **search:**
+binary-search · **string:** kmp, rabin-karp · **pointers:** two-pointers, sliding-window ·
+**dp:** lcs · **union-find:** union-find.
 
 Each card visualizes exactly one algorithm (there is no algorithm selector).
 

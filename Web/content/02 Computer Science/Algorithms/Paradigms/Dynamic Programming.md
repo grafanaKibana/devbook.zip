@@ -17,6 +17,13 @@ There are two equivalent implementation styles:
 
 The recipe: (1) define the **state** (what arguments uniquely identify a subproblem), (2) write the **recurrence** (how a state combines sub-states), (3) set **base cases**, (4) choose memoisation or tabulation, (5) optionally **reduce space**.
 
+
+## Visualization
+
+```steptrace
+{"algorithm":"lcs","a":"AGCAT","b":"GAC"}
+```
+
 ## Example
 
 Top-down memoisation (clear, derived straight from the recurrence):

@@ -282,6 +282,77 @@
   color: var(--_blue);
 }
 
+/* ---- dp table: fills in cell by cell ---- */
+.steptrace__dp-wrap {
+  overflow-x: auto;
+}
+.steptrace__dp {
+  border-collapse: collapse;
+  font: 600 13px ui-monospace, "SF Mono", Menlo, monospace;
+}
+.steptrace__dp th {
+  color: var(--_muted);
+  font-weight: 700;
+  padding: 3px 7px;
+  text-align: center;
+}
+.steptrace__dp td {
+  width: 34px;
+  height: 34px;
+  text-align: center;
+  border: 1px solid var(--_border);
+  color: var(--_text);
+  background: var(--_surface);
+  transition:
+    background var(--_tween) ease,
+    border-color var(--_tween) ease;
+}
+.steptrace__dp td[data-state="dep"] {
+  background: color-mix(in srgb, var(--_amber) 22%, var(--_surface));
+  border-color: var(--_amber);
+}
+.steptrace__dp td[data-state="cur"] {
+  background: var(--_blue);
+  border-color: var(--_blue);
+  color: var(--_on-accent);
+}
+.steptrace__dp td[data-state="path"] {
+  background: var(--_green);
+  border-color: var(--_green);
+  color: var(--_on-accent);
+}
+
+/* ---- union-find forest: parent-pointer arcs above a row of elements ---- */
+.steptrace__uf .steptrace__ufnode circle {
+  fill: var(--_surface);
+  stroke: var(--_neutral);
+  stroke-width: 2.5;
+  transition:
+    stroke var(--_tween) ease,
+    fill var(--_tween) ease;
+}
+.steptrace__uf .steptrace__ufnode[data-root="true"] circle {
+  stroke-width: 4;
+}
+.steptrace__uf .steptrace__ufnode[data-hl="true"] circle {
+  fill: color-mix(in srgb, var(--_blue) 20%, var(--_surface));
+}
+.steptrace__uf .steptrace__id {
+  fill: var(--_text);
+  font: 700 13px ui-sans-serif, system-ui, sans-serif;
+}
+.steptrace__ufarc {
+  stroke: var(--_neutral);
+  stroke-width: 2;
+  transition:
+    stroke var(--_tween) ease,
+    stroke-width var(--_tween) ease;
+}
+.steptrace__ufarc[data-active="true"] {
+  stroke: var(--_blue);
+  stroke-width: 3.5;
+}
+
 /* ---- graph: svg ---- */
 .steptrace__graph {
   display: flex;
@@ -309,6 +380,10 @@
 }
 .steptrace__edge[data-active="true"] {
   stroke: var(--_violet);
+  stroke-width: 4;
+}
+.steptrace__edge[data-selected="true"] {
+  stroke: var(--_green);
   stroke-width: 4;
 }
 .steptrace__edge-label {
@@ -495,6 +570,8 @@
   const searchReg = new Map()
   const stringReg = new Map()
   const pointerReg = new Map()
+  const dpReg = new Map()
+  const ufReg = new Map()
 
   /** Register a sort algorithm. `fn(input, ops)` drives a SortRecorder via ops.*. */
   function registerSort(id, meta, fn) {
@@ -521,6 +598,16 @@
     pointerReg.set(id, { meta, fn })
   }
 
+  /** Register a DP-table algorithm. `fn(input, ops)` drives a DPRecorder (2-D grid). */
+  function registerDP(id, meta, fn) {
+    dpReg.set(id, { meta, fn })
+  }
+
+  /** Register a union-find algorithm. `fn(input, ops)` drives a UnionFindRecorder (forest). */
+  function registerUnionFind(id, meta, fn) {
+    ufReg.set(id, { meta, fn })
+  }
+
   /** Kind of a registered algorithm id, or null if unknown. */
   function kindOf(id) {
     if (sortReg.has(id)) return "sort"
@@ -528,6 +615,8 @@
     if (searchReg.has(id)) return "search"
     if (stringReg.has(id)) return "string"
     if (pointerReg.has(id)) return "pointers"
+    if (dpReg.has(id)) return "dp"
+    if (ufReg.has(id)) return "unionfind"
     return null
   }
 
@@ -569,6 +658,18 @@
       const rec = new PointerRecorder(config.array)
       fn(config, rec)
       return { kind: "pointers", frames: rec.frames }
+    }
+    if (dpReg.has(config.algorithm)) {
+      const { fn } = dpReg.get(config.algorithm)
+      const rec = new DPRecorder()
+      fn(config, rec)
+      return { kind: "dp", frames: rec.frames }
+    }
+    if (ufReg.has(config.algorithm)) {
+      const { fn } = ufReg.get(config.algorithm)
+      const rec = new UnionFindRecorder(config.n || 7)
+      fn(config, rec)
+      return { kind: "unionfind", frames: rec.frames }
     }
     throw new Error(`steptrace: unknown algorithm "${config.algorithm}".`)
   }
@@ -692,6 +793,7 @@
       this._frontier = []
       this._dist = {}
       this._current = null
+      this._selected = [] // edges in the built tree (MST) — stay highlighted
     }
 
     get visitedCount() {
@@ -710,6 +812,7 @@
           current: this._current,
           edge: edge ? { from: edge.from, to: edge.to } : null,
           dist: { ...this._dist },
+          selected: this._selected.map((s) => s.slice()),
           message,
         }),
       )
@@ -737,6 +840,12 @@
     /** Explore an edge u -> v (highlight only; no state change). */
     edge(u, v, message) {
       this._push("edge", { from: u, to: v }, message)
+    }
+
+    /** Add an edge to the built tree (MST) — it stays highlighted afterwards. */
+    selectEdge(u, v, message) {
+      this._selected.push([u, v])
+      this._push("select", { from: u, to: v }, message)
     }
 
     /** Visit a node: dequeue it from the frontier and mark it visited. */
@@ -911,6 +1020,114 @@
       this._push(message)
     }
     done(message) {
+      this._push(message)
+    }
+  }
+
+  // A DPRecorder snapshot: { rowLabels, colLabels, grid, cur, deps, path, message }.
+  //   Rendered as a 2-D table that fills cell by cell, highlighting the current
+  //   cell, the cells it reads (deps), and the final backtrack path.
+  class DPRecorder {
+    constructor() {
+      this.frames = []
+      this.rowLabels = []
+      this.colLabels = []
+      this.grid = []
+      this.cur = null
+      this.deps = []
+      this.path = []
+    }
+    board(rowLabels, colLabels, message) {
+      this.rowLabels = rowLabels.slice()
+      this.colLabels = colLabels.slice()
+      this.grid = rowLabels.map(() => colLabels.map(() => null))
+      this._push(message)
+    }
+    set(r, c, val, deps, message) {
+      this.cur = [r, c]
+      this.deps = (deps || []).map((d) => d.slice())
+      this.grid[r][c] = val
+      this._push(message)
+    }
+    markPath(cells, message) {
+      this.path = cells.map((p) => p.slice())
+      this.cur = null
+      this.deps = []
+      this._push(message)
+    }
+    done(message) {
+      this.cur = null
+      this.deps = []
+      this._push(message)
+    }
+    _push(message) {
+      this.frames.push(
+        Object.freeze({
+          rowLabels: this.rowLabels.slice(),
+          colLabels: this.colLabels.slice(),
+          grid: this.grid.map((row) => row.slice()),
+          cur: this.cur ? this.cur.slice() : null,
+          deps: this.deps.map((d) => d.slice()),
+          path: this.path.map((p) => p.slice()),
+          message,
+        }),
+      )
+    }
+  }
+
+  // A UnionFindRecorder snapshot: { n, parent[], roots[], highlight[], activeEdge,
+  //   message }. Rendered as a row of elements with parent-pointer arcs above;
+  //   nodes are coloured by their set (root).
+  class UnionFindRecorder {
+    constructor(n) {
+      this.n = n
+      this.parent = Array.from({ length: n }, (_, i) => i)
+      this.frames = []
+      this.highlight = []
+      this.activeEdge = null
+    }
+    _root(x) {
+      while (this.parent[x] !== x) x = this.parent[x]
+      return x
+    }
+    _push(message) {
+      const roots = []
+      for (let i = 0; i < this.n; i++) roots.push(this._root(i))
+      this.frames.push(
+        Object.freeze({
+          n: this.n,
+          parent: this.parent.slice(),
+          roots,
+          highlight: this.highlight.slice(),
+          activeEdge: this.activeEdge ? this.activeEdge.slice() : null,
+          message,
+        }),
+      )
+    }
+    init(message) {
+      this._push(message)
+    }
+    /** Highlight the parent-pointer path root-ward from a node. */
+    findPath(path, message) {
+      this.highlight = path.slice()
+      this.activeEdge = null
+      this._push(message)
+    }
+    /** Point `child` at `par` (a union link or path compression). */
+    setParent(child, par, message) {
+      this.parent[child] = par
+      this.activeEdge = [child, par]
+      this._push(message)
+    }
+    /** Clear transient highlights. */
+    clear(message) {
+      this.highlight = []
+      this.activeEdge = null
+      this._push(message)
+    }
+    done(message) {
+      this.highlight = []
+      this.activeEdge = null
       this._push(message)
     }
   }
@@ -1240,6 +1457,84 @@
     },
   )
 
+  // ───────────────────────────────── prim ────────────────────────────────
+  registerGraph("prim", { label: "Prim's MST", frontierLabel: "Frontier" }, (input, ops, graph) => {
+    const adj = {}
+    for (const nd of graph.nodes) adj[nd.id] = []
+    for (const e of graph.edges) {
+      const w = e.weight == null ? 1 : e.weight
+      adj[e.from].push({ to: e.to, w })
+      if (!graph.directed) adj[e.to].push({ to: e.from, w })
+    }
+    const start = input.start
+    ops.init(
+      `Prim's algorithm — grow a minimum spanning tree from ${start}, each step adding the cheapest edge that reaches a node not yet in the tree.`,
+    )
+    const inTree = new Set([start])
+    ops.visit(start, `Start the tree at ${start}.`)
+    let total = 0
+    while (inTree.size < graph.nodes.length) {
+      let best = null
+      for (const u of inTree)
+        for (const { to: v, w } of adj[u]) if (!inTree.has(v) && (best === null || w < best.w)) best = { u, v, w }
+      if (!best) break // graph is disconnected
+      ops.edge(best.u, best.v, `Cheapest edge leaving the tree: ${best.u}–${best.v} (weight ${best.w}).`)
+      ops.selectEdge(best.u, best.v, `Add ${best.u}–${best.v} to the tree.`)
+      inTree.add(best.v)
+      ops.visit(best.v, `${best.v} joins the tree.`)
+      total += best.w
+    }
+    ops.done(`Minimum spanning tree complete — total weight ${total}.`)
+  })
+
+  // ────────────────────────── topological-sort ───────────────────────────
+  registerGraph(
+    "topological-sort",
+    { label: "Topological sort (Kahn)", frontierLabel: "Ready queue (in-degree 0)" },
+    (input, ops, graph) => {
+      const adj = {}
+      const indeg = {}
+      for (const nd of graph.nodes) {
+        adj[nd.id] = []
+        indeg[nd.id] = 0
+      }
+      for (const e of graph.edges) {
+        adj[e.from].push(e.to)
+        indeg[e.to] = (indeg[e.to] || 0) + 1
+      }
+      ops.init(
+        `Topological sort (Kahn's algorithm) — repeatedly take a node with no remaining prerequisites (in-degree 0) and append it to the order; removing it may make others ready.`,
+      )
+      const ready = []
+      for (const nd of graph.nodes) {
+        if (indeg[nd.id] === 0) {
+          ready.push(nd.id)
+          ops.enqueue(nd.id, null, `${nd.id} has in-degree 0 — ready.`)
+        }
+      }
+      const order = []
+      while (ready.length) {
+        ready.sort()
+        const u = ready.shift()
+        ops.visit(u, `Output ${u} (position ${order.length + 1} in the order).`)
+        order.push(u)
+        for (const v of adj[u].slice().sort()) {
+          ops.edge(u, v, `Remove edge ${u}→${v}: in-degree of ${v} becomes ${indeg[v] - 1}.`)
+          indeg[v]--
+          if (indeg[v] === 0) {
+            ready.push(v)
+            ops.enqueue(v, null, `${v} is now ready.`)
+          }
+        }
+      }
+      ops.done(
+        order.length === graph.nodes.length
+          ? `Topological order: ${order.join(" → ")}.`
+          : `A cycle remains (${graph.nodes.length - order.length} node(s) unresolved) — no valid ordering.`,
+      )
+    },
+  )
+
   // ────────────────────────────── binary-search ──────────────────────────
   registerSearch("binary-search", { label: "Binary search" }, (input, ops) => {
     const a = ops.value
@@ -1422,6 +1717,105 @@
     } else {
       ops.done(`No subarray reaches ${target}.`)
     }
+  })
+
+  // ───────────────────────────────── lcs ─────────────────────────────────
+  registerDP("lcs", { label: "Longest common subsequence" }, (input, ops) => {
+    const A = String(input.a != null ? input.a : input.text || "")
+    const B = String(input.b != null ? input.b : input.pattern || "")
+    const m = A.length
+    const n = B.length
+    const rowLabels = ["∅", ...A.split("")]
+    const colLabels = ["∅", ...B.split("")]
+    ops.board(
+      rowLabels,
+      colLabels,
+      `Longest common subsequence of "${A}" and "${B}". Cell dp[i][j] holds the LCS length of the first i letters of "${A}" and the first j of "${B}".`,
+    )
+    const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0))
+    for (let c = 0; c <= n; c++) ops.set(0, c, 0, [], `An empty first string has LCS 0.`)
+    for (let r = 1; r <= m; r++) ops.set(r, 0, 0, [], `An empty second string has LCS 0.`)
+    for (let r = 1; r <= m; r++) {
+      for (let c = 1; c <= n; c++) {
+        if (A[r - 1] === B[c - 1]) {
+          dp[r][c] = dp[r - 1][c - 1] + 1
+          ops.set(r, c, dp[r][c], [[r - 1, c - 1]], `'${A[r - 1]}' = '${B[c - 1]}' → take the diagonal + 1 = ${dp[r][c]}.`)
+        } else {
+          dp[r][c] = Math.max(dp[r - 1][c], dp[r][c - 1])
+          ops.set(r, c, dp[r][c], [[r - 1, c], [r, c - 1]], `'${A[r - 1]}' ≠ '${B[c - 1]}' → max(top ${dp[r - 1][c]}, left ${dp[r][c - 1]}) = ${dp[r][c]}.`)
+        }
+      }
+    }
+    let r = m
+    let c = n
+    const path = []
+    while (r > 0 && c > 0) {
+      if (A[r - 1] === B[c - 1]) {
+        path.push([r, c])
+        r--
+        c--
+      } else if (dp[r - 1][c] >= dp[r][c - 1]) {
+        r--
+      } else {
+        c--
+      }
+    }
+    path.reverse()
+    ops.markPath(path, `Backtrack from the corner: the ${path.length} diagonal step${path.length === 1 ? "" : "s"} spell the LCS.`)
+    ops.done(`LCS length = ${dp[m][n]}.`)
+  })
+
+  // ────────────────────────────── union-find ─────────────────────────────
+  registerUnionFind("union-find", { label: "Union-Find" }, (input, ops) => {
+    const n = input.n || 7
+    ops.init(
+      `Union-Find on ${n} elements — union merges two sets; find returns a set's representative (its root), flattening the path it walks (path compression).`,
+    )
+    const operations =
+      Array.isArray(input.ops) && input.ops.length
+        ? input.ops
+        : [
+            ["union", 0, 1],
+            ["union", 2, 3],
+            ["union", 4, 5],
+            ["union", 1, 2],
+            ["find", 3],
+            ["union", 6, 4],
+          ]
+    const findRoot = (x, why) => {
+      const pathToRoot = [x]
+      let c = x
+      while (ops.parent[c] !== c) {
+        c = ops.parent[c]
+        pathToRoot.push(c)
+      }
+      ops.findPath(pathToRoot, `${why} follow ${pathToRoot.join(" → ")} to root ${c}.`)
+      for (const node of pathToRoot) {
+        if (node !== c && ops.parent[node] !== c) ops.setParent(node, c, `Path compression: point ${node} straight at root ${c}.`)
+      }
+      return c
+    }
+    for (const op of operations) {
+      if (op[0] === "union") {
+        const a = op[1]
+        const b = op[2]
+        const ra = findRoot(a, `Union(${a}, ${b}):`)
+        const rb = findRoot(b, `Union(${a}, ${b}):`)
+        if (ra === rb) ops.clear(`${a} and ${b} are already in the same set.`)
+        else ops.setParent(ra, rb, `Link root ${ra} under root ${rb} — the two sets merge.`)
+      } else if (op[0] === "find") {
+        const x = op[1]
+        const rt = findRoot(x, `Find(${x}):`)
+        ops.clear(`Find(${x}) = ${rt}.`)
+      }
+    }
+    const roots = new Set()
+    for (let i = 0; i < n; i++) {
+      let c = i
+      while (ops.parent[c] !== c) c = ops.parent[c]
+      roots.add(c)
+    }
+    ops.done(`Done — ${roots.size} disjoint set${roots.size === 1 ? "" : "s"} remain.`)
   })
 
   // ==========================================================================
@@ -1616,6 +2010,144 @@
     return { nodes: [stage, status], paint }
   }
 
+  // ---- dp view: a 2-D table that fills in cell by cell ----
+  function makeDPView(frames) {
+    const f0 = frames[0]
+    const R = f0.rowLabels.length
+    const C = f0.colLabels.length
+    const table = el("table", "steptrace__dp")
+    const thead = document.createElement("thead")
+    const htr = document.createElement("tr")
+    htr.append(document.createElement("th"))
+    for (let c = 0; c < C; c++) {
+      const th = document.createElement("th")
+      th.textContent = f0.colLabels[c]
+      htr.append(th)
+    }
+    thead.append(htr)
+    table.append(thead)
+    const tbody = document.createElement("tbody")
+    const cellEls = []
+    for (let r = 0; r < R; r++) {
+      const tr = document.createElement("tr")
+      const th = document.createElement("th")
+      th.textContent = f0.rowLabels[r]
+      tr.append(th)
+      const rowCells = []
+      for (let c = 0; c < C; c++) {
+        const td = document.createElement("td")
+        tr.append(td)
+        rowCells.push(td)
+      }
+      cellEls.push(rowCells)
+      tbody.append(tr)
+    }
+    table.append(tbody)
+    const wrap = el("div", "steptrace__dp-wrap")
+    wrap.append(table)
+    const status = statusEl()
+
+    function paint(frame, i, total) {
+      const curKey = frame.cur ? frame.cur.join(",") : null
+      const depSet = new Set((frame.deps || []).map((d) => d.join(",")))
+      const pathSet = new Set((frame.path || []).map((p) => p.join(",")))
+      for (let r = 0; r < R; r++) {
+        for (let c = 0; c < C; c++) {
+          const td = cellEls[r][c]
+          const v = frame.grid[r][c]
+          td.textContent = v == null ? "" : v
+          const key = r + "," + c
+          let state = ""
+          if (depSet.has(key)) state = "dep"
+          if (pathSet.has(key)) state = "path"
+          if (curKey === key) state = "cur"
+          td.dataset.state = state
+        }
+      }
+      status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`
+    }
+
+    return { nodes: [wrap, status], paint }
+  }
+
+  // ---- union-find view: a row of elements with parent-pointer arcs above ----
+  function makeUnionFindView(frames) {
+    const n = frames[0].n
+    const SP = 56
+    const UR = 16
+    const MX = 26
+    const BASE = 150
+    const TOP = 26
+    const width = MX * 2 + Math.max(0, n - 1) * SP + UR * 2
+    const height = 180
+    const cx = (i) => MX + UR + i * SP
+    const PALETTE = ["var(--_blue)", "var(--_violet)", "var(--_amber)", "var(--_green)", "var(--_muted)"]
+
+    const svg = document.createElementNS(SVGNS, "svg")
+    svg.setAttribute("class", "steptrace__svg steptrace__uf")
+    svg.setAttribute("viewBox", `0 0 ${width} ${height}`)
+    svg.setAttribute("role", "img")
+    svg.setAttribute("aria-label", "Union-Find forest")
+    const arcLayer = document.createElementNS(SVGNS, "g")
+    svg.append(arcLayer)
+
+    const nodeEls = []
+    for (let i = 0; i < n; i++) {
+      const g = document.createElementNS(SVGNS, "g")
+      g.setAttribute("class", "steptrace__ufnode")
+      const circle = document.createElementNS(SVGNS, "circle")
+      circle.setAttribute("cx", cx(i))
+      circle.setAttribute("cy", BASE)
+      circle.setAttribute("r", UR)
+      const id = document.createElementNS(SVGNS, "text")
+      id.setAttribute("class", "steptrace__id")
+      id.setAttribute("x", cx(i))
+      id.setAttribute("y", BASE)
+      id.setAttribute("text-anchor", "middle")
+      id.setAttribute("dominant-baseline", "central")
+      id.textContent = i
+      g.append(circle, id)
+      svg.append(g)
+      nodeEls.push({ g, circle })
+    }
+
+    const wrap = el("div", "steptrace__graph")
+    wrap.append(svg)
+    const status = statusEl()
+
+    function paint(frame, i, total) {
+      const uniqueRoots = [...new Set(frame.roots)]
+      const rootColor = {}
+      uniqueRoots.forEach((r, idx) => (rootColor[r] = PALETTE[idx % PALETTE.length]))
+      const hl = new Set(frame.highlight)
+      const ae = frame.activeEdge
+      for (let k = 0; k < n; k++) {
+        const ne = nodeEls[k]
+        ne.circle.style.stroke = rootColor[frame.roots[k]]
+        ne.g.dataset.root = frame.parent[k] === k ? "true" : "false"
+        ne.g.dataset.hl = hl.has(k) ? "true" : "false"
+      }
+      arcLayer.replaceChildren()
+      for (let k = 0; k < n; k++) {
+        const p = frame.parent[k]
+        if (p === k) continue
+        const x1 = cx(k)
+        const x2 = cx(p)
+        const midX = (x1 + x2) / 2
+        const arc = document.createElementNS(SVGNS, "path")
+        arc.setAttribute("class", "steptrace__ufarc")
+        arc.setAttribute("d", `M ${x1} ${BASE - UR} Q ${midX} ${TOP} ${x2} ${BASE - UR}`)
+        arc.setAttribute("fill", "none")
+        const active = (ae && ae[0] === k && ae[1] === p) || (hl.has(k) && hl.has(p))
+        arc.dataset.active = active ? "true" : "false"
+        arcLayer.append(arc)
+      }
+      status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`
+    }
+
+    return { nodes: [wrap, status], paint }
+  }
+
   // ---- graph view: svg ----
   const SVGNS = "http://www.w3.org/2000/svg"
   const R = 16 // node radius
@@ -1738,12 +2270,16 @@
         const d = frame.dist[n.id]
         ne.dist.textContent = d == null ? "" : `d:${d}`
       }
+      const selected = frame.selected || []
+      const isSel = (from, to) =>
+        selected.some((s) => (s[0] === from && s[1] === to) || (!graph.directed && s[0] === to && s[1] === from))
       for (const e of edgeEls) {
         const act =
           frame.edge &&
           ((frame.edge.from === e.from && frame.edge.to === e.to) ||
             (!graph.directed && frame.edge.from === e.to && frame.edge.to === e.from))
         e.el.dataset.active = act ? "true" : "false"
+        e.el.dataset.selected = isSel(e.from, e.to) ? "true" : "false"
       }
       queue.replaceChildren()
       if (frame.frontier.length === 0) {
@@ -1975,6 +2511,10 @@
         target: state.config.target,
         text: state.config.text,
         pattern: state.config.pattern,
+        a: state.config.a,
+        b: state.config.b,
+        n: state.config.n,
+        ops: state.config.ops,
         directed: state.config.directed,
         nodes: state.config.nodes,
         edges: state.config.edges,
@@ -1984,6 +2524,8 @@
       else if (built.kind === "search") view = makeSearchView(built.frames)
       else if (built.kind === "string") view = makeMatchView(built.frames)
       else if (built.kind === "pointers") view = makePointerView(built.frames)
+      else if (built.kind === "dp") view = makeDPView(built.frames)
+      else if (built.kind === "unionfind") view = makeUnionFindView(built.frames)
       else view = makeSortView(built.frames)
       if (built.kind === "graph" && startSel) syncStartOptions(built.graph)
       stageSlot.replaceChildren(...view.nodes)
@@ -2071,6 +2613,8 @@
     registerSearch,
     registerString,
     registerPointer,
+    registerDP,
+    registerUnionFind,
     listAlgorithms,
     kindOf,
     buildFrames,

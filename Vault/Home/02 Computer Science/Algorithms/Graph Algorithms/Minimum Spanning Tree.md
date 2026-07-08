@@ -21,6 +21,13 @@ Both are [[Greedy Algorithms|greedy]] and both are provably optimal via the **cu
 - **Kruskal's** — sort all edges by weight; add each edge if it connects two **different** components (i.e. doesn't form a cycle), using a [[Union-Find]] to test connectivity in near-O(1). Builds the tree as a "forest" that merges. **O(E log E)**, dominated by the sort. Great for **sparse** graphs.
 - **Prim's** — grow a single tree from an arbitrary start vertex; repeatedly add the cheapest edge crossing from the tree to a vertex outside it, using a [[Heap|priority queue]]. **O(E log V)**. Better for **dense** graphs.
 
+
+## Visualization
+
+```steptrace
+{"algorithm":"prim","start":"A","nodes":[{"id":"A"},{"id":"B"},{"id":"C"},{"id":"D"},{"id":"E"},{"id":"F"}],"edges":[{"from":"A","to":"B","weight":4},{"from":"A","to":"C","weight":2},{"from":"B","to":"C","weight":1},{"from":"B","to":"D","weight":5},{"from":"C","to":"D","weight":8},{"from":"C","to":"E","weight":10},{"from":"D","to":"E","weight":2},{"from":"D","to":"F","weight":6},{"from":"E","to":"F","weight":3}]}
+```
+
 ## Example
 
 Kruskal's (edges sorted, Union-Find for cycle detection):

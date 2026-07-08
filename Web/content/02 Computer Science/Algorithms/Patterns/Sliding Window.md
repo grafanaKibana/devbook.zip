@@ -23,7 +23,6 @@ graph LR
     B -.->|window slides right| E
 ```
 
-
 ## Visualization
 
 ```steptrace
