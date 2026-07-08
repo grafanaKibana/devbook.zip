@@ -26,9 +26,9 @@ The largest element "bubbles" to the end of the array on each round, growing a s
 
 ```mermaid
 graph TD
-  A[Build max-heap O(n)] --> B[Swap root with last heap element]
+  A["Build max-heap O(n)"] --> B[Swap root with last heap element]
   B --> C[Shrink heap by 1]
-  C --> D[Sift new root down O(log n)]
+  C --> D["Sift new root down O(log n)"]
   D --> E{heap size > 1}
   E -->|Yes| B
   E -->|No| Z[Sorted]
