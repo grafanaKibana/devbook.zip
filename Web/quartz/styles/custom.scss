@@ -289,11 +289,21 @@
   }
 }
 
-// Mobile: there is no hover on touch, so reader mode must NOT hide the header —
-// it (including the hamburger) stays fully visible. The hamburger lives in the
-// left sidebar, which the stock reader-mode rule fades; override that so the
-// hamburger — and the explorer overlay when opened in reader mode — stays
-// visible and usable.
+// The reveal path is :hover, so on any hover-less device the faded header would
+// be stranded with no way to bring it back (and thus no way to leave reader
+// mode). This covers phones AND touch tablets in landscape wider than the mobile
+// breakpoint — width alone isn't enough to tell. Never hide the header without a
+// hover capability; this later rule overrides the fade above where both match.
+@media (hover: none) {
+  :root[reader-mode="on"] .site-header {
+    opacity: 1;
+  }
+}
+
+// Mobile: reader mode must NOT hide the header — it (including the hamburger)
+// stays fully visible. The hamburger lives in the left sidebar, which the stock
+// reader-mode rule fades; override that so the hamburger — and the explorer
+// overlay when opened in reader mode — stays visible and usable.
 @media all and ($mobile) {
   :root[reader-mode="on"] .page > #quartz-body > .sidebar.left {
     opacity: 1;
