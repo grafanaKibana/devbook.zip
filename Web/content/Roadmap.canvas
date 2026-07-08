@@ -1,1176 +1,1240 @@
 {
-	"nodes": [
-		{
-			"id": "n_21f0241782",
-			"type": "text",
-			"text": "# [[01 Programming|01 Programming]]",
-			"x": 0,
-			"y": 760,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_47b1436b4f",
-			"type": "text",
-			"text": "# [[NET|NET]]",
-			"x": 420,
-			"y": 760,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_7391a699f9",
-			"type": "text",
-			"text": "# [[ASP.NET Web API|ASP.NET Web API]]",
-			"x": 840,
-			"y": 880,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_81e39394ae",
-			"type": "text",
-			"text": "# [[CSharp|CSharp]]",
-			"x": 840,
-			"y": 1000,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_12ecdbd5c3",
-			"type": "text",
-			"text": "# [[Concurrency and Parallelism|Concurrency and Parallelism]]",
-			"x": 1260,
-			"y": 1120,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_59da91ba7a",
-			"type": "text",
-			"text": "# [[Fundamentals|Fundamentals]]",
-			"x": 1260,
-			"y": 1240,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_8feb284bd4",
-			"type": "text",
-			"text": "# [[Home/01 Programming/NET/CSharp/Fundamentals/Types/Types|Types]]",
-			"x": 1680,
-			"y": 1360,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_7eb25ff61a",
-			"type": "text",
-			"text": "# [[Other|Other]]",
-			"x": 840,
-			"y": 1480,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_5838318922",
-			"type": "text",
-			"text": "# [[Runtime|Runtime]]",
-			"x": 840,
-			"y": 1600,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_de0e84ced0",
-			"type": "text",
-			"text": "# [[02 Computer Science|02 Computer Science]]",
-			"x": 0,
-			"y": 1880,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_84293cac94",
-			"type": "text",
-			"text": "# [[Algorithms|Algorithms]]",
-			"x": 420,
-			"y": 1880,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_8580dfc32b",
-			"type": "text",
-			"text": "# [[Graph Algorithms|Graph Algorithms]]",
-			"x": 840,
-			"y": 2000,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_3daeeb4932",
-			"type": "text",
-			"text": "# [[Home/02 Computer Science/Algorithms/Paradigms/Paradigms|Paradigms]]",
-			"x": 840,
-			"y": 2120,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_46db113891",
-			"type": "text",
-			"text": "# [[Home/02 Computer Science/Algorithms/Patterns/Patterns|Patterns]]",
-			"x": 840,
-			"y": 2240,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_4e3f2742c2",
-			"type": "text",
-			"text": "# [[Search Algorithms|Search Algorithms]]",
-			"x": 840,
-			"y": 2360,
-			"width": 340,
-			"height": 80,
-			"color": "4"
-		},
-		{
-			"id": "n_6f67c9766d",
-			"type": "text",
-			"text": "# [[Sorting Algorithms|Sorting Algorithms]]",
-			"x": 840,
-			"y": 2480,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_9a63ab08fe",
-			"type": "text",
-			"text": "# [[Data Structures|Data Structures]]",
-			"x": -420,
-			"y": 1880,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_4588f305ea",
-			"type": "text",
-			"text": "# [[03 Data Persistence|03 Data Persistence]]",
-			"x": 0,
-			"y": 2760,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_98d03a0b9a",
-			"type": "text",
-			"text": "# [[NoSQL|NoSQL]]",
-			"x": 420,
-			"y": 2760,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_99fd1672ce",
-			"type": "text",
-			"text": "# [[ORMs|ORMs]]",
-			"x": -420,
-			"y": 2760,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_e96ba3df67",
-			"type": "text",
-			"text": "# [[SQL|SQL]]",
-			"x": 420,
-			"y": 2880,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_562477b458",
-			"type": "text",
-			"text": "# [[04 Networks|04 Networks]]",
-			"x": 0,
-			"y": 3160,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_0b0a05ce8f",
-			"type": "text",
-			"text": "# [[Architecture & Ops|Architecture & Ops]]",
-			"x": 420,
-			"y": 3160,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_7af3ba101b",
-			"type": "text",
-			"text": "# [[Protocols|Protocols]]",
-			"x": -420,
-			"y": 3160,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_7069b6749c",
-			"type": "text",
-			"text": "# [[Transport & Sockets|Transport & Sockets]]",
-			"x": 420,
-			"y": 3280,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_8e33116907",
-			"type": "text",
-			"text": "# [[05 Architecture|05 Architecture]]",
-			"x": 0,
-			"y": 3560,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_55d40f25c1",
-			"type": "text",
-			"text": "# [[Application Architecture|Application Architecture]]",
-			"x": 420,
-			"y": 3560,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_3f76eb09b7",
-			"type": "text",
-			"text": "# [[Distributed Systems|Distributed Systems]]",
-			"x": -420,
-			"y": 3560,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_443c6b7acc",
-			"type": "text",
-			"text": "# [[Message Queues|Message Queues]]",
-			"x": -840,
-			"y": 3680,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_dc4a20647f",
-			"type": "text",
-			"text": "# [[Scalability Patterns|Scalability Patterns]]",
-			"x": -840,
-			"y": 3800,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_bf18b195af",
-			"type": "text",
-			"text": "# [[Home/05 Architecture/Patterns/Patterns|Patterns]]",
-			"x": 420,
-			"y": 3680,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_c73870096f",
-			"type": "text",
-			"text": "# [[Architectural Patterns|Architectural Patterns]]",
-			"x": 840,
-			"y": 3800,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_dbd6442a0b",
-			"type": "text",
-			"text": "# [[Design Patterns|Design Patterns]]",
-			"x": 840,
-			"y": 3920,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_1f7479c5a2",
-			"type": "text",
-			"text": "# [[Behavioral|Behavioral]]",
-			"x": 1260,
-			"y": 4040,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_9e8db739d1",
-			"type": "text",
-			"text": "# [[Creational|Creational]]",
-			"x": 1260,
-			"y": 4160,
-			"width": 340,
-			"height": 80,
-			"color": "4"
-		},
-		{
-			"id": "n_36e4617fdf",
-			"type": "text",
-			"text": "# [[Structural|Structural]]",
-			"x": 1260,
-			"y": 4280,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_c1a7dd2abf",
-			"type": "text",
-			"text": "# [[Resilience Patterns|Resilience Patterns]]",
-			"x": 840,
-			"y": 4400,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_c1e483b2d0",
-			"type": "text",
-			"text": "# [[System Architecture|System Architecture]]",
-			"x": -420,
-			"y": 3920,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_a493e627f8",
-			"type": "text",
-			"text": "# [[06 Development Practices|06 Development Practices]]",
-			"x": 0,
-			"y": 4680,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_1133a64372",
-			"type": "text",
-			"text": "# [[Home/06 Development Practices/Paradigms/Paradigms|Paradigms]]",
-			"x": 420,
-			"y": 4680,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_8f4802edd0",
-			"type": "text",
-			"text": "# [[Principles|Principles]]",
-			"x": -420,
-			"y": 4680,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_98e6d345ab",
-			"type": "text",
-			"text": "# [[07 Security|07 Security]]",
-			"x": 0,
-			"y": 4960,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_d34646f1fd",
-			"type": "text",
-			"text": "# [[Home/07 Security/Authentication/Authentication|Authentication]]",
-			"x": 420,
-			"y": 4960,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_f00e1d8151",
-			"type": "text",
-			"text": "# [[08 SDLC|08 SDLC]]",
-			"x": 0,
-			"y": 5240,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_bb7c2d7018",
-			"type": "text",
-			"text": "# [[09 DevOps|09 DevOps]]",
-			"x": 0,
-			"y": 5480,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_11cf2504d7",
-			"type": "text",
-			"text": "# [[Deployment Strategies|Deployment Strategies]]",
-			"x": 420,
-			"y": 5480,
-			"width": 340,
-			"height": 80,
-			"color": "6"
-		},
-		{
-			"id": "n_619c288a2f",
-			"type": "text",
-			"text": "# [[Version Control Systems|Version Control Systems]]",
-			"x": -420,
-			"y": 5480,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_6fc77d3558",
-			"type": "text",
-			"text": "# [[10 Cloud|10 Cloud]]",
-			"x": 0,
-			"y": 5760,
-			"width": 340,
-			"height": 80,
-			"color": "1"
-		},
-		{
-			"id": "n_ee1e334364",
-			"type": "text",
-			"text": "# [[AWS|AWS]]",
-			"x": 420,
-			"y": 5760,
-			"width": 340,
-			"height": 80,
-			"color": "2"
-		},
-		{
-			"id": "n_d69756c8fd",
-			"type": "text",
-			"text": "# [[Azure|Azure]]",
-			"x": -420,
-			"y": 5760,
-			"width": 340,
-			"height": 80,
-			"color": "2"
-		},
-		{
-			"id": "n_416c86c7a9",
-			"type": "text",
-			"text": "# [[Google Cloud|Google Cloud]]",
-			"x": 420,
-			"y": 5880,
-			"width": 340,
-			"height": 80,
-			"color": "2"
-		},
-		{
-			"id": "n_235841ecfa",
-			"type": "text",
-			"text": "# [[11 AI & ML|11 AI & ML]]",
-			"x": 0,
-			"y": 6160,
-			"width": 340,
-			"height": 80,
-			"color": "4"
-		},
-		{
-			"id": "n_c6ccce8189",
-			"type": "text",
-			"text": "# [[LLM|LLM]]",
-			"x": 420,
-			"y": 6160,
-			"width": 340,
-			"height": 80,
-			"color": "4"
-		},
-		{
-			"id": "n_8d7ef76fdd",
-			"type": "text",
-			"text": "# [[Agents|Agents]]",
-			"x": 840,
-			"y": 6280,
-			"width": 340,
-			"height": 80,
-			"color": "4"
-		},
-		{
-			"id": "n_64772f1472",
-			"type": "text",
-			"text": "# [[Home/11 AI & ML/LLM/Agents/Evaluation/Evaluation|Evaluation]]",
-			"x": 1260,
-			"y": 6400,
-			"width": 340,
-			"height": 80,
-			"color": "4"
-		},
-		{
-			"id": "n_c515e1fb46",
-			"type": "text",
-			"text": "# [[Home/11 AI & ML/LLM/Evaluation/Evaluation|Evaluation]]",
-			"x": 840,
-			"y": 6520,
-			"width": 340,
-			"height": 80,
-			"color": "4"
-		},
-		{
-			"id": "n_7e80798d47",
-			"type": "text",
-			"text": "# [[Prompting|Prompting]]",
-			"x": 840,
-			"y": 6640,
-			"width": 340,
-			"height": 80,
-			"color": "4"
-		},
-		{
-			"id": "n_b94b6593b3",
-			"type": "text",
-			"text": "# [[RAG|RAG]]",
-			"x": 840,
-			"y": 6760,
-			"width": 340,
-			"height": 80,
-			"color": "4"
-		},
-		{
-			"id": "n_248481cc04",
-			"type": "text",
-			"text": "# [[Home/11 AI & ML/LLM/RAG/Evaluation/Evaluation|Evaluation]]",
-			"x": 1260,
-			"y": 6880,
-			"width": 340,
-			"height": 80,
-			"color": "4"
-		},
-		{
-			"id": "n_05ca101164",
-			"type": "text",
-			"text": "# [[Machine Learning|Machine Learning]]",
-			"x": -420,
-			"y": 6160,
-			"width": 340,
-			"height": 80,
-			"color": "4"
-		},
-		{
-			"id": "n_f4abc89c6a",
-			"type": "text",
-			"text": "# [[Home/11 AI & ML/Machine Learning/Evaluation/Evaluation|Evaluation]]",
-			"x": -840,
-			"y": 6280,
-			"width": 340,
-			"height": 80,
-			"color": "4"
-		},
-		{
-			"id": "n_60eef9367f",
-			"type": "text",
-			"text": "# [[Home/11 AI & ML/Machine Learning/Types/Types|Types]]",
-			"x": -840,
-			"y": 6400,
-			"width": 340,
-			"height": 80,
-			"color": "4"
-		},
-		{
-			"id": "n_f844471ba4",
-			"type": "text",
-			"text": "# [[Tooling|Tooling]]",
-			"x": -420,
-			"y": 6520,
-			"width": 340,
-			"height": 80,
-			"color": "4"
-		},
-		{
-			"id": "n_328ae87cd7",
-			"type": "group",
-			"label": "Legend",
-			"x": -1460,
-			"y": -20,
-			"width": 540,
-			"height": 530
-		},
-		{
-			"id": "n_b0ac2236f9",
-			"type": "text",
-			"text": "#### Roadmap legend\n**Generated:** Jul 05 2026 | 11:00AM",
-			"x": -1440,
-			"y": 0,
-			"width": 500,
-			"height": 110
-		},
-		{
-			"id": "n_4a66490dd9",
-			"type": "text",
-			"text": "Not-Started: 45",
-			"x": -1380,
-			"y": 126,
-			"width": 380,
-			"height": 60,
-			"color": "1"
-		},
-		{
-			"id": "n_c1cf7bc196",
-			"type": "text",
-			"text": "Creation: 3",
-			"x": -1380,
-			"y": 202,
-			"width": 380,
-			"height": 60,
-			"color": "2"
-		},
-		{
-			"id": "n_a434510472",
-			"type": "text",
-			"text": "Repetition: 0",
-			"x": -1380,
-			"y": 278,
-			"width": 380,
-			"height": 60,
-			"color": "5"
-		},
-		{
-			"id": "n_6de0caeeec",
-			"type": "text",
-			"text": "Ready To Repeat: 0",
-			"x": -1380,
-			"y": 354,
-			"width": 380,
-			"height": 60
-		},
-		{
-			"id": "n_0e6324d0db",
-			"type": "text",
-			"text": "Done: 14",
-			"x": -1380,
-			"y": 430,
-			"width": 380,
-			"height": 60,
-			"color": "4"
-		}
-	],
-	"edges": [
-		{
-			"id": "e_398af486c5",
-			"fromNode": "n_21f0241782",
-			"fromSide": "right",
-			"toNode": "n_47b1436b4f",
-			"toSide": "left"
-		},
-		{
-			"id": "e_965d6003bf",
-			"fromNode": "n_47b1436b4f",
-			"fromSide": "right",
-			"toNode": "n_7391a699f9",
-			"toSide": "left"
-		},
-		{
-			"id": "e_b786689b8d",
-			"fromNode": "n_47b1436b4f",
-			"fromSide": "right",
-			"toNode": "n_81e39394ae",
-			"toSide": "left"
-		},
-		{
-			"id": "e_b1bfe832d5",
-			"fromNode": "n_81e39394ae",
-			"fromSide": "right",
-			"toNode": "n_12ecdbd5c3",
-			"toSide": "left"
-		},
-		{
-			"id": "e_fb6eb328ec",
-			"fromNode": "n_81e39394ae",
-			"fromSide": "right",
-			"toNode": "n_59da91ba7a",
-			"toSide": "left"
-		},
-		{
-			"id": "e_de0ae9341d",
-			"fromNode": "n_59da91ba7a",
-			"fromSide": "right",
-			"toNode": "n_8feb284bd4",
-			"toSide": "left"
-		},
-		{
-			"id": "e_5eaa319669",
-			"fromNode": "n_47b1436b4f",
-			"fromSide": "right",
-			"toNode": "n_7eb25ff61a",
-			"toSide": "left"
-		},
-		{
-			"id": "e_0d66cdcee9",
-			"fromNode": "n_47b1436b4f",
-			"fromSide": "right",
-			"toNode": "n_5838318922",
-			"toSide": "left"
-		},
-		{
-			"id": "e_0f3fa1cde7",
-			"fromNode": "n_21f0241782",
-			"fromSide": "bottom",
-			"toNode": "n_de0e84ced0",
-			"toSide": "top"
-		},
-		{
-			"id": "e_15dd435e23",
-			"fromNode": "n_de0e84ced0",
-			"fromSide": "right",
-			"toNode": "n_84293cac94",
-			"toSide": "left"
-		},
-		{
-			"id": "e_e71740aa5c",
-			"fromNode": "n_84293cac94",
-			"fromSide": "right",
-			"toNode": "n_8580dfc32b",
-			"toSide": "left"
-		},
-		{
-			"id": "e_f9d4c1c560",
-			"fromNode": "n_84293cac94",
-			"fromSide": "right",
-			"toNode": "n_3daeeb4932",
-			"toSide": "left"
-		},
-		{
-			"id": "e_0bfc23d189",
-			"fromNode": "n_84293cac94",
-			"fromSide": "right",
-			"toNode": "n_46db113891",
-			"toSide": "left"
-		},
-		{
-			"id": "e_69e455c3fe",
-			"fromNode": "n_84293cac94",
-			"fromSide": "right",
-			"toNode": "n_4e3f2742c2",
-			"toSide": "left"
-		},
-		{
-			"id": "e_0fd69a6f95",
-			"fromNode": "n_84293cac94",
-			"fromSide": "right",
-			"toNode": "n_6f67c9766d",
-			"toSide": "left"
-		},
-		{
-			"id": "e_c22e15fee3",
-			"fromNode": "n_de0e84ced0",
-			"fromSide": "left",
-			"toNode": "n_9a63ab08fe",
-			"toSide": "right"
-		},
-		{
-			"id": "e_22e770128d",
-			"fromNode": "n_de0e84ced0",
-			"fromSide": "bottom",
-			"toNode": "n_4588f305ea",
-			"toSide": "top"
-		},
-		{
-			"id": "e_aea8b0796e",
-			"fromNode": "n_4588f305ea",
-			"fromSide": "right",
-			"toNode": "n_98d03a0b9a",
-			"toSide": "left"
-		},
-		{
-			"id": "e_a94225cec9",
-			"fromNode": "n_4588f305ea",
-			"fromSide": "left",
-			"toNode": "n_99fd1672ce",
-			"toSide": "right"
-		},
-		{
-			"id": "e_702b2d70c2",
-			"fromNode": "n_4588f305ea",
-			"fromSide": "right",
-			"toNode": "n_e96ba3df67",
-			"toSide": "left"
-		},
-		{
-			"id": "e_b2175f9272",
-			"fromNode": "n_4588f305ea",
-			"fromSide": "bottom",
-			"toNode": "n_562477b458",
-			"toSide": "top"
-		},
-		{
-			"id": "e_ec0ffc014e",
-			"fromNode": "n_562477b458",
-			"fromSide": "right",
-			"toNode": "n_0b0a05ce8f",
-			"toSide": "left"
-		},
-		{
-			"id": "e_58b22023a3",
-			"fromNode": "n_562477b458",
-			"fromSide": "left",
-			"toNode": "n_7af3ba101b",
-			"toSide": "right"
-		},
-		{
-			"id": "e_8a0bf9f59e",
-			"fromNode": "n_562477b458",
-			"fromSide": "right",
-			"toNode": "n_7069b6749c",
-			"toSide": "left"
-		},
-		{
-			"id": "e_2a9ff5bce8",
-			"fromNode": "n_562477b458",
-			"fromSide": "bottom",
-			"toNode": "n_8e33116907",
-			"toSide": "top"
-		},
-		{
-			"id": "e_103bed44dd",
-			"fromNode": "n_8e33116907",
-			"fromSide": "right",
-			"toNode": "n_55d40f25c1",
-			"toSide": "left"
-		},
-		{
-			"id": "e_445d8804b5",
-			"fromNode": "n_8e33116907",
-			"fromSide": "left",
-			"toNode": "n_3f76eb09b7",
-			"toSide": "right"
-		},
-		{
-			"id": "e_a3a1735f11",
-			"fromNode": "n_3f76eb09b7",
-			"fromSide": "left",
-			"toNode": "n_443c6b7acc",
-			"toSide": "right"
-		},
-		{
-			"id": "e_f31ae1c1df",
-			"fromNode": "n_3f76eb09b7",
-			"fromSide": "left",
-			"toNode": "n_dc4a20647f",
-			"toSide": "right"
-		},
-		{
-			"id": "e_36778fb4b5",
-			"fromNode": "n_8e33116907",
-			"fromSide": "right",
-			"toNode": "n_bf18b195af",
-			"toSide": "left"
-		},
-		{
-			"id": "e_164bc64f5f",
-			"fromNode": "n_bf18b195af",
-			"fromSide": "right",
-			"toNode": "n_c73870096f",
-			"toSide": "left"
-		},
-		{
-			"id": "e_adc1f80e47",
-			"fromNode": "n_bf18b195af",
-			"fromSide": "right",
-			"toNode": "n_dbd6442a0b",
-			"toSide": "left"
-		},
-		{
-			"id": "e_6b2fb2ea7c",
-			"fromNode": "n_dbd6442a0b",
-			"fromSide": "right",
-			"toNode": "n_1f7479c5a2",
-			"toSide": "left"
-		},
-		{
-			"id": "e_5c7eb5bcc1",
-			"fromNode": "n_dbd6442a0b",
-			"fromSide": "right",
-			"toNode": "n_9e8db739d1",
-			"toSide": "left"
-		},
-		{
-			"id": "e_20cf488cc8",
-			"fromNode": "n_dbd6442a0b",
-			"fromSide": "right",
-			"toNode": "n_36e4617fdf",
-			"toSide": "left"
-		},
-		{
-			"id": "e_aa7917b59b",
-			"fromNode": "n_bf18b195af",
-			"fromSide": "right",
-			"toNode": "n_c1a7dd2abf",
-			"toSide": "left"
-		},
-		{
-			"id": "e_90a6e83617",
-			"fromNode": "n_8e33116907",
-			"fromSide": "left",
-			"toNode": "n_c1e483b2d0",
-			"toSide": "right"
-		},
-		{
-			"id": "e_4cf7dc83df",
-			"fromNode": "n_8e33116907",
-			"fromSide": "bottom",
-			"toNode": "n_a493e627f8",
-			"toSide": "top"
-		},
-		{
-			"id": "e_ca034855e7",
-			"fromNode": "n_a493e627f8",
-			"fromSide": "right",
-			"toNode": "n_1133a64372",
-			"toSide": "left"
-		},
-		{
-			"id": "e_5de104fc10",
-			"fromNode": "n_a493e627f8",
-			"fromSide": "left",
-			"toNode": "n_8f4802edd0",
-			"toSide": "right"
-		},
-		{
-			"id": "e_c8692271c2",
-			"fromNode": "n_a493e627f8",
-			"fromSide": "bottom",
-			"toNode": "n_98e6d345ab",
-			"toSide": "top"
-		},
-		{
-			"id": "e_5c38c66cd9",
-			"fromNode": "n_98e6d345ab",
-			"fromSide": "right",
-			"toNode": "n_d34646f1fd",
-			"toSide": "left"
-		},
-		{
-			"id": "e_3b46a62b41",
-			"fromNode": "n_98e6d345ab",
-			"fromSide": "bottom",
-			"toNode": "n_f00e1d8151",
-			"toSide": "top"
-		},
-		{
-			"id": "e_f60451b345",
-			"fromNode": "n_f00e1d8151",
-			"fromSide": "bottom",
-			"toNode": "n_bb7c2d7018",
-			"toSide": "top"
-		},
-		{
-			"id": "e_6cd0b4a042",
-			"fromNode": "n_bb7c2d7018",
-			"fromSide": "right",
-			"toNode": "n_11cf2504d7",
-			"toSide": "left"
-		},
-		{
-			"id": "e_7068fce5b4",
-			"fromNode": "n_bb7c2d7018",
-			"fromSide": "left",
-			"toNode": "n_619c288a2f",
-			"toSide": "right"
-		},
-		{
-			"id": "e_f5fb992082",
-			"fromNode": "n_bb7c2d7018",
-			"fromSide": "bottom",
-			"toNode": "n_6fc77d3558",
-			"toSide": "top"
-		},
-		{
-			"id": "e_1e414fdaa4",
-			"fromNode": "n_6fc77d3558",
-			"fromSide": "right",
-			"toNode": "n_ee1e334364",
-			"toSide": "left"
-		},
-		{
-			"id": "e_74aa8e263c",
-			"fromNode": "n_6fc77d3558",
-			"fromSide": "left",
-			"toNode": "n_d69756c8fd",
-			"toSide": "right"
-		},
-		{
-			"id": "e_ad5ce909fb",
-			"fromNode": "n_6fc77d3558",
-			"fromSide": "right",
-			"toNode": "n_416c86c7a9",
-			"toSide": "left"
-		},
-		{
-			"id": "e_a99374aa98",
-			"fromNode": "n_6fc77d3558",
-			"fromSide": "bottom",
-			"toNode": "n_235841ecfa",
-			"toSide": "top"
-		},
-		{
-			"id": "e_478d5cd0b0",
-			"fromNode": "n_235841ecfa",
-			"fromSide": "right",
-			"toNode": "n_c6ccce8189",
-			"toSide": "left"
-		},
-		{
-			"id": "e_c523dc22ed",
-			"fromNode": "n_c6ccce8189",
-			"fromSide": "right",
-			"toNode": "n_8d7ef76fdd",
-			"toSide": "left"
-		},
-		{
-			"id": "e_f121b522fa",
-			"fromNode": "n_8d7ef76fdd",
-			"fromSide": "right",
-			"toNode": "n_64772f1472",
-			"toSide": "left"
-		},
-		{
-			"id": "e_37c5e94d86",
-			"fromNode": "n_c6ccce8189",
-			"fromSide": "right",
-			"toNode": "n_c515e1fb46",
-			"toSide": "left"
-		},
-		{
-			"id": "e_98d487a0b7",
-			"fromNode": "n_c6ccce8189",
-			"fromSide": "right",
-			"toNode": "n_7e80798d47",
-			"toSide": "left"
-		},
-		{
-			"id": "e_324bac136d",
-			"fromNode": "n_c6ccce8189",
-			"fromSide": "right",
-			"toNode": "n_b94b6593b3",
-			"toSide": "left"
-		},
-		{
-			"id": "e_bab42c7204",
-			"fromNode": "n_b94b6593b3",
-			"fromSide": "right",
-			"toNode": "n_248481cc04",
-			"toSide": "left"
-		},
-		{
-			"id": "e_826fcc0acd",
-			"fromNode": "n_235841ecfa",
-			"fromSide": "left",
-			"toNode": "n_05ca101164",
-			"toSide": "right"
-		},
-		{
-			"id": "e_3189fdd78c",
-			"fromNode": "n_05ca101164",
-			"fromSide": "left",
-			"toNode": "n_f4abc89c6a",
-			"toSide": "right"
-		},
-		{
-			"id": "e_b242cd755d",
-			"fromNode": "n_05ca101164",
-			"fromSide": "left",
-			"toNode": "n_60eef9367f",
-			"toSide": "right"
-		},
-		{
-			"id": "e_96def8b7ab",
-			"fromNode": "n_235841ecfa",
-			"fromSide": "left",
-			"toNode": "n_f844471ba4",
-			"toSide": "right"
-		},
-		{
-			"id": "e_0c4030c72b",
-			"fromNode": "n_4a66490dd9",
-			"fromSide": "right",
-			"toNode": "n_c1cf7bc196",
-			"toSide": "right",
-			"color": "1"
-		},
-		{
-			"id": "e_1ca3e47d87",
-			"fromNode": "n_c1cf7bc196",
-			"fromSide": "left",
-			"toNode": "n_a434510472",
-			"toSide": "left",
-			"color": "2"
-		},
-		{
-			"id": "e_cf423710c3",
-			"fromNode": "n_a434510472",
-			"fromSide": "right",
-			"toNode": "n_6de0caeeec",
-			"toSide": "right",
-			"color": "5"
-		},
-		{
-			"id": "e_32f0f6280f",
-			"fromNode": "n_6de0caeeec",
-			"fromSide": "left",
-			"toNode": "n_0e6324d0db",
-			"toSide": "left"
-		}
-	],
-	"metadata": {
-		"version": "1.0-1.0",
-		"frontmatter": {
-			"publish": true,
-			"permalink": "/roadmap/",
-			"title": "Roadmap"
-		}
-	}
+  "nodes": [
+    {
+      "id": "n_36896ec4ff",
+      "type": "text",
+      "text": "# [[Home/.omc/.omc|.omc]]",
+      "x": 0,
+      "y": 0,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_c7385d9de7",
+      "type": "text",
+      "text": "# [[Home/.omc/state/state|state]]",
+      "x": 420,
+      "y": 0,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_908428c699",
+      "type": "text",
+      "text": "# [[Home/.omc/state/sessions/sessions|sessions]]",
+      "x": 840,
+      "y": 120,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_274fd47912",
+      "type": "text",
+      "text": "# [[Home/.omc/state/sessions/9fccd278-e606-4612-8079-e5bbe97fe142/9fccd278-e606-4612-8079-e5bbe97fe142|9fccd278-e606-4612-8079-e5bbe97fe142]]",
+      "x": 1260,
+      "y": 240,
+      "width": 340,
+      "height": 80
+    },
+    {
+      "id": "n_d17a9f6109",
+      "type": "text",
+      "text": "# [[Home/AI & ML/AI & ML|AI & ML]]",
+      "x": 0,
+      "y": 520,
+      "width": 340,
+      "height": 80,
+      "color": "4"
+    },
+    {
+      "id": "n_4d06010d24",
+      "type": "text",
+      "text": "# [[Home/AI & ML/LLM/LLM|LLM]]",
+      "x": 420,
+      "y": 520,
+      "width": 340,
+      "height": 80,
+      "color": "4"
+    },
+    {
+      "id": "n_44d28f3f57",
+      "type": "text",
+      "text": "# [[Home/AI & ML/LLM/Agents/Agents|Agents]]",
+      "x": 840,
+      "y": 640,
+      "width": 340,
+      "height": 80,
+      "color": "4"
+    },
+    {
+      "id": "n_91d77e108f",
+      "type": "text",
+      "text": "# [[Home/AI & ML/LLM/Agents/Evaluation/Evaluation|Evaluation]]",
+      "x": 1260,
+      "y": 760,
+      "width": 340,
+      "height": 80,
+      "color": "4"
+    },
+    {
+      "id": "n_dcca9436f1",
+      "type": "text",
+      "text": "# [[Home/AI & ML/LLM/Evaluation/Evaluation|Evaluation]]",
+      "x": 840,
+      "y": 880,
+      "width": 340,
+      "height": 80,
+      "color": "4"
+    },
+    {
+      "id": "n_5a4ed5be3d",
+      "type": "text",
+      "text": "# [[Home/AI & ML/LLM/Prompting/Prompting|Prompting]]",
+      "x": 840,
+      "y": 1000,
+      "width": 340,
+      "height": 80,
+      "color": "4"
+    },
+    {
+      "id": "n_24a7302d3a",
+      "type": "text",
+      "text": "# [[Home/AI & ML/LLM/RAG/RAG|RAG]]",
+      "x": 840,
+      "y": 1120,
+      "width": 340,
+      "height": 80,
+      "color": "4"
+    },
+    {
+      "id": "n_944baaa5ea",
+      "type": "text",
+      "text": "# [[Home/AI & ML/LLM/RAG/Evaluation/Evaluation|Evaluation]]",
+      "x": 1260,
+      "y": 1240,
+      "width": 340,
+      "height": 80,
+      "color": "4"
+    },
+    {
+      "id": "n_175648160a",
+      "type": "text",
+      "text": "# [[Home/AI & ML/Machine Learning/Machine Learning|Machine Learning]]",
+      "x": -420,
+      "y": 520,
+      "width": 340,
+      "height": 80,
+      "color": "4"
+    },
+    {
+      "id": "n_9ddd68cc06",
+      "type": "text",
+      "text": "# [[Home/AI & ML/Machine Learning/Evaluation/Evaluation|Evaluation]]",
+      "x": -840,
+      "y": 640,
+      "width": 340,
+      "height": 80,
+      "color": "4"
+    },
+    {
+      "id": "n_059ba1103e",
+      "type": "text",
+      "text": "# [[Home/AI & ML/Machine Learning/Types/Types|Types]]",
+      "x": -840,
+      "y": 760,
+      "width": 340,
+      "height": 80,
+      "color": "4"
+    },
+    {
+      "id": "n_59996232f4",
+      "type": "text",
+      "text": "# [[Home/AI & ML/Tooling/Tooling|Tooling]]",
+      "x": -420,
+      "y": 880,
+      "width": 340,
+      "height": 80,
+      "color": "4"
+    },
+    {
+      "id": "n_a60188752e",
+      "type": "text",
+      "text": "# [[Home/Architecture/Architecture|Architecture]]",
+      "x": 0,
+      "y": 1520,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_c8cc8fe95b",
+      "type": "text",
+      "text": "# [[Home/Architecture/Application Architecture/Application Architecture|Application Architecture]]",
+      "x": 420,
+      "y": 1520,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_76049fb9ac",
+      "type": "text",
+      "text": "# [[Home/Architecture/Distributed Systems/Distributed Systems|Distributed Systems]]",
+      "x": -420,
+      "y": 1520,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_29aad89bda",
+      "type": "text",
+      "text": "# [[Home/Architecture/Distributed Systems/Message Queues/Message Queues|Message Queues]]",
+      "x": -840,
+      "y": 1640,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_48cbcd6400",
+      "type": "text",
+      "text": "# [[Home/Architecture/Distributed Systems/Scalability Patterns/Scalability Patterns|Scalability Patterns]]",
+      "x": -840,
+      "y": 1760,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_40669c5467",
+      "type": "text",
+      "text": "# [[Home/Architecture/Patterns/Patterns|Patterns]]",
+      "x": 420,
+      "y": 1640,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_6bc7df8a43",
+      "type": "text",
+      "text": "# [[Home/Architecture/Patterns/Architectural Patterns/Architectural Patterns|Architectural Patterns]]",
+      "x": 840,
+      "y": 1760,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_3103651c1d",
+      "type": "text",
+      "text": "# [[Home/Architecture/Patterns/Design Patterns/Design Patterns|Design Patterns]]",
+      "x": 840,
+      "y": 1880,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_d595fdac1b",
+      "type": "text",
+      "text": "# [[Home/Architecture/Patterns/Design Patterns/Behavioral/Behavioral|Behavioral]]",
+      "x": 1260,
+      "y": 2000,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_674ab80b76",
+      "type": "text",
+      "text": "# [[Home/Architecture/Patterns/Design Patterns/Creational/Creational|Creational]]",
+      "x": 1260,
+      "y": 2120,
+      "width": 340,
+      "height": 80,
+      "color": "4"
+    },
+    {
+      "id": "n_ed1eeea237",
+      "type": "text",
+      "text": "# [[Home/Architecture/Patterns/Design Patterns/Structural/Structural|Structural]]",
+      "x": 1260,
+      "y": 2240,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_b1989bd1b2",
+      "type": "text",
+      "text": "# [[Home/Architecture/Patterns/Resilience Patterns/Resilience Patterns|Resilience Patterns]]",
+      "x": 840,
+      "y": 2360,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_d76d6232a4",
+      "type": "text",
+      "text": "# [[Home/Architecture/System Architecture/System Architecture|System Architecture]]",
+      "x": -420,
+      "y": 1880,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_8ac2c781f7",
+      "type": "text",
+      "text": "# [[Home/Cloud/Cloud|Cloud]]",
+      "x": 0,
+      "y": 2640,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_cafbd1a60a",
+      "type": "text",
+      "text": "# [[Home/Cloud/AWS/AWS|AWS]]",
+      "x": 420,
+      "y": 2640,
+      "width": 340,
+      "height": 80,
+      "color": "2"
+    },
+    {
+      "id": "n_58f1808cdd",
+      "type": "text",
+      "text": "# [[Home/Cloud/Azure/Azure|Azure]]",
+      "x": -420,
+      "y": 2640,
+      "width": 340,
+      "height": 80,
+      "color": "2"
+    },
+    {
+      "id": "n_fb668430ee",
+      "type": "text",
+      "text": "# [[Home/Cloud/Google Cloud/Google Cloud|Google Cloud]]",
+      "x": 420,
+      "y": 2760,
+      "width": 340,
+      "height": 80,
+      "color": "2"
+    },
+    {
+      "id": "n_fb4b199c6d",
+      "type": "text",
+      "text": "# [[Home/Computer Science/Computer Science|Computer Science]]",
+      "x": 0,
+      "y": 3040,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_a02abba51f",
+      "type": "text",
+      "text": "# [[Home/Computer Science/Algorithms/Algorithms|Algorithms]]",
+      "x": 420,
+      "y": 3040,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_eb8a617fef",
+      "type": "text",
+      "text": "# [[Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms|Graph Algorithms]]",
+      "x": 840,
+      "y": 3160,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_9592276565",
+      "type": "text",
+      "text": "# [[Home/Computer Science/Algorithms/Paradigms/Paradigms|Paradigms]]",
+      "x": 840,
+      "y": 3280,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_52cc5b3048",
+      "type": "text",
+      "text": "# [[Home/Computer Science/Algorithms/Patterns/Patterns|Patterns]]",
+      "x": 840,
+      "y": 3400,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_178f915b99",
+      "type": "text",
+      "text": "# [[Home/Computer Science/Algorithms/Search Algorithms/Search Algorithms|Search Algorithms]]",
+      "x": 840,
+      "y": 3520,
+      "width": 340,
+      "height": 80,
+      "color": "4"
+    },
+    {
+      "id": "n_9b15d1a3c2",
+      "type": "text",
+      "text": "# [[Home/Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms|Sorting Algorithms]]",
+      "x": 840,
+      "y": 3640,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_57749fcd3f",
+      "type": "text",
+      "text": "# [[Home/Computer Science/Data Structures/Data Structures|Data Structures]]",
+      "x": -420,
+      "y": 3040,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_8902c507c0",
+      "type": "text",
+      "text": "# [[Home/Data Persistence/Data Persistence|Data Persistence]]",
+      "x": 0,
+      "y": 3920,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_332c392774",
+      "type": "text",
+      "text": "# [[Home/Data Persistence/NoSQL/NoSQL|NoSQL]]",
+      "x": 420,
+      "y": 3920,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_41893888b4",
+      "type": "text",
+      "text": "# [[Home/Data Persistence/ORMs/ORMs|ORMs]]",
+      "x": -420,
+      "y": 3920,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_80dc191cc3",
+      "type": "text",
+      "text": "# [[Home/Data Persistence/SQL/SQL|SQL]]",
+      "x": 420,
+      "y": 4040,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_05f2128b75",
+      "type": "text",
+      "text": "# [[Home/DevOps/DevOps|DevOps]]",
+      "x": 0,
+      "y": 4320,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_5b22d5a91e",
+      "type": "text",
+      "text": "# [[Home/DevOps/Deployment Strategies/Deployment Strategies|Deployment Strategies]]",
+      "x": 420,
+      "y": 4320,
+      "width": 340,
+      "height": 80,
+      "color": "6"
+    },
+    {
+      "id": "n_7a4a503bf9",
+      "type": "text",
+      "text": "# [[Home/DevOps/Version Control Systems/Version Control Systems|Version Control Systems]]",
+      "x": -420,
+      "y": 4320,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_9380ac350f",
+      "type": "text",
+      "text": "# [[Home/Development Practices/Development Practices|Development Practices]]",
+      "x": 0,
+      "y": 4600,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_01fe2700f7",
+      "type": "text",
+      "text": "# [[Home/Development Practices/Paradigms/Paradigms|Paradigms]]",
+      "x": 420,
+      "y": 4600,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_46d63ee25f",
+      "type": "text",
+      "text": "# [[Home/Development Practices/Principles/Principles|Principles]]",
+      "x": -420,
+      "y": 4600,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_b2bfdc08f5",
+      "type": "text",
+      "text": "# [[Home/Networks/Networks|Networks]]",
+      "x": 0,
+      "y": 4880,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_48cc0f0446",
+      "type": "text",
+      "text": "# [[Home/Networks/Architecture & Ops/Architecture & Ops|Architecture & Ops]]",
+      "x": 420,
+      "y": 4880,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_bba3e489e8",
+      "type": "text",
+      "text": "# [[Home/Networks/Protocols/Protocols|Protocols]]",
+      "x": -420,
+      "y": 4880,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_2dd5700c51",
+      "type": "text",
+      "text": "# [[Home/Networks/Transport & Sockets/Transport & Sockets|Transport & Sockets]]",
+      "x": 420,
+      "y": 5000,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_4a92798426",
+      "type": "text",
+      "text": "# [[Home/Programming/Programming|Programming]]",
+      "x": 0,
+      "y": 5280,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_94165b6a1a",
+      "type": "text",
+      "text": "# [[Home/Programming/NET/NET|NET]]",
+      "x": 420,
+      "y": 5280,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_d5754aed6e",
+      "type": "text",
+      "text": "# [[Home/Programming/NET/ASP.NET Web API/ASP.NET Web API|ASP.NET Web API]]",
+      "x": 840,
+      "y": 5400,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_2cf4e55139",
+      "type": "text",
+      "text": "# [[Home/Programming/NET/CSharp/CSharp|CSharp]]",
+      "x": 840,
+      "y": 5520,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_e7cba1ac01",
+      "type": "text",
+      "text": "# [[Home/Programming/NET/CSharp/Concurrency and Parallelism/Concurrency and Parallelism|Concurrency and Parallelism]]",
+      "x": 1260,
+      "y": 5640,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_6cafba7b0e",
+      "type": "text",
+      "text": "# [[Home/Programming/NET/CSharp/Fundamentals/Fundamentals|Fundamentals]]",
+      "x": 1260,
+      "y": 5760,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_45cda74957",
+      "type": "text",
+      "text": "# [[Home/Programming/NET/CSharp/Fundamentals/Types/Types|Types]]",
+      "x": 1680,
+      "y": 5880,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_f4c58f9fd1",
+      "type": "text",
+      "text": "# [[Home/Programming/NET/Other/Other|Other]]",
+      "x": 840,
+      "y": 6000,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_158b3542d7",
+      "type": "text",
+      "text": "# [[Home/Programming/NET/Runtime/Runtime|Runtime]]",
+      "x": 840,
+      "y": 6120,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_513d7e3128",
+      "type": "text",
+      "text": "# [[Home/SDLC/SDLC|SDLC]]",
+      "x": 0,
+      "y": 6400,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_2537584d69",
+      "type": "text",
+      "text": "# [[Home/Security/Security|Security]]",
+      "x": 0,
+      "y": 6640,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_159ffae3a7",
+      "type": "text",
+      "text": "# [[Home/Security/Authentication/Authentication|Authentication]]",
+      "x": 420,
+      "y": 6640,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_328ae87cd7",
+      "type": "group",
+      "label": "Legend",
+      "x": -1460,
+      "y": -20,
+      "width": 540,
+      "height": 530
+    },
+    {
+      "id": "n_b0ac2236f9",
+      "type": "text",
+      "text": "#### Roadmap legend\n**Generated:** Jul 08 2026 | 05:00PM",
+      "x": -1440,
+      "y": 0,
+      "width": 500,
+      "height": 110
+    },
+    {
+      "id": "n_4a66490dd9",
+      "type": "text",
+      "text": "Not-Started: 45",
+      "x": -1380,
+      "y": 126,
+      "width": 380,
+      "height": 60,
+      "color": "1"
+    },
+    {
+      "id": "n_c1cf7bc196",
+      "type": "text",
+      "text": "Creation: 3",
+      "x": -1380,
+      "y": 202,
+      "width": 380,
+      "height": 60,
+      "color": "2"
+    },
+    {
+      "id": "n_a434510472",
+      "type": "text",
+      "text": "Repetition: 0",
+      "x": -1380,
+      "y": 278,
+      "width": 380,
+      "height": 60,
+      "color": "5"
+    },
+    {
+      "id": "n_6de0caeeec",
+      "type": "text",
+      "text": "Ready To Repeat: 0",
+      "x": -1380,
+      "y": 354,
+      "width": 380,
+      "height": 60
+    },
+    {
+      "id": "n_0e6324d0db",
+      "type": "text",
+      "text": "Done: 14",
+      "x": -1380,
+      "y": 430,
+      "width": 380,
+      "height": 60,
+      "color": "4"
+    }
+  ],
+  "edges": [
+    {
+      "id": "e_ccde568903",
+      "fromNode": "n_36896ec4ff",
+      "fromSide": "right",
+      "toNode": "n_c7385d9de7",
+      "toSide": "left"
+    },
+    {
+      "id": "e_e3188e9e91",
+      "fromNode": "n_c7385d9de7",
+      "fromSide": "right",
+      "toNode": "n_908428c699",
+      "toSide": "left"
+    },
+    {
+      "id": "e_ec53160200",
+      "fromNode": "n_908428c699",
+      "fromSide": "right",
+      "toNode": "n_274fd47912",
+      "toSide": "left"
+    },
+    {
+      "id": "e_3eca02d36a",
+      "fromNode": "n_36896ec4ff",
+      "fromSide": "bottom",
+      "toNode": "n_d17a9f6109",
+      "toSide": "top"
+    },
+    {
+      "id": "e_ad46500ea9",
+      "fromNode": "n_d17a9f6109",
+      "fromSide": "right",
+      "toNode": "n_4d06010d24",
+      "toSide": "left"
+    },
+    {
+      "id": "e_14004a739e",
+      "fromNode": "n_4d06010d24",
+      "fromSide": "right",
+      "toNode": "n_44d28f3f57",
+      "toSide": "left"
+    },
+    {
+      "id": "e_3066d15047",
+      "fromNode": "n_44d28f3f57",
+      "fromSide": "right",
+      "toNode": "n_91d77e108f",
+      "toSide": "left"
+    },
+    {
+      "id": "e_0f615b6a0f",
+      "fromNode": "n_4d06010d24",
+      "fromSide": "right",
+      "toNode": "n_dcca9436f1",
+      "toSide": "left"
+    },
+    {
+      "id": "e_4dbcc56816",
+      "fromNode": "n_4d06010d24",
+      "fromSide": "right",
+      "toNode": "n_5a4ed5be3d",
+      "toSide": "left"
+    },
+    {
+      "id": "e_35333d40d1",
+      "fromNode": "n_4d06010d24",
+      "fromSide": "right",
+      "toNode": "n_24a7302d3a",
+      "toSide": "left"
+    },
+    {
+      "id": "e_0fa6636723",
+      "fromNode": "n_24a7302d3a",
+      "fromSide": "right",
+      "toNode": "n_944baaa5ea",
+      "toSide": "left"
+    },
+    {
+      "id": "e_72c7c8570f",
+      "fromNode": "n_d17a9f6109",
+      "fromSide": "left",
+      "toNode": "n_175648160a",
+      "toSide": "right"
+    },
+    {
+      "id": "e_8ee84bf0d6",
+      "fromNode": "n_175648160a",
+      "fromSide": "left",
+      "toNode": "n_9ddd68cc06",
+      "toSide": "right"
+    },
+    {
+      "id": "e_3cad2aa972",
+      "fromNode": "n_175648160a",
+      "fromSide": "left",
+      "toNode": "n_059ba1103e",
+      "toSide": "right"
+    },
+    {
+      "id": "e_e58936c6b6",
+      "fromNode": "n_d17a9f6109",
+      "fromSide": "left",
+      "toNode": "n_59996232f4",
+      "toSide": "right"
+    },
+    {
+      "id": "e_4a63166bbf",
+      "fromNode": "n_d17a9f6109",
+      "fromSide": "bottom",
+      "toNode": "n_a60188752e",
+      "toSide": "top"
+    },
+    {
+      "id": "e_8779c85b22",
+      "fromNode": "n_a60188752e",
+      "fromSide": "right",
+      "toNode": "n_c8cc8fe95b",
+      "toSide": "left"
+    },
+    {
+      "id": "e_07d981a6ef",
+      "fromNode": "n_a60188752e",
+      "fromSide": "left",
+      "toNode": "n_76049fb9ac",
+      "toSide": "right"
+    },
+    {
+      "id": "e_44e48fe789",
+      "fromNode": "n_76049fb9ac",
+      "fromSide": "left",
+      "toNode": "n_29aad89bda",
+      "toSide": "right"
+    },
+    {
+      "id": "e_c5d39d564a",
+      "fromNode": "n_76049fb9ac",
+      "fromSide": "left",
+      "toNode": "n_48cbcd6400",
+      "toSide": "right"
+    },
+    {
+      "id": "e_c5a2071b31",
+      "fromNode": "n_a60188752e",
+      "fromSide": "right",
+      "toNode": "n_40669c5467",
+      "toSide": "left"
+    },
+    {
+      "id": "e_49a1993757",
+      "fromNode": "n_40669c5467",
+      "fromSide": "right",
+      "toNode": "n_6bc7df8a43",
+      "toSide": "left"
+    },
+    {
+      "id": "e_e79f15669f",
+      "fromNode": "n_40669c5467",
+      "fromSide": "right",
+      "toNode": "n_3103651c1d",
+      "toSide": "left"
+    },
+    {
+      "id": "e_57ec3ada52",
+      "fromNode": "n_3103651c1d",
+      "fromSide": "right",
+      "toNode": "n_d595fdac1b",
+      "toSide": "left"
+    },
+    {
+      "id": "e_2b67883d25",
+      "fromNode": "n_3103651c1d",
+      "fromSide": "right",
+      "toNode": "n_674ab80b76",
+      "toSide": "left"
+    },
+    {
+      "id": "e_b9b4595209",
+      "fromNode": "n_3103651c1d",
+      "fromSide": "right",
+      "toNode": "n_ed1eeea237",
+      "toSide": "left"
+    },
+    {
+      "id": "e_555ee6fe32",
+      "fromNode": "n_40669c5467",
+      "fromSide": "right",
+      "toNode": "n_b1989bd1b2",
+      "toSide": "left"
+    },
+    {
+      "id": "e_4cac7c46c5",
+      "fromNode": "n_a60188752e",
+      "fromSide": "left",
+      "toNode": "n_d76d6232a4",
+      "toSide": "right"
+    },
+    {
+      "id": "e_9c5e1e34cf",
+      "fromNode": "n_a60188752e",
+      "fromSide": "bottom",
+      "toNode": "n_8ac2c781f7",
+      "toSide": "top"
+    },
+    {
+      "id": "e_2c0b91abb5",
+      "fromNode": "n_8ac2c781f7",
+      "fromSide": "right",
+      "toNode": "n_cafbd1a60a",
+      "toSide": "left"
+    },
+    {
+      "id": "e_db9b0d5d1f",
+      "fromNode": "n_8ac2c781f7",
+      "fromSide": "left",
+      "toNode": "n_58f1808cdd",
+      "toSide": "right"
+    },
+    {
+      "id": "e_8371ff08a5",
+      "fromNode": "n_8ac2c781f7",
+      "fromSide": "right",
+      "toNode": "n_fb668430ee",
+      "toSide": "left"
+    },
+    {
+      "id": "e_da73837651",
+      "fromNode": "n_8ac2c781f7",
+      "fromSide": "bottom",
+      "toNode": "n_fb4b199c6d",
+      "toSide": "top"
+    },
+    {
+      "id": "e_0d3cc6dda2",
+      "fromNode": "n_fb4b199c6d",
+      "fromSide": "right",
+      "toNode": "n_a02abba51f",
+      "toSide": "left"
+    },
+    {
+      "id": "e_d35105e185",
+      "fromNode": "n_a02abba51f",
+      "fromSide": "right",
+      "toNode": "n_eb8a617fef",
+      "toSide": "left"
+    },
+    {
+      "id": "e_b7d2f3f22f",
+      "fromNode": "n_a02abba51f",
+      "fromSide": "right",
+      "toNode": "n_9592276565",
+      "toSide": "left"
+    },
+    {
+      "id": "e_7b0ce18902",
+      "fromNode": "n_a02abba51f",
+      "fromSide": "right",
+      "toNode": "n_52cc5b3048",
+      "toSide": "left"
+    },
+    {
+      "id": "e_e1a515e247",
+      "fromNode": "n_a02abba51f",
+      "fromSide": "right",
+      "toNode": "n_178f915b99",
+      "toSide": "left"
+    },
+    {
+      "id": "e_2fc55208bc",
+      "fromNode": "n_a02abba51f",
+      "fromSide": "right",
+      "toNode": "n_9b15d1a3c2",
+      "toSide": "left"
+    },
+    {
+      "id": "e_edad50cddf",
+      "fromNode": "n_fb4b199c6d",
+      "fromSide": "left",
+      "toNode": "n_57749fcd3f",
+      "toSide": "right"
+    },
+    {
+      "id": "e_a8a712b3e9",
+      "fromNode": "n_fb4b199c6d",
+      "fromSide": "bottom",
+      "toNode": "n_8902c507c0",
+      "toSide": "top"
+    },
+    {
+      "id": "e_0ab891d24c",
+      "fromNode": "n_8902c507c0",
+      "fromSide": "right",
+      "toNode": "n_332c392774",
+      "toSide": "left"
+    },
+    {
+      "id": "e_3d9968fd76",
+      "fromNode": "n_8902c507c0",
+      "fromSide": "left",
+      "toNode": "n_41893888b4",
+      "toSide": "right"
+    },
+    {
+      "id": "e_76ae0e78cc",
+      "fromNode": "n_8902c507c0",
+      "fromSide": "right",
+      "toNode": "n_80dc191cc3",
+      "toSide": "left"
+    },
+    {
+      "id": "e_e879b67ea6",
+      "fromNode": "n_8902c507c0",
+      "fromSide": "bottom",
+      "toNode": "n_05f2128b75",
+      "toSide": "top"
+    },
+    {
+      "id": "e_a38769d407",
+      "fromNode": "n_05f2128b75",
+      "fromSide": "right",
+      "toNode": "n_5b22d5a91e",
+      "toSide": "left"
+    },
+    {
+      "id": "e_1ef464558d",
+      "fromNode": "n_05f2128b75",
+      "fromSide": "left",
+      "toNode": "n_7a4a503bf9",
+      "toSide": "right"
+    },
+    {
+      "id": "e_1a42855967",
+      "fromNode": "n_05f2128b75",
+      "fromSide": "bottom",
+      "toNode": "n_9380ac350f",
+      "toSide": "top"
+    },
+    {
+      "id": "e_862d9f5562",
+      "fromNode": "n_9380ac350f",
+      "fromSide": "right",
+      "toNode": "n_01fe2700f7",
+      "toSide": "left"
+    },
+    {
+      "id": "e_e8b718bcf9",
+      "fromNode": "n_9380ac350f",
+      "fromSide": "left",
+      "toNode": "n_46d63ee25f",
+      "toSide": "right"
+    },
+    {
+      "id": "e_c4d1d7f88e",
+      "fromNode": "n_9380ac350f",
+      "fromSide": "bottom",
+      "toNode": "n_b2bfdc08f5",
+      "toSide": "top"
+    },
+    {
+      "id": "e_0f8df35926",
+      "fromNode": "n_b2bfdc08f5",
+      "fromSide": "right",
+      "toNode": "n_48cc0f0446",
+      "toSide": "left"
+    },
+    {
+      "id": "e_6e7841577e",
+      "fromNode": "n_b2bfdc08f5",
+      "fromSide": "left",
+      "toNode": "n_bba3e489e8",
+      "toSide": "right"
+    },
+    {
+      "id": "e_0e94d48069",
+      "fromNode": "n_b2bfdc08f5",
+      "fromSide": "right",
+      "toNode": "n_2dd5700c51",
+      "toSide": "left"
+    },
+    {
+      "id": "e_e35482ca2c",
+      "fromNode": "n_b2bfdc08f5",
+      "fromSide": "bottom",
+      "toNode": "n_4a92798426",
+      "toSide": "top"
+    },
+    {
+      "id": "e_b95b413eda",
+      "fromNode": "n_4a92798426",
+      "fromSide": "right",
+      "toNode": "n_94165b6a1a",
+      "toSide": "left"
+    },
+    {
+      "id": "e_00c59f6206",
+      "fromNode": "n_94165b6a1a",
+      "fromSide": "right",
+      "toNode": "n_d5754aed6e",
+      "toSide": "left"
+    },
+    {
+      "id": "e_67e4fba8f6",
+      "fromNode": "n_94165b6a1a",
+      "fromSide": "right",
+      "toNode": "n_2cf4e55139",
+      "toSide": "left"
+    },
+    {
+      "id": "e_a572240182",
+      "fromNode": "n_2cf4e55139",
+      "fromSide": "right",
+      "toNode": "n_e7cba1ac01",
+      "toSide": "left"
+    },
+    {
+      "id": "e_7c9f26a921",
+      "fromNode": "n_2cf4e55139",
+      "fromSide": "right",
+      "toNode": "n_6cafba7b0e",
+      "toSide": "left"
+    },
+    {
+      "id": "e_dcd28eb35e",
+      "fromNode": "n_6cafba7b0e",
+      "fromSide": "right",
+      "toNode": "n_45cda74957",
+      "toSide": "left"
+    },
+    {
+      "id": "e_b41ef0e6bf",
+      "fromNode": "n_94165b6a1a",
+      "fromSide": "right",
+      "toNode": "n_f4c58f9fd1",
+      "toSide": "left"
+    },
+    {
+      "id": "e_99f32d2ceb",
+      "fromNode": "n_94165b6a1a",
+      "fromSide": "right",
+      "toNode": "n_158b3542d7",
+      "toSide": "left"
+    },
+    {
+      "id": "e_c73832ea92",
+      "fromNode": "n_4a92798426",
+      "fromSide": "bottom",
+      "toNode": "n_513d7e3128",
+      "toSide": "top"
+    },
+    {
+      "id": "e_33c0dbb7b8",
+      "fromNode": "n_513d7e3128",
+      "fromSide": "bottom",
+      "toNode": "n_2537584d69",
+      "toSide": "top"
+    },
+    {
+      "id": "e_072272c7bf",
+      "fromNode": "n_2537584d69",
+      "fromSide": "right",
+      "toNode": "n_159ffae3a7",
+      "toSide": "left"
+    },
+    {
+      "id": "e_0c4030c72b",
+      "fromNode": "n_4a66490dd9",
+      "fromSide": "right",
+      "toNode": "n_c1cf7bc196",
+      "toSide": "right",
+      "color": "1"
+    },
+    {
+      "id": "e_1ca3e47d87",
+      "fromNode": "n_c1cf7bc196",
+      "fromSide": "left",
+      "toNode": "n_a434510472",
+      "toSide": "left",
+      "color": "2"
+    },
+    {
+      "id": "e_cf423710c3",
+      "fromNode": "n_a434510472",
+      "fromSide": "right",
+      "toNode": "n_6de0caeeec",
+      "toSide": "right",
+      "color": "5"
+    },
+    {
+      "id": "e_32f0f6280f",
+      "fromNode": "n_6de0caeeec",
+      "fromSide": "left",
+      "toNode": "n_0e6324d0db",
+      "toSide": "left"
+    }
+  ],
+  "metadata": {
+    "version": "1.0-1.0",
+    "frontmatter": {
+      "publish": true,
+      "permalink": "/roadmap/",
+      "title": "Roadmap"
+    }
+  }
 }

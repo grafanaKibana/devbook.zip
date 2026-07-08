@@ -1,11 +1,10 @@
 import { ExplorerIcons } from "./custom/components/explorer-icons"
+import { ExplorerOrder } from "./custom/components/explorer-order"
 import { QuestionsIndex } from "./custom/components/questions-index"
 import { SiteHeader } from "./custom/components/site-header"
 import { SiteMarquee } from "./custom/components/site-marquee"
 import { Steptrace } from "./custom/components/steptrace"
-import { IconBackfill } from "./custom/transformers/icon-backfill"
 import { QuestionCollector } from "./custom/transformers/question-collector"
-import { StatusBackfill } from "./custom/transformers/status-backfill"
 import { SyncerFixups } from "./custom/transformers/syncer-fixups"
 import { SteptraceBlock } from "./custom/transformers/steptrace-block"
 import { componentRegistry } from "./quartz/components/registry"
@@ -42,14 +41,11 @@ config.plugins.transformers.splice(
 // are already resolved.
 config.plugins.transformers.push(QuestionCollector())
 
-// Restore the `status` frontmatter that Syncer drops on publish, so status-gated
-// components (SiteMarquee) can read it. Reads from the Vault source note.
-config.plugins.transformers.push(StatusBackfill())
-
-// Restore the `icon` frontmatter that Syncer drops on publish, so the Explorer
-// file-tree icons (ExplorerIcons) can render a note's assigned Lucide icon.
-// Reads from the Vault source note.
-config.plugins.transformers.push(IconBackfill())
+// Note: `status`, `icon` and `order` frontmatter used to be restored here from
+// the Vault source note (Syncer once stripped them on publish). Quartz Syncer
+// now publishes these properties into content/ directly, so the status-gated
+// SiteMarquee and the Explorer's icon/order decorations read them straight from
+// each note's frontmatter — no backfill transformers needed.
 
 // Rewrite ```steptrace fences (committed raw by Syncer — not on its freeze
 // allowlist) into the <div class="steptrace-mount" data-config> markers that the
@@ -63,15 +59,17 @@ for (const pageLayout of Object.values(layout.byPageType)) {
   pageLayout.beforeBody = [siteMarquee, ...(pageLayout.beforeBody ?? [])]
 }
 
-// Inject the Explorer file-tree icons (issue #51). It renders nothing itself —
-// it only contributes css + afterDOMLoaded that decorate the community
-// Explorer's client-built tree — so it just needs to be present in the layout
-// on every page (the left sidebar shows everywhere). afterBody is set before the
-// content block below so `content` picks it up too.
+// Inject the Explorer file-tree icons (issue #51) and topic ordering (issue #57).
+// Neither renders visible markup itself — they contribute css / afterDOMLoaded /
+// an inert JSON map that decorate and reorder the community Explorer's
+// client-built tree — so they just need to be present in the layout on every
+// page (the left sidebar shows everywhere). afterBody is set before the content
+// block below so `content` picks them up too.
 const explorerIcons = ExplorerIcons()
-layout.defaults.afterBody = [...(layout.defaults.afterBody ?? []), explorerIcons]
+const explorerOrder = ExplorerOrder()
+layout.defaults.afterBody = [...(layout.defaults.afterBody ?? []), explorerIcons, explorerOrder]
 for (const pageLayout of Object.values(layout.byPageType)) {
-  pageLayout.afterBody = [...(pageLayout.afterBody ?? []), explorerIcons]
+  pageLayout.afterBody = [...(pageLayout.afterBody ?? []), explorerIcons, explorerOrder]
 }
 
 // steptrace: ships the engine loader (afterDOMLoaded) + Quartz theme binding on

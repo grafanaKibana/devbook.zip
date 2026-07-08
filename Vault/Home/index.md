@@ -11,17 +11,17 @@ return function TopicDashboard() {
   const ROOT = (dc.useCurrentFile()?.$path || "Home").split("/")[0];
 
   const TOPICS = [
-    { folder: "01 Programming", title: "Programming", desc: "Languages, .NET internals, paradigms, clean code." },
-    { folder: "02 Computer Science", title: "Computer Science", desc: "Algorithms, data structures, the theory underneath." },
-    { folder: "03 Data Persistence", title: "Data Persistence", desc: "Databases, indexing, transactions, storage engines." },
-    { folder: "04 Networks", title: "Networks", desc: "Protocols, HTTP, TCP/IP, how packets travel." },
-    { folder: "05 Architecture", title: "Architecture", desc: "Distributed systems, patterns, designing for scale." },
-    { folder: "06 Development Practices", title: "Development Practices", desc: "Testing, version control, and the craft." },
-    { folder: "07 AI & ML", title: "AI & ML", desc: "Models, training, applied machine learning." },
-    { folder: "08 Security", title: "Security", desc: "Threats, crypto, auth, defensive design." },
-    { folder: "09 Cloud", title: "Cloud", desc: "AWS/Azure, serverless, cloud-native design." },
-    { folder: "10 DevOps", title: "DevOps", desc: "CI/CD, containers, and automation." },
-    { folder: "11 SDLC", title: "SDLC", desc: "How software gets planned, built, and shipped." },
+    { folder: "Programming", title: "Programming", desc: "Languages, .NET internals, paradigms, clean code." },
+    { folder: "Computer Science", title: "Computer Science", desc: "Algorithms, data structures, the theory underneath." },
+    { folder: "Data Persistence", title: "Data Persistence", desc: "Databases, indexing, transactions, storage engines." },
+    { folder: "Networks", title: "Networks", desc: "Protocols, HTTP, TCP/IP, how packets travel." },
+    { folder: "Architecture", title: "Architecture", desc: "Distributed systems, patterns, designing for scale." },
+    { folder: "Development Practices", title: "Development Practices", desc: "Testing, version control, and the craft." },
+    { folder: "AI & ML", title: "AI & ML", desc: "Models, training, applied machine learning." },
+    { folder: "Security", title: "Security", desc: "Threats, crypto, auth, defensive design." },
+    { folder: "Cloud", title: "Cloud", desc: "AWS/Azure, serverless, cloud-native design." },
+    { folder: "DevOps", title: "DevOps", desc: "CI/CD, containers, and automation." },
+    { folder: "SDLC", title: "SDLC", desc: "How software gets planned, built, and shipped." },
   ];
 
   const ICONS = {
