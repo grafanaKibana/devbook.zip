@@ -266,10 +266,47 @@
   display: none;
 }
 
-// Reader mode is a distraction-free view — hide the "in development" marquee.
-// The header itself lives in `.center`, not a sidebar, so the stock reader-mode
-// rule (which fades the sidebars) leaves it visible and interactive.
+// ---------------------------------------------------------------------------
+// Reader mode (distraction-free).
+// ---------------------------------------------------------------------------
+
+// Always hide the "in development" marquee.
 :root[reader-mode="on"] .site-marquee {
   display: none;
+}
+
+// Desktop / tablet: fade the whole header bar away — the entire .site-header
+// (title, search, theme/reader toggles), not just its controls — and bring it
+// back on hover, mirroring how the sidebars fade. It stays fixed and hoverable
+// at opacity 0, so moving the pointer to the top edge reveals it.
+@media all and not ($mobile) {
+  :root[reader-mode="on"] .site-header {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  :root[reader-mode="on"] .site-header:hover {
+    opacity: 1;
+  }
+}
+
+// The reveal path is :hover, so on any hover-less device the faded header would
+// be stranded with no way to bring it back (and thus no way to leave reader
+// mode). This covers phones AND touch tablets in landscape wider than the mobile
+// breakpoint — width alone isn't enough to tell. Never hide the header without a
+// hover capability; this later rule overrides the fade above where both match.
+@media (hover: none) {
+  :root[reader-mode="on"] .site-header {
+    opacity: 1;
+  }
+}
+
+// Mobile: reader mode must NOT hide the header — it (including the hamburger)
+// stays fully visible. The hamburger lives in the left sidebar, which the stock
+// reader-mode rule fades; override that so the hamburger — and the explorer
+// overlay when opened in reader mode — stays visible and usable.
+@media all and ($mobile) {
+  :root[reader-mode="on"] .page > #quartz-body > .sidebar.left {
+    opacity: 1;
+  }
 }
 
