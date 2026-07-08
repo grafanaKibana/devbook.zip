@@ -21,8 +21,8 @@ import type {
 // Icons are Lucide (https://lucide.dev), matching the set the plugin itself
 // ships. Defaults: folder = book -> book-open, note = file -> file-text. A note's
 // assigned icon (frontmatter `icon:`, a Lucide name) overrides the default for
-// that node; the topic folder-notes carry one (e.g. `code-2`), surfaced to the
-// build by the IconBackfill transformer and inlined here per page as
+// that node; the topic folder-notes carry one (e.g. `code-2`), which Quartz
+// Syncer publishes into content/ and which is inlined here per page as
 // `.ec-icon-map`.
 
 // Lucide inner markup (paths only), rendered inside a shared <svg> wrapper.
