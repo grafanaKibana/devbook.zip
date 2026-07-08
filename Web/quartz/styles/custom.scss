@@ -266,10 +266,37 @@
   display: none;
 }
 
-// Reader mode is a distraction-free view — hide the "in development" marquee.
-// The header itself lives in `.center`, not a sidebar, so the stock reader-mode
-// rule (which fades the sidebars) leaves it visible and interactive.
+// ---------------------------------------------------------------------------
+// Reader mode (distraction-free).
+// ---------------------------------------------------------------------------
+
+// Always hide the "in development" marquee.
 :root[reader-mode="on"] .site-marquee {
   display: none;
+}
+
+// Desktop / tablet: fade the whole header bar away — the entire .site-header
+// (title, search, theme/reader toggles), not just its controls — and bring it
+// back on hover, mirroring how the sidebars fade. It stays fixed and hoverable
+// at opacity 0, so moving the pointer to the top edge reveals it.
+@media all and not ($mobile) {
+  :root[reader-mode="on"] .site-header {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  :root[reader-mode="on"] .site-header:hover {
+    opacity: 1;
+  }
+}
+
+// Mobile: there is no hover on touch, so reader mode must NOT hide the header —
+// it (including the hamburger) stays fully visible. The hamburger lives in the
+// left sidebar, which the stock reader-mode rule fades; override that so the
+// hamburger — and the explorer overlay when opened in reader mode — stays
+// visible and usable.
+@media all and ($mobile) {
+  :root[reader-mode="on"] .page > #quartz-body > .sidebar.left {
+    opacity: 1;
+  }
 }
 
