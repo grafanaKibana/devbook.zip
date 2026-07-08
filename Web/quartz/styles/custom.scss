@@ -186,18 +186,31 @@
     }
   }
 
-  // The left sidebar is a sticky, z-index:1 stacking context, so its hamburger
-  // would be trapped below the z-100 header bar. Lift the whole sidebar above
-  // the bar so the hamburger (and, when open, the full-screen explorer overlay)
-  // paints on top.
+  // On mobile the sidebar holds only the Explorer hamburger. Take it out of the
+  // grid flow as a small fixed box in the top-left corner. This fixes two bugs
+  // its default (sticky, in-flow, opaque, z-index:1) behaviour caused:
+  //   1) it occupied a grid row that pushed the page content down (big top gap);
+  //   2) once raised above the header it would stick its opaque body over the
+  //      bar while scrolling, hiding the search/title/toggles.
+  // Sized to the header height, it only overlaps the empty top-left corner where
+  // the hamburger lives — the rest of the bar stays clear. z-index:101 puts the
+  // hamburger (and the full-screen explorer overlay) above the z-100 header.
   .page > #quartz-body > .sidebar.left {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: var(--site-header-height);
+    height: var(--site-header-height);
     z-index: 101;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    overflow: visible;
   }
 
-  // Lift the Explorer's hamburger (still rendered in the left sidebar) into the
-  // top-left of the fixed bar so the header reads hamburger · title · toggles.
+  // Center the hamburger in that corner box, aligned to the bar's 1.5rem inset.
   .page > #quartz-body > .sidebar.left .mobile-explorer {
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 1.5rem;
     height: var(--site-header-height);
@@ -207,9 +220,29 @@
     z-index: 101;
   }
 
-  // The fixed bar leaves the grid content flush to the top; push it down clear
-  // of both the bar and the marquee strip beneath it.
+  // Open the explorer overlay *below* the header bar so the bar (search, title,
+  // toggles, and the close button) stays visible while the menu is open. Stock
+  // covers the full viewport from top:0; start it at the bar's height instead.
+  //
+  // Keep padding-top:0 — the inner scroller (.explorer-ul) is what actually
+  // scrolls, so any top padding here pushes it down and clips nav items that
+  // much *before* the header edge. Flush to the bar, items disappear right at it.
+  .page > #quartz-body > .sidebar.left .explorer-content {
+    top: var(--site-header-height);
+    height: calc(100dvh - var(--site-header-height));
+    max-height: calc(100dvh - var(--site-header-height));
+    padding-top: 0;
+  }
+
+  // Push grid content below the fixed bar. Sit snug under it by default, and
+  // only reserve the extra room for the marquee strip on pages that actually
+  // have one — otherwise marquee-less pages get a big empty top gap. The
+  // selector targets the real marquee (a page-header child), not the copy the
+  // search preview clones into `.preview-container`.
   .page > #quartz-body {
+    padding-top: calc(var(--site-header-height) + 0.75rem);
+  }
+  .page > #quartz-body:has(.page-header > .popover-hint > .site-marquee) {
     padding-top: calc(var(--site-header-height) + 2.5rem);
   }
 }
