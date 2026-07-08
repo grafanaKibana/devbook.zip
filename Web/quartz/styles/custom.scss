@@ -71,6 +71,22 @@ body {
   }
 }
 
+// The home Topics dashboard cards are transparent by design (authored in the
+// note's datacorejsx so they blend with the page fill) — over the dot grid that
+// lets the texture show through them. On the published site, back each card with
+// the opaque page fill so it reads as a clean surface and the grid stays in the
+// gutters. This is Quartz-only (Obsidian has no grid), so it lives here, not in
+// the shared note. The `.dc-topic-grid` anchor lifts specificity above the note's
+// inline `<style>` (which loads after this in the body) without `!important`.
+.dc-topic-grid .dc-topic-card {
+  background-color: var(--light);
+}
+// Preserve the topic-tinted hover, but composite it over the opaque fill (the
+// note's rule uses a 10%-alpha tint that would otherwise let the grid through).
+.dc-topic-grid .dc-topic-card:hover {
+  background-color: color-mix(in srgb, rgb(var(--topic-rgb)) 10%, var(--light));
+}
+
 // ============================================================================
 // Office-365-style top header.
 //
