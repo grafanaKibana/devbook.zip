@@ -3,7 +3,7 @@
 //  steptrace — interactive, step-by-step algorithm-visualizer cards.
 //  ONE self-contained file. No build, no dependencies. Runs verbatim in:
 //    • the browser (Quartz inlines this file into an afterDOMLoaded script)
-//    • Obsidian   (the devbook-steptrace plugin reads + evaluates this file)
+//    • Obsidian   (the steptrace plugin concatenates this file into its main.js)
 //    • Node       (headless: new Function(src)(); then globalThis.steptrace)
 //  It exposes a global `steptrace` (and module.exports) via the UMD wrapper at
 //  the very bottom — no ESM import/export, so nothing needs compiling.
@@ -863,7 +863,6 @@
     }
   }
 
-  // A small, sensible default graph so a bare { "algorithm": "bfs" } runs.
   // A SearchRecorder snapshot: { type, array, lo, hi, mid, found, target,
   //   comparisons, message }. Rendered as a bar row with the live [lo, hi] range,
   //   the probed middle, and the eliminated halves faded out.
@@ -1132,6 +1131,7 @@
     }
   }
 
+  // A small, sensible default graph so a bare { "algorithm": "bfs" } runs.
   const DEFAULT_GRAPH = {
     directed: false,
     start: "A",
@@ -1907,7 +1907,7 @@
     function paint(frame, i, total) {
       for (let k = 0; k < n; k++) {
         const b = bars[k]
-        // data-driven geometry only; colours come from --az-* via data-state.
+        // data-driven geometry only; colours come from --_* tokens via data-state.
         b.fill.style.height = `${Math.max(2, (frame.array[k] / maxVal) * 100)}%`
         b.num.textContent = frame.array[k]
         let state = "range"
@@ -2627,27 +2627,21 @@
     adjacency,
     mount,
   }
-});
+}); // trailing ";" is load-bearing — an ASI guard so this IIFE stays separate when concatenated into Obsidian's main.js.
 
-/* ============================================================================
- * steptrace — Obsidian adapter. CONCATENATED AFTER engine.js by sync.mjs into
- * the plugin's main.js. The engine ran just above and set globalThis.steptrace;
- * this file has NO import/export so the concatenation stays valid CommonJS
- * (Obsidian loads main.js via require).
- *
- * Registers the `steptrace` code-block processor → the shared engine's mount(),
- * torn down on unload, and binds --st-* to Obsidian's own CSS variables so the
- * card looks native. (The engine still exposes registerSort/registerGraph for a
- * future runtime-extension UI; none is wired here for now.)
- * ========================================================================== */
+/* steptrace — Obsidian host adapter. Concatenated after engine.js into the vault
+ * plugin's main.js by sync.mjs, so it uses no import/export and reads
+ * globalThis.steptrace directly (main.js loads as CommonJS via require). Registers
+ * the `steptrace` code-block processor → engine.mount(), tears each card down on
+ * unload, and binds --st-* to Obsidian's palette so the card looks native.
+ */
 
 const { Plugin, MarkdownRenderChild } = require("obsidian")
 
 const st = globalThis.steptrace
 
-// The ONLY per-host styling: bind the neutral --st-* tokens to Obsidian's palette
-// so the card looks native. Base tokens auto-flip with the Obsidian theme; the
-// abstract state hues get an explicit dark override.
+// The only per-host styling: bind the neutral --st-* tokens to Obsidian's palette.
+// Base tokens auto-flip with the theme; the state hues get an explicit dark override.
 const THEME = `
 .steptrace {
   --st-page: var(--background-primary);
