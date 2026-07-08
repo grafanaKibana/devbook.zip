@@ -48,6 +48,7 @@ DevBook/
 
 ## Documentation
 
+- **[WORKFLOW.md](WORKFLOW.md)** — the SDLC: issues, project board, PR review, and release automation.
 - **[Web/README.md](Web/README.md)** — the content → site pipeline: Obsidian authoring, the Quartz Syncer publish step, the Quartz build, dashboards, customizations, and automations.
 - **[Platform/DevBook/README.md](Platform/DevBook/README.md)** — the .NET RAG backend: ingestion, vector search, the ask agent, and the **[Evaluation](Platform/DevBook/README.md#evaluation)** section.
 - **[Platform/DevBook/DevBook.Evaluations/README.md](Platform/DevBook/DevBook.Evaluations/README.md)** — the RAG retrieval evaluation deep-dive (golden dataset, metrics, methodology).
