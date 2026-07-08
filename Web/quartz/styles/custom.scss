@@ -28,6 +28,66 @@
 }
 
 // ============================================================================
+// Dot-grid ("graph paper") page background.
+//
+// A faint radial-gradient dot pattern layered over the flat page fill
+// (`background-color: var(--light)`, set on <body> in base.scss) to give pages
+// a light technical texture. Pure CSS, no image assets. The dot color is the
+// theme foreground (--dark) at a low alpha via color-mix, so it tracks the active
+// theme and stays low-contrast against the page fill in both light and dark.
+// Tokens below tune the pitch/size/color — keep the dots faint (texture, not
+// noise) so prose, cards, callouts, code blocks and the graph view stay fully
+// legible over them. custom.scss is unlayered, so this wins over base.scss's body
+// rule without specificity games; the body background propagates to the viewport
+// canvas, so the grid fills the screen even on short pages.
+// ============================================================================
+
+:root {
+  --dot-grid-spacing: 22px; // grid pitch
+  --dot-grid-radius: 1px; // dot radius
+  --dot-grid-color: color-mix(in srgb, var(--dark) 7%, transparent);
+}
+:root[saved-theme="dark"] {
+  // Dark fills surface texture more readily — dial the dot back a touch.
+  --dot-grid-color: color-mix(in srgb, var(--dark) 6%, transparent);
+}
+
+body {
+  // Scrolls with content (no `background-attachment: fixed`) to avoid repaint
+  // cost on scroll. The 0.5px feather softens the dot edge against aliasing.
+  background-image: radial-gradient(
+    circle at center,
+    var(--dot-grid-color) var(--dot-grid-radius),
+    transparent calc(var(--dot-grid-radius) + 0.5px)
+  );
+  background-size: var(--dot-grid-spacing) var(--dot-grid-spacing);
+  background-position: 0 0;
+}
+
+// Keep the texture off paper — it's screen chrome, not printed content.
+@media print {
+  body {
+    background-image: none;
+  }
+}
+
+// The home Topics dashboard cards are transparent by design (authored in the
+// note's datacorejsx so they blend with the page fill) — over the dot grid that
+// lets the texture show through them. On the published site, back each card with
+// the opaque page fill so it reads as a clean surface and the grid stays in the
+// gutters. This is Quartz-only (Obsidian has no grid), so it lives here, not in
+// the shared note. The `.dc-topic-grid` anchor lifts specificity above the note's
+// inline `<style>` (which loads after this in the body) without `!important`.
+.dc-topic-grid .dc-topic-card {
+  background-color: var(--light);
+}
+// Preserve the topic-tinted hover, but composite it over the opaque fill (the
+// note's rule uses a 10%-alpha tint that would otherwise let the grid through).
+.dc-topic-grid .dc-topic-card:hover {
+  background-color: color-mix(in srgb, rgb(var(--topic-rgb)) 10%, var(--light));
+}
+
+// ============================================================================
 // Office-365-style top header.
 //
 // The title, search, and theme/reader toggles are rendered by the custom
