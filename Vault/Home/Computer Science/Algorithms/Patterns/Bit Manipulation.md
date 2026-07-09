@@ -31,6 +31,14 @@ The core operators (`&` AND, `|` OR, `^` XOR, `~` NOT, `<<`/`>>` shifts) compose
 
 Two recurring high-value facts: **`x & (x-1)` removes the lowest 1-bit** (basis of Brian Kernighan's bit-count and the power-of-two test), and **XOR is its own inverse** (`a ^ a == 0`, `a ^ 0 == a`), which makes it perfect for "find the unpaired element."
 
+## Visualization
+
+The card below traces Brian Kernighan's population count, the algorithm built on the **`x & (x - 1)` clears the lowest set bit** row of the table above. Each pass isolates the lowest 1-bit, subtracts 1 to watch the borrow ripple up through the low zeros, then AND-s the two together to clear exactly that bit — so the loop runs once per set bit rather than once per bit width.
+
+```steptrace
+{"algorithm":"kernighan-popcount","value":44,"width":8}
+```
+
 ## Example
 
 ```csharp

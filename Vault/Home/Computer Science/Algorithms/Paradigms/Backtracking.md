@@ -33,6 +33,14 @@ graph TD
     A1 --> S[solution]
 ```
 
+## Visualization
+
+```steptrace
+{"algorithm":"n-queens","n":4}
+```
+
+Watch the board fill one queen per row (the row index *is* the recursion depth) while the faint shading marks every square the placed queens already attack. 4-Queens has no solution beneath its first choice: after committing a queen to column 0 it exhausts every branch, so it must **retreat all the way back to row 0**, tear that queen off, and only then — starting from column 1 — does it find the arrangement. That retreat-and-undo, with whole subtrees pruned before they are ever expanded, is exactly the choose / explore / un-choose loop above.
+
 ## Example
 
 Generate all permutations — the canonical choose / explore / un-choose loop:

@@ -811,6 +811,323 @@
   stroke: var(--_violet);
 }
 
+/* ---- bits: three aligned bit lanes + index header, in the strip idiom ---- */
+.steptrace__bits {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0.4rem 0;
+}
+.steptrace__brow {
+  display: flex;
+  align-items: stretch;
+  gap: 9px;
+  transition: opacity var(--_tween) ease;
+}
+/* dimmed placeholder lanes (b / r before they go live) — never removed from DOM */
+.steptrace__brow[data-live="0"] {
+  opacity: 0.32;
+}
+.steptrace__bgutter {
+  flex: 0 0 46px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  font: 600 0.72rem var(--_font-mono);
+  color: var(--_muted);
+}
+.steptrace__bcells {
+  display: flex;
+  flex: 1 1 0;
+  min-width: 0;
+  height: 44px;
+  border: 1px solid color-mix(in srgb, var(--_text) 22%, transparent);
+  border-radius: 9px;
+  overflow: hidden; /* clip cell tints flush to the rounded frame */
+}
+.steptrace__brow--idx {
+  align-items: flex-end;
+}
+.steptrace__bcells--idx {
+  height: 20px;
+  border: 0;
+  border-radius: 0;
+  overflow: visible;
+}
+.steptrace__bidx {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  font: 600 0.62rem var(--_font-mono);
+  color: var(--_muted);
+  font-variant-numeric: tabular-nums;
+}
+.steptrace__bcell {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid color-mix(in srgb, var(--_text) 13%, transparent);
+  font: 500 0.95rem var(--_font-mono);
+  color: var(--_muted);
+  transition:
+    background var(--_tween) ease,
+    color 0.22s ease,
+    box-shadow 0.22s ease;
+}
+.steptrace__bcell:last-child {
+  border-right: 0;
+}
+/* a set bit reads as filled so the bitmap pattern is legible at a glance */
+.steptrace__bcell[data-bit="1"] {
+  background: color-mix(in srgb, var(--_text) 12%, transparent);
+  color: var(--_text);
+  font-weight: 600;
+}
+/* states (source-ordered AFTER the data-bit rule so they win on set cells) */
+.steptrace__bcell[data-state="focus"] {
+  background: color-mix(in srgb, var(--_accent) 20%, transparent);
+  box-shadow: inset 0 0 0 2px var(--_accent);
+  color: var(--_accent);
+  font-weight: 700;
+}
+.steptrace__bcell[data-state="low"] {
+  background: color-mix(in srgb, var(--_muted) 14%, transparent);
+  color: var(--_muted);
+}
+.steptrace__bcell[data-state="flip"] {
+  background: color-mix(in srgb, var(--_amber) 26%, transparent);
+  color: var(--_amber);
+  font-weight: 700;
+}
+.steptrace__bcell[data-state="borrow"] {
+  background: color-mix(in srgb, var(--_blue) 22%, transparent);
+  color: var(--_blue);
+  font-weight: 700;
+}
+.steptrace__bcell[data-state="keep"] {
+  background: color-mix(in srgb, var(--_text) 14%, transparent);
+  color: var(--_text);
+  font-weight: 600;
+}
+.steptrace__bcell[data-state="wiped"] {
+  background: color-mix(in srgb, var(--_muted) 10%, transparent);
+  color: var(--_muted);
+}
+.steptrace__bcell[data-state="removed"] {
+  box-shadow: inset 0 0 0 2px var(--_violet);
+  color: var(--_violet);
+  font-weight: 700;
+}
+
+/* ---- backtrack: an n×n board (row = recursion depth) + a path strip ---- */
+.steptrace__bt {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  margin: 0.4rem 0;
+}
+.steptrace__btboard {
+  display: grid;
+  grid-template-columns: repeat(var(--_n), 1fr);
+  width: 100%;
+  max-width: min(100%, 320px);
+  margin: 0 auto;
+  border: 1px solid color-mix(in srgb, var(--_text) 22%, transparent);
+  border-radius: 9px;
+  overflow: hidden; /* clip cell tints flush to the rounded frame */
+}
+.steptrace__btcell {
+  position: relative;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border-right: 1px solid color-mix(in srgb, var(--_text) 10%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--_text) 10%, transparent);
+  transition: background var(--_tween) ease;
+}
+/* faint checkerboard so the grid reads as a board even when empty */
+.steptrace__btcell[data-parity="1"] {
+  background: color-mix(in srgb, var(--_text) 4%, transparent);
+}
+/* squares attacked by committed queens: shrink visibly before a choice, recede on undo */
+.steptrace__btcell[data-state="attacked"] {
+  background: color-mix(in srgb, var(--_muted) 16%, transparent);
+}
+.steptrace__btcell[data-state="try"] {
+  background: color-mix(in srgb, var(--_blue) 22%, transparent);
+}
+.steptrace__btcell[data-state="reject"] {
+  background: color-mix(in srgb, var(--_amber) 22%, transparent);
+}
+.steptrace__btcell[data-state="remove"] {
+  background: color-mix(in srgb, var(--_amber) 40%, transparent);
+}
+.steptrace__btcell[data-state="queen"] {
+  background: color-mix(in srgb, var(--_green) 22%, transparent);
+}
+.steptrace__btcell[data-state="solved"] {
+  background: color-mix(in srgb, var(--_green) 40%, transparent);
+}
+/* the attacking queen above that vetoes a rejected square: an inset amber ring */
+.steptrace__btcell[data-conflict="1"] {
+  box-shadow: inset 0 0 0 2.5px var(--_amber);
+}
+/* ♛ glyph: revealed by opacity when the cell holds a queen (tear-off = fade-out) */
+.steptrace__btqueen {
+  font-size: 1.15rem;
+  line-height: 1;
+  color: var(--_text);
+  opacity: 0;
+  transition: opacity var(--_tween) ease;
+}
+.steptrace__btcell[data-has-queen="1"] .steptrace__btqueen {
+  opacity: 1;
+}
+.steptrace__btcell[data-state="solved"] .steptrace__btqueen,
+.steptrace__btcell[data-state="queen"] .steptrace__btqueen {
+  color: var(--_green);
+}
+/* path strip: one slot per row, the linearised root-to-node path with push/pop */
+.steptrace__btpath {
+  display: flex;
+  max-width: min(100%, 320px);
+  width: 100%;
+  margin: 0 auto;
+  border: 1px solid color-mix(in srgb, var(--_text) 22%, transparent);
+  border-radius: 9px;
+  overflow: hidden;
+}
+.steptrace__btslot {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 600 0.9rem var(--_font-mono);
+  color: var(--_muted);
+  border-right: 1px solid color-mix(in srgb, var(--_text) 13%, transparent);
+  transition:
+    background var(--_tween) ease,
+    color 0.22s ease;
+}
+.steptrace__btslot:last-child {
+  border-right: 0;
+}
+.steptrace__btslot[data-state="on"] {
+  background: color-mix(in srgb, var(--_green) 20%, transparent);
+  color: var(--_green);
+  font-weight: 700;
+}
+.steptrace__btslot[data-state="try"] {
+  background: color-mix(in srgb, var(--_blue) 20%, transparent);
+  color: var(--_blue);
+  font-weight: 700;
+}
+.steptrace__btslot[data-state="reject"] {
+  background: color-mix(in srgb, var(--_amber) 20%, transparent);
+  color: var(--_amber);
+}
+.steptrace__btslot[data-state="remove"] {
+  background: color-mix(in srgb, var(--_amber) 34%, transparent);
+  color: var(--_amber);
+  font-weight: 700;
+}
+
+/* ---- rectree: a naive recursion tree collapsing into a memo DAG (SVG) ----
+   The FULL naive tree is laid out once and every node lives in the SVG from
+   frame 0; reveal is a data-vis opacity toggle (never DOM insertion) and a memo
+   hit dims a subtree via data-collapsed — so the node set, viewBox and stage
+   height are constant on every frame (zero footer jitter). Colour changes only;
+   stroke-width stays fixed (the "graph card" fix) to keep geometry stable. */
+.steptrace__rectree {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+.steptrace__rtsvg {
+  width: 100%;
+  height: auto;
+  max-height: 260px;
+  overflow: visible;
+}
+.steptrace__rtedge {
+  stroke: var(--_neutral);
+  stroke-width: 1.6;
+  transition:
+    stroke var(--_tween) ease,
+    opacity var(--_tween) ease;
+}
+.steptrace__rtedge[data-vis="0"] {
+  opacity: 0.12;
+}
+.steptrace__rtedge[data-collapsed="true"] {
+  opacity: 0.3;
+}
+.steptrace__rtnode {
+  transition: opacity var(--_tween) ease;
+}
+.steptrace__rtnode[data-vis="0"] {
+  opacity: 0.12;
+}
+/* a memo-saved subtree: shown, but dimmed + desaturated so it reads as skipped */
+.steptrace__rtnode[data-collapsed="true"] {
+  opacity: 0.34;
+  filter: grayscale(1);
+}
+.steptrace__rtnode .steptrace__rtback {
+  fill: var(--st-page, var(--_surface));
+  stroke: none;
+}
+.steptrace__rtnode .steptrace__rtcirc {
+  fill: color-mix(in srgb, var(--_neutral) 20%, transparent);
+  stroke: var(--_neutral);
+  stroke-width: 1.6;
+  transition:
+    fill var(--_tween) ease,
+    stroke var(--_tween) ease;
+}
+/* active-call ring: opacity toggle only — no radius/stroke-width change */
+.steptrace__rtnode .steptrace__rtring {
+  fill: none;
+  stroke: var(--_violet);
+  stroke-width: 1.8;
+  opacity: 0;
+  transition: opacity var(--_tween) ease;
+}
+.steptrace__rtnode[data-active="true"] .steptrace__rtring {
+  opacity: 1;
+}
+.steptrace__rtnode .steptrace__rtlabel {
+  fill: var(--_text);
+  font: 600 10px var(--_font-mono);
+}
+.steptrace__rtnode .steptrace__rtval {
+  fill: var(--_muted);
+  font: 600 9px var(--_font-mono);
+}
+.steptrace__rtnode[data-state="compute"] .steptrace__rtcirc {
+  fill: color-mix(in srgb, var(--_blue) 22%, transparent);
+  stroke: var(--_blue);
+}
+.steptrace__rtnode[data-state="base"] .steptrace__rtcirc {
+  fill: color-mix(in srgb, var(--_muted) 16%, transparent);
+  stroke: var(--_muted);
+}
+.steptrace__rtnode[data-state="miss"] .steptrace__rtcirc {
+  fill: color-mix(in srgb, var(--_amber) 18%, transparent);
+  stroke: var(--_amber);
+}
+.steptrace__rtnode[data-state="hit"] .steptrace__rtcirc {
+  fill: color-mix(in srgb, var(--_green) 30%, transparent);
+  stroke: var(--_green);
+}
+
 /* ---- graph: svg ---- */
 .steptrace__graph {
   display: flex;
@@ -1001,6 +1318,9 @@
   const pointerReg = new Map()
   const dpReg = new Map()
   const ufReg = new Map()
+  const bitsReg = new Map()
+  const btReg = new Map()
+  const rtReg = new Map()
 
   /** Register a sort algorithm. `fn(input, ops)` drives a SortRecorder via ops.*. */
   function registerSort(id, meta, fn) {
@@ -1037,6 +1357,21 @@
     ufReg.set(id, { meta, fn })
   }
 
+  /** Register a bit-manipulation algorithm. `fn(input, ops)` drives a BitsRecorder (3 lanes). */
+  function registerBits(id, meta, fn) {
+    bitsReg.set(id, { meta, fn })
+  }
+
+  /** Register a backtracking algorithm. `fn(input, ops)` drives a BacktrackRecorder (board + path). */
+  function registerBacktrack(id, meta, fn) {
+    btReg.set(id, { meta, fn })
+  }
+
+  /** Register a recursion-tree algorithm. `fn(input, ops)` drives a RecTreeRecorder (naive tree → memo DAG). */
+  function registerRecTree(id, meta, fn) {
+    rtReg.set(id, { meta, fn })
+  }
+
   /** Kind of a registered algorithm id, or null if unknown. */
   function kindOf(id) {
     if (sortReg.has(id)) return "sort"
@@ -1046,6 +1381,9 @@
     if (pointerReg.has(id)) return "pointers"
     if (dpReg.has(id)) return "dp"
     if (ufReg.has(id)) return "unionfind"
+    if (bitsReg.has(id)) return "bits"
+    if (btReg.has(id)) return "backtrack"
+    if (rtReg.has(id)) return "rectree"
     return null
   }
 
@@ -1099,6 +1437,24 @@
       const rec = new UnionFindRecorder(config.n || 7)
       fn(config, rec)
       return { kind: "unionfind", frames: rec.frames }
+    }
+    if (bitsReg.has(config.algorithm)) {
+      const { fn } = bitsReg.get(config.algorithm)
+      const rec = new BitsRecorder(config.width || 8)
+      fn(config, rec)
+      return { kind: "bits", frames: rec.frames }
+    }
+    if (btReg.has(config.algorithm)) {
+      const { fn } = btReg.get(config.algorithm)
+      const rec = new BacktrackRecorder()
+      fn(config, rec)
+      return { kind: "backtrack", frames: rec.frames }
+    }
+    if (rtReg.has(config.algorithm)) {
+      const { fn } = rtReg.get(config.algorithm)
+      const rec = new RecTreeRecorder()
+      fn(config, rec)
+      return { kind: "rectree", frames: rec.frames }
     }
     throw new Error(`steptrace: unknown algorithm "${config.algorithm}".`)
   }
@@ -1561,6 +1917,310 @@
       this.highlight = []
       this.activeEdge = null
       this._push(message)
+    }
+  }
+
+  // A BitsRecorder snapshot: { type, width, labels{a,b,r}, a, b, r, value, sub,
+  //   low, removed, pop, message }. Three aligned bit lanes (a = x, b = x−1,
+  //   r = x & (x−1)); each lane is { bits[width] (bits[0]=LSB), state[width], live }.
+  //   The algorithm only calls ops.* — it never assembles a frame itself.
+  class BitsRecorder {
+    constructor(width) {
+      this.width = width
+      this.mask = 2 ** width - 1
+      this.frames = []
+      this.a = this._lane()
+      this.b = this._lane()
+      this.r = this._lane()
+      this.a.live = true
+      this.labels = { a: "x", b: "x − 1", r: "x & (x−1)" }
+      this.value = 0
+      this.sub = null
+      this.low = -1
+      this.removed = null
+      this.pop = 0
+      this._result = 0
+    }
+    _lane() {
+      return { bits: Array(this.width).fill(0), state: Array(this.width).fill(""), live: false }
+    }
+    /** Zero-padded binary string, MSB-left, `width` chars. */
+    bin(x) {
+      return ((x >>> 0) & this.mask).toString(2).padStart(this.width, "0")
+    }
+    /** Index of the lowest set bit (bits[0]=LSB), or -1 when x is zero. */
+    lowestSetBit(x) {
+      x = (x >>> 0) & this.mask
+      return x === 0 ? -1 : 31 - Math.clz32(x & -x)
+    }
+    _fill(lane, x) {
+      x = (x >>> 0) & this.mask
+      for (let i = 0; i < this.width; i++) lane.bits[i] = (x >> i) & 1
+    }
+    _snap(lane) {
+      return { bits: lane.bits.slice(), state: lane.state.slice(), live: lane.live }
+    }
+    _push(type, message) {
+      this.frames.push(
+        Object.freeze({
+          type,
+          width: this.width,
+          labels: { ...this.labels },
+          a: this._snap(this.a),
+          b: this._snap(this.b),
+          r: this._snap(this.r),
+          value: this.value,
+          sub: this.sub,
+          low: this.low,
+          removed: this.removed,
+          pop: this.pop,
+          message,
+        }),
+      )
+    }
+    init(x, labels, message) {
+      this.value = (x >>> 0) & this.mask
+      if (labels) this.labels = { a: labels.a, b: labels.b, r: labels.r }
+      this._fill(this.a, this.value)
+      this.a.state.fill("")
+      this.a.live = true
+      this.b = this._lane()
+      this.r = this._lane()
+      this.low = -1
+      this.sub = null
+      this.removed = null
+      this.pop = 0
+      this._push("init", message)
+    }
+    /** Mark the lowest set bit (focus) and the zero bits below it (low) in lane x. */
+    locate(low, message) {
+      this.low = low
+      this.a.state.fill("")
+      this.a.state[low] = "focus"
+      for (let i = 0; i < low; i++) this.a.state[i] = "low"
+      this._push("locate", message)
+    }
+    /** Lane x−1 goes live: bit `low` flips 1→0 (flip); every bit below borrows 0→1. */
+    decrement(sub, low, message) {
+      this.sub = (sub >>> 0) & this.mask
+      this.low = low
+      this.b.live = true
+      this._fill(this.b, this.sub)
+      this.b.state.fill("")
+      this.b.state[low] = "flip"
+      for (let i = 0; i < low; i++) this.b.state[i] = "borrow"
+      this._push("decrement", message)
+    }
+    /** Lane x & (x−1) goes live: keep set bits above `low`, wipe `low` and below. */
+    and(res, low, message) {
+      this._result = (res >>> 0) & this.mask
+      this.low = low
+      this.r.live = true
+      this._fill(this.r, this._result)
+      this.r.state.fill("")
+      for (let i = 0; i < this.width; i++) {
+        if (i > low) this.r.state[i] = this.r.bits[i] ? "keep" : ""
+        else this.r.state[i] = "wiped"
+      }
+      this.r.state[low] = "removed"
+      this.removed = low
+      this._push("and", message)
+    }
+    /** Commit x ← result: lane x updates, lanes b/r return to dimmed placeholders. */
+    commit(message) {
+      this.value = this._result
+      this._fill(this.a, this.value)
+      this.a.state.fill("")
+      this.b = this._lane()
+      this.r = this._lane()
+      this.low = -1
+      this.removed = null
+      this.pop += 1
+      this._push("commit", message)
+    }
+    done(message) {
+      this.low = -1
+      this.removed = null
+      this._push("done", message)
+    }
+  }
+
+  // A BacktrackRecorder snapshot: { type, n, queens[n] (col|null per row = the
+  //   root-to-node path), cursor:{row,col}|null (the square being tried / torn
+  //   off), conflict:{row,col}|null (the attacker above that vetoes cursor),
+  //   placed, pruned, depth, solved, message }. The board IS the tree: row =
+  //   recursion depth, queen columns = the current partial candidate. `attacked`
+  //   is NOT stored — the renderer derives it from `queens` (small frames).
+  class BacktrackRecorder {
+    constructor() {
+      this.n = 0
+      this.frames = []
+      this._queens = []
+      this.placed = 0
+      this.pruned = 0
+      this.depth = 0
+      this._solved = false
+    }
+    /** Committed placements, live (algorithm reads this for its conflict check). */
+    get queens() {
+      return this._queens.slice()
+    }
+    _push(type, cursor, conflict, message) {
+      this.frames.push(
+        Object.freeze({
+          type,
+          n: this.n,
+          queens: this._queens.slice(),
+          cursor,
+          conflict,
+          placed: this.placed,
+          pruned: this.pruned,
+          depth: this.depth,
+          solved: this._solved,
+          message,
+        }),
+      )
+    }
+    board(n, message) {
+      this.n = n
+      this._queens = Array(n).fill(null)
+      this._push("board", null, null, message)
+    }
+    /** Try (row,col) fails: it clashes with the queen already in `attackerRow`. */
+    reject(row, col, attackerRow, message) {
+      this.pruned++
+      this._push("reject", { row, col }, { row: attackerRow, col: this._queens[attackerRow] }, message)
+    }
+    place(row, col, message) {
+      this._queens[row] = col
+      this.placed++
+      this.depth++
+      this._push("place", { row, col }, null, message)
+    }
+    /** Retreat: capture the square BEFORE clearing so the renderer flashes the tear-off. */
+    backtrack(row, message) {
+      const cursor = { row, col: this._queens[row] }
+      this._queens[row] = null
+      this.depth--
+      this._push("backtrack", cursor, null, message)
+    }
+    solved(message) {
+      this._solved = true
+      this._push("solved", null, null, message)
+    }
+    done(message) {
+      this._push("done", null, null, message)
+    }
+  }
+
+  // A RecTreeRecorder snapshot: { type, nodes:[{id,label,x,y,depth}], edges:[{from,to}],
+  //   active:id|null, vis:[ids], state:{id->"compute"|"base"|"miss"|"hit"}, vals:{id->v},
+  //   collapsed:[ids], memo:[{k,v}], calls, hits, phase:"naive"|"memo", message }.
+  //   nodes/edges are the FULL naive tree, laid out ONCE and frozen — the SAME
+  //   arrays are handed to every frame, so the renderer's node set / viewBox /
+  //   stage height never change (zero jitter). Reveal is a per-node vis toggle;
+  //   a cache hit adds a subtree to `collapsed` (dimmed) — nothing is inserted or
+  //   removed. `calls` is the running count for the ACTIVE phase (reset on memo).
+  class RecTreeRecorder {
+    constructor() {
+      this.frames = []
+      this._nodes = Object.freeze([])
+      this._edges = Object.freeze([])
+      this._vis = new Set()
+      this._state = {}
+      this._vals = {}
+      this._collapsed = new Set()
+      this._memo = []
+      this.calls = 0
+      this.hits = 0
+      this._phase = "naive"
+      this._active = null
+    }
+    _push(type, message) {
+      this.frames.push(
+        Object.freeze({
+          type,
+          nodes: this._nodes,
+          edges: this._edges,
+          active: this._active,
+          vis: Object.freeze([...this._vis]),
+          state: Object.freeze({ ...this._state }),
+          vals: Object.freeze({ ...this._vals }),
+          collapsed: Object.freeze([...this._collapsed]),
+          memo: Object.freeze(this._memo.map((m) => Object.freeze({ ...m }))),
+          calls: this.calls,
+          hits: this.hits,
+          phase: this._phase,
+          message,
+        }),
+      )
+    }
+    /** The full naive call tree — laid out once, reused (same frozen arrays) forever. */
+    tree(nodes, edges, message) {
+      this._nodes = Object.freeze(nodes.map((n) => Object.freeze({ ...n })))
+      this._edges = Object.freeze(edges.map((e) => Object.freeze({ ...e })))
+      this._active = null
+      this._push("tree", message)
+    }
+    /** Enter a new phase: "memo" re-runs the SAME tree, so wipe reveal + counters. */
+    phase(name, message) {
+      this._phase = name
+      if (name === "memo") {
+        this._vis = new Set()
+        this._state = {}
+        this._vals = {}
+        this._collapsed = new Set()
+        this._memo = []
+        this.calls = 0
+        this.hits = 0
+      }
+      this._active = null
+      this._push("phase", message)
+    }
+    /** naive: an internal call — recompute both children from scratch. */
+    enter(id, message) {
+      this._active = id
+      this._vis.add(id)
+      this._state[id] = "compute"
+      this.calls++
+      this._push("enter", message)
+    }
+    /** naive: a base case leaf (k < 2). */
+    base(id, val, message) {
+      this._active = id
+      this._vis.add(id)
+      this._state[id] = "base"
+      this._vals[id] = val
+      this.calls++
+      this._push("base", message)
+    }
+    /** memo: first sight of f(k) — compute + store it. */
+    miss(id, k, val, message) {
+      this._active = id
+      this._vis.add(id)
+      this._state[id] = "miss"
+      this._vals[id] = val
+      this._memo.push({ k, v: val })
+      this.calls++
+      this._push("miss", message)
+    }
+    /** memo: f(k) already stored — reuse it and collapse (dim) the subtree it saved. */
+    hit(id, k, val, subtreeIds, message) {
+      this._active = id
+      this._vis.add(id)
+      this._state[id] = "hit"
+      this._vals[id] = val
+      for (const s of subtreeIds) {
+        this._vis.add(s) // reveal the saved subtree, but dimmed via collapsed
+        this._collapsed.add(s)
+      }
+      this.calls++
+      this.hits++
+      this._push("hit", message)
+    }
+    done(message) {
+      this._active = null
+      this._push("done", message)
     }
   }
 
@@ -2255,27 +2915,54 @@
           ops.set(r, c, dp[r][c], [[r - 1, c - 1]], `'${A[r - 1]}' = '${B[c - 1]}' → take the diagonal + 1 = ${dp[r][c]}.`)
         } else {
           dp[r][c] = Math.max(dp[r - 1][c], dp[r][c - 1])
-          ops.set(r, c, dp[r][c], [[r - 1, c], [r, c - 1]], `'${A[r - 1]}' ≠ '${B[c - 1]}' → max(top ${dp[r - 1][c]}, left ${dp[r][c - 1]}) = ${dp[r][c]}.`)
+          const better = dp[r - 1][c] >= dp[r][c - 1] ? "top" : "left"
+          ops.set(
+            r,
+            c,
+            dp[r][c],
+            [[r - 1, c], [r, c - 1]],
+            `'${A[r - 1]}' ≠ '${B[c - 1]}' → this letter can't extend the match, so the optimum here is inherited from an optimal sub-answer: the better of top (${dp[r - 1][c]}) and left (${dp[r][c - 1]}) = ${dp[r][c]} (from the ${better}).`,
+          )
         }
       }
     }
+    // Per-step traceback: walk the corner back to the origin one move at a time,
+    // so the reader watches the answer decompose into the sub-answers it was
+    // built from. The LCS path grows by one cell on each diagonal (match) step;
+    // a mismatch step inherits the optimum from the better neighbour (optimal
+    // substructure) without adding a letter.
     let r = m
     let c = n
     const path = []
     while (r > 0 && c > 0) {
       if (A[r - 1] === B[c - 1]) {
-        path.push([r, c])
+        path.unshift([r, c])
+        ops.markPath(
+          path,
+          `dp[${r}][${c}]: '${A[r - 1]}' = '${B[c - 1]}' — this cell was built from dp[${r - 1}][${c - 1}] + 1, so '${A[r - 1]}' joins the LCS. Step diagonally to that sub-answer.`,
+        )
         r--
         c--
       } else if (dp[r - 1][c] >= dp[r][c - 1]) {
+        ops.markPath(
+          path,
+          `dp[${r}][${c}]: '${A[r - 1]}' ≠ '${B[c - 1]}' — its optimum was inherited from the top sub-answer dp[${r - 1}][${c}]. Follow it upward; no letter added.`,
+        )
         r--
       } else {
+        ops.markPath(
+          path,
+          `dp[${r}][${c}]: '${A[r - 1]}' ≠ '${B[c - 1]}' — its optimum was inherited from the left sub-answer dp[${r}][${c - 1}]. Follow it leftward; no letter added.`,
+        )
         c--
       }
     }
-    path.reverse()
-    ops.markPath(path, `Backtrack from the corner: the ${path.length} diagonal step${path.length === 1 ? "" : "s"} spell the LCS.`)
-    ops.done(`LCS length = ${dp[m][n]}.`)
+    const lcs = path.map((p) => A[p[0] - 1]).join("")
+    ops.markPath(
+      path,
+      `Traceback done: the ${path.length} diagonal step${path.length === 1 ? "" : "s"} spell the LCS "${lcs}".`,
+    )
+    ops.done(`LCS length = ${dp[m][n]} ("${lcs}").`)
   })
 
   // ────────────────────────────── union-find ─────────────────────────────
@@ -2329,6 +3016,189 @@
       roots.add(c)
     }
     ops.done(`Done — ${roots.size} disjoint set${roots.size === 1 ? "" : "s"} remain.`)
+  })
+
+  // ───────────────────────── kernighan-popcount ──────────────────────────
+  registerBits("kernighan-popcount", { label: "Kernighan population count" }, (input, ops) => {
+    let x = (Number(input.value) >>> 0) & ops.mask
+    ops.init(
+      x,
+      { a: "x", b: "x − 1", r: "x & (x−1)" },
+      `x = ${x} = 0b${ops.bin(x)}. Kernighan's trick clears the lowest set bit each pass, so the loop runs once per set bit — O(number of 1s), not O(width).`,
+    )
+    let pop = 0
+    while (x !== 0) {
+      const low = ops.lowestSetBit(x)
+      ops.locate(low, `Lowest set bit is at index ${low}; the bits below it are all zero.`)
+      const sub = (x - 1) & ops.mask
+      ops.decrement(
+        sub,
+        low,
+        `x − 1 = ${sub}. The borrow ripples up through the low zeros: bit ${low} flips 1→0, and every zero below it flips 0→1.`,
+      )
+      const res = x & sub
+      ops.and(
+        res,
+        low,
+        `x & (x−1) keeps every bit above index ${low} untouched and clears bit ${low} and everything beneath it — exactly one set bit removed in a single instruction.`,
+      )
+      pop++
+      x = res
+      ops.commit(`x ← ${x}. Set-bit count so far: ${pop}.`)
+    }
+    ops.done(`x = 0 — no set bits remain. Population count = ${pop}.`)
+  })
+
+  // ───────────────────────────── n-queens ─────────────────────────────
+  registerBacktrack("n-queens", { label: "N-Queens (backtracking)" }, (input, ops) => {
+    const n = Math.min(Math.max(input.n || 4, 4), 6)
+    ops.board(n, `Place ${n} queens on a ${n}×${n} board so none attack another. Fill one queen per row; retreat whenever a row has no safe square.`)
+    const conflict = (row, col) => {
+      // first attacker above in same column or on a diagonal, or -1 if none
+      const q = ops.queens
+      for (let r = 0; r < row; r++) if (q[r] === col || Math.abs(q[r] - col) === row - r) return r
+      return -1
+    }
+    let solved = false
+    const solve = (row) => {
+      if (solved) return
+      if (row === n) {
+        ops.solved(`All ${n} rows filled — no queen attacks another.`)
+        solved = true
+        return
+      }
+      for (let col = 0; col < n; col++) {
+        const bad = conflict(row, col)
+        if (bad >= 0) {
+          ops.reject(row, col, bad, `Row ${row}, column ${col} clashes with the queen in row ${bad} — prune this square.`)
+          continue
+        }
+        ops.place(row, col, `Column ${col} is safe — place a queen and descend to row ${row + 1}.`)
+        solve(row + 1)
+        if (solved) return
+        ops.backtrack(row, `Row ${row + 1} had no safe square — remove the queen at (${row}, ${col}) and retreat.`)
+      }
+    }
+    solve(0)
+    ops.done(solved ? `Solved — a valid ${n}-queens arrangement.` : `No solution for n = ${n}.`)
+  })
+
+  // ──────────────────────────── fibonacci ────────────────────────────────
+  // The DP paradigm made visible: phase 1 DFS-reveals the FULL naive fib(N)
+  // call tree (it balloons — the same subproblems are recomputed over and over);
+  // phase 2 re-runs the SAME tree with a memo, so repeated states become cache
+  // HITS whose subtrees collapse (dimmed) instead of expanding. The full tree is
+  // laid out ONCE and shipped on frame 0, so the node set never changes.
+  registerRecTree("fibonacci", { label: "Fibonacci — recursion vs memo" }, (input, ops) => {
+    const N = Math.min(Math.max(Math.round(input.n ?? 5), 1), 6) // cap: the naive tree must stay readable
+
+    // true fib values, so every stored/returned value is exact
+    const FIB = [0, 1]
+    for (let i = 2; i <= N; i++) FIB[i] = FIB[i - 1] + FIB[i - 2]
+
+    // 1) build the FULL naive call tree — one unique node per CALL
+    let nextId = 0
+    const all = []
+    const build = (k, depth) => {
+      const node = { id: "c" + nextId++, k, depth, children: [] }
+      all.push(node)
+      if (k >= 2) {
+        node.children.push(build(k - 1, depth + 1))
+        node.children.push(build(k - 2, depth + 1))
+      }
+      return node
+    }
+    const root = build(N, 0)
+
+    // tidy layout: leaves fill left→right, internals centre over their children
+    const ROW = 62
+    const SP = 48
+    let leaf = 0
+    const layout = (node) => {
+      node.y = node.depth * ROW
+      if (!node.children.length) {
+        node.x = leaf++ * SP
+      } else {
+        node.children.forEach(layout)
+        node.x = (node.children[0].x + node.children[node.children.length - 1].x) / 2
+      }
+    }
+    layout(root)
+
+    const descendants = (node) => {
+      const out = []
+      for (const c of node.children) {
+        out.push(c.id)
+        out.push(...descendants(c))
+      }
+      return out
+    }
+
+    const nodeList = all.map((n) => ({ id: n.id, label: `f(${n.k})`, x: Math.round(n.x), y: n.y, depth: n.depth }))
+    const edges = []
+    for (const n of all) for (const c of n.children) edges.push({ from: n.id, to: c.id })
+    ops.tree(
+      nodeList,
+      edges,
+      `Compute f(${N}) by plain recursion: every call spawns two more. The tree balloons because identical subproblems get recomputed from scratch.`,
+    )
+
+    // 2) NAIVE phase — DFS the whole tree; every node is a separate call
+    ops.phase("naive", `Phase 1 — plain recursion. Reveal each call in order; the running count IS the total work.`)
+    const naive = (node) => {
+      if (node.k < 2) {
+        ops.base(node.id, node.k, `f(${node.k}) = ${node.k} — base case, return at once.`)
+      } else {
+        ops.enter(
+          node.id,
+          `Call f(${node.k}); with no memory it must recompute f(${node.k - 1}) + f(${node.k - 2}) all over again.`,
+        )
+        node.children.forEach(naive)
+      }
+    }
+    naive(root)
+    const naiveCalls = all.length
+
+    // 3) MEMO phase — same tree, but a table keyed by the argument k
+    ops.phase(
+      "memo",
+      `Phase 2 — memoise. Same tree, but keep a table of computed f(k); a repeat of any state is now a cache hit.`,
+    )
+    const seen = new Set()
+    let memoCalls = 0
+    let hits = 0
+    const memo = (node) => {
+      memoCalls++
+      if (seen.has(node.k)) {
+        hits++
+        ops.hit(
+          node.id,
+          node.k,
+          FIB[node.k],
+          descendants(node),
+          `f(${node.k}) is already in the table → cache HIT, return ${FIB[node.k]}. Its whole subtree is skipped — that is an overlapping subproblem eliminated.`,
+        )
+        return FIB[node.k]
+      }
+      seen.add(node.k)
+      if (node.k < 2) {
+        ops.miss(node.id, node.k, node.k, `f(${node.k}) = ${node.k} — first time seen, store it in the table.`)
+      } else {
+        ops.miss(
+          node.id,
+          node.k,
+          FIB[node.k],
+          `f(${node.k}) is new → compute f(${node.k - 1}) + f(${node.k - 2}) once and store f(${node.k}) = ${FIB[node.k]}.`,
+        )
+        node.children.forEach(memo)
+      }
+      return FIB[node.k]
+    }
+    memo(root)
+
+    ops.done(
+      `Naive f(${N}) makes ${naiveCalls} calls. Memoised: ${memoCalls} calls — ${hits} of them cache hits that skipped whole subtrees. Same answer, ${naiveCalls - memoCalls} calls saved.`,
+    )
   })
 
   // ==========================================================================
@@ -2847,6 +3717,305 @@
       return [
         { k: "sets", v: String(sets), sw: "var(--_blue)" },
         { k: "edge", v: ae ? `${ae[0]} — ${ae[1]}` : "—", sw: "var(--_violet)" },
+      ]
+    }
+
+    return { nodes: [wrap, status], paint, watch }
+  }
+
+  // ---- bits view: three aligned bit lanes + an index header ----
+  // Every strip is `flex:1 × width` inside an identical-width gutter, so the three
+  // lanes and the header line up for free — no measurement / ResizeObserver. Cells
+  // are built ONCE; paint() only rewrites textContent + data-bit/data-state, and
+  // lane rows keep a constant data-live flag (dimmed placeholders never vanish).
+  function makeBitsView(frames) {
+    const width = frames[0].width
+    const stage = el("div", "steptrace__bits")
+
+    // index header: column j (0=leftmost) shows bit index width-1-j (MSB-left);
+    // for wide words label only nibble boundaries so the header stays legible.
+    const idxRow = el("div", "steptrace__brow steptrace__brow--idx")
+    const idxGutter = el("div", "steptrace__bgutter")
+    idxGutter.textContent = "idx"
+    const idxStrip = el("div", "steptrace__bcells steptrace__bcells--idx")
+    for (let j = 0; j < width; j++) {
+      const bi = width - 1 - j
+      const c = el("div", "steptrace__bidx")
+      c.textContent = width <= 8 || bi % 4 === 0 ? String(bi) : ""
+      idxStrip.append(c)
+    }
+    idxRow.append(idxGutter, idxStrip)
+    stage.append(idxRow)
+
+    const lanes = {}
+    for (const key of ["a", "b", "r"]) {
+      const row = el("div", "steptrace__brow")
+      const gutter = el("div", "steptrace__bgutter")
+      const strip = el("div", "steptrace__bcells")
+      const cells = []
+      for (let j = 0; j < width; j++) {
+        const c = el("div", "steptrace__bcell")
+        strip.append(c)
+        cells.push(c)
+      }
+      row.append(gutter, strip)
+      stage.append(row)
+      lanes[key] = { row, gutter, cells }
+    }
+    const status = statusEl()
+
+    function paint(frame, i, total) {
+      for (const key of ["a", "b", "r"]) {
+        const lane = lanes[key]
+        const data = frame[key]
+        lane.gutter.textContent = frame.labels[key]
+        lane.row.dataset.live = data.live ? "1" : "0"
+        for (let j = 0; j < width; j++) {
+          const bi = width - 1 - j
+          const c = lane.cells[j]
+          c.textContent = String(data.bits[bi])
+          c.dataset.bit = String(data.bits[bi])
+          c.dataset.state = data.state[bi] || ""
+        }
+      }
+      status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`
+    }
+
+    // exactly 4 rows every frame ⇒ constant footer height (no jitter)
+    function watch(frame) {
+      return [
+        { k: "x", v: `${frame.value} = 0b${frame.value.toString(2).padStart(frame.width, "0")}`, sw: "var(--_accent)" },
+        { k: "lowest 1", v: frame.low >= 0 ? `bit ${frame.low}` : "—", sw: "var(--_blue)" },
+        { k: "removed", v: frame.removed != null ? `2^${frame.removed}` : "—", sw: "var(--_amber)" },
+        { k: "set count", v: String(frame.pop), sw: "var(--_violet)" },
+      ]
+    }
+
+    return { nodes: [stage, status], paint, watch }
+  }
+
+  // ---- backtrack view: an n×n board (row = recursion depth) + a path strip ----
+  // The board IS the tree state: queen columns are the root-to-node path. `attacked`
+  // is DERIVED here from `queens` (frames stay small), so shaded options visibly
+  // shrink before a choice and recede when a queen is torn off. Cells + path slots
+  // are built ONCE; paint() only rewrites data-* / textContent (no jitter).
+  function makeBacktrackView(frames) {
+    const n = frames[0].n
+    const wrap = el("div", "steptrace__bt")
+    const board = el("div", "steptrace__btboard")
+    board.style.setProperty("--_n", String(n))
+    const cells = []
+    for (let r = 0; r < n; r++) {
+      const rowCells = []
+      for (let c = 0; c < n; c++) {
+        const cell = el("div", "steptrace__btcell")
+        cell.dataset.parity = String((r + c) % 2)
+        const glyph = el("div", "steptrace__btqueen")
+        glyph.textContent = "♛" // ♛
+        glyph.setAttribute("aria-hidden", "true")
+        cell.append(glyph)
+        board.append(cell)
+        rowCells.push(cell)
+      }
+      cells.push(rowCells)
+    }
+    const strip = el("div", "steptrace__btpath")
+    const slots = []
+    for (let r = 0; r < n; r++) {
+      const slot = el("div", "steptrace__btslot")
+      slot.textContent = "—" // —
+      strip.append(slot)
+      slots.push(slot)
+    }
+    wrap.append(board, strip)
+    const status = statusEl()
+
+    // squares attacked by already-committed queens (column / row / diagonal)
+    function attackedSet(queens) {
+      const hit = new Set()
+      for (let qr = 0; qr < n; qr++) {
+        const qc = queens[qr]
+        if (qc == null) continue
+        for (let r = 0; r < n; r++) {
+          for (let c = 0; c < n; c++) {
+            if (queens[r] === c) continue
+            if (c === qc || r === qr || Math.abs(qr - r) === Math.abs(qc - c)) hit.add(r + "," + c)
+          }
+        }
+      }
+      return hit
+    }
+
+    function paint(frame) {
+      const q = frame.queens
+      const cur = frame.cursor
+      const conf = frame.conflict
+      const attacked = attackedSet(q)
+      for (let r = 0; r < n; r++) {
+        for (let c = 0; c < n; c++) {
+          const cell = cells[r][c]
+          const hasQueen = q[r] === c
+          const isCursor = cur && cur.row === r && cur.col === c
+          let state = ""
+          if (frame.solved && hasQueen) state = "solved"
+          else if (isCursor && frame.type === "reject") state = "reject"
+          else if (isCursor && frame.type === "backtrack") state = "remove"
+          else if (isCursor && frame.type === "place") state = "try"
+          else if (hasQueen) state = "queen"
+          else if (attacked.has(r + "," + c)) state = "attacked"
+          cell.dataset.state = state
+          cell.dataset.hasQueen = hasQueen ? "1" : "0"
+          cell.dataset.conflict = conf && conf.row === r && conf.col === c ? "1" : "0"
+        }
+      }
+      for (let r = 0; r < n; r++) {
+        const slot = slots[r]
+        const col = q[r]
+        slot.textContent = col == null ? "—" : String(col)
+        let sstate = col == null ? "" : "on"
+        if (cur && cur.row === r) {
+          if (frame.type === "reject") sstate = "reject"
+          else if (frame.type === "backtrack") sstate = "remove"
+          else if (frame.type === "place") sstate = "try"
+        }
+        slot.dataset.state = sstate
+      }
+      status.innerHTML = escapeHtml(frame.message)
+    }
+
+    // exactly 3 rows every frame ⇒ constant footer height (depth up-then-down = a backtrack)
+    function watch(frame) {
+      const cur = frame.cursor
+      return [
+        { k: "depth", v: `${frame.depth} / ${frame.n}`, sw: "var(--_blue)" },
+        { k: "trying", v: cur ? `(${cur.row}, ${cur.col})` : "—", sw: "var(--_amber)" },
+        { k: "pruned", v: String(frame.pruned), sw: "var(--_muted)" },
+      ]
+    }
+
+    return { nodes: [wrap, status], paint, watch }
+  }
+
+  // ---- rectree view: an SVG recursion tree (naive) that collapses into a memo
+  //  DAG. Cloned from makeGraphView: the viewBox is derived ONCE from the full
+  //  node set and EVERY node/edge is placed on frame 0. paint() only toggles
+  //  data-* and rewrites value text — never inserts/removes DOM — so the stage
+  //  height is identical on every frame. ----
+  const RT_R = 16 // rectree node radius
+  function makeRecTreeView(frames) {
+    const f0 = frames[0]
+    const nodes = f0.nodes
+    const pad = 26
+    const xs = nodes.map((n) => n.x)
+    const ys = nodes.map((n) => n.y)
+    const minX = Math.min(...xs)
+    const minY = Math.min(...ys)
+    const w = Math.max(...xs) - minX + pad * 2
+    const h = Math.max(...ys) - minY + pad * 2
+    const pos = Object.fromEntries(nodes.map((n) => [n.id, { x: n.x - minX + pad, y: n.y - minY + pad }]))
+
+    const svg = document.createElementNS(SVGNS, "svg")
+    svg.setAttribute("class", "steptrace__rtsvg")
+    svg.setAttribute("viewBox", `0 0 ${w} ${h}`)
+    svg.setAttribute("role", "img")
+    svg.setAttribute("aria-label", "Recursion tree")
+
+    // edges first (under nodes); each fades in with its child node
+    const edgeEls = []
+    for (const e of f0.edges) {
+      const a = pos[e.from]
+      const b = pos[e.to]
+      const line = document.createElementNS(SVGNS, "line")
+      line.setAttribute("class", "steptrace__rtedge")
+      line.setAttribute("x1", a.x)
+      line.setAttribute("y1", a.y)
+      line.setAttribute("x2", b.x)
+      line.setAttribute("y2", b.y)
+      svg.append(line)
+      edgeEls.push({ el: line, to: e.to })
+    }
+
+    const nodeEls = {}
+    for (const n of nodes) {
+      const p = pos[n.id]
+      const g = document.createElementNS(SVGNS, "g")
+      g.setAttribute("class", "steptrace__rtnode")
+      const ring = document.createElementNS(SVGNS, "circle")
+      ring.setAttribute("class", "steptrace__rtring")
+      ring.setAttribute("cx", p.x)
+      ring.setAttribute("cy", p.y)
+      ring.setAttribute("r", RT_R + 3)
+      const back = document.createElementNS(SVGNS, "circle")
+      back.setAttribute("class", "steptrace__rtback")
+      back.setAttribute("cx", p.x)
+      back.setAttribute("cy", p.y)
+      back.setAttribute("r", RT_R)
+      const circ = document.createElementNS(SVGNS, "circle")
+      circ.setAttribute("class", "steptrace__rtcirc")
+      circ.setAttribute("cx", p.x)
+      circ.setAttribute("cy", p.y)
+      circ.setAttribute("r", RT_R)
+      const label = document.createElementNS(SVGNS, "text")
+      label.setAttribute("class", "steptrace__rtlabel")
+      label.setAttribute("x", p.x)
+      label.setAttribute("y", p.y)
+      label.setAttribute("text-anchor", "middle")
+      label.setAttribute("dominant-baseline", "central")
+      label.textContent = n.label
+      const val = document.createElementNS(SVGNS, "text")
+      val.setAttribute("class", "steptrace__rtval")
+      val.setAttribute("x", p.x)
+      val.setAttribute("y", p.y + RT_R + 9)
+      val.setAttribute("text-anchor", "middle")
+      g.append(ring, back, circ, label, val)
+      svg.append(g)
+      nodeEls[n.id] = { g, val }
+    }
+
+    const legend = el("div", "steptrace__legend")
+    for (const [word, key] of [
+      ["compute", "current"],
+      ["store (miss)", "frontier"],
+      ["reuse (hit)", "visited"],
+    ]) {
+      const row = el("div", "steptrace__legend-row")
+      row.append(el("span", "steptrace__swatch steptrace__swatch--" + key), document.createTextNode(word))
+      legend.append(row)
+    }
+
+    const wrap = el("div", "steptrace__rectree")
+    wrap.append(svg, legend)
+    const status = statusEl()
+
+    function paint(frame, i, total) {
+      const vis = new Set(frame.vis)
+      const collapsed = new Set(frame.collapsed)
+      const state = frame.state
+      const vals = frame.vals
+      for (const n of nodes) {
+        const ne = nodeEls[n.id]
+        ne.g.dataset.vis = vis.has(n.id) ? "1" : "0"
+        ne.g.dataset.collapsed = collapsed.has(n.id) ? "true" : "false"
+        ne.g.dataset.state = state[n.id] || ""
+        ne.g.dataset.active = frame.active === n.id ? "true" : "false"
+        const v = vals[n.id]
+        ne.val.textContent = v == null ? "" : "= " + v
+      }
+      for (const e of edgeEls) {
+        e.el.dataset.vis = vis.has(e.to) ? "1" : "0"
+        e.el.dataset.collapsed = collapsed.has(e.to) ? "true" : "false"
+      }
+      status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`
+    }
+
+    // exactly 3 rows every frame ⇒ constant footer height
+    function watch(frame) {
+      const last = frame.memo.length ? frame.memo[frame.memo.length - 1] : null
+      const ev = frame.type === "miss" || frame.type === "hit" || frame.type === "base" ? frame.type : "—"
+      return [
+        { k: "calls", v: String(frame.calls), sw: "var(--_blue)" },
+        { k: "memo", v: last ? `f(${last.k}) = ${last.v}` : "—", sw: "var(--_green)" },
+        { k: "event", v: ev, sw: "var(--_violet)" },
       ]
     }
 
@@ -3431,6 +4600,8 @@
         a: state.config.a,
         b: state.config.b,
         n: state.config.n,
+        value: state.config.value,
+        width: state.config.width,
         ops: state.config.ops,
         directed: state.config.directed,
         nodes: state.config.nodes,
@@ -3443,6 +4614,9 @@
       else if (built.kind === "pointers") view = makePointerView(built.frames)
       else if (built.kind === "dp") view = makeDPView(built.frames)
       else if (built.kind === "unionfind") view = makeUnionFindView(built.frames)
+      else if (built.kind === "bits") view = makeBitsView(built.frames)
+      else if (built.kind === "backtrack") view = makeBacktrackView(built.frames)
+      else if (built.kind === "rectree") view = makeRecTreeView(built.frames)
       else view = makeSortView(built.frames)
       currentView = view
       if (built.kind === "graph") syncStartOptions(built.graph)
@@ -3542,6 +4716,9 @@
     registerPointer,
     registerDP,
     registerUnionFind,
+    registerBits,
+    registerBacktrack,
+    registerRecTree,
     listAlgorithms,
     kindOf,
     buildFrames,
