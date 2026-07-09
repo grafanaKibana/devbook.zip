@@ -1,5 +1,6 @@
 import { ExplorerIcons } from "./custom/components/explorer-icons"
 import { ExplorerOrder } from "./custom/components/explorer-order"
+import { NavScopeDropdown } from "./custom/components/nav-scope-dropdown"
 import { QuestionsIndex } from "./custom/components/questions-index"
 import { SiteHeader } from "./custom/components/site-header"
 import { SiteMarquee } from "./custom/components/site-marquee"
@@ -52,17 +53,30 @@ for (const pageLayout of Object.values(layout.byPageType)) {
   pageLayout.beforeBody = [siteMarquee, ...(pageLayout.beforeBody ?? [])]
 }
 
-// Inject the Explorer file-tree icons (issue #51) and topic ordering (issue #57).
-// Neither renders visible markup itself — they contribute css / afterDOMLoaded /
-// an inert JSON map that decorate and reorder the community Explorer's
-// client-built tree — so they just need to be present in the layout on every
-// page (the left sidebar shows everywhere). afterBody is set before the content
-// block below so `content` picks them up too.
+// Inject the Explorer file-tree icons (issue #51), topic ordering (issue #57) and
+// the top-level scope selector (issue #64). None render visible markup themselves
+// — they contribute css / afterDOMLoaded / an inert JSON map that decorate,
+// reorder and scope the community Explorer's client-built tree — so they just need
+// to render wherever the Explorer (the left sidebar) shows. They go in the `left`
+// slot: canvas pages use a custom frame that renders ONLY `left` (not afterBody),
+// so afterBody-only decorators would be silently dropped there (broken icons /
+// unstyled dropdown on .canvas files). `defaults.left` is inherited by every page
+// type that doesn't override `left` (content/folder/tag/canvas/bases); the 404
+// page intentionally overrides `left` to empty and has no Explorer, so it's
+// correctly excluded.
 const explorerIcons = ExplorerIcons()
 const explorerOrder = ExplorerOrder()
-layout.defaults.afterBody = [...(layout.defaults.afterBody ?? []), explorerIcons, explorerOrder]
+const navScopeDropdown = NavScopeDropdown()
+const explorerDecorators = [explorerIcons, explorerOrder, navScopeDropdown]
+layout.defaults.left = [...(layout.defaults.left ?? []), ...explorerDecorators]
+// resolveLayout picks `byPageType[type].left ?? defaults.left` (override wins, no
+// merge), so page types that define their own `left` must be augmented too. Skip
+// ones that leave it undefined (they inherit defaults.left) or set it empty (404
+// has no sidebar) — appending there would render a stray, Explorer-less sidebar.
 for (const pageLayout of Object.values(layout.byPageType)) {
-  pageLayout.afterBody = [...(pageLayout.afterBody ?? []), explorerIcons, explorerOrder]
+  if (Array.isArray(pageLayout.left) && pageLayout.left.length > 0) {
+    pageLayout.left = [...pageLayout.left, ...explorerDecorators]
+  }
 }
 
 const content = { ...(layout.byPageType.content ?? {}) }
