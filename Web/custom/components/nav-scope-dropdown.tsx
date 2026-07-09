@@ -3,6 +3,7 @@ import type {
   QuartzComponentConstructor,
   QuartzComponentProps,
 } from "@quartz-community/types"
+import { lucideMap } from "../lib/lucide-icons"
 
 // Explorer scope selector (issue #64).
 //
@@ -28,40 +29,6 @@ import type {
 // the clean topic name, and a chevron; the menu lists every top-level entry with
 // a matching coloured chip, plus an "All topics" entry to clear the scope.
 
-// Lucide inner markup (paths only), rendered inside a shared <svg> wrapper. The
-// topic icons are lifted verbatim from explorer-icons.tsx so the dropdown matches
-// the tree exactly; the rest are the chevron/check/grid chrome and file defaults.
-const ICONS: Record<string, string> = {
-  "code-2": '<path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/>',
-  "flask-round": '<path d="M10 2v6.292a7 7 0 1 0 4 0V2"/><path d="M5 15h14"/><path d="M8.5 2h7"/>',
-  database:
-    '<ellipse ry="3" rx="9" cy="5" cx="12"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>',
-  network:
-    '<rect rx="1" height="6" width="6" y="16" x="16"/><rect rx="1" height="6" width="6" y="16" x="2"/><rect rx="1" height="6" width="6" y="2" x="9"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/>',
-  "building-2":
-    '<path d="M10 12h4"/><path d="M10 8h4"/><path d="M14 21v-3a2 2 0 0 0-4 0v3"/><path d="M6 10H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2"/><path d="M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16"/>',
-  "ruler-dimension-line":
-    '<path d="M10 15v-3"/><path d="M14 15v-3"/><path d="M18 15v-3"/><path d="M2 8V4"/><path d="M22 6H2"/><path d="M22 8V4"/><path d="M6 15v-3"/><rect rx="2" height="8" width="20" y="12" x="2"/>',
-  "brain-circuit":
-    '<path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M9 13a4.5 4.5 0 0 0 3-4"/><path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"/><path d="M3.477 10.896a4 4 0 0 1 .585-.396"/><path d="M6 18a4 4 0 0 1-1.967-.516"/><path d="M12 13h4"/><path d="M12 18h6a2 2 0 0 1 2 2v1"/><path d="M12 8h8"/><path d="M16 8V5a2 2 0 0 1 2-2"/><circle r=".5" cy="13" cx="16"/><circle r=".5" cy="3" cx="18"/><circle r=".5" cy="21" cx="20"/><circle r=".5" cy="8" cx="20"/>',
-  lock: '<rect ry="2" rx="2" y="11" x="3" height="11" width="18"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
-  cloud: '<path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>',
-  skull:
-    '<path d="m12.5 17-.5-1-.5 1h1z"/><path d="M15 22a1 1 0 0 0 1-1v-1a2 2 0 0 0 1.56-3.25 8 8 0 1 0-11.12 0A2 2 0 0 0 8 20v1a1 1 0 0 0 1 1z"/><circle r="1" cy="12" cx="15"/><circle r="1" cy="12" cx="9"/>',
-  "area-chart":
-    '<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M7 11.207a.5.5 0 0 1 .146-.353l2-2a.5.5 0 0 1 .708 0l3.292 3.292a.5.5 0 0 0 .708 0l4.292-4.292a.5.5 0 0 1 .854.353V16a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1z"/>',
-  // --- chrome + file defaults ---
-  "circle-help":
-    '<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
-  map: '<path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M15 5.764v15"/><path d="M9 3.236v15"/>',
-  "layout-grid":
-    '<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>',
-  chevron: '<path d="m6 9 6 6 6-6"/>',
-  check: '<path d="M20 6 9 17l-4-4"/>',
-  book: '<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/>',
-  file: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/>',
-}
-
 // localStorage key for the persisted scope (a slug, or the ALL sentinel).
 const STORE_KEY = "devbook:explorer-scope"
 const ALL = "__all"
@@ -73,15 +40,32 @@ const FILE_ICON_BY_NAME: Record<string, string> = {
   roadmap: "map",
 }
 
+// Lucide icon names the dropdown always needs regardless of frontmatter: the
+// selector chevron, the active-row check, the "All topics" grid, and the folder /
+// file fallbacks. These plus every note's `icon:` are resolved from lucide-static
+// at build time (see ../lib/lucide-icons) and inlined as `.ns-icons`.
+const CHROME_ICONS = ["chevron-down", "check", "layout-grid", "book", "file"]
+
 // Browser script. Reads the inlined slug -> meta map (`.ns-scope-map`), builds the
 // dropdown from the Explorer's top-level nodes, wires selection + persistence, and
 // scopes the tree. Idempotent; re-applies on every nav. State is CSS-driven.
 const script = `
 (function () {
-  var ICONS = ${JSON.stringify(ICONS)};
   var FILE_ICON_BY_NAME = ${JSON.stringify(FILE_ICON_BY_NAME)};
   var STORE_KEY = ${JSON.stringify(STORE_KEY)};
   var ALL = ${JSON.stringify(ALL)};
+
+  // name -> inner-svg, inlined as .ns-icons by the component (from lucide-static).
+  // Refreshed each apply() so it tracks the current page's frontmatter icons.
+  var ICONS = {};
+  function readIcons() {
+    var el = document.querySelector(".ns-icons");
+    if (!el) return {};
+    try {
+      var m = JSON.parse(el.textContent || "{}");
+      return m && typeof m === "object" ? m : {};
+    } catch (e) { return {}; }
+  }
 
   function svg(name, cls) {
     var inner = ICONS[name];
@@ -291,7 +275,7 @@ const script = `
         '<button type="button" class="ns-trigger" aria-haspopup="listbox" aria-expanded="false">' +
           '<span class="ns-chip ns-trigger-chip"></span>' +
           '<span class="ns-name"></span>' +
-          '<span class="ns-chev">' + svg("chevron", "ns-chev-svg") + '</span>' +
+          '<span class="ns-chev">' + svg("chevron-down", "ns-chev-svg") + '</span>' +
         '</button>' +
         '<div class="ns-menu" role="listbox" tabindex="-1"></div>';
       place.parent.insertBefore(scope, place.anchor);
@@ -455,6 +439,7 @@ const script = `
     if (busy) return;
     busy = true;
     try {
+      ICONS = readIcons();
       var explorers = document.querySelectorAll("div.explorer");
       if (!explorers.length) return;
       var map = readMap();
@@ -503,6 +488,11 @@ export const NavScopeDropdown: QuartzComponentConstructor = () => {
     // and colour each top-level entry with no extra fetch. We emit every note that
     // carries any of these frontmatter fields (the topic folder-notes do); the
     // script only ever reads the top-level ones, so extra entries are harmless.
+    // Every referenced icon name is collected and resolved from lucide-static, so
+    // whatever `icon:` a note uses just works (no hard-coded icon list to update).
+    const iconNames = new Set<string>(CHROME_ICONS)
+    for (const fileIcon of Object.values(FILE_ICON_BY_NAME)) iconNames.add(fileIcon)
+
     const map: Record<string, { icon?: string; color?: string; order?: number; name?: string }> = {}
     for (const file of allFiles ?? []) {
       const fm = file?.frontmatter as
@@ -511,7 +501,7 @@ export const NavScopeDropdown: QuartzComponentConstructor = () => {
       const slug = file?.slug
       if (typeof slug !== "string" || !fm) continue
 
-      const icon = typeof fm.icon === "string" && fm.icon in ICONS ? fm.icon : undefined
+      const icon = typeof fm.icon === "string" ? fm.icon : undefined
       const color = typeof fm.color === "string" ? fm.color : undefined
       const order =
         typeof fm.order === "number"
@@ -527,20 +517,35 @@ export const NavScopeDropdown: QuartzComponentConstructor = () => {
         continue
       }
       const entry: { icon?: string; color?: string; order?: number; name?: string } = {}
-      if (icon !== undefined) entry.icon = icon
+      if (icon !== undefined) {
+        entry.icon = icon
+        iconNames.add(icon)
+      }
       if (color !== undefined) entry.color = color
       if (order !== undefined) entry.order = order
       if (name !== undefined) entry.name = name
       map[slug] = entry
     }
 
+    // Resolve every collected name to its Lucide SVG; unresolved names are simply
+    // absent, and the browser script falls back to the folder/file default icon.
+    const icons = lucideMap(iconNames)
+
     return (
-      <script
-        type="application/json"
-        class="ns-scope-map"
-        // JSON is inert data (never executed); keys/values are slugs / meta.
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(map) }}
-      />
+      <>
+        <script
+          type="application/json"
+          class="ns-scope-map"
+          // JSON is inert data (never executed); keys/values are slugs / meta.
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(map) }}
+        />
+        <script
+          type="application/json"
+          class="ns-icons"
+          // name -> inner-svg for every icon the dropdown might render.
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(icons) }}
+        />
+      </>
     )
   }
 

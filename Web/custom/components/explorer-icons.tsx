@@ -3,6 +3,7 @@ import type {
   QuartzComponentConstructor,
   QuartzComponentProps,
 } from "@quartz-community/types"
+import { lucideMap } from "../lib/lucide-icons"
 
 // Explorer file-tree icons (issue #51).
 //
@@ -22,40 +23,10 @@ import type {
 // ships. Defaults: folder = book -> book-open, note = file -> file-text. A note's
 // assigned icon (frontmatter `icon:`, a Lucide name) overrides the default for
 // that node; the topic folder-notes carry one (e.g. `code-2`), which Quartz
-// Syncer publishes into content/ and which is inlined here per page as
-// `.ec-icon-map`.
-
-// Lucide inner markup (paths only), rendered inside a shared <svg> wrapper.
-const ICONS: Record<string, string> = {
-  // --- defaults ---
-  book: '<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/>',
-  "book-open":
-    '<path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>',
-  file: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/>',
-  "file-text":
-    '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>',
-  // --- assigned icons: the topic folder-notes' frontmatter `icon:` values.
-  //     Markup lifted verbatim from the homepage Topics dashboard so the tree
-  //     matches the cards exactly. Add more here as notes gain icons. ---
-  "code-2": '<path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/>',
-  "flask-round": '<path d="M10 2v6.292a7 7 0 1 0 4 0V2"/><path d="M5 15h14"/><path d="M8.5 2h7"/>',
-  database:
-    '<ellipse ry="3" rx="9" cy="5" cx="12"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>',
-  network:
-    '<rect rx="1" height="6" width="6" y="16" x="16"/><rect rx="1" height="6" width="6" y="16" x="2"/><rect rx="1" height="6" width="6" y="2" x="9"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/>',
-  "building-2":
-    '<path d="M10 12h4"/><path d="M10 8h4"/><path d="M14 21v-3a2 2 0 0 0-4 0v3"/><path d="M6 10H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2"/><path d="M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16"/>',
-  "ruler-dimension-line":
-    '<path d="M10 15v-3"/><path d="M14 15v-3"/><path d="M18 15v-3"/><path d="M2 8V4"/><path d="M22 6H2"/><path d="M22 8V4"/><path d="M6 15v-3"/><rect rx="2" height="8" width="20" y="12" x="2"/>',
-  "brain-circuit":
-    '<path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M9 13a4.5 4.5 0 0 0 3-4"/><path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"/><path d="M3.477 10.896a4 4 0 0 1 .585-.396"/><path d="M6 18a4 4 0 0 1-1.967-.516"/><path d="M12 13h4"/><path d="M12 18h6a2 2 0 0 1 2 2v1"/><path d="M12 8h8"/><path d="M16 8V5a2 2 0 0 1 2-2"/><circle r=".5" cy="13" cx="16"/><circle r=".5" cy="3" cx="18"/><circle r=".5" cy="21" cx="20"/><circle r=".5" cy="8" cx="20"/>',
-  lock: '<rect ry="2" rx="2" y="11" x="3" height="11" width="18"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
-  cloud: '<path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>',
-  skull:
-    '<path d="m12.5 17-.5-1-.5 1h1z"/><path d="M15 22a1 1 0 0 0 1-1v-1a2 2 0 0 0 1.56-3.25 8 8 0 1 0-11.12 0A2 2 0 0 0 8 20v1a1 1 0 0 0 1 1z"/><circle r="1" cy="12" cx="15"/><circle r="1" cy="12" cx="9"/>',
-  "area-chart":
-    '<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M7 11.207a.5.5 0 0 1 .146-.353l2-2a.5.5 0 0 1 .708 0l3.292 3.292a.5.5 0 0 0 .708 0l4.292-4.292a.5.5 0 0 1 .854.353V16a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1z"/>',
-}
+// Syncer publishes into content/. Every referenced icon is resolved from
+// lucide-static at build time (see ../lib/lucide-icons) and inlined here as
+// `.ec-icons`, alongside the slug -> icon-name map `.ec-icon-map` — so adding or
+// changing a note's `icon:` just works, with no hard-coded icon list to update.
 
 const DEFAULTS = {
   folderClosed: "book",
@@ -68,8 +39,21 @@ const DEFAULTS = {
 // decorates the Explorer's client-built tree. Idempotent; state is CSS-driven.
 const script = `
 (function () {
-  const ICONS = ${JSON.stringify(ICONS)};
   const DEFAULTS = ${JSON.stringify(DEFAULTS)};
+
+  // name -> inner-svg, inlined as .ec-icons by the component (from lucide-static).
+  // Refreshed each decorate() so it tracks the current page's frontmatter icons.
+  var ICONS = {};
+  function readIcons() {
+    const el = document.querySelector(".ec-icons");
+    if (!el) return {};
+    try {
+      const m = JSON.parse(el.textContent || "{}");
+      return m && typeof m === "object" ? m : {};
+    } catch (e) {
+      return {};
+    }
+  }
 
   function svg(name, cls) {
     const inner = ICONS[name];
@@ -94,8 +78,14 @@ const script = `
 
   function normalizeSlug(raw) {
     if (!raw) return "";
-    let s = raw;
-    try { s = new URL(raw, location.href).pathname; } catch (e) {}
+    let s = String(raw);
+    // A folder's data-folderpath is already a root-relative slug (e.g.
+    // "ai--and--ml/index"); only reduce genuinely rooted/absolute values (file
+    // hrefs like "/questions") through URL(). Resolving a bare slug relative to
+    // the current page would prefix it with the page dir and break the map join.
+    if (/^[a-z]+:\\/\\//i.test(s) || s.charAt(0) === "/") {
+      try { s = new URL(s, location.href).pathname; } catch (e) {}
+    }
     return decodeURIComponent(s).replace(/^\\/+/, "").replace(/\\/+$/, "");
   }
 
@@ -142,6 +132,7 @@ const script = `
     if (busy) return;
     busy = true;
     try {
+      ICONS = readIcons();
       const explorers = document.querySelectorAll("div.explorer");
       if (!explorers.length) return;
       const map = readMap();
@@ -178,24 +169,37 @@ const script = `
 
 export const ExplorerIcons: QuartzComponentConstructor = () => {
   const Component: QuartzComponent = ({ allFiles }: QuartzComponentProps) => {
-    // Inline the slug -> icon map so the browser script can render assigned
-    // icons with no extra fetch. Only known (registry-backed) icons are emitted.
+    // Inline a slug -> icon-name map and a name -> inner-svg map, both built from
+    // frontmatter. Every referenced icon (plus the folder/file defaults) is
+    // resolved from lucide-static, so any `icon:` a note uses renders; unresolved
+    // names are absent and the browser script falls back to the default icon.
+    const iconNames = new Set<string>(Object.values(DEFAULTS))
     const map: Record<string, string> = {}
     for (const file of allFiles ?? []) {
       const name = (file?.frontmatter as { icon?: unknown } | undefined)?.icon
       const slug = file?.slug
-      if (typeof name === "string" && typeof slug === "string" && name in ICONS) {
+      if (typeof name === "string" && typeof slug === "string") {
         map[slug] = name
+        iconNames.add(name)
       }
     }
+    const icons = lucideMap(iconNames)
 
     return (
-      <script
-        type="application/json"
-        class="ec-icon-map"
-        // JSON is inert data (never executed); keys/values are slugs/icon names.
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(map) }}
-      />
+      <>
+        <script
+          type="application/json"
+          class="ec-icon-map"
+          // JSON is inert data (never executed); keys/values are slugs/icon names.
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(map) }}
+        />
+        <script
+          type="application/json"
+          class="ec-icons"
+          // name -> inner-svg for every icon the tree might render.
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(icons) }}
+        />
+      </>
     )
   }
 
