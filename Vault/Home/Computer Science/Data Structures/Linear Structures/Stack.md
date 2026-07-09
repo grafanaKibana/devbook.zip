@@ -49,7 +49,7 @@ Console.WriteLine(stack.Pop());  // A
 | Choice | `Stack<T>` | Alternative | Decision criteria |
 | --- | --- | --- | --- |
 | vs [[Queue]] | LIFO — newest item processed first | FIFO — preserves arrival order | Use a stack for backtracking/undo/DFS; use a queue when fairness or arrival order matters. |
-| vs recursive [[DFS BFS\|DFS]] | Explicit state, no call-stack limit | Concise, uses the call stack | Use an explicit stack when depth may be large or unbounded; recursion is fine for shallow, bounded depth. |
+| vs recursive [[DFS BFS|DFS]] | Explicit state, no call-stack limit | Concise, uses the call stack | Use an explicit stack when depth may be large or unbounded; recursion is fine for shallow, bounded depth. |
 | vs `Stack` (non-generic) | Type-safe, no boxing | Stores `object` | Always prefer the generic `Stack<T>`; the legacy type exists only for old interop. |
 
 ## Questions
