@@ -24,7 +24,7 @@ Binary Search finds a target in a sorted array by repeatedly cutting the search 
 ## Visualization
 
 ```steptrace
-{"algorithm":"binary-search","array":[3,8,12,17,23,31,44,52,60,71],"target":31}
+{"algorithm":"binary-search","array":[4,9,13,18,22,27,31,38,45,52,58,64,70,77,83,91],"target":83}
 ```
 
 ## Example
@@ -85,7 +85,7 @@ flowchart TD
 
 | Choice | Binary Search | Alternative | Decision criteria |
 | --- | --- | --- | --- |
-| vs linear search | O(log n), needs sorted data | O(n), works on any order | Use binary search when data is already sorted or searched repeatedly; linear search for tiny or one-shot unsorted data. |
+| vs [[Linear Search]] | O(log n), needs sorted data | O(n), works on any order | Use binary search when data is already sorted or searched repeatedly; linear search for tiny or one-shot unsorted data. |
 | vs hash lookup ([[HashMap]]) | O(log n), in-place, supports range queries | O(1) average, extra memory, point lookups only | Use a hash when you only need exact-match point lookups; binary search when you also need ordering, ranges, or no extra memory. |
 | sort-then-search vs scan | Pays O(n log n) sort once | No preprocessing | Sort-and-search wins when many queries amortize the sort; a single query over unsorted data does not justify sorting. |
 

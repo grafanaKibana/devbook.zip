@@ -24,7 +24,7 @@ BFS explores nodes layer by layer using a **queue** — every node at distance `
 2. Dequeue the front node `v`; for each unvisited neighbour `u`, mark `u` visited and enqueue it.
 3. Repeat until the queue is empty. The first visit to any node is along a shortest path by hop count.
 
-On the edges `A-B, A-C, B-D, C-E` from `A`, BFS visits **A → B → C → D → E** (layer by layer).
+On the edges `A-B, A-C, B-D, B-E, C-F, C-G, E-F` from `A`, BFS visits **A → B → C → D → E → F → G** (layer by layer).
 
 ```mermaid
 graph TD
@@ -41,7 +41,7 @@ graph TD
 ```
 
 ```steptrace
-{"algorithm":"bfs","start":"A"}
+{"algorithm":"bfs","start":"A","nodes":[{"id":"A"},{"id":"B"},{"id":"C"},{"id":"D"},{"id":"E"},{"id":"F"},{"id":"G"}],"edges":[{"from":"A","to":"B"},{"from":"A","to":"C"},{"from":"B","to":"D"},{"from":"B","to":"E"},{"from":"C","to":"F"},{"from":"C","to":"G"},{"from":"E","to":"F"}]}
 ```
 
 **Watch its memory.** The BFS frontier holds every node at the current distance level, so on very wide graphs (millions of nodes per level) the queue can approach `O(V)` and exhaust memory. Mitigate with bidirectional BFS (search from both ends, meet in the middle) or a depth limit.
@@ -56,7 +56,7 @@ DFS explores one branch as deep as possible before backtracking, using a **stack
 2. Move to an unvisited neighbour `u` and mark it visited.
 3. When a node has no unvisited neighbours, backtrack. A node gets its finish time when backtracking completes.
 
-On the same edges from `A`, DFS visits **A → B → D → C → E** (depth first).
+On the same edges from `A`, DFS visits **A → B → D → E → F → C → G** (depth first).
 
 ```mermaid
 graph TD
@@ -72,7 +72,7 @@ graph TD
 ```
 
 ```steptrace
-{"algorithm":"dfs","start":"A"}
+{"algorithm":"dfs","start":"A","nodes":[{"id":"A"},{"id":"B"},{"id":"C"},{"id":"D"},{"id":"E"},{"id":"F"},{"id":"G"}],"edges":[{"from":"A","to":"B"},{"from":"A","to":"C"},{"from":"B","to":"D"},{"from":"B","to":"E"},{"from":"C","to":"F"},{"from":"C","to":"G"},{"from":"E","to":"F"}]}
 ```
 
 **Two DFS traps.** Recursive DFS uses call-stack space proportional to depth — on chain-shaped graphs 10k+ deep it overflows; switch to an **explicit-stack iterative DFS** (identical logic, heap memory). For **directed cycle detection**, track three states — unvisited / in-progress / completed — and report a cycle when DFS reaches an in-progress node (a back edge); "visited" alone can't tell a back edge from a harmless cross edge.

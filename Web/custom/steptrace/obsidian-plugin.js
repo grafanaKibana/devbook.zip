@@ -5,7 +5,7 @@
  * unload, and binds --st-* to Obsidian's palette so the card looks native.
  */
 
-const { Plugin, MarkdownRenderChild } = require("obsidian")
+const { Plugin, MarkdownRenderChild, Notice } = require("obsidian")
 
 const st = globalThis.steptrace
 
@@ -65,6 +65,19 @@ module.exports = class SteptracePlugin extends Plugin {
       const root = el.createEl("div")
       const handle = st.mount(root, config)
       ctx.addChild(new SteptraceChild(el, handle))
+    })
+
+    // Cmd/Ctrl+P → "Steptrace: Reload plugin". Picks up a freshly-synced main.js
+    // without toggling the plugin by hand: disable then re-enable this plugin id.
+    this.addCommand({
+      id: "reload",
+      name: "Reload plugin",
+      callback: async () => {
+        const id = this.manifest.id
+        await this.app.plugins.disablePlugin(id)
+        await this.app.plugins.enablePlugin(id)
+        new Notice("steptrace reloaded")
+      },
     })
   }
 
