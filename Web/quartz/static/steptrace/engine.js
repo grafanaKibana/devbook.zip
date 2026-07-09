@@ -1305,6 +1305,9 @@
       this.mid = null
       this.found = null
       this.comparisons = 0
+      // "range" = eliminating search (binary): watch shows the live [lo, hi].
+      // "scan"  = linear scan: nothing is eliminated, so watch shows progress.
+      this.mode = "range"
     }
     get value() {
       return this.a.slice()
@@ -1320,6 +1323,7 @@
           found: this.found,
           target: this.target,
           comparisons: this.comparisons,
+          mode: this.mode,
           message,
         }),
       )
@@ -1858,10 +1862,12 @@
       for (const id in adj) adj[id].sort((a, b) => (a.to < b.to ? -1 : 1))
 
       const start = input.start
+      const target = input.target != null ? String(input.target) : null
       ops.init(
         `Dijkstra from ${start} — repeatedly settle the nearest unsettled node, then relax its edges to shorten neighbours' distances.`,
       )
       const dist = { [start]: 0 }
+      const pred = {} // predecessor on the current best path to each node
       const settled = new Set()
       const inQ = new Set([start])
       ops.enqueue(start, 0, `Start ${start} at distance 0.`)
@@ -1876,13 +1882,40 @@
           ops.edge(u, v, `Explore edge ${u} → ${v} (weight ${w}).`)
           const nd = dist[u] + w
           if (dist[v] === undefined || nd < dist[v]) {
+            const had = dist[v] !== undefined
             dist[v] = nd
+            pred[v] = u
             inQ.add(v)
-            ops.relax(v, nd, `Relax ${v}: shorter path via ${u} gives distance ${nd}.`)
+            ops.relax(
+              v,
+              nd,
+              had
+                ? `Relax ${v}: a shorter path via ${u} improves its distance to ${nd}.`
+                : `Relax ${v}: reach it via ${u} at distance ${nd}.`,
+            )
           }
         }
       }
-      ops.done(`Dijkstra complete — shortest distances from ${start} are final.`)
+      if (target !== null) {
+        // Highlight the single shortest path start → target by walking predecessors.
+        if (dist[target] === undefined) {
+          ops.done(`${target} is unreachable from ${start}.`)
+        } else {
+          const path = [target]
+          for (let cur = target; pred[cur] !== undefined; cur = pred[cur]) path.push(pred[cur])
+          path.reverse()
+          for (let i = 0; i + 1 < path.length; i++)
+            ops.selectEdge(path[i], path[i + 1], `Shortest path: keep edge ${path[i]}–${path[i + 1]} highlighted.`)
+          ops.done(`Shortest path ${path.join(" → ")} — total cost ${dist[target]}.`)
+        }
+      } else {
+        // No target: highlight the whole shortest-path tree (one edge per reached node).
+        const reached = graph.nodes.map((n) => n.id).filter((id) => id !== start && pred[id] !== undefined)
+        reached.sort()
+        for (const v of reached)
+          ops.selectEdge(pred[v], v, `Shortest-path tree: ${pred[v]}–${v} (distance ${dist[v]}).`)
+        ops.done(`Dijkstra complete — shortest-path tree from ${start} highlighted.`)
+      }
     },
   )
 
@@ -1899,19 +1932,49 @@
     ops.init(
       `Prim's algorithm — grow a minimum spanning tree from ${start}, each step adding the cheapest edge that reaches a node not yet in the tree.`,
     )
+    const pairKey = (a, b) => (a < b ? a + "|" + b : b + "|" + a)
     const inTree = new Set([start])
+    const treeEdges = new Set() // pairKeys already in the MST — silent, never re-flagged
+    const skipped = new Set() // chords already announced as cycle-forming
     ops.visit(start, `Start the tree at ${start}.`)
     let total = 0
     while (inTree.size < graph.nodes.length) {
-      let best = null
+      // Every edge incident to the tree, cheapest first (deduped by endpoints).
+      const cand = []
+      const seenPair = new Set()
       for (const u of inTree)
-        for (const { to: v, w } of adj[u]) if (!inTree.has(v) && (best === null || w < best.w)) best = { u, v, w }
-      if (!best) break // graph is disconnected
-      ops.edge(best.u, best.v, `Cheapest edge leaving the tree: ${best.u}–${best.v} (weight ${best.w}).`)
-      ops.selectEdge(best.u, best.v, `Add ${best.u}–${best.v} to the tree.`)
-      inTree.add(best.v)
-      ops.visit(best.v, `${best.v} joins the tree.`)
-      total += best.w
+        for (const { to: v, w } of adj[u]) {
+          const key = pairKey(u, v)
+          if (seenPair.has(key)) continue
+          seenPair.add(key)
+          cand.push({ u, v, w, key })
+        }
+      cand.sort((a, b) => a.w - b.w || (a.key < b.key ? -1 : 1))
+      let chosen = null
+      for (const c of cand) {
+        if (inTree.has(c.v)) {
+          // Both endpoints already in the tree. Tree edges stay silent; a cheaper
+          // chord is the tempting-but-illegal edge that would close a cycle.
+          if (!treeEdges.has(c.key) && !skipped.has(c.key)) {
+            skipped.add(c.key)
+            ops.edge(
+              c.u,
+              c.v,
+              `${c.u}–${c.v} (weight ${c.w}) links two nodes already in the tree — skip it, adding it would make a cycle.`,
+            )
+          }
+          continue
+        }
+        chosen = c
+        break
+      }
+      if (!chosen) break // graph is disconnected
+      ops.edge(chosen.u, chosen.v, `Cheapest edge leaving the tree: ${chosen.u}–${chosen.v} (weight ${chosen.w}).`)
+      ops.selectEdge(chosen.u, chosen.v, `Add ${chosen.u}–${chosen.v} to the tree.`)
+      treeEdges.add(chosen.key)
+      inTree.add(chosen.v)
+      ops.visit(chosen.v, `${chosen.v} joins the tree.`)
+      total += chosen.w
     }
     ops.done(`Minimum spanning tree complete — total weight ${total}.`)
   })
@@ -1990,6 +2053,27 @@
       }
     }
     ops.done(`${target} is not in the array — the range is empty after ${ops.comparisons} probes.`)
+  })
+
+  // ─────────────────────────────── linear-search ─────────────────────────────
+  registerSearch("linear-search", { label: "Linear search" }, (input, ops) => {
+    const a = ops.value
+    const target = input.target
+    const n = a.length
+    ops.mode = "scan" // whole array stays in play; nothing is ever eliminated
+    ops.init(
+      `Linear search for ${target} — scan left to right, comparing every element until a match is found (or the array ends).`,
+    )
+    for (let i = 0; i < n; i++) {
+      // lo/hi span the whole array on every step: linear search discards nothing.
+      ops.probe(0, n - 1, i, `Check index ${i}: is ${a[i]} the target ${target}?`)
+      if (a[i] === target) {
+        ops.hit(i, `${a[i]} equals ${target} — found it at index ${i}.`)
+        ops.done(`Found ${target} at index ${i} after ${ops.comparisons} comparison${ops.comparisons === 1 ? "" : "s"}.`)
+        return
+      }
+    }
+    ops.done(`${target} is not in the array — scanned all ${n} elements (${ops.comparisons} comparisons).`)
   })
 
   // ───────────────────────────────── kmp ─────────────────────────────────
@@ -2417,11 +2501,23 @@
         ` <span class="steptrace__counts">· ${frame.comparisons} probe${frame.comparisons === 1 ? "" : "s"} · step ${i + 1}/${total}</span>`
     }
 
+    // Constant 3-row watch in both modes (zero footer jitter). Linear search
+    // never eliminates, so a live [lo, hi] range is meaningless — it shows scan
+    // progress instead; binary search keeps the shrinking range.
     function watch(frame) {
+      const target = { k: "target", v: String(frames[0].target), sw: "var(--_accent)" }
+      const at = { k: "at", v: frame.mid != null ? `[${frame.mid}] = ${frame.array[frame.mid]}` : "—", sw: "var(--_blue)" }
+      if (frame.mode === "scan") {
+        return [
+          target,
+          { k: "scanned", v: frame.mid != null ? `${frame.mid + 1}/${frame.array.length}` : "—", sw: "var(--_neutral)" },
+          at,
+        ]
+      }
       return [
-        { k: "target", v: String(frames[0].target), sw: "var(--_accent)" },
+        target,
         { k: "range", v: `[${frame.lo}, ${frame.hi}]`, sw: "var(--_neutral)" },
-        { k: "mid", v: frame.mid != null ? `[${frame.mid}] = ${frame.array[frame.mid]}` : "—", sw: "var(--_blue)" },
+        { ...at, k: "mid" },
       ]
     }
 

@@ -32,8 +32,8 @@ flowchart TD
 
 | Algorithm | Solves | Time | Constraint |
 | --- | --- | --- | --- |
-| [[DFS BFS|BFS]] | Reachability, shortest path by edge count | O(V + E) | Unweighted graphs |
-| [[DFS BFS|DFS]] | Cycle detection, topological sort, components | O(V + E) | Any graph |
+| [[DFS BFS]] | Reachability, shortest path by edge count | O(V + E) | Unweighted graphs |
+| [[DFS BFS]] | Cycle detection, topological sort, components | O(V + E) | Any graph |
 | [[Dijkstra]] | Single-source shortest path | O((V + E) log V) | Non-negative weights |
 | Bellman–Ford | Single-source shortest path | O(V·E) | Handles negative edges; detects negative cycles |
 | Floyd–Warshall | All-pairs shortest path | O(V³) | Small/dense graphs |
