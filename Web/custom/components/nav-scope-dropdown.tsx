@@ -41,10 +41,10 @@ const FILE_ICON_BY_NAME: Record<string, string> = {
 }
 
 // Lucide icon names the dropdown always needs regardless of frontmatter: the
-// selector chevron, the active-row check, the "All topics" grid, and the folder /
-// file fallbacks. These plus every note's `icon:` are resolved from lucide-static
-// at build time (see ../lib/lucide-icons) and inlined as `.ns-icons`.
-const CHROME_ICONS = ["chevron-down", "check", "layout-grid", "book", "file"]
+// selector chevron, the active-row check, the "Home" icon, and the folder / file
+// fallbacks. These plus every note's `icon:` are resolved from lucide-static at
+// build time (see ../lib/lucide-icons) and inlined as `.ns-icons`.
+const CHROME_ICONS = ["chevron-down", "check", "house", "book", "file"]
 
 // Browser script. Reads the inlined slug -> meta map (`.ns-scope-map`), builds the
 // dropdown from the Explorer's top-level nodes, wires selection + persistence, and
@@ -126,12 +126,17 @@ const script = `
     if (fc && fc.dataset.folderpath != null) {
       var slug = normalizeSlug(fc.dataset.folderpath);
       var meta = lookup(map, slug) || {};
+      // Topic folder-notes are pages too: clicking navigates to the topic overview.
+      // With folderClickBehavior "link" the container holds an <a> to it; otherwise
+      // fall back to the slug minus its trailing /index.
+      var flink = fc.querySelector("a[href]");
       return {
         slug: slug,
         kind: "folder",
         li: li,
+        href: flink ? flink.getAttribute("href") || flink.href : "/" + slug.replace(/\\/index$/, ""),
         name: stripPrefix(meta.name || labelText(fc)),
-        icon: (meta.icon && ICONS[meta.icon]) ? meta.icon : "book",
+        icon: meta.icon && ICONS[meta.icon] ? meta.icon : "book",
         color: meta.color || null,
         order: typeof meta.order === "number" ? meta.order : Infinity,
       };
@@ -194,21 +199,29 @@ const script = `
 
   function buildMenu(entries, current) {
     var html =
-      optHtml({ slug: ALL, topic: "var(--gray)", icon: "layout-grid", label: "All topics", active: current === ALL }) +
+      optHtml({ slug: ALL, topic: "var(--gray)", icon: "house", label: "Home", href: "/", active: current === ALL }) +
       '<div class="ns-sep" role="presentation"></div>';
     html += entries
-      .map(function (e) {
-        return optHtml({
-          slug: e.slug,
-          topic: e.color || "var(--secondary)",
-          icon: e.icon,
-          label: e.name,
-          kind: e.kind,
-          href: e.href,
-          // Files are navigation shortcuts, not a scope state, so they never
-          // show the active/checked marker.
-          active: e.kind !== "file" && current === e.slug,
-        });
+      .map(function (e, i) {
+        // A divider between the topic folders and the loose root pages (files),
+        // mirroring the Home/topics one — inserted before the first file.
+        var prev = entries[i - 1];
+        var sep =
+          prev && prev.kind === "folder" && e.kind === "file"
+            ? '<div class="ns-sep" role="presentation"></div>'
+            : "";
+        return (
+          sep +
+          optHtml({
+            slug: e.slug,
+            topic: e.color || "var(--secondary)",
+            icon: e.icon,
+            label: e.name,
+            kind: e.kind,
+            href: e.href,
+            active: current === e.slug,
+          })
+        );
       })
       .join("");
     return html;
@@ -277,7 +290,9 @@ const script = `
           '<span class="ns-name"></span>' +
           '<span class="ns-chev">' + svg("chevron-down", "ns-chev-svg") + '</span>' +
         '</button>' +
-        '<div class="ns-menu" role="listbox" tabindex="-1"></div>';
+        '<div class="ns-menu">' +
+          '<div class="ns-menu-list" role="listbox" tabindex="-1"></div>' +
+        '</div>';
       place.parent.insertBefore(scope, place.anchor);
       wireSelector(explorer, scope);
       return scope;
@@ -314,11 +329,13 @@ const script = `
       var opt = e.target.closest(".ns-opt");
       if (!opt) return;
       close(true);
-      // A file entry opens its page; a folder (or "All topics") scopes the tree.
-      if (opt.dataset.kind === "file") {
-        navigateTo(opt.dataset.href || opt.dataset.slug);
-      } else {
-        select(explorer, opt.dataset.slug);
+      // Every entry becomes the current selection (so the trigger reflects it);
+      // a folder also scopes the tree (via select). Every real topic/file entry
+      // opens its page — folders to their topic overview, files to the file — while
+      // "All topics" (no href) just resets the scope without navigating.
+      select(explorer, opt.dataset.slug);
+      if (opt.dataset.href) {
+        navigateTo(opt.dataset.href);
       }
     });
 
@@ -421,17 +438,17 @@ const script = `
     var isAll = current === ALL || !cur;
     var chip = scope.querySelector(".ns-trigger-chip");
     var name = scope.querySelector(".ns-name");
-    var menu = scope.querySelector(".ns-menu");
+    var list = scope.querySelector(".ns-menu-list");
     if (isAll) {
       scope.style.setProperty("--ns-topic", "var(--gray)");
-      if (chip) chip.innerHTML = svg("layout-grid", "ns-chip-svg");
-      if (name) name.textContent = "All topics";
+      if (chip) chip.innerHTML = svg("house", "ns-chip-svg");
+      if (name) name.textContent = "Home";
     } else {
       scope.style.setProperty("--ns-topic", cur.color || "var(--secondary)");
       if (chip) chip.innerHTML = svg(cur.icon, "ns-chip-svg");
       if (name) name.textContent = cur.name;
     }
-    if (menu) menu.innerHTML = buildMenu(entries, isAll ? ALL : current);
+    if (list) list.innerHTML = buildMenu(entries, isAll ? ALL : current);
   }
 
   var busy = false;
@@ -447,13 +464,16 @@ const script = `
       explorers.forEach(function (explorer) {
         var entries = topLevelEntries(explorer, map);
         if (!entries.length) return;
-        // Fall back to ALL when the stored scope no longer exists (renamed/removed
-        // topic) or points at a file (files navigate, they are never a scope) so
-        // the user is never left with an empty tree.
+        // Fall back to ALL when the stored selection no longer exists (renamed or
+        // removed entry) so the user is never left with an empty tree.
         var curEntry = current !== ALL ? currentEntry(entries, current) : null;
-        if (current !== ALL && (!curEntry || curEntry.kind === "file")) current = ALL;
+        if (current !== ALL && !curEntry) current = ALL;
+        // The selection drives the trigger for any entry (folder or file), but
+        // only a folder scopes the tree — a file is a leaf with nothing to scope
+        // to, so its tree stays the full list.
+        var scopeSlug = curEntry && curEntry.kind === "folder" ? current : ALL;
         renderSelector(explorer, entries, current);
-        applyScope(entries, current);
+        applyScope(entries, scopeSlug);
       });
     } finally {
       busy = false;
@@ -554,15 +574,16 @@ export const NavScopeDropdown: QuartzComponentConstructor = () => {
   Component.css = `
 /* Scope selector — sits in the left sidebar ABOVE the Explorer's "Topics"
    heading (it is the explorer's preceding sibling, outside .nav-files-container).
-   The margin separates it from the Topics heading below. */
-.sidebar .ns-scope {
+   No margin: the sidebar's top padding sets the gap to the header and the
+   Explorer's own top spacing sets the gap below, and they read as equal. */
+.ns-scope {
   position: relative;
-  margin: 0 0 0.75rem;
+  margin: 0;
 }
 
 /* Trigger: a boxed selector — icon chip + name + chevron. The chip carries the
    active topic's colour (--ns-topic, set inline by the script). No colour rail. */
-.sidebar .ns-trigger {
+.ns-trigger {
   display: flex;
   align-items: center;
   gap: 0.55rem;
@@ -577,32 +598,32 @@ export const NavScopeDropdown: QuartzComponentConstructor = () => {
   padding: 0.45rem 0.5rem;
   transition: border-color 0.15s ease, background-color 0.15s ease;
 }
-.sidebar .ns-trigger:hover {
+.ns-trigger:hover {
   border-color: var(--gray);
   background: color-mix(in srgb, var(--gray) 6%, var(--light));
 }
-.sidebar .ns-trigger:focus-visible {
+.ns-trigger:focus-visible {
   outline: 2px solid var(--secondary);
   outline-offset: 2px;
 }
 
-.sidebar .ns-chip {
+.ns-chip {
   flex: 0 0 auto;
   display: grid;
   place-items: center;
 }
-.sidebar .ns-svg {
+.ns-svg {
   width: 16px;
   height: 16px;
 }
-.sidebar .ns-trigger-chip {
+.ns-trigger-chip {
   width: 30px;
   height: 30px;
   border-radius: 8px;
   background: color-mix(in srgb, var(--ns-topic, var(--secondary)) 20%, transparent);
   color: var(--ns-topic, var(--secondary));
 }
-.sidebar .ns-name {
+.ns-name {
   flex: 1 1 auto;
   min-width: 0;
   overflow: hidden;
@@ -611,23 +632,28 @@ export const NavScopeDropdown: QuartzComponentConstructor = () => {
   font-weight: 600;
   font-size: 0.95rem;
 }
-.sidebar .ns-chev {
+.ns-chev {
   flex: 0 0 auto;
   display: grid;
   place-items: center;
   color: var(--gray);
   transition: transform 0.18s ease;
 }
-.sidebar .ns-chev-svg {
+.ns-chev-svg {
   width: 15px;
   height: 15px;
 }
-.sidebar .ns-scope.open .ns-chev {
+.ns-scope.open .ns-chev {
   transform: rotate(180deg);
 }
 
-/* Menu: a bordered panel below the trigger with one row per top-level entry. */
-.sidebar .ns-menu {
+/* Menu: a bordered panel below the trigger with one row per top-level entry.
+   Two layers: an opaque, non-scrolling outer (.ns-menu) that always fills its box
+   and clips to the rounded corners, and an inner scroller (.ns-menu-list). The
+   inner keeps the elastic overscroll bounce (overscroll-behavior: contain, not
+   none) — but because the bounce shows the outer's opaque fill (never the page),
+   it no longer looks transparent. */
+.ns-menu {
   position: absolute;
   top: calc(100% + 6px);
   left: 0;
@@ -638,20 +664,25 @@ export const NavScopeDropdown: QuartzComponentConstructor = () => {
   border: 1px solid var(--lightgray);
   border-radius: 10px;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1), 0 18px 46px rgba(0, 0, 0, 0.16);
+  overflow: hidden;
+}
+.ns-scope.open .ns-menu {
+  display: block;
+}
+.ns-menu-list {
   padding: 0.35rem;
   max-height: min(60vh, 340px);
   overflow-y: auto;
+  /* Keep the bounce, just don't chain the scroll to the sidebar/page behind. */
+  overscroll-behavior: contain;
 }
-.sidebar .ns-scope.open .ns-menu {
-  display: block;
-}
-.sidebar .ns-sep {
+.ns-sep {
   height: 1px;
   background: var(--lightgray);
   margin: 0.3rem 0.2rem;
 }
 
-.sidebar .ns-opt {
+.ns-opt {
   display: flex;
   align-items: center;
   gap: 0.55rem;
@@ -666,43 +697,43 @@ export const NavScopeDropdown: QuartzComponentConstructor = () => {
   border-radius: 7px;
   padding: 0.42rem 0.5rem;
 }
-.sidebar .ns-opt:hover {
+.ns-opt:hover {
   background: color-mix(in srgb, var(--gray) 14%, transparent);
   color: var(--dark);
 }
-.sidebar .ns-opt:focus-visible {
+.ns-opt:focus-visible {
   outline: 2px solid var(--secondary);
   outline-offset: -2px;
 }
-.sidebar .ns-opt .ns-chip {
+.ns-opt .ns-chip {
   width: 24px;
   height: 24px;
   border-radius: 7px;
   background: color-mix(in srgb, var(--ns-topic, var(--gray)) 18%, transparent);
   color: var(--ns-topic, var(--gray));
 }
-.sidebar .ns-opt-name {
+.ns-opt-name {
   flex: 1 1 auto;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.sidebar .ns-check {
+.ns-check {
   flex: 0 0 auto;
   color: var(--ns-topic, var(--secondary));
   opacity: 0;
 }
-.sidebar .ns-check-svg {
+.ns-check-svg {
   width: 15px;
   height: 15px;
 }
-.sidebar .ns-opt.is-active {
+.ns-opt.is-active {
   background: color-mix(in srgb, var(--ns-topic, var(--secondary)) 12%, transparent);
   color: var(--dark);
   font-weight: 600;
 }
-.sidebar .ns-opt.is-active .ns-check {
+.ns-opt.is-active .ns-check {
   opacity: 1;
 }
 
@@ -726,7 +757,7 @@ export const NavScopeDropdown: QuartzComponentConstructor = () => {
 /* Mobile: the selector rides inside the explorer's slide-in panel, above the
    tree — give it room from the panel's top edge and a small side inset. */
 @media (max-width: 800px) {
-  .sidebar .ns-scope {
+  .ns-scope {
     margin: 1rem 0.55rem 1.1rem;
   }
 }

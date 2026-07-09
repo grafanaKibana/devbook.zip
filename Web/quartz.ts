@@ -57,24 +57,26 @@ for (const pageLayout of Object.values(layout.byPageType)) {
 // the top-level scope selector (issue #64). None render visible markup themselves
 // — they contribute css / afterDOMLoaded / an inert JSON map that decorate,
 // reorder and scope the community Explorer's client-built tree — so they just need
-// to be present in the layout on every page (the left sidebar shows everywhere).
-// afterBody is set before the content block below so `content` picks them up too.
+// to render wherever the Explorer (the left sidebar) shows. They go in the `left`
+// slot: canvas pages use a custom frame that renders ONLY `left` (not afterBody),
+// so afterBody-only decorators would be silently dropped there (broken icons /
+// unstyled dropdown on .canvas files). `defaults.left` is inherited by every page
+// type that doesn't override `left` (content/folder/tag/canvas/bases); the 404
+// page intentionally overrides `left` to empty and has no Explorer, so it's
+// correctly excluded.
 const explorerIcons = ExplorerIcons()
 const explorerOrder = ExplorerOrder()
 const navScopeDropdown = NavScopeDropdown()
-layout.defaults.afterBody = [
-  ...(layout.defaults.afterBody ?? []),
-  explorerIcons,
-  explorerOrder,
-  navScopeDropdown,
-]
+const explorerDecorators = [explorerIcons, explorerOrder, navScopeDropdown]
+layout.defaults.left = [...(layout.defaults.left ?? []), ...explorerDecorators]
+// resolveLayout picks `byPageType[type].left ?? defaults.left` (override wins, no
+// merge), so page types that define their own `left` must be augmented too. Skip
+// ones that leave it undefined (they inherit defaults.left) or set it empty (404
+// has no sidebar) — appending there would render a stray, Explorer-less sidebar.
 for (const pageLayout of Object.values(layout.byPageType)) {
-  pageLayout.afterBody = [
-    ...(pageLayout.afterBody ?? []),
-    explorerIcons,
-    explorerOrder,
-    navScopeDropdown,
-  ]
+  if (Array.isArray(pageLayout.left) && pageLayout.left.length > 0) {
+    pageLayout.left = [...pageLayout.left, ...explorerDecorators]
+  }
 }
 
 const content = { ...(layout.byPageType.content ?? {}) }
