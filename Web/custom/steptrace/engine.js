@@ -54,317 +54,773 @@
   --_border: var(--st-border, #c3cbaf);
   --_accent: var(--st-accent, #4c8000);
   --_on-accent: var(--st-on-accent, #ffffff);
+  /* font tokens — hosts bind these to their own families (Quartz: --headerFont
+     /--bodyFont/--codeFont; Obsidian: --font-interface/--font-text/--font-monospace).
+     Fallbacks name the design's own faces for standalone use. */
+  --_font-head: var(--st-font-head, "Schibsted Grotesk", ui-sans-serif, system-ui, sans-serif);
+  --_font-body: var(--st-font-body, "Source Sans 3", "Source Sans Pro", ui-sans-serif, system-ui, sans-serif);
+  --_font-mono: var(--st-font-mono, "IBM Plex Mono", var(--_font-mono));
+  --_hair: color-mix(in srgb, var(--_text) 14%, transparent);
+  --_hover: color-mix(in srgb, var(--_text) 7%, transparent);
   --_tween: 320ms;
+  --_spring: cubic-bezier(.34, 1.4, .5, 1);
   color: var(--_text);
-  font: 400 14px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font: 400 14px/1.5 var(--_font-body);
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  border: 1px solid var(--_border);
-  border-radius: 12px;
-  padding: 1rem;
-  background: var(--st-page, transparent);
+  /* directive: no card box — the card lays naturally on the page like a mermaid
+     diagram (no border, no fill, no padding). */
+  gap: 0;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
 }
+.steptrace * { box-sizing: border-box; }
 .steptrace--reduced * {
   transition: none !important;
   animation: none !important;
 }
 
-/* ---- sort: bars ---- */
+/* ============ head: breadcrumb (left) + step counter (right) ============ */
+.steptrace__head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 0 1.4rem;
+  margin-bottom: 0.9rem;
+}
+.steptrace__crumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--_font-head);
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--_muted);
+  letter-spacing: 0.01em;
+}
+.steptrace__crumb-dot {
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 2px;
+  background: var(--_accent);
+  opacity: 0.9;
+  flex: none;
+}
+.steptrace__crumb-sep {
+  color: var(--_border);
+}
+.steptrace__crumb-algo {
+  color: var(--_text);
+  font-weight: 600;
+}
+.steptrace__counter {
+  justify-self: end;
+  font-family: var(--_font-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--_muted);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.steptrace__counter b {
+  color: var(--_text);
+  font-weight: 600;
+}
+
+/* ============ body: viz stage (left, primary) + rail (right) ============ */
+.steptrace__body {
+  display: grid;
+  grid-template-columns: 1fr minmax(180px, 224px);
+  gap: 0 1.5rem;
+  align-items: stretch;
+}
+.steptrace__stage-col {
+  min-width: 0;
+}
+/* every kind except graph bottom-aligns its viz within the stage column, so the
+   visualization baseline sits level with the rail's WATCH panel */
+.steptrace__stage-col--bottom {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.steptrace__rail {
+  min-width: 0;
+  padding-left: 1.4rem;
+  border-left: 1px solid var(--_hair);
+  display: flex;
+  flex-direction: column;
+}
+.steptrace__rail-label {
+  font-family: var(--_font-head);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--_muted);
+  margin-bottom: 0.5rem;
+}
+/* bottom-anchor the whole TRACE block (label + log) so the newest step sits just
+   above the WATCH divider; the free ("scrollback") space collects at the top. */
+.steptrace__rail > .steptrace__rail-label {
+  margin-top: auto;
+}
+.steptrace__watch-wrap {
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--_hair);
+}
+/* step log: fixed 3 lines, current emphasized (fixed heights ⇒ zero footer jitter) */
+.steptrace__log {
+  list-style: none;
+  margin: 0 0 0.9rem; /* gap under the newest step == WATCH eyebrow-to-divider gap */
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  font-family: var(--_font-mono);
+  font-size: 0.72rem;
+  line-height: 1.4;
+  overflow: hidden; /* clip the between-step scroll so it can't overlap the label */
+}
+.steptrace__log-line {
+  display: flex;
+  gap: 0.5rem;
+  height: 2.8em; /* fits two full lines (line-height 1.4 × 2); 2nd line no longer clipped */
+  overflow: hidden;
+  transition: opacity 0.3s ease;
+}
+/* older history fades progressively (age 1 = previous, age 2 = older) */
+.steptrace__log-line[data-age="1"] {
+  opacity: 0.5;
+}
+.steptrace__log-line[data-age="2"] {
+  opacity: 0.28;
+}
+.steptrace__log-num {
+  flex: none;
+  color: var(--_muted);
+  opacity: 0.5;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.steptrace__log-text {
+  color: var(--_muted);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  /* Only a wrapped 2ND line trails off horizontally — the 1st line stays intact.
+     Layer A keeps the top line box (1.4em) fully opaque regardless of x; layer B
+     is a right-fade that only "wins" below it (where A is transparent), i.e. line
+     2. The layers composite additively, so line 1 is never clipped. */
+  -webkit-mask-image: linear-gradient(to bottom, #000 1.4em, transparent 1.4em),
+    linear-gradient(to right, #000 88%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 1.4em, transparent 1.4em),
+    linear-gradient(to right, #000 88%, transparent 100%);
+}
+.steptrace__log-line--cur .steptrace__log-num {
+  opacity: 1;
+  color: var(--_accent);
+  font-weight: 600;
+}
+.steptrace__log-line--cur .steptrace__log-text {
+  color: var(--_text);
+  font-weight: 600;
+}
+/* watch rows: key … value, hairline between */
+.steptrace__watch {
+  display: flex;
+  flex-direction: column;
+}
+.steptrace__watch-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 2em;
+  font-family: var(--_font-mono);
+  font-size: 0.72rem;
+  border-bottom: 1px solid var(--_hair);
+}
+.steptrace__watch-row:last-child {
+  border-bottom: 0;
+}
+.steptrace__watch-sw {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex: none;
+}
+.steptrace__watch-k {
+  color: var(--_muted);
+  flex: none;
+}
+.steptrace__watch-v {
+  margin-left: auto;
+  color: var(--_text);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ============ foot: scrubber + transport + kebab ============ */
+.steptrace__foot {
+  margin-top: 1.1rem;
+}
+.steptrace__scrub {
+  position: relative;
+  height: 12px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+.steptrace__scrub-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--_hair);
+  border-radius: 2px;
+}
+.steptrace__scrub-fill {
+  position: absolute;
+  left: 0;
+  height: 2px;
+  background: var(--_accent);
+  border-radius: 2px;
+  width: 0;
+}
+.steptrace__scrub-dot {
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--_accent);
+  transform: translateX(-50%);
+  left: 0;
+}
+.steptrace__transport {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  margin-top: 0.55rem;
+}
+.steptrace__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--_text);
+  cursor: pointer;
+  padding: 0;
+}
+.steptrace__btn:hover {
+  background: var(--_hover);
+}
+.steptrace__btn svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.steptrace__btn--play {
+  background: var(--_accent);
+  color: var(--_on-accent);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  margin: 0 0.35rem;
+}
+.steptrace__btn--play svg {
+  fill: currentColor;
+  stroke: currentColor;
+  width: 15px;
+  height: 15px;
+}
+.steptrace__btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+  background: transparent;
+}
+.steptrace__btn:focus-visible {
+  outline: 2px solid var(--_blue);
+  outline-offset: 2px;
+}
+.steptrace__spacer {
+  flex: 1 1 auto;
+}
+/* kebab popover */
+.steptrace__menu-wrap {
+  position: relative;
+}
+.steptrace__menu {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 6px);
+  min-width: 156px;
+  background: var(--st-page, #fff);
+  border: 1px solid var(--_border);
+  border-radius: 9px;
+  padding: 5px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(6px);
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease,
+    visibility 0.15s;
+  z-index: 20;
+}
+.steptrace__menu--open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+.steptrace__menu-h {
+  font-family: var(--_font-head);
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--_muted);
+  padding: 5px 8px 3px;
+}
+.steptrace__menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 6px 8px;
+  border-radius: 6px;
+  font: 500 0.8rem var(--_font-body);
+  color: var(--_text);
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  width: 100%;
+  text-align: left;
+}
+.steptrace__menu-item:hover {
+  background: var(--_hover);
+}
+.steptrace__menu-item[aria-checked="true"] {
+  color: var(--_accent);
+  font-weight: 600;
+}
+
+/* narrow: stack the rail beneath the stage */
+@media (max-width: 560px) {
+  .steptrace__body {
+    grid-template-columns: 1fr;
+  }
+  .steptrace__rail {
+    border-left: 0;
+    border-top: 1px solid var(--_hair);
+    padding-left: 0;
+    padding-top: 1rem;
+    margin-top: 1rem;
+  }
+}
+
+/* ---- bar chart: SHARED by sort + binary-search. A fixed-height stage of
+      bottom-aligned bars; each bar is a coloured fill with the value BELOW and
+      an optional white check INSIDE when the bar is finalised (sorted / found).
+      Sort adds the --pins modifier to reserve headroom for its i/j markers. ---- */
 .steptrace__stage {
+  position: relative;
+  height: 200px;
   display: flex;
   align-items: flex-end;
-  gap: 0.4rem;
-  height: 220px;
-  padding: 0.5rem 0.5rem 0;
-  border-bottom: 2px solid var(--_border);
+  gap: 8px;
+}
+.steptrace__stage--pins {
+  padding-top: 38px; /* headroom above the tallest bar for the pin markers */
 }
 .steptrace__bar {
   flex: 1 1 0;
   min-width: 0;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.3rem;
-  height: 100%;
   justify-content: flex-end;
+  gap: 5px;
 }
 .steptrace__fill {
+  position: relative;
   width: 100%;
-  border-radius: 4px 4px 0 0;
+  min-height: 8px;
+  border-radius: 3px 3px 1px 1px;
   background: var(--_neutral);
-  border: 2px solid transparent;
+  opacity: 0.55;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
   transition:
-    height var(--_tween) ease,
+    height var(--_tween) var(--_spring),
     background var(--_tween) ease,
-    border-color var(--_tween) ease;
+    opacity var(--_tween) ease;
 }
 .steptrace__num {
-  font: 600 12px/1 ui-monospace, "SF Mono", Menlo, monospace;
+  font: 600 0.72rem/1 var(--_font-mono);
   color: var(--_muted);
   font-variant-numeric: tabular-nums;
 }
-.steptrace__cue {
-  font-size: 11px;
-  line-height: 1;
-  min-height: 12px;
-  color: var(--_muted);
+.steptrace__check {
+  display: none;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 0.95rem;
+  height: 0.95rem;
+  color: #fff;
 }
+.steptrace__check svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+/* sort states */
 .steptrace__bar[data-state="compare"] .steptrace__fill {
-  background: var(--_amber);
-  border-color: var(--_amber);
+  background: var(--_blue);
+  opacity: 1;
 }
 .steptrace__bar[data-state="swap"] .steptrace__fill {
   background: var(--_violet);
-  border-color: var(--_violet);
+  opacity: 1;
 }
 .steptrace__bar[data-state="candidate"] .steptrace__fill {
-  background: var(--_surface);
-  border-color: var(--_blue);
-  border-style: dashed;
+  background: var(--_amber);
+  opacity: 1;
 }
 .steptrace__bar[data-state="sorted"] .steptrace__fill {
   background: var(--_green);
-  border-color: var(--_green);
+  opacity: 0.95;
 }
-.steptrace__bar[data-state="sorted"] .steptrace__num {
-  color: var(--_green);
+.steptrace__bar[data-state="sorted"] .steptrace__check {
+  display: block;
 }
-.steptrace__bar[data-state="compare"] .steptrace__num,
-.steptrace__bar[data-state="swap"] .steptrace__num {
-  color: var(--_text);
+/* pin marker: JS writes transform(x,y) to the anchor (bar top-centre); the
+   margins lift the teardrop so its tip floats ~6px above the bar top. */
+.steptrace__pin {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 22px;
+  height: 27px;
+  margin-left: -11px;
+  margin-top: -33px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  will-change: transform;
+}
+.steptrace__pin--a {
+  color: var(--_blue);
+}
+.steptrace__pin--b {
+  color: var(--_violet);
+}
+.steptrace__pin-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  display: block;
+}
+.steptrace__pin-svg path {
+  fill: color-mix(in srgb, currentColor 88%, transparent);
+  stroke: currentColor;
+  stroke-width: 1.6px;
+  stroke-linejoin: round;
+}
+.steptrace__pin-label {
+  position: absolute;
+  left: 50%;
+  top: 38%;
+  transform: translate(-50%, -50%);
+  font: 700 0.62rem/1 var(--_font-head);
+  color: var(--_on-accent);
 }
 
-/* ---- search: bars with a live range + probed middle ---- */
-.steptrace__target {
-  align-self: flex-start;
-  font: 600 13px ui-monospace, "SF Mono", Menlo, monospace;
-  color: var(--_text);
-  padding: 0.25rem 0.6rem;
-  border-radius: 7px;
-  background: var(--_surface);
-}
+/* ---- binary-search states (same shared bars as sort) ---- */
 .steptrace__bar[data-state="range"] .steptrace__fill {
   background: var(--_neutral);
+  opacity: 0.7;
 }
 .steptrace__bar[data-state="eliminated"] .steptrace__fill {
-  background: var(--_neutral);
-  opacity: 0.28;
+  opacity: 0.22;
 }
 .steptrace__bar[data-state="eliminated"] .steptrace__num {
   opacity: 0.4;
 }
 .steptrace__bar[data-state="probe"] .steptrace__fill {
   background: var(--_blue);
-  border-color: var(--_blue);
-}
-.steptrace__bar[data-state="probe"] .steptrace__cue {
-  color: var(--_blue);
-  font-weight: 700;
+  opacity: 1;
 }
 .steptrace__bar[data-state="found"] .steptrace__fill {
   background: var(--_green);
-  border-color: var(--_green);
+  opacity: 1;
 }
-.steptrace__bar[data-state="found"] .steptrace__num {
-  color: var(--_green);
+.steptrace__bar[data-state="found"] .steptrace__check {
+  display: block;
 }
 
-/* ---- string matching: text with the pattern aligned underneath ---- */
+/* ---- string matching: text + pattern as pointer-style segmented strips,
+      stacked (the pattern strip slides under the current window) ---- */
+/* hash badge (rabin-karp): sits BELOW the visualization, above the scrubber */
 .steptrace__hash {
-  align-self: flex-start;
-  font: 600 12px ui-monospace, "SF Mono", Menlo, monospace;
+  display: inline-block;
+  margin-top: 0.85rem;
+  font: 600 0.72rem var(--_font-mono);
   color: var(--_text);
   padding: 0.2rem 0.55rem;
   border-radius: 6px;
-  background: var(--_surface);
+  background: color-mix(in srgb, var(--_accent) 12%, transparent);
 }
 .steptrace__match {
-  overflow-x: auto;
-  padding: 0.25rem 0 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow: hidden; /* clip the sliding pattern flush to the container */
 }
+/* the main text strip fills the full container width like the pointers array */
 .steptrace__cells {
   display: flex;
+  width: 100%;
+  border: 1px solid color-mix(in srgb, var(--_text) 22%, transparent);
+  border-radius: 9px;
+  overflow: hidden;
 }
+/* the pattern strip is only as wide as its own cells and slides via translateX */
 .steptrace__cells--pat {
-  margin-top: 4px;
-  transition: transform var(--_tween) ease;
+  width: max-content;
+  align-self: flex-start;
+  transition: transform var(--_tween) var(--_spring);
 }
 .steptrace__cell {
-  width: 30px;
-  height: 34px;
-  flex: 0 0 30px;
+  flex: 1 1 0; /* text cells stretch to fill; same sizing as the pointers strip */
+  min-width: 0;
+  height: 44px;
   box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--_border);
-  font: 600 15px ui-monospace, "SF Mono", Menlo, monospace;
+  border-right: 1px solid color-mix(in srgb, var(--_text) 13%, transparent);
+  font: 500 0.98rem var(--_font-mono);
   color: var(--_text);
-  background: var(--_surface);
   transition:
     background var(--_tween) ease,
-    border-color var(--_tween) ease;
+    color 0.22s ease;
 }
+/* pattern cells are pinned to the measured width of one text cell (--_cw) so the
+   slide stays aligned even as the responsive text strip changes cell size */
 .steptrace__cell--pat {
-  border-color: var(--_muted);
-  background: transparent;
+  flex: 0 0 var(--_cw, 34px);
+  width: var(--_cw, 34px);
+}
+.steptrace__cell:last-child {
+  border-right: 0;
 }
 .steptrace__cell[data-state="window"] {
-  background: color-mix(in srgb, var(--_blue) 12%, var(--_surface));
+  background: color-mix(in srgb, var(--_accent) 15%, transparent);
 }
 .steptrace__cell[data-state="match"] {
-  background: var(--_green);
-  border-color: var(--_green);
-  color: var(--_on-accent);
+  background: color-mix(in srgb, var(--_green) 22%, transparent);
+  color: var(--_green);
+  font-weight: 700;
 }
 .steptrace__cell[data-state="mismatch"] {
-  background: var(--_amber);
-  border-color: var(--_amber);
-  color: var(--_on-accent);
+  background: color-mix(in srgb, var(--_amber) 22%, transparent);
 }
 .steptrace__cell[data-state="probe"] {
-  border-color: var(--_blue);
-  border-width: 2px;
+  background: color-mix(in srgb, var(--_blue) 18%, transparent);
 }
 .steptrace__cell[data-state="found"] {
-  background: color-mix(in srgb, var(--_green) 30%, var(--_surface));
-  border-color: var(--_green);
+  background: color-mix(in srgb, var(--_green) 22%, transparent);
+  color: var(--_green);
 }
 
-/* ---- array pointers: value cells with named pointers + a window ---- */
-.steptrace__parr {
+/* ---- array pointers: segmented strip + tinted window + [ ] brackets ---- */
+.steptrace__pwrap {
+  position: relative;
+  height: 46px;
+  margin: 1.4rem 0;
+}
+.steptrace__pcells {
   display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
+  height: 100%;
+  border: 1px solid color-mix(in srgb, var(--_text) 22%, transparent);
+  border-radius: 9px;
+  overflow: hidden; /* clips the window tint flush to the rounded ends */
 }
 .steptrace__pcell {
-  min-width: 42px;
-  flex: 1 1 42px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-}
-.steptrace__pval {
-  width: 100%;
-  height: 42px;
+  flex: 1 1 0;
+  min-width: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--_border);
-  border-radius: 7px;
-  font: 600 15px ui-monospace, "SF Mono", Menlo, monospace;
+  font: 500 0.98rem var(--_font-mono);
   color: var(--_text);
-  background: var(--_surface);
+  border-right: 1px solid color-mix(in srgb, var(--_text) 13%, transparent);
   transition:
     background var(--_tween) ease,
-    border-color var(--_tween) ease;
+    color 0.22s ease,
+    font-weight 0.22s ease;
 }
-.steptrace__pcell[data-state="window"] .steptrace__pval {
-  background: color-mix(in srgb, var(--_blue) 14%, var(--_surface));
-  border-color: color-mix(in srgb, var(--_blue) 45%, var(--_border));
+.steptrace__pcell:last-child {
+  border-right: 0;
 }
-.steptrace__pcell[data-state="pointer"] .steptrace__pval {
-  border-color: var(--_blue);
-  border-width: 2px;
+.steptrace__pcell[data-state="window"] {
+  background: color-mix(in srgb, var(--_accent) 15%, transparent);
 }
-.steptrace__pcell[data-state="found"] .steptrace__pval {
-  background: var(--_green);
-  border-color: var(--_green);
-  color: var(--_on-accent);
+.steptrace__pcell[data-state="match"] {
+  background: color-mix(in srgb, var(--_green) 22%, transparent);
 }
-.steptrace__ptr {
-  min-height: 1.1em;
-  font: 700 11px ui-monospace, "SF Mono", Menlo, monospace;
-  letter-spacing: 0.03em;
+.steptrace__pcell[data-end="l"] {
   color: var(--_blue);
+  font-weight: 700;
+}
+.steptrace__pcell[data-end="r"] {
+  color: var(--_violet);
+  font-weight: 700;
+}
+.steptrace__pcell[data-state="match"][data-end] {
+  color: var(--_green);
+}
+/* [ ] brackets: overlaid at the window ends, nested a few px inside, square
+   unless they sit on the strip's own rounded end cell (data-round="1"). */
+.steptrace__pbrackets {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.steptrace__pbr {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  width: 7px;
+  border: 2.5px solid transparent;
+  transition:
+    left 0.35s var(--_spring),
+    border-color 0.3s ease;
+}
+.steptrace__pbr--l {
+  border-right: 0;
+  transform: translateX(3px);
+  border-color: var(--_blue);
+}
+.steptrace__pbr--r {
+  border-left: 0;
+  transform: translateX(calc(-100% - 3px));
+  border-color: var(--_violet);
+}
+.steptrace__pbr--l[data-round="1"] {
+  border-radius: 6px 0 0 6px;
+}
+.steptrace__pbr--r[data-round="1"] {
+  border-radius: 0 6px 6px 0;
+}
+.steptrace__pbrackets[data-match="1"] .steptrace__pbr {
+  border-color: var(--_green);
 }
 
-/* ---- dp table: fills in cell by cell ---- */
+/* ---- dp / LCS: a 2-D grid in the pointer-strip idiom (framed + rounded, with
+      hairline dividers and tinted states); cells fill in one by one ---- */
 .steptrace__dp-wrap {
+  display: block;
+  width: 100%;
   overflow-x: auto;
+  border: 1px solid color-mix(in srgb, var(--_text) 22%, transparent);
+  border-radius: 9px;
+  margin: 0.4rem 0;
 }
 .steptrace__dp {
+  width: 100%; /* fills the container; columns distribute evenly (row height fixed) */
+  table-layout: fixed;
   border-collapse: collapse;
-  font: 600 13px ui-monospace, "SF Mono", Menlo, monospace;
+  font: 500 0.9rem var(--_font-mono);
 }
 .steptrace__dp th {
   color: var(--_muted);
-  font-weight: 700;
-  padding: 3px 7px;
+  font: 600 0.7rem var(--_font-head);
+  padding: 5px 9px;
   text-align: center;
+  background: color-mix(in srgb, var(--_text) 5%, transparent);
+  border: 1px solid color-mix(in srgb, var(--_text) 11%, transparent);
 }
 .steptrace__dp td {
-  width: 34px;
-  height: 34px;
+  height: 38px;
   text-align: center;
-  border: 1px solid var(--_border);
   color: var(--_text);
-  background: var(--_surface);
+  border: 1px solid color-mix(in srgb, var(--_text) 11%, transparent);
   transition:
     background var(--_tween) ease,
-    border-color var(--_tween) ease;
+    color 0.22s ease;
 }
 .steptrace__dp td[data-state="dep"] {
-  background: color-mix(in srgb, var(--_amber) 22%, var(--_surface));
-  border-color: var(--_amber);
+  background: color-mix(in srgb, var(--_amber) 20%, transparent);
 }
 .steptrace__dp td[data-state="cur"] {
-  background: var(--_blue);
-  border-color: var(--_blue);
-  color: var(--_on-accent);
+  background: color-mix(in srgb, var(--_blue) 20%, transparent);
+  color: var(--_blue);
+  font-weight: 700;
 }
 .steptrace__dp td[data-state="path"] {
-  background: var(--_green);
-  border-color: var(--_green);
-  color: var(--_on-accent);
+  background: color-mix(in srgb, var(--_green) 22%, transparent);
+  color: var(--_green);
+  font-weight: 700;
 }
 
-/* ---- union-find forest: parent-pointer arcs above a row of elements ---- */
-.steptrace__uf .steptrace__ufnode circle {
-  fill: var(--_surface);
+/* ---- union-find: nodes + arcs share the GRAPH styling (opaque backing, tinted
+      fill, thin constant stroke; arcs change colour, not thickness). Nodes are
+      coloured by set — stroke + fill tint set inline per frame. ---- */
+.steptrace__uf .steptrace__ufnode .steptrace__nback {
+  fill: var(--st-page, var(--_surface));
+  stroke: none;
+}
+.steptrace__uf .steptrace__ufnode .steptrace__ncirc {
   stroke: var(--_neutral);
-  stroke-width: 2.5;
+  stroke-width: 1.6;
   transition:
     stroke var(--_tween) ease,
     fill var(--_tween) ease;
 }
-.steptrace__uf .steptrace__ufnode[data-root="true"] circle {
-  stroke-width: 4;
-}
-.steptrace__uf .steptrace__ufnode[data-hl="true"] circle {
-  fill: color-mix(in srgb, var(--_blue) 20%, var(--_surface));
-}
 .steptrace__uf .steptrace__id {
   fill: var(--_text);
-  font: 700 13px ui-sans-serif, system-ui, sans-serif;
+  font: 600 13px var(--_font-head);
 }
 .steptrace__ufarc {
   stroke: var(--_neutral);
   stroke-width: 2;
-  transition:
-    stroke var(--_tween) ease,
-    stroke-width var(--_tween) ease;
+  transition: stroke var(--_tween) ease;
 }
 .steptrace__ufarc[data-active="true"] {
-  stroke: var(--_blue);
-  stroke-width: 3.5;
+  stroke: var(--_violet);
 }
 
 /* ---- graph: svg ---- */
 .steptrace__graph {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  align-items: flex-start;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: stretch;
 }
 .steptrace__svg {
-  flex: 1 1 320px;
   width: 100%;
-  max-width: 560px;
   height: auto;
-  max-height: 300px;
+  max-height: 260px;
   overflow: visible;
 }
 .steptrace__arrow {
@@ -373,26 +829,26 @@
 .steptrace__edge {
   stroke: var(--_neutral);
   stroke-width: 2;
-  transition:
-    stroke var(--_tween) ease,
-    stroke-width var(--_tween) ease;
+  transition: stroke var(--_tween) ease;
 }
 .steptrace__edge[data-active="true"] {
   stroke: var(--_violet);
-  stroke-width: 4;
 }
 .steptrace__edge[data-selected="true"] {
   stroke: var(--_green);
-  stroke-width: 4;
 }
 .steptrace__edge-label {
   fill: var(--_muted);
-  font: 600 11px ui-monospace, Menlo, monospace;
+  font: 600 11px var(--_font-mono);
 }
-.steptrace__node circle {
-  fill: var(--_surface);
+.steptrace__node .steptrace__nback {
+  fill: var(--st-page, var(--_surface));
+  stroke: none;
+}
+.steptrace__node .steptrace__ncirc {
+  fill: color-mix(in srgb, var(--_neutral) 20%, transparent);
   stroke: var(--_neutral);
-  stroke-width: 2;
+  stroke-width: 1.6;
   transition:
     fill var(--_tween) ease,
     stroke var(--_tween) ease,
@@ -400,28 +856,23 @@
 }
 .steptrace__node .steptrace__id {
   fill: var(--_text);
-  font: 700 14px ui-sans-serif, system-ui, sans-serif;
+  font: 600 13px var(--_font-head);
 }
 .steptrace__node .steptrace__d {
   fill: var(--_muted);
-  font: 600 10px ui-monospace, Menlo, monospace;
+  font: 600 10px var(--_font-mono);
 }
-.steptrace__node[data-state="visited"] circle {
-  fill: var(--_green);
+.steptrace__node[data-state="visited"] .steptrace__ncirc {
+  fill: color-mix(in srgb, var(--_green) 20%, transparent);
   stroke: var(--_green);
 }
-.steptrace__node[data-state="frontier"] circle {
-  fill: var(--_surface);
+.steptrace__node[data-state="frontier"] .steptrace__ncirc {
+  fill: color-mix(in srgb, var(--_amber) 18%, transparent);
   stroke: var(--_amber);
-  stroke-width: 3.5;
 }
-.steptrace__node[data-state="current"] circle {
-  fill: var(--_blue);
+.steptrace__node[data-state="current"] .steptrace__ncirc {
+  fill: color-mix(in srgb, var(--_blue) 22%, transparent);
   stroke: var(--_blue);
-}
-.steptrace__node[data-state="visited"] .steptrace__id,
-.steptrace__node[data-state="current"] .steptrace__id {
-  fill: var(--_on-accent);
 }
 .steptrace__aside {
   flex: 0 1 auto;
@@ -430,60 +881,38 @@
   gap: 0.6rem;
   min-width: 130px;
 }
-.steptrace__queue-label,
-.steptrace__legend-label {
-  font: 700 11px ui-monospace, Menlo, monospace;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--_muted);
-}
-.steptrace__queue {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.3rem;
-  margin-top: 0.3rem;
-  min-height: 1.8rem;
-}
-.steptrace__chip {
-  font: 600 12px ui-monospace, Menlo, monospace;
-  padding: 0.2rem 0.5rem;
-  border-radius: 6px;
-  background: var(--_surface);
-  border: 1.5px solid var(--_amber);
-  color: var(--_text);
-}
-.steptrace__queue-empty {
-  font-size: 12px;
-  color: var(--_muted);
-  font-style: italic;
-}
 .steptrace__legend {
   display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  margin-top: 0.3rem;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0.2rem 1.1rem;
+  margin-top: 0.1rem;
 }
 .steptrace__legend-row {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  font-size: 12px;
-  color: var(--_text);
+  font: 500 11.5px var(--_font-head);
+  color: var(--_muted);
 }
 .steptrace__swatch {
-  width: 12px;
-  height: 12px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
   flex: none;
+  border: 1.5px solid;
 }
 .steptrace__swatch--current {
-  background: var(--_blue);
+  background: color-mix(in srgb, var(--_blue) 22%, transparent);
+  border-color: var(--_blue);
 }
 .steptrace__swatch--frontier {
-  background: var(--_amber);
+  background: color-mix(in srgb, var(--_amber) 18%, transparent);
+  border-color: var(--_amber);
 }
 .steptrace__swatch--visited {
-  background: var(--_green);
+  background: color-mix(in srgb, var(--_green) 20%, transparent);
+  border-color: var(--_green);
 }
 
 /* ---- shared: status + toolbar ---- */
@@ -540,7 +969,7 @@
   flex: 1 1 auto;
 }
 .steptrace__step {
-  font: 600 12px/1 ui-monospace, Menlo, monospace;
+  font: 600 12px/1 var(--_font-mono);
   color: var(--_muted);
   font-variant-numeric: tabular-nums;
 }
@@ -1838,97 +2267,172 @@
     if (style.textContent !== STYLES) style.textContent = STYLES
   }
 
-  // ---- sort view: bars ----
-  function makeSortView(frames) {
-    const maxVal = Math.max(...frames[0].array, 1)
-    const n = frames[0].array.length
-
-    const stage = el("div", "steptrace__stage")
+  // ---- sort view: value-in-bar + tracked i/j pin markers (no hat) ----
+  // shared bar scaffold for sort + binary-search: bottom-aligned bars, each a
+  // coloured fill with the value BELOW and a white check INSIDE (revealed via
+  // CSS on the finalised state). Returns [{ bar, fill, num, check }].
+  function makeBars(stage, n) {
     const bars = []
     for (let k = 0; k < n; k++) {
       const bar = el("div", "steptrace__bar")
       const fill = el("div", "steptrace__fill")
+      const check = el("div", "steptrace__check")
+      check.innerHTML = ICON.check
+      check.setAttribute("aria-hidden", "true")
+      fill.append(check)
       const num = el("div", "steptrace__num")
-      const cue = el("div", "steptrace__cue")
-      cue.setAttribute("aria-hidden", "true")
-      bar.append(fill, num, cue)
+      bar.append(fill, num)
       stage.append(bar)
-      bars.push({ bar, fill, num, cue })
+      bars.push({ bar, fill, num, check })
     }
+    return bars
+  }
+
+  // ---- sort view: shared bars + tracked i/j pin markers (no hat) ----
+  function makeSortView(frames) {
+    const maxVal = Math.max(...frames[0].array, 1)
+    const n = frames[0].array.length
+
+    const stage = el("div", "steptrace__stage steptrace__stage--pins")
+    const bars = makeBars(stage, n)
+    const pinI = makePin("i", "a")
+    const pinJ = makePin("j", "b")
+    stage.append(pinI.el, pinJ.el)
 
     const status = statusEl()
+    const tracker = createBarTracker(stage, bars, [pinI, pinJ])
 
-    function paint(frame, i, total) {
+    function paint(frame) {
       for (let k = 0; k < n; k++) {
         const b = bars[k]
-        // data-driven geometry (the bar's value → height); not styling.
-        b.fill.style.height = `${Math.max(2, (frame.array[k] / maxVal) * 100)}%`
+        // data-driven geometry (value → height); colours come from data-state.
+        b.fill.style.height = `${Math.max(6, (frame.array[k] / maxVal) * 100)}%`
         b.num.textContent = frame.array[k]
         let state = ""
         if (frame.sorted.includes(k)) state = "sorted"
         if (frame.candidate === k) state = "candidate"
         if (frame.active.includes(k)) state = frame.type === "swap" ? "swap" : "compare"
         b.bar.dataset.state = state
-        b.cue.textContent = state === "sorted" ? "✓" : state === "candidate" ? "◦" : state ? "•" : ""
       }
-      const key = frame.keyValue != null ? ` <span class="steptrace__key">key: ${frame.keyValue}</span>` : ""
-      status.innerHTML =
-        escapeHtml(frame.message) +
-        key +
-        ` <span class="steptrace__counts">· ${frame.comparisons} compares, ${frame.swaps} moves · step ${i + 1}/${total}</span>`
+      // the active pair drives the i / j pins; fall back to the scan candidate.
+      const act = frame.active || []
+      tracker.set(act[0] != null ? act[0] : frame.candidate, act[1])
     }
 
-    return { nodes: [stage, status], paint }
+    function watch(frame) {
+      const act = frame.active || []
+      return [
+        { k: "i", v: act[0] != null ? act[0] : "—", sw: "var(--_blue)" },
+        { k: "j", v: act[1] != null ? act[1] : "—", sw: "var(--_violet)" },
+        { k: "swaps", v: frame.swaps, sw: "var(--_amber)" },
+      ]
+    }
+
+    return { nodes: [stage, status], paint, watch, destroy: tracker.destroy }
   }
 
-  // ---- search view: bars with a live [lo, hi] range + probed middle ----
+  // a single-path teardrop pin (no hat); one SVG shape so the translucent fill
+  // never shows a seam. role "a" = blue, "b" = violet (coloured via CSS).
+  function makePin(label, role) {
+    const wrap = el("div", "steptrace__pin steptrace__pin--" + role)
+    wrap.innerHTML =
+      '<svg class="steptrace__pin-svg" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 1C6.201 1 1.5 5.701 1.5 11.5C1.5 19.5 12 29 12 29S22.5 19.5 22.5 11.5C22.5 5.701 17.799 1 12 1Z"/></svg>'
+    const lbl = el("span", "steptrace__pin-label")
+    lbl.textContent = label
+    wrap.append(lbl)
+    return { el: wrap }
+  }
+
+  // persistent tracker: each marker follows its target bar's live top-centre.
+  // rAF for smoothness + a 16 ms interval fallback so it still runs in occluded/
+  // headless render contexts (screenshot pipelines, hidden panes). x springs
+  // between columns; y is a direct, lag-free read so a bar can never touch a pin.
+  function createBarTracker(stage, bars, markers) {
+    let targets = [null, null]
+    const sx = [null, null]
+    const SPRING = 0.32
+    function frameStep() {
+      const sr = stage.getBoundingClientRect()
+      for (let m = 0; m < markers.length; m++) {
+        const idx = targets[m]
+        const bar = idx != null && idx >= 0 && bars[idx] ? bars[idx].fill : null
+        const mk = markers[m]
+        if (!bar || !bar.isConnected) {
+          mk.el.style.opacity = "0"
+          sx[m] = null
+          continue
+        }
+        const br = bar.getBoundingClientRect()
+        const tx = br.left + br.width / 2 - sr.left
+        const ty = br.top - sr.top
+        if (sx[m] == null) sx[m] = tx
+        else {
+          sx[m] += (tx - sx[m]) * SPRING
+          if (Math.abs(tx - sx[m]) < 0.4) sx[m] = tx
+        }
+        mk.el.style.transform = `translate(${sx[m].toFixed(2)}px, ${ty.toFixed(2)}px)`
+        mk.el.style.opacity = "1"
+      }
+    }
+    function loop() {
+      frameStep()
+      raf = requestAnimationFrame(loop)
+    }
+    let raf = requestAnimationFrame(loop)
+    const iv = setInterval(frameStep, 16)
+    return {
+      set(a, b) {
+        targets = [a != null ? a : null, b != null ? b : null]
+      },
+      destroy() {
+        cancelAnimationFrame(raf)
+        clearInterval(iv)
+      },
+    }
+  }
+
+  // ---- binary-search view: shared bars with a live [lo, hi] range + probe ----
   function makeSearchView(frames) {
     const maxVal = Math.max(...frames[0].array, 1)
     const n = frames[0].array.length
 
-    const banner = el("div", "steptrace__target")
-    banner.textContent = `Searching for ${frames[0].target}`
-
     const stage = el("div", "steptrace__stage")
-    const bars = []
-    for (let k = 0; k < n; k++) {
-      const bar = el("div", "steptrace__bar")
-      const fill = el("div", "steptrace__fill")
-      const num = el("div", "steptrace__num")
-      const cue = el("div", "steptrace__cue")
-      cue.setAttribute("aria-hidden", "true")
-      bar.append(fill, num, cue)
-      stage.append(bar)
-      bars.push({ bar, fill, num, cue })
-    }
+    const bars = makeBars(stage, n)
     const status = statusEl()
 
     function paint(frame, i, total) {
       for (let k = 0; k < n; k++) {
         const b = bars[k]
-        // data-driven geometry only; colours come from --_* tokens via data-state.
-        b.fill.style.height = `${Math.max(2, (frame.array[k] / maxVal) * 100)}%`
+        b.fill.style.height = `${Math.max(6, (frame.array[k] / maxVal) * 100)}%`
         b.num.textContent = frame.array[k]
         let state = "range"
         if (k < frame.lo || k > frame.hi) state = "eliminated"
         if (frame.mid === k) state = "probe"
         if (frame.found === k) state = "found"
         b.bar.dataset.state = state
-        b.cue.textContent = frame.found === k ? "✓" : frame.mid === k ? "▲" : ""
       }
       status.innerHTML =
         escapeHtml(frame.message) +
         ` <span class="steptrace__counts">· ${frame.comparisons} probe${frame.comparisons === 1 ? "" : "s"} · step ${i + 1}/${total}</span>`
     }
 
-    return { nodes: [banner, stage, status], paint }
+    function watch(frame) {
+      return [
+        { k: "target", v: String(frames[0].target), sw: "var(--_accent)" },
+        { k: "range", v: `[${frame.lo}, ${frame.hi}]`, sw: "var(--_neutral)" },
+        { k: "mid", v: frame.mid != null ? `[${frame.mid}] = ${frame.array[frame.mid]}` : "—", sw: "var(--_blue)" },
+      ]
+    }
+
+    return { nodes: [stage, status], paint, watch }
   }
 
   // ---- string-matching view: text with the pattern aligned underneath ----
-  const CELL_W = 30 // px; must match .steptrace__cell width for shift alignment
+  const CELL_W = 34 // px; must match .steptrace__cell width for shift alignment
   function makeMatchView(frames) {
     const text = frames[0].text
     const pattern = frames[0].pattern
+    const hasHash = frames.some((f) => f.hash) // rabin-karp only ⇒ constant rows
 
     const hashBadge = el("div", "steptrace__hash")
     const textRow = el("div", "steptrace__cells")
@@ -1947,12 +2451,28 @@
       patRow.append(c)
       pcells.push(c)
     }
+    // small sliding pattern on TOP, full-width main text on the BOTTOM
     const stage = el("div", "steptrace__match")
-    stage.append(textRow, patRow)
+    stage.append(patRow, textRow)
     const status = statusEl()
 
+    // The text strip is responsive (flex cells), so a text cell's px width isn't
+    // fixed. Measure it and (a) size every pattern cell to match via --_cw and
+    // (b) translate the pattern by shift × that width so the slide stays aligned.
+    // A ResizeObserver re-applies geometry when the container width changes.
+    let lastShift = 0
+    function applyGeom() {
+      const w = tcells.length ? tcells[0].getBoundingClientRect().width : CELL_W
+      const cw = w > 0 ? w : CELL_W
+      stage.style.setProperty("--_cw", cw + "px")
+      patRow.style.transform = `translateX(${(lastShift * cw).toFixed(2)}px)`
+    }
+    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(applyGeom) : null
+    if (ro) ro.observe(textRow)
+
     function paint(frame, i, total) {
-      patRow.style.transform = `translateX(${frame.shift * CELL_W}px)`
+      lastShift = frame.shift
+      applyGeom()
       for (let k = 0; k < tcells.length; k++) tcells[k].dataset.state = ""
       for (let k = 0; k < pcells.length; k++) pcells[k].dataset.state = ""
       // matched regions (persist)
@@ -1965,54 +2485,111 @@
       // current comparison
       if (frame.cmpT != null && tcells[frame.cmpT]) tcells[frame.cmpT].dataset.state = frame.cmpResult || "probe"
       if (frame.cmpP != null && pcells[frame.cmpP]) pcells[frame.cmpP].dataset.state = frame.cmpResult || "probe"
-      if (frame.hash) {
-        hashBadge.style.display = ""
-        hashBadge.textContent = `window hash ${frame.hash.window} ${frame.hash.window === frame.hash.pattern ? "=" : "≠"} pattern hash ${frame.hash.pattern}`
-      } else {
-        hashBadge.style.display = "none"
+      // rabin-karp only: the badge is always present (constant height ⇒ no jitter);
+      // frames without a live hash keep the row via a non-breaking placeholder.
+      if (hasHash) {
+        hashBadge.textContent = frame.hash
+          ? `window hash ${frame.hash.window} ${frame.hash.window === frame.hash.pattern ? "=" : "≠"} pattern hash ${frame.hash.pattern}`
+          : " "
       }
       status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`
     }
 
-    return { nodes: [hashBadge, stage, status], paint }
+    function watch(frame) {
+      const rows = [
+        { k: "shift", v: String(frame.shift), sw: "var(--_blue)" },
+        { k: "matches", v: String(frame.found.length), sw: "var(--_green)" },
+      ]
+      if (hasHash) {
+        rows.push({ k: "hash", v: frame.hash ? `${frame.hash.window} / ${frame.hash.pattern}` : "—", sw: "var(--_amber)" })
+      }
+      return rows
+    }
+
+    // hash badge (if any) is placed AFTER the stage ⇒ it renders below the viz.
+    const nodes = hasHash ? [stage, hashBadge, status] : [stage, status]
+    return { nodes, paint, watch, destroy: () => ro && ro.disconnect() }
   }
 
-  // ---- array-pointer view: value cells with named pointers + a window ----
+  // ---- array-pointer view: a segmented strip + [ ] end brackets + window ----
+  // The active window tints the cells' OWN background, so the strip's
+  // overflow:hidden rounded frame clips it flush — rounded only at the real
+  // ends, square at interior edges (no floating mid-strip radius). The blue [
+  // / violet ] brackets overlay the window ends; match recolours all of it green.
   function makePointerView(frames) {
     const n = frames[0].array.length
-    const stage = el("div", "steptrace__parr")
+    // capture pointer names once so WATCH always shows the same rows (constant
+    // height ⇒ no footer jitter even on frames that carry no pointers).
+    const ptrNames = (function () {
+      for (const f of frames) {
+        const ks = Object.keys(f.pointers || {})
+        if (ks.length) return ks
+      }
+      return []
+    })()
+    const wrap = el("div", "steptrace__pwrap")
+    const strip = el("div", "steptrace__pcells")
     const cells = []
     for (let k = 0; k < n; k++) {
       const cell = el("div", "steptrace__pcell")
-      const val = el("div", "steptrace__pval")
-      val.textContent = frames[0].array[k]
-      const ptr = el("div", "steptrace__ptr")
-      cell.append(val, ptr)
-      stage.append(cell)
-      cells.push({ cell, val, ptr })
+      cell.textContent = frames[0].array[k]
+      strip.append(cell)
+      cells.push(cell)
     }
+    const brackets = el("div", "steptrace__pbrackets")
+    const brL = el("div", "steptrace__pbr steptrace__pbr--l")
+    const brR = el("div", "steptrace__pbr steptrace__pbr--r")
+    brackets.append(brL, brR)
+    wrap.append(strip, brackets)
     const status = statusEl()
 
-    function paint(frame, i, total) {
-      const byIdx = {}
-      for (const name in frame.pointers) {
-        const idx = frame.pointers[name]
-        ;(byIdx[idx] = byIdx[idx] || []).push(name)
-      }
+    function paint(frame) {
+      const win = frame.window
+      const matched = frame.marked && frame.marked.length > 0
       for (let k = 0; k < n; k++) {
         const c = cells[k]
-        c.val.textContent = frame.array[k]
-        let state = "idle"
-        if (frame.window && k >= frame.window[0] && k <= frame.window[1]) state = "window"
-        if (byIdx[k]) state = "pointer"
-        if (frame.marked.indexOf(k) >= 0) state = "found"
-        c.cell.dataset.state = state
-        c.ptr.textContent = byIdx[k] ? byIdx[k].join(" ") : ""
+        c.textContent = frame.array[k]
+        let state = ""
+        if (win && k >= win[0] && k <= win[1]) state = matched ? "match" : "window"
+        c.dataset.state = state
+        c.dataset.end = win && k === win[0] ? "l" : win && k === win[1] ? "r" : ""
       }
-      status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`
+      if (!win) {
+        brackets.style.display = "none"
+      } else {
+        brackets.style.display = ""
+        brL.style.left = (win[0] / n) * 100 + "%"
+        brR.style.left = ((win[1] + 1) / n) * 100 + "%"
+        brL.dataset.round = win[0] === 0 ? "1" : "0"
+        brR.dataset.round = win[1] === n - 1 ? "1" : "0"
+        brackets.dataset.match = matched ? "1" : "0"
+      }
+      status.innerHTML = escapeHtml(frame.message)
     }
 
-    return { nodes: [stage, status], paint }
+    function watch(frame) {
+      const color = {
+        left: "var(--_blue)",
+        lo: "var(--_blue)",
+        l: "var(--_blue)",
+        i: "var(--_blue)",
+        right: "var(--_violet)",
+        hi: "var(--_violet)",
+        r: "var(--_violet)",
+        j: "var(--_violet)",
+      }
+      const p = frame.pointers || {}
+      return ptrNames.map((name) => {
+        const idx = p[name]
+        return {
+          k: name,
+          v: idx != null ? `[${idx}] = ${frame.array[idx]}` : "—",
+          sw: color[name.toLowerCase()] || "var(--_muted)",
+        }
+      })
+    }
+
+    return { nodes: [wrap, status], paint, watch }
   }
 
   // ---- dp view: a 2-D table that fills in cell by cell ----
@@ -2072,7 +2649,16 @@
       status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`
     }
 
-    return { nodes: [wrap, status], paint }
+    function watch(frame) {
+      const cur = frame.cur
+      const v = cur ? frame.grid[cur[0]][cur[1]] : null
+      return [
+        { k: "cell", v: cur ? `[${cur[0]}, ${cur[1]}]` : "—", sw: "var(--_blue)" },
+        { k: "value", v: v == null ? "—" : String(v), sw: "var(--_green)" },
+      ]
+    }
+
+    return { nodes: [wrap, status], paint, watch }
   }
 
   // ---- union-find view: a row of elements with parent-pointer arcs above ----
@@ -2100,7 +2686,13 @@
     for (let i = 0; i < n; i++) {
       const g = document.createElementNS(SVGNS, "g")
       g.setAttribute("class", "steptrace__ufnode")
+      const back = document.createElementNS(SVGNS, "circle")
+      back.setAttribute("class", "steptrace__nback")
+      back.setAttribute("cx", cx(i))
+      back.setAttribute("cy", BASE)
+      back.setAttribute("r", UR)
       const circle = document.createElementNS(SVGNS, "circle")
+      circle.setAttribute("class", "steptrace__ncirc")
       circle.setAttribute("cx", cx(i))
       circle.setAttribute("cy", BASE)
       circle.setAttribute("r", UR)
@@ -2111,7 +2703,7 @@
       id.setAttribute("text-anchor", "middle")
       id.setAttribute("dominant-baseline", "central")
       id.textContent = i
-      g.append(circle, id)
+      g.append(back, circle, id)
       svg.append(g)
       nodeEls.push({ g, circle })
     }
@@ -2128,7 +2720,9 @@
       const ae = frame.activeEdge
       for (let k = 0; k < n; k++) {
         const ne = nodeEls[k]
-        ne.circle.style.stroke = rootColor[frame.roots[k]]
+        const col = rootColor[frame.roots[k]]
+        ne.circle.style.stroke = col
+        ne.circle.style.fill = `color-mix(in srgb, ${col} 22%, transparent)`
         ne.g.dataset.root = frame.parent[k] === k ? "true" : "false"
         ne.g.dataset.hl = hl.has(k) ? "true" : "false"
       }
@@ -2150,7 +2744,16 @@
       status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`
     }
 
-    return { nodes: [wrap, status], paint }
+    function watch(frame) {
+      const sets = new Set(frame.roots).size
+      const ae = frame.activeEdge
+      return [
+        { k: "sets", v: String(sets), sw: "var(--_blue)" },
+        { k: "edge", v: ae ? `${ae[0]} — ${ae[1]}` : "—", sw: "var(--_violet)" },
+      ]
+    }
+
+    return { nodes: [wrap, status], paint, watch }
   }
 
   // ---- graph view: svg ----
@@ -2213,7 +2816,15 @@
       const p = pos[n.id]
       const g = document.createElementNS(SVGNS, "g")
       g.setAttribute("class", "steptrace__node")
+      // opaque backing disc (page-coloured) so edges never bleed through the
+      // translucent node fill; the tinted ncirc sits on top.
+      const back = document.createElementNS(SVGNS, "circle")
+      back.setAttribute("class", "steptrace__nback")
+      back.setAttribute("cx", p.x)
+      back.setAttribute("cy", p.y)
+      back.setAttribute("r", R)
       const circle = document.createElementNS(SVGNS, "circle")
+      circle.setAttribute("class", "steptrace__ncirc")
       circle.setAttribute("cx", p.x)
       circle.setAttribute("cy", p.y)
       circle.setAttribute("r", R)
@@ -2229,25 +2840,17 @@
       dist.setAttribute("x", p.x)
       dist.setAttribute("y", p.y - R - 5)
       dist.setAttribute("text-anchor", "middle")
-      g.append(circle, id, dist)
+      g.append(back, circle, id, dist)
       svg.append(g)
       nodeEls[n.id] = { g, dist }
     }
 
-    // aside: live queue + legend
-    const aside = el("div", "steptrace__aside")
-    const queueWrap = el("div")
-    const queueLabel = el("div", "steptrace__queue-label")
-    queueLabel.textContent = frontierLabel || "Queue (front → back)"
-    const queue = el("div", "steptrace__queue")
-    queueWrap.append(queueLabel, queue)
+    // legend sits UNDER the graph; the live queue + visited set move to the
+    // rail WATCH (see watch() below), matching the other renderers' rails.
     const legend = el("div", "steptrace__legend")
-    const legendLabel = el("div", "steptrace__legend-label")
-    legendLabel.textContent = "Legend"
-    legend.append(legendLabel)
     for (const [word, stateKey] of [
       ["current", "current"],
-      ["frontier (queued)", "frontier"],
+      ["frontier", "frontier"],
       ["visited", "visited"],
     ]) {
       const row = el("div", "steptrace__legend-row")
@@ -2255,10 +2858,9 @@
       row.append(sw, document.createTextNode(word))
       legend.append(row)
     }
-    aside.append(queueWrap, legend)
 
     const graphWrap = el("div", "steptrace__graph")
-    graphWrap.append(svg, aside)
+    graphWrap.append(svg, legend)
 
     const status = statusEl()
 
@@ -2286,24 +2888,19 @@
         e.el.dataset.active = act ? "true" : "false"
         e.el.dataset.selected = isSel(e.from, e.to) ? "true" : "false"
       }
-      queue.replaceChildren()
-      if (frame.frontier.length === 0) {
-        const empty = el("span", "steptrace__queue-empty")
-        empty.textContent = "empty"
-        queue.append(empty)
-      } else {
-        for (const id of frame.frontier) {
-          const chip = el("span", "steptrace__chip")
-          chip.textContent = id
-          queue.append(chip)
-        }
-      }
       status.innerHTML =
         escapeHtml(frame.message) +
         ` <span class="steptrace__counts">· ${frame.visited.length} visited · step ${i + 1}/${total}</span>`
     }
 
-    return { nodes: [graphWrap, status], paint }
+    function watch(frame) {
+      return [
+        { k: "queue", v: "[ " + (frame.frontier.length ? frame.frontier.join(", ") : "∅") + " ]", sw: "var(--_amber)" },
+        { k: "visited", v: "{ " + (frame.visited.length ? frame.visited.join(", ") : "∅") + " }", sw: "var(--_green)" },
+      ]
+    }
+
+    return { nodes: [graphWrap, status], paint, watch }
   }
 
   // ---- small DOM helpers (structure only; no styling) ----
@@ -2342,6 +2939,38 @@
   }
   function escapeHtml(s) {
     return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c])
+  }
+  function stripTags(s) {
+    return String(s).replace(/<[^>]*>/g, "")
+  }
+  function pad2(n) {
+    return String(n).padStart(2, "0")
+  }
+  // transport glyphs — inline SVG so they inherit currentColor. Filled shapes set
+  // their own fill/stroke so they render right on both the ghost and accent buttons.
+  const ICON = {
+    reset:
+      '<svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.4-5.7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3.4 4.6V8h3.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    back:
+      '<svg viewBox="0 0 24 24"><polygon points="18 5 9 12 18 19" fill="currentColor" stroke="none"/><rect x="5" y="5" width="2" height="14" rx="0.6" fill="currentColor" stroke="none"/></svg>',
+    fwd:
+      '<svg viewBox="0 0 24 24"><polygon points="6 5 15 12 6 19" fill="currentColor" stroke="none"/><rect x="17" y="5" width="2" height="14" rx="0.6" fill="currentColor" stroke="none"/></svg>',
+    play: '<svg viewBox="0 0 24 24"><polygon points="7 4.5 19 12 7 19.5" fill="currentColor" stroke="none"/></svg>',
+    pause:
+      '<svg viewBox="0 0 24 24"><rect x="7" y="5" width="3.4" height="14" rx="1" fill="currentColor" stroke="none"/><rect x="13.6" y="5" width="3.4" height="14" rx="1" fill="currentColor" stroke="none"/></svg>',
+    kebab:
+      '<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.5" fill="currentColor" stroke="none"/></svg>',
+    check:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+  }
+  function iconBtn(label, svg, extra) {
+    const b = document.createElement("button")
+    b.type = "button"
+    b.className = "steptrace__btn" + (extra ? " " + extra : "")
+    b.innerHTML = svg
+    b.setAttribute("aria-label", label)
+    b.title = label
+    return b
   }
 
   // ==========================================================================
@@ -2408,6 +3037,11 @@
       if (this.i > 0) this.i--
       this.render()
     }
+    seek(idx) {
+      this.pause()
+      this.i = Math.max(0, Math.min(this.frames.length - 1, idx | 0))
+      this.render()
+    }
     reset() {
       this.pause()
       this.i = 0
@@ -2454,61 +3088,242 @@
     }
 
     let player = null
+    let currentView = null
 
-    // --- shared transport controls ---
-    const btnReset = button("Reset", "↺")
-    const btnBack = button("Step back", "⏮")
-    const btnPlay = button("Play", "▶", "steptrace__play")
-    const btnFwd = button("Step forward", "⏭")
-    const stepLabel = el("span", "steptrace__step")
+    // --- card chrome: head (breadcrumb + counter) / body (stage | rail) / foot ---
+    const head = el("div", "steptrace__head")
+    const crumb = el("div", "steptrace__crumb")
+    const crumbKind = el("span")
+    crumbKind.textContent = kind
+    const crumbSep = el("span", "steptrace__crumb-sep")
+    crumbSep.textContent = "›"
+    const crumbAlgo = el("span", "steptrace__crumb-algo")
+    crumbAlgo.textContent = state.algorithm
+    crumb.append(el("span", "steptrace__crumb-dot"), crumbKind, crumbSep, crumbAlgo)
+    const counter = el("div", "steptrace__counter")
+    head.append(crumb, counter)
 
-    const speedWrap = el("label", "steptrace__speed")
-    const speedInput = document.createElement("input")
-    speedInput.type = "range"
-    speedInput.min = "0.25"
-    speedInput.max = "4"
-    speedInput.step = "0.25"
-    speedInput.value = String(state.speed)
-    speedInput.setAttribute("aria-label", "Playback speed")
-    const speedVal = document.createElement("span")
-    const showSpeed = () => (speedVal.textContent = `${Number(speedInput.value).toFixed(2)}×`)
-    showSpeed()
-    speedWrap.append("Speed ", speedInput, speedVal)
+    const stageCol = el("div", "steptrace__stage-col")
+    const rail = el("div", "steptrace__rail")
+    const traceLabel = el("div", "steptrace__rail-label")
+    traceLabel.textContent = "Trace"
+    const log = el("ol", "steptrace__log")
+    const logLines = []
+    for (let k = 0; k < 3; k++) {
+      const line = el("li", "steptrace__log-line")
+      const num = el("span", "steptrace__log-num")
+      const txt = el("span", "steptrace__log-text")
+      line.append(num, txt)
+      log.append(line)
+      logLines.push({ line, num, txt })
+    }
+    const watchWrap = el("div", "steptrace__watch-wrap")
+    const watchLabel = el("div", "steptrace__rail-label")
+    watchLabel.textContent = "Watch"
+    const watchEl = el("div", "steptrace__watch")
+    watchWrap.append(watchLabel, watchEl)
+    watchWrap.style.display = "none"
+    rail.append(traceLabel, log, watchWrap)
+    const body = el("div", "steptrace__body")
+    body.append(stageCol, rail)
 
-    // --- kind-specific control: shuffle (sort) or start-node (graph). There is
-    //     NO algorithm selector — each card visualizes exactly one algorithm. ---
-    let shuffleBtn = null
-    let startSel = null
+    // foot: scrubber + transport + kebab (speed + kind action)
+    const foot = el("div", "steptrace__foot")
+    const scrub = el("div", "steptrace__scrub")
+    scrub.setAttribute("role", "slider")
+    scrub.setAttribute("tabindex", "0")
+    scrub.setAttribute("aria-label", "Step")
+    const scrubFill = el("div", "steptrace__scrub-fill")
+    const scrubDot = el("div", "steptrace__scrub-dot")
+    scrub.append(el("div", "steptrace__scrub-track"), scrubFill, scrubDot)
+
+    const btnReset = iconBtn("Restart", ICON.reset)
+    const btnBack = iconBtn("Step back", ICON.back)
+    const btnPlay = iconBtn("Play", ICON.play, "steptrace__btn--play")
+    const btnFwd = iconBtn("Step forward", ICON.fwd)
+
+    const menuWrap = el("div", "steptrace__menu-wrap")
+    const btnMenu = iconBtn("Options", ICON.kebab)
+    btnMenu.setAttribute("aria-haspopup", "true")
+    btnMenu.setAttribute("aria-expanded", "false")
+    const menu = el("div", "steptrace__menu")
+    const speedHead = el("div", "steptrace__menu-h")
+    speedHead.textContent = "Speed"
+    menu.append(speedHead)
+    const speedItems = []
+    for (const s of [0.5, 1, 1.5, 2]) {
+      const item = el("button", "steptrace__menu-item")
+      item.type = "button"
+      item.setAttribute("role", "menuitemradio")
+      item.textContent = s + "×"
+      item.setAttribute("aria-checked", s === state.speed ? "true" : "false")
+      item.addEventListener("click", () => {
+        state.speed = s
+        if (player) player.setSpeed(s)
+        speedItems.forEach((it) => it.setAttribute("aria-checked", it === item ? "true" : "false"))
+        closeMenu()
+      })
+      menu.append(item)
+      speedItems.push(item)
+    }
+    let startMenu = null
     if (kind === "sort") {
-      shuffleBtn = button("Shuffle / new array", "⤨")
-      shuffleBtn.addEventListener("click", () => {
+      const h = el("div", "steptrace__menu-h")
+      h.textContent = "Array"
+      const item = el("button", "steptrace__menu-item")
+      item.type = "button"
+      item.textContent = "Shuffle"
+      item.addEventListener("click", () => {
         state.array = randomArray()
+        closeMenu()
         build()
       })
+      menu.append(h, item)
     } else if (kind === "graph") {
-      startSel = el("select")
-      startSel.setAttribute("aria-label", "Start node")
+      const h = el("div", "steptrace__menu-h")
+      h.textContent = "Start node"
+      startMenu = el("div")
+      menu.append(h, startMenu)
     }
+    menuWrap.append(btnMenu, menu)
 
-    const toolbar = el("div", "steptrace__toolbar")
-    const items = []
-    if (startSel) items.push(startSel)
-    items.push(btnReset, btnBack, btnPlay, btnFwd, spacer(), speedWrap)
-    if (shuffleBtn) items.push(shuffleBtn)
-    items.push(stepLabel)
-    toolbar.append(...items)
+    const transport = el("div", "steptrace__transport")
+    transport.append(btnReset, btnBack, btnPlay, btnFwd, spacer(), menuWrap)
+    foot.append(scrub, transport)
 
-    const stageSlot = el("div")
-    root.replaceChildren(stageSlot, toolbar)
+    root.replaceChildren(head, body, foot)
 
-    function syncButtons() {
-      btnPlay.textContent = player.playing ? "❚❚" : "▶"
+    // --- kebab open/close ---
+    let menuOpen = false
+    function closeMenu() {
+      menuOpen = false
+      menu.classList.remove("steptrace__menu--open")
+      btnMenu.setAttribute("aria-expanded", "false")
+    }
+    btnMenu.addEventListener("click", (e) => {
+      e.stopPropagation()
+      menuOpen = !menuOpen
+      menu.classList.toggle("steptrace__menu--open", menuOpen)
+      btnMenu.setAttribute("aria-expanded", menuOpen ? "true" : "false")
+    })
+    menu.addEventListener("click", (e) => e.stopPropagation())
+    const onDocClick = () => closeMenu()
+    document.addEventListener("click", onDocClick)
+
+    // --- rail TRACE log + counter + scrubber, refreshed every render ---
+    let lastRailI = null
+    function renderRail() {
+      const total = player.frames.length
+      const i = player.i
+      // current step pinned to the BOTTOM; the two above it are older history
+      // (progressively more transparent — see data-age styling).
+      const idxs = [i - 2, i - 1, i]
+      for (let k = 0; k < 3; k++) {
+        const fi = idxs[k]
+        const ll = logLines[k]
+        if (fi < 0 || fi >= total) {
+          ll.num.textContent = ""
+          ll.txt.textContent = ""
+          ll.line.classList.remove("steptrace__log-line--cur")
+          ll.line.removeAttribute("data-age")
+        } else {
+          ll.num.textContent = pad2(fi + 1)
+          ll.txt.textContent = stripTags(player.frames[fi].message)
+          ll.line.classList.toggle("steptrace__log-line--cur", fi === i)
+          ll.line.dataset.age = String(i - fi)
+        }
+      }
+      // brief scroll between steps: the block eases in from a small offset in the
+      // travel direction (forward ⇒ rises up, back ⇒ drops down). transform-only,
+      // so it never triggers layout and can't add footer jitter.
+      const dir = lastRailI == null ? 0 : Math.sign(i - lastRailI)
+      lastRailI = i
+      if (dir !== 0) {
+        log.style.transition = "none"
+        log.style.transform = `translateY(${dir > 0 ? "0.55rem" : "-0.55rem"})`
+        void log.offsetHeight // register the start offset before animating home
+        log.style.transition = "transform 0.26s var(--_spring)"
+        log.style.transform = "translateY(0)"
+      }
+    }
+    function onState() {
+      const total = player.frames.length
+      const i = player.i
+      counter.innerHTML = `<b>${pad2(i + 1)}</b> / ${pad2(total)}`
+      const pct = total <= 1 ? 0 : (i / (total - 1)) * 100
+      scrubFill.style.width = pct + "%"
+      scrubDot.style.left = pct + "%"
+      scrub.setAttribute("aria-valuemin", "0")
+      scrub.setAttribute("aria-valuemax", String(total - 1))
+      scrub.setAttribute("aria-valuenow", String(i))
+      btnPlay.innerHTML = player.playing ? ICON.pause : ICON.play
       btnPlay.setAttribute("aria-label", player.playing ? "Pause" : "Play")
-      stepLabel.textContent = `${player.i + 1} / ${player.frames.length}`
+      btnPlay.title = player.playing ? "Pause" : "Play"
+      btnBack.disabled = i === 0
+      btnFwd.disabled = i === total - 1
+      renderRail()
+      renderWatch()
     }
+    function renderWatch() {
+      const rows = currentView && currentView.watch ? currentView.watch(player.frames[player.i]) : null
+      if (!rows || !rows.length) {
+        watchWrap.style.display = "none"
+        return
+      }
+      watchWrap.style.display = ""
+      watchEl.replaceChildren()
+      for (const r of rows) {
+        const row = el("div", "steptrace__watch-row")
+        if (r.sw) {
+          const sw = el("span", "steptrace__watch-sw")
+          sw.style.background = r.sw
+          row.append(sw)
+        }
+        const kk = el("span", "steptrace__watch-k")
+        kk.textContent = r.k
+        const vv = el("span", "steptrace__watch-v")
+        vv.textContent = r.v
+        row.append(kk, vv)
+        watchEl.append(row)
+      }
+    }
+
+    // --- scrubber seek (click + drag + keyboard) ---
+    function seekFromEvent(e) {
+      const r = scrub.getBoundingClientRect()
+      const cx = e.clientX != null ? e.clientX : e.touches && e.touches[0] ? e.touches[0].clientX : r.left
+      const frac = r.width ? Math.max(0, Math.min(1, (cx - r.left) / r.width)) : 0
+      player.seek(Math.round(frac * (player.frames.length - 1)))
+    }
+    let dragging = false
+    scrub.addEventListener("pointerdown", (e) => {
+      dragging = true
+      try {
+        scrub.setPointerCapture(e.pointerId)
+      } catch (_) {}
+      seekFromEvent(e)
+    })
+    scrub.addEventListener("pointermove", (e) => {
+      if (dragging) seekFromEvent(e)
+    })
+    const endDrag = () => {
+      dragging = false
+    }
+    scrub.addEventListener("pointerup", endDrag)
+    scrub.addEventListener("pointercancel", endDrag)
+    scrub.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight") player.stepF()
+      else if (e.key === "ArrowLeft") player.stepB()
+      else if (e.key === "Home") player.seek(0)
+      else if (e.key === "End") player.seek(player.frames.length - 1)
+      else return
+      e.preventDefault()
+      e.stopPropagation()
+    })
 
     function build() {
       if (player) player.destroy()
+      if (currentView && currentView.destroy) currentView.destroy()
       const built = buildFrames({
         algorithm: state.algorithm,
         array: state.array,
@@ -2532,50 +3347,58 @@
       else if (built.kind === "dp") view = makeDPView(built.frames)
       else if (built.kind === "unionfind") view = makeUnionFindView(built.frames)
       else view = makeSortView(built.frames)
-      if (built.kind === "graph" && startSel) syncStartOptions(built.graph)
-      stageSlot.replaceChildren(...view.nodes)
+      currentView = view
+      if (built.kind === "graph") syncStartOptions(built.graph)
+      // every kind but graph bottom-aligns its viz within the stage column
+      stageCol.classList.toggle("steptrace__stage-col--bottom", built.kind !== "graph")
+      // The view's LAST node is its own one-line status; the rail TRACE log
+      // replaces it, so we keep it out of the DOM (paint still writes to it
+      // harmlessly). Everything before it is the actual visualization.
+      const nodes = view.nodes.slice(0, -1)
+      stageCol.replaceChildren(...nodes)
       player = new Player(built.frames, view.paint, state.speed)
-      player.onState = syncButtons
+      player.onState = onState
       player.render()
-      syncButtons()
+      onState()
     }
 
     function syncStartOptions(graph) {
-      if (startSel.options.length && startSel.dataset.filled) return
-      startSel.replaceChildren()
-      for (const n of graph.nodes) {
-        const opt = document.createElement("option")
-        opt.value = n.id
-        opt.textContent = `Start: ${n.id}`
-        if (n.id === graph.start) opt.selected = true
-        startSel.append(opt)
+      if (!startMenu || startMenu.dataset.filled) {
+        if (state.start == null) state.start = graph.start
+        return
       }
-      startSel.dataset.filled = "1"
+      startMenu.replaceChildren()
+      for (const n of graph.nodes) {
+        const item = el("button", "steptrace__menu-item")
+        item.type = "button"
+        item.setAttribute("role", "menuitemradio")
+        item.textContent = n.id
+        item.setAttribute("aria-checked", n.id === graph.start ? "true" : "false")
+        item.addEventListener("click", () => {
+          state.start = n.id
+          for (const c of startMenu.children) c.setAttribute("aria-checked", c === item ? "true" : "false")
+          closeMenu()
+          build()
+        })
+        startMenu.append(item)
+      }
+      startMenu.dataset.filled = "1"
       state.start = graph.start
     }
 
     build()
 
-    // --- wiring ---
-    if (startSel)
-      startSel.addEventListener("change", () => {
-        state.start = startSel.value
-        build()
-      })
+    // --- transport wiring ---
     btnReset.addEventListener("click", () => player.reset())
     btnBack.addEventListener("click", () => player.stepB())
     btnPlay.addEventListener("click", () => player.toggle())
     btnFwd.addEventListener("click", () => player.stepF())
-    speedInput.addEventListener("input", () => {
-      state.speed = Number(speedInput.value)
-      player.setSpeed(state.speed)
-      showSpeed()
-    })
 
     // keyboard: arrows step, space toggles — only when focus is inside the widget
     // and not on a form control; stopPropagation so host editors don't double-fire.
     const onKey = (e) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement) return
+      if (e.target === scrub) return
       if (e.key === "ArrowRight") player.stepF()
       else if (e.key === "ArrowLeft") player.stepB()
       else if (e.key === " " || e.key === "Spacebar") player.toggle()
@@ -2590,8 +3413,10 @@
     return {
       destroy() {
         if (player) player.destroy()
+        if (currentView && currentView.destroy) currentView.destroy()
         mq.removeEventListener("change", applyMotion)
         root.removeEventListener("keydown", onKey)
+        document.removeEventListener("click", onDocClick)
         root.replaceChildren()
         root.classList.remove("steptrace", "steptrace--reduced")
       },

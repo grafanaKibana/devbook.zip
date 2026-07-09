@@ -245,7 +245,7 @@
   "defaultFolderSort": "title-asc",
   "propertySortKey": "order",
   "propertySortSecondary": "title",
-  "manualSortPropertyKey": "sort_index",
+  "manualSortPropertyKey": "manual_order",
   "manualSortGroupHeaderProperty": "group_header",
   "manualSortNewNotePlacement": "below-selected-note",
   "confirmBeforeManualSort": true,

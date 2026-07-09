@@ -81,7 +81,7 @@ N-Queens-style pruning is the same skeleton with a constraint check (`IsSafe(row
 | **Backtracking** | Valid partial branches only (pruned DFS) | Exponential worst case, far better in practice | Enumerate/solve constraint problems; need *all* or *a* valid configuration |
 | Brute force | Every full configuration | Always exponential | Almost never — strictly worse |
 | [[Dynamic Programming]] | Reuses overlapping subproblems | Polynomial | Optimisation with optimal substructure + overlap |
-| [[Greedy Algorithms|Greedy]] | One path, no backtrack | O(n log n) | A provable local rule reaches the optimum |
+| [[Greedy Algorithms]] | One path, no backtrack | O(n log n) | A provable local rule reaches the optimum |
 
 **Decision rule**: use backtracking when you must **search a space of configurations** under constraints and pruning can eliminate most of it — Sudoku, N-Queens, generating subsets/permutations, parsing. If the problem is *optimisation* with overlapping subproblems, DP is usually exponentially faster; if a greedy rule provably works, it's faster still. Branch-and-bound is backtracking plus a bound to prune for optimisation problems.
 

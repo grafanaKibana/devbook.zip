@@ -96,6 +96,9 @@ export const Steptrace: QuartzComponentConstructor = () => {
   --st-state-violet: #7c3aed;
   --st-state-blue: #2563eb;
   --st-state-green: var(--secondary);
+  --st-font-head: var(--headerFont, "Schibsted Grotesk", sans-serif);
+  --st-font-body: var(--bodyFont, "Source Sans Pro", sans-serif);
+  --st-font-mono: var(--codeFont, "IBM Plex Mono", monospace);
 }
 :root[saved-theme="dark"] .steptrace {
   --st-state-amber: #f59e0b;

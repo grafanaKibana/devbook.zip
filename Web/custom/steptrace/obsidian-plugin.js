@@ -25,6 +25,9 @@ const THEME = `
   --st-state-violet: #7c3aed;
   --st-state-blue: #2563eb;
   --st-state-green: #4c8000;
+  --st-font-head: var(--font-interface);
+  --st-font-body: var(--font-text);
+  --st-font-mono: var(--font-monospace);
 }
 .theme-dark .steptrace {
   --st-state-amber: #f59e0b;
