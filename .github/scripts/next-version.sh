@@ -5,8 +5,8 @@
 #   - If the PR title carries a breaking '!' (e.g. `feature!: ...`) the bump is
 #     MAJOR. This is the ONLY way to get a major — commits can never force one.
 #   - Otherwise the bump is derived from commit subjects since the last v* tag:
-#       feature:                      -> minor
-#       docs: / bug: / maintenance:   -> patch
+#       feature:                              -> minor
+#       notes: / docs: / bug: / maintenance:  -> patch
 #
 # Prints two key=value lines so callers can append straight to $GITHUB_OUTPUT:
 #   bump=<major|minor|patch|none|initial>
@@ -18,7 +18,7 @@ TITLE="${1:-}"
 LAST_TAG=$(git tag --list 'v*' --sort=-v:refname | head -n1 || true)
 
 # ── Decide the bump ─────────────────────────────────────────────────────────
-if printf '%s' "$TITLE" | grep -qE '^(feature|docs|bug|maintenance)!:'; then
+if printf '%s' "$TITLE" | grep -qE '^(feature|notes|docs|bug|maintenance)!:'; then
   BUMP=major
 else
   if [ -z "$LAST_TAG" ]; then
@@ -31,7 +31,7 @@ else
   # commits never force a major, that comes solely from the PR title.
   if printf '%s\n' "$SUBJECTS" | grep -qE '^feature!?:'; then
     BUMP=minor
-  elif printf '%s\n' "$SUBJECTS" | grep -qE '^(docs|bug|maintenance)!?:'; then
+  elif printf '%s\n' "$SUBJECTS" | grep -qE '^(notes|docs|bug|maintenance)!?:'; then
     BUMP=patch
   fi
 fi
