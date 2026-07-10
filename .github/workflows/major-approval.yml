@@ -20,7 +20,7 @@ permissions:
   statuses: write # set the major-approval gate status
 
 env:
-  BANG_RE: '^(feature|docs|bug|maintenance)!:'
+  BANG_RE: '^(feature|notes|docs|bug|fix|maintenance)!:'
   MARKER: '<!-- major-approval -->'
 
 jobs:
@@ -101,7 +101,7 @@ jobs:
           fi
 
           # /no-major → strip the `!` from the PR title (no history rewrite).
-          NEW_TITLE=$(printf '%s' "$TITLE" | sed -E 's/^(feature|docs|bug|maintenance)!:/\1:/')
+          NEW_TITLE=$(printf '%s' "$TITLE" | sed -E 's/^(feature|notes|docs|bug|fix|maintenance)!:/\1:/')
           gh pr edit "$PR" --title "$NEW_TITLE"
 
           # Preview the resulting (commit-driven) version from the PR head.
