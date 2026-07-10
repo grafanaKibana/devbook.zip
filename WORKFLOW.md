@@ -15,7 +15,7 @@ Both templates force the same shape: **Problem → Affected → Instructions for
 
 **Labels drive everything downstream:**
 
-- `type:*` — `bug` / `feature` / `docs` / `maintenance`. Missing one? The [`Issue Management`](.github/workflows/issue-management.yml) workflow auto-tags it `needs:triage`.
+- `type:*` — `bug` / `feature` / `notes` / `docs` / `maintenance`. Missing one? The [`Issue Management`](.github/workflows/issue-management.yml) workflow auto-tags it `needs:triage`.
 - `area:*` — `area:vault` / `area:web` / `area:platform`. Required; syncs the issue's **Area** field on the project board automatically.
 
 ## 2. Project board
@@ -24,8 +24,15 @@ Every issue lands on the **DevBook** project (#7). The `area:*` label is the onl
 
 ## 3. Branching
 
-- `notes-updates` — persistent branch for vault/content changes.
-- Everything else (platform, tooling, config) — short-lived branches off `main`.
+Short-lived branches off `main`, filed into the folder matching the work's type — the same word that prefixes its commits and its PR title:
+
+| Branch folder | For |
+|---|---|
+| `notes/…` | Vault / note content |
+| `docs/…` | Repo documentation |
+| `feature/…` | Platform features |
+| `bug/…` | Platform bug fixes (`fix/…` is an accepted alias) |
+| `maintenance/…` | Dependencies, cleanup, config |
 
 Direct pushes to `main` are blocked by a branch ruleset; every change lands through a merged PR.
 
@@ -33,7 +40,7 @@ Direct pushes to `main` are blocked by a branch ruleset; every change lands thro
 
 | Step | What happens |
 |---|---|
-| **Title** | Must start with `feature:`, `docs:`, `bug:`, or `maintenance:` (append `!` for breaking). Enforced by [`PR Title`](.github/workflows/pr-title.yml), a required check. |
+| **Title** | Must start with `feature:`, `notes:`, `docs:`, `bug:` (or its alias `fix:`), or `maintenance:` (append `!` for breaking). Enforced by [`PR Title`](.github/workflows/pr-title.yml), a required check. |
 | **Description** | Auto-written by a Claude routine (Haiku) — summarizes the diff so the PR is reviewable without spelunking through commits. |
 | **Review** | Codex reviews every PR — correctness, simplification, and reuse feedback before merge. |
 | **Breaking changes** | A `!` title parks a `major-approval` check as pending; reply `/approve-major` to confirm or `/no-major` to drop it. See [`Major Release Approval`](.github/workflows/major-approval.yml). |
@@ -56,7 +63,7 @@ Fully automated SemVer, driven by commit/PR title prefixes — no manual version
 | Prefix | Bump |
 |---|---|
 | `feature:` | MINOR |
-| `docs:` / `bug:` / `maintenance:` | PATCH |
+| `notes:` / `docs:` / `bug:` / `fix:` / `maintenance:` | PATCH |
 | PR title `!` (e.g. `feature!:`) | MAJOR — gated, see above |
 
 Full detail: [`.github/RELEASING.md`](.github/RELEASING.md).

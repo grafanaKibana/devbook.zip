@@ -6,8 +6,9 @@ notes, and publishes a GitHub Release + tag. Direct pushes to `main` are blocked
 
 ## Workflow
 
-1. **Notes** changes live on the persistent **`notes-updates`** branch.
-   Platform changes go on their own short-lived branches off `main`.
+1. Work happens on a short-lived branch off `main`, in the folder matching its
+   type — `notes/…` for vault content, `feature/…`, `docs/…`, `bug/…`,
+   `maintenance/…` for everything else.
 2. Open a PR into `main`. The **PR title** must follow the convention (below) —
    the [`PR Title`](workflows/pr-title.yml) check enforces it and is required.
 3. **Merge it** with a merge commit (the branch's commits are preserved on
@@ -17,24 +18,25 @@ notes, and publishes a GitHub Release + tag. Direct pushes to `main` are blocked
    (for a `!` major) and the commits since the last tag (for minor/patch), bumps
    the version, tags it, and publishes the GitHub Release. Done.
 
-> After a release, fast-forward the persistent branch so it doesn't replay old
-> commits: `git fetch origin && git checkout notes-updates && git reset --hard origin/main && git push --force-with-lease`.
-
 ## Convention — commit (and PR) titles
 
 ```
 <type>: <description>
 ```
 
-| `type`         | Use for                       | Version bump |
-| -------------- | ----------------------------- | ------------ |
-| `feature:`     | platform feature              | **MINOR**    |
-| `docs:`        | vault / note content          | **PATCH**    |
-| `bug:`         | platform bug fix              | **PATCH**    |
-| `maintenance:` | dependency / cleanup / config | **PATCH**    |
+| `type`         | Use for                       | Branch folder   | Version bump |
+| -------------- | ----------------------------- | --------------- | ------------ |
+| `feature:`     | platform feature              | `feature/…`     | **MINOR**    |
+| `notes:`       | vault / note content          | `notes/…`       | **PATCH**    |
+| `docs:`        | repo documentation            | `docs/…`        | **PATCH**    |
+| `bug:`         | platform bug fix              | `bug/…`         | **PATCH**    |
+| `fix:`         | alias of `bug:`               | `fix/…`         | **PATCH**    |
+| `maintenance:` | dependency / cleanup / config | `maintenance/…` | **PATCH**    |
 
 The prefixes match the repo's `type:*` issue labels
-(`docs`, `feature`, `bug`, `maintenance`).
+(`notes`, `docs`, `feature`, `bug`, `maintenance`), and each one names the
+branch folder the work lives on. `fix:` is an accepted alias of `bug:` — same
+bump, same changelog group, no `type:fix` label. Prefer `bug:`.
 
 **Breaking / major change:** append `!` to the **PR title** — e.g.
 `feature!: replace Eleventy build with Quartz`. Only the PR title can trigger a
@@ -53,7 +55,8 @@ all dependency updates into a single weekly PR → one patch release.
 Examples:
 
 ```text
-docs: add Dijkstra walkthrough to Graph Algorithms
+notes: add Dijkstra walkthrough to Graph Algorithms
+docs: document the branch-folder convention in WORKFLOW
 feature: add MongoDB chunk repository to evaluation pipeline
 bug: correct rate-limit handling in the LLM judge client
 ```
@@ -64,7 +67,8 @@ bug: correct rate-limit handling in the LLM judge client
   0). e.g. `v1.2.0` → `v2.0.0`. Gated — it needs confirmation in the PR (below),
   so a stray `!` can never ship a major on its own. Commits are ignored for this.
 - `feature:` commit → **MINOR** (`PATCH` resets to 0). e.g. `v1.2.0` → `v1.3.0`.
-- `docs:` / `bug:` / `maintenance:` commit → **PATCH**. e.g. `v1.2.0` → `v1.2.1`.
+- `notes:` / `docs:` / `bug:` / `fix:` / `maintenance:` commit → **PATCH**. e.g.
+  `v1.2.0` → `v1.2.1`.
 - The highest bump across the commits wins; a `!` PR title overrides everything.
 - A release with no matching PR title or commits bumps nothing and is skipped.
 - The first release (no existing tag) is **`v1.0.0`**. Current tags: `v1.0.0`,
