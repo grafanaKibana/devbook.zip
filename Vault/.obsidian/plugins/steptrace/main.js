@@ -60,7 +60,7 @@
      Fallbacks name the design's own faces for standalone use. */
   --_font-head: var(--st-font-head, "Schibsted Grotesk", ui-sans-serif, system-ui, sans-serif);
   --_font-body: var(--st-font-body, "Source Sans 3", "Source Sans Pro", ui-sans-serif, system-ui, sans-serif);
-  --_font-mono: var(--st-font-mono, "IBM Plex Mono", var(--_font-mono));
+  --_font-mono: var(--st-font-mono, "IBM Plex Mono", ui-monospace, monospace);
   --_hair: color-mix(in srgb, var(--_text) 14%, transparent);
   --_hover: color-mix(in srgb, var(--_text) 7%, transparent);
   --_tween: 320ms;
@@ -134,24 +134,35 @@
 /* ============ body: viz stage (left, primary) + rail (right) ============ */
 .steptrace__body {
   display: grid;
-  grid-template-columns: 1fr minmax(200px, 260px);
+  grid-template-columns: 1fr minmax(240px, 312px);
   gap: 0 1.5rem;
   align-items: stretch;
 }
 .steptrace__stage-col {
   min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 .steptrace__stage-col--graph {
-  display: flex;
-  align-items: center;
   justify-content: center;
+}
+/* the graph claims the column's free space and centres itself inside it, which
+   leaves the legend sitting on the column's bottom edge rather than trailing the
+   svg wherever it happens to land */
+.steptrace__stage-col--graph > .steptrace__graph {
+  flex: 1 1 auto;
+  min-height: 0;
 }
 /* every kind except graph bottom-aligns its viz within the stage column, so the
    visualization baseline sits level with the rail's WATCH panel */
 .steptrace__stage-col--bottom {
-  display: flex;
-  flex-direction: column;
   justify-content: flex-end;
+}
+/* legend is a sibling of the viz, not a child: bottom of the column, centred */
+.steptrace__stage-col > .steptrace__legend {
+  width: 100%;
+  margin-top: 0.9rem;
+  justify-content: center;
 }
 .steptrace__rail {
   min-width: 0;
@@ -169,19 +180,36 @@
   color: var(--_muted);
   margin-bottom: 0.5rem;
 }
-.steptrace__rail > .steptrace__rail-label {
-  margin-top: auto;
+.steptrace__trace {
+  display: flex;
+  flex-direction: column;
+  margin: auto 0 0.9rem;
 }
 .steptrace__watch-wrap {
   padding-top: 0.9rem;
   border-top: 1px solid var(--_hair);
 }
+/* The hosts style bare ol/li as prose: Obsidian's .markdown-rendered ol
+   (specificity 0,1,1) beats a lone .steptrace__log and indents the whole log
+   away from the rail's left edge that TRACE, RESULT and WATCH share. Only the
+   inline-start reset needs to outrank it, so it lives here rather than in the
+   base rules below — bumping those would sink the --cur modifiers. */
+.steptrace .steptrace__log,
+.steptrace .steptrace__log-line {
+  margin-inline: 0;
+  padding-inline: 0;
+}
+.steptrace .steptrace__log-line::marker,
+.steptrace .steptrace__insight::marker {
+  content: "";
+}
+
 /* Step log: fixed 3 lines; explicit line-height keeps Quartz prose styles from
    inflating the gaps relative to Obsidian. */
 .steptrace__log {
   position: relative;
   list-style: none;
-  margin: 0 0 0.9rem;
+  margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
@@ -283,17 +311,15 @@
   white-space: nowrap;
 }
 
-/* The invariant is the teaching layer: TRACE says what changed; this block says
-   why that change is safe. On the terminal frame it becomes a compact RESULT. */
+/* The last row of the log on the terminal frame: it stands where the current step
+   line would be, so the TRACE eyebrow and the preceding steps stay in place and
+   only the live line gives way to the answer. */
 .steptrace__insight {
-  margin: 0 0 0.9rem;
+  display: block;
+  list-style: none;
+  margin: 0;
   padding: 0.65rem 0.7rem;
-  border-left: 3px solid var(--_blue);
-  background: color-mix(in srgb, var(--_blue) 7%, transparent);
-  min-height: 4.65em;
-}
-.steptrace__insight[data-result="1"] {
-  border-left-color: var(--_green);
+  border-left: 3px solid var(--_green);
   background: color-mix(in srgb, var(--_green) 9%, transparent);
 }
 .steptrace__insight-label {
@@ -624,7 +650,7 @@
     padding-top: 1rem;
     margin-top: 1rem;
   }
-  .steptrace__rail > .steptrace__trace-label {
+  .steptrace__trace {
     margin-top: 0;
   }
   .steptrace__log {
@@ -632,13 +658,12 @@
     min-height: 0;
     overflow: visible;
   }
+  /* stacked: only the live line (or, at the end, the RESULT that stands in its
+     place) survives — there is no room for the step history */
   .steptrace__log-line:not(.steptrace__log-line--cur) {
     display: none;
   }
   .steptrace__log-line--cur {
-    min-height: 0;
-  }
-  .steptrace__insight {
     min-height: 0;
   }
   .steptrace__scrub {
@@ -1508,6 +1533,12 @@
   stroke: var(--_neutral);
   stroke-width: 2;
   transition: stroke var(--_tween) ease;
+}
+/* Once the algorithm has committed edges (a shortest path, an MST), every edge it
+   passed over goes dashed — the solid run is then only the answer. Ordering is
+   load-bearing: --active and --selected tie on specificity and must win. */
+.steptrace__edge[data-dim="true"] {
+  stroke-dasharray: 4 4;
 }
 .steptrace__edge[data-active="true"] {
   stroke: var(--_violet);
@@ -4915,7 +4946,7 @@
     }
 
     const wrap = el("div", "steptrace__rectree")
-    wrap.append(svg, legend)
+    wrap.append(svg)
     const status = statusEl()
 
     function paint(frame, i, total) {
@@ -4953,7 +4984,7 @@
       ]
     }
 
-    return { nodes: [wrap, status], paint, watch }
+    return { nodes: [wrap, legend, status], paint, watch }
   }
 
   // ---- graph view: svg ----
@@ -5068,8 +5099,9 @@
       nodeEls[n.id] = { g, dist, mark }
     }
 
-    // legend sits UNDER the graph; the live queue + visited set move to the
-    // rail WATCH (see watch() below), matching the other renderers' rails.
+    // legend is returned as its own node so the stage column can pin it to its
+    // bottom edge; the live queue + visited set move to the rail WATCH (see
+    // watch() below), matching the other renderers' rails.
     const legend = el("div", "steptrace__legend")
     for (const [word, stateKey] of [
       ["current", "current"],
@@ -5087,7 +5119,7 @@
     }
 
     const graphWrap = el("div", "steptrace__graph")
-    graphWrap.append(svg, legend)
+    graphWrap.append(svg)
 
     const status = statusEl()
 
@@ -5116,8 +5148,10 @@
           frame.edge &&
           ((frame.edge.from === e.from && frame.edge.to === e.to) ||
             (!graph.directed && frame.edge.from === e.to && frame.edge.to === e.from))
+        const sel = isSel(e.from, e.to)
         e.el.dataset.active = act ? "true" : "false"
-        e.el.dataset.selected = isSel(e.from, e.to) ? "true" : "false"
+        e.el.dataset.selected = sel ? "true" : "false"
+        e.el.dataset.dim = selected.length && !sel ? "true" : "false"
       }
       status.innerHTML =
         escapeHtml(frame.message) +
@@ -5139,7 +5173,7 @@
       ]
     }
 
-    return { nodes: [graphWrap, status], paint, watch }
+    return { nodes: [graphWrap, legend, status], paint, watch }
   }
 
   // ---- small DOM helpers (structure only; no styling) ----
@@ -5343,90 +5377,6 @@
       hit = mark
     }
     return hit
-  }
-
-  function invariantFor(algorithm, kind, frame) {
-    if (kind === "sort") {
-      const fixed = frame.sorted ? frame.sorted.length : 0
-      if (algorithm === "bubble-sort") {
-        if (fixed === 0)
-          return `No values are fixed yet; this pass is still discovering the largest remaining value.`
-        return `${fixed} value${fixed === 1 ? " is" : "s are"} fixed in the final suffix; later passes never touch them.`
-      }
-      if (algorithm === "insertion-sort")
-        return `The left prefix is sorted; the held key moves left only past larger values.`
-      if (algorithm === "selection-sort")
-        return `${fixed} smallest value${fixed === 1 ? " is" : "s are"} fixed in the final prefix.`
-      if (algorithm === "quick-sort")
-        return frame.range
-          ? `Only range [${frame.range[0]}, ${frame.range[1]}] can change; a settled pivot never moves again.`
-          : `Each settled pivot splits the remaining work into independent ranges.`
-      if (algorithm === "heap-sort")
-        return frame.range
-          ? `Sift-down is restoring heap order inside [${frame.range[0]}, ${frame.range[1]}]; only the extracted suffix is final.`
-          : `The extracted suffix is final; the remaining prefix is ready for the next heap repair.`
-      if (algorithm === "merge-sort")
-        return frame.range
-          ? `Both input runs are sorted; choosing the smaller head preserves order in [${frame.range[0]}, ${frame.range[1]}].`
-          : `Each completed round doubles the length of the sorted runs.`
-      return `Fixed positions never move again; active positions are the only ones still under consideration.`
-    }
-    if (kind === "graph") {
-      if (algorithm === "dijkstra")
-        return `Settled distances are final: non-negative edges cannot create a cheaper path later.`
-      if (algorithm === "prim")
-        return `Selected edges connect one new node to the tree; rejecting internal edges prevents cycles.`
-      if (algorithm === "topological-sort")
-        return `Only in-degree-0 nodes are ready; removing one may unlock its successors.`
-      if (algorithm === "bfs")
-        return `The FIFO frontier processes nodes by distance, so the first visit is a shortest unweighted path.`
-      if (algorithm === "dfs")
-        return `The LIFO frontier controls exploration depth; visited nodes are never pushed again.`
-      return `Visited nodes are final; the frontier contains discovered work not yet processed.`
-    }
-    if (kind === "search") {
-      if (frame.mode === "scan")
-        return `Every index before the probe has already failed; the next unchecked index is the only new work.`
-      if (frame.lo > frame.hi) return `The search interval is empty, so the target is absent.`
-      return `If the target exists, it remains inside [${frame.lo}, ${frame.hi}]; discarded indices cannot match.`
-    }
-    if (kind === "string") {
-      if (algorithm === "kmp")
-        return `The failure function preserves the matched prefix, so skipped alignments cannot contain a missed match.`
-      if (algorithm === "rabin-karp")
-        return `A hash match is only a candidate; character comparison is still required to rule out collisions.`
-      return `The current alignment and comparison state come directly from the algorithm's recorded frame.`
-    }
-    if (kind === "pointers") {
-      if (algorithm === "two-pointers")
-        return `Because the array is sorted, moving left raises the sum and moving right lowers it.`
-      if (algorithm === "sliding-window")
-        return `With non-negative values, expanding can only raise the sum; shrinking is the only way to shorten a valid window.`
-      return `Pointer positions delimit the active candidate region; marked cells are committed results.`
-    }
-    if (kind === "dp") {
-      if (algorithm === "lcs")
-        return `Every filled cell reads only solved subproblems; traceback follows choices that produced the optimum.`
-      return `Highlighted dependencies are read before the current table cell is committed.`
-    }
-    if (kind === "unionfind")
-      return `Elements with the same root are in one set; parent rewrites shorten paths without changing membership.`
-    if (kind === "bits") {
-      if (algorithm === "kernighan-popcount")
-        return `x & (x−1) clears exactly the lowest set bit, so one iteration accounts for one 1.`
-      return `The lanes record the current bit transformation; committed tally entries do not change.`
-    }
-    if (kind === "backtrack") {
-      if (algorithm === "n-queens")
-        return `Each row extends a valid partial board; one conflict safely prunes that entire branch.`
-      return `Committed path entries form the current candidate; rejected choices stay pruned in this branch.`
-    }
-    if (kind === "rectree") {
-      if (algorithm === "fibonacci")
-        return `A memoized f(k) is computed once; every later call reuses the stored value and skips its subtree.`
-      return `Visible nodes are explored calls; collapsed subtrees represent recorded reuse.`
-    }
-    return `The highlighted state is the only part that can change in this step.`
   }
 
   function graphEdgeWeight(graph, a, b) {
@@ -5660,6 +5610,7 @@
 
     const stageCol = el("div", "steptrace__stage-col")
     const rail = el("div", "steptrace__rail")
+    const traceWrap = el("div", "steptrace__trace")
     const traceLabel = el("div", "steptrace__rail-label steptrace__trace-label")
     traceLabel.textContent = "Trace"
     const log = el("ol", "steptrace__log")
@@ -5672,22 +5623,27 @@
       log.append(line)
       logLines.push({ line, num, txt })
     }
-
-    const insight = el("div", "steptrace__insight")
+    // RESULT is the log's last row: on the terminal frame it stands in for the
+    // current step line, leaving the TRACE eyebrow and the earlier steps above it
+    // untouched. Once there is an answer, only the live line has to give way.
+    const insight = el("li", "steptrace__insight")
     insight.setAttribute("aria-live", "off")
     insight.setAttribute("aria-atomic", "true")
+    insight.hidden = true
     const insightLabel = el("span", "steptrace__insight-label")
-    insightLabel.textContent = "Invariant"
+    insightLabel.textContent = "Result"
     const insightText = el("span", "steptrace__insight-text")
     insight.append(insightLabel, insightText)
+    log.append(insight)
+    traceWrap.append(traceLabel, log)
 
     const watchWrap = el("div", "steptrace__watch-wrap")
     const watchLabel = el("div", "steptrace__rail-label")
     watchLabel.textContent = "Watch"
     const watchEl = el("div", "steptrace__watch")
     watchWrap.append(watchLabel, watchEl)
-    watchWrap.style.display = "none"
-    rail.append(traceLabel, log, insight, watchWrap)
+    watchWrap.hidden = true
+    rail.append(traceWrap, watchWrap)
     const body = el("div", "steptrace__body")
     body.append(stageCol, rail)
 
@@ -5836,34 +5792,44 @@
     const onDocClick = () => closeMenu()
     document.addEventListener("click", onDocClick)
 
-    // Pin the log block to the tallest frame message so the three-line desktop
-    // trace stays stable while its current entry changes.
-    function sizeLog() {
+    // Pin the log to two history lines plus whichever is taller: the tallest frame
+    // message, or the RESULT box that replaces it on the terminal frame. That makes
+    // the rail's height frame-invariant, so the stage it stretches against — and the
+    // transport buttons below it — never move mid-run. Probes are absolutely
+    // positioned, so measuring them costs no layout and cannot re-trigger the
+    // observer below.
+    function sizeRail() {
       if (!player) return
       if (matchMedia("(max-width: 560px)").matches) {
         log.style.height = "auto"
         return
       }
+      const PROBE = "position:absolute;visibility:hidden;pointer-events:none;left:0;right:0;height:auto"
       const probe = el("li", "steptrace__log-line steptrace__log-line--cur")
-      probe.style.cssText =
-        "position:absolute;visibility:hidden;pointer-events:none;left:0;right:0;height:auto"
+      probe.style.cssText = PROBE
       const pn = el("span", "steptrace__log-num")
       pn.textContent = "00"
       const pt = el("span", "steptrace__log-text")
       probe.append(pn, pt)
       log.append(probe)
-      let maxCur = 0
+      let maxRow = 0
       for (const f of player.frames) {
         pt.textContent = stripTags(f.message)
-        if (probe.offsetHeight > maxCur) maxCur = probe.offsetHeight
+        if (probe.offsetHeight > maxRow) maxRow = probe.offsetHeight
       }
       probe.remove()
+      const resultProbe = insight.cloneNode(true)
+      resultProbe.hidden = false
+      resultProbe.style.cssText = PROBE
+      log.append(resultProbe)
+      if (resultProbe.offsetHeight > maxRow) maxRow = resultProbe.offsetHeight
+      resultProbe.remove()
       const gap = parseFloat(getComputedStyle(log).rowGap) || 0
       const hist = logLines[0].line.offsetHeight
-      const h = Math.ceil(hist * 2 + gap * 2 + maxCur) + "px"
+      const h = Math.ceil(hist * 2 + gap * 2 + maxRow) + "px"
       if (log.style.height !== h) log.style.height = h
     }
-    const logRO = typeof ResizeObserver !== "undefined" ? new ResizeObserver(() => sizeLog()) : null
+    const logRO = typeof ResizeObserver !== "undefined" ? new ResizeObserver(() => sizeRail()) : null
     if (logRO) logRO.observe(rail)
 
     // --- rail TRACE log + counter + scrubber, refreshed every render ---
@@ -5900,12 +5866,9 @@
         log.style.transform = "translateY(0)"
       }
       const terminal = i === total - 1
-      insight.dataset.result = terminal ? "1" : "0"
+      logLines[2].line.hidden = terminal
+      insight.hidden = !terminal
       insight.setAttribute("aria-live", terminal && !player.playing ? "polite" : "off")
-      insightLabel.textContent = terminal ? "Result" : "Invariant"
-      insightText.textContent = terminal
-        ? summaryFor(state.algorithm, kind, player.frames[i], currentGraph)
-        : invariantFor(state.algorithm, kind, player.frames[i])
       const chapter = milestoneAt(currentMilestones, i)
       phaseName.textContent = chapter ? chapter.label : "Step"
       phaseStep.textContent = `${i + 1} / ${total}`
@@ -5949,12 +5912,8 @@
     function renderWatch() {
       const rows =
         currentView && currentView.watch ? currentView.watch(player.frames[player.i]) : null
-      if (!rows || !rows.length) {
-        watchWrap.style.display = "none"
-        return
-      }
-      watchWrap.style.display = ""
       watchEl.replaceChildren()
+      if (!rows || !rows.length) return
       for (const r of rows) {
         const row = el("div", "steptrace__watch-row")
         if (r.sw) {
@@ -6051,10 +6010,34 @@
       stageCol.replaceChildren(...nodes)
       player = new Player(built.frames, view.paint, state.speed)
       player.onState = onState
+      // RESULT reads the terminal frame, which this build already fixed, so its
+      // text is set once here — sizeRail() needs it to measure the slot.
+      insightText.textContent = summaryFor(
+        state.algorithm,
+        built.kind,
+        built.frames[built.frames.length - 1],
+        currentGraph,
+      )
+      reserveWatch(built.frames, view)
       renderMilestones()
-      sizeLog()
+      sizeRail()
       player.render()
       onState()
+    }
+
+    // WATCH row counts can differ between frames; reserve the tallest so the rail
+    // does not resize when a view reports fewer rows on some step.
+    function reserveWatch(frames, view) {
+      let maxRows = 0
+      if (view.watch) {
+        for (const f of frames) {
+          const rows = view.watch(f)
+          if (rows && rows.length > maxRows) maxRows = rows.length
+        }
+      }
+      watchWrap.hidden = maxRows === 0
+      // one row is `height: 2em` at `font-size: 0.72rem`
+      watchEl.style.minHeight = maxRows ? `calc(${maxRows} * 1.44rem)` : ""
     }
 
     function syncStartOptions(graph) {

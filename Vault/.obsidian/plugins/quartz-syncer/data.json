@@ -1,10 +1,10 @@
 {
   "settingsSchemaVersion": 2,
-  "gitRemoteUrl": "",
-  "gitBranch": "v4",
+  "gitRemoteUrl": "https://github.com/grafanaKibana/devbook.zip.git",
+  "gitBranch": "feature/algo-visualization",
   "gitCorsProxyUrl": "",
   "gitAuthType": "basic",
-  "gitAuthUsername": "",
+  "gitAuthUsername": "grafanaKibana",
   "gitProviderHint": "github",
   "vaultPath": "Home/",
   "contentFolder": "Web/content",
