@@ -5,138 +5,240 @@ tags:
 publish: true
 ---
 
-```dataviewjs
-const { MarkdownRenderer } = require("obsidian");
-const ROOT = dv.current().file.folder;
+```datacorejsx
+// Questions index — Datacore port of the former DataviewJS aggregation (issue #69).
+// Walks every note under this folder, pulls out the `[!QUESTION]` callouts, and
+// renders them grouped by sub-folder with a table of contents on top. Uses the
+// Datacore `dc` API (useCurrentPath / useQuery / Markdown) in place of Dataview's
+// `dv`; the callout extraction is byte-for-byte the same so Obsidian output is
+// unchanged.
+//
+// Loading is parallel + progressive: the ~300 note reads run through a bounded
+// worker pool (not one-at-a-time), and partial results are flushed into the view
+// in batches so sections stream in within ~100ms instead of blocking on a single
+// ~6s render. Stable per-callout keys let Preact reuse already-rendered callouts,
+// so each flush only mounts the new ones.
+//
+// The `dc-questions-index` wrapper class is a deliberate strip-target: on the
+// published Quartz site this page is rendered by the QuestionsIndex component
+// (fed by the question-collector transformer), so SyncerFixups removes this
+// block's frozen output by that class to avoid a double render. In Obsidian the
+// class is inert.
+return function QuestionsIndex() {
+  const currentPath = dc.useCurrentPath();
+  const ROOT = currentPath.includes("/")
+    ? currentPath.slice(0, currentPath.lastIndexOf("/"))
+    : "";
 
-const pages = dv.pages('"' + ROOT + '"')
-  .where(p => p.file.name !== "Questions");
+  // Every page under ROOT. `useIndexUpdates` bumps on any index change (including
+  // edits to a note's callouts), so the tree re-loads live like Dataview did.
+  const pages = dc.useQuery(`@page and path("${ROOT}")`);
+  const indexRevision = dc.useIndexUpdates();
 
-// Build a tree: each node has children (sub-folders) and items (callouts)
-const tree = { children: {}, items: [] };
+  // Tree is accumulated in a ref across parallel reads; `setVersion` bumps to
+  // flush partial progress into the view. `done` gates the loading placeholder.
+  const treeRef = dc.useRef({ children: {}, items: [] });
+  const [, setVersion] = dc.useState(0);
+  const [done, setDone] = dc.useState(false);
+  // id -> heading element; TOC links scroll to these (see tocLink).
+  const headingRefs = dc.useRef({});
 
-for (const page of pages) {
-  const content = await dv.io.load(page.file.path);
-  if (!content) continue;
+  dc.useEffect(() => {
+    let cancelled = false;
+    setDone(false);
 
-  const lines = content.split("\n");
-  const callouts = [];
-  for (let i = 0; i < lines.length; i++) {
-    if (/^>\s*\[!QUESTION\]/i.test(lines[i])) {
-      let block = lines[i];
-      let j = i + 1;
-      while (j < lines.length && /^>/.test(lines[j])) {
-        block += "\n" + lines[j];
-        j++;
+    // Build into a fresh tree; only swap it into view on flush, so a re-run
+    // (triggered by an edit) keeps showing the old tree until new data arrives
+    // instead of blanking.
+    const root = { children: {}, items: [] };
+
+    const targets = pages.filter(
+      (p) => p.$path.split("/").pop().replace(/\.md$/, "") !== "Questions",
+    );
+
+    const insert = (path, name, callouts) => {
+      const folder = path.slice(0, path.lastIndexOf("/"));
+      const parts = folder
+        .replace(new RegExp("^" + ROOT + "/?"), "")
+        .split("/")
+        .filter(Boolean);
+      let node = root;
+      for (let d = 0; d < parts.length && d < 6; d++) {
+        const key = parts[d];
+        if (!node.children[key]) node.children[key] = { children: {}, items: [] };
+        node = node.children[key];
       }
-      callouts.push(block);
-      i = j - 1;
+      callouts.forEach((block, k) =>
+        node.items.push({ block, source: name, path, id: `${path}#${k}` }),
+      );
+    };
+
+    const flush = () => {
+      if (cancelled) return;
+      treeRef.current = root;
+      setVersion((v) => v + 1);
+    };
+
+    (async () => {
+      // Bounded worker pool: read files concurrently (the sequential await was
+      // the whole cost) and flush every batch so sections appear as they load.
+      const CONCURRENCY = 24;
+      const FLUSH_EVERY = 24;
+      let cursor = 0;
+      let processed = 0;
+
+      const worker = async () => {
+        while (!cancelled && cursor < targets.length) {
+          const path = targets[cursor++].$path;
+          const name = path.split("/").pop().replace(/\.md$/, "");
+          const file = dc.app.vault.getAbstractFileByPath(path);
+          if (file) {
+            try {
+              const content = await dc.app.vault.cachedRead(file);
+              if (content) {
+                const lines = content.split("\n");
+                const callouts = [];
+                for (let i = 0; i < lines.length; i++) {
+                  if (/^>\s*\[!QUESTION\]/i.test(lines[i])) {
+                    let block = lines[i];
+                    let j = i + 1;
+                    while (j < lines.length && /^>/.test(lines[j])) {
+                      block += "\n" + lines[j];
+                      j++;
+                    }
+                    callouts.push(block);
+                    i = j - 1;
+                  }
+                }
+                if (callouts.length) insert(path, name, callouts);
+              }
+            } catch (e) {
+              /* skip unreadable file */
+            }
+          }
+          processed++;
+          if (processed % FLUSH_EVERY === 0) flush();
+        }
+      };
+
+      await Promise.all(
+        Array.from({ length: Math.min(CONCURRENCY, targets.length) }, worker),
+      );
+      flush();
+      if (!cancelled) setDone(true);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [indexRevision, currentPath, ROOT]);
+
+  // --- Helpers ---
+  const countItems = (node) => {
+    let n = node.items.length;
+    for (const child of Object.values(node.children)) n += countItems(child);
+    return n;
+  };
+  const toId = (str) =>
+    str.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  const sortedKeys = (obj) =>
+    Object.keys(obj).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+
+  const tree = treeRef.current;
+  const total = countItems(tree);
+
+  // Before the first batch lands (or if there are genuinely no questions), show a
+  // light placeholder inside the wrapper so SyncerFixups still has its strip
+  // target and nothing flashes.
+  if (total === 0) {
+    return (
+      <div class="dc-questions-index">
+        {done ? null : <p class="dc-qi-loading">Loading questions…</p>}
+      </div>
+    );
+  }
+
+  // `#id` anchors don't resolve against DOM ids inside Obsidian, so wire each
+  // TOC link to scrollIntoView on the real heading element; href keeps native
+  // anchor scrolling on the published web build.
+  const tocLink = (label, id) => (
+    <a
+      href={`#${id}`}
+      onClick={(e) => {
+        e.preventDefault();
+        headingRefs.current[id]?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }}
+    >
+      {label}
+    </a>
+  );
+
+  // --- Content tree: regular headings + rendered callouts ---
+  const renderTree = (node, depth, idPrefix) => {
+    const out = [];
+    for (const key of sortedKeys(node.children)) {
+      const child = node.children[key];
+      const level = Math.min(depth, 6);
+      const curId = idPrefix ? idPrefix + "-" + toId(key) : toId(key);
+      const setId = depth <= 2;
+      const Heading = `h${level}`;
+
+      out.push(
+        <Heading
+          key={curId + "::h"}
+          id={setId ? curId : undefined}
+          ref={setId ? (el) => { if (el) headingRefs.current[curId] = el; } : undefined}
+        >
+          {key}
+        </Heading>,
+      );
+
+      for (const item of child.items) {
+        const src = `*[${item.source}](${encodeURI(item.path)})*`;
+        const md = item.block + "\n> " + src;
+        out.push(
+          <dc.Markdown key={item.id} content={md} inline={false} sourcePath={currentPath} />,
+        );
+      }
+
+      out.push(...renderTree(child, depth + 1, depth <= 1 ? curId : ""));
     }
-  }
-  if (callouts.length === 0) continue;
+    return out;
+  };
 
-  const parts = page.file.folder.replace(new RegExp("^" + ROOT + "/?"), "").split("/").filter(Boolean);
-
-  let node = tree;
-  for (let d = 0; d < parts.length && d < 6; d++) {
-    const key = parts[d];
-    if (!node.children[key]) node.children[key] = { children: {}, items: [] };
-    node = node.children[key];
-  }
-  for (const block of callouts) {
-    node.items.push({
-      block,
-      source: page.file.name,
-      path: page.file.path
-    });
-  }
+  return (
+    <div class="dc-questions-index">
+      <h1>Table of Contents</h1>
+      <h2>Total questions: {total}</h2>
+      <ul>
+        {sortedKeys(tree.children).map((h1Key) => {
+          const h1Node = tree.children[h1Key];
+          const h1Id = toId(h1Key);
+          const h2Keys = sortedKeys(h1Node.children);
+          return (
+            <li key={h1Id}>
+              <strong>
+                {tocLink(h1Key, h1Id)} ({countItems(h1Node)})
+              </strong>
+              {h2Keys.length > 0 && (
+                <ul>
+                  {h2Keys.map((h2Key) => {
+                    const h2Id = h1Id + "-" + toId(h2Key);
+                    return (
+                      <li key={h2Id}>
+                        {tocLink(h2Key, h2Id)} ({countItems(h1Node.children[h2Key])})
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+      <hr />
+      {renderTree(tree, 1, "")}
+    </div>
+  );
 }
-
-// --- Helpers ---
-function countItems(node) {
-  let n = node.items.length;
-  for (const child of Object.values(node.children)) n += countItems(child);
-  return n;
-}
-
-function toId(str) {
-  return str.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-}
-
-function sortedKeys(obj) {
-  return Object.keys(obj).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
-}
-
-const total = countItems(tree);
-
-// TOC is filled in after the content is rendered, so it can reference the
-// real heading elements. It still lives above the content in the DOM.
-const tocEl = dv.container.createDiv();
-const contentEl = dv.container.createDiv();
-
-// id -> heading element, populated while rendering the tree below.
-const headingMap = {};
-
-// --- Render tree with regular headings ---
-async function renderTree(node, depth, parentEl, idPrefix) {
-  for (const key of sortedKeys(node.children)) {
-    const child = node.children[key];
-    const level = Math.min(depth, 6);
-    const curId = idPrefix ? idPrefix + "-" + toId(key) : toId(key);
-
-    const heading = parentEl.createEl(`h${level}`, { text: key });
-    if (depth <= 2) {
-      heading.id = curId;
-      headingMap[curId] = heading;
-    }
-
-    for (const item of child.items) {
-      const src = `*[${item.source}](${encodeURI(item.path)})*`;
-      const md = item.block + "\n> " + src;
-      await MarkdownRenderer.render(app, md, parentEl.createDiv(), "", dv.component);
-    }
-    await renderTree(child, depth + 1, parentEl, depth <= 1 ? curId : "");
-  }
-}
-
-await renderTree(tree, 1, contentEl, "");
-
-// --- Build TOC (H1 + H2 levels) now that the headings exist ---
-// Use the same id scheme as the headings (toId(h1) + "-" + toId(h2)) and wire
-// each link to scrollIntoView so it works inside Obsidian, where [](#id) links
-// resolve against the heading cache rather than DOM ids. The href="#id" keeps
-// native anchor scrolling working on the published web build.
-function tocLink(parent, label, id) {
-  const a = parent.createEl("a", { text: label, href: `#${id}` });
-  a.addEventListener("click", (e) => {
-    e.preventDefault();
-    headingMap[id]?.scrollIntoView({ behavior: "smooth", block: "start" });
-  });
-  return a;
-}
-
-tocEl.createEl("h1", { text: `Table of Contents` });
-tocEl.createEl("h2", { text: `Total questions: ${total}` });
-
-const tocList = tocEl.createEl("ul");
-for (const h1Key of sortedKeys(tree.children)) {
-  const h1Node = tree.children[h1Key];
-  const h1Id = toId(h1Key);
-
-  const li = tocList.createEl("li");
-  const strong = li.createEl("strong");
-  tocLink(strong, h1Key, h1Id);
-  strong.appendText(` (${countItems(h1Node)})`);
-
-  const h2Keys = sortedKeys(h1Node.children);
-  if (h2Keys.length === 0) continue;
-  const subList = li.createEl("ul");
-  for (const h2Key of h2Keys) {
-    const h2Id = h1Id + "-" + toId(h2Key);
-    const li2 = subList.createEl("li");
-    tocLink(li2, h2Key, h2Id);
-    li2.appendText(` (${countItems(h1Node.children[h2Key])})`);
-  }
-}
-tocEl.createEl("hr");
 ```

@@ -20,8 +20,9 @@ import { loadQuartzConfig, loadQuartzLayout } from "./quartz/plugins/loader/conf
 // Syncer renders to static HTML at publish time, so there is no Topics
 // component here anymore. What remains:
 //   - SyncerFixups      → transformer: cleans Syncer's committed output for the
-//                         web (strips raw ```dataviewjs, normalizes "Home/…"
-//                         links). Must run before crawl-links.
+//                         web (strips raw dataview/datacore query fences + the
+//                         frozen Questions `dc-questions-index` block, normalizes
+//                         "Home/…" links). Must run before crawl-links.
 //   - QuestionsIndex    → component: Questions.md aggregation (self-gates to slug)
 //   - QuestionCollector → transformer: feeds QuestionsIndex
 
