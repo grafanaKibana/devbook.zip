@@ -300,7 +300,7 @@ body {
     top: var(--site-header-height);
     height: calc(100dvh - var(--site-header-height));
     max-height: calc(100dvh - var(--site-header-height));
-    padding: 0 var(--explorer-panel-inset-right) 2rem var(--explorer-panel-inset-left);
+    padding: 0 var(--explorer-panel-inset) 2rem;
   }
 
   // Push grid content below the fixed bar. Sit snug under it by default, and
@@ -335,12 +335,10 @@ body {
   // plugin gives folders — so folder and file rows currently weigh the same.
   // Pull file links back to normal to restore the hierarchy.
   --explorer-file-weight: #{$normalWeight};
-  // Insets for the slide-in panel (mobile) and drawer (tablet), where the tree
-  // would otherwise sit flush against the screen edge. The left inset matches
-  // the header bar's 1.5rem so the tree lines up under the title; the smaller
-  // right inset just keeps text off the scrollbar.
-  --explorer-panel-inset-left: 1.5rem;
-  --explorer-panel-inset-right: 0.75rem;
+  // Inset for the slide-in panel (mobile) and drawer (tablet), where the tree
+  // would otherwise sit flush against the screen edge. Matches the header bar's
+  // 1.5rem so the tree lines up under the title.
+  --explorer-panel-inset: 1.5rem;
 }
 
 // `.explorer` prefixes lift these over the plugin's own (unlayered) rules.
@@ -478,7 +476,7 @@ body {
     height: calc(100dvh - var(--site-header-height));
     max-height: calc(100dvh - var(--site-header-height));
     margin-top: 0;
-    padding: 0 var(--explorer-panel-inset-right) 2rem var(--explorer-panel-inset-left);
+    padding: 0 var(--explorer-panel-inset) 2rem;
     background-color: var(--light);
     border-right: 1px solid var(--lightgray);
     overflow-y: auto;

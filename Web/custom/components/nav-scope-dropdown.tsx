@@ -759,7 +759,7 @@ export const NavScopeDropdown: QuartzComponentConstructor = () => {
 
 /* Mobile + tablet: the selector rides inside the explorer's slide-in panel,
    above the tree — give it room from the panel's top edge. The panel supplies
-   the side inset (--explorer-panel-inset-*), so the selector adds none of its
+   the side inset (--explorer-panel-inset), so the selector adds none of its
    own and lines up with the tree beneath it. */
 @media (max-width: 1200px) {
   .ns-scope {
