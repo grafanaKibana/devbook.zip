@@ -40,8 +40,14 @@ const script = `
 
   function normalizeSlug(raw) {
     if (!raw) return "";
-    let s = raw;
-    try { s = new URL(raw, location.href).pathname; } catch (e) {}
+    let s = String(raw);
+    // A folder's data-folderpath is already a root-relative slug (e.g.
+    // "ai--and--ml/index"); only reduce genuinely rooted/absolute values (file
+    // hrefs like "/questions") through URL(). Resolving a bare slug relative to
+    // the current page would prefix it with the page dir and break the map join.
+    if (/^[a-z]+:\\/\\//i.test(s) || s.charAt(0) === "/") {
+      try { s = new URL(s, location.href).pathname; } catch (e) {}
+    }
     return decodeURIComponent(s).replace(/^\\/+/, "").replace(/\\/+$/, "");
   }
 

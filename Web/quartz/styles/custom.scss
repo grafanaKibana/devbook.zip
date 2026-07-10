@@ -1,7 +1,6 @@
 @use "./variables.scss" as *;
 @use "sass:map";
 
-
 // Component-specific styles live with their components (each sets `.css`):
 //   Web/custom/components/topic-dashboard.tsx  → .topic-* rules
 //   Web/custom/components/questions-index.tsx  → .questions-index / .qi-* rules
@@ -183,9 +182,19 @@ body {
     justify-content: flex-end;
   }
 
-  // Start the sidebars and article below the fixed bar, leaving room for the
-  // marquee strip that now sits directly under it (see marquee block below).
+  // Start the sidebars and article below the fixed bar. Reserve the extra room
+  // for the marquee strip only on pages that actually have one — otherwise
+  // marquee-less pages get a big empty gap under the bar (and above the scope
+  // selector). Mirrors the marquee-conditional mobile offsets below.
   .page > #quartz-body {
+    & .sidebar {
+      padding-top: calc(var(--site-header-height) + 1.25rem);
+    }
+    & .page-header {
+      margin-top: calc(var(--site-header-height) + 1.25rem);
+    }
+  }
+  .page > #quartz-body:has(.page-header > .popover-hint > .site-marquee) {
     & .sidebar {
       padding-top: calc(var(--site-header-height) + 3rem);
     }
@@ -369,4 +378,3 @@ body {
     opacity: 1;
   }
 }
-
