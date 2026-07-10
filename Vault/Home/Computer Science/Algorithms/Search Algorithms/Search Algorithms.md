@@ -9,7 +9,7 @@ publish: true
 priority: Medium
 level:
   - '4'
-status: Done
+status: Creation
 ---
 
 # Intro
@@ -23,23 +23,49 @@ Concrete example: in a sorted list of product ids, Binary Search gives fast look
 ```mermaid
 flowchart TD
   A[Need to find target] --> B{Data is sorted array}
-  B -->|Yes| C[Binary Search]
+  B -->|Yes| C{Length known and random access cheap}
+  C -->|Yes| C1[Binary Search]
+  C -->|Unbounded or target near the front| C2[Exponential Search]
+  C -->|Backward seeks are expensive| C3[Jump Search]
   B -->|No| D{Data is graph}
   D -->|Yes| E[DFS BFS]
   D -->|No| F{Data is text pattern}
-  F -->|Yes| G[String Searching family]
-  F -->|No| H[Use linear scan or indexing structure]
+  F -->|One pattern| G[KMP or Boyer Moore or Z Algorithm]
+  F -->|Many patterns at once| G2[Aho Corasick]
+  F -->|No| H{Optimising a unimodal function}
+  H -->|Yes| I[Ternary Search]
+  H -->|No| J[Use linear scan or indexing structure]
 ```
 
 ## Algorithm Selection
 
+### Searching an array
+
 | Data shape | Algorithm | Time | Precondition |
 | --- | --- | --- | --- |
+| Unsorted array | [[Linear Search]] | O(n) | None |
 | Sorted array | [[Binary Search]] | O(log n) | Sorted, random access |
-| Unsorted array | Linear scan | O(n) | None |
+| Sorted, unbounded length or target near front | [[Exponential Search]] | O(log i) for target at index i | Sorted |
+| Sorted, uniformly distributed keys | [[Interpolation Search]] | O(log log n) avg, O(n) worst | Sorted **and** near-uniform distribution |
+| Sorted, forward-only / costly backward seeks | [[Jump Search]] | O(√n) | Sorted |
+| Unimodal function, not an array | [[Ternary Search]] | O(log n) probes | Strict unimodality |
+
+### Searching text
+
+| Data shape | Algorithm | Time | Precondition |
+| --- | --- | --- | --- |
+| Text + one pattern | [[KMP (Knuth-Morris-Pratt) Algorithm\|KMP]] | O(n + m) | — |
+| Text + one pattern, large alphabet | [[Boyer-Moore]] | O(n/m) best, O(n) with Galil | Sublinear in practice; powers `grep` |
+| Text + one pattern, prefix-structure problems | [[Z-Algorithm]] | O(n + m) | — |
+| Text + many patterns at once | [[Aho-Corasick]] | O(n + matches) after build | Build cost is sum of pattern lengths |
+| Text + rolling / multi-pattern hashing | [[Rabin Karp Search\|Rabin–Karp]] | O(n + m) avg | Good hash to avoid collisions |
+
+### Searching a graph
+
+| Data shape | Algorithm | Time | Precondition |
+| --- | --- | --- | --- |
 | Graph (unweighted) | [[DFS BFS\|BFS / DFS]] | O(V + E) | — |
-| Text + pattern (single) | [[KMP (Knuth-Morris-Pratt) Algorithm\|KMP]] | O(n + m) | — |
-| Text + many patterns / rolling | [[Rabin Karp Search\|Rabin–Karp]] | O(n + m) avg | Good hash to avoid collisions |
+| Graph (weighted) | See [[Graph Algorithms]] | — | [[Dijkstra]], [[A* Search]], [[Bellman-Ford]] |
 
 ## Questions
 

@@ -343,7 +343,7 @@
       "y": 3160,
       "width": 340,
       "height": 80,
-      "color": "1"
+      "color": "2"
     },
     {
       "id": "n_a02abba51f",
@@ -353,7 +353,7 @@
       "y": 3160,
       "width": 340,
       "height": 80,
-      "color": "1"
+      "color": "2"
     },
     {
       "id": "n_eb8a617fef",
@@ -363,7 +363,7 @@
       "y": 3280,
       "width": 340,
       "height": 80,
-      "color": "1"
+      "color": "2"
     },
     {
       "id": "n_9592276565",
@@ -373,7 +373,7 @@
       "y": 3400,
       "width": 340,
       "height": 80,
-      "color": "1"
+      "color": "2"
     },
     {
       "id": "n_52cc5b3048",
@@ -383,7 +383,7 @@
       "y": 3520,
       "width": 340,
       "height": 80,
-      "color": "1"
+      "color": "2"
     },
     {
       "id": "n_178f915b99",
@@ -393,7 +393,7 @@
       "y": 3640,
       "width": 340,
       "height": 80,
-      "color": "4"
+      "color": "2"
     },
     {
       "id": "n_9b15d1a3c2",
@@ -403,7 +403,7 @@
       "y": 3760,
       "width": 340,
       "height": 80,
-      "color": "1"
+      "color": "2"
     },
     {
       "id": "n_57749fcd3f",
@@ -687,7 +687,7 @@
     {
       "id": "n_b0ac2236f9",
       "type": "text",
-      "text": "#### Roadmap legend\n**Generated:** Jul 10 2026 | 08:49AM",
+      "text": "#### Roadmap legend\n**Generated:** Jul 10 2026 | 09:12AM",
       "x": -1440,
       "y": 0,
       "width": 500,
@@ -696,7 +696,7 @@
     {
       "id": "n_4a66490dd9",
       "type": "text",
-      "text": "Not-Started: 45",
+      "text": "Not-Started: 39",
       "x": -1380,
       "y": 126,
       "width": 380,
@@ -706,7 +706,7 @@
     {
       "id": "n_c1cf7bc196",
       "type": "text",
-      "text": "Creation: 3",
+      "text": "Creation: 10",
       "x": -1380,
       "y": 202,
       "width": 380,
@@ -735,7 +735,7 @@
     {
       "id": "n_0e6324d0db",
       "type": "text",
-      "text": "Done: 14",
+      "text": "Done: 13",
       "x": -1380,
       "y": 430,
       "width": 380,
