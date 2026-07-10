@@ -255,22 +255,25 @@ const script = `
     return null;
   }
 
-  function isMobile() {
+  // Below the desktop breakpoint the Explorer folds away behind a hamburger and
+  // opens as a panel — full-screen under 800px, a drawer between 800 and 1200.
+  // Either way the sidebar itself is just a fixed hamburger box, so the selector
+  // has to ride inside the panel. Keep in sync with the tabletOnly drawer block
+  // and the mobile overlay block in Web/quartz/styles/custom.scss.
+  var PANEL_MEDIA = "(max-width: 1200px)";
+
+  function isPanelLayout() {
     return (
-      typeof window !== "undefined" &&
-      window.matchMedia &&
-      window.matchMedia("(max-width: 800px)").matches
+      typeof window !== "undefined" && window.matchMedia && window.matchMedia(PANEL_MEDIA).matches
     );
   }
 
   // Where the selector lives depends on the viewport:
-  //   desktop — the left sidebar, as the explorer's preceding sibling, so it sits
-  //             ABOVE the "Topics" heading (outside the nav-files-container);
-  //   mobile  — inside the explorer's slide-in panel, above the file tree, so it
-  //             rides with the tree in the sidebar (the sidebar itself is just a
-  //             fixed hamburger box on mobile).
+  //   desktop      — the left sidebar, as the explorer's preceding sibling, so it
+  //                  sits ABOVE the "Topics" heading (outside nav-files-container);
+  //   mobile/tablet — inside the explorer's slide-in panel, above the file tree.
   function placement(explorer) {
-    if (isMobile()) {
+    if (isPanelLayout()) {
       var ul = explorer.querySelector(".explorer-ul");
       if (ul && ul.parentNode) return { parent: ul.parentNode, anchor: ul };
     }
@@ -374,13 +377,13 @@ const script = `
     });
   }
 
-  // Re-place the selector when the viewport crosses the mobile breakpoint (it
+  // Re-place the selector when the viewport crosses the desktop breakpoint (it
   // moves between the sidebar and the explorer's slide-in panel). Installed once.
   var mqlBound = false;
   function bindBreakpoint() {
     if (mqlBound || typeof window === "undefined" || !window.matchMedia) return;
     mqlBound = true;
-    var mql = window.matchMedia("(max-width: 800px)");
+    var mql = window.matchMedia(PANEL_MEDIA);
     var onChange = function () { apply(); };
     if (mql.addEventListener) mql.addEventListener("change", onChange);
     else if (mql.addListener) mql.addListener(onChange);
@@ -754,11 +757,13 @@ export const NavScopeDropdown: QuartzComponentConstructor = () => {
   border-left: 0;
 }
 
-/* Mobile: the selector rides inside the explorer's slide-in panel, above the
-   tree — give it room from the panel's top edge and a small side inset. */
-@media (max-width: 800px) {
+/* Mobile + tablet: the selector rides inside the explorer's slide-in panel,
+   above the tree — give it room from the panel's top edge. The panel supplies
+   the side inset (--explorer-panel-inset-*), so the selector adds none of its
+   own and lines up with the tree beneath it. */
+@media (max-width: 1200px) {
   .ns-scope {
-    margin: 1rem 0.55rem 1.1rem;
+    margin: 1rem 0 1.1rem;
   }
 }
 `

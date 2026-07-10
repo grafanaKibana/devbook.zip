@@ -300,7 +300,7 @@ body {
     top: var(--site-header-height);
     height: calc(100dvh - var(--site-header-height));
     max-height: calc(100dvh - var(--site-header-height));
-    padding-top: 0;
+    padding: 0 var(--explorer-panel-inset-right) 2rem var(--explorer-panel-inset-left);
   }
 
   // Push grid content below the fixed bar. Sit snug under it by default, and
@@ -313,6 +313,182 @@ body {
   }
   .page > #quartz-body:has(.page-header > .popover-hint > .site-marquee) {
     padding-top: calc(var(--site-header-height) + 2.5rem);
+  }
+}
+
+// ============================================================================
+// Explorer (left-sidebar file tree).
+//
+// The tree comes from the `@quartz-community/explorer` plugin. Its stylesheet
+// hard-codes `max-width: 800px` for the foldable/overlay state rather than
+// reading our breakpoints, so anything that has to change with the breakpoints
+// is restated here rather than tweaked upstream.
+// ============================================================================
+
+:root {
+  // Vertical breathing room between nav rows.
+  --explorer-item-gap: 0.25rem;
+  // Folders stay heavier than files, but well short of the plugin's near-bold 600.
+  --explorer-folder-weight: 500;
+  // base.scss styles every `a` at $semiBoldWeight (600), which is also what the
+  // plugin gives folders — so folder and file rows currently weigh the same.
+  // Pull file links back to normal to restore the hierarchy.
+  --explorer-file-weight: #{$normalWeight};
+  // Insets for the slide-in panel (mobile) and drawer (tablet), where the tree
+  // would otherwise sit flush against the screen edge. The left inset matches
+  // the header bar's 1.5rem so the tree lines up under the title; the smaller
+  // right inset just keeps text off the scrollbar.
+  --explorer-panel-inset-left: 1.5rem;
+  --explorer-panel-inset-right: 0.75rem;
+}
+
+// `.explorer` prefixes lift these over the plugin's own (unlayered) rules.
+.explorer .explorer-content .folder-container div > a,
+.explorer .explorer-content .folder-container div > button span {
+  font-weight: var(--explorer-folder-weight);
+}
+
+.explorer .explorer-content ul li > a {
+  font-weight: var(--explorer-file-weight);
+}
+
+.explorer .explorer-content ul li {
+  margin-block: var(--explorer-item-gap);
+}
+
+// ---------------------------------------------------------------------------
+// Tablet (800–1200px): foldable Explorer that opens as a narrow drawer.
+//
+// The plugin ships two states — an always-on sidebar, and a full-viewport
+// overlay below 800px — so tablets inherited the desktop sidebar and lost a
+// 320px column of an already narrow viewport. This block re-creates the
+// foldable behaviour for the tablet range and swaps the full-bleed overlay for
+// a drawer that leaves the article visible beside it.
+//
+// `$tablet` is inclusive at both ends and so overlaps `$mobile` at exactly
+// 800px. The two Explorer states must be mutually exclusive, so this is scoped
+// to strictly above the mobile breakpoint: 800px itself stays mobile (full
+// screen), matching how base.scss resolves its grid at that width.
+// ---------------------------------------------------------------------------
+$tabletOnly: "(min-width: #{map.get($breakpoints, mobile) + 0.02px}) and (max-width: #{map.get($breakpoints, desktop)})";
+
+@media all and ($tabletOnly) {
+  :root {
+    // The desktop sidebar's width, capped so a portrait tablet keeps most of
+    // the article visible next to the open drawer.
+    --explorer-drawer-width: min(#{$sidePanelWidth}, 80vw);
+  }
+
+  // Make room at the left of the header bar for the fixed hamburger, as mobile
+  // does. The title stays left-aligned (it only centers on mobile).
+  .site-header {
+    padding-left: 4rem;
+  }
+
+  // Swap the plugin's "Topics" fold arrow for the hamburger.
+  .explorer button.desktop-explorer {
+    display: none;
+  }
+  .explorer button.mobile-explorer {
+    display: flex;
+  }
+  // The menu glyph is three stroked <line>s with no paint of its own — the
+  // plugin colors it only inside its 800px block, so unstyled here it would
+  // render with SVG's default `stroke: none` and the hamburger would be an
+  // invisible (though still clickable) button.
+  .explorer .mobile-explorer .lucide-menu {
+    stroke: var(--darkgray);
+  }
+  // Both halves of the plugin's anti-flash guard: until the inline script runs
+  // and collapses the tree, the hamburger and the tree must stay hidden — else
+  // the drawer paints open on first render.
+  .explorer .mobile-explorer.hide-until-loaded {
+    display: none;
+  }
+  .explorer .hide-until-loaded ~ .explorer-content {
+    display: none;
+  }
+
+  // Drop the 320px left column from the tablet grid: the Explorer no longer
+  // takes part in the flow — it's a fixed hamburger plus an overlaid drawer.
+  .page > #quartz-body {
+    grid-template-columns: auto;
+    grid-template-rows: auto auto auto auto;
+    grid-template-areas:
+      "grid-header"
+      "grid-center"
+      "grid-sidebar-right"
+      "grid-footer";
+  }
+
+  // Same fixed top-left corner box as mobile. Being fixed, it is also the
+  // containing block the drawer positions against. z-index:101 keeps the
+  // hamburger above the z-100 header bar.
+  .page > #quartz-body > .sidebar.left {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: var(--site-header-height);
+    height: var(--site-header-height);
+    z-index: 101;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    overflow: visible;
+  }
+
+  .page > #quartz-body > .sidebar.left .mobile-explorer {
+    position: absolute;
+    top: 0;
+    left: 1.5rem;
+    height: var(--site-header-height);
+    display: flex;
+    align-items: center;
+    padding: 0;
+    z-index: 101;
+  }
+
+  // The plugin's desktop `.explorer` is a flex column sized to the sidebar it
+  // no longer fills; shrink it to the hamburger so the corner box stays clear.
+  .page > #quartz-body > .sidebar.left .explorer {
+    height: initial;
+    flex: 0 0 auto;
+    align-self: flex-start;
+  }
+
+  // The drawer. Opens below the fixed bar so search/title/toggles stay visible
+  // and interactive, and scrolls internally rather than moving the article.
+  .page > #quartz-body > .sidebar.left .explorer-content {
+    box-sizing: border-box;
+    position: absolute;
+    top: var(--site-header-height);
+    left: 0;
+    z-index: 100;
+    width: var(--explorer-drawer-width);
+    max-width: var(--explorer-drawer-width);
+    height: calc(100dvh - var(--site-header-height));
+    max-height: calc(100dvh - var(--site-header-height));
+    margin-top: 0;
+    padding: 0 var(--explorer-panel-inset-right) 2rem var(--explorer-panel-inset-left);
+    background-color: var(--light);
+    border-right: 1px solid var(--lightgray);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    // Slide the drawer's own width, not the viewport's — at 100vw a closed
+    // drawer would sit far off-screen and drag a long transition behind it.
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition:
+      transform 200ms ease,
+      visibility 200ms ease;
+  }
+
+  // Must carry the full sidebar prefix: the closed-state rule above is more
+  // specific than the plugin's bare `.explorer:not(.collapsed)`, so a shorter
+  // selector here would lose and the drawer would never slide in.
+  .page > #quartz-body > .sidebar.left .explorer:not(.collapsed) > .explorer-content {
+    transform: translateX(0);
+    visibility: visible;
   }
 }
 
@@ -374,6 +550,15 @@ body {
 // reader-mode rule fades; override that so the hamburger — and the explorer
 // overlay when opened in reader mode — stays visible and usable.
 @media all and ($mobile) {
+  :root[reader-mode="on"] .page > #quartz-body > .sidebar.left {
+    opacity: 1;
+  }
+}
+
+// Tablet: same reasoning. Fading the sidebar here would fade the hamburger, and
+// with it the only way to reach the drawer — on a touch tablet there is no
+// hover to bring it back.
+@media all and ($tabletOnly) {
   :root[reader-mode="on"] .page > #quartz-body > .sidebar.left {
     opacity: 1;
   }
