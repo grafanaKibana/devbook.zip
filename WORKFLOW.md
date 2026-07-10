@@ -31,7 +31,7 @@ Short-lived branches off `main`, filed into the folder matching the work's type 
 | `notes/…` | Vault / note content |
 | `docs/…` | Repo documentation |
 | `feature/…` | Platform features |
-| `bug/…` | Platform bug fixes |
+| `bug/…` | Platform bug fixes (`fix/…` is an accepted alias) |
 | `maintenance/…` | Dependencies, cleanup, config |
 
 Direct pushes to `main` are blocked by a branch ruleset; every change lands through a merged PR.
@@ -40,7 +40,7 @@ Direct pushes to `main` are blocked by a branch ruleset; every change lands thro
 
 | Step | What happens |
 |---|---|
-| **Title** | Must start with `feature:`, `notes:`, `docs:`, `bug:`, or `maintenance:` (append `!` for breaking). Enforced by [`PR Title`](.github/workflows/pr-title.yml), a required check. |
+| **Title** | Must start with `feature:`, `notes:`, `docs:`, `bug:` (or its alias `fix:`), or `maintenance:` (append `!` for breaking). Enforced by [`PR Title`](.github/workflows/pr-title.yml), a required check. |
 | **Description** | Auto-written by a Claude routine (Haiku) — summarizes the diff so the PR is reviewable without spelunking through commits. |
 | **Review** | Codex reviews every PR — correctness, simplification, and reuse feedback before merge. |
 | **Breaking changes** | A `!` title parks a `major-approval` check as pending; reply `/approve-major` to confirm or `/no-major` to drop it. See [`Major Release Approval`](.github/workflows/major-approval.yml). |
@@ -63,7 +63,7 @@ Fully automated SemVer, driven by commit/PR title prefixes — no manual version
 | Prefix | Bump |
 |---|---|
 | `feature:` | MINOR |
-| `notes:` / `docs:` / `bug:` / `maintenance:` | PATCH |
+| `notes:` / `docs:` / `bug:` / `fix:` / `maintenance:` | PATCH |
 | PR title `!` (e.g. `feature!:`) | MAJOR — gated, see above |
 
 Full detail: [`.github/RELEASING.md`](.github/RELEASING.md).

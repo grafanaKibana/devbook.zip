@@ -32,7 +32,7 @@ commit_parsers = [
   { message = "^vault backup", skip = true },
   { message = "^Merge ", skip = true },
   { message = "^feature!?:", group = "Platform — Features" },
-  { message = "^bug!?:", group = "Platform — Fixes" },
+  { message = "^(bug|fix)!?:", group = "Platform — Fixes" },
   { message = "^notes!?:", group = "Notes" },
   { message = "^docs!?:", group = "Documentation" },
   { message = "^maintenance!?:", group = "Maintenance" },

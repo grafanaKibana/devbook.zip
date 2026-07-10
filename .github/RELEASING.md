@@ -30,11 +30,13 @@ notes, and publishes a GitHub Release + tag. Direct pushes to `main` are blocked
 | `notes:`       | vault / note content          | `notes/…`       | **PATCH**    |
 | `docs:`        | repo documentation            | `docs/…`        | **PATCH**    |
 | `bug:`         | platform bug fix              | `bug/…`         | **PATCH**    |
+| `fix:`         | alias of `bug:`               | `fix/…`         | **PATCH**    |
 | `maintenance:` | dependency / cleanup / config | `maintenance/…` | **PATCH**    |
 
 The prefixes match the repo's `type:*` issue labels
 (`notes`, `docs`, `feature`, `bug`, `maintenance`), and each one names the
-branch folder the work lives on.
+branch folder the work lives on. `fix:` is an accepted alias of `bug:` — same
+bump, same changelog group, no `type:fix` label. Prefer `bug:`.
 
 **Breaking / major change:** append `!` to the **PR title** — e.g.
 `feature!: replace Eleventy build with Quartz`. Only the PR title can trigger a
@@ -65,8 +67,8 @@ bug: correct rate-limit handling in the LLM judge client
   0). e.g. `v1.2.0` → `v2.0.0`. Gated — it needs confirmation in the PR (below),
   so a stray `!` can never ship a major on its own. Commits are ignored for this.
 - `feature:` commit → **MINOR** (`PATCH` resets to 0). e.g. `v1.2.0` → `v1.3.0`.
-- `notes:` / `docs:` / `bug:` / `maintenance:` commit → **PATCH**. e.g. `v1.2.0`
-  → `v1.2.1`.
+- `notes:` / `docs:` / `bug:` / `fix:` / `maintenance:` commit → **PATCH**. e.g.
+  `v1.2.0` → `v1.2.1`.
 - The highest bump across the commits wins; a `!` PR title overrides everything.
 - A release with no matching PR title or commits bumps nothing and is skipped.
 - The first release (no existing tag) is **`v1.0.0`**. Current tags: `v1.0.0`,
