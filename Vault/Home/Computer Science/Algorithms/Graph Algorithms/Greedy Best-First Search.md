@@ -96,7 +96,7 @@ flowchart TD
 
 | Choice | Greedy Best-First | Alternative | Decision criteria |
 | --- | --- | --- | --- |
-| vs [[A-Start Search|A* Search]] | Ranks by `h`, fast, suboptimal, incomplete | Ranks by `g + h`, optimal with admissible `h` | Use GBFS only when any valid path is fine; use A* whenever total path cost matters — the `g` term is cheap insurance. |
+| vs [[A-Start Search\|A* Search]] | Ranks by `h`, fast, suboptimal, incomplete | Ranks by `g + h`, optimal with admissible `h` | Use GBFS only when any valid path is fine; use A* whenever total path cost matters — the `g` term is cheap insurance. |
 | vs [[Dijkstra]] | Goal-directed, ignores accumulated cost | Ignores the goal, ranks by `g`, optimal | GBFS and Dijkstra are the two extremes; pick GBFS for raw speed toward a known goal, Dijkstra for correctness or all-pairs with no heuristic. |
 | Map geometry | Great on open maps, thrashes on concave obstacles | A* handles concave geometry correctly | On maps with pockets or mazes, the greedy pull backfires — switch to a cost-aware search. |
 

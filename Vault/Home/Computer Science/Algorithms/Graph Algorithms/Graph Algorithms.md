@@ -44,7 +44,7 @@ flowchart TD
 | [[DFS BFS]] | Reachability, shortest path by edge count | O(V + E) | Unweighted graphs |
 | [[DFS BFS]] | Cycle detection, topological sort, components | O(V + E) | Any graph |
 | [[Dijkstra]] | Single-source shortest path | O((V + E) log V) | Non-negative weights |
-| [[A-Start Search|A* Search]] | Point-to-point shortest path | O((V + E) log V), far fewer nodes expanded | Non-negative weights **and** an admissible heuristic |
+| [[A-Start Search\|A* Search]] | Point-to-point shortest path | O((V + E) log V), far fewer nodes expanded | Non-negative weights **and** an admissible heuristic |
 | [[Greedy Best-First Search]] | Fast point-to-point path, not optimal | O((V + E) log V) | Heuristic only; sacrifices optimality for speed |
 | [[Bidirectional Search]] | Point-to-point shortest path | O(b^(d/2)) vs O(b^d) | Target known; graph must be reversible |
 | [[Bellman-Ford]] | Single-source shortest path | O(V·E) | Handles negative edges; detects negative cycles |

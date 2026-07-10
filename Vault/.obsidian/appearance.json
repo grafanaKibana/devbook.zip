@@ -9,6 +9,9 @@
   "textFontFamily": "Source Sans 3",
   "theme": "system",
   "baseFontSize": 16,
-  "enabledCssSnippets": [],
+  "enabledCssSnippets": [
+    "devbook-site-fonts",
+    "markdown-max-width"
+  ],
   "monospaceFontFamily": "IBM Plex Mono"
 }

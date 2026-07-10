@@ -82,7 +82,7 @@ public static int PrimWeight(int n, List<(int to, int w)>[] adj)
 | Algorithm | Complexity | Best for | Key structure |
 |---|---|---|---|
 | **Kruskal's** | O(E log E) | Sparse graphs; edge list given | [[Union-Find]] |
-| **Prim's** | O(E log V) with a binary heap | Dense graphs; adjacency given | [[Heap|Priority queue]] |
+| **Prim's** | O(E log V) with a binary heap | Dense graphs; adjacency given | [[Heap\|Priority queue]] |
 
 **Decision rule**: if the graph is given as an edge list and is sparse, **Kruskal's** is simplest and fast. If it's dense or given as an adjacency structure, **Prim's** with a heap edges ahead. Both produce the same total weight; the choice is about graph shape and which structure you already have.
 

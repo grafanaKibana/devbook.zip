@@ -99,7 +99,7 @@ flowchart TD
 | --- | --- | --- | --- |
 | Complexity | `O(E · f*)`, scales with the flow value | `O(V·E²)`, independent of capacities | Prefer Edmonds–Karp when capacities are large or non-integer; Ford–Fulkerson only wins when `f*` is tiny. |
 | Termination | May not terminate on irrational capacities | Always terminates | If capacities are not guaranteed integer, Edmonds–Karp (or scaling) is mandatory. |
-| Path search | DFS or any path finder | [[DFS BFS|BFS]] for fewest-edge path | The BFS choice is what buys the capacity-independent bound; it is not an optional detail. |
+| Path search | DFS or any path finder | [[DFS BFS\|BFS]] for fewest-edge path | The BFS choice is what buys the capacity-independent bound; it is not an optional detail. |
 | Both vs Dinic's | Simpler to implement | — | For large graphs or bipartite matching, skip both and use Dinic's `O(V²·E)` (or `O(E·√V)` unit-capacity) blocking-flow approach. |
 
 ## Questions

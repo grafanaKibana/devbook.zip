@@ -30,7 +30,7 @@ This folder covers the five most important:
 |---|---|---|---|
 | [[Divide and Conquer]] | Split into disjoint subproblems, recurse, combine | Subproblems are independent; combine step is cheap | [[Merge Sort]], [[Binary Search]], Karatsuba, FFT |
 | [[Dynamic Programming]] | Reuse answers to overlapping subproblems | Optimal substructure **and** overlapping subproblems | Knapsack, edit distance, longest common subsequence |
-| [[Greedy Algorithms|Greedy]] | Take the locally optimal choice, never revisit | Greedy-choice property (provable by an exchange argument) | [[Dijkstra]], Huffman coding, interval scheduling |
+| [[Greedy Algorithms\|Greedy]] | Take the locally optimal choice, never revisit | Greedy-choice property (provable by an exchange argument) | [[Dijkstra]], Huffman coding, interval scheduling |
 | [[Backtracking]] | DFS over choices, prune dead branches | Partial solutions can be rejected early | N-Queens, Sudoku, permutations/subsets |
 | [[Branch and Bound]] | DFS or best-first over choices, prune by optimistic bound | An admissible bound on the best achievable in a subtree | 0/1 knapsack, TSP, integer linear programming |
 
