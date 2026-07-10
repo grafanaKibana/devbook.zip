@@ -30,6 +30,8 @@ graph TD
 
 ## Visualization
 
+The card animates the split-then-merge: blue marks the pair being compared at the heads of the two halves, violet marks the element being moved into place, and bars turn green with a white check as a merged run locks into sorted order. The i/j pins track the two read heads; WATCH shows i, j, and the swap count — watch sorted runs double in width with each round of merging.
+
 ```steptrace
 {"algorithm":"merge-sort","array":[8,3,5,1,9,2,7,4]}
 ```

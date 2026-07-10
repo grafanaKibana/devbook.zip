@@ -24,6 +24,8 @@ Both are [[Greedy Algorithms|greedy]] and both are provably optimal via the **cu
 
 ## Visualization
 
+The card runs Prim's from A: the green tree grows one cheapest crossing edge at a time until all six vertices are connected. Watch for the explicit "skip — would make a cycle" step whenever the cheapest candidate edge would join two vertices already inside the tree — that rejection is the cut property's cycle-free invariant in action.
+
 ```steptrace
 {"algorithm":"prim","start":"A","nodes":[{"id":"A"},{"id":"B"},{"id":"C"},{"id":"D"},{"id":"E"},{"id":"F"}],"edges":[{"from":"A","to":"B","weight":4},{"from":"A","to":"C","weight":2},{"from":"B","to":"C","weight":1},{"from":"B","to":"D","weight":5},{"from":"C","to":"D","weight":8},{"from":"C","to":"E","weight":10},{"from":"D","to":"E","weight":2},{"from":"D","to":"F","weight":6},{"from":"E","to":"F","weight":3}]}
 ```

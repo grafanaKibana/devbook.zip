@@ -23,11 +23,11 @@ Linear Search finds a target by scanning elements one at a time from start to en
 
 ## Visualization
 
+This uses the **same array and target** as [[Binary Search]]. Count the probes: linear search makes 15 comparisons to reach index 14, while binary search finds it in 4 — the O(n) vs O(log n) gap made concrete. Notice that linear search never greys out any bar, because it eliminates nothing; binary search fades out each discarded half.
+
 ```steptrace
 {"algorithm":"linear-search","array":[4,9,13,18,22,27,31,38,45,52,58,64,70,77,83,91],"target":83}
 ```
-
-This uses the **same array and target** as [[Binary Search]]. Count the probes: linear search makes 15 comparisons to reach index 14, while binary search finds it in 4 — the O(n) vs O(log n) gap made concrete. Notice that linear search never greys out any bar, because it eliminates nothing; binary search fades out each discarded half.
 
 ## Example
 

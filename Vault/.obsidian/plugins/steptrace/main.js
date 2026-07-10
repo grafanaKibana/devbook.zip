@@ -133,7 +133,7 @@
 /* ============ body: viz stage (left, primary) + rail (right) ============ */
 .steptrace__body {
   display: grid;
-  grid-template-columns: 1fr minmax(180px, 224px);
+  grid-template-columns: 1fr minmax(200px, 260px);
   gap: 0 1.5rem;
   align-items: stretch;
 }
@@ -174,23 +174,40 @@
 }
 /* step log: fixed 3 lines, current emphasized (fixed heights ⇒ zero footer jitter) */
 .steptrace__log {
+  position: relative; /* anchors the hidden sizing probe */
   list-style: none;
   margin: 0 0 0.9rem; /* gap under the newest step == WATCH eyebrow-to-divider gap */
   padding: 0;
   display: flex;
   flex-direction: column;
+  justify-content: flex-end; /* slack collects at the top; newest step hugs the divider */
   gap: 0.55rem;
   font-family: var(--_font-mono);
   font-size: 0.72rem;
   line-height: 1.4;
   overflow: hidden; /* clip the between-step scroll so it can't overlap the label */
+  /* height is pinned by sizeLog() to fit the TALLEST frame message, so the
+     unclamped current line can grow without ever moving the footer */
 }
 .steptrace__log-line {
   display: flex;
   gap: 0.5rem;
-  height: 2.8em; /* fits two full lines (line-height 1.4 × 2); 2nd line no longer clipped */
+  height: 2.8em; /* history: two clamped lines */
   overflow: hidden;
   transition: opacity 0.3s ease;
+}
+/* the CURRENT step shows its full text — no clamp, no fade; the log block's
+   fixed height (sizeLog) absorbs the growth */
+.steptrace__log-line--cur {
+  height: auto;
+  min-height: 1.4em;
+}
+.steptrace__log-line--cur .steptrace__log-text {
+  display: block;
+  -webkit-line-clamp: unset;
+  overflow: visible;
+  -webkit-mask-image: none;
+  mask-image: none;
 }
 /* older history fades progressively (age 1 = previous, age 2 = older) */
 .steptrace__log-line[data-age="1"] {
@@ -417,6 +434,81 @@
   color: var(--_accent);
   font-weight: 600;
 }
+/* speed slider row: thin token track + accent thumb, live value label */
+.steptrace__speed-row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 4px 8px 6px;
+}
+.steptrace__range {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 1 1 auto;
+  height: 14px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.steptrace__range::-webkit-slider-runnable-track {
+  height: 2px;
+  border-radius: 2px;
+  background: var(--_hair);
+}
+.steptrace__range::-moz-range-track {
+  height: 2px;
+  border-radius: 2px;
+  background: var(--_hair);
+}
+.steptrace__range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  margin-top: -5px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--_accent);
+}
+.steptrace__range::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--_accent);
+}
+.steptrace__range:focus-visible {
+  outline: 2px solid var(--_blue);
+  outline-offset: 3px;
+}
+.steptrace__speed-val {
+  min-width: 3ch;
+  text-align: right;
+  font: 600 0.78rem var(--_font-body);
+  color: var(--_text);
+  font-variant-numeric: tabular-nums;
+}
+/* native-looking dropdown (start node / search target), themed via tokens */
+.steptrace__select {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  padding: 6px 26px 6px 8px;
+  border: 1px solid var(--_border);
+  border-radius: 6px;
+  font: 500 0.8rem var(--_font-body);
+  color: var(--_text);
+  background-color: transparent;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M2 4l3 3 3-3' fill='none' stroke='%23888' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 10px;
+  cursor: pointer;
+}
+.steptrace__select:focus-visible {
+  outline: 2px solid var(--_blue);
+  outline-offset: 2px;
+}
 
 /* narrow: stack the rail beneath the stage */
 @media (max-width: 560px) {
@@ -491,6 +583,18 @@
   width: 100%;
   height: 100%;
 }
+/* quick-sort pivot: amber fill that persists across the partition. The compare/
+   swap rules below override the fill (a compared pivot reads blue), but the ring
+   keeps the pivot locatable even while its fill is taken over. */
+.steptrace__bar[data-pivot="1"] .steptrace__fill {
+  background: var(--_amber);
+  opacity: 1;
+}
+.steptrace__bar[data-pivot="1"] {
+  outline: 2px solid var(--_amber);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
 /* sort states */
 .steptrace__bar[data-state="compare"] .steptrace__fill {
   background: var(--_blue);
@@ -510,6 +614,14 @@
 }
 .steptrace__bar[data-state="sorted"] .steptrace__check {
   display: block;
+}
+/* quick/merge: bars outside the active range are dimmed (like binary-search's
+   eliminated half). Overrides the per-state opacity above; keeps the fill hue. */
+.steptrace__bar[data-outside="1"] .steptrace__fill {
+  opacity: 0.28;
+}
+.steptrace__bar[data-outside="1"] .steptrace__num {
+  opacity: 0.4;
 }
 /* pin marker: JS writes transform(x,y) to the anchor (bar top-centre); the
    margins lift the teardrop so its tip floats ~6px above the bar top. */
@@ -811,12 +923,57 @@
   stroke: var(--_violet);
 }
 
-/* ---- bits: three aligned bit lanes + index header, in the strip idiom ---- */
+/* ---- bits: the three lanes read as an equation (x / − 1 / & = result), with a
+   fixed tally of the original 1s that fills in as each is cleared. ---- */
 .steptrace__bits {
   display: flex;
   flex-direction: column;
   gap: 6px;
   margin: 0.4rem 0;
+}
+/* tally: one square per set bit of the ORIGINAL value (count known upfront ⇒
+   fixed width, zero jitter). Squares fill left→right as bits are cleared. */
+.steptrace__btally {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 22px;
+  margin-bottom: 2px;
+}
+.steptrace__btally-lead {
+  flex: 0 0 72px;
+  text-align: right;
+  font: 600 0.62rem var(--_font-mono);
+  letter-spacing: 0.02em;
+  color: var(--_muted);
+}
+.steptrace__btally-boxes {
+  display: flex;
+  gap: 5px;
+}
+.steptrace__btally-box {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 1.5px solid color-mix(in srgb, var(--_text) 26%, transparent);
+  transition:
+    background var(--_tween) var(--_spring),
+    border-color var(--_tween) ease,
+    transform var(--_tween) var(--_spring);
+}
+.steptrace__btally-box[data-filled="1"] {
+  background: var(--_accent);
+  border-color: var(--_accent);
+}
+/* the square that just filled on THIS frame gets a brief pop */
+.steptrace__btally-box[data-just="1"] {
+  transform: scale(1.18);
+}
+.steptrace__btally-count {
+  margin-left: 4px;
+  font: 600 0.68rem var(--_font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--_text);
 }
 .steptrace__brow {
   display: flex;
@@ -829,12 +986,19 @@
   opacity: 0.32;
 }
 .steptrace__bgutter {
-  flex: 0 0 46px;
+  flex: 0 0 72px;
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  font: 600 0.72rem var(--_font-mono);
+  gap: 4px;
+  font: 600 0.66rem var(--_font-mono);
   color: var(--_muted);
+  white-space: nowrap;
+}
+/* the operator that turns the row above into this row (− 1, &) reads as arithmetic */
+.steptrace__bop {
+  color: var(--_accent);
+  font-weight: 700;
 }
 .steptrace__bcells {
   display: flex;
@@ -887,19 +1051,13 @@
   color: var(--_text);
   font-weight: 600;
 }
-/* states (source-ordered AFTER the data-bit rule so they win on set cells) */
-.steptrace__bcell[data-state="focus"] {
-  background: color-mix(in srgb, var(--_accent) 20%, transparent);
-  box-shadow: inset 0 0 0 2px var(--_accent);
-  color: var(--_accent);
-  font-weight: 700;
-}
-.steptrace__bcell[data-state="low"] {
-  background: color-mix(in srgb, var(--_muted) 14%, transparent);
-  color: var(--_muted);
-}
-.steptrace__bcell[data-state="flip"] {
+/* Three states only (source-ordered AFTER the data-bit rule so they win on set
+   cells). die = the lowest 1 being cleared (amber); borrow = the zeros it flips
+   up to 1 (blue); gone = the region AND wipes, struck through so it reads
+   "deleted" without a competing tint. */
+.steptrace__bcell[data-state="die"] {
   background: color-mix(in srgb, var(--_amber) 26%, transparent);
+  box-shadow: inset 0 0 0 2px var(--_amber);
   color: var(--_amber);
   font-weight: 700;
 }
@@ -908,19 +1066,12 @@
   color: var(--_blue);
   font-weight: 700;
 }
-.steptrace__bcell[data-state="keep"] {
-  background: color-mix(in srgb, var(--_text) 14%, transparent);
-  color: var(--_text);
-  font-weight: 600;
-}
-.steptrace__bcell[data-state="wiped"] {
-  background: color-mix(in srgb, var(--_muted) 10%, transparent);
-  color: var(--_muted);
-}
-.steptrace__bcell[data-state="removed"] {
-  box-shadow: inset 0 0 0 2px var(--_violet);
-  color: var(--_violet);
-  font-weight: 700;
+.steptrace__bcell[data-state="gone"] {
+  background: color-mix(in srgb, var(--_muted) 8%, transparent);
+  color: color-mix(in srgb, var(--_muted) 60%, transparent);
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+  text-decoration-color: color-mix(in srgb, var(--_amber) 70%, transparent);
 }
 
 /* ---- backtrack: an n×n board (row = recursion depth) + a path strip ---- */
@@ -1490,6 +1641,8 @@
       this.swaps = 0
       this._cand = null
       this._key = null
+      this._range = null // [lo, hi] active subarray (quick/merge); null = whole array
+      this._pivot = null // pivot index (quick); persists across the partition's frames
     }
 
     /** Current array as a defensive copy (algorithms read live values through this). */
@@ -1498,19 +1651,22 @@
     }
 
     _push(type, active, message) {
-      this.frames.push(
-        Object.freeze({
-          type,
-          array: this.a.slice(),
-          sorted: [...this._sorted].sort((x, y) => x - y),
-          active: active.slice(),
-          candidate: this._cand,
-          keyValue: this._key,
-          comparisons: this.comparisons,
-          swaps: this.swaps,
-          message,
-        }),
-      )
+      const frame = {
+        type,
+        array: this.a.slice(),
+        sorted: [...this._sorted].sort((x, y) => x - y),
+        active: active.slice(),
+        candidate: this._cand,
+        keyValue: this._key,
+        comparisons: this.comparisons,
+        swaps: this.swaps,
+        message,
+      }
+      // Optional recursion-aware fields — absent unless the algorithm set them,
+      // so bubble/insertion/selection frames stay byte-identical.
+      if (this._range) frame.range = this._range.slice()
+      if (this._pivot != null) frame.pivot = this._pivot
+      this.frames.push(Object.freeze(frame))
     }
 
     init(message) {
@@ -1548,6 +1704,18 @@
       this._key = v
     }
 
+    /** Set the active subarray [lo, hi] carried into later frames (pass lo=null to
+     *  clear). Emits no frame — state only, like holdKey. */
+    range(lo, hi) {
+      this._range = lo == null ? null : [lo, hi]
+    }
+
+    /** Set the pivot index carried into later frames (pass null to clear). Emits
+     *  no frame — state only. */
+    pivot(idx) {
+      this._pivot = idx == null ? null : idx
+    }
+
     markSorted(idxs, show, message) {
       idxs.forEach((k) => this._sorted.add(k))
       this._push("mark-sorted", show, message)
@@ -1560,6 +1728,8 @@
     clearMarks() {
       this._cand = null
       this._key = null
+      this._range = null
+      this._pivot = null
     }
 
     done(message) {
@@ -1921,9 +2091,12 @@
   }
 
   // A BitsRecorder snapshot: { type, width, labels{a,b,r}, a, b, r, value, sub,
-  //   low, removed, pop, message }. Three aligned bit lanes (a = x, b = x−1,
-  //   r = x & (x−1)); each lane is { bits[width] (bits[0]=LSB), state[width], live }.
-  //   The algorithm only calls ops.* — it never assembles a frame itself.
+  //   low, pop, total, just, message }. Three aligned lanes read as an equation
+  //   (a = x, b = x−1, r = x & (x−1)); each lane is { bits[width] (bits[0]=LSB),
+  //   state[width], live }. `total` = popcount of the ORIGINAL value (the tally
+  //   width, fixed for zero jitter), `pop` = how many 1s cleared so far, `just` =
+  //   the tally square that filled on THIS frame (−1 otherwise). Three states
+  //   only: die / borrow / gone. The algorithm only calls ops.* — never a frame.
   class BitsRecorder {
     constructor(width) {
       this.width = width
@@ -1933,12 +2106,13 @@
       this.b = this._lane()
       this.r = this._lane()
       this.a.live = true
-      this.labels = { a: "x", b: "x − 1", r: "x & (x−1)" }
+      this.labels = { a: "x", b: "− 1", r: "&" }
       this.value = 0
       this.sub = null
       this.low = -1
-      this.removed = null
       this.pop = 0
+      this.total = 0
+      this.just = -1
       this._result = 0
     }
     _lane() {
@@ -1952,6 +2126,16 @@
     lowestSetBit(x) {
       x = (x >>> 0) & this.mask
       return x === 0 ? -1 : 31 - Math.clz32(x & -x)
+    }
+    /** Population count — the number of iterations (and the tally width). */
+    popcount(x) {
+      x = (x >>> 0) & this.mask
+      let c = 0
+      while (x) {
+        x &= x - 1
+        c++
+      }
+      return c
     }
     _fill(lane, x) {
       x = (x >>> 0) & this.mask
@@ -1972,8 +2156,9 @@
           value: this.value,
           sub: this.sub,
           low: this.low,
-          removed: this.removed,
           pop: this.pop,
+          total: this.total,
+          just: this.just,
           message,
         }),
       )
@@ -1981,6 +2166,7 @@
     init(x, labels, message) {
       this.value = (x >>> 0) & this.mask
       if (labels) this.labels = { a: labels.a, b: labels.b, r: labels.r }
+      this.total = this.popcount(this.value)
       this._fill(this.a, this.value)
       this.a.state.fill("")
       this.a.live = true
@@ -1988,45 +2174,42 @@
       this.r = this._lane()
       this.low = -1
       this.sub = null
-      this.removed = null
       this.pop = 0
+      this.just = -1
       this._push("init", message)
     }
-    /** Mark the lowest set bit (focus) and the zero bits below it (low) in lane x. */
-    locate(low, message) {
-      this.low = low
-      this.a.state.fill("")
-      this.a.state[low] = "focus"
-      for (let i = 0; i < low; i++) this.a.state[i] = "low"
-      this._push("locate", message)
-    }
-    /** Lane x−1 goes live: bit `low` flips 1→0 (flip); every bit below borrows 0→1. */
-    decrement(sub, low, message) {
+    /** Locate + decrement in one beat: in lane x the lowest 1 turns amber (it is
+     *  about to die); lane x−1 goes live showing that 1 flipped to 0 (amber) and
+     *  the zeros beneath it borrowed up to 1 (blue). */
+    subtract(sub, low, message) {
       this.sub = (sub >>> 0) & this.mask
       this.low = low
+      this.just = -1
+      this.a.state.fill("")
+      this.a.state[low] = "die"
       this.b.live = true
       this._fill(this.b, this.sub)
       this.b.state.fill("")
-      this.b.state[low] = "flip"
+      this.b.state[low] = "die"
       for (let i = 0; i < low; i++) this.b.state[i] = "borrow"
-      this._push("decrement", message)
+      this._push("subtract", message)
     }
-    /** Lane x & (x−1) goes live: keep set bits above `low`, wipe `low` and below. */
+    /** AND the two lanes: lane r goes live; bit `low` and everything under it are
+     *  struck out (gone), the surviving 1s above stay plain. Lane x keeps its
+     *  amber marker so the eye tracks the removed bit across the equation. */
     and(res, low, message) {
       this._result = (res >>> 0) & this.mask
       this.low = low
+      this.just = -1
+      this.b.state.fill("")
       this.r.live = true
       this._fill(this.r, this._result)
       this.r.state.fill("")
-      for (let i = 0; i < this.width; i++) {
-        if (i > low) this.r.state[i] = this.r.bits[i] ? "keep" : ""
-        else this.r.state[i] = "wiped"
-      }
-      this.r.state[low] = "removed"
-      this.removed = low
+      for (let i = 0; i <= low; i++) this.r.state[i] = "gone"
       this._push("and", message)
     }
-    /** Commit x ← result: lane x updates, lanes b/r return to dimmed placeholders. */
+    /** Commit x ← result: lane x becomes the survivors, lanes b/r dim back to
+     *  placeholders, and one more tally square fills (just = its index). */
     commit(message) {
       this.value = this._result
       this._fill(this.a, this.value)
@@ -2034,13 +2217,13 @@
       this.b = this._lane()
       this.r = this._lane()
       this.low = -1
-      this.removed = null
+      this.just = this.pop
       this.pop += 1
       this._push("commit", message)
     }
     done(message) {
       this.low = -1
-      this.removed = null
+      this.just = -1
       this._push("done", message)
     }
   }
@@ -2241,26 +2424,136 @@
     ],
   }
 
+  // Layered layout for graphs without explicit coords. Left→right layers make
+  // traversal structure readable (vs the old ellipse). Box matches the ellipse's
+  // footprint (x 40..540, y 34..266) so makeGraphView's viewBox/height is
+  // unchanged. Deterministic: no randomness, ties broken by node id.
+  function layeredLayout(rawNodes, rawEdges, directed, start) {
+    const X0 = 40,
+      X1 = 540,
+      Y0 = 34,
+      Y1 = 266,
+      YC = (Y0 + Y1) / 2,
+      STAG = 8 // per-layer y phase, breaks collinear edges so weight labels don't stack
+    const ids = rawNodes.map((n) => String(n.id))
+    const idSet = new Set(ids)
+    const es = (rawEdges || [])
+      .map((e) => ({ from: String(e.from), to: String(e.to) }))
+      .filter((e) => idSet.has(e.from) && idSet.has(e.to))
+    const out = new Map(ids.map((id) => [id, []]))
+    const inn = new Map(ids.map((id) => [id, []]))
+    const undir = new Map(ids.map((id) => [id, []]))
+    for (const e of es) {
+      out.get(e.from).push(e.to)
+      inn.get(e.to).push(e.from)
+      undir.get(e.from).push(e.to)
+      undir.get(e.to).push(e.from)
+    }
+
+    // 1. layer index per node
+    const layer = new Map()
+    const bfsLayers = (adj, root) => {
+      const q = idSet.has(root) ? [root] : []
+      if (q.length) layer.set(root, 0)
+      for (let h = 0; h < q.length; h++) {
+        const u = q[h]
+        for (const v of adj.get(u)) {
+          if (!layer.has(v)) {
+            layer.set(v, layer.get(u) + 1)
+            q.push(v)
+          }
+        }
+      }
+      let maxL = 0
+      for (const v of layer.values()) maxL = Math.max(maxL, v)
+      for (const id of ids) if (!layer.has(id)) layer.set(id, maxL + 1) // unreachable → final layer
+    }
+    if (directed) {
+      // longest-path DAG layering via Kahn topo order; cycle ⇒ BFS fallback
+      const indeg = new Map(ids.map((id) => [id, inn.get(id).length]))
+      const q = ids.filter((id) => indeg.get(id) === 0).sort()
+      for (const id of ids) layer.set(id, 0)
+      let seen = 0
+      for (let h = 0; h < q.length; h++) {
+        const u = q[h]
+        seen++
+        for (const v of out.get(u)) {
+          if (layer.get(v) < layer.get(u) + 1) layer.set(v, layer.get(u) + 1)
+          const d = indeg.get(v) - 1
+          indeg.set(v, d)
+          if (d === 0) q.push(v)
+        }
+      }
+      if (seen < ids.length) {
+        layer.clear()
+        bfsLayers(out, start)
+      }
+    } else {
+      bfsLayers(undir, start)
+    }
+
+    // 2. group into contiguous layers, initial order by id
+    let maxL = 0
+    for (const v of layer.values()) maxL = Math.max(maxL, v)
+    const buckets = Array.from({ length: maxL + 1 }, () => [])
+    for (const id of ids) buckets[layer.get(id)].push(id)
+    for (const b of buckets) b.sort()
+    const layers = buckets.filter((b) => b.length)
+
+    // 3. crossing reduction — barycenter sweeps (order each layer by mean position
+    //    of its neighbours in the adjacent layer). Deterministic id tie-break.
+    const posIn = (arr) => {
+      const m = new Map()
+      arr.forEach((id, i) => m.set(id, i))
+      return m
+    }
+    const sweep = (li, refIdx) => {
+      const cur = layers[li]
+      const key = new Map()
+      cur.forEach((id, i) => {
+        const nb = undir.get(id).filter((v) => refIdx.has(v))
+        key.set(id, nb.length ? nb.reduce((s, v) => s + refIdx.get(v), 0) / nb.length : i)
+      })
+      cur.sort((a, b) => key.get(a) - key.get(b) || (a < b ? -1 : a > b ? 1 : 0))
+    }
+    for (let pass = 0; pass < 4; pass++) {
+      if (pass % 2 === 0) for (let li = 1; li < layers.length; li++) sweep(li, posIn(layers[li - 1]))
+      else for (let li = layers.length - 2; li >= 0; li--) sweep(li, posIn(layers[li + 1]))
+    }
+
+    // 4. assign coords; single-node layers centre vertically; layer y-phase stagger
+    const L = layers.length
+    const coord = new Map()
+    layers.forEach((lay, li) => {
+      const x = L === 1 ? (X0 + X1) / 2 : X0 + (li * (X1 - X0)) / (L - 1)
+      const k = lay.length
+      const off = (li % 2) * STAG
+      lay.forEach((id, j) => {
+        const y = k === 1 ? YC : Y0 + off + (j * (Y1 - Y0)) / (k - 1)
+        coord.set(id, { x: Math.round(x), y: Math.round(y) })
+      })
+    })
+    return coord
+  }
+
   function normalizeGraph(config) {
     const src = Array.isArray(config.nodes) && config.nodes.length ? config : DEFAULT_GRAPH
-    // If any node lacks coordinates, arrange ALL nodes on an ellipse (a regular
-    // polygon — circular / pentagonic look) spread wide so the graph fills the
-    // card without over-zooming.
+    // If any node lacks coordinates, lay the whole graph out in left→right layers
+    // (see layeredLayout). Explicit-coords contract: if EVERY node has x/y, keep
+    // them untouched.
     const needLayout = src.nodes.some((n) => n.x == null || n.y == null)
-    const N = src.nodes.length
+    let startId = config.start != null ? String(config.start) : src.start != null ? String(src.start) : String(src.nodes[0].id)
+    if (!src.nodes.some((n) => String(n.id) === startId)) startId = String(src.nodes[0].id)
+    const laid = needLayout ? layeredLayout(src.nodes, src.edges, !!src.directed, startId) : null
     const nodes = needLayout
-      ? src.nodes.map((n, i) => {
-          const ang = -Math.PI / 2 + (i * 2 * Math.PI) / N
-          return { id: String(n.id), x: Math.round(290 + 250 * Math.cos(ang)), y: Math.round(150 + 120 * Math.sin(ang)) }
-        })
+      ? src.nodes.map((n) => ({ id: String(n.id), ...laid.get(String(n.id)) }))
       : src.nodes.map((n) => ({ id: String(n.id), x: Number(n.x), y: Number(n.y) }))
     const ids = new Set(nodes.map((n) => n.id))
     const edges = (src.edges || [])
       .filter((e) => ids.has(String(e.from)) && ids.has(String(e.to)))
       .map((e) => ({ from: String(e.from), to: String(e.to), weight: e.weight == null ? null : Number(e.weight) }))
     const directed = !!src.directed
-    let start = config.start != null ? String(config.start) : src.start != null ? String(src.start) : nodes[0].id
-    if (!ids.has(start)) start = nodes[0].id
+    const start = ids.has(startId) ? startId : nodes[0].id
     return { nodes, edges, directed, start }
   }
 
@@ -2359,18 +2652,23 @@
     )
     function partition(lo, hi) {
       const pivot = ops.value[hi]
-      ops.candidate(hi, `Pivot = ${pivot} (index ${hi}); partition the range ${lo}..${hi}.`)
+      ops.range(lo, hi)
+      ops.pivot(hi)
+      ops.candidate(hi, `Partition [${lo}, ${hi}]: pivot ${pivot} (index ${hi}) — send values < ${pivot} left, > ${pivot} right.`)
       let i = lo
       for (let j = lo; j < hi; j++) {
         ops.compare(j, hi, `Compare ${ops.value[j]} with pivot ${pivot}.`)
         if (ops.value[j] < pivot) {
-          if (i !== j) ops.swap(i, j, `${ops.value[j]} < pivot: move it left to index ${i}.`)
+          if (i !== j) ops.swap(i, j, `${ops.value[j]} < ${pivot}: move it into the left region at index ${i}.`)
           i++
         }
       }
-      if (i !== hi) ops.swap(i, hi, `Place the pivot ${pivot} at index ${i}.`)
-      ops.candidate(null, `Pivot ${pivot} is now at its final index ${i}.`)
-      ops.markSorted([i], [i], `Index ${i} is final.`)
+      if (i !== hi) ops.swap(i, hi, `Swap the pivot ${pivot} into index ${i}.`)
+      ops.pivot(i)
+      ops.candidate(null, `Pivot ${pivot} settles at index ${i} — everything left is < ${pivot}, everything right is > ${pivot}.`)
+      ops.pivot(null)
+      ops.markSorted([i], [i], `Index ${i} is final — it never moves again.`)
+      ops.range(null)
       return i
     }
     function qs(lo, hi) {
@@ -2380,7 +2678,15 @@
         return
       }
       const p = partition(lo, hi)
+      if (p - 1 - lo >= 1) {
+        ops.range(lo, p - 1)
+        ops.candidate(null, `Recurse into the left half [${lo}, ${p - 1}] (the values below the pivot).`)
+      }
       qs(lo, p - 1)
+      if (hi - (p + 1) >= 1) {
+        ops.range(p + 1, hi)
+        ops.candidate(null, `Recurse into the right half [${p + 1}, ${hi}] (the values above the pivot).`)
+      }
       qs(p + 1, hi)
     }
     qs(0, n - 1)
@@ -2407,12 +2713,15 @@
         root = child
       }
     }
+    ops.range(0, n - 1)
     for (let i = Math.floor(n / 2) - 1; i >= 0; i--) siftDown(i, n)
     for (let end = n - 1; end > 0; end--) {
       ops.swap(0, end, `Move the largest value (the root) to index ${end}.`)
       ops.markSorted([end], [end], `Index ${end} now holds its final value.`)
+      ops.range(0, end - 1)
       siftDown(0, end)
     }
+    ops.range(null)
     ops.lockAll([0])
     ops.markSorted([0], [0], `The remaining root is the smallest — done.`)
     ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} swaps.`)
@@ -2429,32 +2738,35 @@
         const mid = Math.min(lo + width, n)
         const hi = Math.min(lo + 2 * width, n)
         if (mid >= hi) continue
+        ops.range(lo, hi - 1)
         const left = ops.value.slice(lo, mid)
         const right = ops.value.slice(mid, hi)
+        ops.candidate(null, `Merge the left run [${lo}, ${mid - 1}] and the right run [${mid}, ${hi - 1}] into one sorted run [${lo}, ${hi - 1}].`)
         let i = 0
         let j = 0
         let k = lo
         while (i < left.length && j < right.length) {
           if (left[i] <= right[j]) {
-            ops.overwrite(k, left[i], `Merge: ${left[i]} ≤ ${right[j]} — write ${left[i]} to index ${k}.`)
+            ops.overwrite(k, left[i], `${left[i]} ≤ ${right[j]}: place ${left[i]} from the left half at index ${k}.`)
             i++
           } else {
-            ops.overwrite(k, right[j], `Merge: ${right[j]} < ${left[i]} — write ${right[j]} to index ${k}.`)
+            ops.overwrite(k, right[j], `${right[j]} < ${left[i]}: place ${right[j]} from the right half at index ${k}.`)
             j++
           }
           k++
         }
         while (i < left.length) {
-          ops.overwrite(k, left[i], `Merge: copy remaining ${left[i]} to index ${k}.`)
+          ops.overwrite(k, left[i], `Copy the remaining ${left[i]} from the left half at index ${k}.`)
           i++
           k++
         }
         while (j < right.length) {
-          ops.overwrite(k, right[j], `Merge: copy remaining ${right[j]} to index ${k}.`)
+          ops.overwrite(k, right[j], `Copy the remaining ${right[j]} from the right half at index ${k}.`)
           j++
           k++
         }
       }
+      ops.range(null)
     }
     ops.lockAll(Array.from({ length: n }, (_, k) => k))
     ops.done(`Sorted in ${ops.swaps} writes.`)
@@ -3021,32 +3333,24 @@
   // ───────────────────────── kernighan-popcount ──────────────────────────
   registerBits("kernighan-popcount", { label: "Kernighan population count" }, (input, ops) => {
     let x = (Number(input.value) >>> 0) & ops.mask
+    const total = ops.popcount(x)
     ops.init(
       x,
-      { a: "x", b: "x − 1", r: "x & (x−1)" },
-      `x = ${x} = 0b${ops.bin(x)}. Kernighan's trick clears the lowest set bit each pass, so the loop runs once per set bit — O(number of 1s), not O(width).`,
+      { a: "x", b: "− 1", r: "&" },
+      `x = ${x} has ${total} one${total === 1 ? "" : "s"}. Each pass, x & (x−1) deletes the lowest 1 — so the loop runs ${total} time${total === 1 ? "" : "s"}, once per set bit.`,
     )
     let pop = 0
     while (x !== 0) {
       const low = ops.lowestSetBit(x)
-      ops.locate(low, `Lowest set bit is at index ${low}; the bits below it are all zero.`)
       const sub = (x - 1) & ops.mask
-      ops.decrement(
-        sub,
-        low,
-        `x − 1 = ${sub}. The borrow ripples up through the low zeros: bit ${low} flips 1→0, and every zero below it flips 0→1.`,
-      )
+      ops.subtract(sub, low, `Lowest 1 is at bit ${low}. Subtracting 1 flips it to 0 and turns every zero below it into a 1.`)
       const res = x & sub
-      ops.and(
-        res,
-        low,
-        `x & (x−1) keeps every bit above index ${low} untouched and clears bit ${low} and everything beneath it — exactly one set bit removed in a single instruction.`,
-      )
+      ops.and(res, low, `AND the two: the survivors above stay, bit ${low} and everything under it are wiped — exactly one 1 gone.`)
       pop++
       x = res
-      ops.commit(`x ← ${x}. Set-bit count so far: ${pop}.`)
+      ops.commit(`x ← ${x}. ${pop} of ${total} ones cleared.`)
     }
-    ops.done(`x = 0 — no set bits remain. Population count = ${pop}.`)
+    ops.done(`x = 0 — every 1 is gone. It took ${total} pass${total === 1 ? "" : "es"}, so x had ${total} set bit${total === 1 ? "" : "s"}.`)
   })
 
   // ───────────────────────────── n-queens ─────────────────────────────
@@ -3247,6 +3551,9 @@
   function makeSortView(frames) {
     const maxVal = Math.max(...frames[0].array, 1)
     const n = frames[0].array.length
+    // A card either narrates a recursive range (quick/merge/heap) or it does not
+    // — decided once up front so the WATCH row count is constant per card.
+    const hasRange = frames.some((f) => f.range)
 
     const stage = el("div", "steptrace__stage steptrace__stage--pins")
     const bars = makeBars(stage, n)
@@ -3258,6 +3565,7 @@
     const tracker = createBarTracker(stage, bars, [pinI, pinJ])
 
     function paint(frame) {
+      const range = frame.range || null
       for (let k = 0; k < n; k++) {
         const b = bars[k]
         // data-driven geometry (value → height); colours come from data-state.
@@ -3266,8 +3574,17 @@
         let state = ""
         if (frame.sorted.includes(k)) state = "sorted"
         if (frame.candidate === k) state = "candidate"
-        if (frame.active.includes(k)) state = frame.type === "swap" ? "swap" : "compare"
+        // merge writeback (overwrite within a range) reuses the violet swap state;
+        // insertion shifts (overwrite, no range) stay blue as before.
+        if (frame.active.includes(k))
+          state = frame.type === "swap" || (frame.type === "overwrite" && range) ? "swap" : "compare"
         b.bar.dataset.state = state
+        // recursion overlays: dim bars outside the active range; mark the pivot.
+        // Attribute toggles only (no DOM add/remove) — footer stays jitter-free.
+        if (range && (k < range[0] || k > range[1])) b.bar.dataset.outside = "1"
+        else delete b.bar.dataset.outside
+        if (frame.pivot != null && frame.pivot === k) b.bar.dataset.pivot = "1"
+        else delete b.bar.dataset.pivot
       }
       // the active pair drives the i / j pins; fall back to the scan candidate.
       const act = frame.active || []
@@ -3276,11 +3593,14 @@
 
     function watch(frame) {
       const act = frame.active || []
-      return [
+      const rows = [
         { k: "i", v: act[0] != null ? act[0] : "—", sw: "var(--_blue)" },
         { k: "j", v: act[1] != null ? act[1] : "—", sw: "var(--_violet)" },
-        { k: "swaps", v: frame.swaps, sw: "var(--_amber)" },
       ]
+      if (hasRange)
+        rows.push({ k: "range", v: frame.range ? `[${frame.range[0]}, ${frame.range[1]}]` : "—", sw: "var(--_neutral)" })
+      rows.push({ k: "swaps", v: frame.swaps, sw: "var(--_amber)" })
+      return rows
     }
 
     return { nodes: [stage, status], paint, watch, destroy: tracker.destroy }
@@ -3723,34 +4043,61 @@
     return { nodes: [wrap, status], paint, watch }
   }
 
-  // ---- bits view: three aligned bit lanes + an index header ----
-  // Every strip is `flex:1 × width` inside an identical-width gutter, so the three
-  // lanes and the header line up for free — no measurement / ResizeObserver. Cells
-  // are built ONCE; paint() only rewrites textContent + data-bit/data-state, and
-  // lane rows keep a constant data-live flag (dimmed placeholders never vanish).
+  // ---- bits view: a tally of the original 1s + three lanes read as an equation ----
+  // The tally has one square per set bit of the ORIGINAL value (count known from
+  // frame 0 ⇒ fixed width, zero jitter); squares fill as bits clear. The three
+  // strips align for free (flex:1 × width in an identical gutter — no measurement).
+  // Everything is built ONCE; paint() only rewrites textContent + data-* and the
+  // constant data-live flag (dimmed placeholders never vanish).
   function makeBitsView(frames) {
     const width = frames[0].width
+    const total = frames[0].total
     const stage = el("div", "steptrace__bits")
 
-    // index header: column j (0=leftmost) shows bit index width-1-j (MSB-left);
-    // for wide words label only nibble boundaries so the header stays legible.
+    // tally: the whole story at a glance — "how many 1s are left to delete".
+    const tally = el("div", "steptrace__btally")
+    const tallyLead = el("div", "steptrace__btally-lead")
+    tallyLead.textContent = "1s cleared"
+    const tallyBoxes = el("div", "steptrace__btally-boxes")
+    const boxes = []
+    for (let k = 0; k < total; k++) {
+      const b = el("div", "steptrace__btally-box")
+      tallyBoxes.append(b)
+      boxes.push(b)
+    }
+    const tallyCount = el("div", "steptrace__btally-count")
+    tally.append(tallyLead, tallyBoxes, tallyCount)
+    stage.append(tally)
+
+    // index header: a light ruler — nibble boundaries only (bit 0, 4, 8 …).
     const idxRow = el("div", "steptrace__brow steptrace__brow--idx")
     const idxGutter = el("div", "steptrace__bgutter")
-    idxGutter.textContent = "idx"
+    idxGutter.textContent = "bit"
     const idxStrip = el("div", "steptrace__bcells steptrace__bcells--idx")
     for (let j = 0; j < width; j++) {
       const bi = width - 1 - j
       const c = el("div", "steptrace__bidx")
-      c.textContent = width <= 8 || bi % 4 === 0 ? String(bi) : ""
+      c.textContent = bi % 4 === 0 ? String(bi) : ""
       idxStrip.append(c)
     }
     idxRow.append(idxGutter, idxStrip)
     stage.append(idxRow)
 
+    // gutter operators (constant): x, then "− 1" and "&" so the stack reads as
+    // arithmetic top-to-bottom. Painted once — labels never change.
+    const OP = { a: false, b: true, r: true }
     const lanes = {}
     for (const key of ["a", "b", "r"]) {
       const row = el("div", "steptrace__brow")
       const gutter = el("div", "steptrace__bgutter")
+      const label = frames[0].labels[key]
+      if (OP[key]) {
+        const op = el("span", "steptrace__bop")
+        op.textContent = label
+        gutter.append(op)
+      } else {
+        gutter.textContent = label
+      }
       const strip = el("div", "steptrace__bcells")
       const cells = []
       for (let j = 0; j < width; j++) {
@@ -3760,15 +4107,19 @@
       }
       row.append(gutter, strip)
       stage.append(row)
-      lanes[key] = { row, gutter, cells }
+      lanes[key] = { row, cells }
     }
     const status = statusEl()
 
-    function paint(frame, i, total) {
+    function paint(frame, i, stepTotal) {
+      for (let k = 0; k < boxes.length; k++) {
+        boxes[k].dataset.filled = k < frame.pop ? "1" : "0"
+        boxes[k].dataset.just = k === frame.just ? "1" : "0"
+      }
+      tallyCount.textContent = `${frame.pop} / ${frame.total}`
       for (const key of ["a", "b", "r"]) {
         const lane = lanes[key]
         const data = frame[key]
-        lane.gutter.textContent = frame.labels[key]
         lane.row.dataset.live = data.live ? "1" : "0"
         for (let j = 0; j < width; j++) {
           const bi = width - 1 - j
@@ -3778,16 +4129,15 @@
           c.dataset.state = data.state[bi] || ""
         }
       }
-      status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`
+      status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${stepTotal}</span>`
     }
 
-    // exactly 4 rows every frame ⇒ constant footer height (no jitter)
+    // exactly 3 rows every frame ⇒ constant footer height (no jitter)
     function watch(frame) {
       return [
         { k: "x", v: `${frame.value} = 0b${frame.value.toString(2).padStart(frame.width, "0")}`, sw: "var(--_accent)" },
-        { k: "lowest 1", v: frame.low >= 0 ? `bit ${frame.low}` : "—", sw: "var(--_blue)" },
-        { k: "removed", v: frame.removed != null ? `2^${frame.removed}` : "—", sw: "var(--_amber)" },
-        { k: "set count", v: String(frame.pop), sw: "var(--_violet)" },
+        { k: "lowest 1", v: frame.low >= 0 ? `bit ${frame.low}` : "—", sw: "var(--_amber)" },
+        { k: "1s cleared", v: `${frame.pop} / ${frame.total}`, sw: "var(--_violet)" },
       ]
     }
 
@@ -4415,23 +4765,27 @@
     const menu = el("div", "steptrace__menu")
     const speedHead = el("div", "steptrace__menu-h")
     speedHead.textContent = "Speed"
-    menu.append(speedHead)
-    const speedItems = []
-    for (const s of [0.5, 1, 1.5, 2]) {
-      const item = el("button", "steptrace__menu-item")
-      item.type = "button"
-      item.setAttribute("role", "menuitemradio")
-      item.textContent = s + "×"
-      item.setAttribute("aria-checked", s === state.speed ? "true" : "false")
-      item.addEventListener("click", () => {
-        state.speed = s
-        if (player) player.setSpeed(s)
-        speedItems.forEach((it) => it.setAttribute("aria-checked", it === item ? "true" : "false"))
-        closeMenu()
-      })
-      menu.append(item)
-      speedItems.push(item)
-    }
+    const speedRow = el("div", "steptrace__speed-row")
+    const speedInput = el("input", "steptrace__range")
+    speedInput.type = "range"
+    speedInput.min = "0.5"
+    speedInput.max = "2"
+    speedInput.step = "0.25"
+    speedInput.value = String(state.speed)
+    speedInput.setAttribute("aria-label", "Playback speed")
+    const fmtSpeed = (v) => v + "×"
+    const speedVal = el("span", "steptrace__speed-val")
+    speedVal.textContent = fmtSpeed(state.speed)
+    speedInput.setAttribute("aria-valuetext", fmtSpeed(state.speed))
+    speedInput.addEventListener("input", () => {
+      const v = Number(speedInput.value)
+      state.speed = v
+      if (player) player.setSpeed(v)
+      speedVal.textContent = fmtSpeed(v)
+      speedInput.setAttribute("aria-valuetext", fmtSpeed(v))
+    })
+    speedRow.append(speedInput, speedVal)
+    menu.append(speedHead, speedRow)
     let startMenu = null
     if (kind === "sort") {
       const h = el("div", "steptrace__menu-h")
@@ -4448,8 +4802,36 @@
     } else if (kind === "graph") {
       const h = el("div", "steptrace__menu-h")
       h.textContent = "Start node"
-      startMenu = el("div")
+      startMenu = el("select", "steptrace__select")
+      startMenu.setAttribute("aria-label", "Start node")
+      startMenu.addEventListener("change", () => {
+        state.start = startMenu.value
+        closeMenu()
+        build()
+      })
       menu.append(h, startMenu)
+    } else if (kind === "search") {
+      const h = el("div", "steptrace__menu-h")
+      h.textContent = "Target"
+      const sel = el("select", "steptrace__select")
+      sel.setAttribute("aria-label", "Search target")
+      const seen = new Set()
+      for (const v of state.array) {
+        if (seen.has(v)) continue
+        seen.add(v)
+        const opt = el("option")
+        opt.value = String(v)
+        opt.textContent = String(v)
+        if (Number(v) === Number(state.config.target)) opt.selected = true
+        sel.append(opt)
+      }
+      sel.value = String(state.config.target)
+      sel.addEventListener("change", () => {
+        state.config.target = Number(sel.value)
+        closeMenu()
+        build()
+      })
+      menu.append(h, sel)
     }
     menuWrap.append(btnMenu, menu)
 
@@ -4475,6 +4857,32 @@
     menu.addEventListener("click", (e) => e.stopPropagation())
     const onDocClick = () => closeMenu()
     document.addEventListener("click", onDocClick)
+
+    // Pin the log block to the height of the TALLEST frame message so the
+    // unclamped current line can grow inside a fixed box (zero footer jitter).
+    // Measured with a hidden probe at the rail's live width; re-run on resize.
+    function sizeLog() {
+      if (!player) return
+      const probe = el("li", "steptrace__log-line steptrace__log-line--cur")
+      probe.style.cssText = "position:absolute;visibility:hidden;pointer-events:none;left:0;right:0;height:auto"
+      const pn = el("span", "steptrace__log-num")
+      pn.textContent = "00"
+      const pt = el("span", "steptrace__log-text")
+      probe.append(pn, pt)
+      log.append(probe)
+      let maxCur = 0
+      for (const f of player.frames) {
+        pt.textContent = stripTags(f.message)
+        if (probe.offsetHeight > maxCur) maxCur = probe.offsetHeight
+      }
+      probe.remove()
+      const gap = parseFloat(getComputedStyle(log).rowGap) || 0
+      const hist = logLines[0].line.offsetHeight // fixed 2.8em slots
+      const h = Math.ceil(hist * 2 + gap * 2 + maxCur) + "px"
+      if (log.style.height !== h) log.style.height = h
+    }
+    const logRO = typeof ResizeObserver !== "undefined" ? new ResizeObserver(() => sizeLog()) : null
+    if (logRO) logRO.observe(rail)
 
     // --- rail TRACE log + counter + scrubber, refreshed every render ---
     let lastRailI = null
@@ -4629,6 +5037,7 @@
       stageCol.replaceChildren(...nodes)
       player = new Player(built.frames, view.paint, state.speed)
       player.onState = onState
+      sizeLog()
       player.render()
       onState()
     }
@@ -4640,19 +5049,13 @@
       }
       startMenu.replaceChildren()
       for (const n of graph.nodes) {
-        const item = el("button", "steptrace__menu-item")
-        item.type = "button"
-        item.setAttribute("role", "menuitemradio")
-        item.textContent = n.id
-        item.setAttribute("aria-checked", n.id === graph.start ? "true" : "false")
-        item.addEventListener("click", () => {
-          state.start = n.id
-          for (const c of startMenu.children) c.setAttribute("aria-checked", c === item ? "true" : "false")
-          closeMenu()
-          build()
-        })
-        startMenu.append(item)
+        const opt = el("option")
+        opt.value = n.id
+        opt.textContent = n.id
+        if (n.id === graph.start) opt.selected = true
+        startMenu.append(opt)
       }
+      startMenu.value = graph.start
       startMenu.dataset.filled = "1"
       state.start = graph.start
     }
@@ -4685,6 +5088,7 @@
       destroy() {
         if (player) player.destroy()
         if (currentView && currentView.destroy) currentView.destroy()
+        if (logRO) logRO.disconnect()
         mq.removeEventListener("change", applyMotion)
         root.removeEventListener("keydown", onKey)
         document.removeEventListener("click", onDocClick)

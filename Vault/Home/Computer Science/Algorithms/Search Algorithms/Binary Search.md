@@ -23,6 +23,8 @@ Binary Search finds a target in a sorted array by repeatedly cutting the search 
 
 ## Visualization
 
+The card probes the sorted array for 83: blue marks the middle element being inspected, and the half that can no longer contain the target is greyed out after every comparison. Watch the live range halve each step — 4 probes here, versus the 15 [[Linear Search]] needs on the same array.
+
 ```steptrace
 {"algorithm":"binary-search","array":[4,9,13,18,22,27,31,38,45,52,58,64,70,77,83,91],"target":83}
 ```

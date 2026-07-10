@@ -35,6 +35,8 @@ graph TD
 
 ## Visualization
 
+The card animates the pass structure on a bar chart: blue highlights the adjacent pair being compared, violet flashes when they swap, and bars turn green with a white check as they lock into their final position. The i/j pins track the active indices, and WATCH shows i, j, and the running swap count — watch the largest remaining value bubble to the right end on every pass.
+
 ```steptrace
 {"algorithm":"bubble-sort","array":[8,3,5,1,9,2,7,4]}
 ```

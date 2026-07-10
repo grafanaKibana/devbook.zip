@@ -40,6 +40,8 @@ graph TD
   B3 -->|Yes| B8[Done]
 ```
 
+The card animates exactly this queue-driven traversal on the example graph: the node being dequeued is blue, visited nodes turn green, and WATCH shows the queue itself. Watch the visit order proceed layer by layer — A, then all of distance 1, then distance 2 — and compare it with the DFS card below on the identical graph.
+
 ```steptrace
 {"algorithm":"bfs","start":"A","nodes":[{"id":"A"},{"id":"B"},{"id":"C"},{"id":"D"},{"id":"E"},{"id":"F"},{"id":"G"}],"edges":[{"from":"A","to":"B"},{"from":"A","to":"C"},{"from":"B","to":"D"},{"from":"B","to":"E"},{"from":"C","to":"F"},{"from":"C","to":"G"},{"from":"E","to":"F"}]}
 ```
@@ -70,6 +72,8 @@ graph TD
   D6 --> D2
   D2 -->|Yes| D7[Done]
 ```
+
+Same graph, same start — but a stack (shown in WATCH) replaces the queue, so the card dives A → B → D deep before ever touching C. Compare the visit order with the BFS card above: identical graph and edges, different data structure, completely different order.
 
 ```steptrace
 {"algorithm":"dfs","start":"A","nodes":[{"id":"A"},{"id":"B"},{"id":"C"},{"id":"D"},{"id":"E"},{"id":"F"},{"id":"G"}],"edges":[{"from":"A","to":"B"},{"from":"A","to":"C"},{"from":"B","to":"D"},{"from":"B","to":"E"},{"from":"C","to":"F"},{"from":"C","to":"G"},{"from":"E","to":"F"}]}

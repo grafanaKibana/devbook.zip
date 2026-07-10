@@ -31,6 +31,8 @@ graph TD
 
 ## Visualization
 
+The card animates the partition loop: blue marks the element being compared against the pivot, violet flashes on a swap, and a bar turns green with a white check when a pivot lands in its final position. The i/j pins track the partition indices; WATCH shows i, j, and the swap count — watch each partition place exactly one pivot, then recurse into the two remaining sides.
+
 ```steptrace
 {"algorithm":"quick-sort","array":[8,3,5,1,9,2,7,4]}
 ```

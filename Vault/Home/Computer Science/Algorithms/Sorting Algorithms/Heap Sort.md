@@ -36,6 +36,8 @@ graph TD
 
 ## Visualization
 
+The card shows both phases on the bar chart: blue marks the parent/child pair being compared during a sift-down, violet flashes on a swap, and the green bars with a white check are the sorted suffix growing from the right. The i/j pins track the active indices; WATCH shows i, j, and the swap count — watch the O(n) heapify settle first, then the root repeatedly swap to the end of the shrinking heap.
+
 ```steptrace
 {"algorithm":"heap-sort","array":[8,3,5,1,9,2,7,4]}
 ```

@@ -32,6 +32,8 @@ graph TD
 
 ## Visualization
 
+The card animates each key being inserted into the growing sorted prefix: blue marks the comparison between the key and a prefix element, violet marks the swap that shifts an element right, and bars turn green with a white check once locked in sorted position. The i/j pins track the active indices; WATCH shows i, j, and the swap count — watch how far each key has to walk left before it fits.
+
 ```steptrace
 {"algorithm":"insertion-sort","array":[8,3,5,1,9,2,7,4]}
 ```
