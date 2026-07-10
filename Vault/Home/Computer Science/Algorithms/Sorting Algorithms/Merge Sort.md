@@ -11,123 +11,116 @@ publish: true
 ---
 # Intro
 
-Merge sort is a divide-and-conquer algorithm: split the array in half, recursively sort each half, then merge the two sorted halves into one. It guarantees O(n log n) time in all cases and is stable, at the cost of O(n) extra memory. It is the algorithm of choice when stability matters or when sorting linked lists and external data.
-## Mechanism
+A dataset too large to hold in memory, or a linked list with no random access, rules out the in-place array sorts that quick sort and heap sort rely on. What stays cheap is merging: combining two already-sorted sequences into one takes a single linear pass — compare the two front elements, emit the smaller, advance that side, and repeat. Merge sort turns all of sorting into that one operation. It splits the input by position until each piece holds one element — a run of length 1 is sorted by definition — then merges runs pairwise, doubling the sorted run length each pass: 1 into 2, 2 into 4, up to a single run of length n.
 
-Recursively split until each partition has size 1 (trivially sorted). Then merge pairs of sorted partitions by repeatedly taking the smaller front element from the two halves.
+The merge is the only place ordering happens, and it is valid because of one fact: when both runs are sorted, the smaller of their two front elements is the smallest element neither run has placed yet. A single left-to-right pass therefore merges two runs totalling m elements in `O(m)` time, comparing only their fronts and never looking back. Because the split is by position rather than by value, the recursion has the same shape — `⌈log₂ n⌉` levels of n elements — for sorted, reversed, or random input, which pins the total cost at `O(n log n)` in every case.
 
-```mermaid
-graph TD
-  A[mergeSort A from l to r] --> B{size at most 1}
-  B -->|Yes| R[return]
-  B -->|No| C[Compute mid]
-  C --> D[mergeSort A from l to mid]
-  C --> E[mergeSort A from mid plus 1 to r]
-  D --> F[merge two sorted halves]
-  E --> F
-  F --> R
-```
+**Core condition:** two sorted runs → one linear-time merge takes the smaller front element → `⌈log₂ n⌉` merge levels → `O(n log n)` time on every input, `O(n)` merge buffer for arrays.
 
-## Visualization
+## Splitting, then merging
 
-The card animates the split-then-merge: blue marks the pair being compared at the heads of the two halves, violet marks the element being moved into place, and bars turn green with a white check as a merged run locks into sorted order. The i/j pins track the two read heads; WATCH shows i, j, and the swap count — watch sorted runs double in width with each round of merging.
+The trace sorts the eight-element array `[8, 3, 5, 1, 9, 2, 7, 4]`.
 
 ```steptrace
 {"algorithm":"merge-sort","array":[8,3,5,1,9,2,7,4]}
 ```
 
+The decisive step is the final merge. By then the left half has become `[1, 3, 5, 8]` and the right half `[2, 4, 7, 9]`; one pass compares the two fronts, emits the smaller, and advances that read head, producing `[1, 2, 3, 4, 5, 7, 8, 9]` after at most seven comparisons for eight elements. That same merge runs at every level below it — length-1 runs merge into length-2, then length-4 — so the number of comparisons is bounded by the number of levels, `⌈log₂ 8⌉ = 3`, times the n elements each level touches. No comparison depends on how disordered the input was; it depends only on how the two current fronts relate.
+
+## Why the merge stays sorted
+
+A merge holds one invariant: the output already contains, in sorted order, the smallest elements drawn from the two runs so far, and each run's read head points at the smallest element that run has not yet contributed. Taking the smaller of the two heads appends the next-smallest element overall and advances one head, so both halves of the invariant survive. When one run empties, whatever remains in the other is already sorted and no smaller than anything placed, so it copies over directly.
+
+Nothing sorts on the way down. The split only partitions indices, and the leaves are single elements that are already sorted. Every comparison happens in the merges on the way up, which is why the algorithm's behaviour does not depend on the initial arrangement — there is no pivot to unbalance and no run to detect.
+
+Stability rides on one comparison. The left run holds the elements that appeared earlier in the original array, so on a tie the merge must emit the left element first to keep equal keys in their original order. The implementation does this with `a[i] <= a[j]`: equal keys take the left branch. Switching to `a[i] < a[j]` pulls the right element ahead on ties and quietly makes the sort unstable — the whole distinction between a stable and an unstable merge is that one operator.
+
 ## Complexity
 
-| Case | Time | Space |
-|------|------|-------|
-| Best | O(n log n) | O(n) |
-| Average | O(n log n) | O(n) |
-| Worst | O(n log n) | O(n) |
+| Case | Time | Auxiliary space | Cause |
+| --- | --- | --- | --- |
+| Best | `O(n log n)` | `O(n)` | Positional split gives `⌈log₂ n⌉` levels regardless of order; no early exit shortcuts a sorted input. |
+| Average | `O(n log n)` | `O(n)` | Same recursion tree; element values decide which head is taken, not how many merges run. |
+| Worst | `O(n log n)` | `O(n)` | No partition to skew and no termination test, so the bound is a ceiling rather than an expectation. |
 
-**Properties:** stable, not in-place (requires O(n) merge buffer for arrays), O(1) extra space for linked lists.
+The auxiliary figure is the merge buffer. A top-down array merge sort copies each merge's output into an `O(n)` scratch array and adds `O(log n)` call-stack space for the recursion; a bottom-up variant merges adjacent runs of width 1, 2, 4… in loops and keeps the `O(n)` buffer while dropping the stack entirely. A linked-list merge sort is the outlier: it splices existing nodes by pointer instead of copying, so it needs only `O(1)` extra cells beyond the `O(log n)` stack, and it never asks for `a[mid]` by index.
 
-## C# Implementation
+## Where the memory goes
 
-```csharp
-public static void MergeSort(int[] a, int left, int right)
-{
-    if (left >= right) return;
+The `O(n)` buffer is not incidental. A comparison-only merge of two sorted array segments cannot be done in place without extra work, because writing the next output element would overwrite an input element that has not been read yet. In-place merge variants exist — block merge and related "in-place merge sort" schemes — that keep the `O(n log n)` time bound while pushing auxiliary space toward `O(1)`, but they replace the single linear copy with rotations and block swaps, run several times slower in practice, and are harder to keep stable. The standard tradeoff is therefore explicit: pay `O(n)` memory for a simple, fast, stable merge, or pay a constant-factor slowdown for `O(1)` space.
 
-    int mid = left + (right - left) / 2;
-    MergeSort(a, left, mid);
-    MergeSort(a, mid + 1, right);
-    Merge(a, left, mid, right);
-}
+Where the input is sequential rather than indexed, the buffer stops mattering for a different reason. External merge sort streams sorted runs off disk, merges them with the same take-the-smaller-front rule, and streams the result back, so a dataset larger than RAM is sorted with predictable sequential I/O rather than random seeks. Timsort ([[Tim Sort]]) generalizes the same core: it scans the input for runs that are already ascending or descending and merges them with the identical front-comparison rule, layering galloping and a minimum run length on top. Merge sort's merge step is the primitive both of those build on.
 
-private static void Merge(int[] a, int left, int mid, int right)
-{
-    int[] temp = new int[right - left + 1];
-    int i = left, j = mid + 1, k = 0;
+## Reference drawer
 
-    while (i <= mid && j <= right)
-        temp[k++] = a[i] <= a[j] ? a[i++] : a[j++];
+> [!ABSTRACT]- Divide-and-merge structure
+> ```mermaid
+> graph TD
+>   A[mergeSort A from l to r] --> B{size at most 1}
+>   B -->|Yes| R[return]
+>   B -->|No| C[Compute mid]
+>   C --> D[mergeSort A from l to mid]
+>   C --> E[mergeSort A from mid plus 1 to r]
+>   D --> F[merge two sorted halves]
+>   E --> F
+>   F --> R
+> ```
 
-    while (i <= mid)  temp[k++] = a[i++];
-    while (j <= right) temp[k++] = a[j++];
+> [!EXAMPLE]- C# implementation
+> ```csharp
+> public static void MergeSort(int[] a, int left, int right)
+> {
+>     if (left >= right) return;
+>
+>     int mid = left + (right - left) / 2;
+>     MergeSort(a, left, mid);
+>     MergeSort(a, mid + 1, right);
+>     Merge(a, left, mid, right);
+> }
+>
+> private static void Merge(int[] a, int left, int mid, int right)
+> {
+>     int[] temp = new int[right - left + 1];
+>     int i = left, j = mid + 1, k = 0;
+>
+>     while (i <= mid && j <= right)
+>         temp[k++] = a[i] <= a[j] ? a[i++] : a[j++];
+>
+>     while (i <= mid)  temp[k++] = a[i++];
+>     while (j <= right) temp[k++] = a[j++];
+>
+>     Array.Copy(temp, 0, a, left, temp.Length);
+> }
+> ```
+> The `a[i] <= a[j]` comparison is what keeps the merge stable. This version allocates a buffer inside every `Merge` call; a production implementation hoists one shared `n`-element buffer instead, cutting allocations from `O(n log n)` to `O(1)`.
 
-    Array.Copy(temp, 0, a, left, temp.Length);
-}
-```
+## Comparison
 
-## When to Use
+| Algorithm | Time (worst) | Auxiliary space | Stable | Stronger case | Weaker case |
+| --- | --- | --- | --- | --- | --- |
+| Merge sort | `O(n log n)` | `O(n)` array, `O(1)` list | Yes | Guaranteed bound, linked lists, and external sorting | In-memory arrays, where the buffer and cache misses cost |
+| [[Quick Sort]] | `O(n²)` worst, `O(n log n)` average | `O(log n)` stack | No | In-place, cache-friendly in-memory sorting | Adversarial pivots and any need for stability |
+| [[Heap Sort]] | `O(n log n)` | `O(1)` | No | A hard worst-case bound with no extra buffer | Cache-hostile access pattern; not stable |
+| [[Tim Sort]] | `O(n log n)` | `O(n)` | Yes | Real-world data with existing runs or near-sorted order | Uniformly random data, where run detection earns little |
 
-- **Stability required:** merge sort preserves the relative order of equal elements. Use when sorting objects by a secondary key after a primary sort.
-- **Linked lists:** merge sort is O(1) extra space on linked lists (no random access needed for merging).
-- **External sorting:** sorting data that does not fit in memory — merge sort's sequential access pattern maps well to disk I/O.
-- **Predictable worst case:** unlike quick sort, merge sort never degrades to O(n²).
-
-For in-memory array sorting where stability is not required, `Array.Sort` (introsort) is typically faster due to better cache behavior.
-
-### Bottom-up variant and counting inversions
-
-The recursive version above is **top-down**. A **bottom-up** merge sort skips recursion entirely: merge adjacent runs of width 1, then 2, then 4… doubling each pass. Same O(n log n), but no recursion stack — handy for very large arrays or stack-constrained environments.
-
-Merge sort's merge step also solves a classic problem for free: **counting inversions** (pairs out of order, a measure of "how unsorted" data is). When the right half's front element is taken before the left half is exhausted, every remaining left element forms an inversion — so you can count all inversions in O(n log n) instead of the brute-force O(n²).
-
-## Pitfalls
-
-### Allocating a New Buffer on Every Merge Call
-
-**What goes wrong**: a naive implementation allocates a new `int[]` temp buffer inside every `Merge` call. For n=1,000,000, this creates ~2,000,000 small allocations, causing significant GC pressure and slowing the sort by 2–5×.
-
-**Mitigation**: allocate a single temp buffer of size n once before the sort begins and pass it through all recursive calls. This reduces allocations from O(n log n) to O(1).
-
-### Using Merge Sort When Stability Is Not Required
-
-**What goes wrong**: merge sort is used for general-purpose sorting where stability is not needed. It is 20–40% slower than quick sort (introsort) in practice due to the O(n) auxiliary array and cache-unfriendly merge step.
-
-**Mitigation**: use `Array.Sort` (introsort) for general-purpose in-memory sorting. Use merge sort (or `Array.Sort` with a stable comparer, or LINQ `OrderBy`) only when stability is required.
-
-## Tradeoffs
-
-| Algorithm | Time | Space | Stable | Cache | Use when |
-|-----------|------|-------|--------|-------|----------|
-| Merge sort | O(n log n) all cases | O(n) | Yes | Good | Stability required; linked lists; external sort |
-| Quick sort (introsort) | O(n log n) avg | O(log n) | No | Excellent | General in-memory; fastest in practice |
-| Timsort | O(n log n) worst, O(n) best | O(n) | Yes | Excellent | Nearly-sorted data; Python/Java default |
-| Heap sort | O(n log n) all cases | O(1) | No | Poor | O(1) space + O(n log n) worst case both required |
-
-**Decision rule**: use merge sort when stability is required or when sorting linked lists (O(1) extra space on linked lists). For in-memory array sorting without stability requirements, use `Array.Sort` (introsort). For nearly-sorted data, Timsort (Python/Java default) is optimal.
-
+Merge sort is the stable `O(n log n)` guarantee and the natural fit for linked lists and external sorting; the price is `O(n)` auxiliary memory that in-place quick sort and heap sort avoid. Quick sort is usually faster on in-memory arrays but trades away both the worst-case bound and stability. Heap sort keeps the `O(n log n)` ceiling in `O(1)` space but is unstable and cache-hostile. Timsort keeps merge sort's stability and merge core, adding run detection that pays off precisely when the input is already partly ordered.
 
 ## Questions
 
-> [!QUESTION]- Why is merge sort preferred over quick sort for linked lists?
-> Merge sort requires no random access — it only needs to traverse lists sequentially and re-link nodes. The merge step is O(1) extra space on linked lists (just pointer manipulation, no copy buffer). Quick sort's partitioning requires random access to swap elements by index, which is O(n) on a linked list. For linked list sorting, merge sort is O(n log n) time and O(1) extra space; quick sort degrades to O(n²) or requires O(n) extra space.
+> [!QUESTION]- Why is merge sort `O(n log n)` on every input, with no faster best case?
+> The split is by position, not by value, so the recursion tree has the same `⌈log₂ n⌉` levels for sorted, reversed, or random input, and every level merges all n elements. Element values only decide which read head is taken at each step, not how many merges run, and there is no early-exit test on an already-sorted input.
 
-> [!QUESTION]- When does merge sort's O(n) space cost become a real problem?
-> When sorting large datasets in memory-constrained environments: sorting 1 GB of data requires another 1 GB merge buffer. For external sorting (data larger than RAM), merge sort's sequential access pattern is actually an advantage — it maps well to disk I/O. For in-memory sorting where stability is not required and memory is constrained, quick sort (in-place, O(log n) stack) is the better choice.
+> [!QUESTION]- What single line makes the array merge stable, and why?
+> The comparison `a[i] <= a[j]`, which emits the left run's element on a tie. The left run holds elements that appeared earlier in the original array, so taking it first preserves the original order of equal keys. Using `a[i] < a[j]` instead emits the right element on ties and makes the sort unstable.
 
+> [!QUESTION]- Why does a linked-list merge sort need only `O(1)` extra space while the array version needs `O(n)`?
+> A linked-list merge re-links existing nodes by pointer, so it never copies elements into a scratch array and never needs index access to `a[mid]`. The array merge must write its output somewhere while both inputs are still being read, which forces an `O(n)` buffer. Both still carry `O(log n)` recursion-stack space.
+
+> [!QUESTION]- What does an in-place block merge trade to remove the `O(n)` buffer?
+> It keeps the `O(n log n)` time bound but replaces the single linear copy with rotations and block swaps, adding a constant-factor slowdown and making stability harder to preserve. The buffer exists to avoid overwriting unread input; removing it means doing that bookkeeping with in-place moves instead.
 
 ## References
 
-- [Merge sort (Wikipedia)](https://en.wikipedia.org/wiki/Merge_sort) — algorithm description, stability proof, and external sort variant.
-- [Merge sort (cp-algorithms)](https://cp-algorithms.com/sorting/merge_sort.html) — implementation details and inversion count application.
-
-- [Timsort (Wikipedia)](https://en.wikipedia.org/wiki/Timsort) — the hybrid sort used by Python and Java; built on merge sort's merge step with insertion sort for small runs; the production evolution of merge sort.
-- [Sorting algorithms comparison (Big-O Cheat Sheet)](https://www.bigocheatsheet.com/) — quick reference for time and space complexity of all common sorting algorithms.
+- [Mergesort](https://algs4.cs.princeton.edu/22mergesort/) — Princeton Algorithms: top-down and bottom-up merge, the stability argument, and the doubling of run lengths.
+- [Merge sort](https://en.wikipedia.org/wiki/Merge_sort) — stability proof, bottom-up variant, and the external / multiway merge used for out-of-core data.
+- [listsort.txt](https://github.com/python/cpython/blob/main/Objects/listsort.txt) — CPython's description of Timsort: run detection and galloping merge built on the same take-the-smaller-front rule.
