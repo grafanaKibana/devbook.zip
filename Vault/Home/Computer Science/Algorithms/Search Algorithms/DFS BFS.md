@@ -24,7 +24,7 @@ BFS explores nodes layer by layer using a **queue** — every node at distance `
 2. Dequeue the front node `v`; for each unvisited neighbour `u`, mark `u` visited and enqueue it.
 3. Repeat until the queue is empty. The first visit to any node is along a shortest path by hop count.
 
-On the edges `A-B, A-C, B-D, B-E, C-F, C-G, E-F` from `A`, BFS visits **A → B → C → D → E → F → G** (layer by layer).
+On the edges `A-B, A-C, A-D, B-E, C-F, C-G, D-I, E-H, H-J, I-J`, searching for `J` from `A`, BFS dequeues **A → B → C → D → E → F → G → I → H → J** — layer by layer, reaching `J` at distance 3 (the shortest route, via `D → I`).
 
 ```mermaid
 graph TD
@@ -40,10 +40,10 @@ graph TD
   B3 -->|Yes| B8[Done]
 ```
 
-The card animates exactly this queue-driven traversal on the example graph: the node being dequeued is blue, visited nodes turn green, and WATCH shows the queue itself. Watch the visit order proceed layer by layer — A, then all of distance 1, then distance 2 — and compare it with the DFS card below on the identical graph.
+The card searches for `J` (the node with the dashed ring): the node being dequeued is blue, visited nodes turn green, and WATCH shows the queue itself. BFS sweeps level by level — A, then all of distance 1, then distance 2 — so it visits ten nodes before dequeuing `J`, but the route it finds is guaranteed shortest (distance 3). Compare with the DFS card below on the identical graph and target.
 
 ```steptrace
-{"algorithm":"bfs","start":"A","nodes":[{"id":"A"},{"id":"B"},{"id":"C"},{"id":"D"},{"id":"E"},{"id":"F"},{"id":"G"}],"edges":[{"from":"A","to":"B"},{"from":"A","to":"C"},{"from":"B","to":"D"},{"from":"B","to":"E"},{"from":"C","to":"F"},{"from":"C","to":"G"},{"from":"E","to":"F"}]}
+{"algorithm":"bfs","start":"A","target":"J","nodes":[{"id":"A"},{"id":"B"},{"id":"C"},{"id":"D"},{"id":"E"},{"id":"F"},{"id":"G"},{"id":"H"},{"id":"I"},{"id":"J"}],"edges":[{"from":"A","to":"B"},{"from":"A","to":"C"},{"from":"A","to":"D"},{"from":"B","to":"E"},{"from":"C","to":"F"},{"from":"C","to":"G"},{"from":"D","to":"I"},{"from":"E","to":"H"},{"from":"H","to":"J"},{"from":"I","to":"J"}]}
 ```
 
 **Watch its memory.** The BFS frontier holds every node at the current distance level, so on very wide graphs (millions of nodes per level) the queue can approach `O(V)` and exhaust memory. Mitigate with bidirectional BFS (search from both ends, meet in the middle) or a depth limit.
@@ -58,7 +58,7 @@ DFS explores one branch as deep as possible before backtracking, using a **stack
 2. Move to an unvisited neighbour `u` and mark it visited.
 3. When a node has no unvisited neighbours, backtrack. A node gets its finish time when backtracking completes.
 
-On the same edges from `A`, DFS visits **A → B → D → E → F → C → G** (depth first).
+On the same graph, DFS pops **A → B → E → H → J** — it dives straight down the first branch and reaches `J` after only five visits, but along a depth-4 path.
 
 ```mermaid
 graph TD
@@ -73,10 +73,10 @@ graph TD
   D2 -->|Yes| D7[Done]
 ```
 
-Same graph, same start — but a stack (shown in WATCH) replaces the queue, so the card dives A → B → D deep before ever touching C. Compare the visit order with the BFS card above: identical graph and edges, different data structure, completely different order.
+Same graph, same start, same target — but a stack (shown in WATCH) replaces the queue, so the card dives A → B → E → H straight down and pops `J` after only five visits, half of what BFS needed. The catch: it arrived by a depth-4 path, not the distance-3 shortest one. DFS finds *a* path fast; BFS finds the *shortest* path.
 
 ```steptrace
-{"algorithm":"dfs","start":"A","nodes":[{"id":"A"},{"id":"B"},{"id":"C"},{"id":"D"},{"id":"E"},{"id":"F"},{"id":"G"}],"edges":[{"from":"A","to":"B"},{"from":"A","to":"C"},{"from":"B","to":"D"},{"from":"B","to":"E"},{"from":"C","to":"F"},{"from":"C","to":"G"},{"from":"E","to":"F"}]}
+{"algorithm":"dfs","start":"A","target":"J","nodes":[{"id":"A"},{"id":"B"},{"id":"C"},{"id":"D"},{"id":"E"},{"id":"F"},{"id":"G"},{"id":"H"},{"id":"I"},{"id":"J"}],"edges":[{"from":"A","to":"B"},{"from":"A","to":"C"},{"from":"A","to":"D"},{"from":"B","to":"E"},{"from":"C","to":"F"},{"from":"C","to":"G"},{"from":"D","to":"I"},{"from":"E","to":"H"},{"from":"H","to":"J"},{"from":"I","to":"J"}]}
 ```
 
 **Two DFS traps.** Recursive DFS uses call-stack space proportional to depth — on chain-shaped graphs 10k+ deep it overflows; switch to an **explicit-stack iterative DFS** (identical logic, heap memory). For **directed cycle detection**, track three states — unvisited / in-progress / completed — and report a cycle when DFS reaches an in-progress node (a back edge); "visited" alone can't tell a back edge from a harmless cross edge.

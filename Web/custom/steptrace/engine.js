@@ -191,6 +191,8 @@
 .steptrace__log-line {
   display: flex;
   gap: 0.5rem;
+  margin: 0; /* hosts style bare li (Quartz adds vertical margins) — pin it */
+  padding: 0;
   height: 2.8em; /* history: two clamped lines */
   overflow: hidden;
   transition: opacity 0.3s ease;
@@ -440,48 +442,58 @@
   gap: 0.55rem;
   padding: 4px 8px 6px;
 }
-.steptrace__range {
+/* .steptrace prefix everywhere: hosts (Obsidian) style input[type=range] at
+   (0,1,1) specificity, which beats a lone class — (0,2,0) wins it back. */
+.steptrace .steptrace__range {
   -webkit-appearance: none;
   appearance: none;
   flex: 1 1 auto;
   height: 14px;
   margin: 0;
+  padding: 0;
+  border: 0;
+  box-shadow: none;
   background: transparent;
   cursor: pointer;
 }
-.steptrace__range::-webkit-slider-runnable-track {
+.steptrace .steptrace__range::-webkit-slider-runnable-track {
+  -webkit-appearance: none;
   height: 2px;
+  border: 0;
   border-radius: 2px;
   background: var(--_hair);
 }
-.steptrace__range::-moz-range-track {
+.steptrace .steptrace__range::-moz-range-track {
   height: 2px;
+  border: 0;
   border-radius: 2px;
   background: var(--_hair);
 }
-.steptrace__range::-webkit-slider-thumb {
+.steptrace .steptrace__range::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 12px;
   height: 12px;
   margin-top: -5px;
   border: 0;
+  box-shadow: none;
   border-radius: 50%;
   background: var(--_accent);
 }
-.steptrace__range::-moz-range-thumb {
+.steptrace .steptrace__range::-moz-range-thumb {
   width: 12px;
   height: 12px;
   border: 0;
+  box-shadow: none;
   border-radius: 50%;
   background: var(--_accent);
 }
-.steptrace__range:focus-visible {
+.steptrace .steptrace__range:focus-visible {
   outline: 2px solid var(--_blue);
   outline-offset: 3px;
 }
 .steptrace__speed-val {
-  min-width: 3ch;
+  min-width: 5ch; /* fits "1.25×" — the label can never resize the menu */
   text-align: right;
   font: 600 0.78rem var(--_font-body);
   color: var(--_text);
@@ -582,17 +594,26 @@
   width: 100%;
   height: 100%;
 }
-/* quick-sort pivot: amber fill that persists across the partition. The compare/
-   swap rules below override the fill (a compared pivot reads blue), but the ring
-   keeps the pivot locatable even while its fill is taken over. */
+/* quick-sort pivot: an amber outline on the bar itself (not a frame around the
+   whole column). Compare/swap fills still show through — the ring alone marks
+   the pivot, and it persists across the partition. */
 .steptrace__bar[data-pivot="1"] .steptrace__fill {
-  background: var(--_amber);
+  box-shadow: inset 0 0 0 2px var(--_amber);
   opacity: 1;
 }
-.steptrace__bar[data-pivot="1"] {
-  outline: 2px solid var(--_amber);
-  outline-offset: 2px;
-  border-radius: 2px;
+/* FLIP swap: the two swapped bars slide into each other's slots. While flying,
+   the fill's height transition is dropped so each bar ARRIVES at its new height
+   (a literal swap, not a morph). Transform-only — zero layout impact. */
+.steptrace__bar--fly {
+  transition: transform 0.32s var(--_spring);
+}
+.steptrace__bar--fly .steptrace__fill {
+  transition:
+    background var(--_tween) ease,
+    opacity var(--_tween) ease;
+}
+.steptrace--reduced .steptrace__bar--fly {
+  transition: none;
 }
 /* sort states */
 .steptrace__bar[data-state="compare"] .steptrace__fill {
@@ -1326,6 +1347,13 @@
   fill: var(--_text);
   font: 600 13px var(--_font-head);
 }
+/* search goal (bfs/dfs target): a static dashed halo around the node */
+.steptrace__ntarget {
+  fill: none;
+  stroke: var(--_violet);
+  stroke-width: 1.4;
+  stroke-dasharray: 3 3;
+}
 .steptrace__node .steptrace__d {
   fill: var(--_muted);
   font: 600 10px var(--_font-mono);
@@ -1748,6 +1776,12 @@
       this._dist = {}
       this._current = null
       this._selected = [] // edges in the built tree (MST) — stay highlighted
+      this._target = null // search goal (bfs/dfs) — constant across frames
+    }
+
+    /** Declare the node this traversal is searching for (call before init). */
+    target(id) {
+      this._target = id == null ? null : String(id)
     }
 
     get visitedCount() {
@@ -1767,6 +1801,7 @@
           edge: edge ? { from: edge.from, to: edge.to } : null,
           dist: { ...this._dist },
           selected: this._selected.map((s) => s.slice()),
+          target: this._target,
           message,
         }),
       )
@@ -2775,13 +2810,25 @@
   registerGraph("bfs", { label: "Breadth-first search" }, (input, ops, graph) => {
     const adj = adjacency(graph)
     const start = input.start
-    ops.init(`Breadth-first search from ${start} — explore the graph level by level using a first-in, first-out queue.`)
+    const target = input.target != null && input.target !== start ? String(input.target) : null
+    if (target) ops.target(target)
+    ops.init(
+      target
+        ? `Breadth-first search for ${target}, starting at ${start} — explore level by level with a first-in, first-out queue until the target is dequeued.`
+        : `Breadth-first search from ${start} — explore the graph level by level using a first-in, first-out queue.`,
+    )
     const queue = [start]
     const seen = new Set([start])
     ops.enqueue(start, 0, `Enqueue the start node ${start} at distance 0.`)
     while (queue.length) {
       const u = queue.shift()
       ops.visit(u, `Dequeue ${u} (distance ${ops.dist(u)}) and mark it visited.`)
+      if (u === target) {
+        ops.done(
+          `Found ${target} at distance ${ops.dist(u)} after visiting ${ops.visitedCount} nodes — BFS reaches it by a shortest path.`,
+        )
+        return
+      }
       for (const v of adj[u]) {
         if (seen.has(v)) continue
         ops.edge(u, v, `Explore edge ${u} → ${v}.`)
@@ -2790,20 +2837,36 @@
         ops.enqueue(v, ops.dist(u) + 1, `Discover ${v} — enqueue it at distance ${ops.dist(u) + 1}.`)
       }
     }
-    ops.done(`Breadth-first search complete — visited ${ops.visitedCount} node${ops.visitedCount === 1 ? "" : "s"}.`)
+    ops.done(
+      target
+        ? `${target} is not reachable from ${start} — the queue emptied after ${ops.visitedCount} nodes.`
+        : `Breadth-first search complete — visited ${ops.visitedCount} node${ops.visitedCount === 1 ? "" : "s"}.`,
+    )
   })
 
   // ───────────────────────────────── dfs ─────────────────────────────────
   registerGraph("dfs", { label: "Depth-first search", frontierLabel: "Stack (bottom → top)" }, (input, ops, graph) => {
     const adj = adjacency(graph)
     const start = input.start
-    ops.init(`Depth-first search from ${start} — dive as deep as possible using a stack, backtracking when a node has no unvisited neighbours.`)
+    const target = input.target != null && input.target !== start ? String(input.target) : null
+    if (target) ops.target(target)
+    ops.init(
+      target
+        ? `Depth-first search for ${target}, starting at ${start} — dive as deep as possible with a stack, backtracking at dead ends, until the target is popped.`
+        : `Depth-first search from ${start} — dive as deep as possible using a stack, backtracking when a node has no unvisited neighbours.`,
+    )
     const stack = [start]
     const seen = new Set([start])
     ops.enqueue(start, 0, `Push the start node ${start} onto the stack.`)
     while (stack.length) {
       const u = stack.pop()
       ops.visit(u, `Pop ${u} off the stack and mark it visited.`)
+      if (u === target) {
+        ops.done(
+          `Found ${target} after visiting only ${ops.visitedCount} nodes — but along a depth-${ops.dist(u)} path, with no shortest-path guarantee.`,
+        )
+        return
+      }
       // Push unvisited neighbours in reverse so the lowest id is explored first.
       const neighbours = adj[u].slice().reverse()
       for (const v of neighbours) {
@@ -2814,7 +2877,11 @@
         ops.enqueue(v, ops.dist(u) + 1, `Push ${v} onto the stack (depth ${ops.dist(u) + 1}).`)
       }
     }
-    ops.done(`Depth-first search complete — visited ${ops.visitedCount} node${ops.visitedCount === 1 ? "" : "s"}.`)
+    ops.done(
+      target
+        ? `${target} is not reachable from ${start} — the stack emptied after ${ops.visitedCount} nodes.`
+        : `Depth-first search complete — visited ${ops.visitedCount} node${ops.visitedCount === 1 ? "" : "s"}.`,
+    )
   })
 
   // ─────────────────────────────── dijkstra ──────────────────────────────
@@ -3553,6 +3620,7 @@
     // A card either narrates a recursive range (quick/merge/heap) or it does not
     // — decided once up front so the WATCH row count is constant per card.
     const hasRange = frames.some((f) => f.range)
+    const hasPivot = frames.some((f) => f.pivot != null)
 
     const stage = el("div", "steptrace__stage steptrace__stage--pins")
     const bars = makeBars(stage, n)
@@ -3584,6 +3652,27 @@
         else delete b.bar.dataset.outside
         if (frame.pivot != null && frame.pivot === k) b.bar.dataset.pivot = "1"
         else delete b.bar.dataset.pivot
+        // clear any in-flight swap animation before (possibly) starting a new one
+        b.bar.classList.remove("steptrace__bar--fly")
+        b.bar.style.transform = ""
+      }
+      // FLIP: on a swap frame each bar starts in its OLD slot (inverted
+      // transform, no transition), then springs home — a literal swap.
+      if (frame.type === "swap" && frame.active && frame.active.length === 2) {
+        const bi = bars[frame.active[0]] && bars[frame.active[0]].bar
+        const bj = bars[frame.active[1]] && bars[frame.active[1]].bar
+        if (bi && bj && bi.isConnected) {
+          const dx = bj.getBoundingClientRect().left - bi.getBoundingClientRect().left
+          if (dx) {
+            bi.style.transform = `translateX(${dx}px)`
+            bj.style.transform = `translateX(${-dx}px)`
+            void bi.offsetWidth // commit the inverted start position
+            bi.classList.add("steptrace__bar--fly")
+            bj.classList.add("steptrace__bar--fly")
+            bi.style.transform = ""
+            bj.style.transform = ""
+          }
+        }
       }
       // the active pair drives the i / j pins; fall back to the scan candidate.
       const act = frame.active || []
@@ -3596,6 +3685,8 @@
         { k: "i", v: act[0] != null ? act[0] : "—", sw: "var(--_blue)" },
         { k: "j", v: act[1] != null ? act[1] : "—", sw: "var(--_violet)" },
       ]
+      if (hasPivot)
+        rows.push({ k: "pivot", v: frame.pivot != null ? `[${frame.pivot}] = ${frame.array[frame.pivot]}` : "—", sw: "var(--_amber)" })
       if (hasRange)
         rows.push({ k: "range", v: frame.range ? `[${frame.range[0]}, ${frame.range[1]}]` : "—", sw: "var(--_neutral)" })
       rows.push({ k: "swaps", v: frame.swaps, sw: "var(--_amber)" })
@@ -4443,6 +4534,15 @@
       circle.setAttribute("cx", p.x)
       circle.setAttribute("cy", p.y)
       circle.setAttribute("r", R)
+      // search goal marker: a static dashed halo, present from frame 0
+      if (frames[0] && frames[0].target === n.id) {
+        const halo = document.createElementNS(SVGNS, "circle")
+        halo.setAttribute("class", "steptrace__ntarget")
+        halo.setAttribute("cx", p.x)
+        halo.setAttribute("cy", p.y)
+        halo.setAttribute("r", R + 4.5)
+        g.append(halo)
+      }
       const id = document.createElementNS(SVGNS, "text")
       id.setAttribute("class", "steptrace__id")
       id.setAttribute("x", p.x)
@@ -4772,7 +4872,7 @@
     speedInput.step = "0.25"
     speedInput.value = String(state.speed)
     speedInput.setAttribute("aria-label", "Playback speed")
-    const fmtSpeed = (v) => v + "×"
+    const fmtSpeed = (v) => Number(v).toFixed(2) + "×" // fixed width: "1.50×", never resizes the menu
     const speedVal = el("span", "steptrace__speed-val")
     speedVal.textContent = fmtSpeed(state.speed)
     speedInput.setAttribute("aria-valuetext", fmtSpeed(state.speed))
@@ -4794,8 +4894,7 @@
       item.textContent = "Shuffle"
       item.addEventListener("click", () => {
         state.array = randomArray()
-        closeMenu()
-        build()
+        build() // menu stays open so the reader can reshuffle repeatedly
       })
       menu.append(h, item)
     } else if (kind === "graph") {
