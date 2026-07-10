@@ -31,8 +31,9 @@ tag_pattern = "v[0-9]+\\.[0-9]+\\.[0-9]+"
 commit_parsers = [
   { message = "^vault backup", skip = true },
   { message = "^Merge ", skip = true },
-  { message = "^notes", group = "Notes" },
-  { message = "^feat", group = "Platform — Features" },
-  { message = "^fix", group = "Platform — Fixes" },
-  { message = "^bump", group = "Dependencies" },
+  { message = "^feature!?:", group = "Platform — Features" },
+  { message = "^(bug|fix)!?:", group = "Platform — Fixes" },
+  { message = "^notes!?:", group = "Notes" },
+  { message = "^docs!?:", group = "Documentation" },
+  { message = "^maintenance!?:", group = "Maintenance" },
 ]

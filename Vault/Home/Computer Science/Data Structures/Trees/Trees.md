@@ -3,11 +3,13 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+tags:
+  - FolderNote
 level:
   - "4"
 priority: Medium
-status: Ready to Repeat
 publish: true
+status: Not-Started
 ---
 
 # Intro
@@ -35,12 +37,12 @@ A tree organizes nodes so each node has at most one parent (except the root) and
 
 | Type | What it adds | Used for |
 |---|---|---|
-| **BST** | Ordered left < node < right | Baseline ordered lookup — but degrades to O(n) if unbalanced |
-| **AVL / Red-Black** | Self-balancing rotations → guaranteed O(log n) | `SortedSet`/`SortedDictionary` (red-black); AVL is more rigidly balanced (faster reads, more rotations) |
-| **B-tree / B+-tree** | High fan-out, shallow; node = disk/page sized | **Database & filesystem indexes** — minimizes disk seeks. See [[Indexes]] |
-| **Trie (prefix tree)** | Path = sequence of characters | Autocomplete, prefix search, routing tables — O(k) by key length, independent of n |
-| **Heap** | Parent/child priority, array-backed | Priority queues — see [[Heap]] |
-| **Segment / Fenwick (BIT)** | Range aggregates with point updates | Range-sum/min queries in O(log n) |
+| BST | Ordered left < node < right | Baseline ordered lookup — but degrades to O(n) if unbalanced |
+| AVL / Red-Black | Self-balancing rotations → guaranteed O(log n) | `SortedSet`/`SortedDictionary` (red-black); AVL is more rigidly balanced (faster reads, more rotations) |
+| B-tree / B+-tree | High fan-out, shallow; node = disk/page sized | **Database & filesystem indexes** — minimizes disk seeks. See [[Indexes]] |
+| [[Trie|Trie (prefix tree)]] | Path = sequence of characters | Autocomplete, prefix search, routing tables — O(k) by key length, independent of n |
+| [[Heap]] | Parent/child priority, array-backed | Priority queues and heap-like mergeable queues |
+| Segment / Fenwick (BIT) | Range aggregates with point updates | Range-sum/min queries in O(log n) |
 
 ## Traversal Without Recursion
 
@@ -86,6 +88,11 @@ var ids = new SortedSet<int> { 5, 1, 3, 3 };
 > On unknown/deep depth, where iterative traversal with an explicit stack is safer.
 
 ## Links
+
+- [[Trie]]
+- [[Heap]]
+
+## References
 
 - [`SortedSet<T>` class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.sortedset-1) — API reference for the closest built-in self-balancing tree in .NET.
 - [Sorted collection types](https://learn.microsoft.com/en-us/dotnet/standard/collections/sorted-collection-types) — Microsoft overview of SortedSet, SortedDictionary, and SortedList with complexity comparison.

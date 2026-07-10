@@ -12,7 +12,7 @@ publish: true
 
 # Intro
 
-A heap is an implicit complete d ary tree that keeps a priority rule between parent and child nodes. In a min heap, the smallest value is always at the root, so extracting the next priority item stays fast. In .NET, `PriorityQueue<TElement, TPriority>` is implemented as an array backed quaternary heap that gives fast enqueue and dequeue for scheduler and path finding workloads.
+A heap is an implicit complete d-ary tree that keeps a priority rule between parent and child nodes. In a min heap, the smallest value is always at the root, so extracting the next priority item stays fast. In .NET, `PriorityQueue<TElement, TPriority>` is implemented as an array-backed quaternary heap that gives fast enqueue and dequeue for scheduler and pathfinding workloads.
 
 ## How It Works
 
@@ -71,6 +71,7 @@ Console.WriteLine(pq.Peek());    // high
 |---|---|---|---|
 | Repeated best-item extraction | `PriorityQueue` O(log n) per op | Sorted list O(n) insert | Heap wins for incremental arrivals. Sorted list is simpler when all data is known upfront and you need ordered iteration. |
 | Ordered iteration | Not suitable | `SortedSet<T>` | Use `SortedSet` when you need both priority extraction and in-order traversal. |
+
 ## Questions
 
 > [!QUESTION]- Why is `Dequeue` on a heap O(log n) instead of O(1)?
@@ -82,7 +83,7 @@ Console.WriteLine(pq.Peek());    // high
 > [!QUESTION]- What is the practical reason to use `PriorityQueue<TElement, TPriority>` in .NET?
 > It gives efficient dynamic priority scheduling without resorting full collections after each insert.
 
-## Links
+## References
 
 - [PriorityQueue\<TElement, TPriority\> class (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.priorityqueue-2) — API reference covering enqueue, dequeue, peek, and update priority semantics.
 - [Collections and data structures (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/collections/) — overview of .NET collection types with guidance on choosing the right structure for your use case.
