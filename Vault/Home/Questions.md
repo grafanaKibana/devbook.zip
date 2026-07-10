@@ -13,6 +13,12 @@ publish: true
 // `dv`; the callout extraction is byte-for-byte the same so Obsidian output is
 // unchanged.
 //
+// Loading is parallel + progressive: the ~300 note reads run through a bounded
+// worker pool (not one-at-a-time), and partial results are flushed into the view
+// in batches so sections stream in within ~100ms instead of blocking on a single
+// ~6s render. Stable per-callout keys let Preact reuse already-rendered callouts,
+// so each flush only mounts the new ones.
+//
 // The `dc-questions-index` wrapper class is a deliberate strip-target: on the
 // published Quartz site this page is rendered by the QuestionsIndex component
 // (fed by the question-collector transformer), so SyncerFixups removes this
@@ -29,64 +35,99 @@ return function QuestionsIndex() {
   const pages = dc.useQuery(`@page and path("${ROOT}")`);
   const indexRevision = dc.useIndexUpdates();
 
-  const [tree, setTree] = dc.useState(null);
+  // Tree is accumulated in a ref across parallel reads; `setVersion` bumps to
+  // flush partial progress into the view. `done` gates the loading placeholder.
+  const treeRef = dc.useRef({ children: {}, items: [] });
+  const [, setVersion] = dc.useState(0);
+  const [done, setDone] = dc.useState(false);
   // id -> heading element; TOC links scroll to these (see tocLink).
   const headingRefs = dc.useRef({});
 
   dc.useEffect(() => {
     let cancelled = false;
-    (async () => {
-      // Each node has children (sub-folders) and items (callouts).
-      const root = { children: {}, items: [] };
-      for (const page of pages) {
-        const path = page.$path;
-        const name = path.split("/").pop().replace(/\.md$/, "");
-        if (name === "Questions") continue;
+    setDone(false);
 
-        const file = dc.app.vault.getAbstractFileByPath(path);
-        if (!file) continue;
-        let content;
-        try {
-          content = await dc.app.vault.cachedRead(file);
-        } catch (e) {
-          continue;
-        }
-        if (!content) continue;
+    // Build into a fresh tree; only swap it into view on flush, so a re-run
+    // (triggered by an edit) keeps showing the old tree until new data arrives
+    // instead of blanking.
+    const root = { children: {}, items: [] };
 
-        const lines = content.split("\n");
-        const callouts = [];
-        for (let i = 0; i < lines.length; i++) {
-          if (/^>\s*\[!QUESTION\]/i.test(lines[i])) {
-            let block = lines[i];
-            let j = i + 1;
-            while (j < lines.length && /^>/.test(lines[j])) {
-              block += "\n" + lines[j];
-              j++;
-            }
-            callouts.push(block);
-            i = j - 1;
-          }
-        }
-        if (callouts.length === 0) continue;
+    const targets = pages.filter(
+      (p) => p.$path.split("/").pop().replace(/\.md$/, "") !== "Questions",
+    );
 
-        const folder = path.slice(0, path.lastIndexOf("/"));
-        const parts = folder
-          .replace(new RegExp("^" + ROOT + "/?"), "")
-          .split("/")
-          .filter(Boolean);
-
-        let node = root;
-        for (let d = 0; d < parts.length && d < 6; d++) {
-          const key = parts[d];
-          if (!node.children[key]) node.children[key] = { children: {}, items: [] };
-          node = node.children[key];
-        }
-        for (const block of callouts) {
-          node.items.push({ block, source: name, path });
-        }
+    const insert = (path, name, callouts) => {
+      const folder = path.slice(0, path.lastIndexOf("/"));
+      const parts = folder
+        .replace(new RegExp("^" + ROOT + "/?"), "")
+        .split("/")
+        .filter(Boolean);
+      let node = root;
+      for (let d = 0; d < parts.length && d < 6; d++) {
+        const key = parts[d];
+        if (!node.children[key]) node.children[key] = { children: {}, items: [] };
+        node = node.children[key];
       }
-      if (!cancelled) setTree(root);
+      callouts.forEach((block, k) =>
+        node.items.push({ block, source: name, path, id: `${path}#${k}` }),
+      );
+    };
+
+    const flush = () => {
+      if (cancelled) return;
+      treeRef.current = root;
+      setVersion((v) => v + 1);
+    };
+
+    (async () => {
+      // Bounded worker pool: read files concurrently (the sequential await was
+      // the whole cost) and flush every batch so sections appear as they load.
+      const CONCURRENCY = 24;
+      const FLUSH_EVERY = 24;
+      let cursor = 0;
+      let processed = 0;
+
+      const worker = async () => {
+        while (!cancelled && cursor < targets.length) {
+          const path = targets[cursor++].$path;
+          const name = path.split("/").pop().replace(/\.md$/, "");
+          const file = dc.app.vault.getAbstractFileByPath(path);
+          if (file) {
+            try {
+              const content = await dc.app.vault.cachedRead(file);
+              if (content) {
+                const lines = content.split("\n");
+                const callouts = [];
+                for (let i = 0; i < lines.length; i++) {
+                  if (/^>\s*\[!QUESTION\]/i.test(lines[i])) {
+                    let block = lines[i];
+                    let j = i + 1;
+                    while (j < lines.length && /^>/.test(lines[j])) {
+                      block += "\n" + lines[j];
+                      j++;
+                    }
+                    callouts.push(block);
+                    i = j - 1;
+                  }
+                }
+                if (callouts.length) insert(path, name, callouts);
+              }
+            } catch (e) {
+              /* skip unreadable file */
+            }
+          }
+          processed++;
+          if (processed % FLUSH_EVERY === 0) flush();
+        }
+      };
+
+      await Promise.all(
+        Array.from({ length: Math.min(CONCURRENCY, targets.length) }, worker),
+      );
+      flush();
+      if (!cancelled) setDone(true);
     })();
+
     return () => {
       cancelled = true;
     };
@@ -103,11 +144,19 @@ return function QuestionsIndex() {
   const sortedKeys = (obj) =>
     Object.keys(obj).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 
-  // Always render the wrapper so SyncerFixups has a stable strip target even
-  // before the async load resolves (and so nothing flashes on first paint).
-  if (!tree) return <div class="dc-questions-index" />;
-
+  const tree = treeRef.current;
   const total = countItems(tree);
+
+  // Before the first batch lands (or if there are genuinely no questions), show a
+  // light placeholder inside the wrapper so SyncerFixups still has its strip
+  // target and nothing flashes.
+  if (total === 0) {
+    return (
+      <div class="dc-questions-index">
+        {done ? null : <p class="dc-qi-loading">Loading questions…</p>}
+      </div>
+    );
+  }
 
   // `#id` anchors don't resolve against DOM ids inside Obsidian, so wire each
   // TOC link to scrollIntoView on the real heading element; href keeps native
@@ -144,18 +193,13 @@ return function QuestionsIndex() {
         </Heading>,
       );
 
-      child.items.forEach((item, ci) => {
+      for (const item of child.items) {
         const src = `*[${item.source}](${encodeURI(item.path)})*`;
         const md = item.block + "\n> " + src;
         out.push(
-          <dc.Markdown
-            key={curId + "::i" + ci}
-            content={md}
-            inline={false}
-            sourcePath={currentPath}
-          />,
+          <dc.Markdown key={item.id} content={md} inline={false} sourcePath={currentPath} />,
         );
-      });
+      }
 
       out.push(...renderTree(child, depth + 1, depth <= 1 ? curId : ""));
     }
