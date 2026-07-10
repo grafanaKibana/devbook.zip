@@ -29,6 +29,14 @@ graph LR
     B -.->|window slides right| E
 ```
 
+## Visualization
+
+The card hunts the shortest sub-array with sum ≥ 7 on the segmented strip: the tinted band is the current window, bounded by the blue [ bracket on the left and the violet ] bracket on the right. Watch the right bracket grow the window until the sum reaches the target, then the left bracket shrink it while it stays valid; green marks the best window found.
+
+```steptrace
+{"algorithm":"sliding-window","array":[2,3,1,2,4,3],"target":7}
+```
+
 ## Example
 
 Fixed window — maximum sum of any k consecutive elements:

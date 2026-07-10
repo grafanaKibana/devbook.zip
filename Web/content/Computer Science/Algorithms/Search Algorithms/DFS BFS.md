@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-08T16:14:17.338+03:00
-modified: 2026-07-08T16:14:17.339+03:00
-published: 2026-07-08T16:14:17.339+03:00
+created: 2026-07-10T05:33:01.375Z
+modified: 2026-07-10T05:33:01.375Z
+published: 2026-07-10T05:33:01.375Z
 topic:
   - Computer Science
 subtopic:
@@ -15,93 +15,89 @@ status: Done
 
 # Intro
 
-BFS (Breadth-First Search) and DFS (Depth-First Search) are the two fundamental graph traversal strategies. BFS explores nodes layer by layer using a queue — all nodes at distance `k` from the source are visited before any node at distance `k+1`. DFS explores one branch as deep as possible before backtracking, using a stack or recursion. Both run in `O(V + E)` time, but they solve different problems: BFS finds shortest paths by edge count in unweighted graphs, while DFS is the natural fit for cycle detection, topological sorting, and connected component discovery.
+BFS (Breadth-First Search) and DFS (Depth-First Search) are the two fundamental graph traversal strategies. Both run in `O(V + E)` and visit every reachable node exactly once — so the choice is not about speed but about which property you need: **BFS gives distance ordering** (layers), **DFS gives depth ordering** (finish times, back edges).
 
-The choice between them is not about speed — both visit every reachable node exactly once. It is about which graph property you need: BFS gives distance ordering (layers), DFS gives depth ordering (finish times, back edges).
+## BFS (Breadth-First Search)
 
-## How It Works
+BFS explores nodes layer by layer using a **queue** — every node at distance `k` from the source is visited before any node at distance `k+1`. That ordering makes it the tool for **shortest paths by edge count** in unweighted graphs, and for level-order problems like "minimum moves" or "shortest transformation sequence".
 
-**BFS** maintains a queue and a visited set:
+**How it works** — BFS maintains a queue and a visited set:
 
 1. Enqueue the source and mark it visited.
-2. Dequeue the front node `v`. For each unvisited neighbor `u`, mark `u` visited and enqueue it.
+2. Dequeue the front node `v`; for each unvisited neighbour `u`, mark `u` visited and enqueue it.
 3. Repeat until the queue is empty. The first visit to any node is along a shortest path by hop count.
 
-**DFS** maintains a stack (explicit or call stack) and a visited set:
-
-1. Push the source (or call `dfs(source)`). Mark it visited.
-2. Pop (or recurse into) an unvisited neighbor `u`, mark visited.
-3. When a node has no unvisited neighbors, backtrack. Nodes get a finish time when backtracking completes.
+On the edges `A-B, A-C, A-D, B-E, C-F, C-G, D-I, E-H, H-J, I-J`, searching for `J` from `A`, BFS dequeues **A → B → C → D → E → F → G → I → H → J** — layer by layer, reaching `J` at distance 3 (the shortest route, via `D → I`).
 
 ```mermaid
-graph LR
-  subgraph BFS[Breadth First Search]
-    B0[Start s] --> B1[Mark visited s]
-    B1 --> B2[Push s into queue]
-    B2 --> B3{Queue empty}
-    B3 -->|No| B4[Pop front v]
-    B4 --> B5[For each neighbor u of v]
-    B5 --> B6{visited u}
-    B6 -->|No| B7[Mark visited u and push u]
-    B6 -->|Yes| B5
-    B7 --> B5
-    B3 -->|Yes| B8[Done]
-  end
-
-  subgraph DFS[Depth First Search]
-    D0[Start s] --> D1[Call dfs s]
-    D1 --> D2[Mark visited v]
-    D2 --> D3[For each neighbor u of v]
-    D3 --> D4{visited u}
-    D4 -->|No| D5[dfs u]
-    D4 -->|Yes| D3
-    D5 --> D3
-  end
+graph TD
+  B0[Start s] --> B1[Mark visited s]
+  B1 --> B2[Enqueue s]
+  B2 --> B3{Queue empty}
+  B3 -->|No| B4[Dequeue front v]
+  B4 --> B5[For each neighbour u of v]
+  B5 --> B6{visited u}
+  B6 -->|No| B7[Mark visited u and enqueue u]
+  B6 -->|Yes| B5
+  B7 --> B5
+  B3 -->|Yes| B8[Done]
 ```
 
-## Example
+The card searches for `J` (the node with the dashed ring): the node being dequeued is blue, visited nodes turn green, and WATCH shows the queue itself. BFS sweeps level by level — A, then all of distance 1, then distance 2 — so it visits ten nodes before dequeuing `J`, but the route it finds is guaranteed shortest (distance 3). Compare with the DFS card below on the identical graph and target.
 
-```text
-Graph edges: A-B, A-C, B-D, C-E
-
-BFS from A:
-  visit A → enqueue B, C → dequeue B → enqueue D → dequeue C → enqueue E → dequeue D → dequeue E
-  Visit order: A, B, C, D, E (layer by layer)
-
-DFS from A (recursive, left neighbor first):
-  visit A → recurse B → recurse D → backtrack to B → backtrack to A → recurse C → recurse E
-  Visit order: A, B, D, C, E (depth first)
+```steptrace
+{"algorithm":"bfs","start":"A","target":"J","nodes":[{"id":"A"},{"id":"B"},{"id":"C"},{"id":"D"},{"id":"E"},{"id":"F"},{"id":"G"},{"id":"H"},{"id":"I"},{"id":"J"}],"edges":[{"from":"A","to":"B"},{"from":"A","to":"C"},{"from":"A","to":"D"},{"from":"B","to":"E"},{"from":"C","to":"F"},{"from":"C","to":"G"},{"from":"D","to":"I"},{"from":"E","to":"H"},{"from":"H","to":"J"},{"from":"I","to":"J"}]}
 ```
 
-## Pitfalls
+**Watch its memory.** The BFS frontier holds every node at the current distance level, so on very wide graphs (millions of nodes per level) the queue can approach `O(V)` and exhaust memory. Mitigate with bidirectional BFS (search from both ends, meet in the middle) or a depth limit.
 
-### Stack Overflow with Recursive DFS
+## DFS (Depth-First Search)
 
-- **What goes wrong**: recursive DFS uses call stack proportional to graph depth. On graphs with 10,000+ depth (chain or linked-list shapes), this causes a stack overflow.
-- **Why it happens**: most language runtimes default to 1-8 MB stack size, supporting roughly 10k-50k recursive calls depending on frame size.
-- **How to avoid it**: use iterative DFS with an explicit stack. The logic is identical — push instead of recurse, pop instead of return.
+DFS explores one branch as deep as possible before backtracking, using a **stack** (explicit or the call stack). It is the natural fit for **cycle detection, topological sorting, and connected-component discovery**.
 
-### Missing Visited Set
+**How it works** — DFS maintains a stack and a visited set:
 
-- **What goes wrong**: traversal enters infinite loops on cyclic graphs, revisiting the same nodes forever.
-- **Why it happens**: without marking nodes visited before or during exploration, cycles cause repeated re-entry.
-- **How to avoid it**: always initialize a visited set and check it before exploring a neighbor. For directed cycle detection with DFS, additionally track nodes currently on the recursion stack (three-state: unvisited, in-progress, completed).
+1. Push the source (or call `dfs(source)`) and mark it visited.
+2. Move to an unvisited neighbour `u` and mark it visited.
+3. When a node has no unvisited neighbours, backtrack. A node gets its finish time when backtracking completes.
 
-### BFS Memory on Wide Graphs
+On the same graph, DFS pops **A → B → E → H → J** — it dives straight down the first branch and reaches `J` after only five visits, but along a depth-4 path.
 
-- **What goes wrong**: BFS frontier holds all nodes at the current distance level. On social-graph-like structures with millions of nodes per level, the queue exhausts available memory.
-- **Why it happens**: BFS memory is proportional to the widest level of the graph, which can approach `O(V)` in the worst case.
-- **How to avoid it**: consider bidirectional BFS (search from both source and target, meet in the middle) or impose a depth limit. DFS uses memory proportional to depth, not width.
+```mermaid
+graph TD
+  D0[Start s] --> D1[Push s and mark visited]
+  D1 --> D2{Stack empty}
+  D2 -->|No| D3[Look at top v]
+  D3 --> D4{v has an unvisited neighbour u}
+  D4 -->|Yes| D5[Mark visited u and push u]
+  D4 -->|No| D6[Pop v and backtrack]
+  D5 --> D2
+  D6 --> D2
+  D2 -->|Yes| D7[Done]
+```
 
-## Tradeoffs
+Same graph, same start, same target — but a stack (shown in WATCH) replaces the queue, so the card dives A → B → E → H straight down and pops `J` after only five visits, half of what BFS needed. The catch: it arrived by a depth-4 path, not the distance-3 shortest one. DFS finds _a_ path fast; BFS finds the _shortest_ path.
 
-| Choice | BFS | DFS | Decision criteria |
-| --- | --- | --- | --- |
-| Shortest path by edge count | Guarantees shortest | No guarantee | Always use BFS for unweighted shortest path. DFS may find a valid path but not the shortest. |
-| Memory on wide graphs | Queue grows with level width | Stack grows with depth | DFS uses less memory on wide, shallow graphs. BFS uses less on narrow, deep graphs. |
-| Cycle detection in directed graphs | Less natural | Standard via back edges | DFS with recursion-stack tracking is the textbook method. BFS detects cycles in undirected graphs easily but needs extra work for directed. |
-| Topological sort | Kahn's algorithm via in-degree queue | Reverse post-order from DFS | Both work correctly. DFS variant is simpler to code; Kahn's gives an explicit iterative approach. |
-| Connected components | Works but less common | Standard approach | DFS is the default for finding connected components and SCCs via Tarjan's or Kosaraju's algorithms. |
+```steptrace
+{"algorithm":"dfs","start":"A","target":"J","nodes":[{"id":"A"},{"id":"B"},{"id":"C"},{"id":"D"},{"id":"E"},{"id":"F"},{"id":"G"},{"id":"H"},{"id":"I"},{"id":"J"}],"edges":[{"from":"A","to":"B"},{"from":"A","to":"C"},{"from":"A","to":"D"},{"from":"B","to":"E"},{"from":"C","to":"F"},{"from":"C","to":"G"},{"from":"D","to":"I"},{"from":"E","to":"H"},{"from":"H","to":"J"},{"from":"I","to":"J"}]}
+```
+
+**Two DFS traps.** Recursive DFS uses call-stack space proportional to depth — on chain-shaped graphs 10k+ deep it overflows; switch to an **explicit-stack iterative DFS** (identical logic, heap memory). For **directed cycle detection**, track three states — unvisited / in-progress / completed — and report a cycle when DFS reaches an in-progress node (a back edge); "visited" alone can't tell a back edge from a harmless cross edge.
+
+## Choosing between them
+
+Both traverse in `O(V + E)`; the difference is the property you need:
+
+| Need | Use | Why |
+| --- | --- | --- |
+| Shortest path by edge count | **BFS** | Visits nodes in increasing-distance order; DFS may reach a node via a longer branch first |
+| Memory on wide, shallow graphs | **DFS** | Stack grows with depth, not level width |
+| Memory on narrow, deep graphs | **BFS** | Queue stays small; recursive DFS can overflow |
+| Cycle detection (directed) | **DFS** | Three-state back-edge tracking is the textbook method |
+| Topological sort | either | DFS reverse post-order, or Kahn's in-degree queue |
+| Connected components / SCC | **DFS** | Basis for Tarjan's and Kosaraju's algorithms |
+
+> **Shared trap:** always keep a visited set. Without marking nodes before/at exploration, cycles cause infinite re-entry — for both BFS and DFS.
 
 ## Questions
 

@@ -46,6 +46,14 @@ graph TD
   J --> B
 ```
 
+## Visualization
+
+The card slides the pattern strip beneath the text strip: green marks the region matched so far, amber flags the mismatching character. Watch what happens on a mismatch — thanks to the prefix table the pattern jumps forward by more than one position, while the text pointer never moves backward.
+
+```steptrace
+{"algorithm":"kmp","text":"ABABCABAB","pattern":"ABAB"}
+```
+
 ## Example
 
 ```text

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-08T16:14:17.334+03:00
-modified: 2026-07-08T16:14:17.334+03:00
-published: 2026-07-08T16:14:17.334+03:00
+created: 2026-07-09T20:18:25.879Z
+modified: 2026-07-10T08:56:47.563Z
+published: 2026-07-10T08:56:47.563Z
 topic:
   - Computer Science
 subtopic:
@@ -23,6 +23,14 @@ Both are [[Greedy Algorithms|greedy]] and both are provably optimal via the **cu
 
 - **Kruskal's** — sort all edges by weight; add each edge if it connects two **different** components (i.e. doesn't form a cycle), using a [[Union-Find]] to test connectivity in near-O(1). Builds the tree as a "forest" that merges. **O(E log E)**, dominated by the sort. Great for **sparse** graphs.
 - **Prim's** — grow a single tree from an arbitrary start vertex; repeatedly add the cheapest edge crossing from the tree to a vertex outside it, using a [[Heap|priority queue]]. **O(E log V)**. Better for **dense** graphs.
+
+## Visualization
+
+The card runs Prim's from A: the green tree grows one cheapest crossing edge at a time until all six vertices are connected. Watch for the explicit "skip — would make a cycle" step whenever the cheapest candidate edge would join two vertices already inside the tree — that rejection is the cut property's cycle-free invariant in action.
+
+```steptrace
+{"algorithm":"prim","start":"A","nodes":[{"id":"A"},{"id":"B"},{"id":"C"},{"id":"D"},{"id":"E"},{"id":"F"}],"edges":[{"from":"A","to":"B","weight":4},{"from":"A","to":"C","weight":2},{"from":"B","to":"C","weight":1},{"from":"B","to":"D","weight":5},{"from":"C","to":"D","weight":8},{"from":"C","to":"E","weight":10},{"from":"D","to":"E","weight":2},{"from":"D","to":"F","weight":6},{"from":"E","to":"F","weight":3}]}
+```
 
 ## Example
 

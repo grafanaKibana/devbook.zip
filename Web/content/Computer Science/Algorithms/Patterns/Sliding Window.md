@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-08T16:14:17.337+03:00
-modified: 2026-07-08T16:14:17.337+03:00
-published: 2026-07-08T16:14:17.337+03:00
+created: 2026-07-09T20:18:42.301Z
+modified: 2026-07-09T20:18:42.301Z
+published: 2026-07-09T20:18:42.301Z
 topic:
   - Computer Science
 subtopic:
@@ -30,6 +30,14 @@ Both are O(n) because each index advances at most n times total — every elemen
 graph LR
     A[a] --- B["[ b"] --- C[c] --- D["d ]"] --- E[e]
     B -.->|window slides right| E
+```
+
+## Visualization
+
+The card hunts the shortest sub-array with sum ≥ 7 on the segmented strip: the tinted band is the current window, bounded by the blue \[ bracket on the left and the violet ] bracket on the right. Watch the right bracket grow the window until the sum reaches the target, then the left bracket shrink it while it stays valid; green marks the best window found.
+
+```steptrace
+{"algorithm":"sliding-window","array":[2,3,1,2,4,3],"target":7}
 ```
 
 ## Example

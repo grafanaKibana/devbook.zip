@@ -24,13 +24,13 @@ Retrieval metrics evaluate whether the relevant documents reached the generator.
 
 | Metric | What it answers | When to prefer |
 | --- | --- | --- |
-| [[Monitoring#Retrieval Quality Metrics|Recall@k]] | Did we find the relevant documents | Primary metric -- always track |
-| [[Monitoring#Retrieval Quality Metrics|Precision@k]] | How much noise is in the context | Context window is tight or token cost matters |
-| [[Monitoring#Retrieval Quality Metrics|HitRate@k]] | Did at least one relevant doc appear | Quick minimum-bar check; good for dashboards |
-| [[Monitoring#Retrieval Quality Metrics|MRR]] | Is the best result ranked first | Generator uses only top-1 or top-2 chunks |
-| [[Monitoring#Retrieval Quality Metrics|MAP]] | Are all relevant docs found and ranked high | Multiple relevant documents per query expected |
-| [[Monitoring#Retrieval Quality Metrics|nDCG@k]] | Is the full ranking quality good | Generator uses all k chunks with position-aware weighting |
-| [[Monitoring#Deterministic Metrics|Empty-result rate]] | Are there coverage gaps | Corpus is growing or query patterns are shifting |
+| [[Monitoring#Retrieval Quality Metrics\|Recall@k]] | Did we find the relevant documents | Primary metric -- always track |
+| [[Monitoring#Retrieval Quality Metrics\|Precision@k]] | How much noise is in the context | Context window is tight or token cost matters |
+| [[Monitoring#Retrieval Quality Metrics\|HitRate@k]] | Did at least one relevant doc appear | Quick minimum-bar check; good for dashboards |
+| [[Monitoring#Retrieval Quality Metrics\|MRR]] | Is the best result ranked first | Generator uses only top-1 or top-2 chunks |
+| [[Monitoring#Retrieval Quality Metrics\|MAP]] | Are all relevant docs found and ranked high | Multiple relevant documents per query expected |
+| [[Monitoring#Retrieval Quality Metrics\|nDCG@k]] | Is the full ranking quality good | Generator uses all k chunks with position-aware weighting |
+| [[Monitoring#Deterministic Metrics\|Empty-result rate]] | Are there coverage gaps | Corpus is growing or query patterns are shifting |
 
 Two evaluation-side facts matter beyond the definitions. First, a recall failure is a hard ceiling on answer quality — the generator cannot use evidence it never sees, so no generation-side fix compensates for missing context. Second, track [[Monitoring#Deterministic Metrics|empty-result rate]] separately: even a small rate signals coverage gaps in the index, and aggregate recall hides it.
 
@@ -69,7 +69,7 @@ Individual scores identify symptoms. Reading two scores together identifies root
 | Context Precision | Context Recall | Diagnosis | Fix |
 | --- | --- | --- | --- |
 | Low | High | Noise — retrieval finds relevant docs but drowns them in irrelevant chunks | Re-ranking, tighter metadata filters, reduce k |
-| High | Low | Incomplete — retrieved set is clean but missing relevant evidence | Expand k, add [[Home/AI & ML/LLM/RAG/Retrieval#Hybrid Retrieval — Vector + Keyword|hybrid search]], improve chunk boundaries |
+| High | Low | Incomplete — retrieved set is clean but missing relevant evidence | Expand k, add [[Home/AI & ML/LLM/RAG/Retrieval#Hybrid Retrieval — Vector + Keyword\|hybrid search]], improve chunk boundaries |
 
 ### Additional RAGAS Metrics
 

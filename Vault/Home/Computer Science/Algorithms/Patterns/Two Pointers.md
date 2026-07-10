@@ -24,6 +24,14 @@ Three common configurations:
 
 The reason it's O(n): each pointer only ever moves forward (or they only converge), so the total number of moves is bounded by n — you never re-examine the same pair twice.
 
+## Visualization
+
+The card runs converging-pointer pair-sum on the sorted strip: the blue [ and violet ] brackets are the two pointers, and the tinted band is the range still between them. A too-small sum advances the left bracket, a too-big sum retreats the right one; green marks the pair that sums to 18 — watch both rules fire before the pointers meet on the answer.
+
+```steptrace
+{"algorithm":"two-pointers","array":[1,3,4,6,8,10,13],"target":18}
+```
+
 ## Example
 
 Two-sum on a **sorted** array, converging pointers:

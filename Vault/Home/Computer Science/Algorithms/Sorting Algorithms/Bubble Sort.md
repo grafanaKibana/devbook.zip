@@ -12,7 +12,6 @@ publish: true
 # Intro
 
 Bubble sort repeatedly swaps adjacent out-of-order elements, pushing large values toward the end each pass. It is easy to understand but rarely used in production due to poor performance. Its main value is as a teaching tool and as a baseline to understand why better algorithms exist.
-
 ## Mechanism
 
 Each pass scans left-to-right and swaps `a[i]` with `a[i+1]` when they are out of order. After one full pass, the largest element is in its final position. With an early-exit flag, the algorithm stops as soon as a pass makes zero swaps — giving O(n) best case on already-sorted input.
@@ -32,6 +31,14 @@ graph TD
   H --> J[Increment i]
   I --> J
   J --> F
+```
+
+## Visualization
+
+The card animates the pass structure on a bar chart: blue highlights the adjacent pair being compared, violet flashes when they swap, and bars turn green with a white check as they lock into their final position. The i/j pins track the active indices, and WATCH shows i, j, and the running swap count — watch the largest remaining value bubble to the right end on every pass.
+
+```steptrace
+{"algorithm":"bubble-sort","array":[8,3,5,1,9,2,7,4]}
 ```
 
 ## Complexity

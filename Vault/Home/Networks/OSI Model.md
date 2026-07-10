@@ -22,7 +22,7 @@ From the wire up to the app. Mnemonic (top→down): **A**ll **P**eople **S**eem 
 | 7 | **Application** | What the app actually does | Data | [[HTTP]], [[DNS]], [[SMTP]], [[gRPC]], [[WebSockets\|WebSocket]] |
 | 6 | **Presentation** | Encoding, serialization, encryption | Data | TLS, JSON/Protobuf, compression, character sets |
 | 5 | **Session** | Establishing/maintaining sessions | Data | session cookies, RPC sessions, TLS session resumption |
-| 4 | **Transport** | End-to-end delivery between processes | Segment / Datagram | [[TCP IP|TCP]], [[UDP]] (ports live here) |
+| 4 | **Transport** | End-to-end delivery between processes | Segment / Datagram | [[TCP IP\|TCP]], [[UDP]] (ports live here) |
 | 3 | **Network** | Addressing & routing across networks | Packet | IP, ICMP, routers, NAT |
 | 2 | **Data Link** | Node-to-node on one physical link | Frame | Ethernet, Wi-Fi (802.11), MAC addresses, switches |
 | 1 | **Physical** | Bits on the medium | Bit | copper, fiber, radio, voltage/light signals |

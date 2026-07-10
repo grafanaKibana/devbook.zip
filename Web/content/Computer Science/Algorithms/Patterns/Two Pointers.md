@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-08T16:14:17.337+03:00
-modified: 2026-07-08T16:14:17.338+03:00
-published: 2026-07-08T16:14:17.338+03:00
+created: 2026-07-09T20:21:35.087Z
+modified: 2026-07-09T20:21:35.087Z
+published: 2026-07-09T20:21:35.087Z
 topic:
   - Computer Science
 subtopic:
@@ -26,6 +26,14 @@ Three common configurations:
 - **Two sequences** — one pointer per array, advancing whichever is behind. The merge step of [[Merge Sort]] is exactly this.
 
 The reason it's O(n): each pointer only ever moves forward (or they only converge), so the total number of moves is bounded by n — you never re-examine the same pair twice.
+
+## Visualization
+
+The card runs converging-pointer pair-sum on the sorted strip: the blue \[ and violet ] brackets are the two pointers, and the tinted band is the range still between them. A too-small sum advances the left bracket, a too-big sum retreats the right one; green marks the pair that sums to 18 — watch both rules fire before the pointers meet on the answer.
+
+```steptrace
+{"algorithm":"two-pointers","array":[1,3,4,6,8,10,13],"target":18}
+```
 
 ## Example
 

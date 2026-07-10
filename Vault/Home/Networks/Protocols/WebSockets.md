@@ -16,7 +16,7 @@ WebSocket (RFC 6455) is an application-layer protocol that provides **full-duple
 
 ## WebSocket vs Raw Socket vs HTTP
 
-| | Raw [[Sockets|TCP socket]] | WebSocket | HTTP request/response |
+| | Raw [[Sockets\|TCP socket]] | WebSocket | HTTP request/response |
 |---|---|---|---|
 | Layer | Transport endpoint (OS) | Application protocol over TCP | Application protocol over TCP |
 | Direction | Full-duplex | **Full-duplex** | Half-duplex (client asks, server answers) |

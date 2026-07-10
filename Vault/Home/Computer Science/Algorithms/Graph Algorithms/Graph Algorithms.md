@@ -8,7 +8,7 @@ tags:
 publish: true
 level:
   - '4'
-status: Done
+status: Creation
 priority: High
 ---
 
@@ -23,20 +23,42 @@ flowchart TD
   A[Graph problem] --> B{Need reachability or levels}
   B -->|Yes| C[DFS BFS]
   B -->|No| D{Need minimum path cost}
-  D -->|Yes with non negative weights| E[Dijkstra]
+  D -->|Yes with non negative weights| E{Have a heuristic to the target}
+  E -->|Yes| E1[A Star Search]
+  E -->|No| E2[Dijkstra]
   D -->|Can have negative edges| F[Bellman Ford]
   D -->|Need all pairs shortest paths| G[Floyd Warshall]
+  A --> H{Need structure not distance}
+  H -->|Cheapest way to connect every node| I[Minimum Spanning Tree]
+  H -->|Mutually reachable groups in a digraph| J[Strongly Connected Components]
+  H -->|Single points of failure| K[Articulation Points and Bridges]
+  H -->|Throughput through a capacitated network| L[Maximum Flow]
 ```
 
 ## Algorithm Selection
 
+### Shortest path
+
 | Algorithm | Solves | Time | Constraint |
 | --- | --- | --- | --- |
-| [[DFS BFS|BFS]] | Reachability, shortest path by edge count | O(V + E) | Unweighted graphs |
-| [[DFS BFS|DFS]] | Cycle detection, topological sort, components | O(V + E) | Any graph |
+| [[DFS BFS]] | Reachability, shortest path by edge count | O(V + E) | Unweighted graphs |
+| [[DFS BFS]] | Cycle detection, topological sort, components | O(V + E) | Any graph |
 | [[Dijkstra]] | Single-source shortest path | O((V + E) log V) | Non-negative weights |
-| Bellman–Ford | Single-source shortest path | O(V·E) | Handles negative edges; detects negative cycles |
-| Floyd–Warshall | All-pairs shortest path | O(V³) | Small/dense graphs |
+| [[A-Start Search\|A* Search]] | Point-to-point shortest path | O((V + E) log V), far fewer nodes expanded | Non-negative weights **and** an admissible heuristic |
+| [[Greedy Best-First Search]] | Fast point-to-point path, not optimal | O((V + E) log V) | Heuristic only; sacrifices optimality for speed |
+| [[Bidirectional Search]] | Point-to-point shortest path | O(b^(d/2)) vs O(b^d) | Target known; graph must be reversible |
+| [[Bellman-Ford]] | Single-source shortest path | O(V·E) | Handles negative edges; detects negative cycles |
+| [[Floyd-Warshall]] | All-pairs shortest path | O(V³) | Small/dense graphs; detects negative cycles |
+
+### Structure and connectivity
+
+| Algorithm | Solves | Time | Constraint |
+| --- | --- | --- | --- |
+| [[Minimum Spanning Tree]] | Cheapest edge set connecting all vertices | O(E log V) | Connected, undirected, weighted |
+| [[Topological Sort]] | Linear order respecting dependencies | O(V + E) | Directed acyclic graph |
+| [[Strongly Connected Components]] | Maximal mutually-reachable vertex sets | O(V + E) | Directed graphs |
+| [[Articulation Points and Bridges]] | Cut vertices and cut edges | O(V + E) | Undirected graphs |
+| [[Maximum Flow]] | Max s–t throughput; min cut | O(V·E²) (Edmonds–Karp) | Capacitated network |
 
 ## Questions
 

@@ -1,0 +1,9 @@
+{
+  "id": "steptrace",
+  "name": "Steptrace",
+  "version": "1.0.0",
+  "minAppVersion": "1.4.0",
+  "description": "Renders steptrace algorithm-visualizer cards from a fenced `steptrace` code block, live in the editor.",
+  "author": "grafanaKibana",
+  "isDesktopOnly": false
+}

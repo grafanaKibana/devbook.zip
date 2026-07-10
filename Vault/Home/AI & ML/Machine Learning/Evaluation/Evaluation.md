@@ -31,11 +31,11 @@ The recurring failure across all four is the **offline–online gap**: a metric 
 
 | Question you are answering | Metric family | Where it is covered |
 | --- | --- | --- |
-| Is the classifier right at its chosen threshold? | Precision, recall, F1, confusion matrix | [[Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation|Classification Evaluation]] |
-| How good is the ranking across all thresholds? | ROC-AUC, PR-AUC | [[Home/AI & ML/Machine Learning/Evaluation/ROC-AUC and PR-AUC|ROC-AUC and PR-AUC]] |
-| Can I trust the predicted probabilities? | Brier score, ECE, reliability diagrams | [[Home/AI & ML/Machine Learning/Evaluation/Calibration|Calibration]] |
+| Is the classifier right at its chosen threshold? | Precision, recall, F1, confusion matrix | [[Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation\|Classification Evaluation]] |
+| How good is the ranking across all thresholds? | ROC-AUC, PR-AUC | [[Home/AI & ML/Machine Learning/Evaluation/ROC-AUC and PR-AUC\|ROC-AUC and PR-AUC]] |
+| Can I trust the predicted probabilities? | Brier score, ECE, reliability diagrams | [[Home/AI & ML/Machine Learning/Evaluation/Calibration\|Calibration]] |
 | How far off are continuous predictions? | RMSE, MAE, MAPE, quantile loss | This hub (summary below) |
-| Did the right items rank at the top of a result list? | NDCG, MAP, MRR | [[Home/AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics|RAG Monitoring]] |
+| Did the right items rank at the top of a result list? | NDCG, MAP, MRR | [[Home/AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics\|RAG Monitoring]] |
 
 Pick the family from the decision, not from habit: threshold metrics for a fixed operating point, ranking metrics for comparing models before a threshold exists, calibration metrics when downstream logic consumes probabilities rather than labels.
 

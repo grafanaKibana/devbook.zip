@@ -50,8 +50,8 @@ The first engineering decision is usually not which model — it is which class 
 | Stable rules, auditable logic, tightly controlled error cost | Rules / heuristics | Cheapest to build, test, and explain; no training data needed |
 | Labeled data, explicit prediction target, latency or cost constraints | Classic ML (trees, linear models, small transformers) | Millisecond inference, near-zero unit cost, well-understood evaluation |
 | Open-ended language tasks, no training data, fast iteration | LLM via prompting | No training loop; quality scales with prompt and context engineering |
-| LLM plus current or private knowledge | [[Home/AI & ML/LLM/RAG/RAG|RAG]] | Updates knowledge without retraining; keeps answers traceable to sources |
-| Multi-step tasks with tools and feedback loops | [[Home/AI & ML/LLM/Agents/Agents|Agents]] | Only when simpler single-call patterns demonstrably fall short |
+| LLM plus current or private knowledge | [[Home/AI & ML/LLM/RAG/RAG\|RAG]] | Updates knowledge without retraining; keeps answers traceable to sources |
+| Multi-step tasks with tools and feedback loops | [[Home/AI & ML/LLM/Agents/Agents\|Agents]] | Only when simpler single-call patterns demonstrably fall short |
 
 Whatever the choice, the same operational backbone applies: define success metrics before building, evaluate on held-out data, deploy through the [[Spectrum Of Automations|spectrum of automation]], and monitor for drift and regressions.
 

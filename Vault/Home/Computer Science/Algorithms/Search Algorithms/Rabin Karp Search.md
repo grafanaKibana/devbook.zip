@@ -47,6 +47,14 @@ graph TD
   K --> E
 ```
 
+## Visualization
+
+The card slides the pattern strip beneath the text strip, with a rolling-hash badge under the viz showing the window hash updated in O(1) at each slide. Watch how cheap non-matching windows are — a hash mismatch skips straight to the next slide — while a hash hit still triggers the character-by-character verification before a match is reported.
+
+```steptrace
+{"algorithm":"rabin-karp","text":"GEEKSFORGEEKS","pattern":"GEEK"}
+```
+
 ## Example
 
 ```text

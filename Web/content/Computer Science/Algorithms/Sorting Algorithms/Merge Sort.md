@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-08T16:14:17.341+03:00
-modified: 2026-07-08T16:14:17.341+03:00
-published: 2026-07-08T16:14:17.341+03:00
+created: 2026-07-09T20:18:11.570Z
+modified: 2026-07-09T20:18:11.570Z
+published: 2026-07-09T20:18:11.570Z
 topic:
   - Computer Science
 subtopic:
@@ -31,6 +31,14 @@ graph TD
   D --> F[merge two sorted halves]
   E --> F
   F --> R
+```
+
+## Visualization
+
+The card animates the split-then-merge: blue marks the pair being compared at the heads of the two halves, violet marks the element being moved into place, and bars turn green with a white check as a merged run locks into sorted order. The i/j pins track the two read heads; WATCH shows i, j, and the swap count — watch sorted runs double in width with each round of merging.
+
+```steptrace
+{"algorithm":"merge-sort","array":[8,3,5,1,9,2,7,4]}
 ```
 
 ## Complexity

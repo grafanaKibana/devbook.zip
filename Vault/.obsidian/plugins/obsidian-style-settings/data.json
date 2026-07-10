@@ -6,7 +6,7 @@
   "obsidian-velocity@@line-height-normal": "1.6",
   "obsidian-velocity@@vl-layout-padding": "8px",
   "obsidian-velocity-config@@disable-list-styling": false,
-  "obsidian-velocity-config@@disable-callout-styling": false,
+  "obsidian-velocity-config@@disable-callout-styling": true,
   "obsidian-velocity-config@@disable-custom-icons": false,
   "obsidian-velocity-config@@restore-table-scroll": false,
   "obsidian-velocity-config@@restore-indent-guide": false,

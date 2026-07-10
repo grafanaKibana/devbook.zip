@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-08T16:14:17.339+03:00
-modified: 2026-07-08T16:14:17.339+03:00
-published: 2026-07-08T16:14:17.339+03:00
+created: 2026-07-09T20:18:37.171Z
+modified: 2026-07-09T20:18:37.172Z
+published: 2026-07-09T20:18:37.172Z
 topic:
   - Computer Science
 subtopic:
@@ -47,6 +47,14 @@ graph TD
   I --> C
   H -->|No| J[Increment i]
   J --> B
+```
+
+## Visualization
+
+The card slides the pattern strip beneath the text strip: green marks the region matched so far, amber flags the mismatching character. Watch what happens on a mismatch — thanks to the prefix table the pattern jumps forward by more than one position, while the text pointer never moves backward.
+
+```steptrace
+{"algorithm":"kmp","text":"ABABCABAB","pattern":"ABAB"}
 ```
 
 ## Example

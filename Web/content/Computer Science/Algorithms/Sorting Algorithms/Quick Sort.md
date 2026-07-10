@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-08T16:14:17.341+03:00
-modified: 2026-07-08T16:14:17.341+03:00
-published: 2026-07-08T16:14:17.341+03:00
+created: 2026-07-09T20:18:09.247Z
+modified: 2026-07-09T20:18:09.247Z
+published: 2026-07-09T20:18:09.247Z
 topic:
   - Computer Science
 subtopic:
@@ -32,6 +32,14 @@ graph TD
   E --> G[quickSort A from p plus 1 to r]
   F --> R
   G --> R
+```
+
+## Visualization
+
+The card animates the partition loop: blue marks the element being compared against the pivot, violet flashes on a swap, and a bar turns green with a white check when a pivot lands in its final position. The i/j pins track the partition indices; WATCH shows i, j, and the swap count — watch each partition place exactly one pivot, then recurse into the two remaining sides.
+
+```steptrace
+{"algorithm":"quick-sort","array":[8,3,5,1,9,2,7,4]}
 ```
 
 ## Complexity

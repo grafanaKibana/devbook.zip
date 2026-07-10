@@ -1,0 +1,29 @@
+/* Keep notes at 75% of the viewport when space permits, without letting them
+ * overflow the active pane. Mermaid diagrams scale down to fit both dimensions
+ * of the visible viewport.
+ *
+ * Applies in both Reading view and the Markdown editor. The 100% fallback
+ * respects sidebars and split panes.
+ */
+.markdown-preview-sizer,
+.markdown-source-view.mod-cm6 .cm-sizer {
+  box-sizing: border-box;
+  width: min(75vw, 100%);
+  max-width: 100%;
+  margin-inline: auto;
+}
+
+.markdown-rendered :is(.block-language-mermaid, .mermaid) {
+  display: grid;
+  place-items: center;
+  max-inline-size: 100%;
+  max-height: 85dvh;
+}
+
+.markdown-rendered :is(.block-language-mermaid, .mermaid) > svg {
+  display: block;
+  inline-size: auto !important;
+  block-size: auto !important;
+  max-inline-size: 100% !important;
+  max-block-size: 85dvh !important;
+}

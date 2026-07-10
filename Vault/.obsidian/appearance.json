@@ -5,11 +5,12 @@
   "translucency": true,
   "showRibbon": true,
   "showViewHeader": true,
-  "interfaceFontFamily": "SF Pro",
-  "textFontFamily": "SF Pro Text",
+  "interfaceFontFamily": "Schibsted Grotesk",
+  "textFontFamily": "Source Sans 3",
   "theme": "system",
   "baseFontSize": 16,
   "enabledCssSnippets": [
-    "devbook-site-fonts"
-  ]
+    "markdown-max-width"
+  ],
+  "monospaceFontFamily": "IBM Plex Mono"
 }

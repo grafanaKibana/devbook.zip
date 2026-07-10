@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-08T16:14:17.341+03:00
-modified: 2026-07-08T16:14:17.341+03:00
-published: 2026-07-08T16:14:17.341+03:00
+created: 2026-07-09T20:18:05.091Z
+modified: 2026-07-09T20:18:05.091Z
+published: 2026-07-09T20:18:05.091Z
 topic:
   - Computer Science
 subtopic:
@@ -33,6 +33,14 @@ graph TD
   E -->|No| G[Insert key at i plus 1]
   G --> H[Increment j]
   H --> C
+```
+
+## Visualization
+
+The card animates each key being inserted into the growing sorted prefix: blue marks the comparison between the key and a prefix element, violet marks the swap that shifts an element right, and bars turn green with a white check once locked in sorted position. The i/j pins track the active indices; WATCH shows i, j, and the swap count — watch how far each key has to walk left before it fits.
+
+```steptrace
+{"algorithm":"insertion-sort","array":[8,3,5,1,9,2,7,4]}
 ```
 
 ## Complexity

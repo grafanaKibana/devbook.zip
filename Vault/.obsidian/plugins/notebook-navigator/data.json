@@ -245,7 +245,7 @@
   "defaultFolderSort": "title-asc",
   "propertySortKey": "order",
   "propertySortSecondary": "title",
-  "manualSortPropertyKey": "sort_index",
+  "manualSortPropertyKey": "manual_order",
   "manualSortGroupHeaderProperty": "group_header",
   "manualSortNewNotePlacement": "below-selected-note",
   "confirmBeforeManualSort": true,
@@ -536,34 +536,20 @@
     }
   },
   "collapsedPinnedContexts": {},
-  "fileIcons": {},
+  "fileIcons": {
+    "Home/Roadmap.canvas": "map"
+  },
   "fileColors": {},
   "fileBackgroundColors": {},
   "folderIcons": {
     "Assets": "book-image",
-    "Templates": "book-dashed",
-    "Home/02 Computer Science": "flask-round",
-    "Home/03 Data Persistence": "database",
-    "Home/04 Networks": "network",
-    "Home/05 Architecture": "building-2",
-    "Home/06 Development Practices": "ruler-dimension-line"
+    "Templates": "book-dashed"
   },
-  "folderColors": {
-    "Home/02 Computer Science": "#ef4444",
-    "Home/03 Data Persistence": "#f97316",
-    "Home/04 Networks": "#f59e0b",
-    "Home/05 Architecture": "#eab308",
-    "Home/06 Development Practices": "#84cc16"
-  },
+  "folderColors": {},
   "folderBackgroundColors": {},
   "folderSortOverrides": {},
   "folderTreeSortOverrides": {},
-  "folderAppearances": {
-    "Home/01 Programming": {
-      "mode": "standard",
-      "previewRows": 5
-    }
-  },
+  "folderAppearances": {},
   "tagIcons": {},
   "tagColors": {},
   "tagBackgroundColors": {},

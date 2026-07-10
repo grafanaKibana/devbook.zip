@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-08T16:14:17.342+03:00
-modified: 2026-07-08T16:14:17.343+03:00
-published: 2026-07-08T16:14:17.343+03:00
+created: 2026-07-09T20:18:46.821Z
+modified: 2026-07-09T20:18:46.821Z
+published: 2026-07-09T20:18:46.821Z
 topic:
   - Computer Science
 subtopic:
@@ -51,6 +51,14 @@ graph TD
 - **Union by rank** attaches the tree of smaller rank (approximate height) under the larger, bounding height at O(log n) before path compression kicks in.
 
 Used alone, either gives O(log n); **together they achieve O(α(n)) amortized** — the reason Union-Find scales to large connectivity workloads. α(n) ≤ 4 for any n that fits in the observable universe.
+
+## Visualization
+
+The card starts with seven singleton nodes, each tinted by the set it belongs to, with arcs showing parent links. Watch two tints merge into one on each `union`, and watch a `find` flatten its path — after compression the visited nodes re-point directly at the root.
+
+```steptrace
+{"algorithm":"union-find","n":7}
+```
 
 ## Cycle Detection
 

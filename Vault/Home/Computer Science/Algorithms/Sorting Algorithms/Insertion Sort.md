@@ -12,7 +12,6 @@ publish: true
 # Intro
 
 Insertion sort grows a sorted prefix by inserting each next element into its correct position within that prefix. It is fast for small inputs and nearly-sorted data, and it is a common building block inside hybrid sorts like Timsort and introsort.
-
 ## Mechanism
 
 Iterate left-to-right. For each element at index `j` (the "key"), shift all larger elements in the sorted prefix one position right, then insert the key into the gap. The sorted prefix grows by one element per iteration.
@@ -29,6 +28,14 @@ graph TD
   E -->|No| G[Insert key at i plus 1]
   G --> H[Increment j]
   H --> C
+```
+
+## Visualization
+
+The card animates each key being inserted into the growing sorted prefix: blue marks the comparison between the key and a prefix element, violet marks the swap that shifts an element right, and bars turn green with a white check once locked in sorted position. The i/j pins track the active indices; WATCH shows i, j, and the swap count — watch how far each key has to walk left before it fits.
+
+```steptrace
+{"algorithm":"insertion-sort","array":[8,3,5,1,9,2,7,4]}
 ```
 
 ## Complexity

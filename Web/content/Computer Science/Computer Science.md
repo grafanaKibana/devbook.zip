@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-08T16:14:17.332+03:00
-modified: 2026-07-08T16:28:37.342+03:00
-published: 2026-07-08T16:28:37.342+03:00
+created: 2026-07-08T15:01:12.514Z
+modified: 2026-07-10T06:12:51.844Z
+published: 2026-07-10T06:12:51.844Z
 tags:
   - FolderNote
 icon: flask-round
@@ -13,7 +13,7 @@ topic:
 subtopic: []
 level:
   - "4"
-status: Done
+status: Creation
 priority: High
 ---
 

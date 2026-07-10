@@ -48,6 +48,15 @@ graph TD
 
 Used alone, either gives O(log n); **together they achieve O(α(n)) amortized** — the reason Union-Find scales to large connectivity workloads. α(n) ≤ 4 for any n that fits in the observable universe.
 
+
+## Visualization
+
+The card starts with seven singleton nodes, each tinted by the set it belongs to, with arcs showing parent links. Watch two tints merge into one on each `union`, and watch a `find` flatten its path — after compression the visited nodes re-point directly at the root.
+
+```steptrace
+{"algorithm":"union-find","n":7}
+```
+
 ## Cycle Detection
 
 Before adding an edge `(u, v)` to a graph, call `find(u)` and `find(v)`. If they return the same root, `u` and `v` are already in the same connected component — adding the edge would create a cycle. If different, call `union(u, v)` to merge the components. This O(α(n)) test is what makes Union-Find the standard tool for incremental connectivity.

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-08T16:14:17.338+03:00
-modified: 2026-07-08T16:14:17.338+03:00
-published: 2026-07-08T16:14:17.338+03:00
+created: 2026-07-09T20:18:30.529Z
+modified: 2026-07-09T20:18:30.529Z
+published: 2026-07-09T20:18:30.529Z
 topic:
   - Computer Science
 subtopic:
@@ -23,6 +23,14 @@ Binary Search finds a target in a sorted array by repeatedly cutting the search 
 - If `a[mid]` is less than target, move `left` to `mid + 1`; if `a[mid]` is greater than target, move `right` to `mid - 1`; if equal, return `mid`.
 - Use `mid = left + (right - left) / 2` to avoid integer overflow in fixed-width integer languages.
 - Complexity: `O(log n)` time, `O(1)` extra space for iterative implementation.
+
+## Visualization
+
+The card probes the sorted array for 83: blue marks the middle element being inspected, and the half that can no longer contain the target is greyed out after every comparison. Watch the live range halve each step — 4 probes here, versus the 15 [[Linear Search]] needs on the same array.
+
+```steptrace
+{"algorithm":"binary-search","array":[4,9,13,18,22,27,31,38,45,52,58,64,70,77,83,91],"target":83}
+```
 
 ## Example
 
@@ -82,7 +90,7 @@ flowchart TD
 
 | Choice | Binary Search | Alternative | Decision criteria |
 | --- | --- | --- | --- |
-| vs linear search | O(log n), needs sorted data | O(n), works on any order | Use binary search when data is already sorted or searched repeatedly; linear search for tiny or one-shot unsorted data. |
+| vs [[Linear Search]] | O(log n), needs sorted data | O(n), works on any order | Use binary search when data is already sorted or searched repeatedly; linear search for tiny or one-shot unsorted data. |
 | vs hash lookup ([[HashMap]]) | O(log n), in-place, supports range queries | O(1) average, extra memory, point lookups only | Use a hash when you only need exact-match point lookups; binary search when you also need ordering, ranges, or no extra memory. |
 | sort-then-search vs scan | Pays O(n log n) sort once | No preprocessing | Sort-and-search wins when many queries amortize the sort; a single query over unsorted data does not justify sorting. |
 

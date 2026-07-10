@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-08T16:14:17.333+03:00
-modified: 2026-07-08T16:14:17.333+03:00
-published: 2026-07-08T16:14:17.333+03:00
+created: 2026-07-09T20:18:23.103Z
+modified: 2026-07-10T08:56:48.755Z
+published: 2026-07-10T08:56:48.755Z
 topic:
   - Computer Science
 subtopic:
@@ -44,6 +44,14 @@ graph TD
   K --> H
   I -->|No| H
   E -->|Yes| L[Output dist and optionally parent]
+```
+
+## Visualization
+
+The card runs the algorithm from A to F: settled nodes turn green, the amber frontier holds nodes waiting in the priority queue, and blue marks the node currently being extracted and relaxed, with each node's tentative distance shown as d:N above it. Watch the d:N values drop as cheaper routes are discovered; at the end the shortest path to F stays highlighted green with its total cost.
+
+```steptrace
+{"algorithm":"dijkstra","start":"A","target":"F","directed":false,"nodes":[{"id":"A"},{"id":"B"},{"id":"C"},{"id":"D"},{"id":"E"},{"id":"F"}],"edges":[{"from":"A","to":"B","weight":2},{"from":"A","to":"C","weight":5},{"from":"B","to":"C","weight":1},{"from":"B","to":"D","weight":6},{"from":"C","to":"D","weight":3},{"from":"D","to":"E","weight":1},{"from":"D","to":"F","weight":4},{"from":"E","to":"F","weight":2}]}
 ```
 
 ## Example
