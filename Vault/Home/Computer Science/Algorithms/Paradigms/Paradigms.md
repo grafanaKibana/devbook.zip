@@ -37,7 +37,7 @@ This folder covers the five most important:
 > [!TIP]
 > A common progression: if backtracking explores the *same* subproblem repeatedly, adding memoisation turns it into dynamic programming; if a greedy choice can be proven always-correct, it replaces DP with something far cheaper.
 
-The paradigms pair up along two axes. **Divide-and-conquer vs dynamic programming** differ only in whether the subproblems overlap — that single fact decides whether memoisation buys you anything. **Backtracking vs branch-and-bound** differ only in what justifies a prune: infeasibility for the former, a provably-worse bound for the latter (the same admissibility condition that [[A* Search]] demands of its heuristic).
+The paradigms pair up along two axes. **Divide-and-conquer vs dynamic programming** differ only in whether the subproblems overlap — that single fact decides whether memoisation buys you anything. **Backtracking vs branch-and-bound** differ only in what justifies a prune: infeasibility for the former, a provably-worse bound for the latter (the same admissibility condition that [[A-Start Search|A* Search]] demands of its heuristic).
 
 They all contrast with [[Home/Computer Science/Algorithms/Patterns/Patterns|patterns]] (two pointers, sliding window), which are concrete coding idioms rather than design philosophies.
 

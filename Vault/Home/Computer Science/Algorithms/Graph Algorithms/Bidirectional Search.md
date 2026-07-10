@@ -14,7 +14,7 @@ publish: true
 
 Bidirectional search runs two searches at once — a forward search from the source and a backward search from the target — and stops when their frontiers meet in the middle. The payoff is exponential: an unidirectional [[DFS BFS|BFS]] that reaches depth `d` expands `O(b^d)` nodes (branching factor `b`), but two searches that each go only halfway expand `O(b^(d/2))` each, and `2·b^(d/2)` is vastly smaller than `b^d`. For `b = 10, d = 6` that is roughly `2,000` nodes instead of `1,000,000`. The intuition: two small circles growing toward each other sweep far less area than one large circle covering the same distance.
 
-Reach for bidirectional search on point-to-point queries in large graphs where the goal is known in advance and the branching factor is high — routing meshes, puzzle state spaces (Rubik's cube, sliding puzzles), and word-ladder problems. It needs a graph you can traverse *backward* from the target (predecessors must be enumerable), so it fits explicit or reversible graphs but not searches where the goal is defined only by a test. It composes with weighting: a bidirectional [[Dijkstra]] or bidirectional [[A* Search]] applies the same halving to cost-based search, and modern road routers (contraction hierarchies) are built on it. When you don't know the target node concretely, or the graph can't be reversed, fall back to unidirectional [[A* Search]] or [[Dijkstra]].
+Reach for bidirectional search on point-to-point queries in large graphs where the goal is known in advance and the branching factor is high — routing meshes, puzzle state spaces (Rubik's cube, sliding puzzles), and word-ladder problems. It needs a graph you can traverse *backward* from the target (predecessors must be enumerable), so it fits explicit or reversible graphs but not searches where the goal is defined only by a test. It composes with weighting: a bidirectional [[Dijkstra]] or bidirectional [[A-Start Search|A* Search]] applies the same halving to cost-based search, and modern road routers (contraction hierarchies) are built on it. When you don't know the target node concretely, or the graph can't be reversed, fall back to unidirectional [[A-Start Search|A* Search]] or [[Dijkstra]].
 
 ## How It Works
 
@@ -86,7 +86,7 @@ flowchart TD
 
 - **What goes wrong**: the backward search has nothing to expand because predecessors of a node aren't available — common when edges are generated on the fly or the goal is defined only by a predicate.
 - **Why it happens**: bidirectional search assumes you can enumerate *incoming* edges (or that the graph is undirected). Directed graphs need a reverse adjacency list; implicit state spaces need an invertible move function.
-- **How to avoid it**: build a reverse adjacency list up front for directed graphs, or confirm every move operator is invertible. If the target is only a goal-test with no concrete node, bidirectional search doesn't apply — use unidirectional [[A* Search]].
+- **How to avoid it**: build a reverse adjacency list up front for directed graphs, or confirm every move operator is invertible. If the target is only a goal-test with no concrete node, bidirectional search doesn't apply — use unidirectional [[A-Start Search|A* Search]].
 
 ### Unbalanced frontiers erase the speedup
 
@@ -99,11 +99,11 @@ flowchart TD
 | Choice | Bidirectional | Unidirectional | Decision criteria |
 | --- | --- | --- | --- |
 | vs [[DFS BFS|BFS]] | `O(b^(d/2))` time and space | `O(b^d)` | Use bidirectional for point-to-point queries with a known target and high branching; plain BFS when the graph is small or the target isn't a concrete node. |
-| vs [[A* Search]] | Bidirectional A* roughly square-roots the explored region | A* with a good heuristic | Bidirectional wins on large graphs with reversible edges; a single strong heuristic and forward-only A* is simpler when the graph can't be reversed or the heuristic already prunes hard. |
+| vs [[A-Start Search|A* Search]] | Bidirectional A* roughly square-roots the explored region | A* with a good heuristic | Bidirectional wins on large graphs with reversible edges; a single strong heuristic and forward-only A* is simpler when the graph can't be reversed or the heuristic already prunes hard. |
 | Heuristic design | Front-to-front: accurate, expensive | Front-to-back: cheap, weaker | Front-to-back is the default; front-to-front only pays off when its sharper focus outweighs the many extra pairwise heuristic evaluations. |
 | Cost model | Bidirectional [[Dijkstra]] for weighted graphs | Bidirectional BFS for unweighted | Use the weighted variant when edge costs differ; the termination test generalizes from frontier depth to frontier minimum `f`. |
 
-Consistent with the [[A* Search]] and [[Greedy Best-First Search]] tables: bidirectional search is an orthogonal *optimization* of an existing search (BFS, Dijkstra, or A*), not a different point on the greedy–Dijkstra spectrum. Layer it on when the query is point-to-point and the graph is reversible; it does not replace a good heuristic, it multiplies its effect.
+Consistent with the [[A-Start Search|A* Search]] and [[Greedy Best-First Search]] tables: bidirectional search is an orthogonal *optimization* of an existing search (BFS, Dijkstra, or A*), not a different point on the greedy–Dijkstra spectrum. Layer it on when the query is point-to-point and the graph is reversible; it does not replace a good heuristic, it multiplies its effect.
 
 ## Questions
 
@@ -123,7 +123,7 @@ Consistent with the [[A* Search]] and [[Greedy Best-First Search]] tables: bidir
 > - The graph must be searchable *backward* from the target: predecessors must be enumerable (a reverse adjacency list for directed graphs, or an invertible move function for implicit state spaces).
 > - The target must be a concrete node, not merely a goal-test, since the backward search needs a starting point.
 > - For bidirectional heuristic search, front-to-back estimates distance to the opposite search's fixed origin (cheap, weaker), while front-to-front estimates distance to the opposite search's current frontier (accurate, expensive).
-> - These requirements decide applicability: on a reversible, point-to-point routing graph bidirectional A* is a big win, but on a forward-only implicit search defined by a goal predicate it simply doesn't apply — pick unidirectional [[A* Search]] there.
+> - These requirements decide applicability: on a reversible, point-to-point routing graph bidirectional A* is a big win, but on a forward-only implicit search defined by a goal predicate it simply doesn't apply — pick unidirectional [[A-Start Search|A* Search]] there.
 
 ## References
 

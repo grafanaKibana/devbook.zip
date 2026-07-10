@@ -27,7 +27,7 @@ Four moving parts:
 
 ### The bound must be optimistic — the A* connection
 
-Correctness hinges on one condition: the bound must be **optimistic (admissible)** — it must never be *worse* than the true best achievable in the subtree. If a maximisation bound ever *under*-estimates, you might prune a subtree that actually contained the optimum, and return a wrong answer. This is the *exact* same admissibility condition as [[A* Search]]'s heuristic, which must never *over*estimate the remaining distance to the goal or A\* can settle a node before its true shortest path is found. Both algorithms explore a tree guided by an optimistic estimate of "how good could this get," and both stay correct only while that estimate never lies in the pessimistic direction. Branch-and-bound is, in effect, A\* applied to the decision tree of an optimisation problem; the bounding function is its heuristic.
+Correctness hinges on one condition: the bound must be **optimistic (admissible)** — it must never be *worse* than the true best achievable in the subtree. If a maximisation bound ever *under*-estimates, you might prune a subtree that actually contained the optimum, and return a wrong answer. This is the *exact* same admissibility condition as [[A-Start Search|A* Search]]'s heuristic, which must never *over*estimate the remaining distance to the goal or A\* can settle a node before its true shortest path is found. Both algorithms explore a tree guided by an optimistic estimate of "how good could this get," and both stay correct only while that estimate never lies in the pessimistic direction. Branch-and-bound is, in effect, A\* applied to the decision tree of an optimisation problem; the bounding function is its heuristic.
 
 The tension is the same too: a **tighter** bound prunes more (explores fewer nodes) but costs more to compute per node, exactly as a sharper A\* heuristic expands fewer nodes but costs more per expansion. A loose bound (say, "assume every remaining item fits at full value") is cheap but prunes little; the art is a bound that is tight yet fast.
 
@@ -93,7 +93,7 @@ flowchart TD
 
 - **What goes wrong**: if the bound ever estimates a subtree as *worse* than it truly is (under-estimating for maximisation), branch-and-bound prunes a branch that contained the optimal solution and returns a wrong answer.
 - **Why it happens**: people tune bounds for tightness and accidentally cross from optimistic to pessimistic, or forget the relaxation must dominate the true objective.
-- **How to avoid it**: prove the bound is admissible — for maximisation it must be `≥` the true best in the subtree, for minimisation `≤`. This is the same admissibility rule as an [[A* Search]] heuristic; when in doubt, use a provably valid relaxation (LP relaxation, ignoring integrality) even if looser.
+- **How to avoid it**: prove the bound is admissible — for maximisation it must be `≥` the true best in the subtree, for minimisation `≤`. This is the same admissibility rule as an [[A-Start Search|A* Search]] heuristic; when in doubt, use a provably valid relaxation (LP relaxation, ignoring integrality) even if looser.
 
 ### Best-first search exhausts memory
 
@@ -128,7 +128,7 @@ flowchart TD
 > [!QUESTION]- Why must the bounding function be optimistic, and how does that mirror A* search?
 > - The bound is an estimate of the best achievable in a subtree; pruning happens when that estimate is no better than the incumbent.
 > - If the bound ever under-estimates (for maximisation), a subtree containing the true optimum could be pruned — giving a wrong answer.
-> - So the bound must be **admissible**: never worse than the real subtree optimum — the exact same condition as an [[A* Search]] heuristic never overestimating the remaining cost.
+> - So the bound must be **admissible**: never worse than the real subtree optimum — the exact same condition as an [[A-Start Search|A* Search]] heuristic never overestimating the remaining cost.
 > - Both algorithms are guided tree searches whose correctness depends on an estimate that only ever errs in the optimistic direction; B&B is essentially A* over an optimisation decision tree.
 > - This is why you can safely borrow LP relaxations as bounds: an optimal fractional solution provably dominates the integer one, so it can never lie pessimistically.
 

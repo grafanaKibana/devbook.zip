@@ -14,7 +14,7 @@ publish: true
 
 Greedy Best-First Search (GBFS) expands whichever frontier node *looks* closest to the goal, ranking the priority queue by the heuristic `h(n)` alone — the estimated remaining cost — and ignoring `g(n)`, the cost already paid to get there. This single-minded focus makes it fast: on an open map it charges almost straight at the goal, expanding far fewer nodes than any cost-aware search. The catch is that it never reconsiders how expensive the road behind it was, so it is **neither optimal** (the path it returns can be much longer than the shortest) **nor complete** on infinite graphs (it can chase a forever-improving heuristic down a fruitless branch and never terminate).
 
-The clean way to see GBFS is as one extreme of a spectrum. At the other extreme sits [[Dijkstra]], which ranks purely by `g` and ignores the goal entirely — slow but optimal. [[A* Search]] is the principled middle: it ranks by `f = g + h`, keeping GBFS's goal-seeking pull while restoring optimality. Reach for GBFS only when you need *a* path fast and don't care that it's suboptimal — some level-of-detail game AI, quick reachability probes, or as the inner loop of a larger anytime planner. When the path cost actually matters, use [[A* Search]] instead; the extra bookkeeping of tracking `g` is cheap and buys you correctness.
+The clean way to see GBFS is as one extreme of a spectrum. At the other extreme sits [[Dijkstra]], which ranks purely by `g` and ignores the goal entirely — slow but optimal. [[A-Start Search|A* Search]] is the principled middle: it ranks by `f = g + h`, keeping GBFS's goal-seeking pull while restoring optimality. Reach for GBFS only when you need *a* path fast and don't care that it's suboptimal — some level-of-detail game AI, quick reachability probes, or as the inner loop of a larger anytime planner. When the path cost actually matters, use [[A-Start Search|A* Search]] instead; the extra bookkeeping of tracking `g` is cheap and buys you correctness.
 
 ## How It Works
 
@@ -25,7 +25,7 @@ The clean way to see GBFS is as one extreme of a spectrum. At the other extreme 
 
 The defining move is in step 3: because the queue key is `h(v)` and not `g[v] + h(v)`, GBFS has no memory of accumulated cost. It commits to the direction that minimizes estimated distance-to-goal at each step, which is exactly why it is fast and exactly why it can be fooled.
 
-Complexity: worst case `O(b^m)` time and space where `b` is the branching factor and `m` the maximum depth — the same bound as an uninformed search when the heuristic misleads. With a good heuristic on a well-behaved map it approaches `O(b·d)`, expanding close to a straight line of `d` nodes to the goal. Like [[A* Search]], it holds every generated node in memory, so space is the practical ceiling.
+Complexity: worst case `O(b^m)` time and space where `b` is the branching factor and `m` the maximum depth — the same bound as an uninformed search when the heuristic misleads. With a good heuristic on a well-behaved map it approaches `O(b·d)`, expanding close to a straight line of `d` nodes to the goal. Like [[A-Start Search|A* Search]], it holds every generated node in memory, so space is the practical ceiling.
 
 ## Example
 
@@ -78,7 +78,7 @@ flowchart TD
 
 - **What goes wrong**: GBFS terminates with a valid path that can be dramatically longer than the shortest one, with no indication anything is wrong.
 - **Why it happens**: ranking by `h` alone means the algorithm optimizes "get closer to the goal now," never "minimize total cost." A locally attractive step can commit it to an expensive route.
-- **How to avoid it**: if path cost matters at all, use [[A* Search]] — adding `g` to the key is the entire fix. Reserve GBFS for cases where any path is acceptable.
+- **How to avoid it**: if path cost matters at all, use [[A-Start Search|A* Search]] — adding `g` to the key is the entire fix. Reserve GBFS for cases where any path is acceptable.
 
 ### Concave obstacles cause thrashing
 
@@ -96,11 +96,11 @@ flowchart TD
 
 | Choice | Greedy Best-First | Alternative | Decision criteria |
 | --- | --- | --- | --- |
-| vs [[A* Search]] | Ranks by `h`, fast, suboptimal, incomplete | Ranks by `g + h`, optimal with admissible `h` | Use GBFS only when any valid path is fine; use A* whenever total path cost matters — the `g` term is cheap insurance. |
+| vs [[A-Start Search|A* Search]] | Ranks by `h`, fast, suboptimal, incomplete | Ranks by `g + h`, optimal with admissible `h` | Use GBFS only when any valid path is fine; use A* whenever total path cost matters — the `g` term is cheap insurance. |
 | vs [[Dijkstra]] | Goal-directed, ignores accumulated cost | Ignores the goal, ranks by `g`, optimal | GBFS and Dijkstra are the two extremes; pick GBFS for raw speed toward a known goal, Dijkstra for correctness or all-pairs with no heuristic. |
 | Map geometry | Great on open maps, thrashes on concave obstacles | A* handles concave geometry correctly | On maps with pockets or mazes, the greedy pull backfires — switch to a cost-aware search. |
 
-Consistent with the [[A* Search]] and [[Dijkstra]] tradeoff tables: GBFS is the pure-`h` end, Dijkstra the pure-`g` end, and A* the tunable blend. Weighted A* with a large weight `ε` behaves *almost* like GBFS while still tracking `g`, which is usually the better way to buy speed without fully surrendering optimality.
+Consistent with the [[A-Start Search|A* Search]] and [[Dijkstra]] tradeoff tables: GBFS is the pure-`h` end, Dijkstra the pure-`g` end, and A* the tunable blend. Weighted A* with a large weight `ε` behaves *almost* like GBFS while still tracking `g`, which is usually the better way to buy speed without fully surrendering optimality.
 
 ## Questions
 
@@ -108,12 +108,12 @@ Consistent with the [[A* Search]] and [[Dijkstra]] tradeoff tables: GBFS is the 
 > - It orders the frontier by `h(n)` alone, the estimated cost to the goal, and never accounts for `g(n)`, the cost already spent.
 > - Because it ignores accumulated cost, a locally attractive step can lock it into a globally expensive path — so the returned path can be far from shortest (not optimal).
 > - On an infinite graph, or without a visited set, it can chase an ever-improving heuristic down a fruitless branch forever (not complete).
-> - The takeaway: GBFS trades every correctness guarantee for speed, so it only belongs where "any path, fast" is genuinely acceptable — otherwise [[A* Search]] gives you the same goal-seeking behavior with optimality restored.
+> - The takeaway: GBFS trades every correctness guarantee for speed, so it only belongs where "any path, fast" is genuinely acceptable — otherwise [[A-Start Search|A* Search]] gives you the same goal-seeking behavior with optimality restored.
 
 > [!QUESTION]- Where does GBFS sit on the spectrum between Dijkstra and A*?
 > - [[Dijkstra]] ranks purely by `g` (cost-so-far) and ignores the goal — optimal but explores in all directions.
 > - GBFS ranks purely by `h` (cost-to-go) and ignores accumulated cost — fast toward the goal but suboptimal and incomplete.
-> - [[A* Search]] ranks by `f = g + h`, combining both — the principled middle that keeps GBFS's goal pull while regaining optimality.
+> - [[A-Start Search|A* Search]] ranks by `f = g + h`, combining both — the principled middle that keeps GBFS's goal pull while regaining optimality.
 > - Seeing the three as one family clarifies design choices: you're really tuning how much to trust the heuristic, and weighted A* lets you dial continuously between the A* middle and the greedy extreme.
 
 > [!QUESTION]- What is the concave-obstacle failure mode and how do you avoid it?
