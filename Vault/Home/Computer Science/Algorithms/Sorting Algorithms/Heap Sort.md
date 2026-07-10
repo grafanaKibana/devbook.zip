@@ -5,11 +5,11 @@ subtopic:
   - Algorithms
 level:
   - "4"
-status: Ready to Repeat
+status: Creation
 publish: true
 tags:
   - FolderNote
-priority: Low
+priority: Medium
 ---
 
 # Intro
