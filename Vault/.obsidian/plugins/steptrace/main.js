@@ -286,6 +286,33 @@
   white-space: nowrap;
 }
 
+/* The invariant is the teaching layer: TRACE says what changed; this block says
+   why that change is safe. On the terminal frame it becomes a compact RESULT. */
+.steptrace__insight {
+  margin: 0 0 0.9rem;
+  padding: 0.65rem 0.7rem;
+  border-left: 3px solid var(--_blue);
+  background: color-mix(in srgb, var(--_blue) 7%, transparent);
+  min-height: 4.65em;
+}
+.steptrace__insight[data-result="1"] {
+  border-left-color: var(--_green);
+  background: color-mix(in srgb, var(--_green) 9%, transparent);
+}
+.steptrace__insight-label {
+  display: block;
+  margin-bottom: 0.22rem;
+  font: 700 0.58rem/1.2 var(--_font-head);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--_muted);
+}
+.steptrace__insight-text {
+  display: block;
+  font: 600 0.72rem/1.45 var(--_font-mono);
+  color: var(--_text);
+}
+
 /* ============ foot: scrubber + transport + kebab ============ */
 .steptrace__foot {
   margin-top: 1.1rem;
@@ -321,6 +348,37 @@
   background: var(--_accent);
   transform: translateX(-50%);
   left: 0;
+}
+.steptrace__milestones {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.steptrace__milestone {
+  position: absolute;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 1px;
+  border: 1px solid var(--st-page, #fff);
+  background: var(--_muted);
+  transform: translate(-50%, -50%) rotate(45deg);
+  opacity: 0.72;
+}
+.steptrace__milestone[data-passed="1"] {
+  background: var(--_accent);
+  opacity: 1;
+}
+.steptrace__phase {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+  font: 600 0.66rem/1.3 var(--_font-mono);
+  color: var(--_muted);
+}
+.steptrace__phase-name {
+  color: var(--_text);
 }
 .steptrace__transport {
   display: flex;
@@ -436,52 +494,71 @@
   color: var(--_accent);
   font-weight: 600;
 }
-/* speed slider row: thin token track + accent thumb, live value label */
+/* speed slider row: host-native in Obsidian, HTML range fallback on the web */
 .steptrace__speed-row {
   display: flex;
   align-items: center;
   gap: 0.55rem;
   padding: 4px 8px 6px;
 }
-/* .steptrace prefix everywhere: hosts (Obsidian) style input[type=range] at
-   (0,1,1) specificity, which beats a lone class — (0,2,0) wins it back. */
-.steptrace .steptrace__range {
+.steptrace__speed-control {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.steptrace__speed-control > input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+/* Quartz fallback: draw a consistent rail because browser-native range metrics
+   differ. The Obsidian SliderComponent deliberately does not receive this class. */
+.steptrace input.steptrace__range {
   -webkit-appearance: none;
   appearance: none;
   flex: 1 1 auto;
-  height: 14px;
+  min-width: 0; /* a flex item must be allowed to shrink or it overflows the menu */
+  height: 16px;
   margin: 0;
   padding: 0;
   border: 0;
   box-shadow: none;
-  background: transparent;
   cursor: pointer;
+  vertical-align: middle;
+  background-color: transparent;
+  background-image: linear-gradient(var(--_hair), var(--_hair));
+  background-size: 100% 2px;
+  background-position: 0 50%;
+  background-repeat: no-repeat;
 }
-.steptrace .steptrace__range::-webkit-slider-runnable-track {
+.steptrace input.steptrace__range::-webkit-slider-runnable-track {
   -webkit-appearance: none;
-  height: 2px;
+  height: 16px;
   border: 0;
-  border-radius: 2px;
-  background: var(--_hair);
+  background: transparent;
+  box-shadow: none;
 }
-.steptrace .steptrace__range::-moz-range-track {
-  height: 2px;
+.steptrace input.steptrace__range::-moz-range-track {
+  height: 16px;
   border: 0;
-  border-radius: 2px;
-  background: var(--_hair);
+  background: transparent;
+  box-shadow: none;
 }
-.steptrace .steptrace__range::-webkit-slider-thumb {
+/* margin-top = (track 16 − thumb 12) / 2 — webkit offsets the thumb from the
+   track's top edge; Firefox centres it for us. */
+.steptrace input.steptrace__range::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 12px;
   height: 12px;
-  margin-top: -5px;
+  margin-top: 2px;
   border: 0;
   box-shadow: none;
   border-radius: 50%;
   background: var(--_accent);
 }
-.steptrace .steptrace__range::-moz-range-thumb {
+.steptrace input.steptrace__range::-moz-range-thumb {
   width: 12px;
   height: 12px;
   border: 0;
@@ -489,7 +566,7 @@
   border-radius: 50%;
   background: var(--_accent);
 }
-.steptrace .steptrace__range:focus-visible {
+.steptrace input.steptrace__range:focus-visible {
   outline: 2px solid var(--_blue);
   outline-offset: 3px;
 }
@@ -534,6 +611,34 @@
     padding-top: 1rem;
     margin-top: 1rem;
   }
+  .steptrace__rail > .steptrace__trace-label {
+    margin-top: 0;
+  }
+  .steptrace__log {
+    height: auto !important;
+    min-height: 0;
+    overflow: visible;
+  }
+  .steptrace__log-line:not(.steptrace__log-line--cur) {
+    display: none;
+  }
+  .steptrace__log-line--cur {
+    min-height: 0;
+  }
+  .steptrace__insight {
+    min-height: 0;
+  }
+  .steptrace__scrub {
+    height: 24px;
+  }
+  .steptrace__btn,
+  .steptrace__btn--play {
+    width: 44px;
+    height: 44px;
+  }
+  .steptrace__transport {
+    gap: 0.2rem;
+  }
 }
 
 /* ---- bar chart: SHARED by sort + binary-search. A fixed-height stage of
@@ -574,6 +679,15 @@
     height var(--_tween) var(--_spring),
     background var(--_tween) ease,
     opacity var(--_tween) ease;
+}
+.steptrace__fill::before {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--_on-accent);
+  font: 800 0.82rem/1 var(--_font-head);
+  text-shadow: 0 1px 2px color-mix(in srgb, var(--_text) 45%, transparent);
 }
 .steptrace__num {
   font: 600 0.72rem/1 var(--_font-mono);
@@ -621,13 +735,23 @@
   background: var(--_blue);
   opacity: 1;
 }
+.steptrace__bar[data-state="compare"] .steptrace__fill::before {
+  content: "↔";
+}
 .steptrace__bar[data-state="swap"] .steptrace__fill {
   background: var(--_violet);
   opacity: 1;
 }
+.steptrace__bar[data-state="swap"] .steptrace__fill::before {
+  content: "⇄";
+}
 .steptrace__bar[data-state="candidate"] .steptrace__fill {
   background: var(--_amber);
   opacity: 1;
+}
+.steptrace__bar[data-state="candidate"] .steptrace__fill::before {
+  content: "◆";
+  font-size: 0.68rem;
 }
 .steptrace__bar[data-state="sorted"] .steptrace__fill {
   background: var(--_green);
@@ -695,6 +819,11 @@
 }
 .steptrace__bar[data-state="eliminated"] .steptrace__fill {
   opacity: 0.22;
+  background-image: repeating-linear-gradient(
+    135deg,
+    transparent 0 4px,
+    color-mix(in srgb, var(--_text) 28%, transparent) 4px 5px
+  );
 }
 .steptrace__bar[data-state="eliminated"] .steptrace__num {
   opacity: 0.4;
@@ -702,6 +831,9 @@
 .steptrace__bar[data-state="probe"] .steptrace__fill {
   background: var(--_blue);
   opacity: 1;
+}
+.steptrace__bar[data-state="probe"] .steptrace__fill::before {
+  content: "?";
 }
 .steptrace__bar[data-state="found"] .steptrace__fill {
   background: var(--_green);
@@ -774,16 +906,20 @@
   background: color-mix(in srgb, var(--_green) 22%, transparent);
   color: var(--_green);
   font-weight: 700;
+  box-shadow: inset 0 -3px 0 var(--_green);
 }
 .steptrace__cell[data-state="mismatch"] {
   background: color-mix(in srgb, var(--_amber) 22%, transparent);
+  box-shadow: inset 0 0 0 2px var(--_amber);
 }
 .steptrace__cell[data-state="probe"] {
   background: color-mix(in srgb, var(--_blue) 18%, transparent);
+  box-shadow: inset 0 -3px 0 var(--_blue);
 }
 .steptrace__cell[data-state="found"] {
   background: color-mix(in srgb, var(--_green) 22%, transparent);
   color: var(--_green);
+  box-shadow: inset 0 -3px 0 var(--_green);
 }
 
 /* ---- array pointers: segmented strip + tinted window + [ ] brackets ---- */
@@ -895,6 +1031,7 @@
   border: 1px solid color-mix(in srgb, var(--_text) 11%, transparent);
 }
 .steptrace__dp td {
+  position: relative;
   height: 38px;
   text-align: center;
   color: var(--_text);
@@ -903,18 +1040,34 @@
     background var(--_tween) ease,
     color 0.22s ease;
 }
+.steptrace__dp td::after {
+  position: absolute;
+  right: 3px;
+  top: 2px;
+  font: 800 8px/1 var(--_font-mono);
+  color: currentColor;
+}
 .steptrace__dp td[data-state="dep"] {
   background: color-mix(in srgb, var(--_amber) 20%, transparent);
+}
+.steptrace__dp td[data-state="dep"]::after {
+  content: "↖";
 }
 .steptrace__dp td[data-state="cur"] {
   background: color-mix(in srgb, var(--_blue) 20%, transparent);
   color: var(--_blue);
   font-weight: 700;
 }
+.steptrace__dp td[data-state="cur"]::after {
+  content: "■";
+}
 .steptrace__dp td[data-state="path"] {
   background: color-mix(in srgb, var(--_green) 22%, transparent);
   color: var(--_green);
   font-weight: 700;
+}
+.steptrace__dp td[data-state="path"]::after {
+  content: "✓";
 }
 
 /* ---- union-find: nodes + arcs share the GRAPH styling (opaque backing, tinted
@@ -942,6 +1095,7 @@
 }
 .steptrace__ufarc[data-active="true"] {
   stroke: var(--_violet);
+  stroke-dasharray: 5 3;
 }
 
 /* ---- bits: the three lanes read as an equation (x / − 1 / & = result), with a
@@ -1323,9 +1477,11 @@
 }
 .steptrace__edge[data-active="true"] {
   stroke: var(--_violet);
+  stroke-dasharray: 3 3;
 }
 .steptrace__edge[data-selected="true"] {
   stroke: var(--_green);
+  stroke-dasharray: 7 3;
 }
 .steptrace__edge-label {
   fill: var(--_muted);
@@ -1359,6 +1515,10 @@
   fill: var(--_muted);
   font: 600 10px var(--_font-mono);
 }
+.steptrace__node .steptrace__nmark {
+  fill: var(--_muted);
+  font: 800 9px var(--_font-mono);
+}
 .steptrace__node[data-state="visited"] .steptrace__ncirc {
   fill: color-mix(in srgb, var(--_green) 20%, transparent);
   stroke: var(--_green);
@@ -1366,6 +1526,7 @@
 .steptrace__node[data-state="frontier"] .steptrace__ncirc {
   fill: color-mix(in srgb, var(--_amber) 18%, transparent);
   stroke: var(--_amber);
+  stroke-dasharray: 3 2;
 }
 .steptrace__node[data-state="current"] .steptrace__ncirc {
   fill: color-mix(in srgb, var(--_blue) 22%, transparent);
@@ -1402,14 +1563,24 @@
 .steptrace__swatch--current {
   background: color-mix(in srgb, var(--_blue) 22%, transparent);
   border-color: var(--_blue);
+  border-radius: 2px;
 }
 .steptrace__swatch--frontier {
   background: color-mix(in srgb, var(--_amber) 18%, transparent);
   border-color: var(--_amber);
+  border-style: dashed;
+  transform: rotate(45deg) scale(0.86);
 }
 .steptrace__swatch--visited {
   background: color-mix(in srgb, var(--_green) 20%, transparent);
   border-color: var(--_green);
+}
+.steptrace__swatch--visited::after {
+  content: "✓";
+  display: block;
+  color: var(--_green);
+  font: 900 8px/7px var(--_font-head);
+  text-align: center;
 }
 
 /* ---- shared: status + toolbar ---- */
@@ -1694,6 +1865,7 @@
       // so bubble/insertion/selection frames stay byte-identical.
       if (this._range) frame.range = this._range.slice()
       if (this._pivot != null) frame.pivot = this._pivot
+      if (this._from != null) frame.from = this._from
       this.frames.push(Object.freeze(frame))
     }
 
@@ -1714,11 +1886,15 @@
       this._push("swap", [i, j], message)
     }
 
-    /** Overwrite index i with value v (insertion-style shift); counts as a move. */
-    overwrite(i, v, message) {
+    /** Overwrite index i with value v (insertion-style shift); counts as a move.
+     *  `from` is the index the value travelled from — the view animates the bar
+     *  sliding along that path. Omit when the value has no on-screen origin. */
+    overwrite(i, v, message, from) {
       this.a[i] = v
       this.swaps++
+      this._from = from == null ? null : from
       this._push("overwrite", [i], message)
+      this._from = null
     }
 
     /** Track a candidate index (running min / insertion target), or null to clear. */
@@ -1758,6 +1934,7 @@
       this._key = null
       this._range = null
       this._pivot = null
+      this._from = null
     }
 
     done(message) {
@@ -1952,7 +2129,11 @@
     /** Compare text[ti] with pattern[pj] at alignment `shift`. */
     compare(ti, pj, shift, isMatch, message) {
       this.shift = shift
-      this._push("compare", { cmpT: ti, cmpP: pj, cmpResult: isMatch ? "match" : "mismatch" }, message)
+      this._push(
+        "compare",
+        { cmpT: ti, cmpP: pj, cmpResult: isMatch ? "match" : "mismatch" },
+        message,
+      )
     }
     /** Slide the pattern to a new alignment. */
     slide(shift, message) {
@@ -1990,9 +2171,10 @@
     get value() {
       return this.a.slice()
     }
-    _push(message) {
+    _push(type, message) {
       this.frames.push(
         Object.freeze({
+          type,
           array: this.a.slice(),
           pointers: { ...this.pointers },
           window: this.window ? this.window.slice() : null,
@@ -2002,7 +2184,7 @@
       )
     }
     init(message) {
-      this._push(message)
+      this._push("init", message)
     }
     /** One logical step: update named pointers, the window span, and/or marks. */
     step(update, message) {
@@ -2010,10 +2192,10 @@
       if (update.pointers) this.pointers = { ...update.pointers }
       if ("window" in update) this.window = update.window ? update.window.slice() : null
       if (update.mark) this.marked = this.marked.concat(update.mark)
-      this._push(message)
+      this._push(update.mark ? "match" : "step", message)
     }
     done(message) {
-      this._push(message)
+      this._push("done", message)
     }
   }
 
@@ -2034,28 +2216,29 @@
       this.rowLabels = rowLabels.slice()
       this.colLabels = colLabels.slice()
       this.grid = rowLabels.map(() => colLabels.map(() => null))
-      this._push(message)
+      this._push("init", message)
     }
     set(r, c, val, deps, message) {
       this.cur = [r, c]
       this.deps = (deps || []).map((d) => d.slice())
       this.grid[r][c] = val
-      this._push(message)
+      this._push("compute", message)
     }
     markPath(cells, message) {
       this.path = cells.map((p) => p.slice())
       this.cur = null
       this.deps = []
-      this._push(message)
+      this._push("trace", message)
     }
     done(message) {
       this.cur = null
       this.deps = []
-      this._push(message)
+      this._push("done", message)
     }
-    _push(message) {
+    _push(type, message) {
       this.frames.push(
         Object.freeze({
+          type,
           rowLabels: this.rowLabels.slice(),
           colLabels: this.colLabels.slice(),
           grid: this.grid.map((row) => row.slice()),
@@ -2083,11 +2266,12 @@
       while (this.parent[x] !== x) x = this.parent[x]
       return x
     }
-    _push(message) {
+    _push(type, message) {
       const roots = []
       for (let i = 0; i < this.n; i++) roots.push(this._root(i))
       this.frames.push(
         Object.freeze({
+          type,
           n: this.n,
           parent: this.parent.slice(),
           roots,
@@ -2098,30 +2282,30 @@
       )
     }
     init(message) {
-      this._push(message)
+      this._push("init", message)
     }
     /** Highlight the parent-pointer path root-ward from a node. */
     findPath(path, message) {
       this.highlight = path.slice()
       this.activeEdge = null
-      this._push(message)
+      this._push("find", message)
     }
     /** Point `child` at `par` (a union link or path compression). */
     setParent(child, par, message) {
       this.parent[child] = par
       this.activeEdge = [child, par]
-      this._push(message)
+      this._push("link", message)
     }
     /** Clear transient highlights. */
     clear(message) {
       this.highlight = []
       this.activeEdge = null
-      this._push(message)
+      this._push("clear", message)
     }
     done(message) {
       this.highlight = []
       this.activeEdge = null
-      this._push(message)
+      this._push("done", message)
     }
   }
 
@@ -2307,7 +2491,12 @@
     /** Try (row,col) fails: it clashes with the queen already in `attackerRow`. */
     reject(row, col, attackerRow, message) {
       this.pruned++
-      this._push("reject", { row, col }, { row: attackerRow, col: this._queens[attackerRow] }, message)
+      this._push(
+        "reject",
+        { row, col },
+        { row: attackerRow, col: this._queens[attackerRow] },
+        message,
+      )
     }
     place(row, col, message) {
       this._queens[row] = col
@@ -2552,7 +2741,8 @@
       cur.sort((a, b) => key.get(a) - key.get(b) || (a < b ? -1 : a > b ? 1 : 0))
     }
     for (let pass = 0; pass < 4; pass++) {
-      if (pass % 2 === 0) for (let li = 1; li < layers.length; li++) sweep(li, posIn(layers[li - 1]))
+      if (pass % 2 === 0)
+        for (let li = 1; li < layers.length; li++) sweep(li, posIn(layers[li - 1]))
       else for (let li = layers.length - 2; li >= 0; li--) sweep(li, posIn(layers[li + 1]))
     }
 
@@ -2577,7 +2767,12 @@
     // (see layeredLayout). Explicit-coords contract: if EVERY node has x/y, keep
     // them untouched.
     const needLayout = src.nodes.some((n) => n.x == null || n.y == null)
-    let startId = config.start != null ? String(config.start) : src.start != null ? String(src.start) : String(src.nodes[0].id)
+    let startId =
+      config.start != null
+        ? String(config.start)
+        : src.start != null
+          ? String(src.start)
+          : String(src.nodes[0].id)
     if (!src.nodes.some((n) => String(n.id) === startId)) startId = String(src.nodes[0].id)
     const laid = needLayout ? layeredLayout(src.nodes, src.edges, !!src.directed, startId) : null
     const nodes = needLayout
@@ -2586,7 +2781,11 @@
     const ids = new Set(nodes.map((n) => n.id))
     const edges = (src.edges || [])
       .filter((e) => ids.has(String(e.from)) && ids.has(String(e.to)))
-      .map((e) => ({ from: String(e.from), to: String(e.to), weight: e.weight == null ? null : Number(e.weight) }))
+      .map((e) => ({
+        from: String(e.from),
+        to: String(e.to),
+        weight: e.weight == null ? null : Number(e.weight),
+      }))
     const directed = !!src.directed
     const start = ids.has(startId) ? startId : nodes[0].id
     return { nodes, edges, directed, start }
@@ -2639,7 +2838,12 @@
       ops.compare(i, i - 1, `Take ${key} (index ${i}) and compare it into the sorted prefix.`)
       let j = i - 1
       while (j >= 0 && ops.value[j] > key) {
-        ops.overwrite(j + 1, ops.value[j], `${ops.value[j]} > ${key}: shift it right into index ${j + 1}.`)
+        ops.overwrite(
+          j + 1,
+          ops.value[j],
+          `${ops.value[j]} > ${key}: shift it right into index ${j + 1}.`,
+          j,
+        )
         j--
         if (j >= 0) ops.compare(j, null, `Compare ${key} with ${ops.value[j]}.`)
       }
@@ -2689,18 +2893,29 @@
       const pivot = ops.value[hi]
       ops.range(lo, hi)
       ops.pivot(hi)
-      ops.candidate(hi, `Partition [${lo}, ${hi}]: pivot ${pivot} (index ${hi}) — send values < ${pivot} left, > ${pivot} right.`)
+      ops.candidate(
+        hi,
+        `Partition [${lo}, ${hi}]: pivot ${pivot} (index ${hi}) — send values < ${pivot} left, > ${pivot} right.`,
+      )
       let i = lo
       for (let j = lo; j < hi; j++) {
         ops.compare(j, hi, `Compare ${ops.value[j]} with pivot ${pivot}.`)
         if (ops.value[j] < pivot) {
-          if (i !== j) ops.swap(i, j, `${ops.value[j]} < ${pivot}: move it into the left region at index ${i}.`)
+          if (i !== j)
+            ops.swap(
+              i,
+              j,
+              `${ops.value[j]} < ${pivot}: move it into the left region at index ${i}.`,
+            )
           i++
         }
       }
       if (i !== hi) ops.swap(i, hi, `Swap the pivot ${pivot} into index ${i}.`)
       ops.pivot(i)
-      ops.candidate(null, `Pivot ${pivot} settles at index ${i} — everything left is < ${pivot}, everything right is > ${pivot}.`)
+      ops.candidate(
+        null,
+        `Pivot ${pivot} settles at index ${i} — everything left is < ${pivot}, everything right is > ${pivot}.`,
+      )
       ops.pivot(null)
       ops.markSorted([i], [i], `Index ${i} is final — it never moves again.`)
       ops.range(null)
@@ -2715,12 +2930,18 @@
       const p = partition(lo, hi)
       if (p - 1 - lo >= 1) {
         ops.range(lo, p - 1)
-        ops.candidate(null, `Recurse into the left half [${lo}, ${p - 1}] (the values below the pivot).`)
+        ops.candidate(
+          null,
+          `Recurse into the left half [${lo}, ${p - 1}] (the values below the pivot).`,
+        )
       }
       qs(lo, p - 1)
       if (hi - (p + 1) >= 1) {
         ops.range(p + 1, hi)
-        ops.candidate(null, `Recurse into the right half [${p + 1}, ${hi}] (the values above the pivot).`)
+        ops.candidate(
+          null,
+          `Recurse into the right half [${p + 1}, ${hi}] (the values above the pivot).`,
+        )
       }
       qs(p + 1, hi)
     }
@@ -2739,10 +2960,18 @@
       while (2 * root + 1 < hi) {
         let child = 2 * root + 1
         if (child + 1 < hi) {
-          ops.compare(child, child + 1, `Compare children ${ops.value[child]} and ${ops.value[child + 1]}.`)
+          ops.compare(
+            child,
+            child + 1,
+            `Compare children ${ops.value[child]} and ${ops.value[child + 1]}.`,
+          )
           if (ops.value[child + 1] > ops.value[child]) child++
         }
-        ops.compare(root, child, `Compare parent ${ops.value[root]} with its larger child ${ops.value[child]}.`)
+        ops.compare(
+          root,
+          child,
+          `Compare parent ${ops.value[root]} with its larger child ${ops.value[child]}.`,
+        )
         if (ops.value[root] >= ops.value[child]) break
         ops.swap(root, child, `Parent is smaller — sift it down.`)
         root = child
@@ -2776,27 +3005,52 @@
         ops.range(lo, hi - 1)
         const left = ops.value.slice(lo, mid)
         const right = ops.value.slice(mid, hi)
-        ops.candidate(null, `Merge the left run [${lo}, ${mid - 1}] and the right run [${mid}, ${hi - 1}] into one sorted run [${lo}, ${hi - 1}].`)
+        ops.candidate(
+          null,
+          `Merge the left run [${lo}, ${mid - 1}] and the right run [${mid}, ${hi - 1}] into one sorted run [${lo}, ${hi - 1}].`,
+        )
         let i = 0
         let j = 0
         let k = lo
+        // `from` = the run-head slot the value is lifted out of, so the view can
+        // slide the bar from where it lived into the merged position.
         while (i < left.length && j < right.length) {
           if (left[i] <= right[j]) {
-            ops.overwrite(k, left[i], `${left[i]} ≤ ${right[j]}: place ${left[i]} from the left half at index ${k}.`)
+            ops.overwrite(
+              k,
+              left[i],
+              `${left[i]} ≤ ${right[j]}: place ${left[i]} from the left half at index ${k}.`,
+              lo + i,
+            )
             i++
           } else {
-            ops.overwrite(k, right[j], `${right[j]} < ${left[i]}: place ${right[j]} from the right half at index ${k}.`)
+            ops.overwrite(
+              k,
+              right[j],
+              `${right[j]} < ${left[i]}: place ${right[j]} from the right half at index ${k}.`,
+              mid + j,
+            )
             j++
           }
           k++
         }
         while (i < left.length) {
-          ops.overwrite(k, left[i], `Copy the remaining ${left[i]} from the left half at index ${k}.`)
+          ops.overwrite(
+            k,
+            left[i],
+            `Copy the remaining ${left[i]} from the left half at index ${k}.`,
+            lo + i,
+          )
           i++
           k++
         }
         while (j < right.length) {
-          ops.overwrite(k, right[j], `Copy the remaining ${right[j]} from the right half at index ${k}.`)
+          ops.overwrite(
+            k,
+            right[j],
+            `Copy the remaining ${right[j]} from the right half at index ${k}.`,
+            mid + j,
+          )
           j++
           k++
         }
@@ -2835,7 +3089,11 @@
         ops.edge(u, v, `Explore edge ${u} → ${v}.`)
         seen.add(v)
         queue.push(v)
-        ops.enqueue(v, ops.dist(u) + 1, `Discover ${v} — enqueue it at distance ${ops.dist(u) + 1}.`)
+        ops.enqueue(
+          v,
+          ops.dist(u) + 1,
+          `Discover ${v} — enqueue it at distance ${ops.dist(u) + 1}.`,
+        )
       }
     }
     ops.done(
@@ -2846,44 +3104,48 @@
   })
 
   // ───────────────────────────────── dfs ─────────────────────────────────
-  registerGraph("dfs", { label: "Depth-first search", frontierLabel: "Stack (bottom → top)" }, (input, ops, graph) => {
-    const adj = adjacency(graph)
-    const start = input.start
-    const target = input.target != null && input.target !== start ? String(input.target) : null
-    if (target) ops.target(target)
-    ops.init(
-      target
-        ? `Depth-first search for ${target}, starting at ${start} — dive as deep as possible with a stack, backtracking at dead ends, until the target is popped.`
-        : `Depth-first search from ${start} — dive as deep as possible using a stack, backtracking when a node has no unvisited neighbours.`,
-    )
-    const stack = [start]
-    const seen = new Set([start])
-    ops.enqueue(start, 0, `Push the start node ${start} onto the stack.`)
-    while (stack.length) {
-      const u = stack.pop()
-      ops.visit(u, `Pop ${u} off the stack and mark it visited.`)
-      if (u === target) {
-        ops.done(
-          `Found ${target} after visiting only ${ops.visitedCount} nodes — but along a depth-${ops.dist(u)} path, with no shortest-path guarantee.`,
-        )
-        return
+  registerGraph(
+    "dfs",
+    { label: "Depth-first search", frontierLabel: "Stack (bottom → top)" },
+    (input, ops, graph) => {
+      const adj = adjacency(graph)
+      const start = input.start
+      const target = input.target != null && input.target !== start ? String(input.target) : null
+      if (target) ops.target(target)
+      ops.init(
+        target
+          ? `Depth-first search for ${target}, starting at ${start} — dive as deep as possible with a stack, backtracking at dead ends, until the target is popped.`
+          : `Depth-first search from ${start} — dive as deep as possible using a stack, backtracking when a node has no unvisited neighbours.`,
+      )
+      const stack = [start]
+      const seen = new Set([start])
+      ops.enqueue(start, 0, `Push the start node ${start} onto the stack.`)
+      while (stack.length) {
+        const u = stack.pop()
+        ops.visit(u, `Pop ${u} off the stack and mark it visited.`)
+        if (u === target) {
+          ops.done(
+            `Found ${target} after visiting only ${ops.visitedCount} nodes — but along a depth-${ops.dist(u)} path, with no shortest-path guarantee.`,
+          )
+          return
+        }
+        // Push unvisited neighbours in reverse so the lowest id is explored first.
+        const neighbours = adj[u].slice().reverse()
+        for (const v of neighbours) {
+          if (seen.has(v)) continue
+          ops.edge(u, v, `Explore edge ${u} → ${v}.`)
+          seen.add(v)
+          stack.push(v)
+          ops.enqueue(v, ops.dist(u) + 1, `Push ${v} onto the stack (depth ${ops.dist(u) + 1}).`)
+        }
       }
-      // Push unvisited neighbours in reverse so the lowest id is explored first.
-      const neighbours = adj[u].slice().reverse()
-      for (const v of neighbours) {
-        if (seen.has(v)) continue
-        ops.edge(u, v, `Explore edge ${u} → ${v}.`)
-        seen.add(v)
-        stack.push(v)
-        ops.enqueue(v, ops.dist(u) + 1, `Push ${v} onto the stack (depth ${ops.dist(u) + 1}).`)
-      }
-    }
-    ops.done(
-      target
-        ? `${target} is not reachable from ${start} — the stack emptied after ${ops.visitedCount} nodes.`
-        : `Depth-first search complete — visited ${ops.visitedCount} node${ops.visitedCount === 1 ? "" : "s"}.`,
-    )
-  })
+      ops.done(
+        target
+          ? `${target} is not reachable from ${start} — the stack emptied after ${ops.visitedCount} nodes.`
+          : `Depth-first search complete — visited ${ops.visitedCount} node${ops.visitedCount === 1 ? "" : "s"}.`,
+      )
+    },
+  )
 
   // ─────────────────────────────── dijkstra ──────────────────────────────
   registerGraph(
@@ -2902,6 +3164,7 @@
 
       const start = input.start
       const target = input.target != null ? String(input.target) : null
+      if (target) ops.target(target)
       ops.init(
         `Dijkstra from ${start} — repeatedly settle the nearest unsettled node, then relax its edges to shorten neighbours' distances.`,
       )
@@ -2944,12 +3207,18 @@
           for (let cur = target; pred[cur] !== undefined; cur = pred[cur]) path.push(pred[cur])
           path.reverse()
           for (let i = 0; i + 1 < path.length; i++)
-            ops.selectEdge(path[i], path[i + 1], `Shortest path: keep edge ${path[i]}–${path[i + 1]} highlighted.`)
+            ops.selectEdge(
+              path[i],
+              path[i + 1],
+              `Shortest path: keep edge ${path[i]}–${path[i + 1]} highlighted.`,
+            )
           ops.done(`Shortest path ${path.join(" → ")} — total cost ${dist[target]}.`)
         }
       } else {
         // No target: highlight the whole shortest-path tree (one edge per reached node).
-        const reached = graph.nodes.map((n) => n.id).filter((id) => id !== start && pred[id] !== undefined)
+        const reached = graph.nodes
+          .map((n) => n.id)
+          .filter((id) => id !== start && pred[id] !== undefined)
         reached.sort()
         for (const v of reached)
           ops.selectEdge(pred[v], v, `Shortest-path tree: ${pred[v]}–${v} (distance ${dist[v]}).`)
@@ -3008,7 +3277,11 @@
         break
       }
       if (!chosen) break // graph is disconnected
-      ops.edge(chosen.u, chosen.v, `Cheapest edge leaving the tree: ${chosen.u}–${chosen.v} (weight ${chosen.w}).`)
+      ops.edge(
+        chosen.u,
+        chosen.v,
+        `Cheapest edge leaving the tree: ${chosen.u}–${chosen.v} (weight ${chosen.w}).`,
+      )
       ops.selectEdge(chosen.u, chosen.v, `Add ${chosen.u}–${chosen.v} to the tree.`)
       treeEdges.add(chosen.key)
       inTree.add(chosen.v)
@@ -3077,10 +3350,17 @@
     let hi = a.length - 1
     while (lo <= hi) {
       const mid = Math.floor((lo + hi) / 2)
-      ops.probe(lo, hi, mid, `Range [${lo}, ${hi}]: probe the middle — index ${mid} holds ${a[mid]}.`)
+      ops.probe(
+        lo,
+        hi,
+        mid,
+        `Range [${lo}, ${hi}]: probe the middle — index ${mid} holds ${a[mid]}.`,
+      )
       if (a[mid] === target) {
         ops.hit(mid, `${a[mid]} equals ${target} — found it at index ${mid}.`)
-        ops.done(`Found ${target} after ${ops.comparisons} probe${ops.comparisons === 1 ? "" : "s"}.`)
+        ops.done(
+          `Found ${target} after ${ops.comparisons} probe${ops.comparisons === 1 ? "" : "s"}.`,
+        )
         return
       }
       if (a[mid] < target) {
@@ -3108,11 +3388,15 @@
       ops.probe(0, n - 1, i, `Check index ${i}: is ${a[i]} the target ${target}?`)
       if (a[i] === target) {
         ops.hit(i, `${a[i]} equals ${target} — found it at index ${i}.`)
-        ops.done(`Found ${target} at index ${i} after ${ops.comparisons} comparison${ops.comparisons === 1 ? "" : "s"}.`)
+        ops.done(
+          `Found ${target} at index ${i} after ${ops.comparisons} comparison${ops.comparisons === 1 ? "" : "s"}.`,
+        )
         return
       }
     }
-    ops.done(`${target} is not in the array — scanned all ${n} elements (${ops.comparisons} comparisons).`)
+    ops.done(
+      `${target} is not in the array — scanned all ${n} elements (${ops.comparisons} comparisons).`,
+    )
   })
 
   // ───────────────────────────────── kmp ─────────────────────────────────
@@ -3147,7 +3431,13 @@
     let j = 0
     while (i < n) {
       const isMatch = text[i] === pattern[j]
-      ops.compare(i, j, i - j, isMatch, `Compare text[${i}]='${text[i]}' with pattern[${j}]='${pattern[j]}' → ${isMatch ? "match" : "mismatch"}.`)
+      ops.compare(
+        i,
+        j,
+        i - j,
+        isMatch,
+        `Compare text[${i}]='${text[i]}' with pattern[${j}]='${pattern[j]}' → ${isMatch ? "match" : "mismatch"}.`,
+      )
       if (isMatch) {
         i++
         j++
@@ -3157,13 +3447,20 @@
         }
       } else if (j > 0) {
         j = lps[j - 1]
-        ops.slide(i - j, `Mismatch — reuse the matched prefix: realign so ${j} char${j === 1 ? "" : "s"} already line up (no re-check).`)
+        ops.slide(
+          i - j,
+          `Mismatch — reuse the matched prefix: realign so ${j} char${j === 1 ? "" : "s"} already line up (no re-check).`,
+        )
       } else {
         i++
         ops.slide(i, `Mismatch at the pattern start — slide forward by one.`)
       }
     }
-    ops.done(ops.found.length ? `Found ${ops.found.length} occurrence(s): index ${ops.found.join(", ")}.` : `Pattern not found.`)
+    ops.done(
+      ops.found.length
+        ? `Found ${ops.found.length} occurrence(s): index ${ops.found.join(", ")}.`
+        : `Pattern not found.`,
+    )
   })
 
   // ────────────────────────────── rabin-karp ─────────────────────────────
@@ -3192,12 +3489,23 @@
     for (let k = 0; k < m - 1; k++) highPow = (highPow * B) % MOD
     let wh = hash(text.slice(0, m))
     for (let s = 0; s <= n - m; s++) {
-      ops.hashStep(s, wh, ph, `Window [${s}, ${s + m - 1}]: hash ${wh} ${wh === ph ? "=" : "≠"} pattern hash ${ph}${wh === ph ? " — verify" : " — skip"}.`)
+      ops.hashStep(
+        s,
+        wh,
+        ph,
+        `Window [${s}, ${s + m - 1}]: hash ${wh} ${wh === ph ? "=" : "≠"} pattern hash ${ph}${wh === ph ? " — verify" : " — skip"}.`,
+      )
       if (wh === ph) {
         let ok = true
         for (let j = 0; j < m; j++) {
           const isMatch = text[s + j] === pattern[j]
-          ops.compare(s + j, j, s, isMatch, `Hash hit — verify text[${s + j}]='${text[s + j]}' vs pattern[${j}]='${pattern[j]}'.`)
+          ops.compare(
+            s + j,
+            j,
+            s,
+            isMatch,
+            `Hash hit — verify text[${s + j}]='${text[s + j]}' vs pattern[${j}]='${pattern[j]}'.`,
+          )
           if (!isMatch) {
             ok = false
             break
@@ -3211,7 +3519,11 @@
         wh = (wh * B + text.charCodeAt(s + m)) % MOD
       }
     }
-    ops.done(ops.found.length ? `Found ${ops.found.length} occurrence(s): index ${ops.found.join(", ")}.` : `Pattern not found.`)
+    ops.done(
+      ops.found.length
+        ? `Found ${ops.found.length} occurrence(s): index ${ops.found.join(", ")}.`
+        : `Pattern not found.`,
+    )
   })
 
   // ───────────────────────────── two-pointers ────────────────────────────
@@ -3225,9 +3537,15 @@
     let r = a.length - 1
     while (l < r) {
       const sum = a[l] + a[r]
-      ops.step({ pointers: { L: l, R: r }, window: [l, r] }, `a[${l}] + a[${r}] = ${a[l]} + ${a[r]} = ${sum}.`)
+      ops.step(
+        { pointers: { L: l, R: r }, window: [l, r] },
+        `a[${l}] + a[${r}] = ${a[l]} + ${a[r]} = ${sum}.`,
+      )
       if (sum === target) {
-        ops.step({ pointers: { L: l, R: r }, window: [l, r], mark: [l, r] }, `${a[l]} + ${a[r]} = ${target} — found the pair.`)
+        ops.step(
+          { pointers: { L: l, R: r }, window: [l, r], mark: [l, r] },
+          `${a[l]} + ${a[r]} = ${target} — found the pair.`,
+        )
         ops.done(`Found a pair at indices ${l} and ${r}.`)
         return
       }
@@ -3250,13 +3568,19 @@
     let bestRange = null
     for (let hi = 0; hi < a.length; hi++) {
       sum += a[hi]
-      ops.step({ pointers: { lo, hi }, window: [lo, hi] }, `Expand right to index ${hi}: window sum = ${sum}.`)
+      ops.step(
+        { pointers: { lo, hi }, window: [lo, hi] },
+        `Expand right to index ${hi}: window sum = ${sum}.`,
+      )
       while (sum >= target) {
         if (hi - lo + 1 < best) {
           best = hi - lo + 1
           bestRange = [lo, hi]
         }
-        ops.step({ pointers: { lo, hi }, window: [lo, hi] }, `Sum ${sum} ≥ ${target} (length ${hi - lo + 1}) — record it, then shrink from the left.`)
+        ops.step(
+          { pointers: { lo, hi }, window: [lo, hi] },
+          `Sum ${sum} ≥ ${target} (length ${hi - lo + 1}) — record it, then shrink from the left.`,
+        )
         sum -= a[lo]
         lo++
       }
@@ -3264,7 +3588,10 @@
     if (bestRange) {
       const marks = []
       for (let k = bestRange[0]; k <= bestRange[1]; k++) marks.push(k)
-      ops.step({ pointers: {}, window: bestRange, mark: marks }, `Shortest window: indices ${bestRange[0]}..${bestRange[1]} (length ${best}).`)
+      ops.step(
+        { pointers: {}, window: bestRange, mark: marks },
+        `Shortest window: indices ${bestRange[0]}..${bestRange[1]} (length ${best}).`,
+      )
       ops.done(`Answer: the shortest qualifying length is ${best}.`)
     } else {
       ops.done(`No subarray reaches ${target}.`)
@@ -3291,7 +3618,13 @@
       for (let c = 1; c <= n; c++) {
         if (A[r - 1] === B[c - 1]) {
           dp[r][c] = dp[r - 1][c - 1] + 1
-          ops.set(r, c, dp[r][c], [[r - 1, c - 1]], `'${A[r - 1]}' = '${B[c - 1]}' → take the diagonal + 1 = ${dp[r][c]}.`)
+          ops.set(
+            r,
+            c,
+            dp[r][c],
+            [[r - 1, c - 1]],
+            `'${A[r - 1]}' = '${B[c - 1]}' → take the diagonal + 1 = ${dp[r][c]}.`,
+          )
         } else {
           dp[r][c] = Math.max(dp[r - 1][c], dp[r][c - 1])
           const better = dp[r - 1][c] >= dp[r][c - 1] ? "top" : "left"
@@ -3299,7 +3632,10 @@
             r,
             c,
             dp[r][c],
-            [[r - 1, c], [r, c - 1]],
+            [
+              [r - 1, c],
+              [r, c - 1],
+            ],
             `'${A[r - 1]}' ≠ '${B[c - 1]}' → this letter can't extend the match, so the optimum here is inherited from an optimal sub-answer: the better of top (${dp[r - 1][c]}) and left (${dp[r][c - 1]}) = ${dp[r][c]} (from the ${better}).`,
           )
         }
@@ -3370,7 +3706,8 @@
       }
       ops.findPath(pathToRoot, `${why} follow ${pathToRoot.join(" → ")} to root ${c}.`)
       for (const node of pathToRoot) {
-        if (node !== c && ops.parent[node] !== c) ops.setParent(node, c, `Path compression: point ${node} straight at root ${c}.`)
+        if (node !== c && ops.parent[node] !== c)
+          ops.setParent(node, c, `Path compression: point ${node} straight at root ${c}.`)
       }
       return c
     }
@@ -3410,20 +3747,33 @@
     while (x !== 0) {
       const low = ops.lowestSetBit(x)
       const sub = (x - 1) & ops.mask
-      ops.subtract(sub, low, `Lowest 1 is at bit ${low}. Subtracting 1 flips it to 0 and turns every zero below it into a 1.`)
+      ops.subtract(
+        sub,
+        low,
+        `Lowest 1 is at bit ${low}. Subtracting 1 flips it to 0 and turns every zero below it into a 1.`,
+      )
       const res = x & sub
-      ops.and(res, low, `AND the two: the survivors above stay, bit ${low} and everything under it are wiped — exactly one 1 gone.`)
+      ops.and(
+        res,
+        low,
+        `AND the two: the survivors above stay, bit ${low} and everything under it are wiped — exactly one 1 gone.`,
+      )
       pop++
       x = res
       ops.commit(`x ← ${x}. ${pop} of ${total} ones cleared.`)
     }
-    ops.done(`x = 0 — every 1 is gone. It took ${total} pass${total === 1 ? "" : "es"}, so x had ${total} set bit${total === 1 ? "" : "s"}.`)
+    ops.done(
+      `x = 0 — every 1 is gone. It took ${total} pass${total === 1 ? "" : "es"}, so x had ${total} set bit${total === 1 ? "" : "s"}.`,
+    )
   })
 
   // ───────────────────────────── n-queens ─────────────────────────────
   registerBacktrack("n-queens", { label: "N-Queens (backtracking)" }, (input, ops) => {
     const n = Math.min(Math.max(input.n || 4, 4), 6)
-    ops.board(n, `Place ${n} queens on a ${n}×${n} board so none attack another. Fill one queen per row; retreat whenever a row has no safe square.`)
+    ops.board(
+      n,
+      `Place ${n} queens on a ${n}×${n} board so none attack another. Fill one queen per row; retreat whenever a row has no safe square.`,
+    )
     const conflict = (row, col) => {
       // first attacker above in same column or on a diagonal, or -1 if none
       const q = ops.queens
@@ -3441,13 +3791,21 @@
       for (let col = 0; col < n; col++) {
         const bad = conflict(row, col)
         if (bad >= 0) {
-          ops.reject(row, col, bad, `Row ${row}, column ${col} clashes with the queen in row ${bad} — prune this square.`)
+          ops.reject(
+            row,
+            col,
+            bad,
+            `Row ${row}, column ${col} clashes with the queen in row ${bad} — prune this square.`,
+          )
           continue
         }
         ops.place(row, col, `Column ${col} is safe — place a queen and descend to row ${row + 1}.`)
         solve(row + 1)
         if (solved) return
-        ops.backtrack(row, `Row ${row + 1} had no safe square — remove the queen at (${row}, ${col}) and retreat.`)
+        ops.backtrack(
+          row,
+          `Row ${row + 1} had no safe square — remove the queen at (${row}, ${col}) and retreat.`,
+        )
       }
     }
     solve(0)
@@ -3505,7 +3863,13 @@
       return out
     }
 
-    const nodeList = all.map((n) => ({ id: n.id, label: `f(${n.k})`, x: Math.round(n.x), y: n.y, depth: n.depth }))
+    const nodeList = all.map((n) => ({
+      id: n.id,
+      label: `f(${n.k})`,
+      x: Math.round(n.x),
+      y: n.y,
+      depth: n.depth,
+    }))
     const edges = []
     for (const n of all) for (const c of n.children) edges.push({ from: n.id, to: c.id })
     ops.tree(
@@ -3515,7 +3879,10 @@
     )
 
     // 2) NAIVE phase — DFS the whole tree; every node is a separate call
-    ops.phase("naive", `Phase 1 — plain recursion. Reveal each call in order; the running count IS the total work.`)
+    ops.phase(
+      "naive",
+      `Phase 1 — plain recursion. Reveal each call in order; the running count IS the total work.`,
+    )
     const naive = (node) => {
       if (node.k < 2) {
         ops.base(node.id, node.k, `f(${node.k}) = ${node.k} — base case, return at once.`)
@@ -3553,7 +3920,12 @@
       }
       seen.add(node.k)
       if (node.k < 2) {
-        ops.miss(node.id, node.k, node.k, `f(${node.k}) = ${node.k} — first time seen, store it in the table.`)
+        ops.miss(
+          node.id,
+          node.k,
+          node.k,
+          `f(${node.k}) = ${node.k} — first time seen, store it in the table.`,
+        )
       } else {
         ops.miss(
           node.id,
@@ -3645,7 +4017,8 @@
         // merge writeback (overwrite within a range) reuses the violet swap state;
         // insertion shifts (overwrite, no range) stay blue as before.
         if (frame.active.includes(k))
-          state = frame.type === "swap" || (frame.type === "overwrite" && range) ? "swap" : "compare"
+          state =
+            frame.type === "swap" || (frame.type === "overwrite" && range) ? "swap" : "compare"
         b.bar.dataset.state = state
         // recursion overlays: dim bars outside the active range; mark the pivot.
         // Attribute toggles only (no DOM add/remove) — footer stays jitter-free.
@@ -3657,23 +4030,35 @@
         b.bar.classList.remove("steptrace__bar--fly")
         b.bar.style.transform = ""
       }
-      // FLIP: on a swap frame each bar starts in its OLD slot (inverted
-      // transform, no transition), then springs home — a literal swap.
+      // FLIP: a moved bar starts in the slot it came FROM (inverted transform,
+      // no transition) and springs home, so the motion is literal.
+      //   swap      — the pair trade places (bubble/selection/quick/heap)
+      //   overwrite — one bar travels from frame.from (insertion shift, merge
+      //               lifting a value out of a run head into the merged slot)
+      const fly = []
       if (frame.type === "swap" && frame.active && frame.active.length === 2) {
-        const bi = bars[frame.active[0]] && bars[frame.active[0]].bar
-        const bj = bars[frame.active[1]] && bars[frame.active[1]].bar
-        if (bi && bj && bi.isConnected) {
-          const dx = bj.getBoundingClientRect().left - bi.getBoundingClientRect().left
-          if (dx) {
-            bi.style.transform = `translateX(${dx}px)`
-            bj.style.transform = `translateX(${-dx}px)`
-            void bi.offsetWidth // commit the inverted start position
-            bi.classList.add("steptrace__bar--fly")
-            bj.classList.add("steptrace__bar--fly")
-            bi.style.transform = ""
-            bj.style.transform = ""
-          }
-        }
+        fly.push([frame.active[0], frame.active[1]], [frame.active[1], frame.active[0]])
+      } else if (
+        frame.type === "overwrite" &&
+        frame.from != null &&
+        frame.active &&
+        frame.active.length === 1
+      ) {
+        fly.push([frame.active[0], frame.from])
+      }
+      const starts = []
+      for (const [to, from] of fly) {
+        const bt = bars[to] && bars[to].bar
+        const bf = bars[from] && bars[from].bar
+        if (!bt || !bf || !bt.isConnected) continue
+        const dx = bf.getBoundingClientRect().left - bt.getBoundingClientRect().left
+        if (dx) starts.push([bt, dx])
+      }
+      for (const [bt, dx] of starts) bt.style.transform = `translateX(${dx}px)`
+      if (starts.length) void starts[0][0].offsetWidth // commit the inverted starts
+      for (const [bt] of starts) {
+        bt.classList.add("steptrace__bar--fly")
+        bt.style.transform = ""
       }
       // the active pair drives the i / j pins; fall back to the scan candidate.
       const act = frame.active || []
@@ -3687,9 +4072,17 @@
         { k: "j", v: act[1] != null ? act[1] : "—", sw: "var(--_violet)" },
       ]
       if (hasPivot)
-        rows.push({ k: "pivot", v: frame.pivot != null ? `[${frame.pivot}] = ${frame.array[frame.pivot]}` : "—", sw: "var(--_amber)" })
+        rows.push({
+          k: "pivot",
+          v: frame.pivot != null ? `[${frame.pivot}] = ${frame.array[frame.pivot]}` : "—",
+          sw: "var(--_amber)",
+        })
       if (hasRange)
-        rows.push({ k: "range", v: frame.range ? `[${frame.range[0]}, ${frame.range[1]}]` : "—", sw: "var(--_neutral)" })
+        rows.push({
+          k: "range",
+          v: frame.range ? `[${frame.range[0]}, ${frame.range[1]}]` : "—",
+          sw: "var(--_neutral)",
+        })
       rows.push({ k: "swaps", v: frame.swaps, sw: "var(--_amber)" })
       return rows
     }
@@ -3787,11 +4180,19 @@
     // progress instead; binary search keeps the shrinking range.
     function watch(frame) {
       const target = { k: "target", v: String(frames[0].target), sw: "var(--_accent)" }
-      const at = { k: "at", v: frame.mid != null ? `[${frame.mid}] = ${frame.array[frame.mid]}` : "—", sw: "var(--_blue)" }
+      const at = {
+        k: "at",
+        v: frame.mid != null ? `[${frame.mid}] = ${frame.array[frame.mid]}` : "—",
+        sw: "var(--_blue)",
+      }
       if (frame.mode === "scan") {
         return [
           target,
-          { k: "scanned", v: frame.mid != null ? `${frame.mid + 1}/${frame.array.length}` : "—", sw: "var(--_neutral)" },
+          {
+            k: "scanned",
+            v: frame.mid != null ? `${frame.mid + 1}/${frame.array.length}` : "—",
+            sw: "var(--_neutral)",
+          },
           at,
         ]
       }
@@ -3854,15 +4255,19 @@
       for (let k = 0; k < tcells.length; k++) tcells[k].dataset.state = ""
       for (let k = 0; k < pcells.length; k++) pcells[k].dataset.state = ""
       // matched regions (persist)
-      for (const s of frame.found) for (let k = 0; k < pattern.length; k++) if (tcells[s + k]) tcells[s + k].dataset.state = "found"
+      for (const s of frame.found)
+        for (let k = 0; k < pattern.length; k++)
+          if (tcells[s + k]) tcells[s + k].dataset.state = "found"
       // current window under the pattern
       for (let k = 0; k < pattern.length; k++) {
         const t = tcells[frame.shift + k]
         if (t && t.dataset.state !== "found") t.dataset.state = "window"
       }
       // current comparison
-      if (frame.cmpT != null && tcells[frame.cmpT]) tcells[frame.cmpT].dataset.state = frame.cmpResult || "probe"
-      if (frame.cmpP != null && pcells[frame.cmpP]) pcells[frame.cmpP].dataset.state = frame.cmpResult || "probe"
+      if (frame.cmpT != null && tcells[frame.cmpT])
+        tcells[frame.cmpT].dataset.state = frame.cmpResult || "probe"
+      if (frame.cmpP != null && pcells[frame.cmpP])
+        pcells[frame.cmpP].dataset.state = frame.cmpResult || "probe"
       // rabin-karp only: the badge is always present (constant height ⇒ no jitter);
       // frames without a live hash keep the row via a non-breaking placeholder.
       if (hasHash) {
@@ -3870,7 +4275,9 @@
           ? `window hash ${frame.hash.window} ${frame.hash.window === frame.hash.pattern ? "=" : "≠"} pattern hash ${frame.hash.pattern}`
           : " "
       }
-      status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`
+      status.innerHTML =
+        escapeHtml(frame.message) +
+        ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`
     }
 
     function watch(frame) {
@@ -3879,7 +4286,11 @@
         { k: "matches", v: String(frame.found.length), sw: "var(--_green)" },
       ]
       if (hasHash) {
-        rows.push({ k: "hash", v: frame.hash ? `${frame.hash.window} / ${frame.hash.pattern}` : "—", sw: "var(--_amber)" })
+        rows.push({
+          k: "hash",
+          v: frame.hash ? `${frame.hash.window} / ${frame.hash.pattern}` : "—",
+          sw: "var(--_amber)",
+        })
       }
       return rows
     }
@@ -4024,7 +4435,9 @@
           td.dataset.state = state
         }
       }
-      status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`
+      status.innerHTML =
+        escapeHtml(frame.message) +
+        ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`
     }
 
     function watch(frame) {
@@ -4050,7 +4463,13 @@
     const width = MX * 2 + Math.max(0, n - 1) * SP + UR * 2
     const height = 180
     const cx = (i) => MX + UR + i * SP
-    const PALETTE = ["var(--_blue)", "var(--_violet)", "var(--_amber)", "var(--_green)", "var(--_muted)"]
+    const PALETTE = [
+      "var(--_blue)",
+      "var(--_violet)",
+      "var(--_amber)",
+      "var(--_green)",
+      "var(--_muted)",
+    ]
 
     const svg = document.createElementNS(SVGNS, "svg")
     svg.setAttribute("class", "steptrace__svg steptrace__uf")
@@ -4119,7 +4538,9 @@
         arc.dataset.active = active ? "true" : "false"
         arcLayer.append(arc)
       }
-      status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`
+      status.innerHTML =
+        escapeHtml(frame.message) +
+        ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`
     }
 
     function watch(frame) {
@@ -4220,13 +4641,19 @@
           c.dataset.state = data.state[bi] || ""
         }
       }
-      status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${stepTotal}</span>`
+      status.innerHTML =
+        escapeHtml(frame.message) +
+        ` <span class="steptrace__counts">· step ${i + 1}/${stepTotal}</span>`
     }
 
     // exactly 3 rows every frame ⇒ constant footer height (no jitter)
     function watch(frame) {
       return [
-        { k: "x", v: `${frame.value} = 0b${frame.value.toString(2).padStart(frame.width, "0")}`, sw: "var(--_accent)" },
+        {
+          k: "x",
+          v: `${frame.value} = 0b${frame.value.toString(2).padStart(frame.width, "0")}`,
+          sw: "var(--_accent)",
+        },
         { k: "lowest 1", v: frame.low >= 0 ? `bit ${frame.low}` : "—", sw: "var(--_amber)" },
         { k: "1s cleared", v: `${frame.pop} / ${frame.total}`, sw: "var(--_violet)" },
       ]
@@ -4353,7 +4780,9 @@
     const minY = Math.min(...ys)
     const w = Math.max(...xs) - minX + pad * 2
     const h = Math.max(...ys) - minY + pad * 2
-    const pos = Object.fromEntries(nodes.map((n) => [n.id, { x: n.x - minX + pad, y: n.y - minY + pad }]))
+    const pos = Object.fromEntries(
+      nodes.map((n) => [n.id, { x: n.x - minX + pad, y: n.y - minY + pad }]),
+    )
 
     const svg = document.createElementNS(SVGNS, "svg")
     svg.setAttribute("class", "steptrace__rtsvg")
@@ -4420,7 +4849,10 @@
       ["reuse (hit)", "visited"],
     ]) {
       const row = el("div", "steptrace__legend-row")
-      row.append(el("span", "steptrace__swatch steptrace__swatch--" + key), document.createTextNode(word))
+      row.append(
+        el("span", "steptrace__swatch steptrace__swatch--" + key),
+        document.createTextNode(word),
+      )
       legend.append(row)
     }
 
@@ -4446,13 +4878,16 @@
         e.el.dataset.vis = vis.has(e.to) ? "1" : "0"
         e.el.dataset.collapsed = collapsed.has(e.to) ? "true" : "false"
       }
-      status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`
+      status.innerHTML =
+        escapeHtml(frame.message) +
+        ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`
     }
 
     // exactly 3 rows every frame ⇒ constant footer height
     function watch(frame) {
       const last = frame.memo.length ? frame.memo[frame.memo.length - 1] : null
-      const ev = frame.type === "miss" || frame.type === "hit" || frame.type === "base" ? frame.type : "—"
+      const ev =
+        frame.type === "miss" || frame.type === "hit" || frame.type === "base" ? frame.type : "—"
       return [
         { k: "calls", v: String(frame.calls), sw: "var(--_blue)" },
         { k: "memo", v: last ? `f(${last.k}) = ${last.v}` : "—", sw: "var(--_green)" },
@@ -4475,7 +4910,9 @@
     const minY = Math.min(...ys)
     const w = Math.max(...xs) - minX + pad * 2
     const h = Math.max(...ys) - minY + pad * 2
-    const pos = Object.fromEntries(graph.nodes.map((n) => [n.id, { x: n.x - minX + pad, y: n.y - minY + pad }]))
+    const pos = Object.fromEntries(
+      graph.nodes.map((n) => [n.id, { x: n.x - minX + pad, y: n.y - minY + pad }]),
+    )
 
     const svg = document.createElementNS(SVGNS, "svg")
     svg.setAttribute("class", "steptrace__svg")
@@ -4556,9 +4993,15 @@
       dist.setAttribute("x", p.x)
       dist.setAttribute("y", p.y - R - 5)
       dist.setAttribute("text-anchor", "middle")
-      g.append(back, circle, id, dist)
+      const mark = document.createElementNS(SVGNS, "text")
+      mark.setAttribute("class", "steptrace__nmark")
+      mark.setAttribute("x", p.x)
+      mark.setAttribute("y", p.y + R + 11)
+      mark.setAttribute("text-anchor", "middle")
+      mark.setAttribute("aria-hidden", "true")
+      g.append(back, circle, id, dist, mark)
       svg.append(g)
-      nodeEls[n.id] = { g, dist }
+      nodeEls[n.id] = { g, dist, mark }
     }
 
     // legend sits UNDER the graph; the live queue + visited set move to the
@@ -4590,12 +5033,17 @@
         if (frontier.has(n.id)) state = "frontier"
         if (frame.current === n.id) state = "current"
         ne.g.dataset.state = state
+        ne.mark.textContent =
+          state === "current" ? "■" : state === "frontier" ? "◇" : state === "visited" ? "✓" : ""
         const d = frame.dist[n.id]
         ne.dist.textContent = d == null ? "" : `d:${d}`
       }
       const selected = frame.selected || []
       const isSel = (from, to) =>
-        selected.some((s) => (s[0] === from && s[1] === to) || (!graph.directed && s[0] === to && s[1] === from))
+        selected.some(
+          (s) =>
+            (s[0] === from && s[1] === to) || (!graph.directed && s[0] === to && s[1] === from),
+        )
       for (const e of edgeEls) {
         const act =
           frame.edge &&
@@ -4611,8 +5059,16 @@
 
     function watch(frame) {
       return [
-        { k: "queue", v: "[ " + (frame.frontier.length ? frame.frontier.join(", ") : "∅") + " ]", sw: "var(--_amber)" },
-        { k: "visited", v: "{ " + (frame.visited.length ? frame.visited.join(", ") : "∅") + " }", sw: "var(--_green)" },
+        {
+          k: "queue",
+          v: "[ " + (frame.frontier.length ? frame.frontier.join(", ") : "∅") + " ]",
+          sw: "var(--_amber)",
+        },
+        {
+          k: "visited",
+          v: "{ " + (frame.visited.length ? frame.visited.join(", ") : "∅") + " }",
+          sw: "var(--_green)",
+        },
       ]
     }
 
@@ -4654,7 +5110,10 @@
     return b
   }
   function escapeHtml(s) {
-    return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c])
+    return String(s).replace(
+      /[&<>"]/g,
+      (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c],
+    )
   }
   function stripTags(s) {
     return String(s).replace(/<[^>]*>/g, "")
@@ -4667,10 +5126,8 @@
   const ICON = {
     reset:
       '<svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.4-5.7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3.4 4.6V8h3.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-    back:
-      '<svg viewBox="0 0 24 24"><polygon points="18 5 9 12 18 19" fill="currentColor" stroke="none"/><rect x="5" y="5" width="2" height="14" rx="0.6" fill="currentColor" stroke="none"/></svg>',
-    fwd:
-      '<svg viewBox="0 0 24 24"><polygon points="6 5 15 12 6 19" fill="currentColor" stroke="none"/><rect x="17" y="5" width="2" height="14" rx="0.6" fill="currentColor" stroke="none"/></svg>',
+    back: '<svg viewBox="0 0 24 24"><polygon points="18 5 9 12 18 19" fill="currentColor" stroke="none"/><rect x="5" y="5" width="2" height="14" rx="0.6" fill="currentColor" stroke="none"/></svg>',
+    fwd: '<svg viewBox="0 0 24 24"><polygon points="6 5 15 12 6 19" fill="currentColor" stroke="none"/><rect x="17" y="5" width="2" height="14" rx="0.6" fill="currentColor" stroke="none"/></svg>',
     play: '<svg viewBox="0 0 24 24"><polygon points="7 4.5 19 12 7 19.5" fill="currentColor" stroke="none"/></svg>',
     pause:
       '<svg viewBox="0 0 24 24"><rect x="7" y="5" width="3.4" height="14" rx="1" fill="currentColor" stroke="none"/><rect x="13.6" y="5" width="3.4" height="14" rx="1" fill="currentColor" stroke="none"/></svg>',
@@ -4687,6 +5144,312 @@
     b.setAttribute("aria-label", label)
     b.title = label
     return b
+  }
+
+  // ---- teaching layer: semantic milestones + invariant/result copy ----
+  // These helpers deliberately read immutable frames instead of adding a second
+  // narration channel to every algorithm. New algorithms get a sensible generic
+  // timeline, while built-ins receive renderer- and algorithm-specific language.
+  function buildMilestones(algorithm, kind, frames) {
+    const marks = []
+    const push = (i, label) => {
+      if (i < 0 || i >= frames.length || !label) return
+      const prev = marks[marks.length - 1]
+      if (prev && (prev.i === i || prev.label === label)) return
+      marks.push({ i, label })
+    }
+    const initial =
+      kind === "sort"
+        ? algorithm === "bubble-sort"
+          ? "Pass 1"
+          : algorithm === "insertion-sort"
+            ? "Prefix 1"
+            : algorithm === "selection-sort"
+              ? "Select 1"
+              : algorithm === "heap-sort"
+                ? "Build heap"
+                : algorithm === "merge-sort"
+                  ? "Runs of 1"
+                  : "Partition"
+        : kind === "search"
+          ? "Search range"
+          : kind === "string"
+            ? "Shift 0"
+            : kind === "backtrack"
+              ? "Depth 0"
+              : kind === "rectree"
+                ? "Call tree"
+                : "Initialize"
+    push(0, initial)
+    let lastRange = ""
+    let lastRow = null
+    let lastWindow = ""
+    let lastDepth = null
+    for (let i = 1; i < frames.length - 1; i++) {
+      const f = frames[i]
+      if (kind === "sort") {
+        const range = f.range ? f.range.join(":") : ""
+        if (range && range !== lastRange) {
+          const word =
+            algorithm === "merge-sort" ? "Merge" : algorithm === "heap-sort" ? "Heap" : "Range"
+          push(i, `${word} ${f.range[0]}–${f.range[1]}`)
+        } else if (f.type === "mark-sorted") {
+          const fixed = f.sorted.length
+          const word =
+            algorithm === "insertion-sort"
+              ? "Prefix"
+              : algorithm === "selection-sort"
+                ? "Select"
+                : "Fixed"
+          const count =
+            algorithm === "bubble-sort" || algorithm === "selection-sort"
+              ? Math.min(fixed + 1, f.array.length)
+              : fixed
+          push(i, algorithm === "bubble-sort" ? `Pass ${count}` : `${word} ${count}`)
+        }
+        lastRange = range || lastRange
+      } else if (kind === "graph" && f.type === "visit" && f.current != null) {
+        const word =
+          algorithm === "dijkstra"
+            ? "Settle"
+            : algorithm === "topological-sort"
+              ? "Output"
+              : "Visit"
+        push(i, `${word} ${f.current}`)
+      } else if (kind === "search" && f.type === "probe") {
+        push(i, `Probe ${f.mid}`)
+      } else if (kind === "string") {
+        if (
+          (f.type === "slide" || f.type === "hash" || f.type === "match") &&
+          String(f.shift) !== lastWindow
+        ) {
+          push(i, `Shift ${f.shift}`)
+          lastWindow = String(f.shift)
+        }
+      } else if (kind === "pointers") {
+        const win = f.window ? f.window.join(":") : ""
+        if (win && win !== lastWindow) {
+          push(i, `Window ${f.window[0]}–${f.window[1]}`)
+          lastWindow = win
+        }
+      } else if (kind === "dp") {
+        if (f.type === "compute" && f.cur && f.cur[0] !== lastRow) {
+          push(i, `Row ${f.rowLabels[f.cur[0]]}`)
+          lastRow = f.cur[0]
+        } else if (f.type === "trace" && frames[i - 1].type !== "trace") {
+          push(i, "Traceback")
+        }
+      } else if (kind === "unionfind" && f.type === "link" && f.activeEdge) {
+        push(i, `Link ${f.activeEdge[0]}→${f.activeEdge[1]}`)
+      } else if (kind === "bits" && f.type === "commit") {
+        push(i, `Clear ${f.pop}`)
+      } else if (kind === "backtrack") {
+        if (f.type === "place" && f.depth !== lastDepth) {
+          push(i, `Depth ${f.depth}`)
+          lastDepth = f.depth
+        }
+      } else if (kind === "rectree" && f.type === "phase") {
+        push(i, f.phase === "memo" ? "Memoized" : "Plain recursion")
+      }
+    }
+    push(frames.length - 1, "Result")
+    return marks
+  }
+
+  function thinMilestones(marks) {
+    if (marks.length <= 12) return marks
+    const kept = [marks[0]]
+    const stride = Math.ceil((marks.length - 2) / 10)
+    for (let i = 1; i < marks.length - 1; i += stride) kept.push(marks[i])
+    kept.push(marks[marks.length - 1])
+    return kept
+  }
+
+  function milestoneAt(marks, i) {
+    let hit = marks[0]
+    for (const mark of marks) {
+      if (mark.i > i) break
+      hit = mark
+    }
+    return hit
+  }
+
+  function invariantFor(algorithm, kind, frame) {
+    if (kind === "sort") {
+      const fixed = frame.sorted ? frame.sorted.length : 0
+      if (algorithm === "bubble-sort") {
+        if (fixed === 0)
+          return `No values are fixed yet; this pass is still discovering the largest remaining value.`
+        return `${fixed} value${fixed === 1 ? " is" : "s are"} fixed in the final suffix; later passes never touch them.`
+      }
+      if (algorithm === "insertion-sort")
+        return `The left prefix is sorted; the held key moves left only past larger values.`
+      if (algorithm === "selection-sort")
+        return `${fixed} smallest value${fixed === 1 ? " is" : "s are"} fixed in the final prefix.`
+      if (algorithm === "quick-sort")
+        return frame.range
+          ? `Only range [${frame.range[0]}, ${frame.range[1]}] can change; a settled pivot never moves again.`
+          : `Each settled pivot splits the remaining work into independent ranges.`
+      if (algorithm === "heap-sort")
+        return frame.range
+          ? `Sift-down is restoring heap order inside [${frame.range[0]}, ${frame.range[1]}]; only the extracted suffix is final.`
+          : `The extracted suffix is final; the remaining prefix is ready for the next heap repair.`
+      if (algorithm === "merge-sort")
+        return frame.range
+          ? `Both input runs are sorted; choosing the smaller head preserves order in [${frame.range[0]}, ${frame.range[1]}].`
+          : `Each completed round doubles the length of the sorted runs.`
+      return `Fixed positions never move again; active positions are the only ones still under consideration.`
+    }
+    if (kind === "graph") {
+      if (algorithm === "dijkstra")
+        return `Settled distances are final: non-negative edges cannot create a cheaper path later.`
+      if (algorithm === "prim")
+        return `Selected edges connect one new node to the tree; rejecting internal edges prevents cycles.`
+      if (algorithm === "topological-sort")
+        return `Only in-degree-0 nodes are ready; removing one may unlock its successors.`
+      if (algorithm === "bfs")
+        return `The FIFO frontier processes nodes by distance, so the first visit is a shortest unweighted path.`
+      if (algorithm === "dfs")
+        return `The LIFO frontier controls exploration depth; visited nodes are never pushed again.`
+      return `Visited nodes are final; the frontier contains discovered work not yet processed.`
+    }
+    if (kind === "search") {
+      if (frame.mode === "scan")
+        return `Every index before the probe has already failed; the next unchecked index is the only new work.`
+      if (frame.lo > frame.hi) return `The search interval is empty, so the target is absent.`
+      return `If the target exists, it remains inside [${frame.lo}, ${frame.hi}]; discarded indices cannot match.`
+    }
+    if (kind === "string") {
+      if (algorithm === "kmp")
+        return `The failure function preserves the matched prefix, so skipped alignments cannot contain a missed match.`
+      if (algorithm === "rabin-karp")
+        return `A hash match is only a candidate; character comparison is still required to rule out collisions.`
+      return `The current alignment and comparison state come directly from the algorithm's recorded frame.`
+    }
+    if (kind === "pointers") {
+      if (algorithm === "two-pointers")
+        return `Because the array is sorted, moving left raises the sum and moving right lowers it.`
+      if (algorithm === "sliding-window")
+        return `With non-negative values, expanding can only raise the sum; shrinking is the only way to shorten a valid window.`
+      return `Pointer positions delimit the active candidate region; marked cells are committed results.`
+    }
+    if (kind === "dp") {
+      if (algorithm === "lcs")
+        return `Every filled cell reads only solved subproblems; traceback follows choices that produced the optimum.`
+      return `Highlighted dependencies are read before the current table cell is committed.`
+    }
+    if (kind === "unionfind")
+      return `Elements with the same root are in one set; parent rewrites shorten paths without changing membership.`
+    if (kind === "bits") {
+      if (algorithm === "kernighan-popcount")
+        return `x & (x−1) clears exactly the lowest set bit, so one iteration accounts for one 1.`
+      return `The lanes record the current bit transformation; committed tally entries do not change.`
+    }
+    if (kind === "backtrack") {
+      if (algorithm === "n-queens")
+        return `Each row extends a valid partial board; one conflict safely prunes that entire branch.`
+      return `Committed path entries form the current candidate; rejected choices stay pruned in this branch.`
+    }
+    if (kind === "rectree") {
+      if (algorithm === "fibonacci")
+        return `A memoized f(k) is computed once; every later call reuses the stored value and skips its subtree.`
+      return `Visible nodes are explored calls; collapsed subtrees represent recorded reuse.`
+    }
+    return `The highlighted state is the only part that can change in this step.`
+  }
+
+  function graphEdgeWeight(graph, a, b) {
+    if (!graph) return 0
+    const e = graph.edges.find(
+      (x) => (x.from === a && x.to === b) || (!graph.directed && x.from === b && x.to === a),
+    )
+    return e && e.weight != null ? e.weight : 1
+  }
+
+  function summaryFor(algorithm, kind, frame, graph) {
+    if (kind === "sort") {
+      if (algorithm === "merge-sort")
+        return `Output [${frame.array.join(", ")}] · ${frame.swaps} writes.`
+      const unit = ["bubble-sort", "selection-sort", "quick-sort", "heap-sort"].includes(algorithm)
+        ? "swaps"
+        : "moves"
+      return `Output [${frame.array.join(", ")}] · ${frame.comparisons} comparisons · ${frame.swaps} ${unit}.`
+    }
+    if (kind === "graph") {
+      if (algorithm === "dijkstra" && frame.target != null) {
+        const edges = frame.selected || []
+        const path = edges.length
+          ? [edges[0][0], ...edges.map((e) => e[1])].join(" → ")
+          : String(frame.target)
+        const cost = frame.dist[frame.target]
+        return cost == null
+          ? `${frame.target} is unreachable.`
+          : `Path ${path} · cost ${cost} · ${frame.visited.length} nodes settled.`
+      }
+      if (algorithm === "dijkstra") {
+        const distances = Object.keys(frame.dist)
+          .sort()
+          .map((id) => `${id}:${frame.dist[id]}`)
+          .join(", ")
+        return `Shortest-path tree: ${frame.selected.length} edges · distances ${distances}.`
+      }
+      if (algorithm === "prim") {
+        const weight = (frame.selected || []).reduce(
+          (sum, e) => sum + graphEdgeWeight(graph, e[0], e[1]),
+          0,
+        )
+        return `${frame.selected.length} edges selected · total weight ${weight} · ${frame.visited.length} nodes joined.`
+      }
+      if (algorithm === "topological-sort") {
+        const unresolved = graph ? graph.nodes.length - frame.visited.length : 0
+        return unresolved > 0
+          ? `No topological order · cycle leaves ${unresolved} node${unresolved === 1 ? "" : "s"} unresolved.`
+          : `Order ${frame.visited.join(" → ")} · ${frame.visited.length} nodes emitted.`
+      }
+      if (frame.target != null) {
+        const d = frame.dist[frame.target]
+        return d == null
+          ? `${frame.target} is unreachable.`
+          : `${frame.target} reached at depth ${d} after ${frame.visited.length} visits.`
+      }
+      return `${frame.visited.length} nodes visited · frontier empty.`
+    }
+    if (kind === "search")
+      return frame.found == null
+        ? `${frame.target} not found · ${frame.comparisons} comparisons.`
+        : `${frame.target} found at index ${frame.found} · ${frame.comparisons} comparisons.`
+    if (kind === "string")
+      return frame.found.length
+        ? `${frame.found.length} match${frame.found.length === 1 ? "" : "es"} at ${frame.found.join(", ")}.`
+        : `No matches found.`
+    if (kind === "pointers") {
+      const values = (frame.marked || []).map((i) => frame.array[i])
+      return values.length
+        ? `Answer indices [${frame.marked.join(", ")}] · values [${values.join(", ")}].`
+        : algorithm === "two-pointers" || algorithm === "sliding-window"
+          ? `No qualifying range was found.`
+          : `No committed result was recorded.`
+    }
+    if (kind === "dp") {
+      const row = frame.grid[frame.grid.length - 1] || []
+      const value = row[row.length - 1]
+      const sequence = (frame.path || []).map((p) => frame.rowLabels[p[0]]).join("")
+      return algorithm === "lcs"
+        ? `Optimal value ${value}${sequence ? ` · sequence "${sequence}"` : ""}.`
+        : `Final table value ${value}${frame.path.length ? ` · ${frame.path.length} traced cells` : ""}.`
+    }
+    if (kind === "unionfind")
+      return `${new Set(frame.roots).size} disjoint set${new Set(frame.roots).size === 1 ? "" : "s"} · parents [${frame.parent.join(", ")}].`
+    if (kind === "bits")
+      return algorithm === "kernighan-popcount"
+        ? `Population count ${frame.total} · ${frame.pop} lowest set bits cleared.`
+        : `${frame.pop} of ${frame.total} tally steps committed.`
+    if (kind === "backtrack")
+      return frame.solved
+        ? `Solved at depth ${frame.depth} · ${frame.placed} placements · ${frame.pruned} branches pruned.`
+        : `No arrangement found · ${frame.pruned} branches pruned.`
+    if (kind === "rectree") return stripTags(frame.message)
+    return stripTags(frame.message)
   }
 
   // ==========================================================================
@@ -4775,11 +5538,12 @@
   // ==========================================================================
   //  7. MOUNT  —  assemble a card into `root` from a flat config, wire the
   //  toolbar + keyboard, and return { destroy } (host teardown: stops timers,
-  //  drops listeners). sort: { algorithm, array?, speed? };
+  //  drops listeners). `host` may provide native controls without entering the
+  //  serializable config. sort: { algorithm, array?, speed? };
   //  graph: { algorithm, start?, directed?, nodes?, edges?, speed? }.
   // ==========================================================================
 
-  function mount(root, config) {
+  function mount(root, config, host = {}) {
     injectStyle()
     root.classList.add("steptrace")
     root.setAttribute("role", "group")
@@ -4798,13 +5562,17 @@
     const state = {
       algorithm: config.algorithm,
       speed: config.speed || 1,
-      array: Array.isArray(config.array) && config.array.length ? config.array.slice() : randomArray(),
+      array:
+        Array.isArray(config.array) && config.array.length ? config.array.slice() : randomArray(),
       start: config.start != null ? String(config.start) : null,
       config,
     }
 
     let player = null
     let currentView = null
+    let currentGraph = null
+    let currentMilestones = []
+    let speedControlHandle = null
 
     // --- card chrome: head (breadcrumb + counter) / body (stage | rail) / foot ---
     const head = el("div", "steptrace__head")
@@ -4821,7 +5589,7 @@
 
     const stageCol = el("div", "steptrace__stage-col")
     const rail = el("div", "steptrace__rail")
-    const traceLabel = el("div", "steptrace__rail-label")
+    const traceLabel = el("div", "steptrace__rail-label steptrace__trace-label")
     traceLabel.textContent = "Trace"
     const log = el("ol", "steptrace__log")
     const logLines = []
@@ -4833,13 +5601,20 @@
       log.append(line)
       logLines.push({ line, num, txt })
     }
+    const insight = el("div", "steptrace__insight")
+    insight.setAttribute("aria-live", "off")
+    insight.setAttribute("aria-atomic", "true")
+    const insightLabel = el("span", "steptrace__insight-label")
+    insightLabel.textContent = "Invariant"
+    const insightText = el("span", "steptrace__insight-text")
+    insight.append(insightLabel, insightText)
     const watchWrap = el("div", "steptrace__watch-wrap")
     const watchLabel = el("div", "steptrace__rail-label")
     watchLabel.textContent = "Watch"
     const watchEl = el("div", "steptrace__watch")
     watchWrap.append(watchLabel, watchEl)
     watchWrap.style.display = "none"
-    rail.append(traceLabel, log, watchWrap)
+    rail.append(traceLabel, log, insight, watchWrap)
     const body = el("div", "steptrace__body")
     body.append(stageCol, rail)
 
@@ -4851,7 +5626,12 @@
     scrub.setAttribute("aria-label", "Step")
     const scrubFill = el("div", "steptrace__scrub-fill")
     const scrubDot = el("div", "steptrace__scrub-dot")
-    scrub.append(el("div", "steptrace__scrub-track"), scrubFill, scrubDot)
+    const milestoneLayer = el("div", "steptrace__milestones")
+    scrub.append(el("div", "steptrace__scrub-track"), scrubFill, milestoneLayer, scrubDot)
+    const phase = el("div", "steptrace__phase")
+    const phaseName = el("span", "steptrace__phase-name")
+    const phaseStep = el("span")
+    phase.append(phaseName, phaseStep)
 
     const btnReset = iconBtn("Restart", ICON.reset)
     const btnBack = iconBtn("Step back", ICON.back)
@@ -4866,25 +5646,43 @@
     const speedHead = el("div", "steptrace__menu-h")
     speedHead.textContent = "Speed"
     const speedRow = el("div", "steptrace__speed-row")
-    const speedInput = el("input", "steptrace__range")
-    speedInput.type = "range"
-    speedInput.min = "0.5"
-    speedInput.max = "2"
-    speedInput.step = "0.25"
-    speedInput.value = String(state.speed)
-    speedInput.setAttribute("aria-label", "Playback speed")
+    const speedControl = el("div", "steptrace__speed-control")
+    speedRow.append(speedControl)
     const fmtSpeed = (v) => Number(v).toFixed(2) + "×" // fixed width: "1.50×", never resizes the menu
-    const speedVal = el("span", "steptrace__speed-val")
-    speedVal.textContent = fmtSpeed(state.speed)
-    speedInput.setAttribute("aria-valuetext", fmtSpeed(state.speed))
-    speedInput.addEventListener("input", () => {
-      const v = Number(speedInput.value)
+    const applySpeed = (value) => {
+      const v = Number(value)
       state.speed = v
       if (player) player.setSpeed(v)
-      speedVal.textContent = fmtSpeed(v)
-      speedInput.setAttribute("aria-valuetext", fmtSpeed(v))
-    })
-    speedRow.append(speedInput, speedVal)
+    }
+    if (host && typeof host.createSpeedSlider === "function") {
+      speedControlHandle = host.createSpeedSlider(speedControl, {
+        min: 0.5,
+        max: 2,
+        step: 0.25,
+        value: state.speed,
+        label: "Playback speed",
+        format: fmtSpeed,
+        onChange: applySpeed,
+      })
+    } else {
+      const speedInput = el("input", "steptrace__range")
+      speedInput.type = "range"
+      speedInput.min = "0.5"
+      speedInput.max = "2"
+      speedInput.step = "0.25"
+      speedInput.value = String(state.speed)
+      speedInput.setAttribute("aria-label", "Playback speed")
+      speedInput.setAttribute("aria-valuetext", fmtSpeed(state.speed))
+      const speedVal = el("span", "steptrace__speed-val")
+      speedVal.textContent = fmtSpeed(state.speed)
+      speedInput.addEventListener("input", () => {
+        applySpeed(speedInput.value)
+        speedVal.textContent = fmtSpeed(speedInput.value)
+        speedInput.setAttribute("aria-valuetext", fmtSpeed(speedInput.value))
+      })
+      speedControl.append(speedInput)
+      speedRow.append(speedVal)
+    }
     menu.append(speedHead, speedRow)
     let startMenu = null
     if (kind === "sort") {
@@ -4936,7 +5734,7 @@
 
     const transport = el("div", "steptrace__transport")
     transport.append(btnReset, btnBack, btnPlay, btnFwd, spacer(), menuWrap)
-    foot.append(scrub, transport)
+    foot.append(scrub, phase, transport)
 
     root.replaceChildren(head, body, foot)
 
@@ -4962,8 +5760,13 @@
     // Measured with a hidden probe at the rail's live width; re-run on resize.
     function sizeLog() {
       if (!player) return
+      if (matchMedia("(max-width: 560px)").matches) {
+        log.style.height = "auto"
+        return
+      }
       const probe = el("li", "steptrace__log-line steptrace__log-line--cur")
-      probe.style.cssText = "position:absolute;visibility:hidden;pointer-events:none;left:0;right:0;height:auto"
+      probe.style.cssText =
+        "position:absolute;visibility:hidden;pointer-events:none;left:0;right:0;height:auto"
       const pn = el("span", "steptrace__log-num")
       pn.textContent = "00"
       const pt = el("span", "steptrace__log-text")
@@ -5018,6 +5821,34 @@
         log.style.transition = "transform 0.26s var(--_spring)"
         log.style.transform = "translateY(0)"
       }
+      const terminal = i === total - 1
+      insight.dataset.result = terminal ? "1" : "0"
+      insight.setAttribute("aria-live", terminal && !player.playing ? "polite" : "off")
+      insightLabel.textContent = terminal ? "Result" : "Invariant"
+      insightText.textContent = terminal
+        ? summaryFor(state.algorithm, kind, player.frames[i], currentGraph)
+        : invariantFor(state.algorithm, kind, player.frames[i])
+      const chapter = milestoneAt(currentMilestones, i)
+      phaseName.textContent = chapter ? chapter.label : "Step"
+      phaseStep.textContent = `${i + 1} / ${total}`
+      scrub.setAttribute("aria-valuetext", `${phaseName.textContent}, step ${i + 1} of ${total}`)
+      for (let k = 0; k < milestoneLayer.children.length; k++) {
+        const step = Number(milestoneLayer.children[k].dataset.step)
+        milestoneLayer.children[k].dataset.passed = step <= i ? "1" : "0"
+      }
+    }
+
+    function renderMilestones() {
+      milestoneLayer.replaceChildren()
+      const last = Math.max(1, player.frames.length - 1)
+      for (const mark of thinMilestones(currentMilestones)) {
+        const tick = el("span", "steptrace__milestone")
+        tick.style.left = (mark.i / last) * 100 + "%"
+        tick.dataset.step = String(mark.i)
+        tick.title = `${mark.label} · step ${mark.i + 1}`
+        tick.setAttribute("aria-hidden", "true")
+        milestoneLayer.append(tick)
+      }
     }
     function onState() {
       const total = player.frames.length
@@ -5038,7 +5869,8 @@
       renderWatch()
     }
     function renderWatch() {
-      const rows = currentView && currentView.watch ? currentView.watch(player.frames[player.i]) : null
+      const rows =
+        currentView && currentView.watch ? currentView.watch(player.frames[player.i]) : null
       if (!rows || !rows.length) {
         watchWrap.style.display = "none"
         return
@@ -5064,7 +5896,8 @@
     // --- scrubber seek (click + drag + keyboard) ---
     function seekFromEvent(e) {
       const r = scrub.getBoundingClientRect()
-      const cx = e.clientX != null ? e.clientX : e.touches && e.touches[0] ? e.touches[0].clientX : r.left
+      const cx =
+        e.clientX != null ? e.clientX : e.touches && e.touches[0] ? e.touches[0].clientX : r.left
       const frac = r.width ? Math.max(0, Math.min(1, (cx - r.left) / r.width)) : 0
       player.seek(Math.round(frac * (player.frames.length - 1)))
     }
@@ -5114,8 +5947,11 @@
         nodes: state.config.nodes,
         edges: state.config.edges,
       })
+      currentGraph = built.graph || null
+      currentMilestones = buildMilestones(state.algorithm, built.kind, built.frames)
       let view
-      if (built.kind === "graph") view = makeGraphView(built.frames, built.graph, built.frontierLabel)
+      if (built.kind === "graph")
+        view = makeGraphView(built.frames, built.graph, built.frontierLabel)
       else if (built.kind === "search") view = makeSearchView(built.frames)
       else if (built.kind === "string") view = makeMatchView(built.frames)
       else if (built.kind === "pointers") view = makePointerView(built.frames)
@@ -5136,6 +5972,7 @@
       stageCol.replaceChildren(...nodes)
       player = new Player(built.frames, view.paint, state.speed)
       player.onState = onState
+      renderMilestones()
       sizeLog()
       player.render()
       onState()
@@ -5187,6 +6024,7 @@
       destroy() {
         if (player) player.destroy()
         if (currentView && currentView.destroy) currentView.destroy()
+        if (speedControlHandle && speedControlHandle.destroy) speedControlHandle.destroy()
         if (logRO) logRO.disconnect()
         mq.removeEventListener("change", applyMotion)
         root.removeEventListener("keydown", onKey)
@@ -5237,7 +6075,7 @@
  * unload, and binds --st-* to Obsidian's palette so the card looks native.
  */
 
-const { Plugin, MarkdownRenderChild, Notice } = require("obsidian")
+const { Plugin, MarkdownRenderChild, Notice, SliderComponent } = require("obsidian")
 
 const st = globalThis.steptrace
 
@@ -5269,6 +6107,34 @@ const THEME = `
 }
 `
 
+function createSpeedSlider(container, options) {
+  const slider = new SliderComponent(container).setLimits(options.min, options.max, options.step)
+
+  // Preserve live dragging on Obsidian versions that expose it (since 1.6.6).
+  if (typeof slider.setInstant === "function") slider.setInstant(true)
+
+  // Current Obsidian renders the formatted value beside its native slider.
+  // Older supported versions retain their native dynamic tooltip instead.
+  if (typeof slider.setDisplayFormat === "function") slider.setDisplayFormat(options.format)
+  else if (typeof slider.setDynamicTooltip === "function") slider.setDynamicTooltip()
+
+  slider.setValue(options.value)
+  slider.sliderEl.setAttribute("aria-label", options.label)
+  slider.sliderEl.setAttribute("aria-valuetext", options.format(options.value))
+  slider.onChange((value) => {
+    slider.sliderEl.setAttribute("aria-valuetext", options.format(value))
+    options.onChange(value)
+  })
+
+  return {
+    destroy() {
+      // SliderComponent has no unload API; clear its wrapper so the current
+      // inline value sibling is removed together with the input.
+      container.replaceChildren()
+    },
+  }
+}
+
 class SteptraceChild extends MarkdownRenderChild {
   constructor(el, handle) {
     super(el)
@@ -5295,7 +6161,7 @@ module.exports = class SteptracePlugin extends Plugin {
         return
       }
       const root = el.createEl("div")
-      const handle = st.mount(root, config)
+      const handle = st.mount(root, config, { createSpeedSlider })
       ctx.addChild(new SteptraceChild(el, handle))
     })
 

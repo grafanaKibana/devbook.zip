@@ -5,7 +5,7 @@
  * unload, and binds --st-* to Obsidian's palette so the card looks native.
  */
 
-const { Plugin, MarkdownRenderChild, Notice } = require("obsidian")
+const { Plugin, MarkdownRenderChild, Notice, SliderComponent } = require("obsidian")
 
 const st = globalThis.steptrace
 
@@ -37,6 +37,34 @@ const THEME = `
 }
 `
 
+function createSpeedSlider(container, options) {
+  const slider = new SliderComponent(container).setLimits(options.min, options.max, options.step)
+
+  // Preserve live dragging on Obsidian versions that expose it (since 1.6.6).
+  if (typeof slider.setInstant === "function") slider.setInstant(true)
+
+  // Current Obsidian renders the formatted value beside its native slider.
+  // Older supported versions retain their native dynamic tooltip instead.
+  if (typeof slider.setDisplayFormat === "function") slider.setDisplayFormat(options.format)
+  else if (typeof slider.setDynamicTooltip === "function") slider.setDynamicTooltip()
+
+  slider.setValue(options.value)
+  slider.sliderEl.setAttribute("aria-label", options.label)
+  slider.sliderEl.setAttribute("aria-valuetext", options.format(options.value))
+  slider.onChange((value) => {
+    slider.sliderEl.setAttribute("aria-valuetext", options.format(value))
+    options.onChange(value)
+  })
+
+  return {
+    destroy() {
+      // SliderComponent has no unload API; clear its wrapper so the current
+      // inline value sibling is removed together with the input.
+      container.replaceChildren()
+    },
+  }
+}
+
 class SteptraceChild extends MarkdownRenderChild {
   constructor(el, handle) {
     super(el)
@@ -63,7 +91,7 @@ module.exports = class SteptracePlugin extends Plugin {
         return
       }
       const root = el.createEl("div")
-      const handle = st.mount(root, config)
+      const handle = st.mount(root, config, { createSpeedSlider })
       ctx.addChild(new SteptraceChild(el, handle))
     })
 

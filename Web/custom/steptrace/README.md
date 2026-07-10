@@ -31,6 +31,13 @@ Interactive, step-by-step algorithm-visualizer cards that live in both the Obsid
 | 6 | **PLAYER** | Transport controls: play, pause, step, speed. Iterates precomputed frames. Step-back is a free re-render (no history). | Tweaking playback behavior. |
 | 7 | **MOUNT** | Assembles a card into a given `root` element: parses config, runs the algorithm once (to build frames), wires the player, and returns `{ destroy }` for cleanup. | Never — orchestration only. |
 
+Every card derives a teaching layer from its immutable frames:
+
+- **Invariant** explains why the current operation is safe for that algorithm.
+- **Milestones** divide the scrubber into semantic phases such as passes, probes, settled nodes, DP rows, and traceback.
+- **Result** replaces the invariant on the terminal frame with the concrete output and relevant operation counts.
+- State changes use symbols, line patterns, or geometry as well as color.
+
 After editing engine.js, run:
 ```bash
 npm run steptrace:sync
@@ -48,7 +55,7 @@ Each host loads engine.js independently. Neither reads the other's files at buil
 
 **How it works:**
 1. `obsidian-plugin.js` runs after the engine (same process, same globalThis) and registers the `steptrace` code-block processor.
-2. On render, it parses the fence config (flat JSON), calls `steptrace.mount(root, config)`, and wraps the handle in Obsidian's `MarkdownRenderChild` lifecycle.
+2. On render, it parses the fence config (flat JSON), calls `steptrace.mount(root, config, host)`, and wraps the handle in Obsidian's `MarkdownRenderChild` lifecycle. The runtime-only host adapter supplies Obsidian's native `SliderComponent`; Quartz omits it and uses the engine's HTML range fallback.
 3. Theme tokens (`--st-*`) are bound to Obsidian's CSS variables at plugin load.
 4. The `.hotreload` marker signals the Hot Reload community plugin to refresh.
 
