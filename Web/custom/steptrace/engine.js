@@ -40,6 +40,14 @@
   //  geometry (bar heights, node coordinates). To restyle steptrace, edit here.
   // ==========================================================================
 
+  // Rows available to the TRACE log. Only as many as fit the log's pinned height
+  // are shown, so this is just a ceiling: 10 covers the tallest rail (a deep DP
+  // card) even when every step is a single line.
+  const LOG_ROWS = 10
+  // opacity by age: the live step is 1, the step before it 0.5, then a decaying
+  // ramp that bottoms out rather than reaching zero.
+  const fadeFor = (age) => Math.max(0.1, 0.5 * Math.pow(0.62, age - 1))
+
   const STYLE_ID = "steptrace-engine-style"
   const STYLES = `
 .steptrace {
@@ -188,23 +196,31 @@
   padding-top: 0.9rem;
   border-top: 1px solid var(--_hair);
 }
-/* The hosts style bare ol/li as prose: Obsidian's .markdown-rendered ol
-   (specificity 0,1,1) beats a lone .steptrace__log and indents the whole log
-   away from the rail's left edge that TRACE, RESULT and WATCH share. Only the
-   inline-start reset needs to outrank it, so it lives here rather than in the
-   base rules below — bumping those would sink the --cur modifiers. */
+/* The hosts style bare ol/li as prose, and those rules (Obsidian's
+   .markdown-rendered ol/li, specificity 0,1,1) beat a lone .steptrace__log: the
+   inline padding indents the log off the rail's left edge that TRACE, RESULT and
+   WATCH share, and the block margins inflate the rows until the flex column
+   shrinks them. Only this reset has to outrank the host, so it lives here rather
+   than in the base rules below — bumping those would sink the --cur modifiers. */
 .steptrace .steptrace__log,
 .steptrace .steptrace__log-line {
-  margin-inline: 0;
-  padding-inline: 0;
+  margin: 0;
+  padding: 0;
+}
+/* RESULT is an <li> of that same list, so it needs the reset too — but it keeps
+   its own box padding, and its left edge (the accent border) must land on the
+   log's left edge, level with the step numbers. */
+.steptrace .steptrace__insight {
+  margin: 0;
+  padding: 0.65rem 0.7rem;
 }
 .steptrace .steptrace__log-line::marker,
 .steptrace .steptrace__insight::marker {
   content: "";
 }
 
-/* Step log: fixed 3 lines; explicit line-height keeps Quartz prose styles from
-   inflating the gaps relative to Obsidian. */
+/* Step log: explicit line-height keeps Quartz prose styles from inflating the
+   gaps relative to Obsidian. */
 .steptrace__log {
   position: relative;
   list-style: none;
@@ -219,33 +235,23 @@
   line-height: 1.4;
   overflow: hidden;
 }
+/* Every row hugs its whole message, however many lines that takes. fitLog() then
+   shows only the rows that fit the log's pinned height, so a step is either
+   rendered in full or not at all — never truncated. */
 .steptrace__log-line {
   display: flex;
   gap: 0.5rem;
   margin: 0;
   padding: 0;
-  height: 2.8em;
+  flex: none;
   line-height: 1.4;
-  overflow: hidden;
   transition: opacity 0.3s ease;
 }
 .steptrace__log-line--cur {
-  height: auto;
   min-height: 1.4em;
 }
-.steptrace__log-line--cur .steptrace__log-text {
-  display: block;
-  -webkit-line-clamp: unset;
-  overflow: visible;
-  -webkit-mask-image: none;
-  mask-image: none;
-}
-.steptrace__log-line[data-age="1"] {
-  opacity: 0.5;
-}
-.steptrace__log-line[data-age="2"] {
-  opacity: 0.28;
-}
+/* older steps fade out — the ramp is set inline, since how many of them fit is
+   only known once the rows have been measured against the log's pinned height */
 .steptrace__log-num {
   flex: none;
   color: var(--_muted);
@@ -255,14 +261,6 @@
 }
 .steptrace__log-text {
   color: var(--_muted);
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
-  -webkit-mask-image: linear-gradient(to bottom, #000 1.4em, transparent 1.4em),
-    linear-gradient(to right, #000 88%, transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 1.4em, transparent 1.4em),
-    linear-gradient(to right, #000 88%, transparent 100%);
 }
 .steptrace__log-line--cur .steptrace__log-num {
   opacity: 1;
@@ -312,14 +310,18 @@
 
 /* The last row of the log on the terminal frame: it stands where the current step
    line would be, so the TRACE eyebrow and the preceding steps stay in place and
-   only the live line gives way to the answer. */
+   only the live line gives way to the answer. It restates the card's own 14px so
+   its em-based box does not shrink against the log's 0.72rem text. */
 .steptrace__insight {
   display: block;
   list-style: none;
   margin: 0;
   padding: 0.65rem 0.7rem;
+  flex: none;
+  font-size: 14px;
   border-left: 3px solid var(--_green);
   background: color-mix(in srgb, var(--_green) 9%, transparent);
+  min-height: 4.65em;
 }
 .steptrace__insight-label {
   display: block;
@@ -663,6 +665,9 @@
     display: none;
   }
   .steptrace__log-line--cur {
+    min-height: 0;
+  }
+  .steptrace__insight {
     min-height: 0;
   }
   .steptrace__scrub {
@@ -5613,8 +5618,12 @@
     const traceLabel = el("div", "steptrace__rail-label steptrace__trace-label")
     traceLabel.textContent = "Trace"
     const log = el("ol", "steptrace__log")
+    // The log's height is pinned to its worst case (two full-width history lines
+    // plus the tallest step message), but rows hug their text, so short steps
+    // leave that reservation half empty. Keep a deep pool of rows and let
+    // fitLog() below fill whatever space the current steps did not use.
     const logLines = []
-    for (let k = 0; k < 3; k++) {
+    for (let k = 0; k < LOG_ROWS; k++) {
       const line = el("li", "steptrace__log-line")
       const num = el("span", "steptrace__log-num")
       const txt = el("span", "steptrace__log-text")
@@ -5803,7 +5812,10 @@
         log.style.height = "auto"
         return
       }
+      // sub-pixel heights throughout: offsetHeight rounds, and rounding two history
+      // rows down is enough to clip the top line by a pixel.
       const PROBE = "position:absolute;visibility:hidden;pointer-events:none;left:0;right:0;height:auto"
+      const tall = (node) => node.getBoundingClientRect().height
       const probe = el("li", "steptrace__log-line steptrace__log-line--cur")
       probe.style.cssText = PROBE
       const pn = el("span", "steptrace__log-num")
@@ -5814,21 +5826,60 @@
       let maxRow = 0
       for (const f of player.frames) {
         pt.textContent = stripTags(f.message)
-        if (probe.offsetHeight > maxRow) maxRow = probe.offsetHeight
+        if (tall(probe) > maxRow) maxRow = tall(probe)
       }
       probe.remove()
       const resultProbe = insight.cloneNode(true)
       resultProbe.hidden = false
       resultProbe.style.cssText = PROBE
       log.append(resultProbe)
-      if (resultProbe.offsetHeight > maxRow) maxRow = resultProbe.offsetHeight
+      if (tall(resultProbe) > maxRow) maxRow = tall(resultProbe)
       resultProbe.remove()
-      const gap = parseFloat(getComputedStyle(log).rowGap) || 0
-      const hist = logLines[0].line.offsetHeight
+      const logCS = getComputedStyle(log)
+      const gap = parseFloat(logCS.rowGap) || 0
+      // History rows now hug their message, so reserve their two-line ceiling
+      // rather than measuring whatever the current step happens to render.
+      const hist = (parseFloat(logCS.lineHeight) || 0) * 2
       const h = Math.ceil(hist * 2 + gap * 2 + maxRow) + "px"
       if (log.style.height !== h) log.style.height = h
     }
-    const logRO = typeof ResizeObserver !== "undefined" ? new ResizeObserver(() => sizeRail()) : null
+    // Walk the rendered rows bottom-up and keep only those that fit whole inside
+    // the log's pinned height — a step half-cut by the overflow reads as a bug.
+    // Older rows are already hidden by the loop above once they run out of frames.
+    function fitLog(terminal) {
+      const budget = log.clientHeight
+      if (!budget) return
+      const gap = parseFloat(getComputedStyle(log).rowGap) || 0
+      let used = terminal ? insight.getBoundingClientRect().height : 0
+      let full = false
+      for (let k = LOG_ROWS - 1; k >= 0; k--) {
+        const line = logLines[k].line
+        if (line.hidden) continue
+        if (full) {
+          line.hidden = true
+          continue
+        }
+        const h = line.getBoundingClientRect().height
+        const need = used ? used + gap + h : h
+        // sub-pixel slack: heights and the budget round differently. The live step
+        // is the bottom row and always stays, even if it alone overruns the budget.
+        if (!used || need <= budget + 0.5) {
+          used = need
+        } else {
+          // stop at the first row that will not fit: skipping it to squeeze in an
+          // older, shorter one would leave a hole in the step sequence
+          line.hidden = true
+          full = true
+        }
+      }
+    }
+    // a width change re-wraps the messages, so the log is re-pinned and the rows
+    // re-fitted against the new height
+    const onRailResize = () => {
+      sizeRail()
+      if (player) renderRail()
+    }
+    const logRO = typeof ResizeObserver !== "undefined" ? new ResizeObserver(onRailResize) : null
     if (logRO) logRO.observe(rail)
 
     // --- rail TRACE log + counter + scrubber, refreshed every render ---
@@ -5836,22 +5887,28 @@
     function renderRail() {
       const total = player.frames.length
       const i = player.i
-      const idxs = [i - 2, i - 1, i]
-      for (let k = 0; k < 3; k++) {
-        const fi = idxs[k]
+      const terminal = i === total - 1
+      // the bottom row is the live step, or RESULT once the algorithm has settled
+      insight.hidden = !terminal
+      insight.setAttribute("aria-live", terminal && !player.playing ? "polite" : "off")
+      for (let k = 0; k < LOG_ROWS; k++) {
         const ll = logLines[k]
-        if (fi < 0 || fi >= total) {
+        const fi = i - (LOG_ROWS - 1 - k)
+        const cur = fi === i
+        if (fi < 0 || fi >= total || (cur && terminal)) {
+          ll.line.hidden = true
           ll.num.textContent = ""
           ll.txt.textContent = ""
           ll.line.classList.remove("steptrace__log-line--cur")
-          ll.line.removeAttribute("data-age")
-        } else {
-          ll.num.textContent = pad2(fi + 1)
-          ll.txt.textContent = stripTags(player.frames[fi].message)
-          ll.line.classList.toggle("steptrace__log-line--cur", fi === i)
-          ll.line.dataset.age = String(i - fi)
+          continue
         }
+        ll.line.hidden = false
+        ll.num.textContent = pad2(fi + 1)
+        ll.txt.textContent = stripTags(player.frames[fi].message)
+        ll.line.classList.toggle("steptrace__log-line--cur", cur)
+        ll.line.style.opacity = cur ? "" : String(fadeFor(i - fi))
       }
+      fitLog(terminal)
       // brief scroll between steps: the block eases in from a small offset in the
       // travel direction (forward ⇒ rises up, back ⇒ drops down). transform-only,
       // so it never triggers layout and can't add footer jitter.
@@ -5864,10 +5921,6 @@
         log.style.transition = "transform 0.26s var(--_spring)"
         log.style.transform = "translateY(0)"
       }
-      const terminal = i === total - 1
-      logLines[2].line.hidden = terminal
-      insight.hidden = !terminal
-      insight.setAttribute("aria-live", terminal && !player.playing ? "polite" : "off")
       const chapter = milestoneAt(currentMilestones, i)
       phaseName.textContent = chapter ? chapter.label : "Step"
       phaseStep.textContent = `${i + 1} / ${total}`
