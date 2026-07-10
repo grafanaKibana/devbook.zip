@@ -149,7 +149,7 @@ body {
 }
 
 // ---------------------------------------------------------------------------
-// Desktop / tablet (≥ 800px): title left · search centered · toggles right.
+// Desktop / tablet (≥ 768px): title left · search centered · toggles right.
 // ---------------------------------------------------------------------------
 @media all and not ($mobile) {
   .site-header-title {
@@ -205,7 +205,7 @@ body {
 }
 
 // ---------------------------------------------------------------------------
-// Mobile (< 800px): hamburger left · title centered · search icon + toggles
+// Mobile (< 768px): hamburger left · title centered · search icon + toggles
 // right. The Explorer stays in the left sidebar; only its hamburger is pulled
 // into the bar.
 // ---------------------------------------------------------------------------
@@ -321,8 +321,9 @@ body {
 //
 // The tree comes from the `@quartz-community/explorer` plugin. Its stylesheet
 // hard-codes `max-width: 800px` for the foldable/overlay state rather than
-// reading our breakpoints, so anything that has to change with the breakpoints
-// is restated here rather than tweaked upstream.
+// reading our breakpoints (which split mobile from tablet at 768px), so
+// anything that has to change with the breakpoints is restated here rather
+// than tweaked upstream.
 // ============================================================================
 
 :root {
@@ -357,22 +358,20 @@ body {
 }
 
 // ---------------------------------------------------------------------------
-// Tablet (800–1200px): foldable Explorer that opens as a narrow drawer.
+// Tablet (768–1200px): foldable Explorer that opens as a narrow drawer.
 //
 // The plugin ships two states — an always-on sidebar, and a full-viewport
-// overlay below 800px — so tablets inherited the desktop sidebar and lost a
-// 320px column of an already narrow viewport. This block re-creates the
-// foldable behaviour for the tablet range and swaps the full-bleed overlay for
-// a drawer that leaves the article visible beside it.
+// overlay — so tablets inherited the desktop sidebar and lost a 320px column of
+// an already narrow viewport. This block re-creates the foldable behaviour for
+// the tablet range and swaps the full-bleed overlay for a drawer that leaves
+// the article visible beside it.
 //
-// `$tablet` is inclusive at both ends and so overlaps `$mobile` at exactly
-// 800px. The two Explorer states must be mutually exclusive, so this is scoped
-// to strictly above the mobile breakpoint: 800px itself stays mobile (full
-// screen), matching how base.scss resolves its grid at that width.
+// Between 768 and 800px the plugin's own overlay rules still match (it keys off
+// a hard-coded 800px). They lose to everything below: the plugin ships its CSS
+// in the `quartz-base` layer, and custom.scss is unlayered, so these rules win
+// on every property they set regardless of selector specificity.
 // ---------------------------------------------------------------------------
-$tabletOnly: "(min-width: #{map.get($breakpoints, mobile) + 0.02px}) and (max-width: #{map.get($breakpoints, desktop)})";
-
-@media all and ($tabletOnly) {
+@media all and ($tablet) {
   :root {
     // The desktop sidebar's width, capped so a portrait tablet keeps most of
     // the article visible next to the open drawer.
@@ -383,6 +382,16 @@ $tabletOnly: "(min-width: #{map.get($breakpoints, mobile) + 0.02px}) and (max-wi
   // does. The title stays left-aligned (it only centers on mobile).
   .site-header {
     padding-left: 4rem;
+  }
+
+  // At the narrow end of this range the title would otherwise be squeezed
+  // against the search box (`flex: 0 1 32rem`) and wrap mid-word. Let the
+  // search absorb the shortfall instead — it has a max-width, not a min.
+  .site-header-title {
+    flex: 0 0 auto;
+  }
+  .site-header .page-title {
+    white-space: nowrap;
   }
 
   // Swap the plugin's "Topics" fold arrow for the hamburger.
@@ -558,7 +567,7 @@ $tabletOnly: "(min-width: #{map.get($breakpoints, mobile) + 0.02px}) and (max-wi
 // Tablet: same reasoning. Fading the sidebar here would fade the hamburger, and
 // with it the only way to reach the drawer — on a touch tablet there is no
 // hover to bring it back.
-@media all and ($tabletOnly) {
+@media all and ($tablet) {
   :root[reader-mode="on"] .page > #quartz-body > .sidebar.left {
     opacity: 1;
   }

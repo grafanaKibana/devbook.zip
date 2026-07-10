@@ -6,13 +6,18 @@
  * $desktop: screen width above this value will use desktop styles
  * Screen width between $mobile and $desktop width will use the tablet layout.
  * assuming mobile < desktop
+ *
+ * The mobile breakpoint is the tablet floor: 768px is an iPad mini in portrait,
+ * which belongs in the tablet layout. $mobile therefore stops 0.02px short of
+ * it so the two queries are mutually exclusive — without that they both match
+ * at exactly 768px and the winner comes down to source order.
  */
 $breakpoints: (
-  mobile: 800px,
+  mobile: 768px,
   desktop: 1200px,
 );
 
-$mobile: "(max-width: #{map.get($breakpoints, mobile)})";
+$mobile: "(max-width: #{map.get($breakpoints, mobile) - 0.02px})";
 $tablet: "(min-width: #{map.get($breakpoints, mobile)}) and (max-width: #{map.get($breakpoints, desktop)})";
 $desktop: "(min-width: #{map.get($breakpoints, desktop)})";
 

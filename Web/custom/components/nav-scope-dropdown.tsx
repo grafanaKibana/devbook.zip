@@ -256,10 +256,10 @@ const script = `
   }
 
   // Below the desktop breakpoint the Explorer folds away behind a hamburger and
-  // opens as a panel — full-screen under 800px, a drawer between 800 and 1200.
+  // opens as a panel — full-screen under 768px, a drawer between 768 and 1200.
   // Either way the sidebar itself is just a fixed hamburger box, so the selector
-  // has to ride inside the panel. Keep in sync with the tabletOnly drawer block
-  // and the mobile overlay block in Web/quartz/styles/custom.scss.
+  // has to ride inside the panel. Keep in sync with the $tablet drawer block and
+  // the $mobile overlay block in Web/quartz/styles/custom.scss.
   var PANEL_MEDIA = "(max-width: 1200px)";
 
   function isPanelLayout() {
