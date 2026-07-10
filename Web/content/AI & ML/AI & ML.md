@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-08T15:01:12.289Z
-modified: 2026-07-10T08:56:45.949Z
-published: 2026-07-10T08:56:45.949Z
+modified: 2026-07-10T15:18:33.465Z
+published: 2026-07-10T15:18:33.465Z
 tags:
   - FolderNote
 icon: brain-circuit
