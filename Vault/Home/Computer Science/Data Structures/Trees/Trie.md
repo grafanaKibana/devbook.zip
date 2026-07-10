@@ -104,5 +104,5 @@ public class Trie
 ## References
 
 - [Trie (Wikipedia)](https://en.wikipedia.org/wiki/Trie) — formal definition, radix/Patricia variants, and complexity.
-- [Trie data structure (cp-algorithms)](https://cp-algorithms.com/string/aho_corasick.html) — tries as the basis of Aho-Corasick multi-pattern search.
+- [Aho-Corasick algorithm (cp-algorithms)](https://cp-algorithms.com/string/aho_corasick.html) — trie-based multi-pattern search automaton.
 - [Prefix and suffix trees overview (GeeksforGeeks)](https://www.geeksforgeeks.org/trie-insert-and-search/) — worked insert/search walkthrough with diagrams.
