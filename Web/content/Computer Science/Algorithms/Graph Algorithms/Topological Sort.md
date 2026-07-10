@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-08T16:14:17.334+03:00
-modified: 2026-07-08T16:14:17.335+03:00
-published: 2026-07-08T16:14:17.335+03:00
+created: 2026-07-09T20:18:28.228Z
+modified: 2026-07-09T20:18:28.228Z
+published: 2026-07-09T20:18:28.228Z
 topic:
   - Computer Science
 subtopic:
@@ -26,11 +26,12 @@ Two standard algorithms, both **O(V + E)**:
 
 Kahn's is usually preferred in practice: it detects cycles naturally and avoids recursion-depth limits.
 
-
 ## Visualization
 
+The card runs Kahn's algorithm on the DAG: a node is output the moment its in-degree drops to 0, and WATCH shows the ready queue of currently dependency-free nodes. Watch the queue hold several nodes at once — whenever that happens, more than one valid topological order exists.
+
 ```steptrace
-{"algorithm":"topological-sort","directed":true,"nodes":[{"id":"A"},{"id":"B"},{"id":"C"},{"id":"D"},{"id":"E"},{"id":"F"}],"edges":[{"from":"A","to":"B"},{"from":"A","to":"C"},{"from":"B","to":"D"},{"from":"C","to":"D"},{"from":"D","to":"E"},{"from":"C","to":"F"},{"from":"F","to":"E"}]}
+{"algorithm":"topological-sort","directed":true,"nodes":[{"id":"A"},{"id":"B"},{"id":"C"},{"id":"D"},{"id":"E"},{"id":"F"},{"id":"G"}],"edges":[{"from":"A","to":"B"},{"from":"A","to":"C"},{"from":"B","to":"D"},{"from":"B","to":"E"},{"from":"C","to":"D"},{"from":"C","to":"E"},{"from":"D","to":"F"},{"from":"E","to":"F"},{"from":"F","to":"G"}]}
 ```
 
 ## Example

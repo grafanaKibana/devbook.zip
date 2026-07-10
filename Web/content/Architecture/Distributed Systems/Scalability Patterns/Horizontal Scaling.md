@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-08T16:14:17.423+03:00
-modified: 2026-07-08T16:28:37.389+03:00
-published: 2026-07-08T16:28:37.389+03:00
+created: 2026-07-08T15:01:12.376Z
+modified: 2026-07-08T15:01:12.376Z
+published: 2026-07-08T15:01:12.376Z
 topic:
   - Architecture
 subtopic:

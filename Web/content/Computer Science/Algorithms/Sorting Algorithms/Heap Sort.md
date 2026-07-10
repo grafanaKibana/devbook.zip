@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-08T16:14:17.340+03:00
-modified: 2026-07-08T16:14:17.340+03:00
-published: 2026-07-08T16:14:17.340+03:00
+created: 2026-07-09T20:18:13.659Z
+modified: 2026-07-10T06:12:51.846Z
+published: 2026-07-10T06:12:51.846Z
 tags:
   - FolderNote
 topic:
@@ -11,13 +11,14 @@ subtopic:
   - Algorithms
 level:
   - "4"
-status: Ready to Repeat
-priority: Low
+status: Creation
+priority: Medium
 ---
 
 # Intro
 
 Heap sort turns the array into a [[Heap|binary heap]] and then repeatedly extracts the maximum to build the sorted output from the back. It is the only common comparison sort that is **both O(n log n) in the worst case _and_ O(1) extra space (in-place)** — the combination merge sort and quicksort each give up one of. That guaranteed worst case with no extra memory is exactly why .NET's `Array.Sort` (introsort) uses heap sort as its **fallback** when quicksort's recursion goes too deep, defending against quicksort's O(n²) blow-up.
+
 ## Mechanism
 
 Two phases over the same array:
@@ -38,6 +39,8 @@ graph TD
 ```
 
 ## Visualization
+
+The card shows both phases on the bar chart: blue marks the parent/child pair being compared during a sift-down, violet flashes on a swap, and the green bars with a white check are the sorted suffix growing from the right. The i/j pins track the active indices; WATCH shows i, j, and the swap count — watch the O(n) heapify settle first, then the root repeatedly swap to the end of the shrinking heap.
 
 ```steptrace
 {"algorithm":"heap-sort","array":[8,3,5,1,9,2,7,4]}

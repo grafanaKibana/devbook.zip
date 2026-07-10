@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-08T16:14:17.340+03:00
-modified: 2026-07-08T16:14:17.340+03:00
-published: 2026-07-08T16:14:17.340+03:00
+created: 2026-07-09T20:18:02.681Z
+modified: 2026-07-09T20:18:02.681Z
+published: 2026-07-09T20:18:02.681Z
 topic:
   - Computer Science
 subtopic:
@@ -39,6 +39,8 @@ graph TD
 ```
 
 ## Visualization
+
+The card animates the pass structure on a bar chart: blue highlights the adjacent pair being compared, violet flashes when they swap, and bars turn green with a white check as they lock into their final position. The i/j pins track the active indices, and WATCH shows i, j, and the running swap count — watch the largest remaining value bubble to the right end on every pass.
 
 ```steptrace
 {"algorithm":"bubble-sort","array":[8,3,5,1,9,2,7,4]}

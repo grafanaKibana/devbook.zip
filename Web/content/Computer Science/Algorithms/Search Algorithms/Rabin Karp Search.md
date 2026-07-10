@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-08T16:14:17.339+03:00
-modified: 2026-07-08T16:14:17.339+03:00
-published: 2026-07-08T16:14:17.339+03:00
+created: 2026-07-09T20:18:40.004Z
+modified: 2026-07-09T20:18:40.004Z
+published: 2026-07-09T20:18:40.004Z
 topic:
   - Computer Science
 subtopic:
@@ -51,6 +51,8 @@ graph TD
 ```
 
 ## Visualization
+
+The card slides the pattern strip beneath the text strip, with a rolling-hash badge under the viz showing the window hash updated in O(1) at each slide. Watch how cheap non-matching windows are — a hash mismatch skips straight to the next slide — while a hash hit still triggers the character-by-character verification before a match is reported.
 
 ```steptrace
 {"algorithm":"rabin-karp","text":"GEEKSFORGEEKS","pattern":"GEEK"}

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-08T16:14:17.335+03:00
-modified: 2026-07-08T16:14:17.336+03:00
-published: 2026-07-08T16:14:17.336+03:00
+created: 2026-07-09T19:19:45.697Z
+modified: 2026-07-09T19:55:50.927Z
+published: 2026-07-09T19:55:50.927Z
 topic:
   - Computer Science
 subtopic:
@@ -26,8 +26,15 @@ There are two equivalent implementation styles:
 
 The recipe: (1) define the **state** (what arguments uniquely identify a subproblem), (2) write the **recurrence** (how a state combines sub-states), (3) set **base cases**, (4) choose memoisation or tabulation, (5) optionally **reduce space**.
 
-
 ## Visualization
+
+**The paradigm itself — overlapping subproblems.** Run naive `fib(5)` and every call becomes its own node; the tree balloons to **15 calls** because the same states (`f(3)`, `f(2)`, …) are recomputed again and again. Memoise, and the second time any state appears it becomes a **cache hit** whose entire subtree is skipped — the identical answer in just **9 calls**. Those repeated, greyed-out subtrees are exactly the _overlapping subproblems_ that make a problem worth memoising: they are the redundant work caching removes.
+
+```steptrace
+{"algorithm":"fibonacci","n":5}
+```
+
+**Optimal substructure — the recurrence in action.** The longest-common-subsequence table builds each cell from its neighbours: on a match it inherits `diagonal + 1`, on a mismatch it inherits the optimum of its top/left sub-answer — the concrete statement that an optimal solution is composed of optimal sub-solutions. The per-step traceback then decomposes the finished answer back into the sub-answers it was built from, one cell at a time.
 
 ```steptrace
 {"algorithm":"lcs","a":"AGCAT","b":"GAC"}

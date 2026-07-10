@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-08T16:14:17.346+03:00
-modified: 2026-07-08T16:14:17.347+03:00
-published: 2026-07-08T16:14:17.347+03:00
+created: 2026-07-08T15:01:12.521Z
+modified: 2026-07-08T15:01:12.522Z
+published: 2026-07-08T15:01:12.522Z
 topic:
   - Computer Science
 subtopic:

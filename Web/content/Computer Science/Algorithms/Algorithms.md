@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-08T16:14:17.332+03:00
-modified: 2026-07-08T16:14:17.333+03:00
-published: 2026-07-08T16:14:17.333+03:00
+created: 2026-07-08T15:01:12.496Z
+modified: 2026-07-10T06:12:51.845Z
+published: 2026-07-10T06:12:51.845Z
 tags:
   - FolderNote
 topic:
@@ -11,7 +11,7 @@ subtopic:
   - Algorithms
 level:
   - "4"
-status: Done
+status: Creation
 priority: High
 ---
 
