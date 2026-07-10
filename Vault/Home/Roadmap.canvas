@@ -62,7 +62,7 @@
       "y": 760,
       "width": 340,
       "height": 80,
-      "color": "4"
+      "color": "2"
     },
     {
       "id": "n_4d06010d24",
@@ -756,7 +756,7 @@
     {
       "id": "n_b0ac2236f9",
       "type": "text",
-      "text": "#### Roadmap legend\n**Generated:** Jul 10 2026 | 05:40PM",
+      "text": "#### Roadmap legend\n**Generated:** Jul 10 2026 | 06:31PM",
       "x": -1860,
       "y": 0,
       "width": 500,
@@ -775,7 +775,7 @@
     {
       "id": "n_c1cf7bc196",
       "type": "text",
-      "text": "Creation: 10",
+      "text": "Creation: 11",
       "x": -1800,
       "y": 202,
       "width": 380,
@@ -804,7 +804,7 @@
     {
       "id": "n_0e6324d0db",
       "type": "text",
-      "text": "Done: 13",
+      "text": "Done: 12",
       "x": -1800,
       "y": 430,
       "width": 380,
