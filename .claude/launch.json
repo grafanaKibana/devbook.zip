@@ -8,6 +8,12 @@
       "port": 8080
     },
     {
+      "name": "quartz-wt",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": ["-c", "cd Web && npx quartz build --serve --port 8071 --wsPort 3071"],
+      "port": 8071
+    },
+    {
       "name": "steptrace-mockups",
       "runtimeExecutable": "python3",
       "runtimeArgs": [

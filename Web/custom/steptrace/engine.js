@@ -77,6 +77,7 @@
   background: transparent;
 }
 .steptrace * { box-sizing: border-box; }
+.steptrace [hidden] { display: none !important; }
 .steptrace--reduced * {
   transition: none !important;
   animation: none !important;
@@ -139,6 +140,11 @@
 .steptrace__stage-col {
   min-width: 0;
 }
+.steptrace__stage-col--graph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 /* every kind except graph bottom-aligns its viz within the stage column, so the
    visualization baseline sits level with the rail's WATCH panel */
 .steptrace__stage-col--bottom {
@@ -162,8 +168,6 @@
   color: var(--_muted);
   margin-bottom: 0.5rem;
 }
-/* bottom-anchor the whole TRACE block (label + log) so the newest step sits just
-   above the WATCH divider; the free ("scrollback") space collects at the top. */
 .steptrace__rail > .steptrace__rail-label {
   margin-top: auto;
 }
@@ -171,34 +175,32 @@
   padding-top: 0.9rem;
   border-top: 1px solid var(--_hair);
 }
-/* step log: fixed 3 lines, current emphasized (fixed heights ⇒ zero footer jitter) */
+/* Step log: fixed 3 lines; explicit line-height keeps Quartz prose styles from
+   inflating the gaps relative to Obsidian. */
 .steptrace__log {
-  position: relative; /* anchors the hidden sizing probe */
+  position: relative;
   list-style: none;
-  margin: 0 0 0.9rem; /* gap under the newest step == WATCH eyebrow-to-divider gap */
+  margin: 0 0 0.9rem;
   padding: 0;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end; /* slack collects at the top; newest step hugs the divider */
+  justify-content: flex-end;
   gap: 0.55rem;
   font-family: var(--_font-mono);
   font-size: 0.72rem;
   line-height: 1.4;
-  overflow: hidden; /* clip the between-step scroll so it can't overlap the label */
-  /* height is pinned by sizeLog() to fit the TALLEST frame message, so the
-     unclamped current line can grow without ever moving the footer */
+  overflow: hidden;
 }
 .steptrace__log-line {
   display: flex;
   gap: 0.5rem;
-  margin: 0; /* hosts style bare li (Quartz adds vertical margins) — pin it */
+  margin: 0;
   padding: 0;
-  height: 2.8em; /* history: two clamped lines */
+  height: 2.8em;
+  line-height: 1.4;
   overflow: hidden;
   transition: opacity 0.3s ease;
 }
-/* the CURRENT step shows its full text — no clamp, no fade; the log block's
-   fixed height (sizeLog) absorbs the growth */
 .steptrace__log-line--cur {
   height: auto;
   min-height: 1.4em;
@@ -210,7 +212,6 @@
   -webkit-mask-image: none;
   mask-image: none;
 }
-/* older history fades progressively (age 1 = previous, age 2 = older) */
 .steptrace__log-line[data-age="1"] {
   opacity: 0.5;
 }
@@ -230,10 +231,6 @@
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   overflow: hidden;
-  /* Only a wrapped 2ND line trails off horizontally — the 1st line stays intact.
-     Layer A keeps the top line box (1.4em) fully opaque regardless of x; layer B
-     is a right-fade that only "wins" below it (where A is transparent), i.e. line
-     2. The layers composite additively, so line 1 is never clipped. */
   -webkit-mask-image: linear-gradient(to bottom, #000 1.4em, transparent 1.4em),
     linear-gradient(to right, #000 88%, transparent 100%);
   mask-image: linear-gradient(to bottom, #000 1.4em, transparent 1.4em),
@@ -444,11 +441,14 @@
   position: absolute;
   right: 0;
   bottom: calc(100% + 6px);
-  min-width: 156px;
+  min-width: 13rem;
   background: var(--st-page, #fff);
   border: 1px solid var(--_border);
-  border-radius: 9px;
-  padding: 5px;
+  border-radius: 10px;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
   opacity: 0;
   visibility: hidden;
   transform: translateY(6px);
@@ -457,6 +457,11 @@
     transform 0.15s ease,
     visibility 0.15s;
   z-index: 20;
+}
+.steptrace__menu-section {
+  display: grid;
+  gap: 0.4rem;
+  min-width: 0;
 }
 .steptrace__menu--open {
   opacity: 1;
@@ -470,13 +475,16 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--_muted);
-  padding: 5px 8px 3px;
+  margin: 0;
+  padding: 0 0.1rem;
 }
 .steptrace__menu-item {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 6px 8px;
+  min-height: 2.5rem;
+  margin: 0;
+  padding: 0.55rem 0.6rem;
   border-radius: 6px;
   font: 500 0.8rem var(--_font-body);
   color: var(--_text);
@@ -498,7 +506,9 @@
   display: flex;
   align-items: center;
   gap: 0.55rem;
-  padding: 4px 8px 6px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
 }
 .steptrace__speed-control {
   display: flex;
@@ -581,7 +591,9 @@
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
-  padding: 6px 26px 6px 8px;
+  min-height: 2.5rem;
+  margin: 0;
+  padding: 0.55rem 1.8rem 0.55rem 0.6rem;
   border: 1px solid var(--_border);
   border-radius: 6px;
   font: 500 0.8rem var(--_font-body);
@@ -598,7 +610,8 @@
   outline-offset: 2px;
 }
 
-/* narrow: stack the rail beneath the stage */
+/* Narrow: stack the rail beneath the stage; transport follows the rail as a
+   normal part of the document flow. */
 @media (max-width: 560px) {
   .steptrace__body {
     grid-template-columns: 1fr;
@@ -679,14 +692,24 @@
     background var(--_tween) ease,
     opacity var(--_tween) ease;
 }
-.steptrace__fill::before {
+.steptrace__bar-cue {
   position: absolute;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
   color: var(--_on-accent);
-  font: 800 0.82rem/1 var(--_font-head);
   text-shadow: 0 1px 2px color-mix(in srgb, var(--_text) 45%, transparent);
+  pointer-events: none;
+}
+.steptrace__bar-cue svg {
+  display: none;
+  width: 1rem;
+  height: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 .steptrace__num {
   font: 600 0.72rem/1 var(--_font-mono);
@@ -734,15 +757,15 @@
   background: var(--_blue);
   opacity: 1;
 }
-.steptrace__bar[data-state="compare"] .steptrace__fill::before {
-  content: "↔";
+.steptrace__bar[data-state="compare"] .steptrace__cue-compare {
+  display: block;
 }
 .steptrace__bar[data-state="swap"] .steptrace__fill {
   background: var(--_violet);
   opacity: 1;
 }
-.steptrace__bar[data-state="swap"] .steptrace__fill::before {
-  content: "⇄";
+.steptrace__bar[data-state="swap"] .steptrace__cue-swap {
+  display: block;
 }
 .steptrace__bar[data-state="candidate"] .steptrace__fill {
   background: var(--_amber);
@@ -750,6 +773,13 @@
 }
 .steptrace__bar[data-state="candidate"] .steptrace__fill::before {
   content: "◆";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--_on-accent);
+  font: 800 0.68rem/1 var(--_font-head);
+  text-shadow: 0 1px 2px color-mix(in srgb, var(--_text) 45%, transparent);
   font-size: 0.68rem;
 }
 .steptrace__bar[data-state="sorted"] .steptrace__fill {
@@ -1458,12 +1488,16 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  align-items: stretch;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
 }
 .steptrace__svg {
+  display: block;
   width: 100%;
   height: auto;
   max-height: 260px;
+  margin-inline: auto;
   overflow: visible;
 }
 .steptrace__arrow {
@@ -1480,7 +1514,7 @@
 }
 .steptrace__edge[data-selected="true"] {
   stroke: var(--_green);
-  stroke-dasharray: 7 3;
+  stroke-dasharray: none;
 }
 .steptrace__edge-label {
   fill: var(--_muted);
@@ -1515,8 +1549,25 @@
   font: 600 10px var(--_font-mono);
 }
 .steptrace__node .steptrace__nmark {
-  fill: var(--_muted);
-  font: 800 9px var(--_font-mono);
+  color: var(--_muted);
+  overflow: visible;
+}
+.steptrace__node .steptrace__nmark [data-state-icon] {
+  display: none;
+}
+.steptrace__node .steptrace__nmark[data-state="current"] [data-state-icon="current"],
+.steptrace__node .steptrace__nmark[data-state="frontier"] [data-state-icon="frontier"],
+.steptrace__node .steptrace__nmark[data-state="visited"] [data-state-icon="visited"] {
+  display: block;
+}
+.steptrace__node .steptrace__nmark[data-state="current"] {
+  color: var(--_blue);
+}
+.steptrace__node .steptrace__nmark[data-state="frontier"] {
+  color: var(--_amber);
+}
+.steptrace__node .steptrace__nmark[data-state="visited"] {
+  color: var(--_green);
 }
 .steptrace__node[data-state="visited"] .steptrace__ncirc {
   fill: color-mix(in srgb, var(--_green) 20%, transparent);
@@ -1574,12 +1625,16 @@
   background: color-mix(in srgb, var(--_green) 20%, transparent);
   border-color: var(--_green);
 }
-.steptrace__swatch--visited::after {
-  content: "✓";
-  display: block;
+.steptrace__swatch--visited svg {
+  width: 7px;
+  height: 7px;
+  margin: -0.5px auto 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
   color: var(--_green);
-  font: 900 8px/7px var(--_font-head);
-  text-align: center;
 }
 
 /* ---- shared: status + toolbar ---- */
@@ -3976,11 +4031,14 @@
       const check = el("div", "steptrace__check")
       check.innerHTML = ICON.check
       check.setAttribute("aria-hidden", "true")
-      fill.append(check)
+      const cue = el("div", "steptrace__bar-cue")
+      cue.innerHTML = ICON.compare + ICON.swap
+      cue.setAttribute("aria-hidden", "true")
+      fill.append(check, cue)
       const num = el("div", "steptrace__num")
       bar.append(fill, num)
       stage.append(bar)
-      bars.push({ bar, fill, num, check })
+      bars.push({ bar, fill, num, check, cue })
     }
     return bars
   }
@@ -4992,12 +5050,18 @@
       dist.setAttribute("x", p.x)
       dist.setAttribute("y", p.y - R - 5)
       dist.setAttribute("text-anchor", "middle")
-      const mark = document.createElementNS(SVGNS, "text")
+      const mark = document.createElementNS(SVGNS, "svg")
       mark.setAttribute("class", "steptrace__nmark")
-      mark.setAttribute("x", p.x)
-      mark.setAttribute("y", p.y + R + 11)
-      mark.setAttribute("text-anchor", "middle")
+      mark.setAttribute("x", p.x - 6)
+      mark.setAttribute("y", p.y + R + 5)
+      mark.setAttribute("width", "12")
+      mark.setAttribute("height", "12")
+      mark.setAttribute("viewBox", "0 0 24 24")
       mark.setAttribute("aria-hidden", "true")
+      mark.innerHTML =
+        '<rect data-state-icon="current" x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/>' +
+        '<path data-state-icon="frontier" d="m12 3 9 9-9 9-9-9Z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>' +
+        '<path data-state-icon="visited" d="M20 6 9 17l-5-5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>'
       g.append(back, circle, id, dist, mark)
       svg.append(g)
       nodeEls[n.id] = { g, dist, mark }
@@ -5013,6 +5077,10 @@
     ]) {
       const row = el("div", "steptrace__legend-row")
       const sw = el("span", "steptrace__swatch steptrace__swatch--" + stateKey)
+      if (stateKey === "visited") {
+        sw.innerHTML = ICON.check
+        sw.setAttribute("aria-hidden", "true")
+      }
       row.append(sw, document.createTextNode(word))
       legend.append(row)
     }
@@ -5032,8 +5100,7 @@
         if (frontier.has(n.id)) state = "frontier"
         if (frame.current === n.id) state = "current"
         ne.g.dataset.state = state
-        ne.mark.textContent =
-          state === "current" ? "■" : state === "frontier" ? "◇" : state === "visited" ? "✓" : ""
+        ne.mark.dataset.state = state
         const d = frame.dist[n.id]
         ne.dist.textContent = d == null ? "" : `d:${d}`
       }
@@ -5134,6 +5201,10 @@
       '<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.5" fill="currentColor" stroke="none"/></svg>',
     check:
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+    compare:
+      '<svg class="steptrace__cue-compare" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 16-4-4 4-4"/><path d="M3 12h18"/><path d="m17 8 4 4-4 4"/></svg>',
+    swap:
+      '<svg class="steptrace__cue-swap" viewBox="0 0 24 24" aria-hidden="true"><path d="m2 9 3-3 3 3"/><path d="M13 18H7a2 2 0 0 1-2-2V6"/><path d="m22 15-3 3-3-3"/><path d="M11 6h6a2 2 0 0 1 2 2v10"/></svg>',
   }
   function iconBtn(label, svg, extra) {
     const b = document.createElement("button")
@@ -5600,6 +5671,7 @@
       log.append(line)
       logLines.push({ line, num, txt })
     }
+
     const insight = el("div", "steptrace__insight")
     insight.setAttribute("aria-live", "off")
     insight.setAttribute("aria-atomic", "true")
@@ -5607,6 +5679,7 @@
     insightLabel.textContent = "Invariant"
     const insightText = el("span", "steptrace__insight-text")
     insight.append(insightLabel, insightText)
+
     const watchWrap = el("div", "steptrace__watch-wrap")
     const watchLabel = el("div", "steptrace__rail-label")
     watchLabel.textContent = "Watch"
@@ -5644,6 +5717,7 @@
     const menu = el("div", "steptrace__menu")
     const speedHead = el("div", "steptrace__menu-h")
     speedHead.textContent = "Speed"
+    const speedSection = el("div", "steptrace__menu-section")
     const speedRow = el("div", "steptrace__speed-row")
     const speedControl = el("div", "steptrace__speed-control")
     speedRow.append(speedControl)
@@ -5682,9 +5756,11 @@
       speedControl.append(speedInput)
       speedRow.append(speedVal)
     }
-    menu.append(speedHead, speedRow)
+    speedSection.append(speedHead, speedRow)
+    menu.append(speedSection)
     let startMenu = null
     if (kind === "sort") {
+      const section = el("div", "steptrace__menu-section")
       const h = el("div", "steptrace__menu-h")
       h.textContent = "Array"
       const item = el("button", "steptrace__menu-item")
@@ -5694,8 +5770,10 @@
         state.array = randomArray()
         build() // menu stays open so the reader can reshuffle repeatedly
       })
-      menu.append(h, item)
+      section.append(h, item)
+      menu.append(section)
     } else if (kind === "graph") {
+      const section = el("div", "steptrace__menu-section")
       const h = el("div", "steptrace__menu-h")
       h.textContent = "Start node"
       startMenu = el("select", "steptrace__select")
@@ -5705,8 +5783,10 @@
         closeMenu()
         build()
       })
-      menu.append(h, startMenu)
+      section.append(h, startMenu)
+      menu.append(section)
     } else if (kind === "search") {
+      const section = el("div", "steptrace__menu-section")
       const h = el("div", "steptrace__menu-h")
       h.textContent = "Target"
       const sel = el("select", "steptrace__select")
@@ -5727,7 +5807,8 @@
         closeMenu()
         build()
       })
-      menu.append(h, sel)
+      section.append(h, sel)
+      menu.append(section)
     }
     menuWrap.append(btnMenu, menu)
 
@@ -5754,9 +5835,8 @@
     const onDocClick = () => closeMenu()
     document.addEventListener("click", onDocClick)
 
-    // Pin the log block to the height of the TALLEST frame message so the
-    // unclamped current line can grow inside a fixed box (zero footer jitter).
-    // Measured with a hidden probe at the rail's live width; re-run on resize.
+    // Pin the log block to the tallest frame message so the three-line desktop
+    // trace stays stable while its current entry changes.
     function sizeLog() {
       if (!player) return
       if (matchMedia("(max-width: 560px)").matches) {
@@ -5778,7 +5858,7 @@
       }
       probe.remove()
       const gap = parseFloat(getComputedStyle(log).rowGap) || 0
-      const hist = logLines[0].line.offsetHeight // fixed 2.8em slots
+      const hist = logLines[0].line.offsetHeight
       const h = Math.ceil(hist * 2 + gap * 2 + maxCur) + "px"
       if (log.style.height !== h) log.style.height = h
     }
@@ -5790,8 +5870,6 @@
     function renderRail() {
       const total = player.frames.length
       const i = player.i
-      // current step pinned to the BOTTOM; the two above it are older history
-      // (progressively more transparent — see data-age styling).
       const idxs = [i - 2, i - 1, i]
       for (let k = 0; k < 3; k++) {
         const fi = idxs[k]
@@ -5964,6 +6042,7 @@
       if (built.kind === "graph") syncStartOptions(built.graph)
       // every kind but graph bottom-aligns its viz within the stage column
       stageCol.classList.toggle("steptrace__stage-col--bottom", built.kind !== "graph")
+      stageCol.classList.toggle("steptrace__stage-col--graph", built.kind === "graph")
       // The view's LAST node is its own one-line status; the rail TRACE log
       // replaces it, so we keep it out of the DOM (paint still writes to it
       // harmlessly). Everything before it is the actual visualization.
