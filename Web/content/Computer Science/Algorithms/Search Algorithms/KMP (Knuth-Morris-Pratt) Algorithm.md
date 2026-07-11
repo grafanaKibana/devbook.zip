@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.037Z
-modified: 2026-07-11T16:49:43.037Z
-published: 2026-07-11T16:49:43.037Z
+created: 2026-07-11T18:23:56.483Z
+modified: 2026-07-11T18:23:56.485Z
+published: 2026-07-11T18:23:56.485Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Searches for a pattern in guaranteed O(n + m) time by never rescanning text, using a precomputed prefix (LPS) array.
 level:
   - "4"
 priority: Medium

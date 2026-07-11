@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.045Z
-modified: 2026-07-11T16:49:43.046Z
-published: 2026-07-11T16:49:43.046Z
+created: 2026-07-11T18:23:40.907Z
+modified: 2026-07-11T18:23:40.915Z
+published: 2026-07-11T18:23:40.915Z
 topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: A fixed-size array with wrapping read/write indices, giving O(1) allocation-free enqueue/dequeue for streaming and bounded-history scenarios.
 level:
   - "4"
 priority: Medium

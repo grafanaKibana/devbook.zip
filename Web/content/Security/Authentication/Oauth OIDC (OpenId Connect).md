@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.672Z
-modified: 2026-07-08T15:01:12.673Z
-published: 2026-07-08T15:01:12.673Z
+created: 2026-07-11T18:13:45.472Z
+modified: 2026-07-11T18:13:45.473Z
+published: 2026-07-11T18:13:45.473Z
 topic:
   - Security
 subtopic:
   - Authentication
+summary: OAuth 2.0 grants apps limited access to resources without sharing credentials; OpenID Connect adds an identity layer that tells you who the user is.
 level:
   - "3"
 priority: High

@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.030Z
-modified: 2026-07-11T16:49:43.030Z
-published: 2026-07-11T16:49:43.030Z
+created: 2026-07-11T18:23:28.418Z
+modified: 2026-07-11T18:23:28.423Z
+published: 2026-07-11T18:23:28.423Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Single-source shortest paths on non-negative-weighted graphs, greedily finalizing the closest tentative node and relaxing its outgoing edges.
 level:
   - "4"
 priority: Medium

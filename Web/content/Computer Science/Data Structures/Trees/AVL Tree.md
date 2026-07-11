@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.047Z
-modified: 2026-07-11T16:49:43.047Z
-published: 2026-07-11T16:49:43.047Z
+created: 2026-07-11T18:23:55.187Z
+modified: 2026-07-11T18:23:55.202Z
+published: 2026-07-11T18:23:55.202Z
 topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: A rigidly self-balancing BST that rotates on a ±1 balance factor, giving the fewest search levels at the cost of more write rotations.
 level:
   - "4"
 priority: Medium

@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.033Z
-modified: 2026-07-11T16:49:43.033Z
-published: 2026-07-11T16:49:43.033Z
+created: 2026-07-11T18:23:27.385Z
+modified: 2026-07-11T18:23:27.408Z
+published: 2026-07-11T18:23:27.408Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Builds a solution by repeatedly making the locally best choice and never reconsidering — fast, but correct only when provably applicable.
 level:
   - "4"
 priority: High

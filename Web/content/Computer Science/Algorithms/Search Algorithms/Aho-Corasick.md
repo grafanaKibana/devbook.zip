@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.036Z
-modified: 2026-07-11T16:49:43.036Z
-published: 2026-07-11T16:49:43.036Z
+created: 2026-07-11T18:23:33.479Z
+modified: 2026-07-11T18:23:33.479Z
+published: 2026-07-11T18:23:33.479Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Finds all occurrences of many patterns in one text pass using a trie with failure and output links, in O(n + z).
 level:
   - "4"
 priority: Medium

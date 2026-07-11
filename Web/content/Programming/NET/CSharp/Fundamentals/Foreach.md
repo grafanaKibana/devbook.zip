@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.652Z
-modified: 2026-07-08T15:01:12.652Z
-published: 2026-07-08T15:01:12.652Z
+created: 2026-07-11T18:27:11.021Z
+modified: 2026-07-11T18:27:11.021Z
+published: 2026-07-11T18:27:11.021Z
 topic:
   - Programming
 subtopic:
   - NET
+summary: The most common way to iterate a sequence in C#, lowered by the compiler into an enumerator-based pattern, plus iterators and yield.
 level:
   - "4"
 priority: High

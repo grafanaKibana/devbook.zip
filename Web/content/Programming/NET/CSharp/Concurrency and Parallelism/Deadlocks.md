@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.648Z
-modified: 2026-07-08T15:01:12.649Z
-published: 2026-07-08T15:01:12.649Z
+created: 2026-07-11T18:27:34.539Z
+modified: 2026-07-11T18:27:34.539Z
+published: 2026-07-11T18:27:34.539Z
 topic:
   - Programming
 subtopic:
   - NET
+summary: A deadlock is when two or more execution paths wait forever on resources held by each other, dropping throughput to zero without a crash.
 level:
   - "4"
 priority: High

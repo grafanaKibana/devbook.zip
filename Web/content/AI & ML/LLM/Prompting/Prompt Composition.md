@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.311Z
-modified: 2026-07-08T15:01:12.312Z
-published: 2026-07-08T15:01:12.312Z
+created: 2026-07-11T18:30:25.456Z
+modified: 2026-07-11T18:30:25.457Z
+published: 2026-07-11T18:30:25.457Z
 topic:
   - AI & ML
 subtopic:
   - LLM
+summary: Decomposing complex tasks into multiple LLM calls — prompt chaining, generated knowledge, and meta prompting — for reliability and debuggability.
 level:
   - "3"
 priority: Medium

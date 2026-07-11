@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.480Z
-modified: 2026-07-08T15:01:12.481Z
-published: 2026-07-08T15:01:12.481Z
+created: 2026-07-11T18:17:47.394Z
+modified: 2026-07-11T18:17:47.394Z
+published: 2026-07-11T18:17:47.394Z
 topic:
   - Architecture
 subtopic:
   - Patterns
+summary: A centralized publish/subscribe dispatcher where publishers emit events and subscribers register handlers, with neither side knowing the other exists.
 level:
   - "2"
 priority: Medium

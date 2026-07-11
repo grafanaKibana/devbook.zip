@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.531Z
-modified: 2026-07-08T15:01:12.532Z
-published: 2026-07-08T15:01:12.532Z
+created: 2026-07-11T18:13:53.639Z
+modified: 2026-07-11T18:13:53.639Z
+published: 2026-07-11T18:13:53.639Z
 topic:
   - DevOps
 subtopic:
   - Version Control Systems
+summary: How a team uses Git branches to manage parallel development, releases, and hotfixes; the right strategy depends on team and CI/CD maturity.
 level:
   - "4"
 priority: High

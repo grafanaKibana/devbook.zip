@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.673Z
-modified: 2026-07-08T15:01:12.674Z
-published: 2026-07-08T15:01:12.674Z
+created: 2026-07-11T18:13:49.688Z
+modified: 2026-07-11T18:13:49.696Z
+published: 2026-07-11T18:13:49.696Z
 topic:
   - Security
 subtopic:
   - Authentication
+summary: Lets a user authenticate once with a central Identity Provider, then access many applications without re-entering credentials.
 level:
   - "3"
 priority: High

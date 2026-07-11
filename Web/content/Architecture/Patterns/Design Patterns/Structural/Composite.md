@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.475Z
-modified: 2026-07-08T15:01:12.475Z
-published: 2026-07-08T15:01:12.475Z
+created: 2026-07-11T18:18:12.076Z
+modified: 2026-07-11T18:18:12.079Z
+published: 2026-07-11T18:18:12.079Z
 topic:
   - Architecture
 subtopic:
   - Patterns
+summary: Composite arranges objects into tree structures and lets clients treat individual objects and compositions uniformly through one interface.
 level:
   - "3"
 priority: High

@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.042Z
-modified: 2026-07-11T16:49:43.042Z
-published: 2026-07-11T16:49:43.042Z
+created: 2026-07-11T18:24:11.317Z
+modified: 2026-07-11T18:24:11.318Z
+published: 2026-07-11T18:24:11.318Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Runs insertion sort over decreasing gaps so elements jump far, beating O(n²) with no recursion or scratch memory.
 level:
   - "4"
 priority: Medium

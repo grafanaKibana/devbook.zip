@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.038Z
-modified: 2026-07-11T16:49:43.038Z
-published: 2026-07-11T16:49:43.038Z
+created: 2026-07-11T18:24:09.418Z
+modified: 2026-07-11T18:24:09.419Z
+published: 2026-07-11T18:24:09.419Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Computes the Z-array (longest prefix match starting at each index) in one O(n) pass using a sliding Z-box.
 level:
   - "4"
 priority: Medium

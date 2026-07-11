@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.375Z
-modified: 2026-07-08T15:01:12.376Z
-published: 2026-07-08T15:01:12.376Z
+created: 2026-07-11T18:17:42.109Z
+modified: 2026-07-11T18:17:42.138Z
+published: 2026-07-11T18:17:42.138Z
 topic:
   - Architecture
 subtopic:
   - Distributed Systems
+summary: Open-source AMQP 0-9-1 broker routing messages from exchanges to queues via bindings, decoupling producers from consumers.
 level:
   - "2"
 priority: High

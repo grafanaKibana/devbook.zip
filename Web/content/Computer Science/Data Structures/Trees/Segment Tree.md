@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.049Z
-modified: 2026-07-11T16:49:43.049Z
-published: 2026-07-11T16:49:43.049Z
+created: 2026-07-11T18:24:06.460Z
+modified: 2026-07-11T18:24:06.460Z
+published: 2026-07-11T18:24:06.460Z
 topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: A binary hierarchy of intervals answering associative range queries (sum, min, max) and point updates on a mutable array in O(log n).
 level:
   - "4"
 priority: Medium

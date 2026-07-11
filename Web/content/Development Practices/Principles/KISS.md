@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.538Z
-modified: 2026-07-08T15:01:12.538Z
-published: 2026-07-08T15:01:12.538Z
+created: 2026-07-11T18:13:44.020Z
+modified: 2026-07-11T18:13:44.020Z
+published: 2026-07-11T18:13:44.020Z
 topic:
   - Development Practices
 subtopic:
   - Principles
+summary: Prefer the simplest solution that meets the actual requirements — fewer moving parts, fewer hidden assumptions, clear failure modes.
 level:
   - "4"
 priority: High

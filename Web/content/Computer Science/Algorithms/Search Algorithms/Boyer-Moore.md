@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.036Z
-modified: 2026-07-11T16:49:43.036Z
-published: 2026-07-11T16:49:43.036Z
+created: 2026-07-11T18:23:40.372Z
+modified: 2026-07-11T18:23:40.373Z
+published: 2026-07-11T18:23:40.373Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Matches a pattern by comparing right-to-left and skipping ahead via bad-character and good-suffix rules, sublinear in practice.
 level:
   - "4"
 priority: Medium

@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.337Z
-modified: 2026-07-08T15:01:12.337Z
-published: 2026-07-08T15:01:12.337Z
+created: 2026-07-11T18:31:19.522Z
+modified: 2026-07-11T18:31:19.523Z
+published: 2026-07-11T18:31:19.523Z
 topic:
   - AI & ML
 subtopic:
   - Tooling
+summary: "Lifecycle callbacks that run custom logic at defined agent execution points: the control layer for guardrails, formatting, compliance, and automation."
 status: Done
 level:
   - "2"

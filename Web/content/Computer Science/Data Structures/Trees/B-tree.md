@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.047Z
-modified: 2026-07-11T16:49:43.047Z
-published: 2026-07-11T16:49:43.047Z
+created: 2026-07-11T18:23:59.952Z
+modified: 2026-07-11T18:23:59.957Z
+published: 2026-07-11T18:23:59.957Z
 topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: A self-balancing search tree with page-sized, many-key nodes and high fan-out, keeping disk-resident indexes extremely shallow.
 level:
   - "4"
 priority: Medium

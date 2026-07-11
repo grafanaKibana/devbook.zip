@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.049Z
-modified: 2026-07-11T16:49:43.049Z
-published: 2026-07-11T16:49:43.049Z
+created: 2026-07-11T18:23:53.918Z
+modified: 2026-07-11T18:23:53.919Z
+published: 2026-07-11T18:23:53.919Z
 topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: A heap-ordered binary tree whose null-path-length invariant keeps the right spine short, giving merge in O(log n) worst case.
 level:
   - "4"
 priority: Medium

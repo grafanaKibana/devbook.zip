@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.049Z
-modified: 2026-07-11T16:49:43.049Z
-published: 2026-07-11T16:49:43.049Z
+created: 2026-07-11T18:23:56.009Z
+modified: 2026-07-11T18:23:56.015Z
+published: 2026-07-11T18:23:56.015Z
 topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "A leftist heap with the bookkeeping removed: merge swaps children unconditionally, self-adjusting for amortized O(log n) bounds."
 level:
   - "4"
 priority: Medium

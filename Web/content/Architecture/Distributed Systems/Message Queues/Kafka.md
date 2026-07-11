@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.371Z
-modified: 2026-07-08T15:01:12.372Z
-published: 2026-07-08T15:01:12.372Z
+created: 2026-07-11T18:17:30.617Z
+modified: 2026-07-11T18:17:30.667Z
+published: 2026-07-11T18:17:30.667Z
 topic:
   - Architecture
 subtopic:
   - Distributed Systems
+summary: Distributed event streaming platform built on an append-only commit log, giving durability, high throughput, and replayable per-key ordering.
 level:
   - "2"
 priority: High

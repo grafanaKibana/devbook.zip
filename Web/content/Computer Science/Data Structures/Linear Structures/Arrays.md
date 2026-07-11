@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.045Z
-modified: 2026-07-11T16:49:43.045Z
-published: 2026-07-11T16:49:43.045Z
+created: 2026-07-11T18:23:37.333Z
+modified: 2026-07-11T18:23:37.333Z
+published: 2026-07-11T18:23:37.333Z
 topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: A fixed-size contiguous block of same-typed elements — the substrate every other linear structure is built on.
 level:
   - "4"
 priority: Medium

@@ -1,11 +1,12 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.523Z
-modified: 2026-07-08T15:01:12.523Z
-published: 2026-07-08T15:01:12.523Z
+created: 2026-07-11T18:10:22.115Z
+modified: 2026-07-11T18:10:22.116Z
+published: 2026-07-11T18:10:22.116Z
 topic:
   - Data Persistence
 subtopic: []
+summary: Reusing a bounded set of already-open database connections so opening one becomes a cheap rent-from-pool instead of a costly handshake.
 level:
   - "4"
 priority: High

@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.038Z
-modified: 2026-07-11T16:49:43.038Z
-published: 2026-07-11T16:49:43.038Z
+created: 2026-07-11T18:23:49.212Z
+modified: 2026-07-11T18:23:49.226Z
+published: 2026-07-11T18:23:49.226Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Repeatedly swaps adjacent out-of-order elements; a slow teaching baseline for why better sorts exist.
 level:
   - "4"
 priority: Low

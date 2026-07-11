@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.045Z
-modified: 2026-07-11T16:49:43.045Z
-published: 2026-07-11T16:49:43.045Z
+created: 2026-07-11T18:23:35.595Z
+modified: 2026-07-11T18:23:35.596Z
+published: 2026-07-11T18:23:35.596Z
 topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: A structure storing key-value pairs and using hashing to locate a key's bucket in O(1) average, O(n) worst-case, time.
 level:
   - "4"
 priority: Medium

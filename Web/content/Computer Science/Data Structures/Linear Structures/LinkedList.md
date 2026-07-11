@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.046Z
-modified: 2026-07-11T16:49:43.046Z
-published: 2026-07-11T16:49:43.046Z
+created: 2026-07-11T18:23:45.636Z
+modified: 2026-07-11T18:23:45.636Z
+published: 2026-07-11T18:23:45.636Z
 topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: A doubly linked list giving O(1) inserts and removes around node references you already hold, at the cost of locality.
 level:
   - "4"
 priority: Medium

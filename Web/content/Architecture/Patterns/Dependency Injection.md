@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.380Z
-modified: 2026-07-08T15:01:12.380Z
-published: 2026-07-08T15:01:12.380Z
+created: 2026-07-11T18:17:43.269Z
+modified: 2026-07-11T18:17:43.275Z
+published: 2026-07-11T18:17:43.275Z
 topic:
   - Architecture
 subtopic:
   - Patterns
+summary: A pattern where objects receive dependencies from an external source instead of creating them, a practical form of Inversion of Control.
 level:
   - "4"
 priority: High

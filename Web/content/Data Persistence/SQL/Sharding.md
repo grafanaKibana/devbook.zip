@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.528Z
-modified: 2026-07-08T15:01:12.529Z
-published: 2026-07-08T15:01:12.529Z
+created: 2026-07-11T18:10:37.976Z
+modified: 2026-07-11T18:10:37.976Z
+published: 2026-07-11T18:10:37.976Z
 topic:
   - Data Persistence
 subtopic:
   - SQL
+summary: Sharding is horizontal partitioning that splits a database's rows across independent instances to scale writes and data volume beyond one node.
 level:
   - "4"
 priority: High

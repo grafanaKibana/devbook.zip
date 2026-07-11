@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.029Z
-modified: 2026-07-11T16:49:43.029Z
-published: 2026-07-11T16:49:43.029Z
+created: 2026-07-11T18:23:08.814Z
+modified: 2026-07-11T18:23:08.815Z
+published: 2026-07-11T18:23:08.815Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: A single DFS finds all cut vertices and cut edges — the single points of failure whose removal disconnects an undirected graph — in O(V+E).
 level:
   - "4"
 priority: Medium

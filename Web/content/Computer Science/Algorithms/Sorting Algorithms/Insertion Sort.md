@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.039Z
-modified: 2026-07-11T16:49:43.039Z
-published: 2026-07-11T16:49:43.039Z
+created: 2026-07-11T18:24:00.428Z
+modified: 2026-07-11T18:24:00.429Z
+published: 2026-07-11T18:24:00.429Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Grows a sorted prefix by inserting each element into place; fast on small or nearly-sorted inputs.
 level:
   - "4"
 priority: Low

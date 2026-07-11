@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.039Z
-modified: 2026-07-11T16:49:43.039Z
-published: 2026-07-11T16:49:43.039Z
+created: 2026-07-11T18:23:52.355Z
+modified: 2026-07-11T18:23:52.395Z
+published: 2026-07-11T18:23:52.395Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Scatters elements into range buckets, sorts each, then concatenates; near-linear when keys are uniformly distributed.
 level:
   - "4"
 priority: Medium

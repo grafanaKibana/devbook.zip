@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.378Z
-modified: 2026-07-08T15:01:12.378Z
-published: 2026-07-08T15:01:12.378Z
+created: 2026-07-11T18:17:48.636Z
+modified: 2026-07-11T18:17:48.636Z
+published: 2026-07-11T18:17:48.636Z
 topic:
   - Architecture
 subtopic:
   - Distributed Systems
+summary: "An HTTP callback: a producer POSTs event data to a consumer's pre-registered URL, inverting polling into near real-time push."
 level:
   - "2"
 priority: Medium

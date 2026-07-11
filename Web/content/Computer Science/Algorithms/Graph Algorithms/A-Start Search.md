@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.028Z
-modified: 2026-07-11T16:49:43.029Z
-published: 2026-07-11T16:49:43.029Z
+created: 2026-07-11T18:23:04.986Z
+modified: 2026-07-11T18:23:05.001Z
+published: 2026-07-11T18:23:05.001Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Best-first shortest-path search ordering its frontier by f(n) = g(n) + h(n), settling far fewer nodes than uninformed search when the heuristic is admissible.
 level:
   - "4"
 priority: High

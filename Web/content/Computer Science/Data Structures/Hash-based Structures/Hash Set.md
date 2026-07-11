@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.045Z
-modified: 2026-07-11T16:49:43.045Z
-published: 2026-07-11T16:49:43.045Z
+created: 2026-07-11T18:23:41.767Z
+modified: 2026-07-11T18:23:41.788Z
+published: 2026-07-11T18:23:41.788Z
 topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: A hash-table-backed collection of unique values giving O(1) average membership checks, inserts, and removals, at the cost of ordering.
 level:
   - "4"
 priority: Medium
@@ -88,7 +89,7 @@ var added = tags.Add("DOTNET"); // false, already exists by comparer
 
 **Decision rule**: use `HashSet<T>` when you only need to track membership or perform set operations (union, intersect, except). Use `Dictionary` when you need to associate a value with each key.
 
-## Links
+## References
 
 - [`HashSet<T>` class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.hashset-1) — API reference with set operation methods (UnionWith, IntersectWith, ExceptWith).
 - [`ISet<T>` interface](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.iset-1) — interface contract for set semantics; useful for abstracting over HashSet and SortedSet.

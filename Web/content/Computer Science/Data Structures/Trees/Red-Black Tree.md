@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.049Z
-modified: 2026-07-11T16:49:43.049Z
-published: 2026-07-11T16:49:43.049Z
+created: 2026-07-11T18:24:04.802Z
+modified: 2026-07-11T18:24:04.803Z
+published: 2026-07-11T18:24:04.803Z
 topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: A self-balancing BST using node colors and loose rules for good-enough balance with cheap repairs — the default ordered map.
 level:
   - "4"
 priority: Medium

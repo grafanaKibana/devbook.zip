@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.040Z
-modified: 2026-07-11T16:49:43.040Z
-published: 2026-07-11T16:49:43.040Z
+created: 2026-07-11T18:24:09.086Z
+modified: 2026-07-11T18:24:09.087Z
+published: 2026-07-11T18:24:09.087Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Partitions around a pivot and recurses; often the fastest comparison sort but with an O(n²) worst case.
 level:
   - "4"
 priority: Low

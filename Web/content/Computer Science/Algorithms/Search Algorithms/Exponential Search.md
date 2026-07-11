@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.037Z
-modified: 2026-07-11T16:49:43.037Z
-published: 2026-07-11T16:49:43.037Z
+created: 2026-07-11T18:23:49.301Z
+modified: 2026-07-11T18:23:49.305Z
+published: 2026-07-11T18:23:49.305Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Finds a range containing the target by doubling probe indices, then binary-searches it, in O(log i) by target position.
 level:
   - "4"
 priority: Medium

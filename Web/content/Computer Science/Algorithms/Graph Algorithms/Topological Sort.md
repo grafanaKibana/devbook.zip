@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.031Z
-modified: 2026-07-11T16:49:43.032Z
-published: 2026-07-11T16:49:43.032Z
+created: 2026-07-11T18:23:45.160Z
+modified: 2026-07-11T18:23:45.166Z
+published: 2026-07-11T18:23:45.166Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Linear ordering of a DAG's vertices where every edge u → v places u before v — sequencing tasks so dependencies come first.
 level:
   - "4"
 priority: High

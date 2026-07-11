@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.649Z
-modified: 2026-07-08T15:01:12.649Z
-published: 2026-07-08T15:01:12.649Z
+created: 2026-07-11T18:27:37.449Z
+modified: 2026-07-11T18:27:37.449Z
+published: 2026-07-11T18:27:37.449Z
 topic:
   - Programming
 subtopic:
   - NET
+summary: Mutex is an OS-backed primitive enforcing single-owner access, most useful for cross-process coordination via named mutexes.
 level:
   - "4"
 priority: High

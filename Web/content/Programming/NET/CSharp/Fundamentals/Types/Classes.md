@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.655Z
-modified: 2026-07-08T15:01:12.655Z
-published: 2026-07-08T15:01:12.655Z
+created: 2026-07-11T18:27:12.107Z
+modified: 2026-07-11T18:27:12.108Z
+published: 2026-07-11T18:27:12.108Z
 topic:
   - Programming
 subtopic:
   - NET
+summary: A class is a reference type defining a heap-allocated object blueprint, enabling shared state, inheritance, and virtual dispatch.
 level:
   - "4"
 priority: Medium

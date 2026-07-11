@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.040Z
-modified: 2026-07-11T16:49:43.040Z
-published: 2026-07-11T16:49:43.040Z
+created: 2026-07-11T18:24:10.707Z
+modified: 2026-07-11T18:24:10.707Z
+published: 2026-07-11T18:24:10.707Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Repeatedly selects the minimum of the unsorted suffix; always O(n²) comparisons but only O(n) swaps.
 level:
   - "4"
 priority: Low

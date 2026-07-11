@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.039Z
-modified: 2026-07-11T16:49:43.040Z
-published: 2026-07-11T16:49:43.040Z
+created: 2026-07-11T18:24:01.712Z
+modified: 2026-07-11T18:24:01.735Z
+published: 2026-07-11T18:24:01.735Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Hybrid that runs quicksort but falls back to heap sort on deep recursion, removing the O(n²) tail.
 level:
   - "4"
 priority: Medium

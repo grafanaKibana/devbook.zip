@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.048Z
-modified: 2026-07-11T16:49:43.048Z
-published: 2026-07-11T16:49:43.048Z
+created: 2026-07-11T18:23:48.195Z
+modified: 2026-07-11T18:23:48.198Z
+published: 2026-07-11T18:23:48.198Z
 topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "A binomial queue made lazy: meld, insert, and decreaseKey defer work to extractMin, buying O(1) amortized decreaseKey and meld."
 level:
   - "4"
 priority: Medium

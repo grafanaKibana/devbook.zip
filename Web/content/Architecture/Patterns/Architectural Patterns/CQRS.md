@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.379Z
-modified: 2026-07-08T15:01:12.379Z
-published: 2026-07-08T15:01:12.379Z
+created: 2026-07-11T18:17:35.687Z
+modified: 2026-07-11T18:17:35.755Z
+published: 2026-07-11T18:17:35.755Z
 topic:
   - Architecture
 subtopic:
   - Patterns
+summary: CQRS separates the state-changing write path from the data-serving read path so each can be scaled and optimized independently.
 level:
   - "3"
 priority: High

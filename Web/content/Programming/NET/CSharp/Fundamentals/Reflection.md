@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.654Z
-modified: 2026-07-08T15:01:12.655Z
-published: 2026-07-08T15:01:12.655Z
+created: 2026-07-11T18:27:23.592Z
+modified: 2026-07-11T18:27:23.594Z
+published: 2026-07-11T18:27:23.594Z
 topic:
   - Programming
 subtopic:
   - NET
+summary: Runtime metadata inspection and dynamic member access via System.Reflection, trading compile-time guarantees for runtime flexibility.
 level:
   - "4"
 priority: Medium

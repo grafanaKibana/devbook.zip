@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.329Z
-modified: 2026-07-08T15:01:12.329Z
-published: 2026-07-08T15:01:12.329Z
+created: 2026-07-11T18:31:32.721Z
+modified: 2026-07-11T18:31:32.722Z
+published: 2026-07-11T18:31:32.722Z
 topic:
   - AI & ML
 subtopic:
   - LLM
+summary: A vector database stores embeddings and serves fast approximate nearest-neighbor search, trading a little recall for large speed gains.
 level:
   - "2"
 priority: High

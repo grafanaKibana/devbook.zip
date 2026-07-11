@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.040Z
-modified: 2026-07-11T16:49:43.040Z
-published: 2026-07-11T16:49:43.040Z
+created: 2026-07-11T18:24:09.994Z
+modified: 2026-07-11T18:24:09.995Z
+published: 2026-07-11T18:24:09.995Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Sorts fixed-width integer keys one digit at a time with a stable pass, beating the comparison bound.
 level:
   - "4"
 priority: Medium

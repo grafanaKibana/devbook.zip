@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.466Z
-modified: 2026-07-08T15:01:12.466Z
-published: 2026-07-08T15:01:12.466Z
+created: 2026-07-11T18:17:58.914Z
+modified: 2026-07-11T18:17:58.914Z
+published: 2026-07-11T18:17:58.914Z
 topic:
   - Architecture
 subtopic:
   - Patterns
+summary: Provides an interface for creating families of related objects without specifying their concrete classes, keeping every product in a family compatible.
 level:
   - "3"
 priority: High

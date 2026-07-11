@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.048Z
-modified: 2026-07-11T16:49:43.048Z
-published: 2026-07-11T16:49:43.048Z
+created: 2026-07-11T18:23:45.513Z
+modified: 2026-07-11T18:23:45.514Z
+published: 2026-07-11T18:23:45.514Z
 topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: A forest of binomial trees mirroring the item count's binary form, so meld runs in O(log n) like binary addition.
 level:
   - "4"
 priority: Medium

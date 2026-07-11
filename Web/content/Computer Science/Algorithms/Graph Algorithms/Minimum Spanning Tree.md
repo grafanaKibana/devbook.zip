@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.031Z
-modified: 2026-07-11T16:49:43.031Z
-published: 2026-07-11T16:49:43.031Z
+created: 2026-07-11T18:23:41.548Z
+modified: 2026-07-11T18:23:41.549Z
+published: 2026-07-11T18:23:41.549Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: The cheapest cycle-free edge set connecting every vertex of a weighted undirected graph, built greedily by Kruskal's or Prim's.
 level:
   - "4"
 priority: Medium

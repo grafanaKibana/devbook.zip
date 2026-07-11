@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.030Z
-modified: 2026-07-11T16:49:43.030Z
-published: 2026-07-11T16:49:43.030Z
+created: 2026-07-11T18:23:31.511Z
+modified: 2026-07-11T18:23:31.511Z
+published: 2026-07-11T18:23:31.511Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Dynamic-programming all-pairs shortest paths in a single O(V³) sweep that handles negative edges and detects negative cycles.
 level:
   - "4"
 priority: Medium

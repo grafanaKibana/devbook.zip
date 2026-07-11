@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.031Z
-modified: 2026-07-11T16:49:43.031Z
-published: 2026-07-11T16:49:43.031Z
+created: 2026-07-11T18:23:35.262Z
+modified: 2026-07-11T18:23:35.282Z
+published: 2026-07-11T18:23:35.282Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Expands whichever node looks closest by heuristic h(n) alone — fast and goal-seeking, but neither optimal nor complete.
 level:
   - "4"
 priority: Medium

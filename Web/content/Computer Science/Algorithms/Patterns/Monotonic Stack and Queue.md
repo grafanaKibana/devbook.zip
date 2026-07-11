@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.035Z
-modified: 2026-07-11T16:49:43.035Z
-published: 2026-07-11T16:49:43.035Z
+created: 2026-07-11T18:23:52.864Z
+modified: 2026-07-11T18:23:52.869Z
+published: 2026-07-11T18:23:52.869Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: A stack or deque kept sorted by popping dominated elements, solving next/previous-greater and sliding-window extremum queries in linear time.
 level:
   - "4"
 priority: Medium

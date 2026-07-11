@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.043Z
-modified: 2026-07-11T16:49:43.043Z
-published: 2026-07-11T16:49:43.043Z
+created: 2026-07-11T18:24:12.000Z
+modified: 2026-07-11T18:24:12.000Z
+published: 2026-07-11T18:24:12.000Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Natural merge sort that exploits existing runs; stable, adaptive, and the default in Python and Java.
 level:
   - "4"
 priority: Medium

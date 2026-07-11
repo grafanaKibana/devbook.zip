@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.046Z
-modified: 2026-07-11T16:49:43.046Z
-published: 2026-07-11T16:49:43.046Z
+created: 2026-07-11T18:23:43.896Z
+modified: 2026-07-11T18:23:43.898Z
+published: 2026-07-11T18:23:43.898Z
 topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: A contiguous, index-addressable buffer that grows automatically, giving O(1) random access and amortized O(1) append.
 level:
   - "4"
 priority: Medium

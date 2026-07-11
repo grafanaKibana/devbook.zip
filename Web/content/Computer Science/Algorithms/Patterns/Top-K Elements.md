@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.035Z
-modified: 2026-07-11T16:49:43.035Z
-published: 2026-07-11T16:49:43.035Z
+created: 2026-07-11T18:23:59.271Z
+modified: 2026-07-11T18:23:59.277Z
+published: 2026-07-11T18:23:59.277Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Finds the k largest, smallest, or most frequent items in O(n log k) using a size-k heap over a stream.
 level:
   - "4"
 priority: Medium

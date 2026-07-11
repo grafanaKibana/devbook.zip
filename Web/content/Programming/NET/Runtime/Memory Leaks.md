@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.662Z
-modified: 2026-07-08T15:01:12.663Z
-published: 2026-07-08T15:01:12.663Z
+created: 2026-07-11T18:27:01.732Z
+modified: 2026-07-11T18:27:01.732Z
+published: 2026-07-11T18:27:01.732Z
 topic:
   - Programming
 subtopic:
   - NET
+summary: In .NET, memory leaks are useless objects still reachable from GC roots, plus unmanaged memory and handles never explicitly freed.
 level:
   - "4"
 priority: High

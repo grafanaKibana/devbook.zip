@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.040Z
-modified: 2026-07-11T16:49:43.040Z
-published: 2026-07-11T16:49:43.040Z
+created: 2026-07-11T18:24:03.387Z
+modified: 2026-07-11T18:24:03.396Z
+published: 2026-07-11T18:24:03.396Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Divide-and-conquer sort that is stable and O(n log n) in all cases at the cost of O(n) space.
 level:
   - "4"
 priority: Low

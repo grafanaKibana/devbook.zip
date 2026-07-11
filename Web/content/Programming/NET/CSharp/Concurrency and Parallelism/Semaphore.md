@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.650Z
-modified: 2026-07-08T15:01:12.650Z
-published: 2026-07-08T15:01:12.650Z
+created: 2026-07-11T18:27:43.245Z
+modified: 2026-07-11T18:27:43.245Z
+published: 2026-07-11T18:27:43.245Z
 topic:
   - Programming
 subtopic:
   - NET
+summary: Semaphore allows up to N concurrent holders, the right primitive for bounded parallelism such as capping concurrent outbound requests.
 level:
   - "4"
 priority: High

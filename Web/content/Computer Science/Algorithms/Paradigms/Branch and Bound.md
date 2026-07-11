@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.032Z
-modified: 2026-07-11T16:49:43.032Z
-published: 2026-07-11T16:49:43.032Z
+created: 2026-07-11T18:23:06.949Z
+modified: 2026-07-11T18:23:06.950Z
+published: 2026-07-11T18:23:06.950Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: A search paradigm for optimisation that prunes any branch whose optimistic bound provably cannot beat the best solution found so far.
 level:
   - "4"
 priority: Medium

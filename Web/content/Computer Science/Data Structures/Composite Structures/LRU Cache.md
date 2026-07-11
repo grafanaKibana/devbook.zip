@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.043Z
-modified: 2026-07-11T16:49:43.044Z
-published: 2026-07-11T16:49:43.044Z
+created: 2026-07-11T18:22:58.564Z
+modified: 2026-07-11T18:22:58.577Z
+published: 2026-07-11T18:22:58.577Z
 topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: A bounded cache that evicts the least-recently-used item in O(1) by pairing a hash map with a doubly linked list.
 level:
   - "4"
 priority: High

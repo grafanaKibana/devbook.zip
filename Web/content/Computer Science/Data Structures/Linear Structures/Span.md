@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.047Z
-modified: 2026-07-11T16:49:43.047Z
-published: 2026-07-11T16:49:43.047Z
+created: 2026-07-11T18:23:51.323Z
+modified: 2026-07-11T18:23:51.326Z
+published: 2026-07-11T18:23:51.326Z
 topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: A stack-only view over contiguous memory that owns nothing, enabling high-performance zero-copy slicing and parsing.
 level:
   - "4"
 priority: Medium

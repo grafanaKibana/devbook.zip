@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.657Z
-modified: 2026-07-08T15:01:12.657Z
-published: 2026-07-08T15:01:12.657Z
+created: 2026-07-11T18:27:22.248Z
+modified: 2026-07-11T18:27:22.248Z
+published: 2026-07-11T18:27:22.248Z
 topic:
   - Programming
 subtopic:
   - NET
+summary: Records are data-centric C# types whose compiler generates value-based equality, readable ToString, deconstruction, and with-expression support.
 level:
   - "4"
 priority: Medium

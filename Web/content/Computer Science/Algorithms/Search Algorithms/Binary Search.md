@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.036Z
-modified: 2026-07-11T16:49:43.036Z
-published: 2026-07-11T16:49:43.036Z
+created: 2026-07-11T18:23:36.629Z
+modified: 2026-07-11T18:23:36.632Z
+published: 2026-07-11T18:23:36.632Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Finds a target in a sorted array by repeatedly halving the search range, giving logarithmic O(log n) time.
 level:
   - "4"
 priority: Medium

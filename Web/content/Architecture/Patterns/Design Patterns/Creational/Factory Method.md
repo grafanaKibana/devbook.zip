@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.468Z
-modified: 2026-07-08T15:01:12.468Z
-published: 2026-07-08T15:01:12.468Z
+created: 2026-07-11T18:18:05.902Z
+modified: 2026-07-11T18:18:05.902Z
+published: 2026-07-11T18:18:05.902Z
 topic:
   - Architecture
 subtopic:
   - Patterns
+summary: Defines an interface for creating an object but lets subclasses decide which concrete class to instantiate.
 level:
   - "1"
 priority: High

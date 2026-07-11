@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.039Z
-modified: 2026-07-11T16:49:43.039Z
-published: 2026-07-11T16:49:43.039Z
+created: 2026-07-11T18:23:56.086Z
+modified: 2026-07-11T18:23:56.091Z
+published: 2026-07-11T18:23:56.091Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Tallies integer keys in a small range and places each in O(n + k) without comparisons.
 level:
   - "4"
 priority: Medium

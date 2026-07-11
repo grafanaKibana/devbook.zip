@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.048Z
-modified: 2026-07-11T16:49:43.048Z
-published: 2026-07-11T16:49:43.048Z
+created: 2026-07-11T18:24:01.248Z
+modified: 2026-07-11T18:24:01.248Z
+published: 2026-07-11T18:24:01.248Z
 topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: A binary tree ordered so left < node < right, giving O(height) search plus ordered range, floor/ceiling, and sorted iteration.
 level:
   - "4"
 priority: Medium

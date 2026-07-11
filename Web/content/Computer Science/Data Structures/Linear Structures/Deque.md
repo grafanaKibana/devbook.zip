@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.046Z
-modified: 2026-07-11T16:49:43.046Z
-published: 2026-07-11T16:49:43.046Z
+created: 2026-07-11T18:23:43.045Z
+modified: 2026-07-11T18:23:43.053Z
+published: 2026-07-11T18:23:43.053Z
 topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: A double-ended queue with O(1) push and pop at both ends — the superset of stack and queue.
 level:
   - "4"
 priority: Medium

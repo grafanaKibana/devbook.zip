@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.495Z
-modified: 2026-07-08T15:01:12.496Z
-published: 2026-07-08T15:01:12.496Z
+created: 2026-07-11T18:27:14.510Z
+modified: 2026-07-11T18:27:14.515Z
+published: 2026-07-11T18:27:14.515Z
 topic:
   - Cloud
 subtopic:
   - Cloud
+summary: Cloud service models define how much of the infrastructure stack the provider manages versus how much you manage.
 level:
   - "2"
 priority: High

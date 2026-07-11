@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.337Z
-modified: 2026-07-08T15:01:12.338Z
-published: 2026-07-08T15:01:12.338Z
+created: 2026-07-11T18:31:21.976Z
+modified: 2026-07-11T18:31:21.976Z
+published: 2026-07-11T18:31:21.976Z
 topic:
   - AI & ML
 subtopic:
   - Tooling
+summary: Extension mechanisms that add tools, data sources, and reusable workflows to coding agents, standardized today by the Model Context Protocol.
 status: Done
 level:
   - "2"

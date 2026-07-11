@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.035Z
-modified: 2026-07-11T16:49:43.036Z
-published: 2026-07-11T16:49:43.036Z
+created: 2026-07-11T18:23:34.543Z
+modified: 2026-07-11T18:23:34.545Z
+published: 2026-07-11T18:23:34.545Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Two indices moving over a sequence solve in O(n) what nested loops solve in O(n²), by exploiting monotonic structure.
 level:
   - "4"
 priority: Medium

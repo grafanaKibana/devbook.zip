@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.032Z
-modified: 2026-07-11T16:49:43.032Z
-published: 2026-07-11T16:49:43.032Z
+created: 2026-07-11T18:23:12.009Z
+modified: 2026-07-11T18:23:12.019Z
+published: 2026-07-11T18:23:12.019Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Solves a problem by breaking it into smaller independent instances of itself, solving those recursively, and combining their answers.
 level:
   - "4"
 priority: Medium

@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.039Z
-modified: 2026-07-11T16:49:43.039Z
-published: 2026-07-11T16:49:43.039Z
+created: 2026-07-11T18:23:54.261Z
+modified: 2026-07-11T18:23:54.266Z
+published: 2026-07-11T18:23:54.266Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Bubble sort with a shrinking gap that kills turtles, curing bubble sort's quadratic flaw in practice.
 level:
   - "4"
 priority: Medium

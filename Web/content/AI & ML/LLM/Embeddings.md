@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.298Z
-modified: 2026-07-08T15:01:12.299Z
-published: 2026-07-08T15:01:12.299Z
+created: 2026-07-11T18:31:05.258Z
+modified: 2026-07-11T18:31:05.259Z
+published: 2026-07-11T18:31:05.259Z
 topic:
   - AI & ML
 subtopic:
   - LLM
+summary: Mapping text into a dense vector space where semantic similarity becomes geometric proximity, enabling keyword-free retrieval and semantic search.
 level:
   - "2"
 priority: High

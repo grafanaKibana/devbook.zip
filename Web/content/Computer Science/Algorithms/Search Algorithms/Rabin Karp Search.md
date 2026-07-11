@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.038Z
-modified: 2026-07-11T16:49:43.038Z
-published: 2026-07-11T16:49:43.038Z
+created: 2026-07-11T18:24:05.310Z
+modified: 2026-07-11T18:24:05.310Z
+published: 2026-07-11T18:24:05.310Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Matches patterns by comparing rolling hashes of text windows, expected O(n + m), extending naturally to multi-pattern search.
 level:
   - "4"
 priority: Medium

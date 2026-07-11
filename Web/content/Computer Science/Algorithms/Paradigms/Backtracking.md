@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.032Z
-modified: 2026-07-11T16:49:43.032Z
-published: 2026-07-11T16:49:43.032Z
+created: 2026-07-11T18:23:02.245Z
+modified: 2026-07-11T18:23:02.246Z
+published: 2026-07-11T18:23:02.246Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: A refined brute force that builds candidate solutions incrementally and prunes a partial candidate the moment it can't possibly succeed.
 level:
   - "4"
 priority: Medium

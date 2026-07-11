@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.379Z
-modified: 2026-07-08T15:01:12.379Z
-published: 2026-07-08T15:01:12.379Z
+created: 2026-07-11T18:17:42.109Z
+modified: 2026-07-11T18:17:42.136Z
+published: 2026-07-11T18:17:42.136Z
 topic:
   - Architecture
 subtopic:
   - Patterns
+summary: Domain-Driven Design centers software design on the business domain — its language, rules, and boundaries — rather than on technical infrastructure.
 level:
   - "2"
 priority: High

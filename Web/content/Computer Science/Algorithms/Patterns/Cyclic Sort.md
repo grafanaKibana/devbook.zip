@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.034Z
-modified: 2026-07-11T16:49:43.034Z
-published: 2026-07-11T16:49:43.034Z
+created: 2026-07-11T18:23:44.229Z
+modified: 2026-07-11T18:23:44.229Z
+published: 2026-07-11T18:23:44.229Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Sorts a permutation of 1..n in O(n) time and O(1) space by swapping each value to its home index.
 level:
   - "4"
 priority: Medium

@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.656Z
-modified: 2026-07-08T15:01:12.657Z
-published: 2026-07-08T15:01:12.657Z
+created: 2026-07-11T18:27:18.873Z
+modified: 2026-07-11T18:27:18.873Z
+published: 2026-07-11T18:27:18.873Z
 topic:
   - Programming
 subtopic:
   - NET
+summary: An event is a restricted delegate member implementing publisher-subscriber communication, letting consumers only subscribe and unsubscribe.
 level:
   - "4"
 priority: Medium

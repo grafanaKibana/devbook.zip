@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.529Z
-modified: 2026-07-08T15:01:12.529Z
-published: 2026-07-08T15:01:12.529Z
+created: 2026-07-11T18:20:04.749Z
+modified: 2026-07-11T18:20:04.750Z
+published: 2026-07-11T18:20:04.750Z
 topic:
   - DevOps
 subtopic:
   - Deployment Strategies
+summary: Deployment strategies control how new versions reach production, balancing risk, infrastructure cost, and rollback speed.
 status:
   - Ready to Repeat
 priority: Medium

@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.465Z
-modified: 2026-07-08T15:01:12.466Z
-published: 2026-07-08T15:01:12.466Z
+created: 2026-07-11T18:18:36.581Z
+modified: 2026-07-11T18:18:36.582Z
+published: 2026-07-11T18:18:36.582Z
 topic:
   - Architecture
 subtopic:
   - Patterns
+summary: Adds new operations to an object hierarchy without modifying its classes, using double dispatch via Accept and Visit.
 level:
   - "3"
 priority: High

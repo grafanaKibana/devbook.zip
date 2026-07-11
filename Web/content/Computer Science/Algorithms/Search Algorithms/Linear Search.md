@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T16:49:43.037Z
-modified: 2026-07-11T16:49:43.038Z
-published: 2026-07-11T16:49:43.038Z
+created: 2026-07-11T18:24:02.869Z
+modified: 2026-07-11T18:24:02.870Z
+published: 2026-07-11T18:24:02.870Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Scans elements one at a time until a match, assuming nothing about the data; O(n) but the always-works fallback.
 level:
   - "4"
 priority: Medium
