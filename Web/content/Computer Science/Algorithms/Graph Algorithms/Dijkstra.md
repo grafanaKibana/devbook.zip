@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T05:44:32.519Z
-modified: 2026-07-11T05:44:32.520Z
-published: 2026-07-11T05:44:32.520Z
+created: 2026-07-11T05:51:06.316Z
+modified: 2026-07-11T05:51:06.316Z
+published: 2026-07-11T05:51:06.316Z
 topic:
   - Computer Science
 subtopic:
@@ -45,7 +45,7 @@ Every variant visits each vertex once and inspects each edge once; what differs 
 
 | Priority queue | Time | Auxiliary space | Cause |
 | --- | --- | --- | --- |
-| Binary heap + adjacency list | `O((V + E) log V)` | `O(V)` | `V` extractions and up to `E` key-lowering pushes each cost `O(log V)` on a heap that never holds more than the pushed entries. |
+| Binary heap + adjacency list | `O((V + E) log V)` | `O(V)` decrease-key; `O(E)` lazy-deletion | `V` extractions and up to `E` key-lowering pushes each cost `O(log V)`. A true decrease-key heap holds one entry per vertex; the lazy-deletion code shown here pushes a fresh pair per relaxation, so the heap can carry up to `O(E)` stale entries. |
 | Fibonacci heap | `O(E + V log V)` | `O(V)` | `decrease-key` is `O(1)` amortized, so only the `V` `extract-min` operations pay `log V`; `E` relaxations are effectively free. |
 | Array / linear scan | `O(V²)` | `O(V)` | Selecting the minimum by scanning all vertices is `O(V)` per step; on a dense graph where `E ≈ V²` this matches the relaxation work and drops the heap's `log V` overhead. |
 

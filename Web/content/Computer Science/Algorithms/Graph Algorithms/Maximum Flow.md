@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-10T05:57:59.245Z
-modified: 2026-07-10T08:56:49.582Z
-published: 2026-07-10T08:56:49.582Z
+created: 2026-07-11T07:00:15.241Z
+modified: 2026-07-11T07:00:15.241Z
+published: 2026-07-11T07:00:15.241Z
 topic:
   - Computer Science
 subtopic:
@@ -15,122 +15,149 @@ status: Creation
 
 # Intro
 
-A **flow network** is a directed graph where each edge has a **capacity** and we push flow from a source `s` to a sink `t`. A valid flow obeys two rules: **capacity** (flow on an edge never exceeds its capacity) and **conservation** (at every vertex except `s` and `t`, flow in equals flow out). The **maximum-flow** problem asks for the greatest total flow from `s` to `t` — think maximum throughput of a pipe/road/bandwidth network, or, via reductions, bipartite matching, project selection, and image segmentation.
+A directed network carries a divisible resource — water, bandwidth, matched pairs — from a source `s` to a sink `t`. Every edge `u → v` has a **capacity** bounding what it can carry, and a valid flow obeys two constraints: no edge exceeds its capacity, and every vertex other than `s` and `t` sends out exactly what it takes in (conservation). The **maximum-flow** problem asks for the greatest total rate leaving `s` and arriving at `t`.
 
-The whole family is built on one [[Greedy Algorithms|greedy]] idea made correct by one trick. Repeatedly find an **augmenting path** from `s` to `t` with spare capacity and push flow along it. Naive greedy fails because an early path can commit flow to a suboptimal edge; the fix is the **residual graph**, which adds a **back-edge** for every unit of flow sent. The back-edge lets a later augmenting path _cancel_ earlier flow — greedy with an undo button. **Ford–Fulkerson** is this loop with any augmenting path; **Edmonds–Karp** always picks the _shortest_ augmenting path with a [[DFS BFS|BFS]], which bounds the number of iterations. Reach for max-flow when a problem reduces to routing a divisible resource under capacity limits; if capacities are all 1 and you just want connectivity, plain BFS/DFS suffices.
+Pushing flow along any `s → t` path with spare capacity is the obvious move, but pure [[Greedy Algorithms|greedy]] wedges below the optimum: an early path can saturate an edge the best solution routes around, and conservation then leaves no legal path to correct it. The fix is the **residual graph**. For an edge carrying flow `f` out of capacity `c`, it holds a forward arc with residual `c − f` (room left) and a backward arc with residual `f` (flow that can be pushed back). An augmenting path that traverses a backward arc cancels and reroutes earlier flow, so no committed decision is permanent. The loop finds an augmenting `s → t` path in the residual graph, pushes its bottleneck residual capacity, and stops when no such path remains — at which point the flow value equals the capacity of the minimum `s`-`t` cut.
 
-## How It Works
+**Core shape:** capacities + residual back-edges → each augmenting path pushes its bottleneck and back-edges reroute earlier flow → the flow at termination equals the minimum `s`-`t` cut.
 
-The residual graph is the engine. For an edge `u → v` with capacity `c` carrying flow `f`, the residual graph holds two arcs: a forward arc `u → v` with residual capacity `c − f` (room left), and a backward arc `v → u` with residual capacity `f` (flow that can be undone). An augmenting path is any `s → t` path in the residual graph; its bottleneck is the minimum residual capacity along it; pushing that bottleneck adds to forward arcs and subtracts from back-arcs.
+The transition worth animating is a backward arc in the residual graph retracting an earlier, suboptimal augmenting path.
 
-1. Start with zero flow. Build the residual graph (initially forward capacities only).
-2. Find an augmenting path `s → t` in the residual graph. If none exists, stop.
-3. Push the bottleneck residual capacity along the path: `+bottleneck` on each forward arc used, `−bottleneck` recorded as the paired back-arc.
-4. Repeat.
+> [!NOTE] Visualization pending
+> Planned StepTrace: a flow-network card showing augmenting paths found in the residual graph, each pushing bottleneck flow until no augmenting path remains, with the set reachable from `s` marking the min cut that equals the max flow. No matching renderer exists in `engine.js` yet.
 
-**Why back-edges make greedy correct.** Sending flow through a _back_-arc `v → u` means "retract some of the flow previously sent `u → v` and reroute it." Without back-edges, a bad first choice is permanent and the algorithm can wedge below the optimum; with them, every locally-committed decision stays revisable, and the loop cannot terminate until no `s → t` path remains — which, by the theorem below, is exactly the maximum.
+## Why the residual graph makes greedy exact
 
-**Max-flow min-cut theorem.** An `s`-`t` **cut** partitions vertices into a set `S` containing `s` and `T` containing `t`; its capacity is the total capacity of edges crossing `S → T`. The value of any flow is at most the capacity of any cut, and the theorem states the _maximum_ flow equals the _minimum_ cut capacity. This gives both an optimality certificate and a way to **recover the min cut**: after the algorithm halts, let `S` be the set of vertices still reachable from `s` in the final residual graph; the edges from `S` to `T` in the _original_ graph are the min cut, and they are all saturated.
+Take the unit-capacity network `s→a, s→b, a→b, a→t, b→t`; its maximum flow is 2, since only `s→a` and `s→b` leave the source. A greedy first augmentation along `s → a → b → t` saturates all three of its edges and reports flow 1. Every remaining forward path is now blocked — `s→a` and `b→t` are full — so a forward-only algorithm stops one unit short.
 
-- **Ford–Fulkerson** with arbitrary path selection: `O(E · f*)` where `f*` is the max-flow value, because each augmentation adds at least 1 unit (for integer capacities) and each path search is `O(E)`. On **irrational** capacities with an unlucky path choice it can converge to a wrong value or **never terminate**.
-- **Edmonds–Karp** picks the shortest augmenting path (fewest edges) via BFS. The BFS distance from `s` to any vertex never decreases across augmentations, which caps the total number of augmentations at `O(V·E)`; each BFS is `O(E)`, giving `O(V·E²)` **independent of capacities**.
-- **Dinic's algorithm** is the practical next step: it builds a BFS level graph and pushes _blocking flows_, reaching `O(V²·E)` in general and `O(E·√V)` on unit-capacity graphs — the go-to for bipartite matching at scale.
+The residual graph reopens the choice. Sending one unit `a → b` created a backward arc `b → a` with residual 1. The path `s → b → a → t` uses that backward arc: `b → a` retracts the earlier `a → b` unit and reroutes it, so `a → b` returns to zero while `s→a→t` and `s→b→t` each carry one unit. Flow reaches 2. The backward arc is the entire reason a locally-committed, wrong routing decision can be undone; forward-only residuals leave no legal move to reach that state, which is exactly why greedy-without-residuals returns a value below the maximum.
 
-## Example
+## Termination and the min cut
 
-A hand trace showing a back-edge undo the greedy first path. Graph (all capacities 1): `s→a, s→b, a→b, a→t, b→t`. Max flow is 2 (the cut `{s}` has outgoing capacity `s→a + s→b = 2`).
+An `s`-`t` **cut** splits the vertices into `S` (containing `s`) and `T` (containing `t`); its capacity is the total capacity of the original edges crossing `S → T`. Any flow value is bounded by any cut capacity, because everything reaching `t` must cross the partition. The **max-flow min-cut theorem** sharpens that to equality: the maximum flow equals the minimum cut capacity.
 
-```text
-Residual capacities start equal to capacities. Pick paths arbitrarily (Ford-Fulkerson).
+The theorem also names the cut. When no augmenting path remains, let `S` be the vertices still reachable from `s` in the final residual graph; `t ∉ S`, or a path would exist. Every original edge from `S` to `T` is saturated — an unsaturated one would keep a forward residual arc and extend reachability — and no flow crosses back from `T` to `S`, so the cut capacity equals the flow value. Reachability in the residual graph is therefore a checkable optimality certificate: it both proves the flow is maximal and reads off the bottleneck edges. The cut side `S` comes from the _residual_ reachable set, but the reported edges are the _original_ forward edges out of `S`.
 
-Augment 1: path s -> a -> b -> t, bottleneck = 1
-  push 1: s->a full, a->b full, b->t full
-  residual back-arcs appear: a->s, b->a, t->b  (each capacity 1)
-  flow = 1
+## Complexity
 
-Augment 2: forward s->a is full and b->t is full, but a BACK-arc is open.
-  path s -> b -> a -> t
-    s->b  : forward, residual 1  ok
-    b->a  : BACK-arc, residual 1  (cancels the a->b flow sent in Augment 1)
-    a->t  : forward, residual 1  ok
-  bottleneck = 1, push 1
-  net effect: a->b flow returns to 0; s->a->t and s->b->t each carry 1
-  flow = 2
+The three named algorithms differ only in how they choose the augmenting path, and that choice sets the iteration count.
 
-No s -> t path remains in the residual graph. Max flow = 2.
-
-Min cut: vertices reachable from s in the final residual = {s} only
-  (s->a and s->b are both saturated). Cut edges s->a, s->b, capacity 2 = max flow.
-```
-
-The middle edge `a→b` looked useful in Augment 1 but was wrong; the back-arc `b→a` in Augment 2 quietly undoes it. Without residual back-edges the algorithm would have stalled at flow 1.
-
-## Diagram
-
-```mermaid
-flowchart TD
-  Start[Zero flow and residual graph] --> Find{Augmenting path from s to t exists}
-  Find -->|No| Done[Return flow and min cut from reachable set]
-  Find -->|Yes| Bottleneck[Find bottleneck residual capacity on path]
-  Bottleneck --> Push[Add bottleneck to forward arcs and subtract on back arcs]
-  Push --> Find
-```
-
-## Pitfalls
-
-### Ford–Fulkerson may not terminate on irrational capacities
-
-- **What goes wrong**: with irrational edge capacities and a pathological choice of augmenting paths, the flow value can increase by ever-smaller amounts and converge to a number strictly below the true maximum — or loop forever.
-- **Why it happens**: the `O(E · f*)` bound assumes each augmentation adds at least one whole unit, which only holds for integer (or rational, after scaling) capacities.
-- **How to avoid it**: use Edmonds–Karp (shortest-path augmentation) whose `O(V·E²)` bound is independent of capacity values, or scale rational capacities to integers.
-
-### Forgetting to update the paired back-edge
-
-- **What goes wrong**: pushing flow on a forward arc without incrementing its residual back-arc (or vice versa) makes the "undo" impossible, and the algorithm returns a flow below the maximum.
-- **Why it happens**: implementations that store edges separately lose the pairing between an arc and its reverse.
-- **How to avoid it**: store each edge and its reverse adjacently (the standard trick: keep an edge array and access the reverse as `index XOR 1`) so pushing `+f` on one always applies `−f` to its partner.
-
-### Reading the min cut from the wrong graph
-
-- **What goes wrong**: taking the reachable set `S` from `s` and then listing crossing edges from the _residual_ graph, or including back-arcs, yields the wrong cut edges or capacity.
-- **Why it happens**: the reachable set is computed on the _final residual_ graph, but the cut edges and their capacities come from the _original_ graph.
-- **How to avoid it**: compute `S` = vertices reachable from `s` in the final residual graph, then report original edges `u → v` with `u in S` and `v in T`; these are exactly the saturated min-cut edges.
-
-## Tradeoffs
-
-| Choice | Ford–Fulkerson (any path) | Edmonds–Karp (BFS shortest path) | Decision criteria |
+| Algorithm | Time | Auxiliary space | Cause |
 | --- | --- | --- | --- |
-| Complexity | `O(E · f*)`, scales with the flow value | `O(V·E²)`, independent of capacities | Prefer Edmonds–Karp when capacities are large or non-integer; Ford–Fulkerson only wins when `f*` is tiny. |
-| Termination | May not terminate on irrational capacities | Always terminates | If capacities are not guaranteed integer, Edmonds–Karp (or scaling) is mandatory. |
-| Path search | DFS or any path finder | [[DFS BFS\|BFS]] for fewest-edge path | The BFS choice is what buys the capacity-independent bound; it is not an optional detail. |
-| Both vs Dinic's | Simpler to implement | — | For large graphs or bipartite matching, skip both and use Dinic's `O(V²·E)` (or `O(E·√V)` unit-capacity) blocking-flow approach. |
+| Ford–Fulkerson (any augmenting path) | `O(E·\|f\|)` | `O(V + E)` | Each augmentation adds ≥ 1 unit for integer capacities, so at most `\|f\|` iterations, each an `O(E)` path search. The bound scales with the flow _value_, not the graph size. |
+| Edmonds–Karp (BFS shortest path) | `O(V·E²)` | `O(V + E)` | Shortest-path augmentation keeps the BFS distance `s→v` non-decreasing; each edge is the bottleneck `O(V)` times, capping augmentations at `O(V·E)`, each BFS `O(E)`. Independent of capacities. |
+| Dinic (level graph + blocking flow) | `O(V²·E)` | `O(V + E)` | The level graph's depth strictly increases across `O(V)` phases; each blocking flow costs `O(V·E)`. |
+
+`|f|` is the max-flow value; the Ford–Fulkerson bound is finite only for integer or rational capacities. On unit-capacity graphs and the bipartite-matching reduction, Dinic tightens to `O(E·√V)`. The `O(V + E)` auxiliary space in every row holds the residual adjacency structure plus the BFS/DFS frontier; Dinic adds a per-vertex level and iteration pointer, still `O(V)`. The matrix reference implementation below trades this for `O(V²)` in exchange for readability.
+
+## Where the guarantees break
+
+Two failure modes both trace back to the residual mechanism.
+
+**Irrational capacities with adversarial path choice.** Plain Ford–Fulkerson, free to pick any augmenting path, can chase ever-smaller bottlenecks whose sum converges to a value strictly _below_ the true maximum — and the loop never terminates. The `O(E·|f|)` bound silently assumed each augmentation adds a whole unit, which holds only for integer or rational capacities. Edmonds–Karp removes the dependence on capacity magnitudes entirely (`O(V·E²)`), so it terminates on any capacities; scaling rationals to integers is the other fix. The bad behaviour is not the graph — it is the path selection interacting with capacity values.
+
+**Omitting the backward arcs.** A forward-only residual graph cannot undo. On the `s→a→b→t` network above, dropping the paired reverse arcs leaves the algorithm stalled at flow 1 instead of 2, because `s → b → a → t` never becomes available — the wrong state is a plausible, silently-suboptimal answer, not a crash. In code the usual cause is storing an edge without its reverse; the standard guard keeps edges in an array and accesses the reverse of edge `i` as `i XOR 1`, so `+f` on one arc always applies `−f` to its partner.
+
+## Reference drawer
+
+> [!ABSTRACT]- Augmenting-path loop
+>
+> ```mermaid
+> flowchart TD
+>   A[Zero flow; residual = capacities] --> B{Augmenting path s→t in residual?}
+>   B -->|No| C[Return flow; min cut = edges out of s-reachable set]
+>   B -->|Yes| D[Bottleneck = min residual on the path]
+>   D --> E[Add bottleneck to forward arcs, subtract on reverse arcs]
+>   E --> B
+> ```
+
+> [!EXAMPLE]- Edmonds–Karp in C#
+>
+> ```csharp
+> public static int MaxFlow(int[,] capacity, int source, int sink)
+> {
+>     int n = capacity.GetLength(0);
+>     var residual = (int[,])capacity.Clone();
+>     int maxFlow = 0;
+>
+>     while (true)
+>     {
+>         // BFS for a shortest augmenting path; parent[v] is v's predecessor.
+>         var parent = new int[n];
+>         Array.Fill(parent, -1);
+>         parent[source] = source;
+>         var queue = new Queue<int>();
+>         queue.Enqueue(source);
+>
+>         while (queue.Count > 0 && parent[sink] == -1)
+>         {
+>             int u = queue.Dequeue();
+>             for (int v = 0; v < n; v++)
+>             {
+>                 if (parent[v] == -1 && residual[u, v] > 0)
+>                 {
+>                     parent[v] = u;
+>                     queue.Enqueue(v);
+>                 }
+>             }
+>         }
+>
+>         if (parent[sink] == -1)
+>         {
+>             break; // No augmenting path: the flow is maximal.
+>         }
+>
+>         int bottleneck = int.MaxValue;
+>         for (int v = sink; v != source; v = parent[v])
+>         {
+>             bottleneck = Math.Min(bottleneck, residual[parent[v], v]);
+>         }
+>
+>         for (int v = sink; v != source; v = parent[v])
+>         {
+>             int u = parent[v];
+>             residual[u, v] -= bottleneck; // forward arc down
+>             residual[v, u] += bottleneck; // reverse arc up
+>         }
+>
+>         maxFlow += bottleneck;
+>     }
+>
+>     return maxFlow;
+> }
+> ```
+>
+> The `residual[v, u] += bottleneck` line is the back-edge update; without it the forward-only version stops below the maximum. On return, the vertices still reachable from `source` in the last BFS form the min-cut side `S`. The adjacency-matrix form costs `O(V²)` space and assumes no antiparallel edges (both `u→v` and `v→u` present in the input would share one cell and corrupt the residual); an adjacency-list residual with `XOR 1` reverse edges avoids that and brings space to `O(V + E)`.
+
+## Comparison
+
+| Algorithm | Time | Path / technique | Stronger case | Weaker case |
+| --- | --- | --- | --- | --- |
+| Ford–Fulkerson | `O(E·\|f\|)` | Any augmenting path ([[DFS BFS\|DFS]] or arbitrary) | Tiny integer max-flow value; the conceptual skeleton | Large or non-integer capacities; may not terminate on irrationals |
+| Edmonds–Karp | `O(V·E²)` | [[DFS BFS\|BFS]] shortest augmenting path | Simple, capacity-independent polynomial baseline | Dense graphs where `E ≈ V²` inflate the `E²` term |
+| Dinic | `O(V²·E)`; `O(E·√V)` unit-capacity | BFS level graph + blocking flow | Batches work into `O(V)` phases; near-optimal for bipartite matching | More code than Edmonds–Karp for small inputs |
+| Push–relabel | `O(V²·√E)` highest-label; `O(V³)` FIFO | Local preflow pushes, no `s→t` paths | Dense graphs; best asymptotics without augmenting paths | Harder to reason about; no cheap augmenting-path min-cut story |
+
+Edmonds–Karp is the simplest polynomial answer and the right baseline when the graph is small or the code has to stay obviously correct; it pays for that with an `E²` term that hurts once the graph is dense. Dinic keeps the same augmenting-path model but batches work into `O(V)` phases, and its `O(E·√V)` unit-capacity bound makes it the standard engine for bipartite matching — the practical default when performance matters. Push–relabel abandons `s→t` paths for local pushes and overtakes Dinic on dense graphs, where `O(V²·√E)` / `O(V³)` beat `O(V²·E)`, at the cost of a less transparent min-cut recovery and heavier implementation. Ford–Fulkerson remains the model to reason from rather than the one to ship: its value-dependent bound and non-termination on irrational capacities rule it out whenever capacities are large or not integral.
 
 ## Questions
 
-> [!QUESTION]- Why do residual back-edges make the greedy augmenting-path approach correct?
->
-> - A greedy first augmenting path can commit flow to an edge that a better solution would not use, and capacity constraints then block the optimum.
-> - Each unit of forward flow `u → v` creates a residual back-arc `v → u` of equal residual capacity.
-> - A later augmenting path can traverse that back-arc to retract and reroute the earlier flow — an undo operation.
-> - This is what lets the loop keep going until no `s → t` path remains; without back-edges the algorithm can wedge strictly below the maximum, so the back-edge is the whole reason greedy augmentation is provably optimal.
+> [!QUESTION]- Why do residual back-edges make greedy augmenting paths exact?
+> A greedy first path can commit flow to an edge the optimum routes around, and conservation then blocks every forward correction. Each unit sent `u → v` creates a residual back-arc `v → u` of equal capacity, and a later augmenting path can traverse it to retract and reroute that flow. The loop therefore cannot stop until no `s → t` path remains — which, by max-flow min-cut, is the maximum. Without the back-arcs the algorithm can wedge strictly below it.
 
-> [!QUESTION]- State the max-flow min-cut theorem and explain how to recover the minimum cut.
->
-> - An `s`-`t` cut splits vertices into `S` (with `s`) and `T` (with `t`); its capacity is the total capacity of edges crossing `S → T`.
-> - Any flow value is at most any cut capacity (weak duality); the theorem says the maximum flow equals the minimum cut capacity.
-> - After the algorithm halts, let `S` be the vertices reachable from `s` in the final residual graph; the original edges from `S` to `T` are the min cut and are all saturated.
-> - This gives a checkable optimality certificate and turns max-flow into a min-cut solver, which is exactly how segmentation and project-selection problems are attacked.
+> [!QUESTION]- How is the minimum cut recovered once the flow is maximal?
+> Let `S` be the vertices reachable from `s` in the final residual graph; `t` is not among them. Every original edge from `S` to `T` is saturated, so the sum of their capacities equals the flow value. The cut side comes from residual reachability, but the reported edges are the original forward edges out of `S`.
 
-> [!QUESTION]- Why is Edmonds–Karp `O(V·E²)` while Ford–Fulkerson is only `O(E · f*)`?
->
-> - Ford–Fulkerson bounds iterations by the flow value `f*` because each augmentation adds at least one unit — a bound that blows up with large capacities and fails entirely on irrational ones.
-> - Edmonds–Karp always augments along the shortest (fewest-edge) path via BFS.
-> - Under shortest-path augmentation the BFS distance from `s` to any vertex never decreases, and each edge can be the bottleneck only `O(V)` times, capping augmentations at `O(V·E)`.
-> - With `O(E)` per BFS that is `O(V·E²)`, crucially **independent of capacity magnitudes** — the reason it is preferred whenever capacities are large or non-integer.
+> [!QUESTION]- Why is Edmonds–Karp `O(V·E²)` while Ford–Fulkerson is only `O(E·\|f\|)`?
+> Ford–Fulkerson bounds iterations by the flow value because each augmentation adds at least one unit — a bound that inflates with large capacities and fails outright on irrational ones. Edmonds–Karp augments along the fewest-edge path via BFS; the BFS distance to each vertex never decreases, so each edge is the bottleneck `O(V)` times, capping augmentations at `O(V·E)`. With `O(E)` per BFS that is `O(V·E²)`, independent of capacity magnitudes.
+
+> [!QUESTION]- When does Dinic or push–relabel earn its extra complexity over Edmonds–Karp?
+> Dinic wins whenever the graph is large or the workload is bipartite matching: same model, `O(V)` phases instead of `O(V·E)` augmentations, and an `O(E·√V)` unit-capacity bound. Push–relabel wins on dense graphs, where its `O(V²·√E)` / `O(V³)` bounds beat Dinic's `O(V²·E)`, accepting a harder implementation and a less direct min-cut readout.
 
 ## References
 
-- [Maximum flow problem (Wikipedia)](https://en.wikipedia.org/wiki/Maximum_flow_problem) — flow networks, the min-cut duality, and the algorithm family.
-- [Maximum flow: Ford–Fulkerson and Edmonds–Karp (cp-algorithms)](https://cp-algorithms.com/graph/edmonds_karp.html) — residual graphs, both algorithms, and the `index XOR 1` reverse-edge trick.
-- [Max-flow min-cut theorem (Wikipedia)](https://en.wikipedia.org/wiki/Max-flow_min-cut_theorem) — statement, proof sketch, and cut recovery.
-- [Dinic's algorithm (cp-algorithms)](https://cp-algorithms.com/graph/dinic.html) — the blocking-flow successor and its bipartite-matching bound.
+- [Maximum flow problem (Wikipedia)](https://en.wikipedia.org/wiki/Maximum_flow_problem) — flow-network definition, the augmenting-path family, and the reductions (bipartite matching, project selection, segmentation).
+- [Maximum flow: Ford–Fulkerson and Edmonds–Karp (cp-algorithms)](https://cp-algorithms.com/graph/edmonds_karp.html) — residual graphs and both augmenting-path algorithms, built on a capacity/flow adjacency matrix like the drawer's reference implementation.
+- [Max-flow min-cut theorem (Wikipedia)](https://en.wikipedia.org/wiki/Max-flow_min-cut_theorem) — theorem statement, weak-duality bound, and cut recovery from the residual reachable set.
+- [Dinic's algorithm (cp-algorithms)](https://cp-algorithms.com/graph/dinic.html) — level graph, blocking flow, the `O(V²·E)` bound, the `O(E·√V)` bipartite-matching case, and the edge-list residual with the `index XOR 1` reverse-edge trick.
+- [Maximum flow – push-relabel algorithm (cp-algorithms)](https://cp-algorithms.com/graph/push-relabel.html) — the preflow/local-push alternative and its dense-graph bounds.
