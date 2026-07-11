@@ -1,0 +1,48 @@
+---
+publish: true
+created: 2026-07-10T14:39:34.307Z
+modified: 2026-07-10T14:39:34.307Z
+published: 2026-07-10T14:39:34.307Z
+tags:
+  - FolderNote
+topic:
+  - Computer Science
+subtopic:
+  - Data Structures
+level:
+  - "4"
+priority: Medium
+status: Not-Started
+---
+
+# Intro
+
+Heap-like structures share one contract — a **partial order** (parent beats child, nothing promised between siblings) that keeps the best-priority item at a root for O(1) peek — and differ on everything else. The axis that splits the family is **meld** (merging two heaps into one). An array-backed binary heap can't meld cheaply: concatenating two arrays and re-heapifying is O(n). Every other member of the family exists to fix that, paying for it with pointer-based nodes — per-node allocation, GC pressure, cache misses on every hop.
+
+The second axis is **decreaseKey** — raising an item's priority in place, the operation Dijkstra and Prim lean on. Only [[Fibonacci Heaps]] make it O(1) amortized, and that theoretical win rarely survives contact with real hardware: .NET's `PriorityQueue<TElement, TPriority>` (an array-backed quaternary heap) ships with _no meld and no decreaseKey_ and still wins most benchmarks, because sequential index arithmetic in a flat array beats chasing four pointers per node. The lazy-deletion workaround for decreaseKey lives in [[Heap]].
+
+## The family
+
+| | Backing | Meld | Insert | ExtractMin | DecreaseKey | Bounds |
+|---|---|---|---|---|---|---|
+| [[Heap\|Binary / d-ary heap]] | array | O(n) | O(log n) | O(log n) | O(log n)\* | worst case |
+| [[Binomial Queues]] | pointers | O(log n) | O(1) am. | O(log n) | O(log n) | mixed |
+| [[Leftist Heaps]] | pointers | O(log n) | O(log n) | O(log n) | — | worst case |
+| [[Skew Heaps]] | pointers | O(log n) | O(log n) | O(log n) | — | amortized |
+| [[Fibonacci Heaps]] | pointers | O(1) | O(1) | O(log n) | O(1) | amortized |
+
+\* not exposed by .NET's `PriorityQueue`; use lazy deletion.
+
+**When each wins:**
+
+- **Binary/d-ary [[Heap]]** — the default. No meld needed → nothing else comes close on constants. This is what you actually ship.
+- **[[Leftist Heaps]]** — meld with _worst-case_ O(log n) in ~30 lines; the natural persistent/functional mergeable heap.
+- **[[Skew Heaps]]** — leftist minus the stored metadata; smallest correct mergeable heap when amortized bounds suffice.
+- **[[Binomial Queues]]** — meld as binary addition; the structured forest that Fibonacci heaps lazify. Mostly a stepping stone.
+- **[[Fibonacci Heaps]]** — O(1) amortized decreaseKey and meld; the tool for proving bounds (Dijkstra in O(m + n log n)), rarely for running code.
+
+## References
+
+- [PriorityQueue\<TElement, TPriority> class (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.priorityqueue-2) — the .NET baseline the pointer-based variants are measured against; note the absent meld/decreaseKey surface.
+- [Larkin, Sen & Tarjan, "A back-to-basics empirical study of priority queues" (ALENEX 2014)](https://arxiv.org/abs/1403.0252) — benchmarks across the family; implicit d-ary heaps win most real workloads.
+- [Mergeable heap (Wikipedia)](https://en.wikipedia.org/wiki/Mergeable_heap) — the meld-centric view of the family with links to each variant.

@@ -1,11 +1,11 @@
 ---
 publish: true
 created: 2026-07-08T15:01:12.289Z
-modified: 2026-07-10T08:56:45.949Z
-published: 2026-07-10T08:56:45.949Z
+modified: 2026-07-10T19:34:58.763Z
+published: 2026-07-10T19:34:58.763Z
 tags:
   - FolderNote
-icon: brain-circuit
+icon: brain
 order: 70
 color: "#10b981"
 topic:
