@@ -158,10 +158,35 @@ function FolderStructureMap() {
 .folder-map-node .db-card-summary {
   display: none;
 }
-.folder-map-empty {
-  margin: 1rem 0 0;
-  color: var(--text-muted, var(--darkgray, #5f6b7a));
-  font-size: 0.875rem;
+/* Empty-section placeholder: reuses the full .db-card chrome (border, accent
+   glow gradient, background) so it reads as a regular sub-folder card. It only
+   differs in being non-interactive — no pointer cursor, no hover lift — with the
+   text centered in the card. */
+.folder-map-node-empty {
+  cursor: default;
+}
+.folder-map-node-empty:hover,
+.folder-map-node-empty:focus-within {
+  border-color: var(--background-modifier-border, var(--lightgray, #d8dee9));
+  background-color: var(--background-primary, var(--light, #ffffff));
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  transform: none;
+}
+.folder-map-node-empty:hover::before,
+.folder-map-node-empty:focus-within::before { opacity: 0.78; }
+/* Higher specificity than the @container .folder-map-node .db-card-body
+   rules below so the placeholder stays vertically centered at every width. */
+.folder-structure-map .folder-map-node-empty .db-card-body {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+.folder-map-empty-text {
+  color: var(--text-normal, var(--dark, #1f2937));
+  font-size: 1rem;
+  font-weight: 400;
+  font-style: normal;
+  line-height: 1.25;
 }
 @container folder-map (min-width: 40rem) {
   .folder-map-node {
@@ -213,7 +238,13 @@ function FolderStructureMap() {
           })}
         </div>
       ) : (
-        <p class="folder-map-empty">No notes in this section yet.</p>
+        <div class="folder-map-children">
+          <article class="db-card folder-map-node folder-map-node-empty">
+            <div class="db-card-body">
+              <span class="folder-map-empty-text">No notes in this section yet.</span>
+            </div>
+          </article>
+        </div>
       )}
     </nav>
   );
