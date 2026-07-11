@@ -3,7 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
-summary: "The core unit of behavior in C#, focusing on parameter modifiers (ref/in/out/params) and dispatch keywords (virtual/override/new)."
+summary: "C#'s unit of behavior, covering parameter modifiers and dispatch keywords."
 level:
   - "4"
 priority: Medium

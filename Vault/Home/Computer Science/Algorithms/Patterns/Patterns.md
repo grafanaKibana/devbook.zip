@@ -3,7 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: "Reusable problem-solving idioms — recurring techniques that turn brute-force solutions efficient; recognising the pattern is the hard part, distinct from broader paradigms."
+summary: "Reusable coding idioms that turn brute-force solutions efficient; recognising the pattern is the hard part."
 tags:
   - FolderNote
 publish: true

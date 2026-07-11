@@ -104,15 +104,6 @@ Merge sort's merge step also solves a classic problem for free: **counting inver
 
 **Mitigation**: use `Array.Sort` (introsort) for general-purpose in-memory sorting. Use merge sort (or `Array.Sort` with a stable comparer, or LINQ `OrderBy`) only when stability is required.
 
-## Tradeoffs
-
-| Algorithm | Time | Space | Stable | Cache | Use when |
-|-----------|------|-------|--------|-------|----------|
-| Merge sort | O(n log n) all cases | O(n) | Yes | Good | Stability required; linked lists; external sort |
-| Quick sort (introsort) | O(n log n) avg | O(log n) | No | Excellent | General in-memory; fastest in practice |
-| Timsort | O(n log n) worst, O(n) best | O(n) | Yes | Excellent | Nearly-sorted data; Python/Java default |
-| Heap sort | O(n log n) all cases | O(1) | No | Poor | O(1) space + O(n log n) worst case both required |
-
 **Decision rule**: use merge sort when stability is required or when sorting linked lists (O(1) extra space on linked lists). For in-memory array sorting without stability requirements, use `Array.Sort` (introsort). For nearly-sorted data, Timsort (Python/Java default) is optimal.
 
 

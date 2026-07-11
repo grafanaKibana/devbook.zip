@@ -5,6 +5,7 @@ color: "#3b82f6"
 topic:
   - Cloud
 subtopic: []
+summary: "Renting managed compute, storage, and networking with pay as you go economics."
 tags:
   - FolderNote
 publish: true
@@ -22,6 +23,22 @@ Cloud computing is renting capabilities (compute, storage, networking) with mana
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
 return FolderStructureMap;
 ```
+
+## Cross-Provider Comparison
+
+The three major providers offer equivalent building blocks under different names. This table maps a capability across AWS, Azure, and Google Cloud so you can translate between them.
+
+| Capability | AWS | Azure | Google Cloud |
+|------------|-----|-------|--------------|
+| Virtual machines | EC2 | Azure VMs | Compute Engine |
+| Serverless compute | Lambda | Azure Functions | Cloud Functions |
+| Object storage | S3 | Blob Storage | Cloud Storage |
+| NoSQL document DB | DynamoDB | Cosmos DB | Firestore |
+| Message queue | SQS | Service Bus / Storage Queues | Cloud Pub/Sub |
+| Data warehouse | Redshift | Synapse | BigQuery |
+| Global relational DB | Aurora Global | Azure SQL Database (geo-replication) | Cloud Spanner |
+| Managed ML platform | SageMaker | Azure ML | Vertex AI |
+| LLM API | Bedrock | Azure OpenAI | Vertex AI Gemini |
 
 ## References
 

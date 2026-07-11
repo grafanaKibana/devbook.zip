@@ -83,14 +83,6 @@ flowchart TD
 - **`O(n)` extra memory, not in place.** Tim sort allocates a temporary buffer up to `n/2` for merging. On memory-constrained systems, or when sorting huge primitive arrays where stability is meaningless, that buffer is pure overhead — which is exactly why Java sorts *primitives* with a dual-pivot quicksort and .NET sorts with [[Introsort]] instead.
 - **Stability depends on strict descent.** Runs are detected as ascending (`<=`) or *strictly* descending (`>`). If an implementation used `>=` for descending runs, it would reverse stretches of equal keys and silently break stability. The asymmetry between the two comparisons is deliberate and load-bearing, not an accident.
 
-## Tradeoffs
-
-| Choice | Tim Sort | Alternative | Decision criteria |
-| --- | --- | --- | --- |
-| vs plain [[Merge Sort]] | `O(n)` on ordered input, adaptive, stable | `O(n log n)` always, stable | Tim sort dominates plain merge sort on real data because it charges nothing for existing order; use plain merge sort only when you need the simplest possible stable sort or predictable, input-independent timing. |
-| vs [[Introsort]] | Stable, adaptive, `O(n)` space | Not stable, `O(log n)` space, in place | Sort objects with Tim sort when equal-key order or partial-order adaptivity matters; sort primitives with introsort/quicksort where stability is unobservable and the merge buffer is wasted memory. |
-| vs [[Quick Sort]] | Guaranteed `O(n log n)`, stable | `O(n²)` worst, faster average, not stable | Prefer Tim sort when you cannot risk quicksort's adversarial worst case and need stability; prefer quicksort/introsort for raw average-case speed on unordered primitives. |
-
 ## Questions
 
 > [!QUESTION]- What makes Tim sort adaptive, and why does that matter for real data?

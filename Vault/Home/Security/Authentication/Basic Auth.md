@@ -3,7 +3,7 @@ topic:
   - Security
 subtopic:
   - Authentication
-summary: "The simplest HTTP auth scheme: the client sends Base64-encoded username:password in the Authorization header on every request (RFC 7617)."
+summary: "The simplest HTTP scheme: Base64-encoded credentials in the Authorization header (RFC 7617)."
 level:
   - "4"
 priority: High

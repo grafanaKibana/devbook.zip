@@ -87,14 +87,6 @@ flowchart TD
 - **The depth limit is a safety net, not a pivot strategy.** Introsort still wants good pivots — median-of-three or randomization — so the heap-sort branch stays rare; if it fired often you would pay heap sort's poor cache locality across the whole input. The limit bounds the *worst* case; it does not excuse a lazy pivot choice that makes the average case worse.
 - **The insertion-sort cutoff needs the final pass to be correct.** Leaving sub-16 ranges unsorted during recursion is only valid because a single insertion-sort pass at the end fixes every small local disorder in near-linear time. Omitting that final pass — or recursing on tiny ranges instead — either leaves the array unsorted or throws away the constant-factor win the cutoff exists to capture.
 
-## Tradeoffs
-
-| Choice | Introsort | Alternative | Decision criteria |
-| --- | --- | --- | --- |
-| vs plain [[Quick Sort]] | `O(n log n)` guaranteed, same average speed | `O(n²)` on adversarial input | Always prefer introsort for a general sort — it is quicksort plus a cheap insurance branch that almost never fires, closing the DoS-grade quadratic hole for free. |
-| vs [[Heap Sort]] alone | Quicksort's cache-friendly average case | `O(n log n)` always but ~2× slower typical | Use pure heap sort only when you need `O(1)` space and a hard guarantee with no quicksort phase; otherwise introsort is faster because heap sort runs only on the rare deep partitions. |
-| Stability required | Not stable ([[Introsort]] / `Array.Sort` primitives) | Stable ([[Tim Sort]] / `Array.Sort` objects) | Sort primitives with introsort where equal-key order is unobservable; switch to Tim sort for objects whenever the input order of equal keys must survive. |
-
 ## Questions
 
 > [!QUESTION]- How does introsort remove quicksort's `O(n²)` worst case without losing its speed?

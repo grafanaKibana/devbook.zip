@@ -5,6 +5,7 @@ color: "#10b981"
 topic:
   - AI & ML
 subtopic: []
+summary: "How learning systems are built, evaluated, and operated: classic ML, LLMs, and agent tooling."
 tags:
   - FolderNote
 publish: true

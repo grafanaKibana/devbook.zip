@@ -96,15 +96,6 @@ flowchart TD
 - **Why it happens**: both encode prefix structure, but `z[i]` measures a match *starting at* `i` against the prefix, while `lps[i]` measures the longest prefix that is also a *suffix ending at* `i` — different anchors.
 - **How to avoid it**: keep the definitions explicit; if you need suffix-anchored information, convert deliberately rather than assuming the arrays are interchangeable index-for-index.
 
-## Tradeoffs
-
-| Choice | Option A | Option B | Decision criteria |
-| --- | --- | --- | --- |
-| Single-pattern matching | Z-algorithm `O(n+m)` | [[KMP (Knuth-Morris-Pratt) Algorithm\|KMP]] `O(n+m)` | Same asymptotics; pick whichever prefix structure you reason about more clearly. Z needs the `P+sep+T` concatenation and extra space; KMP scans `T` in place. |
-| Deterministic vs probabilistic | Z-algorithm | [[Rabin Karp Search\|Rabin-Karp]] | Z-algorithm is unconditionally `O(n+m)`; Rabin-Karp is expected linear but can degrade on collisions. Use Z when worst-case matters or hashing is awkward. |
-| Prefix-structure problems | Z-array | Prefix function | The Z-array answers "common prefix with the whole string at every suffix" directly; use it for periodicity and occurrence-counting where the failure function needs extra transformation. |
-| Extra space | KMP `O(m)` | Z-algorithm `O(n+m)` | KMP stores only the pattern's table; Z-matching materializes the array over the full concatenation. Prefer KMP when `T` is huge and memory is tight. |
-
 ## Questions
 
 > [!QUESTION]- What does `z[i]` mean, and how does the Z-box keep the whole computation linear?

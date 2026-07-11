@@ -3,7 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: "Binary-searches the space of possible answers using a monotonic feasibility test, for 'minimise the maximum' or 'maximise the minimum' problems."
+summary: "Binary-searches the space of possible answers using a monotonic feasibility test."
 level:
   - "4"
 priority: Medium

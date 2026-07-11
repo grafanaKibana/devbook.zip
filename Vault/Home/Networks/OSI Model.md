@@ -2,7 +2,7 @@
 topic:
   - Networks
 subtopic: []
-summary: "The 7-layer conceptual reference model for how data moves across a network, and the shared vocabulary for locating problems."
+summary: "The 7-layer reference model for how data moves across a network."
 level:
   - "3"
 priority: Medium

@@ -3,7 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: "Step-by-step problem-solving procedures chosen by trading off runtime, memory, and complexity, with Big O as the primary comparison tool."
+summary: "Step-by-step problem-solving procedures compared by runtime, memory, and complexity using Big O."
 tags:
   - FolderNote
 publish: true

@@ -3,7 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
-summary: "Structures that represent hierarchical data through parent-child relationships, keeping balanced height for O(log n) search."
+summary: "Hierarchical parent-child structures that keep balanced height for O(log n) search."
 tags:
   - FolderNote
 level:

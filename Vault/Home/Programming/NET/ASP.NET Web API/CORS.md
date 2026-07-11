@@ -3,7 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
-summary: "CORS is a browser security mechanism controlling which origins may call your API, permitted via server response headers."
+summary: "Browser security controlling which origins may call your API, via response headers."
 level:
   - "1"
 priority: Medium

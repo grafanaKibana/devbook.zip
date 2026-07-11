@@ -3,7 +3,7 @@ topic:
   - SDLC
 subtopic:
   - SDLC
-summary: "Structured ways to forecast effort, time, or complexity of development work, reducing uncertainty enough to plan without predicting precisely."
+summary: "Structured ways to forecast effort or complexity of development work under uncertainty."
 level:
   - "4"
 priority: Medium

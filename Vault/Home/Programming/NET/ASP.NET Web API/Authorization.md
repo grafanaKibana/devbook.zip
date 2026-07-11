@@ -3,7 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
-summary: "Authorization determines what an authenticated user may do, evaluating the ClaimsPrincipal via role-based, claims-based, or policy-based models."
+summary: "Deciding what an authenticated user may do via roles, claims, or policies."
 level:
   - "1"
 priority: Medium

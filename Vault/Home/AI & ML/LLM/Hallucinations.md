@@ -3,7 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
-summary: "A correctness failure where an LLM produces fluent, confident output unsupported by evidence, because it optimizes next-token likelihood, not truth."
+summary: "An LLM producing fluent, confident output unsupported by evidence, because it optimizes likelihood, not truth."
 level:
   - "3"
 priority: Medium

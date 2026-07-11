@@ -3,7 +3,7 @@ topic:
   - Networks
 subtopic:
   - Protocols
-summary: "REST is an architectural style centered on resources identified by URIs and manipulated through representations over stateless client-server HTTP interactions."
+summary: "An architectural style for resources identified by URIs and manipulated over stateless HTTP."
 level:
   - "3"
 priority: High

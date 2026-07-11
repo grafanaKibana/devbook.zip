@@ -3,7 +3,7 @@ topic:
   - Development Practices
 subtopic:
   - Principles
-summary: "Prefer the simplest solution that meets the actual requirements — fewer moving parts, fewer hidden assumptions, clear failure modes."
+summary: "Prefer the simplest solution that meets the actual requirements."
 level:
   - "4"
 priority: High

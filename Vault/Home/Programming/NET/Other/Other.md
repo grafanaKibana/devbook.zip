@@ -3,7 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
-summary: "Ecosystem .NET topics that don't fit language/runtime buckets, such as legacy OWIN hosting and SignalR real-time communication."
+summary: "Ecosystem .NET topics outside language and runtime, like OWIN hosting and SignalR."
 tags:
   - FolderNote
 publish: true

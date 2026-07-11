@@ -3,7 +3,7 @@ topic:
   - Cloud
 subtopic:
   - Azure
-summary: "Azure is Microsoft's public cloud, the natural home for .NET/AI workloads integrating with Microsoft identity and the AI ecosystem."
+summary: "Microsoft's public cloud, a natural home for .NET and AI workloads."
 level:
   - "3"
 priority: Medium
@@ -94,16 +94,6 @@ Managed labeling workflows within Azure Machine Learning. Supports image classif
 Built-in evaluation runs and tracing in Azure AI Foundry. Evaluators: groundedness, relevance, coherence, fluency, safety. Tracing: OpenTelemetry-compatible traces for every LLM call.
 
 **When to reach for it**: Before deploying any AI feature to production (offline evaluation), and continuously in production (online monitoring for drift and safety regressions).
-
-## Cross-Provider Comparison
-
-| Service | Azure | AWS Equivalent | GCP Equivalent |
-|---------|-------|----------------|----------------|
-| Serverless compute | Azure Functions | AWS Lambda | Cloud Functions |
-| Object storage | Azure Blob Storage | S3 | Cloud Storage |
-| NoSQL document DB | Cosmos DB | DynamoDB | Firestore |
-| Managed ML platform | Azure ML | SageMaker | Vertex AI |
-| LLM API | Azure OpenAI | Amazon Bedrock | Vertex AI Gemini |
 
 ## References
 

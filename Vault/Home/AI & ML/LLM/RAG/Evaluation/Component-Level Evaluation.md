@@ -3,7 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
-summary: "Ablation isolates whether chunking, embedding, or the ANN index caused a retrieval-metric change by varying one component while holding the rest constant."
+summary: "Ablation varies one component at a time to isolate what caused a retrieval-metric change."
 level:
   - "2"
 priority: High

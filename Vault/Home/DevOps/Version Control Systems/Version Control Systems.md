@@ -3,7 +3,7 @@ topic:
   - DevOps
 subtopic:
   - Version Control Systems
-summary: "A version control system tracks file changes over time, enabling collaboration, branching, merging, and reverting to any previous state."
+summary: "Tracks file changes over time, enabling collaboration, branching, merging, and reverting."
 level:
   - "4"
 priority: High

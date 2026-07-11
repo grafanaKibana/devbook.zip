@@ -3,7 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
-summary: "Concurrency keeps work progressing without blocking, while parallelism uses multiple cores to finish CPU-bound work faster."
+summary: "Keeping work progressing without blocking, and using multiple cores for CPU-bound work."
 priority: High
 status: Creation
 tags:

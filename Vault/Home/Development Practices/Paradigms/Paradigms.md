@@ -3,7 +3,7 @@ topic:
   - Development Practices
 subtopic:
   - Paradigms
-summary: "A paradigm is the mental model you adopt before writing code; this folder groups programming and testing/development paradigms."
+summary: "Mental models adopted before writing code, grouping programming and testing paradigms."
 tags:
   - FolderNote
 publish: true

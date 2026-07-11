@@ -3,7 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
-summary: "A leftist heap with the bookkeeping removed: merge swaps children unconditionally, self-adjusting for amortized O(log n) bounds."
+summary: "A leftist heap without the bookkeeping, self-adjusting for amortized O(log n) merge."
 level:
   - "4"
 priority: Medium

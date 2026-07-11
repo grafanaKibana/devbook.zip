@@ -5,6 +5,7 @@ color: "#0ea5e9"
 topic:
   - Security
 subtopic: []
+summary: "Protecting users, data, and systems: authentication, authorization, cryptography, and common vulnerability classes."
 tags:
   - FolderNote
 publish: true

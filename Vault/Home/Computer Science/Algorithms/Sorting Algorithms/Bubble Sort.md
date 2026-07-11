@@ -100,18 +100,6 @@ Bubble sort is useful as a teaching example and for understanding stability and 
 
 **Mitigation**: always include the `swapped` flag. If a full pass makes zero swaps, the array is sorted and the algorithm can stop. This is the only scenario where bubble sort has any advantage over selection sort.
 
-## Tradeoffs
-
-| Algorithm | Time (avg) | Stable | Best case | Practical use |
-|-----------|-----------|--------|-----------|--------------|
-| Bubble sort | O(n²) | Yes | O(n) with early-exit | Teaching only |
-| Insertion sort | O(n²) | Yes | O(n) | Small arrays, nearly-sorted data, hybrid sort base case |
-| Selection sort | O(n²) | No | O(n²) | When writes are expensive |
-| Array.Sort (introsort) | O(n log n) | No | O(n log n) | General-purpose production sorting |
-
-**Decision rule**: never use bubble sort in production. Insertion sort is strictly better for small arrays (same stability, better constant factors). For general-purpose sorting, use `Array.Sort`.
-
-
 ## Questions
 
 > [!QUESTION]- Why is bubble sort never used in production?

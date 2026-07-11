@@ -3,7 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: "The broad strategies for constructing a solution — the lens you choose before writing code, each with its own proof obligations."
+summary: "The broad strategies for constructing a solution, the lens you choose before writing code."
 tags:
   - FolderNote
 publish: true

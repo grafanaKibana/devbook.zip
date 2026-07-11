@@ -3,7 +3,7 @@ topic:
   - Networks
 subtopic:
   - Protocols
-summary: "HTTP is a stateless request-response protocol that carries nearly all web and API traffic in modern systems."
+summary: "A stateless request-response protocol carrying almost all web and API traffic."
 level:
   - "3"
 priority: High

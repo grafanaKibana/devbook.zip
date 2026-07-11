@@ -3,7 +3,7 @@ topic:
   - Security
 subtopic:
   - Security
-summary: "An append-only ledger where records are grouped into blocks linked by cryptographic hashes, making tampering detectable."
+summary: "An append-only ledger of blocks linked by cryptographic hashes, making tampering detectable."
 level:
   - "1"
 priority: Low

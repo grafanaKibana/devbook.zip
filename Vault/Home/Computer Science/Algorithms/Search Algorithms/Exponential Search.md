@@ -83,14 +83,6 @@ flowchart TD
 - **Integer overflow on the doubling** — `bound *= 2` on a very large array can overflow a 32-bit index and wrap negative, producing an out-of-bounds probe or an infinite loop. Cap the bound at `n` (or use a wider type) before doubling.
 - **Forgetting it is still a sorted-data algorithm** — the binary search phase inherits every [[Binary Search]] precondition. Exponential search buys you range discovery, not freedom from sorting; on unsorted input the gallop's `a[bound] < target` test is meaningless.
 
-## Tradeoffs
-
-| Choice | Exponential Search | Alternative | Decision criteria |
-| --- | --- | --- | --- |
-| vs [[Binary Search]] | `O(log i)`, no length needed | `O(log n)`, needs known `n` | Prefer exponential search when the length is unknown/unbounded or the target skews toward the front; use plain binary search when `n` is known and targets are uniform. |
-| vs [[Jump Search]] on bounded data | `O(log i)`, random access | `O(√n)`, forward stepping | Both bound a range first; exponential search is far faster when random access is `O(1)`, jump search wins only when backward seeks are expensive. |
-| vs [[Interpolation Search]] | `O(log i)`, distribution-agnostic | `O(log log n)` uniform, `O(n)` skewed | Exponential search has no distribution assumption; use interpolation only when data is provably near-uniform and you need the extra speed. |
-
 ## Questions
 
 > [!QUESTION]- Why is exponential search `O(log i)` rather than `O(log n)`?

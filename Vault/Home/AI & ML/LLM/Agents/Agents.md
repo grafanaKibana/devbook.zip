@@ -3,7 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
-summary: "Systems where an LLM controls part of the workflow — calling tools, making decisions, or directing other LLMs."
+summary: "Systems where an LLM controls part of the workflow, calling tools, making decisions, or directing other LLMs."
 tags:
   - FolderNote
 publish: true

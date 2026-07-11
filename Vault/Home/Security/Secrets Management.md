@@ -3,7 +3,7 @@ topic:
   - Security
 subtopic:
   - Security
-summary: "The discipline of keeping credentials out of source code, distributing them to workloads, and rotating them safely."
+summary: "Keeping credentials out of source code, distributing them to workloads, and rotating safely."
 level:
   - "3"
 priority: High

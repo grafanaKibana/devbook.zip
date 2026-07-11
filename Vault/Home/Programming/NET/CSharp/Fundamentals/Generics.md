@@ -3,7 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
-summary: "Type-safe, reusable code without duplicating logic per type, covering constraints, variance, generic math, and reflection over generics."
+summary: "Type-safe, reusable code without duplicating logic per type, including constraints and variance."
 level:
   - "4"
 priority: Medium

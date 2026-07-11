@@ -3,7 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - Machine Learning
-summary: "Five levels of AI involvement in a task, from fully human-driven to fully autonomous, framing how much to trust a system as confidence grows."
+summary: "Five levels of AI involvement, from fully human-driven to fully autonomous."
 level:
   - "1"
 priority: Low
@@ -60,7 +60,21 @@ The AI acts autonomously on all cases without human review. Humans monitor aggre
 | Partial Automation | Model has high precision on confident cases | Medium — errors on automated cases |
 | Full Automation | Model is mature, well-monitored, low-stakes errors | High — errors propagate at scale |
 
-**Decision rule**: start every new AI feature in Shadow Mode. Move to AI Assistance after validating accuracy on production data. Move to Partial Automation when precision on high-confidence cases is consistently above your acceptable error threshold. Move to Full Automation only when the cost of errors is low or the monitoring is robust enough to catch degradation quickly.
+**Decision rule**:
+
+```mermaid
+flowchart TD
+    A[New AI feature] --> B[Start in Shadow Mode]
+    B --> C{Accuracy validated on production data?}
+    C -->|No| B
+    C -->|Yes| D[Move to AI Assistance]
+    D --> E{Precision on confident cases above threshold?}
+    E -->|No| D
+    E -->|Yes| F[Move to Partial Automation]
+    F --> G{Error cost low or monitoring robust?}
+    G -->|No| F
+    G -->|Yes| H[Move to Full Automation]
+```
 
 ## Implementation Pattern
 

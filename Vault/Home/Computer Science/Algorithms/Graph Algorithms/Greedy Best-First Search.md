@@ -3,7 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: "Expands whichever node looks closest by heuristic h(n) alone — fast and goal-seeking, but neither optimal nor complete."
+summary: "Expands whichever node looks closest by heuristic h(n) alone; fast but neither optimal nor complete."
 level:
   - "4"
 priority: Medium
@@ -97,8 +97,6 @@ flowchart TD
 
 | Choice | Greedy Best-First | Alternative | Decision criteria |
 | --- | --- | --- | --- |
-| vs [[A-Start Search\|A* Search]] | Ranks by `h`, fast, suboptimal, incomplete | Ranks by `g + h`, optimal with admissible `h` | Use GBFS only when any valid path is fine; use A* whenever total path cost matters — the `g` term is cheap insurance. |
-| vs [[Dijkstra]] | Goal-directed, ignores accumulated cost | Ignores the goal, ranks by `g`, optimal | GBFS and Dijkstra are the two extremes; pick GBFS for raw speed toward a known goal, Dijkstra for correctness or all-pairs with no heuristic. |
 | Map geometry | Great on open maps, thrashes on concave obstacles | A* handles concave geometry correctly | On maps with pockets or mazes, the greedy pull backfires — switch to a cost-aware search. |
 
 Consistent with the [[A-Start Search|A* Search]] and [[Dijkstra]] tradeoff tables: GBFS is the pure-`h` end, Dijkstra the pure-`g` end, and A* the tunable blend. Weighted A* with a large weight `ε` behaves *almost* like GBFS while still tracking `g`, which is usually the better way to buy speed without fully surrendering optimality.

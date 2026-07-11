@@ -3,7 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
-summary: "Heap-like structures share a partial-order root-peek contract and diverge on meld and decreaseKey, trading array locality for pointer-based merging."
+summary: "Priority-queue structures with an O(1) root peek, differing on meld and decreaseKey."
 tags:
   - FolderNote
 level:
@@ -38,11 +38,16 @@ return FolderStructureMap;
 
 **When each wins:**
 
-- **Binary/d-ary [[Heap]]** — the default. No meld needed → nothing else comes close on constants. This is what you actually ship.
-- **[[Leftist Heaps]]** — meld with *worst-case* O(log n) in ~30 lines; the natural persistent/functional mergeable heap.
-- **[[Skew Heaps]]** — leftist minus the stored metadata; smallest correct mergeable heap when amortized bounds suffice.
-- **[[Binomial Queues]]** — meld as binary addition; the structured forest that Fibonacci heaps lazify. Mostly a stepping stone.
-- **[[Fibonacci Heaps]]** — O(1) amortized decreaseKey and meld; the tool for proving bounds (Dijkstra in O(m + n log n)), rarely for running code.
+```mermaid
+flowchart TD
+    A{What do you need?} -->|No meld, best constants, ship this| B[Binary or d-ary Heap]
+    A -->|Meld with worst-case O log n, persistent friendly| C[Leftist Heaps]
+    A -->|Smallest mergeable heap, amortized bounds ok| D[Skew Heaps]
+    A -->|Structured mergeable forest, stepping stone| E[Binomial Queues]
+    A -->|O 1 amortized decreaseKey and meld, proving bounds| F[Fibonacci Heaps]
+```
+
+The [[Heap|binary or d-ary heap]] is what you actually ship: no meld needed, so nothing else comes close on constants. [[Leftist Heaps]] give worst-case O(log n) meld in ~30 lines and are the natural persistent mergeable heap; [[Skew Heaps]] are the same idea minus the stored metadata when amortized bounds suffice. [[Binomial Queues]] meld as binary addition and are mostly a stepping stone to [[Fibonacci Heaps]], whose O(1) amortized decreaseKey and meld prove bounds like Dijkstra in O(m + n log n) but rarely win in running code.
 
 ## References
 

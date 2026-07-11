@@ -3,7 +3,7 @@ topic:
   - Networks
 subtopic:
   - Architecture & Ops
-summary: "A network architecture where peers communicate directly as both client and server, avoiding a central bottleneck or single point of failure."
+summary: "An architecture where peers act as both client and server, avoiding a central bottleneck."
 level:
   - "1"
 priority: Medium

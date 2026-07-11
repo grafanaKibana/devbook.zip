@@ -3,7 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Application Architecture
-summary: "How a codebase is shaped — layers, modules, and interaction patterns — and where responsibilities live, affecting testability and change speed."
+summary: "How a codebase is shaped into layers and modules, and where responsibilities live."
 tags:
   - FolderNote
 publish: true

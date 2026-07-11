@@ -3,7 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Patterns
-summary: "Behavioral patterns assign responsibilities and coordinate communication between objects, composing behaviors without tightly coupling senders, algorithms, or event producers to their counterparts."
+summary: "Behavioral patterns assign responsibilities and coordinate communication between objects without tightly coupling them."
 tags:
   - FolderNote
 level:

@@ -3,7 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - Tooling
-summary: "The practical layer that turns LLMs into day-to-day engineering leverage — coding agents, review agents, and IDE extensions, plus the shared control surfaces of skills, plugins, hooks, and instructions."
+summary: "The layer that turns LLMs into engineering leverage: coding agents, review agents, and IDE extensions."
 tags:
   - FolderNote
 publish: true

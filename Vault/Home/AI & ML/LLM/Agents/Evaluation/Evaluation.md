@@ -3,7 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
-summary: "Agent evaluation measures outcome and process separately over a trajectory, since the same task can succeed or fail by many paths."
+summary: "Measures outcome and process separately over a trajectory, since a task can fail by many paths."
 level:
   - "3"
 priority: High

@@ -3,7 +3,7 @@ topic:
   - Development Practices
 subtopic:
   - Paradigms
-summary: "A unit test verifies a small, isolated piece of behaviour quickly and deterministically, with dependencies replaced by test doubles."
+summary: "Verifies a small, isolated piece of behaviour quickly and deterministically."
 level:
   - "4"
 priority: High

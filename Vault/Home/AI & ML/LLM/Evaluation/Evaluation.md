@@ -3,7 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
-summary: "Measuring whether an LLM app does the right thing via a layered stack of deterministic checks, judges, regression sets, and production signals."
+summary: "Measuring whether an LLM app does the right thing with layered checks, judges, and production signals."
 tags:
   - FolderNote
 publish: true

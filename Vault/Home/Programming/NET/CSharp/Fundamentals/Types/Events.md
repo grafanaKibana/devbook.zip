@@ -3,7 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
-summary: "An event is a restricted delegate member implementing publisher-subscriber communication, letting consumers only subscribe and unsubscribe."
+summary: "A restricted delegate member implementing publisher and subscriber communication."
 level:
   - "4"
 priority: Medium

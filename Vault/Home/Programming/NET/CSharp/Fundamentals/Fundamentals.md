@@ -3,7 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
-summary: "C# fundamentals — the type system, methods, generics, exceptions, namespaces, iteration, and reflection that underpin every .NET codebase."
+summary: "Core C# building blocks: types, methods, generics, exceptions, namespaces, iteration, and reflection."
 tags:
   - FolderNote
 publish: true

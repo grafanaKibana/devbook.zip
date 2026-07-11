@@ -3,7 +3,7 @@ topic:
   - Networks
 subtopic:
   - Protocols
-summary: "The agreed-upon rules that let machines communicate, with each stack layer's protocols and how to debug broken contracts."
+summary: "The agreed rules that let machines communicate, with each layer's protocols and debugging."
 tags:
   - FolderNote
 publish: true

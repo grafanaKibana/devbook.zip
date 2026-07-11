@@ -3,7 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - Tooling
-summary: "Reusable instruction packages that make a coding agent behave with specialized domain expertise, loaded at session start or on demand."
+summary: "Reusable instruction packages that give a coding agent specialized domain expertise on demand."
 publish: true
 status: Done
 level:

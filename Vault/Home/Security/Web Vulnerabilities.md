@@ -3,7 +3,7 @@ topic:
   - Security
 subtopic:
   - Security
-summary: "How SQL Injection, XSS, and CSRF work and the .NET defenses that eliminate each class of attack."
+summary: "How SQL Injection, XSS, and CSRF work and the .NET defenses against each."
 level:
   - "4"
 priority: High

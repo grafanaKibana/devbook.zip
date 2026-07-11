@@ -3,7 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: "Runs forward and backward searches that meet in the middle, cutting an O(b^d) search to two O(b^(d/2)) halves on point-to-point queries."
+summary: "Runs forward and backward searches that meet in the middle, cutting O(b^d) to two O(b^(d/2)) halves."
 level:
   - "4"
 priority: Medium
@@ -99,8 +99,6 @@ flowchart TD
 
 | Choice | Bidirectional | Unidirectional | Decision criteria |
 | --- | --- | --- | --- |
-| vs [[DFS BFS\|BFS]] | `O(b^(d/2))` time and space | `O(b^d)` | Use bidirectional for point-to-point queries with a known target and high branching; plain BFS when the graph is small or the target isn't a concrete node. |
-| vs [[A-Start Search\|A* Search]] | Bidirectional A* roughly square-roots the explored region | A* with a good heuristic | Bidirectional wins on large graphs with reversible edges; a single strong heuristic and forward-only A* is simpler when the graph can't be reversed or the heuristic already prunes hard. |
 | Heuristic design | Front-to-front: accurate, expensive | Front-to-back: cheap, weaker | Front-to-back is the default; front-to-front only pays off when its sharper focus outweighs the many extra pairwise heuristic evaluations. |
 | Cost model | Bidirectional [[Dijkstra]] for weighted graphs | Bidirectional BFS for unweighted | Use the weighted variant when edge costs differ; the termination test generalizes from frontier depth to frontier minimum `f`. |
 

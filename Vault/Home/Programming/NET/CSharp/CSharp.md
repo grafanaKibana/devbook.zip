@@ -3,7 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
-summary: "C# is a statically typed, multi-paradigm language for .NET, pairing OOP with functional features, compile-time type safety, and first-class async."
+summary: "Statically typed, multi-paradigm .NET language pairing OOP, functional features, and first-class async."
 tags:
   - FolderNote
 publish: true

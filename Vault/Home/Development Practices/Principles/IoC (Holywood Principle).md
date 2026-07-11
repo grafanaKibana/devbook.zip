@@ -3,7 +3,7 @@ topic:
   - Development Practices
 subtopic:
   - Principles
-summary: "The flow of control is inverted so a framework, not your code, creates and wires dependencies — don't call us, we'll call you."
+summary: "Control is inverted so a framework, not your code, creates and wires dependencies."
 level:
   - "4"
 priority: High

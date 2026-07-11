@@ -3,7 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: "A search paradigm for optimisation that prunes any branch whose optimistic bound provably cannot beat the best solution found so far."
+summary: "A search paradigm for optimisation that prunes any branch whose optimistic bound cannot beat the best solution so far."
 level:
   - "4"
 priority: Medium
@@ -112,9 +112,7 @@ flowchart TD
 
 | Choice | Branch-and-bound | Alternative | Decision criteria |
 | --- | --- | --- | --- |
-| vs [[Backtracking]] | Prunes feasible-but-suboptimal branches via a bound | Prunes only infeasible branches (constraint violation) | Use B&B when there is an objective to optimise; plain backtracking when you just need any valid configuration. |
 | Node selection | Best-first (fewest expansions, `O(2^n)` memory) | Depth-first (`O(depth)` memory, weaker pruning) | Best-first when memory is ample and a tight bound exists; depth-first when memory is the binding constraint. |
-| vs [[Dynamic Programming]] | Exact, exponential, prunes via bounds | Exact, polynomial *if* overlapping subproblems | If the problem has optimal substructure with overlapping subproblems, DP is polynomial and wins; B&B is for optimisation with no such structure (TSP, general ILP). |
 | Exact vs approximate | Proven optimum, unbounded time | Greedy / LP-rounding heuristic, fast, no guarantee | Use B&B when optimality must be certified; switch to a heuristic when the instance is too large to solve exactly in the time budget. |
 
 ## Questions

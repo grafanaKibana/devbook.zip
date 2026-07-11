@@ -5,6 +5,7 @@ color: "#a855f7"
 topic:
   - SDLC
 subtopic: []
+summary: "The phases and process models that carry a feature from idea to production."
 tags:
   - FolderNote
 publish: true

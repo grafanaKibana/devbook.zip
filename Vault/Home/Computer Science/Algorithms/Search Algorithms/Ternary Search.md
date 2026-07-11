@@ -3,7 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: "Splits a range in thirds with two probes to find the extremum of a unimodal function, discarding a third each step."
+summary: "Finds the extremum of a unimodal function by splitting the range in thirds each step."
 level:
   - "4"
 priority: Medium
@@ -80,7 +80,6 @@ flowchart TD
 
 | Choice | Ternary Search | Alternative | Decision criteria |
 | --- | --- | --- | --- |
-| vs [[Binary Search]] on sorted data | `O(log n)`, `2·log₃ n` comparisons, monotone or unimodal | `O(log n)`, `log₂ n` comparisons, monotone only | Always prefer binary search for array lookups; use ternary only when the target is a unimodal *extremum*, not an ordered value. |
 | vs golden-section search | 2 function evaluations per step | 1 reused evaluation per step | When `f` is costly, golden-section halves evaluations for the same convergence; ternary is fine when `f` is a cheap array index. |
 | Continuous vs integer form | loop to `eps`, return midpoint | loop to width 3, scan the rest | Use the continuous form for real-valued domains; switch to integer form and a final linear scan when the domain is discrete to dodge rounding traps. |
 

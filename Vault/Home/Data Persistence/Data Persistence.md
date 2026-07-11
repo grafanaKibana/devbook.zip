@@ -5,6 +5,7 @@ color: "#f97316"
 topic:
   - Data Persistence
 subtopic: []
+summary: "How software stores and protects state across restarts using SQL, NoSQL, and caching."
 tags:
   - FolderNote
 publish: true

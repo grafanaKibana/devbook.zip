@@ -3,7 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
-summary: "Re-ranking is a second-stage pass that reorders retrieval candidates with a more accurate model to boost precision before generation."
+summary: "A second-stage pass that reorders retrieval candidates with a more accurate model to boost precision."
 level:
   - "2"
 priority: High

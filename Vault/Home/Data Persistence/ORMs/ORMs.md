@@ -3,7 +3,7 @@ topic:
   - Data Persistence
 subtopic:
   - ORMs
-summary: "Object-Relational Mappers translate object graphs and LINQ into SQL so developers work with domain models, but the leaky abstraction must be understood."
+summary: "Mappers that translate object graphs and LINQ into SQL, a leaky abstraction to understand."
 tags:
   - FolderNote
 publish: true

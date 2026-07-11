@@ -3,7 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
-summary: "ASP.NET Core runs each HTTP request through a middleware pipeline, then dispatches it to a Minimal API handler or controller action."
+summary: "How ASP.NET Core routes each HTTP request through middleware to handlers or controllers."
 level:
   - "4"
 priority: High

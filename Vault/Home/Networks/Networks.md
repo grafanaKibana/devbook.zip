@@ -5,6 +5,7 @@ color: "#f59e0b"
 topic:
   - Networks
 subtopic: []
+summary: "Protocols, latency, and reliability of how machines communicate over a network."
 tags:
   - FolderNote
 publish: true

@@ -3,7 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: "Techniques to find target values in arrays, graphs, or text, chosen by data ordering, shape, and worst-case versus average-speed needs."
+summary: "Techniques to find target values in arrays, graphs, or text, chosen by data ordering and shape."
 tags:
   - FolderNote
 publish: true

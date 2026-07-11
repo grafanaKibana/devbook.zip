@@ -3,7 +3,7 @@ topic:
   - Networks
 subtopic:
   - Protocols
-summary: "gRPC is a remote procedure call framework running over HTTP/2 that uses Protocol Buffers for fast, contract-first binary messaging."
+summary: "A contract-first RPC framework over HTTP/2 using Protocol Buffers for fast binary messaging."
 level:
   - "3"
 priority: High

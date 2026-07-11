@@ -3,7 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
-summary: "Measuring an LLM app on real production traffic; A/B tests compare variants to capture distribution shifts offline sets miss."
+summary: "Measuring an LLM app on live traffic; A/B tests catch shifts offline sets miss."
 level:
   - "3"
 priority: Medium

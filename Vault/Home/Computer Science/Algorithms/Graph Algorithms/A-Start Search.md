@@ -3,7 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: "Best-first shortest-path search ordering its frontier by f(n) = g(n) + h(n), settling far fewer nodes than uninformed search when the heuristic is admissible."
+summary: "Best-first shortest-path search ordering its frontier by f(n) = g(n) + h(n), optimal when the heuristic is admissible."
 level:
   - "4"
 priority: High
@@ -100,10 +100,7 @@ flowchart TD
 
 | Choice | Option A | Option B | Decision criteria |
 | --- | --- | --- | --- |
-| Heuristic strength | A* with informed `h` explores near-`O(E)` on good heuristics | [[Dijkstra]] `O((V+E) log V)`, `h ≡ 0` | Use A* when a cheap admissible estimate to a single goal exists; use Dijkstra for all-pairs, multi-target, or when no heuristic is meaningful. |
 | Optimality vs speed | Plain A* returns the optimal path | Weighted A* with `f = g + ε·h`, `ε > 1` | Weighted A* expands far fewer nodes and stays within a factor `ε` of optimal; use it when a slightly longer path is acceptable and latency matters (real-time games). |
-| Goal targeting | A* ranks by `g + h` | [[Greedy Best-First Search]] ranks by `h` alone | Greedy is faster but neither optimal nor complete; use it only when any valid path suffices and you can tolerate detours around concave obstacles. |
-| Wide branching | Unidirectional A* | [[Bidirectional Search]] A* | Bidirectional roughly square-roots the frontier size for point-to-point queries on large maps, at the cost of a reversible graph and a subtle meeting condition. |
 
 Weighted A* is the pressure valve between these rows: scaling `h` by `ε > 1` trades a bounded amount of optimality (the returned path costs at most `ε` times the optimum) for a dramatic cut in expanded nodes. Setting `ε = 1` recovers exact A*; letting `ε → ∞` approaches greedy behavior.
 

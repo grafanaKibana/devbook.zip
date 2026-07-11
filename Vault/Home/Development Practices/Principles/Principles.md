@@ -3,7 +3,7 @@ topic:
   - Development Practices
 subtopic:
   - Principles
-summary: "Design heuristics like SOLID, DRY, KISS, and YAGNI that keep systems understandable as they grow, balancing purity against real constraints."
+summary: "Design heuristics like SOLID, DRY, KISS, and YAGNI that keep systems understandable."
 tags:
   - FolderNote
 publish: true

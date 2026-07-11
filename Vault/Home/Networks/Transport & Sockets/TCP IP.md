@@ -3,7 +3,7 @@ topic:
   - Networks
 subtopic:
   - Transport & Sockets
-summary: "TCP/IP is the internet's foundational protocol suite: IP handles addressing and routing, TCP adds reliable ordered delivery."
+summary: "The internet's core protocol suite: IP handles addressing, TCP adds reliable delivery."
 level:
   - "3"
 priority: Medium

@@ -3,7 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - Machine Learning
-summary: "Classification evaluation quantifies whether a model assigns the right label: measuring false alarms versus misses, picking an operating point, and preventing regressions."
+summary: "Measuring whether a model assigns the right label: false alarms versus misses at a chosen threshold."
 level:
   - "3"
 priority: Medium

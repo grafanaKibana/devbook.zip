@@ -3,7 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Distributed Systems
-summary: "Scalability is a system's ability to keep serving requests as load grows by adding resources without a proportional drop in reliability or latency."
+summary: "A system's ability to keep serving requests as load grows by adding resources."
 level:
   - "2"
 priority: High

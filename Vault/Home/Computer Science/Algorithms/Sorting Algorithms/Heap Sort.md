@@ -101,16 +101,6 @@ For general in-memory sorting, `Array.Sort` (introsort) is the right default; he
 - **Building the heap the slow way** — inserting elements one at a time is O(n log n); the bottom-up heapify above is O(n). Using the slow build wastes the algorithm's one structural advantage.
 - **Index errors in sift-down** — off-by-one in the child indices or the `size` bound (which shrinks each round) silently corrupts the result; the `l < size`/`r < size` guards are essential.
 
-## Tradeoffs
-
-| Algorithm | Time (worst) | Space | Stable | Cache | Use when |
-|-----------|-------------|-------|--------|-------|----------|
-| **Heap sort** | O(n log n) | O(1) | No | Poor | Worst-case guarantee + in-place both required |
-| Quick sort (introsort) | O(n log n) (introsort) | O(log n) | No | Excellent | General-purpose; fastest in practice |
-| Merge sort | O(n log n) | O(n) | Yes | Good | Stability required; linked lists; external sort |
-
-**Decision rule**: choose heap sort when you specifically need **guaranteed O(n log n) and O(1) space**. Otherwise use `Array.Sort` (introsort), which already *contains* heap sort as its worst-case shield while getting quicksort's cache-friendly average case.
-
 ## Questions
 
 > [!QUESTION]- Why does introsort use heap sort as a fallback instead of just using quicksort?

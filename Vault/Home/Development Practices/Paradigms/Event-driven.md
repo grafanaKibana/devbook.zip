@@ -3,7 +3,7 @@ topic:
   - Development Practices
 subtopic:
   - Paradigms
-summary: "Event-driven systems are built around immutable events and reactions to them, decoupling producers from consumers."
+summary: "Systems built around immutable events and reactions, decoupling producers from consumers."
 level:
   - "3"
 priority: Medium

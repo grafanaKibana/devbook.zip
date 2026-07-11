@@ -2,7 +2,7 @@
 topic:
   - DevOps
 subtopic: []
-summary: "Kubernetes orchestrates containers by continuously reconciling reality to a declared desired state, automating deployment, scaling, and self-healing."
+summary: "Orchestrates containers by reconciling reality to a declared desired state."
 level:
   - "2"
 priority: High

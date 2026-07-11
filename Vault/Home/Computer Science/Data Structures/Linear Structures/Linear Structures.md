@@ -3,7 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
-summary: "Structures that store elements in a sequence, defined by access order and position rather than one memory layout."
+summary: "Sequence structures like arrays, lists, stacks, queues, and buffers, defined by access order."
 tags:
   - FolderNote
 level:
@@ -43,11 +43,18 @@ Every structure in this folder is an answer to two questions: *where can you tou
 
 Start from the access pattern, not the structure:
 
-- **Random access or "just a sequence"** → `List<T>`, always the default. Drop to a raw `T[]` when the size is fixed and known; wrap either in [[Span]] to slice without copying.
-- **Only ever one end** → [[Stack]] (backtracking, undo, DFS) or [[Queue]] (fairness, BFS, pipelines). The restriction is the feature — it states intent and can't be violated by a stray `Insert(0, …)`.
-- **Both ends** → [[Deque]]; .NET makes you bring your own (ring buffer preferred over `LinkedList<T>`).
-- **Fixed capacity, zero steady-state allocation** → [[Circular Buffer]] — streaming, "last N events", the engine inside bounded queues.
-- **Many edits around positions you already hold** → [[LinkedList]], the only case it wins; everywhere else its per-node allocations and pointer-chasing lose to contiguous storage (the numbers are in [[Arrays]]).
+```mermaid
+flowchart TD
+    A{Access pattern?} -->|Random access or just a sequence| B[List of T, raw array if fixed size]
+    A -->|Only ever one end| C{Which discipline?}
+    C -->|LIFO: backtracking, undo, DFS| C1[Stack]
+    C -->|FIFO: fairness, BFS, pipelines| C2[Queue]
+    A -->|Both ends| D[Deque]
+    A -->|Fixed capacity, zero steady-state allocation| E[Circular Buffer]
+    A -->|Many edits at positions you already hold| F[LinkedList]
+```
+
+Wrap any contiguous sequence in [[Span]] to slice without copying. [[Stack]] and [[Queue]] make the restriction the feature: it states intent and can't be violated by a stray `Insert(0, …)`. .NET ships no [[Deque]] (bring a ring buffer, preferred over `LinkedList<T>`); [[Circular Buffer]] suits streaming and "last N events". [[LinkedList]] only wins for edits at held positions, and everywhere else its per-node allocations and pointer-chasing lose to contiguous storage (the numbers are in [[Arrays]]).
 
 The recurring theme: contiguous beats linked unless you can prove otherwise with a profiler. Cache locality is the dominant constant factor, and every "O(1) insert" claim for linked nodes quietly assumes you already found the node.
 

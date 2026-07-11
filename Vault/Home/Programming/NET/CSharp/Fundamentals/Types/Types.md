@@ -3,7 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
-summary: "A C# type defines shape, behavior, and assignment semantics, with value-vs-reference semantics driving correctness, allocations, and API design."
+summary: "How C# types define shape, behavior, and value versus reference assignment semantics."
 tags:
   - FolderNote
 publish: true

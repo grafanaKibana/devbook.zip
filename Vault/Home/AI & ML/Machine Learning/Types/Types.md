@@ -3,7 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - Machine Learning
-summary: "Machine learning types describe how a model learns from data and feedback; the choice drives data, training, evaluation, and operational complexity."
+summary: "How a model learns from data and feedback; the choice drives data, training, and evaluation."
 tags:
   - FolderNote
 publish: true
@@ -104,15 +104,21 @@ Train an agent to choose actions that maximize long-term reward through interact
 
 ## Decision Rule
 
-**Start with supervised learning** if you have reliable labels and an explicit prediction target. It is the simplest to evaluate, debug, and operate.
+```mermaid
+flowchart TD
+    A{Do you have reliable labels?} -->|Yes| B{Genuinely sequential, delayed-reward task?}
+    A -->|No| C{Abundant unlabeled data?}
+    B -->|Yes| D[Reinforcement learning]
+    B -->|No| E[Supervised learning]
+    C -->|No| F[Collect data or use rules]
+    C -->|Yes| G{Any labels available at all?}
+    G -->|No| H[Unsupervised learning]
+    G -->|A few, scarce| I{Language or vision task?}
+    I -->|Yes| J[Self-supervised: pretrain then fine-tune]
+    I -->|No| K[Semi-supervised: supervised baseline first]
+```
 
-**Use unsupervised learning** when you have no labels and need to explore structure, detect anomalies, or reduce dimensionality before a supervised task.
-
-**Use self-supervised learning** when you have abundant unlabeled data and scarce labels, especially for language or vision tasks. Pretrain on unlabeled data, fine-tune on labeled data.
-
-**Use semi-supervised learning** when labeling is expensive but you have a clear target variable and abundant unlabeled data. Start with a supervised baseline first — if it already meets your quality bar, stop there.
-
-**Use reinforcement learning** only when the problem is genuinely sequential and delayed-reward. If a one-step supervised model can solve it, use that instead. RL adds reward design complexity, exploration risk, and operational overhead that is rarely justified for single-step decisions.
+Start with supervised learning whenever you have reliable labels and an explicit target; it is the simplest to evaluate, debug, and operate. Drop to unsupervised when there are no labels, self-supervised when unlabeled data is abundant but labels are scarce (especially language and vision), and semi-supervised when labeling is expensive but a clear target exists. Reserve reinforcement learning for genuinely sequential, delayed-reward problems, since it adds reward design complexity, exploration risk, and operational overhead rarely justified for single-step decisions.
 
 ## References
 

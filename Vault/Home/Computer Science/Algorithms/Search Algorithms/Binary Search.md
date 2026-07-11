@@ -3,7 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: "Finds a target in a sorted array by repeatedly halving the search range, giving logarithmic O(log n) time."
+summary: "Finds a target in a sorted array by repeatedly halving the search range, in O(log n)."
 level:
   - "4"
 priority: Medium
@@ -83,14 +83,6 @@ flowchart TD
 - **Unsorted input** — binary search relies on monotonic ordering; on unsorted data the half-split decision is meaningless and it returns false negatives. Sort first (amortize the cost over many searches) or use a different strategy.
 - **Off-by-one boundaries** — inconsistent loop condition and boundary updates produce infinite loops or skipped elements. Keep them paired: `left <= right` with `left = mid + 1` / `right = mid - 1`.
 - **Duplicates** — plain binary search returns *any* match. Finding the first or last occurrence needs a lower-/upper-bound variant that keeps searching after a hit.
-
-## Tradeoffs
-
-| Choice | Binary Search | Alternative | Decision criteria |
-| --- | --- | --- | --- |
-| vs [[Linear Search]] | O(log n), needs sorted data | O(n), works on any order | Use binary search when data is already sorted or searched repeatedly; linear search for tiny or one-shot unsorted data. |
-| vs hash lookup ([[HashMap]]) | O(log n), in-place, supports range queries | O(1) average, extra memory, point lookups only | Use a hash when you only need exact-match point lookups; binary search when you also need ordering, ranges, or no extra memory. |
-| sort-then-search vs scan | Pays O(n log n) sort once | No preprocessing | Sort-and-search wins when many queries amortize the sort; a single query over unsorted data does not justify sorting. |
 
 ## Questions
 

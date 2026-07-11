@@ -3,7 +3,7 @@ topic:
   - Networks
 subtopic:
   - Protocols
-summary: "HTTP/2 multiplexes many request/response pairs over a single TCP connection, eliminating HTTP/1.1's head-of-line blocking and connection overhead."
+summary: "Multiplexes many requests over one TCP connection, removing HTTP/1.1 head-of-line blocking."
 level:
   - "3"
 priority: Medium

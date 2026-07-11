@@ -3,7 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
-summary: "Runtime metadata inspection and dynamic member access via System.Reflection, trading compile-time guarantees for runtime flexibility."
+summary: "Runtime metadata inspection and dynamic member access via System.Reflection."
 level:
   - "4"
 priority: Medium

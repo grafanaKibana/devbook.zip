@@ -3,7 +3,7 @@ topic:
   - Security
 subtopic:
   - Authentication
-summary: "Checks whether a user may act on a specific resource instance ('can this user edit this document?'), not just a resource type."
+summary: "Checks whether a user may act on a specific resource instance, not just a type."
 level:
   - "3"
 priority: High

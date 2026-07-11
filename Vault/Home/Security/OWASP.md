@@ -3,7 +3,7 @@ topic:
   - Security
 subtopic:
   - Security
-summary: "The non-profit behind the OWASP Top 10, the baseline ranked checklist of the most critical web application security risks."
+summary: "The non-profit behind the OWASP Top 10 web security risk checklist."
 level:
   - "4"
 priority: High

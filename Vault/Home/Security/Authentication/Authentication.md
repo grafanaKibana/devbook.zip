@@ -3,7 +3,7 @@ topic:
   - Security
 subtopic:
   - Authentication
-summary: "How a system proves who a user or service is — covering password storage, MFA, sessions, OAuth/OIDC, and secure failure handling."
+summary: "How a system proves who a user or service is, from passwords to OAuth/OIDC."
 tags:
   - FolderNote
 publish: true

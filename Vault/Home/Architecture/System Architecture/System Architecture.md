@@ -3,7 +3,7 @@ topic:
   - Architecture
 subtopic:
   - System Architecture
-summary: "High-level styles for organizing systems — monolith, microservices, serverless, SOA — each with predictable strengths and failure modes chosen by constraints."
+summary: "High-level styles for organizing systems (monolith, microservices, serverless, SOA), each with predictable strengths and failure modes."
 tags:
   - FolderNote
 publish: true

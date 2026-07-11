@@ -3,7 +3,7 @@ topic:
   - Data Persistence
 subtopic:
   - NoSQL
-summary: "NoSQL is an umbrella for non-relational data stores that trade the relational model for scalability, flexible schemas, or specialized access patterns."
+summary: "Non-relational stores trading the relational model for scalability, flexible schemas, or specialized access."
 level:
   - "3"
 status: Done

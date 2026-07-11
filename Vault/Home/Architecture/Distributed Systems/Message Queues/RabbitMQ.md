@@ -203,18 +203,6 @@ public sealed record Order(string OrderId, string CustomerId, decimal Amount);
 - Better safety and failover behavior than classic mirrored queues.
 - Recommended replacement for mirrored classic queues in production designs.
 
-## RabbitMQ vs Kafka
-
-| Dimension | RabbitMQ | [[Kafka]] |
-| --- | --- | --- |
-| Model | Queue broker with exchanges and bindings | Partitioned append-only log |
-| Ordering | Per queue/consumer semantics; strict global ordering is hard | Strong ordering within partition |
-| Replay | Not a core design goal | Native replay by offset |
-| Consumer groups | Competing consumers per queue | Native group coordination and offset commits |
-| Throughput | Strong low-latency messaging, typically lower peak throughput than Kafka | Very high throughput streaming |
-| Routing flexibility | Rich routing (direct/fanout/topic/headers) | Simpler topic/partition routing |
-| Operational complexity | Easier onboarding, careful tuning still required | Heavier ops footprint but strong stream ecosystem |
-
 ## Pitfalls
 
 ### 1) Unbounded queues without TTL and length limits

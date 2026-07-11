@@ -96,7 +96,6 @@ flowchart TD
 | Choice | LSD Radix | MSD Radix | Decision criteria |
 | --- | --- | --- | --- |
 | direction | least digit first, one stable pass each | most digit first, recursive buckets | LSD for fixed-width keys and simplicity; MSD for variable-length keys or early termination on unique prefixes. |
-| vs comparison sort ([[Quick Sort]]) | `O(d · (n + b))`, integer keys | `O(n log n)`, any comparable key | Radix when keys are fixed-width integers or strings and `n` is large; comparison sort for general or long keys. |
 | base `b` | large `b`: fewer passes, bigger counters | small `b`: more passes, tiny counters | Pick `b` so the `count` table fits in cache; `b = 256` (byte-wise) is a common four-pass choice for 32-bit keys. |
 
 ## Questions

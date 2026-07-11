@@ -3,7 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - Tooling
-summary: "Project-level configuration files that tell AI coding agents how a specific repository works: its conventions, architecture, tools, and domain language."
+summary: "Project-level config files telling AI coding agents how a specific repository works."
 publish: true
 status: Done
 level:

@@ -2,7 +2,7 @@
 topic:
   - DevOps
 subtopic: []
-summary: "IaC defines and provisions infrastructure through version-controlled definition files, making environments reviewable, repeatable, and auditable like application code."
+summary: "Provisioning infrastructure through version-controlled files, making environments repeatable and auditable."
 level:
   - "3"
 priority: High

@@ -3,7 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
-summary: "Parallelism finishes CPU-bound work faster by using multiple cores at once, via Parallel.ForEachAsync, PLINQ, and partitioned pipelines."
+summary: "Finishing CPU-bound work faster by using multiple cores at once."
 level:
   - "4"
 priority: High

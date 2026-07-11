@@ -5,6 +5,7 @@ color: "#eab308"
 topic:
   - Architecture
 subtopic: []
+summary: "Structuring software with clear boundaries and explicit tradeoffs so it can evolve sustainably."
 tags:
   - FolderNote
 publish: true

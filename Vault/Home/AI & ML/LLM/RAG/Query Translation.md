@@ -3,7 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
-summary: "Query translation rewrites a user question into one or more retrieval-optimized variants so phrasing mismatches with documents don't sink retrieval."
+summary: "Rewrites a user question into retrieval-optimized variants so phrasing mismatches don't sink retrieval."
 level:
   - "2"
 priority: High

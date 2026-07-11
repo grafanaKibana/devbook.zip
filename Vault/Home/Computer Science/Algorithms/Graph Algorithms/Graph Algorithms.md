@@ -3,7 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: "Algorithms to traverse, rank, and optimize the relationships that graphs model — reachability, shortest paths, connectivity, and flow."
+summary: "Algorithms to traverse, rank, and optimize graph relationships: reachability, shortest paths, connectivity, and flow."
 tags:
   - FolderNote
 publish: true

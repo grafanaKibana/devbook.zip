@@ -3,7 +3,7 @@ topic:
   - Development Practices
 subtopic:
   - Principles
-summary: "Don't build a feature or abstraction until you have a real, current need — it guards against speculative complexity."
+summary: "Don't build a feature until you have a real, current need."
 level:
   - "4"
 priority: High

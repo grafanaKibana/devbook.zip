@@ -3,7 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
-summary: "Retrieval decides what evidence enters the prompt, balancing recall, precision, and latency via vector, keyword, or hybrid search."
+summary: "Decides what evidence enters the prompt, balancing recall, precision, and latency across search methods."
 level:
   - "2"
 priority: High

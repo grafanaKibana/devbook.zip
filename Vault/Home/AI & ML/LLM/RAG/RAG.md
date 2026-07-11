@@ -3,7 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
-summary: "RAG retrieves evidence from your corpus, then generates an answer grounded in it, letting you update knowledge without retraining."
+summary: "Retrieves evidence from your corpus, then generates an answer grounded in it, no retraining needed."
 tags:
   - FolderNote
 priority: High

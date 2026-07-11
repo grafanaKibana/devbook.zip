@@ -215,18 +215,6 @@ finally
 }
 ```
 
-## Kafka vs RabbitMQ Tradeoffs
-
-| Dimension | Kafka | [[RabbitMQ]] |
-| --- | --- | --- |
-| Model | Distributed append-only log | Queue and exchange broker model |
-| Ordering | Strong ordering per partition | Queue order exists but can vary with competing consumers and requeue |
-| Replay | Native replay through offsets and retention | Replay is not a first-class primitive |
-| Routing flexibility | Simpler partition and topic model | Rich routing patterns (direct, topic, fanout, headers) |
-| Throughput | Extremely high for sequential event streams | Strong for messaging workloads but usually lower at large stream scale |
-| Latency | Excellent throughput-oriented latency | Often very low for command dispatch and request-reply |
-| Operational complexity | Higher partition and cluster tuning complexity | Simpler to start, complexity grows with topology and reliability features |
-
 ## Pitfalls
 
 ### Hot partitions from bad key design

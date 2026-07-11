@@ -109,17 +109,6 @@ Avoid naive quick sort (fixed pivot) on inputs that may be sorted or reverse-sor
 
 **Mitigation**: use three-way partitioning (Dutch National Flag algorithm) for inputs with many duplicates. It partitions into three regions: less than, equal to, and greater than the pivot, so all equal elements are placed in their final positions in one pass.
 
-## Tradeoffs
-
-| Algorithm | Time (avg) | Time (worst) | Space | Stable | Use when |
-|-----------|-----------|-------------|-------|--------|----------|
-| Quick sort (randomized) | O(n log n) | O(n²) rare | O(log n) | No | General-purpose in-memory; best cache behavior |
-| Introsort (Array.Sort) | O(n log n) | O(n log n) | O(log n) | No | Production default; guaranteed O(n log n) |
-| Merge sort | O(n log n) | O(n log n) | O(n) | Yes | Stability required; linked lists; external sort |
-| Heap sort | O(n log n) | O(n log n) | O(1) | No | Guaranteed O(n log n) in-place; used as introsort fallback |
-
-**Decision rule**: use `Array.Sort` (introsort) for general-purpose in-memory sorting. Implement quick sort directly only when you need fine-grained control (e.g., three-way partition for duplicate-heavy data). Use merge sort when stability is required.
-
 
 ## Questions
 

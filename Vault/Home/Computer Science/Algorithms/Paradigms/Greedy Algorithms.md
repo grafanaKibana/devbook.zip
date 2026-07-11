@@ -3,7 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: "Builds a solution by repeatedly making the locally best choice and never reconsidering — fast, but correct only when provably applicable."
+summary: "Builds a solution by repeatedly making the locally best choice and never reconsidering; correct only when provably applicable."
 level:
   - "4"
 priority: High
@@ -70,13 +70,6 @@ public static int CoinsGreedy(int[] coins, int amount) // coins sorted desc
 - **Ignoring ties / feasibility** — the local choice must remain *feasible*; forgetting the feasibility check (e.g. `start >= lastEnd`) produces invalid solutions.
 
 ## Tradeoffs
-
-| Aspect | Greedy | Dynamic Programming |
-|---|---|---|
-| Speed | Fast — usually O(n log n) (a sort + pass) | Slower — fills a table, often O(n·W) etc. |
-| Correctness scope | Narrow — needs greedy-choice proof | Broad — any problem with optimal substructure |
-| Memory | O(1)–O(n) | Often O(states) |
-| Risk | Silent wrong answers if misapplied | Reliable but heavier |
 
 **Decision rule**: try greedy first *only if you can prove the greedy-choice property* (exchange argument) — then enjoy its speed. If you can't prove it, or a small counter-example breaks it, use DP. The classic split: **interval scheduling, MST, Huffman, Dijkstra** ⇒ greedy is proven; **0/1 knapsack, general coin change, edit distance** ⇒ DP.
 

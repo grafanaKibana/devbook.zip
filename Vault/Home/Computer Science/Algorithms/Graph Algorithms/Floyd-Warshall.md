@@ -130,9 +130,6 @@ flowchart TD
 
 | Choice | Option A | Option B | Decision criteria |
 | --- | --- | --- | --- |
-| All-pairs on dense graph | Floyd-Warshall `O(V³)` | [[Dijkstra]] per source `O(V · E log V)` | When `E ≈ V²`, Dijkstra-per-source is `O(V³ log V)` and needs a heap per run — Floyd-Warshall is both faster and dramatically simpler to code. |
-| All-pairs on sparse graph with negative edges | Floyd-Warshall `O(V³)` | Johnson's algorithm `O(V² log V + VE)` | On sparse graphs Johnson's reweights via one [[Bellman-Ford]] run then Dijkstra per source, beating `V³`. Use Floyd-Warshall only when `V` is small or the graph is dense. |
-| Single-source, negative edges | [[Bellman-Ford]] `O(VE)` | Floyd-Warshall `O(V³)` | If you need distances from one source only, Bellman-Ford avoids computing the whole matrix. Floyd-Warshall pays for all pairs whether you need them or not. |
 | Reachability only | Warshall transitive closure (boolean) | Full Floyd-Warshall (weighted) | If you only need "can `i` reach `j`," the boolean OR/AND variant is the same loop but uses bitsets for a big constant-factor win. |
 
 ## Questions

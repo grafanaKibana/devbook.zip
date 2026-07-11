@@ -3,7 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
-summary: "RAG evaluation decomposes into retrieval, generation, and end-to-end layers so regressions can be isolated to the layer that caused them."
+summary: "Decomposes into retrieval, generation, and end-to-end layers so regressions isolate to one layer."
 level:
   - "2"
 priority: High

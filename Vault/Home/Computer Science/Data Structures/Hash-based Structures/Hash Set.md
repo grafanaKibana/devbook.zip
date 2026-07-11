@@ -3,7 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
-summary: "A hash-table-backed collection of unique values giving O(1) average membership checks, inserts, and removals, at the cost of ordering."
+summary: "A hash-table-backed collection of unique values with O(1) average membership, inserts, and removals."
 level:
   - "4"
 priority: Medium
@@ -75,16 +75,6 @@ var added = tags.Add("DOTNET"); // false, already exists by comparer
 
 > [!QUESTION]- Why can `HashSet<T>.Contains` fail for logically equal objects?
 > Because hash/equality contracts are broken (for example, mismatched `GetHashCode`).
-
-## Hash-Based Collections Comparison
-
-| Type | Stores | Thread-safe | When to use |
-|---|---|---|---|
-| `HashSet<T>` | Values only | No | Unique membership checks, set operations |
-| `Dictionary<TKey,TValue>` | Key-value pairs | No | Key-based lookup |
-| `SortedSet<T>` | Values only | No | Sorted uniqueness, O(log n) ops |
-
-**Decision rule**: use `HashSet<T>` when you only need to track membership or perform set operations (union, intersect, except). Use `Dictionary` when you need to associate a value with each key.
 
 ## References
 

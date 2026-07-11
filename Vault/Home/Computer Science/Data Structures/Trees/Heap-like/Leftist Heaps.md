@@ -3,7 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
-summary: "A heap-ordered binary tree whose null-path-length invariant keeps the right spine short, giving merge in O(log n) worst case."
+summary: "A heap-ordered binary tree whose null-path-length invariant gives merge in O(log n) worst case."
 level:
   - "4"
 priority: Medium
@@ -39,13 +39,6 @@ static Node? Merge(Node? a, Node? b)
 Both right spines are O(log n), so merge — and therefore insert and extractMin — is **O(log n) worst case**, deterministic, no amortization needed.
 
 ## Where it sits
-
-| | Merge | Insert | ExtractMin | Guarantee |
-|---|---|---|---|---|
-| Leftist heap | O(log n) | O(log n) | O(log n) | worst case |
-| Binary [[Heap]] | O(n) | O(log n) | O(log n) | worst case |
-| [[Skew Heaps]] | O(log n) | O(log n) | O(log n) | amortized |
-| [[Binomial Queues]] | O(log n) | O(1) am. | O(log n) | mixed |
 
 Choose a leftist heap when you need melding with *worst-case* bounds and want something implementable in ~30 lines — it's far simpler than [[Binomial Queues]] or [[Fibonacci Heaps]]. It also merges cleanly as a persistent/immutable structure (popular in functional languages), since merge builds a new right spine without touching left subtrees. If you don't need melding at all, an array-backed binary heap wins on locality; if you don't need worst-case bounds, a [[Skew Heaps|skew heap]] is the same idea minus the npl bookkeeping.
 

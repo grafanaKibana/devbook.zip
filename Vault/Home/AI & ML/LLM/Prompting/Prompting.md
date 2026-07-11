@@ -3,7 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
-summary: "Turning vague intentions into precise, testable model tasks: prompt anatomy, generation settings, instruction and role prompting foundations."
+summary: "Turning vague intentions into precise, testable model tasks: anatomy, settings, and role prompting."
 level:
   - "3"
 status: Done

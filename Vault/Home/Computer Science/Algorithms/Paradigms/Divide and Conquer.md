@@ -3,7 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: "Solves a problem by breaking it into smaller independent instances of itself, solving those recursively, and combining their answers."
+summary: "Breaks a problem into smaller independent instances, solves them recursively, and combines the answers."
 level:
   - "4"
 priority: Medium
@@ -117,7 +117,6 @@ flowchart TD
 
 | Choice | Divide-and-conquer | Alternative | Decision criteria |
 | --- | --- | --- | --- |
-| vs [[Dynamic Programming]] | Disjoint subproblems, solved once, no table | Overlapping subproblems, cached in a table | If subproblems repeat, DP avoids exponential recomputation; if they are disjoint, DP's table is pure overhead. |
 | vs iterative / single-pass | Recursive split, `O(log n)` depth, parallelisable | One linear pass, no recursion overhead | Prefer iterative for problems that do not decompose (running sums, single scans); D&C when independent subproblems unlock a lower exponent or `n log n`. |
 | Base case: recurse to 1 vs cutoff | Clean but slow on small slices | Hand small inputs to insertion sort | Use a cutoff (≈16–32) in any performance-sensitive implementation; recurse-to-1 only for pedagogy. |
 

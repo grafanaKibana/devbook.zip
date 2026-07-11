@@ -2,7 +2,7 @@
 topic:
   - Data Persistence
 subtopic: []
-summary: "Storing a copy of data closer to consumers so repeated reads skip the slower origin; the hard part is invalidation."
+summary: "Storing data closer to consumers so repeated reads skip the slower origin."
 level:
   - "4"
 priority: High

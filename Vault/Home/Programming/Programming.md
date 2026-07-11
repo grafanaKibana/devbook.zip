@@ -5,6 +5,7 @@ color: "#f43f5e"
 topic:
   - Programming
 subtopic: []
+summary: "Software craft focused on the .NET stack: C#, runtime, web APIs, and concurrency."
 tags:
   - FolderNote
 publish: true

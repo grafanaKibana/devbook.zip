@@ -3,7 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
-summary: "async/await is .NET's model for non-blocking I/O, releasing the thread while awaited work is in flight rather than running on another thread."
+summary: ".NET's model for non-blocking I/O that releases the thread while awaiting work."
 level:
   - "4"
 priority: High

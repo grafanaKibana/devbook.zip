@@ -3,7 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Patterns
-summary: "Reusable solutions to recurring design problems around boundaries, dependencies, and change — valuable when they reduce cognitive load, harmful when applied blindly."
+summary: "Reusable solutions to recurring design problems around boundaries, dependencies, and change."
 tags:
   - FolderNote
 publish: true

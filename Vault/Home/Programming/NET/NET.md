@@ -3,7 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
-summary: ".NET is Microsoft's cross-platform runtime and framework for building web APIs, services, desktop, mobile, and cloud-native software."
+summary: "Microsoft's cross-platform runtime and framework for building web, cloud, desktop, and mobile software."
 tags:
   - FolderNote
 publish: true

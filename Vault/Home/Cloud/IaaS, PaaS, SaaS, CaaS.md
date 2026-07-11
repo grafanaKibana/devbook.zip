@@ -3,7 +3,7 @@ topic:
   - Cloud
 subtopic:
   - Cloud
-summary: "Cloud service models define how much of the infrastructure stack the provider manages versus how much you manage."
+summary: "Service models defining how much of the stack the provider manages versus you."
 level:
   - "2"
 priority: High
@@ -71,15 +71,18 @@ The provider manages *everything* up to and including the runtime process — yo
 
 ## Decision Rule
 
-**Start with PaaS** (Azure App Service, AWS Elastic Beanstalk) for new web applications. It eliminates OS management while keeping full application control.
-
-**Move to CaaS** (AKS, EKS, GKE) when you need: container portability, multi-service orchestration, or fine-grained resource control that PaaS cannot provide.
-
-**Use IaaS** only when: you need a specific OS configuration, GPU instances, or are lifting-and-shifting an on-prem workload that cannot be containerized.
-
-**Reach for FaaS** for event-driven, bursty, or low-baseline work (webhooks, scheduled jobs, light glue code) where scale-to-zero billing wins — provided cold-start latency and the stateless, time-limited model are acceptable.
-
-**Use SaaS** for any business function where the software is a commodity (email, CRM, source control, CI/CD).
+```mermaid
+flowchart TD
+  A[New workload] --> B{Commodity business software?}
+  B -->|Yes| C[Use SaaS]
+  B -->|No| D{Event-driven, bursty, low-baseline?}
+  D -->|Yes| E[Use FaaS]
+  D -->|No| F{Need custom OS, GPU, or lift-and-shift?}
+  F -->|Yes| G[Use IaaS]
+  F -->|No| H{Need container portability or orchestration?}
+  H -->|Yes| I[Use CaaS]
+  H -->|No| J[Use PaaS as the default]
+```
 
 ## Examples
 

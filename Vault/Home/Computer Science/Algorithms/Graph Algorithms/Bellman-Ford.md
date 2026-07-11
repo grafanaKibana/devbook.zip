@@ -3,7 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: "Single-source shortest paths on graphs with negative edges, relaxing every edge V−1 times and detecting negative cycles Dijkstra cannot handle."
+summary: "Single-source shortest paths with negative edges, relaxing every edge V-1 times and detecting negative cycles."
 level:
   - "4"
 priority: Medium
@@ -122,8 +122,6 @@ flowchart TD
 
 | Choice | Option A | Option B | Decision criteria |
 | --- | --- | --- | --- |
-| Non-negative weights only | [[Dijkstra]] `O((V+E) log V)` | Bellman-Ford `O(VE)` | Use Dijkstra whenever all weights are `≥ 0`; it is asymptotically far faster. Only pay Bellman-Ford's cost when a negative edge actually exists. |
-| All-pairs shortest paths | [[Floyd-Warshall]] `O(V³)` | Bellman-Ford per source `O(V²E)` | On dense graphs Floyd-Warshall wins and is simpler. For sparse graphs with negative edges, Johnson's algorithm reweights with one Bellman-Ford run then runs Dijkstra from each source. |
 | Convergence speed | Plain passes with early exit | SPFA queue-based | Prefer early-exit Bellman-Ford when you need a guaranteed `O(VE)` bound; use SPFA only when inputs are friendly and average speed matters more than the worst case. |
 | Negative-cycle handling | Bellman-Ford (`V`-th pass) | Dijkstra | Dijkstra cannot detect negative cycles at all. If cycle detection or arbitrage-loop extraction is the goal, Bellman-Ford is the tool. |
 

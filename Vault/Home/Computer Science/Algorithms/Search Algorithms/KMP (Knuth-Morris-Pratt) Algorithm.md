@@ -93,8 +93,6 @@ Text: ABABABC
 | Choice | Option A | Option B | Decision criteria |
 | --- | --- | --- | --- |
 | Worst-case guarantee needed | KMP `O(n+m)` | Naive `O(nm)` | KMP is strictly better on adversarial inputs. Naive is simpler for small inputs where worst case is unlikely. |
-| Multiple patterns | Aho-Corasick | KMP per pattern | Aho-Corasick scans text once for all patterns. Switch when pattern count exceeds 2-3. |
-| Implementation simplicity | [[Rabin Karp Search\|Rabin-Karp]] | KMP | Rabin-Karp is simpler to code (rolling hash) but has probabilistic worst case. KMP is deterministic but requires understanding the prefix function. |
 
 ## Questions
 

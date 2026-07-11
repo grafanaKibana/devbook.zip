@@ -3,7 +3,7 @@ topic:
   - Security
 subtopic:
   - Security
-summary: "Maps data of any size to a fixed-size digest that is one-way and collision-resistant."
+summary: "Maps data of any size to a fixed-size, one-way, collision-resistant digest."
 level:
   - "4"
 priority: High

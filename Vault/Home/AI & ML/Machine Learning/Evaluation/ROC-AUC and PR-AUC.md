@@ -3,7 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - Machine Learning
-summary: "Threshold-free metrics for binary classifiers: ROC-AUC for general ranking on balanced data, PR-AUC for imbalanced data where false positives are expensive."
+summary: "Threshold-free ranking metrics: ROC-AUC for balanced data, PR-AUC for imbalanced data with costly false positives."
 level:
   - "2"
 priority: Medium

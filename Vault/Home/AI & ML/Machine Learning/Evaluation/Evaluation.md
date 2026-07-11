@@ -3,7 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - Machine Learning
-summary: "Evaluation measures whether a model solves its real problem in production; the core discipline is deriving the right metric and closing the offline–online gap."
+summary: "Measuring whether a model solves its real problem in production by picking the right metric."
 tags:
   - FolderNote
 publish: true

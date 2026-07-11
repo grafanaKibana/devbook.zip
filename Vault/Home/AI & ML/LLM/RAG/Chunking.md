@@ -3,7 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
-summary: "Chunking sets the unit of retrieval: too wide adds noise, too narrow splits constraints; aim for coherent, traceable chunks."
+summary: "Sets the unit of retrieval: too wide adds noise, too narrow splits meaning."
 level:
   - "2"
 priority: High

@@ -3,7 +3,7 @@ topic:
   - Data Persistence
 subtopic:
   - SQL
-summary: "The relational model and SQL's declarative query language, plus how the engine executes a query versus the order you write it."
+summary: "The relational model and SQL's declarative query language, plus how queries actually execute."
 tags:
   - FolderNote
 publish: true

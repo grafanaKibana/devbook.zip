@@ -3,7 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
-summary: "A prefix tree storing strings as paths of characters, giving O(k) lookup and prefix queries independent of the number of keys."
+summary: "A prefix tree storing strings as character paths, giving O(k) lookup and prefix queries."
 level:
   - "4"
 priority: Medium

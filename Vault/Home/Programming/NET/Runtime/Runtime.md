@@ -3,7 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
-summary: "The .NET runtime (CLR) is the execution engine for managed code: JIT compilation, garbage collection, type safety, and threading."
+summary: "The .NET CLR execution engine: JIT compilation, garbage collection, type safety, and threading."
 tags:
   - FolderNote
 publish: true

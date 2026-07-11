@@ -5,6 +5,7 @@ color: "#84cc16"
 topic:
   - Development Practices
 subtopic: []
+summary: "Habits and processes like testing, reviews, and refactoring that keep software shippable."
 tags:
   - FolderNote
 publish: true

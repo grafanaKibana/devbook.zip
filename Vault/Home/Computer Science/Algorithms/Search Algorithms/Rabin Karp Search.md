@@ -3,7 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: "Matches patterns by comparing rolling hashes of text windows, expected O(n + m), extending naturally to multi-pattern search."
+summary: "Matches patterns by comparing rolling hashes of text windows, in expected O(n + m)."
 level:
   - "4"
 priority: Medium
@@ -89,14 +89,6 @@ Roll to "aba": (312 - 3·100)·10 + 1 = 121 → verify → match at 4
 - **What goes wrong**: treating a hash match as a confirmed match reports false positives — different substrings that happen to share the same hash value.
 - **Why it happens**: developers optimize for speed and skip the `O(m)` verification step, assuming collisions are rare enough to ignore.
 - **How to avoid it**: always verify on hash match. The expected number of verifications is small (proportional to collision rate), so the cost is negligible. Correctness is never optional.
-
-## Tradeoffs
-
-| Choice | Option A | Option B | Decision criteria |
-| --- | --- | --- | --- |
-| Deterministic guarantee | [[KMP (Knuth-Morris-Pratt) Algorithm\|KMP]] `O(n+m)` worst case | Rabin-Karp `O(n+m)` expected | KMP guarantees linear time regardless of input. Choose Rabin-Karp when expected-case simplicity matters and collisions are manageable. |
-| Multi-pattern search | Rabin-Karp with hash set | KMP per pattern | Rabin-Karp extends naturally to multiple patterns by checking window hash against a set. Switch to Aho-Corasick for very large pattern counts with deterministic guarantees. |
-| Implementation effort | Rabin-Karp rolling hash | KMP prefix function | Rolling hash is simpler to implement correctly. Choose Rabin-Karp for quick prototyping; switch to KMP if collision risk is unacceptable. |
 
 ## Questions
 

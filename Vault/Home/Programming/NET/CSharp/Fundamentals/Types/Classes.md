@@ -3,7 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
-summary: "A class is a reference type defining a heap-allocated object blueprint, enabling shared state, inheritance, and virtual dispatch."
+summary: "A reference type defining a heap-allocated object with state, inheritance, and dispatch."
 level:
   - "4"
 priority: Medium

@@ -104,7 +104,6 @@ flowchart TD
 | Choice | Cyclic Sort | Alternative | Decision criteria |
 | --- | --- | --- | --- |
 | find missing/duplicate in `1..n` | `O(n)` time, `O(1)` space, mutates input | boolean/count array `O(n)` time, `O(n)` space | Use cyclic sort when the "no extra memory" constraint bites; the count array is simpler when space is free. |
-| duplicate on a **read-only** array | not applicable — it mutates | [[Fast and Slow Pointers]] `O(n)` time, `O(1)` space | Floyd's cycle detection treats the array as a linked list and never writes, so it is the only `O(1)`-space option when mutation is forbidden. |
 | in-place marking | Cyclic Sort (rearranges values) | sign-marking (negate `a[abs(v)-1]`) | Both are `O(n)`/`O(1)`; sign-marking preserves positions but destroys signs, cyclic sort reorders but keeps magnitudes — pick by which property downstream code needs. |
 
 ## Questions

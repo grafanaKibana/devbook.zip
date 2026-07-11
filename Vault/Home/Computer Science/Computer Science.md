@@ -5,6 +5,7 @@ color: "#ef4444"
 topic:
   - Computer Science
 subtopic: []
+summary: "Core CS reasoning for software engineering: data structures, algorithms, and complexity analysis."
 tags:
   - FolderNote
 publish: true
