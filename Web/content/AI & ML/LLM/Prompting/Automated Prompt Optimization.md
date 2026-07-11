@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.309Z
-modified: 2026-07-08T15:01:12.310Z
-published: 2026-07-08T15:01:12.310Z
+created: 2026-07-11T18:30:21.077Z
+modified: 2026-07-11T18:30:21.077Z
+published: 2026-07-11T18:30:21.077Z
 topic:
   - AI & ML
 subtopic:
   - LLM
+summary: Repeatable loops that generate, evaluate, and select prompt candidates against a validation set — surveying APE, Active-Prompt, DSP, and PAL.
 level:
   - "3"
 priority: Low

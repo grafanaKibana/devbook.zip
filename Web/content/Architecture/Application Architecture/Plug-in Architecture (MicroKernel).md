@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.361Z
-modified: 2026-07-08T15:01:12.361Z
-published: 2026-07-08T15:01:12.361Z
+created: 2026-07-11T18:17:07.750Z
+modified: 2026-07-11T18:17:07.751Z
+published: 2026-07-11T18:17:07.751Z
 topic:
   - Architecture
 subtopic:
   - Application Architecture
+summary: Keeps a small, stable core defining extension points and extends behavior through plug-ins that implement those points without modifying the core.
 level:
   - "3"
 priority: High

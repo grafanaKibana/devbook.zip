@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.381Z
-modified: 2026-07-08T15:01:12.381Z
-published: 2026-07-08T15:01:12.381Z
+created: 2026-07-11T18:18:18.739Z
+modified: 2026-07-11T18:18:18.744Z
+published: 2026-07-11T18:18:18.744Z
 topic:
   - Architecture
 subtopic:
   - Patterns
+summary: Passes a request along a chain of handlers, each deciding to process it or forward it to the next.
 level:
   - "3"
 priority: High

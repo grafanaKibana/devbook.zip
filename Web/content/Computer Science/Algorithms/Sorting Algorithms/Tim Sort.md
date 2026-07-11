@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-10T19:12:28.644Z
-modified: 2026-07-10T19:12:28.644Z
-published: 2026-07-10T19:12:28.644Z
+created: 2026-07-11T18:24:12.000Z
+modified: 2026-07-11T18:24:12.000Z
+published: 2026-07-11T18:24:12.000Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Natural merge sort that exploits existing runs; stable, adaptive, and the default in Python and Java.
 level:
   - "4"
 priority: Medium
@@ -15,249 +16,109 @@ status: Creation
 
 # Intro
 
-CPython's `list.sort`/`sorted` and Java's `Arrays.sort` for object arrays lean on one fact about production data: it is rarely random. Log lines arrive mostly time-ordered, an appended list is sorted except at its tail, exported records come pre-grouped. A plain [[Merge Sort]] ignores that structure and pays `Θ(n log n)` comparisons on every input, re-discovering order that was already present.
+Tim sort is the default sort in **CPython** (`list.sort`, `sorted`) and in **Java** (`Arrays.sort` for object arrays and `Collections.sort`). It is a _natural_ [[Merge Sort]]: instead of blindly halving the array, it exploits order that already exists. It scans left to right for **runs** — maximal already-ascending or strictly-descending stretches (a descending run is reversed in place so every run is ascending), extends any run shorter than `minrun` (a computed value between 32 and 64) into a run of that length using binary [[Insertion Sort]], and then merges the runs together. The insight is that real-world data is rarely random: log lines arrive mostly time-ordered, a list gets one item appended, records are already grouped. Tim sort charges nothing for order it finds, so it hits `O(n)` on already-sorted input while still guaranteeing `O(n log n)` and remaining **stable**.
 
-Tim sort is the _natural_ merge sort both runtimes use. It reads the existing order first: it splits the array into maximal already-sorted stretches — **runs** — spends work only where order is missing, and merges the runs back together. On an input that is already a single ascending (or single descending) run it finishes in one `Θ(n)` pass; on unstructured input it degrades to the same `Θ(n log n)` as merge sort, staying stable throughout. The only precondition is that exploitable order exists: on uniformly random keys there are no long runs to find, and the extra machinery earns nothing over a plain merge.
+Choose Tim sort — that is, choose the platform default — whenever you are sorting objects and want stability, adaptivity to partially-ordered input, and a guaranteed worst case in one package. Its cost is `O(n)` auxiliary space for the merge buffer, so where memory is tight and stability is unobservable (sorting primitives), platforms deliberately switch to [[Introsort]] or a dual-pivot [[Quick Sort]] instead.
 
-**Core shape:** partially ordered input → detect natural runs → pad short runs to `minrun` with binary insertion sort → merge under stack size invariants → `Θ(n)` on ordered input, `Θ(n log n)` worst, stable, `O(n)` merge buffer.
+## How It Works
 
-## Decisive move
+1. **Compute `minrun`** from `n`: take the high-order 6 bits of `n` and add 1 if any lower bit is set, yielding 32–64. This keeps the number of runs near a power of two, which balances the final merges.
+2. **Find the next run.** Starting at the current position, extend as long as elements are ascending (`a[i] <= a[i+1]`) or _strictly_ descending (`a[i] > a[i+1]`). A descending run is **reversed in place** — strict descent is what makes that reversal stable (equal elements never trigger a reversal, so their order is preserved).
+3. **Extend short runs to `minrun`** with binary insertion sort: if the natural run is shorter than `minrun`, pull in following elements and insert them into the sorted run using a binary search for the position. Small runs cost little and keep merge counts down.
+4. **Push each run onto a stack and merge under invariants.** With the top three run lengths `X, Y, Z` (`Z` deepest), Tim sort enforces `Z > Y + X` and `Y > X`. Whenever an invariant breaks it merges `Y` with the smaller of `X` and `Z`. This keeps stacked runs roughly balanced in size, so merges stay near-equal-length and the total work is `O(n log n)`.
+5. **Galloping mode** accelerates unbalanced merges. When one run keeps "winning" the merge comparison (`MIN_GALLOP = 7` consecutive times), Tim sort stops comparing element by element and instead **binary-searches** for how many of the winning run's elements can be copied in a block. On data where one run's values are mostly smaller than the other's, this turns an `O(k)` linear scan into `O(log k)`; if galloping stops paying off, it adaptively backs out to one-at-a-time merging.
 
-Tim sort's turning point is the moment the run stack collapses two adjacent runs because their sizes have just violated the merge invariant. The intended animation would play that over a small partially-ordered array.
+Complexity: `O(n)` best case (a single already-sorted run), `O(n log n)` average and worst case, `O(n)` auxiliary space for the merge (temporary copy of the smaller run). **Stable**, because every merge and the descending-run reversal preserve the order of equal keys.
 
-> [!NOTE] Visualization pending
-> Planned StepTrace: a run-and-merge card showing natural ascending and descending runs being detected (descending ones reversed in place), short runs extended to `minrun` with binary insertion sort, and the run stack collapsing merges under its size invariants. No matching renderer exists in `engine.js` yet.
-
-Consider `[5, 6, 7, 3, 2, 1, 4, 4, 8]` with an illustrative `minrun = 4`. The left-to-right scan produces `[5,6,7]` (ascending, extended by binary-inserting `3` into `[3,5,6,7]`), then `[2,1]` (strictly descending, reversed to `[1,2]`, extended with `4,4` into `[1,2,4,4]`), then a trailing `[8]`. The run stack now holds lengths `[4, 4, 1]`, and that third push is what forces a decision.
+## Example
 
 ```text
-runs (lengths)                 contents
-[4]              run 1 ->      [3,5,6,7]
-[4, 4]           run 2 ->      [1,2,4,4]
-[4, 4, 1]        run 3 ->      [8]        X=1, Y=4, Z=4  ->  Z > Y+X?  4 > 5  false
-                 merge Y with the smaller neighbour X:
-[4, 5]                         [1,2,4,4] + [8] = [1,2,4,4,8]
-                 two runs left, merge:
-[9]                            [3,5,6,7] + [1,2,4,4,8] = [1,2,3,4,4,5,6,7,8]
+Input: [5, 6, 7, 3, 2, 1, 4, 4, 8]     minrun = 4 (tiny array, illustrative)
+
+Run detection:
+  [5,6,7]  ascending run, length 3  -> shorter than minrun,
+           pull in next element (3) and binary-insert -> [3,5,6,7]
+  [2,1]    descending -> reverse in place -> [1,2] then extend to minrun
+           with 4,4 -> binary-insert -> [1,2,4,4]
+  [8]      trailing run, length 1
+
+Run stack (lengths): [4, 4, 1]
+
+Merge under invariants (X = 1 on top, Y = 4, Z = 4 deepest):
+  Y > X?     4 > 1        yes, holds
+  Z > Y + X? 4 > 4 + 1    no  -> invariant broken, must merge Y
+
+  Merge Y with the SMALLER of X and Z. X = 1 < Z = 4, so Y merges with X:
+      [1,2,4,4] + [8] -> [1,2,4,4,8]        stack lengths now [4, 5]
+
+  Two runs left, 4 <= 5, so merge them (stable):
+      [3,5,6,7] + [1,2,4,4,8] -> [1,2,3,4,4,5,6,7,8]
+      (galloping would kick in here if one side kept winning
+       7+ comparisons in a row)
+
+Result: [1,2,3,4,4,5,6,7,8]   (the two 4s kept their input order — stable)
 ```
 
-The invariant `Z > Y + X` fails the instant `[8]` lands (`4 > 4 + 1` is false), so `Y` merges with the smaller neighbour `X` before the scan continues. Both `4`s keep their input order because every merge resolves ties toward the earlier run. The state that changed is the stack shape, not correctness: the collapse only ever merges _adjacent_ runs, so the partition of the array stays contiguous and the eventual merges stay near-balanced.
+## Diagram
 
-## Runs, minrun, and the merge stack
+```mermaid
+flowchart TD
+  A[Scan for next natural run] --> B{Run descending}
+  B -->|Yes| C[Reverse run in place]
+  B -->|No| D[Keep ascending run]
+  C --> E{Run shorter than minrun}
+  D --> E
+  E -->|Yes| F[Extend with binary insertion sort]
+  E -->|No| G[Push run onto stack]
+  F --> G
+  G --> H{Stack invariants hold}
+  H -->|No| I[Merge adjacent runs possibly galloping]
+  I --> H
+  H -->|Yes| J{More input}
+  J -->|Yes| A
+  J -->|No| K[Merge all remaining runs]
+  K --> Z[Sorted and stable]
+```
 
-Four mechanisms carry the algorithm.
+## Pitfalls
 
-**Run detection.** From the current position the scan extends a run as long as elements stay ascending (`a[i] <= a[i+1]`) or _strictly_ descending (`a[i] > a[i+1]`). A descending run is reversed in place. The asymmetry is load-bearing: because descent is strict, a stretch of equal keys can never form a descending run, so the in-place reversal never disturbs equal keys — which is why the reversal preserves stability.
+- **The merge-stack invariant bug — a real formal-methods lesson.** In 2015 de Gouw et al. tried to _verify_ the Java/Python implementation with the KeY prover and instead found a genuine defect: the stack invariant check compared only the top few runs, so a crafted sequence of run lengths could leave the invariant violated deeper in the stack. The stack was pre-sized assuming the invariant always held, so the violation could overflow it and throw `ArrayIndexOutOfBoundsException`. Java's initial fix bumped the stack size (a patch, not a proof); the invariant check itself was later corrected. The takeaway: "widely deployed for years" is not a proof of correctness, and a subtle loop invariant can hide a crash reachable only by adversarial input.
+- **`O(n)` extra memory, not in place.** Tim sort allocates a temporary buffer up to `n/2` for merging. On memory-constrained systems, or when sorting huge primitive arrays where stability is meaningless, that buffer is pure overhead — which is exactly why Java sorts _primitives_ with a dual-pivot quicksort and .NET sorts with [[Introsort]] instead.
+- **Stability depends on strict descent.** Runs are detected as ascending (`<=`) or _strictly_ descending (`>`). If an implementation used `>=` for descending runs, it would reverse stretches of equal keys and silently break stability. The asymmetry between the two comparisons is deliberate and load-bearing, not an accident.
 
-**`minrun`.** A natural run shorter than `minrun` is extended to `minrun` length by binary [[Insertion Sort]]: following elements are pulled in and placed with a binary search for the insertion point. `minrun` comes from the high-order bits of `n` (plus 1 if any lower bit is set), sizing runs near a power-of-two fraction of `n` so the run count stays close to a power of two and the final merges stay balanced. The exact constant is implementation-specific: CPython caps `minrun` at 64 (`MAX_MINRUN`), giving `minrun ∈ [32, 64]` from the high-order 6 bits (and `minrun = n` for `n < 64`); Java's `TimSort` uses `MIN_MERGE = 32`, giving `minrun ∈ [16, 32]` from the high-order 5 bits (and `minrun = n` for `n < 32`). Either way, a small array collapses to one binary-insertion-sorted run.
+## Tradeoffs
 
-**The run stack and its invariants.** Each run is pushed onto a stack. For the top three lengths `X` (top), `Y`, `Z` (deepest), Tim sort maintains `Z > Y + X` and `Y > X`; when either breaks it merges `Y` with the smaller of `X` and `Z`. These invariants bound the size ratio between adjacent runs, so every merge joins two runs of roughly comparable length. Balanced merges are exactly what caps total merge work at `Θ(n log n)`; unbalanced runs would let the merge cost drift toward quadratic.
-
-**Merging and galloping.** A merge uses [[Merge Sort]]'s two-way merge into a temporary copy of the _smaller_ run (hence `≤ n/2` extra space), resolving ties toward the earlier run to stay stable. When one run wins `MIN_GALLOP = 7` comparisons in a row, the merge switches to **galloping**: instead of comparing element by element it binary-searches how many of the winning run's elements can be block-copied at once, turning an `O(k)` linear advance into `O(log k)`. If galloping stops paying off it adaptively backs out to one-at-a-time merging.
-
-## Complexity
-
-| Case | Time | Auxiliary space | Cause |
+| Choice | Tim Sort | Alternative | Decision criteria |
 | --- | --- | --- | --- |
-| Best | `Θ(n)` | `O(1)` | Input is a single run (already ascending, or descending and reversed in place); run detection short-circuits and no merge occurs. |
-| Average | `Θ(n log n)` | `O(n)` | Runs of `≥ minrun` merge across `~log n` balanced levels; the merge buffer holds the smaller run, `≤ n/2`. |
-| Worst | `Θ(n log n)` | `O(n)` | No exploitable order (random keys): `~n / minrun` `minrun`-length runs still merge in balanced pairs; buffer `≤ n/2`. |
-
-Tim sort is **stable** (every merge and the strict-descent reversal preserve equal-key order) and **adaptive** (existing order shortens run detection and cuts merge count). The best-case `Θ(n)` is the run-detection short-circuit, not a lucky pivot: a sorted _or_ reverse-sorted array is one run. Implementations may pre-size a small merge buffer, but no per-element temporary storage is used when the input forms a single run.
-
-## When the merge policy breaks
-
-The run stack's merge policy is where Tim sort's sharp edges live.
-
-**The merge-collapse invariant defect (2015).** de Gouw et al. tried to _verify_ the Java/Python merge routine with the KeY prover and instead found a genuine bug: `merge_collapse` restored the invariant only among the top runs, so a crafted sequence of run lengths could leave the invariant violated deeper in the stack. Because the run-length stack was pre-sized assuming the invariant always held, that deeper violation could overflow it and throw `ArrayIndexOutOfBoundsException`. Java's first patch simply enlarged the stack (a size bump, not a proof); the invariant check was later corrected to also test the run below the top three. The lesson is specific to the run-stack policy: a subtle loop invariant, deployed to hundreds of millions of users for years, still hid an adversarially reachable crash that testing and ubiquity never surfaced.
-
-**Galloping can be net-negative on random data.** Galloping only pays when one run consistently wins. On interleaved random runs where neither side reaches `MIN_GALLOP` consecutive wins, the mode still costs the occasional wasted binary-search probe and the bookkeeping to enter and exit it. The adaptive back-off keeps the loss bounded, but the constant factor is real work spent detecting that galloping does not help here.
-
-**`O(n)` memory, not in place.** The merge buffer of up to `n/2` is pure overhead when stability is unobservable — for example sorting a huge primitive array whose elements have no identity beyond their value. That cost is precisely why Java sorts _primitives_ with a dual-pivot [[Quick Sort]] and .NET sorts with [[Introsort]] rather than Tim sort.
-
-## Reference drawer
-
-> [!ABSTRACT]- Control flow
->
-> ```mermaid
-> flowchart TD
->   A[Scan for next natural run] --> B{Run descending}
->   B -->|Yes| C[Reverse run in place]
->   B -->|No| D[Keep ascending run]
->   C --> E{Run shorter than minrun}
->   D --> E
->   E -->|Yes| F[Extend with binary insertion sort]
->   E -->|No| G[Push run onto stack]
->   F --> G
->   G --> H{Stack size invariants hold}
->   H -->|No| I[Merge adjacent runs, possibly galloping]
->   I --> H
->   H -->|Yes| J{More input}
->   J -->|Yes| A
->   J -->|No| K[Force-merge remaining runs]
->   K --> Z[Sorted and stable]
-> ```
-
-> [!EXAMPLE]- C# implementation
->
-> ```csharp
-> // Stable natural-merge sort. Galloping is omitted for readability;
-> // the merge below is a plain stable two-way merge on the smaller run.
-> public static class TimSort
-> {
->     public static void Sort(int[] a)
->     {
->         int n = a.Length;
->         if (n < 2) return;
->
->         int minRun = MinRunLength(n);
->         var runs = new List<(int start, int length)>();
->
->         int i = 0;
->         while (i < n)
->         {
->             int runLength = FindRunAndMakeAscending(a, i, n);
->             if (runLength < minRun)
->             {
->                 int force = Math.Min(minRun, n - i);
->                 BinaryInsertionSort(a, i, i + force, i + runLength);
->                 runLength = force;
->             }
->
->             runs.Add((i, runLength));
->             MergeCollapse(a, runs);
->             i += runLength;
->         }
->
->         MergeForceCollapse(a, runs);
->     }
->
->     private static int MinRunLength(int n)
->     {
->         int r = 0;                       // set to 1 if any dropped low bit is 1
->         while (n >= 64) { r |= n & 1; n >>= 1; }
->         return n + r;                    // CPython MAX_MINRUN = 64 -> 32..64 (Java MIN_MERGE = 32 -> 16..32)
->     }
->
->     // Returns run length; a strictly-descending run is reversed in place.
->     private static int FindRunAndMakeAscending(int[] a, int lo, int hi)
->     {
->         int runHi = lo + 1;
->         if (runHi == hi) return 1;
->
->         if (a[runHi++] < a[lo])          // strict descent -> reverse
->         {
->             while (runHi < hi && a[runHi] < a[runHi - 1]) runHi++;
->             Array.Reverse(a, lo, runHi - lo);
->         }
->         else                             // ascending (>=) keeps equal keys stable
->         {
->             while (runHi < hi && a[runHi] >= a[runHi - 1]) runHi++;
->         }
->         return runHi - lo;
->     }
->
->     // [lo, sortedEnd) is already sorted; extend the sort to [lo, hi).
->     private static void BinaryInsertionSort(int[] a, int lo, int hi, int sortedEnd)
->     {
->         if (sortedEnd == lo) sortedEnd++;
->         for (int start = sortedEnd; start < hi; start++)
->         {
->             int pivot = a[start];
->             int left = lo, right = start;
->             while (left < right)         // first index strictly greater than pivot -> stable
->             {
->                 int mid = (left + right) >> 1;
->                 if (pivot < a[mid]) right = mid; else left = mid + 1;
->             }
->             Array.Copy(a, left, a, left + 1, start - left);
->             a[left] = pivot;
->         }
->     }
->
->     // The invariant restored here is the one the 2015 fix widened:
->     // it also tests runs[n-2], not just the top three.
->     private static void MergeCollapse(int[] a, List<(int start, int length)> runs)
->     {
->         while (runs.Count > 1)
->         {
->             int n = runs.Count - 2;
->             if ((n > 0 && runs[n - 1].length <= runs[n].length + runs[n + 1].length) ||
->                 (n > 1 && runs[n - 2].length <= runs[n - 1].length + runs[n].length))
->             {
->                 if (runs[n - 1].length < runs[n + 1].length) n--;
->                 MergeAt(a, runs, n);
->             }
->             else if (runs[n].length <= runs[n + 1].length)
->             {
->                 MergeAt(a, runs, n);
->             }
->             else break;
->         }
->     }
->
->     private static void MergeForceCollapse(int[] a, List<(int start, int length)> runs)
->     {
->         while (runs.Count > 1)
->         {
->             int n = runs.Count - 2;
->             if (n > 0 && runs[n - 1].length < runs[n + 1].length) n--;
->             MergeAt(a, runs, n);
->         }
->     }
->
->     private static void MergeAt(int[] a, List<(int start, int length)> runs, int i)
->     {
->         var (start1, len1) = runs[i];
->         var (_, len2) = runs[i + 1];
->         runs[i] = (start1, len1 + len2);
->         runs.RemoveAt(i + 1);
->         MergeStable(a, start1, len1, len2);
->     }
->
->     private static void MergeStable(int[] a, int start, int len1, int len2)
->     {
->         var left = new int[len1];        // buffer the smaller-or-equal left run
->         Array.Copy(a, start, left, 0, len1);
->
->         int i = 0, j = start + len1, k = start, end2 = start + len1 + len2;
->         while (i < len1 && j < end2)
->             a[k++] = a[j] < left[i] ? a[j++] : left[i++];   // "<" keeps ties on the left -> stable
->         while (i < len1) a[k++] = left[i++];                 // trailing right run is already in place
->     }
-> }
-> ```
->
-> `MergeCollapse` carries the correctness contract: the second clause testing `runs[n - 2]` is the check the 2015 verification found missing. `MergeStable` buffers the left run and resolves ties toward it, which is what makes the whole sort stable.
-
-## Comparison
-
-| Sort | Time (worst) | Aux space | Stable | Adaptive | Stronger case | Weaker case |
-| --- | --- | --- | --- | --- | --- | --- |
-| Tim sort | `Θ(n log n)`, `Θ(n)` best | `O(n)` (`≤ n/2`) | Yes | Yes | Partially-ordered object data needing stable order | Random primitive arrays where the merge buffer is wasted |
-| [[Merge Sort]] | `Θ(n log n)` always | `O(n)` | Yes | No | Simplest stable sort with input-independent timing | Pays full `n log n` even on already-ordered input |
-| [[Quick Sort]] | `Θ(n²)` (`Θ(n log n)` avg) | `O(log n)` stack | No | No | Fastest average on random in-memory arrays | Adversarial worst case; no stability; no adaptivity |
-| [[Introsort]] | `Θ(n log n)` | `O(log n)` stack | No | No | In-place unstable default with a guaranteed bound | When equal-key order must be preserved |
-
-Tim sort is the default in CPython and Java for object sorting because real inputs carry exploitable order and callers can observe stability; run detection is what it adds on top of a plain [[Merge Sort]]. It pays `O(n)` auxiliary memory and a subtle run-stack invariant that a plain [[Introsort]] avoids — which is why the same runtimes drop to introsort or a dual-pivot [[Quick Sort]] for primitive arrays, where stability is unobservable and adaptivity rarely repays the buffer.
+| vs plain [[Merge Sort]] | `O(n)` on ordered input, adaptive, stable | `O(n log n)` always, stable | Tim sort dominates plain merge sort on real data because it charges nothing for existing order; use plain merge sort only when you need the simplest possible stable sort or predictable, input-independent timing. |
+| vs [[Introsort]] | Stable, adaptive, `O(n)` space | Not stable, `O(log n)` space, in place | Sort objects with Tim sort when equal-key order or partial-order adaptivity matters; sort primitives with introsort/quicksort where stability is unobservable and the merge buffer is wasted memory. |
+| vs [[Quick Sort]] | Guaranteed `O(n log n)`, stable | `O(n²)` worst, faster average, not stable | Prefer Tim sort when you cannot risk quicksort's adversarial worst case and need stability; prefer quicksort/introsort for raw average-case speed on unordered primitives. |
 
 ## Questions
 
-> [!QUESTION]- Why does Tim sort reach `Θ(n)` on some inputs while its worst case is still `Θ(n log n)`?
-> Run detection scans for maximal ascending or strictly-descending stretches and merges only across their boundaries. An already-ordered array (ascending, or descending and reversed in place) is a single run, so the scan finishes in one `Θ(n)` pass with no merges. Unstructured input yields `~n / minrun` short runs that still merge across `~log n` balanced levels, giving `Θ(n log n)`.
+> [!QUESTION]- What makes Tim sort adaptive, and why does that matter for real data?
+>
+> - It scans for existing ascending or strictly-descending runs and merges them instead of halving blindly, so any order already present is reused for free.
+> - Descending runs are reversed in place; short runs are padded to `minrun` (32–64) with binary [[Insertion Sort]]; galloping mode block-copies when one run keeps winning.
+> - On already-sorted input it finds one run and runs in `O(n)`; worst case is still `O(n log n)`, stable throughout.
+> - Real inputs — append-mostly lists, time-ordered logs, pre-grouped records — are rarely random, so an adaptive sort beats a fixed `O(n log n)` sort on exactly the data production systems actually feed it.
 
-> [!QUESTION]- What do the run-stack size invariants guarantee, and what breaks without them?
-> For the top three run lengths `X, Y, Z` (Z deepest), Tim sort keeps `Z > Y + X` and `Y > X`, merging when either fails. This bounds the size ratio of adjacent runs so every merge joins near-equal lengths, which is what caps total merge work at `Θ(n log n)`. Without the bound, a merge could repeatedly join a tiny run into a huge one and drift toward quadratic cost.
+> [!QUESTION]- What are the merge-stack invariants and why do they exist?
+>
+> - Runs are pushed on a stack; for the top three lengths `X, Y, Z` (Z deepest) Tim sort enforces `Z > Y + X` and `Y > X`, merging when either breaks.
+> - This keeps adjacent runs within a small size ratio, so each merge is between roughly equal-length runs.
+> - Balanced merges are what bound the total merge cost to `O(n log n)` — unbalanced runs would let merging degrade toward quadratic.
+> - The invariants are the correctness-and-performance contract of the algorithm, which is exactly why a gap in checking them (the 2015 bug) was both a crash and a performance risk, not a cosmetic flaw.
 
-> [!QUESTION]- What did the 2015 formal-verification effort reveal, and how did it tie back to the run stack?
-> de Gouw et al. proved the merge-collapse routine only restored the invariant among the top runs, leaving deeper violations reachable by a crafted run-length sequence. Because the run-length stack was pre-sized assuming the invariant held, the violation could overflow it into an `ArrayIndexOutOfBoundsException`. The stopgap enlarged the stack; the real fix widened the invariant check to also test the run below the top three.
-
-> [!QUESTION]- Why must descending-run detection use strict `>` rather than `>=`?
-> A descending run is reversed in place. If detection used `>=`, it would reverse stretches of equal keys and silently swap their relative order, breaking stability. Strict descent guarantees equal keys never sit inside a run that gets reversed, so the reversal preserves input order.
+> [!QUESTION]- What did formal verification reveal about Tim sort in 2015?
+>
+> - de Gouw et al. attempted to prove the Java/Python merge-collapse routine correct and instead found the invariant was only checked on the top runs, leaving deeper violations possible.
+> - A crafted run-length pattern could break the invariant, and since the merge stack was sized assuming the invariant held, it could overflow and throw an out-of-bounds exception.
+> - The stopgap fix enlarged the stack; the invariant check was subsequently corrected to actually restore the property.
+> - It is a concrete case where code deployed to hundreds of millions of users for years still harbored an adversarially reachable crash — evidence that testing and ubiquity are not substitutes for a proof of a loop invariant.
 
 ## References
 
-- [CPython `listsort.txt` (Tim Peters)](https://github.com/python/cpython/blob/main/Objects/listsort.txt) — the original design note deriving run detection, `minrun`, galloping, and the merge-pattern rationale.
-- [OpenJDK `TimSort.java`](https://github.com/openjdk/jdk/blob/master/src/java.base/share/classes/java/util/TimSort.java) — production source for `mergeCollapse`, the run-length stack, and the `MIN_GALLOP` threshold, including the post-2015 invariant fix.
-- [OpenJDK's `java.utils.Collection.sort()` is broken: The Good, the Bad and the Worst Case (de Gouw, Rot, de Boer, Bubel, Hähnle, CAV 2015)](https://doi.org/10.1007/978-3-319-21690-4_16) — the KeY-prover paper on the merge-stack invariant defect, the reachable crash, and both fixes.
-- [Timsort (Wikipedia)](https://en.wikipedia.org/wiki/Timsort) — overview of runs, `minrun`, galloping, the merge invariants, and the verification bug.
+- [Timsort (Wikipedia)](https://en.wikipedia.org/wiki/Timsort) — runs, `minrun`, galloping, the merge invariants, and the verification bug.
+- [CPython listsort.txt (Tim Peters)](https://github.com/python/cpython/blob/main/Objects/listsort.txt) — the original design note explaining run detection, galloping, and the merge-pattern rationale.
+- [OpenJDK's java.utils.Collection.sort() is broken (de Gouw et al., 2015)](http://envisage-project.eu/proving-android-java-and-python-sorting-algorithm-is-broken-and-how-to-fix-it/) — the formal-verification write-up of the merge-stack bug and its fix.

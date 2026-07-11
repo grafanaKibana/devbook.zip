@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.359Z
-modified: 2026-07-08T15:01:12.360Z
-published: 2026-07-08T15:01:12.360Z
+created: 2026-07-11T18:16:59.263Z
+modified: 2026-07-11T18:16:59.264Z
+published: 2026-07-11T18:16:59.264Z
 topic:
   - Architecture
 subtopic:
   - Application Architecture
+summary: Structures an application into layers with clear responsibilities and strict dependency directions, isolating business rules from infrastructure details.
 level:
   - "4"
 priority: High

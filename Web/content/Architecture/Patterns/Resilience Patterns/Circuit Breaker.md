@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.485Z
-modified: 2026-07-08T15:01:12.486Z
-published: 2026-07-08T15:01:12.486Z
+created: 2026-07-11T18:17:48.024Z
+modified: 2026-07-11T18:17:48.032Z
+published: 2026-07-11T18:17:48.032Z
 topic:
   - Architecture
 subtopic:
   - Patterns
+summary: Stops repeated calls to a failing dependency so the system fails fast instead of failing slowly.
 level:
   - "3"
 priority: High

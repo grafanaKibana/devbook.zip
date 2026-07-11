@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.387Z
-modified: 2026-07-08T15:01:12.387Z
-published: 2026-07-08T15:01:12.387Z
+created: 2026-07-11T18:18:33.060Z
+modified: 2026-07-11T18:18:33.060Z
+published: 2026-07-11T18:18:33.060Z
 topic:
   - Architecture
 subtopic:
   - Patterns
+summary: Defines a family of algorithms behind a common interface and makes them interchangeable at runtime, selected by the client.
 level:
   - "2"
 priority: High

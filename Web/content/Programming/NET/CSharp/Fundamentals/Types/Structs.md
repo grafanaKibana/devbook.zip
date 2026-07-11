@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.657Z
-modified: 2026-07-08T15:01:12.657Z
-published: 2026-07-08T15:01:12.657Z
+created: 2026-07-11T18:27:28.211Z
+modified: 2026-07-11T18:27:28.211Z
+published: 2026-07-11T18:27:28.211Z
 topic:
   - Programming
 subtopic:
   - NET
+summary: A struct is a value type holding its value inline, so assignment copies the value; best for small immutable data.
 level:
   - "4"
 priority: Medium

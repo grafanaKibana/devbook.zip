@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.323Z
-modified: 2026-07-08T15:01:12.323Z
-published: 2026-07-08T15:01:12.323Z
+created: 2026-07-11T18:31:25.832Z
+modified: 2026-07-11T18:31:25.832Z
+published: 2026-07-11T18:31:25.832Z
 topic:
   - AI & ML
 subtopic:
   - LLM
+summary: Query translation rewrites a user question into one or more retrieval-optimized variants so phrasing mismatches with documents don't sink retrieval.
 level:
   - "2"
 priority: High

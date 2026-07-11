@@ -1,11 +1,12 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.523Z
-modified: 2026-07-08T15:01:12.523Z
-published: 2026-07-08T15:01:12.523Z
+created: 2026-07-11T18:10:20.456Z
+modified: 2026-07-11T18:10:20.464Z
+published: 2026-07-11T18:10:20.464Z
 topic:
   - Data Persistence
 subtopic: []
+summary: Storing a copy of data closer to consumers so repeated reads skip the slower origin; the hard part is invalidation.
 level:
   - "4"
 priority: High

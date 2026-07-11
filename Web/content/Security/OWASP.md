@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.682Z
-modified: 2026-07-08T15:01:12.683Z
-published: 2026-07-08T15:01:12.683Z
+created: 2026-07-11T18:13:52.200Z
+modified: 2026-07-11T18:13:52.207Z
+published: 2026-07-11T18:13:52.207Z
 topic:
   - Security
 subtopic:
   - Security
+summary: The non-profit behind the OWASP Top 10, the baseline ranked checklist of the most critical web application security risks.
 level:
   - "4"
 priority: High

@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.536Z
-modified: 2026-07-08T15:01:12.536Z
-published: 2026-07-08T15:01:12.536Z
+created: 2026-07-11T18:13:55.511Z
+modified: 2026-07-11T18:13:55.511Z
+published: 2026-07-11T18:13:55.511Z
 topic:
   - Development Practices
 subtopic:
   - Paradigms
+summary: OOP models a system as interacting objects that combine state and behaviour via encapsulation, abstraction, inheritance, and polymorphism.
 level:
   - "4"
 priority: Medium

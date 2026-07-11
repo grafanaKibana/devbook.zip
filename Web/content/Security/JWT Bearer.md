@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.682Z
-modified: 2026-07-08T15:01:12.682Z
-published: 2026-07-08T15:01:12.682Z
+created: 2026-07-11T18:13:49.705Z
+modified: 2026-07-11T18:13:49.710Z
+published: 2026-07-11T18:13:49.710Z
 topic:
   - Security
 subtopic:
   - Security
+summary: A compact, self-contained signed token sent in the Authorization header and validated statelessly without a database lookup.
 level:
   - "4"
 priority: High

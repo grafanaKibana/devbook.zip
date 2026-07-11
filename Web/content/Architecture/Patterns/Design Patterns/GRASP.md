@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.471Z
-modified: 2026-07-08T15:01:12.473Z
-published: 2026-07-08T15:01:12.473Z
+created: 2026-07-11T18:18:16.766Z
+modified: 2026-07-11T18:18:16.766Z
+published: 2026-07-11T18:18:16.766Z
 topic:
   - Architecture
 subtopic:
   - Patterns
+summary: Nine principles for deciding which class or object should be responsible for a given behavior in object-oriented design.
 level:
   - "1"
 priority: High

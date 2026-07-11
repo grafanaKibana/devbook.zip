@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.537Z
-modified: 2026-07-08T15:01:12.537Z
-published: 2026-07-08T15:01:12.537Z
+created: 2026-07-11T18:13:59.027Z
+modified: 2026-07-11T18:13:59.029Z
+published: 2026-07-11T18:13:59.029Z
 topic:
   - Development Practices
 subtopic:
   - Paradigms
+summary: A unit test verifies a small, isolated piece of behaviour quickly and deterministically, with dependencies replaced by test doubles.
 level:
   - "4"
 priority: High

@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.333Z
-modified: 2026-07-08T15:01:12.334Z
-published: 2026-07-08T15:01:12.334Z
+created: 2026-07-11T18:30:03.710Z
+modified: 2026-07-11T18:30:03.713Z
+published: 2026-07-11T18:30:03.713Z
 topic:
   - AI & ML
 subtopic:
   - Machine Learning
+summary: Five levels of AI involvement in a task, from fully human-driven to fully autonomous, framing how much to trust a system as confidence grows.
 level:
   - "1"
 priority: Low

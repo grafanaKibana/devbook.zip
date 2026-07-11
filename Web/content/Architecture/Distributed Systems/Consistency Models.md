@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.363Z
-modified: 2026-07-08T15:01:12.364Z
-published: 2026-07-08T15:01:12.364Z
+created: 2026-07-11T18:17:28.528Z
+modified: 2026-07-11T18:17:28.531Z
+published: 2026-07-11T18:17:28.531Z
 topic:
   - Architecture
 subtopic:
   - Distributed Systems
+summary: Definitions of what value a read may return relative to writes, from linearizable down to eventual, and their coordination costs.
 level:
   - "2"
 priority: High

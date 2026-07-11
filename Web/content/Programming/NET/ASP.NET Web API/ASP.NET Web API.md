@@ -1,14 +1,15 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.615Z
-modified: 2026-07-08T15:01:12.615Z
-published: 2026-07-08T15:01:12.615Z
+created: 2026-07-11T18:26:45.995Z
+modified: 2026-07-11T18:26:46.010Z
+published: 2026-07-11T18:26:46.010Z
 tags:
   - FolderNote
 topic:
   - Programming
 subtopic:
   - NET
+summary: ASP.NET Core runs each HTTP request through a middleware pipeline, then dispatches it to a Minimal API handler or controller action.
 level:
   - "4"
 priority: High
@@ -20,6 +21,169 @@ status: Creation
 ASP.NET Core Web API runs each HTTP request through a middleware pipeline, then dispatches it to an endpoint (a Minimal API handler or a controller action).
 In practice, you design a Web API by choosing where logic lives (middleware vs filters vs endpoint code), how you validate and map inputs, and how you handle errors and auth.
 This matters because most production issues come from cross-cutting concerns: auth, validation, versioning, serialization, and observability.
+
+<nav style="--map-accent: 244, 63, 94;" class="folder-structure-map" aria-label="ASP.NET Web API section map"><div class="folder-map-children"><article class="folder-map-node"><div class="folder-map-node-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="folder-map-entry-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line y2="13" y1="13" x2="8" x1="16"/><line y2="17" y1="17" x2="8" x1="16"/><line y2="9" y1="9" x2="8" x1="10"/></svg></span><span class="folder-map-node-title" title="Authentication">Authentication</span></span></div><p>Authentication verifies who a caller is; middleware reads credentials and populates HttpContext.User with a ClaimsPrincipal.</p></div><span class="folder-map-hit"><a class="internal-link" href="Home/Programming/NET/ASP.NET Web API/Authentication.md" data-tooltip-position="top" aria-label="Authentication">Authentication</a></span></article><article class="folder-map-node"><div class="folder-map-node-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="folder-map-entry-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line y2="13" y1="13" x2="8" x1="16"/><line y2="17" y1="17" x2="8" x1="16"/><line y2="9" y1="9" x2="8" x1="10"/></svg></span><span class="folder-map-node-title" title="Authorization">Authorization</span></span></div><p>Authorization determines what an authenticated user may do, evaluating the ClaimsPrincipal via role-based, claims-based, or policy-based models.</p></div><span class="folder-map-hit"><a class="internal-link" href="Home/Programming/NET/ASP.NET Web API/Authorization.md" data-tooltip-position="top" aria-label="Authorization">Authorization</a></span></article><article class="folder-map-node"><div class="folder-map-node-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="folder-map-entry-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line y2="13" y1="13" x2="8" x1="16"/><line y2="17" y1="17" x2="8" x1="16"/><line y2="9" y1="9" x2="8" x1="10"/></svg></span><span class="folder-map-node-title" title="CORS">CORS</span></span></div><p>CORS is a browser security mechanism controlling which origins may call your API, permitted via server response headers.</p></div><span class="folder-map-hit"><a class="internal-link" href="Home/Programming/NET/ASP.NET Web API/CORS.md" data-tooltip-position="top" aria-label="CORS">CORS</a></span></article><article class="folder-map-node"><div class="folder-map-node-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="folder-map-entry-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line y2="13" y1="13" x2="8" x1="16"/><line y2="17" y1="17" x2="8" x1="16"/><line y2="9" y1="9" x2="8" x1="10"/></svg></span><span class="folder-map-node-title" title="Dependency Injection">Dependency Injection</span></span></div><p>ASP.NET Core's built-in IoC container manages service lifetimes and injects dependencies via constructor injection throughout the app.</p></div><span class="folder-map-hit"><a class="internal-link" href="Home/Programming/NET/ASP.NET Web API/Dependency Injection.md" data-tooltip-position="top" aria-label="Dependency Injection">Dependency Injection</a></span></article><article class="folder-map-node"><div class="folder-map-node-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="folder-map-entry-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line y2="13" y1="13" x2="8" x1="16"/><line y2="17" y1="17" x2="8" x1="16"/><line y2="9" y1="9" x2="8" x1="10"/></svg></span><span class="folder-map-node-title" title="Filters">Filters</span></span></div><p>Filters run logic before and after stages of controller action execution, for cross-cutting concerns tightly coupled to MVC actions.</p></div><span class="folder-map-hit"><a class="internal-link" href="Home/Programming/NET/ASP.NET Web API/Filters.md" data-tooltip-position="top" aria-label="Filters">Filters</a></span></article><article class="folder-map-node"><div class="folder-map-node-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="folder-map-entry-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line y2="13" y1="13" x2="8" x1="16"/><line y2="17" y1="17" x2="8" x1="16"/><line y2="9" y1="9" x2="8" x1="10"/></svg></span><span class="folder-map-node-title" title="Middlewares">Middlewares</span></span></div><p>ASP.NET Core middleware form the HTTP request pipeline, each wrapping the next to process requests inbound and responses outbound.</p></div><span class="folder-map-hit"><a class="internal-link" href="Home/Programming/NET/ASP.NET Web API/Middlewares.md" data-tooltip-position="top" aria-label="Middlewares">Middlewares</a></span></article></div><style>
+.folder-structure-map {
+  --map-accent: 16, 185, 129;
+  --map-gap: 0.75rem;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0.5rem 0 0.75rem;
+  container-name: folder-map;
+  container-type: inline-size;
+}
+.folder-map-children {
+  /* Flex (not grid) so each card sizes to its own title — a long title widens
+     its card and pushes to another row instead of being truncated, and rows
+     grow to fill the width with no empty tracks when there are few cards. */
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--map-gap);
+}
+.folder-map-node {
+  position: relative;
+  /* No overflow:hidden here: on a flex item that collapses min-width:auto to 0,
+     letting the card shrink below its title + note-count and clip them. Without
+     it, the card's min size is its content, so long titles widen the card (and
+     wrap to another row) instead of being cut off. The accent gradient gets its
+     own border-radius below to stay inside the rounded corners. */
+  flex: 1 1 12rem;
+  min-height: 2.75rem;
+  box-sizing: border-box;
+  border: 1px solid var(--background-modifier-border, var(--lightgray, #d8dee9));
+  border-radius: var(--radius-m, 0.55rem);
+  background-color: var(--background-primary, var(--light, #ffffff));
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+}
+.folder-map-node::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 150% 175% at -22% -38%,
+    rgba(var(--map-accent), 0.09) 0%,
+    rgba(var(--map-accent), 0.04) 38%,
+    rgba(var(--map-accent), 0.014) 66%,
+    transparent 90%
+  );
+  opacity: 0.78;
+  transition: opacity 150ms ease;
+}
+.folder-map-node:hover,
+.folder-map-node:focus-within {
+  border-color: rgba(var(--map-accent), 0.55);
+  background-color: color-mix(in srgb, rgb(var(--map-accent)) 2.5%, var(--background-primary, var(--light, #ffffff)));
+  box-shadow: 0 0.45rem 1.1rem rgba(0, 0, 0, 0.08);
+  transform: translateY(-0.125rem);
+}
+.folder-map-node:hover::before,
+.folder-map-node:focus-within::before {
+  opacity: 1;
+}
+.folder-map-node-body {
+  position: relative;
+  z-index: 0;
+  display: flex;
+  min-height: 2.75rem;
+  box-sizing: border-box;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0.5rem 0.75rem;
+}
+.folder-map-node-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.folder-map-node-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.folder-map-entry-icon {
+  display: flex;
+  width: 1.1rem;
+  height: 1.1rem;
+  flex: 0 0 auto;
+  color: rgb(var(--map-accent));
+}
+.folder-map-entry-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.folder-map-node-title {
+  display: block;
+  margin: 0;
+  color: var(--text-normal, var(--dark, #1f2937));
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+.folder-map-node p {
+  display: none;
+  margin: 0.45rem 0 0;
+  color: var(--text-muted, var(--darkgray, #5f6b7a));
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+.folder-map-node-count {
+  display: block;
+  flex: 0 0 auto;
+  color: var(--text-muted, var(--darkgray, #5f6b7a));
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+.folder-map-hit {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+.folder-map-hit a {
+  position: absolute;
+  inset: 0;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  border-radius: var(--radius-m, 0.55rem);
+  background: transparent !important;
+  font-size: 0;
+}
+.folder-map-hit a:focus-visible {
+  outline: 2px solid rgb(var(--map-accent));
+  outline-offset: -0.3rem;
+}
+.folder-map-empty {
+  margin: 1rem 0 0;
+  color: var(--text-muted, var(--darkgray, #5f6b7a));
+  font-size: 0.875rem;
+}
+@container folder-map (min-width: 40rem) {
+  .folder-map-node {
+    min-height: 6rem;
+  }
+  .folder-map-node-body {
+    min-height: 6rem;
+    justify-content: flex-start;
+    padding: 0.85rem 0.9rem;
+  }
+  .folder-map-node p { display: block; }
+}
+@container folder-map (min-width: 64rem) {
+  .folder-map-node,
+  .folder-map-node-body { min-height: 6.75rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .folder-map-node { transition: none; }
+  .folder-map-node::before { transition: none; }
+  .folder-map-node:hover,
+  .folder-map-node:focus-within { transform: none; }
+}
+</style></nav>
 
 ### Example
 
@@ -67,7 +231,7 @@ public sealed class OrdersController : ControllerBase
 > Put authentication and authorization in the pipeline so endpoints can assume an authenticated principal.
 > Use middleware for auth and use endpoint metadata and policies to decide access per endpoint.
 
-## Links
+## References
 
 - [ASP.NET Core web API docs](https://learn.microsoft.com/en-us/aspnet/core/web-api/?view=aspnetcore-8.0)
 - [ASP.NET Core middleware](https://learn.microsoft.com/aspnet/core/fundamentals/middleware/?view=aspnetcore-10.0)

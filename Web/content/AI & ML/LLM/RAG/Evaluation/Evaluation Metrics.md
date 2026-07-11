@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.318Z
-modified: 2026-07-10T08:56:46.391Z
-published: 2026-07-10T08:56:46.391Z
+created: 2026-07-11T18:30:48.423Z
+modified: 2026-07-11T18:30:48.423Z
+published: 2026-07-11T18:30:48.423Z
 topic:
   - AI & ML
 subtopic:
   - LLM
+summary: Retrieval, generation, and end-to-end metrics each answer a different question, making a RAG regression diagnosable to a specific layer.
 level:
   - "2"
 priority: High

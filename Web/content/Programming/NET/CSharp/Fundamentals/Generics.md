@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.653Z
-modified: 2026-07-08T15:01:12.653Z
-published: 2026-07-08T15:01:12.653Z
+created: 2026-07-11T18:27:13.876Z
+modified: 2026-07-11T18:27:13.876Z
+published: 2026-07-11T18:27:13.876Z
 topic:
   - Programming
 subtopic:
   - NET
+summary: Type-safe, reusable code without duplicating logic per type, covering constraints, variance, generic math, and reflection over generics.
 level:
   - "4"
 priority: Medium

@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.476Z
-modified: 2026-07-08T15:01:12.477Z
-published: 2026-07-08T15:01:12.477Z
+created: 2026-07-11T18:18:19.992Z
+modified: 2026-07-11T18:18:19.993Z
+published: 2026-07-11T18:18:19.993Z
 topic:
   - Architecture
 subtopic:
   - Patterns
+summary: Proxy provides a surrogate for another object to control access to it — deferring, caching, or authorizing calls transparently.
 level:
   - "3"
 priority: High

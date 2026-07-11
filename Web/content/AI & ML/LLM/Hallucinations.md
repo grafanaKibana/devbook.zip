@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.305Z
-modified: 2026-07-08T15:01:12.306Z
-published: 2026-07-08T15:01:12.306Z
+created: 2026-07-11T18:31:12.313Z
+modified: 2026-07-11T18:31:12.313Z
+published: 2026-07-11T18:31:12.313Z
 topic:
   - AI & ML
 subtopic:
   - LLM
+summary: A correctness failure where an LLM produces fluent, confident output unsupported by evidence, because it optimizes next-token likelihood, not truth.
 level:
   - "3"
 priority: Medium

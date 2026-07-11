@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.650Z
-modified: 2026-07-08T15:01:12.651Z
-published: 2026-07-08T15:01:12.651Z
+created: 2026-07-11T18:27:45.835Z
+modified: 2026-07-11T18:27:45.835Z
+published: 2026-07-11T18:27:45.835Z
 topic:
   - Programming
 subtopic:
   - NET
+summary: Task is .NET's core abstraction for asynchronous work, modeling eventual completion, result/error propagation, and composition without managing raw threads.
 level:
   - "4"
 priority: High

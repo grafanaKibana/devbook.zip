@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.673Z
-modified: 2026-07-08T15:01:12.673Z
-published: 2026-07-08T15:01:12.673Z
+created: 2026-07-11T18:13:47.331Z
+modified: 2026-07-11T18:13:47.333Z
+published: 2026-07-11T18:13:47.333Z
 topic:
   - Security
 subtopic:
   - Authentication
+summary: Checks whether a user may act on a specific resource instance ('can this user edit this document?'), not just a resource type.
 level:
   - "3"
 priority: High

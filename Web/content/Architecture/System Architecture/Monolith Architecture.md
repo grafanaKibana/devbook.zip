@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.490Z
-modified: 2026-07-08T15:01:12.490Z
-published: 2026-07-08T15:01:12.490Z
+created: 2026-07-11T18:17:26.205Z
+modified: 2026-07-11T18:17:26.234Z
+published: 2026-07-11T18:17:26.234Z
 topic:
   - Architecture
 subtopic:
   - System Architecture
+summary: An application deployed as a single unit — one process, one codebase, one artifact — with all components sharing the same database.
 level:
   - "4"
 priority: Medium

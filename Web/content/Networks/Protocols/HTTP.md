@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.542Z
-modified: 2026-07-08T15:01:12.542Z
-published: 2026-07-08T15:01:12.542Z
+created: 2026-07-11T17:57:54.408Z
+modified: 2026-07-11T17:57:54.408Z
+published: 2026-07-11T17:57:54.408Z
 topic:
   - Networks
 subtopic:
   - Protocols
+summary: HTTP is a stateless request-response protocol that carries nearly all web and API traffic in modern systems.
 level:
   - "3"
 priority: High

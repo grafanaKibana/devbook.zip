@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.657Z
-modified: 2026-07-08T15:01:12.657Z
-published: 2026-07-08T15:01:12.657Z
+created: 2026-07-11T18:27:25.312Z
+modified: 2026-07-11T18:27:25.312Z
+published: 2026-07-11T18:27:25.312Z
 topic:
   - Programming
 subtopic:
   - NET
+summary: A string in C# is an immutable reference type where assignment copies references but any text change creates a new value.
 level:
   - "4"
 priority: Medium

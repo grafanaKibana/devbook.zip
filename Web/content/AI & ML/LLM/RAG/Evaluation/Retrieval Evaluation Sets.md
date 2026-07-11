@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.322Z
-modified: 2026-07-08T15:01:12.322Z
-published: 2026-07-08T15:01:12.322Z
+created: 2026-07-11T18:30:49.858Z
+modified: 2026-07-11T18:30:49.859Z
+published: 2026-07-11T18:30:49.859Z
 topic:
   - AI & ML
 subtopic:
   - LLM
+summary: A retrieval eval set pairs queries with their relevant chunks; the hard parts are labeling which chunks count and chunk-anchored synthetic generation.
 level:
   - "2"
 priority: High

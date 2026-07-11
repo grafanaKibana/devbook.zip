@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.476Z
-modified: 2026-07-08T15:01:12.476Z
-published: 2026-07-08T15:01:12.476Z
+created: 2026-07-11T18:18:15.980Z
+modified: 2026-07-11T18:18:15.981Z
+published: 2026-07-11T18:18:15.981Z
 topic:
   - Architecture
 subtopic:
   - Patterns
+summary: Facade provides a simplified high-level interface over a complex subsystem, coordinating its components so clients avoid manual orchestration.
 level:
   - "2"
 priority: High

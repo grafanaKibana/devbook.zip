@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.331Z
-modified: 2026-07-08T15:01:12.332Z
-published: 2026-07-08T15:01:12.332Z
+created: 2026-07-11T18:30:36.476Z
+modified: 2026-07-11T18:30:36.477Z
+published: 2026-07-11T18:30:36.477Z
 topic:
   - AI & ML
 subtopic:
   - Machine Learning
+summary: "Classification evaluation quantifies whether a model assigns the right label: measuring false alarms versus misses, picking an operating point, and preventing regressions."
 level:
   - "3"
 priority: Medium

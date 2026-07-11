@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.373Z
-modified: 2026-07-08T15:01:12.374Z
-published: 2026-07-08T15:01:12.374Z
+created: 2026-07-11T18:17:36.440Z
+modified: 2026-07-11T18:17:36.443Z
+published: 2026-07-11T18:17:36.443Z
 topic:
   - Architecture
 subtopic:
   - Distributed Systems
+summary: Windows-native, disk-durable message queuing for reliable asynchronous messaging in on-premise environments; now a legacy technology.
 level:
   - "2"
 priority: High

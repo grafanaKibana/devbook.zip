@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.357Z
-modified: 2026-07-08T15:01:12.359Z
-published: 2026-07-08T15:01:12.359Z
+created: 2026-07-11T18:16:57.319Z
+modified: 2026-07-11T18:16:57.319Z
+published: 2026-07-11T18:16:57.319Z
 topic:
   - Architecture
 subtopic:
   - Application Architecture
+summary: "Organizes software so business policy is protected from technical details via the Dependency Rule: source dependencies point inward toward business rules."
 level:
   - "3"
 priority: High

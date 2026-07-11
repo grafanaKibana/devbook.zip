@@ -1,11 +1,12 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.530Z
-modified: 2026-07-08T15:01:12.531Z
-published: 2026-07-08T15:01:12.531Z
+created: 2026-07-11T18:13:48.078Z
+modified: 2026-07-11T18:13:48.078Z
+published: 2026-07-11T18:13:48.078Z
 topic:
   - DevOps
 subtopic: []
+summary: IaC defines and provisions infrastructure through version-controlled definition files, making environments reviewable, repeatable, and auditable like application code.
 level:
   - "3"
 priority: High

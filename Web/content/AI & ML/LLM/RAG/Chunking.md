@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.315Z
-modified: 2026-07-08T15:01:12.316Z
-published: 2026-07-08T15:01:12.316Z
+created: 2026-07-11T18:31:20.272Z
+modified: 2026-07-11T18:31:20.272Z
+published: 2026-07-11T18:31:20.272Z
 topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "Chunking sets the unit of retrieval: too wide adds noise, too narrow splits constraints; aim for coherent, traceable chunks."
 level:
   - "2"
 priority: High

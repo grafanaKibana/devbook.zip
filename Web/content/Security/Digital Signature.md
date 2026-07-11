@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.675Z
-modified: 2026-07-08T15:01:12.679Z
-published: 2026-07-08T15:01:12.679Z
+created: 2026-07-11T18:13:45.013Z
+modified: 2026-07-11T18:13:45.014Z
+published: 2026-07-11T18:13:45.014Z
 topic:
   - Security
 subtopic:
   - Security
+summary: Proves a message was created by a specific party (authenticity) and unchanged since signing (integrity), without hiding content.
 level:
   - "2"
 priority: Medium

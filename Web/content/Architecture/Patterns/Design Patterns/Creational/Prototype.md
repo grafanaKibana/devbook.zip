@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.468Z
-modified: 2026-07-08T15:01:12.468Z
-published: 2026-07-08T15:01:12.468Z
+created: 2026-07-11T18:18:07.584Z
+modified: 2026-07-11T18:18:07.585Z
+published: 2026-07-11T18:18:07.585Z
 topic:
   - Architecture
 subtopic:
   - Patterns
+summary: Creates new objects by copying an existing instance rather than constructing from scratch, with the prototype knowing how to clone itself.
 level:
   - "2"
 priority: High

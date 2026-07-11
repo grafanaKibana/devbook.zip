@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.360Z
-modified: 2026-07-08T15:01:12.360Z
-published: 2026-07-08T15:01:12.360Z
+created: 2026-07-11T18:17:03.030Z
+modified: 2026-07-11T18:17:03.140Z
+published: 2026-07-11T18:17:03.140Z
 topic:
   - Architecture
 subtopic:
   - Application Architecture
+summary: UI architecture patterns that separate data, presentation, and interaction logic; they differ in how the View and logic layer communicate.
 level:
   - "4"
 priority: High

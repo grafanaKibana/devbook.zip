@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.466Z
-modified: 2026-07-08T15:01:12.467Z
-published: 2026-07-08T15:01:12.467Z
+created: 2026-07-11T18:18:02.443Z
+modified: 2026-07-11T18:18:02.446Z
+published: 2026-07-11T18:18:02.446Z
 topic:
   - Architecture
 subtopic:
   - Patterns
+summary: Separates construction of a complex object from its representation, accumulating configuration through a fluent API validated on a final Build() call.
 level:
   - "3"
 priority: High

@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.386Z
-modified: 2026-07-08T15:01:12.387Z
-published: 2026-07-08T15:01:12.387Z
+created: 2026-07-11T18:18:31.040Z
+modified: 2026-07-11T18:18:31.040Z
+published: 2026-07-11T18:18:31.040Z
 topic:
   - Architecture
 subtopic:
   - Patterns
+summary: Extracts state-specific behavior into separate classes; the context delegates to its current state, which drives transitions.
 level:
   - "3"
 priority: High

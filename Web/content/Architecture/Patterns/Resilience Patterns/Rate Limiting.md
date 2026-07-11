@@ -1,14 +1,15 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.486Z
-modified: 2026-07-08T15:01:12.487Z
-published: 2026-07-08T15:01:12.487Z
+created: 2026-07-11T18:17:52.602Z
+modified: 2026-07-11T18:17:52.683Z
+published: 2026-07-11T18:17:52.683Z
 tags:
   - FolderNote
 topic:
   - Architecture
 subtopic:
   - Patterns
+summary: Caps how many requests a client can make in a period so one caller cannot exhaust shared resources.
 priority: High
 level:
   - "3"

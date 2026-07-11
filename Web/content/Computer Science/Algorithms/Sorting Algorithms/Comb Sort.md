@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-10T19:08:15.115Z
-modified: 2026-07-10T19:08:15.129Z
-published: 2026-07-10T19:08:15.129Z
+created: 2026-07-11T18:23:54.261Z
+modified: 2026-07-11T18:23:54.266Z
+published: 2026-07-11T18:23:54.266Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Bubble sort with a shrinking gap that kills turtles, curing bubble sort's quadratic flaw in practice.
 level:
   - "4"
 priority: Medium
@@ -15,112 +16,101 @@ status: Creation
 
 # Intro
 
-[[Bubble Sort]] compares adjacent elements and swaps the inverted ones, sweeping until a pass makes no swap. Its cost comes from one asymmetry: a small value stranded near the end — a _turtle_ — moves left at most one position per pass, so it needs `O(n)` passes to reach the front. Large values near the front ("rabbits") race right in a single pass; the mismatch is what pins bubble sort at `Θ(n²)`.
+Comb sort is [[Bubble Sort]] with a shrinking gap. Where bubble sort always compares adjacent elements (gap `1`), comb sort starts with a large gap — the array length divided by a shrink factor of about `1.3` — and compares elements that far apart, swapping any out of order, then divides the gap by `1.3` again on each pass until it reaches `1`, after which it finishes as an ordinary bubble sort. The point of the gap is to kill **turtles**: small values sitting near the _end_ of the array. In plain bubble sort a turtle can only move left one position per pass, so a small element stranded at the tail needs `O(n)` passes to crawl home, which is exactly why bubble sort is slow. A wide gap lets that element leap most of the way in a single comparison.
 
-Comb sort keeps the compare-and-swap but widens the distance between the two compared elements. It starts with a gap of about `n / 1.3` instead of `1`, compares `a[i]` against `a[i + gap]` across the array, then divides the gap by roughly `1.3` on each pass until it reaches `1`. A wide gap carries a turtle up to `gap` positions toward the front in one swap instead of one step at a time; the shrinking gap resolves the increasingly local disorder that remains, and the final `gap == 1` pass is an ordinary bubble sort over a nearly sorted array. Comb sort is to [[Bubble Sort]] what [[Shell Sort]] is to [[Insertion Sort]] — the same gapped-pass idea layered onto a different base comparison.
+Comb sort is a genuine improvement over bubble sort — it turns most quadratic inputs into something close to `O(n log n)` in practice — but it is not competitive with [[Shell Sort]] (its gap-based cousin built on [[Insertion Sort]] instead), let alone [[Quick Sort]] or [[Introsort]]. Its real value is pedagogical: it isolates and names the single structural flaw (turtles) that makes bubble sort quadratic, and shows that one cheap change removes it. Do not ship comb sort; ship a library sort.
 
-**Core condition:** comparison-based, in-place swaps → each pass compares elements a shrinking gap apart → wide early gaps evict the turtles that keep bubble sort quadratic.
+## How It Works
 
-A trace of comb sort on a small array would show the gap contracting across passes as gapped pairs are compared and swapped.
+1. **Initialize** `gap = n`.
+2. **Each pass**: set `gap = floor(gap / 1.3)` (clamped to a minimum of `1`). Walk `i` from `0` while `i + gap < n`, comparing `a[i]` with `a[i + gap]` and swapping if they are out of order.
+3. **Repeat** passes until a full pass runs with `gap == 1` _and_ performs no swaps — at that point the array is sorted.
 
-> [!NOTE] Visualization pending
-> Planned StepTrace: a shrinking-gap card showing gapped compare-and-swap passes with the gap divided by ~1.3 each pass until it reaches 1. No matching renderer exists in `engine.js` yet.
+The shrink factor `1.3` is empirical: it was found (by Lacey and Box, and later refined by Dobosiewicz) to minimize total comparisons across random inputs. A useful refinement is the "combsort11" rule — when the computed gap would be `9` or `10`, force it to `11` — which avoids a bad residual pattern and measurably speeds convergence.
 
-## Why the gap accelerates the sort
+Worst case is still `O(n²)` (you can construct inputs where the gap passes achieve little). In practice comb sort runs in roughly `O(n² / 2^p)` where `p` is the number of gap shrinks, which for random data behaves close to `O(n log n)`. Space is `O(1)`, in place. Comb sort is **not stable**: a wide-gap swap can jump one equal key past another.
 
-A pass at gap `g` walks `i` from `0` while `i + g < n`, comparing `a[i]` with `a[i + g]` and swapping any inverted pair. Unlike [[Shell Sort]], the pass does not fully sort the `g` interleaved subsequences — each gap value gets a single sweep before the gap shrinks again. What one wide sweep does change is reach: an element far from its correct side moves up to `g` positions toward it per swap, so a turtle at the tail travels in leaps of `g` rather than steps of `1`.
+## Example
 
-Correctness does not come from the wide passes; they only rearrange. The loop terminates only when a full pass at `gap == 1` performs no swap. A gap-1 pass with no swap means no adjacent pair is inverted, which for a comparison sort is exactly the certificate that the array is sorted. The wide gaps are a heuristic that leaves few inversions for that final bubble phase to resolve — drop them and comb sort is bubble sort; keep them and the gap-1 phase starts from nearly ordered input.
+```csharp
+public static void CombSort(int[] a)
+{
+    int n = a.Length;
+    int gap = n;
+    bool swapped = true;
 
-The shrink factor governs how fast the gap collapses. `1.3` is empirical: Lacey and Box selected it, and later analysis refined it, because it minimized total comparisons on random input. A larger factor shrinks the gap too slowly and wastes passes; a smaller one collapses toward `gap == 1` before the wide passes have displaced the turtles.
+    while (gap > 1 || swapped)
+    {
+        // Shrink the gap by ~1.3 each pass, floor at 1.
+        gap = (int)(gap / 1.3);
+        if (gap < 1) gap = 1;
 
-## Complexity
+        swapped = false;
+        for (int i = 0; i + gap < n; i++)
+        {
+            if (a[i] > a[i + gap])
+            {
+                (a[i], a[i + gap]) = (a[i + gap], a[i]);
+                swapped = true;
+            }
+        }
+    }
+}
+```
 
-| Case | Time | Auxiliary space | Cause |
+Take `[5, 2, 8, 1, 9, 3, 7, 0]` (`n = 8`). The first gap is `8 / 1.3 = 6`, comparing `a[0]↔a[6]` and `a[1]↔a[7]` — this immediately drags the trailing `0` (a turtle) six positions left in one swap, work that plain bubble sort would spread across six separate passes. Subsequent gaps `4, 3, 2, 1` clean up the rest, and the final `gap == 1` pass confirms order.
+
+## Diagram
+
+```mermaid
+flowchart TD
+  A[Input array gap equals n] --> B[Shrink gap by factor of 1.3]
+  B --> C[Clamp gap to at least one]
+  C --> D[Compare and swap elements gap apart across the array]
+  D --> E{gap is one and no swaps this pass}
+  E -->|No| B
+  E -->|Yes| Z[Array sorted]
+```
+
+## Pitfalls
+
+- **The final gap-1 pass is not optional.** Comb sort is only _guaranteed_ correct because it keeps running full passes until a `gap == 1` pass makes zero swaps — the loop condition is `gap > 1 || swapped`. Stopping when the gap first reaches `1` (without the no-swap check) can leave adjacent inversions the wide passes never touched. This is the same "did anything move" termination test that bubble sort needs.
+- **The shrink factor is not free to change.** `1.3` is empirically tuned; larger factors shrink the gap too slowly (extra passes) and smaller ones collapse to bubble sort too fast (turtles survive). Values that make the gap pass through `9` or `10` also hit a known bad pattern — the combsort11 fix forcing those to `11` exists precisely because a plausible-looking factor degraded performance.
+- **It is still not the right tool.** Comb sort's headline is "better than bubble sort," which is a low bar. Its `O(n²)` worst case remains, it is not stable, and [[Shell Sort]] applies the same shrinking-gap idea to the stronger [[Insertion Sort]] base and wins. In production, reach for [[Introsort]] or [[Tim Sort]]; use comb sort to explain a concept, not to sort data.
+
+## Tradeoffs
+
+| Choice | Comb Sort | Alternative | Decision criteria |
 | --- | --- | --- | --- |
-| Best | `Θ(n log n)` | `O(1)` | Even sorted input runs one sweep per gap value; the gap sequence has `Θ(log n)` terms, each an `O(n)` sweep. There is no `O(n)` early-exit shortcut. |
-| Average | `≈ Θ(n log n)` (empirical) | `O(1)` | Commonly cited for the `1.3` shrink factor and modeled as `Θ(n² / 2^p)` for `p` gap shrinks; measured on random data, not a proven bound. |
-| Worst | `Θ(n²)` | `O(1)` | Adversarial inputs where the wide passes achieve little leave a quadratic gap-1 bubble phase; the bound tracks the chosen shrink factor. |
-
-The average `≈ Θ(n log n)` is an empirical observation on random inputs, not a proven bound. Comb sort has no established sub-quadratic guarantee, and its analysis rests on the specific shrink factor rather than a structural argument like the one behind [[Merge Sort]] or [[Heap Sort]]. Auxiliary space is `O(1)` in every case: the algorithm holds only the current gap and a swap temporary, and the loop is iterative, so no call stack grows.
-
-## Where the guarantees thin out
-
-The performance rests on an empirical constant. `1.3` is not derived from a convergence proof; it is the factor that minimized comparisons in the original experiments. Some gap values also interact badly with real inputs: when the shrink sequence passes through a gap of `9` or `10`, a residual pattern survives that the next pass fails to clear, so the "combsort11" variant forces those gaps to `11`. A hand-tuned special case is a symptom that the sub-quadratic behavior is measured rather than guaranteed — an adversary can still drive the algorithm to `Θ(n²)`.
-
-Gapped swaps also cost stability. Two elements with equal keys can be reordered when a wide-gap swap lifts one past the other, and no later pass restores their input order because comb sort compares by value alone. Bubble sort keeps equal keys in place because it only ever swaps strictly-inverted adjacent pairs; widening the gap is exactly what removes that guarantee. Comb sort is therefore in-place but not stable — unusable where a prior sort order must survive as a tiebreak.
-
-## Reference drawer
-
-> [!ABSTRACT]- Pass structure
->
-> ```mermaid
-> flowchart TD
->   A[Start gap equals n] --> B[Shrink gap by factor 1.3]
->   B --> C[Clamp gap to at least one]
->   C --> D[Sweep and swap pairs a gap apart]
->   D --> E{gap is one and no swaps this pass}
->   E -->|No| B
->   E -->|Yes| Z[Array sorted]
-> ```
-
-> [!EXAMPLE]- C# implementation
->
-> ```csharp
-> public static void CombSort(int[] a)
-> {
->     int n = a.Length;
->     int gap = n;
->     bool swapped = true;
->
->     while (gap > 1 || swapped)
->     {
->         // Shrink the gap by ~1.3 each pass, floor at 1.
->         gap = (int)(gap / 1.3);
->         if (gap < 1) gap = 1;
->
->         swapped = false;
->         for (int i = 0; i + gap < n; i++)
->         {
->             if (a[i] > a[i + gap])
->             {
->                 (a[i], a[i + gap]) = (a[i + gap], a[i]);
->                 swapped = true;
->             }
->         }
->     }
-> }
-> ```
->
-> The loop condition `gap > 1 || swapped` keeps the gap-1 phase running until one sweep makes no swap. That no-swap pass is the sorted certificate; removing it can leave adjacent inversions the wide passes never inspected.
-
-## Comparison
-
-| Algorithm | Typical time | Worst time | Aux space | Stable | Distinguishing property |
-| --- | --- | --- | --- | --- | --- |
-| [[Bubble Sort]] | `O(n²)` | `O(n²)` | `O(1)` | Yes | The gap-1 base comb sort improves; turtles crawl one slot per pass |
-| Comb Sort | `≈ Θ(n log n)` empirical | `Θ(n²)` | `O(1)` | No | Wide gaps evict turtles for one extra line over bubble sort |
-| [[Shell Sort]] | `O(n^1.5)` by gap sequence | `O(n²)` for poor gaps | `O(1)` | No | Same shrinking gap over insertion sort; less residual disorder per pass |
-| [[Quick Sort]] | `Θ(n log n)` | `O(n²)` (rare with good pivots) | `O(log n)` stack | No | General-purpose in-place sort; the practical `O(n log n)` default |
-
-Comb sort's only structural claim is over bubble sort: for the same `O(1)` space and nearly the same code, it removes the turtle asymmetry that pins bubble sort at `Θ(n²)`, so random inputs run in roughly `n log n` time. That advantage is contained by [[Shell Sort]], which applies the identical shrinking-gap scheme to insertion-sort passes that leave each subsequence more ordered, so it carries less disorder into the final pass and holds the same niche with better constants. Neither reaches the guarantees of an `O(n log n)` sort: [[Quick Sort]], [[Merge Sort]], and [[Heap Sort]] carry real workloads, and hybrids like [[Introsort]] and [[Tim Sort]] add the worst-case bound comb sort never gets. What remains is comb sort's teaching value: it isolates and names one flaw — turtles — and shows that a single cheap change removes it.
+| vs [[Bubble Sort]] | `O(n² / 2^p)` typical, kills turtles | `O(n²)`, turtles crawl one slot per pass | Comb sort strictly dominates bubble sort on almost every input at the same code complexity; there is no reason to pick bubble sort except to teach the naive baseline. |
+| vs [[Shell Sort]] | Shrinking gap over bubble-style swaps | Shrinking gap over insertion sort | Both use decreasing gaps; Shell sort's insertion-based passes leave less residual disorder and it is the better constrained-environment choice — prefer it whenever you were tempted by comb sort. |
+| vs [[Introsort]] / [[Tim Sort]] | `O(n²)` worst, not stable, `O(1)` space | `O(n log n)` guaranteed | For any real workload use the bounded library sort; comb sort's only edge is conceptual simplicity, which production code does not reward. |
 
 ## Questions
 
-> [!QUESTION]- Why does comb sort lack the `O(n)` best case that bubble sort has?
-> Bubble sort can exit after one clean adjacent pass, so already-sorted input costs `O(n)`. Comb sort always runs one sweep for every gap value from `n / 1.3` down to `1`, and that gap sequence has `Θ(log n)` terms of `O(n)` work each, so even sorted input costs `Θ(n log n)`. The wide passes are unconditional; only the gap-1 phase checks for a no-swap exit.
+> [!QUESTION]- What is a "turtle" and why does it make bubble sort slow?
+>
+> - A turtle is a small value near the _end_ of the array; bubble sort's forward passes move small values leftward only one position per pass.
+> - So a small element stranded at the tail needs `O(n)` passes to reach the front, which is the dominant cost that keeps bubble sort at `O(n²)`.
+> - Large values near the front ("rabbits") are not the problem — they move right quickly — the asymmetry is what hurts.
+> - Comb sort fixes exactly this by starting with a wide gap so a turtle jumps most of the way home in one comparison — naming the failure mode is more useful than the algorithm itself.
 
-> [!QUESTION]- What is a turtle, and how does the gap remove it?
-> A turtle is a small value near the end of the array. A bubble-style adjacent pass moves it left one position at a time, so it needs `O(n)` passes to reach the front — the asymmetry that keeps bubble sort quadratic. A wide initial gap compares distant pairs, so one swap can carry the turtle up to `gap` positions toward the front, and the shrinking gap then resolves the remaining local disorder.
+> [!QUESTION]- How does comb sort's shrinking gap relate to Shell sort's?
+>
+> - Both start with a large gap and shrink it to `1`, using the wide gaps to move elements a long way cheaply and the final `gap = 1` pass to finish.
+> - Comb sort applies the gap to [[Bubble Sort]]-style adjacent-comparison-and-swap; [[Shell Sort]] applies it to [[Insertion Sort]], which shifts a run of elements to open a hole.
+> - Insertion sort leaves each subsequence fully sorted per pass, so Shell sort carries less residual disorder forward and performs better.
+> - They are the same idea on two different bases, and the stronger base wins — which is why Shell sort, not comb sort, is the one that survives into real constrained-environment code.
 
-> [!QUESTION]- Why is comb sort's sub-quadratic behavior not a guarantee?
-> The `≈ n log n` figure is an empirical measurement on random input tied to the `1.3` shrink factor, not a proven bound. No structural argument prevents `Θ(n²)`, and adversarial inputs still reach it. The combsort11 special case for gaps of `9` and `10` exists precisely because the constant was tuned by experiment rather than derived.
-
-> [!QUESTION]- How does comb sort differ from Shell sort, given both shrink a gap?
-> Both shrink a gap from large to `1` and finish with a gap-1 pass. Comb sort applies one bubble-style sweep per gap and does not fully sort the gapped subsequences; [[Shell Sort]] insertion-sorts each subsequence to completion per gap, leaving less residual disorder. The stronger base is why Shell sort, not comb sort, survives into practical constrained-environment code.
+> [!QUESTION]- Is comb sort ever the right production choice?
+>
+> - Its worst case is still `O(n²)`, it is not stable, and typical performance only approximates `O(n log n)`.
+> - [[Shell Sort]] beats it with the same gap idea on a better base, and [[Introsort]] / [[Tim Sort]] beat both with guaranteed `O(n log n)`.
+> - Its one advantage is that it is trivially short and explains, in a few lines, _why_ bubble sort is quadratic.
+> - Treat it as a teaching device, not a tool — if you find yourself typing comb sort into shipping code, you wanted a library sort instead.
 
 ## References
 
-- [Comb sort — Wikipedia](https://en.wikipedia.org/wiki/Comb_sort) — origin (Włodzimierz Dobosiewicz, 1980; popularized by Lacey and Box, _BYTE_, 1991), the `1.3` shrink factor, the combsort11 gap fix, and the turtle/rabbit framing.
-- [Dobosiewicz, "An efficient variation of bubble sort," _Information Processing Letters_ 11(1), 1980](https://doi.org/10.1016/0020-0190%2880%2990022-8) — the original analysis of shrinking-gap bubble variants that comb sort's shrink factor descends from.
-- [Big-O Cheat Sheet](https://www.bigocheatsheet.com/) — comb sort's time and space bounds tabulated against the standard comparison sorts.
+- [Comb sort (Wikipedia)](https://en.wikipedia.org/wiki/Comb_sort) — the `1.3` shrink factor, the combsort11 refinement, and the turtle/rabbit intuition.
+- [A Comb Sort (Stephen Lacey and Richard Box, BYTE, April 1991)](https://en.wikipedia.org/wiki/Comb_sort#References) — the article that popularized the algorithm and the empirical shrink factor.
+- [Sorting algorithms comparison (Big-O Cheat Sheet)](https://www.bigocheatsheet.com/) — time and space complexity of comb sort next to the standard sorts.

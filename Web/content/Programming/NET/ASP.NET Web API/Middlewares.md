@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.645Z
-modified: 2026-07-08T15:01:12.646Z
-published: 2026-07-08T15:01:12.646Z
+created: 2026-07-11T18:27:16.308Z
+modified: 2026-07-11T18:27:16.308Z
+published: 2026-07-11T18:27:16.308Z
 topic:
   - Programming
 subtopic:
   - NET
+summary: ASP.NET Core middleware form the HTTP request pipeline, each wrapping the next to process requests inbound and responses outbound.
 level:
   - "4"
 priority: High

@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.330Z
-modified: 2026-07-08T15:01:12.330Z
-published: 2026-07-08T15:01:12.330Z
+created: 2026-07-11T18:29:59.938Z
+modified: 2026-07-11T18:29:59.938Z
+published: 2026-07-11T18:29:59.938Z
 topic:
   - AI & ML
 subtopic:
   - Machine Learning
+summary: When input data's statistical properties shift away from the training distribution, silently degrading model predictions unless detected and addressed.
 level:
   - "1"
 priority: Low

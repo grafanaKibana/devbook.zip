@@ -1,14 +1,15 @@
 ---
 publish: true
-created: 2026-07-10T05:56:04.207Z
-modified: 2026-07-10T08:56:49.194Z
-published: 2026-07-10T08:56:49.194Z
+created: 2026-07-11T18:22:22.131Z
+modified: 2026-07-11T18:22:22.141Z
+published: 2026-07-11T18:22:22.141Z
 tags:
   - FolderNote
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Algorithms to traverse, rank, and optimize the relationships that graphs model — reachability, shortest paths, connectivity, and flow.
 level:
   - "4"
 status: Creation
@@ -18,6 +19,169 @@ priority: High
 # Intro
 
 Graphs model relationships: networks, dependencies, routes, permissions, and many real-world system structures. Graph algorithms help you traverse, rank, and optimize those relationships efficiently. Example: shortest-path algorithms answer "what's the cheapest route" while BFS/DFS answer "what's reachable".
+
+<nav style="--map-accent: 239, 68, 68;" class="folder-structure-map" aria-label="Graph Algorithms section map"><div class="folder-map-children"><article class="folder-map-node"><div class="folder-map-node-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="folder-map-entry-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line y2="13" y1="13" x2="8" x1="16"/><line y2="17" y1="17" x2="8" x1="16"/><line y2="9" y1="9" x2="8" x1="10"/></svg></span><span class="folder-map-node-title" title="A-Start Search">A-Start Search</span></span></div><p>Best-first shortest-path search ordering its frontier by f(n) = g(n) + h(n), settling far fewer nodes than uninformed search when the heuristic is admissible.</p></div><span class="folder-map-hit"><a class="internal-link" href="Home/Computer Science/Algorithms/Graph Algorithms/A-Start Search.md" data-tooltip-position="top" aria-label="A-Start Search">A-Start Search</a></span></article><article class="folder-map-node"><div class="folder-map-node-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="folder-map-entry-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line y2="13" y1="13" x2="8" x1="16"/><line y2="17" y1="17" x2="8" x1="16"/><line y2="9" y1="9" x2="8" x1="10"/></svg></span><span class="folder-map-node-title" title="Articulation Points and Bridges">Articulation Points and Bridges</span></span></div><p>A single DFS finds all cut vertices and cut edges — the single points of failure whose removal disconnects an undirected graph — in O(V+E).</p></div><span class="folder-map-hit"><a class="internal-link" href="Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges.md" data-tooltip-position="top" aria-label="Articulation Points and Bridges">Articulation Points and Bridges</a></span></article><article class="folder-map-node"><div class="folder-map-node-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="folder-map-entry-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line y2="13" y1="13" x2="8" x1="16"/><line y2="17" y1="17" x2="8" x1="16"/><line y2="9" y1="9" x2="8" x1="10"/></svg></span><span class="folder-map-node-title" title="Bellman-Ford">Bellman-Ford</span></span></div><p>Single-source shortest paths on graphs with negative edges, relaxing every edge V−1 times and detecting negative cycles Dijkstra cannot handle.</p></div><span class="folder-map-hit"><a class="internal-link" href="Home/Computer Science/Algorithms/Graph Algorithms/Bellman-Ford.md" data-tooltip-position="top" aria-label="Bellman-Ford">Bellman-Ford</a></span></article><article class="folder-map-node"><div class="folder-map-node-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="folder-map-entry-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line y2="13" y1="13" x2="8" x1="16"/><line y2="17" y1="17" x2="8" x1="16"/><line y2="9" y1="9" x2="8" x1="10"/></svg></span><span class="folder-map-node-title" title="Bidirectional Search">Bidirectional Search</span></span></div><p>Runs forward and backward searches that meet in the middle, cutting an O(b^d) search to two O(b^(d/2)) halves on point-to-point queries.</p></div><span class="folder-map-hit"><a class="internal-link" href="Home/Computer Science/Algorithms/Graph Algorithms/Bidirectional Search.md" data-tooltip-position="top" aria-label="Bidirectional Search">Bidirectional Search</a></span></article><article class="folder-map-node"><div class="folder-map-node-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="folder-map-entry-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line y2="13" y1="13" x2="8" x1="16"/><line y2="17" y1="17" x2="8" x1="16"/><line y2="9" y1="9" x2="8" x1="10"/></svg></span><span class="folder-map-node-title" title="Dijkstra">Dijkstra</span></span></div><p>Single-source shortest paths on non-negative-weighted graphs, greedily finalizing the closest tentative node and relaxing its outgoing edges.</p></div><span class="folder-map-hit"><a class="internal-link" href="Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra.md" data-tooltip-position="top" aria-label="Dijkstra">Dijkstra</a></span></article><article class="folder-map-node"><div class="folder-map-node-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="folder-map-entry-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line y2="13" y1="13" x2="8" x1="16"/><line y2="17" y1="17" x2="8" x1="16"/><line y2="9" y1="9" x2="8" x1="10"/></svg></span><span class="folder-map-node-title" title="Floyd-Warshall">Floyd-Warshall</span></span></div><p>Dynamic-programming all-pairs shortest paths in a single O(V³) sweep that handles negative edges and detects negative cycles.</p></div><span class="folder-map-hit"><a class="internal-link" href="Home/Computer Science/Algorithms/Graph Algorithms/Floyd-Warshall.md" data-tooltip-position="top" aria-label="Floyd-Warshall">Floyd-Warshall</a></span></article><article class="folder-map-node"><div class="folder-map-node-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="folder-map-entry-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line y2="13" y1="13" x2="8" x1="16"/><line y2="17" y1="17" x2="8" x1="16"/><line y2="9" y1="9" x2="8" x1="10"/></svg></span><span class="folder-map-node-title" title="Greedy Best-First Search">Greedy Best-First Search</span></span></div><p>Expands whichever node looks closest by heuristic h(n) alone — fast and goal-seeking, but neither optimal nor complete.</p></div><span class="folder-map-hit"><a class="internal-link" href="Home/Computer Science/Algorithms/Graph Algorithms/Greedy Best-First Search.md" data-tooltip-position="top" aria-label="Greedy Best-First Search">Greedy Best-First Search</a></span></article><article class="folder-map-node"><div class="folder-map-node-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="folder-map-entry-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line y2="13" y1="13" x2="8" x1="16"/><line y2="17" y1="17" x2="8" x1="16"/><line y2="9" y1="9" x2="8" x1="10"/></svg></span><span class="folder-map-node-title" title="Maximum Flow">Maximum Flow</span></span></div><p>Finds the greatest s–t throughput in a capacitated network by repeatedly augmenting paths in a residual graph that lets later flow cancel earlier flow.</p></div><span class="folder-map-hit"><a class="internal-link" href="Home/Computer Science/Algorithms/Graph Algorithms/Maximum Flow.md" data-tooltip-position="top" aria-label="Maximum Flow">Maximum Flow</a></span></article><article class="folder-map-node"><div class="folder-map-node-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="folder-map-entry-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line y2="13" y1="13" x2="8" x1="16"/><line y2="17" y1="17" x2="8" x1="16"/><line y2="9" y1="9" x2="8" x1="10"/></svg></span><span class="folder-map-node-title" title="Minimum Spanning Tree">Minimum Spanning Tree</span></span></div><p>The cheapest cycle-free edge set connecting every vertex of a weighted undirected graph, built greedily by Kruskal's or Prim's.</p></div><span class="folder-map-hit"><a class="internal-link" href="Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree.md" data-tooltip-position="top" aria-label="Minimum Spanning Tree">Minimum Spanning Tree</a></span></article><article class="folder-map-node"><div class="folder-map-node-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="folder-map-entry-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line y2="13" y1="13" x2="8" x1="16"/><line y2="17" y1="17" x2="8" x1="16"/><line y2="9" y1="9" x2="8" x1="10"/></svg></span><span class="folder-map-node-title" title="Strongly Connected Components">Strongly Connected Components</span></span></div><p>Maximal mutually-reachable vertex sets of a digraph, found in O(V+E) by Kosaraju's or Tarjan's and collapsing into a DAG condensation.</p></div><span class="folder-map-hit"><a class="internal-link" href="Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components.md" data-tooltip-position="top" aria-label="Strongly Connected Components">Strongly Connected Components</a></span></article><article class="folder-map-node"><div class="folder-map-node-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="folder-map-entry-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line y2="13" y1="13" x2="8" x1="16"/><line y2="17" y1="17" x2="8" x1="16"/><line y2="9" y1="9" x2="8" x1="10"/></svg></span><span class="folder-map-node-title" title="Topological Sort">Topological Sort</span></span></div><p>Linear ordering of a DAG's vertices where every edge u → v places u before v — sequencing tasks so dependencies come first.</p></div><span class="folder-map-hit"><a class="internal-link" href="Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort.md" data-tooltip-position="top" aria-label="Topological Sort">Topological Sort</a></span></article></div><style>
+.folder-structure-map {
+  --map-accent: 16, 185, 129;
+  --map-gap: 0.75rem;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0.5rem 0 0.75rem;
+  container-name: folder-map;
+  container-type: inline-size;
+}
+.folder-map-children {
+  /* Flex (not grid) so each card sizes to its own title — a long title widens
+     its card and pushes to another row instead of being truncated, and rows
+     grow to fill the width with no empty tracks when there are few cards. */
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--map-gap);
+}
+.folder-map-node {
+  position: relative;
+  /* No overflow:hidden here: on a flex item that collapses min-width:auto to 0,
+     letting the card shrink below its title + note-count and clip them. Without
+     it, the card's min size is its content, so long titles widen the card (and
+     wrap to another row) instead of being cut off. The accent gradient gets its
+     own border-radius below to stay inside the rounded corners. */
+  flex: 1 1 12rem;
+  min-height: 2.75rem;
+  box-sizing: border-box;
+  border: 1px solid var(--background-modifier-border, var(--lightgray, #d8dee9));
+  border-radius: var(--radius-m, 0.55rem);
+  background-color: var(--background-primary, var(--light, #ffffff));
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+}
+.folder-map-node::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 150% 175% at -22% -38%,
+    rgba(var(--map-accent), 0.09) 0%,
+    rgba(var(--map-accent), 0.04) 38%,
+    rgba(var(--map-accent), 0.014) 66%,
+    transparent 90%
+  );
+  opacity: 0.78;
+  transition: opacity 150ms ease;
+}
+.folder-map-node:hover,
+.folder-map-node:focus-within {
+  border-color: rgba(var(--map-accent), 0.55);
+  background-color: color-mix(in srgb, rgb(var(--map-accent)) 2.5%, var(--background-primary, var(--light, #ffffff)));
+  box-shadow: 0 0.45rem 1.1rem rgba(0, 0, 0, 0.08);
+  transform: translateY(-0.125rem);
+}
+.folder-map-node:hover::before,
+.folder-map-node:focus-within::before {
+  opacity: 1;
+}
+.folder-map-node-body {
+  position: relative;
+  z-index: 0;
+  display: flex;
+  min-height: 2.75rem;
+  box-sizing: border-box;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0.5rem 0.75rem;
+}
+.folder-map-node-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.folder-map-node-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.folder-map-entry-icon {
+  display: flex;
+  width: 1.1rem;
+  height: 1.1rem;
+  flex: 0 0 auto;
+  color: rgb(var(--map-accent));
+}
+.folder-map-entry-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.folder-map-node-title {
+  display: block;
+  margin: 0;
+  color: var(--text-normal, var(--dark, #1f2937));
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+.folder-map-node p {
+  display: none;
+  margin: 0.45rem 0 0;
+  color: var(--text-muted, var(--darkgray, #5f6b7a));
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+.folder-map-node-count {
+  display: block;
+  flex: 0 0 auto;
+  color: var(--text-muted, var(--darkgray, #5f6b7a));
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+.folder-map-hit {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+.folder-map-hit a {
+  position: absolute;
+  inset: 0;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  border-radius: var(--radius-m, 0.55rem);
+  background: transparent !important;
+  font-size: 0;
+}
+.folder-map-hit a:focus-visible {
+  outline: 2px solid rgb(var(--map-accent));
+  outline-offset: -0.3rem;
+}
+.folder-map-empty {
+  margin: 1rem 0 0;
+  color: var(--text-muted, var(--darkgray, #5f6b7a));
+  font-size: 0.875rem;
+}
+@container folder-map (min-width: 40rem) {
+  .folder-map-node {
+    min-height: 6rem;
+  }
+  .folder-map-node-body {
+    min-height: 6rem;
+    justify-content: flex-start;
+    padding: 0.85rem 0.9rem;
+  }
+  .folder-map-node p { display: block; }
+}
+@container folder-map (min-width: 64rem) {
+  .folder-map-node,
+  .folder-map-node-body { min-height: 6.75rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .folder-map-node { transition: none; }
+  .folder-map-node::before { transition: none; }
+  .folder-map-node:hover,
+  .folder-map-node:focus-within { transform: none; }
+}
+</style></nav>
 
 ## Diagram
 

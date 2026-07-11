@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.535Z
-modified: 2026-07-08T15:01:12.535Z
-published: 2026-07-08T15:01:12.535Z
+created: 2026-07-11T18:13:54.277Z
+modified: 2026-07-11T18:13:54.278Z
+published: 2026-07-11T18:13:54.278Z
 topic:
   - Development Practices
 subtopic:
   - Paradigms
+summary: An integration test verifies that multiple components work together with real infrastructure like databases, HTTP clients, and queues.
 level:
   - "3"
 priority: High

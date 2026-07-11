@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.300Z
-modified: 2026-07-08T15:01:12.300Z
-published: 2026-07-08T15:01:12.300Z
+created: 2026-07-11T21:03:40.029Z
+modified: 2026-07-11T21:03:40.029Z
+published: 2026-07-11T21:03:40.029Z
 topic:
   - AI & ML
 subtopic:
   - LLM
+summary: Non-LLM tests that strictly validate outputs — schema, required fields, safety, policy — cheaply and reproducibly, run before any expensive LLM judge.
 level:
   - "3"
 priority: Medium

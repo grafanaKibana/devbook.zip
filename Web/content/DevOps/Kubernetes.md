@@ -1,11 +1,12 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.531Z
-modified: 2026-07-08T15:01:12.531Z
-published: 2026-07-08T15:01:12.531Z
+created: 2026-07-11T18:13:50.493Z
+modified: 2026-07-11T18:13:50.493Z
+published: 2026-07-11T18:13:50.493Z
 topic:
   - DevOps
 subtopic: []
+summary: Kubernetes orchestrates containers by continuously reconciling reality to a declared desired state, automating deployment, scaling, and self-healing.
 level:
   - "2"
 priority: High

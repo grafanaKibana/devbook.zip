@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.548Z
-modified: 2026-07-08T15:01:12.549Z
-published: 2026-07-08T15:01:12.549Z
+created: 2026-07-11T17:57:51.348Z
+modified: 2026-07-11T17:57:51.349Z
+published: 2026-07-11T17:57:51.349Z
 topic:
   - Networks
 subtopic:
   - Transport & Sockets
+summary: A socket is a file-like endpoint for bidirectional communication between two processes over a network.
 level:
   - "3"
 priority: Medium
