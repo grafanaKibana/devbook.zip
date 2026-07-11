@@ -3,6 +3,7 @@ topic:
   - Networks
 subtopic:
   - Architecture & Ops
+summary: "How networks are designed, observed, and kept healthy in production: routing, segmentation, monitoring, and troubleshooting."
 tags:
   - FolderNote
 publish: true

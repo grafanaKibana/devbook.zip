@@ -2,6 +2,7 @@
 topic:
   - AI & ML
 subtopic: []
+summary: "Designing and operating AI so failures are bounded, decisions explainable, and impact fair — the six principles most frameworks converge on, as concrete engineering work."
 level:
   - "3"
 priority: Medium

@@ -121,18 +121,21 @@ return function TopicDashboard() {
 
   const CSS = `
 .dc-topic-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 0.75rem; width: 100%; }
-.dc-topic-card { position: relative; cursor: pointer; min-width: 0; min-height: 7rem; box-sizing: border-box; margin: 0; display: flex; flex-direction: column; background: transparent; border: 1px solid var(--background-modifier-border, var(--lightgray, #e5e5e5)); border-radius: var(--radius-m, 8px); box-shadow: none; padding: 0.9rem 1rem 1rem; transition: border-color 120ms, background-color 120ms; }
-.dc-topic-card:hover { border-color: rgba(var(--topic-rgb), 0.5); background: rgba(var(--topic-rgb), 0.1); }
-.dc-topic-title { display: flex; gap: 0.55rem; align-items: center; line-height: 1.3; }
+.dc-topic-card { position: relative; overflow: hidden; cursor: pointer; min-width: 0; min-height: 7rem; box-sizing: border-box; margin: 0; display: flex; flex-direction: column; background-color: var(--background-primary, var(--light, #ffffff)); border: 1px solid var(--background-modifier-border, var(--lightgray, #e5e5e5)); border-radius: var(--radius-m, 8px); box-shadow: 0 0 0 rgba(0,0,0,0); padding: 0.9rem 1rem 1rem; transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease, transform 150ms ease; }
+.dc-topic-card::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 150% 175% at -22% -38%, rgba(var(--topic-rgb), 0.09) 0%, rgba(var(--topic-rgb), 0.04) 38%, rgba(var(--topic-rgb), 0.014) 66%, transparent 90%); opacity: 0.78; transition: opacity 150ms ease; }
+.dc-topic-card:hover, .dc-topic-card:focus-within { border-color: rgba(var(--topic-rgb), 0.55); background-color: color-mix(in srgb, rgb(var(--topic-rgb)) 2.5%, var(--background-primary, var(--light, #ffffff))); box-shadow: 0 0.45rem 1.1rem rgba(0,0,0,0.08); transform: translateY(-0.125rem); }
+.dc-topic-card:hover::before, .dc-topic-card:focus-within::before { opacity: 1; }
+.dc-topic-link a:focus-visible { outline: 2px solid rgb(var(--topic-rgb)); outline-offset: -0.3rem; border-radius: var(--radius-m, 8px); }
+.dc-topic-title { position: relative; z-index: 0; display: flex; gap: 0.55rem; align-items: center; line-height: 1.3; }
 .dc-topic-icon { display: flex; align-self: center; color: rgb(var(--topic-rgb)); }
 .dc-topic-icon svg { width: 22px; height: 22px; }
 .dc-topic-name { font-weight: 600; font-size: 0.95rem; color: rgb(var(--topic-rgb)); }
-.dc-topic-body { display: flex; flex-direction: column; flex: 1 0 auto; margin-top: 0.4em; }
+.dc-topic-body { position: relative; z-index: 0; display: flex; flex-direction: column; flex: 1 0 auto; margin-top: 0.4em; }
 .dc-topic-desc { margin: 0; color: var(--text-muted, var(--gray, #9ca3af)); font-size: 0.78rem; line-height: 1.3; }
 .dc-topic-spacer { flex: 1 0 auto; min-height: 0.55em; }
 .dc-topic-foot { display: flex; flex-direction: column; gap: 4px; }
 .dc-topic-cap { font-size: 0.72rem; display: flex; justify-content: space-between; align-items: baseline; color: var(--text-muted, var(--gray, #9ca3af)); }
-.dc-topic-bar { display: flex; width: 100%; height: 6px; border-radius: 4px; margin-top: 0.15rem; overflow: hidden; background: var(--background-modifier-border, var(--lightgray, #e5e5e5)); }
+.dc-topic-bar { display: flex; width: 100%; height: 5px; border-radius: 4px; margin-top: 0.15rem; overflow: hidden; background: var(--background-modifier-border, var(--lightgray, #e5e5e5)); }
 .dc-topic-link { position: absolute; inset: 0; z-index: 1; }
 .dc-topic-link a { position: absolute; inset: 0; font-size: 0; background: none !important; }
 .dc-topic-total { margin-top: 0.75rem; padding: 0.75em; border-radius: var(--radius-m, 8px); border: 1px solid rgba(var(--topic-rgb), 0.4); background: rgba(var(--topic-rgb), 0.1); }
@@ -143,6 +146,7 @@ ${spanRules("dsk")}
 @media (max-width: 1600px) { ${spanRules("med")} }
 @media (max-width: 760px) { ${spanRules("nar")} }
 @media (max-width: 430px) { .dc-topic-grid { grid-template-columns: 1fr; } .dc-topic-grid .dc-topic-card { grid-column: span 1; } }
+@media (prefers-reduced-motion: reduce) { .dc-topic-card { transition: none; } .dc-topic-card::before { transition: none; } .dc-topic-card:hover { transform: none; } }
 `;
 
   return (

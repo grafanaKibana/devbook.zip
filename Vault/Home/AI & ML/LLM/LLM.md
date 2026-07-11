@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "A transformer network trained on vast text to predict the next token, treated here as an engineering platform steered by prompting, grounding, and evaluation rather than a knowledge database."
 tags:
   - FolderNote
 publish: true

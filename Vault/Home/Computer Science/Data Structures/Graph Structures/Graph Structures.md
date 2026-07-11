@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "Structures for modelling relationships with cycles and multiple paths, composed from primitives per the connectivity question you must answer cheaply."
 tags:
   - FolderNote
 level:

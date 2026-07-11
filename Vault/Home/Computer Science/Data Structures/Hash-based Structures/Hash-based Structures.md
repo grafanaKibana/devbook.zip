@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "Structures that buy near-O(1) key access by spending a hash function, trading away element ordering."
 tags:
   - FolderNote
 level:

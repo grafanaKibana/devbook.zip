@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "Structures that combine two primitives to get a guarantee neither gives alone, kept in lockstep on every mutation."
 tags:
   - FolderNote
 level:

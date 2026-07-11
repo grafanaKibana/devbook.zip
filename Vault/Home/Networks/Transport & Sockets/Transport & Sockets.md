@@ -3,6 +3,7 @@ topic:
   - Networks
 subtopic:
   - Transport & Sockets
+summary: "The practical interface to the network: ports, connections, streams, datagrams, backpressure, and TCP vs UDP behavior."
 tags:
   - FolderNote
 publish: true

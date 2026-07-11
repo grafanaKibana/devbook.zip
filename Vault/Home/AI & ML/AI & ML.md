@@ -1,5 +1,5 @@
 ---
-icon: brain-circuit
+icon: brain
 order: 70
 color: "#10b981"
 topic:
@@ -9,7 +9,7 @@ tags:
   - FolderNote
 publish: true
 level:
-  - '3'
+  - "3"
 priority: High
 status: Done
 ---
@@ -18,46 +18,10 @@ status: Done
 
 AI & ML covers how learning systems are built, evaluated, and operated — from classic supervised models through large language models to the agent tooling that turns models into day-to-day engineering leverage. The unifying theme across all three branches: the model is rarely the hard part. Data quality, evaluation discipline, guardrails, and monitoring decide whether a system works in production, and that engineering work looks remarkably similar whether the model is a gradient-boosted tree or a frontier LLM.
 
-```mermaid
-flowchart TD
-    A[AI & ML] --> ML[Machine Learning]
-    A --> L[LLM]
-    A --> T[Tooling]
-    ML --> ML1[Learning types]
-    ML --> ML2[Evaluation and drift]
-    L --> L1[Prompting and generation]
-    L --> L2[RAG]
-    L --> L3[Agents]
-    L --> L4[Evaluation and guardrails]
-    T --> T1[Coding agents]
-    T --> T2[Skills, plugins, hooks, instructions]
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
 ```
-
-## Map of the Section
-
-- **[[Home/AI & ML/Machine Learning/Machine Learning|Machine Learning]]** — the classic discipline: training pipelines, [[Home/AI & ML/Machine Learning/Types/Types|learning types]], [[Home/AI & ML/Machine Learning/Evaluation/Evaluation|evaluation metrics]], [[Data Drift]], and the [[Spectrum Of Automations|spectrum of automation]] for deploying models safely. Start here for anything with labeled data and an explicit prediction target.
-- **[[Home/AI & ML/LLM/LLM|LLM]]** — large language models as an engineering platform: [[Home/AI & ML/LLM/Prompting/Prompting|Prompting]], [[Generation]], [[Home/AI & ML/LLM/RAG/RAG|RAG]], [[Home/AI & ML/LLM/Agents/Agents|Agents]], [[Home/AI & ML/LLM/Evaluation/Evaluation|evaluation]], [[Guardrails]], [[Hallucinations]], and [[OWASP vulnerabilities on AI LLM|security]]. The largest branch, organized around the production pipeline rather than model internals.
-- **[[Home/AI & ML/Tooling/Tooling|Tooling]]** — AI-assisted development itself: [[Coding Agents]] and their control surfaces — [[Skills]], [[Plugins]], [[Hooks]], and [[Agent Instructions]].
-
-A useful reading order for someone new to the section: [[Home/AI & ML/Machine Learning/Machine Learning|Machine Learning]] for the foundations and vocabulary, then [[Home/AI & ML/LLM/LLM|LLM]] for the modern stack, then [[Home/AI & ML/Tooling/Tooling|Tooling]] for applying it to your own workflow.
-
-## Choosing an Approach
-
-The first engineering decision is usually not which model — it is which class of solution:
-
-| Situation | Reach for | Why |
-| --- | --- | --- |
-| Stable rules, auditable logic, tightly controlled error cost | Rules / heuristics | Cheapest to build, test, and explain; no training data needed |
-| Labeled data, explicit prediction target, latency or cost constraints | Classic ML (trees, linear models, small transformers) | Millisecond inference, near-zero unit cost, well-understood evaluation |
-| Open-ended language tasks, no training data, fast iteration | LLM via prompting | No training loop; quality scales with prompt and context engineering |
-| LLM plus current or private knowledge | [[Home/AI & ML/LLM/RAG/RAG\|RAG]] | Updates knowledge without retraining; keeps answers traceable to sources |
-| Multi-step tasks with tools and feedback loops | [[Home/AI & ML/LLM/Agents/Agents\|Agents]] | Only when simpler single-call patterns demonstrably fall short |
-
-Whatever the choice, the same operational backbone applies: define success metrics before building, evaluate on held-out data, deploy through the [[Spectrum Of Automations|spectrum of automation]], and monitor for drift and regressions.
-
-## Responsible AI
-
-Fairness, reliability and safety, privacy and security, inclusiveness, transparency, and accountability are the six principles most industry frameworks converge on. They are covered in [[Responsible AI]], including what each principle means in engineering terms and how the major frameworks (Microsoft Responsible AI Standard, NIST AI RMF) operationalize them.
 
 ## Questions
 

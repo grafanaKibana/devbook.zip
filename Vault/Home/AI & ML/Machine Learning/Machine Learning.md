@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - Machine Learning
+summary: "Training models to map inputs to outputs from data rather than explicit rules, where most of the real work is building a testable, deployable, and monitorable pipeline."
 tags:
   - FolderNote
 publish: true

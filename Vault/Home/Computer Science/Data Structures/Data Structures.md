@@ -18,6 +18,11 @@ A data structure organizes data for efficient access, mutation, and iteration. I
 
 The key decision is matching operations to complexity guarantees: random access by index → array or `List<T>`; fast lookup by key → `Dictionary<TKey, TValue>`; membership tests → `HashSet<T>`; ordered traversal → `SortedSet<T>` or sorted array; FIFO processing → `Queue<T>`. Most production performance issues with collections come from using the wrong structure (e.g., searching a `List<T>` linearly when a `HashSet<T>` gives O(1) lookups) rather than from the structure's implementation being slow.
 
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
+
 ## Example
 
 ```csharp
@@ -31,6 +36,16 @@ var ordered = new List<string> { "Ann", "Bob" };
 Console.WriteLine(byId[42]); // Fast lookup by key
 Console.WriteLine(ordered[0]); // Fast lookup by index
 ```
+
+## Suggested Groups
+
+- **Linear structures** - arrays, dynamic arrays, linked lists, stacks, queues, deques, circular buffers, and spans belong together because they model ordered sequences.
+- **Hash-based structures** - hash maps, hash sets, and Bloom filters share the same core mechanism: hash distribution and membership/lookup tradeoffs.
+- **Graph structures** - graphs and disjoint sets belong near each other because both answer relationship/connectivity questions.
+- **Composite structures** - LRU cache belongs here because it combines a hash map with a linked list to get O(1) lookup plus O(1) recency updates.
+- **Index structures** - B-trees, B+ trees, and tries may eventually deserve their own group if the vault grows around database/file-system/search indexes.
+- **Probabilistic structures** - [[Bloom Filter]] could split from hashing later if sketches, HyperLogLog, count-min sketch, or Cuckoo filters are added.
+- **Priority structures** - heap-like structures are currently under [[Trees]] because the invariants are tree-shaped; split them only if priority queues become their own study track.
 
 ## Questions
 
@@ -48,32 +63,6 @@ Console.WriteLine(ordered[0]); // Fast lookup by index
 > [!QUESTION]- When would you use `LinkedList<T>` over `List<T>` in .NET?
 > Almost never in practice. `List<T>` (backed by a contiguous array) has better cache locality, lower memory overhead per element, and faster iteration. `LinkedList<T>` only wins when you need frequent insertions/deletions in the middle of a very large collection and already hold a reference to the node.
 > In most .NET code, `List<T>` is the correct default.
-
-## Links
-
-- [[Trees]]
-- [[Dynamic Array]]
-- [[Stack]]
-- [[Queue]]
-- [[LinkedList]]
-- [[Circular Buffer]]
-- [[Span]]
-- [[HashMap]]
-- [[Hash Set]]
-- [[Bloom Filter]]
-- [[Graph]]
-- [[Disjoint Set]]
-- [[LRU Cache]]
-
-## Suggested Groups
-
-- **Linear structures** - arrays, dynamic arrays, linked lists, stacks, queues, deques, circular buffers, and spans belong together because they model ordered sequences.
-- **Hash-based structures** - hash maps, hash sets, and Bloom filters share the same core mechanism: hash distribution and membership/lookup tradeoffs.
-- **Graph structures** - graphs and disjoint sets belong near each other because both answer relationship/connectivity questions.
-- **Composite structures** - LRU cache belongs here because it combines a hash map with a linked list to get O(1) lookup plus O(1) recency updates.
-- **Index structures** - B-trees, B+ trees, and tries may eventually deserve their own group if the vault grows around database/file-system/search indexes.
-- **Probabilistic structures** - [[Bloom Filter]] could split from hashing later if sketches, HyperLogLog, count-min sketch, or Cuckoo filters are added.
-- **Priority structures** - heap-like structures are currently under [[Trees]] because the invariants are tree-shaped; split them only if priority queues become their own study track.
 
 ## References
 

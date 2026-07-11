@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "Structures that store elements in a sequence, defined by access order and position rather than one memory layout."
 tags:
   - FolderNote
 level:

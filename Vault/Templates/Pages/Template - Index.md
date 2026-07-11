@@ -10,24 +10,27 @@ tags:
 publish: false
 ---
 <%*
-// Derive topic/subtopic from folder path
+// Derive topic/subtopic from the folder path under the "Home" root.
 const parts = tp.file.folder(true).split("/");
-const idx = parts.indexOf("Software Engineering");
+const idx = parts.indexOf("Home");
 const topic = (idx >= 0 && parts.length > idx + 1) ? [parts[idx + 1].replace(/^\d+\s+/, "")] : [];
 const subtopic = (idx >= 0 && parts.length > idx + 2) ? [parts[idx + 2].replace(/^\d+\s+/, "")] : [];
 
-// If file is untitled, prompt for a title
+// If the file is untitled, prompt for a title.
 let title = tp.file.title;
 if (title.startsWith("Untitled")) {
   title = await tp.system.prompt("Title") ?? "Untitled";
   await tp.file.rename(title);
 }
 
-// Prompt for level and priority
+// Prompt for level and priority.
 const level = await tp.system.suggester(["1", "2", "3", "4"], ["1", "2", "3", "4"], false, "Select level");
 const priority = await tp.system.suggester(["Low", "Medium", "High"], ["Low", "Medium", "High"], false, "Select priority");
 
-// Write proper typed frontmatter after template finishes
+// Optional one-sentence summary — used by the parent hub's card map. Leave blank to skip.
+const summary = await tp.system.prompt("One-line summary for the parent's card map (optional)", "");
+
+// Write typed frontmatter after the template finishes.
 tp.hooks.on_all_templates_executed(async () => {
   const file = tp.file.find_tfile(tp.file.path(true));
   await app.fileManager.processFrontMatter(file, (fm) => {
@@ -36,28 +39,26 @@ tp.hooks.on_all_templates_executed(async () => {
     if (level != null) fm.level = [level];
     if (priority != null) fm.priority = priority;
     fm.tags = ["FolderNote"];
+    if (summary && summary.trim()) fm.summary = summary.trim();
+    // Set `color` (hex, e.g. "#10b981") and `order` (number) on this note to give
+    // its card a topic accent and a fixed position in the parent hub's map.
   });
 });
 %>
 # Intro
 
-Quick introduction to the topic
-Explain the topic in plain language.
-Prefer clear, complete explanation over short bullets.
-Include at least one concrete example or a small diagram walkthrough when useful.
+Explain this section in plain language — what it groups and why. Prefer a clear, complete explanation over short bullets, and keep the tone of a personal learning space rather than a curriculum.
 
-## Examples
-
-Examples if needed with their explanation
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
 
 ## Questions
 
-> [!QUESTION]- What is abc?
-> Answer
+> [!QUESTION]- A real question worth being able to answer
+> Answer.
 
 ## References
 
-Replace or delete these example links.
-
-- [Link 1](https://example.com)
-- [Link 2](https://example.com)
+- [Source](https://example.com) — why it is worth keeping.
