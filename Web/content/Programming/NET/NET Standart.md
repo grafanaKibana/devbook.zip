@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:26:27.245Z
-modified: 2026-07-11T18:26:27.246Z
-published: 2026-07-11T18:26:27.246Z
+created: 2026-07-11T21:44:23.936Z
+modified: 2026-07-11T21:44:23.937Z
+published: 2026-07-11T21:44:23.937Z
 topic:
   - Programming
 subtopic:
   - NET
-summary: .NET Standard is a specification defining a set of .NET APIs that multiple .NET runtimes agree to implement.
+summary: A specification of .NET APIs that multiple runtimes agree to implement.
 level:
   - "4"
 priority: Medium

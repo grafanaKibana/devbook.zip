@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T21:03:43.578Z
-modified: 2026-07-11T21:03:43.578Z
-published: 2026-07-11T21:03:43.578Z
+created: 2026-07-11T21:44:49.107Z
+modified: 2026-07-11T21:44:49.110Z
+published: 2026-07-11T21:44:49.110Z
 topic:
   - AI & ML
 subtopic:
   - LLM
-summary: One model grades another's output against an explicit rubric, via absolute scoring or pairwise preference — scalable, semantics-aware regression testing.
+summary: One model grades another's output against an explicit rubric, by absolute scoring or pairwise preference.
 level:
   - "3"
 priority: Medium

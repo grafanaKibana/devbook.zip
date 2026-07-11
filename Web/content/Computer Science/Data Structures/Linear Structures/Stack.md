@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:23:53.491Z
-modified: 2026-07-11T18:23:53.492Z
-published: 2026-07-11T18:23:53.492Z
+created: 2026-07-11T21:42:01.313Z
+modified: 2026-07-11T21:42:01.314Z
+published: 2026-07-11T21:42:01.314Z
 topic:
   - Computer Science
 subtopic:
   - Data Structures
-summary: A LIFO collection where the most recently pushed element is popped first — backtracking, undo, and depth-first traversal.
+summary: A LIFO collection where the most recently pushed element is popped first, used for backtracking, undo, and DFS.
 level:
   - "4"
 priority: Medium

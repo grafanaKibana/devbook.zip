@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:13:39.573Z
-modified: 2026-07-11T18:13:39.573Z
-published: 2026-07-11T18:13:39.573Z
+created: 2026-07-11T21:47:48.042Z
+modified: 2026-07-11T21:47:48.043Z
+published: 2026-07-11T21:47:48.043Z
 topic:
   - Development Practices
 subtopic:
   - Principles
-summary: One place should own each piece of knowledge so a business rule is never duplicated across the codebase.
+summary: Each piece of knowledge should have one authoritative place in the codebase.
 level:
   - "4"
 priority: High

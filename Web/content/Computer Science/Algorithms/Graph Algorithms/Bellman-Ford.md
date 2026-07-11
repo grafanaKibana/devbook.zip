@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:23:13.312Z
-modified: 2026-07-11T18:23:13.336Z
-published: 2026-07-11T18:23:13.336Z
+created: 2026-07-11T21:50:42.526Z
+modified: 2026-07-11T21:50:42.527Z
+published: 2026-07-11T21:50:42.527Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: Single-source shortest paths on graphs with negative edges, relaxing every edge V−1 times and detecting negative cycles Dijkstra cannot handle.
+summary: Single-source shortest paths with negative edges, relaxing every edge V-1 times and detecting negative cycles.
 level:
   - "4"
 priority: Medium

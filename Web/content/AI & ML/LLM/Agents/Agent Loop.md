@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T21:03:31.007Z
-modified: 2026-07-11T21:03:31.008Z
-published: 2026-07-11T21:03:31.008Z
+created: 2026-07-11T21:45:30.463Z
+modified: 2026-07-11T21:45:30.471Z
+published: 2026-07-11T21:45:30.471Z
 topic:
   - AI & ML
 subtopic:
   - LLM
-summary: The execution cycle — ReAct's think-act-observe — that turns an LLM from a single-shot generator into an autonomous problem solver looping over tools.
+summary: The execution cycle, ReAct's think-act-observe, that turns an LLM into an autonomous tool-using problem solver.
 level:
   - "3"
 priority: Medium

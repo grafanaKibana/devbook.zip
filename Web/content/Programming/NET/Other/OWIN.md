@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:26:30.072Z
-modified: 2026-07-11T18:26:30.073Z
-published: 2026-07-11T18:26:30.073Z
+created: 2026-07-11T21:44:25.510Z
+modified: 2026-07-11T21:44:25.511Z
+published: 2026-07-11T21:44:25.511Z
 topic:
   - Programming
 subtopic:
   - NET
-summary: OWIN defines a standard boundary between .NET web servers and applications, most relevant today for maintaining or migrating legacy ASP.NET.
+summary: A standard boundary between .NET web servers and apps, now mainly legacy.
 level:
   - "3"
 priority: Low

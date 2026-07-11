@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:31:10.350Z
-modified: 2026-07-11T18:31:10.350Z
-published: 2026-07-11T18:31:10.350Z
+created: 2026-07-11T21:44:13.361Z
+modified: 2026-07-11T21:44:13.361Z
+published: 2026-07-11T21:44:13.361Z
 topic:
   - AI & ML
 subtopic:
   - LLM
-summary: Layered defense-in-depth controls around an LLM that make unsafe actions, data leaks, and policy violations detectable, bounded, and recoverable.
+summary: Layered controls around an LLM that make unsafe actions and data leaks detectable and recoverable.
 level:
   - "3"
 priority: Medium

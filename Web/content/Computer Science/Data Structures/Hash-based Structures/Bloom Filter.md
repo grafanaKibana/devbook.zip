@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:23:31.855Z
-modified: 2026-07-11T18:23:31.856Z
-published: 2026-07-11T18:23:31.856Z
+created: 2026-07-11T21:43:39.625Z
+modified: 2026-07-11T21:43:39.626Z
+published: 2026-07-11T21:43:39.626Z
 topic:
   - Computer Science
 subtopic:
   - Data Structures
-summary: A probabilistic membership structure using fixed bits to answer 'seen this?' with tunable false positives but never false negatives.
+summary: A probabilistic membership filter using fixed bits, with tunable false positives but never false negatives.
 level:
   - "4"
 priority: Medium

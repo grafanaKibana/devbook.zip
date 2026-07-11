@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:13:53.925Z
-modified: 2026-07-11T18:13:53.925Z
-published: 2026-07-11T18:13:53.925Z
+created: 2026-07-11T21:48:36.493Z
+modified: 2026-07-11T21:48:36.494Z
+published: 2026-07-11T21:48:36.494Z
 topic:
   - Security
 subtopic:
   - Security
-summary: The discipline of keeping credentials out of source code, distributing them to workloads, and rotating them safely.
+summary: Keeping credentials out of source code, distributing them to workloads, and rotating safely.
 level:
   - "3"
 priority: High

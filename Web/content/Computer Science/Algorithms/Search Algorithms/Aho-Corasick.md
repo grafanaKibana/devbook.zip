@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:23:33.479Z
-modified: 2026-07-11T18:23:33.479Z
-published: 2026-07-11T18:23:33.479Z
+created: 2026-07-11T21:45:52.562Z
+modified: 2026-07-11T21:45:52.567Z
+published: 2026-07-11T21:45:52.567Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: Finds all occurrences of many patterns in one text pass using a trie with failure and output links, in O(n + z).
+summary: Finds all occurrences of many patterns in one text pass using a trie with failure links, in O(n + z).
 level:
   - "4"
 priority: Medium
@@ -109,8 +109,6 @@ flowchart TD
 
 | Choice | Option A | Option B | Decision criteria |
 | --- | --- | --- | --- |
-| Many patterns | Aho-Corasick `O(n+z)` | [[KMP (Knuth-Morris-Pratt) Algorithm\|KMP]] per pattern `O(k·n)` | Aho-Corasick scans once regardless of `k`; switch to it as soon as `k` exceeds two or three, or when pattern lengths vary. |
-| Uniform-length patterns | [[Rabin Karp Search\|Rabin-Karp]] with a hash set | Aho-Corasick | Rabin-Karp is simpler when every pattern shares one length; Aho-Corasick handles mixed lengths and gives deterministic, collision-free results. |
 | Transition storage | Dense array per node | Sparse hash map per node | Dense is fastest for small alphabets (ASCII bytes); switch to sparse or a double-array trie for Unicode or huge dictionaries to control memory. |
 | Dictionary volatility | Prebuilt automaton | Rebuild per change | Prebuild and reuse for a fixed dictionary; if patterns change constantly, the `O(m)` build cost may argue for a simpler per-query matcher. |
 

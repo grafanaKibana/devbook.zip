@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:31:15.353Z
-modified: 2026-07-11T18:31:15.353Z
-published: 2026-07-11T18:31:15.353Z
+created: 2026-07-11T21:44:09.126Z
+modified: 2026-07-11T21:44:09.126Z
+published: 2026-07-11T21:44:09.126Z
 topic:
   - AI & ML
 subtopic:
   - LLM
-summary: The OWASP Top 10 for LLM Applications (2025), cataloging the highest-impact security failures in systems that integrate large language models.
+summary: The OWASP Top 10 for LLM Applications, the highest-impact security failures in LLM systems.
 level:
   - "3"
 priority: Medium

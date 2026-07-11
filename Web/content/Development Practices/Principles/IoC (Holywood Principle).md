@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:13:41.822Z
-modified: 2026-07-11T18:13:41.823Z
-published: 2026-07-11T18:13:41.823Z
+created: 2026-07-11T21:47:51.978Z
+modified: 2026-07-11T21:47:51.978Z
+published: 2026-07-11T21:47:51.978Z
 topic:
   - Development Practices
 subtopic:
   - Principles
-summary: The flow of control is inverted so a framework, not your code, creates and wires dependencies — don't call us, we'll call you.
+summary: Control is inverted so a framework, not your code, creates and wires dependencies.
 level:
   - "4"
 priority: High

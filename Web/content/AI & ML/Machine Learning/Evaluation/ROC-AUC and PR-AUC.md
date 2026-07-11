@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:30:38.197Z
-modified: 2026-07-11T18:30:38.197Z
-published: 2026-07-11T18:30:38.197Z
+created: 2026-07-11T21:43:59.382Z
+modified: 2026-07-11T21:43:59.387Z
+published: 2026-07-11T21:43:59.387Z
 topic:
   - AI & ML
 subtopic:
   - Machine Learning
-summary: "Threshold-free metrics for binary classifiers: ROC-AUC for general ranking on balanced data, PR-AUC for imbalanced data where false positives are expensive."
+summary: "Threshold-free ranking metrics: ROC-AUC for balanced data, PR-AUC for imbalanced data with costly false positives."
 level:
   - "2"
 priority: Medium

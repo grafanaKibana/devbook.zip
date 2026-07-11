@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:27:07.151Z
-modified: 2026-07-11T18:27:07.152Z
-published: 2026-07-11T18:27:07.152Z
+created: 2026-07-11T21:44:32.498Z
+modified: 2026-07-11T21:44:32.498Z
+published: 2026-07-11T21:44:32.498Z
 topic:
   - Programming
 subtopic:
   - NET
-summary: CORS is a browser security mechanism controlling which origins may call your API, permitted via server response headers.
+summary: Browser security controlling which origins may call your API, via response headers.
 level:
   - "1"
 priority: Medium

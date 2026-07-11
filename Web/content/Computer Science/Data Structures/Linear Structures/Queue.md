@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:23:47.645Z
-modified: 2026-07-11T18:23:47.665Z
-published: 2026-07-11T18:23:47.665Z
+created: 2026-07-11T21:42:15.894Z
+modified: 2026-07-11T21:42:15.894Z
+published: 2026-07-11T21:42:15.894Z
 topic:
   - Computer Science
 subtopic:
   - Data Structures
-summary: A FIFO collection where the earliest enqueued item is processed first — buffering, BFS, and producer-consumer pipelines.
+summary: A FIFO collection where the earliest enqueued item is processed first, used for buffering, BFS, and pipelines.
 level:
   - "4"
 priority: Medium

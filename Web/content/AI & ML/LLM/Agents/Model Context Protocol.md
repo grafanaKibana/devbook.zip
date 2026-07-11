@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T21:03:32.974Z
-modified: 2026-07-11T21:03:32.974Z
-published: 2026-07-11T21:03:32.974Z
+created: 2026-07-11T21:45:32.178Z
+modified: 2026-07-11T21:45:32.179Z
+published: 2026-07-11T21:45:32.179Z
 topic:
   - AI & ML
 subtopic:
   - LLM
-summary: An open protocol standardizing how LLM apps connect to external tools and data — USB-C for AI, turning N×M integration glue into N+M.
+summary: An open protocol standardizing how LLM apps connect to external tools and data.
 level:
   - "3"
 priority: Low

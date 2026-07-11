@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:18:23.451Z
-modified: 2026-07-11T18:18:23.451Z
-published: 2026-07-11T18:18:23.451Z
+created: 2026-07-11T21:41:05.357Z
+modified: 2026-07-11T21:41:05.358Z
+published: 2026-07-11T21:41:05.358Z
 topic:
   - Architecture
 subtopic:
   - Patterns
-summary: Provides sequential access to a collection's elements without exposing its underlying representation — C#'s foreach and yield return.
+summary: Provides sequential access to a collection's elements without exposing its underlying representation.
 level:
   - "1"
 priority: High

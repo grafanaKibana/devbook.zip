@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:27:20.462Z
-modified: 2026-07-11T18:27:20.462Z
-published: 2026-07-11T18:27:20.462Z
+created: 2026-07-11T21:45:18.007Z
+modified: 2026-07-11T21:45:18.007Z
+published: 2026-07-11T21:45:18.007Z
 topic:
   - Programming
 subtopic:
   - NET
-summary: A logical scope for organizing types that prevents naming collisions, plus using directives, aliases, and project-level conventions.
+summary: A logical scope organizing types and preventing naming collisions.
 level:
   - "4"
 priority: Medium

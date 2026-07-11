@@ -1,12 +1,12 @@
 ---
 publish: true
-created: 2026-07-11T18:13:46.014Z
-modified: 2026-07-11T18:13:46.014Z
-published: 2026-07-11T18:13:46.014Z
+created: 2026-07-11T21:47:05.936Z
+modified: 2026-07-11T21:47:05.936Z
+published: 2026-07-11T21:47:05.936Z
 topic:
   - DevOps
 subtopic: []
-summary: Docker packages an application and its dependencies into an isolated container that runs identically across dev, CI, and production.
+summary: Packages an application and its dependencies into an isolated, portable container.
 level:
   - "2"
 priority: High

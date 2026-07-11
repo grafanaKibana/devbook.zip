@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:30:23.377Z
-modified: 2026-07-11T18:30:23.381Z
-published: 2026-07-11T18:30:23.381Z
+created: 2026-07-11T21:44:31.402Z
+modified: 2026-07-11T21:44:31.402Z
+published: 2026-07-11T21:44:31.402Z
 topic:
   - AI & ML
 subtopic:
   - LLM
-summary: An LLM adapting to a task from prompt examples without weight updates; zero-, one-, and few-shot steering.
+summary: An LLM adapting to a task from prompt examples without weight updates.
 level:
   - "3"
 priority: Medium

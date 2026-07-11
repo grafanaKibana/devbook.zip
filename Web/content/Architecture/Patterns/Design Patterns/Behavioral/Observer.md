@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:18:29.520Z
-modified: 2026-07-11T18:18:29.524Z
-published: 2026-07-11T18:18:29.524Z
+created: 2026-07-11T21:41:07.507Z
+modified: 2026-07-11T21:41:07.507Z
+published: 2026-07-11T21:41:07.507Z
 topic:
   - Architecture
 subtopic:
   - Patterns
-summary: Defines a one-to-many dependency where a subject's state change automatically notifies all subscribers — C#'s event and delegate.
+summary: Defines a one-to-many dependency where a subject's state change automatically notifies all subscribers.
 level:
   - "3"
 priority: High

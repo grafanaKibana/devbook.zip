@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:31:18.121Z
-modified: 2026-07-11T18:31:18.121Z
-published: 2026-07-11T18:31:18.121Z
+created: 2026-07-11T21:45:50.158Z
+modified: 2026-07-11T21:45:50.163Z
+published: 2026-07-11T21:45:50.163Z
 topic:
   - AI & ML
 subtopic:
   - Tooling
-summary: "Tools that run an LLM inside an action loop to complete engineering tasks end to end: read, plan, edit, run, verify, iterate."
+summary: An LLM running in an action loop to complete engineering tasks end to end.
 status: Done
 level:
   - "2"

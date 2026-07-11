@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T21:03:41.935Z
-modified: 2026-07-11T21:03:41.935Z
-published: 2026-07-11T21:03:41.935Z
+created: 2026-07-11T21:44:47.130Z
+modified: 2026-07-11T21:44:47.130Z
+published: 2026-07-11T21:44:47.130Z
 topic:
   - AI & ML
 subtopic:
   - LLM
-summary: Golden sets give broad regression coverage while targeted suites catch specific high-risk failure modes; you need both to trust a change.
+summary: Golden sets give broad regression coverage; targeted suites catch specific high-risk failures. You need both.
 level:
   - "3"
 priority: Medium

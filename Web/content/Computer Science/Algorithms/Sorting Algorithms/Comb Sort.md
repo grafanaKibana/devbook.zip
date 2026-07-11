@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T18:23:54.261Z
-modified: 2026-07-11T18:23:54.266Z
-published: 2026-07-11T18:23:54.266Z
+created: 2026-07-11T21:48:03.466Z
+modified: 2026-07-11T21:48:03.466Z
+published: 2026-07-11T21:48:03.466Z
 topic:
   - Computer Science
 subtopic:
@@ -77,14 +77,6 @@ flowchart TD
 - **The final gap-1 pass is not optional.** Comb sort is only _guaranteed_ correct because it keeps running full passes until a `gap == 1` pass makes zero swaps — the loop condition is `gap > 1 || swapped`. Stopping when the gap first reaches `1` (without the no-swap check) can leave adjacent inversions the wide passes never touched. This is the same "did anything move" termination test that bubble sort needs.
 - **The shrink factor is not free to change.** `1.3` is empirically tuned; larger factors shrink the gap too slowly (extra passes) and smaller ones collapse to bubble sort too fast (turtles survive). Values that make the gap pass through `9` or `10` also hit a known bad pattern — the combsort11 fix forcing those to `11` exists precisely because a plausible-looking factor degraded performance.
 - **It is still not the right tool.** Comb sort's headline is "better than bubble sort," which is a low bar. Its `O(n²)` worst case remains, it is not stable, and [[Shell Sort]] applies the same shrinking-gap idea to the stronger [[Insertion Sort]] base and wins. In production, reach for [[Introsort]] or [[Tim Sort]]; use comb sort to explain a concept, not to sort data.
-
-## Tradeoffs
-
-| Choice | Comb Sort | Alternative | Decision criteria |
-| --- | --- | --- | --- |
-| vs [[Bubble Sort]] | `O(n² / 2^p)` typical, kills turtles | `O(n²)`, turtles crawl one slot per pass | Comb sort strictly dominates bubble sort on almost every input at the same code complexity; there is no reason to pick bubble sort except to teach the naive baseline. |
-| vs [[Shell Sort]] | Shrinking gap over bubble-style swaps | Shrinking gap over insertion sort | Both use decreasing gaps; Shell sort's insertion-based passes leave less residual disorder and it is the better constrained-environment choice — prefer it whenever you were tempted by comb sort. |
-| vs [[Introsort]] / [[Tim Sort]] | `O(n²)` worst, not stable, `O(1)` space | `O(n log n)` guaranteed | For any real workload use the bounded library sort; comb sort's only edge is conceptual simplicity, which production code does not reward. |
 
 ## Questions
 

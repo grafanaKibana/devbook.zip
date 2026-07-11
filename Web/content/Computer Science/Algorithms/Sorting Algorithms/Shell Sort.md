@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T18:24:11.317Z
-modified: 2026-07-11T18:24:11.318Z
-published: 2026-07-11T18:24:11.318Z
+created: 2026-07-11T21:47:54.935Z
+modified: 2026-07-11T21:47:54.935Z
+published: 2026-07-11T21:47:54.935Z
 topic:
   - Computer Science
 subtopic:
@@ -82,8 +82,6 @@ flowchart TD
 
 | Choice | Shell Sort | Alternative | Decision criteria |
 | --- | --- | --- | --- |
-| vs [[Insertion Sort]] | `O(n^1.5)` with a good gap sequence, in place | `O(n²)`, in place, stable | Use plain insertion sort only for tiny (`n ≤ 32`) or nearly-sorted arrays where stability matters; Shell sort wins the moment `n` grows into the thousands. |
-| vs [[Quick Sort]] / [[Introsort]] | `O(n^1.5)`, `O(1)` space, no recursion | `O(n log n)` avg, `O(log n)` stack | Prefer Shell sort only when recursion and heap allocation are unwelcome (embedded, kernel, tiny libc); otherwise a library `O(n log n)` sort is faster and bounded. |
 | Gap sequence | Ciura `1,4,10,23,57,132,301,701` | Shell `n/2^k` | Ciura is the empirical best for `n` up to ~10⁵; the naive `n/2` powers-of-two sequence keeps even and odd indices apart and degrades to `O(n²)`. |
 
 ## Questions

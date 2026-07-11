@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:31:31.267Z
-modified: 2026-07-11T18:31:31.271Z
-published: 2026-07-11T18:31:31.271Z
+created: 2026-07-11T21:45:01.509Z
+modified: 2026-07-11T21:45:01.509Z
+published: 2026-07-11T21:45:01.509Z
 topic:
   - AI & ML
 subtopic:
   - LLM
-summary: Retrieval decides what evidence enters the prompt, balancing recall, precision, and latency via vector, keyword, or hybrid search.
+summary: Decides what evidence enters the prompt, balancing recall, precision, and latency across search methods.
 level:
   - "2"
 priority: High

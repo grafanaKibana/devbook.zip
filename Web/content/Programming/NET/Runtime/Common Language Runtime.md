@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:26:55.671Z
-modified: 2026-07-11T18:26:55.671Z
-published: 2026-07-11T18:26:55.671Z
+created: 2026-07-11T21:45:03.477Z
+modified: 2026-07-11T21:45:03.477Z
+published: 2026-07-11T21:45:03.477Z
 topic:
   - Programming
 subtopic:
   - NET
-summary: The CLR is .NET's execution engine, JIT/AOT-compiling IL to native code and providing memory management, type safety, and threading.
+summary: .NET's execution engine compiling IL to native code and managing memory and types.
 level:
   - "4"
 priority: High

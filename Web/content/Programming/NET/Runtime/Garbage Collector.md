@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:26:58.606Z
-modified: 2026-07-11T18:26:58.606Z
-published: 2026-07-11T18:26:58.606Z
+created: 2026-07-11T21:45:06.093Z
+modified: 2026-07-11T21:45:06.093Z
+published: 2026-07-11T21:45:06.093Z
 topic:
   - Programming
 subtopic:
   - NET
-summary: The Garbage Collector is the CLR's automatic memory manager, using a generational model to reclaim objects no longer reachable from roots.
+summary: The CLR's automatic memory manager reclaiming unreachable objects generationally.
 level:
   - "4"
 priority: High

@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T17:57:48.828Z
-modified: 2026-07-11T17:57:48.828Z
-published: 2026-07-11T17:57:48.828Z
+created: 2026-07-11T21:46:22.723Z
+modified: 2026-07-11T21:46:22.727Z
+published: 2026-07-11T21:46:22.727Z
 topic:
   - Networks
 subtopic:
   - Architecture & Ops
-summary: An encrypted tunnel between endpoints so traffic flows as if both are on the same private network, over the public internet.
+summary: An encrypted tunnel making remote endpoints act as one private network over the internet.
 level:
   - "3"
 priority: Medium

@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:27:07.894Z
-modified: 2026-07-11T18:27:07.903Z
-published: 2026-07-11T18:27:07.903Z
+created: 2026-07-11T21:45:09.957Z
+modified: 2026-07-11T21:45:09.958Z
+published: 2026-07-11T21:45:09.958Z
 topic:
   - Programming
 subtopic:
   - NET
-summary: How C# uses try/catch/finally to handle failures and guarantee cleanup, plus throwing, custom exceptions, and global handlers.
+summary: Using try/catch/finally to handle failures and guarantee cleanup in C#.
 level:
   - "4"
 priority: Medium

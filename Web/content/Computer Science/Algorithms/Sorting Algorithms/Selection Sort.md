@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T18:24:10.707Z
-modified: 2026-07-11T18:24:10.707Z
-published: 2026-07-11T18:24:10.707Z
+created: 2026-07-11T21:48:55.883Z
+modified: 2026-07-11T21:48:55.883Z
+published: 2026-07-11T21:48:55.883Z
 topic:
   - Computer Science
 subtopic:
@@ -103,17 +103,6 @@ For general use, prefer insertion sort (better on nearly-sorted data) or `Array.
 **What goes wrong**: selection sort is chosen for small arrays because it has O(n) swaps. But for small n, the swap count advantage is negligible, and insertion sort is faster in practice due to better cache behavior and O(n) best case on nearly-sorted data.
 
 **Mitigation**: prefer insertion sort for small arrays. Use selection sort only when writes are measurably more expensive than reads in your specific hardware context.
-
-## Tradeoffs
-
-| Algorithm | Time (avg) | Stable | Swaps | Best case | Use when |
-|-----------|-----------|--------|-------|-----------|----------|
-| Selection sort | O(n²) | No | O(n) | O(n²) | Writes are expensive (flash memory); stability not needed |
-| Insertion sort | O(n²) | Yes | O(n²) shifts | O(n) | Small arrays; nearly-sorted data; stability needed |
-| Merge sort | O(n log n) | Yes | O(n log n) | O(n log n) | Stability required; large arrays; linked lists |
-| Array.Sort (introsort) | O(n log n) | No | O(n log n) | O(n log n) | General-purpose in-memory sorting |
-
-**Decision rule**: selection sort's only advantage is O(n) swaps. Use it only when writes are significantly more expensive than reads (flash memory, EEPROM). For all other cases, use insertion sort (small arrays) or `Array.Sort` (large arrays).
 
 ## Questions
 

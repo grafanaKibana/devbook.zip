@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:23:38.837Z
-modified: 2026-07-11T18:23:38.837Z
-published: 2026-07-11T18:23:38.837Z
+created: 2026-07-11T21:43:13.579Z
+modified: 2026-07-11T21:43:13.580Z
+published: 2026-07-11T21:43:13.580Z
 topic:
   - Computer Science
 subtopic:
   - Data Structures
-summary: Graphs model relationships between entities using vertices and edges; unlike trees they allow cycles, multiple paths, and no single root.
+summary: Vertices and edges modelling relationships that allow cycles, multiple paths, and no single root.
 level:
   - "4"
 priority: Medium

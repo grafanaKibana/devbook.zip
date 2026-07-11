@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T17:57:55.081Z
-modified: 2026-07-11T17:57:55.081Z
-published: 2026-07-11T17:57:55.081Z
+created: 2026-07-11T21:44:16.342Z
+modified: 2026-07-11T21:44:16.345Z
+published: 2026-07-11T21:44:16.345Z
 topic:
   - Networks
 subtopic:
   - Transport & Sockets
-summary: UDP is a connectionless transport protocol sending independent datagrams with no delivery, ordering, or congestion guarantees.
+summary: A connectionless transport sending independent datagrams with no delivery or ordering guarantees.
 level:
   - "3"
 priority: Medium

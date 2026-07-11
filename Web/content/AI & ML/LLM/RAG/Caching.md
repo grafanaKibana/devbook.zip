@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:31:22.487Z
-modified: 2026-07-11T18:31:22.513Z
-published: 2026-07-11T18:31:22.513Z
+created: 2026-07-11T21:45:11.521Z
+modified: 2026-07-11T21:45:11.521Z
+published: 2026-07-11T21:45:11.521Z
 topic:
   - AI & ML
 subtopic:
   - LLM
-summary: Caching stores results at each RAG pipeline stage to cut latency and cost, but every cache key must include authorization scope.
+summary: Stores results at each RAG stage to cut latency and cost, scoped by authorization.
 level:
   - "2"
 priority: High

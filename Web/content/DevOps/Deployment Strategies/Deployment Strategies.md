@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:20:04.749Z
-modified: 2026-07-11T18:20:04.750Z
-published: 2026-07-11T18:20:04.750Z
+created: 2026-07-11T21:42:40.773Z
+modified: 2026-07-11T21:42:40.773Z
+published: 2026-07-11T21:42:40.773Z
 topic:
   - DevOps
 subtopic:
   - Deployment Strategies
-summary: Deployment strategies control how new versions reach production, balancing risk, infrastructure cost, and rollback speed.
+summary: How new versions reach production, balancing risk, cost, and rollback speed.
 status:
   - Ready to Repeat
 priority: Medium
@@ -140,15 +140,17 @@ Increase traffic to the new version in fixed increments on a fixed schedule (e.g
 
 ## Decision Rule
 
-**Start with In-Place (Rolling)** for any new service — it's the Kubernetes default, costs nothing extra, and handles most cases.
-
-**Switch to Blue-Green** when: rollback speed is critical (financial transactions, regulated workloads), or you need to validate the full environment before cutover.
-
-**Switch to Canary** when: you have >10k daily users, a service mesh or weighted load balancer, and automated SLO-based rollback. The investment in tooling pays off at scale.
-
-**Use Linear** when: deploying AWS Lambda functions — CodeDeploy makes it trivial and CloudWatch alarms provide automatic rollback.
-
-**Avoid All-at-Once** in production unless downtime is contractually acceptable and infrastructure cost is the primary constraint.
+```mermaid
+flowchart TD
+    A{Deploying AWS Lambda functions} -->|Yes| B[Use Linear]
+    A -->|No| C{Downtime acceptable and infra cost is the primary constraint}
+    C -->|Yes| D[Use All-at-Once]
+    C -->|No| E{Rollback speed critical or must validate full environment before cutover}
+    E -->|Yes| F[Use Blue-Green]
+    E -->|No| G{Over 10k daily users with traffic splitting and SLO-based rollback}
+    G -->|Yes| H[Use Canary]
+    G -->|No| I[Use In-Place Rolling as the default]
+```
 
 ## References
 

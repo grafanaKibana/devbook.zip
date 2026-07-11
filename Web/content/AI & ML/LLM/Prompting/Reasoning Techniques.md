@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:30:27.289Z
-modified: 2026-07-11T18:30:27.290Z
-published: 2026-07-11T18:30:27.290Z
+created: 2026-07-11T21:44:33.843Z
+modified: 2026-07-11T21:44:33.843Z
+published: 2026-07-11T21:44:33.843Z
 topic:
   - AI & ML
 subtopic:
   - LLM
-summary: "Making intermediate reasoning explicit: Chain-of-Thought, Self-Consistency voting, and Tree of Thoughts search for multi-step tasks."
+summary: Making intermediate reasoning explicit with Chain-of-Thought, Self-Consistency, and Tree of Thoughts.
 level:
   - "3"
 priority: Medium

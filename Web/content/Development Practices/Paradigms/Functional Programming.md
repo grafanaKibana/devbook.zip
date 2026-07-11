@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:13:52.639Z
-modified: 2026-07-11T18:13:52.641Z
-published: 2026-07-11T18:13:52.641Z
+created: 2026-07-11T21:47:36.642Z
+modified: 2026-07-11T21:47:36.643Z
+published: 2026-07-11T21:47:36.643Z
 topic:
   - Development Practices
 subtopic:
   - Paradigms
-summary: Functional programming models computation as the evaluation of pure functions over immutable data.
+summary: Models computation as the evaluation of pure functions over immutable data.
 level:
   - "3"
 priority: Medium

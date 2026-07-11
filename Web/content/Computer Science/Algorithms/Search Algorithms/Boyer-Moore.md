@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T18:23:40.372Z
-modified: 2026-07-11T18:23:40.373Z
-published: 2026-07-11T18:23:40.373Z
+created: 2026-07-11T21:45:13.791Z
+modified: 2026-07-11T21:45:13.792Z
+published: 2026-07-11T21:45:13.792Z
 topic:
   - Computer Science
 subtopic:
@@ -101,10 +101,7 @@ flowchart TD
 
 | Choice | Option A | Option B | Decision criteria |
 | --- | --- | --- | --- |
-| Worst-case guarantee | [[KMP (Knuth-Morris-Pratt) Algorithm\|KMP]] `O(n+m)` | Boyer-Moore `O(n/m)` best, `O(nm)` worst | Use KMP when input may be adversarial; use Boyer-Moore for typical large-alphabet text where average sublinear speed dominates. Add Galil's rule to Boyer-Moore to get both. |
-| Implementation effort | Boyer-Moore-Horspool (bad-char only) | Full Boyer-Moore (both rules) | Ship Horspool by default — simpler and nearly as fast. Add the good-suffix rule only when profiling proves the extra skips matter. |
-| Alphabet size | Boyer-Moore | [[KMP (Knuth-Morris-Pratt) Algorithm\|KMP]] or Shift-Or | Boyer-Moore wins as `\|Σ\|` grows (English, Unicode); on 2-4 symbol alphabets (DNA, binary) its skips shrink and KMP or bit-parallel methods win. |
-| Many patterns at once | [[Aho-Corasick]] | Boyer-Moore per pattern | Aho-Corasick scans once regardless of pattern count. Switch as soon as you have more than two or three patterns. |
+| Implementation effort | Boyer-Moore-Horspool (bad-char only) | Full Boyer-Moore (both rules) | Ship Horspool by default, simpler and nearly as fast. Add the good-suffix rule only when profiling proves the extra skips matter. |
 
 ## Questions
 
