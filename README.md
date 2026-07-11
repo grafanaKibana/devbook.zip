@@ -66,4 +66,4 @@ cd devbook.zip
 
 ## License
 
-ISC
+[MIT License](LICENSE)
