@@ -166,30 +166,35 @@ white-space: nowrap;
 .folder-map-node .db-card-summary {
 display: none;
 }
-/_ Empty-section placeholder: a muted gray dashed card (not raw text), reusing
-the .db-card chrome but with the accent gradient and hover lift neutralized. \*/
+/_ Empty-section placeholder: reuses the full .db-card chrome (border, accent
+glow gradient, background) so it reads as a regular sub-folder card. It only
+differs in being non-interactive — no pointer cursor, no hover lift — with the
+text centered in the card. _/
 .folder-map-node-empty {
-border-style: dashed;
-background-color: var(--background-secondary, rgba(125, 125, 125, 0.06));
 cursor: default;
 }
-.folder-map-node-empty::before { display: none; }
 .folder-map-node-empty:hover,
 .folder-map-node-empty:focus-within {
 border-color: var(--background-modifier-border, var(--lightgray, #d8dee9));
-background-color: var(--background-secondary, rgba(125, 125, 125, 0.06));
-box-shadow: none;
+background-color: var(--background-primary, var(--light, #ffffff));
+box-shadow: 0 0 0 rgba(0, 0, 0, 0);
 transform: none;
 }
-.folder-map-node-empty .db-card-body {
+.folder-map-node-empty:hover::before,
+.folder-map-node-empty:focus-within::before { opacity: 0.78; }
+/_ Higher specificity than the @container .folder-map-node .db-card-body
+rules below so the placeholder stays vertically centered at every width. \*/
+.folder-structure-map .folder-map-node-empty .db-card-body {
 justify-content: center;
 align-items: center;
 text-align: center;
 }
 .folder-map-empty-text {
-color: var(--text-muted, var(--darkgray, #5f6b7a));
-font-size: 0.9rem;
-font-style: italic;
+color: var(--text-normal, var(--dark, #1f2937));
+font-size: 1rem;
+font-weight: 400;
+font-style: normal;
+line-height: 1.25;
 }
 @container folder-map (min-width: 40rem) {
 .folder-map-node {
