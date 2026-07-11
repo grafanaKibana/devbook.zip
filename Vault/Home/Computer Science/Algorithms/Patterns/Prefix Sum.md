@@ -118,5 +118,3 @@ Prefix sums give the cheapest possible range query — a single subtraction — 
 - [Summed-area table (Wikipedia)](https://en.wikipedia.org/wiki/Summed-area_table) — the 2D extension and its inclusion–exclusion rectangle query, with the integral-image application.
 - [Fenwick (Binary Indexed) Tree](https://cp-algorithms.com/data_structures/fenwick.html) — the `O(log n)` structure to switch to once the underlying array is mutated between queries.
 - [Subarray Sum Equals K (LeetCode #560)](https://leetcode.com/problems/subarray-sum-equals-k/) — canonical use of running prefixes to answer a range-count question in one pass.
-</content>
-</invoke>

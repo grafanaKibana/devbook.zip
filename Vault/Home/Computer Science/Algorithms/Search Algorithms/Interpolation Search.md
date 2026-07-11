@@ -90,7 +90,7 @@ The denominator fails when `a[hi] == a[lo]`. A run of equal values, or a range t
 >         // Widen an operand to long before subtracting and multiplying, so
 >         // neither the value difference nor the product overflows 32-bit int.
 >         var span = ((long)target - values[lo]) * (hi - lo);
->         var pos = lo + (int)(span / (values[hi] - values[lo]));
+>         var pos = lo + (int)(span / ((long)values[hi] - values[lo]));
 >
 >         if (values[pos] == target)
 >         {

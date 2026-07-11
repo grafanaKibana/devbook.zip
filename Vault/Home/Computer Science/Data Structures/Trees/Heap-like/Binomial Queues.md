@@ -241,5 +241,3 @@ A binomial queue is the mergeable priority queue whose `O(log n)` union comes di
 - [Vuillemin, "A data structure for manipulating priority queues" (CACM 1978)](https://dl.acm.org/doi/10.1145/359460.359478) — the original binomial queue paper defining tree orders, linking, and the binary-addition meld.
 - [Binomial heap (Wikipedia)](https://en.wikipedia.org/wiki/Binomial_heap) — order definitions, the meld walkthrough, and the amortized-insert analysis via the binary counter.
 - [Vuillemin, "A data structure for manipulating priority queues" (CACM, 1978)](https://doi.org/10.1145/359460.359478) — the original binomial-queue paper: the forest-as-binary-counter representation and the meld-by-carry union.
-</content>
-</invoke>

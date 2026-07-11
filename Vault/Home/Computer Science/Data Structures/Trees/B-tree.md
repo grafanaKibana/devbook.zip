@@ -147,5 +147,3 @@ A B-tree is the shallow, high-fan-out tree for a block- or disk-resident ordered
 - [SQLite database file format — B-tree pages](https://www.sqlite.org/fileformat2.html#b_tree_pages) — precise on-disk layout of B-tree and B+-tree pages; the clearest concrete "node = page" walkthrough.
 - [PostgreSQL nbtree README](https://github.com/postgres/postgres/blob/master/src/backend/access/nbtree/README) — production notes on the Lehman–Yao variant Postgres ships: sibling links, page splits, and concurrency on real page-sized nodes.
 - [PostgreSQL indexes](https://www.postgresql.org/docs/current/indexes.html) — index-type overview showing the default B-tree access method in context.
-</content>
-</invoke>

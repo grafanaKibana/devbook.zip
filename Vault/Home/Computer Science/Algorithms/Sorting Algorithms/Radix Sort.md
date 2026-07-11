@@ -150,5 +150,3 @@ Radix Sort is the linear option precisely when keys carry a fixed-width digit st
 - [Radix sort (Wikipedia)](https://en.wikipedia.org/wiki/Radix_sort) — LSD and MSD variants, the `Θ(d·(n+b))` derivation, and history.
 - [Radix sorts (Princeton Algorithms)](https://algs4.cs.princeton.edu/51radix/) — Sedgewick and Wayne on key-indexed counting and LSD/MSD string sorts, with the stability argument stated directly.
 - [Radix Tricks (Michael Herf)](http://stereopsis.com/radix.html) — the canonical write-up of the sign-bit and flip-all-bits transform for radix-sorting IEEE-754 floats.
-</content>
-</invoke>

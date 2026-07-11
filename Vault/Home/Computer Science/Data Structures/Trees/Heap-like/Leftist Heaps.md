@@ -148,5 +148,3 @@ A leftist heap is the answer when a merge must be `O(log n)` in the worst case w
 - [Leftist tree (Wikipedia)](https://en.wikipedia.org/wiki/Leftist_tree) — s-value (npl) definition, the leftist invariant, and the right-spine length proof.
 - [Okasaki, *Purely Functional Data Structures* (thesis, ch. 3)](https://www.cs.cmu.edu/~rwh/students/okasaki.pdf) — leftist heaps as the canonical persistent mergeable heap, with ML implementations and the merge-based API.
 - Mark Allen Weiss, *Data Structures and Algorithm Analysis in C++*, ch. 6 (Priority Queues) — the null-path-length invariant, the worst-case merge along right paths, and the npl-maintaining implementation this note follows.
-</content>
-</invoke>

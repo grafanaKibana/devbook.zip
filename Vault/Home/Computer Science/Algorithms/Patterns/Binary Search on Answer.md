@@ -139,5 +139,3 @@ Binary search on the answer is the `O(n · log(range))` tool when the answer is 
 - [Capacity To Ship Packages Within D Days (LeetCode #1011)](https://leetcode.com/problems/capacity-to-ship-packages-within-d-days/) — the minimise-the-maximum instance whose predicate is the reference implementation above.
 - [Split Array Largest Sum (LeetCode #410)](https://leetcode.com/problems/split-array-largest-sum/) — the same monotone predicate under "minimise the largest subarray sum" wording.
 - [Koko Eating Bananas (LeetCode #875)](https://leetcode.com/problems/koko-eating-bananas/) — minimise-the-speed variant, with `feasible(speed)` summing `ceil(pile / speed)` hours.
-</content>
-</invoke>

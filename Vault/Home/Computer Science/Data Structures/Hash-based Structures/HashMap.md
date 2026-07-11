@@ -134,5 +134,3 @@ A hash map is the default when repeated exact-match keyed lookup dominates and o
 - [Selecting a collection class (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/collections/selecting-a-collection-class) — decision guidance between hash-based and sorted collections.
 - [Anatomy of the .NET Dictionary](https://dunnhq.com/posts/2024/anatomy-of-the-dotnet-dictionary/) — bucket layout, collision handling, and resize behavior walked through the source.
 - [Denial of Service via Algorithmic Complexity Attacks](https://www.usenix.org/legacy/event/sec03/tech/full_papers/crosby/crosby.pdf) — Crosby and Wallach's paper establishing hash-flooding as a practical DoS vector and the motivation for randomized seeds.
-</content>
-</invoke>
