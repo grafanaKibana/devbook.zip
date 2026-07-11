@@ -7,7 +7,7 @@ tags:
 publish: true
 ---
 ```datacorejsx
-const { CARD_CSS } = await dc.require("Assets/components/devbook-card.jsx");
+const { CARD_CSS, squashCss } = await dc.require("Assets/components/devbook-card.jsx");
 const { icon } = await dc.require("Assets/components/devbook-icons.jsx");
 return function TopicDashboard() {
   const ROOT = (dc.useCurrentFile()?.$path || "Home").split("/")[0];
@@ -143,7 +143,7 @@ ${spanRules("dsk")}
 
   return (
     <div style={{ marginTop: "1.5rem" }}>
-      <style dangerouslySetInnerHTML={{ __html: CARD_CSS + CSS }} />
+      <style dangerouslySetInnerHTML={{ __html: squashCss(CARD_CSS + CSS) }} />
       <div class="dc-topic-grid">
         {cards.map((c) => (
           <div class={`db-card dc-topic-card dsk-${c.spanDesktop} med-${c.spanMedium} nar-${c.spanNarrow}`} style={{ "--card-accent": c.rgb, "--topic-rgb": c.rgb }}>

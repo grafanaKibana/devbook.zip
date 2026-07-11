@@ -17,7 +17,7 @@
 // and these hubs stay visually identical. This module only adds the flex-wrap
 // layout, the note-count, and the responsive compaction of small cards.
 
-const { CARD_CSS } = await dc.require("Assets/components/devbook-card.jsx");
+const { CARD_CSS, squashCss } = await dc.require("Assets/components/devbook-card.jsx");
 
 function FolderStructureMap() {
   const current = dc.useCurrentFile();
@@ -207,7 +207,7 @@ function FolderStructureMap() {
 
   return (
     <nav class="folder-structure-map" aria-label={`${folderName} section map`} style={{ "--card-accent": topicRgb }}>
-      <style dangerouslySetInnerHTML={{ __html: CARD_CSS + CSS }} />
+      <style dangerouslySetInnerHTML={{ __html: squashCss(CARD_CSS + CSS) }} />
       {entries.length > 0 ? (
         <div class="folder-map-children">
           {entries.map((entry) => {

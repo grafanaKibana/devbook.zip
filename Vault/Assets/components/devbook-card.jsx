@@ -111,4 +111,14 @@ p.db-card-summary {
 }
 `;
 
-return { CARD_CSS };
+// Collapse an injected CSS string to a single line: strip /* */ comments and
+// squash all whitespace (including blank lines) to single spaces. CSS is
+// whitespace-insensitive so Obsidian renders identically — but the Quartz
+// publish path (Syncer freezes the datacore to raw HTML embedded in Markdown)
+// treats a blank line inside the emitted <style> as the end of the HTML block,
+// which dumps the rest of the CSS onto the page as text and drops the layout
+// rules. Every consumer MUST wrap its <style> content in this before injecting.
+const squashCss = (css) =>
+  String(css).replace(/\/\*[\s\S]*?\*\//g, "").replace(/\s+/g, " ").trim();
+
+return { CARD_CSS, squashCss };
