@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:23:54.755Z
-modified: 2026-07-11T18:23:54.758Z
-published: 2026-07-11T18:23:54.758Z
+created: 2026-07-11T21:53:38.182Z
+modified: 2026-07-11T21:53:38.182Z
+published: 2026-07-11T21:53:38.182Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: Precomputes cumulative sums so any range sum becomes one O(1) subtraction after an O(n) build, over static data.
+summary: Precomputes cumulative sums so any range sum becomes one O(1) subtraction after an O(n) build.
 level:
   - "4"
 priority: Medium
@@ -73,7 +73,6 @@ public static int SubarraysWithSum(int[] a, int k)
 | --- | --- | --- | --- |
 | Static range-sum queries | `O(n)` build, `O(1)` query | Recompute each query `O(n)` | Prefix sum wins the moment you have two or more queries; a single query never justifies the build. |
 | Data changes between queries | `O(n)` rebuild per update | Fenwick / segment tree `O(log n)` update and query | Any interleaving of writes and reads: use a Fenwick tree; prefix sums only for read-only data. |
-| Sub-array sum equals `k` with negatives | Prefix + hash map `O(n)` time, `O(n)` space | [[Sliding Window]] `O(n)`, `O(1)` space | Non-negative values and a contiguous target: use a window. Any negatives, or counting all such ranges: use prefix + hash map. |
 | Many range _updates_, one final read | Difference array `O(1)` per update | Segment tree with lazy propagation | Difference array if all updates precede all reads; lazy segment tree if updates and reads interleave. |
 
 ## Questions

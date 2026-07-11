@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:23:39.269Z
-modified: 2026-07-11T18:23:39.276Z
-published: 2026-07-11T18:23:39.276Z
+created: 2026-07-11T21:51:13.144Z
+modified: 2026-07-11T21:51:13.144Z
+published: 2026-07-11T21:51:13.144Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: Finds the greatest s–t throughput in a capacitated network by repeatedly augmenting paths in a residual graph that lets later flow cancel earlier flow.
+summary: Finds the greatest s-to-t throughput in a capacitated network by repeatedly augmenting paths in a residual graph.
 level:
   - "4"
 priority: Medium

@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:23:38.838Z
-modified: 2026-07-11T18:23:38.838Z
-published: 2026-07-11T18:23:38.838Z
+created: 2026-07-11T21:53:47.186Z
+modified: 2026-07-11T21:53:47.186Z
+published: 2026-07-11T21:53:47.186Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: Binary-searches the space of possible answers using a monotonic feasibility test, for 'minimise the maximum' or 'maximise the minimum' problems.
+summary: Binary-searches the space of possible answers using a monotonic feasibility test.
 level:
   - "4"
 priority: Medium

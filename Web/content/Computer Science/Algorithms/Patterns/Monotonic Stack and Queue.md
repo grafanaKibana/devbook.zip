@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:23:52.864Z
-modified: 2026-07-11T18:23:52.869Z
-published: 2026-07-11T18:23:52.869Z
+created: 2026-07-11T21:53:42.697Z
+modified: 2026-07-11T21:53:42.697Z
+published: 2026-07-11T21:53:42.697Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: A stack or deque kept sorted by popping dominated elements, solving next/previous-greater and sliding-window extremum queries in linear time.
+summary: A stack or deque kept sorted by popping dominated elements, answering next-greater and window-extremum queries in linear time.
 level:
   - "4"
 priority: Medium
@@ -110,7 +110,6 @@ flowchart TD
 | --- | --- | --- | --- |
 | Next/previous greater or smaller for every index | Monotonic stack `O(n)` | Nested comparison `O(n^2)` | Any input beyond tiny sizes: the stack's linear pass dominates once `n` exceeds a few hundred. |
 | Maximum/minimum of every fixed window | Monotonic deque `O(n)` | Balanced BST or heap over the window `O(n log k)` | Deque wins on pure min/max; a heap or multiset is only needed when you also want, say, the median or `k`-th order statistic. |
-| Sum/count over a window | [[Sliding Window]] `O(n)` | Monotonic deque | A running sum can be added and subtracted incrementally; an extremum cannot be "un-added," which is exactly why extrema need the deque. |
 
 ## Questions
 

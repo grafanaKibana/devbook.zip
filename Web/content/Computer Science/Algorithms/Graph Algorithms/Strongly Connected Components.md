@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:23:43.766Z
-modified: 2026-07-11T18:23:43.766Z
-published: 2026-07-11T18:23:43.766Z
+created: 2026-07-11T21:51:10.884Z
+modified: 2026-07-11T21:51:10.884Z
+published: 2026-07-11T21:51:10.884Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: Maximal mutually-reachable vertex sets of a digraph, found in O(V+E) by Kosaraju's or Tarjan's and collapsing into a DAG condensation.
+summary: Maximal mutually-reachable vertex sets of a digraph, found in O(V+E) by Kosaraju's or Tarjan's.
 level:
   - "4"
 priority: Medium
