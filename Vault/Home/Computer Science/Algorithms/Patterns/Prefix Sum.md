@@ -12,89 +12,109 @@ publish: true
 
 # Intro
 
-A prefix sum (cumulative sum) precomputes `pre[i] = a[0] + a[1] + ... + a[i-1]` so that the sum of any range `a[l..r]` becomes `pre[r+1] - pre[l]` — a single subtraction in `O(1)` after an `O(n)` build. The trailing `+1` convention (`pre[0] = 0`, `pre` has length `n+1`) is what makes the boundary arithmetic clean: no special case for `l == 0`. The insight is that a range sum is a *difference of two running totals*, so once you have the totals you never touch the underlying array again.
+A dataset holds daily sales for a year, and a report asks for the total of dozens of arbitrary date ranges. Re-adding the elements of each range costs `O(n)` per question, so `q` questions cost `O(nq)`, and most of that work re-adds the same interior values over and over. A prefix sum precomputes every running total once: `prefix[i]` is the sum of the first `i` elements, with `prefix[0] = 0` standing for the empty prefix. The sum of an inclusive range `[l, r]` is then `prefix[r + 1] - prefix[l]` — a single subtraction, because the shared left portion `prefix[l]` cancels out and only the elements between the two totals survive.
 
-**Reach for it when you see** many range-sum (or range-count, range-XOR) queries over **static** data — the array doesn't change between queries. If the data is updated between queries, prefix sums go stale after every write; use a Fenwick (binary indexed) tree or a segment tree instead, which trade `O(1)` queries for `O(log n)` queries in exchange for `O(log n)` updates. For a *single* pass looking for a contiguous range meeting a constraint, a [[Sliding Window]] is lighter — but prefix sums generalise to negatives and to counting where a window cannot.
+The trade is one `O(n)` pass and `O(n)` extra memory for `O(1)` answers thereafter, and it holds only while the array never changes.
 
-## How It Works
+**Core shape:** static array → one running-sum pass → any range sum is a difference of two totals → `O(1)` query, `O(n)` space.
 
-- **Build** — one left-to-right pass: `pre[i+1] = pre[i] + a[i]`. `pre[0] = 0` represents the empty prefix.
-- **Query** — `sum(l, r) = pre[r+1] - pre[l]` for the inclusive range `[l, r]`.
-- **2D extension (summed-area table / integral image)** — precompute `P[i][j] = ` sum of the sub-rectangle from `(0,0)` to `(i-1,j-1)`. Any axis-aligned rectangle sum comes from **inclusion–exclusion** over four corners: `sum = P[r2+1][c2+1] - P[r1][c2+1] - P[r2+1][c1] + P[r1][c1]`. The two subtracted terms remove the strips above and to the left; the final `+` term adds back the top-left corner that both subtractions removed. This is the trick behind Viola–Jones face detection, which needs constant-time box sums over an image.
-- **Difference array (the dual)** — prefix sum turns point values into range sums; a difference array does the reverse. To add `v` to every element of `a[l..r]`, do `diff[l] += v` and `diff[r+1] -= v` — two `O(1)` writes. After all updates, a single prefix-sum pass over `diff` materialises the final array. This gives `O(1)` **range updates** with a one-time `O(n)` reconstruction, the mirror image of prefix sums giving `O(1)` range *queries*.
-- **Prefix sum + hash map** — to count sub-arrays summing to `k`, keep a running prefix `run` and a hash map of how many times each prefix value has occurred. Since `sum(i, j) = run_j - run_{i-1}`, a range ending at `j` sums to `k` exactly when some earlier prefix equalled `run_j - k`. Look that up, add its count. This handles **negative numbers**, where [[Sliding Window]] fails: a window relies on the sum growing monotonically as it expands, but negatives can make a longer window valid again, so there is no shrink rule — the hash map sidesteps monotonicity entirely by matching exact prefix values.
+> [!NOTE] Visualization pending
+> Planned StepTrace: a running-sum-array card that builds `prefix` in one left-to-right pass, then highlights `prefix[r + 1]` and `prefix[l]` and shows their difference isolating a range. No matching renderer exists in `engine.js` yet.
 
-Complexity: 1D build `O(n)` time and space, query `O(1)`. 2D build `O(nm)`, query `O(1)`. Difference array: `O(1)` per update, `O(n)` to materialise. Subarray-count: `O(n)` time, `O(n)` space for the map.
+## Why the difference is the range sum
 
-## Example
+`prefix[k]` accumulates every element strictly before index `k`, so `prefix[r + 1]` covers `a[0..r]` and `prefix[l]` covers `a[0..l-1]`. Subtracting them removes the common head `a[0..l-1]` exactly, leaving `a[l] + ... + a[r]`. The `prefix[0] = 0` sentinel and the length-`(n + 1)` array are what let `l = 0` use the same formula as any other left bound: `prefix[0]` supplies the empty sum with no special case.
 
-```csharp
-// Build once, then answer any range sum in O(1).
-public static long[] BuildPrefix(int[] a)
-{
-    var pre = new long[a.Length + 1];              // pre[0] = 0, length n+1
-    for (int i = 0; i < a.Length; i++)
-        pre[i + 1] = pre[i] + a[i];                // long avoids overflow on big sums
-    return pre;
-}
+The idea extends along two independent axes:
 
-// Sum of a[l..r] inclusive.
-public static long RangeSum(long[] pre, int l, int r) => pre[r + 1] - pre[l];
+- **2D (summed-area table).** `P[i][j]` holds the sum of the sub-rectangle from the origin to `(i-1, j-1)`. A rectangle sum comes from inclusion–exclusion over four corners: `P[r2+1][c2+1] - P[r1][c2+1] - P[r2+1][c1] + P[r1][c1]`. The two subtractions strip the region above and the region to the left of the target; those overlap in the top-left block, which is removed twice, so the final term adds it back once. Build is `O(nm)`, each query still `O(1)`.
+- **Difference array (the dual).** Prefix sums turn point values into range queries; a difference array turns range updates into point values. Adding `v` to every element of `a[l..r]` is two writes — `diff[l] += v`, `diff[r + 1] -= v` — and one prefix-sum pass over `diff` at the end materialises the final array. That gives `O(1)` range *updates* with a one-time `O(n)` reconstruction, the mirror image of `O(1)` range *queries*.
 
-// Count sub-arrays summing to k — correct even with negative values.
-public static int SubarraysWithSum(int[] a, int k)
-{
-    var seen = new Dictionary<long, int> { [0] = 1 }; // one empty prefix, sum 0
-    long run = 0;
-    int count = 0;
-    foreach (int x in a)
-    {
-        run += x;
-        if (seen.TryGetValue(run - k, out int c)) count += c; // ranges ending here
-        seen[run] = seen.GetValueOrDefault(run) + 1;
-    }
-    return count;
-}
-```
+## Complexity
 
-## Pitfalls
-
-- **Overflow on long arrays** — cumulative sums grow much faster than individual elements. A million `int` values near `2^31` overflow an `int` prefix silently, wrapping to a wrong (often negative) total. Accumulate in a 64-bit type (`long`), and for adversarial sizes consider `checked` arithmetic or a big-integer fallback.
-- **Prefix sums are for static data** — every element change invalidates all prefixes at or after that index, forcing an `O(n)` rebuild. Interleaving updates and queries makes the approach `O(nq)`; that workload wants a Fenwick tree or segment tree (`O(log n)` per operation).
-- **Off-by-one on the `+1` convention** — mixing inclusive/exclusive endpoints or forgetting the leading `pre[0] = 0` produces answers off by exactly one element. Fix the convention (`pre[r+1] - pre[l]` for inclusive `[l, r]`) and test the full-array and single-element ranges.
-
-## Tradeoffs
-
-| Choice | Prefix sum | Alternative | Decision criteria |
+| Operation | Time | Space | Cause |
 | --- | --- | --- | --- |
-| Static range-sum queries | `O(n)` build, `O(1)` query | Recompute each query `O(n)` | Prefix sum wins the moment you have two or more queries; a single query never justifies the build. |
-| Data changes between queries | `O(n)` rebuild per update | Fenwick / segment tree `O(log n)` update and query | Any interleaving of writes and reads: use a Fenwick tree; prefix sums only for read-only data. |
-| Sub-array sum equals `k` with negatives | Prefix + hash map `O(n)` time, `O(n)` space | [[Sliding Window]] `O(n)`, `O(1)` space | Non-negative values and a contiguous target: use a window. Any negatives, or counting all such ranges: use prefix + hash map. |
-| Many range *updates*, one final read | Difference array `O(1)` per update | Segment tree with lazy propagation | Difference array if all updates precede all reads; lazy segment tree if updates and reads interleave. |
+| Build `prefix` | `O(n)` | `O(n)` | One pass writes `n + 1` running totals; the array is the stored state. |
+| Range-sum query | `O(1)` | `O(1)` | A single subtraction of two precomputed totals; nothing is re-scanned. |
+| Naive re-sum (no prefix) | `O(n)` per query | `O(1)` | Each query re-adds every element of the range from scratch. |
+
+The build pays for itself the moment a second query arrives: two queries against `prefix` cost `O(n) + O(1)`, while two naive re-sums cost `O(n)` each and only grow from there. The 2D table shifts the same accounting to `O(nm)` build for `O(1)` rectangle sums.
+
+## When the precompute stops holding
+
+The array must be **static** for the whole query phase. Writing `a[j] = x` changes every running total at index `j + 1` and beyond, so a single element update invalidates the entire tail of `prefix` and forces an `O(n)` rebuild. Interleaving `q` updates with queries degrades the whole approach to `O(nq)` — the exact cost the precompute was meant to remove. A workload that mutates the array between reads wants a [[Fenwick Tree]] (point update plus prefix query, each `O(log n)`) or a [[Segment Tree]] (range update and range query) instead; both accept the log factor per query in exchange for cheap updates.
+
+The `+1` convention is the classic off-by-one. Because the formula is `prefix[r + 1] - prefix[l]` for the inclusive range `[l, r]`, mixing inclusive and exclusive endpoints, or dropping the leading `prefix[0] = 0`, shifts the answer by exactly one element — a full-array or single-element query surfaces it immediately. The half-open shape (`prefix` covers elements *before* the index) is a fixed contract; querying it with a closed-interval mental model silently reads one slot too few or too many.
+
+Accumulated totals also grow far faster than any individual element. A million `int` values near `2^31` overflow a 32-bit prefix long before any single value does, wrapping to a wrong — often negative — total while every input looked in range. Accumulating in a 64-bit type keeps the running sum valid; the same risk carries into the difference between two large prefixes.
+
+## Reference drawer
+
+> [!ABSTRACT]- Range sum as a difference of prefixes
+> ```mermaid
+> flowchart LR
+>   A["prefix[l]<br/>sum of a[0..l-1]"] --> C["prefix[r+1] - prefix[l]"]
+>   B["prefix[r+1]<br/>sum of a[0..r]"] --> C
+>   C --> D["sum of a[l..r]"]
+> ```
+
+> [!EXAMPLE]- C# implementation
+> ```csharp
+> // Build once, then answer any range sum in O(1).
+> public static long[] BuildPrefix(int[] a)
+> {
+>     var prefix = new long[a.Length + 1];           // prefix[0] = 0, length n + 1
+>     for (int i = 0; i < a.Length; i++)
+>         prefix[i + 1] = prefix[i] + a[i];          // long guards against overflow
+>     return prefix;
+> }
+>
+> // Sum of a[l..r] inclusive.
+> public static long RangeSum(long[] prefix, int l, int r) => prefix[r + 1] - prefix[l];
+>
+> // Add v to every element of a[l..r] via a difference array, then reconstruct.
+> public static int[] ApplyRangeUpdates(int n, IEnumerable<(int L, int R, int V)> updates)
+> {
+>     var diff = new int[n + 1];
+>     foreach (var (l, r, v) in updates)
+>     {
+>         diff[l] += v;
+>         diff[r + 1] -= v;                          // r + 1 may equal n; the extra slot absorbs it
+>     }
+>     var a = new int[n];
+>     int run = 0;
+>     for (int i = 0; i < n; i++) { run += diff[i]; a[i] = run; }
+>     return a;
+> }
+> ```
+> `RangeSum` assumes `0 <= l <= r < n`; the `+1` slot in both arrays is what removes the `l == 0` and `r == n - 1` boundary cases.
+
+## Comparison
+
+| Approach | Range query | Update | Preprocessing | Stronger case | Semantic limit |
+| --- | --- | --- | --- | --- | --- |
+| Naive re-sum | `O(n)` | `O(1)` (data is just the array) | None | A handful of queries, or the array changes constantly | Re-reads the whole range every time |
+| Prefix sum | `O(1)` | `O(n)` rebuild | `O(n)` build, `O(n)` space | Many range sums over a static array | Any element write invalidates the table |
+| [[Fenwick Tree]] | `O(log n)` prefix query | `O(log n)` point update | `O(n)` build | Point updates interleaved with prefix/range sums | Prefix-style associative queries only |
+| [[Segment Tree]] | `O(log n)` | `O(log n)`, range update with lazy propagation | `O(n)` build, `~2–4n` space | Range updates and general associative range queries | Higher constant factor and memory |
+| [[Sliding Window]] | `O(1)` amortized over a moving window | window slides in `O(1)` | None | One contiguous window advancing over the array | No random-access range; endpoints only move forward |
+
+Prefix sums give the cheapest possible range query — a single subtraction — but only on data that stays fixed for the query phase, and every write forces a full rebuild. Once the array is updated between queries, a Fenwick tree is the smaller structure for point-update-plus-prefix-sum, and a segment tree covers range updates and arbitrary associative range queries at a larger constant. A sliding window is the lighter choice when the query is a single contiguous span that only advances, since it never materialises the running-total array at all.
 
 ## Questions
 
-> [!QUESTION]- Why can prefix sums plus a hash map count sub-arrays summing to k when a sliding window cannot?
-> - A range sum is `run_j - run_{i-1}`, so a range ending at `j` hits `k` whenever an earlier prefix equalled `run_j - k` — a hash-map lookup, no ordering assumed.
-> - A sliding window instead grows and shrinks a contiguous range, which only works if the sum moves monotonically as the window expands.
-> - Negative numbers break that monotonicity: a longer window can become valid again, so there is no correct shrink rule.
-> - When the array can contain negatives, or you must *count* all qualifying ranges rather than find one, prefix + hash map is the correct tool and the window is simply wrong, not just slower.
+> [!QUESTION]- Why does `prefix[r + 1] - prefix[l]` yield the sum of `a[l..r]`?
+> `prefix[r + 1]` is the sum of every element before index `r + 1`, i.e. `a[0..r]`, and `prefix[l]` is the sum of `a[0..l-1]`. Their difference cancels the shared head `a[0..l-1]` exactly, leaving `a[l] + ... + a[r]`. The `prefix[0] = 0` sentinel lets `l = 0` use the same formula with no special case.
 
-> [!QUESTION]- How does a 2D prefix sum answer a rectangle query in O(1), and why the four terms?
-> - Precompute `P[i][j]` as the sum of everything from the origin to `(i-1, j-1)`.
-> - A rectangle sum is `P[r2+1][c2+1] - P[r1][c2+1] - P[r2+1][c1] + P[r1][c1]`.
-> - The two subtractions strip off the region above and the region to the left of the target rectangle; those overlap in the top-left corner, so it gets removed twice and the final term adds it back.
-> - This inclusion–exclusion is what lets integral images (Viola–Jones face detection) evaluate box features in constant time regardless of box size.
+> [!QUESTION]- What makes prefix sums unsuitable once the array is updated between queries?
+> Writing one element changes every running total from that index onward, so the whole tail of `prefix` is invalid and must be rebuilt in `O(n)`. With `q` interleaved updates this degrades to `O(nq)`. A Fenwick tree (point update and prefix query in `O(log n)`) or a segment tree (range update and query) keeps updates cheap instead.
 
-> [!QUESTION]- When should you abandon prefix sums for a Fenwick or segment tree?
-> - Prefix sums assume the array is static; any element update invalidates every prefix from that index onward.
-> - Rebuilding is `O(n)`, so interleaving `q` updates with queries degrades to `O(nq)`.
-> - A Fenwick tree supports point update and prefix query both in `O(log n)`, and a segment tree extends that to range updates and arbitrary associative range queries.
-> - The deciding question is mutability: read-only data keeps prefix sums (unbeatable `O(1)` queries); any writes between queries mean the log-factor structure is the correct trade.
+> [!QUESTION]- How does a difference array relate to a prefix sum?
+> It is the dual. A prefix sum makes range *queries* `O(1)` by storing running totals; a difference array makes range *updates* `O(1)` by storing deltas at the two endpoints (`diff[l] += v`, `diff[r + 1] -= v`). A single prefix-sum pass over the difference array then reconstructs the final values in `O(n)`.
 
 ## References
 
-- [Prefix sum (Wikipedia)](https://en.wikipedia.org/wiki/Prefix_sum) — definition, parallel scan, and the difference-array duality.
-- [Summed-area table (Wikipedia)](https://en.wikipedia.org/wiki/Summed-area_table) — the 2D extension and its use in image processing.
-- [Subarray Sum Equals K (LeetCode #560)](https://leetcode.com/problems/subarray-sum-equals-k/) — the canonical prefix-sum + hash-map counting problem.
-- [Fenwick (Binary Indexed) Tree (cp-algorithms)](https://cp-algorithms.com/data_structures/fenwick.html) — what to switch to when the data mutates.
+- [Prefix sum (Wikipedia)](https://en.wikipedia.org/wiki/Prefix_sum) — definition, the parallel-scan formulation, and the difference-array duality.
+- [Summed-area table (Wikipedia)](https://en.wikipedia.org/wiki/Summed-area_table) — the 2D extension and its inclusion–exclusion rectangle query, with the integral-image application.
+- [Fenwick (Binary Indexed) Tree](https://cp-algorithms.com/data_structures/fenwick.html) — the `O(log n)` structure to switch to once the underlying array is mutated between queries.
+- [Subarray Sum Equals K (LeetCode #560)](https://leetcode.com/problems/subarray-sum-equals-k/) — canonical use of running prefixes to answer a range-count question in one pass.

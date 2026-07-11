@@ -12,98 +12,119 @@ publish: true
 
 # Intro
 
-Shell sort runs [[Insertion Sort]] over `h`-spaced subsequences of the array, repeating with a decreasing sequence of gaps `h` that ends at `h = 1`. A pass with gap `h` sorts every subsequence of elements `h` positions apart; the final pass (`h = 1`) is an ordinary insertion sort. The insight is that plain insertion sort only ever swaps *adjacent* elements, so an element that belongs `k` positions away needs `k` moves to get there — catastrophic on a reverse-sorted array. Large gaps let an element jump most of that distance in a single comparison, and because insertion sort is `O(n)` on nearly-sorted input, every gap pass makes the array "more sorted" so the expensive `h = 1` pass has almost nothing left to do.
+A reverse-sorted array of `n` elements is the worst input for [[Insertion Sort]]: it only ever swaps *adjacent* elements, so an element that belongs `k` positions away needs `k` one-slot shifts to get there. Summed over a fully inverted array that is `Θ(n²)` shift operations — the total shift work equals the number of inversions.
 
-Reach for Shell sort in constrained environments — embedded firmware, bootloaders, small C libraries — where you want to beat `O(n²)` without the recursion, the `O(n)` scratch buffer, or the code size of [[Merge Sort]] or [[Quick Sort]]. It ships in uClibc's `qsort`, for example. For general-purpose sorting on a real machine, prefer [[Introsort]] or [[Tim Sort]]: they are asymptotically better and, unlike Shell sort, come with a guaranteed bound.
+Shell sort attacks that distance before it attacks the order. It runs an insertion sort over elements `h` positions apart (an `h`-sort) for a decreasing sequence of gaps ending at `h = 1`. A move inside an `h`-spaced subsequence relocates an element by `h` slots at once, so a far-out-of-place element covers most of its journey in a few coarse moves. Each pass leaves the array closer to sorted without undoing the last, and the final `h = 1` pass is a plain insertion sort over data that is already nearly ordered — near-linear work.
 
-## How It Works
+**Core condition:** a decreasing gap sequence ending at `h = 1` → each pass `h`-sorts interleaved subsequences and never undoes an earlier pass → the `h = 1` pass runs on nearly-sorted data → `O(1)` auxiliary space, with the time bound set entirely by the gap sequence.
 
-1. **Pick a gap sequence** `h_t > … > h_2 > h_1 = 1` (see the complexity note — this choice *is* the algorithm's performance).
-2. **For each gap `h`, in decreasing order**, run a gapped insertion sort: for every `i` from `h` to `n − 1`, save `key = a[i]`, then shift elements `a[i − h], a[i − 2h], …` that exceed `key` forward by `h`, and drop `key` into the resulting hole. This is exactly [[Insertion Sort]] with a stride of `h` instead of `1`, interleaving `h` independent subsequences.
-3. **The last pass is `h = 1`** — a full insertion sort, but now over data that every prior pass has already brought close to sorted, so it runs in near-linear time.
+The shrinking gap is the transition worth animating.
 
-Complexity depends *entirely* on the gap sequence. Shell's original `n/2, n/4, …, 1` is `O(n²)` worst case. Hibbard's `2^k − 1` (`1, 3, 7, 15, …`) gives `O(n^1.5)`. Ciura's empirically tuned `1, 4, 10, 23, 57, 132, 301, 701` is the best known in practice, with no proven tight bound. Space is `O(1)` — it sorts fully in place. Shell sort is **not stable**: gapped moves jump equal keys past one another.
+> [!NOTE] Visualization pending
+> Planned StepTrace: a gapped-insertion card showing `h`-sorted passes over interleaved subsequences as the gap `h` shrinks to 1. No matching renderer exists in `engine.js` yet.
 
-## Example
+## Why h-sorting cuts the shift work
 
-```csharp
-public static void ShellSort(int[] a)
-{
-    int n = a.Length;
+An array is *`h`-sorted* when `a[i] ≤ a[i + h]` for every valid `i`. A gap-`h` pass treats the array as `h` interleaved subsequences — indices `{0, h, 2h, …}`, `{1, h+1, …}`, and so on — and insertion-sorts each one independently. Because the stride is `h`, a single shift moves an element `h` positions rather than one, so the coarse early passes pay down long-distance disorder cheaply.
 
-    // Ciura's gap sequence, extended above 701 by the common *2.25 rule.
-    int[] gaps = { 701, 301, 132, 57, 23, 10, 4, 1 };
+The pass ordering is valid because sortedness accumulates. An array that has been `h`-sorted stays `h`-sorted after it is later `k`-sorted for any `k < h`: no smaller-gap pass can reintroduce a large-gap inversion. Residual disorder therefore only shrinks. By the time the gap reaches 1, every element sits within a small distance of its final slot, and insertion sort's near-linear behaviour on nearly-sorted input means the final pass does almost nothing.
 
-    foreach (int gap in gaps)
-    {
-        if (gap >= n) continue;
+On the reverse-sorted `[9, 8, 7, 6, 5, 4, 3, 2, 1]`, a plain insertion sort pays 36 shifts (the inversion count `8 + 7 + … + 1`). A gap-4 pass first sorts the four subsequences `{9,5,1}`, `{8,4}`, `{7,3}`, `{6,2}` in place, yielding `[1, 4, 3, 2, 5, 8, 7, 6, 9]`. That array holds only 6 inversions, so the closing `h = 1` pass performs 6 shifts instead of 36. The long moves were front-loaded into the cheap coarse pass.
 
-        // Gapped insertion sort: h independent subsequences, interleaved.
-        for (int i = gap; i < n; i++)
-        {
-            int key = a[i];
-            int j = i;
-            while (j >= gap && a[j - gap] > key)
-            {
-                a[j] = a[j - gap];   // shift by a whole gap, not by one
-                j -= gap;
-            }
-            a[j] = key;
-        }
-    }
-}
-```
+The algorithm is in place — only a temporary `key` holds the element being inserted, so auxiliary space is `O(1)`. It is **not stable**: a shift jumps `h` positions and can carry a key past an equal key sitting between them, and no later pass restores their original relative order.
 
-On `[9, 8, 7, 6, 5, 4, 3, 2, 1]` with gap `4`, the first pass compares positions `{0,4,8}`, `{1,5}`, `{2,6}`, `{3,7}` and already drags the largest values toward the end. By the time the `gap = 1` pass runs, no element is more than a couple of slots from home, so the final insertion sort is nearly linear instead of the `~36` swaps plain insertion sort would need here.
+## Complexity
 
-## Diagram
+The bound is not a fixed property of the algorithm — it is a property of the gap sequence, which is a free parameter. Different sequences move the same code between complexity classes.
 
-```mermaid
-flowchart TD
-  A[Input array and gap sequence] --> B[Take next largest gap h]
-  B --> C[Run insertion sort with stride h]
-  C --> D{h equals one}
-  D -->|No| E[Shrink to next smaller gap]
-  E --> B
-  D -->|Yes| Z[Array sorted]
-```
-
-## Pitfalls
-
-- **The gap sequence is the whole game.** Shell's original `n/2^k` sequence is not just slow in theory — every gap except the last is *even*, so elements at even indices are never compared with elements at odd indices until the final `h = 1` pass. That defeats the point and drags the worst case back to `O(n²)`. Use Ciura's sequence (or Hibbard/Sedgewick), whose gaps are coprime enough to mix positions early.
-- **Do not expect stability.** Because a single move relocates an element by `h` positions, equal keys routinely leapfrog each other. If you are sorting records by a secondary key, Shell sort will scramble the primary order — use [[Insertion Sort]], [[Merge Sort]], or [[Tim Sort]] instead.
-- **No guaranteed bound to lean on.** The best practical sequence (Ciura) has *no proven* asymptotic bound, and tuned sequences are calibrated for arrays of a few thousand elements. For large or adversarial inputs where you need a contractual `O(n log n)`, Shell sort cannot give it — [[Heap Sort]] or [[Introsort]] can.
-
-## Tradeoffs
-
-| Choice | Shell Sort | Alternative | Decision criteria |
+| Case | Time | Auxiliary space | Cause |
 | --- | --- | --- | --- |
-| vs [[Insertion Sort]] | `O(n^1.5)` with a good gap sequence, in place | `O(n²)`, in place, stable | Use plain insertion sort only for tiny (`n ≤ 32`) or nearly-sorted arrays where stability matters; Shell sort wins the moment `n` grows into the thousands. |
-| vs [[Quick Sort]] / [[Introsort]] | `O(n^1.5)`, `O(1)` space, no recursion | `O(n log n)` avg, `O(log n)` stack | Prefer Shell sort only when recursion and heap allocation are unwelcome (embedded, kernel, tiny libc); otherwise a library `O(n log n)` sort is faster and bounded. |
-| Gap sequence | Ciura `1,4,10,23,57,132,301,701` | Shell `n/2^k` | Ciura is the empirical best for `n` up to ~10⁵; the naive `n/2` powers-of-two sequence keeps even and odd indices apart and degrades to `O(n²)`. |
+| Best | `Θ(n log n)` | `O(1)` | Already sorted: each of the `Θ(log n)` gap passes is a single linear scan with no shifts. |
+| Average | `~Θ(n^1.3)` measured for Ciura's gaps | `O(1)` | Empirical only — Ciura's sequence has no proven tight bound. |
+| Worst | `Θ(n²)` with Shell's `n/2, n/4, …`; `Θ(n^1.5)` with Hibbard's `2^k − 1`; `O(n^4/3)` with Sedgewick's | `O(1)` | The proven worst case is set entirely by how the gaps interleave positions, not by the input alone. |
+
+Shell's original `n/2^k` gaps keep every gap even until the last one, so even-indexed and odd-indexed elements never compare until `h = 1`; that leaves `Θ(n²)` work. Hibbard's `1, 3, 7, 15, …` provably reaches `Θ(n^1.5)`, and Sedgewick's sequences carry a proven `O(n^4/3)` worst-case bound. Ciura's tuned gaps run at roughly `Θ(n^1.3)` in measurements but carry no proven asymptotic bound at all. Auxiliary space stays `O(1)` regardless. Because the tight bound rides on the sequence, no single clean asymptotic describes Shell sort.
+
+## Where it breaks down
+
+The gap-sequence choice is the whole game, and it is genuinely unsettled: the optimal general sequence is an open problem. The trap is concrete — Shell's original `n/2^k` looks reasonable but all its gaps except the last share the factor 2, so `h`-sorting only ever interleaves within a parity class and the two halves stay uncompared until the `h = 1` pass inherits `Θ(n²)` work. Coprime-mixing sequences (Hibbard, Sedgewick, Ciura) avoid this.
+
+There is also no way to buy a proven bound and top speed at once. Pratt's 3-smooth gaps give a proven `Θ(n log² n)` worst case, but they use so many passes that constant factors make them slower in practice than Ciura's unproven-but-fast sequence. A workload that needs a contractual `O(n log n)` guarantee cannot get it from Shell sort — [[Heap Sort]] or [[Introsort]] can.
+
+Instability follows directly from the `h`-stride. Sorting the records `[(5, a), (5, b), (3, c)]` by key, a gap that spans both fives can lift `(5, a)` over `(5, b)`, emitting `… (5, b), (5, a) …` — the original `a`-before-`b` order is lost. A stable secondary sort (the classic radix-style pipeline) cannot be layered on top of Shell sort for that reason.
+
+## Reference drawer
+
+> [!ABSTRACT]- Pass structure
+> ```mermaid
+> flowchart TD
+>   A[Input array and gap sequence] --> B[Take next largest gap h]
+>   B --> C[Insertion-sort each h-spaced subsequence]
+>   C --> D{h equals 1}
+>   D -->|No| E[Shrink to next smaller gap]
+>   E --> B
+>   D -->|Yes| Z[Array sorted]
+> ```
+
+> [!EXAMPLE]- C# implementation
+> ```csharp
+> public static void ShellSort(int[] a)
+> {
+>     int n = a.Length;
+>
+>     // Ciura's empirically tuned gaps, largest first.
+>     int[] gaps = { 701, 301, 132, 57, 23, 10, 4, 1 };
+>
+>     foreach (int gap in gaps)
+>     {
+>         if (gap >= n) continue;
+>
+>         // Gapped insertion sort: h interleaved subsequences at stride `gap`.
+>         for (int i = gap; i < n; i++)
+>         {
+>             int key = a[i];
+>             int j = i;
+>             while (j >= gap && a[j - gap] > key)
+>             {
+>                 a[j] = a[j - gap];   // shift by a whole gap, not by one
+>                 j -= gap;
+>             }
+>             a[j] = key;
+>         }
+>     }
+> }
+> ```
+> The inner loop is line-for-line an insertion sort with stride `gap` in place of `1`. Fixed gaps cap `n` at the largest usable gap; a production version generates the sequence from `n` instead.
+
+## Comparison
+
+| Algorithm | Time | Aux space | Stable | Stronger case | Weaker case |
+| --- | --- | --- | --- | --- | --- |
+| [[Insertion Sort]] | `Θ(n²)` avg, `Θ(n)` nearly sorted | `O(1)` | Yes | Tiny or nearly-sorted arrays; it is the `h = 1` base Shell sort reduces to | Large or reverse-sorted input where adjacent-only shifts pile up |
+| Shell sort | `~Θ(n^1.3)` measured, no proven tight bound | `O(1)` | No | Mid-size arrays and embedded/kernel code where `O(1)` space and small iterative code matter | Large inputs, or when a provable bound or stability is required |
+| [[Quick Sort]] | `Θ(n log n)` avg, `Θ(n²)` worst | `O(log n)` stack | No | General in-memory sorting at large `n` with strong cache behaviour | Adversarial inputs without introspection; recursion or stack growth unwelcome |
+| [[Merge Sort]] | `Θ(n log n)` | `O(n)` | Yes | Stable ordering, linked lists, external/large data | An `O(n)` scratch buffer is unacceptable |
+| [[Heap Sort]] | `Θ(n log n)` | `O(1)` | No | A guaranteed `O(n log n)` bound achieved in place | Poor cache locality and larger constants than quicksort |
+
+Shell sort is a strong in-place, zero-allocation choice for mid-size arrays and constrained settings — bootloaders, firmware, minimal C libraries — where its short iterative code and `O(1)` space are the binding constraints. It pays for that with instability and the absence of a clean provable bound. As `n` grows the `O(n log n)` sorts overtake it: [[Quick Sort]] and [[Merge Sort]] on raw speed, [[Heap Sort]] and [[Introsort]] when the guarantee itself is the requirement.
 
 ## Questions
 
-> [!QUESTION]- Why is Shell sort faster than plain insertion sort even though the final pass is a full insertion sort?
-> - Plain insertion sort only swaps adjacent elements, so an element `k` slots from its home takes `k` moves — `O(n²)` on reverse-sorted data.
-> - Large-gap passes let an element jump `h` positions per move, clearing most long-distance disorder cheaply and early.
-> - Insertion sort is `O(n)` on nearly-sorted input, so after the coarse passes the final `h = 1` pass has almost nothing left to move.
-> - The work is front-loaded into cheap coarse passes so the one expensive pass never actually gets expensive — that reshaping of *where* the work happens, not a better comparison, is the whole speedup.
+> [!QUESTION]- Why is Shell sort faster than a plain insertion sort when its final pass is a full insertion sort?
+> The coarse gap passes move far-out-of-place elements `h` slots at a time, so most long-distance disorder is cleared before the `h = 1` pass runs. Insertion sort is near-linear on nearly-sorted input, so the final pass has little left to shift. The speedup comes from relocating *where* the shift work happens — into cheap coarse passes — not from a cheaper comparison.
 
-> [!QUESTION]- Why does the choice of gap sequence change Shell sort's complexity class?
-> - Each gap pass only guarantees the array is "`h`-sorted"; how much residual disorder survives into the next pass depends on how the gaps interleave positions.
-> - Shell's original `n/2^k` keeps all gaps even until the last, so odd and even indices never mix until `h = 1`, leaving `O(n²)` work.
-> - Hibbard's `2^k − 1` mixes positions and provably reaches `O(n^1.5)`; Ciura's tuned sequence is the best measured but has no proven bound.
-> - The gap sequence is a tunable parameter that moves the whole algorithm between `O(n²)` and `O(n^1.5)`, which is why Shell sort is really a *family* of algorithms rather than one — pick the sequence deliberately.
+> [!QUESTION]- Why does the gap sequence, rather than the input, decide Shell sort's complexity class?
+> A pass only guarantees the array is `h`-sorted, and how much disorder survives into the next pass depends on how the gaps interleave positions. Shell's `n/2^k` keeps every gap even until the last, so parity classes never mix and the worst case is `Θ(n²)`; Hibbard's coprime gaps provably reach `Θ(n^1.5)`; Ciura's tuned gaps measure fastest but have no proven bound. The sequence is a tunable parameter, so Shell sort is a family of algorithms rather than one.
 
-> [!QUESTION]- When would you deploy Shell sort in real code today?
-> - In constrained environments — bootloaders, firmware, minimal C libraries like uClibc's `qsort` — where recursion depth, an `O(n)` merge buffer, and code size all matter.
-> - It is short, purely iterative, in place with `O(1)` space, and needs no auxiliary allocation, so it degrades gracefully under memory pressure.
-> - On a general-purpose machine it is beaten by [[Introsort]] and [[Tim Sort]], which are asymptotically better and bounded.
-> - Choose it when the operating constraints, not the input size, are the binding limit — otherwise a library `O(n log n)` sort is the right default.
+> [!QUESTION]- Why is Shell sort unstable?
+> A shift relocates an element by a whole gap `h`, so it can carry a key past an equal key that lies between them. No later pass records or restores their original relative order, so records that compare equal can emerge reversed.
+
+> [!QUESTION]- Why can Shell sort not offer a contractual `O(n log n)`?
+> The sequences with the best proven worst-case bounds are not the fastest: Pratt's 3-smooth gaps prove `Θ(n log² n)` but run slowly due to many passes, while the fast Ciura sequence has no proven bound at all, and the optimal general sequence is an open problem. A workload needing a guaranteed bound uses [[Heap Sort]] or [[Introsort]] instead.
 
 ## References
 
-- [Shellsort (Wikipedia)](https://en.wikipedia.org/wiki/Shellsort) — gap sequences, the `O(n^1.5)` analysis, and the open problem of the optimal sequence.
-- [Best Increments for the Average Case of Shellsort (Marcin Ciura, 2001)](https://web.archive.org/web/20180923235211/http://sun.aei.polsl.pl/~mciura/publikacje/shellsort.pdf) — the paper that derived the `1, 4, 10, 23, 57, 132, 301, 701` sequence.
+- [Shellsort (Wikipedia)](https://en.wikipedia.org/wiki/Shellsort) — gap sequences, proven and empirical bounds, and the open problem of the optimal sequence.
+- [Best Increments for the Average Case of Shellsort (Marcin Ciura, 2001)](https://web.archive.org/web/20180923235211/http://sun.aei.polsl.pl/~mciura/publikacje/shellsort.pdf) — the paper deriving the `1, 4, 10, 23, 57, 132, 301, 701` sequence and its measured behaviour.
+- [Shellsort and Sorting Networks (Donald E. Knuth, TAOCP Vol. 3, §5.2.1)](https://cs.stanford.edu/~knuth/taocp.html) — the `h`-sorting theorem that a `k`-sorted array stays `k`-sorted after later `h`-sorting.
 - [Shellsort (Princeton Algorithms)](https://algs4.cs.princeton.edu/21elementary/) — Sedgewick's treatment with `h`-sorting intuition and gap-sequence experiments.

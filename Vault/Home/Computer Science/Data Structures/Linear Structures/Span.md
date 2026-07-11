@@ -12,65 +12,99 @@ publish: true
 
 # Intro
 
-`Span<T>` is a stack-only view over contiguous memory. It does not own data, it only points to existing memory (array, stackalloc buffer, or unmanaged memory). Use it when you need high-performance slicing/parsing with minimal allocations.
+Parsing a 4 KB network buffer routinely needs to hand a middle section to another method. Passing `buffer[100..200]` as a `byte[]` allocates a fresh array and copies 100 bytes; doing that per packet turns parsing into a stream of short-lived allocations the garbage collector must later reclaim. A `Span<T>` describes that same section as a (reference, length) pair over the original buffer, so the sub-view costs nothing to create and shares the bytes it points at.
 
-Internally it is just a managed pointer plus a length, so it gives bounds-checked access with almost no overhead and can wrap array segments or stack-allocated buffers. Slicing returns another span over the same backing memory with a new offset and length — nothing is copied, which is why a write through a slice shows up in the original buffer. Being a `ref struct` keeps it on the stack, so it never outlives the memory it points at.
+A span owns nothing. It is a small value type — a managed reference to the first element in view plus an `int` length — laid over memory that lives elsewhere: a managed array, a `stackalloc` block, or native memory. Slicing returns another span over the same backing store with a shifted reference and a new length; no element is copied, which is why a write through a slice is visible in the original buffer. Being a `ref struct` confines it to the stack, so it can never outlive the memory it describes.
 
-```mermaid
-graph LR
-    subgraph arr[Backing array - length 4]
-      A0[10] --> A1[20] --> A2[30] --> A3[40]
-    end
-    S["Span.Slice(2) - start=2, length=2"] --> A2
-    S --> A3
-```
+**Core shape:** existing contiguous buffer → (ref-to-first, length) window → `Slice` adjusts ref+length with no copy → shared memory across views → `O(1)` span storage regardless of window size.
 
-## Example
+> [!NOTE] Visualization pending
+> Planned StepTrace: a (pointer, length) window card laid over part of an existing array, where slicing produces a narrower window over the same memory — no copy — and a write through the slice mutates the shared backing element. No matching renderer exists in `engine.js` yet.
 
-```csharp
-Span<int> values = stackalloc int[] { 10, 20, 30, 40 };
-Span<int> tail = values.Slice(2); // 30, 40
+## Representation and non-ownership
 
-tail[0] = 300;
-Console.WriteLine(values[2]); // 300
-```
+A `Span<T>` holds two fields: a managed reference (`ref T`) to the first element in view and an `int` length. It stores none of the elements itself, so its footprint is constant whether the window covers 2 elements or 2 million. Indexing `span[i]` dereferences `first + i` after checking `0 <= i < length`, giving array-style access with a bounds check and no hop through an owner object.
 
-## Pitfalls
+`Slice(start, length)` builds a new span whose reference is `first + start` and whose length is the requested count. Nothing is allocated and nothing is copied — the result is a narrower view of the same elements. A store through either view writes the shared backing element, so a span deliberately aliases its source rather than isolating a copy.
 
-- **Returning a stack-pointing span** — returning a `Span<T>` that wraps `stackalloc` memory is invalid because the buffer is gone once the method returns. The compiler blocks most cases, but keep span lifetimes inside the owning scope.
-- **Using a span across `await`** — spans are stack-only and cannot survive async suspension, so they are disallowed across `await` and `yield`. Switch to `Memory<T>` for async flows.
-- **Over-applying spans** — converting every API to `Span<T>` hurts readability when performance is not the bottleneck. Apply it to measured hot paths only.
+Three properties follow from the design:
 
-## Tradeoffs
+- **Non-owning.** The backing store — a managed array, a `stackalloc` block, or a native pointer — is allocated and freed elsewhere. The span is a window and never frees anything. A `List<T>` ([[Dynamic Array|dynamic array]]) can expose its contiguous backing array as a span through `CollectionsMarshal.AsSpan`, and an [[Arrays|array]] converts directly with `AsSpan()`.
+- **Stack-only.** `Span<T>` is a `ref struct`. The runtime keeps it on the stack and forbids every move to the heap, which is what stops a window from outliving the buffer beneath it.
+- **Read-only variant.** `ReadOnlySpan<T>` is the same window with writes removed, so it can wrap immutable data such as a `string` (as `ReadOnlySpan<char>`). `Span<T>` converts implicitly to it; the reverse is disallowed.
 
-| Choice | `Span<T>` | Alternative | Decision criteria |
+## Complexity
+
+| Operation | Time | Heap allocation | Aux space |
 | --- | --- | --- | --- |
-| vs `T[]` | Zero-copy view, no ownership | Array owns data, can be stored long-term | Use `Span<T>` for transient slicing over existing memory; use arrays when you must keep or hand off the data. |
-| vs `Memory<T>` | Stack-only, synchronous, fastest | Heap-storable, async-safe | Use `Span<T>` inside the hot synchronous loop; use `Memory<T>` when the buffer crosses `await` or lives in a field. |
-| vs raw `stackalloc` pointer | Bounds-checked, stays in safe code | Unchecked, requires `unsafe` | Use `Span<T>` to keep bounds safety without dropping to pointers. |
+| Construct a span over a buffer | `O(1)` | none | `O(1)` |
+| Element access `span[i]` | `O(1)`, bounds-checked | none | `O(1)` |
+| `Slice(start, length)` | `O(1)` | none — same memory | `O(1)` |
+
+The defining column is allocation: every operation is constant time and copies nothing. A span is two fields, so its own footprint is `O(1)` independent of the window length; the elements live in memory it does not own. Producing the same sub-view as a distinct array — `array[100..200]` typed as `byte[]` — instead costs `O(n)` time and an `O(n)` allocation for the copied elements.
+
+## Where the stack-only window breaks down
+
+The restrictions all follow from one rule: a non-owning window must never outlive its buffer, so the runtime pins it to the stack and refuses every path to the heap.
+
+Storage and capture are blocked at compile time. A `Span<T>` cannot be boxed, assigned to a class field, captured in a lambda or closure, used as an ordinary generic type argument (absent an `allows ref struct` constraint, added in C# 13 / .NET 9), or held across an `await` or `yield` boundary — each of those would place the window on the heap, where the buffer's lifetime no longer constrains it. Code that must keep a view in a field or carry it across async suspension uses `Memory<T>` instead: a heap-storable handle whose `.Span` yields a `Span<T>` at the synchronous point of use.
+
+Lifetime still binds even inside the stack. A span over a `stackalloc` buffer is valid only within the method that allocated it; the escape rules block returning it, because the stack frame — and the buffer — vanish on return. A span over native memory that has since been freed is worse: nothing in the type system records the free, so indexing the span reads whatever now occupies the reclaimed address rather than the original elements.
+
+`ReadOnlySpan<T>` narrows these rules rather than lifting them: it still cannot escape to the heap, and it additionally rejects writes, so an attempt to mutate through a `ReadOnlySpan<char>` obtained from a `string` fails to compile rather than corrupting an interned literal.
+
+## Reference drawer
+
+> [!ABSTRACT]- Window over a backing array
+> ```mermaid
+> flowchart LR
+>   subgraph buf[Backing array — length 4]
+>     A0[10] --- A1[20] --- A2[30] --- A3[40]
+>   end
+>   S["Slice(2): ref = &amp;elem2, length = 2"] --> A2
+>   S --> A3
+> ```
+
+> [!EXAMPLE]- C# usage
+> ```csharp
+> Span<int> values = stackalloc int[] { 10, 20, 30, 40 };
+> Span<int> tail = values.Slice(2);   // ref shifted to index 2, length 2
+>
+> tail[0] = 300;                       // writes the shared backing element
+> Console.WriteLine(values[2]);        // 300 — the original buffer changed
+>
+> // Read-only window over immutable memory, no allocation:
+> ReadOnlySpan<char> id = "user-42".AsSpan(5);  // "42"
+> ```
+> `tail` and `values` alias the same buffer, so the write through `tail` is observable through `values`. `AsSpan` produces a `ReadOnlySpan<char>` over the string's characters without copying them.
+
+## Comparison
+
+| Type | Sub-view cost | Heap-storable | Crosses `await` / lives in a field | Backing store | Stronger case |
+| --- | --- | --- | --- | --- | --- |
+| `Span<T>` | `O(1)`, no copy | No (`ref struct`) | No | Array, `stackalloc`, or native memory | Zero-copy slicing on synchronous hot paths |
+| [[Arrays\|Array]] (`T[]`) | `O(n)` copy + allocation | Yes | Yes | Owns its own elements | Data must be stored, handed off, or outlive the source |
+| `ArraySegment<T>` | `O(1)` view | Yes | Yes | Managed array only | A heap-storable array window from before `Span<T>` existed |
+| `Memory<T>` | `O(1)` slice | Yes | Yes | Array or other owned buffer | A view must live on the heap or cross an async boundary |
+
+`Span<T>` is the zero-copy, zero-allocation view for synchronous code that touches contiguous memory — parsing, formatting, buffer manipulation — and it pays for that speed by being unable to leave the stack. `Memory<T>` accepts one level of indirection to become heap-storable and async-safe, which is the deciding factor whenever a view must sit in a field or survive an `await`. `ArraySegment<T>` fills the same heap-storable niche for managed arrays only and predates both. A real copy — a fresh array — is warranted just once: when the data must outlive the buffer it came from.
 
 ## Questions
 
-> [!QUESTION]- Why is `Span<T>` a `ref struct`?
-> - A `ref struct` is confined to the stack: it cannot be boxed, captured in a lambda, stored in a class field, or used as a generic type argument.
-> - This guarantees the span never outlives the buffer it points to (stack, `stackalloc`, or array), preserving memory safety.
-> - The same restriction is why it cannot cross `await` or `yield` — those would move it to the heap.
-> - You give up flexibility (no async, no fields) for zero-copy, allocation-free access, so it earns its place only on synchronous hot paths.
+> [!QUESTION]- How is a `Span<T>` represented, and why is its size independent of the window length?
+> It is a value type holding two fields — a managed reference to the first element in view and an integer length. The elements stay in the memory it points at, so the span itself is two machine words whether it covers 2 elements or 2 million.
 
-> [!QUESTION]- When should you choose `Memory<T>` instead of `Span<T>`?
-> - Use `Memory<T>` when the buffer must survive an async boundary, be stored in a field, or live beyond one synchronous scope.
-> - `Memory<T>` is a heap-storable handle; call `.Span` to get a `Span<T>` view at the point of synchronous use.
-> - `Span<T>` remains the right choice for the tight synchronous parsing/slicing loop itself.
-> - `Memory<T>` buys async/storage flexibility at the cost of one extra indirection — use `Span<T>` where every nanosecond counts, `Memory<T>` where lifetime demands it.
+> [!QUESTION]- What makes `Slice` zero-copy, and what is the observable consequence?
+> `Slice` returns a new span with the reference advanced to `start` and a new length; no memory is allocated and no element is copied. Because the result aliases the same backing store, a write through the slice changes the element seen through the original span.
 
-> [!QUESTION]- What is the difference between `Span<T>` and `ReadOnlySpan<T>`?
-> - `ReadOnlySpan<T>` is the same windowed view but forbids writes through it, so it can wrap immutable data such as `string` (as `ReadOnlySpan<char>`).
-> - Methods should accept `ReadOnlySpan<T>` when they only read, which makes them callable from the widest set of sources.
-> - `Span<T>` converts implicitly to `ReadOnlySpan<T>`, but not the reverse.
-> - So accept `ReadOnlySpan<T>` in method signatures for reach and intent; use the mutable `Span<T>` only when you actually write back.
+> [!QUESTION]- Why can a `Span<T>` not cross an `await` boundary, and what replaces it there?
+> As a `ref struct` it is confined to the stack; crossing `await` (or `yield`) would move it to the heap-allocated state machine, where the buffer's lifetime no longer guards it, so the compiler rejects it. `Memory<T>` is the heap-storable handle for those cases, yielding a `Span<T>` through `.Span` at the synchronous point of use.
+
+> [!QUESTION]- When is a copy into a fresh array required instead of a span or `Memory<T>`?
+> When the data must outlive the buffer it came from. A span or `Memory<T>` only references existing memory; once that backing store is freed or reused, the view is invalid, so surviving data has to be copied into an owned array.
 
 ## References
 
-- [`Span<T>` struct](https://learn.microsoft.com/en-us/dotnet/api/system.span-1) — API reference covering constructors, Slice, and ref struct constraints.
-- [`Memory<T>` and `Span<T>` usage guidelines](https://learn.microsoft.com/en-us/dotnet/standard/memory-and-spans/) — Microsoft guidance on when to use Span vs Memory, ownership rules, and async boundaries.
-- [Welcome to C# 7.2 and Span](https://devblogs.microsoft.com/dotnet/welcome-to-c-7-2-and-span/) — .NET blog post introducing `Span<T>` with motivation, design rationale, and early usage examples.
+- [`Span<T>` struct](https://learn.microsoft.com/en-us/dotnet/api/system.span-1) — API reference for the constructors, `Slice`, and the `ref struct` constraints that keep it on the stack.
+- [Memory and spans](https://learn.microsoft.com/en-us/dotnet/standard/memory-and-spans/) — Microsoft's ownership, lifetime, and consumption rules covering when a view should be `Span<T>` versus `Memory<T>`.
+- [All About Span: Exploring a New .NET Mainstay](https://learn.microsoft.com/en-us/archive/msdn-magazine/2018/january/csharp-all-about-span-exploring-a-new-net-mainstay) — Stephen Toub's design walkthrough of the two-field layout, slicing, and the `ref struct` motivation.

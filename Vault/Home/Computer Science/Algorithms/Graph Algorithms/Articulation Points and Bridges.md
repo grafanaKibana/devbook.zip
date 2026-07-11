@@ -12,153 +12,149 @@ publish: true
 
 # Intro
 
-In an undirected graph, an **articulation point** (cut vertex) is a vertex whose removal increases the number of connected components — delete it and the graph falls apart. A **bridge** (cut edge) is the edge analogue: an edge whose removal disconnects the graph. Both identify **single points of failure**: in a network topology, an articulation router or bridge link is the node/cable whose outage partitions the system. They also underpin decomposition into biconnected components (2-vertex-connected blocks) and 2-edge-connected components.
+An undirected network needs to know which routers or cables are single points of failure: remove that one vertex or edge and some pair of nodes can no longer reach each other. Checking candidates one at a time — delete it, re-run a connectivity scan, see whether the component count grew — costs `O(V·(V+E))`, a full traversal per vertex or edge.
 
-The naive approach — remove each vertex or edge, re-run a connectivity check, and see if the component count grew — costs `O(V·(V+E))`. The insight is that a single [[DFS BFS|DFS]] finds *all* of them at once in `O(V + E)`, using the same `disc[]`/`low[]` low-link machinery that [[Strongly Connected Components|Tarjan's SCC]] algorithm uses. The DFS tree turns "does removing this disconnect anything?" into a local numeric test on each edge.
+A single depth-first traversal finds all of them at once. As DFS explores an undirected graph it builds a tree whose only non-tree edges are back edges to ancestors — undirectedness forbids cross edges — and each back edge is an alternate route that survives removing the tree edge or vertex above it. Recording, per vertex, how far back its subtree can escape turns "does removing this disconnect anything?" into a local numeric comparison at every edge.
 
-## How It Works
+An **articulation point** (cut vertex) is a vertex whose deletion raises the number of connected components; a **bridge** (cut edge) is the edge analogue. The same DFS reports both.
 
-Run a DFS from any vertex. For each vertex `v` record:
+**Core condition:** undirected graph → one DFS records `disc[v]` and `low[v]` → a child that cannot reach above its parent exposes a cut vertex or bridge → `O(V + E)` time, `O(V)` space.
 
-- `disc[v]` — its discovery time (the order DFS first reaches it).
-- `low[v]` — the smallest `disc` reachable from `v`'s subtree using tree edges plus **at most one** back edge (an edge to an already-visited ancestor). Initialize `low[v] = disc[v]`, then for each tree child `c` take `low[v] = min(low[v], low[c])`, and for each back edge `v → w` take `low[v] = min(low[v], disc[w])`.
+The decisive transition is a DFS tree annotated with `disc`/`low`, where each child's `low` is compared against its parent's `disc`.
 
-The DFS tree has only **tree edges** and **back edges** (no cross edges, because the graph is undirected). A back edge from `v`'s subtree to an ancestor of `v` is an alternate route that survives removing `v` or the tree edge above it. The two rules read `low` against `disc` to detect the *absence* of such a route:
+> [!NOTE] Visualization pending
+> Planned StepTrace: a DFS-tree card showing discovery and low-link values propagating up from the leaves, marking a vertex as a cut vertex when a child's subtree cannot reach above it and an edge as a bridge when a child's low-link strictly exceeds the parent's discovery time. No matching renderer exists in `engine.js` yet.
 
-- **Articulation point (non-root `u`)**: `u` is a cut vertex **iff it has a child `v` with `low[v] >= disc[u]`**. That inequality means nothing in `v`'s subtree can reach above `u` — so `u` is the only way in or out of that subtree.
-- **Articulation point (root)**: the DFS root is a cut vertex **iff it has two or more DFS children**. With one child the root is a leaf-side of the tree and removing it leaves the rest connected; with two children the only path between those subtrees runs through the root.
-- **Bridge `(u, v)`** where `v` is a child of `u`: the edge is a bridge **iff `low[v] > disc[u]`** — a *strict* inequality. Strictness is the whole difference from the vertex rule: a back edge landing exactly on `u` (giving `low[v] == disc[u]`) still keeps `u` an articulation point, but it provides an alternate route around the *edge* `(u, v)`, so the edge is not a bridge.
+## What `disc` and `low` measure
 
-- **Complexity**: `O(V + E)` time — one DFS, constant work per edge — and `O(V)` space for the `disc`/`low` arrays, visited flags, and recursion stack (worst case a path graph of depth `V`).
+DFS runs from any unvisited vertex and repeats until every component is covered. Two integers are stored per vertex:
 
-## Example
+- `disc[v]` — discovery time, a counter incremented the first time DFS reaches `v`. It orders vertices by when the tree first touched them, so an ancestor always has a smaller `disc` than its descendants.
+- `low[v]` — the smallest `disc` reachable from `v`'s subtree using any number of tree edges plus at most one back edge. It starts at `disc[v]`, then absorbs `low[c]` for each tree child `c` and `disc[w]` for each back edge `v → w` to an ancestor `w`.
 
-A C# implementation finding both articulation points and bridges in one pass. Adjacency stores an **edge id** per neighbor so the parent *edge* — not just the parent vertex — can be skipped; this is what makes parallel edges correct (see Pitfalls).
+`low[v]` answers a single question: how far back up the tree can `v`'s subtree escape without passing through the edge that entered it? Comparing that escape height against a parent's `disc` is the whole algorithm.
 
-```csharp
-public sealed class CutFinder
-{
-    private readonly List<(int to, int id)>[] _adj;
-    private readonly int[] _disc, _low;
-    private int _timer;
+- **Non-root cut vertex.** A non-root `u` with a tree child `v` where `low[v] >= disc[u]` is an articulation point. The inequality says nothing in `v`'s subtree reaches strictly above `u`, so every route out of that subtree passes through `u`; deleting `u` strands it.
+- **Root cut vertex.** The DFS root has no ancestor, so `low[v] >= disc[root]` holds trivially for its first child. The root is an articulation point only when it has two or more tree children — the only path between two of its subtrees runs through it.
+- **Bridge.** A tree edge `(u, v)` is a bridge when `low[v] > disc[u]` — strict. Equality (`low[v] == disc[u]`) means a back edge from `v`'s subtree lands exactly on `u`: that route bypasses the edge `(u, v)`, so the edge is not a bridge, but it still forces traffic through the vertex `u`, so `u` stays a cut vertex. The single `>` versus `>=` is the entire distinction between cut edges and cut vertices.
 
-    public HashSet<int> ArticulationPoints { get; } = new();
-    public List<(int u, int v)> Bridges { get; } = new();
+Worked example: a triangle `0-1-2` with a tail `2-3-4`. DFS from `0` discovers `0, 1, 2` around the cycle; the edge `2-0` is a back edge, so `low` across the triangle collapses to `0` and none of `0, 1, 2` is cut inside it. The tail carries no back edge, so `low[3] = 3 > disc[2] = 2` and `low[4] = 4 > disc[3] = 3`: edges `2-3` and `3-4` are bridges, and vertices `2` and `3` are cut vertices — each is the sole link to what hangs below it. Removing any of them raises the connected-component count, which is the property each rule certifies locally.
 
-    public CutFinder(List<(int to, int id)>[] adj)
-    {
-        _adj = adj;
-        _disc = new int[adj.Length];
-        _low = new int[adj.Length];
-        Array.Fill(_disc, -1);              // -1 marks unvisited
-    }
+## Complexity
 
-    public void Run()
-    {
-        for (int s = 0; s < _adj.Length; s++)
-            if (_disc[s] == -1)
-                Dfs(s, parentEdge: -1, isRoot: true);
-    }
+| Measure | Bound | Cause |
+| --- | --- | --- |
+| Time | `O(V + E)` | One DFS: each vertex is discovered once, each edge examined a constant number of times. There is no early exit — the same traversal runs on every input. |
+| Auxiliary space | `O(V)` | `disc`, `low`, visited state, and the result collections are each `O(V)`; the recursion stack reaches depth `V` on a path graph. |
 
-    private void Dfs(int u, int parentEdge, bool isRoot)
-    {
-        _disc[u] = _low[u] = _timer++;
-        int children = 0;
+There is one honest bound, not a best/average/worst spread: the traversal always visits the whole graph regardless of where the cuts fall, so all three cases coincide at `O(V + E)`.
 
-        foreach (var (v, id) in _adj[u])
-        {
-            if (id == parentEdge) continue;          // skip the edge we arrived on, once
-            if (_disc[v] == -1)                       // tree edge
-            {
-                children++;
-                Dfs(v, id, isRoot: false);
-                _low[u] = Math.Min(_low[u], _low[v]);
-                if (!isRoot && _low[v] >= _disc[u])   // articulation rule (non-root)
-                    ArticulationPoints.Add(u);
-                if (_low[v] > _disc[u])               // bridge rule (strict)
-                    Bridges.Add((u, v));
-            }
-            else                                      // back edge
-            {
-                _low[u] = Math.Min(_low[u], _disc[v]);
-            }
-        }
+## Boundaries
 
-        if (isRoot && children >= 2)                  // articulation rule (root)
-            ArticulationPoints.Add(u);
-    }
-}
-```
+**Directed graphs.** The rules assume the DFS tree holds only tree and back edges. Undirectedness guarantees that — every non-tree edge points to an ancestor, and a back edge is a genuine two-way alternate route. On a directed graph DFS also produces cross and forward edges, and a back edge no longer implies a return path, so `low[v]` stops measuring a real escape route and both tests silently report wrong cuts. Directed connectivity is a different decomposition, [[Strongly Connected Components]].
 
-For the graph `0-1, 1-2, 2-0, 2-3, 3-4` (a triangle `0-1-2` with a tail `2-3-4`): vertices `2` and `3` are articulation points, and edges `2-3` and `3-4` are bridges. The triangle has no cut vertices among `0` and `1` because each has a back edge closing the cycle.
+**The root special case.** Applying the non-root rule `low[v] >= disc[u]` to the DFS root marks it as a cut vertex the moment it has any child, because `low[v] >= disc[root]` is vacuously true — nothing sits above the root. Rooting a path `0-1-2` at `0` flags `0` even though deleting it leaves `1-2` connected. The root must instead be tested by child count (two or more). The bridge rule needs no exception: `low[v] > disc[root]` handles the root correctly, since a first child with no back edge genuinely sits below a bridge.
 
-## Diagram
+**`>=` versus `>`.** Reusing one threshold for both objects mislabels edges. In two triangles sharing a single vertex `2` (`0-1-2-0` and `2-3-4-2`), the child edge entering the second triangle produces `low[child] == disc[2]`. The non-strict test `>=` correctly flags `2` as a cut vertex — deleting it separates the triangles — while the strict test `>` correctly leaves every edge un-bridged, since each edge lies on a cycle. Swapping the operators would either miss the cut vertex or invent a bridge that does not exist.
 
-```mermaid
-flowchart TD
-  Zero --- One
-  One --- Two
-  Two --- Zero
-  Two --- Three
-  Three --- Four
-  Two:::cut
-  Three:::cut
-  classDef cut fill:#f9d,stroke:#333
-```
+**Parallel edges (multigraphs).** The usual guard skips the parent by vertex: `if (v == parent) continue;`. With two edges between `u` and `v` it discards both, so `v`'s subtree appears to have no route up and `(u, v)` is reported as a bridge — although the duplicate edge is itself the route keeping them connected. The escape exists in the graph but not in `low[v]`, because the second edge was never examined. Skipping only the specific parent edge by its id leaves the duplicate as a back edge that lowers `low[v]` and cancels the false bridge.
 
-Vertices `Two` and `Three` are articulation points; the tail edges `Two to Three` and `Three to Four` are bridges, while the triangle edges are not.
+## Reference drawer
 
-## Pitfalls
+> [!ABSTRACT]- DFS tree of the triangle-with-tail example
+> ```mermaid
+> flowchart TD
+>   N0["0 (disc 0, low 0)"] --> N1["1 (disc 1, low 0)"]
+>   N1 --> N2["2 (disc 2, low 0)"]
+>   N2 --> N3["3 (disc 3, low 3)"]
+>   N3 --> N4["4 (disc 4, low 4)"]
+>   N2 -. back .-> N0
+> ```
+> Tree edges point downward; the dashed back edge `2→0` pulls `low` to `0` across the triangle, so `0-1-2` has no internal cut. The tail carries no back edge, so `low[3] > disc[2]` and `low[4] > disc[3]` make `2-3` and `3-4` bridges and `2`, `3` cut vertices.
 
-### Forgetting the root special case
+> [!EXAMPLE]- C# implementation
+> ```csharp
+> public sealed class CutFinder
+> {
+>     private readonly List<(int to, int id)>[] _adj;
+>     private readonly int[] _disc, _low;
+>     private int _timer;
+>
+>     public HashSet<int> ArticulationPoints { get; } = new();
+>     public List<(int u, int v)> Bridges { get; } = new();
+>
+>     public CutFinder(List<(int to, int id)>[] adj)
+>     {
+>         _adj = adj;
+>         _disc = new int[adj.Length];
+>         _low = new int[adj.Length];
+>         Array.Fill(_disc, -1);              // -1 marks unvisited
+>     }
+>
+>     public void Run()
+>     {
+>         for (int s = 0; s < _adj.Length; s++)
+>             if (_disc[s] == -1)
+>                 Dfs(s, parentEdge: -1, isRoot: true);
+>     }
+>
+>     private void Dfs(int u, int parentEdge, bool isRoot)
+>     {
+>         _disc[u] = _low[u] = _timer++;
+>         int children = 0;
+>
+>         foreach (var (v, id) in _adj[u])
+>         {
+>             if (id == parentEdge) continue;          // skip the edge we arrived on, once
+>             if (_disc[v] == -1)                       // tree edge
+>             {
+>                 children++;
+>                 Dfs(v, id, isRoot: false);
+>                 _low[u] = Math.Min(_low[u], _low[v]);
+>                 if (!isRoot && _low[v] >= _disc[u])   // articulation rule (non-root)
+>                     ArticulationPoints.Add(u);
+>                 if (_low[v] > _disc[u])               // bridge rule (strict)
+>                     Bridges.Add((u, v));
+>             }
+>             else                                      // back edge
+>             {
+>                 _low[u] = Math.Min(_low[u], _disc[v]);
+>             }
+>         }
+>
+>         if (isRoot && children >= 2)                  // articulation rule (root)
+>             ArticulationPoints.Add(u);
+>     }
+> }
+> ```
+> Adjacency stores an edge id per neighbor so the parent *edge* — not the parent vertex — is skipped, which is what keeps parallel edges correct.
 
-- **What goes wrong**: applying the child rule `low[v] >= disc[u]` to the DFS root flags it as a cut vertex whenever it has any child, over-reporting every root.
-- **Why it happens**: the root has no ancestor, so `low[v] >= disc[root]` is trivially true for its first child even when removing the root changes nothing.
-- **How to avoid it**: test the root separately — it is an articulation point **only** if it has two or more DFS children. Bridges have no such exception; the strict `low[v] > disc[u]` rule already handles the root correctly.
+## Relations
 
-### Skipping the parent vertex instead of the parent edge
+Cut vertices and bridges are the boundary markers of two connectivity decompositions, and both reuse the same low-link DFS.
 
-- **What goes wrong**: with **parallel edges** (two edges between `u` and `v`), skipping "any edge back to the parent vertex" ignores the second parallel edge, so the code thinks `v` has no alternate route up and misreports `(u, v)` as a bridge — even though the duplicate edge is itself the alternate route.
-- **Why it happens**: the usual "don't go back to parent" guard is written as `if (v == parent) continue;`, which discards *all* edges to the parent, not just the one traversed.
-- **How to avoid it**: track the specific **edge id** used to reach the child and skip only that edge (the `id == parentEdge` guard above). Then the second parallel edge is correctly treated as a back edge, lowering `low[v]` and cancelling the false bridge.
-
-### Assuming it works on directed graphs
-
-- **What goes wrong**: the `disc`/`low` bridge and articulation rules assume the DFS tree has only tree and back edges; on a directed graph, cross and forward edges appear and the rules silently give wrong answers.
-- **Why it happens**: undirectedness is what forbids cross edges and guarantees a back edge is a genuine two-way alternate route.
-- **How to avoid it**: use this only on undirected graphs. For directed connectivity questions reach for [[Strongly Connected Components]] instead.
-
-## Tradeoffs
-
-| Choice | Single DFS with low-link | Remove-and-recheck | Decision criteria |
+| Decomposition | Maximal blocks | Boundary object | Same `disc`/`low` DFS |
 | --- | --- | --- | --- |
-| Time | `O(V + E)`, one pass | `O(V·(V+E))` re-running connectivity per vertex/edge | Always prefer the DFS on graphs of any real size; the naive method is only tolerable for tiny or one-off checks. |
-| Parent handling | Skip the parent **edge** by id | Skip the parent **vertex** | Edge-id skipping is mandatory when parallel edges (multigraphs) are possible; vertex-skipping is a latent bug there. |
-| Cut vertices vs cut edges | `low[v] >= disc[u]` plus root rule | `low[v] > disc[u]` (strict) | They differ only by strictness and the root exception; a vertex can be an articulation point without any incident bridge, so compute the one you actually need. |
-| Directed graphs | Not applicable | — | For directed reachability/cycles, decompose with [[Strongly Connected Components]] rather than adapting these rules. |
+| Biconnected components | subgraphs with no cut vertex (2-vertex-connected) | articulation points — a cut vertex belongs to several blocks at once | yes, with an auxiliary edge stack |
+| 2-edge-connected components | subgraphs with no bridge | bridges join adjacent components | yes |
+| [[Strongly Connected Components]] | mutually reachable sets in a **directed** graph | — | yes, low-link over directed edges |
+
+One `disc`/`low` DFS finds every cut vertex and bridge in `O(V + E)`, against `O(V·(V+E))` for remove-and-recheck, and the same pass — with an edge stack — emits the biconnected components those cut vertices separate. The directed reachability question is a separate decomposition, [[Strongly Connected Components]], built on the same low-link idea but where a back edge no longer certifies a two-way route, so the cut-vertex reasoning does not carry over. For undirected reliability analysis — which node or link is the single point of failure — this one DFS is the whole answer.
 
 ## Questions
 
-> [!QUESTION]- What is the exact articulation-point rule, including the root case, and why does the root differ?
-> - A non-root vertex `u` is an articulation point iff it has a DFS child `v` with `low[v] >= disc[u]` — nothing in `v`'s subtree reaches above `u`, so `u` is the only exit.
-> - The root has no ancestor, so that inequality is vacuously satisfied by its first child and would over-report.
-> - The root is an articulation point iff it has two or more DFS children, because those subtrees can only reach each other through the root.
-> - Getting the root case wrong is the single most common bug here, and it flips answers on the most trivial inputs (a root with one child), so an interviewer will probe it directly.
+> [!QUESTION]- What is the articulation-point rule for a non-root vertex versus the DFS root, and why do they differ?
+> A non-root `u` is a cut vertex when it has a tree child `v` with `low[v] >= disc[u]`: nothing in `v`'s subtree reaches above `u`, so `u` is that subtree's only exit. The root has no ancestor, so the same inequality is vacuously true for its first child and would over-report. The root is a cut vertex only when it has two or more tree children, since those subtrees can reach each other only through the root.
 
 > [!QUESTION]- Why is the bridge test strict (`low[v] > disc[u]`) while the articulation test is not (`low[v] >= disc[u]`)?
-> - `low[v] == disc[u]` means the deepest a back edge from `v`'s subtree reaches is exactly `u` itself.
-> - That back edge is an alternate route around the *edge* `(u, v)`, so the edge is not a bridge — hence strict `>`.
-> - But that same back edge still forces all traffic through the *vertex* `u`, so `u` remains an articulation point — hence non-strict `>=`.
-> - The one-symbol difference encodes the whole distinction between cut edges and cut vertices; conflating them mislabels edges on any graph with a back edge landing on `u`.
+> `low[v] == disc[u]` means the deepest a back edge from `v`'s subtree reaches is exactly `u`. That back edge bypasses the edge `(u, v)`, so the edge is not a bridge — hence strict `>`. The same back edge still routes all of the subtree's traffic through the vertex `u`, so `u` remains a cut vertex — hence non-strict `>=`. The one operator carries the entire difference between cut edges and cut vertices.
 
-> [!QUESTION]- How do parallel edges break the standard parent check, and what is the fix?
-> - The common guard `if (v == parent) continue;` skips every edge back to the parent vertex.
-> - With two parallel edges between `u` and `v`, this discards the second edge too, so `v` looks like it has no route back up.
-> - The algorithm then reports `(u, v)` as a bridge, even though the duplicate edge is itself the alternate path keeping the graph connected.
-> - The fix is to skip the specific parent *edge* by id, not the parent vertex — a distinction that only matters on multigraphs but silently corrupts results when it does.
+> [!QUESTION]- How do parallel edges break the usual parent check, and what corrects it?
+> The common guard `if (v == parent) continue;` skips every edge back to the parent vertex. With two parallel edges between `u` and `v`, it discards the second edge too, so `v`'s subtree appears to have no route up and `(u, v)` is reported as a bridge — although the duplicate edge is itself the route keeping them connected. Skipping only the specific parent edge by id leaves the duplicate as a back edge that lowers `low[v]` and cancels the false bridge.
 
 ## References
 
-- [Biconnected component (Wikipedia)](https://en.wikipedia.org/wiki/Biconnected_component) — articulation points, the DFS low-link method, and biconnected decomposition.
-- [Bridge (graph theory) (Wikipedia)](https://en.wikipedia.org/wiki/Bridge_(graph_theory)) — cut edges, 2-edge-connectivity, and the bridge-finding algorithm.
-- [Finding bridges and articulation points (cp-algorithms)](https://cp-algorithms.com/graph/bridge-searching.html) — implementation with the `disc`/`low` arrays and the parent-edge subtlety.
+- [Biconnected component (Wikipedia)](https://en.wikipedia.org/wiki/Biconnected_component) — articulation points, the low-link DFS, and decomposition into biconnected blocks.
+- [Bridge (graph theory) (Wikipedia)](https://en.wikipedia.org/wiki/Bridge_(graph_theory)) — cut edges, 2-edge-connectivity, and the bridge-finding condition.
+- [Finding bridges (cp-algorithms)](https://cp-algorithms.com/graph/bridge-searching.html) — the `disc`/`low` bridge implementation and the parent-edge subtlety on multigraphs.
+- [Finding articulation points (cp-algorithms)](https://cp-algorithms.com/graph/cutpoints.html) — the cut-vertex condition and the root special case in the same DFS.

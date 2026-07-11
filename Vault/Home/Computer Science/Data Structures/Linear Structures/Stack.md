@@ -12,69 +12,106 @@ publish: true
 
 # Intro
 
-`Stack<T>` is a LIFO (last in, first out) collection. The most recently pushed element is the first popped. Use it for backtracking, undo flows, and depth-first traversals.
+A bracket matcher, an expression evaluator, and a depth-first traversal share one requirement: each time the work descends into a nested item, the item currently in progress has to be set aside and resumed later, and the one resumed first is always the most recently suspended. A general list can hold those pending items, but locating "the most recent one" and removing it is a discipline the list does not enforce.
 
-It is array-backed — internally an array plus a `_size` counter. `Push` writes at index `_size` and increments it (doubling the array when full), `Pop` decrements `_size` and returns that slot, and `Peek` reads it without removing. Because all mutation happens at one end, the three operations are O(1) on average and no elements are ever shifted.
+A stack enforces it structurally. All access is fixed to a single end called the top: `push` adds an element there, `pop` removes and returns it, `peek` reads it without removing. Because every operation touches only that one end, the last element pushed is the first popped (LIFO), and all three operations are constant-time. The cost is that nothing else is reachable — no index, no bottom, no search. Reaching a buried element means popping everything above it.
 
-The runtime's own call stack follows the same LIFO discipline: each call pushes a frame with local variables and a return address, and returning pops it. An explicit `Stack<T>` mirrors that in application code — handy for undo/redo chains, expression evaluation, and depth-first backtracking without the recursion-depth limit, bounded only by heap memory.
+**Core shape:** elements → one open end (the top) → last pushed is first popped → `O(1)` push/pop/peek → `O(n)` storage.
 
-```mermaid
-graph TD
-    T[top] --> N3[item c]
-    N3 --> N2[item b]
-    N2 --> N1[item a]
-    N1 --> B[bottom]
-```
+> [!NOTE] Visualization pending
+> Planned StepTrace: a linear-container card showing push then pop acting only at the top — several pushes grow the top end, then pops return them in reverse (LIFO), with the interior never touched. No matching renderer exists in `engine.js` yet.
 
-## Example
+## Representation and invariants
 
-```csharp
-var stack = new Stack<string>();
-stack.Push("A");
-stack.Push("B");
+A stack is an interface — push/pop/peek at one end — that admits two common backings.
 
-Console.WriteLine(stack.Peek()); // B
-Console.WriteLine(stack.Pop());  // B
-Console.WriteLine(stack.Pop());  // A
-```
+- **[[Dynamic Array]] backing.** A contiguous array plus a `_size` counter. The top is the last used slot, index `_size - 1`. `Push` writes at `_size` and increments it, doubling the array when full; `Pop` decrements `_size` and returns that slot; `Peek` reads `_size - 1`. Nothing is ever shifted, so all three operations stay at the tail. This is what `Stack<T>` uses in .NET.
+- **Singly-[[LinkedList|linked list]] backing.** The head node is the top. `Push` prepends a new node; `Pop` unlinks the head; `Peek` reads it. Every push allocates one node and every pop frees one, but no bulk copy ever happens.
 
-## Pitfalls
+Two invariants define a valid state regardless of backing:
 
-- **Popping an empty stack** — `Pop`/`Peek` on an empty stack throws `InvalidOperationException`. Check `Count` first (or use `TryPop`/`TryPeek`) when emptiness is possible.
-- **Using LIFO where FIFO is expected** — reaching for `Stack<T>` in a queue-like workflow reverses processing order and causes subtle logic bugs. Validate ordering requirements before choosing it.
-- **Retained capacity after shrinking** — a stack that grew large keeps its backing array even after most items are popped. Call `TrimExcess()` when a long-lived stack shrinks significantly.
+1. Only the top is addressable. There is no operation to read or remove an interior or bottom element without removing everything above it first.
+2. `push` and `pop` are inverses at the same end: after `push(x); pop()`, both the contents and the top pointer are exactly what they were before.
 
-## Tradeoffs
+The structure deliberately discards random access, bottom access, and search — the same information a plain array keeps. That discard is what buys the constant-time top operations; a query that needs any of it belongs on a different structure.
 
-| Choice | `Stack<T>` | Alternative | Decision criteria |
+## Complexity
+
+| Operation | Array backing | Linked backing | Cause |
 | --- | --- | --- | --- |
-| vs [[Queue]] | LIFO — newest item processed first | FIFO — preserves arrival order | Use a stack for backtracking/undo/DFS; use a queue when fairness or arrival order matters. |
-| vs recursive [[DFS BFS|DFS]] | Explicit state, no call-stack limit | Concise, uses the call stack | Use an explicit stack when depth may be large or unbounded; recursion is fine for shallow, bounded depth. |
-| vs `Stack` (non-generic) | Type-safe, no boxing | Stores `object` | Always prefer the generic `Stack<T>`; the legacy type exists only for old interop. |
+| `Push` | `O(1)` amortized, `O(n)` worst single | `O(1)` | Array append is a slot write plus counter bump; a full array first doubles and copies all `n` elements. A list allocates exactly one node. |
+| `Pop` | `O(1)` | `O(1)` | Decrement the counter / unlink the head. No traversal, no shift. |
+| `Peek` | `O(1)` | `O(1)` | Read the top slot or head node; no mutation. |
+
+Structure space is `O(n)` for both backings. Auxiliary space per operation is `O(1)`, with one exception: an array-backed `Push` that triggers a resize momentarily holds both the old and doubled arrays, an `O(n)` spike on that single call. The `O(1)` on array push is therefore amortized, not worst-case — doubling makes any sequence of `n` pushes cost `O(n)` total, so the per-push average is constant even though an individual resize is linear. The linked backing gives a true per-call `O(1)` but pays a heap allocation and pointer-chasing cache cost on every push.
+
+## Where the discipline bites
+
+Each of these follows directly from fixing access to one end.
+
+**Buried elements are unreachable.** Because only the top is addressable, finding or removing an element below it means popping every element above it into temporary storage and pushing them back — `O(n)` and destructive to the order. A workload that queries interior elements wants an array, not a stack.
+
+**Array-backed push carries the resize spike.** The amortized `O(1)` hides an occasional `O(n)` copy. On a latency-sensitive path this shows up as an intermittent stall exactly on the push that doubles the [[Dynamic Array]]. Constructing with a known capacity (`new Stack<T>(capacity)`) pre-sizes the array and removes those spikes when the maximum depth is predictable.
+
+**Underflow on an empty stack.** `Pop`/`Peek` with no elements has nothing to return; in .NET both throw `InvalidOperationException`. Guarding with `Count > 0` or using `TryPop`/`TryPeek` is required whenever emptiness is reachable — recursion base cases and drain loops both hit it.
+
+**The hardware call stack is a stack too.** Each function call pushes a frame (locals, return address) and each return pops it, following the same LIFO discipline on a fixed-size region. Deep or unbounded recursion overflows it — `StackOverflowException`, uncatchable. Converting the recursion to an explicit `Stack<T>` moves those frames to the heap, where depth is bounded by available memory rather than the fixed call-stack size; the traversal logic is unchanged (push instead of recurse, pop instead of return).
+
+## Reference drawer
+
+> [!ABSTRACT]- Top-of-stack view
+> ```mermaid
+> graph TD
+>   T[top] --> C[item c]
+>   C --> B[item b]
+>   B --> A[item a]
+>   A --> Z[bottom]
+> ```
+
+> [!EXAMPLE]- C# usage of `Stack<T>`
+> ```csharp
+> var stack = new Stack<string>();
+> stack.Push("A");
+> stack.Push("B");
+>
+> stack.Peek();          // "B" — reads the top, leaves it in place
+> stack.Pop();           // "B" — removes and returns the top
+> stack.Pop();           // "A"
+>
+> if (stack.TryPop(out var value))   // false; guards against underflow
+> {
+>     // not reached — the stack is now empty
+> }
+> ```
+> `Pop`/`Peek` throw `InvalidOperationException` on an empty stack; `TryPop`/`TryPeek` return `false` instead. `new Stack<T>(capacity)` pre-sizes the backing array to avoid resize spikes when the depth is known.
+
+## Comparison
+
+| Structure | Accessible ends | Order served | Push / pop | Random access | Generalizes to |
+| --- | --- | --- | --- | --- | --- |
+| Stack | Top only | LIFO — newest first | `O(1)` | No | — |
+| [[Queue]] | Both, but enqueue and dequeue at opposite ends | FIFO — oldest first | `O(1)` | No | — |
+| [[Deque]] | Both ends, symmetric | Either | `O(1)` at each end | No | Stack and queue both |
+| [[Dynamic Array]] | Any index | Insertion order | `O(1)` amortized at the tail | Yes | Stack (its tail operations) |
+
+A stack is the constant-time LIFO structure: it fits reversal, nested-structure processing, backtracking, and depth-first search ([[DFS BFS]]) — anything that resumes the most recent pending item. A [[Queue]] applies the opposite discipline, serving the oldest item, which is what work distribution and breadth-first order need. A [[Deque]] accepts both ends and so subsumes stack and queue at a slightly larger interface. A plain [[Dynamic Array]] already provides amortized `O(1)` tail operations, so a stack is its tail restricted to one end; the array retains an advantage only where the interior also needs random access.
 
 ## Questions
 
-> [!QUESTION]- When is an explicit `Stack<T>` better than recursion?
-> - Use it when graph/tree depth may be large or unbounded — an explicit stack lives on the heap and avoids a `StackOverflowException`.
-> - It also gives you control over traversal state you can inspect, pause, or resume, which recursion hides in call frames.
-> - The traversal logic is identical: push instead of recurse, pop instead of return.
-> - It is more verbose than recursion, but it is the safe default whenever input depth is attacker- or data-controlled.
+> [!QUESTION]- Why is only the top of a stack reachable, and what does that buy?
+> Every operation is fixed to a single end, so there is no addressing scheme for interior or bottom elements. That restriction is what keeps push, pop, and peek at `O(1)` — no shifting, no search, no index arithmetic. Reaching a buried element requires popping everything above it, which is the information the stack trades away.
 
-> [!QUESTION]- Why can `Stack<T>` be a poor fit for work queues?
-> - Work queues usually need FIFO fairness so the oldest item is handled first.
-> - LIFO processing serves the newest item first, which can starve older items indefinitely under sustained load.
-> - This is a correctness/SLA bug, not a performance one — it passes tests but misbehaves in production bursts.
-> - A stack is simpler and cache-friendly, but choose `Queue<T>` (or a priority queue) the moment ordering guarantees matter.
+> [!QUESTION]- Why is array-backed `Push` amortized `O(1)` rather than worst-case constant?
+> Most pushes write one slot and bump a counter. When the backing array is full, that push allocates a doubled array and copies all `n` elements — an `O(n)` single call. Doubling makes any run of `n` pushes cost `O(n)` in total, so the per-push average stays constant, but a specific push can spike.
 
-> [!QUESTION]- What is the complexity of `Push` and why is it not always constant in practice?
-> - `Push` is **amortized** O(1): most pushes just write a slot and bump the counter.
-> - When the backing array is full, `Push` allocates a doubled array and copies all elements — that individual call is O(n).
-> - Doubling makes any sequence of n pushes cost O(n) total, so the average stays O(1).
-> - Pre-size with `new Stack<T>(capacity)` when the count is known to flatten those resize spikes on latency-sensitive paths.
+> [!QUESTION]- How does a stack differ from a queue at the mechanism level?
+> Both offer `O(1)` insert and remove, but a stack inserts and removes at the same end (LIFO, newest served first) while a queue inserts at one end and removes at the other (FIFO, oldest served first). The choice is a correctness decision about processing order, not a performance one.
+
+> [!QUESTION]- Why convert deep recursion into an explicit stack?
+> The call stack is itself a LIFO stack on a fixed-size memory region; deep enough recursion overflows it with an uncatchable `StackOverflowException`. An explicit `Stack<T>` holds the same pending frames on the heap, where depth is bounded by available memory instead. The logic maps directly: push where the recursion would call, pop where it would return.
 
 ## References
 
-- [`Stack<T>` class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.stack-1) — API reference covering Push, Pop, Peek, and enumeration order.
-- [Selecting a collection class](https://learn.microsoft.com/en-us/dotnet/standard/collections/selecting-a-collection-class) — Microsoft decision guide for choosing between Stack, Queue, and other collection types.
-- [Generic collections in .NET](https://learn.microsoft.com/en-us/dotnet/standard/collections/) — overview of all generic collection types with complexity and usage guidance.
-- [Stack implementation in dotnet runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/Stack.cs) — source code showing the internal array and resize logic.
+- [`Stack<T>` class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.stack-1) — the .NET LIFO contract: `Push`, `Pop`, `Peek`, `TryPop`/`TryPeek`, and enumeration from top to bottom.
+- [`Stack<T>` source in dotnet/runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/Stack.cs) — the array-plus-`_size` backing and the doubling resize logic behind amortized push.
+- [Selecting a collection class](https://learn.microsoft.com/en-us/dotnet/standard/collections/selecting-a-collection-class) — Microsoft's guidance on choosing between `Stack<T>`, `Queue<T>`, and the other collections by access discipline.

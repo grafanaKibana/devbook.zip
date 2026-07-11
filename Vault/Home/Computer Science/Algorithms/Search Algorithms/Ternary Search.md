@@ -12,99 +12,125 @@ publish: true
 
 # Intro
 
-Ternary search splits a range into three parts using two interior probes instead of one, then discards the part that cannot contain the answer. On a **sorted array** this is strictly worse than [[Binary Search]]: each level costs two comparisons and shrinks the range to a third, so the total is `2·log₃ n ≈ 1.82·ln n` comparisons versus binary search's `log₂ n ≈ 1.44·ln n`. Never reach for it to look up a value in a sorted array — binary search wins.
+A ball launched at angle `θ` carries farther as `θ` climbs toward the optimum, then falls off as the angle steepens past it: the range is a single-peaked function of `θ` with no closed-form optimum once drag enters the model. Locating that peak means sampling the function and narrowing toward it, which needs a rule for deciding which samples to keep. [[Binary Search]] cannot supply the rule — there is no order to compare a target against, only a value that rises then falls.
 
-Its real job is the one binary search cannot do: finding the **extremum of a unimodal function** — a function that strictly increases up to a single peak then strictly decreases (or the mirror for a valley). There is no ordering to binary-search against, but comparing two interior points `f(m1)` and `f(m2)` tells you which side the peak lies on, and that is enough to discard a third of the interval each step. This shows up in convex optimization over one parameter, geometry problems (closest point on a parabola), and [[Binary Search on Answer|parametric search]] where the objective is unimodal rather than monotonic.
+Ternary search is that rule for a **unimodal** function — one that strictly increases to a single peak, then strictly decreases (or the mirror image for a valley). Two interior probes `m1` and `m2` at the third-points of `[lo, hi]` bracket the peak: whichever probe returns the smaller value sits on the far slope, so the third of the interval beyond it cannot hold the maximum and is discarded. Each step removes a third of the range using two function evaluations.
 
-## How It Works
+The same name describes a three-way split of a sorted array, but there it is strictly worse than binary search: two comparisons per level shrink the range to a third (`2·log₃ n ≈ 1.82·ln n` comparisons) where one comparison already shrinks it to a half (`log₂ n ≈ 1.44·ln n`). The extra split earns nothing on ordered data. Its distinct value is the unimodal case, which binary search does not address at all — one-parameter convex optimization, geometric extremum problems (closest point on a parabola), and [[Binary Search on Answer|parametric search]] whose objective is unimodal rather than monotone.
 
-For a function with a single **maximum** on `[lo, hi]`:
+**Core condition:** a strictly unimodal `f` over `[lo, hi]` → two third-point probes reveal the peak's side → one third of the interval is discarded per step → `Θ(log n)` evaluations, `O(1)` space.
 
-1. Pick two probes `m1 = lo + (hi − lo)/3` and `m2 = hi − (hi − lo)/3`.
-2. If `f(m1) < f(m2)`, the peak cannot be left of `m1`, so set `lo = m1`. Otherwise it cannot be right of `m2`, so set `hi = m2`.
-3. Repeat. Each iteration keeps `2/3` of the interval.
+No StepTrace renderer covers this search yet.
 
-- **Continuous form** — loop while `hi − lo > eps` for a tolerance `eps`, then return the midpoint. The interval shrinks geometrically, so it takes `log_{3/2}(range/eps)` iterations.
-- **Integer form** — loop while `hi − lo > 2`, then linearly scan the two or three remaining indices for the best value. Stopping earlier and finishing with a tiny scan avoids the off-by-one traps that plague integer three-way splits.
-- **Golden-section search** — a constant-factor improvement: choose the two probes at the golden ratio so that one of them is **reused** as an interior probe on the next iteration. That cuts function evaluations from two per step to one, which matters when `f` is expensive (a simulation, a physical measurement) rather than an array lookup.
+> [!NOTE] Visualization pending
+> Planned StepTrace: a card placing two probes at the third-points of the range on a unimodal function, discarding the third that cannot contain the maximum each step. No matching renderer exists in `engine.js` yet.
 
-Complexity: `O(log((hi − lo)/eps))` evaluations for the continuous form, `O(log n)` for the integer form — but with a worse constant than binary search, so it only pays off when the problem is genuinely unimodal rather than monotonic. Space is `O(1)`.
+## Why a third can be dropped
 
-## Example
+The interval `[lo, hi]` holds the peak `p` at the start of every step, and the discard rule preserves that. Let `m1 < m2` be the third-point probes. Strict unimodality means `f` increases on `[lo, p]` and decreases on `[p, hi]`.
 
-```csharp
-// Finds the argument minimizing a unimodal (convex-ish) function on [lo, hi].
-public static double TernarySearchMin(Func<double, double> f, double lo, double hi, double eps = 1e-9)
-{
-    while (hi - lo > eps)
-    {
-        double m1 = lo + (hi - lo) / 3.0;
-        double m2 = hi - (hi - lo) / 3.0;
+- `f(m1) < f(m2)` puts `p` strictly right of `m1`. If instead `p ≤ m1`, both probes would sit on the decreasing slope and give `f(m1) > f(m2)`, a contradiction. So `lo = m1` keeps the peak.
+- `f(m1) > f(m2)` is the mirror case: `p` lies left of `m2`, so `hi = m2` keeps it.
+- `f(m1) == f(m2)` forces `p` strictly between the two probes under strict unimodality, so either bound may move safely. A flat stretch removes that guarantee — see [When unimodality fails](#when-unimodality-fails).
 
-        if (f(m1) < f(m2))
-        {
-            hi = m2;   // minimum is not to the right of m2
-        }
-        else
-        {
-            lo = m1;   // minimum is not to the left of m1
-        }
-    }
+Each step keeps `2/3` of the width, so `k` steps leave `(2/3)^k · (hi − lo)`. Reaching a tolerance `eps` takes `log_{3/2}((hi − lo)/eps)` steps — logarithmic, but with base `3/2` the interval shrinks more slowly per step than under binary search's halving. Only `lo`, `hi`, and the two probes persist, so auxiliary space is `O(1)`.
 
-    return (lo + hi) / 2.0;
-}
-```
+Golden-section search sharpens the constant without changing the shape: placing the probes at the golden ratio makes one probe of the next step coincide with a probe already evaluated, so every step after the first spends one new evaluation instead of two. The saving matters when `f` is a simulation or a physical measurement rather than an array read.
 
-## Diagram
+## Complexity
 
-```mermaid
-flowchart TD
-  A[Interval lo to hi over a unimodal function] --> B{hi minus lo greater than eps}
-  B -->|No| Z[Return midpoint of lo and hi]
-  B -->|Yes| C[Probe m1 at one third and m2 at two thirds]
-  C --> D{f of m1 less than f of m2}
-  D -->|Yes| E[Move hi to m2]
-  D -->|No| F[Move lo to m1]
-  E --> B
-  F --> B
-```
+The cost is deterministic in the interval width rather than data-dependent, so the table is organized by quantity, not by best/average/worst.
 
-## Pitfalls
+| Quantity | Cost | Cause |
+| --- | --- | --- |
+| Iterations to tolerance `eps` (continuous) | `log_{3/2}((hi − lo)/eps)` = `Θ(log n)` | Each step keeps `2/3` of the interval |
+| Function evaluations | `2` per iteration (`1` per iteration with golden-section reuse) | Two fresh probes `f(m1)`, `f(m2)` each step |
+| Auxiliary space | `O(1)` | Only `lo`, `hi`, `m1`, `m2` are stored |
+| Sorted-array lookup (misuse) | `2·log₃ n ≈ 1.82·ln n` comparisons | Two comparisons buy a `3×` reduction; binary search's one comparison already buys `2×` (`log₂ n ≈ 1.44·ln n`) |
 
-- **Flat plateau breaks strict unimodality** — if the function is constant over a stretch, `f(m1) == f(m2)` gives no information about which side to keep, and whichever branch you pick can throw away the interval holding the true extremum. Ternary search requires *strict* increase-then-decrease. For a discrete function with ties, fall back to scanning the plateau or reformulate the objective.
-- **Applying it to a sorted array** — a common interview misfire. Three-way splitting a monotone sequence is legal but does strictly more comparison work than [[Binary Search]] for the same range reduction; there is no scenario where it is the right lookup tool.
-- **`eps` too small for the float type** — set `eps` below the machine precision of `double` and `hi − lo` never crosses it, so the loop spins forever. Bound the iteration count as well, or size `eps` to the problem's real resolution.
+The `Θ(log n)` bound and the `2·log₃ n` comparison count describe the same asymptotic class, so the deciding difference between ternary and binary search is the constant factor — and on monotone data it always favours binary search.
 
-## Tradeoffs
+## When unimodality fails
 
-| Choice | Ternary Search | Alternative | Decision criteria |
-| --- | --- | --- | --- |
-| vs [[Binary Search]] on sorted data | `O(log n)`, `2·log₃ n` comparisons, monotone or unimodal | `O(log n)`, `log₂ n` comparisons, monotone only | Always prefer binary search for array lookups; use ternary only when the target is a unimodal *extremum*, not an ordered value. |
-| vs golden-section search | 2 function evaluations per step | 1 reused evaluation per step | When `f` is costly, golden-section halves evaluations for the same convergence; ternary is fine when `f` is a cheap array index. |
-| Continuous vs integer form | loop to `eps`, return midpoint | loop to width 3, scan the rest | Use the continuous form for real-valued domains; switch to integer form and a final linear scan when the domain is discrete to dodge rounding traps. |
+Strict unimodality is the entire precondition, and it is easy to violate.
+
+A second hump defeats the discard rule. Take `f` with peaks at `x = 1` (height 5) and `x = 4` (height 4) separated by a valley. If the two probes straddle that valley, the taller probe points back toward its own hump, and the step discards the third containing the *other* hump — which here holds the global maximum. The returned point is then a local maximum, silently wrong, with nothing thrown or logged.
+
+A flat plateau breaks the tie logic. When `f` is constant across a stretch that both probes land in, `f(m1) == f(m2)` carries no direction, and moving `hi` to `m2` can drop part of the optimal set if the plateau extends past `m2`. Strict increase-then-decrease is precisely what excludes this; with genuine ties, scanning the flat region or reformulating the objective is the fix.
+
+The discrete domain needs a different stopping rule. With integer bounds and integer division, `m1 = lo + (hi − lo)/3` and `m2 = hi − (hi − lo)/3` do not collide, but a probe can coincide with a bound (e.g. `m1 == lo` once `hi − lo` is small), leaving the interval unchanged, and a loop that waits for `lo == hi` never advances. The integer form loops while `hi − lo > 2` and finishes by scanning the two or three remaining indices, which also sidesteps the rounding traps of three-way integer splits.
+
+For membership in a sorted array the boundary is simpler still: binary search dominates. Same `O(log n)` class, fewer comparisons, one probe per step instead of two.
+
+## Reference drawer
+
+> [!ABSTRACT]- Control flow (maximizing form)
+> ```mermaid
+> flowchart TD
+>   A[Interval lo to hi over a unimodal function] --> B{hi minus lo greater than eps}
+>   B -->|No| Z[Return midpoint of lo and hi]
+>   B -->|Yes| C[Probe m1 at one third and m2 at two thirds]
+>   C --> D{f of m1 less than f of m2}
+>   D -->|Yes| E[Move lo to m1: peak is not left of m1]
+>   D -->|No| F[Move hi to m2: peak is not right of m2]
+>   E --> B
+>   F --> B
+> ```
+
+> [!EXAMPLE]- C# implementation
+> ```csharp
+> // Returns the argument maximizing a strictly unimodal function on [lo, hi].
+> public static double ArgMaxUnimodal(Func<double, double> f, double lo, double hi, double eps = 1e-9)
+> {
+>     while (hi - lo > eps)
+>     {
+>         double m1 = lo + (hi - lo) / 3.0;
+>         double m2 = hi - (hi - lo) / 3.0;
+>
+>         if (f(m1) < f(m2))
+>         {
+>             lo = m1;   // peak is not to the left of m1
+>         }
+>         else
+>         {
+>             hi = m2;   // peak is not to the right of m2
+>         }
+>     }
+>
+>     return (lo + hi) / 2.0;
+> }
+> ```
+> Flipping the comparison to `f(m1) > f(m2)` minimizes instead. `eps` must stay above the machine resolution of `double`, or `hi - lo` never crosses it and the loop spins; bounding the iteration count is the safe guard.
+
+## Comparison
+
+The alternatives address the same workload — finding the extremum of a one-parameter function — except the last row, which covers the ordered-lookup use often confused with it.
+
+| Strategy | Work per step | Requires | Stronger case | Weaker case | Semantic property |
+| --- | --- | --- | --- | --- | --- |
+| Ternary search | 2 evals, `O(1)` space | Strict unimodality; no derivative | Cheap-to-evaluate unimodal `f` with no derivative | Expensive `f`; non-unimodal or plateaued `f` | Finds an extremum, not an ordered position |
+| Golden-section search | 1 new eval/step, `O(1)` space | Strict unimodality; no derivative | Expensive `f` where evaluations dominate | Same unimodality limits as ternary | Reuses one probe; same extremum guarantee |
+| Newton / bisection on `f′` | 1 derivative eval/step | A computable, well-behaved `f′` | Smooth `f` with cheap, reliable `f′` | Non-differentiable, noisy, or multi-modal `f` | Converges to a stationary point; needs a convexity check |
+| [[Binary Search]] | 1 comparison/step, `O(1)` space | Sorted or monotone data | An ordered value or a monotone threshold | An objective that rises then falls (no order) | Finds a position under an ordering |
+
+Ternary search occupies a narrow niche: derivative-free optimization of a single unimodal parameter where each evaluation is cheap. Golden-section search is the stronger form of the same idea whenever evaluations are the dominant cost, since it spends one per step instead of two. A reliable derivative moves the advantage to Newton or bisection on `f′`, which converge faster on smooth objectives. For locating an ordered value or a monotone threshold, binary search is strictly better — fewer comparisons and one probe per step. What stays uniquely ternary search's is the unimodal-but-not-monotone, derivative-free case that none of the others handle.
 
 ## Questions
 
-> [!QUESTION]- Why is ternary search the wrong choice for looking up a value in a sorted array?
-> - Each level of ternary search spends two comparisons to shrink the range to one third, costing `2·log₃ n ≈ 1.82·ln n`.
-> - Binary search spends one comparison to shrink to one half, costing `log₂ n ≈ 1.44·ln n`.
-> - Both are `O(log n)`, but ternary's constant factor is strictly larger — more work for the same result.
-> - The three-way split buys nothing on monotone data; reserve ternary search for unimodal extremum finding, where binary search does not apply at all.
+> [!QUESTION]- Why does the smaller of the two probe values mark a discardable third?
+> Under strict unimodality `f` rises to the peak then falls. The probe returning the smaller value sits farther down a slope, on the side away from the peak, so the interval beyond it lies entirely on that slope and cannot contain the maximum. Two probes are needed because a single point on a non-monotone function cannot reveal which side the peak is on.
 
-> [!QUESTION]- Why can ternary search find a unimodal maximum when binary search cannot?
-> - Binary search needs a single comparison at one point to decide which half to keep, which requires a monotone ordering.
-> - A unimodal function is not monotone, so one probe cannot tell you which side of the peak you are on.
-> - Two probes `f(m1)` and `f(m2)` do: whichever is smaller lies on the far side of the peak, so that third is safe to discard.
-> - This is why the algorithm is the tool for one-dimensional convex optimization and geometric extremum problems, not for ordered lookups.
+> [!QUESTION]- Why is ternary search a poor lookup tool for a sorted array?
+> Each level spends two comparisons to cut the range to a third (`2·log₃ n ≈ 1.82·ln n`), while binary search spends one comparison to halve it (`log₂ n ≈ 1.44·ln n`). Both are `O(log n)`, but the three-way split does strictly more comparison work for the same reduction and gains nothing from a monotone ordering.
 
-> [!QUESTION]- What is golden-section search and when does it beat plain ternary search?
-> - Golden-section search places the two probes at the golden ratio so one probe lands exactly where a probe is needed next iteration.
-> - That reused evaluation cuts the cost from two function calls per step to one.
-> - The convergence rate per step is slightly slower, but with half the evaluations it wins on total function calls.
-> - It matters when `f` is expensive — a simulation or physical measurement — and is irrelevant when `f` is a cheap array read.
+> [!QUESTION]- What does golden-section search change, and when does it matter?
+> It places the probes at the golden ratio so one probe of each step reuses an evaluation from the previous step. Golden-section retains ≈0.618 of the interval per step versus ternary's 0.667 — a slightly *faster* shrink — while reusing one of the two probe evaluations, so it costs one new function call per step instead of two. It dominates ternary on both axes at once whenever evaluating `f` is expensive — a simulation or a measurement rather than an array read.
+
+> [!QUESTION]- What input makes the discard rule return a wrong answer?
+> A non-unimodal function or a flat plateau. With two humps, probes straddling the valley can discard the third holding the global maximum and return a local one. A plateau makes `f(m1) == f(m2)` uninformative, so a bound can move past part of the optimal set. Strict increase-then-decrease is the precondition that excludes both.
 
 ## References
 
-- [Ternary search (Wikipedia)](https://en.wikipedia.org/wiki/Ternary_search) — definition, unimodal requirement, and complexity.
-- [Ternary search (cp-algorithms)](https://cp-algorithms.com/num_methods/ternary_search.html) — continuous and integer forms with correctness reasoning.
-- [Golden-section search (Wikipedia)](https://en.wikipedia.org/wiki/Golden-section_search) — the evaluation-reuse trick and why the golden ratio is optimal.
+- [Ternary search (Wikipedia)](https://en.wikipedia.org/wiki/Ternary_search) — definition, the unimodality requirement, and the iteration-count derivation.
+- [Ternary search (cp-algorithms)](https://cp-algorithms.com/num_methods/ternary_search.html) — continuous and integer forms with correctness reasoning and the `hi − lo > 2` stopping rule.
+- [Golden-section search (Wikipedia)](https://en.wikipedia.org/wiki/Golden-section_search) — the evaluation-reuse trick and why the golden ratio is the optimal probe placement.

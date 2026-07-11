@@ -12,100 +12,128 @@ publish: true
 
 # Intro
 
-Backtracking is a systematic way to explore all candidate solutions by building them incrementally and **abandoning a partial candidate ("pruning") as soon as it can't possibly succeed**. It's a refined brute force: instead of generating every configuration and then testing it, you grow a solution one choice at a time and retreat the moment a constraint is violated, cutting off whole branches of the search tree. It solves constraint-satisfaction and combinatorial-enumeration problems — permutations/combinations/subsets, N-Queens, Sudoku, maze/path finding, and word search.
+Placing eight queens on a chessboard so that none attacks another has 4,426,165,368 ways to drop eight pieces onto 64 squares, and only 92 of them are solutions. Generating every arrangement and then testing it spends almost all of its work on boards that a single early queen already invalidated.
 
-## How It Works
+Backtracking removes that waste by building a candidate one choice at a time and checking it against the constraints after each choice. A queen is committed to a row; if it shares a column or diagonal with a queen placed above, no completion of the remaining rows can succeed, so every board extending that partial placement is discarded without being generated. The reduction rests on one property: the constraint must be testable on a partial candidate — a prefix — not only on a finished one. Fixing one queen per row already narrows the space to `8! = 40,320` column orderings; rejecting diagonal conflicts as each queen lands prunes the boards actually examined far below that.
 
-The shape is a depth-first search over a tree of partial solutions:
+**Core shape:** incremental candidate, one choice per level → a feasibility test that rejects an unextendable prefix → the pruned subtree is never enumerated → `O(depth)` auxiliary space over an exponential search tree.
 
-1. **Choose** — make a candidate decision and add it to the current partial solution.
-2. **Explore** — recurse to make the next decision.
-3. **Un-choose (backtrack)** — undo the decision and try the next candidate.
+## The 4-Queens search
 
-Pruning is the difference between backtracking and naive enumeration: a `if (!isValid) continue;` (or a bound check) abandons a branch early, so you never expand the doomed subtree. The more aggressively you prune, the faster it runs — though the worst case stays exponential.
-
-```mermaid
-graph TD
-    R[ ] --> A[choose 1]
-    R --> B[choose 2 ✗ pruned]
-    A --> A1[choose 1,3]
-    A --> A2[choose 1,4 ✗ pruned]
-    A1 --> S[solution]
-```
-
-## Visualization
-
-Watch the board fill one queen per row (the row index *is* the recursion depth) while the faint shading marks every square the placed queens already attack. 4-Queens has no solution beneath its first choice: after committing a queen to column 0 it exhausts every branch, so it must **retreat all the way back to row 0**, tear that queen off, and only then — starting from column 1 — does it find the arrangement. That retreat-and-undo, with whole subtrees pruned before they are ever expanded, is exactly the choose / explore / un-choose loop above.
+The trace solves 4-Queens, placing one queen per row and rejecting any square already attacked along a column or diagonal.
 
 ```steptrace
 {"algorithm":"n-queens","n":4}
 ```
 
-## Example
+The decisive event is a rejection. When the queen in the current row has no safe column, the partial board cannot be extended, so the search abandons it and returns to the previous row to advance that queen to its next column — every board that would have grown beneath the failed placement is pruned unexamined. Starting the first queen in column 0 leads to exactly this dead end: each of its completions collides, the whole subtree under column 0 is exhausted, and the search retreats to row 0, lifts that queen, and only the column-1 start extends to the arrangement `(1, 3, 0, 2)`. Depth in the tree is the row index, so a rejection at row `k` discards every placement of rows `k+1…n` beneath it at once.
 
-Generate all permutations — the canonical choose / explore / un-choose loop:
+## How a rejected prefix prunes a subtree
 
-```csharp
-public static IList<IList<int>> Permutations(int[] nums)
-{
-    var results = new List<IList<int>>();
-    var current = new List<int>();
-    var used = new bool[nums.Length];
+A candidate is a sequence of choices, one per level of a search tree. At each node the algorithm extends the partial candidate by one choice and tests the constraints its prefix can already decide:
 
-    void Backtrack()
-    {
-        if (current.Count == nums.Length)
-        {
-            results.Add(new List<int>(current));   // a complete solution
-            return;
-        }
-        for (int i = 0; i < nums.Length; i++)
-        {
-            if (used[i]) continue;                  // prune: each element once
-            used[i] = true; current.Add(nums[i]);   // choose
-            Backtrack();                            // explore
-            used[i] = false; current.RemoveAt(current.Count - 1); // un-choose
-        }
-    }
+- a still-feasible prefix recurses to choose at the next level;
+- a prefix that violates a constraint is rejected, and the next sibling is tried;
+- a feasible candidate that reaches a leaf is a complete solution by construction.
 
-    Backtrack();
-    return results;
-}
-```
+Rejecting a partial candidate at depth `k` eliminates every candidate sharing that `k`-choice prefix — a subtree of up to `b^(d−k)` leaves — without generating any of them. This is the whole difference from brute force: the same tree of complete candidates exists, but the feasibility test keeps the search from descending into doomed regions. The earlier and cheaper a prefix is rejected, the fewer nodes the search visits.
 
-N-Queens-style pruning is the same skeleton with a constraint check (`IsSafe(row, col)`) before each `choose`, which discards most of the board placements before they're ever expanded.
+When a node's children are all exhausted, the algorithm undoes its own choice, restoring the shared partial candidate to the state its parent expects, and returns to the next sibling. The traversal is depth-first, so only one root-to-node path and its pending siblings exist at any instant, which bounds live state to the depth of the tree rather than its size.
 
-## Pitfalls
+## Complexity
 
-- **Forgetting to un-choose** — the state mutation made before recursing *must* be reverted after, or sibling branches inherit corrupt state. The single most common backtracking bug is a missing "undo" line.
-- **Snapshotting the result** — when you record a solution, copy it (`new List<int>(current)`); adding the live `current` list stores a reference that later mutations will clobber, leaving you with N copies of the same final state.
-- **Weak pruning ⇒ exponential blowup** — backtracking without good constraint checks degenerates to brute force. The art is pruning early and cheaply (constraint propagation, bounds, ordering choices to fail fast).
-- **Duplicate solutions** — with repeated input elements, naive enumeration yields duplicate permutations/subsets; you typically sort and skip equal siblings (`if (i > start && a[i] == a[i-1]) continue;`) to dedupe.
+Let `b` be the number of choices at each level and `d` the depth (for n-queens, `b = d = n`). Cost is the number of tree nodes visited, each paying `c` for its feasibility test.
 
-## Tradeoffs
+| Case | Time | Auxiliary space | Cause |
+| --- | --- | --- | --- |
+| Best | `O(d · c)` | `O(d)` | the constraint rejects every sibling near the root, so one root-to-leaf path reaches a solution |
+| Typical | far below `O(b^d)`, problem-dependent | `O(d)` | pruning removes large subtrees; the visited-node count tracks how early conflicts surface |
+| Worst | `O(b^d · c)` — n-queens up to `O(n!)` with columns forced distinct | `O(d)` | no prefix is rejected before a leaf, so every complete candidate is enumerated |
 
-| Approach | Explores | Cost | Use when |
-|---|---|---|---|
-| **Backtracking** | Valid partial branches only (pruned DFS) | Exponential worst case, far better in practice | Enumerate/solve constraint problems; need *all* or *a* valid configuration |
-| Brute force | Every full configuration | Always exponential | Almost never — strictly worse |
-| [[Dynamic Programming]] | Reuses overlapping subproblems | Polynomial | Optimisation with optimal substructure + overlap |
-| [[Greedy Algorithms]] | One path, no backtrack | O(n log n) | A provable local rule reaches the optimum |
+Auxiliary space is the recursion stack (depth `d`) plus the partial candidate (length ≤ `d`); the collected solutions are output, counted separately. Pruning changes the constant factor and the number of nodes a real input touches, not the worst-case class. A problem whose feasibility can only be judged at a complete candidate gives backtracking the same `O(b^d)` work as brute force.
 
-**Decision rule**: use backtracking when you must **search a space of configurations** under constraints and pruning can eliminate most of it — Sudoku, N-Queens, generating subsets/permutations, parsing. If the problem is *optimisation* with overlapping subproblems, DP is usually exponentially faster; if a greedy rule provably works, it's faster still. Branch-and-bound is backtracking plus a bound to prune for optimisation problems.
+## When pruning stops helping
+
+The advantage lives entirely in the prefix test, and three mechanism details decide whether it materializes.
+
+If the constraint can only be evaluated on a finished candidate — every partial prefix looks feasible — the rejection never fires above a leaf and the search visits all `b^d` leaves, identical to generating and testing every configuration. The depth-first structure adds nothing without an early feasibility signal.
+
+The partial candidate is one shared mutable buffer, so a choice that is not undone after its subtree is exhausted leaks into later branches. A sibling then reads a `used[]` flag or board square that still reflects an abandoned placement and either skips valid candidates or accepts impossible ones. Nothing raises an error; the enumeration is silently incomplete or wrong.
+
+Recording a solution by appending the live buffer stores a reference that subsequent choices overwrite, leaving the result full of identical copies of the final buffer state — a leaf must snapshot (copy) the candidate. With repeated input elements, equal sibling choices generate identical subtrees, so the same solution appears more than once unless equal siblings at a level are skipped.
+
+## Reference drawer
+
+> [!ABSTRACT]- Pruned search tree
+> ```mermaid
+> graph TD
+>   R[root] --> A[place a]
+>   R --> B[place b ✗ pruned]
+>   A --> A1[a then c]
+>   A --> A2[a then d ✗ pruned]
+>   A1 --> S[solution]
+> ```
+
+> [!EXAMPLE]- C# implementation
+> ```csharp
+> public static IList<IList<int>> Permutations(int[] nums)
+> {
+>     var results = new List<IList<int>>();
+>     var current = new List<int>();
+>     var used = new bool[nums.Length];
+>
+>     void Backtrack()
+>     {
+>         if (current.Count == nums.Length)
+>         {
+>             results.Add(new List<int>(current));   // snapshot the complete candidate
+>             return;
+>         }
+>
+>         for (var i = 0; i < nums.Length; i++)
+>         {
+>             if (used[i]) continue;                 // prefix constraint: each element once
+>             used[i] = true; current.Add(nums[i]);  // choose
+>             Backtrack();                           // recurse on the extended prefix
+>             used[i] = false; current.RemoveAt(current.Count - 1); // undo
+>         }
+>     }
+>
+>     Backtrack();
+>     return results;
+> }
+> ```
+> The `used[i]` guard is the prefix feasibility test; a constraint problem such as n-queens replaces it with an `IsSafe(row, col)` check that reads the columns and diagonals already occupied. The `used[i] = false` line is the undo that keeps sibling branches independent.
+
+## Comparison
+
+Alternatives that also search or decompose a configuration space:
+
+| Strategy | Explores | Prunes by | Reuses across branches | Stronger case | Weaker case |
+| --- | --- | --- | --- | --- | --- |
+| Backtracking | pruned DFS over partial candidates | a violated prefix constraint | nothing | constraint satisfaction and enumeration with a cheap prefix test | optimization, or no early feasibility signal |
+| Brute-force enumeration | every complete candidate | nothing; tests only at the end | nothing | spaces small enough to enumerate, or no usable prefix test | any space large enough for a prefix test to prune |
+| [[Branch and Bound]] | pruned DFS/BFS over partial candidates | an objective bound plus feasibility | best solution and its bound | optimization where a bound on the remaining cost is computable | pure feasibility with no meaningful objective |
+| [[Dynamic Programming]] | each distinct subproblem once | — memoization, not pruning | solved subproblem results | overlapping subproblems with optimal substructure | independent choices, or a need to list every configuration |
+
+Backtracking is the default when the task is to satisfy constraints or enumerate valid configurations and a partial candidate can be rejected early; its cost collapses to brute force exactly when no prefix test bites. [[Branch and Bound]] is the same tree search carried into optimization, adding an objective bound so a partial candidate that cannot beat the best solution found so far is pruned even while still feasible. [[Dynamic Programming]] applies when the search tree's subproblems overlap, so results are stored and reused rather than re-searched — backtracking holds no memo and re-derives repeated subproblems. [[Divide and Conquer]] splits a problem into independent subproblems whose solutions combine directly; backtracking's choices are dependent, which is why its tree cannot be partitioned into independent parts.
 
 ## Questions
 
-> [!QUESTION]- What distinguishes backtracking from plain brute force?
-> Brute force generates every complete candidate and then checks it. Backtracking builds candidates incrementally and **prunes** — the instant a partial candidate violates a constraint, it abandons that entire subtree without expanding it. Same worst case, but pruning often removes the overwhelming majority of the search space in practice.
+> [!QUESTION]- What turns brute-force enumeration into backtracking?
+> A feasibility test applied to a partial candidate. Brute force builds every complete configuration and tests it at the end; backtracking tests the prefix after each choice and, on a violation, discards every configuration sharing that prefix without generating them.
 
-> [!QUESTION]- Why must you "un-choose" after recursing?
-> Backtracking shares one mutable state (the current partial solution / used-set) across all branches to avoid copying. After exploring a choice you must revert it so the next sibling branch starts from the correct state. Skipping the undo leaks state between branches and produces wrong results.
+> [!QUESTION]- Why must a choice be undone after its subtree is explored?
+> The partial candidate is a single mutable buffer shared by all branches to avoid copying. After a subtree is exhausted the choice is reverted so the next sibling starts from the state its parent established. An un-reverted choice leaks into siblings and silently corrupts the enumeration.
 
-> [!QUESTION]- When is backtracking the wrong tool?
-> When the problem is an *optimisation* with overlapping subproblems (use DP — exponentially faster) or when a provable greedy choice exists (faster still). Backtracking shines for *enumeration* and *constraint satisfaction* where you genuinely must search configurations, and where pruning makes the exponential worst case rare in practice.
+> [!QUESTION]- Why is the worst-case class still exponential despite pruning?
+> Pruning removes subtrees but does not shrink the complete search tree, which has `O(b^d)` nodes. When no prefix can be rejected before a leaf, every candidate is still visited. Pruning improves the constant and the practical node count, not the asymptotic class.
+
+> [!QUESTION]- What does branch and bound add that plain backtracking lacks?
+> An objective bound. Backtracking prunes only branches that violate a feasibility constraint; branch and bound also prunes branches whose best possible objective cannot beat the incumbent solution, which is what lets it target optimization rather than only feasibility.
 
 ## References
 
-- [Backtracking (Wikipedia)](https://en.wikipedia.org/wiki/Backtracking) — formal definition, the search tree, and branch-and-bound.
-- [Backtracking (GeeksforGeeks)](https://www.geeksforgeeks.org/backtracking-algorithms/) — N-Queens, Sudoku, and subset/permutation templates.
-- [Recursion and backtracking (USACO Guide)](https://usaco.guide/silver/intro-backtracking) — categorised problems and pruning techniques.
+- [Backtracking](https://en.wikipedia.org/wiki/Backtracking) — formal definition of the method as a depth-first walk of a candidate tree with a partial-candidate rejection test.
+- [Dancing Links](https://arxiv.org/abs/cs/0011047) — Donald Knuth's technique for efficient backtracking over exact-cover problems (n-queens, Sudoku), with `O(1)` undo of each choice.
+- [Introduction to backtracking](https://usaco.guide/silver/intro-backtracking) — categorized constraint problems and the pruning patterns that keep the search tree small.
