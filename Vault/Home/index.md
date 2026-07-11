@@ -7,6 +7,7 @@ tags:
 publish: true
 ---
 ```datacorejsx
+const { CARD_CSS } = await dc.require("Assets/components/devbook-card.jsx");
 return function TopicDashboard() {
   const ROOT = (dc.useCurrentFile()?.$path || "Home").split("/")[0];
 
@@ -119,26 +120,21 @@ return function TopicDashboard() {
   const spanRules = (cls) =>
     Array.from({ length: 12 }, (_, i) => `.dc-topic-card.${cls}-${i + 1} { grid-column: span ${i + 1}; }`).join(" ");
 
+  // Layout + the home-only progress extension. The card's visual chrome
+  // (.db-card, .db-card-icon, .db-card-title, .db-card-summary — same padding,
+  // font, colours, and icon sizing as the FolderNote hubs) comes from the shared
+  // CARD_CSS. Each card sets --card-accent for that chrome and --topic-rgb for
+  // the progress bar / Quartz's opaque backing in custom.scss (both = c.rgb).
   const CSS = `
 .dc-topic-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 0.75rem; width: 100%; }
-.dc-topic-card { position: relative; overflow: hidden; cursor: pointer; min-width: 0; min-height: 7rem; box-sizing: border-box; margin: 0; display: flex; flex-direction: column; background-color: var(--background-primary, var(--light, #ffffff)); border: 1px solid var(--background-modifier-border, var(--lightgray, #e5e5e5)); border-radius: var(--radius-m, 8px); box-shadow: 0 0 0 rgba(0,0,0,0); padding: 0.9rem 1rem 1rem; transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease, transform 150ms ease; }
-.dc-topic-card::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 150% 175% at -22% -38%, rgba(var(--topic-rgb), 0.09) 0%, rgba(var(--topic-rgb), 0.04) 38%, rgba(var(--topic-rgb), 0.014) 66%, transparent 90%); opacity: 0.78; transition: opacity 150ms ease; }
-.dc-topic-card:hover, .dc-topic-card:focus-within { border-color: rgba(var(--topic-rgb), 0.55); background-color: color-mix(in srgb, rgb(var(--topic-rgb)) 2.5%, var(--background-primary, var(--light, #ffffff))); box-shadow: 0 0.45rem 1.1rem rgba(0,0,0,0.08); transform: translateY(-0.125rem); }
-.dc-topic-card:hover::before, .dc-topic-card:focus-within::before { opacity: 1; }
-.dc-topic-link a:focus-visible { outline: 2px solid rgb(var(--topic-rgb)); outline-offset: -0.3rem; border-radius: var(--radius-m, 8px); }
-.dc-topic-title { position: relative; z-index: 0; display: flex; gap: 0.55rem; align-items: center; line-height: 1.3; }
-.dc-topic-icon { display: flex; align-self: center; color: rgb(var(--topic-rgb)); }
-.dc-topic-icon svg { width: 22px; height: 22px; }
-.dc-topic-name { font-weight: 600; font-size: 0.95rem; color: rgb(var(--topic-rgb)); }
-.dc-topic-body { position: relative; z-index: 0; display: flex; flex-direction: column; flex: 1 0 auto; margin-top: 0.4em; }
-.dc-topic-desc { margin: 0; color: var(--text-muted, var(--gray, #9ca3af)); font-size: 0.78rem; line-height: 1.3; }
+.dc-topic-card { overflow: hidden; cursor: pointer; min-width: 0; min-height: 6.75rem; margin: 0; display: flex; flex-direction: column; }
+.dc-topic-card .db-card-body { flex: 1 0 auto; }
+.dc-topic-title { display: flex; gap: 0.5rem; align-items: center; line-height: 1.25; }
 .dc-topic-spacer { flex: 1 0 auto; min-height: 0.55em; }
-.dc-topic-foot { display: flex; flex-direction: column; gap: 4px; }
-.dc-topic-cap { font-size: 0.72rem; display: flex; justify-content: space-between; align-items: baseline; color: var(--text-muted, var(--gray, #9ca3af)); }
-.dc-topic-bar { display: flex; width: 100%; height: 5px; border-radius: 4px; margin-top: 0.15rem; overflow: hidden; background: var(--background-modifier-border, var(--lightgray, #e5e5e5)); }
-.dc-topic-link { position: absolute; inset: 0; z-index: 1; }
-.dc-topic-link a { position: absolute; inset: 0; font-size: 0; background: none !important; }
-.dc-topic-total { margin-top: 0.75rem; padding: 0.75em; border-radius: var(--radius-m, 8px); border: 1px solid rgba(var(--topic-rgb), 0.4); background: rgba(var(--topic-rgb), 0.1); }
+.dc-topic-foot { display: flex; flex-direction: column; gap: 4px; margin-top: 0.6rem; }
+.dc-topic-cap { font-size: 0.72rem; display: flex; justify-content: space-between; align-items: baseline; color: var(--text-muted, var(--darkgray, #5f6b7a)); }
+.dc-topic-bar { display: flex; width: 100%; height: 5px; border-radius: 4px; margin-top: 0.15rem; overflow: hidden; background: var(--background-modifier-border, var(--lightgray, #d8dee9)); }
+.dc-topic-total { margin-top: 0.75rem; padding: 0.75em; border-radius: var(--radius-m, 0.55rem); border: 1px solid rgba(var(--topic-rgb), 0.4); background: rgba(var(--topic-rgb), 0.1); }
 .dc-topic-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4em 1.1em; margin-top: 0.7em; font-size: 0.8em; opacity: 0.85; }
 .dc-topic-legend-item { display: inline-flex; align-items: center; gap: 0.4em; }
 .dc-topic-legend-sw { width: 0.8em; height: 0.8em; border-radius: 3px; flex: 0 0 auto; display: inline-block; background: rgb(var(--topic-rgb)); }
@@ -146,28 +142,27 @@ ${spanRules("dsk")}
 @media (max-width: 1600px) { ${spanRules("med")} }
 @media (max-width: 760px) { ${spanRules("nar")} }
 @media (max-width: 430px) { .dc-topic-grid { grid-template-columns: 1fr; } .dc-topic-grid .dc-topic-card { grid-column: span 1; } }
-@media (prefers-reduced-motion: reduce) { .dc-topic-card { transition: none; } .dc-topic-card::before { transition: none; } .dc-topic-card:hover { transform: none; } }
 `;
 
   return (
     <div style={{ marginTop: "1.5rem" }}>
-      <style dangerouslySetInnerHTML={{ __html: CSS }} />
+      <style dangerouslySetInnerHTML={{ __html: CARD_CSS + CSS }} />
       <div class="dc-topic-grid">
         {cards.map((c) => (
-          <div class={`dc-topic-card dsk-${c.spanDesktop} med-${c.spanMedium} nar-${c.spanNarrow}`} style={{ "--topic-rgb": c.rgb }}>
-            <div class="dc-topic-title">
-              <span class="dc-topic-icon" dangerouslySetInnerHTML={{ __html: c.iconSvg }} />
-              <span class="dc-topic-name">{c.title}</span>
-            </div>
-            <div class="dc-topic-body">
-              <p class="dc-topic-desc">{c.desc}</p>
+          <div class={`db-card dc-topic-card dsk-${c.spanDesktop} med-${c.spanMedium} nar-${c.spanNarrow}`} style={{ "--card-accent": c.rgb, "--topic-rgb": c.rgb }}>
+            <div class="db-card-body">
+              <div class="dc-topic-title">
+                <span class="db-card-icon" dangerouslySetInnerHTML={{ __html: c.iconSvg }} />
+                <span class="db-card-title">{c.title}</span>
+              </div>
+              <p class="db-card-summary">{c.desc}</p>
               <div class="dc-topic-spacer" />
               <div class="dc-topic-foot">
                 <div class="dc-topic-cap"><span>{c.done}/{c.total} done</span><span>{c.pct}%</span></div>
                 <div class="dc-topic-bar">{segments(c.byStatus, c.total)}</div>
               </div>
             </div>
-            {c.fn ? <span class="dc-topic-link"><dc.Link link={c.fn.$link} /></span> : null}
+            {c.fn ? <span class="db-card-hit"><dc.Link link={c.fn.$link} /></span> : null}
           </div>
         ))}
       </div>

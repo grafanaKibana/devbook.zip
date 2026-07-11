@@ -2,7 +2,7 @@
 //
 // Loaded from a FolderNote with:
 //   ```datacorejsx
-//   const { FolderStructureMap } = await dc.require("devbook-folder-map.jsx");
+//   const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
 //   return <FolderStructureMap />;
 //   ```
 //
@@ -11,6 +11,13 @@
 // cards) of the folder the current note lives in. Everything topic-specific —
 // color, ordering, per-card summary — comes from frontmatter, never from a
 // hard-coded map. A published hub only ever links to publishable children.
+//
+// The card look (border, gradient, hover, icon, title, summary) is NOT defined
+// here — it comes from the shared devbook-card.jsx chrome so the home dashboard
+// and these hubs stay visually identical. This module only adds the flex-wrap
+// layout, the note-count, and the responsive compaction of small cards.
+
+const { CARD_CSS } = await dc.require("Assets/components/devbook-card.jsx");
 
 function FolderStructureMap() {
   const current = dc.useCurrentFile();
@@ -90,9 +97,14 @@ function FolderStructureMap() {
     note: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>`,
   };
 
+  // Layout only — the visual chrome (.db-card, .db-card-icon, .db-card-title,
+  // .db-card-summary, .db-card-hit) is supplied by CARD_CSS. Here we add the
+  // flex-wrap row, the note-count, and the responsive compaction: at small
+  // widths the card is a single centered line (summary hidden, tighter padding
+  // via --db-card-pad), expanding to the full card once there's room.
   const CSS = `
 .folder-structure-map {
-  --map-accent: 16, 185, 129;
+  --card-accent: 16, 185, 129;
   --map-gap: 0.75rem;
   width: 100%;
   box-sizing: border-box;
@@ -109,57 +121,18 @@ function FolderStructureMap() {
   gap: var(--map-gap);
 }
 .folder-map-node {
-  position: relative;
-  /* No overflow:hidden here: on a flex item that collapses min-width:auto to 0,
-     letting the card shrink below its title + note-count and clip them. Without
-     it, the card's min size is its content, so long titles widen the card (and
-     wrap to another row) instead of being cut off. The accent gradient gets its
-     own border-radius below to stay inside the rounded corners. */
+  /* No overflow:hidden on a flex item whose min-width:auto collapses to 0: that
+     would let the card shrink below its title + note-count and clip them.
+     Without it the card's min size is its content, so long titles widen the card
+     (and wrap to another row) instead of being cut off. The shared ::before
+     accent uses border-radius:inherit to stay inside the rounded corners. */
   flex: 1 1 12rem;
   min-height: 2.75rem;
-  box-sizing: border-box;
-  border: 1px solid var(--background-modifier-border, var(--lightgray, #d8dee9));
-  border-radius: var(--radius-m, 0.55rem);
-  background-color: var(--background-primary, var(--light, #ffffff));
-  box-shadow: 0 0 0 rgba(0, 0, 0, 0);
-  transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+  --db-card-pad: 0.5rem 0.75rem;
 }
-.folder-map-node::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  background: radial-gradient(
-    ellipse 150% 175% at -22% -38%,
-    rgba(var(--map-accent), 0.09) 0%,
-    rgba(var(--map-accent), 0.04) 38%,
-    rgba(var(--map-accent), 0.014) 66%,
-    transparent 90%
-  );
-  opacity: 0.78;
-  transition: opacity 150ms ease;
-}
-.folder-map-node:hover,
-.folder-map-node:focus-within {
-  border-color: rgba(var(--map-accent), 0.55);
-  background-color: color-mix(in srgb, rgb(var(--map-accent)) 2.5%, var(--background-primary, var(--light, #ffffff)));
-  box-shadow: 0 0.45rem 1.1rem rgba(0, 0, 0, 0.08);
-  transform: translateY(-0.125rem);
-}
-.folder-map-node:hover::before,
-.folder-map-node:focus-within::before {
-  opacity: 1;
-}
-.folder-map-node-body {
-  position: relative;
-  z-index: 0;
-  display: flex;
+.folder-map-node .db-card-body {
   min-height: 2.75rem;
-  box-sizing: border-box;
-  flex-direction: column;
   justify-content: center;
-  padding: 0.5rem 0.75rem;
 }
 .folder-map-node-heading {
   display: flex;
@@ -172,33 +145,8 @@ function FolderStructureMap() {
   align-items: center;
   gap: 0.5rem;
 }
-.folder-map-entry-icon {
-  display: flex;
-  width: 1.1rem;
-  height: 1.1rem;
-  flex: 0 0 auto;
-  color: rgb(var(--map-accent));
-}
-.folder-map-entry-icon svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-.folder-map-node-title {
-  display: block;
-  margin: 0;
-  color: var(--text-normal, var(--dark, #1f2937));
-  font-size: 1rem;
-  font-weight: 700;
-  line-height: 1.25;
+.folder-map-node .db-card-title {
   white-space: nowrap;
-}
-.folder-map-node p {
-  display: none;
-  margin: 0.45rem 0 0;
-  color: var(--text-muted, var(--darkgray, #5f6b7a));
-  font-size: 0.875rem;
-  line-height: 1.45;
 }
 .folder-map-node-count {
   display: block;
@@ -207,23 +155,8 @@ function FolderStructureMap() {
   font-size: 0.875rem;
   white-space: nowrap;
 }
-.folder-map-hit {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-}
-.folder-map-hit a {
-  position: absolute;
-  inset: 0;
-  min-width: 2.75rem;
-  min-height: 2.75rem;
-  border-radius: var(--radius-m, 0.55rem);
-  background: transparent !important;
-  font-size: 0;
-}
-.folder-map-hit a:focus-visible {
-  outline: 2px solid rgb(var(--map-accent));
-  outline-offset: -0.3rem;
+.folder-map-node .db-card-summary {
+  display: none;
 }
 .folder-map-empty {
   margin: 1rem 0 0;
@@ -233,29 +166,23 @@ function FolderStructureMap() {
 @container folder-map (min-width: 40rem) {
   .folder-map-node {
     min-height: 6rem;
+    --db-card-pad: 0.85rem 0.9rem;
   }
-  .folder-map-node-body {
+  .folder-map-node .db-card-body {
     min-height: 6rem;
     justify-content: flex-start;
-    padding: 0.85rem 0.9rem;
   }
-  .folder-map-node p { display: block; }
+  .folder-map-node .db-card-summary { display: block; }
 }
 @container folder-map (min-width: 64rem) {
   .folder-map-node,
-  .folder-map-node-body { min-height: 6.75rem; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .folder-map-node { transition: none; }
-  .folder-map-node::before { transition: none; }
-  .folder-map-node:hover,
-  .folder-map-node:focus-within { transform: none; }
+  .folder-map-node .db-card-body { min-height: 6.75rem; }
 }
 `;
 
   return (
-    <nav class="folder-structure-map" aria-label={`${folderName} section map`} style={{ "--map-accent": topicRgb }}>
-      <style dangerouslySetInnerHTML={{ __html: CSS }} />
+    <nav class="folder-structure-map" aria-label={`${folderName} section map`} style={{ "--card-accent": topicRgb }}>
+      <style dangerouslySetInnerHTML={{ __html: CARD_CSS + CSS }} />
       {entries.length > 0 ? (
         <div class="folder-map-children">
           {entries.map((entry) => {
@@ -263,24 +190,24 @@ function FolderStructureMap() {
             const noteCount = conceptNotesFor(entry).length;
             const summary = summaryFor(entry);
             return (
-              <article class="folder-map-node" key={entry.$path}>
-                <div class="folder-map-node-body">
+              <article class="db-card folder-map-node" key={entry.$path}>
+                <div class="db-card-body">
                   <div class="folder-map-node-heading">
                     <span class="folder-map-node-title-group">
                       <span
-                        class="folder-map-entry-icon"
+                        class="db-card-icon"
                         aria-hidden="true"
                         dangerouslySetInnerHTML={{ __html: isFolder ? icons.folder : icons.note }}
                       />
-                      <span class="folder-map-node-title" title={entry.$name}>{entry.$name}</span>
+                      <span class="db-card-title" title={entry.$name}>{entry.$name}</span>
                     </span>
                     {isFolder ? (
                       <span class="folder-map-node-count">{noteCount} {noteCount === 1 ? "note" : "notes"}</span>
                     ) : null}
                   </div>
-                  {summary ? <p>{summary}</p> : null}
+                  {summary ? <p class="db-card-summary">{summary}</p> : null}
                 </div>
-                <span class="folder-map-hit"><dc.Link link={entry.$link} /></span>
+                <span class="db-card-hit"><dc.Link link={entry.$link} /></span>
               </article>
             );
           })}
