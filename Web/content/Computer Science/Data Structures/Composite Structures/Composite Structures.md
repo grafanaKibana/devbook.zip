@@ -1,14 +1,15 @@
 ---
 publish: true
-created: 2026-07-10T14:39:34.297Z
-modified: 2026-07-10T14:39:34.297Z
-published: 2026-07-10T14:39:34.297Z
+created: 2026-07-11T17:38:26.050Z
+modified: 2026-07-11T17:38:26.050Z
+published: 2026-07-11T17:38:26.050Z
 tags:
   - FolderNote
 topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: Structures that combine two primitives to get a guarantee neither gives alone, kept in lockstep on every mutation.
 level:
   - "4"
 status: Not-Started

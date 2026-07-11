@@ -1,14 +1,15 @@
 ---
 publish: true
-created: 2026-07-10T14:39:34.303Z
-modified: 2026-07-10T14:39:34.303Z
-published: 2026-07-10T14:39:34.303Z
+created: 2026-07-11T17:38:31.971Z
+modified: 2026-07-11T17:38:31.971Z
+published: 2026-07-11T17:38:31.971Z
 tags:
   - FolderNote
 topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: Structures that store elements in a sequence, defined by access order and position rather than one memory layout.
 level:
   - "4"
 priority: Medium

@@ -1,14 +1,15 @@
 ---
 publish: true
-created: 2026-07-10T14:39:34.298Z
-modified: 2026-07-10T14:39:34.299Z
-published: 2026-07-10T14:39:34.299Z
+created: 2026-07-11T17:38:27.992Z
+modified: 2026-07-11T17:38:27.992Z
+published: 2026-07-11T17:38:27.992Z
 tags:
   - FolderNote
 topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: Structures for modelling relationships with cycles and multiple paths, composed from primitives per the connectivity question you must answer cheaply.
 level:
   - "4"
 priority: Medium

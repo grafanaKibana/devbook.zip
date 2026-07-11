@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-10T19:28:11.243Z
-modified: 2026-07-10T19:28:11.244Z
-published: 2026-07-10T19:28:11.244Z
+created: 2026-07-11T16:49:43.037Z
+modified: 2026-07-11T16:49:43.037Z
+published: 2026-07-11T16:49:43.037Z
 topic:
   - Computer Science
 subtopic:
@@ -15,151 +15,113 @@ status: Done
 
 # Intro
 
-A monitoring process scans a byte stream — logs, packets, a large file — for a fixed pattern of length `m` inside text of length `n`. The naive method aligns the pattern at each start position and, on a mismatch after matching several characters, discards that progress and restarts one position over. On text like `aaaaaaaa…` with pattern `aaaab`, nearly every start position matches `m − 1` characters before failing, so the same characters are examined again and again — `O(n·m)` comparisons.
+The Knuth-Morris-Pratt (KMP) algorithm searches for a pattern in text in guaranteed `O(n + m)` time by never rescanning text characters after a mismatch. Its key mechanism is the prefix function (also called the LPS array — Longest Proper Prefix which is also a Suffix), which precomputes for each position in the pattern how far back to fall when a mismatch occurs, reusing work already done instead of starting over.
 
-The wasted work has structure. The characters already matched are a prefix of the pattern, and that prefix's own internal repetition fixes how far the pattern can safely slide. KMP computes that self-overlap once, before the scan. On a mismatch after `k` matched characters, it consults the overlap and resumes the pattern where its longest matched prefix-that-is-also-a-suffix already lines up against the text — the text pointer stays put. Each text character is then read at most twice across the whole search.
+Use KMP when worst-case linear time matters — for example, scanning large log streams or network traffic where adversarial inputs (like `"aaaaab"` in `"aaaa...a"`) would degrade naive search to `O(nm)`. For simple one-off searches on typical text, language built-in functions (which often use optimized heuristics) are fine, but KMP gives a strict guarantee that naive search cannot.
 
-**Core condition:** pattern fixed in advance → a failure table encodes the pattern's self-overlap → each mismatch slides the pattern without rewinding the text → `Θ(n + m)` time, `Θ(m)` space.
+## How It Works
 
-## One scan
+**Step 1 — Build the prefix function (LPS array)** in `O(m)`:
+For each position `j` in the pattern, `lps[j]` stores the length of the longest proper prefix of `pattern[0..j]` that is also a suffix. This tells the algorithm: on mismatch at position `j`, the pattern can be shifted so that `lps[j-1]` characters of the existing match are preserved.
 
-The trace searches for the pattern `ABAB` in the text `ABABCABAB`.
+**Step 2 — Scan the text** in `O(n)`:
+Maintain two pointers: `i` (text position) and `j` (pattern position). On match, advance both. On mismatch, if `j > 0`, set `j = lps[j-1]` (fall back without moving `i`); if `j == 0`, advance `i`. When `j` reaches `m`, a full match is found at position `i - m`.
+
+Total: `O(n + m)` time, `O(m)` space for the LPS array. The text pointer `i` never moves backward — this is what gives KMP its linear guarantee.
+
+```mermaid
+graph TD
+  S[Input pattern P and text T] --> P0[Precompute LPS array for P]
+  P0 --> A[Set i to 0 and j to 0]
+  A --> B{i less than len T}
+  B -->|No| Z[Done]
+  B -->|Yes| C{T at i equals P at j}
+  C -->|Yes| D[Increment i and j]
+  D --> E{j equals len P}
+  E -->|Yes| F[Match found at i minus m]
+  F --> G[Set j to LPS at j minus 1]
+  G --> B
+  E -->|No| B
+  C -->|No| H{j greater than 0}
+  H -->|Yes| I[Set j to LPS at j minus 1]
+  I --> C
+  H -->|No| J[Increment i]
+  J --> B
+```
+
+## Visualization
+
+The card slides the pattern strip beneath the text strip: green marks the region matched so far, amber flags the mismatching character. Watch what happens on a mismatch — thanks to the prefix table the pattern jumps forward by more than one position, while the text pointer never moves backward.
 
 ```steptrace
 {"algorithm":"kmp","text":"ABABCABAB","pattern":"ABAB"}
 ```
 
-The first four characters match, so `j` reaches `4 = m` and a match is reported at index 0. Instead of restarting, `j` resets to `π[3] = 2`: the trailing `AB` of the region just matched is itself a prefix of the pattern, so those two characters already count as matched and the pattern strip slides right by two while the text pointer holds at index 4. There `C` fails against `pattern[2] = A`; `j` falls to `π[1] = 0`, the text pointer finally advances, and the scan re-enters the pattern at `A` to find the second match at index 5. At no point does the text pointer retreat to re-read `C` or the earlier `AB`.
+## Example
 
-## Why the text never rewinds
+```text
+Pattern: ABABC    (m=5)
+LPS:     [0, 0, 1, 2, 0]
 
-The failure table `π` (also called the LPS array — longest proper prefix that is also a suffix) has one entry per pattern position. `π[j]` is the length of the longest proper prefix of `pattern[0..j]` that also occurs as a suffix of that same span. For `ABABC` the table is `[0, 0, 1, 2, 0]`: `ABAB` ends in `AB`, which is also its prefix, so `π[3] = 2`.
+  lps[0]=0: "A" has no proper prefix that is also a suffix
+  lps[1]=0: "AB" — no match
+  lps[2]=1: "ABA" — prefix "A" matches suffix "A"
+  lps[3]=2: "ABAB" — prefix "AB" matches suffix "AB"
+  lps[4]=0: "ABABC" — no match
 
-The search keeps a text index `i` and a match length `j` (equivalently, the current pattern position). On a match, both advance. On a mismatch with `j > 0`, `j` drops to `π[j - 1]` and the comparison retries without touching `i`; the already-matched prefix of length `π[j-1]` is guaranteed to align, because it is at once a prefix and a suffix of what was just matched. On a mismatch with `j == 0`, there is nothing to fall back to, so `i` advances. The text index therefore moves in one direction only.
+Text: ABABABC
+  i=0..3: match ABAB (j=4)
+  i=4: T[4]='A' ≠ P[4]='C' → mismatch. Set j=lps[3]=2 (keep "AB" match).
+  i=4..6: match from j=2. T[4..6]="ABC" matches P[2..4]="ABC".
+  j=5=m → match found at position 2.
+```
 
-That monotonic `i` is the entire bound. `j` rises by at most one each time `i` advances, and `j ≥ 0`, so the fallbacks can remove at most as much as was added: across the scan `j` decreases at most `n` times in total. Every comparison either advances `i` or decreases `j`, so there are at most `2n` character comparisons regardless of how the pattern overlaps itself.
+## Pitfalls
 
-## Complexity
+### Off-by-One in LPS Construction
 
-| Phase | Time | Auxiliary space | Cause |
+- **What goes wrong**: incorrect index arithmetic in the prefix function produces wrong fallback values, causing missed matches or infinite loops during search.
+- **Why it happens**: the LPS construction has a subtle two-pointer loop where `length` tracks the current longest prefix-suffix and must fall back through `lps[length-1]` on mismatch, not just reset to zero.
+- **How to avoid it**: test LPS output against known examples. `"ABABC"` → `[0,0,1,2,0]`, `"AABAAAB"` → `[0,1,0,1,2,2,3]`. If your implementation disagrees, the fallback logic is wrong.
+
+### Single-Pattern Limitation
+
+- **What goes wrong**: running KMP once per pattern on a multi-pattern search becomes `O(k·(n+m))` for `k` patterns, slower than a single-pass multi-pattern algorithm.
+- **Why it happens**: KMP's prefix function is built for one pattern. Each additional pattern requires a separate text scan.
+- **How to avoid it**: for multi-pattern matching, use Aho-Corasick, which builds a single automaton from all patterns and scans text once in `O(n + total_pattern_length + matches)`.
+
+## Tradeoffs
+
+| Choice | Option A | Option B | Decision criteria |
 | --- | --- | --- | --- |
-| Build failure table `π` | `Θ(m)` | `Θ(m)` | Each pattern index is assigned once; the builder's fallback pointer only retreats through values it already produced. |
-| Search | `Θ(n)` | `O(1)` beyond `π` | `i` advances monotonically; each character is compared at most twice before `i` passes it. |
-| Total | `Θ(n + m)` | `Θ(m)` | One preprocessing pass over the pattern, then one non-backtracking pass over the text. |
-
-The bound holds identically in the best, average, and worst case — determinism is the point. Naive search shares the `O(1)`-space profile but has no such ceiling: on `text = aⁿ`, `pattern = aᵐ⁻¹b`, every one of the `n − m + 1` start positions matches `m − 1` characters before failing on the final `b`, so it performs `Θ(n·m)` comparisons. KMP reads that same run once.
-
-## Where the guarantee earns its keep
-
-The repetitive input that breaks naive search is exactly where KMP's ceiling matters. On `aⁿ` against `aᵐ⁻¹b` the failure table is `[0, 1, 2, …, m-2, 0]` — the trailing `b` has no matching prefix, so the last entry drops back to `0` (for `m = 5`, `aaaab` → `[0,1,2,3,0]`). Matching stalls at length `m − 1`, the `b` fails, and `j` falls back one position to `π[m-2] = m-2`, so the scan still finishes in `Θ(n + m)`. This is a correctness-of-cost property, not a speedup on friendly text: on random text with a short, low-overlap pattern, naive search and KMP examine nearly the same number of characters, and naive wins on constants and code size.
-
-The classic implementation bug lives in the failure table. On a mismatch while building it, the length pointer must fall back through `failure[k - 1]`, not reset to `0`. Resetting to zero corrupts every entry where the prefix overlaps itself: `AABAAAB` then builds as `[0,1,0,1,2,1,0]` instead of `[0,1,0,1,2,2,3]`, and the search silently misses matches that depend on the longer overlap. A quick comparison against known outputs surfaces this class of bug.
-
-KMP gains nothing from a large alphabet. It compares left to right and, in the worst case, inspects essentially every text character. Skip-based methods exploit alphabet size instead: [[Boyer-Moore]] scans the pattern right to left and, on a mismatch, uses a bad-character table to jump ahead by up to `m` positions, so a wider alphabet makes each mismatch more informative and the average scan sublinear. KMP's edge is a guarantee, not throughput on wide alphabets.
-
-## Reference drawer
-
-> [!ABSTRACT]- Search control flow
->
-> ```mermaid
-> flowchart TD
->   A[Build failure table for the pattern] --> B[Set text index i and match length j to 0]
->   B --> C{i less than length of text}
->   C -->|No| Z[Search complete]
->   C -->|Yes| D{text at i equals pattern at j}
->   D -->|No, j greater than 0| E[Set j to failure at j minus 1]
->   E --> D
->   D -->|No, j equals 0| F[Advance i]
->   D -->|Yes| G[Advance i and j]
->   G --> H{j equals length of pattern}
->   H -->|No| C
->   H -->|Yes| I[Report match at i minus j, then set j to failure at j minus 1]
->   F --> C
->   I --> C
-> ```
-
-> [!EXAMPLE]- C# implementation
->
-> ```csharp
-> public static IEnumerable<int> FindAll(string text, string pattern)
-> {
->     var failure = BuildFailure(pattern);
->     var j = 0; // characters of the pattern currently matched
->
->     for (var i = 0; i < text.Length; i++)
->     {
->         while (j > 0 && text[i] != pattern[j])
->         {
->             j = failure[j - 1];
->         }
->
->         if (text[i] == pattern[j])
->         {
->             j++;
->         }
->
->         if (j == pattern.Length)
->         {
->             yield return i - j + 1;
->             j = failure[j - 1];
->         }
->     }
-> }
->
-> private static int[] BuildFailure(string pattern)
-> {
->     var failure = new int[pattern.Length];
->     var k = 0; // length of the longest prefix-suffix seen so far
->
->     for (var i = 1; i < pattern.Length; i++)
->     {
->         while (k > 0 && pattern[i] != pattern[k])
->         {
->             k = failure[k - 1];
->         }
->
->         if (pattern[i] == pattern[k])
->         {
->             k++;
->         }
->
->         failure[i] = k;
->     }
->
->     return failure;
-> }
-> ```
->
-> Both loops share the same fallback shape: the inner `while` retreats through `failure` rather than resetting to `0`. That is what keeps the total work linear and the table correct.
-
-## Comparison
-
-| Algorithm | Time | Space / preprocessing | Stronger case | Weaker case | Semantic property |
-| --- | --- | --- | --- | --- | --- |
-| Naive search | `O(n·m)` worst, `O(n)` on low overlap | `O(1)`, none | Short patterns, low self-overlap, tiny inputs | Repetitive text and pattern | Deterministic; re-reads text after each mismatch |
-| KMP | `Θ(n + m)` | `Θ(m)` failure table | Adversarial or streaming input needing a hard bound | Large alphabets where skipping would help | Deterministic; text pointer never rewinds; no hashing |
-| [[Rabin Karp Search]] | `O(n + m)` expected, `O(n·m)` worst | `O(1)` rolling hash | Many patterns matched in one pass via a hash set | Hash collisions or adversarial input | Probabilistic; compares hashes, verifies on a hit |
-| [[Boyer-Moore]] | Sublinear average on large alphabets, `O(n·m)` worst | `O(m + |Σ|)` skip tables | Long patterns over large alphabets | Small alphabets, short patterns | Scans right-to-left; skips via bad-character and good-suffix rules |
-| [[Z-Algorithm]] | `Θ(n + m)` | `Θ(n + m)` Z-array | Same linear bound; adapts to other string problems | Builds a Z-array over the concatenation | Deterministic; equivalent linear-time construction to KMP |
-
-KMP is the deterministic `O(n + m)` single-pattern guarantee with no hashing and no text rewinding; its value is a hard worst-case ceiling on adversarial or streaming input rather than raw speed on ordinary text. Boyer-Moore is usually faster in practice on large alphabets, because a mismatch lets it skip ahead instead of reading every character. Rabin-Karp becomes stronger when many patterns are searched at once, since one rolling hash checks a whole set per position. The [[Z-Algorithm]] reaches the same linear bound through the Z-array and is often the easier starting point for problems beyond plain matching, such as counting distinct substrings. For matching many fixed patterns simultaneously, [[Aho-Corasick]] replaces per-pattern scans with a single automaton.
+| Worst-case guarantee needed | KMP `O(n+m)` | Naive `O(nm)` | KMP is strictly better on adversarial inputs. Naive is simpler for small inputs where worst case is unlikely. |
+| Multiple patterns | Aho-Corasick | KMP per pattern | Aho-Corasick scans text once for all patterns. Switch when pattern count exceeds 2-3. |
+| Implementation simplicity | [[Rabin Karp Search\|Rabin-Karp]] | KMP | Rabin-Karp is simpler to code (rolling hash) but has probabilistic worst case. KMP is deterministic but requires understanding the prefix function. |
 
 ## Questions
 
-> [!QUESTION]- Why does the text index never move backward, and what does that buy?
-> On a mismatch the algorithm only lowers the match length `j` via `π[j-1]`; it never decrements the text index `i`. Because `j` can fall back at most as much as it climbed, total comparisons stay at `2n`, giving the `Θ(n + m)` bound. A monotonic text pointer also lets the search run over a stream that cannot be rewound.
+> [!QUESTION]- What does the prefix function (LPS array) encode and why does it matter?
+>
+> - For each position `j`, `lps[j]` is the length of the longest proper prefix of `pattern[0..j]` that is also a suffix.
+> - On mismatch at position `j`, the algorithm falls back to `lps[j-1]` instead of restarting, preserving valid partial match progress.
+> - This prevents the text pointer `i` from ever moving backward, giving the linear time guarantee.
+> - The LPS array costs `O(m)` time and space to precompute — negligible for single-use searches, and amortized away when the same pattern is reused across many texts.
 
-> [!QUESTION]- What does `π[j]` encode, and how is it used on a mismatch?
-> `π[j]` is the length of the longest proper prefix of `pattern[0..j]` that is also a suffix of it. On a mismatch after matching `j` characters, `j` resets to `π[j-1]`, which realigns that shared prefix/suffix against the text so no already-matched characters are re-read.
+> [!QUESTION]- When is KMP worth the implementation complexity over naive search?
+>
+> - When inputs can be adversarial (e.g., user-supplied patterns against server logs) and worst-case `O(nm)` is unacceptable.
+> - When pattern matching runs on large text streams where constant re-scanning wastes throughput.
+> - When predictable latency matters more than average-case speed.
+> - Naive search has smaller code footprint and better constants on typical text — use KMP when the worst-case cost of naive search exceeds the implementation effort.
 
-> [!QUESTION]- On what input does KMP's guarantee actually pay off, and where does it gain nothing?
-> It pays off on repetitive input such as `text = aⁿ`, `pattern = aᵐ⁻¹b`, where naive search degrades to `Θ(n·m)` while KMP stays `Θ(n + m)`. It gains nothing on large alphabets: unlike Boyer-Moore it reads essentially every character and cannot skip.
-
-> [!QUESTION]- What is the standard bug when building the failure table?
-> Resetting the length pointer to `0` on a mismatch instead of falling back through `failure[k-1]`. That corrupts entries where the prefix overlaps itself — `AABAAAB` builds as `[0,1,0,1,2,1,0]` rather than `[0,1,0,1,2,2,3]` — and the search then misses matches that depend on the longer overlap.
+> [!QUESTION]- How does KMP compare to Rabin-Karp for single-pattern matching?
+>
+> - KMP gives deterministic `O(n+m)` worst case. Rabin-Karp gives expected `O(n+m)` but can degrade to `O(nm)` on hash collisions.
+> - Rabin-Karp is simpler to implement (rolling hash arithmetic vs prefix function logic).
+> - Rabin-Karp extends more naturally to multi-pattern search via hash sets.
+> - Choose KMP when deterministic performance is required; choose Rabin-Karp when simplicity and multi-pattern extension matter more than worst-case guarantees.
 
 ## References
 
-- [Knuth, Morris, Pratt — "Fast Pattern Matching in Strings" (SIAM J. Comput. 6(2), 1977)](https://doi.org/10.1137/0206024) — the original algorithm, the failure-function construction, and the linear-time proof.
-- [Prefix function and KMP (cp-algorithms)](https://cp-algorithms.com/string/prefix-function.html) — failure-table construction, the fallback loop, and the amortized argument, with applications to related string problems.
-- [Knuth–Morris–Pratt algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Knuth%E2%80%93Morris%E2%80%93Pratt_algorithm) — worked failure-table examples and the formal correctness argument.
+- [Knuth-Morris-Pratt algorithm -- encyclopedic overview with formal correctness argument and history (Wikipedia)](https://en.wikipedia.org/wiki/Knuth%E2%80%93Morris%E2%80%93Pratt_algorithm)
+- [Prefix function and KMP -- implementation guide with LPS construction, code examples, and applications to string problems (cp-algorithms)](https://cp-algorithms.com/string/prefix-function.html)

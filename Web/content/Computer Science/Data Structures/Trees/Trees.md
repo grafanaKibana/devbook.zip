@@ -1,18 +1,19 @@
 ---
 publish: true
-created: 2026-07-10T14:39:34.309Z
-modified: 2026-07-11T16:12:59.183Z
-published: 2026-07-11T16:12:59.183Z
+created: 2026-07-11T17:38:33.622Z
+modified: 2026-07-11T17:38:33.622Z
+published: 2026-07-11T17:38:33.622Z
 tags:
   - FolderNote
 topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: Structures that represent hierarchical data through parent-child relationships, keeping balanced height for O(log n) search.
 level:
   - "4"
 priority: Medium
-status: Creation
+status: Not-Started
 ---
 
 # Intro

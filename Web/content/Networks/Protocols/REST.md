@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.544Z
-modified: 2026-07-08T15:01:12.545Z
-published: 2026-07-08T15:01:12.545Z
+created: 2026-07-11T17:57:57.805Z
+modified: 2026-07-11T17:57:57.805Z
+published: 2026-07-11T17:57:57.805Z
 topic:
   - Networks
 subtopic:
   - Protocols
+summary: REST is an architectural style centered on resources identified by URIs and manipulated through representations over stateless client-server HTTP interactions.
 level:
   - "3"
 priority: High

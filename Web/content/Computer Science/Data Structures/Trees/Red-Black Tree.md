@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T11:54:03.254Z
-modified: 2026-07-11T11:54:03.255Z
-published: 2026-07-11T11:54:03.255Z
+created: 2026-07-11T16:49:43.049Z
+modified: 2026-07-11T16:49:43.049Z
+published: 2026-07-11T16:49:43.049Z
 topic:
   - Computer Science
 subtopic:
@@ -15,143 +15,82 @@ status: Ready to Repeat
 
 # Intro
 
-An order book holds 100K price levels and an exchange feed inserts and removes thousands of entries per second, all while ordered iteration and min/max must stay fast. A plain [[Binary Search Tree]] keeps the order but degrades to `O(n)` height on adversarial or already-sorted insertion — exactly the pattern a live feed produces. An [[AVL Tree]] fixes that with a strict ±1 height balance, but pays for it with more rotations on every write. A red-black tree keeps the sorted structure balanced enough for logarithmic queries while capping the structural work per write to a small constant.
+A red-black tree is a [[Binary Search Tree]] that colors every node red or black and enforces a handful of color rules instead of measuring heights. The rules are deliberately looser than an [[AVL Tree]]'s ±1 balance factor — the tree tolerates up to 2·log₂(n+1) height — but in exchange any insert is repaired with at most **two rotations** and any delete with at most **three**, plus some recolorings, which are single-field writes. That "good enough balance, cheap repairs" bargain made it the default self-balancing tree in practice: .NET's `SortedSet<T>` and `SortedDictionary<TKey, TValue>` are red-black trees, as are Java's `TreeMap`, C++'s `std::map`, and the Linux kernel's scheduler run-queue (CFS, now EEVDF).
 
-The state it persists is a [[Binary Search Tree]] plus one color bit per node — red or black — governed by a set of color rules rather than measured heights. The rules are looser than AVL's, so the tree can grow to twice its minimum height, but that slack is what lets an insert repair a violation with at most two rotations and a delete with at most three. The order and the key set are retained; the coloring itself is an internal artifact with no domain meaning, and it cannot be reconstructed from the keys alone once the mutation history is gone.
+You rarely implement one — you use it every time you write `new SortedDictionary<string, decimal>()` to keep, say, 100K price levels ordered while an exchange feed inserts and removes thousands of entries per second. Ordered iteration stays O(log n) per step no matter how adversarial the insertion order — the exact guarantee a naive BST loses on sorted input. (`Min`/`Max` and `GetViewBetween` range views live on `SortedSet<T>`; `SortedDictionary` offers ordered enumeration plus `First()`/`Last()`.)
 
-**Core shape:** ordered nodes + one color bit each → four color invariants bound height ≤ 2·log₂(n+1) → guaranteed `O(log n)` search/insert/delete with `O(1)` structural repair.
+## The Color Rules
 
-> [!NOTE] Visualization pending
-> Planned StepTrace: a tree card showing an insert colored red, a red-red violation fixed by a recolor, and a case where recoloring is not enough so a rotation restores the black-height invariant. No matching renderer exists in `engine.js` yet.
-
-## Representation and invariants
-
-Each node stores its key, left/right/parent pointers, and a single color bit. `nil` leaves are treated as black sentinels, which lets every real node have two children and removes the null-check special cases from the fixup logic — this also folds in the classic fifth property (every `nil` leaf is black) as a property of the sentinel rather than a separate rule. Four invariants then define a valid state:
+Five invariants; the last two do the real work:
 
 1. Every node is red or black.
 2. The root is black.
-3. A red node has two black children — no two reds appear consecutively on any path.
-4. Every root-to-`nil` path crosses the same number of black nodes — the tree's _black-height_.
+3. Every leaf (nil sentinel) is black.
+4. **A red node has no red child** — no two reds in a row on any path.
+5. **Every root-to-leaf path contains the same number of black nodes** (the tree's _black-height_).
 
-Invariant 4 makes the all-black skeleton perfectly balanced. Invariant 3 means the only way to lengthen a path beyond that skeleton is to interleave reds between blacks, which can at most double it. The shortest possible path is all black; the longest alternates black and red. So no path exceeds twice the black-height, giving height ≤ 2·log₂(n+1) and bounding every ordered query at `O(log n)`.
+Why this bounds height: rule 5 makes the all-black skeleton perfectly balanced; rule 4 means reds can at most double a path's length by interleaving. Shortest possible path = all black; longest = alternating black-red. So no path exceeds twice the black-height, giving height ≤ 2·log₂(n+1).
 
-An insert colors the new node red and attaches it as a normal BST leaf. Red can only break invariant 3 — a red child under a red parent — never invariant 4, because a red node adds no blacks to any path. The repair depends on the **uncle** (the parent's sibling):
+```mermaid
+graph TD
+    A((13, B)) --> B((8, R))
+    A --> C((17, R))
+    B --> D((1, B))
+    B --> E((11, B))
+    C --> F((15, B))
+    C --> G((25, B))
+```
 
-- **Uncle red** — recolor parent and uncle black and the grandparent red, then re-examine the grandparent. Each step is three field writes and no pointer surgery; the violation moves up two levels and may bubble to the root, where a final recolor of the root to black ends it.
-- **Uncle black** — one or two rotations around the grandparent (the zig-zig and zig-zag shapes that also drive AVL rebalancing) plus a recolor, after which the fixup **terminates**.
+Every path root→leaf here crosses exactly 2 black nodes, and no red has a red child.
 
-The unbounded part of the work — recoloring up the tree — touches only color bits. The bounded part — rotation, the pointer surgery that actually reshapes the tree — is capped at two. Delete is the harder direction: removing a black node drops a black from one path and violates invariant 4, producing the "double-black" cases resolved by up to three rotations plus recoloring, but the same asymmetry holds — structural change stays near-constant.
+## Rebalancing on Insert
 
-## Complexity
+New nodes are inserted red (inserting black would break rule 5 on one path — much harder to fix). If the parent is black, done — zero extra work. If the parent is red, rule 4 is violated and the fix depends on the **uncle** (parent's sibling):
 
-| Operation | Worst-case time | Rotations | Recolorings | Aux space | Cause |
-| --- | --- | --- | --- | --- | --- |
-| Search | `O(log n)` | 0 | 0 | `O(1)` | height bounded at 2·log₂(n+1) by invariants 3 and 4 |
-| Insert | `O(log n)` | ≤ 2 | `O(log n)` | `O(1)` iter / `O(log n)` rec | BST descent to a leaf, then a red-red fixup that may recolor up to the root but rotates at most twice |
-| Delete | `O(log n)` | ≤ 3 | `O(log n)` | `O(1)` iter / `O(log n)` rec | descent plus double-black propagation up the tree; the rotation cases are the terminating ones |
+- **Uncle red** → recolor parent and uncle black, grandparent red, and re-examine the grandparent. This can bubble to the root, but each step is three field writes — no structural change.
+- **Uncle black** → one or two rotations around the grandparent (same zig-zig/zig-zag distinction as AVL cases) plus a recoloring, and the fixup **terminates**.
 
-Structure space is `O(n)` for the nodes plus one color bit each — a single bit stolen from a pointer's alignment padding in most implementations, so the coloring is effectively free. The per-operation auxiliary space in the table is `O(1)` for an iterative implementation holding a few node references, rising to `O(log n)` when the fixup recurses and consumes call stack proportional to the tree height.
+So the expensive structural operation is capped at two rotations per insert, while the unbounded part (recoloring up the tree) is nearly free. Delete is the messier direction — the "double black" cases — but the same shape holds: at most three rotations, rest is recoloring.
 
-The rotation caps and the height bound both hold unconditionally — no averaging, no amortization over a sequence, and no dependence on insertion order. The `O(log n)` recolorings are single-field writes, so the expensive structural operation stays constant while the cheap one absorbs the height.
+## Red-Black in .NET
 
-## Where the looser balance shows
+`SortedSet<T>` and `SortedDictionary<TKey, TValue>` are the red-black trees you actually touch; `SortedDictionary` is literally a `SortedSet` of key-value pairs internally.
 
-The slack that makes repairs cheap has a cost on reads. A red-black tree can reach 2·log₂(n+1) height where an AVL tree stays under 1.44·log₂ n, so a lookup can visit up to ~40% more nodes. On a read-dominated, mutation-rare workload that difference is the whole trade — the color invariants deliberately allow a taller tree in exchange for fewer rotations that will never happen.
+```csharp
+var prices = new SortedDictionary<decimal, int>();
+prices[101.50m] = 300;   // O(log n) insert, stays ordered
+prices[99.25m]  = 120;
+prices[100.00m] = 450;
 
-Delete is where the invariants turn hostile to the implementer. An insert only ever faces a red-red violation, which is local; a delete that removes a black node breaks the black-height invariant globally along one path, and restoring it requires reasoning about the sibling's color and the colors of the sibling's children across several mirrored cases. This double-black fixup is a well-known source of bugs, and getting it subtly wrong leaves a tree that still satisfies BST order — so lookups return correct answers — while silently violating invariant 4 and losing the height guarantee.
+var bestAsk = prices.First();          // (99.25, 120) — min key, O(log n)
+bool hit = prices.ContainsKey(100m);   // O(log n), regardless of insert order
+```
 
-Every mutation must re-establish all four invariants before it returns. A partial fixup that repairs invariant 3 but leaves two paths with different black counts produces a structurally valid BST whose balance guarantee no longer holds, and the defect surfaces only later as an unexpectedly deep path.
+Decision rule: default to `Dictionary<TKey, TValue>` (O(1) average, see [[HashMap]]); switch to `SortedDictionary` only when you need ordered iteration, min/max, or range views. If the data is mostly loaded up front and then queried, `SortedList<TKey, TValue>` (sorted array, binary search) is more memory-compact and cache-friendly — its weakness is O(n) inserts into the middle, which is exactly where the red-black tree's O(log n) pointer surgery wins.
 
-## Reference drawer
+## Tradeoffs
 
-> [!ABSTRACT]- A valid coloring and its paths
->
-> ```mermaid
-> graph TD
->   A(("13 B")) --> B(("8 R"))
->   A --> C(("17 R"))
->   B --> D(("1 B"))
->   B --> E(("11 B"))
->   C --> F(("15 B"))
->   C --> G(("25 B"))
-> ```
->
-> Every root-to-leaf path crosses exactly two black nodes (black-height 2), the root is black, and no red node has a red child.
-
-> [!EXAMPLE]- Insert fixup (C# sketch)
->
-> ```csharp
-> // After a normal BST insert of `node` colored Red, restore the invariants.
-> private void FixInsert(Node node)
-> {
->     while (node.Parent is { Color: Red })
->     {
->         var grandparent = node.Parent.Parent;
->         var uncle = node.Parent == grandparent.Left ? grandparent.Right : grandparent.Left;
->
->         if (uncle is { Color: Red })
->         {
->             // Case 1: recolor only, then re-examine the grandparent.
->             node.Parent.Color = Black;
->             uncle.Color = Black;
->             grandparent.Color = Red;
->             node = grandparent;
->         }
->         else
->         {
->             // Cases 2/3: rotate into a line, then rotate the grandparent and recolor. Terminates.
->             if (node == node.Parent.Right && node.Parent == grandparent.Left)
->             {
->                 node = node.Parent;
->                 RotateLeft(node);
->             }
->             else if (node == node.Parent.Left && node.Parent == grandparent.Right)
->             {
->                 node = node.Parent;
->                 RotateRight(node);
->             }
->
->             node.Parent.Color = Black;
->             grandparent.Color = Red;
->             if (node == node.Parent.Left) RotateRight(grandparent);
->             else RotateLeft(grandparent);
->         }
->     }
->
->     _root.Color = Black; // Invariant 2, and the exit for the recolor-to-root case.
-> }
-> ```
->
-> Delete follows the mirror shape but branches on a `nil`-or-black "double-black" node and its sibling's colors across four cases; production code (`std::map`, `TreeMap`, `SortedSet<T>`) implements it in full rather than the sketch above.
-
-## Comparison
-
-| Structure | Search | Insert / delete | Height bound | Stronger case |
-| --- | --- | --- | --- | --- |
-| Red-black tree | `O(log n)` | `O(log n)`, ≤ 2–3 rotations | 2·log₂(n+1) | Ordered data with heavy interleaved writes; cheap, bounded repairs matter |
-| [[AVL Tree]] | `O(log n)` | `O(log n)`, more rotations | 1.44·log₂ n | Read-dominated ordered data where a shorter tree pays back the extra rotations |
-| [[Binary Search Tree]] | `O(n)` worst | `O(n)` worst | unbounded | Small or randomly ordered data where balancing overhead is not justified |
-| [[B-tree]] | `O(log n)`, wide fan-out | `O(log n)` | shallow, cache/page tuned | On-disk or cache-sensitive indexes where each level is a page read |
-
-Red-black trees are the general-purpose balanced-BST default in standard libraries — .NET's `SortedDictionary`/`SortedSet`, Java's `TreeMap`, and C++'s `std::map` all use one — because they give a solid all-round balance with the cheapest writes among strictly-balanced options. An AVL tree becomes the stronger choice when lookups dominate and its shorter height outweighs its heavier rotation count; a plain [[Binary Search Tree]] only competes when the input is small or known to be random; and a [[B-tree]]'s wide nodes win once the cost that matters is page or cache-line reads rather than comparisons.
+- **vs [[AVL Tree]]** — red-black is up to ~40% taller (2·log₂ n vs 1.44·log₂ n), so reads visit more nodes; writes are cheaper and bounded. Default to red-black; AVL only for genuinely read-dominated, mutation-rare workloads.
+- **vs [[B-tree]]** — one key per node means one pointer chase per level; fine in RAM, fatal on disk where each chase is a page read. On-disk indexes use B-trees for fan-out; red-black is an in-memory structure.
+- **vs [[HashMap|hash map]]** — you pay O(log n) instead of O(1) per lookup solely to keep order. If you never iterate in key order or query ranges, the tree is pure overhead.
 
 ## Questions
 
+> [!QUESTION]- What does the red-black invariant buy you?
+> It prevents the tree from becoming tall enough to turn ordered lookup into a linear scan, while using fewer rotations than stricter balancing schemes.
+
 > [!QUESTION]- Why is a red-black tree's height at most 2·log₂(n+1)?
-> Equal black counts on every root-to-leaf path (invariant 4) make the all-black skeleton balanced, and "no red parent with a red child" (invariant 3) means reds can at most double a path by interleaving between blacks. The longest path is therefore at most twice the shortest, so height stays within 2·log₂(n+1).
+> Equal black counts on every path (rule 5) make the black skeleton balanced, and "no red parent with a red child" (rule 4) means reds can at most double a path by interleaving — so the longest path is at most twice the shortest.
 
-> [!QUESTION]- Why are new nodes inserted red rather than black?
-> A red node adds no black to any path, so it can only break the "no two reds" invariant, which is a local violation fixable near the insertion point. A black insert would add a black to one path only, breaking the equal-black-height invariant along an entire root-to-leaf path — a global violation that is far more expensive to repair.
+> [!QUESTION]- Why are new nodes inserted red, and when is the fixup expensive?
+> A red insert can only break the "no two reds" rule, fixable locally; a black insert breaks the black-height rule on a whole path. Fixup is cheap recoloring while the uncle is red (possibly bubbling up), and terminates with at most two rotations once a black uncle is hit.
 
-> [!QUESTION]- How can the rotation count per insert be bounded when the recoloring is not?
-> Recoloring only rewrites color bits and can propagate up to the root, but it never reshapes the tree. Once the fixup reaches a black uncle, one or two rotations resolve the violation and the loop terminates. So the structural work (rotations) is capped at two per insert while the unbounded work (recoloring) stays cheap.
-
-> [!QUESTION]- What makes red-black delete more error-prone than insert?
-> Insert only ever repairs a local red-red violation. Delete can remove a black node and break the black-height invariant along a whole path, producing "double-black" cases that branch on the sibling's color and its children's colors. A subtle mistake leaves BST order intact — so lookups still return correct results — while silently losing the height guarantee.
+> [!QUESTION]- Which .NET collections are red-black trees, and when do you pick them over `Dictionary`?
+> `SortedSet<T>` and `SortedDictionary<TKey, TValue>`. Pick them only when you need ordered iteration, or — with `SortedSet<T>` — `Min`/`Max` and `GetViewBetween` range queries; otherwise `Dictionary`'s O(1) average lookup wins.
 
 ## References
 
-- [Guibas & Sedgewick, "A dichromatic framework for balanced trees" (1978)](https://sedgewick.io/wp-content/themes/sedgewick/papers/1978Dichromatic.pdf) — the paper introducing the red-black formulation and its invariants; primary source.
-- [Red-Black BSTs (Princeton Algorithms)](https://algs4.cs.princeton.edu/33balanced/) — Sedgewick's left-leaning variant with a clear walkthrough of insert fixup and the 2-3 tree correspondence.
-- [`SortedSet<T>` source (dotnet/runtime)](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Collections/src/System/Collections/Generic/SortedSet.cs) — the red-black tree backing .NET's ordered set and, via key-value pairs, `SortedDictionary`.
-- [`SortedDictionary<TKey,TValue>` class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.sorteddictionary-2) — API reference documenting the `O(log n)` guarantees and the contrast with `SortedList`.
+- [SortedSet<T> source](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Collections/src/System/Collections/Generic/SortedSet.cs) — .NET runtime implementation of a red-black tree-backed set.
+- [Guibas & Sedgewick, "A dichromatic framework for balanced trees" (1978)](https://sedgewick.io/wp-content/themes/sedgewick/papers/1978Dichromatic.pdf) — the paper that introduced the red-black formulation; primary source.
+- [Red-Black BSTs (Princeton Algorithms)](https://algs4.cs.princeton.edu/33balanced/) — Sedgewick's left-leaning variant with the clearest walkthrough of insert fixup and the 2-3 tree correspondence.
+- [SortedDictionary\<TKey,TValue> class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.sorteddictionary-2) — API reference; documents the O(log n) guarantees and the contrast with `SortedList`.

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-10T18:24:51.327Z
-modified: 2026-07-10T18:24:51.327Z
-published: 2026-07-10T18:24:51.327Z
+created: 2026-07-11T16:49:43.044Z
+modified: 2026-07-11T16:49:43.044Z
+published: 2026-07-11T16:49:43.044Z
 topic:
   - Computer Science
 subtopic:
@@ -15,164 +15,108 @@ status: Ready to Repeat
 
 # Intro
 
-A network receives connections over time and repeatedly asks whether two nodes belong to the same connected component. Running a graph traversal for every query revisits edges whose connectivity was already established. A disjoint set keeps only the partition of nodes into components, so a merge and a connectivity check become nearly constant-time operations.
+A disjoint set (also called a union-find structure) tracks a collection of elements partitioned into disjoint (non-overlapping) sets. Each set has a single **representative** (canonical element) that identifies it. The structure answers one core question — "do these two elements belong to the same set?" — while letting you merge sets over time. .NET has no built-in disjoint-set type — you implement it with two `int[]` arrays (parent and rank/size), as shown below.
 
-The structure is narrower than a graph representation. It remembers which elements belong together, but not the edges, paths, or order that produced each component. Sets can merge; they cannot be split efficiently afterward.
+This note covers the **data structure** itself: how the sets are represented in memory and the cost of its operations. The optimizations that make those operations near-constant time (path compression, union by rank) and the analysis behind them live in the [[Union-Find]] algorithm note.
 
-**Core shape:** elements → parent-index forest → one root per set → shared root means shared membership → `O(n)` storage.
+## How It Works
 
-## State across operations
+Each element starts as its own set. The structure is a **forest of trees**, where every node points to its parent and the root of each tree is that set's representative.
 
-The trace starts with seven singleton sets. The first three unions deliberately create the chain `0 → 1 → 2 → 3`; `find(0)` then rewrites the visited parents to point directly at root `3`.
+It is stored compactly as two parallel arrays rather than linked nodes:
 
-```steptrace
-{"algorithm":"union-find","n":7,"ops":[["union",0,1],["union",1,2],["union",2,3],["find",0],["union",4,5],["union",3,4],["find",1]]}
+- `_parent[i]` — the parent of element `i` (a root points to itself).
+- `_rank[i]` (or `_size[i]`) — metadata used when merging to keep trees shallow.
+
+Three operations are defined over this layout:
+
+- **`find(x)`** — follow parent pointers up to the root; returns the set's representative.
+- **`union(a, b)`** — link the root of one tree under the root of the other, merging two sets into one.
+- **`connected(a, b)`** — `find(a) == find(b)`; true when both elements share a representative.
+
+```mermaid
+graph TD
+  R((root = representative))
+  R --> A((a))
+  R --> B((b))
+  A --> C((c))
+  subgraph one set
+    R
+    A
+    B
+    C
+  end
 ```
 
-Only roots are linked during a union. Linking an arbitrary interior node would detach or misclassify part of its existing set. A find follows parent indices until `parent[root] == root`; path compression can then shorten the route without changing the representative.
+## C# Implementation
 
-The trace uses direct root linking to make a deep chain and its compression visible. The reference implementation also stores rank, preventing that chain from becoming deep in the first place.
+```csharp
+public class DisjointSet
+{
+    private readonly int[] _parent;
+    private readonly int[] _rank;
 
-## Representation and invariants
+    public DisjointSet(int n)
+    {
+        _parent = Enumerable.Range(0, n).ToArray(); // each element is its own root
+        _rank = new int[n];
+    }
 
-Each element is mapped to an integer index. Two parallel arrays hold the state:
+    public int Find(int x)
+    {
+        if (_parent[x] != x)
+            _parent[x] = Find(_parent[x]); // path compression
+        return _parent[x];
+    }
 
-- `_parent[i]` stores the next index on the path to the representative. A root points to itself.
-- `_rank[i]` approximates tree height and is meaningful only for roots. `_size[i]` is a common alternative when component counts are needed.
+    public bool Union(int a, int b)
+    {
+        int ra = Find(a), rb = Find(b);
+        if (ra == rb) return false; // already in the same set
 
-Four invariants define a valid state:
+        // Union by rank: attach smaller tree under larger
+        if (_rank[ra] < _rank[rb])      (ra, rb) = (rb, ra);
+        _parent[rb] = ra;
+        if (_rank[ra] == _rank[rb])     _rank[ra]++;
+        return true;
+    }
 
-1. Every parent index is inside the array.
-2. Following parent indices always reaches a self-parented root; cycles other than that self-reference are invalid.
-3. Two elements are in the same set exactly when their root is the same.
-4. The merge link changes the parent of one root. Any interior-parent rewrites come only from the path-compressing finds that locate both roots.
+    public bool Connected(int a, int b) => Find(a) == Find(b);
+}
+```
 
-Path compression rewrites parent indices but preserves set membership. Union by rank changes which root represents the merged set but preserves every previous connectivity result. The representative is therefore an internal identity, not a stable domain value.
+The two lines doing the real work — `_parent[x] = Find(_parent[x])` (path compression) and the rank comparison (union by rank) — are _algorithmic_ optimizations. Why they reduce the cost to near-constant time is explained in the [[Union-Find]] note.
 
 ## Complexity
 
-| Operation | Best time | Amortized time | Worst single operation | Peak space |
-| --- | --- | --- | --- | --- |
-| Construct `n` singleton sets | `Θ(n)` | `Θ(n)` | `Θ(n)` | `Θ(n)` structure |
-| `Find(x)` | `O(1)` | `O(α(n))` | `O(log n)` | `O(1)` best, `O(log n)` worst stack |
-| `Union(a, b)` | `O(1)` | `O(α(n))` | `O(log n)` | `O(1)` best, `O(log n)` worst stack |
-| `Connected(a, b)` | `O(1)` | `O(α(n))` | `O(log n)` | `O(1)` best, `O(log n)` worst stack |
+| Operation | Without optimizations | With path compression + union by rank |
+|-----------|----------------------|---------------------------------------|
+| `find` | O(n) worst case | O(α(n)) amortized ≈ O(1) |
+| `union` | O(n) worst case | O(α(n)) amortized ≈ O(1) |
+| Space | O(n) | O(n) |
 
-These bounds assume path compression and union by rank. Rank alone keeps tree height at `O(log n)`; path compression makes a sequence of operations cost `O(α(n))` per operation amortized. Without either heuristic, a chain can grow to length `n`, turning `Find`, `Union`, and `Connected` into `O(n)` operations.
-
-`α(n)` is the inverse Ackermann function and stays below 5 for practical input sizes. “Amortized” matters more than an informal average here: an individual operation can traverse several parents, while the rewrites make later operations cheaper.
-
-The recursive implementation uses stack space proportional to the current tree height. An iterative path-halving implementation reduces auxiliary space to `O(1)` while keeping the same amortized time bound.
-
-## When the structure stops fitting
-
-Deletion is the hard boundary. After several unions and path-compressing finds, the structure no longer records which original edge caused a component to form. Removing an edge therefore cannot identify whether the component should stay connected or split. Fully dynamic connectivity needs a graph representation plus a more complex dynamic structure; a known offline sequence can use rollback DSU without path compression.
-
-Connectivity also carries no route information. `Connected(a, b)` can return `true`, but the parent forest is an implementation artifact rather than a path through the original graph. Shortest paths, neighbors, degrees, and edge metadata require an adjacency representation alongside the disjoint set.
-
-The array representation assumes dense integer IDs from `0` through `n - 1`. Strings, GUIDs, and sparse numeric IDs need a `Dictionary<T, int>` mapping before they can enter the structure. That mapping adds memory and makes identity management part of the API boundary.
-
-## Reference drawer
-
-> [!ABSTRACT]- Parent forest
->
-> ```mermaid
-> graph TD
->   R3((3))
->   N0((0)) --> R3
->   N1((1)) --> R3
->   N2((2)) --> R3
->   R3 --> R3
->   R5((5))
->   N4((4)) --> R5
->   R5 --> R5
->   R6((6)) --> R6
-> ```
-
-> [!EXAMPLE]- C# implementation
->
-> ```csharp
-> public sealed class DisjointSet
-> {
->     private readonly int[] _parent;
->     private readonly int[] _rank;
->
->     public DisjointSet(int count)
->     {
->         _parent = Enumerable.Range(0, count).ToArray();
->         _rank = new int[count];
->     }
->
->     public int Find(int value)
->     {
->         if (_parent[value] != value)
->         {
->             _parent[value] = Find(_parent[value]);
->         }
->
->         return _parent[value];
->     }
->
->     public bool Union(int left, int right)
->     {
->         var leftRoot = Find(left);
->         var rightRoot = Find(right);
->         if (leftRoot == rightRoot)
->         {
->             return false;
->         }
->
->         if (_rank[leftRoot] < _rank[rightRoot])
->         {
->             (leftRoot, rightRoot) = (rightRoot, leftRoot);
->         }
->
->         _parent[rightRoot] = leftRoot;
->         if (_rank[leftRoot] == _rank[rightRoot])
->         {
->             _rank[leftRoot]++;
->         }
->
->         return true;
->     }
->
->     public bool Connected(int left, int right) =>
->         Find(left) == Find(right);
-> }
-> ```
->
-> `Union` returns `false` when both values already have the same representative. That result is enough for cycle detection while processing graph edges.
-
-## Comparison
-
-| Representation | Connectivity query | Add connection / merge | Removal | Information retained | Stronger case |
-| --- | --- | --- | --- | --- | --- |
-| Disjoint set | `O(α(n))` amortized | `O(α(n))` amortized | Not supported | Component membership | Connections only accumulate and connectivity is queried repeatedly |
-| Adjacency list + DFS/BFS | `O(V + E)` per traversal | `O(1)` append | `O(degree)` search/removal | Edges, neighbors, and reconstructable paths | Paths, degrees, traversal order, or changing edges matter |
-| Static component labels | `O(1)` after preprocessing | Recompute labels in `O(V + E)` | Recompute labels | Component ID snapshot | The graph is immutable and receives many connectivity queries |
-| Rollback disjoint set | `O(log n)` | `O(log n)` | `O(1)` rollback of the latest merge | Component membership plus change history | Offline connectivity where additions must be undone in reverse order |
-
-The disjoint set occupies a specific point in this comparison: it gives up graph topology and deletion in exchange for extremely cheap incremental merges and membership checks. Static labels are cheaper to query when the graph never changes. An adjacency list carries much more information but must traverse the graph to rediscover connectivity. Rollback retains change history at a higher per-operation cost and without path compression.
-
-The related [[Union-Find]] note covers the operation heuristics and their analysis. This page remains centered on stored state, invariants, and the boundary of the data structure itself.
+α(n) is the inverse Ackermann function — it grows so slowly that α(n) ≤ 4 for any n that fits in the observable universe.
 
 ## Questions
 
 > [!QUESTION]- How is a disjoint set represented in memory?
-> A parent array stores a forest: `parent[i]` is the next index toward the representative, and each root points to itself. Rank or size is stored in a parallel array for roots. No linked node objects are required.
+> As a forest of trees stored in a flat `_parent` array: `_parent[i]` is the parent of element `i`, and a root points to itself. A second `_rank` (or `_size`) array holds the metadata used to keep trees shallow during merges. No linked nodes or per-element allocation — just two integer arrays.
 
-> [!QUESTION]- Why does `Union` link roots rather than the original elements?
-> A root represents an entire existing set. Linking one root under another merges both complete sets. Re-parenting an interior node can move only its subtree and leave other members behind, breaking the partition semantics.
+> [!QUESTION]- What does the "representative" of a set mean, and how do you get it?
+> The representative is the root of an element's tree — the canonical element that identifies the whole set. You obtain it by calling `find(x)`, which walks up the parent chain to the root. Two elements are in the same set exactly when they share a representative.
 
-> [!QUESTION]- Why is the useful bound amortized rather than worst-case constant time?
-> One `Find` can still traverse several parent indices. Path compression pays extra writes during that operation so later finds become shorter. Across a sequence, the total work is `O(m α(n))` for `m` operations, even though a particular operation is not guaranteed to be constant time.
+> [!QUESTION]- Why store the structure as arrays instead of linked tree nodes?
+> Arrays give O(1) index access, no per-node allocation, and excellent cache locality. Mapping elements to integers 0…n-1 lets `find`/`union` be simple array reads and writes, which is what makes the structure fast in practice.
 
-> [!QUESTION]- When is an adjacency list still necessary?
-> A disjoint set answers only whether two elements share a component. An adjacency list remains necessary when the original edges, an actual path, neighbor enumeration, edge removal, weights, or traversal order are part of the result.
+## Pitfalls
+
+**Path compression invalidates parent-array snapshots**: Path compression rewires `_parent` entries on every `Find` call. If you copy the `_parent` array to implement undo or rollback, those snapshots become stale after any `Find`. For rollback-capable disjoint sets (used in offline algorithms), use union by rank only — no path compression — and maintain an explicit undo stack of `(node, oldParent, oldRank)` tuples.
+
+**Rank vs size confusion**: `_rank` approximates tree height; a `_size` field tracks element count. Both achieve O(log n) height when used alone, but they serve different purposes. Mixing them — for example, using a size field but calling it rank — silently degrades efficiency (size can grow faster than rank would, producing taller trees). Choose one consistently and document the invariant. Union by size has the bonus of answering "how big is this set?" in O(1) via `_size[Find(x)]`.
+
+**Integer index assumption**: The standard implementation maps elements to integers 0…n-1. Using non-integer keys requires a separate `Dictionary<T, int>` to assign indices before construction. Forgetting this indirection causes index-out-of-range errors at runtime, not compile time.
 
 ## References
 
-- [Efficiency of a Good But Not Linear Set Union Algorithm](https://dl.acm.org/doi/10.1145/321879.321884) — Robert Tarjan's original amortized analysis of path compression with weighted union.
-- [Union-Find](https://algs4.cs.princeton.edu/15uf/) — Princeton Algorithms implementations showing the progression from quick-find and quick-union to weighted, compressed forests.
-- [Disjoint Set Union](https://cp-algorithms.com/data_structures/disjoint_set_union.html) — implementation variants, complexity discussion, and graph applications.
-- [Deleting from a data structure in `O(T(n) log n)`](https://cp-algorithms.com/data_structures/deleting_in_log_n.html) — rollback DSU implementation and the offline segment-tree technique for undoing merges.
+- [Disjoint-set data structure (Wikipedia)](https://en.wikipedia.org/wiki/Disjoint-set_data_structure) — formal description, proof of O(α(n)) amortized complexity, and history.
+- [Union-Find (Princeton Algorithms)](https://algs4.cs.princeton.edu/15uf/) — Sedgewick's implementation walkthrough with complexity analysis and practical variants.

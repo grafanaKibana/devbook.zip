@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.549Z
-modified: 2026-07-08T15:01:12.549Z
-published: 2026-07-08T15:01:12.549Z
+created: 2026-07-11T17:57:53.290Z
+modified: 2026-07-11T17:57:53.290Z
+published: 2026-07-11T17:57:53.290Z
 topic:
   - Networks
 subtopic:
   - Transport & Sockets
+summary: "TCP/IP is the internet's foundational protocol suite: IP handles addressing and routing, TCP adds reliable ordered delivery."
 level:
   - "3"
 priority: Medium

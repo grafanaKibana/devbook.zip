@@ -1,11 +1,12 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.334Z
-modified: 2026-07-08T15:01:12.335Z
-published: 2026-07-08T15:01:12.335Z
+created: 2026-07-11T17:16:59.660Z
+modified: 2026-07-11T17:16:59.660Z
+published: 2026-07-11T17:16:59.660Z
 topic:
   - AI & ML
 subtopic: []
+summary: Designing and operating AI so failures are bounded, decisions explainable, and impact fair — the six principles most frameworks converge on, as concrete engineering work.
 level:
   - "3"
 priority: Medium

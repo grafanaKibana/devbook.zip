@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.541Z
-modified: 2026-07-08T15:01:12.542Z
-published: 2026-07-08T15:01:12.542Z
+created: 2026-07-11T17:57:52.109Z
+modified: 2026-07-11T17:57:52.109Z
+published: 2026-07-11T17:57:52.109Z
 topic:
   - Networks
 subtopic:
   - Protocols
+summary: DNS is the internet's distributed, hierarchical directory that maps human-readable hostnames to machine-readable records like IP addresses.
 level:
   - "3"
 priority: Medium

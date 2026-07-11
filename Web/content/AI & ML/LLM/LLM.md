@@ -1,14 +1,15 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.306Z
-modified: 2026-07-08T15:01:12.306Z
-published: 2026-07-08T15:01:12.306Z
+created: 2026-07-11T17:04:07.942Z
+modified: 2026-07-11T17:04:07.942Z
+published: 2026-07-11T17:04:07.942Z
 tags:
   - FolderNote
 topic:
   - AI & ML
 subtopic:
   - LLM
+summary: A transformer network trained on vast text to predict the next token, treated here as an engineering platform steered by prompting, grounding, and evaluation rather than a knowledge database.
 level:
   - "3"
 priority: High

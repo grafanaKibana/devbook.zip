@@ -1,14 +1,15 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.333Z
-modified: 2026-07-08T15:01:12.333Z
-published: 2026-07-08T15:01:12.333Z
+created: 2026-07-11T17:04:05.930Z
+modified: 2026-07-11T17:04:05.932Z
+published: 2026-07-11T17:04:05.932Z
 tags:
   - FolderNote
 topic:
   - AI & ML
 subtopic:
   - Machine Learning
+summary: Training models to map inputs to outputs from data rather than explicit rules, where most of the real work is building a testable, deployable, and monitorable pipeline.
 status: Done
 priority: Medium
 level:

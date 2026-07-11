@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-10T19:28:20.584Z
-modified: 2026-07-10T19:28:20.585Z
-published: 2026-07-10T19:28:20.585Z
+created: 2026-07-11T16:49:43.037Z
+modified: 2026-07-11T16:49:43.038Z
+published: 2026-07-11T16:49:43.038Z
 topic:
   - Computer Science
 subtopic:
@@ -15,105 +15,93 @@ status: Done
 
 # Intro
 
-A freshly captured log buffer holds unsorted lines, and the task is to find the first one that mentions an error. Nothing in the buffer is ordered or indexed, so no comparison can rule out a line that has not yet been read. Linear Search accepts exactly that constraint: it compares each element against the target in sequence and returns on the first match, or reports absence once the sequence ends.
+Linear Search finds a target by scanning elements one at a time from start to end, comparing each against the target until it matches or the sequence runs out. It makes no assumptions about the data: no sorting, no index, no random access. That gives `O(n)` time but also unmatched generality — it is the fallback that always works. Example: finding the first log line that mentions an error in a freshly captured, unsorted buffer.
 
-The missing precondition is the whole point. [[Binary Search]] needs sorted, indexable input; a hash lookup needs a prebuilt index. Linear Search assumes neither, so it runs unchanged over an unsorted array, a singly linked list, or a stream read once and never rewound. That generality is precisely what a faster search gives up.
+## How It Works
 
-**Core condition:** any sequence, no ordering or index → one comparison per element until match or end → `O(n)` time with `O(1)` auxiliary space.
+- Walk the sequence left to right, comparing each element with the target.
+- Return the index on the first match; return a sentinel (e.g. `-1`) if the scan ends with no match.
+- Nothing is ever eliminated in advance — every unchecked element remains a candidate — which is exactly why it tolerates unsorted input where [[Binary Search]] cannot.
+- Complexity: `O(n)` time (worst and average case), `O(1)` extra space; best case `O(1)` when the target is first.
 
-## One search
+## Visualization
 
-The trace searches for `83` in a 16-element array.
+This uses the **same array and target** as [[Binary Search]]. Count the probes: linear search makes 15 comparisons to reach index 14, while binary search finds it in 4 — the O(n) vs O(log n) gap made concrete. Notice that linear search never greys out any bar, because it eliminates nothing; binary search fades out each discarded half.
 
 ```steptrace
 {"algorithm":"linear-search","array":[4,9,13,18,22,27,31,38,45,52,58,64,70,77,83,91],"target":83}
 ```
 
-The scan starts at index 0 and compares each value with `83` in order, reaching the match at index 14 after 15 comparisons; a target that was absent would cost all 16. No comparison rules out an element it has not read, because unsorted input offers no proof about the values ahead. Unlike [[Binary Search]], the scan never discards a range: every unchecked element stays a candidate until it is inspected, and the search ends only on the first match or when the sequence is exhausted.
+## Example
 
-## Why no precondition is needed
+```csharp
+public static int LinearSearch(int[] arr, int target)
+{
+    for (int i = 0; i < arr.Length; i++)
+    {
+        if (arr[i] == target)
+        {
+            return i;
+        }
+    }
 
-Linear Search reads the sequence in whatever order the structure yields and tests each element independently. It never computes a midpoint, never hashes a key, and never compares two elements to each other — so it requires neither ordering, nor random access, nor a key that maps to a slot. That is what makes it the baseline: it works on an unsorted array, on a singly linked list with no `O(1)` indexing, and on a stream consumed once. Every faster search buys its speed by adding an assumption — sorted order, an index, a hash function — and paying to establish and maintain it.
+    return -1;
+}
+```
 
-The only invariant available is weak by design. After inspecting the first `k` elements, the target is known to be absent from those `k` and possibly present in the remaining `n − k`. Without ordering or an index there is no stronger claim, so the sole way to shrink the unknown region is to read one more element. A faster search replaces this one-at-a-time shrinkage with an assumption that lets a single step eliminate many candidates at once.
+## Diagram
 
-## Complexity
+```mermaid
+flowchart TD
+  A[Start with array and target] --> B[Set index i to 0]
+  B --> C{i less than length}
+  C -->|No| Z[Not found]
+  C -->|Yes| D{value at i equals target}
+  D -->|Yes| F[Return i]
+  D -->|No| G[Increment i]
+  G --> C
+```
 
-| Case | Time | Auxiliary space | Cause |
+## Pitfalls
+
+- **Reaching for it at scale** — a linear scan over millions of elements repeated per request is a classic hidden `O(n·q)` cost. If you query the same collection many times, build an index (sort + [[Binary Search]], a [[HashMap]], or a tree) once and amortize.
+- **Scanning inside a hot loop** — an innocuous "find" call nested in another loop silently becomes `O(n²)`. Hoist the lookup or replace it with a set/dictionary membership test.
+- **Assuming it short-circuits** — the average case is only half the array _when the target is present_. Absent targets and "find all matches" always pay the full `O(n)`; size your budget for the worst case, not the lucky first hit.
+
+## Tradeoffs
+
+| Choice | Linear Search | Alternative | Decision criteria |
 | --- | --- | --- | --- |
-| Best | `O(1)` | `O(1)` | Target sits at the first position; one comparison ends the scan. |
-| Average | `O(n)` | `O(1)` | A present target with uniform position is found after `(n + 1) / 2` comparisons. |
-| Worst | `O(n)` | `O(1)` | Target is at the last position or absent, forcing all `n` comparisons. |
-
-A sentinel value that removes the bounds check from the loop, or an early exit on the first match, changes only the constant factor: every element between the start and the answer is still read, so the class stays `O(n)`. The average bound assumes a present target equally likely to occupy any position; an absent target always costs the full `n`, which makes a miss — not a hit — the true worst case.
-
-## When a scan is the wrong tool
-
-A single lookup over unsorted input cannot beat `O(n)`. Any correct method must at least read the elements it declares absent, and reading them is the entire cost, so no preprocessing pays back within one query.
-
-The boundary appears once the same collection is searched repeatedly. A one-time `O(n log n)` sort followed by [[Binary Search]] lookups, or an `O(n)` [[HashMap]] build followed by average `O(1)` lookups, amortizes the setup across queries: `q` searches drop from `O(n·q)` to `O(n log n + q log n)` or `O(n + q)`. The scan also degrades quietly when nested inside another loop — a `find` call evaluated once per element is `O(n²)` — so a hot-path membership test belongs in a set or dictionary rather than a repeated scan.
-
-## Reference drawer
-
-> [!ABSTRACT]- Control flow
->
-> ```mermaid
-> flowchart TD
->   A[Start with sequence and target] --> B[Set index i to 0]
->   B --> C{i within bounds}
->   C -->|No| Z[Target is absent]
->   C -->|Yes| D{value at i equals target}
->   D -->|Yes| F[Return i]
->   D -->|No| G[Advance to next element]
->   G --> C
-> ```
-
-> [!EXAMPLE]- C# implementation
->
-> ```csharp
-> public static int LinearSearch(int[] values, int target)
-> {
->     for (var i = 0; i < values.Length; i++)
->     {
->         if (values[i] == target)
->         {
->             return i;
->         }
->     }
->
->     return -1;
-> }
-> ```
->
-> The loop reads each element in index order and returns `-1` when the target is absent. .NET's `Array.IndexOf` performs the same scan and applies equally to any `IEnumerable` walked with `Enumerable.FirstOrDefault`, where no random access exists.
-
-## Comparison
-
-| Strategy | Lookup time | Required input | Stronger case | Weaker case |
-| --- | --- | --- | --- | --- |
-| Linear Search | `O(n)` | Any sequence | Unsorted, tiny, or single-shot lookups; non-indexable structures | Repeated searches over large ordered or indexed data |
-| [[Binary Search]] | `O(log n)` | Sorted, random-access | Existing sorted order; range and insertion-point queries | Unsorted input or structures without `O(1)` indexing |
-| Hash lookup ([[HashMap]]) | `O(1)` average, `O(n)` worst | Prebuilt index; exact-match keys | Repeated exact-match lookups where order is irrelevant | Ordered traversal, range queries, or non-hashable keys |
-| [[Jump Search]] | `O(√n)` | Sorted, block-indexable | Sorted data where jumping backward costs more than stepping forward | Fully indexable arrays, where Binary Search's `O(log n)` dominates |
-
-Linear Search is the default when the data is unsorted, small, or searched once, and for structures that cannot be indexed in `O(1)` such as a linked list or a one-pass stream. It loses to Binary Search and hash lookup once the data is already ordered or indexed, or once the same collection is searched often enough to amortize building that order or index. [[Jump Search]] matters only in the narrow case where the data is sorted but random access is costly enough that fewer, larger strides beat Binary Search's probes.
+| vs [[Binary Search]] | O(n), works on any order, no preprocessing | O(log n), requires sorted data | Linear wins on unsorted data, tiny `n`, or one-shot queries where sorting first costs more than it saves; binary wins once data is sorted or searched repeatedly. |
+| vs [[HashMap]] lookup | O(n), zero memory overhead, no hashing | O(1) average, extra memory, needs hashable keys | Use a hash for repeated exact-match lookups on large sets; linear scan when the set is tiny, built once and read once, or keys are not hashable. |
+| over array vs over tree/list | Contiguous scan, cache-friendly, no per-node indirection | O(log n) tree search chases pointers across the heap | For small `n`, a linear scan of a packed array routinely beats an asymptotically faster tree because it avoids cache misses and branch misprediction. |
 
 ## Questions
 
-> [!QUESTION]- Why does Linear Search require no precondition on its input?
-> It tests each element independently and never compares two elements to each other or computes a position, so it needs neither ordering nor an index. The cost of that generality is that it cannot skip any element it has not yet read.
+> [!QUESTION]- When is linear search the _right_ choice over binary search?
+>
+> - The data is unsorted and will be searched only once — sorting first costs `O(n log n)`, more than the single `O(n)` scan it would enable.
+> - `n` is tiny (a handful of elements), where constant factors and cache behavior dominate asymptotic order.
+> - The structure has no cheap random access (a singly linked list), so binary search cannot compute a midpoint in `O(1)`.
+> - You need to find _all_ matches or apply a predicate, not just one exact key.
+> - In each case the precondition binary search needs (sorted, random-access) is absent or not worth establishing, so the simpler scan wins in practice.
 
-> [!QUESTION]- What is the average comparison count for a present versus an absent target?
-> A present target with uniform position averages `(n + 1) / 2` comparisons. An absent target always performs all `n`, so a miss, not a hit, is the true worst case.
+> [!QUESTION]- Why can a linear scan of an array beat an asymptotically faster tree search?
+>
+> - A contiguous array is walked in strict address order, which the CPU prefetcher predicts perfectly, so most accesses hit cache.
+> - A balanced tree stores nodes across the heap; each step follows a pointer to an unpredictable address, often causing a cache miss.
+> - For small `n` the `O(log n)` node count is small, so the miss penalty per node outweighs the reduced number of comparisons.
+> - Big-O ignores the constant factor of a memory access, which can span two orders of magnitude between L1 and main memory — so measure on realistic sizes before assuming the lower-complexity structure is faster.
 
-> [!QUESTION]- Why can no preprocessing beat `O(n)` for a single search over unsorted data?
-> Any correct method must at least read the elements it rules out, and reading them is the whole cost. With one query there is nothing to amortize a build against, so preprocessing only pays back across repeated searches.
-
-> [!QUESTION]- When does building an index beat repeated linear scans?
-> When the same collection is searched many times: `q` scans cost `O(n·q)`, while a one-time `O(n log n)` sort plus [[Binary Search]], or an `O(n)` hash build plus average `O(1)` lookups, amortizes to `O(n log n + q log n)` or `O(n + q)`.
+> [!QUESTION]- What is the average number of comparisons for a successful vs unsuccessful linear search?
+>
+> - Successful search over `n` elements averages `(n + 1) / 2` comparisons, assuming each position is equally likely to hold the target.
+> - Unsuccessful search always performs all `n` comparisons before concluding the target is absent.
+> - This means "not found" is the true worst case and it happens on every miss, not rarely.
+> - Budget capacity and latency for the full `O(n)`; the halved average only applies to guaranteed hits with uniform positions.
 
 ## References
 
-- [Linear search (Wikipedia)](https://en.wikipedia.org/wiki/Linear_search) — average- and worst-case analysis and the sentinel-value variant that removes the bounds check from the loop without changing the complexity class.
-- [`Array.IndexOf` method (.NET API)](https://learn.microsoft.com/dotnet/api/system.array.indexof) — the framework's built-in linear scan over an array; returns `-1` when the value is absent.
-- [`Enumerable.FirstOrDefault` method (.NET API)](https://learn.microsoft.com/dotnet/api/system.linq.enumerable.firstordefault) — the sequential first-match scan over any `IEnumerable<T>`, backing the note's point that Linear Search applies to structures walked once with no random access.
+- [Linear search (Wikipedia)](https://en.wikipedia.org/wiki/Linear_search) — average/worst-case analysis and the sentinel-value optimization that removes the bounds check from the loop.
+- [Array.IndexOf method (.NET API)](https://learn.microsoft.com/dotnet/api/system.array.indexof) — the framework's built-in linear scan; returns `-1` when the value is absent.
+- [Latency numbers every programmer should know (Jeff Dean)](https://gist.github.com/jboner/2841832) — the L1-cache vs main-memory gap that explains why a cache-friendly linear scan can beat a pointer-chasing structure at small sizes.

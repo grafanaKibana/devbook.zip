@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.542Z
-modified: 2026-07-08T15:01:12.542Z
-published: 2026-07-08T15:01:12.542Z
+created: 2026-07-11T17:57:55.722Z
+modified: 2026-07-11T17:57:55.722Z
+published: 2026-07-11T17:57:55.722Z
 topic:
   - Networks
 subtopic:
   - Protocols
+summary: HTTP/2 multiplexes many request/response pairs over a single TCP connection, eliminating HTTP/1.1's head-of-line blocking and connection overhead.
 level:
   - "3"
 priority: Medium

@@ -1,14 +1,15 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.356Z
-modified: 2026-07-08T15:01:12.356Z
-published: 2026-07-08T15:01:12.356Z
+created: 2026-07-11T17:04:09.736Z
+modified: 2026-07-11T17:04:09.736Z
+published: 2026-07-11T17:04:09.736Z
 tags:
   - FolderNote
 topic:
   - AI & ML
 subtopic:
   - Tooling
+summary: The practical layer that turns LLMs into day-to-day engineering leverage — coding agents, review agents, and IDE extensions, plus the shared control surfaces of skills, plugins, hooks, and instructions.
 status: Done
 level:
   - "2"
