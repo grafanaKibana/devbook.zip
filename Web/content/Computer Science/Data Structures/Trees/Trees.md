@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-10T14:39:34.309Z
-modified: 2026-07-10T14:39:34.309Z
-published: 2026-07-10T14:39:34.309Z
+modified: 2026-07-11T16:12:59.183Z
+published: 2026-07-11T16:12:59.183Z
 tags:
   - FolderNote
 topic:
@@ -12,7 +12,7 @@ subtopic:
 level:
   - "4"
 priority: Medium
-status: Not-Started
+status: Creation
 ---
 
 # Intro
