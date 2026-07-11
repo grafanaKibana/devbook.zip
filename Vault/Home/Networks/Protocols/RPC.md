@@ -3,6 +3,7 @@ topic:
   - Networks
 subtopic:
   - Protocols
+summary: "RPC is a communication style where a client invokes a server operation as if it were a local function call."
 level:
   - "3"
 priority: Medium

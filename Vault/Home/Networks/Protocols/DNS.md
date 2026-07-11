@@ -3,6 +3,7 @@ topic:
   - Networks
 subtopic:
   - Protocols
+summary: "DNS is the internet's distributed, hierarchical directory that maps human-readable hostnames to machine-readable records like IP addresses."
 level:
   - "3"
 priority: Medium

@@ -3,6 +3,7 @@ topic:
   - Networks
 subtopic:
   - Protocols
+summary: "SMTP is the standard TCP-based protocol for sending email between mail servers and from clients to mail servers."
 level:
   - "3"
 priority: Low

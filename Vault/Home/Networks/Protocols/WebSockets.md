@@ -3,6 +3,7 @@ topic:
   - Networks
 subtopic:
   - Protocols
+summary: "WebSocket provides full-duplex, message-oriented communication over a single long-lived TCP connection, the standard transport for the real-time web."
 level:
   - "3"
 priority: High

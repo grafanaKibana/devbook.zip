@@ -3,6 +3,7 @@ topic:
   - Networks
 subtopic:
   - Transport & Sockets
+summary: "UDP is a connectionless transport protocol sending independent datagrams with no delivery, ordering, or congestion guarantees."
 level:
   - "3"
 priority: Medium

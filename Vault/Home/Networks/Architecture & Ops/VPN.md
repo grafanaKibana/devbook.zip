@@ -3,6 +3,7 @@ topic:
   - Networks
 subtopic:
   - Architecture & Ops
+summary: "An encrypted tunnel between endpoints so traffic flows as if both are on the same private network, over the public internet."
 level:
   - "3"
 priority: Medium

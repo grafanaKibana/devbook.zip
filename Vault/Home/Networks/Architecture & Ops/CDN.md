@@ -3,6 +3,7 @@ topic:
   - Networks
 subtopic:
   - Architecture & Ops
+summary: "A globally distributed network of edge caching servers that serve content from near users, cutting latency and origin load while improving resilience."
 level:
   - "3"
 priority: Medium

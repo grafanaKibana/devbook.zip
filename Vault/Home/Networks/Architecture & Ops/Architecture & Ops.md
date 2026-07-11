@@ -17,6 +17,11 @@ status: Creation
 
 Network architecture and operations cover how networks are designed, observed, and kept healthy in real environments. This is where theory meets incident response: routing, segmentation, monitoring, and troubleshooting. Example: when users report intermittent failures, you need logs + metrics + packet-level thinking to isolate where packets drop.
 
-## Links
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
+
+## References
 
 - [Network architecture (Wikipedia)](https://en.wikipedia.org/wiki/Network_architecture)
