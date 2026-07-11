@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:27:13.139Z
-modified: 2026-07-11T18:27:13.139Z
-published: 2026-07-11T18:27:13.139Z
+created: 2026-07-11T21:44:36.607Z
+modified: 2026-07-11T21:44:36.611Z
+published: 2026-07-11T21:44:36.611Z
 topic:
   - Programming
 subtopic:
   - NET
-summary: Filters run logic before and after stages of controller action execution, for cross-cutting concerns tightly coupled to MVC actions.
+summary: Logic running around controller action stages for cross-cutting MVC concerns.
 level:
   - "2"
 priority: Medium

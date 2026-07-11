@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T21:03:36.671Z
-modified: 2026-07-11T21:03:36.677Z
-published: 2026-07-11T21:03:36.677Z
+created: 2026-07-11T21:45:36.817Z
+modified: 2026-07-11T21:45:36.817Z
+published: 2026-07-11T21:45:36.817Z
 topic:
   - AI & ML
 subtopic:
   - LLM
-summary: The interface between an LLM's reasoning and the external world via function calling; tool quality often matters more than prompt quality.
+summary: The interface between an LLM's reasoning and the external world via function calling.
 level:
   - "3"
 priority: Low

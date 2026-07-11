@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:23:26.202Z
-modified: 2026-07-11T18:23:26.602Z
-published: 2026-07-11T18:23:26.602Z
+created: 2026-07-11T21:43:17.759Z
+modified: 2026-07-11T21:43:17.759Z
+published: 2026-07-11T21:43:17.759Z
 topic:
   - Computer Science
 subtopic:
   - Data Structures
-summary: A union-find structure tracking elements partitioned into disjoint sets, answering whether two elements share a set while merging sets over time.
+summary: A union-find structure that partitions elements into disjoint sets and answers whether two share a set.
 level:
   - "3"
 priority: Medium

@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T17:58:00.622Z
-modified: 2026-07-11T17:58:00.622Z
-published: 2026-07-11T17:58:00.622Z
+created: 2026-07-11T21:46:09.875Z
+modified: 2026-07-11T21:46:09.875Z
+published: 2026-07-11T21:46:09.875Z
 topic:
   - Networks
 subtopic:
   - Protocols
-summary: SMTP is the standard TCP-based protocol for sending email between mail servers and from clients to mail servers.
+summary: The standard TCP protocol for sending email between servers and from clients.
 level:
   - "3"
 priority: Low

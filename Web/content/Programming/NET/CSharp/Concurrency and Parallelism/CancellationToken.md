@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:27:31.697Z
-modified: 2026-07-11T18:27:31.697Z
-published: 2026-07-11T18:27:31.697Z
+created: 2026-07-11T21:46:02.796Z
+modified: 2026-07-11T21:46:02.796Z
+published: 2026-07-11T21:46:02.796Z
 topic:
   - Programming
 subtopic:
   - NET
-summary: CancellationToken is .NET's cooperative cancellation mechanism, letting callers request a stop while callees choose safe cancellation points and cleanup.
+summary: Cooperative cancellation where callers request a stop and callees comply safely.
 level:
   - "4"
 priority: Medium

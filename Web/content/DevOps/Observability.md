@@ -1,12 +1,12 @@
 ---
 publish: true
-created: 2026-07-11T18:13:52.361Z
-modified: 2026-07-11T18:13:52.374Z
-published: 2026-07-11T18:13:52.374Z
+created: 2026-07-11T21:47:09.440Z
+modified: 2026-07-11T21:47:09.440Z
+published: 2026-07-11T21:47:09.440Z
 topic:
   - DevOps
 subtopic: []
-summary: Observability is understanding a system's internal state from its external outputs — metrics, logs, and traces — to move from symptoms to causes.
+summary: Understanding a system's internal state from metrics, logs, and traces.
 level:
   - "2"
 priority: High

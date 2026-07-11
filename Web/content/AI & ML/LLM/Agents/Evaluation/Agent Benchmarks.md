@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:30:37.181Z
-modified: 2026-07-11T18:30:37.181Z
-published: 2026-07-11T18:30:37.181Z
+created: 2026-07-11T21:45:42.524Z
+modified: 2026-07-11T21:45:42.526Z
+published: 2026-07-11T21:45:42.526Z
 topic:
   - AI & ML
 subtopic:
   - LLM
-summary: Public fixed task suites scoring how a model-plus-scaffold completes multi-step tool-using tasks; useful to shortlist models, not to decide.
+summary: Public task suites scoring multi-step tool use; useful to shortlist models, not to decide.
 level:
   - "3"
 priority: Medium

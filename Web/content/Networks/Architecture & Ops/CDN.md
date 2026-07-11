@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:00:34.889Z
-modified: 2026-07-11T18:00:34.889Z
-published: 2026-07-11T18:00:34.889Z
+created: 2026-07-11T21:46:23.928Z
+modified: 2026-07-11T21:46:23.929Z
+published: 2026-07-11T21:46:23.929Z
 topic:
   - Networks
 subtopic:
   - Architecture & Ops
-summary: A globally distributed network of edge caching servers that serve content from near users, cutting latency and origin load while improving resilience.
+summary: Edge caching servers that serve content from near users, cutting latency and origin load.
 level:
   - "3"
 priority: Medium

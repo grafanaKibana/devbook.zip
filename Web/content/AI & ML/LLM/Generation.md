@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:31:09.137Z
-modified: 2026-07-11T18:31:09.137Z
-published: 2026-07-11T18:31:09.137Z
+created: 2026-07-11T21:44:19.250Z
+modified: 2026-07-11T21:44:19.251Z
+published: 2026-07-11T21:44:19.251Z
 topic:
   - AI & ML
 subtopic:
   - LLM
-summary: Producing reliable, grounded, correctly formatted output by controlling token sampling, grounding evidence, and output structure.
+summary: Producing reliable, grounded, correctly formatted output by controlling sampling, evidence, and structure.
 level:
   - "2"
 priority: High

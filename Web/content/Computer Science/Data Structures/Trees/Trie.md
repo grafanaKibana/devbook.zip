@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:24:08.148Z
-modified: 2026-07-11T18:24:08.148Z
-published: 2026-07-11T18:24:08.148Z
+created: 2026-07-11T21:45:28.488Z
+modified: 2026-07-11T21:45:28.488Z
+published: 2026-07-11T21:45:28.488Z
 topic:
   - Computer Science
 subtopic:
   - Data Structures
-summary: A prefix tree storing strings as paths of characters, giving O(k) lookup and prefix queries independent of the number of keys.
+summary: A prefix tree storing strings as character paths, giving O(k) lookup and prefix queries.
 level:
   - "4"
 priority: Medium

@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:26:32.057Z
-modified: 2026-07-11T18:26:32.059Z
-published: 2026-07-11T18:26:32.059Z
+created: 2026-07-11T21:44:27.097Z
+modified: 2026-07-11T21:44:27.097Z
+published: 2026-07-11T21:44:27.097Z
 topic:
   - Programming
 subtopic:
   - NET
-summary: ASP.NET Core's real-time framework for bidirectional server/client messaging over persistent connections, the default when the server must push updates immediately.
+summary: ASP.NET Core framework for real-time, bidirectional server and client messaging.
 level:
   - "3"
 priority: Medium

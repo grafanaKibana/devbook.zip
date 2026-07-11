@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:31:23.976Z
-modified: 2026-07-11T18:31:23.976Z
-published: 2026-07-11T18:31:23.976Z
+created: 2026-07-11T21:45:14.411Z
+modified: 2026-07-11T21:45:14.411Z
+published: 2026-07-11T21:45:14.411Z
 topic:
   - AI & ML
 subtopic:
   - LLM
-summary: Monitoring continuously observes a deployed RAG pipeline per stage to catch quality, performance, and staleness regressions before users do.
+summary: Continuously observing a deployed RAG pipeline per stage to catch regressions before users do.
 level:
   - "2"
 priority: High

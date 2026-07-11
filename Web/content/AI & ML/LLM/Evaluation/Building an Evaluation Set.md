@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T21:03:38.025Z
-modified: 2026-07-11T21:03:38.025Z
-published: 2026-07-11T21:03:38.025Z
+created: 2026-07-11T21:44:42.332Z
+modified: 2026-07-11T21:44:42.333Z
+published: 2026-07-11T21:44:42.333Z
 topic:
   - AI & ML
 subtopic:
   - LLM
-summary: The labeled data every other eval technique scores against; labeling and size relative to the effect decide whether the numbers mean anything.
+summary: The labeled data every eval technique scores against; labeling and size decide if numbers mean anything.
 level:
   - "3"
 priority: High

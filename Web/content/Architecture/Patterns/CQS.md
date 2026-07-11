@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:17:38.593Z
-modified: 2026-07-11T18:17:38.610Z
-published: 2026-07-11T18:17:38.610Z
+created: 2026-07-11T21:41:01.809Z
+modified: 2026-07-11T21:41:01.809Z
+published: 2026-07-11T21:41:01.809Z
 topic:
   - Architecture
 subtopic:
   - Patterns
-summary: A design principle where every method is either a command that changes state or a query that returns data — never both.
+summary: A principle where a method either changes state (command) or returns data (query), never both.
 level:
   - "4"
 priority: High

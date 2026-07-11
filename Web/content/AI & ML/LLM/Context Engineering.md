@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:31:03.751Z
-modified: 2026-07-11T18:31:03.751Z
-published: 2026-07-11T18:31:03.751Z
+created: 2026-07-11T21:44:21.245Z
+modified: 2026-07-11T21:44:21.245Z
+published: 2026-07-11T21:44:21.245Z
 topic:
   - AI & ML
 subtopic:
   - LLM
-summary: Deliberately deciding what fills the finite, attention-limited context window — and in what order — to maximize useful signal for the task.
+summary: Deliberately deciding what fills the finite context window, and in what order, to maximize useful signal.
 level:
   - "2"
 priority: High

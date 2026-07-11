@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:26:59.386Z
-modified: 2026-07-11T18:26:59.386Z
-published: 2026-07-11T18:26:59.386Z
+created: 2026-07-11T21:44:29.128Z
+modified: 2026-07-11T21:44:29.128Z
+published: 2026-07-11T21:44:29.128Z
 topic:
   - Programming
 subtopic:
   - NET
-summary: Authentication verifies who a caller is; middleware reads credentials and populates HttpContext.User with a ClaimsPrincipal.
+summary: Verifying who a caller is and populating HttpContext.User with a ClaimsPrincipal.
 level:
   - "1"
 priority: Medium

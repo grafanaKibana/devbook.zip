@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:13:46.709Z
-modified: 2026-07-11T18:13:46.709Z
-published: 2026-07-11T18:13:46.709Z
+created: 2026-07-11T21:48:33.493Z
+modified: 2026-07-11T21:48:33.493Z
+published: 2026-07-11T21:48:33.493Z
 topic:
   - Security
 subtopic:
   - Security
-summary: Transforms readable plaintext into unreadable ciphertext using a key, protecting confidentiality (not integrity or authenticity).
+summary: Transforms plaintext into ciphertext with a key, protecting confidentiality only.
 level:
   - "4"
 priority: High

@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:27:40.342Z
-modified: 2026-07-11T18:27:40.343Z
-published: 2026-07-11T18:27:40.343Z
+created: 2026-07-11T21:46:09.181Z
+modified: 2026-07-11T21:46:09.181Z
+published: 2026-07-11T21:46:09.181Z
 topic:
   - Programming
 subtopic:
   - NET
-summary: Parallelism finishes CPU-bound work faster by using multiple cores at once, via Parallel.ForEachAsync, PLINQ, and partitioned pipelines.
+summary: Finishing CPU-bound work faster by using multiple cores at once.
 level:
   - "4"
 priority: High

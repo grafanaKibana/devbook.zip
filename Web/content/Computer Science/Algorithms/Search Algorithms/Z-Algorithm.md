@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T18:24:09.418Z
-modified: 2026-07-11T18:24:09.419Z
-published: 2026-07-11T18:24:09.419Z
+created: 2026-07-11T21:45:30.820Z
+modified: 2026-07-11T21:45:30.830Z
+published: 2026-07-11T21:45:30.830Z
 topic:
   - Computer Science
 subtopic:
@@ -98,15 +98,6 @@ flowchart TD
 - **What goes wrong**: people expect `z[i]` to behave like KMP's `lps[i]` and index it the same way, producing off-by-one errors when porting solutions between the two.
 - **Why it happens**: both encode prefix structure, but `z[i]` measures a match _starting at_ `i` against the prefix, while `lps[i]` measures the longest prefix that is also a _suffix ending at_ `i` — different anchors.
 - **How to avoid it**: keep the definitions explicit; if you need suffix-anchored information, convert deliberately rather than assuming the arrays are interchangeable index-for-index.
-
-## Tradeoffs
-
-| Choice | Option A | Option B | Decision criteria |
-| --- | --- | --- | --- |
-| Single-pattern matching | Z-algorithm `O(n+m)` | [[KMP (Knuth-Morris-Pratt) Algorithm\|KMP]] `O(n+m)` | Same asymptotics; pick whichever prefix structure you reason about more clearly. Z needs the `P+sep+T` concatenation and extra space; KMP scans `T` in place. |
-| Deterministic vs probabilistic | Z-algorithm | [[Rabin Karp Search\|Rabin-Karp]] | Z-algorithm is unconditionally `O(n+m)`; Rabin-Karp is expected linear but can degrade on collisions. Use Z when worst-case matters or hashing is awkward. |
-| Prefix-structure problems | Z-array | Prefix function | The Z-array answers "common prefix with the whole string at every suffix" directly; use it for periodicity and occurrence-counting where the failure function needs extra transformation. |
-| Extra space | KMP `O(m)` | Z-algorithm `O(n+m)` | KMP stores only the pattern's table; Z-matching materializes the array over the full concatenation. Prefer KMP when `T` is huge and memory is tight. |
 
 ## Questions
 

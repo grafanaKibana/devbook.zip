@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T18:23:54.537Z
-modified: 2026-07-11T18:23:54.543Z
-published: 2026-07-11T18:23:54.543Z
+created: 2026-07-11T21:45:34.886Z
+modified: 2026-07-11T21:45:34.886Z
+published: 2026-07-11T21:45:34.886Z
 topic:
   - Computer Science
 subtopic:
@@ -79,14 +79,6 @@ flowchart TD
 - **Wrong block size throws away the win** — the `O(√n)` bound holds only at `m = √n`. A fixed constant block (say 100) gives `O(n)` on large arrays because the jump phase dominates; too large a block makes the linear scan dominate. Compute `m` from `n`, not a hardcoded constant.
 - **Last-block boundary errors** — the final block usually is not full, so probing `a[k·m]` can index past the end. Clamp every access with `Math.Min(step, n) − 1`, and make sure the terminating jump condition fires before `prev` exceeds `n`.
 - **Using it where random access is `O(1)`** — on an ordinary array jump search is simply a slower [[Binary Search]]. Its `O(√n)` only earns its keep when backward seeks are genuinely expensive (tape, linked lists, streamed pages); reaching for it on in-memory data is a mistake, not an optimization.
-
-## Tradeoffs
-
-| Choice | Jump Search | Alternative | Decision criteria |
-| --- | --- | --- | --- |
-| vs [[Binary Search]] | `O(√n)`, bounded backward movement | `O(log n)`, scattered random probes | Prefer binary search on any array with `O(1)` random access; choose jump search only when seeking backward is costly. |
-| vs [[Linear Search]] | `O(√n)`, needs sorted data, forward-only | `O(n)`, any order, forward-only | Both stream forward, but jump search cuts the scan to `O(√n)` on sorted sequential media; linear search when data is unsorted or tiny. |
-| vs [[Exponential Search]] | `O(√n)`, fixed `√n` blocks | `O(log i)`, geometric blocks with random access | Exponential search is far faster when random access is cheap; jump search wins only under the expensive-backward-seek cost model. |
 
 ## Questions
 

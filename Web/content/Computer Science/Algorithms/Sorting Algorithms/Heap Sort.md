@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T18:23:58.612Z
-modified: 2026-07-11T18:23:58.612Z
-published: 2026-07-11T18:23:58.612Z
+created: 2026-07-11T21:47:49.079Z
+modified: 2026-07-11T21:47:49.079Z
+published: 2026-07-11T21:47:49.079Z
 tags:
   - FolderNote
 topic:
@@ -104,16 +104,6 @@ For general in-memory sorting, `Array.Sort` (introsort) is the right default; he
 - **Poor cache locality** — sift-down jumps between parent index `i` and children `2i+1`/`2i+2`, which are far apart in memory for large arrays, causing cache misses. This is why heap sort is typically ~2× slower than quicksort in practice even with identical Big-O.
 - **Building the heap the slow way** — inserting elements one at a time is O(n log n); the bottom-up heapify above is O(n). Using the slow build wastes the algorithm's one structural advantage.
 - **Index errors in sift-down** — off-by-one in the child indices or the `size` bound (which shrinks each round) silently corrupts the result; the `l < size`/`r < size` guards are essential.
-
-## Tradeoffs
-
-| Algorithm | Time (worst) | Space | Stable | Cache | Use when |
-|-----------|-------------|-------|--------|-------|----------|
-| **Heap sort** | O(n log n) | O(1) | No | Poor | Worst-case guarantee + in-place both required |
-| Quick sort (introsort) | O(n log n) (introsort) | O(log n) | No | Excellent | General-purpose; fastest in practice |
-| Merge sort | O(n log n) | O(n) | Yes | Good | Stability required; linked lists; external sort |
-
-**Decision rule**: choose heap sort when you specifically need **guaranteed O(n log n) and O(1) space**. Otherwise use `Array.Sort` (introsort), which already _contains_ heap sort as its worst-case shield while getting quicksort's cache-friendly average case.
 
 ## Questions
 

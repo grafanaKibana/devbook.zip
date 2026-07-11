@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:10:34.148Z
-modified: 2026-07-11T18:10:34.148Z
-published: 2026-07-11T18:10:34.148Z
+created: 2026-07-11T21:46:49.851Z
+modified: 2026-07-11T21:46:49.851Z
+published: 2026-07-11T21:46:49.851Z
 topic:
   - Data Persistence
 subtopic:
   - SQL
-summary: Normalization structures a relational schema to eliminate redundancy and prevent update anomalies, trading read performance since normalized data requires joins.
+summary: Structuring a relational schema to remove redundancy, trading read performance for fewer anomalies.
 level:
   - "4"
 priority: High

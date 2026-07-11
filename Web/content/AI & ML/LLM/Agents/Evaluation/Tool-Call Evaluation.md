@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:30:39.236Z
-modified: 2026-07-11T18:30:39.236Z
-published: 2026-07-11T18:30:39.236Z
+created: 2026-07-11T21:45:43.729Z
+modified: 2026-07-11T21:45:43.731Z
+published: 2026-07-11T21:45:43.731Z
 topic:
   - AI & ML
 subtopic:
   - LLM
-summary: Scoring each agent tool call on four axes—right tool, correct arguments, valid call, and necessity—since one number hides distinct fixes.
+summary: "Scoring each agent tool call on four axes: right tool, correct arguments, valid call, and necessity."
 level:
   - "3"
 priority: High

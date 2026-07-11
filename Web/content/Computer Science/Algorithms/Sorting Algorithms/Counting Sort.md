@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T18:23:56.086Z
-modified: 2026-07-11T18:23:56.091Z
-published: 2026-07-11T18:23:56.091Z
+created: 2026-07-11T21:42:38.144Z
+modified: 2026-07-11T21:42:38.145Z
+published: 2026-07-11T21:42:38.145Z
 topic:
   - Computer Science
 subtopic:
@@ -74,14 +74,6 @@ For `a = [2, 5, 3, 0, 2, 3, 0, 3]` with `k = 6`: the tally is `[2, 0, 2, 3, 0, 1
 - **What goes wrong**: a negative key indexes `count[-3]` and throws; a floating-point or string key has no natural counter slot at all.
 - **Why it happens**: the algorithm indexes an array _by the key itself_, which only works for non-negative integers.
 - **How to avoid it**: offset keys by subtracting the minimum (`count[key - min]`) so the range starts at zero. For genuinely non-integer keys, use [[Bucket Sort]] (range partitioning) or a comparison sort instead.
-
-## Tradeoffs
-
-| Choice | Counting Sort | Alternative | Decision criteria |
-| --- | --- | --- | --- |
-| vs comparison sort ([[Quick Sort]]) | `O(n + k)`, integer keys only | `O(n log n)`, any comparable key | Use Counting Sort when keys are integers with `k = O(n)`; otherwise the comparison sort wins on generality and memory. |
-| vs [[Radix Sort]] | one pass, needs small `k` | `d` passes, handles large key ranges | Counting Sort alone for small ranges; Radix Sort (Counting Sort per digit) when the range is large but the key width is bounded. |
-| vs [[Bucket Sort]] | one bucket per distinct key, no inner sort | `k` range buckets, each sorted | Counting Sort for exact discrete integer keys; Bucket Sort for continuous keys spread over a range. |
 
 ## Questions
 

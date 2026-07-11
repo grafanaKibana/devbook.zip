@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:23:51.659Z
-modified: 2026-07-11T18:23:51.665Z
-published: 2026-07-11T18:23:51.665Z
+created: 2026-07-11T21:47:40.844Z
+modified: 2026-07-11T21:47:40.844Z
+published: 2026-07-11T21:47:40.844Z
 topic:
   - Computer Science
 subtopic:
   - Data Structures
-summary: An implicit complete d-ary tree with a parent-child priority rule keeping the best item at the root for O(1) peek.
+summary: An implicit complete d-ary tree with a parent-child priority rule, keeping the best item at the root.
 level:
   - "4"
 priority: Medium

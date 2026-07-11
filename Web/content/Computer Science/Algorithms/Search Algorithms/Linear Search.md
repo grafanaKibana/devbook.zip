@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:24:02.869Z
-modified: 2026-07-11T18:24:02.870Z
-published: 2026-07-11T18:24:02.870Z
+created: 2026-07-11T21:45:59.153Z
+modified: 2026-07-11T21:45:59.155Z
+published: 2026-07-11T21:45:59.155Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: Scans elements one at a time until a match, assuming nothing about the data; O(n) but the always-works fallback.
+summary: Scans elements one by one until a match; O(n) and works on any data.
 level:
   - "4"
 priority: Medium
@@ -73,7 +73,6 @@ flowchart TD
 
 | Choice | Linear Search | Alternative | Decision criteria |
 | --- | --- | --- | --- |
-| vs [[Binary Search]] | O(n), works on any order, no preprocessing | O(log n), requires sorted data | Linear wins on unsorted data, tiny `n`, or one-shot queries where sorting first costs more than it saves; binary wins once data is sorted or searched repeatedly. |
 | vs [[HashMap]] lookup | O(n), zero memory overhead, no hashing | O(1) average, extra memory, needs hashable keys | Use a hash for repeated exact-match lookups on large sets; linear scan when the set is tiny, built once and read once, or keys are not hashable. |
 | over array vs over tree/list | Contiguous scan, cache-friendly, no per-node indirection | O(log n) tree search chases pointers across the heap | For small `n`, a linear scan of a packed array routinely beats an asymptotically faster tree because it avoids cache misses and branch misprediction. |
 

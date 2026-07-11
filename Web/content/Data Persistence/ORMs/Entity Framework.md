@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:10:19.211Z
-modified: 2026-07-11T18:10:19.211Z
-published: 2026-07-11T18:10:19.211Z
+created: 2026-07-11T21:47:01.907Z
+modified: 2026-07-11T21:47:01.908Z
+published: 2026-07-11T21:47:01.908Z
 topic:
   - Data Persistence
 subtopic:
   - ORMs
-summary: "Microsoft's official .NET ORM: maps C# classes to tables, translates LINQ to SQL, tracks changes, and manages schema migrations."
+summary: "Microsoft's .NET ORM: maps C# classes to tables, translates LINQ, and manages migrations."
 level:
   - "4"
 priority: High

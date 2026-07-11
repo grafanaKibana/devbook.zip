@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T18:23:28.418Z
-modified: 2026-07-11T18:23:28.423Z
-published: 2026-07-11T18:23:28.423Z
+created: 2026-07-11T21:50:40.201Z
+modified: 2026-07-11T21:50:40.201Z
+published: 2026-07-11T21:50:40.201Z
 topic:
   - Computer Science
 subtopic:
@@ -89,14 +89,6 @@ Shortest A→D path: A→B→C→D (cost 4)
 - **What goes wrong**: on dense graphs (`E ≈ V²`), the heap-based approach becomes `O(V² log V)`, slower than the `O(V²)` array-scan version.
 - **Why it happens**: heap overhead (log V per push) exceeds its benefit when nearly every node pair has an edge.
 - **How to avoid it**: for dense graphs, use the simple array-scan variant that picks the minimum in `O(V)` per iteration, giving `O(V²)` total.
-
-## Tradeoffs
-
-| Choice | Option A | Option B | Decision criteria |
-| --- | --- | --- | --- |
-| Unweighted graph | [[DFS BFS\|BFS]] `O(V+E)` | Dijkstra `O((V+E) log V)` | BFS is simpler and faster when all edge weights are equal. Use Dijkstra only when weights differ. |
-| Negative edges present | Bellman-Ford `O(VE)` | Dijkstra | Dijkstra is faster but requires non-negative weights. Use Bellman-Ford when negative edges exist and no negative cycles. |
-| Target-directed search | A\* with heuristic | Dijkstra | A\* explores fewer nodes when a good admissible heuristic exists. Fall back to Dijkstra for all-pairs or when no heuristic is available. |
 
 ## Questions
 

@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:27:02.310Z
-modified: 2026-07-11T18:27:02.310Z
-published: 2026-07-11T18:27:02.310Z
+created: 2026-07-11T21:44:31.074Z
+modified: 2026-07-11T21:44:31.074Z
+published: 2026-07-11T21:44:31.074Z
 topic:
   - Programming
 subtopic:
   - NET
-summary: Authorization determines what an authenticated user may do, evaluating the ClaimsPrincipal via role-based, claims-based, or policy-based models.
+summary: Deciding what an authenticated user may do via roles, claims, or policies.
 level:
   - "1"
 priority: Medium

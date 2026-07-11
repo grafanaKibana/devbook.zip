@@ -1,14 +1,15 @@
 ---
 publish: true
-created: 2026-07-11T17:05:06.473Z
-modified: 2026-07-11T21:22:28.167Z
-published: 2026-07-11T21:22:28.167Z
+created: 2026-07-11T21:40:01.891Z
+modified: 2026-07-11T21:40:01.891Z
+published: 2026-07-11T21:40:01.891Z
 tags:
   - FolderNote
 topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: How to pick a data structure by matching operations to complexity, with the .NET type for each.
 level:
   - "4"
 priority: High
@@ -21,33 +22,9 @@ A data structure organizes data for efficient access, mutation, and iteration. I
 
 The key decision is matching operations to complexity guarantees: random access by index → array or `List<T>`; fast lookup by key → `Dictionary<TKey, TValue>`; membership tests → `HashSet<T>`; ordered traversal → `SortedSet<T>` or sorted array; FIFO processing → `Queue<T>`. Most production performance issues with collections come from using the wrong structure (e.g., searching a `List<T>` linearly when a `HashSet<T>` gives O(1) lookups) rather than from the structure's implementation being slow.
 
-<nav style="--map-accent: 239, 68, 68;" class="folder-structure-map" aria-label="Data Structures section map"><div class="folder-map-children"><article class="folder-map-node"><div class="folder-map-node-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="folder-map-entry-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span><span class="folder-map-node-title" title="Composite Structures">Composite Structures</span></span><span class="folder-map-node-count">1 note</span></div><p>Structures that combine two primitives to get a guarantee neither gives alone, kept in lockstep on every mutation.</p></div><span class="folder-map-hit"><a class="internal-link" href="Home/Computer Science/Data Structures/Composite Structures/Composite Structures.md" data-tooltip-position="top" aria-label="Composite Structures">Composite Structures</a></span></article><article class="folder-map-node"><div class="folder-map-node-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="folder-map-entry-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span><span class="folder-map-node-title" title="Graph Structures">Graph Structures</span></span><span class="folder-map-node-count">2 notes</span></div><p>Structures for modelling relationships with cycles and multiple paths, composed from primitives per the connectivity question you must answer cheaply.</p></div><span class="folder-map-hit"><a class="internal-link" href="Home/Computer Science/Data Structures/Graph Structures/Graph Structures.md" data-tooltip-position="top" aria-label="Graph Structures">Graph Structures</a></span></article><article class="folder-map-node"><div class="folder-map-node-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="folder-map-entry-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span><span class="folder-map-node-title" title="Hash-based Structures">Hash-based Structures</span></span><span class="folder-map-node-count">3 notes</span></div><p>Structures that buy near-O(1) key access by spending a hash function, trading away element ordering.</p></div><span class="folder-map-hit"><a class="internal-link" href="Home/Computer Science/Data Structures/Hash-based Structures/Hash-based Structures.md" data-tooltip-position="top" aria-label="Hash-based Structures">Hash-based Structures</a></span></article><article class="folder-map-node"><div class="folder-map-node-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="folder-map-entry-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span><span class="folder-map-node-title" title="Linear Structures">Linear Structures</span></span><span class="folder-map-node-count">8 notes</span></div><p>Structures that store elements in a sequence, defined by access order and position rather than one memory layout.</p></div><span class="folder-map-hit"><a class="internal-link" href="Home/Computer Science/Data Structures/Linear Structures/Linear Structures.md" data-tooltip-position="top" aria-label="Linear Structures">Linear Structures</a></span></article><article class="folder-map-node"><div class="folder-map-node-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="folder-map-entry-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span><span class="folder-map-node-title" title="Trees">Trees</span></span><span class="folder-map-node-count">13 notes</span></div><p>Structures that represent hierarchical data through parent-child relationships, keeping balanced height for O(log n) search.</p></div><span class="folder-map-hit"><a class="internal-link" href="Home/Computer Science/Data Structures/Trees/Trees.md" data-tooltip-position="top" aria-label="Trees">Trees</a></span></article></div><style>
-.folder-structure-map {
-  --map-accent: 16, 185, 129;
-  --map-gap: 0.75rem;
-  width: 100%;
-  box-sizing: border-box;
-  margin: 0.5rem 0 0.75rem;
-  container-name: folder-map;
-  container-type: inline-size;
-}
-.folder-map-children {
-  /* Flex (not grid) so each card sizes to its own title — a long title widens
-     its card and pushes to another row instead of being truncated, and rows
-     grow to fill the width with no empty tracks when there are few cards. */
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--map-gap);
-}
-.folder-map-node {
+<nav style="--card-accent: 239, 68, 68;" class="folder-structure-map" aria-label="Data Structures section map"><div class="folder-map-children"><article class="db-card folder-map-node"><div class="db-card-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="db-card-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span><span class="db-card-title" title="Composite Structures">Composite Structures</span></span><span class="folder-map-node-count">1 note</span></div><p class="db-card-summary">Structures that combine two primitives to get a guarantee neither gives alone.</p></div><span class="db-card-hit"><a class="internal-link" href="Home/Computer Science/Data Structures/Composite Structures/Composite Structures.md" data-tooltip-position="top" aria-label="Composite Structures">Composite Structures</a></span></article><article class="db-card folder-map-node"><div class="db-card-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="db-card-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span><span class="db-card-title" title="Graph Structures">Graph Structures</span></span><span class="folder-map-node-count">2 notes</span></div><p class="db-card-summary">Graphs and disjoint sets for modelling relationships with cycles and multiple paths.</p></div><span class="db-card-hit"><a class="internal-link" href="Home/Computer Science/Data Structures/Graph Structures/Graph Structures.md" data-tooltip-position="top" aria-label="Graph Structures">Graph Structures</a></span></article><article class="db-card folder-map-node"><div class="db-card-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="db-card-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span><span class="db-card-title" title="Hash-based Structures">Hash-based Structures</span></span><span class="folder-map-node-count">3 notes</span></div><p class="db-card-summary">Dictionary, hash set, and Bloom filter, trading element ordering for near-O(1) key access.</p></div><span class="db-card-hit"><a class="internal-link" href="Home/Computer Science/Data Structures/Hash-based Structures/Hash-based Structures.md" data-tooltip-position="top" aria-label="Hash-based Structures">Hash-based Structures</a></span></article><article class="db-card folder-map-node"><div class="db-card-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="db-card-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span><span class="db-card-title" title="Linear Structures">Linear Structures</span></span><span class="folder-map-node-count">8 notes</span></div><p class="db-card-summary">Sequence structures like arrays, lists, stacks, queues, and buffers, defined by access order.</p></div><span class="db-card-hit"><a class="internal-link" href="Home/Computer Science/Data Structures/Linear Structures/Linear Structures.md" data-tooltip-position="top" aria-label="Linear Structures">Linear Structures</a></span></article><article class="db-card folder-map-node"><div class="db-card-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="db-card-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span><span class="db-card-title" title="Trees">Trees</span></span><span class="folder-map-node-count">13 notes</span></div><p class="db-card-summary">Hierarchical parent-child structures that keep balanced height for O(log n) search.</p></div><span class="db-card-hit"><a class="internal-link" href="Home/Computer Science/Data Structures/Trees/Trees.md" data-tooltip-position="top" aria-label="Trees">Trees</a></span></article></div><style>
+.db-card {
   position: relative;
-  /* No overflow:hidden here: on a flex item that collapses min-width:auto to 0,
-     letting the card shrink below its title + note-count and clip them. Without
-     it, the card's min size is its content, so long titles widen the card (and
-     wrap to another row) instead of being cut off. The accent gradient gets its
-     own border-radius below to stay inside the rounded corners. */
-  flex: 1 1 12rem;
-  min-height: 2.75rem;
   box-sizing: border-box;
   border: 1px solid var(--background-modifier-border, var(--lightgray, #d8dee9));
   border-radius: var(--radius-m, 0.55rem);
@@ -55,7 +32,7 @@ The key decision is matching operations to complexity guarantees: random access 
   box-shadow: 0 0 0 rgba(0, 0, 0, 0);
   transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
 }
-.folder-map-node::before {
+.db-card::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -63,87 +40,60 @@ The key decision is matching operations to complexity guarantees: random access 
   pointer-events: none;
   background: radial-gradient(
     ellipse 150% 175% at -22% -38%,
-    rgba(var(--map-accent), 0.09) 0%,
-    rgba(var(--map-accent), 0.04) 38%,
-    rgba(var(--map-accent), 0.014) 66%,
+    rgba(var(--card-accent, 125, 125, 125), 0.09) 0%,
+    rgba(var(--card-accent, 125, 125, 125), 0.04) 38%,
+    rgba(var(--card-accent, 125, 125, 125), 0.014) 66%,
     transparent 90%
   );
   opacity: 0.78;
   transition: opacity 150ms ease;
 }
-.folder-map-node:hover,
-.folder-map-node:focus-within {
-  border-color: rgba(var(--map-accent), 0.55);
-  background-color: color-mix(in srgb, rgb(var(--map-accent)) 2.5%, var(--background-primary, var(--light, #ffffff)));
+.db-card:hover,
+.db-card:focus-within {
+  border-color: rgba(var(--card-accent, 125, 125, 125), 0.55);
+  background-color: color-mix(in srgb, rgb(var(--card-accent, 125, 125, 125)) 2.5%, var(--background-primary, var(--light, #ffffff)));
   box-shadow: 0 0.45rem 1.1rem rgba(0, 0, 0, 0.08);
   transform: translateY(-0.125rem);
 }
-.folder-map-node:hover::before,
-.folder-map-node:focus-within::before {
-  opacity: 1;
-}
-.folder-map-node-body {
+.db-card:hover::before,
+.db-card:focus-within::before { opacity: 1; }
+.db-card-body {
   position: relative;
   z-index: 0;
-  display: flex;
-  min-height: 2.75rem;
   box-sizing: border-box;
+  display: flex;
   flex-direction: column;
-  justify-content: center;
-  padding: 0.5rem 0.75rem;
+  padding: var(--db-card-pad, 0.85rem 0.9rem);
 }
-.folder-map-node-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-}
-.folder-map-node-title-group {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-.folder-map-entry-icon {
+.db-card-icon {
   display: flex;
   width: 1.1rem;
   height: 1.1rem;
   flex: 0 0 auto;
-  color: rgb(var(--map-accent));
+  color: rgb(var(--card-accent, 125, 125, 125));
 }
-.folder-map-entry-icon svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-.folder-map-node-title {
+.db-card-icon svg { display: block; width: 100%; height: 100%; }
+.db-card-title {
   display: block;
   margin: 0;
   color: var(--text-normal, var(--dark, #1f2937));
   font-size: 1rem;
   font-weight: 700;
   line-height: 1.25;
-  white-space: nowrap;
 }
-.folder-map-node p {
-  display: none;
+/* Element-qualified (p.db-card-summary) on purpose: it ties the specificity of
+   Obsidian reading view's ".markdown-rendered p" and, being injected later in
+   the body, wins. A bare ".db-card-summary" loses to it, so Obsidian keeps its
+   default paragraph spacing and the description gets large gaps above/below.
+   Quartz doesn't add those margins, which is why the gap only showed there. */
+p.db-card-summary {
   margin: 0.45rem 0 0;
   color: var(--text-muted, var(--darkgray, #5f6b7a));
   font-size: 0.875rem;
   line-height: 1.45;
 }
-.folder-map-node-count {
-  display: block;
-  flex: 0 0 auto;
-  color: var(--text-muted, var(--darkgray, #5f6b7a));
-  font-size: 0.875rem;
-  white-space: nowrap;
-}
-.folder-map-hit {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-}
-.folder-map-hit a {
+.db-card-hit { position: absolute; inset: 0; z-index: 1; }
+.db-card-hit a {
   position: absolute;
   inset: 0;
   min-width: 2.75rem;
@@ -152,37 +102,92 @@ The key decision is matching operations to complexity guarantees: random access 
   background: transparent !important;
   font-size: 0;
 }
-.folder-map-hit a:focus-visible {
-  outline: 2px solid rgb(var(--map-accent));
+.db-card-hit a:focus-visible {
+  outline: 2px solid rgb(var(--card-accent, 125, 125, 125));
   outline-offset: -0.3rem;
 }
+@media (prefers-reduced-motion: reduce) {
+  .db-card { transition: none; }
+  .db-card::before { transition: none; }
+  .db-card:hover,
+  .db-card:focus-within { transform: none; }
+}
+
+.folder-structure-map {
+\--card-accent: 16, 185, 129;
+\--map-gap: 0.75rem;
+width: 100%;
+box-sizing: border-box;
+margin: 0.5rem 0 0.75rem;
+container-name: folder-map;
+container-type: inline-size;
+}
+.folder-map-children {
+/\* Flex (not grid) so each card sizes to its own title — a long title widens
+its card and pushes to another row instead of being truncated, and rows
+grow to fill the width with no empty tracks when there are few cards. _/
+display: flex;
+flex-wrap: wrap;
+gap: var(--map-gap);
+}
+.folder-map-node {
+/_ No overflow:hidden on a flex item whose min-width:auto collapses to 0: that
+would let the card shrink below its title + note-count and clip them.
+Without it the card's min size is its content, so long titles widen the card
+(and wrap to another row) instead of being cut off. The shared ::before
+accent uses border-radius:inherit to stay inside the rounded corners. \*/
+flex: 1 1 12rem;
+min-height: 2.75rem;
+\--db-card-pad: 0.5rem 0.75rem;
+}
+.folder-map-node .db-card-body {
+min-height: 2.75rem;
+justify-content: center;
+}
+.folder-map-node-heading {
+display: flex;
+align-items: center;
+justify-content: space-between;
+gap: 0.75rem;
+}
+.folder-map-node-title-group {
+display: flex;
+align-items: center;
+gap: 0.5rem;
+}
+.folder-map-node .db-card-title {
+white-space: nowrap;
+}
+.folder-map-node-count {
+display: block;
+flex: 0 0 auto;
+color: var(--text-muted, var(--darkgray, #5f6b7a));
+font-size: 0.875rem;
+white-space: nowrap;
+}
+.folder-map-node .db-card-summary {
+display: none;
+}
 .folder-map-empty {
-  margin: 1rem 0 0;
-  color: var(--text-muted, var(--darkgray, #5f6b7a));
-  font-size: 0.875rem;
+margin: 1rem 0 0;
+color: var(--text-muted, var(--darkgray, #5f6b7a));
+font-size: 0.875rem;
 }
 @container folder-map (min-width: 40rem) {
-  .folder-map-node {
-    min-height: 6rem;
-  }
-  .folder-map-node-body {
-    min-height: 6rem;
-    justify-content: flex-start;
-    padding: 0.85rem 0.9rem;
-  }
-  .folder-map-node p { display: block; }
+.folder-map-node {
+min-height: 6rem;
+\--db-card-pad: 0.85rem 0.9rem;
+}
+.folder-map-node .db-card-body {
+min-height: 6rem;
+justify-content: flex-start;
+}
+.folder-map-node .db-card-summary { display: block; }
 }
 @container folder-map (min-width: 64rem) {
-  .folder-map-node,
-  .folder-map-node-body { min-height: 6.75rem; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .folder-map-node { transition: none; }
-  .folder-map-node::before { transition: none; }
-  .folder-map-node:hover,
-  .folder-map-node:focus-within { transform: none; }
-}
-</style></nav>
+.folder-map-node,
+.folder-map-node .db-card-body { min-height: 6.75rem; }
+} </style></nav>
 
 ## Questions
 

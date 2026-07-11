@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:13:57.485Z
-modified: 2026-07-11T18:13:57.485Z
-published: 2026-07-11T18:13:57.485Z
+created: 2026-07-11T21:47:38.605Z
+modified: 2026-07-11T21:47:38.605Z
+published: 2026-07-11T21:47:38.605Z
 topic:
   - Development Practices
 subtopic:
   - Paradigms
-summary: Test-Driven Development writes a failing test before the code that satisfies it, using Red-Green-Refactor as a design technique.
+summary: Writing a failing test before the code, using Red-Green-Refactor as a design technique.
 level:
   - "4"
 priority: High

@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T18:13:43.602Z
-modified: 2026-07-11T18:13:43.602Z
-published: 2026-07-11T18:13:43.602Z
+created: 2026-07-11T21:48:18.423Z
+modified: 2026-07-11T21:48:18.423Z
+published: 2026-07-11T21:48:18.423Z
 topic:
   - Security
 subtopic:
   - Authentication
-summary: "The simplest HTTP auth scheme: the client sends Base64-encoded username:password in the Authorization header on every request (RFC 7617)."
+summary: "The simplest HTTP scheme: Base64-encoded credentials in the Authorization header (RFC 7617)."
 level:
   - "4"
 priority: High

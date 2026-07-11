@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T17:57:59.132Z
-modified: 2026-07-11T17:57:59.133Z
-published: 2026-07-11T17:57:59.133Z
+created: 2026-07-11T21:46:20.386Z
+modified: 2026-07-11T21:46:20.386Z
+published: 2026-07-11T21:46:20.386Z
 topic:
   - Networks
 subtopic:
   - Protocols
-summary: RPC is a communication style where a client invokes a server operation as if it were a local function call.
+summary: A style where a client invokes a server operation like a local function call.
 level:
   - "3"
 priority: Medium
