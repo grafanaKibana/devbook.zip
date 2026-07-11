@@ -12,118 +12,137 @@ publish: true
 
 # Intro
 
-Greedy Best-First Search (GBFS) expands whichever frontier node *looks* closest to the goal, ranking the priority queue by the heuristic `h(n)` alone — the estimated remaining cost — and ignoring `g(n)`, the cost already paid to get there. This single-minded focus makes it fast: on an open map it charges almost straight at the goal, expanding far fewer nodes than any cost-aware search. The catch is that it never reconsiders how expensive the road behind it was, so it is **neither optimal** (the path it returns can be much longer than the shortest) **nor complete** on infinite graphs (it can chase a forever-improving heuristic down a fruitless branch and never terminate).
+A grid pathfinder has to reach a goal cell and cares more about producing *a* route quickly than about producing the shortest one. A cost-aware search like [[Dijkstra]] weighs the distance already travelled and fans out in every direction, so most of its expansions land on cells that point away from the goal. Greedy Best-First Search discards the accumulated cost and orders its frontier by the heuristic `h(n)` alone — the estimated remaining distance to the goal — so it always expands whichever node currently looks closest and drives almost straight at the target.
 
-The clean way to see GBFS is as one extreme of a spectrum. At the other extreme sits [[Dijkstra]], which ranks purely by `g` and ignores the goal entirely — slow but optimal. [[A-Start Search|A* Search]] is the principled middle: it ranks by `f = g + h`, keeping GBFS's goal-seeking pull while restoring optimality. Reach for GBFS only when you need *a* path fast and don't care that it's suboptimal — some level-of-detail game AI, quick reachability probes, or as the inner loop of a larger anytime planner. When the path cost actually matters, use [[A-Start Search|A* Search]] instead; the extra bookkeeping of tracking `g` is cheap and buys you correctness.
+That single ranking key is also the whole weakness. Because `g(n)`, the cost paid to reach a node, never enters the comparison, the search cannot separate a short route from a long one that merely ends near the goal. It expands what looks close, not what is cheap: the path it returns can be far longer than necessary, and on an infinite graph it can follow a forever-improving estimate down a branch that never terminates.
 
-## How It Works
+**Core condition:** frontier ordered by `h(n)` alone → always expand the node that looks closest → fast and goal-directed, but neither optimal nor complete.
 
-1. Initialize the priority queue with `source`, keyed by `h(source)`. Track visited nodes to avoid re-expansion.
-2. Pop the node `u` with the smallest `h(u)` — the one the heuristic thinks is closest to the goal. If `u` is the goal, reconstruct the path and stop.
-3. For each unvisited neighbor `v`, set `parent[v] = u`, mark `v` visited, and push `v` keyed by `h(v)`. The edge weight `w(u, v)` is never consulted.
-4. Repeat until the goal is popped or the queue empties (no path found).
+The decisive behaviour is the moment the heuristic selects a node that looks close and commits the search to a longer path.
 
-The defining move is in step 3: because the queue key is `h(v)` and not `g[v] + h(v)`, GBFS has no memory of accumulated cost. It commits to the direction that minimizes estimated distance-to-goal at each step, which is exactly why it is fast and exactly why it can be fooled.
+> [!NOTE] Visualization pending
+> Planned StepTrace: a graph-search card showing a frontier ordered by the heuristic `h` alone — always expanding the node that looks closest to the goal, sometimes down a misleading path. No matching renderer exists in `engine.js` yet.
 
-Complexity: worst case `O(b^m)` time and space where `b` is the branching factor and `m` the maximum depth — the same bound as an uninformed search when the heuristic misleads. With a good heuristic on a well-behaved map it approaches `O(b·d)`, expanding close to a straight line of `d` nodes to the goal. Like [[A-Start Search|A* Search]], it holds every generated node in memory, so space is the practical ceiling.
+## Ordering by the estimate
 
-## Example
+The frontier is a priority queue keyed by `h(n)`. Each iteration pops the node with the smallest estimate, and if it is not the goal, pushes every unvisited neighbor keyed by that neighbor's own `h`. The edge weight `w(u, v)` is available but never read; a visited set stops a node from entering the queue twice.
 
-```text
-4-connected grid. S = start, G = goal, # = wall (a concave "U" trap).
-Heuristic h = Manhattan distance to G.
+The only property this maintains is that the next node expanded is the one the heuristic currently rates closest to the goal. Nothing ties the order of expansion to the length of the path built so far, which is the guarantee a cost-aware search provides and this one drops. When `h` is accurate and the map is open, the estimate shrinks along an almost straight line and the goal is reached after expanding on the order of `m` nodes. When `h` points into an obstacle, the same rule keeps re-selecting cells that hug the barrier because they still score lowest, and the accumulated `g` that would expose the detour is never consulted.
 
-  col: 0 1 2 3 4
-row0:  . . . . .
-row1:  . S # G .
-row2:  . . # . .
-row3:  . . # . .
+One framing makes the family relationship exact: [[A-Start Search|A*]] expands by `f = g + h`. Setting `g` to zero collapses `f` to `h`, which is precisely Greedy Best-First — the case where a node's history counts for nothing.
 
-From S(1,1), h = |1-1| + |1-3| = 2.
-GBFS wants to move straight toward G, but column 2 is a wall, so the cell
-that would most shrink h is blocked. Among reachable neighbors it takes the
-best available h and detours UP and OVER the top of the wall:
+## Complexity
 
-  S(1,1) -> (0,1) h=3 -> (0,2) h=2 -> (0,3) h=1 -> (1,3)=G.
-
-That works here. Now block the top too (wall across row0 col2): the greedy
-pull keeps steering GBFS back toward the wall face nearest G, and it wastes
-expansions oscillating along the barrier before finally escaping around the
-long way. A* avoids this: because it also counts g, once the short-looking
-route proves expensive it lets a "further-looking" but genuinely cheaper
-detour overtake it.
-```
-
-The concave-obstacle failure mode is the signature weakness: a wall that cups the goal lures GBFS into the pocket because every cell inside it has a tempting low `h`, and it must thrash along the barrier before it discovers the long way around.
-
-## Diagram
-
-```mermaid
-flowchart TD
-  A[Push source keyed by h of source] --> B{Priority queue empty}
-  B -->|Yes| Z[No path found]
-  B -->|No| C[Pop node u with smallest h]
-  C --> D{u is the goal}
-  D -->|Yes| Y[Reconstruct path from parents]
-  D -->|No| E[For each unvisited neighbor v]
-  E --> F[Set parent of v to u and mark visited]
-  F --> G[Push v keyed by h of v ignoring edge cost]
-  G --> E
-  E --> B
-```
-
-## Pitfalls
-
-### Returns a suboptimal path and never signals it
-
-- **What goes wrong**: GBFS terminates with a valid path that can be dramatically longer than the shortest one, with no indication anything is wrong.
-- **Why it happens**: ranking by `h` alone means the algorithm optimizes "get closer to the goal now," never "minimize total cost." A locally attractive step can commit it to an expensive route.
-- **How to avoid it**: if path cost matters at all, use [[A-Start Search|A* Search]] — adding `g` to the key is the entire fix. Reserve GBFS for cases where any path is acceptable.
-
-### Concave obstacles cause thrashing
-
-- **What goes wrong**: a wall shaped like a pocket around the goal traps GBFS — it repeatedly expands cells hugging the barrier because they score low on `h`, wasting work before escaping.
-- **Why it happens**: the heuristic points straight at the goal, but the obstacle blocks that direction; without cost awareness GBFS keeps re-committing to the blocked heading.
-- **How to avoid it**: use a cost-aware search (A* or [[Dijkstra]]) on maps with concave geometry, or precompute a better heuristic that reflects obstacles (e.g., a flow field / navigation mesh distance).
-
-### Incompleteness on infinite or unbounded graphs
-
-- **What goes wrong**: on an infinite graph, or a finite one without visited-tracking, GBFS can follow an endlessly-improving heuristic down a branch that never reaches the goal and never terminate.
-- **Why it happens**: with no bound from `g`, nothing forces the search to eventually exhaust a fruitless region; a monotically decreasing `h` estimate can lead it astray forever.
-- **How to avoid it**: maintain a visited/closed set to guarantee finite graphs terminate, and prefer A* on unbounded state spaces where completeness matters.
-
-## Tradeoffs
-
-| Choice | Greedy Best-First | Alternative | Decision criteria |
+| Case | Time | Auxiliary space | Cause |
 | --- | --- | --- | --- |
-| vs [[A-Start Search\|A* Search]] | Ranks by `h`, fast, suboptimal, incomplete | Ranks by `g + h`, optimal with admissible `h` | Use GBFS only when any valid path is fine; use A* whenever total path cost matters — the `g` term is cheap insurance. |
-| vs [[Dijkstra]] | Goal-directed, ignores accumulated cost | Ignores the goal, ranks by `g`, optimal | GBFS and Dijkstra are the two extremes; pick GBFS for raw speed toward a known goal, Dijkstra for correctness or all-pairs with no heuristic. |
-| Map geometry | Great on open maps, thrashes on concave obstacles | A* handles concave geometry correctly | On maps with pockets or mazes, the greedy pull backfires — switch to a cost-aware search. |
+| Best | `O(b·m)` | `O(b·m)` | A near-perfect heuristic guides expansion almost directly to the goal, one productive node per level. |
+| Average | between `O(b·m)` and `O(b^m)` | up to `O(b^m)` | Heuristic quality sets how far expansion strays from the direct route. |
+| Worst | `O(b^m)` | `O(b^m)` | A misleading heuristic offers no guidance and expansion degrades toward uninformed search. |
 
-Consistent with the [[A-Start Search|A* Search]] and [[Dijkstra]] tradeoff tables: GBFS is the pure-`h` end, Dijkstra the pure-`g` end, and A* the tunable blend. Weighted A* with a large weight `ε` behaves *almost* like GBFS while still tracking `g`, which is usually the better way to buy speed without fully surrendering optimality.
+`b` is the branching factor and `m` the maximum depth of the search space. Every bound is governed by heuristic quality: a strong `h` keeps the frontier small and the path close to direct, while a weak one distinguishes no better than an uninformed traversal. Like A*, Greedy Best-First holds every generated node in memory, so space tracks the number of nodes generated and is usually the binding limit before time is.
+
+## When the estimate misleads
+
+The h-only ordering fails in three distinct ways, all traceable to the missing `g` term.
+
+**A path that looks close but is long.** Suppose neighbor `A` sits one cell from the goal in straight-line distance (`h(A) = 1`) but reaches it only through a long corridor that winds the far way around, while neighbor `B` is farther in straight line (`h(B) = 5`) yet lies on a short, direct route of about five steps. Greedy Best-First pops `A` first because `1 < 5`, follows the corridor, and returns a route many times the length of the direct route through `B`. `B` is dequeued only after the goal has already been reached, and nothing flags the result as suboptimal — the search optimised "get closer now," never "minimise total cost."
+
+**Loops without a visited set.** With no closed set, a node the search has already left can be re-enqueued, and on a cyclic graph the frontier can oscillate between two low-`h` nodes indefinitely. A visited set bounds any finite graph, but it cannot rescue an infinite one: where `h` keeps improving down a fruitless branch, there is no `g` bound to force the search to abandon that region, so it never terminates.
+
+**A poor heuristic collapses to uninformed search.** If `h` returns near-constant or weakly correlated values, the priority queue no longer separates directions and expansion degrades to an uninformed fan-out, paying the full `O(b^m)`. The concave obstacle is the common concrete case: a wall cupping the goal gives every cell inside the pocket a tempting low `h`, so the search thrashes along the barrier — re-committing to the blocked heading because those cells keep scoring lowest — before it discovers the way around.
+
+## Reference drawer
+
+> [!ABSTRACT]- Control flow
+> ```mermaid
+> flowchart TD
+>   A[Push source keyed by h of source] --> B{Priority queue empty}
+>   B -->|Yes| Z[No path found]
+>   B -->|No| C[Pop node u with smallest h]
+>   C --> D{u is the goal}
+>   D -->|Yes| Y[Reconstruct path from parents]
+>   D -->|No| E[For each unvisited neighbor v]
+>   E --> F[Set parent of v to u and mark visited]
+>   F --> G[Push v keyed by h of v, ignoring edge cost]
+>   G --> E
+>   E --> B
+> ```
+
+> [!EXAMPLE]- C# implementation
+> ```csharp
+> public static IReadOnlyList<int>? GreedyBestFirstSearch(
+>     IReadOnlyList<IReadOnlyList<int>> neighbors,
+>     Func<int, int> heuristic,
+>     int source,
+>     int goal)
+> {
+>     var frontier = new PriorityQueue<int, int>();
+>     var parent = new Dictionary<int, int>();
+>     var visited = new HashSet<int> { source };
+>     frontier.Enqueue(source, heuristic(source));
+>
+>     while (frontier.Count > 0)
+>     {
+>         var u = frontier.Dequeue();
+>         if (u == goal)
+>         {
+>             return Reconstruct(u);
+>         }
+>
+>         foreach (var v in neighbors[u])
+>         {
+>             if (visited.Add(v))
+>             {
+>                 parent[v] = u;
+>                 frontier.Enqueue(v, heuristic(v)); // key is h(v) alone; edge cost never read
+>             }
+>         }
+>     }
+>
+>     return null;
+>
+>     List<int> Reconstruct(int node)
+>     {
+>         var path = new List<int> { node };
+>         while (parent.TryGetValue(node, out var previous))
+>         {
+>             node = previous;
+>             path.Add(node);
+>         }
+>         path.Reverse();
+>         return path;
+>     }
+> }
+> ```
+> The priority key is `heuristic(v)` with no `g` term, so the frontier orders by estimated distance to the goal alone. `visited` guarantees termination on a finite graph but says nothing about path length.
+
+## Comparison
+
+| Strategy | Frontier key | Time (worst) | Optimal | Stronger case | Weaker case |
+| --- | --- | --- | --- | --- | --- |
+| Greedy Best-First | `h(n)` | `O(b^m)` | No | Any acceptable path is needed fast and `h` is strong | Path cost matters, or `h` is weak or the geometry is concave |
+| [[A-Start Search\|A*]] | `f = g + h` | `O(b^m)` | Yes, with an admissible `h` | A shortest path is required while still exploiting a heuristic | Stores and re-expands more nodes, so memory is the ceiling |
+| [[Dijkstra]] | `g(n)` | `O((V + E) log V)` | Yes | Optimal paths with no usable heuristic, or many goals at once | No goal direction, so it expands outward in every direction |
+| [[DFS BFS\|BFS]] | insertion order | `O(V + E)` | Yes on unit edges | Fewest-edge path on an unweighted graph | Weighted edges, and no heuristic pull toward the goal |
+
+Greedy Best-First, A*, and Dijkstra are one family separated only by how much the cost-so-far counts: Dijkstra weights `g` fully and ignores the goal, Greedy Best-First weights it at zero and follows the goal blindly, and A* weights both — with an admissible heuristic it keeps the goal pull while restoring optimality. Greedy Best-First is the fast fit when any reasonable path suffices and the heuristic is strong, as in an interactive pathfinding preview that redraws while the goal is being dragged. A* becomes the fit when the returned path must be optimal, and it pays for that with more expansions and more memory; weighted A* with a large weight approximates the greedy behaviour while still tracking `g`. BFS remains the fit only when edges are unweighted and no heuristic is available.
 
 ## Questions
 
 > [!QUESTION]- Why is Greedy Best-First Search neither optimal nor complete?
-> - It orders the frontier by `h(n)` alone, the estimated cost to the goal, and never accounts for `g(n)`, the cost already spent.
-> - Because it ignores accumulated cost, a locally attractive step can lock it into a globally expensive path — so the returned path can be far from shortest (not optimal).
-> - On an infinite graph, or without a visited set, it can chase an ever-improving heuristic down a fruitless branch forever (not complete).
-> - The takeaway: GBFS trades every correctness guarantee for speed, so it only belongs where "any path, fast" is genuinely acceptable — otherwise [[A-Start Search|A* Search]] gives you the same goal-seeking behavior with optimality restored.
+> It orders the frontier by `h(n)` alone and never accounts for `g(n)`, the cost already spent. A neighbor that is close in straight-line distance but reached by a long detour is expanded before a farther-looking neighbor that sits beside the goal, so the returned path can be far from shortest — not optimal. On an infinite graph a monotonically improving `h` can lead expansion down a branch that never reaches the goal — not complete. A finite graph with a visited set terminates, but the path it returns can still be long.
 
-> [!QUESTION]- Where does GBFS sit on the spectrum between Dijkstra and A*?
-> - [[Dijkstra]] ranks purely by `g` (cost-so-far) and ignores the goal — optimal but explores in all directions.
-> - GBFS ranks purely by `h` (cost-to-go) and ignores accumulated cost — fast toward the goal but suboptimal and incomplete.
-> - [[A-Start Search|A* Search]] ranks by `f = g + h`, combining both — the principled middle that keeps GBFS's goal pull while regaining optimality.
-> - Seeing the three as one family clarifies design choices: you're really tuning how much to trust the heuristic, and weighted A* lets you dial continuously between the A* middle and the greedy extreme.
+> [!QUESTION]- What single change turns Greedy Best-First Search into A*, and what does it restore?
+> Adding the cost-so-far to the key: ranking by `f = g + h` instead of `h` alone. With an admissible heuristic this restores optimality, because a node reached expensively can no longer outrank a cheaper route that merely looks farther. Greedy Best-First is A* with `g` weighted at zero.
 
-> [!QUESTION]- What is the concave-obstacle failure mode and how do you avoid it?
-> - A wall shaped like a pocket around the goal gives every cell inside it a low `h`, so GBFS is lured in.
-> - Once inside, the direct heading to the goal is blocked, and with no cost awareness GBFS thrashes along the barrier re-committing to the blocked direction before escaping the long way.
-> - Avoid it by using a cost-aware search (A* or [[Dijkstra]]) on maps with concave geometry, or by precomputing an obstacle-aware heuristic like a navigation-mesh distance.
-> - It illustrates that a heuristic is only a hint: when map geometry contradicts the straight-line estimate, pure greedy search pays for its lack of memory — which is exactly the case A* was designed to handle.
+> [!QUESTION]- Why does a concave obstacle around the goal cause thrashing?
+> Every cell inside the pocket is geometrically near the goal, so all of them score a low `h` and the frontier keeps selecting barrier-hugging cells. The direct heading is blocked, and the accumulated `g` that would reveal the long way around is never read, so expansion oscillates along the wall before escaping. It is the h-only ordering, not the map, that has no way to notice the pocket is a dead pull.
+
+> [!QUESTION]- What does the visited set guarantee, and what does it not fix?
+> It stops a node from being enqueued twice, which prevents cycles from looping forever and guarantees termination on a finite graph. It does not make the returned path optimal, and it cannot bound an infinite graph where `h` keeps improving down a fruitless branch.
 
 ## References
 
-- [Best-first search (Wikipedia)](https://en.wikipedia.org/wiki/Best-first_search) — greedy best-first as a special case of best-first search and its relation to A*.
-- [Heuristics (Amit's A* Pages, Stanford)](https://theory.stanford.edu/~amitp/GameProgramming/Heuristics.html) — how heuristic weighting slides between Dijkstra, A*, and greedy behavior.
-- [Introduction to A* (Red Blob Games)](https://www.redblobgames.com/pathfinding/a-star/introduction.html) — side-by-side interactive comparison of Greedy Best-First, Dijkstra, and A* on the same grid.
+- [Best-first search (Wikipedia)](https://en.wikipedia.org/wiki/Best-first_search) — greedy best-first as the `f = h` special case of best-first search, with its optimality and completeness caveats.
+- [Heuristics (Amit's A* Pages, Stanford)](https://theory.stanford.edu/~amitp/GameProgramming/Heuristics.html) — how the heuristic weight slides a search between Dijkstra, A*, and greedy behaviour.
+- [Introduction to A* (Red Blob Games)](https://www.redblobgames.com/pathfinding/a-star/introduction.html) — side-by-side interactive comparison of Greedy Best-First, Dijkstra, and A* on one grid, including the concave-obstacle case.
