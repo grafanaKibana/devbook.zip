@@ -30,7 +30,7 @@ The first comparison adds the extremes, `1 + 13 = 14`, which falls short of `18`
 
 ## Why moving one pointer discards a whole set
 
-Sorted order is the invariant that turns each move into a proof instead of a guess. Picture the full grid of candidate pairs `(i, j)` with `i < j`: a brute-force loop inspects all `O(n²)` cells. The converging pointers instead sit at one cell `(left, right)` and let a single comparison eliminate an entire line of that grid.
+Sorted order is the invariant that turns each move into a proof instead of a guess. Consider the full grid of candidate pairs `(i, j)` with `i < j`: a brute-force loop inspects all `O(n²)` cells. The converging pointers instead sit at one cell `(left, right)` and let a single comparison eliminate an entire line of that grid.
 
 - `a[left] + a[right] < target`: every pair `(left, j)` with `j ≤ right` uses a partner no larger than `a[right]`, so all of them are even smaller. The column at `left` holds no solution; `left++`.
 - `a[left] + a[right] > target`: every pair `(i, right)` with `i ≥ left` uses a value no smaller than `a[left]`, so all of them are even larger. The row at `right` holds no solution; `right--`.

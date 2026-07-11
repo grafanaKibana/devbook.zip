@@ -50,8 +50,6 @@ The amortized column assumes both heuristics. Union by rank *alone* keeps tree h
 
 ## Where the bound and the interface stop
 
-The `O(α(n))` figure is amortized, never a per-call promise. A `find` on a freshly linked chain still walks `O(log n)` parents; the guarantee is only that the total for `m` operations is `O(m α(n))`.
-
 Path compression trades reversibility for speed. Once a `find` rewrites the parents it walked, the pre-compression shape is gone, so a merge cannot be undone. Rollback DSU keeps union by rank and *drops* compression precisely to preserve that history: each `union` records the single parent-and-rank change it made and can pop it. That is how an offline problem with edge deletions is solved — process the sequence in reverse so every deletion becomes an addition, undoing merges as it unwinds ([rollback DSU](https://cp-algorithms.com/data_structures/deleting_in_log_n.html)).
 
 The interface only grows sets. There is no split, and no removal of an element from a set — the parent forest records membership, not the edges that produced it, so a merged component cannot be separated back into its pre-merge pieces. That limit belongs to the [[Disjoint Set]] page as its own boundary; the algorithmic consequence here is that any workload with removals needs either a rollback variant run offline or a fully dynamic connectivity structure.

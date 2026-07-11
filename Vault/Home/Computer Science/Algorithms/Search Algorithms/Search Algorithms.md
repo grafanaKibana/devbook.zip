@@ -65,7 +65,7 @@ flowchart TD
 | Data shape | Algorithm | Time | Precondition |
 | --- | --- | --- | --- |
 | Graph (unweighted) | [[DFS BFS\|BFS / DFS]] | O(V + E) | — |
-| Graph (weighted) | See [[Graph Algorithms]] | — | [[Dijkstra]], [[A-Start Search\|A* Search]], [[Bellman-Ford]] |
+| Graph (weighted) | See [[Graph Algorithms]] | — | [[Dijkstra]], [[A-Star Search\|A* Search]], [[Bellman-Ford]] |
 
 ## Questions
 

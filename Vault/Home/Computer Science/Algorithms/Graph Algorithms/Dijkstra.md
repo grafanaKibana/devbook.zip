@@ -119,7 +119,7 @@ Every alternative below answers a shortest-path-shaped question over the same gr
 | --- | --- | --- | --- | --- |
 | Dijkstra | `O((V + E) log V)` | non-negative weights | single source, all targets, weighted | any negative edge |
 | [[Bellman-Ford]] | `O(VE)` | nothing; reports negative cycles | negative weights, cycle detection | dense graphs, or when weights are all non-negative and the `VE` cost is wasted |
-| [[A-Start Search]] | `O((V + E) log V)` worst; far fewer expansions with a heuristic | an admissible heuristic and a single target | one source–target pair with a good spatial estimate | all-pairs work, or when no heuristic exists |
+| [[A-Star Search|A* Search]] | `O((V + E) log V)` worst; far fewer expansions with a heuristic | an admissible heuristic and a single target | one source–target pair with a good spatial estimate | all-pairs work, or when no heuristic exists |
 | BFS ([[DFS BFS]]) | `O(V + E)` | unweighted (unit-cost) edges | shortest path by edge count | any differing edge weights |
 | Prim ([[Minimum Spanning Tree]]) | `O((V + E) log V)` | undirected connected graph | cheapest tree spanning all nodes | shortest distance from a source — a different objective |
 

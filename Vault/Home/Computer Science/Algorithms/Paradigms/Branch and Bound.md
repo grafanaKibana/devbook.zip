@@ -34,7 +34,7 @@ Branch-and-bound turns on four moving parts:
 
 The correctness of the discard rests on the optimism of the bound. For maximisation, "optimistic" means the bound is `≥` the true best of every completion in the subtree. So if `bound ≤ incumbent`, then *every* completion is `≤ incumbent`, and none of them can improve the answer — the subtree can be removed unexplored without risking the optimum. Minimisation reverses the inequality.
 
-This is the same optimism requirement as [[A-Start Search|A* Search]]'s admissibility condition: a guided tree search stays correct only while its estimate errs in the optimistic direction and never lies pessimistically. Branch-and-bound is that same idea applied to the decision tree of an optimisation problem, with the bounding function playing the role of the heuristic. It is why an LP relaxation is a safe bound — an optimal fractional solution can only meet or exceed the integer optimum, so ignoring integrality never under-shoots.
+This is the same optimism requirement as [[A-Star Search|A* Search]]'s admissibility condition: a guided tree search stays correct only while its estimate errs in the optimistic direction and never lies pessimistically. Branch-and-bound is that same idea applied to the decision tree of an optimisation problem, with the bounding function playing the role of the heuristic. It is why an LP relaxation is a safe bound — an optimal fractional solution can only meet or exceed the integer optimum, so ignoring integrality never under-shoots.
 
 ## Exploration order
 

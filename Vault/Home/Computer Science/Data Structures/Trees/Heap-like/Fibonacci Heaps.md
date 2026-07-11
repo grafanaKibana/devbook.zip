@@ -33,7 +33,7 @@ Three invariants hold between operations:
 2. **Distinct root degrees only after consolidation.** Between extract-mins the root list may contain many roots of the same degree; consolidation restores distinctness, and that is the only place it is enforced.
 3. **The mark records one prior loss.** A root is always unmarked. A non-root becomes marked when it loses its *first* child to a cut; losing a *second* child triggers a cut of the node itself.
 
-The mark bit is the whole trick. Insert and merge never touch existing trees, so nothing bounds tree shape on its own — repeated decrease-keys could otherwise strip a high-degree node down to almost nothing and leave consolidation linking wide, shallow trees forever. The cascading cut caps the damage: a node is allowed to lose at most one child before it is itself cut up to the root list. That guarantees a node of degree `k` retains at least `F(k + 2)` descendants (consecutive Fibonacci numbers, hence the name), which forces the maximum degree — and therefore the cost of consolidation — to stay `O(log n)`.
+The mark bit is what bounds tree shape. Insert and merge never touch existing trees, so nothing bounds tree shape on its own — repeated decrease-keys could otherwise strip a high-degree node down to almost nothing and leave consolidation linking wide, shallow trees forever. The cascading cut caps the damage: a node is allowed to lose at most one child before it is itself cut up to the root list. That guarantees a node of degree `k` retains at least `F(k + 2)` descendants (consecutive Fibonacci numbers, hence the name), which forces the maximum degree — and therefore the cost of consolidation — to stay `O(log n)`.
 
 Which fields each operation may change:
 

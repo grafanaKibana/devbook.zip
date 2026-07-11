@@ -29,7 +29,7 @@ The frontier is a priority queue keyed by `h(n)`. Each iteration pops the node w
 
 The only property this maintains is that the next node expanded is the one the heuristic currently rates closest to the goal. Nothing ties the order of expansion to the length of the path built so far, which is the guarantee a cost-aware search provides and this one drops. When `h` is accurate and the map is open, the estimate shrinks along an almost straight line and the goal is reached after expanding on the order of `m` nodes. When `h` points into an obstacle, the same rule keeps re-selecting cells that hug the barrier because they still score lowest, and the accumulated `g` that would expose the detour is never consulted.
 
-One framing makes the family relationship exact: [[A-Start Search|A*]] expands by `f = g + h`. Setting `g` to zero collapses `f` to `h`, which is precisely Greedy Best-First — the case where a node's history counts for nothing.
+One framing makes the family relationship exact: [[A-Star Search|A*]] expands by `f = g + h`. Setting `g` to zero collapses `f` to `h`, which is precisely Greedy Best-First — the case where a node's history counts for nothing.
 
 ## Complexity
 
@@ -121,7 +121,7 @@ The h-only ordering fails in three distinct ways, all traceable to the missing `
 | Strategy | Frontier key | Time (worst) | Optimal | Stronger case | Weaker case |
 | --- | --- | --- | --- | --- | --- |
 | Greedy Best-First | `h(n)` | `O(b^m)` | No | Any acceptable path is needed fast and `h` is strong | Path cost matters, or `h` is weak or the geometry is concave |
-| [[A-Start Search\|A*]] | `f = g + h` | `O(b^m)` | Yes, with an admissible `h` | A shortest path is required while still exploiting a heuristic | Stores and re-expands more nodes, so memory is the ceiling |
+| [[A-Star Search\|A*]] | `f = g + h` | `O(b^m)` | Yes, with an admissible `h` | A shortest path is required while still exploiting a heuristic | Stores and re-expands more nodes, so memory is the ceiling |
 | [[Dijkstra]] | `g(n)` | `O((V + E) log V)` | Yes | Optimal paths with no usable heuristic, or many goals at once | No goal direction, so it expands outward in every direction |
 | [[DFS BFS\|BFS]] | insertion order | `O(V + E)` | Yes on unit edges | Fewest-edge path on an unweighted graph | Weighted edges, and no heuristic pull toward the goal |
 

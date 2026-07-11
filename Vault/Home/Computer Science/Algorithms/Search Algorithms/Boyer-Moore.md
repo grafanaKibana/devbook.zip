@@ -202,6 +202,6 @@ Boyer-Moore, and the Horspool variant it usually appears as, is the practical de
 ## References
 
 - [A Fast String Searching Algorithm](https://dl.acm.org/doi/10.1145/359842.359859) — Boyer and Moore's original 1977 CACM paper introducing right-to-left scanning with the two shift heuristics.
-- [Exact String Matching Algorithms](http://www-igm.univ-mlv.fr/~lecroq/string/) — Charras and Lecroq's handbook with the canonical bad-character, good-suffix, and `suffixes` preprocessing this note's implementation follows.
+- Charras & Lecroq, *Handbook of Exact String-Matching Algorithms* (King's College Publications, 2004) — the canonical bad-character, good-suffix, and `suffixes` preprocessing this note's implementation follows (also published as the online ESMAJ handbook).
 - [Boyer–Moore string-search algorithm](https://en.wikipedia.org/wiki/Boyer%E2%80%93Moore_string-search_algorithm) — both heuristics, the Galil rule, and the complexity analysis distinguishing the plain and linear worst cases.
 - [Boyer–Moore–Horspool algorithm](https://en.wikipedia.org/wiki/Boyer%E2%80%93Moore%E2%80%93Horspool_algorithm) — the bad-character-only simplification most production code ships.
