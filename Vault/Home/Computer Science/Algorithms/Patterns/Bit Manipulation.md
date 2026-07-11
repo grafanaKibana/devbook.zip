@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Operates directly on integers' binary representation, using bitmasks to model small sets, flags, and subsets with O(1) operations and near-zero memory."
 level:
   - "4"
 priority: Medium

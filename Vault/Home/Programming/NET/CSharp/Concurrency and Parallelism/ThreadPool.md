@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "The .NET ThreadPool is the shared execution engine for Task-based work, dynamically managing worker and I/O threads to balance throughput and latency."
 level:
   - "4"
 priority: High

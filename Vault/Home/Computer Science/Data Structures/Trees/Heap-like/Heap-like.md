@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "Heap-like structures share a partial-order root-peek contract and diverge on meld and decreaseKey, trading array locality for pointer-based merging."
 tags:
   - FolderNote
 level:
@@ -17,6 +18,11 @@ publish: true
 Heap-like structures share one contract — a **partial order** (parent beats child, nothing promised between siblings) that keeps the best-priority item at a root for O(1) peek — and differ on everything else. The axis that splits the family is **meld** (merging two heaps into one). An array-backed binary heap can't meld cheaply: concatenating two arrays and re-heapifying is O(n). Every other member of the family exists to fix that, paying for it with pointer-based nodes — per-node allocation, GC pressure, cache misses on every hop.
 
 The second axis is **decreaseKey** — raising an item's priority in place, the operation Dijkstra and Prim lean on. Only [[Fibonacci Heaps]] make it O(1) amortized, and that theoretical win rarely survives contact with real hardware: .NET's `PriorityQueue<TElement, TPriority>` (an array-backed quaternary heap) ships with *no meld and no decreaseKey* and still wins most benchmarks, because sequential index arithmetic in a flat array beats chasing four pointers per node. The lazy-deletion workaround for decreaseKey lives in [[Heap]].
+
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
 
 ## The family
 

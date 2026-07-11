@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "ASP.NET Core's built-in IoC container manages service lifetimes and injects dependencies via constructor injection throughout the app."
 level:
   - "1"
 priority: Medium

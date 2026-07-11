@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Patterns
+summary: "Defines a one-to-many dependency where a subject's state change automatically notifies all subscribers — C#'s event and delegate."
 level:
   - "3"
 priority: High

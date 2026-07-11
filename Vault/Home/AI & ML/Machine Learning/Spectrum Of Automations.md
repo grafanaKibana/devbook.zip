@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - Machine Learning
+summary: "Five levels of AI involvement in a task, from fully human-driven to fully autonomous, framing how much to trust a system as confidence grows."
 level:
   - "1"
 priority: Low

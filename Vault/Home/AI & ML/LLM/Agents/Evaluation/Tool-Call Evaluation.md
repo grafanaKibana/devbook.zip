@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "Scoring each agent tool call on four axes—right tool, correct arguments, valid call, and necessity—since one number hides distinct fixes."
 level:
   - "3"
 priority: High

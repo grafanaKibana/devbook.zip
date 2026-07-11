@@ -3,6 +3,7 @@ topic:
   - Development Practices
 subtopic:
   - Paradigms
+summary: "An integration test verifies that multiple components work together with real infrastructure like databases, HTTP clients, and queues."
 level:
   - "3"
 priority: High

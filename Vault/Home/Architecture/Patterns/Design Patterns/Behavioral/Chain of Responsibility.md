@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Patterns
+summary: "Passes a request along a chain of handlers, each deciding to process it or forward it to the next."
 level:
   - "3"
 priority: High

@@ -22,6 +22,11 @@ Two areas are covered here: **data structures** (how to organize data for effici
 
 A concrete example: a code review reveals a nested loop checking membership in a `List<T>` — O(n²) per batch. Replacing the inner list with a `HashSet<T>` turns it into O(n) with constant-factor lookups. That is not optimization trivia — it is the difference between a batch job finishing in seconds versus timing out.
 
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
+
 ## Questions
 
 > [!QUESTION]- When does algorithmic complexity matter less than constant factors?
@@ -31,7 +36,7 @@ A concrete example: a code review reveals a nested loop checking membership in a
 > [!QUESTION]- How do you decide between optimizing data structure choice versus algorithm choice?
 > Start with the data structure. The right structure often eliminates the need for a clever algorithm — a `HashSet<T>` gives O(1) lookup without binary search, a `SortedSet<T>` gives ordered iteration without explicit sorting. Optimize the algorithm when the structure is fixed by external constraints (e.g., searching within a sorted array from an external source).
 
-## Links
+## References
 
 - [Big O cheat sheet](https://www.bigocheatsheet.com/) — Visual comparison of data structure and algorithm complexities.
 - [Introduction to Algorithms (MIT OpenCourseWare)](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/) — University-level CS fundamentals with lectures and problem sets.

@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Matches patterns by comparing rolling hashes of text windows, expected O(n + m), extending naturally to multi-pattern search."
 level:
   - "4"
 priority: Medium

@@ -3,6 +3,7 @@ topic:
   - Data Persistence
 subtopic:
   - SQL
+summary: "Replication keeps copies of the same data on multiple nodes to spread read load, survive failures, and recover from disasters."
 level:
   - "4"
 priority: High

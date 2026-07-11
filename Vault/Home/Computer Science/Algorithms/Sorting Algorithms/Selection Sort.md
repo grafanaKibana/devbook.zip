@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Repeatedly selects the minimum of the unsorted suffix; always O(n²) comparisons but only O(n) swaps."
 level:
   - "4"
 priority: Low

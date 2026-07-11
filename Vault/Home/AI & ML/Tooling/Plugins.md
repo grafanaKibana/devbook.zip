@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - Tooling
+summary: "Extension mechanisms that add tools, data sources, and reusable workflows to coding agents, standardized today by the Model Context Protocol."
 publish: true
 status: Done
 level:

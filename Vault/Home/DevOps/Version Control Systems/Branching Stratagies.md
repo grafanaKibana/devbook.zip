@@ -3,6 +3,7 @@ topic:
   - DevOps
 subtopic:
   - Version Control Systems
+summary: "How a team uses Git branches to manage parallel development, releases, and hotfixes; the right strategy depends on team and CI/CD maturity."
 level:
   - "4"
 priority: High

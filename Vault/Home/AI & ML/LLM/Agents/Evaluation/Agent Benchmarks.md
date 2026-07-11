@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "Public fixed task suites scoring how a model-plus-scaffold completes multi-step tool-using tasks; useful to shortlist models, not to decide."
 level:
   - "3"
 priority: Medium

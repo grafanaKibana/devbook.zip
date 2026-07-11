@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Distributed Systems
+summary: "Horizontal scaling adds more service instances behind a load balancer, requiring stateless design and externalized state to grow capacity."
 level:
   - "2"
 priority: High

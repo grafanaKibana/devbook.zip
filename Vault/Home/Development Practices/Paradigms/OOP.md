@@ -3,6 +3,7 @@ topic:
   - Development Practices
 subtopic:
   - Paradigms
+summary: "OOP models a system as interacting objects that combine state and behaviour via encapsulation, abstraction, inheritance, and polymorphism."
 level:
   - "4"
 priority: Medium

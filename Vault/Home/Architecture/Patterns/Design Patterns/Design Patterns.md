@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Patterns
+summary: "23 reusable object-oriented solutions to recurring design problems, giving teams a shared vocabulary for design intent and tradeoffs."
 tags:
   - FolderNote
 priority: High
@@ -11,21 +12,14 @@ level:
   - "3"
 status: Done
 ---
-# GoF Design Patterns
+# Intro
 
 GoF (Gang of Four) Design Patterns are 23 reusable solutions to recurring object-oriented design problems, first documented in *Design Patterns: Elements of Reusable Object-Oriented Software* (1994) by Gamma, Helm, Johnson, and Vlissides. They provide a shared vocabulary for design intent — when a team says "let's use a Strategy here," everyone immediately understands the tradeoffs without long explanations. Patterns are not copy-paste code; they're templates for solving classes of problems. This section covers all 23 GoF patterns organized by category, each with production C# examples showing the problem without the pattern, the transformation with it, and the .NET built-ins that already implement it — connecting new knowledge to things you use daily.
 
-## The Three Categories
-
-**[[Home/Architecture/Patterns/Design Patterns/Creational/Creational|Creational Patterns]]** (5 patterns) abstract the instantiation process, making systems independent of how objects are created. Reach for them when construction logic becomes complex or needs to vary by context.
-
-**[[Home/Architecture/Patterns/Design Patterns/Structural/Structural|Structural Patterns]]** (7 patterns) deal with how classes and objects compose into larger, flexible structures. Reach for them when you need to adapt incompatible interfaces, wrap objects transparently, or simplify complex subsystems.
-
-**[[Home/Architecture/Patterns/Design Patterns/Behavioral/Behavioral|Behavioral Patterns]]** (11 patterns) are concerned with algorithms and communication between objects. Reach for them when you need to decouple senders from receivers, make algorithms swappable, or orchestrate complex workflows without tight coupling.
-
-## How to Use This Section
-
-Each pattern page shows the same e-commerce scenario coded **without** the pattern — with inline comments highlighting the exact coupling, duplication, or rigidity — then **with** the pattern applied, showing what improved. Every page closes with the .NET framework implementations of that pattern you already use without realising it's a design pattern.
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
 
 ## Questions
 

@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "Non-LLM tests that strictly validate outputs — schema, required fields, safety, policy — cheaply and reproducibly, run before any expensive LLM judge."
 level:
   - "3"
 priority: Medium

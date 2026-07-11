@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Patterns
+summary: "Defensive strategies that re-attempt transient failures and bound how long a call may wait before failing."
 level:
   - "3"
 priority: High

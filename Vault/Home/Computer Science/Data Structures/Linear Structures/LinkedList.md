@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "A doubly linked list giving O(1) inserts and removes around node references you already hold, at the cost of locality."
 level:
   - "4"
 priority: Medium

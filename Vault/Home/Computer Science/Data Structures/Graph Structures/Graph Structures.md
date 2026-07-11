@@ -19,6 +19,11 @@ Graph structures model relationships between entities — service dependencies, 
 
 That last option is the reason this folder has two notes rather than one. [[Graph]] is the explicit representation — you keep vertices and edges and run traversals (BFS, DFS, Dijkstra) over them. [[Disjoint Set]] keeps no edges: it collapses the graph into "which component is this vertex in?", trading every other question away for near-constant connectivity queries and merges.
 
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
+
 ## Which Note You Need
 
 | You need to answer | Reach for | Why |

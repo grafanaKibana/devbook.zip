@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Application Architecture
+summary: "Structures an application into layers with clear responsibilities and strict dependency directions, isolating business rules from infrastructure details."
 level:
   - "4"
 priority: High

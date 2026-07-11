@@ -3,6 +3,7 @@ topic:
   - Security
 subtopic:
   - Security
+summary: "Maps data of any size to a fixed-size digest that is one-way and collision-resistant."
 level:
   - "4"
 priority: High

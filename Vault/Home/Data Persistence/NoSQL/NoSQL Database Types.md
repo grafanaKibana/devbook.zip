@@ -3,6 +3,7 @@ topic:
   - Data Persistence
 subtopic:
   - NoSQL
+summary: "The four NoSQL families — document, key-value, wide-column, and graph — each trade relational schema and joins for a different access pattern."
 level:
   - "3"
 priority: High

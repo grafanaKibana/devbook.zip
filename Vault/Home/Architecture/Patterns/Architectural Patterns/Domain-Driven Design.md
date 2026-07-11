@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Patterns
+summary: "Domain-Driven Design centers software design on the business domain — its language, rules, and boundaries — rather than on technical infrastructure."
 level:
   - "2"
 priority: High

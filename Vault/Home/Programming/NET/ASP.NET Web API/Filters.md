@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "Filters run logic before and after stages of controller action execution, for cross-cutting concerns tightly coupled to MVC actions."
 level:
   - "2"
 priority: Medium

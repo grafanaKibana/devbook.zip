@@ -3,6 +3,7 @@ topic:
   - Cloud
 subtopic:
   - AWS
+summary: "AWS is the largest public cloud platform, offering .NET engineers mature SDKs, deep Kubernetes support, and the broadest service catalog."
 level:
   - "3"
 priority: Medium
@@ -12,9 +13,14 @@ tags:
 publish: true
 ---
 
-# AWS Services Overview
+# Intro
 
 AWS (Amazon Web Services) is the largest public cloud platform by market share. For .NET engineers, AWS provides mature SDKs, deep Kubernetes support (EKS), and the broadest service catalog. This page covers the four AWS services most commonly used in .NET/AI workloads.
+
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
 
 ```bash
 # Verify active identity

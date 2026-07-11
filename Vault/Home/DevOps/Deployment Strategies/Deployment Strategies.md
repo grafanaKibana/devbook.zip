@@ -3,6 +3,7 @@ topic:
   - DevOps
 subtopic:
   - Deployment Strategies
+summary: "Deployment strategies control how new versions reach production, balancing risk, infrastructure cost, and rollback speed."
 publish: true
 status:
   - Ready to Repeat

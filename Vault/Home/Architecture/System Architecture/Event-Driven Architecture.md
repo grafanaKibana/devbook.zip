@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - System Architecture
+summary: "A style where services communicate by publishing and consuming events instead of calling each other directly, reducing coupling and improving resilience."
 level:
   - "2"
 priority: High

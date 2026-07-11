@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "Making intermediate reasoning explicit: Chain-of-Thought, Self-Consistency voting, and Tree of Thoughts search for multi-step tasks."
 level:
   - "3"
 priority: Medium

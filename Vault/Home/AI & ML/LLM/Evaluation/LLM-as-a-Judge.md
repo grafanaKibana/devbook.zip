@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "One model grades another's output against an explicit rubric, via absolute scoring or pairwise preference — scalable, semantics-aware regression testing."
 level:
   - "3"
 priority: Medium

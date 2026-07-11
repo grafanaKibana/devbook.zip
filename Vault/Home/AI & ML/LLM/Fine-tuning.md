@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "Continuing training a model's weights on task-specific data to bake in behavior — format, tone, policy — rather than knowledge."
 level:
   - "2"
 priority: High

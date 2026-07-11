@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Precomputes cumulative sums so any range sum becomes one O(1) subtraction after an O(n) build, over static data."
 level:
   - "4"
 priority: Medium

@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Distributed Systems
+summary: "Windows-native, disk-durable message queuing for reliable asynchronous messaging in on-premise environments; now a legacy technology."
 level:
   - "2"
 priority: High

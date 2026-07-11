@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "Golden sets give broad regression coverage while targeted suites catch specific high-risk failure modes; you need both to trust a change."
 level:
   - "3"
 priority: Medium

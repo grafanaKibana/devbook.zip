@@ -3,6 +3,7 @@ topic:
   - Security
 subtopic:
   - Security
+summary: "Proves a message was created by a specific party (authenticity) and unchanged since signing (integrity), without hiding content."
 level:
   - "2"
 priority: Medium

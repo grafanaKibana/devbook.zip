@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Patterns
+summary: "Provides an interface for creating families of related objects without specifying their concrete classes, keeping every product in a family compatible."
 level:
   - "3"
 priority: High

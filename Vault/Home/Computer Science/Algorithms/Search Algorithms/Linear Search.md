@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Scans elements one at a time until a match, assuming nothing about the data; O(n) but the always-works fallback."
 level:
   - "4"
 priority: Medium

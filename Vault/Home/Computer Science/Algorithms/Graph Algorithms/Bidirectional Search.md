@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Runs forward and backward searches that meet in the middle, cutting an O(b^d) search to two O(b^(d/2)) halves on point-to-point queries."
 level:
   - "4"
 priority: Medium

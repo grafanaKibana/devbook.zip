@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Builds a solution by repeatedly making the locally best choice and never reconsidering — fast, but correct only when provably applicable."
 level:
   - "4"
 priority: High

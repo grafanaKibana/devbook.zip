@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Sorts fixed-width integer keys one digit at a time with a stable pass, beating the comparison bound."
 level:
   - "4"
 priority: Medium

@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "Ecosystem .NET topics that don't fit language/runtime buckets, such as legacy OWIN hosting and SignalR real-time communication."
 tags:
   - FolderNote
 publish: true
@@ -16,6 +17,11 @@ status: Creation
 
 Not everything in .NET fits cleanly into language/runtime buckets. This folder captures ecosystem topics that are important in practice but often context-dependent, such as legacy web hosting abstractions and real-time communication stacks. Example: use SignalR for server-push real-time updates, and study OWIN mainly for legacy ASP.NET maintenance or migration work.
 
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
+
 ## Questions
 
 > [!QUESTION]- When should you use SignalR versus polling or server-sent events?
@@ -26,7 +32,7 @@ Not everything in .NET fits cleanly into language/runtime buckets. This folder c
 > OWIN matters for teams maintaining or migrating legacy ASP.NET Framework applications. Understanding the OWIN middleware pipeline model helps when migrating to ASP.NET Core's similar but distinct middleware pipeline, and when troubleshooting Katana-hosted services still running in production.
 
 
-## Links
+## References
 
 - [.NET documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/) — Platform overview and official references.
 - [ASP.NET Core documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/) — Modern web stack guidance for middleware and real-time features.

@@ -3,6 +3,7 @@ topic:
   - Security
 subtopic:
   - Authentication
+summary: "Lets a user authenticate once with a central Identity Provider, then access many applications without re-entering credentials."
 level:
   - "3"
 priority: High

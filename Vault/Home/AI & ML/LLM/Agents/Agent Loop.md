@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "The execution cycle — ReAct's think-act-observe — that turns an LLM from a single-shot generator into an autonomous problem solver looping over tools."
 level:
   - "3"
 priority: Medium

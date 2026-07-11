@@ -3,6 +3,7 @@ topic:
   - Development Practices
 subtopic:
   - Paradigms
+summary: "Test-Driven Development writes a failing test before the code that satisfies it, using Red-Green-Refactor as a design technique."
 level:
   - "4"
 priority: High

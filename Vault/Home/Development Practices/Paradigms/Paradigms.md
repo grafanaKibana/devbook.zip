@@ -3,6 +3,7 @@ topic:
   - Development Practices
 subtopic:
   - Paradigms
+summary: "A paradigm is the mental model you adopt before writing code; this folder groups programming and testing/development paradigms."
 tags:
   - FolderNote
 publish: true
@@ -14,20 +15,13 @@ priority: High
 
 # Intro
 
-A *paradigm* here is a way of modelling and building software — the mental model you adopt before writing code. Knowing several lets you pick the simplest model for the job (a functional style shines in data transformations where immutability cuts bugs; an event-driven one decouples producers from consumers). This folder groups two related families:
+A *paradigm* here is a way of modelling and building software — the mental model you adopt before writing code. Knowing several lets you pick the simplest model for the job (a functional style shines in data transformations where immutability cuts bugs; an event-driven one decouples producers from consumers). This folder groups two related families: **programming paradigms** — how you structure the code itself (OOP, functional, event-driven) — and **testing & development paradigms** — how you drive and verify the work (TDD, unit testing, integration testing).
 
-**Programming paradigms** — how you structure the code itself:
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
 
-- [[OOP]] — model the domain as objects bundling state and behaviour.
-- [[Functional Programming]] — pure functions and immutable data over shared mutable state.
-- [[Event-driven]] — react to immutable facts (events) rather than calling components directly.
-
-**Testing & development paradigms** — how you drive and verify the work:
-
-- [[Test-Driven Development]] — write the failing test first, then the code that passes it.
-- [[Unit Testing]] — verify small, isolated pieces of behaviour fast.
-- [[Integration Testing]] — verify components working together with real infrastructure.
-
-## Links
+## References
 
 - [Programming paradigm (Wikipedia)](https://en.wikipedia.org/wiki/Programming_paradigm)

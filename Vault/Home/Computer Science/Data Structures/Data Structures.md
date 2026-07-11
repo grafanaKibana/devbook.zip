@@ -23,30 +23,6 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## Example
-
-```csharp
-var byId = new Dictionary<int, string>
-{
-    [42] = "Ann"
-};
-
-var ordered = new List<string> { "Ann", "Bob" };
-
-Console.WriteLine(byId[42]); // Fast lookup by key
-Console.WriteLine(ordered[0]); // Fast lookup by index
-```
-
-## Suggested Groups
-
-- **Linear structures** - arrays, dynamic arrays, linked lists, stacks, queues, deques, circular buffers, and spans belong together because they model ordered sequences.
-- **Hash-based structures** - hash maps, hash sets, and Bloom filters share the same core mechanism: hash distribution and membership/lookup tradeoffs.
-- **Graph structures** - graphs and disjoint sets belong near each other because both answer relationship/connectivity questions.
-- **Composite structures** - LRU cache belongs here because it combines a hash map with a linked list to get O(1) lookup plus O(1) recency updates.
-- **Index structures** - B-trees, B+ trees, and tries may eventually deserve their own group if the vault grows around database/file-system/search indexes.
-- **Probabilistic structures** - [[Bloom Filter]] could split from hashing later if sketches, HyperLogLog, count-min sketch, or Cuckoo filters are added.
-- **Priority structures** - heap-like structures are currently under [[Trees]] because the invariants are tree-shaped; split them only if priority queues become their own study track.
-
 ## Questions
 
 > [!QUESTION]- What is a data structure? Which ones do you know? Which of them exist in .NET?

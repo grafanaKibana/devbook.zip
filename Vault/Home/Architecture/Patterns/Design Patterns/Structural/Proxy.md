@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Patterns
+summary: "Proxy provides a surrogate for another object to control access to it — deferring, caching, or authorizing calls transparently."
 level:
   - "3"
 priority: High

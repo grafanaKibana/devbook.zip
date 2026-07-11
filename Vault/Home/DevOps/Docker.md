@@ -2,6 +2,7 @@
 topic:
   - DevOps
 subtopic: []
+summary: "Docker packages an application and its dependencies into an isolated container that runs identically across dev, CI, and production."
 level:
   - "2"
 priority: High

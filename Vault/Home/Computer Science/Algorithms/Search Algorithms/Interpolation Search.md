@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Guesses the target's position by linear interpolation between endpoints, reaching O(log log n) on uniformly distributed sorted data."
 level:
   - "4"
 priority: Medium

@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Computes an aggregate over every contiguous subarray in O(n) by incrementally updating a moving range instead of recomputing it."
 level:
   - "4"
 priority: Medium

@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "C# fundamentals — the type system, methods, generics, exceptions, namespaces, iteration, and reflection that underpin every .NET codebase."
 tags:
   - FolderNote
 publish: true
@@ -18,9 +19,12 @@ C# fundamentals are the language building blocks that appear in every .NET codeb
 
 These are not beginner topics with a ceiling. A senior developer's edge comes from knowing the mechanics well enough to predict behavior in edge cases: what happens when you box a struct through an interface, why a `foreach` over a custom type requires specific patterns, or when reflection becomes a correctness risk rather than just a performance cost.
 
-## Questions
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
 
-## Links
+## References
 
 - [C# fundamentals (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/) — Official guide to types, classes, and core language features.
 - [C# programming guide (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/) — In-depth coverage of language concepts.

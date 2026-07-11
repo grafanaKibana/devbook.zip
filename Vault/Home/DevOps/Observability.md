@@ -2,6 +2,7 @@
 topic:
   - DevOps
 subtopic: []
+summary: "Observability is understanding a system's internal state from its external outputs — metrics, logs, and traces — to move from symptoms to causes."
 level:
   - "2"
 priority: High

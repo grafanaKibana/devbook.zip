@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Expands whichever node looks closest by heuristic h(n) alone — fast and goal-seeking, but neither optimal nor complete."
 level:
   - "4"
 priority: Medium

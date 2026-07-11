@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "The OWASP Top 10 for LLM Applications (2025), cataloging the highest-impact security failures in systems that integrate large language models."
 level:
   - "3"
 priority: Medium

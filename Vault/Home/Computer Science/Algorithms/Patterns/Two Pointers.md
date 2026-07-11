@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Two indices moving over a sequence solve in O(n) what nested loops solve in O(n²), by exploiting monotonic structure."
 level:
   - "4"
 priority: Medium

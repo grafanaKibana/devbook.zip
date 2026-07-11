@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Application Architecture
+summary: "Keeps a small, stable core defining extension points and extends behavior through plug-ins that implement those points without modifying the core."
 level:
   - "3"
 priority: High

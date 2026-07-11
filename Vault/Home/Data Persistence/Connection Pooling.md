@@ -2,6 +2,7 @@
 topic:
   - Data Persistence
 subtopic: []
+summary: "Reusing a bounded set of already-open database connections so opening one becomes a cheap rent-from-pool instead of a costly handshake."
 level:
   - "4"
 priority: High

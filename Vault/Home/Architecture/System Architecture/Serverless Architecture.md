@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - System Architecture
+summary: "Runs application logic in stateless, short-lived functions fully managed by a cloud provider, billed per invocation with no idle capacity."
 level:
   - "3"
 priority: Medium

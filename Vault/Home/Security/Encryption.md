@@ -3,6 +3,7 @@ topic:
   - Security
 subtopic:
   - Security
+summary: "Transforms readable plaintext into unreadable ciphertext using a key, protecting confidentiality (not integrity or authenticity)."
 level:
   - "4"
 priority: High

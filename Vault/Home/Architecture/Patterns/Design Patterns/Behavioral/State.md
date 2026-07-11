@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Patterns
+summary: "Extracts state-specific behavior into separate classes; the context delegates to its current state, which drives transitions."
 level:
   - "3"
 priority: High

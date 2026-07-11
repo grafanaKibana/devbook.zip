@@ -3,6 +3,7 @@ topic:
   - Data Persistence
 subtopic:
   - SQL
+summary: "An index is a sorted B+ tree structure that lets the engine avoid full table scans, trading write overhead and storage."
 publish: true
 level:
   - "4"

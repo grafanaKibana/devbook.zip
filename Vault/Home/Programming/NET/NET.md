@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: ".NET is Microsoft's cross-platform runtime and framework for building web APIs, services, desktop, mobile, and cloud-native software."
 tags:
   - FolderNote
 publish: true
@@ -20,13 +21,18 @@ The platform has three layers worth understanding separately: the **runtime** (C
 
 .NET releases annually. Even-numbered releases (.NET 8, .NET 10) are LTS with three years of support. The ecosystem is open-source on GitHub, and the runtime team publishes detailed performance improvement analyses with each release.
 
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
+
 ## Questions
 
 > [!QUESTION]- What are the three layers of the .NET platform, and why does that distinction matter?
 > Runtime (CLR), language (C#/F#), and framework libraries (ASP.NET Core, EF Core, extensions).
 > It matters because most production issues cross layers: a performance problem might involve language-level allocations (C#), runtime GC behavior (CLR), and framework middleware configuration (ASP.NET Core). Understanding the boundaries helps you diagnose root causes instead of applying surface-level fixes.
 
-## Links
+## References
 
 - [.NET documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/) — Platform overview, guides, and API reference.
 - [.NET runtime (GitHub)](https://github.com/dotnet/runtime) — Source code, design docs, and issue discussions.

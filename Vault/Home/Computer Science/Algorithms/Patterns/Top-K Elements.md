@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Finds the k largest, smallest, or most frequent items in O(n log k) using a size-k heap over a stream."
 level:
   - "4"
 priority: Medium

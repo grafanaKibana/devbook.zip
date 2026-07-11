@@ -3,6 +3,7 @@ topic:
   - Security
 subtopic:
   - Authentication
+summary: "OAuth 2.0 grants apps limited access to resources without sharing credentials; OpenID Connect adds an identity layer that tells you who the user is."
 level:
   - "3"
 priority: High

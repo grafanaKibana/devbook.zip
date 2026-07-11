@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "Systems where an LLM controls part of the workflow — calling tools, making decisions, or directing other LLMs."
 tags:
   - FolderNote
 publish: true
@@ -20,6 +21,11 @@ An agentic system is any system where an LLM controls part of the workflow — c
 - **Agents** are systems where the LLM dynamically directs its own process and tool usage, deciding what to do next based on results so far.
 
 Most production systems that people call "agents" are actually workflows — and that is the right choice. The most effective agentic systems use the simplest pattern that solves the problem. Start with a single LLM call with good prompting and retrieval. Add workflow orchestration when that falls short. Reach for autonomous agents only when the task is genuinely open-ended and unpredictable.
+
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
 
 ## The Augmented LLM
 

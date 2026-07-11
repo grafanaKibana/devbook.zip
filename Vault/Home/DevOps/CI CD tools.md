@@ -2,6 +2,7 @@
 topic:
   - DevOps
 subtopic: []
+summary: "CI/CD pipelines automate the path from commit to production; GitHub Actions, Azure DevOps, and Jenkins trade off hosting, cost, and integration."
 level:
   - "3"
 priority: High

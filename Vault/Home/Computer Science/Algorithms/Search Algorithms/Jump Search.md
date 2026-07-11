@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Steps a sorted array in fixed √n blocks then scans back one block, giving O(√n) with bounded backward seeking."
 level:
   - "4"
 priority: Medium

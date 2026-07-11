@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Patterns
+summary: "Caps how many requests a client can make in a period so one caller cannot exhaust shared resources."
 priority: High
 publish: true
 tags:

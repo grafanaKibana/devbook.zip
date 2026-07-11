@@ -3,6 +3,7 @@ topic:
   - Development Practices
 subtopic:
   - Paradigms
+summary: "Functional programming models computation as the evaluation of pure functions over immutable data."
 level:
   - "3"
 priority: Medium

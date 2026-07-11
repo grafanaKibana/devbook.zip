@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Distributed Systems
+summary: "A single entry point that centralizes routing, auth, rate limiting, and TLS so backend services don't re-implement cross-cutting concerns."
 level:
   - "2"
 priority: High

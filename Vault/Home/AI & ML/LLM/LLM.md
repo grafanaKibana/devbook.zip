@@ -19,6 +19,11 @@ A large language model (LLM) is a transformer neural network trained on vast tex
 
 The engineering consequence: an LLM is not a knowledge database with retrieval semantics. It is a probability distribution over token sequences, shaped by training data and steered at inference time by the prompt. That is why grounding, [[Home/AI & ML/LLM/Prompting/Prompting|Prompting]], and [[Home/AI & ML/LLM/Evaluation/Evaluation|evaluation]] are engineering disciplines rather than nice-to-haves — see [[Hallucinations]] for what happens when fluent prediction is mistaken for factual recall.
 
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
+
 ## How LLMs Are Built
 
 ![07 AI & ML-LLM-20260705173634102.png](11%20AI%20&%20ML-LLM-20260705173634102.png)
@@ -33,16 +38,6 @@ Training a modern LLM is a three-stage pipeline. Each stage changes what the mod
 Base model  =  pretraining (next-token prediction at scale)
 Instruction-tuned model  =  base model + SFT + preference alignment (RLHF/DPO)
 ```
-
-## Adapting an LLM to a Task
-
-Three adaptation levers, ordered by cost. Reach for the cheaper one first:
-
-- **Prompting (zero-shot / few-shot)** — steer behavior entirely through the input: instructions, examples, and output format. No training, instant iteration. Covered in [[Home/AI & ML/LLM/Prompting/Prompting|Prompting]] and [[In-Context Learning]].
-- **Retrieval-Augmented Generation** — keep knowledge outside the model and inject relevant evidence into the prompt at query time. The right tool when facts change faster than you can retrain or when answers must cite sources. Covered in [[Home/AI & ML/LLM/RAG/RAG|RAG]], including the RAG-vs-fine-tuning decision.
-- **Fine-tuning** — continue training the model's weights on task-specific data. Buys consistent behavior (format, tone, policy) at the cost of a training pipeline, evaluation discipline, and slower iteration. Use it for stable behavior, not for injecting fast-changing facts. Covered in [[Fine-tuning]].
-
-Two cross-cutting concerns sit alongside these levers: [[Context Engineering]] — deciding what fills the finite context window and in what order — and [[Model Selection and Routing]] — matching each request to the cheapest model that can handle it.
 
 ## Dictionary
 

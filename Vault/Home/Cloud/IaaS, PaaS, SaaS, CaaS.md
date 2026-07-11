@@ -3,6 +3,7 @@ topic:
   - Cloud
 subtopic:
   - Cloud
+summary: "Cloud service models define how much of the infrastructure stack the provider manages versus how much you manage."
 level:
   - "2"
 priority: High

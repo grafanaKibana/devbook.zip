@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - Machine Learning
+summary: "Calibration measures whether predicted probabilities match reality: among all predictions of 0.7, a calibrated model is correct about 70% of the time."
 level:
   - "2"
 priority: Medium

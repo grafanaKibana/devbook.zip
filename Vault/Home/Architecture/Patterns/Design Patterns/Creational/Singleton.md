@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Patterns
+summary: "Ensures a class has only one instance and provides a global access point to it; in modern .NET, AddSingleton is the correct form."
 level:
   - "2"
 priority: High

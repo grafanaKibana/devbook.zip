@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "Mapping text into a dense vector space where semantic similarity becomes geometric proximity, enabling keyword-free retrieval and semantic search."
 level:
   - "2"
 priority: High

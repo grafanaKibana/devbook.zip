@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Patterns
+summary: "Defines an interface for creating an object but lets subclasses decide which concrete class to instantiate."
 level:
   - "1"
 priority: High

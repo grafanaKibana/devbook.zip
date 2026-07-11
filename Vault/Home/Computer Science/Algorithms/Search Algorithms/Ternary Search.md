@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Splits a range in thirds with two probes to find the extremum of a unimodal function, discarding a third each step."
 level:
   - "4"
 priority: Medium

@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "Layered defense-in-depth controls around an LLM that make unsafe actions, data leaks, and policy violations detectable, bounded, and recoverable."
 level:
   - "3"
 priority: Medium

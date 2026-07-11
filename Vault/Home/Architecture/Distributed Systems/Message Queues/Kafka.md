@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Distributed Systems
+summary: "Distributed event streaming platform built on an append-only commit log, giving durability, high throughput, and replayable per-key ordering."
 level:
   - "2"
 priority: High

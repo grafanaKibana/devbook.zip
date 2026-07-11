@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "Authentication verifies who a caller is; middleware reads credentials and populates HttpContext.User with a ClaimsPrincipal."
 level:
   - "1"
 priority: Medium

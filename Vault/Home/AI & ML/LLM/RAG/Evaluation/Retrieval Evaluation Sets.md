@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "A retrieval eval set pairs queries with their relevant chunks; the hard parts are labeling which chunks count and chunk-anchored synthetic generation."
 level:
   - "2"
 priority: High

@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Partitions around a pivot and recurses; often the fastest comparison sort but with an O(n²) worst case."
 level:
   - "4"
 priority: Low

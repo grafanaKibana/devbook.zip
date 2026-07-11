@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "ASP.NET Core's real-time framework for bidirectional server/client messaging over persistent connections, the default when the server must push updates immediately."
 level:
   - "3"
 priority: Medium

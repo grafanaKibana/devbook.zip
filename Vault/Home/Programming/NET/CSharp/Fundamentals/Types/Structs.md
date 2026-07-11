@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "A struct is a value type holding its value inline, so assignment copies the value; best for small immutable data."
 level:
   - "4"
 priority: Medium

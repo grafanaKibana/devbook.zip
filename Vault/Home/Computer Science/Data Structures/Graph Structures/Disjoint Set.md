@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "A union-find structure tracking elements partitioned into disjoint sets, answering whether two elements share a set while merging sets over time."
 level:
   - "3"
 priority: Medium

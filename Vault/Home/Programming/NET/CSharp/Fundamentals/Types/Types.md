@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "A C# type defines shape, behavior, and assignment semantics, with value-vs-reference semantics driving correctness, allocations, and API design."
 tags:
   - FolderNote
 publish: true
@@ -17,6 +18,11 @@ level:
 A C# type defines shape, behavior, and assignment semantics.
 A common source of bugs is value semantics versus reference semantics: value types copy the value, while reference types copy object references.
 That nuance matters for correctness, allocations, and API design, especially when code crosses boundaries such as collections, interfaces, and async flows.
+
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
 
 ## How It Works
 
@@ -83,7 +89,7 @@ Console.WriteLine(h.Counter.Value); // 1
 > - Use `record class` for data-centric models where value-based equality improves correctness.
 > - Validate the choice against mutation rules, size/copy costs, and equality requirements.
 
-## Links
+## References
 
 - [C# type system overview](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/)
 - [Value types (C# reference)](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/value-types)

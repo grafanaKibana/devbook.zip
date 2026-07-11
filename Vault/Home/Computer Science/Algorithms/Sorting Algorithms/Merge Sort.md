@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Divide-and-conquer sort that is stable and O(n log n) in all cases at the cost of O(n) space."
 level:
   - "4"
 priority: Low

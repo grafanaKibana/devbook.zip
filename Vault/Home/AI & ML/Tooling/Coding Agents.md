@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - Tooling
+summary: "Tools that run an LLM inside an action loop to complete engineering tasks end to end: read, plan, edit, run, verify, iterate."
 publish: true
 status: Done
 level:

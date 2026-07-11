@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "A structure storing key-value pairs and using hashing to locate a key's bucket in O(1) average, O(n) worst-case, time."
 level:
   - "4"
 priority: Medium

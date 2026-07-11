@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Solves a problem by breaking it into smaller independent instances of itself, solving those recursively, and combining their answers."
 level:
   - "4"
 priority: Medium

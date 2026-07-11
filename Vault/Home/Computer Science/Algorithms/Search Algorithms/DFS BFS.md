@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "The two fundamental O(V + E) graph traversals: BFS gives distance ordering by layers, DFS gives depth ordering."
 level:
   - "4"
 priority: Medium

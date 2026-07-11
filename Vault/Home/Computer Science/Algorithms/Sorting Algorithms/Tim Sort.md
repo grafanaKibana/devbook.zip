@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Natural merge sort that exploits existing runs; stable, adaptive, and the default in Python and Java."
 level:
   - "4"
 priority: Medium

@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "A vector database stores embeddings and serves fast approximate nearest-neighbor search, trading a little recall for large speed gains."
 level:
   - "2"
 priority: High

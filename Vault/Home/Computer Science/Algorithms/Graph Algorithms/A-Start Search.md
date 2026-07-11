@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Best-first shortest-path search ordering its frontier by f(n) = g(n) + h(n), settling far fewer nodes than uninformed search when the heuristic is admissible."
 level:
   - "4"
 priority: High

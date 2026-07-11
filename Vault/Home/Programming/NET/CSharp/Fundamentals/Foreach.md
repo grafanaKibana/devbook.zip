@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "The most common way to iterate a sequence in C#, lowered by the compiler into an enumerator-based pattern, plus iterators and yield."
 level:
   - "4"
 priority: High

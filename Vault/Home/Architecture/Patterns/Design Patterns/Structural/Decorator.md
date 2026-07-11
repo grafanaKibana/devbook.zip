@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Patterns
+summary: "Decorator attaches responsibilities to an object dynamically by wrapping it in objects sharing the same interface, composable in any order."
 level:
   - "3"
 priority: High

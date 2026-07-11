@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "Matching each request to the cheapest model that can handle it, trading quality against cost and latency."
 level:
   - "2"
 priority: Medium

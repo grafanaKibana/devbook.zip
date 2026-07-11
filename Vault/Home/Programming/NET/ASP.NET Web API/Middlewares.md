@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "ASP.NET Core middleware form the HTTP request pipeline, each wrapping the next to process requests inbound and responses outbound."
 level:
   - "4"
 priority: High

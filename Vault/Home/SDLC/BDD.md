@@ -3,6 +3,7 @@ topic:
   - SDLC
 subtopic:
   - SDLC
+summary: "Behavior-Driven Development uses concrete business-language examples to align requirements, implementation, and tests before coding begins."
 level:
   - "1"
 priority: Medium

@@ -1,7 +1,7 @@
 {
   "settingsSchemaVersion": 2,
   "gitRemoteUrl": "https://github.com/grafanaKibana/devbook.zip.git",
-  "gitBranch": "feature/algo-visualization",
+  "gitBranch": "notes/folder-notes-rewrite",
   "gitCorsProxyUrl": "",
   "gitAuthType": "basic",
   "gitAuthUsername": "grafanaKibana",

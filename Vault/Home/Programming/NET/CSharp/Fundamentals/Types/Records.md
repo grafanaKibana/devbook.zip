@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "Records are data-centric C# types whose compiler generates value-based equality, readable ToString, deconstruction, and with-expression support."
 level:
   - "4"
 priority: Medium

@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Distributed Systems
+summary: "Scalability is a system's ability to keep serving requests as load grows by adding resources without a proportional drop in reliability or latency."
 level:
   - "2"
 priority: High
@@ -18,9 +19,10 @@ Scalability is a system's ability to keep serving requests as load grows by addi
 
 Concrete interview lens: if checkout traffic grows from 1,000 RPS to 10,000 RPS, a good answer is not "add more servers" but "measure where saturation appears first, then apply the right pattern for that bottleneck."
 
-## Vertical vs Horizontal Scaling
-
-Two fundamental approaches to adding capacity: [[Vertical Scaling]] (bigger node) and [[Horizontal Scaling]] (more nodes). Vertical is the fastest first move; horizontal is the long-term strategy for stateless services. See the dedicated pages for mechanisms, tradeoffs, and pitfalls.
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
 
 ## Core Patterns
 
@@ -36,8 +38,6 @@ Two fundamental approaches to adding capacity: [[Vertical Scaling]] (bigger node
 | Connection pooling | Expensive connection setup and DB connection limits | Reuse open connections to reduce handshake cost and limit churn | Pool exhaustion often appears as latency spikes before hard failures |
 | Event-Driven Architecture (see [[Home/Architecture/System Architecture/Event-Driven Architecture\|Event-Driven Architecture]]) | Tight coupling between services | Publish events so services scale and evolve independently | Ordering, duplication, and schema evolution must be designed upfront |
 | Load shedding and rate limiting | Overload collapse during spikes | Reject or defer excess traffic early to protect critical paths | Requires clear priority rules and client retry behavior |
-
-How to use this table in interviews: name the bottleneck first, then pick one or two patterns that directly reduce that bottleneck.
 
 ### Pattern Walkthrough (Quick Explanations)
 
@@ -70,12 +70,6 @@ flowchart TD
     F --> G
 ```
 
-Practical checklist for the first 10x discussion:
-
-- Confirm current limits using p95 latency, CPU saturation, queue depth, DB waits, and error rates.
-- Separate steady load from burst load; spikes often need buffering, not just more instances.
-- Distinguish read growth from write growth; they usually need different patterns.
-- Validate non-functional constraints early (consistency, RTO and RPO, compliance, budget).
 
 ## .NET and Azure Context
 

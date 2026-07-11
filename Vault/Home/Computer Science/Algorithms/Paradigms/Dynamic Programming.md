@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Solves a problem by breaking it into overlapping subproblems, solving each once, and reusing the stored result instead of recomputing."
 level:
   - "4"
 priority: High

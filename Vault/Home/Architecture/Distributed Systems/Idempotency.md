@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Distributed Systems
+summary: "Applying the same logical operation multiple times produces the same final state as applying it once, making retries safe."
 level:
   - "2"
 priority: High

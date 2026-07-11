@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Patterns
+summary: "Provides sequential access to a collection's elements without exposing its underlying representation — C#'s foreach and yield return."
 level:
   - "1"
 priority: High

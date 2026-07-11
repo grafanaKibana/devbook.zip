@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Patterns
+summary: "Defines a grammar for a language and an interpreter that evaluates sentences, composing complex expressions from simpler ones."
 level:
   - "3"
 priority: High

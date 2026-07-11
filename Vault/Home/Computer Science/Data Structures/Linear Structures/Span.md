@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "A stack-only view over contiguous memory that owns nothing, enabling high-performance zero-copy slicing and parsing."
 level:
   - "4"
 priority: Medium

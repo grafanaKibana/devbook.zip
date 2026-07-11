@@ -3,6 +3,7 @@ topic:
   - Security
 subtopic:
   - Authentication
+summary: "Requires two independent factors — something you know plus something you have or are — so a stolen password alone can't authenticate."
 level:
   - "3"
 priority: High

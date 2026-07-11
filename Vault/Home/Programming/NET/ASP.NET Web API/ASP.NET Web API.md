@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "ASP.NET Core runs each HTTP request through a middleware pipeline, then dispatches it to a Minimal API handler or controller action."
 level:
   - "4"
 priority: High
@@ -18,6 +19,11 @@ status: Creation
 ASP.NET Core Web API runs each HTTP request through a middleware pipeline, then dispatches it to an endpoint (a Minimal API handler or a controller action).
 In practice, you design a Web API by choosing where logic lives (middleware vs filters vs endpoint code), how you validate and map inputs, and how you handle errors and auth.
 This matters because most production issues come from cross-cutting concerns: auth, validation, versioning, serialization, and observability.
+
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
 
 ### Example
 
@@ -65,7 +71,7 @@ public sealed class OrdersController : ControllerBase
 > Put authentication and authorization in the pipeline so endpoints can assume an authenticated principal.
 > Use middleware for auth and use endpoint metadata and policies to decide access per endpoint.
 
-## Links
+## References
 
 - [ASP.NET Core web API docs](https://learn.microsoft.com/en-us/aspnet/core/web-api/?view=aspnetcore-8.0)
 - [ASP.NET Core middleware](https://learn.microsoft.com/aspnet/core/fundamentals/middleware/?view=aspnetcore-10.0)

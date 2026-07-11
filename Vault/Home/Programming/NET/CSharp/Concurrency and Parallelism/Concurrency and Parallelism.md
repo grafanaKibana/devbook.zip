@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "Concurrency keeps work progressing without blocking, while parallelism uses multiple cores to finish CPU-bound work faster."
 priority: High
 status: Creation
 tags:
@@ -16,16 +17,12 @@ level:
 
 Concurrency and parallelism are related but different concerns in .NET applications. Concurrency is about making progress on multiple units of work without unnecessary blocking, while parallelism is about using multiple cores to finish CPU-bound work faster. This hub focuses on practical decisions for backend and desktop systems where latency, throughput, and correctness all matter.
 
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
+
 ## Deeper Explanation
-
-Use this folder as a map:
-
-- `Async Await` and `Tasks` for async orchestration and structured composition.
-- `CancellationToken` for cooperative cancellation and timeout boundaries.
-- `Parallelism` for CPU-bound work distribution.
-- `ThreadPool` for runtime scheduling behavior and starvation diagnostics.
-- `Deadlocks` for correctness and failure prevention under contention.
-- `Mutex` and `Semaphore` for synchronization limits and access control strategies.
 
 ### Mental model
 
@@ -109,7 +106,7 @@ public async Task<IReadOnlyList<UserDto>> LoadUsersBoundedAsync(
 > [!QUESTION]- For one requirement ("update shared state safely"), when do you choose `lock` vs `SemaphoreSlim` vs `Channel<T>`?
 > Use `lock` for short synchronous sections, `SemaphoreSlim` for async flows that need awaiting, and `Channel<T>` when you also need queueing, ordering, or backpressure.
 
-## Links
+## References
 
 - [Asynchronous programming with async and await (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/)
 - [Task parallel library (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/task-parallel-library-tpl)

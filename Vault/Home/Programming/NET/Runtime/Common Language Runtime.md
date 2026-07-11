@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "The CLR is .NET's execution engine, JIT/AOT-compiling IL to native code and providing memory management, type safety, and threading."
 level:
   - "4"
 priority: High

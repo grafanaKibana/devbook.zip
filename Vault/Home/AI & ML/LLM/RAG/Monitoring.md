@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "Monitoring continuously observes a deployed RAG pipeline per stage to catch quality, performance, and staleness regressions before users do."
 level:
   - "2"
 priority: High

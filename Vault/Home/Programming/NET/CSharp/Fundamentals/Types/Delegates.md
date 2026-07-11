@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "A delegate is a type-safe function pointer that lets you store, pass, compose, and invoke methods as values."
 level:
   - "4"
 priority: Medium

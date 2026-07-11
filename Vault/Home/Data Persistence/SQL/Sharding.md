@@ -3,6 +3,7 @@ topic:
   - Data Persistence
 subtopic:
   - SQL
+summary: "Sharding is horizontal partitioning that splits a database's rows across independent instances to scale writes and data volume beyond one node."
 level:
   - "4"
 priority: High

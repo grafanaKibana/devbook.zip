@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Distributed Systems
+summary: "Definitions of what value a read may return relative to writes, from linearizable down to eventual, and their coordination costs."
 level:
   - "2"
 priority: High

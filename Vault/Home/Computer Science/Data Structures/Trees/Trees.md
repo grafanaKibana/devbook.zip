@@ -17,6 +17,11 @@ status: Not-Started
 
 Trees represent hierarchical data with parent-child relationships. In .NET, tree-like behavior commonly appears through `SortedSet<T>` (red-black tree), `SortedDictionary<TKey, TValue>`, custom recursive node models, and expression trees in the compiler pipeline. A concrete use case: an autocomplete service maintains a trie (prefix tree) of 500K product names; lookup for any prefix completes in O(k) where k is prefix length, regardless of dataset size — a `Dictionary` scan would be O(n).
 
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
+
 ## Deeper Explanation
 
 A tree organizes nodes so each node has at most one parent (except the root) and any number of children. Balanced trees keep height at O(log n), making insert, delete, and search O(log n). Unbalanced trees degrade toward O(n) — inserting already-sorted values into a naïve BST produces a linked list.
@@ -87,11 +92,6 @@ var ids = new SortedSet<int> { 5, 1, 3, 3 };
 
 > [!QUESTION]- When would you avoid recursive tree traversal?
 > On unknown/deep depth, where iterative traversal with an explicit stack is safer.
-
-## Links
-
-- [[Trie]]
-- [[Heap]]
 
 ## References
 

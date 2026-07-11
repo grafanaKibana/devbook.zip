@@ -3,6 +3,7 @@ topic:
   - Cloud
 subtopic:
   - Azure
+summary: "Azure is Microsoft's public cloud, the natural home for .NET/AI workloads integrating with Microsoft identity and the AI ecosystem."
 level:
   - "3"
 priority: Medium
@@ -12,7 +13,7 @@ tags:
 publish: true
 ---
 
-# Azure Services Overview
+# Intro
 
 Azure is Microsoft's public cloud platform. For .NET and AI engineers, Azure is the natural home for workloads that integrate with Microsoft identity, Active Directory, and the Microsoft AI ecosystem. This page covers the Azure services most relevant to .NET/AI development.
 
@@ -21,6 +22,11 @@ Azure is Microsoft's public cloud platform. For .NET and AI engineers, Azure is 
 az account list -o table
 # Set active subscription
 az account set --subscription "My Subscription"
+```
+
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
 ```
 
 ## Compute

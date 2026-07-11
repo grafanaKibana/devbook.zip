@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Patterns
+summary: "A design principle where every method is either a command that changes state or a query that returns data — never both."
 level:
   - "4"
 priority: High

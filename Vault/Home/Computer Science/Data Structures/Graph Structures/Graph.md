@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "Graphs model relationships between entities using vertices and edges; unlike trees they allow cycles, multiple paths, and no single root."
 level:
   - "4"
 priority: Medium
@@ -86,7 +87,7 @@ The two decisions that trip people up: **use BFS, not Dijkstra, for unweighted s
 > [!QUESTION]- How do you detect a cycle in a directed graph during DFS?
 > Three-color marking: white (unvisited), grey (on the current recursion stack), black (fully explored). Encountering a grey node via an edge means a back-edge → a cycle. (Topological sort via Kahn's algorithm detects the same condition: leftover nodes with non-zero in-degree.)
 
-## Links
+## References
 
 - [Collections and data structures overview](https://learn.microsoft.com/en-us/dotnet/standard/collections/) — Microsoft overview of built-in collection types; graphs are typically composed from these primitives.
 - [PriorityQueue<TElement, TPriority> class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.priorityqueue-2) — API reference for the priority queue used in weighted graph algorithms like Dijkstra.

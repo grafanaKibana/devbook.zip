@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Patterns
+summary: "Defines the skeleton of an algorithm in a base class, letting subclasses override specific steps without changing its structure."
 level:
   - "2"
 priority: High

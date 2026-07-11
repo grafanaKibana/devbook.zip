@@ -3,6 +3,7 @@ topic:
   - Development Practices
 subtopic:
   - Principles
+summary: "Five design principles governing how classes relate — who knows whom, who changes when, and where new behavior gets added."
 level:
   - "4"
 priority: High

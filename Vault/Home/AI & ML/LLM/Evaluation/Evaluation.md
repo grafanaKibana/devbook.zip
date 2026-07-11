@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "Measuring whether an LLM app does the right thing via a layered stack of deterministic checks, judges, regression sets, and production signals."
 tags:
   - FolderNote
 publish: true
@@ -15,6 +16,11 @@ priority: High
 # Intro
 
 Evaluation is how you measure whether an LLM application is doing the right thing: answer quality, grounding, safety, and regressions over time. Because LLM output is probabilistic and open-ended, you cannot rely on a single pass/fail assertion the way you would for deterministic code — evaluation becomes a layered system that combines cheap hard checks, scalable semantic judges, fixed regression sets, and production signals. This folder covers each layer; this hub shows how they fit together.
+
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
 
 ## The Evaluation Stack
 
@@ -32,10 +38,7 @@ flowchart TD
     ON -->|new failures become cases| G
 ```
 
-- **[[Deterministic Checks]]** — non-LLM rules that run first on every output: schema validity, allowlisted actions, PII scans, length and format constraints. Microseconds, zero cost, zero false positives. A malformed or unsafe output is a hard failure that never reaches a judge.
-- **[[LLM-as-a-Judge]]** — a separate model scores semantic quality (correctness, groundedness, tone) against a rubric, either as absolute scorecards or pairwise comparisons. Scalable where human review is too slow, but carries its own biases (verbosity, position, self-preference) that must be calibrated against human labels.
-- **[[Golden Test Set and Regression Runs]]** — a versioned, curated set of representative and adversarial cases run on every change to catch regressions, with a frozen holdout you never tune against. This is the release gate.
-- **[[Online Evaluation and AB Tests]]** — measure real user outcomes on live traffic, since offline sets cannot anticipate production distribution. New production failures feed back into the golden set, closing the loop.
+Each layer is its own note in this folder; the map above links them. The ordering is the point: **deterministic checks** enforce hard contracts in microseconds with zero false positives, so a malformed or unsafe output is a hard failure that never reaches a judge; **LLM-as-a-Judge** then scores the semantic quality that survives; the **golden test set** gates releases against a frozen holdout; and **online evaluation** measures real outcomes and feeds new failures back into the golden set, closing the loop.
 
 A useful framing across all four: combine **offline** (fixed sets, fast iteration, regression gating) with **online** (real outcomes, distribution shift), and combine **automated** (deterministic + judge, scalable) with **human** (rubric review, calibration, edge-case discovery). Neither axis alone is enough.
 

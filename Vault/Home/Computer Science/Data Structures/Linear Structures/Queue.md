@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "A FIFO collection where the earliest enqueued item is processed first — buffering, BFS, and producer-consumer pipelines."
 level:
   - "4"
 priority: Medium

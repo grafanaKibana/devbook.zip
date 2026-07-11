@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "A contiguous, index-addressable buffer that grows automatically, giving O(1) random access and amortized O(1) append."
 level:
   - "4"
 priority: Medium

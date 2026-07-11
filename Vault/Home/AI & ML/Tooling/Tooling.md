@@ -19,6 +19,11 @@ AI development tooling is the practical layer that turns large language models i
 
 The landscape now breaks into three operational buckets: coding agents that can execute multi-step tasks, review agents that focus on pull-request quality, and IDE extensions that blend autocomplete, chat, and limited automation in the editor. Across all buckets, the same control surfaces show up repeatedly: **skills** (reusable capability packs), **plugins** (integrations and extensions), **hooks** (automation triggers before/after actions), and **agent instructions** (repo-scoped rules such as `AGENTS.md`, `CLAUDE.md`, or tool-specific rules files).
 
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
+
 ## Categories
 
 ### Coding agents
@@ -32,29 +37,6 @@ Code review agents optimize a narrower loop: pull-request analysis, risky change
 ### IDE extensions
 
 IDE extensions prioritize in-flow assistance: inline completion, chat panes, refactor suggestions, and basic command execution from the editor. This category includes Copilot extension workflows and extension-backed agents such as Cline. Compared with terminal-first agents, IDE integrations usually reduce context switching but can hide execution details if the tool does not expose a clear action log.
-
-## Major Tool Comparison
-
-| Tool | Type (Terminal/IDE/Both) | Model Support | Key Differentiator |
-|---|---|---|---|
-| Claude Code | Both | Claude models (Anthropic) | Strong agent loop with hooks, MCP support, and repo instruction conventions (`AGENTS.md`/`CLAUDE.md`) |
-| Cursor | IDE | Multi-model (Anthropic, OpenAI, Google, others by plan/provider) | VS Code-based IDE with integrated agent mode, chat, and high-quality tab completion |
-| GitHub Copilot | Both | Multi-model via GitHub platform | Tight GitHub + IDE integration, PR and coding workflows in existing enterprise GitHub setups |
-| Cline | IDE | Multi-provider via API keys | Open-source VS Code agent with transparent actions and user-controlled provider choice |
-| Aider | Terminal | Many providers/models | Git-aware terminal workflow that is explicit, scriptable, and strong for commit-oriented iteration |
-| Windsurf (Codeium) | IDE | Codeium-hosted + provider options by product tier | Cascade agent + Supercomplete focused on end-to-end coding flow inside a VS Code-style IDE |
-| Opencode | Both | Multi-provider including local and hosted models | Open-source agent with skill system and `AGENTS.md` project instructions across terminal/IDE experiences |
-
-## Core Building Blocks
-
-The tooling ecosystem shares four control surfaces that determine how reliably agents integrate with real codebases:
-
-- **[[Skills]]:** reusable instruction packages loaded on demand that give the agent domain-specific expertise (code review, docs lookup, framework conventions)
-- **[[Plugins]]:** integrations that connect agents to external services, databases, and APIs at runtime
-- **[[Hooks]]:** event-based automation points (pre-edit, post-edit, pre-commit) that enforce policy or run checks without modifying the agent itself
-- **[[Agent Instructions]]:** project-local guidance files that align agent behavior with architecture, coding standards, and security boundaries
-
-Working teams usually combine all four: instructions define policy, hooks enforce it, plugins connect external systems, and skills keep repeated workflows fast.
 
 ## Questions
 

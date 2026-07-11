@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "Task is .NET's core abstraction for asynchronous work, modeling eventual completion, result/error propagation, and composition without managing raw threads."
 level:
   - "4"
 priority: High

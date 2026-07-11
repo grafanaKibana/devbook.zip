@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Algorithms to traverse, rank, and optimize the relationships that graphs model — reachability, shortest paths, connectivity, and flow."
 tags:
   - FolderNote
 publish: true
@@ -15,6 +16,11 @@ priority: High
 # Intro
 
 Graphs model relationships: networks, dependencies, routes, permissions, and many real-world system structures. Graph algorithms help you traverse, rank, and optimize those relationships efficiently. Example: shortest-path algorithms answer "what's the cheapest route" while BFS/DFS answer "what's reachable".
+
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
 
 ## Diagram
 

@@ -3,6 +3,7 @@ topic:
   - Data Persistence
 subtopic:
   - NoSQL
+summary: "NoSQL is an umbrella for non-relational data stores that trade the relational model for scalability, flexible schemas, or specialized access patterns."
 level:
   - "3"
 status: Done
@@ -33,35 +34,16 @@ flowchart TD
   J -->|Yes| K[Graph]
 ```
 
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
+
 ## How It Works
 
 NoSQL is not one thing — it is four data models, each shaped around a different access pattern. Pick the family by how you read and write, then model the data around those queries.
 
-| Family | Stores | Fits | Examples |
-| --- | --- | --- | --- |
-| Key-Value | opaque value addressed by a key | sessions, caches, lookups by id | Redis, DynamoDB |
-| Document | self-contained JSON-like aggregates | catalogs, profiles, content | MongoDB, Cosmos DB |
-| Wide-Column | rows with dynamic, sparse columns | time series, very high write throughput | Cassandra, HBase |
-| Graph | nodes and edges | relationship traversal, recommendations | Neo4j, Neptune |
-
 Most distributed NoSQL stores sit on the AP side of the [[CAP theorem]]: they favor availability and partition tolerance and offer **eventual** (tunable) consistency rather than the strong, immediately-consistent transactions of a relational database. Modeling is query-first — you denormalize and duplicate data to make the reads you need cheap, accepting write-side duplication as the cost.
-
-## Example
-
-Document store example: a product page is an aggregate, so store it as one document.
-
-```json
-{
-  "id": "p-123",
-  "name": "Keyboard",
-  "price": 79.99,
-  "tags": ["input", "usb"],
-  "inventory": {
-    "warehouse": "kyiv-1",
-    "available": 42
-  }
-}
-```
 
 ## Tradeoffs
 

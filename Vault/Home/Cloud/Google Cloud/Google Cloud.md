@@ -3,6 +3,7 @@ topic:
   - Cloud
 subtopic:
   - Google Cloud
+summary: "Google Cloud Platform (GCP) is a public cloud known for data analytics, machine learning, and Kubernetes, with strong managed services for .NET data and AI workloads."
 level:
   - "3"
 priority: Medium
@@ -12,7 +13,7 @@ publish: true
 status: Creation
 ---
 
-# Google Cloud Services Overview
+# Intro
 
 Google Cloud Platform (GCP) is a public cloud platform known for its data analytics, machine learning, and Kubernetes capabilities (Google invented Kubernetes). For .NET engineers, GCP offers strong managed services for data-intensive and AI workloads.
 
@@ -21,6 +22,11 @@ Google Cloud Platform (GCP) is a public cloud platform known for its data analyt
 gcloud config set project "my-project-id"
 # List available services
 gcloud services list --enabled
+```
+
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
 ```
 
 ## Compute

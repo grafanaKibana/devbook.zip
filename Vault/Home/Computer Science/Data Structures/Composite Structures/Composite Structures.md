@@ -19,6 +19,11 @@ A composite structure combines two primitives to get a guarantee neither gives a
 
 .NET ships one composite ready-made: `OrderedDictionary<TKey, TValue>` (.NET 9), hash lookup + insertion order. (`PriorityQueue<TElement, TPriority>` looks like a candidate but fails the membership test below — its guarantee comes from a single clever layout, an array with a heap invariant, so it lives with [[Heap|the heaps]].) When the combination you need isn't built in — LRU being the classic gap — you compose it yourself, which is why these structures dominate interviews: the design *is* the answer.
 
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
+
 ## What Belongs Here
 
 Membership test: the structure's headline guarantee comes from coordinating two simpler structures, not from a single clever layout. Today the folder has one note; candidates for future notes follow the same pattern:

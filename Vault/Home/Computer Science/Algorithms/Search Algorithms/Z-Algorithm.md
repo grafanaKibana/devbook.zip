@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Computes the Z-array (longest prefix match starting at each index) in one O(n) pass using a sliding Z-box."
 level:
   - "4"
 priority: Medium

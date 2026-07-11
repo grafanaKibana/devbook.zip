@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "CancellationToken is .NET's cooperative cancellation mechanism, letting callers request a stop while callees choose safe cancellation points and cleanup."
 level:
   - "4"
 priority: Medium
