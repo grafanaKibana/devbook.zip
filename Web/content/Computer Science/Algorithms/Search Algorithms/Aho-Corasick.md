@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-10T19:37:36.557Z
-modified: 2026-07-10T19:37:36.557Z
-published: 2026-07-10T19:37:36.557Z
+created: 2026-07-11T05:33:51.379Z
+modified: 2026-07-11T05:33:51.379Z
+published: 2026-07-11T05:33:51.379Z
 topic:
   - Computer Science
 subtopic:
@@ -44,7 +44,7 @@ The dictionary `{ he, she, his, hers }` compiles to a trie with a handful of fai
 
 Reading `ushers` left to right, the automaton stays at the root through `u`, then walks `s → sh → she` on the next three characters. Arriving at `she` after the `e`, the state itself ends a pattern, so `she` is reported at `[1..3]`. Its output link then leads to `he`, which also ends here, reported at `[2..3]` — a nested match that shares the same end position and is invisible without the output walk. On the next character `r`, the state `she` has no child, so the automaton follows the failure link to `he` and takes `he → her` on `r`; the final `s` reaches `hers`, reported at `[2..5]`.
 
-The invariant makes each of those steps legal: after reading `i` characters the automaton is always at the state whose string is the longest suffix of `text[0..i]` that is still a prefix of some pattern. Every pattern occurrence ending at position `i` is a suffix of that state's string, and the output chain lists exactly those. That is why a single left-to-right pass, with no rewinding of the text, sees every match.
+The invariant makes each of those steps legal: after reading `i` characters the automaton is always at the state whose string is the longest suffix of the first `i` characters that is still a prefix of some pattern. Every pattern occurrence ending at position `i` is a suffix of that state's string, and the output chain lists exactly those. That is why a single left-to-right pass, with no rewinding of the text, sees every match.
 
 ## Complexity
 
@@ -191,7 +191,7 @@ Aho-Corasick is the fit for matching many patterns of varied length in one pass 
 > All patterns share one trie, so common prefixes collapse into shared paths and the text drives a single walk through the automaton. Each character makes one forward move plus failure hops that amortize to `O(1)` over the whole scan, and the output walk emits exactly the `z` matches found. Nothing in the loop scales with `k`, the pattern count, so a thousand signatures cost the same per character as one.
 
 > [!QUESTION]- What does a failure link point to, and what invariant holds after reading `i` characters?
-> A state's failure link points to the state for the longest proper suffix of its string that is still a prefix of some pattern — KMP's longest-prefix-suffix relation lifted onto the trie. That link maintains the invariant that after `i` characters the automaton sits at the state whose string is the longest suffix of `text[0..i]` that is a prefix of some pattern, which is precisely the state from which every match ending at `i` can be read.
+> A state's failure link points to the state for the longest proper suffix of its string that is still a prefix of some pattern — KMP's longest-prefix-suffix relation lifted onto the trie. That link maintains the invariant that after `i` characters the automaton sits at the state whose string is the longest suffix of the first `i` characters that is a prefix of some pattern, which is precisely the state from which every match ending at `i` can be read.
 
 > [!QUESTION]- What do output links add, and what fails silently without them?
 > A single state can complete several patterns when a shorter one is a suffix of a longer one, such as `he` ending inside `she`. Output links chain each state to the nearest shorter pattern that also ends there, and walking the chain enumerates every simultaneous match. Without them the scan is still correctly positioned but reports only the pattern the current node ends, silently dropping the nested ones — the classic loss of `he` when matching `{ he, she, hers }` in `ushers`.

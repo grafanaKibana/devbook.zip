@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-10T19:38:33.068Z
-modified: 2026-07-10T19:38:33.069Z
-published: 2026-07-10T19:38:33.069Z
+created: 2026-07-11T05:35:55.670Z
+modified: 2026-07-11T05:35:55.671Z
+published: 2026-07-11T05:35:55.671Z
 topic:
   - Computer Science
 subtopic:
@@ -62,7 +62,7 @@ Indices 5, 6, and 7 spend zero comparisons: their values are copied from the mir
 
 ## Matching a pattern by concatenation
 
-Single-pattern search reduces to one Z-array. Build `S = P + sep + T`, where `sep` is a character occurring in neither `P` nor `T`, and compute `z` over `S`. Any index `i` in the `T` region with `z[i] == |P|` marks an occurrence: the substring at `i` reproduces the whole pattern prefix. The separator caps every Z-value at `|P|` — no match can run across the boundary — so the equality test is exact. With `|P| = m` and `|T| = n`, `|S| = n + m + 1`, giving `Θ(n + m)` time and `Θ(n + m)` space.
+Single-pattern search reduces to one Z-array. Build `S = P + sep + T`, where `sep` is a character occurring in neither `P` nor `T`, and compute `z` over `S`. Any index `i` in the `T` region with `z[i] >= |P|` marks an occurrence: the substring at `i` reproduces the whole pattern prefix in `|P|` characters that lie entirely inside `T`. A proper separator caps every text-region Z-value at `|P|` — no match can run across the boundary — so here `>=` and `==` coincide. With `|P| = m` and `|T| = n`, `|S| = n + m + 1`, giving `Θ(n + m)` time and `Θ(n + m)` space.
 
 ## Complexity
 
@@ -75,7 +75,7 @@ Best, average, and worst cases coincide: the pass is `Θ(|S|)` whether the strin
 
 ## When the assumptions stop holding
 
-**A separator drawn from the alphabet.** The concatenation trick depends on `sep` capping every Z-value at `m`. If `sep` also appears in `P` or `T`, a match can extend across the join: searching for `P = "ab"` in `T = "xab"` with `sep = 'a'` builds `"ab" + "a" + "xab" = "abaxab"`, and a Z-value near the injected `a` can exceed the true pattern length or mask a real hit, reporting a position that does not occur or missing one that does. A sentinel outside the input alphabet — a `\0` byte, or `-1` over an integer sequence — restores the cap.
+**A separator drawn from the alphabet — and why `>=` survives it.** A separator outside the input alphabet caps every text-region `z[i]` at `m`: exceeding `m` would require matching `S[m]`, the separator, against a text character, which cannot happen. That cap keeps `z[i] == m` and `z[i] >= m` equivalent and stops any match from spanning the `P`/`T` boundary. Let the separator back into the alphabet and the cap is gone. Searching for `P = "ab"` in `T = "aba"` with `sep = 'a'` builds `"ab" + "a" + "aba" = "abaaba"`, whose Z-array is `[6, 0, 1, 3, 0, 1]`. The real occurrence of `"ab"` at text position 0 lands at index 3, where the match runs on through the separator-turned-`a` into the prefix and gives `z[3] = 3`. A strict `z[i] == m` test checks for `2` and misses it — a genuine hit dropped. The shipped `FindAll` uses `z[i] >= m`, which is robust: any text-region index (scanned from `m + 1` on) with `z[i] >= m` has `S[i..i+m-1]` equal to `P` in `m` consecutive characters lying wholly inside `T` — an occurrence whatever `sep` is. So the separator's job is narrower than correctness: with `>=`, an in-alphabet separator costs only the `== m` equivalence, not the result. A sentinel outside the alphabet — a `\0` byte, or `-1` over an integer sequence — keeps the two tests interchangeable.
 
 **Copying a mirror that reaches the box edge.** Inside the box the mirror `z[i-l]` is exact only while it ends before `r`. When `z[i-l] >= r - i + 1`, taking it verbatim asserts a match over characters past `r` that were never compared. On `S = "aaabaaa"`, index 2 mirrors index 1 with `z[1] = 2`, but copying that would claim `S[2..3] = "ab"` matches the prefix `"aa"`; the true value is `z[2] = 1`. The mirror at the edge is only a lower bound, so `z[i]` must be reset to the box remainder and re-extended from `r + 1`.
 
@@ -148,7 +148,7 @@ Best, average, and worst cases coincide: the pass is `Θ(|S|)` whether the strin
 > }
 > ```
 >
-> `FindAll` assumes `separator` occurs in neither argument; `\0` suits ordinary text but must change if the input can contain it. Because the separator caps every Z-value at `m`, `z[i] >= m` is only ever exactly `m`.
+> `FindAll` scans from `m + 1`, so every index it tests lies in `T`; a text-region `z[i] >= m` means `m` characters of `T` reproduce `P`, a genuine occurrence for any separator. With a separator outside both arguments the cap makes `z[i] >= m` fire only at exactly `m`; `\0` suits ordinary text but must change if the input can contain it. Should the separator leak into the alphabet, `>= m` still reports correctly — only a stricter `== m` test would start dropping hits.
 
 ## Comparison
 
@@ -159,15 +159,15 @@ Best, average, and worst cases coincide: the pass is `Θ(|S|)` whether the strin
 | [[Rabin Karp Search\|Rabin-Karp]] | `Θ(n + m)` expected, `O(nm)` worst | `O(1)` | Rolling hash of `P` | Many patterns of one length; 2-D or set search | Adversarial input forcing hash collisions |
 | [[Boyer-Moore]] | `O(n/m)` best, `O(nm)` worst | `O(m + \|Σ\|)` | Bad-character and good-suffix tables | Long patterns over large alphabets | Short patterns or adversarial text |
 
-The Z-algorithm and KMP are the two unconditionally linear choices, with identical asymptotics; the split is representational. The Z-array exposes prefix-overlap lengths directly, which reads cleanly for periodicity, occurrence counting, and "longest common prefix with the whole string per suffix," and the forward match length is for many easier to reason about than a fallback link. KMP pays nothing to build a concatenated string and streams the text in `O(m)` space, so it fits where `T` is large and memory is scarce. Rabin-Karp trades the linear guarantee for `O(1)` space and easy multi-pattern extension; Boyer-Moore skips ahead sublinearly on long patterns but falls to quadratic on adversarial text.
+The Z-algorithm and KMP are the two unconditionally linear choices, with identical asymptotics; the split is representational. The Z-array exposes prefix-overlap lengths directly, which reads cleanly for periodicity, occurrence counting, and "longest common prefix with the whole string per suffix," and the forward match length is often easier to reason about than a fallback link. KMP pays nothing to build a concatenated string and streams the text in `O(m)` space, so it fits where `T` is large and memory is scarce. Rabin-Karp trades the linear guarantee for `O(1)` space and easy multi-pattern extension; Boyer-Moore skips ahead sublinearly on long patterns but falls to quadratic on adversarial text.
 
 ## Questions
 
 > [!QUESTION]- What does `z[i]` measure, and why does the Z-box keep the whole pass linear?
 > `z[i]` is the length of the longest substring starting at index `i` that also matches a prefix of the string. The box `[l, r]` is the match interval with the largest `r`; a position inside it copies its value from the mirror `z[i-l]` when that mirror ends before the edge, spending no comparisons. Direct comparisons occur only while extending past `r`, and each either fails once or pushes `r` one step right. Since `r` never retreats and stops at `|S| - 1`, total comparisons are `Θ(|S|)`.
 
-> [!QUESTION]- Why must the concatenation separator lie outside the input alphabet?
-> The separator's role is to cap every Z-value at `|P|` so no match spans the boundary between pattern and text. A separator that also appears in `P` or `T` lets a match run across the join, which can report a position where the pattern does not occur or hide one where it does. A sentinel outside the alphabet keeps every reported `z[i] == |P|` an exact pattern occurrence.
+> [!QUESTION]- Why should the concatenation separator lie outside the input alphabet?
+> To keep the cap: a separator absent from `P` and `T` holds every text-region `z[i]` to at most `|P|`, so `z[i] == |P|` and `z[i] >= |P|` coincide and no match spans the pattern/text join. If the separator also appears in the input, a genuine occurrence can extend across the join and produce `z[i] > |P|` — a strict `== |P|` test would then drop it. The shipped `>= |P|` test survives this (a text-region `z[i] >= |P|` is always `|P|` real characters of `T` matching `P`); a sentinel outside the alphabet is what lets the simpler `==` formulation stay correct too.
 
 > [!QUESTION]- Given identical `O(n + m)` time, where does the Z-algorithm differ from KMP?
 > Both are unconditionally linear and encode the same prefix structure. The Z-algorithm materializes `P + sep + T` and its Z-array — `Θ(n + m)` scratch space — and exposes match lengths directly. KMP builds only an `O(m)` failure table and streams the text in place, so it uses less memory on large text; the Z-array is often preferred when the problem itself is about prefix overlaps.

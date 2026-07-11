@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-10T19:35:33.051Z
-modified: 2026-07-10T19:35:33.051Z
-published: 2026-07-10T19:35:33.051Z
+created: 2026-07-11T05:34:20.668Z
+modified: 2026-07-11T05:34:20.668Z
+published: 2026-07-11T05:34:20.668Z
 topic:
   - Computer Science
 subtopic:
@@ -15,7 +15,7 @@ status: Creation
 
 # Intro
 
-A sorted log sits on magnetic tape or arrives as a forward-only stream: reading the next record is cheap, but seeking to an arbitrary offset means winding the medium. Binary Search would probe offset `n/2`, then `n/4`, then `3n/4` — three arbitrary seeks that dominate the cost here. Linear Search never seeks, yet may read all `n` records. Jump Search reads only every `m`-th record — `a[m], a[2m], a[3m], …` — advancing in fixed forward strides until a block's end value reaches or passes the target, then scanning the one block that must contain it.
+A sorted log sits on magnetic tape or arrives as a forward-only stream: reading the next record is cheap, but seeking to an arbitrary offset means winding the medium. Binary Search would probe offset `n/2`, then `n/4`, then `3n/4` — three arbitrary seeks that dominate the cost here. Linear Search never seeks, yet may read all `n` records. Jump Search reads only every `m`-th record — the block ends `a[m−1], a[2m−1], a[3m−1], …` — advancing in fixed forward strides until a block's end value reaches or passes the target, then scanning the one block that must contain it.
 
 Two properties justify skipping `m − 1` records per stride. Ordering lets `a[block] < target` prove the target lies further ahead, so the skipped records cannot match. A cheap forward stride keeps each jump close to the cost of reading a single record. Jump Search keeps Binary Search's ordering requirement but drops its random-access requirement: it never seeks to an arbitrary position, only forward by a fixed stride and back by at most one block.
 
@@ -28,7 +28,7 @@ The move that defines the algorithm is the overshoot: the first block end that c
 
 ## Why √n blocks work
 
-Each jump is a proof, not a guess. Because the array is sorted, `a[k·m] < target` guarantees every element in the first `k` blocks is at most `a[k·m]` and therefore below the target — none can match, and the stride skips all of them unread. The search stops at the first block whose end satisfies `a[k·m] >= target`; the previous block ended below the target, so monotonic order forces the target, if present, into this single block. The scan then walks that block forward from its start. The only backward movement in the whole algorithm is re-entering that last block; every other move is a forward stride.
+Each jump is a proof, not a guess. Block `k` spans indices `[(k−1)m, k·m − 1]`, so its end value is `a[k·m − 1]`. Because the array is sorted, `a[k·m − 1] < target` guarantees every element in the first `k` blocks is at most `a[k·m − 1]` and therefore below the target — none can match, and the stride skips all of them unread. The search stops at the first block whose end satisfies `a[k·m − 1] >= target`; the previous block ended below the target, so monotonic order forces the target, if present, into this single block. The scan then walks that block forward from its start. The only backward movement in the whole algorithm is re-entering that last block; every other move is a forward stride.
 
 The stride size sets the balance between the two phases. Reaching a late target takes up to `n/m` jumps, and scanning the final block takes up to `m` steps, so total work is `f(m) = n/m + m`. The jump count falls as `m` grows while the scan lengthens, and `f'(m) = −n/m² + 1` is zero at `m = √n`, where the two phases are equal and the total is `2√n`. The bound depends on tying `m` to `n`: a fixed `m = 100` holds the jump phase at `n/100`, still linear in `n`, so large input degrades to `O(n)`.
 
@@ -36,7 +36,7 @@ The stride size sets the balance between the two phases. Reaching a late target 
 
 | Case | Time | Auxiliary space | Cause |
 | --- | --- | --- | --- |
-| Best | `O(1)` | `O(1)` | The target sits in the first block, found on the opening block-end check or the first scan step. |
+| Best | `O(1)` | `O(1)` | The target sits at index 0 — the first scanned position — so the scan matches on its first step. |
 | Average | `O(√n)` | `O(1)` | A few jumps locate the block, then a partial scan finds the target; both phases contribute `√n`. |
 | Worst | `O(√n)` | `O(1)` | The target lies in the last block or is absent — all `n/m` jumps run, then a full `m`-element scan. |
 

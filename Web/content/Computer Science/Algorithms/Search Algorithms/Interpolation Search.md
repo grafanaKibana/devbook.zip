@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-10T19:36:09.327Z
-modified: 2026-07-10T19:36:09.327Z
-published: 2026-07-10T19:36:09.327Z
+created: 2026-07-11T05:34:17.884Z
+modified: 2026-07-11T05:34:17.884Z
+published: 2026-07-11T05:34:17.884Z
 topic:
   - Computer Science
 subtopic:
@@ -50,7 +50,7 @@ The average bound is inseparable from its assumption: on keys that are not close
 
 ## When the distribution stops cooperating
 
-Non-uniform data destroys the analysis rather than merely slowing it. Feed exponentially growing values `1, 2, 4, 8, …, 2^k` and search the large tail: the value span `a[hi] - a[lo]` is dominated by the final element, so `(target - a[lo]) / (a[hi] - a[lo])` stays near zero and the probe repeatedly lands close to `lo`. The boundary then moves by about one element per iteration, isolating the target in `O(n)` probes — slower than the `O(log n)` Binary Search that was given up. Clustered timestamps and Zipfian frequency tables produce the same collapse for the same reason.
+Non-uniform data destroys the analysis rather than merely slowing it. Feed exponentially growing values `1, 2, 4, 8, …, 2^k`: the single largest element dwarfs the rest of the span, so `a[hi] - a[lo]` is essentially `a[hi]` alone. When one endpoint value dwarfs the rest of the span like this, any target that is only a small fraction of that maximum makes `(target - a[lo]) / (a[hi] - a[lo])` near zero, so every estimate collapses toward `lo` and the boundary advances by about one element per probe. Such a target sits deep in the array by index — around `n − Θ(log n)`, since the values only reach a small fraction of the maximum near the very end — so crawling out to its true position costs `O(n)` probes, slower than the `O(log n)` Binary Search that was given up. Clustered timestamps and Zipfian frequency tables produce the same collapse for the same reason.
 
 The probe also requires keys with meaningful arithmetic. `(target - a[lo]) * (hi - lo) / (a[hi] - a[lo])` needs subtraction and a ratio, not just an ordering. Strings under a custom comparator, GUIDs, or opaque records support comparison but not a numeric offset, so the position cannot be estimated at all; those inputs are restricted to comparison-based search such as Binary Search.
 
@@ -92,8 +92,9 @@ The denominator fails when `a[hi] == a[lo]`. A run of equal values, or a range t
 >             return values[lo] == target ? lo : -1;
 >         }
 >
->         // Widen the product to avoid 32-bit overflow before dividing.
->         var span = (long)(target - values[lo]) * (hi - lo);
+>         // Widen an operand to long before subtracting and multiplying, so
+>         // neither the value difference nor the product overflows 32-bit int.
+>         var span = ((long)target - values[lo]) * (hi - lo);
 >         var pos = lo + (int)(span / (values[hi] - values[lo]));
 >
 >         if (values[pos] == target)
@@ -133,8 +134,8 @@ Interpolation Search is the strongest option on large numeric arrays that are pr
 > [!QUESTION]- Why does Interpolation Search beat Binary Search only on uniform data?
 > The interpolated probe assumes value grows linearly with index. On uniform data that model is accurate, so each probe lands near the target and shrinks the candidate set to about its square root, giving `O(log log n)`. When the gaps between values are uneven the estimate is consistently off, the range barely shrinks, and the cost rises to `O(n)` — below the `O(log n)` of the Binary Search it replaced.
 
-> [!QUESTION]- What input drives it to `O(n)`, and why?
-> Values whose magnitude grows far faster than their index, such as `1, 2, 4, …, 2^k`. The estimate weights by value span, so a target in the large tail maps to a fraction near zero of the range and the probe lands close to `lo`. The boundary then advances by roughly one element per iteration, so isolating the target across `n` elements costs `O(n)`.
+> [!QUESTION]- What property of a value distribution forces the linear worst case?
+> A single endpoint value that dwarfs the rest of the span — as with exponentially growing keys, clustered timestamps, or Zipfian counts. Once the maximum is far larger than most values, any target that is only a small fraction of that maximum interpolates to a position near `lo`, so each estimate advances the boundary by about one element instead of shrinking the range geometrically, and isolating the target costs `O(n)`.
 
 > [!QUESTION]- Why can it not run on arbitrary comparable keys?
 > The probe computes `(target - a[lo]) * (hi - lo) / (a[hi] - a[lo])`, which needs subtraction and a ratio with numeric meaning. Ordering-only types such as strings under a custom comparator support comparison but not that arithmetic, so no position can be estimated and only comparison-based search applies.

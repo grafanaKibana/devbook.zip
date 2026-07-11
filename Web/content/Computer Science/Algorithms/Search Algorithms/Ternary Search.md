@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-10T19:37:31.287Z
-modified: 2026-07-10T19:37:31.288Z
-published: 2026-07-10T19:37:31.288Z
+created: 2026-07-11T05:33:40.832Z
+modified: 2026-07-11T05:33:40.832Z
+published: 2026-07-11T05:33:40.832Z
 topic:
   - Computer Science
 subtopic:
@@ -61,7 +61,7 @@ A second hump defeats the discard rule. Take `f` with peaks at `x = 1` (height 5
 
 A flat plateau breaks the tie logic. When `f` is constant across a stretch that both probes land in, `f(m1) == f(m2)` carries no direction, and moving `hi` to `m2` can drop part of the optimal set if the plateau extends past `m2`. Strict increase-then-decrease is precisely what excludes this; with genuine ties, scanning the flat region or reformulating the objective is the fix.
 
-The discrete domain needs a different stopping rule. With integer bounds, `m1 = lo + (hi − lo)/3` and `m2 = hi − (hi − lo)/3` collide (`m1 == m2`) once `hi − lo` falls to 1 or 2, and a loop that waits for `lo == hi` never advances. The integer form loops while `hi − lo > 2` and finishes by scanning the two or three remaining indices, which also sidesteps the rounding traps of three-way integer splits.
+The discrete domain needs a different stopping rule. With integer bounds and integer division, `m1 = lo + (hi − lo)/3` and `m2 = hi − (hi − lo)/3` do not collide, but a probe can coincide with a bound (e.g. `m1 == lo` once `hi − lo` is small), leaving the interval unchanged, and a loop that waits for `lo == hi` never advances. The integer form loops while `hi − lo > 2` and finishes by scanning the two or three remaining indices, which also sidesteps the rounding traps of three-way integer splits.
 
 For membership in a sorted array the boundary is simpler still: binary search dominates. Same `O(log n)` class, fewer comparisons, one probe per step instead of two.
 
@@ -130,7 +130,7 @@ Ternary search occupies a narrow niche: derivative-free optimization of a single
 > Each level spends two comparisons to cut the range to a third (`2·log₃ n ≈ 1.82·ln n`), while binary search spends one comparison to halve it (`log₂ n ≈ 1.44·ln n`). Both are `O(log n)`, but the three-way split does strictly more comparison work for the same reduction and gains nothing from a monotone ordering.
 
 > [!QUESTION]- What does golden-section search change, and when does it matter?
-> It places the probes at the golden ratio so one probe of each step reuses an evaluation from the previous step, dropping the per-step cost from two evaluations to one. The interval shrinks slightly slower per step, but with half the evaluations it wins on total function calls whenever `f` is expensive — a simulation or a measurement rather than an array read.
+> It places the probes at the golden ratio so one probe of each step reuses an evaluation from the previous step. Golden-section retains ≈0.618 of the interval per step versus ternary's 0.667 — a slightly _faster_ shrink — while reusing one of the two probe evaluations, so it costs one new function call per step instead of two. It dominates ternary on both axes at once whenever evaluating `f` is expensive — a simulation or a measurement rather than an array read.
 
 > [!QUESTION]- What input makes the discard rule return a wrong answer?
 > A non-unimodal function or a flat plateau. With two humps, probes straddling the valley can discard the third holding the global maximum and return a local one. A plateau makes `f(m1) == f(m2)` uninformative, so a bound can move past part of the optimal set. Strict increase-then-decrease is the precondition that excludes both.

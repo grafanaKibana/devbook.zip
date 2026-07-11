@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-10T19:35:43.232Z
-modified: 2026-07-10T19:35:43.232Z
-published: 2026-07-10T19:35:43.232Z
+created: 2026-07-11T05:33:38.434Z
+modified: 2026-07-11T05:33:38.434Z
+published: 2026-07-11T05:33:38.434Z
 topic:
   - Computer Science
 subtopic:
@@ -17,7 +17,7 @@ status: Creation
 
 A sorted sequence arrives without a known length — a forward-read file, a paginated API that is indexable but not measurable, a lazily materialized list — and a lookup still has to land on one value. [[Binary Search]] cannot begin: its first midpoint needs a right endpoint, and there is none to compute. Exponential search manufactures that endpoint by probing outward. It reads index `1`, then `2, 4, 8, 16, …`, doubling the probe until `a[bound] >= target` or the probe runs off the end. Every earlier probe was still below the target, so at the stopping point the target — if present — must sit between the previous probe and this one. The gallop has produced a bounded window `[bound/2, min(bound, n − 1)]`, and Binary Search finishes inside it.
 
-Doubling reaches or passes the target's position `i` after about `log i` steps, and the window it brackets holds at most `i/2` elements, so the closing binary search is another `O(log i)`. The total cost tracks `i`, the _position of the answer_, not the array length. When the target sits near the front, `i ≪ n`, and `O(log i)` is strictly below Binary Search's `O(log n)`; when the length is simply unknown, the gallop is what makes any bisection possible at all.
+Doubling reaches or passes the target's position `i` after about `log i` steps, and the window it brackets holds fewer than `i` elements, so the closing binary search is another `O(log i)`. The total cost tracks `i`, the _position of the answer_, not the array length. When the target sits near the front, `i ≪ n`, and `O(log i)` is strictly below Binary Search's `O(log n)`; when the length is simply unknown, the gallop is what makes any bisection possible at all.
 
 **Core condition:** sorted, indexable input of unknown or unbounded length → double a probe to bracket the target, then bisect the bracket → `O(log i)` lookup in the answer's position `i` with `O(1)` auxiliary space.
 
@@ -42,7 +42,7 @@ The gallop never references `n`. It generates the indices it probes (`1, 2, 4, �
 | Case | Time | Auxiliary space | Cause |
 | --- | --- | --- | --- |
 | Best | `O(1)` | `O(1)` | The target is at the front (`a[0]`), found before the gallop starts. |
-| Average | `O(log i)` | `O(1)` | Doubling reaches position `i` in `~log i` steps; bisecting a window of at most `i/2` elements adds another `O(log i)`. |
+| Average | `O(log i)` | `O(1)` | Doubling reaches position `i` in `~log i` steps; bisecting a window of fewer than `i` elements adds another `O(log i)`. |
 | Worst | `O(log i)` → `O(log n)` | `O(1)` | The target sits near the end (`i ≈ n`), so both phases run their full `log n` length. |
 
 The bound is expressed in `i`, the target's position, which is what makes it beat Binary Search when `i ≪ n`; it degrades to `O(log n)` only when the target is near the end, never worse. Auxiliary space is `O(1)` for the iterative binary search below. A recursive binary search over the bracket would add `O(log i)` call-stack space without changing the time bound.
@@ -132,6 +132,6 @@ Exponential search fits sorted data whose size is unknown or unbounded, and sort
 
 ## References
 
-- [An almost optimal algorithm for unbounded searching](https://doi.org/10.1016/0020-0190\(76\)90071-5) — Bentley and Yao's original doubling-search analysis for searching an ordered sequence of unknown length.
+- [An almost optimal algorithm for unbounded searching](https://doi.org/10.1016/0020-0190%2876%2990071-5) — Bentley and Yao's original doubling-search analysis for searching an ordered sequence of unknown length.
 - [Exponential search (Wikipedia)](https://en.wikipedia.org/wiki/Exponential_search) — the doubling-then-binary-search scheme and its unbounded-array motivation.
 - [Timsort listsort.txt (CPython source)](https://github.com/python/cpython/blob/main/Objects/listsort.txt) — Tim Peters' description of galloping mode, exponential search running inside a production sort.
