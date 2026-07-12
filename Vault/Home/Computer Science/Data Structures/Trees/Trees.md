@@ -41,6 +41,7 @@ A tree organizes nodes so each node has at most one parent (except the root) and
 | AVL / Red-Black | Self-balancing rotations → guaranteed O(log n) | `SortedSet`/`SortedDictionary` (red-black); AVL is more rigidly balanced (faster reads, more rotations) |
 | B-tree / B+-tree | High fan-out, shallow; node = disk/page sized | **Database & filesystem indexes** — minimizes disk seeks. See [[Indexes]] |
 | [[Trie|Trie (prefix tree)]] | Path = sequence of characters | Autocomplete, prefix search, routing tables — O(k) by key length, independent of n |
+| [[Ternary Search Tree]] | Trie whose children are a BST on the next char, not a σ-wide array | Large/Unicode alphabets; sorted and near-neighbour string queries |
 | [[Heap]] | Parent/child priority, array-backed | Priority queues and heap-like mergeable queues |
 | Segment / Fenwick (BIT) | Range aggregates with point updates | Range-sum/min queries in O(log n) |
 
@@ -90,6 +91,7 @@ var ids = new SortedSet<int> { 5, 1, 3, 3 };
 ## Links
 
 - [[Trie]]
+- [[Ternary Search Tree]]
 - [[Heap]]
 
 ## References
