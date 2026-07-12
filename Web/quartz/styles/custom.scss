@@ -621,29 +621,56 @@ body[data-slug="index"] {
 }
 
 // ---------------------------------------------------------------------------
-// Desktop + tablet (≥768px): the dashboard fills the viewport below the title,
-// growing the gaps between rows to take up the slack.
+// Desktop (≥1200px): the dashboard fills exactly one viewport under the title —
+// no scroll. Two levers share the fill so the cards never balloon: the rows
+// stretch but are capped at 10rem (and shrink to fit on a shorter window), and
+// BOTH gaps grow with the viewport (column-gap with width, row-gap with height)
+// to soak up the rest. Once the cards hit the cap, align-content:space-between
+// hands the leftover vertical space to the row gaps; max-height keeps that from
+// getting cavernous on a very tall monitor. The Explorer takes the left column;
+// the right column is empty on the index page (graph/backlinks are not-index,
+// the TOC has no headings), so it's dropped to give the dashboard the room.
+//
+// Gated one pixel above the tablet range: `$tablet` is max-width:1200 and
+// `$desktop` is min-width:1200, so they overlap at exactly 1200px — where the
+// Explorer is still a fixed hamburger (tablet). Reserving a 320px sidebar column
+// there would strand the dashboard beside an empty gutter, so the fill only
+// starts at 1201px, matching where the Explorer becomes a real sidebar.
 // ---------------------------------------------------------------------------
-@media all and not ($mobile) {
+@media all and (min-width: 1201px) {
   body[data-slug="index"] {
-    // Fill the viewport when the dashboard is shorter than it; grow and scroll
-    // when it isn't. (min-height, so nothing is ever clipped.)
     .page > #quartz-body {
-      min-height: 100dvh;
       box-sizing: border-box;
+      height: 100dvh;
+      max-height: 100dvh;
+      overflow: hidden;
+      grid-template-columns: #{$sidePanelWidth} auto;
+      grid-template-rows: minmax(0, 1fr) auto;
+      grid-template-areas:
+        "grid-sidebar-left grid-center"
+        "grid-sidebar-left grid-footer";
+    }
+    // The Explorer spans the full height, starts below the fixed header, and
+    // scrolls internally if the tree ever outgrows the viewport.
+    .page > #quartz-body > .sidebar.left {
+      height: 100dvh;
+      max-height: 100dvh;
+      padding-top: calc(var(--site-header-height) + 1.25rem);
+      padding-bottom: 1rem;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
+    .page > #quartz-body > .sidebar.right {
+      display: none;
     }
 
     // The center column stacks the title/meta (natural height, positioned by the
     // usual page-header margin) and the dashboard, which fills the rest.
     .page > #quartz-body > .center {
-      grid-area: grid-center;
       display: flex;
       flex-direction: column;
       min-height: 0;
     }
-    // The article and the note's markdown wrapper pass the remaining height down
-    // to the dashboard root (which carries an inline `margin-top: 1.5rem`; only
-    // an inline-beating `!important` can retune it).
     .center > article,
     .center > article > div,
     .center > article > div > div {
@@ -657,61 +684,48 @@ body[data-slug="index"] {
       margin-top: 0 !important;
       gap: clamp(0.5rem, 1.4vh, 0.9rem);
     }
-
-    // Cards keep their natural (content) height; align-content:space-between puts
-    // the leftover vertical space into the gaps between rows, so a big monitor
-    // gets a roomier dashboard instead of ballooned cards. First row stays under
-    // the title, last row above the summary. max-height bounds how far the rows
-    // can spread on a very tall monitor (past it the slack falls below the grid),
-    // so the gaps stay generous rather than cavernous.
     .dc-topic-grid {
       flex: 1 1 auto;
       min-height: 0;
-      max-height: 46rem;
-      grid-auto-rows: min-content;
+      max-height: 42rem;
+      grid-auto-rows: minmax(min-content, 10rem);
       align-content: space-between;
-      gap: clamp(0.5rem, 1.4vw, 1rem);
+      column-gap: clamp(0.75rem, 1.8vw, 2.5rem);
+      row-gap: clamp(0.6rem, 1.5vh, 1.5rem);
     }
     .dc-topic-total {
       flex: 0 0 auto;
     }
-  }
-}
 
-// Desktop (≥1200px): three-column grid with the Explorer on the left. The right
-// sidebar is empty on the index page (graph/backlinks are not-index, the TOC has
-// no headings), so drop that column and give the dashboard the room. The center
-// row stretches (1fr, but never below its content) so the dashboard fills the
-// height without ever clipping.
-@media all and ($desktop) {
-  body[data-slug="index"] {
-    .page > #quartz-body {
-      grid-template-columns: #{$sidePanelWidth} auto;
-      grid-template-rows: minmax(min-content, 1fr) auto;
-      grid-template-areas:
-        "grid-sidebar-left grid-center"
-        "grid-sidebar-left grid-footer";
-    }
-    .page > #quartz-body > .sidebar.right {
-      display: none;
+    // Force the note's 3-row "desktop" span layout across every desktop width,
+    // not just >1600px. The 1200–1600px "medium" layout is four rows, which can't
+    // fit one viewport once the title and footer margin are in — the last row
+    // would overlap the summary. Re-asserting the dsk-* spans (higher specificity
+    // than the note's inline med-* rules) keeps it at three rows everywhere.
+    @for $i from 1 through 12 {
+      .dc-topic-card.dsk-#{$i} {
+        grid-column: span #{$i};
+      }
     }
   }
 }
 
 // Tablet (768–1200px): the sidebars are out of flow (the Explorer is a fixed
-// hamburger, the right sidebar is empty), so it's a single column — title +
-// dashboard over footer — below the fixed header.
+// hamburger, the right sidebar is empty). Four rows of cards plus the title
+// rarely fit one landscape viewport, so this is a natural single column that
+// scrolls; the cards keep their content height and the same width-growing gaps.
 @media all and ($tablet) {
   body[data-slug="index"] {
-    .page > #quartz-body {
-      grid-template-columns: auto;
-      grid-template-rows: minmax(min-content, 1fr) auto;
-      grid-template-areas:
-        "grid-center"
-        "grid-footer";
-    }
     .page > #quartz-body > .sidebar.right {
       display: none;
+    }
+    .center > article > div > div {
+      margin-top: 0 !important;
+    }
+    .dc-topic-grid {
+      column-gap: clamp(0.75rem, 1.8vw, 2rem);
+      row-gap: clamp(0.6rem, 1.4vh, 1.25rem);
+      margin-top: 0.75rem;
     }
   }
 }
