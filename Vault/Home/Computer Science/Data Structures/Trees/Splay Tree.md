@@ -7,7 +7,7 @@ level:
   - "4"
 priority: Medium
 status: Creation
-publish: false
+publish: true
 ---
 
 # Intro
