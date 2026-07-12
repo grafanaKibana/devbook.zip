@@ -674,10 +674,21 @@ body[data-slug="index"] {
 
     // The center column stacks the title/meta (natural height, positioned by the
     // usual page-header margin) and the dashboard, which fills the rest.
+    //
+    // The fill grid makes #quartz-body span the full page width, and below the
+    // 1600px page cap the page is the whole viewport — so without an explicit
+    // gutter the dashboard's right edge hugs the window (the left is spared only
+    // because the Explorer sidebar carries its own padding). Add symmetric
+    // horizontal breathing room so the cards never touch either edge.
     .page > #quartz-body > .center {
       display: flex;
       flex-direction: column;
       min-height: 0;
+      // border-box so the gutter insets within the grid track instead of adding
+      // to the center's width (content-box would push it past the track and get
+      // clipped by #quartz-body's overflow:hidden).
+      box-sizing: border-box;
+      padding-inline: clamp(1.25rem, 1.6vw, 2rem);
     }
     .center > article,
     .center > article > div,
@@ -693,16 +704,47 @@ body[data-slug="index"] {
       gap: clamp(0.5rem, 1.4vh, 0.9rem);
     }
     // Cards stretch to fill the viewport with only a small, even gap between
-    // them — the panel treatment (below) keeps each one looking full at any
-    // height, so filling no longer means empty middles.
+    // them. Rows are minmax(0, 1fr) — three EQUAL rows that divide the leftover
+    // height and, crucially, SHRINK below their content when the window is short
+    // (minmax(min-content, 1fr) refused to shrink, so tall cards overflowed the
+    // fixed-height #quartz-body and collided with the total bar). The card body
+    // and description absorb the shrink (see below) so nothing scrolls.
     .dc-topic-grid {
       flex: 1 1 auto;
       min-height: 0;
-      grid-auto-rows: minmax(min-content, 1fr);
+      grid-auto-rows: minmax(0, 1fr);
       gap: clamp(0.6rem, 0.9vw, 1rem);
     }
     .dc-topic-total {
       flex: 0 0 auto;
+    }
+
+    // Let a card shrink below its natural/content height so three rows always
+    // fit. The description is the flexible element: it grows to push the progress
+    // bar to the card's bottom on tall screens, and clips (never the title or the
+    // bar) on short ones. The spacer is redundant once the summary flexes.
+    .dc-topic-card,
+    .dc-topic-card .db-card-body {
+      min-height: 0;
+    }
+    .dc-topic-card .dc-topic-spacer {
+      display: none;
+    }
+    .dc-topic-card .db-card-summary {
+      flex: 1 1 0;
+      min-height: 0;
+      margin-top: 0.45rem;
+      overflow: hidden;
+    }
+    // Trim the 1c chrome slightly so the description keeps a line or two of room
+    // at common laptop heights before it has to clip.
+    .dc-topic-chip {
+      width: 2rem;
+      height: 2rem;
+    }
+    .dc-topic-chip svg {
+      width: 1.15rem;
+      height: 1.15rem;
     }
 
     // Force the note's 3-row "desktop" span layout across every desktop width,
@@ -729,6 +771,13 @@ body[data-slug="index"] {
     }
     .center > article > div > div {
       margin-top: 0 !important;
+    }
+    // The Explorer is a fixed hamburger here, so the center spans the full width
+    // with no gutter — give the full-bleed dashboard the same horizontal breathing
+    // room it gets on desktop and mobile so cards never touch the window edges.
+    .center {
+      box-sizing: border-box;
+      padding-inline: clamp(1rem, 2.5vw, 2rem);
     }
     .dc-topic-grid {
       column-gap: clamp(0.75rem, 1.8vw, 2rem);
@@ -764,6 +813,12 @@ body[data-slug="index"] {
     .dc-topic-grid .dc-topic-card {
       grid-column: span 1;
       min-height: 4.75rem;
+    }
+    // With an odd number of topics the final card is alone on the last row —
+    // stretch it across both columns so the row isn't left half-empty (matches
+    // the design's full-width last mobile tile).
+    .dc-topic-grid .dc-topic-card:last-child:nth-child(odd) {
+      grid-column: 1 / -1;
     }
     .db-card-summary,
     .dc-topic-legend {

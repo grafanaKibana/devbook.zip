@@ -149,8 +149,8 @@ return function TopicDashboard() {
 .dc-topic-spacer { flex: 1 0 auto; min-height: 0.55em; }
 .dc-topic-foot { display: flex; flex-direction: column; gap: 4px; margin-top: 0.6rem; }
 .dc-topic-cap { font-size: 0.72rem; display: flex; justify-content: space-between; align-items: baseline; color: var(--text-muted, var(--darkgray, #5f6b7a)); }
-.dc-topic-bar { position: relative; width: 100%; height: 11px; margin-top: 0.15rem; padding: 2px; border-radius: 999px; border: 1px solid rgba(var(--topic-rgb), 0.5); background: var(--background-primary, var(--light, #ffffff)); overflow: hidden; }
-.dc-topic-bar-track { position: relative; height: 100%; border-radius: 999px; overflow: hidden; }
+.dc-topic-bar { box-sizing: border-box; position: relative; width: 100%; height: 11px; margin-top: 0.15rem; padding: 2px; border-radius: 999px; border: 1px solid rgba(var(--topic-rgb), 0.5); background: var(--background-primary, var(--light, #ffffff)); overflow: hidden; }
+.dc-topic-bar-track { box-sizing: border-box; position: relative; height: 100%; border-radius: 999px; overflow: hidden; }
 .dc-topic-bar--total { height: 12px; }
 .dc-topic-total { margin-top: 0.75rem; padding: 0.75em; border-radius: var(--radius-m, 0.55rem); border: 1px solid rgba(var(--topic-rgb), 0.4); background: rgba(var(--topic-rgb), 0.1); }
 .dc-topic-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4em 1.1em; margin-top: 0.7em; font-size: 0.8em; opacity: 0.85; }
