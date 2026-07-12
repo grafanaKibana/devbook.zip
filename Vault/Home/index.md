@@ -100,13 +100,26 @@ return function TopicDashboard() {
   }
   const oPct = oTotal > 0 ? Math.round(oPoints / oTotal) : 0;
 
-  const segments = (byStatus, total) =>
-    STATUS_RAMP.map((seg) => {
+  // Filled tiers as cumulative overlapping layers: each spans from the left edge
+  // to its running total and stacks above the next (darkest on top), so a darker
+  // tier's rounded right cap nests over the lighter one behind it. Every tier
+  // ends in a rounded cap, but they read as one continuous bar, not separate pills.
+  const segments = (byStatus, total) => {
+    if (total <= 0) return null;
+    let cum = 0;
+    return STATUS_RAMP.map((seg, i) => {
       const cnt = byStatus[seg.key] ?? 0;
-      const width = total > 0 ? (cnt * seg.weight) / total : 0;
-      if (width <= 0) return null;
-      return <span style={{ width: `${width}%`, background: tint(seg.mix) }} />;
+      cum += (cnt * seg.weight) / total;
+      if (cnt <= 0) return null;
+      return (
+        <span style={{
+          position: "absolute", left: 0, top: 0, height: "100%",
+          width: `${cum}%`, background: tint(seg.mix),
+          borderRadius: "0 999px 999px 0", zIndex: STATUS_RAMP.length - i,
+        }} />
+      );
     });
+  };
 
   // Safari/WebKit does not resolve a var() used as the count in `grid-column: span var(--x)`;
   // it drops the declaration and falls back to `span 1`, breaking the grid. Emit static
@@ -127,9 +140,7 @@ return function TopicDashboard() {
 .dc-topic-spacer { flex: 1 0 auto; min-height: 0.55em; }
 .dc-topic-foot { display: flex; flex-direction: column; gap: 4px; margin-top: 0.6rem; }
 .dc-topic-cap { font-size: 0.72rem; display: flex; justify-content: space-between; align-items: baseline; color: var(--text-muted, var(--darkgray, #5f6b7a)); }
-.dc-topic-bar { display: flex; width: 100%; height: 5px; border-radius: 4px; margin-top: 0.15rem; overflow: hidden; background: var(--background-modifier-border, var(--lightgray, #d8dee9)); }
-/* Round the trailing edge of the filled portion so the progress ends in a cap, not a hard vertical cut. */
-.dc-topic-bar > span:last-child { border-radius: 0 999px 999px 0; }
+.dc-topic-bar { position: relative; width: 100%; height: 5px; border-radius: 4px; margin-top: 0.15rem; overflow: hidden; background: var(--background-modifier-border, var(--lightgray, #d8dee9)); }
 .dc-topic-total { margin-top: 0.75rem; padding: 0.75em; border-radius: var(--radius-m, 0.55rem); border: 1px solid rgba(var(--topic-rgb), 0.4); background: rgba(var(--topic-rgb), 0.1); }
 .dc-topic-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4em 1.1em; margin-top: 0.7em; font-size: 0.8em; opacity: 0.85; }
 .dc-topic-legend-item { display: inline-flex; align-items: center; gap: 0.4em; }
