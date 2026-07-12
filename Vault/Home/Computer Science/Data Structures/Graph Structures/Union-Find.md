@@ -2,7 +2,7 @@
 topic:
   - Computer Science
 subtopic:
-  - Algorithms
+  - Data Structures
 summary: "Answers connectivity queries over a disjoint set via find and union, in near-constant O(α(n)) amortized time."
 level:
   - "3"
