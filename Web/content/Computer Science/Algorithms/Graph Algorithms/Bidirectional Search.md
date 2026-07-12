@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T21:51:04.292Z
-modified: 2026-07-11T21:51:04.293Z
-published: 2026-07-11T21:51:04.293Z
+created: 2026-07-12T14:27:20.401Z
+modified: 2026-07-12T14:27:20.401Z
+published: 2026-07-12T14:27:20.401Z
 topic:
   - Computer Science
 subtopic:
@@ -16,122 +16,190 @@ status: Creation
 
 # Intro
 
-Bidirectional search runs two searches at once — a forward search from the source and a backward search from the target — and stops when their frontiers meet in the middle. The payoff is exponential: an unidirectional [[DFS BFS|BFS]] that reaches depth `d` expands `O(b^d)` nodes (branching factor `b`), but two searches that each go only halfway expand `O(b^(d/2))` each, and `2·b^(d/2)` is vastly smaller than `b^d`. For `b = 10, d = 6` that is roughly `2,000` nodes instead of `1,000,000`. The intuition: two small circles growing toward each other sweep far less area than one large circle covering the same distance.
+Finding the shortest path between two specific vertices `s` and `t` in a large graph with a single BFS from `s` expands every vertex within distance `d` of the source. That frontier grows as `b^d`, where `b` is the branching factor and `d` is the shortest-path length — for `b = 10, d = 6` that is on the order of a million vertices, almost all of them nowhere near `t`.
 
-Reach for bidirectional search on point-to-point queries in large graphs where the goal is known in advance and the branching factor is high — routing meshes, puzzle state spaces (Rubik's cube, sliding puzzles), and word-ladder problems. It needs a graph you can traverse _backward_ from the target (predecessors must be enumerable), so it fits explicit or reversible graphs but not searches where the goal is defined only by a test. It composes with weighting: a bidirectional [[Dijkstra]] or bidirectional [[A-Start Search|A* Search]] applies the same halving to cost-based search, and modern road routers (contraction hierarchies) are built on it. When you don't know the target node concretely, or the graph can't be reversed, fall back to unidirectional [[A-Start Search|A* Search]] or [[Dijkstra]].
+Bidirectional search launches a second BFS backward from `t` over reversed edges and runs both at once. Each side only has to reach depth `d/2` before the two frontiers collide somewhere in the middle, so together they expand about `2·b^(d/2)` vertices — roughly two thousand for the same `b = 10, d = 6`. Two small frontiers growing toward each other sweep far less of the graph than one frontier covering the whole distance.
 
-## How It Works
+The saving is conditional. The target has to be a concrete vertex the backward search can start from, and the graph has to expose predecessors — a reverse adjacency list, or an invertible move operator for an implicit state space. Without both, the second frontier has nothing to grow from.
 
-1. Maintain two frontiers: `F` grown from `source` (following edges forward) and `B` grown from `target` (following edges backward). Keep a visited set with recorded distances for each side.
-2. Alternate expansion — typically expand whichever frontier is currently smaller, to keep the two balanced and minimize total work.
-3. When a node `x` is reached by _both_ sides, record a candidate meeting: the path cost is `dist_F[x] + dist_B[x]`. Keep the best (`μ`) candidate seen so far, but **do not stop yet**.
-4. Terminate only when the search can no longer improve `μ`: once the sum of the two frontiers' minimum keys (`top_F + top_B` for uniform BFS, or the min `f` on each side for cost-based variants) is `≥ μ`, no unexpanded path can beat the best meeting, so `μ` is optimal.
-5. Reconstruct the path by splicing the forward half (`source → x`) with the reversed backward half (`x → target`).
+**Core condition:** one known target + enumerable predecessors → forward and backward BFS meet near depth `d/2` → `O(b^(d/2))` time and space instead of `O(b^d)`.
 
-The termination condition is the whole game. The first time the two frontiers _touch_ gives you _a_ path, but not necessarily the shortest one — a cheaper meeting can still be found at a _different_ node that neither side has fully expanded. Stopping at first contact is the classic bidirectional-search bug. You must keep expanding until the cheapest still-possible completion (`top_F + top_B`) provably cannot undercut the best meeting cost `μ`.
+> [!NOTE] Visualization pending
+> Planned StepTrace: a two-frontier graph card showing forward and backward BFS expanding outward from source and target until they first intersect at a meeting vertex, then the path spliced through it. No matching renderer exists in `engine.js` yet.
 
-Two designs exist for bidirectional **heuristic** search:
+## Meeting in the middle
 
-- **Front-to-back**: each side's heuristic estimates distance to the _static_ origin of the opposite search (the forward side estimates distance to `target`, the backward side to `source`). Cheap to compute but the two heuristics can be inconsistent with each other, complicating optimality.
-- **Front-to-front**: each side estimates distance to the _current frontier_ of the opposite search. More accurate and better-focused, but far more expensive because the heuristic target keeps moving, requiring many pairwise estimates per expansion.
+Two frontiers advance in parallel. `F` holds the vertices reached from `s` along forward edges; `B` holds the vertices reached from `t` along reversed edges. Each side records the distance at which it first reached every vertex.
 
-Complexity: time and space both drop to `O(b^(d/2))` from `O(b^d)` for uniform-cost search — a genuine exponential improvement in the depth of the solution. The space saving is often the bigger practical win, since both frontiers still have to be held in memory but are individually far smaller.
+Take an unweighted graph where `s` and `t` are six edges apart. The forward BFS reaches depths 0, 1, 2, 3 from `s`; the backward BFS reaches depths 0, 1, 2, 3 from `t`. The two sides collide at a vertex three edges from each end, and neither BFS ever expands a fourth level. With branching factor `b`, the forward side holds about `b^3` vertices and the backward side about `b^3`, against the `b^6` a single BFS would expand to reach depth six. Splitting one path of length `d` into two halves is what caps each search at depth `d/2`.
 
-## Example
+For an unweighted graph the stopping rule is exact. Expansion proceeds one full BFS level at a time, alternating sides, and the search halts the first time a level completes with a vertex present in both visited sets. Because each side labels every vertex with its true BFS distance, a shared vertex `x` lies on a path of length `distF[x] + distB[x]`; scanning that first overlapping level for the smallest such sum yields a shortest path. The path is rebuilt by following forward parents from `x` back to `s`, reversing, then appending the backward parents from `x` to `t`.
 
-```text
-Unweighted graph, find shortest path from S to T with BFS from both ends.
+Expanding whichever frontier currently holds fewer vertices keeps the two searches near the same depth. A lopsided pair — one side pushed far past the other — loses the halving, because the deeper frontier is already climbing back toward `b^d`.
 
-  S - a - b - c - T
-       \        /
-        d ---- e
+## Complexity
 
-Forward frontier from S:      Backward frontier from T:
-  depth 0: {S}                  depth 0: {T}
-  depth 1: {a}                  depth 1: {c, e}
-  depth 2: {b, d}               depth 2: {b, d}   (b via c, d via e)
-
-At depth 2 both sides reach b AND d simultaneously.
-  Meeting at b: dist_F[b]=2 + dist_B[b]=2 = 4  -> S-a-b-c-T
-  Meeting at d: dist_F[d]=2 + dist_B[d]=2 = 4  -> S-a-d-e-T
-Both are length 4; μ = 4.
-
-Why not stop at the FIRST touch? Suppose the forward side had reached b at
-depth 2 while the backward side reached b at depth 3 (a longer back-half).
-First contact would report cost 5, but continuing one more layer could reveal
-the depth-2/depth-2 meeting at d with cost 4. The rule top_F + top_B >= μ is
-what guards against committing to that premature, worse meeting.
-```
-
-## Diagram
-
-```mermaid
-flowchart TD
-  A[Init forward frontier at source and backward frontier at target] --> B{Either frontier empty}
-  B -->|Yes| Z[No path exists]
-  B -->|No| C[Expand the smaller frontier by one node]
-  C --> D{Node reached by both sides}
-  D -->|Yes| E[Update best meeting cost mu]
-  D -->|No| F{Sum of frontier minimum keys at least mu}
-  E --> F
-  F -->|No| B
-  F -->|Yes| Y[Splice forward half with reversed backward half]
-```
-
-## Pitfalls
-
-### Stopping at the first frontier collision
-
-- **What goes wrong**: the code returns as soon as a node appears in both visited sets, reporting a path that can be longer than the true shortest one.
-- **Why it happens**: the first meeting is only the first _discovered_ connection, not the cheapest. A shorter path can pass through a different node whose two halves haven't both been expanded yet.
-- **How to avoid it**: track the best meeting cost `μ` and keep expanding until `top_F + top_B ≥ μ` (frontier minimums can no longer improve the meeting). Only then is `μ` provably optimal.
-
-### The graph can't be searched backward
-
-- **What goes wrong**: the backward search has nothing to expand because predecessors of a node aren't available — common when edges are generated on the fly or the goal is defined only by a predicate.
-- **Why it happens**: bidirectional search assumes you can enumerate _incoming_ edges (or that the graph is undirected). Directed graphs need a reverse adjacency list; implicit state spaces need an invertible move function.
-- **How to avoid it**: build a reverse adjacency list up front for directed graphs, or confirm every move operator is invertible. If the target is only a goal-test with no concrete node, bidirectional search doesn't apply — use unidirectional [[A-Start Search|A* Search]].
-
-### Unbalanced frontiers erase the speedup
-
-- **What goes wrong**: if one side is always expanded, or the two sides have very different branching factors, one frontier balloons to near `O(b^d)` and the `O(b^(d/2))` benefit evaporates.
-- **Why it happens**: the halving argument assumes both searches advance to roughly `d/2`. Expanding a single side, or a side with a much higher branching factor, breaks that symmetry.
-- **How to avoid it**: always expand the frontier with fewer nodes (or lower total estimated cost) next, keeping the two searches balanced by size rather than by depth.
-
-## Tradeoffs
-
-| Choice | Bidirectional | Unidirectional | Decision criteria |
+| Case | Time | Auxiliary space | Cause |
 | --- | --- | --- | --- |
-| Heuristic design | Front-to-front: accurate, expensive | Front-to-back: cheap, weaker | Front-to-back is the default; front-to-front only pays off when its sharper focus outweighs the many extra pairwise heuristic evaluations. |
-| Cost model | Bidirectional [[Dijkstra]] for weighted graphs | Bidirectional BFS for unweighted | Use the weighted variant when edge costs differ; the termination test generalizes from frontier depth to frontier minimum `f`. |
+| Best | `O(b)` | `O(b)` | `s` and `t` sit a few edges apart; the frontiers intersect after a handful of expansions. |
+| Average | `O(b^(d/2))` | `O(b^(d/2))` | The frontiers meet near depth `d/2`; each side expands and stores about `b^(d/2)` vertices. |
+| Worst | `O(b^(d/2))` † | `O(b^(d/2))` | The meeting sits at full depth or the shortest path just reaches length `d`; both frontiers grow to maximum size before touching. |
 
-Consistent with the [[A-Start Search|A* Search]] and [[Greedy Best-First Search]] tables: bidirectional search is an orthogonal _optimization_ of an existing search (BFS, Dijkstra, or A\*), not a different point on the greedy–Dijkstra spectrum. Layer it on when the query is point-to-point and the graph is reversible; it does not replace a good heuristic, it multiplies its effect.
+† A connected worst case stays at `O(b^(d/2))`, but disconnected endpoints are worse: both searches exhaust their entire reachable sets, `O(V + E)`, before reporting that no path exists.
+
+Here `b` is the branching factor and `d` the shortest-path length. The bounds assume a roughly uniform graph where every vertex has about `b` successors and `b` predecessors and both sides advance in balance. Space matches time because both frontiers plus their distance maps must be held in memory to test for intersection — there is no `O(1)`-space variant, unlike unidirectional search. The unidirectional BFS baseline on the same input is `O(b^d)` time and space; bidirectional search halves the exponent, not the constant.
+
+## Where the clean case ends
+
+Weighted edges break first-touch. Once the frontiers advance by cumulative cost rather than by level, the first vertex to appear in both visited sets is no longer guaranteed shortest — a cheaper meeting can still be one relaxation away at a different vertex whose two halves are not both settled. A correct termination tracks the best summed cost `μ = min(gF[u] + gB[u])` over all met vertices and keeps expanding until the sum of the two frontiers' smallest keys — their current search radii — reaches `μ`. Only then can no unexpanded path undercut the best meeting. Returning on first contact is the classic bidirectional-search correctness bug; unweighted BFS avoids it because level-order expansion settles distances in nondecreasing order, so the first overlap is already optimal.
+
+The target must be a concrete vertex. The backward search needs somewhere to start, so a goal defined only by a predicate — "any solved state", "any node with property `P`" — leaves nothing to grow a backward frontier from, and the meet-in-the-middle mechanism does not apply. A unidirectional search that expands forward until the predicate holds is the only option there.
+
+Predecessors must be enumerable. The backward BFS walks edges in reverse, so a directed graph needs a reverse adjacency list and an implicit state space needs an invertible move operator. Without incoming edges the backward frontier cannot advance past depth zero, and the `b^(d/2)` bound depends on that frontier reaching depth `d/2`. Undirected graphs supply this for free.
+
+## Reference drawer
+
+> [!ABSTRACT]- Control flow (unweighted case)
+>
+> ```mermaid
+> flowchart TD
+>   A[Forward frontier at source, backward frontier at target] --> B{Either frontier empty}
+>   B -->|Yes| Z[No path exists]
+>   B -->|No| C[Expand the smaller frontier by one level]
+>   C --> D{A vertex now in both visited sets}
+>   D -->|No| B
+>   D -->|Yes| Y[Splice forward half with reversed backward half]
+> ```
+
+> [!EXAMPLE]- C# implementation
+>
+> ```csharp
+> // Unweighted bidirectional BFS. forward[v] lists successors of v,
+> // backward[v] lists its predecessors. Returns a shortest path s..t, or null.
+> public static IReadOnlyList<int>? ShortestPath(
+>     IReadOnlyList<IReadOnlyList<int>> forward,
+>     IReadOnlyList<IReadOnlyList<int>> backward,
+>     int source,
+>     int target)
+> {
+>     if (source == target)
+>     {
+>         return new[] { source };
+>     }
+>
+>     var parentF = new Dictionary<int, int> { [source] = source };
+>     var parentB = new Dictionary<int, int> { [target] = target };
+>     var distF = new Dictionary<int, int> { [source] = 0 };
+>     var distB = new Dictionary<int, int> { [target] = 0 };
+>     var frontierF = new Queue<int>(new[] { source });
+>     var frontierB = new Queue<int>(new[] { target });
+>
+>     while (frontierF.Count > 0 && frontierB.Count > 0)
+>     {
+>         // Advance whichever side has fewer nodes so the frontiers stay balanced.
+>         var meet = frontierF.Count <= frontierB.Count
+>             ? ExpandLevel(frontierF, forward, parentF, distF, distB)
+>             : ExpandLevel(frontierB, backward, parentB, distB, distF);
+>
+>         if (meet is int x)
+>         {
+>             return Splice(x, parentF, parentB, source, target);
+>         }
+>     }
+>
+>     return null; // s and t are in different components
+> }
+>
+> // Expands one BFS level. Returns the minimum-sum meeting vertex found in that
+> // level, or null if the two sides did not overlap yet. Scanning the whole level
+> // for the smallest distOwn + distOther sum is what keeps the answer shortest.
+> private static int? ExpandLevel(
+>     Queue<int> frontier,
+>     IReadOnlyList<IReadOnlyList<int>> edges,
+>     Dictionary<int, int> parent,
+>     Dictionary<int, int> distOwn,
+>     Dictionary<int, int> distOther)
+> {
+>     int? best = null;
+>     var bestCost = int.MaxValue;
+>
+>     for (var count = frontier.Count; count > 0; count--)
+>     {
+>         var node = frontier.Dequeue();
+>         foreach (var next in edges[node])
+>         {
+>             if (distOwn.ContainsKey(next))
+>             {
+>                 continue;
+>             }
+>
+>             parent[next] = node;
+>             distOwn[next] = distOwn[node] + 1;
+>
+>             if (distOther.TryGetValue(next, out var otherDist))
+>             {
+>                 var cost = distOwn[next] + otherDist;
+>                 if (cost < bestCost)
+>                 {
+>                     bestCost = cost;
+>                     best = next;
+>                 }
+>             }
+>             else
+>             {
+>                 frontier.Enqueue(next);
+>             }
+>         }
+>     }
+>
+>     return best;
+> }
+>
+> private static List<int> Splice(
+>     int meet,
+>     Dictionary<int, int> parentF,
+>     Dictionary<int, int> parentB,
+>     int source,
+>     int target)
+> {
+>     var path = new List<int>();
+>     for (var node = meet; node != source; node = parentF[node])
+>     {
+>         path.Add(node);
+>     }
+>     path.Add(source);
+>     path.Reverse();
+>
+>     // meet already holds the target when s->t is a single edge; the forward
+>     // walk above emitted it, so only append the backward half when it differs.
+>     if (meet != target)
+>     {
+>         for (var node = parentB[meet]; node != target; node = parentB[node])
+>         {
+>             path.Add(node);
+>         }
+>         path.Add(target);
+>     }
+>
+>     return path;
+> }
+> ```
+>
+> The level scan, not the first cross-edge, is load-bearing: two meetings can appear in the same expanded level with different back-halves, so the minimum sum over the level is what stays optimal. On a weighted graph this level rule is replaced by the `gF + gB` termination test from the section above. The `meet != target` guard covers the single-edge `s → t` query, where the forward side discovers the target directly and the backward half is empty.
 
 ## Questions
 
-> [!QUESTION]- Why does bidirectional search reduce complexity from `O(b^d)` to `O(b^(d/2))`?
->
-> - A single search reaching depth `d` expands `O(b^d)` nodes because the frontier grows exponentially with depth.
-> - Two searches meeting in the middle each reach only depth `d/2`, expanding `O(b^(d/2))` nodes apiece.
-> - Since `2·b^(d/2)` is exponentially smaller than `b^d`, total work collapses — for `b=10, d=6` that's roughly `2,000` nodes versus `1,000,000`.
-> - The insight is geometric: two small search "spheres" growing toward each other sweep far less volume than one large sphere of the same reach — which is why it's a go-to optimization for high-branching point-to-point queries, and why the win is often in memory as much as time.
+> [!QUESTION]- Why does bidirectional search cut `O(b^d)` to `O(b^(d/2))`?
+> A single BFS reaching depth `d` expands a frontier that grows as `b^d`. Splitting the path into two halves lets a forward search and a backward search each stop at depth `d/2`, so each explores about `b^(d/2)` vertices and the total is `2·b^(d/2)`. The reduction lands on the exponent, which is why it compounds with depth: every extra level of separation that would multiply a one-sided search by another factor of `b` only adds half a level to each frontier. The same halving applies to space, since both sides must be held in memory to detect the meeting.
 
-> [!QUESTION]- Why is it wrong to stop bidirectional search the moment the two frontiers meet?
->
-> - The first node found in both visited sets gives _a_ connecting path, but not necessarily the shortest one.
-> - A cheaper path can pass through a different node whose forward and backward halves haven't both been expanded yet, so first contact can over-report the cost.
-> - The correct rule tracks the best meeting cost `μ` and keeps expanding until the sum of the two frontiers' minimum keys (`top_F + top_B`) is at least `μ`, proving no unexpanded path can do better.
-> - This is the single subtlest part of the algorithm: a naive implementation that returns on first collision is a common, silent correctness bug — the termination condition, not the meeting, is what makes the answer optimal.
+> [!QUESTION]- Why is stopping at the first frontier collision correct on an unweighted graph but wrong on a weighted one?
+> Unweighted BFS expands level by level, settling distances in nondecreasing order, so the first vertex shared by both visited sets already lies on a shortest path. With weights the frontiers advance by cumulative cost, and the first shared vertex can sit on an expensive path while a cheaper meeting is one relaxation away elsewhere. The weighted version must track the best `gF[u] + gB[u]` and keep expanding until the two frontiers' combined radius reaches that best, proving no unexpanded path can beat it.
 
-> [!QUESTION]- What must a graph support for bidirectional search to be usable, and what is front-to-front vs front-to-back?
->
-> - The graph must be searchable _backward_ from the target: predecessors must be enumerable (a reverse adjacency list for directed graphs, or an invertible move function for implicit state spaces).
-> - The target must be a concrete node, not merely a goal-test, since the backward search needs a starting point.
-> - For bidirectional heuristic search, front-to-back estimates distance to the opposite search's fixed origin (cheap, weaker), while front-to-front estimates distance to the opposite search's current frontier (accurate, expensive).
-> - These requirements decide applicability: on a reversible, point-to-point routing graph bidirectional A\* is a big win, but on a forward-only implicit search defined by a goal predicate it simply doesn't apply — pick unidirectional [[A-Start Search|A* Search]] there.
+> [!QUESTION]- What must the graph and the goal provide before bidirectional search applies?
+> The target must be a concrete vertex, because the backward search needs a starting point — a goal given only as a predicate has nothing to expand backward from. The graph must expose predecessors, either as a reverse adjacency list or as an invertible move operator, since the backward frontier walks edges in reverse. Without both, the second frontier cannot reach depth `d/2` and the halving disappears.
 
 ## References
 
-- [Bidirectional search (Wikipedia)](https://en.wikipedia.org/wiki/Bidirectional_search) — the `O(b^(d/2))` argument, termination conditions, and heuristic variants.
-- [Bidirectional Search That Is Guaranteed to Meet in the Middle (Holte et al., AAAI 2016)](https://ojs.aaai.org/index.php/AAAI/article/view/10346) — the MM algorithm and a rigorous treatment of the optimal termination condition.
-- [Contraction Hierarchies (Wikipedia)](https://en.wikipedia.org/wiki/Contraction_hierarchies) — how production road routers combine bidirectional Dijkstra with preprocessing for millisecond continental queries.
+- [Bidirectional search (Wikipedia)](https://en.wikipedia.org/wiki/Bidirectional_search) — the `b^(d/2)` argument, the balanced-frontier heuristic, and front-to-front versus front-to-back heuristic variants.
+- [Bidirectional Search That Is Guaranteed to Meet in the Middle (Holte et al., AAAI 2016)](https://ojs.aaai.org/index.php/AAAI/article/view/10346) — the MM algorithm and a rigorous treatment of the meeting condition that makes the answer optimal.
+- [Contraction hierarchies (Wikipedia)](https://en.wikipedia.org/wiki/Contraction_hierarchies) — how production road routers pair bidirectional Dijkstra with preprocessing for millisecond continental queries.

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T18:17:20.182Z
-modified: 2026-07-11T18:17:20.195Z
-published: 2026-07-11T18:17:20.195Z
+created: 2026-07-12T14:27:20.397Z
+modified: 2026-07-12T14:27:20.397Z
+published: 2026-07-12T14:27:20.397Z
 tags:
   - FolderNote
 topic:
@@ -178,9 +178,10 @@ Use [[RabbitMQ]] for routing-heavy queues and latency-sensitive tasks. Use [[Kaf
 
 | Option | Strengths | Tradeoffs | Typical .NET fit |
 |---|---|---|---|
-| RabbitMQ | Rich routing, easy work queues, low latency | Cluster ops are your responsibility unless managed | Background jobs, webhook pipelines, command dispatch |
-| Kafka | High throughput, durable log, strong replay | Partition model and ops complexity | Event streaming, analytics, event sourcing feeds |
+| [[RabbitMQ]] | Rich routing, easy work queues, low latency | Cluster ops are your responsibility unless managed | Background jobs, webhook pipelines, command dispatch |
+| [[Kafka]] | High throughput, durable log, strong replay | Partition model and ops complexity | Event streaming, analytics, event sourcing feeds |
 | Azure Service Bus | Fully managed with enterprise messaging features | Cost and platform coupling | Azure-native workflows and integration |
+| [[MSMQ]] | Durable, transactional (MSDTC), Windows-native | Windows-only, no containers, legacy; `System.Messaging` absent in .NET 5+ | Existing on-prem Windows systems only |
 
 - `IDistributedCache` is not a queue.
 - Cache stores key-value state; queues store ordered work items/events with ack/retry semantics.

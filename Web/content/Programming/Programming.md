@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T21:41:36.168Z
-modified: 2026-07-11T21:41:36.168Z
-published: 2026-07-11T21:41:36.168Z
+created: 2026-07-12T14:27:20.433Z
+modified: 2026-07-12T14:27:20.433Z
+published: 2026-07-12T14:27:20.433Z
 tags:
   - FolderNote
 icon: code-2
@@ -12,7 +12,7 @@ topic:
   - Programming
 subtopic: []
 summary: "Software craft focused on the .NET stack: C#, runtime, web APIs, and concurrency."
-status: Creation
+status: Done
 level:
   - "4"
 priority: High
@@ -28,5 +28,6 @@ What separates senior programming skill from junior: knowing when _not_ to use a
 
 ## References
 
-- [.NET documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/) — Entry point for the .NET platform covered in this section.
-- [The Pragmatic Programmer (Hunt & Thomas)](https://pragprog.com/titles/tpp20/the-pragmatic-programmer-20th-anniversary-edition/) — Practitioner guide to programming craft and engineering judgment.
+- [.NET documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/) — entry point for the .NET platform covered in this section.
+- [C# language reference (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/csharp/) — authoritative reference for the C# language, runtime behavior, and features.
+- [The Pragmatic Programmer (Hunt & Thomas)](https://pragprog.com/titles/tpp20/the-pragmatic-programmer-20th-anniversary-edition/) — practitioner guide to programming craft and engineering judgment.

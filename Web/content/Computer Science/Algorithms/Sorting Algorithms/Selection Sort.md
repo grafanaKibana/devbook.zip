@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T21:48:55.883Z
-modified: 2026-07-11T21:48:55.883Z
-published: 2026-07-11T21:48:55.883Z
+created: 2026-07-12T14:27:20.416Z
+modified: 2026-07-12T14:27:20.416Z
+published: 2026-07-12T14:27:20.416Z
 topic:
   - Computer Science
 subtopic:
@@ -16,108 +16,100 @@ status: Ready to Repeat
 
 # Intro
 
-Selection sort builds a sorted prefix by repeatedly finding the minimum element in the unsorted suffix and swapping it into place. It always performs exactly O(n²) comparisons regardless of input order, but only O(n) swaps — making it useful in the rare case where writes are expensive but comparisons are cheap.
+An array must be ordered on a medium where a write costs far more than a comparison — a flash or EEPROM cell rated for a limited number of erase cycles, for instance. Most sorts move an element many times before it settles into its final slot, and each of those moves is a write. Selection sort commits each element with a single write instead: pass `i` scans the unsorted suffix `a[i..n-1]`, finds its minimum, and swaps that minimum into position `i`. Every position is written at most once, so ordering an n-element array costs at most `n − 1` swaps, whatever the starting order.
 
-## Mechanism
+The scan that finds each minimum is unconditional. It inspects every remaining element, and nothing about the data — already sorted, reversed, random — changes that count. The write budget is minimal; the comparison budget is fixed.
 
-For each position `i`, scan `a[i..n-1]` to find the minimum, then swap it with `a[i]`. After each iteration, the sorted prefix grows by one element.
+**Core condition:** unsorted array, writes dearer than comparisons → one swap places each element's final value → at most `n − 1` writes but always `Θ(n²)` comparisons.
 
-```mermaid
-graph TD
-  A[Start array A] --> B[Set i to 0]
-  B --> C{i less than n minus 1}
-  C -->|No| Z[Done]
-  C -->|Yes| D[Set min to i and set j to i plus 1]
-  D --> E{j less than n}
-  E -->|No| F[Swap A at i and A at min]
-  F --> G[Increment i]
-  G --> C
-  E -->|Yes| H{A at j less than A at min}
-  H -->|Yes| I[Set min to j]
-  H -->|No| J[No op]
-  I --> K[Increment j]
-  J --> K
-  K --> E
-```
+## One pass
 
-## Visualization
-
-The card animates the minimum scan: blue marks the pair being compared, amber tracks the current minimum candidate, violet flashes on the single swap that ends each pass, and green bars with a white check are locked in place. WATCH shows i, j, and the swap count — note how the swap count stays tiny (at most one per pass) while the comparison work never shrinks.
+The trace sorts the eight-element array `[8, 3, 5, 1, 9, 2, 7, 4]`.
 
 ```steptrace
 {"algorithm":"selection-sort","array":[8,3,5,1,9,2,7,4]}
 ```
 
+The first pass scans all eight elements, finds the minimum `1` at index 3, and swaps it with `a[0]`. That single write fixes index 0 permanently: no smaller value remains in the suffix, so index 0 is never revisited. The second pass repeats the scan over `a[1..7]`, now seven elements, and places `2`. Each pass performs one swap and shortens the unsorted suffix by one, so the sorted prefix on the left grows by one element per pass while the comparison work on the right falls by one — the sorted region and the scanning cost move in opposite directions.
+
+## Why each placement is final
+
+After pass `i` completes, `a[0..i]` holds the `i + 1` smallest values in sorted order, and each of them is less than or equal to every value still in `a[i+1..n-1]`. Pass `i` establishes that invariant by choosing the true minimum of the suffix: no later pass can surface a smaller value to displace it, so the placement is settled and the prefix stays sorted without ever being re-examined.
+
+The comparison count follows from the scan alone and ignores the data. Pass `i` tests the running minimum against each of the `n − 1 − i` remaining elements; summing `n−1, n−2, …, 1` gives `n(n−1)/2` comparisons — the same total whether the input arrives sorted, reversed, or shuffled. There is no `a[j] < a[min]` shortcut that ends a pass early and no outer flag that notices an already-sorted array, so the algorithm is non-adaptive: a sorted input costs exactly what a reversed one does.
+
+Writes run the opposite way. Each pass ends in one swap — `n − 1` across the whole sort in the classic formulation, and never more. That split, quadratic comparisons against linear writes, is the property that separates selection sort from every other elementary sort.
+
 ## Complexity
 
-| Case | Time | Space | Swaps |
-|------|------|-------|-------|
-| Best | O(n²) | O(1) | O(n) |
-| Average | O(n²) | O(1) | O(n) |
-| Worst | O(n²) | O(1) | O(n) |
+| Case | Time | Swaps | Auxiliary space | Cause |
+| --- | --- | --- | --- | --- |
+| Best | `Θ(n²)` | `0` | `O(1)` | Sorted input still triggers all `n(n−1)/2` comparisons; the minimum already sits at `a[i]`, so the guarded swap is skipped every pass. |
+| Average | `Θ(n²)` | `O(n)` | `O(1)` | The suffix scan is fixed at `n(n−1)/2` comparisons; roughly `n` out-of-place minima each move once. |
+| Worst | `Θ(n²)` | `n − 1` | `O(1)` | Every pass finds its minimum away from `a[i]` and performs its one swap; the comparison count is unchanged from the best case. |
 
-**Properties:** in-place, typically not stable (a swap can reorder equal keys), exactly n−1 swaps in the worst case.
+Comparisons dominate the running time and are identical across all three rows — the direct consequence of an unconditional scan. Swaps are the axis that varies, yet even the worst case stays linear at one swap per pass. Auxiliary space is `O(1)`: the sort runs in place over the original array using a handful of index variables.
 
-## C# Implementation
+## Boundaries
 
-```csharp
-public static void SelectionSort(int[] a)
-{
-    int n = a.Length;
-    for (int i = 0; i < n - 1; i++)
-    {
-        int minIdx = i;
-        for (int j = i + 1; j < n; j++)
-        {
-            if (a[j] < a[minIdx])
-                minIdx = j;
-        }
-        if (minIdx != i)
-            (a[i], a[minIdx]) = (a[minIdx], a[i]);
-    }
-}
-```
+Selection sort is not stable, and the instability comes straight from the long-distance swap. Sorting `[5a, 3, 5b, 1]` by value: pass 0 finds the minimum `1` at index 3 and swaps it into `a[0]`, giving `[1, 3, 5b, 5a]`. That swap carried `5a` to the far end, behind `5b`, even though `5a` started ahead of it. Two keys that compared equal have had their original order reversed, and no later pass touches either again. This matters when selection sort runs as a secondary key sort: it silently scrambles the ordering the primary sort established.
 
-> [!TIP]
-> **Heapsort is selection sort done right.** Selection sort's cost is the O(n) linear scan to find the minimum each round. Replace that flat scan with a **heap**, which surrenders the min/max in O(log n), and the whole sort drops from O(n²) to O(n log n) — that's exactly heapsort. Seeing selection sort as "repeatedly select the extreme" makes the [[Heap]] the natural optimization.
+A stable variant exists but abandons the write budget that motivates the algorithm. Rather than swapping the minimum into place, it removes the minimum and shifts the intervening elements up by one — the same move [[Insertion Sort]] makes. Preserving equal-key order costs `Θ(n)` writes per pass, restoring the `Θ(n²)` write total that the swap-based form was chosen to avoid.
 
-## When to Use
+## Reference drawer
 
-Rarely in production. The O(n) swap count is its only advantage over bubble sort. Consider it when:
+> [!ABSTRACT]- Control flow
+>
+> ```mermaid
+> graph TD
+>   A[Start array A] --> B[Set i to 0]
+>   B --> C{i less than n minus 1}
+>   C -->|No| Z[Done]
+>   C -->|Yes| D[Set min to i and set j to i plus 1]
+>   D --> E{j less than n}
+>   E -->|No| F[Swap A at i and A at min]
+>   F --> G[Increment i]
+>   G --> C
+>   E -->|Yes| H{A at j less than A at min}
+>   H -->|Yes| I[Set min to j]
+>   H -->|No| J[No op]
+>   I --> K[Increment j]
+>   J --> K
+>   K --> E
+> ```
 
-- Writes are significantly more expensive than reads (e.g., flash memory with limited write cycles).
-- You need a simple, predictable algorithm with no extra memory.
-
-For general use, prefer insertion sort (better on nearly-sorted data) or `Array.Sort` (introsort).
-
-## Pitfalls
-
-### Using Selection Sort When Stability Is Required
-
-**What goes wrong**: selection sort swaps the minimum element into position, which can move an equal element past another equal element, breaking stability. A developer uses it for a secondary sort (e.g., sort by name after sorting by age) and the primary sort order is corrupted.
-
-**Mitigation**: use insertion sort or merge sort when stability is required. Selection sort is only appropriate when writes are significantly more expensive than reads (e.g., flash memory) and stability is not needed.
-
-### Choosing Selection Sort Over Insertion Sort for Small Arrays
-
-**What goes wrong**: selection sort is chosen for small arrays because it has O(n) swaps. But for small n, the swap count advantage is negligible, and insertion sort is faster in practice due to better cache behavior and O(n) best case on nearly-sorted data.
-
-**Mitigation**: prefer insertion sort for small arrays. Use selection sort only when writes are measurably more expensive than reads in your specific hardware context.
+> [!EXAMPLE]- C# implementation
+>
+> ```csharp
+> public static void SelectionSort(int[] a)
+> {
+>     int n = a.Length;
+>     for (int i = 0; i < n - 1; i++)
+>     {
+>         int minIdx = i;
+>         for (int j = i + 1; j < n; j++)
+>         {
+>             if (a[j] < a[minIdx])
+>                 minIdx = j;
+>         }
+>         if (minIdx != i)
+>             (a[i], a[minIdx]) = (a[minIdx], a[i]);
+>     }
+> }
+> ```
+>
+> The `minIdx != i` guard skips the write when the minimum already sits in place, which is why a sorted input performs zero swaps while still running every comparison.
 
 ## Questions
 
-> [!QUESTION]- Why does selection sort make exactly O(n) swaps, and when does that matter?
-> Selection sort scans the entire unsorted suffix to find the minimum, then performs exactly one swap per iteration — n−1 swaps total. This matters when writes are significantly more expensive than reads, such as flash memory with limited write cycles or EEPROM. In those cases, minimizing swaps is worth the O(n²) comparison cost. For RAM-based sorting, the swap count advantage is irrelevant — use insertion sort or Array.Sort instead.
+> [!QUESTION]- Why are the comparisons `Θ(n²)` even on already-sorted input?
+> The suffix scan is unconditional: pass `i` compares the running minimum against all `n − 1 − i` remaining elements, with no early-exit test and no check for existing order. The `n(n−1)/2` total depends only on `n`, not on arrangement, so a sorted array costs exactly what a reversed one does. The algorithm is non-adaptive.
 
-> [!QUESTION]- Why is selection sort not stable, and how can it be made stable?
-> Selection sort swaps the minimum element into position, which can move an equal element past another equal element. For example, sorting \[3a, 3b, 1] by value: the 1 swaps with 3a, giving \[1, 3b, 3a] — the relative order of the two 3s is reversed. To make it stable, replace the swap with a shift (like insertion sort does), but that eliminates the O(n) swap advantage. In practice, if stability is needed, use merge sort.
+> [!QUESTION]- Why is standard selection sort unstable, and what does the stable fix cost?
+> The swap that places the suffix minimum can carry an equal-keyed element across its partner: `[5a, 3, 5b, 1]` becomes `[1, 3, 5b, 5a]`, reversing the two 5s. Restoring stability means shifting the intervening elements instead of swapping, which raises writes to `Θ(n)` per pass and forfeits the linear-write property that was the reason to use it.
 
 ## References
 
-- [Selection sort (Wikipedia)](https://en.wikipedia.org/wiki/Selection_sort) — algorithm description, stability discussion, and comparison with insertion sort.
-
-- [Sorting visualizations (VisuAlgo)](https://visualgo.net/en/sorting) — step-by-step animation comparing all basic sorting algorithms.
-
-- [Timsort (Wikipedia)](https://en.wikipedia.org/wiki/Timsort) — Python's and Java's default sort; uses insertion sort (not selection sort) for small runs, illustrating why insertion sort is preferred over selection sort in practice.
-
-- [Sorting algorithms comparison (Big-O Cheat Sheet)](https://www.bigocheatsheet.com/) — quick reference for time and space complexity of all common sorting algorithms.
+- [Selection sort (Wikipedia)](https://en.wikipedia.org/wiki/Selection_sort) — the exchange count, the non-adaptive comparison total, and the shift-based stable variant.
+- [Elementary Sorts (Sedgewick & Wayne, algs4)](https://algs4.cs.princeton.edu/21elementary/) — analysis showing `~N²/2` compares and `N` exchanges, and why the running time is insensitive to input order.
+- [Sorting visualizations (VisuAlgo)](https://visualgo.net/en/sorting) — side-by-side animation of the elementary sorts, useful for contrasting selection sort's swap count with bubble and insertion sort.
