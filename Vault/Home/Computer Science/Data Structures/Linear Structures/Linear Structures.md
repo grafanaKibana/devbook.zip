@@ -30,13 +30,13 @@ Every structure in this folder is an answer to two questions: *where can you tou
 
 | Structure | Access discipline | Backing | Key costs | .NET |
 |---|---|---|---|---|
-| [[Arrays\|Array]] | Any index, O(1) | Contiguous, fixed size | Resize = reallocate + copy | `T[]` |
+| [[Arrays\|Array]] | Any index, O(1) | Contiguous, fixed size | Resize = reallocate + copy; middle insert/remove = O(n) shift | `T[]` |
 | [[Dynamic Array]] | Any index, O(1); append amortized O(1) | Contiguous, grows ×2 | Mid-sequence insert/remove O(n) | `List<T>` |
 | [[LinkedList]] | O(1) at a *held node*; O(n) to find it | Doubly-linked nodes | Allocation per node, cache-hostile traversal | `LinkedList<T>` |
 | [[Stack]] | One end (LIFO) | Contiguous | Resize on growth; no access below the top | `Stack<T>` |
 | [[Queue]] | In back, out front (FIFO) | Ring over an array | Unbounded growth if producers outpace consumers | `Queue<T>` |
-| [[Deque]] | Both ends, O(1) | Ring or linked nodes | No built-in .NET type | roll your own / `LinkedList<T>` |
-| [[Circular Buffer]] | FIFO, fixed capacity | Ring, wraps in place | Full ⇒ reject or overwrite oldest | hand-rolled; inside `Channel<T>` |
+| [[Deque]] | Both ends O(1); indexed access O(1) (ring) | Ring or linked nodes | No built-in .NET type | roll your own / `LinkedList<T>` |
+| [[Circular Buffer]] | FIFO, fixed capacity, O(1) worst-case | Ring, wraps in place; zero steady-state allocation | Full ⇒ reject or overwrite oldest | hand-rolled; inside `Channel<T>` |
 | [[Span]] | Any index — a *view*, owns nothing | Points at existing memory | Stack-only, can't cross `await` | `Span<T>` / `Memory<T>` |
 
 ## Choosing

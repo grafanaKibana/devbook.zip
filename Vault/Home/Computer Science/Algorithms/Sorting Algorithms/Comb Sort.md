@@ -90,30 +90,13 @@ Gapped swaps also cost stability. Two elements with equal keys can be reordered 
 >
 > The loop condition `gap > 1 || swapped` keeps the gap-1 phase running until one sweep makes no swap. That no-swap pass is the sorted certificate; removing it can leave adjacent inversions the wide passes never inspected.
 
-## Comparison
-
-| Algorithm | Typical time | Worst time | Aux space | Stable | Distinguishing property |
-| --- | --- | --- | --- | --- | --- |
-| [[Bubble Sort]] | `O(n²)` | `O(n²)` | `O(1)` | Yes | The gap-1 base comb sort improves; turtles crawl one slot per pass |
-| Comb Sort | `≈ Θ(n log n)` empirical | `Θ(n²)` | `O(1)` | No | Wide gaps evict turtles for one extra line over bubble sort |
-| [[Shell Sort]] | `O(n^1.5)` by gap sequence | `O(n²)` for poor gaps | `O(1)` | No | Same shrinking gap over insertion sort; less residual disorder per pass |
-| [[Quick Sort]] | `Θ(n log n)` | `O(n²)` (rare with good pivots) | `O(log n)` stack | No | General-purpose in-place sort; the practical `O(n log n)` default |
-
-Comb sort's only structural claim is over bubble sort: for the same `O(1)` space and nearly the same code, it removes the turtle asymmetry that pins bubble sort at `Θ(n²)`, so random inputs run in roughly `n log n` time. That advantage is contained by [[Shell Sort]], which applies the identical shrinking-gap scheme to insertion-sort passes that leave each subsequence more ordered, so it carries less disorder into the final pass and holds the same niche with better constants. Neither reaches the guarantees of an `O(n log n)` sort: [[Quick Sort]], [[Merge Sort]], and [[Heap Sort]] carry real workloads, and hybrids like [[Introsort]] and [[Tim Sort]] add the worst-case bound comb sort never gets. What remains is comb sort's teaching value: it isolates and names one flaw — turtles — and shows that a single cheap change removes it.
-
 ## Questions
-
-> [!QUESTION]- Why does comb sort lack the `O(n)` best case that bubble sort has?
-> Bubble sort can exit after one clean adjacent pass, so already-sorted input costs `O(n)`. Comb sort always runs one sweep for every gap value from `n / 1.3` down to `1`, and that gap sequence has `Θ(log n)` terms of `O(n)` work each, so even sorted input costs `Θ(n log n)`. The wide passes are unconditional; only the gap-1 phase checks for a no-swap exit.
 
 > [!QUESTION]- What is a turtle, and how does the gap remove it?
 > A turtle is a small value near the end of the array. A bubble-style adjacent pass moves it left one position at a time, so it needs `O(n)` passes to reach the front — the asymmetry that keeps bubble sort quadratic. A wide initial gap compares distant pairs, so one swap can carry the turtle up to `gap` positions toward the front, and the shrinking gap then resolves the remaining local disorder.
 
 > [!QUESTION]- Why is comb sort's sub-quadratic behavior not a guarantee?
 > The `≈ n log n` figure is an empirical measurement on random input tied to the `1.3` shrink factor, not a proven bound. No structural argument prevents `Θ(n²)`, and adversarial inputs still reach it. The combsort11 special case for gaps of `9` and `10` exists precisely because the constant was tuned by experiment rather than derived.
-
-> [!QUESTION]- How does comb sort differ from Shell sort, given both shrink a gap?
-> Both shrink a gap from large to `1` and finish with a gap-1 pass. Comb sort applies one bubble-style sweep per gap and does not fully sort the gapped subsequences; [[Shell Sort]] insertion-sorts each subsequence to completion per gap, leaving less residual disorder. The stronger base is why Shell sort, not comb sort, survives into practical constrained-environment code.
 
 ## References
 

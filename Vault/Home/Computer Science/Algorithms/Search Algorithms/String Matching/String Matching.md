@@ -9,7 +9,7 @@ tags:
 publish: true
 priority: Medium
 level:
-  - '4'
+  - "4"
 status: Creation
 ---
 
@@ -40,13 +40,13 @@ flowchart TD
 
 ## The family
 
-| Algorithm | Patterns | Preprocesses | Time | Worst case | Reach for it when |
-| --- | --- | --- | --- | --- | --- |
-| [[KMP (Knuth-Morris-Pratt) Algorithm\|KMP]] | one | pattern → prefix (failure) function | O(n + m) | O(n + m) | Guaranteed linear scan; never backs up in the text (streaming) |
-| [[Z-Algorithm]] | one | pattern → Z-array | O(n + m) | O(n + m) | Prefix-structure problems; often the simpler linear method to reason about |
-| [[Boyer-Moore]] | one | pattern → bad-character + good-suffix tables | O(n / m) best | O(n) with Galil rule | Long patterns over large alphabets — sublinear in practice; powers `grep` |
-| [[Rabin Karp Search\|Rabin–Karp]] | one or many | text → rolling hash | O(n + m) avg | O(n·m) on hash collisions | Many equal-length patterns, plagiarism/fingerprinting, 2-D matching |
-| [[Aho-Corasick]] | many | pattern set → trie + failure links | O(n + Σmᵢ + matches) | same | Scanning once for a whole dictionary of patterns |
+| Algorithm | Patterns | Preprocesses | Time | Worst case | Aux space | Weaker case | Reach for it when |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [[KMP (Knuth-Morris-Pratt) Algorithm\|KMP]] | one | pattern → prefix (failure) function | O(n + m) | O(n + m) | Θ(m) | Large alphabets, where skipping would pay | Guaranteed linear scan; never backs up in the text (streaming) |
+| [[Z-Algorithm]] | one | pattern → Z-array | O(n + m) | O(n + m) | Θ(n + m) | Large text under tight memory | Prefix-structure problems; often the simpler linear method to reason about |
+| [[Boyer-Moore]] | one | pattern → bad-character + good-suffix tables | O(n / m) best | O(n) with Galil rule | O(m + \|Σ\|) | Small alphabets, adversarial repeats | Long patterns over large alphabets — sublinear in practice; powers `grep` |
+| [[Rabin Karp Search\|Rabin–Karp]] | one or many | text → rolling hash | O(n + m) avg | O(n·m) on hash collisions | Θ(m) hash / O(1) scan | Collisions or adversarial text → O(n·m) | Many equal-length patterns, plagiarism/fingerprinting, 2-D matching |
+| [[Aho-Corasick]] | many | pattern set → trie + failure links | O(n + Σmᵢ + matches) | same | Θ(M·σ) dense / Θ(M) sparse | A single pattern; memory-tight dense alphabets | Scanning once for a whole dictionary of patterns |
 
 The two linear single-pattern methods, [[KMP (Knuth-Morris-Pratt) Algorithm|KMP]] and [[Z-Algorithm]], are two views of the same prefix structure: both preprocess the pattern in `O(m)`, guarantee `O(n)` scans, and are interconvertible. [[Boyer-Moore]] gives up the worst-case simplicity to win the *average* case by skipping ahead — the longer the pattern and the larger the alphabet, the bigger its shifts. [[Aho-Corasick]] is KMP generalised from one pattern to a set: the trie holds every pattern and the failure links are the multi-pattern equivalent of KMP's failure function. [[Rabin Karp Search|Rabin–Karp]] stands apart — it never builds an automaton, so it stays correct only up to hash collisions, which is exactly why it generalises to problems the automaton methods can't reach cheaply.
 

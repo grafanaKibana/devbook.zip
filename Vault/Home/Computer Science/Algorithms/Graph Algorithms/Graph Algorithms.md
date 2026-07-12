@@ -54,7 +54,7 @@ flowchart TD
 | [[Greedy Best-First Search]] | Fast point-to-point path, not optimal | O((V + E) log V) | Heuristic only; sacrifices optimality for speed |
 | [[Bidirectional Search]] | Point-to-point shortest path | O(b^(d/2)) vs O(b^d) | Target known; graph must be reversible |
 | [[Bellman-Ford]] | Single-source shortest path | O(V·E) | Handles negative edges; detects negative cycles |
-| [[Floyd-Warshall]] | All-pairs shortest path | O(V³) | Small/dense graphs; detects negative cycles |
+| [[Floyd-Warshall]] | All-pairs shortest path | O(V³) time, Θ(V²) space | Small/dense graphs; detects negative cycles |
 
 ### Structure and connectivity
 
@@ -65,6 +65,9 @@ flowchart TD
 | [[Strongly Connected Components]] | Maximal mutually-reachable vertex sets | O(V + E) | Directed graphs |
 | [[Articulation Points and Bridges]] | Cut vertices and cut edges | O(V + E) | Undirected graphs |
 | [[Maximum Flow]] | Max s–t throughput; min cut | O(V·E²) (Edmonds–Karp) | Capacitated network |
+
+> [!NOTE]
+> Not every graph problem admits a polynomial algorithm. [[Hamiltonian Cycle]] — visit every vertex exactly once and return to the start — is **NP-complete**, so it sits outside the selection tables above: there is no known efficient algorithm to choose, only exponential search and heuristics.
 
 ## Questions
 

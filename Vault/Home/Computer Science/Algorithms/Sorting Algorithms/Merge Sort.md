@@ -95,17 +95,6 @@ Where the input is sequential rather than indexed, the buffer stops mattering fo
 > ```
 > The `a[i] <= a[j]` comparison is what keeps the merge stable. This version allocates a buffer inside every `Merge` call; a production implementation hoists one shared `n`-element buffer instead, cutting allocations from `O(n log n)` to `O(1)`.
 
-## Comparison
-
-| Algorithm | Time (worst) | Auxiliary space | Stable | Stronger case | Weaker case |
-| --- | --- | --- | --- | --- | --- |
-| Merge sort | `O(n log n)` | `O(n)` array, `O(1)` list | Yes | Guaranteed bound, linked lists, and external sorting | In-memory arrays, where the buffer and cache misses cost |
-| [[Quick Sort]] | `O(n²)` worst, `O(n log n)` average | `O(log n)` stack | No | In-place, cache-friendly in-memory sorting | Adversarial pivots and any need for stability |
-| [[Heap Sort]] | `O(n log n)` | `O(1)` | No | A hard worst-case bound with no extra buffer | Cache-hostile access pattern; not stable |
-| [[Tim Sort]] | `O(n log n)` | `O(n)` | Yes | Real-world data with existing runs or near-sorted order | Uniformly random data, where run detection earns little |
-
-Merge sort is the stable `O(n log n)` guarantee and the natural fit for linked lists and external sorting; the price is `O(n)` auxiliary memory that in-place quick sort and heap sort avoid. Quick sort is usually faster on in-memory arrays but trades away both the worst-case bound and stability. Heap sort keeps the `O(n log n)` ceiling in `O(1)` space but is unstable and cache-hostile. Timsort keeps merge sort's stability and merge core, adding run detection that pays off precisely when the input is already partly ordered.
-
 ## Questions
 
 > [!QUESTION]- Why is merge sort `O(n log n)` on every input, with no faster best case?

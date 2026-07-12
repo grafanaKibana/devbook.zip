@@ -121,9 +121,6 @@ Kahn's fits when cycle detection and iterative control matter: the count check i
 > [!QUESTION]- Why is the topological order generally not unique, and how is a deterministic one obtained?
 > Whenever two or more vertices have in-degree 0 at the same time, either may be emitted next, so most DAGs admit many orders. Keying Kahn's frontier with a priority queue instead of a plain queue fixes the choice — for example always taking the smallest label yields the lexicographically smallest order.
 
-> [!QUESTION]- Why does an acyclic graph make Dijkstra unnecessary for shortest paths?
-> On a DAG the vertices can be laid out in topological order and their outgoing edges relaxed in that order in a single `O(V + E)` pass; every edge is relaxed after its source is final. Dijkstra's priority queue and non-negative-weight restriction exist to cope with graphs where such an ordering is impossible, so both are unneeded here — and the linear pass also handles negative weights and longest paths.
-
 ## References
 
 - [Topological sorting of large networks (Kahn, 1962)](https://dl.acm.org/doi/10.1145/368996.369025) — the original in-degree/queue construction the algorithm is named after.

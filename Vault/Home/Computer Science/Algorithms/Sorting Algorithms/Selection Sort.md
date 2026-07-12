@@ -93,30 +93,13 @@ A stable variant exists but abandons the write budget that motivates the algorit
 > ```
 > The `minIdx != i` guard skips the write when the minimum already sits in place, which is why a sorted input performs zero swaps while still running every comparison.
 
-## Comparison
-
-| Algorithm | Average time | Writes | Stable | Stronger case | Weaker case |
-| --- | --- | --- | --- | --- | --- |
-| Selection sort | `Θ(n²)` | `≤ n − 1` swaps | No | Writes cost far more than comparisons (flash, EEPROM) | Comparisons are the bottleneck, or stability is required |
-| [[Bubble Sort]] | `Θ(n²)` | `O(n²)` swaps | Yes | A flagged early exit detects already-sorted input | Its swap count is worse on random or reversed input when a write is the dear operation |
-| [[Insertion Sort]] | `Θ(n²)` | `O(n²)` shifts, `O(n)` when nearly sorted | Yes | Small or nearly-sorted input, or stability is needed | Large random input, where shifts accumulate |
-| [[Heap Sort]] | `Θ(n log n)` | `O(n log n)` | No | Large input where "repeatedly extract the extreme" must scale | Small arrays, and cache locality weaker than quicksort |
-
-Selection sort and [[Bubble Sort]] share the same `Θ(n²)` comparison cost, but bubble sort spends it in `Θ(n²)` swaps, so selection sort dominates it outright wherever a write is the expensive operation — the only setting either belongs in. [[Insertion Sort]] carries the identical asymptotic comparison cost yet collapses to `Θ(n)` on nearly-sorted data and keeps equal keys in order, which makes it the better default across ordinary in-memory workloads. The one property that keeps selection sort alive is its write budget: on flash or EEPROM, where an erase-write cycle costs orders of magnitude more than a compare and the cells wear out, capping the sort at `n − 1` swaps is worth the fixed quadratic scan. When the aim is instead to scale the "repeatedly extract the minimum" idea itself, [[Heap Sort]] replaces the linear suffix scan with a heap that surrenders its extreme in `O(log n)`, turning the whole sort into `O(n log n)`.
-
 ## Questions
 
 > [!QUESTION]- Why are the comparisons `Θ(n²)` even on already-sorted input?
 > The suffix scan is unconditional: pass `i` compares the running minimum against all `n − 1 − i` remaining elements, with no early-exit test and no check for existing order. The `n(n−1)/2` total depends only on `n`, not on arrangement, so a sorted array costs exactly what a reversed one does. The algorithm is non-adaptive.
 
-> [!QUESTION]- What single property justifies selection sort, and over which sibling?
-> Its write budget: at most `n − 1` swaps, one per pass, against the `Θ(n²)` swaps of [[Bubble Sort]] and the `Θ(n²)` shifts of [[Insertion Sort]] on unfavourable input. That only matters where a write is far costlier than a comparison — flash or EEPROM with wear limits. On ordinary RAM the advantage is invisible and insertion sort wins.
-
 > [!QUESTION]- Why is standard selection sort unstable, and what does the stable fix cost?
 > The swap that places the suffix minimum can carry an equal-keyed element across its partner: `[5a, 3, 5b, 1]` becomes `[1, 3, 5b, 5a]`, reversing the two 5s. Restoring stability means shifting the intervening elements instead of swapping, which raises writes to `Θ(n)` per pass and forfeits the linear-write property that was the reason to use it.
-
-> [!QUESTION]- How does heap sort descend from selection sort?
-> Both repeatedly extract the current extreme. Selection sort locates it with an `O(n)` linear scan of the unsorted region, giving `Θ(n²)`. [[Heap Sort]] stores that region as a heap that yields its extreme in `O(log n)`, so the same "select the extreme `n` times" strategy runs in `O(n log n)`.
 
 ## References
 

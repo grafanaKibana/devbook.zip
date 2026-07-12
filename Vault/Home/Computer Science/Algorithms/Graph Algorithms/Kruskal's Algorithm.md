@@ -7,7 +7,7 @@ level:
   - "4"
 priority: Medium
 status: Creation
-publish: false
+publish: true
 ---
 
 # Intro
@@ -47,16 +47,6 @@ With path compression and union by rank or size, the disjoint-set work is `O(E �
 A disconnected graph never reaches `V - 1` accepted edges. The scan returns a minimum spanning forest rather than an MST, so the edge count must be checked.
 
 Equal weights can produce several valid MSTs. Sort stability or an explicit endpoint tie-break changes which equal-weight edge enters, but not the minimum total weight. Negative weights require no special handling: ascending order and the cut property remain valid.
-
-## Comparison
-
-| Algorithm | Time | Input shape | Stronger case | Main cost |
-| --- | --- | --- | --- | --- |
-| Kruskal | `O(E log E)` | edge list | sparse graphs and sortable batches | global edge sort |
-| Prim | `O(E log V)` with heap | adjacency lists | connected graph grown from one frontier | priority-queue maintenance |
-| [[Borůvka's Algorithm]] | `O(E log V)` | edge list + components | parallel component contraction | repeated full edge scans |
-
-Kruskal fits sparse edge-list input and makes cycle prevention explicit through union-find. Prim becomes stronger when adjacency is already indexed around vertices; Borůvka becomes stronger when many components can select and merge edges concurrently.
 
 ## References
 

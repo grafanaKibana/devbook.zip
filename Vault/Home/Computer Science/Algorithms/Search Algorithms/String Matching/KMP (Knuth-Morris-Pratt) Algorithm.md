@@ -127,18 +127,6 @@ KMP gains nothing from a large alphabet. It compares left to right and, in the w
 > ```
 > Both loops share the same fallback shape: the inner `while` retreats through `failure` rather than resetting to `0`. That is what keeps the total work linear and the table correct.
 
-## Comparison
-
-| Algorithm | Time | Space / preprocessing | Stronger case | Weaker case | Semantic property |
-| --- | --- | --- | --- | --- | --- |
-| Naive search | `O(n·m)` worst, `O(n)` on low overlap | `O(1)`, none | Short patterns, low self-overlap, tiny inputs | Repetitive text and pattern | Deterministic; re-reads text after each mismatch |
-| KMP | `Θ(n + m)` | `Θ(m)` failure table | Adversarial or streaming input needing a hard bound | Large alphabets where skipping would help | Deterministic; text pointer never rewinds; no hashing |
-| [[Rabin Karp Search]] | `O(n + m)` expected, `O(n·m)` worst | `O(1)` rolling hash | Many patterns matched in one pass via a hash set | Hash collisions or adversarial input | Probabilistic; compares hashes, verifies on a hit |
-| [[Boyer-Moore]] | Sublinear average on large alphabets, `O(n·m)` worst | `O(m + |Σ|)` skip tables | Long patterns over large alphabets | Small alphabets, short patterns | Scans right-to-left; skips via bad-character and good-suffix rules |
-| [[Z-Algorithm]] | `Θ(n + m)` | `Θ(n + m)` Z-array | Same linear bound; adapts to other string problems | Builds a Z-array over the concatenation | Deterministic; equivalent linear-time construction to KMP |
-
-KMP is the deterministic `O(n + m)` single-pattern guarantee with no hashing and no text rewinding; its value is a hard worst-case ceiling on adversarial or streaming input rather than raw speed on ordinary text. Boyer-Moore is usually faster in practice on large alphabets, because a mismatch lets it skip ahead instead of reading every character. Rabin-Karp becomes stronger when many patterns are searched at once, since one rolling hash checks a whole set per position. The [[Z-Algorithm]] reaches the same linear bound through the Z-array and is often the easier starting point for problems beyond plain matching, such as counting distinct substrings. For matching many fixed patterns simultaneously, [[Aho-Corasick]] replaces per-pattern scans with a single automaton.
-
 ## Questions
 
 > [!QUESTION]- Why does the text index never move backward, and what does that buy?

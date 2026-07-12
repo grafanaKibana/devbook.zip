@@ -49,12 +49,14 @@ flowchart TD
 
 | Data shape | Algorithm | Time | Precondition |
 | --- | --- | --- | --- |
-| Unsorted array | [[Linear Search]] | O(n) | None |
+| Unsorted array, linked list, or one-pass stream | [[Linear Search]] | O(n) | None; needs no index or random access |
 | Sorted array | [[Binary Search]] | O(log n) | Sorted, random access |
 | Sorted, unbounded length or target near front | [[Exponential Search]] | O(log i) for target at index i | Sorted |
-| Sorted, uniformly distributed keys | [[Interpolation Search]] | O(log log n) avg, O(n) worst | Sorted **and** near-uniform distribution |
+| Sorted, uniformly distributed keys | [[Interpolation Search]] | O(log log n) avg, O(n) worst | Sorted **and** near-uniform **numeric** distribution |
 | Sorted, forward-only / costly backward seeks | [[Jump Search]] | O(√n) | Sorted |
 | Unimodal function, not an array | [[Ternary Search]] | O(log n) probes | Strict unimodality |
+
+Binary Search also serves range and insertion-point queries — lower-bound / upper-bound, first/last match — because it keeps the data in sorted order rather than building a separate index.
 
 ### Searching text
 

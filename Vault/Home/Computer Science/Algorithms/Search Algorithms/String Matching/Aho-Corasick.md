@@ -169,17 +169,6 @@ The `Θ(M·σ)` (dense) or `Θ(M)` (sparse) figure is the automaton itself, allo
 > ```
 > `Build` runs once after the final `Add`. `Search` yields `(endIndex, patternId)` for every occurrence; the inner `for` walks the output chain, so overlapping and nested matches are all emitted. A dense `char`-indexed array could replace `Dictionary<char, int>` to trade memory for a faster transition.
 
-## Comparison
-
-| Algorithm | Time | Space / preprocessing | Stronger case | Weaker case | Semantic property |
-| --- | --- | --- | --- | --- | --- |
-| Aho-Corasick | `Θ(n + z)` search, `Θ(M)` build | `Θ(M·σ)` dense / `Θ(M)` sparse automaton | Many patterns of varied length matched in one pass | A single pattern; memory-tight dense alphabets | Deterministic; reports every overlapping and nested match; dictionary fixed at build |
-| [[KMP (Knuth-Morris-Pratt) Algorithm\|KMP]] | `Θ(n + m)` per pattern | `Θ(m)` failure table | One pattern with a hard linear bound; streaming input | `k` patterns force `O(k·n)` rescans | Deterministic single pattern; text pointer never rewinds |
-| [[Rabin Karp Search\|Rabin-Karp]] | `Θ(n + m)` expected, `Θ(nm)` worst | `O(1)` rolling hash | Many **equal-length** patterns screened via a hash set | Varied lengths; adversarial collisions | Probabilistic; verifies characters on a hash hit |
-| [[Boyer-Moore]] | `O(n/m)` best, `O(nm)` worst | `O(m + σ)` skip tables | One long pattern over a large alphabet | Small alphabets; many patterns at once | Skips via right-to-left scan; single pattern |
-
-Aho-Corasick is the fit for matching many patterns of varied length in one pass — dictionary matching, intrusion and virus signatures, `fgrep -f` — because a single automaton absorbs the whole set and search stays `Θ(n + z)` no matter how many patterns exist, paying for it in automaton memory and a build that assumes a fixed dictionary. A single pattern is simpler and lighter with KMP's guaranteed linear scan or Boyer-Moore's sublinear skipping on a large alphabet. A set of patterns that all share one length can stay with Rabin-Karp, where one rolling hash screens the whole set through a membership test, but that construction cannot express the mixed lengths Aho-Corasick handles directly.
-
 ## Questions
 
 > [!QUESTION]- Why is search cost `Θ(n + z)` independent of the number of patterns?

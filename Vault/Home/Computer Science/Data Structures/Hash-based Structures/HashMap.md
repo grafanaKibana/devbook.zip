@@ -100,20 +100,6 @@ Each boundary traces back to the bucket-and-hash mechanism.
 > ```
 > `Dictionary<TKey, TValue>` is the default map in modern .NET. `ConcurrentDictionary` covers concurrent writes (a plain map corrupts its bucket array under a data race), `FrozenDictionary` optimizes build-once/read-many hot paths, and `SortedDictionary` trades `O(1)` for ordered iteration. Passing an initial `capacity` pre-sizes the array and skips the grow-and-rehash cycles.
 
-## Comparison
-
-Alternatives for the same problem — associate a key with something and retrieve it — differ in what order information they keep and what key shapes they accept.
-
-| Structure | Lookup time | Ordering | Extra capability | Key shape it fits |
-| --- | --- | --- | --- | --- |
-| Hash map | `O(1)` average, `O(n)` worst | None | Value stored per key | Any hashable key |
-| [[Hash Set]] | `O(1)` average, `O(n)` worst | None | Membership only, no value | Any hashable key |
-| Balanced BST / [[Red-Black Tree]] | `O(log n)` | Sorted | Ordered iteration, range and successor queries | Any comparable key |
-| [[Trie]] | `O(k)` in key length | Lexicographic | Prefix and longest-match queries | Shared-prefix string keys |
-| Plain array | `O(1)` direct index | Index order | None beyond indexing | Dense integer keys |
-
-A hash map is the default when repeated exact-match keyed lookup dominates and order does not matter — it pays `O(n)` memory, an unstable iteration order, and a hash-quality dependency for its `O(1)` average. A balanced tree such as a [[Red-Black Tree]] becomes stronger when ordered iteration, range scans, or successor queries are part of the workload, accepting `O(log n)` per operation to keep keys sorted. A [[Trie]] wins when keys share prefixes and prefix or longest-match queries matter. A plain array beats all of them when keys are dense integers that can index directly, with no hashing and better locality. A [[Hash Set]] is the same machinery when only membership, not an associated value, is needed.
-
 ## Questions
 
 > [!QUESTION]- What assumptions make hash-map operations `O(1)` on average?

@@ -20,3 +20,21 @@ Behavioral patterns are concerned with algorithms and the assignment of responsi
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
 return FolderStructureMap;
 ```
+
+## Patterns at a Glance
+
+What unites the behavioral patterns is *how responsibility and communication are distributed* between objects. This is a catalog of intents, not a ranking — most compose freely.
+
+| Pattern | Intent | Reach for it when |
+| --- | --- | --- |
+| [[Chain of Responsibility]] | Pass a request along a chain of handlers, each choosing to handle it or forward it | Several objects might handle a request and the handler isn't known in advance (middleware, escalation) |
+| [[Command]] | Encapsulate a request as an object bundling action, parameters, and receiver | You need to queue, log, undo/redo, or replay operations |
+| [[Interpreter]] | Define a grammar and an interpreter that evaluates sentences of a language | You have a simple, stable language to evaluate (rules, expressions, DSLs) |
+| [[Iterator]] | Provide sequential access to a collection's elements without exposing its structure | Clients must traverse a collection without depending on its internal representation |
+| [[Mediator]] | Centralize how a set of components interact, replacing a many-to-many web with one-to-many routing | Objects communicate in complex ways and direct references have become tangled |
+| [[Memento]] | Capture and externalize an object's state so it can be restored later, without breaking encapsulation | You need snapshots for undo, checkpoints, or rollback |
+| [[Observer]] | Define a one-to-many dependency so a subject's change notifies all subscribers | State changes in one object must fan out to many decoupled listeners (events) |
+| [[State]] | Extract state-specific behavior into classes; the context delegates to its current state | Behavior changes with an internal mode and you want to avoid sprawling conditionals |
+| [[Strategy]] | Define a family of interchangeable algorithms behind a common interface | You want to swap an algorithm at runtime, chosen by the client |
+| [[Template Method]] | Define an algorithm's skeleton in a base class, letting subclasses override specific steps | Multiple variants share a fixed overall structure but differ in individual steps |
+| [[Visitor]] | Add new operations to an object hierarchy without modifying its classes, via double dispatch | You add operations often but change the class hierarchy rarely |
