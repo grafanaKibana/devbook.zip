@@ -146,17 +146,6 @@ Reordering the loops so `i` or `j` is outermost still compiles, runs, and termin
 
 Overflow is the other silent corruptor. With `int.MaxValue` as `∞`, the unconditional `dist[i][k] + dist[k][j]` wraps to a large negative number whenever both operands are the sentinel, and that phantom shortcut then propagates through the rest of the sweep. Skipping the relaxation when either operand is `∞`, or using a sentinel such as `long.MaxValue / 4` that tolerates one addition, closes it.
 
-## Comparison
-
-| Approach | Time | Space | Negatives | Stronger case | Weaker case |
-| --- | --- | --- | --- | --- | --- |
-| Floyd-Warshall | `Θ(V³)` | `Θ(V²)` | Edges yes, cycles detected | Small or dense graphs; whole matrix wanted; negative edges present | Large sparse graphs where `V³` dwarfs the real path count |
-| Binary-heap [[Dijkstra]] from every vertex | `O(V·(E + V) log V)` | `O(V + E)` per run | No | Sparse non-negative graphs still needing all pairs | Any negative edge; dense graphs where it nears `V³ log V` |
-| [[Bellman-Ford]] | `O(V·E)` single source | `O(V)` | Edges yes, cycles detected | Distances from one source with negative edges | Paying `V×` to cover every source |
-| Johnson's with Fibonacci heaps | `O(V² log V + V·E)` | `O(V²)` | Edges yes (reweighted), cycles detected | Large sparse graphs with negative edges | Dense graphs where reweighting buys nothing over `V³` |
-
-Floyd-Warshall is the compact all-pairs choice when `V` is small or the graph is dense and when negative edges are in play — three loops and a `min`, no heap and no reweighting, plus a negative-cycle verdict for every vertex as a by-product. It pays `Θ(V³)` whether the graph is dense or not, so on a large sparse graph repeated Dijkstra scales with `E` on non-negative weights, and Johnson's reweights once with Bellman-Ford before running Dijkstra per source when negatives force it. For a single source, Bellman-Ford avoids materializing the whole matrix at all.
-
 ## Questions
 
 > [!QUESTION]- Why is the `k`-loop the outermost of the three?
@@ -167,9 +156,6 @@ Floyd-Warshall is the compact all-pairs choice when `V` is small or the graph is
 
 > [!QUESTION]- How does Floyd-Warshall surface a negative cycle, and how does that differ from Bellman-Ford?
 > After the sweep, any `dist[i][i] < 0` means a negative-weight path leaves `i` and returns to it — a negative cycle through `i` — reported for all vertices at once with no extra pass. Bellman-Ford instead runs one additional relaxation from a chosen source and can walk predecessors to extract the concrete cycle, which is what arbitrage-style problems need.
-
-> [!QUESTION]- When does repeated Dijkstra or Johnson's beat Floyd-Warshall?
-> On a large sparse graph, `Θ(V³)` is dominated by the `V²` empty pairs. With non-negative weights, Dijkstra from every vertex costs `O(V·(E + V) log V)` and scales with `E`. With negative edges, Johnson's reweights once via Bellman-Ford, then runs Dijkstra per source for `O(V² log V + V·E)`. Floyd-Warshall wins back only when `V` is small or the graph is dense enough that `E ≈ V²`.
 
 ## References
 

@@ -96,18 +96,6 @@ Auxiliary space is `O(1)` in every case: the array is sorted in place and only i
 > ```
 > `n--` shrinks the scanned range because each pass leaves one more settled element at the tail; the `do/while` runs at least one pass and the `swapped` flag ends the sort after the first pass with no swap.
 
-## Comparison
-
-| Algorithm | Average / worst time | Aux space | Stable | Stronger case | Weaker case |
-| --- | --- | --- | --- | --- | --- |
-| Bubble sort | `O(n²)` / `O(n²)` | `O(1)` | Yes | Detecting an already-sorted array in one `O(n)` pass; explaining swaps and stability | Any input with displaced elements |
-| [[Insertion Sort]] | `O(n²)` / `O(n²)` | `O(1)` | Yes | Small or nearly-sorted arrays; shifts instead of swaps, so fewer writes | Large random arrays |
-| [[Selection Sort]] | `O(n²)` / `O(n²)` | `O(1)` | No | Minimizing writes — `Θ(n)` swaps total | When stability or subquadratic time is needed |
-| [[Merge Sort]] | `O(n log n)` / `O(n log n)` | `O(n)` | Yes | Stable subquadratic sorting; linked lists and external merges | Tight memory with no room for the `O(n)` buffer |
-| .NET `Array.Sort` ([[Introsort|introsort]]) | `O(n log n)` / `O(n log n)` | `O(log n)` | No | General-purpose in-memory sorting | When stable order must be preserved |
-
-Bubble sort's only genuine edge is pedagogical: the adjacent-swap loop is easy to read, and the early-exit flag makes the sorted-input case visibly cheap. On any real workload it shares its `O(n²)` class and stability with insertion sort, which does the same job with fewer element writes and a contiguous write pattern the cache favors — so insertion sort dominates it wherever a simple quadratic sort is acceptable. Once inputs grow the `O(n log n)` sorts take over: merge sort where stability matters, and `Array.Sort`'s introsort as the general in-memory default.
-
 ## Questions
 
 > [!QUESTION]- What does the `swapped` flag detect, and what does omitting it cost?
@@ -118,9 +106,6 @@ Bubble sort's only genuine edge is pedagogical: the adjacent-swap loop is easy t
 
 > [!QUESTION]- Why is bubble sort stable?
 > A swap happens only on a strict `a[i] > a[i+1]`. Equal keys never satisfy that test, so they are never exchanged and their original relative order is preserved through every pass.
-
-> [!QUESTION]- Bubble and insertion sort share `O(n²)` average time and stability. Why is insertion sort the stronger of the two?
-> Insertion sort shifts elements into an opening gap instead of repeatedly swapping neighbors, so it performs fewer writes for the same set of inversions and writes to a contiguous run the cache handles well. It also stops scanning once an element reaches its insertion point, while bubble sort re-compares the whole active range each pass. Both are stable and `O(1)` space, so insertion sort wins on constants without giving anything up.
 
 ## References
 

@@ -126,22 +126,7 @@ A **bound too loose to discriminate degenerates to brute force.** "Assume every 
 > ```
 > Updating `best` on entry, before the bound check, means a fresh incumbent tightens pruning for the sibling branch immediately. `Bound` returns an upper bound on every completion of the current node, so `Bound(...) <= best` proves the subtree cannot improve the answer.
 
-## Comparison
-
-| Strategy | Worst-case time | Space | Guarantee | Stronger case | Weaker case |
-| --- | --- | --- | --- | --- | --- |
-| Branch-and-bound | `O(2ⁿ)` | `O(n)` DFS / `O(2ⁿ)` best-first frontier | Proven optimum | Optimisation over a huge space with a tight bounding relaxation | No good bound exists, or overlapping subproblems make DP polynomial |
-| [[Backtracking]] | `O(2ⁿ)` | `O(n)` | Any or all feasible solutions | Constraint satisfaction / enumeration with no objective | There is an objective to optimise — the bound-prune goes unused |
-| [[Dynamic Programming]] | Poly / pseudo-poly with overlap (`O(nW)` knapsack, `O(2ⁿn²)` Held-Karp TSP) | Table proportional to the state space | Exact optimum | Overlapping subproblems + optimal substructure | State space is itself exponential (few overlaps) |
-| Brute-force enumeration | `Θ(2ⁿ)` always | `O(n)` | Exact optimum | Tiny instances, a correctness oracle | Any non-trivial size |
-| [[Greedy Algorithms]] | `O(n log n)` | `O(1)` | Optimal only under an exchange/matroid argument, else a heuristic | A provable greedy-optimal structure, or an acceptable approximation | Optimality must be certified and no greedy proof exists |
-
-Branch-and-bound is the default when the optimum must be certified over a combinatorial space and a cheap relaxation prunes most of the tree; it pays a worst-case exponential time that a loose bound makes real, and — under best-first — a frontier that can exhaust memory. Dynamic programming overtakes it once subproblems overlap enough to collapse the search into a polynomial table (0/1 knapsack with a small integer capacity is the standard case). Backtracking is the same tree walk minus the bound, for when only feasibility matters. A greedy pass replaces the search entirely when a local rule is provably optimal, or when a fast approximation is acceptable in place of a proven optimum — which is also why solvers seed the incumbent with a greedy solution before the exact search begins.
-
 ## Questions
-
-> [!QUESTION]- How does branch-and-bound's pruning differ from backtracking's?
-> Backtracking discards a partial candidate when it violates a constraint — an infeasibility test. Branch-and-bound discards a *feasible* subtree when its optimistic bound is no better than the incumbent, the best complete solution so far. Backtracking answers whether a valid configuration exists or enumerates them; branch-and-bound answers which feasible configuration is optimal. The bound is the extra machinery that pays off only when there is an objective to optimise.
 
 > [!QUESTION]- Why must the bounding function be optimistic?
 > The bound gates pruning: a subtree is discarded when its bound cannot beat the incumbent. If a maximisation bound under-estimates a subtree's true best, that subtree can be pruned while it still holds the optimum, and the search returns a suboptimal incumbent labelled as proven-optimal — a silent correctness failure. The requirement is exactly A* search's admissibility: the estimate may only err optimistically. An LP relaxation satisfies it because a fractional optimum can only meet or exceed the integer one.

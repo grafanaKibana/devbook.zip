@@ -87,18 +87,6 @@ A fixed-capacity circular queue has a hard ceiling. Once the live region occupie
 > ```
 > `Queue<T>` is the growable circular buffer described above; `Dequeue` and `Peek` throw `InvalidOperationException` when empty, so a `Count` guard or the `Try*` variants are required at boundaries where the queue can drain.
 
-## Comparison
-
-| Structure | Removal end | Insertion end | Order served | Extra cost | Stronger case |
-| --- | --- | --- | --- | --- | --- |
-| Queue (FIFO) | Front only | Back only | Arrival order | `O(1)` ends | Arrival-order scheduling, buffering, BFS frontiers |
-| [[Stack]] | Top only | Top only | Reverse arrival (LIFO) | `O(1)` ends | Backtracking, undo, DFS recursion |
-| [[Deque]] | Both ends | Both ends | Either end | `O(1)` ends | Sliding windows, work-stealing, when both ends are hot |
-| [[Circular Buffer]] | Front | Back (bounded) | Arrival order | Fixed capacity | The bounded array that backs a queue; overwrite-oldest streams |
-| Priority queue ([[Heap]]) | Extremum | Anywhere | By priority key | `O(log n)` per op | Dijkstra, schedulers, SLA dispatch — order by priority, not arrival |
-
-A queue is the `O(1)` structure for problems whose correctness or fairness depends on arrival order: producer-consumer buffering, breadth-first search where every node at distance `k` must precede any node at distance `k+1` ([[DFS BFS|BFS]]), and round-robin scheduling. It gives up random access and priority to keep both ends constant-time. A [[Stack]] is the same trade with the opposite order when the most recent item is wanted first; a [[Deque]] keeps `O(1)` at both ends when a window is consumed from one side and fed from the other; a priority queue built on a [[Heap]] is the choice when the next item is chosen by a key rather than by when it arrived, accepting `O(log n)` operations to keep the extremum reachable.
-
 ## Questions
 
 > [!QUESTION]- Why does a queue use a circular buffer or linked list instead of a plain array?

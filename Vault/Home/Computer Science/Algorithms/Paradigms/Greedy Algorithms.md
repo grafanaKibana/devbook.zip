@@ -87,17 +87,6 @@ The common thread: both are the greedy-choice property failing under a different
 > ```
 > The sort fixes the greedy key; `start >= lastEnd` is the only place a candidate is rejected. Replacing the key with shortest-duration or earliest-start breaks the exchange argument and the result, even though the code still runs.
 
-## Comparison
-
-| Approach | Time on a solvable instance | Extra space | Explores | Correct when | Weaker when |
-| --- | --- | --- | --- | --- | --- |
-| Greedy | `O(n log n)` typical | `O(1)`–`O(n)` | One path, no backtracking | Greedy-choice property and optimal substructure are proven | A locally optimal choice can be globally wrong |
-| [[Dynamic Programming]] | Polynomial, e.g. `O(nW)` | `O(states)` | All subproblems, memoized | Optimal substructure with overlapping subproblems | State space is large or unbounded |
-| [[Backtracking]] | Exponential worst, pruned | `O(depth)` | Search tree with pruning | A valid/optimal configuration is needed and pruning is effective | Pruning is weak and the tree stays large |
-| Brute force | Exponential | `O(1)`–`O(n)` | Every candidate | Inputs are tiny or a correctness baseline is wanted | Candidates exceed roughly 20–30 |
-
-Greedy is the cheapest of the four and the only one that commits without ever reconsidering, which is exactly why it is correct on the narrowest set of problems. [[Dynamic Programming]] reconsiders choices through overlapping subproblems and stays correct on the instances where a local choice can be globally wrong — general coin change, 0/1 knapsack — at the cost of a table in both time and memory. [[Backtracking]] and brute force keep full generality by searching configurations, and become the fallback when neither a provable greedy rule nor an optimal-substructure recurrence exists. The deciding property is whether the greedy-choice property can be proven for the instance: when it can, greedy dominates on speed and space; when it cannot, [[Dynamic Programming]] is the safe replacement and search is the last resort.
-
 ## Questions
 
 > [!QUESTION]- Why does greedy solve coin change for `{1, 5, 10, 25}` but not `{1, 3, 4}`?

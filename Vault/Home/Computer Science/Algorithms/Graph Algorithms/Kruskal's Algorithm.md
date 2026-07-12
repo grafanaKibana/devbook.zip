@@ -48,16 +48,6 @@ A disconnected graph never reaches `V - 1` accepted edges. The scan returns a mi
 
 Equal weights can produce several valid MSTs. Sort stability or an explicit endpoint tie-break changes which equal-weight edge enters, but not the minimum total weight. Negative weights require no special handling: ascending order and the cut property remain valid.
 
-## Comparison
-
-| Algorithm | Time | Input shape | Stronger case | Main cost |
-| --- | --- | --- | --- | --- |
-| Kruskal | `O(E log E)` | edge list | sparse graphs and sortable batches | global edge sort |
-| Prim | `O(E log V)` with heap | adjacency lists | connected graph grown from one frontier | priority-queue maintenance |
-| [[Borůvka's Algorithm]] | `O(E log V)` | edge list + components | parallel component contraction | repeated full edge scans |
-
-Kruskal fits sparse edge-list input and makes cycle prevention explicit through union-find. Prim becomes stronger when adjacency is already indexed around vertices; Borůvka becomes stronger when many components can select and merge edges concurrently.
-
 ## References
 
 - [On the Shortest Spanning Subtree of a Graph and the Traveling Salesman Problem](https://www.ams.org/journals/proc/1956-007-01/S0002-9939-1956-0078686-7/) — Kruskal's original 1956 paper.

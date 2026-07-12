@@ -104,18 +104,6 @@ The switch reacts to cumulative recursion depth, not to the quality of any singl
 > ```
 > `Partition`, `HeapSortRange`, and `InsertionSort` are the standard helpers from [[Quick Sort]], [[Heap Sort]], and [[Insertion Sort]]. The load-bearing lines are the `depth == 0` handoff to heap sort and the `> 16` cutoff that defers small ranges to the single final pass.
 
-## Comparison
-
-| Sort | Time (avg / worst) | Aux space | Stable | Stronger case | Weaker case |
-| --- | --- | --- | --- | --- | --- |
-| Introsort | `O(n log n)` / `O(n log n)` | `O(log n)` | No | General-purpose in-memory sort needing a hard ceiling | Equal-key order must survive |
-| [[Quick Sort]] | `O(n log n)` / `O(n²)` | `O(log n)` | No | Fast average case with minimal machinery | Adversarial or already-structured input drives it quadratic |
-| [[Heap Sort]] | `O(n log n)` / `O(n log n)` | `O(1)` | No | Hard ceiling in constant extra space | Cache-hostile; ~2× slower than quicksort on typical input |
-| [[Merge Sort]] | `O(n log n)` / `O(n log n)` | `O(n)` | Yes | Stable order and predictable behavior | `O(n)` extra memory |
-| [[Tim Sort]] | `O(n)` / `O(n log n)` | `O(n)` | Yes | Partially-ordered real-world data, sorted stably | `O(n)` merge buffer and more machinery |
-
-Introsort is the general-purpose unstable in-memory default — C++'s `std::sort` and .NET's `Array.Sort` both use it — because it keeps quicksort's average speed while pinning the worst case to `O(n log n)` through the depth switch. What it gives up is stability: [[Merge Sort]] and [[Tim Sort]] preserve equal-key order but pay for it in `O(n)` memory (and, for Timsort, more machinery), while [[Heap Sort]] matches introsort's ceiling in `O(1)` space but loses on cache locality and average constants. The decision turns on whether stability is observable and whether the extra memory is available, not on the worst-case bound, which introsort already guarantees.
-
 ## Questions
 
 > [!QUESTION]- What makes introsort switch to heap sort, and why is `2⌊log₂ n⌋` the threshold?

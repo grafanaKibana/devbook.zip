@@ -121,9 +121,6 @@ Two pointers is the `O(1)`-space linear method once the array is sorted: it reus
 > [!QUESTION]- When `a[left] + a[right]` is too small, which pairs become impossible and why is `left++` safe?
 > Every pair that keeps the current `left` and uses any partner at or below `right` is even smaller than the current sum, so no pair anchored at `left` can reach the target. That entire column is eliminated, and `left++` discards it without losing a possible answer.
 
-> [!QUESTION]- How does this pattern differ from fast and slow pointers?
-> Converging two pointers start at opposite ends and move toward each other, relying on sorted order to discard pairs. Fast and slow pointers travel the same direction at different speeds and rely on relative position; they detect cycles or find a midpoint and need no ordering.
-
 > [!QUESTION]- What does a hash set buy over two pointers for two-sum?
 > A hash set removes the sorted-input precondition and finds a complement in `O(n)` time on unsorted data. The cost is `O(n)` extra memory and the loss of ordered traversal, which two pointers keep for free when the array is already sorted.
 
