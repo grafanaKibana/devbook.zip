@@ -13,137 +13,124 @@ publish: true
 
 # Intro
 
-Divide-and-conquer solves a problem by breaking it into smaller instances of the **same** problem, solving those recursively, and combining their answers into the answer for the whole. The shape is three steps: **divide** the input into subproblems, **conquer** each by recursing until a base case is small enough to solve directly, and **combine** the sub-results. Because every subproblem is a scaled-down copy of the original, the running time obeys a recurrence `T(n) = a·T(n/b) + f(n)` — and that is the paradigm's real gift: the **Master Theorem** reads the complexity straight off `a`, `b`, and the combine cost `f(n)`, so the analysis is mechanical rather than clever.
+Sorting a million elements, multiplying two very large integers, and locating a value in a sorted array share a structure: the input breaks into smaller instances of the identical problem, and the sub-answers reassemble into the whole. Divide-and-conquer is the control structure for that shape. It divides a size-`n` input into subproblems of the same kind, conquers each by recursing until a base case is small enough to solve directly, and combines the sub-results at cost `f(n)`.
 
-It powers [[Merge Sort]], [[Quick Sort]], [[Binary Search]], Karatsuba multiplication, Strassen's matrix multiply, the closest-pair-of-points algorithm, and the FFT. Reach for it when a problem splits into pieces that can be solved **independently**. If instead the pieces overlap and keep re-solving each other's work, divide-and-conquer recomputes that shared work every time — that is exactly the gap [[Dynamic Programming]] fills.
+The subproblems have to be **independent** — each reads a disjoint slice of the input and never consults another's answer. That independence, not the recursion itself, separates the paradigm from [[Dynamic Programming]], whose subproblems overlap and must be cached. It also makes the analysis mechanical: every instance produces a recurrence `T(n) = a·T(n/b) + f(n)`, and the Master Theorem reads the bound off `a`, `b`, and the combine cost.
 
-## How It Works
+**Core shape:** input → `a` independent subproblems of size `n/b` → recurse to a base case → combine at cost `f(n)` → `T(n) = a·T(n/b) + f(n)`.
 
-The template is three steps plus a stopping rule:
+A paradigm has no single input to step through; the structure a renderer would animate is the recursion tree itself.
 
-1. **Divide** — split the size-`n` input into `a` subproblems, each of size roughly `n/b`.
-2. **Conquer** — solve each subproblem recursively. Below a size cutoff, stop recursing and solve directly (the **base case**).
-3. **Combine** — merge the `a` sub-answers into the answer for the original, at cost `f(n)`.
+> [!NOTE] Visualization pending
+> Planned StepTrace: a recursion-tree card that splits a problem into independent subproblems, solves each branch, then combines the results on the way back up — the split-and-merge shape of merge sort. No matching renderer exists in `engine.js` yet.
 
-The difficulty and the cost live in different places depending on the algorithm. In [[Merge Sort]] the divide is trivial (split in the middle) and all the work is in the combine (merging two sorted halves, `O(n)`). In [[Quick Sort]] it is the reverse: the partition *is* the work and the combine is free. In [[Binary Search]] there is only **one** subproblem (`a = 1`) — you discard the half that cannot contain the target and recurse into the other — which is why it is sometimes called *decrease*-and-conquer.
+## Divide, conquer, combine
 
-### The Master Theorem
+The paradigm is three steps and a stopping rule:
 
-For `T(n) = a·T(n/b) + f(n)` with `a ≥ 1`, `b > 1`, compare the combine cost `f(n)` against `n^(log_b a)` — the total cost of the leaves of the recursion tree. Whichever grows faster dominates:
+1. **Divide** — split the size-`n` input into `a` subproblems, each of size about `n/b`.
+2. **Conquer** — solve each subproblem by recursing. Below a size cutoff the recursion stops and solves the base case directly.
+3. **Combine** — merge the `a` sub-answers into the answer for size `n`, at cost `f(n)`.
 
-- **Case 1 — leaves win.** If `f(n) = O(n^(log_b a − ε))` for some `ε > 0`, then `T(n) = Θ(n^(log_b a))`. Most of the work is at the bottom of the tree.
-- **Case 2 — balanced.** If `f(n) = Θ(n^(log_b a))`, then `T(n) = Θ(n^(log_b a) · log n)`. Every level costs the same, and there are `log n` of them — this is where the extra log factor comes from.
-- **Case 3 — root wins.** If `f(n) = Ω(n^(log_b a + ε))` (and `a·f(n/b) ≤ c·f(n)` for some `c < 1`, the regularity condition), then `T(n) = Θ(f(n))`. The top-level combine dominates everything below it.
+Which step carries the work varies by algorithm. [[Merge Sort]] splits at the midpoint for free and does everything in the combine, merging two sorted halves in `O(n)`. [[Quick Sort]] inverts that: partitioning around a pivot *is* the work, and once both sides are sorted the combine is nothing. [[Binary Search]] has a single subproblem (`a = 1`) — each step discards the half that cannot hold the target and recurses into the other, which is why it is sometimes called *decrease*-and-conquer. Karatsuba multiplication, the FFT, and the closest-pair-of-points algorithm are the same skeleton with heavier divide or combine steps.
 
-Worked against real recurrences:
+The subproblems are independent: they read disjoint slices of the input and never need one another's results. Because the `a` recursive calls share no mutable state, they run on separate cores with no locking, which is why fork/join frameworks and map-style GPU kernels map onto divide-and-conquer directly. Overlapping subproblems would contend over shared state and lose that property.
 
-```text
-Algorithm            Recurrence          a  b  log_b(a)   f(n)   Case  Result
--------------------  ------------------  --  -  --------  -----  ----  -----------
-Merge Sort           2T(n/2) + O(n)       2  2   1        n^1     2    O(n log n)
-Binary Search        1T(n/2) + O(1)       1  2   0        n^0     2    O(log n)
-Karatsuba multiply   3T(n/2) + O(n)       3  2   1.585    n^1     1    O(n^1.585)
-Naive matrix mult.   8T(n/2) + O(n^2)     8  2   3        n^2     1    O(n^3)
-Strassen matrix      7T(n/2) + O(n^2)     7  2   2.807    n^2     1    O(n^2.807)
-```
+## Complexity via the Master Theorem
 
-Karatsuba is the paradigm at its most striking: it replaces one of the four half-size multiplications in schoolbook `O(n^2)` multiplication with additions, turning `4T(n/2)` into `3T(n/2)`. That single dropped subproblem moves the exponent from `2` to `log_2 3 ≈ 1.585`. Strassen does the same trick for matrices — `8` recursive multiplies become `7` — dropping the exponent from `3` to `log_2 7 ≈ 2.807`. The number of subproblems `a` is not a constant factor; it is *in the exponent*.
+Because each subproblem is a scaled copy of the original, the running time satisfies `T(n) = a·T(n/b) + f(n)`: `a` subproblems, each `1/b` the size, plus `f(n)` to combine. The Master Theorem resolves it by comparing the combine cost `f(n)` against `n^(log_b a)`, the total work across the leaves of the recursion tree. The larger term dominates.
 
-### Disjoint subproblems — the line against dynamic programming
-
-The defining property is that the subproblems are **disjoint**: they operate on separate slices of the input and never need each other's answers. This is the entire distinction from [[Dynamic Programming]], which exists precisely because *its* subproblems **overlap**. The test is concrete: memoising [[Merge Sort]] buys you nothing, because each recursive call sorts a different slice of the array exactly once — there is no repeated subproblem to cache. Memoising naive Fibonacci buys you *everything* (exponential to linear), because `fib(n-1)` and `fib(n-2)` both recompute `fib(n-3)`, `fib(n-4)`, and so on, over and over. Same recursive shape, opposite payoff — and the deciding factor is whether the subproblems overlap.
-
-Two structural consequences follow from disjointness:
-
-- **It parallelises for free.** Disjoint subproblems share no mutable state, so the `a` recursive calls can run on separate cores with no locking or coordination — the natural fit for fork/join frameworks and GPU kernels. Overlapping (DP) subproblems, by contrast, contend over the shared table.
-- **The base-case cutoff matters.** Recursion has per-call overhead (stack frames, function calls) that dominates when the subproblem is tiny. Real sorts stop recursing well above `n = 1` and hand small slices to [[Insertion Sort]], whose tight inner loop beats recursion on small inputs — the exact reason [[Introsort]] and [[Tim Sort]] fall back to insertion sort below a threshold (around 16–32 elements).
-
-**Complexity:** determined by the recurrence via the Master Theorem above; typical results are `O(n log n)` (balanced split with linear combine) down to `O(log n)` (single subproblem, constant combine). Space is usually `O(log n)` for the recursion stack, plus whatever the combine step allocates — `O(n)` for merge sort's auxiliary buffer, `O(1)` for in-place partitioning.
-
-## Example
-
-Merge sort is the paradigm in its cleanest form — divide is trivial, combine does the work:
-
-```csharp
-public static void MergeSort(int[] a, int lo, int hi)
-{
-    if (hi - lo <= 16)          // base-case cutoff: small slices go to insertion sort
-    {
-        InsertionSort(a, lo, hi);
-        return;
-    }
-    int mid = lo + (hi - lo) / 2;
-    MergeSort(a, lo, mid);      // conquer left half  (disjoint)
-    MergeSort(a, mid, hi);      // conquer right half (disjoint)
-    Merge(a, lo, mid, hi);      // combine: O(n) merge of two sorted runs
-}
-```
-
-The two recursive calls touch disjoint index ranges, so they could run on separate threads with no synchronisation. The recurrence is `2T(n/2) + O(n)` — Master Theorem Case 2 — giving `O(n log n)`. Note the cutoff: below 16 elements the recursion overhead outweighs the algorithmic advantage, so it defers to [[Insertion Sort]], exactly as [[Tim Sort]] and [[Introsort]] do in production libraries.
-
-## Diagram
-
-```mermaid
-flowchart TD
-    A[Problem of size n] --> B{Size below cutoff}
-    B -->|Yes| C[Solve directly as base case]
-    B -->|No| D[Divide into a subproblems of size n over b]
-    D --> E[Conquer each subproblem recursively]
-    E --> F[Combine sub answers at cost f of n]
-    F --> G[Answer for size n]
-```
-
-## Pitfalls
-
-### Assuming the split is free when combine dominates
-
-- **What goes wrong**: people quote `O(n log n)` for any "split in half" algorithm, but the complexity lives in the combine cost `f(n)`, not the split.
-- **Why it happens**: the divide step is visually obvious; the combine step is where the real work (and the Master-Theorem case) is decided.
-- **How to avoid it**: always write the recurrence explicitly and classify `f(n)` against `n^(log_b a)`. A quadratic combine can push an otherwise-logarithmic-depth algorithm all the way to Case 3.
-
-### Reaching for divide-and-conquer when subproblems overlap
-
-- **What goes wrong**: solving an overlapping-subproblem problem (Fibonacci, edit distance, coin change) with plain recursion blows up exponentially because the same subproblem is recomputed on every branch.
-- **Why it happens**: the recursive decomposition looks like textbook divide-and-conquer, but the pieces are not disjoint.
-- **How to avoid it**: check whether subproblems repeat. If they do, cache them — that is [[Dynamic Programming]], and it is the difference between `O(2^n)` and `O(n)`.
-
-### No base-case cutoff — recursion overhead swamps small inputs
-
-- **What goes wrong**: recursing all the way to `n = 1` spends more time on call frames than on useful work for small slices, and can overflow the stack on adversarial inputs.
-- **Why it happens**: the mathematically clean base case (`n ≤ 1`) is not the performant one.
-- **How to avoid it**: cut over to an iterative algorithm ([[Insertion Sort]] for sorting) below a tuned threshold — the standard trick in every production sort.
-
-## Tradeoffs
-
-| Choice | Divide-and-conquer | Alternative | Decision criteria |
+| Case | Condition | Result | Where the work concentrates |
 | --- | --- | --- | --- |
-| vs iterative / single-pass | Recursive split, `O(log n)` depth, parallelisable | One linear pass, no recursion overhead | Prefer iterative for problems that do not decompose (running sums, single scans); D&C when independent subproblems unlock a lower exponent or `n log n`. |
-| Base case: recurse to 1 vs cutoff | Clean but slow on small slices | Hand small inputs to insertion sort | Use a cutoff (≈16–32) in any performance-sensitive implementation; recurse-to-1 only for pedagogy. |
+| 1 | `f(n) = O(n^(log_b a − ε))` | `Θ(n^(log_b a))` | The leaves — most work is at the bottom of the tree. |
+| 2 | `f(n) = Θ(n^(log_b a))` | `Θ(n^(log_b a) · log n)` | Every level costs the same; the `log n` levels add the log factor. |
+| 3 | `f(n) = Ω(n^(log_b a + ε))`, regular | `Θ(f(n))` | The top-level combine dominates everything below. |
+
+Merge sort is `2T(n/2) + Θ(n)`: `a = 2`, `b = 2`, so the leaf work is `n^(log_2 2) = n^1`, and `f(n) = Θ(n)` matches it — Case 2, giving `Θ(n log n)`. The same table applied to other instances:
+
+| Instance | Recurrence | `log_b a` | `f(n)` | Case | Result |
+| --- | --- | --- | --- | --- | --- |
+| [[Merge Sort]] | `2T(n/2) + Θ(n)` | 1 | `n` | 2 | `Θ(n log n)` |
+| [[Binary Search]] | `T(n/2) + Θ(1)` | 0 | `n^0` | 2 | `Θ(log n)` |
+| Karatsuba multiply | `3T(n/2) + Θ(n)` | 1.585 | `n` | 1 | `Θ(n^1.585)` |
+| Strassen matrix | `7T(n/2) + Θ(n^2)` | 2.807 | `n^2` | 1 | `Θ(n^2.807)` |
+
+Karatsuba shows why `a` carries weight. Schoolbook multiplication is `4T(n/2)`, but replacing one of the four half-size multiplications with additions drops it to `3T(n/2)`, moving the exponent from `2` to `log_2 3 ≈ 1.585`. The count of subproblems sits in the exponent, not a constant factor, so a single dropped recursive call is a genuine asymptotic win; Strassen does the same for matrices, `8` multiplies down to `7`.
+
+Space is usually `O(log n)` for the recursion stack, plus whatever the combine allocates — `O(n)` for merge sort's auxiliary buffer, `O(1)` for in-place partitioning.
+
+## When the paradigm is the wrong fit
+
+Independence is a precondition, not a guarantee. If the subproblems overlap — calling each other's subcalls — plain recursion recomputes the shared work on every branch. Naive Fibonacci is the standard case: `fib(n-1)` and `fib(n-2)` both recompute `fib(n-3)` and below, an exponential blowup for a problem that is linear once the repeated calls are cached. The recursive *shape* is identical to merge sort's; the difference is that merge sort's slices are disjoint and never recur, so memoising it saves nothing. Overlapping subproblems are the signal to switch to [[Dynamic Programming]], whose entire purpose is to store and reuse them.
+
+The combine step can dominate the recurrence. A "split in half" decomposition does not imply `O(n log n)`. If `f(n)` grows faster than the leaf work `n^(log_b a)`, the recurrence lands in Case 3 and the bound is `Θ(f(n))`, no better than the combine alone. The recurrence has to be written down and classified, not inferred from the split.
+
+The base case is a performance boundary, not only a mathematical one. Recursing all the way to `n = 1` spends more time on call frames than on useful work once a slice is small, and can overflow the stack on adversarial input. Production sorts stop well above the clean base case and hand small slices to [[Insertion Sort]], whose tight loop beats recursion below roughly 16–32 elements — the fallback [[Introsort]] and [[Tim Sort]] both use.
+
+## Reference drawer
+
+> [!ABSTRACT]- Recursion structure
+> ```mermaid
+> flowchart TD
+>   A[Problem of size n] --> B{Size below cutoff}
+>   B -->|Yes| C[Solve base case directly]
+>   B -->|No| D[Divide into a subproblems of size n over b]
+>   D --> E[Conquer each subproblem recursively]
+>   E --> F[Combine sub-answers at cost f of n]
+>   F --> G[Answer for size n]
+> ```
+
+> [!EXAMPLE]- Generic skeleton in C#
+> ```csharp
+> static TResult DivideAndConquer(Problem p)
+> {
+>     if (p.Size <= Cutoff)              // base case: stop recursing on small inputs
+>     {
+>         return SolveDirectly(p);
+>     }
+>
+>     var parts = Divide(p);             // a independent subproblems of size ~n/b
+>     var answers = new TResult[parts.Length];
+>     for (var i = 0; i < parts.Length; i++)
+>     {
+>         answers[i] = DivideAndConquer(parts[i]);   // disjoint slices: parallelisable
+>     }
+>
+>     return Combine(answers);           // cost f(n) decides the Master-Theorem case
+> }
+> ```
+> The subproblems in `parts` touch disjoint data, so the loop can be a parallel fork/join with no locking. `Cutoff` sets the constant factor; the cost of `Combine` sets the asymptotic case.
+
+## Comparison
+
+Each alternative answers a different question about how the subproblems relate.
+
+| Paradigm | Subproblem relationship | Extra state | Typical bound | Stronger case |
+| --- | --- | --- | --- | --- |
+| Divide-and-conquer | Independent, disjoint slices | Recursion stack, `O(log n)` | `Θ(n log n)`–`Θ(log n)` | Input splits cleanly and the combine is cheap |
+| [[Dynamic Programming]] | Overlapping, reused | Memo table, `O(states)` | `Θ(states · work per state)` | The same subproblem recurs across branches |
+| [[Backtracking]] | Independent choices, pruned | Recursion stack + partial solution | Exponential, pruned early | A decision tree where most branches abandon quickly |
+| Plain iteration | None — no decomposition | `O(1)` | `Θ(n)` per pass | A single linear scan already answers the problem |
+
+Divide-and-conquer fits problems that break into independent subproblems joined by an efficient combine; it pays a recursion stack, and for some algorithms an auxiliary buffer, in exchange for a lower exponent or an `n log n` bound. When subproblems overlap, that same recursion recomputes shared work and [[Dynamic Programming]]'s memoisation is required instead. When the problem is a search over decisions rather than a decomposition of data, [[Backtracking]] prunes a decision tree; when it decomposes at all, a single iterative pass avoids the recursion overhead entirely.
 
 ## Questions
 
-> [!QUESTION]- State the Master Theorem and apply it to merge sort and Karatsuba.
-> - For `T(n) = a·T(n/b) + f(n)`, compare `f(n)` with `n^(log_b a)` (the leaf work).
-> - Case 1 (`f` smaller): `Θ(n^(log_b a))`; Case 2 (`f` equal): `Θ(n^(log_b a) · log n)`; Case 3 (`f` larger, regular): `Θ(f(n))`.
-> - Merge sort is `2T(n/2)+O(n)`: `log_2 2 = 1`, `f(n)=n` matches, so Case 2 gives `O(n log n)`.
-> - Karatsuba is `3T(n/2)+O(n)`: `log_2 3 ≈ 1.585`, `f(n)=n` is smaller, so Case 1 gives `O(n^1.585)`.
-> - The count of subproblems `a` sits in the *exponent*, not a constant factor — which is why dropping one recursive multiply (4→3) is a genuine asymptotic win, not a micro-optimisation.
+> [!QUESTION]- What distinguishes divide-and-conquer from dynamic programming, given that both recurse?
+> The subproblems. Divide-and-conquer's are independent — each recursive call works on a disjoint slice and never repeats — so there is nothing to cache. Dynamic programming exists because its subproblems overlap: the same subproblem recurs across branches, and memoising it turns exponential recomputation into linear or polynomial work. The recursive shape can be identical; the deciding property is whether subproblems are shared.
 
-> [!QUESTION]- Why does memoising merge sort buy nothing while memoising Fibonacci buys everything?
-> - Merge sort's subproblems are **disjoint**: each recursive call sorts a distinct slice of the array exactly once, so there is no repeated work to cache.
-> - Naive Fibonacci's subproblems **overlap**: `fib(n-1)` and `fib(n-2)` both recompute `fib(n-3)` and below, exponentially many times.
-> - Caching only helps when the same subproblem recurs — that is the definition of [[Dynamic Programming]] versus plain divide-and-conquer.
-> - So the decision to memoise is not about the recursive *shape* (both look identical) but about whether subproblems are shared — get this wrong and you either waste memory or miss an exponential speedup.
+> [!QUESTION]- How does the Master Theorem produce merge sort's `Θ(n log n)`?
+> Merge sort's recurrence is `2T(n/2) + Θ(n)`, so `a = 2`, `b = 2`, and the leaf work is `n^(log_2 2) = n`. The combine cost `f(n) = Θ(n)` matches the leaf term exactly — Case 2 — so every one of the `log n` levels costs `Θ(n)`, and the total is `Θ(n log n)`.
 
-> [!QUESTION]- Why does divide-and-conquer parallelise so naturally, and where does the base-case cutoff fit?
-> - The subproblems are disjoint, so they share no mutable state and can run on separate cores with no locking — the model behind fork/join and map-style GPU kernels.
-> - The recursion depth is only `O(log n)`, so the tree is wide and shallow — lots of independent work to spread out.
-> - The base-case cutoff exists because per-call overhead dominates on tiny inputs, so real implementations defer small slices to an iterative algorithm like [[Insertion Sort]].
-> - This is why production sorts ([[Introsort]], [[Tim Sort]]) are hybrids: divide-and-conquer for the asymptotics, insertion sort for the constant factor — the paradigm is a scaffold, not the whole algorithm.
+> [!QUESTION]- Why does a "split in half" algorithm not automatically run in `O(n log n)`?
+> The bound depends on the combine cost `f(n)`, not the split. If `f(n)` grows faster than the leaf work `n^(log_b a)` — a quadratic combine over a linear-leaf recurrence, for instance — the recurrence falls into Case 3 and the result is `Θ(f(n))`, dominated entirely by the top-level combine. The recurrence has to be classified, not read off the fact that the input was halved.
+
+> [!QUESTION]- Why do production divide-and-conquer sorts stop recursing above the base case?
+> Per-call overhead — stack frames and function-call cost — outweighs the algorithmic advantage once a slice is small, and deep recursion risks stack overflow on adversarial input. Below a threshold of roughly 16–32 elements, insertion sort's tight loop is faster, so hybrids such as Introsort and Tim Sort cut over to it there.
 
 ## References
 
-- [Divide-and-conquer algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Divide-and-conquer_algorithm) — the general schema, worked examples, and parallelism.
-- [Master theorem (Wikipedia)](https://en.wikipedia.org/wiki/Master_theorem_(analysis_of_algorithms)) — all three cases with the regularity condition and derivations.
-- [Divide and conquer (cp-algorithms)](https://cp-algorithms.com/) — closest pair, Karatsuba, and FFT as divide-and-conquer.
+- [Divide-and-conquer algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Divide-and-conquer_algorithm) — the general schema, worked examples, and the parallelism that disjoint subproblems permit.
+- [Master theorem (Wikipedia)](https://en.wikipedia.org/wiki/Master_theorem_(analysis_of_algorithms)) — all three cases with the regularity condition and their derivations from the recursion tree.
 - [Karatsuba algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Karatsuba_algorithm) — the three-multiplication recurrence and its `O(n^1.585)` analysis.
+- [Fast Fourier transform (cp-algorithms)](https://cp-algorithms.com/algebra/fft.html) — a canonical divide-and-conquer instance whose `Θ(n)` butterfly combine over `log n` levels yields the `O(n log n)` transform (`2T(n/2) + Θ(n)`, Master Theorem Case 2).

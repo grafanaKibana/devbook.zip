@@ -13,133 +13,148 @@ publish: true
 
 # Intro
 
-Branch-and-bound is a systematic search paradigm for **optimisation** problems — find the configuration that minimises or maximises some objective, not just any valid one. It is the natural sibling of [[Backtracking]]: both explore a tree of partial solutions depth-first-ish and prune whole subtrees, but they prune on different grounds. Backtracking prunes a branch when it is **infeasible** — the partial solution already violates a constraint and can never be completed. Branch-and-bound prunes a branch when it is perfectly feasible but **provably cannot beat the best solution found so far**, using a *bound*: an optimistic estimate of the best objective achievable anywhere in that subtree.
+A 0/1 knapsack with 40 items has `2^40` candidate subsets; a travelling-salesman tour over 15 cities has `14!/2` orderings. Enumerating every configuration to find the single best one is exponential and rarely finishes. Branch-and-bound searches the same space but attaches a *bound* to every partial configuration — an optimistic estimate of the best objective any completion of it could reach — and discards a whole subtree the moment its bound cannot beat the best complete solution already found.
 
-That "optimistic estimate versus best-so-far" test is the whole idea. If the most hopeful outcome in a subtree is still worse than a complete solution you already hold, there is no reason to explore it — you discard it unexpanded. It is the standard engine for 0/1 knapsack, the travelling salesman problem, and integer linear programming; every commercial mixed-integer-programming (MIP) solver — CPLEX, Gurobi — is branch-and-bound at its core. When your problem is pure constraint satisfaction with no objective to optimise, drop the bound and use plain [[Backtracking]]; when a local rule provably reaches the optimum, [[Greedy Algorithms]] is faster still.
+That pruning is valid only under one precondition: the bound must be *optimistic*. For a maximisation problem it must never fall below the true best achievable in the subtree; for minimisation it must never rise above it. A bound that leans in the pessimistic direction can throw away the subtree that held the optimum. A bound so loose it never clears the best-so-far leaves plain exponential enumeration.
 
-## How It Works
+**Core condition:** an optimisation objective + a cheap bound from a relaxation that never underestimates a subtree's true optimum → prune any subtree whose bound cannot beat the best complete solution so far (the incumbent) → exact search that in practice touches a fraction of an exponential tree.
 
-Four moving parts:
+The step that carries the whole idea is a single bound comparison that erases a subtree before it is expanded.
 
-1. **Branch** — split the problem at a decision point into subproblems (e.g. "item *i* is in the knapsack" vs "item *i* is out"), forming a search tree.
-2. **Bound** — for each node, compute a bound: an optimistic estimate of the best objective reachable in that subtree. For a maximisation problem this is an *upper* bound (never lower than the true best below); for minimisation, a *lower* bound.
-3. **Prune** — maintain the **incumbent**: the best complete solution found so far. If a node's optimistic bound is no better than the incumbent's objective, the entire subtree is discarded — nothing in it can improve the answer.
-4. **Select** — pick the next live node to expand, by some strategy (below), and repeat until no live nodes remain. The final incumbent is provably optimal.
+> [!NOTE] Visualization pending
+> Planned StepTrace: a search-tree card showing each node's bound against the running incumbent, where a subtree whose bound cannot beat the incumbent is pruned unexplored. No matching renderer exists in `engine.js` yet.
 
-### The bound must be optimistic — the A* connection
+## Why a subtree can be discarded
 
-Correctness hinges on one condition: the bound must be **optimistic (admissible)** — it must never be *worse* than the true best achievable in the subtree. If a maximisation bound ever *under*-estimates, you might prune a subtree that actually contained the optimum, and return a wrong answer. This is the *exact* same admissibility condition as [[A-Start Search|A* Search]]'s heuristic, which must never *over*estimate the remaining distance to the goal or A\* can settle a node before its true shortest path is found. Both algorithms explore a tree guided by an optimistic estimate of "how good could this get," and both stay correct only while that estimate never lies in the pessimistic direction. Branch-and-bound is, in effect, A\* applied to the decision tree of an optimisation problem; the bounding function is its heuristic.
+Branch-and-bound turns on four moving parts:
 
-The tension is the same too: a **tighter** bound prunes more (explores fewer nodes) but costs more to compute per node, exactly as a sharper A\* heuristic expands fewer nodes but costs more per expansion. A loose bound (say, "assume every remaining item fits at full value") is cheap but prunes little; the art is a bound that is tight yet fast.
+- **Branch** — split the problem at a decision point into disjoint subproblems (item *i* is in the knapsack vs out), so the partial configurations form a search tree.
+- **Bound** — at each node, compute an optimistic estimate of the best objective any completion below it could reach. For maximisation this is an *upper* bound; for minimisation a *lower* one.
+- **Incumbent** — the best complete solution seen so far, and the yardstick every bound is measured against.
+- **Prune / select** — if a node's bound is no better than the incumbent, discard its whole subtree; otherwise expand it and pick the next live node to visit.
 
-### Node selection and the incumbent
+The correctness of the discard rests on the optimism of the bound. For maximisation, "optimistic" means the bound is `≥` the true best of every completion in the subtree. So if `bound ≤ incumbent`, then *every* completion is `≤ incumbent`, and none of them can improve the answer — the subtree can be removed unexplored without risking the optimum. Minimisation reverses the inequality.
 
-- **Best-first search** — keep live nodes in a priority queue ordered by bound, always expanding the most promising node. This tends to reach a strong incumbent and prove optimality with the fewest expansions, but the queue can hold exponentially many nodes, so **memory** is the risk.
-- **Depth-first search** — dive to a complete solution quickly, using `O(depth)` memory like [[Backtracking]]. It finds *an* incumbent fast, which then starts pruning siblings — but may waste effort in unpromising regions a best-first search would have skipped.
+This is the same optimism requirement as [[A-Star Search|A* Search]]'s admissibility condition: a guided tree search stays correct only while its estimate errs in the optimistic direction and never lies pessimistically. Branch-and-bound is that same idea applied to the decision tree of an optimisation problem, with the bounding function playing the role of the heuristic. It is why an LP relaxation is a safe bound — an optimal fractional solution can only meet or exceed the integer optimum, so ignoring integrality never under-shoots.
 
-A good **early incumbent** is worth a lot: the sooner you hold a strong complete solution, the higher the bar every bound must clear, so more subtrees get pruned. In practice solvers seed the incumbent with a fast heuristic — often a [[Greedy Algorithms|greedy]] solution — before the search even starts, precisely to accelerate pruning.
+## Exploration order
 
-**Complexity:** the worst case is still exponential — branch-and-bound is exact search, and on adversarial inputs it prunes nothing and degenerates to brute-force enumeration. It improves the **constant factor and the typical case**, often dramatically, but never the complexity class. NP-hard problems stay NP-hard; you are buying practicality, not a polynomial algorithm.
+Every live (unpruned, unexpanded) node is a candidate to visit next, and the order changes how fast a strong incumbent appears — which in turn changes how much gets pruned.
 
-## Example
+- **Best-first** keeps live nodes in a priority queue ordered by bound and always expands the most promising one. It tends to certify the optimum with the fewest expansions, but the queue can hold exponentially many live nodes, so memory is the binding constraint.
+- **Depth-first** dives to a complete solution quickly in `O(depth)` memory, like [[Backtracking]]. That early incumbent immediately starts pruning siblings, though the dive can waste effort in regions best-first would have skipped.
 
-0/1 knapsack, maximise value within a weight capacity. The classic bound is the **fractional-LP relaxation**: at any node, fill the remaining capacity greedily by value-to-weight ratio, allowing the *last* item to be taken fractionally. Because the fractional knapsack optimum can only be `≥` the 0/1 optimum, this is a valid (optimistic) upper bound.
+A good early incumbent raises the bar every later bound must clear, so more subtrees fall on a single comparison. Solvers exploit this by seeding the incumbent with a fast heuristic — often a [[Greedy Algorithms|greedy]] solution — before the exact search starts.
 
-```text
-Capacity 10.  Items sorted by value/weight ratio:
-  A: value 40, weight 2   (ratio 20)
-  B: value 30, weight 5   (ratio  6)
-  C: value 25, weight 5   (ratio  5)
-  D: value 12, weight 3   (ratio  4)
+## Complexity
 
-Root bound (fractional fill): A(40,w2) + B(30,w5) + C partial 3/5 of 25 = 15
-  -> upper bound 85, no incumbent yet.
+Let `n` be the number of decisions (the tree depth) and `b` the cost of computing one bound.
 
-Branch on A:
-  [take A]   capacity 8 left, value 40. Bound = 40 + B(30) + C 3/5*25=15 = 85.
-  [skip A]   bound = B(30)+C(25)+... = well under 85 -> less promising.
-
-Dive [take A] -> [take B] -> [take C]: weight 2+5+5=12 > 10, infeasible on C.
-  Backtrack; [take A][take B][skip C][take D]: weight 2+5+3=10, value 82. INCUMBENT = 82.
-
-Now every live node whose bound <= 82 is pruned:
-  the [skip A] subtree had upper bound well below 82  -> pruned unexpanded.
-  [take A][skip B] subtree bound = 40 + C(25) + D(12) = 77 <= 82 -> pruned.
-
-No live node has a bound > 82. Incumbent 82 is proven optimal.
-```
-
-The pruning is the payoff: once the incumbent reaches 82, entire branches are discarded on a single bound comparison, never expanded. Note the bound stayed **optimistic** throughout (it always assumed the best possible fractional fill) — that is what makes the pruning safe. A bound that ever under-shot the true subtree optimum could have pruned the branch holding the real answer.
-
-## Diagram
-
-```mermaid
-flowchart TD
-    A[Take a live node from the frontier] --> B[Compute optimistic bound for its subtree]
-    B --> C{Bound better than incumbent}
-    C -->|No| D[Prune the whole subtree]
-    C -->|Yes| E{Node is a complete solution}
-    E -->|Yes| F[Update incumbent if it is better]
-    E -->|No| G[Branch into child subproblems and add to frontier]
-    D --> H{Frontier empty}
-    F --> H
-    G --> H
-    H -->|No| A
-    H -->|Yes| I[Return incumbent as proven optimum]
-```
-
-## Pitfalls
-
-### A non-optimistic bound prunes the optimum
-
-- **What goes wrong**: if the bound ever estimates a subtree as *worse* than it truly is (under-estimating for maximisation), branch-and-bound prunes a branch that contained the optimal solution and returns a wrong answer.
-- **Why it happens**: people tune bounds for tightness and accidentally cross from optimistic to pessimistic, or forget the relaxation must dominate the true objective.
-- **How to avoid it**: prove the bound is admissible — for maximisation it must be `≥` the true best in the subtree, for minimisation `≤`. This is the same admissibility rule as an [[A-Start Search|A* Search]] heuristic; when in doubt, use a provably valid relaxation (LP relaxation, ignoring integrality) even if looser.
-
-### Best-first search exhausts memory
-
-- **What goes wrong**: a best-first frontier can grow to hold exponentially many live nodes, running out of RAM long before it runs out of time.
-- **Why it happens**: best-first keeps every unexpanded node in the priority queue, and hard instances generate enormous frontiers.
-- **How to avoid it**: use depth-first or iterative-deepening branch-and-bound for `O(depth)` memory, or hybrid schemes (beam-limited frontiers) — trading some pruning quality for a bounded footprint.
-
-### Expecting branch-and-bound to beat the complexity class
-
-- **What goes wrong**: teams deploy a B&B solver on a large NP-hard instance and are surprised when it runs for hours or never terminates.
-- **Why it happens**: pruning helps the *typical* case, but the worst case is still exponential; on adversarial or large instances the bound prunes almost nothing.
-- **How to avoid it**: for large instances, accept approximation — an early incumbent from a [[Greedy Algorithms|greedy]] heuristic, or an LP-rounding / metaheuristic solution — rather than waiting for a proven optimum you may never get.
-
-## Tradeoffs
-
-| Choice | Branch-and-bound | Alternative | Decision criteria |
+| Case | Time | Auxiliary space | Cause |
 | --- | --- | --- | --- |
-| Node selection | Best-first (fewest expansions, `O(2^n)` memory) | Depth-first (`O(depth)` memory, weaker pruning) | Best-first when memory is ample and a tight bound exists; depth-first when memory is the binding constraint. |
-| Exact vs approximate | Proven optimum, unbounded time | Greedy / LP-rounding heuristic, fast, no guarantee | Use B&B when optimality must be certified; switch to a heuristic when the instance is too large to solve exactly in the time budget. |
+| Best | `O(n · b)` | `O(n)` | A strong early incumbent and a tight bound prune every sibling; the search follows essentially one root-to-leaf path. |
+| Average | instance-dependent, `≪ 2ⁿ` | `O(n)` | The bound rejects most subtrees; no closed form — it depends on how tightly the relaxation tracks the objective. |
+| Worst | `O(2ⁿ · b)` | `O(n)` | A loose or non-discriminating bound prunes nothing; every node is expanded, as in brute-force enumeration. |
+
+The table describes depth-first branch-and-bound over an `n`-decision binary tree (0/1 knapsack), so auxiliary space is the `O(n)` recursion stack. Best-first exploration keeps live nodes in a priority queue instead of a stack, so its auxiliary space grows with the frontier — up to `O(2ⁿ)` nodes — even though it usually expands the fewest nodes to certify the optimum. A permutation problem such as TSP has an `n!` tree in place of `2ⁿ`. In every case the worst case is exponential: branch-and-bound is exact search that improves the constant factor and the typical case, never the complexity class.
+
+## When the bound stops helping
+
+A **non-optimistic bound returns a wrong answer, silently.** Suppose a maximisation subtree's true best is 90 but the bound reports 78, and the incumbent is 80. The subtree is pruned, its 90 is never found, and the search halts reporting 80 as *proven optimal*. Nothing flags the error — the optimality certificate is simply false. The defence is to derive the bound from a relaxation that provably dominates the objective (an LP relaxation that ignores integrality), even when that makes the bound looser.
+
+A **bound too loose to discriminate degenerates to brute force.** "Assume every remaining item is taken at full value with no weight limit" is optimistic and valid, but it exceeds the incumbent at nearly every node, so nothing is pruned and the frontier never shrinks below the full `2ⁿ` tree. Validity keeps the answer correct; tightness is what decides the practical runtime, and the two goals pull against per-node cost.
+
+**Best-first exploration exhausts memory before time.** On a hard instance the priority queue accumulates exponentially many live nodes and the process runs out of RAM long before it runs out of clock. Depth-first or iterative-deepening branch-and-bound bounds space to `O(depth)`, at the cost of re-expanding nodes or losing some global pruning quality.
+
+## Reference drawer
+
+> [!ABSTRACT]- Control flow
+> ```mermaid
+> flowchart TD
+>   A[Pop a live node from the frontier] --> B[Compute its optimistic bound]
+>   B --> C{Bound beats the incumbent}
+>   C -->|No| D[Discard the subtree]
+>   C -->|Yes| E{Node is a complete solution}
+>   E -->|Yes| F[Replace incumbent if better]
+>   E -->|No| G[Branch into child subproblems, push to frontier]
+>   D --> H{Frontier empty}
+>   F --> H
+>   G --> H
+>   H -->|No| A
+>   H -->|Yes| I[Return incumbent as proven optimum]
+> ```
+
+> [!EXAMPLE]- C# implementation — 0/1 knapsack with an LP-relaxation bound
+> ```csharp
+> public sealed record Item(int Value, int Weight);
+>
+> public static int Knapsack(Item[] items, int capacity)
+> {
+>     // Sort by value-to-weight ratio so the fractional bound is a simple prefix fill.
+>     var order = items.OrderByDescending(i => (double)i.Value / i.Weight).ToArray();
+>     int best = 0;
+>
+>     // Fractional (LP) relaxation: fill the remaining room by ratio, last item taken fractionally.
+>     // The fractional optimum dominates the 0/1 optimum, so this never under-shoots.
+>     double Bound(int index, int weight, int value)
+>     {
+>         double bound = value;
+>         int room = capacity - weight;
+>         for (int i = index; i < order.Length && room > 0; i++)
+>         {
+>             int take = Math.Min(order[i].Weight, room);
+>             bound += take * (double)order[i].Value / order[i].Weight;
+>             room -= take;
+>         }
+>         return bound;
+>     }
+>
+>     void Explore(int index, int weight, int value)
+>     {
+>         if (weight > capacity) return;                    // infeasible: constraint prune
+>         if (value > best) best = value;                   // a feasible completion; update incumbent
+>         if (index == order.Length) return;
+>         if (Bound(index, weight, value) <= best) return;  // optimistic bound loses -> prune subtree
+>
+>         Explore(index + 1, weight + order[index].Weight, value + order[index].Value); // take
+>         Explore(index + 1, weight, value);                                            // skip
+>     }
+>
+>     Explore(0, 0, 0);
+>     return best;
+> }
+> ```
+> Updating `best` on entry, before the bound check, means a fresh incumbent tightens pruning for the sibling branch immediately. `Bound` returns an upper bound on every completion of the current node, so `Bound(...) <= best` proves the subtree cannot improve the answer.
+
+## Comparison
+
+| Strategy | Worst-case time | Space | Guarantee | Stronger case | Weaker case |
+| --- | --- | --- | --- | --- | --- |
+| Branch-and-bound | `O(2ⁿ)` | `O(n)` DFS / `O(2ⁿ)` best-first frontier | Proven optimum | Optimisation over a huge space with a tight bounding relaxation | No good bound exists, or overlapping subproblems make DP polynomial |
+| [[Backtracking]] | `O(2ⁿ)` | `O(n)` | Any or all feasible solutions | Constraint satisfaction / enumeration with no objective | There is an objective to optimise — the bound-prune goes unused |
+| [[Dynamic Programming]] | Poly / pseudo-poly with overlap (`O(nW)` knapsack, `O(2ⁿn²)` Held-Karp TSP) | Table proportional to the state space | Exact optimum | Overlapping subproblems + optimal substructure | State space is itself exponential (few overlaps) |
+| Brute-force enumeration | `Θ(2ⁿ)` always | `O(n)` | Exact optimum | Tiny instances, a correctness oracle | Any non-trivial size |
+| [[Greedy Algorithms]] | `O(n log n)` | `O(1)` | Optimal only under an exchange/matroid argument, else a heuristic | A provable greedy-optimal structure, or an acceptable approximation | Optimality must be certified and no greedy proof exists |
+
+Branch-and-bound is the default when the optimum must be certified over a combinatorial space and a cheap relaxation prunes most of the tree; it pays a worst-case exponential time that a loose bound makes real, and — under best-first — a frontier that can exhaust memory. Dynamic programming overtakes it once subproblems overlap enough to collapse the search into a polynomial table (0/1 knapsack with a small integer capacity is the standard case). Backtracking is the same tree walk minus the bound, for when only feasibility matters. A greedy pass replaces the search entirely when a local rule is provably optimal, or when a fast approximation is acceptable in place of a proven optimum — which is also why solvers seed the incumbent with a greedy solution before the exact search begins.
 
 ## Questions
 
-> [!QUESTION]- How does branch-and-bound differ from backtracking?
-> - Both explore a tree of partial solutions and prune subtrees, but on different criteria.
-> - [[Backtracking]] prunes a branch when it becomes **infeasible** — the partial solution already violates a constraint.
-> - Branch-and-bound prunes a branch that is feasible but whose **optimistic bound cannot beat the incumbent** — the best complete solution found so far.
-> - So backtracking answers "does a valid configuration exist / enumerate them," while B&B answers "which valid configuration is *optimal*."
-> - The practical upshot: the moment your problem has an objective function to optimise, you want a bound, and plain backtracking leaves that pruning power on the table.
+> [!QUESTION]- How does branch-and-bound's pruning differ from backtracking's?
+> Backtracking discards a partial candidate when it violates a constraint — an infeasibility test. Branch-and-bound discards a *feasible* subtree when its optimistic bound is no better than the incumbent, the best complete solution so far. Backtracking answers whether a valid configuration exists or enumerates them; branch-and-bound answers which feasible configuration is optimal. The bound is the extra machinery that pays off only when there is an objective to optimise.
 
-> [!QUESTION]- Why must the bounding function be optimistic, and how does that mirror A* search?
-> - The bound is an estimate of the best achievable in a subtree; pruning happens when that estimate is no better than the incumbent.
-> - If the bound ever under-estimates (for maximisation), a subtree containing the true optimum could be pruned — giving a wrong answer.
-> - So the bound must be **admissible**: never worse than the real subtree optimum — the exact same condition as an [[A-Start Search|A* Search]] heuristic never overestimating the remaining cost.
-> - Both algorithms are guided tree searches whose correctness depends on an estimate that only ever errs in the optimistic direction; B&B is essentially A* over an optimisation decision tree.
-> - This is why you can safely borrow LP relaxations as bounds: an optimal fractional solution provably dominates the integer one, so it can never lie pessimistically.
+> [!QUESTION]- Why must the bounding function be optimistic?
+> The bound gates pruning: a subtree is discarded when its bound cannot beat the incumbent. If a maximisation bound under-estimates a subtree's true best, that subtree can be pruned while it still holds the optimum, and the search returns a suboptimal incumbent labelled as proven-optimal — a silent correctness failure. The requirement is exactly A* search's admissibility: the estimate may only err optimistically. An LP relaxation satisfies it because a fractional optimum can only meet or exceed the integer one.
 
-> [!QUESTION]- Does branch-and-bound change the complexity class of NP-hard problems?
-> - No — the worst case remains exponential; on adversarial inputs the bound prunes nothing and it degenerates to brute-force enumeration.
-> - It improves the constant factor and the typical case, often by orders of magnitude, which is why real MIP solvers (CPLEX, Gurobi) rely on it.
-> - A tight bound and a strong early incumbent (often a [[Greedy Algorithms|greedy]] seed) prune more subtrees and shrink the practical runtime.
-> - The takeaway for a real decision: B&B buys you *practicality and a certificate of optimality*, not polynomial time — so on very large instances, budget for a heuristic fallback rather than a proven optimum.
+> [!QUESTION]- What determines how much of the tree is actually explored?
+> Two factors independent of the worst-case class: the tightness of the bound and how early a strong incumbent is found. A tight bound rejects more subtrees per comparison; an early incumbent raises the bar every later bound must clear. Exploration order feeds the second — best-first reaches a strong incumbent with the fewest expansions but stores a large frontier, while depth-first reaches some incumbent fast in `O(depth)` memory.
+
+> [!QUESTION]- Does branch-and-bound lower the complexity class of an NP-hard problem?
+> No. The worst case stays exponential; on an adversarial instance the bound prunes nothing and it reduces to brute-force enumeration. It improves the constant factor and the typical case, often by orders of magnitude, and returns a certificate of optimality — but not polynomial time. On very large instances the practical answer is an approximation, not a proven optimum.
 
 ## References
 
-- [Branch and bound (Wikipedia)](https://en.wikipedia.org/wiki/Branch_and_bound) — the general framework, bounding functions, and node-selection strategies.
-- [Branch and bound: knapsack (GeeksforGeeks)](https://www.geeksforgeeks.org/0-1-knapsack-using-branch-and-bound/) — the fractional-LP bound worked through the 0/1 knapsack tree.
-- [Integer programming (Wikipedia)](https://en.wikipedia.org/wiki/Integer_programming) — how LP-relaxation bounds drive branch-and-bound in commercial MIP solvers.
-- [Admissible heuristic (Wikipedia)](https://en.wikipedia.org/wiki/Admissible_heuristic) — the optimism condition shared with A* search.
+- [An Automatic Method of Solving Discrete Programming Problems](https://doi.org/10.2307/1910129) — Land and Doig's 1960 Econometrica paper introducing branch-and-bound for integer programming; the origin of the branch/bound/prune formulation.
+- [Integer programming](https://en.wikipedia.org/wiki/Integer_programming) — how LP-relaxation bounds drive branch-and-bound inside commercial MIP solvers.
+- [Admissible heuristic](https://en.wikipedia.org/wiki/Admissible_heuristic) — the optimism condition the bounding function shares with an A* search heuristic.
+- [0/1 Knapsack using Branch and Bound](https://www.geeksforgeeks.org/0-1-knapsack-using-branch-and-bound/) — the fractional-LP bound worked through the 0/1 knapsack search tree.
