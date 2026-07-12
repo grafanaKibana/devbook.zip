@@ -47,7 +47,7 @@ flowchart TD
     A -->|O 1 amortized decreaseKey and meld, proving bounds| F[Fibonacci Heaps]
 ```
 
-The [[Heap|binary or d-ary heap]] is what you actually ship: no meld needed, so nothing else comes close on constants. [[Leftist Heaps]] give worst-case O(log n) meld in ~30 lines and are the natural persistent mergeable heap; [[Skew Heaps]] are the same idea minus the stored metadata when amortized bounds suffice. [[Binomial Queues]] meld as binary addition and are mostly a stepping stone to [[Fibonacci Heaps]], whose O(1) amortized decreaseKey and meld prove bounds like Dijkstra in O(m + n log n) but rarely win in running code.
+The [[Heap|binary or d-ary heap]] is what you actually ship: no meld needed, so nothing else comes close on constants. [[Leftist Heaps]] give worst-case O(log n) meld in ~30 lines and are the natural persistent mergeable heap — the cost is one extra null-path-length field per node; [[Skew Heaps]] are the same idea minus that stored metadata when amortized bounds suffice. [[Binomial Queues]] meld as binary addition and are mostly a stepping stone to [[Fibonacci Heaps]], whose O(1) amortized decreaseKey and meld prove bounds like Dijkstra in O(m + n log n) but rarely win in running code: each node carries four pointers plus a degree and a mark bit, scattered across memory, so the "large constants" are literal per-node overhead.
 
 ## References
 

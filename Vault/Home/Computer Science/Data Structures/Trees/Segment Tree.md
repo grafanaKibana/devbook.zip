@@ -119,17 +119,6 @@ Memory is the standing cost. The `≈4n` slots and, for lazy trees, a parallel t
 > ```
 > Swapping the three `// merge` sites and the outside-identity for `Math.Min`/`int.MaxValue` turns this into a range-min tree with no structural change. Range updates require a parallel `_lazy[]` array plus a push-down step before each descent — the deferred-tag layer omitted here.
 
-## Comparison
-
-| Structure | Range query | Update support | Preprocessing / space | Aggregate constraint | Stronger case |
-| --- | --- | --- | --- | --- | --- |
-| Segment tree | `O(log n)` | Point `O(log n)`; range `O(log n)` with lazy | `O(n)` build, `≈4n` slots | Any associative `merge` | Mutable data with min/max/gcd or range updates |
-| [[Fenwick Tree]] | `O(log n)` | Point `O(log n)` | `O(n)` build, exactly `n` slots | Invertible only (sum, xor) | Sum/xor with point updates, minimal code and memory |
-| [[Prefix Sum]] | `O(1)` | Not supported (static) | `O(n)` build, `n` slots | Invertible only | Immutable data queried repeatedly |
-| Sparse table | `O(1)` | Not supported (static) | `O(n log n)` build and space | Idempotent only (min, max, gcd) | Immutable data, many `O(1)` min/max/gcd queries |
-
-A segment tree is the general `O(log n)` range-query/update structure: it handles any associative operation, including the min/max/gcd cases a Fenwick tree cannot express and the lazy range updates a static structure cannot support. The cost is roughly `4n` memory and more code. A [[Fenwick Tree]] is smaller and faster when the aggregate is invertible and only point updates are needed. A [[Prefix Sum]] array wins when the data never changes and the aggregate is invertible; a sparse table wins for static, idempotent range queries where `O(1)` per query beats `O(log n)`.
-
 ## Questions
 
 > [!QUESTION]- How is a segment tree laid out in memory, and why `4n` slots?
@@ -137,9 +126,6 @@ A segment tree is the general `O(log n)` range-query/update structure: it handle
 
 > [!QUESTION]- Why does a range query cost `O(log n)` instead of touching every element in the range?
 > Any `[l, r]` decomposes into at most `O(log n)` canonical nodes whose ranges lie fully inside it. Each such node's aggregate is already computed, so the query reads it and stops descending, never reaching the leaves beneath.
-
-> [!QUESTION]- What can a segment tree do that a Fenwick tree cannot, and at what cost?
-> Aggregate over a non-invertible operation such as min, max, or gcd, and apply lazy range updates. A Fenwick tree's range query relies on subtracting prefixes, which those operations lack. The cost is roughly `4n` memory versus exactly `n`, and more implementation code.
 
 > [!QUESTION]- What does lazy propagation defer, and how does that failure show up?
 > A range update stores a pending tag on each covering node instead of rewriting its whole subtree; the tag is pushed to children only when a later operation descends past that node. Forgetting a push-down returns a stale aggregate — a plausibly-wrong number, not a crash — which makes it the bug-prone part of the structure.

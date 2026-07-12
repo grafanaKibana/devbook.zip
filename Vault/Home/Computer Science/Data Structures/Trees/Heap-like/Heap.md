@@ -169,19 +169,6 @@ Every boundary here traces back to the same fact: the array holds a partial orde
 > ```
 > `Build` starts sift-down at index `Count / 2 - 1` — the last internal node — because every index beyond it is a leaf that already satisfies heap order. A decrease-key or arbitrary remove would require a parallel `Dictionary<int, int>` mapping value to index, updated inside both sift loops.
 
-## Comparison
-
-| Structure | find-min | insert | extract-min | union | Ordered search / iteration | Stronger case |
-| --- | --- | --- | --- | --- | --- | --- |
-| Binary heap (array) | `O(1)` | `O(log n)` | `O(log n)` | `O(n)` | `O(n)` search, no ordered scan | Compact, cache-friendly repeated min/max extraction |
-| Balanced BST ([[Red-Black Tree]]) | `O(log n)` | `O(log n)` | `O(log n)` | `O(n)` | `O(log n)` search, in-order scan | Ordered lookup and iteration are also needed |
-| Sorted array | `O(1)` | `O(n)` | `O(1)` at one end | `O(n)` | `O(log n)` search, ordered scan | Data is static or nearly so, ordering matters |
-| Mergeable heap ([[Binomial Queues]] / [[Leftist Heaps]] / [[Fibonacci Heaps]]) | `O(1)` (binomial `O(log n)` w/o min-pointer) | `O(log n)` or `O(1)` am. | `O(log n)` | `O(log n)` or `O(1)` am. | `O(n)` search, no ordered scan | Heaps are repeatedly unioned |
-
-A binary heap keeps the smallest working set of any of these: one array, a fixed extreme at index `0`, and only local order to maintain. A balanced BST answers ordered queries the heap cannot, but pays pointer overhead and worse constants for the pure "give me the minimum" loop. A sorted array reads the minimum in `O(1)` too, but every insert shifts elements in `O(n)`. The mergeable heaps trade the array's locality for a pointer-linked forest so that combining two priority queues stays logarithmic or amortized-constant.
-
-The binary heap is the default array priority queue for [[Heap Sort]], the frontier in [[Dijkstra]] and [[Minimum Spanning Tree]] algorithms, and bounded top-k selection. A balanced BST fits when ordered search or iteration must coexist with min-extraction; a mergeable heap fits when priority queues must be unioned rather than rebuilt.
-
 ## Questions
 
 > [!QUESTION]- Why can a complete binary tree be stored without any pointers?
@@ -192,9 +179,6 @@ The binary heap is the default array priority queue for [[Heap Sort]], the front
 
 > [!QUESTION]- Why does a plain binary heap need an external map to support decrease-key?
 > The heap exposes elements only by heap-order position, not by identity, and offers no way to locate an arbitrary value without an `O(n)` scan. A side table mapping each element to its current array index — updated on every swap — is required to point at the node before re-keying and sifting it in `O(log n)`.
-
-> [!QUESTION]- Why is merging two binary heaps `O(n)` when a balanced BST or a Fibonacci heap can do better?
-> Two packed heap arrays carry no ordering information about each other, so no local seam repair produces a valid combined heap; the general fix is to concatenate and run `build-heap` over all `n` elements. Mergeable heaps keep a pointer-linked forest instead of one array, letting union splice trees in `O(log n)` or `O(1)` amortized.
 
 ## References
 

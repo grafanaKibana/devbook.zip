@@ -61,10 +61,10 @@ Over English text most mismatching characters are absent from a short pattern, s
 
 | Case | Time | Auxiliary space | Cause |
 | --- | --- | --- | --- |
-| Preprocessing | `Θ(m + |Σ|)` | `Θ(m + |Σ|)` | Build the bad-character table over the alphabet and the good-suffix table over the pattern. |
-| Best / sublinear | `O(n/m)` | `O(m + |Σ|)` | Large alphabet, long pattern: each alignment mismatches on its last character and that character is absent from the pattern, so every probe jumps a full `m` and most text is never read. |
-| Worst, plain | `O(n·m)` | `O(m + |Σ|)` | An all-equal pattern `A^m` in text `A^n`, where every alignment matches all `m` characters right-to-left (a full match) and the good-suffix rule shifts by only one, so ~`n` alignments each cost `O(m)`. |
-| Worst, Galil rule | `O(n)` | `O(m + |Σ|)` | Remembering how much of the pattern is already known to match after a shift skips those re-comparisons, bounding total character comparisons linearly. |
+| Preprocessing | `Θ(m + \|Σ\|)` | `Θ(m + \|Σ\|)` | Build the bad-character table over the alphabet and the good-suffix table over the pattern. |
+| Best / sublinear | `O(n/m)` | `O(m + \|Σ\|)` | Large alphabet, long pattern: each alignment mismatches on its last character and that character is absent from the pattern, so every probe jumps a full `m` and most text is never read. |
+| Worst, plain | `O(n·m)` | `O(m + \|Σ\|)` | An all-equal pattern `A^m` in text `A^n`, where every alignment matches all `m` characters right-to-left (a full match) and the good-suffix rule shifts by only one, so ~`n` alignments each cost `O(m)`. |
+| Worst, Galil rule | `O(n)` | `O(m + \|Σ\|)` | Remembering how much of the pattern is already known to match after a shift skips those re-comparisons, bounding total character comparisons linearly. |
 
 The tables persist through the scan, so search space stays `O(m + |Σ|)`; the loop itself keeps only a few indices beyond them. The plain-versus-Galil split matters: the sublinear `O(n/m)` is a property of large-alphabet inputs, not a guarantee. Without Galil's rule an adversarial input degrades to `O(n·m)`, and the guaranteed-linear bound requires the extra bookkeeping.
 
@@ -174,18 +174,6 @@ The good-suffix table is the part that breaks silently. Its "case 2" prefix fall
 > ```
 > The `badChar` table assumes byte-range characters; Unicode text needs a `Dictionary<char,int>` (default `m`) instead of `int[256]`. Dropping `BuildGoodSuffixTable` and shifting by the bad-character rule alone yields Boyer-Moore-Horspool.
 
-## Comparison
-
-| Algorithm | Search time | Extra space | Stronger case | Weaker case | Text coverage |
-| --- | --- | --- | --- | --- | --- |
-| Naive scan | `O(n·m)` worst | `O(1)` | Tiny inputs, one-off searches | Long text with near-misses | Reads every position, re-scans on each |
-| Boyer-Moore / BMH | `O(n/m)` best, `O(n·m)` plain worst | `O(m + |Σ|)` tables | Long literal pattern over a large alphabet | Small alphabet, adversarial repeats | Skips blocks it never reads |
-| [[KMP (Knuth-Morris-Pratt) Algorithm\|KMP]] | `O(n + m)` | `O(m)` prefix table | Small alphabet, adversarial or streaming input | Large alphabet where skipping would pay | Reads every character exactly once |
-| [[Rabin Karp Search]] | `O(n + m)` avg, `O(n·m)` worst | `O(1)` rolling hash | Many patterns or substrings via a hash set | Hash collisions force re-verification | Reads every character; hashes a window |
-| [[Z-Algorithm]] | `O(n + m)` | `O(n + m)` Z-array | Also needs the full match structure of the string | Extra linear space over pattern+text | Reads every character once |
-
-Boyer-Moore, and the Horspool variant it usually appears as, is the practical default for a single literal pattern in text editors and `grep` because right-to-left skipping makes it sublinear on the large alphabets those tools face — English, source code, Unicode. It pays for that with a fragile good-suffix table and no worst-case guarantee unless Galil's rule is added. [[KMP (Knuth-Morris-Pratt) Algorithm|KMP]] trades away skipping for a deterministic single left-to-right pass, which is what small-alphabet or streaming workloads favor: on DNA (`|Σ| = 4`) Boyer-Moore's skips collapse while KMP's `O(n + m)` bound holds regardless of input. [[Rabin Karp Search]] wins when the same window hash can screen many patterns at once, and the [[Z-Algorithm]] fits when the match is a by-product of building the full Z-structure for other string queries.
-
 ## Questions
 
 > [!QUESTION]- Why does comparing right-to-left let Boyer-Moore skip characters it never reads?
@@ -196,9 +184,6 @@ Boyer-Moore, and the Horspool variant it usually appears as, is the practical de
 
 > [!QUESTION]- Why is the plain worst case `O(n·m)`, and what recovers a linear bound?
 > The sublinear behavior depends on frequent large skips, which vanish when text and pattern share long repeated runs — as with an all-equal pattern `aaaa` over `aaaa…a`, where every alignment is a full match over all `m` characters and the good-suffix rule then shifts by only one. Galil's rule remembers how much of the pattern is already known to match after a shift and skips re-comparing those positions, bounding total comparisons at `O(n)`.
-
-> [!QUESTION]- On what input does Boyer-Moore lose to KMP?
-> Small alphabets. With two to four symbols the mismatching character is almost always present in the pattern, so the bad-character shift is roughly one and the sublinear advantage disappears; DNA and binary streams are the canonical case. [[KMP (Knuth-Morris-Pratt) Algorithm|KMP]]'s `O(n + m)` guarantee is independent of alphabet size and never re-scans a character, so it is the steadier choice there and on adversarial input.
 
 ## References
 

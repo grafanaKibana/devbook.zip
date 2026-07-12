@@ -86,17 +86,6 @@ Each of these follows directly from fixing access to one end.
 > ```
 > `Pop`/`Peek` throw `InvalidOperationException` on an empty stack; `TryPop`/`TryPeek` return `false` instead. `new Stack<T>(capacity)` pre-sizes the backing array to avoid resize spikes when the depth is known.
 
-## Comparison
-
-| Structure | Accessible ends | Order served | Push / pop | Random access | Generalizes to |
-| --- | --- | --- | --- | --- | --- |
-| Stack | Top only | LIFO — newest first | `O(1)` | No | — |
-| [[Queue]] | Both, but enqueue and dequeue at opposite ends | FIFO — oldest first | `O(1)` | No | — |
-| [[Deque]] | Both ends, symmetric | Either | `O(1)` at each end | No | Stack and queue both |
-| [[Dynamic Array]] | Any index | Insertion order | `O(1)` amortized at the tail | Yes | Stack (its tail operations) |
-
-A stack is the constant-time LIFO structure: it fits reversal, nested-structure processing, backtracking, and depth-first search ([[DFS BFS]]) — anything that resumes the most recent pending item. A [[Queue]] applies the opposite discipline, serving the oldest item, which is what work distribution and breadth-first order need. A [[Deque]] accepts both ends and so subsumes stack and queue at a slightly larger interface. A plain [[Dynamic Array]] already provides amortized `O(1)` tail operations, so a stack is its tail restricted to one end; the array retains an advantage only where the interior also needs random access.
-
 ## Questions
 
 > [!QUESTION]- Why is only the top of a stack reachable, and what does that buy?
@@ -104,9 +93,6 @@ A stack is the constant-time LIFO structure: it fits reversal, nested-structure 
 
 > [!QUESTION]- Why is array-backed `Push` amortized `O(1)` rather than worst-case constant?
 > Most pushes write one slot and bump a counter. When the backing array is full, that push allocates a doubled array and copies all `n` elements — an `O(n)` single call. Doubling makes any run of `n` pushes cost `O(n)` in total, so the per-push average stays constant, but a specific push can spike.
-
-> [!QUESTION]- How does a stack differ from a queue at the mechanism level?
-> Both offer `O(1)` insert and remove, but a stack inserts and removes at the same end (LIFO, newest served first) while a queue inserts at one end and removes at the other (FIFO, oldest served first). The choice is a correctness decision about processing order, not a performance one.
 
 > [!QUESTION]- Why convert deep recursion into an explicit stack?
 > The call stack is itself a LIFO stack on a fixed-size memory region; deep enough recursion overflows it with an uncatchable `StackOverflowException`. An explicit `Stack<T>` holds the same pending frames on the heap, where depth is bounded by available memory instead. The logic maps directly: push where the recursion would call, pop where it would return.

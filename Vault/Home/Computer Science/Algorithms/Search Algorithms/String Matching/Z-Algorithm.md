@@ -145,17 +145,6 @@ Best, average, and worst cases coincide: the pass is `Θ(|S|)` whether the strin
 > ```
 > `FindAll` scans from `m + 1`, so every index it tests lies in `T`; a text-region `z[i] >= m` means `m` characters of `T` reproduce `P`, a genuine occurrence for any separator. With a separator outside both arguments the cap makes `z[i] >= m` fire only at exactly `m`; `\0` suits ordinary text but must change if the input can contain it. Should the separator leak into the alphabet, `>= m` still reports correctly — only a stricter `== m` test would start dropping hits.
 
-## Comparison
-
-| Algorithm | Time | Extra space | Preprocessing | Stronger case | Weaker case |
-| --- | --- | --- | --- | --- | --- |
-| Z-algorithm | `Θ(n + m)` | `Θ(n + m)` | Concatenate `P + sep + T` | Prefix-structure problems; a directly readable match length | Large `T` under tight memory |
-| [[KMP (Knuth-Morris-Pratt) Algorithm\|KMP]] | `Θ(n + m)` | `Θ(m)` | Failure table over `P` | Streaming `T` in place with minimal extra memory | Reasoning about a recursive fallback link |
-| [[Rabin Karp Search\|Rabin-Karp]] | `Θ(n + m)` expected, `O(nm)` worst | `O(1)` | Rolling hash of `P` | Many patterns of one length; 2-D or set search | Adversarial input forcing hash collisions |
-| [[Boyer-Moore]] | `O(n/m)` best, `O(nm)` worst | `O(m + \|Σ\|)` | Bad-character and good-suffix tables | Long patterns over large alphabets | Short patterns or adversarial text |
-
-The Z-algorithm and KMP are the two unconditionally linear choices, with identical asymptotics; the split is representational. The Z-array exposes prefix-overlap lengths directly, which reads cleanly for periodicity, occurrence counting, and "longest common prefix with the whole string per suffix," and the forward match length is often easier to reason about than a fallback link. KMP pays nothing to build a concatenated string and streams the text in `O(m)` space, so it fits where `T` is large and memory is scarce. Rabin-Karp trades the linear guarantee for `O(1)` space and easy multi-pattern extension; Boyer-Moore skips ahead sublinearly on long patterns but falls to quadratic on adversarial text.
-
 ## Questions
 
 > [!QUESTION]- What does `z[i]` measure, and why does the Z-box keep the whole pass linear?
@@ -163,9 +152,6 @@ The Z-algorithm and KMP are the two unconditionally linear choices, with identic
 
 > [!QUESTION]- Why should the concatenation separator lie outside the input alphabet?
 > To keep the cap: a separator absent from `P` and `T` holds every text-region `z[i]` to at most `|P|`, so `z[i] == |P|` and `z[i] >= |P|` coincide and no match spans the pattern/text join. If the separator also appears in the input, a genuine occurrence can extend across the join and produce `z[i] > |P|` — a strict `== |P|` test would then drop it. The shipped `>= |P|` test survives this (a text-region `z[i] >= |P|` is always `|P|` real characters of `T` matching `P`); a sentinel outside the alphabet is what lets the simpler `==` formulation stay correct too.
-
-> [!QUESTION]- Given identical `O(n + m)` time, where does the Z-algorithm differ from KMP?
-> Both are unconditionally linear and encode the same prefix structure. The Z-algorithm materializes `P + sep + T` and its Z-array — `Θ(n + m)` scratch space — and exposes match lengths directly. KMP builds only an `O(m)` failure table and streams the text in place, so it uses less memory on large text; the Z-array is often preferred when the problem itself is about prefix overlaps.
 
 > [!QUESTION]- Inside the box, when can `z[i]` be copied from the mirror, and when must it be recomputed?
 > When `z[i-l] < r - i + 1` the mirrored match ends strictly before the box edge, so it is fully verified and `z[i] = z[i-l]`. When `z[i-l] >= r - i + 1` the mirror only guarantees a match up to `r`; the characters past `r` were never compared, so `z[i]` is reset to the box remainder `r - i + 1` and extended from `r + 1`.

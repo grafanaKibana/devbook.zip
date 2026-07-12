@@ -9,7 +9,7 @@ summary: "Software craft focused on the .NET stack: C#, runtime, web APIs, and c
 tags:
   - FolderNote
 publish: true
-status: Creation
+status: Done
 level:
   - "4"
 priority: High
@@ -28,5 +28,6 @@ return FolderStructureMap;
 
 ## References
 
-- [.NET documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/) — Entry point for the .NET platform covered in this section.
-- [The Pragmatic Programmer (Hunt & Thomas)](https://pragprog.com/titles/tpp20/the-pragmatic-programmer-20th-anniversary-edition/) — Practitioner guide to programming craft and engineering judgment.
+- [.NET documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/) — entry point for the .NET platform covered in this section.
+- [C# language reference (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/csharp/) — authoritative reference for the C# language, runtime behavior, and features.
+- [The Pragmatic Programmer (Hunt & Thomas)](https://pragprog.com/titles/tpp20/the-pragmatic-programmer-20th-anniversary-edition/) — practitioner guide to programming craft and engineering judgment.

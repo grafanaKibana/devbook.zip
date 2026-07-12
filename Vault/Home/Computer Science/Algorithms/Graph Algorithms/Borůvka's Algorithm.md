@@ -7,7 +7,7 @@ level:
   - "4"
 priority: Medium
 status: Creation
-publish: false
+publish: true
 ---
 
 # Intro
@@ -42,16 +42,6 @@ Parallel edges are harmless: only the lightest outgoing candidate for a componen
 An isolated component has no outgoing edge. If more than one component remains after a round and none can select an outgoing edge, the input is disconnected and the result is a minimum spanning forest.
 
 Selected edges cannot be appended blindly. Two components can nominate the same edge, and later selections in the same round can become internal after earlier unions. Each candidate still passes through a union-find check before it enters the result.
-
-## Comparison
-
-| Algorithm | Time | Growth pattern | Stronger case | Main cost |
-| --- | --- | --- | --- | --- |
-| Borůvka | `O(E log V)` | all components grow simultaneously | parallel and distributed processing | repeated global edge scans |
-| [[Kruskal's Algorithm]] | `O(E log E)` | globally sorted edges merge components | sparse edge lists on one machine | sorting |
-| Prim | `O(E log V)` with heap | one connected frontier grows | adjacency-based single-threaded traversal | priority queue |
-
-Borůvka exposes the most parallel work because component choices are independent within a round. Kruskal has a simpler single ordered pass after sorting, while Prim avoids rescanning irrelevant edges by maintaining one frontier.
 
 ## References
 
