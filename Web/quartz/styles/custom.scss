@@ -581,25 +581,28 @@ body[data-slug$="/index"]:not([data-slug="tags/index"]) .page-listing {
 }
 
 // ============================================================================
-// Home (index) — dashboard-only, single-viewport layout.
+// Home (index) — dashboard-only layout.
 //
-// The home page is just the Topics dashboard + the site footer, sized to fill
-// exactly one viewport (no page scroll, no dead space) from 320×568 up to
-// 2560×1440. The prose that used to sit under the dashboard (welcome heading,
-// intro, "Why this exists") now lives in Credits.md, linked from the footer.
+// The home page is just the Topics dashboard + the site footer. The prose that
+// used to sit under the dashboard (welcome heading, intro, "Why this exists")
+// now lives in Credits.md, linked from the footer.
 //
 // Gated on `body[data-slug="index"]`, so no other page is touched, and it's a
 // Quartz-only concern — Obsidian renders the same note as an ordinary page.
 //
-// Mechanism: #quartz-body is pinned to 100dvh and clips; the center column is a
-// flex stack whose topic grid grows to absorb the slack (grid-auto-rows: 1fr —
-// "stretched card rows"), so the footer always hugs the bottom edge. Card chrome
-// scales with clamp(); descriptions and the legend drop on small screens where
-// vertical room is scarce, keeping the 44px hit target (.db-card-hit) intact.
+//   • Desktop / tablet (≥768px): the dashboard is TOP-aligned — its first card
+//     lines up with the top of the Explorer — and fills one viewport, no scroll.
+//     The topic grid stretches to take the height between the header and the
+//     footer, but each row is capped (14rem) so a big monitor doesn't balloon
+//     the cards; past the cap the slack falls below the grid (still top-aligned,
+//     never centered).
+//   • Mobile (<768px): a natural two-column grid. Cards keep their content
+//     height so the progress bar never clips when a two-word topic wraps, and
+//     the page scrolls if the topics don't fit — readable cards beat a forced
+//     single screen on a phone.
 // ============================================================================
 body[data-slug="index"] {
-  // Card chrome tightens as the viewport shrinks — driven off one knob so the
-  // desktop and mobile branches stay in sync.
+  // Card chrome tightens as the viewport shrinks — one knob for both branches.
   --home-card-pad: clamp(0.55rem, 1.4vh, 0.85rem) clamp(0.65rem, 1.2vw, 0.9rem);
 
   // Strip the page chrome the dashboard doesn't need. Keep .page-header itself —
@@ -615,96 +618,92 @@ body[data-slug="index"] {
     margin: 0;
   }
 
-  // The center column is a flex stack that fills its grid row and clears the
-  // fixed header once, at the top; the article and the note's markdown wrapper
-  // pass that height straight down to the dashboard.
-  .page > #quartz-body > .center {
-    grid-area: grid-center;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    padding-top: calc(var(--site-header-height) + 0.75rem);
-  }
-  .center > article,
-  .center > article > div {
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 auto;
-    min-height: 0;
-    margin: 0;
-  }
-  // The note's dashboard root carries an inline `margin-top: 1.5rem`; only an
-  // inline-beating `!important` can retune it for the fitted layout.
-  .center > article > div > div {
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 auto;
-    min-height: 0;
-    margin-top: 0 !important;
-    gap: clamp(0.5rem, 1.4vh, 0.9rem);
-  }
-
-  // The topic grid grows to fill the space above the summary bar; equal-fraction
-  // rows stretch the cards instead of leaving a gap. min-height:0 lets it shrink
-  // under its content on short screens so the summary + footer never get pushed
-  // out of view.
-  .dc-topic-grid {
-    flex: 1 1 auto;
-    min-height: 0;
-    grid-auto-rows: minmax(0, 1fr);
-    gap: clamp(0.4rem, 1vw, 0.75rem);
-  }
   .dc-topic-card {
-    min-height: 0;
     --db-card-pad: var(--home-card-pad);
   }
-  // The flex spacer that pushes the progress footer down inside each card can
-  // collapse fully when rows are short — the grid stretch already spaces them.
-  .dc-topic-spacer {
-    min-height: 0;
-  }
 
-  .dc-topic-total {
-    flex: 0 0 auto;
-    margin-top: 0;
-  }
-
-  // Footer hugs the bottom of the viewport, no extra chrome above it.
+  // Footer hugs the bottom edge, no extra chrome above it.
   .page > #quartz-body > footer {
     grid-area: grid-footer;
     margin: 0;
   }
 }
 
-// Tall viewports only: cap how far the cards stretch and center the block, so a
-// big monitor reads as a deliberate dashboard with balanced padding rather than
-// a few over-stretched rows. Shorter screens (laptops, phones) keep filling — at
-// those heights the cards never grow big enough to look stretched, and the fill
-// is what keeps the per-card progress in view.
-@media (min-height: 900px) {
-  body[data-slug="index"] {
-    .center > article > div > div {
-      justify-content: center;
-    }
-    .dc-topic-grid {
-      flex: 0 1 auto;
-      max-height: 34rem;
-    }
-  }
-}
-
 // ---------------------------------------------------------------------------
-// Desktop (≥1200px): three-column grid with the Explorer on the left. The
-// right sidebar is empty on the index page (graph/backlinks are not-index, the
-// TOC has no headings), so drop that column and give the dashboard the room.
+// Desktop + tablet (≥768px): pin the page to one viewport and let the topic
+// grid fill it from the top down to the footer.
 // ---------------------------------------------------------------------------
-@media all and ($desktop) {
+@media all and not ($mobile) {
   body[data-slug="index"] {
+    // Pin the page to the viewport; the grid absorbs the height, so nothing
+    // scrolls and the footer sits on the bottom row.
     .page > #quartz-body {
       box-sizing: border-box;
       height: 100dvh;
       max-height: 100dvh;
       overflow: hidden;
+    }
+
+    // The center column is a flex stack that fills its grid row. Its top padding
+    // matches the Explorer's (`--site-header-height` + 1.25rem) so the first card
+    // and the first nav row start on exactly the same line.
+    .page > #quartz-body > .center {
+      grid-area: grid-center;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      padding-top: calc(var(--site-header-height) + 1.25rem);
+    }
+    // The article and the note's markdown wrapper pass the height straight down
+    // to the dashboard root (which carries an inline `margin-top: 1.5rem`; only
+    // an inline-beating `!important` can retune it for the fitted layout).
+    .center > article,
+    .center > article > div,
+    .center > article > div > div {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 auto;
+      min-height: 0;
+      margin: 0;
+    }
+    .center > article > div > div {
+      margin-top: 0 !important;
+      gap: clamp(0.5rem, 1.4vh, 0.9rem);
+    }
+
+    // The grid fills the space above the summary bar. Rows stretch to share that
+    // height but never below their content (no clipping) and never past 14rem
+    // (no ballooning on a big monitor); align-content:start keeps everything
+    // top-aligned, dropping any surplus below the grid instead of centering it.
+    // On a normal laptop (≤~900px tall) the cap isn't reached, so the cards fill
+    // the viewport flush against the footer with no gap.
+    .dc-topic-grid {
+      flex: 1 1 auto;
+      min-height: 0;
+      grid-auto-rows: minmax(min-content, 14rem);
+      align-content: start;
+      gap: clamp(0.4rem, 1vw, 0.75rem);
+    }
+    .dc-topic-card {
+      min-height: 0;
+    }
+    // The in-card flex spacer can collapse — the row stretch already spaces cards.
+    .dc-topic-spacer {
+      min-height: 0;
+    }
+    .dc-topic-total {
+      flex: 0 0 auto;
+      margin-top: 0;
+    }
+  }
+}
+
+// Desktop (≥1200px): three-column grid with the Explorer on the left. The right
+// sidebar is empty on the index page (graph/backlinks are not-index, the TOC has
+// no headings), so drop that column and give the dashboard the room.
+@media all and ($desktop) {
+  body[data-slug="index"] {
+    .page > #quartz-body {
       grid-template-columns: #{$sidePanelWidth} auto;
       grid-template-rows: minmax(0, 1fr) auto;
       grid-template-areas:
@@ -721,25 +720,18 @@ body[data-slug="index"] {
       overflow-y: auto;
       overscroll-behavior: contain;
     }
-    // The empty right column is gone from the template; hide the element too.
     .page > #quartz-body > .sidebar.right {
       display: none;
     }
   }
 }
 
-// ---------------------------------------------------------------------------
-// Tablet + mobile (<1200px): the sidebars are already out of flow (the Explorer
-// is a fixed hamburger, the right sidebar is empty), so the index page is a
-// single column — dashboard over footer — offset below the fixed header.
-// ---------------------------------------------------------------------------
-@media all and not ($desktop) {
+// Tablet (768–1200px): the sidebars are out of flow (the Explorer is a fixed
+// hamburger, the right sidebar is empty), so it's a single column — dashboard
+// over footer — below the fixed header.
+@media all and ($tablet) {
   body[data-slug="index"] {
     .page > #quartz-body {
-      box-sizing: border-box;
-      height: 100dvh;
-      max-height: 100dvh;
-      overflow: hidden;
       grid-template-columns: auto;
       grid-template-rows: minmax(0, 1fr) auto;
       grid-template-areas:
@@ -753,40 +745,48 @@ body[data-slug="index"] {
 }
 
 // ---------------------------------------------------------------------------
-// Small screens (<760px): vertical room is scarce, so trim the card body to its
-// essentials — hide the descriptions and keep a two-column grid (never collapse
-// to one) so the 11 topics stay a handful of short rows rather than a tall
-// stack. The legend under the summary bar drops too; the progress bar and its
-// caption carry the meaning.
+// Mobile (<768px): a natural two-column grid that scrolls. Cards keep their
+// content height (icon + title + progress), so the progress bar never clips
+// when a two-word topic ("Computer Science", "Development Practices") wraps to
+// two lines. Descriptions and the legend drop to save room; the progress bar
+// and its caption carry the meaning, and the 44px hit target (.db-card-hit) is
+// untouched.
 // ---------------------------------------------------------------------------
-@media all and (max-width: 760px) {
+@media all and ($mobile) {
   body[data-slug="index"] {
-    .db-card-summary {
+    .page > #quartz-body > .sidebar.right {
       display: none;
     }
+    // Neutralize the note's inline top margin; the header clearance already comes
+    // from #quartz-body's mobile padding-top.
+    .center > article > div > div {
+      margin-top: 0 !important;
+    }
+    .dc-topic-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-auto-rows: auto;
+      gap: 0.6rem;
+      margin-top: 0.75rem;
+    }
+    .dc-topic-grid .dc-topic-card {
+      grid-column: span 1;
+      min-height: 4.75rem;
+    }
+    // Collapse the in-card spacer so the progress bar sits just under the title.
+    .dc-topic-spacer {
+      display: none;
+    }
+    .db-card-summary,
     .dc-topic-legend {
       display: none;
     }
-    // Tighter card type so a two-word topic ("Computer Science", "Development
-    // Practices") fits its short card without the second line being clipped.
+    // Tighter type so a two-word topic fits without wrapping to three lines.
     .db-card-title {
       font-size: 0.9rem;
       line-height: 1.15;
     }
     .dc-topic-cap {
       font-size: 0.68rem;
-    }
-  }
-}
-@media all and (max-width: 430px) {
-  body[data-slug="index"] {
-    // Override the note's single-column fallback: two columns keep the row count
-    // (and thus the height) in check on the narrowest phones.
-    .dc-topic-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-    .dc-topic-grid .dc-topic-card {
-      grid-column: span 1;
     }
   }
 }
