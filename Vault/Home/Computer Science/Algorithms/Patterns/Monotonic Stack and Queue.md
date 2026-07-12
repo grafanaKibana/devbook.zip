@@ -125,9 +125,6 @@ A monotonic stack is the `O(n)` tool for next-greater and next-smaller spans, pa
 > [!QUESTION]- Why must a monotonic deque store indices rather than values?
 > A window maximum is evicted precisely when its position falls out of range, so the front check compares stored indices against the window bound. A deque of raw values has discarded the positions and cannot tell when a candidate has left the window, returning a stale maximum from a slot no longer in scope.
 
-> [!QUESTION]- Why does sliding-window maximum defeat a plain scalar sliding window?
-> A running sum is reversible: subtract the departing element and the aggregate stays correct in `O(1)`. A maximum has no inverse — when the current max leaves, the next-largest is unknown without rescanning the window. The monotonic deque keeps every still-possibly-maximal index instead of a single collapsed scalar, so the answer survives a removal and stays `O(n)`.
-
 > [!QUESTION]- How does the monotone direction relate to which query is answered?
 > The direction of the stack fixes the query. A decreasing stack (values fall bottom to top) resolves each popped index against the arriving larger value, yielding the next *greater* element; reversing the pop comparison makes the stack increasing and yields the next *smaller* element. Choosing the direction backwards produces a fully populated result that answers the opposite question.
 

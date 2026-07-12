@@ -114,21 +114,7 @@ The denominator fails when `a[hi] == a[lo]`. A run of equal values, or a range t
 >
 > The `target >= values[lo] && target <= values[hi]` guard doubles as the absence check: once the target leaves the range's value window, no interpolated position can be valid.
 
-## Comparison
-
-| Strategy | Lookup time | Required input | Stronger case | Weaker case |
-| --- | --- | --- | --- | --- |
-| Interpolation Search | `O(log log n)` avg, `O(n)` worst | Sorted, uniformly distributed, numeric | Large uniformly distributed numeric arrays | Skewed distributions or non-numeric keys |
-| [[Binary Search]] | `O(log n)` | Sorted, indexable | Any sorted input regardless of distribution | Very small inputs where a scan is simpler |
-| [[Exponential Search]] | `O(log i)`, `i` = target index | Sorted; unknown or unbounded length | Target near the front of a streamed or unbounded sequence | Target deep in the array, where it reduces to `O(log n)` anyway |
-| [[Jump Search]] | `O(√n)` | Sorted, block-steppable | Media where stepping forward is cheap but seeking back is costly | Random-access arrays, where `O(log n)` search dominates |
-
-Interpolation Search is the strongest option on large numeric arrays that are provably close to uniform: `O(log log n)` genuinely beats `O(log n)` there. Binary Search is the safer default whenever the distribution is unknown or skewed, because its `O(log n)` holds regardless of how values are spaced. Exponential Search wins when the length is unknown and the target is likely near the front; Jump Search fits sequential media where a logarithmic pattern of backward seeks would cost more than `√n` forward steps.
-
 ## Questions
-
-> [!QUESTION]- Why does Interpolation Search beat Binary Search only on uniform data?
-> The interpolated probe assumes value grows linearly with index. On uniform data that model is accurate, so each probe lands near the target and shrinks the candidate set to about its square root, giving `O(log log n)`. When the gaps between values are uneven the estimate is consistently off, the range barely shrinks, and the cost rises to `O(n)` — below the `O(log n)` of the Binary Search it replaced.
 
 > [!QUESTION]- What property of a value distribution forces the linear worst case?
 > A single endpoint value that dwarfs the rest of the span — as with exponentially growing keys, clustered timestamps, or Zipfian counts. Once the maximum is far larger than most values, any target that is only a small fraction of that maximum interpolates to a position near `lo`, so each estimate advances the boundary by about one element instead of shrinking the range geometrically, and isolating the target costs `O(n)`.

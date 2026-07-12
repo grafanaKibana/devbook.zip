@@ -125,24 +125,10 @@ The binding limit is memory. A* holds every generated node across the open front
 > ```
 > .NET's `PriorityQueue<TElement, TPriority>` has no decrease-key, so an improved node is enqueued again rather than updated; the `closed` guard discards the stale higher-`f` copy when it later surfaces. Dropping that guard — reopening — is what an inconsistent heuristic requires to stay optimal.
 
-## Comparison
-
-| Strategy | Frontier key | Optimal? | Extra requirement | Stronger case |
-| --- | --- | --- | --- | --- |
-| A* | `g + h` | Yes, if `h` admissible | An admissible `h` | Single target with a cheap distance estimate |
-| [[Dijkstra]] | `g` (`h ≡ 0`) | Yes | None | No usable heuristic, or many targets share one source |
-| [[Greedy Best-First Search]] | `h` (ignores `g`) | No | An admissible `h` still helps | Any valid path fast, quality negotiable |
-| [[Bidirectional Search]] | `g + h` from both ends | Yes, with care | Reversible edges + a meeting test | Point-to-point on a large, high-branching graph |
-
-A* is the default for single-target shortest paths once an admissible heuristic exists, and it pays for the goal bias with the memory to hold the frontier and closed set. Dijkstra is the fallback when no heuristic is meaningful, or when many targets share one source and a per-goal `h` would only be recomputed. Greedy best-first drops `g` to move faster and gives up both optimality and completeness — it can wander into concave obstacles — so it fits only when any path will do. Bidirectional search shrinks the explored volume toward its square root when edges are reversible and the frontiers' meeting condition is handled correctly.
-
 ## Questions
 
 > [!QUESTION]- What does admissibility guarantee, and what does consistency add on top?
 > Admissibility (`h(n)` never exceeds the true remaining cost) makes A* return an optimal path: when the goal is popped its `f` equals its actual cost, and every frontier node's `f` is a lower bound on any path through it, so nothing cheaper is hidden. Consistency (`h(n) ≤ cost(n, n') + h(n')`) additionally forces `f` to be non-decreasing along a path, so a node's first pop is already optimal — graph-search A* can close it and never reopen it, expanding each node at most once.
-
-> [!QUESTION]- Why is A* with `h ≡ 0` exactly Dijkstra?
-> With `h ≡ 0`, `f(n) = g(n)`, so the frontier is ordered purely by cost-from-source. That is Dijkstra's ordering. `h ≡ 0` is trivially admissible and consistent, so A* keeps its optimality but loses all goal direction and settles nodes in uniform cost rings.
 
 > [!QUESTION]- An inadmissible heuristic returns a longer path with no error. What causes that?
 > Overestimating the remaining cost for a node on the true optimal path inflates that node's `f`. A* then pops the goal through a cheaper-looking detour before it expands the node on the real shortest path. The search still terminates and returns a valid path — just not the minimum-cost one — because the inflated `f` reordered the frontier against the optimum. Weighted A* (`f = g + ε·h`, `ε > 1`) does this on purpose for a path bounded within `ε` of optimal.

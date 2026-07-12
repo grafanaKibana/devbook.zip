@@ -43,12 +43,14 @@ A tree organizes nodes so each node has at most one parent (except the root) and
 
 | Type | What it adds | Used for |
 |---|---|---|
-| BST | Ordered left < node < right | Baseline ordered lookup — but degrades to O(n) if unbalanced |
-| AVL / Red-Black | Self-balancing rotations → guaranteed O(log n) | `SortedSet`/`SortedDictionary` (red-black); AVL is more rigidly balanced (faster reads, more rotations) |
-| B-tree / B+-tree | High fan-out, shallow; node = disk/page sized | **Database & filesystem indexes** — minimizes disk seeks. See [[Indexes]] |
-| [[Trie|Trie (prefix tree)]] | Path = sequence of characters | Autocomplete, prefix search, routing tables — O(k) by key length, independent of n |
+| [[Binary Search Tree\|BST]] | Ordered left < node < right | Baseline ordered lookup — but degrades to O(n) if unbalanced |
+| [[AVL Tree\|AVL]] / [[Red-Black Tree\|Red-Black]] | Self-balancing rotations → guaranteed O(log n) | `SortedSet`/`SortedDictionary` (red-black); AVL is more rigidly balanced (faster reads, more rotations) |
+| [[Splay Tree\|Splay]] | Self-adjusting: each access rotated to the root | Amortized O(log n) (O(n) worst); locality-adaptive — reads mutate structure, no stored balance metadata |
+| [[B-tree]] / [[B+ Tree\|B+-tree]] | High fan-out, shallow; node = disk/page sized | **Database & filesystem indexes** — minimizes disk seeks. See [[Indexes]] |
+| [[Trie\|Trie (prefix tree)]] | Path = sequence of characters | Autocomplete, prefix search, routing tables — O(k) by key length, independent of n |
 | [[Heap]] | Parent/child priority, array-backed | Priority queues and heap-like mergeable queues |
-| Segment / Fenwick (BIT) | Range aggregates with point updates | Range-sum/min queries in O(log n) |
+| [[Segment Tree]] | Any associative merge over a range — sum, **min/max**, gcd; lazy range updates | Range-min/max & range-assign in O(log n), ~4n slots |
+| [[Fenwick Tree\|Fenwick (BIT)]] | Prefix/range **sum** only — invertible aggregates, so no range-min | Range-sum with point updates in O(log n), ~n slots |
 
 ## Traversal Without Recursion
 

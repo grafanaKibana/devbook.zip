@@ -114,17 +114,6 @@ Stability is inherited, not intrinsic. Scatter appends keys in read order, so or
 > ```
 > Keys outside `[0, 1)` are normalized first with `(key − min) / (max − min)`. The index clamp is the only guard against the exact maximum mapping to slot `n`, one past the last bucket.
 
-## Comparison
-
-| Strategy | Average time | Distribution dependence | Stronger case | Weaker case |
-| --- | --- | --- | --- | --- |
-| Bucket Sort | `Θ(n + m)` | Needs roughly uniform keys over a known range | Large, uniformly distributed numeric data | Skewed, clustered, or unknown distributions |
-| [[Counting Sort]] | `Θ(n + k)` | One bucket per exact key over a small integer range | Small discrete integer keys, no inner sort needed | Large or continuous key ranges |
-| [[Radix Sort]] | `Θ(d · (n + b))` | Distribution-independent, fixed-width keys | Fixed-width keys of any distribution | Variable-length or non-orderable keys |
-| [[Quick Sort]] / [[Merge Sort]] | `Θ(n log n)` | Requires only a comparison operator | Arbitrary keys and any distribution, with a bound that never depends on spread | Cannot beat linear on ideal uniform numeric data |
-
-Bucket Sort's default fit is large, uniformly distributed numeric data, where its linear average genuinely holds; the cost it pays is a quadratic tail the moment the distribution skews. A comparison sort such as [[Quick Sort]] or [[Merge Sort]] is stronger wherever that distribution cannot be guaranteed, because its `O(n log n)` bound is independent of how the keys are spread. [[Counting Sort]] is the degenerate case — one bucket per exact key and no inner sort — and fits small discrete integer ranges; [[Radix Sort]] keeps linear time without the uniformity assumption by bucketing one digit at a time.
-
 ## Questions
 
 > [!QUESTION]- Where does the `Θ(n)` average bound actually come from?
@@ -135,9 +124,6 @@ Bucket Sort's default fit is large, uniformly distributed numeric data, where it
 
 > [!QUESTION]- What input drives Bucket Sort to `Θ(n²)`, and why is the result still correct?
 > A skewed distribution — Zipfian, exponential, or duplicate-heavy — that drops most keys into one bucket. That bucket's inner [[Insertion Sort]] gains nothing from the partition and costs `Θ(n²)`. The partition still separates ranges correctly, so the output stays sorted; only the running time collapses.
-
-> [!QUESTION]- How does Counting Sort relate to Bucket Sort?
-> Counting Sort is the special case with one bucket per exact key. Because each bucket then holds a single distinct value, no inner sort is needed at all. It fits small discrete integer ranges, whereas Bucket Sort's range buckets handle continuous keys spread over an interval.
 
 ## References
 

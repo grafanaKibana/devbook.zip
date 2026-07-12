@@ -101,23 +101,7 @@ The base case is a performance boundary, not only a mathematical one. Recursing 
 > ```
 > The subproblems in `parts` touch disjoint data, so the loop can be a parallel fork/join with no locking. `Cutoff` sets the constant factor; the cost of `Combine` sets the asymptotic case.
 
-## Comparison
-
-Each alternative answers a different question about how the subproblems relate.
-
-| Paradigm | Subproblem relationship | Extra state | Typical bound | Stronger case |
-| --- | --- | --- | --- | --- |
-| Divide-and-conquer | Independent, disjoint slices | Recursion stack, `O(log n)` | `Θ(n log n)`–`Θ(log n)` | Input splits cleanly and the combine is cheap |
-| [[Dynamic Programming]] | Overlapping, reused | Memo table, `O(states)` | `Θ(states · work per state)` | The same subproblem recurs across branches |
-| [[Backtracking]] | Independent choices, pruned | Recursion stack + partial solution | Exponential, pruned early | A decision tree where most branches abandon quickly |
-| Plain iteration | None — no decomposition | `O(1)` | `Θ(n)` per pass | A single linear scan already answers the problem |
-
-Divide-and-conquer fits problems that break into independent subproblems joined by an efficient combine; it pays a recursion stack, and for some algorithms an auxiliary buffer, in exchange for a lower exponent or an `n log n` bound. When subproblems overlap, that same recursion recomputes shared work and [[Dynamic Programming]]'s memoisation is required instead. When the problem is a search over decisions rather than a decomposition of data, [[Backtracking]] prunes a decision tree; when it decomposes at all, a single iterative pass avoids the recursion overhead entirely.
-
 ## Questions
-
-> [!QUESTION]- What distinguishes divide-and-conquer from dynamic programming, given that both recurse?
-> The subproblems. Divide-and-conquer's are independent — each recursive call works on a disjoint slice and never repeats — so there is nothing to cache. Dynamic programming exists because its subproblems overlap: the same subproblem recurs across branches, and memoising it turns exponential recomputation into linear or polynomial work. The recursive shape can be identical; the deciding property is whether subproblems are shared.
 
 > [!QUESTION]- How does the Master Theorem produce merge sort's `Θ(n log n)`?
 > Merge sort's recurrence is `2T(n/2) + Θ(n)`, so `a = 2`, `b = 2`, and the leaf work is `n^(log_2 2) = n`. The combine cost `f(n) = Θ(n)` matches the leaf term exactly — Case 2 — so every one of the `log n` levels costs `Θ(n)`, and the total is `Θ(n log n)`.

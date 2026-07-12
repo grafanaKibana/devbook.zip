@@ -130,18 +130,6 @@ The screening is strongest across many patterns at once. A single rolling hash o
 > ```
 > `SequenceEqual` is the mandatory verification: it runs only when the hashes match and guards against reporting a collision as a match. The `+ Modulus` before the final reductions keeps the subtraction non-negative in modular arithmetic. `Base = 256` assumes byte-range (ASCII) input; non-ASCII `char` values exceed 255, so a larger base (or hashing the byte encoding) is needed — correctness is unaffected either way because verification checks every hit.
 
-## Comparison
-
-| Strategy | Search time | Preprocessing / space | Stronger case | Weaker case |
-| --- | --- | --- | --- | --- |
-| Naive scan | `O(nm)` worst, `O(n)` typical | None | A one-off search or tiny input where setup is not worth it | Long text with many partial matches |
-| Rabin-Karp | `Θ(n + m)` expected, `Θ(nm)` worst | `Θ(m)` pattern hash; `O(1)` space; hashes many equal-length patterns at once | Many equal-length patterns; fingerprint / plagiarism screening | A single pattern needing a hard worst-case bound (collisions can force `O(nm)`) |
-| [[KMP (Knuth-Morris-Pratt) Algorithm\|KMP]] | `Θ(n + m)` worst | `Θ(m)` prefix function | One pattern with a guaranteed linear bound; streaming input | Multiple patterns (rerun per pattern); no sublinear skipping |
-| [[Boyer-Moore]] | `O(n / m)` best, `O(nm)` worst | `O(m + σ)` bad-character / good-suffix tables | Large alphabets where a mismatch skips many characters | Small alphabets, short patterns, or many patterns at once |
-| [[Aho-Corasick]] | `Θ(n + Σmᵢ + z)` for `z` matches | `Θ(Σmᵢ)` automaton over all patterns | Many patterns of varied length, matched in one pass | A single pattern (KMP is simpler); memory-tight settings |
-
-Rabin-Karp's natural fit is a set of equal-length patterns, or fingerprint and plagiarism screening by hashing, where one rolling hash filters for the whole set and the expected bound holds under a good modulus. It pays for that with a verification on every hash hit and a worst case that repetitive text or collisions can trigger. For a single pattern with a hard worst-case guarantee, KMP's deterministic `Θ(n + m)` is stronger; Boyer-Moore pulls ahead on large alphabets by skipping most characters; and when the patterns differ in length, Aho-Corasick's automaton matches them all in one pass that equal-length hashing cannot express.
-
 ## Questions
 
 > [!QUESTION]- How does sliding the window keep the hash update at `O(1)`?
@@ -152,9 +140,6 @@ Rabin-Karp's natural fit is a set of equal-length patterns, or fingerprint and p
 
 > [!QUESTION]- What turns the expected `Θ(n + m)` into the `Θ(nm)` worst case?
 > A hash match at almost every position, each forcing an `O(m)` verification. It arises with genuine matches everywhere (text `aaaa` searched for `aa`) or with a weak or small modulus that makes collisions frequent. A large prime modulus keeps spurious matches rare, which is the low-collision assumption behind the average bound.
-
-> [!QUESTION]- What workload makes Rabin-Karp a better fit than KMP?
-> Screening many equal-length patterns in one pass — hash every pattern into a set and test each window hash for membership in `O(1)`, so a single rolling hash filters for all of them. For a single pattern needing a guaranteed linear bound, KMP is stronger; for patterns of varied length, Aho-Corasick's automaton fits better.
 
 ## References
 

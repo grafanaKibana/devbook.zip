@@ -89,17 +89,6 @@ The cache-locality advantage is not a rounding error. For small `n`, a contiguou
 > ```
 > A true insert cannot grow the block; `InsertAt` overwrites the last element because the capacity was fixed at allocation. Preserving every element is a resize, which allocates a new array — the job of [[Dynamic Array]].
 
-## Comparison
-
-| Structure | Index access | Middle insert / delete | Append | Order retained | Stronger case |
-| --- | --- | --- | --- | --- | --- |
-| Fixed array | `O(1)` | `O(n)` shift | Not supported | Positional | Size is known and stable, index and scan dominate |
-| [[Dynamic Array]] | `O(1)` | `O(n)` shift | Amortized `O(1)` | Positional | Size varies but index and locality still matter |
-| [[LinkedList]] | `O(n)` walk | `O(1)` with a node reference | `O(1)` | Sequential, no positional index | Splices at held positions dominate and indexing is not needed |
-| [[HashMap]] | `O(1)` avg by key, none by position | `O(1)` avg by key | `O(1)` avg | None (keyed, unordered) | Repeated exact-match lookups where position and order are irrelevant |
-
-A fixed array is the `O(1)`-index, cache-optimal contiguous default when the number of elements is known and stable. It pays for that with a capacity chosen up front and an `O(n)` cost on any middle mutation. A dynamic array keeps the same layout and access while absorbing a varying size behind amortized append. A linked list gives up the positional index and locality to make splices at a held node constant time. A hash map abandons positional order entirely, which is the right trade only when access is by key rather than by index.
-
 ## Questions
 
 > [!QUESTION]- Why is array indexing `O(1)` and independent of the index?

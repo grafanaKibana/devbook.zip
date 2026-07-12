@@ -29,19 +29,6 @@ sequenceDiagram
   Sender->>Receiver: Datagram 4
 ```
 
-## UDP vs TCP
-
-| Feature | UDP | TCP |
-|---------|-----|-----|
-| Connection | Connectionless | Connection-oriented (3-way handshake) |
-| Delivery guarantee | None | Guaranteed (retransmit on loss) |
-| Ordering | None | In-order delivery |
-| Flow control | None | Yes (sliding window) |
-| Congestion control | None | Yes (slow start, AIMD) |
-| Overhead | 8 bytes header | 20+ bytes header + state |
-| Latency | Lower (no handshake, no ACK wait) | Higher |
-| Use cases | Streaming, gaming, DNS, QUIC | HTTP, file transfer, databases |
-
 ## When to Use UDP
 
 **Real-time audio/video:** a retransmitted audio packet from 200ms ago is useless — the conversation has moved on. Applications implement their own loss concealment (interpolation, FEC) rather than waiting for TCP retransmission.

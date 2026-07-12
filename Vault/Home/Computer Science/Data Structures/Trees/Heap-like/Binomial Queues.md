@@ -211,31 +211,13 @@ Decrease-key is `O(log n)`, not the `O(1)` amortized a [[Fibonacci Heaps|Fibonac
 > ```
 > `Meld` defers a link when three consecutive roots share a degree, letting the trailing pair carry on the next iteration — this is the case a naive equal-degree link would corrupt.
 
-## Comparison
-
-| Structure | Meld | Insert | Extract-min | Decrease-key | Layout / semantics | Stronger case |
-| --- | --- | --- | --- | --- | --- | --- |
-| Array [[Heap]] | `O(n)` | `O(log n)` | `O(log n)` | `O(log n)` | One contiguous array, implicit indices, best cache behavior, no cheap union | A single priority queue that never merges |
-| Binomial queue | `O(log n)` | `O(1)` amortized | `O(log n)` | `O(log n)` | Forest of binomial trees, one per order; union is binary addition | Frequent union of whole queues |
-| [[Leftist Heaps]] | `O(log n)` | `O(log n)` | `O(log n)` | `O(log n)` | Single tree biased by null-path length; meld recurses down the right spine | A mergeable queue wanting the least code |
-| [[Skew Heaps]] | `O(log n)` amortized | `O(log n)` amortized | `O(log n)` amortized | `O(log n)` amortized | Single tree, no balance metadata; meld swaps children unconditionally | A mergeable queue with the least per-node bookkeeping |
-| [[Fibonacci Heaps]] | `O(1)` | `O(1)` amortized | `O(log n)` amortized | `O(1)` amortized | Lazy forest with cascading cuts; large constants | Decrease-key-heavy workloads such as Dijkstra and Prim |
-
-A binomial queue is the mergeable priority queue whose `O(log n)` union comes directly from binary addition of tree orders. An array heap is faster and denser for everything except that union, which it cannot do in less than `O(n)`. [[Leftist Heaps]] and [[Skew Heaps]] reach the same asymptotics through a single tree and right-spine recursion, with markedly simpler code and no per-order accounting — they win when merge matters but the binary-counter machinery does not. A [[Fibonacci Heaps|Fibonacci heap]] pulls ahead only when decrease-key dominates, paying larger constants and harder implementation to make that operation `O(1)` amortized.
-
 ## Questions
-
-> [!QUESTION]- Why does the forest structure make merge `O(log n)` when an array heap needs `O(n)`?
-> The orders present in the forest are the binary digits of `n`, with at most one tree per order. Melding two forests walks the orders from low to high and links equal-order trees in `O(1)`, producing a carry into the next order — exactly binary addition. There are `≤ log n` orders, so the whole meld is `O(log n)`. An array heap stores keys contiguously with no separable subtrees, so merging two of them means concatenating and re-heapifying all `n` elements.
 
 > [!QUESTION]- How does extract-min stay `O(log n)` when the heap is a forest rather than one tree?
 > The minimum is a root (heap order holds within each tree), so it is found by scanning the `≤ log n` roots. Removing a root of order `k` exposes its `k` children, which already have orders `k−1 … 0` — a valid binomial forest. Reversing them into a root list and melding that back costs another `O(log n)`.
 
 > [!QUESTION]- Why is insert amortized `O(1)` when its worst case is `O(log n)`?
 > Insert melds in a single `B₀`, which is a binary increment. A long carry chain that links at every order is the `O(log n)` worst case, but it can only happen because earlier cheap inserts left those orders filled. The potential argument that bounds a binary counter's increment at amortized `O(1)` per operation applies directly, so `m` inserts cost `O(m)` total.
-
-> [!QUESTION]- Where does a binomial queue lose to a Fibonacci heap, and why?
-> On decrease-key-heavy workloads such as Dijkstra. A binomial queue must sift a lowered key up its binomial tree, which is `O(log n)`. A Fibonacci heap cuts the node out lazily and defers consolidation, reaching `O(1)` amortized decrease-key at the cost of larger constants and a harder implementation.
 
 ## References
 

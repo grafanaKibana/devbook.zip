@@ -84,7 +84,6 @@ Lifetime still binds even inside the stack. A span over a `stackalloc` buffer is
 | Type | Sub-view cost | Heap-storable | Crosses `await` / lives in a field | Backing store | Stronger case |
 | --- | --- | --- | --- | --- | --- |
 | `Span<T>` | `O(1)`, no copy | No (`ref struct`) | No | Array, `stackalloc`, or native memory | Zero-copy slicing on synchronous hot paths |
-| [[Arrays\|Array]] (`T[]`) | `O(n)` copy + allocation | Yes | Yes | Owns its own elements | Data must be stored, handed off, or outlive the source |
 | `ArraySegment<T>` | `O(1)` view | Yes | Yes | Managed array only | A heap-storable array window from before `Span<T>` existed |
 | `Memory<T>` | `O(1)` slice | Yes | Yes | Array or other owned buffer | A view must live on the heap or cross an async boundary |
 

@@ -104,27 +104,10 @@ The absence of a bad case is the point: the `Θ(n)` build plus `n` extractions o
 > ```
 > `size` is the live heap boundary and shrinks each extraction round; the `l < size` / `r < size` guards keep sift-down out of the sorted suffix. The iterative loop is what holds auxiliary space at `O(1)`.
 
-## Comparison
-
-| Strategy | Worst time | Auxiliary space | Stable | Stronger case | Weaker case |
-| --- | --- | --- | --- | --- | --- |
-| Heap sort | `O(n log n)` | `O(1)` | No | Hard worst-case bound with no extra memory | Average throughput; parent↔child jumps defeat the cache |
-| [[Quick Sort]] | `O(n²)` | `O(log n)` stack | No | Fastest in practice; sequential, cache-friendly access | Adversarial pivots degrade to quadratic |
-| [[Merge Sort]] | `O(n log n)` | `O(n)` | Yes | Stability; predictable passes; linked-list and external sorting | Needs `O(n)` extra memory |
-| [[Introsort]] | `O(n log n)` | `O(log n)` | No | General-purpose default: quicksort speed with a guaranteed ceiling | Not stable |
-
-Heap sort is the in-place, worst-case-guaranteed member of this group: `O(n log n)` on every input in `O(1)` space. That guarantee is why introsort keeps it as a shield — once quicksort's recursion passes roughly `2·log n` depth, a sign the pivots are turning quadratic, the offending partition is finished with heap sort. Standing on its own, heap sort pays for the guarantee twice: it loses average-case throughput to quicksort because its scattered accesses miss the cache, and it loses stability to merge sort because its swaps reorder equal keys. It is the right fit only where a hard worst-case bound and constant space both matter and neither average speed nor stability does. In .NET, `Array.Sort` *is* introsort, so heap sort already ships inside it as that ceiling rather than as a directly selected sort.
-
 ## Questions
 
 > [!QUESTION]- Why does build-heap cost `O(n)` rather than `O(n log n)`?
 > Bottom-up sift-down moves each node down only as far as its own subtree height. Most nodes are near the leaves and barely descend; only the few near the root can travel `log n`. Summing height × count across the levels converges to `O(n)`. Inserting `n` elements one at a time, by contrast, pays up to `O(log n)` each and totals `O(n log n)`.
-
-> [!QUESTION]- Why is heap sort `O(n log n)` in the worst case when quicksort is not?
-> Its cost comes from tree height, not from input arrangement: build-heap is `Θ(n)` and each of the `n` extractions sifts down over a heap of height at most `⌊log n⌋`. No input can force a deeper descent, so there is no `O(n²)` case. Quicksort's cost depends on pivot quality, and adversarial pivots produce unbalanced partitions that reach `O(n²)`.
-
-> [!QUESTION]- Why is heap sort usually slower than quicksort at the same asymptotic complexity?
-> Cache behaviour. Sift-down hops between a parent `i` and its children `2i+1` / `2i+2`, which are far apart for large arrays, so each descent lands on a fresh cache line. Quicksort's partitioning scans memory sequentially, which the prefetcher predicts. Same `O(n log n)`, worse constant factor.
 
 > [!QUESTION]- Where does heap sort's instability come from?
 > The extraction swaps. Moving the root to the end and sifting a new root down relocates elements by heap geometry, not by input order, so two equal keys can be swapped past each other with nothing to restore their original sequence. Merge sort's merge step, choosing the left element on ties, keeps equal keys in input order.

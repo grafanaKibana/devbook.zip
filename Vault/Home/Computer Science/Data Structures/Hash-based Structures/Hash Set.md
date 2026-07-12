@@ -83,28 +83,10 @@ A resize also produces a latency spike: one unlucky `Add` pays the full `O(n)` r
 > ```
 > `HashSet<T>` stores keys only; `UnionWith`/`IntersectWith`/`ExceptWith` are in-place `O(n)` mutations, and passing an explicit `capacity` pre-sizes the bucket array to avoid intermediate rehashes.
 
-## Comparison
-
-| Structure | Membership | Ordered / range | Space | Semantic property |
-| --- | --- | --- | --- | --- |
-| Hash set | `O(1)` avg, `O(n)` worst | Not supported | `O(n)`, one entry per element | Exact membership, dedup, key-only |
-| [[HashMap]] | `O(1)` avg | Not supported | `O(n)`, key + value | Same hashing, but each key carries a value |
-| Sorted set ([[Red-Black Tree]]) | `O(log n)` | `O(log n)` lookup, in-order iteration | `O(n)` + node pointers | Ordered iteration and range queries |
-| [[Bloom Filter]] | `O(1)` bit probes | Not supported | `O(n)` bits, a few per element (sublinear vs storing the elements) | Probabilistic: false positives, **no** false negatives, cannot enumerate |
-| Bit-set | `O(1)` | Iterates in integer order | `O(u)` bits over universe `u` | One bit per possible value; dense integer domain only |
-
-A hash set is the default when the workload is exact membership or deduplication and order does not matter: `O(1)` average operations, one stored entry per element, and no false answers. It pays for that with lost ordering and a worst case that reappears under bad hashing. A [[Bloom Filter]] wins when space is the binding constraint and occasional false positives are tolerable — it drops per-element storage to a handful of bits but can never list its members or promise exactness. A sorted set becomes stronger the moment ordered iteration or range queries enter the requirement, accepting `O(log n)` to keep elements comparable by rank. A bit-set beats all of them for a small, dense integer universe, where a single bit per value is both the storage and the index.
-
 ## Questions
-
-> [!QUESTION]- What does a hash set add over the hash table that backs it?
-> The uniqueness contract. It reuses the same bucket array, hash function, collision resolution, and resize behavior as a [[HashMap]], but stores keys only and rejects any `Add` whose element is already `Equals` to a member. No two elements in the set ever compare equal.
 
 > [!QUESTION]- Why is the `O(1)` membership bound an average rather than a guarantee?
 > It assumes the hash spreads elements roughly uniformly and the load factor caps expected chain length at a constant. When many elements collide into one bucket — weak `hashCode` or adversarial keys — that bucket becomes a linear list and `Contains`/`Add`/`Remove` degrade to `O(n)`.
-
-> [!QUESTION]- How does hash-set membership differ from a Bloom filter's?
-> A hash set answers membership exactly by probing a bucket and comparing with `Equals`: no false positives, no false negatives, and it can enumerate its members. A [[Bloom Filter]] answers from hashed bits in `O(1)` space per element but can report a non-member as present, and it cannot list what it contains.
 
 > [!QUESTION]- Why can a member become unreachable after insertion?
 > Membership routes an element to a bucket via `hashCode`, then confirms with `Equals`. Mutating a field that participates in `hashCode` after adding leaves the element in its original bucket while lookups probe the new one, so `Contains` returns `false` on an element that is still stored.

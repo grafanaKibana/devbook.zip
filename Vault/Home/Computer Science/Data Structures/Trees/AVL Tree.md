@@ -52,7 +52,7 @@ Insert and delete diverge in how far the repair travels. After an insert, a sing
 | Operation | Time | Extra space | Cause |
 | --- | --- | --- | --- |
 | Search | `O(log n)` guaranteed | `O(1)` iterative, `O(log n)` recursion stack | the invariant caps height at ≤ ~1.44·log₂ n, so no path is longer |
-| Insert | `O(log n)` guaranteed | `O(1)` beyond the stored heights | `O(log n)` descent plus one rebalancing walk; **at most one rebalance** (one single or one double rotation) restores `|balance| ≤ 1` globally |
+| Insert | `O(log n)` guaranteed | `O(1)` beyond the stored heights | `O(log n)` descent plus one rebalancing walk; **at most one rebalance** (one single or one double rotation) restores `\|balance\| ≤ 1` globally |
 | Delete | `O(log n)` guaranteed | `O(1)` | descent plus a rebalancing walk; a shortened subtree can propagate, so **up to `O(log n)`** rotations up the path |
 | Any rotation | `O(1)` | `O(1)` | a fixed set of pointer and height reassignments, independent of `n` |
 
@@ -165,17 +165,6 @@ Rotation-case selection is the classic implementation bug, and it too is a conse
 > ```
 > `Rebalance` is applied to every node on the way back up the recursion. Deletion reuses the same `Recompute` + `Rebalance` pair; because it can shorten a subtree, the rebalancing must continue past the first fix rather than stopping like insertion does.
 
-## Comparison
-
-| Structure | Search | Insert / delete | Height bound | Rotations per write | Stronger case |
-| --- | --- | --- | --- | --- | --- |
-| AVL tree | `O(log n)`, shortest paths | `O(log n)`, more repair | ≤ ~1.44·log₂ n | insert ≤ 1; delete up to `O(log n)` | Read-heavy ordered data queried far more than mutated |
-| [[Red-Black Tree]] | `O(log n)`, slightly deeper | `O(log n)`, less repair | ≤ 2·log₂ n | insert ≤ 2, delete ≤ 3 (plus cheap recolors) | Mixed read/write; the general-purpose library default |
-| [[Binary Search Tree]] | `O(n)` worst | `O(n)` worst | unbounded | none | Random or pre-shuffled keys where balancing overhead is not worth it |
-| [[B-tree]] | `O(log n)`, wide nodes | `O(log n)` | low fan-out-limited | node splits/merges | Data on disk or optimized for cache lines, where node width beats node count |
-
-Among binary search trees, AVL's strict invariant buys the shortest height and therefore the fewest node visits and cache misses per lookup — its edge is read-dominated workloads where the tree is built or updated rarely and queried heavily. A red-black tree accepts a tree up to ~40% taller in the worst case in exchange for bounding the repair work per mutation, which is why it, not AVL, is the standard library default (`SortedSet<T>` and `SortedDictionary<TKey,TValue>` in .NET, `TreeMap` in Java, `std::map` in C++). Once the data no longer fits comfortably in memory, both lose to a [[B-tree]], where minimizing disk or cache-line accesses through wide nodes matters more than counting comparisons.
-
 ## Questions
 
 > [!QUESTION]- What is the AVL invariant and when is it checked?
@@ -186,9 +175,6 @@ Among binary search trees, AVL's strict invariant buys the shortest height and t
 
 > [!QUESTION]- Why do the Left-Right and Right-Left cases require a double rotation?
 > A single rotation on a zig-zag shape only mirrors the imbalance to the other side. The inner (median) node has to be rotated outward into a straight chain first, after which a single rotation lifts it to the top.
-
-> [!QUESTION]- Why is a red-black tree, not AVL, the usual library default despite AVL's faster lookups?
-> AVL's strict `|balance| ≤ 1` forces more rotations on writes — deletes can cascade `O(log n)` rotations. A red-black tree's looser 2·log₂ n bound caps repair at ≤2 rotations on insert and ≤3 on delete, which serves general mixed workloads better; AVL only wins when the workload is genuinely read-dominated.
 
 ## References
 

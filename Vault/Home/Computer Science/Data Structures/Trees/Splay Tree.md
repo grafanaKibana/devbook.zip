@@ -54,17 +54,6 @@ Read operations mutate the tree. A lookup cannot safely run under a shared read 
 
 The missing height guarantee matters for latency-sensitive code. An [[AVL Tree]] bounds every lookup by `O(log n)`; a splay tree only bounds the average cost across a sequence. This makes the splay tree a poor fit when one `O(n)` request is unacceptable, but a strong fit when locality and total sequence cost matter more than individual latency.
 
-## Comparison
-
-| Structure | Per-operation guarantee | Stored metadata | Adapts to locality | Read mutates state |
-| --- | --- | --- | --- | --- |
-| Splay tree | `O(log n)` amortized, `O(n)` worst | none beyond links | yes | yes |
-| [[AVL Tree]] | `O(log n)` worst | height or balance factor | no | no |
-| [[Red-Black Tree]] | `O(log n)` worst | color bit | no | no |
-| [[HashMap]] | `O(1)` average exact lookup | buckets and hashes | no ordering | usually no |
-
-Splay trees fit ordered workloads with temporal locality and sequence-level performance goals. AVL and red-black trees pay metadata and balancing work for predictable single-operation latency; hash tables become stronger when exact lookup matters and ordered operations do not.
-
 ## References
 
 - [Self-Adjusting Binary Search Trees](https://www.cs.cmu.edu/~sleator/papers/self-adjusting.pdf) — Sleator and Tarjan's original paper, including splaying cases, the access lemma, and amortized bounds.

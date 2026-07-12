@@ -141,24 +141,7 @@ Sliding-window *maximum* is a common target, but a raw deque does not provide it
 > ```
 > The BCL ships no `Deque<T>`. `Queue<T>` is already a ring buffer but exposes only one end for insertion; `LinkedList<T>` supplies `AddFirst`/`AddLast`/`RemoveFirst`/`RemoveLast` as a ready doubly-linked deque at the cost of a node per element.
 
-## Comparison
-
-Alternatives for a sequence mutated at its ends:
-
-| Structure | Front insert/remove | Back insert/remove | Index `i` | Locality | Stronger case |
-| --- | --- | --- | --- | --- | --- |
-| Deque (ring buffer) | `O(1)` amortized | `O(1)` amortized | `O(1)` | Contiguous | Both ends are hot and indexed reads matter |
-| [[Stack]] | — | `O(1)` amortized (one end) | `O(1)` top only | Contiguous | LIFO on a single end; nothing touches the other |
-| [[Queue]] | remove `O(1)` | insert `O(1)` (opposite ends) | — | Contiguous | Strict FIFO; producer and consumer never swap ends |
-| [[Dynamic Array]] | `O(n)` shift | `O(1)` amortized | `O(1)` | Contiguous | Only the tail is hot; front is rarely touched |
-| [[LinkedList|Doubly-linked list]] | `O(1)` | `O(1)` | `O(n)` | Pointer-chasing | Middle splices at *held* node references dominate |
-
-A deque is the `O(1)`-both-ends contiguous default: it keeps a dynamic array's cache behaviour and index while removing the front-shift penalty, which is why it backs work-stealing schedulers, sliding-window passes, and browser back/forward history. A [[Dynamic Array]] wins when only the tail is ever mutated and the front-shift cost never arises — the deque's index-and-count bookkeeping is then unused. A doubly-[[LinkedList|linked list]] becomes stronger only when splices in the middle at already-held nodes dominate the workload, the one thing the contiguous deque cannot do cheaply; it pays for that with an allocation per element and no `O(1)` index.
-
 ## Questions
-
-> [!QUESTION]- What does a deque add over a stack and a queue, and what does it give up?
-> `O(1)` insert and remove at *both* ends, where a stack mutates one end and a queue uses opposite ends for insert and remove. In exchange it gives up cheap access to the middle: neither the ring-buffer nor the linked backing holds an interior position, so a non-end insert or remove is `O(n)`.
 
 > [!QUESTION]- How do a `head` index and a `count` let a ring-buffer deque touch both ends in `O(1)`?
 > The occupied slots are `head` through `(head + count - 1) % cap`. `PushBack` writes at `(head + count) % cap` and increments `count`; `PushFront` decrements `head` (mod capacity), writes there, and increments `count`; each pop reads an end slot and adjusts `head` or `count`. Because every access wraps modulo capacity and only `head` and `count` change, no element is ever shifted.
