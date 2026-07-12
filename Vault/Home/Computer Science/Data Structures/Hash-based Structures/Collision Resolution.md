@@ -108,10 +108,21 @@ The worst case is `O(n)` for all three and fires the same way — a hash that co
 >     {
 >         if ((_count + 1) > _slots.Length * 0.7) Resize();      // stay well below full
 >         var i = Index(key);
->         while (_slots[i].Occupied && !_slots[i].Key.Equals(key))
+>         var firstTombstone = -1;
+>         while (_slots[i].Occupied || _slots[i].Tombstone)      // stop only at a never-used slot
+>         {
+>             if (_slots[i].Occupied && _slots[i].Key.Equals(key))
+>             {
+>                 _slots[i] = _slots[i] with { Value = value };  // key present later in the cluster: update in place
+>                 return;
+>             }
+>             if (_slots[i].Tombstone && firstTombstone < 0)
+>                 firstTombstone = i;                            // remember the first reusable slot, but keep probing
 >             i = (i + 1) & (_slots.Length - 1);                 // probe forward, wrap
->         if (!_slots[i].Occupied) _count++;
->         _slots[i] = new Slot(key, value, Occupied: true, Tombstone: false);
+>         }
+>         _slots[firstTombstone < 0 ? i : firstTombstone] =      // key absent: fill the tombstone, else the empty slot
+>             new Slot(key, value, Occupied: true, Tombstone: false);
+>         _count++;
 >     }
 >
 >     public bool TryGet(TKey key, out TValue value)

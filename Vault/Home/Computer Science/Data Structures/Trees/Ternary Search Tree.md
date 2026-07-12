@@ -113,9 +113,12 @@ Where it breaks is balance. Inserting keys in sorted order turns a per-position 
 >         return node;
 >     }
 >
->     public bool Contains(string key) => Get(_root, key, 0) is { IsEnd: true };
+>     // Empty is never a stored key (Insert rejects it); the empty prefix matches everything.
+>     public bool Contains(string key) =>
+>         !string.IsNullOrEmpty(key) && Get(_root, key, 0) is { IsEnd: true };
 >
->     public bool StartsWith(string prefix) => Get(_root, prefix, 0) is not null;
+>     public bool StartsWith(string prefix) =>
+>         string.IsNullOrEmpty(prefix) || Get(_root, prefix, 0) is not null;
 >
 >     private static Node? Get(Node? node, string key, int d)
 >     {
