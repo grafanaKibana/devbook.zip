@@ -579,3 +579,298 @@ body {
 body[data-slug$="/index"]:not([data-slug="tags/index"]) .page-listing {
   display: none;
 }
+
+// ============================================================================
+// Home (index) — dashboard-first layout.
+//
+// The home page keeps its normal article header (the "Welcome to DevBook!" title
+// + meta) and then the Topics dashboard; the prose that used to follow the
+// dashboard (welcome heading, intro, "Why this exists") now lives in Credits.md,
+// linked from the footer.
+//
+// Gated on `body[data-slug="index"]`, so no other page is touched, and it's a
+// Quartz-only concern — Obsidian renders the same note as an ordinary page.
+//
+//   • Desktop / tablet (≥768px): title, then a dashboard that fills the rest of
+//     the viewport. Cards keep their natural height — the leftover vertical space
+//     on a big monitor is spread as bigger GAPS between the rows (align-content),
+//     not taller cards — and the page scrolls only if the topics genuinely don't
+//     fit (min-height, not a hard clip).
+//   • Mobile (<768px): a natural two-column grid that scrolls; each card keeps
+//     its content height so the progress bar sits at the card's bottom and never
+//     clips when a two-word topic wraps to two lines.
+//
+// The progress bar stays pinned to the bottom of every card via the note's
+// `.dc-topic-spacer` (left at its default), and the site footer keeps its stock
+// `margin-bottom` — neither is overridden here.
+// ============================================================================
+body[data-slug="index"] {
+  // Card chrome tightens as the viewport shrinks — one knob for both branches.
+  --home-card-pad: clamp(0.7rem, 1.5vh, 1rem) clamp(0.8rem, 1.3vw, 1.1rem);
+
+  // Drop only the rule after the body and the (empty) afterBody block. The
+  // page-header (article title + meta) stays — it's the normal page header.
+  .center > hr,
+  .center > .page-footer {
+    display: none;
+  }
+
+  .dc-topic-card {
+    --db-card-pad: var(--home-card-pad);
+    position: relative;
+    overflow: hidden;
+  }
+  .dc-topic-card::before {
+    opacity: 1;
+  }
+  .dc-topic-card .db-card-body {
+    height: 100%;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Desktop (≥1200px): the dashboard fills exactly one viewport under the title —
+// no scroll. Two levers share the fill so the cards never balloon: the rows
+// stretch but are capped at 10rem (and shrink to fit on a shorter window), and
+// BOTH gaps grow with the viewport (column-gap with width, row-gap with height)
+// to soak up the rest. Once the cards hit the cap, align-content:space-between
+// hands the leftover vertical space to the row gaps; max-height keeps that from
+// getting cavernous on a very tall monitor. The Explorer takes the left column;
+// the right column is empty on the index page (graph/backlinks are not-index,
+// the TOC has no headings), so it's dropped to give the dashboard the room.
+//
+// Gated one pixel above the tablet range: `$tablet` is max-width:1200 and
+// `$desktop` is min-width:1200, so they overlap at exactly 1200px — where the
+// Explorer is still a fixed hamburger (tablet). Reserving a 320px sidebar column
+// there would strand the dashboard beside an empty gutter, so the fill only
+// starts at 1201px, matching where the Explorer becomes a real sidebar.
+//
+// Gated on a minimum height (36rem) as well as width: the one-viewport fill
+// fixes #quartz-body to 100dvh with overflow:hidden, so if the title + three
+// rows + total bar + footer can't fit — a short landscape window, browser zoom,
+// or an enlarged base font — the bottom would be clipped with no way to scroll.
+// Below 36rem tall the whole fill turns off and the page falls back to the
+// normal scrolling desktop layout, so nothing is ever unreachable. The threshold
+// is in rem so it grows with the user's default font size (enlarged fonts push
+// the fallback in sooner, matching the taller content).
+// ---------------------------------------------------------------------------
+// Height-independent index layout: the home page never has a right sidebar
+// (empty graph/backlinks, TOC has no headings) and runs the Explorer as a real
+// left sidebar at any desktop width. Applied without the min-height gate so the
+// short-viewport fallback below doesn't strand the dashboard beside an empty
+// right column.
+@media all and (min-width: 1201px) {
+  body[data-slug="index"] {
+    .page > #quartz-body {
+      grid-template-columns: #{$sidePanelWidth} auto;
+      grid-template-areas:
+        "grid-sidebar-left grid-center"
+        "grid-sidebar-left grid-footer";
+    }
+    .page > #quartz-body > .sidebar.right {
+      display: none;
+    }
+  }
+}
+
+@media all and (min-width: 1201px) and (min-height: 36rem) {
+  body[data-slug="index"] {
+    // Columns, areas, and the hidden right sidebar come from the height-independent
+    // block above; here we only add the one-viewport fill: fix to 100dvh, clip
+    // overflow, and make the center row the flexible track.
+    .page > #quartz-body {
+      box-sizing: border-box;
+      height: 100dvh;
+      max-height: 100dvh;
+      overflow: hidden;
+      grid-template-rows: minmax(0, 1fr) auto;
+    }
+    // The Explorer spans the full height, starts below the fixed header, and
+    // scrolls internally if the tree ever outgrows the viewport.
+    .page > #quartz-body > .sidebar.left {
+      height: 100dvh;
+      max-height: 100dvh;
+      padding-top: calc(var(--site-header-height) + 1.25rem);
+      padding-bottom: 1rem;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
+
+    // The center column stacks the title/meta (natural height, positioned by the
+    // usual page-header margin) and the dashboard, which fills the rest.
+    //
+    // The fill grid makes #quartz-body span the full page width, and below the
+    // 1600px page cap the page is the whole viewport — so without an explicit
+    // gutter the dashboard's right edge hugs the window (the left is spared only
+    // because the Explorer sidebar carries its own padding). Add symmetric
+    // horizontal breathing room so the cards never touch either edge.
+    .page > #quartz-body > .center {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      // border-box so the gutter insets within the grid track instead of adding
+      // to the center's width (content-box would push it past the track and get
+      // clipped by #quartz-body's overflow:hidden).
+      box-sizing: border-box;
+      padding-inline: clamp(1.25rem, 1.6vw, 2rem);
+    }
+    .center > article,
+    .center > article > div,
+    .center > article > div > div {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 auto;
+      min-height: 0;
+      margin: 0;
+    }
+    .center > article > div > div {
+      margin-top: 0 !important;
+      gap: clamp(0.5rem, 1.4vh, 0.9rem);
+    }
+    // Cards stretch to fill the viewport with only a small, even gap between
+    // them. Rows are minmax(0, 1fr) — three EQUAL rows that divide the leftover
+    // height and, crucially, SHRINK below their content when the window is short
+    // (minmax(min-content, 1fr) refused to shrink, so tall cards overflowed the
+    // fixed-height #quartz-body and collided with the total bar). The card body
+    // and description absorb the shrink (see below) so nothing scrolls.
+    .dc-topic-grid {
+      flex: 1 1 auto;
+      min-height: 0;
+      grid-auto-rows: minmax(0, 1fr);
+      gap: clamp(0.6rem, 0.9vw, 1rem);
+    }
+    .dc-topic-total {
+      flex: 0 0 auto;
+    }
+
+    // Let a card shrink below its natural/content height so three rows always
+    // fit. The description is the flexible element: it grows to push the progress
+    // bar to the card's bottom on tall screens, and clips (never the title or the
+    // bar) on short ones. The spacer is redundant once the summary flexes.
+    .dc-topic-card,
+    .dc-topic-card .db-card-body {
+      min-height: 0;
+    }
+    .dc-topic-card .dc-topic-spacer {
+      display: none;
+    }
+    .dc-topic-card .db-card-summary {
+      flex: 1 1 0;
+      min-height: 0;
+      margin-top: 0.45rem;
+      overflow: hidden;
+    }
+    // Trim the 1c chrome slightly so the description keeps a line or two of room
+    // at common laptop heights before it has to clip.
+    .dc-topic-chip {
+      width: 2rem;
+      height: 2rem;
+    }
+    .dc-topic-chip svg {
+      width: 1.15rem;
+      height: 1.15rem;
+    }
+
+    // Force the note's 3-row "desktop" span layout across every desktop width,
+    // not just >1600px. The 1200–1600px "medium" layout is four rows, which can't
+    // fit one viewport once the title and footer margin are in — the last row
+    // would overlap the summary. Re-asserting the dsk-* spans (higher specificity
+    // than the note's inline med-* rules) keeps it at three rows everywhere.
+    @for $i from 1 through 12 {
+      .dc-topic-card.dsk-#{$i} {
+        grid-column: span #{$i};
+      }
+    }
+  }
+}
+
+// Tablet (768–1200px): the sidebars are out of flow (the Explorer is a fixed
+// hamburger, the right sidebar is empty). Four rows of cards plus the title
+// rarely fit one landscape viewport, so this is a natural single column that
+// scrolls; the cards keep their content height and the same width-growing gaps.
+@media all and ($tablet) {
+  body[data-slug="index"] {
+    .page > #quartz-body > .sidebar.right {
+      display: none;
+    }
+    .center > article > div > div {
+      margin-top: 0 !important;
+    }
+    // The Explorer is a fixed hamburger here, so the center spans the full width
+    // with no gutter — give the full-bleed dashboard the same horizontal breathing
+    // room it gets on desktop and mobile so cards never touch the window edges.
+    .center {
+      box-sizing: border-box;
+      padding-inline: clamp(1rem, 2.5vw, 2rem);
+    }
+    .dc-topic-grid {
+      column-gap: clamp(0.75rem, 1.8vw, 2rem);
+      row-gap: clamp(0.6rem, 1.4vh, 1.25rem);
+      margin-top: 0.75rem;
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Mobile (<768px): a natural two-column grid that scrolls. Cards keep their
+// content height, and the progress bar stays pinned to the bottom of each card
+// (via the note's spacer), so it never clips when a two-word topic ("Computer
+// Science", "Development Practices") wraps to two lines. Descriptions and the
+// legend drop to save room; the 44px hit target (.db-card-hit) is untouched.
+// ---------------------------------------------------------------------------
+@media all and ($mobile) {
+  body[data-slug="index"] {
+    .page > #quartz-body > .sidebar.right {
+      display: none;
+    }
+    // Neutralize the note's inline top margin; the header clearance already comes
+    // from #quartz-body's mobile padding-top.
+    .center > article > div > div {
+      margin-top: 0 !important;
+    }
+    .dc-topic-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-auto-rows: auto;
+      gap: 0.6rem;
+      margin-top: 0.75rem;
+    }
+    .dc-topic-grid .dc-topic-card {
+      grid-column: span 1;
+      min-height: 4.75rem;
+    }
+    // With an odd number of topics the final card is alone on the last row —
+    // stretch it across both columns so the row isn't left half-empty (matches
+    // the design's full-width last mobile tile).
+    .dc-topic-grid .dc-topic-card:last-child:nth-child(odd) {
+      grid-column: 1 / -1;
+    }
+    .db-card-summary,
+    .dc-topic-legend {
+      display: none;
+    }
+    // On phones the tinted chip tile collapses to a bare inline glyph (design:
+    // the mobile tiles revert to a small inline icon) so the 2-up cards stay
+    // compact and the title has room.
+    .dc-topic-chip {
+      width: auto;
+      height: auto;
+      background: transparent;
+      border-radius: 0;
+    }
+    .dc-topic-chip svg {
+      width: 1.05rem;
+      height: 1.05rem;
+    }
+    .dc-topic-title {
+      gap: 0.4rem;
+    }
+    // Tighter type so a two-word topic fits without wrapping to three lines.
+    .db-card-title {
+      font-size: 0.9rem;
+      line-height: 1.15;
+    }
+    .dc-topic-cap {
+      font-size: 0.68rem;
+    }
+  }
+}
