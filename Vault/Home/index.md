@@ -127,20 +127,31 @@ return function TopicDashboard() {
   const spanRules = (cls) =>
     Array.from({ length: 12 }, (_, i) => `.dc-topic-card.${cls}-${i + 1} { grid-column: span ${i + 1}; }`).join(" ");
 
-  // Layout + the home-only progress extension. The card's visual chrome
-  // (.db-card, .db-card-icon, .db-card-title, .db-card-summary — same padding,
-  // font, colours, and icon sizing as the FolderNote hubs) comes from the shared
-  // CARD_CSS. Each card sets --card-accent for that chrome and --topic-rgb for
-  // the progress bar / Quartz's opaque backing in custom.scss (both = c.rgb).
+  // Layout + the home-only "1c" card treatment (claude.ai design "DevBook Page B
+  // - Glow"). The card's base chrome (.db-card border, radius, neutral surface and
+  // the single soft corner glow via .db-card::before, .db-card-title, -summary)
+  // comes from the shared CARD_CSS. On top of it the home cards add the 1c signature
+  // pieces, which are home-only and NOT shared with the FolderNote hubs:
+  //   • .dc-topic-chip  — a tinted rounded tile holding the topic icon, in place of
+  //     the bare inline glyph, beside the title.
+  //   • .dc-topic-bar   — a framed capsule progress track (accent-bordered pill with
+  //     the cumulative status fill nested inside .dc-topic-bar-track), not a flat rail.
+  // Each card sets --card-accent for the base chrome and --topic-rgb for the chip,
+  // capsule, and Quartz's opaque backing in custom.scss (both = c.rgb).
   const CSS = `
-.dc-topic-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 0.75rem; width: 100%; }
+.dc-topic-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 1rem; width: 100%; }
 .dc-topic-card { overflow: hidden; cursor: pointer; min-width: 0; min-height: 6.75rem; margin: 0; display: flex; flex-direction: column; }
 .dc-topic-card .db-card-body { flex: 1 0 auto; }
-.dc-topic-title { display: flex; gap: 0.5rem; align-items: center; line-height: 1.25; }
+.dc-topic-card .db-card-title { font-size: 1.04rem; }
+.dc-topic-title { display: flex; gap: 0.6rem; align-items: center; line-height: 1.25; }
+.dc-topic-chip { display: grid; place-items: center; flex: 0 0 auto; width: 2.25rem; height: 2.25rem; border-radius: 0.625rem; background: rgba(var(--topic-rgb), 0.13); color: rgb(var(--topic-rgb)); }
+.dc-topic-chip svg { display: block; width: 1.3rem; height: 1.3rem; }
 .dc-topic-spacer { flex: 1 0 auto; min-height: 0.55em; }
 .dc-topic-foot { display: flex; flex-direction: column; gap: 4px; margin-top: 0.6rem; }
 .dc-topic-cap { font-size: 0.72rem; display: flex; justify-content: space-between; align-items: baseline; color: var(--text-muted, var(--darkgray, #5f6b7a)); }
-.dc-topic-bar { position: relative; width: 100%; height: 5px; border-radius: 4px; margin-top: 0.15rem; overflow: hidden; background: var(--background-modifier-border, var(--lightgray, #d8dee9)); }
+.dc-topic-bar { position: relative; width: 100%; height: 11px; margin-top: 0.15rem; padding: 2px; border-radius: 999px; border: 1px solid rgba(var(--topic-rgb), 0.5); background: var(--background-primary, var(--light, #ffffff)); overflow: hidden; }
+.dc-topic-bar-track { position: relative; height: 100%; border-radius: 999px; overflow: hidden; }
+.dc-topic-bar--total { height: 12px; }
 .dc-topic-total { margin-top: 0.75rem; padding: 0.75em; border-radius: var(--radius-m, 0.55rem); border: 1px solid rgba(var(--topic-rgb), 0.4); background: rgba(var(--topic-rgb), 0.1); }
 .dc-topic-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4em 1.1em; margin-top: 0.7em; font-size: 0.8em; opacity: 0.85; }
 .dc-topic-legend-item { display: inline-flex; align-items: center; gap: 0.4em; }
@@ -159,14 +170,14 @@ ${spanRules("dsk")}
           <div class={`db-card dc-topic-card dsk-${c.spanDesktop} med-${c.spanMedium} nar-${c.spanNarrow}`} style={{ "--card-accent": c.rgb, "--topic-rgb": c.rgb }}>
             <div class="db-card-body">
               <div class="dc-topic-title">
-                <span class="db-card-icon" dangerouslySetInnerHTML={{ __html: c.iconSvg }} />
+                <span class="dc-topic-chip" dangerouslySetInnerHTML={{ __html: c.iconSvg }} />
                 <span class="db-card-title">{c.title}</span>
               </div>
               {c.desc ? <p class="db-card-summary">{c.desc}</p> : null}
               <div class="dc-topic-spacer" />
               <div class="dc-topic-foot">
                 <div class="dc-topic-cap"><span>{c.done}/{c.total} done</span><span>{c.pct}%</span></div>
-                <div class="dc-topic-bar">{segments(c.byStatus, c.total)}</div>
+                <div class="dc-topic-bar"><div class="dc-topic-bar-track">{segments(c.byStatus, c.total)}</div></div>
               </div>
             </div>
             {c.fn ? <span class="db-card-hit"><dc.Link link={c.fn.$link} /></span> : null}
@@ -175,7 +186,7 @@ ${spanRules("dsk")}
       </div>
       <div class="dc-topic-total" style={{ "--topic-rgb": "0, 200, 83" }}>
         <div class="dc-topic-foot">
-          <div class="dc-topic-bar" style={{ height: "0.7em" }}>{segments(oByStatus, oTotal)}</div>
+          <div class="dc-topic-bar dc-topic-bar--total"><div class="dc-topic-bar-track">{segments(oByStatus, oTotal)}</div></div>
           <div class="dc-topic-cap"><span style={{ opacity: 0.7 }}>{oDone}/{oTotal} done</span><span>{oPct}%</span></div>
         </div>
         <div class="dc-topic-legend">
