@@ -615,8 +615,52 @@ body[data-slug="index"] {
     display: none;
   }
 
+  // ---- Card panel treatment (Socratica-inspired) --------------------------
+  // Each card becomes a colored panel in its topic accent, with an oversized,
+  // faded copy of its own icon bled into the bottom-right as a watermark. The
+  // tint + watermark fill the card, so when the grid stretches it tall there's
+  // no empty middle — it reads as a deliberate panel, not a sparse box.
   .dc-topic-card {
     --db-card-pad: var(--home-card-pad);
+    position: relative;
+    overflow: hidden;
+    background:
+      linear-gradient(
+        145deg,
+        rgba(var(--card-accent), 0.18) 0%,
+        rgba(var(--card-accent), 0.06) 45%,
+        rgba(var(--card-accent), 0.02) 100%
+      ),
+      var(--background-primary, var(--light, #ffffff));
+    border-color: rgba(var(--card-accent), 0.32);
+  }
+  // The icon (normally the small glyph beside the title) is pulled out of the
+  // title flow and blown up into a corner watermark.
+  .dc-topic-card .db-card-icon {
+    position: absolute;
+    right: -0.4rem;
+    bottom: -0.6rem;
+    width: clamp(2.75rem, 7vw, 6.5rem);
+    height: clamp(2.75rem, 7vw, 6.5rem);
+    color: rgb(var(--card-accent));
+    opacity: 0.18;
+    pointer-events: none;
+    z-index: 0;
+  }
+  // The body fills the card and pins its content top (title/summary) and bottom
+  // (progress) apart, over the watermark.
+  .dc-topic-card .db-card-body {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    justify-content: space-between;
+  }
+  .dc-topic-card .db-card-title {
+    font-size: 1.05rem;
+  }
+  // A slightly chunkier progress bar to anchor the bottom of the taller panel.
+  .dc-topic-card .dc-topic-bar {
+    height: 7px;
   }
 }
 
@@ -684,14 +728,14 @@ body[data-slug="index"] {
       margin-top: 0 !important;
       gap: clamp(0.5rem, 1.4vh, 0.9rem);
     }
+    // Cards stretch to fill the viewport with only a small, even gap between
+    // them — the panel treatment (below) keeps each one looking full at any
+    // height, so filling no longer means empty middles.
     .dc-topic-grid {
       flex: 1 1 auto;
       min-height: 0;
-      max-height: 42rem;
-      grid-auto-rows: minmax(min-content, 10rem);
-      align-content: space-between;
-      column-gap: clamp(0.75rem, 1.8vw, 2.5rem);
-      row-gap: clamp(0.6rem, 1.5vh, 1.5rem);
+      grid-auto-rows: minmax(min-content, 1fr);
+      gap: clamp(0.6rem, 0.9vw, 1rem);
     }
     .dc-topic-total {
       flex: 0 0 auto;
