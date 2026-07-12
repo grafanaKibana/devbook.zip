@@ -9,7 +9,7 @@ summary: "Habits and processes like testing, reviews, and refactoring that keep 
 tags:
   - FolderNote
 publish: true
-status: Creation
+status: Done
 level:
   - '4'
 priority: High
@@ -24,6 +24,16 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
+## Questions
+
+> [!QUESTION]- How much testing is enough, and what kind?
+> - Match the test to the risk: unit tests for logic-heavy code, integration tests for wiring and boundaries, a few end-to-end tests for critical user paths — not 100% coverage for its own sake
+> - The test pyramid is a cost model: many fast unit tests, fewer slow integration tests, minimal brittle E2E — inverting it makes the suite slow and flaky
+> - TDD is a design tool as much as a verification one: writing the test first pressures you toward decoupled, testable code
+> - A test that never fails teaches nothing; a test that fails randomly teaches you to ignore it — invest in determinism
+
 ## References
 
-- [Software development process (Wikipedia)](https://en.wikipedia.org/wiki/Software_development_process)
+- [The Pragmatic Programmer (Hunt & Thomas)](https://pragprog.com/titles/tpp20/the-pragmatic-programmer-20th-anniversary-edition/) — practitioner guide to the habits that keep software maintainable.
+- [Continuous Integration (Martin Fowler)](https://martinfowler.com/articles/continuousIntegration.html) — the foundational article on CI and the fast-feedback discipline behind it.
+- [Refactoring (Martin Fowler)](https://refactoring.com/) — the reference on safe, incremental code improvement backed by tests.

@@ -9,7 +9,7 @@ summary: "Renting managed compute, storage, and networking with pay as you go ec
 tags:
   - FolderNote
 publish: true
-status: Creation
+status: Done
 priority: High
 level:
   - "2"
@@ -36,10 +36,22 @@ The three major providers offer equivalent building blocks under different names
 | NoSQL document DB | DynamoDB | Cosmos DB | Firestore |
 | Message queue | SQS | Service Bus / Storage Queues | Cloud Pub/Sub |
 | Data warehouse | Redshift | Synapse | BigQuery |
-| Global relational DB | Aurora Global | Azure SQL Database (geo-replication) | Cloud Spanner |
+| Cross-region relational DB | Aurora Global | Azure SQL Database (geo-replication) | Cloud Spanner |
 | Managed ML platform | SageMaker | Azure ML | Vertex AI |
 | LLM API | Bedrock | Azure OpenAI | Vertex AI Gemini |
 
+These map capabilities, not guarantees: Cloud Spanner is synchronously global, whereas Aurora Global and Azure geo-replication are asynchronous primary + read-replica designs.
+
+## Questions
+
+> [!QUESTION]- How do you choose a compute abstraction — VMs, containers, or serverless?
+> - Serverless (functions) minimizes ops for spiky, event-driven, short-lived work; you pay per invocation and give up control over runtime and cold-start latency
+> - Containers (managed Kubernetes or container services) fit long-running services that need portability and fine-grained resource control, at the cost of running the orchestration
+> - VMs are the escape hatch for legacy workloads, specialized OS/kernel needs, or lift-and-shift: most control, most ops
+> - Decide by workload shape (spiky vs steady), operational appetite, and whether container portability is worth more than serverless's low-ops
+
 ## References
 
-- [NIST definition of cloud computing (SP 800-145)](https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-145.pdf)
+- [NIST definition of cloud computing (SP 800-145)](https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-145.pdf) — the standard vendor-neutral definition of cloud service and deployment models.
+- [AWS Well-Architected Framework](https://aws.amazon.com/architecture/well-architected/) — the reliability, cost, security, and operational-excellence pillars of cloud design (broadly applicable beyond AWS).
+- [Azure Architecture Center — Cloud design patterns](https://learn.microsoft.com/en-us/azure/architecture/patterns/) — a catalog of provider-neutral cloud patterns (retry, circuit breaker, sharding, and more).
