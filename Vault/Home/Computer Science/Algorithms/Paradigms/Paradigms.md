@@ -33,7 +33,7 @@ return FolderStructureMap;
 | [[Branch and Bound]] | DFS or best-first over choices, prune by optimistic bound | An admissible bound on the best achievable in a subtree | 0/1 knapsack, TSP, integer linear programming |
 
 > [!TIP]
-> A common progression: if backtracking explores the *same* subproblem repeatedly, adding memoisation turns it into dynamic programming; if a greedy choice can be proven always-correct, it replaces DP with something far cheaper.
+> A common progression: if backtracking explores the *same* subproblem repeatedly, adding [[Memoization|memoisation]] turns it into dynamic programming; if a greedy choice can be proven always-correct, it replaces DP with something far cheaper.
 
 The paradigms pair up along two axes. **Divide-and-conquer vs dynamic programming** differ only in whether the subproblems overlap — that single fact decides whether memoisation buys you anything. **Backtracking vs branch-and-bound** differ only in what justifies a prune: infeasibility for the former, a provably-worse bound for the latter (the same admissibility condition that [[A-Star Search|A* Search]] demands of its heuristic). Backtracking reuses nothing across branches and is unsuited to optimisation; branch-and-bound turns the same tree search into an optimiser that proves its answer optimal, though dynamic programming dominates it once subproblems overlap enough to collapse the search into a polynomial table.
 
