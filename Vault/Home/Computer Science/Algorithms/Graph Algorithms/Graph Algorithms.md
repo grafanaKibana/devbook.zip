@@ -32,6 +32,7 @@ flowchart TD
   H -->|Cheapest way to connect every node| I[Minimum Spanning Tree]
   H -->|Mutually reachable groups in a digraph| J[Strongly Connected Components]
   H -->|Single points of failure| K[Articulation Points and Bridges]
+  H -->|Clusters in an undirected graph| M[Connected Components]
   H -->|Throughput through a capacitated network| L[Maximum Flow]
 ```
 
@@ -57,6 +58,7 @@ flowchart TD
 | [[Minimum Spanning Tree]] | Cheapest edge set connecting all vertices | O(E log V) | Connected, undirected, weighted |
 | [[Topological Sort]] | Linear order respecting dependencies | O(V + E) | Directed acyclic graph |
 | [[Strongly Connected Components]] | Maximal mutually-reachable vertex sets | O(V + E) | Directed graphs |
+| [[Connected Components]] | Maximal connected vertex sets | O(V + E) | Undirected graphs |
 | [[Articulation Points and Bridges]] | Cut vertices and cut edges | O(V + E) | Undirected graphs |
 | [[Maximum Flow]] | Max s–t throughput; min cut | O(V·E²) (Edmonds–Karp) | Capacitated network |
 
