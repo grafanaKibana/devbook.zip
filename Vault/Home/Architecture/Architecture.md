@@ -24,6 +24,16 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
+## Questions
+
+> [!QUESTION]- How do you choose between a monolith, a modular monolith, and microservices?
+> - The decision is mainly organizational: microservices buy independent deployment and team autonomy at the cost of network calls, distributed failure modes, and operational overhead
+> - A modular monolith captures most of the boundary benefits — clear module seams, enforced dependencies — while keeping one deployable and in-process calls; it's the right default for most teams
+> - Reach for microservices when independent scaling or deployment or team boundaries genuinely demand it, not because it's fashionable, and rarely before you understand the domain boundaries
+> - Migration is one-directional and cheap the right way round: a well-structured modular monolith can later be carved into services along its existing seams
+
 ## References
 
-- [Software architecture (Wikipedia)](https://en.wikipedia.org/wiki/Software_architecture)
+- [Architecture styles (Microsoft Azure Architecture Center)](https://learn.microsoft.com/en-us/azure/architecture/guide/architecture-styles/) — a decision-oriented survey of monolith, microservices, event-driven, and other styles.
+- [Patterns of Enterprise Application Architecture (Martin Fowler)](https://martinfowler.com/eaaCatalog/) — the canonical catalog of application-architecture patterns.
+- [Fallacies of distributed computing (Wikipedia)](https://en.wikipedia.org/wiki/Fallacies_of_distributed_computing) — the assumptions that break every distributed architecture; essential before splitting a system.

@@ -58,6 +58,8 @@ flowchart TD
 
 ### Searching text
 
+Text/pattern matching is its own sub-family — see [[String Matching]] for the full comparison.
+
 | Data shape | Algorithm | Time | Precondition |
 | --- | --- | --- | --- |
 | Text + one pattern | [[KMP (Knuth-Morris-Pratt) Algorithm\|KMP]] | O(n + m) | — |
