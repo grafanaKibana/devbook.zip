@@ -218,6 +218,7 @@ plugins:
     enabled: true
     options:
       links:
+        Credits: /Credits
         Email: mailto:reshetnik.nikita@gmail.com
         LinkedIn: https://www.linkedin.com/in/nikitareshetnik/
         GitHub: https://github.com/grafanaKibana
