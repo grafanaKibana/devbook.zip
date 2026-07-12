@@ -16,7 +16,7 @@ priority: High
 
 # Intro
 
-Computer science gives you the reasoning tools behind effective software engineering: algorithmic thinking, data structure selection, complexity analysis, and understanding how computation scales. For a senior .NET developer, CS fundamentals matter most when designing systems that must handle production scale — choosing the right collection, avoiding quadratic blowups in batch processing, and reasoning about tradeoffs before writing code.
+Computer science gives you the reasoning tools behind effective software engineering: algorithmic thinking, data structure selection, complexity analysis ([[Big O Notation]]), and understanding how computation scales. For a senior .NET developer, CS fundamentals matter most when designing systems that must handle production scale — choosing the right collection, avoiding quadratic blowups in batch processing, and reasoning about tradeoffs before writing code.
 
 Two areas are covered here: **data structures** (how to organize data for efficient access, mutation, and iteration in .NET) and **algorithms** (how to solve search, sorting, graph, and set problems with predictable performance). The practical payoff is making correct design decisions upfront instead of discovering performance problems in production.
 
