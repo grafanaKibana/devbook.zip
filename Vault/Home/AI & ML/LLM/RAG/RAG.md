@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "Retrieves evidence from your corpus, then generates an answer grounded in it, no retraining needed."
 tags:
   - FolderNote
 priority: High
@@ -18,6 +19,11 @@ Retrieval-Augmented Generation (RAG) combines retrieval and generation: retrieve
 In practice, strong RAG systems are pipelines, not prompts. The main engineering work is query processing, retrieval quality, context assembly, evaluation, and production operations.
 Example: for a support assistant, a user asks "What changed in API v2 rate limits?". RAG retrieves release notes and policy docs first, then the model answers with citations to the exact source sections instead of guessing from stale parametric memory.
 
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
+
 ## Core Flow
 
 ```mermaid
@@ -30,26 +36,7 @@ flowchart LR
     G --> V[Groundedness and Citation Checks]
 ```
 
-Each stage has its own page: [[Query Translation]] rewrites the user question into retrieval-friendly variants, [[Chunking]] defines the unit of retrieval, [[Retrieval]] finds candidate evidence over a [[Vector Databases|vector database]], [[Re-ranking]] orders it, [[Home/AI & ML/LLM/RAG/Evaluation/Evaluation|RAG Evaluation]] and [[Monitoring]] measure it offline and in production, and [[Home/AI & ML/LLM/RAG/Caching|Caching]] keeps the whole pipeline fast and affordable.
-
-## Choosing a Pattern
-
-Production RAG architectures range from a single retrieve-then-generate pass to agentic, graph-backed systems. The full catalog — twelve patterns with diagrams, fit criteria, risks, and a selection guide — lives in [[RAG Patterns]]. The short version, in adoption order:
-
-- **Baseline single-pass RAG** — embed, retrieve, generate; the mandatory starting point and measurement baseline.
-- **Hybrid search plus reranking** — lexical + vector retrieval with a rerank stage; the mainstream production default.
-- **Query rewriting and routing** — make vague queries explicit and send each query down the cheapest capable path.
-- **Parent-document retrieval** — match on small chunks, generate from their larger parent sections.
-- **Multi-query fusion** — several query variants, fused rankings; raises recall on compound questions.
-- **Contextual retrieval** — enrich each chunk with document-aware context at indexing time.
-- **Multimodal RAG** — retrieve across text, tables, images, and scanned pages.
-- **HyDE** — search with the embedding of a hypothetical answer instead of the raw query.
-- **Iterative multi-hop retrieval** — retrieve, reason about gaps, retrieve again.
-- **Agentic RAG** — an agent picks retrieval tools dynamically per query.
-- **GraphRAG** — knowledge-graph indexing for relationship and global-synthesis questions.
-- **Corrective / self-reflective RAG** — evaluator-gated retrieval and generation; research-stage for most teams.
-
-Ship the baseline first, add [[Retrieval#Hybrid Retrieval — Vector + Keyword|hybrid search]] and reranking next, and adopt anything further down only for a failure mode your [[Home/AI & ML/LLM/RAG/Evaluation/Evaluation|evaluation]] actually shows.
+The pipeline runs in order and each stage constrains the next: a query the translation step mangles cannot be recovered by retrieval, and evidence retrieval never surfaces cannot be reranked into the context. This execution order is why RAG is engineered stage by stage rather than tuned as a single prompt.
 
 ## Operational Baselines
 

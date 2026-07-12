@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.328Z
-modified: 2026-07-08T15:01:12.328Z
-published: 2026-07-08T15:01:12.328Z
+created: 2026-07-11T21:45:05.448Z
+modified: 2026-07-11T21:45:05.449Z
+published: 2026-07-11T21:45:05.449Z
 topic:
   - AI & ML
 subtopic:
   - LLM
+summary: A second-stage pass that reorders retrieval candidates with a more accurate model to boost precision.
 level:
   - "2"
 priority: High

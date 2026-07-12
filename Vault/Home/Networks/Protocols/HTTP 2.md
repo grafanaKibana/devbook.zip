@@ -3,6 +3,7 @@ topic:
   - Networks
 subtopic:
   - Protocols
+summary: "Multiplexes many requests over one TCP connection, removing HTTP/1.1 head-of-line blocking."
 level:
   - "3"
 priority: Medium

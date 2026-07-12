@@ -3,6 +3,7 @@ topic:
   - Security
 subtopic:
   - Authentication
+summary: "OAuth grants apps limited access without sharing credentials; OIDC adds an identity layer."
 level:
   - "3"
 priority: High
@@ -55,15 +56,15 @@ And three tokens: an **access token** (a bearer credential to call the resource 
 
 ## Choosing a Flow
 
-| Client type | Flow | Why |
-|---|---|---|
-| Web app, SPA, mobile | **Authorization Code + PKCE** | The default for anything with a user; PKCE is now required even for confidential clients |
-| Service-to-service (no user) | **Client Credentials** | App authenticates as itself |
-| TV / CLI / input-constrained device | **Device Authorization (Device Code)** | User authorizes on a second device via a short code |
-| ~~SPA without a backend~~ | ~~Implicit~~ — **deprecated** | Leaked tokens in URL fragments; use Auth Code + PKCE instead |
-| ~~First-party password~~ | ~~Resource Owner Password (ROPC)~~ — **deprecated** | Defeats the point (app handles the password); avoid |
+```mermaid
+flowchart TD
+    A{Is a human user involved} -->|No| B[Client Credentials]
+    A -->|Yes| C{Browserless or input-constrained device like TV or CLI}
+    C -->|Yes| D[Device Authorization Device Code]
+    C -->|No| E[Authorization Code plus PKCE]
+```
 
-The takeaway: **Authorization Code + PKCE for users, Client Credentials for machines** covers nearly everything; Device Code for constrained devices; never Implicit or ROPC in new systems. **Scopes** (`profile`, `mail.read`) bound what an access token may do; the **consent** screen is where the user grants them.
+The takeaway: **Authorization Code + PKCE for users, Client Credentials for machines** covers nearly everything; Device Code for constrained devices. Never use **Implicit** (tokens leak in URL fragments) or **Resource Owner Password / ROPC** (the app handles the password) in new systems, as both are deprecated. **Scopes** (`profile`, `mail.read`) bound what an access token may do; the **consent** screen is where the user grants them.
 
 ## OIDC: Authentication Layer
 

@@ -2,6 +2,7 @@
 topic:
   - DevOps
 subtopic: []
+summary: "Packages an application and its dependencies into an isolated, portable container."
 level:
   - "2"
 priority: High

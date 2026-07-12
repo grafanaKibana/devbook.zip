@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "Browser security controlling which origins may call your API, via response headers."
 level:
   - "1"
 priority: Medium

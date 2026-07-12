@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Repeatedly swaps adjacent out-of-order elements; a slow teaching baseline for why better sorts exist."
 level:
   - "4"
 priority: Low

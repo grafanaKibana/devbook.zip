@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.647Z
-modified: 2026-07-08T15:01:12.647Z
-published: 2026-07-08T15:01:12.647Z
+created: 2026-07-11T21:46:00.416Z
+modified: 2026-07-11T21:46:00.416Z
+published: 2026-07-11T21:46:00.416Z
 topic:
   - Programming
 subtopic:
   - NET
+summary: .NET's model for non-blocking I/O that releases the thread while awaiting work.
 level:
   - "4"
 priority: High

@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.537Z
-modified: 2026-07-08T15:01:12.537Z
-published: 2026-07-08T15:01:12.537Z
+created: 2026-07-11T21:47:43.997Z
+modified: 2026-07-11T21:47:43.997Z
+published: 2026-07-11T21:47:43.997Z
 topic:
   - Development Practices
 subtopic:
   - Paradigms
+summary: Verifies a small, isolated piece of behaviour quickly and deterministically.
 level:
   - "4"
 priority: High

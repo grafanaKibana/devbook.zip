@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Two indices over a sequence solve in O(n) what nested loops solve in O(n²)."
 level:
   - "4"
 priority: Medium

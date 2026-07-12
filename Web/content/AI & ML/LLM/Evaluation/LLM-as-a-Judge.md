@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.302Z
-modified: 2026-07-08T15:01:12.302Z
-published: 2026-07-08T15:01:12.302Z
+created: 2026-07-11T21:44:49.107Z
+modified: 2026-07-11T21:44:49.110Z
+published: 2026-07-11T21:44:49.110Z
 topic:
   - AI & ML
 subtopic:
   - LLM
+summary: One model grades another's output against an explicit rubric, by absolute scoring or pairwise preference.
 level:
   - "3"
 priority: Medium

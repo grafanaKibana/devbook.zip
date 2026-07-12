@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.654Z
-modified: 2026-07-08T15:01:12.654Z
-published: 2026-07-08T15:01:12.654Z
+created: 2026-07-11T21:45:18.007Z
+modified: 2026-07-11T21:45:18.007Z
+published: 2026-07-11T21:45:18.007Z
 topic:
   - Programming
 subtopic:
   - NET
+summary: A logical scope organizing types and preventing naming collisions.
 level:
   - "4"
 priority: Medium

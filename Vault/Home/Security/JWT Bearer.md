@@ -3,6 +3,7 @@ topic:
   - Security
 subtopic:
   - Security
+summary: "A compact, self-contained signed token validated statelessly without a database lookup."
 level:
   - "4"
 priority: High

@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "A leftist heap without the bookkeeping, self-adjusting for amortized O(log n) merge."
 level:
   - "4"
 priority: Medium

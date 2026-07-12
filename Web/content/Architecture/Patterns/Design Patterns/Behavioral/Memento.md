@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.384Z
-modified: 2026-07-08T15:01:12.384Z
-published: 2026-07-08T15:01:12.384Z
+created: 2026-07-11T18:18:27.562Z
+modified: 2026-07-11T18:18:27.562Z
+published: 2026-07-11T18:18:27.562Z
 topic:
   - Architecture
 subtopic:
   - Patterns
+summary: Captures and externalizes an object's internal state so it can be restored later, without violating encapsulation.
 level:
   - "1"
 priority: High

@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.304Z
-modified: 2026-07-08T15:01:12.305Z
-published: 2026-07-08T15:01:12.305Z
+created: 2026-07-11T21:44:13.361Z
+modified: 2026-07-11T21:44:13.361Z
+published: 2026-07-11T21:44:13.361Z
 topic:
   - AI & ML
 subtopic:
   - LLM
+summary: Layered controls around an LLM that make unsafe actions and data leaks detectable and recoverable.
 level:
   - "3"
 priority: Medium

@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Answers connectivity queries over a disjoint set via find and union, in near-constant O(α(n)) amortized time."
 level:
   - "3"
 priority: Medium

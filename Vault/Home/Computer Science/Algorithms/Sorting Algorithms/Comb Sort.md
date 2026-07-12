@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Bubble sort with a shrinking gap that kills turtles, curing bubble sort's quadratic flaw in practice."
 level:
   - "4"
 priority: Medium

@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.540Z
-modified: 2026-07-08T15:01:12.540Z
-published: 2026-07-08T15:01:12.540Z
+created: 2026-07-11T21:46:23.928Z
+modified: 2026-07-11T21:46:23.929Z
+published: 2026-07-11T21:46:23.929Z
 topic:
   - Networks
 subtopic:
   - Architecture & Ops
+summary: Edge caching servers that serve content from near users, cutting latency and origin load.
 level:
   - "3"
 priority: Medium

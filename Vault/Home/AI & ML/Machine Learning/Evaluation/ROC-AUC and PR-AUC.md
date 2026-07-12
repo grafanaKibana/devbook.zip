@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - Machine Learning
+summary: "Threshold-free ranking metrics: ROC-AUC for balanced data, PR-AUC for imbalanced data with costly false positives."
 level:
   - "2"
 priority: Medium

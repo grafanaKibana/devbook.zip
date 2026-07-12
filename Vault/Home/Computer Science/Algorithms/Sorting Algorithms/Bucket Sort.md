@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Scatters elements into range buckets, sorts each, then concatenates; near-linear when keys are uniformly distributed."
 level:
   - "4"
 priority: Medium

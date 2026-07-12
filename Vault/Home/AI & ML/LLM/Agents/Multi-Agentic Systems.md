@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "Coordinating multiple LLM agents, each with its own context and tools, on tasks one agent handles poorly."
 level:
   - "3"
 priority: Low

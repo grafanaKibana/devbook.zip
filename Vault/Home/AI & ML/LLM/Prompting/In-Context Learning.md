@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "An LLM adapting to a task from prompt examples without weight updates."
 level:
   - "3"
 priority: Medium

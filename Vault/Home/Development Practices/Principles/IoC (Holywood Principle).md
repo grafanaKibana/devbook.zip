@@ -3,6 +3,7 @@ topic:
   - Development Practices
 subtopic:
   - Principles
+summary: "Control is inverted so a framework, not your code, creates and wires dependencies."
 level:
   - "4"
 priority: High

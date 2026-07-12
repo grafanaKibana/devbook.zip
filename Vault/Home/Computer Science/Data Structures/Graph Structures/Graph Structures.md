@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "Graphs and disjoint sets for modelling relationships with cycles and multiple paths."
 tags:
   - FolderNote
 level:
@@ -18,13 +19,19 @@ Graph structures model relationships between entities — service dependencies, 
 
 That last option is the reason this folder has two notes rather than one. [[Graph]] is the explicit representation — you keep vertices and edges and run traversals (BFS, DFS, Dijkstra) over them. [[Disjoint Set]] keeps no edges: it collapses the graph into "which component is this vertex in?", trading every other question away for near-constant connectivity queries and merges.
 
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
+
 ## Which Note You Need
 
-| You need to answer | Reach for | Why |
-|---|---|---|
-| Paths, distances, orderings, cycles | [[Graph]] + BFS/DFS/Dijkstra | Needs actual edges to walk; O(V + E) per traversal |
-| "Same component?" as edges arrive over time | [[Disjoint Set]] | O(α(n)) ≈ O(1) per union/find; no re-traversal after each new edge |
-| Both | Both — Kruskal's MST is the canonical pairing | Sort edges (graph data), accept an edge only if its endpoints aren't already connected (disjoint set) |
+```mermaid
+flowchart TD
+    A{What must be cheap?} -->|Paths, distances, orderings, cycles| B[Graph with BFS DFS Dijkstra]
+    A -->|Same component as edges arrive over time| C[Disjoint Set]
+    A -->|Both, canonical case Kruskal MST| D[Graph plus Disjoint Set]
+```
 
 The decision hinges on whether connectivity is **static or dynamic**. One-off "is B reachable from A?" on a fixed graph — a single BFS is simpler and answers directionality too. Edges arriving incrementally with connectivity queries interleaved — re-running BFS per query is O(V + E) each time, while a disjoint set amortizes to near-constant. The cost of the disjoint set: it only handles *undirected* connectivity and can never un-merge (no edge deletion).
 

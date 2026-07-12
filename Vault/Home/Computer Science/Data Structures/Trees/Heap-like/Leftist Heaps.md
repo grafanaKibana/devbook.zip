@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "A heap-ordered binary tree whose null-path-length invariant gives merge in O(log n) worst case."
 level:
   - "4"
 priority: Medium

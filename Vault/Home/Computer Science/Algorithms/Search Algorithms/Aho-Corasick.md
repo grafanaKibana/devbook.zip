@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Finds all occurrences of many patterns in one text pass using a trie with failure links, in O(n + z)."
 level:
   - "4"
 priority: Medium

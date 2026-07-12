@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Runs insertion sort over decreasing gaps so elements jump far, beating O(n²) with no recursion or scratch memory."
 level:
   - "4"
 priority: Medium

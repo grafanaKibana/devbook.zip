@@ -2,6 +2,7 @@
 topic:
   - Data Persistence
 subtopic: []
+summary: "Reusing a bounded set of open database connections to avoid costly handshakes."
 level:
   - "4"
 priority: High

@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - Tooling
+summary: "An LLM running in an action loop to complete engineering tasks end to end."
 publish: true
 status: Done
 level:

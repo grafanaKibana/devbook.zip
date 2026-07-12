@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.330Z
-modified: 2026-07-08T15:01:12.331Z
-published: 2026-07-08T15:01:12.331Z
+created: 2026-07-11T21:43:54.640Z
+modified: 2026-07-11T21:43:54.640Z
+published: 2026-07-11T21:43:54.640Z
 topic:
   - AI & ML
 subtopic:
   - Machine Learning
+summary: "Whether predicted probabilities match reality: 0.7 predictions should be right about 70% of the time."
 level:
   - "2"
 priority: Medium

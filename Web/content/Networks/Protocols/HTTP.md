@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.542Z
-modified: 2026-07-08T15:01:12.542Z
-published: 2026-07-08T15:01:12.542Z
+created: 2026-07-11T21:46:18.865Z
+modified: 2026-07-11T21:46:18.866Z
+published: 2026-07-11T21:46:18.866Z
 topic:
   - Networks
 subtopic:
   - Protocols
+summary: A stateless request-response protocol carrying almost all web and API traffic.
 level:
   - "3"
 priority: High

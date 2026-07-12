@@ -3,6 +3,7 @@ topic:
   - Data Persistence
 subtopic:
   - SQL
+summary: "Structuring a relational schema to remove redundancy, trading read performance for fewer anomalies."
 level:
   - "4"
 priority: High

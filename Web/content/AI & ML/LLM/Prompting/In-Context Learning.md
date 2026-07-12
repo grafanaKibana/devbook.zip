@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.310Z
-modified: 2026-07-08T15:01:12.311Z
-published: 2026-07-08T15:01:12.311Z
+created: 2026-07-11T21:44:31.402Z
+modified: 2026-07-11T21:44:31.402Z
+published: 2026-07-11T21:44:31.402Z
 topic:
   - AI & ML
 subtopic:
   - LLM
+summary: An LLM adapting to a task from prompt examples without weight updates.
 level:
   - "3"
 priority: Medium

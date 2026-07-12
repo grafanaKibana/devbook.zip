@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - Machine Learning
+summary: "Measuring whether a model assigns the right label: false alarms versus misses at a chosen threshold."
 level:
   - "3"
 priority: Medium

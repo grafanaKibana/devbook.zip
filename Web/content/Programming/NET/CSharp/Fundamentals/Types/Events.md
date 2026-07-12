@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.656Z
-modified: 2026-07-08T15:01:12.657Z
-published: 2026-07-08T15:01:12.657Z
+created: 2026-07-11T21:45:52.944Z
+modified: 2026-07-11T21:45:52.944Z
+published: 2026-07-11T21:45:52.944Z
 topic:
   - Programming
 subtopic:
   - NET
+summary: A restricted delegate member implementing publisher and subscriber communication.
 level:
   - "4"
 priority: Medium

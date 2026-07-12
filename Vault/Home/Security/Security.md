@@ -5,6 +5,7 @@ color: "#0ea5e9"
 topic:
   - Security
 subtopic: []
+summary: "Protecting users, data, and systems: authentication, authorization, cryptography, and common vulnerability classes."
 tags:
   - FolderNote
 publish: true
@@ -18,6 +19,11 @@ status: Creation
 
 Security is a production feature: protecting users, data, and systems against realistic threats and mistakes. These notes focus on practical engineering security: authn/authz, cryptography basics, and common vulnerability classes. Example: most incidents start with a small gap like weak password handling, missing rate limits, or overly-permissive access checks.
 
-## Links
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
+
+## References
 
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)

@@ -1,11 +1,12 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.531Z
-modified: 2026-07-08T15:01:12.531Z
-published: 2026-07-08T15:01:12.531Z
+created: 2026-07-11T21:47:07.438Z
+modified: 2026-07-11T21:47:07.438Z
+published: 2026-07-11T21:47:07.438Z
 topic:
   - DevOps
 subtopic: []
+summary: Orchestrates containers by reconciling reality to a declared desired state.
 level:
   - "2"
 priority: High

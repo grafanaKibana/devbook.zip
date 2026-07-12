@@ -3,6 +3,7 @@ topic:
   - Development Practices
 subtopic:
   - Paradigms
+summary: "Verifies a small, isolated piece of behaviour quickly and deterministically."
 level:
   - "4"
 priority: High

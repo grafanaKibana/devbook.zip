@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.526Z
-modified: 2026-07-08T15:01:12.527Z
-published: 2026-07-08T15:01:12.527Z
+created: 2026-07-11T21:46:49.851Z
+modified: 2026-07-11T21:46:49.851Z
+published: 2026-07-11T21:46:49.851Z
 topic:
   - Data Persistence
 subtopic:
   - SQL
+summary: Structuring a relational schema to remove redundancy, trading read performance for fewer anomalies.
 level:
   - "4"
 priority: High

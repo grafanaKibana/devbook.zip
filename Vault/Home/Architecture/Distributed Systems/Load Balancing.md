@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Distributed Systems
+summary: "Distributing incoming traffic across multiple service instances so no single instance becomes a bottleneck or point of failure."
 level:
   - "2"
 priority: High

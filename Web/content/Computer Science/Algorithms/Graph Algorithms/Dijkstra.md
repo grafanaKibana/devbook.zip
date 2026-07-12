@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T05:51:06.316Z
-modified: 2026-07-11T05:51:06.316Z
-published: 2026-07-11T05:51:06.316Z
+created: 2026-07-11T21:50:40.201Z
+modified: 2026-07-11T21:50:40.201Z
+published: 2026-07-11T21:50:40.201Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Single-source shortest paths on non-negative-weighted graphs, greedily finalizing the closest tentative node and relaxing its outgoing edges.
 level:
   - "4"
 priority: Medium
@@ -15,138 +16,106 @@ status: Done
 
 # Intro
 
-A weighted graph assigns each edge a non-negative cost — travel time, latency, price — and the question is the cheapest total cost from one source node to every other node. Enumerating routes is exponential, and re-deriving a node's best cost every time a shorter approach appears repeats work already done. Dijkstra's algorithm keeps a single tentative distance per node, improves it only through edge relaxation, and commits nodes to a final distance in increasing order of that distance.
+Dijkstra's algorithm computes shortest paths from a single source to all other nodes in a graph with non-negative edge weights. It works by greedily finalizing the node with the smallest tentative distance, then relaxing its outgoing edges to improve neighbor distances. The greedy choice is correct because non-negative weights guarantee that no future path through an unfinalized node can beat the current shortest — once a node is extracted from the priority queue, its distance is final.
 
-The commit order is what makes it cheap. Each step removes the unsettled node with the smallest tentative distance from a min-priority-queue and marks it settled; its distance can no longer change. Relaxing its outgoing edges can only lower still-unsettled neighbours, never a node already behind the frontier. Non-negative weights are the precondition: they guarantee that leaving a settled node and returning through a longer detour cannot arrive cheaper.
+Use Dijkstra for routing (network shortest paths, GPS navigation), cost minimization (cheapest flight itinerary), and resource planning where edge costs represent real quantities like latency, distance, or price. It does not work when edges have negative weights — that breaks the finalization invariant and requires Bellman-Ford instead.
 
-**Core condition:** non-negative edge weights → settle nodes in nondecreasing distance order → `O((V + E) log V)` with a binary heap and `O(V)` auxiliary space.
+## How It Works
 
-## One run from a source
+1. Initialize `dist[source] = 0` and `dist[v] = ∞` for all other nodes. Push `(0, source)` into a min-priority queue.
+2. Extract the node `v` with the smallest tentative distance. If the extracted distance exceeds `dist[v]`, skip it (stale entry from lazy deletion).
+3. For each outgoing edge `(v, u, w)`, check if `dist[v] + w < dist[u]`. If so, update `dist[u]` and push `(dist[v] + w, u)`.
+4. Repeat until the queue is empty. Optionally maintain a `parent[]` array to reconstruct paths by walking backward from the target.
 
-The trace runs a single source from `A` over an undirected weighted graph, settling one node per step until `F` is reached.
+Complexity: `O((V + E) log V)` with a binary heap. On dense graphs where `E ≈ V²`, a simple array scan gives `O(V²)` which is faster than heap overhead.
+
+```mermaid
+graph TD
+  A[Input graph with nonnegative weights and source s] --> B[Initialize dist to INF]
+  B --> C[Set dist of s to 0]
+  C --> D[Push pair 0 and s into priority queue]
+  D --> E{PQ empty}
+  E -->|No| F[Extract min pair d and v]
+  F --> G{d differs from dist of v}
+  G -->|Yes| E
+  G -->|No| H[For each edge from v to u with weight w]
+  H --> I{dist of v plus w less than dist of u}
+  I -->|Yes| J[Update dist of u]
+  J --> K[Push updated pair into priority queue]
+  K --> H
+  I -->|No| H
+  E -->|Yes| L[Output dist and optionally parent]
+```
+
+## Visualization
+
+The card runs the algorithm from A to F: settled nodes turn green, the amber frontier holds nodes waiting in the priority queue, and blue marks the node currently being extracted and relaxed, with each node's tentative distance shown as d:N above it. Watch the d:N values drop as cheaper routes are discovered; at the end the shortest path to F stays highlighted green with its total cost.
 
 ```steptrace
 {"algorithm":"dijkstra","start":"A","target":"F","directed":false,"nodes":[{"id":"A"},{"id":"B"},{"id":"C"},{"id":"D"},{"id":"E"},{"id":"F"}],"edges":[{"from":"A","to":"B","weight":2},{"from":"A","to":"C","weight":5},{"from":"B","to":"C","weight":1},{"from":"B","to":"D","weight":6},{"from":"C","to":"D","weight":3},{"from":"D","to":"E","weight":1},{"from":"D","to":"F","weight":4},{"from":"E","to":"F","weight":2}]}
 ```
 
-The first extraction settles `A` at distance 0 and relaxes its edges, giving `B` a tentative 2 and `C` a tentative 5. The decisive move is the next extraction: it takes the smallest tentative value, `B` at 2 — not `C` at 5 — settles it, and relaxing `B→C` lowers `C` from 5 to 3. `C` is now final at 3. Every remaining route to `C` must leave through a node whose tentative distance is already at least 2, and every edge adds a non-negative amount, so no later step can undercut the value `C` settles at. Nodes turn final in the order they leave the queue; the frontier holds only the tentative distances still open to a cheaper approach.
+## Example
 
-## Why settled distances stay final
+```text
+Graph edges: A-B(2), A-C(5), B-C(1), B-D(4), C-D(1)
+Source: A
 
-The loop maintains one invariant: when a node leaves the priority queue, its tentative distance already equals its true shortest-path distance.
+Step 1: Extract A (dist=0). Relax A→B: dist[B]=2. Relax A→C: dist[C]=5.
+Step 2: Extract B (dist=2). Relax B→C: 2+1=3 < 5, update dist[C]=3. Relax B→D: dist[D]=6.
+Step 3: Extract C (dist=3). Relax C→D: 3+1=4 < 6, update dist[D]=4.
+Step 4: Extract D (dist=4). No unfinalized neighbors.
 
-Suppose node `u` is popped with tentative distance `d[u]`, and assume for contradiction a strictly shorter path `P` to `u` exists. `P` starts at the source, which is settled, and at some edge `(x, y)` it first crosses from the settled set into the unsettled set — `y` is the first unsettled node on `P`. Settling `x` already relaxed `(x, y)`, so `d[y]` is at most the length of `P` up to `y`. Since the remainder of `P` from `y` to `u` has non-negative length, that prefix is itself at most the length of all of `P`, giving `d[y] ≤ length(P) < d[u]`. But `u` was chosen as the smallest tentative distance among unsettled nodes, so `d[u] ≤ d[y]` — a contradiction.
+Final: dist[A]=0, dist[B]=2, dist[C]=3, dist[D]=4
+Shortest A→D path: A→B→C→D (cost 4)
+```
 
-The single step that makes the argument valid is that the tail from `y` to `u` cannot be negative. With a negative edge that tail could subtract from the cost, `d[y]` would no longer bound the full path, and a node could settle at a distance a later path beats.
+## Pitfalls
 
-## Complexity
+### Negative Edge Weights Break Correctness
 
-Every variant visits each vertex once and inspects each edge once; what differs is the cost of `extract-min` and of lowering a neighbour's key, which is set by the priority queue.
+- **What goes wrong**: Dijkstra finalizes a node's distance on extraction, but a later path through a negative-weight edge can produce a shorter distance to an already-finalized node, giving wrong results.
+- **Why it happens**: the greedy invariant assumes adding more edges can only increase path cost. Negative weights violate this assumption.
+- **How to avoid it**: validate all edge weights are ≥ 0 before running Dijkstra. Use Bellman-Ford when negative edges exist.
 
-| Priority queue | Time | Auxiliary space | Cause |
-| --- | --- | --- | --- |
-| Binary heap + adjacency list | `O((V + E) log V)` | `O(V)` decrease-key; `O(E)` lazy-deletion | `V` extractions and up to `E` key-lowering pushes each cost `O(log V)`. A true decrease-key heap holds one entry per vertex; the lazy-deletion code shown here pushes a fresh pair per relaxation, so the heap can carry up to `O(E)` stale entries. |
-| Fibonacci heap | `O(E + V log V)` | `O(V)` | `decrease-key` is `O(1)` amortized, so only the `V` `extract-min` operations pay `log V`; `E` relaxations are effectively free. |
-| Array / linear scan | `O(V²)` | `O(V)` | Selecting the minimum by scanning all vertices is `O(V)` per step; on a dense graph where `E ≈ V²` this matches the relaxation work and drops the heap's `log V` overhead. |
+### Stale Priority Queue Entries
 
-Auxiliary space is `O(V)` for the `dist` and `settled` arrays plus `O(V)` for the queue in a decrease-key model. With the lazy-deletion approach below, the binary heap can transiently hold up to `O(E)` stale entries, since each relaxation pushes rather than updates.
+- **What goes wrong**: without decrease-key support, updating a node's distance pushes a new entry while the old one remains. Processing stale entries wastes time and can cause incorrect relaxation if the guard check is missing.
+- **Why it happens**: standard binary heaps in most languages do not support decrease-key, so lazy deletion is the common workaround.
+- **How to avoid it**: always check `if extracted_dist > dist[v]: skip` before processing a node. This guard is what makes lazy deletion correct.
 
-## Where the invariant breaks
+### Dense Graph Performance
 
-A single negative edge violates settle-once. Take edges `A→B = 2`, `A→C = 3`, and `C→B = −2`. Dijkstra relaxes `A` to reach `B` at 2 and `C` at 3, extracts and settles `B` at 2, then extracts `C` at 3 and relaxes `C→B` to `3 + (−2) = 1`. `B` is already settled, so that improvement is discarded and `B` is reported at 2, while the true shortest distance `A→C→B` is 1. Nothing throws — the output is simply not a shortest-path tree. Weights that can be negative need [[Bellman-Ford]], which relaxes all edges `V − 1` times and drops the finalization assumption.
-
-A negative _cycle_ has no shortest path at all: a route can loop it repeatedly to drive its cost below any bound, so no single-source algorithm returns a finite answer. The condition has to be detected rather than solved, which Bellman-Ford also does.
-
-The second boundary is internal to the implementation. Standard binary heaps (including .NET's `PriorityQueue<TElement, TPriority>`) offer no `decrease-key`, so a relaxation pushes a fresh `(distance, node)` pair and leaves the older, larger one in the heap. When such a stale pair is later popped for a node that was already settled through a cheaper entry, it must be skipped — the `if settled[node] continue` guard at the top of the loop. Omitting it re-relaxes that node's edges from an out-of-date distance and can corrupt neighbours still on the frontier.
-
-## Reference drawer
-
-> [!ABSTRACT]- Control flow
->
-> ```mermaid
-> flowchart TD
->   A[dist source = 0, all others = infinity] --> B[Push source into min-priority-queue]
->   B --> C{Queue empty}
->   C -->|Yes| Z[dist holds every shortest distance]
->   C -->|No| D[Pop node with smallest tentative distance]
->   D --> E{Already settled}
->   E -->|Yes, stale entry| C
->   E -->|No| F[Mark node settled and relax outgoing edges]
->   F --> G{Edge lowers a neighbour's tentative distance}
->   G -->|Yes| H[Update neighbour and push it]
->   G -->|No| C
->   H --> C
-> ```
-
-> [!EXAMPLE]- C# implementation
->
-> ```csharp
-> public static int[] Dijkstra(List<(int To, int Weight)>[] graph, int source)
-> {
->     var dist = new int[graph.Length];
->     Array.Fill(dist, int.MaxValue);
->     dist[source] = 0;
->
->     var settled = new bool[graph.Length];
->     var queue = new PriorityQueue<int, int>();
->     queue.Enqueue(source, 0);
->
->     while (queue.TryDequeue(out var node, out var d))
->     {
->         if (settled[node])
->         {
->             continue; // stale entry: a cheaper pair already settled this node
->         }
->
->         settled[node] = true;
->
->         foreach (var (to, weight) in graph[node])
->         {
->             if (!settled[to] && d + weight < dist[to])
->             {
->                 dist[to] = d + weight;
->                 queue.Enqueue(to, dist[to]);
->             }
->         }
->     }
->
->     return dist;
-> }
-> ```
->
-> The `settled` array replaces `decrease-key`: relaxation always pushes a new pair, and the guard discards the outdated ones on pop. A parallel `parent[]` array, written whenever `dist[to]` is lowered, reconstructs a path by walking backward from the target.
-
-## Comparison
-
-Every alternative below answers a shortest-path-shaped question over the same graph, but each pays for a different guarantee.
-
-| Algorithm | Time | Requires | Stronger case | Weaker case |
-| --- | --- | --- | --- | --- |
-| Dijkstra | `O((V + E) log V)` | non-negative weights | single source, all targets, weighted | any negative edge |
-| [[Bellman-Ford]] | `O(VE)` | nothing; reports negative cycles | negative weights, cycle detection | dense graphs, or when weights are all non-negative and the `VE` cost is wasted |
-| [[A-Start Search]] | `O((V + E) log V)` worst; far fewer expansions with a heuristic | an admissible heuristic and a single target | one source–target pair with a good spatial estimate | all-pairs work, or when no heuristic exists |
-| BFS ([[DFS BFS]]) | `O(V + E)` | unweighted (unit-cost) edges | shortest path by edge count | any differing edge weights |
-| Prim ([[Minimum Spanning Tree]]) | `O((V + E) log V)` | undirected connected graph | cheapest tree spanning all nodes | shortest distance from a source — a different objective |
-
-Dijkstra is the default single-source shortest-path algorithm when weights are non-negative. Bellman-Ford is the fallback the moment a weight can be negative, trading the higher `O(VE)` cost for correctness and negative-cycle detection. A\* narrows to a single target and, given an admissible heuristic, expands far fewer nodes than Dijkstra while returning the same optimal path. BFS is the right tool only when edges are unweighted. Prim shares Dijkstra's greedy min-frontier structure but minimizes the total weight of a spanning tree rather than distances from a source, so the two are structurally similar yet answer different questions.
+- **What goes wrong**: on dense graphs (`E ≈ V²`), the heap-based approach becomes `O(V² log V)`, slower than the `O(V²)` array-scan version.
+- **Why it happens**: heap overhead (log V per push) exceeds its benefit when nearly every node pair has an edge.
+- **How to avoid it**: for dense graphs, use the simple array-scan variant that picks the minimum in `O(V)` per iteration, giving `O(V²)` total.
 
 ## Questions
 
-> [!QUESTION]- Why does the settle-once rule require non-negative edge weights?
-> When a node is popped it is treated as final. The proof that this is safe relies on the tail of any alternative path — from the first unsettled node it reaches onward — having non-negative length, so that first node's tentative distance already bounds the whole path. A negative edge lets that tail subtract cost, so a later path can beat a node's settled distance and the reported distance is wrong.
+> [!QUESTION]- Why does Dijkstra require non-negative edge weights?
+>
+> - Dijkstra is greedy: it treats the extracted minimum-distance node as finalized.
+> - Non-negative weights guarantee no future path through unfinalized nodes can undercut a finalized distance.
+> - A negative-weight edge can create a later, cheaper path to an already-finalized node, producing wrong results.
+> - Bellman-Ford relaxes all edges V-1 times without the finalization assumption, handling negative weights at `O(VE)` cost.
+> - Bellman-Ford handles negative weights but is slower — accept the non-negative constraint when graph structure allows it.
 
-> [!QUESTION]- What does the `if settled[node] continue` guard fix?
-> A binary heap has no `decrease-key`, so relaxing a node pushes a new pair and leaves the old larger one behind. The guard skips a node the second time it is popped, after a cheaper pair already settled it. Without the guard, the stale pair re-relaxes that node's edges from an outdated distance and can lower a frontier neighbour incorrectly.
+> [!QUESTION]- What data structures make Dijkstra practical at scale?
+>
+> - Adjacency list keeps memory proportional to edges for sparse graphs vs `O(V²)` for adjacency matrix.
+> - Min-heap priority queue gives `O(log V)` extraction vs `O(V)` linear scan.
+> - Lazy deletion avoids the need for decrease-key, which most standard library heaps lack.
+> - Distance array plus parent array supports `O(V)` path reconstruction by walking parent pointers backward.
+> - A Fibonacci heap improves the asymptotics to `O(V log V + E)` but has worse constant factors, so a binary heap wins in practice for most graph sizes.
 
-> [!QUESTION]- Why can an array scan beat a binary heap on a dense graph?
-> With a heap, each of the `E` relaxations may cost `O(log V)`, giving `O((V + E) log V)`. On a dense graph `E ≈ V²`, so the heap term dominates at `O(V² log V)`. Scanning all vertices to pick the minimum is `O(V)` per step and `O(V²)` overall, which drops the `log V` factor entirely.
-
-> [!QUESTION]- How do the weights decide between Dijkstra and Bellman-Ford?
-> If every edge weight is non-negative, Dijkstra settles each node once at `O((V + E) log V)`. If any weight can be negative, that invariant breaks and Bellman-Ford is needed, relaxing all edges `V − 1` times at `O(VE)` and detecting a negative cycle if one exists.
+> [!QUESTION]- When should you prefer A\* over Dijkstra?
+>
+> - A\* adds a heuristic estimating remaining cost to the target, prioritizing nodes that appear closer to the goal.
+> - With an admissible heuristic (never overestimates), A\* finds optimal paths while exploring fewer nodes.
+> - Without a good heuristic (e.g., abstract cost graphs, all-pairs queries), A\* degrades to Dijkstra with extra overhead.
+> - A\* trades generality for speed: it needs domain knowledge (the heuristic) but can explore orders of magnitude fewer nodes on spatial graphs.
 
 ## References
 
-- [A Note on Two Problems in Connexion with Graphs](https://doi.org/10.1007/BF01386390) — Dijkstra's 1959 paper introducing the algorithm and its greedy minimum-distance selection.
-- [Dijkstra — finding shortest paths from given vertex](https://cp-algorithms.com/graph/dijkstra.html) — adjacency-list implementation with a binary heap and the lazy-deletion (skip-stale) pattern for sparse graphs.
-- [Dijkstra on dense graphs](https://cp-algorithms.com/graph/dijkstra_dense.html) — the `O(V²)` array-scan variant and when it outperforms the heap version.
-- [`PriorityQueue<TElement, TPriority>`](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.priorityqueue-2) — .NET's min-priority-queue, which exposes `Enqueue`/`TryDequeue` but no `decrease-key`, forcing the lazy-deletion approach used above.
+- [Dijkstra's algorithm -- encyclopedic overview covering correctness proof, complexity analysis, and historical context (Wikipedia)](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm)
+- [Dijkstra on sparse graphs -- implementation guide with adjacency list, binary heap, and code examples for competitive programming (cp-algorithms)](https://cp-algorithms.com/graph/dijkstra.html)

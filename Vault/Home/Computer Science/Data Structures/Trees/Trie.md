@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "A prefix tree storing strings as character paths, giving O(k) lookup and prefix queries."
 level:
   - "4"
 priority: Medium

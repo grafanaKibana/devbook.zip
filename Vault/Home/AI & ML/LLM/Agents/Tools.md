@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "The interface between an LLM's reasoning and the external world via function calling."
 level:
   - "3"
 priority: Low

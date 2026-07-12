@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T11:20:16.440Z
-modified: 2026-07-11T11:20:16.441Z
-published: 2026-07-11T11:20:16.441Z
+created: 2026-07-11T21:43:13.579Z
+modified: 2026-07-11T21:43:13.580Z
+published: 2026-07-11T21:43:13.580Z
 topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: Vertices and edges modelling relationships that allow cycles, multiple paths, and no single root.
 level:
   - "4"
 priority: Medium
@@ -15,127 +16,83 @@ status: Ready to Repeat
 
 # Intro
 
-A dependency system holds a set of entities and a set of connections between them, and it repeatedly asks two different questions: does a direct link exist between `u` and `v`, and what are all the neighbors of `u`. The connections carry no inherent order and no single root, so there is nothing to sort or index the way an array allows. What must persist is the _incidence_ structure — which vertex connects to which, in which direction, at what weight — and the storage choice decides which of those two questions is cheap and which is linear.
+Graphs model relationships between entities using vertices (nodes) and edges. Unlike trees, graphs can have cycles, multiple paths between nodes, and no single root. In .NET, there is no built-in `Graph<T>` type — you compose graphs from `Dictionary<TNode, List<TNode>>` for adjacency lists, `bool[,]` for adjacency matrices, and `PriorityQueue<TElement, int>` for weighted shortest-path algorithms. A production example: a microservice dependency graph with 200 services uses BFS from a failing service node to identify all downstream services affected by the outage, generating an automated blast radius report in under 50 ms.
 
-A graph has no single canonical layout. The same set of vertices and edges can be stored as an **adjacency list** (per-vertex neighbor lists), an **adjacency matrix** (a `V × V` table of presence or weight), or an **edge list** (a flat sequence of `(u, v[, w])` tuples). All three retain the full topology, and all three can encode direction and weight; they differ in what they make constant-time versus what they force a scan. The list answers "who are `u`'s neighbors" directly but tests a specific edge in `O(deg u)`; the matrix answers "is `u–v` present" in `O(1)` but spends `O(V²)` even when almost no edges exist; the edge list stores nothing but the edges and is fast only when every edge is streamed at once.
+## Deeper Explanation
 
-**Core shape:** vertices + edges → one of {neighbor lists, `V × V` table, flat edge tuples} → each keeps topology, direction, and weight but trades space against edge-test and neighbor-scan cost.
+The most common representation is an adjacency list: each node maps to its neighbors. Adjacency lists cost O(V + E) space and are efficient for sparse graphs where E ≪ V².
 
-> [!NOTE] Visualization pending
-> Planned StepTrace: a graph-representation card showing one small graph rendered three ways — adjacency list, adjacency matrix, and edge list — with a single edge added to each so the differing storage cost of the same mutation is visible side by side. No matching renderer exists in `engine.js` yet.
+**Adjacency matrix** costs O(V²) space and offers O(1) edge-existence checks, but wastes memory on sparse graphs. In .NET, a `bool[,]` or `int[,]` can serve as a matrix.
 
-## Representation and invariants
+**Weighted graphs** extend either representation: an adjacency list becomes `Dictionary<int, List<(int neighbor, int weight)>>`, while a matrix stores `int[,]` with a sentinel (0 or `int.MaxValue`) for absent edges. Dijkstra's algorithm requires weights and pairs naturally with `PriorityQueue<TElement, int>` in .NET for O((V + E) log V) performance.
 
-Each representation stores the same edge set in a different physical shape.
+**Directed vs undirected**: Directed graphs (digraphs) model one-way relationships — `A → B` does not imply `B → A` — and require asymmetric adjacency structures. Undirected graphs store each edge in both directions. Most shortest-path algorithms (Dijkstra, Bellman-Ford) operate on directed graphs; connectivity checks work on either.
 
-**Adjacency list** — an array or dictionary indexed by vertex, where entry `u` holds a collection of `u`'s out-neighbors (`List<int>`, or `List<(int to, int weight)>` when weighted). Total storage is one slot per vertex plus one entry per stored edge. A directed edge `u → v` appears once, in `u`'s list. An undirected edge is stored as two mirrored entries: `v` in `u`'s list and `u` in `v`'s list, so removing it means editing both. A self-loop is `u` appearing inside its own list; parallel edges are simply repeated entries, which the list represents with no extra machinery.
+## Structure
 
-**Adjacency matrix** — a `V × V` grid where cell `[u, v]` holds `1`/`0` for presence, or the weight (with a sentinel such as `0` or `int.MaxValue` for "no edge"). A directed graph writes only `[u, v]`; an undirected graph keeps the matrix symmetric, writing both `[u, v]` and `[v, u]`, so exactly half the grid is redundant. The diagonal `[v, v]` is the self-loop slot. A plain `0/1` or weight matrix cannot express parallel edges — a cell holds one value — so multigraphs need a count or a list per cell, which forfeits the matrix's compactness.
+```mermaid
+graph TD
+    A[node a] --> B[node b]
+    A --> C[node c]
+    B --> D[node d]
+    C --> D
+```
 
-**Edge list** — a flat sequence of tuples `(u, v)` or `(u, v, w)`, with no per-vertex indexing at all. Direction is whatever order the tuple stores; an undirected edge is one tuple read both ways. Self-loops and parallel edges are just more tuples. There is no structure to answer "neighbors of `u`" except a full pass.
+### Example
 
-Three invariants hold across all three:
+```csharp
+var graph = new Dictionary<string, List<string>>
+{
+    ["A"] = new() { "B", "C" },
+    ["B"] = new() { "D" },
+    ["C"] = new(),
+    ["D"] = new()
+};
+```
 
-1. Every endpoint is a valid vertex identifier — an index inside `[0, V)` for the array and matrix forms, or a mapped key for a dictionary form.
-2. Undirected symmetry is a stored property, not a derived one: the mirrored list entries or the symmetric matrix cells must be maintained together, or the graph silently becomes directed.
-3. The vertex identifier is an internal index. The array and matrix forms assume dense integer IDs `0 … V − 1`; strings, GUIDs, or sparse numeric IDs need a `Dictionary<T, int>` mapping first, which adds memory and makes ID management part of the API boundary — the same constraint the [[Disjoint Set]] array representation carries.
+### Pitfalls
 
-## Complexity
+- **Infinite loops without cycle detection** — a DFS or BFS that does not track visited nodes will loop forever on cyclic graphs. Always maintain a `HashSet<TNode>` of visited nodes. In production, a service health checker without cycle detection caused a CPU spike to 100% when a circular dependency was introduced between services.
+- **Stack overflow on recursive DFS** — graphs with 10K+ nodes and deep chains blow the default 1 MB .NET stack. Use iterative DFS with an explicit `Stack<TNode>` for unknown-depth graphs.
+- **Adjacency matrix on sparse graphs** — a matrix for 10K nodes costs 100M entries (400 MB for `int[,]`), even if only 50K edges exist. An adjacency list for the same graph costs O(V + E) = roughly 60K entries. Always match representation to graph density.
 
-The bounds are per operation and per representation; `deg u` is the number of edges incident to `u`.
+### Tradeoffs
 
-| Operation | Adjacency list | Adjacency matrix | Edge list | Cause |
-| --- | --- | --- | --- | --- |
-| Space | `O(V + E)` | `O(V²)` | `O(E)` | List stores one entry per edge; matrix stores every possible cell; edge list stores only edges |
-| `has-edge(u, v)` | `O(deg u)` | `O(1)` | `O(E)` | List scans `u`'s neighbors; matrix indexes one cell; edge list has no index |
-| `iterate-neighbors(u)` | `O(deg u)` | `O(V)` | `O(E)` | List holds exactly the neighbors; matrix scans a full row of `V` cells; edge list scans all tuples |
-| `add-edge(u, v)` | `O(1)` | `O(1)` | `O(1)` | Append to a list / set one cell / append one tuple |
-| `add-vertex` | `O(1)` amortized | `O(V²)` rebuild | `O(1)` | List/edge list grow by one slot; the matrix must reallocate to `(V+1)²` and copy |
+- Adjacency list is better for sparse graphs.
+- Adjacency matrix can be useful for dense graphs with fixed node sets.
+- `PriorityQueue<TElement, TPriority>` is useful for weighted shortest-path algorithms.
 
-The matrix's `O(1)` edge test and the list's `O(deg u)` neighbor scan are the two bounds that drive the choice. `add-edge` is constant everywhere, so mutation cost separates the representations only at the vertex level, where the matrix's fixed `V × V` footprint forces an `O(V²)` copy. The `O(1)` amortized bound on list `add-vertex` assumes a growable backing array (`List<T>` doubling); a preallocated fixed-size list is `O(1)` worst case but caps `V`.
+## Core Algorithms
 
-## When one representation stops fitting
+The data structure only matters in service of the algorithms that run on it. The ones worth knowing cold:
 
-Density is the dividing line. A **dense** graph where `E ≈ V²` loses nothing to the matrix — the `O(V²)` space is already the edge count, and every algorithm gets `O(1)` edge tests and a compact per-row bitset. A **sparse** graph is where the matrix fails: 10 000 vertices with 50 000 edges costs the list roughly 60 000 entries but costs an `int[V, V]` matrix 100 million cells (~400 MB), almost all of them the sentinel. The matrix charges `O(V²)` whether or not the edges exist.
+| Problem | Algorithm | Complexity | Notes |
+|---|---|---|---|
+| Reachability / shortest path (unweighted) | **BFS** | O(V + E) | Queue + visited set; layer = distance |
+| Explore / detect cycles / components | **DFS** | O(V + E) | Recursion or explicit `Stack`; color nodes white/grey/black to detect back-edges |
+| Shortest path, non-negative weights | **Dijkstra** | O((V + E) log V) | `PriorityQueue`; **fails with negative weights** |
+| Shortest path, negative weights allowed | **Bellman–Ford** | O(V·E) | Detects negative cycles |
+| All-pairs shortest paths | **Floyd–Warshall** | O(V³) | Dense graphs / small V |
+| Order a DAG by dependencies | **Topological sort** | O(V + E) | Kahn's (in-degree queue) or DFS post-order; only valid on a DAG |
+| Minimum spanning tree | **Prim / Kruskal** | O(E log V) | Kruskal pairs with [[Union-Find]] |
+| Connectivity / dynamic union | **Union-Find** | ~O(α(n)) | Near-constant with path compression — see [[Union-Find]] |
 
-The **edge list** is not a general-purpose store. `has-edge` and `iterate-neighbors` are both `O(E)`, so it is only competitive for algorithms that consume every edge in one sweep and never query a single edge — relaxing all edges in [[Bellman-Ford]], or sorting edges by weight in Kruskal's [[Minimum Spanning Tree]]. Used for traversal, it turns each neighbor lookup into a full-list scan.
-
-Dynamic vertex insertion splits the same way. Adding a vertex to an adjacency list appends one slot in amortized `O(1)`; adding one to a matrix reallocates the entire `(V+1) × (V+1)` grid and copies the old cells, an `O(V²)` rebuild. A graph whose vertex set grows during its lifetime is a poor match for the matrix regardless of density.
-
-None of these are crashes. A matrix on a sparse graph runs correctly; it simply pays memory the workload never uses, and an edge list backing a traversal returns correct neighbors after scanning far more than it needed.
-
-## Reference drawer
-
-> [!ABSTRACT]- Same graph, three stored forms
->
-> ```mermaid
-> flowchart LR
->   A((0)) --> B((1))
->   A --> C((2))
->   B --> D((3))
->   C --> D
-> ```
->
-> List: `0→[1,2]`, `1→[3]`, `2→[3]`, `3→[]`. Matrix rows `0…3`: `0110 / 0001 / 0001 / 0000`. Edge list: `(0,1) (0,2) (1,3) (2,3)`.
-
-> [!EXAMPLE]- C# adjacency-list graph
->
-> ```csharp
-> public sealed class Graph
-> {
->     private readonly List<List<int>> _adjacency = new();
->
->     public int AddVertex()
->     {
->         _adjacency.Add(new List<int>());
->         return _adjacency.Count - 1;
->     }
->
->     public void AddEdge(int from, int to, bool undirected = false)
->     {
->         _adjacency[from].Add(to);
->         if (undirected)
->         {
->             _adjacency[to].Add(from);
->         }
->     }
->
->     public bool HasEdge(int from, int to) =>
->         _adjacency[from].Contains(to);
->
->     public IReadOnlyList<int> Neighbors(int vertex) =>
->         _adjacency[vertex];
-> }
-> ```
->
-> `HasEdge` is `O(deg from)` because the neighbor list is unordered; swapping the inner `List<int>` for a `HashSet<int>` makes it `O(1)` at the cost of ordered iteration and higher per-edge memory. An undirected edge is two stored entries, so removal must touch both lists.
-
-## Comparison
-
-| Representation | Space | `has-edge(u,v)` | Iterate neighbors of `u` | Add vertex | Stronger workload |
-| --- | --- | --- | --- | --- | --- |
-| Adjacency list | `O(V + E)` | `O(deg u)` | `O(deg u)` | `O(1)` amortized | Sparse graphs and traversal ([[DFS BFS]], [[Dijkstra]]) |
-| Adjacency matrix | `O(V²)` | `O(1)` | `O(V)` | `O(V²)` rebuild | Dense graphs and frequent single-edge tests |
-| Edge list | `O(E)` | `O(E)` | `O(E)` | `O(1)` | Algorithms that stream every edge once ([[Bellman-Ford]], Kruskal's [[Minimum Spanning Tree]]) |
-
-The adjacency list is the general default: real graphs are usually sparse, its space tracks the actual edge count, and it enumerates neighbors — the operation traversal repeats — in output-sized time. The matrix pays `O(V²)` space unconditionally, which is only free on dense graphs, and buys `O(1)` edge tests plus tight per-row bitsets in return; it becomes the stronger choice when the graph is near-complete or the workload is dominated by "is `u–v` connected" rather than "walk `u`'s neighbors". The edge list retains the least accessible structure and fits exactly the algorithms that never ask about one edge in isolation but sweep all of them.
+The two decisions that trip people up: **use BFS, not Dijkstra, for unweighted shortest paths** (same answer, far simpler), and **switch from Dijkstra to Bellman–Ford the moment any edge weight can be negative** (Dijkstra's greedy "settle once" assumption breaks).
 
 ## Questions
 
-> [!QUESTION]- Why does the adjacency list make neighbor iteration cheap but the adjacency matrix make edge existence cheap?
-> The list physically stores only `u`'s actual neighbors, so enumerating them is `O(deg u)` with nothing wasted, but confirming a specific edge means scanning that list. The matrix reserves a fixed cell for every ordered pair, so `[u, v]` is a single `O(1)` index, but reading all of `u`'s neighbors means scanning a full row of `V` cells, most of them empty on a sparse graph.
+> [!QUESTION]- Which collections are typically used for BFS?
+> `Queue<T>` for frontier and `HashSet<T>` for visited tracking.
 
-> [!QUESTION]- What makes the adjacency matrix a bad fit for a sparse graph?
-> Its space is `O(V²)` regardless of how many edges exist. A graph with 10 000 vertices and 50 000 edges stores ~60 000 list entries but 100 million matrix cells, nearly all sentinel values. The matrix charges for every possible edge, so it only breaks even when `E` approaches `V²`.
+> [!QUESTION]- When must you use Bellman–Ford instead of Dijkstra?
+> When edges can have negative weights. Dijkstra settles each node once on the assumption that a shorter path can never appear later — negative edges violate that. Bellman–Ford relaxes all edges V−1 times and can also report a negative cycle.
 
-> [!QUESTION]- How is an undirected edge encoded in each representation, and why does that matter for mutation?
-> The adjacency list stores it twice, as mirrored entries in both endpoints' lists; the matrix stores it as two symmetric cells `[u, v]` and `[v, u]`; the edge list stores one tuple read in both directions. For the list and matrix, symmetry is a maintained invariant — removing or updating the edge must touch both stored copies, or the graph silently becomes directed.
-
-> [!QUESTION]- When is an edge list the right storage despite its `O(E)` edge test?
-> When the algorithm consumes every edge in a single pass and never queries an individual edge — relaxing all edges in Bellman-Ford, or sorting edges by weight for Kruskal's MST. Both want a flat, iterable edge set; neither benefits from per-vertex indexing, so the edge list's weakness never triggers.
+> [!QUESTION]- How do you detect a cycle in a directed graph during DFS?
+> Three-color marking: white (unvisited), grey (on the current recursion stack), black (fully explored). Encountering a grey node via an edge means a back-edge → a cycle. (Topological sort via Kahn's algorithm detects the same condition: leftover nodes with non-zero in-degree.)
 
 ## References
 
-- [Graph (abstract data type)](https://en.wikipedia.org/wiki/Graph_\(abstract_data_type\)) — the adjacency-list, adjacency-matrix, and edge-list representations with their operation costs side by side.
-- [Graph representation](https://cp-algorithms.com/graph/graph-representation.html) — practical comparison of the storage forms and when sparse versus dense density favors each.
-- [Introduction to Algorithms, Ch. 22 — Elementary Graph Algorithms](https://mitpress.mit.edu/9780262046305/introduction-to-algorithms/) — CLRS's formal treatment of adjacency-list versus adjacency-matrix storage and their `O(V + E)` / `O(V²)` bounds.
+- [Collections and data structures overview](https://learn.microsoft.com/en-us/dotnet/standard/collections/) — Microsoft overview of built-in collection types; graphs are typically composed from these primitives.
+- [PriorityQueue\<TElement, TPriority> class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.priorityqueue-2) — API reference for the priority queue used in weighted graph algorithms like Dijkstra.
+- [.NET libraries update with Dijkstra example](https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-9/libraries#collections) — .NET 9 release notes showing PriorityQueue usage in a real Dijkstra implementation.
+- [Dijkstra test implementation in dotnet runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Collections/tests/Generic/PriorityQueue/PriorityQueue.Tests.Dijkstra.cs) — reference implementation of Dijkstra using .NET collections.

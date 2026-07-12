@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Distributed Systems
+summary: "Coordinating a change across multiple services or databases so all participants commit or roll back together, via 2PC or Saga."
 level:
   - "2"
 priority: High

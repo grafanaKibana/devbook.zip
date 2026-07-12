@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Guesses the target's position by interpolation, reaching O(log log n) on uniform sorted data."
 level:
   - "4"
 priority: Medium

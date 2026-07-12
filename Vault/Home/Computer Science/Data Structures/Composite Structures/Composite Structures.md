@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "Structures that combine two primitives to get a guarantee neither gives alone."
 tags:
   - FolderNote
 level:
@@ -17,6 +18,11 @@ priority: High
 A composite structure combines two primitives to get a guarantee neither gives alone. The recipe is always the same: each primitive answers one question in O(1) or O(log n), and the implementation's job is keeping both in lockstep — every mutation updates both, or the structure silently corrupts. [[LRU Cache]] is the canonical case: a `Dictionary<TKey, Node>` answers "where is key k?" in O(1), a doubly linked `LinkedList<T>` answers "what's the eviction order?" in O(1), and the invariant is that every key in the map points at a live list node — [[LRU Cache]] shows exactly what breaks when it doesn't.
 
 .NET ships one composite ready-made: `OrderedDictionary<TKey, TValue>` (.NET 9), hash lookup + insertion order. (`PriorityQueue<TElement, TPriority>` looks like a candidate but fails the membership test below — its guarantee comes from a single clever layout, an array with a heap invariant, so it lives with [[Heap|the heaps]].) When the combination you need isn't built in — LRU being the classic gap — you compose it yourself, which is why these structures dominate interviews: the design *is* the answer.
+
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
 
 ## What Belongs Here
 

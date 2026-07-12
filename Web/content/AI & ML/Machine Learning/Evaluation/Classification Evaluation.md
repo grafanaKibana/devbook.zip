@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.331Z
-modified: 2026-07-08T15:01:12.332Z
-published: 2026-07-08T15:01:12.332Z
+created: 2026-07-11T21:43:56.959Z
+modified: 2026-07-11T21:43:56.959Z
+published: 2026-07-11T21:43:56.959Z
 topic:
   - AI & ML
 subtopic:
   - Machine Learning
+summary: "Measuring whether a model assigns the right label: false alarms versus misses at a chosen threshold."
 level:
   - "3"
 priority: Medium

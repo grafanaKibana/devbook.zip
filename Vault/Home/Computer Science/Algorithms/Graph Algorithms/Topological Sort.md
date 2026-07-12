@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Linear ordering of a DAG's vertices that places every edge's source before its target, sequencing dependencies first."
 level:
   - "4"
 priority: High

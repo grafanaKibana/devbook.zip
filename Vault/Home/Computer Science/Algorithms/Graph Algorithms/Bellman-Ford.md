@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Single-source shortest paths with negative edges, relaxing every edge V-1 times and detecting negative cycles."
 level:
   - "4"
 priority: Medium

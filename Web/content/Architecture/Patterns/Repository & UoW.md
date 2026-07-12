@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.483Z
-modified: 2026-07-08T15:01:12.484Z
-published: 2026-07-08T15:01:12.484Z
+created: 2026-07-11T18:17:51.912Z
+modified: 2026-07-11T18:17:51.926Z
+published: 2026-07-11T18:17:51.926Z
 topic:
   - Architecture
 subtopic:
   - Patterns
+summary: Repository gives a collection-like interface over domain objects; Unit of Work tracks changes and commits them as one atomic transaction.
 level:
   - "4"
 priority: High

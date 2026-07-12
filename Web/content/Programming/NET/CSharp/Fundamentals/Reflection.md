@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.654Z
-modified: 2026-07-08T15:01:12.655Z
-published: 2026-07-08T15:01:12.655Z
+created: 2026-07-11T21:45:19.765Z
+modified: 2026-07-11T21:45:19.766Z
+published: 2026-07-11T21:45:19.766Z
 topic:
   - Programming
 subtopic:
   - NET
+summary: Runtime metadata inspection and dynamic member access via System.Reflection.
 level:
   - "4"
 priority: Medium

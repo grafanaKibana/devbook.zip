@@ -3,6 +3,7 @@ topic:
   - Networks
 subtopic:
   - Protocols
+summary: "A stateless request-response protocol carrying almost all web and API traffic."
 level:
   - "3"
 priority: High

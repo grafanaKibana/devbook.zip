@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.614Z
-modified: 2026-07-08T15:01:12.614Z
-published: 2026-07-08T15:01:12.614Z
+created: 2026-07-11T21:44:16.342Z
+modified: 2026-07-11T21:44:16.345Z
+published: 2026-07-11T21:44:16.345Z
 topic:
   - Networks
 subtopic:
   - Transport & Sockets
+summary: A connectionless transport sending independent datagrams with no delivery or ordering guarantees.
 level:
   - "3"
 priority: Medium

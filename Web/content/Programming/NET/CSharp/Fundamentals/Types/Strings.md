@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.657Z
-modified: 2026-07-08T15:01:12.657Z
-published: 2026-07-08T15:01:12.657Z
+created: 2026-07-11T21:45:56.970Z
+modified: 2026-07-11T21:45:56.971Z
+published: 2026-07-11T21:45:56.971Z
 topic:
   - Programming
 subtopic:
   - NET
+summary: An immutable C# reference type where any text change creates a new value.
 level:
   - "4"
 priority: Medium

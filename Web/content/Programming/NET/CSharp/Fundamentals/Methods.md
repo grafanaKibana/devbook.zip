@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.653Z
-modified: 2026-07-08T15:01:12.654Z
-published: 2026-07-08T15:01:12.654Z
+created: 2026-07-11T21:45:16.088Z
+modified: 2026-07-11T21:45:16.088Z
+published: 2026-07-11T21:45:16.088Z
 topic:
   - Programming
 subtopic:
   - NET
+summary: C#'s unit of behavior, covering parameter modifiers and dispatch keywords.
 level:
   - "4"
 priority: Medium

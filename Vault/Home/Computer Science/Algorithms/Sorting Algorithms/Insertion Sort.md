@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Grows a sorted prefix by inserting each element into place; fast on small or nearly-sorted inputs."
 level:
   - "4"
 priority: Low

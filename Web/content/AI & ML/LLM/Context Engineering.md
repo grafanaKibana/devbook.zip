@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.298Z
-modified: 2026-07-08T15:01:12.298Z
-published: 2026-07-08T15:01:12.298Z
+created: 2026-07-11T21:44:21.245Z
+modified: 2026-07-11T21:44:21.245Z
+published: 2026-07-11T21:44:21.245Z
 topic:
   - AI & ML
 subtopic:
   - LLM
+summary: Deliberately deciding what fills the finite context window, and in what order, to maximize useful signal.
 level:
   - "2"
 priority: High

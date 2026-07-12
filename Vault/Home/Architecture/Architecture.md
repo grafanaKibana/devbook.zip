@@ -5,6 +5,7 @@ color: "#eab308"
 topic:
   - Architecture
 subtopic: []
+summary: "Structuring software with clear boundaries and explicit tradeoffs so it can evolve sustainably."
 tags:
   - FolderNote
 publish: true
@@ -18,6 +19,11 @@ status: Not-Started
 
 Architecture is about structuring software so it can evolve: clear boundaries, explicit tradeoffs, and sustainable complexity. Good architecture makes the "next change" cheaper without over-engineering the current one. Example: choosing between a modular monolith and microservices is mainly about team boundaries, deployment independence, and operational cost.
 
-## Links
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
+
+## References
 
 - [Software architecture (Wikipedia)](https://en.wikipedia.org/wiki/Software_architecture)

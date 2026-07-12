@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Patterns
+summary: "Bridge decouples an abstraction from its implementation so the two hierarchies can evolve independently instead of exploding combinatorially."
 level:
   - "3"
 priority: High

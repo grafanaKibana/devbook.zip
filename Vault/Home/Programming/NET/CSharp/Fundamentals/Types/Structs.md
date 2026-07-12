@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "A value type holding its value inline, so assignment copies it."
 level:
   - "4"
 priority: Medium

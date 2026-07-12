@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.537Z
-modified: 2026-07-08T15:01:12.537Z
-published: 2026-07-08T15:01:12.537Z
+created: 2026-07-11T21:47:38.605Z
+modified: 2026-07-11T21:47:38.605Z
+published: 2026-07-11T21:47:38.605Z
 topic:
   - Development Practices
 subtopic:
   - Paradigms
+summary: Writing a failing test before the code, using Red-Green-Refactor as a design technique.
 level:
   - "4"
 priority: High

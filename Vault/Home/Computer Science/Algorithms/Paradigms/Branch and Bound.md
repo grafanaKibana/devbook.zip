@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "A search paradigm for optimisation that prunes any branch whose optimistic bound cannot beat the best solution so far."
 level:
   - "4"
 priority: Medium

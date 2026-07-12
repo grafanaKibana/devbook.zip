@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "An implicit complete d-ary tree with a parent-child priority rule, keeping the best item at the root."
 level:
   - "4"
 priority: Medium

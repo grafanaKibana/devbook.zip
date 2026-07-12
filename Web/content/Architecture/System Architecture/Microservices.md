@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.489Z
-modified: 2026-07-08T15:01:12.490Z
-published: 2026-07-08T15:01:12.490Z
+created: 2026-07-11T18:17:17.170Z
+modified: 2026-07-11T18:17:17.171Z
+published: 2026-07-11T18:17:17.171Z
 topic:
   - Architecture
 subtopic:
   - System Architecture
+summary: A style splitting a system into independently deployable services, each aligned to a business capability and owning its own data.
 level:
   - "3"
 priority: Medium

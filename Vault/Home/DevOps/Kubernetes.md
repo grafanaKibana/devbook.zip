@@ -2,6 +2,7 @@
 topic:
   - DevOps
 subtopic: []
+summary: "Orchestrates containers by reconciling reality to a declared desired state."
 level:
   - "2"
 priority: High

@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.317Z
-modified: 2026-07-08T15:01:12.317Z
-published: 2026-07-08T15:01:12.317Z
+created: 2026-07-11T21:45:18.006Z
+modified: 2026-07-11T21:45:18.007Z
+published: 2026-07-11T21:45:18.007Z
 topic:
   - AI & ML
 subtopic:
   - LLM
+summary: Ablation varies one component at a time to isolate what caused a retrieval-metric change.
 level:
   - "2"
 priority: High

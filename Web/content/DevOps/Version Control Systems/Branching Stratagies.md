@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.531Z
-modified: 2026-07-08T15:01:12.532Z
-published: 2026-07-08T15:01:12.532Z
+created: 2026-07-11T21:44:08.056Z
+modified: 2026-07-11T21:44:08.057Z
+published: 2026-07-11T21:44:08.057Z
 topic:
   - DevOps
 subtopic:
   - Version Control Systems
+summary: How a team uses Git branches for parallel development, releases, and hotfixes.
 level:
   - "4"
 priority: High
@@ -63,11 +64,13 @@ A branching strategy defines how a team uses Git branches to manage parallel dev
 
 ## Decision Rule
 
-**Start with GitHub Flow** (feature branches + PRs to main) for any new team. It is simple, enforces code review, and works with any CI/CD system.
-
-**Switch to Trunk-Based Development** when: your team is mature enough to use feature flags, your CI runs in < 10 minutes, and you want to eliminate merge conflicts from long-lived branches.
-
-**Use GitFlow** only when: you ship versioned releases on a fixed schedule (e.g., a mobile app or packaged software) and need to maintain multiple release branches simultaneously.
+```mermaid
+flowchart TD
+    A{Ship versioned releases on a fixed schedule with multiple release branches} -->|Yes| B[Use GitFlow]
+    A -->|No| C{Team uses feature flags with CI under 10 minutes}
+    C -->|Yes| D[Use Trunk-Based Development]
+    C -->|No| E[Use GitHub Flow as the default]
+```
 
 ## Pitfalls
 

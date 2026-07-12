@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.337Z
-modified: 2026-07-08T15:01:12.337Z
-published: 2026-07-08T15:01:12.337Z
+created: 2026-07-11T21:45:54.216Z
+modified: 2026-07-11T21:45:54.216Z
+published: 2026-07-11T21:45:54.216Z
 topic:
   - AI & ML
 subtopic:
   - Tooling
+summary: Lifecycle callbacks that run custom logic at defined agent execution points.
 status: Done
 level:
   - "2"

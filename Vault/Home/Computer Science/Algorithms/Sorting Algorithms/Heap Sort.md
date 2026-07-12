@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Heapifies the array then repeatedly extracts the max; the only common O(n log n), in-place comparison sort."
 level:
   - "4"
 status: Creation

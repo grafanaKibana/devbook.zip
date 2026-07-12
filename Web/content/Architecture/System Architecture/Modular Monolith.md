@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.490Z
-modified: 2026-07-08T15:01:12.490Z
-published: 2026-07-08T15:01:12.490Z
+created: 2026-07-11T18:17:21.126Z
+modified: 2026-07-11T18:17:21.130Z
+published: 2026-07-11T18:17:21.130Z
 topic:
   - Architecture
 subtopic:
   - System Architecture
+summary: A single deployable application intentionally split into strict modules with explicit boundaries, gaining microservices benefits without the distributed systems tax.
 level:
   - "3"
 priority: High

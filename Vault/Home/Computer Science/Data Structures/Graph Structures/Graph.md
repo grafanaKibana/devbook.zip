@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "Vertices and edges modelling relationships that allow cycles, multiple paths, and no single root."
 level:
   - "4"
 priority: Medium

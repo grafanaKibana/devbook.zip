@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "Key-value pairs located by hashing in O(1) average, O(n) worst-case time."
 level:
   - "4"
 priority: Medium

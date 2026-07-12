@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.546Z
-modified: 2026-07-10T08:56:46.850Z
-published: 2026-07-10T08:56:46.850Z
+created: 2026-07-11T21:46:04.955Z
+modified: 2026-07-11T21:46:04.955Z
+published: 2026-07-11T21:46:04.955Z
 topic:
   - Networks
 subtopic:
   - Protocols
+summary: Full-duplex, message-oriented communication over a single long-lived TCP connection for real-time apps.
 level:
   - "3"
 priority: High

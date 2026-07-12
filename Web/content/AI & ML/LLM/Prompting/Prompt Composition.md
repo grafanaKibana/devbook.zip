@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.311Z
-modified: 2026-07-08T15:01:12.312Z
-published: 2026-07-08T15:01:12.312Z
+created: 2026-07-11T21:44:36.173Z
+modified: 2026-07-11T21:44:36.190Z
+published: 2026-07-11T21:44:36.190Z
 topic:
   - AI & ML
 subtopic:
   - LLM
+summary: Decomposing complex tasks into multiple LLM calls for reliability and debuggability.
 level:
   - "3"
 priority: Medium

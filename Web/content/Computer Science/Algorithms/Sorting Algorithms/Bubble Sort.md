@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-10T18:52:53.514Z
-modified: 2026-07-10T18:52:53.514Z
-published: 2026-07-10T18:52:53.514Z
+created: 2026-07-11T21:48:51.513Z
+modified: 2026-07-11T21:48:51.513Z
+published: 2026-07-11T21:48:51.513Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Repeatedly swaps adjacent out-of-order elements; a slow teaching baseline for why better sorts exist.
 level:
   - "4"
 priority: Low
@@ -15,121 +16,110 @@ status: Ready to Repeat
 
 # Intro
 
-Sorting an array when the only permitted move is swapping two adjacent elements forces every value to walk to its place one position at a time. Bubble sort is what that constraint produces: a left-to-right pass compares each `a[i]` with `a[i+1]` and swaps on `a[i] > a[i+1]`, so a value larger than everything to its right keeps winning those comparisons and is carried to the end of the pass. One pass is therefore enough to seat the largest unsorted element in its final slot.
+Bubble sort repeatedly swaps adjacent out-of-order elements, pushing large values toward the end each pass. It is easy to understand but rarely used in production due to poor performance. Its main value is as a teaching tool and as a baseline to understand why better algorithms exist.
 
-Adjacency is also the cost. An element that starts `k` positions from where it belongs needs at least `k` swaps to get there, and a left-to-right pass can move it toward the front by only one step. Random input therefore takes a quadratic number of comparisons. The one lever against that is a per-pass flag: a pass that performs no swap proves the array is already ordered and ends the sort.
+## Mechanism
 
-**Core shape:** adjacent compare-and-swap → each pass settles one more tail element → a swap-free pass ends the sort → `O(n²)` comparisons, `O(1)` extra space, `O(n)` on already-sorted input.
+Each pass scans left-to-right and swaps `a[i]` with `a[i+1]` when they are out of order. After one full pass, the largest element is in its final position. With an early-exit flag, the algorithm stops as soon as a pass makes zero swaps — giving O(n) best case on already-sorted input.
 
-## One sort
+```mermaid
+graph TD
+  A[Start array A] --> B[Set swapped true]
+  B --> C{swapped}
+  C -->|No| Z[Done]
+  C -->|Yes| D[Set swapped false]
+  D --> E[Set i to 0]
+  E --> F{i less than n minus 1}
+  F -->|No| C
+  F -->|Yes| G{A at i greater than A at i plus 1}
+  G -->|Yes| H[Swap A at i and A at i plus 1 and set swapped true]
+  G -->|No| I[No op]
+  H --> J[Increment i]
+  I --> J
+  J --> F
+```
 
-The trace sorts `[8, 3, 5, 1, 9, 2, 7, 4]` with left-to-right compare-and-swap passes.
+## Visualization
+
+The card animates the pass structure on a bar chart: blue highlights the adjacent pair being compared, violet flashes when they swap, and bars turn green with a white check as they lock into their final position. The i/j pins track the active indices, and WATCH shows i, j, and the running swap count — watch the largest remaining value bubble to the right end on every pass.
 
 ```steptrace
 {"algorithm":"bubble-sort","array":[8,3,5,1,9,2,7,4]}
 ```
 
-`9` is the largest value in the first pass. Once a swap brings it into the traveling comparison window it beats every element to its right and slides to index 7, its permanent position. The next pass stops one element short because that tail slot is already correct, and each later pass shortens again as the sorted suffix grows leftward. The `swapped` flag watches for the moment this settling is complete: the first pass that finishes without a single swap means no adjacent pair is out of order, so the whole array is sorted and the loop exits.
-
-## Why a pass settles the tail
-
-The invariant is local: after comparing and swapping `a[i]` and `a[i+1]`, the larger of the two sits at `i+1`. Carried across a full pass, the running maximum is always held at the current index and pushed rightward, so it ends the pass at the far end. After pass `k`, the last `k` positions hold the `k` largest values in order and are never touched again — which is why the scanned range can shrink by one each pass.
-
-The `swapped` flag turns "no work happened" into a stopping condition. On already-sorted input the first pass makes zero swaps and the sort ends after `n-1` comparisons — the `O(n)` best case. Removing the flag forfeits exactly that: the plain double loop always runs its full `Θ(n²)` comparisons regardless of order, so sorted input costs the same as random input.
-
-Two properties fall out of the mechanism. The sort is **stable** because a swap happens only on a strict `a[i] > a[i+1]`; equal keys never cross, so their input order survives. It is **in-place** because the only extra storage is a couple of loop indices and the boolean flag — `O(1)` regardless of input size.
-
-## Where adjacency hurts
-
-A large value can travel any distance toward the end in one pass, but a small value moves toward the front by at most one index per pass. On `[2, 3, 4, 5, 1]` the `1` shifts left exactly one slot each pass — `[2, 3, 4, 1, 5]`, then `[2, 3, 1, 4, 5]` — and needs four passes to reach the front even though the array is otherwise sorted. These trailing small values are the classic "turtles": each one forces roughly one pass per position it must travel, and they, not the large values, set the pass count.
-
-> [!NOTE]
-> Cocktail-shaker sort is the bidirectional variant: it alternates a left-to-right pass that lifts the maximum with a right-to-left pass that drags the minimum down. The reverse pass lets a turtle descend many positions at once, cutting the pass count on inputs like the one above, but the total comparison work stays `Θ(n²)`.
-
 ## Complexity
 
-| Case | Time | Auxiliary space | Cause |
-| --- | --- | --- | --- |
-| Best | `O(n)` | `O(1)` | Already sorted; the first pass makes no swap and the early-exit flag stops after one pass. |
-| Average | `O(n²)` | `O(1)` | Random order; about `n²/4` swaps over `~n²/2` comparisons. |
-| Worst | `O(n²)` | `O(1)` | Reverse-sorted; every adjacent pair is out of order, forcing `n(n-1)/2` swaps and comparisons. |
+| Case | Time | Space |
+|------|------|-------|
+| Best (sorted input, early-exit) | O(n) | O(1) |
+| Average | O(n²) | O(1) |
+| Worst (reverse-sorted) | O(n²) | O(1) |
 
-Auxiliary space is `O(1)` in every case: the array is sorted in place and only indices and the flag are added. The `O(n)` best case exists only with the early-exit flag; without it the best case degrades to `Θ(n²)`.
+**Properties:** stable (adjacent swaps preserve equal-element order), in-place.
 
-## Reference drawer
+## C# Implementation
 
-> [!ABSTRACT]- Control flow
->
-> ```mermaid
-> graph TD
->   A[Start array A] --> B[Set swapped true]
->   B --> C{swapped}
->   C -->|No| Z[Done]
->   C -->|Yes| D[Set swapped false]
->   D --> E[Set i to 0]
->   E --> F{i less than n minus 1}
->   F -->|No| C
->   F -->|Yes| G{A at i greater than A at i plus 1}
->   G -->|Yes| H[Swap A at i and A at i plus 1 and set swapped true]
->   G -->|No| I[No op]
->   H --> J[Increment i]
->   I --> J
->   J --> F
-> ```
+```csharp
+public static void BubbleSort(int[] a)
+{
+    int n = a.Length;
+    bool swapped;
+    do
+    {
+        swapped = false;
+        for (int i = 0; i < n - 1; i++)
+        {
+            if (a[i] > a[i + 1])
+            {
+                (a[i], a[i + 1]) = (a[i + 1], a[i]);
+                swapped = true;
+            }
+        }
+        n--; // last element is already in place
+    } while (swapped);
+}
+```
 
-> [!EXAMPLE]- C# implementation
->
-> ```csharp
-> public static void BubbleSort(int[] a)
-> {
->     int n = a.Length;
->     bool swapped;
->     do
->     {
->         swapped = false;
->         for (int i = 0; i < n - 1; i++)
->         {
->             if (a[i] > a[i + 1])
->             {
->                 (a[i], a[i + 1]) = (a[i + 1], a[i]);
->                 swapped = true;
->             }
->         }
->         n--; // last element is already in place
->     } while (swapped);
-> }
-> ```
->
-> `n--` shrinks the scanned range because each pass leaves one more settled element at the tail; the `do/while` runs at least one pass and the `swapped` flag ends the sort after the first pass with no swap.
+> [!NOTE]
+> **Cocktail shaker sort** is the bidirectional variant: alternate a left-to-right pass (bubbling the max up) with a right-to-left pass (bubbling the min down). It fixes bubble sort's "turtles" problem — small values near the end that move left only one step per full pass — but it's still O(n²) and remains a teaching curiosity, not a production choice.
 
-## Comparison
+## When to Use
 
-| Algorithm | Average / worst time | Aux space | Stable | Stronger case | Weaker case |
-| --- | --- | --- | --- | --- | --- |
-| Bubble sort | `O(n²)` / `O(n²)` | `O(1)` | Yes | Detecting an already-sorted array in one `O(n)` pass; explaining swaps and stability | Any input with displaced elements |
-| [[Insertion Sort]] | `O(n²)` / `O(n²)` | `O(1)` | Yes | Small or nearly-sorted arrays; shifts instead of swaps, so fewer writes | Large random arrays |
-| [[Selection Sort]] | `O(n²)` / `O(n²)` | `O(1)` | No | Minimizing writes — `Θ(n)` swaps total | When stability or subquadratic time is needed |
-| [[Merge Sort]] | `O(n log n)` / `O(n log n)` | `O(n)` | Yes | Stable subquadratic sorting; linked lists and external merges | Tight memory with no room for the `O(n)` buffer |
-| .NET `Array.Sort` ([[Introsort\|introsort]]) | `O(n log n)` / `O(n log n)` | `O(log n)` | No | General-purpose in-memory sorting | When stable order must be preserved |
+Almost never in production. Prefer:
 
-Bubble sort's only genuine edge is pedagogical: the adjacent-swap loop is easy to read, and the early-exit flag makes the sorted-input case visibly cheap. On any real workload it shares its `O(n²)` class and stability with insertion sort, which does the same job with fewer element writes and a contiguous write pattern the cache favors — so insertion sort dominates it wherever a simple quadratic sort is acceptable. Once inputs grow the `O(n log n)` sorts take over: merge sort where stability matters, and `Array.Sort`'s introsort as the general in-memory default.
+- **Insertion sort** for small arrays (n ≤ 20) or nearly-sorted data — better constant factors.
+- **Array.Sort** (introsort) for general-purpose sorting in .NET.
+
+Bubble sort is useful as a teaching example and for understanding stability and in-place constraints.
+
+## Pitfalls
+
+### Using Bubble Sort in Production
+
+**What goes wrong**: bubble sort is used for a small utility sort because it is easy to write. Even for n=100, it performs ~5,000 comparisons versus ~700 for insertion sort. For n=1,000, it is ~500,000 versus ~250,000.
+
+**Mitigation**: use insertion sort instead of bubble sort for small arrays. Insertion sort has the same O(n²) worst case but fewer comparisons, fewer swaps, and better cache behavior. For n > 50, use `Array.Sort` (introsort).
+
+### Omitting the Early-Exit Optimization
+
+**What goes wrong**: the basic bubble sort without the `swapped` flag always runs n²/2 comparisons, even on already-sorted input. The O(n) best case only applies with the early-exit optimization.
+
+**Mitigation**: always include the `swapped` flag. If a full pass makes zero swaps, the array is sorted and the algorithm can stop. This is the only scenario where bubble sort has any advantage over selection sort.
 
 ## Questions
 
-> [!QUESTION]- What does the `swapped` flag detect, and what does omitting it cost?
-> A pass that completes with no swap means no adjacent pair is out of order, so the array is sorted and the loop can stop. On already-sorted input this ends the sort after one `O(n)` pass. Without the flag the double loop always runs its full `Θ(n²)` comparisons, so sorted input costs as much as random input and the `O(n)` best case is gone.
+> [!QUESTION]- Why is bubble sort never used in production?
+> Bubble sort has O(n²) average and worst-case time with poor cache behavior — each swap touches two adjacent elements, causing many cache misses on large arrays. Insertion sort is strictly better for small arrays (same O(n²) but fewer comparisons and better cache access). For large arrays, introsort (Array.Sort in .NET) is O(n log n). Bubble sort has no scenario where it is the best choice.
 
-> [!QUESTION]- Why can a large value reach its final slot in one pass while a small value at the tail takes many?
-> A left-to-right pass carries the running maximum forward through consecutive swaps, so a large value can cross the whole array in a single pass. The same pass only ever compares a given element with its left neighbor once, so a small value ("turtle") near the end moves toward the front by at most one index per pass and needs about one pass per position it must travel.
-
-> [!QUESTION]- Why is bubble sort stable?
-> A swap happens only on a strict `a[i] > a[i+1]`. Equal keys never satisfy that test, so they are never exchanged and their original relative order is preserved through every pass.
-
-> [!QUESTION]- Bubble and insertion sort share `O(n²)` average time and stability. Why is insertion sort the stronger of the two?
-> Insertion sort shifts elements into an opening gap instead of repeatedly swapping neighbors, so it performs fewer writes for the same set of inversions and writes to a contiguous run the cache handles well. It also stops scanning once an element reaches its insertion point, while bubble sort re-compares the whole active range each pass. Both are stable and `O(1)` space, so insertion sort wins on constants without giving anything up.
+> [!QUESTION]- What is bubble sort's one practical advantage?
+> The early-exit optimization gives O(n) best case on already-sorted input — the same as insertion sort. However, insertion sort achieves this with fewer comparisons and better cache behavior, so even in this case insertion sort is preferred. Bubble sort's main value is pedagogical: it is easy to explain and visualize.
 
 ## References
 
-- [Bubble sort](https://en.wikipedia.org/wiki/Bubble_sort) — pass structure, the early-exit optimization, stability, and the cocktail-shaker variant.
-- [`Array.Sort` method](https://learn.microsoft.com/en-us/dotnet/api/system.array.sort) — .NET's general-purpose sort; the remarks document the introsort scheme (insertion sort under 16 elements, heapsort past a recursion-depth limit, quicksort otherwise) and that it is not stable.
-- [Bubble Sort: An Archaeological Algorithmic Analysis](https://users.cs.duke.edu/~ola/papers/bubble.pdf) — Owen Astrachan's SIGCSE analysis of bubble sort's history, performance, and why it persists in teaching.
+- [Bubble sort (Wikipedia)](https://en.wikipedia.org/wiki/Bubble_sort) — algorithm description, variants (cocktail shaker sort), and stability proof.
+
+- [Sorting visualizations (VisuAlgo)](https://visualgo.net/en/sorting) — step-by-step animation to build intuition for all comparison sorts.
+
+- [Timsort (Wikipedia)](https://en.wikipedia.org/wiki/Timsort) — Python's and Java's default sort; replaced bubble sort and insertion sort for general use; shows why O(n²) algorithms are only kept as base cases for small partitions.
+
+- [Sorting algorithms comparison (Big-O Cheat Sheet)](https://www.bigocheatsheet.com/) — quick reference for time and space complexity of all common sorting algorithms.

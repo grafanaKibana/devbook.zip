@@ -1,14 +1,15 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.334Z
-modified: 2026-07-08T15:01:12.334Z
-published: 2026-07-08T15:01:12.334Z
+created: 2026-07-11T21:43:44.520Z
+modified: 2026-07-11T21:43:44.520Z
+published: 2026-07-11T21:43:44.520Z
 tags:
   - FolderNote
 topic:
   - AI & ML
 subtopic:
   - Machine Learning
+summary: How a model learns from data and feedback; the choice drives data, training, and evaluation.
 status: Done
 priority: Low
 level:
@@ -18,6 +19,8 @@ level:
 # Intro
 
 Machine learning types describe how a model learns from data and feedback. Choosing the wrong type is expensive: it changes your data requirements, training loop, evaluation criteria, and operational complexity from day one. The decision is driven by what signal you have, not by what architecture is fashionable.
+
+<nav style="--card-accent: 16, 185, 129;" class="folder-structure-map" aria-label="Types section map"><div class="folder-map-children"><article class="db-card folder-map-node folder-map-node-empty"><div class="db-card-body"><span class="folder-map-empty-text">No notes in this section yet.</span></div></article></div><style>.db-card { position: relative; box-sizing: border-box; border: 1px solid var(--background-modifier-border, var(--lightgray, #d8dee9)); border-radius: var(--radius-m, 0.55rem); background-color: var(--background-primary, var(--light, #ffffff)); box-shadow: 0 0 0 rgba(0, 0, 0, 0); transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease, transform 150ms ease; } .db-card::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: radial-gradient( ellipse 150% 175% at -22% -38%, rgba(var(--card-accent, 125, 125, 125), 0.09) 0%, rgba(var(--card-accent, 125, 125, 125), 0.04) 38%, rgba(var(--card-accent, 125, 125, 125), 0.014) 66%, transparent 90% ); opacity: 0.78; transition: opacity 150ms ease; } .db-card:hover, .db-card:focus-within { border-color: rgba(var(--card-accent, 125, 125, 125), 0.55); background-color: color-mix(in srgb, rgb(var(--card-accent, 125, 125, 125)) 2.5%, var(--background-primary, var(--light, #ffffff))); box-shadow: 0 0.45rem 1.1rem rgba(0, 0, 0, 0.08); transform: translateY(-0.125rem); } .db-card:hover::before, .db-card:focus-within::before { opacity: 1; } .db-card-body { position: relative; z-index: 0; box-sizing: border-box; display: flex; flex-direction: column; padding: var(--db-card-pad, 0.85rem 0.9rem); } .db-card-icon { display: flex; width: 1.1rem; height: 1.1rem; flex: 0 0 auto; color: rgb(var(--card-accent, 125, 125, 125)); } .db-card-icon svg { display: block; width: 100%; height: 100%; } .db-card-title { display: block; margin: 0; color: var(--text-normal, var(--dark, #1f2937)); font-size: 1rem; font-weight: 700; line-height: 1.25; } p.db-card-summary { margin: 0.45rem 0 0; color: var(--text-muted, var(--darkgray, #5f6b7a)); font-size: 0.875rem; line-height: 1.45; } .db-card-hit { position: absolute; inset: 0; z-index: 1; } .db-card-hit a { position: absolute; inset: 0; min-width: 2.75rem; min-height: 2.75rem; border-radius: var(--radius-m, 0.55rem); background: transparent !important; font-size: 0; } .db-card-hit a:focus-visible { outline: 2px solid rgb(var(--card-accent, 125, 125, 125)); outline-offset: -0.3rem; } @media (prefers-reduced-motion: reduce) { .db-card { transition: none; } .db-card::before { transition: none; } .db-card:hover, .db-card:focus-within { transform: none; } } .folder-structure-map { --card-accent: 16, 185, 129; --map-gap: 0.75rem; width: 100%; box-sizing: border-box; margin: 0.5rem 0 0.75rem; container-name: folder-map; container-type: inline-size; } .folder-map-children { display: flex; flex-wrap: wrap; gap: var(--map-gap); } .folder-map-node { flex: 1 1 12rem; min-height: 2.75rem; --db-card-pad: 0.5rem 0.75rem; } .folder-map-node .db-card-body { min-height: 2.75rem; justify-content: center; } .folder-map-node-heading { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; } .folder-map-node-title-group { display: flex; align-items: center; gap: 0.5rem; } .folder-map-node .db-card-title { white-space: nowrap; } .folder-map-node-count { display: block; flex: 0 0 auto; color: var(--text-muted, var(--darkgray, #5f6b7a)); font-size: 0.875rem; white-space: nowrap; } .folder-map-node .db-card-summary { display: none; } .folder-map-node-empty { cursor: default; } .folder-map-node-empty:hover, .folder-map-node-empty:focus-within { border-color: var(--background-modifier-border, var(--lightgray, #d8dee9)); background-color: var(--background-primary, var(--light, #ffffff)); box-shadow: 0 0 0 rgba(0, 0, 0, 0); transform: none; } .folder-map-node-empty:hover::before, .folder-map-node-empty:focus-within::before { opacity: 0.78; } .folder-structure-map .folder-map-node-empty .db-card-body { justify-content: center; align-items: center; text-align: center; } .folder-map-empty-text { color: var(--text-normal, var(--dark, #1f2937)); font-size: 1rem; font-weight: 400; font-style: normal; line-height: 1.25; } @container folder-map (min-width: 40rem) { .folder-map-node { min-height: 6rem; --db-card-pad: 0.85rem 0.9rem; } .folder-map-node .db-card-body { min-height: 6rem; justify-content: flex-start; } .folder-map-node .db-card-summary { display: block; } } @container folder-map (min-width: 64rem) { .folder-map-node, .folder-map-node .db-card-body { min-height: 6.75rem; } }</style></nav>
 
 ## Supervised Learning
 
@@ -101,15 +104,21 @@ Train an agent to choose actions that maximize long-term reward through interact
 
 ## Decision Rule
 
-**Start with supervised learning** if you have reliable labels and an explicit prediction target. It is the simplest to evaluate, debug, and operate.
+```mermaid
+flowchart TD
+    A{Do you have reliable labels?} -->|Yes| B{Genuinely sequential, delayed-reward task?}
+    A -->|No| C{Abundant unlabeled data?}
+    B -->|Yes| D[Reinforcement learning]
+    B -->|No| E[Supervised learning]
+    C -->|No| F[Collect data or use rules]
+    C -->|Yes| G{Any labels available at all?}
+    G -->|No| H[Unsupervised learning]
+    G -->|A few, scarce| I{Language or vision task?}
+    I -->|Yes| J[Self-supervised: pretrain then fine-tune]
+    I -->|No| K[Semi-supervised: supervised baseline first]
+```
 
-**Use unsupervised learning** when you have no labels and need to explore structure, detect anomalies, or reduce dimensionality before a supervised task.
-
-**Use self-supervised learning** when you have abundant unlabeled data and scarce labels, especially for language or vision tasks. Pretrain on unlabeled data, fine-tune on labeled data.
-
-**Use semi-supervised learning** when labeling is expensive but you have a clear target variable and abundant unlabeled data. Start with a supervised baseline first — if it already meets your quality bar, stop there.
-
-**Use reinforcement learning** only when the problem is genuinely sequential and delayed-reward. If a one-step supervised model can solve it, use that instead. RL adds reward design complexity, exploration risk, and operational overhead that is rarely justified for single-step decisions.
+Start with supervised learning whenever you have reliable labels and an explicit target; it is the simplest to evaluate, debug, and operate. Drop to unsupervised when there are no labels, self-supervised when unlabeled data is abundant but labels are scarce (especially language and vision), and semi-supervised when labeling is expensive but a clear target exists. Reserve reinforcement learning for genuinely sequential, delayed-reward problems, since it adds reward design complexity, exploration risk, and operational overhead rarely justified for single-step decisions.
 
 ## References
 

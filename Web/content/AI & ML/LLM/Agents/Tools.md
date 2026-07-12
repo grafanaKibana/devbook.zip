@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.297Z
-modified: 2026-07-08T15:01:12.298Z
-published: 2026-07-08T15:01:12.298Z
+created: 2026-07-11T21:45:36.817Z
+modified: 2026-07-11T21:45:36.817Z
+published: 2026-07-11T21:45:36.817Z
 topic:
   - AI & ML
 subtopic:
   - LLM
+summary: The interface between an LLM's reasoning and the external world via function calling.
 level:
   - "3"
 priority: Low

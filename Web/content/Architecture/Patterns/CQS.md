@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.380Z
-modified: 2026-07-08T15:01:12.380Z
-published: 2026-07-08T15:01:12.380Z
+created: 2026-07-11T21:41:01.809Z
+modified: 2026-07-11T21:41:01.809Z
+published: 2026-07-11T21:41:01.809Z
 topic:
   - Architecture
 subtopic:
   - Patterns
+summary: A principle where a method either changes state (command) or returns data (query), never both.
 level:
   - "4"
 priority: High

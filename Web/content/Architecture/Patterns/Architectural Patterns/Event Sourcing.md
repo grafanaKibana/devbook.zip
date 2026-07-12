@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.379Z
-modified: 2026-07-08T15:01:12.380Z
-published: 2026-07-08T15:01:12.380Z
+created: 2026-07-11T18:17:46.967Z
+modified: 2026-07-11T18:17:46.973Z
+published: 2026-07-11T18:17:46.973Z
 topic:
   - Architecture
 subtopic:
   - Patterns
+summary: Event Sourcing stores each aggregate's state as an ordered stream of domain events instead of only the latest snapshot.
 level:
   - "2"
 priority: High

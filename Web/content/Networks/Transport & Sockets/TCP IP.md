@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.549Z
-modified: 2026-07-08T15:01:12.549Z
-published: 2026-07-08T15:01:12.549Z
+created: 2026-07-11T21:46:14.260Z
+modified: 2026-07-11T21:46:14.261Z
+published: 2026-07-11T21:46:14.261Z
 topic:
   - Networks
 subtopic:
   - Transport & Sockets
+summary: "The internet's core protocol suite: IP handles addressing, TCP adds reliable delivery."
 level:
   - "3"
 priority: Medium

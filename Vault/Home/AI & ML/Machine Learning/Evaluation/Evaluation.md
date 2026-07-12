@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - Machine Learning
+summary: "Measuring whether a model solves its real problem in production by picking the right metric."
 tags:
   - FolderNote
 publish: true
@@ -15,6 +16,11 @@ status: Done
 # Intro
 
 Evaluation is how you measure whether a model actually solves the problem it was built for, under the conditions it will face in production. The gap between offline metrics and real-world usefulness is where most ML projects fail silently. A senior engineer needs to pick the right metric for the decision, understand what each curve and score hides, and connect evaluation to business outcomes and deployment gates. This hub orients the family of metrics; the dedicated pages — [[Classification Evaluation]], [[ROC-AUC and PR-AUC]], and [[Calibration]] — carry the depth.
+
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
 
 ## The Evaluation Discipline
 
@@ -29,15 +35,7 @@ The recurring failure across all four is the **offline–online gap**: a metric 
 
 ## Metric Families
 
-| Question you are answering | Metric family | Where it is covered |
-| --- | --- | --- |
-| Is the classifier right at its chosen threshold? | Precision, recall, F1, confusion matrix | [[Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation\|Classification Evaluation]] |
-| How good is the ranking across all thresholds? | ROC-AUC, PR-AUC | [[Home/AI & ML/Machine Learning/Evaluation/ROC-AUC and PR-AUC\|ROC-AUC and PR-AUC]] |
-| Can I trust the predicted probabilities? | Brier score, ECE, reliability diagrams | [[Home/AI & ML/Machine Learning/Evaluation/Calibration\|Calibration]] |
-| How far off are continuous predictions? | RMSE, MAE, MAPE, quantile loss | This hub (summary below) |
-| Did the right items rank at the top of a result list? | NDCG, MAP, MRR | [[Home/AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics\|RAG Monitoring]] |
-
-Pick the family from the decision, not from habit: threshold metrics for a fixed operating point, ranking metrics for comparing models before a threshold exists, calibration metrics when downstream logic consumes probabilities rather than labels.
+Pick the family from the decision, not from habit: threshold metrics (precision, recall, F1) for a fixed operating point, ranking metrics (ROC-AUC, PR-AUC) for comparing models before a threshold exists, and calibration metrics (Brier, ECE) when downstream logic consumes probabilities rather than labels. For ranking items within a retrieved list (NDCG, MAP, MRR), see [[Home/AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics\|RAG Monitoring]]. Regression targets get their own family, covered below.
 
 ### Regression Metrics
 

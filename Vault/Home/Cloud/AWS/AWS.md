@@ -3,6 +3,7 @@ topic:
   - Cloud
 subtopic:
   - AWS
+summary: "The largest public cloud, with mature SDKs and the broadest service catalog."
 level:
   - "3"
 priority: Medium
@@ -12,7 +13,7 @@ tags:
 publish: true
 ---
 
-# AWS Services Overview
+# Intro
 
 AWS (Amazon Web Services) is the largest public cloud platform by market share. For .NET engineers, AWS provides mature SDKs, deep Kubernetes support (EKS), and the broadest service catalog. This page covers the four AWS services most commonly used in .NET/AI workloads.
 
@@ -21,6 +22,11 @@ AWS (Amazon Web Services) is the largest public cloud platform by market share. 
 aws sts get-caller-identity
 # List S3 buckets
 aws s3 ls
+```
+
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
 ```
 
 ## Compute
@@ -74,15 +80,6 @@ aws sqs send-message --queue-url https://sqs.us-east-1.amazonaws.com/123456789/m
 # Receive messages
 aws sqs receive-message --queue-url https://sqs.us-east-1.amazonaws.com/123456789/my-queue
 ```
-
-## Cross-Provider Comparison
-
-| Service | AWS | Azure Equivalent | GCP Equivalent |
-|---------|-----|-----------------|----------------|
-| Virtual machines | EC2 | Azure VMs | Compute Engine |
-| Object storage | S3 | Azure Blob Storage | Cloud Storage |
-| NoSQL database | DynamoDB | Cosmos DB | Firestore |
-| Message queue | SQS | Azure Service Bus / Storage Queues | Cloud Pub/Sub |
 
 ## References
 

@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.332Z
-modified: 2026-07-08T15:01:12.333Z
-published: 2026-07-08T15:01:12.333Z
+created: 2026-07-11T21:43:59.382Z
+modified: 2026-07-11T21:43:59.387Z
+published: 2026-07-11T21:43:59.387Z
 topic:
   - AI & ML
 subtopic:
   - Machine Learning
+summary: "Threshold-free ranking metrics: ROC-AUC for balanced data, PR-AUC for imbalanced data with costly false positives."
 level:
   - "2"
 priority: Medium

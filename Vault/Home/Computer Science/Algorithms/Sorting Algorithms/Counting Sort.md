@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Tallies integer keys in a small range and places each in O(n + k) without comparisons."
 level:
   - "4"
 priority: Medium

@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "A rigidly self-balancing BST with a ±1 balance factor, giving the fewest search levels per lookup."
 level:
   - "4"
 priority: Medium

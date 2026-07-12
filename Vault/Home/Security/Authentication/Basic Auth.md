@@ -3,6 +3,7 @@ topic:
   - Security
 subtopic:
   - Authentication
+summary: "The simplest HTTP scheme: Base64-encoded credentials in the Authorization header (RFC 7617)."
 level:
   - "4"
 priority: High

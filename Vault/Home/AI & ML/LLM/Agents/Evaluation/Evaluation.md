@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "Measures outcome and process separately over a trajectory, since a task can fail by many paths."
 level:
   - "3"
 priority: High
@@ -17,6 +18,11 @@ publish: true
 Evaluating an [[Home/AI & ML/LLM/Agents/Agents|agent]] is harder than evaluating a single LLM call because the unit under test is a *trajectory*, not one response: the agent chooses tools, reads results, and decides the next step in a loop, so the same task can succeed by many different paths and fail in the middle of a plausible-looking one. A single output score cannot tell you whether the agent solved the task, took a wasteful route to get there, or got lucky after three wrong tool calls. Agent evaluation therefore measures two things separately — the **outcome** (did the task get done) and the **process** (was the path correct and efficient).
 
 This folder holds only what is specific to agents. The general machinery — [[LLM-as-a-Judge]] (here used to grade a whole trajectory), [[Deterministic Checks]] (here applied to each tool call's schema and arguments), [[Building an Evaluation Set|building the task set]], and the [[Online Evaluation and AB Tests|online/A-B loop]] — is shared with every other LLM system and lives under [[Home/AI & ML/LLM/Evaluation/Evaluation|LLM Evaluation]].
+
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
 
 ## What to measure
 

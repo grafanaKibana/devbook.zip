@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Finds a target in a sorted array by repeatedly halving the search range, in O(log n)."
 level:
   - "4"
 priority: Medium

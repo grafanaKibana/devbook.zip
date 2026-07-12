@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.305Z
-modified: 2026-07-08T15:01:12.306Z
-published: 2026-07-08T15:01:12.306Z
+created: 2026-07-11T21:44:15.251Z
+modified: 2026-07-11T21:44:15.252Z
+published: 2026-07-11T21:44:15.252Z
 topic:
   - AI & ML
 subtopic:
   - LLM
+summary: An LLM producing fluent, confident output unsupported by evidence, because it optimizes likelihood, not truth.
 level:
   - "3"
 priority: Medium

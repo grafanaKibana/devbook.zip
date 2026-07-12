@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "The broad strategies for constructing a solution, the lens you choose before writing code."
 tags:
   - FolderNote
 publish: true
@@ -16,13 +17,10 @@ status: Creation
 
 Algorithm-design paradigms are the broad *strategies* for constructing a solution — the lens you choose before writing any code. Most named algorithms are instances of one: merge sort is divide-and-conquer, Dijkstra is greedy, Fibonacci-with-memoisation is dynamic programming. Knowing the paradigm tells you the shape of the answer and the proof obligations (e.g. greedy needs an exchange argument; DP needs optimal substructure).
 
-This folder covers the five most important:
-
-- **Divide and Conquer** — split into *disjoint* subproblems, solve recursively, combine.
-- **Dynamic Programming** — solve *overlapping* subproblems once and reuse the results (memoisation / tabulation).
-- **Greedy** — make the locally optimal choice at each step and prove it yields a global optimum.
-- **Backtracking** — explore choices depth-first, abandoning (pruning) branches that can't lead to a valid solution.
-- **Branch and Bound** — backtracking for optimisation, pruning branches that are feasible but provably not optimal.
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
 
 ## Algorithm Selection
 

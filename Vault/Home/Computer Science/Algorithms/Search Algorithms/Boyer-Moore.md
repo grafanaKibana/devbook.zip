@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Matches a pattern by comparing right-to-left and skipping ahead via bad-character and good-suffix rules, sublinear in practice."
 level:
   - "4"
 priority: Medium

@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "A union-find structure that partitions elements into disjoint sets and answers whether two share a set."
 level:
   - "3"
 priority: Medium

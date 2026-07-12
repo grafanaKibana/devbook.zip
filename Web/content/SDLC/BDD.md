@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.666Z
-modified: 2026-07-08T15:01:12.667Z
-published: 2026-07-08T15:01:12.667Z
+created: 2026-07-11T21:44:14.949Z
+modified: 2026-07-11T21:44:14.949Z
+published: 2026-07-11T21:44:14.949Z
 topic:
   - SDLC
 subtopic:
   - SDLC
+summary: Uses concrete business-language examples to align requirements, code, and tests before coding.
 level:
   - "1"
 priority: Medium

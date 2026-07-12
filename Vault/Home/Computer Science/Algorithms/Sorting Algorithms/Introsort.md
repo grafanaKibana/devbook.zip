@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Hybrid that runs quicksort but falls back to heap sort on deep recursion, removing the O(n²) tail."
 level:
   - "4"
 priority: Medium

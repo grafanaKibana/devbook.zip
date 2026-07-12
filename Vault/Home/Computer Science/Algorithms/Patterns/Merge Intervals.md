@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Sorts ranges by start then sweeps to merge overlapping intervals in O(n log n)."
 level:
   - "4"
 priority: Medium

@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "The CLR's automatic memory manager reclaiming unreachable objects generationally."
 level:
   - "4"
 priority: High

@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - Machine Learning
+summary: "The AI field enabling computers to understand and generate human language, now dominated by transformers."
 level:
   - "1"
 priority: Low

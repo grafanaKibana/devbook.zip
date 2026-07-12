@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - System Architecture
+summary: "Structures a system as loosely coupled services communicating over standardized protocols, historically integrated through an Enterprise Service Bus."
 level:
   - "3"
 priority: Medium

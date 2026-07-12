@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "A lazy binomial queue that defers work to extractMin, buying O(1) amortized decreaseKey and meld."
 level:
   - "4"
 priority: Medium

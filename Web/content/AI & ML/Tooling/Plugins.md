@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.337Z
-modified: 2026-07-08T15:01:12.338Z
-published: 2026-07-08T15:01:12.338Z
+created: 2026-07-11T21:45:56.353Z
+modified: 2026-07-11T21:45:56.353Z
+published: 2026-07-11T21:45:56.353Z
 topic:
   - AI & ML
 subtopic:
   - Tooling
+summary: Extension mechanisms adding tools, data, and workflows to coding agents, standardized by MCP.
 status: Done
 level:
   - "2"

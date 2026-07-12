@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "An OS-backed primitive enforcing single-owner access, useful across processes."
 level:
   - "4"
 priority: High

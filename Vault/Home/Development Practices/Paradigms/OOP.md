@@ -3,6 +3,7 @@ topic:
   - Development Practices
 subtopic:
   - Paradigms
+summary: "Models a system as objects combining state and behaviour via encapsulation and inheritance."
 level:
   - "4"
 priority: Medium

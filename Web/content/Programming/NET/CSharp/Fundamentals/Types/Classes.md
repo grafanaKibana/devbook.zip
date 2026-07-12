@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.655Z
-modified: 2026-07-08T15:01:12.655Z
-published: 2026-07-08T15:01:12.655Z
+created: 2026-07-11T21:45:48.805Z
+modified: 2026-07-11T21:45:48.805Z
+published: 2026-07-11T21:45:48.805Z
 topic:
   - Programming
 subtopic:
   - NET
+summary: A reference type defining a heap-allocated object with state, inheritance, and dispatch.
 level:
   - "4"
 priority: Medium

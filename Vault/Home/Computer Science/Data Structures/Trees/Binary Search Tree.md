@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "A binary tree ordered left < node < right, giving O(height) search and ordered queries."
 level:
   - "4"
 priority: Medium

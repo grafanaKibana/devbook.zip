@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "Rewrites a user question into retrieval-optimized variants so phrasing mismatches don't sink retrieval."
 level:
   - "2"
 priority: High

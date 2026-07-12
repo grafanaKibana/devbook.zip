@@ -3,6 +3,7 @@ topic:
   - Security
 subtopic:
   - Security
+summary: "Keeping credentials out of source code, distributing them to workloads, and rotating safely."
 level:
   - "3"
 priority: High

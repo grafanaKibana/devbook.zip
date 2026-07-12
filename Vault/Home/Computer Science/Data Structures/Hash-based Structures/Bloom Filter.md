@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "A probabilistic membership filter using fixed bits, with tunable false positives but never false negatives."
 level:
   - "4"
 priority: Medium

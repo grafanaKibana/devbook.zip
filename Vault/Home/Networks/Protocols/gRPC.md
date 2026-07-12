@@ -3,6 +3,7 @@ topic:
   - Networks
 subtopic:
   - Protocols
+summary: "A contract-first RPC framework over HTTP/2 using Protocol Buffers for fast binary messaging."
 level:
   - "3"
 priority: High

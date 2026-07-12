@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.649Z
-modified: 2026-07-08T15:01:12.649Z
-published: 2026-07-08T15:01:12.649Z
+created: 2026-07-11T21:46:06.935Z
+modified: 2026-07-11T21:46:06.935Z
+published: 2026-07-11T21:46:06.935Z
 topic:
   - Programming
 subtopic:
   - NET
+summary: An OS-backed primitive enforcing single-owner access, useful across processes.
 level:
   - "4"
 priority: High

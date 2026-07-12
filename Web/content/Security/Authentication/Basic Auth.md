@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.668Z
-modified: 2026-07-08T15:01:12.672Z
-published: 2026-07-08T15:01:12.672Z
+created: 2026-07-11T21:48:18.423Z
+modified: 2026-07-11T21:48:18.423Z
+published: 2026-07-11T21:48:18.423Z
 topic:
   - Security
 subtopic:
   - Authentication
+summary: "The simplest HTTP scheme: Base64-encoded credentials in the Authorization header (RFC 7617)."
 level:
   - "4"
 priority: High

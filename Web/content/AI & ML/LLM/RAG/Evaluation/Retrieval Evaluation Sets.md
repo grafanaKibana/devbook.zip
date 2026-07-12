@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.322Z
-modified: 2026-07-08T15:01:12.322Z
-published: 2026-07-08T15:01:12.322Z
+created: 2026-07-11T21:45:21.953Z
+modified: 2026-07-11T21:45:21.953Z
+published: 2026-07-11T21:45:21.953Z
 topic:
   - AI & ML
 subtopic:
   - LLM
+summary: Pairs queries with their relevant chunks; the hard part is labeling which chunks count.
 level:
   - "2"
 priority: High

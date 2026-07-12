@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T05:33:51.379Z
-modified: 2026-07-11T05:33:51.379Z
-published: 2026-07-11T05:33:51.379Z
+created: 2026-07-11T21:45:52.562Z
+modified: 2026-07-11T21:45:52.567Z
+published: 2026-07-11T21:45:52.567Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Finds all occurrences of many patterns in one text pass using a trie with failure links, in O(n + z).
 level:
   - "4"
 priority: Medium
@@ -15,192 +16,127 @@ status: Creation
 
 # Intro
 
-A signature engine scans a byte stream — packets, log lines, a file — against a fixed dictionary of `k` patterns and must report every occurrence of every pattern. Running a single-pattern matcher such as [[KMP (Knuth-Morris-Pratt) Algorithm|KMP]] once per pattern reads the whole text `k` times, so the cost is `O(k·n)` and grows with the dictionary even though the text never changes.
+Aho-Corasick finds **all** occurrences of **many** patterns in a text in a single pass. It builds a finite-state machine from the set of patterns — a trie of all the patterns, augmented with **failure links** and **output links** — then feeds the text through it one character at a time, never backtracking over the text. Its defining property is that search cost is `O(n + z)` where `n` is the text length and `z` the number of matches, **independent of the number of patterns**. Running [[KMP (Knuth-Morris-Pratt) Algorithm|KMP]] once per pattern would cost `O(k·n)` for `k` patterns; Aho-Corasick collapses that to one scan.
 
-The patterns share structure. Any two that begin `sh…` walk the same first edges, and a shorter pattern can be a suffix of the state a longer one reaches. Aho-Corasick compiles the whole dictionary once into a single finite automaton — a trie of all patterns carrying **failure links** and **output links** — then drives the text through it one character at a time without ever rewinding. One pass reports every match of every pattern, and its search cost stops depending on `k`.
+It is the direct multi-pattern generalization of KMP: the trie's failure links are exactly KMP's failure function lifted from a single string onto a tree of strings. Reach for it whenever you have a fixed dictionary of terms to match against streaming or bulk text — intrusion detection (Snort's rule engine), spam and profanity filters, `fgrep -f patternfile`, virus signature scanning, and bioinformatics motif search. Prefer [[Rabin Karp Search|Rabin-Karp]] with a hash set only when patterns are all the same length and you want a simpler probabilistic filter; use Aho-Corasick when pattern lengths vary and you need deterministic, single-pass completeness.
 
-**Core shape:** fixed pattern set → trie + failure links + output links → one non-backtracking pass over the text → `Θ(n + z)` search for `z` reported matches, from one automaton built over the whole dictionary.
+## How It Works
 
-A future trace would follow the automaton over one short text.
+The automaton has three ingredients built on top of a trie of the pattern set.
 
-> [!NOTE] Visualization pending
-> Planned StepTrace: a string-automaton card showing a trie of the pattern set with its failure links, consuming the text one character at a time as the automaton transitions on each character and emits every pattern that ends at the arrived state. No matching renderer exists in `engine.js` yet.
+1. **Trie (goto function).** Insert every pattern into a trie; each node is a prefix of one or more patterns, and nodes ending a pattern are marked. This is the `goto`: from a node, a character either follows a child edge or fails.
 
-## Trie, failure links, output links
+2. **Failure links.** For each node representing string `s`, its failure link points to the node representing the **longest proper suffix of `s` that is also a prefix of some pattern** — the trie-wide analogue of KMP's `lps`. When the text character has no matching child at the current node, follow failure links (which shorten the matched suffix) until a child matches or you reach the root. Because a suffix always exists at worst as the root, this always terminates.
 
-The automaton is a trie of the pattern set plus two kinds of back-edge.
+3. **Output (dictionary) links.** A pattern can end _inside_ the matched suffix of a longer one — for instance `"he"` ends inside the state you reach after reading `"she"`. Each node's output link points to the nearest failure-reachable node that ends a pattern, forming a chain you walk on every visited state to emit all patterns ending there. **Omitting these silently misses nested matches.**
 
-**Goto (the trie).** Every pattern is inserted into a trie; each node is a prefix shared by one or more patterns, and a node that completes a pattern is marked with the pattern ids ending there. From a node, a text character either follows a child edge or has none — a miss.
+**Construction by BFS.** The failure and output links are filled level by level with a breadth-first traversal of the trie. Root's children fail to the root. For a node `u` with parent `p` and edge character `c`, follow `p`'s failure link `f`; the child of `f` on `c` (if any) is `u`'s failure target, otherwise recurse up the failure chain to the root. The output link is `u`'s failure target if that target ends a pattern, else the failure target's own output link. BFS order guarantees every failure target is finalized before it is needed.
 
-**Failure links.** For the node representing string `s`, the failure link points to the node for the longest proper suffix of `s` that is itself a node in the trie — equivalently, a prefix of some pattern. This is KMP's longest-prefix-suffix table generalized from one string onto the whole tree. On a miss, following failure links shortens the matched suffix until a child on the current character exists or the root is reached. The root is the empty suffix and always exists, so the fallback terminates.
+**Search.** Start at the root; for each text character advance via `goto` (using failure links on a miss), then walk the output chain at the arrived state to report every pattern that ends there.
 
-**Output links.** A single state can complete several patterns at once, because a shorter pattern may be a suffix of a longer one — `he` is a suffix of the state reached by `she`. Each state's output link points to the nearest failure-reachable state that ends a pattern; walking that chain at every visited state emits all patterns ending there. The link is set by the same suffix rule as the failure link: a state's output is its failure target if that target ends a pattern, otherwise the failure target's own output.
+Complexity: construction `O(m + |Σ|·nodes)` time (where `m` is the total length of all patterns) — commonly stated as `O(m)` for a fixed alphabet — and `O(nodes·|Σ|)` space for the goto table (a hash map per node reduces this for sparse large alphabets). Search is `O(n + z)`: linear in the text plus the number of reported matches, and crucially **not** a function of `k`, the pattern count.
 
-**Construction.** Failure and output links are filled by one breadth-first pass from the root. A node's failure target always sits at strictly smaller depth, so it is finalized before the node needs it; a depth-first order would read unfinished links. The root's direct children fail to the root.
+## Example
 
-## One pass over "ushers"
+```text
+Patterns: { he, she, his, hers }   Text: "ushers"
 
-The dictionary `{ he, she, his, hers }` compiles to a trie with a handful of failure and output links. Two are decisive: the state for `she` fails to the state for `he` — its longest proper suffix that is also a prefix in the trie — and because `he` ends a pattern, `she`'s output link points there.
+Trie (edges) and pattern-end nodes marked *:
+  root --h--> 1 --e--> 2*(he) --r--> 6 --s--> 7*(hers)
+       --s--> 3 --h--> 4 --e--> 5*(she)
+  root --h--> 1 --i--> ... --s--> ...*(his)
 
-Reading `ushers` left to right, the automaton stays at the root through `u`, then walks `s → sh → she` on the next three characters. Arriving at `she` after the `e`, the state itself ends a pattern, so `she` is reported at `[1..3]`. Its output link then leads to `he`, which also ends here, reported at `[2..3]` — a nested match that shares the same end position and is invisible without the output walk. On the next character `r`, the state `she` has no child, so the automaton follows the failure link to `he` and takes `he → her` on `r`; the final `s` reaches `hers`, reported at `[2..5]`.
+Key failure/output links:
+  node 5 (she) fails to node 2 (he)   → output link 5 -> 2*(he)
+  node 4 (sh)  fails to node 1 (h)
+  node 2 (he)  fails to root
 
-The invariant makes each of those steps legal: after reading `i` characters the automaton is always at the state whose string is the longest suffix of the first `i` characters that is still a prefix of some pattern. Every pattern occurrence ending at position `i` is a suffix of that state's string, and the output chain lists exactly those. That is why a single left-to-right pass, with no rewinding of the text, sees every match.
+Scan "ushers":
+  u : no goto from root → stay at root, no output.
+  s : root -> 3 (s).
+  h : 3 -> 4 (sh).
+  e : 4 -> 5 (she). node 5 ends "she" → report she.
+      Walk output link: 5 -> 2 ends "he" → report he.   <-- nested match
+  r : goto from 5 on 'r'? none. Follow failure 5->2; from 2 on 'r' -> 6 (her).
+  s : 6 -> 7 (hers). node 7 ends "hers" → report hers.
 
-## Complexity
+Matches (start index in "ushers" = u0 s1 h2 e3 r4 s5):
+  she @1..3    he @2..3    hers @2..5
+```
 
-Let `M = Σmᵢ` be the total length of all patterns — an upper bound on the trie's node count — and `σ` the alphabet size.
+`he` and `she` _end_ at the same position, and that is the whole point of output links: the scanner is sitting on node 5 (`she`) when it finishes reading `e`, and only the `5 -> 2` output link tells it that `he` also ends right here. Without that link it would report `she` and `hers` but silently drop the nested `he`.
 
-| Phase | Time | Space | Cause |
+## Diagram
+
+```mermaid
+flowchart TD
+  A[Insert all patterns into a trie] --> B[BFS over trie to set failure links]
+  B --> C[Set output links along failure chain]
+  C --> D[Start at root and read text left to right]
+  D --> E{current node has child for text char}
+  E -->|Yes| F[Follow the child edge]
+  E -->|No| G{at root}
+  G -->|Yes| H[Stay at root]
+  G -->|No| I[Follow failure link and retry char]
+  I --> E
+  F --> J[Walk output chain and report every pattern ending here]
+  H --> K[Advance to next text char]
+  J --> K
+  K --> D
+```
+
+## Pitfalls
+
+### Forgetting Output Links Misses Nested Matches
+
+- **What goes wrong**: reporting a match only when the _current_ node ends a pattern drops patterns that end inside a longer matched suffix, such as `he` inside `she` when searching the dictionary `{he, she, hers}` in `"ushers"`.
+- **Why it happens**: the failure links alone route the automaton correctly but do not enumerate every pattern that terminates at a state; a single state can end several patterns at once.
+- **How to avoid it**: build an output (dictionary) link chain and walk it fully at every visited state, or precompute the complete match list per state.
+
+### Rebuilding the Automaton per Query
+
+- **What goes wrong**: constructing the trie and links inside a hot loop that also runs the search throws away Aho-Corasick's advantage, turning an amortized win into repeated `O(m)` builds.
+- **Why it happens**: the dictionary is treated as if it changes every call when it is actually fixed across many texts.
+- **How to avoid it**: build the automaton once for a stable dictionary and reuse it across all inputs; only rebuild when the pattern set changes.
+
+### Memory Blowup on Large Alphabets
+
+- **What goes wrong**: storing a dense `|Σ|`-wide transition array per node explodes memory for Unicode or byte-plus-wide alphabets with many patterns.
+- **Why it happens**: the goto table is `O(nodes·|Σ|)`; most entries are empty but still allocated in a dense representation.
+- **How to avoid it**: use a hash map of transitions per node (sparse goto), or a double-array trie, trading a small constant-factor lookup cost for large memory savings.
+
+## Tradeoffs
+
+| Choice | Option A | Option B | Decision criteria |
 | --- | --- | --- | --- |
-| Build automaton | `Θ(M)` sparse, `Θ(M·σ)` dense | `Θ(M)` sparse, `Θ(M·σ)` dense | One insertion per pattern character builds the `≤ M+1` trie nodes; a single BFS assigns every failure and output link. A dense `σ`-wide transition row per node adds the `σ` factor; a hash map per node stores only real edges and drops it, at an `O(1)` expected lookup instead of an array index. |
-| Search | `Θ(n + z)` | `O(1)` beyond the automaton | Each text character makes one forward move plus failure hops that amortize to `O(1)` over the scan (the KMP argument), and the output walk emits exactly the `z` matches. No term in `k`, the pattern count. |
-
-The `Θ(M·σ)` (dense) or `Θ(M)` (sparse) figure is the automaton itself, allocated once and reused across every text. A search adds only a current-state index and an output-walk cursor, so its per-pass auxiliary space is `O(1)` — the automaton is structure space, not per-operation space. The dense-versus-sparse choice trades that automaton memory against a constant-factor transition cost, and is the main space decision on wide alphabets.
-
-## Where it stops fitting
-
-**Automaton memory on wide alphabets.** A dense `σ`-wide transition row per node makes each lookup a single array index but allocates `Θ(M·σ)` slots, most of them empty — for byte or Unicode alphabets over a large dictionary that is the dominant cost. A hash map per node (or a double-array trie) stores only the edges that exist, cutting space to `Θ(M)` at the price of a hashed lookup per transition. Both representations compute identical matches; only memory and constant factors differ.
-
-**Overlapping and nested matches.** The automaton reports every occurrence of every pattern, including matches that overlap (`aa` in `aaa` at offsets 0 and 1) and matches nested inside a longer one (`he` ending inside `she`). Those extra matches surface only through the output-link walk. Reporting a pattern only when the current node itself ends one leaves the scan correctly positioned but silently drops the nested cases: on `{ he, she, hers }` over `ushers` it reports `she` and `hers` and loses `he`. The defect is invisible on any dictionary where no pattern is a suffix of another, which is what makes it easy to ship.
-
-**A fixed dictionary.** Failure and output links are global properties of the whole pattern set, resolved by the single construction BFS. Adding a pattern changes suffix relationships throughout the trie, so the links must be recomputed — an insertion after construction means rebuilding the automaton, or maintaining a more complex dynamic variant. The algorithm therefore fits a dictionary compiled once and reused across many texts; a set that changes on every query pays the `Θ(M)` build repeatedly and loses its edge over rerunning a single-pattern matcher.
-
-## Reference drawer
-
-> [!ABSTRACT]- Construction and search control flow
->
-> ```mermaid
-> flowchart TD
->   A[Insert every pattern into a trie] --> B[BFS from root sets each failure link]
->   B --> C[Set each output link along the failure chain]
->   C --> D[Start at root and read text left to right]
->   D --> E{current state has a child for the text char}
->   E -->|Yes| F[Follow the child edge]
->   E -->|No| G{at root}
->   G -->|Yes| H[Stay at root]
->   G -->|No| I[Follow the failure link and retry the char]
->   I --> E
->   F --> J[Walk the output chain and emit every pattern ending here]
->   H --> K[Advance to the next text char]
->   J --> K
->   K --> D
-> ```
-
-> [!EXAMPLE]- C# implementation
->
-> ```csharp
-> public sealed class AhoCorasick
-> {
->     private sealed class Node
->     {
->         public readonly Dictionary<char, int> Next = new();
->         public int Fail;               // failure link (node index)
->         public int Output = -1;        // nearest failure-reachable pattern end
->         public readonly List<int> Ends = new(); // pattern ids ending exactly here
->     }
->
->     private readonly List<Node> _nodes = new() { new Node() }; // index 0 = root
->
->     public void Add(string pattern, int id)
->     {
->         var node = 0;
->         foreach (var c in pattern)
->         {
->             if (!_nodes[node].Next.TryGetValue(c, out var next))
->             {
->                 next = _nodes.Count;
->                 _nodes.Add(new Node());
->                 _nodes[node].Next[c] = next;
->             }
->
->             node = next;
->         }
->
->         _nodes[node].Ends.Add(id);
->     }
->
->     public void Build()
->     {
->         var queue = new Queue<int>();
->         foreach (var child in _nodes[0].Next.Values)
->         {
->             _nodes[child].Fail = 0;
->             queue.Enqueue(child);
->         }
->
->         while (queue.Count > 0)
->         {
->             var u = queue.Dequeue();
->             foreach (var (c, v) in _nodes[u].Next)
->             {
->                 var f = _nodes[u].Fail;
->                 while (f != 0 && !_nodes[f].Next.ContainsKey(c))
->                 {
->                     f = _nodes[f].Fail;
->                 }
->
->                 _nodes[v].Fail = _nodes[f].Next.TryGetValue(c, out var t) ? t : 0;
->                 var fail = _nodes[v].Fail;
->                 _nodes[v].Output = _nodes[fail].Ends.Count > 0 ? fail : _nodes[fail].Output;
->                 queue.Enqueue(v);
->             }
->         }
->     }
->
->     public IEnumerable<(int End, int PatternId)> Search(string text)
->     {
->         var node = 0;
->         for (var i = 0; i < text.Length; i++)
->         {
->             var c = text[i];
->             while (node != 0 && !_nodes[node].Next.ContainsKey(c))
->             {
->                 node = _nodes[node].Fail;
->             }
->
->             _nodes[node].Next.TryGetValue(c, out node); // stays at root (0) when no edge exists
->
->             for (var o = node; o != -1; o = _nodes[o].Output)
->             {
->                 foreach (var id in _nodes[o].Ends)
->                 {
->                     yield return (i, id);
->                 }
->             }
->         }
->     }
-> }
-> ```
->
-> `Build` runs once after the final `Add`. `Search` yields `(endIndex, patternId)` for every occurrence; the inner `for` walks the output chain, so overlapping and nested matches are all emitted. A dense `char`-indexed array could replace `Dictionary<char, int>` to trade memory for a faster transition.
-
-## Comparison
-
-| Algorithm | Time | Space / preprocessing | Stronger case | Weaker case | Semantic property |
-| --- | --- | --- | --- | --- | --- |
-| Aho-Corasick | `Θ(n + z)` search, `Θ(M)` build | `Θ(M·σ)` dense / `Θ(M)` sparse automaton | Many patterns of varied length matched in one pass | A single pattern; memory-tight dense alphabets | Deterministic; reports every overlapping and nested match; dictionary fixed at build |
-| [[KMP (Knuth-Morris-Pratt) Algorithm\|KMP]] | `Θ(n + m)` per pattern | `Θ(m)` failure table | One pattern with a hard linear bound; streaming input | `k` patterns force `O(k·n)` rescans | Deterministic single pattern; text pointer never rewinds |
-| [[Rabin Karp Search\|Rabin-Karp]] | `Θ(n + m)` expected, `Θ(nm)` worst | `O(1)` rolling hash | Many **equal-length** patterns screened via a hash set | Varied lengths; adversarial collisions | Probabilistic; verifies characters on a hash hit |
-| [[Boyer-Moore]] | `O(n/m)` best, `O(nm)` worst | `O(m + σ)` skip tables | One long pattern over a large alphabet | Small alphabets; many patterns at once | Skips via right-to-left scan; single pattern |
-
-Aho-Corasick is the fit for matching many patterns of varied length in one pass — dictionary matching, intrusion and virus signatures, `fgrep -f` — because a single automaton absorbs the whole set and search stays `Θ(n + z)` no matter how many patterns exist, paying for it in automaton memory and a build that assumes a fixed dictionary. A single pattern is simpler and lighter with KMP's guaranteed linear scan or Boyer-Moore's sublinear skipping on a large alphabet. A set of patterns that all share one length can stay with Rabin-Karp, where one rolling hash screens the whole set through a membership test, but that construction cannot express the mixed lengths Aho-Corasick handles directly.
+| Transition storage | Dense array per node | Sparse hash map per node | Dense is fastest for small alphabets (ASCII bytes); switch to sparse or a double-array trie for Unicode or huge dictionaries to control memory. |
+| Dictionary volatility | Prebuilt automaton | Rebuild per change | Prebuild and reuse for a fixed dictionary; if patterns change constantly, the `O(m)` build cost may argue for a simpler per-query matcher. |
 
 ## Questions
 
-> [!QUESTION]- Why is search cost `Θ(n + z)` independent of the number of patterns?
-> All patterns share one trie, so common prefixes collapse into shared paths and the text drives a single walk through the automaton. Each character makes one forward move plus failure hops that amortize to `O(1)` over the whole scan, and the output walk emits exactly the `z` matches found. Nothing in the loop scales with `k`, the pattern count, so a thousand signatures cost the same per character as one.
+> [!QUESTION]- Why is Aho-Corasick's search cost independent of the number of patterns?
+>
+> - All patterns share one trie, so common prefixes collapse into shared paths and the text drives a single walk through the automaton.
+> - Each text character causes one goto transition (plus failure-link hops that are amortized `O(1)` overall, same argument as KMP), regardless of how many patterns exist.
+> - Output links let a single state report every pattern that ends there, so multiple simultaneous matches cost only the `z` matches emitted, not a re-scan per pattern.
+> - This is exactly why intrusion-detection engines like Snort and `fgrep -f` use it: they match thousands of signatures against a stream in one `O(n+z)` pass instead of thousands of separate scans.
 
-> [!QUESTION]- What does a failure link point to, and what invariant holds after reading `i` characters?
-> A state's failure link points to the state for the longest proper suffix of its string that is still a prefix of some pattern — KMP's longest-prefix-suffix relation lifted onto the trie. That link maintains the invariant that after `i` characters the automaton sits at the state whose string is the longest suffix of the first `i` characters that is a prefix of some pattern, which is precisely the state from which every match ending at `i` can be read.
+> [!QUESTION]- What are failure links and output links, and what breaks if you omit each?
+>
+> - A failure link points from a state (string `s`) to the state for the longest proper suffix of `s` that is still a prefix of some pattern — the trie-wide version of KMP's `lps` — and drives correct transitions on a mismatch.
+> - Omitting failure links breaks the automaton entirely: on a miss it has no way to resume without rescanning the text.
+> - Output links chain a state to shorter patterns that also end there (like `he` ending inside `she`), and walking them enumerates all simultaneous matches.
+> - Omitting output links keeps the scan correct in position but silently misses every nested pattern — the classic bug of dropping `he` when matching `{he, she, hers}` in `"ushers"`.
 
-> [!QUESTION]- What do output links add, and what fails silently without them?
-> A single state can complete several patterns when a shorter one is a suffix of a longer one, such as `he` ending inside `she`. Output links chain each state to the nearest shorter pattern that also ends there, and walking the chain enumerates every simultaneous match. Without them the scan is still correctly positioned but reports only the pattern the current node ends, silently dropping the nested ones — the classic loss of `he` when matching `{ he, she, hers }` in `ushers`.
-
-> [!QUESTION]- Why does adding a pattern after construction force a rebuild?
-> Failure and output links encode suffix relationships across the entire pattern set and are resolved together by the single construction BFS. A new pattern can change the longest-suffix target of many existing states, so the links are no longer valid and must be recomputed. That is why the automaton fits a dictionary built once and reused across texts rather than one that changes per query.
+> [!QUESTION]- How is the automaton built, and why does the order matter?
+>
+> - Insert all patterns into a trie, then fill failure and output links with a breadth-first traversal from the root.
+> - BFS processes nodes in increasing depth, so a node's failure target — always at a strictly smaller depth — is already finalized when computed.
+> - A node's failure link is found by following its parent's failure link and taking the child on the same edge character, recursing toward the root until one exists; its output link is the nearest failure-reachable pattern-ending node.
+> - Getting the order wrong (e.g. DFS) would reference unfinished failure links and produce a broken automaton, which is why the level-by-level guarantee is load-bearing, not incidental.
 
 ## References
 
-- [Efficient String Matching: An Aid to Bibliographic Search](https://dl.acm.org/doi/10.1145/360825.360855) — Aho and Corasick's original 1975 paper (CACM), introducing the goto/failure/output construction and its linear-time search bound.
-- [Aho-Corasick algorithm (cp-algorithms)](https://cp-algorithms.com/string/aho_corasick.html) — trie plus suffix (failure) links, the BFS construction, the dictionary-link walk, and a reference implementation with complexity discussion.
-- [Aho–Corasick algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Aho%E2%80%93Corasick_algorithm) — worked automaton example, the relationship to KMP, and applications in intrusion detection and `fgrep`.
+- [Aho-Corasick algorithm -- construction, failure and output links, and applications (Wikipedia)](https://en.wikipedia.org/wiki/Aho%E2%80%93Corasick_algorithm)
+- [Aho-Corasick automaton -- trie plus suffix links with implementation and complexity (cp-algorithms)](https://cp-algorithms.com/string/aho_corasick.html)
+- [Efficient String Matching: An Aid to Bibliographic Search -- the original 1975 Aho and Corasick paper (CACM)](https://dl.acm.org/doi/10.1145/360825.360855)

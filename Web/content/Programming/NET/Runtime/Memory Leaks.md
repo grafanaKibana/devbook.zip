@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.662Z
-modified: 2026-07-08T15:01:12.663Z
-published: 2026-07-08T15:01:12.663Z
+created: 2026-07-11T21:45:07.941Z
+modified: 2026-07-11T21:45:07.941Z
+published: 2026-07-11T21:45:07.941Z
 topic:
   - Programming
 subtopic:
   - NET
+summary: Useless objects still reachable from GC roots, plus unfreed unmanaged memory and handles.
 level:
   - "4"
 priority: High

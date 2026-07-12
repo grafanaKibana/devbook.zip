@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.667Z
-modified: 2026-07-08T15:01:12.667Z
-published: 2026-07-08T15:01:12.667Z
+created: 2026-07-11T21:47:32.473Z
+modified: 2026-07-11T21:47:32.473Z
+published: 2026-07-11T21:47:32.473Z
 topic:
   - SDLC
 subtopic:
   - SDLC
+summary: Structured ways to forecast effort or complexity of development work under uncertainty.
 level:
   - "4"
 priority: Medium

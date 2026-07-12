@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Reusable coding idioms that turn brute-force solutions efficient; recognising the pattern is the hard part."
 tags:
   - FolderNote
 publish: true
@@ -16,9 +17,12 @@ status: Creation
 
 Patterns are reusable problem-solving idioms — not full named algorithms like Dijkstra, but recurring *techniques* you apply to turn a brute-force solution into an efficient one. Recognising the pattern is usually the hard part of a coding problem; once you see "this is a sliding window," the implementation follows. They differ from [[Home/Computer Science/Algorithms/Paradigms/Paradigms|paradigms]] (DP, greedy, backtracking), which are broader *design philosophies* — patterns are the concrete moves.
 
-## Algorithm Selection
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
 
-The table is the note. Read the middle column first — recognising the signal is the hard part; the implementation follows.
+## Algorithm Selection
 
 | Pattern | The move | Tells you to reach for it | Typical win |
 |---|---|---|---|

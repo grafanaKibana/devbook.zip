@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Finds the extremum of a unimodal function by splitting the range in thirds each step."
 level:
   - "4"
 priority: Medium

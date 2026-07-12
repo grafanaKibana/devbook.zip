@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.659Z
-modified: 2026-07-08T15:01:12.660Z
-published: 2026-07-08T15:01:12.660Z
+created: 2026-07-11T21:44:25.510Z
+modified: 2026-07-11T21:44:25.511Z
+published: 2026-07-11T21:44:25.511Z
 topic:
   - Programming
 subtopic:
   - NET
+summary: A standard boundary between .NET web servers and apps, now mainly legacy.
 level:
   - "3"
 priority: Low

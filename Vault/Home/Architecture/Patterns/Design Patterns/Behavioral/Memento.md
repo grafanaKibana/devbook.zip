@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Patterns
+summary: "Captures and externalizes an object's internal state so it can be restored later, without violating encapsulation."
 level:
   - "1"
 priority: High

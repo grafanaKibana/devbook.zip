@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "A type-safe function pointer for storing, passing, and invoking methods as values."
 level:
   - "4"
 priority: Medium

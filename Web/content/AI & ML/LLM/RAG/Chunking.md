@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.315Z
-modified: 2026-07-08T15:01:12.316Z
-published: 2026-07-08T15:01:12.316Z
+created: 2026-07-11T21:45:04.161Z
+modified: 2026-07-11T21:45:04.161Z
+published: 2026-07-11T21:45:04.161Z
 topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "Sets the unit of retrieval: too wide adds noise, too narrow splits meaning."
 level:
   - "2"
 priority: High

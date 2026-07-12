@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "A binary indexed tree computing prefix sums and point updates in O(log n) with one array."
 level:
   - "4"
 priority: Medium

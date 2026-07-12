@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "Data-centric C# types with generated value equality, ToString, and with-expressions."
 level:
   - "4"
 priority: Medium

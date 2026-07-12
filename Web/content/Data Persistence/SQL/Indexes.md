@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.526Z
-modified: 2026-07-08T15:01:12.526Z
-published: 2026-07-08T15:01:12.526Z
+created: 2026-07-11T21:46:51.917Z
+modified: 2026-07-11T21:46:51.917Z
+published: 2026-07-11T21:46:51.917Z
 topic:
   - Data Persistence
 subtopic:
   - SQL
+summary: A sorted B+ tree that avoids full table scans, trading write and storage overhead.
 level:
   - "4"
 priority: High

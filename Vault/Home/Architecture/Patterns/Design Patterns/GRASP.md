@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Patterns
+summary: "Nine principles for deciding which class or object should be responsible for a given behavior in object-oriented design."
 level:
   - "1"
 priority: High

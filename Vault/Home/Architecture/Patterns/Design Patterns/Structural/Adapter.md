@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Patterns
+summary: "Adapter converts an existing class's interface into a different one clients expect, translating calls without changing either side."
 level:
   - "2"
 priority: High

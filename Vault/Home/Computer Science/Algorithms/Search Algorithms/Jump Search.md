@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Steps a sorted array in fixed blocks of size root n, then scans back one block."
 level:
   - "4"
 priority: Medium

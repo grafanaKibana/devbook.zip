@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "A hash-table-backed collection of unique values with O(1) average membership, inserts, and removals."
 level:
   - "4"
 priority: Medium

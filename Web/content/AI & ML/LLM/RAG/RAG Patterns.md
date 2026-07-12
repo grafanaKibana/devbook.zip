@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.323Z
-modified: 2026-07-08T15:01:12.327Z
-published: 2026-07-08T15:01:12.327Z
+created: 2026-07-11T21:44:59.665Z
+modified: 2026-07-11T21:44:59.665Z
+published: 2026-07-11T21:44:59.665Z
 topic:
   - AI & ML
 subtopic:
   - LLM
+summary: A catalog of production RAG patterns, each naming the failure it fixes and the risk it adds.
 level:
   - "2"
 priority: High

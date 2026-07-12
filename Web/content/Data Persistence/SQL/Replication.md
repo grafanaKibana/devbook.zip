@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.528Z
-modified: 2026-07-08T15:01:12.528Z
-published: 2026-07-08T15:01:12.528Z
+created: 2026-07-11T21:46:59.949Z
+modified: 2026-07-11T21:46:59.949Z
+published: 2026-07-11T21:46:59.949Z
 topic:
   - Data Persistence
 subtopic:
   - SQL
+summary: Keeping copies of data on multiple nodes to spread reads and survive failures.
 level:
   - "4"
 priority: High

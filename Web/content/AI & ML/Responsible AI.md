@@ -1,11 +1,12 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.334Z
-modified: 2026-07-08T15:01:12.335Z
-published: 2026-07-08T15:01:12.335Z
+created: 2026-07-11T21:43:40.174Z
+modified: 2026-07-11T21:43:40.175Z
+published: 2026-07-11T21:43:40.175Z
 topic:
   - AI & ML
 subtopic: []
+summary: Designing and operating AI so failures are bounded, decisions explainable, and impact fair.
 level:
   - "3"
 priority: Medium

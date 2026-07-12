@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "A bounded cache evicting the least-recently-used item in O(1) via a hash map plus doubly linked list."
 level:
   - "4"
 priority: High

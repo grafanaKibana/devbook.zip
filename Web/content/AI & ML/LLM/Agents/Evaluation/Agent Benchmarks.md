@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.292Z
-modified: 2026-07-08T15:01:12.293Z
-published: 2026-07-08T15:01:12.293Z
+created: 2026-07-11T21:45:42.524Z
+modified: 2026-07-11T21:45:42.526Z
+published: 2026-07-11T21:45:42.526Z
 topic:
   - AI & ML
 subtopic:
   - LLM
+summary: Public task suites scoring multi-step tool use; useful to shortlist models, not to decide.
 level:
   - "3"
 priority: Medium

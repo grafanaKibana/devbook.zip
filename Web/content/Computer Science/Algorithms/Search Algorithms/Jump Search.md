@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T05:34:20.668Z
-modified: 2026-07-11T05:34:20.668Z
-published: 2026-07-11T05:34:20.668Z
+created: 2026-07-11T21:57:53.532Z
+modified: 2026-07-11T21:57:53.532Z
+published: 2026-07-11T21:57:53.532Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Steps a sorted array in fixed blocks of size root n, then scans back one block.
 level:
   - "4"
 priority: Medium
@@ -15,121 +16,94 @@ status: Creation
 
 # Intro
 
-A sorted log sits on magnetic tape or arrives as a forward-only stream: reading the next record is cheap, but seeking to an arbitrary offset means winding the medium. Binary Search would probe offset `n/2`, then `n/4`, then `3n/4` — three arbitrary seeks that dominate the cost here. Linear Search never seeks, yet may read all `n` records. Jump Search reads only every `m`-th record — the block ends `a[m−1], a[2m−1], a[3m−1], …` — advancing in fixed forward strides until a block's end value reaches or passes the target, then scanning the one block that must contain it.
+Jump search finds a target in a sorted array by stepping forward in fixed blocks of size `m` until it overshoots the target, then linear-scanning backward within the last block. Jump `m, 2m, 3m, …` until `a[k·m] >= target`, then walk `[(k−1)·m, k·m]` one element at a time. With `n/m` jumps and up to `m` steps in the final scan, total work is `n/m + m`, minimized at `m = √n`, giving `O(√n)`.
 
-Two properties justify skipping `m − 1` records per stride. Ordering lets `a[block] < target` prove the target lies further ahead, so the skipped records cannot match. A cheap forward stride keeps each jump close to the cost of reading a single record. Jump Search keeps Binary Search's ordering requirement but drops its random-access requirement: it never seeks to an arbitrary position, only forward by a fixed stride and back by at most one block.
+That `O(√n)` is asymptotically worse than [[Binary Search]]'s `O(log n)`, so on a normal in-memory array binary search always wins and you should use it. Jump search has exactly one justification: it **never seeks backward by more than one block**. Binary search bounces across the whole array — a probe at index `n/2`, then `n/4`, then `3n/4` — which is cheap on RAM but expensive on media where random access is not `O(1)`: magnetic tape, a singly linked structure, a paged/streamed source where seeking forward is cheap but rewinding is not. When the cost model is "stepping forward is cheap, jumping around is expensive," jump search's bounded backward movement beats binary search's scattered probes. Absent that constraint, it is a strictly worse [[Binary Search]].
 
-**Core condition:** sorted input where a forward stride is cheaper than an arbitrary seek → `n/m` jumps plus an `m`-element scan → minimized at `m = √n` for `O(√n)` time and `O(1)` space.
+## How It Works
 
-The move that defines the algorithm is the overshoot: the first block end that crosses the target, collapsing the search to a single block.
+1. Choose block size `m = ⌊√n⌋`.
+2. Jump forward: check `a[m], a[2m], a[3m], …`, advancing the block boundary while `a[block] < target`. Each jump moves forward by `m`.
+3. Stop at the first block whose end value is `>= target` (or when you pass the array end). The target, if present, lies in the previous block.
+4. Linear-scan that block from its start until you reach or pass the target. Return the index on a hit, `−1` otherwise.
 
-> [!NOTE] Visualization pending
-> Planned StepTrace: a search card jumping ahead in fixed blocks of size √n until a block's end value exceeds the target, then a linear scan backward within that block. No matching renderer exists in `engine.js` yet.
+**Why `m = √n` is optimal:** the two phases trade off. Larger blocks mean fewer jumps (`n/m`) but a longer final scan (`m`); smaller blocks mean the reverse. Minimizing `f(m) = n/m + m` by setting `f′(m) = −n/m² + 1 = 0` gives `m = √n`, and the total cost `2√n` follows. This is the same block-decomposition idea behind √-decomposition data structures.
 
-## Why √n blocks work
+Complexity: `O(√n)` time, `O(1)` space. Worst case is a target in the last block or absent, forcing all `n/m` jumps plus a full `m`-element scan — still `O(√n)`. Critically, only forward jumps happen; the sole backward movement is the bounded final scan of at most `m` elements.
 
-Each jump is a proof, not a guess. Block `k` spans indices `[(k−1)m, k·m − 1]`, so its end value is `a[k·m − 1]`. Because the array is sorted, `a[k·m − 1] < target` guarantees every element in the first `k` blocks is at most `a[k·m − 1]` and therefore below the target — none can match, and the stride skips all of them unread. The search stops at the first block whose end satisfies `a[k·m − 1] >= target`; the previous block ended below the target, so monotonic order forces the target, if present, into this single block. The scan then walks that block forward from its start. The only backward movement in the whole algorithm is re-entering that last block; every other move is a forward stride.
+## Example
 
-The stride size sets the balance between the two phases. Reaching a late target takes up to `n/m` jumps, and scanning the final block takes up to `m` steps, so total work is `f(m) = n/m + m`. The jump count falls as `m` grows while the scan lengthens, and `f'(m) = −n/m² + 1` is zero at `m = √n`, where the two phases are equal and the total is `2√n`. The bound depends on tying `m` to `n`: a fixed `m = 100` holds the jump phase at `n/100`, still linear in `n`, so large input degrades to `O(n)`.
+```csharp
+public static int JumpSearch(int[] arr, int target)
+{
+    int n = arr.Length;
+    if (n == 0) return -1;
 
-## Complexity
+    int step = (int)Math.Floor(Math.Sqrt(n));
+    int prev = 0;
 
-| Case | Time | Auxiliary space | Cause |
-| --- | --- | --- | --- |
-| Best | `O(1)` | `O(1)` | The target sits at index 0 — the first scanned position — so the scan matches on its first step. |
-| Average | `O(√n)` | `O(1)` | A few jumps locate the block, then a partial scan finds the target; both phases contribute `√n`. |
-| Worst | `O(√n)` | `O(1)` | The target lies in the last block or is absent — all `n/m` jumps run, then a full `m`-element scan. |
+    // Jump forward until the block end reaches or passes the target.
+    while (arr[Math.Min(step, n) - 1] < target)
+    {
+        prev = step;
+        step += (int)Math.Floor(Math.Sqrt(n));
+        if (prev >= n) return -1;   // ran off the end without reaching target
+    }
 
-The bounds hold only at the optimal block size `m = √n`; a constant block size leaves the jump phase linear. Both phases read an element by position and advance by a fixed stride, so the analysis assumes sorted, indexable input even though the algorithm's niche is media where that indexing is expensive.
+    // Linear scan the identified block; only bounded backward-adjacent movement.
+    for (int i = prev; i < Math.Min(step, n); i++)
+    {
+        if (arr[i] == target) return i;
+    }
 
-## Reference drawer
+    return -1;
+}
+```
 
-> [!ABSTRACT]- Control flow
->
-> ```mermaid
-> flowchart TD
->   A[Sorted input and target] --> B[Set block size to floor of square root of n]
->   B --> C{value at block end below target}
->   C -->|Yes| D[Advance block forward by one stride]
->   D --> E{block start past array end}
->   E -->|Yes| Z[Target is absent]
->   E -->|No| C
->   C -->|No| F[Scan the identified block from its start]
->   F --> Y[Return the matching index or absent]
-> ```
+## Diagram
 
-> [!EXAMPLE]- C# implementation
->
-> ```csharp
-> public static int JumpSearch(int[] values, int target)
-> {
->     var n = values.Length;
->     if (n == 0)
->     {
->         return -1;
->     }
->
->     var block = (int)Math.Floor(Math.Sqrt(n));
->     var prev = 0;
->     var step = block;
->
->     // Jump forward until a block end reaches or passes the target.
->     while (values[Math.Min(step, n) - 1] < target)
->     {
->         prev = step;
->         step += block;
->         if (prev >= n)
->         {
->             return -1;   // ran off the end without reaching the target
->         }
->     }
->
->     // Scan the single block that can contain the target.
->     for (var i = prev; i < Math.Min(step, n); i++)
->     {
->         if (values[i] == target)
->         {
->             return i;
->         }
->     }
->
->     return -1;
-> }
-> ```
->
-> Every block-end read clamps with `Math.Min(step, n) - 1`; the final block is usually shorter than `block`, so an unclamped probe would index past the array.
+```mermaid
+flowchart TD
+  A[Sorted array and target] --> B[Set step to floor of square root of n]
+  B --> C{value at block end less than target}
+  C -->|Yes| D[Advance block forward by step]
+  D --> E{block start past array end}
+  E -->|Yes| Z[Return minus one]
+  E -->|No| C
+  C -->|No| F[Linear scan the previous block]
+  F --> Y[Return found index or minus one]
+```
 
-## When the assumptions stop holding
+## Pitfalls
 
-On an ordinary array, indexing is already `O(1)`, so Binary Search's `O(log n)` strictly dominates Jump Search's `O(√n)` and the bounded-backward property buys nothing — every seek is cheap regardless. The advantage exists only under a cost model where a forward stride of `m` is far cheaper than an arbitrary jump: block-addressed storage, magnetic tape, a singly linked structure that supports only forward stepping, or a streamed source that cannot rewind cheaply. Outside that model Jump Search is a slower variant of Binary Search.
-
-Unsorted input breaks the jump proof. On `[2, 40, 9, 55, 13, 91, 7]` a search for `9` reads block ends that are not monotonic; a stride can land on `55`, satisfy `a[block] >= target`, and hand the scan a block that never held the value, while `9` sits in a block that was already skipped. Nothing crashes — the result is a silent false negative. Sorting first costs `O(n log n)`, which only pays back across repeated searches.
-
-The final block is usually shorter than `m`, so the block-end index `k·m − 1` can fall past the array. Each block-end access clamps to `Math.Min(step, n) - 1`, and the jump loop halts once `prev` passes `n`; dropping either guard reads out of bounds on the last stride.
-
-## Comparison
-
-| Strategy | Lookup time | Required input | Access model | Stronger case | Weaker case |
-| --- | --- | --- | --- | --- | --- |
-| [[Linear Search]] | `O(n)` | Any order | Forward-only | Unsorted or tiny data, or a single lookup | Large sorted data searched repeatedly |
-| Jump Search | `O(√n)` | Sorted | Forward stride + one backward block | Sorted sequential/block media where arbitrary seeks are costly | Random-access memory, where `O(log n)` is available |
-| [[Binary Search]] | `O(log n)` | Sorted | Arbitrary random access | Any sorted, indexable array | Media where reaching `n/2` is expensive |
-| [[Exponential Search]] | `O(log i)` | Sorted, unbounded or front-clustered target | Arbitrary random access | Unknown length or targets near the front | Costly random access, or targets spread late |
-
-Jump Search occupies a thin band between Linear and Binary Search: it needs the sorted order Binary Search needs but only the forward-stride access Linear Search needs. That combination earns its `O(√n)` when a stride of `√n` is cheap and an arbitrary probe is not — block-addressed storage, tape, or a forward-only linked structure. On random-access memory every seek is already `O(1)`, so Binary Search's `O(log n)` dominates and Jump Search reduces to a slower version of it. Exponential Search shares Binary Search's random-access assumption and pulls ahead when the length is unknown or the target clusters near the front.
+- **Wrong block size throws away the win** — the `O(√n)` bound holds only at `m = √n`. A fixed constant block (say 100) gives `O(n)` on large arrays because the jump phase dominates; too large a block makes the linear scan dominate. Compute `m` from `n`, not a hardcoded constant.
+- **Last-block boundary errors** — the final block usually is not full, so probing `a[k·m]` can index past the end. Clamp every access with `Math.Min(step, n) − 1`, and make sure the terminating jump condition fires before `prev` exceeds `n`.
+- **Using it where random access is `O(1)`** — on an ordinary array jump search is simply a slower [[Binary Search]]. Its `O(√n)` only earns its keep when backward seeks are genuinely expensive (tape, linked lists, streamed pages); reaching for it on in-memory data is a mistake, not an optimization.
 
 ## Questions
 
-> [!QUESTION]- Why is `m = √n` the block size that minimizes total work?
-> The cost is `n/m` jumps to reach the target's block plus up to `m` steps to scan it, so `f(m) = n/m + m`. Its derivative `−n/m² + 1` is zero at `m = √n`, where the two phases are equal and the total is `2√n`. Larger blocks lengthen the scan; smaller blocks multiply the jumps. A constant block size leaves the jump phase linear in `n`, so the bound degrades to `O(n)`.
+> [!QUESTION]- Why is `m = √n` the optimal block size for jump search?
+>
+> - The cost has two parts: `n/m` jumps to reach the target's block and up to `m` steps to scan it.
+> - Total cost is `f(m) = n/m + m`.
+> - Minimizing gives `f′(m) = −n/m² + 1 = 0`, so `m = √n` and the total is `2√n = O(√n)`.
+> - Larger blocks over-lengthen the scan; smaller blocks over-multiply the jumps — `√n` balances the two phases exactly.
 
-> [!QUESTION]- What cost model makes Jump Search preferable to Binary Search despite being asymptotically slower?
-> Binary Search probes arbitrary indices across the whole range, which is `O(1)` on RAM but expensive on tape, a singly linked list, or a streamed/paged source. Jump Search only steps forward by a fixed stride and re-enters at most one block, so its access pattern stays local. When a forward stride is far cheaper than an arbitrary seek, that locality outweighs the worse asymptotic bound; on random-access memory it does not.
+> [!QUESTION]- When would jump search ever beat binary search, given it is asymptotically slower?
+>
+> - Binary search probes scattered indices across the whole array — cheap on RAM, expensive where random access is not `O(1)`.
+> - Jump search only ever steps forward, and its single backward movement is a bounded scan of at most `√n` adjacent elements.
+> - On tape, singly linked structures, or streamed/paged sources where forward reads are cheap but seeking back is costly, that bounded locality beats binary search's jumping around.
+> - On any ordinary array it loses — the win exists only under the expensive-backward-seek cost model.
 
-> [!QUESTION]- What breaks when Jump Search runs on unsorted input?
-> The jump phase assumes `a[block] < target` proves the target lies further ahead, which requires monotonic order. On unsorted data a block end can exceed the target while the matching value sits in an earlier, already-skipped block, so the scan examines the wrong block. The failure is a silent false negative rather than a crash.
+> [!QUESTION]- Why does jump search require sorted data, and what breaks without it?
+>
+> - The jump phase relies on `a[block] < target` implying the target cannot be before that block — that inference needs monotonic ordering.
+> - On unsorted data an early block might straddle the target's value by accident, so a passing jump gives no guarantee about what lies behind it.
+> - The algorithm would skip past the target and the final block scan would look in the wrong place.
+> - Like binary search, its speed is conditional on the sorted precondition; on unsorted input fall back to [[Linear Search]].
 
 ## References
 
 - [Jump search (Wikipedia)](https://en.wikipedia.org/wiki/Jump_search) — the block-step scheme and the `√n` optimality derivation.
-- [Jump Search (GeeksforGeeks)](https://www.geeksforgeeks.org/jump-search/) — worked example, block-size analysis, and the comparison with binary search.
+- [Jump search (GeeksforGeeks)](https://www.geeksforgeeks.org/jump-search/) — worked example, block-size analysis, and comparison with binary search.

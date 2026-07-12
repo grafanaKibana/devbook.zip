@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "ASP.NET Core framework for real-time, bidirectional server and client messaging."
 level:
   - "3"
 priority: Medium

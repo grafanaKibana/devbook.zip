@@ -3,6 +3,7 @@ topic:
   - Networks
 subtopic:
   - Protocols
+summary: "The internet's distributed directory mapping hostnames to records like IP addresses."
 level:
   - "3"
 priority: Medium

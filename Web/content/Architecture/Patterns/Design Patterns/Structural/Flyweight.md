@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.476Z
-modified: 2026-07-08T15:01:12.476Z
-published: 2026-07-08T15:01:12.476Z
+created: 2026-07-11T18:18:18.183Z
+modified: 2026-07-11T18:18:18.187Z
+published: 2026-07-11T18:18:18.187Z
 topic:
   - Architecture
 subtopic:
   - Patterns
+summary: Flyweight cuts memory by sharing immutable intrinsic state across many fine-grained objects while callers pass unique extrinsic state.
 level:
   - "1"
 priority: High

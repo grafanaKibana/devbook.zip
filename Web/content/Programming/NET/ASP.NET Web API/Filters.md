@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.644Z
-modified: 2026-07-08T15:01:12.645Z
-published: 2026-07-08T15:01:12.645Z
+created: 2026-07-11T21:44:36.607Z
+modified: 2026-07-11T21:44:36.611Z
+published: 2026-07-11T21:44:36.611Z
 topic:
   - Programming
 subtopic:
   - NET
+summary: Logic running around controller action stages for cross-cutting MVC concerns.
 level:
   - "2"
 priority: Medium

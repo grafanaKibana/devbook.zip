@@ -3,6 +3,7 @@ topic:
   - Networks
 subtopic:
   - Transport & Sockets
+summary: "A connectionless transport sending independent datagrams with no delivery or ordering guarantees."
 level:
   - "3"
 priority: Medium

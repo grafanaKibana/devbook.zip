@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.368Z
-modified: 2026-07-08T15:01:12.370Z
-published: 2026-07-08T15:01:12.370Z
+created: 2026-07-11T18:17:44.859Z
+modified: 2026-07-11T18:17:44.860Z
+published: 2026-07-11T18:17:44.860Z
 topic:
   - Architecture
 subtopic:
   - Distributed Systems
+summary: Distributing incoming traffic across multiple service instances so no single instance becomes a bottleneck or point of failure.
 level:
   - "2"
 priority: High

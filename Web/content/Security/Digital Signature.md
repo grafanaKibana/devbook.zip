@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.675Z
-modified: 2026-07-08T15:01:12.679Z
-published: 2026-07-08T15:01:12.679Z
+created: 2026-07-11T21:48:29.585Z
+modified: 2026-07-11T21:48:29.586Z
+published: 2026-07-11T21:48:29.586Z
 topic:
   - Security
 subtopic:
   - Security
+summary: Proves a message's authenticity and integrity without hiding its content.
 level:
   - "2"
 priority: Medium

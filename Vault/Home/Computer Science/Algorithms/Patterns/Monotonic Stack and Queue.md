@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "A stack or deque kept sorted by popping dominated elements, answering next-greater and window-extremum queries in linear time."
 level:
   - "4"
 priority: Medium

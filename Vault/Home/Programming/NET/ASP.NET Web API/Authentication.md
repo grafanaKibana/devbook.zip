@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "Verifying who a caller is and populating HttpContext.User with a ClaimsPrincipal."
 level:
   - "1"
 priority: Medium

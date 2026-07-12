@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.657Z
-modified: 2026-07-08T15:01:12.657Z
-published: 2026-07-08T15:01:12.657Z
+created: 2026-07-11T21:45:58.836Z
+modified: 2026-07-11T21:45:58.837Z
+published: 2026-07-11T21:45:58.837Z
 topic:
   - Programming
 subtopic:
   - NET
+summary: A value type holding its value inline, so assignment copies it.
 level:
   - "4"
 priority: Medium

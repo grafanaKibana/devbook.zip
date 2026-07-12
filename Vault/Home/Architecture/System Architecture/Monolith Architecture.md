@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - System Architecture
+summary: "An application deployed as one unit and codebase, with all components sharing a single database."
 level:
   - "4"
 priority: Medium

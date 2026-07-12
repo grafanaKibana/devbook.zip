@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "A binary interval hierarchy answering associative range queries and point updates in O(log n)."
 level:
   - "4"
 priority: Medium

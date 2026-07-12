@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.683Z
-modified: 2026-07-08T15:01:12.683Z
-published: 2026-07-08T15:01:12.683Z
+created: 2026-07-11T21:48:36.493Z
+modified: 2026-07-11T21:48:36.494Z
+published: 2026-07-11T21:48:36.494Z
 topic:
   - Security
 subtopic:
   - Security
+summary: Keeping credentials out of source code, distributing them to workloads, and rotating safely.
 level:
   - "3"
 priority: High

@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: ".NET's model for non-blocking I/O that releases the thread while awaiting work."
 level:
   - "4"
 priority: High

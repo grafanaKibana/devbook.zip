@@ -3,6 +3,7 @@ topic:
   - Data Persistence
 subtopic:
   - ORMs
+summary: "Microsoft's .NET ORM: maps C# classes to tables, translates LINQ, and manages migrations."
 level:
   - "4"
 priority: High

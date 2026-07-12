@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "Making intermediate reasoning explicit with Chain-of-Thought, Self-Consistency, and Tree of Thoughts."
 level:
   - "3"
 priority: Medium

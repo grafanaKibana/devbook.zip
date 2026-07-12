@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "Logic running around controller action stages for cross-cutting MVC concerns."
 level:
   - "2"
 priority: Medium

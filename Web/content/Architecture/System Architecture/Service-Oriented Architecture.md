@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.491Z
-modified: 2026-07-08T15:01:12.492Z
-published: 2026-07-08T15:01:12.492Z
+created: 2026-07-11T18:17:38.051Z
+modified: 2026-07-11T18:17:38.069Z
+published: 2026-07-11T18:17:38.069Z
 topic:
   - Architecture
 subtopic:
   - System Architecture
+summary: Structures a system as loosely coupled services communicating over standardized protocols, historically integrated through an Enterprise Service Bus.
 level:
   - "3"
 priority: Medium

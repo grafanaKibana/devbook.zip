@@ -3,6 +3,7 @@ topic:
   - Development Practices
 subtopic:
   - Paradigms
+summary: "Systems built around immutable events and reactions, decoupling producers from consumers."
 level:
   - "3"
 priority: Medium

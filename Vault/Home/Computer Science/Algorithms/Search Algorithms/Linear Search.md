@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Scans elements one by one until a match; O(n) and works on any data."
 level:
   - "4"
 priority: Medium

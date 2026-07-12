@@ -1,11 +1,12 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.530Z
-modified: 2026-07-08T15:01:12.530Z
-published: 2026-07-08T15:01:12.530Z
+created: 2026-07-11T21:47:05.936Z
+modified: 2026-07-11T21:47:05.936Z
+published: 2026-07-11T21:47:05.936Z
 topic:
   - DevOps
 subtopic: []
+summary: Packages an application and its dependencies into an isolated, portable container.
 level:
   - "2"
 priority: High

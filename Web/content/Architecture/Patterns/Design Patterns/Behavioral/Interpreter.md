@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.383Z
-modified: 2026-07-08T15:01:12.383Z
-published: 2026-07-08T15:01:12.383Z
+created: 2026-07-11T18:18:21.467Z
+modified: 2026-07-11T18:18:21.467Z
+published: 2026-07-11T18:18:21.467Z
 topic:
   - Architecture
 subtopic:
   - Patterns
+summary: Defines a grammar for a language and an interpreter that evaluates sentences, composing complex expressions from simpler ones.
 level:
   - "3"
 priority: High

@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.312Z
-modified: 2026-07-08T15:01:12.313Z
-published: 2026-07-08T15:01:12.313Z
+created: 2026-07-11T21:44:33.843Z
+modified: 2026-07-11T21:44:33.843Z
+published: 2026-07-11T21:44:33.843Z
 topic:
   - AI & ML
 subtopic:
   - LLM
+summary: Making intermediate reasoning explicit with Chain-of-Thought, Self-Consistency, and Tree of Thoughts.
 level:
   - "3"
 priority: Medium

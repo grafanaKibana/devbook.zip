@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "Dictionary, hash set, and Bloom filter, trading element ordering for near-O(1) key access."
 tags:
   - FolderNote
 level:
@@ -18,6 +19,11 @@ Hash-based structures buy near-O(1) access by spending a hash function: the key'
 
 In .NET this family is `Dictionary<TKey, TValue>` and friends ([[HashMap]]), `HashSet<T>` ([[Hash Set]]), and the roll-your-own [[Bloom Filter]]. Reach for it whenever the access pattern is "by key" or "seen before?" and ordering doesn't matter — the price of hashing is losing order: enumeration order is unspecified for the map and the set, and the Bloom filter can't enumerate at all — it stores bits, not elements.
 
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
+
 ## Choosing Within the Family
 
 Three structures, one axis: how much you store per element.
@@ -30,7 +36,14 @@ Three structures, one axis: how much you store per element.
 | Delete | Yes | Yes | No (needs counting/cuckoo variants) |
 | .NET | `Dictionary<TKey,TValue>` | `HashSet<T>` | None built in — `BitArray` + k hashes |
 
-Decision path: need a value back → [[HashMap]]. Need only membership (dedupe, visited tracking, set algebra) → [[Hash Set]]; a `Dictionary<TKey, bool>` wastes a value slot per entry and hides the intent. Need membership over a set too large to hold exactly, where a small false-positive rate is cheaper than the memory — [[Bloom Filter]]: 100M URLs fit in ~120 MB at 1% false positives, versus many gigabytes as a `HashSet<string>`.
+```mermaid
+flowchart TD
+    A{What do you need?} -->|A value back for a key| B[HashMap]
+    A -->|Only membership: dedupe, visited, set algebra| C[Hash Set]
+    A -->|Membership over a set too large to hold exactly| D[Bloom Filter]
+```
+
+A `Dictionary<TKey, bool>` used for membership wastes a value slot per entry and hides the intent, so prefer [[Hash Set]] there. The [[Bloom Filter]] wins when a small false-positive rate is cheaper than the memory: 100M URLs fit in ~120 MB at 1% false positives, versus many gigabytes as a `HashSet<string>`.
 
 The Bloom filter is not a drop-in third option — it's a *pre-filter* in front of one of the exact structures (or a disk/network lookup). "Definitely not" skips the expensive check; "maybe" falls through to the authoritative source.
 

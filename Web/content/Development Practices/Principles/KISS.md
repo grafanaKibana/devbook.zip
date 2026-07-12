@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.538Z
-modified: 2026-07-08T15:01:12.538Z
-published: 2026-07-08T15:01:12.538Z
+created: 2026-07-11T21:47:50.065Z
+modified: 2026-07-11T21:47:50.065Z
+published: 2026-07-11T21:47:50.065Z
 topic:
   - Development Practices
 subtopic:
   - Principles
+summary: Prefer the simplest solution that meets the actual requirements.
 level:
   - "4"
 priority: High

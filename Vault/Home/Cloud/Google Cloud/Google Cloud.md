@@ -3,6 +3,7 @@ topic:
   - Cloud
 subtopic:
   - Google Cloud
+summary: "Google's public cloud known for data analytics, machine learning, and Kubernetes."
 level:
   - "3"
 priority: Medium
@@ -12,7 +13,7 @@ publish: true
 status: Creation
 ---
 
-# Google Cloud Services Overview
+# Intro
 
 Google Cloud Platform (GCP) is a public cloud platform known for its data analytics, machine learning, and Kubernetes capabilities (Google invented Kubernetes). For .NET engineers, GCP offers strong managed services for data-intensive and AI workloads.
 
@@ -21,6 +22,11 @@ Google Cloud Platform (GCP) is a public cloud platform known for its data analyt
 gcloud config set project "my-project-id"
 # List available services
 gcloud services list --enabled
+```
+
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
 ```
 
 ## Compute
@@ -70,16 +76,6 @@ Globally distributed, strongly consistent relational database. Combines the hori
 Mobile and web application platform. Includes: Firestore (real-time NoSQL document database), Authentication, Hosting, Cloud Messaging (push notifications), and Analytics.
 
 **When to reach for it**: Mobile apps and web apps that need real-time data sync, offline support, and built-in authentication. Firestore is the primary database — it syncs data to clients in real time. Not suitable for complex server-side workloads.
-
-## Cross-Provider Comparison
-
-| Service | GCP | AWS Equivalent | Azure Equivalent |
-|---------|-----|----------------|-----------------|
-| Serverless compute | Cloud Functions | AWS Lambda | Azure Functions |
-| Object storage | Cloud Storage | S3 | Azure Blob Storage |
-| Data warehouse | BigQuery | Redshift | Azure Synapse |
-| Global relational DB | Cloud Spanner | Aurora Global | Cosmos DB (SQL API) |
-| Mobile/real-time DB | Firebase/Firestore | DynamoDB | Cosmos DB |
 
 ## References
 

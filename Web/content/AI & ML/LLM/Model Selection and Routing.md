@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.306Z
-modified: 2026-07-08T15:01:12.308Z
-published: 2026-07-08T15:01:12.308Z
+created: 2026-07-11T21:44:23.122Z
+modified: 2026-07-11T21:44:23.123Z
+published: 2026-07-11T21:44:23.123Z
 topic:
   - AI & ML
 subtopic:
   - LLM
+summary: Routing each request to the cheapest model that can handle it, trading quality against cost and latency.
 level:
   - "2"
 priority: Medium

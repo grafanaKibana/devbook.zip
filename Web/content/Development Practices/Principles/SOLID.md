@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.539Z
-modified: 2026-07-08T15:01:12.539Z
-published: 2026-07-08T15:01:12.539Z
+created: 2026-07-11T21:47:53.398Z
+modified: 2026-07-11T21:47:53.398Z
+published: 2026-07-11T21:47:53.398Z
 topic:
   - Development Practices
 subtopic:
   - Principles
+summary: Five design principles governing how classes relate and where new behavior goes.
 level:
   - "4"
 priority: High

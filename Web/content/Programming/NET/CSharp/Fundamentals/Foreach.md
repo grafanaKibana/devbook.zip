@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.652Z
-modified: 2026-07-08T15:01:12.652Z
-published: 2026-07-08T15:01:12.652Z
+created: 2026-07-11T21:45:12.067Z
+modified: 2026-07-11T21:45:12.067Z
+published: 2026-07-11T21:45:12.067Z
 topic:
   - Programming
 subtopic:
   - NET
+summary: C#'s common way to iterate a sequence, plus iterators and yield.
 level:
   - "4"
 priority: High

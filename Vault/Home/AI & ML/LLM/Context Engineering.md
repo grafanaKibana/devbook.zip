@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "Deliberately deciding what fills the finite context window, and in what order, to maximize useful signal."
 level:
   - "2"
 priority: High

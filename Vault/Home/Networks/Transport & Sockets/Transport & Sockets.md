@@ -3,6 +3,7 @@ topic:
   - Networks
 subtopic:
   - Transport & Sockets
+summary: "The practical network interface: ports, connections, streams, datagrams, and TCP vs UDP."
 tags:
   - FolderNote
 publish: true
@@ -16,6 +17,11 @@ level:
 
 Transport and sockets are the practical interface to the network: ports, connections, streams, datagrams, and backpressure. Understanding TCP vs UDP and basic socket behavior prevents a lot of subtle production issues. Example: TCP guarantees ordered delivery but can amplify latency under loss; UDP trades guarantees for control and speed.
 
-## Links
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
+
+## References
 
 - [Network socket (Wikipedia)](https://en.wikipedia.org/wiki/Network_socket)

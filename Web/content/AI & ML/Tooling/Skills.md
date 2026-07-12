@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.354Z
-modified: 2026-07-08T15:01:12.356Z
-published: 2026-07-08T15:01:12.356Z
+created: 2026-07-11T21:45:57.965Z
+modified: 2026-07-11T21:45:57.967Z
+published: 2026-07-11T21:45:57.967Z
 topic:
   - AI & ML
 subtopic:
   - Tooling
+summary: Reusable instruction packages that give a coding agent specialized domain expertise on demand.
 status: Done
 level:
   - "2"

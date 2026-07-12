@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "Useless objects still reachable from GC roots, plus unfreed unmanaged memory and handles."
 level:
   - "4"
 priority: High

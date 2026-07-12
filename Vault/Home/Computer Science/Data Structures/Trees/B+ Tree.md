@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "The B-tree variant databases ship, with data only in leaves chained for fast range scans."
 level:
   - "4"
 priority: Medium

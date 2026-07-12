@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Patterns
+summary: "Adds new operations to an object hierarchy without modifying its classes, using double dispatch via Accept and Visit."
 level:
   - "3"
 priority: High

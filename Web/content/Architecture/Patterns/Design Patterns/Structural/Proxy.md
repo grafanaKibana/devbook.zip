@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.476Z
-modified: 2026-07-08T15:01:12.477Z
-published: 2026-07-08T15:01:12.477Z
+created: 2026-07-11T21:41:09.191Z
+modified: 2026-07-11T21:41:09.192Z
+published: 2026-07-11T21:41:09.192Z
 topic:
   - Architecture
 subtopic:
   - Patterns
+summary: Provides a surrogate for another object to control access, deferring, caching, or authorizing calls transparently.
 level:
   - "3"
 priority: High
