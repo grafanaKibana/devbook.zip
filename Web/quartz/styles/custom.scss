@@ -644,19 +644,46 @@ body[data-slug="index"] {
 // Explorer is still a fixed hamburger (tablet). Reserving a 320px sidebar column
 // there would strand the dashboard beside an empty gutter, so the fill only
 // starts at 1201px, matching where the Explorer becomes a real sidebar.
+//
+// Gated on a minimum height (36rem) as well as width: the one-viewport fill
+// fixes #quartz-body to 100dvh with overflow:hidden, so if the title + three
+// rows + total bar + footer can't fit — a short landscape window, browser zoom,
+// or an enlarged base font — the bottom would be clipped with no way to scroll.
+// Below 36rem tall the whole fill turns off and the page falls back to the
+// normal scrolling desktop layout, so nothing is ever unreachable. The threshold
+// is in rem so it grows with the user's default font size (enlarged fonts push
+// the fallback in sooner, matching the taller content).
 // ---------------------------------------------------------------------------
+// Height-independent index layout: the home page never has a right sidebar
+// (empty graph/backlinks, TOC has no headings) and runs the Explorer as a real
+// left sidebar at any desktop width. Applied without the min-height gate so the
+// short-viewport fallback below doesn't strand the dashboard beside an empty
+// right column.
 @media all and (min-width: 1201px) {
   body[data-slug="index"] {
+    .page > #quartz-body {
+      grid-template-columns: #{$sidePanelWidth} auto;
+      grid-template-areas:
+        "grid-sidebar-left grid-center"
+        "grid-sidebar-left grid-footer";
+    }
+    .page > #quartz-body > .sidebar.right {
+      display: none;
+    }
+  }
+}
+
+@media all and (min-width: 1201px) and (min-height: 36rem) {
+  body[data-slug="index"] {
+    // Columns, areas, and the hidden right sidebar come from the height-independent
+    // block above; here we only add the one-viewport fill: fix to 100dvh, clip
+    // overflow, and make the center row the flexible track.
     .page > #quartz-body {
       box-sizing: border-box;
       height: 100dvh;
       max-height: 100dvh;
       overflow: hidden;
-      grid-template-columns: #{$sidePanelWidth} auto;
       grid-template-rows: minmax(0, 1fr) auto;
-      grid-template-areas:
-        "grid-sidebar-left grid-center"
-        "grid-sidebar-left grid-footer";
     }
     // The Explorer spans the full height, starts below the fixed header, and
     // scrolls internally if the tree ever outgrows the viewport.
@@ -667,9 +694,6 @@ body[data-slug="index"] {
       padding-bottom: 1rem;
       overflow-y: auto;
       overscroll-behavior: contain;
-    }
-    .page > #quartz-body > .sidebar.right {
-      display: none;
     }
 
     // The center column stacks the title/meta (natural height, positioned by the
