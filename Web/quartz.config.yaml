@@ -3,7 +3,7 @@ configuration:
   pageTitle: DEVBOOK
   pageTitleSuffix: ""
   enableSPA: true
-  enablePopovers: true
+  enablePopovers: false
   analytics:
     provider: vercel
   locale: en-US
@@ -244,7 +244,7 @@ plugins:
         - subtopic
         - status
       excludedProperties: []
-      hidePropertiesView: false
+      hidePropertiesView: true
       delimiters: ---
       language: yaml
     order: 5
