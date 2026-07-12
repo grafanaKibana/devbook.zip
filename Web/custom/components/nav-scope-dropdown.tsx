@@ -255,6 +255,25 @@ const script = `
     return null;
   }
 
+  // The top-level folder entry the *current page* lives under, or null on the home
+  // root / a loose file. Matched by folder href prefix (base-path safe: both the
+  // href and location.pathname carry any configured base), longest match wins so a
+  // topic whose slug is a prefix of another can't shadow the deeper one.
+  function currentTopicEntry(entries) {
+    var here = normalizeSlug(location.pathname);
+    var best = null, bestLen = -1;
+    for (var i = 0; i < entries.length; i++) {
+      var e = entries[i];
+      if (e.kind !== "folder") continue;
+      var base = normalizeSlug(e.href || e.slug.replace(/\\/index$/, ""));
+      if (!base) continue;
+      if (here === base || here.indexOf(base + "/") === 0) {
+        if (base.length > bestLen) { best = e; bestLen = base.length; }
+      }
+    }
+    return best;
+  }
+
   // Below the desktop breakpoint the Explorer folds away behind a hamburger and
   // opens as a panel — full-screen under 768px, a drawer between 768 and 1200.
   // Either way the sidebar itself is just a fixed hamburger box, so the selector
@@ -454,6 +473,13 @@ const script = `
     if (list) list.innerHTML = buildMenu(entries, isAll ? ALL : current);
   }
 
+  // Set on every real navigation (not on plain re-renders). While true, the next
+  // apply() that finds a built tree re-derives the scope from the current URL, so
+  // browsing into a topic auto-scopes to it — and clears the flag. A manual "All
+  // topics" pick doesn't navigate, so it never sets this and thus survives until
+  // the user actually moves to another page.
+  var pendingSync = false;
+
   var busy = false;
   function apply() {
     if (busy) return;
@@ -463,6 +489,15 @@ const script = `
       var explorers = document.querySelectorAll("div.explorer");
       if (!explorers.length) return;
       var map = readMap();
+      if (pendingSync) {
+        // The tree is built asynchronously; do this the first apply() that sees it.
+        var refEntries = topLevelEntries(explorers[0], map);
+        if (refEntries.length) {
+          var topic = currentTopicEntry(refEntries);
+          setStored(topic ? topic.slug : ALL);
+          pendingSync = false;
+        }
+      }
       var current = getStored();
       explorers.forEach(function (explorer) {
         var entries = topLevelEntries(explorer, map);
@@ -498,10 +533,15 @@ const script = `
     });
   }
 
-  function run() { installClickAway(); bindBreakpoint(); observe(); apply(); }
-  document.addEventListener("nav", run);
-  document.addEventListener("render", run);
-  run();
+  function run(doSync) {
+    if (doSync) pendingSync = true;
+    installClickAway(); bindBreakpoint(); observe(); apply();
+  }
+  // A real navigation re-derives the scope from the new URL; a plain re-render
+  // (theme toggle, etc.) must not, so it leaves a manual "All topics" pick intact.
+  document.addEventListener("nav", function () { run(true); });
+  document.addEventListener("render", function () { run(false); });
+  run(true);
 })();
 `
 
