@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Finds the extremum of a unimodal function by splitting the range in thirds each step."
 level:
   - "4"
 priority: Medium
@@ -102,26 +103,10 @@ For membership in a sorted array the boundary is simpler still: binary search do
 > ```
 > Flipping the comparison to `f(m1) > f(m2)` minimizes instead. `eps` must stay above the machine resolution of `double`, or `hi - lo` never crosses it and the loop spins; bounding the iteration count is the safe guard.
 
-## Comparison
-
-The alternatives address the same workload — finding the extremum of a one-parameter function — except the last row, which covers the ordered-lookup use often confused with it.
-
-| Strategy | Work per step | Requires | Stronger case | Weaker case | Semantic property |
-| --- | --- | --- | --- | --- | --- |
-| Ternary search | 2 evals, `O(1)` space | Strict unimodality; no derivative | Cheap-to-evaluate unimodal `f` with no derivative | Expensive `f`; non-unimodal or plateaued `f` | Finds an extremum, not an ordered position |
-| Golden-section search | 1 new eval/step, `O(1)` space | Strict unimodality; no derivative | Expensive `f` where evaluations dominate | Same unimodality limits as ternary | Reuses one probe; same extremum guarantee |
-| Newton / bisection on `f′` | 1 derivative eval/step | A computable, well-behaved `f′` | Smooth `f` with cheap, reliable `f′` | Non-differentiable, noisy, or multi-modal `f` | Converges to a stationary point; needs a convexity check |
-| [[Binary Search]] | 1 comparison/step, `O(1)` space | Sorted or monotone data | An ordered value or a monotone threshold | An objective that rises then falls (no order) | Finds a position under an ordering |
-
-Ternary search occupies a narrow niche: derivative-free optimization of a single unimodal parameter where each evaluation is cheap. Golden-section search is the stronger form of the same idea whenever evaluations are the dominant cost, since it spends one per step instead of two. A reliable derivative moves the advantage to Newton or bisection on `f′`, which converge faster on smooth objectives. For locating an ordered value or a monotone threshold, binary search is strictly better — fewer comparisons and one probe per step. What stays uniquely ternary search's is the unimodal-but-not-monotone, derivative-free case that none of the others handle.
-
 ## Questions
 
 > [!QUESTION]- Why does the smaller of the two probe values mark a discardable third?
 > Under strict unimodality `f` rises to the peak then falls. The probe returning the smaller value sits farther down a slope, on the side away from the peak, so the interval beyond it lies entirely on that slope and cannot contain the maximum. Two probes are needed because a single point on a non-monotone function cannot reveal which side the peak is on.
-
-> [!QUESTION]- Why is ternary search a poor lookup tool for a sorted array?
-> Each level spends two comparisons to cut the range to a third (`2·log₃ n ≈ 1.82·ln n`), while binary search spends one comparison to halve it (`log₂ n ≈ 1.44·ln n`). Both are `O(log n)`, but the three-way split does strictly more comparison work for the same reduction and gains nothing from a monotone ordering.
 
 > [!QUESTION]- What does golden-section search change, and when does it matter?
 > It places the probes at the golden ratio so one probe of each step reuses an evaluation from the previous step. Golden-section retains ≈0.618 of the interval per step versus ternary's 0.667 — a slightly *faster* shrink — while reusing one of the two probe evaluations, so it costs one new function call per step instead of two. It dominates ternary on both axes at once whenever evaluating `f` is expensive — a simulation or a measurement rather than an array read.

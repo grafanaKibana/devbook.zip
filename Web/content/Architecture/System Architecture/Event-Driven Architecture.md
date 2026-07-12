@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.488Z
-modified: 2026-07-08T15:01:12.489Z
-published: 2026-07-08T15:01:12.489Z
+created: 2026-07-11T21:41:26.242Z
+modified: 2026-07-11T21:41:26.243Z
+published: 2026-07-11T21:41:26.243Z
 topic:
   - Architecture
 subtopic:
   - System Architecture
+summary: A style where services communicate by publishing and consuming events instead of calling each other directly.
 level:
   - "2"
 priority: High

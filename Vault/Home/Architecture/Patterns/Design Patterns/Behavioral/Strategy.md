@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Patterns
+summary: "Defines a family of algorithms behind a common interface and makes them interchangeable at runtime, selected by the client."
 level:
   - "2"
 priority: High

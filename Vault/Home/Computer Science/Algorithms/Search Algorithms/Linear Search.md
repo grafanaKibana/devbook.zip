@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Scans elements one by one until a match; O(n) and works on any data."
 level:
   - "4"
 priority: Medium
@@ -81,17 +82,6 @@ The boundary appears once the same collection is searched repeatedly. A one-time
 > ```
 >
 > The loop reads each element in index order and returns `-1` when the target is absent. .NET's `Array.IndexOf` performs the same scan and applies equally to any `IEnumerable` walked with `Enumerable.FirstOrDefault`, where no random access exists.
-
-## Comparison
-
-| Strategy | Lookup time | Required input | Stronger case | Weaker case |
-| --- | --- | --- | --- | --- |
-| Linear Search | `O(n)` | Any sequence | Unsorted, tiny, or single-shot lookups; non-indexable structures | Repeated searches over large ordered or indexed data |
-| [[Binary Search]] | `O(log n)` | Sorted, random-access | Existing sorted order; range and insertion-point queries | Unsorted input or structures without `O(1)` indexing |
-| Hash lookup ([[HashMap]]) | `O(1)` average, `O(n)` worst | Prebuilt index; exact-match keys | Repeated exact-match lookups where order is irrelevant | Ordered traversal, range queries, or non-hashable keys |
-| [[Jump Search]] | `O(√n)` | Sorted, block-indexable | Sorted data where jumping backward costs more than stepping forward | Fully indexable arrays, where Binary Search's `O(log n)` dominates |
-
-Linear Search is the default when the data is unsorted, small, or searched once, and for structures that cannot be indexed in `O(1)` such as a linked list or a one-pass stream. It loses to Binary Search and hash lookup once the data is already ordered or indexed, or once the same collection is searched often enough to amortize building that order or index. [[Jump Search]] matters only in the narrow case where the data is sorted but random access is costly enough that fewer, larger strides beat Binary Search's probes.
 
 ## Questions
 

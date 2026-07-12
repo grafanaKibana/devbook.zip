@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "Statically typed, multi-paradigm .NET language pairing OOP, functional features, and first-class async."
 tags:
   - FolderNote
 publish: true
@@ -20,6 +21,11 @@ What makes C# distinct in practice: the type system enforces correctness at comp
 
 The notes in this folder cover two areas: **language fundamentals** (type system, generics, methods, error handling, reflection) and **concurrency** (async/await, tasks, synchronization, thread pool behavior). Fundamentals are prerequisite knowledge for everything else in .NET; concurrency is where most production bugs and performance issues live.
 
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
+
 ## Questions
 
 > [!QUESTION]- What makes C# a multi-paradigm language, and why does that matter for API design?
@@ -34,7 +40,7 @@ The notes in this folder cover two areas: **language fundamentals** (type system
 > - Strong typing prevents accidental type confusion that would be runtime errors in dynamic languages.
 > The practical impact: many bugs that surface as runtime exceptions in Python or JavaScript are caught during compilation in C#.
 
-## Links
+## References
 
 - [C# documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/csharp/) — Official language reference and tutorials.
 - [C# language specification](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/introduction) — Formal spec for edge-case behavior.

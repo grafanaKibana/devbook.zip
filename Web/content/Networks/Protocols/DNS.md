@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.541Z
-modified: 2026-07-08T15:01:12.542Z
-published: 2026-07-08T15:01:12.542Z
+created: 2026-07-11T21:46:17.381Z
+modified: 2026-07-11T21:46:17.381Z
+published: 2026-07-11T21:46:17.381Z
 topic:
   - Networks
 subtopic:
   - Protocols
+summary: The internet's distributed directory mapping hostnames to records like IP addresses.
 level:
   - "3"
 priority: Medium

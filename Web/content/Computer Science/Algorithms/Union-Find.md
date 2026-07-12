@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-09T20:18:46.821Z
-modified: 2026-07-09T20:18:46.821Z
-published: 2026-07-09T20:18:46.821Z
+created: 2026-07-11T21:53:53.101Z
+modified: 2026-07-11T21:53:53.101Z
+published: 2026-07-11T21:53:53.101Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Answers connectivity queries over a disjoint set via find and union, in near-constant O(α(n)) amortized time.
 level:
   - "3"
 priority: Medium

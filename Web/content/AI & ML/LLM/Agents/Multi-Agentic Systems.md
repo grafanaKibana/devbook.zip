@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.296Z
-modified: 2026-07-08T15:01:12.297Z
-published: 2026-07-08T15:01:12.297Z
+created: 2026-07-11T21:45:34.626Z
+modified: 2026-07-11T21:45:34.626Z
+published: 2026-07-11T21:45:34.626Z
 topic:
   - AI & ML
 subtopic:
   - LLM
+summary: Coordinating multiple LLM agents, each with its own context and tools, on tasks one agent handles poorly.
 level:
   - "3"
 priority: Low

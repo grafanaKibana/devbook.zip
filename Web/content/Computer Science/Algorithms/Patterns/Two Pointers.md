@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-09T20:21:35.087Z
-modified: 2026-07-09T20:21:35.087Z
-published: 2026-07-09T20:21:35.087Z
+created: 2026-07-11T21:53:31.949Z
+modified: 2026-07-11T21:53:31.949Z
+published: 2026-07-11T21:53:31.949Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Two indices over a sequence solve in O(n) what nested loops solve in O(n²).
 level:
   - "4"
 priority: Medium

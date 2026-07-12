@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "The labeled data every eval technique scores against; labeling and size decide if numbers mean anything."
 level:
   - "3"
 priority: High

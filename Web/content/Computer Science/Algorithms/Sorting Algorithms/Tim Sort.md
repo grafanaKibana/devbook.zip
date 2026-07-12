@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-10T06:05:46.821Z
-modified: 2026-07-10T06:05:46.821Z
-published: 2026-07-10T06:05:46.821Z
+created: 2026-07-11T21:48:08.991Z
+modified: 2026-07-11T21:48:08.991Z
+published: 2026-07-11T21:48:08.991Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Natural merge sort that exploits existing runs; stable, adaptive, and the default in Python and Java.
 level:
   - "4"
 priority: Medium
@@ -84,14 +85,6 @@ flowchart TD
 - **The merge-stack invariant bug — a real formal-methods lesson.** In 2015 de Gouw et al. tried to _verify_ the Java/Python implementation with the KeY prover and instead found a genuine defect: the stack invariant check compared only the top few runs, so a crafted sequence of run lengths could leave the invariant violated deeper in the stack. The stack was pre-sized assuming the invariant always held, so the violation could overflow it and throw `ArrayIndexOutOfBoundsException`. Java's initial fix bumped the stack size (a patch, not a proof); the invariant check itself was later corrected. The takeaway: "widely deployed for years" is not a proof of correctness, and a subtle loop invariant can hide a crash reachable only by adversarial input.
 - **`O(n)` extra memory, not in place.** Tim sort allocates a temporary buffer up to `n/2` for merging. On memory-constrained systems, or when sorting huge primitive arrays where stability is meaningless, that buffer is pure overhead — which is exactly why Java sorts _primitives_ with a dual-pivot quicksort and .NET sorts with [[Introsort]] instead.
 - **Stability depends on strict descent.** Runs are detected as ascending (`<=`) or _strictly_ descending (`>`). If an implementation used `>=` for descending runs, it would reverse stretches of equal keys and silently break stability. The asymmetry between the two comparisons is deliberate and load-bearing, not an accident.
-
-## Tradeoffs
-
-| Choice | Tim Sort | Alternative | Decision criteria |
-| --- | --- | --- | --- |
-| vs plain [[Merge Sort]] | `O(n)` on ordered input, adaptive, stable | `O(n log n)` always, stable | Tim sort dominates plain merge sort on real data because it charges nothing for existing order; use plain merge sort only when you need the simplest possible stable sort or predictable, input-independent timing. |
-| vs [[Introsort]] | Stable, adaptive, `O(n)` space | Not stable, `O(log n)` space, in place | Sort objects with Tim sort when equal-key order or partial-order adaptivity matters; sort primitives with introsort/quicksort where stability is unobservable and the merge buffer is wasted memory. |
-| vs [[Quick Sort]] | Guaranteed `O(n log n)`, stable | `O(n²)` worst, faster average, not stable | Prefer Tim sort when you cannot risk quicksort's adversarial worst case and need stability; prefer quicksort/introsort for raw average-case speed on unordered primitives. |
 
 ## Questions
 

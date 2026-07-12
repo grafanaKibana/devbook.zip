@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Tallies integer keys in a small range and places each in O(n + k) without comparisons."
 level:
   - "4"
 priority: Medium
@@ -93,17 +94,6 @@ Every failure traces to the same assumption: the key can serve as an array index
 > }
 > ```
 > The `k + 1` sizing includes the endpoint value `k`. For a nonzero minimum, subtract `min` on every index and size the array `max - min + 1`.
-
-## Comparison
-
-| Algorithm | Time | Auxiliary space | Key requirement | Stronger case | Weaker case |
-| --- | --- | --- | --- | --- | --- |
-| Counting Sort | `Θ(n + k)` | `Θ(n + k)` | Integer keys over `[0, k]` | `k = O(n)`: small dense integer ranges | `k ≫ n`, or non-integer keys |
-| [[Radix Sort]] | `Θ(d·(n + b))` | `Θ(n + b)` | Fixed-width integer/string keys | Wide keys with a bounded digit base `b` | Few elements, or variable-length keys |
-| [[Bucket Sort]] | `Θ(n + b)` avg, `Θ(n²)` worst | `Θ(n + b)` | Keys spread over a known range | Near-uniform continuous keys | Clustered keys collapsing into one bucket |
-| [[Quick Sort]] / [[Merge Sort]] | `Θ(n log n)` | `O(log n)` / `Θ(n)` | Any comparable key | Large or unbounded keys, no range assumption | Small integer ranges where `n + k` beats `n log n` |
-
-Counting Sort wins when the key range is small relative to `n`: it turns each key into an address and pays only `Θ(n + k)`. [[Radix Sort]] generalizes it to wide keys by running Counting Sort once per digit, trading a single pass for `d` bounded ones. [[Bucket Sort]] is the continuous-domain cousin — it distributes into range buckets rather than exact-value counters and sorts within each bucket. A comparison sort assumes nothing about the keys and stays the baseline whenever they are large, unbounded, or not integers; that generality is what costs it the `Θ(n log n)` lower bound Counting Sort was built to dodge.
 
 ## Questions
 

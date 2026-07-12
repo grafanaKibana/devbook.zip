@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Single-source shortest paths with negative edges, relaxing every edge V-1 times and detecting negative cycles."
 level:
   - "4"
 priority: Medium
@@ -31,7 +32,7 @@ That guarantee is layered by edge count. Before any round only the source is cor
 
 Detection falls out of the same bound. Run one extra round. If any edge still relaxes, a path is shortening beyond `V−1` edges, which is impossible for a simple path — so a negative cycle is reachable from the source, and the region it feeds has no finite shortest distance. To recover the cycle itself, take a vertex that relaxed on the `V`-th round and walk `pred` back `V` times; the walk cannot leave a cycle once inside it, so it lands on a cycle vertex, and following `pred` from there until it repeats reads off the loop.
 
-A full round that relaxes nothing means every distance is already final, so the sweep can stop early. On graphs that converge before the frontier reaches its diameter this turns the fixed `V−1` rounds into far fewer.
+A full round that relaxes nothing means every distance is already final, so the sweep can stop early. On graphs that converge before the frontier reaches its diameter this turns the fixed `V−1` rounds into far fewer. SPFA, a queue-based variant, pushes this further by re-relaxing only edges leaving vertices whose distance just changed — the same `O(V·E)` worst case, often far fewer relaxations in practice, but no better guarantee on adversarial inputs.
 
 A four-vertex run makes the layering concrete; no renderer exists yet, so the `dist` array is traced by hand. The source is `0`, one edge is negative, and each round relaxes the edges in the fixed order `2→3, 1→2, 0→2, 0→1` — an adverse order that advances the settled frontier by one edge per round.
 
@@ -124,24 +125,10 @@ Overflow is the second silent failure. Because a round relaxes every edge, inclu
 > ```
 > `long.MaxValue` marks an unreached vertex and is skipped as a relaxation source, so no `int`-width sentinel wraps. Recording `pred[to] = from` alongside each update is what later makes the negative cycle walkable.
 
-## Comparison
-
-| Algorithm | Time | Required input | Stronger case | Weaker case |
-| --- | --- | --- | --- | --- |
-| [[Dijkstra]] | `O((V+E) log V)` | Non-negative weights, single source | Any-density graph with non-negative weights | Any negative edge (returns wrong distances silently) |
-| Bellman-Ford | `O(V·E)` | Any weights, single source | Negative edges present, or a negative cycle must be detected and extracted | Non-negative weights, where it pays a factor of `V` for nothing |
-| SPFA (queue-based Bellman-Ford) | `O(V·E)` worst, faster typical | Any weights, single source | Sparse, non-adversarial graphs with negative edges | Adversarial grids and lattices that force the worst case |
-| [[Floyd-Warshall]] | `O(V³)` | Any weights, all pairs | Dense graphs needing every pairwise distance | A single source, or sparse graphs (mostly wasted work) |
-
-Bellman-Ford is the single-source choice precisely when [[Dijkstra]]'s non-negativity assumption breaks: negative edges are present, or a negative cycle has to be found and extracted. It pays a factor of `V` over Dijkstra for that reach, so on non-negative weights Dijkstra dominates and Bellman-Ford is only the fallback. SPFA keeps the same guarantee while usually relaxing far fewer edges, but its worst case is unchanged, so it is not a safe default where inputs can be adversarial. For all-pairs work on a dense graph [[Floyd-Warshall]] replaces `V` single-source runs; on a sparse graph with negative edges, Johnson's algorithm reweights with one Bellman-Ford pass and then runs Dijkstra from every source.
-
 ## Questions
 
 > [!QUESTION]- Why exactly `V−1` rounds, and what does a relaxation on the `V`-th round prove?
 > Without a negative cycle, every shortest path is simple and spans at most `V−1` edges. Round `k` finalizes every shortest path of at most `k` edges, so `V−1` rounds finalize all of them. A relaxation still possible on the `V`-th round means a path is shortening past that `V−1`-edge limit, which only a negative cycle permits, so the extra round is the negative-cycle detector rather than wasted work.
-
-> [!QUESTION]- Why does Bellman-Ford tolerate negative edges where Dijkstra fails?
-> Dijkstra settles each vertex once and never revisits it, assuming no later edge can lower a closed distance — true only for non-negative weights. Bellman-Ford re-relaxes every edge each round, so a distance can keep falling after it first looks final, which is exactly what a negative edge requires.
 
 > [!QUESTION]- How is the actual negative cycle recovered after detection?
 > Take a vertex that relaxed on the `V`-th round; it lies on a negative cycle or is reachable from one. Walking `pred` back `V` times cannot exit a cycle once inside it, so the walk ends on a cycle vertex. Following `pred` from there until it returns to that vertex lists the cycle.

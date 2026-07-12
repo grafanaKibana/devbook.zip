@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Step-by-step problem-solving procedures compared by runtime, memory, and complexity using Big O."
 tags:
   - FolderNote
 publish: true
@@ -19,6 +20,11 @@ Algorithms are step-by-step procedures for solving problems with predictable beh
 Complexity analysis ([[Big O Notation|Big O]]) is the primary tool for comparing algorithms without benchmarking. It captures growth rate: O(n log n) sorting scales to millions of items where O(n²) does not. But Big O ignores constant factors, cache behavior, and real-world input distributions — so production decisions combine theoretical analysis with profiling on representative data.
 
 Concrete example: for repeated membership checks in a large list of ids, sorting once and using binary search gives fast lookups with low memory overhead. For one-off checks on unsorted data, a linear scan is usually simpler and can be faster overall because there is no preprocessing cost.
+
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
 
 ## Questions
 
@@ -37,7 +43,7 @@ Concrete example: for repeated membership checks in a large list of ids, sorting
 > Worst-case guarantees behavior under adversarial or degenerate inputs (important for security and SLAs). Average-case describes typical behavior under random inputs. Amortized complexity describes cost spread over a sequence of operations (e.g., dynamic array resizing is O(1) amortized even though individual resizes are O(n)).
 > Choose based on whether you control the input distribution and whether tail latency matters.
 
-## Links
+## References
 
 - [Big O notation (Wikipedia)](https://en.wikipedia.org/wiki/Big_O_notation)
 - [Algorithm design and analysis (MIT OpenCourseWare)](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/)

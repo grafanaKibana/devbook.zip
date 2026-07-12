@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-09T20:52:23.077Z
-modified: 2026-07-09T20:52:23.077Z
-published: 2026-07-09T20:52:23.077Z
+created: 2026-07-11T21:53:49.175Z
+modified: 2026-07-11T21:53:49.175Z
+published: 2026-07-11T21:53:49.175Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Operates on integers' binary representation, using bitmasks to model sets, flags, and subsets in O(1).
 level:
   - "4"
 priority: Medium

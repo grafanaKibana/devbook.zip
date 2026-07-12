@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "A self-balancing BST using node colors for good-enough balance with cheap repairs, the default ordered map."
 level:
   - "4"
 priority: Medium
@@ -116,17 +117,6 @@ Every mutation must re-establish all four invariants before it returns. A partia
 > }
 > ```
 > Delete follows the mirror shape but branches on a `nil`-or-black "double-black" node and its sibling's colors across four cases; production code (`std::map`, `TreeMap`, `SortedSet<T>`) implements it in full rather than the sketch above.
-
-## Comparison
-
-| Structure | Search | Insert / delete | Height bound | Stronger case |
-| --- | --- | --- | --- | --- |
-| Red-black tree | `O(log n)` | `O(log n)`, ≤ 2–3 rotations | 2·log₂(n+1) | Ordered data with heavy interleaved writes; cheap, bounded repairs matter |
-| [[AVL Tree]] | `O(log n)` | `O(log n)`, more rotations | 1.44·log₂ n | Read-dominated ordered data where a shorter tree pays back the extra rotations |
-| [[Binary Search Tree]] | `O(n)` worst | `O(n)` worst | unbounded | Small or randomly ordered data where balancing overhead is not justified |
-| [[B-tree]] | `O(log n)`, wide fan-out | `O(log n)` | shallow, cache/page tuned | On-disk or cache-sensitive indexes where each level is a page read |
-
-Red-black trees are the general-purpose balanced-BST default in standard libraries — .NET's `SortedDictionary`/`SortedSet`, Java's `TreeMap`, and C++'s `std::map` all use one — because they give a solid all-round balance with the cheapest writes among strictly-balanced options. An AVL tree becomes the stronger choice when lookups dominate and its shorter height outweighs its heavier rotation count; a plain [[Binary Search Tree]] only competes when the input is small or known to be random; and a [[B-tree]]'s wide nodes win once the cost that matters is page or cache-line reads rather than comparisons.
 
 ## Questions
 

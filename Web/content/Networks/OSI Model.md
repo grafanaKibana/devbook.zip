@@ -1,11 +1,12 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.541Z
-modified: 2026-07-10T08:56:47.809Z
-published: 2026-07-10T08:56:47.809Z
+created: 2026-07-11T21:46:15.775Z
+modified: 2026-07-11T21:46:15.779Z
+published: 2026-07-11T21:46:15.779Z
 topic:
   - Networks
 subtopic: []
+summary: The 7-layer reference model for how data moves across a network.
 level:
   - "3"
 priority: Medium

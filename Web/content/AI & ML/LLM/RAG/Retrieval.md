@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.329Z
-modified: 2026-07-08T15:01:12.329Z
-published: 2026-07-08T15:01:12.329Z
+created: 2026-07-11T21:45:01.509Z
+modified: 2026-07-11T21:45:01.509Z
+published: 2026-07-11T21:45:01.509Z
 topic:
   - AI & ML
 subtopic:
   - LLM
+summary: Decides what evidence enters the prompt, balancing recall, precision, and latency across search methods.
 level:
   - "2"
 priority: High

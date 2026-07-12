@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-10T06:07:18.289Z
-modified: 2026-07-10T09:22:40.654Z
-published: 2026-07-10T09:22:40.654Z
+created: 2026-07-11T21:50:42.526Z
+modified: 2026-07-11T21:50:42.527Z
+published: 2026-07-11T21:50:42.527Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Single-source shortest paths with negative edges, relaxing every edge V-1 times and detecting negative cycles.
 level:
   - "4"
 priority: Medium

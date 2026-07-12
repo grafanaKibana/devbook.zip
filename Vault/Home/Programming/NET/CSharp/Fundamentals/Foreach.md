@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "C#'s common way to iterate a sequence, plus iterators and yield."
 level:
   - "4"
 priority: High

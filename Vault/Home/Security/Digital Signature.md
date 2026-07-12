@@ -3,6 +3,7 @@ topic:
   - Security
 subtopic:
   - Security
+summary: "Proves a message's authenticity and integrity without hiding its content."
 level:
   - "2"
 priority: Medium

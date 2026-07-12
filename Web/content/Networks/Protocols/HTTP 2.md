@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.542Z
-modified: 2026-07-08T15:01:12.542Z
-published: 2026-07-08T15:01:12.542Z
+created: 2026-07-11T21:46:11.960Z
+modified: 2026-07-11T21:46:11.960Z
+published: 2026-07-11T21:46:11.960Z
 topic:
   - Networks
 subtopic:
   - Protocols
+summary: Multiplexes many requests over one TCP connection, removing HTTP/1.1 head-of-line blocking.
 level:
   - "3"
 priority: Medium

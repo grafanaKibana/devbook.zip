@@ -1,11 +1,12 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.529Z
-modified: 2026-07-08T15:01:12.529Z
-published: 2026-07-08T15:01:12.529Z
+created: 2026-07-11T21:43:58.302Z
+modified: 2026-07-11T21:43:58.302Z
+published: 2026-07-11T21:43:58.302Z
 topic:
   - DevOps
 subtopic: []
+summary: Pipelines that automate the path from commit to production, compared across major tools.
 level:
   - "3"
 priority: High
@@ -120,11 +121,13 @@ pipeline {
 
 ## Decision Rule
 
-**Start with GitHub Actions** if your code is on GitHub and you have no existing CI/CD investment. Zero setup, excellent .NET support, and the free tier covers most small teams.
-
-**Use Azure DevOps Pipelines** when: deploying to Azure services (AKS, App Service, Azure Functions), needing enterprise approval gates and audit trails, or when your organization already uses Azure DevOps for work tracking.
-
-**Use Jenkins** only when: you have an air-gapped or on-premises environment where cloud CI/CD is not an option, or you have an existing Jenkins investment that is too costly to migrate.
+```mermaid
+flowchart TD
+    A{Air-gapped or on-prem, or heavy existing Jenkins investment} -->|Yes| B[Use Jenkins]
+    A -->|No| C{Deploying to Azure or need enterprise approval gates and audit trails}
+    C -->|Yes| D[Use Azure DevOps Pipelines]
+    C -->|No| E[Use GitHub Actions as the default]
+```
 
 ## Pitfalls
 

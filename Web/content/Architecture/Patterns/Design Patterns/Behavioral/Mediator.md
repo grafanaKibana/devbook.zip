@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.384Z
-modified: 2026-07-08T15:01:12.384Z
-published: 2026-07-08T15:01:12.384Z
+created: 2026-07-11T18:18:25.820Z
+modified: 2026-07-11T18:18:25.820Z
+published: 2026-07-11T18:18:25.820Z
 topic:
   - Architecture
 subtopic:
   - Patterns
+summary: Defines an object that encapsulates how a set of components interact, replacing a many-to-many dependency web with one-to-many routing.
 level:
   - "1"
 priority: High

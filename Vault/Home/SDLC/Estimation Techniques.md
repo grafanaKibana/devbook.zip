@@ -3,6 +3,7 @@ topic:
   - SDLC
 subtopic:
   - SDLC
+summary: "Structured ways to forecast effort or complexity of development work under uncertainty."
 level:
   - "4"
 priority: Medium

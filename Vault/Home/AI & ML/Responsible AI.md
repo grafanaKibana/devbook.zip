@@ -2,6 +2,7 @@
 topic:
   - AI & ML
 subtopic: []
+summary: "Designing and operating AI so failures are bounded, decisions explainable, and impact fair."
 level:
   - "3"
 priority: Medium

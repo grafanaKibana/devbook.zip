@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-09T20:18:42.301Z
-modified: 2026-07-09T20:18:42.301Z
-published: 2026-07-09T20:18:42.301Z
+created: 2026-07-11T21:53:33.817Z
+modified: 2026-07-11T21:53:33.818Z
+published: 2026-07-11T21:53:33.818Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Computes an aggregate over every contiguous subarray in O(n) by updating a moving range.
 level:
   - "4"
 priority: Medium

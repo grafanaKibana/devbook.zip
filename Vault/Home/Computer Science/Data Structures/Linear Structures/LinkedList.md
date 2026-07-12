@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "A doubly linked list giving O(1) inserts and removes around node references you already hold, at the cost of locality."
 level:
   - "4"
 priority: Medium
@@ -87,27 +88,7 @@ Per-node allocation is the third boundary. Every insert allocates a node object 
 > ```
 > `AddAfter(a, "B")` is `O(1)` because `a` is held. `Remove("C")` is `O(n)` because it searches first — the unlink itself is `O(1)`. A node from another list passed to `AddAfter`/`Remove` throws: node identity is scoped to its owning list.
 
-## Comparison
-
-| Structure | Index access | Mid-sequence insert/remove | Ends insert/remove | Memory locality | Stronger case |
-| --- | --- | --- | --- | --- | --- |
-| Doubly linked list | `O(n)` walk | `O(1)` at a held node, else `O(n)` to find | `O(1)` | Poor — scattered nodes, per-node pointer overhead | Node references are held and interior splices are frequent |
-| [[Arrays]] | `O(1)` | `O(n)` shift | `O(1)` append if capacity, else N/A resize | Excellent — one contiguous block | Fixed size with heavy indexed reads |
-| [[Dynamic Array]] | `O(1)` | `O(n)` shift | `O(1)` amortized append | Excellent — one contiguous block | Default sequence; indexing and iteration dominate |
-| [[Deque]] | `O(1)` | `O(n)` | `O(1)` both ends | Good — usually contiguous / ring buffer | Push and pop at both ends without interior edits |
-
-A linked list wins only in a narrow regime: the code already holds a node reference and performs frequent interior splices, so the `O(1)` rewire is realized without an `O(n)` find. That regime shows up in a doubly linked list as the backbone of an [[LRU Cache]] — a held node is moved to the front in `O(1)` on every access — and in intrusive lists or adjacency lists where edges are removed by known node. Outside it, a [[Dynamic Array]]'s cache locality and `O(1)` indexing make it the better default even where the linked list's asymptotics look stronger, because the array pays its `O(n)` shift in contiguous memory the hardware moves fast while the list pays an unpredictable cache-missing walk. If the edits are confined to the two ends, a [[Deque]] provides `O(1)` there without giving up contiguity at all.
-
 ## Questions
-
-> [!QUESTION]- Why is index access `O(n)` on a linked list but `O(1)` on an array?
-> An array stores elements in one contiguous block, so an index is turned into an address by arithmetic (`base + i × size`) in constant time. A linked list stores only pointers between separately allocated nodes; nothing maps an index to an address, so reaching the *k*-th element means following `next` from a head reference `k` times.
-
-> [!QUESTION]- The splice is `O(1)`, so why is a linked list often slower than a dynamic array in practice?
-> The `O(1)` splice only applies when the node reference is already held; otherwise an `O(n)` walk to find the node dominates. Even when it applies, nodes live at scattered heap addresses, so traversal is a chain of cache-missing pointer loads. A contiguous array's `O(n)` shift moves memory the CPU prefetcher handles efficiently, so its larger asymptotic cost often beats the list's smaller one at realistic sizes.
-
-> [!QUESTION]- What does a doubly linked list buy an LRU cache that an array cannot?
-> On a cache hit the accessed entry must move to the most-recently-used end. With a held `LinkedListNode<T>`, that is an `O(1)` unlink-and-relink of a few pointers, with no other entry moving. An array would shift every element between the old and new position, making each access `O(n)`.
 
 > [!QUESTION]- Why does the `Prev` ↔ `Next` invariant matter during a removal?
 > Adjacency is stored twice: `a.Next == b` must agree with `b.Prev == a`. A removal must re-point both directions across the gap. Updating only one leaves a half-linked chain where forward and backward traversal disagree about membership, corrupting the list.

@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "When execution paths wait forever on resources each other holds, halting progress."
 level:
   - "4"
 priority: High

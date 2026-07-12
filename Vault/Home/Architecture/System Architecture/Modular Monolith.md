@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - System Architecture
+summary: "A single deployable application intentionally split into strict modules with explicit boundaries, gaining microservices benefits without the distributed systems tax."
 level:
   - "3"
 priority: High

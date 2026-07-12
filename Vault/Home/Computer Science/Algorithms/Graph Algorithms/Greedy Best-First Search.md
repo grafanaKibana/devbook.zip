@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Expands whichever node looks closest by heuristic h(n) alone; fast but neither optimal nor complete."
 level:
   - "4"
 priority: Medium
@@ -116,24 +117,10 @@ The h-only ordering fails in three distinct ways, all traceable to the missing `
 > ```
 > The priority key is `heuristic(v)` with no `g` term, so the frontier orders by estimated distance to the goal alone. `visited` guarantees termination on a finite graph but says nothing about path length.
 
-## Comparison
-
-| Strategy | Frontier key | Time (worst) | Optimal | Stronger case | Weaker case |
-| --- | --- | --- | --- | --- | --- |
-| Greedy Best-First | `h(n)` | `O(b^m)` | No | Any acceptable path is needed fast and `h` is strong | Path cost matters, or `h` is weak or the geometry is concave |
-| [[A-Star Search\|A*]] | `f = g + h` | `O(b^m)` | Yes, with an admissible `h` | A shortest path is required while still exploiting a heuristic | Stores and re-expands more nodes, so memory is the ceiling |
-| [[Dijkstra]] | `g(n)` | `O((V + E) log V)` | Yes | Optimal paths with no usable heuristic, or many goals at once | No goal direction, so it expands outward in every direction |
-| [[DFS BFS\|BFS]] | insertion order | `O(V + E)` | Yes on unit edges | Fewest-edge path on an unweighted graph | Weighted edges, and no heuristic pull toward the goal |
-
-Greedy Best-First, A*, and Dijkstra are one family separated only by how much the cost-so-far counts: Dijkstra weights `g` fully and ignores the goal, Greedy Best-First weights it at zero and follows the goal blindly, and A* weights both — with an admissible heuristic it keeps the goal pull while restoring optimality. Greedy Best-First is the fast fit when any reasonable path suffices and the heuristic is strong, as in an interactive pathfinding preview that redraws while the goal is being dragged. A* becomes the fit when the returned path must be optimal, and it pays for that with more expansions and more memory; weighted A* with a large weight approximates the greedy behaviour while still tracking `g`. BFS remains the fit only when edges are unweighted and no heuristic is available.
-
 ## Questions
 
 > [!QUESTION]- Why is Greedy Best-First Search neither optimal nor complete?
 > It orders the frontier by `h(n)` alone and never accounts for `g(n)`, the cost already spent. A neighbor that is close in straight-line distance but reached by a long detour is expanded before a farther-looking neighbor that sits beside the goal, so the returned path can be far from shortest — not optimal. On an infinite graph a monotonically improving `h` can lead expansion down a branch that never reaches the goal — not complete. A finite graph with a visited set terminates, but the path it returns can still be long.
-
-> [!QUESTION]- What single change turns Greedy Best-First Search into A*, and what does it restore?
-> Adding the cost-so-far to the key: ranking by `f = g + h` instead of `h` alone. With an admissible heuristic this restores optimality, because a node reached expensively can no longer outrank a cheaper route that merely looks farther. Greedy Best-First is A* with `g` weighted at zero.
 
 > [!QUESTION]- Why does a concave obstacle around the goal cause thrashing?
 > Every cell inside the pocket is geometrically near the goal, so all of them score a low `h` and the frontier keeps selecting barrier-hugging cells. The direct heading is blocked, and the accumulated `g` that would reveal the long way around is never read, so expansion oscillates along the wall before escaping. It is the h-only ordering, not the map, that has no way to notice the pocket is a dead pull.

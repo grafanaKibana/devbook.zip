@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "A reference type defining a heap-allocated object with state, inheritance, and dispatch."
 level:
   - "4"
 priority: Medium

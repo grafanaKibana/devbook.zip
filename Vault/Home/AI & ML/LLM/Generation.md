@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "Producing reliable, grounded, correctly formatted output by controlling sampling, evidence, and structure."
 level:
   - "2"
 priority: High

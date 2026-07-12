@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Patterns
+summary: "Composite arranges objects into tree structures and lets clients treat individual objects and compositions uniformly through one interface."
 level:
   - "3"
 priority: High

@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.682Z
-modified: 2026-07-08T15:01:12.682Z
-published: 2026-07-08T15:01:12.682Z
+created: 2026-07-11T21:48:31.641Z
+modified: 2026-07-11T21:48:31.641Z
+published: 2026-07-11T21:48:31.641Z
 topic:
   - Security
 subtopic:
   - Security
+summary: Maps data of any size to a fixed-size, one-way, collision-resistant digest.
 level:
   - "4"
 priority: High

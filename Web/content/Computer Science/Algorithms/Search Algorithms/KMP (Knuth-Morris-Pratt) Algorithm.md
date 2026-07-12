@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-09T20:18:37.171Z
-modified: 2026-07-09T20:18:37.172Z
-published: 2026-07-09T20:18:37.172Z
+created: 2026-07-11T21:45:38.368Z
+modified: 2026-07-11T21:45:38.388Z
+published: 2026-07-11T21:45:38.388Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Searches for a pattern in guaranteed O(n + m) time by never rescanning text, using a precomputed prefix (LPS) array.
 level:
   - "4"
 priority: Medium
@@ -95,8 +96,6 @@ Text: ABABABC
 | Choice | Option A | Option B | Decision criteria |
 | --- | --- | --- | --- |
 | Worst-case guarantee needed | KMP `O(n+m)` | Naive `O(nm)` | KMP is strictly better on adversarial inputs. Naive is simpler for small inputs where worst case is unlikely. |
-| Multiple patterns | Aho-Corasick | KMP per pattern | Aho-Corasick scans text once for all patterns. Switch when pattern count exceeds 2-3. |
-| Implementation simplicity | [[Rabin Karp Search\|Rabin-Karp]] | KMP | Rabin-Karp is simpler to code (rolling hash) but has probabilistic worst case. KMP is deterministic but requires understanding the prefix function. |
 
 ## Questions
 

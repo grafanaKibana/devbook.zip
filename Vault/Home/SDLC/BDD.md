@@ -3,6 +3,7 @@ topic:
   - SDLC
 subtopic:
   - SDLC
+summary: "Uses concrete business-language examples to align requirements, code, and tests before coding."
 level:
   - "1"
 priority: Medium

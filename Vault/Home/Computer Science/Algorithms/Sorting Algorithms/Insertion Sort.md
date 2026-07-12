@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Grows a sorted prefix by inserting each element into place; fast on small or nearly-sorted inputs."
 level:
   - "4"
 priority: Low
@@ -89,18 +90,6 @@ Cutting comparisons does not fix this. Since the prefix is sorted, [[Binary Sear
 > }
 > ```
 > The strict `a[i] > key` test is what makes the sort stable; relaxing it to `>=` would shift equal elements and reverse their original order.
-
-## Comparison
-
-| Algorithm | Time (avg / best) | Space | Stable | Stronger case | Weaker case |
-| --- | --- | --- | --- | --- | --- |
-| Insertion sort | `O(n²)` / `O(n)` | `O(1)` | Yes | Small or nearly-sorted arrays; hybrid base case | Large unordered input |
-| [[Bubble Sort]] | `O(n²)` / `O(n)` | `O(1)` | Yes | Same bounds and stability | A swap per inversion moves more data than a single shift |
-| [[Selection Sort]] | `O(n²)` / `O(n²)` | `O(1)` | No | Writes are the scarce resource—only `n-1` swaps | No adaptivity; unstable; always scans for the minimum |
-| [[Shell Sort]] | `~O(n^1.3)` / `O(n log n)` | `O(1)` | No | Mid-size arrays with no spare memory | Not stable; bound depends on the gap sequence |
-| [[Merge Sort]] | `O(n log n)` / `O(n log n)` | `O(n)` | Yes | Large arrays needing a guaranteed stable `O(n log n)` | Allocation overhead loses to insertion sort on tiny inputs |
-
-Insertion sort is the default for small and nearly-sorted arrays and the base case that `O(n log n)` sorts drop into for small partitions: it allocates nothing, stays stable, and reaches linear time when little is out of place. [[Bubble Sort]] matches its bounds but moves more data per inversion; [[Selection Sort]] trades adaptivity and stability for the fewest writes; [[Shell Sort]] breaks the one-step-at-a-time shift to reach sub-quadratic time without extra memory. Against a true `O(n log n)` sort such as [[Merge Sort]], the quadratic shift count is decisive as `n` grows—that crossover, a few dozen elements, is exactly where the hybrids stop delegating to insertion sort.
 
 ## Questions
 

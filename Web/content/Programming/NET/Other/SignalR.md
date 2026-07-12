@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.660Z
-modified: 2026-07-08T15:01:12.661Z
-published: 2026-07-08T15:01:12.661Z
+created: 2026-07-11T21:44:27.097Z
+modified: 2026-07-11T21:44:27.097Z
+published: 2026-07-11T21:44:27.097Z
 topic:
   - Programming
 subtopic:
   - NET
+summary: ASP.NET Core framework for real-time, bidirectional server and client messaging.
 level:
   - "3"
 priority: Medium

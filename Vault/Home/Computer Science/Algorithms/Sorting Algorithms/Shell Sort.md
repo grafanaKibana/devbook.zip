@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Runs insertion sort over decreasing gaps so elements jump far, beating O(n²) with no recursion or scratch memory."
 level:
   - "4"
 priority: Medium
@@ -95,18 +96,6 @@ Instability follows directly from the `h`-stride. Sorting the records `[(5, a), 
 > }
 > ```
 > The inner loop is line-for-line an insertion sort with stride `gap` in place of `1`. Fixed gaps cap `n` at the largest usable gap; a production version generates the sequence from `n` instead.
-
-## Comparison
-
-| Algorithm | Time | Aux space | Stable | Stronger case | Weaker case |
-| --- | --- | --- | --- | --- | --- |
-| [[Insertion Sort]] | `Θ(n²)` avg, `Θ(n)` nearly sorted | `O(1)` | Yes | Tiny or nearly-sorted arrays; it is the `h = 1` base Shell sort reduces to | Large or reverse-sorted input where adjacent-only shifts pile up |
-| Shell sort | `~Θ(n^1.3)` measured, no proven tight bound | `O(1)` | No | Mid-size arrays and embedded/kernel code where `O(1)` space and small iterative code matter | Large inputs, or when a provable bound or stability is required |
-| [[Quick Sort]] | `Θ(n log n)` avg, `Θ(n²)` worst | `O(log n)` stack | No | General in-memory sorting at large `n` with strong cache behaviour | Adversarial inputs without introspection; recursion or stack growth unwelcome |
-| [[Merge Sort]] | `Θ(n log n)` | `O(n)` | Yes | Stable ordering, linked lists, external/large data | An `O(n)` scratch buffer is unacceptable |
-| [[Heap Sort]] | `Θ(n log n)` | `O(1)` | No | A guaranteed `O(n log n)` bound achieved in place | Poor cache locality and larger constants than quicksort |
-
-Shell sort is a strong in-place, zero-allocation choice for mid-size arrays and constrained settings — bootloaders, firmware, minimal C libraries — where its short iterative code and `O(1)` space are the binding constraints. It pays for that with instability and the absence of a clean provable bound. As `n` grows the `O(n log n)` sorts overtake it: [[Quick Sort]] and [[Merge Sort]] on raw speed, [[Heap Sort]] and [[Introsort]] when the guarantee itself is the requirement.
 
 ## Questions
 

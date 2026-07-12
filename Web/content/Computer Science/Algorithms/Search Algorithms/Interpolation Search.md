@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-10T05:56:31.443Z
-modified: 2026-07-10T06:24:35.852Z
-published: 2026-07-10T06:24:35.852Z
+created: 2026-07-11T21:45:20.388Z
+modified: 2026-07-11T21:45:20.389Z
+published: 2026-07-11T21:45:20.389Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Guesses the target's position by interpolation, reaching O(log log n) on uniform sorted data.
 level:
   - "4"
 priority: Medium
@@ -91,8 +92,6 @@ flowchart TD
 
 | Choice | Interpolation Search | Alternative | Decision criteria |
 | --- | --- | --- | --- |
-| vs [[Binary Search]] | `O(log log n)` uniform, `O(n)` skewed | `O(log n)` guaranteed | Use interpolation only when data is provably near-uniform and lookups are hot; otherwise binary search's worst-case guarantee wins. |
-| vs [[Exponential Search]] | distribution-dependent | `O(log i)`, distribution-agnostic | Exponential search needs no distribution assumption and handles unknown length; prefer it unless you have measured uniformity. |
 | Probe formula | proportional estimate | fixed midpoint | The proportional probe pays off only when value gaps are even; on clustered or heavy-tailed keys the midpoint's predictability is the safer bet. |
 
 ## Questions

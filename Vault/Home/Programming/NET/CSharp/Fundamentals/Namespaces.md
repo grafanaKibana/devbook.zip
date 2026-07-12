@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "A logical scope organizing types and preventing naming collisions."
 level:
   - "4"
 priority: Medium

@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.366Z
-modified: 2026-07-08T15:01:12.367Z
-published: 2026-07-08T15:01:12.367Z
+created: 2026-07-11T18:17:34.337Z
+modified: 2026-07-11T18:17:34.342Z
+published: 2026-07-11T18:17:34.342Z
 topic:
   - Architecture
 subtopic:
   - Distributed Systems
+summary: Coordinating a change across multiple services or databases so all participants commit or roll back together, via 2PC or Saga.
 level:
   - "2"
 priority: High

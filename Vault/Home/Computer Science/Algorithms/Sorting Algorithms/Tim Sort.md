@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Natural merge sort that exploits existing runs; stable, adaptive, and the default in Python and Java."
 level:
   - "4"
 priority: Medium
@@ -223,17 +224,6 @@ The run stack's merge policy is where Tim sort's sharp edges live.
 > }
 > ```
 > `MergeCollapse` carries the correctness contract: the second clause testing `runs[n - 2]` is the check the 2015 verification found missing. `MergeStable` buffers the left run and resolves ties toward it, which is what makes the whole sort stable.
-
-## Comparison
-
-| Sort | Time (worst) | Aux space | Stable | Adaptive | Stronger case | Weaker case |
-| --- | --- | --- | --- | --- | --- | --- |
-| Tim sort | `Θ(n log n)`, `Θ(n)` best | `O(n)` (`≤ n/2`) | Yes | Yes | Partially-ordered object data needing stable order | Random primitive arrays where the merge buffer is wasted |
-| [[Merge Sort]] | `Θ(n log n)` always | `O(n)` | Yes | No | Simplest stable sort with input-independent timing | Pays full `n log n` even on already-ordered input |
-| [[Quick Sort]] | `Θ(n²)` (`Θ(n log n)` avg) | `O(log n)` stack | No | No | Fastest average on random in-memory arrays | Adversarial worst case; no stability; no adaptivity |
-| [[Introsort]] | `Θ(n log n)` | `O(log n)` stack | No | No | In-place unstable default with a guaranteed bound | When equal-key order must be preserved |
-
-Tim sort is the default in CPython and Java for object sorting because real inputs carry exploitable order and callers can observe stability; run detection is what it adds on top of a plain [[Merge Sort]]. It pays `O(n)` auxiliary memory and a subtle run-stack invariant that a plain [[Introsort]] avoids — which is why the same runtimes drop to introsort or a dual-pivot [[Quick Sort]] for primitive arrays, where stability is unobservable and adaptivity rarely repays the buffer.
 
 ## Questions
 

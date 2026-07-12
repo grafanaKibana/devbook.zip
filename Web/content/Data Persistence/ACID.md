@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.523Z
-modified: 2026-07-08T15:01:12.523Z
-published: 2026-07-08T15:01:12.523Z
+created: 2026-07-11T21:46:58.426Z
+modified: 2026-07-11T21:46:58.426Z
+published: 2026-07-11T21:46:58.426Z
 topic:
   - Data Persistence
 subtopic:
   - SQL
+summary: Four properties (Atomicity, Consistency, Isolation, Durability) guaranteeing reliable database transactions.
 level:
   - "3"
 priority: High

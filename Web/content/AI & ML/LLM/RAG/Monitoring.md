@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.322Z
-modified: 2026-07-08T15:01:12.323Z
-published: 2026-07-08T15:01:12.323Z
+created: 2026-07-11T21:45:14.411Z
+modified: 2026-07-11T21:45:14.411Z
+published: 2026-07-11T21:45:14.411Z
 topic:
   - AI & ML
 subtopic:
   - LLM
+summary: Continuously observing a deployed RAG pipeline per stage to catch regressions before users do.
 level:
   - "2"
 priority: High

@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "A probabilistic membership filter using fixed bits, with tunable false positives but never false negatives."
 level:
   - "4"
 priority: Medium
@@ -133,17 +134,6 @@ Every one of these boundaries traces back to the same design choice: no elements
 > ```
 >
 > `MightContain` never allocates and never mutates state; `Add` only ever sets bits. There is no `Remove` — the counting-filter variant would replace `BitArray` with a `byte[]` of counters.
-
-## Comparison
-
-| Structure | Membership query | Space | Delete | Enumerate / retrieve | False positives |
-| --- | --- | --- | --- | --- | --- |
-| Bloom filter | `O(k)` | `O(m)` bits, no elements | No | No | Yes, tunable via *m* and *k* |
-| [[Hash Set]] | `O(1)` average exact | `O(n)` full keys | Yes | Yes | Never (exact) |
-| Counting Bloom filter | `O(k)` | ~4× a Bloom filter | Yes | No | Yes, tunable |
-| Cuckoo filter | `O(1)` fingerprint lookup | Often below a Bloom filter at the same rate | Yes | No | Yes, often lower per bit |
-
-A Bloom filter is the sub-linear-**bit**-space probabilistic membership pre-filter: it sits in front of an authoritative store and answers "definitely absent" from RAM, letting the caller skip a disk, database, or network lookup for keys that were never added, while paying a small, tunable false-positive rate on the keys it lets through. It fits when elements never need to be retrieved and a bounded rate of unnecessary follow-up lookups is acceptable. A [[Hash Set]] is required instead when membership must be exact, or when elements must be enumerated or deleted, since it retains the keys the filter discards. A counting Bloom filter buys deletion with extra counter space; a cuckoo filter typically matches or beats the Bloom filter's space-versus-rate curve while also supporting deletion, at the cost of a more involved insertion path.
 
 ## Questions
 

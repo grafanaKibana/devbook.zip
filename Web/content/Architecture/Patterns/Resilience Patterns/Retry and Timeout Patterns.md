@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.488Z
-modified: 2026-07-08T15:01:12.488Z
-published: 2026-07-08T15:01:12.488Z
+created: 2026-07-11T18:17:57.568Z
+modified: 2026-07-11T18:17:57.571Z
+published: 2026-07-11T18:17:57.571Z
 topic:
   - Architecture
 subtopic:
   - Patterns
+summary: Defensive strategies that re-attempt transient failures and bound how long a call may wait before failing.
 level:
   - "3"
 priority: High

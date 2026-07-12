@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "A self-balancing search tree with page-sized many-key nodes, keeping disk-resident indexes shallow."
 level:
   - "4"
 priority: Medium
@@ -116,30 +117,13 @@ The branching factor must be sized to the page. Choosing `m` too small shrinks f
 > ```
 > `BinarySearch` returns the bitwise complement of the insertion index on a miss, so `~i` is exactly the child pointer to follow. A production node is a serialized page, not a `List<int>`; the array layout is the same.
 
-## Comparison
-
-| Structure | Point lookup | Range / ordered scan | Where values live | Stronger case | Weaker case |
-| --- | --- | --- | --- | --- | --- |
-| B-tree | `O(log_m n)` page reads | descends and revisits internal nodes | keys and payloads in every node | block-resident ordered index needing point and range access | pure in-memory data; write-heavy load |
-| [[B+ Tree]] | `O(log_m n)` page reads | linked leaves scan sequentially | values only in leaves; internal nodes are pure routers | the database-index default: range scans and full-order iteration | marginal extra indirection for a single point lookup |
-| [[Red-Black Tree]] / [[AVL Tree]] | `O(log₂ n)` comparisons | in-order traversal | one key per node | the whole index fits in RAM | data on disk, where per-level page reads dominate |
-| Hash index | `O(1)` average | not supported | key → slot | repeated exact-match lookups where order never matters | any range, prefix, or ordered-iteration query |
-
-A B-tree is the shallow, high-fan-out tree for a block- or disk-resident ordered index: it pays extra in-node comparisons and half-empty pages to buy a height measured in single-digit page reads. A [[B+ Tree]] keeps that structure but moves every value to the leaves and chains the leaves together, which turns a range scan into a sequential walk — the reason it, not the plain B-tree, is the default index in most databases and the practical structure behind [[Indexes]]. When the entire index fits in memory the page-read advantage disappears and a [[Red-Black Tree]] or [[AVL Tree]] is the simpler equal, while a hash index such as a [[HashMap]] wins outright on point lookups but cannot answer a range or ordered query at all. The [[Trees]] overview places these in the wider family.
-
 ## Questions
-
-> [!QUESTION]- Why does a B-tree cut disk cost when it performs more comparisons than a binary tree?
-> Cost on external memory is counted in random page reads, not comparisons. A B-tree packs many keys per page-sized node, so its height is `log_m n` and a lookup touches three or four pages instead of `log₂ n`. The extra comparisons happen inside a page already in memory and are effectively free against the reads they eliminate.
 
 > [!QUESTION]- How does a B-tree stay balanced with all leaves at one depth, and without rotations?
 > Height changes only at the root. An overflowing node splits and pushes its median key into the parent; if the split cascades to the root, a new root adds a single level. Because growth happens only at the top and every split keeps both halves at least half full, all leaves remain at equal depth by construction.
 
 > [!QUESTION]- What fixes a node that drops below its minimum fill on delete?
 > If an adjacent sibling has a spare key, the node borrows: the parent's separator rotates down and the sibling's key rotates up. If both siblings are minimal, the node merges with a sibling and the separating parent key into one node, which can cascade upward and shrink the tree by a level.
-
-> [!QUESTION]- Why choose a B-tree over a red-black tree, or the reverse?
-> The B-tree's only advantage is fewer page reads, so it earns its keep when the data lives on disk or SSD. In RAM there are no page reads to save; the wide-node scan is overhead, and a red-black or AVL tree is simpler and equally fast. The branching factor `m` is set to fill a page — too small and the height, and the reads, climb back toward a binary tree.
 
 ## References
 

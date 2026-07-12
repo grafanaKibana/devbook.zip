@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.525Z
-modified: 2026-07-08T15:01:12.525Z
-published: 2026-07-08T15:01:12.525Z
+created: 2026-07-11T21:46:54.041Z
+modified: 2026-07-11T21:46:54.042Z
+published: 2026-07-11T21:46:54.042Z
 topic:
   - Data Persistence
 subtopic:
   - NoSQL
+summary: The four NoSQL families (document, key-value, wide-column, graph) and their access patterns.
 level:
   - "3"
 priority: High

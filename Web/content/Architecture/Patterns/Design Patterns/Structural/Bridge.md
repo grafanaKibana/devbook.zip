@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.474Z
-modified: 2026-07-08T15:01:12.475Z
-published: 2026-07-08T15:01:12.475Z
+created: 2026-07-11T18:18:10.003Z
+modified: 2026-07-11T18:18:10.007Z
+published: 2026-07-11T18:18:10.007Z
 topic:
   - Architecture
 subtopic:
   - Patterns
+summary: Bridge decouples an abstraction from its implementation so the two hierarchies can evolve independently instead of exploding combinatorially.
 level:
   - "3"
 priority: High

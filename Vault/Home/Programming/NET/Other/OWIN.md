@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "A standard boundary between .NET web servers and apps, now mainly legacy."
 level:
   - "3"
 priority: Low

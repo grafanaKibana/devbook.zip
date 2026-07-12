@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.661Z
-modified: 2026-07-08T15:01:12.662Z
-published: 2026-07-08T15:01:12.662Z
+created: 2026-07-11T21:45:06.093Z
+modified: 2026-07-11T21:45:06.093Z
+published: 2026-07-11T21:45:06.093Z
 topic:
   - Programming
 subtopic:
   - NET
+summary: The CLR's automatic memory manager reclaiming unreachable objects generationally.
 level:
   - "4"
 priority: High

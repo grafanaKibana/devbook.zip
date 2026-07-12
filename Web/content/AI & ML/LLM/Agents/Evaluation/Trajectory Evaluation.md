@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.295Z
-modified: 2026-07-08T15:01:12.295Z
-published: 2026-07-08T15:01:12.295Z
+created: 2026-07-11T21:45:45.905Z
+modified: 2026-07-11T21:45:45.905Z
+published: 2026-07-11T21:45:45.905Z
 topic:
   - AI & ML
 subtopic:
   - LLM
+summary: Scoring the whole path an agent took via reference-trajectory match or an LLM judge over the trace.
 level:
   - "3"
 priority: High

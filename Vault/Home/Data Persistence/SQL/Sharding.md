@@ -3,6 +3,7 @@ topic:
   - Data Persistence
 subtopic:
   - SQL
+summary: "Horizontal partitioning that splits rows across independent instances to scale writes."
 level:
   - "4"
 priority: High

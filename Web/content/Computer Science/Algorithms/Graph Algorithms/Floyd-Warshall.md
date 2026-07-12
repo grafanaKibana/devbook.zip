@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-10T05:55:48.750Z
-modified: 2026-07-10T05:55:48.750Z
-published: 2026-07-10T05:55:48.750Z
+created: 2026-07-11T21:50:35.928Z
+modified: 2026-07-11T21:50:35.929Z
+published: 2026-07-11T21:50:35.929Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Dynamic-programming all-pairs shortest paths in a single O(V³) sweep that handles negative edges and detects negative cycles.
 level:
   - "4"
 priority: Medium
@@ -132,9 +133,6 @@ flowchart TD
 
 | Choice | Option A | Option B | Decision criteria |
 | --- | --- | --- | --- |
-| All-pairs on dense graph | Floyd-Warshall `O(V³)` | [[Dijkstra]] per source `O(V · E log V)` | When `E ≈ V²`, Dijkstra-per-source is `O(V³ log V)` and needs a heap per run — Floyd-Warshall is both faster and dramatically simpler to code. |
-| All-pairs on sparse graph with negative edges | Floyd-Warshall `O(V³)` | Johnson's algorithm `O(V² log V + VE)` | On sparse graphs Johnson's reweights via one [[Bellman-Ford]] run then Dijkstra per source, beating `V³`. Use Floyd-Warshall only when `V` is small or the graph is dense. |
-| Single-source, negative edges | [[Bellman-Ford]] `O(VE)` | Floyd-Warshall `O(V³)` | If you need distances from one source only, Bellman-Ford avoids computing the whole matrix. Floyd-Warshall pays for all pairs whether you need them or not. |
 | Reachability only | Warshall transitive closure (boolean) | Full Floyd-Warshall (weighted) | If you only need "can `i` reach `j`," the boolean OR/AND variant is the same loop but uses bitsets for a big constant-factor win. |
 
 ## Questions

@@ -1,11 +1,12 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.523Z
-modified: 2026-07-08T15:01:12.523Z
-published: 2026-07-08T15:01:12.523Z
+created: 2026-07-11T21:46:55.896Z
+modified: 2026-07-11T21:46:55.896Z
+published: 2026-07-11T21:46:55.896Z
 topic:
   - Data Persistence
 subtopic: []
+summary: Reusing a bounded set of open database connections to avoid costly handshakes.
 level:
   - "4"
 priority: High

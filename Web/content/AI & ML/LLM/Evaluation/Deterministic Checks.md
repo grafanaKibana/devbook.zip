@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.300Z
-modified: 2026-07-08T15:01:12.300Z
-published: 2026-07-08T15:01:12.300Z
+created: 2026-07-11T21:44:44.407Z
+modified: 2026-07-11T21:44:44.407Z
+published: 2026-07-11T21:44:44.407Z
 topic:
   - AI & ML
 subtopic:
   - LLM
+summary: Non-LLM tests that cheaply validate outputs for schema, safety, and policy before any LLM judge.
 level:
   - "3"
 priority: Medium

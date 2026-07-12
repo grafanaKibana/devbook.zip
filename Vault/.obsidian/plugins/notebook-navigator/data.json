@@ -43,6 +43,12 @@
           "showInNavigation": true,
           "showInList": true,
           "showInFileMenu": false
+        },
+        {
+          "key": "publish",
+          "showInNavigation": true,
+          "showInList": false,
+          "showInFileMenu": false
         }
       ],
       "navRainbow": {
@@ -574,7 +580,9 @@
     "key:level=1": "tally-1",
     "key:priority=high": "signal-high",
     "key:priority=low": "signal-low",
-    "key:priority=medium": "signal-medium"
+    "key:priority=medium": "signal-medium",
+    "key:publish=true": "cloud",
+    "key:publish=false": "cloud-off"
   },
   "propertyColors": {
     "key:level=4": "#8b5cf6",
@@ -587,7 +595,9 @@
     "key:status=creation": "#f97316",
     "key:status=not-started": "#ef4444",
     "key:status=ready to repeat": "#a855f7",
-    "key:status=done": "#22c55e"
+    "key:status=done": "#22c55e",
+    "key:publish=true": "#0ea5e9",
+    "key:publish=false": "#ef4444"
   },
   "propertyBackgroundColors": {},
   "propertySortOverrides": {},

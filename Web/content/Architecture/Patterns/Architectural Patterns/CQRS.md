@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.379Z
-modified: 2026-07-08T15:01:12.379Z
-published: 2026-07-08T15:01:12.379Z
+created: 2026-07-11T21:41:22.394Z
+modified: 2026-07-11T21:41:22.466Z
+published: 2026-07-11T21:41:22.466Z
 topic:
   - Architecture
 subtopic:
   - Patterns
+summary: Separates the write path from the read path so each can be scaled and optimized independently.
 level:
   - "3"
 priority: High

@@ -3,6 +3,7 @@ topic:
   - Networks
 subtopic:
   - Protocols
+summary: "Full-duplex, message-oriented communication over a single long-lived TCP connection for real-time apps."
 level:
   - "3"
 priority: High

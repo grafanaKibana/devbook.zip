@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.303Z
-modified: 2026-07-08T15:01:12.304Z
-published: 2026-07-08T15:01:12.304Z
+created: 2026-07-11T21:44:19.250Z
+modified: 2026-07-11T21:44:19.251Z
+published: 2026-07-11T21:44:19.251Z
 topic:
   - AI & ML
 subtopic:
   - LLM
+summary: Producing reliable, grounded, correctly formatted output by controlling sampling, evidence, and structure.
 level:
   - "2"
 priority: High

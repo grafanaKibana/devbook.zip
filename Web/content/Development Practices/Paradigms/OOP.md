@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.536Z
-modified: 2026-07-08T15:01:12.536Z
-published: 2026-07-08T15:01:12.536Z
+created: 2026-07-11T21:47:40.497Z
+modified: 2026-07-11T21:47:40.497Z
+published: 2026-07-11T21:47:40.497Z
 topic:
   - Development Practices
 subtopic:
   - Paradigms
+summary: Models a system as objects combining state and behaviour via encapsulation and inheritance.
 level:
   - "4"
 priority: Medium

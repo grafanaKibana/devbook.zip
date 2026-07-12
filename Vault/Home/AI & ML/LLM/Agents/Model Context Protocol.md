@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "An open protocol standardizing how LLM apps connect to external tools and data."
 level:
   - "3"
 priority: Low

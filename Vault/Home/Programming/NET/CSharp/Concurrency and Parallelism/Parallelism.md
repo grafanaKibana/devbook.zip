@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "Finishing CPU-bound work faster by using multiple cores at once."
 level:
   - "4"
 priority: High

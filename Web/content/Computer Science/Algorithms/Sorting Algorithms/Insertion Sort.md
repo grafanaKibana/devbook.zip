@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-09T20:18:05.091Z
-modified: 2026-07-09T20:18:05.091Z
-published: 2026-07-09T20:18:05.091Z
+created: 2026-07-11T21:48:47.704Z
+modified: 2026-07-11T21:48:47.707Z
+published: 2026-07-11T21:48:47.707Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Grows a sorted prefix by inserting each element into place; fast on small or nearly-sorted inputs.
 level:
   - "4"
 priority: Low
@@ -96,18 +97,6 @@ Since the prefix is already sorted, you can find the insertion point with a **bi
 **What goes wrong**: a developer replaces insertion sort with selection sort for a small-array case, not realizing selection sort is not stable. Equal elements that were in a specific order are now reordered.
 
 **Mitigation**: when stability matters (sorting objects by a secondary key), use insertion sort or merge sort. Selection sort and quick sort are not stable by default.
-
-## Tradeoffs
-
-| Algorithm | Time (avg) | Space | Stable | Best case | Use when |
-|-----------|-----------|-------|--------|-----------|----------|
-| Insertion sort | O(n²) | O(1) | Yes | O(n) | n ≤ 50; nearly-sorted; base case in hybrid sorts |
-| Selection sort | O(n²) | O(1) | No | O(n²) | Writes are expensive; n is small |
-| Bubble sort | O(n²) | O(1) | Yes | O(n) | Teaching only; never in production |
-| Merge sort | O(n log n) | O(n) | Yes | O(n log n) | Stability required; linked lists; external sort |
-| Quick sort (introsort) | O(n log n) | O(log n) | No | O(n log n) | General-purpose in-memory sorting |
-
-**Decision rule**: use insertion sort for small arrays (n ≤ 50) or nearly-sorted data. For general-purpose sorting, use `Array.Sort` (introsort). For stable sorting of large arrays, use `Array.Sort` with a stable comparer or LINQ `OrderBy` (which uses merge sort).
 
 ## Questions
 

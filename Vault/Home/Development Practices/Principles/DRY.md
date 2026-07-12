@@ -3,6 +3,7 @@ topic:
   - Development Practices
 subtopic:
   - Principles
+summary: "Each piece of knowledge should have one authoritative place in the codebase."
 level:
   - "4"
 priority: High

@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.362Z
-modified: 2026-07-08T15:01:12.363Z
-published: 2026-07-08T15:01:12.363Z
+created: 2026-07-11T18:17:17.734Z
+modified: 2026-07-11T18:17:17.734Z
+published: 2026-07-11T18:17:17.734Z
 topic:
   - Architecture
 subtopic:
   - Distributed Systems
+summary: A single entry point that centralizes routing, auth, rate limiting, and TLS so backend services don't re-implement cross-cutting concerns.
 level:
   - "2"
 priority: High

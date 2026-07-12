@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "Deciding what an authenticated user may do via roles, claims, or policies."
 level:
   - "1"
 priority: Medium

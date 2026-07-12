@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Patterns
+summary: "A pattern where objects receive dependencies from an external source instead of creating them, a practical form of Inversion of Control."
 level:
   - "4"
 priority: High

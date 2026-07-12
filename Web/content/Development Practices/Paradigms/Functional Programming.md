@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.535Z
-modified: 2026-07-08T15:01:12.535Z
-published: 2026-07-08T15:01:12.535Z
+created: 2026-07-11T21:47:36.642Z
+modified: 2026-07-11T21:47:36.643Z
+published: 2026-07-11T21:47:36.643Z
 topic:
   - Development Practices
 subtopic:
   - Paradigms
+summary: Models computation as the evaluation of pure functions over immutable data.
 level:
   - "3"
 priority: Medium

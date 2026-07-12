@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.540Z
-modified: 2026-07-08T15:01:12.541Z
-published: 2026-07-08T15:01:12.541Z
+created: 2026-07-11T21:46:22.723Z
+modified: 2026-07-11T21:46:22.727Z
+published: 2026-07-11T21:46:22.727Z
 topic:
   - Networks
 subtopic:
   - Architecture & Ops
+summary: An encrypted tunnel making remote endpoints act as one private network over the internet.
 level:
   - "3"
 priority: Medium

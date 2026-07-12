@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "C#'s unit of behavior, covering parameter modifiers and dispatch keywords."
 level:
   - "4"
 priority: Medium

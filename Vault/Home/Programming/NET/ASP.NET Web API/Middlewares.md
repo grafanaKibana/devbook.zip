@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "Components forming the ASP.NET Core HTTP pipeline, each wrapping the next."
 level:
   - "4"
 priority: High

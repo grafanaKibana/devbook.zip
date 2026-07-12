@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "Sequence structures like arrays, lists, stacks, queues, and buffers, defined by access order."
 tags:
   - FolderNote
 level:
@@ -18,30 +19,42 @@ Linear structures store elements in a sequence. The academic category is about a
 
 .NET's everyday defaults lean array-backed: `T[]`, `List<T>`, `Stack<T>`, and `Queue<T>` all use contiguous storage internally. `LinkedList<T>` lives here as the contrast case. It answers the same "ordered sequence" question, but pays pointer overhead and poor cache locality to avoid shifting elements during node-local edits.
 
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
+
 ## The Family at a Glance
 
 Every structure in this folder is an answer to two questions: *where can you touch the sequence* (any index, one end, both ends) and *what backs it* (one contiguous array, or nodes). Contiguous backing wins locality and allocation-free steady state; nodes win only when you hold a reference into the middle.
 
 | Structure | Access discipline | Backing | Key costs | .NET |
 |---|---|---|---|---|
-| [[Arrays\|Array]] | Any index, O(1) | Contiguous, fixed size | Resize = reallocate + copy | `T[]` |
+| [[Arrays\|Array]] | Any index, O(1) | Contiguous, fixed size | Resize = reallocate + copy; middle insert/remove = O(n) shift | `T[]` |
 | [[Dynamic Array]] | Any index, O(1); append amortized O(1) | Contiguous, grows ×2 | Mid-sequence insert/remove O(n) | `List<T>` |
 | [[LinkedList]] | O(1) at a *held node*; O(n) to find it | Doubly-linked nodes | Allocation per node, cache-hostile traversal | `LinkedList<T>` |
 | [[Stack]] | One end (LIFO) | Contiguous | Resize on growth; no access below the top | `Stack<T>` |
 | [[Queue]] | In back, out front (FIFO) | Ring over an array | Unbounded growth if producers outpace consumers | `Queue<T>` |
-| [[Deque]] | Both ends, O(1) | Ring or linked nodes | No built-in .NET type | roll your own / `LinkedList<T>` |
-| [[Circular Buffer]] | FIFO, fixed capacity | Ring, wraps in place | Full ⇒ reject or overwrite oldest | hand-rolled; inside `Channel<T>` |
+| [[Deque]] | Both ends O(1); indexed access O(1) (ring) | Ring or linked nodes | No built-in .NET type | roll your own / `LinkedList<T>` |
+| [[Circular Buffer]] | FIFO, fixed capacity, O(1) worst-case | Ring, wraps in place; zero steady-state allocation | Full ⇒ reject or overwrite oldest | hand-rolled; inside `Channel<T>` |
 | [[Span]] | Any index — a *view*, owns nothing | Points at existing memory | Stack-only, can't cross `await` | `Span<T>` / `Memory<T>` |
 
 ## Choosing
 
 Start from the access pattern, not the structure:
 
-- **Random access or "just a sequence"** → `List<T>`, always the default. Drop to a raw `T[]` when the size is fixed and known; wrap either in [[Span]] to slice without copying.
-- **Only ever one end** → [[Stack]] (backtracking, undo, DFS) or [[Queue]] (fairness, BFS, pipelines). The restriction is the feature — it states intent and can't be violated by a stray `Insert(0, …)`.
-- **Both ends** → [[Deque]]; .NET makes you bring your own (ring buffer preferred over `LinkedList<T>`).
-- **Fixed capacity, zero steady-state allocation** → [[Circular Buffer]] — streaming, "last N events", the engine inside bounded queues.
-- **Many edits around positions you already hold** → [[LinkedList]], the only case it wins; everywhere else its per-node allocations and pointer-chasing lose to contiguous storage (the numbers are in [[Arrays]]).
+```mermaid
+flowchart TD
+    A{Access pattern?} -->|Random access or just a sequence| B[List of T, raw array if fixed size]
+    A -->|Only ever one end| C{Which discipline?}
+    C -->|LIFO: backtracking, undo, DFS| C1[Stack]
+    C -->|FIFO: fairness, BFS, pipelines| C2[Queue]
+    A -->|Both ends| D[Deque]
+    A -->|Fixed capacity, zero steady-state allocation| E[Circular Buffer]
+    A -->|Many edits at positions you already hold| F[LinkedList]
+```
+
+Wrap any contiguous sequence in [[Span]] to slice without copying. [[Stack]] and [[Queue]] make the restriction the feature: it states intent and can't be violated by a stray `Insert(0, …)`. .NET ships no [[Deque]] (bring a ring buffer, preferred over `LinkedList<T>`); [[Circular Buffer]] suits streaming and "last N events". [[LinkedList]] only wins for edits at held positions, and everywhere else its per-node allocations and pointer-chasing lose to contiguous storage (the numbers are in [[Arrays]]).
 
 The recurring theme: contiguous beats linked unless you can prove otherwise with a profiler. Cache locality is the dominant constant factor, and every "O(1) insert" claim for linked nodes quietly assumes you already found the node.
 

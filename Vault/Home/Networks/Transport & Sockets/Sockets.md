@@ -3,6 +3,7 @@ topic:
   - Networks
 subtopic:
   - Transport & Sockets
+summary: "A file-like endpoint for bidirectional communication between two processes over a network."
 level:
   - "3"
 priority: Medium
@@ -17,17 +18,11 @@ A socket is an endpoint for bidirectional communication between two processes ov
 
 You reach for raw sockets when building custom protocols, high-performance servers, or when HTTP/gRPC adds too much overhead. For most application-layer work, higher-level abstractions (`HttpClient`, gRPC, SignalR) are safer and faster to build with.
 
-## TCP vs UDP Sockets
+## Stream vs Datagram Sockets
 
-| Property | TCP | UDP |
-|---|---|---|
-| Connection | Connection-oriented (3-way handshake) | Connectionless |
-| Delivery | Guaranteed, ordered | Best-effort, unordered |
-| Framing | Byte stream (no message boundaries) | Datagrams (message boundaries preserved) |
-| Overhead | Higher (ACKs, retransmit, flow control) | Lower |
-| Use cases | HTTP, databases, file transfer | DNS, video streaming, gaming, telemetry |
+The socket API comes in two flavors, one per transport. A **TCP (stream) socket** is a byte stream with no message boundaries — partial reads and writes are normal, so framing the application's messages is your responsibility. A **UDP (datagram) socket** preserves message boundaries — each `Send` maps to one `Receive` — but delivery and ordering are best-effort.
 
-**Decision rule**: use TCP when correctness requires delivery guarantees. Use UDP when latency matters more than reliability and the application can tolerate or handle loss itself.
+For the full TCP-vs-UDP trade-off (delivery, ordering, congestion control, fan-out), see the [[Transport & Sockets]] hub. **Decision rule**: use a stream socket when correctness requires delivery guarantees; use a datagram socket when latency matters more than reliability and the app can tolerate or handle loss itself.
 
 ## Socket Lifecycle
 

@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Floyd's tortoise-and-hare: two pointers moving at different speeds detect cycles, midpoints, or duplicates in O(1) space."
 level:
   - "4"
 priority: Medium

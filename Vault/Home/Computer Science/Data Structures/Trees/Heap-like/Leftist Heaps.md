@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "A heap-ordered binary tree whose null-path-length invariant gives merge in O(log n) worst case."
 level:
   - "4"
 priority: Medium
@@ -115,20 +116,6 @@ These are worst-case bounds. That is the whole reason to pay for the npl field: 
 > ```
 > The swap and the `a.Npl` update are the two lines that keep the right spine short; dropping either forfeits the worst-case bound.
 
-## Comparison
-
-All four hold a heap-ordered multiset and answer find-min; they differ in how melding and the guarantee behave.
-
-| Structure | Merge | Insert | Extract-min | Guarantee | Per-node overhead |
-| --- | --- | --- | --- | --- | --- |
-| Leftist heap | `O(log n)` | `O(log n)` | `O(log n)` | worst-case | npl field + two child pointers |
-| [[Skew Heaps]] | `O(log n)` | `O(log n)` | `O(log n)` | amortized | two child pointers, no npl |
-| [[Binomial Queues]] | `O(log n)` | `O(1)` amortized | `O(log n)` | mixed | forest of trees, child/sibling links |
-| Array [[Heap]] | `O(n)` | `O(log n)` | `O(log n)` | worst-case | none — implicit array indices |
-| [[Fibonacci Heaps]] | `O(1)` amortized | `O(1)` amortized | `O(log n)` amortized | amortized | mark bit, degree, sibling ring |
-
-A leftist heap is the answer when a merge must be `O(log n)` in the worst case with the least machinery: the npl field buys a provably short right spine and a deterministic bound in about thirty lines. A skew heap drops that field for the same asymptotic merge amortized and simpler code, which fits when a per-operation guarantee is not required. Binomial queues meld by binary-addition over a forest and give `O(1)` amortized insert. Fibonacci heaps push merge and insert to `O(1)` amortized for algorithms like Dijkstra that decrease keys often, at a steep constant-factor and implementation cost. When no melding is needed at all, an array heap wins on contiguous memory and cache locality and its lack of a cheap merge is irrelevant.
-
 ## Questions
 
 > [!QUESTION]- What does the leftist invariant bound, and how does that make merge logarithmic?
@@ -136,9 +123,6 @@ A leftist heap is the answer when a merge must be `O(log n)` in the worst case w
 
 > [!QUESTION]- Why swap children after each recursive merge step?
 > The recursive merge attaches the result as the right child, which may make the right subtree deeper than the left and violate the invariant. Swapping pushes the heavier subtree to the left — where no operation walks it — keeping the right spine short. Omitting the swap lets the right spine grow to `O(n)` and degrades every operation to linear.
-
-> [!QUESTION]- How does a leftist heap's guarantee differ from a skew heap's?
-> Both do the same right-spine merge with a child swap. A leftist heap stores npl and swaps only when the invariant demands it, giving `O(log n)` worst-case per operation. A skew heap stores no npl and swaps unconditionally, giving `O(log n)` only amortized — a single meld can be linear.
 
 > [!QUESTION]- How do insert and extract-min reduce to merge?
 > Insert merges the heap with a single-node heap. Extract-min removes the root and merges its left and right subtrees. One correct merge implements the whole API and every operation inherits its `O(log n)` worst-case bound.

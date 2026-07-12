@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "A binary indexed tree computing prefix sums and point updates in O(log n) with one array."
 level:
   - "4"
 priority: Medium
@@ -122,17 +123,6 @@ Two mechanical traps recur. The `Update` contract takes a **delta**, not an assi
 > }
 > ```
 > `Update` applies a delta rather than assigning a value; setting position `i` to `v` means `Update(i, v - current[i])` with `current` tracked by the caller. An `O(n)` in-place build replaces `n` calls to `Update` by adding each finished slot into its parent `i + (i & -i)`.
-
-## Comparison
-
-| Structure | Point update | Prefix / range sum | Range min/max | Extra state | Stronger case |
-| --- | --- | --- | --- | --- | --- |
-| [[Prefix Sum]] array | `O(n)` rebuild | `O(1)` | Not supported | `O(n)` | Data is fixed after one build and queried many times |
-| Fenwick tree | `O(log n)` | `O(log n)` | Not supported (no inverse) | `n + 1` ints | Point updates over an invertible aggregate, minimal memory and code |
-| [[Segment Tree]] | `O(log n)` | `O(log n)` | `O(log n)`, any associative op | `~4n` nodes, plus lazy tags | Min/max/gcd, range-assign, or lazy range updates |
-| Sqrt decomposition | `O(1)` or `O(√n)` | `O(√n)` | `O(√n)` | `O(√n)` blocks | A simple structure tolerating `√n` queries, arbitrary block aggregates |
-
-A Fenwick tree is the compact choice when the aggregate is invertible and updates are point updates: it matches the segment tree's `O(log n)` on both operations while spending a quarter of the memory and a fraction of the code, and its whole API is two bit-twiddling loops. The segment tree earns its extra memory and recursion when the aggregate is min/max or gcd, or when range-assignment and lazy propagation are required — cases the prefix-subtraction trick cannot express. A prefix-sum array is stronger still on the narrow case where the data never changes after construction.
 
 ## Questions
 

@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.682Z
-modified: 2026-07-08T15:01:12.683Z
-published: 2026-07-08T15:01:12.683Z
+created: 2026-07-11T21:48:23.931Z
+modified: 2026-07-11T21:48:23.931Z
+published: 2026-07-11T21:48:23.931Z
 topic:
   - Security
 subtopic:
   - Security
+summary: The non-profit behind the OWASP Top 10 web security risk checklist.
 level:
   - "4"
 priority: High

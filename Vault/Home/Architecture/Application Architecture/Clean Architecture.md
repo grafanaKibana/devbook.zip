@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Application Architecture
+summary: "Organizes software so business policy is protected from technical details via the Dependency Rule: source dependencies point inward toward business rules."
 level:
   - "3"
 priority: High

@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "A union-find structure that partitions elements into disjoint sets and answers whether two share a set."
 level:
   - "3"
 priority: Medium
@@ -142,11 +143,10 @@ The array representation assumes dense integer IDs from `0` through `n - 1`. Str
 | Representation | Connectivity query | Add connection / merge | Removal | Information retained | Stronger case |
 | --- | --- | --- | --- | --- | --- |
 | Disjoint set | `O(α(n))` amortized | `O(α(n))` amortized | Not supported | Component membership | Connections only accumulate and connectivity is queried repeatedly |
-| Adjacency list + DFS/BFS | `O(V + E)` per traversal | `O(1)` append | `O(degree)` search/removal | Edges, neighbors, and reconstructable paths | Paths, degrees, traversal order, or changing edges matter |
 | Static component labels | `O(1)` after preprocessing | Recompute labels in `O(V + E)` | Recompute labels | Component ID snapshot | The graph is immutable and receives many connectivity queries |
 | Rollback disjoint set | `O(log n)` | `O(log n)` | `O(1)` rollback of the latest merge | Component membership plus change history | Offline connectivity where additions must be undone in reverse order |
 
-The disjoint set occupies a specific point in this comparison: it gives up graph topology and deletion in exchange for extremely cheap incremental merges and membership checks. Static labels are cheaper to query when the graph never changes. An adjacency list carries much more information but must traverse the graph to rediscover connectivity. Rollback retains change history at a higher per-operation cost and without path compression.
+The disjoint set occupies a specific point in this comparison: it gives up graph topology and deletion in exchange for extremely cheap incremental merges and membership checks. Static labels are cheaper to query when the graph never changes. Rollback retains change history at a higher per-operation cost and without path compression.
 
 The related [[Union-Find]] note covers the operation heuristics and their analysis. This page remains centered on stored state, invariants, and the boundary of the data structure itself.
 
@@ -160,9 +160,6 @@ The related [[Union-Find]] note covers the operation heuristics and their analys
 
 > [!QUESTION]- Why is the useful bound amortized rather than worst-case constant time?
 > One `Find` can still traverse several parent indices. Path compression pays extra writes during that operation so later finds become shorter. Across a sequence, the total work is `O(m α(n))` for `m` operations, even though a particular operation is not guaranteed to be constant time.
-
-> [!QUESTION]- When is an adjacency list still necessary?
-> A disjoint set answers only whether two elements share a component. An adjacency list remains necessary when the original edges, an actual path, neighbor enumeration, edge removal, weights, or traversal order are part of the result.
 
 ## References
 

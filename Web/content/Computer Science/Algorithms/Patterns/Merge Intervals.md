@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-10T05:57:55.524Z
-modified: 2026-07-10T05:57:55.524Z
-published: 2026-07-10T05:57:55.524Z
+created: 2026-07-11T21:53:51.208Z
+modified: 2026-07-11T21:53:51.208Z
+published: 2026-07-11T21:53:51.208Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Sorts ranges by start then sweeps to merge overlapping intervals in O(n log n).
 level:
   - "4"
 priority: Medium

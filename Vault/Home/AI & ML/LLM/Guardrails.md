@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "Layered controls around an LLM that make unsafe actions and data leaks detectable and recoverable."
 level:
   - "3"
 priority: Medium

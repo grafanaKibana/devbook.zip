@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.675Z
-modified: 2026-07-08T15:01:12.675Z
-published: 2026-07-08T15:01:12.675Z
+created: 2026-07-11T21:48:27.437Z
+modified: 2026-07-11T21:48:27.437Z
+published: 2026-07-11T21:48:27.437Z
 topic:
   - Security
 subtopic:
   - Security
+summary: An append-only ledger of blocks linked by cryptographic hashes, making tampering detectable.
 level:
   - "1"
 priority: Low

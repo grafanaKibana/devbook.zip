@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-10T05:55:53.168Z
-modified: 2026-07-10T05:55:53.168Z
-published: 2026-07-10T05:55:53.168Z
+created: 2026-07-11T21:45:24.983Z
+modified: 2026-07-11T21:45:24.983Z
+published: 2026-07-11T21:45:24.983Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Finds a range containing the target by doubling probe indices, then binary-searches it, in O(log i) by target position.
 level:
   - "4"
 priority: Medium
@@ -84,14 +85,6 @@ flowchart TD
 - **Assuming the source is bounded** — the headline use case is unknown-length input, but the naive loop guards on `bound < n`. On a true stream you must instead stop the gallop when a probe returns "past the end" or `a[bound] >= target`, or you will index off the end. Decide up front whether `n` is known.
 - **Integer overflow on the doubling** — `bound *= 2` on a very large array can overflow a 32-bit index and wrap negative, producing an out-of-bounds probe or an infinite loop. Cap the bound at `n` (or use a wider type) before doubling.
 - **Forgetting it is still a sorted-data algorithm** — the binary search phase inherits every [[Binary Search]] precondition. Exponential search buys you range discovery, not freedom from sorting; on unsorted input the gallop's `a[bound] < target` test is meaningless.
-
-## Tradeoffs
-
-| Choice | Exponential Search | Alternative | Decision criteria |
-| --- | --- | --- | --- |
-| vs [[Binary Search]] | `O(log i)`, no length needed | `O(log n)`, needs known `n` | Prefer exponential search when the length is unknown/unbounded or the target skews toward the front; use plain binary search when `n` is known and targets are uniform. |
-| vs [[Jump Search]] on bounded data | `O(log i)`, random access | `O(√n)`, forward stepping | Both bound a range first; exponential search is far faster when random access is `O(1)`, jump search wins only when backward seeks are expensive. |
-| vs [[Interpolation Search]] | `O(log i)`, distribution-agnostic | `O(log log n)` uniform, `O(n)` skewed | Exponential search has no distribution assumption; use interpolation only when data is provably near-uniform and you need the extra speed. |
 
 ## Questions
 

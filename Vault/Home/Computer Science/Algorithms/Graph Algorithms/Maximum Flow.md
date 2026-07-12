@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Finds the greatest s-to-t throughput in a capacitated network by repeatedly augmenting paths in a residual graph."
 level:
   - "4"
 priority: Medium

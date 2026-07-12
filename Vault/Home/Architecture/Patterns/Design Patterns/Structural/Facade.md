@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Patterns
+summary: "Facade provides a simplified high-level interface over a complex subsystem, coordinating its components so clients avoid manual orchestration."
 level:
   - "2"
 priority: High

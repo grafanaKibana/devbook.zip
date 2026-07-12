@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Algorithms to traverse, rank, and optimize graph relationships: reachability, shortest paths, connectivity, and flow."
 tags:
   - FolderNote
 publish: true
@@ -15,6 +16,11 @@ priority: High
 # Intro
 
 Graphs model relationships: networks, dependencies, routes, permissions, and many real-world system structures. Graph algorithms help you traverse, rank, and optimize those relationships efficiently. Example: shortest-path algorithms answer "what's the cheapest route" while BFS/DFS answer "what's reachable".
+
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
 
 ## Diagram
 
@@ -49,7 +55,7 @@ flowchart TD
 | [[Greedy Best-First Search]] | Fast point-to-point path, not optimal | O((V + E) log V) | Heuristic only; sacrifices optimality for speed |
 | [[Bidirectional Search]] | Point-to-point shortest path | O(b^(d/2)) vs O(b^d) | Target known; graph must be reversible |
 | [[Bellman-Ford]] | Single-source shortest path | O(V·E) | Handles negative edges; detects negative cycles |
-| [[Floyd-Warshall]] | All-pairs shortest path | O(V³) | Small/dense graphs; detects negative cycles |
+| [[Floyd-Warshall]] | All-pairs shortest path | O(V³) time, Θ(V²) space | Small/dense graphs; detects negative cycles |
 
 ### Structure and connectivity
 
@@ -61,6 +67,9 @@ flowchart TD
 | [[Connected Components]] | Maximal connected vertex sets | O(V + E) | Undirected graphs |
 | [[Articulation Points and Bridges]] | Cut vertices and cut edges | O(V + E) | Undirected graphs |
 | [[Maximum Flow]] | Max s–t throughput; min cut | O(V·E²) (Edmonds–Karp) | Capacitated network |
+
+> [!NOTE]
+> Not every graph problem admits a polynomial algorithm. [[Hamiltonian Cycle]] — visit every vertex exactly once and return to the start — is **NP-complete**, so it sits outside the selection tables above: there is no known efficient algorithm to choose, only exponential search and heuristics.
 
 ## Questions
 

@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "A catalog of production RAG patterns, each naming the failure it fixes and the risk it adds."
 level:
   - "2"
 priority: High

@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Runs forward and backward searches that meet in the middle, cutting O(b^d) to two O(b^(d/2)) halves."
 level:
   - "4"
 priority: Medium
@@ -179,17 +180,6 @@ Predecessors must be enumerable. The backward BFS walks edges in reverse, so a d
 > }
 > ```
 > The level scan, not the first cross-edge, is load-bearing: two meetings can appear in the same expanded level with different back-halves, so the minimum sum over the level is what stays optimal. On a weighted graph this level rule is replaced by the `gF + gB` termination test from the section above. The `meet != target` guard covers the single-edge `s → t` query, where the forward side discovers the target directly and the backward half is empty.
-
-## Comparison
-
-| Strategy | Time | Requires | Stronger case | Weaker case |
-| --- | --- | --- | --- | --- |
-| Bidirectional BFS | `O(b^(d/2))` time and space | One concrete target; enumerable predecessors | Large, roughly uniform graph with a single known target and high `b` | Predicate-only goal, non-reversible edges, or weighted graphs without the corrected meeting test |
-| Unidirectional [[DFS BFS\|BFS]] | `O(b^d)` | A start vertex and a goal test | Small graphs, or a goal defined only by a predicate | Deep, high-branching point-to-point queries |
-| [[A-Star Search\|A* Search]] | `O(b^d)` worst; far less with a sharp heuristic | An admissible heuristic toward the target | A heuristic already prunes most of the frontier | No informative heuristic; the graph looks uniform in every direction |
-| [[Dijkstra]] | `O((V + E) log V)` | Non-negative edge weights | Weighted graphs, or many targets from one source | A single target where reverse search or a heuristic could prune the frontier |
-
-Bidirectional search is an optimization layered onto an existing search rather than a different frontier strategy. On a large, roughly uniform graph with one known target and reversible edges it turns `b^d` into `b^(d/2)`, and the memory saving usually matters as much as the time. It buys nothing when the target is only a goal test, when the graph cannot be traversed backward, or when one source has many goals — and on weighted graphs the plain "first frontier touch" rule is wrong, so it must carry the `gF + gB` termination test. A strong heuristic and bidirectional search are complementary rather than competing: bidirectional [[A-Star Search|A* Search]] applies the same halving to heuristic search, which is how contraction-hierarchy road routers answer continental queries in milliseconds.
 
 ## Questions
 

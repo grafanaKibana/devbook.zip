@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Sorts fixed-width integer keys one digit at a time with a stable pass, beating the comparison bound."
 level:
   - "4"
 priority: Medium
@@ -119,28 +120,10 @@ The `Θ(n + b)` auxiliary space is the counting sort's output buffer (`n`) plus 
 > ```
 > The backward final loop is load-bearing: reversing it turns the inner sort unstable and corrupts every prior pass. Signed or floating-point keys must first go through the unsigned transform from the boundaries above.
 
-## Comparison
-
-| Algorithm | Time | Aux space | Key requirement | Stronger case | Weaker case |
-| --- | --- | --- | --- | --- | --- |
-| Radix Sort (LSD) | `Θ(d · (n + b))` | `Θ(n + b)`, stable | Keys split into `d` fixed-width digits over radix `b` | Large `n` of fixed-width integer or string keys | Wide, variable-length, or non-decomposable keys |
-| [[Counting Sort]] | `Θ(n + k)` | `Θ(n + k)`, stable | Integer keys in a small range `[0, k)` | `k` on the order of `n` | Large range — `k ≫ n` makes the count array dominate |
-| [[Quick Sort]] | `O(n log n)` avg, `O(n²)` worst | `O(log n)` stack, in-place | Any comparator | General comparable data, tight memory | Fixed-width integers where radix runs linear |
-| [[Merge Sort]] | `Θ(n log n)` | `Θ(n)`, stable | Any comparator | Stable general sort, linked or external data | The extra `log n` factor and buffer versus radix on integers |
-| [[Bucket Sort]] | `Θ(n + k)` expected | `Θ(n + k)` | Keys roughly uniform over a known range | Uniformly distributed reals or floats | Skewed input degrades toward `O(n²)` |
-
-Radix Sort is the linear option precisely when keys carry a fixed-width digit structure: for 32- or 64-bit integers and fixed-length strings it beats every comparison sort and stays stable, paying an `Θ(n + b)` buffer and giving up in-place operation. [[Counting Sort]] is its single-digit primitive — radix exists to escape counting sort's collapse when the key range `k` is enormous, by processing a few narrow digits instead of one wide key. Against [[Quick Sort]] and [[Merge Sort]] the trade is the `d` factor: while `d` stays small radix wins, but wide keys, unbounded-length keys, or keys that expose only a comparator with no digit decomposition hand the advantage back to the comparison sorts. [[Bucket Sort]] shares radix's distribute-by-key idea but bets on uniform inputs, where radix assumes nothing about the distribution at all.
-
 ## Questions
 
 > [!QUESTION]- Why must each per-digit pass be stable?
 > Each pass sorts on one digit and trusts that ties on that digit are already ordered by the less-significant digits sorted in earlier passes. A stable counting sort preserves that established order; an unstable one reorders the ties and destroys the work of every prior pass, producing output that is sorted only on the final digit. Stability is a correctness requirement here, not an optimization.
-
-> [!QUESTION]- Why does Radix Sort have no best/worst-case asymmetry the way Quick Sort does?
-> It never branches on a comparison. Every pass scatters all `n` keys through the `b` buckets and gathers them, regardless of how the input is arranged, so sorted, reverse, and random inputs all cost `Θ(d · (n + b))`. There is no pivot to unbalance and nothing to short-circuit, so the best and worst cases coincide.
-
-> [!QUESTION]- How does Radix Sort avoid Counting Sort's blow-up on a large key range?
-> A plain [[Counting Sort]] over a range `[0, k)` allocates a count array of size `k`, which dominates when `k ≫ n`. Radix Sort applies counting sort to one narrow digit at a time instead of the whole key, so the count array is only `b` entries (the radix) and the large range is absorbed by making a few more passes rather than one enormous table.
 
 > [!QUESTION]- When does a comparison sort beat Radix Sort?
 > When keys are wide, variable-length without a bound, or not decomposable into digits. The `d` passes carry a real cost, so once `d` grows relative to `log₂ n` — long strings, big integers — a tuned [[Quick Sort]] wins on wall-clock time. Keys exposed only through a comparator have no digit to bucket on, so radix does not apply at all.

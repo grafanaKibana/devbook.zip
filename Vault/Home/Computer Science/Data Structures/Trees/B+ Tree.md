@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "The B-tree variant databases ship, with data only in leaves chained for fast range scans."
 level:
   - "4"
 priority: Medium
@@ -134,26 +135,10 @@ The same page-sizing constraint as a [[B-tree]] applies: node capacity is chosen
 > ```
 > Insert and delete (leaf overflow splits, underflow merges, and the `Next` relinking each performs) are omitted; `Range` shows the invariant that makes the structure worthwhile — after `DescendToLeaf` it never returns to an internal node.
 
-## Comparison
-
-Alternatives for the same ordered on-disk index workload:
-
-| Structure | Point lookup | Range / ordered scan | Write cost | Ordering retained | Stronger case |
-| --- | --- | --- | --- | --- | --- |
-| B+ tree | `O(log_m n)`, always to a leaf | `O(log_m n + k)` sequential leaf walk | In-place, split/merge on overflow | Full sorted order via leaf chain | Range queries and ordered scans over disk-resident data |
-| [[B-tree]] | `O(log_m n)`, may stop early at an internal node | `O(k log_m n)`, re-descends per successor | In-place, split/merge on overflow | Sorted, but no leaf links | Point-lookup-dominant workloads, often in memory |
-| LSM-tree | `O(log n)` across levels, bloom-filtered | Merge sorted runs; scan spans levels | Buffered sequential appends, background compaction | Sorted within runs, merged on read | Write-heavy ingestion where sequential writes beat in-place updates |
-| Hash index | `O(1)` average, `O(n)` worst | Not supported — no order | In-place bucket write | None | Exact-match lookups where range and ordering are irrelevant |
-
-The B+ tree is the default for range queries and disk-backed indexes — RDBMS primary and secondary indexes, filesystem directory and extent trees — because its linked leaves turn a range or ordered scan into a sequential walk that a plain [[B-tree]] cannot match. A plain [[B-tree]] is competitive, and its early-exit lookups are marginally cheaper, when only point lookups matter and the tree lives in memory. An LSM-tree wins when the workload is write-heavy and turning random in-place updates into sequential appends is worth the extra read-side merge. A hash index is faster still for a lone exact match but forfeits every ordered operation. The [[Binary Search Tree]] family answers the same ordered queries in memory but with a fan-out of two, so it is far too tall for page-oriented storage.
-
 ## Questions
 
 > [!QUESTION]- What two structural changes turn a B-tree into a B+ tree, and which query do they serve?
 > All `(key, value)` pairs move to the leaves, leaving internal nodes as a pure routing key index, and the leaves are chained into a sorted linked list. Both changes serve the range scan: after one descent, matching keys are read by walking the leaf chain in order instead of re-ascending into internal nodes.
-
-> [!QUESTION]- Why does a B+ point lookup always reach a leaf while a B-tree lookup can stop early?
-> A B-tree stores values in internal nodes too, so a key found on the way down returns immediately. A B+ tree's internal nodes hold only separators, so a value exists only in a leaf and every lookup pays a full descent. The trade buys uniform latency and cheap ordered scans.
 
 > [!QUESTION]- Why is a B+ range scan `O(log_m n + k)` rather than `O(k log_m n)`?
 > The `log_m n` descent locates the first matching leaf once. From there the leaf `next` links yield the remaining `k` entries in order as a sequential walk, adding one term per result. Without leaf links, each successor would require its own descent, multiplying the height into the cost.

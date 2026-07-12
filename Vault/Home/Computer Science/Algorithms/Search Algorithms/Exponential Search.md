@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Finds a range containing the target by doubling probe indices, then binary-searches it, in O(log i) by target position."
 level:
   - "4"
 priority: Medium
@@ -103,24 +104,10 @@ The bracket is only as trustworthy as the ordering. The gallop's `a[bound] < tar
 >
 > `Math.Min(bound, n - 1)` clamps the overshoot from the last doubling; an unbounded variant drops the `bound < n` guard and stops on an end-of-stream probe instead.
 
-## Comparison
-
-| Strategy | Lookup time | Requires | Stronger case | Weaker case |
-| --- | --- | --- | --- | --- |
-| [[Binary Search]] | `O(log n)` | Sorted, indexable, known length `n` | Bounded array with targets spread uniformly | Length unknown or unbounded; target skewed to the front |
-| Exponential Search | `O(log i)` | Sorted, indexable; length may be unknown | Unbounded or unknown-length input; targets near the front | Known `n` with no front bias — the extra gallop earns nothing |
-| [[Jump Search]] | `O(√n)` | Sorted; cheap forward stepping | Sequential media where backward seeks are expensive | Random access is `O(1)`, where `log i` beats `√n` |
-| [[Interpolation Search]] | `O(log log n)` average, `O(n)` worst | Sorted, near-uniform numeric keys | Large uniformly distributed numeric arrays | Skewed distributions or non-numeric keys |
-
-Exponential search fits sorted data whose size is unknown or unbounded, and sorted arrays whose targets cluster near the front: it pays one extra doubling phase to discover the right endpoint that Binary Search assumes it already has, and is rewarded with an `O(log i)` bound in the answer's position. Once the length is known and targets carry no front bias, that phase buys nothing — plain Binary Search reaches the same asymptotics with less code. The doubling gallop is also the core of Timsort's merge step, where "galloping mode" skips a long run of one side in `O(log k)` comparisons instead of one at a time.
-
 ## Questions
 
 > [!QUESTION]- Why is exponential search `O(log i)` rather than `O(log n)`?
 > Doubling stops as soon as `bound` reaches or passes the target's position `i`, after about `log i` steps, and the bracket it leaves spans fewer than `i` elements, so the closing binary search is another `O(log i)`. Neither phase inspects the whole array, so the cost tracks the answer's position, not the array length — strictly better than `O(log n)` when the target is near the front and no worse when it is near the end.
-
-> [!QUESTION]- What makes exponential search applicable to unknown-length input when binary search is not?
-> Binary Search needs `n` to compute a midpoint and cannot start without it. Exponential search generates the indices it probes (`1, 2, 4, …`) and only ever asks whether `a[bound]` is still below the target, so the doubling stops the moment a probe reaches or exceeds the target — bounding a finite window without ever referencing the total size.
 
 > [!QUESTION]- Why must the high end of the bracket be clamped, and what breaks without it?
 > The final doubling makes `bound` the first power of two at or beyond the target, so it can land past the last valid index. Bisecting `[bound/2, bound]` without clamping the upper end to `min(bound, n − 1)` reads outside the array; on an unbounded source the same overshoot indexes past end-of-stream. `bound *= 2` can also overflow a 32-bit index into a negative probe.

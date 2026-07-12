@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.641Z
-modified: 2026-07-08T15:01:12.642Z
-published: 2026-07-08T15:01:12.642Z
+created: 2026-07-11T21:44:32.498Z
+modified: 2026-07-11T21:44:32.498Z
+published: 2026-07-11T21:44:32.498Z
 topic:
   - Programming
 subtopic:
   - NET
+summary: Browser security controlling which origins may call your API, via response headers.
 level:
   - "1"
 priority: Medium

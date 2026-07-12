@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "A leftist heap without the bookkeeping, self-adjusting for amortized O(log n) merge."
 level:
   - "4"
 priority: Medium
@@ -117,28 +118,10 @@ The unconditional swap is the whole mechanism, not a tunable detail. Making it c
 > ```
 > The two swap-carrying lines are the entire self-adjustment: there is no rank field to update and no condition guarding the swap. Removing the swap, or making it conditional on stored metadata, produces a different data structure.
 
-## Comparison
-
-| Structure | Merge | Extract-min | Per-node overhead | Guarantee | Stronger case |
-| --- | --- | --- | --- | --- | --- |
-| Skew heap | `O(log n)` amortized | `O(log n)` amortized | 2 pointers + key, no rank | Amortized only | Meldable heap with the least code and no rank bookkeeping |
-| [[Leftist Heaps\|Leftist heap]] | `O(log n)` worst case | `O(log n)` worst case | 2 pointers + key + npl | Per-operation worst case | A worst-case per-op bound, or persistent/shared use |
-| [[Binomial Queues]] | `O(log n)` worst case | `O(log n)` worst case | Forest of trees + degree | Per-operation worst case | Meld plus fast `O(1)` amortized insert |
-| Array [[Heap]] | `O(n)` | `O(log n)` worst case | Contiguous array, no pointers | Per-operation worst case | No melding; cache-friendly, compact |
-| [[Fibonacci Heaps]] | `O(1)` amortized | `O(log n)` amortized | Marks, degree, sibling/child pointers | Amortized only | Heavy decrease-key (Dijkstra, Prim) |
-
-A skew heap is the simplest mergeable heap in this group: amortized `O(log n)` across merge, insert, and extract-min with two pointers per node, no rank field, and the shortest merge routine of the pointer-based options. A leftist heap is the closer fit when a worst-case — not amortized — per-operation bound is required, or when the heap is shared across versions, since its npl-driven balance survives both conditions. A binomial queue matches leftist's worst-case merge and adds `O(1)` amortized insert at the cost of a forest representation, an array heap wins on locality and memory when melding is never needed, and a Fibonacci heap only earns its bookkeeping when decrease-key is on the hot path.
-
 ## Questions
-
-> [!QUESTION]- What does a skew heap remove relative to a leftist heap, and what replaces it?
-> The per-node null-path-length field and the conditional child swap. Merge instead swaps the two children unconditionally at every node it descends on the right spine. Self-adjustment replaces the stored invariant, trading a per-operation worst-case bound for an amortized one.
 
 > [!QUESTION]- How can `O(log n)` amortized hold when one merge can be `O(n)`?
 > A potential function counts heavy nodes — those whose right subtree outweighs their left. An expensive merge traverses many heavy nodes, but each unconditional swap makes a heavy node light. The costly traversal discharges potential accumulated by earlier cheap operations and leaves the heap cheap to merge again, so the per-operation cost averages to `O(log n)` even though a single call is not bounded by it.
-
-> [!QUESTION]- When is a leftist heap the better choice despite storing an extra field?
-> When a per-operation worst-case bound is required rather than an amortized sequence bound — a latency-sensitive path where one operation must not spike to `O(n)` — or when the heap is used persistently. Re-merging a shared expensive shape from an old version defeats amortized accounting, while a leftist heap's `O(log n)` is per operation and survives sharing.
 
 ## References
 

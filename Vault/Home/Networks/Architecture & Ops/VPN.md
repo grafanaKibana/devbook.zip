@@ -3,6 +3,7 @@ topic:
   - Networks
 subtopic:
   - Architecture & Ops
+summary: "An encrypted tunnel making remote endpoints act as one private network over the internet."
 level:
   - "3"
 priority: Medium

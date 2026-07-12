@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.539Z
-modified: 2026-07-08T15:01:12.540Z
-published: 2026-07-08T15:01:12.540Z
+created: 2026-07-11T21:47:46.050Z
+modified: 2026-07-11T21:47:46.050Z
+published: 2026-07-11T21:47:46.050Z
 topic:
   - Development Practices
 subtopic:
   - Principles
+summary: Don't build a feature until you have a real, current need.
 level:
   - "4"
 priority: High

@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "Stores results at each RAG stage to cut latency and cost, scoped by authorization."
 level:
   - "2"
 priority: High

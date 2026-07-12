@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "A lazy binomial queue that defers work to extractMin, buying O(1) amortized decreaseKey and meld."
 level:
   - "4"
 priority: Medium
@@ -166,18 +167,6 @@ The mark-and-cascading-cut machinery is intricate and error-prone: forgetting to
 > ```
 > The invariant carriers are `Cut` (clears the mark because a root is always unmarked) and `CascadingCut` (stops at the first unmarked ancestor, otherwise cuts upward). Consolidation is elided; it is the standard degree-indexed linking pass that pays the deferred cost.
 
-## Comparison
-
-| Heap | decrease-key | extract-min | merge | Memory / locality | Practical standing |
-| --- | --- | --- | --- | --- | --- |
-| Fibonacci | `O(1)` amortized | `O(log n)` amortized | `O(1)` amortized | 4 pointers + degree + mark per node; scattered | Best asymptotic bound; high constants, cache-hostile |
-| Binary [[Heap]] | `O(log n)` | `O(log n)` | `O(n)` rebuild | Flat array, no per-node pointers | Simplest, cache-friendly, usually fastest overall |
-| Pairing heap | `O(log n)` proven, better conjectured | `O(log n)` amortized | `O(1)` | Pointer nodes, simpler than Fibonacci | Near-Fibonacci in practice with far less code |
-| [[Binomial Queues]] | `O(log n)` | `O(log n)` | `O(log n)` | Pointer forest of binomial trees | Mergeable, but no `O(1)` decrease-key |
-| [[Leftist Heaps]] | `O(log n)` | `O(log n)` | `O(log n)` | Pointer tree keyed on null-path length | Simple mergeable heap, no `O(1)` decrease-key |
-
-A Fibonacci heap is the theoretically optimal priority queue for decrease-key-heavy work: it is the structure that gives Dijkstra and Prim their best-known `O(E + V log V)` bound, and no comparison heap improves the amortized decrease-key. The cost it pays is steep constants and pointer-chasing across a scattered forest, so in practice a binary heap's contiguous array or a pairing heap's much simpler code — both with smaller constants and better cache behavior — usually make one of them the faster real-world choice, even though their decrease-key is asymptotically worse. [[Binomial Queues]] and [[Leftist Heaps]] match the `O(log n)` merge but never reach the `O(1)` decrease-key that is the entire reason to build a Fibonacci heap.
-
 ## Questions
 
 > [!QUESTION]- What does the laziness actually defer, and to where?
@@ -188,9 +177,6 @@ A Fibonacci heap is the theoretically optimal priority queue for decrease-key-he
 
 > [!QUESTION]- Why is find-min O(1) but extract-min O(log n)?
 > Heap order forces the global minimum to be a root, and the heap keeps a direct pointer to it, so find-min is a single read. Extract-min must remove that root, promote its children, and then consolidate the whole root list — linking equal-degree roots until degrees are distinct — which costs `O(log n)` amortized because the maximum degree is `O(log n)`.
-
-> [!QUESTION]- On real Dijkstra inputs a binary heap often beats a Fibonacci heap despite worse asymptotics. Why?
-> The Fibonacci advantage is amortized `O(1)` decrease-key, which only dominates when decrease-key vastly outnumbers extract-min, and it comes with large constants and per-node pointers spread across memory. A binary heap works over one contiguous array with cache-friendly index arithmetic, so its smaller constants and better locality usually outrun the asymptotic gap on sparse or moderately sized graphs.
 
 ## References
 

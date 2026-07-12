@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "A binary tree ordered left < node < right, giving O(height) search and ordered queries."
 level:
   - "4"
 priority: Medium
@@ -166,12 +167,10 @@ Order queries by *rank* — "the 7th smallest key" — are not `O(log n)` on a p
 | Structure | Search | Insert | Ordered queries | Worst-case guarantee | Stronger case |
 | --- | --- | --- | --- | --- | --- |
 | Binary search tree | `O(h)` | `O(h)` | min/max/successor/range | None — degrades to `O(n)` | Random or already-balanced input; the simplest ordered structure |
-| [[AVL Tree]] | `O(log n)` | `O(log n)` | same | `O(log n)` (strict balance) | Lookup-heavy workloads where read speed matters most |
-| [[Red-Black Tree]] | `O(log n)` | `O(log n)` | same | `O(log n)` (looser balance) | Mixed read/write; fewer rotations per write — the library default |
 | [[HashMap]] | `O(1)` avg | `O(1)` avg | none | `O(n)` worst | Exact-match lookups where order is irrelevant |
 | Sorted array + [[Binary Search]] | `O(log n)` | `O(n)` | via index | `O(log n)` search only | Static data searched far more often than it changes |
 
-A plain BST is the simplest structure that keeps keys ordered while supporting cheap insertion, and it behaves well on random or already-balanced input. It pays for that simplicity with no worst-case guarantee: a self-balancing tree is the only one of these that holds `O(log n)` on adversarial or sorted input, trading a small constant per write for rotations. A hash map is faster still for point lookups but discards ordering entirely, so it cannot answer range or successor queries; a sorted array matches the search cost but cannot absorb insertions cheaply.
+A plain BST is the simplest structure that keeps keys ordered while supporting cheap insertion, and it behaves well on random or already-balanced input. It pays for that simplicity with no worst-case guarantee — holding `O(log n)` on adversarial or sorted input needs a self-balancing variant ([[AVL Tree]], [[Red-Black Tree]]). A hash map is faster still for point lookups but discards ordering entirely, so it cannot answer range or successor queries; a sorted array matches the search cost but cannot absorb insertions cheaply.
 
 ## Questions
 

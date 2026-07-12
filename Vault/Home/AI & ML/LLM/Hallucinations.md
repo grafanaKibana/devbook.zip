@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "An LLM producing fluent, confident output unsupported by evidence, because it optimizes likelihood, not truth."
 level:
   - "3"
 priority: Medium

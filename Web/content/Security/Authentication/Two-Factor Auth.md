@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.674Z
-modified: 2026-07-08T15:01:12.675Z
-published: 2026-07-08T15:01:12.675Z
+created: 2026-07-11T21:48:20.463Z
+modified: 2026-07-11T21:48:20.463Z
+published: 2026-07-11T21:48:20.463Z
 topic:
   - Security
 subtopic:
   - Authentication
+summary: Requires two independent factors so a stolen password alone can't authenticate.
 level:
   - "3"
 priority: High

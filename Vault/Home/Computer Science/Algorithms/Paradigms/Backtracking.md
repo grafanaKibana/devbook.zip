@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "A refined brute force that builds candidate solutions incrementally and prunes a partial candidate the moment it can't possibly succeed."
 level:
   - "4"
 priority: Medium
@@ -105,19 +106,6 @@ Recording a solution by appending the live buffer stores a reference that subseq
 > ```
 > The `used[i]` guard is the prefix feasibility test; a constraint problem such as n-queens replaces it with an `IsSafe(row, col)` check that reads the columns and diagonals already occupied. The `used[i] = false` line is the undo that keeps sibling branches independent.
 
-## Comparison
-
-Alternatives that also search or decompose a configuration space:
-
-| Strategy | Explores | Prunes by | Reuses across branches | Stronger case | Weaker case |
-| --- | --- | --- | --- | --- | --- |
-| Backtracking | pruned DFS over partial candidates | a violated prefix constraint | nothing | constraint satisfaction and enumeration with a cheap prefix test | optimization, or no early feasibility signal |
-| Brute-force enumeration | every complete candidate | nothing; tests only at the end | nothing | spaces small enough to enumerate, or no usable prefix test | any space large enough for a prefix test to prune |
-| [[Branch and Bound]] | pruned DFS/BFS over partial candidates | an objective bound plus feasibility | best solution and its bound | optimization where a bound on the remaining cost is computable | pure feasibility with no meaningful objective |
-| [[Dynamic Programming]] | each distinct subproblem once | — memoization, not pruning | solved subproblem results | overlapping subproblems with optimal substructure | independent choices, or a need to list every configuration |
-
-Backtracking is the default when the task is to satisfy constraints or enumerate valid configurations and a partial candidate can be rejected early; its cost collapses to brute force exactly when no prefix test bites. [[Branch and Bound]] is the same tree search carried into optimization, adding an objective bound so a partial candidate that cannot beat the best solution found so far is pruned even while still feasible. [[Dynamic Programming]] applies when the search tree's subproblems overlap, so results are stored and reused rather than re-searched — backtracking holds no memo and re-derives repeated subproblems. [[Divide and Conquer]] splits a problem into independent subproblems whose solutions combine directly; backtracking's choices are dependent, which is why its tree cannot be partitioned into independent parts.
-
 ## Questions
 
 > [!QUESTION]- What turns brute-force enumeration into backtracking?
@@ -128,9 +116,6 @@ Backtracking is the default when the task is to satisfy constraints or enumerate
 
 > [!QUESTION]- Why is the worst-case class still exponential despite pruning?
 > Pruning removes subtrees but does not shrink the complete search tree, which has `O(b^d)` nodes. When no prefix can be rejected before a leaf, every candidate is still visited. Pruning improves the constant and the practical node count, not the asymptotic class.
-
-> [!QUESTION]- What does branch and bound add that plain backtracking lacks?
-> An objective bound. Backtracking prunes only branches that violate a feasibility constraint; branch and bound also prunes branches whose best possible objective cannot beat the incumbent solution, which is what lets it target optimization rather than only feasibility.
 
 ## References
 

@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Steps a sorted array in fixed blocks of size root n, then scans back one block."
 level:
   - "4"
 priority: Medium
@@ -101,24 +102,10 @@ Unsorted input breaks the jump proof. On `[2, 40, 9, 55, 13, 91, 7]` a search fo
 
 The final block is usually shorter than `m`, so the block-end index `k·m − 1` can fall past the array. Each block-end access clamps to `Math.Min(step, n) - 1`, and the jump loop halts once `prev` passes `n`; dropping either guard reads out of bounds on the last stride.
 
-## Comparison
-
-| Strategy | Lookup time | Required input | Access model | Stronger case | Weaker case |
-| --- | --- | --- | --- | --- | --- |
-| [[Linear Search]] | `O(n)` | Any order | Forward-only | Unsorted or tiny data, or a single lookup | Large sorted data searched repeatedly |
-| Jump Search | `O(√n)` | Sorted | Forward stride + one backward block | Sorted sequential/block media where arbitrary seeks are costly | Random-access memory, where `O(log n)` is available |
-| [[Binary Search]] | `O(log n)` | Sorted | Arbitrary random access | Any sorted, indexable array | Media where reaching `n/2` is expensive |
-| [[Exponential Search]] | `O(log i)` | Sorted, unbounded or front-clustered target | Arbitrary random access | Unknown length or targets near the front | Costly random access, or targets spread late |
-
-Jump Search occupies a thin band between Linear and Binary Search: it needs the sorted order Binary Search needs but only the forward-stride access Linear Search needs. That combination earns its `O(√n)` when a stride of `√n` is cheap and an arbitrary probe is not — block-addressed storage, tape, or a forward-only linked structure. On random-access memory every seek is already `O(1)`, so Binary Search's `O(log n)` dominates and Jump Search reduces to a slower version of it. Exponential Search shares Binary Search's random-access assumption and pulls ahead when the length is unknown or the target clusters near the front.
-
 ## Questions
 
 > [!QUESTION]- Why is `m = √n` the block size that minimizes total work?
 > The cost is `n/m` jumps to reach the target's block plus up to `m` steps to scan it, so `f(m) = n/m + m`. Its derivative `−n/m² + 1` is zero at `m = √n`, where the two phases are equal and the total is `2√n`. Larger blocks lengthen the scan; smaller blocks multiply the jumps. A constant block size leaves the jump phase linear in `n`, so the bound degrades to `O(n)`.
-
-> [!QUESTION]- What cost model makes Jump Search preferable to Binary Search despite being asymptotically slower?
-> Binary Search probes arbitrary indices across the whole range, which is `O(1)` on RAM but expensive on tape, a singly linked list, or a streamed/paged source. Jump Search only steps forward by a fixed stride and re-enters at most one block, so its access pattern stays local. When a forward stride is far cheaper than an arbitrary seek, that locality outweighs the worse asymptotic bound; on random-access memory it does not.
 
 > [!QUESTION]- What breaks when Jump Search runs on unsorted input?
 > The jump phase assumes `a[block] < target` proves the target lies further ahead, which requires monotonic order. On unsorted data a block end can exceed the target while the matching value sits in an earlier, already-skipped block, so the scan examines the wrong block. The failure is a silent false negative rather than a crash.

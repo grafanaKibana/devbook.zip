@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "The .NET CLR execution engine: JIT compilation, garbage collection, type safety, and threading."
 tags:
   - FolderNote
 publish: true
@@ -20,6 +21,11 @@ Three areas are covered here: the **CLR itself** (how code gets compiled and exe
 
 A practical example: your API handles 1000 req/s fine in testing. In production under sustained load, P99 latency spikes to 2 seconds every 30 seconds. The cause is Gen2 GC pauses from large object heap allocations you never noticed in dev. Diagnosing this requires understanding GC generations, the large object heap threshold, and how to interpret GC event traces.
 
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
+
 ## Questions
 
 > [!QUESTION]- What does the CLR do when your application starts, and why does startup behavior matter?
@@ -35,7 +41,7 @@ A practical example: your API handles 1000 req/s fine in testing. In production 
 > Yes. Common causes: event handler subscriptions never unsubscribed, static collections that grow indefinitely, closures capturing references unexpectedly, and finalizer queue stalls blocking reclamation.
 > These are not OS-level leaks but logical leaks — the GC cannot collect objects that are still reachable through a live reference chain, even if the application no longer needs them.
 
-## Links
+## References
 
 - [.NET runtime overview (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/clr) — CLR architecture and execution model.
 - [Garbage collection fundamentals (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/fundamentals) — GC generations, modes, and behavior.

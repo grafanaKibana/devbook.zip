@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.388Z
-modified: 2026-07-08T15:01:12.465Z
-published: 2026-07-08T15:01:12.465Z
+created: 2026-07-11T18:18:35.175Z
+modified: 2026-07-11T18:18:35.175Z
+published: 2026-07-11T18:18:35.175Z
 topic:
   - Architecture
 subtopic:
   - Patterns
+summary: Defines the skeleton of an algorithm in a base class, letting subclasses override specific steps without changing its structure.
 level:
   - "2"
 priority: High

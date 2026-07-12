@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Single-source shortest paths on non-negative-weighted graphs, greedily finalizing the closest tentative node and relaxing its outgoing edges."
 level:
   - "4"
 priority: Medium
@@ -111,20 +112,6 @@ The second boundary is internal to the implementation. Standard binary heaps (in
 >
 > The `settled` array replaces `decrease-key`: relaxation always pushes a new pair, and the guard discards the outdated ones on pop. A parallel `parent[]` array, written whenever `dist[to]` is lowered, reconstructs a path by walking backward from the target.
 
-## Comparison
-
-Every alternative below answers a shortest-path-shaped question over the same graph, but each pays for a different guarantee.
-
-| Algorithm | Time | Requires | Stronger case | Weaker case |
-| --- | --- | --- | --- | --- |
-| Dijkstra | `O((V + E) log V)` | non-negative weights | single source, all targets, weighted | any negative edge |
-| [[Bellman-Ford]] | `O(VE)` | nothing; reports negative cycles | negative weights, cycle detection | dense graphs, or when weights are all non-negative and the `VE` cost is wasted |
-| [[A-Star Search|A* Search]] | `O((V + E) log V)` worst; far fewer expansions with a heuristic | an admissible heuristic and a single target | one source–target pair with a good spatial estimate | all-pairs work, or when no heuristic exists |
-| BFS ([[DFS BFS]]) | `O(V + E)` | unweighted (unit-cost) edges | shortest path by edge count | any differing edge weights |
-| Prim ([[Minimum Spanning Tree]]) | `O((V + E) log V)` | undirected connected graph | cheapest tree spanning all nodes | shortest distance from a source — a different objective |
-
-Dijkstra is the default single-source shortest-path algorithm when weights are non-negative. Bellman-Ford is the fallback the moment a weight can be negative, trading the higher `O(VE)` cost for correctness and negative-cycle detection. A* narrows to a single target and, given an admissible heuristic, expands far fewer nodes than Dijkstra while returning the same optimal path. BFS is the right tool only when edges are unweighted. Prim shares Dijkstra's greedy min-frontier structure but minimizes the total weight of a spanning tree rather than distances from a source, so the two are structurally similar yet answer different questions.
-
 ## Questions
 
 > [!QUESTION]- Why does the settle-once rule require non-negative edge weights?
@@ -135,9 +122,6 @@ Dijkstra is the default single-source shortest-path algorithm when weights are n
 
 > [!QUESTION]- Why can an array scan beat a binary heap on a dense graph?
 > With a heap, each of the `E` relaxations may cost `O(log V)`, giving `O((V + E) log V)`. On a dense graph `E ≈ V²`, so the heap term dominates at `O(V² log V)`. Scanning all vertices to pick the minimum is `O(V)` per step and `O(V²)` overall, which drops the `log V` factor entirely.
-
-> [!QUESTION]- How do the weights decide between Dijkstra and Bellman-Ford?
-> If every edge weight is non-negative, Dijkstra settles each node once at `O((V + E) log V)`. If any weight can be negative, that invariant breaks and Bellman-Ford is needed, relaxing all edges `V − 1` times at `O(VE)` and detecting a negative cycle if one exists.
 
 ## References
 

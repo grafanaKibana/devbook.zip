@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.318Z
-modified: 2026-07-10T08:56:46.391Z
-published: 2026-07-10T08:56:46.391Z
+created: 2026-07-11T21:45:20.034Z
+modified: 2026-07-11T21:45:20.034Z
+published: 2026-07-11T21:45:20.034Z
 topic:
   - AI & ML
 subtopic:
   - LLM
+summary: Retrieval, generation, and end-to-end metrics each answer a different question, making regressions diagnosable.
 level:
   - "2"
 priority: High

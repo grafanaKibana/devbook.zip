@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Application Architecture
+summary: "UI architecture patterns that separate data, presentation, and interaction logic; they differ in how the View and logic layer communicate."
 level:
   - "4"
 priority: High

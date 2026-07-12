@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - System Architecture
+summary: "A style splitting a system into independently deployable services, each aligned to a business capability and owning its own data."
 level:
   - "3"
 priority: Medium

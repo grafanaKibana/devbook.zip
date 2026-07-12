@@ -7,7 +7,7 @@ level:
   - "4"
 priority: Medium
 status: Creation
-publish: false
+publish: true
 ---
 
 # Intro
@@ -53,17 +53,6 @@ The amortized bound applies to a sequence, not to each operation independently. 
 Read operations mutate the tree. A lookup cannot safely run under a shared read lock because it rewrites parent and child pointers on the search path. Iterators also become invalid when another access splays a node, even if no key was inserted or removed.
 
 The missing height guarantee matters for latency-sensitive code. An [[AVL Tree]] bounds every lookup by `O(log n)`; a splay tree only bounds the average cost across a sequence. This makes the splay tree a poor fit when one `O(n)` request is unacceptable, but a strong fit when locality and total sequence cost matter more than individual latency.
-
-## Comparison
-
-| Structure | Per-operation guarantee | Stored metadata | Adapts to locality | Read mutates state |
-| --- | --- | --- | --- | --- |
-| Splay tree | `O(log n)` amortized, `O(n)` worst | none beyond links | yes | yes |
-| [[AVL Tree]] | `O(log n)` worst | height or balance factor | no | no |
-| [[Red-Black Tree]] | `O(log n)` worst | color bit | no | no |
-| [[HashMap]] | `O(1)` average exact lookup | buckets and hashes | no ordering | usually no |
-
-Splay trees fit ordered workloads with temporal locality and sequence-level performance goals. AVL and red-black trees pay metadata and balancing work for predictable single-operation latency; hash tables become stronger when exact lookup matters and ordered operations do not.
 
 ## References
 

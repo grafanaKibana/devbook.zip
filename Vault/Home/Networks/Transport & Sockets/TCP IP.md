@@ -3,6 +3,7 @@ topic:
   - Networks
 subtopic:
   - Transport & Sockets
+summary: "The internet's core protocol suite: IP handles addressing, TCP adds reliable delivery."
 level:
   - "3"
 priority: Medium

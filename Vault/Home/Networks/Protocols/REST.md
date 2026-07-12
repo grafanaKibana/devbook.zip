@@ -3,6 +3,7 @@ topic:
   - Networks
 subtopic:
   - Protocols
+summary: "An architectural style for resources identified by URIs and manipulated over stateless HTTP."
 level:
   - "3"
 priority: High

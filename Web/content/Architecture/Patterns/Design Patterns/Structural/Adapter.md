@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.474Z
-modified: 2026-07-08T15:01:12.474Z
-published: 2026-07-08T15:01:12.474Z
+created: 2026-07-11T18:18:07.584Z
+modified: 2026-07-11T18:18:07.584Z
+published: 2026-07-11T18:18:07.584Z
 topic:
   - Architecture
 subtopic:
   - Patterns
+summary: Adapter converts an existing class's interface into a different one clients expect, translating calls without changing either side.
 level:
   - "2"
 priority: High

@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "Using try/catch/finally to handle failures and guarantee cleanup in C#."
 level:
   - "4"
 priority: Medium

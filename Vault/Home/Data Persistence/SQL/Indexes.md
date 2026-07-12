@@ -3,6 +3,7 @@ topic:
   - Data Persistence
 subtopic:
   - SQL
+summary: "A sorted B+ tree that avoids full table scans, trading write and storage overhead."
 publish: true
 level:
   - "4"

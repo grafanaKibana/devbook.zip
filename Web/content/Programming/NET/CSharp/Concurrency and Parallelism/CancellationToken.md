@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.647Z
-modified: 2026-07-08T15:01:12.648Z
-published: 2026-07-08T15:01:12.648Z
+created: 2026-07-11T21:46:02.796Z
+modified: 2026-07-11T21:46:02.796Z
+published: 2026-07-11T21:46:02.796Z
 topic:
   - Programming
 subtopic:
   - NET
+summary: Cooperative cancellation where callers request a stop and callees comply safely.
 level:
   - "4"
 priority: Medium

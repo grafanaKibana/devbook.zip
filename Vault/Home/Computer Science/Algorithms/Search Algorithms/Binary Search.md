@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Finds a target in a sorted array by repeatedly halving the search range, in O(log n)."
 level:
   - "4"
 priority: Medium
@@ -109,20 +110,6 @@ Boundary conventions remain paired. This version uses an inclusive range, so its
 > ```
 >
 > This implementation uses an inclusive search range and returns `-1` when the target is absent. .NET's `Array.BinarySearch` instead returns the bitwise complement of the insertion index.
-
-
-## Comparison
-
-| Strategy | Lookup time | Additional cost | Stronger case | Weaker case |
-| --- | --- | --- | --- | --- |
-| [[Linear Search]] | `O(n)` | None | One lookup over unsorted or very small data | Repeated searches as the collection grows |
-| Binary Search | `O(log n)` | Sorted input; `O(1)` search space | Existing sorted order, range queries, insertion points | Frequent inserts or data without cheap indexing |
-| Hash lookup | `O(1)` average, `O(n)` worst | `O(n)` memory and an `O(n)` build | Repeated exact-match lookups where order is irrelevant | Ordered traversal, range queries, or memory-sensitive data |
-| [[Interpolation Search]] | `O(log log n)` average, `O(n)` worst | Sorted, near-uniform numeric distribution | Large uniformly distributed numeric arrays | Skewed distributions or non-numeric keys |
-
-Binary Search sits between a scan and an index: it keeps the collection in its original sorted representation while reducing lookup to logarithmic time. A hash table is faster on average for exact matches but gives up ordering and allocates a separate index. Interpolation Search can outperform Binary Search on unusually uniform numeric data, but its distribution assumption makes its worst case linear.
-
-In .NET, `Array.BinarySearch` and `List<T>.BinarySearch` expose the standard arbitrary-match operation. Lower-bound and upper-bound variants cover first match, last match, and insertion-point queries.
 
 ## Questions
 

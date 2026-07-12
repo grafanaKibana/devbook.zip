@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.379Z
-modified: 2026-07-08T15:01:12.379Z
-published: 2026-07-08T15:01:12.379Z
+created: 2026-07-11T21:41:03.717Z
+modified: 2026-07-11T21:41:03.717Z
+published: 2026-07-11T21:41:03.717Z
 topic:
   - Architecture
 subtopic:
   - Patterns
+summary: Centers software design on the business domain, its language, rules, and boundaries, rather than on technical infrastructure.
 level:
   - "2"
 priority: High

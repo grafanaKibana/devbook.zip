@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.335Z
-modified: 2026-07-08T15:01:12.335Z
-published: 2026-07-08T15:01:12.335Z
+created: 2026-07-11T21:45:52.264Z
+modified: 2026-07-11T21:45:52.272Z
+published: 2026-07-11T21:45:52.272Z
 topic:
   - AI & ML
 subtopic:
   - Tooling
+summary: Project-level config files telling AI coding agents how a specific repository works.
 status: Done
 level:
   - "2"

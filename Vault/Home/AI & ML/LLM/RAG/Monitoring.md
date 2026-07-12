@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "Continuously observing a deployed RAG pipeline per stage to catch regressions before users do."
 level:
   - "2"
 priority: High

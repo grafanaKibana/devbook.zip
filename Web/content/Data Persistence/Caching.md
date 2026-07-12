@@ -1,11 +1,12 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.523Z
-modified: 2026-07-08T15:01:12.523Z
-published: 2026-07-08T15:01:12.523Z
+created: 2026-07-11T21:47:03.874Z
+modified: 2026-07-11T21:47:03.874Z
+published: 2026-07-11T21:47:03.874Z
 topic:
   - Data Persistence
 subtopic: []
+summary: Storing data closer to consumers so repeated reads skip the slower origin.
 level:
   - "4"
 priority: High

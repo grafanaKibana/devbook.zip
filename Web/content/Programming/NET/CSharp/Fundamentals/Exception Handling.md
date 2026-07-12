@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.651Z
-modified: 2026-07-08T15:01:12.652Z
-published: 2026-07-08T15:01:12.652Z
+created: 2026-07-11T21:45:09.957Z
+modified: 2026-07-11T21:45:09.958Z
+published: 2026-07-11T21:45:09.958Z
 topic:
   - Programming
 subtopic:
   - NET
+summary: Using try/catch/finally to handle failures and guarantee cleanup in C#.
 level:
   - "4"
 priority: Medium

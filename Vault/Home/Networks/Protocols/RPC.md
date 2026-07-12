@@ -3,6 +3,7 @@ topic:
   - Networks
 subtopic:
   - Protocols
+summary: "A style where a client invokes a server operation like a local function call."
 level:
   - "3"
 priority: Medium

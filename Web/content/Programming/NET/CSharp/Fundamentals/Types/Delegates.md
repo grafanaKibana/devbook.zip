@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.655Z
-modified: 2026-07-08T15:01:12.656Z
-published: 2026-07-08T15:01:12.656Z
+created: 2026-07-11T21:45:50.902Z
+modified: 2026-07-11T21:45:50.909Z
+published: 2026-07-11T21:45:50.909Z
 topic:
   - Programming
 subtopic:
   - NET
+summary: A type-safe function pointer for storing, passing, and invoking methods as values.
 level:
   - "4"
 priority: Medium

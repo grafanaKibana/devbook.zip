@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "Hierarchical parent-child structures that keep balanced height for O(log n) search."
 tags:
   - FolderNote
 level:
@@ -15,6 +16,11 @@ status: Creation
 # Intro
 
 Trees represent hierarchical data with parent-child relationships. In .NET, tree-like behavior commonly appears through `SortedSet<T>` (red-black tree), `SortedDictionary<TKey, TValue>`, custom recursive node models, and expression trees in the compiler pipeline. A concrete use case: an autocomplete service maintains a trie (prefix tree) of 500K product names; lookup for any prefix completes in O(k) where k is prefix length, regardless of dataset size — a `Dictionary` scan would be O(n).
+
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
 
 ## Deeper Explanation
 
@@ -37,13 +43,15 @@ A tree organizes nodes so each node has at most one parent (except the root) and
 
 | Type | What it adds | Used for |
 |---|---|---|
-| BST | Ordered left < node < right | Baseline ordered lookup — but degrades to O(n) if unbalanced |
-| AVL / Red-Black | Self-balancing rotations → guaranteed O(log n) | `SortedSet`/`SortedDictionary` (red-black); AVL is more rigidly balanced (faster reads, more rotations) |
-| B-tree / B+-tree | High fan-out, shallow; node = disk/page sized | **Database & filesystem indexes** — minimizes disk seeks. See [[Indexes]] |
-| [[Trie|Trie (prefix tree)]] | Path = sequence of characters | Autocomplete, prefix search, routing tables — O(k) by key length, independent of n |
+| [[Binary Search Tree\|BST]] | Ordered left < node < right | Baseline ordered lookup — but degrades to O(n) if unbalanced |
+| [[AVL Tree\|AVL]] / [[Red-Black Tree\|Red-Black]] | Self-balancing rotations → guaranteed O(log n) | `SortedSet`/`SortedDictionary` (red-black); AVL is more rigidly balanced (faster reads, more rotations) |
+| [[Splay Tree\|Splay]] | Self-adjusting: each access rotated to the root | Amortized O(log n) (O(n) worst); locality-adaptive — reads mutate structure, no stored balance metadata |
+| [[B-tree]] / [[B+ Tree\|B+-tree]] | High fan-out, shallow; node = disk/page sized | **Database & filesystem indexes** — minimizes disk seeks. See [[Indexes]] |
+| [[Trie\|Trie (prefix tree)]] | Path = sequence of characters | Autocomplete, prefix search, routing tables — O(k) by key length, independent of n |
 | [[Ternary Search Tree]] | Trie whose children are a BST on the next char, not a σ-wide array | Large/Unicode alphabets; sorted and near-neighbour string queries |
 | [[Heap]] | Parent/child priority, array-backed | Priority queues and heap-like mergeable queues |
-| Segment / Fenwick (BIT) | Range aggregates with point updates | Range-sum/min queries in O(log n) |
+| [[Segment Tree]] | Any associative merge over a range — sum, **min/max**, gcd; lazy range updates | Range-min/max & range-assign in O(log n), ~4n slots |
+| [[Fenwick Tree\|Fenwick (BIT)]] | Prefix/range **sum** only — invertible aggregates, so no range-min | Range-sum with point updates in O(log n), ~n slots |
 
 ## Traversal Without Recursion
 
@@ -87,12 +95,6 @@ var ids = new SortedSet<int> { 5, 1, 3, 3 };
 
 > [!QUESTION]- When would you avoid recursive tree traversal?
 > On unknown/deep depth, where iterative traversal with an explicit stack is safer.
-
-## Links
-
-- [[Trie]]
-- [[Ternary Search Tree]]
-- [[Heap]]
 
 ## References
 

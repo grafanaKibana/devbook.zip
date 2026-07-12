@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "A contiguous, index-addressable buffer that grows automatically, giving O(1) random access and amortized O(1) append."
 level:
   - "4"
 priority: Medium
@@ -119,17 +120,6 @@ Editing away from the tail is `O(n)` because contiguity must be preserved. `Inse
 >
 > The `Append` fast path is a single store; the grow branch runs only when `Count == Capacity`. `Insert` always shifts the suffix, which is what makes non-tail insertion `O(n)` regardless of capacity.
 
-## Comparison
-
-| Structure | Index access | Tail append | Front/middle edit | Both-ends ops | Memory locality |
-| --- | --- | --- | --- | --- | --- |
-| Dynamic array (`List<T>`) | `O(1)` | `O(1)` amortized | `O(n)` shift | `O(n)` at front | Contiguous, cache-friendly |
-| [[Arrays]] (`T[]`) | `O(1)` | Not supported (fixed capacity) | `O(n)` shift | `O(n)` at front | Contiguous, cache-friendly |
-| [[LinkedList]] | `O(n)` | `O(1)` with a tail ref | `O(1)` splice with a node ref | `O(1)` with end refs | Pointer-chasing, cache-hostile |
-| [[Deque]] | `O(1)` | `O(1)` amortized | `O(n)` | `O(1)` both ends | Contiguous (ring buffer) |
-
-A dynamic array is the default growable indexed sequence: it pairs amortized `O(1)` append with `O(1)` random access over contiguous, cache-friendly storage, paying only the periodic resize copy and up to `2×` slack. A [[Deque]] becomes the stronger fit when both ends are hot, since it keeps `O(1)` insertion and removal at the front where a dynamic array degrades to `O(n)`. A [[LinkedList]] wins only when frequent splices happen in the middle and a cursor already holds the relevant node — it trades away `O(1)` indexing and cache locality to get `O(1)` structural edits at a held position.
-
 ## Questions
 
 > [!QUESTION]- Why is append amortized `O(1)` even though a resize copies every element?
@@ -140,9 +130,6 @@ A dynamic array is the default growable indexed sequence: it pairs amortized `O(
 
 > [!QUESTION]- Why does a resize invalidate held references and iterators?
 > Growth allocates a new backing array and copies elements into it, then drops the old buffer. Any pointer, cached index target, or iterator bound to the old array now refers to a stale allocation, which is why appending during iteration is unsound.
-
-> [!QUESTION]- When does a deque or linked list beat a dynamic array?
-> A deque wins when both ends are mutated, since it keeps `O(1)` front operations where a dynamic array shifts `O(n)`. A linked list wins for frequent middle splices when a node reference is already held, trading away `O(1)` indexing and cache locality for `O(1)` structural edits.
 
 ## References
 

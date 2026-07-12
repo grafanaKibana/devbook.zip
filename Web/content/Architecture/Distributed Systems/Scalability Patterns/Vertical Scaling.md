@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.377Z
-modified: 2026-07-08T15:01:12.378Z
-published: 2026-07-08T15:01:12.378Z
+created: 2026-07-11T18:17:55.845Z
+modified: 2026-07-11T18:17:55.849Z
+published: 2026-07-11T18:17:55.849Z
 topic:
   - Architecture
 subtopic:
   - Distributed Systems
+summary: Vertical scaling gives a single node more CPU, RAM, or disk, the simplest first move for monoliths and managed databases.
 level:
   - "2"
 priority: High

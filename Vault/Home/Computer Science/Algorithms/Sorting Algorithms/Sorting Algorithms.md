@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Comparing sorting algorithms by stability, memory tradeoffs, and typical runtime behavior to guide production choices."
 tags:
   - FolderNote
 publish: true
@@ -15,6 +16,11 @@ status: Creation
 # Intro
 
 Sorting is a foundational operation that impacts performance all over the stack: databases, UIs, pipelines, and in-memory processing. The important part is not memorizing algorithms, but understanding stability, memory tradeoffs, and typical runtime behavior. Example: mergesort is stable and predictable, while quicksort is often fast in practice but has worst-case pitfalls.
+
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
 
 ## Diagram
 

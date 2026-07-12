@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-09T19:19:45.697Z
-modified: 2026-07-09T19:55:50.927Z
-published: 2026-07-09T19:55:50.927Z
+created: 2026-07-11T21:53:15.832Z
+modified: 2026-07-11T21:53:15.832Z
+published: 2026-07-11T21:53:15.832Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Breaks a problem into overlapping subproblems, solves each once, and reuses stored results.
 level:
   - "4"
 priority: High

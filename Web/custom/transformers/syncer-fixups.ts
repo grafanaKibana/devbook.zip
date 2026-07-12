@@ -3,14 +3,24 @@ import type { Root as HastRoot, Element } from "hast"
 import type { QuartzTransformerPlugin } from "@quartz-community/types"
 
 // Cleans the markdown/HTML that Quartz Syncer commits into content so it renders
-// correctly on the flattened web build. Two general fixups (not per-note):
+// correctly on the flattened web build. Three general fixups (not per-note):
 //
-//   1. Strip raw ```dataviewjs fenced blocks. Syncer cannot execute imperative
-//      DataviewJS, so it publishes those blocks as raw source — meaningless code
-//      dumps on the web (e.g. above the Questions index). Removed at the mdast
-//      stage so they never reach HTML.
+//   1. Strip raw dataview/datacore fenced blocks. Syncer freezes `datacore*` and
+//      declarative `dataview` fences to static HTML, but imperative DataviewJS it
+//      cannot execute — those it publishes as raw source (a meaningless code dump
+//      on the web, e.g. above the Questions index). Any such fence that survives
+//      to content/ means the freeze fell back to raw, so we drop it at the mdast
+//      stage before it reaches HTML.
 //
-//   2. Normalize vault-absolute internal links. Syncer renders in-note Datacore
+//   2. Strip the frozen output of the Questions index block. Questions.md carries
+//      a `datacorejsx` block (a `dc-questions-index` wrapper) whose only job is
+//      the in-Obsidian render; on the web the page is built by the QuestionsIndex
+//      component from the question-collector transformer. Syncer freezes the
+//      block to static HTML at publish, so we remove that wrapper here — before
+//      the link fixup below and before QuestionCollector runs — so the page has a
+//      single renderer and the block's own callouts aren't re-aggregated.
+//
+//   3. Normalize vault-absolute internal links. Syncer renders in-note Datacore
 //      (dc.Link) to <a href="Home/…​.md"> using the *vault* path, but strips the
 //      "Home" vault-root folder from the published tree — so those hrefs 404. We
 //      drop a leading "Home/" segment before crawl-links (LinkProcessing)
@@ -19,11 +29,32 @@ import type { QuartzTransformerPlugin } from "@quartz-community/types"
 
 const ROOT_FOLDER = "Home"
 
+// Query-engine fences that are dead weight if Syncer ever commits them raw
+// (failed freeze). datacorejsx is the current Questions engine; dataviewjs is the
+// pre-migration one; the rest round out the family so a stray fence can't leak.
+const RAW_QUERY_FENCES = new Set([
+  "dataview",
+  "dataviewjs",
+  "datacore",
+  "datacorejs",
+  "datacorejsx",
+  "datacorets",
+  "datacoretsx",
+])
+
+// Wrapper class emitted by the Questions.md datacorejsx block; the web renderer
+// is the QuestionsIndex component, so the frozen block output is removed.
+const QUESTIONS_BLOCK_CLASS = "dc-questions-index"
+
 const isInternal = (href: string): boolean =>
-  !!href &&
-  !/^([a-z]+:)?\/\//i.test(href) &&
-  !href.startsWith("#") &&
-  !href.startsWith("mailto:")
+  !!href && !/^([a-z]+:)?\/\//i.test(href) && !href.startsWith("#") && !href.startsWith("mailto:")
+
+const hasClass = (node: Element, cls: string): boolean => {
+  const c = node.properties?.className
+  if (Array.isArray(c)) return c.map(String).includes(cls)
+  if (typeof c === "string") return c.split(/\s+/).includes(cls)
+  return false
+}
 
 const stripRootPrefix = (href: string): string => {
   // Keep any ?query/#hash aside; only the path can carry the vault-root folder.
@@ -50,9 +81,9 @@ export const SyncerFixups: QuartzTransformerPlugin = () => ({
   markdownPlugins() {
     return [
       () => (tree: HastRoot) => {
-        // mdast `code` nodes: drop the ones fenced as dataviewjs.
+        // mdast `code` nodes: drop raw dataview/datacore query fences.
         visit(tree, "code", (node: { lang?: string | null }, index, parent) => {
-          if (parent && typeof index === "number" && node.lang === "dataviewjs") {
+          if (parent && typeof index === "number" && node.lang && RAW_QUERY_FENCES.has(node.lang)) {
             parent.children.splice(index, 1)
             return [SKIP, index]
           }
@@ -63,6 +94,15 @@ export const SyncerFixups: QuartzTransformerPlugin = () => ({
   htmlPlugins() {
     return [
       () => (tree: HastRoot) => {
+        // Remove the frozen Questions index block (see fixup #2). Runs before the
+        // link normalization below and before QuestionCollector.
+        visit(tree, "element", (node: Element, index, parent) => {
+          if (parent && typeof index === "number" && hasClass(node, QUESTIONS_BLOCK_CLASS)) {
+            parent.children.splice(index, 1)
+            return [SKIP, index]
+          }
+        })
+        // Normalize vault-absolute internal links (see fixup #3).
         visit(tree, "element", (node: Element) => {
           if (node.tagName !== "a") return
           const href = node.properties?.href

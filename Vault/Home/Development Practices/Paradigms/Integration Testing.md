@@ -3,6 +3,7 @@ topic:
   - Development Practices
 subtopic:
   - Paradigms
+summary: "Verifies that multiple components work together with real infrastructure like databases."
 level:
   - "3"
 priority: High

@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.323Z
-modified: 2026-07-08T15:01:12.323Z
-published: 2026-07-08T15:01:12.323Z
+created: 2026-07-11T21:45:07.558Z
+modified: 2026-07-11T21:45:07.558Z
+published: 2026-07-11T21:45:07.558Z
 topic:
   - AI & ML
 subtopic:
   - LLM
+summary: Rewrites a user question into retrieval-optimized variants so phrasing mismatches don't sink retrieval.
 level:
   - "2"
 priority: High

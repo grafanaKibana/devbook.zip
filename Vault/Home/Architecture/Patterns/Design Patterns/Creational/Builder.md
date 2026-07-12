@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Patterns
+summary: "Separates construction of a complex object from its representation, accumulating configuration through a fluent API validated on a final Build() call."
 level:
   - "3"
 priority: High

@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.313Z
-modified: 2026-07-08T15:01:12.315Z
-published: 2026-07-08T15:01:12.315Z
+created: 2026-07-11T21:45:11.521Z
+modified: 2026-07-11T21:45:11.521Z
+published: 2026-07-11T21:45:11.521Z
 topic:
   - AI & ML
 subtopic:
   - LLM
+summary: Stores results at each RAG stage to cut latency and cost, scoped by authorization.
 level:
   - "2"
 priority: High

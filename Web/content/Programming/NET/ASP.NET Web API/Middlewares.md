@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.645Z
-modified: 2026-07-08T15:01:12.646Z
-published: 2026-07-08T15:01:12.646Z
+created: 2026-07-11T21:44:38.996Z
+modified: 2026-07-11T21:44:38.997Z
+published: 2026-07-11T21:44:38.997Z
 topic:
   - Programming
 subtopic:
   - NET
+summary: Components forming the ASP.NET Core HTTP pipeline, each wrapping the next.
 level:
   - "4"
 priority: High

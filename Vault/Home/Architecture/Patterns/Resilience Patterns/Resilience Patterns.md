@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Patterns
+summary: "Patterns that keep distributed systems stable when dependencies degrade by controlling how failure propagates."
 tags:
   - FolderNote
 publish: true
@@ -17,6 +18,11 @@ status: Done
 Resilience patterns protect distributed systems from cascading failures by controlling how services behave when dependencies degrade. The core insight is that partial failure is the normal state — something is always slow, overloaded, or down — and uncontrolled failure propagation turns a single slow dependency into a system-wide outage. Without explicit resilience boundaries, threads, sockets, and retries pile up until healthy parts of the system also degrade.
 
 The two foundational patterns here are [[Circuit Breaker]] (stop calling a failing dependency and fail fast instead of waiting) and [[Rate Limiting]] (cap request volume so one caller cannot exhaust shared resources). In production .NET systems, these compose into a resilience stack together with timeouts, retries with exponential backoff, and fallbacks — each layer handling a different failure mode. Polly and `Microsoft.Extensions.Resilience` wire these layers into a single `HttpClient` pipeline.
+
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
 
 ## References
 

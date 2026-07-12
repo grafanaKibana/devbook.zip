@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.336Z
-modified: 2026-07-08T15:01:12.337Z
-published: 2026-07-08T15:01:12.337Z
+created: 2026-07-11T21:45:50.158Z
+modified: 2026-07-11T21:45:50.163Z
+published: 2026-07-11T21:45:50.163Z
 topic:
   - AI & ML
 subtopic:
   - Tooling
+summary: An LLM running in an action loop to complete engineering tasks end to end.
 status: Done
 level:
   - "2"

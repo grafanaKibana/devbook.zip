@@ -570,3 +570,12 @@ body {
     opacity: 1;
   }
 }
+
+// Folder hubs render their own cardmap (datacore folder-map) in the note body,
+// so the folder-page plugin's auto-generated "N items under this folder"
+// PageList underneath is redundant. Hide it on folder pages (body slug ends in
+// "/index") while leaving tag-page listings (slug "tags/…", incl. tags/index)
+// intact.
+body[data-slug$="/index"]:not([data-slug="tags/index"]) .page-listing {
+  display: none;
+}

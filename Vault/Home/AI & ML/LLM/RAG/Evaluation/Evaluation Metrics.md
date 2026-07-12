@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "Retrieval, generation, and end-to-end metrics each answer a different question, making regressions diagnosable."
 level:
   - "2"
 priority: High

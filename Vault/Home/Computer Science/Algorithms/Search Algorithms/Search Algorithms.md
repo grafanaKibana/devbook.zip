@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Techniques to find target values in arrays, graphs, or text, chosen by data ordering and shape."
 tags:
   - FolderNote
 publish: true
@@ -17,6 +18,11 @@ status: Creation
 Search algorithms find target values in collections, trees, graphs, or text while minimizing work. Choosing the right search approach depends on data ordering, data shape, and whether you need worst-case guarantees or best average speed.
 
 Concrete example: in a sorted list of product ids, Binary Search gives fast lookups with logarithmic time. In graph traversal, BFS finds the shortest path by edge count in unweighted graphs. In text processing, KMP and Rabin Karp avoid naive full rescans.
+
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
 
 ## Diagram
 
@@ -43,14 +49,18 @@ flowchart TD
 
 | Data shape | Algorithm | Time | Precondition |
 | --- | --- | --- | --- |
-| Unsorted array | [[Linear Search]] | O(n) | None |
+| Unsorted array, linked list, or one-pass stream | [[Linear Search]] | O(n) | None; needs no index or random access |
 | Sorted array | [[Binary Search]] | O(log n) | Sorted, random access |
 | Sorted, unbounded length or target near front | [[Exponential Search]] | O(log i) for target at index i | Sorted |
-| Sorted, uniformly distributed keys | [[Interpolation Search]] | O(log log n) avg, O(n) worst | Sorted **and** near-uniform distribution |
+| Sorted, uniformly distributed keys | [[Interpolation Search]] | O(log log n) avg, O(n) worst | Sorted **and** near-uniform **numeric** distribution |
 | Sorted, forward-only / costly backward seeks | [[Jump Search]] | O(√n) | Sorted |
 | Unimodal function, not an array | [[Ternary Search]] | O(log n) probes | Strict unimodality |
 
+Binary Search also serves range and insertion-point queries — lower-bound / upper-bound, first/last match — because it keeps the data in sorted order rather than building a separate index.
+
 ### Searching text
+
+Text/pattern matching is its own sub-family — see [[String Matching]] for the full comparison.
 
 | Data shape | Algorithm | Time | Precondition |
 | --- | --- | --- | --- |

@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "The cheapest cycle-free edge set connecting every vertex of a weighted undirected graph, built greedily by Kruskal's or Prim's."
 level:
   - "4"
 priority: Medium
@@ -44,7 +45,7 @@ Both algorithms are this property applied to a different cut each step:
 | Prim, binary heap | `O(E log V)` | `O(V)` eager / `O(E)` lazy | Each of the `E` edges can push or relax a heap entry at `O(log V)`; an indexed decrease-key holds one entry per vertex, the lazy reference code below one per crossing edge. |
 | Prim, Fibonacci heap | `O(E + V log V)` | `O(V)` | Decrease-key is `O(1)` amortized; only the `V` extract-mins pay `O(log V)`. |
 | Prim, array (dense) | `O(V²)` | `O(V)` | A linear scan finds the minimum key in each of `V` rounds; competitive when `E ≈ V²`. |
-| Kruskal | `O(E log E)` | `O(V)` | Sorting all edges dominates; the [[Union-Find|union-find]] passes add only `O(E α(V))`. |
+| Kruskal | `O(E log E)` | `O(V)` | Sorting all edges dominates; the [[Union-Find\|union-find]] passes add only `O(E α(V))`. |
 
 Because `E ≤ V²`, `log E ≤ 2 log V`, so Kruskal's `O(E log E)` is the same asymptotic class as Prim's heap variant — the two differ in constant factors and in which structure the input already provides, not in growth rate. The space column counts working structures only: the priority queue or the union-find forest, both `O(V)`, excluding the `O(V)` output tree and the input graph. The lazy priority queue in the reference code below pushes an entry per crossing edge, so it can hold `O(E)` stale entries before they are discarded on dequeue.
 
@@ -112,8 +113,8 @@ An MST minimizes total weight, not the distance between any particular pair of v
 | Algorithm | Time | Structure it needs | Stronger case | Weaker case |
 | --- | --- | --- | --- | --- |
 | Prim (binary heap) | `O(E log V)` | adjacency lists + priority queue | dense graphs already held as adjacency; a single running frontier | sparse input given as an edge list, needing conversion first |
-| Kruskal | `O(E log E)` | edge list + union-find | sparse graphs given as an edge list; the sort parallelizes cleanly | dense graphs where sorting `E ≈ V²` edges dominates |
-| Borůvka | `O(E log V)` | edge list + per-component cheapest edge | parallel or distributed builds; contracts every component's cheapest edge per round | single-threaded runs, where its extra bookkeeping buys nothing |
+| [[Kruskal's Algorithm\|Kruskal]] | `O(E log E)` | edge list + union-find | sparse graphs given as an edge list; the sort parallelizes cleanly | dense graphs where sorting `E ≈ V²` edges dominates |
+| [[Borůvka's Algorithm\|Borůvka]] | `O(E log V)` | edge list + per-component cheapest edge | parallel or distributed builds; contracts every component's cheapest edge per round | single-threaded runs, where its extra bookkeeping buys nothing |
 
 All three return a tree of the same minimum total weight — the choice is representation and execution model, not the result. Prim fits a graph already held as an adjacency structure and dense, since its frontier reuses that adjacency and it never sorts. Kruskal fits sparse edge lists, where sorting `E` edges and union-find are both cheap and its dominant step — the sort — is trivial to parallelize. Borůvka's rounds each add the cheapest edge out of every component at once, which maps naturally onto parallel and distributed hardware; on one core its per-round contraction rarely beats the other two.
 

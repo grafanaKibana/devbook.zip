@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "A restricted delegate member implementing publisher and subscriber communication."
 level:
   - "4"
 priority: Medium

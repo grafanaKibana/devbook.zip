@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - Tooling
+summary: "Lifecycle callbacks that run custom logic at defined agent execution points."
 publish: true
 status: Done
 level:

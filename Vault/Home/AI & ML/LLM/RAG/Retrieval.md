@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "Decides what evidence enters the prompt, balancing recall, precision, and latency across search methods."
 level:
   - "2"
 priority: High

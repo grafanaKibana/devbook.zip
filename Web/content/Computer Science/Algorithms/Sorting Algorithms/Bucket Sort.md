@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-10T06:07:02.310Z
-modified: 2026-07-10T06:07:02.310Z
-published: 2026-07-10T06:07:02.310Z
+created: 2026-07-11T21:47:58.457Z
+modified: 2026-07-11T21:47:58.457Z
+published: 2026-07-11T21:47:58.457Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Scatters elements into range buckets, sorts each, then concatenates; near-linear when keys are uniformly distributed.
 level:
   - "4"
 priority: Medium
@@ -114,8 +115,6 @@ flowchart TD
 
 | Choice | Bucket Sort | Alternative | Decision criteria |
 | --- | --- | --- | --- |
-| vs [[Counting Sort]] | range buckets, inner sort per bucket | one bucket per distinct key, no inner sort | Bucket Sort for continuous keys over a range; Counting Sort for exact discrete integers with small `k`. |
-| vs [[Radix Sort]] | one range partition, distribution-dependent | repeated stable bucketing by digit, distribution-independent | Radix Sort when you need a robust linear sort regardless of distribution; Bucket Sort when keys are known-uniform and you want simplicity. |
 | inner sort choice | [[Insertion Sort]] per bucket, `O(n)` avg but `O(n^2)` worst | comparison sort per bucket, `O(n log n)` worst | Insertion Sort when uniformity is trusted; a comparison sort per bucket to cap the worst case when it is not. |
 
 Bucket Sort also generalizes beyond memory. Partitioning keys into ranged buckets is exactly how **external sorts** and the **MapReduce / Spark shuffle** sort data too large for RAM: a partitioner sends each key to the bucket (reducer/partition) for its range, each bucket is sorted independently, and the sorted buckets concatenate in range order. The uniformity assumption reappears there as _data skew_ — a hot partition that starves the rest, the distributed-systems face of the one-dominant-bucket worst case.

@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.650Z
-modified: 2026-07-08T15:01:12.650Z
-published: 2026-07-08T15:01:12.650Z
+created: 2026-07-11T21:46:10.852Z
+modified: 2026-07-11T21:46:10.852Z
+published: 2026-07-11T21:46:10.852Z
 topic:
   - Programming
 subtopic:
   - NET
+summary: A primitive allowing up to N concurrent holders, for bounded parallelism.
 level:
   - "4"
 priority: High

@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "Pairs queries with their relevant chunks; the hard part is labeling which chunks count."
 level:
   - "2"
 priority: High

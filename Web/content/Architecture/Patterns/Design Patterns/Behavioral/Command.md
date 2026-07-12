@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.381Z
-modified: 2026-07-08T15:01:12.383Z
-published: 2026-07-08T15:01:12.383Z
+created: 2026-07-11T18:18:20.474Z
+modified: 2026-07-11T18:18:20.475Z
+published: 2026-07-11T18:18:20.475Z
 topic:
   - Architecture
 subtopic:
   - Patterns
+summary: Encapsulates a request as an object bundling action, parameters, and receiver, so it can be queued, logged, undone, and replayed.
 level:
   - "2"
 priority: High

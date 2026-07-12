@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-10T05:55:51.617Z
-modified: 2026-07-10T05:55:51.618Z
-published: 2026-07-10T05:55:51.618Z
+created: 2026-07-11T21:51:10.884Z
+modified: 2026-07-11T21:51:10.884Z
+published: 2026-07-11T21:51:10.884Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Maximal mutually-reachable vertex sets of a digraph, found in O(V+E) by Kosaraju's or Tarjan's.
 level:
   - "4"
 priority: Medium

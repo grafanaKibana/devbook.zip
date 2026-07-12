@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-10T05:57:12.066Z
-modified: 2026-07-10T05:57:12.067Z
-published: 2026-07-10T05:57:12.067Z
+created: 2026-07-11T21:53:47.186Z
+modified: 2026-07-11T21:53:47.186Z
+published: 2026-07-11T21:53:47.186Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Binary-searches the space of possible answers using a monotonic feasibility test.
 level:
   - "4"
 priority: Medium

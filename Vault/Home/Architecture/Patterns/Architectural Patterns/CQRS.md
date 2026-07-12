@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Patterns
+summary: "Separates the write path from the read path so each can be scaled and optimized independently."
 level:
   - "3"
 priority: High

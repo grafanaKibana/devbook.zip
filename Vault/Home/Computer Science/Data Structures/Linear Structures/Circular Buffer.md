@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "A fixed-size array with wrapping read/write indices, giving O(1) allocation-free enqueue/dequeue for streaming and bounded-history scenarios."
 level:
   - "4"
 priority: Medium
@@ -122,17 +123,6 @@ The ring **does not grow**. Reaching capacity never triggers a resize — that i
 > }
 > ```
 > The `count` field is what disambiguates `head == tail`. Nulling the dequeued slot matters only for reference types: without it the array pins objects that are logically gone, a slow leak in a long-lived ring.
-
-## Comparison
-
-| Structure | Enqueue / dequeue | Capacity | Allocation | Ends usable | Stronger case |
-| --- | --- | --- | --- | --- | --- |
-| Circular buffer | `O(1)` worst case | Fixed at construction | None after construction | Front and back (FIFO) | Bounded streaming with no GC churn |
-| Linked-list [[Queue]] | `O(1)` | Unbounded | One node per element | Front and back (FIFO) | Size is unpredictable and per-node cost is acceptable |
-| [[Dynamic Array]] queue | `O(1)` amortized | Unbounded | Reallocates on growth | Front and back (FIFO) | Unbounded size but contiguous storage is wanted |
-| [[Deque]] | `O(1)` amortized | Unbounded (typically ring-backed) | Reallocates on growth | Both ends push/pop | Insertion and removal are needed at both ends |
-
-A circular buffer is the fixed-capacity, allocation-free O(1) FIFO. It pays for that with a hard size ceiling and lost history: past the capacity, data is either overwritten or refused. That trade is exactly right for streaming and real-time work — audio and DSP pipelines, logging and telemetry rings, single-producer/single-consumer channels, network receive buffers — where a bounded memory footprint and the absence of garbage-collection pauses are worth more than unlimited size. When the number of live items is genuinely unpredictable, an unbounded linked [[Queue]] or a growable [[Dynamic Array]] queue is the fit, accepting per-node allocation or periodic resize spikes in exchange for never rejecting a write. A [[Deque]] generalizes to both-ends access when strict FIFO is too restrictive.
 
 ## Questions
 

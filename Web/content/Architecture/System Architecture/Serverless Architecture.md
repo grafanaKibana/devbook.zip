@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.491Z
-modified: 2026-07-08T15:01:12.491Z
-published: 2026-07-08T15:01:12.491Z
+created: 2026-07-11T18:17:32.574Z
+modified: 2026-07-11T18:17:32.574Z
+published: 2026-07-11T18:17:32.574Z
 topic:
   - Architecture
 subtopic:
   - System Architecture
+summary: Runs application logic in stateless, short-lived functions fully managed by a cloud provider, billed per invocation with no idle capacity.
 level:
   - "3"
 priority: Medium

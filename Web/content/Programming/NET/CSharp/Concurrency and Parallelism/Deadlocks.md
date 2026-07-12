@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.648Z
-modified: 2026-07-08T15:01:12.649Z
-published: 2026-07-08T15:01:12.649Z
+created: 2026-07-11T21:46:04.805Z
+modified: 2026-07-11T21:46:04.805Z
+published: 2026-07-11T21:46:04.805Z
 topic:
   - Programming
 subtopic:
   - NET
+summary: When execution paths wait forever on resources each other holds, halting progress.
 level:
   - "4"
 priority: High

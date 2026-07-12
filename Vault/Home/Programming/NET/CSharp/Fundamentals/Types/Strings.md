@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "An immutable C# reference type where any text change creates a new value."
 level:
   - "4"
 priority: Medium

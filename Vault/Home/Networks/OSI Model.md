@@ -2,6 +2,7 @@
 topic:
   - Networks
 subtopic: []
+summary: "The 7-layer reference model for how data moves across a network."
 level:
   - "3"
 priority: Medium

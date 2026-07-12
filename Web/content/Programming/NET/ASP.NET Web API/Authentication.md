@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.615Z
-modified: 2026-07-08T15:01:12.617Z
-published: 2026-07-08T15:01:12.617Z
+created: 2026-07-11T21:44:29.128Z
+modified: 2026-07-11T21:44:29.128Z
+published: 2026-07-11T21:44:29.128Z
 topic:
   - Programming
 subtopic:
   - NET
+summary: Verifying who a caller is and populating HttpContext.User with a ClaimsPrincipal.
 level:
   - "1"
 priority: Medium

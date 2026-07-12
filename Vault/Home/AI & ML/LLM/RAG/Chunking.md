@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "Sets the unit of retrieval: too wide adds noise, too narrow splits meaning."
 level:
   - "2"
 priority: High

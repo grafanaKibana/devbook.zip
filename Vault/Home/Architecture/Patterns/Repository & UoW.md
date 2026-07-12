@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Patterns
+summary: "Repository gives a collection-like interface over domain objects; Unit of Work tracks changes and commits them as one atomic transaction."
 level:
   - "4"
 priority: High

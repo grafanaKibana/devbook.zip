@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "Decomposes into retrieval, generation, and end-to-end layers so regressions isolate to one layer."
 level:
   - "2"
 priority: High
@@ -30,9 +31,10 @@ flowchart LR
 
 Example: a support bot returns the correct policy document (retrieval passes) but the model misreads a date constraint and answers with the wrong deadline (generation fails). Without layer separation, the team would chase retrieval improvements that cannot fix a generation problem.
 
-This folder holds only what is specific to RAG. [[Evaluation Metrics]] defines what to measure at each layer — the retrieval metrics, the generation metrics, and the RAGAS scores plus the two-score diagnostic combinations that point at a root cause. [[Component-Level Evaluation]] isolates *which* upstream component — chunking, embedding, or the ANN index — moved a metric, using ablation that holds everything else constant. [[Retrieval Evaluation Sets]] covers the RAG-specific labeling problem — substitutable versus complementary chunks — and chunk-anchored synthetic generation.
-
-The domain-independent machinery all of this reuses — [[LLM-as-a-Judge]], [[Deterministic Checks]], [[Golden Test Set and Regression Runs|golden sets]], [[Building an Evaluation Set|synthetic data generation and sizing]], and the [[Online Evaluation and AB Tests|online/A-B loop]] — lives under [[Home/AI & ML/LLM/Evaluation/Evaluation|LLM Evaluation]] and is referenced here rather than repeated. For production-time measurement of these same signals, see [[Monitoring]].
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
 
 ## Questions
 

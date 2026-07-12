@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Patterns
+summary: "Provides a surrogate for another object to control access, deferring, caching, or authorizing calls transparently."
 level:
   - "3"
 priority: High

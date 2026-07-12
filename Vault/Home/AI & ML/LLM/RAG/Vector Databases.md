@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "Stores embeddings and serves fast approximate nearest-neighbor search, trading recall for speed."
 level:
   - "2"
 priority: High

@@ -1,11 +1,12 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.531Z
-modified: 2026-07-08T15:01:12.531Z
-published: 2026-07-08T15:01:12.531Z
+created: 2026-07-11T21:47:09.440Z
+modified: 2026-07-11T21:47:09.440Z
+published: 2026-07-11T21:47:09.440Z
 topic:
   - DevOps
 subtopic: []
+summary: Understanding a system's internal state from metrics, logs, and traces.
 level:
   - "2"
 priority: High

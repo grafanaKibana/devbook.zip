@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "A specification of .NET APIs that multiple runtimes agree to implement."
 level:
   - "4"
 priority: Medium

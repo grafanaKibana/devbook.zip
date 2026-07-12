@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.376Z
-modified: 2026-07-08T15:01:12.376Z
-published: 2026-07-08T15:01:12.376Z
+created: 2026-07-11T18:17:50.442Z
+modified: 2026-07-11T18:17:50.452Z
+published: 2026-07-11T18:17:50.452Z
 topic:
   - Architecture
 subtopic:
   - Distributed Systems
+summary: Horizontal scaling adds more service instances behind a load balancer, requiring stateless design and externalized state to grow capacity.
 level:
   - "2"
 priority: High

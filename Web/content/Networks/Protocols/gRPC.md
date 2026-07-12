@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.547Z
-modified: 2026-07-08T15:01:12.547Z
-published: 2026-07-08T15:01:12.547Z
+created: 2026-07-11T21:46:07.129Z
+modified: 2026-07-11T21:46:07.130Z
+published: 2026-07-11T21:46:07.130Z
 topic:
   - Networks
 subtopic:
   - Protocols
+summary: A contract-first RPC framework over HTTP/2 using Protocol Buffers for fast binary messaging.
 level:
   - "3"
 priority: High

@@ -7,45 +7,24 @@ tags:
 publish: true
 ---
 ```datacorejsx
+const { CARD_CSS, squashCss } = await dc.require("Assets/components/devbook-card.jsx");
+const { icon } = await dc.require("Assets/components/devbook-icons.jsx");
 return function TopicDashboard() {
   const ROOT = (dc.useCurrentFile()?.$path || "Home").split("/")[0];
 
-  const TOPICS = [
-    { folder: "Programming", title: "Programming", desc: "Languages, .NET internals, paradigms, clean code." },
-    { folder: "Computer Science", title: "Computer Science", desc: "Algorithms, data structures, the theory underneath." },
-    { folder: "Data Persistence", title: "Data Persistence", desc: "Databases, indexing, transactions, storage engines." },
-    { folder: "Networks", title: "Networks", desc: "Protocols, HTTP, TCP/IP, how packets travel." },
-    { folder: "Architecture", title: "Architecture", desc: "Distributed systems, patterns, designing for scale." },
-    { folder: "Development Practices", title: "Development Practices", desc: "Testing, version control, and the craft." },
-    { folder: "AI & ML", title: "AI & ML", desc: "Models, training, applied machine learning." },
-    { folder: "Security", title: "Security", desc: "Threats, crypto, auth, defensive design." },
-    { folder: "Cloud", title: "Cloud", desc: "AWS/Azure, serverless, cloud-native design." },
-    { folder: "DevOps", title: "DevOps", desc: "CI/CD, containers, and automation." },
-    { folder: "SDLC", title: "SDLC", desc: "How software gets planned, built, and shipped." },
-  ];
-
-  const ICONS = {
-    "code-2": `<path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/>`,
-    "flask-round": `<path d="M10 2v6.292a7 7 0 1 0 4 0V2"/><path d="M5 15h14"/><path d="M8.5 2h7"/>`,
-    database: `<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>`,
-    network: `<rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/>`,
-    "building-2": `<path d="M10 12h4"/><path d="M10 8h4"/><path d="M14 21v-3a2 2 0 0 0-4 0v3"/><path d="M6 10H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2"/><path d="M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16"/>`,
-    "ruler-dimension-line": `<path d="M10 15v-3"/><path d="M14 15v-3"/><path d="M18 15v-3"/><path d="M2 8V4"/><path d="M22 6H2"/><path d="M22 8V4"/><path d="M6 15v-3"/><rect x="2" y="12" width="20" height="8" rx="2"/>`,
-    lock: `<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>`,
-    "area-chart": `<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M7 11.207a.5.5 0 0 1 .146-.353l2-2a.5.5 0 0 1 .708 0l3.292 3.292a.5.5 0 0 0 .708 0l4.292-4.292a.5.5 0 0 1 .854.353V16a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1z"/>`,
-    skull: `<path d="m12.5 17-.5-1-.5 1h1z"/><path d="M15 22a1 1 0 0 0 1-1v-1a2 2 0 0 0 1.56-3.25 8 8 0 1 0-11.12 0A2 2 0 0 0 8 20v1a1 1 0 0 0 1 1z"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="12" r="1"/>`,
-    cloud: `<path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>`,
-    "brain-circuit": `<path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M9 13a4.5 4.5 0 0 0 3-4"/><path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"/><path d="M3.477 10.896a4 4 0 0 1 .585-.396"/><path d="M6 18a4 4 0 0 1-1.967-.516"/><path d="M12 13h4"/><path d="M12 18h6a2 2 0 0 1 2 2v1"/><path d="M12 8h8"/><path d="M16 8V5a2 2 0 0 1 2-2"/><circle cx="16" cy="13" r=".5"/><circle cx="18" cy="3" r=".5"/><circle cx="20" cy="21" r=".5"/><circle cx="20" cy="8" r=".5"/>`,
-  };
-  const DEFAULT_ICON = `<path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>`;
-  const wrapSvg = (inner) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;
-
   const STATUS_PROGRESS = { "not-started": 0, "creation": 33, "ready to repeat": 66, "done": 100 };
+  // `mix` is the accent-vs-surface blend for each status segment. Solid tints
+  // (not opacity) keep segments crisp on dark backgrounds and over the Quartz
+  // dot grid, where a faded alpha would let the background bleed through.
   const STATUS_RAMP = [
-    { key: "done", label: "Done", weight: 100, alpha: 1 },
-    { key: "ready to repeat", label: "Ready to Repeat", weight: 66, alpha: 0.6 },
-    { key: "creation", label: "Creation", weight: 33, alpha: 0.28 },
+    { key: "done", label: "Done", weight: 100, mix: 100 },
+    { key: "ready to repeat", label: "Ready to Repeat", weight: 66, mix: 58 },
+    { key: "creation", label: "Creation", weight: 33, mix: 30 },
   ];
+  const tint = (mix) =>
+    mix >= 100
+      ? "rgb(var(--topic-rgb))"
+      : `color-mix(in srgb, rgb(var(--topic-rgb)) ${mix}%, var(--background-primary, var(--light, #ffffff)))`;
 
   const firstString = (v) =>
     Array.isArray(v) ? (v.length ? String(v[0]).trim() : "") : (v == null ? "" : String(v).trim());
@@ -60,15 +39,8 @@ return function TopicDashboard() {
 
   const pages = dc.useQuery(`@page and path("${ROOT}")`);
 
-  const folderNoteFor = new Map();
-  for (const p of pages) {
-    if (!hasTag(p, "FolderNote")) continue;
-    const dir = p.$path.slice(0, p.$path.lastIndexOf("/"));
-    folderNoteFor.set(dir, p);
-  }
-
-  const statsFor = (folder) => {
-    const prefix = `${ROOT}/${folder}/`;
+  const statsFor = (dir) => {
+    const prefix = `${dir}/`;
     const byStatus = {};
     let total = 0, points = 0, done = 0;
     for (const p of pages) {
@@ -83,12 +55,35 @@ return function TopicDashboard() {
     return { pct: total > 0 ? Math.round(points / total) : 0, done, total, points, byStatus };
   };
 
-  const cards = TOPICS
-    .map((t) => {
-      const fn = folderNoteFor.get(`${ROOT}/${t.folder}`);
-      const rgb = hexToRgbTriple(fn?.value("color")) || "125, 125, 125";
-      const iconSvg = wrapSvg(ICONS[firstString(fn?.value("icon"))] ?? DEFAULT_ICON);
-      return { ...t, fn, rgb, iconSvg, ...statsFor(t.folder) };
+  // Topics are the direct-child folders of ROOT — their FolderNote sits two path
+  // segments below ROOT (ROOT/<Folder>/<name>.md). Title, description, colour,
+  // icon, and order all come from that note's frontmatter (summary = the card
+  // description, exactly like the child cards in the shared folder map), so there
+  // is no hard-coded topic list to keep in sync.
+  const isTopicHub = (p) =>
+    hasTag(p, "FolderNote") &&
+    !hasTag(p, "MetricsIgnore") &&
+    p.$path.slice(ROOT.length + 1).split("/").length === 2;
+
+  const cards = pages
+    .filter(isTopicHub)
+    .sort((a, b) => {
+      const orderA = Number(firstString(a.value("order")) || Number.MAX_SAFE_INTEGER);
+      const orderB = Number(firstString(b.value("order")) || Number.MAX_SAFE_INTEGER);
+      return orderA - orderB || a.$name.localeCompare(b.$name);
+    })
+    .map((fn) => {
+      const dir = fn.$path.slice(0, fn.$path.lastIndexOf("/"));
+      const rgb = hexToRgbTriple(fn.value("color")) || "125, 125, 125";
+      const iconSvg = icon(fn.value("icon"));
+      return {
+        fn,
+        title: fn.$name,
+        desc: firstString(fn.value("summary")),
+        rgb,
+        iconSvg,
+        ...statsFor(dir),
+      };
     })
     .map((c, index) => ({
       ...c,
@@ -105,13 +100,26 @@ return function TopicDashboard() {
   }
   const oPct = oTotal > 0 ? Math.round(oPoints / oTotal) : 0;
 
-  const segments = (byStatus, total) =>
-    STATUS_RAMP.map((seg) => {
+  // Filled tiers as cumulative overlapping layers: each spans from the left edge
+  // to its running total and stacks above the next (darkest on top), so a darker
+  // tier's rounded right cap nests over the lighter one behind it. Every tier
+  // ends in a rounded cap, but they read as one continuous bar, not separate pills.
+  const segments = (byStatus, total) => {
+    if (total <= 0) return null;
+    let cum = 0;
+    return STATUS_RAMP.map((seg, i) => {
       const cnt = byStatus[seg.key] ?? 0;
-      const width = total > 0 ? (cnt * seg.weight) / total : 0;
-      if (width <= 0) return null;
-      return <span style={{ width: `${width}%`, background: "rgb(var(--topic-rgb))", opacity: seg.alpha }} />;
+      cum += (cnt * seg.weight) / total;
+      if (cnt <= 0) return null;
+      return (
+        <span style={{
+          position: "absolute", left: 0, top: 0, height: "100%",
+          width: `${cum}%`, background: tint(seg.mix),
+          borderRadius: "0 999px 999px 0", zIndex: STATUS_RAMP.length - i,
+        }} />
+      );
     });
+  };
 
   // Safari/WebKit does not resolve a var() used as the count in `grid-column: span var(--x)`;
   // it drops the declaration and falls back to `span 1`, breaking the grid. Emit static
@@ -119,23 +127,21 @@ return function TopicDashboard() {
   const spanRules = (cls) =>
     Array.from({ length: 12 }, (_, i) => `.dc-topic-card.${cls}-${i + 1} { grid-column: span ${i + 1}; }`).join(" ");
 
+  // Layout + the home-only progress extension. The card's visual chrome
+  // (.db-card, .db-card-icon, .db-card-title, .db-card-summary — same padding,
+  // font, colours, and icon sizing as the FolderNote hubs) comes from the shared
+  // CARD_CSS. Each card sets --card-accent for that chrome and --topic-rgb for
+  // the progress bar / Quartz's opaque backing in custom.scss (both = c.rgb).
   const CSS = `
 .dc-topic-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 0.75rem; width: 100%; }
-.dc-topic-card { position: relative; cursor: pointer; min-width: 0; min-height: 7rem; box-sizing: border-box; margin: 0; display: flex; flex-direction: column; background: transparent; border: 1px solid var(--background-modifier-border, var(--lightgray, #e5e5e5)); border-radius: var(--radius-m, 8px); box-shadow: none; padding: 0.9rem 1rem 1rem; transition: border-color 120ms, background-color 120ms; }
-.dc-topic-card:hover { border-color: rgba(var(--topic-rgb), 0.5); background: rgba(var(--topic-rgb), 0.1); }
-.dc-topic-title { display: flex; gap: 0.55rem; align-items: center; line-height: 1.3; }
-.dc-topic-icon { display: flex; align-self: center; color: rgb(var(--topic-rgb)); }
-.dc-topic-icon svg { width: 22px; height: 22px; }
-.dc-topic-name { font-weight: 600; font-size: 0.95rem; color: rgb(var(--topic-rgb)); }
-.dc-topic-body { display: flex; flex-direction: column; flex: 1 0 auto; margin-top: 0.4em; }
-.dc-topic-desc { margin: 0; color: var(--text-muted, var(--gray, #9ca3af)); font-size: 0.78rem; line-height: 1.3; }
+.dc-topic-card { overflow: hidden; cursor: pointer; min-width: 0; min-height: 6.75rem; margin: 0; display: flex; flex-direction: column; }
+.dc-topic-card .db-card-body { flex: 1 0 auto; }
+.dc-topic-title { display: flex; gap: 0.5rem; align-items: center; line-height: 1.25; }
 .dc-topic-spacer { flex: 1 0 auto; min-height: 0.55em; }
-.dc-topic-foot { display: flex; flex-direction: column; gap: 4px; }
-.dc-topic-cap { font-size: 0.72rem; display: flex; justify-content: space-between; align-items: baseline; color: var(--text-muted, var(--gray, #9ca3af)); }
-.dc-topic-bar { display: flex; width: 100%; height: 6px; border-radius: 4px; margin-top: 0.15rem; overflow: hidden; background: var(--background-modifier-border, var(--lightgray, #e5e5e5)); }
-.dc-topic-link { position: absolute; inset: 0; z-index: 1; }
-.dc-topic-link a { position: absolute; inset: 0; font-size: 0; background: none !important; }
-.dc-topic-total { margin-top: 0.75rem; padding: 0.75em; border-radius: var(--radius-m, 8px); border: 1px solid rgba(var(--topic-rgb), 0.4); background: rgba(var(--topic-rgb), 0.1); }
+.dc-topic-foot { display: flex; flex-direction: column; gap: 4px; margin-top: 0.6rem; }
+.dc-topic-cap { font-size: 0.72rem; display: flex; justify-content: space-between; align-items: baseline; color: var(--text-muted, var(--darkgray, #5f6b7a)); }
+.dc-topic-bar { position: relative; width: 100%; height: 5px; border-radius: 4px; margin-top: 0.15rem; overflow: hidden; background: var(--background-modifier-border, var(--lightgray, #d8dee9)); }
+.dc-topic-total { margin-top: 0.75rem; padding: 0.75em; border-radius: var(--radius-m, 0.55rem); border: 1px solid rgba(var(--topic-rgb), 0.4); background: rgba(var(--topic-rgb), 0.1); }
 .dc-topic-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4em 1.1em; margin-top: 0.7em; font-size: 0.8em; opacity: 0.85; }
 .dc-topic-legend-item { display: inline-flex; align-items: center; gap: 0.4em; }
 .dc-topic-legend-sw { width: 0.8em; height: 0.8em; border-radius: 3px; flex: 0 0 auto; display: inline-block; background: rgb(var(--topic-rgb)); }
@@ -147,23 +153,23 @@ ${spanRules("dsk")}
 
   return (
     <div style={{ marginTop: "1.5rem" }}>
-      <style dangerouslySetInnerHTML={{ __html: CSS }} />
+      <style dangerouslySetInnerHTML={{ __html: squashCss(CARD_CSS + CSS) }} />
       <div class="dc-topic-grid">
         {cards.map((c) => (
-          <div class={`dc-topic-card dsk-${c.spanDesktop} med-${c.spanMedium} nar-${c.spanNarrow}`} style={{ "--topic-rgb": c.rgb }}>
-            <div class="dc-topic-title">
-              <span class="dc-topic-icon" dangerouslySetInnerHTML={{ __html: c.iconSvg }} />
-              <span class="dc-topic-name">{c.title}</span>
-            </div>
-            <div class="dc-topic-body">
-              <p class="dc-topic-desc">{c.desc}</p>
+          <div class={`db-card dc-topic-card dsk-${c.spanDesktop} med-${c.spanMedium} nar-${c.spanNarrow}`} style={{ "--card-accent": c.rgb, "--topic-rgb": c.rgb }}>
+            <div class="db-card-body">
+              <div class="dc-topic-title">
+                <span class="db-card-icon" dangerouslySetInnerHTML={{ __html: c.iconSvg }} />
+                <span class="db-card-title">{c.title}</span>
+              </div>
+              {c.desc ? <p class="db-card-summary">{c.desc}</p> : null}
               <div class="dc-topic-spacer" />
               <div class="dc-topic-foot">
                 <div class="dc-topic-cap"><span>{c.done}/{c.total} done</span><span>{c.pct}%</span></div>
                 <div class="dc-topic-bar">{segments(c.byStatus, c.total)}</div>
               </div>
             </div>
-            {c.fn ? <span class="dc-topic-link"><dc.Link link={c.fn.$link} /></span> : null}
+            {c.fn ? <span class="db-card-hit"><dc.Link link={c.fn.$link} /></span> : null}
           </div>
         ))}
       </div>
@@ -175,7 +181,7 @@ ${spanRules("dsk")}
         <div class="dc-topic-legend">
           {STATUS_RAMP.map((seg) => (
             <span class="dc-topic-legend-item">
-              <span class="dc-topic-legend-sw" style={{ opacity: seg.alpha }} />
+              <span class="dc-topic-legend-sw" style={{ background: tint(seg.mix) }} />
               <span>{seg.label} · {seg.weight}%</span>
             </span>
           ))}

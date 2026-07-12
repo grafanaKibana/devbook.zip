@@ -3,6 +3,7 @@ topic:
   - Security
 subtopic:
   - Authentication
+summary: "Checks whether a user may act on a specific resource instance, not just a type."
 level:
   - "3"
 priority: High

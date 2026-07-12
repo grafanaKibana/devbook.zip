@@ -3,6 +3,7 @@ topic:
   - Development Practices
 subtopic:
   - Paradigms
+summary: "Writing a failing test before the code, using Red-Green-Refactor as a design technique."
 level:
   - "4"
 priority: High

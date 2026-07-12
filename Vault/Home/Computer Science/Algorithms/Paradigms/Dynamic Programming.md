@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Breaks a problem into overlapping subproblems, solves each once, and reuses stored results."
 level:
   - "4"
 priority: High
@@ -170,19 +171,6 @@ The deciding question is not "is DP better" but "does the greedy-choice property
 > ```
 > Both return the LCS length. Keeping two rows instead of the full `dp` drops space to `O(min(m, n))` but removes the table needed to reconstruct the subsequence itself.
 
-## Comparison
-
-The shared baseline is naive full recursion, which re-solves overlapping subproblems and runs in exponential time. The four paradigms differ in whether — and how — they avoid redoing work on the same problem.
-
-| Paradigm | Reuses subresults | Requires | Stronger case | Weaker case |
-| --- | --- | --- | --- | --- |
-| Dynamic programming | Yes — each state cached once | Optimal substructure + overlap; enumerable states | Optimisation over overlapping subproblems with a small state space | Huge or continuous state space; no overlap to amortise |
-| [[Divide and Conquer]] | No — subproblems disjoint | Split into independent parts | Independent halves (sort, FFT, closest pair) | Subproblems overlap, so work is recomputed |
-| [[Greedy Algorithms]] | No — one choice, never revisited | Greedy-choice property | A local rule is provably globally optimal | The safe local choice cannot be proven |
-| [[Backtracking]] | No — explores, prunes, discards | A feasibility / constraint test | Enumerate or verify configurations with no exploitable overlap | Overlap exists that a memo could reuse |
-
-Dynamic programming earns its place exactly when the subproblems overlap and the optimum is composed of sub-optima: it pays `(states × work)` in time and, unless a rolling array applies, the same in memory. Divide and conquer skips the memo entirely when the subproblems are independent; greedy skips the table and runs in near-linear time when one local choice is provably safe; backtracking searches configurations directly when there is no reusable overlap. DP is the fit for optimisation over overlapping subproblems whose state space is small enough to hold.
-
 ## Questions
 
 > [!QUESTION]- What two properties must hold for DP to apply, and what does each guarantee?
@@ -190,9 +178,6 @@ Dynamic programming earns its place exactly when the subproblems overlap and the
 
 > [!QUESTION]- Where does DP's running time come from?
 > The number of distinct states multiplied by the work to combine each state from its sub-states. LCS over lengths m and n has `m·n` prefix-pair states with `O(1)` work each, giving `O(m·n)`. The state count is also the memory bound, unless a rolling array drops rows that are no longer read.
-
-> [!QUESTION]- What separates DP from divide and conquer and from greedy?
-> All three decompose into subproblems. Divide and conquer's subproblems are independent, so there is nothing to cache. Greedy commits to one provably safe local choice and never reconsiders it, exploring no alternatives. DP sits between them: subproblems overlap, so each distinct one is solved once and reused across every place it recurs.
 
 > [!QUESTION]- How can a correct recurrence still produce wrong answers once implemented?
 > If the state omits an argument the answer depends on, two different subproblems map to the same cache slot and the second read returns a stale value with no error raised. Bottom-up, the analogous failure is filling a cell before its dependencies, reading uninitialised sub-answers.

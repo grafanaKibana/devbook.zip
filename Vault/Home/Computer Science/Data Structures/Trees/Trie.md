@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "A prefix tree storing strings as character paths, giving O(k) lookup and prefix queries."
 level:
   - "4"
 priority: Medium
@@ -136,11 +137,10 @@ Every structure below stores a set of keys; they differ in whether prefixes and 
 | --- | --- | --- | --- | --- |
 | Trie | `O(L)` | Prefix in `O(L + m)`; a DFS visiting children in symbol order yields sorted keys | `O(total chars × σ)` | Shared-prefix structure, lexicographic order |
 | [[HashMap]] | `O(1)` expected, `O(L)` to hash the key | None — no prefix or ordered scan | `O(n)`, far smaller | Membership only |
-| Balanced [[Binary Search Tree]] | `O(log n · L)` | Range and ordered scan; no cheap prefix set | `O(n)` | Total order over whole keys |
 | Radix / PATRICIA trie | `O(L)` | Prefix in `O(L + m)`; sorted | `O(n)`, fewer nodes than a plain trie | Same as trie, path-compressed |
 | [[Aho-Corasick]] | `O(L)` per pattern | Multi-pattern text scan via failure links | Trie space + failure links | All patterns plus fallback transitions |
 
-A trie is the structure when prefixes are the query — autocomplete, longest-prefix routing, shared-prefix key sets — because its `O(L)` lookup stays flat as `n` grows and the tree already enumerates completions and sorted order for free. A [[HashMap]] wins when only exact membership matters and memory is tight: it drops prefix and ordering entirely but costs a fraction of the space. A balanced [[Binary Search Tree]] keeps total order across whole keys without the per-symbol memory, at an `O(log n · L)` lookup that reads the key `O(log n)` times. A radix tree is the trie to pick when the plain trie's node count is the problem — it compresses single-child chains without changing the query semantics. [[Aho-Corasick]] extends the trie with failure links to scan one text against many patterns at once, a different workload from single-key lookup.
+A trie is the structure when prefixes are the query — autocomplete, longest-prefix routing, shared-prefix key sets — because its `O(L)` lookup stays flat as `n` grows and the tree already enumerates completions and sorted order for free. A [[HashMap]] wins when only exact membership matters and memory is tight: it drops prefix and ordering entirely but costs a fraction of the space. A radix tree is the trie to pick when the plain trie's node count is the problem — it compresses single-child chains without changing the query semantics. [[Aho-Corasick]] extends the trie with failure links to scan one text against many patterns at once, a different workload from single-key lookup.
 
 ## Questions
 

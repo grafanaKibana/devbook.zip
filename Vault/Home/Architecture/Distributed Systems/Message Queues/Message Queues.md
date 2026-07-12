@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Distributed Systems
+summary: "Message queues decouple producers from consumers by buffering messages until consumers are ready, absorbing spikes and isolating failures."
 tags:
   - FolderNote
 publish: true
@@ -15,6 +16,11 @@ status: Done
 # Intro
 
 Message queues decouple producers from consumers by buffering messages until consumers are ready. They absorb spikes, isolate failures, and keep systems working when downstream services slow. Use queues for webhook ingestion and background work.
+
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
 
 ## Core concepts
 
@@ -148,9 +154,10 @@ Use [[RabbitMQ]] for routing-heavy queues and latency-sensitive tasks. Use [[Kaf
 
 | Option | Strengths | Tradeoffs | Typical .NET fit |
 |---|---|---|---|
-| RabbitMQ | Rich routing, easy work queues, low latency | Cluster ops are your responsibility unless managed | Background jobs, webhook pipelines, command dispatch |
-| Kafka | High throughput, durable log, strong replay | Partition model and ops complexity | Event streaming, analytics, event sourcing feeds |
+| [[RabbitMQ]] | Rich routing, easy work queues, low latency | Cluster ops are your responsibility unless managed | Background jobs, webhook pipelines, command dispatch |
+| [[Kafka]] | High throughput, durable log, strong replay | Partition model and ops complexity | Event streaming, analytics, event sourcing feeds |
 | Azure Service Bus | Fully managed with enterprise messaging features | Cost and platform coupling | Azure-native workflows and integration |
+| [[MSMQ]] | Durable, transactional (MSDTC), Windows-native | Windows-only, no containers, legacy; `System.Messaging` absent in .NET 5+ | Existing on-prem Windows systems only |
 
 - `IDistributedCache` is not a queue.
 - Cache stores key-value state; queues store ordered work items/events with ack/retry semantics.

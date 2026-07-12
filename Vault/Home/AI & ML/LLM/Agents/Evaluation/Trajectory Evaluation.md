@@ -3,6 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
+summary: "Scoring the whole path an agent took via reference-trajectory match or an LLM judge over the trace."
 level:
   - "3"
 priority: High

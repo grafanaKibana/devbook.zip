@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.661Z
-modified: 2026-07-08T15:01:12.661Z
-published: 2026-07-08T15:01:12.661Z
+created: 2026-07-11T21:45:03.477Z
+modified: 2026-07-11T21:45:03.477Z
+published: 2026-07-11T21:45:03.477Z
 topic:
   - Programming
 subtopic:
   - NET
+summary: .NET's execution engine compiling IL to native code and managing memory and types.
 level:
   - "4"
 priority: High

@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Partitions around a pivot and recurses; often the fastest comparison sort but with an O(n²) worst case."
 level:
   - "4"
 priority: Low
@@ -102,17 +103,6 @@ Many equal keys break the two-way scheme for a different reason. Lomuto sends ev
 > ```
 > The randomized swap before partitioning is what buys the expected `O(n log n)`. Both recursive calls run directly, so worst-case stack is `O(n)`; recursing into the smaller side first and looping on the larger bounds it to `O(log n)`.
 
-## Comparison
-
-| Algorithm | Average time | Worst time | Auxiliary space | Stable | Distinguishing property |
-| --- | --- | --- | --- | --- | --- |
-| Quick sort (randomized) | `O(n log n)` | `O(n²)` | `O(log n)` stack | No | In-place with the smallest constants and sequential access; the worst case is rare but real |
-| [[Merge Sort]] | `O(n log n)` | `O(n log n)` | `O(n)` buffer | Yes | Guaranteed bound and stable; the natural fit for linked lists and external sorts |
-| [[Heap Sort]] | `O(n log n)` | `O(n log n)` | `O(1)` | No | Guaranteed bound fully in place, but scattered access defeats the cache |
-| [[Introsort]] | `O(n log n)` | `O(n log n)` | `O(log n)` stack | No | Runs quick sort until recursion passes `2 log₂ n`, then switches to heap sort to cap the worst case |
-
-Quick sort is the default in-place comparison sort: its sequential partition scans use the cache well and its constant factors beat the alternatives on typical in-memory arrays. It pays a genuine `O(n²)` worst case, which introsort removes by falling back to heap sort once recursion runs too deep, and it gives up the stability that merge sort keeps at the cost of an `O(n)` buffer. .NET's `Array.Sort` is introsort for exactly this reason.
-
 ## Questions
 
 > [!QUESTION]- Why can the two sides of a partition be sorted without ever combining them?
@@ -123,9 +113,6 @@ Quick sort is the default in-place comparison sort: its sequential partition sca
 
 > [!QUESTION]- Why is quick sort's worst-case stack `O(n)`, and how is it bounded to `O(log n)`?
 > Degenerate partitions nest the recursion `n` deep, and a naive version that recurses into both sides holds all those frames. Recursing into the smaller side first and iterating on the larger (tail-call elimination) keeps at most `O(log n)` frames live, because the smaller side is at most half the range.
-
-> [!QUESTION]- What does quick sort trade against merge sort and introsort?
-> It gives up stability — swaps move equal elements past one another — which merge sort preserves using an `O(n)` buffer. It also carries an `O(n²)` worst case that introsort caps by switching to heap sort past a recursion-depth limit, while keeping quick sort's fast average case.
 
 ## References
 

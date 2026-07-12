@@ -3,6 +3,7 @@ topic:
   - Architecture
 subtopic:
   - Patterns
+summary: "Architectural patterns define how a system's components are organized, how data flows between them, and where responsibility boundaries lie."
 tags:
   - FolderNote
 publish: true
@@ -17,6 +18,11 @@ status: Done
 Architectural patterns define how a system's components are organized, how data flows between them, and where the boundaries of responsibility lie. They matter because choosing the wrong boundary or data flow shape creates problems that no amount of refactoring within a component can fix — the pain shows up as coupling, consistency bugs, and scaling walls.
 
 The three patterns here compose naturally: [[Domain-Driven Design]] establishes bounded contexts and a shared language so the code matches the business domain. [[CQRS]] separates the read path from the write path so each can be optimized independently. [[Event Sourcing]] stores state as an immutable event stream, giving you audit trails, temporal queries, and the ability to rebuild read models from history. You can use DDD without CQRS, and CQRS without Event Sourcing, but in complex domains teams often adopt all three because each one solves a problem the others expose.
+
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
 
 ## References
 

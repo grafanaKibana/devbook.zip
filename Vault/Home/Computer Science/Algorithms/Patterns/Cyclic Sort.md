@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Sorts a permutation of 1..n in O(n) time and O(1) space by swapping each value to its home index."
 level:
   - "4"
 priority: Medium

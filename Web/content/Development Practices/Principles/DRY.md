@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.537Z
-modified: 2026-07-08T15:01:12.538Z
-published: 2026-07-08T15:01:12.538Z
+created: 2026-07-11T21:47:48.042Z
+modified: 2026-07-11T21:47:48.043Z
+published: 2026-07-11T21:47:48.043Z
 topic:
   - Development Practices
 subtopic:
   - Principles
+summary: Each piece of knowledge should have one authoritative place in the codebase.
 level:
   - "4"
 priority: High

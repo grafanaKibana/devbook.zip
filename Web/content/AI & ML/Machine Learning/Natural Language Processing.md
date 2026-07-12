@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.333Z
-modified: 2026-07-08T15:01:12.333Z
-published: 2026-07-08T15:01:12.333Z
+created: 2026-07-11T21:43:50.456Z
+modified: 2026-07-11T21:43:50.456Z
+published: 2026-07-11T21:43:50.456Z
 topic:
   - AI & ML
 subtopic:
   - Machine Learning
+summary: The AI field enabling computers to understand and generate human language, now dominated by transformers.
 level:
   - "1"
 priority: Low

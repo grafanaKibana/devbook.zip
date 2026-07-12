@@ -351,11 +351,21 @@
       "color": "2"
     },
     {
+      "id": "n_dcfc79b8a4",
+      "type": "text",
+      "text": "# [[Home/Computer Science/Algorithms/Search Algorithms/String Matching/String Matching|String Matching]]",
+      "x": 1260,
+      "y": 3120,
+      "width": 340,
+      "height": 80,
+      "color": "2"
+    },
+    {
       "id": "n_9b15d1a3c2",
       "type": "text",
       "text": "# [[Home/Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms|Sorting Algorithms]]",
       "x": 840,
-      "y": 3120,
+      "y": 3240,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -702,7 +712,7 @@
     {
       "id": "n_b0ac2236f9",
       "type": "text",
-      "text": "#### Roadmap legend\n**Generated:** Jul 12 2026 | 07:32PM",
+      "text": "#### Roadmap legend\n**Generated:** Jul 12 2026 | 08:25PM",
       "x": -1860,
       "y": 0,
       "width": 500,
@@ -721,7 +731,7 @@
     {
       "id": "n_c1cf7bc196",
       "type": "text",
-      "text": "Creation: 12",
+      "text": "Creation: 13",
       "x": -1800,
       "y": 202,
       "width": 380,
@@ -995,6 +1005,13 @@
       "fromNode": "n_a02abba51f",
       "fromSide": "right",
       "toNode": "n_178f915b99",
+      "toSide": "left"
+    },
+    {
+      "id": "e_a232dbbf66",
+      "fromNode": "n_178f915b99",
+      "fromSide": "right",
+      "toNode": "n_dcfc79b8a4",
       "toSide": "left"
     },
     {

@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.329Z
-modified: 2026-07-08T15:01:12.329Z
-published: 2026-07-08T15:01:12.329Z
+created: 2026-07-11T21:45:09.440Z
+modified: 2026-07-11T21:45:09.440Z
+published: 2026-07-11T21:45:09.440Z
 topic:
   - AI & ML
 subtopic:
   - LLM
+summary: Stores embeddings and serves fast approximate nearest-neighbor search, trading recall for speed.
 level:
   - "2"
 priority: High

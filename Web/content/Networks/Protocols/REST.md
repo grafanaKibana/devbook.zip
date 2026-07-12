@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.544Z
-modified: 2026-07-08T15:01:12.545Z
-published: 2026-07-08T15:01:12.545Z
+created: 2026-07-11T21:46:02.944Z
+modified: 2026-07-11T21:46:02.945Z
+published: 2026-07-11T21:46:02.945Z
 topic:
   - Networks
 subtopic:
   - Protocols
+summary: An architectural style for resources identified by URIs and manipulated over stateless HTTP.
 level:
   - "3"
 priority: High

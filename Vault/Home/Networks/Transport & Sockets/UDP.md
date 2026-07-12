@@ -3,6 +3,7 @@ topic:
   - Networks
 subtopic:
   - Transport & Sockets
+summary: "A connectionless transport sending independent datagrams with no delivery or ordering guarantees."
 level:
   - "3"
 priority: Medium
@@ -27,19 +28,6 @@ sequenceDiagram
   Note over Receiver: Datagram 3 lost — no retransmit
   Sender->>Receiver: Datagram 4
 ```
-
-## UDP vs TCP
-
-| Feature | UDP | TCP |
-|---------|-----|-----|
-| Connection | Connectionless | Connection-oriented (3-way handshake) |
-| Delivery guarantee | None | Guaranteed (retransmit on loss) |
-| Ordering | None | In-order delivery |
-| Flow control | None | Yes (sliding window) |
-| Congestion control | None | Yes (slow start, AIMD) |
-| Overhead | 8 bytes header | 20+ bytes header + state |
-| Latency | Lower (no handshake, no ACK wait) | Higher |
-| Use cases | Streaming, gaming, DNS, QUIC | HTTP, file transfer, databases |
 
 ## When to Use UDP
 

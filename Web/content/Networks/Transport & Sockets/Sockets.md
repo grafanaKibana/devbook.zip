@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.548Z
-modified: 2026-07-08T15:01:12.549Z
-published: 2026-07-08T15:01:12.549Z
+created: 2026-07-11T21:46:08.746Z
+modified: 2026-07-11T21:46:08.746Z
+published: 2026-07-11T21:46:08.746Z
 topic:
   - Networks
 subtopic:
   - Transport & Sockets
+summary: A file-like endpoint for bidirectional communication between two processes over a network.
 level:
   - "3"
 priority: Medium

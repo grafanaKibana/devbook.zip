@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.475Z
-modified: 2026-07-08T15:01:12.475Z
-published: 2026-07-08T15:01:12.475Z
+created: 2026-07-11T18:18:13.349Z
+modified: 2026-07-11T18:18:13.349Z
+published: 2026-07-11T18:18:13.349Z
 topic:
   - Architecture
 subtopic:
   - Patterns
+summary: Decorator attaches responsibilities to an object dynamically by wrapping it in objects sharing the same interface, composable in any order.
 level:
   - "3"
 priority: High

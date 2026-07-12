@@ -3,6 +3,7 @@ topic:
   - Programming
 subtopic:
   - NET
+summary: "A primitive allowing up to N concurrent holders, for bounded parallelism."
 level:
   - "4"
 priority: High

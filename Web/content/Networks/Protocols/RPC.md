@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.545Z
-modified: 2026-07-08T15:01:12.546Z
-published: 2026-07-08T15:01:12.546Z
+created: 2026-07-11T21:46:20.386Z
+modified: 2026-07-11T21:46:20.386Z
+published: 2026-07-11T21:46:20.386Z
 topic:
   - Networks
 subtopic:
   - Protocols
+summary: A style where a client invokes a server operation like a local function call.
 level:
   - "3"
 priority: Medium

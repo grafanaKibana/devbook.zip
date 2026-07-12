@@ -1,12 +1,13 @@
 ---
 publish: true
-created: 2026-07-08T15:01:12.546Z
-modified: 2026-07-08T15:01:12.546Z
-published: 2026-07-08T15:01:12.546Z
+created: 2026-07-11T21:46:09.875Z
+modified: 2026-07-11T21:46:09.875Z
+published: 2026-07-11T21:46:09.875Z
 topic:
   - Networks
 subtopic:
   - Protocols
+summary: The standard TCP protocol for sending email between servers and from clients.
 level:
   - "3"
 priority: Low
