@@ -1,7 +1,5 @@
 public
 node_modules
 .quartz-cache
-# steptrace src/ fragments are slices of one IIFE — indented for their assembled
-# context, not standalone modules; prettier would dedent them and break the stitch.
-# The assembled engine (Web/quartz/static/steptrace/engine.js) stays prettier-checked.
-custom/steptrace/src
+# Generated artifacts are verified byte-for-byte by `npm run steptrace:check`.
+custom/steptrace/generated

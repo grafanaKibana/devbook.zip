@@ -1,0 +1,25 @@
+// Quartz-only token bindings. Shared StepTrace styling is emitted lazily as
+// /static/steptrace/engine.css so pages without a visualizer do not pay for it.
+.steptrace {
+  --st-page: var(--light);
+  --st-surface: var(--lightgray);
+  --st-text: var(--darkgray);
+  --st-muted: var(--gray);
+  --st-border: var(--gray);
+  --st-accent: var(--secondary);
+  --st-on-accent: var(--light);
+  --st-neutral: var(--gray);
+  --st-state-amber: #d97706;
+  --st-state-violet: #7c3aed;
+  --st-state-blue: #2563eb;
+  --st-state-green: var(--secondary);
+  --st-font-head: var(--headerFont, "Schibsted Grotesk", sans-serif);
+  --st-font-body: var(--bodyFont, "Source Sans Pro", sans-serif);
+  --st-font-mono: var(--codeFont, "IBM Plex Mono", monospace);
+}
+
+:root[saved-theme="dark"] .steptrace {
+  --st-state-amber: #f59e0b;
+  --st-state-violet: #a78bfa;
+  --st-state-blue: #60a5fa;
+}

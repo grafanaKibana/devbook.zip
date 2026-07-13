@@ -72,7 +72,7 @@ Vercel builds from the repo-root `vercel.json`:
 
 ```text
 installCommand:  cd Web && npm ci
-buildCommand:    cd Web && npx quartz plugin install --from-config && npx quartz build
+buildCommand:    cd Web && npm run steptrace:check && npx quartz plugin install --from-config && npx quartz build
 outputDirectory: Web/public
 ```
 
