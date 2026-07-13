@@ -28,7 +28,7 @@ The engine is authored as fragments of ONE UMD module under `src/`. They are **n
 | `10-styles.js` | **STYLES** | All CSS: colors, layout, transitions. Tied to `--st-*` tokens so hosts rebind the palette without touching this. | Tweaking visual appearance, changing layout, adjusting animations. |
 | `20-registry.js` | **REGISTRY** | `registerSort()`, `registerGraph()`, … `buildFrames()` — extension API and frame-building entry point. | Rarely; sets the contract for algorithms. |
 | `30-recorders.js` | **RECORDERS** | Turn `ops.*` calls (e.g., `ops.swap(i, j)`, `ops.visit(n)`) into immutable step frames. Per-renderer kind (Sort, Graph, Search, String, Pointers, DP, UnionFind, Bits, Backtrack, RecTree). | Changing what information is captured per step. |
-| `40-algorithms/*.js` | **ALGORITHMS** | 22 built-ins, **one file each**: 6 sorts · 5 graph (bfs, dfs, dijkstra, prim, topological-sort) · 2 search (binary, linear) · 2 string (kmp, rabin-karp) · 2 pointer (two-pointers, sliding-window) · lcs · union-find · kernighan-popcount · n-queens · fibonacci. Each file is one `registerX()` block. `00-header.js` is the section banner. | Adding a new algorithm (drop one file here). |
+| `40-algorithms/*.js` | **ALGORITHMS** | 22 built-ins, **one file each**: 6 sorts · 5 graph (bfs, dfs, dijkstra, prim, topological-sort) · 2 search (binary, linear) · 2 string (kmp, rabin-karp) · 2 pointer (two-pointers, sliding-window) · lcs · union-find · kernighan-popcount · n-queens · fibonacci. Each file is one `registerX()` block; `01-bubble-sort.js` also carries the section banner. | Adding a new algorithm (drop one file here). |
 | `50-render.js` | **RENDER** | DOM builder: HTML structure with semantic classes and data-driven geometry (no inline styles for colors/layout — those live entirely in STYLES). | Never for appearance — only if DOM structure changes. |
 | `60-player.js` | **PLAYER** | Transport controls: play, pause, step, speed. Iterates precomputed frames. Step-back is a free re-render (no history). | Tweaking playback behavior. |
 | `70-mount.js` | **MOUNT** | Assembles a card into a given `root` element: parses config, runs the algorithm once (to build frames), wires the player, and returns `{ destroy }` for cleanup. | Never — orchestration only. |
@@ -125,7 +125,7 @@ Quartz builds from `Web/content/`, NOT the live Vault. A steptrace fence added t
    { "algorithm": "insertion-sort", "array": [5, 2, 9, 1] }
    ```
 
-See the header comment in `src/40-algorithms/00-header.js` / `20-registry.js` for the available `ops.*` methods per kind.
+See the `§4` banner atop `src/40-algorithms/01-bubble-sort.js` and the recorders in `src/30-recorders.js` for the available `ops.*` methods per kind.
 
 ### Tweak Visual Appearance (Colors, Layout, Animations)
 
