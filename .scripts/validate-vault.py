@@ -577,14 +577,39 @@ def validate_steptrace(repo_root: Path) -> list[Issue]:
         if result.returncode == 0:
             return []
         output = "\n".join((result.stderr, result.stdout))
-        message = next(
+        # A genuine staleness/build failure is reported by build.mjs on a line
+        # tagged `steptrace check:`/`steptrace build:`. If one is present, use it
+        # (it names the stale artifacts and the fix).
+        reported = next(
             (
                 line.strip().removeprefix("Error: ")
                 for line in output.splitlines()
                 if "steptrace check:" in line or "steptrace build:" in line
             ),
-            "StepTrace freshness check failed; run `(cd Web && npm run steptrace:build)`",
+            None,
         )
+        if reported is not None:
+            message = reported
+        else:
+            # The check crashed before it could compare anything (e.g. missing
+            # Web/node_modules → esbuild import error). Surface the raw error so
+            # it is not mistaken for stale artifacts — `steptrace:build` would
+            # rebuild identical bytes and not help. Prefer the first error line
+            # over trailing noise like node's `Node.js vXX` footer.
+            lines = [line.strip() for line in output.splitlines() if line.strip()]
+            markers = ("Error", "ERR_", "not found", "Traceback")
+            detail = (
+                # Prefer the human-readable error message ...
+                next((l for l in lines if l.startswith("Error") or "Cannot find" in l), None)
+                # ... else any error-ish line (skips code frames / the version footer) ...
+                or next((l for l in lines if any(m in l for m in markers)), None)
+                # ... else fall back to whatever the process printed last.
+                or (lines[-1] if lines else f"exit code {result.returncode}")
+            )
+            message = (
+                f"StepTrace freshness check could not run (are Web dependencies "
+                f"installed? run `npm ci` in Web): {detail}"
+            )
     return [Issue("generated.steptrace", "Web/custom/steptrace", 1, message)]
 
 
