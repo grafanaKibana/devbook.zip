@@ -32,9 +32,24 @@ const script = `
       element.scrollWidth <= element.clientWidth + 1;
   }
 
-  function containedBy(parent, child) {
+  // The parent's CONTENT box (border-box rect inset by its padding). Retained
+  // elements are measured against this, not getBoundingClientRect(): the card
+  // body's padding is part of the design, so a bar that slides into it is
+  // already touching the card edge visually — a state must fail BEFORE that,
+  // not once content crosses the border box.
+  function contentBox(element) {
+    var rect = element.getBoundingClientRect();
+    var style = getComputedStyle(element);
+    return {
+      top: rect.top + parseFloat(style.paddingTop),
+      bottom: rect.bottom - parseFloat(style.paddingBottom),
+      left: rect.left + parseFloat(style.paddingLeft),
+      right: rect.right - parseFloat(style.paddingRight),
+    };
+  }
+
+  function containedBy(outer, child) {
     if (!visible(child)) return true;
-    var outer = parent.getBoundingClientRect();
     var inner = child.getBoundingClientRect();
     return inner.top >= outer.top - 1 && inner.bottom <= outer.bottom + 1 &&
       inner.left >= outer.left - 1 && inner.right <= outer.right + 1;
@@ -60,11 +75,12 @@ const script = `
       var cardBody = card.querySelector(".db-card-body");
       if (!cardBody || !scrollFits(cardBody)) return false;
 
+      var box = contentBox(cardBody);
       var retained = card.querySelectorAll(
         ".dc-topic-title, .db-card-summary, .dc-topic-cap, .dc-topic-bar"
       );
       for (var j = 0; j < retained.length; j += 1) {
-        if (!containedBy(cardBody, retained[j])) return false;
+        if (!containedBy(box, retained[j])) return false;
       }
     }
 

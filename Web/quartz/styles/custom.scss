@@ -781,10 +781,14 @@ body[data-slug="index"] {
       flex: 0 0 auto;
       overflow: visible;
     }
+    // Keep the note's 0.55em floor: the gap between the summary and the foot is
+    // part of the design, not slack. If honouring it pushes the foot into the
+    // body padding, the fit check fails and the controller degrades a tier —
+    // the summary never sits flush against the counter to buy one more state.
     .dc-topic-card .dc-topic-spacer {
       display: block;
       flex: 1 1 auto;
-      min-height: 0;
+      min-height: 0.55em;
     }
     .dc-topic-card .dc-topic-foot {
       margin-top: auto;
@@ -980,10 +984,13 @@ body[data-slug="index"] {
       flex: 0 0 auto;
       overflow: visible;
     }
+    // 0.55em floor, same as the desktop fill: the summary–foot gap is design,
+    // not slack — honouring it makes the fit check degrade a tier before the
+    // foot ever crowds the body padding.
     .dc-topic-card .dc-topic-spacer {
       display: block;
       flex: 1 1 auto;
-      min-height: 0;
+      min-height: 0.55em;
     }
     .dc-topic-card .dc-topic-foot {
       margin-top: auto;
