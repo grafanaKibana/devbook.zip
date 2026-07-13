@@ -263,7 +263,7 @@ def generate():
     topic_dirs = [
         os.path.join(KNOWLEDGE, n)
         for n in sorted(os.listdir(KNOWLEDGE))
-        if os.path.isdir(os.path.join(KNOWLEDGE, n))
+        if not n.startswith(".") and os.path.isdir(os.path.join(KNOWLEDGE, n))
     ]
 
     nodes = []

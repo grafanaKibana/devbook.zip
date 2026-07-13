@@ -1,5 +1,6 @@
 import { ExplorerIcons } from "./custom/components/explorer-icons"
 import { ExplorerOrder } from "./custom/components/explorer-order"
+import { HomepageFit } from "./custom/components/homepage-fit"
 import { NavScopeDropdown } from "./custom/components/nav-scope-dropdown"
 import { QuestionsIndex } from "./custom/components/questions-index"
 import { SiteHeader } from "./custom/components/site-header"
@@ -87,12 +88,14 @@ for (const pageLayout of Object.values(layout.byPageType)) {
   }
 }
 
-// steptrace: ships the engine loader (afterDOMLoaded) + Quartz theme binding on
-// every content page so `steptrace` cards hydrate live. Renders nothing itself.
+// Client-only helpers render nothing themselves. Steptrace ships its engine
+// loader/theme binding; HomepageFit measures the frozen home dashboard and
+// selects the least-degraded tablet state that fits one viewport.
 const steptrace = Steptrace()
-layout.defaults.afterBody = [...(layout.defaults.afterBody ?? []), steptrace]
+const homepageFit = HomepageFit()
+layout.defaults.afterBody = [...(layout.defaults.afterBody ?? []), steptrace, homepageFit]
 for (const pageLayout of Object.values(layout.byPageType)) {
-  pageLayout.afterBody = [...(pageLayout.afterBody ?? []), steptrace]
+  pageLayout.afterBody = [...(pageLayout.afterBody ?? []), steptrace, homepageFit]
 }
 
 const content = { ...(layout.byPageType.content ?? {}) }

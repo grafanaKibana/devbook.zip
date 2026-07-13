@@ -7,7 +7,7 @@ summary: "Vertical scaling gives a single node more CPU, RAM, or disk, the simpl
 level:
   - "2"
 priority: High
-status: Not-Started
+status: Creation
 publish: true
 ---
 
