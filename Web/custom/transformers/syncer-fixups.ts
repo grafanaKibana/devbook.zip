@@ -1,5 +1,6 @@
 import { visit, SKIP } from "unist-util-visit"
 import type { Root as HastRoot, Element } from "hast"
+import type { Code, Root as MdastRoot } from "mdast"
 import type { QuartzTransformerPlugin } from "@quartz-community/types"
 
 // Cleans the markdown/HTML that Quartz Syncer commits into content so it renders
@@ -80,9 +81,9 @@ export const SyncerFixups: QuartzTransformerPlugin = () => ({
   name: "SyncerFixups",
   markdownPlugins() {
     return [
-      () => (tree: HastRoot) => {
+      () => (tree: MdastRoot) => {
         // mdast `code` nodes: drop raw dataview/datacore query fences.
-        visit(tree, "code", (node: { lang?: string | null }, index, parent) => {
+        visit(tree, "code", (node: Code, index, parent) => {
           if (parent && typeof index === "number" && node.lang && RAW_QUERY_FENCES.has(node.lang)) {
             parent.children.splice(index, 1)
             return [SKIP, index]

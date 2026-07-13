@@ -39,13 +39,13 @@ On a fresh clone / CI, `plugin install --from-config` must run before the first 
 
 Quartz is "clone and own" — the engine under `quartz/` is committed. **Ground changes in the [official docs](https://quartz.jzhao.xyz) and prefer config/plugins over custom code.** Only these surfaces are ours:
 
-| Path | Purpose |
-|---|---|
-| `quartz.config.yaml` | site config — plugins, theme (accent green, fonts), `ignorePatterns` |
-| `quartz.ts` | function-typed overrides + wiring for the local components/transformers |
-| `quartz/styles/custom.scss` | custom CSS/SCSS |
-| `custom/` | local components + transformers (below) |
-| `content/` | generated content from Quartz Syncer — don't hand-edit |
+| Path                        | Purpose                                                                 |
+| --------------------------- | ----------------------------------------------------------------------- |
+| `quartz.config.yaml`        | site config — plugins, theme (accent green, fonts), `ignorePatterns`    |
+| `quartz.ts`                 | function-typed overrides + wiring for the local components/transformers |
+| `quartz/styles/custom.scss` | custom CSS/SCSS                                                         |
+| `custom/`                   | local components + transformers (below)                                 |
+| `content/`                  | generated content from Quartz Syncer — don't hand-edit                  |
 
 Do **not** edit anything else under `quartz/` — `npx quartz upgrade` overwrites it.
 
@@ -58,13 +58,13 @@ The vault's old DataviewJS dashboards are handled two ways on the static site:
 
 Local transformers/components in `custom/` (wired in `quartz.ts`):
 
-| File | Role |
-|---|---|
-| `transformers/syncer-fixups.ts` | strips raw dataview/datacore query fences + the frozen Questions `dc-questions-index` block, and normalizes the vault-absolute `Home/…` links Syncer leaves in rendered Datacore |
-| `transformers/question-collector.ts` | collects `[!QUESTION]` callouts across notes for the Questions page |
-| `transformers/status-backfill.ts` | restores the `status` frontmatter Syncer drops on publish, so status-gated components can read it |
-| `components/questions-index.tsx` | renders the Questions aggregation page |
-| `components/site-marquee.tsx` | "under construction" banner shown on in-progress (non-`Done`) notes |
+| File                                 | Role                                                                                                                                                                             |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `transformers/syncer-fixups.ts`      | strips raw dataview/datacore query fences + the frozen Questions `dc-questions-index` block, and normalizes the vault-absolute `Home/…` links Syncer leaves in rendered Datacore |
+| `transformers/question-collector.ts` | collects `[!QUESTION]` callouts across notes for the Questions page                                                                                                              |
+| `transformers/status-backfill.ts`    | restores the `status` frontmatter Syncer drops on publish, so status-gated components can read it                                                                                |
+| `components/questions-index.tsx`     | renders the Questions aggregation page                                                                                                                                           |
+| `components/site-marquee.tsx`        | "under construction" banner shown on in-progress (non-`Done`) notes                                                                                                              |
 
 ## Deploy
 
@@ -72,8 +72,8 @@ Vercel builds from the repo-root `vercel.json`:
 
 ```text
 installCommand:  cd Web && npm ci
-buildCommand:    cd Web && npm run steptrace:check && npx quartz plugin install --from-config && npx quartz build
+buildCommand:    cd Web && npm run steptrace:build && npm run steptrace:check && npm run quartz -- plugin install --from-config && npm run quartz -- build
 outputDirectory: Web/public
 ```
 
-`quartz.lock.json` pins plugin commits — commit it, and CI must run the plugin-install step before the build.
+`quartz.lock.json` pins plugin commits — commit it, and CI must run the plugin-install step before the build. Vercel regenerates StepTrace before checking artifact freshness, so a stale committed Obsidian bundle cannot block the web build.

@@ -28,6 +28,8 @@ interface TreeNode {
   items: Item[]
 }
 
+type HeadingTag = `h${1 | 2 | 3 | 4 | 5 | 6}`
+
 const toId = (s: string): string =>
   s
     .toLowerCase()
@@ -123,7 +125,7 @@ export const QuestionsIndex: QuartzComponentConstructor = () => {
       const out: any[] = []
       for (const [, child] of sortedEntries(node.children)) {
         const level = Math.min(depth + 1, 6)
-        const Heading = `h${level}` as keyof JSX.IntrinsicElements
+        const Heading = `h${level}` as HeadingTag
         out.push(
           <Heading id={child.slugId} class="qi-heading">
             {child.title}
