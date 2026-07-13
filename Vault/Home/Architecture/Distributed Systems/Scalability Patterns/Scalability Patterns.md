@@ -10,7 +10,7 @@ priority: High
 publish: true
 tags:
   - FolderNote
-status: Not-Started
+status: Creation
 ---
 
 # Intro

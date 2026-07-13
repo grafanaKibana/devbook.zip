@@ -91,11 +91,12 @@ const script = `
       if (fits(quartzBody, dashboard)) return;
     }
 
-    // This should not be reached at the supported tablet dimensions. Keep the
-    // least-content state and expose an observable diagnostic instead of hiding
-    // any additional, unspecified content.
-    body.dataset.homeFit = states[states.length - 1];
+    // If no complete state fits, the one-viewport contract is impossible at
+    // this height. Restore the existing scrolling tablet layout rather than
+    // leaving retained content inside the fit mode's clipped 100dvh frame.
+    body.removeAttribute("data-home-fit");
     body.dataset.homeFitOverflow = "true";
+    observe(null);
   }
 
   function schedule() {

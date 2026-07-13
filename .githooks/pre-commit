@@ -12,40 +12,52 @@ for bin_dir in /opt/homebrew/bin /opt/homebrew/opt/node@22/bin /usr/local/bin; d
     [[ -d "$bin_dir" ]] && PATH="$bin_dir:$PATH"
 done
 
-# Collect staged Markdown files under Vault/ only (skip .opencode/, root AGENTS.md, etc.)
+# Collect staged Vault files, plus Markdown separately for note-only automations.
+STAGED_VAULT=()
 STAGED_MD=()
 while IFS= read -r file; do
-    [[ "$file" =~ \.(md|MD)$ ]] || continue
     [[ "$file" == Vault/* ]] || continue
-    STAGED_MD+=("$file")
+    STAGED_VAULT+=("$file")
+    [[ "$file" =~ \.(md|MD)$ ]] && STAGED_MD+=("$file")
 done < <(git diff --cached --name-only --diff-filter=ACMR)
 
-# If no staged Markdown files, skip automations
-if [[ ${#STAGED_MD[@]} -eq 0 ]]; then
+# If no staged Vault files, skip vault automations.
+if [[ ${#STAGED_VAULT[@]} -eq 0 ]]; then
     exit 0
 fi
 
 # Run vault maintenance automations in order
 echo "[pre-commit] Running vault automations..."
 
-# 1. Sync folder frontmatter (derives status/priority/level from children)
-ROLLUP_CHANGED=$(python3 "$REPO_ROOT/.scripts/sync-folder-rollup-frontmatter.py" --write --force --print-changed)
-if [[ -n "$ROLLUP_CHANGED" ]]; then
-    while IFS= read -r file; do
-        git add "$REPO_ROOT/$file"
-    done <<< "$ROLLUP_CHANGED"
-    echo "[pre-commit] ✓ Folder frontmatter synced ($(echo "$ROLLUP_CHANGED" | wc -l | tr -d ' ') notes)"
+# Note-derived artifacts only need refreshes when Markdown changed.
+if [[ ${#STAGED_MD[@]} -gt 0 ]]; then
+    # 1. Sync folder frontmatter (derives status/priority/level from children)
+    ROLLUP_CHANGED=$(python3 "$REPO_ROOT/.scripts/sync-folder-rollup-frontmatter.py" --write --force --print-changed)
+    if [[ -n "$ROLLUP_CHANGED" ]]; then
+        while IFS= read -r file; do
+            git add "$REPO_ROOT/$file"
+        done <<< "$ROLLUP_CHANGED"
+        echo "[pre-commit] ✓ Folder frontmatter synced ($(echo "$ROLLUP_CHANGED" | wc -l | tr -d ' ') notes)"
+    fi
+
+    # 2. Generate roadmap canvas from folder structure
+    python3 "$REPO_ROOT/.scripts/generate-roadmap.py"
+    ROADMAP_FILE="Vault/Home/Roadmap.canvas"
+    if ! git diff --quiet -- "$REPO_ROOT/$ROADMAP_FILE" 2>/dev/null; then
+        git add "$REPO_ROOT/$ROADMAP_FILE"
+        echo "[pre-commit] ✓ Roadmap canvas regenerated"
+    fi
 fi
 
-# 2. Generate roadmap canvas from folder structure
-python3 "$REPO_ROOT/.scripts/generate-roadmap.py"
-ROADMAP_FILE="Vault/Home/Roadmap.canvas"
-if ! git diff --quiet -- "$REPO_ROOT/$ROADMAP_FILE" 2>/dev/null; then
-    git add "$REPO_ROOT/$ROADMAP_FILE"
-    echo "[pre-commit] ✓ Roadmap canvas regenerated"
+# 3. Validate staged vault structure, metadata, links, and generated artifacts
+echo "[pre-commit] Validating staged vault changes..."
+if ! python3 "$REPO_ROOT/.scripts/validate-vault.py" --staged; then
+    echo ""
+    echo "[pre-commit] ✗ Vault validation failed. Fix the violations above, then re-stage."
+    exit 1
 fi
 
-### MD040 LINT — markdownlint-cli2 (staged-only) ###
+### 4. MD040 LINT — markdownlint-cli2 (staged-only) ###
 if [[ ${#STAGED_MD[@]} -gt 0 ]]; then
     echo "[pre-commit] Checking fenced code block languages (MD040)..."
 

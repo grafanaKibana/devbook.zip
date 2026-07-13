@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "description": "Known pre-validator vault debt. Staged mode ignores this baseline so touched notes must conform.",
+  "violations": [
+    "publish.reference|Vault/Home/Architecture/Patterns/Design Patterns/Behavioral/Behavioral.md",
+    "frontmatter.type|Vault/Home/Architecture/Patterns/Design Patterns/Behavioral/Command.md|status",
+    "frontmatter.type|Vault/Home/Architecture/Patterns/Design Patterns/Behavioral/Observer.md|status",
+    "frontmatter.type|Vault/Home/Architecture/Patterns/Design Patterns/Behavioral/State.md|status",
+    "frontmatter.type|Vault/Home/Architecture/Patterns/Design Patterns/Behavioral/Strategy.md|status",
+    "frontmatter.type|Vault/Home/Architecture/Patterns/Design Patterns/Creational/Abstract Factory.md|status",
+    "frontmatter.type|Vault/Home/Architecture/Patterns/Design Patterns/Creational/Builder.md|status",
+    "publish.reference|Vault/Home/Architecture/Patterns/Design Patterns/Creational/Creational.md",
+    "frontmatter.type|Vault/Home/Architecture/Patterns/Design Patterns/Creational/Factory Method.md|status",
+    "frontmatter.type|Vault/Home/Architecture/Patterns/Design Patterns/Creational/Prototype.md|status",
+    "frontmatter.type|Vault/Home/Architecture/Patterns/Design Patterns/Creational/Singleton.md|status",
+    "frontmatter.type|Vault/Home/Architecture/Patterns/Design Patterns/Structural/Adapter.md|status",
+    "frontmatter.type|Vault/Home/Architecture/Patterns/Design Patterns/Structural/Decorator.md|status",
+    "publish.reference|Vault/Home/Architecture/Patterns/Design Patterns/Structural/Structural.md",
+    "folder-note.name|Vault/Home/Architecture/Patterns/Resilience Patterns/Rate Limiting.md",
+    "folder-note.tag|Vault/Home/DevOps/Deployment Strategies/Deployment Strategies.md",
+    "frontmatter.type|Vault/Home/DevOps/Deployment Strategies/Deployment Strategies.md|status"
+  ]
+}

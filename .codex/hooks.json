@@ -2,12 +2,23 @@
   "hooks": {
     "PostToolUse": [
       {
-        "matcher": "Edit|Write|MultiEdit",
+        "matcher": "apply_patch|Edit|Write|MultiEdit",
         "hooks": [
           {
             "type": "command",
-            "command": "node '/Users/nikitareshetnik/Engineering/Repositories/DevBook/.codex/hooks/suggest-review.mjs'",
-            "statusMessage": "Checking if a note review is warranted..."
+            "command": "node \"$(git rev-parse --show-toplevel)/.codex/hooks/suggest-review.mjs\"",
+            "statusMessage": "Tracking note review requirements..."
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/.codex/hooks/enforce-review.mjs\"",
+            "statusMessage": "Checking note review receipts..."
           }
         ]
       }

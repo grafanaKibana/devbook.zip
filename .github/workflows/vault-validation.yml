@@ -1,0 +1,33 @@
+name: Vault Validation
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Test note review hooks
+        run: node --test .codex/hooks/tests/note-review-hooks.test.mjs
+
+      - name: Test vault validator
+        run: python -m unittest discover -s .scripts/tests -p 'test_*.py'
+
+      - name: Validate full vault
+        run: python .scripts/validate-vault.py --all
