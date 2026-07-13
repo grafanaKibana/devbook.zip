@@ -34,11 +34,14 @@
   const VERSION = "2.0.0"
 
   // ==========================================================================
-  //  1. STYLES  —  the ONLY place visual styling lives.
-  //  Colours are --st-* tokens (mapped to internal --_* with fallbacks) so a
-  //  host rebinds the palette via the cascade without touching this file. The
-  //  render section (§5) never sets a colour or layout inline — only data-driven
-  //  geometry (bar heights, node coordinates). To restyle steptrace, edit here.
+  //  1. STYLES  —  the ONLY place visual styling lives, split by renderer kind
+  //  across this 10-styles/ folder: this file holds the tokens + shared card
+  //  chrome (head / body / foot), and each sibling (10-bars, 20-string, …) adds
+  //  its kind's rules. Colours are --st-* tokens (mapped to internal --_* with
+  //  fallbacks) so a host rebinds the palette via the cascade without touching
+  //  these files. The render section (§5) never sets a colour or layout inline —
+  //  only data-driven geometry (bar heights, node coordinates). To restyle a
+  //  given kind, edit its file here; for chrome/tokens, edit this one.
   // ==========================================================================
 
   // Rows available to the TRACE log. Only as many as fit the log's pinned height
@@ -50,7 +53,11 @@
   const fadeFor = (age) => Math.max(0.1, 0.5 * Math.pow(0.62, age - 1))
 
   const STYLE_ID = "steptrace-engine-style"
-  const STYLES = `
+  const STYLE_PARTS = []
+  // Each 10-styles/* sibling appends its renderer-kind's CSS to STYLE_PARTS in
+  // filename-prefix order; injectStyle (§5) joins them into the single <style>.
+  // Order matters for the cascade, so the prefixes mirror the original order.
+  STYLE_PARTS.push(`
 .steptrace {
   --_amber: var(--st-state-amber, #d97706);
   --_violet: var(--st-state-violet, #7c3aed);
@@ -684,7 +691,8 @@
   }
 }
 
-/* ---- bar chart: SHARED by sort + binary-search. A fixed-height stage of
+`)
+  STYLE_PARTS.push(`/* ---- bar chart: SHARED by sort + binary-search. A fixed-height stage of
       bottom-aligned bars; each bar is a coloured fill with the value BELOW and
       an optional white check INSIDE when the bar is finalised (sorted / found).
       Sort adds the --pins modifier to reserve headroom for its i/j markers. ---- */
@@ -903,7 +911,8 @@
   display: block;
 }
 
-/* ---- string matching: text + pattern as pointer-style segmented strips,
+`)
+  STYLE_PARTS.push(`/* ---- string matching: text + pattern as pointer-style segmented strips,
       stacked (the pattern strip slides under the current window) ---- */
 /* hash badge (rabin-karp): sits BELOW the visualization, above the scrubber */
 .steptrace__hash {
@@ -982,7 +991,8 @@
   box-shadow: inset 0 -3px 0 var(--_green);
 }
 
-/* ---- array pointers: segmented strip + tinted window + [ ] brackets ---- */
+`)
+  STYLE_PARTS.push(`/* ---- array pointers: segmented strip + tinted window + [ ] brackets ---- */
 .steptrace__pwrap {
   position: relative;
   height: 46px;
@@ -1066,7 +1076,8 @@
   border-color: var(--_green);
 }
 
-/* ---- dp / LCS: a 2-D grid in the pointer-strip idiom (framed + rounded, with
+`)
+  STYLE_PARTS.push(`/* ---- dp / LCS: a 2-D grid in the pointer-strip idiom (framed + rounded, with
       hairline dividers and tinted states); cells fill in one by one ---- */
 .steptrace__dp-wrap {
   display: block;
@@ -1130,7 +1141,8 @@
   content: "✓";
 }
 
-/* ---- union-find: nodes + arcs share the GRAPH styling (opaque backing, tinted
+`)
+  STYLE_PARTS.push(`/* ---- union-find: nodes + arcs share the GRAPH styling (opaque backing, tinted
       fill, thin constant stroke; arcs change colour, not thickness). Nodes are
       coloured by set — stroke + fill tint set inline per frame. ---- */
 .steptrace__uf .steptrace__ufnode .steptrace__nback {
@@ -1158,7 +1170,8 @@
   stroke-dasharray: 5 3;
 }
 
-/* ---- bits: the three lanes read as an equation (x / − 1 / & = result), with a
+`)
+  STYLE_PARTS.push(`/* ---- bits: the three lanes read as an equation (x / − 1 / & = result), with a
    fixed tally of the original 1s that fills in as each is cleared. ---- */
 .steptrace__bits {
   display: flex;
@@ -1309,7 +1322,8 @@
   text-decoration-color: color-mix(in srgb, var(--_amber) 70%, transparent);
 }
 
-/* ---- backtrack: an n×n board (row = recursion depth) + a path strip ---- */
+`)
+  STYLE_PARTS.push(`/* ---- backtrack: an n×n board (row = recursion depth) + a path strip ---- */
 .steptrace__bt {
   display: flex;
   flex-direction: column;
@@ -1424,7 +1438,8 @@
   font-weight: 700;
 }
 
-/* ---- rectree: a naive recursion tree collapsing into a memo DAG (SVG) ----
+`)
+  STYLE_PARTS.push(`/* ---- rectree: a naive recursion tree collapsing into a memo DAG (SVG) ----
    The FULL naive tree is laid out once and every node lives in the SVG from
    frame 0; reveal is a data-vis opacity toggle (never DOM insertion) and a memo
    hit dims a subtree via data-collapsed — so the node set, viewBox and stage
@@ -1514,7 +1529,8 @@
   stroke: var(--_green);
 }
 
-/* ---- graph: svg ---- */
+`)
+  STYLE_PARTS.push(`/* ---- graph: svg ---- */
 .steptrace__graph {
   display: flex;
   flex-direction: column;
@@ -1674,7 +1690,8 @@
   color: var(--_green);
 }
 
-/* ---- shared: status + toolbar ---- */
+`)
+  STYLE_PARTS.push(`/* ---- shared: status + toolbar ---- */
 .steptrace__status {
   min-height: 2.6em;
   padding: 0.5rem 0.65rem;
@@ -1742,7 +1759,7 @@
 .steptrace__speed input {
   accent-color: var(--_accent);
 }
-`
+`)
 
   // ==========================================================================
   //  2. REGISTRY  —  the extension surface.
@@ -4053,7 +4070,9 @@
     // Always refresh the content: Obsidian keeps the DOM across plugin reloads,
     // so a stale stylesheet from an older build must be overwritten — if we
     // skipped when the tag existed, new renderers/size-caps would never apply.
-    if (style.textContent !== STYLES) style.textContent = STYLES
+    // STYLE_PARTS is filled by the 10-styles/* fragments (one per renderer kind).
+    const css = STYLE_PARTS.join("")
+    if (style.textContent !== css) style.textContent = css
   }
 
   // ---- sort view: value-in-bar + tracked i/j pin markers (no hat) ----

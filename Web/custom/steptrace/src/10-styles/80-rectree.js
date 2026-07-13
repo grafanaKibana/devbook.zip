@@ -1,0 +1,91 @@
+  STYLE_PARTS.push(`/* ---- rectree: a naive recursion tree collapsing into a memo DAG (SVG) ----
+   The FULL naive tree is laid out once and every node lives in the SVG from
+   frame 0; reveal is a data-vis opacity toggle (never DOM insertion) and a memo
+   hit dims a subtree via data-collapsed — so the node set, viewBox and stage
+   height are constant on every frame (zero footer jitter). Colour changes only;
+   stroke-width stays fixed (the "graph card" fix) to keep geometry stable. */
+.steptrace__rectree {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+.steptrace__rtsvg {
+  width: 100%;
+  height: auto;
+  max-height: 260px;
+  overflow: visible;
+}
+.steptrace__rtedge {
+  stroke: var(--_neutral);
+  stroke-width: 1.6;
+  transition:
+    stroke var(--_tween) ease,
+    opacity var(--_tween) ease;
+}
+.steptrace__rtedge[data-vis="0"] {
+  opacity: 0.12;
+}
+.steptrace__rtedge[data-collapsed="true"] {
+  opacity: 0.3;
+}
+.steptrace__rtnode {
+  transition: opacity var(--_tween) ease;
+}
+.steptrace__rtnode[data-vis="0"] {
+  opacity: 0.12;
+}
+/* a memo-saved subtree: shown, but dimmed + desaturated so it reads as skipped */
+.steptrace__rtnode[data-collapsed="true"] {
+  opacity: 0.34;
+  filter: grayscale(1);
+}
+.steptrace__rtnode .steptrace__rtback {
+  fill: var(--st-page, var(--_surface));
+  stroke: none;
+}
+.steptrace__rtnode .steptrace__rtcirc {
+  fill: color-mix(in srgb, var(--_neutral) 20%, transparent);
+  stroke: var(--_neutral);
+  stroke-width: 1.6;
+  transition:
+    fill var(--_tween) ease,
+    stroke var(--_tween) ease;
+}
+/* active-call ring: opacity toggle only — no radius/stroke-width change */
+.steptrace__rtnode .steptrace__rtring {
+  fill: none;
+  stroke: var(--_violet);
+  stroke-width: 1.8;
+  opacity: 0;
+  transition: opacity var(--_tween) ease;
+}
+.steptrace__rtnode[data-active="true"] .steptrace__rtring {
+  opacity: 1;
+}
+.steptrace__rtnode .steptrace__rtlabel {
+  fill: var(--_text);
+  font: 600 10px var(--_font-mono);
+}
+.steptrace__rtnode .steptrace__rtval {
+  fill: var(--_muted);
+  font: 600 9px var(--_font-mono);
+}
+.steptrace__rtnode[data-state="compute"] .steptrace__rtcirc {
+  fill: color-mix(in srgb, var(--_blue) 22%, transparent);
+  stroke: var(--_blue);
+}
+.steptrace__rtnode[data-state="base"] .steptrace__rtcirc {
+  fill: color-mix(in srgb, var(--_muted) 16%, transparent);
+  stroke: var(--_muted);
+}
+.steptrace__rtnode[data-state="miss"] .steptrace__rtcirc {
+  fill: color-mix(in srgb, var(--_amber) 18%, transparent);
+  stroke: var(--_amber);
+}
+.steptrace__rtnode[data-state="hit"] .steptrace__rtcirc {
+  fill: color-mix(in srgb, var(--_green) 30%, transparent);
+  stroke: var(--_green);
+}
+
+`)

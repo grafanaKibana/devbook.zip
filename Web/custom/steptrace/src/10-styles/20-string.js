@@ -1,0 +1,80 @@
+  STYLE_PARTS.push(`/* ---- string matching: text + pattern as pointer-style segmented strips,
+      stacked (the pattern strip slides under the current window) ---- */
+/* hash badge (rabin-karp): sits BELOW the visualization, above the scrubber */
+.steptrace__hash {
+  display: inline-block;
+  margin-top: 0.85rem;
+  font: 600 0.72rem var(--_font-mono);
+  color: var(--_text);
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--_accent) 12%, transparent);
+}
+.steptrace__match {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow: hidden; /* clip the sliding pattern flush to the container */
+}
+/* the main text strip fills the full container width like the pointers array */
+.steptrace__cells {
+  display: flex;
+  width: 100%;
+  border: 1px solid color-mix(in srgb, var(--_text) 22%, transparent);
+  border-radius: 9px;
+  overflow: hidden;
+}
+/* the pattern strip is only as wide as its own cells and slides via translateX */
+.steptrace__cells--pat {
+  width: max-content;
+  align-self: flex-start;
+  transition: transform var(--_tween) var(--_spring);
+}
+.steptrace__cell {
+  flex: 1 1 0; /* text cells stretch to fill; same sizing as the pointers strip */
+  min-width: 0;
+  height: 44px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid color-mix(in srgb, var(--_text) 13%, transparent);
+  font: 500 0.98rem var(--_font-mono);
+  color: var(--_text);
+  transition:
+    background var(--_tween) ease,
+    color 0.22s ease;
+}
+/* pattern cells are pinned to the measured width of one text cell (--_cw) so the
+   slide stays aligned even as the responsive text strip changes cell size */
+.steptrace__cell--pat {
+  flex: 0 0 var(--_cw, 34px);
+  width: var(--_cw, 34px);
+}
+.steptrace__cell:last-child {
+  border-right: 0;
+}
+.steptrace__cell[data-state="window"] {
+  background: color-mix(in srgb, var(--_accent) 15%, transparent);
+}
+.steptrace__cell[data-state="match"] {
+  background: color-mix(in srgb, var(--_green) 22%, transparent);
+  color: var(--_green);
+  font-weight: 700;
+  box-shadow: inset 0 -3px 0 var(--_green);
+}
+.steptrace__cell[data-state="mismatch"] {
+  background: color-mix(in srgb, var(--_amber) 22%, transparent);
+  box-shadow: inset 0 0 0 2px var(--_amber);
+}
+.steptrace__cell[data-state="probe"] {
+  background: color-mix(in srgb, var(--_blue) 18%, transparent);
+  box-shadow: inset 0 -3px 0 var(--_blue);
+}
+.steptrace__cell[data-state="found"] {
+  background: color-mix(in srgb, var(--_green) 22%, transparent);
+  color: var(--_green);
+  box-shadow: inset 0 -3px 0 var(--_green);
+}
+
+`)

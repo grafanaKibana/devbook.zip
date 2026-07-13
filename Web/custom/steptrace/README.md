@@ -25,7 +25,7 @@ The engine is authored as fragments of ONE UMD module under `src/`. They are **n
 | File(s) | Section | What lives here | Edit when... |
 |---------|---------|-----------------|--------------|
 | `00-prologue.js` | — | UMD wrapper open + `VERSION`. Opens the shared IIFE scope. | Never — boilerplate. |
-| `10-styles.js` | **STYLES** | All CSS: colors, layout, transitions. Tied to `--st-*` tokens so hosts rebind the palette without touching this. | Tweaking visual appearance, changing layout, adjusting animations. |
+| `10-styles/*.js` | **STYLES** | All CSS, split **one file per renderer kind**: `00-shared.js` (tokens + head/body/foot chrome) then `10-bars` (sort + binary-search) · `20-string` · `30-pointers` · `40-dp` · `50-unionfind` · `60-bits` · `70-backtrack` · `80-rectree` · `90-graph` · `95-status-toolbar`. Each file pushes its CSS into a shared `STYLE_PARTS`; prefixes preserve cascade order. Tied to `--st-*` tokens so hosts rebind the palette. | Tweaking visual appearance, changing layout, adjusting animations. |
 | `20-registry.js` | **REGISTRY** | `registerSort()`, `registerGraph()`, … `buildFrames()` — extension API and frame-building entry point. | Rarely; sets the contract for algorithms. |
 | `30-recorders.js` | **RECORDERS** | Turn `ops.*` calls (e.g., `ops.swap(i, j)`, `ops.visit(n)`) into immutable step frames. Per-renderer kind (Sort, Graph, Search, String, Pointers, DP, UnionFind, Bits, Backtrack, RecTree). | Changing what information is captured per step. |
 | `40-algorithms/*.js` | **ALGORITHMS** | 22 built-ins, **one file each**: 6 sorts · 5 graph (bfs, dfs, dijkstra, prim, topological-sort) · 2 search (binary, linear) · 2 string (kmp, rabin-karp) · 2 pointer (two-pointers, sliding-window) · lcs · union-find · kernighan-popcount · n-queens · fibonacci. Each file is one `registerX()` block; `01-bubble-sort.js` also carries the section banner. | Adding a new algorithm (drop one file here). |
@@ -34,7 +34,7 @@ The engine is authored as fragments of ONE UMD module under `src/`. They are **n
 | `70-mount.js` | **MOUNT** | Assembles a card into a given `root` element: parses config, runs the algorithm once (to build frames), wires the player, and returns `{ destroy }` for cleanup. | Never — orchestration only. |
 | `90-epilogue.js` | — | The public-API `return { … }` object + UMD wrapper close. | When exporting a new `registerX` from the registry. |
 
-> Because the fragments are indented for their assembled context (inside the IIFE) rather than as standalone modules, `src/` is listed in `Web/.prettierignore`. The assembled engine (`Web/quartz/static/steptrace/engine.js`) stays prettier-checked, so formatting is still enforced on the output.
+> Because the fragments are indented for their assembled context (inside the IIFE) rather than as standalone modules, `src/` is listed in `Web/.prettierignore` — prettier would dedent them and break the stitch. Format each fragment to match its neighbours by hand.
 
 Every card derives a teaching layer from its immutable frames:
 
@@ -54,7 +54,7 @@ Both regenerate the two host copies: the Obsidian plugin and the Quartz static s
 
 ### Why plain concat and not esbuild / source maps
 
-The stitch is a deliberate verbatim concatenation, not a bundle. Keeping it a plain concat means the generated artifacts stay **byte-identical** to hand-authoring the engine as one file (the split introduced zero behavior change — only the banner line differs), it preserves the module's "no build, no dependencies" property, and it keeps the shared-scope IIFE model intact with no ESM conversion. A bundler (esbuild) was considered for source maps that point stack traces back to the fragment files, but it would wrap each fragment as a module (breaking shared scope) or require offset-tracked map generation, and it trades away the byte-identical guarantee — so it was left out. Line numbers in stack traces refer to the assembled engine; the section/algorithm is easy to locate from the banner comments.
+The stitch is a deliberate verbatim concatenation, not a bundle. Keeping it a plain concat means the assembled engine is exactly what hand-authoring these fragments as one file would produce — behavior-preserving by construction (the styles split, for instance, reassembles the same CSS byte-for-byte). It preserves the module's "no build, no dependencies" property and keeps the shared-scope IIFE model intact with no ESM conversion. A bundler (esbuild) was considered for source maps that point stack traces back to the fragment files, but it would wrap each fragment as a module (breaking shared scope) or require offset-tracked map generation, and it trades away the plain-concat simplicity — so it was left out. Line numbers in stack traces refer to the assembled engine; the section/algorithm is easy to locate from the banner comments.
 
 ## The Two Hosts
 
@@ -129,8 +129,8 @@ See the `§4` banner atop `src/40-algorithms/01-bubble-sort.js` and the recorder
 
 ### Tweak Visual Appearance (Colors, Layout, Animations)
 
-1. Open `src/10-styles.js`.
-2. Edit the CSS. All colors are `--st-*` tokens (mapped to internal `--_*`) so hosts can rebind via the cascade without touching this file.
+1. Open the file for the kind you're restyling in `src/10-styles/` (e.g. `10-bars.js` for sorts, `50-graph.js` for graphs), or `00-shared.js` for the card chrome and `--st-*` tokens.
+2. Edit the CSS. All colors are `--st-*` tokens (mapped to internal `--_*`) so hosts can rebind via the cascade without touching these files.
 3. Run `npm run steptrace:sync` (or `steptrace:watch`).
 4. In Obsidian: reload the plugin.
 5. In Quartz: rebuild (`quartz build`).
@@ -139,7 +139,7 @@ See the `§4` banner atop `src/40-algorithms/01-bubble-sort.js` and the recorder
 
 1. Add a new recorder class in `src/30-recorders.js` that captures the ops for your kind.
 2. Add render logic in `src/50-render.js` that builds the DOM for this kind.
-3. Add CSS for the new kind in `src/10-styles.js`.
+3. Add a `src/10-styles/NN-yourkind.js` file (copy an existing one) that does `STYLE_PARTS.push(\`…\`)` with your kind's CSS; pick a prefix that places it correctly in the cascade.
 4. Export `registerYourKind()` from the registry (`src/20-registry.js`), add it to the public API in `src/90-epilogue.js`, and call it from an algorithm file in `src/40-algorithms/`.
 5. Run `npm run steptrace:sync`, reload both hosts.
 

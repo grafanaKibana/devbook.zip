@@ -29,7 +29,9 @@ function run() {
   pending.clear()
   try {
     const { fragments } = stitch()
-    console.log(`[${new Date().toLocaleTimeString()}] steptrace: synced ${fragments} fragments — ${changed}`)
+    console.log(
+      `[${new Date().toLocaleTimeString()}] steptrace: synced ${fragments} fragments — ${changed}`,
+    )
   } catch (e) {
     console.error(`steptrace watch: stitch failed — ${e && e.message ? e.message : e}`)
   }
@@ -50,7 +52,8 @@ function watchTree(dir) {
     // Recursive watch unsupported here — watch src/ and each subdirectory directly.
     watch(dir, (_e, file) => schedule(file || "src"))
     for (const entry of readdirSync(dir, { withFileTypes: true })) {
-      if (entry.isDirectory()) watch(join(dir, entry.name), (_e, file) => schedule(file || entry.name))
+      if (entry.isDirectory())
+        watch(join(dir, entry.name), (_e, file) => schedule(file || entry.name))
     }
   }
 }
@@ -59,4 +62,6 @@ watchTree(srcDir)
 for (const f of extraFiles) watch(join(here, f), (_e) => schedule(f))
 
 run() // initial stitch so the artifacts match src/ the moment the watcher starts
-console.log(`steptrace: watching src/ + ${extraFiles.join(" + ")} — edit a file to re-sync (Ctrl+C to stop)`)
+console.log(
+  `steptrace: watching src/ + ${extraFiles.join(" + ")} — edit a file to re-sync (Ctrl+C to stop)`,
+)
