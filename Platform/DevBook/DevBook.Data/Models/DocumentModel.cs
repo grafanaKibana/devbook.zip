@@ -16,7 +16,7 @@ public sealed record Document
 
     /// <summary>
     /// Original source path of the document.
-    /// Example: <c>Vault/Software Engineering/11 AI &amp; ML/LLM/RAG/RAG.md</c>
+    /// Example: <c>Vault/Home/11 AI &amp; ML/LLM/RAG/RAG.md</c>
     /// </summary>
     public required string SourcePath { get; init; }
 

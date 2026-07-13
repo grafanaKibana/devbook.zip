@@ -8,7 +8,7 @@ public sealed class IngestionOptions
     /// <summary>
     /// Gets content root path.
     /// </summary>
-    public string ContentRootPath { get; init; } = "../../../Vault/Software Engineering";
+    public string ContentRootPath { get; init; } = "../../../Vault/Home";
 
     /// <summary>
     /// Gets max file read concurrency.
