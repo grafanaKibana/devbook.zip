@@ -34,7 +34,7 @@ The OWASP Top 10 for LLM Applications (2025 edition) catalogs the highest-impact
 
 ### Prompt Injection (LLM01)
 
-**Mechanism**: The model receives attacker instructions in the same natural-language channel as legitimate instructions, so it may follow malicious text even when system guidance says not to. **Direct injection** is the obvious case (`Ignore previous instructions and ...`) entered in a user prompt. **Indirect injection** is more dangerous in production: the attacker plants instructions in content that gets retrieved through [[Home/AI & ML/LLM/RAG/RAG|RAG]] or browsing. **Multimodal injection** (new in 2025) extends this to hidden instructions in images or audio that multimodal models process.
+**Mechanism**: The model receives attacker instructions in the same natural-language channel as legitimate instructions, so it may follow malicious text even when system guidance says not to. **Direct injection** is the obvious case (`Ignore previous instructions and ...`) entered in a user prompt. **Indirect injection** is more dangerous in production: the attacker plants instructions in content that gets retrieved through [[Home/AI & ML/LLM/Context Engineering/RAG/RAG|RAG]] or browsing. **Multimodal injection** (new in 2025) extends this to hidden instructions in images or audio that multimodal models process.
 
 **Concrete examples**: Slack AI indirect injection was used to extract private channel data, and Microsoft Copilot retrieved poisoned SharePoint documents containing embedded instructions. Both cases show why retrieval pathways become execution pathways when trust boundaries are unclear.
 
@@ -80,7 +80,7 @@ New in 2025, this risk captures adversarial extraction of the system prompt itse
 
 ### Vector and Embedding Weaknesses (LLM08)
 
-New in 2025, this risk targets retrieval layers: poisoned corpus documents and adversarial embeddings can make irrelevant or malicious content rank highly. Monitor embedding distribution drift, validate document provenance, and harden [[Home/AI & ML/LLM/RAG/RAG|RAG]] ingestion pipelines.
+New in 2025, this risk targets retrieval layers: poisoned corpus documents and adversarial embeddings can make irrelevant or malicious content rank highly. Monitor embedding distribution drift, validate document provenance, and harden [[Home/AI & ML/LLM/Context Engineering/RAG/RAG|RAG]] ingestion pipelines.
 
 ### Misinformation (LLM09)
 

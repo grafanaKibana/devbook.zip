@@ -13,7 +13,7 @@ publish: true
 
 # Intro
 
-RAG monitoring is the continuous observation of a deployed RAG pipeline to detect quality regressions, performance degradation, and data staleness before users notice. Offline [[Home/AI & ML/LLM/RAG/Evaluation/Evaluation|Evaluation]] validates a pipeline before deployment — it answers "is this version good enough to ship?" Monitoring validates it after — it answers "is it still working as expected right now?" The distinction matters because production traffic exposes failure modes that static eval sets cannot anticipate: new query patterns, corpus drift, model behavior changes after provider updates, and load-dependent latency spikes.
+RAG monitoring is the continuous observation of a deployed RAG pipeline to detect quality regressions, performance degradation, and data staleness before users notice. Offline [[Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation|Evaluation]] validates a pipeline before deployment — it answers "is this version good enough to ship?" Monitoring validates it after — it answers "is it still working as expected right now?" The distinction matters because production traffic exposes failure modes that static eval sets cannot anticipate: new query patterns, corpus drift, model behavior changes after provider updates, and load-dependent latency spikes.
 
 The mechanism: each request flows through multiple stages — query translation, embedding, retrieval, reranking, context assembly, generation — and each stage can degrade independently. Monitoring instruments each stage with metrics and traces, samples a fraction of responses for quality scoring via [[LLM-as-a-Judge|LLM-as-judge]], and fires alerts when metrics breach thresholds relative to a rolling baseline. Without per-stage instrumentation, teams observe "answers got worse" but cannot tell whether retrieval stopped finding relevant documents, the reranker misordered them, or the generator hallucinated despite good context.
 
@@ -134,7 +134,7 @@ For semantic quality, run an LLM judge asynchronously on a sampled fraction of p
 
 **Token usage** — input and output tokens per request via `gen_ai.client.token.usage`. Track daily cost aggregates and per-query cost. A sudden increase suggests prompt bloat or context window misuse.
 
-**Cache hit rate** — per [[Home/AI & ML/LLM/RAG/Caching|Caching]] layer. Drops after corpus updates are expected; sustained drops on stable corpora indicate a cache key design or invalidation problem.
+**Cache hit rate** — per [[Home/AI & ML/LLM/Context Engineering/RAG/Caching|Caching]] layer. Drops after corpus updates are expected; sustained drops on stable corpora indicate a cache key design or invalidation problem.
 
 **Error rate** — rate of failed requests (model API errors, timeouts, malformed responses), segmented by stage so failures are attributed to the correct component.
 
@@ -185,7 +185,7 @@ Effective RAG alerting uses relative thresholds anchored to a rolling baseline, 
 | Ingestion failure rate | Exceeds 1% of scheduled ingestions | Silent data loss accumulating |
 | Token cost per query | Increases >30% from baseline | Prompt bloat, context window misuse, or upstream retrieval change |
 
-Recompute baselines after any intentional pipeline change (model swap, prompt update, index rebuild). See the same baseline principle in [[Home/AI & ML/LLM/RAG/Evaluation/Evaluation|Evaluation]].
+Recompute baselines after any intentional pipeline change (model swap, prompt update, index rebuild). See the same baseline principle in [[Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation|Evaluation]].
 
 ## Pitfalls
 

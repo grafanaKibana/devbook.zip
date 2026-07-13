@@ -22,6 +22,8 @@ An agentic system is any system where an LLM controls part of the workflow — c
 
 Most production systems that people call "agents" are actually workflows — and that is the right choice. The most effective agentic systems use the simplest pattern that solves the problem. Start with a single LLM call with good prompting and retrieval. Add workflow orchestration when that falls short. Reach for autonomous agents only when the task is genuinely open-ended and unpredictable.
 
+An agent is where the four steering disciplines of the [[Home/AI & ML/LLM/LLM|engineering ladder]] come together: precise instructions ([[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering|Prompt Engineering]]), a curated window ([[Context Engineering]]), a capability surface ([[Harness Engineering]] — [[Tools]] and [[Model Context Protocol|MCP]]), and a controlled runtime ([[Loop Engineering]] — the [[Agent Loop]] and [[Multi-Agentic Systems|multi-agent topologies]]). This note covers the integration: when to assemble those pieces into a workflow versus an autonomous agent, and which orchestration pattern fits. Measuring the result is [[Home/AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]].
+
 ```datacorejsx
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
 return FolderStructureMap;

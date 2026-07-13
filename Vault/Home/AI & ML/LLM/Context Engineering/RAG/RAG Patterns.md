@@ -13,7 +13,7 @@ publish: true
 
 # Intro
 
-This is the catalog of production RAG patterns, ranked by how common they are as default guidance in current vendor docs, open-source frameworks, and enterprise architectures. The ranking is a practical adoption heuristic, not market-share data. Start at the top and move down only when [[Home/AI & ML/LLM/RAG/Evaluation/Evaluation|evaluation]] shows a specific failure that cheaper patterns do not fix — each pattern below names the failure mode it solves and the risk it introduces. For the overall pipeline these patterns plug into, see [[Home/AI & ML/LLM/RAG/RAG|RAG]].
+This is the catalog of production RAG patterns, ranked by how common they are as default guidance in current vendor docs, open-source frameworks, and enterprise architectures. The ranking is a practical adoption heuristic, not market-share data. Start at the top and move down only when [[Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation|evaluation]] shows a specific failure that cheaper patterns do not fix — each pattern below names the failure mode it solves and the risk it introduces. For the overall pipeline these patterns plug into, see [[Home/AI & ML/LLM/Context Engineering/RAG/RAG|RAG]].
 
 ## 1. Baseline Single-Pass RAG
 

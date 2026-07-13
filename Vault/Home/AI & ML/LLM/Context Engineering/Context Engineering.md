@@ -4,6 +4,8 @@ topic:
 subtopic:
   - LLM
 summary: "Deliberately deciding what fills the finite context window, and in what order, to maximize useful signal."
+tags:
+  - FolderNote
 level:
   - "2"
 priority: High
@@ -13,7 +15,7 @@ publish: true
 
 # Intro
 
-Context engineering is the practice of deliberately deciding what goes into the model's context window — instructions, examples, retrieved evidence, conversation history, tool definitions, and tool results — and in what order, to maximize useful signal within a finite, attention-limited budget. It is the discipline [[Home/AI & ML/LLM/Prompting/Prompting|Prompting]] grows into once a system involves retrieval, tools, and memory: the prompt is no longer a single authored string but an assembled payload, and assembling it well is what separates a reliable agent from a flaky one.
+Context engineering is the practice of deliberately deciding what goes into the model's context window — instructions, examples, retrieved evidence, conversation history, tool definitions, and tool results — and in what order, to maximize useful signal within a finite, attention-limited budget. It is the discipline [[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering|Prompting]] grows into once a system involves retrieval, tools, and memory: the prompt is no longer a single authored string but an assembled payload, and assembling it well is what separates a reliable agent from a flaky one. On the [[Home/AI & ML/LLM/LLM|engineering ladder]] it is the second rung: prompt engineering shapes the single instruction, context engineering decides what the model *sees*, [[Harness Engineering]] decides what it *can do*, and [[Loop Engineering]] decides how it behaves over time.
 
 The core constraint is that the context window is finite and attention across it is uneven. More context is not better. Two findings drive the whole discipline: models attend most to the beginning and end of the context and least to the middle ("lost in the middle", Liu et al. 2023), and answer quality degrades as the input grows even when the extra tokens are relevant — the model's attention dilutes across the material (often called context rot). The engineering goal is therefore the smallest, highest-signal, best-ordered context that answers the task.
 
@@ -32,6 +34,13 @@ flowchart TD
     TS --> M
 ```
 
+The largest mechanism for filling the window with evidence — retrieval — lives in this folder as [[Home/AI & ML/LLM/Context Engineering/RAG/RAG|RAG]]: the pipeline that selects, ranks, and bounds what enters the context from a corpus.
+
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
+
 ## The Context Budget
 
 Everything competes for the same window: the system prompt, the running conversation history, retrieved documents, tool schemas, tool results, and the space reserved for the output all draw from one token budget. Treat it like a memory budget — account for each component, and when the total approaches the limit, decide what to cut rather than letting the runtime truncate arbitrarily (which usually drops the oldest, and often most important, instructions).
@@ -48,15 +57,15 @@ Practical accounting:
 
 **Selection over stuffing.** Retrieve few high-signal chunks rather than many partial ones — noise dilutes signal. [[Re-ranking|Reranking]] and tight [[Retrieval]] exist precisely to bound what enters the window. Prefer a complete, relevant chunk over fragments of many.
 
-**Compaction.** Summarize or prune older history before it crowds out the task. In long sessions, periodically replace verbose past turns with a compact summary of what matters. Keep tool results minimal — return only the fields the model needs, not entire API payloads (see [[Tools]] on return-value minimalism).
+**Compaction.** Summarize or prune older history before it crowds out the task. In long sessions, periodically replace verbose past turns with a compact summary of what matters. Keep tool results minimal — return only the fields the model needs, not entire API payloads (see [[Tools]] on return-value minimalism). Deciding *when* to compact in a running agent is a [[Loop Engineering]] concern.
 
-**Structure.** Use clear delimiters and sections so the model can tell instructions from data from evidence — this also hardens against [[Guardrails|prompt injection]] by keeping trusted and untrusted content visibly separate. See [[Home/AI & ML/LLM/Prompting/Prompting|prompt anatomy]] for the building blocks.
+**Structure.** Use clear delimiters and sections so the model can tell instructions from data from evidence — this also hardens against [[Guardrails|prompt injection]] by keeping trusted and untrusted content visibly separate. See [[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering|prompt anatomy]] for the building blocks.
 
 **Offloading.** Move state out of the window into external storage and pass lightweight references back — a scratchpad, a filesystem, or a store the agent reads on demand. Multi-agent systems use this as the filesystem-artifact pattern (see [[Multi-Agentic Systems]]); it keeps the working context compact while preserving access to detail.
 
 **Isolation.** Give separate concerns separate contexts. Splitting work across sub-agents along context boundaries (not problem boundaries) keeps each window focused — the context-centric decomposition principle from [[Multi-Agentic Systems]].
 
-**Caching stable prefixes.** When a long prefix (system prompt, tool definitions, fixed context) repeats across requests, prompt caching makes it cheap and fast to re-send rather than re-engineer it away. See [[Home/AI & ML/LLM/RAG/Caching|Caching]].
+**Caching stable prefixes.** When a long prefix (system prompt, tool definitions, fixed context) repeats across requests, prompt caching makes it cheap and fast to re-send rather than re-engineer it away. See [[Home/AI & ML/LLM/Context Engineering/RAG/Caching|Caching]].
 
 ## Pitfalls
 
