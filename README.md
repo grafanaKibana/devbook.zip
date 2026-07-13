@@ -4,7 +4,7 @@
 
 **🔗 Live site: [devbook.zip](https://devbook.zip)**
 
-[![DevBook homepage](docs/assets/site-home.png)](https://devbook.zip)
+[![DevBook homepage in light and dark theme](docs/assets/site-home.png)](https://devbook.zip)
 
 ## What It Is
 
