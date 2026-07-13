@@ -190,7 +190,7 @@ public sealed class SearchMetricCalculatorTests
             retrievedDocuments:
             [
                 Document(
-                    "Software Engineering/11 AI & ML/LLM/Prompt Composition.md",
+                    "Home/11 AI & ML/LLM/Prompt Composition.md",
                     "Different heading",
                     "retrieved chunk text without generated preview",
                     chunkId: "chunk-1",
@@ -345,9 +345,9 @@ public sealed class SearchMetricCalculatorTests
             ],
             retrievedDocuments:
             [
-                Document("Software Engineering/11 AI & ML/LLM/RAG/RAG Patterns.md", "Pattern Selection Guide", "baseline first", chunkId: "patterns-1"),
+                Document("Home/11 AI & ML/LLM/RAG/RAG Patterns.md", "Pattern Selection Guide", "baseline first", chunkId: "patterns-1"),
                 Document(IrrelevantPath, CompositeHeading, IrrelevantSnippet),
-                Document("Software Engineering/11 AI & ML/LLM/RAG/Retrieval.md", "Intro", "retrieval mechanics", chunkId: "retrieval-1")
+                Document("Home/11 AI & ML/LLM/RAG/Retrieval.md", "Intro", "retrieval mechanics", chunkId: "retrieval-1")
             ]);
 
         // Act

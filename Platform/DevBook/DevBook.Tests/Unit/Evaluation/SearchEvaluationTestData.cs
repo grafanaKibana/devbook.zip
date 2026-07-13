@@ -10,13 +10,13 @@ using DevBook.Evaluations.Scenarios.RAG.Search;
 internal static class SearchEvaluationTestData
 {
     /// <summary>Vault path of the primary expected evidence document.</summary>
-    public const string EvaluationPath = "Software Engineering/11 AI & ML/LLM/RAG/Evaluation.md";
+    public const string EvaluationPath = "Home/11 AI & ML/LLM/RAG/Evaluation.md";
 
     /// <summary>Vault path of a second relevant evidence document.</summary>
-    public const string ChunkingPath = "Software Engineering/11 AI & ML/LLM/RAG/Chunking.md";
+    public const string ChunkingPath = "Home/11 AI & ML/LLM/RAG/Chunking.md";
 
     /// <summary>Vault path used as retrieved-but-irrelevant evidence.</summary>
-    public const string IrrelevantPath = "Software Engineering/05 Architecture/Patterns/Design Patterns/Composite.md";
+    public const string IrrelevantPath = "Home/05 Architecture/Patterns/Design Patterns/Composite.md";
 
     /// <summary>Heading of the primary expected evidence section.</summary>
     public const string RetrievalHeading = "Retrieval Metrics";

@@ -229,7 +229,7 @@ Example full-root request:
 ## Ingestion rules
 
 - `sourcePath` is **relative to** the configured ingestion root; null or blank ingests the full root.
-- Default ingestion root: `Vault/Software Engineering`.
+- Default ingestion root: `Vault/Home`.
 - `fileName` is optional, but when present it must be a single `.md` file name with no path segments.
 - `forceReingest` is optional and defaults to `false`; set it to `true` to refresh stored documents/chunks even when the source content is unchanged.
 - `chunkingStrategy` is optional. When omitted, ingestion writes chunks for all registered strategies: `FixedSize`, `MarkdownSection`, and `Semantic`. When set, ingestion updates only that strategy collection.
