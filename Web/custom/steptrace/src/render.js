@@ -16,7 +16,7 @@
     // Always refresh the content: Obsidian keeps the DOM across plugin reloads,
     // so a stale stylesheet from an older build must be overwritten — if we
     // skipped when the tag existed, new renderers/size-caps would never apply.
-    // STYLE_PARTS is filled by the 10-styles/* fragments (one per renderer kind).
+    // STYLE_PARTS is filled by the styles/* fragments (one per renderer kind).
     const css = STYLE_PARTS.join("")
     if (style.textContent !== css) style.textContent = css
   }

@@ -35,9 +35,9 @@
 
   // ==========================================================================
   //  1. STYLES  —  the ONLY place visual styling lives, split by renderer kind
-  //  across this 10-styles/ folder: this file holds the tokens + shared card
-  //  chrome (head / body / foot), and each sibling (10-bars, 20-string, …) adds
-  //  its kind's rules. Colours are --st-* tokens (mapped to internal --_* with
+  //  across this styles/ folder: this file holds the tokens + shared card chrome
+  //  (head / body / foot), and each sibling (bars.js, string.js, …) adds its
+  //  kind's rules. Colours are --st-* tokens (mapped to internal --_* with
   //  fallbacks) so a host rebinds the palette via the cascade without touching
   //  these files. The render section (§5) never sets a colour or layout inline —
   //  only data-driven geometry (bar heights, node coordinates). To restyle a
@@ -54,9 +54,9 @@
 
   const STYLE_ID = "steptrace-engine-style"
   const STYLE_PARTS = []
-  // Each 10-styles/* sibling appends its renderer-kind's CSS to STYLE_PARTS in
-  // filename-prefix order; injectStyle (§5) joins them into the single <style>.
-  // Order matters for the cascade, so the prefixes mirror the original order.
+  // Each styles/* sibling appends its renderer-kind's CSS to STYLE_PARTS; injectStyle
+  // (§5) joins them into the single <style>. Cascade order = the order the files are
+  // listed in sync.mjs (styles/shared first, then bars, string, …).
   STYLE_PARTS.push(`
 .steptrace {
   --_amber: var(--st-state-amber, #d97706);
@@ -4070,7 +4070,7 @@
     // Always refresh the content: Obsidian keeps the DOM across plugin reloads,
     // so a stale stylesheet from an older build must be overwritten — if we
     // skipped when the tag existed, new renderers/size-caps would never apply.
-    // STYLE_PARTS is filled by the 10-styles/* fragments (one per renderer kind).
+    // STYLE_PARTS is filled by the styles/* fragments (one per renderer kind).
     const css = STYLE_PARTS.join("")
     if (style.textContent !== css) style.textContent = css
   }

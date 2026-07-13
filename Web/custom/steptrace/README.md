@@ -6,7 +6,7 @@ Interactive, step-by-step algorithm-visualizer cards that live in both the Obsid
 
 | File | Role | Edit? |
 |------|------|-------|
-| `src/` | **Single source of truth**: the engine, split into small fragments of ONE shared-scope IIFE — prologue, §1 styles, §2 registry, §3 recorders, §4 **one file per algorithm** (`src/40-algorithms/`), §5 render, §6 player, §7 mount, epilogue. Two-digit filename prefixes define the stitch order. | **Edit often** — all algorithm changes and visual tweaks go here. |
+| `src/` | **Single source of truth**: the engine, split into small fragments of ONE shared-scope IIFE — `prologue`, §1 `styles/`, §2 `registry`, §3 `recorders`, §4 **one file per algorithm** (`src/algorithms/`), §5 `render`, §6 `player`, §7 `mount`, `epilogue`. The concatenation order is an explicit list (`ORDER`) in `sync.mjs`. | **Edit often** — all algorithm changes and visual tweaks go here. |
 | `obsidian-plugin.js` | Obsidian bootstrap (appended to the engine via sync). Registers the `steptrace` code-block processor, wires theme tokens, and binds mount/destroy lifecycle. | Edit rarely — only if Obsidian integration changes. |
 | `manifest.json` | Obsidian plugin manifest (id drives folder name). | Edit rarely — version bumps only. |
 | `sync.mjs` | Build script: stitches the `src/` fragments into the engine (byte-for-byte, plain concat, no compilation), then writes `Vault/.obsidian/plugins/<id>/main.js` (engine + obsidian-plugin.js) and `Web/quartz/static/steptrace/engine.js` (engine only). Exports `stitch()`. | Rarely — only if the build itself changes. |
@@ -20,19 +20,19 @@ Interactive, step-by-step algorithm-visualizer cards that live in both the Obsid
 
 ## The Single Source of Truth: src/
 
-The engine is authored as fragments of ONE UMD module under `src/`. They are **not** ES modules: each is a raw slice of the same `(function(){ … })()` IIFE and shares its scope with all the others, so a `const` or `function` declared in one is visible to the rest. `sync.mjs` reads them in filename order and concatenates them **verbatim** — no bundler, no transforms — so the assembled engine is byte-for-byte what a single hand-authored file would be. The two-digit prefixes are the whole ordering mechanism; adding a fragment is just dropping a correctly-numbered `.js` file into `src/` (or `src/40-algorithms/`).
+The engine is authored as fragments of ONE UMD module under `src/`, with plain descriptive filenames (no numeric prefixes). They are **not** ES modules: each is a raw slice of the same `(function(){ … })()` IIFE and shares its scope with all the others, so a `const` or `function` declared in one is visible to the rest. Because they are concatenated rather than imported, **load order matters** (the registry must precede the algorithms that call it, styles stack in cascade order, etc.), so the order lives in one explicit place — the `ORDER` array in `sync.mjs`. `sync.mjs` concatenates them **verbatim** in that order — no bundler, no transforms — so the assembled engine is byte-for-byte what a single hand-authored file would be. It cross-checks `ORDER` against the files on disk and **fails loudly** if a fragment is listed-but-missing or present-but-unlisted, so nothing is ever silently dropped. Adding a fragment = create the file and add one line to `ORDER` at the right spot.
 
 | File(s) | Section | What lives here | Edit when... |
 |---------|---------|-----------------|--------------|
-| `00-prologue.js` | — | UMD wrapper open + `VERSION`. Opens the shared IIFE scope. | Never — boilerplate. |
-| `10-styles/*.js` | **STYLES** | All CSS, split **one file per renderer kind**: `00-shared.js` (tokens + head/body/foot chrome) then `10-bars` (sort + binary-search) · `20-string` · `30-pointers` · `40-dp` · `50-unionfind` · `60-bits` · `70-backtrack` · `80-rectree` · `90-graph` · `95-status-toolbar`. Each file pushes its CSS into a shared `STYLE_PARTS`; prefixes preserve cascade order. Tied to `--st-*` tokens so hosts rebind the palette. | Tweaking visual appearance, changing layout, adjusting animations. |
-| `20-registry.js` | **REGISTRY** | `registerSort()`, `registerGraph()`, … `buildFrames()` — extension API and frame-building entry point. | Rarely; sets the contract for algorithms. |
-| `30-recorders.js` | **RECORDERS** | Turn `ops.*` calls (e.g., `ops.swap(i, j)`, `ops.visit(n)`) into immutable step frames. Per-renderer kind (Sort, Graph, Search, String, Pointers, DP, UnionFind, Bits, Backtrack, RecTree). | Changing what information is captured per step. |
-| `40-algorithms/*.js` | **ALGORITHMS** | 22 built-ins, **one file each**: 6 sorts · 5 graph (bfs, dfs, dijkstra, prim, topological-sort) · 2 search (binary, linear) · 2 string (kmp, rabin-karp) · 2 pointer (two-pointers, sliding-window) · lcs · union-find · kernighan-popcount · n-queens · fibonacci. Each file is one `registerX()` block; `01-bubble-sort.js` also carries the section banner. | Adding a new algorithm (drop one file here). |
-| `50-render.js` | **RENDER** | DOM builder: HTML structure with semantic classes and data-driven geometry (no inline styles for colors/layout — those live entirely in STYLES). | Never for appearance — only if DOM structure changes. |
-| `60-player.js` | **PLAYER** | Transport controls: play, pause, step, speed. Iterates precomputed frames. Step-back is a free re-render (no history). | Tweaking playback behavior. |
-| `70-mount.js` | **MOUNT** | Assembles a card into a given `root` element: parses config, runs the algorithm once (to build frames), wires the player, and returns `{ destroy }` for cleanup. | Never — orchestration only. |
-| `90-epilogue.js` | — | The public-API `return { … }` object + UMD wrapper close. | When exporting a new `registerX` from the registry. |
+| `prologue.js` | — | UMD wrapper open + `VERSION`. Opens the shared IIFE scope. | Never — boilerplate. |
+| `styles/*.js` | **STYLES** | All CSS, split **one file per renderer kind**: `shared.js` (tokens + head/body/foot chrome) then `bars` (sort + binary-search) · `string` · `pointers` · `dp` · `unionfind` · `bits` · `backtrack` · `rectree` · `graph` · `status-toolbar`. Each file pushes its CSS into a shared `STYLE_PARTS`; the `ORDER` list preserves cascade order. Tied to `--st-*` tokens so hosts rebind the palette. | Tweaking visual appearance, changing layout, adjusting animations. |
+| `registry.js` | **REGISTRY** | `registerSort()`, `registerGraph()`, … `buildFrames()` — extension API and frame-building entry point. | Rarely; sets the contract for algorithms. |
+| `recorders.js` | **RECORDERS** | Turn `ops.*` calls (e.g., `ops.swap(i, j)`, `ops.visit(n)`) into immutable step frames. Per-renderer kind (Sort, Graph, Search, String, Pointers, DP, UnionFind, Bits, Backtrack, RecTree). | Changing what information is captured per step. |
+| `algorithms/*.js` | **ALGORITHMS** | 22 built-ins, **one file each**: 6 sorts · 5 graph (bfs, dfs, dijkstra, prim, topological-sort) · 2 search (binary, linear) · 2 string (kmp, rabin-karp) · 2 pointer (two-pointers, sliding-window) · lcs · union-find · kernighan-popcount · n-queens · fibonacci. Each file is one `registerX()` block; `bubble-sort.js` also carries the section banner. | Adding a new algorithm (add a file + an `ORDER` line). |
+| `render.js` | **RENDER** | DOM builder: HTML structure with semantic classes and data-driven geometry (no inline styles for colors/layout — those live entirely in STYLES). | Never for appearance — only if DOM structure changes. |
+| `player.js` | **PLAYER** | Transport controls: play, pause, step, speed. Iterates precomputed frames. Step-back is a free re-render (no history). | Tweaking playback behavior. |
+| `mount.js` | **MOUNT** | Assembles a card into a given `root` element: parses config, runs the algorithm once (to build frames), wires the player, and returns `{ destroy }` for cleanup. | Never — orchestration only. |
+| `epilogue.js` | — | The public-API `return { … }` object + UMD wrapper close. | When exporting a new `registerX` from the registry. |
 
 > Because the fragments are indented for their assembled context (inside the IIFE) rather than as standalone modules, `src/` is listed in `Web/.prettierignore` — prettier would dedent them and break the stitch. Format each fragment to match its neighbours by hand.
 
@@ -101,9 +101,9 @@ Quartz builds from `Web/content/`, NOT the live Vault. A steptrace fence added t
 
 ### Add an Algorithm
 
-1. Add a new file under `src/40-algorithms/` — copy the numbering of the block it should follow (e.g. `23-my-sort.js`). One file = one `registerX()` block:
+1. Add `src/algorithms/<name>.js`. One file = one `registerX()` block:
    ```js
-   // src/40-algorithms/23-my-sort.js
+   // src/algorithms/my-sort.js
    // ─────────────────────────────── my-sort ───────────────────────────────
    registerSort("insertion-sort", { label: "Insertion Sort" }, (input, ops) => {
      // input is the array; ops are: compare, swap, overwrite, candidate, holdKey, markSorted, done
@@ -117,19 +117,20 @@ Quartz builds from `Web/content/`, NOT the live Vault. A steptrace fence added t
      ops.done()
    })
    ```
-   Match the surrounding indentation (2 spaces — the file is a slice of the IIFE body). No `import`/`export`: `registerSort` and friends are in scope from `20-registry.js`.
-2. Run `npm run steptrace:sync` (or leave `npm run steptrace:watch` running — it re-stitches on save).
-3. Reload the Obsidian plugin (Cmd+P → "Reload app without saving").
-4. Add a fence to a note:
+   Match the surrounding indentation (2 spaces — the file is a slice of the IIFE body). No `import`/`export`: `registerSort` and friends are in scope from `registry.js`.
+2. Add the file to the `ORDER` list in `sync.mjs`, in the `algorithms/` block at the teaching-order position you want (this is also the order `listAlgorithms()` returns). Sync will error until you do.
+3. Run `npm run steptrace:sync` (or leave `npm run steptrace:watch` running — it re-stitches on save).
+4. Reload the Obsidian plugin (Cmd+P → "Reload app without saving").
+5. Add a fence to a note:
    ```steptrace
    { "algorithm": "insertion-sort", "array": [5, 2, 9, 1] }
    ```
 
-See the `§4` banner atop `src/40-algorithms/01-bubble-sort.js` and the recorders in `src/30-recorders.js` for the available `ops.*` methods per kind.
+See the `§4` banner atop `src/algorithms/bubble-sort.js` and the recorders in `src/recorders.js` for the available `ops.*` methods per kind.
 
 ### Tweak Visual Appearance (Colors, Layout, Animations)
 
-1. Open the file for the kind you're restyling in `src/10-styles/` (e.g. `10-bars.js` for sorts, `50-graph.js` for graphs), or `00-shared.js` for the card chrome and `--st-*` tokens.
+1. Open the file for the kind you're restyling in `src/styles/` (e.g. `bars.js` for sorts, `graph.js` for graphs), or `shared.js` for the card chrome and `--st-*` tokens.
 2. Edit the CSS. All colors are `--st-*` tokens (mapped to internal `--_*`) so hosts can rebind via the cascade without touching these files.
 3. Run `npm run steptrace:sync` (or `steptrace:watch`).
 4. In Obsidian: reload the plugin.
@@ -137,17 +138,17 @@ See the `§4` banner atop `src/40-algorithms/01-bubble-sort.js` and the recorder
 
 ### Add a New Renderer Kind (New Visual Primitive)
 
-1. Add a new recorder class in `src/30-recorders.js` that captures the ops for your kind.
-2. Add render logic in `src/50-render.js` that builds the DOM for this kind.
-3. Add a `src/10-styles/NN-yourkind.js` file (copy an existing one) that does `STYLE_PARTS.push(\`…\`)` with your kind's CSS; pick a prefix that places it correctly in the cascade.
-4. Export `registerYourKind()` from the registry (`src/20-registry.js`), add it to the public API in `src/90-epilogue.js`, and call it from an algorithm file in `src/40-algorithms/`.
+1. Add a new recorder class in `src/recorders.js` that captures the ops for your kind.
+2. Add render logic in `src/render.js` that builds the DOM for this kind.
+3. Add a `src/styles/<yourkind>.js` file (copy an existing one) that does `STYLE_PARTS.push(\`…\`)` with your kind's CSS, and add it to the `styles/` block of `ORDER` in `sync.mjs` at the right cascade position.
+4. Export `registerYourKind()` from the registry (`src/registry.js`), add it to the public API in `src/epilogue.js`, and call it from an algorithm file in `src/algorithms/`.
 5. Run `npm run steptrace:sync`, reload both hosts.
 
 ## Where It Can Fail
 
 | Symptom | Likely Cause | Fix |
 |---------|--------------|-----|
-| Card doesn't render in Obsidian (blank or "steptrace: mount failed") | The fence config is invalid JSON, or the algorithm doesn't exist. | Check the fence in the note: valid JSON in the code block? Algorithm name matches a file in `src/40-algorithms/`? |
+| Card doesn't render in Obsidian (blank or "steptrace: mount failed") | The fence config is invalid JSON, or the algorithm doesn't exist. | Check the fence in the note: valid JSON in the code block? Algorithm name matches a file in `src/algorithms/`? |
 | Card renders but is unstyled (no colors, squished) in Obsidian | The engine didn't run (main.js is stale) or Obsidian theme tokens are missing. | Run `npm run steptrace:sync` and reload the plugin (Cmd+P → "Reload app without saving"). |
 | Card doesn't appear on the published Quartz site | Fence is in the Vault but not mirrored to `Web/content/` yet, or `/static/steptrace/engine.js` is stale. | (1) Ensure the note with the fence has been synced to `Web/content/`. (2) Run `npm run steptrace:sync` and `quartz build`. |
 | Card shows "steptrace: failed to load engine" on published site | `/static/steptrace/engine.js` returned 404 or a network error. | Check the Quartz build log. Ensure `Web/quartz/static/steptrace/engine.js` exists and is readable. Run `npm run steptrace:sync` and `quartz build`. |
