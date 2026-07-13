@@ -9,7 +9,7 @@ tags:
 publish: true
 level:
   - '3'
-status: Done
+status: Creation
 priority: High
 ---
 
@@ -37,76 +37,9 @@ The building block of every agentic system is an LLM enhanced with retrieval, [[
 
 ## Workflow Patterns
 
-Five workflow patterns cover the spectrum from simple single-LLM orchestration to dynamic multi-LLM coordination. They form a progression of increasing complexity — start with the simplest pattern that solves the problem.
+When one augmented LLM is not enough but full autonomy is overkill, five reusable workflow patterns cover the middle ground — **prompt chaining**, **routing**, **parallelization**, **orchestrator-workers**, and **evaluator-optimizer**. They form a progression of increasing complexity; start with the simplest that solves the problem. Orchestrator-workers, where the subtasks are decided at runtime, is the dominant pattern for complex coding and research and the bridge into [[Multi-Agentic Systems]].
 
-### Prompt Chaining
-
-```mermaid
-flowchart LR
-    In[Input] --> S1[Step 1 LLM] --> G1{Gate} --> S2[Step 2 LLM] --> G2{Gate} --> Out[Output]
-```
-
-Break a task into sequential steps where each LLM call processes the output of the previous one. Add programmatic checks (gates) between steps to verify the process stays on track.
-
-When to use: tasks that decompose cleanly into fixed subtasks. Example: generate marketing copy then translate it, or write an outline, validate it meets criteria, then write the document.
-
-### Routing
-
-```mermaid
-flowchart TD
-    In[Input] --> R[Router LLM]
-    R --> P1[Prompt or Model A]
-    R --> P2[Prompt or Model B]
-    R --> P3[Prompt or Model C]
-```
-
-Classify the input and direct it to a specialized prompt or model. This lets you optimize each downstream path independently — a change to handle refund requests will not degrade general question answering.
-
-When to use: distinct input categories that need different handling. Example: route customer queries to a small fast model for general questions, a larger model for complex technical issues, a constrained workflow for refund requests.
-
-### Parallelization
-
-```mermaid
-flowchart TD
-    In[Input] --> A[LLM Call A] & B[LLM Call B] & C[LLM Call C]
-    A --> Agg[Aggregator]
-    B --> Agg
-    C --> Agg
-    Agg --> Out[Output]
-```
-
-Run multiple LLMs simultaneously and aggregate results. Two variants: **sectioning** splits independent subtasks across parallel calls; **voting** runs the same task through multiple calls for higher confidence.
-
-When to use: independent subtasks that benefit from speed, or tasks where multiple perspectives improve reliability — running guardrails in parallel with the main response, multi-aspect code review, content moderation with vote thresholds.
-
-### Orchestrator-Workers
-
-```mermaid
-flowchart TD
-    In[Input] --> O[Orchestrator LLM]
-    O --> W1[Worker 1] & W2[Worker 2] & W3[Worker 3]
-    W1 --> S[Synthesize]
-    W2 --> S
-    W3 --> S
-    S --> Out[Output]
-```
-
-A central LLM dynamically decomposes the task, delegates subtasks to worker LLMs, and synthesizes results. The subtasks are not predefined — the orchestrator determines them based on the input. Topologically similar to parallelization, but the key difference is flexibility: workers and their tasks are determined at runtime. Anthropic's Research system uses this pattern — a lead agent spawning 3–5 subagents in parallel — and reports a 90.2% improvement over single-agent on their internal research eval. The dominant production pattern for complex coding and research tasks, and the bridge into [[Multi-Agentic Systems]].
-
-### Evaluator-Optimizer
-
-```mermaid
-flowchart TD
-    In[Input] --> G[Generator LLM]
-    G --> D[Draft]
-    D --> E[Evaluator LLM]
-    E -->|Revise| G
-    E -->|Accepted| Out[Final Output]
-```
-
-One LLM generates a response; another evaluates it against criteria and provides feedback. The loop continues until the evaluator approves or an iteration cap is hit. Two indicators of good fit: LLM responses demonstrably improve when given human-like feedback, and the LLM can provide such feedback.
-
-When to use: tasks with clear evaluation criteria — literary translation with nuance, complex search requiring multiple rounds, code review, compliance checking.
+See [[Home/AI & ML/LLM/Agents/Workflow Patterns|Workflow Patterns]] for the full catalog — each pattern with its diagram and when-to-use guidance.
 
 ## Autonomous Agents
 

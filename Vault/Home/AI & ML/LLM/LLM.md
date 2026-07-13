@@ -10,7 +10,7 @@ publish: true
 level:
   - '3'
 priority: High
-status: Done
+status: Creation
 ---
 
 # Intro
@@ -40,7 +40,7 @@ flowchart LR
 | [[Harness Engineering]] | The scaffold around the model | What can the model do, and through what? | [[Tools]], [[Model Context Protocol\|MCP]], execution environment |
 | [[Loop Engineering]] | The runtime across turns | How does it iterate, verify, and stop? | [[Agent Loop]], termination, verification, [[Multi-Agentic Systems\|multi-agent topologies]] |
 
-The rungs compose rather than compete: a production [[Home/AI & ML/LLM/Agents/Agents|agent]] is all four assembled — a model given precise instructions (prompt), curated evidence (context), a capability surface (harness), and a controlled runtime (loop). [[Home/AI & ML/LLM/Evaluation/Evaluation|Evaluation]] sits orthogonal to the ladder and measures every rung; the remaining notes in this section (Embeddings, Fine-tuning, Generation, Guardrails, …) cover the model foundations and safety concerns the ladder builds on.
+The rungs compose rather than compete: a production [[Home/AI & ML/LLM/Agents/Agents|agent]] is all four assembled — a model given precise instructions (prompt), curated evidence (context), a capability surface (harness), and a controlled runtime (loop). Two folders sit **orthogonal** to the ladder and span every rung: [[Home/AI & ML/LLM/Evaluation/Evaluation|Evaluation]] measures each one, and [[Home/AI & ML/LLM/Safety/Safety|Safety]] secures it (guardrails, the OWASP threat model, and hallucination). The remaining leaves — Embeddings, Fine-tuning, Generation, Model Selection and Routing — are the model foundations the ladder builds on.
 
 ## How LLMs Are Built
 

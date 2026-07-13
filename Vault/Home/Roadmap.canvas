@@ -8,7 +8,7 @@
       "y": 0,
       "width": 340,
       "height": 80,
-      "color": "4"
+      "color": "2"
     },
     {
       "id": "n_4d06010d24",
@@ -18,7 +18,7 @@
       "y": 0,
       "width": 340,
       "height": 80,
-      "color": "4"
+      "color": "2"
     },
     {
       "id": "n_44d28f3f57",
@@ -28,7 +28,7 @@
       "y": 120,
       "width": 340,
       "height": 80,
-      "color": "4"
+      "color": "2"
     },
     {
       "id": "n_91d77e108f",
@@ -111,6 +111,16 @@
       "color": "4"
     },
     {
+      "id": "n_161004bfd0",
+      "type": "text",
+      "text": "# [[Home/AI & ML/LLM/Safety/Safety|Safety]]",
+      "x": 840,
+      "y": 1200,
+      "width": 340,
+      "height": 80,
+      "color": "4"
+    },
+    {
       "id": "n_175648160a",
       "type": "text",
       "text": "# [[Home/AI & ML/Machine Learning/Machine Learning|Machine Learning]]",
@@ -155,7 +165,7 @@
       "type": "text",
       "text": "# [[Home/Architecture/Architecture|Architecture]]",
       "x": 0,
-      "y": 1360,
+      "y": 1480,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -165,7 +175,7 @@
       "type": "text",
       "text": "# [[Home/Architecture/Application Architecture/Application Architecture|Application Architecture]]",
       "x": 420,
-      "y": 1360,
+      "y": 1480,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -175,7 +185,7 @@
       "type": "text",
       "text": "# [[Home/Architecture/Distributed Systems/Distributed Systems|Distributed Systems]]",
       "x": -420,
-      "y": 1360,
+      "y": 1480,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -185,7 +195,7 @@
       "type": "text",
       "text": "# [[Home/Architecture/Distributed Systems/Message Queues/Message Queues|Message Queues]]",
       "x": -840,
-      "y": 1480,
+      "y": 1600,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -195,7 +205,7 @@
       "type": "text",
       "text": "# [[Home/Architecture/Distributed Systems/Scalability Patterns/Scalability Patterns|Scalability Patterns]]",
       "x": -840,
-      "y": 1600,
+      "y": 1720,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -205,7 +215,7 @@
       "type": "text",
       "text": "# [[Home/Architecture/Patterns/Patterns|Patterns]]",
       "x": 420,
-      "y": 1480,
+      "y": 1600,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -215,7 +225,7 @@
       "type": "text",
       "text": "# [[Home/Architecture/Patterns/Architectural Patterns/Architectural Patterns|Architectural Patterns]]",
       "x": 840,
-      "y": 1600,
+      "y": 1720,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -225,7 +235,7 @@
       "type": "text",
       "text": "# [[Home/Architecture/Patterns/Design Patterns/Design Patterns|Design Patterns]]",
       "x": 840,
-      "y": 1720,
+      "y": 1840,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -235,7 +245,7 @@
       "type": "text",
       "text": "# [[Home/Architecture/Patterns/Design Patterns/Behavioral/Behavioral|Behavioral]]",
       "x": 1260,
-      "y": 1840,
+      "y": 1960,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -245,7 +255,7 @@
       "type": "text",
       "text": "# [[Home/Architecture/Patterns/Design Patterns/Creational/Creational|Creational]]",
       "x": 1260,
-      "y": 1960,
+      "y": 2080,
       "width": 340,
       "height": 80,
       "color": "4"
@@ -255,7 +265,7 @@
       "type": "text",
       "text": "# [[Home/Architecture/Patterns/Design Patterns/Structural/Structural|Structural]]",
       "x": 1260,
-      "y": 2080,
+      "y": 2200,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -265,7 +275,7 @@
       "type": "text",
       "text": "# [[Home/Architecture/Patterns/Resilience Patterns/Resilience Patterns|Resilience Patterns]]",
       "x": 840,
-      "y": 2200,
+      "y": 2320,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -275,7 +285,7 @@
       "type": "text",
       "text": "# [[Home/Architecture/System Architecture/System Architecture|System Architecture]]",
       "x": -420,
-      "y": 1720,
+      "y": 1840,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -285,7 +295,7 @@
       "type": "text",
       "text": "# [[Home/Cloud/Cloud|Cloud]]",
       "x": 0,
-      "y": 2480,
+      "y": 2600,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -295,7 +305,7 @@
       "type": "text",
       "text": "# [[Home/Cloud/AWS/AWS|AWS]]",
       "x": 420,
-      "y": 2480,
+      "y": 2600,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -305,7 +315,7 @@
       "type": "text",
       "text": "# [[Home/Cloud/Azure/Azure|Azure]]",
       "x": -420,
-      "y": 2480,
+      "y": 2600,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -315,7 +325,7 @@
       "type": "text",
       "text": "# [[Home/Cloud/Google Cloud/Google Cloud|Google Cloud]]",
       "x": 420,
-      "y": 2600,
+      "y": 2720,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -325,7 +335,7 @@
       "type": "text",
       "text": "# [[Home/Computer Science/Computer Science|Computer Science]]",
       "x": 0,
-      "y": 2880,
+      "y": 3000,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -335,7 +345,7 @@
       "type": "text",
       "text": "# [[Home/Computer Science/Algorithms/Algorithms|Algorithms]]",
       "x": 420,
-      "y": 2880,
+      "y": 3000,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -345,7 +355,7 @@
       "type": "text",
       "text": "# [[Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms|Graph Algorithms]]",
       "x": 840,
-      "y": 3000,
+      "y": 3120,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -355,7 +365,7 @@
       "type": "text",
       "text": "# [[Home/Computer Science/Algorithms/Paradigms/Paradigms|Paradigms]]",
       "x": 840,
-      "y": 3120,
+      "y": 3240,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -365,7 +375,7 @@
       "type": "text",
       "text": "# [[Home/Computer Science/Algorithms/Patterns/Patterns|Patterns]]",
       "x": 840,
-      "y": 3240,
+      "y": 3360,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -375,7 +385,7 @@
       "type": "text",
       "text": "# [[Home/Computer Science/Algorithms/Search Algorithms/Search Algorithms|Search Algorithms]]",
       "x": 840,
-      "y": 3360,
+      "y": 3480,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -385,7 +395,7 @@
       "type": "text",
       "text": "# [[Home/Computer Science/Algorithms/Search Algorithms/String Matching/String Matching|String Matching]]",
       "x": 1260,
-      "y": 3480,
+      "y": 3600,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -395,7 +405,7 @@
       "type": "text",
       "text": "# [[Home/Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms|Sorting Algorithms]]",
       "x": 840,
-      "y": 3600,
+      "y": 3720,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -405,7 +415,7 @@
       "type": "text",
       "text": "# [[Home/Computer Science/Data Structures/Data Structures|Data Structures]]",
       "x": -420,
-      "y": 2880,
+      "y": 3000,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -415,7 +425,7 @@
       "type": "text",
       "text": "# [[Home/Computer Science/Data Structures/Composite Structures/Composite Structures|Composite Structures]]",
       "x": -840,
-      "y": 3000,
+      "y": 3120,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -425,7 +435,7 @@
       "type": "text",
       "text": "# [[Home/Computer Science/Data Structures/Graph Structures/Graph Structures|Graph Structures]]",
       "x": -840,
-      "y": 3120,
+      "y": 3240,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -435,7 +445,7 @@
       "type": "text",
       "text": "# [[Home/Computer Science/Data Structures/Hash-based Structures/Hash-based Structures|Hash-based Structures]]",
       "x": -840,
-      "y": 3240,
+      "y": 3360,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -445,7 +455,7 @@
       "type": "text",
       "text": "# [[Home/Computer Science/Data Structures/Linear Structures/Linear Structures|Linear Structures]]",
       "x": -840,
-      "y": 3360,
+      "y": 3480,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -455,7 +465,7 @@
       "type": "text",
       "text": "# [[Home/Computer Science/Data Structures/Trees/Trees|Trees]]",
       "x": -840,
-      "y": 3480,
+      "y": 3600,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -465,7 +475,7 @@
       "type": "text",
       "text": "# [[Home/Computer Science/Data Structures/Trees/Heap-like/Heap-like|Heap-like]]",
       "x": -1260,
-      "y": 3600,
+      "y": 3720,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -475,7 +485,7 @@
       "type": "text",
       "text": "# [[Home/Data Persistence/Data Persistence|Data Persistence]]",
       "x": 0,
-      "y": 3880,
+      "y": 4000,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -485,7 +495,7 @@
       "type": "text",
       "text": "# [[Home/Data Persistence/NoSQL/NoSQL|NoSQL]]",
       "x": 420,
-      "y": 3880,
+      "y": 4000,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -495,7 +505,7 @@
       "type": "text",
       "text": "# [[Home/Data Persistence/ORMs/ORMs|ORMs]]",
       "x": -420,
-      "y": 3880,
+      "y": 4000,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -505,7 +515,7 @@
       "type": "text",
       "text": "# [[Home/Data Persistence/SQL/SQL|SQL]]",
       "x": 420,
-      "y": 4000,
+      "y": 4120,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -515,7 +525,7 @@
       "type": "text",
       "text": "# [[Home/DevOps/DevOps|DevOps]]",
       "x": 0,
-      "y": 4280,
+      "y": 4400,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -525,7 +535,7 @@
       "type": "text",
       "text": "# [[Home/DevOps/Deployment Strategies/Deployment Strategies|Deployment Strategies]]",
       "x": 420,
-      "y": 4280,
+      "y": 4400,
       "width": 340,
       "height": 80,
       "color": "6"
@@ -535,7 +545,7 @@
       "type": "text",
       "text": "# [[Home/DevOps/Version Control Systems/Version Control Systems|Version Control Systems]]",
       "x": -420,
-      "y": 4280,
+      "y": 4400,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -545,7 +555,7 @@
       "type": "text",
       "text": "# [[Home/Development Practices/Development Practices|Development Practices]]",
       "x": 0,
-      "y": 4560,
+      "y": 4680,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -555,7 +565,7 @@
       "type": "text",
       "text": "# [[Home/Development Practices/Paradigms/Paradigms|Paradigms]]",
       "x": 420,
-      "y": 4560,
+      "y": 4680,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -565,7 +575,7 @@
       "type": "text",
       "text": "# [[Home/Development Practices/Principles/Principles|Principles]]",
       "x": -420,
-      "y": 4560,
+      "y": 4680,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -575,7 +585,7 @@
       "type": "text",
       "text": "# [[Home/Networks/Networks|Networks]]",
       "x": 0,
-      "y": 4840,
+      "y": 4960,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -585,7 +595,7 @@
       "type": "text",
       "text": "# [[Home/Networks/Architecture & Ops/Architecture & Ops|Architecture & Ops]]",
       "x": 420,
-      "y": 4840,
+      "y": 4960,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -595,7 +605,7 @@
       "type": "text",
       "text": "# [[Home/Networks/Protocols/Protocols|Protocols]]",
       "x": -420,
-      "y": 4840,
+      "y": 4960,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -605,7 +615,7 @@
       "type": "text",
       "text": "# [[Home/Networks/Transport & Sockets/Transport & Sockets|Transport & Sockets]]",
       "x": 420,
-      "y": 4960,
+      "y": 5080,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -615,7 +625,7 @@
       "type": "text",
       "text": "# [[Home/Programming/Programming|Programming]]",
       "x": 0,
-      "y": 5240,
+      "y": 5360,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -625,7 +635,7 @@
       "type": "text",
       "text": "# [[Home/Programming/NET/NET|NET]]",
       "x": 420,
-      "y": 5240,
+      "y": 5360,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -635,7 +645,7 @@
       "type": "text",
       "text": "# [[Home/Programming/NET/ASP.NET Web API/ASP.NET Web API|ASP.NET Web API]]",
       "x": 840,
-      "y": 5360,
+      "y": 5480,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -645,7 +655,7 @@
       "type": "text",
       "text": "# [[Home/Programming/NET/CSharp/CSharp|CSharp]]",
       "x": 840,
-      "y": 5480,
+      "y": 5600,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -655,7 +665,7 @@
       "type": "text",
       "text": "# [[Home/Programming/NET/CSharp/Concurrency and Parallelism/Concurrency and Parallelism|Concurrency and Parallelism]]",
       "x": 1260,
-      "y": 5600,
+      "y": 5720,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -665,7 +675,7 @@
       "type": "text",
       "text": "# [[Home/Programming/NET/CSharp/Fundamentals/Fundamentals|Fundamentals]]",
       "x": 1260,
-      "y": 5720,
+      "y": 5840,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -675,7 +685,7 @@
       "type": "text",
       "text": "# [[Home/Programming/NET/CSharp/Fundamentals/Types/Types|Types]]",
       "x": 1680,
-      "y": 5840,
+      "y": 5960,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -685,7 +695,7 @@
       "type": "text",
       "text": "# [[Home/Programming/NET/Other/Other|Other]]",
       "x": 840,
-      "y": 5960,
+      "y": 6080,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -695,7 +705,7 @@
       "type": "text",
       "text": "# [[Home/Programming/NET/Runtime/Runtime|Runtime]]",
       "x": 840,
-      "y": 6080,
+      "y": 6200,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -705,7 +715,7 @@
       "type": "text",
       "text": "# [[Home/SDLC/SDLC|SDLC]]",
       "x": 0,
-      "y": 6360,
+      "y": 6480,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -715,7 +725,7 @@
       "type": "text",
       "text": "# [[Home/Security/Security|Security]]",
       "x": 0,
-      "y": 6600,
+      "y": 6720,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -725,7 +735,7 @@
       "type": "text",
       "text": "# [[Home/Security/Authentication/Authentication|Authentication]]",
       "x": 420,
-      "y": 6600,
+      "y": 6720,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -742,7 +752,7 @@
     {
       "id": "n_b0ac2236f9",
       "type": "text",
-      "text": "#### Roadmap legend\n**Generated:** Jul 13 2026 | 09:44PM",
+      "text": "#### Roadmap legend\n**Generated:** Jul 13 2026 | 10:12PM",
       "x": -1860,
       "y": 0,
       "width": 500,
@@ -761,7 +771,7 @@
     {
       "id": "n_c1cf7bc196",
       "type": "text",
-      "text": "Creation: 16",
+      "text": "Creation: 19",
       "x": -1800,
       "y": 202,
       "width": 380,
@@ -790,7 +800,7 @@
     {
       "id": "n_0e6324d0db",
       "type": "text",
-      "text": "Done: 16",
+      "text": "Done: 14",
       "x": -1800,
       "y": 430,
       "width": 380,
@@ -867,6 +877,13 @@
       "fromNode": "n_4d06010d24",
       "fromSide": "right",
       "toNode": "n_7766e6618c",
+      "toSide": "left"
+    },
+    {
+      "id": "e_87c5cd9ce8",
+      "fromNode": "n_4d06010d24",
+      "fromSide": "right",
+      "toNode": "n_161004bfd0",
       "toSide": "left"
     },
     {

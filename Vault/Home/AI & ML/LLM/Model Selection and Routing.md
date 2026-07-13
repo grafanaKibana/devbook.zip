@@ -47,7 +47,7 @@ flowchart TD
     L --> Out
 ```
 
-**Classifier routing.** A small, fast classifier (or the model itself) labels each query and dispatches it to the right model up front, rather than escalating after a failure. This is the [[Home/AI & ML/LLM/Agents/Agents#Workflow Patterns|routing workflow pattern]] applied to model choice, and the same idea as query routing in [[Home/AI & ML/LLM/Context Engineering/RAG/RAG|RAG]].
+**Classifier routing.** A small, fast classifier (or the model itself) labels each query and dispatches it to the right model up front, rather than escalating after a failure. This is the [[Home/AI & ML/LLM/Agents/Workflow Patterns#Routing|routing workflow pattern]] applied to model choice, and the same idea as query routing in [[Home/AI & ML/LLM/Context Engineering/RAG/RAG|RAG]].
 
 **Task-based mapping.** A fixed, deterministic mapping: classification and extraction to a small model, complex reasoning to a frontier model, code to a code-specialized model. Simplest to reason about when traffic is cleanly segmented by task type.
 
