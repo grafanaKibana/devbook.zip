@@ -103,7 +103,7 @@ A practical decision: if you already run Postgres and the corpus is modest, **pg
 
 **Why it happens**: different embedding models occupy different vector spaces; their vectors are not comparable.
 
-**How to avoid it**: re-embed the entire corpus on any model change, key the [[Home/AI & ML/LLM/RAG/Caching|embedding cache]] by model version, and cut over with a collection alias after validating recall on the new index.
+**How to avoid it**: re-embed the entire corpus on any model change, key the [[Home/AI & ML/LLM/Context Engineering/RAG/Caching|embedding cache]] by model version, and cut over with a collection alias after validating recall on the new index.
 
 ## Tradeoffs
 

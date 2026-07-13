@@ -125,7 +125,7 @@ Mitigation: include the original query as one of the retrieval variants — neve
 
 N query variants means N retrieval calls. In a pipeline with a tight total latency SLA, the LLM translation step (generating the variants) runs before any retrieval begins, and the retrieval calls follow — even with parallelization, the sequential translation-then-retrieval pattern adds meaningful overhead. Teams adopt query translation for quality, then discover that p95 latency exceeds the SLA under production load because total cost is LLM generation time plus the slowest retrieval call, not just retrieval alone.
 
-Mitigation: set a hard variant budget (2–4 variants is the practical range). Parallelize all retrieval calls. Pre-compute translations for common query patterns via [[Home/AI & ML/LLM/RAG/Caching|caching]]. Profile end-to-end latency under realistic concurrency, not single-query benchmarks.
+Mitigation: set a hard variant budget (2–4 variants is the practical range). Parallelize all retrieval calls. Pre-compute translations for common query patterns via [[Home/AI & ML/LLM/Context Engineering/RAG/Caching|caching]]. Profile end-to-end latency under realistic concurrency, not single-query benchmarks.
 
 ### HyDE Hallucination Amplification
 

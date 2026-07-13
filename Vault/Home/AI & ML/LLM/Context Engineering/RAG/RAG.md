@@ -43,7 +43,7 @@ The pipeline runs in order and each stage constrains the next: a query the trans
 - Gate every pattern behind a feature flag. Measure [[Monitoring#Retrieval Quality Metrics|retrieval precision]], [[Monitoring#LLM-as-Judge Metrics|generation faithfulness]], latency p95, and cost per query before and after.
 - Set hard iteration caps on looping patterns (iterative, agentic) to bound latency and cost. For corrective/self-reflective patterns, cap retry count and reject unsupported output instead of looping until the answer looks good.
 - Monitor query drift and noise accumulation in iterative patterns. Track semantic similarity between the original query and each iteration's retrieval query.
-- Cache aggressively: community summaries (GraphRAG), query rewrites, multi-query result sets, contextual chunk enrichments, reasoning chains, and agent tool outputs. See [[Home/AI & ML/LLM/RAG/Caching|Caching]] for cache-key risks.
+- Cache aggressively: community summaries (GraphRAG), query rewrites, multi-query result sets, contextual chunk enrichments, reasoning chains, and agent tool outputs. See [[Home/AI & ML/LLM/Context Engineering/RAG/Caching|Caching]] for cache-key risks.
 - Route simple queries to the cheapest path. Most production traffic is simple — do not pay multi-hop costs for single-hop questions.
 
 ## RAG vs Fine-Tuning

@@ -15,7 +15,7 @@ publish: true
 
 Model selection is choosing which model serves a request; routing is choosing per-request among several models. Both exist because there is no single best model — every choice trades **quality against cost and latency**. Frontier models give the highest quality at the highest price and slowest response; small models are cheap and fast but weaker. A production system that sends every request to the largest model overpays and runs slow; one that uses a small model everywhere fails the hard queries. The engineering job is to match each request to the cheapest model that can handle it, and to keep that mapping changeable as models and prices shift underneath you.
 
-This decision compounds with the rest of the stack: a stronger [[Home/AI & ML/LLM/Prompting/Prompting|prompt]], [[Home/AI & ML/LLM/RAG/RAG|retrieval]], or a [[Fine-tuning|fine-tuned]] small model can let a cheaper model do a job that otherwise needs a frontier one.
+This decision compounds with the rest of the stack: a stronger [[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering|prompt]], [[Home/AI & ML/LLM/Context Engineering/RAG/RAG|retrieval]], or a [[Fine-tuning|fine-tuned]] small model can let a cheaper model do a job that otherwise needs a frontier one.
 
 ## Selection Criteria
 
@@ -47,7 +47,7 @@ flowchart TD
     L --> Out
 ```
 
-**Classifier routing.** A small, fast classifier (or the model itself) labels each query and dispatches it to the right model up front, rather than escalating after a failure. This is the [[Home/AI & ML/LLM/Agents/Agents#Workflow Patterns|routing workflow pattern]] applied to model choice, and the same idea as query routing in [[Home/AI & ML/LLM/RAG/RAG|RAG]].
+**Classifier routing.** A small, fast classifier (or the model itself) labels each query and dispatches it to the right model up front, rather than escalating after a failure. This is the [[Home/AI & ML/LLM/Agents/Workflow Patterns#Routing|routing workflow pattern]] applied to model choice, and the same idea as query routing in [[Home/AI & ML/LLM/Context Engineering/RAG/RAG|RAG]].
 
 **Task-based mapping.** A fixed, deterministic mapping: classification and extraction to a small model, complex reasoning to a frontier model, code to a code-specialized model. Simplest to reason about when traffic is cleanly segmented by task type.
 
@@ -56,7 +56,7 @@ flowchart TD
 Cost is driven by tokens, and input and output are usually priced differently (output is typically several times more expensive). Levers:
 
 - **Output-length control** — cap and shape output with `max_tokens` and stop sequences (see [[Generation]]); output tokens dominate cost on generative tasks.
-- **Prompt caching** — when a long, stable prefix repeats across requests, caching cuts its input cost and latency dramatically (see [[Home/AI & ML/LLM/RAG/Caching|Caching]]).
+- **Prompt caching** — when a long, stable prefix repeats across requests, caching cuts its input cost and latency dramatically (see [[Home/AI & ML/LLM/Context Engineering/RAG/Caching|Caching]]).
 - **Right-sizing via routing** — cascades and classifier routing keep the expensive model off the easy majority of traffic.
 - **Distillation** — [[Fine-tuning|fine-tune]] a small model on a frontier model's outputs to move a high-volume task down a tier permanently.
 

@@ -10,23 +10,41 @@ publish: true
 level:
   - '3'
 priority: High
-status: Done
+status: Creation
 ---
 
 # Intro
 
 A large language model (LLM) is a transformer neural network trained on vast text corpora to predict the next token in a sequence. That single objective — next-token prediction at scale — is what produces the capabilities the rest of this section builds on: answering questions, summarizing, translating, writing code, and calling tools. Virtually all modern generative LLMs (GPT, Claude, Llama, Gemini) are **decoder-only** transformers: self-attention lets every token attend to all earlier tokens, so the model builds contextual meaning across the whole input before predicting what comes next. (Encoder-only transformers like BERT and encoder-decoder models like T5 exist, but they serve classification, [[Embeddings|embedding]], and translation workloads rather than open-ended generation.)
 
-The engineering consequence: an LLM is not a knowledge database with retrieval semantics. It is a probability distribution over token sequences, shaped by training data and steered at inference time by the prompt. That is why grounding, [[Home/AI & ML/LLM/Prompting/Prompting|Prompting]], and [[Home/AI & ML/LLM/Evaluation/Evaluation|evaluation]] are engineering disciplines rather than nice-to-haves — see [[Hallucinations]] for what happens when fluent prediction is mistaken for factual recall.
+The engineering consequence: an LLM is not a knowledge database with retrieval semantics. It is a probability distribution over token sequences, shaped by training data and steered at inference time by the prompt. That is why grounding, [[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering|Prompting]], and [[Home/AI & ML/LLM/Evaluation/Evaluation|evaluation]] are engineering disciplines rather than nice-to-haves — see [[Hallucinations]] for what happens when fluent prediction is mistaken for factual recall.
 
 ```datacorejsx
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
 return FolderStructureMap;
 ```
 
+## The Engineering Ladder
+
+Steering an LLM at inference time is organized here as four disciplines of increasing scope — each one wraps the previous, and each has its own folder:
+
+```mermaid
+flowchart LR
+    P[Prompt Engineering<br>the instruction] --> C[Context Engineering<br>the window] --> H[Harness Engineering<br>the capability surface] --> L[Loop Engineering<br>the runtime over time]
+```
+
+| Rung | Unit of design | The question it answers | Key mechanisms |
+| --- | --- | --- | --- |
+| [[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering\|Prompt Engineering]] | A single instruction | How do I phrase this one task precisely? | Anatomy, few-shot examples, reasoning scaffolds, composition |
+| [[Context Engineering]] | The whole context window | What fills the window, and in what order? | Budgeting, ordering, compaction, offloading, [[Home/AI & ML/LLM/Context Engineering/RAG/RAG\|RAG]] |
+| [[Harness Engineering]] | The scaffold around the model | What can the model do, and through what? | [[Tools]], [[Model Context Protocol\|MCP]], execution environment |
+| [[Loop Engineering]] | The runtime across turns | How does it iterate, verify, and stop? | [[Agent Loop]], termination, verification, [[Multi-Agentic Systems\|multi-agent topologies]] |
+
+The rungs compose rather than compete: a production [[Home/AI & ML/LLM/Agents/Agents|agent]] is all four assembled — a model given precise instructions (prompt), curated evidence (context), a capability surface (harness), and a controlled runtime (loop). Two folders sit **orthogonal** to the ladder and span every rung: [[Home/AI & ML/LLM/Evaluation/Evaluation|Evaluation]] measures each one, and [[Home/AI & ML/LLM/Safety/Safety|Safety]] secures it (guardrails, the OWASP threat model, and hallucination). The remaining leaves — Embeddings, Fine-tuning, Generation, Model Selection and Routing — are the model foundations the ladder builds on.
+
 ## How LLMs Are Built
 
-![07 AI & ML-LLM-20260705173634102.png](11%20AI%20&%20ML-LLM-20260705173634102.png)
+![11 AI & ML-LLM-20260705173634102.png](11%20AI%20&%20ML-LLM-20260705173634102.png)
 
 Training a modern LLM is a three-stage pipeline. Each stage changes what the model is good at:
 

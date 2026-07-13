@@ -70,7 +70,7 @@ Individual scores identify symptoms. Reading two scores together identifies root
 | Context Precision | Context Recall | Diagnosis | Fix |
 | --- | --- | --- | --- |
 | Low | High | Noise — retrieval finds relevant docs but drowns them in irrelevant chunks | Re-ranking, tighter metadata filters, reduce k |
-| High | Low | Incomplete — retrieved set is clean but missing relevant evidence | Expand k, add [[Home/AI & ML/LLM/RAG/Retrieval#Hybrid Retrieval — Vector + Keyword\|hybrid search]], improve chunk boundaries |
+| High | Low | Incomplete — retrieved set is clean but missing relevant evidence | Expand k, add [[Home/AI & ML/LLM/Context Engineering/RAG/Retrieval#Hybrid Retrieval — Vector + Keyword\|hybrid search]], improve chunk boundaries |
 
 ### Additional RAGAS Metrics
 

@@ -38,13 +38,13 @@ Use multiple detectors because each catches different failure modes.
 - **LLM-as-judge**: score answer [[Monitoring#LLM-as-Judge Metrics|faithfulness]] against context using an evaluator LLM. Common metric: faithfulness = supported claims divided by total claims. Frameworks like RAGAS automate this decomposition.
 - **Atomic fact verification (FActScore)**: break text into atomic facts, retrieve evidence from a knowledge base, and validate each fact independently. This gives granular failure localization; on biography generation benchmarks, models score around 58% FActScore, illustrating how frequently atomic claims lack support.
 
-For RAG stacks, pair these with [[Home/AI & ML/LLM/RAG/Evaluation/Evaluation|RAG Evaluation]] so retrieval quality and answer faithfulness are measured separately.
+For RAG stacks, pair these with [[Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation|RAG Evaluation]] so retrieval quality and answer faithfulness are measured separately.
 
 ## Mitigation
 
 Start with grounding, then add targeted controls where risk justifies cost.
 
-- **Retrieval grounding (RAG)**: move from memory recall to source summarization. This is usually the single biggest reduction in fabricated claims because it gives explicit evidence boundaries. It is not a hard guarantee: RAG-based legal tools still report hallucination rates above 17%, so treat grounding as risk reduction, not elimination. See [[Home/AI & ML/LLM/RAG/RAG|RAG]].
+- **Retrieval grounding (RAG)**: move from memory recall to source summarization. This is usually the single biggest reduction in fabricated claims because it gives explicit evidence boundaries. It is not a hard guarantee: RAG-based legal tools still report hallucination rates above 17%, so treat grounding as risk reduction, not elimination. See [[Home/AI & ML/LLM/Context Engineering/RAG/RAG|RAG]].
 - **Chain-of-Verification (CoVe)**: run a factored loop of generate answer, plan verification questions, answer verification questions independently without original draft context, then revise. Independent verification interrupts the feedback loop where the model reuses its own hallucinated tokens as if they were evidence.
 - **Structured output with constrained decoding**: enforce schema, enums, and field contracts so the model cannot invent arbitrary free-form structures. This shrinks the space of possible fabrications and is especially useful for downstream automation.
 - **Abstention policy**: define a strict fallback phrase (for example, "I do not have enough evidence in the provided context") when evidence is insufficient. Explicit abstention is safer than confident guessing in high-stakes flows.
