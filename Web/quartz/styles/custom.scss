@@ -687,7 +687,12 @@ body[data-slug="index"] {
 }
 
 @media all and (min-width: 1201px) and (min-height: 36rem) {
-  body[data-slug="index"] {
+  // Gated on [data-home-fit]: the HomepageFit controller owns the one-viewport
+  // fill on desktop just as it does on tablet, so it can hide whole tiers
+  // (summaries → counters → bars) uniformly instead of letting cards clip
+  // raggedly. Without the attribute (JS off, or the controller bailed because
+  // nothing fits) the page keeps its normal scrolling layout — a safe fallback.
+  body[data-slug="index"][data-home-fit] {
     // Columns, areas, and the hidden right sidebar come from the height-independent
     // block above; here we only add the one-viewport fill: fix to 100dvh, clip
     // overflow, and make the center row the flexible track.
@@ -744,8 +749,9 @@ body[data-slug="index"] {
     // them. Rows are minmax(0, 1fr) — three EQUAL rows that divide the leftover
     // height and, crucially, SHRINK below their content when the window is short
     // (minmax(min-content, 1fr) refused to shrink, so tall cards overflowed the
-    // fixed-height #quartz-body and collided with the total bar). The card body
-    // and description absorb the shrink (see below) so nothing scrolls.
+    // fixed-height #quartz-body and collided with the total bar). When full
+    // descriptions no longer fit, the HomepageFit controller hides them
+    // dashboard-wide (see the shared [data-home-fit] states) so nothing scrolls.
     .dc-topic-grid {
       flex: 1 1 auto;
       min-height: 0;
@@ -756,22 +762,39 @@ body[data-slug="index"] {
       flex: 0 0 auto;
     }
 
-    // Let a card shrink below its natural/content height so three rows always
-    // fit. The description is the flexible element: it grows to push the progress
-    // bar to the card's bottom on tall screens, and clips (never the title or the
-    // bar) on short ones. The spacer is redundant once the summary flexes.
+    // Each card is a flex column whose spacer absorbs the leftover height and
+    // pushes the progress bar to the bottom; the summary is measured WHOLE and
+    // is never clipped mid-line. When three rows of full descriptions can't fit
+    // one viewport, the HomepageFit controller hides every summary at once (then
+    // counters, then bars) via the shared [data-home-fit] states below — so the
+    // dashboard degrades uniformly instead of clipping individual cards raggedly.
     .dc-topic-card,
     .dc-topic-card .db-card-body {
       min-height: 0;
     }
+    .dc-topic-card .db-card-body {
+      flex: 1 1 auto;
+    }
+    .dc-topic-card .dc-topic-title,
+    .dc-topic-card .db-card-summary,
+    .dc-topic-card .dc-topic-foot {
+      flex: 0 0 auto;
+      overflow: visible;
+    }
+    // Keep the note's 0.55em floor: the gap between the summary and the foot is
+    // part of the design, not slack. If honouring it pushes the foot into the
+    // body padding, the fit check fails and the controller degrades a tier —
+    // the summary never sits flush against the counter to buy one more state.
     .dc-topic-card .dc-topic-spacer {
-      display: none;
+      display: block;
+      flex: 1 1 auto;
+      min-height: 0.55em;
+    }
+    .dc-topic-card .dc-topic-foot {
+      margin-top: auto;
     }
     .dc-topic-card .db-card-summary {
-      flex: 1 1 0;
-      min-height: 0;
       margin-top: 0.45rem;
-      overflow: hidden;
     }
     // Trim the 1c chrome slightly so the description keeps a line or two of room
     // at common laptop heights before it has to clip.
@@ -893,7 +916,8 @@ body[data-slug="index"] {
 // sets the first dashboard-wide state whose COMPLETE retained elements fit:
 // full → summaries hidden → counters hidden → bars hidden. CSS owns only the
 // complete states; it never clips a summary/title or shrinks a retained footer.
-// Mobile and desktop remain on their existing branches.
+// This block is the tablet-specific LAYOUT; the degraded states themselves are
+// shared with desktop below. Mobile stays on its normal scrolling branch.
 // ---------------------------------------------------------------------------
 @media all and ($tablet) {
   body[data-slug="index"][data-home-fit] {
@@ -960,10 +984,13 @@ body[data-slug="index"] {
       flex: 0 0 auto;
       overflow: visible;
     }
+    // 0.55em floor, same as the desktop fill: the summary–foot gap is design,
+    // not slack — honouring it makes the fit check degrade a tier before the
+    // foot ever crowds the body padding.
     .dc-topic-card .dc-topic-spacer {
       display: block;
       flex: 1 1 auto;
-      min-height: 0;
+      min-height: 0.55em;
     }
     .dc-topic-card .dc-topic-foot {
       margin-top: auto;
@@ -982,25 +1009,33 @@ body[data-slug="index"] {
       margin: 0.45rem 0 0.75rem;
     }
   }
+}
 
-  body[data-slug="index"][data-home-fit="summary-hidden"],
-  body[data-slug="index"][data-home-fit="counter-hidden"],
-  body[data-slug="index"][data-home-fit="bar-hidden"] {
-    .dc-topic-grid .db-card-summary {
-      display: none;
-    }
+// ---------------------------------------------------------------------------
+// Shared degraded states for BOTH one-viewport fits (tablet 768–1200px and
+// desktop ≥1201px). The HomepageFit controller sets one dashboard-wide state in
+// whichever range is active, hiding a whole tier at a time — summaries, then
+// counters, then bars — so a card is never left with a half-clipped line. These
+// are viewport-independent: [data-home-fit] is only present while a fill is
+// engaged, so no media-query gate is needed.
+// ---------------------------------------------------------------------------
+body[data-slug="index"][data-home-fit="summary-hidden"],
+body[data-slug="index"][data-home-fit="counter-hidden"],
+body[data-slug="index"][data-home-fit="bar-hidden"] {
+  .dc-topic-grid .db-card-summary {
+    display: none;
   }
+}
 
-  body[data-slug="index"][data-home-fit="counter-hidden"],
-  body[data-slug="index"][data-home-fit="bar-hidden"] {
-    .dc-topic-grid .dc-topic-cap {
-      display: none;
-    }
+body[data-slug="index"][data-home-fit="counter-hidden"],
+body[data-slug="index"][data-home-fit="bar-hidden"] {
+  .dc-topic-grid .dc-topic-cap {
+    display: none;
   }
+}
 
-  body[data-slug="index"][data-home-fit="bar-hidden"] {
-    .dc-topic-grid .dc-topic-bar {
-      display: none;
-    }
+body[data-slug="index"][data-home-fit="bar-hidden"] {
+  .dc-topic-grid .dc-topic-bar {
+    display: none;
   }
 }

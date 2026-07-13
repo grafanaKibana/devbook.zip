@@ -1,17 +1,22 @@
 import type { QuartzComponent, QuartzComponentConstructor } from "@quartz-community/types"
 
-// Homepage tablet fit controller. The dashboard is frozen HTML emitted by
+// Homepage one-viewport fit controller. The dashboard is frozen HTML emitted by
 // Quartz Syncer, so CSS can style its states but cannot know whether wrapped
 // summaries, loaded fonts, zoom, the overall-progress panel, and the footer fit
 // together. This client-only component measures the rendered result and applies
-// the least-degraded dashboard-wide state that fits the existing tablet range.
-// It renders no markup and deliberately does not detect device or input type.
+// the least-degraded dashboard-wide state that fits. It drives BOTH one-viewport
+// ranges — tablet (768–1200px) and desktop (≥1201px, tall enough for the fill) —
+// so neither ever clips a single card raggedly; below those ranges the page
+// keeps its normal scrolling layout. It renders no markup and deliberately does
+// not detect device or input type.
 
 const script = `
 (function () {
   if (window.__devbookHomepageFit) return;
 
-  var tablet = window.matchMedia("(min-width: 768px) and (max-width: 1200px)");
+  var fit = window.matchMedia(
+    "(min-width: 768px) and (max-width: 1200px), (min-width: 1201px) and (min-height: 36rem)"
+  );
   var states = ["full", "summary-hidden", "counter-hidden", "bar-hidden"];
   var frame = 0;
   var observed = null;
@@ -27,9 +32,24 @@ const script = `
       element.scrollWidth <= element.clientWidth + 1;
   }
 
-  function containedBy(parent, child) {
+  // The parent's CONTENT box (border-box rect inset by its padding). Retained
+  // elements are measured against this, not getBoundingClientRect(): the card
+  // body's padding is part of the design, so a bar that slides into it is
+  // already touching the card edge visually — a state must fail BEFORE that,
+  // not once content crosses the border box.
+  function contentBox(element) {
+    var rect = element.getBoundingClientRect();
+    var style = getComputedStyle(element);
+    return {
+      top: rect.top + parseFloat(style.paddingTop),
+      bottom: rect.bottom - parseFloat(style.paddingBottom),
+      left: rect.left + parseFloat(style.paddingLeft),
+      right: rect.right - parseFloat(style.paddingRight),
+    };
+  }
+
+  function containedBy(outer, child) {
     if (!visible(child)) return true;
-    var outer = parent.getBoundingClientRect();
     var inner = child.getBoundingClientRect();
     return inner.top >= outer.top - 1 && inner.bottom <= outer.bottom + 1 &&
       inner.left >= outer.left - 1 && inner.right <= outer.right + 1;
@@ -55,11 +75,12 @@ const script = `
       var cardBody = card.querySelector(".db-card-body");
       if (!cardBody || !scrollFits(cardBody)) return false;
 
+      var box = contentBox(cardBody);
       var retained = card.querySelectorAll(
         ".dc-topic-title, .db-card-summary, .dc-topic-cap, .dc-topic-bar"
       );
       for (var j = 0; j < retained.length; j += 1) {
-        if (!containedBy(cardBody, retained[j])) return false;
+        if (!containedBy(box, retained[j])) return false;
       }
     }
 
@@ -73,7 +94,7 @@ const script = `
     var quartzBody = body.querySelector('.page > #quartz-body');
     var isHome = body.dataset.slug === "index";
 
-    if (!isHome || !tablet.matches || !dashboard || !quartzBody) {
+    if (!isHome || !fit.matches || !dashboard || !quartzBody) {
       body.removeAttribute("data-home-fit");
       body.removeAttribute("data-home-fit-overflow");
       observe(null);
