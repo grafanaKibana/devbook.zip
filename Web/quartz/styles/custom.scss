@@ -392,6 +392,19 @@ body {
     white-space: nowrap;
   }
 
+  // The title is content-sized on tablets while the actions sit at the far
+  // right, so the shared flex layout centers search between unequal siblings.
+  // Anchor it to the viewport midpoint instead. The available-width cap keeps
+  // the full search control clear of the title/hamburger and actions at 768px;
+  // wider tablets retain the desktop 32rem width.
+  .site-header-search {
+    position: absolute;
+    left: 50%;
+    width: calc(100vw - 21rem);
+    max-width: 32rem;
+    transform: translateX(-50%);
+  }
+
   // Swap the plugin's "Topics" fold arrow for the hamburger.
   .explorer button.desktop-explorer {
     display: none;
@@ -871,6 +884,123 @@ body[data-slug="index"] {
     }
     .dc-topic-cap {
       font-size: 0.68rem;
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Tablet one-viewport fit (768–1200px). The client-side HomepageFit controller
+// sets the first dashboard-wide state whose COMPLETE retained elements fit:
+// full → summaries hidden → counters hidden → bars hidden. CSS owns only the
+// complete states; it never clips a summary/title or shrinks a retained footer.
+// Mobile and desktop remain on their existing branches.
+// ---------------------------------------------------------------------------
+@media all and ($tablet) {
+  body[data-slug="index"][data-home-fit] {
+    --home-card-pad: clamp(0.65rem, 1.2vh, 0.85rem) clamp(0.75rem, 1.5vw, 1rem);
+
+    .page > #quartz-body {
+      box-sizing: border-box;
+      height: 100dvh;
+      max-height: 100dvh;
+      overflow: hidden;
+      grid-template-rows: minmax(0, 1fr) auto;
+      grid-template-areas:
+        "grid-center"
+        "grid-footer";
+    }
+
+    .page-header {
+      margin-top: calc(var(--site-header-height) + 0.5rem) !important;
+    }
+    .page-header h1 {
+      margin: 0 !important;
+      font-size: 1.7rem;
+    }
+
+    .page > #quartz-body > .center,
+    .center > article,
+    .center > article > div,
+    .center > article > div > div {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    .page > #quartz-body > .center {
+      height: 100%;
+    }
+    .center > article,
+    .center > article > div,
+    .center > article > div > div {
+      flex: 1 1 auto;
+      margin: 0;
+    }
+    .center > article > div > div {
+      margin-top: 0 !important;
+    }
+
+    .dc-topic-grid {
+      flex: 1 1 auto;
+      min-height: 0;
+      grid-auto-rows: minmax(0, 1fr);
+      column-gap: clamp(0.75rem, 1.8vw, 1.5rem);
+      row-gap: clamp(0.45rem, 1vh, 0.75rem);
+      margin-top: 0.55rem;
+    }
+    .dc-topic-card,
+    .dc-topic-card .db-card-body {
+      min-height: 0;
+    }
+    .dc-topic-card .db-card-body {
+      flex: 1 1 auto;
+    }
+    .dc-topic-card .dc-topic-title,
+    .dc-topic-card .db-card-summary,
+    .dc-topic-card .dc-topic-foot {
+      flex: 0 0 auto;
+      overflow: visible;
+    }
+    .dc-topic-card .dc-topic-spacer {
+      display: block;
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+    .dc-topic-card .dc-topic-foot {
+      margin-top: auto;
+    }
+
+    .dc-topic-total {
+      flex: 0 0 auto;
+      margin-top: 0.55rem;
+      padding: 0.6em 0.7em;
+    }
+    .dc-topic-total .dc-topic-legend {
+      margin-top: 0.5em;
+    }
+
+    .page > #quartz-body > footer {
+      margin: 0.45rem 0 0.75rem;
+    }
+  }
+
+  body[data-slug="index"][data-home-fit="summary-hidden"],
+  body[data-slug="index"][data-home-fit="counter-hidden"],
+  body[data-slug="index"][data-home-fit="bar-hidden"] {
+    .dc-topic-grid .db-card-summary {
+      display: none;
+    }
+  }
+
+  body[data-slug="index"][data-home-fit="counter-hidden"],
+  body[data-slug="index"][data-home-fit="bar-hidden"] {
+    .dc-topic-grid .dc-topic-cap {
+      display: none;
+    }
+  }
+
+  body[data-slug="index"][data-home-fit="bar-hidden"] {
+    .dc-topic-grid .dc-topic-bar {
+      display: none;
     }
   }
 }

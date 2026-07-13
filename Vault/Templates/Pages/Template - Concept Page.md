@@ -9,11 +9,11 @@ tags:
 publish: false
 ---
 <%*
-// Derive topic/subtopic from folder path
+// Derive topic/subtopic from the path below Vault/Home
 const parts = tp.file.folder(true).split("/");
-const idx = parts.indexOf("Software Engineering");
-const topic = (idx >= 0 && parts.length > idx + 1) ? [parts[idx + 1].replace(/^\d+\s+/, "")] : [];
-const subtopic = (idx >= 0 && parts.length > idx + 2) ? [parts[idx + 2].replace(/^\d+\s+/, "")] : [];
+const homeIndex = parts.indexOf("Home");
+const topic = (homeIndex >= 0 && parts.length > homeIndex + 1) ? [parts[homeIndex + 1].replace(/^\d+\s+/, "")] : [];
+const subtopic = (homeIndex >= 0 && parts.length > homeIndex + 2) ? [parts[homeIndex + 2].replace(/^\d+\s+/, "")] : [];
 
 // If file is untitled, prompt for a title
 let title = tp.file.title;
@@ -40,21 +40,8 @@ tp.hooks.on_all_templates_executed(async () => {
 %>
 # Intro
 
-Quick introduction to the concept
-For simple topics, keep mechanism + example inline in this section.
-Add standalone sections only when they improve clarity:
-- `## How It Works` for non-obvious mechanisms/flows
-- `## Example` when an inline example is not enough
-- `## Pitfalls` only for non-obvious real-world failure modes
-
-## Questions
-
-> [!QUESTION]- What is abc?
-> Answer
+<!-- Explain what this is, why it matters, when to reach for it, and the mechanism when it is non-obvious. Include a concrete example here for a compact topic. Add separate mechanism, example, pitfalls, tradeoffs, or questions sections only when they teach something the Intro cannot. -->
 
 ## References
 
-Replace or delete these example links.
-
-- [Link 1](https://example.com)
-- [Link 2](https://example.com)
+<!-- Add at least one annotated primary source: what it specifies, proves, or documents. -->

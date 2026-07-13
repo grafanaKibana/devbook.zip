@@ -7,7 +7,7 @@ summary: "Horizontal scaling adds more service instances behind a load balancer,
 level:
   - "2"
 priority: High
-status: Not-Started
+status: Creation
 publish: true
 ---
 
