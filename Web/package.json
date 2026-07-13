@@ -15,12 +15,16 @@
     "quartz": "node ./quartz/bootstrap-cli.mjs",
     "serve": "node ./quartz/bootstrap-cli.mjs build --serve --port 8080",
     "docs": "node ./quartz/bootstrap-cli.mjs build --serve -d docs",
-    "check": "tsc --noEmit && npx prettier . --check",
+    "check": "npm run steptrace:test && npm run steptrace:typecheck && npm run steptrace:check && tsc --noEmit && npx prettier . --check",
     "format": "npx prettier . --write",
     "test": "tsx --test",
     "profile": "0x -D prof ./quartz/bootstrap-cli.mjs build --concurrency=1",
     "install-plugins": "npx tsx ./quartz/plugins/loader/install-plugins.ts",
-    "steptrace:sync": "node ./custom/steptrace/sync.mjs",
+    "steptrace:build": "node ./custom/steptrace/build.mjs",
+    "steptrace:check": "node ./custom/steptrace/build.mjs --check",
+    "steptrace:test": "node --test ./custom/steptrace/steptrace.test.mjs",
+    "steptrace:typecheck": "tsc --noEmit -p ./custom/steptrace/tsconfig.json",
+    "steptrace:watch": "node ./custom/steptrace/watch.mjs",
     "prebuild": "npm run install-plugins"
   },
   "engines": {

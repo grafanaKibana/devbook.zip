@@ -1,6 +1,6 @@
 {
-    "installCommand": "cd Web && npm ci",
-    "buildCommand": "cd Web && npx quartz plugin install --from-config && npx quartz build",
-    "outputDirectory": "Web/public",
-    "cleanUrls": true
+  "installCommand": "cd Web && npm ci",
+  "buildCommand": "cd Web && npm run steptrace:build && npm run steptrace:check && npm run quartz -- plugin install --from-config && npm run quartz -- build",
+  "outputDirectory": "Web/public",
+  "cleanUrls": true
 }

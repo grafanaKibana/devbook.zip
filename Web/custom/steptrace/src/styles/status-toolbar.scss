@@ -1,0 +1,68 @@
+/* ---- shared: status + toolbar ---- */
+.steptrace__status {
+  min-height: 2.6em;
+  padding: 0.5rem 0.65rem;
+  border-radius: 8px;
+  background: var(--_surface);
+  color: var(--_text);
+  font-size: 13px;
+}
+.steptrace__status .steptrace__counts {
+  color: var(--_muted);
+  font-variant-numeric: tabular-nums;
+}
+.steptrace__key {
+  color: var(--_blue);
+  font-weight: 600;
+}
+.steptrace__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.5rem;
+}
+.steptrace__toolbar button,
+.steptrace__toolbar select {
+  font: inherit;
+  font-size: 13px;
+  color: var(--_text);
+  background: var(--st-page, #fff);
+  border: 1px solid var(--_border);
+  border-radius: 7px;
+  padding: 0.32rem 0.6rem;
+  cursor: pointer;
+  min-height: 34px;
+  min-width: 34px;
+}
+.steptrace__toolbar button:hover,
+.steptrace__toolbar select:hover {
+  border-color: var(--_accent);
+}
+.steptrace__toolbar button.steptrace__play {
+  background: var(--_accent);
+  color: var(--_on-accent);
+  border-color: var(--_accent);
+  font-weight: 600;
+}
+.steptrace__toolbar :focus-visible {
+  outline: 2px solid var(--_blue);
+  outline-offset: 2px;
+}
+.steptrace__spacer {
+  flex: 1 1 auto;
+}
+.steptrace__step {
+  font: 600 12px/1 var(--_font-mono);
+  color: var(--_muted);
+  font-variant-numeric: tabular-nums;
+}
+.steptrace__speed {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 12px;
+  color: var(--_muted);
+}
+.steptrace__speed input {
+  accent-color: var(--_accent);
+}

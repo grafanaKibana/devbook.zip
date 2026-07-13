@@ -1,4 +1,5 @@
 import type { QuartzComponent, QuartzComponentConstructor } from "@quartz-community/types"
+import styles from "./styles/steptrace.scss"
 
 // steptrace — Quartz host component. Renders nothing server-side; only contributes
 // css + an afterDOMLoaded hydrator. The SteptraceBlock transformer emits
@@ -8,12 +9,33 @@ import type { QuartzComponent, QuartzComponentConstructor } from "@quartz-commun
 // mounts each div.
 
 const ENGINE_URL = "/static/steptrace/engine.js"
+const STYLE_URL = "/static/steptrace/engine.css"
 
 const hydrate = `
 (function () {
   if (window.__steptraceHydrator) return;
   window.__steptraceHydrator = true;
+  var stylePromise = null;
   var enginePromise = null;
+  function stylesheet() {
+    if (stylePromise) return stylePromise;
+    stylePromise = new Promise(function (resolve, reject) {
+      var link = document.querySelector('link[data-steptrace-style="1"]');
+      if (link && link.sheet) return resolve();
+      var created = false;
+      if (!link) {
+        link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = ${JSON.stringify(STYLE_URL)};
+        link.dataset.steptraceStyle = "1";
+        created = true;
+      }
+      link.addEventListener("load", function () { resolve(); }, { once: true });
+      link.addEventListener("error", function () { reject(new Error("could not load ${STYLE_URL}")); }, { once: true });
+      if (created) document.head.appendChild(link);
+    });
+    return stylePromise;
+  }
   function engine() {
     if (enginePromise) return enginePromise;
     enginePromise = new Promise(function (resolve, reject) {
@@ -25,6 +47,9 @@ const hydrate = `
       document.head.appendChild(s);
     });
     return enginePromise;
+  }
+  function assets() {
+    return stylesheet().then(engine);
   }
   function fail(root, msg, e) {
     root.dataset.steptraceMounted = "1";
@@ -57,7 +82,7 @@ const hydrate = `
   }
   function run() {
     if (!document.querySelector(".steptrace-mount:not([data-steptrace-mounted])")) return;
-    engine().then(function (st) {
+    assets().then(function (st) {
       if (!st || !st.mount) throw new Error("engine loaded but exposed no mount()");
       document.querySelectorAll(".steptrace-mount:not([data-steptrace-mounted])").forEach(function (root) { mountOne(root, st); });
     }).catch(function (e) {
@@ -81,30 +106,6 @@ const hydrate = `
 export const Steptrace: QuartzComponentConstructor = () => {
   const Component: QuartzComponent = () => null
   Component.afterDOMLoaded = hydrate
-  // The only per-host piece: bind the neutral --st-* tokens to Quartz's palette.
-  Component.css = `
-.steptrace {
-  --st-page: var(--light);
-  --st-surface: var(--lightgray);
-  --st-text: var(--darkgray);
-  --st-muted: var(--gray);
-  --st-border: var(--gray);
-  --st-accent: var(--secondary);
-  --st-on-accent: var(--light);
-  --st-neutral: var(--gray);
-  --st-state-amber: #d97706;
-  --st-state-violet: #7c3aed;
-  --st-state-blue: #2563eb;
-  --st-state-green: var(--secondary);
-  --st-font-head: var(--headerFont, "Schibsted Grotesk", sans-serif);
-  --st-font-body: var(--bodyFont, "Source Sans Pro", sans-serif);
-  --st-font-mono: var(--codeFont, "IBM Plex Mono", monospace);
-}
-:root[saved-theme="dark"] .steptrace {
-  --st-state-amber: #f59e0b;
-  --st-state-violet: #a78bfa;
-  --st-state-blue: #60a5fa;
-}
-`
+  Component.css = styles
   return Component
 }

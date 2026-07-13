@@ -6,6 +6,7 @@ import { QuestionsIndex } from "./custom/components/questions-index"
 import { SiteHeader } from "./custom/components/site-header"
 import { SiteMarquee } from "./custom/components/site-marquee"
 import { Steptrace } from "./custom/components/steptrace"
+import { StepTraceStatic } from "./custom/emitters/steptrace-static"
 import { QuestionCollector } from "./custom/transformers/question-collector"
 import { SyncerFixups } from "./custom/transformers/syncer-fixups"
 import { SteptraceBlock } from "./custom/transformers/steptrace-block"
@@ -54,6 +55,10 @@ config.plugins.transformers.push(QuestionCollector())
 // allowlist) into the <div class="steptrace-mount" data-config> markers that the
 // Steptrace component hydrates. Only touches lang=steptrace, so order-independent.
 config.plugins.transformers.push(SteptraceBlock())
+
+// Emit the generated engine from the sanctioned custom/ surface. This avoids
+// placing DevBook-owned code under Quartz's upgrade-owned quartz/static tree.
+config.plugins.emitters.push(StepTraceStatic())
 
 const layout = await loadQuartzLayout()
 const siteMarquee = SiteMarquee()

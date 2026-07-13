@@ -1,0 +1,26 @@
+@use "../index";
+
+.steptrace {
+  --st-page: var(--background-primary);
+  --st-surface: var(--background-secondary);
+  --st-text: var(--text-normal);
+  --st-muted: var(--text-muted);
+  --st-border: var(--background-modifier-border);
+  --st-accent: var(--interactive-accent);
+  --st-on-accent: var(--text-on-accent);
+  --st-neutral: var(--text-faint);
+  --st-state-amber: #d97706;
+  --st-state-violet: #7c3aed;
+  --st-state-blue: #2563eb;
+  --st-state-green: #4c8000;
+  --st-font-head: var(--font-interface);
+  --st-font-body: var(--font-text);
+  --st-font-mono: var(--font-monospace);
+}
+
+.theme-dark .steptrace {
+  --st-state-amber: #f59e0b;
+  --st-state-violet: #a78bfa;
+  --st-state-blue: #60a5fa;
+  --st-state-green: #84cc16;
+}
