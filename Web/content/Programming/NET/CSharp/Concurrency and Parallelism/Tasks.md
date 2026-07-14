@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T21:46:13.365Z
-modified: 2026-07-11T21:46:13.366Z
-published: 2026-07-11T21:46:13.366Z
+created: 2026-07-14T19:23:03.467Z
+modified: 2026-07-14T19:23:03.467Z
+published: 2026-07-14T19:23:03.467Z
 topic:
   - Programming
 subtopic:
@@ -22,7 +22,7 @@ status: Ready to Repeat
 
 ## How It Works
 
-A `Task` is a promise: it starts in one of three terminal states — `RanToCompletion`, `Faulted`, or `Canceled`. The runtime tracks the state and stores the result or exception. When you `await` a task, the compiler generates a continuation that runs when the task reaches a terminal state.
+`Task` is the **future** half of the Futures and Promises pattern — the read side, the handle to a result that isn't ready yet. The write side is the **promise**, `TaskCompletionSource<T>`, which you complete by hand (see below). A task doesn't _start_ in a terminal state, it _ends_ in one: it begins as `WaitingForActivation` (async methods, `TaskCompletionSource<T>`), `WaitingToRun` (`Task.Run`, queued to the pool), or `Created` (the `new Task(…)` form only), and settles into exactly one of `RanToCompletion`, `Faulted`, or `Canceled`. The runtime tracks the state and stores the result or exception. When you `await` a task, the compiler generates a continuation that runs when the task reaches a terminal state.
 
 **Key types:**
 
@@ -175,7 +175,7 @@ Fix: use `SemaphoreSlim` to bound concurrency (see [[ThreadPool]]).
 
 - [Task class (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task) — full API reference for `Task`, `Task<T>`, `WhenAll`, `WhenAny`, `Run`, and `FromResult`.
 - [Task.WhenAll documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task.whenall) — behavior details including exception aggregation semantics.
-- [Understanding the cost of async/await (Stephen Toub, Microsoft)](https://devblogs.microsoft.com/dotnet/understanding-the-whys-whats-and-whens-of-valuetask/) — deep dive into when `ValueTask` is appropriate and its consumption rules.
+- [Understanding the Whys, Whats, and Whens of ValueTask (Stephen Toub, Microsoft)](https://devblogs.microsoft.com/dotnet/understanding-the-whys-whats-and-whens-of-valuetask/) — deep dive into when `ValueTask` is appropriate and its consumption rules.
 - [There is no thread (Stephen Cleary)](https://blog.stephencleary.com/2013/10/there-is-no-thread.html) — explains why async I/O tasks don't require a dedicated thread while waiting.
 - [Threading in C#: Task Parallelism (Joe Albahari)](https://www.albahari.com/threading/part5.aspx#_Task_Parallelism) — comprehensive reference on `Task` creation, continuations, and `AggregateException` handling.
 - [Threading in C#: Working with AggregateException (Joe Albahari)](https://www.albahari.com/threading/part5.aspx#_Working_with_AggregateException) — how to inspect all faults from `Task.WhenAll`.

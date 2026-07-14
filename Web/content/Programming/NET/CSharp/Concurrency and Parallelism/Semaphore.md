@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T21:46:10.852Z
-modified: 2026-07-11T21:46:10.852Z
-published: 2026-07-11T21:46:10.852Z
+created: 2026-07-14T19:14:38.304Z
+modified: 2026-07-14T19:14:38.304Z
+published: 2026-07-14T19:14:38.304Z
 topic:
   - Programming
 subtopic:
@@ -67,9 +67,9 @@ finally
 
 - **Leaked permits stall all waiters** — forgetting `Release` in an exception path permanently reduces available permits. With a maxCount of 4, one leaked permit drops throughput by 25%; four leaked permits deadlock the system. Always release in `finally`.
 - **Over-release inflates concurrency** — for `SemaphoreSlim` without an explicit `maxCount`, calling `Release` without a matching `Wait` silently increases the permit count beyond your intended limit. Your "max 10 concurrent" throttle quietly becomes 11, then 12. With explicit `maxCount`, over-release throws `SemaphoreFullException` — which is noisy but at least detectable. Always set `maxCount` and keep acquire/release symmetry in one scope.
-- **No fairness guarantee** — `SemaphoreSlim` does not guarantee FIFO ordering under contention. A request that arrives later can acquire the permit before an earlier waiter, causing starvation in pathological cases. If ordering matters, use `Channel<T>` as a bounded queue.
+- **No fairness guarantee** — `SemaphoreSlim` does not guarantee FIFO ordering under contention. A request that arrives later can acquire the permit before an earlier waiter, causing starvation in pathological cases. If ordering matters, use `Channel<T>` as a bounded queue (see [[Channels]]).
 - **No ownership tracking, and not reentrant** — unlike `Mutex`, semaphores have no thread affinity: any code path can `Release`, even without a matching `Wait`, which makes leaks hard to trace (instrument `Wait`/`Release` in production throttling code). The flip side is there is **no recursion count** — a method holding the only permit that calls another method which also `WaitAsync`s the _same_ semaphore self-deadlocks. Take the permit once at the top of the call chain.
-- **`WaitAsync` allocates under contention** — an immediately-available permit is cheap, but when callers have to wait, `WaitAsync` enqueues an async waiter (a `Task`/state object) per caller. On a very hot throttle this allocation shows up; for high-throughput producer/consumer flows a bounded `Channel<T>` (which also gives true FIFO) is often the better primitive.
+- **`WaitAsync` allocates under contention** — an immediately-available permit is cheap, but when callers have to wait, `WaitAsync` enqueues an async waiter (a `Task`/state object) per caller. On a very hot throttle this allocation shows up; for high-throughput producer/consumer flows a bounded `Channel<T>` (which also gives true FIFO) is often the better primitive — see [[Channels]].
 
 ## Tradeoffs
 
@@ -88,7 +88,7 @@ finally
 > [!QUESTION]- What bug pattern most often breaks semaphore-based code?
 > Missing or unbalanced `Release` calls. The safe pattern is acquire then `try/finally` release in the same method scope.
 
-## Links
+## References
 
 - [Semaphore class (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.threading.semaphore)
 - [SemaphoreSlim class (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.threading.semaphoreslim)
