@@ -21,5 +21,9 @@
   "obsidian-velocity-config@@improve-pinned-tabs": false,
   "obsidian-velocity@@theme-paint-light": "velocity",
   "obsidian-velocity@@override-default-font": false,
-  "obsidian-velocity@@titlebar-button-visibility": "none"
+  "obsidian-velocity@@titlebar-button-visibility": "none",
+  "obsidian-velocity@@ss-section-news": true,
+  "baseline-style@@color-scheme-dark": "cupertino-dark",
+  "baseline-style@@color-scheme-light": "cupertino-light",
+  "baseline-style@@layout-style": "layout-cupertino"
 }

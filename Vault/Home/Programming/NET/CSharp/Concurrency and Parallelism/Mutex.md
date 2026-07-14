@@ -112,12 +112,12 @@ finally
 > When you need to coordinate access across multiple processes on the same machine (for example single-writer protection for shared file/database artifacts).
 
 > [!QUESTION]- Why is `Mutex` often a poor default for web request hot paths?
-> It is OS-backed and blocking, so heavy contention can increase latency. In-process patterns (`lock`, `SemaphoreSlim`, `Channel<T>`) are usually more efficient.
+> It is OS-backed and blocking, so heavy contention can increase latency. In-process patterns (`lock`, `SemaphoreSlim`, `Channel<T>` — see [[Channels]]) are usually more efficient.
 
 > [!QUESTION]- What does `AbandonedMutexException` signal?
 > A previous owner exited without releasing the mutex, which means exclusive ownership was recovered but shared state may be inconsistent and must be validated.
 
-## Links
+## References
 
 - [Mutex class (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.threading.mutex)
 - [Overview of synchronization primitives (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/threading/overview-of-synchronization-primitives)

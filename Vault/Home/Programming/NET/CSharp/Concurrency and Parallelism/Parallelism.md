@@ -111,7 +111,7 @@ This replaces N contended writes with one merge per worker — far better scalin
 | `Task.WhenAll` fan-out | I/O-bound work (HTTP, DB) | Thread-pool friendly; no CPU parallelism benefit |
 | Manual partitioning + channels | Streaming pipelines with backpressure | Most complex; best throughput for producer/consumer patterns |
 
-**Decision rule**: start with `Parallel.ForEachAsync` for CPU-bound batch work. Switch to PLINQ when the operation is a pure transform and you want terse syntax. Use `Task.WhenAll` for I/O. Reach for channels only when you need backpressure or streaming.
+**Decision rule**: start with `Parallel.ForEachAsync` for CPU-bound batch work. Switch to PLINQ when the operation is a pure transform and you want terse syntax. Use `Task.WhenAll` for I/O. Reach for channels only when you need backpressure or streaming (see [[Channels]]).
 
 **Two other parallelism axes** worth knowing exist beyond multi-threading:
 
@@ -133,7 +133,7 @@ This replaces N contended writes with one merge per worker — far better scalin
 > Partitioning, scheduling, and result merge overhead can dominate when per-element CPU work is too small.
 
 
-## Links
+## References
 
 - [Parallel programming in .NET (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/) — overview of the Task Parallel Library, PLINQ, and data/task parallelism patterns.
 - [Parallel.ForEachAsync API (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.parallel.foreachasync) — API reference with signature, parameters, and cancellation behavior.

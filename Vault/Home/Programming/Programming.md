@@ -9,7 +9,7 @@ summary: "Software craft focused on the .NET stack: C#, runtime, web APIs, and c
 tags:
   - FolderNote
 publish: true
-status: Done
+status: Creation
 level:
   - "4"
 priority: High
