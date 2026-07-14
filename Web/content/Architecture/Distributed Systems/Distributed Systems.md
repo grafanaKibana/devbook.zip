@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T18:17:08.954Z
-modified: 2026-07-11T18:17:08.962Z
-published: 2026-07-11T18:17:08.962Z
+created: 2026-07-13T09:43:13.822Z
+modified: 2026-07-13T09:43:13.822Z
+published: 2026-07-13T09:43:13.822Z
 tags:
   - FolderNote
 topic:
@@ -13,7 +13,7 @@ summary: "Core distributed-systems concepts for production: consistency tradeoff
 priority: High
 level:
   - "2"
-status: Not-Started
+status: Creation
 ---
 
 # Intro

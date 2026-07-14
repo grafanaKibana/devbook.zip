@@ -16,6 +16,14 @@
   border-radius: var(--surface-radius);
 }
 
+// ============================================================================
+// Quieter callouts
+// ============================================================================
+.callout[data-callout] {
+  --border: color-mix(in srgb, var(--color) 24%, var(--lightgray));
+  --bg: color-mix(in srgb, var(--color) 3.5%, var(--light));
+}
+
 // Remove tags from the tags page.
 .page-listing .tags {
   display: none;
@@ -28,32 +36,18 @@
 
 // ============================================================================
 // Dot-grid ("graph paper") page background.
-//
-// A faint radial-gradient dot pattern layered over the flat page fill
-// (`background-color: var(--light)`, set on <body> in base.scss) to give pages
-// a light technical texture. Pure CSS, no image assets. The dot color is the
-// theme foreground (--dark) at a low alpha via color-mix, so it tracks the active
-// theme and stays low-contrast against the page fill in both light and dark.
-// Tokens below tune the pitch/size/color — keep the dots faint (texture, not
-// noise) so prose, cards, callouts, code blocks and the graph view stay fully
-// legible over them. custom.scss is unlayered, so this wins over base.scss's body
-// rule without specificity games; the body background propagates to the viewport
-// canvas, so the grid fills the screen even on short pages.
 // ============================================================================
 
 :root {
-  --dot-grid-spacing: 22px; // grid pitch
-  --dot-grid-radius: 1px; // dot radius
+  --dot-grid-spacing: 22px;
+  --dot-grid-radius: 1px;
   --dot-grid-color: color-mix(in srgb, var(--dark) 7%, transparent);
 }
 :root[saved-theme="dark"] {
-  // Dark fills surface texture more readily — dial the dot back a touch.
   --dot-grid-color: color-mix(in srgb, var(--dark) 6%, transparent);
 }
 
 body {
-  // Scrolls with content (no `background-attachment: fixed`) to avoid repaint
-  // cost on scroll. The 0.5px feather softens the dot edge against aliasing.
   background-image: radial-gradient(
     circle at center,
     var(--dot-grid-color) var(--dot-grid-radius),
@@ -87,18 +81,7 @@ body {
 }
 
 // ============================================================================
-// Office-365-style top header.
-//
-// The title, search, and theme/reader toggles are rendered by the custom
-// SiteHeader component (Web/custom/components/site-header.tsx) into the page's
-// semantic `header` slot — NOT the left sidebar. See Web/quartz.ts. The markup:
-//   header > .site-header
-//     .site-header-title   → h2.page-title
-//     .site-header-search  → .search
-//     .site-header-actions → .darkmode, .readermode
-// Layout: title left · search center · toggles right (desktop); on mobile the
-// title centers, search collapses to an icon, and the Explorer's hamburger
-// (still in the left sidebar) is lifted into the bar's left edge.
+// MS-style top header.
 // ============================================================================
 
 :root {
@@ -216,7 +199,7 @@ body {
     padding-left: 4rem;
   }
 
-  // Title centered over the bar (like Office headers).
+  // Title centered over the bar.
   .site-header-title {
     position: absolute;
     left: 50%;
@@ -318,12 +301,6 @@ body {
 
 // ============================================================================
 // Explorer (left-sidebar file tree).
-//
-// The tree comes from the `@quartz-community/explorer` plugin. Its stylesheet
-// hard-codes `max-width: 800px` for the foldable/overlay state rather than
-// reading our breakpoints (which split mobile from tablet at 768px), so
-// anything that has to change with the breakpoints is restated here rather
-// than tweaked upstream.
 // ============================================================================
 
 :root {
@@ -522,6 +499,24 @@ body {
   position: fixed;
   top: var(--site-header-height);
   z-index: 99;
+
+  padding: 0;
+  background-color: color-mix(in srgb, var(--light) 62%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--lightgray);
+}
+
+.site-marquee-track {
+  color: var(--gray);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+// Keep the "log an issue" link as the single accent in the strip.
+.site-marquee-message a {
+  color: var(--secondary);
+  font-weight: 600;
+  text-decoration: none;
 }
 
 // The search preview clones the target page's `.popover-hint` (marquee
@@ -529,6 +524,15 @@ body {
 // surfaces over the search overlay. Hide it there, like the hover popover rule.
 .preview-container .site-marquee {
   display: none;
+}
+
+// ============================================================================
+// Full-width tables.
+// ============================================================================
+.table-container > table {
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
 }
 
 // ---------------------------------------------------------------------------

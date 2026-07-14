@@ -1701,6 +1701,7 @@ var DEFAULT_SETTINGS_VALUES = {
   disableNodePopup: false,
   disableZoom: false,
   disablePan: false,
+  readingModeFixEnabled: false,
   autoResizeNodeFeatureEnabled: false,
   autoResizeNodeEnabledByDefault: false,
   autoResizeNodeMaxHeight: -1,
@@ -2105,6 +2106,12 @@ var SETTINGS = {
     label: "Variable breakpoint",
     description: `Change the zoom breakpoint (the zoom level at which the nodes won't render their content anymore) on a per-node basis using the ${VARIABLE_BREAKPOINT_CSS_VAR} CSS variable.`,
     infoSection: "variable-breakpoints",
+    children: {}
+  },
+  readingModeFixEnabled: {
+    label: "Alternative text rendering",
+    description: "Tries to synchronize editing and reading view rendering. Caution: Causes visual inconsistencies compared to the default Obsidian reading view.",
+    infoSection: "alternative-text-rendering",
     children: {}
   },
   autoResizeNodeFeatureEnabled: {
@@ -2854,6 +2861,11 @@ var CanvasPatcher = class extends Patcher {
   patchNode(node) {
     const that = this;
     Patcher.patch(this.plugin, node, {
+      render: Patcher.OverrideExisting((next) => function(...args) {
+        const result = next.call(this, ...args);
+        that.plugin.app.workspace.trigger("advanced-canvas:node-rendered", this.canvas, node);
+        return result;
+      }),
       setData: Patcher.OverrideExisting((next) => function(data, addHistory) {
         const result = next.call(this, data);
         if (node.initialized && !node.isDirty) {
@@ -7422,6 +7434,38 @@ var EdgeHighlightCanvasExtension = class extends CanvasExtension {
   }
 };
 
+// src/canvas-extensions/reading-mode-fix-canvas-extension.ts
+var ReadingModeFixCanvasExtension = class extends CanvasExtension {
+  isEnabled() {
+    return "readingModeFixEnabled";
+  }
+  init() {
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      "advanced-canvas:node-rendered",
+      (_canvas, node) => this.updateNodeRenderer(node)
+    ));
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      "advanced-canvas:node-editing-state-changed",
+      (_canvas, node, isEditing) => {
+        if (isEditing) return;
+        this.updateNodeRenderer(node);
+      }
+    ));
+  }
+  updateNodeRenderer(node) {
+    var _a, _b;
+    const renderer = (_b = (_a = node.child) == null ? void 0 : _a.previewMode) == null ? void 0 : _b.renderer;
+    if (!renderer) return;
+    renderer.onRendered(() => {
+      var _a2;
+      let text = (_a2 = renderer.text) != null ? _a2 : "";
+      text = text.replaceAll('<span class="vertical-space">&nbsp;</span>\n', "\n");
+      text = text.replaceAll("\n", '<span class="vertical-space">&nbsp;</span>\n');
+      renderer.set(text);
+    });
+  }
+};
+
 // src/canvas-extensions/dataset-exposers/canvas-metadata-exposer.ts
 var CanvasMetadataExposerExtension = class extends CanvasExtension {
   isEnabled() {
@@ -7442,6 +7486,54 @@ var CanvasMetadataExposerExtension = class extends CanvasExtension {
     for (const [nodeId, node] of canvas.nodes) {
       if (nodeId === startNodeId) node.nodeEl.dataset.isStartNode = "true";
       else delete node.nodeEl.dataset.isStartNode;
+    }
+  }
+};
+
+// src/canvas-extensions/dataset-exposers/canvas-wrapper-exposer.ts
+var EXPOSED_SETTINGS = [
+  "disableFontSizeRelativeToZoom",
+  "hideBackgroundGridWhenInReadonly",
+  "readingModeFixEnabled",
+  "collapsibleGroupsFeatureEnabled",
+  "collapsedGroupPreviewOnDrag",
+  "allowFloatingEdgeCreation"
+];
+var CanvasWrapperExposerExtension = class _CanvasWrapperExposerExtension extends CanvasExtension {
+  isEnabled() {
+    return true;
+  }
+  init() {
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      "advanced-canvas:settings-changed",
+      () => {
+        var _a;
+        return _CanvasWrapperExposerExtension.updateCanvasExposedSettings(
+          this.plugin,
+          (_a = this.plugin.getCurrentCanvas()) == null ? void 0 : _a.wrapperEl
+        );
+      }
+    ));
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      "advanced-canvas:canvas-changed",
+      (canvas) => _CanvasWrapperExposerExtension.updateCanvasExposedSettings(
+        this.plugin,
+        canvas.wrapperEl
+      )
+    ));
+    this.plugin.registerEvent(this.plugin.app.workspace.on(
+      "advanced-canvas:dragging-state-changed",
+      (canvas, dragging) => {
+        if (dragging) canvas.wrapperEl.dataset.isDragging = "true";
+        else delete canvas.wrapperEl.dataset.isDragging;
+      }
+    ));
+  }
+  static updateCanvasExposedSettings(plugin, element) {
+    if (!element) return;
+    for (const setting of EXPOSED_SETTINGS) {
+      const value = plugin.settings.getSetting(setting);
+      element.dataset[setting] = JSON.stringify(value);
     }
   }
 };
@@ -7483,6 +7575,7 @@ var NodeExposerExtension = class extends CanvasExtension {
         iframe.classList.add(CANVAS_NODE_IFRAME_BODY_CLASS);
         new MutationObserver(() => iframe.classList.toggle(CANVAS_NODE_IFRAME_BODY_CLASS, true)).observe(iframe, { attributes: true, attributeFilter: ["class"] });
         this.setDataAttributes(iframe, nodeData);
+        CanvasWrapperExposerExtension.updateCanvasExposedSettings(this.plugin, iframe);
       }
     ));
   }
@@ -7559,43 +7652,6 @@ var EdgeExposerExtension = class extends CanvasExtension {
         }
       }
     ));
-  }
-};
-
-// src/canvas-extensions/dataset-exposers/canvas-wrapper-exposer.ts
-var EXPOSED_SETTINGS = [
-  "disableFontSizeRelativeToZoom",
-  "hideBackgroundGridWhenInReadonly",
-  "collapsibleGroupsFeatureEnabled",
-  "collapsedGroupPreviewOnDrag",
-  "allowFloatingEdgeCreation"
-];
-var CanvasWrapperExposerExtension = class extends CanvasExtension {
-  isEnabled() {
-    return true;
-  }
-  init() {
-    this.plugin.registerEvent(this.plugin.app.workspace.on(
-      "advanced-canvas:settings-changed",
-      () => this.updateExposedSettings(this.plugin.getCurrentCanvas())
-    ));
-    this.plugin.registerEvent(this.plugin.app.workspace.on(
-      "advanced-canvas:canvas-changed",
-      (canvas) => this.updateExposedSettings(canvas)
-    ));
-    this.plugin.registerEvent(this.plugin.app.workspace.on(
-      "advanced-canvas:dragging-state-changed",
-      (canvas, dragging) => {
-        if (dragging) canvas.wrapperEl.dataset.isDragging = "true";
-        else delete canvas.wrapperEl.dataset.isDragging;
-      }
-    ));
-  }
-  updateExposedSettings(canvas) {
-    if (!canvas) return;
-    for (const setting of EXPOSED_SETTINGS) {
-      canvas.wrapperEl.dataset[setting] = JSON.stringify(this.plugin.settings.getSetting(setting));
-    }
   }
 };
 
@@ -7701,6 +7757,7 @@ var CANVAS_EXTENSIONS = [
   BetterDefaultSettingsCanvasExtension,
   CommandsCanvasExtension,
   BetterReadonlyCanvasExtension,
+  ReadingModeFixCanvasExtension,
   GroupCanvasExtension,
   NodeTemplatesCanvasExtension,
   VariableBreakpointCanvasExtension,

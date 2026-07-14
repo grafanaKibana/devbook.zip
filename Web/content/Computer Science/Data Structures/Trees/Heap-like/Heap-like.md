@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-12T14:27:20.424Z
-modified: 2026-07-12T14:27:20.425Z
-published: 2026-07-12T14:27:20.425Z
+created: 2026-07-13T09:43:13.824Z
+modified: 2026-07-13T09:43:13.824Z
+published: 2026-07-13T09:43:13.824Z
 tags:
   - FolderNote
 topic:
@@ -13,7 +13,7 @@ summary: Priority-queue structures with an O(1) root peek, differing on meld and
 level:
   - "4"
 priority: Medium
-status: Not-Started
+status: Done
 ---
 
 # Intro

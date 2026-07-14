@@ -1,7 +1,7 @@
 {
   "settingsSchemaVersion": 2,
   "gitRemoteUrl": "https://github.com/grafanaKibana/devbook.zip.git",
-  "gitBranch": "main",
+  "gitBranch": "maintenance/design-polish",
   "gitCorsProxyUrl": "",
   "gitAuthType": "basic",
   "gitAuthUsername": "grafanaKibana",

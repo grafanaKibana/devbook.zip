@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T21:41:17.203Z
-modified: 2026-07-11T21:41:17.207Z
-published: 2026-07-11T21:41:17.207Z
+created: 2026-07-13T09:43:13.822Z
+modified: 2026-07-13T09:43:13.822Z
+published: 2026-07-13T09:43:13.822Z
 tags:
   - FolderNote
 topic:
@@ -13,7 +13,7 @@ summary: A system's ability to keep serving requests as load grows by adding res
 level:
   - "2"
 priority: High
-status: Not-Started
+status: Creation
 ---
 
 # Intro

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-12T14:27:20.406Z
-modified: 2026-07-12T14:27:20.406Z
-published: 2026-07-12T14:27:20.406Z
+created: 2026-07-12T20:39:23.957Z
+modified: 2026-07-12T20:39:23.957Z
+published: 2026-07-12T20:39:23.957Z
 topic:
   - Computer Science
 subtopic:
@@ -71,6 +71,56 @@ Both prerequisites are load-bearing, and each failure has a distinct signature.
 - **No optimal substructure.** If a globally optimal answer is not composed of optimal sub-answers, the recurrence is simply wrong. The longest _simple_ path in a general graph is the standard failure — the best path into a vertex can force a worse continuation, so per-vertex optima do not compose into the global optimum, and the problem needs full search ([[Backtracking]]). (The opposite extreme is [[Greedy Algorithms|greedy]], which is not a failure of optimal substructure but a _strengthening_ of it: when the problem also has the greedy-choice property — one locally optimal choice is provably part of some global optimum — the table collapses to a single committed choice at each step.)
 - **State space too large to tabulate.** The time bound is also the memory bound. A knapsack with capacity `10⁹` has `10⁹` states per item; the `states × work` product that is polynomial in one parameter can still be exponential in the input's bit length (0/1 knapsack is NP-hard). Memoising only the reached states, or redefining the state, is the escape.
 - **Wrong state definition.** Omitting a dimension the answer depends on maps two different subproblems to the same slot, and the second read returns a stale value with no error. Bottom-up, the analogous defect is filling a cell before its dependencies and reading uninitialised sub-answers. Both are silent: nothing crashes, the table just answers the wrong question.
+
+## One task, greedy versus DP — coin change
+
+The clearest way to see what DP buys is a task where the cheaper paradigm gets the wrong answer. **Minimum coin change:** make an amount `W` from denominations `{1, 3, 4}` using as few coins as possible.
+
+A [[Greedy Algorithms|greedy]] rule — take the largest coin that fits, repeat — is `O(W)` and needs no table. Making `6` it takes `4`, then `1`, then `1`: three coins. It commits to the `4` on the first step and never reconsiders. But `3 + 3` uses only two, so the greedy first choice belongs to no optimal solution — the greedy-choice property fails for this denomination set, and there is nothing to patch in the loop.
+
+DP fixes the amount as the state and never commits early. Let `dp[a]` be the fewest coins summing to `a`; each amount tries _every_ coin and reuses the already-solved smaller amount:
+
+`dp[a] = min over coins c ≤ a of dp[a − c] + 1`, with `dp[0] = 0`.
+
+Filling the table left to right for `{1, 3, 4}`:
+
+| amount `a` | 0 | 1 | 2 | 3 | 4 | 5 | 6 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `dp[a]` | 0 | 1 | 2 | 1 | 1 | 2 | **2** |
+| one optimal set | — | 1 | 1+1 | 3 | 4 | 4+1 | 3+3 |
+
+`dp[6]` considers `dp[6−4]+1 = dp[2]+1 = 3` _and_ `dp[6−3]+1 = dp[3]+1 = 2`, and keeps the smaller — the `3 + 3` answer greedy could never reach, because it had already spent the `4`. The overlapping subproblems are visible in the table: `dp[3]` is computed once and read by both `dp[6]` and `dp[4]`. The cost is `O(W × coins)` time and `O(W)` space, against greedy's `O(W)` time and `O(1)` space.
+
+> [!EXAMPLE]- Coin change both ways (C#)
+>
+> ```csharp
+> // Greedy: largest coin first. O(amount) time, O(1) space — but only correct
+> // for canonical systems like {1, 5, 10, 25}, not for {1, 3, 4}.
+> static int GreedyCoins(int[] descending, int amount)
+> {
+>     var count = 0;
+>     foreach (var c in descending)
+>         while (amount >= c) { amount -= c; count++; }
+>     return amount == 0 ? count : -1;
+> }
+>
+> // DP: fewest coins for every sub-amount, reusing sub-results.
+> // O(amount × coins) time, O(amount) space — correct for any denominations.
+> static int DpCoins(int[] coins, int amount)
+> {
+>     var dp = new int[amount + 1];
+>     Array.Fill(dp, amount + 1);           // sentinel larger than any real answer
+>     dp[0] = 0;
+>     for (var a = 1; a <= amount; a++)
+>         foreach (var c in coins)
+>             if (c <= a)
+>                 dp[a] = Math.Min(dp[a], dp[a - c] + 1);
+>     return dp[amount] > amount ? -1 : dp[amount];
+> }
+> // GreedyCoins({4,3,1}, 6) == 3;  DpCoins({1,3,4}, 6) == 2.
+> ```
+
+The deciding question is not "is DP better" but "does the greedy-choice property hold". On canonical currencies `{1, 5, 10, 25}` it does, so greedy is optimal _and_ cheaper — reach for DP only when a local rule can be globally wrong, which the [[Greedy Algorithms]] note works through from the other side.
 
 ## Reference drawer
 
