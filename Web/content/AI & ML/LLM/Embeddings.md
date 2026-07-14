@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T21:44:17.129Z
-modified: 2026-07-11T21:44:17.130Z
-published: 2026-07-11T21:44:17.130Z
+created: 2026-07-13T18:39:40.411Z
+modified: 2026-07-13T18:39:40.411Z
+published: 2026-07-13T18:39:40.411Z
 topic:
   - AI & ML
 subtopic:
@@ -82,7 +82,7 @@ Mitigation: finetune with domain data (GPL or continued pre-training on your cor
 
 Changing the embedding model — even a minor version — invalidates every stored vector. The new model produces vectors in a different geometric space. Cosine similarity between old and new vectors is meaningless.
 
-This means re-embedding the entire corpus: for a 10M-chunk index at $0.02/1M tokens and 500 tokens/chunk average, that is ~$100 and hours of ingestion time. Key the [[AI & ML/LLM/RAG/Caching|embedding cache]] by model name + version to prevent serving stale vectors.
+This means re-embedding the entire corpus: for a 10M-chunk index at $0.02/1M tokens and 500 tokens/chunk average, that is ~$100 and hours of ingestion time. Key the [[AI & ML/LLM/Context Engineering/RAG/Caching|embedding cache]] by model name + version to prevent serving stale vectors.
 
 ### Benchmark Leaderboard Overfitting
 

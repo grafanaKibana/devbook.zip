@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-12T14:27:20.397Z
-modified: 2026-07-12T14:27:20.397Z
-published: 2026-07-12T14:27:20.397Z
+created: 2026-07-13T09:43:13.821Z
+modified: 2026-07-13T09:43:13.821Z
+published: 2026-07-13T09:43:13.821Z
 tags:
   - FolderNote
 icon: building-2
@@ -15,7 +15,7 @@ summary: Structuring software with clear boundaries and explicit tradeoffs so it
 priority: High
 level:
   - "4"
-status: Not-Started
+status: Creation
 ---
 
 # Intro

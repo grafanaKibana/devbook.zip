@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T18:17:50.442Z
-modified: 2026-07-11T18:17:50.452Z
-published: 2026-07-11T18:17:50.452Z
+created: 2026-07-13T09:43:13.822Z
+modified: 2026-07-13T09:43:13.822Z
+published: 2026-07-13T09:43:13.822Z
 topic:
   - Architecture
 subtopic:
@@ -11,7 +11,7 @@ summary: Horizontal scaling adds more service instances behind a load balancer, 
 level:
   - "2"
 priority: High
-status: Not-Started
+status: Creation
 ---
 
 # Horizontal Scaling

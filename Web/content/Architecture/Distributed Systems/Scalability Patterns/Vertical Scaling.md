@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T18:17:55.845Z
-modified: 2026-07-11T18:17:55.849Z
-published: 2026-07-11T18:17:55.849Z
+created: 2026-07-13T09:43:13.823Z
+modified: 2026-07-13T09:43:13.823Z
+published: 2026-07-13T09:43:13.823Z
 topic:
   - Architecture
 subtopic:
@@ -11,7 +11,7 @@ summary: Vertical scaling gives a single node more CPU, RAM, or disk, the simple
 level:
   - "2"
 priority: High
-status: Not-Started
+status: Creation
 ---
 
 # Vertical Scaling

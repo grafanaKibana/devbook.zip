@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T21:44:19.250Z
-modified: 2026-07-11T21:44:19.251Z
-published: 2026-07-11T21:44:19.251Z
+created: 2026-07-13T18:39:40.427Z
+modified: 2026-07-13T18:39:40.427Z
+published: 2026-07-13T18:39:40.427Z
 topic:
   - AI & ML
 subtopic:
@@ -68,7 +68,7 @@ The grounding contract defines the rules the model must follow:
 
 **Abstention** — when evidence is insufficient, the model should explicitly state this rather than fabricate an answer. Abstention preserves user trust. Define the abstention output format in the system prompt: a specific phrase like "I don't have enough information to answer this" rather than a vague hedge.
 
-Grounding is especially critical in [[AI & ML/LLM/RAG/RAG|RAG]] pipelines where the model must stay faithful to retrieved documents, but the same principles apply to any context-augmented generation: tool outputs, database results, or user-provided documents.
+Grounding is especially critical in [[AI & ML/LLM/Context Engineering/RAG/RAG|RAG]] pipelines where the model must stay faithful to retrieved documents, but the same principles apply to any context-augmented generation: tool outputs, database results, or user-provided documents.
 
 ## Context Assembly
 
@@ -82,7 +82,7 @@ Practical implications:
 - Include source identifiers (document IDs, section markers) in the context payload so the model can produce traceable citations.
 - When the total evidence exceeds the context window, truncate lower-ranked chunks rather than truncating all chunks. A complete chunk with full context is more useful than fragments of many chunks.
 
-For RAG-specific context assembly patterns, see [[AI & ML/LLM/RAG/RAG|RAG]].
+For RAG-specific context assembly patterns, see [[AI & ML/LLM/Context Engineering/RAG/RAG|RAG]].
 
 ## Structured Output
 

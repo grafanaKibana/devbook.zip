@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T21:43:14.600Z
-modified: 2026-07-11T21:43:14.601Z
-published: 2026-07-11T21:43:14.601Z
+created: 2026-07-13T18:39:40.396Z
+modified: 2026-07-13T19:23:03.268Z
+published: 2026-07-13T19:23:03.268Z
 tags:
   - FolderNote
 icon: brain
@@ -15,7 +15,7 @@ summary: "How learning systems are built, evaluated, and operated: classic ML, L
 level:
   - "3"
 priority: High
-status: Done
+status: Creation
 ---
 
 # Intro
@@ -38,7 +38,7 @@ AI & ML covers how learning systems are built, evaluated, and operated — from 
 > - Without held-out evaluation, every model swap, prompt change, or retraining run is a guess — improvements cannot be distinguished from noise or regressions
 > - Production failures are dominated by data and distribution problems (drift, leakage, segment regressions), which only evaluation and monitoring catch — not by raw model capability
 > - A weaker model with solid evaluation and a feedback loop improves over time; a stronger model without them silently degrades
-> - This is why every branch of this section has its own evaluation pages: [[AI & ML/Machine Learning/Evaluation/Evaluation|ML Evaluation]] and the general [[AI & ML/LLM/Evaluation/Evaluation|LLM Evaluation]], which RAG and agents specialize in [[AI & ML/LLM/RAG/Evaluation/Evaluation|RAG Evaluation]] and [[AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]]
+> - This is why every branch of this section has its own evaluation pages: [[AI & ML/Machine Learning/Evaluation/Evaluation|ML Evaluation]] and the general [[AI & ML/LLM/Evaluation/Evaluation|LLM Evaluation]], which RAG and agents specialize in [[AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation|RAG Evaluation]] and [[AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]]
 
 ## References
 

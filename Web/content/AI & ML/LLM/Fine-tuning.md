@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T21:44:11.142Z
-modified: 2026-07-11T21:44:11.142Z
-published: 2026-07-11T21:44:11.142Z
+created: 2026-07-13T18:39:40.421Z
+modified: 2026-07-13T18:39:40.421Z
+published: 2026-07-13T18:39:40.421Z
 topic:
   - AI & ML
 subtopic:
@@ -16,7 +16,7 @@ status: Done
 
 # Intro
 
-Fine-tuning continues training a pretrained model's weights on task-specific data, changing the model's behavior rather than just its inputs. It is the most powerful and most expensive of the three adaptation levers in [[AI & ML/LLM/LLM|LLM]] — the others being [[AI & ML/LLM/Prompting/Prompting|Prompting]] (no weight change) and [[AI & ML/LLM/RAG/RAG|RAG]] (external knowledge at query time). The defining trait: fine-tuning bakes behavior into the weights, so it persists across every request without consuming context tokens — but it also bakes in a snapshot that starts aging the moment training ends.
+Fine-tuning continues training a pretrained model's weights on task-specific data, changing the model's behavior rather than just its inputs. It is the most powerful and most expensive of the three adaptation levers in [[AI & ML/LLM/LLM|LLM]] — the others being [[AI & ML/LLM/Prompt Engineering/Prompt Engineering|Prompting]] (no weight change) and [[AI & ML/LLM/Context Engineering/RAG/RAG|RAG]] (external knowledge at query time). The defining trait: fine-tuning bakes behavior into the weights, so it persists across every request without consuming context tokens — but it also bakes in a snapshot that starts aging the moment training ends.
 
 The single most important decision is _what_ you are trying to change. Fine-tuning is the right tool for **behavior** — output format, tone, refusal policy, domain style, structured-output reliability, or compressing a large model's behavior into a smaller one. It is the wrong tool for **knowledge** — facts change faster than you can retrain, fine-tuning provides no source traceability, and a model fine-tuned to "know" a fact will still hallucinate confidently at the edges. Keep mutable facts in retrieval; keep durable behavior in weights.
 
@@ -80,7 +80,7 @@ Data quality dominates data quantity. A few hundred to a few thousand clean, con
 
 **Why it happens**: fine-tuning shifts behavior and style far more reliably than it implants retrievable facts, and it bakes a snapshot with no source traceability.
 
-**How to avoid it**: use [[AI & ML/LLM/RAG/RAG|RAG]] for knowledge. Fine-tune for how the model should behave with that knowledge, not to store the knowledge itself.
+**How to avoid it**: use [[AI & ML/LLM/Context Engineering/RAG/RAG|RAG]] for knowledge. Fine-tune for how the model should behave with that knowledge, not to store the knowledge itself.
 
 ### Catastrophic Forgetting
 

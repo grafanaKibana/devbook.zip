@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T21:41:12.179Z
-modified: 2026-07-11T21:41:12.180Z
-published: 2026-07-11T21:41:12.180Z
+created: 2026-07-13T09:43:13.823Z
+modified: 2026-07-13T09:43:13.823Z
+published: 2026-07-13T09:43:13.823Z
 tags:
   - FolderNote
 topic:
@@ -12,7 +12,7 @@ subtopic:
 summary: Structures that combine two primitives to get a guarantee neither gives alone.
 level:
   - "4"
-status: Not-Started
+status: Creation
 priority: High
 ---
 

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T21:43:52.579Z
-modified: 2026-07-11T21:43:52.579Z
-published: 2026-07-11T21:43:52.579Z
+created: 2026-07-13T18:39:40.402Z
+modified: 2026-07-13T18:39:40.402Z
+published: 2026-07-13T18:39:40.402Z
 tags:
   - FolderNote
 topic:
@@ -35,7 +35,7 @@ The recurring failure across all four is the **offline–online gap**: a metric 
 
 ## Metric Families
 
-Pick the family from the decision, not from habit: threshold metrics (precision, recall, F1) for a fixed operating point, ranking metrics (ROC-AUC, PR-AUC) for comparing models before a threshold exists, and calibration metrics (Brier, ECE) when downstream logic consumes probabilities rather than labels. For ranking items within a retrieved list (NDCG, MAP, MRR), see [[AI & ML/LLM/RAG/Monitoring#Retrieval Quality Metrics|RAG Monitoring]]. Regression targets get their own family, covered below.
+Pick the family from the decision, not from habit: threshold metrics (precision, recall, F1) for a fixed operating point, ranking metrics (ROC-AUC, PR-AUC) for comparing models before a threshold exists, and calibration metrics (Brier, ECE) when downstream logic consumes probabilities rather than labels. For ranking items within a retrieved list (NDCG, MAP, MRR), see [[AI & ML/LLM/Context Engineering/RAG/Monitoring#Retrieval Quality Metrics|RAG Monitoring]]. Regression targets get their own family, covered below.
 
 ### Regression Metrics
 
