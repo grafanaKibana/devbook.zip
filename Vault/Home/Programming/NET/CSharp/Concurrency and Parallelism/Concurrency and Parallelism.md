@@ -15,7 +15,7 @@ level:
 
 # Intro
 
-Concurrency and parallelism are related but different concerns in .NET applications. Concurrency is about making progress on multiple units of work without unnecessary blocking, while parallelism is about using multiple cores to finish CPU-bound work faster. This hub focuses on practical decisions for backend and desktop systems where latency, throughput, and correctness all matter.
+Concurrency is a property of program **structure** — composing a program out of independently executing tasks that can be *dealt with* in overlapping time periods. Parallelism is a property of **execution** — actually *doing* several of them in the same instant, which requires multiple cores. A single-core machine runs concurrent programs perfectly well by interleaving them, with zero parallelism; concurrent design enables parallelism without requiring it. The practical consequence is the split this hub is organized around: concurrency is what keeps I/O-bound work from blocking threads, and parallelism is what makes CPU-bound work finish faster on multiple cores.
 
 ```datacorejsx
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
@@ -84,15 +84,15 @@ public async Task<IReadOnlyList<UserDto>> LoadUsersBoundedAsync(
 
 #### Same requirement: "protect state and stay async"
 
-- For tiny in-memory critical sections, `lock` is simplest.
+- For tiny in-memory critical sections, a [[Locking|lock]] is simplest.
 - For async sections that must `await`, prefer `SemaphoreSlim.WaitAsync`.
-- If contention is high and order matters, move state mutation behind a single-consumer `Channel<T>`.
+- If contention is high and order matters, move state mutation behind a single-consumer [[Channels|channel]].
 
 ## Questions
 
 > [!QUESTION]- What is the difference between concurrency and parallelism in practice?
-> Concurrency is about responsiveness and non-blocking progress, often with async I/O.
-> Parallelism is about throughput for CPU-bound workloads by using multiple cores simultaneously.
+> Concurrency is structure — a program composed of independently executing tasks that can be dealt with in overlapping time periods. Parallelism is execution — those tasks actually running in the same instant, which takes multiple cores. A single-core machine is perfectly capable of concurrency (it interleaves) and incapable of parallelism.
+> In practice the structural choice buys responsiveness and non-blocking progress for I/O-bound work, and separately enables the throughput gain that parallelism delivers for CPU-bound work. Concurrent design permits parallelism; it does not require it.
 
 > [!QUESTION]- Why do many production outages in .NET systems look like "performance" but are actually concurrency bugs?
 > Because thread starvation, deadlocks, lock contention, and unbounded fan-out all manifest as latency spikes and timeouts before obvious crashes.
@@ -108,6 +108,7 @@ public async Task<IReadOnlyList<UserDto>> LoadUsersBoundedAsync(
 
 ## References
 
+- [Concurrency Is Not Parallelism (Rob Pike, 2012)](https://go.dev/talks/2012/concurrency.slide) — the talk this distinction comes from; argues concurrency is about program structure, parallelism about execution.
 - [Asynchronous programming with async and await (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/)
 - [Task parallel library (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/task-parallel-library-tpl)
 - [Managed threading best practices (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/threading/managed-threading-best-practices)
