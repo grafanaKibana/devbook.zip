@@ -98,7 +98,8 @@
           "transitionStyle": "hue",
           "scope": "root"
         }
-      }
+      },
+      "descendantExcludedFolders": []
     }
   ],
   "vaultProfile": "default",
@@ -158,7 +159,7 @@
   "showTooltipPath": true,
   "showTooltipWordCount": false,
   "desktopBackground": "primary",
-  "desktopScale": 1.05,
+  "desktopScale": 1,
   "mobileScale": 1,
   "useFloatingToolbars": true,
   "toolbarVisibility": {
@@ -212,9 +213,9 @@
   "springLoadedFoldersSubsequentDelay": 0.5,
   "showSectionIcons": true,
   "showShortcuts": true,
-  "shortcutBadgeDisplay": "index",
+  "shortcutBadgeDisplay": "none",
   "skipAutoScroll": false,
-  "showRecentNotes": true,
+  "showRecentNotes": false,
   "hideRecentNotes": "none",
   "pinRecentNotesWithShortcuts": false,
   "recentNotesCount": 5,
@@ -341,6 +342,7 @@
   "calendarMonthHeadingFormat": "full",
   "calendarHighlightToday": false,
   "calendarShowFeatureImage": false,
+  "calendarShowTasks": true,
   "calendarMonthHighlights": {},
   "calendarShowWeekNumber": false,
   "calendarShowQuarter": false,
@@ -631,7 +633,7 @@
     "#404040",
     "#404040"
   ],
-  "lastShownVersion": "3.2.2",
+  "lastShownVersion": "3.2.3",
   "rootFolderOrder": [],
   "rootTagOrder": [],
   "rootPropertyOrder": []
