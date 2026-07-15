@@ -28,6 +28,23 @@ flowchart TD
   E --> F[Return]
 ```
 
+## Latency ladder
+
+Caching only pays off because the cost of reaching data spans many orders of magnitude depending on *where* it lives. This is the classic "latency numbers every programmer should know" ladder — the absolute figures drift with each hardware generation, but the **ratios between the rungs are what stay stable**, which is what makes it a durable mental model for caching, indexing, and data-placement decisions.
+
+| Where the data is | Rough latency | Relative to L1 |
+| --- | --- | --- |
+| L1 cache | ~1 ns | 1× |
+| L2 cache | ~4 ns | ~4× |
+| Main memory (RAM) | ~100 ns | ~100× |
+| SSD random read | ~16 µs | ~16,000× |
+| Round trip within a datacenter | ~0.5 ms | ~500,000× |
+| WAN round trip (cross-continent) | ~150 ms | ~150,000,000× |
+
+Each rung down is one to three orders of magnitude slower than the one above. That gap is the entire economic case for a cache: an L1 hit in nanoseconds versus an origin fetch over the network in milliseconds is a factor of a million, so even a modest hit rate on the slow tier dominates average latency. The same ladder explains why an in-process L1 is worth keeping in front of a distributed L2, and why crossing a WAN link is a design decision rather than an implementation detail.
+
+The numbers here are recreated from the well-known figures: the original [Jeff Dean / Peter Norvig gist](https://gist.github.com/jboner/2841832) and Colin Scott's hardware-year-adjusted [interactive version](https://colin-scott.github.io/personal_website/research/interactive_latency.html).
+
 ## Cache Patterns
 
 **Cache-aside** — the application reads and writes the cache explicitly. On a miss, the app fetches from the source, writes to the cache, and returns. The app owns both paths.

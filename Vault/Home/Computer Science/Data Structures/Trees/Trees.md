@@ -49,6 +49,7 @@ A tree organizes nodes so each node has at most one parent (except the root) and
 | [[B-tree]] / [[B+ Tree\|B+-tree]] | High fan-out, shallow; node = disk/page sized | **Database & filesystem indexes** — minimizes disk seeks. See [[Indexes]] |
 | [[Trie\|Trie (prefix tree)]] | Path = sequence of characters | Autocomplete, prefix search, routing tables — O(k) by key length, independent of n |
 | [[Ternary Search Tree]] | Trie whose children are a BST on the next char, not a σ-wide array | Large/Unicode alphabets; sorted and near-neighbour string queries |
+| [[Quadtree]] | Recursively splits 2D space into four quadrants — a **spatial-partitioning tree, unbalanced, not an O(log n) balanced search tree** | 2D range / nearest-neighbor / geospatial queries (spatial indexes, collision detection) |
 | [[Heap]] | Parent/child priority, array-backed | Priority queues and heap-like mergeable queues |
 | [[Segment Tree]] | Any associative merge over a range — sum, **min/max**, gcd; lazy range updates | Range-min/max & range-assign in O(log n), ~4n slots |
 | [[Fenwick Tree\|Fenwick (BIT)]] | Prefix/range **sum** only — invertible aggregates, so no range-min | Range-sum with point updates in O(log n), ~n slots |

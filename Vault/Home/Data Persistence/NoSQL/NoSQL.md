@@ -5,8 +5,8 @@ subtopic:
   - NoSQL
 summary: "Non-relational stores trading the relational model for scalability, flexible schemas, or specialized access."
 level:
-  - "3"
-status: Done
+  - "4"
+status: Creation
 tags:
   - FolderNote
 
