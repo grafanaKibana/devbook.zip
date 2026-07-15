@@ -618,8 +618,9 @@ body[data-slug$="/index"]:not([data-slug="tags/index"]) .page-listing {
 //     clips when a two-word topic wraps to two lines.
 //
 // The progress bar stays pinned to the bottom of every card via the note's
-// `.dc-topic-spacer` (left at its default), and the site footer keeps its stock
-// `margin-bottom` — neither is overridden here.
+// `.dc-topic-spacer` (left at its default). The site footer keeps its stock
+// `margin-bottom` except inside the desktop one-viewport fill, which trims it
+// to hand the space to the card rows.
 // ============================================================================
 body[data-slug="index"] {
   // Card chrome tightens as the viewport shrinks — one knob for both branches.
@@ -750,20 +751,30 @@ body[data-slug="index"] {
       gap: clamp(0.5rem, 1.4vh, 0.9rem);
     }
     // Cards stretch to fill the viewport with only a small, even gap between
-    // them. Rows are minmax(0, 1fr) — three EQUAL rows that divide the leftover
-    // height and, crucially, SHRINK below their content when the window is short
-    // (minmax(min-content, 1fr) refused to shrink, so tall cards overflowed the
-    // fixed-height #quartz-body and collided with the total bar). When full
-    // descriptions no longer fit, the HomepageFit controller hides them
-    // dashboard-wide (see the shared [data-home-fit] states) so nothing scrolls.
+    // them. Rows are minmax(min-content, 1fr): each row is at least as tall as
+    // its wordiest card, and the leftover height is shared — so a row of narrow
+    // span-3 cards with three-line summaries may run slightly taller than the
+    // hero rows instead of clipping. Rows therefore never shrink below their
+    // content; when the window is too short for that, the grid overflows its
+    // fixed-height container, the HomepageFit fit check fails, and the
+    // controller hides a tier (summaries → counters → bars) dashboard-wide —
+    // shrinking min-content itself — or bails to the scrolling layout. The
+    // controller is what makes min-content safe here: without it this rule
+    // used to hard-clip against the total bar.
     .dc-topic-grid {
       flex: 1 1 auto;
       min-height: 0;
-      grid-auto-rows: minmax(0, 1fr);
+      grid-auto-rows: minmax(min-content, 1fr);
       gap: clamp(0.6rem, 0.9vw, 1rem);
     }
     .dc-topic-total {
       flex: 0 0 auto;
+    }
+    // The stock footer bottom margin is dead space inside the fixed 100dvh
+    // frame — reclaim most of it for the dashboard rows. Only in fit mode;
+    // everywhere else the footer keeps its stock margin.
+    .page > #quartz-body > footer {
+      margin-bottom: 1rem;
     }
 
     // Each card is a flex column whose spacer absorbs the leftover height and

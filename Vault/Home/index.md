@@ -5,6 +5,7 @@ tags:
   - MetricsIgnore
   - Template
 publish: true
+icon: home
 ---
 ```datacorejsx
 const { CARD_CSS, squashCss } = await dc.require("Assets/components/devbook-card.jsx");

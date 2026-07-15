@@ -551,7 +551,8 @@
   "fileBackgroundColors": {},
   "folderIcons": {
     "Assets": "book-image",
-    "Templates": "book-dashed"
+    "Templates": "book-dashed",
+    "Home": "home"
   },
   "folderColors": {},
   "folderBackgroundColors": {},

@@ -3,6 +3,7 @@ title: Credits
 publish: true
 tags:
   - MetricsIgnore
+icon: badge-info
 ---
 
 # Welcome to my software engineering notebook
