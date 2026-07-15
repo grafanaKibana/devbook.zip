@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-15T11:45:41.732Z
-modified: 2026-07-15T11:45:41.733Z
-published: 2026-07-15T11:45:41.733Z
+created: 2026-07-15T12:17:30.514Z
+modified: 2026-07-15T12:17:30.514Z
+published: 2026-07-15T12:17:30.514Z
 topic:
   - Computer Science
 subtopic: []
@@ -24,7 +24,7 @@ The same notation measures two resources. **Time complexity** counts operations 
 
 ## The growth classes, side by side
 
-The complexity class is the shape of the curve. This chart plots the five classes that describe almost all everyday code, over a small input range where they stay comparable.
+The complexity class is the shape of the curve. This chart plots six classes over a small input range, on a single axis tall enough to hold `2ⁿ` at `n = 10` — which is itself the lesson: making room for the exponential flattens every polynomial class into a thin band along the bottom.
 
 ```mermaid
 ---
@@ -34,7 +34,7 @@ config:
     height: 500
   themeVariables:
     xyChart:
-      plotColorPalette: "#3b82f6, #22c55e, #eab308, #f97316, #ef4444"
+      plotColorPalette: "#3b82f6, #22c55e, #eab308, #f97316, #ef4444, #7c3aed"
 ---
 xychart-beta
   title "Growth of common complexity classes (n = 1..10)"
@@ -45,37 +45,19 @@ xychart-beta
   line [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
   line [0, 2, 4.75, 8, 11.6, 15.5, 19.7, 24, 28.5, 33.2]
   line [1, 4, 9, 16, 25, 36, 49, 64, 81, 100]
-```
-
-Reading the lines from bottom to top at the right edge:
-
-- **`O(1)` constant** (flat at 1) — cost is independent of `n`. An array index or an average hash lookup.
-- **`O(log n)` logarithmic** (rises to ~3.3) — each step discards a constant fraction of the input. Binary search, a balanced-tree operation.
-- **`O(n)` linear** (reaches 10) — cost tracks input size one-for-one. A single scan.
-- **`O(n log n)` linearithmic** (reaches ~33) — a linear pass repeated a logarithmic number of times. Merge sort, and the comparison-sort lower bound.
-- **`O(n²)` quadratic** (reaches 100) — every element against every other. Nested loops, naive pair-checking.
-
-`O(2ⁿ)` and `O(n!)` are missing here because on this axis they would already dwarf everything: the next chart adds `2ⁿ` against `n²` alone to show the crossover.
-
-```mermaid
----
-config:
-  xyChart:
-    width: 1200
-    height: 500
-  themeVariables:
-    xyChart:
-      plotColorPalette: "#f97316, #ef4444"
----
-xychart-beta
-  title "The exponential wall: n squared vs 2 to the n (n = 1..10)"
-  x-axis "input size n" [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-  y-axis "operations" 0 --> 1024
-  line [1, 4, 9, 16, 25, 36, 49, 64, 81, 100]
   line [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]
 ```
 
-The lower line is `n²`, the upper is `2ⁿ`. They are equal near `n = 4`, and by `n = 10` the exponential is ten times larger and pulling away — every `+1` to `n` _doubles_ it. That doubling is the practical boundary between "solvable for large inputs" (polynomial) and "solvable only for tiny inputs" (exponential and factorial); it is why an `O(2ⁿ)` [[Backtracking|brute-force]] search caps out around `n = 30` and an `O(n!)` permutation search around `n = 12`.
+Reading the lines from bottom to top at the right edge (the swatch matches each line's colour on the chart):
+
+- 🔵 **`O(1)` constant** (flat at 1) — cost is independent of `n`. An array index or an average hash lookup.
+- 🟢 **`O(log n)` logarithmic** (rises to ~3.3) — each step discards a constant fraction of the input. Binary search, a balanced-tree operation.
+- 🟡 **`O(n)` linear** (reaches 10) — cost tracks input size one-for-one. A single scan.
+- 🟠 **`O(n log n)` linearithmic** (reaches ~33) — a linear pass repeated a logarithmic number of times. Merge sort, and the comparison-sort lower bound.
+- 🔴 **`O(n²)` quadratic** (reaches 100) — every element against every other. Nested loops, naive pair-checking.
+- 🟣 **`O(2ⁿ)` exponential** (reaches 1024) — every `+1` to `n` _doubles_ the cost. Trying every subset; naive recursion that branches.
+
+The first five curves share the bottom tenth of the axis — at a scale that holds `2ⁿ`, even `n²`'s climb to 100 reads as almost flat. That is the wall: `n²` and `2ⁿ` are equal near `n = 4`, and by `n = 10` the exponential is already ten times larger and pulling away. That doubling is the practical boundary between "solvable for large inputs" (polynomial) and "solvable only for tiny inputs" (exponential and factorial); it is why an `O(2ⁿ)` [[Backtracking|brute-force]] search caps out around `n = 30` and an `O(n!)` permutation search around `n = 12`. `O(n!)` is left off entirely — it would dwarf even `2ⁿ` here.
 
 ## Why the wall is a wall
 
