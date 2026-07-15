@@ -65,7 +65,7 @@ return function TopicDashboard() {
     !hasTag(p, "MetricsIgnore") &&
     p.$path.slice(ROOT.length + 1).split("/").length === 2;
 
-  const cards = pages
+  const baseCards = pages
     .filter(isTopicHub)
     .sort((a, b) => {
       const orderA = Number(firstString(a.value("order")) || Number.MAX_SAFE_INTEGER);
@@ -84,13 +84,23 @@ return function TopicDashboard() {
         iconSvg,
         ...statsFor(dir),
       };
-    })
-    .map((c, index) => ({
-      ...c,
-      spanDesktop: index < 3 ? 4 : 3,
-      spanMedium: index < 2 ? 6 : 4,
-      spanNarrow: index === 0 ? 12 : 6,
-    }));
+    });
+
+  const N = baseCards.length;
+  const fillSpan = (index, hero, heroSpan, baseSpan) => {
+    if (index < hero) return heroSpan;
+    const perRow = 12 / baseSpan;
+    const rest = N - hero;
+    const remainder = rest % perRow;
+    if (remainder !== 0 && index - hero >= rest - remainder) return 12 / remainder;
+    return baseSpan;
+  };
+  const cards = baseCards.map((c, index) => ({
+    ...c,
+    spanDesktop: fillSpan(index, 3, 4, 3),
+    spanMedium: fillSpan(index, 2, 6, 4),
+    spanNarrow: fillSpan(index, 1, 12, 6),
+  }));
 
   let oDone = 0, oTotal = 0, oPoints = 0;
   const oByStatus = {};
