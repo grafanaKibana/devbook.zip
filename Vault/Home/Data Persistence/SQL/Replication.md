@@ -65,6 +65,27 @@ Asynchronous replication means replicas are always slightly behind the leader. T
 
 **Sync vs async tradeoff**: synchronous replication means the leader waits for at least one replica to confirm before acknowledging the write. Zero data loss on failover, but every write pays the round-trip latency to the replica. Asynchronous replication acknowledges immediately: lower latency, but any writes not yet replicated are lost if the leader crashes before they propagate. Most production systems use async with a semi-sync option (one synchronous replica for failover safety).
 
+## Read/write splitting
+
+Single-leader replication only pays off if reads actually land on the replicas. Read/write splitting is the routing rule that makes that happen: every write (`INSERT`/`UPDATE`/`DELETE`, and anything inside an explicit transaction) goes to the primary, while read-only `SELECT`s are load-balanced across the replicas. Writes still bottleneck at the single leader, but read capacity scales with the replica count.
+
+The design question is **where the routing decision lives**:
+
+- **In the application.** The app holds two data sources — a primary/write connection and a replica/read connection — and picks per query. No extra infrastructure, and the app has the most context about which reads tolerate staleness. The cost is discipline: every caller (and every ORM query path) must route correctly and the app owns lag handling itself. One misrouted call silently reads stale data with no error.
+- **In a proxy / middleware layer.** A proxy sits between the app and the databases, inspects each statement, and forwards writes to the primary while load-balancing reads across replicas — ProxySQL and pgpool-II do this with query rules; managed options include Azure SQL Database read scale-out (`ApplicationIntent=ReadOnly`) and AWS RDS Proxy in front of an Aurora cluster. The app sees one endpoint and stays unaware of the topology, so routing changes happen in one place instead of every caller. This is the same proxy tier that smooths failover (see the connection-pool pitfall under **Pitfalls**).
+
+```mermaid
+flowchart LR
+    A[App] --> R{Router / proxy}
+    R -->|writes| P[(Primary)]
+    R -->|reads| S1[(Replica 1)]
+    R -->|reads| S2[(Replica 2)]
+    P -.->|async replication| S1
+    P -.->|async replication| S2
+```
+
+Because replication is asynchronous, a read routed to a replica right after a write can return **stale** data — the read-your-writes and monotonic-read hazards from **Replication Lag** above. Neither routing style removes this; both need the same fix: pin staleness-sensitive reads (and anything in a read-after-write flow) back to the primary, or wait for the replica's LSN to catch up. A query-level proxy can't tell which reads those are, so that decision usually stays with the application even when the proxy owns the split.
+
 ## CAP and PACELC
 
 The sync/async and leader-model choices above are all instances of one theorem. **CAP** says that when a network **P**artition splits your replicas, you must choose between **C**onsistency (reject reads/writes that can't be coordinated) and **A**vailability (keep serving, accept divergence) — you cannot have both *during a partition*. A single-leader system that refuses writes when it can't reach a quorum is **CP**; a leaderless Dynamo-style system that keeps accepting writes and reconciles later is **AP**.
@@ -122,3 +143,6 @@ Typical scaling progression: vertical scale → read replicas → caching layer 
 - [PostgreSQL High Availability and Replication](https://www.postgresql.org/docs/15/high-availability.html) — official docs covering streaming replication, WAL shipping, and standby configuration.
 - [Designing Data-Intensive Applications, Ch. 5: Replication (Martin Kleppmann)](https://www.oreilly.com/library/view/designing-data-intensive-applications/9781098119058/) — deep-dive into leader-follower, multi-leader, and leaderless replication with replication lag and consistency analysis.
 - [Read-your-writes on replicas: PostgreSQL WAIT FOR LSN and MongoDB causal consistency](https://dev.to/franckpachot/read-your-writes-on-replicas-postgresql-wait-for-lsn-and-mongodb-causal-consistency-4he2) — practitioner post on implementing read-your-writes consistency across replicas in PostgreSQL and MongoDB.
+- [Amazon RDS read replicas](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.html) — official docs on provisioning read replicas and directing read traffic to them; the primary source for the managed read/write-split pattern.
+- [pgpool-II load-balancing configuration](https://www.pgpool.net/docs/latest/en/html/runtime-config-load-balancing.html) — how a middleware proxy decides which statements are load-balanced to standbys versus sent to the primary.
+- [ProxySQL documentation](https://proxysql.com/documentation/) — query-rule engine and hostgroups used to route writes and reads to different backend groups.

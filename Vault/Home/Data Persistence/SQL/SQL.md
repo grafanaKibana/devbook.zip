@@ -10,7 +10,7 @@ publish: true
 priority: High
 level:
   - '4'
-status: Done
+status: Creation
 ---
 
 # Intro
@@ -67,6 +67,15 @@ ORDER BY headcount DESC;
 -- The same alias fails in WHERE because SELECT hasn't run yet.
 ```
 
+### Physical Query-Processing Pipeline
+
+The logical clause order above is what a query *means*; the physical pipeline is how the engine actually *produces* the result — and the cost-based optimizer is free to reorder work (swap join order, push predicates down, pick an index over a scan) as long as the logical result is preserved. The engine parses the text into a tree, binds names to real objects and type-checks them (SQL Server calls this algebrization; PostgreSQL runs a separate rewriter for views and rules), then the optimizer costs alternative plans and emits one plan of physical operators, which the executor runs against the storage engine's pages and indexes.
+
+```mermaid
+graph LR
+    P1["1 Parse syntax to tree"] --> P2["2 Bind resolve type-check"] --> P3["3 Optimize cost-based plan"] --> P4["4 Execute physical operators"] --> P5["5 Storage engine pages indexes"]
+```
+
 ## Questions
 
 > [!QUESTION]- What is the difference between WHERE and HAVING?
@@ -86,7 +95,8 @@ ORDER BY headcount DESC;
 
 ## References
 
-- [Query processing architecture guide (Microsoft Learn)](https://learn.microsoft.com/sql/relational-databases/query-processing-architecture-guide?view=sql-server-ver16)
+- [Query processing architecture guide (Microsoft Learn)](https://learn.microsoft.com/sql/relational-databases/query-processing-architecture-guide?view=sql-server-ver16) — parse → algebrize → optimize → execute; the source for the physical pipeline above.
+- [Overview of PostgreSQL Internals (PostgreSQL docs)](https://www.postgresql.org/docs/current/overview.html) — the parser → rewriter → planner/optimizer → executor stages of a query's life.
 - [WITH common_table_expression (T-SQL)](https://learn.microsoft.com/sql/t-sql/queries/with-common-table-expression-transact-sql?view=sql-server-ver16)
 - [Joins — Microsoft Learn](https://learn.microsoft.com/sql/relational-databases/performance/joins?view=sql-server-ver16)
 - [Execution plans overview](https://learn.microsoft.com/sql/relational-databases/performance/execution-plans?view=sql-server-ver16)

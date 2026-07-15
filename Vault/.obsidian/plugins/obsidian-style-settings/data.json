@@ -55,7 +55,7 @@
   "baseline-style@@tab-text-align": "center",
   "baseline-style@@file-header-visibility": "view-header-title-always",
   "baseline-style@@tab-top-left-style": "tab-top-left-icon",
-  "baseline-style@@tab-top-right-style": "tab-top-right-dropdown",
+  "baseline-style@@tab-top-right-style": "tab-top-right-icon",
   "baseline-style@@nav-action": "nav-action-indicator",
   "baseline-style@@hide-vault-switcher-off": true,
   "baseline-style@@hover-ribbon": true,
@@ -127,5 +127,9 @@
   "baseline-style@@tab-stacked-spine-orientation": "tab-stack-top",
   "baseline-style@@p-spacing": "1.5rem",
   "baseline-style@@readable-spacing-modifier": 0.25,
-  "notebook-navigator-style-settings@@nn-theme-file-border-radius": 8
+  "notebook-navigator-style-settings@@nn-theme-file-border-radius": 8,
+  "baseline-style@@tab-left-style": "tab-left-compact",
+  "baseline-style@@translucent-light-opacity": 50,
+  "baseline-style@@translucent-dark-opacity": 50,
+  "baseline-style@@mode-switcher-off": false
 }
