@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-12T14:27:20.420Z
-modified: 2026-07-12T14:27:20.420Z
-published: 2026-07-12T14:27:20.420Z
+created: 2026-07-15T07:36:25.603Z
+modified: 2026-07-15T07:36:25.603Z
+published: 2026-07-15T07:36:25.603Z
 tags:
   - FolderNote
 topic:
@@ -56,7 +56,7 @@ flowchart TD
 
 Wrap any contiguous sequence in [[Span]] to slice without copying. [[Stack]] and [[Queue]] make the restriction the feature: it states intent and can't be violated by a stray `Insert(0, …)`. .NET ships no [[Deque]] (bring a ring buffer, preferred over `LinkedList<T>`); [[Circular Buffer]] suits streaming and "last N events". [[LinkedList]] only wins for edits at held positions, and everywhere else its per-node allocations and pointer-chasing lose to contiguous storage (the numbers are in [[Arrays]]).
 
-The recurring theme: contiguous beats linked unless you can prove otherwise with a profiler. Cache locality is the dominant constant factor, and every "O(1) insert" claim for linked nodes quietly assumes you already found the node.
+The recurring theme: contiguous beats linked unless you can prove otherwise with a profiler. Cache locality is the dominant constant factor (the [[Data Persistence/Caching#Latency ladder|latency ladder]] shows why: a main-memory miss is ~100× an L1 hit), and every "O(1) insert" claim for linked nodes quietly assumes you already found the node.
 
 ## References
 

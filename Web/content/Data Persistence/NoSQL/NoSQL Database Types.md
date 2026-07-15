@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T21:46:54.041Z
-modified: 2026-07-11T21:46:54.042Z
-published: 2026-07-11T21:46:54.042Z
+created: 2026-07-15T07:35:47.863Z
+modified: 2026-07-15T07:35:47.864Z
+published: 2026-07-15T07:35:47.864Z
 topic:
   - Data Persistence
 subtopic:
@@ -43,7 +43,7 @@ The simplest model: a giant distributed hash map of `key → opaque value`. O(1)
 
 ### Wide-Column
 
-Rows are identified by a partition key and hold a flexible, sparse set of columns; data is physically grouped by partition. Built for **massive write throughput** and queries along a known partition + clustering key.
+Rows are identified by a partition key and hold a flexible, sparse set of columns; data is physically grouped by partition. Built for **massive write throughput** and queries along a known partition + clustering key. That write throughput comes from the storage engine underneath: these stores are backed by an [[LSM-Tree]] / SSTable engine, which turns random writes into sequential appends.
 
 - **Examples**: Cassandra, ScyllaDB, HBase, Bigtable.
 - **Best for**: time-series, event logs, IoT/sensor data, high-write feeds at petabyte scale.
