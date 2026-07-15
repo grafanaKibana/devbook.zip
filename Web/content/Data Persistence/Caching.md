@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-15T08:11:35.783Z
-modified: 2026-07-15T08:11:35.783Z
-published: 2026-07-15T08:11:35.783Z
+created: 2026-07-15T09:07:59.299Z
+modified: 2026-07-15T09:07:59.299Z
+published: 2026-07-15T09:07:59.299Z
 topic:
   - Data Persistence
 subtopic: []
@@ -54,6 +54,8 @@ The numbers here are recreated from the well-known figures: the original [Jeff D
 **Read-through / write-through** — a cache layer sits between the app and the source. On a read miss, the cache itself fetches from the source. On a write, the cache writes through to the source synchronously. The app talks only to the cache.
 
 **Write-behind (write-back)** — like write-through, but the cache writes to the source asynchronously. This reduces write latency but risks data loss if the cache fails before flushing.
+
+**Write-around** — on a write, go straight to the backing store and bypass the cache entirely; the entry is populated only later, on a read miss (usually paired with cache-aside reads). This is the right call for write-heavy data that isn't read back soon — it avoids churning the cache with write-once/read-rarely entries that may never be read and would only evict hotter keys. Alongside write-through and write-behind it completes _where a write lands relative to the cache_: through it, behind it, or around it.
 
 Cache-aside with `IDistributedCache`:
 
@@ -221,7 +223,7 @@ The eviction policy is the same family of algorithms as an in-process [[LRU Cach
 - **Serialization cost and format drift** — large payloads and frequent (de)serialization can dominate latency, and schema changes can break old entries. Mitigation: cache smaller projections, version the cached envelope, measure CPU and payload size.
 - **Cold start after deploy** — restart or rollout wipes in-memory caches and can amplify load on the source. Mitigation: distributed cache for shared warm state, background warmup for hot keys, gradual rollout.
 - **Distributed cache partition and partial outages** — network split can cause a fleet-wide miss storm or inconsistent reads. Mitigation: timeouts, circuit breaker, fallback to source with rate limiting, avoid coupling correctness to cache.
-- **Negative caching without care** — caching "not found" can hide newly created data and extend user-visible inconsistency. Mitigation: short TTL for negatives, invalidate on create.
+- **Cache penetration (missing-key floods)** — reads for keys that _don't exist_ miss the cache every time and fall straight through to the origin; because nothing is ever cached to absorb them, they hammer the store on every request, which an attacker can weaponize by requesting a stream of random absent keys. Mitigation: cache the negative "not found" result under a short TTL (and invalidate it on create, so it can't hide newly written data or extend user-visible inconsistency); for a large key space, front the store with a [[Bloom Filter]] that cheaply rejects definitely-absent keys before they reach it.
 - **Cache key design mistakes** — missing locale, permissions, feature flags, or query parameters leads to serving wrong content. Mitigation: deterministic key builder, include all correctness dimensions.
 
 ## Questions
@@ -237,3 +239,5 @@ The eviction policy is the same family of algorithms as an in-process [[LRU Cach
 - [Cache-aside pattern (Azure Architecture Center)](https://learn.microsoft.com/azure/architecture/patterns/cache-aside)
 - [RFC 5861 — HTTP cache-control extensions for stale content](https://www.rfc-editor.org/rfc/rfc5861)
 - [Solving thundering herds with request coalescing (jazco.dev)](https://jazco.dev/2023/09/28/request-coalescing)
+- [Database Caching Strategies Using Redis (AWS Whitepaper)](https://docs.aws.amazon.com/whitepapers/latest/database-caching-strategies-using-redis/welcome.html) — defines the write-through/write-behind/write-around trio and cache-aside population.
+- [Key eviction (Redis docs)](https://redis.io/docs/latest/develop/reference/eviction/) — the `maxmemory-policy` options (`allkeys-lru`/`allkeys-lfu`/`volatile-ttl`/`noeviction`).

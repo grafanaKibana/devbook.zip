@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T21:46:58.426Z
-modified: 2026-07-11T21:46:58.426Z
-published: 2026-07-11T21:46:58.426Z
+created: 2026-07-15T08:55:49.824Z
+modified: 2026-07-15T09:24:28.905Z
+published: 2026-07-15T09:24:28.905Z
 topic:
   - Data Persistence
 subtopic:
@@ -60,7 +60,7 @@ Concurrent transactions do not observe each other's intermediate (uncommitted) s
 
 #### MVCC and snapshot isolation
 
-Modern databases mostly avoid read locks via **MVCC (Multi-Version Concurrency Control)**: each write creates a new _version_ of a row, and a transaction reads the version that was committed when it began. The headline benefit is **readers never block writers and writers never block readers** — a long report doesn't stall the write path. PostgreSQL is MVCC throughout; SQL Server's `SNAPSHOT` / `READ_COMMITTED_SNAPSHOT` is its MVCC mode (that's why the table above lists Snapshot as low-contention). The cost is version bookkeeping: PostgreSQL needs `VACUUM` to reclaim dead row versions; SQL Server keeps versions in `tempdb`.
+Isolation is enforced one of two ways: by **locking** (block conflicting access) or by **MVCC/versioning** (read an older version instead of blocking) — for the  see [[Database Locks|lock]] mechanics (modes, granularity, escalation). Modern databases mostly avoid read locks via **MVCC (Multi-Version Concurrency Control)**: each write creates a new _version_ of a row, and a transaction reads the version that was committed when it began. The headline benefit is **readers never block writers and writers never block readers** — a long report doesn't stall the write path. PostgreSQL is MVCC throughout; SQL Server's `SNAPSHOT` / `READ_COMMITTED_SNAPSHOT` is its MVCC mode (that's why the table above lists Snapshot as low-contention). The cost is version bookkeeping: PostgreSQL needs `VACUUM` to reclaim dead row versions; SQL Server keeps versions in `tempdb`.
 
 #### Write skew — the anomaly the table misses
 

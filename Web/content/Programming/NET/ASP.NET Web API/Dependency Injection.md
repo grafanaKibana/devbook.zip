@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T21:44:34.543Z
-modified: 2026-07-11T21:44:34.544Z
-published: 2026-07-11T21:44:34.544Z
+created: 2026-07-15T11:47:57.336Z
+modified: 2026-07-15T11:47:57.336Z
+published: 2026-07-15T11:47:57.336Z
 topic:
   - Programming
 subtopic:
@@ -18,7 +18,7 @@ status: Ready to Repeat
 
 ASP.NET Core has a built-in IoC container that manages service lifetimes and resolves dependencies automatically. You register services in `Program.cs` and the container injects them via constructor injection throughout the application — controllers, middleware, filters, background services, and hosted services all participate.
 
-This page covers the ASP.NET Core DI container specifically. For the general Dependency Injection pattern and its design benefits, see [[Architecture/Patterns/Dependency Injection|Dependency Injection]].
+This page covers the ASP.NET Core DI container specifically. For the general Dependency Injection pattern and its design benefits, see [[Software Architecture/Patterns/Dependency Injection|Dependency Injection]].
 
 ## Service Lifetimes
 
@@ -160,5 +160,5 @@ The container **owns disposal of the instances it creates**: when a scope ends i
 - [Service lifetimes (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection#service-lifetimes) — detailed explanation of Singleton, Scoped, and Transient with examples of when each is appropriate.
 - [Dependency injection guidelines](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection-guidelines) — best practices including captive dependency avoidance, scope validation, and testing patterns.
 - [IServiceScopeFactory (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.dependencyinjection.iservicescopefactory) — API reference for creating manual service scopes; the correct pattern for Singletons that need Scoped dependencies.
-- [[Architecture/Patterns/Dependency Injection|Dependency Injection]] — the general DI pattern: why it improves testability and decoupling, independent of ASP.NET Core.
+- [[Software Architecture/Patterns/Dependency Injection|Dependency Injection]] — the general DI pattern: why it improves testability and decoupling, independent of ASP.NET Core.
 - [[IoC (Holywood Principle)|IoC (Hollywood Principle)]] — the underlying principle: the framework provides dependencies rather than your code creating them.

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-15T07:35:47.863Z
-modified: 2026-07-15T07:35:47.864Z
-published: 2026-07-15T07:35:47.864Z
+created: 2026-07-15T08:54:29.815Z
+modified: 2026-07-15T09:21:39.560Z
+published: 2026-07-15T09:21:39.560Z
 topic:
   - Data Persistence
 subtopic:
@@ -17,6 +17,8 @@ status: Ready to Repeat
 # Intro
 
 "NoSQL" isn't one thing — it's four distinct data models, each trading the relational model's rigid schema and joins for a different scaling and access pattern. Picking the right one is a data-modeling decision driven by _how you query_, not a popularity contest. The four families are **document**, **key-value**, **wide-column**, and **graph**. They share themes (horizontal scaling, flexible schema, usually [[Replication|eventual consistency]] under the [[CAP theorem|CAP]] lens) but differ sharply in what they're good at. This page compares them; for the general "why NoSQL" framing see [[Data Persistence/NoSQL/NoSQL|NoSQL]].
+
+Beyond these four data _models_, specialized engines exist — search engines (Elasticsearch/OpenSearch, built on an inverted index) and time-series stores (InfluxDB, Prometheus, TimescaleDB) — but these are purpose-built or layered _on_ the families above rather than a fifth model.
 
 ## The Four Families
 
@@ -97,3 +99,5 @@ Stores **nodes** and **edges** as first-class citizens, making relationship trav
 - [NoSQL data modeling techniques (Highly Scalable Blog)](https://highlyscalable.wordpress.com/2012/03/01/nosql-data-modeling-techniques/) — query-first modeling patterns across families.
 - [DynamoDB single-table design (AWS)](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/bp-general-nosql-design.html) — access-pattern-driven modeling for key-value/wide-column.
 - [Designing Data-Intensive Applications, Ch. 2 (Martin Kleppmann)](https://dataintensive.net/) — relational vs document vs graph data models compared in depth.
+- [How Discord Stores Trillions of Messages (Discord Engineering)](https://discord.com/blog/how-discord-stores-trillions-of-messages) — production wide-column case study: Cassandra → ScyllaDB, and why the LSM-Tree/SSTable engine underneath matters at that scale.
+- [Scaling Time Series Data Storage — Part I (Netflix Tech Blog)](https://netflixtechblog.com/scaling-time-series-data-storage-part-i-ec2b6d44ba39) — Netflix's wide-column (Cassandra) time-series design, a concrete slice of their polyglot-persistence stack.
