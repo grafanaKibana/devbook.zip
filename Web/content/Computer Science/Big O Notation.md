@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-12T20:39:23.958Z
-modified: 2026-07-12T20:39:23.958Z
-published: 2026-07-12T20:39:23.958Z
+created: 2026-07-15T11:45:41.732Z
+modified: 2026-07-15T11:45:41.733Z
+published: 2026-07-15T11:45:41.733Z
 topic:
   - Computer Science
 subtopic: []
@@ -27,6 +27,15 @@ The same notation measures two resources. **Time complexity** counts operations 
 The complexity class is the shape of the curve. This chart plots the five classes that describe almost all everyday code, over a small input range where they stay comparable.
 
 ```mermaid
+---
+config:
+  xyChart:
+    width: 1200
+    height: 500
+  themeVariables:
+    xyChart:
+      plotColorPalette: "#3b82f6, #22c55e, #eab308, #f97316, #ef4444"
+---
 xychart-beta
   title "Growth of common complexity classes (n = 1..10)"
   x-axis "input size n" [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
@@ -49,6 +58,15 @@ Reading the lines from bottom to top at the right edge:
 `O(2ⁿ)` and `O(n!)` are missing here because on this axis they would already dwarf everything: the next chart adds `2ⁿ` against `n²` alone to show the crossover.
 
 ```mermaid
+---
+config:
+  xyChart:
+    width: 1200
+    height: 500
+  themeVariables:
+    xyChart:
+      plotColorPalette: "#f97316, #ef4444"
+---
 xychart-beta
   title "The exponential wall: n squared vs 2 to the n (n = 1..10)"
   x-axis "input size n" [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
