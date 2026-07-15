@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-12T14:27:20.422Z
-modified: 2026-07-12T14:27:20.423Z
-published: 2026-07-12T14:27:20.423Z
+created: 2026-07-15T07:35:54.331Z
+modified: 2026-07-15T07:35:54.331Z
+published: 2026-07-15T07:35:54.331Z
 topic:
   - Computer Science
 subtopic:
@@ -62,7 +62,7 @@ Each boundary traces back to the page-sized node.
 
 In pure memory there is no page to amortize. The `O(m)` linear or binary scan inside a wide node is pure overhead over a binary node's single comparison, so a [[Red-Black Tree]] or [[AVL Tree]] is simpler to implement and just as fast for RAM-resident data — the B-tree's advantage is I/O, and in RAM there is no I/O to save. The exception is a node sized to a cache line rather than a disk page: an order-eight B-tree can beat pointer-chasing binary trees on cache locality, which is why some in-memory engines still use one.
 
-Writes rewrite whole pages. An insert that fills a page splits it, producing two page writes where a binary tree would flip a few pointers, and random-order insertion keeps triggering splits — sustained write amplification. Bulk-loading already-sorted keys sidesteps this by packing pages to near-100% before they are written, which is why databases build an index faster from sorted input than by inserting rows one at a time.
+Writes rewrite whole pages. An insert that fills a page splits it, producing two page writes where a binary tree would flip a few pointers, and random-order insertion keeps triggering splits — sustained write amplification. Bulk-loading already-sorted keys sidesteps this by packing pages to near-100% before they are written, which is why databases build an index faster from sorted input than by inserting rows one at a time. Where writes dominate, the [[LSM-Tree]] is the write-optimized counterpart that attacks exactly this cost, trading read and space amplification for far higher write throughput.
 
 The branching factor must be sized to the page. Choosing `m` too small shrinks fan-out toward a binary tree, so height climbs back toward `log₂ n` and the extra page reads return — the design's entire benefit is spent. `m` is effectively fixed by `page_size / (key_size + pointer_size)`, not chosen freely.
 

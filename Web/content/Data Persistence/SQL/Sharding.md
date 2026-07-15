@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T21:43:46.134Z
-modified: 2026-07-11T21:43:46.134Z
-published: 2026-07-11T21:43:46.134Z
+created: 2026-07-15T09:08:12.156Z
+modified: 2026-07-15T09:08:12.156Z
+published: 2026-07-15T09:08:12.156Z
 topic:
   - Data Persistence
 subtopic:
@@ -32,6 +32,14 @@ The shard key determines which shard owns a given row. Choosing it wrong is the 
 ### Consistent hashing
 
 Simple modulo hashing (`hash(key) % N`) has a fatal flaw: adding one shard changes N, which remaps almost every key to a different shard. A full data migration follows. Consistent hashing places both keys and shards on a hash ring. Adding a shard only displaces the keys that fall between the new shard and its predecessor, limiting remapping to roughly 1/N of keys. Virtual nodes (multiple ring positions per physical shard) smooth out uneven distribution further. A practical variant is pre-allocating many logical shards mapped to fewer physical machines: adding capacity means remapping logical shards to new nodes, moving only the affected partitions rather than the entire dataset.
+
+## Where the routing lives
+
+The shard key decides _which_ shard owns a row; a separate question is _who_ turns that decision into a connection to the right node. Three layers can own routing, each trading control for operational burden.
+
+- **Application-level.** The app computes the shard from the shard key and connects to that node directly — maximum control and no extra hop, but the routing logic is smeared across every client and they must all agree on the shard map. One service running a stale map writes to the wrong shard.
+- **Middleware / proxy.** A routing tier between app and shards parses queries and dispatches them (Vitess, Citus, ProxySQL). The app talks to a single endpoint as if it were one database; the proxy owns the shard map, scatter-gather, and rebalancing — you trade a network hop for keeping routing out of application code. PlanetScale is Vitess run as a managed service.
+- **Database-native / NewSQL.** The engine shards transparently and the app sees one logical database (CockroachDB, Spanner, YugabyteDB). Routing, cross-shard transactions, and rebalancing move into the storage layer, at the cost of adopting a different engine and its consistency and latency model.
 
 ## Cross-Shard Operations
 
@@ -89,10 +97,12 @@ flowchart TD
 > - **Table partitioning**: splits data within one server, preserving joins and transactions.
 >
 > Sharding adds permanent operational complexity and limits cross-shard queries.
+
 > [!QUESTION]- Why is shard key choice critical, and what makes a good shard key?
 > The key determines data distribution and query routing. A bad key causes hotspot shards (uneven load) or scatter queries (fan-out to all shards on every read).
 >
 > A good shard key has high cardinality, even distribution (avoid sequential IDs with range sharding), query alignment (appears in most WHERE clauses), and stability (changing a key requires moving the row). Common choices: user ID, tenant ID, or a composite of region + entity ID.
+
 > [!QUESTION]- How does consistent hashing reduce resharding cost compared to simple modulo hashing?
 > With `hash(key) % N`, adding one shard changes N and remaps almost every key, requiring a near-total data migration.
 >

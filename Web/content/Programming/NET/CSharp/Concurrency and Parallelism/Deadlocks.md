@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T21:46:04.805Z
-modified: 2026-07-11T21:46:04.805Z
-published: 2026-07-11T21:46:04.805Z
+created: 2026-07-15T08:55:55.030Z
+modified: 2026-07-15T08:55:55.031Z
+published: 2026-07-15T08:55:55.031Z
 topic:
   - Programming
 subtopic:
@@ -22,7 +22,7 @@ A deadlock happens when two or more execution paths wait forever on resources he
 
 Deadlocks require all four Coffman conditions simultaneously:
 
-1. **Mutual exclusion** — a resource cannot be shared (e.g., a `lock`/monitor). Protects correctness but introduces contention risk.
+1. **Mutual exclusion** — a resource cannot be shared (e.g., a [[Locking|lock]] or monitor). Protects correctness but introduces contention risk.
 2. **Hold and wait** — a thread holds one resource while waiting for another. The common trigger in nested locking.
 3. **No preemption** — a resource cannot be forcibly taken; the owner must release it. Blocked threads can wait forever without a timeout or cancellation path.
 4. **Circular wait** — the wait graph has a cycle (A waits for B, B waits for A). The easiest condition to break with deterministic lock ordering.
@@ -192,13 +192,13 @@ public async Task UpdateAsync()
 > **`SemaphoreSlim` is not reentrant.** Unlike `Monitor`/`lock` (and `Mutex`), it has no thread affinity and no recursion count. If a method that already holds the gate calls another method that tries to acquire the _same_ 1-permit semaphore, it **self-deadlocks**. Don't make `WaitAsync`-guarded methods call each other; restructure so the lock is taken once at the top.
 
 **`lock` on a shared/public object**
-Never `lock(this)`, `lock(typeof(X))`, or lock on an interned `string`. These objects are visible to other code that may lock on the same instance, creating cross-component lock-ordering cycles you can't see. Always lock on a `private readonly object _gate = new();` (or use `System.Threading.Lock` in .NET 9+).
+Never `lock(this)`, `lock(typeof(X))`, or lock on an interned `string`. These objects are visible to other code that may lock on the same instance, creating cross-component lock-ordering cycles you can't see. Always lock on a `private readonly object _gate = new();` (or a `private readonly Lock` in .NET 9+).
 
 **Nested locks in library code**
 Third-party libraries may acquire internal locks. Calling library methods while holding your own lock can create unexpected lock ordering dependencies you cannot control.
 
 **Database deadlocks are a separate layer**
-The DB engine has its own lock manager: two transactions touching rows/indexes in opposite order deadlock, and the engine kills one as the _deadlock victim_ (SQL Server error 1205). Fix with consistent access order, smaller transactions, and retry-on-1205 — not with CLR locks. See [[Data Persistence/SQL/SQL|SQL]].
+The DB engine has its own lock manager: two transactions touching rows/indexes in opposite order deadlock, and the engine kills one as the _deadlock victim_ (SQL Server error 1205). Fix with consistent access order, smaller transactions, and retry-on-1205 — not with CLR locks. See [[Database Locks]].
 
 ## Questions
 

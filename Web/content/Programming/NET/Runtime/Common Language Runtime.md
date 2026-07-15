@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T21:45:03.477Z
-modified: 2026-07-11T21:45:03.477Z
-published: 2026-07-11T21:45:03.477Z
+created: 2026-07-15T06:02:06.813Z
+modified: 2026-07-15T06:02:06.813Z
+published: 2026-07-15T06:02:06.813Z
 topic:
   - Programming
 subtopic:
@@ -104,7 +104,7 @@ Beep(440, 500); // A4 note for 500ms
 
 ### Assembly Loading and the Type System
 
-The loader resolves and loads assemblies (IL + metadata) into an **`AssemblyLoadContext`**. A _collectible_ `AssemblyLoadContext` can be unloaded, which is how plugin hosts load and later drop assemblies without recycling the process. At the type-system level the CLR represents each loaded type by a **MethodTable** (vtable, interface map, type flags); every reference-type object carries an **object header** (sync-block index used for `lock`/hash code) plus a MethodTable pointer. Generics are instantiated lazily: the runtime shares one JIT-compiled body across all reference-type arguments but generates a specialized body per value-type argument (why `List<int>` is as fast as hand-written code — see [[Generics]]).
+The loader resolves and loads assemblies (IL + metadata) into an **`AssemblyLoadContext`**. A _collectible_ `AssemblyLoadContext` can be unloaded, which is how plugin hosts load and later drop assemblies without recycling the process. At the type-system level the CLR represents each loaded type by a **MethodTable** (vtable, interface map, type flags); every reference-type object carries an **object header** (sync-block index used for `lock`/hash code) plus a MethodTable pointer. [[Generics]] are instantiated lazily: the runtime shares one JIT-compiled body across all reference-type arguments but generates a specialized body per value-type argument (why `List<int>` is as fast as hand-written code).
 
 ### Memory Model and Exceptions
 

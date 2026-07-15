@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-12T14:27:20.419Z
-modified: 2026-07-12T14:27:20.419Z
-published: 2026-07-12T14:27:20.419Z
+created: 2026-07-15T07:36:19.944Z
+modified: 2026-07-15T07:36:19.944Z
+published: 2026-07-15T07:36:19.944Z
 topic:
   - Computer Science
 subtopic:
@@ -35,7 +35,7 @@ Multi-dimensional arrays flatten the same way. A row-major `T[,]` stores row 0 i
 
 For a value type the values live in the block itself — `new int[1000]` is one allocation holding 4,000 bytes of data. For a reference type the block holds references and the objects live elsewhere, so `string[]` iteration is contiguous over the _pointers_ but still chases each one to reach the characters.
 
-Contiguity is worth more than the complexity table shows. A CPU pulls memory in 64-byte cache lines, so one miss brings in a line of neighbors for free (16 elements for 4-byte ints), and the hardware prefetcher recognizes a sequential scan and streams the next lines ahead. That hides the gap between an L1 hit (~1 ns) and main memory (~100 ns). A [[LinkedList]] node is a separate allocation at an unpredictable address, so every `Next` is a potential full-latency miss the prefetcher cannot anticipate — the same `n` and the same `O(n)` can run an order of magnitude slower. This is the physical reason .NET's default collections are array-backed.
+Contiguity is worth more than the complexity table shows. A CPU pulls memory in 64-byte cache lines, so one miss brings in a line of neighbors for free (16 elements for 4-byte ints), and the hardware prefetcher recognizes a sequential scan and streams the next lines ahead. That hides the gap between an L1 hit (~1 ns) and main memory (~100 ns) — the top rungs of the [[Data Persistence/Caching#Latency ladder|latency ladder]]. A [[LinkedList]] node is a separate allocation at an unpredictable address, so every `Next` is a potential full-latency miss the prefetcher cannot anticipate — the same `n` and the same `O(n)` can run an order of magnitude slower. This is the physical reason .NET's default collections are array-backed.
 
 ## Complexity
 
