@@ -17,13 +17,37 @@
   display: grid;
   place-items: center;
   max-inline-size: 100%;
-  max-height: 85dvh;
 }
 
-.markdown-rendered :is(.block-language-mermaid, .mermaid) > svg {
+.markdown-rendered :is(.block-language-mermaid, .mermaid) > svg:not([aria-roledescription="xychart"]) {
   display: block;
   inline-size: auto !important;
   block-size: auto !important;
   max-inline-size: 100% !important;
   max-block-size: 85dvh !important;
+}
+
+.markdown-rendered :is(.block-language-mermaid, .mermaid) > svg[aria-roledescription="xychart"] {
+  display: block;
+  width: auto !important;
+  height: auto !important;
+  max-width: 100% !important;
+  max-height: min(30rem, 75dvh) !important;
+}
+
+
+:is(.block-language-mermaid, .mermaid) svg[aria-roledescription="xychart"] .background {
+  fill: transparent !important;
+}
+
+:is(.block-language-mermaid, .mermaid) svg[aria-roledescription="xychart"] :is(.bottom-axis, .left-axis) :is(path, line) {
+  stroke: var(--background-modifier-border) !important;
+}
+
+:is(.block-language-mermaid, .mermaid) svg[aria-roledescription="xychart"] text {
+  fill: var(--text-muted) !important;
+}
+
+:is(.block-language-mermaid, .mermaid) svg[aria-roledescription="xychart"] .chart-title text {
+  fill: var(--text-normal) !important;
 }

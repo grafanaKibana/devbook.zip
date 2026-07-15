@@ -45,8 +45,8 @@
   "Editor@@callout-style-select": "callout-style-4",
   "notebook-navigator-style-settings@@nn-theme-navitem-border-width": 0,
   "baseline-style@@accented-interface": true,
-  "baseline-style@@color-scheme-light": "minimal-light",
-  "baseline-style@@color-scheme-dark": "minimal-dark",
+  "baseline-style@@color-scheme-light": "admin-light",
+  "baseline-style@@color-scheme-dark": "admin-dark",
   "baseline-style@@color-scheme-accent": true,
   "baseline-style@@layout-style": "layout-cards",
   "baseline-style@@status-bar-style": "status-bar-cupertino",
@@ -129,7 +129,7 @@
   "baseline-style@@readable-spacing-modifier": 0.25,
   "notebook-navigator-style-settings@@nn-theme-file-border-radius": 8,
   "baseline-style@@tab-left-style": "tab-left-compact",
-  "baseline-style@@translucent-light-opacity": 50,
-  "baseline-style@@translucent-dark-opacity": 50,
-  "baseline-style@@mode-switcher-off": false
+  "baseline-style@@translucent-dark-opacity": 70,
+  "baseline-style@@mode-switcher-off": false,
+  "baseline-style@@translucent-light-opacity": 70
 }

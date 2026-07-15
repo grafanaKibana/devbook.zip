@@ -988,9 +988,6 @@ body[data-slug="index"] {
       flex: 0 0 auto;
       overflow: visible;
     }
-    // 0.55em floor, same as the desktop fill: the summary–foot gap is design,
-    // not slack — honouring it makes the fit check degrade a tier before the
-    // foot ever crowds the body padding.
     .dc-topic-card .dc-topic-spacer {
       display: block;
       flex: 1 1 auto;
@@ -1042,4 +1039,18 @@ body[data-slug="index"][data-home-fit="bar-hidden"] {
   .dc-topic-grid .dc-topic-bar {
     display: none;
   }
+}
+
+// ---------------------------------------------------------------------------
+// Mermaid xy charts (xychart-beta)
+// ---------------------------------------------------------------------------
+.center pre > code.mermaid > svg[aria-roledescription="xychart"] {
+  width: auto !important;
+  height: auto !important;
+  max-width: 100% !important;
+  max-height: min(30rem, 75dvh) !important;
+}
+
+:is(code.mermaid, .mermaid-content) svg[aria-roledescription="xychart"] .background {
+  fill: transparent !important;
 }
