@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-15T11:47:55.110Z
-modified: 2026-07-15T11:47:55.111Z
-published: 2026-07-15T11:47:55.111Z
+created: 2026-07-15T12:03:14.842Z
+modified: 2026-07-15T12:03:14.843Z
+published: 2026-07-15T12:03:14.843Z
 topic:
   - Software Architecture
 subtopic:
@@ -11,8 +11,7 @@ summary: Encapsulates a request as an object bundling action, parameters, and re
 level:
   - "2"
 priority: High
-status:
-  - Done
+status: Done
 ---
 
 # Command

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-15T11:47:55.160Z
-modified: 2026-07-15T11:47:55.161Z
-published: 2026-07-15T11:47:55.161Z
+created: 2026-07-15T12:04:07.832Z
+modified: 2026-07-15T12:04:07.833Z
+published: 2026-07-15T12:04:07.833Z
 tags:
   - FolderNote
 topic:
@@ -35,3 +35,8 @@ Every structural pattern is about _composition_ — wiring objects and classes i
 | [[Facade]] | Provide a simplified high-level entry point over a complex subsystem, coordinating its parts. | Many clients drive the same multi-service workflow and you want one front door instead of scattered orchestration. |
 | [[Flyweight]] | Share immutable intrinsic state across many fine-grained objects while callers pass the extrinsic state. | A very large number of objects duplicate the same heavy state and memory (not CPU) is the bottleneck. |
 | [[Proxy]] | Stand a same-interface surrogate in front of an object to control access — deferring, caching, or authorizing calls. | You need to lazy-load, cache, or gate access to an object transparently, without callers knowing it's there. |
+
+## References
+
+- [Structural Patterns (Refactoring Guru)](https://refactoring.guru/design-patterns/structural-patterns) — example-driven walkthrough of each structural pattern's intent, structure, and trade-offs.
+- [Design Patterns: Elements of Reusable Object-Oriented Software (Gang of Four)](https://en.wikipedia.org/wiki/Design_Patterns) — the original catalog that named these patterns and their vocabulary.

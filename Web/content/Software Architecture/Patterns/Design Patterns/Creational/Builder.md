@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-15T11:47:55.118Z
-modified: 2026-07-15T11:47:55.119Z
-published: 2026-07-15T11:47:55.119Z
+created: 2026-07-15T12:03:14.879Z
+modified: 2026-07-15T12:03:14.880Z
+published: 2026-07-15T12:03:14.880Z
 topic:
   - Software Architecture
 subtopic:
@@ -11,8 +11,7 @@ summary: Separates construction of a complex object from its representation, acc
 level:
   - "3"
 priority: High
-status:
-  - Done
+status: Done
 ---
 
 # Builder

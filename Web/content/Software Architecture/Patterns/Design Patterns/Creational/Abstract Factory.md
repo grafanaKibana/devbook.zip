@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-15T11:47:55.169Z
-modified: 2026-07-15T11:47:55.171Z
-published: 2026-07-15T11:47:55.171Z
+created: 2026-07-15T12:03:14.872Z
+modified: 2026-07-15T12:03:14.873Z
+published: 2026-07-15T12:03:14.873Z
 topic:
   - Software Architecture
 subtopic:
@@ -11,8 +11,7 @@ summary: Provides an interface for creating families of related objects without 
 level:
   - "3"
 priority: High
-status:
-  - Done
+status: Done
 ---
 
 # Abstract Factory

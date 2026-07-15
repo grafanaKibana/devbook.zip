@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-15T11:47:55.993Z
-modified: 2026-07-15T11:47:55.993Z
-published: 2026-07-15T11:47:55.993Z
+created: 2026-07-15T12:03:14.907Z
+modified: 2026-07-15T12:03:14.908Z
+published: 2026-07-15T12:03:14.908Z
 topic:
   - Software Architecture
 subtopic:
@@ -11,8 +11,7 @@ summary: Adapter converts an existing class's interface into a different one cli
 level:
   - "2"
 priority: High
-status:
-  - Done
+status: Done
 ---
 
 # Adapter

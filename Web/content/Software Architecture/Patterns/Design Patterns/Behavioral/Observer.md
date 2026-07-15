@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-15T11:47:55.214Z
-modified: 2026-07-15T11:47:55.214Z
-published: 2026-07-15T11:47:55.214Z
+created: 2026-07-15T12:03:14.851Z
+modified: 2026-07-15T12:03:14.851Z
+published: 2026-07-15T12:03:14.851Z
 topic:
   - Software Architecture
 subtopic:
@@ -11,8 +11,7 @@ summary: Defines a one-to-many dependency where a subject's state change automat
 level:
   - "3"
 priority: High
-status:
-  - Done
+status: Done
 ---
 
 # Observer

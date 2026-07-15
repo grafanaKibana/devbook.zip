@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-15T11:47:55.419Z
-modified: 2026-07-15T11:47:55.419Z
-published: 2026-07-15T11:47:55.419Z
+created: 2026-07-15T12:03:14.934Z
+modified: 2026-07-15T12:03:14.937Z
+published: 2026-07-15T12:03:14.937Z
 topic:
   - Software Architecture
 subtopic:
@@ -11,8 +11,7 @@ summary: Decorator attaches responsibilities to an object dynamically by wrappin
 level:
   - "3"
 priority: High
-status:
-  - Done
+status: Done
 ---
 
 # Decorator

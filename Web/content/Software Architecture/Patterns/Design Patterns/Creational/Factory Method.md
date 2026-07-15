@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-15T11:47:55.065Z
-modified: 2026-07-15T11:47:55.065Z
-published: 2026-07-15T11:47:55.065Z
+created: 2026-07-15T12:03:14.885Z
+modified: 2026-07-15T12:03:14.886Z
+published: 2026-07-15T12:03:14.886Z
 topic:
   - Software Architecture
 subtopic:
@@ -11,8 +11,7 @@ summary: Defines an interface for creating an object but lets subclasses decide 
 level:
   - "1"
 priority: High
-status:
-  - Done
+status: Done
 ---
 
 # Factory Method

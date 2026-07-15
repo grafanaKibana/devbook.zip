@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-15T11:47:55.128Z
-modified: 2026-07-15T11:47:55.128Z
-published: 2026-07-15T11:47:55.128Z
+created: 2026-07-15T12:04:02.735Z
+modified: 2026-07-15T12:04:02.736Z
+published: 2026-07-15T12:04:02.736Z
 tags:
   - FolderNote
 topic:
@@ -33,3 +33,8 @@ These are a catalog, not competing choices — every creational pattern decouple
 | [[Builder]] | Separate construction of a complex object from its representation, assembling it step by step. | Construction needs cross-field validation, computed fields, or a director-driven sequence — beyond what `required` / `init` object initializers cover. |
 | [[Prototype]] | Create new objects by copying an existing instance rather than constructing from scratch. | Construction is expensive, or you need many near-identical variants cloned from a template (idiomatically `record with { }`). |
 | [[Singleton]] | Ensure a class has only one instance and give it a single global access point. | Exactly one shared instance should serve the whole application — in modern .NET, prefer `AddSingleton<T>()` over the classical static form. |
+
+## References
+
+- [Creational Patterns (Refactoring Guru)](https://refactoring.guru/design-patterns/creational-patterns) — example-driven walkthrough of each creational pattern's intent, structure, and trade-offs.
+- [Design Patterns: Elements of Reusable Object-Oriented Software (Gang of Four)](https://en.wikipedia.org/wiki/Design_Patterns) — the original catalog that named these patterns and their vocabulary.

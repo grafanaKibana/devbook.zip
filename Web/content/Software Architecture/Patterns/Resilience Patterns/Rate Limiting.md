@@ -1,10 +1,8 @@
 ---
 publish: true
-created: 2026-07-15T11:47:55.014Z
-modified: 2026-07-15T11:47:55.031Z
-published: 2026-07-15T11:47:55.031Z
-tags:
-  - FolderNote
+created: 2026-07-15T12:03:33.446Z
+modified: 2026-07-15T12:03:33.449Z
+published: 2026-07-15T12:03:33.449Z
 topic:
   - Software Architecture
 subtopic:

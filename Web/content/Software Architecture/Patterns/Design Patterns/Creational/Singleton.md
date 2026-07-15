@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-15T11:47:54.969Z
-modified: 2026-07-15T11:47:54.972Z
-published: 2026-07-15T11:47:54.972Z
+created: 2026-07-15T12:03:14.899Z
+modified: 2026-07-15T12:03:14.900Z
+published: 2026-07-15T12:03:14.900Z
 topic:
   - Software Architecture
 subtopic:
@@ -11,8 +11,7 @@ summary: Ensures a class has only one instance and provides a global access poin
 level:
   - "2"
 priority: High
-status:
-  - Done
+status: Done
 ---
 
 # Singleton

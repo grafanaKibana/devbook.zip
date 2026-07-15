@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-15T11:47:55.085Z
-modified: 2026-07-15T11:47:55.086Z
-published: 2026-07-15T11:47:55.086Z
+created: 2026-07-15T12:03:14.892Z
+modified: 2026-07-15T12:03:14.892Z
+published: 2026-07-15T12:03:14.892Z
 topic:
   - Software Architecture
 subtopic:
@@ -11,8 +11,7 @@ summary: Creates new objects by copying an existing instance rather than constru
 level:
   - "2"
 priority: High
-status:
-  - Done
+status: Done
 ---
 
 # Prototype

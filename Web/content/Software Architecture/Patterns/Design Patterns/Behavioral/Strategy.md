@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-15T11:47:55.122Z
-modified: 2026-07-15T11:47:55.123Z
-published: 2026-07-15T11:47:55.123Z
+created: 2026-07-15T12:03:14.864Z
+modified: 2026-07-15T12:03:14.865Z
+published: 2026-07-15T12:03:14.865Z
 topic:
   - Software Architecture
 subtopic:
@@ -11,8 +11,7 @@ summary: Defines a family of algorithms behind a common interface and makes them
 level:
   - "2"
 priority: High
-status:
-  - Done
+status: Done
 ---
 
 # Strategy

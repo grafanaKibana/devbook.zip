@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-15T11:47:55.102Z
-modified: 2026-07-15T11:47:55.102Z
-published: 2026-07-15T11:47:55.102Z
+created: 2026-07-15T12:03:58.427Z
+modified: 2026-07-15T12:03:58.428Z
+published: 2026-07-15T12:03:58.428Z
 tags:
   - FolderNote
 topic:
@@ -39,3 +39,8 @@ What unites the behavioral patterns is _how responsibility and communication are
 | [[Strategy]] | Define a family of interchangeable algorithms behind a common interface | You want to swap an algorithm at runtime, chosen by the client |
 | [[Template Method]] | Define an algorithm's skeleton in a base class, letting subclasses override specific steps | Multiple variants share a fixed overall structure but differ in individual steps |
 | [[Visitor]] | Add new operations to an object hierarchy without modifying its classes, via double dispatch | You add operations often but change the class hierarchy rarely |
+
+## References
+
+- [Behavioral Patterns (Refactoring Guru)](https://refactoring.guru/design-patterns/behavioral-patterns) — example-driven walkthrough of each behavioral pattern's intent, structure, and trade-offs.
+- [Design Patterns: Elements of Reusable Object-Oriented Software (Gang of Four)](https://en.wikipedia.org/wiki/Design_Patterns) — the original catalog that named these patterns and their vocabulary.

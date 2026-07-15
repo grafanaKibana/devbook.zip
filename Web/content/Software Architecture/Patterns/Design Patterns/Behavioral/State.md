@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-15T11:47:55.305Z
-modified: 2026-07-15T11:47:55.306Z
-published: 2026-07-15T11:47:55.306Z
+created: 2026-07-15T12:03:14.857Z
+modified: 2026-07-15T12:03:14.857Z
+published: 2026-07-15T12:03:14.857Z
 topic:
   - Software Architecture
 subtopic:
@@ -11,8 +11,7 @@ summary: Extracts state-specific behavior into separate classes; the context del
 level:
   - "3"
 priority: High
-status:
-  - Done
+status: Done
 ---
 
 # State
