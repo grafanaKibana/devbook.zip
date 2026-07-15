@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-14T19:23:03.467Z
-modified: 2026-07-14T19:23:03.467Z
-published: 2026-07-14T19:23:03.467Z
+created: 2026-07-15T06:02:04.334Z
+modified: 2026-07-15T06:02:04.334Z
+published: 2026-07-15T06:02:04.334Z
 topic:
   - Programming
 subtopic:
@@ -104,7 +104,7 @@ await foreach (var finished in Task.WhenEach(tasks))
 }
 ```
 
-`TaskScheduler` is the abstraction that decides where continuations run; you rarely implement one, but it's why `Task.Factory.StartNew` defaulting to `TaskScheduler.Current` matters (above). For bounded concurrent fan-out over a collection, prefer `Parallel.ForEachAsync` (see [[Parallelism]]) over hand-rolled `WhenAll` + `SemaphoreSlim`.
+`TaskScheduler` is the abstraction that decides where continuations run; you rarely implement one, but it's why `Task.Factory.StartNew` defaulting to `TaskScheduler.Current` matters (above). For bounded concurrent [[Parallelism|fan-out]] over a collection, prefer `Parallel.ForEachAsync` over hand-rolled `WhenAll` + `SemaphoreSlim`.
 
 ## Pitfalls
 
@@ -153,7 +153,7 @@ Calling `Task.WhenAll` on thousands of tasks simultaneously can overwhelm the Th
 var results = await Task.WhenAll(items.Select(i => ProcessAsync(i)));
 ```
 
-Fix: use `SemaphoreSlim` to bound concurrency (see [[ThreadPool]]).
+Fix: bound concurrency with `SemaphoreSlim` so a large collection can't exhaust the [[ThreadPool]].
 
 ## Questions
 

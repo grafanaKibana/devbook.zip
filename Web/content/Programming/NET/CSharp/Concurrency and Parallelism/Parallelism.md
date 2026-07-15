@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-14T19:14:53.673Z
-modified: 2026-07-14T19:14:53.673Z
-published: 2026-07-14T19:14:53.673Z
+created: 2026-07-15T06:12:10.154Z
+modified: 2026-07-15T06:12:10.155Z
+published: 2026-07-15T06:12:10.155Z
 topic:
   - Programming
 subtopic:
@@ -115,7 +115,13 @@ This replaces N contended writes with one merge per worker — far better scalin
 | `Task.WhenAll` fan-out | I/O-bound work (HTTP, DB) | Thread-pool friendly; no CPU parallelism benefit |
 | Manual partitioning + channels | Streaming pipelines with backpressure | Most complex; best throughput for producer/consumer patterns |
 
+<<<<<<< HEAD
+**Decision rule**: start with `Parallel.ForEachAsync` for CPU-bound batch work. Switch to PLINQ when the operation is a pure transform and you want terse syntax. Use `Task.WhenAll` for I/O. Reach for [[Channels|channels]] only when you need backpressure or streaming.
+===========================================================================================================================================================================================================================================================================
+
 **Decision rule**: start with `Parallel.ForEachAsync` for CPU-bound batch work. Switch to PLINQ when the operation is a pure transform and you want terse syntax. Use `Task.WhenAll` for I/O. Reach for channels only when you need backpressure or streaming (see [[Channels]]).
+
+> > > > > > > origin/notes/byte-byte-go-adoption
 
 **Two other parallelism axes** worth knowing exist beyond multi-threading:
 
