@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T06:12:10.155Z
-modified: 2026-07-15T06:12:10.155Z
-published: 2026-07-15T06:12:10.155Z
+modified: 2026-07-15T06:13:42.138Z
+published: 2026-07-15T06:13:42.138Z
 topic:
   - Programming
 subtopic:
@@ -67,16 +67,9 @@ finally
 
 - **Leaked permits stall all waiters** — forgetting `Release` in an exception path permanently reduces available permits. With a maxCount of 4, one leaked permit drops throughput by 25%; four leaked permits deadlock the system. Always release in `finally`.
 - **Over-release inflates concurrency** — for `SemaphoreSlim` without an explicit `maxCount`, calling `Release` without a matching `Wait` silently increases the permit count beyond your intended limit. Your "max 10 concurrent" throttle quietly becomes 11, then 12. With explicit `maxCount`, over-release throws `SemaphoreFullException` — which is noisy but at least detectable. Always set `maxCount` and keep acquire/release symmetry in one scope.
-  <<<<<<< HEAD
 - **No fairness guarantee** — `SemaphoreSlim` does not guarantee FIFO ordering under contention. A request that arrives later can acquire the permit before an earlier waiter, causing starvation in pathological cases. If ordering matters, use a bounded [[Channels|channel]] instead.
 - **No ownership tracking, and not reentrant** — unlike [[Mutex]] or [[Locking|lock/Monitor]], semaphores have no thread affinity: any code path can `Release`, even without a matching `Wait`, which makes leaks hard to trace (instrument `Wait`/`Release` in production throttling code). The flip side is there is **no recursion count** — a method holding the only permit that calls another method which also `WaitAsync`s the _same_ semaphore self-deadlocks. Take the permit once at the top of the call chain.
 - **`WaitAsync` allocates under contention** — an immediately-available permit is cheap, but when callers have to wait, `WaitAsync` enqueues an async waiter (a `Task`/state object) per caller. On a very hot throttle this allocation shows up; for high-throughput producer/consumer flows a bounded [[Channels|channel]] (which also gives true FIFO) is often the better primitive.
-  \=======
-- **No fairness guarantee** — `SemaphoreSlim` does not guarantee FIFO ordering under contention. A request that arrives later can acquire the permit before an earlier waiter, causing starvation in pathological cases. If ordering matters, use `Channel<T>` as a bounded queue (see [[Channels]]).
-- **No ownership tracking, and not reentrant** — unlike `Mutex`, semaphores have no thread affinity: any code path can `Release`, even without a matching `Wait`, which makes leaks hard to trace (instrument `Wait`/`Release` in production throttling code). The flip side is there is **no recursion count** — a method holding the only permit that calls another method which also `WaitAsync`s the _same_ semaphore self-deadlocks. Take the permit once at the top of the call chain.
-- **`WaitAsync` allocates under contention** — an immediately-available permit is cheap, but when callers have to wait, `WaitAsync` enqueues an async waiter (a `Task`/state object) per caller. On a very hot throttle this allocation shows up; for high-throughput producer/consumer flows a bounded `Channel<T>` (which also gives true FIFO) is often the better primitive — see [[Channels]].
-
-> > > > > > > origin/notes/byte-byte-go-adoption
 
 ## Tradeoffs
 

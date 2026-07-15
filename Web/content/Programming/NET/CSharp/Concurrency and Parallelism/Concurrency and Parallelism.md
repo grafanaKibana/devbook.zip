@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T06:12:10.153Z
-modified: 2026-07-15T06:12:10.153Z
-published: 2026-07-15T06:12:10.153Z
+modified: 2026-07-15T06:13:58.896Z
+published: 2026-07-15T06:13:58.896Z
 tags:
   - FolderNote
 topic:
@@ -86,12 +86,7 @@ public async Task<IReadOnlyList<UserDto>> LoadUsersBoundedAsync(
 
 - For tiny in-memory critical sections, a [[Locking|lock]] is simplest.
 - For async sections that must `await`, prefer `SemaphoreSlim.WaitAsync`.
-  <<<<<<< HEAD
 - If contention is high and order matters, move state mutation behind a single-consumer [[Channels|channel]].
-  \=======
-- If contention is high and order matters, move state mutation behind a single-consumer `Channel<T>` (see [[Channels]]).
-
-> > > > > > > origin/notes/byte-byte-go-adoption
 
 ## Questions
 

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T06:12:10.154Z
-modified: 2026-07-15T06:12:10.154Z
-published: 2026-07-15T06:12:10.154Z
+modified: 2026-07-15T06:13:07.089Z
+published: 2026-07-15T06:13:07.089Z
 topic:
   - Programming
 subtopic:
@@ -117,12 +117,7 @@ finally
 > When you need to coordinate access across multiple processes on the same machine (for example single-writer protection for shared file/database artifacts).
 
 > [!QUESTION]- Why is `Mutex` often a poor default for web request hot paths?
-> <<<<<<< HEAD
 > It is OS-backed and blocking, so heavy contention can increase latency. In-process patterns (`lock`, `SemaphoreSlim`, or a `Channel<T>`) are usually more efficient.
-> \=======
-> It is OS-backed and blocking, so heavy contention can increase latency. In-process patterns (`lock`, `SemaphoreSlim`, `Channel<T>` — see [[Channels]]) are usually more efficient.
->
-> > > > > > > origin/notes/byte-byte-go-adoption
 
 > [!QUESTION]- What does `AbandonedMutexException` signal?
 > A previous owner exited without releasing the mutex, which means exclusive ownership was recovered but shared state may be inconsistent and must be validated.
