@@ -131,6 +131,27 @@ body {
   gap: 1rem;
 }
 
+// Header toggle + search icons pick up the title accent (--secondary, the
+// default link colour the page title uses) on hover. Their own component CSS
+// paints them --darkgray via fill/stroke, so override both.
+.site-header-actions .darkmode,
+.site-header-actions .readermode,
+.site-header-search .search > .search-button {
+  & svg {
+    transition:
+      fill 0.15s ease,
+      stroke 0.15s ease,
+      color 0.15s ease,
+      opacity 0.1s ease;
+  }
+
+  &:hover svg {
+    fill: var(--secondary);
+    stroke: var(--secondary);
+    color: var(--secondary);
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Desktop / tablet (≥ 768px): title left · search centered · toggles right.
 // ---------------------------------------------------------------------------
@@ -625,11 +646,16 @@ body[data-slug="index"] {
   // Card chrome tightens as the viewport shrinks — one knob for both branches.
   --home-card-pad: clamp(0.7rem, 1.5vh, 1rem) clamp(0.8rem, 1.3vw, 1.1rem);
 
-  // Drop only the rule after the body and the (empty) afterBody block. The
-  // page-header (article title + meta) stays — it's the normal page header.
-  .center > hr,
-  .center > .page-footer {
+  // Drop the rule after the body. The afterBody block can't be display:none:
+  // it now carries the position:fixed floating scroll buttons, and display:none
+  // on this wrapper hides them too (fatal on the scrollable mobile homepage).
+  // display:contents removes the empty footer box from layout while letting the
+  // fixed controls render. The page-header (article title + meta) stays.
+  .center > hr {
     display: none;
+  }
+  .center > .page-footer {
+    display: contents;
   }
 
   .dc-topic-card {

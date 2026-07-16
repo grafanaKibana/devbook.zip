@@ -1,0 +1,93 @@
+// Scroll-to-top / scroll-to-bottom cluster styling.
+// Idiom credit: fanteastick/quartz-test (origin CatCodeMe).
+.floating-buttons {
+  position: fixed;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  right: clamp(1rem, 2vw, 1.75rem);
+  bottom: calc(clamp(1rem, 2.5vw, 1.75rem) + env(safe-area-inset-bottom, 0px));
+
+  // Script-owned fade gate. Default state is hidden until the script marks
+  // the cluster visible via data-visible — see floating-buttons.tsx.
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(6px);
+  pointer-events: none;
+  transition:
+    opacity 200ms ease-out,
+    transform 200ms ease-out,
+    visibility 0s linear 200ms;
+
+  // No-JS gate only. Distinct from the data-visible animation gate above:
+  // this attribute is stripped by the afterDOMLoaded script on every nav.
+  &[hidden] {
+    display: none;
+  }
+
+  &[data-visible="true"] {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    pointer-events: auto;
+    transition:
+      opacity 200ms ease-out,
+      transform 200ms ease-out,
+      visibility 0s linear 0s;
+  }
+}
+
+.floating-button {
+  box-sizing: border-box;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  border: 1px solid var(--lightgray);
+  border-radius: var(--surface-radius, 8px);
+  background: var(--light);
+  color: var(--secondary);
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease;
+
+  // Subtle tint on hover, matching the left-sidebar scope dropdown's trigger.
+  &:hover,
+  &:active {
+    border-color: var(--gray);
+    background: color-mix(in srgb, var(--gray) 6%, var(--light));
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--secondary);
+    outline-offset: 2px;
+  }
+
+  // Script-set on the button at the current scroll extreme. Kept focusable —
+  // see the floating-buttons.tsx click guard — so the pointer-events block
+  // doesn't also need to defeat keyboard activation.
+  &[aria-disabled="true"] {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+}
+
+.floating-button-icon {
+  width: 18px;
+  height: 18px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  // Both selectors are needed: the reveal transition lives on the more-specific
+  // [data-visible="true"] rule, so the bare .floating-buttons override alone
+  // would lose to it and the slide-in would still animate under reduced-motion.
+  .floating-buttons,
+  .floating-buttons[data-visible="true"] {
+    transition: none;
+  }
+}
