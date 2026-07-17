@@ -1275,3 +1275,25 @@ blockquote.transclude:has(.excalidraw-page) {
 //     cohesion gain is negligible), the override is intentionally withheld and the
 //     plugin's own --excalidraw-bg/--excalidraw-fg values are kept. Per-element
 //     --excalidraw-color-* variables are never touched regardless.
+
+// Comments (giscus) — issue #130. The comments plugin renders a `.giscus`
+// container in afterBody; the thread itself lives in a cross-origin iframe styled
+// by the site-hosted devbook-light/dark giscus theme, so only the page-level
+// container chrome is ours. Separate it from the note body and label it with a
+// heading in the site's header typography. Gated pages (home dashboard, Questions)
+// and canvas pages never emit `.giscus`, so this only shows where comments load.
+.giscus {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--lightgray);
+
+  &::before {
+    content: "Comments";
+    display: block;
+    margin-bottom: 1rem;
+    font-family: var(--headerFont);
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--dark);
+  }
+}

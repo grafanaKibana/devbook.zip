@@ -205,16 +205,22 @@ plugins:
       priority: 5
       condition: not-index
   - source: github:quartz-community/comments
-    enabled: false
+    enabled: true
     options:
       provider: giscus
       options:
         repo: grafanaKibana/devbook.zip
-        repoId: myRepoID,
+        repoId: R_kgDORNIvbg
         category: Comments
-        categoryId: myCategoryID,
+        categoryId: DIC_kwDORNIvbs4DAmwx
+        mapping: url
+        strict: true
+        reactionsEnabled: true
+        inputPosition: bottom
         lang: en
-        reactionsEnabled: false
+        themeUrl: https://devbook.zip/static/giscus
+        lightTheme: devbook-light
+        darkTheme: devbook-dark
     layout:
       position: afterBody
       priority: 10

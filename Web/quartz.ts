@@ -8,7 +8,9 @@ import { QuestionsIndex } from "./custom/components/questions-index"
 import { SiteHeader } from "./custom/components/site-header"
 import { SiteMarquee } from "./custom/components/site-marquee"
 import { Steptrace } from "./custom/components/steptrace"
+import { GiscusTheme } from "./custom/emitters/giscus-theme"
 import { StepTraceStatic } from "./custom/emitters/steptrace-static"
+import { CommentsGate } from "./custom/transformers/comments-gate"
 import { QuestionCollector } from "./custom/transformers/question-collector"
 import { SyncerFixups } from "./custom/transformers/syncer-fixups"
 import { SteptraceBlock } from "./custom/transformers/steptrace-block"
@@ -47,6 +49,11 @@ config.plugins.transformers.splice(
 // are already resolved.
 config.plugins.transformers.push(QuestionCollector())
 
+// Suppress the giscus comment thread on the home dashboard and Questions index
+// by flagging their frontmatter (`comments: false`). Pushed late so file.data.slug
+// is resolved by the time it runs.
+config.plugins.transformers.push(CommentsGate())
+
 // Note: `status`, `icon` and `order` frontmatter used to be restored here from
 // the Vault source note (Syncer once stripped them on publish). Quartz Syncer
 // now publishes these properties into content/ directly, so the status-gated
@@ -61,6 +68,10 @@ config.plugins.transformers.push(SteptraceBlock())
 // Emit the generated engine from the sanctioned custom/ surface. This avoids
 // placing DevBook-owned code under Quartz's upgrade-owned quartz/static tree.
 config.plugins.emitters.push(StepTraceStatic())
+
+// Host the DevBook giscus themes at static/giscus/ so the comments plugin's
+// themeUrl can point back at the site itself instead of stock giscus themes.
+config.plugins.emitters.push(GiscusTheme())
 
 const layout = await loadQuartzLayout()
 const siteMarquee = SiteMarquee()
