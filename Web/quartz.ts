@@ -9,6 +9,7 @@ import { SiteHeader } from "./custom/components/site-header"
 import { SiteMarquee } from "./custom/components/site-marquee"
 import { Steptrace } from "./custom/components/steptrace"
 import { StepTraceStatic } from "./custom/emitters/steptrace-static"
+import { ClickableImages } from "./custom/transformers/clickable-images"
 import { QuestionCollector } from "./custom/transformers/question-collector"
 import { SyncerFixups } from "./custom/transformers/syncer-fixups"
 import { SteptraceBlock } from "./custom/transformers/steptrace-block"
@@ -57,6 +58,12 @@ config.plugins.transformers.push(QuestionCollector())
 // allowlist) into the <div class="steptrace-mount" data-config> markers that the
 // Steptrace component hydrates. Only touches lang=steptrace, so order-independent.
 config.plugins.transformers.push(SteptraceBlock())
+
+// Make content images click-to-zoom (issue #128). Appended after the built-in
+// transformers so it runs after LinkProcessing and each <img src> is the final
+// resolved URL; it only tags note-content images (skipping ones inside links)
+// and ships its themed overlay CSS/JS via externalResources.
+config.plugins.transformers.push(ClickableImages())
 
 // Emit the generated engine from the sanctioned custom/ surface. This avoids
 // placing DevBook-owned code under Quartz's upgrade-owned quartz/static tree.
