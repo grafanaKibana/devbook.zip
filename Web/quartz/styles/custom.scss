@@ -716,6 +716,42 @@ body[data-slug="index"] {
   }
 }
 
+// ============================================================================
+// Collapse the empty right sidebar on default-frame index pages.
+//
+// Folder and tag pages set positions.right: [] (quartz.config.yaml), so
+// DefaultFrame emits a childless <div class="right sidebar">. Empty, it still
+// takes space at every breakpoint: on desktop the grid reserves its 320px
+// column; on tablet/mobile it's a flow row that keeps the sidebars' fixed-header
+// clearance padding (calc(--site-header-height + 1.25rem)), leaving an empty gap
+// above the footer. Hide the empty div everywhere so it reserves nothing.
+//
+// Content/leaf notes always keep graph + backlinks in the right slot
+// (condition: not-index), so their right sidebar is never :empty — only
+// folder/tag (right: []) match. Home is excluded ([data-slug="index"]); it owns
+// the bespoke dashboard grid above and already hides its own right sidebar per
+// breakpoint. Scoped to [data-frame="default"] so a future frame that reserves
+// an empty right column is unaffected.
+// ============================================================================
+body:not([data-slug="index"]) .page[data-frame="default"] > #quartz-body > .sidebar.right:empty {
+  display: none;
+}
+
+// Desktop additionally reserves the 320px right column in the grid template, so
+// drop it there — hiding the div alone won't reclaim a statically-sized column.
+// Tablet/mobile are already single-column, so the display:none above suffices.
+// Gated at ≥1201px (clearing the 1200px tablet/desktop overlap) like the home
+// rule; the two-column areas are the base desktop grid minus grid-sidebar-right.
+@media all and (min-width: 1201px) {
+  body:not([data-slug="index"]) .page[data-frame="default"] > #quartz-body:has(> .sidebar.right:empty) {
+    grid-template-columns: #{$sidePanelWidth} auto;
+    grid-template-areas:
+      "grid-sidebar-left grid-header"
+      "grid-sidebar-left grid-center"
+      "grid-sidebar-left grid-footer";
+  }
+}
+
 @media all and (min-width: 1201px) and (min-height: 36rem) {
   // Gated on [data-home-fit]: the HomepageFit controller owns the one-viewport
   // fill on desktop just as it does on tablet, so it can hide whole tiers
