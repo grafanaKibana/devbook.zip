@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T11:47:56.385Z
-modified: 2026-07-15T11:47:56.386Z
-published: 2026-07-15T11:47:56.386Z
+modified: 2026-07-16T17:34:23.089Z
+published: 2026-07-16T17:34:23.089Z
 topic:
   - Software Architecture
 subtopic:
@@ -77,7 +77,7 @@ ZooKeeper-style mindset: "If I cannot prove this write is globally safe, I will 
 
 ### AP behavior (availability-first during partition)
 
-Representative systems: Amazon DynamoDB (Dynamo-style), Cassandra, and many multi-region eventually consistent setups.
+Representative systems: the original Amazon Dynamo design, Cassandra configurations that accept on reachable replicas, and other explicitly availability-first multi-writer topologies.
 
 - Replicas accept writes on reachable nodes even when not fully coordinated.
 - Divergent versions can exist temporarily.
@@ -100,51 +100,20 @@ This is one of the most important interview points:
 
 Practical implication: ask "What happens in the bad 0.1% network case?" rather than evaluating only happy-path latency graphs.
 
-## PACELC Extension (What You Face Daily)
+### Partition-time choice and the false CA option
 
-CAP explains partition behavior, but most daily engineering happens without active partition alarms. PACELC extends the model:
+| Partitioned operation | Preserve CAP consistency | Preserve CAP availability |
+|---|---|---|
+| `ReserveInventory` cannot reach a quorum | Reject or wait; do not confirm an unprovable reservation | Accept locally and reconcile competing reservations later |
+| `GetRecommendations` loses the fresh replica | Reject rather than return stale data | Return a reachable replica's stale result |
 
-- **PA/EC**: if Partition then choose Availability or Consistency; Else choose Latency or Consistency.
+"CA" is not a third partition-time mode for a replicated system. If isolated nodes both keep answering and must remain linearizable, one side can neither learn the other's latest write nor prove that its own value is current. A single-node database can provide consistency and ordinary uptime while it is reachable, but it does not tolerate a partition between replicas because there are no replicas to continue serving.
 
-So even without partitions, distributed databases still force a design choice:
+CAP availability is also stricter than an uptime SLO. It requires every request to every non-failed node to receive a non-error response in finite time. A service can meet `99.99%` monthly uptime while rejecting the small set of partitioned writes needed to protect consistency; that makes the operation CP under CAP, not an operationally "unavailable service" in the usual dashboard sense.
 
-- wait for more replicas/quorum to improve consistency
-- or respond faster from local/near replicas with weaker freshness guarantees
+## Normal-time tradeoffs
 
-This is why engineers spend so much time on read consistency levels, session guarantees, quorum sizes, and timeout policy tuning.
-
-## .NET System Design Relevance
-
-For senior .NET interviews, tie CAP/PACELC to concrete platform choices instead of abstract definitions.
-
-### SQL Server with Always On/synchronous replication (CP-leaning)
-
-- CAP tradeoffs show up when SQL Server is deployed as a replicated system (for example, Always On Availability Groups), not as a single standalone instance.
-- Strong transactional guarantees and synchronous commit patterns prioritize correctness when replicas must coordinate commit.
-- Under replication or failover network issues, some operations may block/fail rather than return divergent committed state.
-- Good fit for orders, payments, inventory reservation, ledger-like data.
-
-### Azure Cosmos DB (tunable consistency)
-
-- You can select [[Consistency Models]] (Strong, Bounded Staleness, Session, Consistent Prefix, Eventual).
-- This lets you pick different points on latency/freshness per workload.
-- Interview signal: mention that one product can serve CP-like or AP-leaning behaviors depending on configuration and operation.
-
-### Redis (AP-leaning in cache usage patterns)
-
-- In most architectures, Redis is used as a cache where temporary staleness or key loss is acceptable.
-- During partitions/failover races, cache inconsistencies are tolerated because database remains source of truth.
-- The business decision is explicit: keep low-latency serving path available, recover correctness from authoritative store.
-
-### Mixed-store architecture is normal
-
-Most production .NET systems are not globally CP or AP. They are operation-scoped:
-
-- `PlaceOrder` path: CP-leaning store + strict idempotency + transactional guarantees.
-- `GetRecommendations` path: AP-leaning cache/search index + eventual refresh.
-- `UserProfile` path: session consistency may be enough.
-
-That per-operation selection is usually what interviewers want to hear.
+CAP constrains partition-time behavior. [[PACELC and Distributed Database Tradeoffs]] extends the analysis to normal operation, where replica coordination trades latency against consistency, and maps those choices to concrete database configurations. Classify guarantees per operation rather than labeling an entire product CP or AP.
 
 ## Pitfalls
 
@@ -168,9 +137,6 @@ That per-operation selection is usually what interviewers want to hear.
 
 ## Questions
 
-> [!QUESTION]- If CAP is only about partitions, why do we still tune consistency levels on healthy clusters?
-> Because CAP only describes the partition case, and partitions are rare — PACELC covers the other 99% of the time. Its "ELC" half says that even with healthy links (Else), a replicated store still trades Latency against Consistency: wait for a quorum to confirm and you get fresher, better-ordered reads at higher latency; answer from the nearest replica and you get speed with a chance of staleness. That is exactly what read-consistency levels, session guarantees, quorum sizes, and timeout tuning are dialing in. CAP tells you how to fail; PACELC tells you what you pay every day.
-
 > [!QUESTION]- Is a system "CP" or "AP" as a whole?
 > Don't think of it system-wide — decide per operation, because different endpoints have different correctness budgets. A `PlaceOrder` or ledger write wants CP: refuse it under partition rather than risk split-brain or a double charge. A `GetRecommendations` read wants AP: keep serving slightly stale data because availability beats freshness there. A profile read might only need session consistency. So the same system is CP on some paths and AP on others; labeling the whole platform and applying one rule everywhere is the mistake. Map each operation to its business invariant and its allowed staleness window.
 
@@ -184,3 +150,4 @@ That per-operation selection is usually what interviewers want to hear.
 - [Azure Cosmos DB consistency levels](https://learn.microsoft.com/azure/cosmos-db/consistency-levels) — practical example of a production system offering five tunable consistency levels, illustrating CAP tradeoffs in a real product.
 - [Amazon Dynamo paper (SOSP 2007)](https://www.allthingsdistributed.com/files/amazon-dynamo-sosp2007.pdf) — canonical AP system design paper showing how Amazon chose availability over consistency and the engineering consequences.
 - [Abadi, "Consistency Tradeoffs in Modern Distributed Database System Design: CAP is only part of the story" (PACELC)](https://www.cs.umd.edu/~abadi/papers/abadi-pacelc.pdf) — extends CAP with the PACELC model, adding latency vs consistency tradeoffs during normal operation.
+- [CAP theorem: one of the most misunderstood terms](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/cap-theorem-one-of-the-most-misunderstood-terms.md) — ByteByteGo provenance for the partition-time prompt; its false CA-choice visual was rejected.

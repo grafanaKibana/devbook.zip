@@ -1,94 +1,95 @@
 ---
 publish: true
-created: 2026-07-11T21:44:51.182Z
-modified: 2026-07-11T21:44:51.182Z
-published: 2026-07-11T21:44:51.182Z
+created: 2026-07-16T18:32:50.723Z
+modified: 2026-07-16T18:38:51.738Z
+published: 2026-07-16T18:38:51.738Z
 topic:
   - AI & ML
 subtopic:
   - LLM
-summary: Measuring an LLM app on live traffic; A/B tests catch shifts offline sets miss.
+summary: Measuring LLM changes on live traffic with outcome metrics, randomized assignment, and uncertainty.
 level:
   - "3"
 priority: Medium
-status: Done
+status: Ready to Repeat
 ---
 
 # Intro
 
-Online evaluation measures an LLM application in production using real user traffic. A/B tests compare two variants (different prompts, models, retrieval strategies, or tooling) on live traffic to determine which produces better user outcomes. Unlike offline evaluation on a fixed test set, online evaluation captures real distribution shifts, edge cases, and user behavior that benchmarks miss. This is why a model or prompt change that moves offline scores only marginally can still produce a large swing in outcome metrics like task resolution rate or escalation-to-human — those metrics depend on multi-turn interaction patterns, user trust, and follow-up behavior that no fixed test set simulates. The reverse also holds: an offline win can fail to materialize online.
+Online evaluation measures an LLM application on real traffic. An A/B test randomly assigns independent units such as users or accounts to control and treatment, then estimates how a prompt, model, retrieval, or tool change affects outcomes. It catches distribution shifts and multi-turn behavior that a fixed offline set misses, but only when assignment, exposure, metrics, and analysis describe the same experiment. The infrastructure that keeps those contracts aligned is covered in [[Experiment Platform Architecture]].
 
-The key discipline: define success metrics and guardrail metrics before running the experiment. Never optimize for a proxy metric (e.g., response length) without also monitoring the outcome metric (e.g., task resolution rate).
+Define the primary outcome and guardrails before traffic starts. A response-length increase is not success if resolution rate falls; a resolution lift is not shippable if safety incidents or p95 latency cross an abort threshold.
 
-## What to Measure
+## What to measure
 
-Prefer outcome metrics over style metrics:
+| Metric type | Examples | Role |
+| --- | --- | --- |
+| Task outcome | Resolution rate, escalation rate, completion | Primary product effect |
+| User outcome | CSAT, re-contact rate, corrected-answer rate | Quality from user behavior |
+| Safety | PII leak rate, policy violation rate | Guardrail and abort condition |
+| Efficiency | Cost per resolved case, p95 latency | Operational guardrail or secondary metric |
+| Engagement | Follow-up rate, session length | Diagnostic proxy, not success by itself |
 
-| Metric type | Examples | Why it matters |
-|-------------|---------|----------------|
-| **Task success** | Resolution rate, escalation rate, task completion | Directly measures whether the system works |
-| **User satisfaction** | Thumbs up/down, CSAT, re-contact rate | Captures quality from the user's perspective |
-| **Safety** | PII leak rate, policy violation rate, harmful content rate | Non-negotiable guardrails |
-| **Efficiency** | Time-to-resolution, cost per conversation, latency p95 | Operational sustainability |
-| **Engagement** | Session length, follow-up rate | Proxy for usefulness (use with caution) |
+A metric contract names the numerator, denominator, attribution window, exclusions, and aggregation unit. “Resolution rate” is ambiguous until it says whether one user, conversation, or message contributes an observation.
 
-Avoid optimizing for engagement alone — a system that generates long, verbose responses may score high on engagement but low on task success.
-
-## Running a Safe A/B Test
+## Running a safe A/B test
 
 ```text
-Hypothesis: Prompt v2 increases resolution rate without increasing safety incidents.
+Hypothesis: prompt v2 improves account-level resolution rate.
 
-Primary metric:   resolution_rate
-Guardrail metrics: pii_leak_rate, policy_violation_rate
-Secondary:        latency_p95, cost_per_conversation
-
-Traffic ramp: 1% → 10% → 50%
-Abort criteria: if any guardrail metric worsens by >X% relative to control.
-Minimum runtime: 2 weeks (to capture weekly seasonality).
+Assignment unit: account
+Primary metric: resolved_accounts / exposed_accounts
+Guardrails: pii_incident_rate, latency_p95
+Minimum detectable effect: +2 percentage points
+Power: 80%
+Significance level: 5%
+Runtime: long enough to reach sample size and cover weekly seasonality
+Ramp: 1% → 10% → 50%, with guardrail aborts at every stage
 ```
 
-**Statistical significance:** use a two-proportion z-test or t-test depending on the metric type. Require p < 0.05 and a minimum detectable effect size before declaring a winner. Underpowered experiments produce false positives.
+The assignment unit determines the independent analysis unit. If treatment is assigned per account, ten conversations from one account are correlated observations, not ten independent samples. Analyze account-level outcomes or use a variance estimator that models the clustering. Randomizing by message while the user sees both variants can also create interference and carryover.
 
-**Segmentation:** always break down results by user segment (geography, language, user tier, device). Averages can hide regressions — a prompt that improves English users may degrade non-English users.
+Choose the estimator from the metric and design:
 
-## Monitoring vs Experimentation
+- For a binary user-level outcome, estimate a difference in proportions and its confidence interval.
+- For a continuous user-level outcome, Welch’s t-test is often a reasonable large-sample default; inspect heavy tails and use a robust or bootstrap estimator when a few users dominate the mean.
+- For ratio metrics such as cost per resolved case, preserve the joint numerator/denominator structure rather than treating per-event ratios as independent values.
+- For clustered, repeated, or triggered observations, use unit-aware methods; changing the test name does not repair a mismatched assignment and analysis unit.
+
+Pre-register the minimum detectable effect, sample size, stopping rule, and segmentation plan. A `p < 0.05` result can still be too small to matter operationally; report the effect estimate and confidence interval, not only a threshold crossing.
+
+## Power and uncertainty
+
+An underpowered experiment has a high probability of missing a real effect: a false negative. It does not inherently create more false positives when the significance level and stopping rule are respected. The subtler failure is conditional: among the few underpowered studies that do reach significance, the observed effect is often exaggerated because only unusually large estimates cross the threshold. Treat that as an estimate-selection problem, not evidence of a large product win.
+
+Repeatedly peeking and stopping on the first significant result does inflate false positives. Use the predeclared fixed horizon or a valid sequential design when continuous monitoring is required.
+
+## Segmentation
+
+Segments should be defined before analysis when they drive decisions. Geography, language, plan, and device can expose a treatment that improves the average while harming a smaller population. Exploratory slices are useful for finding hypotheses, but many post-hoc comparisons also create false discoveries; label them exploratory and confirm important findings in a later test.
+
+## Monitoring versus experimentation
 
 | Aspect | Continuous monitoring | A/B test |
-|--------|----------------------|---------|
-| Purpose | Detect degradation over time | Compare two specific variants |
-| Traffic split | All traffic to one variant | Split between control and treatment |
-| Duration | Ongoing | Fixed window (days to weeks) |
-| Decision | Alert on threshold breach | Statistical significance test |
-| Use case | Production health | Prompt/model/retrieval changes |
+| --- | --- | --- |
+| Purpose | Detect degradation | Estimate the effect of a specific change |
+| Traffic | Current production behavior | Randomized control and treatment |
+| Duration | Ongoing | Planned sample and stopping rule |
+| Decision | Alert on a threshold | Ship, reject, or gather more evidence |
 
-Both are necessary. Monitoring catches silent degradation (model updates, data drift, traffic shifts). A/B tests validate intentional changes.
-
-## Pitfalls
-
-**Novelty effect**
-Users interact differently with new systems. A new prompt may score higher initially because users are more engaged with something new, not because it is better — a satisfaction lift in the first week can shrink to almost nothing a few weeks later, once users stop exploring the new response style. Run experiments long enough to see past the novelty period (typically 1–2 weeks) before reading the results.
-
-**Peeking at results early**
-Checking significance before the planned end date inflates false positive rates. Use sequential testing methods (e.g., always-valid p-values) if you need to monitor results continuously.
-
-**Averages hiding regressions**
-A 2% improvement in average resolution rate can coexist with a 20% regression for a specific language or user tier. Always segment results.
-
-**Optimizing guardrail metrics**
-If safety metrics are included in the optimization objective, the system may learn to avoid triggering safety checks rather than actually being safer. Keep guardrail metrics as hard abort criteria, not optimization targets.
+Monitoring catches provider updates, drift, and outages. Randomization estimates causality for an intentional change. One cannot substitute for the other.
 
 ## Questions
 
-> [!QUESTION]- How do you determine the minimum sample size for an A/B test?
-> Use a power analysis: specify the minimum detectable effect (e.g., 2% improvement in resolution rate), desired statistical power (80%), and significance level (p < 0.05). Tools like statsmodels or online calculators give the required sample size. Underpowered tests produce false positives that waste engineering effort.
+> [!QUESTION]- What does low statistical power mean?
+> A real effect often fails to reach the decision threshold, producing a false negative. If an underpowered result is significant, its estimate may be unusually large because only extreme samples crossed the threshold; confirm both practical size and uncertainty.
 
-> [!QUESTION]- What is the difference between data drift and model degradation in online evaluation?
-> Data drift is a change in the input distribution (users asking different types of questions). Model degradation is a drop in output quality for the same input distribution. Both show up as metric regressions in online monitoring, but the remediation differs: drift may require retraining or prompt updates; degradation may indicate a model update or infrastructure issue.
+> [!QUESTION]- Why must analysis follow the assignment unit?
+> Randomization makes assigned units independent across variants. Repeated events within one unit remain correlated, so counting them as independent understates uncertainty and can create a confident-looking result from little independent evidence.
 
 ## References
 
-- [Define your success criteria (Anthropic Docs)](https://docs.anthropic.com/en/docs/test-and-evaluate/define-success) — practical guidance on choosing evaluation metrics for LLM applications, including the distinction between proxy and outcome metrics.
-- [Observability in generative AI (Azure AI Foundry)](https://learn.microsoft.com/en-us/azure/ai-foundry/concepts/observability) — Microsoft's framework for monitoring LLM applications in production including tracing, metrics, and evaluation integration.
-- [Trustworthy Online Controlled Experiments (Kohavi et al.)](https://www.cambridge.org/core/books/trustworthy-online-controlled-experiments/D97B26382EB0EB2DC2019A7A7B518F59) — the definitive book on A/B testing methodology including statistical significance, segmentation, and common pitfalls.
-- [Sequential testing for A/B tests (Optimizely)](https://www.optimizely.com/optimization-glossary/sequential-testing/) — how to monitor A/B test results continuously without inflating false positive rates.
+- [Practical Guide to Controlled Experiments on the Web](https://exp-platform.com/Documents/GuideControlledExperiments.pdf) — Kohavi and colleagues’ primary guide to randomization, metrics, power, and trustworthy analysis.
+- [Online Experimentation at Microsoft](https://www.microsoft.com/en-us/research/publication/online-experimentation-at-microsoft/) — primary account of large-scale experimentation infrastructure and organizational practice.
+- [The ASA statement on p-values](https://doi.org/10.1080/00031305.2016.1154108) — primary statistical guidance explaining why a threshold alone does not measure effect size or practical importance.
+- [Beyond Power Calculations](https://doi.org/10.1177/1745691614551642) — Gelman and Carlin’s primary treatment of Type S errors and exaggerated Type M estimates under low-power designs.

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:43:58.302Z
-modified: 2026-07-11T21:43:58.302Z
-published: 2026-07-11T21:43:58.302Z
+modified: 2026-07-16T07:27:11.845Z
+published: 2026-07-16T07:27:11.845Z
 topic:
   - DevOps
 subtopic: []
@@ -21,6 +21,33 @@ The three dominant tools for .NET teams are GitHub Actions, Azure DevOps Pipelin
 
 > [!NOTE]
 > **The two "CD"s are different.** _Continuous **Delivery**_ means every passing build is _automatically made ready_ to release, but a human clicks the button to push to production (a manual approval gate). _Continuous **Deployment**_ removes that gate — every commit that passes the pipeline goes to production automatically. Deployment requires more trust in your tests, observability, and rollback (it pairs naturally with [[DevOps/Deployment Strategies/Deployment Strategies|canary/blue-green deployments]] and feature flags). Most teams practice continuous _delivery_; continuous _deployment_ is the further, optional step.
+
+## CI, Delivery, and Deployment
+
+Use one immutable artifact to make the boundary operational. A commit produces `checkout-api@sha256:8f31c20000000000000000000000000000000000000000000000000000000000`; CI compiles it, runs tests, scans dependencies, and publishes that exact digest. Continuous delivery promotes the same digest through staging and leaves production behind an approval gate. Continuous deployment removes that last human gate when automated checks, rollback, and on-call ownership are good enough. Rebuilding after approval breaks the evidence chain because production no longer runs the bytes that passed the earlier checks.
+
+![[Assets/System Design 101/f804ed9753569b53ead6d128845cb77c151b4b3482a716fd05ae267e1bb60175.png]]
+
+## Commit-to-Production Stages and Gates
+
+| Stage | Input and output | Gate | Failure response |
+| --- | --- | --- | --- |
+| Build | Source commit to signed package or image digest | Reproducible build and provenance | Stop; do not publish a partial artifact |
+| Verify | Same digest plus unit, integration, security, and policy results | Required evidence passes | Fix the commit or explicitly accept tracked risk |
+| Deploy | Same digest plus environment configuration | Readiness and smoke checks | Remove the new instances from traffic |
+| Release | Healthy deployment plus traffic or feature policy | SLO and business guardrails | Shift traffic back or disable the feature |
+
+Build-time checks prove properties of the artifact. Deployment-time checks prove the artifact can start and serve in a particular environment. Before promotion, record the previous digest, backward-compatible database state, rollback command, and the metric threshold that stops the rollout. A pipeline that cannot identify the running digest or reverse its last traffic change is not ready for unattended deployment.
+
+![[Assets/System Design 101/809457b84cae7c3fc6f3d613b0868c197439c85837613e6c3ed314485f4608a4.png]]
+
+## Netflix Delivery Pipeline Case Study
+
+Netflix's published pipeline is useful as a historical trace, not a current tool prescription. A Gradle build produced application packages; Bakery created an immutable Amazon Machine Image; Spinnaker coordinated deployment; Atlas supplied telemetry; Kayenta compared canary and baseline metrics; PagerDuty carried failed automation into incident response. Each boundary exchanged an immutable artifact or explicit evidence instead of rebuilding the application.
+
+The transferable rule is to separate packaging, rollout, analysis, and response. Adopt the named stack only when its operational cost fits; a smaller team can preserve the same boundaries with a container registry, a managed deployment service, an SLO query, and one paging system.
+
+![[Assets/System Design 101/150184c4075c71457db5a4e85b4cfc57410246975c11291af2560a7228efd2d5.png]]
 
 ## GitHub Actions
 
@@ -164,3 +191,9 @@ flowchart TD
 - [Azure DevOps Pipelines](https://learn.microsoft.com/en-us/azure/devops/pipelines/) — official Azure DevOps docs; covers YAML pipelines, environments, and Azure deployment tasks
 - [Martin Fowler — Continuous Integration](https://martinfowler.com/articles/continuousIntegration.html) — canonical CI definition and practices by the originator of the concept
 - [Jenkins documentation](https://www.jenkins.io/doc/) — official Jenkins docs; covers pipeline syntax, plugins, and administration
+- [SLSA provenance](https://slsa.dev/spec/v1.0/provenance) — the supply-chain specification for binding an artifact to its build inputs and process.
+- [Netflix: Spinnaker, global continuous delivery](https://netflixtechblog.com/spinnaker-global-continuous-delivery-a4f7578067b7) — primary description of Netflix's delivery platform and immutable-image flow.
+- [Netflix: Automated Canary Analysis with Kayenta](https://netflixtechblog.com/automated-canary-analysis-at-netflix-with-kayenta-3260bc7acc69) — primary explanation of metric-based canary analysis.
+- [ByteByteGo: CI/CD simplified](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/cicd-simplified-visual-guide.md) — source contribution for the CI, delivery, and deployment boundary.
+- [ByteByteGo: CI/CD pipeline](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/cicd-pipeline-explained-in-simple-terms.md) — source contribution for artifact lineage, stages, and gates.
+- [ByteByteGo: Netflix CI/CD pipeline](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/netflix-tech-stack-cicd-pipeline.md) — source contribution for the bounded Netflix case study.

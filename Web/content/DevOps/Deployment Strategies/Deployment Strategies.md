@@ -1,8 +1,10 @@
 ---
 publish: true
 created: 2026-07-11T21:42:40.773Z
-modified: 2026-07-11T21:42:40.773Z
-published: 2026-07-11T21:42:40.773Z
+modified: 2026-07-16T07:27:12.031Z
+published: 2026-07-16T07:27:12.031Z
+tags:
+  - FolderNote
 topic:
   - DevOps
 subtopic:
@@ -21,11 +23,30 @@ Deployment strategies control how new versions of software reach production. The
 
 The five main strategies differ on one axis: **how much of your fleet runs the new version at any given moment** during the rollout.
 
+## Deployment, Traffic, Experiment, and Feature Boundaries
+
+These controls solve different problems and should be composed deliberately:
+
+| Control | Changes | Proves | Rollback |
+| --- | --- | --- | --- |
+| Rolling or recreate deployment | Which artifact runs on instances | The new process starts and stays ready | Redeploy the prior artifact |
+| Blue-green or canary traffic shift | Which healthy version receives requests | Production behavior at controlled blast radius | Reweight traffic |
+| Shadow traffic | A copy of requests reaches a non-serving version | Compatibility, performance, and side effects under realistic input | Stop mirroring |
+| A/B experiment | Stable cohorts receive different experiences | A causal product hypothesis | End assignment or select a winner |
+| Feature flag | Code path exposure inside a deployed artifact | Controlled release independent of deployment | Disable the flag |
+
+Every rollout needs backward-compatible database changes, enough spare capacity for overlap, a previous artifact that still works, and an SLO threshold with an observation window. Clean up old ReplicaSets, environments, experiment assignments, and flags after the decision; otherwise the safety mechanisms become permanent operational state.
+
 ## All-at-Once (Big Bang)
 
 Replace every instance simultaneously. The old version stops; the new version starts.
 
-**Mechanism**: Stop all instances → deploy new artifact → start all instances. In Kubernetes, this is `RollingUpdate` with `maxUnavailable: 100%` or simply deleting the old Deployment and applying a new one.
+**Mechanism**: Stop all instances → deploy new artifact → start all instances. In Kubernetes, set the Deployment strategy to `Recreate`; the controller terminates the old Pods before it creates Pods for the new revision.
+
+```yaml
+strategy:
+  type: Recreate
+```
 
 **Scenario**: A startup with a single EC2 instance and a 2 AM maintenance window. Downtime is acceptable; infrastructure cost is the constraint.
 
@@ -112,6 +133,18 @@ strategy:
 
 **When to use**: High-traffic services where you want real-user validation before full rollout. Pairs well with feature flags and automated rollback on SLO breach.
 
+### Netflix Canary Case Study
+
+Netflix combined failure-seeking operational practice with automated progressive delivery. Spinnaker controlled the rollout, Atlas provided time-series measurements, and Kayenta scored the canary against a baseline before traffic advanced. The useful mechanism is the closed loop: an explicit cohort, comparable telemetry, a pass/fail rule, and an automatic traffic reversal. The tool names are historical evidence, not a recommendation to reproduce Netflix's stack.
+
+![[Assets/System Design 101/150184c4075c71457db5a4e85b4cfc57410246975c11291af2560a7228efd2d5.png]]
+
+## Shadow Traffic and A/B Experiments
+
+Kubernetes Deployments directly implement `Recreate` and `RollingUpdate`; they do not by themselves provide blue-green, canary analysis, shadowing, or experiment assignment. Those need traffic infrastructure such as a gateway, service mesh, progressive-delivery controller, or application feature system.
+
+Shadow requests must not create production side effects: suppress writes, payments, messages, and emails, or route them to isolated dependencies. A/B assignment must be sticky and measured long enough for statistical power. Use shadowing to validate technical behavior, canary to protect reliability, and A/B only after the candidate is operationally safe.
+
 ## Linear
 
 Increase traffic to the new version in fixed increments on a fixed schedule (e.g., +10% every 10 minutes).
@@ -159,6 +192,11 @@ flowchart TD
 - [AWS — Deployment Methods](https://docs.aws.amazon.com/whitepapers/latest/practicing-continuous-integration-continuous-delivery/deployment-methods.html) — AWS whitepaper covering all major strategies with diagrams and AWS-specific implementation guidance
 - [Kubernetes — Rolling Updates](https://kubernetes.io/docs/tutorials/kubernetes-basics/update/update-intro/) — how Kubernetes implements rolling/in-place deploys natively with `maxUnavailable` and `maxSurge`
 - [Argo Rollouts](https://argoproj.github.io/rollouts/) — Kubernetes controller for advanced canary and blue-green deployments with automated analysis
+- [Kubernetes Deployment strategies](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy) — official boundary for rolling and recreate behavior.
+- [Netflix: Automated Canary Analysis with Kayenta](https://netflixtechblog.com/automated-canary-analysis-at-netflix-with-kayenta-3260bc7acc69) — primary description of canary scoring against a baseline.
+- [ByteByteGo: common deployment strategies](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/top-5-most-used-deployment-strategies.md) — source contribution for the deployment and release matrix; its visual was rejected by the audit.
+- [ByteByteGo: Kubernetes deployment strategies](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/kubernetes-deployment-strategies.md) — source contribution for the Kubernetes boundary and shadow/A/B distinction; its visual was rejected by the audit.
+- [ByteByteGo: Netflix CI/CD pipeline](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/netflix-tech-stack-cicd-pipeline.md) — source contribution for the historical Netflix canary case study.
 
 ## Questions
 

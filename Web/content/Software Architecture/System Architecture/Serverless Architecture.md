@@ -1,13 +1,13 @@
 ---
 publish: true
 created: 2026-07-15T11:47:56.074Z
-modified: 2026-07-15T11:47:56.075Z
-published: 2026-07-15T11:47:56.075Z
+modified: 2026-07-16T17:10:33.489Z
+published: 2026-07-16T17:10:33.489Z
 topic:
   - Software Architecture
 subtopic:
   - System Architecture
-summary: Runs application logic in stateless, short-lived functions fully managed by a cloud provider, billed per invocation with no idle capacity.
+summary: Uses provider-managed functions, containers, messaging, storage, or databases with service-defined scaling and billing.
 level:
   - "3"
 priority: Medium
@@ -16,53 +16,48 @@ status: Ready to Repeat
 
 # Serverless Architecture
 
-Serverless architecture runs application logic in stateless, short-lived functions managed entirely by a cloud provider. You write the function; the provider handles provisioning, scaling, patching, and billing. You pay per invocation and execution time, not for idle capacity. "Serverless" is a misnomer — servers exist, but you don't manage them.
+Serverless architecture delegates capacity provisioning, patching, and much of the availability control plane to a provider. It includes FaaS, serverless containers, managed queues and event buses, object storage, and databases whose billing and scaling are service-defined. It does not mean every service scales to zero, has no idle charge, or bills only per invocation.
 
-The canonical example is **Azure Functions** / **AWS Lambda**: a function triggered by an HTTP request, a queue message, a timer, or a blob upload. The function runs, completes, and the infrastructure scales to zero when idle.
+Reach for it when workload shape matches a managed service contract and reduced infrastructure ownership outweighs platform constraints. A queue-triggered function, a Cloud Run service, and a serverless database are different products with different concurrency, state, latency, and cost boundaries.
 
-## How It Works
+## Function example
+
+This Azure Function performs one concrete scheduled operation while keeping durable state in a repository:
 
 ```csharp
-// Azure Function: HTTP trigger
-public static class OrderProcessor
+public sealed class ExpiredSessionCleanup(ISessionRepository sessions)
 {
-    [Function("ProcessOrder")]
-    public static async Task<HttpResponseData> Run(
-        [HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestData req,
-        FunctionContext ctx)
+    [Function("ExpiredSessionCleanup")]
+    public Task RunAsync(
+        [TimerTrigger("0 */5 * * * *")] TimerInfo timer,
+        CancellationToken ct)
     {
-        var order = await req.ReadFromJsonAsync<OrderRequest>();
-        // Process order...
-        var response = req.CreateResponse(HttpStatusCode.OK);
-        await response.WriteAsJsonAsync(new { OrderId = Guid.NewGuid() });
-        return response;
+        return sessions.DeleteExpiredAsync(DateTimeOffset.UtcNow, ct);
     }
 }
 ```
 
-The function is stateless: no in-memory state survives between invocations. State must be externalized to a database, cache, or storage service.
+The function process may be reused and can safely reuse clients and connection pools, but correctness cannot depend on its memory surviving. Durable progress belongs in managed storage.
 
-## Triggers and Bindings
+## Triggers and managed services
 
-Azure Functions and AWS Lambda support multiple trigger types:
+HTTP, timers, queues, object notifications, and event buses are common function triggers. Serverless containers accept ordinary container workloads with provider-managed capacity; some products can scale to zero and others keep minimum instances. Managed databases and queues remove host management but retain quotas, consistency, retention, and pricing contracts.
 
-| Trigger | Use case |
-|---|---|
-| HTTP | REST APIs, webhooks |
-| Timer | Scheduled jobs (cron) |
-| Queue (Service Bus, SQS) | Async message processing |
-| Blob/S3 | File processing on upload |
-| Event Grid/EventBridge | Event-driven workflows |
+## AWS Lambda execution orientation
+
+![[Assets/System Design 101/aae14f041eec7ebaf0b4ed863793f574fd3b11dfc73ccf0b2f29dd8f4d5a539e.png]]
+
+The visual is a dated fleet model, not an AWS compatibility contract. The stable behavior is isolated execution environments that may be initialized, reused, frozen, reset, or removed. [[Serverless Runtime Internals]] owns the lifecycle, cold-start variables, client reuse, snapshots, and connection constraints.
 
 ## Pitfalls
 
 ### Cold Start Latency
 
-**What goes wrong**: the first invocation after a period of inactivity takes 500ms–3s while the runtime initializes. For latency-sensitive APIs, this is unacceptable.
+**What goes wrong**: a newly created execution environment adds runtime and application initialization latency that breaches a latency objective.
 
-**Why it happens**: the provider scales to zero when idle. The first request must boot the runtime, load the function, and initialize dependencies.
+**Why it happens**: the selected plan has no ready environment, or scale-out needs more environments. Runtime, package, networking, and application initialization costs vary by product and configuration.
 
-**Mitigation**: use **Premium Plan** (Azure) or **Provisioned Concurrency** (AWS) to keep instances warm. For .NET, use Native AOT compilation to reduce startup time. Accept cold starts for background jobs where latency doesn't matter.
+**Mitigation**: measure the chosen plan and region. Use minimum/provisioned capacity when the latency objective justifies fixed cost, reduce initialization work, and evaluate Native AOT where its compatibility constraints fit.
 
 ### Vendor Lock-In
 
@@ -76,33 +71,33 @@ Azure Functions and AWS Lambda support multiple trigger types:
 
 **What goes wrong**: under load the platform spins up hundreds of concurrent function instances, each opening its own database connections, and the database hits `max_connections` and rejects everyone — a self-inflicted outage exactly when traffic is highest.
 
-**Why it happens**: serverless instances are isolated and short-lived, so they **can't share an in-process connection pool** the way a long-running server does. Massive horizontal fan-out multiplies the connection count.
+**Why it happens**: each execution environment has its own pool. Warm invocations can reuse that local pool, but rapid scale-out multiplies the number of pools and connections.
 
 **Mitigation**: front the database with a **server-side pooler** that all instances share (RDS Proxy, Azure SQL, PgBouncer) and cap per-instance pool size. See [[Connection Pooling]] — this is the canonical serverless data gotcha.
 
 > [!NOTE]
-> **"Serverless" now includes containers.** Beyond FaaS (Functions/Lambda), serverless _container_ platforms — Azure Container Apps, AWS Fargate, Google Cloud Run — give scale-to-zero and pay-per-use for a normal containerized app, sidestepping the function programming model and much of the cold-start/portability friction. Often the better fit when you want serverless economics without rewriting to a function host.
+> Serverless container products are not interchangeable. Cloud Run and Azure Container Apps can scale to zero under supported configurations. AWS Fargate supplies serverless task compute but does not itself promise automatic scale-to-zero for an ECS service. Billing follows each product's allocated-resource and minimum-instance rules.
 
 ## Tradeoffs
 
 | Approach | Strengths | Weaknesses | When to use |
 |---|---|---|---|
-| Serverless (Functions) | Zero infrastructure management, scales to zero, pay-per-use | Cold starts, stateless constraint, vendor lock-in, hard to debug locally | Event-driven workloads, variable traffic, background jobs |
-| Containers (AKS, ECS) | Full control, no cold starts, portable | Infrastructure management overhead, minimum cost even at idle | Steady traffic, stateful workloads, complex services |
-| PaaS (App Service, Elastic Beanstalk) | Managed runtime, no cold starts | Always-on cost, less granular scaling | Long-running services, traditional web apps |
+| Serverless functions | Provider-managed event execution; some plans scale to zero | Initialization variance, quotas, provider bindings, external state | Event-driven workloads with bounded execution |
+| Serverless containers | Familiar container contract with managed capacity | Product-specific minimum instances, concurrency, and billing | HTTP or worker workloads that do not fit a function host |
+| Managed PaaS | Managed runtime with stable process model | Minimum capacity and platform constraints vary | Long-running services with predictable latency needs |
 
-**Decision rule**: use serverless for event-driven, bursty, or infrequent workloads where idle cost matters. Use containers or PaaS for services with steady traffic, strict latency requirements, or complex state management. Serverless and containers are often combined: serverless for async processing, containers for the synchronous API layer.
+**Decision rule**: model the exact service's request, duration, memory, concurrency, minimum-capacity, egress, and downstream costs. Choose the managed boundary that reduces ownership without violating latency, state, quota, or portability requirements.
 
 ## Questions
 
 > [!QUESTION]- How do you mitigate cold start latency in serverless functions?
-> Cold starts occur when the provider scales from zero — the runtime must boot, load the function, and initialize dependencies (500ms–3s for .NET). Mitigations: (1) Premium Plan (Azure) or Provisioned Concurrency (AWS) keeps instances warm at a fixed cost. (2) Native AOT compilation reduces .NET startup time by eliminating JIT. (3) Minimize dependencies loaded at startup — lazy-initialize anything not needed on every invocation. Accept cold starts for background jobs where latency doesn't matter; eliminate them for latency-sensitive APIs.
+> Measure initialization and scale-out latency on the chosen product, runtime, plan, package, and network path. Reduce initialization work, reuse clients in warm environments, and buy minimum/provisioned capacity when the latency objective justifies its fixed cost. Native AOT can help .NET startup when reflection and library constraints are acceptable.
 
 > [!QUESTION]- How do you avoid vendor lock-in with serverless functions?
 > Isolate business logic from the function host. The function handler should be a thin adapter that reads the trigger event, calls a provider-agnostic service, and returns a response. The core logic lives in a class library with no provider-specific dependencies. This makes the business logic portable even if the host (Azure Functions, AWS Lambda) is not. Cost: requires discipline to keep the adapter thin; teams often let provider-specific bindings leak into business logic.
 
 > [!QUESTION]- How do you model cost for a serverless workload vs a container-based one?
-> Serverless: cost = (invocations × duration × memory) + egress. Scales to zero when idle — no cost for unused capacity. Container: cost = (instances × uptime) regardless of traffic. Serverless wins for bursty or infrequent workloads; containers win for steady high-throughput traffic where the per-invocation overhead adds up. The crossover point is roughly when serverless cost exceeds the minimum container cost at sustained load.
+> Use the product's actual dimensions: requests, duration, allocated CPU/memory, provisioned or minimum instances, gateway, storage, egress, logging, and downstream connections. Some services scale to zero and some do not. Run the representative traffic shape through both pricing models and include latency and operating labor rather than assuming one universal crossover.
 
 ## References
 
@@ -110,3 +105,10 @@ Azure Functions and AWS Lambda support multiple trigger types:
 - [Serverless architectures (Martin Fowler)](https://martinfowler.com/articles/serverless.html) — practitioner article covering the tradeoffs of serverless, when it fits, and the operational challenges (cold starts, observability, testing).
 - [Azure Functions performance and reliability (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/azure-functions/functions-best-practices) — best practices for cold start mitigation, connection reuse, and scaling configuration.
 - [Cold starts in Azure Functions (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/azure-functions/functions-scale#cold-start-behavior) — explains cold start behavior across hosting plans and mitigation options including Premium Plan and Provisioned Concurrency.
+- [Understanding the Lambda execution environment lifecycle](https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtime-environment.html) — official Init, Invoke, freeze/reuse, reset, and Shutdown behavior.
+- [Improving startup performance with Lambda SnapStart](https://docs.aws.amazon.com/lambda/latest/dg/snapstart.html) — current supported runtimes, snapshot lifecycle, and restore-time constraints.
+- [Firecracker: Lightweight Virtualization for Serverless Applications](https://www.usenix.org/conference/nsdi20/presentation/agache) — peer-reviewed architecture paper for the microVM isolation mechanism used by Lambda.
+
+### ByteByteGo provenance
+
+- [What makes AWS Lambda fast](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/what-makes-aws-lambda-so-fast.md) — editorial lead for the fleet visual; internal component names are treated as dated implementation detail, not a service guarantee.

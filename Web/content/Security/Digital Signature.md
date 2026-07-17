@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:48:29.585Z
-modified: 2026-07-11T21:48:29.586Z
-published: 2026-07-11T21:48:29.586Z
+modified: 2026-07-16T11:07:22.817Z
+published: 2026-07-16T11:07:22.817Z
 topic:
   - Security
 subtopic:
@@ -16,15 +16,16 @@ status: Ready to Repeat
 
 # Digital Signature
 
-A digital signature proves that a message or document was created by a specific party (authenticity) and has not been modified since signing (integrity). Unlike encryption, signing does not hide the content — it proves who created it and that it is unchanged. Every JWT your ASP.NET Core API validates uses a digital signature: the identity provider signs the token with its private key (RS256 or ES256), and the API verifies the signature using the public key from the JWKS endpoint — a failed signature check means the token was forged or tampered with and the request is rejected with a 401.
+A digital signature proves that a message matches a private signing key (authenticity) and has not been modified since signing (integrity). Unlike encryption, signing does not hide the content. An ASP.NET Core API commonly verifies RS256 or ES256 tokens with a public key from the issuer's JWKS endpoint; that result is meaningful only after the issuer and key source are authenticated. HMAC-protected JWTs use a shared-secret MAC instead, so either secret holder can generate them.
 
 ## How It Works
 
-1. The signer computes a hash of the message (e.g., SHA-256)
-2. The signer encrypts the hash with their **private key** — this is the signature
-3. The verifier decrypts the signature with the signer's **public key** to recover the hash
-4. The verifier independently computes the hash of the received message
-5. If the hashes match, the signature is valid — the message is authentic and unmodified
+1. The signature algorithm encodes the message, normally through an approved hash and algorithm-specific preparation.
+2. The signer applies the private signing operation and emits a signature.
+3. The verifier applies the public verification operation to the received message and signature.
+4. A successful result proves that the message matches the signature under that public key. Trust in the claimed signer still depends on how the public key was authenticated.
+
+“Encrypt the hash with the private key” is not a portable model. RSA-PSS, ECDSA, and EdDSA have different signing mathematics, and none should be implemented by composing raw encryption and hashing operations.
 
 ## Example in .NET
 
@@ -46,10 +47,9 @@ verifier.ImportRSAPublicKey(publicKey, out _);
 bool isValid = verifier.VerifyData(message, signature, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
 ```
 
-ECDSA (the modern alternative) produces smaller signatures and is faster:
+ECDSA P-256 produces smaller signatures than RSA-2048 and is supported by protocols such as JOSE. Use it only when the protocol specifies the curve, hash, and signature encoding and every verifier supports that profile:
 
 ```csharp
-// ECDSA signing (preferred for new systems)
 using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
 var message = System.Text.Encoding.UTF8.GetBytes("Transfer $1000 to account 12345");
 var signature = ecdsa.SignData(message, HashAlgorithmName.SHA256);
@@ -64,45 +64,69 @@ bool isValid = ecdsa.VerifyData(message, signature, HashAlgorithmName.SHA256);
 - **JWT signing**: The identity provider signs the JWT with its private key; APIs verify with the public key (JWKS endpoint). See [[JWT Bearer]].
 - **Code signing**: Software publishers sign executables so users can verify the binary has not been tampered with.
 - **Document signing**: PDF signatures, contract signing (DocuSign uses digital signatures under the hood).
-- **TLS certificates**: Certificate authorities sign server certificates to prove domain ownership.
+- **TLS certificates**: after issuance validation, a CA signature attests the binding between a certificate identity, such as a DNS name, and its public key.
+
+## HMAC-Signed API Requests and Replay Windows
+
+HMAC authenticates a message between parties that share one secret. An access or key ID selects the secret; it is not a public key, and the secret is not a private key. Either party can generate the same MAC, so HMAC does not provide a digital signature's asymmetric attribution.
+
+A client can canonicalize and authenticate these request components:
+
+```text
+POST
+/v1/transfers
+content-digest: sha-256=:LPJNul+wow4m6DsqxbninhsWHlwfp0JecwQzYpOLmCQ=:
+x-client-id: client-42
+x-created: 1710000000
+x-nonce: a4e90b0c1f5a4de3
+```
+
+The client computes `HMAC-SHA-256(secret, canonical-request)` and sends the result with the key ID. The server reconstructs the same bytes, resolves the secret, verifies the MAC with a constant-time comparison, checks that the creation time is inside a short acceptance window, and atomically marks `(key ID, nonce)` as used until that window expires.
+
+A timestamp alone limits how long a captured request is useful but does not stop replay inside the window. A nonce without server-side acceptance state is only extra text. Cover the method, authority, path, relevant query values, body digest, and replay parameters so an attacker cannot transplant a valid MAC onto a different operation.
+
+![[Assets/System Design 101/43c5215844c4ce07c9aeda7a92da6da06d810aa7e33e2f4810071f2eaf0cb262.png]]
 
 ## Pitfalls
 
-### Using RSA with PKCS#1 Padding (Vulnerable to Bleichenbacher Attack)
+### Treating RSA Signing as RSA Encryption
 
-**What goes wrong**: RSA with PKCS#1 v1.5 padding is vulnerable to padding oracle attacks (Bleichenbacher's attack, CVE-1999-1230 and variants). An attacker can exploit timing differences in error responses to decrypt ciphertexts or forge signatures. In 2018, the ROBOT attack (Return Of Bleichenbacher's Oracle Threat) demonstrated that PKCS#1 v1.5 vulnerabilities persisted in major TLS implementations including Facebook, Citrix, and Cisco — affecting an estimated 2.8% of the Alexa Top Million sites.
+**What goes wrong**: code applies raw RSA operations to a hand-built hash encoding because signing was described as “encrypting with the private key.” Verification then depends on non-standard parsing and may accept malformed encodings.
 
-**Mitigation**: use RSA-PSS padding for signatures (`RSASignaturePadding.Pss` in .NET) or switch to ECDSA. Never use PKCS#1 v1.5 for new systems.
+**Mitigation**: call the platform's signature API with a specified scheme and parameters. Prefer RSA-PSS for a new RSA-based protocol; use PKCS#1 v1.5 signatures only where the protocol requires compatibility. The Bleichenbacher padding oracle concerns PKCS#1 v1.5 **encryption**, not a reason to describe every PKCS#1 v1.5 signature as decryptable ciphertext.
 
 ### Trusting Signatures Without Certificate Validation
 
 **What goes wrong**: verifying a signature with a public key proves the message was signed by whoever holds the corresponding private key — but not that the key belongs to who you think it does. Without certificate validation (chain of trust to a trusted CA), an attacker can substitute their own key pair.
 
-**Mitigation**: in production systems, use X.509 certificates signed by a trusted CA. For JWT, validate the `kid` (key ID) against the issuer's JWKS endpoint, not against a hardcoded key.
+**Mitigation**: authenticate the key through the trust model the protocol defines, such as a validated X.509 chain or an issuer-bound JWKS document. In JWT, `kid` is only a selector among keys already obtained for the expected issuer; it does not authenticate the issuer or authorize a new key source. Reject an unknown or ambiguous `kid`, and never let an untrusted `kid`, `jku`, or `x5u` value redirect verification to an arbitrary key.
 
 ## Tradeoffs
 
-| Algorithm | Key size | Signature size | Speed | Use when |
-|---|---|---|---|---|
-| RSA-PSS | 2048–4096 bits | 256–512 bytes | Slower | Legacy compatibility, wide support |
-| ECDSA (P-256) | 256 bits | 64 bytes | Faster | New systems, JWT (ES256), TLS certificates |
-| Ed25519 | 256 bits | 64 bytes | Fastest | High-performance signing, SSH keys |
+| Algorithm | Typical public-key size | Signature representation | Use when |
+| --- | --- | --- | --- |
+| RSA-PSS | 2048–4096 bits | Modulus-sized | Existing RSA infrastructure or protocol support |
+| ECDSA P-256 | 256 bits | Usually DER-encoded or fixed-width by protocol | Broad JOSE, TLS, and platform interoperability |
+| Ed25519 | 256 bits | 64 bytes | Protocols and libraries with explicit Ed25519 support |
 
-**Decision rule**: use ECDSA (P-256 / ES256) for new systems. It provides equivalent security to RSA-3072 with a 256-bit key, produces smaller signatures, and is faster. Use RSA only when the client or protocol requires it.
+Choose the algorithm the protocol specifies and the complete client set can verify. Algorithm agility means storing an algorithm or key identifier, supporting a controlled migration, and rejecting unapproved algorithms; it does not mean trusting an unverified message to choose its verifier.
 
 ## Questions
 
 > [!QUESTION]- Why does signing use the private key to encrypt the hash, not the public key?
-> The private key is secret — only the signer can produce a valid signature. Anyone with the public key can verify it, but only the private key holder can create it. Reversing this would let anyone forge signatures.
+> Signing does not generally encrypt a hash. A signature scheme uses the private key to create a value that anyone with the public key can verify for the exact message. The asymmetry makes creation exclusive to the private-key holder while leaving verification public.
 
 > [!QUESTION]- What is the difference between signing and encryption?
-> Signing proves authenticity and integrity — it does not hide the content. Encryption hides the content but does not prove who sent it. TLS uses both: the server certificate is signed (proves identity), and the session data is encrypted (provides confidentiality).
+> Signing proves authenticity and integrity under a trusted key — it does not hide the content. Encryption hides the content but does not identify the sender. In TLS, the client validates the certificate chain, validity period, hostname, key usage, and configured revocation policy; the handshake proves the server holds the corresponding private key, and the negotiated session keys encrypt traffic.
 
-> [!QUESTION]- Why is ECDSA preferred over RSA for new systems?
-> ECDSA produces shorter signatures (256-bit key gives equivalent security to 3072-bit RSA) and is faster to compute. RSA is still widely used for compatibility, but ECDSA is the modern default for JWT signing (ES256) and TLS certificates.
+> [!QUESTION]- How do you choose between ECDSA and RSA?
+> Follow the protocol's allowed algorithms and encodings, then check every signer, verifier, HSM, and rotation path. ECDSA P-256 offers shorter keys and signatures; RSA often has broader compatibility with existing infrastructure. Neither should be selected by an untrusted message or treated as a universal default.
 
 ## References
 
+- [ByteByteGo — A Cheat Sheet for API Designs](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/a-cheat-sheet-for-api-designs.md) — the pinned HMAC-request source, with its key terminology and replay handling corrected here.
+- [RFC 9421 — HTTP Message Signatures](https://datatracker.ietf.org/doc/html/rfc9421) — canonical component coverage, timestamps, expiry, nonce parameters, and replay considerations.
+- [NIST FIPS 198-1 — HMAC](https://csrc.nist.gov/pubs/fips/198-1/final) — the keyed-hash message-authentication construction.
 - [Microsoft — Cryptographic Signatures](https://learn.microsoft.com/en-us/dotnet/standard/security/cryptographic-signatures) — .NET guide to RSA and ECDSA signing
 - [RFC 7515 — JSON Web Signature (JWS)](https://datatracker.ietf.org/doc/html/rfc7515) — the standard for signing JWTs
 - [NIST FIPS 186-5 — Digital Signature Standard](https://csrc.nist.gov/publications/detail/fips/186/5/final) — the authoritative NIST standard for digital signatures; covers RSA, ECDSA, and EdDSA with key size requirements and algorithm selection guidance.

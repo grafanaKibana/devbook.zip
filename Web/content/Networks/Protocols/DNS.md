@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:46:17.381Z
-modified: 2026-07-11T21:46:17.381Z
-published: 2026-07-11T21:46:17.381Z
+modified: 2026-07-16T15:17:19.403Z
+published: 2026-07-16T15:17:19.403Z
 topic:
   - Networks
 subtopic:
@@ -16,7 +16,7 @@ status: Ready to Repeat
 
 # Intro
 
-DNS (Domain Name System) is the internet's distributed directory: it maps human-readable names like `api.example.com` to machine-readable records like IP addresses. Every network connection that uses a hostname goes through DNS first. Understanding DNS is essential for diagnosing connectivity failures, designing reliable service discovery, and reasoning about propagation delays when you change infrastructure.
+DNS (Domain Name System) is the internet's distributed directory: it maps human-readable names like `api.example.com` to records such as IP addresses. Before connecting to a hostname, an application normally obtains an address from a local cache, static mapping, service-specific naming mechanism, or DNS resolver; a network connection does not necessarily perform a fresh DNS query. Understanding that boundary is essential for diagnosing connectivity failures, designing reliable service discovery, and reasoning about propagation delays when infrastructure changes.
 
 DNS is hierarchical and distributed — no single server knows all names. Queries are resolved by walking the hierarchy from root servers down to authoritative servers, with caching at every layer to reduce latency.
 
@@ -54,56 +54,45 @@ sequenceDiagram
 
 This full walk (iterative resolution) only happens on a cache miss. Most queries are served from the resolver's cache.
 
+The stub resolver asks its recursive resolver for a complete answer. The recursive resolver then performs iterative work: root and TLD servers usually return **referrals** to another zone, not the final address. A referral can include in-bailiwick **glue** A/AAAA records so the resolver can reach a delegated nameserver without a circular lookup.
+
+If the requested name is a CNAME, the resolver follows that alias and returns the chain plus the terminal data, subject to cache and loop limits. Each record set has its own TTL. An NXDOMAIN or NODATA result can be cached using the zone's SOA-derived negative TTL, so fixing a missing record does not instantly clear every resolver.
+
+DNS normally begins over UDP. A truncated response sets `TC=1`, prompting retry over TCP; TCP is also required for zone transfers. Encrypted transports such as DoT and DoH change the client-to-resolver hop, not the referral algorithm between DNS authorities.
+
+![[Assets/System Design 101/dfaafd9073b0a72bc05c758dc1162a3f470a0cf903a50156e6d6107f79f1fdd0.png]]
+
 ## Record Types
 
-| Type | Purpose | Example |
-|------|---------|---------|
-| `A` | IPv4 address | `api.example.com → 203.0.113.42` |
-| `AAAA` | IPv6 address | `api.example.com → 2001:db8::1` |
-| `CNAME` | Alias to another name | `www.example.com → example.com` |
-| `MX` | Mail server | `example.com → mail.example.com` |
-| `TXT` | Arbitrary text | SPF, DKIM, domain verification |
-| `NS` | Nameserver for a zone | `example.com → ns1.example.com` |
-| `SOA` | Zone authority metadata | Serial, refresh, retry, expire |
-| `PTR` | Reverse lookup (IP → name) | `42.113.0.203.in-addr.arpa → api.example.com` |
-| `SRV` | Service location | `_http._tcp.example.com → host:port` |
+| Type | Lookup direction | Payload | Operational example |
+|------|---------|---------|---------|
+| `A` | Name → address | IPv4 address | `api.example.com → 203.0.113.42` |
+| `AAAA` | Name → address | IPv6 address | `api.example.com → 2001:db8::1` |
+| `CNAME` | Alias → canonical name | Another domain name | `www.example.com → example.com`; the resolver then looks up the target |
+| `MX` | Mail domain → exchanger | Preference plus mail-server name | `example.com → 10 mail.example.com`; see [[SMTP]] |
+| `TXT` | Name → text strings | One or more character strings | SPF policy, DKIM public-key material, and domain verification |
+| `NS` | Zone → authoritative server | Nameserver name | Delegates `example.com` to `ns1.example.net` |
+| `SOA` | Zone → authority metadata | Primary server, serial, and timers | Drives zone transfer freshness and negative caching |
+| `PTR` | Reverse-tree name → host name | Domain name | `42.113.0.203.in-addr.arpa → api.example.com` |
+| `SRV` | Service/protocol/domain → endpoint | Priority, weight, port, and target | `_sip._tcp.example.com → 10 5 5060 sip1.example.com` |
+
+![[Assets/System Design 101/cf648ed0a8c256e338b080a139796886987b527a7e761d913b98e38092984af0.png]]
 
 ## TTL and Caching
 
-Every DNS record has a TTL (Time To Live) in seconds. Resolvers and clients cache the answer for the TTL duration. After expiry, they re-query.
-
-**Implications:**
-
-- **Propagation delay:** when you change a DNS record, old answers persist in caches until their TTL expires. A 24-hour TTL means changes take up to 24 hours to propagate globally.
-- **Pre-change TTL reduction:** before a planned migration, lower the TTL to 60–300 seconds a day in advance. After the change, raise it back.
-- **Negative caching:** NXDOMAIN (name not found) responses are also cached for the SOA's negative TTL. A misconfigured record can cause "DNS not found" errors that persist for minutes.
+Every record set has a TTL. A resolver can reuse the old answer until that TTL expires, so changing the authoritative value does not invalidate existing caches. Before a migration, lower the TTL and wait at least one full **previous-TTL window** before changing the target; lowering a one-day TTL five minutes before cutover does not affect answers already cached for the original day. [[DNS Operations]] covers cutover, failover, traffic steering, and debugging.
 
 ## DNSSEC
 
-DNSSEC adds cryptographic signatures to DNS records, allowing resolvers to verify that responses are authentic and unmodified. It protects against DNS spoofing and cache poisoning attacks.
-
-**How it works:** the authoritative server signs records with a private key. Resolvers verify signatures using the public key published in the DNS hierarchy. A chain of trust runs from the root zone down to the authoritative zone.
-
-**Adoption:** DNSSEC is supported by major TLDs and cloud DNS providers (Azure DNS, Route 53, Cloudflare) but is not universally deployed. It adds complexity (key rotation, signing overhead) and does not encrypt DNS traffic — it only authenticates it.
+DNSSEC lets a validating resolver authenticate signed DNS data through a chain of trust. It does not encrypt queries or hide names. Key rollover and delegation records are operational parts of the security boundary; see [[DNS Security]].
 
 ## Encrypted DNS (DoH / DoT)
 
-DNSSEC authenticates but doesn't _encrypt_ — classic DNS queries travel in plaintext on UDP 53, so anyone on-path can see (and tamper with) the names you look up. Two protocols close that gap:
+DoT and DoH protect the channel between a client and its chosen recursive resolver. They do not authenticate the DNS data end-to-end, protect the resolver-to-authoritative path by themselves, or prevent a trusted resolver from returning a false answer. DNSSEC authenticates signed data; encrypted DNS protects one transport channel. [[DNS Security]] shows how the two controls compose.
 
-- **DNS-over-TLS (DoT)** — DNS inside a TLS connection on port 853; easy for networks to identify (and block) by port.
-- **DNS-over-HTTPS (DoH)** — DNS queries as HTTPS requests on 443, indistinguishable from normal web traffic; harder to block but controversial because it bypasses network-level DNS controls.
+## Operations Boundary
 
-Both give confidentiality and integrity against eavesdropping/poisoning; they're complementary to DNSSEC (authentication), not a replacement.
-
-## DNS as a Traffic Director
-
-Beyond name→IP, DNS is a load-balancing and routing layer because the _answer_ can depend on who's asking and what's healthy:
-
-- **Round-robin** — return multiple A records; clients spread across them (crude, no health awareness).
-- **GeoDNS / latency-based** — return the IP of the nearest/fastest region (Route 53 latency routing, Azure Traffic Manager) to cut RTT.
-- **Weighted** — split traffic by percentage for canary/blue-green rollouts.
-- **Health-check-aware failover** — stop returning an endpoint that fails health checks (pairs with short TTLs).
-- **Anycast** — one IP (e.g. `8.8.8.8`, `1.1.1.1`) announced from many locations via BGP; the network routes each client to the closest instance. This is how public resolvers and CDNs appear "everywhere at once."
+DNS can steer traffic with weighted, geographic, latency, or health-aware answers, but cached answers make every change gradual. Anycast is a routing mechanism for reaching one advertised address, not a DNS answer-selection policy. [[DNS Operations]] separates those mechanisms and gives a migration runbook.
 
 ## Pitfalls
 
@@ -114,7 +103,7 @@ A 24-hour TTL means a failed server's IP stays cached for up to 24 hours. Client
 A CNAME cannot coexist with other records at the zone apex (`example.com`). You cannot have `example.com CNAME cdn.example.net` alongside `example.com MX mail.example.com`. Fix: use ALIAS/ANAME records (supported by Route 53, Cloudflare) which behave like CNAME but are resolved server-side.
 
 **DNS cache poisoning**
-An attacker injects a forged DNS response into a resolver's cache, redirecting traffic to a malicious IP. Mitigations: DNSSEC, DNS-over-HTTPS (DoH), DNS-over-TLS (DoT), and source port randomization.
+An attacker injects a forged response into a resolver's cache. DNSSEC validation authenticates signed data; source-port and query-ID randomization make blind forgery harder. DoH and DoT protect only the client-to-resolver channel and are not substitutes for DNSSEC.
 
 **Split-horizon DNS**
 Internal and external DNS return different answers for the same name (e.g., internal IP vs public IP). Misconfiguration can cause internal services to route through the public internet or expose internal IPs externally.
@@ -122,49 +111,13 @@ Internal and external DNS return different answers for the same name (e.g., inte
 ## Questions
 
 > [!QUESTION]- Why does a DNS change "take time" to propagate?
-> Because resolvers cache answers for the record's TTL. Old answers persist until they expire. A 24-hour TTL means up to 24 hours of propagation delay. Mitigation: lower TTL to 60–300s before planned changes, then restore it after.
+> Because resolvers cache answers for the record's TTL. Old answers persist until they expire. Lower the TTL, wait at least one complete old-TTL interval so earlier cache entries expire, then cut over and restore the longer TTL after the new answer is stable.
 
 > [!QUESTION]- What is the difference between a recursive resolver and an authoritative server?
 > A recursive resolver (e.g., 8.8.8.8) does the work of walking the DNS hierarchy on behalf of the client. It caches results. An authoritative server holds the actual records for a zone and answers queries about names in that zone. The resolver queries authoritative servers; clients query resolvers.
 
 > [!QUESTION]- How does DNSSEC protect against cache poisoning?
 > DNSSEC signs records with a private key. Resolvers verify signatures using the public key from the DNS hierarchy. A forged response without a valid signature is rejected. Cost: key rotation complexity, signing overhead, and larger DNS responses (signatures add bytes).
-
-## Tradeoffs
-
-**TTL length: short vs long**
-
-| Dimension | Short TTL (60–300s) | Long TTL (3600–86400s) |
-|-----------|--------------------|-----------------------|
-| Failover speed | Fast (minutes) | Slow (hours) |
-| Cache hit rate | Low (more resolver queries) | High (fewer queries) |
-| DNS query load | Higher | Lower |
-| Migration risk | Low | High (stale records persist) |
-
-Decision rule: use short TTLs for records that may change (load balancer IPs, CDN origins, failover targets). Use long TTLs for stable records (MX, NS, static content). Always lower TTL 24h before a planned migration, then restore it after.
-
-**Recursive vs iterative resolution**
-Recursive: client delegates all work to the resolver. Simpler for clients, but the resolver is a single point of failure and cache poisoning target. Iterative: client walks the hierarchy itself. Rare in practice — most clients use recursive resolvers. Useful for DNS debugging tools (`dig +trace`).
-
-## DNS Debugging Commands
-
-```bash
-# Full resolution trace (shows each step)
-dig +trace api.example.com
-
-# Query specific record type
-dig api.example.com A
-dig example.com MX
-
-# Check TTL remaining in resolver cache
-dig @8.8.8.8 api.example.com A
-
-# Reverse lookup
-dig -x 203.0.113.42
-
-# Check DNSSEC validation
-dig +dnssec api.example.com
-```
 
 ## References
 
@@ -173,3 +126,6 @@ dig +dnssec api.example.com
 - [DNS basics (Cloudflare Learning)](https://www.cloudflare.com/learning/dns/what-is-dns/) — accessible explanation of the resolution process with diagrams; good for building intuition.
 - [DNSSEC overview (ICANN)](https://www.icann.org/resources/pages/dnssec-what-is-it-why-important-2019-03-05-en) — authoritative explanation of DNSSEC, chain of trust, and deployment considerations.
 - [DNS record types (Cloudflare)](https://www.cloudflare.com/learning/dns/dns-records/) — practical guide to A, AAAA, CNAME, MX, TXT, and SRV records with use cases.
+- [Negative caching (RFC 2308)](https://www.rfc-editor.org/rfc/rfc2308) — specifies caching for NXDOMAIN and NODATA answers using SOA data.
+- [ByteByteGo: DNS lookup](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/how-does-the-domain-name-system-dns-lookup-work.md) — source resolution visual, bounded here with referrals, caches, aliases, transport fallback, and negative answers.
+- [ByteByteGo: DNS record types](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/dns-record-types-you-should-know.md) — source record map expanded here with lookup direction and wire payload.

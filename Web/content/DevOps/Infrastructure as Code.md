@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:47:11.231Z
-modified: 2026-07-11T21:47:11.232Z
-published: 2026-07-11T21:47:11.232Z
+modified: 2026-07-16T07:09:20.034Z
+published: 2026-07-16T07:09:20.034Z
 topic:
   - DevOps
 subtopic: []
@@ -54,6 +54,12 @@ resource storage 'Microsoft.Storage/storageAccounts@2023-01-01' = {
 
 ## State and the Plan/Apply Loop
 
+Terraform first refreshes its view of remote objects, builds a dependency graph from configuration and provider relationships, and produces a plan. Review that plan as an executable change set: replacements, deletes, and provider-version changes deserve explicit attention. Apply the saved plan, not a freshly recomputed one, when the approval must bind to exact operations.
+
+Store state in a remote backend with encryption, access control, versioning, and locking. State is operational data and can contain secrets; it is not ordinary source code. If an apply is interrupted, inspect the real resource and state before retrying. Use `import`, `state mv`, or provider-specific recovery only after backing up state. Never “fix” drift by editing the state JSON by hand.
+
+![[Assets/System Design 101/2a1a0f16507f0b03cd0a5bc0ace96681a01eeec3f6632c4d0385bdac95ab5c12.png]]
+
 Declarative tools track what they've created in a **state file** that maps your code to real cloud resources. The workflow:
 
 1. **Plan** — diff desired config against current state → a preview of what will be created/changed/destroyed. The safety gate; review it like a PR.
@@ -76,6 +82,21 @@ State is the crux of Terraform-style tools (Bicep/ARM and CloudFormation keep st
 
 > [!NOTE]
 > **Provisioning vs configuration management.** Terraform/Bicep _provision_ infrastructure (create the VM, network, DB). Tools like Ansible/Chef/Puppet _configure_ what's inside (install packages, set files). They're complementary — provision with one, configure with the other — though containers + Kubernetes increasingly fold configuration into immutable images.
+
+## Provisioning, Configuration, Orchestration, and GitOps
+
+| Boundary | Declared result | Typical failure | Decision rule |
+| --- | --- | --- | --- |
+| Image build | Versioned application plus runtime filesystem | Mutable or unscanned artifact | Build once and address by digest |
+| Provisioning | Networks, clusters, databases, identities | Drift or destructive replacement | Require a reviewed plan |
+| Machine configuration | Packages, files, and services converge on hosts | Snowflake hosts or non-idempotent runs | Prefer immutable images when replacement is cheap |
+| Orchestration | Runtime units are scheduled and reconciled | Readiness, capacity, or lifecycle mismatch | Use it only for long-running runtime state |
+| Application configuration | Environment-specific values reach the process | Secret leakage or staging/production drift | Validate schema and inject at runtime |
+| GitOps | A controller continuously reconciles declared cluster state | Bad Git state propagates automatically | Protect the repository and define emergency reconciliation controls |
+
+Tools overlap, so classify the state they own before choosing one. Terraform can configure bootstrap data, Kubernetes can provision cloud resources through controllers, and Ansible can create resources, but overlapping ownership creates competing reconcilers. One resource should have one authoritative controller.
+
+![[Assets/System Design 101/203c7f1d0a6b3d00a4748c5334399f9d20b32194e8e766300bfc7a23313485df.png]]
 
 ## Pitfalls
 
@@ -116,3 +137,9 @@ State is the crux of Terraform-style tools (Bicep/ARM and CloudFormation keep st
 - [Bicep documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/overview) — Azure-native declarative IaC.
 - [Pulumi documentation](https://www.pulumi.com/docs/) — IaC in general-purpose languages.
 - [OpenTofu](https://opentofu.org/) — the open-source Terraform fork and its governance.
+- [Terraform state](https://developer.hashicorp.com/terraform/language/state) — official state purpose, storage, and operational cautions.
+- [Terraform saved plans](https://developer.hashicorp.com/terraform/cli/commands/plan#out-filename) — official workflow for binding review to a specific apply input.
+- [OpenGitOps principles](https://opengitops.dev/) — vendor-neutral declarative, versioned, pulled, and continuously reconciled GitOps contract.
+- [ByteByteGo: IaC landscape](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/a-cheatsheet-on-infrastructure-as-code-landscape.md) — source contribution for the tool-boundary map.
+- [ByteByteGo: configuration management](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/how-do-we-manage-configurations-in-a-system.md) — source contribution for ownership boundaries; its visual was rejected by the audit.
+- [ByteByteGo: Terraform plan/apply](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/how-does-terraform-turn-code-into-cloud.md) — source contribution for state, drift, and recovery.

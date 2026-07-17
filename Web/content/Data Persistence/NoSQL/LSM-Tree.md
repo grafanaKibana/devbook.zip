@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T08:11:32.112Z
-modified: 2026-07-15T08:11:32.112Z
-published: 2026-07-15T08:11:32.112Z
+modified: 2026-07-16T06:46:30.261Z
+published: 2026-07-16T06:46:30.261Z
 topic:
   - Data Persistence
 subtopic:
@@ -16,9 +16,9 @@ status: Creation
 
 # Intro
 
-A [[B-tree]] keeps its keys sorted on disk by updating pages in place: an insert finds the right page and rewrites it where it lives. That is ideal for reads, but every write is a small random write to a specific page, and ingest-heavy workloads — event logs, time-series, high-write feeds — thrash the disk rewriting scattered pages and their write-ahead-log copies.
+A [[B-tree]] keeps its keys sorted on disk by updating pages in place: an insert finds the right page and eventually rewrites it where it lives. That is ideal for reads, but small updates commonly become random page writes, and ingest-heavy workloads — event logs, time-series, high-write feeds — can thrash the disk rewriting scattered pages alongside their write-ahead-log records.
 
-An LSM-Tree (Log-Structured Merge-Tree) inverts the deal: it **never updates data in place**. A write is appended — to a durable log and to an in-memory buffer — and acknowledged immediately. When the buffer fills, it is flushed to disk as one **immutable, sorted file** written in a single sequential pass. An update to an existing key just writes a newer version; a delete writes a small marker called a **tombstone**. Nothing on disk is ever edited; older versions are simply shadowed by newer ones. A background process later merges these files, keeping the newest version of each key and physically discarding the rest. The result is that random writes become sequential appends — the write-optimized counterpart to the B-tree, tuned for how fast you can ingest rather than how fast you can point-read.
+An LSM-Tree (Log-Structured Merge-Tree) inverts the deal: it does not update user records inside an existing SSTable. A write is appended to a log and an in-memory buffer, then acknowledged according to the engine's configured durability policy. When the buffer fills, it is flushed to disk as one **immutable, sorted file** written in a sequential pass. An update to an existing key writes a newer version; a delete writes a small marker called a **tombstone**. Existing SSTables are not edited; older versions are shadowed by newer ones. A background process later merges these files, keeping the newest version of each key and physically discarding the rest. The result is that random user-data updates become sequential flushes and merges — the write-optimized counterpart to the B-tree, tuned for how fast you can ingest rather than how fast you can point-read.
 
 **Core shape:** append to WAL + in-memory memtable → flush full memtable as an immutable sorted SSTable → read memtable then SSTables newest→oldest (Bloom-filter pruned) → background compaction merges SSTables, drops tombstones → sequential writes, `O(n)` storage.
 
@@ -26,7 +26,7 @@ An LSM-Tree (Log-Structured Merge-Tree) inverts the deal: it **never updates dat
 
 Three steps, all sequential or in-memory:
 
-1. **Write-ahead log (WAL).** Every mutation is appended to an on-disk log — a commit log — before the write is acknowledged. This append is sequential and makes the write crash-durable even though the data itself is still only in memory.
+1. **Write-ahead log (WAL).** Every mutation is appended to an on-disk log — a commit log. With synchronous durability, the engine flushes the required log record before acknowledging; weaker modes may acknowledge before that flush and accept a crash-loss window. The WAL makes the memtable write recoverable under the configured durability contract.
 2. **Memtable.** The same key/value is inserted into the memtable, an in-memory _sorted_ structure — commonly a skiplist — so entries stay in key order and support ordered iteration and fast merges. An update to an existing key does not search-and-overwrite; it inserts a newer entry that shadows the old one. A delete inserts a tombstone timestamped so later reconciliation knows it supersedes older values.
 3. **Flush.** When the memtable reaches its size threshold it is frozen (made immutable) and a fresh memtable takes over new writes. The frozen memtable is written to disk as an **SSTable** (Sorted String Table): a single immutable file, keys already in sorted order, emitted in one sequential pass. Once an SSTable is durable, the WAL segments it covers can be recycled.
 
@@ -79,6 +79,8 @@ This is a cross-area comparison, so it lives here rather than in the [[B-tree]] 
 
 Neither is strictly better: a B-tree wins read-heavy and range-scan-heavy workloads with predictable latency; an LSM-Tree wins write-heavy ingest and gets better on-disk compression from its dense, immutable files.
 
+![[Assets/System Design 101/d08e8d5089282057718210907663b5c7a522978f4a356bc91cae9b30c8cd3a9a.png]]
+
 ## Complexity
 
 | Operation | Disk I/O | In-memory work | Cause |
@@ -88,11 +90,11 @@ Neither is strictly better: a B-tree wins read-heavy and range-scan-heavy worklo
 | Range scan | seeks across every overlapping run | k-way merge of sorted runs | results are scattered across the memtable and multiple SSTables |
 | Compaction (background) | rewrites merged SSTables sequentially | merge-sort of already-sorted runs | reclaims space, finalizes tombstones, bounds read amplification |
 
-Here `m` is the memtable's entry count and `n` the total key count. The decisive property is that no operation issues a random in-place write: writes are amortized into sequential flushes and merges, which is exactly the cost a B-tree pays and an LSM-Tree avoids — in exchange for the multi-SSTable read and the background compaction load.
+Here `m` is the memtable's entry count and `n` the total key count. The decisive property is that the user-data path avoids random in-place SSTable updates: writes are amortized into sequential flushes and merges. The WAL, manifest, filesystem metadata, or engine housekeeping can still issue other I/O. The LSM-Tree buys its user-data write pattern in exchange for multi-SSTable reads and background compaction load.
 
 ## Where it's used
 
-LSM-Trees underlie most write-optimized stores. Among the wide-column and key-value families (see [[NoSQL Database Types]]): **Cassandra**, **ScyllaDB**, **HBase**, and Google **Bigtable**. As embeddable engines that many other systems build on: **RocksDB** (which powers state stores in Kafka Streams, TiKV, CockroachDB, and more) and its ancestor **LevelDB**, whose Bigtable-derived SSTable format popularized the design.
+LSM-Trees underlie most write-optimized stores. Among the wide-column and key-value families (see [[NoSQL Database Types]]): **Cassandra**, **ScyllaDB**, **HBase**, and Google **Bigtable**. As embeddable engines that many other systems build on: **RocksDB** (which powers state stores in Kafka Streams and TiKV) and its ancestor **LevelDB**, whose Bigtable-derived SSTable format popularized the design.
 
 ## Reference drawer
 
@@ -116,13 +118,13 @@ LSM-Trees underlie most write-optimized stores. Among the wide-column and key-va
 ## Questions
 
 > [!QUESTION]- Why are SSTables immutable?
-> Immutability is what turns writes sequential and reads safe. Because a flushed file is never edited, the disk only ever sees appends (fast) and concurrent readers need no locks (the bytes never change under them), crash recovery is trivial (a partial file is simply discarded), and files compress well as dense, static blocks. The price is that updates and deletes cannot edit the old data in place — they write new versions and tombstones — so a background **compaction** pass is required to reconcile versions and reclaim space.
+> Immutability lets the engine create SSTables and compaction outputs with sequential file writes, then install the completed files without overwriting data that concurrent readers are using. Recovery still has work to do: replay the WAL into a memtable, read the manifest or version set to identify the live SSTables, and discard incomplete output files that were never installed. Dense, static files also compress well. The price is that updates and deletes write new versions and tombstones, so background **compaction** must reconcile versions and reclaim space.
 
 > [!QUESTION]- What is the read-vs-write amplification tradeoff, and how does compaction strategy control it?
 > Write amplification is bytes written to disk per byte the app wrote; read amplification is disk reads per logical read; space amplification is on-disk bytes per byte of live data. Compaction cannot minimize all three at once. **Size-tiered** rewrites data rarely (low write amp) but leaves a key's live version spread across tiers (high read and space amp). **Leveled** keeps non-overlapping ranges per level so a read hits at most one file per level (low read and space amp) but rewrites each key as it descends levels (high write amp). You choose which amplification the workload can afford.
 
 > [!QUESTION]- When does a B-tree beat an LSM-Tree?
-> When reads dominate and latency must be predictable. A B-tree resolves a point or range lookup on a single root-to-leaf path with no read amplification and no background rewrite bursts, so read-heavy OLTP and range-scan-heavy workloads favor it. An LSM-Tree shines on write-heavy ingest (logs, time-series, high-write feeds) where its sequential appends and dense immutable files pay off, but it makes reads probe several SSTables and periodically stalls on compaction I/O.
+> When reads dominate and latency must be predictable. A B-tree point lookup follows one root-to-leaf path; a range lookup follows that path to the first matching leaf, then traverses the required leaf pages. An LSM range scan instead performs a k-way merge across the memtable and every overlapping SSTable run, while point reads may probe several Bloom-filter candidates. That difference favors B-trees for read-heavy OLTP and range scans; LSM-Trees favor write-heavy ingest but pay multi-run read and background compaction costs.
 
 ## References
 
@@ -130,4 +132,4 @@ LSM-Trees underlie most write-optimized stores. Among the wide-column and key-va
 - [RocksDB wiki — Leveled Compaction](https://github.com/facebook/rocksdb/wiki/Leveled-Compaction) — precise mechanics of levels, non-overlapping ranges, and the write-amplification cost of LCS in a production engine.
 - [Apache Cassandra — storage engine](https://cassandra.apache.org/doc/latest/cassandra/architecture/storage-engine.html) — memtable, commit log, and SSTable flush described from a shipping wide-column store.
 - [LevelDB — implementation notes](https://github.com/google/leveldb/blob/main/doc/impl.md) — the SSTable-plus-compaction design that popularized the modern LSM layout, with the sparse-index and Bloom-filter read path.
-- [ByteByteGo — B-Tree vs LSM-Tree (further reading)](https://blog.bytebytego.com/p/b-tree-vs-lsm-tree) — outbound overview only; not a source for any text on this page.
+- [B-Tree vs LSM-Tree (ByteByteGo, pinned source)](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/b-tree-vs.md) — visual comparison of the two storage-engine write and read paths; used as editorial provenance alongside the primary engine references above.

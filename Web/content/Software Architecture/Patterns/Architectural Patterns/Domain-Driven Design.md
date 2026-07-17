@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T11:47:56.302Z
-modified: 2026-07-15T11:47:56.303Z
-published: 2026-07-15T11:47:56.303Z
+modified: 2026-07-16T17:06:07.421Z
+published: 2026-07-16T17:06:07.421Z
 topic:
   - Software Architecture
 subtopic:
@@ -16,7 +16,7 @@ status: Ready to Repeat
 
 # Domain-Driven Design
 
-Domain-Driven Design (DDD) is an approach to software development that centers the design on the business domain — its language, rules, and boundaries — rather than on technical infrastructure. The core idea: complex software fails not because of bad technology but because the code doesn't reflect how the business actually works. DDD provides a set of tactical patterns (Entities, Value Objects, Aggregates, Domain Events, Repositories) and strategic patterns (Bounded Contexts, Ubiquitous Language) to close that gap. In an insurance claims platform, introducing Bounded Contexts between Underwriting and Claims Processing eliminated a class of bugs where claim status updates silently overwrote underwriting decisions — the two contexts had different definitions of "approved" that a shared `Policy` model conflated.
+Domain-Driven Design (DDD) centers software design on the business domain — its language, rules, and boundaries — rather than on technical infrastructure. Strategic patterns such as Bounded Contexts and Ubiquitous Language prevent one ambiguous shared model from forcing different business meanings into the same type. Tactical implementation patterns are covered separately in [[Tactical Domain-Driven Design]].
 
 DDD is most valuable in complex domains with rich business rules. For CRUD-heavy systems with little domain logic, the overhead is not justified.
 
@@ -32,7 +32,7 @@ A shared vocabulary used by both developers and domain experts in conversations,
 
 A Bounded Context is an explicit boundary within which a particular domain model applies. The same word can mean different things in different contexts: "Customer" in the Sales context (prospect, contact info, deal history) is different from "Customer" in the Billing context (payment method, invoice address, credit limit).
 
-Each Bounded Context has its own model, its own database schema, and its own team ownership. Communication between contexts happens via well-defined contracts (events, APIs) — not shared database tables.
+Each Bounded Context owns its model and language. A separate schema and aligned team ownership are common ways to reinforce that boundary, not requirements of the pattern: contexts can share a deployment or physical database when table ownership and access rules prevent model leakage. Communication crosses an explicit translation or contract boundary rather than treating another context's tables as a shared domain model.
 
 ```text
 Sales Context          Billing Context
@@ -67,126 +67,9 @@ Bounded contexts don't live in isolation — **context maps** describe the _rela
 
 The map is a _strategic_ deliverable: it tells you where to put ACLs, which integrations are risky (Shared Kernel), and where team coordination is required.
 
-## Tactical Patterns
+## Tactical modeling
 
-### Entity
-
-An object with a unique identity that persists over time. Two entities with the same data are still different objects if their IDs differ.
-
-```csharp
-public sealed class Order
-{
-    public OrderId Id { get; }
-    public CustomerId CustomerId { get; }
-    private readonly List<LineItem> _lineItems = new();
-
-    public Order(OrderId id, CustomerId customerId)
-    {
-        Id = id;
-        CustomerId = customerId;
-    }
-
-    public void AddItem(ProductId productId, int quantity, Money price)
-    {
-        _lineItems.Add(new LineItem(productId, quantity, price));
-    }
-}
-```
-
-### Value Object
-
-An object defined entirely by its attributes, with no identity. Two Value Objects with the same data are equal. Value Objects are immutable.
-
-```csharp
-public sealed record Money(decimal Amount, string Currency)
-{
-    public Money Add(Money other)
-    {
-        if (Currency != other.Currency)
-            throw new InvalidOperationException("Currency mismatch");
-        return new Money(Amount + other.Amount, Currency);
-    }
-}
-```
-
-`Money(10, "USD")` equals `Money(10, "USD")` — no identity needed.
-
-### Aggregate
-
-An Aggregate is a cluster of Entities and Value Objects treated as a single unit for data changes. The **Aggregate Root** is the only entry point — external code cannot modify internal objects directly.
-
-```csharp
-public sealed class Order  // Aggregate Root
-{
-    private readonly List<LineItem> _lineItems = new();
-    public IReadOnlyList<LineItem> LineItems => _lineItems.AsReadOnly();
-    public OrderStatus Status { get; private set; } = OrderStatus.Draft;
-
-    public void Confirm()
-    {
-        if (!_lineItems.Any())
-            throw new DomainException("Cannot confirm an empty order");
-        Status = OrderStatus.Confirmed;
-        AddDomainEvent(new OrderConfirmed(Id, DateTimeOffset.UtcNow));
-    }
-}
-```
-
-The Aggregate enforces invariants: you cannot confirm an empty order. External code calls `order.Confirm()` — it never sets `order.Status` directly.
-
-Two design rules make aggregates work:
-
-- **Reference other aggregates by ID, not by object reference.** An `Order` holds a `CustomerId`, not a `Customer` object. This keeps each aggregate a small, independently-loadable consistency boundary (and avoids loading half the database to confirm one order).
-- **One aggregate per transaction.** A single transaction should modify exactly one aggregate instance; changes that span aggregates are made _eventually consistent_ via [[Distributed Transactions|domain events / sagas]], not a big multi-aggregate transaction. The aggregate _is_ the transactional consistency boundary.
-
-Keep aggregates **as small as invariants allow** — a too-large aggregate (see Pitfalls) serializes unrelated updates and causes contention.
-
-### Domain Service
-
-When a piece of behavior doesn't naturally belong to any single Entity or Value Object — typically because it **coordinates several aggregates** or expresses a domain concept that isn't a "thing" — put it in a **Domain Service**: a stateless object named in the ubiquitous language (e.g. `FundsTransferService.Transfer(from, to, amount)` where the logic belongs to neither account alone). Don't confuse it with an _application_ service (which orchestrates use cases, transactions, and I/O) — a domain service contains **business rules** and lives in the domain layer with no infrastructure dependencies. Reach for it sparingly; most behavior should still live on the aggregate that owns the data (Information Expert).
-
-### Domain Events
-
-Facts that something happened in the domain, published after a state change. Other parts of the system react without the originating aggregate knowing about them.
-
-```csharp
-public sealed record OrderConfirmed(OrderId OrderId, DateTimeOffset OccurredAt)
-    : IDomainEvent;
-```
-
-Domain Events are raised inside the Aggregate and dispatched after the transaction commits (see [[Event-driven|Event-driven Development]] for the dispatch mechanism).
-
-### Repository
-
-An abstraction over persistence that provides a collection-like interface for Aggregates. The domain layer depends on the `IOrderRepository` interface; the infrastructure layer provides the EF Core implementation.
-
-```csharp
-public interface IOrderRepository
-{
-    Task<Order?> FindAsync(OrderId id, CancellationToken ct);
-    Task SaveAsync(Order order, CancellationToken ct);
-}
-```
-
-See [[Repository & UoW|Repository & Unit of Work]] for the full pattern.
-
-## Pitfalls
-
-### Anemic Domain Model
-
-**What goes wrong**: Entities are data bags with only getters/setters. All business logic lives in service classes. The domain model doesn't enforce invariants.
-
-**Why it happens**: developers familiar with CRUD patterns treat domain objects as DTOs and put logic in "service" or "manager" classes.
-
-**Mitigation**: business rules belong in the Aggregate. If you find yourself writing `if (order.Status == OrderStatus.Draft) order.Status = OrderStatus.Confirmed;` in a service, move that logic into `order.Confirm()`.
-
-### Aggregate Boundaries Too Large
-
-**What goes wrong**: one Aggregate contains dozens of Entities. Every operation loads the entire graph, causing performance problems and contention. A `Customer` Aggregate that included `Orders`, `Addresses`, `PaymentMethods`, and `ActivityLog` loaded 15MB of data on every update — a simple address change took 4 seconds and held a database lock that blocked concurrent writes to the same customer.
-
-**Why it happens**: developers model "what belongs together conceptually" rather than "what must change together transactionally."
-
-**Mitigation**: Aggregate boundaries should be defined by transactional consistency requirements, not conceptual grouping. If `Order` and `Customer` don't need to change in the same transaction, they should be separate Aggregates referenced by ID.
+[[Tactical Domain-Driven Design]] owns entities, value objects, aggregates, domain services, events, repositories, and their .NET examples. Prefer one aggregate per transaction as a guideline because it keeps consistency local; a multi-aggregate transaction can still be correct when one immediate invariant requires it and the storage boundary supports atomic commit.
 
 ## Tradeoffs
 
@@ -200,19 +83,8 @@ See [[Repository & UoW|Repository & Unit of Work]] for the full pattern.
 
 ## Questions
 
-> [!QUESTION]- What is the difference between an Entity and a Value Object?
->
-> - Entity: has a unique identity that persists over time. Two entities with the same data are different if their IDs differ. Example: `Order` with `OrderId`.
-> - Value Object: defined entirely by its attributes, no identity. Two Value Objects with the same data are equal. Immutable. Example: `Money(10, "USD")`.
-> - Rule of thumb: if you care about _which_ instance it is, it's an Entity. If you only care about _what_ it contains, it's a Value Object.
-> - Tradeoff: Value Objects are simpler to reason about (immutable, no identity tracking) but require copying on mutation. Use them for concepts like Money, Address, DateRange, Coordinates.
-
-> [!QUESTION]- Why should external code only interact with an Aggregate through its root?
->
-> - The Aggregate Root enforces all invariants for the cluster. If external code modifies a `LineItem` directly, it bypasses the `Order`'s consistency checks.
-> - Example: adding a line item after an order is confirmed should be rejected. If `LineItem` is modified directly, the `Order` never gets a chance to enforce this rule.
-> - Practical implication: repositories load and save entire Aggregates, not individual child entities. EF Core's change tracking makes this natural.
-> - Tradeoff: loading the full Aggregate for every operation can be expensive if the Aggregate is large. This is a signal that the Aggregate boundary is too wide.
+> [!QUESTION]- What makes a Bounded Context boundary real?
+> A context owns a coherent model and language. Integrations translate through explicit contracts or an anti-corruption layer rather than sharing one ambiguous domain model. Separate schemas, deployments, and aligned teams can reinforce that boundary, but none is mandatory by itself.
 
 ## References
 
@@ -221,3 +93,4 @@ See [[Repository & UoW|Repository & Unit of Work]] for the full pattern.
 - [Implementing Domain-Driven Design (Vaughn Vernon)](https://www.oreilly.com/library/view/implementing-domain-driven-design/9780133039900/) — more practical than Evans; covers Aggregate design, Domain Events, and Bounded Context integration with code examples.
 - [CQRS.nu DDD FAQ](https://cqrs.nu/faq/Domain%20Driven%20Design) — concise Q\&A on DDD concepts, Aggregates, and how DDD relates to CQRS and Event Sourcing.
 - [[CQRS]] — architectural pattern that pairs naturally with DDD: commands map to Aggregate operations, queries bypass the domain model for read efficiency.
+- [8 key concepts in DDD -- ByteByteGo vocabulary overview; the table above tightens its entity, repository, and aggregate-boundary definitions](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/8-key-concepts-in-ddd.md)

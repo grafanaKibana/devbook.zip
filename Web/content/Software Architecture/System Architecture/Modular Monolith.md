@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T11:47:56.091Z
-modified: 2026-07-15T11:47:56.093Z
-published: 2026-07-15T11:47:56.093Z
+modified: 2026-07-16T17:42:36.643Z
+published: 2026-07-16T17:42:36.643Z
 topic:
   - Software Architecture
 subtopic:
@@ -43,113 +43,11 @@ flowchart LR
 ```
 
 > [!IMPORTANT]
-> **Data isolation reintroduces the cross-boundary consistency problem early.** The moment each module owns a separate `DbContext`/schema, a single use case that touches two modules can no longer wrap them in one ACID transaction — you face the same choice as [[Distributed Transactions]]: accept eventual consistency via integration events (the **outbox pattern** to publish reliably) or keep the operation within one module. This is a _feature_, not a bug — it forces you to design real boundaries before extraction — but teams are often surprised that a "monolith" gives up easy cross-module transactions. (If modules share one database, you keep ACID but weaken the boundary.)
+> **Data isolation makes the transaction boundary explicit.** Separate `DbContext` types or schemas can still share one local ACID transaction when they use the same relational database, connection, and provider transaction. The boundary becomes asynchronous when modules use separate databases, brokers, or resources that cannot participate in the same supported transaction. Then keep each local change atomic and publish reliably through an outbox instead of assuming all modules committed together. [[Modular Monolith in NET]] shows both cases.
 
-## .NET Implementation
+## .NET implementation
 
-```text
-src/
-  Modules/
-    Orders/
-      Orders.Contracts/
-      Orders.Core/
-      Orders.Infrastructure/
-    Inventory/
-      Inventory.Contracts/
-      Inventory.Core/
-      Inventory.Infrastructure/
-  Host/
-  Shared.Kernel/
-```
-
-`Orders.Core` depends on `Inventory.Contracts`, not `Inventory.Core`.
-
-```csharp
-namespace Inventory.Contracts;
-
-public sealed record ReserveStockRequest(Guid ProductId, int Quantity, Guid OrderId);
-
-public sealed record ReserveStockResult(bool Success, string? FailureCode);
-
-public interface IInventoryGateway
-{
-    Task<ReserveStockResult> ReserveAsync(ReserveStockRequest request, CancellationToken cancellationToken);
-}
-```
-
-```csharp
-using Inventory.Contracts;
-
-namespace Orders.Core.Application;
-
-public sealed record PlaceOrderCommand(Guid OrderId, Guid ProductId, int Quantity, Guid CustomerId);
-
-public sealed class PlaceOrderHandler
-{
-    private readonly IInventoryGateway _inventoryGateway;
-    private readonly IOrderRepository _orders;
-
-    public PlaceOrderHandler(IInventoryGateway inventoryGateway, IOrderRepository orders)
-    {
-        _inventoryGateway = inventoryGateway;
-        _orders = orders;
-    }
-
-    public async Task<Result> HandleAsync(PlaceOrderCommand command, CancellationToken cancellationToken)
-    {
-        if (command.Quantity <= 0)
-        {
-            return Result.Failure("orders.invalid_quantity");
-        }
-
-        var reserve = await _inventoryGateway.ReserveAsync(
-            new ReserveStockRequest(command.ProductId, command.Quantity, command.OrderId),
-            cancellationToken);
-
-        if (!reserve.Success)
-        {
-            return Result.Failure(reserve.FailureCode ?? "inventory.unavailable");
-        }
-
-        var order = Order.Create(command.OrderId, command.CustomerId, command.ProductId, command.Quantity);
-        await _orders.AddAsync(order, cancellationToken);
-        return Result.Success();
-    }
-}
-```
-
-```csharp
-using Inventory.Infrastructure;
-using Orders.Infrastructure;
-
-var builder = WebApplication.CreateBuilder(args);
-
-// Each module owns its own DI registration behind one extension.
-builder.Services.AddOrdersModule();
-builder.Services.AddInventoryModule();
-
-var app = builder.Build();
-app.Run();
-```
-
-```csharp
-using Inventory.Contracts;
-using Microsoft.Extensions.DependencyInjection;
-
-namespace Inventory.Infrastructure;
-
-public static class InventoryModuleExtensions
-{
-    public static IServiceCollection AddInventoryModule(this IServiceCollection services)
-    {
-        services.AddScoped<IInventoryGateway, InventoryGateway>();
-        // Register Inventory DbContext and repositories here.
-        return services;
-    }
-}
-```
-
-This keeps module boundaries enforceable in code review, dependency graphs, and architecture tests.
+[[Modular Monolith in NET]] contains the project layout, contracts-only dependency rule, concrete module registration, module-owned EF Core persistence, and a shared-transaction example for two `DbContext` instances using one relational resource.
 
 ## Extraction Path to Microservices
 
@@ -161,6 +59,14 @@ If boundaries are real, extraction is mechanical instead of a rewrite.
 4. Keep Orders calling code unchanged because the contract shape stays the same.
 
 This is why modular monolith is often a safer first architecture than either a big unstructured monolith or premature microservices. It gives an incremental path from [[Monolith Architecture]] toward [[Microservices]] only when real scaling or release pressure appears.
+
+## Collocation and scale cases
+
+Collocation pays when stages always change together, share one scaling profile, and exchange large intermediate data. Prime Video's monitoring team reported that moving one tightly ordered video-analysis pipeline into one process removed remote orchestration and transfer costs. The result was specific to that workload, not a general comparison between monoliths and services.
+
+Stack Overflow's documented 2016 architecture shows a different mechanism: a stateless application tier scaled horizontally while SQL Server, Redis, and search remained specialized systems. The lesson is not a server-count target. A modular deployment can carry substantial load when request paths, caches, database constraints, and failure headroom are measured.
+
+Use these cases as boundary tests. Collocate modules when their changes, data movement, and scaling remain coupled. Extract a service only when independent deployment, failure isolation, or asymmetric scaling repeatedly pays for the new network and operating boundary.
 
 ## Pitfalls
 
@@ -228,3 +134,5 @@ Decision rule: default to modular monolith for most product teams, choose tradit
 - [Modular Monolith Communication Patterns by Milan Jovanovic](https://www.milanjovanovic.tech/blog/modular-monolith-communication-patterns) - Practitioner guidance on in process communication choices and contract based module interaction in .NET.
 - [.NET Microservices Architecture guide](https://learn.microsoft.com/en-us/dotnet/architecture/microservices/) - Microsoft architecture anchor describing service boundaries, independent deployment, and distributed systems tradeoffs.
 - [.NET Aspire overview](https://aspire.dev/get-started/what-is-aspire/) - Official .NET Aspire guidance covering local orchestration, code first service composition, and deployment flexibility when evolving modules into separately deployed services.
+- [Prime Video monitoring service](https://www.primevideotech.com/video-streaming/scaling-up-the-prime-video-audio-video-monitoring-service-and-reducing-costs-by-90) — primary case describing the transfer and orchestration costs removed by collocation.
+- [Stack Overflow architecture, 2016](https://nickcraver.com/blog/2016/02/17/stack-overflow-the-architecture-2016-edition/) — primary historical account of the application tier, data systems, traffic, and capacity headroom.

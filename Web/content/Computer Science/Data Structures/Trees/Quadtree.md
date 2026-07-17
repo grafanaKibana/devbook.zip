@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T08:11:34.538Z
-modified: 2026-07-15T08:11:34.539Z
-published: 2026-07-15T08:11:34.539Z
+modified: 2026-07-16T18:39:21.620Z
+published: 2026-07-16T18:39:21.620Z
 topic:
   - Computer Science
 subtopic:
@@ -16,7 +16,7 @@ status: Creation
 
 # Intro
 
-A quadtree is a tree in which every internal node has exactly **four** children, each owning one quadrant — **NW, NE, SW, SE** — of its parent's rectangular region. Building one recursively subdivides 2D space: a region holding too much (too many points, or a non-uniform block of pixels) splits into four equal sub-regions, each of which may split again, until every leaf is "simple enough" — holds at most a small bucket of points, or is a uniform block. A point at `(x, y)` is placed by repeatedly asking which quadrant it falls in and descending, so spatial neighbors end up in the same or adjacent leaves.
+A quadtree recursively subdivides a 2D domain into as many as four quadrants per node. In point-region (PR) and region quadtrees, each subdivided node owns four child regions — **NW, NE, SW, SE** — although an implementation can keep empty quadrants as implicit slots instead of allocating child objects. A region holding too much (too many points, or a non-uniform block of pixels) splits into four equal sub-regions, each of which may split again, until every leaf is "simple enough" — holds at most a small bucket of points, or is a uniform block. A point at `(x, y)` is placed by repeatedly asking which quadrant it falls in and descending, so spatial neighbors end up in the same or adjacent leaves.
 
 Be honest about what it is not: a quadtree is a **spatial-partitioning tree, not a balanced `O(log n)` search tree**. It has no rotation or fill invariant like an [[AVL Tree]] or a [[B-tree]]; its depth is driven entirely by how the data clusters in space. Uniformly spread points give a shallow tree (~`log₄ n`); tightly clustered points force long degenerate branches and drag operations toward `O(n)`. What it buys in return is spatial pruning: a range or nearest-neighbor query discards whole quadrants that cannot intersect the query region, instead of scanning every point.
 
@@ -42,23 +42,25 @@ Insert, search, and delete all follow the quadrant containing the target down to
 
 ## Quadtree vs geohash
 
-Geohash has no note of its own, so the contrast lives here. A **geohash** interleaves the bits of latitude and longitude and base-32-encodes the result into a short string, so that a shared _prefix_ means spatial proximity — it linearizes 2D space onto a 1D **Z-order (Morton) curve**, the very interleaving a PR-quadtree path encodes. The consequence is powerful: a 2D range query becomes a **string-prefix / sorted-range scan** that any ordinary sorted index or key-value store can serve, with no custom tree to traverse.
+A [[Geohash]] encodes a point into a fixed-grid, sortable prefix; a quadtree is an adaptive tree whose cells subdivide only where the workload requires more resolution. Geohash is the better fit when an existing sorted index, cache, or shard key should produce spatial candidates. A quadtree is the better fit for mutable in-memory workloads that benefit from exact region traversal, local subdivision, collision broad-phase, or sparse raster compression.
 
-That is the real distinction. A quadtree is a live, mutable, in-memory pointer structure you walk and rebalance by hand; a geohash is a flat, sortable **key** you can drop into an existing index, shard on, or cache. Geohash trades some boundary accuracy (two physically adjacent points can straddle a cell edge and share no prefix) for the ability to ride 1D infrastructure — which is why **Redis GEO** (52-bit interleaved scores in a sorted set) uses it, and why **Elasticsearch** exposes a `geohash_grid` aggregation (its `geo_point` index itself moved to Lucene BKD trees).
+![[Assets/System Design 101/a0d8f8de511d1c23c9b85c7125994affbb45028b1115fe676bbee9cdffa61fbd.jpg]]
 
-For durable database indexing, neither is the answer: an **R-tree** groups objects by (possibly overlapping) minimum bounding rectangles and is balanced and paged like a B-tree, making it the _on-disk_ spatial index. A quadtree is best seen as the in-memory partitioner — the counterpart to the on-disk R-tree / GiST spatial _indexes_ described in [[Indexes]], not an equivalent of them.
+The boundary cost differs. Adjacent points can fall into different geohash prefixes, so a proximity query must inspect neighboring cells and filter candidates by exact geometry or distance. A quadtree avoids a fixed global cell size but still degenerates under clustering. For paged durable storage, prefer the database's spatial index unless the fixed-prefix key is itself the requirement. [[Geohash]] carries the encoding, Redis and Elasticsearch examples, boundary algorithm, and R-tree/GiST comparison; [[Indexes]] covers the broader database-index tradeoff.
 
 ## Complexity
 
-For `n` points; "average" assumes a roughly uniform spatial distribution, "worst" assumes heavy clustering.
+For `n` points, `v` visited or intersected quadtree nodes, and `k` results; "average" assumes a roughly uniform spatial distribution, while "worst" assumes heavy clustering.
 
 | Operation | Average (uniform) | Worst (clustered) | Space |
 | --- | --- | --- | --- |
 | Insert | `O(log n)` | `O(n)` | `O(n)` |
 | Point search | `O(log n)` | `O(n)` | — |
-| Range query | `O(log n + k)` for `k` results | `O(n)` | — |
+| Range query | `O(v + k)` | `O(n)` | — |
 | Nearest neighbor | `~O(log n)` expected | `O(n)` | — |
 | Build (`n` points) | `O(n log n)` | `O(n²)` | `O(n)` |
+
+With roughly uniform occupancy and a query window that intersects a bounded number of cells at the chosen depth, `v` remains small relative to `n`; it is not generally `O(log n)`.
 
 The single cause behind every worst case is the missing balance invariant: depth equals the number of subdivisions needed to separate the closest points, so two nearly coincident points force splitting down to the coordinate-precision limit. A PR quadtree's depth is therefore bounded by the coordinate resolution rather than by `n`, but on adversarial or clustered data it still degenerates — the honest reason a quadtree is a _partitioner_, not a guaranteed-`O(log n)` search tree.
 
@@ -78,7 +80,7 @@ The single cause behind every worst case is the missing balance invariant: depth
 >   NE --> SE2["SE"]
 > ```
 >
-> Every internal node fans out to exactly four quadrants. Only the overfull quadrant (`NE`) subdivides again — the tree deepens locally, wherever the data is dense, rather than uniformly.
+> Every subdivided PR/region node defines four child regions; this diagram materializes all four quadrant slots. Only the overfull quadrant (`NE`) subdivides again — the tree deepens locally, wherever the data is dense, rather than uniformly.
 
 ## Questions
 
@@ -86,7 +88,7 @@ The single cause behind every worst case is the missing balance invariant: depth
 > It has no balancing invariant — nothing forces the four subtrees to hold comparable amounts of data, and there are no rotations or fill rules. Depth is dictated by the spatial distribution: uniformly spread points give ~`log₄ n` depth, but clustered points force long degenerate branches and push operations toward `O(n)`. A PR quadtree's depth is bounded by coordinate precision rather than `n`, yet it still degrades under heavy clustering. The payoff for accepting this is spatial pruning of whole quadrants during range and nearest-neighbor queries.
 
 > [!QUESTION]- When would you reach for a geohash instead of a quadtree?
-> When you want spatial queries served by ordinary 1D infrastructure. A geohash interleaves lat/long bits into a sortable string whose shared prefix means proximity, so a range query becomes a prefix/sorted-range scan on a normal index, key-value store, or shard key — no live tree to traverse or rebalance. A quadtree is the better fit when you need a mutable in-memory structure with exact, adaptive subdivision (collision broad-phase, nearest-neighbor, image compression). Geohash trades boundary accuracy for the ability to ride existing indexes.
+> Use [[Geohash]] when spatial candidates must ride ordinary sorted indexes, cache keys, or shard prefixes and exact filtering can repair cell-boundary error. Use a quadtree when adaptive subdivision and tree traversal are the mechanism: collision broad-phase, nearest-neighbor pruning, or image-region compression. Geohash pays with neighboring-cell expansion; quadtree pays with pointer structure and distribution-dependent depth.
 
 > [!QUESTION]- How does a point quadtree differ from a PR quadtree?
 > A point quadtree splits the plane at the coordinates of each inserted point (like a 2D BST), so its shape depends on insertion order and a bad order degrades it. A PR (point-region) quadtree always splits space into four _equal_ quadrants independent of point coordinates, subdividing a bucket only when it overflows — so its shape depends solely on where the points are, not the order they arrived.
@@ -96,3 +98,5 @@ The single cause behind every worst case is the missing balance invariant: depth
 - [Finkel & Bentley — Quad trees: a data structure for retrieval on composite keys, Acta Informatica 4 (1974)](https://doi.org/10.1007/BF00288933) — the original paper introducing the point quadtree for multidimensional keys; the primary source.
 - [Hanan Samet — Foundations of Multidimensional and Metric Data Structures (2006)](https://www.sciencedirect.com/book/9780123694461/foundations-of-multidimensional-and-metric-data-structures) — the definitive reference on quadtree variants, region quadtrees, and their relationship to R-trees and other spatial indexes.
 - [Hanan Samet — quadtree research page](https://www.cs.umd.edu/~hjs/quadtree/) — companion bibliography and figures for the region/PR/point quadtree families.
+- [ByteByteGo System Design 101 — Quadtree](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/quadtree.md) — editorial overview of the split mechanism and spatial use cases; used as an audited mechanism baseline, not the sole factual authority, and its inconsistent source diagram is intentionally excluded.
+- [ByteByteGo System Design 101 — Proximity service](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/proximity-service.md) — editorial comparison of geohash and quadtree lookup paths plus the embedded proximity-search visual; used for provenance, with the primary references above remaining authoritative for quadtree behavior.

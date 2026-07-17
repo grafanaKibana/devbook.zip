@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:44:08.056Z
-modified: 2026-07-11T21:44:08.057Z
-published: 2026-07-11T21:44:08.057Z
+modified: 2026-07-16T07:27:12.486Z
+published: 2026-07-16T07:27:12.486Z
 topic:
   - DevOps
 subtopic:
@@ -112,6 +112,30 @@ if (_featureFlags.IsEnabled("PayPalPayment", userId))
 return await _stripeGateway.ChargeAsync(amount);  // existing path
 ```
 
+## Merge vs Rebase
+
+`git merge` creates a commit with both histories as parents and preserves the identity and topology of published commits. `git rebase` copies a private sequence onto a new base, producing new commit IDs that are easier to review as a linear series. The content result can be equivalent; the collaboration contract is not.
+
+Use rebase to clean up commits that only you own before review. Use merge when preserving branch topology matters or when collaborators may already reference the commits. Never rebase a published shared branch: another developer's descendant commits still point to the old identities, forcing recovery or duplicate history. If a rebase conflict is unclear, abort, inspect the branch, and choose a merge instead of guessing through it.
+
+```bash
+git fetch origin
+git rebase origin/main
+```
+
+If the rebase stops on a conflict that cannot be resolved safely, return the branch to its pre-rebase state:
+
+```bash
+git rebase --abort
+```
+
+To preserve both histories instead, merge:
+
+```bash
+git switch main
+git merge --no-ff feature/payment-method
+```
+
 ## Questions
 
 > [!QUESTION]- Why does GitFlow create integration problems for teams practicing continuous deployment?
@@ -126,3 +150,6 @@ return await _stripeGateway.ChargeAsync(amount);  // existing path
 - [A successful Git branching model (nvie)](https://nvie.com/posts/a-successful-git-branching-model/) — the original GitFlow post by Vincent Driessen; includes the author's 2020 note recommending trunk-based development for web services
 - [Atlassian — Comparing workflows](https://www.atlassian.com/git/tutorials/comparing-workflows) — comparison of branching strategies with diagrams and team-size guidance
 - [Martin Fowler — Feature Branch](https://martinfowler.com/bliki/FeatureBranch.html) — canonical analysis of feature branches, their risks, and when they are justified
+- [Git: rebase](https://git-scm.com/docs/git-rebase) — official mechanics, conflict recovery, and the published-history warning.
+- [Git: merge](https://git-scm.com/docs/git-merge) — official parent topology and merge behavior.
+- [ByteByteGo: merge versus rebase](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/git-merge-vs-git-rebate.md) — source contribution for the decision rule; its visual was rejected by the audit.

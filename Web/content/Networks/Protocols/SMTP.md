@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:46:09.875Z
-modified: 2026-07-11T21:46:09.875Z
-published: 2026-07-11T21:46:09.875Z
+modified: 2026-07-16T15:17:20.336Z
+published: 2026-07-16T15:17:20.336Z
 topic:
   - Networks
 subtopic:
@@ -14,7 +14,7 @@ priority: Low
 status: Ready to Repeat
 ---
 
-# SMTP
+# Intro
 
 SMTP (Simple Mail Transfer Protocol) is the standard protocol for sending email between mail servers and from email clients to mail servers. It operates over TCP, typically on port 25 (server-to-server), 587 (client submission with STARTTLS), or 465 (SMTPS, implicit TLS). SMTP handles delivery; reading email uses IMAP or POP3.
 
@@ -45,75 +45,46 @@ Server: 250 Message accepted
 Client: QUIT
 ```
 
+## Relay, MX Lookup, Storage, and Retrieval
+
+The compact path hides several independent acceptance boundaries:
+
+1. Alice's client submits the message to her provider's message-submission agent over authenticated SMTP, normally port 587 with STARTTLS or port 465 with implicit TLS.
+2. The submission service validates policy, adds trace headers, stores the message durably, and enqueues recipients before acknowledging success.
+3. The sending mail transfer agent queries [[DNS]] for `company.com` MX records. Lower preference values are tried first; each MX hostname is then resolved to addresses.
+4. It opens SMTP to the receiving domain, attempts recipients separately, and transfers message content only for accepted recipients.
+5. The receiving boundary performs connection, reputation, SPF, DKIM, DMARC, spam, malware, and recipient-policy checks. Some checks happen before SMTP acceptance; others classify or quarantine after durable acceptance.
+6. The receiving system commits the message to mailbox storage. Bob's client synchronizes that mailbox using IMAP, or retrieves it using POP3. SMTP does not provide mailbox reading.
+
+![[Assets/System Design 101/422fcc82e0fee953f75cac96e0678fdb576821151928df2de6a00a1a5287a356.jpg]]
+
+### Retry, Duplicates, and Bounces
+
+A temporary `4xx` result leaves the message in the sender's durable queue for a later attempt; a permanent `5xx` result ends delivery for that recipient. Timeouts are ambiguous: the receiver may have committed the message before the response was lost, so retry can produce duplicates. SMTP has no global exactly-once transaction. Receivers and downstream processors use message IDs plus their own bounded deduplication, while clients must tolerate repeated delivery.
+
+If delivery ultimately fails, the sending system generates a delivery status notification to the envelope sender. A null reverse path (`MAIL FROM:<>`) on the notification prevents bounce loops. Reject an unauthenticated message during the SMTP transaction when possible; accepting it and later bouncing to a forged sender creates backscatter.
+
+The trust boundary is not "inside Gmail" or any one server box. Submission authentication establishes who may send through an outbound service; SPF authorizes sending infrastructure for the envelope domain; DKIM protects signed message fields; DMARC checks alignment with the visible From domain. The receiving provider still applies local spam and abuse policy after those checks pass.
+
 ## Sending Email in .NET
 
-For production use, prefer a managed email service (SendGrid, Mailgun, Azure Communication Services) over direct SMTP — they handle deliverability, bounce handling, and spam reputation.
-
-For SMTP directly, use `MailKit` (the recommended .NET library; `System.Net.Mail.SmtpClient` is obsolete):
-
-```csharp
-using MailKit.Net.Smtp;
-using MimeKit;
-
-var message = new MimeMessage();
-message.From.Add(new MailboxAddress("Alice", "alice@example.com"));
-message.To.Add(new MailboxAddress("Bob", "bob@company.com"));
-message.Subject = "Order Confirmation";
-message.Body = new TextPart("plain") { Text = "Your order has been placed." };
-
-using var client = new SmtpClient();
-await client.ConnectAsync("smtp.example.com", 587, SecureSocketOptions.StartTls);
-await client.AuthenticateAsync("alice@example.com", "password");
-await client.SendAsync(message);
-await client.DisconnectAsync(quit: true);
-```
+`System.Net.Mail.SmtpClient` remains usable, but Microsoft does not recommend it for new development because it lacks support for many modern protocols and operational patterns. Choose a maintained SMTP client such as MailKit for direct submission, or a managed provider API when bounce, complaint, suppression, and deliverability workflows matter. [[NET Email Sending]] owns the client and operations boundary.
 
 ## Email Authentication (SPF, DKIM, DMARC)
 
-Modern email delivery requires authentication records to avoid spam filters:
-
-- **SPF** (Sender Policy Framework): DNS TXT record listing authorized sending IPs for a domain.
-- **DKIM** (DomainKeys Identified Mail): cryptographic signature added to outgoing emails, verified by the recipient's server.
-- **DMARC**: policy that tells receiving servers what to do when SPF/DKIM fail (quarantine, reject, or report).
-
-Without these, emails from your domain will be marked as spam or rejected.
-
-> [!IMPORTANT]
-> **There are two "From" addresses, and the difference is the heart of email auth.** The **envelope sender** (`MAIL FROM`, also called Return-Path) is used at the SMTP layer for delivery and bounces; the **header From** is what the user sees in their client. SPF checks the _envelope_ sender, DKIM signs the _message_, and **DMARC requires "alignment"** — that the header-From domain matches the SPF/DKIM domain. This is why mail sent through a third party (newsletters, `noreply@` services) can pass SPF yet fail DMARC: the envelope domain is the provider's, not yours. Bounces (NDRs) go to the envelope sender, which is also how mailing lists avoid loops.
-
-## Pitfalls
-
-### Missing SPF/DKIM/DMARC
-
-**What goes wrong**: emails from your domain land in spam or are rejected outright by major providers (Gmail, Outlook).
-
-**Why it happens**: SMTP has no built-in sender authentication. Without SPF, DKIM, and DMARC, receiving servers cannot verify that your server is authorized to send for your domain.
-
-**Mitigation**: configure all three DNS records before sending any production email. Use a managed email service (SendGrid, Mailgun, Azure Communication Services) — they handle authentication setup and maintain sender reputation.
-
-### Using System.Net.Mail.SmtpClient
-
-**What goes wrong**: `SmtpClient` does not support OAuth2, has poor async support, and is marked obsolete in .NET.
-
-**Mitigation**: use MailKit for all new .NET email code. It supports SMTP, IMAP, POP3, OAuth2, and modern TLS.
-
-## Tradeoffs
-
-| Approach | Pros | Cons | Use when |
-|---|---|---|---|
-| Direct SMTP (MailKit) | Full control, no third-party dependency | You manage deliverability, bounce handling, spam reputation | Internal systems, low volume |
-| Managed service (SendGrid, Mailgun) | Deliverability handled, analytics, bounce/unsubscribe management | Cost, vendor dependency | Production transactional email |
-| Azure Communication Services | Azure-native, integrates with Azure Monitor | Azure lock-in | Azure-hosted systems |
-
-**Decision rule**: use a managed email service for any production transactional email. Direct SMTP is only appropriate for internal notifications where deliverability to external inboxes is not required.
+SPF authorizes sending infrastructure for an envelope domain, DKIM signs selected message fields, and DMARC evaluates alignment with the visible header From domain. Receiver requirements vary by provider, sender type, and volume; passing all three improves authentication but does not guarantee inbox placement. [[Email Authentication]] covers alignment, rollout, and receiver policy.
 
 ## Questions
 
 > [!QUESTION]- Why does SMTP require SPF, DKIM, and DMARC for deliverability?
-> SMTP has no built-in sender authentication — anyone can claim any From address. SPF restricts which IPs can send for a domain. DKIM adds a cryptographic signature that proves the message was not tampered with. DMARC tells receiving servers what to do when SPF/DKIM fail. Without all three, email from your domain will be marked as spam or rejected by major providers.
+> SMTP does not authenticate the visible From identity by itself. SPF checks whether the connecting infrastructure is authorized for the envelope domain; DKIM validates signed fields; DMARC requires an aligned SPF or DKIM result for the header From domain and publishes policy/reporting. Exact enforcement varies by receiver and sending volume, and authentication success does not replace reputation or abuse controls.
 
 ## References
 
 - [SMTP (RFC 5321)](https://www.rfc-editor.org/rfc/rfc5321) — the current SMTP specification; defines the protocol commands, response codes, and message format.
-- [MailKit documentation](https://github.com/jstedfast/MailKit) — the recommended .NET email library; supports SMTP, IMAP, POP3, MIME, and OAuth2 authentication. `System.Net.Mail.SmtpClient` is marked obsolete.
+- [MailKit documentation](https://github.com/jstedfast/MailKit) — maintained .NET SMTP, IMAP, POP3, MIME, TLS, and OAuth2 implementation for direct mail protocols.
 - [Email authentication (Cloudflare)](https://www.cloudflare.com/learning/email-security/dmarc-dkim-spf/) — practical explanation of SPF, DKIM, and DMARC with configuration examples.
+- [Message Submission (RFC 6409)](https://www.rfc-editor.org/rfc/rfc6409) — separates authenticated client submission from server-to-server SMTP relay.
+- [IMAP4rev2 (RFC 9051)](https://www.rfc-editor.org/rfc/rfc9051) — current mailbox synchronization protocol used after SMTP delivery.
+- [POP3 (RFC 1939)](https://www.rfc-editor.org/rfc/rfc1939) — retrieval protocol for downloading mailbox messages.
+- [ByteByteGo: Design Gmail](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/design-gmail.md) — source system trace bounded here by SMTP acceptance, durable queues, DNS routing, retrieval, and authentication checks.
