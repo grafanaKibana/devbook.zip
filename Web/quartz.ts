@@ -2,6 +2,7 @@ import { ExcalidrawEnhance } from "./custom/components/excalidraw-enhance"
 import { ExplorerIcons } from "./custom/components/explorer-icons"
 import { ExplorerOrder } from "./custom/components/explorer-order"
 import { FloatingButtons } from "./custom/components/floating-buttons"
+import { GiscusThemeOrigin } from "./custom/components/giscus-theme-origin"
 import { HomepageFit } from "./custom/components/homepage-fit"
 import { NavScopeDropdown } from "./custom/components/nav-scope-dropdown"
 import { QuestionsIndex } from "./custom/components/questions-index"
@@ -134,6 +135,14 @@ const floatingButtons = FloatingButtons()
 layout.defaults.afterBody = [...(layout.defaults.afterBody ?? []), floatingButtons]
 for (const pageLayout of Object.values(layout.byPageType)) {
   pageLayout.afterBody = [...(pageLayout.afterBody ?? []), floatingButtons]
+}
+
+// Rebase the giscus theme URL onto the serving origin so the site-hosted theme
+// loads on preview/branch deploys too (not just production). Renders nothing.
+const giscusThemeOrigin = GiscusThemeOrigin()
+layout.defaults.afterBody = [...(layout.defaults.afterBody ?? []), giscusThemeOrigin]
+for (const pageLayout of Object.values(layout.byPageType)) {
+  pageLayout.afterBody = [...(pageLayout.afterBody ?? []), giscusThemeOrigin]
 }
 
 const content = { ...(layout.byPageType.content ?? {}) }

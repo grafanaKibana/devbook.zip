@@ -150,3 +150,36 @@ main {
     Arial,
     sans-serif;
 }
+
+/*! DevBook comment chrome (issue #130 follow-up).
+ *  1. Comment cards + the editor take the sidebar dropdown's surface: var(--light)
+ *     fill (#fafbf8) + var(--lightgray) border (#e5e9de).
+ *  2. Lift the OP reactions onto the comment-count header row so the section reads
+ *     more compact (reactions is a sibling of .gsc-comments, so it's pulled out of
+ *     flow and overlaid on the header, which rises to the top). */
+main .gsc-comment > div,
+main .gsc-comment-box {
+  background-color: #fafbf8;
+  border-color: #e5e9de;
+}
+.gsc-main {
+  position: relative;
+}
+main .gsc-reactions {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  margin: 0;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  z-index: 1;
+}
+main .gsc-reactions > * {
+  margin-top: 0;
+}
+main .gsc-comments > .gsc-header {
+  min-height: 34px;
+  align-items: center;
+}

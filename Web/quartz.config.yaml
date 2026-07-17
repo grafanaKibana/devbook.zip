@@ -213,7 +213,7 @@ plugins:
         repoId: R_kgDORNIvbg
         category: Comments
         categoryId: DIC_kwDORNIvbs4DAmwx
-        mapping: url
+        mapping: pathname
         strict: true
         reactionsEnabled: true
         inputPosition: bottom
