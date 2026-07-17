@@ -1,5 +1,6 @@
 import { ExplorerIcons } from "./custom/components/explorer-icons"
 import { ExplorerOrder } from "./custom/components/explorer-order"
+import { FloatingButtons } from "./custom/components/floating-buttons"
 import { HomepageFit } from "./custom/components/homepage-fit"
 import { NavScopeDropdown } from "./custom/components/nav-scope-dropdown"
 import { QuestionsIndex } from "./custom/components/questions-index"
@@ -101,6 +102,15 @@ const homepageFit = HomepageFit()
 layout.defaults.afterBody = [...(layout.defaults.afterBody ?? []), steptrace, homepageFit]
 for (const pageLayout of Object.values(layout.byPageType)) {
   pageLayout.afterBody = [...(pageLayout.afterBody ?? []), steptrace, homepageFit]
+}
+
+// Floating scroll-to-top / scroll-to-bottom buttons (issue #129). afterBody is
+// dropped on canvas pages (MinimalFrame renders no afterBody) — an intended
+// exclusion: scroll-to-extremes is meaningless on a pan/zoom canvas.
+const floatingButtons = FloatingButtons()
+layout.defaults.afterBody = [...(layout.defaults.afterBody ?? []), floatingButtons]
+for (const pageLayout of Object.values(layout.byPageType)) {
+  pageLayout.afterBody = [...(pageLayout.afterBody ?? []), floatingButtons]
 }
 
 const content = { ...(layout.byPageType.content ?? {}) }
