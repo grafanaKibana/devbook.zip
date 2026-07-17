@@ -89,7 +89,6 @@ const css = `
   height: auto;
   object-fit: contain;
   border-radius: var(--surface-radius, 8px);
-  box-shadow: 0 18px 48px color-mix(in srgb, var(--dark) 45%, transparent);
   background: var(--light);
   transform: scale(0.96);
   transition: transform 0.25s ease;
