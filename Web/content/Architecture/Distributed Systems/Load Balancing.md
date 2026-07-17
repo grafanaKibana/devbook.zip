@@ -75,8 +75,6 @@ Typical state transition:
 3. Existing requests are drained, failed, or retried according to policy.
 4. Instance must pass recovery criteria before re-entry.
 
-![[Load Balancing Health Checks.excalidraw]]
-
 Important implementation point: a readiness endpoint must verify critical dependencies, not just return process-alive.
 
 ## .NET Context
