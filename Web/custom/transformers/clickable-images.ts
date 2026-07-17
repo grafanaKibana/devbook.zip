@@ -10,9 +10,10 @@ import type { QuartzTransformerPlugin } from "@quartz-community/types"
 //
 //   1. No DOM wrapper. Upstream boxes every <img> in a <div.lightbox-wrapper>,
 //      which is invalid inside a <p> (the parser splits the paragraph) and
-//      breaks the `p > img + em` caption rule. We tag the <img> itself and
-//      hydrate with a single delegated click listener, so captions and valid
-//      markup survive.
+//      breaks the `p > img + em` caption rule. We instead give the <img> button
+//      semantics (role/tabindex/aria-label) and hydrate with delegated click +
+//      keyboard listeners, so captions and valid markup survive while the zoom
+//      stays reachable by pointer and keyboard alike.
 //   2. Scoped visitor. Images nested in an <a> are skipped so the link keeps
 //      navigating — upstream's blanket preventDefault silently swallowed it.
 //      Site chrome (favicons, Explorer/header icons) is never in scope because
@@ -41,6 +42,10 @@ const css = `
   transform: scale(1.01);
   box-shadow: 0 6px 18px color-mix(in srgb, var(--dark) 22%, transparent);
 }
+.lightbox-image:focus-visible {
+  outline: 2px solid var(--secondary);
+  outline-offset: 3px;
+}
 
 .lightbox-modal {
   --lightbox-scrim: color-mix(in srgb, var(--dark) 88%, transparent);
@@ -54,9 +59,12 @@ const css = `
   background: var(--lightbox-scrim);
   opacity: 0;
   visibility: hidden;
+  /* Flip visibility immediately on open (so the close button is focusable the
+     same tick .active lands) but hold it until the opacity fade finishes on
+     close. */
   transition:
     opacity 0.25s ease,
-    visibility 0.25s ease;
+    visibility 0s linear 0.25s;
   -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
 }
@@ -66,6 +74,9 @@ const css = `
 .lightbox-modal.active {
   opacity: 1;
   visibility: visible;
+  transition:
+    opacity 0.25s ease,
+    visibility 0s linear 0s;
 }
 .lightbox-modal img {
   max-width: min(92vw, 1600px);
@@ -148,7 +159,7 @@ const script = `
   if (window.__devbookLightbox) return;
   window.__devbookLightbox = true;
 
-  var modal = null, modalImg = null, modalClose = null;
+  var modal = null, modalImg = null, modalClose = null, lastFocus = null;
 
   function ensureModal() {
     if (modal && modal.isConnected) return;
@@ -178,6 +189,7 @@ const script = `
 
   function open(img) {
     ensureModal();
+    lastFocus = img;
     modalImg.src = img.currentSrc || img.src;
     modalImg.alt = img.alt || "";
     // Commit the from-state before adding .active so the enter transition runs
@@ -192,6 +204,9 @@ const script = `
     if (!modal) return;
     modal.classList.remove("active");
     document.body.classList.remove("lightbox-open");
+    // Return focus to the image that opened the overlay (keyboard round-trip).
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+    lastFocus = null;
   }
 
   document.addEventListener("click", function (e) {
@@ -203,6 +218,17 @@ const script = `
   document.addEventListener("keydown", function (e) {
     if ((e.key === "Escape" || e.key === "Esc") && modal && modal.classList.contains("active")) {
       close();
+      return;
+    }
+    // Activate a focused zoomable image with Enter or Space (the img carries
+    // role=button + tabindex=0). preventDefault stops Space from scrolling.
+    if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
+      var t = e.target;
+      var img = t && t.closest ? t.closest(".lightbox-image") : null;
+      if (img) {
+        e.preventDefault();
+        open(img);
+      }
     }
   });
 })();
@@ -224,6 +250,12 @@ export const ClickableImages: QuartzTransformerPlugin = () => ({
           if (classes.includes(LIGHTBOX_CLASS)) return
           el.properties!.className = [...classes, LIGHTBOX_CLASS]
           if (el.properties!.loading == null) el.properties!.loading = "lazy"
+          // Button semantics so the zoom is focusable, activatable, and announced
+          // to keyboard and screen-reader users (a bare <img> is none of these).
+          el.properties!.tabIndex = 0
+          el.properties!.role = "button"
+          const alt = typeof el.properties!.alt === "string" ? el.properties!.alt.trim() : ""
+          el.properties!.ariaLabel = alt ? `Zoom image: ${alt}` : "Zoom image"
         })
       },
     ]
