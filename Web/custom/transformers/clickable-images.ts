@@ -34,13 +34,17 @@ const classList = (node: Element): string[] => {
 const css = `
 .lightbox-image {
   cursor: zoom-in;
+  /* Share the DevBook card hover treatment (mirrors .db-card:hover): lift +
+     a fixed black shadow, so it reads identically to cards and never becomes a
+     light glow in dark mode. */
   transition:
-    transform 0.18s ease,
-    box-shadow 0.18s ease;
+    box-shadow 150ms ease,
+    transform 150ms ease;
 }
-.lightbox-image:hover {
-  transform: scale(1.01);
-  box-shadow: 0 6px 18px color-mix(in srgb, var(--dark) 22%, transparent);
+.lightbox-image:hover,
+.lightbox-image:focus-visible {
+  transform: translateY(-0.125rem);
+  box-shadow: 0 0.45rem 1.1rem rgba(0, 0, 0, 0.08);
 }
 .lightbox-image:focus-visible {
   outline: 2px solid var(--secondary);
@@ -143,7 +147,8 @@ body.lightbox-open {
   .lightbox-modal img {
     transition: none;
   }
-  .lightbox-image:hover {
+  .lightbox-image:hover,
+  .lightbox-image:focus-visible {
     transform: none;
   }
 }
