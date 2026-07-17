@@ -1,3 +1,4 @@
+import { ExcalidrawEnhance } from "./custom/components/excalidraw-enhance"
 import { ExplorerIcons } from "./custom/components/explorer-icons"
 import { ExplorerOrder } from "./custom/components/explorer-order"
 import { FloatingButtons } from "./custom/components/floating-buttons"
@@ -99,9 +100,20 @@ for (const pageLayout of Object.values(layout.byPageType)) {
 // selects the least-degraded tablet state that fits one viewport.
 const steptrace = Steptrace()
 const homepageFit = HomepageFit()
-layout.defaults.afterBody = [...(layout.defaults.afterBody ?? []), steptrace, homepageFit]
+const excalidrawEnhance = ExcalidrawEnhance()
+layout.defaults.afterBody = [
+  ...(layout.defaults.afterBody ?? []),
+  steptrace,
+  homepageFit,
+  excalidrawEnhance,
+]
 for (const pageLayout of Object.values(layout.byPageType)) {
-  pageLayout.afterBody = [...(pageLayout.afterBody ?? []), steptrace, homepageFit]
+  pageLayout.afterBody = [
+    ...(pageLayout.afterBody ?? []),
+    steptrace,
+    homepageFit,
+    excalidrawEnhance,
+  ]
 }
 
 // Floating scroll-to-top / scroll-to-bottom buttons (issue #129). afterBody is
