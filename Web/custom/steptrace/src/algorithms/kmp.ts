@@ -20,7 +20,7 @@ export const kmp = {
     // failure function (longest proper prefix that is also a suffix)
     const lps = new Array(m).fill(0)
     let len = 0
-    for (let idx = 1; idx < m; ) {
+    for (let idx = 1; idx < m;) {
       if (pattern[idx] === pattern[len]) {
         len++
         lps[idx] = len

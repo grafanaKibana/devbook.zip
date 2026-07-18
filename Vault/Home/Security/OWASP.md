@@ -14,134 +14,102 @@ publish: true
 
 # OWASP Top 10
 
-OWASP (Open Worldwide Application Security Project) is a non-profit that publishes the most widely used web application security standard: the OWASP Top 10. Updated every 3-4 years, it ranks the most critical security risks based on real-world vulnerability data. For .NET engineers, the Top 10 is the baseline security checklist for any web application.
+OWASP (Open Worldwide Application Security Project) publishes the OWASP Top 10, an awareness document for common web-application risk classes. It is a baseline for threat modeling and verification, not proof that an application is secure. The current released list is the 2025 edition.
 
-## OWASP Top 10 (2021)
+## OWASP Top 10 (2025)
 
 ### A01: Broken Access Control
-**What**: Users can access resources or perform actions they are not authorized for. Most common vulnerability in 2021 (94% of tested apps).
-**Example**: A user changes `?userId=123` to `?userId=456` in a URL and accesses another user's data.
-**Mitigation**: Enforce authorization server-side on every request. Use ASP.NET Core policy-based authorization. Deny by default — explicitly grant access, never rely on obscurity.
+
+The system accepts an operation the caller is not allowed to perform. A signed-in user changes `/invoices/42` to `/invoices/43` and reads another tenant's data because the endpoint checked identity but not ownership. Authorize every resource and action server-side, deny by default, and test nearby denied cases.
 
 ```csharp
-// ASP.NET Core: resource-based authorization
-var authResult = await _authorizationService.AuthorizeAsync(User, resource, "OwnerPolicy");
-if (!authResult.Succeeded) return Forbid();
+var decision = await authorizationService.AuthorizeAsync(
+    User,
+    invoice,
+    "CanReadInvoice");
+
+if (!decision.Succeeded)
+    return Forbid();
 ```
 
-### A02: Cryptographic Failures
-**What**: Sensitive data exposed due to weak or missing encryption. Formerly called "Sensitive Data Exposure".
-**Example**: Passwords stored as MD5 hashes, HTTP instead of HTTPS, weak TLS cipher suites.
-**Mitigation**: Use bcrypt/Argon2 for passwords (never MD5/SHA1). Enforce HTTPS everywhere. Use AES-256-GCM for data at rest. See [[Encryption]].
+### A02: Security Misconfiguration
 
-### A03: Injection
-**What**: Untrusted data sent to an interpreter as part of a command or query. SQL injection, LDAP injection, OS command injection.
-**Example**: `SELECT * FROM users WHERE name = '` + userInput + `'` — attacker inputs `' OR '1'='1`.
-**Mitigation**: Use parameterized queries (EF Core, Dapper with parameters). Never concatenate user input into SQL. Use ORMs. Validate and sanitize all input. See [[Web Vulnerabilities]] for SQLi, XSS, and CSRF in depth.
+Unsafe defaults, unnecessary services, permissive cloud policies, missing headers, or detailed production errors expose a path the application did not intend. Build hardened configuration into deployment, compare it continuously with policy, and fail closed when required settings are absent.
+
+### A03: Software Supply Chain Failures
+
+A compromised package, build action, registry, or signing identity reaches production through a trusted delivery path. Maintain an inventory, restrict and pin build inputs, verify provenance where available, isolate CI credentials, and practice replacing a compromised dependency without disabling the evidence trail.
+
+### A04: Cryptographic Failures
+
+Sensitive data is exposed because protection is absent or the primitive, parameters, nonce, key, or trust model is wrong. Plain SHA-256 password hashes and a reused AES-GCM nonce are different failures with the same root: cryptography was applied outside its required construction. Use approved libraries, [[Home/Security/Password Storage|password-storage schemes]], [[Home/Security/Encryption|authenticated encryption]], and managed key lifecycles.
+
+### A05: Injection
+
+Untrusted data changes the syntax of a SQL, shell, template, LDAP, or another interpreter command. A query built by concatenating an email address lets input become SQL. Keep code and data separate with parameterized APIs, allowlist identifiers that cannot be parameters, and constrain any interpreter the process can reach.
 
 ```csharp
-// Safe: parameterized query with Dapper
-var user = await conn.QueryFirstOrDefaultAsync<User>(
+var user = await connection.QueryFirstOrDefaultAsync<User>(
     "SELECT * FROM Users WHERE Email = @Email",
     new { Email = userEmail });
 ```
 
-### A04: Insecure Design
-**What**: Architectural flaws that cannot be fixed by correct implementation. Missing threat modeling, no rate limiting, no fraud controls.
-**Example**: A password reset flow that allows brute-forcing the reset token because there is no rate limit or token expiry.
-**Mitigation**: Threat model during design. Apply rate limiting (see [[Rate Limiting]]). Use secure design patterns.
+### A06: Insecure Design
 
-### A05: Security Misconfiguration
-**What**: Default credentials, unnecessary features enabled, verbose error messages, missing security headers.
-**Example**: A production app with `app.UseDeveloperExceptionPage()` enabled, exposing stack traces to users.
-**Mitigation**: Disable developer exception pages in production. Set security headers (CSP, HSTS, X-Frame-Options). Remove default accounts. Audit cloud storage permissions.
+The intended workflow lacks a control, so correct implementation still produces an exploitable system. A password-reset token with no expiry, attempt budget, or account binding is not repaired by clean code. Threat-model abuse cases and make rate, value, state transition, and recovery invariants explicit before implementation.
 
-```csharp
-// ASP.NET Core: only use developer exception page in development
-if (app.Environment.IsDevelopment())
-{
-    app.UseDeveloperExceptionPage();
-}
-else
-{
-    app.UseExceptionHandler("/Error");
-    app.UseHsts();
-}
-```
+### A07: Authentication Failures
 
-### A06: Vulnerable and Outdated Components
-**What**: Using libraries, frameworks, or OS components with known vulnerabilities.
-**Example**: A NuGet package with a known RCE vulnerability that has not been updated.
-**Mitigation**: Use `dotnet list package --vulnerable` to scan for vulnerable packages. Enable Dependabot. Keep dependencies updated. Remove unused packages.
+Credential, session, recovery, or authenticator handling lets an attacker assume another identity. Defend against credential stuffing, protect session and renewal tokens, require phishing-resistant authentication where the risk warrants it, and make account recovery at least as strong as normal sign-in.
 
-### A07: Identification and Authentication Failures
-**What**: Weak authentication mechanisms, credential stuffing, missing MFA, insecure session management.
-**Example**: No account lockout after failed login attempts, allowing brute-force attacks.
-**Mitigation**: Use ASP.NET Core Identity with lockout enabled. Enforce MFA for sensitive operations. Use secure session cookies (HttpOnly, Secure, SameSite=Strict).
+### A08: Software or Data Integrity Failures
 
-### A08: Software and Data Integrity Failures
-**What**: Code and infrastructure that does not protect against integrity violations. Insecure deserialization, CI/CD pipeline attacks.
-**Example**: A CI/CD pipeline that pulls dependencies from untrusted sources without verifying checksums.
-**Mitigation**: Verify NuGet package signatures. Pin dependency versions. Use trusted package sources. Validate deserialized data.
+The system trusts code, serialized state, updates, or business data without establishing its origin and integrity. Verify signed artifacts and update metadata, constrain deserialization to expected types and schemas, and keep the verification key outside the channel that delivers the payload.
 
-### A09: Security Logging and Monitoring Failures
-**What**: Insufficient logging and monitoring, allowing attacks to go undetected.
-**Example**: A successful SQL injection attack that is not logged, allowing the attacker to exfiltrate data over days.
-**Mitigation**: Log all authentication events (success and failure), authorization failures, and input validation failures. Use structured logging (Serilog, Application Insights). Set up alerts for anomalous patterns.
+### A09: Security Logging and Alerting Failures
 
-### A10: Server-Side Request Forgery (SSRF)
-**What**: The server makes HTTP requests to attacker-controlled URLs, potentially accessing internal services.
-**Example**: An image upload feature that fetches images by URL — attacker provides `http://169.254.169.254/latest/meta-data/` (AWS metadata endpoint).
-**Mitigation**: Validate and allowlist URLs before making server-side requests. Block requests to private IP ranges. Use network-level controls (VPC security groups).
+The system cannot reconstruct or detect an attack because decision events are absent, unsafe, or never turned into alerts. Record authentication, authorization, administrative, and sensitive-data events with safe metadata. Test that a real abuse sequence triggers a routed alert; collecting logs alone is not detection.
+
+### A10: Mishandling of Exceptional Conditions
+
+Unexpected states, timeouts, resource exhaustion, partial failure, or exception paths leave the system open or inconsistent. A payment handler that commits an order after its authorization service times out fails open. Define failure semantics, bound resources, make retries idempotent, and test recovery from faults at every external boundary.
+
+## API Threats and Controls
+
+For an API, apply the same Top 10 categories at the object, property, and function levels. A valid token does not prove that the caller may read object `42`, set its `isAdmin` property, or invoke an administrative operation. Load the exact resource, authorize each action, bind writable schemas, reject unknown fields, parameterize interpreter inputs, and bound payload size, concurrency, and workflow retries.
+
+Pair preventive controls with evidence: denied cross-tenant identifiers for access control, validation-failure rates for malformed input, inventory drift for shadow endpoints, and cost or queue-depth anomalies for resource abuse. Do not log tokens, passwords, API keys, card data, or request bodies to obtain that evidence. Basic authentication, JWT, OAuth, and OpenID Connect also remain different protocol roles; changing token format does not repair a missing authorization or trust check.
 
 ## Pitfalls
 
 ### Checklist Security (False Sense of Compliance)
 
-**What goes wrong**: a team works through the OWASP Top 10 as a checklist, marks each item 'done,' and considers the application secure. The Top 10 is a minimum baseline, not a comprehensive security program.
+**What goes wrong**: a team marks each broad risk class "done" and treats the result as proof of security, even though the list cannot identify this application's assets, trust boundaries, business rules, or chained abuse cases.
 
-**Why it matters**: the Top 10 covers the most common vulnerabilities, not all vulnerabilities. Application-specific logic flaws, business logic bypasses, and supply chain attacks are not covered.
-
-**Mitigation**: use the Top 10 as a starting point. Add threat modeling, penetration testing, and security code review. Treat security as a continuous process, not a one-time audit.
-
-### Stale Dependency Scanning
-
-**What goes wrong**: `dotnet list package --vulnerable` is run once during setup and never again. New CVEs are published daily; a package that was safe last month may be vulnerable today.
-
-**Mitigation**: automate dependency scanning in CI (GitHub Dependabot, OWASP Dependency-Check). Set up alerts for new CVEs in your dependency tree. Pin dependency versions and review updates regularly.
-
-## Tradeoffs
-
-**Security scanning depth vs CI speed**
-
-| Approach | Coverage | CI Impact | When to use |
-|----------|----------|-----------|-------------|
-| SAST (static analysis) | Code patterns, known vulnerabilities | Low (seconds) | Every PR |
-| DAST (dynamic analysis) | Runtime vulnerabilities, auth bypasses | High (minutes) | Nightly or pre-release |
-| Penetration testing | Business logic, chained vulnerabilities | Very high (days) | Quarterly or pre-launch |
-| Dependency scanning | Known CVEs in dependencies | Low (seconds) | Every PR |
-
-**Decision rule**: run SAST and dependency scanning on every PR (fast, automated). Run DAST nightly against a staging environment. Schedule penetration testing quarterly or before major releases. Do not skip DAST because it is slow — it catches vulnerabilities that static analysis cannot.
-
+**Mitigation**: use the Top 10 to seed threat models and verification. Add architecture-specific abuse cases, security review, dependency monitoring, runtime testing, and penetration testing according to the system's exposure and release risk.
 
 ## Questions
 
-> [!QUESTION]- Which OWASP Top 10 item is most commonly found in production .NET apps?
-> - A01 (Broken Access Control) is the most prevalent — 94% of tested apps had at least one instance.
-> - Common .NET manifestation: missing `[Authorize]` attributes, IDOR (insecure direct object references) where IDs are not validated against the current user.
-> - A05 (Security Misconfiguration) is also common: developer exception pages in production, missing security headers.
-> - Tradeoff: fixing access control requires understanding the authorization model, not just adding attributes — resource-based authorization is more work but more correct.
+> [!QUESTION]- Why does passing an OWASP Top 10 checklist not prove an application is secure?
+> - The Top 10 groups broad, common risk classes; it does not enumerate the application's assets, trust boundaries, business rules, or attackers.
+> - A system can prevent listed injection patterns and still let a valid customer refund another customer's order through broken workflow authorization.
+> - Use the list to seed threat models and verification, then add abuse cases, architecture-specific controls, dependency review, and incident exercises.
 
 > [!QUESTION]- How do you prevent SQL injection in a .NET application?
 > - Use parameterized queries always — EF Core and Dapper with parameters are safe by default.
 > - Never concatenate user input into SQL strings, even for dynamic ORDER BY or table names.
 > - For dynamic SQL, use allowlists (validate column names against a known set) rather than sanitization.
-> - Enable SQL Server's Query Store to detect unusual query patterns.
-> - Tradeoff: ORMs prevent injection but can generate inefficient queries — use raw parameterized SQL for performance-critical paths.
+> - Do not assume an ORM makes interpolated raw SQL safe; verify which APIs parameterize and which execute literal command text.
+> - Raw SQL is appropriate for performance-sensitive paths when every value remains parameterized and dynamic identifiers come from a closed allowlist.
 
 ## References
 
-- [OWASP Top 10 2021](https://owasp.org/www-project-top-ten/) — the authoritative OWASP Top 10 list with detailed descriptions, examples, and prevention guidance
+- [ByteByteGo — Top 12 Tips for API Security](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/top-12-tips-for-api-security.md) — the pinned checklist source, mapped here to preventive and detective controls; its defective visual is not reused.
+- [ByteByteGo — A Cheatsheet to Build Secure APIs](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/a-cheatsheet-to-build-secure-apis.md) — the pinned control categories, with authentication, JWT, and OAuth terminology corrected.
+- [OWASP API Security Top 10 2023](https://owasp.org/API-Security/editions/2023/en/0x11-t10/) — object, property, function, resource, inventory, SSRF, and unsafe-upstream risk definitions.
+- [RFC 7617 — Basic HTTP Authentication](https://datatracker.ietf.org/doc/html/rfc7617) — the Basic scheme and its cleartext credential transport considerations.
+- [RFC 9700 — OAuth 2.0 Security Best Current Practice](https://datatracker.ietf.org/doc/html/rfc9700) — current OAuth threat model and deployment guidance.
+- [OWASP Top 10 2025](https://owasp.org/Top10/2025/0x00_2025-Introduction/) — the current released web-application risk list and change summary.
 - [OWASP .NET Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/DotNet_Security_Cheat_Sheet.html) — .NET-specific mitigations for each OWASP category
 - [OWASP Testing Guide](https://owasp.org/www-project-web-security-testing-guide/) — comprehensive guide for testing web application security
 - [Microsoft — ASP.NET Core Security](https://learn.microsoft.com/en-us/aspnet/core/security/) — official ASP.NET Core security documentation covering authentication, authorization, and data protection

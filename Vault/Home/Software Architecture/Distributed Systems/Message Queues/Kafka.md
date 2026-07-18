@@ -104,6 +104,16 @@ flowchart LR
 - Modern Kafka deployments migrate to **KRaft** mode where Kafka self-manages metadata via Raft.
 - KRaft removes the external ZooKeeper dependency from cluster metadata management.
 
+### Semantics checklist
+
+Before choosing configuration values, keep five boundaries straight:
+
+- A record is an opaque key/value envelope plus headers and timestamp; the broker does not understand the business payload.
+- Ordering is per partition, not per topic.
+- An offset identifies a position inside one partition; it is not a global event ID.
+- A consumer group shares partitions among its members; separate groups receive independent copies of the logical stream.
+- Replication protects broker storage. It does not prove that a producer sent a record or that a consumer committed its external side effect.
+
 ## Delivery Semantics
 
 Kafka delivery guarantees come from producer acknowledgement settings, replication health, and consumer offset management.
@@ -151,70 +161,55 @@ Design strategies:
 - Use composite keys like `customer_id:region` when one dimension is too skewed.
 - Validate key distribution with load tests and partition-level metrics before production rollout.
 
-## C# Example with Confluent.Kafka
+## Producer, broker, and consumer loss windows
 
-```csharp
-using System.Text.Json;
-using System.Threading;
-using Confluent.Kafka;
+![[System Design 101/ffe24e0289421d68d1c1570a2dcab55f04b478c581581754f9a6ad45b25d1341.png]]
 
-record Order(string OrderId, string CustomerId, decimal Amount);
+Message loss is not one failure mode. Locate the acknowledgement boundary first:
 
-var producerConfig = new ProducerConfig
-{
-    BootstrapServers = "localhost:9092",
-    Acks = Acks.All,
-    EnableIdempotence = true
-};
+| Window | Failure | Control |
+|---|---|---|
+| Producer before broker acknowledgement | Client crashes or exhausts retries before a successful send | Treat send failure as unknown until the application reconciles by business ID; enable idempotence and bounded retries |
+| Leader after acknowledgement | Leader fails before enough replicas retain the write | Use `acks=all`, an appropriate replication factor, and `min.insync.replicas` |
+| Consumer before processing | Offset committed too early | Disable automatic commit and commit only after the required effect succeeds |
+| Consumer after effect, before offset commit | Record is processed twice after restart | Make the effect idempotent or atomically couple it with an inbox/outbox boundary |
 
-var consumerConfig = new ConsumerConfig
-{
-    BootstrapServers = "localhost:9092",
-    GroupId = "orders-worker",
-    AutoOffsetReset = AutoOffsetReset.Earliest,
-    EnableAutoCommit = false,
-    EnablePartitionEof = false
-};
+`acks=all` means all current in-sync replicas acknowledge, not all configured replicas. If `min.insync.replicas=2`, a critical topic can reject writes when fewer than two replicas are in sync instead of acknowledging a single-copy write.
 
-var order = new Order("order-1001", "customer-42", 149.99m);
-using var cts = new CancellationTokenSource();
-var ct = cts.Token;
+## Kafka use cases by workload requirement
 
-// Producer
-using var producer = new ProducerBuilder<string, string>(producerConfig).Build();
-await producer.ProduceAsync("orders", new Message<string, string>
-{
-    Key = order.CustomerId,
-    Value = JsonSerializer.Serialize(order)
-});
+Choose Kafka for its log semantics, not because a workload is merely "real time."
 
-// Consumer
-using var consumer = new ConsumerBuilder<string, string>(consumerConfig).Build();
-consumer.Subscribe("orders");
-try
-{
-    while (!ct.IsCancellationRequested)
-    {
-        var result = consumer.Consume(ct);
-        var parsedOrder = JsonSerializer.Deserialize<Order>(result.Message.Value);
-        if (parsedOrder is null)
-        {
-            continue;
-        }
-        // process...
-        consumer.Commit(result);
-    }
-}
-catch (OperationCanceledException)
-{
-    // graceful shutdown
-}
-finally
-{
-    consumer.Close();
-}
-```
+| Workload | Kafka property that matters | Constraint to check |
+|---|---|---|
+| Change data capture | Durable ordered history per table/key | Source connector semantics and schema evolution |
+| Event sourcing feed | Replay and independent consumer offsets | The domain still needs an authoritative event model and snapshots |
+| Stream processing | Partitioned parallelism and retained inputs | State stores, checkpoints, and end-to-end side effects |
+| Log or telemetry aggregation | High sequential throughput | Retention cost and whether loss is acceptable |
+| Fan-out integration events | Independent consumer groups | Contract governance and per-key ordering |
 
+A simple work queue with per-message priorities, arbitrary routing, or short retention may fit RabbitMQ or Service Bus better. The workload requirement selects the broker.
+
+## Schema evolution
+
+![[System Design 101/d5bf9b9c1d4a6ca3ec04fe50401d2a1d12503a07179326a2abd3d6d62d2ae050.png]]
+
+Kafka records commonly carry a schema identifier rather than an Avro object-container header. [[Kafka Schema Evolution]] owns writer/reader resolution, registry compatibility modes, retained-record replay, and breaking-change migrations.
+## Why Kafka achieves high throughput
+
+Kafka combines several mechanisms rather than one trick:
+
+- Append-only partition logs turn writes into mostly sequential I/O.
+- The operating-system page cache serves hot data and avoids a separate application cache.
+- Producers batch records and optionally compress a batch, reducing syscalls and network bytes.
+- Brokers transfer batches without parsing application payloads.
+- Partitions distribute storage and consumer work across brokers.
+
+Each mechanism has a cost. Larger batches improve throughput but add linger latency; more partitions raise metadata, file, and rebalance overhead; compression spends CPU. Measure record size, batch size, partition throughput, and consumer lag instead of copying a benchmark configuration.
+
+## .NET consumer boundary
+
+[[Kafka in NET]] owns the Confluent .NET consumer loop, manual offset rules, idempotent effects, poison-record quarantine, replay, and lag telemetry. The offset advances only after the business effect or quarantine record is durable.
 ## Pitfalls
 
 ### Hot partitions from bad key design
@@ -248,7 +243,7 @@ kafka-consumer-groups.sh --bootstrap-server localhost:9092 --group orders-worker
 ## Questions
 
 > [!QUESTION]- How do you design a Kafka topic to keep per-customer ordering while handling high throughput?
-> Use `customer_id` as the partition key so every event for a customer lands in the same partition and stays ordered — Kafka only guarantees order within a partition. Then provision enough partitions for parallelism, sized from measured per-partition consumer throughput against your latency target, and scale the consumer group up to (but not beyond) the partition count, since extra consumers just sit idle. Watch for hot partitions: if one customer dominates traffic, a plain `customer_id` key overloads one partition, so move to a composite key like `customer_id:region`. Keep consumers [[Idempotency|idempotent]], because rebalances and retries will reprocess records. Ordering and scale pull against each other, and the partition key is where you resolve the tension.
+> Use `customer_id` when all events for one customer require one partition order. Size partitions from measured consumer throughput and scale a consumer group only to the partition count. If a hot customer forces a composite key such as `customer_id:region`, the guarantee is now only per customer per region; any cross-region customer order must be serialized by another sequencer, version check, or downstream merge rule. Keep consumers [[Idempotency|idempotent]] because retries and rebalances can repeat records.
 
 > [!QUESTION]- Compare at-most-once, at-least-once, and exactly-once in Kafka — which fits payment events?
 > At-most-once commits the offset before processing, so a crash loses events — almost never acceptable for payments. At-least-once processes first and commits after, so a crash before commit reprocesses; it's the common production default and safe as long as handlers are idempotent. Exactly-once is real but narrow: Kafka transactions plus an idempotent producer give atomic consume-process-produce, but only for Kafka-to-Kafka flows — a database write or HTTP call inside the handler still needs its own idempotency or an outbox. For payments, the usual answer is at-least-once with strict idempotency (dedupe on a payment ID), reaching for exactly-once only when a duplicate side effect is too costly to risk and the whole flow stays inside Kafka.
@@ -259,3 +254,15 @@ kafka-consumer-groups.sh --bootstrap-server localhost:9092 --group orders-worker
 - [Confluent Kafka .NET Client Documentation](https://docs.confluent.io/kafka-clients/dotnet/current/overview.html) — official `Confluent.Kafka` client reference covering `ProducerConfig`/`ConsumerConfig`, idempotence, and offset management.
 - [The Log: What every software engineer should know about real-time data's unifying abstraction](https://engineering.linkedin.com/distributed-systems/log-what-every-software-engineer-should-know-about-real-time-datas-unifying) — Jay Kreps' foundational essay on the log abstraction Kafka is built on.
 - [The Apache Kafka Monitoring Blog Post to End Most Posts](https://www.confluent.io/blog/blog-post-on-monitoring-an-apache-kafka-deployment-to-end-most-blog-posts/) — Confluent practitioner deep-dive on metrics, consumer lag, and operating a Kafka cluster in production.
+- [Kafka design](https://kafka.apache.org/documentation/#design) — Apache's design reference for the log, batching, page cache, replication, and consumer groups.
+- [Kafka producer configuration](https://kafka.apache.org/documentation/#producerconfigs) — official definitions for `acks`, idempotence, retries, batching, and compression.
+- [Kafka consumer configuration](https://kafka.apache.org/documentation/#consumerconfigs) — official offset-commit and isolation settings that shape delivery behavior.
+- [Apache Avro specification](https://avro.apache.org/docs/current/specification/) — authoritative writer/reader schema resolution and object container file format.
+
+### ByteByteGo provenance
+
+- [Can Kafka lose messages?](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/can-kafka-lose-messages.md) — editorial lead for the producer, broker, and consumer failure matrix.
+- [Top Kafka use cases](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/top-5-kafka-use-cases.md) — provenance for workload examples; broker choice remains requirements-driven.
+- [Kafka 101](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/the-ultimate-kafka-101-you-cannot-miss.md) — provenance for the semantics checklist; its defective record-label visual was rejected.
+- [Avro migration](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/smooth-data-migration-with-avro.md) — provenance for the writer/reader schema example.
+- [Why Kafka is fast](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/why-is-kafka-fast.md) — editorial lead for the throughput mechanisms; its defective diagram was rejected.

@@ -3,7 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
-summary: "Measuring whether an LLM app does the right thing with layered checks, judges, and production signals."
+summary: "Measuring LLM behavior with versioned cases, exact checks, semantic scoring, and production outcomes."
 tags:
   - FolderNote
 publish: true
@@ -15,85 +15,91 @@ priority: High
 
 # Intro
 
-Evaluation is how you measure whether an LLM application is doing the right thing: answer quality, grounding, safety, and regressions over time. Because LLM output is probabilistic and open-ended, you cannot rely on a single pass/fail assertion the way you would for deterministic code — evaluation becomes a layered system that combines cheap hard checks, scalable semantic judges, fixed regression sets, and production signals. This folder covers each layer; this hub shows how they fit together.
+Evaluation measures whether an LLM application satisfies product, grounding, safety, and operational requirements. Because open-ended output has several valid forms, one assertion cannot cover the system. A useful evaluation combines a versioned regression corpus, exact predicates, semantic rubrics, human calibration, and production outcomes.
+
+The corpus and the scoring techniques are different things. A [[Golden Test Set and Regression Runs|golden test set]] is the versioned dataset that supplies inputs, expected facts or invariants, rubrics, and slice metadata. [[Deterministic Checks]] and [[LLM-as-a-Judge|judges]] score candidate outputs produced from those cases. Regression logic then compares the candidate with a pinned baseline or threshold.
 
 ```datacorejsx
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
 return FolderStructureMap;
 ```
 
-## The Evaluation Stack
-
-No single technique is sufficient. A production LLM evaluation system layers four, cheapest and strictest first, so expensive judgment is spent only on output that already passed the hard gates:
+## Evaluation system
 
 ```mermaid
 flowchart TD
-    O[LLM output] --> D[Deterministic checks]
-    D -->|fail| R[Reject -- hard failure]
-    D -->|pass| J[LLM-as-a-Judge]
-    J --> G[Golden test set regression gate]
-    G -->|regression| F[Block release]
-    G -->|pass| P[Ship to production]
-    P --> ON[Online eval and A/B tests]
-    ON -->|new failures become cases| G
+    G[Versioned golden corpus] --> R[Run candidate and baseline]
+    R --> O[Captured outputs and traces]
+    O --> X[Exact deterministic predicates]
+    O --> J[Rubric judge and human samples]
+    X --> S[Scores by case and slice]
+    J --> S
+    S --> C{Regression gate}
+    C -->|pass| P[Controlled production rollout]
+    C -->|fail| F[Block and diagnose]
+    P --> ON[Online outcomes and failures]
+    ON --> T[Triage and label]
+    T -->|new dataset version| G
 ```
 
-Each layer is its own note in this folder; the map above links them. The ordering is the point: **deterministic checks** enforce hard contracts in microseconds with zero false positives, so a malformed or unsafe output is a hard failure that never reaches a judge; **LLM-as-a-Judge** then scores the semantic quality that survives; the **golden test set** gates releases against a frozen holdout; and **online evaluation** measures real outcomes and feeds new failures back into the golden set, closing the loop.
+Exact checks can run before an expensive judge for one candidate output, but the golden corpus is not a downstream stage after the judge. It is the common input and comparison boundary for every scorer.
 
-A useful framing across all four: combine **offline** (fixed sets, fast iteration, regression gating) with **online** (real outcomes, distribution shift), and combine **automated** (deterministic + judge, scalable) with **human** (rubric review, calibration, edge-case discovery). Neither axis alone is enough.
+Use deterministic code where the predicate is exact:
 
-All four layers run against an evaluation set; how you construct, synthesize, and size that set is [[Building an Evaluation Set]]. Two domains specialize this general stack with their own metrics and labeling, reusing everything above rather than repeating it: RAG adds retrieval-quality and faithfulness metrics — see [[Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation|RAG Evaluation]] and [[Monitoring]] — and agents add trajectory, tool-call, and task-success metrics — see [[Home/AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]].
+- JSON parses against a pinned schema.
+- A required field exists and has the expected type.
+- A tool name belongs to an allowed set.
+- A numeric value stays inside a declared range.
+
+Those checks have no classification error when the predicate and implementation match the product contract. The guarantee does not extend to every rule implemented in code. Regex-based PII detection, keyword safety filters, toxicity classifiers, and unsupported-claim heuristics are repeatable but imperfect: they can produce both false positives and false negatives. Calibrate them on labeled examples and treat uncertain content as a scored signal or review path rather than an infallible hard gate.
+
+Semantic dimensions such as correctness, groundedness, and actionability need a rubric. An LLM judge scales that rubric, while blinded human samples measure judge agreement and reveal systematic bias. Keep judge model, prompt, rubric, and sampling settings versioned with the result.
 
 ## Example
 
-Example scorecard for a customer support assistant (one test case):
+One customer-support case can carry both exact and semantic expectations:
 
 ```text
-Case: "Refund policy for damaged item after 45 days"
+case_id: damaged-refund-45-days
+input: "Can I return a damaged item after 45 days?"
 
-Dimensions (0-2):
-- Correctness: 0 wrong / 1 partly / 2 correct
-- Groundedness: 0 invented / 1 unclear / 2 supported by policy
-- Safety: 0 unsafe / 1 questionable / 2 safe
-- Actionability: 0 vague / 1 partial / 2 clear steps
+exact predicates:
+- response matches the answer schema
+- cited_policy_sections contains at least one identifier
+- tool_calls use only policy_search
 
-Hard checks:
-- Must include a citation to the policy section
-- Must not request credit card numbers
+rubric dimensions (0-2):
+- policy correctness
+- groundedness in the cited section
+- actionability of the escalation path
+
+heuristic signals:
+- possible payment-card number
+- possible unsupported promise
 ```
 
-## Evaluation Overfitting
+A schema failure is exact. “Possible payment-card number” remains a detector result until its precision and recall are established for this traffic.
 
-When you iterate on prompts or rubrics against a fixed evaluation set, you can overfit to that benchmark—improvements on your dev set don't transfer to real users. This happens because you're optimizing for the specific distribution and phrasing of your test cases, not for genuine quality.
+## Dataset lifecycle and overfitting
 
-**Practical signals of evaluation overfitting:**
+Give every corpus version immutable case identifiers, provenance, expected behavior, slice labels, and a reason for inclusion. New production failures enter through triage, not by silently editing an existing case. Keep a development set for iteration and a frozen holdout for release decisions.
 
-- You keep iterating on a prompt until it maximizes a single judge score on your dev set.
-- It becomes overly verbose and "judge-friendly" while real users complain about slow, indirect answers.
-- Improvements only show up on your dev set but not on a holdout set (or online metrics).
-
-**Fix:** Introduce multiple eval dimensions, add human spot checks, and keep a frozen holdout set that you never tune against.
+Repeatedly tuning prompts or judge rubrics against the holdout turns it into training data. A rising holdout score with flat [[Online Evaluation and AB Tests|online outcomes]] is evidence of evaluation overfitting. Rotate or add independently sourced cases, inspect slice-level effects, and retain human review for disputed decisions.
 
 ## Questions
 
-> [!QUESTION]- When are classic metrics (BLEU/ROUGE) useful?
-> Mainly for narrow summarization/translation style tasks and as weak signals. For open-ended assistants, rubric-based scoring and pairwise ranking usually track real quality better.
+> [!QUESTION]- Is a golden test set a scoring stage?
+> No. It is a versioned regression dataset. Exact predicates, semantic judges, and human raters score outputs generated from its cases; the regression gate compares those results with a pinned baseline or threshold.
 
-> [!QUESTION]- Why run deterministic checks before an LLM judge rather than relying on the judge alone?
-> - Deterministic checks are microseconds and free; LLM-judge calls cost API tokens and seconds — running the cheap gate first avoids paying to judge output that is already invalid
-> - Hard constraints (schema validity, disallowed actions, PII, length) have a zero false-positive rate when expressed as rules, whereas a judge can mis-rule on them
-> - A judge can be distracted into scoring an output "good" that a deterministic rule would reject outright (a fluent answer that violates the output contract)
-> - The two are complementary, not redundant: deterministic checks enforce hard contracts, judges evaluate soft quality — see [[Deterministic Checks]]
+> [!QUESTION]- When does a deterministic check have zero classification error?
+> Only when it evaluates an exact product predicate, such as schema validity or membership in an allowed set, and the implementation matches that contract. Deterministic PII, toxicity, and content heuristics still have false positives and false negatives.
 
-> [!QUESTION]- Why isn't a strong offline score enough to ship an LLM change?
-> - Offline sets are frozen samples; production traffic shifts in phrasing, intent, and edge-case mix the set never captured
-> - Iterating against a fixed set invites evaluation overfitting — the prompt gets tuned to the benchmark's distribution, not to real quality
-> - Outcome metrics that matter (task resolution, escalation, retention) depend on multi-turn user behavior that no static set simulates
-> - Treat offline evaluation as a release gate, then confirm with [[Online Evaluation and AB Tests|online evaluation]] before trusting the change
+> [!QUESTION]- Why is a strong offline score insufficient to ship?
+> A fixed corpus cannot reproduce every traffic shift, multi-turn interaction, or user outcome. Use offline regression as a release gate, then estimate production impact with monitoring and controlled online experiments.
 
 ## References
 
-- [Evaluation best practices (OpenAI API Docs)](https://developers.openai.com/api/docs/guides/evaluation-best-practices)
-- [Working with evals (OpenAI API Docs)](https://developers.openai.com/api/docs/guides/evals)
-- [Define your success criteria (Anthropic Docs)](https://docs.anthropic.com/en/docs/test-and-evaluate/define-success)
-- [AI Risk Management Framework (NIST)](https://www.nist.gov/itl/ai-risk-management-framework)
+- [OpenAI evaluation best practices](https://developers.openai.com/api/docs/guides/evaluation-best-practices) — provider guidance for task-specific criteria, datasets, graders, and continuous evaluation loops.
+- [OpenAI evals guide](https://developers.openai.com/api/docs/guides/evals) — primary API documentation for defining, running, and inspecting evaluation jobs.
+- [Anthropic: define success criteria](https://docs.anthropic.com/en/docs/test-and-evaluate/define-success) — provider guidance for translating product goals into measurable success criteria and test cases.
+- [NIST AI Risk Management Framework](https://www.nist.gov/itl/ai-risk-management-framework) — the primary voluntary risk-management framework for governing measurement, validation, and monitoring across the AI lifecycle.

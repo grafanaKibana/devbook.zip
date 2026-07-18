@@ -19,9 +19,9 @@ publish: true
 
 `Channel.CreateBounded<T>(capacity)` gives a fixed buffer; `Channel.CreateUnbounded<T>()` one that grows without limit. The channel exposes two façades, `channel.Writer` and `channel.Reader`, so each end can be handed to a different component.
 
-- `WriteAsync` completes when the item is accepted. On a full bounded channel in the default `Wait` mode it suspends the producer until space frees up, without parking a thread. **That suspension is the backpressure.**
+- `WriteAsync` follows the configured full-buffer policy. In the default `Wait` mode, it completes after the item is accepted and suspends the producer on a full channel until space frees up, without parking a thread. In `DropWrite` mode, completion does not prove acceptance: a full buffer can discard the incoming item. **Waiting in `Wait` mode is the backpressure.**
 - `TryWrite` returns `false` immediately instead of waiting; `WaitToWriteAsync` awaits capacity, returning `false` once the channel is completed. Looping the two avoids per-item await machinery on hot paths.
-- `reader.ReadAllAsync()` returns an `IAsyncEnumerable<T>`, so a consumer is an `await foreach`. Items come out **FIFO** — the ordering [[Semaphore|SemaphoreSlim]] does not guarantee.
+- `reader.ReadAllAsync()` returns an `IAsyncEnumerable<T>`, so a consumer is an `await foreach`. Items come out **FIFO** — the ordering [[Home/Programming/NET/CSharp/Concurrency and Parallelism/Semaphore|SemaphoreSlim]] does not guarantee.
 - `writer.Complete()` says *no more items*: the reader drains the buffer, `ReadAllAsync` ends the loop, `reader.Completion` completes. Without it the reader cannot know the stream ended.
 
 `BoundedChannelFullMode`, fixed at construction, is the entire backpressure decision:
@@ -34,6 +34,14 @@ publish: true
 | `DropNewest` | The newest buffered item is evicted |
 
 Either you slow the producer or you throw data away; choosing a capacity is choosing which. `SingleReader`/`SingleWriter` are promises about how many threads touch each end — the channel takes a cheaper path when you make them, and breaks when you lie.
+
+### Blocking, lock-free, starvation-free, and wait-free progress
+
+API waiting and implementation progress answer different questions. On a full bounded channel, `WriteAsync` deliberately suspends until capacity exists: that is backpressure, even though no thread is blocked. `TryWrite` reports the admission decision immediately, but `false` means only *not accepted now*; it does not define the channel as formally non-blocking.
+
+A lock-free queue can update its head or tail with compare-and-swap (CAS). When two threads race, one wins and the other retries. Lock-free means the system as a whole keeps completing operations despite those retries; it does not guarantee that a particular thread wins. Starvation-free means every contender eventually makes progress. Wait-free is stronger again: every operation finishes within a bounded number of its own steps.
+
+`Channel<T>` exposes waiting and drop semantics, not a wait-free guarantee. Its progress properties depend on the runtime implementation and the options used. Treat bounded capacity as an overload contract, and use the formal progress terms only when the chosen data structure documents them.
 
 ## Example
 
@@ -50,7 +58,7 @@ builder.Services.AddHostedService<ThumbnailWorker>();
 app.MapPost("/thumbnails", async (
     ThumbnailJob job, Channel<ThumbnailJob> channel, CancellationToken ct) =>
 {
-    // With 100 buffered, this await blocks until the worker takes one out.
+    // With 100 buffered, this waits asynchronously until the worker takes one out.
     // The request gets slower; the queue does not grow.
     await channel.Writer.WriteAsync(job, ct);
     return Results.Accepted();
@@ -116,3 +124,4 @@ What flips it: `ConcurrentQueue<T>` when nobody waits — the consumer runs on a
 - [An Introduction to System.Threading.Channels (.NET Blog)](https://devblogs.microsoft.com/dotnet/an-introduction-to-system-threading-channels/) — design rationale for the writer/reader split and the `SingleReader`/`SingleWriter` fast paths.
 - [Thread-safe collections (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/collections/thread-safe/) — `ConcurrentQueue<T>` and `BlockingCollection<T>`, and the blocking behaviour that rules the latter out of async code.
 - [Threading in C#: Parallel programming (Joe Albahari)](https://www.albahari.com/threading/part5.aspx) — the classic `BlockingCollection<T>` producer-consumer walkthrough that channels replaced.
+- [Blocking vs. non-blocking queue (ByteByteGo, pinned source)](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/blocking-vs-non-blocking-queue.md) — editorial comparison of waiting and progress terminology; its diagram conflates admission behavior with formal progress guarantees, so it is not reproduced here.

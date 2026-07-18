@@ -12,7 +12,7 @@ publish: true
 ---
 # Intro
 
-MVC and MVVM are UI architecture patterns that separate data, presentation, and interaction logic to improve testability and maintainability. Both solve the same problem — keeping UI code from tangling with business logic — but they differ in how the View and the logic layer communicate. MVC uses a Controller that handles requests and selects views; MVVM uses a ViewModel that exposes observable state the View binds to directly. In a 120-controller ASP.NET Core API, enforcing thin MVC controllers (under 20 lines per action) that delegate to domain services reduced the average time to add a new endpoint from 2 hours to 30 minutes because developers no longer had to untangle business logic embedded in controller actions.
+MVC and MVVM are UI architecture patterns that separate data, presentation, and interaction logic to improve testability and maintainability. Both solve the same problem — keeping UI code from tangling with business logic — but they differ in how the View and the logic layer communicate. MVC uses a Controller that handles requests and selects views; MVVM uses a ViewModel that exposes observable state the View binds to directly.
 
 ## MVC — Model-View-Controller
 
@@ -49,7 +49,7 @@ The Controller is the entry point. It is thin — it delegates to services and p
 
 **Roles:**
 - **Model** — domain data and business rules. Same as MVC.
-- **View** — UI that binds to ViewModel properties and commands. No code-behind logic.
+- **View** — UI that binds to ViewModel properties and commands. Framework adapter code can live in code-behind, but business rules and parallel state synchronization should not.
 - **ViewModel** — exposes observable state (`INotifyPropertyChanged`) and commands (`ICommand`). The View binds to it; the ViewModel does not reference the View.
 
 **Flow:** User action → View binding → ViewModel command → Model update → ViewModel notifies View via binding.
@@ -83,7 +83,7 @@ public class ProductDetailsViewModel : INotifyPropertyChanged
 }
 ```
 
-The View (XAML) binds to `Name` and `LoadCommand` — no code-behind. The ViewModel is fully testable without a UI.
+The View (XAML) binds to `Name` and `LoadCommand`. Small view-only event adapters can remain in code-behind; presentation state and business decisions stay in the ViewModel or domain service so they remain testable without a UI.
 
 ## Comparison
 
@@ -93,31 +93,28 @@ The View (XAML) binds to `Name` and `LoadCommand` — no code-behind. The ViewMo
 | View coupling | Controller selects View (loose) | View binds directly to ViewModel (tight binding) |
 | Testability | Controller testable; View requires integration test | ViewModel fully unit-testable without UI |
 | Data binding | Manual (controller passes model to view) | Automatic (two-way binding via `INotifyPropertyChanged`) |
-| Primary platform | Server-side web (ASP.NET Core MVC) | Desktop/mobile UI (WPF, MAUI, Blazor) |
+| Primary platform | Server-side web (ASP.NET Core MVC) | Desktop/mobile UI with binding infrastructure (WPF, MAUI) |
 | Boilerplate | Low | Higher (binding infrastructure, `ICommand`) |
 
 ## Decision Rule
 
 **Use MVC** for server-rendered web applications (ASP.NET Core MVC, Razor Pages). The request/response model maps naturally to Controller → View. No persistent UI state between requests.
 
-**Use MVVM** for stateful UI applications (WPF, MAUI, Blazor) where the UI reacts to state changes in real time. Two-way data binding eliminates manual UI update code and makes ViewModels independently testable.
+**Use MVVM** for stateful UI applications such as WPF and MAUI where binding infrastructure connects observable state to the UI. Blazor is primarily a component model; it can use view-models, but its event/render cycle and common one-way state flow are closer to component or MVU-style design than classic WPF MVVM.
 
-**When to switch:** if you find yourself writing significant code-behind in a WPF/MAUI app to update UI elements manually, switch to MVVM. If your ASP.NET Core controllers are growing large with UI logic, consider Razor Pages (a simplified MVC variant) or move logic to services.
+**When to switch:** if WPF/MAUI code-behind starts duplicating presentation state or business decisions, move that behavior behind a ViewModel. View-only wiring does not justify a rewrite. If ASP.NET Core controllers are growing large with UI logic, consider Razor Pages or move behavior to application/domain services.
 
-## The Wider Family: MVP and MVU
+## Related presentation variants
 
-MVC and MVVM are two points in a family of UI separation patterns:
+![[System Design 101/8aa1acfad654b14fa9e37888735e16583b5dc841968bdf139337637682bd0e69.png]]
 
-- **MVP (Model-View-Presenter)** — like MVC, but the **Presenter** holds *all* presentation logic and updates a passive View through an interface (`IView`), which makes the View trivially mockable. Common in classic WinForms and Android; the View is dumber than in MVVM (no data binding) and the Presenter pushes values explicitly.
-- **MVU / unidirectional flow (Model-View-Update, a.k.a. Elm/Flux/Redux)** — state flows **one way**: an immutable model renders a view, the view emits messages, an `update` function produces a *new* model, repeat. There's no two-way binding to reason about, so state is predictable and time-travel-debuggable. This is the model behind Elm, Redux/React, and increasingly **Blazor** components and .NET MAUI's `Fabulous`/`Comet`. (So Blazor is better described as component/MVU than classic MVVM, despite supporting binding.)
-
-The trend in modern UI is toward **unidirectional data flow** because two-way binding, while convenient, makes "who changed this state?" hard to trace in complex screens.
+The visual is a responsibility map, not a maturity ladder. [[Presentation Architecture Variants]] compares MVP, MVU, MVVM-C coordinators, and VIPER, including the conditions that justify their extra seams. Across all variants, domain behavior must remain independent of UI frameworks.
 
 ## Pitfalls
 
 ### Massive Controllers (MVC)
 
-**What goes wrong**: the Controller accumulates business logic — validation, orchestration, data transformation — instead of delegating to services. A 500-line controller is a sign that the Controller is doing the Model's job. In one production codebase, a `PaymentsController` grew to 1,200 lines with inline Stripe API calls, retry logic, and email sending — a bug in the retry logic caused double charges for 340 customers over a weekend, and it took 3 developers 2 days to trace the issue because the payment flow was spread across 8 controller actions instead of a single `PaymentService`.
+**What goes wrong**: the Controller accumulates business logic, provider calls, retry policy, and notification side effects instead of delegating to application/domain services. The flow becomes difficult to test as one unit and uncertain retries can duplicate effects.
 
 **Why it happens**: it is the path of least resistance. The controller already has access to the request, the response, and the DI container.
 
@@ -148,3 +145,5 @@ The trend in modern UI is toward **unidirectional data flow** because two-way bi
 - [Model-View-ViewModel (Wikipedia)](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93viewmodel) — MVVM pattern origin (Microsoft WPF), data binding mechanics, and comparison with MVC.
 - [Data binding in WPF (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/data/) — how `INotifyPropertyChanged` and `ICommand` power MVVM in WPF.
 - [MVVM in .NET MAUI (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/maui/xaml/fundamentals/mvvm) — MVVM pattern applied to cross-platform .NET MAUI apps.
+- [Presentation Model](https://martinfowler.com/eaaDev/PresentationModel.html) — Martin Fowler's description of a UI-independent presentation state and behavior object, the conceptual base for view-model test seams.
+- [MVC, MVP, MVVM, and VIPER patterns](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/mvc-mvp-mvvm-viper-patterns.md) — ByteByteGo provenance for the responsibility visual; MVVM-C and VIPER are kept client-specific rather than ranked as successors.

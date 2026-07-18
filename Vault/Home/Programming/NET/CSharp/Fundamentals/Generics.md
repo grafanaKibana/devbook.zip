@@ -128,7 +128,7 @@ Newer constraints worth knowing: `where T : struct, Enum` (enum-only generics), 
 > Repeated fallback usage can spread bad state across caches, persistence, or downstream services before detection.
 > Prefer explicit failure paths (`TryXxx`, exceptions, discriminated result types) and validate invariants at boundaries.
 
-## Links
+## References
 
 - [Generics in C#](https://learn.microsoft.com/dotnet/csharp/programming-guide/generics/) — official guide covering generic classes, methods, interfaces, and delegates with examples.
 - [Constraints on type parameters](https://learn.microsoft.com/dotnet/csharp/programming-guide/generics/constraints-on-type-parameters) — full list of constraint keywords and their semantics.

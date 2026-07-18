@@ -138,7 +138,7 @@ Always have a top-level net so a stray exception is logged, not silently lost or
 > [!QUESTION]- When might `finally` not execute?
 > When the process terminates abruptly and normal stack unwinding does not happen (for example, crash/kill, `Environment.FailFast()`, or `StackOverflowException`).
 
-## Links
+## References
 
 - [Exception-handling statements (try/catch/finally/throw)](https://learn.microsoft.com/dotnet/csharp/language-reference/statements/exception-handling-statements) — language reference for all exception-handling syntax including `when` filters and throw expressions.
 - [Best practices for exceptions](https://learn.microsoft.com/dotnet/standard/exceptions/best-practices-for-exceptions) — Microsoft guidance on when to throw, when to catch, and how to design exception hierarchies.

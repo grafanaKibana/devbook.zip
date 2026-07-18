@@ -3,7 +3,7 @@ topic:
   - Software Architecture
 subtopic:
   - System Architecture
-summary: "An application deployed as one unit and codebase, with all components sharing a single database."
+summary: "An application whose modules are released and deployed together as one unit."
 level:
   - "4"
 priority: Medium
@@ -12,11 +12,11 @@ publish: true
 ---
 # Intro
 
-A monolith is an application deployed as a single unit — one process, one codebase, one deployment artifact. All components (UI, business logic, data access) run in the same process and share the same database. This is not inherently bad: fewer moving parts, simpler operations, easy local development, and no distributed systems complexity. Shopify, for example, runs one of the world's largest e-commerce platforms on a modular Rails monolith handling over 80,000 requests/second — proving that monoliths scale further than most teams assume before microservices become necessary. The problems emerge when the monolith grows large and teams start coupling components in ways that make independent change difficult.
+A monolith is defined by one deployment unit: its modules are versioned, released, and rolled back together. It commonly uses one process and database, but those implementation choices are not the definition. The style keeps operations and in-process transactions simple; its main cost is deployment and scaling coupling as modules and teams grow.
 
 ## What a Monolith Looks Like
 
-A typical ASP.NET Core monolith:
+A typical ASP.NET Core monolith can use this layout:
 
 ```text
 MyApp/
@@ -27,17 +27,17 @@ MyApp/
 └── Program.cs          # Single startup, single deployment
 ```
 
-One `dotnet publish`, one Docker image, one deployment. All requests go to the same process. The database is shared by all components.
+One `dotnet publish` produces one coordinated deployment unit. That unit may run as one process or several collocated processes, and it may use one database or several stores; those parts are still versioned, released, and rolled back together.
 
 ## Benefits
 
-**Operational simplicity:** one service to deploy, monitor, and debug. No distributed tracing, no network partitions between components, no eventual consistency to reason about.
+**Operational simplicity:** one coordinated release unit reduces deployment and rollback surfaces. It does not eliminate distributed failure: a monolithic deployment that calls external services or spans processes and datastores still needs network-failure handling, tracing, and explicit eventual workflows.
 
 **Easy local development:** `dotnet run` starts everything. No service mesh, no container orchestration needed for development.
 
-**Simple transactions:** all operations share a database connection. ACID transactions across components are trivial — no distributed transaction protocols needed.
+**Simple local transactions:** components that share one transactional database can commit together without a distributed protocol. This advantage is common, not inherent: modules using separate resources still need explicit coordination.
 
-**Low latency for internal calls:** component-to-component calls are in-process function calls, not network hops.
+**Low latency for collocated components:** modules in the same process use local calls instead of network hops. Components in another process, datastore, or external service keep their ordinary network latency and failure modes.
 
 > [!NOTE]
 > **A monolith still scales horizontally** — the common myth is "monolith = can't scale." You scale it by running **N identical copies behind a [[Load Balancing|load balancer]]** (which is why keeping the process **stateless** matters). What you *can't* do is scale components *independently* — if only the report generator is hot, you still replicate the whole app. That inefficiency, not a hard ceiling, is the real scaling argument for microservices.
@@ -56,28 +56,13 @@ These signals indicate the monolith has become a **big ball of mud** — not bec
 
 ## Modular Monolith — The Middle Ground
 
-A modular monolith enforces explicit module boundaries within a single deployment:
-
-```text
-MyApp/
-├── Ordering/           # Module: owns its own models, services, DB tables
-│   ├── OrderService.cs
-│   └── IOrderRepository.cs
-├── Catalog/            # Module: no direct dependency on Ordering internals
-│   ├── ProductService.cs
-│   └── ICatalogRepository.cs
-├── Shared/             # Shared kernel: only stable abstractions
-└── Program.cs
-```
-
-Modules communicate through public interfaces, not by reaching into each other's internals. This gives you most of the maintainability benefits of microservices while keeping operational simplicity.
-
+A [[Modular Monolith]] keeps one deployment unit while enforcing explicit module contracts and data ownership. It is the normal upgrade path when an unstructured monolith needs stronger change boundaries but independent service deployment is not yet worth the operating cost.
 ## Monolith vs Microservices
 
 | Aspect | Monolith | Microservices |
 |--------|----------|---------------|
 | Deployment | Single unit | Independent per service |
-| Transactions | ACID (trivial) | Distributed (Saga, 2PC) |
+| Transactions | Local ACID when components share one resource | Local transactions plus saga, outbox, or supported distributed coordination across resources |
 | Scaling | Scale everything together | Scale individual services |
 | Operational complexity | Low | High (service mesh, tracing, retries) |
 | Team autonomy | Low (shared codebase) | High (independent deployments) |
@@ -95,6 +80,13 @@ See [[Microservices]] for the full microservices pattern.
 
 The cost of premature microservices is high: distributed systems complexity, eventual consistency, and operational overhead before the product has proven its architecture.
 
+## Collocation provenance visuals
+
+![[System Design 101/ca82d79e2ef18b6b3dd26780a6d65322ca281b766d5aa2e2100fb623f578ff9f.jpg]]
+
+Prime Video's monitoring pipeline and Stack Overflow's historical application tier are provenance cases, not architecture targets. [[Modular Monolith]] owns the reusable comparison of collocation, scaling, and boundary decisions.
+
+![[System Design 101/95ba5ef6bdaa94d2e0794e5d311431f0f14f8883038cb662100f5cebe0231125.png]]
 ## Pitfalls
 
 ### Deployment Coupling
@@ -107,9 +99,9 @@ The cost of premature microservices is high: distributed systems complexity, eve
 
 ### Database Monolith
 
-**What goes wrong**: all modules share the same database schema and tables. A schema change for one module requires coordinating with all teams and risks breaking other modules.
+**What goes wrong**: modules share tables or schema ownership without boundaries. A schema change for one module requires coordinating with all teams and risks breaking other modules.
 
-**Why it happens**: a shared database is the default in a monolith. It is convenient early on but becomes a coordination bottleneck as the team grows.
+**Why it happens**: a shared database is a common convenience in a monolith, so table ownership stays implicit as the team grows.
 
 **Mitigation**: partition the database by module even within a monolith. Each module owns its tables and accesses other modules' data only through service interfaces, not direct SQL joins. This is the modular monolith approach and is a prerequisite for eventual microservice extraction.
 
@@ -129,3 +121,10 @@ The cost of premature microservices is high: distributed systems complexity, eve
 - [Microservices (Martin Fowler)](https://martinfowler.com/articles/microservices.html) — the canonical microservices article; useful for understanding what you are trading away when you leave the monolith.
 - [Modular Monolith: A Primer (Kamil Grzybek)](https://www.kamilgrzybek.com/blog/posts/modular-monolith-primer) — practitioner guide to enforcing module boundaries in a .NET monolith.
 - [Building Microservices (Sam Newman)](https://samnewman.io/books/building_microservices/) — the definitive book on microservices; Chapter 1 covers when NOT to use them.
+- [Scaling up the Prime Video audio/video monitoring service and reducing costs by 90%](https://www.primevideotech.com/video-streaming/scaling-up-the-prime-video-audio-video-monitoring-service-and-reducing-costs-by-90) — the original 2023 engineering case; explains the high-volume data-transfer and orchestration bottlenecks behind the team-specific result.
+- [Stack Overflow: The Architecture — 2016 Edition](https://nickcraver.com/blog/2016/02/17/stack-overflow-the-architecture-2016-edition/) — primary historical account of the web tier, data systems, traffic, redundancy, and nine-primary-server figure.
+
+### ByteByteGo provenance
+
+- [Prime Video monitoring service](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/amazon-prime-video-monitoring-service.md) — editorial lead for the collocation case; the 90% result is kept explicitly scoped to that service.
+- [Designing Stack Overflow](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/how-will-you-design-the-stack-overflow-website.md) — provenance for the 2016 case visual; server counts are labeled historical rather than current.

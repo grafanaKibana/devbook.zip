@@ -57,114 +57,9 @@ flowchart LR
 - Prefer asynchronous for cross-domain workflows and side effects.
 - Avoid deep synchronous chains (`A -> B -> C -> D`) on critical paths.
 
-## .NET implementation notes
-**Service boundaries with ASP.NET Core Minimal APIs**
-```csharp
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
+## Implementation and operations
 
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddOpenApi();
-builder.Services.AddHealthChecks()
-    .AddCheck("self", () => HealthCheckResult.Healthy(), tags: new[] { "live" })
-    .AddCheck("database", () => HealthCheckResult.Healthy(), tags: new[] { "ready" });
-
-var app = builder.Build();
-
-app.MapGet("/orders/{id:guid}", async (Guid id, IOrderRepository repo) =>
-{
-    var order = await repo.GetByIdAsync(id);
-    return order is null ? Results.NotFound() : Results.Ok(order);
-});
-
-app.MapPost("/orders", async (CreateOrderRequest request, IOrderService service) =>
-{
-    var result = await service.CreateAsync(request);
-    return Results.Created($"/orders/{result.OrderId}", result);
-});
-
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
-
-app.MapHealthChecks("/health/live", new HealthCheckOptions
-{
-    Predicate = check => check.Tags.Contains("live")
-});
-
-app.MapHealthChecks("/health/ready", new HealthCheckOptions
-{
-    Predicate = check => check.Tags.Contains("live") || check.Tags.Contains("ready")
-});
-
-app.Run();
-```
-- `AddOpenApi`/`MapOpenApi` comes from `Microsoft.AspNetCore.OpenApi`.
-- If missing in your service project, add it with:
-
-```bash
-dotnet add package Microsoft.AspNetCore.OpenApi
-```
-- Keep each service API focused on its own bounded context.
-- Version contracts intentionally; prefer backward-compatible evolution.
-- If `AddOpenApi` is enabled, expose OpenAPI in development only.
-
-**Service discovery**
-- In Kubernetes, discovery is usually DNS-based (`inventory-service.default.svc.cluster.local`).
-- Outside Kubernetes, use platform-native discovery or a registry.
-- Apply timeouts on all outbound calls, retries with jitter only for idempotent operations (or with idempotency keys), and circuit breakers where appropriate.
-
-**Health checks and readiness**
-- Keep liveness cheap (process-level signal) and avoid dependency checks there.
-- Put dependency checks in readiness so traffic is removed without restarting healthy processes.
-
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: orders-service
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: orders-service
-  template:
-    metadata:
-      labels:
-        app: orders-service
-    spec:
-      containers:
-        - name: orders
-          image: myregistry/orders-service:1.0.0
-          env:
-            - name: ASPNETCORE_HTTP_PORTS
-              value: "8080"
-          ports:
-            - containerPort: 8080
-          startupProbe:
-            httpGet:
-              path: /health/live
-              port: 8080
-            periodSeconds: 5
-            failureThreshold: 12
-          livenessProbe:
-            httpGet:
-              path: /health/live
-              port: 8080
-          readinessProbe:
-            httpGet:
-              path: /health/ready
-              port: 8080
-```
-
-**Containers and orchestration**
-- Package each service as its own Docker image.
-- Use Kubernetes for scheduling, scaling, rollout, and service discovery.
-- Standardize OpenTelemetry, structured logs, and correlation IDs.
-
+An independently deployable service can run in a container, virtual machine, managed application platform, or function/container service. Docker and Kubernetes are optional delivery mechanisms, not defining properties of microservices. [[Microservices Operations]] owns the .NET hosting, deployment, health, discovery, telemetry, rollback, and Kubernetes guidance.
 ## Microservices vs monolith vs modular monolith
 | Dimension | [[Monolith Architecture\|Monolith]] | [[Modular Monolith]] | Microservices |
 |---|---|---|---|
@@ -177,12 +72,55 @@ spec:
 
 [[Monolith Architecture]] is usually the best starting point when boundaries are still evolving and operational maturity is limited.
 
-**Migration path: start monolith, then extract**
-1. Start with a modular monolith and enforce boundaries internally.
-2. Measure release bottlenecks, scale asymmetry, and team contention.
-3. Extract one bounded context with clear API contracts and isolated data ownership.
-4. Keep extraction incremental; avoid big-bang rewrites.
-5. Repeat only when another boundary has clear business pressure.
+## Migration boundary
+
+[[Microservices Migration]] owns the staged extraction path, data cutover, rollback gates, and evidence required to prove delivery independence. The action visuals remain here as provenance for the historical Airbnb case.
+
+![[System Design 101/b9f01827e4bd9750c1373fc521401b109579dc9ea8ad15ec341d2cc393c70e1a.png]]
+
+Airbnb's multi-year evolution supports incremental extraction under measured organizational and scaling pressure, not a fixed service-count target.
+
+![[System Design 101/e02d3f2aec1fc038ce099b7ff1093637040adf8f701e7cb6585bd6b805c05754.jpg]]
+
+Later use of both microservices and larger macroservices reinforces that service size follows ownership and change coupling.
+
+## Boundaries and delivery independence
+
+A service boundary is credible only when one team can change, test, deploy, roll back, and operate it without a lockstep release. Shared writable tables, paired deployments, or a mandatory long synchronous chain produce a distributed monolith even when processes run separately.
+
+![[System Design 101/3d6ca99f3ca6f859b57019017474ce9cef54b0d9a9c3cd7d9c100db2ed4bd707.png]]
+
+This capability map is a menu, not a mandatory topology. Gateways, meshes, containers, and separate databases support particular operating constraints; they do not create sound domain boundaries.
+
+![[System Design 101/4f307656dcd815ca1f070bfefab9e30ed94e2c0db32ffd2866710c13d0efc179.png]]
+
+Ownership, explicit failure behavior, and cross-boundary telemetry are the baseline. [[Microservices Operations]] owns the deployment, discovery, health, rollback, and observability contract.
+
+## Production platform capabilities are conditional
+
+![[System Design 101/3fb5b89e47761e9fe1da86003020b0a6e6d8fe57ff21e0955ef2869573abd33a.png]]
+
+The pictured components are optional capabilities selected by observed failure modes and platform constraints. They are not prerequisites for calling a system microservices.
+
+## Workflow ownership: orchestration versus choreography
+
+Both styles can implement the same checkout, but they place workflow state differently.
+
+| Question | Orchestration | Choreography |
+|---|---|---|
+| Who knows the next step? | A process manager | Each event consumer |
+| Where is workflow state? | Explicit orchestrator state | Distributed across services and the event log |
+| Failure recovery | Central retry and compensation policy | Each consumer owns retry; compensations emerge from events |
+| Operational cost | Coordinator availability and throughput | Subscription graph, traceability, and contract governance |
+| Best fit | Ordered, auditable workflows with compensation | Independent reactions and fan-out |
+
+For `Charge -> Reserve -> Ship`, orchestration makes incomplete state and compensation visible. For `OrderPlaced -> email + analytics + search indexing`, choreography avoids a coordinator that adds no business decision. Mixing them is normal: orchestrate the transaction and publish facts for independent reactions.
+
+## When microservices are the wrong fit
+
+Prefer a modular monolith when the domain boundaries are changing weekly, one team owns the whole product, deployments are not blocking each other, or the team cannot operate distributed tracing, on-call ownership, and asynchronous consistency. Microservices turn compile-time coupling into network and operational coupling; they do not remove coordination for free.
+
+A concrete stop rule: if extracting `Catalog` creates a separate pipeline, datastore, dashboard, pager, and compatibility contract but releases remain coordinated with the monolith, the extraction has added cost without delivery independence. Restore the module boundary in-process and revisit it when a measured constraint changes.
 
 ## Pitfalls
 **1) Distributed monolith**
@@ -207,7 +145,7 @@ spec:
 
 ## Questions
 > [!QUESTION]- Why can microservices lead to distributed data consistency problems, and how do you address them?
-> - Each service owns its data, so cross-service business actions cannot rely on one ACID transaction.
+> - Each service owns its data, so cross-service business actions cannot assume one local ACID transaction. A distributed transaction can coordinate supported resources, but its coupling, latency, and recovery costs make sagas and local transactions the usual design.
 > - A later step can fail after an earlier local commit, producing partial state.
 > - Use sagas with compensating actions across local transactions.
 > - Use outbox/inbox and idempotent handlers to survive retries and duplicates.
@@ -226,3 +164,19 @@ spec:
 - [.NET Microservices: Architecture for Containerized .NET Applications](https://learn.microsoft.com/en-us/dotnet/architecture/microservices/) — official Microsoft .NET guidance.
 - [Default ASP.NET Core port changed from 80 to 8080](https://learn.microsoft.com/en-us/dotnet/core/compatibility/containers/8.0/aspnet-port) — container port behavior in modern ASP.NET Core images.
 - [Building Microservices (2nd Edition) — Sam Newman](https://samnewman.io/books/building_microservices_2nd_edition/) — practical production lessons on boundaries and migration.
+- [Decompose by business capability](https://microservices.io/patterns/decomposition/decompose-by-business-capability.html) — pattern reference for assigning cohesive business ownership instead of splitting by technical layer.
+- [Strangler Fig pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/strangler-fig) — Microsoft guidance for incremental replacement while the existing system keeps serving traffic.
+- [OpenTelemetry context propagation](https://opentelemetry.io/docs/concepts/context-propagation/) — official trace-context model for correlating work across service and messaging boundaries.
+- [Saga distributed transactions](https://learn.microsoft.com/en-us/azure/architecture/reference-architectures/saga/saga) — Microsoft reference for orchestration, choreography, compensation, and their operational tradeoffs.
+- [Airbnb's Great Migration](https://www.infoq.com/presentations/airbnb-services/) — Jessica Tai's case study of Airbnb's service migration and the organizational constraints behind it.
+
+### ByteByteGo provenance
+
+- [Airbnb architectural evolution](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/airbnb-artchitectural-evolution.md) — editorial lead for the staged extraction case; company-specific scale claims are treated as dated context.
+- [Typical microservice architecture](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/what-does-a-typical-microservice-architecture-look-like.md) — provenance for the conditional topology map.
+- [Production microservice components](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/9-essential-components-of-a-production-microservice-application.md) — provenance for the platform-capability map; "essential" is not adopted as a universal claim.
+- [Orchestration versus choreography](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/orchestration-vs-choreography-microservices.md) — provenance for the symmetric workflow comparison.
+- [Microservice development practices](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/9-best-practices-for-developing-microservices.md) — editorial lead for delivery independence; its prescriptive visual was rejected.
+- [Is microservice architecture the silver bullet?](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/is-microservice-architecture-the-silver-bullet.md) — provenance for the wrong-fit decision rule.
+- [Evolution of Airbnb's microservices](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/evolution-of-airbnb%27s-microservice.md) — editorial lead for the microservice and macroservice case.
+- [Building microservices practices](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/9-best-practices-for-building-microservices.md) — provenance for the ownership, discovery, failure, and observability checklist.

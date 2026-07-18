@@ -13,7 +13,7 @@ publish: true
 
 # Intro
 
-An API Gateway is a single entry point between external clients and a set of backend services. It centralizes cross-cutting concerns such as request routing, authentication and authorization enforcement, rate limiting, TLS termination, and traffic policies so individual services do not have to re-implement them. This matters because it gives you one place to enforce consistency and security while keeping clients simpler, especially when each client would otherwise need to call many services directly. You reach for it when you have microservices with multiple consumer types, or when you want a BFF approach where each client family gets an API surface tailored to its needs.
+An API Gateway is a single entry point between external clients and a set of backend services. It centralizes cross-cutting concerns such as request routing, authentication and authorization enforcement, rate limiting, TLS termination, and traffic policies so individual services do not have to re-implement them. This matters because it gives you one place to enforce consistency and security while keeping clients simpler, especially when each client would otherwise need to call many services directly.
 
 In .NET ecosystems, a common implementation is to run a reverse proxy gateway at the system edge and keep service-level business behavior inside domain services.
 
@@ -35,6 +35,35 @@ flowchart LR
 - **[[Circuit Breaker|Circuit breaking]] and resiliency policies**: Fail fast when a downstream is unhealthy and apply retries or fallback only where safe.
 - **TLS termination**: Offload certificate handling and HTTPS policy enforcement from every backend service.
 - **[[Observability]]**: Emit centralized logs, traces, metrics, and correlation IDs for end-to-end troubleshooting.
+
+### Routing, policy enforcement, composition, and failure boundary
+
+Trace `GET /mobile/orders/42` through the edge:
+
+1. Terminate TLS and enforce request-size and protocol limits.
+2. Authenticate the caller and apply a coarse-grained route policy.
+3. Rate-limit by tenant or credential before consuming downstream capacity.
+4. Route to `Orders`, or fan out to `Orders`, `Payments`, and `Shipping` for a mobile projection.
+5. Propagate trace and cancellation context; cap every downstream timeout inside the client deadline.
+6. Return a bounded response: complete, explicitly partial, or failed. Never silently omit a failed dependency.
+
+Routing and policy are common gateway duties. Composition, response caching, transformation, retries, and circuit breaking are optional because each concentrates more state, latency, and failure at the gateway. A fan-out endpoint with three independent 99.9% dependencies has lower end-to-end availability than any one dependency unless it can degrade safely.
+
+### Reverse proxy, gateway, and load balancer capability overlap
+
+![[System Design 101/f8408b96b2c46ddbccb453ca0dff9728562f83739c8511892d4f9e081b8935e8.png]]
+
+The image shows archetypal roles, not mutually exclusive products. NGINX, Envoy, YARP, and cloud gateways can combine several columns.
+
+| Capability | Reverse proxy | API gateway | Load balancer |
+|---|---|---|---|
+| Hide backend addresses and terminate TLS | Common | Common | Common for proxy load balancers |
+| Route by host, path, or header | Common at L7 | Core | L7 only |
+| Auth, quotas, API keys, contract lifecycle | Possible with modules | Core | Usually outside scope |
+| Compose multiple APIs | Possible in custom code | Optional | Outside scope |
+| Health-aware distribution across equivalent instances | Possible | Often delegated or built in | Core |
+
+Choose the failure boundary deliberately. A global edge proxy affects all routes; a domain gateway affects one bounded context; a per-service load balancer affects one replica pool. Product names do not define the blast radius — topology and ownership do.
 
 ## Patterns
 
@@ -71,74 +100,17 @@ Benefit:
 
 ### BFF (Backend for Frontend)
 
-Separate gateways or gateway routes per client type (web, mobile, partner API) when each has different payload, latency, or auth requirements.
+Separate gateways or route sets per client type only when payload, authentication, latency, or ownership needs have materially diverged. [[Backend for Frontend and API Federation]] owns the client-specific composition and federated ownership tradeoffs.
 
-Why this is useful:
+### Netflix API evolution: aggregation to federation
 
-- Web clients might need richer payloads.
-- Mobile clients might need smaller aggregated responses.
-- Partner APIs often need stricter contract stability and separate throttling.
+![[System Design 101/3e1b2b8d87fdc6b1e589b34ba270f8497c314218e558b304c60ad21a3bcaec42.png]]
 
-## .NET Implementation (YARP)
+The visual compresses distinct systems into an evolution story. The durable point is that federation redistributes schema and resolver ownership toward domains while a shared registry and graph gateway retain composition and execution responsibilities. See [[Backend for Frontend and API Federation]] for the full boundary and operating tradeoffs.
 
-For .NET, YARP (Yet Another Reverse Proxy) is a Microsoft-maintained reverse proxy library (`Yarp.ReverseProxy`) that you can use as the core of an API gateway.
+## .NET gateway implementation
 
-Minimal `appsettings.json` routing and cluster example:
-
-```json
-{
-  "ReverseProxy": {
-    "Routes": {
-      "orders-route": {
-        "ClusterId": "orders-cluster",
-        "Match": {
-          "Path": "/api/orders/{**catch-all}"
-        }
-      },
-      "catalog-route": {
-        "ClusterId": "catalog-cluster",
-        "Match": {
-          "Path": "/api/catalog/{**catch-all}"
-        }
-      }
-    },
-    "Clusters": {
-      "orders-cluster": {
-        "Destinations": {
-          "orders-d1": {
-            "Address": "https://orders-service.internal/"
-          }
-        }
-      },
-      "catalog-cluster": {
-        "Destinations": {
-          "catalog-d1": {
-            "Address": "https://catalog-service.internal/"
-          }
-        }
-      }
-    }
-  }
-}
-```
-
-Minimal registration in ASP.NET Core:
-
-```csharp
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Services
-    .AddReverseProxy()
-    .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
-
-var app = builder.Build();
-
-app.MapReverseProxy();
-
-app.Run();
-```
-
-YARP composes well with ASP.NET Core middleware and observability tooling. Ocelot is a known alternative and can be a pragmatic fit in teams already invested in its ecosystem.
+YARP provides configurable routes, clusters, transforms, destination health, and ASP.NET Core extension points. [[YARP API Gateway]] contains the focused configuration and production boundary; the gateway pattern itself is independent of the chosen proxy library.
 
 ## Gateway vs Service Mesh
 
@@ -185,9 +157,6 @@ Rule of thumb:
 > [!QUESTION]- How do you design gateway aggregation endpoints for client efficiency, and what do you keep out of the gateway?
 > Use gateway routing for normal traffic and add a few targeted aggregation endpoints where a client — usually mobile — would otherwise make five round trips for one screen. The gateway composes those reads and tunes the payload, but it stays thin: auth, throttling, routing, transformation, observability, and nothing else. Business rules, transactions, and domain invariants live in the backend services, with correlation IDs flowing across the fan-out so you can trace a slow screen. The line to hold: aggregation is response-shaping, not orchestration — the moment decision logic creeps in, you have a distributed monolith.
 
-> [!QUESTION]- When would you choose a single API gateway versus a BFF approach?
-> A single gateway is simpler to run and the right default when clients have similar needs and ship on a shared cadence. Reach for BFF — a gateway or route set per client type — when web, mobile, and partner clients want materially different payloads, auth, or latency profiles, or when separate teams own them and want deployment autonomy. The catch is operational: every extra gateway is one more thing to deploy, monitor, and secure. Start with one and split to BFF only when client divergence or team boundaries actually justify the cost.
-
 > [!QUESTION]- Where do API Gateway and service mesh responsibilities belong in one architecture?
 > They handle different traffic planes, so they sit side by side rather than compete. The gateway owns north-south traffic — clients entering the system — so edge auth, TLS termination, external rate limits, and API surface control belong there. The mesh owns east-west traffic between internal services: mTLS, retries, traffic shifting, and per-service telemetry. The gateway guards the front door; the mesh governs the hallways.
 
@@ -198,3 +167,10 @@ Rule of thumb:
 - [YARP GitHub repository](https://github.com/dotnet/yarp) — source code, samples, and issue tracker for the YARP project.
 - [Ocelot documentation](https://ocelot.readthedocs.io/en/latest/) — configuration reference for the Ocelot .NET API gateway including routing, authentication, and rate limiting.
 - [Microservices.io — API Gateway pattern (Chris Richardson)](https://microservices.io/patterns/apigateway.html) — pattern catalog entry covering API gateway vs BFF, forces, and consequences in microservices architectures.
+- [How Netflix scales its API with GraphQL Federation](https://medium.com/netflix-techblog/how-netflix-scales-its-api-with-graphql-federation-part-1-ae3557c187e2) — Netflix's primary account of the unified aggregation layer, domain graph services, schema registry, and graph gateway.
+
+### ByteByteGo provenance
+
+- [API gateway 101](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/api-gateway-101.md) — editorial lead for the request trace; its stale product infographic was rejected.
+- [Reverse proxy versus API gateway versus load balancer](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/reverse-proxy-vs-api-gateway-vs-load-balancer.md) — provenance for the role visual, qualified by capability overlap.
+- [Evolution of the Netflix API architecture](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/evolution-of-the-netflix-api-architecture.md) — editorial lead for the simplified evolution case, grounded in Netflix's federation write-up.

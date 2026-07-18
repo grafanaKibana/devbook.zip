@@ -36,7 +36,7 @@ Stores self-contained documents (JSON/BSON), each a nested tree of fields. The d
 
 The simplest model: a giant distributed hash map of `key → opaque value`. O(1) get/put by key, no querying *inside* the value. Often in-memory.
 
-- **Examples**: Redis, DynamoDB (core), Memcached, etcd.
+- **Examples**: [[Redis]], DynamoDB (core), Memcached, etcd.
 - **Best for**: caching ([[Home/Data Persistence/Caching|Caching]]), sessions, feature flags, rate-limit counters, leaderboards.
 - **Constraint**: you can only fetch by key — design the key (and any secondary-index tables) around your access patterns up front.
 
@@ -48,13 +48,17 @@ Rows are identified by a partition key and hold a flexible, sparse set of column
 - **Best for**: time-series, event logs, IoT/sensor data, high-write feeds at petabyte scale.
 - **Model rule**: **query-first design** — you model one table *per query*, denormalizing aggressively, because there are no joins and cross-partition scans are expensive (echoes [[Sharding|sharding's]] shard-key discipline).
 
+Discord's message store shows the rule under real load. Messages are read by channel and time, so the storage key must keep that access path local instead of scattering one channel across the cluster. Discord moved from Cassandra to ScyllaDB after operational pain around hot partitions, garbage collection, and repairs; the lesson is not that one wide-column engine always wins, but that partition shape and node behavior dominate at trillions of rows.
+
+![[System Design 101/e6cc56c88d16cbc5e9987e3b83be6913c9b4f0b07880ad80cb59248242f23d62.png]]
+
 ### Graph
 
 Stores **nodes** and **edges** as first-class citizens, making relationship traversal cheap. A query like "friends-of-friends who like X" is a local walk, not an exploding chain of joins.
 
 - **Examples**: Neo4j, Amazon Neptune, JanusGraph.
 - **Best for**: social networks, recommendations, fraud rings, knowledge graphs, network/IT topology.
-- **Why not SQL**: deep multi-hop traversals are O(joins) in relational stores but O(edges visited) in a graph DB — the difference between seconds and milliseconds.
+- **Why not SQL**: a deep or unpredictable traversal in a relational database requires repeated joins, index probes, and intermediate rows. A graph engine can keep adjacency relationships close to the node being expanded, reducing lookup and materialization work when the walk is selective. Both still pay for the edges they visit, and SQL can win for set-based aggregates, integrity constraints, and well-indexed fixed-depth joins; the deciding factors are traversal depth, selectivity, data locality, cache state, and the available indexes.
 
 ## Comparison
 
@@ -64,6 +68,10 @@ Stores **nodes** and **edges** as first-class citizens, making relationship trav
 | **Key-Value** | Key only | Raw speed, simplicity | Querying value contents | Redis, DynamoDB |
 | **Wide-Column** | Partition + clustering key | Write throughput at scale | Ad-hoc queries, cross-partition joins | Cassandra |
 | **Graph** | Traversal from a node | Deep relationship queries | Bulk aggregate scans | Neo4j |
+
+## Time-Series Workloads
+
+A time-series workload is append-heavy and reads ordered ranges by series and time. The important boundary is not “contains timestamps”; it is whether cardinality, compression, retention, and time-window aggregation have become the dominant storage costs. [[Time-Series Databases]] owns the series model, partitioning, rollups, late data, and the workload-selector diagram.
 
 ## Pitfalls
 
@@ -98,3 +106,7 @@ Stores **nodes** and **edges** as first-class citizens, making relationship trav
 - [Designing Data-Intensive Applications, Ch. 2 (Martin Kleppmann)](https://dataintensive.net/) — relational vs document vs graph data models compared in depth.
 - [How Discord Stores Trillions of Messages (Discord Engineering)](https://discord.com/blog/how-discord-stores-trillions-of-messages) — production wide-column case study: Cassandra → ScyllaDB, and why the LSM-Tree/SSTable engine underneath matters at that scale.
 - [Scaling Time Series Data Storage — Part I (Netflix Tech Blog)](https://netflixtechblog.com/scaling-time-series-data-storage-part-i-ec2b6d44ba39) — Netflix's wide-column (Cassandra) time-series design, a concrete slice of their polyglot-persistence stack.
+- [Prometheus data model](https://prometheus.io/docs/concepts/data_model/) — authoritative definition of a time series as a metric name plus label set and timestamped samples.
+- [Choose a database for a metric collecting system (ByteByteGo, pinned source)](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/choose-the-right-database-for-metric-collecting-system.md) — visual access-pattern selector, used here with an explicit cardinality and scale boundary.
+- [Time-series database in 20 lines (ByteByteGo, pinned source)](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/time-series-db-tsdb-in-20-lines.md) — compact editorial model of time-series ingestion and queries; its engine-specific infographic is intentionally omitted.
+- [How Discord stores trillions of messages (ByteByteGo, pinned source)](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/how-discord-stores-trillions-of-messages.md) — condensed production case, paired above with Discord's primary engineering account.

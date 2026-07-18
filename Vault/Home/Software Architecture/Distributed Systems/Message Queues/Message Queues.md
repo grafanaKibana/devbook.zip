@@ -9,7 +9,7 @@ tags:
 publish: true
 priority: High
 level:
-  - '2'
+  - "3"
 status: Done
 ---
 
@@ -78,76 +78,9 @@ flowchart LR
 - Limit in-flight work using prefetch/QoS.
 - Track queue depth, lag, and oldest-message age to avoid memory and latency collapse.
 
-## Concrete .NET example (Webhook -> Queue -> Worker)
+## .NET worker implementation
 
-Common webhook pattern: acknowledge HTTP quickly, enqueue durable work, then process asynchronously with idempotent handlers.
-
-```csharp
-public sealed class WebhookController : ControllerBase
-{
-    private readonly IMessagePublisher _publisher;
-
-    public WebhookController(IMessagePublisher publisher)
-    {
-        _publisher = publisher;
-    }
-
-    [HttpPost("/webhooks/provider")]
-    public async Task<IActionResult> Receive([FromBody] ProviderWebhook payload, CancellationToken ct)
-    {
-        var envelope = new WebhookEnvelope(
-            messageId: payload.EventId,
-            occurredAtUtc: DateTimeOffset.UtcNow,
-            eventType: payload.Type,
-            body: payload);
-
-        await _publisher.PublishAsync("webhooks.incoming", envelope, ct);
-        return Accepted();
-    }
-}
-
-public sealed class WebhookWorker
-{
-    private readonly IIdempotencyStore _idempotency;
-    private readonly IBusinessHandler _handler;
-
-    public async Task HandleAsync(WebhookEnvelope message, IAckContext ack, CancellationToken ct)
-    {
-        await using var tx = await _handler.BeginTransactionAsync(ct);
-
-        try
-        {
-            // Interfaces are conceptual; reserve inside the transaction boundary.
-            var state = await _idempotency.TryReserveAsync(message.MessageId, tx, ct);
-            if (state == ReservationState.Completed)
-            {
-                await tx.RollbackAsync(ct);
-                await ack.AckAsync(ct);
-                return;
-            }
-
-            if (state == ReservationState.InProgress)
-            {
-                await tx.RollbackAsync(ct);
-                await ack.NackForRetryAsync(ct);
-                return;
-            }
-
-            await _handler.ProcessAsync(message, tx, ct);
-            await _idempotency.MarkCompletedAsync(message.MessageId, tx, ct);
-            await tx.CommitAsync(ct);
-            await ack.AckAsync(ct);
-        }
-        catch
-        {
-            await tx.RollbackAsync(ct);
-            await ack.NackForRetryAsync(ct);
-            return;
-        }
-    }
-}
-```
-
+[[NET Message Queue Workers]] owns the full receive-handle-acknowledge boundary, including idempotent state changes, bounded retry, shutdown, and dead-letter ordering. The durable rule is short: acknowledge only after the business effect or owned quarantine record is committed.
 ## .NET platform choices
 
 Use [[RabbitMQ]] for routing-heavy queues and latency-sensitive tasks. Use [[Kafka]] for replayable event streams. Use Azure Service Bus for managed messaging with queues/topics and dead-lettering.
@@ -162,6 +95,36 @@ Use [[RabbitMQ]] for routing-heavy queues and latency-sensitive tasks. Use [[Kaf
 - `IDistributedCache` is not a queue.
 - Cache stores key-value state; queues store ordered work items/events with ack/retry semantics.
 
+## Delivery attempts, processing effects, and idempotency
+
+Broker guarantees describe delivery attempts at a boundary; they do not automatically guarantee business effects. An at-least-once broker may redeliver after a consumer commits `ChargeCustomer` but crashes before acknowledgement. The second attempt is correct broker behavior and a dangerous duplicate unless the charge operation uses a stable idempotency key.
+
+| Broker behavior | Consumer sequence | Result |
+|---|---|---|
+| At-most-once | Acknowledge, then process | A crash can lose work |
+| At-least-once | Process, then acknowledge | A crash can repeat work |
+| Transactional broker scope | Atomically consume and publish inside one broker | External database or HTTP effects remain outside that transaction |
+
+For `InvoicePaid { EventId = 91, InvoiceId = 42 }`, reserve `EventId=91` with a unique constraint in the same database transaction that marks invoice 42 paid. A redelivery then observes the completed reservation and acknowledges without applying the transition twice. This produces one durable effect even though delivery was attempted more than once.
+
+## Messaging patterns
+
+Choose a pattern from ownership and fan-out, not from broker terminology:
+
+- **Competing consumers:** several workers share one logical subscription; each message is handled by one worker. Use it to scale image processing.
+- **Publish/subscribe:** each subscription receives the event independently. Use it when `OrderPlaced` drives billing, email, and analytics.
+- **Request/reply:** a request carries a correlation ID and a reply address. Use it only when asynchronous transport is required but the caller still needs a response; it preserves temporal coupling.
+- **Priority queue:** urgent work is selected first. Guard against starvation and do not assume every broker offers strict priority.
+- **Dead-letter channel:** terminally failed messages leave the hot path with failure metadata and an owned replay process.
+- **Claim check:** store a large payload in object storage and send its identifier, checksum, and authorization context through the broker.
+
+Patterns combine. A video upload can publish a claim-check message to a competing-consumer queue, then emit `VideoProcessed` to multiple subscribers.
+
+## Choosing a broker
+
+![[System Design 101/6cfe944116519663da3149d9783b6dfb18c7051528250a9d2143433efe5446c9.png]]
+
+Choose from replay, routing, ordering, delivery, retention, managed-service, and operating requirements. [[Message Broker Selection]] compares [[Kafka]], [[RabbitMQ]], [[MSMQ]], and managed alternatives without treating broker families as a supersession sequence.
 ## Pitfalls
 
 - **1) Ordering assumptions across partitions**
@@ -209,11 +172,22 @@ Use [[RabbitMQ]] for routing-heavy queues and latency-sensitive tasks. Use [[Kaf
 
 ## References
 
-- [RabbitMQ Documentation](https://www.rabbitmq.com/docs)
-- [Apache Kafka Documentation](https://kafka.apache.org/documentation/)
-- [Microsoft - Queue-based load leveling](https://learn.microsoft.com/azure/architecture/patterns/queue-based-load-leveling)
-- [Microsoft - Service Bus dead-letter queues](https://learn.microsoft.com/azure/service-bus-messaging/service-bus-dead-letter-queues)
-- [Microsoft - Service Bus locks and settlement](https://learn.microsoft.com/azure/service-bus-messaging/message-transfers-locks-settlement)
-- [RabbitMQ Documentation - Dead Letter Exchanges](https://www.rabbitmq.com/docs/dlx)
-- [RabbitMQ Documentation - Time-to-Live and Expiration](https://www.rabbitmq.com/docs/ttl)
-- [Martin Kleppmann - Should You Put Several Event Types in the Same Kafka Topic?](https://martin.kleppmann.com/2018/01/18/event-types-in-kafka-topic.html)
+- [RabbitMQ Documentation](https://www.rabbitmq.com/docs) — official queue, exchange, acknowledgement, routing, and operation model.
+- [Apache Kafka Documentation](https://kafka.apache.org/documentation/) — official topic, partition, replication, consumer-group, and retention model.
+- [Microsoft - Queue-based load leveling](https://learn.microsoft.com/azure/architecture/patterns/queue-based-load-leveling) — pattern for buffering demand so consumers process at a sustainable rate.
+- [Microsoft - Service Bus dead-letter queues](https://learn.microsoft.com/azure/service-bus-messaging/service-bus-dead-letter-queues) — official dead-letter reasons, retention, and operator responsibilities.
+- [Microsoft - Service Bus locks and settlement](https://learn.microsoft.com/azure/service-bus-messaging/message-transfers-locks-settlement) — official receive-lock, completion, abandonment, and redelivery boundary.
+- [RabbitMQ Documentation - Dead Letter Exchanges](https://www.rabbitmq.com/docs/dlx) — official dead-letter routing and policy behavior.
+- [RabbitMQ Documentation - Time-to-Live and Expiration](https://www.rabbitmq.com/docs/ttl) — official per-message and per-queue expiration behavior.
+- [Martin Kleppmann - Should You Put Several Event Types in the Same Kafka Topic?](https://martin.kleppmann.com/2018/01/18/event-types-in-kafka-topic.html) — tradeoffs for topic boundaries, ordering, and consumer subscription.
+- [RabbitMQ consumer acknowledgements](https://www.rabbitmq.com/docs/confirms) — official acknowledgement, redelivery, and publisher-confirm boundaries.
+- [Amazon SQS visibility timeout](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html) — official explanation of redelivery when processing outlives or loses a visibility lease.
+- [Azure Architecture Center messaging choices](https://learn.microsoft.com/en-us/azure/architecture/guide/technology-choices/messaging) — requirements-based comparison of queues, streams, and managed messaging services.
+- [Enterprise Integration Patterns](https://www.enterpriseintegrationpatterns.com/patterns/messaging/) — canonical definitions for competing consumers, request/reply, dead-letter channel, and claim check.
+
+### ByteByteGo provenance
+
+- [Delivery semantics](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/delivery-semantics.md) — editorial lead for separating delivery attempts from durable effects; its misleading visual was rejected.
+- [Types of message queue](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/types-of-message-queue.md) — provenance for workload-first broker selection; its defective taxonomy visual was rejected.
+- [Cloud messaging patterns](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/top-6-cloud-messaging-patterns.md) — provenance for the pattern set; its inaccurate visual was rejected.
+- [Message queue architecture evolution](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/how-do-message-queue-architectures-evolve.md) — provenance for the broker-family visual, explicitly not treated as a supersession sequence.

@@ -35,7 +35,9 @@ Server flow:
 1. Read `Idempotency-Key`.
 2. Lookup key in a durable store.
 3. If key exists and request fingerprint matches, return stored response.
-4. If key does not exist, process exactly once, persist response, and bind response to key.
+4. If the key does not exist, atomically insert `Pending` with the request fingerprint.
+5. Apply the domain effect and transition `Pending -> Completed(response)` in one declared transaction when both live in the same database.
+6. If the effect crosses a resource boundary, persist an explicit intermediate or unknown state and use that resource's own idempotency/reconciliation contract.
 
 This turns ambiguous network outcomes into deterministic behavior for retries.
 
@@ -62,18 +64,24 @@ CREATE TABLE payments (
 sequenceDiagram
     participant Client
     participant Api
-    participant KeyStore
+    participant Database
     participant Domain
     Client->>Api: Send request with key
-    Api->>KeyStore: Check key
-    KeyStore-->>Api: Key missing
-    Api->>Domain: Process operation
-    Domain-->>Api: Result ready
-    Api->>KeyStore: Save key and result
+    Api->>Database: INSERT key, fingerprint, Pending
+    Database-->>Api: Reserved or existing state
+    alt Newly reserved
+        Api->>Domain: Apply operation inside declared transaction
+        Domain->>Database: Persist effect and Completed response atomically
+        Database-->>Api: Commit succeeds
+    else Existing Completed
+        Database-->>Api: Return stored response
+    else Existing Pending or Unknown
+        Database-->>Api: Return in-progress or reconcile
+    end
     Api-->>Client: Return result
     Client->>Api: Retry with same key
-    Api->>KeyStore: Check key
-    KeyStore-->>Api: Key found with result
+    Api->>Database: Read reserved state
+    Database-->>Api: Completed with stored result
     Api-->>Client: Return cached result
 ```
 
@@ -91,160 +99,21 @@ Interview critical distinction:
 
 Even with idempotent methods, distributed replicas can still show temporary divergence depending on [[Consistency Models]], so method semantics and system consistency level are separate concerns.
 
-## .NET Implementation Example
+## Payment implementation boundary
 
-Example below uses ASP.NET Core .NET 8 with PostgreSQL and an external payment gateway. It handles duplicate concurrent requests by inserting an idempotency row first under a unique key and reusing a cached response on retries.
+Payment endpoints need a durable local attempt and a provider that honors the same idempotency key. The provider call must run outside local database transactions, and timeouts must be represented as unknown outcomes rather than rolled-back evidence. [[Payment Idempotency]] owns the complete reserve-call-reconcile sequence and the narrow effect guarantee.
+## Common Applications
 
-```sql
-CREATE TABLE api_idempotency (
-    idempotency_key TEXT PRIMARY KEY,
-    request_hash TEXT NOT NULL,
-    status_code INT,
-    response_json JSONB,
-    state TEXT NOT NULL,
-    created_utc TIMESTAMPTZ NOT NULL,
-    expires_utc TIMESTAMPTZ NOT NULL
-);
-```
+| Case | Operation identity | Duplicate effect to prevent | Dedupe and atomic boundary | Returned result | Retention |
+|---|---|---|---|---|---|
+| Public API `POST` | Tenant + endpoint + `Idempotency-Key` + request hash | Two resources or external calls | Unique key record committed before the operation; store completion with response | Replay the original status and body; reject same key with different hash | At least the documented client retry window |
+| Payment charge | Merchant + payment attempt ID | Double charge | Local payment-attempt row plus the same provider idempotency key | Same payment ID and terminal/pending state | Through charge, dispute, and reconciliation horizon |
+| Order command | Order ID + command ID | Duplicate state transition or inventory reservation | Inbox row and order transition in one transaction | Existing order version and outcome | Longer than broker redelivery and replay retention |
+| Account balance | Account + ledger entry ID | Double credit or debit | Unique immutable ledger entry in the ledger transaction | Existing ledger entry and resulting balance/version | Permanent financial record |
+| Database import | Source dataset + source row/version | Duplicate entity or repeated update | Unique source identity or upsert constraint with version check | Existing/upserted entity identity | Source replay and backfill horizon |
+| Message consumer | Subscriber + event ID | Repeated email, shipment, or projection update | Consumer inbox and business write in one transaction; acknowledge afterward | Usually acknowledgement; optionally stored processing outcome | Broker retention plus operational replay window |
 
-```csharp
-using System.Security.Cryptography;
-using System.Text;
-using System.Text.Json;
-using Dapper;
-using Npgsql;
-
-var builder = WebApplication.CreateBuilder(args);
-var app = builder.Build();
-
-app.MapPost("/payments", async (HttpContext http, NpgsqlDataSource dataSource, CancellationToken ct) =>
-{
-    var key = http.Request.Headers["Idempotency-Key"].ToString();
-    if (string.IsNullOrWhiteSpace(key))
-        return Results.BadRequest(new { error = "Idempotency-Key header is required" });
-
-    var request = await JsonSerializer.DeserializeAsync<ChargeRequest>(http.Request.Body, cancellationToken: ct);
-    if (request is null || request.AmountCents <= 0)
-        return Results.BadRequest(new { error = "Invalid request body" });
-
-    var requestHash = ComputeRequestHash(request);
-    await using var conn = await dataSource.OpenConnectionAsync(ct);
-    await using var tx = await conn.BeginTransactionAsync(ct);
-
-    const string insertPending = """
-        INSERT INTO api_idempotency (idempotency_key, request_hash, state, created_utc, expires_utc)
-        VALUES (@Key, @Hash, 'Pending', now(), now() + interval '24 hours')
-        ON CONFLICT DO NOTHING;
-        """;
-
-    var inserted = await conn.ExecuteAsync(new CommandDefinition(
-        insertPending,
-        new { Key = key, Hash = requestHash },
-        tx,
-        cancellationToken: ct));
-
-    if (inserted == 0)
-    {
-        const string readExisting = """
-            SELECT request_hash, status_code, response_json, state
-            FROM api_idempotency
-            WHERE idempotency_key = @Key;
-            """;
-
-        var existing = await conn.QuerySingleAsync<IdempotencyRecord>(new CommandDefinition(
-            readExisting,
-            new { Key = key },
-            tx,
-            cancellationToken: ct));
-
-        if (!string.Equals(existing.RequestHash, requestHash, StringComparison.Ordinal))
-            return Results.Conflict(new { error = "Key reused with different payload" });
-
-        if (existing.State == "Completed" && existing.StatusCode is not null && existing.ResponseJson is not null)
-            return Results.Json(existing.ResponseJson, statusCode: existing.StatusCode.Value);
-
-        return Results.StatusCode(StatusCodes.Status409Conflict);
-    }
-
-    ChargeResult gatewayResult;
-    try
-    {
-        gatewayResult = await ChargeProvider.ChargeAsync(request, key, ct);
-    }
-    catch (Exception ex)
-    {
-        await tx.RollbackAsync(ct);
-        return Results.Problem($"Payment provider error {ex.Message}", statusCode: StatusCodes.Status502BadGateway);
-    }
-
-    var apiResponse = new
-    {
-        paymentId = gatewayResult.PaymentId,
-        status = gatewayResult.Status,
-        amountCents = request.AmountCents,
-        currency = request.Currency
-    };
-
-    const string complete = """
-        UPDATE api_idempotency
-        SET state = 'Completed',
-            status_code = @StatusCode,
-            response_json = @Response::jsonb
-        WHERE idempotency_key = @Key;
-        """;
-
-    await conn.ExecuteAsync(new CommandDefinition(
-        complete,
-        new
-        {
-            Key = key,
-            StatusCode = StatusCodes.Status200OK,
-            Response = JsonSerializer.Serialize(apiResponse)
-        },
-        tx,
-        cancellationToken: ct));
-
-    await tx.CommitAsync(ct);
-    return Results.Json(apiResponse, statusCode: StatusCodes.Status200OK);
-});
-
-app.Run();
-
-static string ComputeRequestHash(ChargeRequest request)
-{
-    var json = JsonSerializer.Serialize(request);
-    var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(json));
-    return Convert.ToHexString(bytes);
-}
-
-public sealed record ChargeRequest(Guid CustomerId, long AmountCents, string Currency, string CardToken);
-
-public sealed record ChargeResult(string PaymentId, string Status);
-
-public sealed class IdempotencyRecord
-{
-    public string RequestHash { get; init; } = string.Empty;
-    public int? StatusCode { get; init; }
-    public JsonElement? ResponseJson { get; init; }
-    public string State { get; init; } = string.Empty;
-}
-
-public static class ChargeProvider
-{
-    public static Task<ChargeResult> ChargeAsync(ChargeRequest request, string idempotencyKey, CancellationToken ct)
-    {
-        var result = new ChargeResult($"pay_{Guid.NewGuid():N}", "Succeeded");
-        return Task.FromResult(result);
-    }
-}
-```
-
-Why this avoids race conditions:
-
-- The unique key insert is the concurrency gate.
-- Exactly one request wins `INSERT` and proceeds to process the charge.
-- Concurrent duplicates lose the insert and fetch existing status or cached response.
-- Request hash prevents accidental key reuse across different payloads.
+HTTP method semantics are only a starting point. `PUT` and `DELETE` are idempotent in the protocol's intended effect, but triggers, audit events, and external calls can still repeat unless the implementation shares an operation identity and atomic boundary. `POST` can be made idempotent with a key and stored result. Retention is part of the guarantee: deleting the key before a late retry makes the same request new again.
 
 ## Pitfalls
 
@@ -292,12 +161,7 @@ Decision rule: start with database uniqueness for core entities, add idempotency
 > - Stronger idempotency guarantees cost extra storage, key lifecycle management, and stricter request validation.
 
 > [!QUESTION]- How do you implement idempotency for a payment endpoint that processes charges through a third party provider?
-> - Require `Idempotency-Key` for `POST /payments` and hash a canonical request payload.
-> - Use an atomic insert into an idempotency table keyed by that header to gate concurrent duplicates.
-> - If key exists with matching hash and completed state, return cached response with same status code.
-> - Pass the same key to the provider when supported so upstream retries are also deduplicated.
-> - If key exists but hash differs, reject with conflict to prevent accidental key reuse.
-> - Caching and replaying responses makes retries predictable, but it adds storage overhead and couples you to the stored response schema.
+> Reserve a durable local attempt, commit, then call a provider that honors the same key outside the database transaction. A timeout becomes an unknown outcome that is reconciled with the same provider key; it is not evidence that no charge happened. [[Payment Idempotency]] contains the complete sequence and its boundary-specific guarantee.
 
 ## References
 
@@ -307,3 +171,4 @@ Decision rule: start with database uniqueness for core entities, add idempotency
 - [Microsoft Learn Data platform for mission critical workloads on Azure idempotent message processing](https://learn.microsoft.com/azure/architecture/reference-architectures/containers/aks-mission-critical/mission-critical-data-platform#idempotent-message-processing) - Practical cloud architecture guidance for dedup in at least once messaging.
 - [Chris Richardson Idempotent Consumer pattern](https://microservices.io/post/microservices/patterns/2020/10/16/idempotent-consumer.html) - Practitioner pattern for implementing duplicate safe message handlers.
 - [IETF RFC 9110 HTTP Semantics](https://www.rfc-editor.org/rfc/rfc9110.html#name-idempotent-methods) - Protocol level definition of idempotent methods and their intended behavior.
+- [Top cases to apply idempotency](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/top-6-cases-to-apply-idempotency.md) - ByteByteGo provenance for the application matrix; its incorrect HTTP-method visual was rejected.

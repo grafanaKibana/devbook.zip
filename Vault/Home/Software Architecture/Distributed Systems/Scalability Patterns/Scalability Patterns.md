@@ -5,7 +5,7 @@ subtopic:
   - Distributed Systems
 summary: "A system's ability to keep serving requests as load grows by adding resources."
 level:
-  - "2"
+  - "3"
 priority: High
 publish: true
 tags:
@@ -51,6 +51,11 @@ return FolderStructureMap;
 8. Connection pooling is usually low-effort, high-impact hygiene before more dramatic architecture changes.
 9. Event-driven design scales team autonomy and workload isolation, but consistency guarantees must be explicit.
 
+## Measurement and bottleneck migration
+
+![[System Design 101/78cc77c1ac6e94aa62c92b43e52db37d4c4d1fd6a999cbb7ce4f21e2ad845c43.png]]
+
+The strategies in the visual solve different measured bottlenecks; they are not a checklist. [[Scalability Operations]] defines offered load, completed throughput, latency distributions, capacity, saturation, marginal cost, and a repeatable .NET load-test workflow. Apply one change, verify the expected capacity gain, then locate the next bottleneck.
 ## Scaling Decision Framework
 
 Start with telemetry and saturation, not architecture fashion.
@@ -71,30 +76,9 @@ flowchart TD
 ```
 
 
-## .NET and Azure Context
+## .NET operating guidance
 
-- Azure App Service scale-out adds instances quickly for stateless ASP.NET Core apps; pair it with health checks and external session state.
-- Kubernetes Horizontal Pod Autoscaler (HPA) scales pods by CPU, memory, or custom metrics; this is useful when queue depth is the real trigger.
-- For PostgreSQL-heavy workloads, PgBouncer helps with connection pooling so app scale-out does not overwhelm DB connection limits.
-- Redis is a common distributed cache choice in .NET systems (session state, response caching, hot lookups, rate limiting counters).
-
-Minimal ASP.NET Core example with Redis distributed cache:
-
-```csharp
-builder.Services.AddStackExchangeRedisCache(options =>
-{
-    options.Configuration = builder.Configuration.GetConnectionString("Redis");
-    options.InstanceName = "scalability-patterns:";
-});
-```
-
-Simple production pattern:
-
-- Keep APIs stateless.
-- Put Redis between API and database for hot reads.
-- Add read replicas before discussing sharding.
-- Introduce queues where downstream latency is unpredictable.
-
+[[Scalability Operations]] owns the .NET counters, traces, database waits, load-test gates, and cost-per-completed-operation checks. Platform scaling features are useful only when their signal matches the saturated resource; CPU-based autoscaling does not fix a database lock or third-party quota.
 ## Tradeoffs
 
 | Choice | Better when | Worse when |
@@ -143,3 +127,11 @@ Simple production pattern:
 - [Azure App Service - Scale up and scale out](https://learn.microsoft.com/azure/app-service/manage-scale-up)
 - [Amazon Builders Library - Using load shedding to avoid overload](https://aws.amazon.com/builders-library/using-load-shedding-to-avoid-overload/)
 - [ASP.NET Core distributed caching guidance](https://learn.microsoft.com/aspnet/core/performance/caching/distributed?view=aspnetcore-10.0)
+- [Google SRE: Service Level Objectives](https://sre.google/sre-book/service-level-objectives/) — defines measurable service indicators, objectives, and evaluation windows for availability and latency.
+- [Google SRE: Monitoring Distributed Systems](https://sre.google/sre-book/monitoring-distributed-systems/) — primary guidance for latency, traffic, errors, and saturation signals used to locate bottlenecks.
+
+### ByteByteGo provenance
+
+- [Scalability strategies](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/8-must-know-scalability-strategies.md) — provenance for the strategy visual, used as a bottleneck map rather than a checklist.
+- [System design cheat sheet](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/system-design-cheat-sheet.md) — editorial lead for the operational definitions; its defective scalability and availability visual was rejected.
+- [Architectural scalability crash course](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/a-crash-course-on-architectural-scalability.md) — provenance for economic repetition and bottleneck migration; its imprecise definition visual was rejected.

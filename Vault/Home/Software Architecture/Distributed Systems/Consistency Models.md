@@ -61,6 +61,22 @@ In interviews, the important skill is mapping each business invariant to the wea
 - **Use case:** common middle ground for user-facing flows.
 - **Cost:** lower than global strong consistency, but requires session propagation discipline.
 
+[[Session Guarantees]] separates read-your-writes, monotonic reads, monotonic writes, and writes-follow-reads, including token propagation across replicas and stateless application instances.
+
+## Eventual consistency mechanisms and user-visible guarantees
+
+"Eventual" states only that replicas converge after writes stop. The mechanism determines what users can observe and how conflicts are repaired.
+
+| Mechanism | What converges | Required failure logic | Useful user guarantee |
+|---|---|---|---|
+| Asynchronous replica | Copies of one record or log | Detect lag, choose conflict/version policy, repair missing data | Bounded staleness if lag is measured and enforced |
+| Asynchronous projection | Read model derived from an authoritative log/store | Idempotent replay, checkpoints, poison-event handling | Show projection version/freshness; route critical post-write reads to source |
+| Saga workflow | Several local transactions | Persist workflow state, retry safely, compensate completed steps | Expose `Pending`, `Completed`, or `Compensating` instead of claiming instant completion |
+| CQRS | Separately shaped write and read models | Publish committed changes reliably and rebuild projections | Read model can lag while write acknowledgement remains authoritative |
+| Conflict-aware multi-writer replication | Concurrent versions of the same logical data | Causality/version metadata plus deterministic or application merge | Never silently discard a conflicting user edit |
+
+Example: an order API commits `OrderPlaced` in the authoritative store and returns `202 Pending`. A projection updates order history asynchronously, while a saga reserves inventory and captures payment. The UI uses read-your-writes against the authoritative order version until the projection catches up. A failed reservation becomes an explicit compensation state; CQRS did not perform the compensation, and messaging alone did not define the consistency guarantee.
+
 ## Tradeoffs
 
 | Model | Guarantee | Example Use Case | Cost |
@@ -71,19 +87,9 @@ In interviews, the important skill is mapping each business invariant to the wea
 | Session | Client sees own writes | Profile/settings updates | Low-medium cost, session token plumbing |
 | Eventual | Converges after writes stop | Catalog/cache/reference data | Lowest coordination, stale reads expected |
 
-## Tunable consistency (Cosmos DB)
+## Tunable product consistency
 
-Azure Cosmos DB sets a default consistency level at the account level.
-For the API for NoSQL SDKs, clients and requests can relax reads to weaker levels, but cannot strengthen beyond the account default.
-
-- `Strong`: linearizable; not supported with multiple write regions; highest latency profile.
-- `Bounded Staleness`: lag bounded by versions or time window.
-- `Session`: read-your-writes per session.
-- `Consistent Prefix`: never out-of-order, but may miss latest writes.
-- `Eventual`: weakest ordering, best throughput/latency.
-
-This is a practical tradeoff spectrum: moving from `Strong` toward `Eventual` reduces coordination cost and latency while increasing stale-read risk.
-During a partition, preserving stronger consistency typically means reduced availability for affected requests, which is the operational lens of [[CAP theorem]].
+Some databases expose several positions in this taxonomy. [[Cosmos DB Consistency]] owns the five Cosmos DB levels, account and request boundaries, client-session behavior, and selection examples. Product names alone do not define an operation's consistency; record the selected level and topology.
 
 ## Pitfalls
 
@@ -112,35 +118,9 @@ During a partition, preserving stronger consistency typically means reduced avai
 - Keep consistency decisions visible in architecture docs and API contracts.
 
 
-## Example: Optimistic Concurrency for Read-Your-Writes
+## Optimistic write protection
 
-ETag-based optimistic concurrency enforces that a write only succeeds if the client's version matches the server's current version — a practical implementation of session consistency for HTTP APIs:
-
-```csharp
-// GET /orders/42 returns ETag: "v3"
-// Client stores the ETag and sends it on the next write
-
-// PUT /orders/42 with If-Match: "v3"
-// If another writer committed between the GET and PUT, the server returns 412 Precondition Failed
-app.MapPut("/orders/{id}", async (int id, OrderUpdate update,
-    HttpContext ctx, OrderRepository repo) =>
-{
-    var etag = ctx.Request.Headers.IfMatch.FirstOrDefault();
-    var order = await repo.GetAsync(id);
-    if (order is null) return Results.NotFound();
-
-    // Reject if the client's version is stale (another writer committed first)
-    if (etag is not null && etag != order.ETag)
-        return Results.StatusCode(412);  // Precondition Failed
-
-    order.Apply(update);
-    order.ETag = Guid.NewGuid().ToString("N");
-    await repo.SaveAsync(order);
-    return Results.Ok(order);
-});
-```
-
-This pattern implements read-your-writes at the API layer: the client reads the current ETag, includes it on the write, and the server rejects stale writes. The client retries with a fresh GET if it receives 412.
+[[Optimistic HTTP Concurrency]] shows the complete lost-update contract: require `If-Match`, return `428` when absent, and enforce the validator with one atomic compare-and-swap write. An application-side check followed by an unconditional save is still racy.
 
 
 ## Questions
@@ -157,7 +137,6 @@ This pattern implements read-your-writes at the API layer: the client reads the 
 ## References
 
 - [Jepsen - Consistency Models](https://jepsen.io/consistency) — the definitive practitioner reference for consistency model taxonomy, with formal definitions and real-world database analysis.
-- [Azure Cosmos DB Consistency Levels](https://learn.microsoft.com/azure/cosmos-db/consistency-levels) — Microsoft's tunable consistency spectrum (Strong, Bounded Staleness, Session, Consistent Prefix, Eventual) with latency and availability tradeoffs.
-- [Manage consistency levels in Azure Cosmos DB](https://learn.microsoft.com/azure/cosmos-db/nosql/how-to-manage-consistency) — how to configure and override consistency per request in Cosmos DB.
 - [ZooKeeper Internals](https://zookeeper.apache.org/doc/current/zookeeperInternals.html) — explains ZooKeeper's linearizable writes + sequentially consistent reads model.
 - [Meta Engineering - Cache made consistent](https://engineering.fb.com/2022/06/08/core-infra/cache-made-consistent/) — Meta's production experience with cache consistency at scale; real-world example of read-your-writes and invalidation challenges.
+- [Eventual consistency patterns](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/top-eventual-consistency-patterns-you-must-know.md) — ByteByteGo provenance for the mechanism inventory; its visual was rejected because eventing, jobs, sagas, and CQRS are not interchangeable consistency models.

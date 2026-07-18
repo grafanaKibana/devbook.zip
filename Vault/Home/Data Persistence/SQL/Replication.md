@@ -23,7 +23,7 @@ All writes go to one designated node (the leader). Replicas receive a stream of 
 
 Reads can be routed to replicas using `ApplicationIntent=ReadOnly` in SQL Server connection strings, or by pointing read-heavy workloads at a replica endpoint. Write throughput is bounded by the single leader; you can't scale writes by adding replicas.
 
-Failover requires electing a new leader. SQL Server uses Windows Server Failover Clustering (WSFC) quorum; PostgreSQL uses Patroni or Repmgr. A quorum requirement (majority of nodes must agree) prevents split-brain during network partitions.
+Failover requires electing a new leader. SQL Server uses Windows Server Failover Clustering (WSFC) quorum; PostgreSQL commonly relies on an external manager such as Patroni or repmgr. A voting quorum prevents two candidates in the same voting configuration from both winning a majority. It does not stop an isolated former leader from continuing to serve stale endpoints or accept writes; leases, endpoint ownership, and fencing must revoke that old leader before the replacement is writable.
 
 ### Multi-Leader
 
@@ -39,58 +39,45 @@ In SQL Server peer-to-peer transactional replication, the recommended practice i
 
 ### Leaderless (Dynamo-style)
 
-Any node accepts reads and writes. Consistency is achieved through quorums: with N replicas, a write must succeed on W nodes and a read must query R nodes, where W + R > N. Used by Cassandra, DynamoDB, and Riak.
+In Dynamo-style systems such as the original Amazon Dynamo, Cassandra, and Riak, several replicas can accept an operation and the client or coordinator can use tunable `N`, `W`, and `R` quorums. `W + R > N` creates overlap between the acknowledged write and read sets, but overlap alone does not serialize concurrent writes or prove linearizability; version reconciliation, sloppy quorums, membership changes, and failure handling still matter. Read repair and anti-entropy reconcile divergent replicas under product-specific rules.
 
-Divergence between nodes is reconciled by two background processes: read repair (a read that detects a stale replica pushes the latest value back) and anti-entropy (a background process continuously compares and syncs nodes). Quorum does not guarantee strong consistency if writes overlap. Two concurrent writes can each reach a different quorum majority.
+Do not infer Amazon DynamoDB's contract from the Dynamo name. DynamoDB does not expose client-selected `R` and `W` values. Its API documents eventual or strongly consistent reads per operation for supported single-Region resources, transactional operations with their own contract, and separate consistency/replication choices for global tables. Treat those documented operations and multi-Region modes as the boundary rather than applying the generic quorum formula.
 
 ### Model Comparison
 
 | Dimension | Single-Leader | Multi-Leader | Leaderless |
 |---|---|---|---|
 | Write scaling | Bounded by leader | Multiple write points | Any node |
-| Conflict handling | None needed | Mandatory | Quorum + repair |
-| Consistency | Strong (sync) or eventual (async) | Eventual | Tunable via W/R/N |
-| Failover complexity | Leader election required | Automatic | No election needed |
-| Typical use | PostgreSQL, SQL Server AG | CouchDB, geo-distributed | Cassandra, DynamoDB |
+| Conflict handling | Leader orders writes; failover still needs fencing | Mandatory | Version/conflict handling plus repair |
+| Acknowledgement and reads | Sync acknowledgement can protect commit durability; replica observation still depends on replay and routing | Cross-leader acknowledgement and conflict policy are separate | Quorum settings influence overlap but do not remove concurrent-write reconciliation |
+| Failover complexity | Election, endpoint ownership, and fencing | Per-leader failure and conflict recovery | No leader election, but membership and quorum availability still matter |
+| Typical use | PostgreSQL, SQL Server AG | CouchDB, geo-distributed write topologies | Cassandra, Riak, original Dynamo-style systems |
 
 ## Replication Lag
 
-Asynchronous replication means replicas are always slightly behind the leader. This lag creates three canonical anomalies (from DDIA Ch. 5):
+Asynchronous acknowledgement means the leader does not wait for a standby before confirming a write. A replica may be caught up at that instant or may lag behind the leader. When lag exists, it creates three canonical anomalies (from DDIA Ch. 5):
 
-**1. Read-your-writes**: a user submits a form, then immediately reloads the page. The read hits a stale replica and the user sees their own write disappear. Fix: route reads to the leader for a short window after a write, or track the LSN of the last write and wait for the replica to catch up (`pg_wait_for_lsn` in PostgreSQL, causal consistency tokens in MongoDB).
+**1. Read-your-writes**: a user submits a form, then immediately reloads the page. The read hits a stale replica and the user sees their own write disappear. Fix: route reads to the leader for a short window after a write, or track the LSN of the last write and wait for the replica to catch up. PostgreSQL has no built-in `pg_wait_for_lsn`; application or custom database logic must poll and compare `pg_last_wal_replay_lsn()` (or an equivalent replay-position signal) with the required commit LSN. MongoDB exposes causal consistency tokens for the same boundary.
 
-**2. Monotonic reads**: a user refreshes twice and sees newer data on the first refresh, then older data on the second (two requests hit different replicas). Fix: sticky sessions. Pin a user to the same replica for the duration of a session.
+**2. Monotonic reads**: a user refreshes twice and sees newer data on the first refresh, then older data on the second. Carry the highest observed commit/replay position or a product causal token, then route to the primary or wait for a replica that has reached at least that position. Sticky routing is only an optimization while the selected replica remains available and never moves backward; by itself it does not preserve monotonicity across failover or topology change.
 
-**3. Consistent prefix reads**: causally related writes appear out of order on a replica. A reply appears before the original message. Fix: route causally related writes to the same partition so they're applied in order.
+**3. Consistent prefix reads**: causally related writes appear out of order on a replica. A reply appears before the original message. Preserve the dependency through one ordered commit stream or explicit causal metadata, and read from a replica whose applied position includes the prerequisite. Routing related writes to one partition helps only when that partition supplies the required ordering and failover preserves it; the partition key alone is not a causal guarantee.
 
-**Sync vs async tradeoff**: synchronous replication means the leader waits for at least one replica to confirm before acknowledging the write. Zero data loss on failover, but every write pays the round-trip latency to the replica. Asynchronous replication acknowledges immediately: lower latency, but any writes not yet replicated are lost if the leader crashes before they propagate. Most production systems use async with a semi-sync option (one synchronous replica for failover safety).
+**Sync vs async tradeoff**: synchronous acknowledgement means the leader waits for the configured standby acknowledgement before confirming the write. With the right `synchronous_commit`, standby selection, and storage settings, that acknowledgement protects commit durability across failover to an eligible standby. It does not make reads from every replica linearizable: WAL can be durable but not yet replayed on a readable standby. A read that must observe the commit still needs the primary or a replica whose replay position has reached the commit token. In asynchronous acknowledgement mode, the leader confirms the write without waiting for a standby. A replica may be caught up or lagging; if the leader fails, an acknowledged commit is at risk only when no eligible surviving node received it.
 
-## Read/write splitting
+## Replica Read Boundary
 
-Single-leader replication only pays off if reads actually land on the replicas. Read/write splitting is the routing rule that makes that happen: every write (`INSERT`/`UPDATE`/`DELETE`, and anything inside an explicit transaction) goes to the primary, while read-only `SELECT`s are load-balanced across the replicas. Writes still bottleneck at the single leader, but read capacity scales with the replica count.
+Single-leader replication can offload reads only when routing preserves the request's contract. Writes, write-capable transactions, and unclassified work stay on the primary. An explicitly read-only transaction pins one eligible replica, while a read that must observe a prior commit uses the primary or a replica whose replay position has reached that commit token. A proxy can classify statements, but the application usually owns the causal requirement.
 
-The design question is **where the routing decision lives**:
+![[System Design 101/fad9c0171b8080e840a469ddf29a9f82d932eb2687a8d62fdb013bf9c3014ece.png]]
 
-- **In the application.** The app holds two data sources — a primary/write connection and a replica/read connection — and picks per query. No extra infrastructure, and the app has the most context about which reads tolerate staleness. The cost is discipline: every caller (and every ORM query path) must route correctly and the app owns lag handling itself. One misrouted call silently reads stale data with no error.
-- **In a proxy / middleware layer.** A proxy sits between the app and the databases, inspects each statement, and forwards writes to the primary while load-balancing reads across replicas — ProxySQL and pgpool-II do this with query rules; managed options include Azure SQL Database read scale-out (`ApplicationIntent=ReadOnly`) and AWS RDS Proxy in front of an Aurora cluster. The app sees one endpoint and stays unaware of the topology, so routing changes happen in one place instead of every caller. This is the same proxy tier that smooths failover (see the connection-pool pitfall under **Pitfalls**).
-
-```mermaid
-flowchart LR
-    A[App] --> R{Router / proxy}
-    R -->|writes| P[(Primary)]
-    R -->|reads| S1[(Replica 1)]
-    R -->|reads| S2[(Replica 2)]
-    P -.->|async replication| S1
-    P -.->|async replication| S2
-```
-
-Because replication is asynchronous, a read routed to a replica right after a write can return **stale** data — the read-your-writes and monotonic-read hazards from **Replication Lag** above. Neither routing style removes this; both need the same fix: pin staleness-sensitive reads (and anything in a read-after-write flow) back to the primary, or wait for the replica's LSN to catch up. A query-level proxy can't tell which reads those are, so that decision usually stays with the application even when the proxy owns the split.
+The diagram shows the middleware topology, not the lag or transaction boundary. [[Home/Data Persistence/SQL/Replica Read Routing|Replica Read Routing]] owns position tokens, transaction pinning, topology refresh, bounded waits, failover timelines, and overload behavior.
 
 ## CAP and PACELC
 
 The sync/async and leader-model choices above are all instances of one theorem. **CAP** says that when a network **P**artition splits your replicas, you must choose between **C**onsistency (reject reads/writes that can't be coordinated) and **A**vailability (keep serving, accept divergence) — you cannot have both *during a partition*. A single-leader system that refuses writes when it can't reach a quorum is **CP**; a leaderless Dynamo-style system that keeps accepting writes and reconciles later is **AP**.
 
-CAP only describes the partition case, which is why **PACELC** is the more useful framing: *if* **P**artition, choose **A**vailability or **C**onsistency; **E**lse (normal operation) choose **L**atency or **C**onsistency. Synchronous replication is the "**C** over **L**" choice (pay latency for consistency); async is "**L** over **C**" (faster, but stale reads). Most SQL setups are **PC/EC**-leaning (consistency-first); Cassandra/DynamoDB default to **PA/EL** (availability- and latency-first). This is the lens behind every model and mode in this note — see [[CAP theorem]] for the full treatment.
+CAP only describes the partition case, which is why **PACELC** also asks whether normal operation favors latency or coordination. Synchronous commit pays latency for acknowledged durability; it is not by itself a linearizable-replica-read protocol. Strong observation additionally requires routing to the primary or waiting until the chosen replica has replayed the required position. See [[Home/Software Architecture/Distributed Systems/CAP theorem|CAP theorem]] for the theorem's full boundary.
 
 ## Tradeoffs
 
@@ -100,17 +87,17 @@ Replication and sharding solve different problems. Reaching for sharding before 
 |---|---|---|
 | What it solves | Read throughput, HA, DR | Write throughput, dataset size |
 | Write scaling | Writes still bottleneck at leader | Writes distributed across shards |
-| Consistency | Eventual (async) or strong (sync) | Cross-shard transactions are complex |
+| Durability and observation | Async acknowledgement can expose an acknowledged commit to failover loss when no eligible survivor received it; sync acknowledgement can protect durability, while replica reads still need replay-aware routing | Each shard has its own replication and read-consistency boundary |
 | Operational complexity | Medium | High |
 | When to reach for | Read bottleneck, HA requirement | Write or storage bottleneck |
 
-Typical scaling progression: vertical scale → read replicas → caching layer → CQRS (separate read/write models) → sharding. Most applications never need sharding.
+Choose each mechanism from the measured bottleneck and required consistency boundary. Read replicas scale eligible reads; a cache removes repeated origin work with a freshness cost; sharding distributes ownership and creates cross-shard work. They are not mandatory stages of one progression.
 
 ## Pitfalls
 
-**Split-brain**: a network partition causes the old primary and a newly promoted secondary to both accept writes simultaneously. Writes diverge and reconciliation is painful or impossible. Mitigation: quorum-based leader election (a node needs majority votes to become primary), plus fencing (STONITH, Shoot The Other Node In The Head) to forcibly terminate the old primary before the new one starts accepting writes.
+**Split-brain**: a network partition leaves the old primary accepting writes while a new primary is promoted elsewhere. A voting quorum limits who can be elected in the current configuration; fencing is the separate act that revokes the old leader's ability to write. Promotion must couple both boundaries.
 
-**Replication lag as silent data corruption**: a replica appears healthy in monitoring but is 30 seconds behind. Reads return stale data with no error. Mitigation: monitor replication lag metrics (`pg_stat_replication` in PostgreSQL, `sys.dm_hadr_database_replica_states` in SQL Server), alert on lag exceeding your SLA threshold, and expose lag in health checks.
+**Replication lag as a silent consistency violation**: a replica appears healthy in monitoring but is 30 seconds behind. Reads return stale data with no error. Mitigation: monitor replication lag metrics (`pg_stat_replication` in PostgreSQL, `sys.dm_hadr_database_replica_states` in SQL Server), alert on lag exceeding your SLA threshold, and expose lag in health checks.
 
 **Connection pool not refreshing after failover**: infrastructure failover completes in 30 seconds, but the application holds pooled connections to the old primary's IP. Requests fail until the pool times out. Mitigation: short DNS TTL on the cluster endpoint, connection pool validation on borrow, or a proxy layer (PgBouncer, RDS Proxy, Azure SQL connection retry policy) that handles reconnection transparently.
 
@@ -122,27 +109,32 @@ Typical scaling progression: vertical scale → read replicas → caching layer 
 
 > [!QUESTION]- What are the three replication lag anomalies, and how do you mitigate each?
 > - **Read-your-writes**: user writes then reads from a stale replica and sees their write missing. Fix: route post-write reads to the leader for a short window, or use LSN/timestamp tracking to wait for the replica to catch up.
-> - **Monotonic reads**: user sees newer data on one request, then older data on the next (different replicas). Fix: sticky sessions. Pin the user to the same replica.
-> - **Consistent prefix reads**: causally related writes appear out of order (a reply before the original message). Fix: route causally related writes to the same partition so ordering is preserved.
+> - **Monotonic reads**: user sees newer data, then an older replica. Carry the highest observed position or causal token and require the next source to have reached it; stickiness alone fails after replica failover.
+> - **Consistent prefix reads**: a dependent write appears before its prerequisite. Preserve one ordered stream or causal dependency token and read from a position that includes the prerequisite; a shared partition key helps only when its ordering contract covers the failover path.
 
 > [!QUESTION]- When would you choose synchronous vs asynchronous replication?
-> - **Synchronous**: when zero data loss is a hard requirement (financial transactions, audit logs). The leader waits for replica acknowledgment before confirming the write. Cost: every write pays the replica round-trip latency.
-> - **Asynchronous**: when write latency matters more than guaranteed durability. Replicas may lag; any unconfirmed writes are lost if the leader crashes.
-> - Most production systems use async replication with one semi-synchronous replica for failover safety. SQL Server Always On supports both modes per replica. PostgreSQL `synchronous_standby_names` controls which standbys must confirm before commit.
+> - **Synchronous**: when acknowledged commits must survive failover. The leader confirms only after the configured standby acknowledgement, and failover must select an eligible durable standby. This protects acknowledged durability; replica reads still need a replay-position check or primary routing to observe the commit.
+> - **Asynchronous**: when avoiding the standby round trip justifies weaker failover durability. The leader does not wait for a standby, and replicas may be current or lagging. An acknowledged commit can be lost on failover only if no eligible surviving node received it.
+> - SQL Server Always On configures synchronous-commit or asynchronous-commit per availability replica. PostgreSQL uses `synchronous_standby_names` to select synchronous standbys and `synchronous_commit` to choose the acknowledgement boundary; standbys not selected for synchronous confirmation remain asynchronous.
 
 > [!QUESTION]- How does split-brain occur and how is it prevented?
 > - A network partition isolates the primary from the rest of the cluster. A quorum of remaining nodes elects a new primary. When the partition heals, both nodes believe they are primary and have accepted divergent writes.
-> - Prevention: quorum-based election. A node must hold a majority of votes to become primary, so only one node can win. Fencing (STONITH) ensures the old primary is forcibly terminated before the new one starts accepting writes, eliminating the window where both are active.
-> - WSFC uses quorum witnesses; Patroni uses distributed locks in etcd/Consul. Without fencing, quorum alone is not sufficient. A slow primary that loses quorum might still be processing writes for a few seconds.
+> - A majority vote prevents two candidates in the same voting configuration from both being elected. Fencing separately terminates or revokes the old primary before the new one accepts writes.
+> - WSFC uses quorum witnesses; Patroni uses distributed coordination in systems such as etcd or Consul. Without endpoint revocation or fencing, election quorum alone is insufficient because a slow former leader can keep serving writes after losing authority.
 
-## Links
+## References
 
 - [Types of SQL Server replication](https://learn.microsoft.com/sql/relational-databases/replication/types-of-replication?view=sql-server-ver17) — official overview of snapshot, transactional, and merge replication with use-case guidance.
 - [Always On availability groups overview](https://learn.microsoft.com/sql/database-engine/availability-groups/windows/overview-of-always-on-availability-groups-sql-server?view=sql-server-ver17) — covers synchronous vs asynchronous commit modes, failover behavior, and readable secondaries.
 - [Cosmos DB consistency levels](https://learn.microsoft.com/azure/cosmos-db/consistency-levels) — explains the five consistency levels (strong, bounded staleness, session, consistent prefix, eventual) with latency and availability tradeoffs.
+- [DynamoDB read consistency](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadConsistency.html) — per-operation eventual and strong read contracts; DynamoDB does not expose client-selected quorum values.
+- [DynamoDB global table consistency](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/V2globaltables_HowItWorks.html) — multi-Region replication and consistency modes, which are separate from single-Region read selection.
 - [PostgreSQL High Availability and Replication](https://www.postgresql.org/docs/15/high-availability.html) — official docs covering streaming replication, WAL shipping, and standby configuration.
+- [PostgreSQL backup control functions](https://www.postgresql.org/docs/current/functions-admin.html#FUNCTIONS-ADMIN-BACKUP) — primary definitions for current and replay WAL-location functions used by position-aware routing.
 - [Designing Data-Intensive Applications, Ch. 5: Replication (Martin Kleppmann)](https://www.oreilly.com/library/view/designing-data-intensive-applications/9781098119058/) — deep-dive into leader-follower, multi-leader, and leaderless replication with replication lag and consistency analysis.
 - [Read-your-writes on replicas: PostgreSQL WAIT FOR LSN and MongoDB causal consistency](https://dev.to/franckpachot/read-your-writes-on-replicas-postgresql-wait-for-lsn-and-mongodb-causal-consistency-4he2) — practitioner post on implementing read-your-writes consistency across replicas in PostgreSQL and MongoDB.
 - [Amazon RDS read replicas](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.html) — official docs on provisioning read replicas and directing read traffic to them; the primary source for the managed read/write-split pattern.
 - [pgpool-II load-balancing configuration](https://www.pgpool.net/docs/latest/en/html/runtime-config-load-balancing.html) — how a middleware proxy decides which statements are load-balanced to standbys versus sent to the primary.
 - [ProxySQL documentation](https://proxysql.com/documentation/) — query-rule engine and hostgroups used to route writes and reads to different backend groups.
+- [Database middleware (ByteByteGo, pinned source)](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/database-middleware.md) — visual routing path for proxy-based read/write splitting; used here with explicit transaction and failure boundaries.
+- [Read replica pattern (ByteByteGo, pinned source)](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/read-replica-pattern.md) — topology overview, supplemented here with the replay-position eligibility contract absent from its diagram.

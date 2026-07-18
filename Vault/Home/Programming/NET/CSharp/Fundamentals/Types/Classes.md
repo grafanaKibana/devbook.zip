@@ -272,7 +272,7 @@ Key rules:
 > [!QUESTION]- A static constructor throws an exception. What happens on subsequent accesses to that type?
 > The runtime marks the type as permanently broken. Every subsequent attempt to access any member of the type throws a `TypeInitializationException` wrapping the original exception — even if the condition that caused the failure has been resolved. The type cannot be re-initialized for the lifetime of the AppDomain (or AssemblyLoadContext in .NET Core). This is why static constructors should be kept minimal and defensive because failures are unrecoverable.
 
-## Links
+## References
 
 - [Classes - C# Programming Guide](https://learn.microsoft.com/dotnet/csharp/fundamentals/types/classes)
 - [Abstract and sealed classes - C# reference](https://learn.microsoft.com/dotnet/csharp/programming-guide/classes-and-structs/abstract-and-sealed-classes-and-class-members)

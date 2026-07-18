@@ -62,6 +62,14 @@ Use log levels intentionally:
 
 In distributed systems, correlation IDs are essential in practice: every service should log the same request identifier so operators can reconstruct one end-to-end user request across many log streams.
 
+#### Log Ingestion and Indexing Pipeline
+
+An ELK implementation makes the boundaries concrete: applications emit structured events; Beats or Elastic Agent collect them; Logstash can buffer and transform; Elasticsearch indexes selected fields; Kibana queries and visualizes them. OpenTelemetry Collector is an alternative vendor-neutral collection and routing layer, not another name for Elasticsearch.
+
+Normalize timestamps, service identity, severity, trace ID, and schema version before indexing. Drop or redact secrets and regulated fields at the earliest boundary. Use a durable buffer for bursts, a dead-letter path for malformed events, index lifecycle policies for retention, and explicit handling when downstream storage is unavailable. Indexing every field increases cost and mapping risk; index only fields used for filtering or aggregation and retain the original event according to policy.
+
+![[System Design 101/e02dde606c2771cde74766a7b33faf462ab59e9f13eb474645bdfade8c75995d.jpg]]
+
 ### Traces
 
 Traces represent a single request journey across services and dependencies.
@@ -94,139 +102,44 @@ sequenceDiagram
     deactivate A
 ```
 
-## OpenTelemetry in Practice
+## Signal Shape and Correlation
 
-OpenTelemetry is the vendor-neutral standard for telemetry instrumentation and export.
+| Signal | Shape | Correlation and cardinality | Retention and sampling | Best question |
+| --- | --- | --- | --- | --- |
+| Metric | Aggregated numeric series | Bounded labels such as service, route, and status class | Long retention is affordable; preserve counters and histograms | Is the system healthy, and how large is the problem? |
+| Log | Discrete structured event | Trace ID plus stable fields; user IDs belong here only under privacy policy | Index short; archive selectively; sample repetitive success events | What exact state or error occurred? |
+| Trace | Causal tree of timed spans | Trace/span IDs join services and selected logs | Tail sampling can retain errors and slow traces | Where did this request spend time or fail? |
 
-- **API + SDK**: consistent model to create metrics, logs, and traces.
-- **Instrumentation packages** in .NET cover common libraries (`ASP.NET Core`, `HttpClient`, `gRPC`, `EF Core`, runtime/process metrics); runtime auto-instrumentation is a separate deployment model.
-- **Exporters** let you route the same telemetry to different backends (for example Jaeger, Prometheus, Datadog, Azure Monitor) without changing application code.
+Propagate W3C trace context, attach the trace ID to structured logs, and derive exemplars or links from metrics to traces where the backend supports them. Never put unbounded request, user, or container IDs in metric labels. Sampling should preserve the rare failures the system exists to explain; uniform head sampling can discard them before their outcome is known.
 
-Minimal .NET tracing and metrics setup:
+The source visual for this comparison was rejected because its topology did not match the verified OpenTelemetry signal model; the table is rebuilt from primary specifications.
 
-```csharp
-using OpenTelemetry.Metrics;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
+## Collection-to-Action Pipeline
 
-var builder = WebApplication.CreateBuilder(args);
+Telemetry moves through six boundaries: emit, collect, buffer/transform, store, query, and act. The application emits a stable schema; an agent or OpenTelemetry Collector batches and retries; the backend enforces retention and indexing; queries power dashboards and alerts; automation creates a ticket, pages an owner, or applies a safe remediation. Best-effort diagnostic telemetry should apply backpressure at collectors and buffers, then sample or shed according to an explicit priority policy rather than take the production request path down.
 
-builder.Services
-    .AddOpenTelemetry()
-    .ConfigureResource(resource => resource.AddService("checkout-api"))
-    .WithTracing(tracing => tracing
-        .AddAspNetCoreInstrumentation()
-        .AddHttpClientInstrumentation()
-        .AddGrpcClientInstrumentation()
-        .AddEntityFrameworkCoreInstrumentation()
-        .AddSource("Checkout.Api")
-        .AddOtlpExporter())
-    .WithMetrics(metrics => metrics
-        .AddAspNetCoreInstrumentation()
-        .AddRuntimeInstrumentation()
-        .AddHttpClientInstrumentation()
-        .AddMeter("Checkout.Api")
-        .AddPrometheusExporter());
-```
+Audit, security, financial, or regulatory records can be part of a durable or fail-closed business contract rather than disposable telemetry. Route those records through a separately capacity-planned durable log or transaction/outbox path, define acknowledgement and recovery semantics, and fail the protected operation when policy requires the record to be retained. Do not silently drop them under the generic telemetry-shedding rule.
 
-The key senior signal in interviews: instrument from day one with standard telemetry contracts, then choose backends based on team and platform constraints.
+Choose retention by investigation window and compliance, not habit. Make alert ownership explicit and alert on a user-visible symptom or an exhausted error budget. A dashboard with no decision or owner is decoration.
 
-Prometheus export also needs a mapped scrape endpoint in ASP.NET Core:
+![[System Design 101/c17b0fea47b51ea2363baad05c7a519ce318cc777a53004fbfb824c888601983.png]]
 
-```csharp
-var app = builder.Build();
-app.MapPrometheusScrapingEndpoint();
-```
+> [!WARNING] Non-normative source visual
+> The provider names and category groupings are historical and should not drive a product choice. Use the visual only for the emit → collect → buffer/transform → store → query → act flow, then verify current product names, supported signals, retention, and alerting contracts in provider documentation.
 
-If `MapPrometheusScrapingEndpoint()` is unavailable in your package version, use middleware instead:
+## Push versus Pull Metrics
 
-```csharp
-app.UseOpenTelemetryPrometheusScrapingEndpoint();
-```
+Prometheus pull works when targets are discoverable and the collector can reach them: each scrape also proves target reachability, while the server owns retry pace and backpressure. Push works across restrictive network boundaries or for event-driven delivery, but the sender now owns retry, queueing, authentication, and stale-series cleanup. For short-lived batch jobs, push only job-level terminal metrics to a Pushgateway; do not turn it into a general event store.
 
-Prometheus ASP.NET Core exporter support can be version-sensitive and may require prerelease packages. The exporter documentation recommends considering OTLP export for production scenarios, so teams often route metrics to an OpenTelemetry Collector and expose them to Prometheus there.
+Use pull as the default for long-running discoverable services. Use push when topology makes pull impossible or the protocol is already an authenticated telemetry stream, then define expiration and failed-delivery behavior. Neither model permits unbounded labels.
 
-## .NET Implementation Patterns
+![[System Design 101/51d727bf3bda3570c7c7f0e5fe2cb6b95e4c69072df19e58e5ad7575499dbcdb.png]]
 
-### Custom Metrics with Meter API
+## Focused Runbooks and Implementation
 
-```csharp
-using System.Diagnostics;
-using System.Diagnostics.Metrics;
+Use [[Home/DevOps/CPU Saturation Runbook|CPU Saturation Runbook]] to separate utilization, runnable work, I/O wait, cgroup throttling, allocation pressure, and hot code before changing capacity. It includes a bounded Linux and .NET evidence sequence and keeps the rejected source visual out of the diagnostic model.
 
-var meter = new Meter("Checkout.Api", "1.0.0");
-Counter<long> ordersCreated = meter.CreateCounter<long>("orders_created_total");
-Histogram<double> checkoutLatencyMs = meter.CreateHistogram<double>("checkout_latency_ms");
-
-public IResult CreateOrder(OrderRequest request)
-{
-    var startedAt = Stopwatch.GetTimestamp();
-
-    // Business logic...
-
-    ordersCreated.Add(1, new KeyValuePair<string, object?>("tenant", request.TenantId));
-    var elapsedMs = Stopwatch.GetElapsedTime(startedAt).TotalMilliseconds;
-    checkoutLatencyMs.Record(elapsedMs);
-
-    return Results.Ok();
-}
-```
-
-### Custom Tracing with ActivitySource
-
-```csharp
-using System.Diagnostics;
-
-public static class Telemetry
-{
-    public static readonly ActivitySource ActivitySource = new("Checkout.Api");
-}
-
-public async Task ReserveInventoryAsync(string sku, int quantity)
-{
-    using var activity = Telemetry.ActivitySource.StartActivity("ReserveInventory");
-    activity?.SetTag("inventory.sku", sku);
-    activity?.SetTag("inventory.quantity", quantity);
-
-    await _inventoryClient.ReserveAsync(sku, quantity);
-}
-```
-
-### Structured Logging with Serilog
-
-```csharp
-using Serilog;
-using Serilog.Formatting.Compact;
-
-builder.Host.UseSerilog((_, config) => config
-    .Enrich.FromLogContext()
-    .Enrich.WithProperty("service", "checkout-api")
-    .WriteTo.Console(new RenderedCompactJsonFormatter()));
-
-app.UseSerilogRequestLogging();
-
-app.MapPost("/checkout", (CheckoutRequest request, ILogger<Program> logger) =>
-{
-    logger.LogInformation(
-        "Checkout started for {CustomerId} with {ItemCount} items",
-        request.CustomerId,
-        request.Items.Count);
-
-    return Results.Accepted();
-});
-```
-
-Example JSON event shape emitted by structured logging:
-
-```json
-{
-  "@t": "2026-02-28T12:30:45.1234567Z",
-  "@i": "f2a8a4c1",
-  "@m": "Checkout started for 42 with 3 items",
-  "CustomerId": 42,
-  "ItemCount": 3
-}
-```
+Use [[Home/DevOps/NET Observability|NET Observability]] for OpenTelemetry registration, ASP.NET Core instrumentation, custom `Meter` and `ActivitySource` signals, Prometheus or OTLP export, and structured logging examples. Keep signal names and bounded dimensions stable so the backend remains replaceable.
 
 ## Pitfalls
 
@@ -274,8 +187,17 @@ If thresholds are too sensitive or static, teams get constant false positives an
 
 ## References
 
-- [OpenTelemetry for .NET (official docs)](https://opentelemetry.io/docs/languages/dotnet/)
-- [ASP.NET Core observability example with OpenTelemetry and Prometheus (Microsoft Learn)](https://learn.microsoft.com/dotnet/core/diagnostics/observability-prgrja-example)
-- [W3C Trace Context (traceparent and tracestate)](https://www.w3.org/TR/trace-context/)
-- [Prometheus ASP.NET Core exporter README (OpenTelemetry .NET)](https://github.com/open-telemetry/opentelemetry-dotnet/tree/main/src/OpenTelemetry.Exporter.Prometheus.AspNetCore)
-- [Google SRE Book: Monitoring Distributed Systems (practitioner)](https://sre.google/sre-book/monitoring-distributed-systems/)
+- [OpenTelemetry for .NET (official docs)](https://opentelemetry.io/docs/languages/dotnet/) — documents the .NET SDK, instrumentation, exporters, and signal-specific setup.
+- [ASP.NET Core observability example with OpenTelemetry and Prometheus (Microsoft Learn)](https://learn.microsoft.com/dotnet/core/diagnostics/observability-prgrja-example) — supplies an end-to-end .NET metrics and tracing example with Prometheus collection.
+- [W3C Trace Context](https://www.w3.org/TR/trace-context/) — defines the interoperable `traceparent` and `tracestate` headers used for cross-service correlation.
+- [Prometheus ASP.NET Core exporter README (OpenTelemetry .NET)](https://github.com/open-telemetry/opentelemetry-dotnet/tree/main/src/OpenTelemetry.Exporter.Prometheus.AspNetCore) — documents the exporter endpoint, registration, and hosting constraints for ASP.NET Core.
+- [Google SRE Book — Monitoring Distributed Systems](https://sre.google/sre-book/monitoring-distributed-systems/) — grounds alerting and dashboard design in user-visible symptoms, actionable signals, and the four golden signals.
+- [OpenTelemetry signals](https://opentelemetry.io/docs/concepts/signals/) — official definitions and relationships for traces, metrics, and logs.
+- [Prometheus: when to use the Pushgateway](https://prometheus.io/docs/practices/pushing/) — official limits and lifecycle risks of pushed metrics.
+- [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/) — official receive, process, and export pipeline boundaries.
+- [Elastic ingestion tools](https://www.elastic.co/guide/en/observability/current/ingest-logs-metrics-uptime.html) — official Elastic ingestion and indexing paths.
+- [ByteByteGo: logs, traces, and metrics](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/logging-tracing-metrics.md) — source contribution for signal comparison; its visual was rejected by the audit.
+- [ByteByteGo: push versus pull metrics](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/push-vs-pull-in-metrics-collecting-systems.md) — source contribution for the collection selector.
+- [ByteByteGo: cloud monitoring](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/cloud-monitoring-cheat-sheet.md) — source contribution for the collection-to-action pipeline.
+- [ByteByteGo: high CPU cases](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/top-9-cases-behind-100-cpu-usage.md) — source contribution for the evidence-first CPU runbook; its visual was rejected by the audit.
+- [ByteByteGo: ELK](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/what-is-elk-stack-and-why-is-it-so-popular-for-log-management.md) — source contribution for the log-ingestion example.

@@ -33,73 +33,34 @@ sequenceDiagram
 
 Webhooks complement [[Event-Driven Architecture]] — they are the HTTP-native way to deliver events between systems that do not share a message broker. For internal service-to-service communication within the same platform, [[Home/Software Architecture/Distributed Systems/Message Queues/Message Queues|Message Queues]] are usually a better fit because they provide built-in durability, fan-out, and back-pressure.
 
-## Receiver Example (ASP.NET Core)
+## ASP.NET Core receiver
 
-A production-quality webhook receiver needs three things: signature verification, [[Idempotency]], and fast acknowledgment. This example receives GitHub-style webhooks signed with HMAC-SHA256.
+[[ASP.NET Core Webhook Receivers]] owns the implementation boundary: authenticate the provider's exact raw request bytes, validate timestamp/replay policy, deduplicate under a durable unique key, commit inbox or queue work, then return success. Parsing and reserializing JSON before HMAC verification changes the signed bytes.
 
-```csharp
-using System.Security.Cryptography;
-using System.Text;
-using Microsoft.AspNetCore.Mvc;
+## Polling interval versus durable webhook delivery contract
 
-var builder = WebApplication.CreateBuilder(args);
-var app = builder.Build();
+![[System Design 101/3381182ee93536fc7fa7f386859a9d426c239e650375751c49b5ca6d196d7b49.png]]
 
-app.MapPost("/webhooks/github", async (
-    HttpContext ctx,
-    [FromServices] IWebhookProcessor processor,
-    CancellationToken ct) =>
-{
-    // 1. Read raw body (need exact bytes for HMAC verification)
-    ctx.Request.EnableBuffering();
-    var body = await new StreamReader(ctx.Request.Body).ReadToEndAsync(ct);
+The visual shows the direction difference, not a reliability guarantee. Polling can be cheap when the interval is long or conditional requests return no body; webhooks can be expensive when retries storm or endpoints are slow.
 
-    // 2. Verify HMAC-SHA256 signature
-    var signature = ctx.Request.Headers["X-Hub-Signature-256"].FirstOrDefault();
-    var secret = builder.Configuration["Webhooks:GitHubSecret"]!;
+| Question | Polling | Webhook |
+|---|---|---|
+| Freshness | Bounded by the interval plus API latency | Usually near real-time, bounded by delivery and retry delay |
+| Missed changes | Fetch from a durable source cursor or `updated_since` window | Producer must retain deliveries or expose replay/reconciliation |
+| Duplicate work | Overlapping windows repeat records | At-least-once retries repeat events |
+| Load owner | Consumer chooses interval and batch size | Producer controls fan-out and retry schedule |
+| Failure recovery | Resume from cursor after outage | Replay by event ID, dead-letter inspection, or reconciliation poll |
 
-    if (!VerifySignature(body, signature, secret))
-        return Results.Unauthorized();
+A durable webhook contract needs more than `POST`:
 
-    // 3. Extract idempotency key and event type
-    var deliveryId = ctx.Request.Headers["X-GitHub-Delivery"].FirstOrDefault();
-    var eventType = ctx.Request.Headers["X-GitHub-Event"].FirstOrDefault();
+1. Sign the exact body plus a timestamp and identify the signing key version.
+2. Assign a stable event or delivery ID and document retry and ordering scope.
+3. Retry transient failures with bounded exponential backoff and jitter; do not retry permanent `4xx` failures blindly.
+4. Require the receiver to persist the event before returning success and process it idempotently.
+5. Expose delivery logs, manual replay, retention, timeout, and terminal failure behavior.
+6. Provide a cursor-based list API so consumers can reconcile gaps after outages.
 
-    if (string.IsNullOrEmpty(deliveryId) || string.IsNullOrEmpty(eventType))
-        return Results.BadRequest();
-
-    // 4. Acknowledge fast, process async
-    //    In production: enqueue to durable storage, return 200 immediately
-    await processor.EnqueueAsync(eventType, deliveryId, body, ct);
-
-    return Results.Ok();
-});
-
-app.Run();
-
-static bool VerifySignature(string payload, string? signatureHeader, string secret)
-{
-    if (string.IsNullOrEmpty(signatureHeader) || !signatureHeader.StartsWith("sha256="))
-        return false;
-
-    var expected = signatureHeader["sha256=".Length..];
-    var keyBytes = Encoding.UTF8.GetBytes(secret);
-    var payloadBytes = Encoding.UTF8.GetBytes(payload);
-
-    var hash = HMACSHA256.HashData(keyBytes, payloadBytes);
-    var computed = Convert.ToHexStringLower(hash);
-
-    return CryptographicOperations.FixedTimeEquals(
-        Encoding.UTF8.GetBytes(computed),
-        Encoding.UTF8.GetBytes(expected));
-}
-```
-
-Key implementation decisions:
-
-- **`EnableBuffering`** — allows reading the raw request body for HMAC computation before model binding.
-- **`CryptographicOperations.FixedTimeEquals`** — constant-time comparison prevents timing attacks on signature verification.
-- **Enqueue, then acknowledge** — return `200` quickly and process the event asynchronously from a durable queue. This prevents producer timeouts and decouples processing latency from delivery acknowledgment.
+For an hourly billing export, polling may be simpler and more controllable. For `PaymentCaptured`, use a signed webhook for low latency, then poll `GET /events?after=<cursor>` periodically as a correctness safety net. Push handles the common path; pull repairs the gaps.
 
 ## Tradeoffs: Webhooks vs Polling vs SSE vs WebSockets
 
@@ -129,7 +90,7 @@ Decision heuristic:
 
 - **What goes wrong**: the consumer does heavy work synchronously in the webhook handler, exceeds the producer's timeout (typically 5-30 seconds), and triggers retries that compound the load.
 - **Why it happens**: inline database writes, external API calls, or computation in the request path.
-- **Mitigation**: acknowledge the webhook immediately (return `200`) and enqueue the payload for async processing. Use a background worker (hosted service, queue consumer) for the actual business logic.
+- **Mitigation**: authenticate and durably store the inbox/queue record, then return `2xx` without running downstream business work inline. A background worker performs the business logic.
 
 ### 3) Missing or Weak Signature Verification
 
@@ -146,7 +107,7 @@ Decision heuristic:
 ## Questions
 
 > [!QUESTION]- How do you design webhook consumers to prevent event loss and duplicate processing?
-> Verify the HMAC signature on every request first, to reject forged payloads. Then defend against duplicates with the provider's event ID as an idempotency key — stored durably and checked before you act, because at-least-once delivery means the same webhook arrives twice eventually. Acknowledge fast: return `200` and process asynchronously from a durable queue so slow work never trips the sender's timeout. And since your consumer can be down when an event fires, add reconciliation — periodically poll the provider's event-list API to catch what you missed. Signature for trust, idempotency for duplicates, reconciliation for gaps.
+> Verify the HMAC over the provider's exact raw bytes and validate its signed timestamp. Store the provider event ID and inbox/queue payload durably before returning `2xx`, then process it idempotently in a worker. Since the producer can exhaust its retry window while the consumer is unavailable, reconcile against the provider's event-list API or replay facility.
 
 > [!QUESTION]- When would you choose webhooks over a shared message broker for inter-service event delivery?
 > Webhooks win when you cross an organizational boundary — a SaaS or third-party provider you don't control can't publish into your broker, but it can POST to a URL. Inside your own platform a message broker is usually better: durable fan-out, back-pressure, replay, and per-key ordering that raw HTTP callbacks don't give you. They aren't exclusive, though — the common pattern is to receive external webhooks at the edge and immediately republish them onto an internal broker, so you get HTTP reach at the boundary and broker guarantees everywhere inside.
@@ -164,3 +125,4 @@ Decision heuristic:
 - [Standard Webhooks](https://www.standardwebhooks.com/) — Open specification for webhook signing, verification, and delivery semantics backed by Svix, aiming to standardize webhook behavior across providers.
 - [Asynchronous messaging options (Microsoft Learn)](https://learn.microsoft.com/azure/architecture/guide/technology-choices/messaging) — Azure architecture guide comparing webhooks, queues, event hubs, and event grid for event delivery.
 - [Retry pattern (Azure Architecture Center)](https://learn.microsoft.com/azure/architecture/patterns/retry) — Canonical guidance on retry strategies with exponential backoff, directly applicable to webhook sender retry loops.
+- [Polling versus webhooks](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/polling-vs-webhooks.md) — ByteByteGo provenance for the direction comparison; resource and reliability claims are qualified by the delivery contract.

@@ -24,6 +24,8 @@ Retry and timeout patterns are defensive reliability strategies for outbound cal
 - `Exponential backoff`: increase wait duration after each failure to reduce pressure on an unhealthy dependency.
 - `Exponential backoff with jitter`: add randomization to each delay so clients do not retry in lockstep.
 
+Linear or exponential labels describe how the base delay grows between attempts; jitter describes how randomness is applied around that base. A fixed one-second delay randomized to `0.8`, `1.1`, and `1.3` seconds is fixed backoff with jitter, not linear backoff. Exponential backoff with jitter is the normal fleet-safe default, but every strategy still needs a maximum attempt count, maximum delay, and total deadline.
+
 ## Why jitter matters
 
 If 10,000 clients all fail at the same time and all retry at exactly 200 ms, then 400 ms, then 800 ms, they create synchronized request spikes that prolong outage recovery. Jitter decorrelates retry timing, turning one synchronized storm into a spread-out arrival pattern that gives the downstream service room to recover.
@@ -44,9 +46,20 @@ Cap retries on user-facing request paths. For long-running background workers, i
 
 ## What to retry
 
-- Retry only transient failures: connection reset, timeout, temporary DNS failure, HTTP `408`, `429`, and most `5xx`.
-- Do not retry client bugs and invalid requests (`400`, `401`, `403`, `404`, validation errors).
-- Do not retry non-idempotent operations unless you provide idempotency keys or equivalent deduplication.
+Retry only when the operation is replayable and the failure is plausibly transient. Connection resets, temporary DNS failures, and a per-attempt timeout can qualify, but an uncertain timeout means the server may already have completed the work.
+
+## HTTP retry policy
+
+HTTP method semantics and application behavior decide whether another attempt is safe:
+
+- `GET`, `HEAD`, `OPTIONS`, and `TRACE` are defined as safe and idempotent. Retry only when the API actually honors those semantics and the response body can be replayed or reacquired.
+- `PUT` and `DELETE` are idempotent by specification, but a retry can still repeat logging, billing, or other incorrectly attached side effects. Verify the concrete endpoint.
+- `POST` and `PATCH` are not idempotent by default. Retry them only with an idempotency key or another server-side deduplication contract whose retention exceeds the retry window.
+- `408 Request Timeout` can be retried on a new connection when the request is replayable. `425 Too Early` can be retried after avoiding early data. `429 Too Many Requests` should respect `Retry-After` and the caller's deadline.
+- `502 Bad Gateway`, `503 Service Unavailable`, and `504 Gateway Timeout` often represent transient gateway or availability failures, but retry only within a bounded budget; respect `Retry-After` on `503`.
+- Treat `500 Internal Server Error` as endpoint-specific. A deterministic server bug will not improve on retry. Do not retry `400`, `401`, `403`, `404`, validation failures, or other permanent outcomes unless that API documents a transient meaning.
+
+One layer owns retries for a call path. Propagate the remaining deadline, cap total attempts across hops, and record effective attempts per original request. Otherwise three attempts at two nested services can turn one request into nine downstream calls.
 
 ## Retry flow
 
@@ -64,89 +77,13 @@ sequenceDiagram
     Service-->>Client: Success
 ```
 
-# Timeout mechanism
+# Timeout and deadline boundary
 
-## Per-attempt timeout
+[[Timeouts and Deadlines]] owns per-attempt timeouts, overall request deadlines, cancellation propagation, and remaining-budget checks. Retry must reuse the same overall deadline; creating a fresh timeout for every attempt or downstream hop allows the call path to exceed its end-to-end latency budget.
 
-Per-attempt timeout bounds one call attempt. If the dependency hangs, the attempt is canceled and retry logic can decide whether to try again.
+# .NET implementation
 
-## Overall timeout
-
-Overall timeout bounds the total operation budget across all attempts, waits, and strategy overhead. It prevents retry loops from consuming request time indefinitely.
-
-## Why both are required
-
-- Per-attempt timeout only: each attempt is bounded, but cumulative retries can still exceed acceptable end-to-end latency.
-- Overall timeout only: one hung attempt can consume the full budget before retry gets a chance.
-- Combined: each attempt is bounded and the full operation is also bounded.
-
-# .NET Polly v8 example
-
-This ASP.NET Core example configures an `HttpClient` for an inventory dependency with an outer total timeout, a transient-fault retry policy using exponential backoff and jitter, and an inner per-attempt timeout.
-
-```csharp
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Http.Resilience;
-using Polly;
-using Polly.Retry;
-using Polly.Timeout;
-
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddHttpClient<InventoryClient>(client =>
-{
-    client.BaseAddress = new Uri("https://inventory.internal/");
-    client.Timeout = Timeout.InfiniteTimeSpan;
-})
-.AddResilienceHandler("inventory-http", (pipelineBuilder, context) =>
-{
-    // Outermost total timeout for full operation budget
-    pipelineBuilder.AddTimeout(new TimeoutStrategyOptions
-    {
-        Timeout = TimeSpan.FromSeconds(8)
-    });
-
-    pipelineBuilder.AddRetry(new RetryStrategyOptions<HttpResponseMessage>
-    {
-        MaxRetryAttempts = 3,
-        Delay = TimeSpan.FromMilliseconds(200),
-        BackoffType = DelayBackoffType.Exponential,
-        UseJitter = true,
-        ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
-            .Handle<HttpRequestException>()
-            .Handle<TimeoutRejectedException>()
-            .HandleResult(response =>
-                response.StatusCode == System.Net.HttpStatusCode.RequestTimeout ||
-                response.StatusCode == System.Net.HttpStatusCode.TooManyRequests ||
-                (int)response.StatusCode >= 500)
-    });
-
-    // Innermost timeout for each individual attempt
-    pipelineBuilder.AddTimeout(new TimeoutStrategyOptions
-    {
-        Timeout = TimeSpan.FromSeconds(2)
-    });
-});
-
-var app = builder.Build();
-app.Run();
-
-public sealed class InventoryClient
-{
-    private readonly HttpClient _httpClient;
-
-    public InventoryClient(HttpClient httpClient)
-    {
-        _httpClient = httpClient;
-    }
-
-    public Task<HttpResponseMessage> GetAvailabilityAsync(string sku, CancellationToken ct)
-    {
-        return _httpClient.GetAsync($"api/stock/{sku}", ct);
-    }
-}
-```
-
+[[Polly Retry and Timeout]] contains the focused Polly v8 pipeline, including an outer total timeout, bounded exponential retry with jitter, Retry-After handling, and an inner per-attempt timeout. The policy is demonstrated on a replayable GET; writes still require an end-to-end idempotency contract.
 # Integration with other resilience patterns
 
 For production systems, compose retry and timeout with neighboring patterns in a deliberate order from outermost to innermost:
@@ -220,3 +157,8 @@ Decision rule: start with exponential backoff plus jitter and dual timeout bound
 - [Microsoft Learn .NET HTTP resilience](https://learn.microsoft.com/dotnet/core/resilience/http-resilience) - `Microsoft.Extensions.Http.Resilience` guidance for composing retry, timeout, circuit breaker, and fallback in `HttpClient` pipelines.
 - [Microsoft Learn transient fault handling](https://learn.microsoft.com/azure/architecture/best-practices/transient-faults) - Cloud architecture guidance on identifying transient failures and choosing retry and timeout policies.
 - [AWS Architecture Blog Exponential Backoff and Jitter](https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/) - Marc Brooker explanation of why jitter reduces coordinated retries and improves system recovery under contention.
+- [How do we retry on failures? -- ByteByteGo backoff overview; the note corrects the visual's fixed-jitter example and anchors selection in retry budgets](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/how-do-we-retry-on-failures.md)
+- [How to handle web request errors -- ByteByteGo decision flow; the HTTP policy above narrows its unsafe blanket 4xx and 5xx retry branches](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/how-to-handle-web-request-error.md)
+- [RFC 9110: HTTP Semantics](https://www.rfc-editor.org/rfc/rfc9110) - Primary specification for safe and idempotent methods, status semantics, and `Retry-After`.
+- [RFC 6585: Additional HTTP Status Codes](https://www.rfc-editor.org/rfc/rfc6585) - Primary specification for `429 Too Many Requests` and optional `Retry-After` guidance.
+- [RFC 8470: Using Early Data in HTTP](https://www.rfc-editor.org/rfc/rfc8470) - Primary specification for `425 Too Early` and retrying without early data.

@@ -50,6 +50,12 @@ Weighted round robin | Round robin with per-instance weight multipliers. | Insta
 Least connections | Picks the instance with the fewest active connections. | Connection duration varies, such as streaming or long-running AI completions. | Connection count may not reflect CPU or memory cost for short but expensive requests.
 IP hash | Deterministically maps client IP to backend. | You need simple affinity without external session storage. | NAT gateways can collapse many users to one IP and create hotspots.
 Consistent hashing | Maps keys to a hash ring with minimal remapping when nodes change. | Cache locality, shard affinity, and gradual scale changes matter. | Too few virtual nodes or poor weights can skew ring ownership, and hot keys can still create hotspots even with a balanced ring.
+Least latency or least response time | Uses measured latency, often combined with in-flight work. | Backends have variable network or processing time and measurements are timely. | Noisy or stale measurements can chase transient winners and oscillate traffic.
+Session affinity | Reuses a cookie or key-to-backend mapping; this is a constraint layered on an algorithm. | A legacy service still holds session state locally. | Reduces failover freedom and can preserve hotspots after capacity changes.
+
+![[System Design 101/6ffd8fc456eddf8c90190c14b087f823d3a664693903428b8879d65b3c2106fc.png]]
+
+The visual is an orientation map. "Sticky round robin" means affinity over a base algorithm, and IP or URL hashing is not the same as a consistent-hash ring. Whatever algorithm is selected, health eligibility comes first: choose only among ready backends, then apply weights, connection counts, latency, or hashing. A perfect algorithm still routes failures if readiness is wrong.
 
 For AI inference endpoints, request duration and compute cost vary heavily, so pick the algorithm by measuring p95 and p99 latency, error rate, and backend saturation under representative load instead of assuming one default winner.
 
@@ -72,61 +78,38 @@ Typical state transition:
 3. Existing requests are drained, failed, or retried according to policy.
 4. Instance must pass recovery criteria before re-entry.
 
-Important implementation point: a readiness endpoint must verify critical dependencies, not just return process-alive.
+Important implementation point: readiness must reflect whether routing away from this instance can improve service. Check instance-local initialization and selectively check dependencies; a globally shared dependency in every probe can remove the whole fleet at once.
 
-## .NET Context
+## Cloud load-balancer capability mapping
 
-ASP.NET Core services with Kestrel are commonly deployed behind a reverse proxy or managed load balancer.
+Select capabilities before provider product names:
 
-- **Kestrel behind reverse proxy**
-  - Common options are NGINX, YARP, ingress controllers, or cloud-managed LBs.
-  - Proxy handles ingress concerns such as TLS termination, route matching, and header forwarding.
-- **Azure service choices**
-  - **Azure Load Balancer** is L4 and optimized for high-performance TCP or UDP distribution.
-  - **Azure Application Gateway** is L7 and supports HTTP routing, TLS policy controls, and WAF features.
+| Decision | Options | Consequence |
+|---|---|---|
+| Protocol layer | L4 TCP/UDP or L7 HTTP | L7 enables content routing and HTTP policy; L4 supports generic transport with less parsing |
+| Reachability | Internal or internet-facing | Changes addressing, firewall exposure, and trust boundary |
+| Scope | Zonal, regional, or global | Wider scope can improve failover and proximity but adds control-plane and cross-region complexity |
+| Data path | Proxy or pass-through/direct server return | Proxy centralizes TLS and observability; pass-through preserves source/data-path properties but exposes more backend responsibility |
+| TLS boundary | Terminate, re-encrypt, or pass through | Determines certificate ownership, inspection, and end-to-end encryption |
+| Affinity | None, cookie, source hash, or application key | Improves locality but couples sessions to backend availability |
 
-Minimal readiness and liveness setup in ASP.NET Core.
-The `AddSqlServer` and `AddRedis` probes below come from the community Xabaril health checks packages (`AspNetCore.HealthChecks.SqlServer` and `AspNetCore.HealthChecks.Redis`).
-If your team prefers only Microsoft-maintained dependencies, use custom `AddCheck` implementations for dependency readiness.
+Only then map to a service. Azure Load Balancer is an L4 family with regional public/internal variants and a cross-region global tier; Application Gateway is regional L7, while Front Door is a global HTTP edge. Similar provider names do not imply identical health, source-IP, cross-zone, or failover semantics; verify the selected SKU and test a backend failure.
 
-```bash
-dotnet add package AspNetCore.HealthChecks.SqlServer
-dotnet add package AspNetCore.HealthChecks.Redis
-```
+## Health, routing, TLS, zones, and affinity are separate controls
 
-```csharp
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+| Control | Problem solved | Cost introduced |
+|---|---|---|
+| Active and passive health | Stop routing to failed or degraded instances | Probe traffic, thresholds, and false positive/negative tuning |
+| L7 routing | Send hosts, paths, or headers to different pools | HTTP parsing, route configuration, and a larger policy surface |
+| TLS termination | Centralize certificates and cryptographic work | Key custody, renewal, and a new plaintext or re-encryption boundary |
+| Cross-zone balancing | Use healthy capacity across zones | Inter-zone latency/egress and larger failure coupling |
+| Session affinity | Keep a client on one backend | Uneven load, slow draining, and weaker failover |
 
-var builder = WebApplication.CreateBuilder(args);
+Do not bundle these under "add a load balancer." For a stateless API, enable health-aware distribution and TLS at the documented trust boundary, leave affinity off, and decide cross-zone routing from failure tests and egress cost. For a stateful legacy application, affinity can be a migration bridge, but shared state is the durable fix.
 
-builder.Services
-    .AddHealthChecks()
-    .AddSqlServer(builder.Configuration.GetConnectionString("MainDb")!)
-    .AddRedis(builder.Configuration.GetConnectionString("Redis")!);
+## .NET health boundary
 
-var app = builder.Build();
-
-app.MapHealthChecks("/health/live", new HealthCheckOptions
-{
-    Predicate = _ => false
-});
-
-app.MapHealthChecks("/health/ready", new HealthCheckOptions
-{
-    Predicate = _ => true
-});
-
-app.MapGet("/", () => Results.Ok("service-ready"));
-
-app.Run();
-```
-
-Session affinity in .NET systems:
-
-- It helps as a short-term bridge when legacy in-memory session state exists.
-- It hurts elasticity and failure recovery because clients are pinned to specific instances.
-- Preferred senior design is stateless APIs plus shared state in Redis or another durable store.
-
+ASP.NET Core exposes liveness and readiness through health checks, but the signal must match the routing decision. [[NET Health Checks]] contains the focused implementation and explains why a globally shared dependency in every readiness probe can evict the whole fleet during one shared outage.
 ## Pitfalls
 
 ### Sticky sessions can defeat balancing goals
@@ -135,11 +118,11 @@ Session affinity in .NET systems:
 - **Why**: affinity preserves client-to-instance mapping even as traffic patterns change.
 - **Mitigation**: externalize session state, shorten affinity TTL, and apply affinity only when strictly required.
 
-### Health endpoint does not validate dependencies
+### Readiness does not represent routing eligibility
 
-- **What goes wrong**: failing instances remain in rotation because `/health` always returns 200.
-- **Why**: liveness is implemented, readiness is not.
-- **Mitigation**: split liveness and readiness, include DB cache queue checks in readiness, and alert on dependency failure rates.
+- **What goes wrong**: an instance that cannot serve stays in rotation, or a shared dependency outage evicts every replica.
+- **Why**: one `/health` endpoint is used for process restart, routing, and dependency monitoring.
+- **Mitigation**: keep liveness dependency-free; make readiness instance-specific and include a dependency only when another replica can serve successfully. Monitor shared dependencies separately.
 
 ### Thundering herd when recovering instances
 
@@ -171,7 +154,7 @@ Health model | Active only | Active plus passive | Simplicity versus better dete
 > L4 balances on connection metadata — IP, port, protocol — without reading the payload, so it's fast and works for any TCP/UDP traffic, but it can't decide based on HTTP path, host, or headers. L7 parses HTTP, so it can route by path or header and do canary, A/B, and edge auth, at the cost of more processing per request. Choose L4 when you need raw throughput and generic transport routing; choose L7 the moment routing depends on request content. Plenty of systems use both — L4 at the edge for raw distribution, L7 deeper for content-aware routing.
 
 > [!QUESTION]- Why must readiness checks differ from liveness checks behind a load balancer?
-> They answer different questions, and conflating them keeps broken instances in rotation. Liveness is "is the process alive" — if it fails, the orchestrator restarts the pod. Readiness is "can this instance serve traffic right now," so it must actually probe critical dependencies (database, cache, downstream) and let the balancer pull a started-but-not-ready instance out of rotation without restarting it. The classic bug is a `/health` that always returns 200: the process is up, its database is unreachable, and the balancer keeps routing real traffic into failures. Keep liveness cheap and dependency-free; put the dependency checks in readiness.
+> They drive different actions. Liveness asks whether the process can make progress and commonly triggers restart, so it stays local and dependency-free. Readiness asks whether this instance should receive new traffic. It can include instance-specific initialization or a dependency failure unique to this replica, but blindly checking a database shared by every replica can evict the entire fleet. Keep shared-dependency health observable and put it in readiness only when routing elsewhere can help.
 
 ## References
 
@@ -180,3 +163,12 @@ Health model | Active only | Active plus passive | Simplicity versus better dete
 - [NGINX HTTP load balancing guide](https://docs.nginx.com/nginx/admin-guide/load-balancer/http-load-balancer/) — practical configuration guide for round-robin, least-connections, and IP-hash algorithms in NGINX.
 - [Xabaril ASP.NET Core Diagnostics Health Checks](https://github.com/Xabaril/AspNetCore.Diagnostics.HealthChecks) — community library providing health check integrations for databases, message queues, and external services.
 - [Google SRE book chapter on handling overload](https://sre.google/sre-book/handling-overload/) — production-grade strategies for load shedding, client-side throttling, and graceful degradation under overload.
+- [Azure Front Door overview](https://learn.microsoft.com/en-us/azure/frontdoor/front-door-overview) — official global HTTP edge scope, routing, health probes, and TLS capabilities.
+- [AWS Elastic Load Balancing product comparison](https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/what-is-load-balancing.html) — official distinction among application, network, gateway, and classic load balancers.
+- [Google Cloud load balancing overview](https://cloud.google.com/load-balancing/docs/load-balancing-overview) — official mapping of global/regional, internal/external, proxy/pass-through, L4/L7 capabilities.
+
+### ByteByteGo provenance
+
+- [Top load-balancing algorithms](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/top-6-load-balancing-algorithms.md) — provenance for the algorithm visual; affinity and hashing caveats are made explicit.
+- [Cloud load-balancer cheat sheet](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/cloud-load-balancer-cheat-sheet.md) — editorial lead for capability selection; its dated and incorrect provider mapping was rejected.
+- [Load-balancer use cases](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/load-balancer-realistic-use-cases-you-may-not-know.md) — provenance for separate controls; its unrelated HTTP-status visual was rejected.

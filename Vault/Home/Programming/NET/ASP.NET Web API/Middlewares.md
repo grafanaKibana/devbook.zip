@@ -166,7 +166,7 @@ app.UseWhen(
 > [!QUESTION]- What is the ASP.NET request processing pipeline?
 > A request is received by the host (for example, Kestrel) and then flows through an ordered chain of middleware. Middleware can add features (routing, authN/authZ, CORS, compression, etc.), select an endpoint, and finally execute the endpoint (MVC action, Minimal API handler, etc.). On the way back out, the middleware chain unwinds, allowing post-processing of the response.
 
-## Links
+## References
 
 - [Middleware in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/middleware/) — official guide covering pipeline order, built-in middleware, and writing custom components.
 - [Handle errors in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/error-handling) — covers `UseExceptionHandler`, `UseDeveloperExceptionPage`, and Problem Details.
